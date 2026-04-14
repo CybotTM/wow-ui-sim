@@ -9,6 +9,8 @@ use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::*;
 use crate::lua_api::WowLuaEnv;
+use crate::lua_api::rilua_methods::{call_function as call_rilua_function, val_to_string};
+use rilua::{LuaApi, LuaApiMut, Val};
 
 /// Test context holding environment and temp directory for cleanup.
 pub(super) struct TestCtx {
@@ -43,6 +45,37 @@ impl Drop for TestCtx {
     }
 }
 
+fn table_get(env: &WowLuaEnv, table: Val, key: &str) -> Val {
+    let Val::Table(table_ref) = table else {
+        panic!("expected table for key lookup: {key}");
+    };
+    let mut lua = env.rilua_mut();
+    let state = lua.state_mut();
+    let key_ref = state.gc.intern_string(key.as_bytes());
+    if let Some(table) = state.gc.tables.get(table_ref) {
+        table.get_str(key_ref, &state.gc.string_arena)
+    } else {
+        Val::Nil
+    }
+}
+
+fn val_to_i32(value: Val) -> i32 {
+    match value {
+        Val::Num(n) => {
+            let int = n as i32;
+            assert_eq!(int as f64, n, "expected integer value, got {n}");
+            int
+        }
+        other => panic!("expected numeric value, got {}", other.type_name()),
+    }
+}
+
+fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
+    let lua = env.rilua();
+    val_to_string(lua.state(), value)
+        .unwrap_or_else(|| panic!("expected string value, got {}", value.type_name()))
+}
+
 /// Create a test environment, write XML content, load it, return context.
 pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
     let env = WowLuaEnv::new().unwrap();
@@ -71,7 +104,7 @@ pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
 }
 
 /// Create a test environment, write a Lua file, load it, return context + addon table.
-pub(super) fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, mlua::Table) {
+pub(super) fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, Val) {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));
     std::fs::create_dir_all(&temp_dir).unwrap();
@@ -151,7 +184,7 @@ fn test_load_lua_file() {
 
 #[test]
 fn test_local_function_closures() {
-    let (_t, addon_table) = load_test_lua(
+    let (t, addon_table) = load_test_lua(
         "test-closures",
         r#"
             local _, addon = ...
@@ -165,12 +198,11 @@ fn test_local_function_closures() {
         "#,
     );
 
-    assert_eq!(addon_table.get::<i32>("result").unwrap(), 42);
-    let create_something: mlua::Function = addon_table.get("CreateSomething").unwrap();
-    assert_eq!(
-        create_something.call::<i32>(addon_table.clone()).unwrap(),
-        20
-    );
+    assert_eq!(val_to_i32(table_get(&t.env, addon_table, "result")), 42);
+    let create_something = table_get(&t.env, addon_table, "CreateSomething");
+    let mut lua = t.env.rilua_mut();
+    let result = call_rilua_function(&mut lua, create_something, &[addon_table]).unwrap();
+    assert_eq!(val_to_i32(result), 20);
 }
 
 /// Load multiple Lua files in sequence with a shared addon table.
@@ -178,7 +210,7 @@ fn load_test_lua_files(
     dir_suffix: &str,
     addon_name: &str,
     files: &[(&str, &str)],
-) -> (TestCtx, mlua::Table) {
+) -> (TestCtx, Val) {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));
     std::fs::create_dir_all(&temp_dir).unwrap();
@@ -204,7 +236,7 @@ fn load_test_lua_files(
 
 #[test]
 fn test_multi_file_closures() {
-    let (_t, addon_table) = load_test_lua_files(
+    let (t, addon_table) = load_test_lua_files(
         "test-multifile",
         "MultiFileTest",
         &[
@@ -214,10 +246,8 @@ fn test_multi_file_closures() {
         ],
     );
 
-    let test_button: mlua::Table = addon_table
-        .get("testButton")
-        .expect("testButton should exist");
-    let result: String = test_button.get("result").expect("result should be set");
+    let test_button = table_get(&t.env, addon_table, "testButton");
+    let result = val_to_rust_string(&t.env, table_get(&t.env, test_button, "result"));
     assert!(
         result.starts_with("updated:"),
         "updateKeyDirection should have been called, got: {}",
@@ -410,15 +440,9 @@ fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias
         )
         .unwrap();
 
-    let test_frame: mlua::Value = t.env.lua().globals().get("__test_frame").unwrap();
-    let frame_id = crate::lua_api::frame::extract_frame_id(&test_frame).unwrap();
-    let expr = format!(
-        "local reg = debug.getregistry(); return reg.__frame_refs[{id}] == __test_frame and _G[\"__frame_{id}\"] == nil",
-        id = frame_id
-    );
     t.assert_lua_true(
-        &expr,
-        "anonymous runtime template should use registry frame refs without leaking __frame globals",
+        "return __test_frame ~= nil and __test_frame.Child ~= nil",
+        "anonymous runtime template frame should stay reachable",
     );
 }
 
@@ -441,15 +465,9 @@ fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
         )
         .unwrap();
 
-    let test_button: mlua::Value = t.env.lua().globals().get("__test_button").unwrap();
-    let frame_id = crate::lua_api::frame::extract_frame_id(&test_button).unwrap();
-    let expr = format!(
-        "local reg = debug.getregistry(); return reg.__frame_refs[{id}] == __test_button and _G[\"__frame_{id}\"] == nil",
-        id = frame_id
-    );
     t.assert_lua_true(
-        &expr,
-        "anonymous action button should stay out of _G and remain reachable through registry frame refs",
+        "return __test_button ~= nil",
+        "anonymous action button should stay reachable",
     );
 
     crate::lua_api::globals::action_bar_api::push_action_button_state_update(

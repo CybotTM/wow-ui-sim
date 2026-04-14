@@ -23,8 +23,8 @@ use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
     val_to_string,
 };
-use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
@@ -78,7 +78,8 @@ fn font_f64(state: &mut LuaState, font: Val, key: &str) -> f64 {
 }
 
 fn font_str(state: &mut LuaState, font: Val, key: &str) -> String {
-    val_to_string(state, table_get(state, font, key)).unwrap_or_default()
+    let value = table_get(state, font, key);
+    val_to_string(state, value).unwrap_or_default()
 }
 
 // ── Font method registration ─────────────────────────────────────────────────
@@ -121,7 +122,10 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
     table_set_rust_fn(state, font_ref, "GetFont", |state| {
         let font = Val::from_stack(state, 1)?;
         let path = table_get(state, font, "__fontPath");
-        let path_val = match path { Val::Str(_) => path, _ => Val::Nil };
+        let path_val = match path {
+            Val::Str(_) => path,
+            _ => Val::Nil,
+        };
         let height = font_f64(state, font, "__fontHeight");
         let flags = font_str(state, font, "__fontFlags");
         let flags_val = create_string(state, &flags);
@@ -240,7 +244,10 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
 
     table_set_rust_fn(state, font_ref, "GetIndentedWordWrap", |state| {
         let font = Val::from_stack(state, 1)?;
-        let v = matches!(table_get(state, font, "__indentedWordWrap"), Val::Bool(true));
+        let v = matches!(
+            table_get(state, font, "__indentedWordWrap"),
+            Val::Bool(true)
+        );
         v.into_stack(state)
     })?;
 
@@ -263,7 +270,10 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
     table_set_rust_fn(state, font_ref, "GetName", |state| {
         let font = Val::from_stack(state, 1)?;
         let name = table_get(state, font, "__name");
-        match name { Val::Str(_) => name.into_stack(state), _ => Val::Nil.into_stack(state) }
+        match name {
+            Val::Str(_) => name.into_stack(state),
+            _ => Val::Nil.into_stack(state),
+        }
     })?;
 
     table_set_rust_fn(state, font_ref, "GetFontObjectForAlphabet", |state| {
@@ -361,7 +371,14 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     ("GameFontNormalHuge", 20.0, "", 1.0, 0.82, 0.0),
     ("GameFontHighlight", 12.0, "", 1.0, 1.0, 1.0),
     ("GameFontHighlightSmall", 10.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightSmallOutline", 10.0, "OUTLINE", 1.0, 1.0, 1.0),
+    (
+        "GameFontHighlightSmallOutline",
+        10.0,
+        "OUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
     ("GameFontHighlightLarge", 16.0, "", 1.0, 1.0, 1.0),
     ("GameFontHighlightHuge", 20.0, "", 1.0, 1.0, 1.0),
     ("GameFontHighlightOutline", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
@@ -384,7 +401,14 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     ("NumberFontNormalLarge", 16.0, "OUTLINE", 1.0, 1.0, 1.0),
     ("NumberFontNormalHuge", 24.0, "OUTLINE", 1.0, 1.0, 1.0),
     ("NumberFontNormalRightRed", 14.0, "OUTLINE", 1.0, 0.1, 0.1),
-    ("NumberFontNormalRightYellow", 14.0, "OUTLINE", 1.0, 1.0, 0.0),
+    (
+        "NumberFontNormalRightYellow",
+        14.0,
+        "OUTLINE",
+        1.0,
+        1.0,
+        0.0,
+    ),
     ("ChatFontNormal", 14.0, "", 1.0, 1.0, 1.0),
     ("ChatFontSmall", 12.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Small", 10.0, "", 1.0, 1.0, 1.0),
@@ -395,15 +419,43 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     ("SystemFont_Huge1", 20.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Huge2", 24.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Outline", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("SystemFont_OutlineThick_Huge2", 24.0, "OUTLINE, THICKOUTLINE", 1.0, 1.0, 1.0),
-    ("SystemFont_OutlineThick_Huge4", 32.0, "OUTLINE, THICKOUTLINE", 1.0, 1.0, 1.0),
-    ("SystemFont_OutlineThick_WTF", 64.0, "OUTLINE, THICKOUTLINE", 1.0, 1.0, 1.0),
+    (
+        "SystemFont_OutlineThick_Huge2",
+        24.0,
+        "OUTLINE, THICKOUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
+    (
+        "SystemFont_OutlineThick_Huge4",
+        32.0,
+        "OUTLINE, THICKOUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
+    (
+        "SystemFont_OutlineThick_WTF",
+        64.0,
+        "OUTLINE, THICKOUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
     ("SystemFont_Shadow_Small", 10.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Med1", 12.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Med2", 13.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Med3", 14.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Large", 16.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Shadow_Large_Outline", 16.0, "OUTLINE", 1.0, 1.0, 1.0),
+    (
+        "SystemFont_Shadow_Large_Outline",
+        16.0,
+        "OUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
     ("SystemFont_Shadow_Huge1", 20.0, "", 1.0, 1.0, 1.0),
     ("GameTooltipHeader", 14.0, "", 1.0, 1.0, 1.0),
     ("GameTooltipText", 12.0, "", 1.0, 1.0, 1.0),
@@ -446,7 +498,13 @@ pub fn register_standard_font_objects(lua: &mut rilua::Lua) -> LuaResult<()> {
 // ── Color table helper ────────────────────────────────────────────────────────
 
 /// Build a rilua color table {r, g, b, a} with GetRGB/GetRGBA/GenerateHexColor/WrapTextInColorCode.
-pub fn make_rilua_color_table(state: &mut LuaState, r: f64, g: f64, b: f64, a: f64) -> LuaResult<Val> {
+pub fn make_rilua_color_table(
+    state: &mut LuaState,
+    r: f64,
+    g: f64,
+    b: f64,
+    a: f64,
+) -> LuaResult<Val> {
     let t = create_table(state);
     table_set(state, t, "r", Val::Num(r));
     table_set(state, t, "g", Val::Num(g));
@@ -457,39 +515,87 @@ pub fn make_rilua_color_table(state: &mut LuaState, r: f64, g: f64, b: f64, a: f
 
     table_set_rust_fn(state, t_ref, "GetRGB", |state| {
         let this = Val::from_stack(state, 1)?;
-        let r = match table_get(state, this, "r") { Val::Num(n) => n, _ => 0.0 };
-        let g = match table_get(state, this, "g") { Val::Num(n) => n, _ => 0.0 };
-        let b = match table_get(state, this, "b") { Val::Num(n) => n, _ => 0.0 };
+        let r = match table_get(state, this, "r") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let g = match table_get(state, this, "g") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let b = match table_get(state, this, "b") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
         (r, g, b).into_stack(state)
     })?;
 
     table_set_rust_fn(state, t_ref, "GetRGBA", |state| {
         let this = Val::from_stack(state, 1)?;
-        let r = match table_get(state, this, "r") { Val::Num(n) => n, _ => 0.0 };
-        let g = match table_get(state, this, "g") { Val::Num(n) => n, _ => 0.0 };
-        let b = match table_get(state, this, "b") { Val::Num(n) => n, _ => 0.0 };
-        let a = match table_get(state, this, "a") { Val::Num(n) => n, _ => 1.0 };
+        let r = match table_get(state, this, "r") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let g = match table_get(state, this, "g") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let b = match table_get(state, this, "b") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let a = match table_get(state, this, "a") {
+            Val::Num(n) => n,
+            _ => 1.0,
+        };
         (r, g, b, a).into_stack(state)
     })?;
 
     table_set_rust_fn(state, t_ref, "GenerateHexColor", |state| {
         let this = Val::from_stack(state, 1)?;
-        let r = match table_get(state, this, "r") { Val::Num(n) => n, _ => 0.0 };
-        let g = match table_get(state, this, "g") { Val::Num(n) => n, _ => 0.0 };
-        let b = match table_get(state, this, "b") { Val::Num(n) => n, _ => 0.0 };
-        let hex = format!("{:02x}{:02x}{:02x}",
-            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8);
+        let r = match table_get(state, this, "r") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let g = match table_get(state, this, "g") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let b = match table_get(state, this, "b") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let hex = format!(
+            "{:02x}{:02x}{:02x}",
+            (r * 255.0) as u8,
+            (g * 255.0) as u8,
+            (b * 255.0) as u8
+        );
         create_string(state, &hex).into_stack(state)
     })?;
 
     table_set_rust_fn(state, t_ref, "WrapTextInColorCode", |state| {
         let this = Val::from_stack(state, 1)?;
         let text = String::from_stack(state, 2)?;
-        let r = match table_get(state, this, "r") { Val::Num(n) => n, _ => 0.0 };
-        let g = match table_get(state, this, "g") { Val::Num(n) => n, _ => 0.0 };
-        let b = match table_get(state, this, "b") { Val::Num(n) => n, _ => 0.0 };
-        let wrapped = format!("|cff{:02x}{:02x}{:02x}{}|r",
-            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8, text);
+        let r = match table_get(state, this, "r") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let g = match table_get(state, this, "g") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let b = match table_get(state, this, "b") {
+            Val::Num(n) => n,
+            _ => 0.0,
+        };
+        let wrapped = format!(
+            "|cff{:02x}{:02x}{:02x}{}|r",
+            (r * 255.0) as u8,
+            (g * 255.0) as u8,
+            (b * 255.0) as u8,
+            text
+        );
         create_string(state, &wrapped).into_stack(state)
     })?;
 
@@ -587,13 +693,25 @@ pub fn set_binding(state: &mut LuaState) -> LuaResult<u32> {
     true.into_stack(state)
 }
 
-pub fn set_binding_click(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
-pub fn set_binding_spell(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
-pub fn set_binding_item(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
-pub fn set_binding_macro(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
+pub fn set_binding_click(state: &mut LuaState) -> LuaResult<u32> {
+    true.into_stack(state)
+}
+pub fn set_binding_spell(state: &mut LuaState) -> LuaResult<u32> {
+    true.into_stack(state)
+}
+pub fn set_binding_item(state: &mut LuaState) -> LuaResult<u32> {
+    true.into_stack(state)
+}
+pub fn set_binding_macro(state: &mut LuaState) -> LuaResult<u32> {
+    true.into_stack(state)
+}
 
-pub fn save_bindings(state: &mut LuaState) -> LuaResult<u32> { Ok(0) }
-pub fn load_bindings(state: &mut LuaState) -> LuaResult<u32> { Ok(0) }
+pub fn save_bindings(state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+pub fn load_bindings(state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
 
 pub fn register_rilua_keybinding_functions(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetBindingKey", get_binding_key)?;
@@ -639,9 +757,7 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             drop(st);
             (owned, total).into_stack(state)
         })?
-        .set_function("GetNumPetsNeedingFanfare", |state| {
-            (0i32).into_stack(state)
-        })?
+        .set_function("GetNumPetsNeedingFanfare", |state| (0i32).into_stack(state))?
         .set_function("GetPetInfoByIndex", |state| {
             let index = i32::from_stack(state, 1)?;
             let st = borrow_state(state)?;
@@ -663,13 +779,16 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             state.push(Val::Num(0.0));
             state.push(Val::Num(0.0));
             state.push(Val::Num(0.0));
+            let name_val = create_string(state, &name_str);
+            let empty_1 = create_string(state, "");
+            let empty_2 = create_string(state, "");
             state.push(Val::Bool(false));
-            state.push(create_string(state, &name_str));
+            state.push(name_val);
             state.push(Val::Num(icon));
             state.push(Val::Num(pet_type));
             state.push(Val::Num(0.0));
-            state.push(create_string(state, ""));
-            state.push(create_string(state, ""));
+            state.push(empty_1);
+            state.push(empty_2);
             state.push(Val::Bool(false));
             state.push(Val::Bool(true));
             state.push(Val::Bool(false));
@@ -684,9 +803,7 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             // TODO: lookup by species_id
             Ok(0)
         })?
-        .set_function("PetIsSummonable", |state| {
-            false.into_stack(state)
-        })?
+        .set_function("PetIsSummonable", |state| false.into_stack(state))?
         .build();
 
     set_global_val(lua.state_mut(), "C_PetJournal", t);
@@ -724,7 +841,8 @@ pub fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             let is_collected = m.is_collected;
             let mount_id = m.mount_id as f64;
             drop(st);
-            state.push(create_string(state, &name));
+            let name_val = create_string(state, &name);
+            state.push(name_val);
             state.push(Val::Num(spell_id));
             state.push(Val::Num(icon));
             state.push(Val::Bool(false));
@@ -752,7 +870,8 @@ pub fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             let is_collected = m.is_collected;
             let mid = m.mount_id as f64;
             drop(st);
-            state.push(create_string(state, &name));
+            let name_val = create_string(state, &name);
+            state.push(name_val);
             state.push(Val::Num(spell_id));
             state.push(Val::Num(icon));
             state.push(Val::Bool(false));
@@ -775,9 +894,11 @@ pub fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             };
             let mount_type = m.mount_type as f64;
             drop(st);
+            let empty = create_string(state, "");
+            let source = create_string(state, "Drop");
             state.push(Val::Num(0.0));
-            state.push(create_string(state, ""));
-            state.push(create_string(state, "Drop"));
+            state.push(empty);
+            state.push(source);
             state.push(Val::Bool(false));
             state.push(Val::Num(mount_type));
             state.push(Val::Num(0.0));
@@ -786,22 +907,16 @@ pub fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             state.push(Val::Bool(false));
             Ok(9)
         })?
-        .set_function("GetMountIDs", |state| {
-            create_table(state).into_stack(state)
-        })?
+        .set_function("GetMountIDs", |state| create_table(state).into_stack(state))?
         .set_function("GetNumMountsNeedingFanfare", |state| {
             (0i32).into_stack(state)
         })?
-        .set_function("GetCollectedFilterSetting", |state| {
-            true.into_stack(state)
-        })?
-        .set_function("SetCollectedFilterSetting", |_state| { Ok(0) })?
-        .set_function("GetIsFavorite", |state| {
-            (false, false).into_stack(state)
-        })?
-        .set_function("SetIsFavorite", |_state| { Ok(0) })?
-        .set_function("Summon", |_state| { Ok(0) })?
-        .set_function("Dismiss", |_state| { Ok(0) })?
+        .set_function("GetCollectedFilterSetting", |state| true.into_stack(state))?
+        .set_function("SetCollectedFilterSetting", |_state| Ok(0))?
+        .set_function("GetIsFavorite", |state| (false, false).into_stack(state))?
+        .set_function("SetIsFavorite", |_state| Ok(0))?
+        .set_function("Summon", |_state| Ok(0))?
+        .set_function("Dismiss", |_state| Ok(0))?
         .build();
 
     set_global_val(lua.state_mut(), "C_MountJournal", t);
@@ -855,8 +970,9 @@ pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
             let name = toy.name.clone();
             let icon = toy.icon as f64;
             drop(st);
+            let name_val = create_string(state, &name);
             state.push(Val::Num(tid));
-            state.push(create_string(state, &name));
+            state.push(name_val);
             state.push(Val::Num(icon));
             state.push(Val::Bool(false));
             state.push(Val::Bool(false));
@@ -866,7 +982,10 @@ pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
         .set_function("IsToyUsable", |state| {
             let item_id = i32::from_stack(state, 1)?;
             let st = borrow_state(state)?;
-            let usable = st.world.toys.iter()
+            let usable = st
+                .world
+                .toys
+                .iter()
                 .find(|t| t.item_id == item_id as u32)
                 .map(|t| t.is_usable)
                 .unwrap_or(false);
@@ -889,12 +1008,17 @@ pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
         .set_function("GetToyLink", |state| {
             let item_id = i32::from_stack(state, 1)?;
             let st = borrow_state(state)?;
-            let link = st.world.toys.iter()
+            let link = st
+                .world
+                .toys
+                .iter()
                 .find(|t| t.item_id == item_id as u32)
-                .map(|toy| format!(
-                    "|cff0070dd|Hitem:{}::::::::1:0|h[{}]|h|r",
-                    toy.item_id, toy.name
-                ));
+                .map(|toy| {
+                    format!(
+                        "|cff0070dd|Hitem:{}::::::::1:0|h[{}]|h|r",
+                        toy.item_id, toy.name
+                    )
+                });
             drop(st);
             match link {
                 Some(s) => create_string(state, &s).into_stack(state),
@@ -912,13 +1036,13 @@ pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
             }
             Ok(0)
         })?
-        .set_function("GetCollectedShown", |state| { true.into_stack(state) })?
-        .set_function("GetUncollectedShown", |state| { true.into_stack(state) })?
-        .set_function("GetUnusableShown", |state| { true.into_stack(state) })?
-        .set_function("SetCollectedShown", |_state| { Ok(0) })?
-        .set_function("SetUncollectedShown", |_state| { Ok(0) })?
-        .set_function("SetUnusableShown", |_state| { Ok(0) })?
-        .set_function("ForceToyRefilter", |_state| { Ok(0) })?
+        .set_function("GetCollectedShown", |state| true.into_stack(state))?
+        .set_function("GetUncollectedShown", |state| true.into_stack(state))?
+        .set_function("GetUnusableShown", |state| true.into_stack(state))?
+        .set_function("SetCollectedShown", |_state| Ok(0))?
+        .set_function("SetUncollectedShown", |_state| Ok(0))?
+        .set_function("SetUnusableShown", |_state| Ok(0))?
+        .set_function("ForceToyRefilter", |_state| Ok(0))?
         .build();
 
     set_global_val(lua.state_mut(), "C_ToyBox", t);

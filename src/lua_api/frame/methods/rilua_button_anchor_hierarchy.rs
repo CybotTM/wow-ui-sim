@@ -189,7 +189,27 @@ fn button_texture_should_show(
     button_id: u64,
     parent_key: &str,
 ) -> bool {
-    super::methods_button::button_texture_should_show(sim, button_id, parent_key)
+    let (enabled, button_state) = sim
+        .widgets
+        .get(button_id)
+        .map(|frame| {
+            let enabled = frame
+                .attributes
+                .get("__enabled")
+                .and_then(|value| match value {
+                    crate::widget::AttributeValue::Boolean(value) => Some(*value),
+                    _ => None,
+                })
+                .unwrap_or(true);
+            (enabled, frame.button_state)
+        })
+        .unwrap_or((true, 0));
+    match parent_key {
+        "NormalTexture" => enabled && button_state == 0,
+        "PushedTexture" => enabled && button_state == 1,
+        "DisabledTexture" => !enabled,
+        _ => true,
+    }
 }
 
 /// Apply a texture path/atlas/fileDataID to a button slot and its child texture.
@@ -750,10 +770,7 @@ fn get_num_points(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let count = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .map(|f| f.anchors.len())
-            .unwrap_or(0) as i32
+        sim.widgets.get(id).map(|f| f.anchors.len()).unwrap_or(0) as i32
     };
     count.into_stack(state)
 }
@@ -812,7 +829,15 @@ fn get_point_by_name(state: &mut LuaState) -> LuaResult<u32> {
             .anchors
             .iter()
             .find(|a| a.point.as_str().to_uppercase() == point_upper)
-            .map(|a| (a.point, a.relative_to_id, a.relative_point, a.x_offset, a.y_offset))
+            .map(|a| {
+                (
+                    a.point,
+                    a.relative_to_id,
+                    a.relative_point,
+                    a.x_offset,
+                    a.y_offset,
+                )
+            })
     };
     let Some((point, relative_to_id, relative_point, x_offset, y_offset)) = anchor_data else {
         return Ok(0);
@@ -851,10 +876,18 @@ fn set_point(state: &mut LuaState) -> LuaResult<u32> {
     // Minimal implementation: apply with parent as relativeTo and zero offsets
     let relative_to = {
         let sim = borrow_state(state)?;
-        sim.widgets.get(id).and_then(|f| f.parent_id).map(|pid| pid as usize)
+        sim.widgets
+            .get(id)
+            .and_then(|f| f.parent_id)
+            .map(|pid| pid as usize)
     };
     let mut sim = borrow_state_mut(state)?;
-    if let Some(old) = sim.widgets.get(id).and_then(|f| f.anchors.iter().find(|a| a.point == point).map(|a| a.relative_to_id)) {
+    if let Some(old) = sim.widgets.get(id).and_then(|f| {
+        f.anchors
+            .iter()
+            .find(|a| a.point == point)
+            .map(|a| a.relative_to_id)
+    }) {
         if let Some(old_target) = old {
             sim.widgets.remove_anchor_dependent(old_target as u64, id);
         }
@@ -957,10 +990,7 @@ fn get_num_children(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let count = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .map(|f| f.children.len())
-            .unwrap_or(0) as i32
+        sim.widgets.get(id).map(|f| f.children.len()).unwrap_or(0) as i32
     };
     count.into_stack(state)
 }
@@ -1057,9 +1087,7 @@ fn get_parent_key(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let key = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|f| f.parent_key.clone())
+        sim.widgets.get(id).and_then(|f| f.parent_key.clone())
     };
     match key {
         Some(k) => {
@@ -1362,11 +1390,7 @@ fn create_animation(state: &mut LuaState) -> LuaResult<u32> {
     let name = anim_name_raw.map(|n| {
         let sim = borrow_state(state).ok();
         if let Some(sim) = sim {
-            crate::lua_api::globals::create_frame::apply_parent_sub(
-                &n,
-                Some(group_frame_id),
-                &sim,
-            )
+            crate::lua_api::globals::create_frame::apply_parent_sub(&n, Some(group_frame_id), &sim)
         } else {
             n
         }
@@ -1428,10 +1452,30 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     // Button: font objects
     table_set_rust_fn(state, table, "SetNormalFontObject", set_normal_font_object)?;
     table_set_rust_fn(state, table, "GetNormalFontObject", get_normal_font_object)?;
-    table_set_rust_fn(state, table, "SetHighlightFontObject", set_highlight_font_object)?;
-    table_set_rust_fn(state, table, "GetHighlightFontObject", get_highlight_font_object)?;
-    table_set_rust_fn(state, table, "SetDisabledFontObject", set_disabled_font_object)?;
-    table_set_rust_fn(state, table, "GetDisabledFontObject", get_disabled_font_object)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetHighlightFontObject",
+        set_highlight_font_object,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetHighlightFontObject",
+        get_highlight_font_object,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetDisabledFontObject",
+        set_disabled_font_object,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetDisabledFontObject",
+        get_disabled_font_object,
+    )?;
 
     // Button: pushed text offset
     table_set_rust_fn(state, table, "SetPushedTextOffset", set_pushed_text_offset)?;
@@ -1457,12 +1501,27 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
 
     // Button: checked textures
     table_set_rust_fn(state, table, "SetCheckedTexture", set_checked_texture)?;
-    table_set_rust_fn(state, table, "SetDisabledCheckedTexture", set_disabled_checked_texture)?;
-    table_set_rust_fn(state, table, "GetDisabledCheckedTexture", get_disabled_checked_texture)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetDisabledCheckedTexture",
+        set_disabled_checked_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetDisabledCheckedTexture",
+        get_disabled_checked_texture,
+    )?;
 
     // Button: clear textures
     table_set_rust_fn(state, table, "ClearNormalTexture", clear_normal_texture)?;
-    table_set_rust_fn(state, table, "ClearHighlightTexture", clear_highlight_texture)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "ClearHighlightTexture",
+        clear_highlight_texture,
+    )?;
     table_set_rust_fn(state, table, "ClearPushedTexture", clear_pushed_texture)?;
     table_set_rust_fn(state, table, "ClearDisabledTexture", clear_disabled_texture)?;
 

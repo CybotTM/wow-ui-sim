@@ -54,7 +54,11 @@ fn set_global_fn(state: &mut LuaState, name: &'static str, func: RustFn) {
     let closure_ref = state.gc.alloc_closure(closure);
     let global = state.global;
     if let Some(g) = state.gc.tables.get_mut(global) {
-        let _ = g.raw_set(Val::Str(key), Val::Function(closure_ref), &state.gc.string_arena);
+        let _ = g.raw_set(
+            Val::Str(key),
+            Val::Function(closure_ref),
+            &state.gc.string_arena,
+        );
     }
 }
 
@@ -98,7 +102,11 @@ fn set_namespace_fn(
     let closure = Closure::Rust(RustClosure::new(func, method));
     let closure_ref = state.gc.alloc_closure(closure);
     if let Some(ns) = state.gc.tables.get_mut(ns_ref) {
-        let _ = ns.raw_set(Val::Str(m_key), Val::Function(closure_ref), &state.gc.string_arena);
+        let _ = ns.raw_set(
+            Val::Str(m_key),
+            Val::Function(closure_ref),
+            &state.gc.string_arena,
+        );
     }
 }
 
@@ -541,8 +549,16 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_BattleNet", "GetFriendAccountInfo", stub_nil),
     ("C_BattleNet", "GetGameAccountInfoByGUID", stub_nil),
     // C_CharacterServices
-    ("C_CharacterServices", "GetActiveCharacterUpgradeBoostType", stub_nil),
-    ("C_CharacterServices", "GetActiveClassTrialBoostType", stub_nil),
+    (
+        "C_CharacterServices",
+        "GetActiveCharacterUpgradeBoostType",
+        stub_nil,
+    ),
+    (
+        "C_CharacterServices",
+        "GetActiveClassTrialBoostType",
+        stub_nil,
+    ),
     // C_ChatBubbles
     ("C_ChatBubbles", "GetAllChatBubbles", stub_nil),
     // C_ClassTalents
@@ -583,7 +599,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_LFGInfo", "GetLFGCategoryInfo", stub_nil),
     // C_LossOfControl
     ("C_LossOfControl", "GetActiveLossOfControlData", stub_nil),
-    ("C_LossOfControl", "GetActiveLossOfControlDataCount", stub_nil),
+    (
+        "C_LossOfControl",
+        "GetActiveLossOfControlDataCount",
+        stub_nil,
+    ),
     // C_Map
     ("C_Map", "GetMapArtID", stub_nil),
     ("C_Map", "GetMapChildrenInfo", stub_nil),
@@ -593,7 +613,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_MythicPlus", "GetCurrentSeason", stub_nil),
     ("C_MythicPlus", "GetLastWeeklyChest", stub_nil),
     ("C_MythicPlus", "GetRunHistory", stub_nil),
-    ("C_MythicPlus", "GetSeasonBestAffixScoreInfoForMap", stub_nil),
+    (
+        "C_MythicPlus",
+        "GetSeasonBestAffixScoreInfoForMap",
+        stub_nil,
+    ),
     ("C_MythicPlus", "GetWeeklyChestRewardLevel", stub_nil),
     ("C_MythicPlus", "RequestCurrentAffixes", stub_nil),
     ("C_MythicPlus", "RequestMapInfo", stub_nil),
@@ -624,7 +648,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_PetBattles", "StartPVPMatchmaking", stub_nil),
     // C_PlayerInfo
     ("C_PlayerInfo", "GetAlternateFormInfo", stub_nil),
-    ("C_PlayerInfo", "GetContentDifficultyCreatureForPlayer", stub_nil),
+    (
+        "C_PlayerInfo",
+        "GetContentDifficultyCreatureForPlayer",
+        stub_nil,
+    ),
     ("C_PlayerInfo", "GetPlayerMythicPlusRatingSummary", stub_nil),
     // C_QuestLog
     ("C_QuestLog", "GetBountySetInfoForMapID", stub_nil),
@@ -636,7 +664,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_RaidFrames
     ("C_RaidFrames", "GetProfile", stub_nil),
     // C_ScenarioInfo
-    ("C_ScenarioInfo", "GetScenarioBonusStepRewardQuestID", stub_nil),
+    (
+        "C_ScenarioInfo",
+        "GetScenarioBonusStepRewardQuestID",
+        stub_nil,
+    ),
     ("C_ScenarioInfo", "GetScenarioInfo", stub_nil),
     ("C_ScenarioInfo", "GetScenarioStepInfo", stub_nil),
     // C_Social
@@ -659,7 +691,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TooltipInfo", "GetGuildBankItem", stub_nil),
     ("C_TooltipInfo", "GetHyperlink", stub_nil),
     ("C_TooltipInfo", "GetInboxItem", stub_nil),
-    ("C_TooltipInfo", "GetInstanceLockEncountersComplete", stub_nil),
+    (
+        "C_TooltipInfo",
+        "GetInstanceLockEncountersComplete",
+        stub_nil,
+    ),
     ("C_TooltipInfo", "GetInventoryItem", stub_nil),
     ("C_TooltipInfo", "GetItem", stub_nil),
     ("C_TooltipInfo", "GetLFGDungeon", stub_nil),
@@ -684,7 +720,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TooltipInfo", "GetUnit", stub_nil),
     ("C_TooltipInfo", "GetUpgradeItem", stub_nil),
     // C_TradeSkillUI
-    ("C_TradeSkillUI", "GetAllProfessionTradeSkillLines", stub_nil),
+    (
+        "C_TradeSkillUI",
+        "GetAllProfessionTradeSkillLines",
+        stub_nil,
+    ),
     ("C_TradeSkillUI", "GetBaseProfessionInfo", stub_nil),
     ("C_TradeSkillUI", "GetChildProfessionInfo", stub_nil),
     ("C_TradeSkillUI", "GetCraftingOrderCount", stub_nil),
@@ -716,7 +756,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_VoiceChat", "GetActiveChannelID", stub_nil),
     ("C_VoiceChat", "GetChannel", stub_nil),
     ("C_VoiceChat", "GetChannels", stub_nil),
-    ("C_VoiceChat", "GetCurrentVoiceChatConnectionStatusCode", stub_nil),
+    (
+        "C_VoiceChat",
+        "GetCurrentVoiceChatConnectionStatusCode",
+        stub_nil,
+    ),
     ("C_VoiceChat", "GetMasterVolumeScale", stub_nil),
     ("C_VoiceChat", "GetMicrophoneVolume", stub_nil),
     ("C_VoiceChat", "GetOutputVolume", stub_nil),
@@ -738,7 +782,11 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_BattleNet
     ("C_BattleNet", "IsAccountMuted", stub_false),
     // C_CharacterServices
-    ("C_CharacterServices", "HasRequiredServiceForCharacterUpgrade", stub_false),
+    (
+        "C_CharacterServices",
+        "HasRequiredServiceForCharacterUpgrade",
+        stub_false,
+    ),
     // C_ClassTalents
     ("C_ClassTalents", "CanChangeTalents", stub_false),
     ("C_ClassTalents", "GetHasStarterBuild", stub_false),
@@ -748,7 +796,11 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_GarrisonInfo
     ("C_GarrisonInfo", "HasGarrison", stub_false),
     // C_IncomingSummon
-    ("C_IncomingSummon", "HasIncomingSummonFromFriend", stub_false),
+    (
+        "C_IncomingSummon",
+        "HasIncomingSummonFromFriend",
+        stub_false,
+    ),
     // C_Item
     ("C_Item", "IsItemTransmogrifiable", stub_false),
     // C_LFGInfo
@@ -840,7 +892,11 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_Social", "GetFriends", stub_empty_table),
     // C_TooltipInfo: these return nil not empty table, handled above
     // C_TradeSkillUI
-    ("C_TradeSkillUI", "GetAllProfessionTradeSkillLines", stub_empty_table),
+    (
+        "C_TradeSkillUI",
+        "GetAllProfessionTradeSkillLines",
+        stub_empty_table,
+    ),
     ("C_TradeSkillUI", "GetFilteredRecipeIDs", stub_empty_table),
     // C_UnitAuras
     ("C_UnitAuras", "GetAuraSlots", stub_empty_table),
@@ -908,7 +964,8 @@ mod tests {
     #[test]
     fn stub_nil_returns_nothing() {
         let env = make_env();
-        env.register_rilua_function("__test_stub_nil", stub_nil).unwrap();
+        env.register_rilua_function("__test_stub_nil", stub_nil)
+            .unwrap();
         let func = env.load_rilua("return __test_stub_nil()").unwrap();
         let result = env.call_rilua(&func, &[]).unwrap();
         assert_eq!(result, vec![]);
@@ -917,31 +974,34 @@ mod tests {
     #[test]
     fn stub_false_returns_false() {
         let env = make_env();
-        env.register_rilua_function("__test_stub_false", stub_false).unwrap();
-        let result = env.call_rilua(
-            &env.load_rilua("return __test_stub_false()").unwrap(),
-            &[],
-        ).unwrap();
+        env.register_rilua_function("__test_stub_false", stub_false)
+            .unwrap();
+        let result = env
+            .call_rilua(&env.load_rilua("return __test_stub_false()").unwrap(), &[])
+            .unwrap();
         assert_eq!(result, vec![Val::Bool(false)]);
     }
 
     #[test]
     fn stub_zero_returns_zero() {
         let env = make_env();
-        env.register_rilua_function("__test_stub_zero", stub_zero).unwrap();
-        let result = env.call_rilua(
-            &env.load_rilua("return __test_stub_zero()").unwrap(),
-            &[],
-        ).unwrap();
+        env.register_rilua_function("__test_stub_zero", stub_zero)
+            .unwrap();
+        let result = env
+            .call_rilua(&env.load_rilua("return __test_stub_zero()").unwrap(), &[])
+            .unwrap();
         assert_eq!(result, vec![Val::Num(0.0)]);
     }
 
     #[test]
     fn stub_empty_table_returns_table() {
         let env = make_env();
-        env.register_rilua_function("__test_stub_empty_table", stub_empty_table).unwrap();
+        env.register_rilua_function("__test_stub_empty_table", stub_empty_table)
+            .unwrap();
         // type() returns "table" for a table value
-        let func = env.load_rilua("return type(__test_stub_empty_table())").unwrap();
+        let func = env
+            .load_rilua("return type(__test_stub_empty_table())")
+            .unwrap();
         let result = env.call_rilua(&func, &[]).unwrap();
         // Val::Str wraps a GcRef — we can compare by checking via Lua
         // Just assert we got one result and it is not nil/false/number
@@ -951,6 +1011,7 @@ mod tests {
 
     #[test]
     fn register_all_does_not_panic() {
+        use rilua::LuaApiMut;
         let env = make_env();
         {
             let mut lua = env.rilua_mut();
@@ -960,9 +1021,11 @@ mod tests {
 
     #[test]
     fn register_all_skips_existing_global() {
+        use rilua::LuaApiMut;
         let env = make_env();
         // Pre-register a sentinel value as a global
-        env.set_rilua_global("ClearTarget", Val::Bool(true)).unwrap();
+        env.set_rilua_global("ClearTarget", Val::Bool(true))
+            .unwrap();
         {
             let mut lua = env.rilua_mut();
             register_all(lua.state_mut());

@@ -27,6 +27,14 @@ impl MultiValue {
         self.values.len()
     }
 
+    pub fn front(&self) -> Option<&Val> {
+        self.values.first()
+    }
+
+    pub fn get(&self, index: usize) -> Option<&Val> {
+        self.values.get(index)
+    }
+
     pub fn is_empty(&self) -> bool {
         self.values.is_empty()
     }

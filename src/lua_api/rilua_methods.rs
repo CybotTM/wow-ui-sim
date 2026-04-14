@@ -5,10 +5,10 @@
 //! Instead, methods are raw `RustFn`s that use these helpers to extract
 //! the frame ID from a rilua-backed table and borrow `SimState`.
 
-use super::env::WowLuaAppData;
 use super::SimState;
-use crate::lua_bridge::stack_val;
+use super::env::WowLuaAppData;
 use crate::lua_bridge::create_frame_table;
+use crate::lua_bridge::stack_val;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -292,7 +292,9 @@ pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
 
 /// Get a string key from a table Val.
 pub fn table_get(state: &mut LuaState, table: Val, key: &str) -> Val {
-    let Val::Table(table_ref) = table else { return Val::Nil };
+    let Val::Table(table_ref) = table else {
+        return Val::Nil;
+    };
     let key_ref = state.gc.intern_string(key.as_bytes());
     state
         .gc

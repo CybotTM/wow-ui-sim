@@ -9,8 +9,7 @@
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack,
 };
-use crate::lua_bridge::from_stack::FromStack;
-use crate::lua_bridge::table_builder::table_set_rust_fn;
+use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -26,8 +25,18 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "IsDragging", is_dragging)?;
 
     // Propagation
-    table_set_rust_fn(state, mt, "CanPropagateMouseClicks", can_propagate_mouse_clicks)?;
-    table_set_rust_fn(state, mt, "CanPropagateMouseMotion", can_propagate_mouse_motion)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "CanPropagateMouseClicks",
+        can_propagate_mouse_clicks,
+    )?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "CanPropagateMouseMotion",
+        can_propagate_mouse_motion,
+    )?;
     table_set_rust_fn(
         state,
         mt,
@@ -40,15 +49,40 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
         "SetHyperlinkPropagateToParent",
         set_hyperlink_propagate_to_parent,
     )?;
-    table_set_rust_fn(state, mt, "SetPropagateMouseClicks", set_propagate_mouse_clicks)?;
-    table_set_rust_fn(state, mt, "SetPropagateMouseMotion", set_propagate_mouse_motion)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "SetPropagateMouseClicks",
+        set_propagate_mouse_clicks,
+    )?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "SetPropagateMouseMotion",
+        set_propagate_mouse_motion,
+    )?;
 
     // Gamepad
     table_set_rust_fn(state, mt, "EnableGamePadButton", enable_game_pad_button)?;
     table_set_rust_fn(state, mt, "EnableGamePadStick", enable_game_pad_stick)?;
-    table_set_rust_fn(state, mt, "IsGamePadButtonEnabled", is_game_pad_button_enabled)?;
-    table_set_rust_fn(state, mt, "IsGamePadStickEnabled", is_game_pad_stick_enabled)?;
-    table_set_rust_fn(state, mt, "ShouldButtonPassThrough", should_button_pass_through)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "IsGamePadButtonEnabled",
+        is_game_pad_button_enabled,
+    )?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "IsGamePadStickEnabled",
+        is_game_pad_stick_enabled,
+    )?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "ShouldButtonPassThrough",
+        should_button_pass_through,
+    )?;
 
     // Alpha Gradient
     table_set_rust_fn(state, mt, "ClearAlphaGradient", clear_alpha_gradient)?;
@@ -88,10 +122,20 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "HasSecretValues", has_secret_values)?;
     table_set_rust_fn(state, mt, "IsAnchoringRestricted", is_anchoring_restricted)?;
     table_set_rust_fn(state, mt, "IsAnchoringSecret", is_anchoring_secret)?;
-    table_set_rust_fn(state, mt, "IsPreventingSecretValues", is_preventing_secret_values)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "IsPreventingSecretValues",
+        is_preventing_secret_values,
+    )?;
     table_set_rust_fn(state, mt, "IsProtected", is_protected)?;
     table_set_rust_fn(state, mt, "Protect", protect)?;
-    table_set_rust_fn(state, mt, "SetPreventSecretValues", set_prevent_secret_values)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "SetPreventSecretValues",
+        set_prevent_secret_values,
+    )?;
 
     // Flatten render layers
     table_set_rust_fn(
@@ -100,7 +144,12 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
         "GetEffectivelyFlattensRenderLayers",
         get_effectively_flattens_render_layers,
     )?;
-    table_set_rust_fn(state, mt, "GetFlattensRenderLayers", get_flattens_render_layers)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "GetFlattensRenderLayers",
+        get_flattens_render_layers,
+    )?;
 
     // Window / display
     table_set_rust_fn(state, mt, "GetDontSavePosition", get_dont_save_position)?;
@@ -110,7 +159,12 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     // Misc
     table_set_rust_fn(state, mt, "DesaturateHierarchy", desaturate_hierarchy)?;
     table_set_rust_fn(state, mt, "IsHighlightLocked", is_highlight_locked)?;
-    table_set_rust_fn(state, mt, "IsIgnoringChildrenForBounds", is_ignoring_children_for_bounds)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "IsIgnoringChildrenForBounds",
+        is_ignoring_children_for_bounds,
+    )?;
     table_set_rust_fn(state, mt, "SetHighlightLocked", set_highlight_locked)?;
     table_set_rust_fn(
         state,
@@ -159,8 +213,11 @@ pub fn intercept_start_drag(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn is_dragging(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    state.push(Val::Bool(sim.active_drag_frame == Some(id)));
+    let is_dragging = {
+        let sim = borrow_state(state)?;
+        sim.active_drag_frame == Some(id)
+    };
+    state.push(Val::Bool(is_dragging));
     Ok(1)
 }
 
@@ -168,36 +225,39 @@ pub fn is_dragging(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn can_propagate_mouse_clicks(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.propagate_mouse_clicks)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.propagate_mouse_clicks)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn can_propagate_mouse_motion(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.propagate_mouse_motion)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.propagate_mouse_motion)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn does_hyperlink_propagate_to_parent(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.propagate_hyperlinks_to_parent)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.propagate_hyperlinks_to_parent)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -256,24 +316,26 @@ pub fn enable_game_pad_stick(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn is_game_pad_button_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.gamepad_button_enabled)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.gamepad_button_enabled)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn is_game_pad_stick_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.gamepad_stick_enabled)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.gamepad_stick_enabled)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -282,12 +344,13 @@ pub fn should_button_pass_through(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let button = String::from_stack(state, 2)?;
     let normalized = button.to_ascii_lowercase();
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.pass_through_buttons.contains(&normalized))
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.pass_through_buttons.contains(&normalized))
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -305,12 +368,13 @@ pub fn clear_alpha_gradient(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn has_alpha_gradient(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| !f.alpha_gradients.is_empty())
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| !f.alpha_gradients.is_empty())
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -347,12 +411,13 @@ fn set_draw_layer_enabled_fn(state: &mut LuaState, enabled: bool) -> LuaResult<u
 
 pub fn is_frame_buffer(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.is_frame_buffer)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.is_frame_buffer)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -368,11 +433,7 @@ pub fn rotate_textures(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn rotate_descendant_textures_fn(
-    sim: &mut crate::lua_api::SimState,
-    frame_id: u64,
-    radians: f32,
-) {
+fn rotate_descendant_textures_fn(sim: &mut crate::lua_api::SimState, frame_id: u64, radians: f32) {
     let mut pending = vec![frame_id];
     while let Some(current_id) = pending.pop() {
         let Some(frame) = sim.widgets.get(current_id) else {
@@ -409,12 +470,13 @@ pub fn get_bounds_rect(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_clamp_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let (left, right, top, bottom) = sim
-        .widgets
-        .get(id)
-        .map(|f| f.clamp_rect_insets)
-        .unwrap_or((0.0, 0.0, 0.0, 0.0));
+    let (left, right, top, bottom) = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.clamp_rect_insets)
+            .unwrap_or((0.0, 0.0, 0.0, 0.0))
+    };
     state.push(Val::Num(left as f64));
     state.push(Val::Num(right as f64));
     state.push(Val::Num(top as f64));
@@ -469,8 +531,10 @@ pub fn raise(state: &mut LuaState) -> LuaResult<u32> {
 pub fn get_highest_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let iterate_all = Option::<bool>::from_stack(state, 2)?.unwrap_or(false);
-    let sim = borrow_state(state)?;
-    let level = highest_frame_level(&sim.widgets, id, iterate_all);
+    let level = {
+        let sim = borrow_state(state)?;
+        highest_frame_level(&sim.widgets, id, iterate_all)
+    };
     state.push(Val::Num(level as f64));
     Ok(1)
 }
@@ -500,24 +564,26 @@ fn highest_frame_level(
 
 pub fn get_raised_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let level = sim
-        .widgets
-        .get(id)
-        .map(|f| f.frame_level + f.raise_order)
-        .unwrap_or(0);
+    let level = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.frame_level + f.raise_order)
+            .unwrap_or(0)
+    };
     state.push(Val::Num(level as f64));
     Ok(1)
 }
 
 pub fn is_using_parent_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| !f.has_fixed_frame_level)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| !f.has_fixed_frame_level)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -548,9 +614,11 @@ fn inherited_parent_level_fn(widgets: &crate::widget::WidgetRegistry, id: u64) -
 
 pub fn has_any_secret_aspect(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = frame_has_secret_values_fn(&sim.widgets, id)
-        || frame_is_anchoring_restricted_fn(&sim.widgets, id);
+    let val = {
+        let sim = borrow_state(state)?;
+        frame_has_secret_values_fn(&sim.widgets, id)
+            || frame_is_anchoring_restricted_fn(&sim.widgets, id)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -562,9 +630,11 @@ pub fn has_secret_aspect(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(n) => Some(n as i64),
         _ => None,
     };
-    let sim = borrow_state(state)?;
-    let has_any = frame_has_secret_values_fn(&sim.widgets, id)
-        || frame_is_anchoring_restricted_fn(&sim.widgets, id);
+    let has_any = {
+        let sim = borrow_state(state)?;
+        frame_has_secret_values_fn(&sim.widgets, id)
+            || frame_is_anchoring_restricted_fn(&sim.widgets, id)
+    };
     let result = aspect_num.is_some_and(|v| v == 1 && has_any);
     state.push(Val::Bool(result));
     Ok(1)
@@ -572,45 +642,53 @@ pub fn has_secret_aspect(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn has_secret_values(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    state.push(Val::Bool(frame_has_secret_values_fn(&sim.widgets, id)));
+    let has_secret_values = {
+        let sim = borrow_state(state)?;
+        frame_has_secret_values_fn(&sim.widgets, id)
+    };
+    state.push(Val::Bool(has_secret_values));
     Ok(1)
 }
 
 pub fn is_anchoring_restricted(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    state.push(Val::Bool(frame_is_anchoring_restricted_fn(&sim.widgets, id)));
+    let is_restricted = {
+        let sim = borrow_state(state)?;
+        frame_is_anchoring_restricted_fn(&sim.widgets, id)
+    };
+    state.push(Val::Bool(is_restricted));
     Ok(1)
 }
 
 pub fn is_anchoring_secret(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    state.push(Val::Bool(frame_has_secret_values_fn(&sim.widgets, id)));
+    let is_secret = {
+        let sim = borrow_state(state)?;
+        frame_has_secret_values_fn(&sim.widgets, id)
+    };
+    state.push(Val::Bool(is_secret));
     Ok(1)
 }
 
 pub fn is_preventing_secret_values(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.prevent_secret_values)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.prevent_secret_values)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn is_protected(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let protected = sim
-        .widgets
-        .get(id)
-        .map(|f| f.is_protected)
-        .unwrap_or(false);
+    let protected = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).map(|f| f.is_protected).unwrap_or(false)
+    };
     state.push(Val::Bool(protected));
     state.push(Val::Bool(protected));
     Ok(2)
@@ -649,8 +727,8 @@ fn frame_is_anchoring_restricted_fn(widgets: &crate::widget::WidgetRegistry, id:
 
 pub fn get_effectively_flattens_render_layers(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
     let val = {
+        let sim = borrow_state(state)?;
         let mut current = Some(id);
         let mut found = false;
         while let Some(fid) = current {
@@ -672,12 +750,13 @@ pub fn get_effectively_flattens_render_layers(state: &mut LuaState) -> LuaResult
 
 pub fn get_flattens_render_layers(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.flattens_render_layers)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.flattens_render_layers)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -686,12 +765,13 @@ pub fn get_flattens_render_layers(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_dont_save_position(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.dont_save_position)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.dont_save_position)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
@@ -743,24 +823,26 @@ fn collect_frame_and_descendant_ids_fn(
 
 pub fn is_highlight_locked(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.highlight_locked)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.highlight_locked)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }
 
 pub fn is_ignoring_children_for_bounds(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.ignoring_children_for_bounds)
-        .unwrap_or(false);
+    let val = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.ignoring_children_for_bounds)
+            .unwrap_or(false)
+    };
     state.push(Val::Bool(val));
     Ok(1)
 }

@@ -100,7 +100,9 @@ pub fn setglobal(state: &mut LuaState) -> LuaResult<u32> {
     let name_val = stack_val(state, 1);
     let value = stack_val(state, 2);
     let Val::Str(name_ref) = name_val else {
-        return Err(runtime_error("setglobal: expected string as first argument"));
+        return Err(runtime_error(
+            "setglobal: expected string as first argument",
+        ));
     };
     let name = {
         let lua_str = state
@@ -219,7 +221,9 @@ pub fn register_static_constants(_state: &mut LuaState) -> LuaResult<u32> {
 pub fn pcall(state: &mut LuaState) -> LuaResult<u32> {
     // TODO: implement pcall semantics via rilua's error boundary API
     state.push(Val::Bool(false));
-    let msg = state.gc.intern_string(b"pcall: not implemented in rilua path");
+    let msg = state
+        .gc
+        .intern_string(b"pcall: not implemented in rilua path");
     state.push(Val::Str(msg));
     Ok(2)
 }
@@ -230,7 +234,9 @@ pub fn pcall(state: &mut LuaState) -> LuaResult<u32> {
 pub fn xpcall(state: &mut LuaState) -> LuaResult<u32> {
     // TODO: implement xpcall semantics via rilua's error boundary API
     state.push(Val::Bool(false));
-    let msg = state.gc.intern_string(b"xpcall: not implemented in rilua path");
+    let msg = state
+        .gc
+        .intern_string(b"xpcall: not implemented in rilua path");
     state.push(Val::Str(msg));
     Ok(2)
 }

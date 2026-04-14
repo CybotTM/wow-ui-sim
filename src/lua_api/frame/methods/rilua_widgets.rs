@@ -14,11 +14,11 @@
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, val_to_string,
 };
-use crate::lua_bridge::{stack_val, table_set_rust_fn, IntoStack};
+use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{runtime_error, LuaResult, Val};
+use rilua::{LuaResult, Val, runtime_error};
 
 // ---------------------------------------------------------------------------
 // Helpers shared across widget methods
@@ -51,7 +51,12 @@ fn normalize_mod_rate(r: f64) -> f64 {
     if r <= 0.0 { 1.0 } else { r }
 }
 
-fn apply_cooldown_state(frame: &mut crate::widget::Frame, start: f64, duration: f64, mod_rate: f64) {
+fn apply_cooldown_state(
+    frame: &mut crate::widget::Frame,
+    start: f64,
+    duration: f64,
+    mod_rate: f64,
+) {
     frame.cooldown_start = start;
     frame.cooldown_duration = duration;
     frame.cooldown_display_duration_ms = duration.max(0.0) * 1000.0;
@@ -563,7 +568,11 @@ fn editbox_set_cursor_position(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_get_cursor_position(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_cursor_pos).unwrap_or(0);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_cursor_pos)
+        .unwrap_or(0);
     drop(sim);
     (v as f64).into_stack(state)
 }
@@ -594,7 +603,11 @@ fn editbox_set_max_letters(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_get_max_letters(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_max_letters).unwrap_or(0);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_max_letters)
+        .unwrap_or(0);
     drop(sim);
     (v as f64).into_stack(state)
 }
@@ -612,7 +625,11 @@ fn editbox_set_multi_line(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_is_multi_line(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_multi_line).unwrap_or(false);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_multi_line)
+        .unwrap_or(false);
     drop(sim);
     v.into_stack(state)
 }
@@ -630,7 +647,11 @@ fn editbox_set_auto_focus(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_is_auto_focus(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_auto_focus).unwrap_or(false);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_auto_focus)
+        .unwrap_or(false);
     drop(sim);
     v.into_stack(state)
 }
@@ -648,7 +669,11 @@ fn editbox_set_numeric(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_is_numeric(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_numeric).unwrap_or(false);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_numeric)
+        .unwrap_or(false);
     drop(sim);
     v.into_stack(state)
 }
@@ -666,7 +691,11 @@ fn editbox_set_password(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_is_password(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_password).unwrap_or(false);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_password)
+        .unwrap_or(false);
     drop(sim);
     v.into_stack(state)
 }
@@ -841,7 +870,11 @@ fn editbox_set_blink_speed(state: &mut LuaState) -> LuaResult<u32> {
 fn editbox_get_blink_speed(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.editbox_blink_speed).unwrap_or(0.5);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_blink_speed)
+        .unwrap_or(0.5);
     drop(sim);
     v.into_stack(state)
 }
@@ -982,7 +1015,11 @@ fn slider_set_steps_per_page(state: &mut LuaState) -> LuaResult<u32> {
 fn slider_get_steps_per_page(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).map(|f| f.slider_steps_per_page).unwrap_or(1);
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.slider_steps_per_page)
+        .unwrap_or(1);
     drop(sim);
     (v as f64).into_stack(state)
 }
@@ -1303,7 +1340,11 @@ fn apply_statusbar_desaturation_inner(state: &mut LuaState, id: u64, desaturatio
             f.statusbar_desaturation = clamped;
         }
         if let Some(child_id) = child_id {
-            let is_desat = sim.widgets.get(id).map(|f| f.statusbar_desaturation > 0.0).unwrap_or(false);
+            let is_desat = sim
+                .widgets
+                .get(id)
+                .map(|f| f.statusbar_desaturation > 0.0)
+                .unwrap_or(false);
             if let Some(child) = sim.widgets.get_mut_visual(child_id) {
                 child.desaturated = is_desat;
             }
@@ -1350,7 +1391,10 @@ fn model_get_model(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let path = {
         let sim = borrow_state(state)?;
-        sim.widgets.get(id).and_then(|f| f.model_path.clone()).unwrap_or_default()
+        sim.widgets
+            .get(id)
+            .and_then(|f| f.model_path.clone())
+            .unwrap_or_default()
     };
     let val = create_string(state, &path);
     val.into_stack(state)
@@ -1491,7 +1535,11 @@ fn model_clear_model(state: &mut LuaState) -> LuaResult<u32> {
 fn model_get_model_file_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.widgets.get(id).and_then(|f| f.model_file_id).unwrap_or(0);
+    let v = sim
+        .widgets
+        .get(id)
+        .and_then(|f| f.model_file_id)
+        .unwrap_or(0);
     drop(sim);
     (v as f64).into_stack(state)
 }
@@ -1717,7 +1765,11 @@ fn tooltip_set_minimum_width(state: &mut LuaState) -> LuaResult<u32> {
 fn tooltip_get_minimum_width(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.tooltips.get(&id).map(|td| td.min_width as f64).unwrap_or(0.0);
+    let v = sim
+        .tooltips
+        .get(&id)
+        .map(|td| td.min_width as f64)
+        .unwrap_or(0.0);
     drop(sim);
     v.into_stack(state)
 }
@@ -1801,7 +1853,11 @@ fn tooltip_set_padding(state: &mut LuaState) -> LuaResult<u32> {
 fn tooltip_get_padding(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let v = sim.tooltips.get(&id).map(|td| td.padding as f64).unwrap_or(0.0);
+    let v = sim
+        .tooltips
+        .get(&id)
+        .map(|td| td.padding as f64)
+        .unwrap_or(0.0);
     drop(sim);
     v.into_stack(state)
 }
@@ -1895,13 +1951,48 @@ fn tooltip_add_fonts_strings(state: &mut LuaState) -> LuaResult<u32> {
 pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     // --- Cooldown ---
     table_set_rust_fn(state, metatable, "SetCooldown", cooldown_set_cooldown)?;
-    table_set_rust_fn(state, metatable, "SetCooldownUNIX", cooldown_set_cooldown_unix)?;
-    table_set_rust_fn(state, metatable, "SetCooldownFromExpirationTime", cooldown_set_cooldown_from_expiration_time)?;
-    table_set_rust_fn(state, metatable, "SetCooldownDuration", cooldown_set_cooldown_duration)?;
-    table_set_rust_fn(state, metatable, "SetCooldownFromDurationObject", cooldown_set_from_duration_object)?;
-    table_set_rust_fn(state, metatable, "GetCooldownTimes", cooldown_get_cooldown_times)?;
-    table_set_rust_fn(state, metatable, "GetCooldownDuration", cooldown_get_cooldown_duration)?;
-    table_set_rust_fn(state, metatable, "GetCooldownDisplayDuration", cooldown_get_cooldown_display_duration)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCooldownUNIX",
+        cooldown_set_cooldown_unix,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCooldownFromExpirationTime",
+        cooldown_set_cooldown_from_expiration_time,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCooldownDuration",
+        cooldown_set_cooldown_duration,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCooldownFromDurationObject",
+        cooldown_set_from_duration_object,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCooldownTimes",
+        cooldown_get_cooldown_times,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCooldownDuration",
+        cooldown_get_cooldown_duration,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCooldownDisplayDuration",
+        cooldown_get_cooldown_display_duration,
+    )?;
     table_set_rust_fn(state, metatable, "Clear", cooldown_clear)?;
     table_set_rust_fn(state, metatable, "Pause", cooldown_pause)?;
     table_set_rust_fn(state, metatable, "Resume", cooldown_resume)?;
@@ -1914,32 +2005,112 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "GetDrawBling", cooldown_get_draw_bling)?;
     table_set_rust_fn(state, metatable, "SetReverse", cooldown_set_reverse)?;
     table_set_rust_fn(state, metatable, "GetReverse", cooldown_get_reverse)?;
-    table_set_rust_fn(state, metatable, "SetHideCountdownNumbers", cooldown_set_hide_countdown_numbers)?;
-    table_set_rust_fn(state, metatable, "GetHideCountdownNumbers", cooldown_get_hide_countdown_numbers)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetHideCountdownNumbers",
+        cooldown_set_hide_countdown_numbers,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetHideCountdownNumbers",
+        cooldown_get_hide_countdown_numbers,
+    )?;
     table_set_rust_fn(state, metatable, "SetEdgeScale", cooldown_set_edge_scale)?;
     table_set_rust_fn(state, metatable, "GetEdgeScale", cooldown_get_edge_scale)?;
-    table_set_rust_fn(state, metatable, "SetMinimumCountdownDuration", cooldown_set_minimum_countdown_duration)?;
-    table_set_rust_fn(state, metatable, "GetMinimumCountdownDuration", cooldown_get_minimum_countdown_duration)?;
-    table_set_rust_fn(state, metatable, "SetUseAuraDisplayTime", cooldown_set_use_aura_display_time)?;
-    table_set_rust_fn(state, metatable, "GetUseAuraDisplayTime", cooldown_get_use_aura_display_time)?;
-    table_set_rust_fn(state, metatable, "SetUseCircularEdge", cooldown_set_use_circular_edge)?;
-    table_set_rust_fn(state, metatable, "SetCountdownAbbrevThreshold", cooldown_set_countdown_abbrev_threshold)?;
-    table_set_rust_fn(state, metatable, "SetSwipeTexture", cooldown_set_swipe_texture)?;
-    table_set_rust_fn(state, metatable, "SetEdgeTexture", cooldown_set_edge_texture)?;
-    table_set_rust_fn(state, metatable, "SetBlingTexture", cooldown_set_bling_texture)?;
-    table_set_rust_fn(state, metatable, "SetCountdownFont", cooldown_set_countdown_font)?;
-    table_set_rust_fn(state, metatable, "GetCountdownFontString", cooldown_get_countdown_font_string)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetMinimumCountdownDuration",
+        cooldown_set_minimum_countdown_duration,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetMinimumCountdownDuration",
+        cooldown_get_minimum_countdown_duration,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetUseAuraDisplayTime",
+        cooldown_set_use_aura_display_time,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetUseAuraDisplayTime",
+        cooldown_get_use_aura_display_time,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetUseCircularEdge",
+        cooldown_set_use_circular_edge,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCountdownAbbrevThreshold",
+        cooldown_set_countdown_abbrev_threshold,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetSwipeTexture",
+        cooldown_set_swipe_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetEdgeTexture",
+        cooldown_set_edge_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetBlingTexture",
+        cooldown_set_bling_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCountdownFont",
+        cooldown_set_countdown_font,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCountdownFontString",
+        cooldown_get_countdown_font_string,
+    )?;
     table_set_rust_fn(state, metatable, "SetSwipeColor", cooldown_set_swipe_color)?;
     table_set_rust_fn(state, metatable, "SetEdgeColor", cooldown_set_edge_color)?;
-    table_set_rust_fn(state, metatable, "SetTexCoordRange", cooldown_set_tex_coord_range)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetTexCoordRange",
+        cooldown_set_tex_coord_range,
+    )?;
 
     // --- EditBox ---
     table_set_rust_fn(state, metatable, "SetFocus", editbox_set_focus)?;
     table_set_rust_fn(state, metatable, "ClearFocus", editbox_clear_focus)?;
     table_set_rust_fn(state, metatable, "HasFocus", editbox_has_focus)?;
     table_set_rust_fn(state, metatable, "HasText", editbox_has_text)?;
-    table_set_rust_fn(state, metatable, "SetCursorPosition", editbox_set_cursor_position)?;
-    table_set_rust_fn(state, metatable, "GetCursorPosition", editbox_get_cursor_position)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCursorPosition",
+        editbox_set_cursor_position,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCursorPosition",
+        editbox_get_cursor_position,
+    )?;
     table_set_rust_fn(state, metatable, "GetNumLetters", editbox_get_num_letters)?;
     table_set_rust_fn(state, metatable, "SetMaxLetters", editbox_set_max_letters)?;
     table_set_rust_fn(state, metatable, "GetMaxLetters", editbox_get_max_letters)?;
@@ -1954,11 +2125,31 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetNumber", editbox_set_number)?;
     table_set_rust_fn(state, metatable, "GetNumber", editbox_get_number)?;
     table_set_rust_fn(state, metatable, "AddHistoryLine", editbox_add_history_line)?;
-    table_set_rust_fn(state, metatable, "GetHistoryLines", editbox_get_history_lines)?;
-    table_set_rust_fn(state, metatable, "SetHistoryLines", editbox_set_history_lines)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetHistoryLines",
+        editbox_get_history_lines,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetHistoryLines",
+        editbox_set_history_lines,
+    )?;
     table_set_rust_fn(state, metatable, "ClearHistory", editbox_clear_history)?;
-    table_set_rust_fn(state, metatable, "GetInputLanguage", editbox_get_input_language)?;
-    table_set_rust_fn(state, metatable, "ToggleInputLanguage", editbox_toggle_input_language)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetInputLanguage",
+        editbox_get_input_language,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "ToggleInputLanguage",
+        editbox_toggle_input_language,
+    )?;
     table_set_rust_fn(state, metatable, "ResetInputMode", editbox_reset_input_mode)?;
     table_set_rust_fn(state, metatable, "SetTextInsets", editbox_set_text_insets)?;
     table_set_rust_fn(state, metatable, "GetTextInsets", editbox_get_text_insets)?;
@@ -1966,49 +2157,169 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "Insert", editbox_insert)?;
     table_set_rust_fn(state, metatable, "SetBlinkSpeed", editbox_set_blink_speed)?;
     table_set_rust_fn(state, metatable, "GetBlinkSpeed", editbox_get_blink_speed)?;
-    table_set_rust_fn(state, metatable, "SetAltArrowKeyMode", editbox_set_alt_arrow_key_mode)?;
-    table_set_rust_fn(state, metatable, "GetAltArrowKeyMode", editbox_get_alt_arrow_key_mode)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetAltArrowKeyMode",
+        editbox_set_alt_arrow_key_mode,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetAltArrowKeyMode",
+        editbox_get_alt_arrow_key_mode,
+    )?;
     table_set_rust_fn(state, metatable, "HighlightText", editbox_highlight_text)?;
-    table_set_rust_fn(state, metatable, "ClearHighlightText", editbox_clear_highlight_text)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "ClearHighlightText",
+        editbox_clear_highlight_text,
+    )?;
 
     // --- Slider ---
     table_set_rust_fn(state, metatable, "SetValueStep", slider_set_value_step)?;
     table_set_rust_fn(state, metatable, "GetValueStep", slider_get_value_step)?;
     table_set_rust_fn(state, metatable, "SetOrientation", slider_set_orientation)?;
     table_set_rust_fn(state, metatable, "GetOrientation", slider_get_orientation)?;
-    table_set_rust_fn(state, metatable, "SetObeyStepOnDrag", slider_set_obey_step_on_drag)?;
-    table_set_rust_fn(state, metatable, "GetObeyStepOnDrag", slider_get_obey_step_on_drag)?;
-    table_set_rust_fn(state, metatable, "SetStepsPerPage", slider_set_steps_per_page)?;
-    table_set_rust_fn(state, metatable, "GetStepsPerPage", slider_get_steps_per_page)?;
-    table_set_rust_fn(state, metatable, "IsDraggingThumb", slider_is_dragging_thumb)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetObeyStepOnDrag",
+        slider_set_obey_step_on_drag,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetObeyStepOnDrag",
+        slider_get_obey_step_on_drag,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetStepsPerPage",
+        slider_set_steps_per_page,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetStepsPerPage",
+        slider_get_steps_per_page,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "IsDraggingThumb",
+        slider_is_dragging_thumb,
+    )?;
 
     // --- Shared value (Slider + StatusBar) ---
     table_set_rust_fn(state, metatable, "SetValue", shared_set_value)?;
     table_set_rust_fn(state, metatable, "GetValue", shared_get_value)?;
-    table_set_rust_fn(state, metatable, "SetMinMaxValues", shared_set_min_max_values)?;
-    table_set_rust_fn(state, metatable, "GetMinMaxValues", shared_get_min_max_values)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetMinMaxValues",
+        shared_set_min_max_values,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetMinMaxValues",
+        shared_get_min_max_values,
+    )?;
 
     // --- CheckButton ---
     table_set_rust_fn(state, metatable, "SetChecked", checkbutton_set_checked)?;
     table_set_rust_fn(state, metatable, "GetChecked", checkbutton_get_checked)?;
 
     // --- StatusBar ---
-    table_set_rust_fn(state, metatable, "SetStatusBarColor", statusbar_set_status_bar_color)?;
-    table_set_rust_fn(state, metatable, "GetStatusBarColor", statusbar_get_status_bar_color)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetStatusBarColor",
+        statusbar_set_status_bar_color,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetStatusBarColor",
+        statusbar_get_status_bar_color,
+    )?;
     table_set_rust_fn(state, metatable, "SetFillStyle", statusbar_set_fill_style)?;
     table_set_rust_fn(state, metatable, "GetFillStyle", statusbar_get_fill_style)?;
-    table_set_rust_fn(state, metatable, "SetReverseFill", statusbar_set_reverse_fill)?;
-    table_set_rust_fn(state, metatable, "GetReverseFill", statusbar_get_reverse_fill)?;
-    table_set_rust_fn(state, metatable, "GetInterpolatedValue", statusbar_get_interpolated_value)?;
-    table_set_rust_fn(state, metatable, "IsInterpolating", statusbar_is_interpolating)?;
-    table_set_rust_fn(state, metatable, "SetToTargetValue", statusbar_set_to_target_value)?;
-    table_set_rust_fn(state, metatable, "SetStatusBarDesaturated", statusbar_set_desaturated)?;
-    table_set_rust_fn(state, metatable, "GetStatusBarDesaturated", statusbar_get_status_bar_desaturated)?;
-    table_set_rust_fn(state, metatable, "SetStatusBarDesaturation", statusbar_set_desaturation)?;
-    table_set_rust_fn(state, metatable, "GetStatusBarDesaturation", statusbar_get_status_bar_desaturation)?;
-    table_set_rust_fn(state, metatable, "IsStatusBarDesaturated", statusbar_is_status_bar_desaturated)?;
-    table_set_rust_fn(state, metatable, "SetRotatesTexture", statusbar_set_rotates_texture)?;
-    table_set_rust_fn(state, metatable, "GetRotatesTexture", statusbar_get_rotates_texture)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetReverseFill",
+        statusbar_set_reverse_fill,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetReverseFill",
+        statusbar_get_reverse_fill,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetInterpolatedValue",
+        statusbar_get_interpolated_value,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "IsInterpolating",
+        statusbar_is_interpolating,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetToTargetValue",
+        statusbar_set_to_target_value,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetStatusBarDesaturated",
+        statusbar_set_desaturated,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetStatusBarDesaturated",
+        statusbar_get_status_bar_desaturated,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetStatusBarDesaturation",
+        statusbar_set_desaturation,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetStatusBarDesaturation",
+        statusbar_get_status_bar_desaturation,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "IsStatusBarDesaturated",
+        statusbar_is_status_bar_desaturated,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetRotatesTexture",
+        statusbar_set_rotates_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetRotatesTexture",
+        statusbar_get_rotates_texture,
+    )?;
 
     // --- Model ---
     table_set_rust_fn(state, metatable, "SetModel", model_set_model)?;
@@ -2029,8 +2340,18 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "GetModelAlpha", model_get_model_alpha)?;
     table_set_rust_fn(state, metatable, "SetSequence", model_set_sequence)?;
     table_set_rust_fn(state, metatable, "SetSequenceTime", model_set_sequence_time)?;
-    table_set_rust_fn(state, metatable, "GetCameraDistance", model_get_camera_distance)?;
-    table_set_rust_fn(state, metatable, "SetCameraDistance", model_set_camera_distance)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCameraDistance",
+        model_get_camera_distance,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCameraDistance",
+        model_set_camera_distance,
+    )?;
     table_set_rust_fn(state, metatable, "GetCameraFacing", model_get_camera_facing)?;
     table_set_rust_fn(state, metatable, "SetCameraFacing", model_set_camera_facing)?;
     table_set_rust_fn(state, metatable, "GetCameraTarget", model_get_camera_target)?;
@@ -2045,7 +2366,12 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "ResetLights", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "RefreshUnit", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "RefreshCamera", model_stub_variadic)?;
-    table_set_rust_fn(state, metatable, "TransitionToModelSceneID", model_stub_variadic)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "TransitionToModelSceneID",
+        model_stub_variadic,
+    )?;
     table_set_rust_fn(state, metatable, "SetFromModelSceneID", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "CycleVariation", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "GetModelSceneID", model_stub_zero)?;
@@ -2062,9 +2388,24 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetRoll", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "GetRoll", model_stub_zero)?;
     table_set_rust_fn(state, metatable, "GetWorldScale", model_stub_one)?;
-    table_set_rust_fn(state, metatable, "TransformCameraSpaceToModelSpace", model_stub_nil)?;
-    table_set_rust_fn(state, metatable, "UseModelCenterToTransform", model_stub_variadic)?;
-    table_set_rust_fn(state, metatable, "IsUsingModelCenterToTransform", model_stub_false)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "TransformCameraSpaceToModelSpace",
+        model_stub_nil,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "UseModelCenterToTransform",
+        model_stub_variadic,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "IsUsingModelCenterToTransform",
+        model_stub_false,
+    )?;
     table_set_rust_fn(state, metatable, "SetViewTranslation", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetModelDrawLayer", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "ReplaceIconTexture", model_stub_variadic)?;
@@ -2075,7 +2416,12 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetParticlesEnabled", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetUseGBuffer", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetCustomCamera", model_stub_variadic)?;
-    table_set_rust_fn(state, metatable, "MakeCurrentCameraCustom", model_stub_variadic)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "MakeCurrentCameraCustom",
+        model_stub_variadic,
+    )?;
     table_set_rust_fn(state, metatable, "GetUpperEmblemTexture", model_stub_nil)?;
     table_set_rust_fn(state, metatable, "GetLowerEmblemTexture", model_stub_nil)?;
 
@@ -2085,13 +2431,48 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "AddDoubleLine", tooltip_add_double_line)?;
     table_set_rust_fn(state, metatable, "NumLines", tooltip_num_lines)?;
     table_set_rust_fn(state, metatable, "GetNumLines", tooltip_num_lines)?;
-    table_set_rust_fn(state, metatable, "SetCustomLineSpacing", tooltip_set_custom_line_spacing)?;
-    table_set_rust_fn(state, metatable, "GetCustomLineSpacing", tooltip_get_custom_line_spacing)?;
-    table_set_rust_fn(state, metatable, "SetMinimumWidth", tooltip_set_minimum_width)?;
-    table_set_rust_fn(state, metatable, "GetMinimumWidth", tooltip_get_minimum_width)?;
-    table_set_rust_fn(state, metatable, "SetAllowShowWithNoLines", tooltip_set_allow_show_with_no_lines)?;
-    table_set_rust_fn(state, metatable, "SetCustomWordWrapMinWidth", tooltip_set_custom_word_wrap_min_width)?;
-    table_set_rust_fn(state, metatable, "SetShrinkToFitWrapped", tooltip_set_shrink_to_fit_wrapped)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCustomLineSpacing",
+        tooltip_set_custom_line_spacing,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetCustomLineSpacing",
+        tooltip_get_custom_line_spacing,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetMinimumWidth",
+        tooltip_set_minimum_width,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetMinimumWidth",
+        tooltip_get_minimum_width,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetAllowShowWithNoLines",
+        tooltip_set_allow_show_with_no_lines,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetCustomWordWrapMinWidth",
+        tooltip_set_custom_word_wrap_min_width,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetShrinkToFitWrapped",
+        tooltip_set_shrink_to_fit_wrapped,
+    )?;
     table_set_rust_fn(state, metatable, "GetSpell", tooltip_get_spell)?;
     table_set_rust_fn(state, metatable, "GetUnit", tooltip_get_unit)?;
     table_set_rust_fn(state, metatable, "GetItem", tooltip_get_item)?;
@@ -2110,7 +2491,12 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetAnchorType", tooltip_set_anchor_type)?;
     table_set_rust_fn(state, metatable, "CopyTooltip", tooltip_copy_tooltip)?;
     table_set_rust_fn(state, metatable, "SetFrameStack", tooltip_set_frame_stack)?;
-    table_set_rust_fn(state, metatable, "AddFontStrings", tooltip_add_fonts_strings)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "AddFontStrings",
+        tooltip_add_fonts_strings,
+    )?;
 
     Ok(())
 }

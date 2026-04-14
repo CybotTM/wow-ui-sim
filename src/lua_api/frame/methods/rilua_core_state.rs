@@ -92,11 +92,7 @@ pub fn is_visible(state: &mut LuaState) -> LuaResult<u32> {
 pub fn is_shown(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.visible)
-        .unwrap_or(false);
+    let result = sim.widgets.get(id).map(|f| f.visible).unwrap_or(false);
     drop(sim);
     state.push(Val::Bool(result));
     Ok(1)
@@ -370,11 +366,7 @@ pub fn set_frame_level(state: &mut LuaState) -> LuaResult<u32> {
 pub fn get_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.frame_level)
-        .unwrap_or(0);
+    let result = sim.widgets.get(id).map(|f| f.frame_level).unwrap_or(0);
     drop(sim);
     state.push(Val::Num(result as f64));
     Ok(1)
@@ -420,11 +412,7 @@ pub fn set_toplevel(state: &mut LuaState) -> LuaResult<u32> {
 pub fn is_toplevel(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
-    let result = sim
-        .widgets
-        .get(id)
-        .map(|f| f.toplevel)
-        .unwrap_or(false);
+    let result = sim.widgets.get(id).map(|f| f.toplevel).unwrap_or(false);
     drop(sim);
     state.push(Val::Bool(result));
     Ok(1)
@@ -890,6 +878,60 @@ pub fn set_draw_layer_enabled(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn get_name(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let name = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).and_then(|frame| frame.name.clone())
+    };
+    let name_val = match name {
+        Some(name) => create_string(state, &name),
+        None => Val::Nil,
+    };
+    state.push(name_val);
+    Ok(1)
+}
+
+pub fn get_object_type(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let object_type = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| {
+                frame
+                    .object_type_name
+                    .clone()
+                    .unwrap_or_else(|| frame.widget_type.as_str().to_string())
+            })
+            .unwrap_or_else(|| "Frame".to_string())
+    };
+    let object_type_val = create_string(state, &object_type);
+    state.push(object_type_val);
+    Ok(1)
+}
+
+pub fn is_object_type(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let requested = String::from_stack(state, 2)?;
+    let result = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| {
+                let actual = frame
+                    .object_type_name
+                    .as_deref()
+                    .unwrap_or(frame.widget_type.as_str());
+                actual.eq_ignore_ascii_case(&requested)
+                    || frame.widget_type.as_str().eq_ignore_ascii_case(&requested)
+            })
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(result));
+    Ok(1)
+}
+
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
@@ -923,6 +965,10 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "GetFrameLevel", get_frame_level)?;
     table_set_rust_fn(state, mt, "SetFixedFrameLevel", set_fixed_frame_level)?;
     table_set_rust_fn(state, mt, "HasFixedFrameLevel", has_fixed_frame_level)?;
+    // Identity
+    table_set_rust_fn(state, mt, "GetName", get_name)?;
+    table_set_rust_fn(state, mt, "GetObjectType", get_object_type)?;
+    table_set_rust_fn(state, mt, "IsObjectType", is_object_type)?;
     // Toplevel
     table_set_rust_fn(state, mt, "SetToplevel", set_toplevel)?;
     table_set_rust_fn(state, mt, "IsToplevel", is_toplevel)?;

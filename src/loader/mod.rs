@@ -7,7 +7,7 @@ pub(crate) mod chunk_cache;
 mod error;
 pub(crate) mod helpers;
 pub(crate) mod helpers_anim;
-mod lua_file;
+pub(crate) mod lua_file;
 pub(crate) mod precompiled;
 mod xml_file;
 mod xml_fontstring;

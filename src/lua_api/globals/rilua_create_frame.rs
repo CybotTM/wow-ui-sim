@@ -8,10 +8,11 @@
 //! `register_all` registers all globals on a rilua Lua state.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id, registry_get,
-    registry_table_or_create, table_set,
+    borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id, frame_ref,
+    registry_get, registry_table_or_create, table_set,
 };
 use crate::lua_bridge::FromStack;
+use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -19,15 +20,39 @@ use rilua::{LuaApiMut, LuaResult, Val};
 // CreateFrame
 // ---------------------------------------------------------------------------
 
-/// rilua stub for the `CreateFrame` global.
-///
-/// TODO: wire up to the full `create_frame_instance` / `finalize_registered_frame`
-/// pipeline once mlua frame creation is migrated to rilua.
 pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
-    let _frame_type: String = FromStack::from_stack(state, 1)?;
-    let _name: Option<String> = FromStack::from_stack(state, 2)?;
-    // TODO: parse remaining args (parent, template, id), call create_frame_instance
-    state.push(Val::Nil);
+    let frame_type: String = FromStack::from_stack(state, 1)?;
+    let name: Option<String> = FromStack::from_stack(state, 2)?;
+    let parent_val: Val = FromStack::from_stack(state, 3)?;
+    let _inherits: Option<String> = FromStack::from_stack(state, 4)?;
+    let id: Option<f64> = FromStack::from_stack(state, 5)?;
+
+    let widget_type = WidgetType::from_str(&frame_type)
+        .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))?;
+    let parent_explicit = !matches!(parent_val, Val::Nil);
+    let parent_id = if parent_explicit {
+        extract_frame_id(state, parent_val)
+            .ok_or_else(|| rilua::runtime_error("CreateFrame parent must be a frame or nil"))?
+    } else {
+        let sim = borrow_state(state)?;
+        sim.widgets.get_id_by_name("UIParent").unwrap_or_default()
+    };
+
+    let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
+        state,
+        widget_type,
+        &frame_type,
+        name,
+        if parent_id == 0 {
+            None
+        } else {
+            Some(parent_id)
+        },
+        parent_explicit,
+        id.map(|n| n as i32),
+    )?;
+    let frame_val = frame_ref(state, frame_id)?;
+    state.push(frame_val);
     Ok(1)
 }
 
@@ -35,13 +60,19 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
 // Global frames registration
 // ---------------------------------------------------------------------------
 
-/// Register all global frame objects (UIParent, WorldFrame, Minimap, etc.) on rilua.
-///
-/// TODO: Port each register_frame_global / register_typed_frame_global call from
-/// global_frames.rs once frame creation is fully migrated to rilua.
 pub fn register_global_frames(lua: &mut rilua::Lua) -> LuaResult<()> {
-    // TODO: register UIParent, WorldFrame, Minimap, DEFAULT_CHAT_FRAME, etc.
-    let _ = lua;
+    let state = lua.state_mut();
+    let named_frames = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .named_frames()
+            .map(|(id, name)| (id, name.clone()))
+            .collect::<Vec<_>>()
+    };
+    for (id, name) in named_frames {
+        let frame_val = frame_ref(state, id)?;
+        set_global_raw(state, &name, frame_val);
+    }
     Ok(())
 }
 
@@ -513,8 +544,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_global_frames(lua)?;
     register_dropdown_constants(lua)?;
 
-    LuaApiMut::register_function(lua, "UIDropDownMenu_CreateInfo", ui_dropdown_menu_create_info)?;
-    LuaApiMut::register_function(lua, "UIDropDownMenu_Initialize", ui_dropdown_menu_initialize)?;
+    LuaApiMut::register_function(
+        lua,
+        "UIDropDownMenu_CreateInfo",
+        ui_dropdown_menu_create_info,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "UIDropDownMenu_Initialize",
+        ui_dropdown_menu_initialize,
+    )?;
     LuaApiMut::register_function(lua, "UIDropDownMenu_AddButton", ui_dropdown_menu_add_button)?;
     LuaApiMut::register_function(lua, "UIDropDownMenu_SetWidth", ui_dropdown_menu_set_width)?;
     LuaApiMut::register_function(lua, "UIDropDownMenu_SetText", ui_dropdown_menu_set_text)?;
@@ -556,11 +595,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     )?;
     LuaApiMut::register_function(lua, "ToggleDropDownMenu", toggle_dropdown_menu)?;
     LuaApiMut::register_function(lua, "CloseDropDownMenus", close_dropdown_menus)?;
-    LuaApiMut::register_function(
-        lua,
-        "UIDropDownMenu_SetAnchor",
-        ui_dropdown_menu_set_anchor,
-    )?;
+    LuaApiMut::register_function(lua, "UIDropDownMenu_SetAnchor", ui_dropdown_menu_set_anchor)?;
     LuaApiMut::register_function(
         lua,
         "UIDropDownMenu_SetFrameStrata",
@@ -673,7 +708,7 @@ fn get_frame_field(state: &mut LuaState, field_name: &str) -> LuaResult<u32> {
 }
 
 /// Get a string-keyed value from a `Val::Table`.
-fn table_get_str(state: &LuaState, table: Val, key: &str) -> Val {
+fn table_get_str(state: &mut LuaState, table: Val, key: &str) -> Val {
     let Val::Table(table_ref) = table else {
         return Val::Nil;
     };
@@ -687,7 +722,7 @@ fn table_get_str(state: &LuaState, table: Val, key: &str) -> Val {
 }
 
 /// Get a named global value from the Lua global table.
-fn get_global(state: &LuaState, name: &str) -> Val {
+fn get_global(state: &mut LuaState, name: &str) -> Val {
     let key = state.gc.intern_string(name.as_bytes());
     state
         .gc
@@ -722,5 +757,31 @@ fn parse_frame_strata(strata: &str) -> crate::widget::FrameStrata {
         "FULLSCREEN_DIALOG" => crate::widget::FrameStrata::FullscreenDialog,
         "TOOLTIP" => crate::widget::FrameStrata::Tooltip,
         _ => crate::widget::FrameStrata::Medium,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn create_frame_registers_named_global_and_parent() {
+        let env = WowLuaEnv::new().expect("env");
+
+        env.exec(
+            r#"
+            local child = CreateFrame("Frame", "RiluaCreateFrameChild", UIParent)
+            assert(child ~= nil, "CreateFrame should return a frame")
+            assert(type(child) == "table", "CreateFrame should expose frames as tables")
+            assert(RiluaCreateFrameChild == child, "named frame should be global")
+            assert(child:GetParent() == UIParent, "parent should be assigned")
+        "#,
+        )
+        .expect("CreateFrame should create a named child frame");
+
+        let parent_name: Option<String> = env
+            .eval("local p = RiluaCreateFrameChild:GetParent(); return p and p:GetName()")
+            .expect("eval parent name");
+        assert_eq!(parent_name.as_deref(), Some("UIParent"));
     }
 }

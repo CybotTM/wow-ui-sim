@@ -21,8 +21,9 @@
 //! `compile_chunk_rilua` — compiles Lua source bytes via rilua's pure-Rust
 //! compiler (`compile_with_rilua`). Entry point for the rilua-side loading path.
 
-use crate::loader::error::LoadError;
+use crate::loader::LoadError;
 use crate::loader::lua_file::compile_with_rilua;
+use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
@@ -49,7 +50,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 ///
 /// Permissive stub: ignores taint, delegates to the global `securecall`.
 fn securecallmethod(state: &mut LuaState) -> LuaResult<u32> {
-    let nargs = state.top() - state.base as i32;
+    let nargs = state.top as i32 - state.base as i32;
     if nargs < 1 {
         return Ok(0);
     }
@@ -61,17 +62,11 @@ fn securecallmethod(state: &mut LuaState) -> LuaResult<u32> {
 
     let method_name = match state.stack_get(state.base + 1) {
         Val::Str(s) => s,
-        _ => {
-            return Err(runtime_error(
-                "Usage: securecallmethod(table, name, ...)",
-            ))
-        }
+        _ => return Err(runtime_error("Usage: securecallmethod(table, name, ...)")),
     };
 
     let Val::Table(obj_ref) = obj else {
-        return Err(runtime_error(
-            "Usage: securecallmethod(table, name, ...)",
-        ));
+        return Err(runtime_error("Usage: securecallmethod(table, name, ...)"));
     };
 
     let method = state
@@ -87,18 +82,16 @@ fn securecallmethod(state: &mut LuaState) -> LuaResult<u32> {
 
     // Gather extra args (everything after `name`): obj + trailing args.
     let self_and_extra: Vec<Val> = std::iter::once(obj)
-        .chain((2..nargs as usize).map(|i| state.stack_get(state.base + i as i32)))
+        .chain((2..nargs as usize).map(|i| state.stack_get(state.base + i)))
         .collect();
 
     // Invoke global securecall.
+    let securecall_key = state.gc.intern_string(b"securecall");
     let securecall = state
         .gc
         .tables
-        .get(state.globals)
-        .map(|g| {
-            let k = state.gc.intern_string(b"securecall");
-            g.get_str(k, &state.gc.string_arena)
-        })
+        .get(state.global)
+        .map(|g| g.get_str(securecall_key, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
 
     let Val::Function(sc_ref) = securecall else {
@@ -175,7 +168,7 @@ fn register_scrub_fallbacks(lua: &mut rilua::Lua) -> LuaResult<()> {
 /// `scrub(...)` / `scrubsecretvalues(...)` — return args unchanged.
 fn scrub_passthrough(state: &mut LuaState) -> LuaResult<u32> {
     // All args are already on the stack; return them as-is.
-    let nargs = (state.top() - state.base as i32).max(0) as u32;
+    let nargs = (state.top as i32 - state.base as i32).max(0) as u32;
     Ok(nargs)
 }
 
@@ -214,13 +207,16 @@ fn secure_cmd_option_parse(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
-    let lua_str = state
-        .gc
-        .string_arena
-        .get(s_ref)
-        .ok_or_else(|| runtime_error("SecureCmdOptionParse: invalid string"))?;
-    let text = std::str::from_utf8(lua_str.data())
-        .map_err(|_| runtime_error("SecureCmdOptionParse: non-UTF8 string"))?;
+    let text = {
+        let lua_str = state
+            .gc
+            .string_arena
+            .get(s_ref)
+            .ok_or_else(|| runtime_error("SecureCmdOptionParse: invalid string"))?;
+        std::str::from_utf8(lua_str.data())
+            .map_err(|_| runtime_error("SecureCmdOptionParse: non-UTF8 string"))?
+            .to_owned()
+    };
     let last = text.split(';').next_back().map(str::trim).unwrap_or("");
     let result = Val::Str(state.gc.intern_string(last.as_bytes()));
     state.push(result);
@@ -250,10 +246,7 @@ pub fn create_secure_environment(_lua: &mut rilua::Lua) -> LuaResult<()> {
 /// `UseSecureEnvironment` addon code runs in the isolated secure table.
 ///
 /// TODO: implement via rilua's upvalue/env API once available.
-pub fn apply_secure_env_rilua(
-    _lua: &mut rilua::Lua,
-    _func: &rilua::Function,
-) -> LuaResult<()> {
+pub fn apply_secure_env_rilua(_lua: &mut rilua::Lua, _func: &rilua::Function) -> LuaResult<()> {
     // TODO: call rilua equivalent of setfenv(func, secureenv).
     Ok(())
 }
@@ -262,11 +255,7 @@ pub fn apply_secure_env_rilua(
 ///
 /// TODO: once `create_secure_environment` is implemented, also write to the
 /// secureenv table stored in the registry.
-pub fn set_in_both_envs_rilua(
-    lua: &mut rilua::Lua,
-    key: &str,
-    val: Val,
-) -> LuaResult<()> {
+pub fn set_in_both_envs_rilua(lua: &mut rilua::Lua, key: &str, val: Val) -> LuaResult<()> {
     use rilua::LuaApiMut;
     LuaApiMut::set_global_val(lua, key, val)?;
     // TODO: also write to registry["__secureenv"][key].
@@ -301,13 +290,11 @@ pub fn exec_chunk_rilua(
     chunk_name: &str,
     use_secure_env: bool,
 ) -> Result<(), LoadError> {
-    use rilua::LuaApiMut;
     let func = compile_chunk_rilua(lua, source, chunk_name)?;
     if use_secure_env {
-        apply_secure_env_rilua(lua, &func)
-            .map_err(|e| LoadError::Lua(e.to_string()))?;
+        apply_secure_env_rilua(lua, &func).map_err(|e| LoadError::Lua(e.to_string()))?;
     }
-    LuaApiMut::call_function(lua, &func, &[])
+    lua.call_function(&func, &[])
         .map_err(|e| LoadError::Lua(e.to_string()))?;
     Ok(())
 }
@@ -317,11 +304,7 @@ pub fn exec_chunk_rilua(
 /// Register a `RustFn` only if the global is currently nil.
 ///
 /// Mirrors `security_api::set_if_missing` for the rilua path.
-fn register_if_missing(
-    lua: &mut rilua::Lua,
-    name: &str,
-    func: rilua::RustFn,
-) -> LuaResult<()> {
+fn register_if_missing(lua: &mut rilua::Lua, name: &str, func: rilua::RustFn) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let existing = LuaApiMut::get_global_val(lua, name);
     if existing == Val::Nil {

@@ -6,6 +6,7 @@ use super::rilua_methods::create_string;
 use crate::Result;
 use crate::lua_api::rilua_methods::create_table;
 use crate::lua_bridge::table_set_rust_fn;
+use rilua::LuaApiMut;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 use std::cell::{Ref, RefMut};
@@ -33,7 +34,8 @@ impl<'a> LoaderEnv<'a> {
 
     pub fn exec(&self, code: &str) -> Result<()> {
         let mut lua = self.env.rilua_mut();
-        let func = crate::loader::chunk_cache::load_chunk(&mut lua, code, "loader-exec")?;
+        let func = crate::loader::chunk_cache::load_chunk(&mut lua, code, "loader-exec")
+            .map_err(|e| crate::Error::Other(e.to_string()))?;
         if self.loading_addon_uses_secure_env() {
             apply_secure_env_rilua(&mut lua, &func)?;
         }

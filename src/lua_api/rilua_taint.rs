@@ -1,7 +1,7 @@
 //! WoW taint integration for rilua.
 
-use rilua::vm::state::LuaState;
 use rilua::LuaApiMut;
+use rilua::vm::state::LuaState;
 
 /// Enable taint tracking on the rilua state.
 pub fn enable_taint_mode(lua: &mut rilua::Lua) {

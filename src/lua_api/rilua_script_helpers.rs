@@ -33,7 +33,11 @@ fn registry_table_or_create(state: &mut LuaState, key: &str) -> GcRef<Table> {
     let new_table = state.gc.alloc_table(Table::new());
     let key_ref = state.gc.intern_string(key.as_bytes());
     if let Some(reg) = state.gc.tables.get_mut(state.registry) {
-        let _ = reg.raw_set(Val::Str(key_ref), Val::Table(new_table), &state.gc.string_arena);
+        let _ = reg.raw_set(
+            Val::Str(key_ref),
+            Val::Table(new_table),
+            &state.gc.string_arena,
+        );
     }
     new_table
 }
@@ -94,11 +98,7 @@ fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str
     };
     let table_ref = registry_table_or_create(state, cache_key);
     if let Some(table) = state.gc.tables.get_mut(table_ref) {
-        let _ = table.raw_set(
-            Val::Num(widget_id as f64),
-            value,
-            &state.gc.string_arena,
-        );
+        let _ = table.raw_set(Val::Num(widget_id as f64), value, &state.gc.string_arena);
     }
 }
 

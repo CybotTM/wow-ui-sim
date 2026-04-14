@@ -318,20 +318,16 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
         unit_state.mouse_over_units = vec!["party1".to_string(), "player".to_string()];
     }
 
-    let hovered_units = env
-        .eval::<mlua::MultiValue>(
+    let hovered_units: (String, String) = env
+        .eval(
             r#"
-            return UnitPositionStateFrame:GetMouseOverUnits()
+            local first, second = UnitPositionStateFrame:GetMouseOverUnits()
+            return first, second
         "#,
         )
         .unwrap();
-    assert_eq!(hovered_units.len(), 2);
-    assert!(
-        matches!(hovered_units.front(), Some(mlua::Value::String(s)) if s.to_str().unwrap() == "party1")
-    );
-    assert!(
-        matches!(hovered_units.get(1), Some(mlua::Value::String(s)) if s.to_str().unwrap() == "player")
-    );
+    assert_eq!(hovered_units.0, "party1");
+    assert_eq!(hovered_units.1, "player");
 
     env.exec(
         r#"

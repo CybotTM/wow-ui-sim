@@ -176,14 +176,14 @@ fn ensure_button_texture_children(
     button_name: &str,
 ) {
     use crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture;
-    let button_id = env.state.borrow().widgets.get_id_by_name(button_name);
+    let button_id = env.state().borrow().widgets.get_id_by_name(button_name);
     let Some(button_id) = button_id else { return };
     for &(_, parent_key, tex_opt) in slots {
         if tex_opt.is_none() {
             continue;
         }
-        let mut state = env.state.borrow_mut();
-        get_or_create_button_texture(env.lua, &mut state, button_id, parent_key);
+        let mut state = env.state().borrow_mut();
+        get_or_create_button_texture(&mut state, button_id, parent_key);
     }
 }
 

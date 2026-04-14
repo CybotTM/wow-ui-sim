@@ -109,8 +109,8 @@ fn fog_overlay_alpha(frame: &crate::widget::Frame, alpha: f32) -> Option<f32> {
 }
 
 fn fog_overlay_rects(bounds: Rectangle) -> Option<FogOverlayRects> {
-    let explored_left_fraction =
-        crate::lua_api::globals::c_map_api::EXPLORED_LEFT_FRACTION.clamp(0.0, 1.0);
+    const EXPLORED_LEFT_FRACTION: f32 = 0.5;
+    let explored_left_fraction = EXPLORED_LEFT_FRACTION.clamp(0.0, 1.0);
     let fog_fraction = 1.0 - explored_left_fraction;
     if fog_fraction <= f32::EPSILON {
         return None;

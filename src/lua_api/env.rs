@@ -45,6 +45,10 @@ trait FromRiluaResults: Sized {
     fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self>;
 }
 
+trait FromRiluaValue: Sized {
+    fn from_value(state: &rilua::vm::state::LuaState, value: Val) -> Result<Self>;
+}
+
 fn first_result(results: &[Val]) -> Val {
     results.first().copied().unwrap_or(Val::Nil)
 }
@@ -80,15 +84,33 @@ impl FromRiluaResults for bool {
     }
 }
 
+impl FromRiluaValue for bool {
+    fn from_value(_state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        Ok(!matches!(value, Val::Nil | Val::Bool(false)))
+    }
+}
+
 impl FromRiluaResults for f64 {
     fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
         decode_number(first_result(&results))
     }
 }
 
+impl FromRiluaValue for f64 {
+    fn from_value(_state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        decode_number(value)
+    }
+}
+
 impl FromRiluaResults for f32 {
     fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
         Ok(decode_number(first_result(&results))? as f32)
+    }
+}
+
+impl FromRiluaValue for f32 {
+    fn from_value(_state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        Ok(decode_number(value)? as f32)
     }
 }
 
@@ -106,9 +128,57 @@ impl FromRiluaResults for i32 {
     }
 }
 
+impl FromRiluaValue for i32 {
+    fn from_value(_state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        let number = decode_number(value)?;
+        let int = number as i32;
+        if int as f64 == number {
+            Ok(int)
+        } else {
+            Err(crate::Error::Other(format!(
+                "expected integer result, got non-integer number {number}"
+            )))
+        }
+    }
+}
+
+impl FromRiluaResults for i64 {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        let number = decode_number(first_result(&results))?;
+        let int = number as i64;
+        if int as f64 == number {
+            Ok(int)
+        } else {
+            Err(crate::Error::Other(format!(
+                "expected integer result, got non-integer number {number}"
+            )))
+        }
+    }
+}
+
+impl FromRiluaValue for i64 {
+    fn from_value(_state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        let number = decode_number(value)?;
+        let int = number as i64;
+        if int as f64 == number {
+            Ok(int)
+        } else {
+            Err(crate::Error::Other(format!(
+                "expected integer result, got non-integer number {number}"
+            )))
+        }
+    }
+}
+
 impl FromRiluaResults for String {
     fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
         decode_string(state, first_result(&results))
+    }
+}
+
+impl FromRiluaValue for String {
+    fn from_value(state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        decode_string(state, value)
     }
 }
 
@@ -121,9 +191,24 @@ impl FromRiluaResults for Option<String> {
     }
 }
 
+impl FromRiluaValue for Option<String> {
+    fn from_value(state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        match value {
+            Val::Nil => Ok(None),
+            value => decode_string(state, value).map(Some),
+        }
+    }
+}
+
 impl FromRiluaResults for Val {
     fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
         Ok(first_result(&results))
+    }
+}
+
+impl FromRiluaValue for Val {
+    fn from_value(_state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        Ok(value)
     }
 }
 
@@ -132,6 +217,42 @@ impl FromRiluaResults for crate::lua_bridge::MultiValue {
         Ok(results.into())
     }
 }
+
+macro_rules! impl_from_results_tuple {
+    ($(($($name:ident),+)),+ $(,)?) => {
+        $(
+            impl<$($name),+> FromRiluaResults for ($($name,)+)
+            where
+                $($name: FromRiluaValue),+
+            {
+                fn from_results(
+                    state: &rilua::vm::state::LuaState,
+                    results: Vec<Val>,
+                ) -> Result<Self> {
+                    let mut iter = results.into_iter();
+                    Ok((
+                        $(
+                            <$name as FromRiluaValue>::from_value(
+                                state,
+                                iter.next().unwrap_or(Val::Nil),
+                            )?,
+                        )+
+                    ))
+                }
+            }
+        )+
+    };
+}
+
+impl_from_results_tuple!(
+    (A, B),
+    (A, B, C),
+    (A, B, C, D),
+    (A, B, C, D, E),
+    (A, B, C, D, E, F),
+    (A, B, C, D, E, F, G),
+    (A, B, C, D, E, F, G, H),
+);
 
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
@@ -172,6 +293,15 @@ impl WowLuaEnv {
         Ok(())
     }
 
+    /// Borrow the active rilua VM.
+    pub fn lua(&self) -> std::cell::Ref<'_, rilua::Lua> {
+        self.rilua()
+    }
+
+    pub fn send_key_press(&self, _key: &str, _text: Option<&str>) -> Result<()> {
+        Ok(())
+    }
+
     /// Execute Lua code with a custom chunk name (for better error messages and debugstack).
     pub fn exec_named(&self, code: &str, name: &str) -> Result<()> {
         self.exec_rilua_named(code, name)?;
@@ -207,18 +337,14 @@ impl WowLuaEnv {
         let state = lua.state_mut();
         let table = registry_get(state, "__addon_names");
         for (index, addon_name) in addon_names.iter().enumerate() {
-            table_set(
-                state,
-                table,
-                &index.to_string(),
-                create_string(state, addon_name),
-            );
+            let addon_name_val = create_string(state, addon_name);
+            table_set(state, table, &index.to_string(), addon_name_val);
             if let Val::Table(table_ref) = table
                 && let Some(table) = state.gc.tables.get_mut(table_ref)
             {
                 let _ = table.raw_set(
                     Val::Num(index as f64),
-                    create_string(state, addon_name),
+                    addon_name_val,
                     &state.gc.string_arena,
                 );
             }
@@ -433,12 +559,12 @@ impl WowLuaEnv {
         let cmd_lower = cmd.to_lowercase();
 
         let mut lua = self.lua.borrow_mut();
-        let state = lua.state_mut();
-        let globals = state.global;
         let slash_cmd_list = LuaApiMut::get_global_val(&mut *lua, "SlashCmdList");
         let Val::Table(slash_table_ref) = slash_cmd_list else {
             return Ok(false);
         };
+        let state = lua.state_mut();
+        let globals = state.global;
 
         for (name, handler) in matching_slash_handlers(state, globals, slash_table_ref, &cmd_lower)
         {
@@ -458,7 +584,11 @@ impl WowLuaEnv {
     pub fn call_global(&self, name: &str, args: &[Val]) -> Result<Vec<Val>> {
         let mut lua = self.lua.borrow_mut();
         let func = LuaApiMut::get_global_val(&mut *lua, name);
-        call_rilua_function(&mut lua, func, args).map_err(Into::into)
+        let Val::Function(func_ref) = func else {
+            return Ok(Vec::new());
+        };
+        let func_handle = rilua::Function::from_gc_ref(func_ref);
+        lua.call_function(&func_handle, args).map_err(Into::into)
     }
 
     /// Get access to the simulator state.
@@ -769,16 +899,12 @@ fn matching_slash_handlers(
             continue;
         }
 
+        let handler_key = state.gc.intern_string(name.as_bytes());
         let handler = state
             .gc
             .tables
             .get(slash_table_ref)
-            .map(|table| {
-                table.get_str(
-                    state.gc.intern_string(name.as_bytes()),
-                    &state.gc.string_arena,
-                )
-            })
+            .map(|table| table.get_str(handler_key, &state.gc.string_arena))
             .unwrap_or(Val::Nil);
         matches.push((name.to_string(), handler));
     }

@@ -7,9 +7,23 @@
 //! - Misc global stubs (totems, parental controls, etc.)
 
 pub(super) use super::c_stubs_api_delves::register_c_delves_ui;
-pub(super) use super::c_stubs_api_pet_battles::register_guild_bank_pet_battles;
 
 use mlua::{Lua, Result, Value};
+
+pub(super) fn register_guild_bank_pet_battles(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let guild_bank = lua.create_table()?;
+    guild_bank.set(
+        "IsGuildBankEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    guild_bank.set("GetCurrentBankTab", lua.create_function(|_, ()| Ok(1i32))?)?;
+    guild_bank.set("FetchNumTabs", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set("C_GuildBank", guild_bank)?;
+
+    let pet_battles = lua.create_table()?;
+    g.set("C_PetBattles", pet_battles)?;
+    Ok(())
+}
 
 /// C_ZoneAbility namespace - zone ability data.
 pub(super) fn register_c_zone_ability(lua: &Lua) -> Result<()> {

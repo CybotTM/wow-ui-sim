@@ -29,9 +29,7 @@ fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
-        frame.text_stripped = text
-            .as_ref()
-            .map(|t| crate::render::strip_wow_markup(t));
+        frame.text_stripped = text.as_ref().map(|t| crate::render::strip_wow_markup(t));
     }
     Ok(0)
 }
@@ -104,6 +102,7 @@ fn set_font(state: &mut LuaState) -> LuaResult<u32> {
             frame.font_outline = crate::widget::TextOutline::from_wow_str(f);
         }
     }
+    drop(sim);
     state.stack.push(Val::Bool(true));
     Ok(1)
 }
@@ -151,11 +150,7 @@ fn set_font_height(state: &mut LuaState) -> LuaResult<u32> {
 fn get_font_height(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let size = sim
-        .widgets
-        .get(id)
-        .map(|f| f.font_size)
-        .unwrap_or(12.0);
+    let size = sim.widgets.get(id).map(|f| f.font_size).unwrap_or(12.0);
     drop(sim);
     state.stack.push(Val::Num(size as f64));
     Ok(1)
@@ -170,7 +165,11 @@ fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
     let a = val_to_f32(stack_val(state, 5), 1.0);
     let new_color = crate::widget::Color::new(r, g, b, a);
     let mut sim = borrow_state_mut(state)?;
-    if !sim.widgets.get(id).is_some_and(|f| f.text_color == new_color) {
+    if !sim
+        .widgets
+        .get(id)
+        .is_some_and(|f| f.text_color == new_color)
+    {
         if let Some(frame) = sim.widgets.get_mut_visual(id) {
             frame.text_color = new_color;
         }
@@ -211,13 +210,14 @@ fn get_attribute(state: &mut LuaState) -> LuaResult<u32> {
     };
     // TODO: wildcard key fallback order (prefix/suffix) — only simple lookup for now
     // TODO: __frame_table_attributes for table/userdata/function attributes
-    let sim = borrow_state(state)?;
-    let attr = sim
-        .widgets
-        .get(id)
-        .and_then(|f| f.attributes.get(name.as_str()));
-    let val = attribute_to_val(state, attr);
-    drop(sim);
+    let attr = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|f| f.attributes.get(name.as_str()))
+            .cloned()
+    };
+    let val = attribute_to_val(state, attr.as_ref());
     state.stack.push(val);
     Ok(1)
 }
@@ -304,11 +304,7 @@ fn set_forbidden(state: &mut LuaState) -> LuaResult<u32> {
 fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
-    let val = sim
-        .widgets
-        .get(id)
-        .map(|f| f.forbidden)
-        .unwrap_or(false);
+    let val = sim.widgets.get(id).map(|f| f.forbidden).unwrap_or(false);
     drop(sim);
     state.stack.push(Val::Bool(val));
     Ok(1)
@@ -455,9 +451,7 @@ fn register_event(state: &mut LuaState) -> LuaResult<u32> {
         rilua_hlist_register_individual(state, id, &event)?;
     }
     let restricted = crate::event::is_restricted_event(&event);
-    state
-        .stack
-        .push(Val::Bool(newly_registered && !restricted));
+    state.stack.push(Val::Bool(newly_registered && !restricted));
     Ok(1)
 }
 
@@ -645,7 +639,11 @@ fn rilua_hlist_register_individual(state: &mut LuaState, id: u64, event: &str) -
         _ => {
             let new_tbl = state.gc.alloc_table(Table::new());
             if let Some(t) = state.gc.tables.get_mut(individual) {
-                let _ = t.raw_set(Val::Str(event_key), Val::Table(new_tbl), &state.gc.string_arena);
+                let _ = t.raw_set(
+                    Val::Str(event_key),
+                    Val::Table(new_tbl),
+                    &state.gc.string_arena,
+                );
             }
             new_tbl
         }
@@ -654,11 +652,7 @@ fn rilua_hlist_register_individual(state: &mut LuaState, id: u64, event: &str) -
 }
 
 /// Remove `id` from the per-event hlist.
-fn rilua_hlist_unregister_individual(
-    state: &mut LuaState,
-    id: u64,
-    event: &str,
-) -> LuaResult<()> {
+fn rilua_hlist_unregister_individual(state: &mut LuaState, id: u64, event: &str) -> LuaResult<()> {
     let individual_val = crate::lua_api::rilua_methods::registry_get(state, "__event_individual");
     let Val::Table(individual) = individual_val else {
         return Ok(());
@@ -726,18 +720,20 @@ fn rilua_hlist_insert(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
     if already {
         return Ok(());
     }
-    let n = state
-        .gc
-        .tables
-        .get(tbl)
-        .map(|t| t.array_len())
-        .unwrap_or(0)
-        + 1;
+    let n = state.gc.tables.get(tbl).map(|t| t.array_len()).unwrap_or(0) + 1;
     if let Some(t) = state.gc.tables.get_mut(tbl) {
-        let _ = t.raw_set(Val::Num(n as f64), Val::Num(id as f64), &state.gc.string_arena);
+        let _ = t.raw_set(
+            Val::Num(n as f64),
+            Val::Num(id as f64),
+            &state.gc.string_arena,
+        );
     }
     if let Some(s) = state.gc.tables.get_mut(set) {
-        let _ = s.raw_set(Val::Num(id as f64), Val::Num(n as f64), &state.gc.string_arena);
+        let _ = s.raw_set(
+            Val::Num(id as f64),
+            Val::Num(n as f64),
+            &state.gc.string_arena,
+        );
     }
     Ok(())
 }
@@ -755,12 +751,7 @@ fn rilua_hlist_remove(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
             _ => None,
         });
     let Some(idx) = idx else { return Ok(()) };
-    let n = state
-        .gc
-        .tables
-        .get(tbl)
-        .map(|t| t.array_len())
-        .unwrap_or(0);
+    let n = state.gc.tables.get(tbl).map(|t| t.array_len()).unwrap_or(0);
     if idx != n {
         let last_id = state
             .gc
@@ -772,10 +763,18 @@ fn rilua_hlist_remove(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
             });
         if let Some(lid) = last_id {
             if let Some(t) = state.gc.tables.get_mut(tbl) {
-                let _ = t.raw_set(Val::Num(idx as f64), Val::Num(lid as f64), &state.gc.string_arena);
+                let _ = t.raw_set(
+                    Val::Num(idx as f64),
+                    Val::Num(lid as f64),
+                    &state.gc.string_arena,
+                );
             }
             if let Some(s) = state.gc.tables.get_mut(set) {
-                let _ = s.raw_set(Val::Num(lid as f64), Val::Num(idx as f64), &state.gc.string_arena);
+                let _ = s.raw_set(
+                    Val::Num(lid as f64),
+                    Val::Num(idx as f64),
+                    &state.gc.string_arena,
+                );
             }
         }
     }
@@ -801,7 +800,11 @@ fn rilua_hlist_set(state: &mut LuaState, tbl: GcRef<Table>) -> GcRef<Table> {
     }
     let new_set = state.gc.alloc_table(Table::new());
     if let Some(t) = state.gc.tables.get_mut(tbl) {
-        let _ = t.raw_set(Val::Str(key_ref), Val::Table(new_set), &state.gc.string_arena);
+        let _ = t.raw_set(
+            Val::Str(key_ref),
+            Val::Table(new_set),
+            &state.gc.string_arena,
+        );
     }
     new_set
 }
@@ -815,10 +818,7 @@ fn val_to_f32(val: Val, default: f32) -> f32 {
     }
 }
 
-fn attribute_to_val(
-    state: &mut LuaState,
-    attr: Option<&crate::widget::AttributeValue>,
-) -> Val {
+fn attribute_to_val(state: &mut LuaState, attr: Option<&crate::widget::AttributeValue>) -> Val {
     match attr {
         None => Val::Nil,
         Some(crate::widget::AttributeValue::Nil) => Val::Nil,
@@ -846,12 +846,7 @@ fn val_to_attribute(val: Val, state: &LuaState) -> crate::widget::AttributeValue
     }
 }
 
-fn store_simple_attribute(
-    state: &mut LuaState,
-    id: u64,
-    name: &str,
-    value: Val,
-) -> LuaResult<()> {
+fn store_simple_attribute(state: &mut LuaState, id: u64, name: &str, value: Val) -> LuaResult<()> {
     let attr = val_to_attribute(value, state);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut(id) {
@@ -881,16 +876,36 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     // Attribute methods
     table_set_rust_fn(state, table, "GetAttribute", get_attribute)?;
     table_set_rust_fn(state, table, "SetAttribute", set_attribute)?;
-    table_set_rust_fn(state, table, "SetAttributeNoHandler", set_attribute_no_handler)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetAttributeNoHandler",
+        set_attribute_no_handler,
+    )?;
     table_set_rust_fn(state, table, "ClearAttributes", clear_attributes)?;
     table_set_rust_fn(state, table, "ExecuteAttribute", execute_attribute)?;
     table_set_rust_fn(state, table, "SetFrameRef", set_frame_ref)?;
     table_set_rust_fn(state, table, "GetFrameRef", get_frame_ref)?;
     table_set_rust_fn(state, table, "SetForbidden", set_forbidden)?;
     table_set_rust_fn(state, table, "IsForbidden", is_forbidden)?;
-    table_set_rust_fn(state, table, "CanChangeProtectedState", can_change_protected_state)?;
-    table_set_rust_fn(state, table, "SetPassThroughButtons", set_pass_through_buttons)?;
-    table_set_rust_fn(state, table, "SetFlattensRenderLayers", set_flattens_render_layers)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "CanChangeProtectedState",
+        can_change_protected_state,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetPassThroughButtons",
+        set_pass_through_buttons,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetFlattensRenderLayers",
+        set_flattens_render_layers,
+    )?;
     table_set_rust_fn(
         state,
         table,
@@ -914,7 +929,12 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "UnregisterAllEvents", unregister_all_events)?;
     table_set_rust_fn(state, table, "RegisterAllEvents", register_all_events)?;
     table_set_rust_fn(state, table, "IsEventRegistered", is_event_registered)?;
-    table_set_rust_fn(state, table, "RegisterEventCallback", register_event_callback)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "RegisterEventCallback",
+        register_event_callback,
+    )?;
     table_set_rust_fn(
         state,
         table,
