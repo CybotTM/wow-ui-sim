@@ -510,8 +510,14 @@ fn create_atlas_bind_groups(
 ) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
     let layout = create_atlas_bind_group_layout(device);
     let views: [&wgpu::TextureView; 8] = [
-        &tiers[0].view, &tiers[1].view, &tiers[2].view, &tiers[3].view, &tiers[4].view,
-        glyph_view, bc1_view, bc3_view,
+        &tiers[0].view,
+        &tiers[1].view,
+        &tiers[2].view,
+        &tiers[3].view,
+        &tiers[4].view,
+        glyph_view,
+        bc1_view,
+        bc3_view,
     ];
     let mut entries: Vec<wgpu::BindGroupEntry<'_>> = views
         .iter()
@@ -521,10 +527,13 @@ fn create_atlas_bind_groups(
             resource: wgpu::BindingResource::TextureView(view),
         })
         .collect();
-    entries.insert(5, wgpu::BindGroupEntry {
-        binding: 5,
-        resource: wgpu::BindingResource::Sampler(sampler),
-    });
+    entries.insert(
+        5,
+        wgpu::BindGroupEntry {
+            binding: 5,
+            resource: wgpu::BindingResource::Sampler(sampler),
+        },
+    );
     // Fix bindings 6-8 after sampler insertion shifted them.
     for (i, entry) in entries.iter_mut().enumerate() {
         entry.binding = i as u32;
