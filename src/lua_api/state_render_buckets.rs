@@ -86,19 +86,39 @@ fn partition_children(
     let mut regions = Vec::new();
     let mut child_frames = Vec::new();
     for &child_id in &frame.children {
-        if !visible.contains(&child_id) {
-            continue;
-        }
-        let Some(child) = widgets.get(child_id) else {
-            continue;
-        };
-        if is_region(child.widget_type) {
-            regions.push(child_id);
-        } else if child.frame_strata.as_index() == strata_idx {
-            child_frames.push(child_id);
-        }
+        collect_child_for_emit(
+            child_id,
+            strata_idx,
+            widgets,
+            visible,
+            &mut regions,
+            &mut child_frames,
+        );
     }
     (regions, child_frames)
+}
+
+fn collect_child_for_emit(
+    child_id: u64,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    regions: &mut Vec<u64>,
+    child_frames: &mut Vec<u64>,
+) {
+    if !visible.contains(&child_id) {
+        return;
+    }
+    let Some(child) = widgets.get(child_id) else {
+        return;
+    };
+    if is_region(child.widget_type) {
+        regions.push(child_id);
+        return;
+    }
+    if child.frame_strata.as_index() == strata_idx {
+        child_frames.push(child_id);
+    }
 }
 
 pub(super) fn collect_same_strata_subtree_ids(
@@ -185,7 +205,8 @@ fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
 
 #[cfg(test)]
 mod tests {
-    use super::same_strata_subtree_segment_end;
+    use super::{collect_child_for_emit, same_strata_subtree_segment_end};
+    use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
     use std::collections::HashSet;
 
     #[test]
@@ -194,5 +215,50 @@ mod tests {
         let subtree_ids = HashSet::from([10, 11, 12, 13]);
 
         assert_eq!(same_strata_subtree_segment_end(&bucket, 0, &subtree_ids), 3);
+    }
+
+    #[test]
+    fn collect_child_for_emit_routes_regions_and_same_strata_frames() {
+        let mut widgets = WidgetRegistry::default();
+        widgets.register(Frame {
+            id: 2,
+            widget_type: WidgetType::Texture,
+            ..Default::default()
+        });
+        widgets.register(Frame {
+            id: 3,
+            widget_type: WidgetType::Frame,
+            frame_strata: FrameStrata::Medium,
+            ..Default::default()
+        });
+        widgets.register(Frame {
+            id: 4,
+            widget_type: WidgetType::Frame,
+            frame_strata: FrameStrata::High,
+            ..Default::default()
+        });
+        widgets.register(Frame {
+            id: 5,
+            widget_type: WidgetType::Texture,
+            ..Default::default()
+        });
+
+        let visible = HashSet::from([2, 3, 4]);
+        let mut regions = Vec::new();
+        let mut child_frames = Vec::new();
+
+        for child_id in [2, 3, 4, 5] {
+            collect_child_for_emit(
+                child_id,
+                FrameStrata::Medium.as_index(),
+                &widgets,
+                &visible,
+                &mut regions,
+                &mut child_frames,
+            );
+        }
+
+        assert_eq!(regions, vec![2]);
+        assert_eq!(child_frames, vec![3]);
     }
 }
