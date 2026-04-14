@@ -107,32 +107,32 @@ fn emit_vert_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtlas
         return;
     }
 
-    let left_bounds = Rectangle::new(
-        Point::new(bounds.x, edge_y),
-        Size::new(ns.edge_left.width as f32, edge_h),
-    );
-    let (left_path, left_uvs) = crop_piece(&ns.edge_left);
-    emit_vert_tiles(
-        batch,
-        left_bounds,
-        &left_uvs,
-        &left_path,
-        ns.edge_left.height as f32,
-        [1.0, 1.0, 1.0, alpha],
-        BlendMode::Alpha,
-    );
+    let left_x = bounds.x;
+    emit_vert_edge_strip(batch, left_x, edge_y, edge_h, &ns.edge_left, alpha);
 
-    let right_bounds = Rectangle::new(
-        Point::new(bounds.x + bounds.width - ns.edge_right.width as f32, edge_y),
-        Size::new(ns.edge_right.width as f32, edge_h),
+    let right_x = bounds.x + bounds.width - ns.edge_right.width as f32;
+    emit_vert_edge_strip(batch, right_x, edge_y, edge_h, &ns.edge_right, alpha);
+}
+
+fn emit_vert_edge_strip(
+    batch: &mut QuadBatch,
+    x: f32,
+    y: f32,
+    height: f32,
+    piece: &NineSlicePiece,
+    alpha: f32,
+) {
+    let strip = Rectangle::new(
+        Point::new(x, y),
+        Size::new(piece.width as f32, height),
     );
-    let (right_path, right_uvs) = crop_piece(&ns.edge_right);
+    let (path, uvs) = crop_piece(piece);
     emit_vert_tiles(
         batch,
-        right_bounds,
-        &right_uvs,
-        &right_path,
-        ns.edge_right.height as f32,
+        strip,
+        &uvs,
+        &path,
+        piece.height as f32,
         [1.0, 1.0, 1.0, alpha],
         BlendMode::Alpha,
     );
