@@ -272,6 +272,69 @@ fn test_runtime_action_button_template_creates_named_children() {
 }
 
 #[test]
+fn test_runtime_spellfx_template_creates_nested_inherited_children() {
+    let t = load_test_xml(
+        "runtime-spellfx-template",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="ActionButtonInterruptTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="Highlight" hidden="true">
+                        <Size x="7" y="8"/>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>self.loaded = true;</OnLoad>
+                        </Scripts>
+                    </Frame>
+                </Frames>
+            </Frame>
+            <Frame name="ActionButtonCastingAnimFrameTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="Fill">
+                        <Size x="9" y="10"/>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>self.loaded = true;</OnLoad>
+                        </Scripts>
+                    </Frame>
+                </Frames>
+            </Frame>
+            <CheckButton name="ActionButtonSpellFXTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="InterruptDisplay" inherits="ActionButtonInterruptTemplate" hidden="true"/>
+                    <Frame parentKey="SpellCastAnimFrame" inherits="ActionButtonCastingAnimFrameTemplate" hidden="true"/>
+                </Frames>
+            </CheckButton>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local button = CreateFrame("CheckButton", "SpellFXFastPathButton", UIParent, "ActionButtonSpellFXTemplate")
+            assert(button.InterruptDisplay ~= nil, "InterruptDisplay should exist")
+            assert(button.SpellCastAnimFrame ~= nil, "SpellCastAnimFrame should exist")
+            assert(not button.InterruptDisplay:IsShown(), "inherited hidden flag should be preserved")
+            assert(not button.SpellCastAnimFrame:IsShown(), "spell cast child should inherit hidden state")
+
+            assert(button.InterruptDisplay.Highlight ~= nil, "nested interrupt child should exist")
+            assert(button.InterruptDisplay.Highlight.loaded == true, "nested interrupt OnLoad should fire")
+            assert(button.InterruptDisplay.Highlight:GetParent() == button.InterruptDisplay, "nested interrupt child parent should match")
+
+            assert(button.SpellCastAnimFrame.Fill ~= nil, "nested casting child should exist")
+            assert(button.SpellCastAnimFrame.Fill.loaded == true, "nested casting OnLoad should fire")
+            assert(button.SpellCastAnimFrame.Fill:GetParent() == button.SpellCastAnimFrame, "nested casting child parent should match")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_runtime_template_mixin_and_key_values_apply() {
     let t = load_test_xml(
         "runtime-template-mixin-keyvalues",

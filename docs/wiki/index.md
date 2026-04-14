@@ -54,7 +54,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; 3 fix strategies with tradeoffs |
-| [[startup-createframe-profile]] | Runtime `CreateFrame` profiling shows action-bar button template expansion is the biggest script-created startup cost |
+| [[startup-createframe-profile]] | Runtime `CreateFrame` profiling shows action-bar button template expansion, including nested SpellFX child creation, is the biggest script-created startup cost |
 | [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |

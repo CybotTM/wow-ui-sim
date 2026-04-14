@@ -23,12 +23,7 @@ The logger records:
 
 Nested/suppressed `CreateFrame` calls are excluded so the log stays focused on top-level runtime callers such as action-bar construction in `ActionBarMixin:ActionBar_OnLoad()`.
 
-`src/lua_api/globals/template/mod.rs` also supports section-level template timing via:
-
-- `WOW_SIM_PROFILE_TEMPLATE_APPLY=1` — log slow template-application steps
-- `WOW_SIM_PROFILE_TEMPLATE_APPLY_MIN_MS=<n>` — minimum total duration to log, default `10`
-
-This breaks a template apply into mixins, key values, direct Rust props, layers, button textures, child creation, animation groups, and script wiring.
+Focused follow-up template timing broke template apply into mixins, key values, direct Rust props, layers, button textures, child creation, animation groups, and script wiring. That run showed the next remaining action-bar bottlenecks were concentrated in child creation for `ActionButtonSpellFXTemplate` and `MinimalScrollBar`.
 
 ### Action-bar buttons dominate runtime frame creation
 
@@ -115,6 +110,31 @@ Residual hotspots after those changes:
 - `ActionButtonTemplate` still spends meaningful time in child creation, layers, and button textures
 - non-action-bar one-offs like `CompactArenaFrameTemplate` and `CompactPartyFrameTemplate` are now relatively more visible
 
+### Nested SpellFX child fast path follow-up (2026-04-14)
+
+The first `ActionButtonSpellFXTemplate` fast path still left a lot of work in nested inherited children:
+
+- `ActionButtonInterruptTemplate`
+- `ActionButtonCastingAnimFrameTemplate`
+
+Those templates create their own child frames, so the outer `SpellFX` direct-create path still fell back to Lua string child creation inside the inherited descendants.
+
+`template/children.rs` now includes those nested templates in the same direct runtime child-creation selector. On a new profiled `wow-sim --no-addons --no-saved-vars` run with `WOW_SIM_PROFILE_CREATE_FRAME=1 WOW_SIM_PROFILE_CREATE_FRAME_MIN_MS=10`, the hot action-button families improved again:
+
+- summed explicit template time across main-bar, pet-bar, and `MultiBar1-7` buttons: `1688.92ms -> 1205.84ms` (`-28.6%`)
+- summed total `CreateFrame` time across the same button families: `2641.24ms -> 1945.03ms` (`-26.4%`)
+- `MainBarActionBarButtonTemplate` average explicit time: `17.12ms -> 10.38ms`
+- `MultiBar7ButtonTemplate` average explicit time: `18.17ms -> 12.44ms`
+- `PetActionButtonTemplate` average explicit time: `15.31ms -> 12.81ms`
+
+Shared-worktree startup also moved again on the same no-addons/no-saved-vars path:
+
+- Blizzard addons loaded: `28.89s -> 17.67s`
+- `xmlproc`: `24.87s -> 15.08s`
+- setup `exec_lua`: `11.46s -> 6.59s`
+- lifecycle: `10.34s -> 6.77s`
+- `PLAYER_ENTERING_WORLD`: `37.44s -> 23.66s`
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.
@@ -128,7 +148,6 @@ Most promising direction:
 ## Sources
 
 - [create_frame.rs](../../src/lua_api/globals/create_frame.rs) — runtime `CreateFrame` profiling hooks and timing buckets
-- [template/mod.rs](../../src/lua_api/globals/template/mod.rs) — template-apply section profiler
 - [template/elements.rs](../../src/lua_api/globals/template/elements.rs) — method-only XML script fast path
 - [template/children.rs](../../src/lua_api/globals/template/children.rs) — direct Rust child creation hot-path selector
 - [ActionBar.lua](../../Interface/BlizzardUI/Blizzard_ActionBar/Shared/ActionBar.lua) — `ActionBar_OnLoad()` runtime button creation loop
