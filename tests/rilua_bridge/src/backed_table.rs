@@ -104,6 +104,11 @@ fn register_frame_methods(
     state: &mut LuaState,
     mt_ref: rilua::vm::gc::arena::GcRef<Table>,
 ) {
+    register_name_methods(state, mt_ref);
+    register_frame_state_methods(state, mt_ref);
+}
+
+fn register_name_methods(state: &mut LuaState, mt_ref: rilua::vm::gc::arena::GcRef<Table>) {
     fn set_name(state: &mut LuaState) -> LuaResult<u32> {
         let self_val = stack_val(state, 1);
         let name = get_string(state, 2)?;
@@ -138,6 +143,14 @@ fn register_frame_methods(
         Ok(1)
     }
 
+    table_set_fn(state, mt_ref, "SetName", set_name);
+    table_set_fn(state, mt_ref, "GetName", get_name);
+}
+
+fn register_frame_state_methods(
+    state: &mut LuaState,
+    mt_ref: rilua::vm::gc::arena::GcRef<Table>,
+) {
     fn is_frame(state: &mut LuaState) -> LuaResult<u32> {
         let self_val = stack_val(state, 1);
         let result = if let Val::Table(tref) = self_val {
@@ -169,8 +182,6 @@ fn register_frame_methods(
         Ok(0)
     }
 
-    table_set_fn(state, mt_ref, "SetName", set_name);
-    table_set_fn(state, mt_ref, "GetName", get_name);
     table_set_fn(state, mt_ref, "IsFrame", is_frame);
     table_set_fn(state, mt_ref, "GetFrameIndex", get_frame_index);
     table_set_fn(state, mt_ref, "Show", show);

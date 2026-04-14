@@ -85,6 +85,7 @@ pub mod c_system_api;
 pub mod c_unit_auras_api;
 pub mod constants_api;
 pub mod create_frame;
+pub(crate) mod create_frame_args;
 mod create_frame_util;
 pub mod currency_data;
 pub mod cursor_api;

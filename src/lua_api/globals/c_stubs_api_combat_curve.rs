@@ -308,8 +308,8 @@ fn add_shared_add_clear<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<
     Ok(())
 }
 
-/// Registers `RemovePoint`, `SetPoints`, `SetToDefaults`, and `SetType` — identical for both types.
-fn add_shared_set_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
+/// Registers `RemovePoint` and `SetPoints`.
+fn add_remove_set_points<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "RemovePoint",
         lua.create_function(|_, (ud, index): (AnyUserData, usize)| {
@@ -336,6 +336,11 @@ fn add_shared_set_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Resul
             Ok(())
         })?,
     )?;
+    Ok(())
+}
+
+/// Registers `SetToDefaults` and `SetType`.
+fn add_set_defaults_type<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "SetToDefaults",
         lua.create_function(|_, ud: AnyUserData| {
@@ -355,8 +360,14 @@ fn add_shared_set_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Resul
     Ok(())
 }
 
-/// Registers `GetPoint`, `GetPointCount`, `GetPoints`, `GetType`, and `HasSecretValues` — identical for both types.
-fn add_shared_get_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
+/// Registers `RemovePoint`, `SetPoints`, `SetToDefaults`, and `SetType` — identical for both types.
+fn add_shared_set_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    add_remove_set_points::<T>(lua, table)?;
+    add_set_defaults_type::<T>(lua, table)
+}
+
+/// Registers `GetPoint`, `GetPointCount`, and `GetPoints`.
+fn add_get_point_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "GetPoint",
         lua.create_function(|lua, (ud, index): (AnyUserData, usize)| {
@@ -392,6 +403,12 @@ fn add_shared_get_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Resul
             Ok(point_table)
         })?,
     )?;
+    Ok(())
+}
+
+/// Registers `GetPoint`, `GetPointCount`, `GetPoints`, `GetType`, and `HasSecretValues` — identical for both types.
+fn add_shared_get_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    add_get_point_methods::<T>(lua, table)?;
     table.raw_set(
         "GetType",
         lua.create_function(|_, ud: AnyUserData| {
@@ -452,27 +469,8 @@ fn build_curve_methods(lua: &Lua) -> Result<mlua::Table> {
 // Color curve method table builders
 // ---------------------------------------------------------------------------
 
-fn add_color_curve_copy_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
-    table.raw_set(
-        "Copy",
-        lua.create_function(|lua, ud: AnyUserData| {
-            let curve = ud.borrow::<LuaColorCurveObject>()?;
-            let new_curve = LuaColorCurveObject {
-                id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
-                curve_type: RefCell::new(*curve.curve_type().borrow()),
-                points: RefCell::new(
-                    curve
-                        .points()
-                        .borrow()
-                        .iter()
-                        .map(|p| CurvePoint { x: p.x, y: p.y })
-                        .collect(),
-                ),
-            };
-            drop(curve);
-            create_color_curve_proxy(lua, new_curve)
-        })?,
-    )?;
+/// Registers `Evaluate` and `EvaluateUnpacked` for color curves.
+fn add_color_curve_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "Evaluate",
         lua.create_function(|lua, (ud, x): (AnyUserData, f64)| {
@@ -498,6 +496,30 @@ fn add_color_curve_copy_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
         })?,
     )?;
     Ok(())
+}
+
+fn add_color_curve_copy_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.raw_set(
+        "Copy",
+        lua.create_function(|lua, ud: AnyUserData| {
+            let curve = ud.borrow::<LuaColorCurveObject>()?;
+            let new_curve = LuaColorCurveObject {
+                id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
+                curve_type: RefCell::new(*curve.curve_type().borrow()),
+                points: RefCell::new(
+                    curve
+                        .points()
+                        .borrow()
+                        .iter()
+                        .map(|p| CurvePoint { x: p.x, y: p.y })
+                        .collect(),
+                ),
+            };
+            drop(curve);
+            create_color_curve_proxy(lua, new_curve)
+        })?,
+    )?;
+    add_color_curve_evaluate(lua, table)
 }
 
 fn build_color_curve_methods(lua: &Lua) -> Result<mlua::Table> {
