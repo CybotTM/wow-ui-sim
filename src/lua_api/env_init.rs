@@ -189,6 +189,69 @@ if GetActionInfo == nil then
   end
 end
 
+-- `GetInventorySlotInfo(slotName)` — canonical WoW slot id + icon name.
+-- Callsites use the numeric return as a TABLE KEY (e.g.
+-- `CANCELABLE_ITEMS[GetInventorySlotInfo("MainHandSlot")] = 1`), so a
+-- nil return crashes the chunk with "table index is nil". Provide the
+-- stable mapping Blizzard has shipped for years; texture name and
+-- `checkRelic` aren't used by sim callers yet, returned as placeholders.
+if GetInventorySlotInfo == nil then
+  local __wow_inventory_slots = {
+    HEADSLOT=1, NECKSLOT=2, SHOULDERSLOT=3, SHIRTSLOT=4, CHESTSLOT=5,
+    WAISTSLOT=6, LEGSSLOT=7, FEETSLOT=8, WRISTSLOT=9, HANDSSLOT=10,
+    FINGER0SLOT=11, FINGER1SLOT=12, TRINKET0SLOT=13, TRINKET1SLOT=14,
+    BACKSLOT=15, MAINHANDSLOT=16, SECONDARYHANDSLOT=17, RANGEDSLOT=18,
+    TABARDSLOT=19, BAG0SLOT=20,
+  }
+  function GetInventorySlotInfo(slot_name)
+    if type(slot_name) ~= "string" then
+      return nil
+    end
+    local id = __wow_inventory_slots[slot_name:upper()]
+    if id == nil then
+      return nil
+    end
+    return id, "Interface\\PaperDoll\\UI-PaperDoll-Slot-" .. slot_name, false
+  end
+end
+
+-- `C_PvP` namespace used by ZoneText. The sim has no PVP zone concept,
+-- so `GetZonePVPInfo` reports a neutral zone. Full namespace defined
+-- because the callsite dereferences the field directly.
+if C_PvP == nil then
+  C_PvP = {}
+end
+if C_PvP.GetZonePVPInfo == nil then
+  function C_PvP.GetZonePVPInfo()
+    -- (pvpType, isSubZonePvP, factionName) — neutral zone, no subzone PVP
+    return "contested", false, nil
+  end
+end
+
+-- Zone / sub-zone text probes: sim has no world, so empty string is
+-- the accurate "no zone info" answer that OnLoad handlers expect.
+if GetZoneText == nil then
+  function GetZoneText() return "" end
+end
+if GetSubZoneText == nil then
+  function GetSubZoneText() return "" end
+end
+if GetMinimapZoneText == nil then
+  function GetMinimapZoneText() return "" end
+end
+if GetRealZoneText == nil then
+  function GetRealZoneText() return "" end
+end
+
+-- Modifier-key state. Sim never has modifier keys pressed at load
+-- time, so `Is{Shift,Control,Alt}KeyDown` return false. IsShiftKeyDown
+-- is already in GLOBAL_FALSE_STUBS; add the three remaining modifiers
+-- inline here so SecureTemplates / binding code doesn't crash.
+if IsControlKeyDown == nil then function IsControlKeyDown() return false end end
+if IsAltKeyDown == nil then function IsAltKeyDown() return false end end
+if IsModifierKeyDown == nil then function IsModifierKeyDown() return false end end
+if IsMetaKeyDown == nil then function IsMetaKeyDown() return false end end
+
 -- Network-stats: no real socket in the sim, so bandwidth and latency are 0.
 -- Returns four values so `local a, b, c, d = GetNetStats()` works for the
 -- latency comparisons in Blizzard_MicroMenu and friends.

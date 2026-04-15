@@ -262,6 +262,52 @@ fn unit_is_player_true_for_player_and_group_slots() {
 }
 
 #[test]
+fn get_inventory_slot_info_returns_integer_id() {
+    // SecureTemplates.lua uses `CANCELABLE_ITEMS[GetInventorySlotInfo("MainHandSlot")]`
+    // where the return value has to be a valid table key. Nil here
+    // crashes with "table index is nil". The mapping is Blizzard's
+    // long-stable canonical slot table.
+    let env = env();
+    let (head_id, main_id, secondary_id, ranged_id, unknown): (f64, f64, f64, f64, String) = env
+        .eval(
+            r#"
+            return GetInventorySlotInfo("HEADSLOT"),
+                   GetInventorySlotInfo("MainHandSlot"),
+                   GetInventorySlotInfo("SecondaryHandSlot"),
+                   GetInventorySlotInfo("RangedSlot"),
+                   tostring(GetInventorySlotInfo("NotASlot"))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(head_id, 1.0);
+    assert_eq!(main_id, 16.0);
+    assert_eq!(secondary_id, 17.0);
+    assert_eq!(ranged_id, 18.0);
+    assert_eq!(unknown, "nil");
+}
+
+#[test]
+fn c_pvp_and_zone_text_defaults_are_neutral() {
+    // ZoneText.lua:7 dereferences `C_PvP.GetZonePVPInfo()` during
+    // SubZoneTextFrame OnLoad, and the same OnLoad chain accesses
+    // GetSubZoneText. The sim has no world state, so return the
+    // "neutral zone, empty text" flavor the OnLoad path tolerates.
+    let env = env();
+    let (pvp_type, is_sub_zone, zone_text, sub_text): (String, bool, String, String) = env
+        .eval(
+            r#"
+            local pvpType, isSubZonePvP = C_PvP.GetZonePVPInfo()
+            return pvpType, isSubZonePvP, GetZoneText(), GetSubZoneText()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(pvp_type, "contested");
+    assert!(!is_sub_zone);
+    assert_eq!(zone_text, "");
+    assert_eq!(sub_text, "");
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env
