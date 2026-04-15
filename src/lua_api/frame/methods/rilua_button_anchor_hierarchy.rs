@@ -1813,6 +1813,149 @@ fn animation_config_noop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn animation_numeric_arg(state: &LuaState, index: i32) -> f64 {
+    match stack_val(state, index) {
+        Val::Num(value) => value.max(0.0),
+        _ => 0.0,
+    }
+}
+
+fn with_animation_state_mut<F>(state: &mut LuaState, f: F) -> LuaResult<()>
+where
+    F: FnOnce(&mut crate::lua_api::animation::AnimState),
+{
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some((group_id, animation_index)) =
+        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+        && let Some(animation) = group.animations.get_mut(animation_index)
+    {
+        f(animation);
+    }
+    Ok(())
+}
+
+fn animation_set_flipbook_rows(state: &mut LuaState) -> LuaResult<u32> {
+    let rows = animation_numeric_arg(state, 2) as u32;
+    with_animation_state_mut(state, |animation| animation.flipbook_rows = rows)?;
+    Ok(0)
+}
+
+fn animation_get_flipbook_rows(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let rows = {
+        let sim = borrow_state(state)?;
+        sim.anim_frame_to_anim
+            .get(&animation_frame_id)
+            .and_then(|(group_id, animation_index)| {
+                sim.animation_groups
+                    .get(group_id)
+                    .and_then(|group| group.animations.get(*animation_index))
+                    .map(|animation| animation.flipbook_rows)
+            })
+            .unwrap_or(0)
+    };
+    state.push(Val::Num(rows as f64));
+    Ok(1)
+}
+
+fn animation_set_flipbook_columns(state: &mut LuaState) -> LuaResult<u32> {
+    let columns = animation_numeric_arg(state, 2) as u32;
+    with_animation_state_mut(state, |animation| animation.flipbook_columns = columns)?;
+    Ok(0)
+}
+
+fn animation_get_flipbook_columns(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let columns = {
+        let sim = borrow_state(state)?;
+        sim.anim_frame_to_anim
+            .get(&animation_frame_id)
+            .and_then(|(group_id, animation_index)| {
+                sim.animation_groups
+                    .get(group_id)
+                    .and_then(|group| group.animations.get(*animation_index))
+                    .map(|animation| animation.flipbook_columns)
+            })
+            .unwrap_or(0)
+    };
+    state.push(Val::Num(columns as f64));
+    Ok(1)
+}
+
+fn animation_set_flipbook_frames(state: &mut LuaState) -> LuaResult<u32> {
+    let frames = animation_numeric_arg(state, 2) as u32;
+    with_animation_state_mut(state, |animation| animation.flipbook_frames = frames)?;
+    Ok(0)
+}
+
+fn animation_get_flipbook_frames(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let frames = {
+        let sim = borrow_state(state)?;
+        sim.anim_frame_to_anim
+            .get(&animation_frame_id)
+            .and_then(|(group_id, animation_index)| {
+                sim.animation_groups
+                    .get(group_id)
+                    .and_then(|group| group.animations.get(*animation_index))
+                    .map(|animation| animation.flipbook_frames)
+            })
+            .unwrap_or(0)
+    };
+    state.push(Val::Num(frames as f64));
+    Ok(1)
+}
+
+fn animation_set_flipbook_frame_width(state: &mut LuaState) -> LuaResult<u32> {
+    let width = animation_numeric_arg(state, 2);
+    with_animation_state_mut(state, |animation| animation.flipbook_frame_width = width)?;
+    Ok(0)
+}
+
+fn animation_get_flipbook_frame_width(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let width = {
+        let sim = borrow_state(state)?;
+        sim.anim_frame_to_anim
+            .get(&animation_frame_id)
+            .and_then(|(group_id, animation_index)| {
+                sim.animation_groups
+                    .get(group_id)
+                    .and_then(|group| group.animations.get(*animation_index))
+                    .map(|animation| animation.flipbook_frame_width)
+            })
+            .unwrap_or(0.0)
+    };
+    state.push(Val::Num(width));
+    Ok(1)
+}
+
+fn animation_set_flipbook_frame_height(state: &mut LuaState) -> LuaResult<u32> {
+    let height = animation_numeric_arg(state, 2);
+    with_animation_state_mut(state, |animation| animation.flipbook_frame_height = height)?;
+    Ok(0)
+}
+
+fn animation_get_flipbook_frame_height(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let height = {
+        let sim = borrow_state(state)?;
+        sim.anim_frame_to_anim
+            .get(&animation_frame_id)
+            .and_then(|(group_id, animation_index)| {
+                sim.animation_groups
+                    .get(group_id)
+                    .and_then(|group| group.animations.get(*animation_index))
+                    .map(|animation| animation.flipbook_frame_height)
+            })
+            .unwrap_or(0.0)
+    };
+    state.push(Val::Num(height));
+    Ok(1)
+}
+
 fn animation_group_set_to_final_alpha(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let set_to_final_alpha = matches!(stack_val(state, 2), Val::Bool(true));
@@ -1983,8 +2126,56 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetChildKey", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetTargetName", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetTargetKey", animation_config_noop)?;
-    table_set_rust_fn(state, table, "SetFlipBookRows", animation_config_noop)?;
-    table_set_rust_fn(state, table, "SetFlipBookColumns", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetFlipBookRows", animation_set_flipbook_rows)?;
+    table_set_rust_fn(state, table, "GetFlipBookRows", animation_get_flipbook_rows)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetFlipBookColumns",
+        animation_set_flipbook_columns,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetFlipBookColumns",
+        animation_get_flipbook_columns,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetFlipBookFrames",
+        animation_set_flipbook_frames,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetFlipBookFrames",
+        animation_get_flipbook_frames,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetFlipBookFrameWidth",
+        animation_set_flipbook_frame_width,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetFlipBookFrameWidth",
+        animation_get_flipbook_frame_width,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetFlipBookFrameHeight",
+        animation_set_flipbook_frame_height,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetFlipBookFrameHeight",
+        animation_get_flipbook_frame_height,
+    )?;
     table_set_rust_fn(state, table, "CreateControlPoint", create_control_point)?;
 
     Ok(())

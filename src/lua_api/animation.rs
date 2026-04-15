@@ -76,6 +76,11 @@ pub struct AnimState {
     pub start_delay: f64,
     pub end_delay: f64,
     pub elapsed: f64,
+    pub flipbook_rows: u32,
+    pub flipbook_columns: u32,
+    pub flipbook_frames: u32,
+    pub flipbook_frame_width: f64,
+    pub flipbook_frame_height: f64,
     pub scripts: HashMap<String, ()>,
 }
 
@@ -89,6 +94,11 @@ impl AnimState {
             start_delay: 0.0,
             end_delay: 0.0,
             elapsed: 0.0,
+            flipbook_rows: 0,
+            flipbook_columns: 0,
+            flipbook_frames: 0,
+            flipbook_frame_width: 0.0,
+            flipbook_frame_height: 0.0,
             scripts: HashMap::new(),
         }
     }

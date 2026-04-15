@@ -470,6 +470,47 @@ fn test_animation_runtime_exposes_core_configuration_methods() {
 }
 
 #[test]
+fn test_flipbook_animation_runtime_exposes_configuration_surface() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        set_frames_ty,
+        get_frames_ty,
+        get_columns_ty,
+        get_width_ty,
+        frames,
+        columns,
+        width,
+        height,
+    ): (String, String, String, String, i64, i64, f64, f64) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local group = frame:CreateAnimationGroup()
+            local animation = group:CreateAnimation("FlipBook")
+            animation:SetFlipBookRows(3)
+            animation:SetFlipBookColumns(4)
+            animation:SetFlipBookFrames(12)
+            animation:SetFlipBookFrameWidth(64)
+            animation:SetFlipBookFrameHeight(32)
+            return type(animation.SetFlipBookFrames), type(animation.GetFlipBookFrames),
+                type(animation.GetFlipBookColumns), type(animation.GetFlipBookFrameWidth),
+                animation:GetFlipBookFrames(), animation:GetFlipBookColumns(),
+                animation:GetFlipBookFrameWidth(), animation:GetFlipBookFrameHeight()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(set_frames_ty, "function");
+    assert_eq!(get_frames_ty, "function");
+    assert_eq!(get_columns_ty, "function");
+    assert_eq!(get_width_ty, "function");
+    assert_eq!(frames, 12);
+    assert_eq!(columns, 4);
+    assert_eq!(width, 64.0);
+    assert_eq!(height, 32.0);
+}
+
+#[test]
 fn test_gamepad_cursor_bootstrap_functions_exist() {
     let env = WowLuaEnv::new().unwrap();
     let (auto_ty, auto_value, set_ty): (String, bool, String) = env
