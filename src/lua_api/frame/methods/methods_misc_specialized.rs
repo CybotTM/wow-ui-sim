@@ -166,58 +166,111 @@ fn add_quest_poi_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 fn add_fog_of_war_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetFogOfWarBackgroundAtlas", |lua, this, ()| {
-        let atlas = read_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
-            fog.background_atlas.clone()
-        });
+    add_fog_of_war_atlas_getter(methods, "GetFogOfWarBackgroundAtlas", |fog| {
+        fog.background_atlas.clone()
+    });
+    add_fog_of_war_atlas_getter(methods, "GetFogOfWarMaskAtlas", |fog| {
+        fog.mask_atlas.clone()
+    });
+    add_fog_of_war_mask_scalar_getter(methods);
+    add_fog_of_war_atlas_setter(
+        methods,
+        "SetFogOfWarBackgroundAtlas",
+        |fog, atlas| {
+            fog.background_atlas = atlas.clone();
+        },
+        |frame, atlas| {
+            frame.fog_of_war_background_atlas = atlas;
+        },
+    );
+    add_fog_of_war_atlas_setter(
+        methods,
+        "SetFogOfWarMaskAtlas",
+        |fog, atlas| {
+            fog.mask_atlas = atlas.clone();
+        },
+        |frame, atlas| {
+            frame.fog_of_war_mask_atlas = atlas;
+        },
+    );
+    add_fog_of_war_mask_scalar_setter(methods);
+}
+
+fn add_fog_of_war_atlas_getter<M, F>(methods: &mut M, name: &'static str, read: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::lua_api::state::FogOfWarFrameState) -> Option<String> + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
+        let atlas = read_fog_of_war_frame_state(get_sim_state(lua), this.0, read);
         fog_of_war_string_value(lua, atlas)
     });
-    methods.add_method("GetFogOfWarMaskAtlas", |lua, this, ()| {
-        let atlas =
-            read_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| fog.mask_atlas.clone());
-        fog_of_war_string_value(lua, atlas)
-    });
+}
+
+fn add_fog_of_war_mask_scalar_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetMaskScalar", |lua, this, ()| {
         Ok(
             read_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| fog.mask_scalar)
                 .unwrap_or(1.0),
         )
     });
-    methods.add_method("SetFogOfWarBackgroundAtlas", |lua, this, atlas: Value| {
+}
+
+fn add_fog_of_war_atlas_setter<M, F, G>(
+    methods: &mut M,
+    name: &'static str,
+    write_state: F,
+    write_frame: G,
+) where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::state::FogOfWarFrameState, &Option<String>) + Copy + 'static,
+    G: Fn(&mut crate::widget::Frame, Option<String>) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, atlas: Value| {
         let atlas = super::methods_misc::texture_asset_to_string(&atlas)?;
-        let state_rc = get_sim_state(lua);
-        write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), this.0, |fog| {
-            fog.background_atlas = atlas.clone();
-        });
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.fog_of_war_background_atlas = atlas;
-        }
+        write_fog_of_war_atlas(get_sim_state(lua), this.0, atlas, write_state, write_frame);
         Ok(())
     });
-    methods.add_method("SetFogOfWarMaskAtlas", |lua, this, atlas: Value| {
-        let atlas = super::methods_misc::texture_asset_to_string(&atlas)?;
-        let state_rc = get_sim_state(lua);
-        write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), this.0, |fog| {
-            fog.mask_atlas = atlas.clone();
-        });
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.fog_of_war_mask_atlas = atlas;
-        }
-        Ok(())
-    });
+}
+
+fn add_fog_of_war_mask_scalar_setter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMaskScalar", |lua, this, scalar: Option<f64>| {
-        let state_rc = get_sim_state(lua);
-        write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), this.0, |fog| {
-            fog.mask_scalar = scalar;
-        });
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.fog_of_war_mask_scalar = scalar.map(|value| value as f32);
-        }
+        write_fog_of_war_mask_scalar(get_sim_state(lua), this.0, scalar);
         Ok(())
     });
+}
+
+fn write_fog_of_war_atlas<F, G>(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    atlas: Option<String>,
+    write_state: F,
+    write_frame: G,
+) where
+    F: Fn(&mut crate::lua_api::state::FogOfWarFrameState, &Option<String>),
+    G: Fn(&mut crate::widget::Frame, Option<String>),
+{
+    write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), frame_id, |fog| {
+        write_state(fog, &atlas);
+    });
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        write_frame(frame, atlas);
+    }
+}
+
+fn write_fog_of_war_mask_scalar(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    scalar: Option<f64>,
+) {
+    write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), frame_id, |fog| {
+        fog.mask_scalar = scalar;
+    });
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.fog_of_war_mask_scalar = scalar.map(|value| value as f32);
+    }
 }
 
 fn fog_of_war_string_value(lua: &mlua::Lua, value: Option<String>) -> mlua::Result<Value> {
