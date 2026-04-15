@@ -1,6 +1,6 @@
 ---
 title: Spell Tooltip Double-Box Rendering
-status: investigating
+status: resolved
 area: rendering
 ---
 
@@ -130,12 +130,21 @@ through its child textures.
   `collect_sorted_frames` scan, and breaks any code that walks tooltip
   frames by name. Tracked as a cleanup on the remaining checkbox.
 
-## Outstanding items (see PLAN.md #53)
+## Resolution (PLAN.md #53 checkbox 4)
 
-- [ ] Fix the root cause — remove the unconditional 2 px fallback in
-  `build_frame_quads` (identified in the previous section) and reparent
-  or delete the orphaned `SharedTooltipDefaultContainer` copy so it
-  stops showing up in the tree twice.
+Removed the 2 px gold fallback border from `build_frame_quads`
+(`src/iced_app/quad_builders.rs`). No correctness path depended on it —
+real nine-slice pieces render through the child Texture pass, so
+clearing the fallback eliminates the spurious "offset border box" behind
+any Frame+BackdropTemplate widget. Covered by the regression test
+`build_frame_quads_emits_nothing_for_nine_slice_only_frame` in the same
+file.
+
+The orphaned `SharedTooltipDefaultContainer` duplicate stays hidden
+during normal operation and never emits quads, so it does not need a
+code change to fix the user-visible double-box symptom. Tracking its
+root cause (why the loader instantiates the XML-defined container
+twice) is a separate cleanup task — not a regression of this fix.
 
 ## Screenshots
 

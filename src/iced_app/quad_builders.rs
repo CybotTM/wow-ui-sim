@@ -47,9 +47,12 @@ pub fn build_frame_quads(
         }
     }
 
-    if f.nine_slice_layout.is_some() {
-        batch.push_border(bounds, 2.0, [0.6, 0.45, 0.15, alpha]);
-    }
+    // Nine-slice frames render their pieces through the child Texture pass
+    // (see `quad_builders_textures.rs` → `emit_nine_slice_atlas`), so the
+    // parent Frame must not add an extra border here. The previous 2 px gold
+    // fallback used to paint a visible box behind any frame that had a
+    // nine-slice layout registered — it's the "offset border box behind the
+    // tooltip" artifact reported in PLAN.md #53.
 }
 
 const FOG_OPACITY: f32 = 0.6;
@@ -498,4 +501,61 @@ fn inv_lerp(a: f32, b: f32, v: f32) -> f32 {
 
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
     a + (b - a) * t
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::widget::Frame;
+
+    /// A frame that only has a nine-slice layout registered (no active
+    /// backdrop) must not emit any quads from `build_frame_quads`. The real
+    /// nine-slice rendering happens through the child Texture pass, so the
+    /// parent Frame has nothing to draw — otherwise it paints a spurious
+    /// rectangle behind the tooltip (PLAN.md #53).
+    #[test]
+    fn build_frame_quads_emits_nothing_for_nine_slice_only_frame() {
+        let mut frame = Frame::new(crate::widget::WidgetType::Frame, None, None);
+        frame.nine_slice_layout = Some("ChatBubble".into());
+        // backdrop.enabled defaults to false, so no background should emit.
+        let mut batch = QuadBatch::default();
+        let before = batch.vertices.len();
+        build_frame_quads(
+            &mut batch,
+            Rectangle::new(iced::Point::new(0.0, 0.0), iced::Size::new(100.0, 50.0)),
+            &frame,
+            1.0,
+        );
+        assert_eq!(
+            batch.vertices.len(),
+            before,
+            "nine-slice-only frame must not emit any quads from build_frame_quads"
+        );
+    }
+
+    /// A frame with `backdrop.enabled` still emits the solid background the
+    /// user explicitly configured. Regression guard for the fix above.
+    #[test]
+    fn build_frame_quads_still_emits_enabled_backdrop() {
+        let mut frame = Frame::new(crate::widget::WidgetType::Frame, None, None);
+        frame.backdrop.enabled = true;
+        frame.backdrop.bg_color = crate::widget::Color {
+            r: 0.1,
+            g: 0.2,
+            b: 0.3,
+            a: 1.0,
+        };
+        let mut batch = QuadBatch::default();
+        let before = batch.vertices.len();
+        build_frame_quads(
+            &mut batch,
+            Rectangle::new(iced::Point::new(0.0, 0.0), iced::Size::new(100.0, 50.0)),
+            &frame,
+            1.0,
+        );
+        assert!(
+            batch.vertices.len() > before,
+            "enabled backdrop should still emit quads"
+        );
+    }
 }
