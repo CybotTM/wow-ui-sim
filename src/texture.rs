@@ -164,8 +164,6 @@ impl TextureManager {
     /// Returns `Some` only when the resolved file is a BLP with DXT1/DXT3/DXT5 content.
     /// Callers should fall back to `load()` (RGBA path) when this returns `None`.
     pub fn load_bc(&mut self, wow_path: &str) -> Option<&BcTextureResult> {
-        use crate::render::shader::atlas::BcFormat;
-
         let normalized = normalize_wow_path(wow_path);
         if self.bc_cache.contains_key(&normalized) {
             return self.bc_cache.get(&normalized);
@@ -178,46 +176,43 @@ impl TextureManager {
         }
 
         let blp = load_blp(&file_path).ok()?;
-        let width = blp.header.width;
-        let height = blp.header.height;
+        let bc_texture = bc_texture_result(blp.header.width, blp.header.height, blp.content)?;
 
-        let (bc_data, format): (Arc<[u8]>, BcFormat) = match blp.content {
-            BlpContent::Dxt1(dxtn) => {
-                let Some(image) = dxtn.images.into_iter().next() else {
-                    return None;
-                };
-                (Arc::<[u8]>::from(image.content), BcFormat::Bc1)
-            }
-            BlpContent::Dxt3(dxtn) => {
-                let Some(image) = dxtn.images.into_iter().next() else {
-                    return None;
-                };
-                (Arc::<[u8]>::from(image.content), BcFormat::Bc3)
-            }
-            BlpContent::Dxt5(dxtn) => {
-                let Some(image) = dxtn.images.into_iter().next() else {
-                    return None;
-                };
-                (Arc::<[u8]>::from(image.content), BcFormat::Bc3)
-            }
-            _ => return None,
-        };
-
-        if bc_data.is_empty() {
-            return None;
-        }
-
-        self.bc_cache.insert(
-            normalized.clone(),
-            BcTextureResult {
-                width,
-                height,
-                bc_data,
-                format,
-            },
-        );
+        self.bc_cache.insert(normalized.clone(), bc_texture);
         self.bc_cache.get(&normalized)
     }
+}
+
+fn bc_texture_result(width: u32, height: u32, content: BlpContent) -> Option<BcTextureResult> {
+    let (bc_data, format) = bc_texture_data(content)?;
+    Some(BcTextureResult {
+        width,
+        height,
+        bc_data,
+        format,
+    })
+}
+
+fn bc_texture_data(
+    content: BlpContent,
+) -> Option<(Arc<[u8]>, crate::render::shader::atlas::BcFormat)> {
+    use crate::render::shader::atlas::BcFormat;
+
+    match content {
+        BlpContent::Dxt1(dxtn) => first_bc_image(dxtn).map(|bc_data| (bc_data, BcFormat::Bc1)),
+        BlpContent::Dxt3(dxtn) | BlpContent::Dxt5(dxtn) => {
+            first_bc_image(dxtn).map(|bc_data| (bc_data, BcFormat::Bc3))
+        }
+        _ => None,
+    }
+}
+
+fn first_bc_image(dxtn: image_blp::types::direct::dxtn::BlpDxtn) -> Option<Arc<[u8]>> {
+    let image = dxtn.images.into_iter().next()?;
+    if image.content.is_empty() {
+        return None;
+    }
+    Some(Arc::<[u8]>::from(image.content))
 }
 
 /// Normalize a WoW texture path.
@@ -292,6 +287,7 @@ fn load_texture_file(path: &Path) -> Result<TextureData, Box<dyn std::error::Err
 mod tests {
     use self::preload::should_preload_talent_atlas_key;
     use super::*;
+    use image_blp::types::direct::dxtn::{BlpDxtn, DxtnFormat, DxtnImage};
     use std::fs;
     use tempfile::TempDir;
 
@@ -501,6 +497,64 @@ mod tests {
         assert_eq!(cached.height, 4);
         assert_eq!(cached.format, crate::render::shader::atlas::BcFormat::Bc1);
         assert_eq!(cached.bc_data.as_ref(), [0xaa; 8]);
+    }
+
+    fn test_dxtn(content: Vec<u8>, format: DxtnFormat) -> BlpDxtn {
+        BlpDxtn {
+            format,
+            cmap: Vec::new(),
+            images: vec![DxtnImage { content }],
+        }
+    }
+
+    #[test]
+    fn bc_texture_result_maps_supported_dxt_formats() {
+        let dxt1 = bc_texture_result(
+            4,
+            4,
+            BlpContent::Dxt1(test_dxtn(vec![0x11; 8], DxtnFormat::Dxt1)),
+        )
+        .expect("DXT1 content should map to a BC texture result");
+        assert_eq!(dxt1.format, crate::render::shader::atlas::BcFormat::Bc1);
+        assert_eq!(dxt1.bc_data.as_ref(), [0x11; 8]);
+
+        let dxt3 = bc_texture_result(
+            8,
+            8,
+            BlpContent::Dxt3(test_dxtn(vec![0x22; 16], DxtnFormat::Dxt3)),
+        )
+        .expect("DXT3 content should map to a BC texture result");
+        assert_eq!(dxt3.format, crate::render::shader::atlas::BcFormat::Bc3);
+
+        let dxt5 = bc_texture_result(
+            8,
+            8,
+            BlpContent::Dxt5(test_dxtn(vec![0x33; 16], DxtnFormat::Dxt5)),
+        )
+        .expect("DXT5 content should map to a BC texture result");
+        assert_eq!(dxt5.format, crate::render::shader::atlas::BcFormat::Bc3);
+    }
+
+    #[test]
+    fn bc_texture_result_rejects_empty_and_unsupported_content() {
+        assert!(
+            bc_texture_result(
+                4,
+                4,
+                BlpContent::Dxt1(test_dxtn(Vec::new(), DxtnFormat::Dxt1)),
+            )
+            .is_none(),
+            "DXT content without mip data should be ignored"
+        );
+
+        assert!(
+            bc_texture_data(BlpContent::Raw3(image_blp::types::BlpRaw3 {
+                cmap: Vec::new(),
+                images: Vec::new(),
+            }))
+            .is_none(),
+            "non-BC BLP content should stay on the RGBA path"
+        );
     }
 
     #[test]
