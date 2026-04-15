@@ -1289,6 +1289,21 @@ end
 if IsActiveBattlefieldArena == nil then
   function IsActiveBattlefieldArena() return false end
 end
+if UnitExists == nil then
+  function UnitExists(unit)
+    return unit == "player"
+  end
+end
+
+-- Social / commentator: sim has no social restrictions or spectator.
+C_SocialRestrictions = C_SocialRestrictions or __wow_namespace()
+if rawget(C_SocialRestrictions, "IsChatDisabled") == nil then
+  function C_SocialRestrictions.IsChatDisabled() return false end
+end
+C_Commentator = C_Commentator or __wow_namespace()
+if rawget(C_Commentator, "IsSpectating") == nil then
+  function C_Commentator.IsSpectating() return false end
+end
 
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
