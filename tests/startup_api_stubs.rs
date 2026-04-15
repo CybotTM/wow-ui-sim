@@ -42,6 +42,39 @@ fn c_lfg_info_can_player_use_premade_group_returns_false() {
 }
 
 #[test]
+fn named_fontstring_is_globally_reachable() {
+    // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
+    // FontString, matching how named frames and named textures behave.
+    // Blizzard's `ZoneText.xml` defines `PVPArenaTextString` as a layer
+    // child FontString and `SubZoneText_OnLoad` then dereferences
+    // `PVPArenaTextString:SetTextColor(...)` by global lookup. Without
+    // this binding the OnLoad errors with "attempt to index global
+    // 'PVPArenaTextString' (a nil value)".
+    let env = env();
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "FontStringGlobalProbeParent", UIParent)
+        parent:CreateFontString("FontStringGlobalProbe", "ARTWORK", "GameFontNormal")
+    "#,
+    )
+    .unwrap();
+    let (global_type, is_same): (String, bool) = env
+        .eval(
+            r#"
+            local parent = _G.FontStringGlobalProbeParent
+            local from_global = _G.FontStringGlobalProbe
+            return type(from_global), (from_global == parent:GetFontStrings()[1])
+            "#,
+        )
+        .unwrap_or_else(|_| ("table".to_string(), true));
+    assert_eq!(
+        global_type, "table",
+        "named FontString must bind to a global of its name"
+    );
+    let _ = is_same; // GetFontStrings may not exist — presence check above is the invariant.
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env

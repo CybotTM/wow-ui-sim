@@ -1641,6 +1641,14 @@ fn create_font_string(state: &mut LuaState) -> LuaResult<u32> {
         sim.widgets.add_child(parent_id, child_id);
         sim.invalidate_strata_buckets();
     }
+    // Named FontStrings must be reachable as `_G[name]`, just like named
+    // frames and textures. Blizzard XML (`ZoneText.xml`'s
+    // `PVPArenaTextString`) and Lua code (`SubZoneText_OnLoad`) both
+    // dereference the FontString by its global name. Without this bind,
+    // the FontString exists in our widget registry but Lua sees `nil`.
+    if let Some(ref n) = name {
+        bind_named_child_global(state, n, child_id)?;
+    }
     let val = frame_ref(state, child_id)?;
     state.push(val);
     Ok(1)
