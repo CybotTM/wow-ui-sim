@@ -180,6 +180,45 @@ mod tests {
         assert!(line.contains("gc=250.00ms"));
         assert!(line.contains("bytecode cache: 3/4 hits"));
     }
+
+    #[test]
+    fn timing_breakdown_lines_include_frame_and_lua_details() {
+        let timing = LoadTiming {
+            io_time: std::time::Duration::from_millis(10),
+            xml_parse_time: std::time::Duration::from_millis(20),
+            xml_process_time: std::time::Duration::from_millis(30),
+            xml_frame_create_time: std::time::Duration::from_millis(12),
+            xml_frame_setup_time: std::time::Duration::from_millis(5),
+            xml_frame_finalize_time: std::time::Duration::from_millis(7),
+            frame_code_build_time: std::time::Duration::from_millis(2),
+            frame_exec_lua_time: std::time::Duration::from_millis(1),
+            frame_apply_props_time: std::time::Duration::from_millis(2),
+            frame_layer_children_time: std::time::Duration::from_millis(3),
+            frame_anim_time: std::time::Duration::from_millis(1),
+            frame_button_time: std::time::Duration::from_millis(1),
+            frame_lifecycle_time: std::time::Duration::from_millis(2),
+            frame_count: 4,
+            texture_count: 6,
+            fontstring_count: 2,
+            lifecycle_fire_count: 3,
+            lua_compile_time: std::time::Duration::from_millis(4),
+            lua_call_time: std::time::Duration::from_millis(6),
+            lua_exec_time: std::time::Duration::from_millis(10),
+            saved_vars_time: std::time::Duration::from_millis(5),
+            ..LoadTiming::default()
+        };
+
+        let lines = timing_breakdown_lines(&timing);
+
+        assert_eq!(lines[0], "Total time: 75.00ms");
+        assert!(
+            lines
+                .iter()
+                .any(|line| line.contains("XML frames: 12.00ms"))
+        );
+        assert!(lines.iter().any(|line| line.contains("compile:  4.00ms")));
+        assert!(lines.iter().any(|line| line.contains("4 frames, 6 textures, 2 fontstrings, 3 lifecycle fires")));
+    }
 }
 
 /// Scan, load, and register third-party addons; print summary.
@@ -450,71 +489,101 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
 }
 
 fn print_timing_breakdown(t: &LoadTiming) {
-    let total_time = t.total();
-    if total_time.is_zero() {
-        return;
+    for line in timing_breakdown_lines(t) {
+        println!("{line}");
     }
-    let pct = |d: std::time::Duration| 100.0 * d.as_secs_f64() / total_time.as_secs_f64();
-    println!("Total time: {:.2?}", total_time);
-    println!("  IO:         {:.2?} ({:.1}%)", t.io_time, pct(t.io_time));
-    println!(
-        "  XML parse:  {:.2?} ({:.1}%)",
-        t.xml_parse_time,
-        pct(t.xml_parse_time)
-    );
-    println!(
-        "  XML proc:   {:.2?} ({:.1}%)",
-        t.xml_process_time,
-        pct(t.xml_process_time)
-    );
-    print_frame_timing_detail(t, &pct);
-    println!(
-        "  Lua exec:   {:.2?} ({:.1}%)",
-        t.lua_exec_time,
-        pct(t.lua_exec_time)
-    );
-    println!(
-        "    compile:  {:.2?} ({:.1}%, subset of Lua exec)",
-        t.lua_compile_time,
-        pct(t.lua_compile_time)
-    );
-    println!(
-        "    call:     {:.2?} ({:.1}%, subset of Lua exec)",
-        t.lua_call_time,
-        pct(t.lua_call_time)
-    );
-    println!(
-        "  SavedVars:  {:.2?} ({:.1}%)",
-        t.saved_vars_time,
-        pct(t.saved_vars_time)
-    );
 }
 
-fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {
-    println!(
-        "  XML frames: {:.2?} ({:.1}%, subset of XML proc)",
-        t.xml_frame_create_time,
-        pct(t.xml_frame_create_time)
-    );
-    println!(
-        "    setup:  {:.2?}  (code_build={:.2?} exec_lua={:.2?} props={:.2?})",
-        t.xml_frame_setup_time,
-        t.frame_code_build_time,
-        t.frame_exec_lua_time,
-        t.frame_apply_props_time
-    );
-    println!(
-        "    finalize: {:.2?}  (layers={:.2?} anim={:.2?} button={:.2?} lifecycle={:.2?})",
-        t.xml_frame_finalize_time,
-        t.frame_layer_children_time,
-        t.frame_anim_time,
-        t.frame_button_time,
-        t.frame_lifecycle_time
-    );
-    println!(
-        "    {} frames, {} textures, {} fontstrings, {} lifecycle fires",
-        t.frame_count, t.texture_count, t.fontstring_count, t.lifecycle_fire_count
-    );
+fn timing_breakdown_lines(timing: &LoadTiming) -> Vec<String> {
+    let total_time = timing.total();
+    if total_time.is_zero() {
+        return Vec::new();
+    }
+
+    let mut lines = vec![
+        format!("Total time: {:.2?}", total_time),
+        timing_breakdown_line("IO", timing.io_time, total_time),
+        timing_breakdown_line("XML parse", timing.xml_parse_time, total_time),
+        timing_breakdown_line("XML proc", timing.xml_process_time, total_time),
+    ];
+    lines.extend(frame_timing_detail_lines(timing, total_time));
+    lines.push(timing_breakdown_line(
+        "Lua exec",
+        timing.lua_exec_time,
+        total_time,
+    ));
+    lines.push(lua_compile_line(timing, total_time));
+    lines.push(lua_call_line(timing, total_time));
+    lines.push(timing_breakdown_line(
+        "SavedVars",
+        timing.saved_vars_time,
+        total_time,
+    ));
+    lines
+}
+
+fn timing_breakdown_line(
+    label: &str,
+    duration: std::time::Duration,
+    total_time: std::time::Duration,
+) -> String {
+    format!(
+        "  {label:10} {:.2?} ({:.1}%)",
+        duration,
+        timing_percent(duration, total_time)
+    )
+}
+
+fn frame_timing_detail_lines(timing: &LoadTiming, total_time: std::time::Duration) -> [String; 4] {
+    [
+        format!(
+            "  XML frames: {:.2?} ({:.1}%, subset of XML proc)",
+            timing.xml_frame_create_time,
+            timing_percent(timing.xml_frame_create_time, total_time)
+        ),
+        format!(
+            "    setup:  {:.2?}  (code_build={:.2?} exec_lua={:.2?} props={:.2?})",
+            timing.xml_frame_setup_time,
+            timing.frame_code_build_time,
+            timing.frame_exec_lua_time,
+            timing.frame_apply_props_time
+        ),
+        format!(
+            "    finalize: {:.2?}  (layers={:.2?} anim={:.2?} button={:.2?} lifecycle={:.2?})",
+            timing.xml_frame_finalize_time,
+            timing.frame_layer_children_time,
+            timing.frame_anim_time,
+            timing.frame_button_time,
+            timing.frame_lifecycle_time
+        ),
+        format!(
+            "    {} frames, {} textures, {} fontstrings, {} lifecycle fires",
+            timing.frame_count,
+            timing.texture_count,
+            timing.fontstring_count,
+            timing.lifecycle_fire_count
+        ),
+    ]
+}
+
+fn lua_compile_line(timing: &LoadTiming, total_time: std::time::Duration) -> String {
+    format!(
+        "    compile:  {:.2?} ({:.1}%, subset of Lua exec)",
+        timing.lua_compile_time,
+        timing_percent(timing.lua_compile_time, total_time)
+    )
+}
+
+fn lua_call_line(timing: &LoadTiming, total_time: std::time::Duration) -> String {
+    format!(
+        "    call:     {:.2?} ({:.1}%, subset of Lua exec)",
+        timing.lua_call_time,
+        timing_percent(timing.lua_call_time, total_time)
+    )
+}
+
+fn timing_percent(duration: std::time::Duration, total_time: std::time::Duration) -> f64 {
+    100.0 * duration.as_secs_f64() / total_time.as_secs_f64()
 }
 
 fn print_cache_stats(hits: u32, misses: u32) {
