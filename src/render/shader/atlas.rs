@@ -14,6 +14,9 @@
 use std::collections::HashMap;
 
 use super::atlas_bc::{BcAtlasTier, build_bc_entry, init_bc_atlases, write_bc_slot};
+use super::atlas_bind_groups::{
+    create_atlas_bind_groups, create_glyph_atlas, create_texture_sampler,
+};
 
 pub use super::atlas_bc::{BC_CELL_SIZE, BcFormat, BcTextureEntry, is_bc_supported};
 
@@ -446,9 +449,16 @@ fn create_atlas_backing(device: &wgpu::Device, tiers: &[TierAtlas; NUM_TIERS]) -
     let (glyph_texture, glyph_view) = create_glyph_atlas(device, GLYPH_ATLAS_SIZE);
     let (bc1_atlas, bc3_atlas, has_bc_support) = init_bc_atlases(device);
     let sampler = create_texture_sampler(device);
+    let tier_views = [
+        &tiers[0].view,
+        &tiers[1].view,
+        &tiers[2].view,
+        &tiers[3].view,
+        &tiers[4].view,
+    ];
     let (bind_group_layout, bind_group) = create_atlas_bind_groups(
         device,
-        tiers,
+        tier_views,
         &glyph_view,
         &bc1_atlas.view,
         &bc3_atlas.view,
@@ -470,118 +480,6 @@ pub struct TierStats {
     pub allocated_bytes: usize,
     pub used_bytes: usize,
     pub used_slots: [usize; NUM_TIERS],
-}
-
-fn create_texture_sampler(device: &wgpu::Device) -> wgpu::Sampler {
-    device.create_sampler(&wgpu::SamplerDescriptor {
-        label: Some("WoW UI Texture Sampler"),
-        address_mode_u: wgpu::AddressMode::ClampToEdge,
-        address_mode_v: wgpu::AddressMode::ClampToEdge,
-        address_mode_w: wgpu::AddressMode::ClampToEdge,
-        mag_filter: wgpu::FilterMode::Linear,
-        min_filter: wgpu::FilterMode::Linear,
-        mipmap_filter: wgpu::FilterMode::Nearest,
-        ..Default::default()
-    })
-}
-
-/// Create the glyph atlas texture and view.
-fn create_glyph_atlas(device: &wgpu::Device, size: u32) -> (wgpu::Texture, wgpu::TextureView) {
-    let texture = device.create_texture(&wgpu::TextureDescriptor {
-        label: Some("Glyph Atlas"),
-        size: wgpu::Extent3d {
-            width: size,
-            height: size,
-            depth_or_array_layers: 1,
-        },
-        mip_level_count: 1,
-        sample_count: 1,
-        dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Rgba8Unorm,
-        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-        view_formats: &[],
-    });
-    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-    (texture, view)
-}
-
-/// Create bind group layout and bind group for tier textures, sampler, glyph atlas, and BC atlases.
-fn create_atlas_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
-    let texture_entry = |binding: u32| wgpu::BindGroupLayoutEntry {
-        binding,
-        visibility: wgpu::ShaderStages::FRAGMENT,
-        ty: wgpu::BindingType::Texture {
-            sample_type: wgpu::TextureSampleType::Float { filterable: true },
-            view_dimension: wgpu::TextureViewDimension::D2,
-            multisampled: false,
-        },
-        count: None,
-    };
-    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: Some("WoW UI Texture Bind Group Layout"),
-        entries: &[
-            texture_entry(0), // Tier 0 (64x64 cells)
-            texture_entry(1), // Tier 1 (128x128 cells)
-            texture_entry(2), // Tier 2 (256x256 cells)
-            texture_entry(3), // Tier 3 (512x512 cells)
-            texture_entry(4), // Tier 4 (2048x2048 cells)
-            wgpu::BindGroupLayoutEntry {
-                binding: 5,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                count: None,
-            },
-            texture_entry(6), // Glyph atlas
-            texture_entry(7), // BC1 (DXT1) compressed atlas
-            texture_entry(8), // BC3 (DXT3/DXT5) compressed atlas
-        ],
-    })
-}
-
-fn create_atlas_bind_groups(
-    device: &wgpu::Device,
-    tiers: &[TierAtlas; NUM_TIERS],
-    glyph_view: &wgpu::TextureView,
-    bc1_view: &wgpu::TextureView,
-    bc3_view: &wgpu::TextureView,
-    sampler: &wgpu::Sampler,
-) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
-    let layout = create_atlas_bind_group_layout(device);
-    let views: [&wgpu::TextureView; 8] = [
-        &tiers[0].view,
-        &tiers[1].view,
-        &tiers[2].view,
-        &tiers[3].view,
-        &tiers[4].view,
-        glyph_view,
-        bc1_view,
-        bc3_view,
-    ];
-    let mut entries: Vec<wgpu::BindGroupEntry<'_>> = views
-        .iter()
-        .enumerate()
-        .map(|(i, view)| wgpu::BindGroupEntry {
-            binding: i as u32,
-            resource: wgpu::BindingResource::TextureView(view),
-        })
-        .collect();
-    entries.insert(
-        5,
-        wgpu::BindGroupEntry {
-            binding: 5,
-            resource: wgpu::BindingResource::Sampler(sampler),
-        },
-    );
-    // Fix bindings 6-8 after sampler insertion shifted them.
-    for (i, entry) in entries.iter_mut().enumerate() {
-        entry.binding = i as u32;
-    }
-    let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-        label: Some("WoW UI Texture Bind Group"),
-        layout: &layout,
-        entries: &entries,
-    });
-    (layout, bind_group)
 }
 
 /// Upload texture data to a specific cell in a tier atlas.
