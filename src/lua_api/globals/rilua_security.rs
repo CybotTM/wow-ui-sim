@@ -12,9 +12,9 @@
 //!
 //! # Secure environment (secure_env.rs counterpart)
 //!
-//! `create_secure_environment` and `apply_secure_env` depend on `setfenv`,
-//! which is Lua 5.1 specific. rilua may expose this but taint integration is
-//! not yet wired. Both are stubbed with `TODO` comments.
+//! `create_secure_environment` and `apply_secure_env` mirror the old mlua
+//! secureenv path: create a shallow copy of `_G`, give it its own `Enum`,
+//! expose it as `__secureenv`, and retarget secure addon chunks to that env.
 //!
 //! # Loader environment (loader_env.rs / env_init.rs counterpart)
 //!
@@ -23,6 +23,8 @@
 
 use crate::loader::LoadError;
 use crate::loader::lua_file::compile_with_rilua;
+use crate::lua_api::rilua_methods::registry_get;
+use crate::lua_api::rilua_methods::registry_set;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
@@ -225,44 +227,102 @@ fn secure_cmd_option_parse(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── Secure environment (secure_env.rs counterpart) ───────────────────────────
 
-/// Create the secure environment (rilua stub).
+const CREATE_SECURE_ENV_LUA: &str = r##"
+    local genv = _G
+    local secureenv = {}
+    for k, v in pairs(genv) do
+        secureenv[k] = v
+    end
+    if genv.Enum then
+        local se = {}
+        for k, v in pairs(genv.Enum) do
+            se[k] = v
+        end
+        secureenv.Enum = se
+    end
+    secureenv._G = secureenv
+    setmetatable(secureenv, { __index = genv })
+    return secureenv
+"##;
+
+fn secure_env_table(
+    state: &mut LuaState,
+) -> LuaResult<rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>> {
+    match registry_get(state, "__secureenv") {
+        Val::Table(table_ref) => Ok(table_ref),
+        _ => Err(runtime_error("secure environment not initialized")),
+    }
+}
+
+/// Create the secure environment as a shallow copy of `_G` with fallback.
 ///
-/// In the mlua path, `create_secure_environment` copies `_G` into a `secureenv`
-/// table with `__index = _G` fallback so `Blizzard_EnvironmentCleanup` can nil
-/// APIs from `_G` without affecting secure addons.
-///
-/// TODO: implement once rilua exposes `setfenv` / environment APIs and the
-/// taint system is wired. For now this is a no-op; all code runs in the single
-/// global env.
-pub fn create_secure_environment(_lua: &mut rilua::Lua) -> LuaResult<()> {
-    // TODO: clone globals table into secureenv, store in registry as
-    // "__secureenv", set __index = globals metatable fallback.
+/// This preserves secure APIs when `Blizzard_EnvironmentCleanup` nils them
+/// from `_G`, while still seeing globals registered later through the
+/// metatable `__index` fallback.
+pub fn create_secure_environment(lua: &mut rilua::Lua) -> LuaResult<()> {
+    if matches!(LuaApiMut::get_global_val(lua, "__secureenv"), Val::Table(_)) {
+        return Ok(());
+    }
+
+    let chunk = LuaApiMut::load(lua, CREATE_SECURE_ENV_LUA)?;
+    let secureenv = lua
+        .call_function(&chunk, &[])?
+        .into_iter()
+        .next()
+        .ok_or_else(|| runtime_error("create_secure_environment: missing return value"))?;
+    let Val::Table(_) = secureenv else {
+        return Err(runtime_error(
+            "create_secure_environment: expected secureenv table",
+        ));
+    };
+
+    {
+        let state = lua.state_mut();
+        registry_set(state, "__secureenv", secureenv);
+    }
+    LuaApiMut::set_global_val(lua, "__secureenv", secureenv)?;
     Ok(())
 }
 
-/// Apply the secure environment to a compiled function (rilua stub).
+/// Apply the secure environment to a compiled function.
 ///
-/// In the mlua path, `apply_secure_env` calls `setfenv(func, secureenv)` so
-/// `UseSecureEnvironment` addon code runs in the isolated secure table.
-///
-/// TODO: implement via rilua's upvalue/env API once available.
-pub fn apply_secure_env_rilua(_lua: &mut rilua::Lua, _func: &rilua::Function) -> LuaResult<()> {
-    // TODO: call rilua equivalent of setfenv(func, secureenv).
-    Ok(())
+/// Secure addons execute with `secureenv` as their function environment,
+/// matching the old mlua path and WoW's `setfenv(func, secureenv)` behavior.
+pub fn apply_secure_env_rilua(lua: &mut rilua::Lua, func: &rilua::Function) -> LuaResult<()> {
+    apply_secure_env_state(lua.state_mut(), func)
 }
 
-pub fn apply_secure_env_state(_state: &mut LuaState, _func: &rilua::Function) -> LuaResult<()> {
-    Ok(())
+pub fn apply_secure_env_state(state: &mut LuaState, func: &rilua::Function) -> LuaResult<()> {
+    let secureenv = secure_env_table(state)?;
+    let closure = state
+        .gc
+        .closures
+        .get_mut(func.gc_ref())
+        .ok_or_else(|| runtime_error("'setfenv' cannot change environment of given object"))?;
+
+    match closure {
+        rilua::vm::closure::Closure::Lua(lua_cl) => {
+            lua_cl.env = secureenv;
+            Ok(())
+        }
+        rilua::vm::closure::Closure::Rust(_) => Err(runtime_error(
+            "'setfenv' cannot change environment of given object",
+        )),
+    }
 }
 
-/// Set a key in both the global table and secureenv (rilua stub).
+/// Set a key in both the global table and secureenv.
 ///
-/// TODO: once `create_secure_environment` is implemented, also write to the
-/// secureenv table stored in the registry.
+/// Used for names that must stay visible in secure code even after cleanup
+/// strips them from `_G`.
 pub fn set_in_both_envs_rilua(lua: &mut rilua::Lua, key: &str, val: Val) -> LuaResult<()> {
-    use rilua::LuaApiMut;
     LuaApiMut::set_global_val(lua, key, val)?;
-    // TODO: also write to registry["__secureenv"][key].
+    let state = lua.state_mut();
+    if let Ok(secureenv_ref) = secure_env_table(state) {
+        let secureenv = rilua::Table::from_gc_ref(secureenv_ref);
+        let key_ref = state.gc.intern_string(key.as_bytes());
+        secureenv.raw_set(state, Val::Str(key_ref), val)?;
+    }
     Ok(())
 }
 

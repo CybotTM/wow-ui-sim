@@ -17,6 +17,12 @@ pub struct TocFile {
     pub metadata: HashMap<String, String>,
     /// Files to load in order (relative paths)
     pub files: Vec<PathBuf>,
+    /// Optional per-file environment override from inline annotations.
+    ///
+    /// `Some(true)` means `[LoadIntoEnvironment secure]`, `Some(false)` means
+    /// `[LoadIntoEnvironment global]`, and `None` means inherit the addon's
+    /// default environment.
+    pub file_env_overrides: Vec<Option<bool>>,
 }
 
 /// Strip inline annotations like `[AllowLoadEnvironment Global]` from a TOC line.
@@ -99,8 +105,23 @@ fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
     metadata.insert(key.to_string(), replace_template_vars(value));
 }
 
+fn parse_load_into_environment(line: &str) -> Option<bool> {
+    let lower = line.to_ascii_lowercase();
+    if lower.contains("[loadintoenvironment secure]") {
+        Some(true)
+    } else if lower.contains("[loadintoenvironment global]") {
+        Some(false)
+    } else {
+        None
+    }
+}
+
 /// Process a non-metadata, non-comment TOC line as a file path entry.
-fn push_file_entry(files: &mut Vec<PathBuf>, line: &str) {
+fn push_file_entry(
+    files: &mut Vec<PathBuf>,
+    file_env_overrides: &mut Vec<Option<bool>>,
+    line: &str,
+) {
     if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
         return;
     }
@@ -113,6 +134,7 @@ fn push_file_entry(files: &mut Vec<PathBuf>, line: &str) {
     let file_path = strip_annotations(&line).replace('\\', "/");
     if !file_path.is_empty() {
         files.push(PathBuf::from(file_path));
+        file_env_overrides.push(parse_load_into_environment(&line));
     }
 }
 
@@ -128,6 +150,7 @@ impl TocFile {
     pub fn parse(addon_dir: &Path, contents: &str) -> Self {
         let mut metadata = HashMap::new();
         let mut files = Vec::new();
+        let mut file_env_overrides = Vec::new();
 
         for line in contents.lines() {
             let line = line.trim();
@@ -141,7 +164,7 @@ impl TocFile {
             if line.starts_with('#') {
                 continue;
             }
-            push_file_entry(&mut files, line);
+            push_file_entry(&mut files, &mut file_env_overrides, line);
         }
 
         TocFile {
@@ -149,6 +172,7 @@ impl TocFile {
             name: resolve_addon_name(&metadata, addon_dir),
             metadata,
             files,
+            file_env_overrides,
         }
     }
 
@@ -217,6 +241,11 @@ impl TocFile {
             .get("UseSecureEnvironment")
             .map(|v| v == "1")
             .unwrap_or(false)
+    }
+
+    /// Get the per-file environment override for a TOC entry.
+    pub fn file_use_secure_env(&self, index: usize) -> Option<bool> {
+        self.file_env_overrides.get(index).copied().flatten()
     }
 
     /// Check if addon is load-on-demand.
@@ -504,6 +533,28 @@ Debug.lua [AllowLoadEnvironment Global, SomeFlag]
         assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
         assert_eq!(toc.files[1], PathBuf::from("Dump.lua"));
         assert_eq!(toc.files[2], PathBuf::from("Debug.lua"));
+        assert_eq!(toc.file_use_secure_env(0), None);
+        assert_eq!(toc.file_use_secure_env(1), None);
+        assert_eq!(toc.file_use_secure_env(2), None);
+    }
+
+    #[test]
+    fn test_parse_load_into_environment_annotations() {
+        let contents = r#"
+## Title: TestAddon
+Core.lua
+Restricted.lua [LoadIntoEnvironment secure]
+Public.lua [LoadIntoEnvironment global]
+"#;
+        let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+        assert_eq!(toc.files.len(), 3);
+        assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
+        assert_eq!(toc.files[1], PathBuf::from("Restricted.lua"));
+        assert_eq!(toc.files[2], PathBuf::from("Public.lua"));
+        assert_eq!(toc.file_use_secure_env(0), None);
+        assert_eq!(toc.file_use_secure_env(1), Some(true));
+        assert_eq!(toc.file_use_secure_env(2), Some(false));
     }
 
     #[test]

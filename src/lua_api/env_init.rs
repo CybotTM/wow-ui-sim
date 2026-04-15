@@ -94,7 +94,13 @@ end
 
 if GetFrameMetatable == nil then
   function GetFrameMetatable(frame)
-    return getmetatable(frame)
+    if frame == nil then
+      if CreateFrame == nil then
+        return nil
+      end
+      frame = CreateFrame("Frame")
+    end
+    return frame and getmetatable(frame) or nil
   end
 end
 
@@ -1348,12 +1354,12 @@ fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
-fn init_shared_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+pub(super) fn init_shared_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(SHARED_BOOTSTRAP_LUA)?;
     Ok(())
 }
 
-fn init_runtime_surface_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
+pub(super) fn init_runtime_surface_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(RUNTIME_SURFACE_BOOTSTRAP_LUA)?;
     Ok(())
 }
@@ -1411,5 +1417,45 @@ fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     rilua_text_attribute_event::register_all(state, frame_mt_ref)?;
     rilua_button_anchor_hierarchy::register_all(state, frame_mt_ref)?;
     rilua_widgets::register_all(state, frame_mt_ref)?;
+
+    // Replace the self-referencing `__index` with a shallow clone that omits
+    // metamethod keys. Blizzard's restricted code does
+    // `CopyTable(GetFrameMetatable().__index)` (RestrictedExecution.lua), which
+    // would infinitely recurse if `__index` pointed back at the metatable
+    // itself. The clone captures the methods registered above and stays
+    // stable for the lifetime of the VM (method registration only happens
+    // here at init).
+    let frame_index = build_frame_index_table(state, frame_mt_ref);
+    table_set(state, frame_mt, "__index", Val::Table(frame_index));
     Ok(())
+}
+
+/// Build a shallow, non-cyclic clone of the frame metatable's method entries.
+///
+/// Skips keys that start with `__` (metamethods) so the resulting table only
+/// exposes frame methods — matching what Blizzard's restricted loader expects
+/// from `GetFrameMetatable().__index`.
+fn build_frame_index_table(
+    state: &mut rilua::vm::state::LuaState,
+    frame_mt_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> rilua::vm::gc::arena::GcRef<rilua::vm::table::Table> {
+    let new_ref = state.gc.alloc_table(rilua::vm::table::Table::new());
+    let entries = state
+        .gc
+        .tables
+        .get(frame_mt_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+    for (key, value) in entries {
+        if let Val::Str(str_ref) = key
+            && let Some(name) = state.gc.string_arena.get(str_ref)
+            && name.data().starts_with(b"__")
+        {
+            continue;
+        }
+        if let Some(t) = state.gc.tables.get_mut(new_ref) {
+            let _ = t.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+    new_ref
 }

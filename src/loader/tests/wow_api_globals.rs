@@ -244,6 +244,23 @@ fn test_create_frame_exposes_core_event_methods() {
 }
 
 #[test]
+fn test_get_frame_metatable_without_instance_returns_shared_metatable() {
+    let env = WowLuaEnv::new().unwrap();
+    let (mt_ty, mt_index_ty, get_object_type_ty, set_forbidden_ty): (String, String, String, String) = env
+        .eval(
+            r#"
+            local mt = GetFrameMetatable()
+            return type(mt), type(mt and mt.__index), type(mt and mt.GetObjectType), type(mt and mt.SetForbidden)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(mt_ty, "table");
+    assert_eq!(mt_index_ty, "table");
+    assert_eq!(get_object_type_ty, "function");
+    assert_eq!(set_forbidden_ty, "function");
+}
+
+#[test]
 fn test_create_texture_exposes_core_visual_methods() {
     let env = WowLuaEnv::new().unwrap();
     let (

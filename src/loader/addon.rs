@@ -90,6 +90,13 @@ pub fn load_addon_internal(
     let addon_name = result.name.clone();
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);
+    if folder_name == "Blizzard_EnvironmentCleanup"
+        && let Err(e) = env.restore_post_cleanup_globals()
+    {
+        result.warnings.push(format!(
+            "Failed to restore post-cleanup globals for {folder_name}: {e}"
+        ));
+    }
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     let mut state = env.state().borrow_mut();
     if let Some(addon) = state
@@ -187,9 +194,16 @@ fn load_addon_files(
 ) {
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
 
-    for (file_rel, file) in toc.files.iter().zip(toc.file_paths()) {
+    for (index, (file_rel, file)) in toc.files.iter().zip(toc.file_paths()).enumerate() {
         let resolved_file = resolve_addon_file_path(&overlay_dir, file_rel, file);
-        load_addon_file(env, ctx, result, &resolved_file);
+        let file_ctx = AddonContext {
+            name: ctx.name,
+            table: ctx.table,
+            addon_root: ctx.addon_root,
+            use_secure_env: toc.file_use_secure_env(index).unwrap_or(ctx.use_secure_env),
+            taint: ctx.taint,
+        };
+        load_addon_file(env, &file_ctx, result, &resolved_file);
     }
 }
 

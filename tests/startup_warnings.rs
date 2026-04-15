@@ -204,6 +204,59 @@ fn fire_events_and_timers(env: &WowLuaEnv) {
     let _ = env.process_timers();
 }
 
+#[test]
+fn test_restricted_addon_environment_exposes_execution_surface() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+        let mut restricted_result = None;
+        for (name, toc_path) in addons {
+            let result = load_addon(&env.loader_env(), &toc_path)
+                .unwrap_or_else(|error| panic!("{name} should load before restricted env: {error}"));
+            if name == "Blizzard_RestrictedAddOnEnvironment" {
+                restricted_result = Some(result);
+                break;
+            }
+        }
+        let result = restricted_result.expect("Blizzard_RestrictedAddOnEnvironment should be in addon order");
+
+        let warnings = result.warnings.join("\n");
+        assert!(
+            !warnings.contains("RestrictedExecution.lua"),
+            "RestrictedExecution.lua should load cleanly:\n{warnings}"
+        );
+        assert!(
+            !warnings.contains("SecureHoverDriver.lua"),
+            "SecureHoverDriver.lua should load cleanly:\n{warnings}"
+        );
+
+        let (
+            get_frame_mt_ty,
+            get_frame_mt_index_ty,
+            call_fn_ty,
+            propagate_fn_ty,
+        ): (String, String, String, String) = env
+            .eval(
+                r#"
+                local frameMt = GetFrameMetatable()
+                return type(frameMt),
+                    type(frameMt and frameMt.__index),
+                    type(CallRestrictedClosure),
+                    type(PropagateForbiddenToReferencedFrames)
+                "#,
+            )
+            .expect("restricted surface inspection should be callable");
+
+        assert_eq!(get_frame_mt_ty, "table");
+        assert_eq!(get_frame_mt_index_ty, "table");
+        assert_eq!(call_fn_ty, "function");
+        assert_eq!(propagate_fn_ty, "function");
+    }
+}
+
 /// Verify that template mixin inheritance is properly applied.
 ///
 /// ObjectiveTrackerUIWidgetContainer inherits UIWidgetContainerTemplate,
