@@ -43,42 +43,64 @@ pub struct NineSliceAtlasInfo {
 /// this is a nine-slice kit. Returns `None` if any required piece is missing.
 pub fn get_nine_slice_atlas_info(name: &str) -> Option<NineSliceAtlasInfo> {
     let kit = name.to_lowercase();
-    let probe = format!("{kit}-nineslice-cornertopleft");
-    ATLAS_DB.get(&probe as &str)?;
-
-    let piece = |key: &str| -> Option<NineSlicePiece> {
-        let lookup = paired_2x_variant(key).or_else(|| ATLAS_DB.get(key))?;
-        let from_2x = ATLAS_DB.get(key).is_none();
-        let (width, height) = if from_2x {
-            (
-                (lookup.width as f32 / 2.0).round() as u32,
-                (lookup.height as f32 / 2.0).round() as u32,
-            )
-        } else {
-            (lookup.width, lookup.height)
-        };
-        Some(NineSlicePiece {
-            file: lookup.file,
-            left: lookup.left_tex_coord,
-            right: lookup.right_tex_coord,
-            top: lookup.top_tex_coord,
-            bottom: lookup.bottom_tex_coord,
-            width,
-            height,
-        })
-    };
+    ensure_nine_slice_kit_exists(&kit)?;
 
     Some(NineSliceAtlasInfo {
-        corner_tl: piece(&format!("{kit}-nineslice-cornertopleft"))?,
-        corner_tr: piece(&format!("{kit}-nineslice-cornertopright"))?,
-        corner_bl: piece(&format!("{kit}-nineslice-cornerbottomleft"))?,
-        corner_br: piece(&format!("{kit}-nineslice-cornerbottomright"))?,
-        edge_top: piece(&format!("_{kit}-nineslice-edgetop"))?,
-        edge_bottom: piece(&format!("_{kit}-nineslice-edgebottom"))?,
-        edge_left: piece(&format!("!{kit}-nineslice-edgeleft"))?,
-        edge_right: piece(&format!("!{kit}-nineslice-edgeright"))?,
-        center: piece(&format!("{kit}-nineslice-center")),
+        corner_tl: nine_slice_piece(&format!("{kit}-nineslice-cornertopleft"))?,
+        corner_tr: nine_slice_piece(&format!("{kit}-nineslice-cornertopright"))?,
+        corner_bl: nine_slice_piece(&format!("{kit}-nineslice-cornerbottomleft"))?,
+        corner_br: nine_slice_piece(&format!("{kit}-nineslice-cornerbottomright"))?,
+        edge_top: nine_slice_piece(&format!("_{kit}-nineslice-edgetop"))?,
+        edge_bottom: nine_slice_piece(&format!("_{kit}-nineslice-edgebottom"))?,
+        edge_left: nine_slice_piece(&format!("!{kit}-nineslice-edgeleft"))?,
+        edge_right: nine_slice_piece(&format!("!{kit}-nineslice-edgeright"))?,
+        center: nine_slice_piece(&format!("{kit}-nineslice-center")),
     })
+}
+
+fn ensure_nine_slice_kit_exists(kit: &str) -> Option<()> {
+    let probe = format!("{kit}-nineslice-cornertopleft");
+    nine_slice_piece(&probe).map(|_| ())
+}
+
+fn nine_slice_piece(key: &str) -> Option<NineSlicePiece> {
+    let (lookup, from_2x) = resolve_nine_slice_lookup(key)?;
+    let (width, height) = logical_nine_slice_piece_size(lookup, from_2x);
+
+    Some(NineSlicePiece {
+        file: lookup.file,
+        left: lookup.left_tex_coord,
+        right: lookup.right_tex_coord,
+        top: lookup.top_tex_coord,
+        bottom: lookup.bottom_tex_coord,
+        width,
+        height,
+    })
+}
+
+fn resolve_nine_slice_lookup(key: &str) -> Option<(&'static AtlasInfo, bool)> {
+    for candidate in nine_slice_key_candidates(key) {
+        let base_lookup = ATLAS_DB.get(candidate.as_str());
+        if let Some(lookup) = paired_2x_variant(candidate.as_str()).or(base_lookup) {
+            return Some((lookup, base_lookup.is_none()));
+        }
+    }
+    None
+}
+
+fn nine_slice_key_candidates(key: &str) -> [String; 2] {
+    [key.to_string(), key.replacen("-nineslice", "", 1)]
+}
+
+fn logical_nine_slice_piece_size(lookup: &AtlasInfo, from_2x: bool) -> (u32, u32) {
+    if from_2x {
+        (
+            (lookup.width as f32 / 2.0).round() as u32,
+            (lookup.height as f32 / 2.0).round() as u32,
+        )
+    } else {
+        (lookup.width, lookup.height)
+    }
 }
 
 /// Common square sizes used in WoW's size-suffixed atlas entries.
@@ -192,16 +214,19 @@ fn try_spelling_corrections(lower: &str) -> Option<AtlasLookup> {
 
 #[cfg(test)]
 mod tests {
-    use super::{get_atlas_info, get_render_atlas_info};
+    use super::{
+        ATLAS_DB, get_atlas_info, get_render_atlas_info, logical_nine_slice_piece_size,
+        nine_slice_piece,
+    };
 
     #[test]
     fn nine_slice_uses_2x_fallback_with_logical_sizes() {
         let ns_info = super::get_nine_slice_atlas_info("ui-frame-metal")
             .expect("metal nineslice should exist from 2x atlas fallback");
-        let corner = super::ATLAS_DB
+        let corner = ATLAS_DB
             .get("ui-frame-metal-cornertopleft-2x")
             .expect("metal corner +2x entry should exist");
-        let edge_top = super::ATLAS_DB
+        let edge_top = ATLAS_DB
             .get("_ui-frame-metal-edgetop-2x")
             .expect("metal edge top +2x entry should exist");
 
@@ -217,6 +242,20 @@ mod tests {
             ns_info.edge_top.height,
             (edge_top.height as f32 / 2.0).round() as u32
         );
+    }
+
+    #[test]
+    fn nine_slice_piece_uses_2x_dimensions_when_base_piece_is_missing() {
+        let corner = ATLAS_DB
+            .get("ui-frame-metal-cornertopleft-2x")
+            .expect("metal corner +2x entry should exist");
+
+        let piece = nine_slice_piece("ui-frame-metal-nineslice-cornertopleft")
+            .expect("metal corner should resolve through paired 2x fallback");
+
+        assert_eq!(piece.file, corner.file);
+        assert_eq!(piece.width, logical_nine_slice_piece_size(corner, true).0);
+        assert_eq!(piece.height, logical_nine_slice_piece_size(corner, true).1);
     }
 
     #[test]
