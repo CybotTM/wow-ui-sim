@@ -189,6 +189,24 @@ if GetActionInfo == nil then
   end
 end
 
+-- Network-stats: no real socket in the sim, so bandwidth and latency are 0.
+-- Returns four values so `local a, b, c, d = GetNetStats()` works for the
+-- latency comparisons in Blizzard_MicroMenu and friends.
+if GetNetStats == nil then
+  function GetNetStats()
+    return 0, 0, 0, 0
+  end
+end
+
+-- Store UI is never shown in the sim, so the "is it visible" probe
+-- reports false. Used by MainMenuBarMicroButtons to decide whether the
+-- Store micro-button should render as pushed.
+if StoreFrame_IsShown == nil then
+  function StoreFrame_IsShown()
+    return false
+  end
+end
+
 if LE_TOKEN_REDEEM_TYPE_GAME_TIME == nil then
   LE_TOKEN_REDEEM_TYPE_GAME_TIME = 1
 end

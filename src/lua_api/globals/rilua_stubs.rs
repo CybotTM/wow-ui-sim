@@ -804,6 +804,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_Item
     ("C_Item", "IsItemTransmogrifiable", stub_false),
     // C_LFGInfo
+    ("C_LFGInfo", "CanPlayerUsePremadeGroup", stub_false),
     ("C_LFGInfo", "IsLFGModeActiveForCategory", stub_false),
     // C_Map
     ("C_Map", "IsMapValidForNavigation", stub_false),
@@ -813,6 +814,9 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_PartyInfo
     ("C_PartyInfo", "IsPartyFull", stub_false),
     ("C_PartyInfo", "IsPartyInJailersTower", stub_false),
+    // C_PhotoSharing — in sim we never upload/authorize, so both are false
+    ("C_PhotoSharing", "IsAuthorized", stub_false),
+    ("C_PhotoSharing", "IsEnabled", stub_false),
     // C_PlayerInfo
     ("C_PlayerInfo", "IsPlayerEligibleForNPE", stub_false),
     ("C_PlayerInfo", "IsPlayerNPERestricted", stub_false),
