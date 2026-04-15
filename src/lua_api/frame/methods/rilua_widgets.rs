@@ -85,6 +85,22 @@ fn set_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `GetDrawLayer()` — returns the draw layer name and sub-level.
+fn get_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let (layer_name, sub_level) = sim
+        .widgets
+        .get(id)
+        .map(|f| (f.draw_layer.as_str(), f.draw_sub_layer))
+        .unwrap_or(("ARTWORK", 0));
+    drop(sim);
+    let s = create_string(state, layer_name);
+    state.push(s);
+    state.push(Val::Num(sub_level as f64));
+    Ok(2)
+}
+
 fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(atlas_name) = opt_string(state, 2) else {
@@ -2633,6 +2649,7 @@ fn tooltip_add_fonts_strings(state: &mut LuaState) -> LuaResult<u32> {
 /// passing its `GcRef<Table>` as `metatable`.
 pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, metatable, "SetDrawLayer", set_draw_layer)?;
+    table_set_rust_fn(state, metatable, "GetDrawLayer", get_draw_layer)?;
     table_set_rust_fn(
         state,
         metatable,

@@ -1071,6 +1071,18 @@ end
 
 local __cvars = rawget(_G, "__wow_cvars") or {}
 rawset(_G, "__wow_cvars", __cvars)
+-- Pre-seed CVars that Blizzard OnLoad code reads before any addon has
+-- a chance to SetCVar. Each default matches the value WoW ships with.
+local __cvar_defaults = {
+  timeMgrAlarmTime = "0",
+  timeMgrUseMilitaryTime = "0",
+  timeMgrUseLocalTime = "0",
+  showTimestamps = "none",
+  spellActivationOverlayOpacity = "1.0",
+}
+for k, v in pairs(__cvar_defaults) do
+  if __cvars[k] == nil then __cvars[k] = v end
+end
 
 C_CVar = C_CVar or __wow_namespace({
   GetCVar = function(name)
