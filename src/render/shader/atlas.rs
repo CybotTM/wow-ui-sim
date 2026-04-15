@@ -299,22 +299,11 @@ impl GpuTextureAtlas {
         if !self.has_bc_support {
             return None;
         }
-        if let Some(entry) = self.bc_texture_map.get(path) {
+        if let Some(entry) = self.cached_bc_entry(path) {
             return Some(*entry);
         }
-
-        let atlas = match format {
-            BcFormat::Bc1 => &mut self.bc1_atlas,
-            BcFormat::Bc3 => &mut self.bc3_atlas,
-        };
-        if atlas.is_full() {
-            return None;
-        }
-
-        let (grid_x, grid_y) = atlas.allocate_slot()?;
-        write_bc_slot(queue, atlas, grid_x, grid_y, width, height, bc_data, format);
-        let entry = build_bc_entry(atlas, format, grid_x, grid_y, width, height);
-
+        let atlas = self.bc_atlas_mut(format);
+        let entry = upload_new_bc_texture(queue, atlas, width, height, bc_data, format)?;
         self.bc_texture_map.insert(path.to_string(), entry);
         Some(entry)
     }
@@ -359,6 +348,17 @@ impl GpuTextureAtlas {
             }
         }
         scaled
+    }
+
+    fn cached_bc_entry(&self, path: &str) -> Option<&BcTextureEntry> {
+        self.bc_texture_map.get(path)
+    }
+
+    fn bc_atlas_mut(&mut self, format: BcFormat) -> &mut BcAtlasTier {
+        match format {
+            BcFormat::Bc1 => &mut self.bc1_atlas,
+            BcFormat::Bc3 => &mut self.bc3_atlas,
+        }
     }
 
     /// Clear the atlas (for reload).
@@ -427,6 +427,19 @@ impl GpuTextureAtlas {
 
 fn create_tier_atlases(device: &wgpu::Device) -> [TierAtlas; NUM_TIERS] {
     std::array::from_fn(|i| TierAtlas::new(device, TIER_SIZES[i], i))
+}
+
+fn upload_new_bc_texture(
+    queue: &wgpu::Queue,
+    atlas: &mut BcAtlasTier,
+    width: u32,
+    height: u32,
+    bc_data: &[u8],
+    format: BcFormat,
+) -> Option<BcTextureEntry> {
+    let (grid_x, grid_y) = atlas.allocate_slot()?;
+    write_bc_slot(queue, atlas, grid_x, grid_y, width, height, bc_data, format);
+    Some(build_bc_entry(atlas, format, grid_x, grid_y, width, height))
 }
 
 fn create_atlas_backing(device: &wgpu::Device, tiers: &[TierAtlas; NUM_TIERS]) -> AtlasBacking {
@@ -666,7 +679,7 @@ impl std::fmt::Debug for GpuTextureAtlas {
 mod tests {
     use super::*;
 
-    fn create_test_device() -> wgpu::Device {
+    fn create_test_device() -> (wgpu::Device, wgpu::Queue) {
         let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::LowPower,
@@ -674,15 +687,32 @@ mod tests {
             force_fallback_adapter: false,
         }))
         .expect("test adapter should exist");
-        let (device, _queue) =
-            pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
-                .expect("test device should be created");
-        device
+        pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
+            .expect("test device should be created")
+    }
+
+    fn create_test_bc_atlas(device: &wgpu::Device) -> BcAtlasTier {
+        let had_bc = set_bc_supported_for_tests(true);
+        let (mut bc1_atlas, _bc3_atlas, _has_bc_support) = init_bc_atlases(device);
+        set_bc_supported_for_tests(had_bc);
+        bc1_atlas.reset();
+        bc1_atlas
+    }
+
+    #[test]
+    fn upload_new_bc_texture_returns_none_when_atlas_is_full() {
+        let (device, queue) = create_test_device();
+        let mut atlas = create_test_bc_atlas(&device);
+        while atlas.allocate_slot().is_some() {}
+
+        let entry = upload_new_bc_texture(&queue, &mut atlas, 256, 256, &[], BcFormat::Bc1);
+
+        assert!(entry.is_none(), "full atlas should reject a new BC upload");
     }
 
     #[test]
     fn create_tier_atlases_uses_configured_sizes_and_empty_slots() {
-        let device = create_test_device();
+        let (device, _queue) = create_test_device();
         let tiers = create_tier_atlases(&device);
 
         for (index, tier) in tiers.iter().enumerate() {
@@ -690,5 +720,31 @@ mod tests {
             assert_eq!(tier.grid_size, ATLAS_SIZE / TIER_SIZES[index]);
             assert_eq!(tier.next_slot, 0);
         }
+    }
+
+    #[test]
+    fn cached_bc_entry_returns_copied_entry() {
+        let (device, _queue) = create_test_device();
+        let mut atlas = GpuTextureAtlas::new(&device);
+        let expected = BcTextureEntry {
+            format: BcFormat::Bc1,
+            grid_x: 1,
+            grid_y: 2,
+            original_width: 256,
+            original_height: 256,
+            uv_x: 0.0,
+            uv_y: 0.0,
+            uv_width: 0.25,
+            uv_height: 0.25,
+        };
+        atlas.bc_texture_map.insert("foo".to_string(), expected);
+
+        assert_eq!(
+            atlas
+                .cached_bc_entry("foo")
+                .copied()
+                .map(|entry| entry.grid_x),
+            Some(1)
+        );
     }
 }
