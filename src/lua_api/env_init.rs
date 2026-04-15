@@ -1638,7 +1638,44 @@ fn init_registry_tables(lua: &mut rilua::Lua, state: &Rc<RefCell<SimState>>) -> 
     let _ = registry_table_or_create(lua_state, "__on_update_scripts");
     let _ = registry_table_or_create(lua_state, "__on_post_update_scripts");
     let _ = registry_table_or_create(lua_state, "__rilua_frame_fields");
+    // Register the error-reporting callback that loader/helpers.rs uses
+    // in script handler wrappers. Without this, every chained handler
+    // that hits a pcall error crashes with "attempt to call upvalue
+    // '__report' (a nil value)" because the closure captures
+    // `debug.getregistry()["__report_script_error"]` at define time.
+    register_script_error_reporter(lua_state);
     super::on_update::register(lua_state, state)
+}
+
+fn register_script_error_reporter(state: &mut rilua::vm::state::LuaState) {
+    use crate::lua_api::rilua_methods::registry_set;
+    use rilua::vm::closure::{Closure, RustClosure};
+
+    fn report_script_error(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+        let msg = match state.stack_get(state.base) {
+            rilua::Val::Str(s) => state
+                .gc
+                .string_arena
+                .get(s)
+                .map(|ls| String::from_utf8_lossy(ls.data()).to_string())
+                .unwrap_or_default(),
+            other => format!("{other:?}"),
+        };
+        eprintln!("Lua error: {msg}");
+        crate::lua_api::rilua_script_helpers::call_error_handler_state(state, &msg);
+        Ok(0)
+    }
+
+    let closure = Closure::Rust(RustClosure::new(
+        report_script_error,
+        "__report_script_error",
+    ));
+    let closure_ref = state.gc.alloc_closure(closure);
+    registry_set(
+        state,
+        "__report_script_error",
+        rilua::Val::Function(closure_ref),
+    );
 }
 
 /// Enable Elune taint tracking and wrap loadstring as secure.
