@@ -5,11 +5,13 @@ use std::collections::HashSet;
 use super::state::SimState;
 #[path = "state_render_buckets.rs"]
 mod state_render_buckets;
+#[path = "state_render_repairs.rs"]
+mod state_render_repairs;
 use state_render_buckets::{
-    collect_same_strata_subtree_ids, dfs_emit, effective_frame_level, is_region,
-    is_strata_root_boundary, same_strata_subtree_segment_end, should_trace_strata_invalidations,
-    uses_parent_alpha_fallback,
+    dfs_emit, effective_frame_level, is_region, is_strata_root_boundary,
+    should_trace_strata_invalidations, uses_parent_alpha_fallback,
 };
+use state_render_repairs::{build_strata_bucket_repair_plan, splice_strata_bucket_repair};
 
 impl SimState {
     /// Initialize derived render state that must be propagated once after startup.
@@ -322,46 +324,13 @@ impl SimState {
         let Some(repair_root) = self.visible_same_strata_ancestor(shown_id) else {
             return false;
         };
-        let Some(root_frame) = self.widgets.get(repair_root) else {
+        let Some(repair_plan) = build_strata_bucket_repair_plan(self, repair_root) else {
             return false;
         };
-        let strata_idx = self.frame_bucket_strata(root_frame).as_index();
-
-        let mut subtree_ids = HashSet::new();
-        collect_same_strata_subtree_ids(repair_root, strata_idx, &self.widgets, &mut subtree_ids);
-
-        let visible_ids: HashSet<u64> = subtree_ids
-            .iter()
-            .copied()
-            .filter(|&id| {
-                self.widgets
-                    .get(id)
-                    .is_some_and(|frame| self.frame_render_alpha(frame) > 0.0)
-            })
-            .collect();
-        if !visible_ids.contains(&repair_root) {
-            return false;
-        }
-
-        let mut new_segment = Vec::new();
-        dfs_emit(
-            repair_root,
-            strata_idx,
-            &self.widgets,
-            &visible_ids,
-            &mut new_segment,
-        );
-
         let Some(buckets) = self.strata_buckets.as_mut() else {
             return false;
         };
-        let bucket = &mut buckets[strata_idx];
-        let Some(start) = bucket.iter().position(|&id| id == repair_root) else {
-            return false;
-        };
-        let end = same_strata_subtree_segment_end(bucket, start, &subtree_ids);
-        bucket.splice(start..end, new_segment);
-        true
+        splice_strata_bucket_repair(&mut buckets[repair_plan.strata_idx], repair_plan)
     }
 
     fn visible_same_strata_ancestor(&self, id: u64) -> Option<u64> {
@@ -559,11 +528,10 @@ impl SimState {
 
     /// Add `id` and its descendants to cache if they have OnUpdate and are ancestor-visible.
     fn add_on_update_descendants(&self, id: u64, cache: &mut Vec<u64>) {
-        if self.on_update_frames.contains(&id) && self.widgets.is_ancestor_visible(id) {
-            if !cache.contains(&id) {
-                cache.push(id);
-            }
-        }
+        let should_cache_id =
+            self.on_update_frames.contains(&id) && self.widgets.is_ancestor_visible(id);
+        let already_cached = cache.iter().any(|&cached_id| cached_id == id);
+        cache.extend((should_cache_id && !already_cached).then_some(id));
         let children: Vec<u64> = self
             .widgets
             .get(id)
