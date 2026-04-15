@@ -293,22 +293,9 @@ pub fn apply_secure_env_rilua(lua: &mut rilua::Lua, func: &rilua::Function) -> L
 }
 
 pub fn apply_secure_env_state(state: &mut LuaState, func: &rilua::Function) -> LuaResult<()> {
-    let secureenv = secure_env_table(state)?;
-    let closure = state
-        .gc
-        .closures
-        .get_mut(func.gc_ref())
-        .ok_or_else(|| runtime_error("'setfenv' cannot change environment of given object"))?;
-
-    match closure {
-        rilua::vm::closure::Closure::Lua(lua_cl) => {
-            lua_cl.env = secureenv;
-            Ok(())
-        }
-        rilua::vm::closure::Closure::Rust(_) => Err(runtime_error(
-            "'setfenv' cannot change environment of given object",
-        )),
-    }
+    let secureenv_ref = secure_env_table(state)?;
+    let secureenv = rilua::Table::from_gc_ref(secureenv_ref);
+    rilua::api::state_set_fenv(state, func, &secureenv)
 }
 
 /// Set a key in both the global table and secureenv.
