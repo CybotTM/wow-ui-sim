@@ -1245,6 +1245,28 @@ end
 -- Adventure journal: the sim has no adventure content.
 C_AdventureJournal = C_AdventureJournal or __wow_namespace()
 
+-- Store / shop public API: sim has no store.
+C_StorePublic = C_StorePublic or __wow_namespace()
+if rawget(C_StorePublic, "IsEnabled") == nil then
+  function C_StorePublic.IsEnabled() return false end
+end
+if rawget(C_StorePublic, "IsDisabledByParentalControls") == nil then
+  function C_StorePublic.IsDisabledByParentalControls() return false end
+end
+
+-- Additional LFG helpers.
+if GetLFGCategoryForID == nil then
+  function GetLFGCategoryForID() return 0 end
+end
+
+-- Battle.net friends count: sim has no BNet connection.
+if BNGetNumFriends == nil then
+  function BNGetNumFriends() return 0, 0 end
+end
+if BNGetNumFriendInvites == nil then
+  function BNGetNumFriendInvites() return 0 end
+end
+
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
 
