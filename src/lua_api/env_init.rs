@@ -496,8 +496,8 @@ C_LFGList = __wow_merge_namespace(C_LFGList, {
   GetApplications = function() return {} end,
   GetApplicationInfo = function() return nil end,
   GetAvailableRoles = function() return false, false, false end,
-  GetNumApplications = function() return 0 end,
-  GetNumApplicants = function() return 0 end,
+  GetNumApplications = function() return 0, 0 end,
+  GetNumApplicants = function() return 0, 0 end,
   GetPremadeGroupFinderStyle = function() return 0 end,
   GetActivityFullName = function() return "" end,
   GetActivityInfoTable = function() return nil end,
@@ -1190,15 +1190,35 @@ if rawget(C_PetBattles, "GetBattleState") == nil then
   function C_PetBattles.GetBattleState() return 0 end
 end
 
--- LFGList application counters: no active applications/listings in the
--- sim. `GetNumApplications` is destructured as (num, numActive), both
--- compared against 0 in LFGList:4121, so nil here crashes.
-C_LFGList = C_LFGList or __wow_namespace()
-if rawget(C_LFGList, "GetNumApplications") == nil then
-  function C_LFGList.GetNumApplications() return 0, 0 end
+-- Guild-info probes: sim has no guild, no locale variants, no ranks.
+-- Accurate "empty guild state" returns keep MainMenuBarMicroButtons
+-- and the guild UIs from crashing their OnLoad chains.
+C_GuildInfo = C_GuildInfo or __wow_namespace()
+if rawget(C_GuildInfo, "GetClubId") == nil then
+  function C_GuildInfo.GetClubId() return nil end
 end
-if rawget(C_LFGList, "GetNumApplicants") == nil then
-  function C_LFGList.GetNumApplicants() return 0 end
+if rawget(C_GuildInfo, "IsGuildOfficer") == nil then
+  function C_GuildInfo.IsGuildOfficer() return false end
+end
+if rawget(C_GuildInfo, "CanSpeakInGuildChat") == nil then
+  function C_GuildInfo.CanSpeakInGuildChat() return true end
+end
+if GetAvailableLocaleInfo == nil then
+  function GetAvailableLocaleInfo()
+    return {}
+  end
+end
+if GuildControlSetRank == nil then
+  function GuildControlSetRank(_rankIndex) end
+end
+if GuildControlGetRankName == nil then
+  function GuildControlGetRankName(_index) return "" end
+end
+if GuildControlGetNumRanks == nil then
+  function GuildControlGetNumRanks() return 0 end
+end
+if GuildControlGetRankFlags == nil then
+  function GuildControlGetRankFlags() return {} end
 end
 
 -- Housing: not simulated. The only surface accessed at load is
