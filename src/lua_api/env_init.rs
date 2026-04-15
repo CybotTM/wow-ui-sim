@@ -1177,6 +1177,30 @@ if rawget(C_GameRules, "GetGameModeGlueScreenName") == nil then
   function C_GameRules.GetGameModeGlueScreenName() return "CharacterSelect" end
 end
 
+-- Pet battles: not simulated. `GetNumPets` is compared numerically
+-- during PetBattleFrame OnLoad refresh, so returning nil crashes
+-- `petIndex > GetNumPets(owner)`. Zero is the accurate "no pets" answer.
+C_PetBattles = C_PetBattles or __wow_namespace()
+if rawget(C_PetBattles, "GetNumPets") == nil then
+  function C_PetBattles.GetNumPets(_owner) return 0 end
+end
+if rawget(C_PetBattles, "GetBattleState") == nil then
+  -- Enum.PetbattleState.PVEInvitationSent = 0 in Blizzard's enums; return
+  -- 0 as a safe "no active battle" sentinel.
+  function C_PetBattles.GetBattleState() return 0 end
+end
+
+-- LFGList application counters: no active applications/listings in the
+-- sim. `GetNumApplications` is destructured as (num, numActive), both
+-- compared against 0 in LFGList:4121, so nil here crashes.
+C_LFGList = C_LFGList or __wow_namespace()
+if rawget(C_LFGList, "GetNumApplications") == nil then
+  function C_LFGList.GetNumApplications() return 0, 0 end
+end
+if rawget(C_LFGList, "GetNumApplicants") == nil then
+  function C_LFGList.GetNumApplicants() return 0 end
+end
+
 -- Housing: not simulated. The only surface accessed at load is
 -- IsHousingServiceEnabled (MainMenuBarMicroButtons gates the housing
 -- micro-button on it).

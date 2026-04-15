@@ -633,9 +633,10 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_PetBattles", "GetAbilityInfoByID", stub_nil),
     ("C_PetBattles", "GetActivePet", stub_nil),
     ("C_PetBattles", "GetAllEffectiveAbilityIDs", stub_nil),
-    ("C_PetBattles", "GetBattleState", stub_nil),
+    // GetBattleState / GetNumPets intentionally omitted: zero-returning
+    // stubs live in env_init.rs so `petIndex > GetNumPets(...)` stays
+    // a number comparison and doesn't crash PetBattleFrame OnLoad.
     ("C_PetBattles", "GetMaxAbilityCharges", stub_nil),
-    ("C_PetBattles", "GetNumPets", stub_nil),
     ("C_PetBattles", "GetPetAbilityInfo", stub_nil),
     ("C_PetBattles", "GetPetAbilityList", stub_nil),
     ("C_PetBattles", "GetPetInfo", stub_nil),
