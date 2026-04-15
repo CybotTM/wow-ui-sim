@@ -16,7 +16,12 @@ struct LuaError {
 /// `saved_stdout` is the original stdout fd (redirected to stderr during loading).
 /// We restore it before printing JSON so only JSON goes to stdout.
 /// `exec_lua` is optional Lua code to execute after startup events.
-pub fn run_lua_errors(env: &WowLuaEnv, saved_stdout: Option<i32>, exec_lua: Option<&str>) {
+pub fn run_lua_errors(
+    env: &WowLuaEnv,
+    saved_stdout: Option<i32>,
+    exec_lua: Option<&str>,
+    exec_lua_secure: bool,
+) {
     // Suppress stderr during startup events (errors are collected in SimState)
     let saved_stderr = suppress_stderr();
 
@@ -24,10 +29,10 @@ pub fn run_lua_errors(env: &WowLuaEnv, saved_stdout: Option<i32>, exec_lua: Opti
 
     restore_stderr(saved_stderr);
 
-    if let Some(code) = exec_lua {
-        if let Err(e) = env.exec(code) {
-            eprintln!("[exec-lua] error: {e}");
-        }
+    if let Some(code) = exec_lua
+        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
+    {
+        eprintln!("[exec-lua] error: {e}");
     }
     // Restore stdout so println goes to real stdout (not stderr redirect)
     restore_stdout(saved_stdout);

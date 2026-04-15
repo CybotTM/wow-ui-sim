@@ -158,6 +158,44 @@ fn two_secure_chunks_share_one_secureenv() {
 }
 
 #[test]
+fn exec_maybe_secure_true_matches_exec_rilua_secure() {
+    // The --exec-lua-secure CLI flag routes exec-lua code through
+    // `exec_maybe_secure(code, true)`. Confirm that path is a pure
+    // pass-through to `exec_rilua_secure`: a write lands in secureenv,
+    // not in _G.
+    let env = env();
+
+    env.exec_maybe_secure(r#"execMaybeSecureProbe = "via-flag""#, true)
+        .unwrap();
+
+    let (g_probe_type, secureenv_value): (String, String) = env
+        .eval(
+            r#"
+            return type(rawget(_G, "execMaybeSecureProbe")),
+                   tostring(rawget(__secureenv, "execMaybeSecureProbe"))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(g_probe_type, "nil");
+    assert_eq!(secureenv_value, "via-flag");
+}
+
+#[test]
+fn exec_maybe_secure_false_matches_exec() {
+    // Without the flag, exec-lua routes through `exec_maybe_secure(code,
+    // false)`, which must behave like plain `exec` — writes land on _G.
+    let env = env();
+
+    env.exec_maybe_secure(r#"execMaybeSecureInsecure = "plain""#, false)
+        .unwrap();
+
+    let on_g: String = env
+        .eval(r#"return tostring(rawget(_G, "execMaybeSecureInsecure"))"#)
+        .unwrap();
+    assert_eq!(on_g, "plain");
+}
+
+#[test]
 fn shared_table_mutation_propagates_both_ways() {
     // The one legitimate cross-env write: mutating a table that both
     // envs already reference. Since shallow copy shares table refs,

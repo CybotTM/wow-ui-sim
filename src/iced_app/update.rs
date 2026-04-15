@@ -409,10 +409,14 @@ impl App {
     }
 
     fn run_pending_exec_lua(&mut self) {
-        if let Some(code) = self.pending_exec_lua.take() {
-            eprintln!("[exec-lua] Running: {}", code);
+        if let Some((code, secure)) = self.pending_exec_lua.take() {
+            eprintln!(
+                "[exec-lua{}] Running: {}",
+                if secure { "-secure" } else { "" },
+                code
+            );
             let env = self.env.borrow();
-            if let Err(e) = env.exec(&code) {
+            if let Err(e) = env.exec_maybe_secure(&code, secure) {
                 eprintln!("[exec-lua] Error: {}", e);
             }
             drop(env);

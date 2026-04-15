@@ -43,6 +43,17 @@ impl WowLuaEnv {
         Ok(())
     }
 
+    /// Dispatch between `exec` (default, runs under `_G`) and
+    /// `exec_rilua_secure` (runs under secureenv). Lets callers that
+    /// have a `secure: bool` toggle avoid an `if/else` at every use.
+    pub fn exec_maybe_secure(&self, code: &str, secure: bool) -> crate::Result<()> {
+        if secure {
+            Ok(self.exec_rilua_secure(code)?)
+        } else {
+            self.exec(code)
+        }
+    }
+
     /// Call a rilua function handle with arguments.
     pub fn call_rilua(
         &self,

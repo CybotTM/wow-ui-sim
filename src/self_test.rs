@@ -548,12 +548,13 @@ pub fn run_test(
     env: &WowLuaEnv,
     max_ticks: u32,
     exec_lua: Option<&str>,
+    exec_lua_secure: bool,
     saved_stdout: Option<i32>,
 ) {
-    if let Some(code) = exec_lua {
-        if let Err(e) = env.exec(code) {
-            eprintln!("[exec-lua] error: {e}");
-        }
+    if let Some(code) = exec_lua
+        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
+    {
+        eprintln!("[exec-lua] error: {e}");
     }
 
     override_debugprofilestop(env);

@@ -47,7 +47,7 @@ thread_local! {
     pub static INIT_TEXTURES: RefCell<Option<PathBuf>> = const { RefCell::new(None) };
     pub static INIT_DEBUG: RefCell<Option<DebugOptions>> = const { RefCell::new(None) };
     pub static INIT_SAVED_VARS: RefCell<Option<SavedVariablesManager>> = const { RefCell::new(None) };
-    pub static INIT_EXEC_LUA: RefCell<Option<String>> = const { RefCell::new(None) };
+    pub static INIT_EXEC_LUA: RefCell<Option<(String, bool)>> = const { RefCell::new(None) };
 }
 
 /// Fire the standard WoW startup events.
@@ -134,8 +134,9 @@ pub struct App {
     pub(crate) last_on_update_time: std::time::Instant,
     /// SavedVariables manager for persisting addon data on exit.
     pub(crate) saved_vars: Option<SavedVariablesManager>,
-    /// Lua code to execute after first frame (from --exec-lua).
-    pub(crate) pending_exec_lua: Option<String>,
+    /// Lua code to execute after first frame (from --exec-lua). Bool is
+    /// `true` when `--exec-lua-secure` was passed (run under secureenv).
+    pub(crate) pending_exec_lua: Option<(String, bool)>,
     /// Currently selected XP bar level label.
     pub(crate) selected_xp_level: String,
     /// Last time party health was ticked (random walk every 2 seconds).

@@ -75,8 +75,13 @@ fn load_test_framework(env: &WowLuaEnv) {
 }
 
 /// Run all .lua test files from `Interface/AddOns/<addon_name>/tests/`.
-pub fn run_addon_tests(env: &WowLuaEnv, addon_name: &str, exec_lua: Option<&str>) {
-    run_exec_lua(env, exec_lua);
+pub fn run_addon_tests(
+    env: &WowLuaEnv,
+    addon_name: &str,
+    exec_lua: Option<&str>,
+    exec_lua_secure: bool,
+) {
+    run_exec_lua(env, exec_lua, exec_lua_secure);
     load_test_framework(env);
     let (tests_dir, test_files) = load_test_files(addon_name);
     eprintln!(
@@ -96,11 +101,11 @@ pub fn run_addon_tests(env: &WowLuaEnv, addon_name: &str, exec_lua: Option<&str>
     print_summary_and_exit(total_passed, total_failed);
 }
 
-fn run_exec_lua(env: &WowLuaEnv, exec_lua: Option<&str>) {
-    if let Some(code) = exec_lua {
-        if let Err(e) = env.exec(code) {
-            eprintln!("[exec-lua] error: {e}");
-        }
+fn run_exec_lua(env: &WowLuaEnv, exec_lua: Option<&str>, exec_lua_secure: bool) {
+    if let Some(code) = exec_lua
+        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
+    {
+        eprintln!("[exec-lua] error: {e}");
     }
 }
 

@@ -43,6 +43,12 @@ struct Args {
     #[arg(long, value_name = "CODE")]
     exec_lua: Option<String>,
 
+    /// Run `--exec-lua` under secureenv (fenv retargeted via `mark_secure`).
+    /// Handy for inspecting/setting secure-scope globals from an ad-hoc
+    /// script without staging a TOC-annotated `.lua` file.
+    #[arg(long)]
+    exec_lua_secure: bool,
+
     /// Which top-level WoW screen to load.
     #[arg(long, value_enum, default_value_t = ScreenKind::Game, value_name = "SCREEN")]
     screen: ScreenKind,
@@ -157,6 +163,7 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
         font_system,
         delay: args.delay,
         exec_lua: resolve_exec_lua(&args.exec_lua),
+        exec_lua_secure: args.exec_lua_secure,
         saved_stdout,
         saved_vars,
         debug_borders: args.debug_borders,
@@ -314,6 +321,7 @@ struct CommandDispatch {
     font_system: Rc<RefCell<WowFontSystem>>,
     delay: Option<u64>,
     exec_lua: Option<String>,
+    exec_lua_secure: bool,
     saved_stdout: Option<i32>,
     saved_vars: Option<SavedVariablesManager>,
     debug_borders: bool,
@@ -341,6 +349,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 height,
                 dispatch.delay,
                 dispatch.exec_lua.as_deref(),
+                dispatch.exec_lua_secure,
             );
         }
         #[cfg(feature = "gui")]
@@ -362,6 +371,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 crop,
                 dispatch.delay,
                 dispatch.exec_lua.as_deref(),
+                dispatch.exec_lua_secure,
                 dump_tree,
             );
         }
@@ -370,6 +380,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 &dispatch.env,
                 dispatch.saved_stdout,
                 dispatch.exec_lua.as_deref(),
+                dispatch.exec_lua_secure,
             );
         }
         Some(Commands::SelfTest {
@@ -384,6 +395,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 &dispatch.env,
                 max_ticks,
                 dispatch.exec_lua.as_deref(),
+                dispatch.exec_lua_secure,
                 dispatch.saved_stdout,
             );
         }
@@ -393,6 +405,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 &dispatch.env,
                 &addon_name,
                 dispatch.exec_lua.as_deref(),
+                dispatch.exec_lua_secure,
             );
         }
         #[cfg(feature = "gui")]
@@ -415,7 +428,13 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 borders: dispatch.debug_borders || dispatch.debug_elements,
                 anchors: dispatch.debug_anchors || dispatch.debug_elements,
             };
-            wow_ui_sim::run_iced_ui(dispatch.env, debug, dispatch.saved_vars, dispatch.exec_lua)?;
+            wow_ui_sim::run_iced_ui(
+                dispatch.env,
+                debug,
+                dispatch.saved_vars,
+                dispatch.exec_lua,
+                dispatch.exec_lua_secure,
+            )?;
         }
         #[cfg(not(feature = "gui"))]
         None => {
@@ -437,10 +456,11 @@ fn run_dump_tree(
     height: u32,
     delay: Option<u64>,
     exec_lua: Option<&str>,
+    exec_lua_secure: bool,
 ) {
     settle_headless_startup(env);
     if let Some(code) = exec_lua
-        && let Err(e) = env.exec(code)
+        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
     {
         eprintln!("[exec-lua] error: {e}");
     }
@@ -540,6 +560,7 @@ fn run_screenshot(
     crop: Option<String>,
     delay: Option<u64>,
     exec_lua: Option<&str>,
+    exec_lua_secure: bool,
     dump_tree: Option<Option<String>>,
 ) {
     use wow_ui_sim::render::headless::render_to_image;
@@ -547,7 +568,7 @@ fn run_screenshot(
     env.set_screen_size(width as f32, height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     if let Some(code) = exec_lua
-        && let Err(e) = env.exec(code)
+        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
     {
         eprintln!("[exec-lua] error: {e}");
     }

@@ -171,6 +171,7 @@ pub fn run_iced_ui(
     debug: DebugOptions,
     saved_vars: Option<SavedVariablesManager>,
     exec_lua: Option<String>,
+    exec_lua_secure: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Prefer local WebP textures, fall back to full repo
     let textures_path = if PathBuf::from(LOCAL_TEXTURES_PATH).exists() {
@@ -179,7 +180,7 @@ pub fn run_iced_ui(
         PathBuf::from(FALLBACK_TEXTURES_PATH)
     };
     if let Some(code) = exec_lua {
-        app::INIT_EXEC_LUA.with(|cell| *cell.borrow_mut() = Some(code));
+        app::INIT_EXEC_LUA.with(|cell| *cell.borrow_mut() = Some((code, exec_lua_secure)));
     }
     run_iced_ui_with_textures(env, textures_path, debug, saved_vars)
 }
