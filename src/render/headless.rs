@@ -203,19 +203,48 @@ fn read_back_pixels(
 ) -> RgbaImage {
     let layout = read_back_buffer_layout(width, height);
     let output_buffer = create_read_back_buffer(device, &layout);
-
-    let mut encoder = encoder;
-    copy_render_texture_to_read_back_buffer(
-        &mut encoder,
+    queue_read_back_copy(
+        queue,
+        encoder,
         render_texture,
         &output_buffer,
         width,
         height,
         layout.bytes_per_row,
     );
+    read_back_image(device, &output_buffer, width, height, layout.bytes_per_row)
+}
+
+fn queue_read_back_copy(
+    queue: &wgpu::Queue,
+    encoder: wgpu::CommandEncoder,
+    render_texture: &wgpu::Texture,
+    output_buffer: &wgpu::Buffer,
+    width: u32,
+    height: u32,
+    bytes_per_row: u32,
+) {
+    let mut encoder = encoder;
+    copy_render_texture_to_read_back_buffer(
+        &mut encoder,
+        render_texture,
+        output_buffer,
+        width,
+        height,
+        bytes_per_row,
+    );
     queue.submit(std::iter::once(encoder.finish()));
-    let data = map_read_back_buffer(device, &output_buffer);
-    image_from_read_back_buffer(&data, width, height, layout.bytes_per_row)
+}
+
+fn read_back_image(
+    device: &wgpu::Device,
+    output_buffer: &wgpu::Buffer,
+    width: u32,
+    height: u32,
+    bytes_per_row: u32,
+) -> RgbaImage {
+    let data = map_read_back_buffer(device, output_buffer);
+    image_from_read_back_buffer(&data, width, height, bytes_per_row)
 }
 
 fn build_headless_primitive(
