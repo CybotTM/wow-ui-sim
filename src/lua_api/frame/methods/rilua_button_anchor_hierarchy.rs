@@ -37,6 +37,15 @@ fn opt_string(state: &LuaState, index: i32) -> Option<String> {
     }
 }
 
+fn bind_named_child_global(state: &mut LuaState, name: &str, child_id: u64) -> LuaResult<()> {
+    let child_ref = frame_ref(state, child_id)?;
+    let key = state.gc.intern_string(name.as_bytes());
+    if let Some(globals) = state.gc.tables.get_mut(state.global) {
+        let _ = globals.raw_set(Val::Str(key), child_ref, &state.gc.string_arena);
+    }
+    Ok(())
+}
+
 // ── Button font object methods ────────────────────────────────────────────────
 
 /// GetOrCreate the `__button_font_objects` registry table.
@@ -1171,8 +1180,7 @@ fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
     }
 
     if let Some(ref n) = name {
-        // TODO: set global n -> child frame ref in rilua globals table
-        let _ = n;
+        bind_named_child_global(state, n, child_id)?;
     }
 
     let val = frame_ref(state, child_id)?;
@@ -1205,6 +1213,80 @@ fn create_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
     }
     let val = frame_ref(state, child_id)?;
     state.push(val);
+    Ok(1)
+}
+
+/// AddMaskTexture(maskTexture)
+fn add_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let texture_id = frame_id_from_stack(state, 1)?;
+    let mask_id = extract_frame_id(state, Val::from_stack(state, 2)?)
+        .ok_or_else(|| runtime_error("expected mask texture"))?;
+
+    let mut sim = borrow_state_mut(state)?;
+    let is_mask = sim.widgets.get(mask_id).map(|f| f.is_mask).unwrap_or(false);
+    if !is_mask {
+        return Err(runtime_error("expected mask texture"));
+    }
+
+    if let Some(texture) = sim.widgets.get_mut_visual(texture_id)
+        && !texture.mask_textures.contains(&mask_id)
+    {
+        texture.mask_textures.push(mask_id);
+    }
+
+    Ok(0)
+}
+
+/// RemoveMaskTexture(maskTexture)
+fn remove_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let texture_id = frame_id_from_stack(state, 1)?;
+    let Some(mask_id) = extract_frame_id(state, Val::from_stack(state, 2)?) else {
+        return Ok(0);
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(texture) = sim.widgets.get_mut_visual(texture_id) {
+        texture.mask_textures.retain(|id| *id != mask_id);
+    }
+
+    Ok(0)
+}
+
+/// GetNumMaskTextures() -> count
+fn get_num_mask_textures(state: &mut LuaState) -> LuaResult<u32> {
+    let texture_id = frame_id_from_stack(state, 1)?;
+    let count = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(texture_id)
+            .map(|f| f.mask_textures.len())
+            .unwrap_or(0)
+    };
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+/// GetMaskTexture(index) -> maskTexture|nil
+fn get_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let texture_id = frame_id_from_stack(state, 1)?;
+    let index = i64::from_stack(state, 2).unwrap_or(1);
+    let mask_id = {
+        let sim = borrow_state(state)?;
+        if index <= 0 {
+            None
+        } else {
+            sim.widgets
+                .get(texture_id)
+                .and_then(|f| f.mask_textures.get((index - 1) as usize).copied())
+        }
+    };
+
+    if let Some(mask_id) = mask_id {
+        let mask_ref = frame_ref(state, mask_id)?;
+        state.push(mask_ref);
+    } else {
+        state.push(Val::Nil);
+    }
     Ok(1)
 }
 
@@ -1703,6 +1785,10 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     // Create methods
     table_set_rust_fn(state, table, "CreateTexture", create_texture)?;
     table_set_rust_fn(state, table, "CreateMaskTexture", create_mask_texture)?;
+    table_set_rust_fn(state, table, "AddMaskTexture", add_mask_texture)?;
+    table_set_rust_fn(state, table, "RemoveMaskTexture", remove_mask_texture)?;
+    table_set_rust_fn(state, table, "GetNumMaskTextures", get_num_mask_textures)?;
+    table_set_rust_fn(state, table, "GetMaskTexture", get_mask_texture)?;
     table_set_rust_fn(state, table, "CreateLine", create_line)?;
     table_set_rust_fn(state, table, "CreateFontString", create_font_string)?;
     table_set_rust_fn(state, table, "AttachTexture", attach_texture)?;
