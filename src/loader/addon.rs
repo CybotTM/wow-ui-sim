@@ -90,7 +90,15 @@ pub fn load_addon_internal(
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
-    env.state().borrow_mut().loading_addon_index = None;
+    let mut state = env.state().borrow_mut();
+    if let Some(addon) = state
+        .addons
+        .iter_mut()
+        .find(|addon| addon.folder_name == folder_name)
+    {
+        addon.loaded = true;
+    }
+    state.loading_addon_index = None;
     Ok(result)
 }
 

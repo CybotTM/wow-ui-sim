@@ -14,6 +14,7 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
 use std::cell::{Ref, RefMut};
+use std::rc::Rc;
 
 /// Extract the frame ID (u64) from a Lua argument (a backed table).
 ///
@@ -47,6 +48,25 @@ pub fn borrow_state_mut(state: &LuaState) -> LuaResult<RefMut<'_, SimState>> {
         .app_data::<WowLuaAppData>()
         .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
     Ok(app.sim_state.borrow_mut())
+}
+
+/// Clone the owning SimState handle from app_data.
+pub fn state_handle(state: &LuaState) -> LuaResult<Rc<std::cell::RefCell<SimState>>> {
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    Ok(Rc::clone(&app.sim_state))
+}
+
+/// Clone the owning rilua cell from app_data for runtime loader helpers.
+pub fn borrow_lua(state: &LuaState) -> LuaResult<Rc<std::cell::RefCell<rilua::Lua>>> {
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    app.lua
+        .as_ref()
+        .cloned()
+        .ok_or_else(|| runtime_error("missing WowLuaEnv lua handle"))
 }
 
 // ── Frame ref creation and caching ───────────────────────────────────

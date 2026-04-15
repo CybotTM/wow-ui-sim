@@ -18,6 +18,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -124,7 +125,7 @@ impl SavedVariablesManager {
     /// Returns the number of files loaded (0, 1, or 2 for account + character).
     pub fn load_wtf_for_addon(
         &mut self,
-        lua: &RefCell<rilua::Lua>,
+        lua: &Rc<RefCell<rilua::Lua>>,
         addon_name: &str,
     ) -> crate::Result<usize> {
         let Some(config) = self.wtf_config.clone() else {
@@ -163,7 +164,7 @@ impl SavedVariablesManager {
     /// Initialize saved variables for an addon before it loads.
     pub fn init_for_addon(
         &mut self,
-        lua: &RefCell<rilua::Lua>,
+        lua: &Rc<RefCell<rilua::Lua>>,
         addon_name: &str,
         saved_vars: &[String],
         saved_vars_per_char: &[String],
@@ -175,7 +176,7 @@ impl SavedVariablesManager {
     }
 
     /// Save all registered variables for an addon in WoW-compatible Lua format.
-    pub fn save_addon(&self, lua: &RefCell<rilua::Lua>, addon_name: &str) -> crate::Result<()> {
+    pub fn save_addon(&self, lua: &Rc<RefCell<rilua::Lua>>, addon_name: &str) -> crate::Result<()> {
         let mut lua = lua.borrow_mut();
         self.write_registered_file(lua.state_mut(), addon_name, false)?;
         self.write_registered_file(lua.state_mut(), addon_name, true)?;
@@ -183,7 +184,7 @@ impl SavedVariablesManager {
     }
 
     /// Save all registered variables for all addons.
-    pub fn save_all(&self, lua: &RefCell<rilua::Lua>) -> crate::Result<()> {
+    pub fn save_all(&self, lua: &Rc<RefCell<rilua::Lua>>) -> crate::Result<()> {
         let addon_names: Vec<String> = self
             .registered
             .keys()
@@ -205,7 +206,7 @@ impl SavedVariablesManager {
 
     fn init_registered_globals(
         &self,
-        lua: &RefCell<rilua::Lua>,
+        lua: &Rc<RefCell<rilua::Lua>>,
         addon_name: &str,
         variable_names: &[String],
         per_character: bool,
@@ -242,7 +243,7 @@ impl SavedVariablesManager {
 
     fn load_variable(
         &self,
-        lua: &RefCell<rilua::Lua>,
+        lua: &Rc<RefCell<rilua::Lua>>,
         addon_name: &str,
         var_name: &str,
         per_character: bool,
@@ -266,7 +267,7 @@ impl SavedVariablesManager {
 
     fn load_lua_file(
         &self,
-        lua: &RefCell<rilua::Lua>,
+        lua: &Rc<RefCell<rilua::Lua>>,
         path: &Path,
         chunk_prefix: &str,
     ) -> crate::Result<()> {

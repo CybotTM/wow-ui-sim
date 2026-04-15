@@ -7,7 +7,8 @@
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaApiMut, Val};
+use rilua::{LuaApi, LuaApiMut, Val};
+use std::time::Instant;
 
 // ── Registry helpers ────────────────────────────────────────────────
 
@@ -403,10 +404,41 @@ pub fn dispatch_on_update(
         let Val::Function(func_ref) = handler_val else {
             continue;
         };
+        let owner_addon = frame_owner_addon(lua.state(), frame_id);
         let func = rilua::Function::from_gc_ref(func_ref);
+        let start = Instant::now();
         if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
             call_error_handler(lua, &e.to_string());
         }
+        record_frame_timing(lua.state(), owner_addon, &start);
     }
     Ok(())
+}
+
+fn frame_owner_addon(state: &LuaState, frame_id: u64) -> Option<u16> {
+    use super::env::WowLuaAppData;
+
+    let app = state.app_data::<WowLuaAppData>()?;
+    let sim = app.sim_state.try_borrow().ok()?;
+    sim.widgets
+        .get(frame_id)
+        .and_then(|frame| frame.owner_addon)
+}
+
+fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Instant) {
+    use super::env::WowLuaAppData;
+
+    let Some(addon_idx) = owner_addon else {
+        return;
+    };
+    let Some(app) = state.app_data::<WowLuaAppData>() else {
+        return;
+    };
+    let Ok(mut sim) = app.sim_state.try_borrow_mut() else {
+        return;
+    };
+    let Some(addon) = sim.addons.get_mut(addon_idx as usize) else {
+        return;
+    };
+    addon.runtime.current_frame_ms += start.elapsed().as_secs_f64() * 1000.0;
 }

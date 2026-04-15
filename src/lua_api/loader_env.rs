@@ -10,21 +10,39 @@ use rilua::LuaApiMut;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 use std::cell::{Ref, RefMut};
+use std::marker::PhantomData;
 use std::rc::Rc;
 
 use super::state::SimState;
 
 pub struct LoaderEnv<'a> {
-    env: &'a WowLuaEnv,
+    lua: Rc<std::cell::RefCell<rilua::Lua>>,
+    state: Rc<std::cell::RefCell<SimState>>,
+    _marker: PhantomData<&'a WowLuaEnv>,
 }
 
 impl<'a> LoaderEnv<'a> {
     pub fn new(env: &'a WowLuaEnv) -> Self {
-        Self { env }
+        Self {
+            lua: Rc::clone(&env.lua),
+            state: Rc::clone(&env.state),
+            _marker: PhantomData,
+        }
+    }
+
+    pub fn from_parts(
+        lua: Rc<std::cell::RefCell<rilua::Lua>>,
+        state: Rc<std::cell::RefCell<SimState>>,
+    ) -> LoaderEnv<'static> {
+        LoaderEnv {
+            lua,
+            state,
+            _marker: PhantomData,
+        }
     }
 
     fn loading_addon_uses_secure_env(&self) -> bool {
-        let state = self.env.state().borrow();
+        let state = self.state.borrow();
         state
             .loading_addon_index
             .and_then(|idx| state.addons.get(idx as usize))
@@ -33,7 +51,7 @@ impl<'a> LoaderEnv<'a> {
     }
 
     pub fn exec(&self, code: &str) -> Result<()> {
-        let mut lua = self.env.rilua_mut();
+        let mut lua = self.lua.borrow_mut();
         let func = crate::loader::chunk_cache::load_chunk(&mut lua, code, "loader-exec")
             .map_err(|e| crate::Error::Other(e.to_string()))?;
         if self.loading_addon_uses_secure_env() {
@@ -50,7 +68,7 @@ impl<'a> LoaderEnv<'a> {
         addon_name: &str,
         addon_table: Val,
     ) -> Result<()> {
-        let mut lua = self.env.rilua_mut();
+        let mut lua = self.lua.borrow_mut();
         let func = rilua::LuaApiMut::load_bytes(&mut *lua, code.as_bytes(), name)?;
         let addon_name = create_string(lua.state_mut(), addon_name);
         lua.call_function(&func, &[addon_name, addon_table])?;
@@ -58,28 +76,55 @@ impl<'a> LoaderEnv<'a> {
     }
 
     pub fn fire_event_with_args(&self, event: &str, args: &[Val]) -> Result<()> {
-        self.env.fire_event_with_args(event, args)
+        let listeners = {
+            let mut lua = self.lua.borrow_mut();
+            crate::lua_api::rilua_script_helpers::get_event_listeners(lua.state_mut(), event)
+        };
+        for widget_id in listeners {
+            let mut lua = self.lua.borrow_mut();
+            let handler = {
+                let state = lua.state_mut();
+                crate::lua_api::rilua_script_helpers::get_script(state, widget_id, "OnEvent")
+            };
+            let Some(handler) = handler else {
+                continue;
+            };
+            let frame = {
+                let state = lua.state_mut();
+                crate::lua_api::rilua_methods::frame_ref(state, widget_id)?
+            };
+            let event_name = {
+                let state = lua.state_mut();
+                crate::lua_api::rilua_methods::create_string(state, event)
+            };
+            let mut call_args = Vec::with_capacity(args.len() + 2);
+            call_args.push(frame);
+            call_args.push(event_name);
+            call_args.extend_from_slice(args);
+            let _ = crate::lua_api::rilua_methods::call_function(&mut lua, handler, &call_args);
+        }
+        Ok(())
     }
 
     pub fn create_addon_table(&self) -> Result<Val> {
-        let mut lua = self.env.rilua_mut();
+        let mut lua = self.lua.borrow_mut();
         create_addon_table(&mut lua)
     }
 
-    pub fn lua(&self) -> &std::cell::RefCell<rilua::Lua> {
-        &self.env.lua
+    pub fn lua(&self) -> &Rc<std::cell::RefCell<rilua::Lua>> {
+        &self.lua
     }
 
     pub fn rilua(&self) -> Ref<'_, rilua::Lua> {
-        self.env.rilua()
+        self.lua.borrow()
     }
 
     pub fn rilua_mut(&self) -> RefMut<'_, rilua::Lua> {
-        self.env.rilua_mut()
+        self.lua.borrow_mut()
     }
 
     pub fn state(&self) -> &Rc<std::cell::RefCell<SimState>> {
-        self.env.state()
+        &self.state
     }
 }
 

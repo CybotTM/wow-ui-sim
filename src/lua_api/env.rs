@@ -30,6 +30,7 @@ pub(crate) fn next_timer_id() -> u64 {
 #[derive(Clone)]
 pub(crate) struct WowLuaAppData {
     pub(crate) sim_state: Rc<RefCell<SimState>>,
+    pub(crate) lua: Option<Rc<RefCell<rilua::Lua>>>,
     pub(crate) font_system: Option<Rc<RefCell<WowFontSystem>>>,
 }
 
@@ -37,6 +38,7 @@ impl WowLuaAppData {
     fn new(sim_state: Rc<RefCell<SimState>>) -> Self {
         Self {
             sim_state,
+            lua: None,
             font_system: None,
         }
     }
@@ -334,7 +336,7 @@ impl_from_results_tuple!(
 
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
-    pub(crate) lua: RefCell<rilua::Lua>,
+    pub(crate) lua: Rc<RefCell<rilua::Lua>>,
     pub(crate) state: Rc<RefCell<SimState>>,
 }
 
@@ -353,10 +355,19 @@ impl WowLuaEnv {
         let mut lua = Self::new_rilua(Rc::clone(&state));
         init_builtin_frames(&state);
         init_lua_state(&mut lua, Rc::clone(&state))?;
-        Ok(Self {
-            lua: RefCell::new(lua),
+        let env = Self {
+            lua: Rc::new(RefCell::new(lua)),
             state,
-        })
+        };
+        {
+            let mut lua = env.lua.borrow_mut();
+            let app_data = lua
+                .state_mut()
+                .app_data_mut::<WowLuaAppData>()
+                .expect("WowLuaEnv rilua app_data should always exist");
+            app_data.lua = Some(Rc::clone(&env.lua));
+        }
+        Ok(env)
     }
 
     fn new_rilua(state: Rc<RefCell<SimState>>) -> rilua::Lua {

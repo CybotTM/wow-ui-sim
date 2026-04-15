@@ -16,6 +16,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
 
+const MISSING_ENUMS_LUA: &str = include_str!("globals/enum_data/missing_enums.lua");
+const COMPAT_ENUMS_LUA: &str = include_str!("globals/enum_data/compat_enums.lua");
+
 /// Increment threshold counters for a frame's addon time.
 pub(super) fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
     if ms > 1.0 {
@@ -110,6 +113,7 @@ pub(super) fn init_lua_state(
 ) -> crate::Result<()> {
     register_pure_lua_taint_stubs(lua)?;
     init_registry_tables(lua, &state)?;
+    init_enum_globals(lua)?;
     init_frame_metatable(lua)?;
     register_rilua_globals(lua)?;
     super::globals::rilua_security::create_secure_environment(lua)?;
@@ -128,6 +132,12 @@ pub(super) fn init_lua_state(
 /// always returns true, `securecall` just calls the function directly.
 fn register_pure_lua_taint_stubs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::globals::rilua_security::register_all(lua)?;
+    Ok(())
+}
+
+fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    lua.exec(MISSING_ENUMS_LUA)?;
+    lua.exec(COMPAT_ENUMS_LUA)?;
     Ok(())
 }
 
