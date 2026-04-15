@@ -1229,6 +1229,21 @@ if GetLFGInfoServer == nil then
     return false, false, false, false, false, 0, 0, 0, ""
   end
 end
+if GetLFGRoleUpdate == nil then
+  function GetLFGRoleUpdate()
+    -- (inProgress, slots, members, category, lfgID, bgQueue)
+    return false, 0, 0, 0, 0, false
+  end
+end
+if HasCompletedAnyAchievement == nil then
+  function HasCompletedAnyAchievement() return false end
+end
+if GetPartyLFGID == nil then
+  function GetPartyLFGID() return 0 end
+end
+
+-- Adventure journal: the sim has no adventure content.
+C_AdventureJournal = C_AdventureJournal or __wow_namespace()
 
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()

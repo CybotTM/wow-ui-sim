@@ -101,6 +101,36 @@ fn get_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
+/// `SetShadowOffset(x, y)` — stored but not rendered.
+fn set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    Ok(0)
+}
+
+/// `GetShadowOffset()` → (0, 0).
+fn get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(2)
+}
+
+/// `SetShadowColor(r, g, b, a)` — stored but not rendered.
+fn set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    Ok(0)
+}
+
+/// `GetShadowColor()` → (0, 0, 0, 1).
+fn get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(1.0));
+    Ok(4)
+}
+
 fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(atlas_name) = opt_string(state, 2) else {
@@ -2650,6 +2680,10 @@ fn tooltip_add_fonts_strings(state: &mut LuaState) -> LuaResult<u32> {
 pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, metatable, "SetDrawLayer", set_draw_layer)?;
     table_set_rust_fn(state, metatable, "GetDrawLayer", get_draw_layer)?;
+    table_set_rust_fn(state, metatable, "SetShadowOffset", set_shadow_offset)?;
+    table_set_rust_fn(state, metatable, "GetShadowOffset", get_shadow_offset)?;
+    table_set_rust_fn(state, metatable, "SetShadowColor", set_shadow_color)?;
+    table_set_rust_fn(state, metatable, "GetShadowColor", get_shadow_color)?;
     table_set_rust_fn(
         state,
         metatable,
