@@ -1138,6 +1138,41 @@ C_FunctionContainers = C_FunctionContainers or __wow_namespace({
 
 C_Sound = C_Sound or __wow_namespace()
 C_GameRules = C_GameRules or __wow_namespace()
+-- Explicit members so their return shapes are accurate (callers multiply
+-- by the return value, so nil-from-namespace-default crashes).
+-- No game rules are active in the sim: IsGameRuleActive = false,
+-- GetGameRuleAsFloat = 0, GetGameRuleAsInt = 0, GetGameRuleAsString = "".
+if rawget(C_GameRules, "IsGameRuleActive") == nil then
+  function C_GameRules.IsGameRuleActive(_rule) return false end
+end
+if rawget(C_GameRules, "GetGameRuleAsFloat") == nil then
+  function C_GameRules.GetGameRuleAsFloat(_rule) return 0 end
+end
+if rawget(C_GameRules, "GetGameRuleAsInt") == nil then
+  function C_GameRules.GetGameRuleAsInt(_rule) return 0 end
+end
+if rawget(C_GameRules, "GetGameRuleAsString") == nil then
+  function C_GameRules.GetGameRuleAsString(_rule) return "" end
+end
+if rawget(C_GameRules, "IsPlunderstorm") == nil then
+  function C_GameRules.IsPlunderstorm() return false end
+end
+if rawget(C_GameRules, "GetActiveGameMode") == nil then
+  function C_GameRules.GetActiveGameMode()
+    return (Enum and Enum.GameMode and Enum.GameMode.Standard) or 0
+  end
+end
+if rawget(C_GameRules, "GetGameModeGlueScreenName") == nil then
+  function C_GameRules.GetGameModeGlueScreenName() return "CharacterSelect" end
+end
+
+-- Housing: not simulated. The only surface accessed at load is
+-- IsHousingServiceEnabled (MainMenuBarMicroButtons gates the housing
+-- micro-button on it).
+C_Housing = C_Housing or __wow_namespace()
+if rawget(C_Housing, "IsHousingServiceEnabled") == nil then
+  function C_Housing.IsHousingServiceEnabled() return false end
+end
 C_RestrictedActions = C_RestrictedActions or __wow_namespace()
 C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
