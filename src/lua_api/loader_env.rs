@@ -45,6 +45,16 @@ if Menu.CreateMenuElementDescription == nil then
         return __wow_menu_descriptor_stub()
     end
 end
+if Menu.PopulateDescription == nil then
+    -- Real PopulateDescription invokes the generator against a mutable
+    -- descriptor. With our stub descriptor the generator's calls are
+    -- no-ops already, so we just let the generator run and discard it.
+    function Menu.PopulateDescription(menuGenerator, ownerRegion, description)
+        if type(menuGenerator) == "function" then
+            pcall(menuGenerator, ownerRegion, description)
+        end
+    end
+end
 if MenuUtil == nil then MenuUtil = {} end
 if MenuUtil.CreateRootMenuDescription == nil then
     function MenuUtil.CreateRootMenuDescription(menuMixin)

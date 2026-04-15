@@ -2202,6 +2202,35 @@ fn model_scene_set_allow_overlapped_models(state: &mut LuaState) -> LuaResult<u3
     Ok(0)
 }
 
+fn model_scene_set_view_insets(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let l = val_to_f64(stack_val(state, 2)) as f32;
+    let r = val_to_f64(stack_val(state, 3)) as f32;
+    let t = val_to_f64(stack_val(state, 4)) as f32;
+    let b = val_to_f64(stack_val(state, 5)) as f32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.model_scene_state.view_insets = (l, r, t, b);
+    }
+    Ok(0)
+}
+
+fn model_scene_get_view_insets(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (l, r, t, b) = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.model_scene_state.view_insets)
+            .unwrap_or((0.0, 0.0, 0.0, 0.0))
+    };
+    state.push(Val::Num(l as f64));
+    state.push(Val::Num(r as f64));
+    state.push(Val::Num(t as f64));
+    state.push(Val::Num(b as f64));
+    Ok(4)
+}
+
 fn model_scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let allow = borrow_state(state)?
@@ -3144,6 +3173,18 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
         metatable,
         "IsAllowOverlappedModels",
         model_scene_is_allow_overlapped_models,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetViewInsets",
+        model_scene_set_view_insets,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetViewInsets",
+        model_scene_get_view_insets,
     )?;
     table_set_rust_fn(state, metatable, "ReplaceIconTexture", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetGlow", model_stub_variadic)?;
