@@ -12,7 +12,7 @@
 //!
 //! # Secure environment (secure_env.rs counterpart)
 //!
-//! `create_secure_environment` and `apply_secure_env` mirror the old mlua
+//! `create_secure_environment` and `mark_secure` mirror the old mlua
 //! secureenv path: create a shallow copy of `_G`, give it its own `Enum`,
 //! expose it as `__secureenv`, and retarget secure addon chunks to that env.
 //!
@@ -52,42 +52,79 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 ///
 /// Permissive stub: ignores taint, delegates to the global `securecall`.
 fn securecallmethod(state: &mut LuaState) -> LuaResult<u32> {
-    let nargs = state.top as i32 - state.base as i32;
-    if nargs < 1 {
+    let Some((obj, obj_ref, method_name, nargs)) = parse_securecallmethod_args(state)? else {
         return Ok(0);
-    }
-
-    let obj = state.stack_get(state.base);
-    if obj == Val::Nil {
-        return Ok(0);
-    }
-
-    let method_name = match state.stack_get(state.base + 1) {
-        Val::Str(s) => s,
-        _ => return Err(runtime_error("Usage: securecallmethod(table, name, ...)")),
     };
 
-    let Val::Table(obj_ref) = obj else {
-        return Err(runtime_error("Usage: securecallmethod(table, name, ...)"));
-    };
-
-    let method = state
-        .gc
-        .tables
-        .get(obj_ref)
-        .map(|t| t.get_str(method_name, &state.gc.string_arena))
-        .unwrap_or(Val::Nil);
-
+    let method = lookup_method_on_table(state, obj_ref, method_name);
     if method == Val::Nil {
         return Ok(0);
     }
 
-    // Gather extra args (everything after `name`): obj + trailing args.
-    let self_and_extra: Vec<Val> = std::iter::once(obj)
-        .chain((2..nargs as usize).map(|i| state.stack_get(state.base + i)))
-        .collect();
+    let self_and_extra = gather_self_and_extra_args(state, obj, nargs);
+    dispatch_securecall(state, method, &self_and_extra)
+}
 
-    // Invoke global securecall.
+/// Validates the incoming stack and returns `(obj, obj_ref, method_name, nargs)`.
+///
+/// Returns `Ok(None)` when the call is a no-op (missing args, nil receiver).
+fn parse_securecallmethod_args(
+    state: &LuaState,
+) -> LuaResult<
+    Option<(
+        Val,
+        rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+        rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
+        usize,
+    )>,
+> {
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    if nargs < 1 {
+        return Ok(None);
+    }
+
+    let obj = state.stack_get(state.base);
+    if obj == Val::Nil {
+        return Ok(None);
+    }
+
+    let Val::Str(method_name) = state.stack_get(state.base + 1) else {
+        return Err(runtime_error("Usage: securecallmethod(table, name, ...)"));
+    };
+    let Val::Table(obj_ref) = obj else {
+        return Err(runtime_error("Usage: securecallmethod(table, name, ...)"));
+    };
+
+    Ok(Some((obj, obj_ref, method_name, nargs)))
+}
+
+/// Look up `method_name` on the table referenced by `obj_ref`.
+fn lookup_method_on_table(
+    state: &LuaState,
+    obj_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    method_name: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
+) -> Val {
+    state
+        .gc
+        .tables
+        .get(obj_ref)
+        .map(|t| t.get_str(method_name, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+}
+
+/// Build the argument list `[obj, extras...]` passed through to the callee.
+///
+/// Stack layout: `[obj, method_name, extra_1, extra_2, ...]`. The method is
+/// invoked as `method(obj, extra_1, ...)`, so we keep `obj` and drop the name.
+fn gather_self_and_extra_args(state: &LuaState, obj: Val, nargs: usize) -> Vec<Val> {
+    std::iter::once(obj)
+        .chain((2..nargs).map(|i| state.stack_get(state.base + i)))
+        .collect()
+}
+
+/// Invoke the method either through the global `securecall` wrapper or
+/// directly if `securecall` was stripped from the environment.
+fn dispatch_securecall(state: &mut LuaState, method: Val, args: &[Val]) -> LuaResult<u32> {
     let securecall_key = state.gc.intern_string(b"securecall");
     let securecall = state
         .gc
@@ -96,15 +133,12 @@ fn securecallmethod(state: &mut LuaState) -> LuaResult<u32> {
         .map(|g| g.get_str(securecall_key, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
 
-    let Val::Function(sc_ref) = securecall else {
-        // securecall not present (stripped env) — call method directly.
-        return call_direct(state, method, &self_and_extra);
-    };
-
-    drop_unused(sc_ref); // will be used below once call-from-RustFn is available
-    // TODO: invoke securecall(method, obj, ...) once rilua exposes call-from-RustFn.
-    // For now, call the method directly without taint wrapping.
-    call_direct(state, method, &self_and_extra)
+    if let Val::Function(sc_ref) = securecall {
+        drop_unused(sc_ref); // reserved for call-from-RustFn wiring
+        // TODO: invoke securecall(method, obj, ...) once rilua exposes
+        // call-from-RustFn. For now fall through to direct call.
+    }
+    call_direct(state, method, args)
 }
 
 /// Call a function value directly and push its results onto the stack.
@@ -284,15 +318,20 @@ pub fn create_secure_environment(lua: &mut rilua::Lua) -> LuaResult<()> {
     Ok(())
 }
 
-/// Apply the secure environment to a compiled function.
+/// Mark a compiled function as running under the secure environment.
 ///
-/// Secure addons execute with `secureenv` as their function environment,
-/// matching the old mlua path and WoW's `setfenv(func, secureenv)` behavior.
-pub fn apply_secure_env_rilua(lua: &mut rilua::Lua, func: &rilua::Function) -> LuaResult<()> {
-    apply_secure_env_state(lua.state_mut(), func)
+/// Swaps the function's fenv to the registry-stored `__secureenv` table so
+/// the closure and every inner closure it creates see `secureenv` as their
+/// globals table. Matches Blizzard's `setfenv(chunk, secureenv)` step for
+/// `[LoadIntoEnvironment secure]` files — caller never passes secureenv
+/// explicitly; it's looked up via the registry.
+pub fn mark_secure(lua: &mut rilua::Lua, func: &rilua::Function) -> LuaResult<()> {
+    mark_secure_state(lua.state_mut(), func)
 }
 
-pub fn apply_secure_env_state(state: &mut LuaState, func: &rilua::Function) -> LuaResult<()> {
+/// Raw-state variant of [`mark_secure`] for callers holding `&mut LuaState`
+/// (e.g. inside a `with_state` closure or a `RustFn`).
+pub fn mark_secure_state(state: &mut LuaState, func: &rilua::Function) -> LuaResult<()> {
     let secureenv_ref = secure_env_table(state)?;
     let secureenv = rilua::Table::from_gc_ref(secureenv_ref);
     rilua::api::state_set_fenv(state, func, &secureenv)
@@ -343,7 +382,7 @@ pub fn exec_chunk_rilua(
 ) -> Result<(), LoadError> {
     let func = compile_chunk_rilua(lua, source, chunk_name)?;
     if use_secure_env {
-        apply_secure_env_rilua(lua, &func).map_err(|e| LoadError::Lua(e.to_string()))?;
+        mark_secure(lua, &func).map_err(|e| LoadError::Lua(e.to_string()))?;
     }
     lua.call_function(&func, &[])
         .map_err(|e| LoadError::Lua(e.to_string()))?;

@@ -1,7 +1,7 @@
 //! XML file loading and element processing.
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::globals::rilua_security::apply_secure_env_state;
+use crate::lua_api::globals::rilua_security::mark_secure_state;
 use crate::lua_api::rilua_methods::create_string;
 use crate::lua_api::rilua_script_helpers::call_error_handler_state;
 use crate::xml::{FrameXml, XmlElement, parse_xml_file};
@@ -165,7 +165,7 @@ fn run_inline_script(
     let call_start = Instant::now();
     env.with_state(|state| {
         if ctx.use_secure_env {
-            apply_secure_env_state(state, &func).map_err(|e| {
+            mark_secure_state(state, &func).map_err(|e| {
                 call_error_handler_state(state, &e.to_string());
                 LoadError::Lua(e.to_string())
             })?;

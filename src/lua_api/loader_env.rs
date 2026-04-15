@@ -1,7 +1,7 @@
 //! Lightweight loader environment for addon loading.
 
 use super::env::WowLuaEnv;
-use super::globals::rilua_security::apply_secure_env_state;
+use super::globals::rilua_security::mark_secure_state;
 use super::rilua_methods::create_string;
 use crate::Result;
 use crate::lua_api::rilua_methods::create_table;
@@ -89,7 +89,7 @@ impl<'a> LoaderEnv<'a> {
             let func = crate::loader::chunk_cache::load_chunk(state, code, "loader-exec")
                 .map_err(|e| crate::Error::Other(e.to_string()))?;
             if self.loading_addon_uses_secure_env() {
-                apply_secure_env_state(state, &func)?;
+                mark_secure_state(state, &func)?;
             }
             crate::lua_api::rilua_methods::call_function_state(
                 state,

@@ -1,7 +1,7 @@
 //! Lua file loading functionality.
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::globals::rilua_security::apply_secure_env_state;
+use crate::lua_api::globals::rilua_security::mark_secure_state;
 use crate::lua_api::rilua_methods::create_string;
 use crate::lua_api::rilua_script_helpers::call_error_handler_state;
 use crate::lua_api::rilua_taint::stamp_addon_taint_state;
@@ -45,7 +45,7 @@ pub fn load_lua_file(
             set_object_taint(state, &func, ctx.name);
         }
         if ctx.use_secure_env {
-            apply_secure_env_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
+            mark_secure_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
         }
         exec_addon_func(state, func, ctx).map_err(|e| {
             if let LoadError::Lua(msg) = &e {
