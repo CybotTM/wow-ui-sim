@@ -89,30 +89,36 @@ pub(crate) fn create_texture_from_template_direct(
     ctx: DirectTextureCreateContext<'_>,
 ) -> mlua::Result<()> {
     let resolved = crate::xml::resolve_texture_inheritance(ctx.texture);
-    ensure_direct_texture_supported(&resolved)?;
+    let finalize_ctx = prepare_direct_texture_child(lua, state, &resolved, &ctx)?;
+    finalize_direct_texture_child(lua, state, finalize_ctx)
+}
+
+fn prepare_direct_texture_child<'a>(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    texture: &'a crate::xml::TextureXml,
+    ctx: &DirectTextureCreateContext<'a>,
+) -> mlua::Result<DirectTextureFinalizeContext<'a>> {
+    ensure_direct_texture_supported(texture)?;
     let parent_id = direct_texture_parent_id(state, ctx.parent_name)?;
-    let child_name = direct_texture_child_name(&resolved, ctx.subst_parent);
+    let child_name = direct_texture_child_name(texture, ctx.subst_parent);
     let child_id = register_direct_texture_child(
         lua,
-        &resolved,
+        texture,
         parent_id,
         &child_name,
         ctx.draw_layer,
         ctx.is_mask,
         ctx.is_line,
     )?;
-    finalize_direct_texture_child(
-        lua,
-        state,
-        DirectTextureFinalizeContext {
-            texture: &resolved,
-            parent_id,
-            child_id,
-            parent_name: ctx.parent_name,
-            is_mask: ctx.is_mask,
-            is_line: ctx.is_line,
-        },
-    )
+    Ok(DirectTextureFinalizeContext {
+        texture,
+        parent_id,
+        child_id,
+        parent_name: ctx.parent_name,
+        is_mask: ctx.is_mask,
+        is_line: ctx.is_line,
+    })
 }
 
 fn direct_texture_parent_id(state: &Rc<RefCell<SimState>>, parent_name: &str) -> mlua::Result<u64> {
