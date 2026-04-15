@@ -430,6 +430,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     register_table_util(lua.state_mut())?;
     register_c_addons(lua.state_mut())?;
     register_c_addon_profiler(lua.state_mut())?;
+    register_c_texture(lua.state_mut())?;
     register_legacy_addon_globals(lua.state_mut())?;
     register_widget_container_mixin(lua.state_mut())?;
 
@@ -615,6 +616,34 @@ fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
+fn register_c_texture(state: &mut LuaState) -> LuaResult<()> {
+    let c_texture = create_table(state);
+    let Val::Table(c_texture_ref) = c_texture else {
+        unreachable!("create_table must return a table");
+    };
+    table_set_rust_fn(
+        state,
+        c_texture_ref,
+        "GetAtlasInfo",
+        c_texture_get_atlas_info,
+    )?;
+    table_set_rust_fn(
+        state,
+        c_texture_ref,
+        "GetAtlasExists",
+        c_texture_get_atlas_exists,
+    )?;
+    let key_ref = state.gc.intern_string(b"C_Texture");
+    if let Some(global) = state.gc.tables.get_mut(state.global) {
+        let _ = global.raw_set(
+            Val::Str(key_ref),
+            Val::Table(c_texture_ref),
+            &state.gc.string_arena,
+        );
+    }
+    Ok(())
+}
+
 fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
     let mixin = create_table(state);
     let Val::Table(mixin_ref) = mixin else {
@@ -631,6 +660,89 @@ fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
         let _ = global.raw_set(Val::Str(key_ref), mixin, &state.gc.string_arena);
     }
     Ok(())
+}
+
+fn c_texture_get_atlas_exists(state: &mut LuaState) -> LuaResult<u32> {
+    let atlas_name = val_to_string(state, stack_val(state, 1));
+    state.push(Val::Bool(
+        atlas_name
+            .as_deref()
+            .and_then(crate::atlas::get_atlas_info)
+            .is_some(),
+    ));
+    Ok(1)
+}
+
+fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(atlas_name) = val_to_string(state, stack_val(state, 1)) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let Some(lookup) = crate::atlas::get_atlas_info(&atlas_name) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let info = create_table(state);
+    let Val::Table(info_ref) = info else {
+        unreachable!("create_table must return a table");
+    };
+    let raw_size = create_table(state);
+    let Val::Table(raw_size_ref) = raw_size else {
+        unreachable!("create_table must return a table");
+    };
+
+    let set_str = |state: &mut LuaState, key: &str, value: &str| {
+        let key = state.gc.intern_string(key.as_bytes());
+        let value = create_string(state, value);
+        if let Some(table) = state.gc.tables.get_mut(info_ref) {
+            let _ = table.raw_set(Val::Str(key), value, &state.gc.string_arena);
+        }
+    };
+    let set_num = |state: &mut LuaState, key: &str, value: f64| {
+        let key = state.gc.intern_string(key.as_bytes());
+        if let Some(table) = state.gc.tables.get_mut(info_ref) {
+            let _ = table.raw_set(Val::Str(key), Val::Num(value), &state.gc.string_arena);
+        }
+    };
+    let set_bool = |state: &mut LuaState, key: &str, value: bool| {
+        let key = state.gc.intern_string(key.as_bytes());
+        if let Some(table) = state.gc.tables.get_mut(info_ref) {
+            let _ = table.raw_set(Val::Str(key), Val::Bool(value), &state.gc.string_arena);
+        }
+    };
+
+    if let Some(table) = state.gc.tables.get_mut(raw_size_ref) {
+        let _ = table.raw_set(
+            Val::Num(1.0),
+            Val::Num(lookup.width() as f64),
+            &state.gc.string_arena,
+        );
+        let _ = table.raw_set(
+            Val::Num(2.0),
+            Val::Num(lookup.height() as f64),
+            &state.gc.string_arena,
+        );
+    }
+
+    set_str(state, "elementName", &atlas_name);
+    set_num(state, "width", lookup.width() as f64);
+    set_num(state, "height", lookup.height() as f64);
+    set_num(state, "leftTexCoord", lookup.info.left_tex_coord as f64);
+    set_num(state, "rightTexCoord", lookup.info.right_tex_coord as f64);
+    set_num(state, "topTexCoord", lookup.info.top_tex_coord as f64);
+    set_num(state, "bottomTexCoord", lookup.info.bottom_tex_coord as f64);
+    set_bool(state, "tilesHorizontally", lookup.info.tiles_horizontally);
+    set_bool(state, "tilesVertically", lookup.info.tiles_vertically);
+    set_str(state, "filename", lookup.info.file);
+
+    let raw_size_key = state.gc.intern_string(b"rawSize");
+    if let Some(table) = state.gc.tables.get_mut(info_ref) {
+        let _ = table.raw_set(Val::Str(raw_size_key), raw_size, &state.gc.string_arena);
+    }
+
+    state.push(info);
+    Ok(1)
 }
 
 fn ensure_error_handler(state: &mut LuaState) -> LuaResult<Val> {
@@ -994,7 +1106,7 @@ fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(2);
     };
 
-    let loader_env = LoaderEnv::from_parts(borrow_lua(state)?, state_handle(state)?);
+    let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
     match crate::loader::load_addon(&loader_env, &toc_path) {
         Ok(_) => {
             {

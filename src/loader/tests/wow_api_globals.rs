@@ -246,11 +246,30 @@ fn test_create_frame_exposes_core_event_methods() {
 #[test]
 fn test_create_texture_exposes_core_visual_methods() {
     let env = WowLuaEnv::new().unwrap();
-    let (set_texture, set_color_texture, set_vertex_color, set_blend_mode): (
+    let (
+        set_texture,
+        set_color_texture,
+        set_vertex_color,
+        set_blend_mode,
+        set_tex_coord,
+        set_horiz_tile,
+        set_vert_tile,
+        set_texel_snapping_bias,
+        get_texel_snapping_bias,
+        set_snap_to_pixel_grid,
+        bias,
+    ): (
         String,
         String,
         String,
         String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        f64,
     ) = env
         .eval(
             r#"
@@ -260,7 +279,16 @@ fn test_create_texture_exposes_core_visual_methods() {
             tex:SetVertexColor(0.1, 0.2, 0.3, 0.4)
             tex:SetBlendMode("ADD")
             tex:SetColorTexture(0.5, 0.6, 0.7, 0.8)
-            return type(tex.SetTexture), type(tex.SetColorTexture), type(tex.SetVertexColor), type(tex.SetBlendMode)
+            tex:SetTexCoord(0, 1, 0, 1)
+            tex:SetHorizTile(true)
+            tex:SetVertTile(true)
+            tex:SetTexelSnappingBias(0.25)
+            tex:SetSnapToPixelGrid(true)
+            return type(tex.SetTexture), type(tex.SetColorTexture), type(tex.SetVertexColor),
+                type(tex.SetBlendMode), type(tex.SetTexCoord), type(tex.SetHorizTile),
+                type(tex.SetVertTile), type(tex.SetTexelSnappingBias),
+                type(tex.GetTexelSnappingBias), type(tex.SetSnapToPixelGrid),
+                tex:GetTexelSnappingBias()
             "#,
         )
         .unwrap();
@@ -270,14 +298,27 @@ fn test_create_texture_exposes_core_visual_methods() {
             set_color_texture,
             set_vertex_color,
             set_blend_mode,
+            set_tex_coord,
+            set_horiz_tile,
+            set_vert_tile,
+            set_texel_snapping_bias,
+            get_texel_snapping_bias,
+            set_snap_to_pixel_grid,
         ),
         (
             "function".to_string(),
             "function".to_string(),
             "function".to_string(),
             "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
         )
     );
+    assert_eq!(bias, 0.25);
 }
 
 #[test]
@@ -367,6 +408,41 @@ fn test_bootstrap_fills_existing_namespace_defaults() {
     assert!(!quest_value);
     assert_eq!(color_ty, "function");
     assert_eq!(hex_ty, "function");
+}
+
+#[test]
+fn test_c_texture_exposes_atlas_lookup() {
+    let env = WowLuaEnv::new().unwrap();
+    let (exists_ty, exists, info_ty, width, height, tile_h, tile_v): (
+        String,
+        bool,
+        String,
+        i64,
+        i64,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local info = C_Texture.GetAtlasInfo("UI-Frame-InnerTopLeft")
+            return type(C_Texture.GetAtlasExists),
+                C_Texture.GetAtlasExists("UI-Frame-InnerTopLeft"),
+                type(info),
+                info and info.width or 0,
+                info and info.height or 0,
+                info and info.tilesHorizontally or false,
+                info and info.tilesVertically or false
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(exists_ty, "function");
+    assert!(exists);
+    assert_eq!(info_ty, "table");
+    assert!(width > 0);
+    assert!(height > 0);
+    assert!(!tile_h);
+    assert!(!tile_v);
 }
 
 #[test]

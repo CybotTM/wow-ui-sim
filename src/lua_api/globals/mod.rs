@@ -2,6 +2,7 @@
 
 pub mod action_bar_api;
 pub mod create_frame;
+pub mod enum_data;
 pub mod environment_restore;
 pub mod global_frames;
 pub mod hero_talents;

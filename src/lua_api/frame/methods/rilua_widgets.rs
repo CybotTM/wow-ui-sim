@@ -192,6 +192,89 @@ fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let coords: Vec<f32> = (2..=9).filter_map(|index| opt_f32(state, index)).collect();
+    if coords.len() != 4 && coords.len() != 8 {
+        return Ok(0);
+    }
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        if coords.len() == 4 {
+            frame.tex_coords = Some((coords[0], coords[1], coords[2], coords[3]));
+            frame.tex_coords_quad = None;
+        } else {
+            let quad = [
+                coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6],
+                coords[7],
+            ];
+            let left = quad[0].min(quad[2]).min(quad[4]).min(quad[6]);
+            let right = quad[0].max(quad[2]).max(quad[4]).max(quad[6]);
+            let top = quad[1].min(quad[3]).min(quad[5]).min(quad[7]);
+            let bottom = quad[1].max(quad[3]).max(quad[5]).max(quad[7]);
+            frame.tex_coords = Some((left, right, top, bottom));
+            frame.tex_coords_quad = Some(quad);
+        }
+    }
+    Ok(0)
+}
+
+fn set_horiz_tile(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = opt_bool(state, 2).unwrap_or(false);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.horiz_tile = enabled;
+    }
+    Ok(0)
+}
+
+fn set_vert_tile(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = opt_bool(state, 2).unwrap_or(false);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.vert_tile = enabled;
+    }
+    Ok(0)
+}
+
+fn set_texel_snapping_bias(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let bias = opt_f32(state, 2).unwrap_or(0.0);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.texel_snapping_bias = bias;
+    }
+    Ok(0)
+}
+
+fn get_texel_snapping_bias(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let bias = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.texel_snapping_bias)
+        .unwrap_or_default();
+    state.push(Val::Num(bias as f64));
+    Ok(1)
+}
+
+fn set_snap_to_pixel_grid(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = opt_bool(state, 2).unwrap_or(false);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.snap_to_pixel_grid = enabled;
+    }
+    Ok(0)
+}
+
 /// Parse (start, duration, mod_rate) from stack positions 2, 3, 4.
 fn parse_f64_triple(state: &LuaState) -> (f64, f64, f64) {
     let start = val_to_f64(stack_val(state, 2));
@@ -2108,6 +2191,27 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetColorTexture", set_color_texture)?;
     table_set_rust_fn(state, metatable, "SetVertexColor", set_vertex_color)?;
     table_set_rust_fn(state, metatable, "SetBlendMode", set_blend_mode)?;
+    table_set_rust_fn(state, metatable, "SetTexCoord", set_tex_coord)?;
+    table_set_rust_fn(state, metatable, "SetHorizTile", set_horiz_tile)?;
+    table_set_rust_fn(state, metatable, "SetVertTile", set_vert_tile)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetTexelSnappingBias",
+        set_texel_snapping_bias,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetTexelSnappingBias",
+        get_texel_snapping_bias,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetSnapToPixelGrid",
+        set_snap_to_pixel_grid,
+    )?;
 
     // --- Cooldown ---
     table_set_rust_fn(state, metatable, "SetCooldown", cooldown_set_cooldown)?;
