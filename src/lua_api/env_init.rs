@@ -151,6 +151,8 @@ end
 local function __wow_noop()
 end
 
+local __wow_clock_start = os.clock and os.clock() or 0
+
 if GetText == nil then
   function GetText(token)
     if type(token) ~= "string" then
@@ -164,6 +166,21 @@ end
 if GetGameTime == nil then
   function GetGameTime()
     return 12, 0
+  end
+end
+
+if GetTime == nil then
+  function GetTime()
+    if os.clock == nil then
+      return 0
+    end
+    return os.clock() - __wow_clock_start
+  end
+end
+
+if GetActionInfo == nil then
+  function GetActionInfo()
+    return nil, nil, nil
   end
 end
 
@@ -206,6 +223,30 @@ end
 if GetBackgroundLoadingStatus == nil then
   function GetBackgroundLoadingStatus()
     return 0
+  end
+end
+
+if GetWebTicket == nil then
+  function GetWebTicket()
+    return nil
+  end
+end
+
+if GetDungeonDifficultyID == nil then
+  function GetDungeonDifficultyID()
+    return 1
+  end
+end
+
+if UnitInVehicle == nil then
+  function UnitInVehicle()
+    return false
+  end
+end
+
+if UnitGetAvailableRoles == nil then
+  function UnitGetAvailableRoles()
+    return true, true, true
   end
 end
 
@@ -338,6 +379,23 @@ C_LFGList = __wow_merge_namespace(C_LFGList, {
   CanCreateScenarioGroup = function() return false end,
   IsPremadeGroupFinderEnabled = function() return false end,
   RemoveListing = __wow_noop,
+})
+
+C_AuthChallenge = __wow_merge_namespace(C_AuthChallenge, {
+  SetFrame = __wow_noop,
+  Submit = __wow_noop,
+  Cancel = __wow_noop,
+  OnTabPressed = __wow_noop,
+  DidChallengeSucceed = function() return false end,
+})
+
+C_ClassTrial = __wow_merge_namespace(C_ClassTrial, {
+  IsClassTrialCharacter = function() return false end,
+  GetClassTrialLogoutTimeSeconds = function() return 0 end,
+})
+
+C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
+  HasRequiredBoostForClassTrial = function() return false end,
 })
 
 C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {

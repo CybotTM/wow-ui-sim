@@ -846,6 +846,108 @@ fn test_text_runtime_helpers_exist() {
 }
 
 #[test]
+fn test_startup_time_and_service_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        get_time_ty,
+        now,
+        action_info_ty,
+        action_type_ty,
+        web_ticket_ty,
+        web_ticket_value_ty,
+        dungeon_ty,
+        dungeon_id,
+        unit_in_vehicle_ty,
+        in_vehicle,
+        roles_ty,
+        can_tank,
+        can_heal,
+        can_dps,
+    ): (
+        String,
+        f64,
+        String,
+        String,
+        String,
+        String,
+        String,
+        i64,
+        String,
+        bool,
+        String,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local actionType = GetActionInfo(1)
+            local canTank, canHeal, canDps = UnitGetAvailableRoles("player")
+            return type(GetTime),
+                GetTime(),
+                type(GetActionInfo),
+                type(actionType),
+                type(GetWebTicket),
+                type(GetWebTicket()),
+                type(GetDungeonDifficultyID),
+                GetDungeonDifficultyID(),
+                type(UnitInVehicle),
+                UnitInVehicle("player"),
+                type(UnitGetAvailableRoles),
+                canTank,
+                canHeal,
+                canDps
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(get_time_ty, "function");
+    assert!(now >= 0.0);
+    assert_eq!(action_info_ty, "function");
+    assert_eq!(action_type_ty, "nil");
+    assert_eq!(web_ticket_ty, "function");
+    assert_eq!(web_ticket_value_ty, "nil");
+    assert_eq!(dungeon_ty, "function");
+    assert_eq!(dungeon_id, 1);
+    assert_eq!(unit_in_vehicle_ty, "function");
+    assert!(!in_vehicle);
+    assert_eq!(roles_ty, "function");
+    assert!(can_tank);
+    assert!(can_heal);
+    assert!(can_dps);
+
+    let (
+        auth_ty,
+        auth_succeeded,
+        class_trial_ty,
+        is_class_trial,
+        logout_seconds,
+        character_services_ty,
+        has_trial_boost,
+    ): (String, bool, String, bool, i64, String, bool) = env
+        .eval(
+            r#"
+            return type(C_AuthChallenge.SetFrame),
+                C_AuthChallenge.DidChallengeSucceed(),
+                type(C_ClassTrial.IsClassTrialCharacter),
+                C_ClassTrial.IsClassTrialCharacter(),
+                C_ClassTrial.GetClassTrialLogoutTimeSeconds(),
+                type(C_CharacterServices.HasRequiredBoostForClassTrial),
+                C_CharacterServices.HasRequiredBoostForClassTrial()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(auth_ty, "function");
+    assert!(!auth_succeeded);
+    assert_eq!(class_trial_ty, "function");
+    assert!(!is_class_trial);
+    assert_eq!(logout_seconds, 0);
+    assert_eq!(character_services_ty, "function");
+    assert!(!has_trial_boost);
+}
+
+#[test]
 fn test_c_texture_exposes_atlas_lookup() {
     let env = WowLuaEnv::new().unwrap();
     let (exists_ty, exists, info_ty, width, height, tile_h, tile_v): (

@@ -733,7 +733,10 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
         | "OnEditFocusLost"
         | "OnInputLanguageChanged" => matches!(widget_type, WidgetType::EditBox),
         "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
-        "OnVerticalScroll" => matches!(widget_type, WidgetType::ScrollFrame | WidgetType::EditBox),
+        "OnVerticalScroll" | "OnScrollRangeChanged" => {
+            matches!(widget_type, WidgetType::ScrollFrame | WidgetType::EditBox)
+        }
+        "OnColorSelect" => matches!(widget_type, WidgetType::ColorSelect),
         "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave" => true,
         _ => false,
     }
