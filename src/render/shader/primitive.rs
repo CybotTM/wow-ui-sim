@@ -119,8 +119,8 @@ fn try_load_bc_texture(
 
 fn bc_texture_dimensions_fit_gpu_atlas(width: u32, height: u32) -> bool {
     const BC_BLOCK_DIMENSION: u32 = 4;
-    width % BC_BLOCK_DIMENSION == 0
-        && height % BC_BLOCK_DIMENSION == 0
+    width.is_multiple_of(BC_BLOCK_DIMENSION)
+        && height.is_multiple_of(BC_BLOCK_DIMENSION)
         && width <= crate::render::shader::atlas::BC_CELL_SIZE
         && height <= crate::render::shader::atlas::BC_CELL_SIZE
 }
@@ -169,11 +169,15 @@ fn decode_crop_request<'a>(
 #[cfg(test)]
 mod tests {
     use super::{
-        LoadedTexture, WowUiPipeline, bc_texture_dimensions_fit_gpu_atlas, decode_crop_request,
-        load_texture_prefer_bc, remap_entry_uv, resolve_and_scale_quads,
+        LoadedTexture, ResolvedTextureEntry, WowUiPipeline, apply_resolved_texture_entry,
+        bc_texture_dimensions_fit_gpu_atlas, decode_crop_request, load_texture_prefer_bc,
+        remap_bc_entry_uv, remap_entry_uv, resolve_and_scale_quads,
     };
     use crate::render::BlendMode;
     use crate::render::shader::QuadBatch;
+    use crate::render::shader::atlas::{BcFormat, BcTextureEntry};
+    use crate::render::shader::quad::QuadVertex;
+    use bytemuck::Zeroable;
     use iced::widget::shader::Pipeline;
     use iced::{Point, Rectangle, Size};
     use std::sync::Arc;
@@ -368,6 +372,48 @@ mod tests {
             assert!((vertex.tex_coords[1] - expected_v).abs() < 1e-6);
         }
     }
+
+    #[test]
+    fn resolved_bc_entries_remap_quad_uvs_into_bc_slot() {
+        let bc_entry = BcTextureEntry {
+            format: BcFormat::Bc3,
+            grid_x: 0,
+            grid_y: 0,
+            original_width: 128,
+            original_height: 64,
+            uv_x: 0.25,
+            uv_y: 0.5,
+            uv_width: 0.125,
+            uv_height: 0.25,
+        };
+        let mut vertices = [
+            QuadVertex {
+                tex_coords: [0.0, 0.0],
+                local_uv: [0.0, 0.0],
+                tex_index: -2,
+                ..QuadVertex::zeroed()
+            },
+            QuadVertex {
+                tex_coords: [1.0, 1.0],
+                local_uv: [1.0, 1.0],
+                tex_index: -2,
+                ..QuadVertex::zeroed()
+            },
+        ];
+
+        apply_resolved_texture_entry(&mut vertices, ResolvedTextureEntry::Bc(bc_entry));
+
+        assert_eq!(vertices[0].tex_index, bc_entry.tex_index());
+        assert_eq!(vertices[1].tex_index, bc_entry.tex_index());
+        assert!(
+            (vertices[0].tex_coords[0] - remap_bc_entry_uv(0.0, 0.25, 0.125, 128)).abs() < 1e-6
+        );
+        assert!((vertices[0].tex_coords[1] - remap_bc_entry_uv(0.0, 0.5, 0.25, 64)).abs() < 1e-6);
+        assert!(
+            (vertices[1].tex_coords[0] - remap_bc_entry_uv(1.0, 0.25, 0.125, 128)).abs() < 1e-6
+        );
+        assert!((vertices[1].tex_coords[1] - remap_bc_entry_uv(1.0, 0.5, 0.25, 64)).abs() < 1e-6);
+    }
 }
 
 use crate::widget::FrameStrata;
@@ -548,16 +594,13 @@ fn resolve_and_scale_quads(
 
 /// Remap primary texture UVs for resolved atlas entries (RGBA or BC).
 fn resolve_texture_requests(
-    atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
+    atlas: &crate::render::shader::atlas::GpuTextureAtlas,
     requests: &[crate::render::TextureRequest],
     vertices: &mut [crate::render::QuadVertex],
 ) {
     for request in requests {
-        let verts = request_vertices(request, vertices);
-        if let Some(entry) = atlas.get(&request.path) {
-            apply_rgba_entry(verts, entry);
-        } else if let Some(bc_entry) = atlas.get_bc(&request.path).copied() {
-            apply_bc_entry(verts, &bc_entry);
+        if let Some(entry) = resolved_texture_entry(atlas, &request.path) {
+            apply_resolved_texture_entry(request_vertices(request, vertices), entry);
         }
     }
 }
@@ -569,6 +612,33 @@ fn request_vertices<'a>(
     let start = request.vertex_start as usize;
     let end = start + request.vertex_count as usize;
     &mut vertices[start..end]
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ResolvedTextureEntry {
+    Rgba(crate::render::shader::atlas::TextureEntry),
+    Bc(crate::render::shader::atlas::BcTextureEntry),
+}
+
+fn resolved_texture_entry(
+    atlas: &crate::render::shader::atlas::GpuTextureAtlas,
+    path: &str,
+) -> Option<ResolvedTextureEntry> {
+    atlas
+        .get(path)
+        .copied()
+        .map(ResolvedTextureEntry::Rgba)
+        .or_else(|| atlas.get_bc(path).copied().map(ResolvedTextureEntry::Bc))
+}
+
+fn apply_resolved_texture_entry(
+    vertices: &mut [crate::render::QuadVertex],
+    entry: ResolvedTextureEntry,
+) {
+    match entry {
+        ResolvedTextureEntry::Rgba(entry) => apply_rgba_entry(vertices, &entry),
+        ResolvedTextureEntry::Bc(entry) => apply_bc_entry(vertices, &entry),
+    }
 }
 
 fn apply_rgba_entry(
