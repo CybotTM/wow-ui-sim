@@ -108,12 +108,14 @@ fn create_texture_layer(
         && elements::create_texture_from_template_direct(
             ctx.region.lua,
             ctx.region.state,
-            texture,
-            ctx.region.frame_name,
-            ctx.region.subst_parent,
-            ctx.draw_layer,
-            is_mask,
-            is_line,
+            elements::DirectTextureCreateContext {
+                texture,
+                parent_name: ctx.region.frame_name,
+                subst_parent: ctx.region.subst_parent,
+                draw_layer: ctx.draw_layer,
+                is_mask,
+                is_line,
+            },
         )
         .is_ok();
     if used_direct {
