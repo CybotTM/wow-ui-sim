@@ -90,40 +90,96 @@ fn print_blizzard_summary(
     t: &LoadTiming,
     gc_dur: std::time::Duration,
 ) {
-    let cache_total = t.cache_hits + t.cache_misses;
-    let cache_info = if cache_total > 0 {
-        format!(", bytecode cache: {}/{} hits", t.cache_hits, cache_total)
+    logging::println_elapsed(&blizzard_summary_line(elapsed, t, gc_dur));
+    println!("{}", blizzard_frame_breakdown_line(t));
+    println!("{}", blizzard_setup_breakdown_line(t));
+    println!("{}", blizzard_finalize_breakdown_line(t));
+}
+
+fn blizzard_summary_line(
+    elapsed: std::time::Duration,
+    timing: &LoadTiming,
+    gc_dur: std::time::Duration,
+) -> String {
+    format!(
+        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}] gc={gc_dur:.2?}{})",
+        timing.io_time,
+        timing.xml_parse_time,
+        timing.xml_process_time,
+        timing.xml_frame_create_time,
+        timing.lua_exec_time,
+        timing.lua_compile_time,
+        timing.lua_call_time,
+        blizzard_cache_info(timing),
+    )
+}
+
+fn blizzard_cache_info(timing: &LoadTiming) -> String {
+    let cache_total = timing.cache_hits + timing.cache_misses;
+    if cache_total > 0 {
+        format!(
+            ", bytecode cache: {}/{} hits",
+            timing.cache_hits, cache_total
+        )
     } else {
         String::new()
-    };
-    logging::println_elapsed(&format!(
-        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}] gc={gc_dur:.2?}{cache_info})",
-        t.io_time,
-        t.xml_parse_time,
-        t.xml_process_time,
-        t.xml_frame_create_time,
-        t.lua_exec_time,
-        t.lua_compile_time,
-        t.lua_call_time
-    ));
-    println!(
+    }
+}
+
+fn blizzard_frame_breakdown_line(timing: &LoadTiming) -> String {
+    format!(
         "  frame breakdown: setup={:.2?} finalize={:.2?} ({} frames)",
-        t.xml_frame_setup_time, t.xml_frame_finalize_time, t.frame_count
-    );
-    println!(
+        timing.xml_frame_setup_time, timing.xml_frame_finalize_time, timing.frame_count
+    )
+}
+
+fn blizzard_setup_breakdown_line(timing: &LoadTiming) -> String {
+    format!(
         "  setup: code_build={:.2?} exec_lua={:.2?} props={:.2?}",
-        t.frame_code_build_time, t.frame_exec_lua_time, t.frame_apply_props_time
-    );
-    println!(
+        timing.frame_code_build_time, timing.frame_exec_lua_time, timing.frame_apply_props_time
+    )
+}
+
+fn blizzard_finalize_breakdown_line(timing: &LoadTiming) -> String {
+    format!(
         "  finalize: layers={:.2?} ({} tex, {} fs) anim={:.2?} button={:.2?} lifecycle={:.2?} ({} fires)",
-        t.frame_layer_children_time,
-        t.texture_count,
-        t.fontstring_count,
-        t.frame_anim_time,
-        t.frame_button_time,
-        t.frame_lifecycle_time,
-        t.lifecycle_fire_count
-    );
+        timing.frame_layer_children_time,
+        timing.texture_count,
+        timing.fontstring_count,
+        timing.frame_anim_time,
+        timing.frame_button_time,
+        timing.frame_lifecycle_time,
+        timing.lifecycle_fire_count
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn blizzard_cache_info_omits_empty_cache_stats() {
+        assert!(blizzard_cache_info(&LoadTiming::default()).is_empty());
+    }
+
+    #[test]
+    fn blizzard_summary_line_includes_cache_stats_when_present() {
+        let timing = LoadTiming {
+            cache_hits: 3,
+            cache_misses: 1,
+            ..LoadTiming::default()
+        };
+
+        let line = blizzard_summary_line(
+            std::time::Duration::from_secs(2),
+            &timing,
+            std::time::Duration::from_millis(250),
+        );
+
+        assert!(line.contains("Blizzard addons loaded in"));
+        assert!(line.contains("gc=250.00ms"));
+        assert!(line.contains("bytecode cache: 3/4 hits"));
+    }
 }
 
 /// Scan, load, and register third-party addons; print summary.
