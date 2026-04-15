@@ -311,90 +311,90 @@ fn patch_mail_toggle(env: &WowLuaEnv) {
 /// Falling back to C_Map.GetBestMapForUnit("player") matches Blizzard's own
 /// non-world-map branch and keeps the quest log path usable until the parent
 /// exists.
-fn patch_quest_map_current_map_lookup(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not __wow_ui_sim_quest_map_parent_guard_patched then
-            local function getQuestMapParent(frame)
-                if not frame or type(frame.GetParent) ~= "function" then
-                    return nil
-                end
-
-                local parent = frame:GetParent()
-                if not parent or type(parent.IsShown) ~= "function" then
-                    return nil
-                end
-
-                return parent
+const QUEST_MAP_CURRENT_MAP_LOOKUP_PATCH: &str = r#"
+    if not __wow_ui_sim_quest_map_parent_guard_patched then
+        local function getQuestMapParent(frame)
+            if not frame or type(frame.GetParent) ~= "function" then
+                return nil
             end
 
-            local function getCurrentMapID(self)
-                local parent = getQuestMapParent(self)
-                if parent and parent:IsShown() and type(parent.GetMapID) == "function" then
-                    return parent:GetMapID()
-                end
-
-                return C_Map.GetBestMapForUnit("player")
+            local parent = frame:GetParent()
+            if not parent or type(parent.IsShown) ~= "function" then
+                return nil
             end
 
-            local function refresh(self)
-                local parent = getQuestMapParent(self)
-                if parent and QuestMapFrame.DetailsFrame.questMapID
-                    and self.DetailsFrame.questMapID ~= parent:GetMapID() then
-                    QuestMapFrame_CloseQuestDetails()
-                end
-
-                self:SyncQuestSystemWithCurrentMap()
-                SortQuestSortTypes()
-                SortQuests()
-                local numPOIs = QuestMapUpdateAllQuests()
-                QuestMapFrame_ResetFilters()
-                QuestMapFrame_UpdateAll(numPOIs)
-
-                self:ValidateTabs()
-                self:CheckEventsTabTutorial()
-            end
-
-            local function updateAll(numPOIs)
-                QuestMapFrame:UpdatePOIs()
-
-                if not numPOIs then
-                    QuestMapUpdateAllQuests()
-                end
-
-                local parent = getQuestMapParent(QuestMapFrame)
-                if parent and parent:IsShown() then
-                    local questDetailID = QuestMapFrame.DetailsFrame.questID
-                    if questDetailID then
-                        QuestMapFrame_ShowQuestDetails(questDetailID)
-                    else
-                        QuestLogQuests_Update()
-                    end
-
-                    if type(parent.OnQuestLogUpdate) == "function" then
-                        parent:OnQuestLogUpdate()
-                    end
-                end
-            end
-
-            if QuestLogMixin then
-                QuestLogMixin.GetCurrentMapID = getCurrentMapID
-                QuestLogMixin.Refresh = refresh
-            end
-
-            if QuestMapFrame then
-                QuestMapFrame.GetCurrentMapID = getCurrentMapID
-                QuestMapFrame.Refresh = refresh
-            end
-
-            if type(QuestMapFrame_UpdateAll) == "function" then
-                QuestMapFrame_UpdateAll = updateAll
-            end
-
-            __wow_ui_sim_quest_map_parent_guard_patched = true
+            return parent
         end
-    "#,
-    );
+
+        local function getCurrentMapID(self)
+            local parent = getQuestMapParent(self)
+            if parent and parent:IsShown() and type(parent.GetMapID) == "function" then
+                return parent:GetMapID()
+            end
+
+            return C_Map.GetBestMapForUnit("player")
+        end
+
+        local function refresh(self)
+            local parent = getQuestMapParent(self)
+            if parent and QuestMapFrame.DetailsFrame.questMapID
+                and self.DetailsFrame.questMapID ~= parent:GetMapID() then
+                QuestMapFrame_CloseQuestDetails()
+            end
+
+            self:SyncQuestSystemWithCurrentMap()
+            SortQuestSortTypes()
+            SortQuests()
+            local numPOIs = QuestMapUpdateAllQuests()
+            QuestMapFrame_ResetFilters()
+            QuestMapFrame_UpdateAll(numPOIs)
+
+            self:ValidateTabs()
+            self:CheckEventsTabTutorial()
+        end
+
+        local function updateAll(numPOIs)
+            QuestMapFrame:UpdatePOIs()
+
+            if not numPOIs then
+                QuestMapUpdateAllQuests()
+            end
+
+            local parent = getQuestMapParent(QuestMapFrame)
+            if parent and parent:IsShown() then
+                local questDetailID = QuestMapFrame.DetailsFrame.questID
+                if questDetailID then
+                    QuestMapFrame_ShowQuestDetails(questDetailID)
+                else
+                    QuestLogQuests_Update()
+                end
+
+                if type(parent.OnQuestLogUpdate) == "function" then
+                    parent:OnQuestLogUpdate()
+                end
+            end
+        end
+
+        if QuestLogMixin then
+            QuestLogMixin.GetCurrentMapID = getCurrentMapID
+            QuestLogMixin.Refresh = refresh
+        end
+
+        if QuestMapFrame then
+            QuestMapFrame.GetCurrentMapID = getCurrentMapID
+            QuestMapFrame.Refresh = refresh
+        end
+
+        if type(QuestMapFrame_UpdateAll) == "function" then
+            QuestMapFrame_UpdateAll = updateAll
+        end
+
+        __wow_ui_sim_quest_map_parent_guard_patched = true
+    end
+"#;
+
+fn patch_quest_map_current_map_lookup(env: &WowLuaEnv) {
+    let _ = env.exec(QUEST_MAP_CURRENT_MAP_LOOKUP_PATCH);
 }
 
 /// Patch MapCanvasScrollControllerMixin to guard nil targetScale before compare.
@@ -670,5 +670,44 @@ mod tests {
             minimize,
             "PLAYER_SPELLS_MINIMIZE tutorial should be marked closed"
         );
+    }
+
+    #[test]
+    fn quest_map_patch_falls_back_to_best_map_for_unit_without_parent() {
+        let env = env();
+        env.exec(
+            r#"
+            C_Map = {
+                GetBestMapForUnit = function(unit)
+                    assert(unit == "player")
+                    return 4242
+                end
+            }
+            QuestLogMixin = {}
+            QuestMapFrame = {
+                DetailsFrame = {},
+                UpdatePOIs = function() end,
+                ValidateTabs = function() end,
+                CheckEventsTabTutorial = function() end,
+                SyncQuestSystemWithCurrentMap = function() end,
+            }
+            function SortQuestSortTypes() end
+            function SortQuests() end
+            function QuestMapUpdateAllQuests() return 0 end
+            function QuestMapFrame_ResetFilters() end
+            function QuestMapFrame_UpdateAll() end
+        "#,
+        )
+        .unwrap();
+
+        patch_quest_map_current_map_lookup(&env);
+
+        let map_id: i64 = env.eval("return QuestLogMixin:GetCurrentMapID()").unwrap();
+        let patched: bool = env
+            .eval("return __wow_ui_sim_quest_map_parent_guard_patched == true")
+            .unwrap();
+
+        assert_eq!(map_id, 4242);
+        assert!(patched, "quest map guard patch should be marked installed");
     }
 }
