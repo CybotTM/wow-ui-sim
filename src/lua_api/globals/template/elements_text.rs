@@ -123,7 +123,7 @@ pub(super) fn create_fontstring_from_template_direct(
     draw_layer: &str,
 ) -> mlua::Result<()> {
     ensure_direct_fontstring_supported(fontstring)?;
-    let parent_id = resolve_direct_fontstring_parent(state, parent_name)?;
+    let parent_id = resolve_direct_region_parent(state, parent_name, "fontstring")?;
     let child_name = template_fontstring_name(fontstring, subst_parent);
     let child = build_direct_fontstring(lua, fontstring, parent_id, &child_name, draw_layer);
     let child_id = child.id;
@@ -148,14 +148,15 @@ pub(super) fn create_fontstring_from_template_direct(
     Ok(())
 }
 
-fn resolve_direct_fontstring_parent(
+fn resolve_direct_region_parent(
     state: &Rc<RefCell<SimState>>,
     parent_name: &str,
+    region_kind: &str,
 ) -> mlua::Result<u64> {
     resolve_state_frame_id(state, parent_name).ok_or_else(|| {
         mlua::Error::runtime(format!(
-            "missing parent '{}' for direct fontstring create",
-            parent_name
+            "missing parent '{}' for direct {region_kind} create",
+            parent_name,
         ))
     })
 }
@@ -397,35 +398,17 @@ pub(super) fn create_button_texture_from_template_direct(
     subst_parent: &str,
     parent_key: &str,
 ) -> mlua::Result<()> {
-    let parent_id = resolve_state_frame_id(state, parent_name).ok_or_else(|| {
-        mlua::Error::runtime(format!(
-            "missing parent '{}' for direct button texture create",
-            parent_name
-        ))
-    })?;
-    let default_parent_key = format!("{parent_key}Texture");
-    let actual_parent_key = texture.parent_key.as_deref().unwrap_or(&default_parent_key);
-    let child_name = texture
-        .name
-        .as_ref()
-        .map(|name| name.replace("$parent", subst_parent))
-        .unwrap_or_else(|| format!("__tex_{}", rand_id()));
-
-    let mut child = Frame::new(
-        WidgetType::Texture,
-        Some(child_name.clone()),
-        Some(parent_id),
-    );
-    child.parent_key = Some(actual_parent_key.to_string());
-    apply_button_slot_defaults(&mut child, actual_parent_key);
+    let parent_id = resolve_direct_region_parent(state, parent_name, "button texture")?;
+    let binding = direct_button_texture_binding(texture, subst_parent, parent_key);
+    let child = build_direct_button_texture(parent_id, &binding);
     let child_id = child.id;
-    register_child_widget(lua, parent_id, child, &Some(child_name))?;
+    register_direct_button_texture(lua, parent_id, child, &binding.child_name)?;
     sync_region_parent_refs(
         lua,
         state,
         parent_id,
         child_id,
-        Some(actual_parent_key),
+        Some(binding.actual_parent_key.as_str()),
         texture.parent_array.as_deref(),
     )?;
     apply_texture_visuals_direct(state, child_id, texture, false, false);
@@ -438,8 +421,56 @@ pub(super) fn create_button_texture_from_template_direct(
         false,
     );
     apply_region_visibility(state, child_id, texture.hidden, texture.alpha);
-    sync_button_texture_slot(state, parent_id, child_id, actual_parent_key);
+    sync_button_texture_slot(
+        state,
+        parent_id,
+        child_id,
+        binding.actual_parent_key.as_str(),
+    );
     Ok(())
+}
+
+struct DirectButtonTextureBinding {
+    child_name: String,
+    actual_parent_key: String,
+}
+
+fn direct_button_texture_binding(
+    texture: &crate::xml::TextureXml,
+    subst_parent: &str,
+    parent_key: &str,
+) -> DirectButtonTextureBinding {
+    let default_parent_key = format!("{parent_key}Texture");
+    let actual_parent_key = texture.parent_key.clone().unwrap_or(default_parent_key);
+    let child_name = texture
+        .name
+        .as_ref()
+        .map(|name| name.replace("$parent", subst_parent))
+        .unwrap_or_else(|| format!("__tex_{}", rand_id()));
+    DirectButtonTextureBinding {
+        child_name,
+        actual_parent_key,
+    }
+}
+
+fn build_direct_button_texture(parent_id: u64, binding: &DirectButtonTextureBinding) -> Frame {
+    let mut child = Frame::new(
+        WidgetType::Texture,
+        Some(binding.child_name.clone()),
+        Some(parent_id),
+    );
+    child.parent_key = Some(binding.actual_parent_key.clone());
+    apply_button_slot_defaults(&mut child, binding.actual_parent_key.as_str());
+    child
+}
+
+fn register_direct_button_texture(
+    lua: &Lua,
+    parent_id: u64,
+    child: Frame,
+    child_name: &str,
+) -> mlua::Result<()> {
+    register_child_widget(lua, parent_id, child, &Some(child_name.to_string())).map(|_| ())
 }
 
 /// Create a button texture from template XML (NormalTexture, PushedTexture, etc.).
@@ -685,8 +716,9 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
 #[cfg(test)]
 mod tests {
     use super::{
-        append_thumb_texture_parent_binding, build_direct_fontstring,
-        build_fontstring_create_preamble, quoted_fontstring_inherits,
+        append_thumb_texture_parent_binding, build_direct_button_texture, build_direct_fontstring,
+        build_fontstring_create_preamble, direct_button_texture_binding,
+        quoted_fontstring_inherits,
     };
     use crate::widget::{DrawLayer, WidgetType};
     use mlua::Lua;
@@ -747,5 +779,23 @@ mod tests {
         assert_eq!(child.parent_key.as_deref(), Some("Text"));
         assert_eq!(child.draw_layer, DrawLayer::Overlay);
         assert_eq!(child.text.as_deref(), Some("Hello"));
+    }
+
+    #[test]
+    fn direct_button_texture_binding_and_builder_apply_parent_key_defaults() {
+        let texture = crate::xml::TextureXml {
+            name: Some("$parentNormal".to_string()),
+            ..Default::default()
+        };
+
+        let binding = direct_button_texture_binding(&texture, "Frame", "Normal");
+        assert_eq!(binding.child_name, "FrameNormal");
+        assert_eq!(binding.actual_parent_key, "NormalTexture");
+
+        let child = build_direct_button_texture(9, &binding);
+        assert_eq!(child.widget_type, WidgetType::Texture);
+        assert_eq!(child.parent_id, Some(9));
+        assert_eq!(child.name.as_deref(), Some("FrameNormal"));
+        assert_eq!(child.parent_key.as_deref(), Some("NormalTexture"));
     }
 }
