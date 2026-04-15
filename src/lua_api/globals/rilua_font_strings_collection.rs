@@ -62,6 +62,17 @@ const NAMED_COLOR_GLOBALS: &[(&str, (f64, f64, f64, f64))] = &[
     ("DIM_RED_FONT_COLOR", (0.8, 0.1, 0.1, 1.0)),
     ("LIGHTBLUE_FONT_COLOR", (0.51176, 0.77255, 1.0, 1.0)),
     ("ACTIONBAR_HOTKEY_FONT_COLOR", (0.6, 0.6, 0.6, 1.0)),
+    ("FACTION_RED_COLOR", (0.8, 0.13, 0.13, 1.0)),
+    ("FACTION_ORANGE_COLOR", (0.93, 0.53, 0.13, 1.0)),
+    ("FACTION_YELLOW_COLOR", (0.8, 0.73, 0.13, 1.0)),
+    ("FACTION_GREEN_COLOR", (0.13, 0.8, 0.13, 1.0)),
+    (
+        "OBJECTIVE_TRACKER_BLOCK_HEADER_COLOR",
+        (1.0, 0.82, 0.0, 1.0),
+    ),
+    ("PANEL_BACKGROUND_COLOR", (0.15, 0.15, 0.15, 1.0)),
+    ("EDIT_MODE_GRID_LINE_COLOR", (1.0, 1.0, 1.0, 0.3)),
+    ("EDIT_MODE_GRID_CENTER_LINE_COLOR", (0.0, 0.8, 1.0, 0.6)),
 ];
 
 const RAID_CLASS_COLORS_DATA: &[(&str, (f64, f64, f64, f64))] = &[

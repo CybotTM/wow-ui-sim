@@ -456,7 +456,11 @@ impl WowLuaEnv {
 
     /// Restore globals that EnvironmentCleanup nil'd but later addons need.
     pub fn restore_post_cleanup_globals(&self) {
-        let _ = super::globals::environment_restore::restore_post_cleanup_globals(&*self.rilua());
+        let mut lua = self.rilua_mut();
+        let _ = super::globals::environment_restore::restore_post_cleanup_globals(
+            &mut lua,
+            Rc::clone(&self.state),
+        );
     }
 
     /// Apply post-load workarounds for Blizzard code that depends on

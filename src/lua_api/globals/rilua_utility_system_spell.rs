@@ -9,11 +9,13 @@
 //! Complex operations (pcall, xpcall, securecall) are stubbed with TODO.
 
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::globals::unit_api::parse_party_index;
 use crate::lua_api::rilua_methods::{
-    borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack,
-    registry_get, registry_set, state_handle, val_to_string,
+    borrow_lua, borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    frame_id_from_stack, frame_ref, registry_get, registry_set, state_handle, table_get, table_set,
+    val_to_string,
 };
-use crate::lua_api::rilua_script_helpers::protected_call_state;
+use crate::lua_api::rilua_script_helpers::{get_event_listeners, get_script, protected_call_state};
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
 use crate::specializations;
 use rilua::LuaApiMut;
@@ -22,11 +24,118 @@ use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
 use std::path::PathBuf;
 
+#[derive(Clone)]
+struct UnitVitals {
+    health: i32,
+    health_max: i32,
+    power: i32,
+    power_max: i32,
+    power_type: i32,
+    power_type_name: String,
+}
+
 fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     if let Some(g) = state.gc.tables.get_mut(global) {
         let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
+    }
+}
+
+fn global_val(state: &mut LuaState, name: &str) -> Val {
+    let key = state.gc.intern_string(name.as_bytes());
+    state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|table| table.get_str(key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+}
+
+fn ensure_global_table(state: &mut LuaState, name: &str) -> Val {
+    match global_val(state, name) {
+        table @ Val::Table(_) => table,
+        _ => {
+            let table = create_table(state);
+            set_global_val(state, name, table);
+            table
+        }
+    }
+}
+
+fn lookup_unit_vitals(state: &LuaState, unit: &str) -> UnitVitals {
+    let sim = borrow_state(state).expect("sim state should exist");
+    if unit == "target"
+        && let Some(target) = &sim.current_target
+    {
+        return UnitVitals {
+            health: target.health,
+            health_max: target.health_max,
+            power: target.power,
+            power_max: target.power_max,
+            power_type: target.power_type,
+            power_type_name: target.power_type_name.clone(),
+        };
+    }
+    if let Some(index) = parse_party_index(unit)
+        && let Some(member) = sim.party_members.get(index)
+    {
+        return UnitVitals {
+            health: member.health,
+            health_max: member.health_max,
+            power: member.power,
+            power_max: member.power_max,
+            power_type: member.power_type,
+            power_type_name: member.power_type_name.clone(),
+        };
+    }
+    UnitVitals {
+        health: sim.player.health,
+        health_max: sim.player.health_max,
+        power: sim.player.power,
+        power_max: sim.player.power_max,
+        power_type: sim.player.power_type,
+        power_type_name: power_type_name(sim.player.power_type).to_string(),
+    }
+}
+
+fn requested_power_type(state: &LuaState) -> Option<i64> {
+    match stack_val(state, 2) {
+        Val::Num(n) => Some(n as i64),
+        _ => None,
+    }
+}
+
+fn is_secondary_power_type(power_type: Option<i64>) -> bool {
+    matches!(power_type, Some(power_type) if power_type != 0)
+}
+
+fn secondary_power_max(power_type: i64) -> i32 {
+    match power_type {
+        4 => 7,
+        5 => 6,
+        9 => 5,
+        16 => 4,
+        _ => 5,
+    }
+}
+
+fn power_type_name(power_type: i32) -> &'static str {
+    match power_type {
+        0 => "MANA",
+        1 => "RAGE",
+        2 => "FOCUS",
+        3 => "ENERGY",
+        5 => "RUNES",
+        6 => "RUNIC_POWER",
+        7 => "SOUL_SHARDS",
+        8 => "LUNAR_POWER",
+        9 => "HOLY_POWER",
+        11 => "MAELSTROM",
+        13 => "INSANITY",
+        17 => "FURY",
+        18 => "PAIN",
+        _ => "MANA",
     }
 }
 
@@ -362,6 +471,68 @@ pub fn table_util_find_indexed_mismatch(state: &mut LuaState) -> LuaResult<u32> 
 
 // ── Spell API ────────────────────────────────────────────────────────────────
 
+fn unit_health(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.health as f64));
+    Ok(1)
+}
+
+fn unit_health_max(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.health_max as f64));
+    Ok(1)
+}
+
+fn unit_power(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    if is_secondary_power_type(requested_power_type(state)) {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    }
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.power as f64));
+    Ok(1)
+}
+
+fn unit_power_max(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    if let Some(power_type) = requested_power_type(state)
+        && is_secondary_power_type(Some(power_type))
+    {
+        state.push(Val::Num(secondary_power_max(power_type) as f64));
+        return Ok(1);
+    }
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.power_max as f64));
+    Ok(1)
+}
+
+fn unit_power_type(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    let power_type_name = create_string(state, &vitals.power_type_name);
+    state.push(Val::Num(vitals.power_type as f64));
+    state.push(power_type_name);
+    Ok(2)
+}
+
+fn unit_get_incoming_heals(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn unit_get_total_absorbs(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn unit_get_total_heal_absorbs(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 /// CastSpellByID(spellId [, unit]) — cast a spell by ID.
 ///
 /// TODO: cast_spell_by_id requires Rc<RefCell<SimState>> — use borrow_state_mut helper.
@@ -505,6 +676,334 @@ fn player_get_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn wowtoken_state_table(state: &mut LuaState) -> Val {
+    match global_val(state, "__wowtoken_state") {
+        table @ Val::Table(_) => table,
+        _ => {
+            let table = create_table(state);
+            table_set(state, table, "tokenCount", Val::Num(2.0));
+            table_set(state, table, "currentBalance", Val::Num(2500.0));
+            table_set(state, table, "balanceRedeemAmount", Val::Num(1500.0));
+            table_set(state, table, "cannotRedeemReason", Val::Num(0.0));
+            table_set(state, table, "isSubscribed", Val::Bool(false));
+            table_set(state, table, "remainingGameTime", Val::Num(1440.0));
+            table_set(state, table, "pendingRedeemType", Val::Nil);
+            table_set(state, table, "priceLockDuration", Val::Num(900.0));
+            table_set(state, table, "willKickFromWorld", Val::Bool(false));
+            set_global_val(state, "__wowtoken_state", table);
+            table
+        }
+    }
+}
+
+fn wowtoken_num(state: &mut LuaState, key: &str, default: f64) -> f64 {
+    let token_state = wowtoken_state_table(state);
+    match table_get(state, token_state, key) {
+        Val::Num(value) => value,
+        _ => default,
+    }
+}
+
+fn wowtoken_bool(state: &mut LuaState, key: &str, default: bool) -> bool {
+    let token_state = wowtoken_state_table(state);
+    match table_get(state, token_state, key) {
+        Val::Bool(value) => value,
+        _ => default,
+    }
+}
+
+fn wowtoken_pending_redeem_type(state: &mut LuaState) -> Option<i32> {
+    let token_state = wowtoken_state_table(state);
+    match table_get(state, token_state, "pendingRedeemType") {
+        Val::Num(value) => Some(value as i32),
+        _ => None,
+    }
+}
+
+fn wowtoken_set_num(state: &mut LuaState, key: &str, value: f64) {
+    let token_state = wowtoken_state_table(state);
+    table_set(state, token_state, key, Val::Num(value));
+}
+
+fn wowtoken_set_bool(state: &mut LuaState, key: &str, value: bool) {
+    let token_state = wowtoken_state_table(state);
+    table_set(state, token_state, key, Val::Bool(value));
+}
+
+fn wowtoken_set_pending_redeem_type(state: &mut LuaState, value: Option<i32>) {
+    let token_state = wowtoken_state_table(state);
+    match value {
+        Some(value) => table_set(
+            state,
+            token_state,
+            "pendingRedeemType",
+            Val::Num(value as f64),
+        ),
+        None => table_set(state, token_state, "pendingRedeemType", Val::Nil),
+    }
+}
+
+fn parse_balance_amount(text: &str) -> Option<i64> {
+    let digits_only: String = text.chars().filter(|ch| ch.is_ascii_digit()).collect();
+    if digits_only.len() >= 3 {
+        return digits_only.parse().ok();
+    }
+    if digits_only.is_empty() {
+        return None;
+    }
+    digits_only.parse::<i64>().ok().map(|dollars| dollars * 100)
+}
+
+fn first_bool_arg(state: &LuaState) -> bool {
+    (1..=2)
+        .find_map(|index| match stack_val(state, index) {
+            Val::Bool(value) => Some(value),
+            _ => None,
+        })
+        .unwrap_or(false)
+}
+
+fn first_num_arg(state: &LuaState) -> Option<i32> {
+    (1..=2).find_map(|index| match stack_val(state, index) {
+        Val::Num(value) => Some(value as i32),
+        _ => None,
+    })
+}
+
+fn first_string_arg(state: &LuaState) -> String {
+    (1..=2)
+        .find_map(|index| val_to_string(state, stack_val(state, index)))
+        .unwrap_or_default()
+}
+
+fn fire_named_event(state: &mut LuaState, event_name: &str) {
+    for widget_id in get_event_listeners(state, event_name) {
+        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
+            continue;
+        };
+        let Ok(frame) = frame_ref(state, widget_id) else {
+            continue;
+        };
+        let event_name_val = create_string(state, event_name);
+        let _ = call_function_state(state, handler, &[frame, event_name_val]);
+    }
+}
+
+fn c_wowtoken_can_redeem_for_balance(state: &mut LuaState) -> LuaResult<u32> {
+    fire_named_event(state, "TOKEN_REDEEM_BALANCE_UPDATED");
+    let result = if wowtoken_num(state, "tokenCount", 0.0) > 0.0 {
+        0.0
+    } else {
+        1.0
+    };
+    state.push(Val::Num(result));
+    Ok(1)
+}
+
+fn c_wowtoken_cancel_redeem(state: &mut LuaState) -> LuaResult<u32> {
+    wowtoken_set_pending_redeem_type(state, None);
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_wowtoken_confirm_buy_token(state: &mut LuaState) -> LuaResult<u32> {
+    let accepted = first_bool_arg(state);
+    if !accepted {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
+    let token_count = wowtoken_num(state, "tokenCount", 0.0) + 1.0;
+    wowtoken_set_num(state, "tokenCount", token_count);
+    fire_named_event(state, "TOKEN_STATUS_CHANGED");
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_wowtoken_confirm_sell_token(state: &mut LuaState) -> LuaResult<u32> {
+    let accepted = first_bool_arg(state);
+    if !accepted {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
+    let token_count = wowtoken_num(state, "tokenCount", 0.0);
+    if token_count > 0.0 {
+        wowtoken_set_num(state, "tokenCount", token_count - 1.0);
+    }
+    fire_named_event(state, "TOKEN_STATUS_CHANGED");
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_wowtoken_get_balance_redeem_amount(state: &mut LuaState) -> LuaResult<u32> {
+    let balance_redeem_amount = wowtoken_num(state, "balanceRedeemAmount", 1500.0);
+    state.push(Val::Num(balance_redeem_amount));
+    Ok(1)
+}
+
+fn c_wowtoken_get_balance_redemption_info(state: &mut LuaState) -> LuaResult<u32> {
+    let current_balance = wowtoken_num(state, "currentBalance", 2500.0);
+    let balance_redeem_amount = wowtoken_num(state, "balanceRedeemAmount", 1500.0);
+    let token_count = wowtoken_num(state, "tokenCount", 0.0);
+    let cannot_redeem_reason = wowtoken_num(state, "cannotRedeemReason", 0.0);
+    state.push(Val::Num(current_balance));
+    state.push(Val::Num(balance_redeem_amount));
+    state.push(Val::Bool(token_count > 0.0));
+    state.push(Val::Num(cannot_redeem_reason));
+    Ok(4)
+}
+
+fn c_wowtoken_get_game_time_redemption_info(state: &mut LuaState) -> LuaResult<u32> {
+    let is_subscribed = wowtoken_bool(state, "isSubscribed", false);
+    let remaining_game_time = wowtoken_num(state, "remainingGameTime", 1440.0);
+    state.push(Val::Bool(is_subscribed));
+    state.push(Val::Num(remaining_game_time));
+    Ok(2)
+}
+
+fn c_wowtoken_get_price_lock_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let price_lock_duration = wowtoken_num(state, "priceLockDuration", 900.0);
+    state.push(Val::Num(price_lock_duration));
+    Ok(1)
+}
+
+fn c_wowtoken_get_remaining_game_time(state: &mut LuaState) -> LuaResult<u32> {
+    fire_named_event(state, "TOKEN_REDEEM_GAME_TIME_UPDATED");
+    let remaining_game_time = wowtoken_num(state, "remainingGameTime", 1440.0);
+    state.push(Val::Num(remaining_game_time));
+    Ok(1)
+}
+
+fn c_wowtoken_get_token_count(state: &mut LuaState) -> LuaResult<u32> {
+    let token_count = wowtoken_num(state, "tokenCount", 2.0);
+    state.push(Val::Num(token_count));
+    Ok(1)
+}
+
+fn c_wowtoken_is_redemption_still_valid(state: &mut LuaState) -> LuaResult<u32> {
+    let pending_redeem_type = wowtoken_pending_redeem_type(state);
+    let token_count = wowtoken_num(state, "tokenCount", 0.0);
+    state.push(Val::Bool(
+        pending_redeem_type.is_some() && token_count > 0.0,
+    ));
+    Ok(1)
+}
+
+fn c_wowtoken_redeem_token(state: &mut LuaState) -> LuaResult<u32> {
+    let redeem_type = first_num_arg(state).unwrap_or(0);
+    if wowtoken_num(state, "tokenCount", 0.0) <= 0.0 {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
+    wowtoken_set_pending_redeem_type(state, Some(redeem_type));
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn confirm_game_time_redemption(state: &mut LuaState) {
+    wowtoken_set_bool(state, "isSubscribed", true);
+    let remaining_game_time = wowtoken_num(state, "remainingGameTime", 1440.0);
+    wowtoken_set_num(
+        state,
+        "remainingGameTime",
+        remaining_game_time + 30.0 * 24.0 * 60.0,
+    );
+    fire_named_event(state, "TOKEN_STATUS_CHANGED");
+    fire_named_event(state, "TOKEN_REDEEM_GAME_TIME_UPDATED");
+    state.push(Val::Bool(true));
+}
+
+fn confirm_balance_redemption(state: &mut LuaState) {
+    let current_balance = wowtoken_num(state, "currentBalance", 2500.0);
+    let balance_redeem_amount = wowtoken_num(state, "balanceRedeemAmount", 1500.0);
+    wowtoken_set_num(
+        state,
+        "currentBalance",
+        current_balance + balance_redeem_amount,
+    );
+    fire_named_event(state, "TOKEN_STATUS_CHANGED");
+    fire_named_event(state, "TOKEN_REDEEM_BALANCE_UPDATED");
+    state.push(Val::Bool(true));
+}
+
+fn c_wowtoken_redeem_token_confirm(state: &mut LuaState) -> LuaResult<u32> {
+    let redeem_type = first_num_arg(state).unwrap_or(0);
+    if wowtoken_pending_redeem_type(state) != Some(redeem_type)
+        || wowtoken_num(state, "tokenCount", 0.0) <= 0.0
+    {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
+
+    wowtoken_set_pending_redeem_type(state, None);
+    let token_count = wowtoken_num(state, "tokenCount", 0.0);
+    wowtoken_set_num(state, "tokenCount", token_count - 1.0);
+
+    match redeem_type {
+        1 => confirm_game_time_redemption(state),
+        2 => confirm_balance_redemption(state),
+        _ => state.push(Val::Bool(false)),
+    }
+    Ok(1)
+}
+
+fn c_wowtoken_set_balance_amount_string(state: &mut LuaState) -> LuaResult<u32> {
+    let value = first_string_arg(state);
+    if let Some(parsed_amount) = parse_balance_amount(&value) {
+        wowtoken_set_num(state, "balanceRedeemAmount", parsed_amount as f64);
+    }
+    Ok(0)
+}
+
+fn c_wowtoken_will_kick_from_world(state: &mut LuaState) -> LuaResult<u32> {
+    let will_kick_from_world = wowtoken_bool(state, "willKickFromWorld", false);
+    state.push(Val::Bool(will_kick_from_world));
+    Ok(1)
+}
+
+const WOWTOKEN_SECURE_FUNCTIONS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    ("CanRedeemForBalance", c_wowtoken_can_redeem_for_balance),
+    ("CancelRedeem", c_wowtoken_cancel_redeem),
+    ("ConfirmBuyToken", c_wowtoken_confirm_buy_token),
+    ("ConfirmSellToken", c_wowtoken_confirm_sell_token),
+    (
+        "GetBalanceRedeemAmount",
+        c_wowtoken_get_balance_redeem_amount,
+    ),
+    (
+        "GetBalanceRedemptionInfo",
+        c_wowtoken_get_balance_redemption_info,
+    ),
+    (
+        "GetGameTimeRedemptionInfo",
+        c_wowtoken_get_game_time_redemption_info,
+    ),
+    ("GetPriceLockDuration", c_wowtoken_get_price_lock_duration),
+    ("GetRemainingGameTime", c_wowtoken_get_remaining_game_time),
+    ("GetTokenCount", c_wowtoken_get_token_count),
+    (
+        "IsRedemptionStillValid",
+        c_wowtoken_is_redemption_still_valid,
+    ),
+    ("RedeemToken", c_wowtoken_redeem_token),
+    ("RedeemTokenConfirm", c_wowtoken_redeem_token_confirm),
+    (
+        "SetBalanceAmountString",
+        c_wowtoken_set_balance_amount_string,
+    ),
+    ("WillKickFromWorld", c_wowtoken_will_kick_from_world),
+];
+
+fn register_rust_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+    functions: &[(&str, rilua::vm::closure::RustFn)],
+) -> LuaResult<()> {
+    for (name, func) in functions {
+        table_set_rust_fn(state, table_ref, name, *func)?;
+    }
+    Ok(())
+}
+
 // ── Registration ─────────────────────────────────────────────────────────────
 
 /// Register all functions in this module as rilua globals.
@@ -560,6 +1059,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     LuaApiMut::register_function(lua, "seterrorhandler", seterrorhandler)?;
     LuaApiMut::register_function(lua, "geterrorhandler", geterrorhandler)?;
 
+    // Unit health/power
+    LuaApiMut::register_function(lua, "UnitHealth", unit_health)?;
+    LuaApiMut::register_function(lua, "UnitHealthMax", unit_health_max)?;
+    LuaApiMut::register_function(lua, "UnitPower", unit_power)?;
+    LuaApiMut::register_function(lua, "UnitPowerMax", unit_power_max)?;
+    LuaApiMut::register_function(lua, "UnitPowerType", unit_power_type)?;
+    LuaApiMut::register_function(lua, "UnitGetIncomingHeals", unit_get_incoming_heals)?;
+    LuaApiMut::register_function(lua, "UnitGetTotalAbsorbs", unit_get_total_absorbs)?;
+    LuaApiMut::register_function(lua, "UnitGetTotalHealAbsorbs", unit_get_total_heal_absorbs)?;
+
     // Spell: cast globals (stubbed)
     LuaApiMut::register_function(lua, "CastSpellByID", cast_spell_by_id)?;
     LuaApiMut::register_function(lua, "CastSpellByName", cast_spell_by_name)?;
@@ -575,6 +1084,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     register_c_addon_profiler(lua.state_mut())?;
     register_c_specialization_info(lua.state_mut())?;
     register_c_model_info(lua.state_mut())?;
+    register_c_lfg_info(lua.state_mut())?;
+    register_c_wowtoken_secure(lua.state_mut())?;
     register_c_texture(lua.state_mut())?;
     register_legacy_addon_globals(lua.state_mut())?;
     register_widget_container_mixin(lua.state_mut())?;
@@ -663,6 +1174,45 @@ fn register_c_model_info(state: &mut LuaState) -> LuaResult<()> {
         c_model_info_get_model_scene_info_by_id,
     )?;
     set_global_val(state, "C_ModelInfo", t);
+    Ok(())
+}
+
+fn register_c_lfg_info(state: &mut LuaState) -> LuaResult<()> {
+    let t = ensure_global_table(state, "C_LFGInfo");
+    let Val::Table(t_ref) = t else {
+        unreachable!("C_LFGInfo must be a table");
+    };
+    table_set_rust_fn(state, t_ref, "GetDungeonInfo", c_model_info_get_empty_table)?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetLFDLockStates",
+        c_model_info_get_empty_table,
+    )?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetAllEntriesForCategory",
+        c_model_info_get_empty_table,
+    )?;
+    table_set_rust_fn(state, t_ref, "CanPlayerUseLFD", c_lfg_info_can_player_use)?;
+    table_set_rust_fn(state, t_ref, "CanPlayerUseLFR", c_lfg_info_can_player_use)?;
+    Ok(())
+}
+
+fn c_lfg_info_can_player_use(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    state.push(Val::Nil);
+    Ok(2)
+}
+
+fn register_c_wowtoken_secure(state: &mut LuaState) -> LuaResult<()> {
+    wowtoken_state_table(state);
+    let t = ensure_global_table(state, "C_WowTokenSecure");
+    let Val::Table(t_ref) = t else {
+        unreachable!("C_WowTokenSecure must be a table");
+    };
+    register_rust_fns(state, t_ref, WOWTOKEN_SECURE_FUNCTIONS)?;
     Ok(())
 }
 

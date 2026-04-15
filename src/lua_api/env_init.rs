@@ -183,6 +183,18 @@ if GetActionInfo == nil then
   end
 end
 
+if LE_TOKEN_REDEEM_TYPE_GAME_TIME == nil then
+  LE_TOKEN_REDEEM_TYPE_GAME_TIME = 1
+end
+
+if LE_TOKEN_REDEEM_TYPE_BALANCE == nil then
+  LE_TOKEN_REDEEM_TYPE_BALANCE = 2
+end
+
+if LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP == nil then
+  LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP = 10
+end
+
 if IsTrialAccount == nil then
   function IsTrialAccount()
     return false

@@ -539,6 +539,8 @@ impl SimState {
         self.action_bars = default_action_bars();
         self.party_members = default_party();
         self.player.name = random_player_name();
+        self.player.power = 50_000;
+        self.player.power_max = 100_000;
         self.player.buffs = default_player_buffs();
     }
 

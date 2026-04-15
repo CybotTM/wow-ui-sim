@@ -667,8 +667,8 @@ fn test_startup_service_namespaces_exist() {
     assert_eq!(has_new_products_ty, "function");
     assert!(!has_new_products);
     assert_eq!(token_secure_ty, "function");
-    assert_eq!(price_lock_duration, 0);
-    assert_eq!(token_count, 0);
+    assert_eq!(price_lock_duration, 900);
+    assert_eq!(token_count, 2);
 }
 
 #[test]
@@ -837,6 +837,78 @@ fn test_old_stack_startup_globals_exist_on_rilua_path() {
     assert!(unit_casting_nil);
     assert!(active_spec_id > 0);
     assert!(!active_spec_name.is_empty());
+}
+
+#[test]
+fn test_old_stack_power_lfg_and_cleanup_globals_exist_on_rilua_path() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("C_WowTokenSecure = nil").unwrap();
+    env.restore_post_cleanup_globals();
+
+    let (
+        unit_power,
+        unit_power_with_type,
+        unit_power_max,
+        power_type,
+        power_token,
+        lfg_lfd_ty,
+        lfg_lfr_ty,
+        can_use_lfd,
+        can_use_lfr,
+        faction_rgba_ty,
+        token_secure_ty,
+        token_count,
+        price_lock_duration,
+    ): (
+        i64,
+        i64,
+        i64,
+        i64,
+        String,
+        String,
+        String,
+        bool,
+        bool,
+        String,
+        String,
+        i64,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            local ptype, ptoken = UnitPowerType("player")
+            local canUseLFD = C_LFGInfo.CanPlayerUseLFD()
+            local canUseLFR = C_LFGInfo.CanPlayerUseLFR()
+            return UnitPower("player"),
+                UnitPower("player", 0),
+                UnitPowerMax("player"),
+                ptype,
+                ptoken,
+                type(C_LFGInfo.CanPlayerUseLFD),
+                type(C_LFGInfo.CanPlayerUseLFR),
+                canUseLFD,
+                canUseLFR,
+                type(FACTION_RED_COLOR.GetRGBA),
+                type(C_WowTokenSecure.GetTokenCount),
+                C_WowTokenSecure.GetTokenCount(),
+                C_WowTokenSecure.GetPriceLockDuration()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(unit_power, 50_000);
+    assert_eq!(unit_power_with_type, 50_000);
+    assert_eq!(unit_power_max, 100_000);
+    assert_eq!(power_type, 0);
+    assert_eq!(power_token, "MANA");
+    assert_eq!(lfg_lfd_ty, "function");
+    assert_eq!(lfg_lfr_ty, "function");
+    assert!(can_use_lfd);
+    assert!(can_use_lfr);
+    assert_eq!(faction_rgba_ty, "function");
+    assert_eq!(token_secure_ty, "function");
+    assert_eq!(token_count, 2);
+    assert_eq!(price_lock_duration, 900);
 }
 
 #[test]
