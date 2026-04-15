@@ -493,6 +493,34 @@ fn test_model_scene_camera_light_and_fog_methods_persist_state() {
 }
 
 #[test]
+fn test_model_scene_overlap_flag_persists_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local scene = CreateFrame("ModelScene", "TestModelSceneOverlap", UIParent)
+        scene:SetAllowOverlappedModels(true)
+    "#,
+    )
+    .unwrap();
+
+    let allow: bool = env
+        .eval("return TestModelSceneOverlap:IsAllowOverlappedModels()")
+        .unwrap();
+    assert!(allow);
+
+    let scene_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestModelSceneOverlap")
+        .unwrap();
+    let state = env.state().borrow();
+    let frame = state.widgets.get(scene_id).unwrap();
+    assert!(frame.model_scene_state.allow_overlapped_models);
+}
+
+#[test]
 fn test_model_scene_project_3d_point_uses_camera_projection() {
     let env = WowLuaEnv::new().unwrap();
 

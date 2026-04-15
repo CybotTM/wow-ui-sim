@@ -2165,6 +2165,28 @@ fn model_stub_zero(state: &mut LuaState) -> LuaResult<u32> {
     0.0_f64.into_stack(state)
 }
 
+fn model_scene_set_allow_overlapped_models(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let allow = opt_bool(state, 2).unwrap_or(false);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.model_scene_state.allow_overlapped_models = allow;
+    }
+    Ok(0)
+}
+
+fn model_scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let allow = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.model_scene_state.allow_overlapped_models)
+        .unwrap_or(false);
+    state.push(Val::Bool(allow));
+    Ok(1)
+}
+
 fn model_stub_one(state: &mut LuaState) -> LuaResult<u32> {
     1.0_f64.into_stack(state)
 }
@@ -2972,6 +2994,18 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     )?;
     table_set_rust_fn(state, metatable, "SetViewTranslation", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetModelDrawLayer", model_stub_variadic)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetAllowOverlappedModels",
+        model_scene_set_allow_overlapped_models,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "IsAllowOverlappedModels",
+        model_scene_is_allow_overlapped_models,
+    )?;
     table_set_rust_fn(state, metatable, "ReplaceIconTexture", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetGlow", model_stub_variadic)?;
     table_set_rust_fn(state, metatable, "SetGradientMask", model_stub_variadic)?;

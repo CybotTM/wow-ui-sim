@@ -1703,6 +1703,108 @@ fn get_animation_groups(state: &mut LuaState) -> LuaResult<u32> {
     Ok(count)
 }
 
+/// GetAnimations() -> animation1, animation2, ...
+fn get_animations(state: &mut LuaState) -> LuaResult<u32> {
+    let group_frame_id = frame_id_from_stack(state, 1)?;
+    let mut animation_frame_ids: Vec<(usize, u64)> = {
+        let sim = borrow_state(state)?;
+        let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied() else {
+            return Ok(0);
+        };
+        sim.anim_frame_to_anim
+            .iter()
+            .filter_map(|(&frame_id, &(mapped_group_id, animation_index))| {
+                (mapped_group_id == group_id).then_some((animation_index, frame_id))
+            })
+            .collect()
+    };
+    animation_frame_ids.sort_unstable_by_key(|(animation_index, _)| *animation_index);
+    let count = animation_frame_ids.len() as u32;
+    for (_, frame_id) in animation_frame_ids {
+        let animation_ref = frame_ref(state, frame_id)?;
+        state.push(animation_ref);
+    }
+    Ok(count)
+}
+
+fn resolve_anim_target_id(
+    sim: &crate::lua_api::SimState,
+    owner_id: u64,
+    child_key: Option<&str>,
+) -> Option<u64> {
+    match child_key {
+        Some(key) => sim.widgets.get(owner_id).and_then(|owner| {
+            owner.children_keys.get(key).copied().or_else(|| {
+                owner.children.iter().copied().find(|child_id| {
+                    sim.widgets.get(*child_id).is_some_and(|child| {
+                        child.parent_key.as_deref() == Some(key)
+                            || child.name.as_deref() == Some(key)
+                    })
+                })
+            })
+        }),
+        None => Some(owner_id),
+    }
+}
+
+fn get_animation_target(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let target_id = {
+        let sim = borrow_state(state)?;
+        let Some((group_id, animation_index)) = sim.anim_frame_to_anim.get(&animation_frame_id)
+        else {
+            return Ok(0);
+        };
+        let Some(group) = sim.animation_groups.get(group_id) else {
+            return Ok(0);
+        };
+        let child_key = group
+            .animations
+            .get(*animation_index)
+            .and_then(|animation| animation.child_key.as_deref());
+        resolve_anim_target_id(&sim, group.owner_frame_id, child_key)
+    };
+    let Some(target_id) = target_id else {
+        return Ok(0);
+    };
+    let target_ref = frame_ref(state, target_id)?;
+    state.push(target_ref);
+    Ok(1)
+}
+
+fn set_animation_child_key(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let child_key = String::from_stack(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some((group_id, animation_index)) =
+        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+        && let Some(animation) = group.animations.get_mut(animation_index)
+    {
+        animation.child_key = Some(child_key);
+    }
+    Ok(0)
+}
+
+fn get_region_parent(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let owner_id = {
+        let sim = borrow_state(state)?;
+        let Some((group_id, _)) = sim.anim_frame_to_anim.get(&animation_frame_id) else {
+            return Ok(0);
+        };
+        sim.animation_groups
+            .get(group_id)
+            .map(|group| group.owner_frame_id)
+    };
+    let Some(owner_id) = owner_id else {
+        return Ok(0);
+    };
+    let owner_ref = frame_ref(state, owner_id)?;
+    state.push(owner_ref);
+    Ok(1)
+}
+
 /// CreateAnimationGroup([name [, inherits]]) -> animationGroup
 fn create_animation_group(state: &mut LuaState) -> LuaResult<u32> {
     use crate::lua_api::animation::AnimGroupState;
@@ -2234,6 +2336,7 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "AttachTexture", attach_texture)?;
     table_set_rust_fn(state, table, "AttachFontString", attach_font_string)?;
     table_set_rust_fn(state, table, "GetAnimationGroups", get_animation_groups)?;
+    table_set_rust_fn(state, table, "GetAnimations", get_animations)?;
     table_set_rust_fn(state, table, "CreateAnimationGroup", create_animation_group)?;
     table_set_rust_fn(state, table, "CreateAnimation", create_animation)?;
     table_set_rust_fn(state, table, "Play", animation_group_play)?;
@@ -2258,7 +2361,9 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetScaleFrom", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetScaleTo", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetDegrees", animation_config_noop)?;
-    table_set_rust_fn(state, table, "SetChildKey", animation_config_noop)?;
+    table_set_rust_fn(state, table, "GetTarget", get_animation_target)?;
+    table_set_rust_fn(state, table, "GetRegionParent", get_region_parent)?;
+    table_set_rust_fn(state, table, "SetChildKey", set_animation_child_key)?;
     table_set_rust_fn(state, table, "SetTargetName", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetTargetKey", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetFlipBookRows", animation_set_flipbook_rows)?;

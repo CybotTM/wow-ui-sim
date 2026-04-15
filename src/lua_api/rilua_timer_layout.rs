@@ -427,6 +427,21 @@ fn get_frame_rect(state: &mut LuaState) -> LuaResult<u32> {
     Ok(4)
 }
 
+/// `frame:GetScaledRect()` — rect in screen-space coordinates.
+fn get_scaled_rect(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, _eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
+        return Ok(0);
+    };
+    let left = rect.x;
+    let bottom = screen_height - rect.y - rect.height;
+    state.push(Val::Num(left as f64));
+    state.push(Val::Num(bottom as f64));
+    state.push(Val::Num(rect.width as f64));
+    state.push(Val::Num(rect.height as f64));
+    Ok(4)
+}
+
 /// `frame:GetLeft()` — left edge in WoW UI coordinates.
 fn get_left(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -469,6 +484,19 @@ fn get_bottom(state: &mut LuaState) -> LuaResult<u32> {
     let bottom = (screen_height - rect.y - rect.height) / eff_scale;
     state.push(Val::Num(bottom as f64));
     Ok(1)
+}
+
+/// `frame:GetCenter()` — center point in WoW UI coordinates.
+fn get_center(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
+        return Ok(0);
+    };
+    let center_x = (rect.x + rect.width / 2.0) / eff_scale;
+    let center_y = (screen_height - rect.y - rect.height / 2.0) / eff_scale;
+    state.push(Val::Num(center_x as f64));
+    state.push(Val::Num(center_y as f64));
+    Ok(2)
 }
 
 /// `frame:GetWidth()` — frame width in WoW UI coordinates.
@@ -517,10 +545,12 @@ pub fn register_layout_fns_on_table(
     table: rilua::vm::gc::arena::GcRef<Table>,
 ) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetRect", get_frame_rect)?;
+    table_set_rust_fn(state, table, "GetScaledRect", get_scaled_rect)?;
     table_set_rust_fn(state, table, "GetLeft", get_left)?;
     table_set_rust_fn(state, table, "GetRight", get_right)?;
     table_set_rust_fn(state, table, "GetTop", get_top)?;
     table_set_rust_fn(state, table, "GetBottom", get_bottom)?;
+    table_set_rust_fn(state, table, "GetCenter", get_center)?;
     table_set_rust_fn(state, table, "GetWidth", get_width)?;
     table_set_rust_fn(state, table, "GetHeight", get_height)?;
     table_set_rust_fn(state, table, "GetSize", get_size)?;

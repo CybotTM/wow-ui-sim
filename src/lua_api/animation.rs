@@ -71,6 +71,7 @@ impl LoopType {
 pub struct AnimState {
     pub anim_type: AnimationType,
     pub name: Option<String>,
+    pub child_key: Option<String>,
     pub order: u32,
     pub duration: f64,
     pub start_delay: f64,
@@ -89,6 +90,7 @@ impl AnimState {
         Self {
             anim_type,
             name: None,
+            child_key: None,
             order: 1,
             duration: 0.0,
             start_delay: 0.0,
