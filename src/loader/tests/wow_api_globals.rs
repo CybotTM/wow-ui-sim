@@ -257,7 +257,12 @@ fn test_create_texture_exposes_core_visual_methods() {
         set_texel_snapping_bias,
         get_texel_snapping_bias,
         set_snap_to_pixel_grid,
+        set_desaturated_ty,
+        is_desaturated_ty,
+        get_desaturation_ty,
         bias,
+        is_desaturated,
+        desaturation,
     ): (
         String,
         String,
@@ -269,6 +274,11 @@ fn test_create_texture_exposes_core_visual_methods() {
         String,
         String,
         String,
+        String,
+        String,
+        String,
+        f64,
+        bool,
         f64,
     ) = env
         .eval(
@@ -284,41 +294,36 @@ fn test_create_texture_exposes_core_visual_methods() {
             tex:SetVertTile(true)
             tex:SetTexelSnappingBias(0.25)
             tex:SetSnapToPixelGrid(true)
+            tex:SetDesaturated(true)
             return type(tex.SetTexture), type(tex.SetColorTexture), type(tex.SetVertexColor),
                 type(tex.SetBlendMode), type(tex.SetTexCoord), type(tex.SetHorizTile),
                 type(tex.SetVertTile), type(tex.SetTexelSnappingBias),
                 type(tex.GetTexelSnappingBias), type(tex.SetSnapToPixelGrid),
-                tex:GetTexelSnappingBias()
+                type(tex.SetDesaturated), type(tex.IsDesaturated), type(tex.GetDesaturation),
+                tex:GetTexelSnappingBias(), tex:IsDesaturated(), tex:GetDesaturation()
             "#,
         )
         .unwrap();
-    assert_eq!(
-        (
-            set_texture,
-            set_color_texture,
-            set_vertex_color,
-            set_blend_mode,
-            set_tex_coord,
-            set_horiz_tile,
-            set_vert_tile,
-            set_texel_snapping_bias,
-            get_texel_snapping_bias,
-            set_snap_to_pixel_grid,
-        ),
-        (
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-            "function".to_string(),
-        )
-    );
+    for ty in [
+        set_texture,
+        set_color_texture,
+        set_vertex_color,
+        set_blend_mode,
+        set_tex_coord,
+        set_horiz_tile,
+        set_vert_tile,
+        set_texel_snapping_bias,
+        get_texel_snapping_bias,
+        set_snap_to_pixel_grid,
+        set_desaturated_ty,
+        is_desaturated_ty,
+        get_desaturation_ty,
+    ] {
+        assert_eq!(ty, "function");
+    }
     assert_eq!(bias, 0.25);
+    assert!(is_desaturated);
+    assert_eq!(desaturation, 1.0);
 }
 
 #[test]
@@ -746,6 +751,48 @@ fn test_startup_runtime_method_and_namespace_gaps_exist() {
     assert_eq!(force_update_calls, 2);
     assert_eq!(private_warning_ty, "function");
     assert_eq!(pet_effects_count, 0);
+}
+
+#[test]
+fn test_startup_social_and_lfg_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        tutorial_ty,
+        tutorial_flagged,
+        lfg_ty,
+        has_active_entry,
+        premade_style,
+        search_result_ty,
+        queue_ty,
+        group_count,
+        queue_config_ty,
+    ): (String, bool, String, bool, i64, String, String, i64, String) = env
+        .eval(
+            r#"
+            local groups = C_SocialQueue.GetAllGroups()
+            local config = C_SocialQueue.GetConfig()
+            return type(IsTutorialFlagged),
+                IsTutorialFlagged(42),
+                type(C_LFGList.GetApplications),
+                C_LFGList.HasActiveEntryInfo(),
+                C_LFGList.GetPremadeGroupFinderStyle(),
+                type(C_LFGList.GetSearchResultInfo(7)),
+                type(C_SocialQueue.GetAllGroups),
+                #groups,
+                type(config)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(tutorial_ty, "function");
+    assert!(!tutorial_flagged);
+    assert_eq!(lfg_ty, "function");
+    assert!(!has_active_entry);
+    assert_eq!(premade_style, 0);
+    assert_eq!(search_result_ty, "nil");
+    assert_eq!(queue_ty, "function");
+    assert_eq!(group_count, 0);
+    assert_eq!(queue_config_ty, "table");
 }
 
 #[test]

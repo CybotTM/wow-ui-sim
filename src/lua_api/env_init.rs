@@ -179,6 +179,12 @@ if IsRestrictedAccount == nil then
   end
 end
 
+if IsTutorialFlagged == nil then
+  function IsTutorialFlagged()
+    return false
+  end
+end
+
 if GetFileStreamingStatus == nil then
   function GetFileStreamingStatus()
     return 0
@@ -313,6 +319,36 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
   GetGeneralChannelID = function() return 0 end,
   GetChannelShortcutForChannelID = function() return "" end,
   IsChannelRegionalForChannelID = function() return false end,
+})
+
+C_LFGList = __wow_merge_namespace(C_LFGList, {
+  GetApplications = function() return {} end,
+  GetApplicationInfo = function() return nil end,
+  GetAvailableRoles = function() return false, false, false end,
+  GetNumApplications = function() return 0 end,
+  GetNumApplicants = function() return 0 end,
+  GetPremadeGroupFinderStyle = function() return 0 end,
+  GetActivityFullName = function() return "" end,
+  GetActivityInfoTable = function() return nil end,
+  GetSearchResultInfo = function() return nil end,
+  GetSearchResultMemberCounts = function() return 0, 0, 0, 0 end,
+  HasActiveEntryInfo = function() return false end,
+  HasSearchResultInfo = function() return false end,
+  CanCreateQuestGroup = function() return false end,
+  CanCreateScenarioGroup = function() return false end,
+  IsPremadeGroupFinderEnabled = function() return false end,
+  RemoveListing = __wow_noop,
+})
+
+C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
+  GetAllGroups = function() return {} end,
+  GetConfig = function() return {} end,
+  GetGroupForPlayer = function() return nil end,
+  GetGroupInfo = function() return nil end,
+  GetGroupMembers = function() return {} end,
+  GetGroupQueues = function() return {} end,
+  RequestToJoin = __wow_noop,
+  SignalToastDisplayed = __wow_noop,
 })
 
 C_UnitAuras = __wow_merge_namespace(C_UnitAuras, {

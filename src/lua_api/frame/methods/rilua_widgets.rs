@@ -234,6 +234,55 @@ fn get_vertex_color(state: &mut LuaState) -> LuaResult<u32> {
     (r, g, b, a).into_stack(state)
 }
 
+fn set_desaturated(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let desaturated = val_to_bool(stack_val(state, 2));
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.desaturated = desaturated;
+    }
+    Ok(0)
+}
+
+fn is_desaturated(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let desaturated = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.desaturated)
+        .unwrap_or(false);
+    state.push(Val::Bool(desaturated));
+    Ok(1)
+}
+
+fn set_desaturation(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let desaturated = val_to_f64(stack_val(state, 2)) > 0.0;
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.desaturated = desaturated;
+    }
+    Ok(0)
+}
+
+fn get_desaturation(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let desaturation = if borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.desaturated)
+        .unwrap_or(false)
+    {
+        1.0
+    } else {
+        0.0
+    };
+    state.push(Val::Num(desaturation));
+    Ok(1)
+}
+
 fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(mode_name) = opt_string(state, 2) else {
@@ -2419,6 +2468,10 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
         "GetTextureFilePath",
         get_texture_file_path,
     )?;
+    table_set_rust_fn(state, metatable, "SetDesaturated", set_desaturated)?;
+    table_set_rust_fn(state, metatable, "IsDesaturated", is_desaturated)?;
+    table_set_rust_fn(state, metatable, "SetDesaturation", set_desaturation)?;
+    table_set_rust_fn(state, metatable, "GetDesaturation", get_desaturation)?;
     table_set_rust_fn(state, metatable, "SetColorTexture", set_color_texture)?;
     table_set_rust_fn(state, metatable, "SetVertexColor", set_vertex_color)?;
     table_set_rust_fn(state, metatable, "GetVertexColor", get_vertex_color)?;
