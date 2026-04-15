@@ -251,6 +251,10 @@ pub fn apply_secure_env_rilua(_lua: &mut rilua::Lua, _func: &rilua::Function) ->
     Ok(())
 }
 
+pub fn apply_secure_env_state(_state: &mut LuaState, _func: &rilua::Function) -> LuaResult<()> {
+    Ok(())
+}
+
 /// Set a key in both the global table and secureenv (rilua stub).
 ///
 /// TODO: once `create_secure_environment` is implemented, also write to the

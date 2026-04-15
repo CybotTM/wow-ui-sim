@@ -9,8 +9,9 @@
 
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::rilua_methods::{
-    borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id,
-    frame_ref, registry_get, registry_table_or_create, state_handle, table_get, table_set,
+    borrow_lua, borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    extract_frame_id, frame_ref, registry_get, registry_table_or_create, state_handle, table_get,
+    table_set,
 };
 use crate::lua_bridge::FromStack;
 use crate::widget::WidgetType;
@@ -706,7 +707,7 @@ fn apply_runtime_template_chain(
 
     for entry in &chain {
         ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
-        apply_template_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
+        apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
         if let Some(scripts) = entry.frame.scripts() {
             apply_template_scripts(state, frame_id, scripts)?;
@@ -838,7 +839,7 @@ fn create_template_child_frame(
     apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     apply_runtime_template_loader_effects(state, &child_name, frame, inherited_chain.as_deref())?;
-    apply_template_mixins(state, child_id, frame.combined_mixin().as_deref());
+    apply_frame_mixins(state, child_id, frame.combined_mixin().as_deref());
     apply_template_key_values(state, child_id, frame.all_key_values());
     if let Some(scripts) = frame.scripts() {
         apply_template_scripts(state, child_id, scripts)?;
@@ -1079,7 +1080,7 @@ fn append_parent_array_entry(state: &mut LuaState, parent_id: u64, key: &str, ch
     }
 }
 
-fn apply_template_mixins(state: &mut LuaState, frame_id: u64, mixins: Option<&str>) {
+pub(crate) fn apply_frame_mixins(state: &mut LuaState, frame_id: u64, mixins: Option<&str>) {
     let Some(mixins) = mixins else {
         return;
     };
@@ -1128,14 +1129,7 @@ fn apply_template_scripts(
     let chunk = format!("local frame = ...\n{script_code}");
     let func = LuaApiMut::load(state, &chunk)?;
     let frame = frame_ref(state, frame_id)?;
-    let call_base = state.top;
-    state.ensure_stack(call_base + 3);
-    state.stack_set(call_base, Val::Function(func.gc_ref()));
-    state.stack_set(call_base + 1, frame);
-    state.top = call_base + 2;
-    let result = state.call_function(call_base, 0);
-    state.top = call_base;
-    result?;
+    call_function_state(state, Val::Function(func.gc_ref()), &[frame])?;
     Ok(())
 }
 
@@ -1225,15 +1219,7 @@ fn call_handler_with_frame(state: &mut LuaState, handler: Val, frame: Val) -> Lu
     let Val::Function(_) = handler else {
         return Ok(());
     };
-
-    let call_base = state.top;
-    state.ensure_stack(call_base + 3);
-    state.stack_set(call_base, handler);
-    state.stack_set(call_base + 1, frame);
-    state.top = call_base + 2;
-    let result = state.call_function(call_base, 0);
-    state.top = call_base;
-    result
+    call_function_state(state, handler, &[frame]).map(|_| ())
 }
 
 /// Set a named field (arg 2) on the frame (arg 1)'s fields table.

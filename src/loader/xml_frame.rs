@@ -1,7 +1,6 @@
 //! Frame creation from XML definitions.
 
 use crate::lua_api::LoaderEnv;
-use rilua::LuaApiMut;
 use std::time::Instant;
 
 use super::LoadTiming;
@@ -119,12 +118,32 @@ fn setup_frame(
     exec_create_frame_code(env, setup.lua_code, setup.name, setup.initial_hidden)?;
     timing.frame_exec_lua_time += exec_start.elapsed();
     let props_start = Instant::now();
+    apply_direct_frame_mixins(env, setup.name, setup.frame);
     apply_xml_properties_direct(env, setup.name, setup.frame, setup.inherits, setup.parent);
     apply_intrinsic_property(env, setup.intrinsic_base, setup.name);
     timing.frame_apply_props_time += props_start.elapsed();
     timing.xml_frame_setup_time += setup_start.elapsed();
     timing.frame_count += 1;
     Ok(())
+}
+
+fn apply_direct_frame_mixins(env: &LoaderEnv<'_>, name: &str, frame: &crate::xml::FrameXml) {
+    let Some(mixins) = frame.combined_mixin() else {
+        return;
+    };
+    let _ = env.with_state(|state| {
+        let global = rilua::Val::Table(state.global);
+        let frame_val = crate::lua_api::rilua_methods::table_get(state, global, name);
+        let frame_id = crate::lua_api::rilua_methods::extract_frame_id(state, frame_val);
+        if let Some(frame_id) = frame_id {
+            crate::lua_api::globals::rilua_create_frame::apply_frame_mixins(
+                state,
+                frame_id,
+                Some(&mixins),
+            );
+        }
+        Ok::<(), crate::Error>(())
+    });
 }
 
 struct SetupFrame<'a> {
@@ -201,8 +220,10 @@ fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, n
         let Some(frame_id) = env.state().borrow().widgets.get_id_by_name(name) else {
             return;
         };
-        let mut lua = env.rilua_mut();
-        crate::lua_api::globals::template::set_intrinsic(lua.state_mut(), frame_id, base);
+        let _ = env.with_state(|state| {
+            crate::lua_api::globals::template::set_intrinsic(state, frame_id, base);
+            Ok::<(), crate::Error>(())
+        });
     }
 }
 
@@ -214,15 +235,15 @@ fn create_children_and_finalize(
     inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    create_child_frames(env, frame, name, timing)?;
+    create_child_frames(env, frame, name, inherits, timing)?;
     let layer_start = Instant::now();
-    create_layer_children(env, frame, name, timing)?;
+    create_layer_children(env, frame, name, inherits, timing)?;
     timing.frame_layer_children_time += layer_start.elapsed();
     let anim_start = Instant::now();
     apply_animation_groups(env, frame, name, inherits)?;
     timing.frame_anim_time += anim_start.elapsed();
     let btn_start = Instant::now();
-    apply_button_textures(env, frame, name)?;
+    apply_button_textures(env, frame, name, inherits)?;
     apply_button_text(env, frame, name, inherits)?;
     apply_bar_texture(env, frame, name)?;
     init_action_bar_tables(env, frame, name);
@@ -369,6 +390,7 @@ fn create_layer_children(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    _inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     super::xml_layer_batch::create_layer_children_batched(env, frame, name, timing)
@@ -395,13 +417,16 @@ fn create_child_frames(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    // Use all_frame_elements() to handle multiple <Frames> sections in the XML
-    // and standalone frame-type children outside <Frames> wrappers
-    let elements = frame.all_frame_elements();
-    for child in &elements {
-        create_single_child_frame(env, child, name, timing)?;
+    for entry in crate::xml::get_template_chain(inherits) {
+        for child in entry.frame.all_frame_elements() {
+            create_single_child_frame(env, &child, name, timing)?;
+        }
+    }
+    for child in frame.all_frame_elements() {
+        create_single_child_frame(env, &child, name, timing)?;
     }
     // ScrollChild children are parented to the ScrollFrame just like regular children,
     // but the first ScrollChild element also becomes the ScrollFrame's scroll child.
@@ -485,13 +510,12 @@ fn assign_parent_key(env: &LoaderEnv<'_>, parent_name: &str, parent_key: &str, c
         return;
     };
 
-    let mut lua = env.rilua_mut();
-    let _ = crate::lua_api::globals::template::assign_parent_key(
-        lua.state_mut(),
-        parent_id,
-        parent_key,
-        child_id,
-    );
+    let _ = env.with_state(|state| {
+        let _ = crate::lua_api::globals::template::assign_parent_key(
+            state, parent_id, parent_key, child_id,
+        );
+        Ok::<(), crate::Error>(())
+    });
 }
 
 fn register_scroll_child(env: &LoaderEnv<'_>, parent_name: &str, child_name: &str) {

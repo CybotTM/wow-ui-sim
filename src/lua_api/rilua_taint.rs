@@ -14,8 +14,10 @@ pub fn enable_taint_mode(lua: &mut rilua::Lua) {
 /// the closure's GC arena index. When the VM calls this function, the
 /// taint propagation system reads it back to set the call frame's taint.
 pub fn stamp_addon_taint(lua: &mut rilua::Lua, func: &rilua::Function, addon_name: &str) {
-    use rilua::vm::table::Table;
-    let state = lua.state_mut();
+    stamp_addon_taint_state(lua.state_mut(), func, addon_name);
+}
+
+pub fn stamp_addon_taint_state(state: &mut LuaState, func: &rilua::Function, addon_name: &str) {
     let cl_ref = func.gc_ref();
     let taint_table = get_or_create_closure_taint_table(state);
     let key = rilua::Val::Num(cl_ref.index() as f64);

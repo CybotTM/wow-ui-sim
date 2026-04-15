@@ -9,6 +9,8 @@ use super::SimState;
 use super::env::WowLuaAppData;
 use crate::lua_bridge::create_frame_table;
 use crate::lua_bridge::stack_val;
+use rilua::vm::callinfo::LUA_MULTRET;
+use rilua::vm::execute::{CallResult, execute};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -154,6 +156,37 @@ fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
         if let Some(t) = state.gc.tables.get_mut(table_ref) {
             t.set_metatable(Some(mt_ref));
         }
+        copy_frame_methods_from_metatable(state, table_ref, mt_ref);
+    }
+}
+
+fn copy_frame_methods_from_metatable(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    mt_ref: GcRef<Table>,
+) {
+    let entries = state
+        .gc
+        .tables
+        .get(mt_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+
+    for (key, value) in entries {
+        let Val::Str(str_ref) = key else {
+            continue;
+        };
+
+        let Some(name) = state.gc.string_arena.get(str_ref) else {
+            continue;
+        };
+        if name.data().starts_with(b"__") {
+            continue;
+        }
+
+        if let Some(table) = state.gc.tables.get_mut(table_ref) {
+            let _ = table.raw_set(key, value, &state.gc.string_arena);
+        }
     }
 }
 
@@ -163,12 +196,12 @@ fn table_get_num(state: &LuaState, table: GcRef<Table>, key: f64) -> Val {
         .gc
         .tables
         .get(table)
-        .and_then(|t| {
-            let idx = key as usize;
-            if idx > 0 && idx as f64 == key {
-                t.array_slice().get(idx - 1).copied()
+        .map(|t| {
+            let int_key = key as i64;
+            if int_key > 0 && int_key as f64 == key {
+                t.get_int(int_key)
             } else {
-                None
+                t.get(Val::Num(key), &state.gc.string_arena)
             }
         })
         .unwrap_or(Val::Nil)
@@ -225,6 +258,41 @@ pub fn call_function(lua: &mut rilua::Lua, func: Val, args: &[Val]) -> LuaResult
     let func_handle = rilua::Function::from_gc_ref(func_ref);
     let results = lua.call_function(&func_handle, args)?;
     Ok(results.into_iter().next().unwrap_or(Val::Nil))
+}
+
+pub fn call_function_state(state: &mut LuaState, func: Val, args: &[Val]) -> LuaResult<Val> {
+    let Val::Function(_) = func else {
+        return Err(runtime_error("expected function"));
+    };
+    let func_idx = state.top;
+    state.ensure_stack(func_idx + 1 + args.len());
+    state.stack_set(func_idx, func);
+    state.top = func_idx + 1;
+
+    for arg in args {
+        let top = state.top;
+        state.stack_set(top, *arg);
+        state.top = top + 1;
+    }
+
+    let save_base = state.base;
+    state.base = func_idx + 1;
+
+    let result = match state.precall(func_idx, LUA_MULTRET)? {
+        CallResult::Lua => execute(state),
+        CallResult::Rust => Ok(()),
+    };
+
+    let first = if result.is_ok() && state.top > func_idx {
+        state.stack_get(func_idx)
+    } else {
+        Val::Nil
+    };
+
+    state.top = func_idx;
+    state.base = save_base;
+    result?;
+    Ok(first)
 }
 
 /// Call a Lua function with error handling (pcall semantics).

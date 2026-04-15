@@ -3,7 +3,7 @@
 mod common;
 
 use std::path::PathBuf;
-use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
+use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -172,6 +172,21 @@ fn load_single_blizzard_addon(addon_name: &str) -> (WowLuaEnv, Vec<String>) {
     (env, result.warnings)
 }
 
+fn load_blizzard_addon_by_folder(folder_name: &str) -> (WowLuaEnv, Vec<String>) {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+
+    let ui = blizzard_ui_dir();
+    let addons = discover_all_blizzard_addons(&ui);
+    let (_, toc_path) = addons
+        .into_iter()
+        .find(|(name, _)| name == folder_name)
+        .unwrap_or_else(|| panic!("addon folder {folder_name} should exist"));
+    let result = load_addon(&env.loader_env(), &toc_path)
+        .unwrap_or_else(|error| panic!("{folder_name} should load: {error}"));
+    (env, result.warnings)
+}
+
 /// Assert that a Lua expression evaluates to true.
 fn assert_lua(env: &WowLuaEnv, code: &str, msg: &str) {
     assert!(env.eval::<bool>(code).unwrap_or(false), "{msg}");
@@ -249,6 +264,169 @@ fn test_uiparent_onshow_loads_account_store_without_nil_error() {
             account_store_exists,
             "AccountStoreFrame should exist after UIParent_OnShow addon load"
         );
+    }
+}
+
+#[test]
+fn test_account_store_frame_exposes_mixin_methods_after_load() {
+    test_timeout! {
+        let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_AccountStore");
+
+        let (frame_ty, on_load_ty, set_storefront_ty, set_fullscreen_ty): (
+            String,
+            String,
+            String,
+            String,
+        ) = env
+            .eval(
+                r#"
+                return type(AccountStoreFrame),
+                    type(AccountStoreFrame and AccountStoreFrame.OnLoad),
+                    type(AccountStoreFrame and AccountStoreFrame.SetStoreFrontID),
+                    type(AccountStoreFrame and AccountStoreFrame.SetFullscreenMode)
+                "#,
+            )
+            .expect("AccountStoreFrame inspection should be callable");
+
+        assert_eq!(frame_ty, "table", "AccountStoreFrame should exist after Blizzard_AccountStore load");
+        assert_eq!(
+            on_load_ty, "function",
+            "AccountStoreFrame.OnLoad should come from AccountStoreMixin; warnings:\n  {}",
+            warnings.join("\n  ")
+        );
+        assert_eq!(set_storefront_ty, "function");
+        assert_eq!(set_fullscreen_ty, "function");
+    }
+}
+
+#[test]
+fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
+    test_timeout! {
+        let env = load_all_addons();
+
+        let (
+            ok,
+            loaded,
+            frame_ty,
+            mixin_ty,
+            mixin_set_storefront_ty,
+            on_load_ty,
+            set_storefront_ty,
+            set_fullscreen_ty,
+            err,
+        ): (
+            bool,
+            bool,
+            String,
+            String,
+            String,
+            String,
+            String,
+            String,
+            Option<String>,
+        ) = env
+            .eval(
+                r#"
+                local ok, err = pcall(function()
+                    C_AddOns.LoadAddOn("Blizzard_AccountStore")
+                end)
+                return ok,
+                    C_AddOns.IsAddOnLoaded("Blizzard_AccountStore"),
+                    type(AccountStoreFrame),
+                    type(AccountStoreMixin),
+                    type(AccountStoreMixin and AccountStoreMixin.SetStoreFrontID),
+                    type(AccountStoreFrame and AccountStoreFrame.OnLoad),
+                    type(AccountStoreFrame and AccountStoreFrame.SetStoreFrontID),
+                    type(AccountStoreFrame and AccountStoreFrame.SetFullscreenMode),
+                    ok and nil or tostring(err)
+                "#,
+            )
+            .expect("C_AddOns.LoadAddOn inspection should be callable");
+
+        assert!(ok, "C_AddOns.LoadAddOn should not error: {:?}", err);
+        assert!(loaded, "Blizzard_AccountStore should be marked loaded");
+        assert_eq!(
+            frame_ty, "table",
+            "AccountStoreFrame should exist after runtime load"
+        );
+        assert_eq!(
+            mixin_ty, "table",
+            "AccountStoreMixin should exist after runtime load"
+        );
+        assert_eq!(
+            mixin_set_storefront_ty, "function",
+            "AccountStoreMixin.SetStoreFrontID should exist after runtime load"
+        );
+        assert_eq!(
+            on_load_ty, "function",
+            "AccountStoreFrame.OnLoad should exist after runtime load"
+        );
+        assert_eq!(
+            set_storefront_ty, "function",
+            "AccountStoreFrame.SetStoreFrontID should exist after runtime load"
+        );
+        assert_eq!(
+            set_fullscreen_ty, "function",
+            "AccountStoreFrame.SetFullscreenMode should exist after runtime load"
+        );
+    }
+}
+
+#[test]
+fn test_rust_load_addon_after_base_load_preserves_account_store_mixin_methods() {
+    test_timeout! {
+        let env = load_all_addons();
+
+        let ui = blizzard_ui_dir();
+        let addons = discover_all_blizzard_addons(&ui);
+        let (_, toc_path) = addons
+            .into_iter()
+            .find(|(name, _)| name == "Blizzard_AccountStore")
+            .expect("Blizzard_AccountStore should exist");
+        let _result = load_addon(&env.loader_env(), &toc_path).expect("late Rust load should succeed");
+
+        let (
+            mixin_fn_ty,
+            scratch_on_load_ty,
+            frame_ty,
+            mixin_ty,
+            on_load_ty,
+            set_storefront_ty,
+            get_object_type_ty,
+            set_point_ty,
+        ): (
+            String,
+            String,
+            String,
+            String,
+            String,
+            String,
+            String,
+            String,
+        ) =
+            env.eval(
+                r#"
+                local scratch = {}
+                if type(Mixin) == "function" and type(AccountStoreMixin) == "table" then
+                    Mixin(scratch, AccountStoreMixin)
+                end
+                return type(Mixin),
+                    type(scratch.OnLoad),
+                    type(AccountStoreFrame),
+                    type(AccountStoreMixin),
+                    type(AccountStoreFrame and AccountStoreFrame.OnLoad),
+                    type(AccountStoreFrame and AccountStoreFrame.SetStoreFrontID),
+                    type(AccountStoreFrame and AccountStoreFrame.GetObjectType),
+                    type(AccountStoreFrame and AccountStoreFrame.SetPoint)
+                "#,
+            )
+            .expect("late Rust load inspection should be callable");
+        assert_eq!(mixin_fn_ty, "function");
+        assert_eq!(scratch_on_load_ty, "function");
+        assert_eq!(frame_ty, "table");
+        assert_eq!(mixin_ty, "table");
+        assert_eq!(on_load_ty, "function");
+        assert_eq!(set_storefront_ty, "function");
     }
 }
 

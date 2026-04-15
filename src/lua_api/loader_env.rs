@@ -1,16 +1,18 @@
 //! Lightweight loader environment for addon loading.
 
 use super::env::WowLuaEnv;
-use super::globals::rilua_security::apply_secure_env_rilua;
+use super::globals::rilua_security::apply_secure_env_state;
 use super::rilua_methods::create_string;
 use crate::Result;
 use crate::lua_api::rilua_methods::create_table;
+use crate::lua_api::rilua_script_helpers::call_error_handler_state;
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::LuaApiMut;
 use rilua::Val;
 use rilua::vm::state::LuaState;
 use std::cell::{Ref, RefMut};
 use std::marker::PhantomData;
+use std::ptr::NonNull;
 use std::rc::Rc;
 
 use super::state::SimState;
@@ -18,6 +20,7 @@ use super::state::SimState;
 pub struct LoaderEnv<'a> {
     lua: Rc<std::cell::RefCell<rilua::Lua>>,
     state: Rc<std::cell::RefCell<SimState>>,
+    current_state: Option<NonNull<LuaState>>,
     _marker: PhantomData<&'a WowLuaEnv>,
 }
 
@@ -26,6 +29,7 @@ impl<'a> LoaderEnv<'a> {
         Self {
             lua: Rc::clone(&env.lua),
             state: Rc::clone(&env.state),
+            current_state: None,
             _marker: PhantomData,
         }
     }
@@ -37,7 +41,37 @@ impl<'a> LoaderEnv<'a> {
         LoaderEnv {
             lua,
             state,
+            current_state: None,
             _marker: PhantomData,
+        }
+    }
+
+    pub fn from_parts_active(
+        lua: Rc<std::cell::RefCell<rilua::Lua>>,
+        state: Rc<std::cell::RefCell<SimState>>,
+        current_state: &mut LuaState,
+    ) -> LoaderEnv<'static> {
+        LoaderEnv {
+            lua,
+            state,
+            current_state: Some(NonNull::from(current_state)),
+            _marker: PhantomData,
+        }
+    }
+
+    pub fn with_state<T, E>(
+        &self,
+        f: impl FnOnce(&mut LuaState) -> std::result::Result<T, E>,
+    ) -> std::result::Result<T, E> {
+        match self.current_state {
+            Some(mut current_state) => {
+                let state = unsafe { current_state.as_mut() };
+                f(state)
+            }
+            None => {
+                let mut lua = self.lua.borrow_mut();
+                f(lua.state_mut())
+            }
         }
     }
 
@@ -51,14 +85,19 @@ impl<'a> LoaderEnv<'a> {
     }
 
     pub fn exec(&self, code: &str) -> Result<()> {
-        let mut lua = self.lua.borrow_mut();
-        let func = crate::loader::chunk_cache::load_chunk(&mut lua, code, "loader-exec")
-            .map_err(|e| crate::Error::Other(e.to_string()))?;
-        if self.loading_addon_uses_secure_env() {
-            apply_secure_env_rilua(&mut lua, &func)?;
-        }
-        lua.call_function(&func, &[])?;
-        Ok(())
+        self.with_state(|state| {
+            let func = crate::loader::chunk_cache::load_chunk(state, code, "loader-exec")
+                .map_err(|e| crate::Error::Other(e.to_string()))?;
+            if self.loading_addon_uses_secure_env() {
+                apply_secure_env_state(state, &func)?;
+            }
+            crate::lua_api::rilua_methods::call_function_state(
+                state,
+                Val::Function(func.gc_ref()),
+                &[],
+            )?;
+            Ok(())
+        })
     }
 
     pub fn exec_with_varargs(
@@ -68,47 +107,53 @@ impl<'a> LoaderEnv<'a> {
         addon_name: &str,
         addon_table: Val,
     ) -> Result<()> {
-        let mut lua = self.lua.borrow_mut();
-        let func = rilua::LuaApiMut::load_bytes(&mut *lua, code.as_bytes(), name)?;
-        let addon_name = create_string(lua.state_mut(), addon_name);
-        lua.call_function(&func, &[addon_name, addon_table])?;
-        Ok(())
+        self.with_state(|state| {
+            let func = LuaApiMut::load_bytes(state, code.as_bytes(), name)?;
+            let addon_name = create_string(state, addon_name);
+            crate::lua_api::rilua_methods::call_function_state(
+                state,
+                Val::Function(func.gc_ref()),
+                &[addon_name, addon_table],
+            )?;
+            Ok(())
+        })
     }
 
     pub fn fire_event_with_args(&self, event: &str, args: &[Val]) -> Result<()> {
-        let listeners = {
-            let mut lua = self.lua.borrow_mut();
-            crate::lua_api::rilua_script_helpers::get_event_listeners(lua.state_mut(), event)
-        };
+        let listeners = self.with_state(|state| {
+            Ok::<Vec<u64>, crate::Error>(crate::lua_api::rilua_script_helpers::get_event_listeners(
+                state, event,
+            ))
+        })?;
         for widget_id in listeners {
-            let mut lua = self.lua.borrow_mut();
-            let handler = {
-                let state = lua.state_mut();
-                crate::lua_api::rilua_script_helpers::get_script(state, widget_id, "OnEvent")
-            };
-            let Some(handler) = handler else {
-                continue;
-            };
-            let frame = {
-                let state = lua.state_mut();
-                crate::lua_api::rilua_methods::frame_ref(state, widget_id)?
-            };
-            let event_name = {
-                let state = lua.state_mut();
-                crate::lua_api::rilua_methods::create_string(state, event)
-            };
-            let mut call_args = Vec::with_capacity(args.len() + 2);
-            call_args.push(frame);
-            call_args.push(event_name);
-            call_args.extend_from_slice(args);
-            let _ = crate::lua_api::rilua_methods::call_function(&mut lua, handler, &call_args);
+            let result: std::result::Result<(), crate::Error> = self.with_state(|state| {
+                let handler =
+                    crate::lua_api::rilua_script_helpers::get_script(state, widget_id, "OnEvent");
+                let Some(handler) = handler else {
+                    return Ok(());
+                };
+                let frame = crate::lua_api::rilua_methods::frame_ref(state, widget_id)?;
+                let event_name = crate::lua_api::rilua_methods::create_string(state, event);
+                let mut call_args = Vec::with_capacity(args.len() + 2);
+                call_args.push(frame);
+                call_args.push(event_name);
+                call_args.extend_from_slice(args);
+                let _ =
+                    crate::lua_api::rilua_methods::call_function_state(state, handler, &call_args);
+                Ok(())
+            });
+            if let Err(error) = result {
+                self.with_state(|state| {
+                    call_error_handler_state(state, &error.to_string());
+                    Ok::<(), crate::Error>(())
+                })?;
+            }
         }
         Ok(())
     }
 
     pub fn create_addon_table(&self) -> Result<Val> {
-        let mut lua = self.lua.borrow_mut();
-        create_addon_table(&mut lua)
+        self.with_state(create_addon_table_state)
     }
 
     pub fn lua(&self) -> &Rc<std::cell::RefCell<rilua::Lua>> {
@@ -129,7 +174,10 @@ impl<'a> LoaderEnv<'a> {
 }
 
 pub(crate) fn create_addon_table(lua: &mut rilua::Lua) -> Result<Val> {
-    let state = lua.state_mut();
+    create_addon_table_state(lua.state_mut())
+}
+
+pub(crate) fn create_addon_table_state(state: &mut LuaState) -> Result<Val> {
     let table = create_table(state);
     let Val::Table(table_ref) = table else {
         unreachable!("create_table must return a table");

@@ -7,7 +7,7 @@ use super::helpers::{escape_lua_string, lua_global_ref, rand_id};
 use super::helpers_anim::generate_animation_group_code;
 
 /// Apply animation groups from the frame and its inherited templates.
-pub(super) fn apply_animation_groups(
+pub(crate) fn apply_animation_groups(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
@@ -49,7 +49,7 @@ fn exec_animation_groups(env: &LoaderEnv<'_>, anims: &crate::xml::AnimationsXml,
 }
 
 /// Create the bar texture for a StatusBar from its inline `<BarTexture>` XML element.
-pub(super) fn apply_bar_texture(
+pub(crate) fn apply_bar_texture(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
@@ -118,7 +118,7 @@ fn append_bar_texture_properties(code: &mut String, bar: &crate::xml::TextureXml
 
 /// Initialize tables expected by action bar OnLoad handlers.
 /// Only runs Lua when the frame has a `numButtons` KeyValue (rare).
-pub(super) fn init_action_bar_tables(
+pub(crate) fn init_action_bar_tables(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,

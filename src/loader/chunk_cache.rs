@@ -4,8 +4,8 @@ use crate::loader::error::LoadError;
 use rilua::LuaApiMut;
 
 /// Compile a generated Lua chunk for the active rilua VM.
-pub fn load_chunk(
-    lua: &mut rilua::Lua,
+pub fn load_chunk<L: LuaApiMut>(
+    lua: &mut L,
     code: &str,
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {

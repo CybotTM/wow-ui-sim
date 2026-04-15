@@ -1,7 +1,7 @@
 //! Addon loader - loads addons from TOC files.
 
 mod addon;
-mod button;
+pub(crate) mod button;
 pub(crate) mod bytecode_cache;
 pub(crate) mod chunk_cache;
 mod error;
@@ -13,8 +13,8 @@ mod xml_file;
 mod xml_fontstring;
 mod xml_frame;
 mod xml_frame_codegen;
-mod xml_frame_extras;
-mod xml_layer_batch;
+pub(crate) mod xml_frame_extras;
+pub(crate) mod xml_layer_batch;
 mod xml_lifecycle;
 mod xml_texture;
 

@@ -1,11 +1,12 @@
 //! Lua file loading functionality.
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::globals::rilua_security::apply_secure_env_rilua;
+use crate::lua_api::globals::rilua_security::apply_secure_env_state;
 use crate::lua_api::rilua_methods::create_string;
-use crate::lua_api::rilua_script_helpers::call_error_handler;
-use crate::lua_api::rilua_taint::stamp_addon_taint;
+use crate::lua_api::rilua_script_helpers::call_error_handler_state;
+use crate::lua_api::rilua_taint::stamp_addon_taint_state;
 use rilua::LuaApiMut;
+use rilua::vm::state::LuaState;
 use std::path::Path;
 use std::time::Instant;
 
@@ -28,8 +29,8 @@ pub fn load_lua_file(
     let chunk_name = wow_chunk_name(path);
 
     let compile_start = Instant::now();
-    let mut lua = env.rilua_mut();
-    let func_result = load_cached_or_compile(&mut lua, &bytes, &chunk_name, timing);
+    let func_result =
+        env.with_state(|state| load_cached_or_compile(state, &bytes, &chunk_name, timing));
     let compile_elapsed = compile_start.elapsed();
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
@@ -39,19 +40,19 @@ pub fn load_lua_file(
     // Stamp addon taint on the compiled function's GC header.
     // When the VM executes it, fixedtaint = cl->taint blocks read-propagation
     // and inner closures inherit via writetaint.
-    if ctx.taint {
-        set_object_taint(&mut lua, &func, ctx.name);
-    }
-
-    if ctx.use_secure_env {
-        apply_secure_env_rilua(&mut lua, &func).map_err(|e| report_lua_load_error(&mut lua, e))?;
-    }
-
-    let exec_result = exec_addon_func(&mut lua, func, ctx).map_err(|e| {
-        if let LoadError::Lua(msg) = &e {
-            call_error_handler(&mut lua, msg);
+    let exec_result = env.with_state(|state| {
+        if ctx.taint {
+            set_object_taint(state, &func, ctx.name);
         }
-        e
+        if ctx.use_secure_env {
+            apply_secure_env_state(state, &func).map_err(|e| report_lua_load_error(state, e))?;
+        }
+        exec_addon_func(state, func, ctx).map_err(|e| {
+            if let LoadError::Lua(msg) = &e {
+                call_error_handler_state(state, msg);
+            }
+            e
+        })
     });
     let call_elapsed = call_start.elapsed();
     timing.lua_call_time += call_elapsed;
@@ -74,19 +75,23 @@ fn wow_chunk_name(path: &Path) -> String {
 /// Execute a compiled addon function.
 /// Taint is already stamped on the function's GC header by the caller.
 fn exec_addon_func(
-    lua: &mut rilua::Lua,
+    state: &mut LuaState,
     func: rilua::Function,
     ctx: &AddonContext,
 ) -> Result<(), LoadError> {
-    let name = create_string(lua.state_mut(), ctx.name);
-    lua.call_function(&func, &[name, ctx.table])
-        .map(|_| ())
-        .map_err(|e| LoadError::Lua(e.to_string()))
+    let name = create_string(state, ctx.name);
+    crate::lua_api::rilua_methods::call_function_state(
+        state,
+        rilua::Val::Function(func.gc_ref()),
+        &[name, ctx.table],
+    )
+    .map(|_| ())
+    .map_err(|e| LoadError::Lua(e.to_string()))
 }
 
 /// Try loading from bytecode cache; compile and cache on miss.
 fn load_cached_or_compile(
-    lua: &mut rilua::Lua,
+    lua: &mut LuaState,
     bytes: &[u8],
     chunk_name: &str,
     timing: &mut LoadTiming,
@@ -98,19 +103,19 @@ fn load_cached_or_compile(
 }
 
 /// Set taint on a Lua function's GC object header via `debug.setobjecttaint`.
-fn set_object_taint(lua: &mut rilua::Lua, func: &rilua::Function, taint: &str) {
-    stamp_addon_taint(lua, func, taint);
+fn set_object_taint(state: &mut LuaState, func: &rilua::Function, taint: &str) {
+    stamp_addon_taint_state(state, func, taint);
 }
 
-fn report_lua_load_error(lua: &mut rilua::Lua, err: impl ToString) -> LoadError {
+fn report_lua_load_error(state: &mut LuaState, err: impl ToString) -> LoadError {
     let msg = err.to_string();
-    call_error_handler(lua, &msg);
+    call_error_handler_state(state, &msg);
     LoadError::Lua(msg)
 }
 
 /// Compile Lua source code into a function.
 fn compile_from_source(
-    lua: &mut rilua::Lua,
+    lua: &mut LuaState,
     bytes: &[u8],
     chunk_name: &str,
 ) -> Result<rilua::Function, LoadError> {
@@ -123,12 +128,11 @@ fn compile_from_source(
 /// source code and returns a rilua Function handle. Used as a parallel
 /// compilation path for Phase 3 migration — the mlua path remains active
 /// until the full VM switch.
-pub fn compile_with_rilua(
-    lua: &mut rilua::Lua,
+pub fn compile_with_rilua<L: LuaApiMut>(
+    lua: &mut L,
     bytes: &[u8],
     chunk_name: &str,
 ) -> Result<rilua::Function, LoadError> {
-    use rilua::LuaApiMut;
     // Strip UTF-8 BOM if present
     let bytes = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
         &bytes[3..]

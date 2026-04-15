@@ -107,8 +107,9 @@ pub fn apply_button_textures(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
+    inherits: &str,
 ) -> Result<(), LoadError> {
-    let texture_slots = button_texture_slots(frame_xml);
+    let texture_slots = button_texture_slots(frame_xml, inherits);
 
     // Create texture children for ALL slots BEFORE running Lua code.
     // The Lua atlas path calls Get*Texture() which needs the child to exist.
@@ -118,40 +119,66 @@ pub fn apply_button_textures(
 
 fn button_texture_slots(
     frame_xml: &crate::xml::FrameXml,
-) -> [(&str, &str, Option<&crate::xml::TextureXml>); 4] {
+    inherits: &str,
+) -> [(&'static str, &'static str, Option<crate::xml::TextureXml>); 4] {
     [
         (
             "SetNormalTexture",
             "NormalTexture",
-            frame_xml.normal_texture(),
+            resolve_button_texture_slot(frame_xml, inherits, crate::xml::FrameXml::normal_texture),
         ),
         (
             "SetPushedTexture",
             "PushedTexture",
-            frame_xml.pushed_texture(),
+            resolve_button_texture_slot(frame_xml, inherits, crate::xml::FrameXml::pushed_texture),
         ),
         (
             "SetHighlightTexture",
             "HighlightTexture",
-            frame_xml.highlight_texture(),
+            resolve_button_texture_slot(
+                frame_xml,
+                inherits,
+                crate::xml::FrameXml::highlight_texture,
+            ),
         ),
         (
             "SetDisabledTexture",
             "DisabledTexture",
-            frame_xml.disabled_texture(),
+            resolve_button_texture_slot(
+                frame_xml,
+                inherits,
+                crate::xml::FrameXml::disabled_texture,
+            ),
         ),
     ]
 }
 
+fn resolve_button_texture_slot(
+    frame_xml: &crate::xml::FrameXml,
+    inherits: &str,
+    slot: fn(&crate::xml::FrameXml) -> Option<&crate::xml::TextureXml>,
+) -> Option<crate::xml::TextureXml> {
+    if let Some(texture) = slot(frame_xml) {
+        return Some(crate::xml::resolve_texture_inheritance(texture));
+    }
+
+    crate::xml::get_template_chain(inherits)
+        .into_iter()
+        .rev()
+        .find_map(|entry| slot(&entry.frame).cloned())
+        .map(|texture| crate::xml::resolve_texture_inheritance(&texture))
+}
+
 fn apply_button_texture_lua(
     env: &LoaderEnv<'_>,
-    texture_slots: &[(&str, &str, Option<&crate::xml::TextureXml>); 4],
+    texture_slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 4],
     button_name: &str,
 ) -> Result<(), LoadError> {
     let lua_code: String = texture_slots
         .iter()
         .filter_map(|(method, _, tex)| {
-            tex.map(|t| generate_button_texture_code(button_name, method, t))
+            tex.as_ref()
+                .map(|texture| generate_button_texture_code(button_name, method, texture))
         })
         .collect();
 
@@ -172,13 +199,13 @@ fn apply_button_texture_lua(
 /// regardless of whether it has atlas/file attributes.
 fn ensure_button_texture_children(
     env: &LoaderEnv<'_>,
-    slots: &[(&str, &str, Option<&crate::xml::TextureXml>); 4],
+    slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 4],
     button_name: &str,
 ) {
     use crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture;
     let button_id = env.state().borrow().widgets.get_id_by_name(button_name);
     let Some(button_id) = button_id else { return };
-    for &(_, parent_key, tex_opt) in slots {
+    for (_, parent_key, tex_opt) in slots {
         if tex_opt.is_none() {
             continue;
         }
