@@ -26,10 +26,10 @@ pub(crate) fn sync_frame_owner_to_lua(lua: &Lua, state: &Rc<RefCell<SimState>>, 
         .widgets
         .get(frame_id)
         .and_then(|f| f.owner_addon);
-    if let Some(idx) = owner {
-        if let Ok(t) = lua.named_registry_value::<mlua::Table>("__frame_owners") {
-            let _ = t.raw_set(frame_id as i64, idx as i64);
-        }
+    if let Some(idx) = owner
+        && let Ok(t) = lua.named_registry_value::<mlua::Table>("__frame_owners")
+    {
+        let _ = t.raw_set(frame_id as i64, idx as i64);
     }
 }
 
@@ -55,6 +55,13 @@ struct CreateFrameProfileConfig {
     min_duration: Duration,
 }
 
+#[derive(Clone, Copy)]
+struct CreateFrameCallProfile {
+    config: Option<CreateFrameProfileConfig>,
+    total_start: Option<Instant>,
+    runtime_call: bool,
+}
+
 #[derive(Default)]
 struct CreateFrameTemplateTiming {
     intrinsic_templates: Duration,
@@ -62,6 +69,24 @@ struct CreateFrameTemplateTiming {
     deferred_child_onloads: Duration,
     self_onload: Duration,
     deferred_child_count: usize,
+}
+
+pub(crate) struct CreateFrameInstanceSpec<'a> {
+    pub(crate) widget_type: WidgetType,
+    pub(crate) frame_type: &'a str,
+    pub(crate) name: Option<String>,
+    pub(crate) parent_id: Option<u64>,
+    pub(crate) parent_explicit: bool,
+    pub(crate) id: Option<i32>,
+}
+
+struct CreateFrameTemplateContext<'a> {
+    frame_type: &'a str,
+    ref_name: &'a str,
+    template: Option<&'a str>,
+    parent_id: Option<u64>,
+    frame_id: u64,
+    profile_runtime_call: bool,
 }
 
 fn create_frame_profile_config() -> Option<CreateFrameProfileConfig> {
@@ -125,26 +150,35 @@ fn log_create_frame_profile(
 pub(crate) fn create_frame_instance(
     lua: &Lua,
     state: &Rc<RefCell<SimState>>,
-    widget_type: WidgetType,
-    frame_type: &str,
-    name: Option<String>,
-    parent_id: Option<u64>,
-    parent_explicit: bool,
-    id: Option<i32>,
+    spec: &CreateFrameInstanceSpec<'_>,
 ) -> Result<u64> {
-    let old_same_name = name
+    let old_same_name = spec
+        .name
         .as_ref()
         .and_then(|frame_name| state.borrow().widgets.get_id_by_name(frame_name));
-    let frame_id = register_new_frame(state, widget_type, name.clone(), parent_id, parent_explicit);
-    configure_frame_metadata(lua, state, frame_id, widget_type, frame_type, id);
+    let frame_id = register_new_frame(
+        state,
+        spec.widget_type,
+        spec.name.clone(),
+        spec.parent_id,
+        spec.parent_explicit,
+    );
+    configure_frame_metadata(
+        lua,
+        state,
+        frame_id,
+        spec.widget_type,
+        spec.frame_type,
+        spec.id,
+    );
     let is_forbidden = frame_is_forbidden(state, frame_id);
-    let ud = create_frame_userdata(lua, frame_id, name.as_deref(), is_forbidden)?;
+    let ud = create_frame_userdata(lua, frame_id, spec.name.as_deref(), is_forbidden)?;
     if let Some(old_id) = old_same_name {
         migrate_lua_fields_to_new_frame(lua, old_id, frame_id)?;
     }
-    store_widget_type_key(lua, &ud, widget_type, frame_type)?;
-    register_named_button_children(lua, state, frame_id, widget_type, name.as_deref())?;
-    if frame_type == "ItemButton" {
+    store_widget_type_key(lua, &ud, spec.widget_type, spec.frame_type)?;
+    register_named_button_children(lua, state, frame_id, spec.widget_type, spec.name.as_deref())?;
+    if spec.frame_type == "ItemButton" {
         apply_item_button_mixin(lua, frame_id);
     }
     Ok(frame_id)
@@ -153,55 +187,78 @@ pub(crate) fn create_frame_instance(
 /// Create the CreateFrame Lua function.
 pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
     let state_clone = Rc::clone(&state);
-    let create_frame = lua.create_function(move |lua, args: mlua::MultiValue| {
-        let profile = create_frame_profile_config();
-        let entry_suppress_depth = current_create_frame_suppress_depth(lua);
-        let profile_runtime_call = profile.is_some() && entry_suppress_depth <= 0;
-        let total_start = profile_runtime_call.then(Instant::now);
-        let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
-        let widget_type = parse_widget_type(&cfa.frame_type)?;
-        let frame_id = create_frame_instance(
-            lua,
-            &state_clone,
+    lua.create_function(move |lua, args: mlua::MultiValue| {
+        handle_create_frame_call(lua, &state_clone, args)
+    })
+}
+
+fn handle_create_frame_call(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    args: mlua::MultiValue,
+) -> Result<Value> {
+    let profile = begin_create_frame_call_profile(lua);
+    let cfa = parse_create_frame_args(lua, &args, state)?;
+    let widget_type = parse_widget_type(&cfa.frame_type)?;
+    let frame_id = create_frame_instance(
+        lua,
+        state,
+        &CreateFrameInstanceSpec {
             widget_type,
-            &cfa.frame_type,
-            cfa.name.clone(),
-            cfa.parent_id,
-            cfa.parent_explicit,
-            cfa.id,
-        )?;
-        let ref_name = cfa
-            .name
-            .clone()
-            .unwrap_or_else(|| format!("__frame_{}", frame_id));
-        let finalize_start = profile_runtime_call.then(Instant::now);
-        let template_timing = finalize_registered_frame(
-            lua,
-            &state_clone,
-            frame_id,
-            &cfa,
-            &ref_name,
-            profile_runtime_call,
-        )?;
-        if let (Some(cfg), Some(total_start)) = (profile, total_start) {
-            let total = total_start.elapsed();
-            if cfg.log_all || total >= cfg.min_duration {
-                let finalize = finalize_start
-                    .map(|start| start.elapsed())
-                    .unwrap_or_default();
-                log_create_frame_profile(
-                    &cfa.frame_type,
-                    &ref_name,
-                    cfa.template.as_deref(),
-                    total,
-                    finalize,
-                    &template_timing,
-                );
-            }
+            frame_type: &cfa.frame_type,
+            name: cfa.name.clone(),
+            parent_id: cfa.parent_id,
+            parent_explicit: cfa.parent_explicit,
+            id: cfa.id,
+        },
+    )?;
+    let ref_name = create_frame_ref_name(&cfa, frame_id);
+    let finalize_start = profile.runtime_call.then(Instant::now);
+    let template_timing =
+        finalize_registered_frame(lua, state, frame_id, &cfa, &ref_name, profile.runtime_call)?;
+    maybe_log_create_frame_profile(profile, finalize_start, &cfa, &ref_name, &template_timing);
+    frame_ref(lua, frame_id)
+}
+
+fn begin_create_frame_call_profile(lua: &Lua) -> CreateFrameCallProfile {
+    let config = create_frame_profile_config();
+    let runtime_call = config.is_some() && current_create_frame_suppress_depth(lua) <= 0;
+    CreateFrameCallProfile {
+        config,
+        total_start: runtime_call.then(Instant::now),
+        runtime_call,
+    }
+}
+
+fn create_frame_ref_name(cfa: &CreateFrameArgs, frame_id: u64) -> String {
+    cfa.name
+        .clone()
+        .unwrap_or_else(|| format!("__frame_{}", frame_id))
+}
+
+fn maybe_log_create_frame_profile(
+    profile: CreateFrameCallProfile,
+    finalize_start: Option<Instant>,
+    cfa: &CreateFrameArgs,
+    ref_name: &str,
+    template_timing: &CreateFrameTemplateTiming,
+) {
+    if let (Some(cfg), Some(total_start)) = (profile.config, profile.total_start) {
+        let total = total_start.elapsed();
+        if cfg.log_all || total >= cfg.min_duration {
+            let finalize = finalize_start
+                .map(|start| start.elapsed())
+                .unwrap_or_default();
+            log_create_frame_profile(
+                &cfa.frame_type,
+                ref_name,
+                cfa.template.as_deref(),
+                total,
+                finalize,
+                template_timing,
+            );
         }
-        frame_ref(lua, frame_id)
-    })?;
-    Ok(create_frame)
+    }
 }
 
 fn configure_frame_metadata(
@@ -267,12 +324,14 @@ fn finalize_registered_frame(
     apply_intrinsic_and_templates(
         lua,
         state,
-        &cfa.frame_type,
-        ref_name,
-        cfa.template.as_deref(),
-        cfa.parent_id,
-        frame_id,
-        profile_runtime_call,
+        &CreateFrameTemplateContext {
+            frame_type: &cfa.frame_type,
+            ref_name,
+            template: cfa.template.as_deref(),
+            parent_id: cfa.parent_id,
+            frame_id,
+            profile_runtime_call,
+        },
     )
 }
 
@@ -322,10 +381,10 @@ fn parse_widget_type(frame_type: &str) -> Result<WidgetType> {
 }
 
 fn apply_frame_id_arg(state: &Rc<RefCell<SimState>>, frame_id: u64, id: Option<i32>) {
-    if let Some(frame_lua_id) = id {
-        if let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id) {
-            frame.user_id = frame_lua_id;
-        }
+    if let Some(frame_lua_id) = id
+        && let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        frame.user_id = frame_lua_id;
     }
 }
 
@@ -343,29 +402,28 @@ fn apply_item_button_mixin(lua: &Lua, frame_id: u64) {
 fn apply_intrinsic_and_templates(
     lua: &Lua,
     state: &Rc<RefCell<SimState>>,
-    frame_type: &str,
-    ref_name: &str,
-    template: Option<&str>,
-    parent_id: Option<u64>,
-    frame_id: u64,
-    profile_runtime_call: bool,
+    ctx: &CreateFrameTemplateContext<'_>,
 ) -> mlua::Result<CreateFrameTemplateTiming> {
     let mut timing = CreateFrameTemplateTiming::default();
-    if let Some(entry) = &crate::xml::get_template(frame_type) {
+    if let Some(entry) = &crate::xml::get_template(ctx.frame_type) {
         let canonical = &entry.name;
-        let start = profile_runtime_call.then(Instant::now);
-        apply_templates_from_registry(lua, state, ref_name, canonical);
+        let start = ctx.profile_runtime_call.then(Instant::now);
+        apply_templates_from_registry(lua, state, ctx.ref_name, canonical);
         timing.intrinsic_templates = start.map(|t| t.elapsed()).unwrap_or_default();
-        let code = format!("{}.intrinsic = \"{}\"", lua_global_ref(ref_name), canonical);
+        let code = format!(
+            "{}.intrinsic = \"{}\"",
+            lua_global_ref(ctx.ref_name),
+            canonical
+        );
         let _ = lua.load(&code).exec();
     }
-    if let Some(tmpl) = template {
-        let start = profile_runtime_call.then(Instant::now);
-        apply_templates_from_registry(lua, state, ref_name, tmpl);
+    if let Some(tmpl) = ctx.template {
+        let start = ctx.profile_runtime_call.then(Instant::now);
+        apply_templates_from_registry(lua, state, ctx.ref_name, tmpl);
         timing.explicit_templates = start.map(|t| t.elapsed()).unwrap_or_default();
-        if parent_id.is_some() {
-            apply_parent_key_from_template(lua, tmpl, ref_name);
-            apply_parent_array_from_template(lua, tmpl, frame_id, ref_name);
+        if ctx.parent_id.is_some() {
+            apply_parent_key_from_template(lua, tmpl, ctx.ref_name);
+            apply_parent_array_from_template(lua, tmpl, ctx.frame_id, ctx.ref_name);
         }
     }
     let suppress_depth: i32 = lua
@@ -373,11 +431,11 @@ fn apply_intrinsic_and_templates(
         .get("__suppress_create_frame_onload")
         .unwrap_or(0);
     if suppress_depth <= 0 {
-        let deferred_start = profile_runtime_call.then(Instant::now);
+        let deferred_start = ctx.profile_runtime_call.then(Instant::now);
         timing.deferred_child_count = fire_deferred_child_onloads(lua);
         timing.deferred_child_onloads = deferred_start.map(|t| t.elapsed()).unwrap_or_default();
-        let onload_start = profile_runtime_call.then(Instant::now);
-        fire_on_load(lua, ref_name);
+        let onload_start = ctx.profile_runtime_call.then(Instant::now);
+        fire_on_load(lua, ctx.ref_name);
         timing.self_onload = onload_start.map(|t| t.elapsed()).unwrap_or_default();
     }
     Ok(timing)
@@ -450,7 +508,7 @@ fn parse_parent_arg(
             "Usage: CreateFrame(\"type\" [, \"name\"] [, parent] [, \"template\"] [, id])",
         ));
     }
-    let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
+    let explicit_parent = parent_arg.and_then(extract_frame_id_or_proxy);
     let parent_explicit = explicit_parent.is_some();
     let parent_id = explicit_parent.or_else(|| default_parent_id(state));
     Ok((parent_id, parent_explicit, explicit_parent))
@@ -504,10 +562,11 @@ fn find_named_ancestor(start_id: Option<u64>, state: &SimState) -> Option<String
     let mut current_id = start_id;
     while let Some(id) = current_id {
         if let Some(frame) = state.widgets.get(id) {
-            if let Some(ref n) = frame.name {
-                if !n.is_empty() && n != "UIParent" {
-                    return Some(n.clone());
-                }
+            if let Some(ref n) = frame.name
+                && !n.is_empty()
+                && n != "UIParent"
+            {
+                return Some(n.clone());
             }
             current_id = frame.parent_id;
         } else {

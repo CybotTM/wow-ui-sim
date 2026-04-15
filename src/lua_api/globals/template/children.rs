@@ -7,7 +7,7 @@ use crate::loader::chunk_cache;
 use crate::loader::helpers::generate_set_point_code;
 use crate::lua_api::SimState;
 use crate::lua_api::frame::{frame_ref, sync_child_to_lua};
-use crate::lua_api::globals::create_frame::create_frame_instance;
+use crate::lua_api::globals::create_frame::{CreateFrameInstanceSpec, create_frame_instance};
 use crate::widget::WidgetType;
 use crate::xml::{FrameElement, FrameXml, get_template_chain};
 use mlua::{Lua, Value};
@@ -221,12 +221,14 @@ fn create_child_frame_direct(
     let child_id = create_frame_instance(
         lua,
         state,
-        widget_type,
-        widget_type_name,
-        Some(child_name.to_string()),
-        Some(parent_id),
-        true,
-        frame.xml_id,
+        &CreateFrameInstanceSpec {
+            widget_type,
+            frame_type: widget_type_name,
+            name: Some(child_name.to_string()),
+            parent_id: Some(parent_id),
+            parent_explicit: true,
+            id: frame.xml_id,
+        },
     )?;
     apply_direct_child_layout(state, child_id, frame, parent_name);
     apply_direct_child_parent_refs(lua, state, parent_id, child_id, frame)?;
