@@ -893,7 +893,7 @@ fn set_guild_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn join_guild(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
+    use crate::event::Event;
     let name = String::from_stack(state, 1)?;
     let rank = String::from_stack(state, 2)?;
     let num_members = i32::from_stack(state, 3)?;
@@ -917,7 +917,7 @@ fn clear_guild(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn leave_guild(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
+    use crate::event::Event;
     let mut st = borrow_state_mut(state)?;
     st.world.guild_name = None;
     st.world.guild_rank = None;

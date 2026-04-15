@@ -2067,7 +2067,7 @@ fn ui_widget_container_get_num_widgets_showing(state: &mut LuaState) -> LuaResul
     Ok(1)
 }
 
-fn profiler_metric_kind(state: &LuaState, metric: Val) -> Option<i32> {
+fn profiler_metric_kind(_state: &LuaState, metric: Val) -> Option<i32> {
     match metric {
         Val::Num(value) if value.is_finite() && value.fract() == 0.0 => Some(value as i32),
         _ => None,

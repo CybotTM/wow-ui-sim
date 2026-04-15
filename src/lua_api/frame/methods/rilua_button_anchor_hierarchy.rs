@@ -1030,18 +1030,16 @@ fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text_id = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|frame| {
-                frame.children_keys.get("Text").copied().or_else(|| {
-                    let fallback_name = frame.name.as_ref().map(|name| format!("{name}Text"))?;
-                    let child_id = sim.widgets.get_id_by_name(&fallback_name)?;
-                    let child = sim.widgets.get(child_id)?;
-                    (child.parent_id == Some(id)
-                        && child.widget_type == crate::widget::WidgetType::FontString)
-                        .then_some(child_id)
-                })
+        sim.widgets.get(id).and_then(|frame| {
+            frame.children_keys.get("Text").copied().or_else(|| {
+                let fallback_name = frame.name.as_ref().map(|name| format!("{name}Text"))?;
+                let child_id = sim.widgets.get_id_by_name(&fallback_name)?;
+                let child = sim.widgets.get(child_id)?;
+                (child.parent_id == Some(id)
+                    && child.widget_type == crate::widget::WidgetType::FontString)
+                    .then_some(child_id)
             })
+        })
     };
     match text_id {
         Some(tid) => {
@@ -1050,28 +1048,33 @@ fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
             Ok(1)
         }
         None => {
-            let text_value = {
+            let fallback = {
                 let sim = borrow_state(state)?;
-                sim.widgets.get(id).and_then(|frame| {
-                    if matches!(
-                        frame.widget_type,
-                        crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
-                    ) {
-                        frame.text.clone()
-                    } else {
-                        None
-                    }
+                sim.widgets.get(id).map(|frame| {
+                    (
+                        matches!(
+                            frame.widget_type,
+                            crate::widget::WidgetType::Button
+                                | crate::widget::WidgetType::CheckButton
+                        ),
+                        frame.name.as_ref().map(|name| format!("{name}Text")),
+                        frame.text.clone().unwrap_or_default(),
+                    )
                 })
             };
-            let Some(text_value) = text_value else {
+            let Some((is_button, child_name, text_value)) = fallback else {
                 state.push(Val::Nil);
                 return Ok(1);
             };
+            if !is_button {
+                state.push(Val::Nil);
+                return Ok(1);
+            }
 
             let child_id = {
                 use crate::widget::{Frame, WidgetType};
 
-                let mut font_string = Frame::new(WidgetType::FontString, None, Some(id));
+                let mut font_string = Frame::new(WidgetType::FontString, child_name, Some(id));
                 font_string.parent_key = Some("Text".to_string());
                 font_string.text = Some(text_value.clone());
                 font_string.text_stripped = Some(crate::render::strip_wow_markup(&text_value));
@@ -1645,13 +1648,14 @@ fn create_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
 /// AddMaskTexture(maskTexture)
 fn add_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
     let texture_id = frame_id_from_stack(state, 1)?;
-    let mask_id = extract_frame_id(state, Val::from_stack(state, 2)?)
-        .ok_or_else(|| runtime_error("expected mask texture"))?;
+    let Some(mask_id) = extract_frame_id(state, Val::from_stack(state, 2)?) else {
+        return Ok(0);
+    };
 
     let mut sim = borrow_state_mut(state)?;
     let is_mask = sim.widgets.get(mask_id).map(|f| f.is_mask).unwrap_or(false);
     if !is_mask {
-        return Err(runtime_error("expected mask texture"));
+        return Ok(0);
     }
 
     if let Some(texture) = sim.widgets.get_mut_visual(texture_id)
@@ -2181,11 +2185,12 @@ fn animation_group_is_playing(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let playing = {
         let sim = borrow_state(state)?;
-        resolve_animation_group_id(&sim, group_frame_id).and_then(|group_id| {
-            sim.animation_groups
-                .get(&group_id)
-                .map(|group| group.playing)
-        })
+        resolve_animation_group_id(&sim, group_frame_id)
+            .and_then(|group_id| {
+                sim.animation_groups
+                    .get(&group_id)
+                    .map(|group| group.playing)
+            })
             .unwrap_or(false)
     };
     state.push(Val::Bool(playing));
@@ -2193,10 +2198,11 @@ fn animation_group_is_playing(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn resolve_animation_group_id(sim: &crate::lua_api::SimState, frame_id: u64) -> Option<u64> {
-    sim.anim_frame_to_group
-        .get(&frame_id)
-        .copied()
-        .or_else(|| sim.anim_frame_to_anim.get(&frame_id).map(|(group_id, _)| *group_id))
+    sim.anim_frame_to_group.get(&frame_id).copied().or_else(|| {
+        sim.anim_frame_to_anim
+            .get(&frame_id)
+            .map(|(group_id, _)| *group_id)
+    })
 }
 
 fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {

@@ -5,40 +5,21 @@ use std::collections::HashMap;
 #[derive(Clone, Copy)]
 pub struct SeededTalentConfig {
     pub id: i32,
-    pub name: &'static str,
 }
 
 const HOLY_CONFIGS: [SeededTalentConfig; 2] = [
-    SeededTalentConfig {
-        id: 101,
-        name: "Holy Default",
-    },
-    SeededTalentConfig {
-        id: 102,
-        name: "Holy Raid",
-    },
+    SeededTalentConfig { id: 101 },
+    SeededTalentConfig { id: 102 },
 ];
 
 const PROTECTION_CONFIGS: [SeededTalentConfig; 2] = [
-    SeededTalentConfig {
-        id: 201,
-        name: "Protection Default",
-    },
-    SeededTalentConfig {
-        id: 202,
-        name: "Protection Mythic+",
-    },
+    SeededTalentConfig { id: 201 },
+    SeededTalentConfig { id: 202 },
 ];
 
 const RETRIBUTION_CONFIGS: [SeededTalentConfig; 2] = [
-    SeededTalentConfig {
-        id: 301,
-        name: "Retribution Default",
-    },
-    SeededTalentConfig {
-        id: 302,
-        name: "Retribution Raid",
-    },
+    SeededTalentConfig { id: 301 },
+    SeededTalentConfig { id: 302 },
 ];
 
 pub fn seeded_class_talent_configs(spec_id: u32) -> &'static [SeededTalentConfig] {
@@ -48,21 +29,6 @@ pub fn seeded_class_talent_configs(spec_id: u32) -> &'static [SeededTalentConfig
         70 => &RETRIBUTION_CONFIGS,
         _ => &[],
     }
-}
-
-pub fn seeded_class_talent_config_name(config_id: i32) -> Option<&'static str> {
-    [65u32, 66, 70]
-        .into_iter()
-        .flat_map(seeded_class_talent_configs)
-        .find(|config| config.id == config_id)
-        .map(|config| config.name)
-}
-
-pub fn seeded_class_talent_config_id_by_name(spec_id: u32, loadout_name: &str) -> Option<i32> {
-    seeded_class_talent_configs(spec_id)
-        .iter()
-        .find(|config| config.name.eq_ignore_ascii_case(loadout_name))
-        .map(|config| config.id)
 }
 
 pub fn default_class_talent_config_id(spec_id: u32) -> Option<i32> {

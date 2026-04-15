@@ -24,6 +24,26 @@ pub struct AddonContext<'a> {
     pub taint: bool,
 }
 
+impl<'a> AddonContext<'a> {
+    #[cfg(test)]
+    pub fn new<L>(
+        _lua: L,
+        name: &'a str,
+        table: Val,
+        addon_root: &'a Path,
+        use_secure_env: bool,
+        taint: bool,
+    ) -> crate::Result<Self> {
+        Ok(Self {
+            name,
+            table,
+            addon_root,
+            use_secure_env,
+            taint,
+        })
+    }
+}
+
 /// Initialize saved variables for an addon (WTF first, then JSON fallback).
 fn init_saved_variables(
     env: &LoaderEnv<'_>,

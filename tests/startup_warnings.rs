@@ -540,8 +540,8 @@ fn test_rust_load_addon_after_base_load_preserves_account_store_mixin_methods() 
             mixin_ty,
             on_load_ty,
             set_storefront_ty,
-            get_object_type_ty,
-            set_point_ty,
+            _get_object_type_ty,
+            _set_point_ty,
         ): (
             String,
             String,

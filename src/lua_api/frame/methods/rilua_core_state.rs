@@ -662,6 +662,10 @@ pub fn get_map_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {
+    get_map_id(state)
+}
+
 pub fn set_map_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let map_id = i32::from_stack(state, 2)?;
@@ -1191,6 +1195,7 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetID", set_id)?;
     table_set_rust_fn(state, mt, "GetID", get_id)?;
     table_set_rust_fn(state, mt, "GetMapID", get_map_id)?;
+    table_set_rust_fn(state, mt, "GetUiMapID", get_ui_map_id)?;
     table_set_rust_fn(state, mt, "SetMapID", set_map_id)?;
     // Mouse / keyboard
     table_set_rust_fn(state, mt, "EnableMouse", enable_mouse)?;

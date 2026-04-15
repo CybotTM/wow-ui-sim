@@ -7,11 +7,11 @@ use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     frame_ref, registry_table_or_create, table_get, table_set, val_to_string,
 };
-use crate::lua_api::state::SimState;
 use crate::lua_api::rilua_script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, remove_script as remove_rilua_script,
     set_script as set_rilua_script,
 };
+use crate::lua_api::state::SimState;
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
 use crate::render::font::WowFontSystem;
 use crate::widget::WidgetType;
@@ -90,7 +90,11 @@ fn clear_text(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn frame_text_value(sim: &SimState, frame: &crate::widget::Frame, stripped: bool) -> Option<String> {
+fn frame_text_value(
+    sim: &SimState,
+    frame: &crate::widget::Frame,
+    stripped: bool,
+) -> Option<String> {
     let own_text = || {
         if stripped {
             frame.text_stripped.clone().or_else(|| frame.text.clone())
@@ -99,11 +103,15 @@ fn frame_text_value(sim: &SimState, frame: &crate::widget::Frame, stripped: bool
         }
     };
 
-    if !matches!(frame.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+    if !matches!(
+        frame.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    ) {
         return own_text();
     }
 
-    frame.children_keys
+    frame
+        .children_keys
         .get("Text")
         .and_then(|&cid| sim.widgets.get(cid))
         .and_then(|child| {
@@ -166,10 +174,12 @@ fn measure_text_height(state: &LuaState, id: u64, wrap_width: Option<f32>) -> f6
     if let Some(app) = state.app_data::<crate::lua_api::env::WowLuaAppData>()
         && let Some(font_system) = app.font_system.as_ref()
     {
-        return font_system
-            .borrow_mut()
-            .measure_text_height(&text, font.as_deref(), font_size, wrap_width)
-            as f64
+        return font_system.borrow_mut().measure_text_height(
+            &text,
+            font.as_deref(),
+            font_size,
+            wrap_width,
+        ) as f64
             * text_scale;
     }
 
@@ -181,6 +191,18 @@ fn measure_text_height(state: &LuaState, id: u64, wrap_width: Option<f32>) -> f6
 fn get_string_width(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     state.push(Val::Num(measure_text_width(state, id)));
+    Ok(1)
+}
+
+fn get_string_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let wrap_width = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| (frame.word_wrap && frame.width > 0.0).then_some(frame.width))
+    };
+    state.push(Val::Num(measure_text_height(state, id, wrap_width)));
     Ok(1)
 }
 
@@ -706,7 +728,7 @@ fn execute_attribute(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn set_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
+    let _id = frame_id_from_stack(state, 1)?;
     let label_val = stack_val(state, 2);
     let frame_val = stack_val(state, 3);
     let Some(label) = val_to_string(state, label_val) else {
@@ -1662,6 +1684,7 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetFontHeight", set_font_height)?;
     table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
     table_set_rust_fn(state, table, "GetStringWidth", get_string_width)?;
+    table_set_rust_fn(state, table, "GetStringHeight", get_string_height)?;
     table_set_rust_fn(state, table, "GetTextWidth", get_text_width)?;
     table_set_rust_fn(state, table, "GetLineHeight", get_line_height)?;
     table_set_rust_fn(state, table, "IsTruncated", is_truncated)?;

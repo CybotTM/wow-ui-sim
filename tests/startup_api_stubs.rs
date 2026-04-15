@@ -240,8 +240,14 @@ fn startup_expansion_and_threat_stubs_return_safe_values() {
     assert_eq!(result.2, 10.0);
     assert_eq!(result.3, 80.0);
     assert_eq!(result.4, 80.0);
-    assert!(!result.5, "human-player probe should default false in the sim");
-    assert!(!result.6, "threat warning UI should default disabled in the sim");
+    assert!(
+        !result.5,
+        "human-player probe should default false in the sim"
+    );
+    assert!(
+        !result.6,
+        "threat warning UI should default disabled in the sim"
+    );
     assert_eq!(result.7, 0.0);
     assert_eq!(result.8, 0.0);
     assert_eq!(result.9, 0.0);

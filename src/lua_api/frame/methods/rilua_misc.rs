@@ -8,7 +8,8 @@
 
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
-    extract_frame_id, frame_id_from_stack, table_get, table_set, val_to_string,
+    extract_frame_id, frame_id_from_stack, get_or_create_frame_fields, table_get, table_set,
+    val_to_string,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -192,7 +193,19 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "GetOrCreateGroup", get_or_create_group)?;
     table_set_rust_fn(state, mt, "ForceUpdateTimers", force_update_timers)?;
     table_set_rust_fn(state, mt, "RegisterFontStrings", register_font_strings)?;
+    table_set_rust_fn(
+        state,
+        mt,
+        "RegisterBackgroundTexture",
+        register_background_texture,
+    )?;
+    table_set_rust_fn(state, mt, "RegisterFrames", register_frames)?;
+    table_set_rust_fn(state, mt, "SetBorderAlpha", set_border_alpha)?;
+    table_set_rust_fn(state, mt, "SetBorderScalar", set_border_scalar)?;
+    table_set_rust_fn(state, mt, "SetBorderTexture", set_border_texture)?;
+    table_set_rust_fn(state, mt, "SetFillAlpha", set_fill_alpha)?;
     table_set_rust_fn(state, mt, "SetOwningDialog", set_owning_dialog)?;
+    table_set_rust_fn(state, mt, "SetFillTexture", set_fill_texture)?;
     table_set_rust_fn(state, mt, "SetToDefaults", set_to_defaults)?;
     table_set_rust_fn(state, mt, "UnlockHighlight", unlock_highlight)?;
 
@@ -516,7 +529,7 @@ pub fn has_alpha_gradient(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-pub fn set_alpha_gradient(state: &mut LuaState) -> LuaResult<u32> {
+pub fn set_alpha_gradient(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: needs table support to read the gradient table argument
     Ok(0)
 }
@@ -682,8 +695,10 @@ pub fn get_resize_bounds(state: &mut LuaState) -> LuaResult<u32> {
             .get(id)
             .map(|frame| {
                 let (min_width, min_height) = frame.resize_bounds_min;
-                let (max_width, max_height) =
-                    frame.resize_bounds_max.map(|(w, h)| (Val::Num(w as f64), Val::Num(h as f64))).unwrap_or((Val::Nil, Val::Nil));
+                let (max_width, max_height) = frame
+                    .resize_bounds_max
+                    .map(|(w, h)| (Val::Num(w as f64), Val::Num(h as f64)))
+                    .unwrap_or((Val::Nil, Val::Nil));
                 (min_width, min_height, max_width, max_height)
             })
             .unwrap_or((0.0, 0.0, Val::Nil, Val::Nil))
@@ -954,7 +969,7 @@ pub fn is_protected(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-pub fn protect(state: &mut LuaState) -> LuaResult<u32> {
+pub fn protect(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: needs issecure() call via Lua globals — requires mlua/function support
     Ok(0)
 }
@@ -1036,17 +1051,34 @@ pub fn get_dont_save_position(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-pub fn get_window(state: &mut LuaState) -> LuaResult<u32> {
+pub fn get_window(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: needs frame_fields table access — requires mlua/Lua table support
     Ok(0)
 }
 
-pub fn set_window(state: &mut LuaState) -> LuaResult<u32> {
+pub fn set_window(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: needs frame_fields table access — requires mlua/Lua table support
     Ok(0)
 }
 
 // ── Misc ──────────────────────────────────────────────────────────────────────
+
+fn frame_fields_table(state: &mut LuaState) -> LuaResult<Val> {
+    let frame = Val::from_stack(state, 1)?;
+    let Some(id) = extract_frame_id(state, frame) else {
+        return Ok(Val::Nil);
+    };
+    Ok(get_or_create_frame_fields(state, id))
+}
+
+fn table_set_array_value(state: &mut LuaState, table: Val, index: i64, value: Val) {
+    let Val::Table(table_ref) = table else {
+        return;
+    };
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(Val::Num(index as f64), value, &state.gc.string_arena);
+    }
+}
 
 pub fn desaturate_hierarchy(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -1220,7 +1252,7 @@ fn update_height(_state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
-    let self_table = Val::from_stack(state, 1)?;
+    let fields = frame_fields_table(state)?;
     let font_strings = create_table(state);
     let mut out_index = 1;
     let mut input_index = 2;
@@ -1229,18 +1261,47 @@ pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
         if value == Val::Nil {
             break;
         }
-        table_set(state, font_strings, &out_index.to_string(), value);
+        table_set_array_value(state, font_strings, out_index, value);
         out_index += 1;
         input_index += 1;
     }
-    table_set(state, self_table, "__registeredFontStrings", font_strings);
+    table_set(state, fields, "fontStrings", font_strings);
+    table_set(state, fields, "__registeredFontStrings", font_strings);
+    Ok(0)
+}
+
+pub fn register_background_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let fields = frame_fields_table(state)?;
+    let background = Val::from_stack(state, 2)?;
+    let texture_kit = Val::from_stack(state, 3)?;
+    table_set(state, fields, "backgroundTexture", background);
+    table_set(state, fields, "textureKit", texture_kit);
+    Ok(0)
+}
+
+pub fn register_frames(state: &mut LuaState) -> LuaResult<u32> {
+    let fields = frame_fields_table(state)?;
+    let frames = create_table(state);
+    let mut out_index = 1;
+    let mut input_index = 2;
+    loop {
+        let value = stack_val(state, input_index);
+        if value == Val::Nil {
+            break;
+        }
+        table_set_array_value(state, frames, out_index, value);
+        out_index += 1;
+        input_index += 1;
+    }
+    table_set(state, fields, "frames", frames);
     Ok(0)
 }
 
 pub fn set_owning_dialog(state: &mut LuaState) -> LuaResult<u32> {
-    let self_table = Val::from_stack(state, 1)?;
+    let fields = frame_fields_table(state)?;
     let dialog = Val::from_stack(state, 2)?;
-    table_set(state, self_table, "OwningDialog", dialog);
+    table_set(state, fields, "owningDialog", dialog);
+    table_set(state, fields, "OwningDialog", dialog);
     Ok(0)
 }
 
@@ -1266,7 +1327,61 @@ pub fn force_update_timers(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-pub fn set_to_defaults(state: &mut LuaState) -> LuaResult<u32> {
+pub fn set_fill_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let texture = val_to_string(state, stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    blob.fill_texture = texture;
+    Ok(0)
+}
+
+pub fn set_fill_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let alpha = match stack_val(state, 2) {
+        Val::Num(value) => Some(value),
+        _ => None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    blob.fill_alpha = alpha;
+    Ok(0)
+}
+
+pub fn set_border_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let texture = val_to_string(state, stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    blob.border_texture = texture;
+    Ok(0)
+}
+
+pub fn set_border_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let alpha = match stack_val(state, 2) {
+        Val::Num(value) => Some(value),
+        _ => None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    blob.border_alpha = alpha;
+    Ok(0)
+}
+
+pub fn set_border_scalar(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let scalar = match stack_val(state, 2) {
+        Val::Num(value) => Some(value),
+        _ => None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    blob.border_scalar = scalar;
+    Ok(0)
+}
+
+pub fn set_to_defaults(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: needs reset_frame_to_defaults from methods_misc_minimap — requires mlua context
     Ok(0)
 }

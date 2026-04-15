@@ -55,6 +55,16 @@ fn opt_f32(state: &LuaState, index: i32) -> Option<f32> {
     }
 }
 
+fn set_security_disable_set_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let disabled = opt_bool(state, 2).unwrap_or(false);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.editbox_security_disable_set_text = disabled;
+    }
+    Ok(0)
+}
+
 fn rgba_from_stack(state: &LuaState, start: i32) -> Option<crate::widget::Color> {
     let r = opt_f32(state, start)?;
     let g = opt_f32(state, start + 1)?;
@@ -539,14 +549,6 @@ fn set_snap_to_pixel_grid(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// Parse (start, duration, mod_rate) from stack positions 2, 3, 4.
-fn parse_f64_triple(state: &LuaState) -> (f64, f64, f64) {
-    let start = val_to_f64(stack_val(state, 2));
-    let duration = val_to_f64(stack_val(state, 3));
-    let mod_rate = val_to_f64(stack_val(state, 4));
-    (start, duration, mod_rate)
-}
-
 fn normalize_mod_rate(r: f64) -> f64 {
     if r <= 0.0 { 1.0 } else { r }
 }
@@ -971,7 +973,7 @@ fn cooldown_get_countdown_font_string(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
-fn cooldown_set_from_duration_object(state: &mut LuaState) -> LuaResult<u32> {
+fn cooldown_set_from_duration_object(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: parse duration object (Table/UserData with GetStartTime/GetTotalDuration/GetModRate/IsZero)
     // For now this is a no-op stub.
     Ok(0)
@@ -1016,7 +1018,7 @@ fn cooldown_set_edge_color(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn cooldown_set_tex_coord_range(state: &mut LuaState) -> LuaResult<u32> {
+fn cooldown_set_tex_coord_range(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: parse two Vector2 args
     Ok(0)
 }
@@ -1691,10 +1693,11 @@ fn shared_get_min_max_values(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn animation_group_id_for_frame(sim: &crate::lua_api::SimState, frame_id: u64) -> Option<u64> {
-    sim.anim_frame_to_group
-        .get(&frame_id)
-        .copied()
-        .or_else(|| sim.anim_frame_to_anim.get(&frame_id).map(|(group_id, _)| *group_id))
+    sim.anim_frame_to_group.get(&frame_id).copied().or_else(|| {
+        sim.anim_frame_to_anim
+            .get(&frame_id)
+            .map(|(group_id, _)| *group_id)
+    })
 }
 
 fn scroll_child_extent(frame: &crate::widget::Frame, axis: char) -> f64 {
@@ -1818,7 +1821,9 @@ fn set_scroll_child(state: &mut LuaState) -> LuaResult<u32> {
     };
     {
         let mut sim = borrow_state_mut(state)?;
-        crate::lua_api::frame::methods::widget_scroll::assign_scroll_child(&mut sim, id, child_id, true);
+        crate::lua_api::frame::methods::widget_scroll::assign_scroll_child(
+            &mut sim, id, child_id, true,
+        );
     }
     let _ = sync_child_to_rilua(state, id, "ScrollChild", child_id);
     Ok(0)
@@ -1831,7 +1836,11 @@ fn update_scroll_child_rect(state: &mut LuaState) -> LuaResult<u32> {
         .widgets
         .get(id)
         .and_then(|frame| frame.scroll_child_id)
-        .and_then(|child_id| sim.widgets.get(child_id).map(|child| (child.width, child.height)));
+        .and_then(|child_id| {
+            sim.widgets
+                .get(child_id)
+                .map(|child| (child.width, child.height))
+        });
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.scroll_child_rect_size = scroll_child_rect_size;
     }
@@ -1927,7 +1936,7 @@ fn statusbar_set_color_fill(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(frame) = sim.widgets.get(id)
         && frame.widget_type == WidgetType::StatusBar
     {
-        drop(frame);
+        let _ = frame;
         let bar_id = statusbar_child_id_inner(&sim, id);
         if let Some(bar_id) = bar_id
             && let Some(bar) = sim.widgets.get_mut_visual(bar_id)
@@ -2157,7 +2166,7 @@ fn statusbar_get_rotates_texture(state: &mut LuaState) -> LuaResult<u32> {
     false.into_stack(state)
 }
 
-fn statusbar_set_rotates_texture(state: &mut LuaState) -> LuaResult<u32> {
+fn statusbar_set_rotates_texture(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
@@ -2458,7 +2467,7 @@ fn model_set_camera_target(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn model_stub_variadic(state: &mut LuaState) -> LuaResult<u32> {
+fn model_stub_variadic(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
@@ -2731,36 +2740,36 @@ fn tooltip_append_text(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn tooltip_set_spell_by_id(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_spell_by_id(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: populate_spell_tooltip + fire OnTooltipSetSpell
     Ok(0)
 }
 
-fn tooltip_set_item_by_id(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_item_by_id(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: populate_item_tooltip + fire OnTooltipSetItem
     Ok(0)
 }
 
-fn tooltip_set_hyperlink(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_hyperlink(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: parse item/spell hyperlink and populate
     Ok(0)
 }
 
-fn tooltip_set_unit(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_unit(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: set_unit_for_tooltip
     Ok(0)
 }
 
-fn tooltip_set_unit_buff(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_unit_buff(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: lookup_aura + populate_aura_tooltip
     Ok(0)
 }
 
-fn tooltip_set_unit_debuff(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_unit_debuff(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn tooltip_set_unit_aura(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_unit_aura(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
@@ -2880,22 +2889,22 @@ fn tooltip_is_owned(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn tooltip_set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_anchor_type(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: set_anchor_type_impl
     Ok(0)
 }
 
-fn tooltip_copy_tooltip(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_copy_tooltip(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: copy_tooltip_impl
     Ok(0)
 }
 
-fn tooltip_set_frame_stack(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_set_frame_stack(_state: &mut LuaState) -> LuaResult<u32> {
     // TODO: set_frame_stack_impl
     Ok(0)
 }
 
-fn tooltip_add_fonts_strings(state: &mut LuaState) -> LuaResult<u32> {
+fn tooltip_add_fonts_strings(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
@@ -2971,6 +2980,12 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
         metatable,
         "SetSnapToPixelGrid",
         set_snap_to_pixel_grid,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetSecurityDisableSetText",
+        set_security_disable_set_text,
     )?;
 
     // --- Cooldown ---

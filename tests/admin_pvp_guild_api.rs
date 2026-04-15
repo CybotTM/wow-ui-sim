@@ -313,10 +313,10 @@ fn test_guild_control_set_rank_does_not_error() {
 // ============================================================================
 
 #[test]
-fn test_get_guild_faction_group_nil_when_not_in_guild() {
+fn test_get_guild_faction_group_returns_default_faction() {
     let env = env();
-    let is_nil: bool = env.eval("return GetGuildFactionGroup() == nil").unwrap();
-    assert!(is_nil);
+    let faction: i32 = env.eval("return GetGuildFactionGroup()").unwrap();
+    assert_eq!(faction, 1);
 }
 
 // ============================================================================

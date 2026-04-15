@@ -193,6 +193,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "GuildKick",
     "GuildLeave",
     "GuildPromote",
+    "RequestGuildChallengeInfo",
     "GuildSetMOTD",
     "GuildUninvite",
     "InitiateTrade",
@@ -236,6 +237,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "RequestLFDPlayerLockInfo",
     "RequestPartyLootMethod",
     "RequestRaidInfo",
+    "GetUnitPowerBarInfo",
     "ResetCameraPosition",
     "ResurrectGetOfferer",
     "RetrieveCorpse",
@@ -243,6 +245,11 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "SendAddonMessage",
     "SendChatMessage",
     "SendMail",
+    "SetChatWindowAlpha",
+    "SetChatWindowColor",
+    "SetChatWindowLocked",
+    "SetChatWindowUninteractable",
+    "ChangeChatColor",
     "SetAbandonQuest",
     "SetActionBarToggles",
     "SetChannelPassword",
@@ -314,6 +321,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "CanMerchant",
     "CanReplaceGuildMaster",
     "CanSendAuctionQuery",
+    "CanShowAchievementUI",
     "CanSummonFriend",
     "CanUseLanguage",
     "DoesCurrentZoneHaveDungeon",
@@ -366,12 +374,14 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "ShouldShowLevelSquishDialog",
     "UnitCanAssist",
     "UnitCanCooperate",
+    "UnitDistanceSquared",
     "UnitFactionGroup",
     "UnitInAura",
     "UnitInBattleground",
     "UnitInOtherParty",
     "UnitInParty",
     "UnitInRaid",
+    "UnitInRange",
     "UnitIsCharmed",
     "UnitIsCorpse",
     "UnitIsDeadOrGhost",
@@ -379,6 +389,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitIsGroupLeader",
     "UnitIsOwnerOrControllerOfUnit",
     "UnitHasVehicleUI",
+    "UnitIsGameObject",
     "UnitIsPVPSanctioned",
     "UnitIsQuestBoss",
     "UnitIsTapDenied",
@@ -402,11 +413,11 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetContainerNumFreeSlots",
     "GetCurrentGuildBankTab",
     "GetCursorPosition",
+    "GetArenaOpponentSpec",
     "GetFactionInfoByID",
     "GetGossipNumOptions",
     "GetGossipNumAvailableQuests",
     "GetGossipNumActiveQuests",
-    "GetGroupMemberCounts",
     "GetGuildBankTabCost",
     "GetGuildBankTabInfo",
     "GetGuildBankText",
@@ -680,6 +691,8 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_Spell
     ("C_Spell", "GetMountFromSpell", stub_nil),
     ("C_Spell", "GetSpellInfo", stub_nil),
+    // C_SummonInfo
+    ("C_SummonInfo", "GetSummonReason", stub_nil),
     // C_System
     ("C_System", "GetFrameStack", stub_nil),
     // C_Timer (already has real impl for After/NewTicker; these are stubs)
@@ -817,6 +830,8 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_PartyInfo
     ("C_PartyInfo", "IsPartyFull", stub_false),
     ("C_PartyInfo", "IsPartyInJailersTower", stub_false),
+    // C_PvP
+    ("C_PvP", "IsMatchConsideredArena", stub_false),
     // C_PhotoSharing — in sim we never upload/authorize, so both are false
     ("C_PhotoSharing", "IsAuthorized", stub_false),
     ("C_PhotoSharing", "IsEnabled", stub_false),
@@ -834,6 +849,15 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ("C_QuestLog", "IsWorldQuest", stub_false),
     // C_Spell
     ("C_Spell", "IsSpellUsable", stub_false),
+    ("C_Spell", "TargetSpellIsEnchanting", stub_false),
+    ("C_Spell", "TargetSpellJumpsUpgradeTrack", stub_false),
+    ("C_Spell", "TargetSpellReplacesBonusTree", stub_false),
+    // C_SummonInfo
+    (
+        "C_SummonInfo",
+        "IsSummonSkippingStartExperience",
+        stub_false,
+    ),
     // C_StableInfo
     ("C_StableInfo", "IsAtPetStable", stub_false),
     // C_Transmog
@@ -867,6 +891,8 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     ("C_QuestLog", "GetNumQuestLogEntries", stub_zero),
     // C_Spell
     ("C_Spell", "GetSpellCooldown", stub_zero),
+    // C_SummonInfo
+    ("C_SummonInfo", "GetSummonConfirmTimeLeft", stub_zero),
     // C_TradeSkillUI
     ("C_TradeSkillUI", "GetNumRecipes", stub_zero),
     ("C_TradeSkillUI", "GetNumTradeSkills", stub_zero),

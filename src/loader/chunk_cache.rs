@@ -17,14 +17,6 @@ pub fn load_chunk<L: LuaApiMut>(
         .map_err(|e| LoadError::Lua(e.to_string()))
 }
 
-/// Execute a generated Lua chunk.
-pub fn exec(lua: &mut rilua::Lua, code: &str, tag: &str) -> Result<(), LoadError> {
-    let func = load_chunk(lua, code, tag)?;
-    lua.call_function(&func, &[])
-        .map_err(|e| LoadError::Lua(e.to_string()))?;
-    Ok(())
-}
-
 fn tagged_hash(bytes: &[u8], tag: &str) -> u64 {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};

@@ -129,33 +129,6 @@ fn implicit_target_to_type(target: u8) -> SpellTargetType {
 }
 
 /// Check whether a spell can be cast given the current target.
-/// Returns Ok(()) if the cast should proceed, Err(message) with a WoW-style
-/// error string if it should be blocked.
-///
-/// WoW behavior:
-/// - Helpful spells with no target or hostile target → auto-target self (Ok)
-/// - Harmful spells with no target → "You have no target"
-/// - Harmful spells with friendly target → "Target is friendly"
-/// - Self-only spells → always Ok
-pub fn validate_spell_target(
-    spell_id: u32,
-    target: Option<&TargetInfo>,
-) -> std::result::Result<(), &'static str> {
-    match spell_target_type(spell_id) {
-        SpellTargetType::SelfOnly => Ok(()),
-        SpellTargetType::Helpful => match target {
-            // Can't heal dead units with normal spells (need resurrection)
-            Some(t) if !t.is_enemy && t.health <= 0 => Err("Target is dead."),
-            _ => Ok(()), // auto-target self handled by caller
-        },
-        SpellTargetType::Harmful => match target {
-            None => Err("You have no target."),
-            Some(t) if !t.is_enemy => Err("Target is friendly."),
-            Some(_) => Ok(()),
-        },
-    }
-}
-
 /// Hardcoded spell effect amounts (damage or healing).
 pub fn spell_effect_amount(spell_id: u32) -> i32 {
     match spell_id {
@@ -169,35 +142,6 @@ pub fn spell_effect_amount(spell_id: u32) -> i32 {
         82326 => 35_000, // Holy Light (cast-time, helpful)
         85673 => 20_000, // Word of Glory (instant, helpful)
         _ => 10_000,     // Default fallback
-    }
-}
-
-/// Standard GCD duration in seconds (1.5s for most spells).
-pub const GCD_DURATION: f64 = 1.5;
-
-/// Per-spell cooldown durations in seconds. Spells not listed here have no
-/// individual cooldown beyond the GCD.
-pub fn spell_cooldown_duration(spell_id: u32) -> f64 {
-    match spell_id {
-        31935 => 15.0,  // Avenger's Shield
-        26573 => 9.0,   // Consecration
-        53600 => 0.0,   // Shield of the Righteous (charges, no CD for now)
-        62124 => 8.0,   // Hand of Reckoning (Taunt)
-        853 => 60.0,    // Hammer of Justice
-        375576 => 60.0, // Divine Toll
-        31850 => 120.0, // Ardent Defender
-        86659 => 300.0, // Guardian of Ancient Kings
-        642 => 300.0,   // Divine Shield
-        _ => 0.0,
-    }
-}
-
-/// Whether a spell triggers the GCD (most do, but some defensives/off-GCD
-/// abilities don't).
-pub fn spell_triggers_gcd(spell_id: u32) -> bool {
-    match spell_id {
-        31850 | 86659 | 642 => false, // Ardent Defender, GoAK, Divine Shield are off-GCD
-        _ => true,
     }
 }
 
@@ -383,92 +327,6 @@ pub fn default_party() -> Vec<PartyMember> {
             },
         )
         .collect()
-}
-
-/// Enemy NPC definition: (name, class_index, level, health, health_max, power, power_max, power_type_name).
-const ENEMY_NPC: (&str, i32, i32, i32, i32, i32, i32, &str) =
-    ("Hogger", 1, 11, 45_000, 45_000, 0, 0, "MANA");
-
-/// Build a TargetInfo from a unit ID string.
-pub fn build_target_info(unit_id: &str, state: &super::state::SimState) -> Option<TargetInfo> {
-    match unit_id {
-        "player" => Some(build_player_target(state)),
-        u if u.starts_with("party") => build_party_target(u, state),
-        "enemy1" => Some(build_enemy_target()),
-        _ => None,
-    }
-}
-
-fn build_player_target(state: &super::state::SimState) -> TargetInfo {
-    TargetInfo {
-        unit_id: "player".into(),
-        name: state.player.name.clone(),
-        class_index: state.player.class_index,
-        level: 80,
-        health: state.player.health,
-        health_max: state.player.health_max,
-        power: 50_000,
-        power_max: 100_000,
-        power_type: 0,
-        power_type_name: "MANA".to_string(),
-        is_player: true,
-        is_enemy: false,
-        guid: "Player-0000-00000001".into(),
-        classification: "normal".into(),
-        creature_type: "Humanoid".into(),
-        reaction: 5,
-    }
-}
-
-fn build_party_target(unit_id: &str, state: &super::state::SimState) -> Option<TargetInfo> {
-    let idx = unit_id
-        .strip_prefix("party")?
-        .parse::<usize>()
-        .ok()
-        .filter(|&n| n >= 1)
-        .map(|n| n - 1)?;
-    let m = state.party_members.get(idx)?;
-    Some(TargetInfo {
-        unit_id: unit_id.into(),
-        name: m.name.clone(),
-        class_index: m.class_index,
-        level: m.level,
-        health: m.health,
-        health_max: m.health_max,
-        power: m.power,
-        power_max: m.power_max,
-        power_type: m.power_type,
-        power_type_name: m.power_type_name.clone(),
-        is_player: true,
-        is_enemy: false,
-        guid: format!("Player-0000-0000000{}", idx + 2),
-        classification: "normal".into(),
-        creature_type: "Humanoid".into(),
-        reaction: 5,
-    })
-}
-
-fn build_enemy_target() -> TargetInfo {
-    let (name, class_index, level, health, health_max, power, power_max, power_type_name) =
-        ENEMY_NPC;
-    TargetInfo {
-        unit_id: "enemy1".into(),
-        name: name.into(),
-        class_index,
-        level,
-        health,
-        health_max,
-        power,
-        power_max,
-        power_type: 0,
-        power_type_name: power_type_name.to_string(),
-        is_player: false,
-        is_enemy: true,
-        guid: "Creature-0000-00000099".into(),
-        classification: "normal".into(),
-        creature_type: "Humanoid".into(),
-        reaction: 2,
-    }
 }
 
 /// Randomly damage party members, auto-resurrect after 30s dead.

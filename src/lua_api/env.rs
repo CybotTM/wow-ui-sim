@@ -572,7 +572,6 @@ impl WowLuaEnv {
         let Some(handler) = handler else {
             return Ok(());
         };
-
         let call_args = self.build_event_call_args(&mut lua, widget_id, event, args)?;
         self.call_widget_handler(&mut lua, addon_idx, handler, &call_args);
         Ok(())
@@ -912,7 +911,9 @@ impl WowLuaEnv {
             return Ok(());
         };
 
-        let info = self.eval::<Val>("return C_EditMode.GetLayouts()")?;
+        let info = self.eval::<Val>(
+            "return (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()",
+        )?;
         self.fire_event_with_args("EDIT_MODE_LAYOUTS_UPDATED", &[info, Val::Bool(true)])
     }
 

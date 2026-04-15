@@ -10,62 +10,6 @@ use crate::xml::{AnchorXml, FrameXml};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Set frame size directly from a FrameXml's `<Size>` element.
-pub fn set_size(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
-    let Some(size) = template.size() else { return };
-    let (width, height) = super::get_size_values(size);
-    let (Some(w), Some(h)) = (width, height) else {
-        return;
-    };
-    let mut s = state.borrow_mut();
-    if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-        frame.set_size(w, h);
-    }
-    s.widgets.mark_rect_dirty(frame_id);
-}
-
-/// Set partial or full size from XML (handles width-only and height-only).
-pub fn set_size_partial(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
-    let Some(size) = template.size() else { return };
-    let (w, h) = super::get_size_values(size);
-    let mut s = state.borrow_mut();
-    match (w, h) {
-        (Some(w), Some(h)) => {
-            if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-                frame.set_size(w, h);
-            }
-        }
-        (Some(w), None) => {
-            if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-                frame.width = w;
-            }
-        }
-        (None, Some(h)) => {
-            if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-                frame.height = h;
-            }
-        }
-        (None, None) => return,
-    }
-    s.widgets.mark_rect_dirty(frame_id);
-}
-
-/// Set frame anchors directly from a FrameXml's `<Anchors>` element.
-pub fn set_anchors(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    template: &FrameXml,
-    frame_name: &str,
-) {
-    let Some(anchors) = template.anchors() else {
-        return;
-    };
-    let mut s = state.borrow_mut();
-    for anchor in &anchors.anchors {
-        set_single_anchor(&mut s, frame_id, anchor, frame_name);
-    }
-}
-
 /// Set a single anchor point on a frame.
 pub(super) fn set_single_anchor(
     state: &mut SimState,
@@ -187,15 +131,6 @@ fn resolve_relative_key(state: &SimState, frame_id: u64, key: &str) -> Option<u6
     Some(current_id)
 }
 
-/// Set SetAllPoints from template (clears anchors, adds TOPLEFT+BOTTOMRIGHT to parent).
-pub fn set_all_points(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
-    if template.set_all_points != Some(true) {
-        return;
-    }
-    let mut s = state.borrow_mut();
-    set_all_points_inner(&mut s, frame_id);
-}
-
 /// Inner: clear all points and fill parent with TOPLEFT+BOTTOMRIGHT anchors.
 ///
 /// Matches Lua `SetAllPoints(true)`: stores `relative_to_id = None` (implicit parent)
@@ -224,23 +159,6 @@ fn set_all_points_inner(state: &mut SimState, frame_id: u64) {
     }
 
     state.widgets.mark_rect_dirty(frame_id);
-}
-
-/// Set frame hidden state directly from template.
-pub fn set_hidden(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
-    if template.hidden != Some(true) {
-        return;
-    }
-    state.borrow_mut().set_frame_visible(frame_id, false);
-}
-
-/// Set frame clips-children state directly from template.
-pub fn set_clips_children(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
-    if let Some(clips_children) = template.clip_children
-        && let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id)
-    {
-        frame.clips_children = clips_children;
-    }
 }
 
 /// Set frame alpha directly.

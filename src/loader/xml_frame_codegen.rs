@@ -4,7 +4,9 @@
 //! instantiate a frame: CreateFrame call, parentKey, mixins, KeyValues,
 //! attributes, and script handlers.
 
-use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref, lua_table_field_ref};
+use super::helpers::{
+    escape_lua_string, generate_scripts_code, lua_global_ref, lua_table_field_ref,
+};
 
 /// Build the complete Lua code string for creating a frame from XML.
 pub(super) fn build_frame_lua_code(
@@ -189,9 +191,7 @@ pub(super) fn generate_key_values_code(
     for kv in &key_values.values {
         let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
         let field_ref = lua_table_field_ref(var_name, &kv.key);
-        code.push_str(&format!(
-            "\n        {field_ref} = {value}\n        "
-        ));
+        code.push_str(&format!("\n        {field_ref} = {value}\n        "));
     }
     code
 }

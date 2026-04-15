@@ -115,7 +115,18 @@ fn setup_frame(
 ) -> Result<(), LoadError> {
     let setup_start = Instant::now();
     let exec_start = Instant::now();
-    exec_create_frame_code(env, setup.lua_code, setup.name, setup.initial_hidden)?;
+    match exec_create_frame_code(env, setup.lua_code, setup.name, setup.initial_hidden) {
+        Ok(()) => {}
+        Err(error)
+            if recover_frame_after_loader_vm_error(
+                env,
+                setup.name,
+                setup.frame,
+                setup.parent,
+                &error,
+            )? => {}
+        Err(error) => return Err(error),
+    }
     timing.frame_exec_lua_time += exec_start.elapsed();
     let props_start = Instant::now();
     apply_direct_frame_mixins(env, setup.name, setup.frame);
@@ -125,6 +136,56 @@ fn setup_frame(
     timing.xml_frame_setup_time += setup_start.elapsed();
     timing.frame_count += 1;
     Ok(())
+}
+
+fn recover_frame_after_loader_vm_error(
+    env: &LoaderEnv<'_>,
+    name: &str,
+    frame: &crate::xml::FrameXml,
+    parent: &str,
+    error: &LoadError,
+) -> Result<bool, LoadError> {
+    let error_text = error.to_string();
+    if !error_text.contains("expected Lua closure in execute") {
+        return Ok(false);
+    }
+
+    let frame_exists = env.state().borrow().widgets.get_id_by_name(name).is_some();
+    if !frame_exists {
+        return Ok(false);
+    }
+
+    let parent_key = frame.parent_key.as_deref();
+    let parent_array = frame.parent_array.as_deref();
+    if parent_key.is_none() && parent_array.is_none() {
+        return Ok(false);
+    }
+
+    let parent_ref = super::helpers::lua_global_ref(parent);
+    let child_ref = super::helpers::lua_global_ref(name);
+    let mut repair = String::new();
+    repair.push_str(&format!(
+        "local parent = {parent_ref}\nlocal child = {child_ref}\n"
+    ));
+    repair.push_str("if parent and child then\n");
+    if let Some(parent_key) = parent_key {
+        repair.push_str(&format!("  parent[{parent_key:?}] = child\n"));
+    }
+    if let Some(parent_array) = parent_array {
+        repair.push_str(&format!(
+            "  parent[{parent_array:?}] = parent[{parent_array:?}] or {{}}\n"
+        ));
+        repair.push_str(&format!(
+            "  table.insert(parent[{parent_array:?}], child)\n"
+        ));
+    }
+    repair.push_str("end\n");
+    env.exec(&repair).map_err(|repair_error| {
+        LoadError::Lua(format!(
+            "Recovered frame {name} exists but failed to repair parent links after loader VM error: {repair_error}"
+        ))
+    })?;
+    Ok(true)
 }
 
 fn apply_direct_frame_mixins(env: &LoaderEnv<'_>, name: &str, frame: &crate::xml::FrameXml) {
@@ -304,7 +365,8 @@ fn exec_create_frame_code(
     {
         let mut state = env.state().borrow_mut();
         state.create_frame_initial_hidden = None;
-        state.suppress_runtime_on_load_depth = state.suppress_runtime_on_load_depth.saturating_sub(1);
+        state.suppress_runtime_on_load_depth =
+            state.suppress_runtime_on_load_depth.saturating_sub(1);
     }
     exec_result
 }

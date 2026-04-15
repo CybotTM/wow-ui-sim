@@ -6,7 +6,6 @@ pub mod enum_data;
 pub mod environment_restore;
 pub mod global_frames;
 pub mod hero_talents;
-pub mod lua_duration_object;
 pub mod register;
 pub mod rilua_admin;
 pub mod rilua_create_frame;

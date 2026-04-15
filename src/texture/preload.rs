@@ -1,35 +1,4 @@
 use super::TextureManager;
-use std::collections::BTreeSet;
-
-pub(crate) fn collect_map_preload_texture_paths(map_id: u32) -> Vec<String> {
-    let mut paths = BTreeSet::new();
-
-    if let Some(map_art) = crate::map_art::get_map_art(map_id) {
-        for file_data_id in map_art.tiles.iter().flat_map(|tiles| tiles.iter().copied()) {
-            if let Some(path) = wow_texture_path_from_file_data_id(file_data_id) {
-                paths.insert(path);
-            }
-        }
-    }
-
-    if let Some(overlays) = crate::map_exploration::get_overlays_for_map(map_id) {
-        for file_data_id in overlays
-            .iter()
-            .flat_map(|overlay| overlay.file_data_ids.iter().copied())
-        {
-            if let Some(path) = wow_texture_path_from_file_data_id(file_data_id) {
-                paths.insert(path);
-            }
-        }
-    }
-
-    paths.into_iter().collect()
-}
-
-fn wow_texture_path_from_file_data_id(file_data_id: u32) -> Option<String> {
-    let path = crate::manifest_interface_data::get_texture_path(file_data_id)?;
-    Some(format!("Interface\\{}", path.replace('/', "\\")))
-}
 
 impl TextureManager {
     /// Pre-load talent icon textures for the given tree to avoid on-demand lag.

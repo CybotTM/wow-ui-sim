@@ -181,10 +181,7 @@ fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
 
 /// Fire EDIT_MODE_LAYOUTS_UPDATED, TIME_PLAYED_MSG, and PLAYER_ENTERING_WORLD.
 fn fire_world_enter_sequence(env: &WowLuaEnv) {
-    log_with_timestamp(env, "[Startup] Firing EDIT_MODE_LAYOUTS_UPDATED");
-    if let Err(e) = env.fire_edit_mode_layouts_updated() {
-        log_with_timestamp(env, &e.to_string());
-    }
+    log_with_timestamp(env, "[Startup] Skipping EDIT_MODE_LAYOUTS_UPDATED");
 
     log_with_timestamp(
         env,

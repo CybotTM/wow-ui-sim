@@ -106,6 +106,28 @@ if CreateSecureDelegate == nil then
   end
 end
 
+if secureexecuterange == nil then
+  function secureexecuterange(tbl, callback, ...)
+    if type(tbl) ~= "table" or type(callback) ~= "function" then
+      return
+    end
+    for index, value in ipairs(tbl) do
+      callback(index, value, ...)
+    end
+  end
+end
+
+if debug ~= nil and debug.getfenv ~= nil then
+  local __wow_debug_getfenv = debug.getfenv
+
+  function debug.getfenv(obj)
+    if type(obj) == "table" and rawget(obj, "GetObjectType") ~= nil then
+      return obj
+    end
+    return __wow_debug_getfenv(obj)
+  end
+end
+
 if GetFrameMetatable == nil then
   function GetFrameMetatable(frame)
     if frame == nil then
@@ -182,9 +204,21 @@ if GetText == nil then
   end
 end
 
+if BreakUpLargeNumbers == nil then
+  function BreakUpLargeNumbers(value)
+    return tostring(value)
+  end
+end
+
 if GetGameTime == nil then
   function GetGameTime()
     return 12, 0
+  end
+end
+
+if GetTutorialsEnabled == nil then
+  function GetTutorialsEnabled()
+    return false
   end
 end
 
@@ -193,6 +227,14 @@ if GetChatWindowInfo == nil then
     return "Chat " .. tostring(id or 1), 12, 1, 1, 1, 1, true, false, (id or 1) == 1, false
   end
 end
+
+ChatTypeInfo = ChatTypeInfo or {}
+ChatTypeInfo.SYSTEM = ChatTypeInfo.SYSTEM or {
+  r = 1,
+  g = 1,
+  b = 0,
+  id = 1,
+}
 
 local __wow_chat_window_state = __wow_chat_window_state or {}
 
@@ -688,6 +730,10 @@ C_UnitAurasPrivate = __wow_merge_namespace(C_UnitAurasPrivate, {
 
 C_PetBattles = __wow_merge_namespace(C_PetBattles, {
   GetAllEffectNames = function() return end,
+  GetAbilityState = function() return false, 0, 0 end,
+  GetActivePet = function() return 1 end,
+  IsTrapAvailable = function() return false, 0 end,
+  ShouldShowPetSelect = function() return false end,
 })
 
 C_VoiceChat = __wow_merge_namespace(C_VoiceChat, {
@@ -1552,6 +1598,12 @@ if UnitLevel == nil then
   end
 end
 
+if UnitEffectiveLevel == nil then
+  function UnitEffectiveLevel(unit)
+    return UnitLevel(unit)
+  end
+end
+
 if GetMaxPlayerLevel == nil then
   function GetMaxPlayerLevel()
     return 80
@@ -1610,6 +1662,42 @@ if UnitAffectingCombat == nil then
   end
 end
 
+if UnitIsPVPFreeForAll == nil then
+  function UnitIsPVPFreeForAll(_unit)
+    return false
+  end
+end
+
+if UnitPhaseReason == nil then
+  function UnitPhaseReason(_unit)
+    return nil
+  end
+end
+
+if PartialPlayTime == nil then
+  function PartialPlayTime()
+    return false
+  end
+end
+
+if NoPlayTime == nil then
+  function NoPlayTime()
+    return false
+  end
+end
+
+if GetBillingTimeRested == nil then
+  function GetBillingTimeRested()
+    return 0
+  end
+end
+
+if GetUnitTotalModifiedMaxHealthPercent == nil then
+  function GetUnitTotalModifiedMaxHealthPercent(_unit)
+    return 0
+  end
+end
+
 if GetNumShapeshiftForms == nil then
   function GetNumShapeshiftForms()
     return 0
@@ -1625,6 +1713,12 @@ end
 if GetShapeshiftFormInfo == nil then
   function GetShapeshiftFormInfo(_index)
     return nil, false, false, nil
+  end
+end
+
+if GetTotemInfo == nil then
+  function GetTotemInfo(_slot)
+    return false, nil, 0, 0, nil
   end
 end
 
@@ -2150,7 +2244,19 @@ if rawget(C_GuildInfo, "CanSpeakInGuildChat") == nil then
 end
 if GetAvailableLocaleInfo == nil then
   function GetAvailableLocaleInfo()
-    return {}
+    return {
+      {
+        localeId = 1,
+        localeName = "enUS",
+        englishName = "English (US)",
+        displayName = "English (US)",
+      }
+    }
+  end
+end
+if GetGuildFactionGroup == nil then
+  function GetGuildFactionGroup()
+    return 1
   end
 end
 if GuildControlSetRank == nil then
@@ -2164,6 +2270,75 @@ if GuildControlGetNumRanks == nil then
 end
 if GuildControlGetRankFlags == nil then
   function GuildControlGetRankFlags() return {} end
+end
+if GetGroupMemberCounts == nil then
+  function GetGroupMemberCounts()
+    return {
+      TANK = 0,
+      HEALER = 0,
+      DAMAGER = 0,
+      NOROLE = 0,
+    }
+  end
+end
+if GetLootSpecialization == nil then
+  function GetLootSpecialization()
+    return 0
+  end
+end
+
+if GetSpellConfirmationPromptsInfo == nil then
+  function GetSpellConfirmationPromptsInfo()
+    return {}
+  end
+end
+
+if GetActiveLootRollIDs == nil then
+  function GetActiveLootRollIDs()
+    return {}
+  end
+end
+
+if GetNumArenaOpponents == nil then
+  function GetNumArenaOpponents()
+    return 0
+  end
+end
+if C_EditMode == nil then
+  C_EditMode = __wow_namespace()
+end
+if rawget(C_EditMode, "GetAccountSettings") == nil then
+  local function __wow_default_edit_mode_account_setting(setting)
+    if setting == Enum.EditModeAccountSetting.ShowGrid then
+      return 0
+    elseif setting == Enum.EditModeAccountSetting.GridSpacing then
+      return Constants.EditModeConsts.EditModeDefaultGridSpacing or 100
+    elseif setting == Enum.EditModeAccountSetting.SettingsExpanded then
+      return 0
+    elseif setting == Enum.EditModeAccountSetting.EnableAdvancedOptions then
+      return 0
+    end
+    return 1
+  end
+
+  function C_EditMode.GetAccountSettings()
+    local settings = {}
+    for _, setting in pairs(Enum.EditModeAccountSetting or {}) do
+      if type(setting) == "number" then
+        table.insert(settings, {
+          setting = setting,
+          value = __wow_default_edit_mode_account_setting(setting),
+        })
+      end
+    end
+    table.sort(settings, function(a, b) return a.setting < b.setting end)
+    return settings
+  end
+end
+if WorldLootObjectExists == nil then
+  function WorldLootObjectExists(_unit)
+    return false
+  end
 end
 
 -- Housing: not simulated. The only surface accessed at load is
@@ -2331,6 +2506,14 @@ local function __wow_is_color_constant_key(key)
      and not key:match("_COLOR_TABLE")
      and not key:match("_COLOR_ATLASES")
 end
+local function __wow_preserve_nil_global(key)
+  if type(key) ~= "string" then
+    return false
+  end
+  return key:match("^SLASH_[A-Z0-9_]+%d+$") ~= nil
+      or key:match("^EMOTE%d+_CMD%d+$") ~= nil
+      or key:match("^EMOTE%d+_TOKEN$") ~= nil
+end
 __global_mt.__index = function(t, key)
   local value = nil
   if __prev_index ~= nil then
@@ -2342,6 +2525,9 @@ __global_mt.__index = function(t, key)
   end
   if value ~= nil then
     return value
+  end
+  if __wow_preserve_nil_global(key) then
+    return nil
   end
 
   if key == "HIGHLIGHT_FONT_COLOR" then
@@ -2392,19 +2578,6 @@ pub(super) fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
     if ms > 1000.0 {
         rt.count_over_1000ms += 1;
     }
-}
-
-/// Stamp addon taint on a handler and call it. The VM applies fixedtaint on entry.
-/// For Blizzard addons (is_blizzard=true), clear the handler's taint so issecure()
-/// returns true during execution, matching real WoW behavior.
-pub(super) fn call_with_taint<L, H, A>(
-    _lua: &L,
-    _handler: H,
-    _taint: Option<String>,
-    _is_blizzard: bool,
-    _args: A,
-) -> crate::Result<()> {
-    Ok(())
 }
 
 /// Look up the addon folder name for a given owner_addon index.

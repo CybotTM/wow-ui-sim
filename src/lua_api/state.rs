@@ -98,8 +98,8 @@ macro_rules! build_empty_sim_state {
 // Re-export game data types so existing `crate::lua_api::state::X` imports keep working.
 pub use super::game_data::SpellCooldownState;
 pub use super::game_data::{
-    AuraInfo, CLASS_LABELS, CastingState, PartyMember, RACE_DATA, ROT_DAMAGE_LEVELS, TargetInfo,
-    XP_LEVELS, build_target_info, tick_party_health,
+    CLASS_LABELS, CastingState, PartyMember, RACE_DATA, ROT_DAMAGE_LEVELS, TargetInfo, XP_LEVELS,
+    tick_party_health,
 };
 use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,

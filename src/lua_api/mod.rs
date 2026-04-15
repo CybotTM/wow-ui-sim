@@ -3,13 +3,11 @@
 mod addon_scan;
 pub mod animation;
 mod builtin_frames;
-pub(crate) mod chat_init;
 mod diagnostics;
 mod env;
 mod env_init;
 mod env_rilua;
 pub(crate) mod frame;
-mod frame_methods;
 pub(crate) mod game_data;
 pub mod globals;
 mod layout;
@@ -24,13 +22,11 @@ pub(crate) mod rilua_script_helpers;
 pub(crate) mod rilua_taint;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod rilua_timer_layout;
-pub(crate) mod script_helpers;
 pub mod simple_html;
 pub(crate) mod state;
 mod state_defaults;
 pub(crate) mod state_render;
 pub(crate) mod state_types;
-mod string_format;
 pub(crate) mod talent_state;
 mod timer_processing;
 pub mod tooltip;

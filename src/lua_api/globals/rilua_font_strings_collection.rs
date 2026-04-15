@@ -799,11 +799,11 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             state.push(Val::Bool(false));
             Ok(17)
         })?
-        .set_function("GetPetInfoByPetID", |state| {
+        .set_function("GetPetInfoByPetID", |_state| {
             // TODO: lookup by pet_id string
             Ok(0)
         })?
-        .set_function("GetPetInfoBySpeciesID", |state| {
+        .set_function("GetPetInfoBySpeciesID", |_state| {
             // TODO: lookup by species_id
             Ok(0)
         })?

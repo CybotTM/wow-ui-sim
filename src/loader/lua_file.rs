@@ -7,6 +7,7 @@ use crate::lua_api::rilua_script_helpers::call_error_handler_state;
 use crate::lua_api::rilua_taint::stamp_addon_taint_state;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
+use std::borrow::Cow;
 use std::path::Path;
 use std::time::Instant;
 
@@ -27,10 +28,11 @@ pub fn load_lua_file(
     timing.io_time += io_start.elapsed();
 
     let chunk_name = wow_chunk_name(path);
+    let patched_source = patch_lua_source(&bytes, &chunk_name);
 
     let compile_start = Instant::now();
     let func_result =
-        env.with_state(|state| load_cached_or_compile(state, &bytes, &chunk_name, timing));
+        env.with_state(|state| load_cached_or_compile(state, &patched_source, &chunk_name, timing));
     let compile_elapsed = compile_start.elapsed();
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
@@ -70,6 +72,136 @@ fn wow_chunk_name(path: &Path) -> String {
     } else {
         format!("@{}", path_str)
     }
+}
+
+fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
+    let Ok(source) = std::str::from_utf8(bytes) else {
+        return Cow::Borrowed(bytes);
+    };
+
+    let patched = if chunk_name.ends_with("/ChatFrameUtil.lua") {
+        source
+            .replace(
+                "local info = ChatTypeInfo[\"SYSTEM\"];",
+                "local info = ChatTypeInfo[\"SYSTEM\"] or { r = 1, g = 1, b = 0, id = 1 };",
+            )
+            .replacen(
+                "previousValue:Hide();",
+                "if type(previousValue.Hide) == \"function\" then previousValue:Hide(); end",
+                1,
+            )
+            .replacen(
+                "FCFClickAnywhereButton_UpdateState(previousValue.chatFrame.clickAnywhereButton);",
+                "if previousValue.chatFrame and previousValue.chatFrame.clickAnywhereButton then FCFClickAnywhereButton_UpdateState(previousValue.chatFrame.clickAnywhereButton); end",
+                1,
+            )
+            .replacen(
+                "FCFClickAnywhereButton_UpdateState(editBox.chatFrame.clickAnywhereButton);",
+                "if editBox.chatFrame and editBox.chatFrame.clickAnywhereButton then FCFClickAnywhereButton_UpdateState(editBox.chatFrame.clickAnywhereButton); end",
+                1,
+            )
+    } else if chunk_name.ends_with("/Deprecated_ArenaUI.lua") {
+        source
+            .replacen(
+                "self.layoutIndex = self:GetParent().layoutIndex + 1;",
+                "self.layoutIndex = (self:GetParent().layoutIndex or ((id * 2) - 1)) + 1;",
+                1,
+            )
+            .replacen(
+                "_G[prefix..\"HealthBar\"]:SetBarTextZeroText(DEAD);",
+                "if _G[prefix..\"HealthBar\"] then _G[prefix..\"HealthBar\"]:SetBarTextZeroText(DEAD); end",
+                1,
+            )
+            .replacen(
+                "_G[prefix..\"Name\"]:Hide();",
+                "if _G[prefix..\"Name\"] then _G[prefix..\"Name\"]:Hide(); end",
+                1,
+            )
+    } else if chunk_name.ends_with("/VoiceChatTranscriptionFrame.lua") {
+        source.replace(
+            "chatInfo = ChatTypeInfo[chatType];",
+            "chatInfo = ChatTypeInfo[chatType] or ChatTypeInfo.SYSTEM or { r = 1, g = 1, b = 0, id = 1 };",
+        )
+    } else if chunk_name.ends_with("/EventUtil.lua") {
+        source.replace(
+            "callback();",
+            "if type(callback) == \"function\" then callback(); end",
+        )
+    } else if chunk_name.ends_with("/EditModeManager.lua") {
+        source
+            .replacen(
+                "function EditModeManagerFrameMixin:ReconcileLayoutsWithModern()\n\tlocal somethingChanged = false;",
+                "function EditModeManagerFrameMixin:ReconcileLayoutsWithModern()\n\tif type(self.layoutInfo) ~= \"table\" or type(self.layoutInfo.layouts) ~= \"table\" then\n\t\treturn false;\n\tend\n\tlocal somethingChanged = false;",
+                1,
+            )
+            .replacen(
+                "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo;",
+                "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo or self.layoutInfo or { layouts = {}, activeLayout = 1 };\n\tif type(self.layoutInfo.layouts) ~= \"table\" then\n\t\tself.layoutInfo.layouts = {};\n\tend",
+                1,
+            )
+    } else if chunk_name.ends_with("/UIParent.lua") {
+        source
+            .replacen(
+                "if ( lastTalkedToGM ~= \"\" ) then",
+                "if false and ( lastTalkedToGM ~= \"\" ) then",
+                1,
+            )
+            .replacen(
+                "NPETutorial_AttemptToBegin(event);",
+                "if type(NPETutorial_AttemptToBegin) == \"function\" then NPETutorial_AttemptToBegin(event); end",
+                1,
+            )
+            .replacen(
+                "CatalogShopInboundInterface.CheckForFree(event);",
+                "if CatalogShopInboundInterface and type(CatalogShopInboundInterface.CheckForFree) == \"function\" then CatalogShopInboundInterface.CheckForFree(event); end",
+                1,
+            )
+            .replacen(
+                "StoreFrame_CheckForFree(event);",
+                "if type(StoreFrame_CheckForFree) == \"function\" then StoreFrame_CheckForFree(event); end",
+                1,
+            )
+            .replacen(
+                "EventUtil.TriggerOnVariablesLoaded();",
+                "-- EventUtil.TriggerOnVariablesLoaded() skipped in rilua startup",
+                1,
+            )
+    } else if chunk_name.ends_with("/MinimalSlider.lua") {
+        source.replace(
+            "self.Slider.Thumb:SetAlpha(alpha);",
+            "if self.Slider and self.Slider.Thumb then self.Slider.Thumb:SetAlpha(alpha); end",
+        )
+    } else if chunk_name.ends_with("/FloatingChatFrame.lua") {
+        source
+            .replace(
+                "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha, DEFAULT_CHATFRAME_ALPHA));",
+                "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA, DEFAULT_CHATFRAME_ALPHA));",
+            )
+            .replace(
+                "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha(), chatFrame.oldAlpha), chatFrame.oldAlpha);",
+                "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha() or 0, chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA), chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA);",
+            )
+    } else if chunk_name.ends_with("/Blizzard_PetBattleUI.lua") {
+        source
+            .replace(
+                "cooldown = max(currentCooldown, currentLockdown);",
+                "cooldown = max(currentCooldown or 0, currentLockdown or 0);",
+            )
+            .replace(
+                "self.XPBar:SetWidth(max((xp / max(maxXp,1)) * self.xpBarWidth, 1));",
+                "self.XPBar:SetWidth(max(((xp or 0) / max(maxXp or 1,1)) * self.xpBarWidth, 1));",
+            )
+            .replace(
+                "self.ActualHealthBar:SetWidth((health / max(maxHealth,1)) * self.healthBarWidth);",
+                "self.ActualHealthBar:SetWidth(((health or 0) / max(maxHealth or 1,1)) * self.healthBarWidth);",
+            )
+    } else {
+        return Cow::Borrowed(bytes);
+    };
+    if patched == source {
+        return Cow::Borrowed(bytes);
+    }
+    Cow::Owned(patched.into_bytes())
 }
 
 /// Execute a compiled addon function.

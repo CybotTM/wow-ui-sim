@@ -9,9 +9,8 @@
 
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::rilua_methods::{
-    borrow_lua, borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
-    extract_frame_id, frame_ref, registry_get, registry_table_or_create, state_handle, table_get,
-    table_set,
+    borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id,
+    frame_ref, get_or_create_frame_fields, registry_get, state_handle, table_get, table_set,
 };
 use crate::lua_api::rilua_script_helpers::protected_lua_pcall_state;
 use crate::lua_bridge::FromStack;
@@ -647,39 +646,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 // Private helpers
 // ---------------------------------------------------------------------------
 
-/// Get or create the per-frame fields subtable in the `__rilua_frame_fields` registry entry.
-///
-/// Returns the frame fields as `Val::Table`, or `Val::Nil` if GC has collected it.
-fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
-    let fields_registry = registry_table_or_create(state, "__rilua_frame_fields");
-    let Val::Table(fields_reg_ref) = fields_registry else {
-        return Val::Nil;
-    };
-    let id_key = Val::Num(frame_id as f64);
-    let existing = state
-        .gc
-        .tables
-        .get(fields_reg_ref)
-        .map(|t| t.get_int(frame_id as i64))
-        .unwrap_or(Val::Nil);
-    if let Val::Table(_) = existing {
-        return existing;
-    }
-    let new_table = create_table(state);
-    if let Some(reg) = state.gc.tables.get_mut(fields_reg_ref) {
-        let _ = reg.raw_set(id_key, new_table, &state.gc.string_arena);
-    }
-    new_table
-}
-
-fn apply_runtime_templates(
-    state: &mut LuaState,
-    frame_id: u64,
-    inherits: Option<&str>,
-) -> LuaResult<()> {
-    apply_runtime_template_chain(state, frame_id, inherits, true)
-}
-
 fn apply_runtime_template_chain(
     state: &mut LuaState,
     frame_id: u64,
@@ -1141,7 +1107,10 @@ fn apply_template_scripts(
     let chunk = format!("local frame = ...\n{script_code}");
     let func = LuaApiMut::load(state, &chunk)?;
     let frame = frame_ref(state, frame_id)?;
-    call_function_state(state, Val::Function(func.gc_ref()), &[frame])?;
+    match protected_lua_pcall_state(state, Val::Function(func.gc_ref()), &[frame]) {
+        Ok(_) => {}
+        Err(error) => return Err(rilua::runtime_error(error)),
+    }
     Ok(())
 }
 

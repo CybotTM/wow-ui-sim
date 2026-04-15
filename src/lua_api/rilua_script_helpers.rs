@@ -201,7 +201,8 @@ pub fn protected_lua_pcall_state(
     let wrapper = call_function_state(state, Val::Function(wrapper_factory.gc_ref()), &[func])
         .map_err(|error| error.to_string())?;
     let results = protected_call_state(state, wrapper, args).map_err(|error| {
-        val_to_string(state, error).unwrap_or_else(|| format!("script error ({})", error.type_name()))
+        val_to_string(state, error)
+            .unwrap_or_else(|| format!("script error ({})", error.type_name()))
     })?;
     match results.first().copied() {
         Some(Val::Bool(true)) => Ok(results.into_iter().skip(1).collect()),
