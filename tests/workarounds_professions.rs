@@ -1,0 +1,117 @@
+//! Integration tests for the professions panel open flow.
+//!
+//! Loads every Blizzard addon like the real client, then verifies that
+//! casting a profession opener spell (Blacksmithing) fires the chain
+//! UIParent expects and that `ProfessionsFrame` actually becomes visible.
+
+use std::path::PathBuf;
+use std::time::Duration;
+use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::startup::{fire_one_on_update_tick, fire_startup_events, process_pending_timers};
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn full_game_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1600.0, 1200.0);
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+
+    load_all_blizzard_addons(&env);
+    settle_env(&env);
+
+    env
+}
+
+fn load_all_blizzard_addons(env: &WowLuaEnv) {
+    let ui = blizzard_ui_dir();
+    for (name, toc_path) in &discover_blizzard_addons(&ui) {
+        if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+            panic!("[load {name}] FAILED: {err}");
+        }
+    }
+}
+
+fn settle_env(env: &WowLuaEnv) {
+    env.apply_post_load_workarounds();
+    fire_startup_events(env);
+    env.apply_post_event_workarounds();
+    env.state().borrow_mut().widgets.rebuild_anchor_index();
+    process_pending_timers(env);
+    fire_one_on_update_tick(env);
+    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+
+    std::thread::sleep(Duration::from_secs(2));
+    for _ in 0..3 {
+        env.state().borrow_mut().ensure_layout_rects();
+        fire_one_on_update_tick(env);
+        process_pending_timers(env);
+    }
+}
+
+#[test]
+fn casting_blacksmithing_opens_professions_frame() {
+    let env = full_game_env();
+
+    let shown: bool = env
+        .eval(
+            r#"
+            CastSpellByID(2018)
+            return ProfessionsFrame ~= nil and ProfessionsFrame:IsShown() or false
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        shown,
+        "ProfessionsFrame should be visible after casting Blacksmithing (spell 2018)"
+    );
+}
+
+#[test]
+fn clicking_blacksmithing_button_in_professions_book_opens_panel() {
+    let env = full_game_env();
+
+    let shown: bool = env
+        .eval(
+            r#"
+            ToggleProfessionsBook()
+
+            local button
+            for _, candidate in ipairs({
+                PrimaryProfession1SpellButtonTop,
+                PrimaryProfession1SpellButtonBottom,
+                PrimaryProfession2SpellButtonTop,
+                PrimaryProfession2SpellButtonBottom,
+            }) do
+                if candidate then
+                    local slot = ProfessionsBook_GetSpellBookItemSlot(candidate)
+                    if slot then
+                        local name = C_SpellBook.GetSpellBookItemName(slot, 0)
+                        if name == "Blacksmithing" then
+                            button = candidate
+                            break
+                        end
+                    end
+                end
+            end
+
+            assert(button, "no ProfessionsBook button is labelled 'Blacksmithing'")
+            button:Click("LeftButton")
+
+            return ProfessionsFrame ~= nil and ProfessionsFrame:IsShown() or false
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        shown,
+        "Clicking the Blacksmithing spell button should open ProfessionsFrame"
+    );
+}
