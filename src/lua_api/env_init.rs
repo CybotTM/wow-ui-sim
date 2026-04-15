@@ -315,6 +315,14 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
   IsChannelRegionalForChannelID = function() return false end,
 })
 
+C_UnitAuras = __wow_merge_namespace(C_UnitAuras, {
+  SetPrivateWarningTextAnchor = __wow_noop,
+})
+
+C_PetBattles = __wow_merge_namespace(C_PetBattles, {
+  GetAllEffectNames = function() return end,
+})
+
 C_VoiceChat = __wow_merge_namespace(C_VoiceChat, {
   GetTtsVoices = function() return {} end,
   IsTranscriptionAllowed = function() return false end,

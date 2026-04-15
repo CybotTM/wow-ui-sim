@@ -7,7 +7,8 @@
 //! issecure() call, SetToDefaults) are stubbed with a `// TODO` comment.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    extract_frame_id, frame_id_from_stack, table_get, table_set, val_to_string,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -182,6 +183,8 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
         "SetIgnoringChildrenForBounds",
         set_ignoring_children_for_bounds,
     )?;
+    table_set_rust_fn(state, mt, "GetOrCreateGroup", get_or_create_group)?;
+    table_set_rust_fn(state, mt, "ForceUpdateTimers", force_update_timers)?;
     table_set_rust_fn(state, mt, "SetToDefaults", set_to_defaults)?;
 
     Ok(())
@@ -1026,6 +1029,84 @@ pub fn set_ignoring_children_for_bounds(state: &mut LuaState) -> LuaResult<u32> 
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut(id) {
         frame.ignoring_children_for_bounds = ignore;
+    }
+    Ok(0)
+}
+
+pub fn get_or_create_group(state: &mut LuaState) -> LuaResult<u32> {
+    let self_table = Val::from_stack(state, 1)?;
+    let group_text = String::from_stack(state, 2)?;
+    let order = match Val::from_stack(state, 3)? {
+        Val::Num(value) => value,
+        _ => 10.0,
+    };
+
+    let groups = match table_get(state, self_table, "groups") {
+        table @ Val::Table(_) => table,
+        _ => {
+            let table = create_table(state);
+            table_set(state, self_table, "groups", table);
+            table
+        }
+    };
+
+    if let Val::Table(groups_ref) = groups {
+        let existing = state
+            .gc
+            .tables
+            .get(groups_ref)
+            .map(|table| table.array_slice().to_vec())
+            .unwrap_or_default();
+
+        for entry in &existing {
+            let group_name = table_get(state, *entry, "groupText");
+            let existing_text = val_to_string(state, group_name);
+            if existing_text.as_deref() == Some(group_text.as_str()) {
+                state.push(*entry);
+                return Ok(1);
+            }
+        }
+
+        let group = create_table(state);
+        let group_name = create_string(state, &group_text);
+        let categories = create_table(state);
+        table_set(state, group, "groupText", group_name);
+        table_set(state, group, "order", Val::Num(order));
+        table_set(state, group, "categories", categories);
+
+        if let Some(table) = state.gc.tables.get_mut(groups_ref) {
+            let _ = table.raw_set(
+                Val::Num((existing.len() + 1) as f64),
+                group,
+                &state.gc.string_arena,
+            );
+        }
+        state.push(group);
+        return Ok(1);
+    }
+
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+pub fn force_update_timers(state: &mut LuaState) -> LuaResult<u32> {
+    let self_table = Val::from_stack(state, 1)?;
+    let active_timers = table_get(state, self_table, "activeTimers");
+    let Val::Table(active_timers_ref) = active_timers else {
+        return Ok(0);
+    };
+
+    let timers = state
+        .gc
+        .tables
+        .get(active_timers_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+    for (_, timer) in timers {
+        let update_fn = table_get(state, timer, "OnUpdate");
+        if matches!(update_fn, Val::Function(_)) {
+            let _ = call_function_state(state, update_fn, &[timer]);
+        }
     }
     Ok(0)
 }

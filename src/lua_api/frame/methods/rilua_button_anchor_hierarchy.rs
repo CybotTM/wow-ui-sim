@@ -191,6 +191,41 @@ fn push_button_state_name(state: &mut LuaState, pushed: bool) -> LuaResult<u32> 
     Ok(1)
 }
 
+fn set_item_button_scale(state: &mut LuaState) -> LuaResult<u32> {
+    let self_table = Val::from_stack(state, 1)?;
+    let scale = f64::from_stack(state, 2)?;
+    let count = table_get(state, self_table, "Count");
+    if let Some(count_id) = extract_frame_id(state, count) {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(count_id) {
+            frame.scale = scale as f32;
+        }
+    }
+    Ok(0)
+}
+
+fn calculate_action(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let result = {
+        let sim = borrow_state(state)?;
+        let frame = sim.widgets.get(id);
+        let button_id = frame.map(|widget| widget.user_id).unwrap_or(0);
+        if button_id > 0 {
+            button_id
+        } else {
+            frame
+                .and_then(|widget| widget.attributes.get("action"))
+                .and_then(|value| match value {
+                    crate::widget::AttributeValue::Number(number) => Some(*number as i32),
+                    _ => None,
+                })
+                .unwrap_or(1)
+        }
+    };
+    state.push(Val::Num(result as f64));
+    Ok(1)
+}
+
 // ── Button font object methods ────────────────────────────────────────────────
 
 /// GetOrCreate the `__button_font_objects` registry table.
@@ -2162,6 +2197,8 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetButtonState", set_button_state)?;
     table_set_rust_fn(state, table, "GetButtonState", get_button_state)?;
     table_set_rust_fn(state, table, "Click", click)?;
+    table_set_rust_fn(state, table, "SetItemButtonScale", set_item_button_scale)?;
+    table_set_rust_fn(state, table, "CalculateAction", calculate_action)?;
 
     // Anchor methods
     table_set_rust_fn(state, table, "SetPoint", set_point)?;

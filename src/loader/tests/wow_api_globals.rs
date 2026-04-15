@@ -667,6 +667,88 @@ fn test_startup_service_namespaces_exist() {
 }
 
 #[test]
+fn test_startup_runtime_method_and_namespace_gaps_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        same_group,
+        group_text,
+        group_order,
+        group_categories_ty,
+        groups_ty,
+        item_button_scale_ty,
+        count_scale,
+        calculate_action_ty,
+        action_slot,
+        force_update_calls,
+        private_warning_ty,
+        pet_effects_count,
+    ): (
+        bool,
+        String,
+        i64,
+        String,
+        String,
+        String,
+        f64,
+        String,
+        i64,
+        i64,
+        String,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            local panel = CreateFrame("Frame")
+            local firstGroup = panel:GetOrCreateGroup("advanced", 7)
+            local secondGroup = panel:GetOrCreateGroup("advanced", 3)
+
+            local itemButton = CreateFrame("Button")
+            local count = itemButton:CreateFontString(nil, "OVERLAY")
+            itemButton.Count = count
+            itemButton:SetItemButtonScale(1.25)
+
+            local actionButton = CreateFrame("Button")
+            actionButton:SetID(3)
+
+            local timerContainer = CreateFrame("Frame")
+            local calls = 0
+            timerContainer.activeTimers = {
+                one = { OnUpdate = function() calls = calls + 1 end },
+                two = { OnUpdate = function() calls = calls + 1 end },
+            }
+            timerContainer:ForceUpdateTimers()
+
+            return firstGroup == secondGroup,
+                firstGroup.groupText,
+                firstGroup.order,
+                type(firstGroup.categories),
+                type(panel.groups),
+                type(itemButton.SetItemButtonScale),
+                count:GetScale(),
+                type(actionButton.CalculateAction),
+                actionButton:CalculateAction(),
+                calls,
+                type(C_UnitAuras.SetPrivateWarningTextAnchor),
+                #{C_PetBattles.GetAllEffectNames()}
+            "#,
+        )
+        .unwrap();
+
+    assert!(same_group);
+    assert_eq!(group_text, "advanced");
+    assert_eq!(group_order, 7);
+    assert_eq!(group_categories_ty, "table");
+    assert_eq!(groups_ty, "table");
+    assert_eq!(item_button_scale_ty, "function");
+    assert_eq!(count_scale, 1.25);
+    assert_eq!(calculate_action_ty, "function");
+    assert_eq!(action_slot, 3);
+    assert_eq!(force_update_calls, 2);
+    assert_eq!(private_warning_ty, "function");
+    assert_eq!(pet_effects_count, 0);
+}
+
+#[test]
 fn test_c_texture_exposes_atlas_lookup() {
     let env = WowLuaEnv::new().unwrap();
     let (exists_ty, exists, info_ty, width, height, tile_h, tile_v): (
