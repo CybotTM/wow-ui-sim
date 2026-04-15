@@ -482,9 +482,16 @@ struct EmptyRuntimeState {
     start_time: Instant,
 }
 
-impl EmptyRuntimeState {
-    fn new() -> Self {
-        Self {
+macro_rules! build_empty_runtime_state {
+    (
+        start_time: $start_time:expr,
+        next_report_token: $next_report_token:expr,
+        next_anim_group_id: $next_anim_group_id:expr,
+        next_cast_id: $next_cast_id:expr,
+        screen_width: $screen_width:expr,
+        screen_height: $screen_height:expr
+    ) => {
+        EmptyRuntimeState {
             focused_frame_id: None,
             visible_on_update_cache: None,
             strata_buckets: None,
@@ -493,7 +500,7 @@ impl EmptyRuntimeState {
             hovered_frame: None,
             active_drag_frame: None,
             active_slider_thumb_drag_frame: None,
-            next_report_token: 1,
+            next_report_token: $next_report_token,
             current_target: None,
             current_focus: None,
             sound_manager: None,
@@ -503,10 +510,10 @@ impl EmptyRuntimeState {
             loading_addon_index: None,
             executing_addon_index: None,
             loading_forbidden: false,
-            next_anim_group_id: 1,
-            next_cast_id: 1,
-            screen_width: 1600.0,
-            screen_height: 1200.0,
+            next_anim_group_id: $next_anim_group_id,
+            next_cast_id: $next_cast_id,
+            screen_width: $screen_width,
+            screen_height: $screen_height,
             screen_kind: ScreenKind::Game,
             is_logged_in: false,
             screen_first_displayed: false,
@@ -518,9 +525,32 @@ impl EmptyRuntimeState {
             account_locked_post_save: false,
             fps: 0.0,
             rot_damage_level: 0,
-            start_time: Instant::now(),
+            start_time: $start_time,
         }
+    };
+}
+
+const INITIAL_REPORT_TOKEN: i64 = 1;
+const INITIAL_ANIM_GROUP_ID: u64 = 1;
+const INITIAL_CAST_ID: u32 = 1;
+const DEFAULT_SCREEN_WIDTH: f32 = 1600.0;
+const DEFAULT_SCREEN_HEIGHT: f32 = 1200.0;
+
+impl EmptyRuntimeState {
+    fn new() -> Self {
+        build_initialized_empty_runtime_state(Instant::now())
     }
+}
+
+fn build_initialized_empty_runtime_state(start_time: Instant) -> EmptyRuntimeState {
+    build_empty_runtime_state!(
+        start_time: start_time,
+        next_report_token: INITIAL_REPORT_TOKEN,
+        next_anim_group_id: INITIAL_ANIM_GROUP_ID,
+        next_cast_id: INITIAL_CAST_ID,
+        screen_width: DEFAULT_SCREEN_WIDTH,
+        screen_height: DEFAULT_SCREEN_HEIGHT
+    )
 }
 
 impl Default for SimState {
@@ -621,5 +651,30 @@ impl SimState {
         let _ = frame;
         self.widgets.mark_rect_dirty(tooltip_id);
         self.widgets.mark_visual_dirty(tooltip_id);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn empty_runtime_state_new_seeds_expected_runtime_defaults() {
+        let state = EmptyRuntimeState::new();
+
+        assert_eq!(state.next_report_token, INITIAL_REPORT_TOKEN);
+        assert_eq!(state.next_anim_group_id, INITIAL_ANIM_GROUP_ID);
+        assert_eq!(state.next_cast_id, INITIAL_CAST_ID);
+        assert_eq!(state.screen_width, DEFAULT_SCREEN_WIDTH);
+        assert_eq!(state.screen_height, DEFAULT_SCREEN_HEIGHT);
+        assert_eq!(state.screen_kind, ScreenKind::Game);
+        assert!(!state.is_logged_in);
+        assert!(!state.screen_first_displayed);
+        assert!(state.focused_frame_id.is_none());
+        assert!(state.hovered_frame.is_none());
+        assert!(state.saved_account_name.is_empty());
+        assert!(state.saved_account_list.is_empty());
+        assert!(state.start_time.elapsed() < Duration::from_secs(1));
     }
 }
