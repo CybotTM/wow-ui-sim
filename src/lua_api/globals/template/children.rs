@@ -396,19 +396,26 @@ fn reapply_inline_anchors(
     let Some(anchors) = frame.anchors() else {
         return;
     };
-    let frame_id = {
-        let s = state.borrow();
-        s.widgets.get_id_by_name(child_name).or_else(|| {
-            child_name
-                .strip_prefix("__frame_")
-                .and_then(|suffix| suffix.parse::<u64>().ok())
-        })
-    };
+    let frame_id = resolve_runtime_frame_id(state, child_name);
     let Some(fid) = frame_id else { return };
     let mut s = state.borrow_mut();
     for anchor in &anchors.anchors {
         direct::set_single_anchor(&mut s, fid, anchor, parent_name);
     }
+}
+
+fn runtime_frame_id_from_name(frame_name: &str) -> Option<u64> {
+    frame_name
+        .strip_prefix("__frame_")
+        .and_then(|suffix| suffix.parse::<u64>().ok())
+}
+
+fn resolve_runtime_frame_id(state: &Rc<RefCell<SimState>>, frame_name: &str) -> Option<u64> {
+    state
+        .borrow()
+        .widgets
+        .get_id_by_name(frame_name)
+        .or_else(|| runtime_frame_id_from_name(frame_name))
 }
 
 fn append_child_parent_refs(code: &mut String, frame: &FrameXml) {
@@ -500,24 +507,51 @@ fn apply_inline_frame_content(
     subst_parent: &str,
     use_direct_creation: bool,
 ) {
+    apply_inline_frame_setup(lua, state, frame, frame_name);
+    apply_inline_child_regions(
+        lua,
+        state,
+        frame,
+        frame_name,
+        subst_parent,
+        use_direct_creation,
+    );
+    apply_inline_frame_regions(
+        lua,
+        state,
+        frame,
+        frame_name,
+        subst_parent,
+        use_direct_creation,
+    );
+    apply_inline_frame_scripts(lua, frame, frame_name);
+}
+
+fn apply_inline_frame_setup(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    frame_name: &str,
+) {
     super::mixin::apply_mixin(lua, &frame.combined_mixin(), frame_name);
     apply_inline_key_values(lua, frame, frame_name);
 
-    let frame_id = state
-        .borrow()
-        .widgets
-        .get_id_by_name(frame_name)
-        .or_else(|| {
-            frame_name
-                .strip_prefix("__frame_")
-                .and_then(|suffix| suffix.parse::<u64>().ok())
-        });
-    if let Some(frame_id) = frame_id {
-        direct::set_size_partial(state, frame_id, frame);
-        let inherits = frame.inherits.as_deref().unwrap_or("");
-        direct::apply_xml_alpha(state, frame_id, frame, inherits);
-    }
+    let Some(frame_id) = resolve_runtime_frame_id(state, frame_name) else {
+        return;
+    };
+    direct::set_size_partial(state, frame_id, frame);
+    let inherits = frame.inherits.as_deref().unwrap_or("");
+    direct::apply_xml_alpha(state, frame_id, frame, inherits);
+}
 
+fn apply_inline_child_regions(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+    use_direct_creation: bool,
+) {
     // Create child frames before layers so that relativeKey anchors
     // from FontStrings/Textures to sibling child frames resolve correctly
     // (e.g. $parent.AccountWideIcon in ReputationEntryTemplate). Keep the
@@ -542,7 +576,16 @@ fn apply_inline_frame_content(
             use_direct_creation,
         );
     }
+}
 
+fn apply_inline_frame_regions(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+    use_direct_creation: bool,
+) {
     super::layers::apply_layers(
         lua,
         state,
@@ -571,7 +614,9 @@ fn apply_inline_frame_content(
     elements_text::apply_button_text_attribute(lua, frame, frame_name);
     apply_editbox_fontstring(lua, frame, frame_name, subst_parent);
     apply_animation_groups(lua, frame, frame_name);
+}
 
+fn apply_inline_frame_scripts(lua: &Lua, frame: &FrameXml, frame_name: &str) {
     if let Some(scripts) = frame.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
     }
@@ -579,7 +624,7 @@ fn apply_inline_frame_content(
 
 #[cfg(test)]
 mod tests {
-    use super::use_direct_runtime_child_creation;
+    use super::{runtime_frame_id_from_name, use_direct_runtime_child_creation};
 
     #[test]
     fn action_button_template_uses_direct_runtime_child_creation() {
@@ -599,5 +644,12 @@ mod tests {
     #[test]
     fn unrelated_template_skips_direct_runtime_child_creation() {
         assert!(!use_direct_runtime_child_creation("UIPanelButtonTemplate"));
+    }
+
+    #[test]
+    fn runtime_frame_id_from_name_only_parses_inline_frame_ids() {
+        assert_eq!(runtime_frame_id_from_name("__frame_42"), Some(42));
+        assert_eq!(runtime_frame_id_from_name("__frame_bad"), None);
+        assert_eq!(runtime_frame_id_from_name("NamedFrame"), None);
     }
 }
