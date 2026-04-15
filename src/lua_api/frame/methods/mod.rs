@@ -10,6 +10,7 @@ mod methods_attribute;
 mod methods_backdrop;
 mod methods_button;
 mod methods_button_state;
+mod methods_button_texture;
 pub(crate) mod methods_core;
 mod methods_core_identity;
 mod methods_core_region;
