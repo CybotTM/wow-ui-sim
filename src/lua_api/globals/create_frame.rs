@@ -1,5 +1,6 @@
 //! CreateFrame implementation for creating WoW frames from Lua.
 
+mod profile;
 mod widget_defaults;
 
 use super::super::SimState;
@@ -10,12 +11,11 @@ use super::create_frame_util::{
 };
 use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
-use crate::logging;
 use crate::widget::{Frame, WidgetRegistry, WidgetType};
 use mlua::{Lua, Result, Value};
+use profile::{begin_create_frame_call_profile, maybe_log_create_frame_profile};
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::OnceLock;
 use std::time::{Duration, Instant};
 use widget_defaults::{create_item_button_intrinsics, create_widget_type_defaults};
 
@@ -49,19 +49,6 @@ fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
     }
 }
 
-#[derive(Clone, Copy)]
-struct CreateFrameProfileConfig {
-    log_all: bool,
-    min_duration: Duration,
-}
-
-#[derive(Clone, Copy)]
-struct CreateFrameCallProfile {
-    config: Option<CreateFrameProfileConfig>,
-    total_start: Option<Instant>,
-    runtime_call: bool,
-}
-
 #[derive(Default)]
 struct CreateFrameTemplateTiming {
     intrinsic_templates: Duration,
@@ -87,64 +74,6 @@ struct CreateFrameTemplateContext<'a> {
     parent_id: Option<u64>,
     frame_id: u64,
     profile_runtime_call: bool,
-}
-
-fn create_frame_profile_config() -> Option<CreateFrameProfileConfig> {
-    static CONFIG: OnceLock<Option<CreateFrameProfileConfig>> = OnceLock::new();
-    *CONFIG.get_or_init(|| {
-        let raw = std::env::var("WOW_SIM_PROFILE_CREATE_FRAME").ok()?;
-        let value = raw.trim();
-        if value.is_empty()
-            || value == "0"
-            || value.eq_ignore_ascii_case("false")
-            || value.eq_ignore_ascii_case("off")
-        {
-            return None;
-        }
-        Some(CreateFrameProfileConfig {
-            log_all: value.eq_ignore_ascii_case("all"),
-            min_duration: parse_create_frame_profile_min_duration(
-                std::env::var("WOW_SIM_PROFILE_CREATE_FRAME_MIN_MS")
-                    .ok()
-                    .as_deref(),
-            ),
-        })
-    })
-}
-
-fn parse_create_frame_profile_min_duration(raw: Option<&str>) -> Duration {
-    raw.and_then(|s| s.trim().parse::<u64>().ok())
-        .map(Duration::from_millis)
-        .unwrap_or_else(|| Duration::from_millis(5))
-}
-
-fn current_create_frame_suppress_depth(lua: &Lua) -> i32 {
-    lua.globals()
-        .get("__suppress_create_frame_onload")
-        .unwrap_or(0)
-}
-
-fn log_create_frame_profile(
-    frame_type: &str,
-    frame_name: &str,
-    template: Option<&str>,
-    total: Duration,
-    finalize: Duration,
-    template_timing: &CreateFrameTemplateTiming,
-) {
-    logging::println_elapsed(&format!(
-        "[CreateFrame] name={} type={} template={} total={:.2?} finalize={:.2?} intrinsic={:.2?} explicit={:.2?} deferred_onloads={:.2?} child_onloads={} self_onload={:.2?}",
-        frame_name,
-        frame_type,
-        template.unwrap_or("-"),
-        total,
-        finalize,
-        template_timing.intrinsic_templates,
-        template_timing.explicit_templates,
-        template_timing.deferred_child_onloads,
-        template_timing.deferred_child_count,
-        template_timing.self_onload,
-    ));
 }
 
 pub(crate) fn create_frame_instance(
@@ -216,49 +145,21 @@ fn handle_create_frame_call(
     let finalize_start = profile.runtime_call.then(Instant::now);
     let template_timing =
         finalize_registered_frame(lua, state, frame_id, &cfa, &ref_name, profile.runtime_call)?;
-    maybe_log_create_frame_profile(profile, finalize_start, &cfa, &ref_name, &template_timing);
+    maybe_log_create_frame_profile(
+        profile,
+        finalize_start,
+        &cfa.frame_type,
+        &ref_name,
+        cfa.template.as_deref(),
+        &template_timing,
+    );
     frame_ref(lua, frame_id)
-}
-
-fn begin_create_frame_call_profile(lua: &Lua) -> CreateFrameCallProfile {
-    let config = create_frame_profile_config();
-    let runtime_call = config.is_some() && current_create_frame_suppress_depth(lua) <= 0;
-    CreateFrameCallProfile {
-        config,
-        total_start: runtime_call.then(Instant::now),
-        runtime_call,
-    }
 }
 
 fn create_frame_ref_name(cfa: &CreateFrameArgs, frame_id: u64) -> String {
     cfa.name
         .clone()
         .unwrap_or_else(|| format!("__frame_{}", frame_id))
-}
-
-fn maybe_log_create_frame_profile(
-    profile: CreateFrameCallProfile,
-    finalize_start: Option<Instant>,
-    cfa: &CreateFrameArgs,
-    ref_name: &str,
-    template_timing: &CreateFrameTemplateTiming,
-) {
-    if let (Some(cfg), Some(total_start)) = (profile.config, profile.total_start) {
-        let total = total_start.elapsed();
-        if cfg.log_all || total >= cfg.min_duration {
-            let finalize = finalize_start
-                .map(|start| start.elapsed())
-                .unwrap_or_default();
-            log_create_frame_profile(
-                &cfa.frame_type,
-                ref_name,
-                cfa.template.as_deref(),
-                total,
-                finalize,
-                template_timing,
-            );
-        }
-    }
 }
 
 fn configure_frame_metadata(
@@ -801,34 +702,4 @@ fn create_forbidden_proxy(lua: &Lua, ud: Value) -> Result<Value> {
     let mt: mlua::Table = lua.named_registry_value("__forbidden_proxy_mt")?;
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::parse_create_frame_profile_min_duration;
-    use std::time::Duration;
-
-    #[test]
-    fn create_frame_profile_min_duration_defaults_to_five_ms() {
-        assert_eq!(
-            parse_create_frame_profile_min_duration(None),
-            Duration::from_millis(5)
-        );
-        assert_eq!(
-            parse_create_frame_profile_min_duration(Some("")),
-            Duration::from_millis(5)
-        );
-        assert_eq!(
-            parse_create_frame_profile_min_duration(Some("garbage")),
-            Duration::from_millis(5)
-        );
-    }
-
-    #[test]
-    fn create_frame_profile_min_duration_parses_ms() {
-        assert_eq!(
-            parse_create_frame_profile_min_duration(Some("17")),
-            Duration::from_millis(17)
-        );
-    }
 }
