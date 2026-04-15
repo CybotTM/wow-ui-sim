@@ -4,10 +4,10 @@
 //! the corresponding mlua method. Complex operations are stubbed with TODO.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string,
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, val_to_string,
 };
 use crate::lua_api::rilua_script_helpers::{
-    get_script as get_rilua_script, remove_script as remove_rilua_script,
+    call_error_handler_state, get_script as get_rilua_script, remove_script as remove_rilua_script,
     set_script as set_rilua_script,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
@@ -62,16 +62,16 @@ fn get_text(state: &mut LuaState) -> LuaResult<u32> {
     match text {
         Some(t) => {
             let s = create_string(state, &t);
-            state.stack.push(s);
+            state.push(s);
             Ok(1)
         }
         None if is_editbox => {
             let s = create_string(state, "");
-            state.stack.push(s);
+            state.push(s);
             Ok(1)
         }
         None => {
-            state.stack.push(Val::Nil);
+            state.push(Val::Nil);
             Ok(1)
         }
     }
@@ -109,7 +109,7 @@ fn set_font(state: &mut LuaState) -> LuaResult<u32> {
         }
     }
     drop(sim);
-    state.stack.push(Val::Bool(true));
+    state.push(Val::Bool(true));
     Ok(1)
 }
 
@@ -134,9 +134,9 @@ fn get_font(state: &mut LuaState) -> LuaResult<u32> {
     drop(sim);
     let font_val = create_string(state, &font_path);
     let flags_val = create_string(state, &flags);
-    state.stack.push(font_val);
-    state.stack.push(Val::Num(font_size as f64));
-    state.stack.push(flags_val);
+    state.push(font_val);
+    state.push(Val::Num(font_size as f64));
+    state.push(flags_val);
     Ok(3)
 }
 
@@ -158,7 +158,7 @@ fn get_font_height(state: &mut LuaState) -> LuaResult<u32> {
     let sim = borrow_state(state)?;
     let size = sim.widgets.get(id).map(|f| f.font_size).unwrap_or(12.0);
     drop(sim);
-    state.stack.push(Val::Num(size as f64));
+    state.push(Val::Num(size as f64));
     Ok(1)
 }
 
@@ -198,34 +198,126 @@ fn get_text_color(state: &mut LuaState) -> LuaResult<u32> {
         (1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32)
     };
     drop(sim);
-    state.stack.push(Val::Num(r as f64));
-    state.stack.push(Val::Num(g as f64));
-    state.stack.push(Val::Num(b as f64));
-    state.stack.push(Val::Num(a as f64));
+    state.push(Val::Num(r as f64));
+    state.push(Val::Num(g as f64));
+    state.push(Val::Num(b as f64));
+    state.push(Val::Num(a as f64));
     Ok(4)
+}
+
+fn set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(justification) = val_to_string(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.justify_h = crate::widget::TextJustify::from_wow_str(&justification);
+    }
+    Ok(0)
+}
+
+fn get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let justify = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.justify_h.as_h_str())
+            .unwrap_or("LEFT")
+    };
+    let justify = create_string(state, justify);
+    state.push(justify);
+    Ok(1)
+}
+
+fn set_justify_v(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(justification) = val_to_string(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.justify_v = crate::widget::TextJustify::from_wow_str(&justification);
+    }
+    Ok(0)
+}
+
+fn get_justify_v(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let justify = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.justify_v.as_v_str())
+            .unwrap_or("TOP")
+    };
+    let justify = create_string(state, justify);
+    state.push(justify);
+    Ok(1)
+}
+
+fn set_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let word_wrap = matches!(stack_val(state, 2), Val::Bool(true));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.word_wrap = word_wrap;
+    }
+    Ok(0)
+}
+
+fn set_max_lines(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let max_lines = match stack_val(state, 2) {
+        Val::Num(value) if value >= 0.0 => value as u32,
+        _ => 0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.max_lines = max_lines;
+    }
+    Ok(0)
 }
 
 // ── Attribute methods ───────────────────────────────────────────────────────
 
 fn get_attribute(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let name_val = stack_val(state, 2);
-    let Some(name) = val_to_string(state, name_val) else {
-        state.stack.push(Val::Nil);
-        return Ok(1);
+    let first = val_to_string(state, stack_val(state, 2));
+    let second = val_to_string(state, stack_val(state, 3));
+    let third = val_to_string(state, stack_val(state, 4));
+    let keys = match (first, second, third) {
+        (Some(name), None, None) => vec![name],
+        (Some(prefix), Some(name), suffix) => {
+            attribute_lookup_keys(&prefix, &name, suffix.as_deref().unwrap_or_default())
+        }
+        _ => {
+            state.push(Val::Nil);
+            return Ok(1);
+        }
     };
-    // TODO: wildcard key fallback order (prefix/suffix) — only simple lookup for now
-    // TODO: __frame_table_attributes for table/userdata/function attributes
+
     let attr = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|f| f.attributes.get(name.as_str()))
-            .cloned()
+        sim.widgets.get(id).and_then(|frame| {
+            keys.iter()
+                .find_map(|key| frame.attributes.get(key.as_str()).cloned())
+        })
     };
     let val = attribute_to_val(state, attr.as_ref());
-    state.stack.push(val);
+    state.push(val);
     Ok(1)
+}
+
+fn attribute_lookup_keys(prefix: &str, name: &str, suffix: &str) -> Vec<String> {
+    let mut keys = Vec::with_capacity(5);
+    keys.push(format!("{prefix}{name}{suffix}"));
+    keys.push(format!("*{name}{suffix}"));
+    keys.push(format!("{prefix}{name}*"));
+    keys.push(format!("*{name}*"));
+    keys.push(name.to_string());
+    keys
 }
 
 fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
@@ -235,10 +327,44 @@ fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
     let Some(name) = val_to_string(state, name_val) else {
         return Ok(0);
     };
-    // TODO: table/function/userdata attributes via a Lua-side __frame_table_attributes table
-    // TODO: fire OnAttributeChanged script handler
+    let name_arg = create_string(state, &name);
     store_simple_attribute(state, id, &name, value)?;
+    if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
+        let frame = frame_ref(state, id)?;
+        dispatch_attribute_changed(state, handler, frame, name_arg, value);
+    }
     Ok(0)
+}
+
+fn dispatch_attribute_changed(
+    state: &mut LuaState,
+    handler: Val,
+    frame: Val,
+    name: Val,
+    value: Val,
+) {
+    let Ok(dispatcher) = state.load(
+        r#"
+        local handler, frame, name, value = ...
+        handler(frame, name, value)
+        "#,
+    ) else {
+        return;
+    };
+
+    let call_base = state.top;
+    state.ensure_stack(call_base + 5);
+    state.stack_set(call_base, Val::Function(dispatcher.gc_ref()));
+    state.stack_set(call_base + 1, handler);
+    state.stack_set(call_base + 2, frame);
+    state.stack_set(call_base + 3, name);
+    state.stack_set(call_base + 4, value);
+    state.top = call_base + 5;
+
+    if let Err(error) = state.call_function(call_base, 0) {
+        call_error_handler_state(state, &error.to_string());
+    }
+    state.top = call_base;
 }
 
 fn set_attribute_no_handler(state: &mut LuaState) -> LuaResult<u32> {
@@ -265,8 +391,8 @@ fn execute_attribute(state: &mut LuaState) -> LuaResult<u32> {
     // TODO: full ExecuteAttribute semantics (function callback and snippet execution)
     let _id = frame_id_from_stack(state, 1)?;
     let reason = create_string(state, "attribute-missing");
-    state.stack.push(Val::Bool(false));
-    state.stack.push(reason);
+    state.push(Val::Bool(false));
+    state.push(reason);
     Ok(2)
 }
 
@@ -288,7 +414,7 @@ fn get_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
     let _id = frame_id_from_stack(state, 1)?;
     let _label_val = stack_val(state, 2);
     // TODO: retrieve from Lua-side attribute table
-    state.stack.push(Val::Nil);
+    state.push(Val::Nil);
     Ok(1)
 }
 
@@ -312,13 +438,13 @@ fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
     let sim = borrow_state(state)?;
     let val = sim.widgets.get(id).map(|f| f.forbidden).unwrap_or(false);
     drop(sim);
-    state.stack.push(Val::Bool(val));
+    state.push(Val::Bool(val));
     Ok(1)
 }
 
 fn can_change_protected_state(state: &mut LuaState) -> LuaResult<u32> {
     // TODO: combat lockdown check
-    state.stack.push(Val::Bool(true));
+    state.push(Val::Bool(true));
     Ok(1)
 }
 
@@ -366,7 +492,7 @@ fn get_motion_scripts_while_disabled(state: &mut LuaState) -> LuaResult<u32> {
         .map(|f| f.motion_scripts_while_disabled)
         .unwrap_or(false);
     drop(sim);
-    state.stack.push(Val::Bool(val));
+    state.push(Val::Bool(val));
     Ok(1)
 }
 
@@ -532,7 +658,7 @@ fn does_clip_children(state: &mut LuaState) -> LuaResult<u32> {
         .map(|f| f.clips_children)
         .unwrap_or(false);
     drop(sim);
-    state.stack.push(Val::Bool(val));
+    state.push(Val::Bool(val));
     Ok(1)
 }
 
@@ -559,10 +685,10 @@ fn get_hit_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
         .map(|f| f.hit_rect_insets)
         .unwrap_or((0.0, 0.0, 0.0, 0.0));
     drop(sim);
-    state.stack.push(Val::Num(l as f64));
-    state.stack.push(Val::Num(r as f64));
-    state.stack.push(Val::Num(t as f64));
-    state.stack.push(Val::Num(b as f64));
+    state.push(Val::Num(l as f64));
+    state.push(Val::Num(r as f64));
+    state.push(Val::Num(t as f64));
+    state.push(Val::Num(b as f64));
     Ok(4)
 }
 
@@ -596,7 +722,7 @@ fn register_event(state: &mut LuaState) -> LuaResult<u32> {
         rilua_hlist_register_individual(state, id, &event)?;
     }
     let restricted = crate::event::is_restricted_event(&event);
-    state.stack.push(Val::Bool(newly_registered && !restricted));
+    state.push(Val::Bool(newly_registered && !restricted));
     Ok(1)
 }
 
@@ -604,7 +730,7 @@ fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let event_val = stack_val(state, 2);
     let Some(event) = val_to_string(state, event_val) else {
-        state.stack.push(Val::Bool(false));
+        state.push(Val::Bool(false));
         return Ok(1);
     };
     // Unit args at 3+ are intentionally ignored (unit event filtering not implemented)
@@ -618,7 +744,7 @@ fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
     if newly_registered {
         rilua_hlist_register_individual(state, id, &event)?;
     }
-    state.stack.push(Val::Bool(newly_registered));
+    state.push(Val::Bool(newly_registered));
     Ok(1)
 }
 
@@ -626,7 +752,7 @@ fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let event_val = stack_val(state, 2);
     let Some(event) = val_to_string(state, event_val) else {
-        state.stack.push(Val::Bool(false));
+        state.push(Val::Bool(false));
         return Ok(1);
     };
     let was_registered = {
@@ -650,7 +776,7 @@ fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
     if was_registered {
         rilua_hlist_unregister_individual(state, id, &event)?;
     }
-    state.stack.push(Val::Bool(was_registered));
+    state.push(Val::Bool(was_registered));
     Ok(1)
 }
 
@@ -690,8 +816,8 @@ fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
         .map(|f| f.registered_events.contains(&event))
         .unwrap_or(false);
     drop(sim);
-    state.stack.push(Val::Bool(registered));
-    state.stack.push(Val::Nil);
+    state.push(Val::Bool(registered));
+    state.push(Val::Nil);
     Ok(2)
 }
 
@@ -699,7 +825,7 @@ fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let event_val = stack_val(state, 2);
     let Some(event) = val_to_string(state, event_val) else {
-        state.stack.push(Val::Bool(false));
+        state.push(Val::Bool(false));
         return Ok(1);
     };
     if !crate::event::is_callback_event(&event) {
@@ -714,7 +840,7 @@ fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     }
     let restricted = crate::event::is_restricted_event(&event);
     drop(sim);
-    state.stack.push(Val::Bool(!restricted));
+    state.push(Val::Bool(!restricted));
     Ok(1)
 }
 
@@ -723,7 +849,7 @@ fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let event_val = stack_val(state, 2);
     let Some(event) = val_to_string(state, event_val) else {
-        state.stack.push(Val::Bool(false));
+        state.push(Val::Bool(false));
         return Ok(1);
     };
     let mut sim = borrow_state_mut(state)?;
@@ -733,7 +859,7 @@ fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     let restricted = crate::event::is_restricted_event(&event);
     drop(sim);
     rilua_hlist_register_individual(state, id, &event)?;
-    state.stack.push(Val::Bool(!restricted));
+    state.push(Val::Bool(!restricted));
     Ok(1)
 }
 
@@ -760,7 +886,7 @@ fn get_propagate_keyboard_input(state: &mut LuaState) -> LuaResult<u32> {
         .map(|f| f.propagate_keyboard_input)
         .unwrap_or(false);
     drop(sim);
-    state.stack.push(Val::Bool(val));
+    state.push(Val::Bool(val));
     Ok(1)
 }
 
@@ -1016,6 +1142,12 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetFont", get_font)?;
     table_set_rust_fn(state, table, "SetFontHeight", set_font_height)?;
     table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
+    table_set_rust_fn(state, table, "SetJustifyH", set_justify_h)?;
+    table_set_rust_fn(state, table, "GetJustifyH", get_justify_h)?;
+    table_set_rust_fn(state, table, "SetJustifyV", set_justify_v)?;
+    table_set_rust_fn(state, table, "GetJustifyV", get_justify_v)?;
+    table_set_rust_fn(state, table, "SetWordWrap", set_word_wrap)?;
+    table_set_rust_fn(state, table, "SetMaxLines", set_max_lines)?;
     table_set_rust_fn(state, table, "SetTextColor", set_text_color)?;
     table_set_rust_fn(state, table, "GetTextColor", get_text_color)?;
     // Attribute methods

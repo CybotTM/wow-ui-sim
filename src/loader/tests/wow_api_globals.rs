@@ -202,6 +202,137 @@ fn test_uiparent_exists() {
 }
 
 #[test]
+fn test_create_frame_exposes_core_event_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let registry_mt_type: String = {
+        let mut lua = env.lua.borrow_mut();
+        let state = lua.state_mut();
+        match crate::lua_api::rilua_methods::registry_get(state, "__rilua_frame_mt") {
+            rilua::Val::Table(_) => "table".to_string(),
+            other => other.type_name().to_string(),
+        }
+    };
+    let (set_forbidden, set_script, register_event, get_object_type, mt_type, mt_index_type, mt_set_forbidden, mt_get_object_type): (
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            local mt = getmetatable(f)
+            return type(f.SetForbidden), type(f.SetScript), type(f.RegisterEvent), type(f.GetObjectType),
+                type(mt), type(mt and mt.__index), type(mt and mt.SetForbidden), type(mt and mt.GetObjectType)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        (set_forbidden, set_script, register_event, get_object_type),
+        (
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+        ),
+        "frame surface mismatch: registry={registry_mt_type}, mt={mt_type}, mt.__index={mt_index_type}, mt.SetForbidden={mt_set_forbidden}, mt.GetObjectType={mt_get_object_type}",
+    );
+}
+
+#[test]
+fn test_set_attribute_fires_on_attribute_changed() {
+    let env = WowLuaEnv::new().unwrap();
+    let (name_ty, seen_name, value_ty, seen_value, stored_ty, stored_value): (
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local seenName, seenValue
+
+            frame:SetScript("OnAttributeChanged", function(_, name, value)
+                seenName = name
+                seenValue = value
+            end)
+
+            frame:SetAttribute("count", 7)
+
+            return type(seenName), tostring(seenName), type(seenValue), tostring(seenValue),
+                type(frame:GetAttribute("count")), tostring(frame:GetAttribute("count"))
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(name_ty, "string");
+    assert_eq!(seen_name, "count");
+    assert_eq!(
+        value_ty, "number",
+        "seen_name={seen_name} seen_value={seen_value} stored_ty={stored_ty} stored_value={stored_value}"
+    );
+    assert_eq!(seen_value, "7");
+    assert_eq!(stored_ty, "number");
+    assert_eq!(stored_value, "7");
+}
+
+#[test]
+fn test_global_unpack_exists() {
+    let env = WowLuaEnv::new().unwrap();
+    let (global_ty, table_ty, first, second, third): (String, String, i64, i64, i64) = env
+        .eval(
+            r#"
+            local values = {11, 22, 33}
+            return type(unpack), type(table.unpack), table.unpack(values)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(global_ty, "function");
+    assert_eq!(table_ty, "function");
+    assert_eq!((first, second, third), (11, 22, 33));
+}
+
+#[test]
+fn test_bootstrap_fills_existing_namespace_defaults() {
+    let env = WowLuaEnv::new().unwrap();
+    let (trade_ty, trade_value, quest_ty, quest_value, color_ty, hex_ty): (
+        String,
+        i64,
+        String,
+        bool,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local color = C_ColorOverrides.GetColorForQuality(0)
+            return type(C_TradeSkillUI.GetProfessionSkillLineID),
+                C_TradeSkillUI.GetProfessionSkillLineID(7),
+                type(C_QuestLog.ReadyForTurnIn),
+                C_QuestLog.ReadyForTurnIn(42),
+                type(C_ColorOverrides.GetColorForQuality),
+                type(color and color.GenerateHexColorMarkup)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(trade_ty, "function");
+    assert_eq!(trade_value, 7);
+    assert_eq!(quest_ty, "function");
+    assert!(!quest_value);
+    assert_eq!(color_ty, "function");
+    assert_eq!(hex_ty, "function");
+}
+
+#[test]
 fn test_ui_special_frames_table() {
     let env = WowLuaEnv::new().unwrap();
     let ty: String = env.eval("return type(UISpecialFrames)").unwrap();
