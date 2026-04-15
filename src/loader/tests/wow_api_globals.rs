@@ -796,6 +796,56 @@ fn test_startup_social_and_lfg_globals_exist() {
 }
 
 #[test]
+fn test_text_runtime_helpers_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        font_object_ty,
+        width_ty,
+        text_to_fit_ty,
+        hyperlink_ty,
+        scroll_script_ty,
+        frame_script_ty,
+        width,
+        hyperlinks_enabled,
+    ): (String, String, String, String, String, String, f64, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local fontString = frame:CreateFontString()
+            fontString:SetText("Runtime helper text")
+            fontString:SetFontObjectsToTry("GameFontHighlightLarge", "GameFontHighlightSmall")
+            fontString:SetTextToFit("Runtime helper text")
+
+            local messageFrame = CreateFrame("MessageFrame")
+            messageFrame:SetHyperlinksEnabled(true)
+
+            local scrollFrame = CreateFrame("ScrollFrame")
+            scrollFrame:SetScript("OnVerticalScroll", function() end)
+            frame:SetScript("OnKeyDown", function() end)
+
+            return type(fontString:GetFontObject()),
+                type(fontString.GetUnboundedStringWidth),
+                type(fontString.SetTextToFit),
+                type(messageFrame.SetHyperlinksEnabled),
+                type(scrollFrame:GetScript("OnVerticalScroll")),
+                type(frame:GetScript("OnKeyDown")),
+                fontString:GetUnboundedStringWidth(),
+                messageFrame:GetHyperlinksEnabled()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(font_object_ty, "string");
+    assert_eq!(width_ty, "function");
+    assert_eq!(text_to_fit_ty, "function");
+    assert_eq!(hyperlink_ty, "function");
+    assert_eq!(scroll_script_ty, "function");
+    assert_eq!(frame_script_ty, "function");
+    assert!(width > 0.0);
+    assert!(hyperlinks_enabled);
+}
+
+#[test]
 fn test_c_texture_exposes_atlas_lookup() {
     let env = WowLuaEnv::new().unwrap();
     let (exists_ty, exists, info_ty, width, height, tile_h, tile_v): (

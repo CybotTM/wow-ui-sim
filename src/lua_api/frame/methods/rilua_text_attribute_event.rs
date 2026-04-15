@@ -5,7 +5,7 @@
 
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
-    frame_ref, val_to_string,
+    frame_ref, registry_table_or_create, table_get, table_set, val_to_string,
 };
 use crate::lua_api::rilua_script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, remove_script as remove_rilua_script,
@@ -215,12 +215,62 @@ fn get_font_height(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn set_font_object(_state: &mut LuaState) -> LuaResult<u32> {
+fn get_or_create_font_object_store(state: &mut LuaState) -> Val {
+    registry_table_or_create(state, "__font_objects")
+}
+
+fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let font_object = stack_val(state, 2);
+    let store = get_or_create_font_object_store(state);
+    table_set(state, store, &id.to_string(), font_object);
     Ok(0)
 }
 
 fn get_font_object(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
+    let id = frame_id_from_stack(state, 1)?;
+    let store = get_or_create_font_object_store(state);
+    let font_object = table_get(state, store, &id.to_string());
+    state.push(font_object);
+    Ok(1)
+}
+
+fn set_font_objects_to_try(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    for index in 2..=8 {
+        let font_object = stack_val(state, index);
+        if !matches!(font_object, Val::Nil) {
+            let store = get_or_create_font_object_store(state);
+            table_set(state, store, &id.to_string(), font_object);
+            break;
+        }
+    }
+    Ok(0)
+}
+
+fn get_unbounded_string_width(state: &mut LuaState) -> LuaResult<u32> {
+    get_string_width(state)
+}
+
+fn set_text_to_fit(state: &mut LuaState) -> LuaResult<u32> {
+    set_text(state)
+}
+
+fn set_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = matches!(stack_val(state, 2), Val::Bool(true));
+    store_simple_attribute(state, id, "__hyperlinks_enabled", Val::Bool(enabled))?;
+    Ok(0)
+}
+
+fn get_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.attributes.get("__hyperlinks_enabled"))
+        .is_some_and(|value| matches!(value, crate::widget::AttributeValue::Boolean(true)));
+    state.push(Val::Bool(enabled));
     Ok(1)
 }
 
@@ -675,25 +725,16 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
                 | WidgetType::Slider
                 | WidgetType::ScrollFrame
         ),
-        "OnEnterPressed"
-        | "OnEscapePressed"
-        | "OnTabPressed"
-        | "OnSpacePressed"
-        | "OnTextChanged"
+        "OnEnterPressed" | "OnEscapePressed" | "OnTabPressed" | "OnSpacePressed" | "OnChar"
+        | "OnKeyDown" | "OnKeyUp" => true,
+        "OnTextChanged"
         | "OnTextSet"
-        | "OnChar"
         | "OnEditFocusGained"
         | "OnEditFocusLost"
-        | "OnInputLanguageChanged"
-        | "OnKeyDown"
-        | "OnKeyUp" => matches!(widget_type, WidgetType::EditBox),
+        | "OnInputLanguageChanged" => matches!(widget_type, WidgetType::EditBox),
         "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
-        "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave" => {
-            matches!(
-                widget_type,
-                WidgetType::SimpleHTML | WidgetType::MessageFrame | WidgetType::GameTooltip
-            )
-        }
+        "OnVerticalScroll" => matches!(widget_type, WidgetType::ScrollFrame | WidgetType::EditBox),
+        "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave" => true,
         _ => false,
     }
 }
@@ -1415,19 +1456,29 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetFont", set_font)?;
     table_set_rust_fn(state, table, "GetFont", get_font)?;
     table_set_rust_fn(state, table, "SetFontObject", set_font_object)?;
+    table_set_rust_fn(state, table, "SetFontObjectsToTry", set_font_objects_to_try)?;
     table_set_rust_fn(state, table, "GetFontObject", get_font_object)?;
     table_set_rust_fn(state, table, "SetFontHeight", set_font_height)?;
     table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
     table_set_rust_fn(state, table, "GetStringWidth", get_string_width)?;
     table_set_rust_fn(state, table, "GetTextWidth", get_text_width)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetUnboundedStringWidth",
+        get_unbounded_string_width,
+    )?;
     table_set_rust_fn(state, table, "SetJustifyH", set_justify_h)?;
     table_set_rust_fn(state, table, "GetJustifyH", get_justify_h)?;
     table_set_rust_fn(state, table, "SetJustifyV", set_justify_v)?;
     table_set_rust_fn(state, table, "GetJustifyV", get_justify_v)?;
     table_set_rust_fn(state, table, "SetWordWrap", set_word_wrap)?;
     table_set_rust_fn(state, table, "SetMaxLines", set_max_lines)?;
+    table_set_rust_fn(state, table, "SetTextToFit", set_text_to_fit)?;
     table_set_rust_fn(state, table, "SetTextColor", set_text_color)?;
     table_set_rust_fn(state, table, "GetTextColor", get_text_color)?;
+    table_set_rust_fn(state, table, "SetHyperlinksEnabled", set_hyperlinks_enabled)?;
+    table_set_rust_fn(state, table, "GetHyperlinksEnabled", get_hyperlinks_enabled)?;
     // Attribute methods
     table_set_rust_fn(state, table, "GetAttribute", get_attribute)?;
     table_set_rust_fn(state, table, "SetAttribute", set_attribute)?;
