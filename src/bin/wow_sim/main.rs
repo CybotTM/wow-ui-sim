@@ -321,109 +321,164 @@ struct CommandDispatch {
     debug_elements: bool,
 }
 
-fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
-    match dispatch.command {
-        Some(Commands::DumpTree {
+impl CommandDispatch {
+    fn exec_lua_code(&self) -> Option<&str> {
+        self.exec_lua.as_deref()
+    }
+
+    fn debug_options(&self) -> wow_ui_sim::DebugOptions {
+        wow_ui_sim::DebugOptions {
+            borders: self.debug_borders || self.debug_elements,
+            anchors: self.debug_anchors || self.debug_elements,
+        }
+    }
+
+    fn run_dump_tree_command(
+        &self,
+        filter: Option<String>,
+        filter_key: Option<String>,
+        visible_only: bool,
+        verbose: bool,
+        width: u32,
+        height: u32,
+    ) {
+        run_dump_tree(
+            &self.env,
             filter,
             filter_key,
             visible_only,
             verbose,
             width,
             height,
-        }) => {
-            run_dump_tree(
-                &dispatch.env,
+            self.delay,
+            self.exec_lua_code(),
+        );
+    }
+
+    #[cfg(feature = "gui")]
+    fn run_screenshot_command(
+        &self,
+        output: PathBuf,
+        width: u32,
+        height: u32,
+        filter: Option<String>,
+        crop: Option<String>,
+        dump_tree: Option<Option<String>>,
+    ) {
+        run_screenshot(
+            &self.env,
+            &self.font_system,
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            self.delay,
+            self.exec_lua_code(),
+            dump_tree,
+        );
+    }
+
+    fn run_lua_errors_command(&self) {
+        wow_ui_sim::lua_errors::run_lua_errors(&self.env, self.saved_stdout, self.exec_lua_code());
+    }
+
+    fn run_self_test_command(&self, max_ticks: u32, categories: Option<String>) {
+        if let Some(categories) = categories.as_deref() {
+            wow_ui_sim::self_test::inject_category_filter(&self.env, categories);
+        }
+        wow_ui_sim::self_test::run_startup(&self.env);
+        wow_ui_sim::self_test::run_test(
+            &self.env,
+            max_ticks,
+            self.exec_lua_code(),
+            self.saved_stdout,
+        );
+    }
+
+    fn run_tests_command(&self, addon_name: String) {
+        settle_headless_startup(&self.env);
+        wow_ui_sim::addon_tests::run_addon_tests(&self.env, &addon_name, self.exec_lua_code());
+    }
+
+    #[cfg(feature = "gui")]
+    fn run_dump_texture_command(
+        &self,
+        output: PathBuf,
+        filter: Option<String>,
+        frame_filter: Option<String>,
+    ) {
+        run_dump_texture(&self.env, &self.font_system, output, filter, frame_filter);
+    }
+
+    #[cfg(feature = "gui")]
+    fn run_gui(self) -> Result<(), Box<dyn std::error::Error>> {
+        let debug = self.debug_options();
+        wow_ui_sim::run_iced_ui(self.env, debug, self.saved_vars, self.exec_lua)?;
+        Ok(())
+    }
+
+    #[cfg(not(feature = "gui"))]
+    fn run_gui(self) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = self;
+        eprintln!("GUI not available (compiled without 'gui' feature).");
+        std::process::exit(1);
+    }
+
+    fn dispatch_known_command(&self, command: Commands) {
+        match command {
+            Commands::DumpTree {
                 filter,
                 filter_key,
                 visible_only,
                 verbose,
                 width,
                 height,
-                dispatch.delay,
-                dispatch.exec_lua.as_deref(),
-            );
+            } => {
+                self.run_dump_tree_command(filter, filter_key, visible_only, verbose, width, height)
+            }
+            Commands::LuaErrors => self.run_lua_errors_command(),
+            Commands::SelfTest {
+                max_ticks,
+                categories,
+            } => self.run_self_test_command(max_ticks, categories),
+            Commands::RunTests { addon_name } => self.run_tests_command(addon_name),
+            #[cfg(feature = "gui")]
+            command => self.dispatch_gui_command(command),
         }
-        #[cfg(feature = "gui")]
-        Some(Commands::Screenshot {
-            output,
-            width,
-            height,
-            filter,
-            crop,
-            dump_tree,
-        }) => {
-            run_screenshot(
-                &dispatch.env,
-                &dispatch.font_system,
+    }
+
+    #[cfg(feature = "gui")]
+    fn dispatch_gui_command(&self, command: Commands) {
+        match command {
+            Commands::Screenshot {
                 output,
                 width,
                 height,
                 filter,
                 crop,
-                dispatch.delay,
-                dispatch.exec_lua.as_deref(),
                 dump_tree,
-            );
-        }
-        Some(Commands::LuaErrors) => {
-            wow_ui_sim::lua_errors::run_lua_errors(
-                &dispatch.env,
-                dispatch.saved_stdout,
-                dispatch.exec_lua.as_deref(),
-            );
-        }
-        Some(Commands::SelfTest {
-            max_ticks,
-            categories,
-        }) => {
-            if let Some(c) = &categories {
-                wow_ui_sim::self_test::inject_category_filter(&dispatch.env, c);
-            }
-            wow_ui_sim::self_test::run_startup(&dispatch.env);
-            wow_ui_sim::self_test::run_test(
-                &dispatch.env,
-                max_ticks,
-                dispatch.exec_lua.as_deref(),
-                dispatch.saved_stdout,
-            );
-        }
-        Some(Commands::RunTests { addon_name }) => {
-            settle_headless_startup(&dispatch.env);
-            wow_ui_sim::addon_tests::run_addon_tests(
-                &dispatch.env,
-                &addon_name,
-                dispatch.exec_lua.as_deref(),
-            );
-        }
-        #[cfg(feature = "gui")]
-        Some(Commands::DumpTexture {
-            output,
-            filter,
-            frame_filter,
-        }) => {
-            run_dump_texture(
-                &dispatch.env,
-                &dispatch.font_system,
+            } => self.run_screenshot_command(output, width, height, filter, crop, dump_tree),
+            Commands::DumpTexture {
                 output,
                 filter,
                 frame_filter,
-            );
-        }
-        #[cfg(feature = "gui")]
-        None => {
-            let debug = wow_ui_sim::DebugOptions {
-                borders: dispatch.debug_borders || dispatch.debug_elements,
-                anchors: dispatch.debug_anchors || dispatch.debug_elements,
-            };
-            wow_ui_sim::run_iced_ui(dispatch.env, debug, dispatch.saved_vars, dispatch.exec_lua)?;
-        }
-        #[cfg(not(feature = "gui"))]
-        None => {
-            eprintln!("GUI not available (compiled without 'gui' feature).");
-            std::process::exit(1);
+            } => self.run_dump_texture_command(output, filter, frame_filter),
+            _ => unreachable!("non-GUI commands are handled before GUI dispatch"),
         }
     }
-    Ok(())
+
+    fn dispatch(mut self) -> Result<(), Box<dyn std::error::Error>> {
+        match self.command.take() {
+            Some(command) => self.dispatch_known_command(command),
+            None => return self.run_gui(),
+        }
+        Ok(())
+    }
+}
+
+fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
+    dispatch.dispatch()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -675,5 +730,26 @@ mod tests {
         let args = Args::try_parse_from(["wow-sim", "--screen", "character-create"])
             .expect("screen option should parse character-create");
         assert_eq!(args.effective_screen(), ScreenKind::CharacterCreate);
+    }
+
+    #[test]
+    fn debug_elements_enable_borders_and_anchors() {
+        let env = WowLuaEnv::new().expect("failed to create Lua env");
+        let dispatch = CommandDispatch {
+            command: None,
+            env,
+            font_system: Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts")))),
+            delay: None,
+            exec_lua: None,
+            saved_stdout: None,
+            saved_vars: None,
+            debug_borders: false,
+            debug_anchors: false,
+            debug_elements: true,
+        };
+
+        let debug = dispatch.debug_options();
+        assert!(debug.borders);
+        assert!(debug.anchors);
     }
 }
