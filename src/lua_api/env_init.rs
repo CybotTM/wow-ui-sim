@@ -151,6 +151,52 @@ end
 local function __wow_noop()
 end
 
+if GetText == nil then
+  function GetText(token)
+    if type(token) ~= "string" then
+      return token
+    end
+    local value = rawget(_G, token)
+    return value ~= nil and value or token
+  end
+end
+
+if GetGameTime == nil then
+  function GetGameTime()
+    return 12, 0
+  end
+end
+
+if IsTrialAccount == nil then
+  function IsTrialAccount()
+    return false
+  end
+end
+
+if IsRestrictedAccount == nil then
+  function IsRestrictedAccount()
+    return false
+  end
+end
+
+if GetFileStreamingStatus == nil then
+  function GetFileStreamingStatus()
+    return 0
+  end
+end
+
+if GetNumArenaOpponentSpecs == nil then
+  function GetNumArenaOpponentSpecs()
+    return 0
+  end
+end
+
+if GetErrorCallstackHeight == nil then
+  function GetErrorCallstackHeight()
+    return 0
+  end
+end
+
 local function __wow_namespace(defaults)
   return setmetatable(defaults or {}, {
     __index = function(t, key)
@@ -176,6 +222,55 @@ local function __wow_merge_namespace(existing, defaults)
   end
   return namespace
 end
+
+Kiosk = __wow_merge_namespace(Kiosk, {
+  IsEnabled = function() return false end,
+  IsCompetitiveModeEnabled = function() return false end,
+})
+
+C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
+  PerformEmote = function() return false end,
+  CancelEmote = __wow_noop,
+  IsValidChatLine = function() return false end,
+  ReplaceIconAndGroupExpressions = function(message) return message end,
+  SendChatMessage = __wow_noop,
+  AreOutgoingAddonChatMessagesRestricted = function() return false end,
+  GetNumReservedChatWindows = function() return 0 end,
+  GetNumActiveChannels = function() return 0 end,
+  GetChannelRulesetForChannelID = function() return 0 end,
+  GetChannelRuleset = function() return 0 end,
+  GetChannelInfoFromIdentifier = function() return nil end,
+  GetChatLineText = function() return nil end,
+  IsTimerunningPlayer = function() return false end,
+  UncensorChatLine = __wow_noop,
+  DropCautionaryChatMessage = __wow_noop,
+  SendCautionaryChatMessage = __wow_noop,
+  GetChannelShortcut = function(index) return tostring(index or "") end,
+  GetGeneralChannelLocalID = function() return 0 end,
+  GetGeneralChannelID = function() return 0 end,
+  GetChannelShortcutForChannelID = function() return "" end,
+  IsChannelRegionalForChannelID = function() return false end,
+})
+
+C_Navigation = __wow_merge_namespace(C_Navigation, {
+  WasClampedToScreen = function() return false end,
+  GetTargetState = function() return 0 end,
+  HasValidScreenPosition = function() return false end,
+  GetDistance = function() return 0 end,
+  GetNearestPartyMemberToken = function() return nil end,
+  GetFrame = function() return UIParent end,
+})
+
+C_WowTokenPublic = __wow_merge_namespace(C_WowTokenPublic, {
+  GetCommerceSystemStatus = function() return false, 0, false end,
+  UpdateTokenCount = __wow_noop,
+  GetCurrentMarketPrice = function() return 0, 0 end,
+  GetGuaranteedPrice = function() return 0 end,
+  BuyToken = __wow_noop,
+  UpdateListedAuctionableTokens = __wow_noop,
+  UpdateMarketPrice = __wow_noop,
+  IsAuctionableWowToken = function() return false end,
+})
 
 if EnumUtil == nil then
   EnumUtil = {}

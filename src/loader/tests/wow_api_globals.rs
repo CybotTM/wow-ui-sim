@@ -411,6 +411,159 @@ fn test_bootstrap_fills_existing_namespace_defaults() {
 }
 
 #[test]
+fn test_startup_utility_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        get_text_ty,
+        get_text_value,
+        game_time_ty,
+        hour,
+        minute,
+        trial_ty,
+        trial_value,
+        restricted_ty,
+        restricted_value,
+    ): (String, String, String, i64, i64, String, bool, String, bool) = env
+        .eval(
+            r#"
+            local hour, minute = GetGameTime()
+            return type(GetText),
+                GetText("ERR_FAKE_TOKEN"),
+                type(GetGameTime),
+                hour,
+                minute,
+                type(IsTrialAccount),
+                IsTrialAccount(),
+                type(IsRestrictedAccount),
+                IsRestrictedAccount()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(get_text_ty, "function");
+    assert_eq!(get_text_value, "ERR_FAKE_TOKEN");
+    assert_eq!(game_time_ty, "function");
+    assert!((0..=23).contains(&hour));
+    assert!((0..=59).contains(&minute));
+    assert_eq!(trial_ty, "function");
+    assert!(!trial_value);
+    assert_eq!(restricted_ty, "function");
+    assert!(!restricted_value);
+
+    let (
+        stream_ty,
+        stream_value,
+        callstack_ty,
+        callstack_height,
+        arena_ty,
+        arena_specs,
+        kiosk_ty,
+        kiosk_enabled_ty,
+        kiosk_enabled,
+    ): (String, i64, String, i64, String, i64, String, String, bool) = env
+        .eval(
+            r#"
+            return type(GetFileStreamingStatus),
+                GetFileStreamingStatus(),
+                type(GetErrorCallstackHeight),
+                GetErrorCallstackHeight(),
+                type(GetNumArenaOpponentSpecs),
+                GetNumArenaOpponentSpecs(),
+                type(Kiosk),
+                type(Kiosk and Kiosk.IsEnabled),
+                Kiosk and Kiosk.IsEnabled and Kiosk.IsEnabled() or false
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(stream_ty, "function");
+    assert_eq!(stream_value, 0);
+    assert_eq!(callstack_ty, "function");
+    assert_eq!(callstack_height, 0);
+    assert_eq!(arena_ty, "function");
+    assert_eq!(arena_specs, 0);
+    assert_eq!(kiosk_ty, "table");
+    assert_eq!(kiosk_enabled_ty, "function");
+    assert!(!kiosk_enabled);
+}
+
+#[test]
+fn test_startup_bootstrap_namespaces_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        chat_ty,
+        replaced_message,
+        chat_restricted,
+        nav_ty,
+        nav_distance,
+        nav_frame_ty,
+        token_ty,
+        commerce_enabled,
+        commerce_poll_seconds,
+        commerce_balance_enabled,
+    ): (
+        String,
+        String,
+        bool,
+        String,
+        i64,
+        String,
+        String,
+        bool,
+        i64,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local enabled, pollSeconds, balanceEnabled = C_WowTokenPublic.GetCommerceSystemStatus()
+            return type(C_ChatInfo.PerformEmote),
+                C_ChatInfo.ReplaceIconAndGroupExpressions("{rt1} hello"),
+                C_ChatInfo.AreOutgoingAddonChatMessagesRestricted(),
+                type(C_Navigation.GetDistance),
+                C_Navigation.GetDistance(),
+                type(C_Navigation.GetFrame()),
+                type(C_WowTokenPublic.GetCommerceSystemStatus),
+                enabled,
+                pollSeconds,
+                balanceEnabled
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(chat_ty, "function");
+    assert_eq!(replaced_message, "{rt1} hello");
+    assert!(!chat_restricted);
+    assert_eq!(nav_ty, "function");
+    assert_eq!(nav_distance, 0);
+    assert_eq!(nav_frame_ty, "table");
+    assert_eq!(token_ty, "function");
+    assert!(!commerce_enabled);
+    assert_eq!(commerce_poll_seconds, 0);
+    assert!(!commerce_balance_enabled);
+
+    let (market_price_ty, market_price, guaranteed_price_ty, guaranteed_price): (
+        String,
+        i64,
+        String,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            return type(C_WowTokenPublic.GetCurrentMarketPrice),
+                C_WowTokenPublic.GetCurrentMarketPrice(),
+                type(C_WowTokenPublic.GetGuaranteedPrice),
+                C_WowTokenPublic.GetGuaranteedPrice()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(market_price_ty, "function");
+    assert_eq!(market_price, 0);
+    assert_eq!(guaranteed_price_ty, "function");
+    assert_eq!(guaranteed_price, 0);
+}
+
+#[test]
 fn test_c_texture_exposes_atlas_lookup() {
     let env = WowLuaEnv::new().unwrap();
     let (exists_ty, exists, info_ty, width, height, tile_h, tile_v): (
