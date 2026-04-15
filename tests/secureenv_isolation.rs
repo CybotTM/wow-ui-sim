@@ -106,6 +106,58 @@ fn insecure_chunk_still_lands_in_global_env() {
 }
 
 #[test]
+fn two_secure_chunks_share_one_secureenv() {
+    // Blizzard's restricted addon loads several secure files in sequence
+    // (RestrictedEnvironment, RestrictedExecution, etc.). They cooperate
+    // by writing to secureenv-scope globals that later files read. That
+    // only works if every secure chunk resolves globals through the same
+    // secureenv table.
+    let env = env();
+
+    // First secure chunk defines a binding that cannot exist in _G
+    // (per the fenv-isolation test above) and only lives in secureenv.
+    env.exec_rilua_secure(
+        r#"
+            secureenvSharedBetweenChunks = "defined-by-first-chunk"
+        "#,
+    )
+    .unwrap();
+
+    // Second secure chunk reads the same name through its own fenv and
+    // republishes the result under a separate key so we can pull it out
+    // from the registry-stored secureenv without trusting _G.
+    env.exec_rilua_secure(
+        r#"
+            secureenvSharedBetweenChunksCopy = secureenvSharedBetweenChunks
+        "#,
+    )
+    .unwrap();
+
+    let (first_binding, copy_binding, mt_index_is_genv): (String, String, bool) = env
+        .eval(
+            r#"
+            return tostring(rawget(__secureenv, "secureenvSharedBetweenChunks")),
+                   tostring(rawget(__secureenv, "secureenvSharedBetweenChunksCopy")),
+                   (getmetatable(__secureenv) and getmetatable(__secureenv).__index == _G) or false
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        first_binding, "defined-by-first-chunk",
+        "first chunk's write must be present in secureenv"
+    );
+    assert_eq!(
+        copy_binding, "defined-by-first-chunk",
+        "second chunk must see the first chunk's binding through the shared secureenv"
+    );
+    assert!(
+        mt_index_is_genv,
+        "secureenv's metatable should still fall back to _G (no accidental rebuild)"
+    );
+}
+
+#[test]
 fn shared_table_mutation_propagates_both_ways() {
     // The one legitimate cross-env write: mutating a table that both
     // envs already reference. Since shallow copy shares table refs,
