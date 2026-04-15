@@ -244,6 +244,43 @@ fn test_create_frame_exposes_core_event_methods() {
 }
 
 #[test]
+fn test_create_texture_exposes_core_visual_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (set_texture, set_color_texture, set_vertex_color, set_blend_mode): (
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local tex = frame:CreateTexture()
+            tex:SetTexture("Interface\\Buttons\\WHITE8X8")
+            tex:SetVertexColor(0.1, 0.2, 0.3, 0.4)
+            tex:SetBlendMode("ADD")
+            tex:SetColorTexture(0.5, 0.6, 0.7, 0.8)
+            return type(tex.SetTexture), type(tex.SetColorTexture), type(tex.SetVertexColor), type(tex.SetBlendMode)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        (
+            set_texture,
+            set_color_texture,
+            set_vertex_color,
+            set_blend_mode,
+        ),
+        (
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+            "function".to_string(),
+        )
+    );
+}
+
+#[test]
 fn test_set_attribute_fires_on_attribute_changed() {
     let env = WowLuaEnv::new().unwrap();
     let (name_ty, seen_name, value_ty, seen_value, stored_ty, stored_value): (

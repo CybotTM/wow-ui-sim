@@ -18,7 +18,7 @@ use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaResult, Val, runtime_error};
+use rilua::{LuaResult, Val};
 
 // ---------------------------------------------------------------------------
 // Helpers shared across widget methods
@@ -37,6 +37,159 @@ fn val_to_bool(val: Val) -> bool {
 
 fn opt_string(state: &LuaState, index: i32) -> Option<String> {
     val_to_string(state, stack_val(state, index))
+}
+
+fn opt_bool(state: &LuaState, index: i32) -> Option<bool> {
+    match stack_val(state, index) {
+        Val::Bool(value) => Some(value),
+        _ => None,
+    }
+}
+
+fn opt_f32(state: &LuaState, index: i32) -> Option<f32> {
+    match stack_val(state, index) {
+        Val::Num(value) => Some(value as f32),
+        _ => None,
+    }
+}
+
+fn rgba_from_stack(state: &LuaState, start: i32) -> Option<crate::widget::Color> {
+    let r = opt_f32(state, start)?;
+    let g = opt_f32(state, start + 1)?;
+    let b = opt_f32(state, start + 2)?;
+    let a = opt_f32(state, start + 3).unwrap_or(1.0);
+    Some(crate::widget::Color::new(r, g, b, a))
+}
+
+fn set_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(layer_name) = opt_string(state, 2) else {
+        return Ok(0);
+    };
+    let Some(draw_layer) = crate::widget::DrawLayer::from_str(&layer_name) else {
+        return Ok(0);
+    };
+    let sub_level = match stack_val(state, 3) {
+        Val::Num(value) => Some(value as i32),
+        _ => None,
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.draw_layer = draw_layer;
+        if let Some(sub_level) = sub_level {
+            frame.draw_sub_layer = sub_level;
+        }
+    }
+    Ok(0)
+}
+
+fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(atlas_name) = opt_string(state, 2) else {
+        return Ok(0);
+    };
+    let Some(lookup) = crate::atlas::get_atlas_info(&atlas_name) else {
+        return Ok(0);
+    };
+
+    let tex_coords = (
+        lookup.info.left_tex_coord,
+        lookup.info.right_tex_coord,
+        lookup.info.top_tex_coord,
+        lookup.info.bottom_tex_coord,
+    );
+    let use_atlas_size = opt_bool(state, 3).unwrap_or(false);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.atlas = Some(atlas_name);
+        frame.texture = Some(lookup.info.file.to_string());
+        frame.tex_coords = Some(tex_coords);
+        frame.atlas_tex_coords = Some(tex_coords);
+        if use_atlas_size {
+            frame.set_size(lookup.info.width as f32, lookup.info.height as f32);
+        }
+    }
+    Ok(0)
+}
+
+fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let texture_val = stack_val(state, 2);
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        match texture_val {
+            Val::Str(_) => {
+                frame.texture = val_to_string(state, texture_val);
+                frame.texture_file_data_id = None;
+            }
+            Val::Num(value) => {
+                frame.texture = None;
+                frame.texture_file_data_id = Some(value as i64);
+            }
+            Val::Nil => {
+                frame.texture = None;
+                frame.texture_file_data_id = None;
+            }
+            _ => return Ok(0),
+        }
+        frame.color_texture = None;
+        frame.atlas = None;
+        frame.atlas_tex_coords = None;
+    }
+    Ok(0)
+}
+
+fn set_color_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(color) = rgba_from_stack(state, 2) else {
+        return Ok(0);
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.color_texture = Some(color);
+        frame.texture = None;
+        frame.texture_file_data_id = None;
+        frame.atlas = None;
+        frame.atlas_tex_coords = None;
+    }
+    Ok(0)
+}
+
+fn set_vertex_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(color) = rgba_from_stack(state, 2) else {
+        return Ok(0);
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.vertex_color = Some(color);
+    }
+    Ok(0)
+}
+
+fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(mode_name) = opt_string(state, 2) else {
+        return Ok(0);
+    };
+
+    let normalized = mode_name.to_ascii_uppercase();
+    let blend_mode = match normalized.as_str() {
+        "ADD" => crate::BlendMode::Additive,
+        _ => crate::BlendMode::Alpha,
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.alpha_mode = Some(normalized);
+        frame.blend_mode = blend_mode;
+    }
+    Ok(0)
 }
 
 /// Parse (start, duration, mod_rate) from stack positions 2, 3, 4.
@@ -1949,6 +2102,13 @@ fn tooltip_add_fonts_strings(state: &mut LuaState) -> LuaResult<u32> {
 /// Call this after the standard frame metatable has been created,
 /// passing its `GcRef<Table>` as `metatable`.
 pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn(state, metatable, "SetDrawLayer", set_draw_layer)?;
+    table_set_rust_fn(state, metatable, "SetAtlas", set_atlas)?;
+    table_set_rust_fn(state, metatable, "SetTexture", set_texture)?;
+    table_set_rust_fn(state, metatable, "SetColorTexture", set_color_texture)?;
+    table_set_rust_fn(state, metatable, "SetVertexColor", set_vertex_color)?;
+    table_set_rust_fn(state, metatable, "SetBlendMode", set_blend_mode)?;
+
     // --- Cooldown ---
     table_set_rust_fn(state, metatable, "SetCooldown", cooldown_set_cooldown)?;
     table_set_rust_fn(

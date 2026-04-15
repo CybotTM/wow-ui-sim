@@ -157,6 +157,21 @@ fn load_all_addons() -> WowLuaEnv {
     env
 }
 
+fn load_single_blizzard_addon(addon_name: &str) -> (WowLuaEnv, Vec<String>) {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addons(&ui);
+    let (_, toc_path) = addons
+        .into_iter()
+        .find(|(name, _)| name == addon_name)
+        .unwrap_or_else(|| panic!("addon {addon_name} should exist"));
+    let result = load_addon(&env.loader_env(), &toc_path)
+        .unwrap_or_else(|error| panic!("{addon_name} should load: {error}"));
+    (env, result.warnings)
+}
+
 /// Assert that a Lua expression evaluates to true.
 fn assert_lua(env: &WowLuaEnv, code: &str, msg: &str) {
     assert!(env.eval::<bool>(code).unwrap_or(false), "{msg}");
@@ -233,6 +248,58 @@ fn test_uiparent_onshow_loads_account_store_without_nil_error() {
         assert!(
             account_store_exists,
             "AccountStoreFrame should exist after UIParent_OnShow addon load"
+        );
+    }
+}
+
+#[test]
+fn test_low_health_frame_animation_bound_after_load() {
+    test_timeout! {
+        let env = load_all_addons();
+
+        let (frame_ty, group_ty, alpha_ty): (String, String, String) = env
+            .eval(
+                r#"
+                return type(LowHealthFrame),
+                    type(LowHealthFrame and LowHealthFrame.pulseAnim),
+                    type(LowHealthFrame and LowHealthFrame.pulseAnim and LowHealthFrame.pulseAnim.AlphaAnim)
+                "#,
+            )
+            .expect("LowHealthFrame inspection should be callable");
+
+        assert_eq!(frame_ty, "table", "LowHealthFrame should exist after addon load");
+        assert_eq!(group_ty, "table", "LowHealthFrame.pulseAnim should exist after addon load");
+        assert_eq!(
+            alpha_ty, "table",
+            "LowHealthFrame.pulseAnim.AlphaAnim should exist after addon load"
+        );
+    }
+}
+
+#[test]
+fn test_low_health_frame_animation_bound_after_blizzard_framexml_load() {
+    test_timeout! {
+        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let (frame_ty, group_ty, alpha_ty): (String, String, String) = env
+            .eval(
+                r#"
+                return type(LowHealthFrame),
+                    type(LowHealthFrame and LowHealthFrame.pulseAnim),
+                    type(LowHealthFrame and LowHealthFrame.pulseAnim and LowHealthFrame.pulseAnim.AlphaAnim)
+                "#,
+            )
+            .expect("LowHealthFrame inspection should be callable");
+
+        assert_eq!(frame_ty, "table", "LowHealthFrame should exist after Blizzard_FrameXML load");
+        assert_eq!(
+            group_ty, "table",
+            "LowHealthFrame.pulseAnim should exist after Blizzard_FrameXML load; warnings:\n  {}",
+            warnings.join("\n  ")
+        );
+        assert_eq!(
+            alpha_ty, "table",
+            "LowHealthFrame.pulseAnim.AlphaAnim should exist after Blizzard_FrameXML load"
         );
     }
 }
