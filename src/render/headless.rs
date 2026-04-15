@@ -348,18 +348,21 @@ pub fn render_to_image(
 ) -> RgbaImage {
     let mut primitive = build_headless_primitive(batch, tex_mgr, glyph_atlas_data);
     let (device, queue) = create_headless_device();
+    render_headless_primitive_to_image(&mut primitive, &device, &queue, width, height)
+}
+
+fn render_headless_primitive_to_image(
+    primitive: &mut WowUiPrimitive,
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    width: u32,
+    height: u32,
+) -> RgbaImage {
     let (mut pipeline, render_texture, render_view) =
-        create_headless_pipeline_and_target(&device, &queue, width, height);
-    prepare_headless_primitive(
-        &mut primitive,
-        &mut pipeline,
-        &device,
-        &queue,
-        width,
-        height,
-    );
-    let encoder = clear_headless_render_target(&device, &mut pipeline, &render_view, width, height);
-    read_back_pixels(&device, &queue, encoder, &render_texture, width, height)
+        create_headless_pipeline_and_target(device, queue, width, height);
+    prepare_headless_primitive(primitive, &mut pipeline, device, queue, width, height);
+    let encoder = clear_headless_render_target(device, &mut pipeline, &render_view, width, height);
+    read_back_pixels(device, queue, encoder, &render_texture, width, height)
 }
 
 #[cfg(test)]
