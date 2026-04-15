@@ -22,6 +22,7 @@ pub(crate) mod methods_hierarchy;
 mod methods_line;
 mod methods_misc;
 mod methods_misc_alerts;
+mod methods_misc_map_frames;
 mod methods_misc_minimap;
 mod methods_misc_specialized;
 mod methods_rect;
