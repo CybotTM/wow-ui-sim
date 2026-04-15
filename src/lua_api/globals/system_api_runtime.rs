@@ -217,42 +217,109 @@ fn register_set_screen_size(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<
 }
 
 fn register_request_time_played(lua: &Lua) -> Result<()> {
+    const TIME_PLAYED_EVENT: &str = "TIME_PLAYED_MSG";
+    const TOTAL_PLAYED_SECONDS: i64 = 15 * 24 * 3600;
+    const LEVEL_PLAYED_SECONDS: i64 = 3 * 24 * 3600;
+
     let request_fn = lua.create_function(move |lua, ()| {
-        let total_played = 15 * 24 * 3600;
-        let level_played = 3 * 24 * 3600;
-
-        let listeners =
-            crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, "TIME_PLAYED_MSG")?;
-
-        for widget_id in listeners {
-            if let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id) {
-                if let Some(handler) =
-                    crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
-                {
-                    let args = vec![
-                        frame.clone(),
-                        Value::String(lua.create_string("TIME_PLAYED_MSG")?),
-                        Value::Integer(total_played),
-                        Value::Integer(level_played),
-                    ];
-                    if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(args)) {
-                        crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-                    }
-                }
-                crate::lua_api::script_helpers::dispatch_frame_unit_event_callbacks(
-                    lua,
-                    widget_id,
-                    frame,
-                    &[Value::Integer(total_played), Value::Integer(level_played)],
-                    "TIME_PLAYED_MSG",
-                )?;
-            }
+        for widget_id in time_played_listeners(lua, TIME_PLAYED_EVENT)? {
+            dispatch_time_played_listener(
+                lua,
+                widget_id,
+                TIME_PLAYED_EVENT,
+                TOTAL_PLAYED_SECONDS,
+                LEVEL_PLAYED_SECONDS,
+            )?;
         }
 
         Ok(())
     })?;
     lua.globals().set("RequestTimePlayed", request_fn)?;
     Ok(())
+}
+
+fn time_played_listeners(lua: &Lua, event_name: &str) -> Result<Vec<u64>> {
+    crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, event_name)
+}
+
+fn dispatch_time_played_listener(
+    lua: &Lua,
+    widget_id: u64,
+    event_name: &str,
+    total_played: i64,
+    level_played: i64,
+) -> Result<()> {
+    let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id) else {
+        return Ok(());
+    };
+    dispatch_time_played_on_event(
+        lua,
+        widget_id,
+        &frame,
+        event_name,
+        total_played,
+        level_played,
+    )?;
+    dispatch_time_played_callbacks(
+        lua,
+        widget_id,
+        frame,
+        event_name,
+        total_played,
+        level_played,
+    )
+}
+
+fn dispatch_time_played_on_event(
+    lua: &Lua,
+    widget_id: u64,
+    frame: &Value,
+    event_name: &str,
+    total_played: i64,
+    level_played: i64,
+) -> Result<()> {
+    let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
+    else {
+        return Ok(());
+    };
+    let args =
+        time_played_on_event_args(lua, frame.clone(), event_name, total_played, level_played)?;
+    if let Err(error) = handler.call::<()>(args) {
+        crate::lua_api::script_helpers::call_error_handler(lua, &error.to_string());
+    }
+    Ok(())
+}
+
+fn time_played_on_event_args(
+    lua: &Lua,
+    frame: Value,
+    event_name: &str,
+    total_played: i64,
+    level_played: i64,
+) -> Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        frame,
+        Value::String(lua.create_string(event_name)?),
+        Value::Integer(total_played),
+        Value::Integer(level_played),
+    ]))
+}
+
+fn dispatch_time_played_callbacks(
+    lua: &Lua,
+    widget_id: u64,
+    frame: Value,
+    event_name: &str,
+    total_played: i64,
+    level_played: i64,
+) -> Result<()> {
+    crate::lua_api::script_helpers::dispatch_frame_unit_event_callbacks(
+        lua,
+        widget_id,
+        frame,
+        &[Value::Integer(total_played), Value::Integer(level_played)],
+        event_name,
+    )
 }
 
 fn register_cursor_position(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
@@ -345,4 +412,59 @@ fn register_ui_parent_stubs(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
     )?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    const TIME_PLAYED_EVENT: &str = "TIME_PLAYED_MSG";
+    const TOTAL_PLAYED_SECONDS: i64 = 15 * 24 * 3600;
+    const LEVEL_PLAYED_SECONDS: i64 = 3 * 24 * 3600;
+
+    fn env() -> WowLuaEnv {
+        WowLuaEnv::new().expect("failed to create Lua environment")
+    }
+
+    #[test]
+    fn request_time_played_dispatches_on_event_and_callbacks() {
+        let env = env();
+        env.exec(
+            r#"
+            observed = {}
+            local frame = CreateFrame("Frame")
+            frame:RegisterEvent("TIME_PLAYED_MSG")
+            frame:SetScript("OnEvent", function(self, event, total, level)
+                observed.on_event = { event, total, level, self == frame }
+            end)
+            frame:RegisterUnitEventCallback("TIME_PLAYED_MSG", function(self, total, level)
+                observed.callback = { total, level, self == frame }
+            end)
+            RequestTimePlayed()
+            "#,
+        )
+        .expect("request time played script should run");
+
+        let observed: (String, i64, i64, bool, i64, i64, bool) = env
+            .eval(
+                r#"
+                return observed.on_event[1], observed.on_event[2], observed.on_event[3], observed.on_event[4],
+                    observed.callback[1], observed.callback[2], observed.callback[3]
+                "#,
+            )
+            .expect("request time played handlers should populate observations");
+
+        assert_eq!(
+            observed,
+            (
+                TIME_PLAYED_EVENT.to_string(),
+                TOTAL_PLAYED_SECONDS,
+                LEVEL_PLAYED_SECONDS,
+                true,
+                TOTAL_PLAYED_SECONDS,
+                LEVEL_PLAYED_SECONDS,
+                true,
+            )
+        );
+    }
 }
