@@ -13,7 +13,7 @@ use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_id_from_stack,
     frame_ref, registry_table_or_create, sync_child_to_rilua, val_to_string,
 };
-use crate::lua_bridge::{FromStack, IntoStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -1445,6 +1445,102 @@ fn create_control_point(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn animation_set_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let duration = match stack_val(state, 2) {
+        Val::Num(value) => value.max(0.0),
+        _ => 0.0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some((group_id, animation_index)) =
+        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+        && let Some(animation) = group.animations.get_mut(animation_index)
+    {
+        animation.duration = duration;
+    }
+    Ok(0)
+}
+
+fn animation_set_order(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let order = match stack_val(state, 2) {
+        Val::Num(value) if value >= 0.0 => value as u32,
+        _ => 0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some((group_id, animation_index)) =
+        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+        && let Some(animation) = group.animations.get_mut(animation_index)
+    {
+        animation.order = order;
+    }
+    Ok(0)
+}
+
+fn animation_set_start_delay(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let start_delay = match stack_val(state, 2) {
+        Val::Num(value) => value.max(0.0),
+        _ => 0.0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some((group_id, animation_index)) =
+        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+        && let Some(animation) = group.animations.get_mut(animation_index)
+    {
+        animation.start_delay = start_delay;
+    }
+    Ok(0)
+}
+
+fn animation_set_end_delay(state: &mut LuaState) -> LuaResult<u32> {
+    let animation_frame_id = frame_id_from_stack(state, 1)?;
+    let end_delay = match stack_val(state, 2) {
+        Val::Num(value) => value.max(0.0),
+        _ => 0.0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some((group_id, animation_index)) =
+        sim.anim_frame_to_anim.get(&animation_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+        && let Some(animation) = group.animations.get_mut(animation_index)
+    {
+        animation.end_delay = end_delay;
+    }
+    Ok(0)
+}
+
+fn animation_group_set_looping(state: &mut LuaState) -> LuaResult<u32> {
+    let group_frame_id = frame_id_from_stack(state, 1)?;
+    let looping = opt_string(state, 2).unwrap_or_default();
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.looping = crate::lua_api::animation::LoopType::from_str(&looping);
+    }
+    Ok(0)
+}
+
+fn animation_config_noop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn animation_group_set_to_final_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    let group_frame_id = frame_id_from_stack(state, 1)?;
+    let set_to_final_alpha = matches!(stack_val(state, 2), Val::Bool(true));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.set_to_final_alpha = set_to_final_alpha;
+    }
+    Ok(0)
+}
+
 // ── register_all ──────────────────────────────────────────────────────────────
 
 /// Register all button, anchor, hierarchy, and create methods on the given metatable.
@@ -1566,6 +1662,30 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetAnimationGroups", get_animation_groups)?;
     table_set_rust_fn(state, table, "CreateAnimationGroup", create_animation_group)?;
     table_set_rust_fn(state, table, "CreateAnimation", create_animation)?;
+    table_set_rust_fn(state, table, "SetLooping", animation_group_set_looping)?;
+    table_set_rust_fn(state, table, "SetDuration", animation_set_duration)?;
+    table_set_rust_fn(state, table, "SetOrder", animation_set_order)?;
+    table_set_rust_fn(state, table, "SetStartDelay", animation_set_start_delay)?;
+    table_set_rust_fn(state, table, "SetEndDelay", animation_set_end_delay)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetToFinalAlpha",
+        animation_group_set_to_final_alpha,
+    )?;
+    table_set_rust_fn(state, table, "SetSmoothing", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetFromAlpha", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetToAlpha", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetOffset", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetScale", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetScaleFrom", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetScaleTo", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetDegrees", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetChildKey", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetTargetName", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetTargetKey", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetFlipBookRows", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetFlipBookColumns", animation_config_noop)?;
     table_set_rust_fn(state, table, "CreateControlPoint", create_control_point)?;
 
     Ok(())

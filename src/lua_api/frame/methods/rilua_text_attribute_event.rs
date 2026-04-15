@@ -600,7 +600,8 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
     match handler_name {
         "OnLoad" | "OnEvent" | "OnUpdate" | "OnShow" | "OnHide" | "OnEnter" | "OnLeave"
         | "OnMouseDown" | "OnMouseUp" | "OnMouseWheel" | "OnDragStart" | "OnDragStop"
-        | "OnReceiveDrag" | "OnSizeChanged" | "OnAttributeChanged" => true,
+        | "OnReceiveDrag" | "OnSizeChanged" | "OnAttributeChanged" | "OnPlay" | "OnFinished"
+        | "OnStop" | "OnLoop" | "OnPause" => true,
         "OnClick" | "PreClick" | "PostClick" => {
             matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
         }

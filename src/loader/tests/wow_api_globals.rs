@@ -333,6 +333,30 @@ fn test_bootstrap_fills_existing_namespace_defaults() {
 }
 
 #[test]
+fn test_animation_runtime_exposes_core_configuration_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (group_method_ty, animation_duration_ty, animation_order_ty, finished_script_ty): (String, String, String, String) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local group = frame:CreateAnimationGroup()
+            local animation = group:CreateAnimation("Alpha")
+            group:SetToFinalAlpha(true)
+            animation:SetDuration(0.5)
+            animation:SetOrder(2)
+            group:SetScript("OnFinished", function() end)
+            return type(group.SetToFinalAlpha), type(animation.SetDuration), type(animation.SetOrder), type(group:GetScript("OnFinished"))
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(group_method_ty, "function");
+    assert_eq!(animation_duration_ty, "function");
+    assert_eq!(animation_order_ty, "function");
+    assert_eq!(finished_script_ty, "function");
+}
+
+#[test]
 fn test_ui_special_frames_table() {
     let env = WowLuaEnv::new().unwrap();
     let ty: String = env.eval("return type(UISpecialFrames)").unwrap();
