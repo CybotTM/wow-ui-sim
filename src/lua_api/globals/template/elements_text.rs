@@ -123,30 +123,11 @@ pub(super) fn create_fontstring_from_template_direct(
     draw_layer: &str,
 ) -> mlua::Result<()> {
     ensure_direct_fontstring_supported(fontstring)?;
-
-    let parent_id = resolve_state_frame_id(state, parent_name).ok_or_else(|| {
-        mlua::Error::runtime(format!(
-            "missing parent '{}' for direct fontstring create",
-            parent_name
-        ))
-    })?;
+    let parent_id = resolve_direct_fontstring_parent(state, parent_name)?;
     let child_name = template_fontstring_name(fontstring, subst_parent);
-
-    let mut child = Frame::new(
-        WidgetType::FontString,
-        Some(child_name.clone()),
-        Some(parent_id),
-    );
-    if let Some(layer) = crate::widget::DrawLayer::from_str(draw_layer) {
-        child.draw_layer = layer;
-    }
-    if let Some(parent_key) = fontstring.parent_key.as_ref() {
-        child.parent_key = Some(parent_key.clone());
-    }
-    apply_font_inherit(lua, &mut child, fontstring.inherits.as_deref());
-    apply_fontstring_fields_direct(&mut child, fontstring);
+    let child = build_direct_fontstring(lua, fontstring, parent_id, &child_name, draw_layer);
     let child_id = child.id;
-    register_child_widget(lua, parent_id, child, &Some(child_name))?;
+    register_direct_fontstring(lua, parent_id, child, &child_name)?;
     sync_region_parent_refs(
         lua,
         state,
@@ -165,6 +146,50 @@ pub(super) fn create_fontstring_from_template_direct(
     );
     apply_region_visibility(state, child_id, fontstring.hidden, fontstring.alpha);
     Ok(())
+}
+
+fn resolve_direct_fontstring_parent(
+    state: &Rc<RefCell<SimState>>,
+    parent_name: &str,
+) -> mlua::Result<u64> {
+    resolve_state_frame_id(state, parent_name).ok_or_else(|| {
+        mlua::Error::runtime(format!(
+            "missing parent '{}' for direct fontstring create",
+            parent_name
+        ))
+    })
+}
+
+fn build_direct_fontstring(
+    lua: &Lua,
+    fontstring: &crate::xml::FontStringXml,
+    parent_id: u64,
+    child_name: &str,
+    draw_layer: &str,
+) -> Frame {
+    let mut child = Frame::new(
+        WidgetType::FontString,
+        Some(child_name.to_string()),
+        Some(parent_id),
+    );
+    if let Some(layer) = crate::widget::DrawLayer::from_str(draw_layer) {
+        child.draw_layer = layer;
+    }
+    if let Some(parent_key) = fontstring.parent_key.as_ref() {
+        child.parent_key = Some(parent_key.clone());
+    }
+    apply_font_inherit(lua, &mut child, fontstring.inherits.as_deref());
+    apply_fontstring_fields_direct(&mut child, fontstring);
+    child
+}
+
+fn register_direct_fontstring(
+    lua: &Lua,
+    parent_id: u64,
+    child: Frame,
+    child_name: &str,
+) -> mlua::Result<()> {
+    register_child_widget(lua, parent_id, child, &Some(child_name.to_string())).map(|_| ())
 }
 
 fn append_fontstring_size_and_text(code: &mut String, fontstring: &crate::xml::FontStringXml) {
@@ -660,9 +685,11 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
 #[cfg(test)]
 mod tests {
     use super::{
-        append_thumb_texture_parent_binding, build_fontstring_create_preamble,
-        quoted_fontstring_inherits,
+        append_thumb_texture_parent_binding, build_direct_fontstring,
+        build_fontstring_create_preamble, quoted_fontstring_inherits,
     };
+    use crate::widget::{DrawLayer, WidgetType};
+    use mlua::Lua;
 
     #[test]
     fn quoted_fontstring_inherits_uses_nil_for_missing_or_empty_values() {
@@ -699,5 +726,26 @@ mod tests {
         code.clear();
         append_thumb_texture_parent_binding(&mut code, Some("Thumb\"Key"));
         assert!(code.contains("parent[\"Thumb\\\"Key\"] = thumb"));
+    }
+
+    #[test]
+    fn build_direct_fontstring_sets_layer_parent_key_and_text_fields() {
+        let lua = Lua::new();
+        let fontstring = crate::xml::FontStringXml {
+            name: Some("$parentTitle".to_string()),
+            parent_key: Some("Text".to_string()),
+            text: Some("Hello".to_string()),
+            justify_h: Some("CENTER".to_string()),
+            ..Default::default()
+        };
+
+        let child = build_direct_fontstring(&lua, &fontstring, 7, "FrameTitle", "OVERLAY");
+
+        assert_eq!(child.widget_type, WidgetType::FontString);
+        assert_eq!(child.parent_id, Some(7));
+        assert_eq!(child.name.as_deref(), Some("FrameTitle"));
+        assert_eq!(child.parent_key.as_deref(), Some("Text"));
+        assert_eq!(child.draw_layer, DrawLayer::Overlay);
+        assert_eq!(child.text.as_deref(), Some("Hello"));
     }
 }
