@@ -692,47 +692,60 @@ const THREE_SLICE_TEMPLATE_XML: &str = r#"<Ui>
 /// Set up env with three-slice templates and mixins registered.
 fn setup_three_slice_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
-    let ui = parse_xml(THREE_SLICE_TEMPLATE_XML).unwrap();
-    for element in &ui.elements {
-        if let XmlElement::Button(frame) = element {
-            if let Some(ref name) = frame.name {
-                register_template(name, "Button", frame.clone());
-            }
-        }
-    }
-    env.exec(
-        r#"
-        ThreeSliceButtonMixin = {}
-        function ThreeSliceButtonMixin:InitButton()
-            self.leftAtlasInfo = C_Texture.GetAtlasInfo(self.atlasName .. "-Left")
-            self.rightAtlasInfo = C_Texture.GetAtlasInfo(self.atlasName .. "-Right")
-            self:SetHighlightAtlas(self.atlasName .. "-Highlight")
-        end
-        function ThreeSliceButtonMixin:UpdateButton(buttonState)
-            buttonState = buttonState or "NORMAL"
-            self.Left:SetAtlas(self.atlasName .. "-Left", true)
-            self.Center:SetAtlas("_" .. self.atlasName .. "-Center")
-            self.Right:SetAtlas(self.atlasName .. "-Right", true)
-            self:UpdateScale()
-        end
-        function ThreeSliceButtonMixin:UpdateScale()
-            local scale = self:GetHeight() / self.leftAtlasInfo.height
-            self.Left:SetScale(scale)
-            self.Right:SetScale(scale)
-            self.Left:SetTexCoord(0, 1, 0, 1)
-            self.Left:SetWidth(self.leftAtlasInfo.width)
-            self.Right:SetTexCoord(0, 1, 0, 1)
-            self.Right:SetWidth(self.rightAtlasInfo.width)
-        end
-        ButtonControllerMixin = {}
-        function ButtonControllerMixin:OnLoad()
-            self:GetParent():InitButton()
-        end
-    "#,
-    )
-    .unwrap();
+    register_three_slice_templates();
+    install_three_slice_mixins(&env);
     env
 }
+
+fn register_three_slice_templates() {
+    let ui = parse_xml(THREE_SLICE_TEMPLATE_XML).unwrap();
+    for element in &ui.elements {
+        register_three_slice_button_template(element);
+    }
+}
+
+fn register_three_slice_button_template(element: &XmlElement) {
+    let XmlElement::Button(frame) = element else {
+        return;
+    };
+    let Some(name) = frame.name.as_deref() else {
+        return;
+    };
+    register_template(name, "Button", frame.clone());
+}
+
+fn install_three_slice_mixins(env: &WowLuaEnv) {
+    env.exec(THREE_SLICE_MIXIN_LUA).unwrap();
+}
+
+const THREE_SLICE_MIXIN_LUA: &str = r#"
+    ThreeSliceButtonMixin = {}
+    function ThreeSliceButtonMixin:InitButton()
+        self.leftAtlasInfo = C_Texture.GetAtlasInfo(self.atlasName .. "-Left")
+        self.rightAtlasInfo = C_Texture.GetAtlasInfo(self.atlasName .. "-Right")
+        self:SetHighlightAtlas(self.atlasName .. "-Highlight")
+    end
+    function ThreeSliceButtonMixin:UpdateButton(buttonState)
+        buttonState = buttonState or "NORMAL"
+        self.Left:SetAtlas(self.atlasName .. "-Left", true)
+        self.Center:SetAtlas("_" .. self.atlasName .. "-Center")
+        self.Right:SetAtlas(self.atlasName .. "-Right", true)
+        self:UpdateScale()
+    end
+    function ThreeSliceButtonMixin:UpdateScale()
+        local scale = self:GetHeight() / self.leftAtlasInfo.height
+        self.Left:SetScale(scale)
+        self.Right:SetScale(scale)
+        self.Left:SetTexCoord(0, 1, 0, 1)
+        self.Left:SetWidth(self.leftAtlasInfo.width)
+        self.Right:SetTexCoord(0, 1, 0, 1)
+        self.Right:SetWidth(self.rightAtlasInfo.width)
+    end
+    ButtonControllerMixin = {}
+    function ButtonControllerMixin:OnLoad()
+        self:GetParent():InitButton()
+    end
+"#;
 
 /// Three-slice InitButton runs via Controller:OnLoad after all templates applied.
 #[test]

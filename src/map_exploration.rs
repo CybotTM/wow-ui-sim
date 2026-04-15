@@ -3,6 +3,7 @@ use std::sync::LazyLock;
 
 #[derive(Debug, Clone)]
 pub struct MapExplorationOverlay {
+    pub id: u32,
     pub texture_width: u32,
     pub texture_height: u32,
     pub offset_x: i32,
@@ -17,15 +18,6 @@ pub struct MapExplorationOverlay {
 }
 
 impl MapExplorationOverlay {
-    pub fn center_x_fraction(&self, layer_width: u32) -> f32 {
-        if layer_width == 0 {
-            return 0.0;
-        }
-
-        let center_x = self.offset_x as f32 + self.texture_width as f32 * 0.5;
-        center_x / layer_width as f32
-    }
-
     pub fn contains_pixel(&self, pixel_x: f32, pixel_y: f32) -> bool {
         let (left, right, top, bottom) = self.hit_rect_bounds();
         pixel_x >= left as f32
@@ -43,6 +35,10 @@ impl MapExplorationOverlay {
 
     pub fn is_default_visible(&self) -> bool {
         self.player_condition_id == 0
+    }
+
+    pub fn is_seeded_unexplored(&self, map_id: u32) -> bool {
+        seeded_unexplored_overlay_ids(map_id).contains(&self.id)
     }
 
     fn hit_rect_bounds(&self) -> (i32, i32, i32, i32) {
@@ -90,25 +86,14 @@ pub fn get_overlays_for_map(map_id: u32) -> Option<&'static [MapExplorationOverl
     OVERLAYS_BY_ART_ID.get(&art_id).map(Vec::as_slice)
 }
 
-pub fn get_half_explored_overlays_for_map(
-    map_id: u32,
-    explored_left_fraction: f32,
-) -> Vec<&'static MapExplorationOverlay> {
-    let Some(layer_width) = crate::map_art::get_map_art(map_id)
-        .and_then(|info| info.layers.first())
-        .map(|layer| layer.layer_width)
-    else {
-        return Vec::new();
-    };
-
+pub fn get_default_visible_overlays_for_map(map_id: u32) -> Vec<&'static MapExplorationOverlay> {
     let Some(overlays) = get_overlays_for_map(map_id) else {
         return Vec::new();
     };
 
     overlays
         .iter()
-        .filter(|overlay| overlay.is_default_visible())
-        .filter(|overlay| overlay.center_x_fraction(layer_width) <= explored_left_fraction)
+        .filter(|overlay| overlay.is_default_visible() && !overlay.is_seeded_unexplored(map_id))
         .collect()
 }
 
@@ -123,6 +108,7 @@ fn load_overlays_by_art_id() -> HashMap<u32, Vec<MapExplorationOverlay>> {
         };
 
         let overlay = MapExplorationOverlay {
+            id: pending.id,
             texture_width: pending.texture_width,
             texture_height: pending.texture_height,
             offset_x: pending.offset_x,
@@ -142,6 +128,18 @@ fn load_overlays_by_art_id() -> HashMap<u32, Vec<MapExplorationOverlay>> {
     }
 
     overlays_by_art_id
+}
+
+fn seeded_unexplored_overlay_ids(map_id: u32) -> &'static [u32] {
+    match map_id {
+        // Keep one real Isle of Dorn sub-zone unexplored until we model
+        // character-specific exploration state. Overlay 4885 is an
+        // isolated explored chunk for The Three Shields / Skolzgal Mill,
+        // so omitting it keeps one genuine pocket unexplored without
+        // manufacturing fog geometry.
+        2248 => &[4885],
+        _ => &[],
+    }
 }
 
 fn load_overlay_rows() -> Vec<PendingOverlay> {

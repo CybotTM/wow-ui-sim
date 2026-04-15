@@ -43,6 +43,8 @@ mod render;
 #[cfg(feature = "gui")]
 mod screenshot;
 #[cfg(feature = "gui")]
+mod slice_render;
+#[cfg(feature = "gui")]
 mod state;
 #[cfg(feature = "gui")]
 mod statusbar;

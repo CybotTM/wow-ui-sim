@@ -1,185 +1,17 @@
 //! Strata rendering, layout, and visibility methods for SimState.
 
-use crate::widget::WidgetRegistry;
 use std::collections::HashSet;
 
 use super::state::SimState;
-
-fn should_trace_strata_invalidations(start_time: &std::time::Instant) -> bool {
-    if std::env::var_os("WOW_SIM_TRACE_STRATA_INVALIDATIONS").is_none() {
-        return false;
-    }
-
-    let after_ms = std::env::var("WOW_SIM_TRACE_STRATA_INVALIDATIONS_AFTER_MS")
-        .ok()
-        .and_then(|value| value.parse::<u64>().ok());
-    match after_ms {
-        Some(ms) => start_time.elapsed() >= std::time::Duration::from_millis(ms),
-        None => true,
-    }
-}
-
-fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
-    matches!(
-        frame.parent_key.as_deref(),
-        Some("NormalTexture" | "PushedTexture" | "HighlightTexture" | "DisabledTexture")
-    )
-}
-
-fn is_region(wt: crate::widget::WidgetType) -> bool {
-    matches!(
-        wt,
-        crate::widget::WidgetType::Texture
-            | crate::widget::WidgetType::FontString
-            | crate::widget::WidgetType::Line
-    )
-}
-
-fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
-    frame.frame_level.saturating_add(frame.raise_order)
-}
-
-fn is_strata_root_boundary(frame: &crate::widget::Frame) -> bool {
-    matches!(frame.name.as_deref(), Some("UIParent" | "WorldFrame"))
-}
-
-/// DFS emit: parent frame, then its Texture regions (sorted by draw_layer),
-/// then child frames (recursively), then its FontString regions.
-///
-/// FontStrings are deferred past child frames so that parent text renders on top
-/// of child frame backgrounds.  In WoW's flat render model, all regions at the
-/// same frame_level are interleaved by draw_layer — ARTWORK FontStrings from a
-/// parent sort after BACKGROUND Textures from a child.  Our DFS groups by frame
-/// tree, so we approximate this by splitting regions into textures (before
-/// children) and fontstrings (after children).
-fn dfs_emit(
-    id: u64,
-    strata_idx: usize,
-    widgets: &WidgetRegistry,
-    visible: &HashSet<u64>,
-    out: &mut Vec<u64>,
-) {
-    let Some(f) = widgets.get(id) else { return };
-    out.push(id);
-
-    let (mut regions, mut child_frames) = partition_children(f, strata_idx, widgets, visible);
-    sort_regions(&mut regions, widgets);
-
-    // Split: Texture/Line regions before children, FontStrings after.
-    let split = regions.partition_point(|&rid| {
-        widgets.get(rid).map_or(true, |r| {
-            r.widget_type != crate::widget::WidgetType::FontString
-        })
-    });
-    let (texture_regions, fontstring_regions) = regions.split_at(split);
-    out.extend_from_slice(texture_regions);
-
-    sort_child_frames(&mut child_frames, widgets);
-    for child_id in child_frames {
-        dfs_emit(child_id, strata_idx, widgets, visible, out);
-    }
-
-    out.extend_from_slice(fontstring_regions);
-}
-
-/// Split visible children into regions (textures/fontstrings) and child frames in same strata.
-fn partition_children(
-    f: &crate::widget::Frame,
-    strata_idx: usize,
-    widgets: &WidgetRegistry,
-    visible: &HashSet<u64>,
-) -> (Vec<u64>, Vec<u64>) {
-    let mut regions = Vec::new();
-    let mut child_frames = Vec::new();
-    for &child_id in &f.children {
-        if !visible.contains(&child_id) {
-            continue;
-        }
-        let Some(child) = widgets.get(child_id) else {
-            continue;
-        };
-        if is_region(child.widget_type) {
-            regions.push(child_id);
-        } else if child.frame_strata.as_index() == strata_idx {
-            child_frames.push(child_id);
-        }
-    }
-    (regions, child_frames)
-}
-
-fn collect_same_strata_subtree_ids(
-    id: u64,
-    strata_idx: usize,
-    widgets: &WidgetRegistry,
-    out: &mut HashSet<u64>,
-) {
-    if !out.insert(id) {
-        return;
-    }
-    let Some(frame) = widgets.get(id) else {
-        return;
-    };
-    for &child_id in &frame.children {
-        let Some(child) = widgets.get(child_id) else {
-            continue;
-        };
-        if is_region(child.widget_type) {
-            out.insert(child_id);
-            continue;
-        }
-        if child.frame_strata.as_index() == strata_idx {
-            collect_same_strata_subtree_ids(child_id, strata_idx, widgets, out);
-        }
-    }
-}
-
-fn same_strata_subtree_segment_end(
-    bucket: &[u64],
-    start: usize,
-    subtree_ids: &HashSet<u64>,
-) -> usize {
-    let mut end = start + 1;
-    while end < bucket.len() && subtree_ids.contains(&bucket[end]) {
-        end += 1;
-    }
-    end
-}
-
-/// Sort regions by (draw_layer, draw_sub_layer, type_flag, id).
-/// FontStrings sort after Textures within the same layer (type_flag=1 vs 0).
-fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
-    use std::cmp::Reverse;
-    regions.sort_by(|&a, &b| {
-        let (fa, fb) = match (widgets.get(a), widgets.get(b)) {
-            (Some(fa), Some(fb)) => (fa, fb),
-            _ => return a.cmp(&b),
-        };
-        let type_flag = |f: &crate::widget::Frame| -> u8 {
-            u8::from(f.widget_type == crate::widget::WidgetType::FontString)
-        };
-        (
-            fa.draw_layer as i32,
-            fa.draw_sub_layer,
-            type_flag(fa),
-            Reverse(a),
-        )
-            .cmp(&(
-                fb.draw_layer as i32,
-                fb.draw_sub_layer,
-                type_flag(fb),
-                Reverse(b),
-            ))
-    });
-}
-
-/// Sort child frames by (frame_level, raise_order, id).
-fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
-    frames.sort_by(|&a, &b| match (widgets.get(a), widgets.get(b)) {
-        (Some(fa), Some(fb)) => (effective_frame_level(fa), fa.frame_level, fa.raise_order, a)
-            .cmp(&(effective_frame_level(fb), fb.frame_level, fb.raise_order, b)),
-        _ => a.cmp(&b),
-    });
-}
+#[path = "state_render_buckets.rs"]
+mod state_render_buckets;
+#[path = "state_render_repairs.rs"]
+mod state_render_repairs;
+use state_render_buckets::{
+    dfs_emit, effective_frame_level, is_region, is_strata_root_boundary,
+    should_trace_strata_invalidations, uses_parent_alpha_fallback,
+};
+use state_render_repairs::{build_strata_bucket_repair_plan, splice_strata_bucket_repair};
 
 impl SimState {
     /// Initialize derived render state that must be propagated once after startup.
@@ -407,10 +239,23 @@ impl SimState {
     /// Force layout resolution for a single frame, clearing its rect_dirty flag.
     /// Called by GetSize/GetWidth/GetHeight, rect query methods, and IsRectValid
     /// to match WoW behavior where layout resolves immediately.
+    ///
+    /// Fast path: when `id` is directly in `rect_dirty_ids` (common during
+    /// loading — SetPoint marks dirty, then GetRect resolves), skips the
+    /// ancestor walk and resolves just `id`.
+    /// Slow path: when `id` inherits dirtiness from an ancestor, resolves
+    /// dirty ancestor subtrees first.
     pub fn resolve_rect_if_dirty(&mut self, id: u64) {
         if !self.widgets.is_rect_dirty(id) {
             return;
         }
+        // Fast path: `id` itself is dirty — no ancestor walk needed.
+        if self.widgets.is_rect_dirty_self(id) {
+            self.invalidate_layout(id);
+            self.widgets.clear_rect_dirty(id);
+            return;
+        }
+        // Slow path: dirty ancestor(s) need subtree recomputation first.
         self.resolve_dirty_ancestors(id);
         self.invalidate_layout(id);
         self.widgets.clear_rect_dirty(id);
@@ -479,46 +324,13 @@ impl SimState {
         let Some(repair_root) = self.visible_same_strata_ancestor(shown_id) else {
             return false;
         };
-        let Some(root_frame) = self.widgets.get(repair_root) else {
+        let Some(repair_plan) = build_strata_bucket_repair_plan(self, repair_root) else {
             return false;
         };
-        let strata_idx = self.frame_bucket_strata(root_frame).as_index();
-
-        let mut subtree_ids = HashSet::new();
-        collect_same_strata_subtree_ids(repair_root, strata_idx, &self.widgets, &mut subtree_ids);
-
-        let visible_ids: HashSet<u64> = subtree_ids
-            .iter()
-            .copied()
-            .filter(|&id| {
-                self.widgets
-                    .get(id)
-                    .is_some_and(|frame| self.frame_render_alpha(frame) > 0.0)
-            })
-            .collect();
-        if !visible_ids.contains(&repair_root) {
-            return false;
-        }
-
-        let mut new_segment = Vec::new();
-        dfs_emit(
-            repair_root,
-            strata_idx,
-            &self.widgets,
-            &visible_ids,
-            &mut new_segment,
-        );
-
         let Some(buckets) = self.strata_buckets.as_mut() else {
             return false;
         };
-        let bucket = &mut buckets[strata_idx];
-        let Some(start) = bucket.iter().position(|&id| id == repair_root) else {
-            return false;
-        };
-        let end = same_strata_subtree_segment_end(bucket, start, &subtree_ids);
-        bucket.splice(start..end, new_segment);
-        true
+        splice_strata_bucket_repair(&mut buckets[repair_plan.strata_idx], repair_plan)
     }
 
     fn visible_same_strata_ancestor(&self, id: u64) -> Option<u64> {
@@ -716,11 +528,10 @@ impl SimState {
 
     /// Add `id` and its descendants to cache if they have OnUpdate and are ancestor-visible.
     fn add_on_update_descendants(&self, id: u64, cache: &mut Vec<u64>) {
-        if self.on_update_frames.contains(&id) && self.widgets.is_ancestor_visible(id) {
-            if !cache.contains(&id) {
-                cache.push(id);
-            }
-        }
+        let should_cache_id =
+            self.on_update_frames.contains(&id) && self.widgets.is_ancestor_visible(id);
+        let already_cached = cache.iter().any(|&cached_id| cached_id == id);
+        cache.extend((should_cache_id && !already_cached).then_some(id));
         let children: Vec<u64> = self
             .widgets
             .get(id)

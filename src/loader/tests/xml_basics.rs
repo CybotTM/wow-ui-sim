@@ -192,13 +192,8 @@ fn test_xml_scripts_function_attribute() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -231,13 +226,8 @@ fn test_xml_scripts_method_attribute() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -286,13 +276,8 @@ fn test_xml_keyvalues() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -336,13 +321,8 @@ fn test_xml_keyvalue_global_type_resolves_global_string() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -392,13 +372,8 @@ fn test_xml_keyvalues_on_fontstring_and_texture() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -450,13 +425,8 @@ fn test_xml_anchors_with_offset() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -495,13 +465,8 @@ fn test_xml_size_with_absdimension() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -597,13 +562,8 @@ fn test_xml_texture_color() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -641,13 +601,8 @@ fn test_xml_virtual_frames_skipped() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,

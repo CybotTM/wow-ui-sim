@@ -128,6 +128,7 @@ macro_rules! frame_defaults {
             fog_of_war_background_atlas: None,
             fog_of_war_mask_atlas: None,
             fog_of_war_mask_scalar: None,
+            fog_of_war_ui_map_id: None,
             minimap_mask_texture: None,
             minimap_icon_texture: None,
             minimap_player_texture: None,

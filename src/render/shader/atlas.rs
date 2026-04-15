@@ -13,19 +13,15 @@
 
 use std::collections::HashMap;
 
-/// Whether the GPU supports BC texture compression (set once at atlas init).
-static BC_SUPPORTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+use super::atlas_bc::{BcAtlasTier, build_bc_entry, init_bc_atlases, write_bc_slot};
+use super::atlas_bind_groups::{
+    create_atlas_bind_groups, create_glyph_atlas, create_texture_sampler,
+};
 
-/// Check if the GPU supports BC texture compression.
-/// Only valid after `GpuTextureAtlas::new()` has been called.
-pub fn is_bc_supported() -> bool {
-    BC_SUPPORTED.load(std::sync::atomic::Ordering::Relaxed)
-}
+pub use super::atlas_bc::{BC_CELL_SIZE, BcFormat, BcTextureEntry, is_bc_supported};
 
 #[cfg(test)]
-pub(crate) fn set_bc_supported_for_tests(supported: bool) -> bool {
-    BC_SUPPORTED.swap(supported, std::sync::atomic::Ordering::Relaxed)
-}
+pub(crate) use super::atlas_bc::set_bc_supported_for_tests;
 
 /// Cell sizes for each tier.
 pub const TIER_SIZES: [u32; 5] = [64, 128, 256, 512, 2048];
@@ -35,6 +31,7 @@ pub const NUM_TIERS: usize = 5;
 
 /// Size of each tier's atlas texture.
 const ATLAS_SIZE: u32 = 4096;
+const GLYPH_ATLAS_SIZE: u32 = 2048;
 
 /// Entry for a texture in the atlas.
 #[derive(Debug, Clone, Copy)]
@@ -154,180 +151,6 @@ pub const BC1_ATLAS_TEX_INDEX: i32 = 6;
 /// Texture index used for BC3 (DXT3/DXT5) compressed textures.
 pub const BC3_ATLAS_TEX_INDEX: i32 = 7;
 
-/// Size of the BC atlas texture (4096x4096).
-const BC_ATLAS_SIZE: u32 = 4096;
-
-/// Cell size for BC atlas slots (256x256, matching map tile size).
-pub const BC_CELL_SIZE: u32 = 256;
-
-/// BC compression format.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BcFormat {
-    /// DXT1 — no alpha channel.
-    Bc1,
-    /// DXT3/DXT5 — with alpha channel.
-    Bc3,
-}
-
-impl BcFormat {
-    fn bytes_per_block(self) -> u32 {
-        match self {
-            BcFormat::Bc1 => 8,
-            BcFormat::Bc3 => 16,
-        }
-    }
-
-    fn wgpu_format(self) -> wgpu::TextureFormat {
-        match self {
-            BcFormat::Bc1 => wgpu::TextureFormat::Bc1RgbaUnormSrgb,
-            BcFormat::Bc3 => wgpu::TextureFormat::Bc3RgbaUnormSrgb,
-        }
-    }
-
-    fn tex_index(self) -> i32 {
-        match self {
-            BcFormat::Bc1 => BC1_ATLAS_TEX_INDEX,
-            BcFormat::Bc3 => BC3_ATLAS_TEX_INDEX,
-        }
-    }
-}
-
-/// Entry for a BC-compressed texture in the BC atlas.
-#[derive(Debug, Clone, Copy)]
-pub struct BcTextureEntry {
-    /// Which atlas (BC1 or BC3).
-    pub format: BcFormat,
-    /// Grid position X within the atlas.
-    pub grid_x: u32,
-    /// Grid position Y within the atlas.
-    pub grid_y: u32,
-    /// Original texture dimensions.
-    pub original_width: u32,
-    pub original_height: u32,
-    /// UV rectangle within the atlas.
-    pub uv_x: f32,
-    pub uv_y: f32,
-    pub uv_width: f32,
-    pub uv_height: f32,
-}
-
-impl BcTextureEntry {
-    /// Get the shader tex_index for this entry.
-    pub fn tex_index(&self) -> i32 {
-        self.format.tex_index()
-    }
-
-    /// Get UV rectangle for the shader.
-    pub fn uv_rect(&self) -> iced::Rectangle {
-        iced::Rectangle::new(
-            iced::Point::new(self.uv_x, self.uv_y),
-            iced::Size::new(self.uv_width, self.uv_height),
-        )
-    }
-}
-
-/// A single BC-format atlas (BC1 or BC3).
-struct BcAtlasTier {
-    texture: wgpu::Texture,
-    view: wgpu::TextureView,
-    /// Grid dimensions.
-    grid_size: u32,
-    /// Next available grid slot (linear).
-    next_slot: u32,
-}
-
-impl BcAtlasTier {
-    /// Create a real BC-compressed atlas (requires `TEXTURE_COMPRESSION_BC` feature).
-    fn new(device: &wgpu::Device, format: BcFormat) -> Self {
-        let grid_size = BC_ATLAS_SIZE / BC_CELL_SIZE;
-        let label = match format {
-            BcFormat::Bc1 => "WoW UI BC1 Atlas",
-            BcFormat::Bc3 => "WoW UI BC3 Atlas",
-        };
-        let texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some(label),
-            size: wgpu::Extent3d {
-                width: BC_ATLAS_SIZE,
-                height: BC_ATLAS_SIZE,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: format.wgpu_format(),
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-        let view = texture.create_view(&wgpu::TextureViewDescriptor {
-            label: Some(&format!("{} View", label)),
-            dimension: Some(wgpu::TextureViewDimension::D2),
-            ..Default::default()
-        });
-        Self {
-            texture,
-            view,
-            grid_size,
-            next_slot: 0,
-        }
-    }
-
-    /// Create a 1x1 RGBA8 placeholder (used when BC compression is unavailable).
-    ///
-    /// The placeholder occupies binding slots in the bind group without needing
-    /// `TEXTURE_COMPRESSION_BC`. The atlas will never allocate slots, so no BC
-    /// textures will be uploaded or sampled.
-    fn new_placeholder(device: &wgpu::Device, label: &str) -> Self {
-        let texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some(label),
-            size: wgpu::Extent3d {
-                width: 1,
-                height: 1,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-        let view = texture.create_view(&wgpu::TextureViewDescriptor {
-            label: Some(&format!("{} View", label)),
-            dimension: Some(wgpu::TextureViewDimension::D2),
-            ..Default::default()
-        });
-        // grid_size = 0 means is_full() always returns true, preventing any allocation.
-        Self {
-            texture,
-            view,
-            grid_size: 0,
-            next_slot: 0,
-        }
-    }
-
-    fn is_full(&self) -> bool {
-        self.next_slot >= self.grid_size * self.grid_size
-    }
-
-    fn allocate_slot(&mut self) -> Option<(u32, u32)> {
-        if self.is_full() {
-            return None;
-        }
-        let slot = self.next_slot;
-        self.next_slot += 1;
-        Some((slot % self.grid_size, slot / self.grid_size))
-    }
-
-    fn pixel_offset(&self, grid_x: u32, grid_y: u32) -> (u32, u32) {
-        (grid_x * BC_CELL_SIZE, grid_y * BC_CELL_SIZE)
-    }
-
-    fn uv_offset(&self, grid_x: u32, grid_y: u32) -> (f32, f32) {
-        let cell_uv = BC_CELL_SIZE as f32 / BC_ATLAS_SIZE as f32;
-        (grid_x as f32 * cell_uv, grid_y as f32 * cell_uv)
-    }
-}
-
 /// GPU texture atlas with multiple size tiers.
 pub struct GpuTextureAtlas {
     /// 2D texture atlases for each tier.
@@ -351,68 +174,30 @@ pub struct GpuTextureAtlas {
     bc_texture_map: HashMap<String, BcTextureEntry>,
 }
 
+struct AtlasBacking {
+    glyph_texture: wgpu::Texture,
+    bc1_atlas: BcAtlasTier,
+    bc3_atlas: BcAtlasTier,
+    has_bc_support: bool,
+    bind_group: wgpu::BindGroup,
+    bind_group_layout: wgpu::BindGroupLayout,
+}
+
 impl GpuTextureAtlas {
     /// Create a new tiered GPU texture atlas.
     pub fn new(device: &wgpu::Device) -> Self {
-        let tiers = std::array::from_fn(|i| TierAtlas::new(device, TIER_SIZES[i], i));
-
-        let glyph_atlas_size = 2048;
-        let (glyph_texture, glyph_view) = create_glyph_atlas(device, glyph_atlas_size);
-
-        let has_bc_support = device
-            .features()
-            .contains(wgpu::Features::TEXTURE_COMPRESSION_BC);
-        BC_SUPPORTED.store(has_bc_support, std::sync::atomic::Ordering::Relaxed);
-        eprintln!(
-            "{} [GPU] BC texture compression: {}",
-            crate::logging::global_elapsed_prefix(),
-            if has_bc_support {
-                "supported"
-            } else {
-                "NOT supported (using placeholders)"
-            }
-        );
-        let (bc1_atlas, bc3_atlas) = if has_bc_support {
-            (
-                BcAtlasTier::new(device, BcFormat::Bc1),
-                BcAtlasTier::new(device, BcFormat::Bc3),
-            )
-        } else {
-            (
-                BcAtlasTier::new_placeholder(device, "WoW UI BC1 Atlas (placeholder)"),
-                BcAtlasTier::new_placeholder(device, "WoW UI BC3 Atlas (placeholder)"),
-            )
-        };
-
-        let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
-            label: Some("WoW UI Texture Sampler"),
-            address_mode_u: wgpu::AddressMode::ClampToEdge,
-            address_mode_v: wgpu::AddressMode::ClampToEdge,
-            address_mode_w: wgpu::AddressMode::ClampToEdge,
-            mag_filter: wgpu::FilterMode::Linear,
-            min_filter: wgpu::FilterMode::Linear,
-            mipmap_filter: wgpu::FilterMode::Nearest,
-            ..Default::default()
-        });
-
-        let (bind_group_layout, bind_group) = create_atlas_bind_groups(
-            device,
-            &tiers,
-            &glyph_view,
-            &bc1_atlas.view,
-            &bc3_atlas.view,
-            &sampler,
-        );
+        let tiers = create_tier_atlases(device);
+        let backing = create_atlas_backing(device, &tiers);
 
         Self {
             tiers,
-            glyph_texture,
-            glyph_atlas_size,
-            bc1_atlas,
-            bc3_atlas,
-            has_bc_support,
-            bind_group,
-            bind_group_layout,
+            glyph_texture: backing.glyph_texture,
+            glyph_atlas_size: GLYPH_ATLAS_SIZE,
+            bc1_atlas: backing.bc1_atlas,
+            bc3_atlas: backing.bc3_atlas,
+            has_bc_support: backing.has_bc_support,
+            bind_group: backing.bind_group,
+            bind_group_layout: backing.bind_group_layout,
             texture_map: HashMap::new(),
             bc_texture_map: HashMap::new(),
         }
@@ -517,69 +302,11 @@ impl GpuTextureAtlas {
         if !self.has_bc_support {
             return None;
         }
-
-        if let Some(entry) = self.bc_texture_map.get(path) {
+        if let Some(entry) = self.cached_bc_entry(path) {
             return Some(*entry);
         }
-
-        let atlas = match format {
-            BcFormat::Bc1 => &mut self.bc1_atlas,
-            BcFormat::Bc3 => &mut self.bc3_atlas,
-        };
-
-        if atlas.is_full() {
-            return None;
-        }
-
-        let (grid_x, grid_y) = atlas.allocate_slot()?;
-        let (pixel_x, pixel_y) = atlas.pixel_offset(grid_x, grid_y);
-
-        // BC textures must have dimensions that are multiples of 4.
-        let upload_width = width.max(4);
-        let upload_height = height.max(4);
-        let bytes_per_row = (upload_width / 4) * format.bytes_per_block();
-
-        queue.write_texture(
-            wgpu::TexelCopyTextureInfo {
-                texture: &atlas.texture,
-                mip_level: 0,
-                origin: wgpu::Origin3d {
-                    x: pixel_x,
-                    y: pixel_y,
-                    z: 0,
-                },
-                aspect: wgpu::TextureAspect::All,
-            },
-            bc_data,
-            wgpu::TexelCopyBufferLayout {
-                offset: 0,
-                bytes_per_row: Some(bytes_per_row),
-                rows_per_image: Some(upload_height / 4),
-            },
-            wgpu::Extent3d {
-                width: upload_width,
-                height: upload_height,
-                depth_or_array_layers: 1,
-            },
-        );
-
-        let (uv_base_x, uv_base_y) = atlas.uv_offset(grid_x, grid_y);
-        let cell_uv = BC_CELL_SIZE as f32 / BC_ATLAS_SIZE as f32;
-        let uv_width = (width as f32 / BC_ATLAS_SIZE as f32).min(cell_uv);
-        let uv_height = (height as f32 / BC_ATLAS_SIZE as f32).min(cell_uv);
-
-        let entry = BcTextureEntry {
-            format,
-            grid_x,
-            grid_y,
-            original_width: width,
-            original_height: height,
-            uv_x: uv_base_x,
-            uv_y: uv_base_y,
-            uv_width,
-            uv_height,
-        };
-
+        let atlas = self.bc_atlas_mut(format);
+        let entry = upload_new_bc_texture(queue, atlas, width, height, bc_data, format)?;
         self.bc_texture_map.insert(path.to_string(), entry);
         Some(entry)
     }
@@ -626,6 +353,17 @@ impl GpuTextureAtlas {
         scaled
     }
 
+    fn cached_bc_entry(&self, path: &str) -> Option<&BcTextureEntry> {
+        self.bc_texture_map.get(path)
+    }
+
+    fn bc_atlas_mut(&mut self, format: BcFormat) -> &mut BcAtlasTier {
+        match format {
+            BcFormat::Bc1 => &mut self.bc1_atlas,
+            BcFormat::Bc3 => &mut self.bc3_atlas,
+        }
+    }
+
     /// Clear the atlas (for reload).
     pub fn clear(&mut self) {
         self.texture_map.clear();
@@ -633,8 +371,8 @@ impl GpuTextureAtlas {
         for tier in &mut self.tiers {
             tier.next_slot = 0;
         }
-        self.bc1_atlas.next_slot = 0;
-        self.bc3_atlas.next_slot = 0;
+        self.bc1_atlas.reset();
+        self.bc3_atlas.reset();
     }
 
     /// Number of textures in the atlas.
@@ -690,121 +428,58 @@ impl GpuTextureAtlas {
     }
 }
 
+fn create_tier_atlases(device: &wgpu::Device) -> [TierAtlas; NUM_TIERS] {
+    std::array::from_fn(|i| TierAtlas::new(device, TIER_SIZES[i], i))
+}
+
+fn upload_new_bc_texture(
+    queue: &wgpu::Queue,
+    atlas: &mut BcAtlasTier,
+    width: u32,
+    height: u32,
+    bc_data: &[u8],
+    format: BcFormat,
+) -> Option<BcTextureEntry> {
+    let (grid_x, grid_y) = atlas.allocate_slot()?;
+    write_bc_slot(queue, atlas, grid_x, grid_y, width, height, bc_data, format);
+    Some(build_bc_entry(atlas, format, grid_x, grid_y, width, height))
+}
+
+fn create_atlas_backing(device: &wgpu::Device, tiers: &[TierAtlas; NUM_TIERS]) -> AtlasBacking {
+    let (glyph_texture, glyph_view) = create_glyph_atlas(device, GLYPH_ATLAS_SIZE);
+    let (bc1_atlas, bc3_atlas, has_bc_support) = init_bc_atlases(device);
+    let sampler = create_texture_sampler(device);
+    let tier_views = [
+        &tiers[0].view,
+        &tiers[1].view,
+        &tiers[2].view,
+        &tiers[3].view,
+        &tiers[4].view,
+    ];
+    let (bind_group_layout, bind_group) = create_atlas_bind_groups(
+        device,
+        tier_views,
+        &glyph_view,
+        &bc1_atlas.view,
+        &bc3_atlas.view,
+        &sampler,
+    );
+    AtlasBacking {
+        glyph_texture,
+        bc1_atlas,
+        bc3_atlas,
+        has_bc_support,
+        bind_group,
+        bind_group_layout,
+    }
+}
+
 /// Memory usage statistics for the atlas.
 #[derive(Debug, Default)]
 pub struct TierStats {
     pub allocated_bytes: usize,
     pub used_bytes: usize,
     pub used_slots: [usize; NUM_TIERS],
-}
-
-/// Create the glyph atlas texture and view.
-fn create_glyph_atlas(device: &wgpu::Device, size: u32) -> (wgpu::Texture, wgpu::TextureView) {
-    let texture = device.create_texture(&wgpu::TextureDescriptor {
-        label: Some("Glyph Atlas"),
-        size: wgpu::Extent3d {
-            width: size,
-            height: size,
-            depth_or_array_layers: 1,
-        },
-        mip_level_count: 1,
-        sample_count: 1,
-        dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Rgba8Unorm,
-        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-        view_formats: &[],
-    });
-    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-    (texture, view)
-}
-
-/// Create bind group layout and bind group for tier textures, sampler, glyph atlas, and BC atlases.
-fn create_atlas_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
-    let texture_entry = |binding: u32| wgpu::BindGroupLayoutEntry {
-        binding,
-        visibility: wgpu::ShaderStages::FRAGMENT,
-        ty: wgpu::BindingType::Texture {
-            sample_type: wgpu::TextureSampleType::Float { filterable: true },
-            view_dimension: wgpu::TextureViewDimension::D2,
-            multisampled: false,
-        },
-        count: None,
-    };
-    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: Some("WoW UI Texture Bind Group Layout"),
-        entries: &[
-            texture_entry(0), // Tier 0 (64x64 cells)
-            texture_entry(1), // Tier 1 (128x128 cells)
-            texture_entry(2), // Tier 2 (256x256 cells)
-            texture_entry(3), // Tier 3 (512x512 cells)
-            texture_entry(4), // Tier 4 (2048x2048 cells)
-            wgpu::BindGroupLayoutEntry {
-                binding: 5,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                count: None,
-            },
-            texture_entry(6), // Glyph atlas
-            texture_entry(7), // BC1 (DXT1) compressed atlas
-            texture_entry(8), // BC3 (DXT3/DXT5) compressed atlas
-        ],
-    })
-}
-
-fn create_atlas_bind_groups(
-    device: &wgpu::Device,
-    tiers: &[TierAtlas; NUM_TIERS],
-    glyph_view: &wgpu::TextureView,
-    bc1_view: &wgpu::TextureView,
-    bc3_view: &wgpu::TextureView,
-    sampler: &wgpu::Sampler,
-) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
-    let layout = create_atlas_bind_group_layout(device);
-
-    let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-        label: Some("WoW UI Texture Bind Group"),
-        layout: &layout,
-        entries: &[
-            wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureView(&tiers[0].view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 1,
-                resource: wgpu::BindingResource::TextureView(&tiers[1].view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 2,
-                resource: wgpu::BindingResource::TextureView(&tiers[2].view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 3,
-                resource: wgpu::BindingResource::TextureView(&tiers[3].view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 4,
-                resource: wgpu::BindingResource::TextureView(&tiers[4].view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 5,
-                resource: wgpu::BindingResource::Sampler(sampler),
-            },
-            wgpu::BindGroupEntry {
-                binding: 6,
-                resource: wgpu::BindingResource::TextureView(glyph_view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 7,
-                resource: wgpu::BindingResource::TextureView(bc1_view),
-            },
-            wgpu::BindGroupEntry {
-                binding: 8,
-                resource: wgpu::BindingResource::TextureView(bc3_view),
-            },
-        ],
-    });
-
-    (layout, bind_group)
 }
 
 /// Upload texture data to a specific cell in a tier atlas.
@@ -895,5 +570,79 @@ impl std::fmt::Debug for GpuTextureAtlas {
             .field("used_mb", &(stats.used_bytes / 1024 / 1024))
             .field("allocated_mb", &(stats.allocated_bytes / 1024 / 1024))
             .finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn create_test_device() -> (wgpu::Device, wgpu::Queue) {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::LowPower,
+            compatible_surface: None,
+            force_fallback_adapter: false,
+        }))
+        .expect("test adapter should exist");
+        pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
+            .expect("test device should be created")
+    }
+
+    fn create_test_bc_atlas(device: &wgpu::Device) -> BcAtlasTier {
+        let had_bc = set_bc_supported_for_tests(true);
+        let (mut bc1_atlas, _bc3_atlas, _has_bc_support) = init_bc_atlases(device);
+        set_bc_supported_for_tests(had_bc);
+        bc1_atlas.reset();
+        bc1_atlas
+    }
+
+    #[test]
+    fn upload_new_bc_texture_returns_none_when_atlas_is_full() {
+        let (device, queue) = create_test_device();
+        let mut atlas = create_test_bc_atlas(&device);
+        while atlas.allocate_slot().is_some() {}
+
+        let entry = upload_new_bc_texture(&queue, &mut atlas, 256, 256, &[], BcFormat::Bc1);
+
+        assert!(entry.is_none(), "full atlas should reject a new BC upload");
+    }
+
+    #[test]
+    fn create_tier_atlases_uses_configured_sizes_and_empty_slots() {
+        let (device, _queue) = create_test_device();
+        let tiers = create_tier_atlases(&device);
+
+        for (index, tier) in tiers.iter().enumerate() {
+            assert_eq!(tier.cell_size, TIER_SIZES[index]);
+            assert_eq!(tier.grid_size, ATLAS_SIZE / TIER_SIZES[index]);
+            assert_eq!(tier.next_slot, 0);
+        }
+    }
+
+    #[test]
+    fn cached_bc_entry_returns_copied_entry() {
+        let (device, _queue) = create_test_device();
+        let mut atlas = GpuTextureAtlas::new(&device);
+        let expected = BcTextureEntry {
+            format: BcFormat::Bc1,
+            grid_x: 1,
+            grid_y: 2,
+            original_width: 256,
+            original_height: 256,
+            uv_x: 0.0,
+            uv_y: 0.0,
+            uv_width: 0.25,
+            uv_height: 0.25,
+        };
+        atlas.bc_texture_map.insert("foo".to_string(), expected);
+
+        assert_eq!(
+            atlas
+                .cached_bc_entry("foo")
+                .copied()
+                .map(|entry| entry.grid_x),
+            Some(1)
+        );
     }
 }

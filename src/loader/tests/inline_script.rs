@@ -47,13 +47,8 @@ fn test_xml_inline_script_error_continues() {
     .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     let before_errors = env.state().borrow().lua_errors.len();
     // Should not return an error — inline script errors are non-fatal
     let result = load_xml_file(
@@ -95,13 +90,8 @@ fn test_load_lua_file_runtime_error_collects_lua_error() {
     std::fs::write(&lua_path, r#"error("load lua failed")"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
 
     let before_errors = env.state().borrow().lua_errors.len();
     let result = load_lua_file(

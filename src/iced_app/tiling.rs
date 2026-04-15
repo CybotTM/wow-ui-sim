@@ -131,6 +131,14 @@ fn frame_tint(f: &crate::widget::Frame, alpha: f32) -> [f32; 4] {
     ]
 }
 
+struct StandardTileConfig {
+    cropped_path: String,
+    cropped_uvs: Rectangle,
+    tile_w: f32,
+    tile_h: f32,
+    tint: [f32; 4],
+}
+
 /// Emit tiled texture quads (horizontal, vertical, or both).
 pub(super) fn emit_tiled_texture(
     batch: &mut QuadBatch,
@@ -140,59 +148,91 @@ pub(super) fn emit_tiled_texture(
     f: &crate::widget::Frame,
     alpha: f32,
 ) {
-    // Check for UV-based repeat tiling (BackdropTemplateMixin pattern):
-    // 8-arg SetTexCoord with values >1.0 encoding repeat counts.
-    if let Some(raw) = &f.tex_coords_quad {
-        if raw.iter().any(|&v| v > 1.0) {
-            emit_uv_repeat_tiled(batch, bounds, raw, tex_path, f, alpha);
-            return;
-        }
+    if emit_uv_repeat_if_needed(batch, bounds, tex_path, f, alpha) {
+        return;
     }
 
-    // Isolate sub-region UVs into their own GPU atlas slot via @crop: so that
-    // bilinear filtering at tile boundaries can't bleed into adjacent content.
-    let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, uvs);
-    let (left, right, top, bottom) = (
-        cropped_uvs.x,
-        cropped_uvs.x + cropped_uvs.width,
-        cropped_uvs.y,
-        cropped_uvs.y + cropped_uvs.height,
-    );
-    let (tile_w, tile_h) = tile_dimensions(f, right - left, bottom - top);
-    let tint = frame_tint(f, alpha);
+    let config = standard_tile_config(tex_path, uvs, f, alpha);
+    emit_standard_tiled_texture(batch, bounds, &config, f);
+}
 
+fn emit_uv_repeat_if_needed(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    f: &crate::widget::Frame,
+    alpha: f32,
+) -> bool {
+    let Some(raw) = &f.tex_coords_quad else {
+        return false;
+    };
+    if !raw.iter().any(|&v| v > 1.0) {
+        return false;
+    }
+    emit_uv_repeat_tiled(batch, bounds, raw, tex_path, f, alpha);
+    true
+}
+
+fn standard_tile_config(
+    tex_path: &str,
+    uvs: &Rectangle,
+    f: &crate::widget::Frame,
+    alpha: f32,
+) -> StandardTileConfig {
+    let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, uvs);
+    let (tile_w, tile_h) = tile_dimensions(f, cropped_uvs.width, cropped_uvs.height);
+
+    StandardTileConfig {
+        cropped_path,
+        cropped_uvs,
+        tile_w,
+        tile_h,
+        tint: frame_tint(f, alpha),
+    }
+}
+
+fn emit_standard_tiled_texture(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    config: &StandardTileConfig,
+    f: &crate::widget::Frame,
+) {
     if f.horiz_tile && !f.vert_tile {
         emit_horiz_tiles(
             batch,
             bounds,
-            &cropped_uvs,
-            &cropped_path,
-            tile_w,
-            tint,
+            &config.cropped_uvs,
+            &config.cropped_path,
+            config.tile_w,
+            config.tint,
             f.blend_mode,
         );
-    } else if f.vert_tile && !f.horiz_tile {
+        return;
+    }
+
+    if f.vert_tile && !f.horiz_tile {
         emit_vert_tiles(
             batch,
             bounds,
-            &cropped_uvs,
-            &cropped_path,
-            tile_h,
-            tint,
+            &config.cropped_uvs,
+            &config.cropped_path,
+            config.tile_h,
+            config.tint,
             f.blend_mode,
         );
-    } else {
-        emit_grid_tiles(
-            batch,
-            bounds,
-            &cropped_uvs,
-            &cropped_path,
-            tile_w,
-            tile_h,
-            tint,
-            f.blend_mode,
-        );
+        return;
     }
+
+    emit_grid_tiles(
+        batch,
+        bounds,
+        &config.cropped_uvs,
+        &config.cropped_path,
+        config.tile_w,
+        config.tile_h,
+        config.tint,
+        f.blend_mode,
+    );
 }
 
 /// Handle UV-based repeat tiling from BackdropTemplateMixin.
@@ -438,5 +478,35 @@ mod tests {
             "Interface/Test@crop:0.250000,0.750000,0.400000,1.000000"
         );
         assert_eq!(uvs, Rectangle::new(Point::ORIGIN, Size::new(1.0, 1.0)));
+    }
+
+    #[test]
+    fn standard_tile_config_crops_subregions_and_uses_fallback_sizes() {
+        let frame = crate::widget::Frame {
+            width: 0.0,
+            height: 0.0,
+            vertex_color: Some(crate::widget::Color {
+                r: 0.25,
+                g: 0.5,
+                b: 0.75,
+                a: 0.8,
+            }),
+            ..Default::default()
+        };
+        let uvs = Rectangle::new(Point::new(0.25, 0.5), Size::new(0.5, 0.25));
+
+        let config = standard_tile_config("Interface/Test", &uvs, &frame, 0.5);
+
+        assert_eq!(
+            config.cropped_path,
+            "Interface/Test@crop:0.250000,0.750000,0.500000,0.750000"
+        );
+        assert_eq!(
+            config.cropped_uvs,
+            Rectangle::new(Point::ORIGIN, Size::new(1.0, 1.0))
+        );
+        assert_eq!(config.tile_w, 128.0);
+        assert_eq!(config.tile_h, 128.0);
+        assert_eq!(config.tint, [0.25, 0.5, 0.75, 0.4]);
     }
 }

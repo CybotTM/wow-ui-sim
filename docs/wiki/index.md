@@ -53,9 +53,9 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
-| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; 3 fix strategies with tradeoffs |
-| [[startup-createframe-profile]] | Runtime `CreateFrame` profiling shows action-bar button template expansion, including nested SpellFX child creation, is the biggest script-created startup cost |
-| [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only |
+| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks the compact-raid cleanup, remaining leave-button/BuffFrame churn, and the same-day `GameTimeFrame_SetDate()` calendar-atlas no-op fix |
+| [[startup-createframe-profile]] | Runtime `CreateFrame` profiling shows action-bar button template expansion is the biggest script-created startup cost; nested SpellFX, scrollbar, ActionButtonTemplate region fast paths, and XML lifecycle frame-id threading all reduced loader overhead |
+| [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, empty `UIParent` worklists short-circuit, but the fresh 90s world-map profile still sits at 31 steady-state handlers |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
 | [[transparent-wrapper-render-order]] | Renderless `Frame`/`ScrollFrame` wrappers were creating fake z-order boundaries; descendant regions now hoist through them |
@@ -65,4 +65,6 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
 | [[world-map-frame-level-rebuilds]] | World map pins were forcing no-op `SetFrameLevel()` invalidations; steady-state bucket rebuilds are now gone |
 | [[world-map-create-texture-sublevel]] | World-map textures were created at sublevel 0 because `CreateTexture(..., subLevel)` ignored its fourth argument; immediate `SetDrawLayer()` repair churn is now gone |
-| [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw now share BC cache, honor `RequestPreloadMap()`, use smaller budgets, and keep the fast tick alive until GPU uploads finish |
+| [[world-map-fog-of-war-first-open-size]] | First-open world-map fog pins could keep a stale size because `FogOfWarPinMixin` only resized on canvas scale changes; simulator now patches size-change handling for existing and future pins |
+| [[world-map-fog-of-war-overlay-model]] | Current world map has no `UiMapFogOfWar` entry; simulator now hides fake fog and seeds one real unexplored overlay chunk until character exploration state exists |
+| [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw now share BC cache, honor `RequestPreloadMap()`, keep the fast tick alive until GPU uploads finish, and count BC-preloaded tiles as cached during budgeted draw |

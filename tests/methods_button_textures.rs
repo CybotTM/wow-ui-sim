@@ -424,3 +424,44 @@ fn test_texture_children_have_fill_parent_anchors() {
         );
     }
 }
+
+#[test]
+fn test_set_normal_texture_same_calendar_atlas_does_not_mark_render_dirty() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestRepeatCalendarAtlas", UIParent)
+        btn:SetNormalTexture("ui-hud-calendar-1-up")
+    "#,
+    )
+    .unwrap();
+
+    let (btn_id, tex_id) = {
+        let state = env.state().borrow();
+        let btn_id = state
+            .widgets
+            .get_id_by_name("TestRepeatCalendarAtlas")
+            .unwrap();
+        let tex_id = state.widgets.get(btn_id).unwrap().children_keys["NormalTexture"];
+        (btn_id, tex_id)
+    };
+
+    let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+
+    env.exec(r#"TestRepeatCalendarAtlas:SetNormalTexture("ui-hud-calendar-1-up")"#)
+        .unwrap();
+
+    let (dirty_mask, dirty_ids) = env.state().borrow().widgets.take_render_dirty_with_ids();
+    let dirty_ids = dirty_ids.unwrap_or_default();
+
+    assert_eq!(
+        dirty_mask, 0,
+        "repeating the same atlas-backed SetNormalTexture should not dirty rendering"
+    );
+    assert!(
+        !dirty_ids.contains(&btn_id) && !dirty_ids.contains(&tex_id),
+        "repeat SetNormalTexture should not mark button or texture child dirty (got {:?})",
+        dirty_ids
+    );
+}

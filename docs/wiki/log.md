@@ -2,6 +2,116 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] ingest | world-map exploration seed follow-up
+
+Updated `investigations/world-map-fog-of-war-overlay-model.md` with the current
+map exploration follow-up. After removing synthetic fog, Isle of Dorn still
+showed fully explored because every default-visible overlay was treated as
+discovered. Documented the temporary seed that leaves one real overlay chunk
+(`WorldMapOverlay.ID = 4885`, The Three Shields / Skolzgal Mill) unexplored
+until per-character exploration state exists, and refreshed the `index.md`
+summary.
+
+## [2026-04-14] ingest | world-map fog-of-war overlay model correction
+
+Updated `investigations/world-map-fog-of-war-overlay-model.md` to correct the
+previous diagnosis. The current world map does not have a `UiMapFogOfWar` DB
+row, so the bug was not a wrong irregular fog shape; it was the simulator
+inventing fog for any map art and rendering synthetic geometry from exploration
+overlay gaps. Documented the DB-backed fog lookup, the removal of the synthetic
+renderer, and the new API/render regressions. Updated `index.md` with the
+corrected summary.
+
+## [2026-04-14] ingest | world-map fog-of-war overlay model
+
+Created `investigations/world-map-fog-of-war-overlay-model.md` for the third
+world-map fog bug: exploration APIs were already using real irregular overlay
+chunks, but the fog renderer still assumed a synthetic half-map model.
+Documented the root cause, the `FogOfWarFrame` `uiMapID` plumbing, the new
+overlay-complement fog geometry, and the focused API/render regressions.
+Updated `index.md` with the new investigation page.
+
+## [2026-04-14] ingest | world-map texture loading budget follow-up
+
+Updated `investigations/world-map-texture-loading-budget.md` with a first-frame
+world-map follow-up: BC-preloaded tiles were landing in `bc_cache`, but
+`TextureManager::is_cached()` only consulted the RGBA cache. That caused
+budgeted draw to pause early after the first BC upload and could make the
+world map open with an apparent quarter-map fog/exploration artifact. Added
+the BC-cache root cause, fix, and regression coverage to the investigation
+page.
+
+## [2026-04-14] ingest | world-map fog-of-war first-open size
+
+Created `investigations/world-map-fog-of-war-first-open-size.md` for the fog
+overlay bug where first-open world-map fog could keep a stale size even though
+the map tiles were already correct. Documented the missing
+`FogOfWarPinMixin:OnCanvasSizeChanged()` handling, the simulator-side
+workaround that patches both the mixin and existing fog pins, and the focused
+regression tests. Updated `index.md` with the new investigation page.
+
+## [2026-04-14] investigations | world map 90s OnUpdate recapture
+
+Updated `investigations/world-map-onupdate-hover-polling.md` with the fresh
+90s world-map profile after the recent OnUpdate fixes. Recorded the new
+`/tmp/worldmap-onupdate-20260414.log` numbers (`485` total `fire_on_update`
+spikes, `31` steady-state handlers, `64.73ms` post-90s average), added the
+new `world_map_onupdate_inventory` handler-ceiling regression test, and
+refreshed the `index.md` summary for the page.
+
+## [2026-04-14] investigations | startup XML lifecycle frame-id threading
+
+Updated `investigations/startup-createframe-profile.md` with the loader
+follow-up that removes repeated `name -> id -> frame_ref` lifecycle resolution
+during XML finalize. Recorded the new `xml_frame.rs` / `xml_lifecycle.rs`
+threaded-frame-id path, the focused regression test that fires lifecycle
+handlers with a wrong display name but the correct frame id, and refreshed the
+`index.md` summary for the page.
+
+## [2026-04-14] investigations | world map UIParent empty worklist follow-up
+
+Updated `investigations/world-map-onupdate-hover-polling.md` with the
+`UIParent_OnUpdate` fan-out follow-up: `FCF_OnUpdate`, `ButtonPulse_OnUpdate`,
+and `AnimatedShine_OnUpdate` were still doing empty-list Lua dispatch every
+tick. Recorded the new post-load wrappers in `workarounds.rs`, the focused
+`uiparent_onupdate_worklists` regression tests, and refreshed the `index.md`
+summary for the page.
+
+## [2026-04-14] investigations | on-update dirty GameTimeFrame calendar atlas follow-up
+
+Updated `investigations/on-update-dirty.md` with the `GameTimeFrame_SetDate()`
+follow-up: same-day calendar atlas updates were still dirtying render because
+the plain button texture setter took visual mutable borrows before checking for
+real changes. Recorded the new no-op fast path in
+`apply_set_button_texture_path()`, the focused atlas-backed button regression
+test, the full-UI `GameTimeFrame_SetDate()` regression test, and refreshed the
+`index.md` summary for the page.
+
+## [2026-04-14] investigations | on-update dirty handler audit follow-up
+
+Updated `investigations/on-update-dirty.md` with focused handler-audit results:
+`LeaveInstanceGroupButton` now shows pure query/dispatch cost once its mutators
+settle, while the remaining BuffFrame button cost comes from
+`AuraButtonMixin:OnUpdate` doing duration formatting and font-threshold work on
+every tick before the no-op setters bail out. Refreshed the `index.md` summary
+for the page.
+
+## [2026-04-14] investigations | on-update dirty solo compact raid manager follow-up
+
+Updated `investigations/on-update-dirty.md` with the compact-raid follow-up:
+`A_Admin.SetPartySize(0)` now fires `GROUP_ROSTER_UPDATE`, so solo transitions
+hide `CompactRaidFrameManager` and remove `LeaveInstanceGroupButton` from the
+visible `OnUpdate` handler set. Refreshed the `index.md` summary for the page.
+
+## [2026-04-14] investigations | startup CreateFrame profiling ActionButtonTemplate regions
+
+Updated `investigations/startup-createframe-profile.md` with the direct
+`ActionButtonTemplate` layer/fontstring/button-texture fast path: the new
+Rust-side region creation in `template/elements*.rs`, the focused regression
+test that proves the hot path avoids Lua region fallback, and isolated
+`WOW_SIM_PROFILE_CREATE_FRAME` numbers showing another `-27.36%` drop in
+explicit template time across the profiled action-bar button families.
+
 ## [2026-04-14] investigations | startup CreateFrame profiling nested SpellFX follow-up
 
 Updated `investigations/startup-createframe-profile.md` with the nested `ActionButtonSpellFXTemplate` follow-up: the remaining `ActionButtonInterruptTemplate` / `ActionButtonCastingAnimFrameTemplate` child creation fallback, the widened direct-child selector in `template/children.rs`, and new `WOW_SIM_PROFILE_CREATE_FRAME` numbers showing another `-28.6%` drop in explicit template time across action-bar button families.

@@ -158,6 +158,72 @@ On a current `wow-sim --no-addons --no-saved-vars` rerun with `WOW_SIM_PROFILE_C
 - Blizzard addons loaded: `19.03s -> 18.51s`
 - `PLAYER_ENTERING_WORLD`: `24.20s -> 23.74s`
 
+### ActionButtonTemplate direct region fast path follow-up (2026-04-14)
+
+After the nested `SpellFX` and recursive `MinimalScrollBar` work, the next
+residual action-bar hotspot was the remaining `ActionButtonTemplate` region
+setup:
+
+- layer textures
+- layer fontstrings
+- button state textures (`NormalTexture`, `PushedTexture`, and friends)
+
+Those regions were still being created through generated Lua chunks even on the
+hot action-button path. That meant each runtime-created button kept paying for
+Lua `CreateTexture`, `CreateFontString`, setter calls, parent-key wiring, and
+button-slot synchronization even after child-frame creation had moved to Rust.
+
+`template/elements.rs` and `template/elements_text.rs` now add direct Rust
+creation for those hot `ActionButtonTemplate` regions:
+
+- textures, lines, and mask textures create/register directly in Rust
+- fontstrings inherit font objects and copy common text fields directly
+- button state textures wire their button slots and visibility directly
+- inline descendants now stay on the same direct path through
+  `apply_inline_frame_content()`
+
+The focused regression
+`test_runtime_action_button_template_avoids_lua_layer_and_button_texture_methods`
+proves the change with test-only counters:
+
+- Lua template texture fallback count: `0`
+- Lua template fontstring fallback count: `0`
+- Lua template button-texture fallback count: `0`
+
+On isolated hot-family `WOW_SIM_PROFILE_CREATE_FRAME=1
+WOW_SIM_PROFILE_CREATE_FRAME_MIN_MS=10` runs, summing the action-bar button
+families (`MainBar`, `Pet`, `MultiBar1-7`, `Stance`, `Possess`) showed another
+meaningful drop:
+
+- explicit template time: `1815.60ms -> 1318.78ms` (`-27.36%`)
+- total `CreateFrame` time: `2855.80ms -> 2119.22ms` (`-25.79%`)
+- frame count: unchanged at `118`
+
+### XML lifecycle frame-id threading follow-up (2026-04-14)
+
+Fresh release-build startup `perf` still showed loader finalization spending
+meaningful time in XML lifecycle firing after the action-button hot paths had
+already moved down. One small but repeated cost in that path was:
+
+- XML finalize handed `fire_lifecycle_scripts()` only the frame name
+- `fire_lifecycle_scripts()` re-did `name -> id -> frame_ref`
+- every XML `OnLoad` / `OnShow` fire paid the extra global-name lookup again
+
+`xml_frame.rs` now resolves the created frame id once immediately after the
+Lua `CreateFrame(...)` chunk succeeds and threads that id through finalize.
+`xml_lifecycle.rs` now takes `(frame_id, display_name, lifecycle)` and calls
+`frame_ref()` directly.
+
+The focused regression
+`lifecycle_scripts_use_passed_frame_id_instead_of_name_lookup` proves the
+behavior change directly by firing lifecycle handlers with:
+
+- the real frame id
+- an intentionally wrong display name
+
+The handlers still run, which means lifecycle dispatch no longer depends on a
+second global name lookup during XML finalize.
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.
@@ -177,6 +243,36 @@ Most promising direction:
 - [ActionButton.lua](../../Interface/BlizzardUI/Blizzard_ActionBar/Shared/ActionButton.lua) — action-button `OnLoad` handlers for comparison against template cost
 - [ActionButtonTemplate.xml](../../Interface/BlizzardUI/Blizzard_ActionBar/Mainline/ActionButtonTemplate.xml) — action-button template inheritance and child regions
 - [MainActionBar.xml](../../Interface/BlizzardUI/Blizzard_ActionBar/Mainline/MainActionBar.xml) — `MainBarActionBarButtonTemplate` definition
+
+## Post-Optimization Profile (2026-04-14)
+
+After lifecycle dispatch, layout deferral, and Lua allocation reduction:
+
+### perf top functions (self time, `--no-addons --no-saved-vars lua-errors`)
+
+| Function | Self% | Category |
+|----------|-------|----------|
+| `sweeplist` | 6.4% | Lua GC sweep |
+| `luaV_execute` | 3.7% | Lua VM execution |
+| `hash_one` | 2.9% | HashMap hashing |
+| `luaS_newlstr` | 2.5% | Lua string creation |
+| `propagatemark` | 1.9% | Lua GC mark |
+| `luaD_precall` | 1.7% | Lua function dispatch |
+| `compute_frame_rect_cached` | 1.7% | Layout computation |
+| `mlua::stack_value` | 1.7% | mlua stack ops |
+| `luaH_next` | 1.6% | Lua table iteration |
+
+Profile is healthy — no single function dominates. Top costs are inherent Lua runtime (GC, VM, string interning) rather than simulator-side hot loops. `compute_frame_rect_cached` dropped from a top-3 spot to 1.7% after the `resolve_rect_if_dirty` fast-path optimization.
+
+### Loading phase budgets (test thresholds)
+
+| Phase | Measured | Budget |
+|-------|----------|--------|
+| Total addon loading | ~13.5s | 25s |
+| XML parse | ~1.1s | 2.5s |
+| Lua compile | ~240ms | 2s |
+| Lifecycle scripts | ~4.3s | 7s |
+| Full root layout | ~180ms | 500ms |
 
 ## See Also
 

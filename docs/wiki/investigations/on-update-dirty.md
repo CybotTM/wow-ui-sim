@@ -12,6 +12,7 @@
 - `ActionBarButtonUpdateFrame` — calls `SetChecked()` on all buttons each tick; idle after first few ticks once buttons unregister
 - `MainMenuMicroButton` — calls `SetNormalAtlas` etc. with the same values every second
 - `QueueStatusButton` — calls `Show()` on an already-shown texture every tick
+- `LeaveInstanceGroupButton` — only while the compact raid manager subtree is actually shown; as of 2026-04-14, `A_Admin.SetPartySize(0)` fires `GROUP_ROSTER_UPDATE`, so solo transitions now hide `CompactRaidFrameManager` and drop this button out of the visible `OnUpdate` set outside party content
 
 **Legitimate (should trigger redraws):**
 - `PlayerCastingBarFrame` — `SetValue()` and `SetText()` genuinely change every frame during a cast
@@ -20,6 +21,49 @@
 
 **Inert (no dirty, no issue):**
 - `ChatFrame1`, `WorldFrame`, ModelScene frames, idle PartyMemberFrame buttons
+
+## 2026-04-14 Handler Audit Follow-up
+
+Two focused audit tests narrowed the remaining work after the earlier `SetText` / `SetEnabled` no-op guards:
+
+- `LeaveInstanceGroupButton`
+  - A settled second tick still calls `C_PartyInfo.IsPartyWalkIn()` once, `PartyUtil.CanLeaveInstance()` once, `IsInGroup()` twice, `IsInInstance()` once, and `GetPartyLFGID()` once.
+  - The handler still invokes `SetText` and `SetEnabled`, but the dirty batch stays empty once the button is already settled.
+  - Conclusion: the remaining cost is query/dispatch work while the button is visible, not visual mutation churn. After the solo visibility fix, this handler no longer matters outside grouped content.
+
+- `AuraButtonMixin:OnUpdate` (BuffFrame buttons)
+  - A settled second tick still runs `SecondsToTimeAbbrev()`, `Duration:SetFormattedText()`, `Duration:SetFontObject()`, `Duration:SetPoint()`, `Duration:SetShown()`, `Duration:SetVertexColor()`, and `SetAlpha()` once each.
+  - The dirty batch also stays empty on that settled tick.
+  - Conclusion: the remaining cost is Lua-side duration formatting and font-threshold branching before the guarded mutators decide nothing changed.
+
+That shifts the next optimization target away from more setter no-op guards and toward short-circuiting the redundant work in the handlers themselves, especially `AuraButtonMixin:OnUpdate`.
+
+## 2026-04-14 GameTimeFrame calendar atlas follow-up
+
+The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than
+the visible `OnUpdate` handlers above:
+
+- `GameTimeFrame_SetDate()` re-applies three atlas-backed button textures every
+  time it runs (`up`, `down`, `mouseover`) even when the calendar day has not
+  changed.
+- In the simulator, the plain `SetNormalTexture` / `SetPushedTexture` /
+  `SetHighlightTexture` path resolved the atlas string, then immediately called
+  `get_mut_visual()` on both the button and child texture.
+- `get_mut_visual()` marks render-dirty on mutable borrow, so a same-day
+  `GameTimeFrame_SetDate()` still dirtied the minimap strata even though the
+  resolved file path, UVs, and visibility were identical.
+
+The fix was to make `apply_set_button_texture_path()` check the current button
+field and texture-child state first. When the resolved path/UVs, `fileDataID`,
+parent key, anchors, and visibility already match, it now returns before taking
+any visual mutable borrows.
+
+Regression coverage now includes:
+
+- a low-level button-texture test that repeats
+  `SetNormalTexture("ui-hud-calendar-1-up")`
+- a full-UI `GameTimeFrame_SetDate()` test that proves the second same-day call
+  leaves the render-dirty batch empty
 
 ## Fix Strategies
 

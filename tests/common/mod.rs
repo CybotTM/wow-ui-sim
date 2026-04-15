@@ -2,6 +2,7 @@
 
 use rilua::Val;
 use std::path::PathBuf;
+use std::sync::{Mutex, OnceLock};
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -26,6 +27,18 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
             panic!("test thread panicked (see above)")
         }
     }
+}
+
+/// Serialize perf-sensitive integration tests so their thresholds measure one
+/// startup/load scenario at a time instead of competing with sibling tests.
+#[allow(dead_code)]
+pub fn with_perf_lock<T>(f: impl FnOnce() -> T) -> T {
+    static PERF_TEST_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+    let _guard = PERF_TEST_LOCK
+        .get_or_init(|| Mutex::new(()))
+        .lock()
+        .expect("perf test lock should not be poisoned");
+    f()
 }
 
 /// Convenience macro: wraps a test body with a 120s timeout.

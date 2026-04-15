@@ -247,6 +247,8 @@ pub struct Frame {
     pub fog_of_war_mask_atlas: Option<String>,
     /// FogOfWar mask scalar configured on FogOfWarFrame.
     pub fog_of_war_mask_scalar: Option<f32>,
+    /// UiMapID currently bound to this FogOfWarFrame.
+    pub fog_of_war_ui_map_id: Option<i32>,
     /// Stored Minimap mask asset.
     pub minimap_mask_texture: Option<String>,
     /// Stored Minimap icon texture asset.

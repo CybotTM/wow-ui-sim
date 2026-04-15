@@ -358,19 +358,32 @@ fn test_get_explored_area_ids() {
 }
 
 #[test]
-fn test_get_explored_area_ids_only_cover_left_half() {
+fn test_get_explored_area_ids_follow_real_overlay_positions() {
     let env = env();
-    let (left_count, right_count): (i32, i32) = env
+    let (left_count, right_count, gap_count): (i32, i32, i32) = env
         .eval(
             r#"
         local mapID = C_Map.GetCurrentMapID()
-        local layer = C_Map.GetMapArtLayers(mapID)[1]
         local overlays = C_MapExplorationInfo.GetExploredMapTextures(mapID)
-        local overlay = overlays and overlays[1]
-        assert(overlay, "expected at least one explored overlay on the default map")
+        assert(type(overlays) == "table" and #overlays > 0, "expected explored overlays on the default map")
 
-        local sampleX = (overlay.offsetX + (overlay.textureWidth / 2)) / layer.layerWidth
-        local sampleY = (overlay.offsetY + (overlay.textureHeight / 2)) / layer.layerHeight
+        local leftOverlay
+        local rightOverlay
+        for _, overlay in ipairs(overlays) do
+            local center = overlay.offsetX + (overlay.textureWidth / 2)
+            if not leftOverlay or center < leftOverlay.offsetX + (leftOverlay.textureWidth / 2) then
+                leftOverlay = overlay
+            end
+            if not rightOverlay or center > rightOverlay.offsetX + (rightOverlay.textureWidth / 2) then
+                rightOverlay = overlay
+            end
+        end
+
+        local layer = C_Map.GetMapArtLayers(mapID)[1]
+        local leftSampleX = (leftOverlay.offsetX + (leftOverlay.textureWidth / 2)) / layer.layerWidth
+        local leftSampleY = (leftOverlay.offsetY + (leftOverlay.textureHeight / 2)) / layer.layerHeight
+        local rightSampleX = (rightOverlay.offsetX + (rightOverlay.textureWidth / 2)) / layer.layerWidth
+        local rightSampleY = (rightOverlay.offsetY + (rightOverlay.textureHeight / 2)) / layer.layerHeight
 
         local function count(list)
             if type(list) ~= "table" then
@@ -384,20 +397,64 @@ fn test_get_explored_area_ids_only_cover_left_half() {
             return n
         end
 
-        local left = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = sampleX, y = sampleY })
-        local right = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = 0.75, y = 0.50 })
-        return count(left), count(right)
+        local left = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = leftSampleX, y = leftSampleY })
+        local right = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = rightSampleX, y = rightSampleY })
+        local gap = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = 0.05, y = 0.05 })
+        return count(left), count(right), count(gap)
     "#,
         )
         .unwrap();
 
     assert!(
         left_count > 0,
-        "left half should report explored area IDs for the default map"
+        "left-side explored overlays should report area IDs for the default map"
+    );
+    assert!(
+        right_count > 0,
+        "right-side explored overlays should also report area IDs for the default map"
     );
     assert_eq!(
-        right_count, 0,
-        "right half should remain unexplored for the default map"
+        gap_count, 0,
+        "a known empty corner should remain unexplored"
+    );
+}
+
+#[test]
+fn test_get_explored_area_ids_leave_one_current_map_sub_zone_unexplored() {
+    let env = env();
+    let (seeded_unexplored_count, nearby_count): (i32, i32) = env
+        .eval(
+            r#"
+        local mapID = C_Map.GetCurrentMapID()
+        local layer = C_Map.GetMapArtLayers(mapID)[1]
+
+        local function count(list)
+            local n = 0
+            for _ in ipairs(list or {}) do
+                n = n + 1
+            end
+            return n
+        end
+
+        local seededUnexploredX = (2359 + (1095 / 2)) / layer.layerWidth
+        local seededUnexploredY = (223 + (784 / 2)) / layer.layerHeight
+        local nearbyX = (967 + (1409 / 2)) / layer.layerWidth
+        local nearbyY = (558 + (1002 / 2)) / layer.layerHeight
+
+        local seededUnexplored = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = seededUnexploredX, y = seededUnexploredY })
+        local nearby = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = nearbyX, y = nearbyY })
+        return count(seededUnexplored), count(nearby)
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        seeded_unexplored_count, 0,
+        "the seeded current-map sub-zone should remain unexplored"
+    );
+    assert!(
+        nearby_count > 0,
+        "neighboring current-map overlays should still remain explored"
     );
 }
 
@@ -411,7 +468,7 @@ fn test_get_explored_map_textures() {
 }
 
 #[test]
-fn test_get_explored_map_textures_return_real_left_half_overlays_for_current_map() {
+fn test_get_explored_map_textures_return_real_irregular_overlays_for_current_map() {
     let env = env();
     let matches_expected_overlay: bool = env
         .eval(
@@ -423,8 +480,10 @@ fn test_get_explored_map_textures_return_real_left_half_overlays_for_current_map
             return false
         end
 
-        local minCenter = 1
-        local maxCenter = 0
+        local minLeft = 1
+        local maxRight = 0
+        local minTop = 1
+        local maxBottom = 0
         local overlayCount = 0
         local hasMultiTileOverlay = false
         local hasAreaTexture = false
@@ -443,44 +502,51 @@ fn test_get_explored_map_textures_return_real_left_half_overlays_for_current_map
                 hasMultiTileOverlay = true
             end
 
-            local center = (overlay.offsetX + (overlay.textureWidth / 2)) / layer.layerWidth
-            minCenter = math.min(minCenter, center)
-            maxCenter = math.max(maxCenter, center)
+            local left = overlay.offsetX / layer.layerWidth
+            local right = (overlay.offsetX + overlay.textureWidth) / layer.layerWidth
+            local top = overlay.offsetY / layer.layerHeight
+            local bottom = (overlay.offsetY + overlay.textureHeight) / layer.layerHeight
+            minLeft = math.min(minLeft, left)
+            maxRight = math.max(maxRight, right)
+            minTop = math.min(minTop, top)
+            maxBottom = math.max(maxBottom, bottom)
         end
 
         return overlayCount > 1
             and hasMultiTileOverlay
             and hasAreaTexture
-            and minCenter < 0.5
-            and maxCenter <= 0.5
+            and minLeft < 0.10
+            and maxRight > 0.90
+            and minTop < 0.05
+            and maxBottom > 0.95
     "#,
         )
         .unwrap();
     assert!(
         matches_expected_overlay,
-        "GetExploredMapTextures should expose real explored-area overlays filtered to the explored half of the current map"
+        "GetExploredMapTextures should expose the real irregular explored-area overlays for the current map"
     );
 }
 
 #[test]
-fn test_c_fog_of_war_returns_half_map_data_for_current_map() {
+fn test_c_fog_of_war_returns_nil_for_current_map_without_fog_data() {
     let env = env();
-    let (fog_id, background, mask, scalar): (i32, Option<String>, Option<String>, f64) = env
-        .eval(
+    let (fog_id, background, mask, scalar): (Option<i32>, Option<String>, Option<String>, f64) =
+        env.eval(
             r#"
             local mapID = C_Map.GetCurrentMapID()
             local fogID = C_FogOfWar.GetFogOfWarForMap(mapID)
             local info = C_FogOfWar.GetFogOfWarInfo(fogID)
-            return fogID or 0, info.backgroundAtlas, info.maskAtlas, info.maskScalar
+            return fogID, info.backgroundAtlas, info.maskAtlas, info.maskScalar
         "#,
         )
         .unwrap();
-    assert!(fog_id > 0, "current map should expose simulator fog data");
-    assert_eq!(background.as_deref(), Some("Interface/Map/MapFogOfWar"));
     assert_eq!(
-        mask.as_deref(),
-        Some("Interface/Map/MapFogOfWarMaskSoftEdge")
+        fog_id, None,
+        "current map should not invent a fog-of-war ID when DB data has no entry"
     );
+    assert_eq!(background, None);
+    assert_eq!(mask, None);
     assert!((scalar - 1.0).abs() < f64::EPSILON);
 }
 

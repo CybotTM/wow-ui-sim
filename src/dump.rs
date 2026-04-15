@@ -240,22 +240,8 @@ fn emit_frame_line(
     ctx: &mut DumpRenderCtx<'_>,
 ) {
     let indent = "  ".repeat(depth);
-    let vis = if frame.visible { "visible" } else { "hidden" };
     let rect = compute_frame_rect(ctx.widgets, id, ctx.screen_width, ctx.screen_height);
-    let size_str = format_size_str(frame, &rect);
-    let stale_str = format_stale_str(frame, &rect);
-    let info_str = format_info_str(frame, &rect);
-    let text_str = format_text_str(ctx.widgets, frame);
-    let font_str = format_font_str(frame);
-    let strata_str = format!(" {}:{}", frame.frame_strata.as_str(), frame.frame_level);
-    let mask_str = if frame.is_mask { " MASK" } else { "" };
-    let owner_str = resolve_addon_name(ctx.addon_names, frame.owner_addon)
-        .map(|name| format!(" @{name}"))
-        .unwrap_or_default();
-    ctx.lines.push(format!(
-        "{indent}{display_name} [{:?}] {size_str} {vis}{strata_str}{mask_str}{owner_str}{stale_str}{info_str}{text_str}{font_str}",
-        frame.widget_type,
-    ));
+    emit_frame_summary_line(frame, display_name, &indent, &rect, ctx);
     emit_anchor_lines(
         ctx.widgets,
         frame,
@@ -264,33 +250,80 @@ fn emit_frame_line(
         ctx.screen_height,
         ctx.lines,
     );
+    emit_texture_detail_line(frame, id, &indent, &rect, ctx);
+    if let Some(line) = atlas_detail_line(frame, &indent) {
+        ctx.lines.push(line);
+    }
+    if let Some(line) = mask_detail_line(ctx.widgets, frame, &indent) {
+        ctx.lines.push(line);
+    }
+}
+
+fn emit_frame_summary_line(
+    frame: &Frame,
+    display_name: &str,
+    indent: &str,
+    rect: &LayoutRect,
+    ctx: &mut DumpRenderCtx<'_>,
+) {
+    let vis = if frame.visible { "visible" } else { "hidden" };
+    let strata_str = format!(" {}:{}", frame.frame_strata.as_str(), frame.frame_level);
+    let mask_str = if frame.is_mask { " MASK" } else { "" };
+    let owner_str = resolve_addon_name(ctx.addon_names, frame.owner_addon)
+        .map(|name| format!(" @{name}"))
+        .unwrap_or_default();
+    ctx.lines.push(format!(
+        "{indent}{display_name} [{:?}] {} {vis}{strata_str}{mask_str}{owner_str}{}{}{}{}",
+        frame.widget_type,
+        format_size_str(frame, rect),
+        format_stale_str(frame, rect),
+        format_info_str(frame, rect),
+        format_text_str(ctx.widgets, frame),
+        format_font_str(frame),
+    ));
+}
+
+fn emit_texture_detail_line(
+    frame: &Frame,
+    id: u64,
+    indent: &str,
+    rect: &LayoutRect,
+    ctx: &mut DumpRenderCtx<'_>,
+) {
     let tex_path = frame
         .texture
         .as_deref()
         .or_else(|| resolve_button_state_texture(ctx.widgets, frame, id));
     if let Some(path) = tex_path {
         let fmt = resolve_texture_format(path);
-        let detail = format_texture_detail_str(frame, &rect, ctx.verbose);
+        let detail = format_texture_detail_str(frame, rect, ctx.verbose);
         ctx.lines
             .push(format!("{indent}  [texture] {path}{fmt}{detail}"));
     }
-    if let Some(ref atlas) = frame.atlas {
-        ctx.lines.push(format!("{indent}  [atlas] {atlas}"));
+}
+
+fn atlas_detail_line(frame: &Frame, indent: &str) -> Option<String> {
+    frame
+        .atlas
+        .as_ref()
+        .map(|atlas| format!("{indent}  [atlas] {atlas}"))
+}
+
+fn mask_detail_line(widgets: &WidgetRegistry, frame: &Frame, indent: &str) -> Option<String> {
+    if frame.mask_textures.is_empty() {
+        return None;
     }
-    if !frame.mask_textures.is_empty() {
-        let mask_names: Vec<_> = frame
-            .mask_textures
-            .iter()
-            .map(|mid| {
-                ctx.widgets
-                    .get(*mid)
-                    .map(|m| m.texture.as_deref().unwrap_or("?"))
-                    .unwrap_or("missing")
-            })
-            .collect();
-        ctx.lines
-            .push(format!("{indent}  [masks] {}", mask_names.join(", ")));
-    }
+    let mask_names: Vec<_> = frame
+        .mask_textures
+        .iter()
+        .map(|mid| {
+            widgets
+                .get(*mid)
+                .map(|m| m.texture.as_deref().unwrap_or("?"))
+                .unwrap_or("missing")
+        })
+        .collect();
+    Some(format!("{indent}  [masks] {}", mask_names.join(", ")))
 }
 
 /// Emit anchor detail lines for a frame.
@@ -666,7 +699,7 @@ fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
 }
 
 /// Resolve owner addon index to folder name.
-fn resolve_addon_name<'a>(addon_names: &'a [String], owner: Option<u16>) -> Option<&'a str> {
+fn resolve_addon_name(addon_names: &[String], owner: Option<u16>) -> Option<&str> {
     owner.and_then(|idx| addon_names.get(idx as usize).map(|s| s.as_str()))
 }
 
@@ -887,5 +920,28 @@ fn resolve_texture_format(wow_path: &str) -> String {
             format!(" ({ext})")
         }
         None => " (MISSING)".to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mask_detail_line_lists_resolved_unknown_and_missing_masks() {
+        let mut widgets = WidgetRegistry::new();
+
+        let mut mask = Frame::new(WidgetType::Texture, Some("MaskTex".to_string()), None);
+        mask.texture = Some("Interface/Masks/QuestMask".to_string());
+        let mask_id = mask.id;
+        widgets.register(mask);
+
+        let mut frame = Frame::new(WidgetType::Texture, Some("Owner".to_string()), None);
+        frame.mask_textures = vec![mask_id, 424242];
+
+        let line = mask_detail_line(&widgets, &frame, "  ")
+            .expect("mask line should exist when masks are present");
+
+        assert_eq!(line, "    [masks] Interface/Masks/QuestMask, missing");
     }
 }

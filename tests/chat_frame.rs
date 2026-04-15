@@ -10,6 +10,48 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+const CHAT_LAYOUT_DEBUG_LUA: &str = r#"
+    local frames = {
+        {"ChatFrame1", ChatFrame1},
+        {"ChatFrame1Background", ChatFrame1Background},
+        {"ChatFrame1.ResizeButton", ChatFrame1.ResizeButton},
+        {"ChatFrame1.ScrollToBottomButton", ChatFrame1.ScrollToBottomButton},
+        {"ChatFrame1.ScrollBar", ChatFrame1.ScrollBar},
+        {"ChatFrame1EditBox", ChatFrame1EditBox},
+    }
+
+    local out = {}
+    for _, item in ipairs(frames) do
+        local label, frame = item[1], item[2]
+        if frame then
+            local x, y, w, h = frame:GetRect()
+            local points = {}
+            for i = 1, frame:GetNumPoints() do
+                local point, rel, relPoint, ox, oy = frame:GetPoint(i)
+                local relName = rel and rel:GetName() or "$parent"
+                table.insert(points, string.format("%s->%s:%s(%.0f,%.0f)", point, relName, relPoint, ox, oy))
+            end
+            table.sort(points)
+            table.insert(
+                out,
+                string.format(
+                    "%s rect=(%.0f,%.0f %.0fx%.0f) shown=%s points=%s",
+                    label,
+                    x or -1,
+                    y or -1,
+                    w or -1,
+                    h or -1,
+                    tostring(frame:IsShown()),
+                    table.concat(points, " | ")
+                )
+            )
+        else
+            table.insert(out, label .. " <nil>")
+        end
+    end
+    return table.concat(out, "\n")
+"#;
+
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
@@ -55,50 +97,8 @@ fn fire_startup_events(env: &WowLuaEnv) {
 }
 
 fn chat_layout_debug(env: &WowLuaEnv) -> String {
-    env.eval(
-        r#"
-        local frames = {
-            {"ChatFrame1", ChatFrame1},
-            {"ChatFrame1Background", ChatFrame1Background},
-            {"ChatFrame1.ResizeButton", ChatFrame1.ResizeButton},
-            {"ChatFrame1.ScrollToBottomButton", ChatFrame1.ScrollToBottomButton},
-            {"ChatFrame1.ScrollBar", ChatFrame1.ScrollBar},
-            {"ChatFrame1EditBox", ChatFrame1EditBox},
-        }
-
-        local out = {}
-        for _, item in ipairs(frames) do
-            local label, frame = item[1], item[2]
-            if frame then
-                local x, y, w, h = frame:GetRect()
-                local points = {}
-                for i = 1, frame:GetNumPoints() do
-                    local point, rel, relPoint, ox, oy = frame:GetPoint(i)
-                    local relName = rel and rel:GetName() or "$parent"
-                    table.insert(points, string.format("%s->%s:%s(%.0f,%.0f)", point, relName, relPoint, ox, oy))
-                end
-                table.sort(points)
-                table.insert(
-                    out,
-                    string.format(
-                        "%s rect=(%.0f,%.0f %.0fx%.0f) shown=%s points=%s",
-                        label,
-                        x or -1,
-                        y or -1,
-                        w or -1,
-                        h or -1,
-                        tostring(frame:IsShown()),
-                        table.concat(points, " | ")
-                    )
-                )
-            else
-                table.insert(out, label .. " <nil>")
-            end
-        end
-        return table.concat(out, "\n")
-    "#,
-    )
-    .expect("chat layout debug eval failed")
+    env.eval(CHAT_LAYOUT_DEBUG_LUA)
+        .expect("chat layout debug eval failed")
 }
 
 /// Hook C_ChatInfo.SendChatMessage to capture submitted messages.

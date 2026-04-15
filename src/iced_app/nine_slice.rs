@@ -101,38 +101,44 @@ fn emit_horiz_edge(batch: &mut QuadBatch, bounds: Rectangle, piece: &NineSlicePi
 
 /// Emit tiled vertical edges (left and right) between corners.
 fn emit_vert_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtlasInfo, alpha: f32) {
+    let Some([left_strip, right_strip]) = vert_edge_strips(bounds, ns) else {
+        return;
+    };
+    emit_vert_edge_strip(batch, left_strip, &ns.edge_left, alpha);
+    emit_vert_edge_strip(batch, right_strip, &ns.edge_right, alpha);
+}
+
+fn vert_edge_strips(bounds: Rectangle, ns: &NineSliceAtlasInfo) -> Option<[Rectangle; 2]> {
     let edge_y = bounds.y + ns.corner_tl.height as f32;
     let edge_h = bounds.height - ns.corner_tl.height as f32 - ns.corner_bl.height as f32;
     if edge_h <= 0.0 {
-        return;
+        return None;
     }
+    Some([
+        Rectangle::new(
+            Point::new(bounds.x, edge_y),
+            Size::new(ns.edge_left.width as f32, edge_h),
+        ),
+        Rectangle::new(
+            Point::new(bounds.x + bounds.width - ns.edge_right.width as f32, edge_y),
+            Size::new(ns.edge_right.width as f32, edge_h),
+        ),
+    ])
+}
 
-    let left_bounds = Rectangle::new(
-        Point::new(bounds.x, edge_y),
-        Size::new(ns.edge_left.width as f32, edge_h),
-    );
-    let (left_path, left_uvs) = crop_piece(&ns.edge_left);
+fn emit_vert_edge_strip(
+    batch: &mut QuadBatch,
+    strip: Rectangle,
+    piece: &NineSlicePiece,
+    alpha: f32,
+) {
+    let (path, uvs) = crop_piece(piece);
     emit_vert_tiles(
         batch,
-        left_bounds,
-        &left_uvs,
-        &left_path,
-        ns.edge_left.height as f32,
-        [1.0, 1.0, 1.0, alpha],
-        BlendMode::Alpha,
-    );
-
-    let right_bounds = Rectangle::new(
-        Point::new(bounds.x + bounds.width - ns.edge_right.width as f32, edge_y),
-        Size::new(ns.edge_right.width as f32, edge_h),
-    );
-    let (right_path, right_uvs) = crop_piece(&ns.edge_right);
-    emit_vert_tiles(
-        batch,
-        right_bounds,
-        &right_uvs,
-        &right_path,
-        ns.edge_right.height as f32,
+        strip,
+        &uvs,
+        &path,
+        piece.height as f32,
         [1.0, 1.0, 1.0, alpha],
         BlendMode::Alpha,
     );
@@ -253,5 +259,24 @@ mod tests {
                 .iter()
                 .any(|request| request.path.contains("edge_bottom"))
         );
+    }
+
+    #[test]
+    fn vert_edge_strips_follow_corner_insets_and_piece_widths() {
+        let [left, right] = vert_edge_strips(
+            Rectangle::new(Point::new(10.0, 20.0), Size::new(40.0, 30.0)),
+            &test_nine_slice_info(),
+        )
+        .expect("test bounds should leave room for vertical edges");
+
+        assert_eq!(left.x, 10.0);
+        assert_eq!(left.y, 25.0);
+        assert_eq!(left.width, 3.0);
+        assert_eq!(left.height, 18.0);
+
+        assert_eq!(right.x, 47.0);
+        assert_eq!(right.y, 25.0);
+        assert_eq!(right.width, 3.0);
+        assert_eq!(right.height, 18.0);
     }
 }

@@ -33,13 +33,15 @@ fn load_test_addon(env: &WowLuaEnv) -> Result<(), String> {
 
 fn fire_addon_loaded(env: &WowLuaEnv) {
     // Fire ADDON_LOADED with "TestAddon" as the addon name argument
-    // Check a wide range since widget IDs are global and increment across tests
     env.exec(
         r#"
-        -- Manually trigger the loader's OnEvent
-        for id = 1, 10000 do
-            local key = "__frame_" .. id
-            local frame = _G[key]
+        -- Manually trigger the loader's OnEvent through the registry cache.
+        local reg = debug.getregistry()
+        local frame_refs = reg and reg.__frame_refs
+        if not frame_refs then
+            return
+        end
+        for _, frame in pairs(frame_refs) do
             if frame then
                 local handler = frame:GetScript("OnEvent")
                 if handler then

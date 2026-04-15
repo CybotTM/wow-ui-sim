@@ -73,12 +73,7 @@ pub(super) fn set_single_anchor(
     anchor: &AnchorXml,
     frame_name: &str,
 ) {
-    let point_str = anchor.point.as_deref().unwrap_or("TOPLEFT");
-    let relative_point_str = anchor.relative_point.as_deref().unwrap_or(point_str);
-    let Some(point) = AnchorPoint::from_str(point_str) else {
-        return;
-    };
-    let Some(relative_point) = AnchorPoint::from_str(relative_point_str) else {
+    let Some((point, relative_point)) = anchor_points(anchor) else {
         return;
     };
 
@@ -103,6 +98,14 @@ pub(super) fn set_single_anchor(
         );
     }
     state.widgets.mark_rect_dirty(frame_id);
+}
+
+fn anchor_points(anchor: &AnchorXml) -> Option<(AnchorPoint, AnchorPoint)> {
+    let point_str = anchor.point.as_deref().unwrap_or("TOPLEFT");
+    let relative_point_str = anchor.relative_point.as_deref().unwrap_or(point_str);
+    let point = AnchorPoint::from_str(point_str)?;
+    let relative_point = AnchorPoint::from_str(relative_point_str)?;
+    Some((point, relative_point))
 }
 
 /// Resolve the relative_to target ID for an anchor element.
@@ -659,5 +662,45 @@ fn merge_size(
         if let Some(y) = y {
             *height = Some(y);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn anchor_points_default_relative_point_and_reject_invalid_values() {
+        let default_relative = AnchorXml {
+            point: Some("BOTTOM".to_string()),
+            relative_point: None,
+            relative_to: None,
+            relative_key: None,
+            x: None,
+            y: None,
+            offset: None,
+        };
+        assert_eq!(
+            anchor_points(&default_relative),
+            Some((AnchorPoint::Bottom, AnchorPoint::Bottom))
+        );
+
+        let invalid_point = AnchorXml {
+            point: Some("NOPE".to_string()),
+            ..default_relative.clone()
+        };
+        assert!(
+            anchor_points(&invalid_point).is_none(),
+            "invalid primary point should reject the anchor"
+        );
+
+        let invalid_relative = AnchorXml {
+            relative_point: Some("NOPE".to_string()),
+            ..default_relative
+        };
+        assert!(
+            anchor_points(&invalid_relative).is_none(),
+            "invalid relative point should reject the anchor"
+        );
     }
 }
