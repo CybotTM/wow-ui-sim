@@ -207,6 +207,26 @@ if StoreFrame_IsShown == nil then
   end
 end
 
+-- `UnitIsPlayer(unit)` — true when `unit` resolves to a player-character
+-- entity. In the sim, "player" and party/raid slots are players; other
+-- unit IDs (target/focus/mouseover/etc.) only exist when the GUI wires
+-- them up to a player, so default to false. Callers in TargetFrame,
+-- PlayerFrame, etc. check this before running player-specific rendering.
+if UnitIsPlayer == nil then
+  function UnitIsPlayer(unit)
+    if type(unit) ~= "string" then
+      return false
+    end
+    if unit == "player" or unit == "self" then
+      return true
+    end
+    if unit:match("^party[1-4]$") or unit:match("^raid%d+$") then
+      return true
+    end
+    return false
+  end
+end
+
 
 if LE_TOKEN_REDEEM_TYPE_GAME_TIME == nil then
   LE_TOKEN_REDEEM_TYPE_GAME_TIME = 1

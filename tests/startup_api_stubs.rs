@@ -234,6 +234,34 @@ fn set_spacing_round_trips_on_editbox() {
 }
 
 #[test]
+fn unit_is_player_true_for_player_and_group_slots() {
+    // TargetFrame.lua:865 and other UnitFrame code call UnitIsPlayer on
+    // whatever unit the frame is tracking. "player" and party/raid
+    // slots are always player-character entities in the sim; other unit
+    // tokens (target/focus/mouseover) only exist when the GUI wires
+    // them, so default to false.
+    let env = env();
+    let (player, party, raid, target, nonstring, self_): (bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return UnitIsPlayer("player"),
+                   UnitIsPlayer("party2"),
+                   UnitIsPlayer("raid12"),
+                   UnitIsPlayer("target"),
+                   UnitIsPlayer(42),
+                   UnitIsPlayer("self")
+            "#,
+        )
+        .unwrap();
+    assert!(player);
+    assert!(party);
+    assert!(raid);
+    assert!(self_);
+    assert!(!target);
+    assert!(!nonstring);
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env
