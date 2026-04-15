@@ -12,7 +12,8 @@
 //! with a `TODO` comment.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, val_to_string,
+    borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_id_from_stack,
+    frame_ref, sync_child_to_rilua, val_to_string,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -142,6 +143,56 @@ fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn get_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (file_id, path) = {
+        let sim = borrow_state(state)?;
+        let frame = sim.widgets.get(id);
+        (
+            frame.and_then(|frame| frame.texture_file_data_id),
+            frame.and_then(|frame| frame.texture.clone()),
+        )
+    };
+    let value = if let Some(file_id) = file_id {
+        Val::Num(file_id as f64)
+    } else if let Some(path) = path {
+        create_string(state, &path)
+    } else {
+        Val::Nil
+    };
+    state.push(value);
+    Ok(1)
+}
+
+fn get_texture_file_id(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let file_id = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.texture_file_data_id);
+    match file_id {
+        Some(file_id) => state.push(Val::Num(file_id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_texture_file_path(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let path = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.texture.clone());
+    match path {
+        Some(path) => {
+            let path_val = create_string(state, &path);
+            state.push(path_val);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 fn set_color_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(color) = rgba_from_stack(state, 2) else {
@@ -172,6 +223,17 @@ fn set_vertex_color(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn get_vertex_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (r, g, b, a) = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.vertex_color)
+        .map(|c| (c.r as f64, c.g as f64, c.b as f64, c.a as f64))
+        .unwrap_or((1.0, 1.0, 1.0, 1.0));
+    (r, g, b, a).into_stack(state)
+}
+
 fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(mode_name) = opt_string(state, 2) else {
@@ -190,6 +252,18 @@ fn set_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
         frame.blend_mode = blend_mode;
     }
     Ok(0)
+}
+
+fn get_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mode = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.alpha_mode.clone())
+        .unwrap_or_else(|| "BLEND".to_string());
+    let mode_val = create_string(state, &mode);
+    state.push(mode_val);
+    Ok(1)
 }
 
 fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
@@ -231,6 +305,17 @@ fn set_horiz_tile(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn get_horiz_tile(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.horiz_tile)
+        .unwrap_or(false);
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
 fn set_vert_tile(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let enabled = opt_bool(state, 2).unwrap_or(false);
@@ -240,6 +325,17 @@ fn set_vert_tile(state: &mut LuaState) -> LuaResult<u32> {
         frame.vert_tile = enabled;
     }
     Ok(0)
+}
+
+fn get_vert_tile(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.vert_tile)
+        .unwrap_or(false);
+    state.push(Val::Bool(enabled));
+    Ok(1)
 }
 
 fn set_texel_snapping_bias(state: &mut LuaState) -> LuaResult<u32> {
@@ -261,6 +357,43 @@ fn get_texel_snapping_bias(state: &mut LuaState) -> LuaResult<u32> {
         .map(|frame| frame.texel_snapping_bias)
         .unwrap_or_default();
     state.push(Val::Num(bias as f64));
+    Ok(1)
+}
+
+fn get_atlas(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let atlas = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.atlas.clone());
+    match atlas {
+        Some(atlas) => {
+            let atlas_val = create_string(state, &atlas);
+            state.push(atlas_val);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_texture_slice_margins(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (left, right, top, bottom) = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.texture_slice_margins)
+        .unwrap_or((0.0, 0.0, 0.0, 0.0));
+    (left as f64, right as f64, top as f64, bottom as f64).into_stack(state)
+}
+
+fn get_texture_slice_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mode = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.texture_slice_mode)
+        .unwrap_or_default();
+    state.push(Val::Num(mode as f64));
     Ok(1)
 }
 
@@ -1458,6 +1591,83 @@ fn statusbar_get_status_bar_color(state: &mut LuaState) -> LuaResult<u32> {
     (r, g, b, a).into_stack(state)
 }
 
+fn statusbar_set_status_bar_texture(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::widget::{Frame, WidgetType};
+
+    let id = frame_id_from_stack(state, 1)?;
+    let texture_val = stack_val(state, 2);
+    let existing_bar_id = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).and_then(|frame| frame.statusbar_bar_id)
+    };
+
+    let bar_id = if let Some(bar_id) = existing_bar_id {
+        bar_id
+    } else if let Some(texture_id) = extract_frame_id(state, texture_val) {
+        texture_id
+    } else {
+        let mut child = Frame::new(WidgetType::Texture, None, Some(id));
+        child.parent_key = Some("BarTexture".to_string());
+        let child_id = child.id;
+        {
+            let mut sim = borrow_state_mut(state)?;
+            sim.widgets.register(child);
+            sim.widgets.add_child(id, child_id);
+            if let Some(parent) = sim.widgets.get_mut_visual(id) {
+                parent.statusbar_bar_id = Some(child_id);
+                parent
+                    .children_keys
+                    .insert("BarTexture".to_string(), child_id);
+            }
+            sim.invalidate_strata_buckets();
+        }
+        sync_child_to_rilua(state, id, "BarTexture", child_id)?;
+        child_id
+    };
+
+    let path = val_to_string(state, texture_val);
+    let file_id = match texture_val {
+        Val::Num(value) => Some(value as i64),
+        _ => None,
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(parent) = sim.widgets.get_mut_visual(id) {
+            parent.statusbar_bar_id = Some(bar_id);
+            parent.statusbar_texture_path = path.clone();
+            parent
+                .children_keys
+                .insert("BarTexture".to_string(), bar_id);
+        }
+        if let Some(bar) = sim.widgets.get_mut_visual(bar_id) {
+            bar.parent_id = Some(id);
+            bar.parent_key = Some("BarTexture".to_string());
+            bar.texture = path.clone();
+            bar.texture_file_data_id = file_id;
+            bar.color_texture = None;
+            bar.atlas = None;
+            bar.atlas_tex_coords = None;
+        }
+    }
+    Ok(0)
+}
+
+fn statusbar_get_status_bar_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let bar_id = {
+        let sim = borrow_state(state)?;
+        statusbar_child_id_inner(&sim, id)
+    };
+    match bar_id {
+        Some(bar_id) => {
+            let bar = frame_ref(state, bar_id)?;
+            state.push(bar);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 fn statusbar_child_id_inner(sim: &crate::lua_api::SimState, id: u64) -> Option<u64> {
     let bar_id = sim.widgets.get(id)?.statusbar_bar_id?;
     sim.widgets
@@ -2186,14 +2396,39 @@ fn tooltip_add_fonts_strings(state: &mut LuaState) -> LuaResult<u32> {
 /// passing its `GcRef<Table>` as `metatable`.
 pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, metatable, "SetDrawLayer", set_draw_layer)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetTextureSliceMargins",
+        get_texture_slice_margins,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetTextureSliceMode",
+        get_texture_slice_mode,
+    )?;
     table_set_rust_fn(state, metatable, "SetAtlas", set_atlas)?;
+    table_set_rust_fn(state, metatable, "GetAtlas", get_atlas)?;
     table_set_rust_fn(state, metatable, "SetTexture", set_texture)?;
+    table_set_rust_fn(state, metatable, "GetTexture", get_texture)?;
+    table_set_rust_fn(state, metatable, "GetTextureFileID", get_texture_file_id)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetTextureFilePath",
+        get_texture_file_path,
+    )?;
     table_set_rust_fn(state, metatable, "SetColorTexture", set_color_texture)?;
     table_set_rust_fn(state, metatable, "SetVertexColor", set_vertex_color)?;
+    table_set_rust_fn(state, metatable, "GetVertexColor", get_vertex_color)?;
     table_set_rust_fn(state, metatable, "SetBlendMode", set_blend_mode)?;
+    table_set_rust_fn(state, metatable, "GetBlendMode", get_blend_mode)?;
     table_set_rust_fn(state, metatable, "SetTexCoord", set_tex_coord)?;
     table_set_rust_fn(state, metatable, "SetHorizTile", set_horiz_tile)?;
+    table_set_rust_fn(state, metatable, "GetHorizTile", get_horiz_tile)?;
     table_set_rust_fn(state, metatable, "SetVertTile", set_vert_tile)?;
+    table_set_rust_fn(state, metatable, "GetVertTile", get_vert_tile)?;
     table_set_rust_fn(
         state,
         metatable,
@@ -2503,6 +2738,18 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
         metatable,
         "SetStatusBarColor",
         statusbar_set_status_bar_color,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetStatusBarTexture",
+        statusbar_set_status_bar_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetStatusBarTexture",
+        statusbar_get_status_bar_texture,
     )?;
     table_set_rust_fn(
         state,

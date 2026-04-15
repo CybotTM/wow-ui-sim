@@ -12,6 +12,7 @@ use crate::lua_api::rilua_script_helpers::{
     set_script as set_rilua_script,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::render::font::WowFontSystem;
 use crate::widget::WidgetType;
 use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
@@ -76,6 +77,57 @@ fn get_text(state: &mut LuaState) -> LuaResult<u32> {
             Ok(1)
         }
     }
+}
+
+fn frame_text_measurement(state: &LuaState, id: u64) -> (String, Option<String>, f32) {
+    let sim = borrow_state(state).expect("sim state should exist");
+    let frame = sim.widgets.get(id);
+    let result = frame
+        .map(|f| {
+            let text = if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+                f.children_keys
+                    .get("Text")
+                    .and_then(|&cid| sim.widgets.get(cid))
+                    .and_then(|child| child.text_stripped.clone().or_else(|| child.text.clone()))
+                    .unwrap_or_default()
+            } else {
+                f.text_stripped
+                    .clone()
+                    .or_else(|| f.text.clone())
+                    .unwrap_or_default()
+            };
+            (text, f.font.clone(), f.font_size)
+        })
+        .unwrap_or_else(|| (String::new(), None, 12.0));
+    drop(sim);
+    result
+}
+
+fn measure_text_width(state: &LuaState, id: u64) -> f64 {
+    let (text, font, font_size) = frame_text_measurement(state, id);
+    if text.is_empty() {
+        return 0.0;
+    }
+    if let Some(app) = state.app_data::<crate::lua_api::env::WowLuaAppData>()
+        && let Some(font_system) = app.font_system.as_ref()
+    {
+        return font_system
+            .borrow_mut()
+            .measure_text_width(&text, font.as_deref(), font_size) as f64;
+    }
+
+    let mut fallback_font_system = WowFontSystem::new(std::path::Path::new("./fonts"));
+    fallback_font_system.measure_text_width(&text, font.as_deref(), font_size) as f64
+}
+
+fn get_string_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    state.push(Val::Num(measure_text_width(state, id)));
+    Ok(1)
+}
+
+fn get_text_width(state: &mut LuaState) -> LuaResult<u32> {
+    get_string_width(state)
 }
 
 fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
@@ -160,6 +212,15 @@ fn get_font_height(state: &mut LuaState) -> LuaResult<u32> {
     let size = sim.widgets.get(id).map(|f| f.font_size).unwrap_or(12.0);
     drop(sim);
     state.push(Val::Num(size as f64));
+    Ok(1)
+}
+
+fn set_font_object(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn get_font_object(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
     Ok(1)
 }
 
@@ -1353,8 +1414,12 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetFormattedText", set_formatted_text)?;
     table_set_rust_fn(state, table, "SetFont", set_font)?;
     table_set_rust_fn(state, table, "GetFont", get_font)?;
+    table_set_rust_fn(state, table, "SetFontObject", set_font_object)?;
+    table_set_rust_fn(state, table, "GetFontObject", get_font_object)?;
     table_set_rust_fn(state, table, "SetFontHeight", set_font_height)?;
     table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
+    table_set_rust_fn(state, table, "GetStringWidth", get_string_width)?;
+    table_set_rust_fn(state, table, "GetTextWidth", get_text_width)?;
     table_set_rust_fn(state, table, "SetJustifyH", set_justify_h)?;
     table_set_rust_fn(state, table, "GetJustifyH", get_justify_h)?;
     table_set_rust_fn(state, table, "SetJustifyV", set_justify_v)?;

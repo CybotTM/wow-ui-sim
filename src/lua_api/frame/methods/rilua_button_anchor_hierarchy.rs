@@ -41,6 +41,79 @@ fn opt_string(state: &LuaState, index: i32) -> Option<String> {
     }
 }
 
+fn resolve_anchor_target_id(state: &mut LuaState, value: Val) -> Option<usize> {
+    if let Some(id) = extract_frame_id(state, value) {
+        return Some(id as usize);
+    }
+
+    let name = val_to_string(state, value)?;
+    let key_ref = state.gc.intern_string(name.as_bytes());
+    let global = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|table| table.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    extract_frame_id(state, global).map(|id| id as usize)
+}
+
+fn resolve_relative_point_from_val(
+    state: &mut LuaState,
+    value: Val,
+    default: crate::widget::AnchorPoint,
+) -> LuaResult<crate::widget::AnchorPoint> {
+    match value {
+        Val::Nil => Ok(default),
+        Val::Str(_) => {
+            let point_name = val_to_string(state, value).unwrap_or_default();
+            crate::widget::AnchorPoint::from_str(&point_name).ok_or_else(|| {
+                runtime_error(format!(
+                    "Frame:SetPoint(): Unknown region point {point_name}"
+                ))
+            })
+        }
+        _ => Ok(default),
+    }
+}
+
+fn parse_set_point_args(
+    state: &mut LuaState,
+    point: crate::widget::AnchorPoint,
+) -> LuaResult<(Option<usize>, crate::widget::AnchorPoint, f32, f32)> {
+    let arg3 = stack_val(state, 3);
+    let arg4 = stack_val(state, 4);
+    let arg5 = stack_val(state, 5);
+    let arg6 = stack_val(state, 6);
+
+    if arg3 == Val::Nil {
+        return Ok((None, point, 0.0, 0.0));
+    }
+
+    let x = match arg3 {
+        Val::Num(n) => Some(n as f32),
+        _ => None,
+    };
+    let y = match arg4 {
+        Val::Num(n) => Some(n as f32),
+        _ => None,
+    };
+    if let (Some(x_offset), Some(y_offset)) = (x, y) {
+        return Ok((None, point, x_offset, y_offset));
+    }
+
+    let relative_to = resolve_anchor_target_id(state, arg3);
+    let relative_point = resolve_relative_point_from_val(state, arg4, point)?;
+    let x_offset = match arg5 {
+        Val::Num(n) => n as f32,
+        _ => 0.0,
+    };
+    let y_offset = match arg6 {
+        Val::Num(n) => n as f32,
+        _ => 0.0,
+    };
+    Ok((relative_to, relative_point, x_offset, y_offset))
+}
+
 fn bind_named_child_global(state: &mut LuaState, name: &str, child_id: u64) -> LuaResult<()> {
     let child_ref = frame_ref(state, child_id)?;
     let key = state.gc.intern_string(name.as_bytes());
@@ -48,6 +121,26 @@ fn bind_named_child_global(state: &mut LuaState, name: &str, child_id: u64) -> L
         let _ = globals.raw_set(Val::Str(key), child_ref, &state.gc.string_arena);
     }
     Ok(())
+}
+
+fn frame_global_or_ref(state: &mut LuaState, id: u64) -> LuaResult<Val> {
+    let frame_name = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).and_then(|frame| frame.name.clone())
+    };
+    if let Some(name) = frame_name {
+        let key_ref = state.gc.intern_string(name.as_bytes());
+        let global = state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|table| table.get_str(key_ref, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+        if global != Val::Nil {
+            return Ok(global);
+        }
+    }
+    frame_ref(state, id)
 }
 
 fn button_enabled(frame: &crate::widget::Frame) -> bool {
@@ -966,7 +1059,7 @@ fn get_point(state: &mut LuaState) -> LuaResult<u32> {
     state.push(point_str);
     match relative_to_id {
         Some(rid) => {
-            let rel_val = frame_ref(state, rid as u64)?;
+            let rel_val = frame_global_or_ref(state, rid as u64)?;
             state.push(rel_val);
         }
         None => state.push(Val::Nil),
@@ -1009,7 +1102,7 @@ fn get_point_by_name(state: &mut LuaState) -> LuaResult<u32> {
     state.push(point_str);
     match relative_to_id {
         Some(rid) => {
-            let rel_val = frame_ref(state, rid as u64)?;
+            let rel_val = frame_global_or_ref(state, rid as u64)?;
             state.push(rel_val);
         }
         None => state.push(Val::Nil),
@@ -1022,9 +1115,6 @@ fn get_point_by_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 /// SetPoint(point [, relativeTo [, relativePoint]] [, xOfs, yOfs])
-///
-/// TODO: This requires variadic argument parsing and combat lockdown checks
-/// that depend on Lua execution. The full implementation is deferred.
 fn set_point(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let point_name = String::from_stack(state, 2)?;
@@ -1033,18 +1123,26 @@ fn set_point(state: &mut LuaState) -> LuaResult<u32> {
             "Frame:SetPoint(): Invalid region point {point_name}"
         )));
     };
-    // TODO: full variadic arg parsing (relativeTo as frame/string/nil, relativePoint, x, y)
-    // TODO: combat lockdown check
-    // TODO: cycle detection
-    // Minimal implementation: apply with parent as relativeTo and zero offsets
-    let relative_to = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|f| f.parent_id)
-            .map(|pid| pid as usize)
-    };
+
+    let (mut relative_to, relative_point, x_offset, y_offset) = parse_set_point_args(state, point)?;
+    if relative_to.is_none() {
+        relative_to = {
+            let sim = borrow_state(state)?;
+            sim.widgets
+                .get(id)
+                .and_then(|f| f.parent_id)
+                .map(|pid| pid as usize)
+        };
+    }
+
     let mut sim = borrow_state_mut(state)?;
+    if let Some(rel_id) = relative_to {
+        if sim.widgets.would_create_anchor_cycle(id, rel_id as u64) {
+            return Err(runtime_error(
+                "Action[SetPoint] failed because[Cannot anchor to itself or create anchor cycle].",
+            ));
+        }
+    }
     if let Some(old) = sim.widgets.get(id).and_then(|f| {
         f.anchors
             .iter()
@@ -1059,7 +1157,7 @@ fn set_point(state: &mut LuaState) -> LuaResult<u32> {
         sim.widgets.add_anchor_dependent(rel_id as u64, id);
     }
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.set_point(point, relative_to, point, 0.0, 0.0);
+        frame.set_point(point, relative_to, relative_point, x_offset, y_offset);
     }
     sim.widgets.mark_rect_dirty(id);
     Ok(0)

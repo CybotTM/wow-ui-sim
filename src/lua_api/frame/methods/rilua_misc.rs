@@ -7,9 +7,9 @@
 //! issecure() call, SetToDefaults) are stubbed with a `// TODO` comment.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack,
+    borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, val_to_string,
 };
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -23,6 +23,15 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "AbortDrag", abort_drag)?;
     table_set_rust_fn(state, mt, "InterceptStartDrag", intercept_start_drag)?;
     table_set_rust_fn(state, mt, "IsDragging", is_dragging)?;
+    table_set_rust_fn(state, mt, "RegisterForDrag", register_for_drag)?;
+    table_set_rust_fn(state, mt, "SetMovable", set_movable)?;
+    table_set_rust_fn(state, mt, "IsMovable", is_movable)?;
+    table_set_rust_fn(state, mt, "StartMoving", start_moving)?;
+    table_set_rust_fn(state, mt, "StopMovingOrSizing", stop_moving_or_sizing)?;
+    table_set_rust_fn(state, mt, "SetUserPlaced", set_user_placed)?;
+    table_set_rust_fn(state, mt, "IsUserPlaced", is_user_placed)?;
+    table_set_rust_fn(state, mt, "SetClampedToScreen", set_clamped_to_screen)?;
+    table_set_rust_fn(state, mt, "IsClampedToScreen", is_clamped_to_screen)?;
 
     // Propagation
     table_set_rust_fn(
@@ -101,6 +110,7 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     // Bounds / Position
     table_set_rust_fn(state, mt, "GetBoundsRect", get_bounds_rect)?;
     table_set_rust_fn(state, mt, "GetClampRectInsets", get_clamp_rect_insets)?;
+    table_set_rust_fn(state, mt, "SetClampRectInsets", set_clamp_rect_insets)?;
     table_set_rust_fn(state, mt, "SetPointsOffset", set_points_offset)?;
 
     // Attribute stubs
@@ -218,6 +228,121 @@ pub fn is_dragging(state: &mut LuaState) -> LuaResult<u32> {
         sim.active_drag_frame == Some(id)
     };
     state.push(Val::Bool(is_dragging));
+    Ok(1)
+}
+
+pub fn register_for_drag(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut buttons = Vec::new();
+    let mut index = 2;
+    loop {
+        let value = stack_val(state, index);
+        if value == Val::Nil {
+            break;
+        }
+        if let Some(button) = val_to_string(state, value) {
+            buttons.push(button);
+        }
+        index += 1;
+    }
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.registered_drag_buttons.clear();
+        frame.registered_drag_buttons.extend(buttons);
+    }
+    Ok(0)
+}
+
+pub fn set_movable(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let movable = bool::from_stack(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.movable = movable;
+    }
+    Ok(0)
+}
+
+pub fn is_movable(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let movable = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.movable)
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(movable));
+    Ok(1)
+}
+
+pub fn start_moving(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && frame.movable
+    {
+        frame.is_moving = true;
+    }
+    Ok(0)
+}
+
+pub fn stop_moving_or_sizing(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        if frame.is_moving {
+            frame.user_placed = true;
+        }
+        frame.is_moving = false;
+    }
+    Ok(0)
+}
+
+pub fn set_user_placed(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let user_placed = bool::from_stack(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.user_placed = user_placed;
+    }
+    Ok(0)
+}
+
+pub fn is_user_placed(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let user_placed = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.user_placed)
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(user_placed));
+    Ok(1)
+}
+
+pub fn set_clamped_to_screen(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let clamped = bool::from_stack(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.clamped_to_screen = clamped;
+    }
+    sim.widgets.mark_rect_dirty(id);
+    Ok(0)
+}
+
+pub fn is_clamped_to_screen(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let clamped = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.clamped_to_screen)
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(clamped));
     Ok(1)
 }
 
@@ -464,8 +589,33 @@ pub fn set_is_frame_buffer(state: &mut LuaState) -> LuaResult<u32> {
 // ── Bounds / Position ─────────────────────────────────────────────────────────
 
 pub fn get_bounds_rect(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs resolve_and_extract which requires mlua/SimState layout resolution
-    Ok(0)
+    let id = frame_id_from_stack(state, 1)?;
+    {
+        let needs_resolve = borrow_state(state)?.widgets.is_rect_dirty(id);
+        if needs_resolve {
+            borrow_state_mut(state)?.resolve_rect_if_dirty(id);
+        }
+    }
+    let (left, bottom, width, height) = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| {
+                frame
+                    .layout_rect
+                    .map(|rect| (rect, frame.effective_scale.max(1e-6)))
+            })
+            .map(|(rect, eff_scale)| {
+                (
+                    (rect.x / eff_scale) as f64,
+                    ((sim.screen_height - rect.y - rect.height) / eff_scale) as f64,
+                    (rect.width / eff_scale) as f64,
+                    (rect.height / eff_scale) as f64,
+                )
+            })
+            .unwrap_or((0.0, 0.0, 0.0, 0.0))
+    };
+    (left, bottom, width, height).into_stack(state)
 }
 
 pub fn get_clamp_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
@@ -482,6 +632,19 @@ pub fn get_clamp_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(top as f64));
     state.push(Val::Num(bottom as f64));
     Ok(4)
+}
+
+pub fn set_clamp_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let left = f64::from_stack(state, 2).unwrap_or(0.0) as f32;
+    let right = f64::from_stack(state, 3).unwrap_or(0.0) as f32;
+    let top = f64::from_stack(state, 4).unwrap_or(0.0) as f32;
+    let bottom = f64::from_stack(state, 5).unwrap_or(0.0) as f32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.clamp_rect_insets = (left, right, top, bottom);
+    }
+    Ok(0)
 }
 
 pub fn set_points_offset(state: &mut LuaState) -> LuaResult<u32> {

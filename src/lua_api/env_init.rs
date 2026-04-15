@@ -1075,6 +1075,7 @@ fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     let Val::Table(frame_mt_ref) = frame_mt else {
         unreachable!("frame metatable must be a table");
     };
+    super::rilua_timer_layout::register_layout_fns_on_table(state, frame_mt_ref)?;
     rilua_core_state::register_all(state, frame_mt_ref)?;
     rilua_misc::register_all(state, frame_mt_ref)?;
     rilua_text_attribute_event::register_all(state, frame_mt_ref)?;

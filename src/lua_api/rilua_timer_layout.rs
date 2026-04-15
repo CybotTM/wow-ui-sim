@@ -31,6 +31,7 @@
 
 use crate::lua_api::env::WowLuaAppData;
 use crate::lua_api::next_timer_id;
+use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -366,25 +367,59 @@ fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
 /// in WoW UI coordinates, or nil×4 if no rect is available.
 ///
 /// `self` is argument 1 (a frame-backed table). Returns 4 numbers or 0 values.
-fn get_frame_rect(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
+fn resolve_queryable_rect(
+    state: &mut LuaState,
+    id: u64,
+) -> LuaResult<Option<(crate::LayoutRect, f32, f32)>> {
+    let needs_resolve = {
+        let sim = borrow_state(state)?;
+        let Some(frame) = sim.widgets.get(id) else {
+            return Ok(None);
+        };
+        let has_queryable_rect =
+            !frame.anchors.is_empty() || frame.name.as_deref() == Some("UIParent") || id == 1;
+        if !has_queryable_rect {
+            return Ok(None);
+        }
+        frame.layout_rect.is_none() || sim.widgets.is_rect_dirty(id)
+    };
+
+    if needs_resolve {
+        let mut sim = borrow_state_mut(state)?;
+        if sim
+            .widgets
+            .get(id)
+            .and_then(|frame| frame.layout_rect)
+            .is_none()
+        {
+            sim.invalidate_layout(id);
+        }
+        sim.resolve_rect_if_dirty(id);
+    }
+
+    let sim = borrow_state(state)?;
     let Some(frame) = sim.widgets.get(id) else {
-        return Ok(0);
+        return Ok(None);
     };
     let Some(rect) = frame.layout_rect else {
+        return Ok(None);
+    };
+    Ok(Some((
+        rect,
+        frame.effective_scale.max(1e-6),
+        sim.screen_height,
+    )))
+}
+
+fn get_frame_rect(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let eff_scale = frame.effective_scale.max(1e-6);
-    let sh = sim.screen_height;
     let left = rect.x / eff_scale;
-    let bottom = (sh - rect.y - rect.height) / eff_scale;
+    let bottom = (screen_height - rect.y - rect.height) / eff_scale;
     let width = rect.width / eff_scale;
     let height = rect.height / eff_scale;
-    drop(sim);
     state.push(Val::Num(left as f64));
     state.push(Val::Num(bottom as f64));
     state.push(Val::Num(width as f64));
@@ -394,139 +429,78 @@ fn get_frame_rect(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `frame:GetLeft()` — left edge in WoW UI coordinates.
 fn get_left(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let left = rect.x / frame.effective_scale.max(1e-6);
-    drop(sim);
+    let left = rect.x / eff_scale;
     state.push(Val::Num(left as f64));
     Ok(1)
 }
 
 /// `frame:GetRight()` — right edge in WoW UI coordinates.
 fn get_right(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let right = (rect.x + rect.width) / frame.effective_scale.max(1e-6);
-    drop(sim);
+    let right = (rect.x + rect.width) / eff_scale;
     state.push(Val::Num(right as f64));
     Ok(1)
 }
 
 /// `frame:GetTop()` — top edge in WoW UI coordinates (inverted: large = near top of screen).
 fn get_top(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let sh = sim.screen_height;
-    let eff_scale = frame.effective_scale.max(1e-6);
-    let top = (sh - rect.y) / eff_scale;
-    drop(sim);
+    let top = (screen_height - rect.y) / eff_scale;
     state.push(Val::Num(top as f64));
     Ok(1)
 }
 
 /// `frame:GetBottom()` — bottom edge in WoW UI coordinates.
 fn get_bottom(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let sh = sim.screen_height;
-    let eff_scale = frame.effective_scale.max(1e-6);
-    let bottom = (sh - rect.y - rect.height) / eff_scale;
-    drop(sim);
+    let bottom = (screen_height - rect.y - rect.height) / eff_scale;
     state.push(Val::Num(bottom as f64));
     Ok(1)
 }
 
 /// `frame:GetWidth()` — frame width in WoW UI coordinates.
 fn get_width(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let width = rect.width / frame.effective_scale.max(1e-6);
-    drop(sim);
+    let width = rect.width / eff_scale;
     state.push(Val::Num(width as f64));
     Ok(1)
 }
 
 /// `frame:GetHeight()` — frame height in WoW UI coordinates.
 fn get_height(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let height = rect.height / frame.effective_scale.max(1e-6);
-    drop(sim);
+    let height = rect.height / eff_scale;
     state.push(Val::Num(height as f64));
     Ok(1)
 }
 
 /// `frame:GetSize()` — (width, height) in WoW UI coordinates.
 fn get_size(state: &mut LuaState) -> LuaResult<u32> {
-    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
-    let app = state
-        .app_data::<WowLuaAppData>()
-        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-    let sim = app.sim_state.borrow();
-    let Some(frame) = sim.widgets.get(id) else {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
         return Ok(0);
     };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(0);
-    };
-    let eff_scale = frame.effective_scale.max(1e-6);
     let width = rect.width / eff_scale;
     let height = rect.height / eff_scale;
-    drop(sim);
     state.push(Val::Num(width as f64));
     state.push(Val::Num(height as f64));
     Ok(2)
