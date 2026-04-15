@@ -4,7 +4,8 @@
 //! the corresponding mlua method. Complex operations are stubbed with TODO.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
+    frame_ref, val_to_string,
 };
 use crate::lua_api::rilua_script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, remove_script as remove_rilua_script,
@@ -845,6 +846,217 @@ fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+const FRAME_CALLBACKS_KEY: &str = "__callbacks";
+
+fn callback_event_table(
+    state: &mut LuaState,
+    frame_id: u64,
+    event: &str,
+    create: bool,
+) -> LuaResult<Option<GcRef<Table>>> {
+    let frame = frame_ref(state, frame_id)?;
+    let Val::Table(frame_ref) = frame else {
+        return Ok(None);
+    };
+
+    let callbacks_key = state.gc.intern_string(FRAME_CALLBACKS_KEY.as_bytes());
+    let callbacks = match state
+        .gc
+        .tables
+        .get(frame_ref)
+        .map(|t| t.get_str(callbacks_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+    {
+        Val::Table(table_ref) => table_ref,
+        _ if create => {
+            let table_ref = state.gc.alloc_table(Table::new());
+            if let Some(frame_table) = state.gc.tables.get_mut(frame_ref) {
+                let _ = frame_table.raw_set(
+                    Val::Str(callbacks_key),
+                    Val::Table(table_ref),
+                    &state.gc.string_arena,
+                );
+            }
+            table_ref
+        }
+        _ => return Ok(None),
+    };
+
+    let event_key = state.gc.intern_string(event.as_bytes());
+    let event_table = match state
+        .gc
+        .tables
+        .get(callbacks)
+        .map(|t| t.get_str(event_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+    {
+        Val::Table(table_ref) => table_ref,
+        _ if create => {
+            let table_ref = state.gc.alloc_table(Table::new());
+            if let Some(callbacks_table) = state.gc.tables.get_mut(callbacks) {
+                let _ = callbacks_table.raw_set(
+                    Val::Str(event_key),
+                    Val::Table(table_ref),
+                    &state.gc.string_arena,
+                );
+            }
+            table_ref
+        }
+        _ => return Ok(None),
+    };
+
+    Ok(Some(event_table))
+}
+
+fn callback_entries(state: &LuaState, event_table: GcRef<Table>) -> Vec<Val> {
+    state
+        .gc
+        .tables
+        .get(event_table)
+        .map(|table| table.array_slice().to_vec())
+        .unwrap_or_default()
+}
+
+fn callback_entry_fields(state: &mut LuaState, entry: Val) -> Option<(Val, Val)> {
+    let Val::Table(entry_ref) = entry else {
+        return None;
+    };
+    let owner_key = state.gc.intern_string(b"owner");
+    let func_key = state.gc.intern_string(b"func");
+    let table = state.gc.tables.get(entry_ref)?;
+    Some((
+        table.get_str(owner_key, &state.gc.string_arena),
+        table.get_str(func_key, &state.gc.string_arena),
+    ))
+}
+
+fn rewrite_callback_entries(state: &mut LuaState, event_table: GcRef<Table>, entries: &[Val]) {
+    let old_len = state
+        .gc
+        .tables
+        .get(event_table)
+        .map(|table| table.array_slice().len())
+        .unwrap_or(0);
+    let new_len = entries.len();
+    let clear_to = old_len.max(new_len);
+
+    if let Some(table) = state.gc.tables.get_mut(event_table) {
+        for (index, entry) in entries.iter().copied().enumerate() {
+            let _ = table.raw_set(Val::Num((index + 1) as f64), entry, &state.gc.string_arena);
+        }
+        for index in new_len..clear_to {
+            let _ = table.raw_set(
+                Val::Num((index + 1) as f64),
+                Val::Nil,
+                &state.gc.string_arena,
+            );
+        }
+    }
+}
+
+fn register_callback(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let event = val_to_string(state, stack_val(state, 2)).ok_or_else(|| {
+        runtime_error("CallbackRegistryMixin:RegisterCallback 'event' requires string type.")
+    })?;
+    let func = stack_val(state, 3);
+    if !matches!(func, Val::Function(_)) {
+        return Err(runtime_error(
+            "CallbackRegistryMixin:RegisterCallback 'func' requires function type.",
+        ));
+    }
+
+    let owner = match stack_val(state, 4) {
+        Val::Nil => func,
+        owner => owner,
+    };
+
+    if let Some(event_table) = callback_event_table(state, frame_id, &event, true)? {
+        let mut entries = callback_entries(state, event_table)
+            .into_iter()
+            .filter(|entry| {
+                callback_entry_fields(state, *entry)
+                    .map(|(entry_owner, _)| entry_owner != owner)
+                    .unwrap_or(false)
+            })
+            .collect::<Vec<_>>();
+
+        let entry_ref = state.gc.alloc_table(Table::new());
+        let owner_key = state.gc.intern_string(b"owner");
+        let func_key = state.gc.intern_string(b"func");
+        if let Some(entry_table) = state.gc.tables.get_mut(entry_ref) {
+            let _ = entry_table.raw_set(Val::Str(owner_key), owner, &state.gc.string_arena);
+            let _ = entry_table.raw_set(Val::Str(func_key), func, &state.gc.string_arena);
+        }
+        entries.push(Val::Table(entry_ref));
+        rewrite_callback_entries(state, event_table, &entries);
+    }
+
+    state.push(owner);
+    Ok(1)
+}
+
+fn unregister_callback(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let event = val_to_string(state, stack_val(state, 2)).ok_or_else(|| {
+        runtime_error("CallbackRegistryMixin:UnregisterCallback 'event' requires string type.")
+    })?;
+    let owner = stack_val(state, 3);
+    if matches!(owner, Val::Nil) {
+        return Err(runtime_error(
+            "CallbackRegistryMixin:UnregisterCallback 'owner' is required.",
+        ));
+    }
+
+    if let Some(event_table) = callback_event_table(state, frame_id, &event, false)? {
+        let entries = callback_entries(state, event_table)
+            .into_iter()
+            .filter(|entry| {
+                callback_entry_fields(state, *entry)
+                    .map(|(entry_owner, _)| entry_owner != owner)
+                    .unwrap_or(false)
+            })
+            .collect::<Vec<_>>();
+        rewrite_callback_entries(state, event_table, &entries);
+    }
+
+    Ok(0)
+}
+
+fn trigger_callback_event(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let event = val_to_string(state, stack_val(state, 2)).ok_or_else(|| {
+        runtime_error("CallbackRegistryMixin:TriggerEvent 'event' requires string type.")
+    })?;
+
+    let arg_count = state.top.saturating_sub(state.base) as i32;
+    let args: Vec<Val> = if arg_count >= 3 {
+        (3..=arg_count).map(|idx| stack_val(state, idx)).collect()
+    } else {
+        Vec::new()
+    };
+    let callbacks = callback_event_table(state, frame_id, &event, false)?
+        .map(|event_table| callback_entries(state, event_table))
+        .unwrap_or_default();
+
+    for entry in callbacks {
+        let Some((owner, func)) = callback_entry_fields(state, entry) else {
+            continue;
+        };
+        if matches!(func, Val::Nil) {
+            continue;
+        }
+        let mut call_args = Vec::with_capacity(args.len() + 1);
+        call_args.push(owner);
+        call_args.extend(args.iter().copied());
+        if let Err(error) = call_function_state(state, func, &call_args) {
+            call_error_handler_state(state, &error.to_string());
+        }
+    }
+
+    Ok(0)
+}
+
 fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u32> {
     // TODO: full unit-event callback (unit filter + Lua callback storage)
     let id = frame_id_from_stack(state, 1)?;
@@ -1213,6 +1425,9 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "RegisterEventCallback",
         register_event_callback,
     )?;
+    table_set_rust_fn(state, table, "RegisterCallback", register_callback)?;
+    table_set_rust_fn(state, table, "UnregisterCallback", unregister_callback)?;
+    table_set_rust_fn(state, table, "TriggerEvent", trigger_callback_event)?;
     table_set_rust_fn(
         state,
         table,

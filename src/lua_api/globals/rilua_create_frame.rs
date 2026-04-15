@@ -1197,6 +1197,25 @@ fn copy_table_into_frame(state: &mut LuaState, frame_id: u64, source: Val) {
                 fields_table.raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena);
         }
         for (key, value) in hash_entries {
+            let should_skip = match key {
+                Val::Str(str_ref) => state
+                    .gc
+                    .string_arena
+                    .get(str_ref)
+                    .map(|name| {
+                        matches!(
+                            name.as_str(),
+                            Some("RegisterCallback")
+                                | Some("UnregisterCallback")
+                                | Some("TriggerEvent")
+                        )
+                    })
+                    .unwrap_or(false),
+                _ => false,
+            };
+            if should_skip {
+                continue;
+            }
             let _ = fields_table.raw_set(key, value, &state.gc.string_arena);
         }
     }
