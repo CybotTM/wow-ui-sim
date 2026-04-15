@@ -257,11 +257,10 @@ fn set_button_text_from_info(state: &Rc<RefCell<SimState>>, info: &mlua::Table, 
             .widgets
             .get(btn_id)
             .and_then(|f| f.children_keys.get("Text"))
+            && let Some(tc) = s.widgets.get_mut_visual(text_child_id)
         {
-            if let Some(tc) = s.widgets.get_mut_visual(text_child_id) {
-                tc.text_stripped = Some(crate::render::strip_wow_markup(&text_str));
-                tc.text = Some(text_str);
-            }
+            tc.text_stripped = Some(crate::render::strip_wow_markup(&text_str));
+            tc.text = Some(text_str);
         }
         s.set_frame_visible(btn_id, true);
     }
@@ -429,20 +428,34 @@ fn register_toggle_dropdown(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<
                 let level = level.unwrap_or(1);
                 let list_val: Value = lua
                     .globals()
-                    .get(format!("DropDownList{}", level).as_str())
+                    .get(dropdown_list_name(level).as_str())
                     .unwrap_or(Value::Nil);
-                if let Some(id) = extract_frame_id(&list_val) {
-                    let mut s = state_t.borrow_mut();
-                    if let Some(f) = s.widgets.get_mut_visual(id) {
-                        f.visible = !f.visible;
-                    }
-                }
-                lua.globals()
-                    .set("UIDROPDOWNMENU_OPEN_MENU", dropdown_frame)?;
+                toggle_dropdown_list_visibility(&state_t, &list_val);
+                set_open_dropdown_menu(lua, dropdown_frame)?;
                 Ok(())
             },
         )?,
     )
+}
+
+fn dropdown_list_name(level: i32) -> String {
+    format!("DropDownList{}", level)
+}
+
+fn toggle_dropdown_list_visibility(state: &Rc<RefCell<SimState>>, list_val: &Value) {
+    let Some(id) = extract_frame_id(list_val) else {
+        return;
+    };
+    let mut sim = state.borrow_mut();
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return;
+    };
+    frame.visible = !frame.visible;
+}
+
+fn set_open_dropdown_menu(lua: &Lua, dropdown_frame: Option<Value>) -> Result<()> {
+    lua.globals()
+        .set("UIDROPDOWNMENU_OPEN_MENU", dropdown_frame)
 }
 
 fn register_close_dropdown_menus(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
@@ -571,7 +584,7 @@ fn register_query_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<
 
     let state_io = Rc::clone(state);
     let is_open = lua.create_function(move |lua, frame: Option<Value>| {
-        let target_id = match frame.as_ref().and_then(|v| extract_frame_id(v)) {
+        let target_id = match frame.as_ref().and_then(extract_frame_id) {
             Some(id) => id,
             None => return Ok(false),
         };
@@ -631,4 +644,41 @@ fn register_noop_functions(lua: &Lua) -> Result<()> {
     lua.globals()
         .set("UIDropDownMenu_HandleGlobalMouseEvent", handle_mouse)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::frame::frame_ref;
+
+    #[test]
+    fn dropdown_list_name_and_toggle_visibility_work_for_registered_frame() {
+        assert_eq!(dropdown_list_name(2), "DropDownList2");
+
+        let lua = Lua::new();
+        let state = Rc::new(RefCell::new(SimState::default()));
+        let mut frame = Frame::new(WidgetType::Button, Some("DropDownList2".to_string()), None);
+        frame.visible = false;
+        let frame_id = frame.id;
+        state.borrow_mut().widgets.register(frame);
+
+        let list_val = frame_ref(&lua, frame_id).expect("frame ref should build");
+        toggle_dropdown_list_visibility(&state, &list_val);
+        assert!(
+            state
+                .borrow()
+                .widgets
+                .get(frame_id)
+                .is_some_and(|frame| frame.visible)
+        );
+
+        toggle_dropdown_list_visibility(&state, &list_val);
+        assert!(
+            state
+                .borrow()
+                .widgets
+                .get(frame_id)
+                .is_some_and(|frame| !frame.visible)
+        );
+    }
 }
