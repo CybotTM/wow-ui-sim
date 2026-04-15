@@ -488,6 +488,14 @@ pub struct Frame {
 
     /// Whether this frame marks script-visible values as secret.
     pub prevent_secret_values: bool,
+
+    /// ID of the frame that owns this tooltip (set via `SetOwner`).
+    ///
+    /// `None` when the tooltip is not bound to any frame. Blizzard code
+    /// reads this via `GetOwner()` (returns the owning frame) and
+    /// `IsOwned(frame)` (checks identity) to decide whether to refresh or
+    /// clear tooltip contents.
+    pub tooltip_owner_id: Option<u64>,
 }
 
 // The `frame_defaults!` macro lives in `frame_defaults.rs` (included here

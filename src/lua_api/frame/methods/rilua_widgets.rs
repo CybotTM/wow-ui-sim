@@ -2433,9 +2433,120 @@ fn tooltip_set_unit_aura(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `Tooltip:SetOwner(frame, anchor, xOffset, yOffset)` — bind tooltip
+/// ownership and compute its anchor relative to the owner.
+///
+/// Records owner frame ID in `tooltip_owner_id` (consumed by `GetOwner` /
+/// `IsOwned`) and replaces the tooltip's anchor list based on `anchor`:
+///
+/// | Anchor type       | tooltip point | owner point   |
+/// |-------------------|---------------|---------------|
+/// | `ANCHOR_RIGHT`    | Left          | Right         |
+/// | `ANCHOR_LEFT`     | Right         | Left          |
+/// | `ANCHOR_TOP`      | Bottom        | Top           |
+/// | `ANCHOR_BOTTOM`   | Top           | Bottom        |
+/// | `ANCHOR_TOPRIGHT` | BottomRight   | TopRight      |
+/// | `ANCHOR_TOPLEFT`  | BottomLeft    | TopLeft       |
+/// | `ANCHOR_BOTTOMRIGHT` | TopRight   | BottomRight   |
+/// | `ANCHOR_BOTTOMLEFT`  | TopLeft    | BottomLeft    |
+/// | `ANCHOR_NONE`     | (clears)      | (clears)      |
+/// | `ANCHOR_PRESERVE` | (kept from previous SetOwner call)           |
+/// | `ANCHOR_CURSOR`   | TODO: cursor-follow, currently clears        |
 fn tooltip_set_owner(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: set_owner_impl (complex: anchor type, parent frame, etc.)
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let owner_id = frame_id_from_stack(state, 2).ok();
+    let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".into());
+    let x_offset = opt_f32(state, 4).unwrap_or(0.0);
+    let y_offset = opt_f32(state, 5).unwrap_or(0.0);
+
+    let mut sim = borrow_state_mut(state)?;
+    let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) else {
+        return Ok(0);
+    };
+    tooltip.tooltip_owner_id = owner_id;
+    apply_tooltip_anchor(tooltip, &anchor_kind, owner_id, x_offset, y_offset);
     Ok(0)
+}
+
+/// Apply the anchor transformation implied by `anchor_kind` onto the
+/// tooltip frame. Separated from `tooltip_set_owner` so the ID-string →
+/// anchor-point mapping stays readable.
+fn apply_tooltip_anchor(
+    tooltip: &mut crate::widget::Frame,
+    anchor_kind: &str,
+    owner_id: Option<u64>,
+    x_offset: f32,
+    y_offset: f32,
+) {
+    use crate::widget::AnchorPoint::{
+        Bottom, BottomLeft, BottomRight, Left, Right, Top, TopLeft, TopRight,
+    };
+    if anchor_kind == "ANCHOR_PRESERVE" {
+        return;
+    }
+    tooltip.anchors.clear();
+    let Some(owner_id) = owner_id else {
+        return;
+    };
+    let points = match anchor_kind {
+        "ANCHOR_RIGHT" => Some((Left, Right)),
+        "ANCHOR_LEFT" => Some((Right, Left)),
+        "ANCHOR_TOP" => Some((Bottom, Top)),
+        "ANCHOR_BOTTOM" => Some((Top, Bottom)),
+        "ANCHOR_TOPRIGHT" => Some((BottomRight, TopRight)),
+        "ANCHOR_TOPLEFT" => Some((BottomLeft, TopLeft)),
+        "ANCHOR_BOTTOMRIGHT" => Some((TopRight, BottomRight)),
+        "ANCHOR_BOTTOMLEFT" => Some((TopLeft, BottomLeft)),
+        _ => None, // ANCHOR_NONE, ANCHOR_CURSOR (TODO), unknown → no anchor
+    };
+    if let Some((point, relative_point)) = points {
+        tooltip.anchors.push(crate::widget::Anchor {
+            point,
+            relative_to: None,
+            relative_to_id: Some(owner_id as usize),
+            relative_point,
+            x_offset,
+            y_offset,
+        });
+    }
+}
+
+/// `Tooltip:GetOwner()` — return the frame currently bound via `SetOwner`.
+///
+/// Returns nil when no owner is set, matching Blizzard's contract:
+/// `GameTooltip:GetOwner() == self` must compare true only for the frame
+/// that actually called `SetOwner(self, ...)`.
+fn tooltip_get_owner(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let owner_id = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(tooltip_id).and_then(|f| f.tooltip_owner_id)
+    };
+    let val = match owner_id {
+        Some(id) => frame_ref(state, id)?,
+        None => Val::Nil,
+    };
+    state.push(val);
+    Ok(1)
+}
+
+/// `Tooltip:IsOwned(frame)` — true when `frame` is the tooltip's current owner.
+///
+/// Equivalent to `GetOwner() == frame` but avoids constructing an
+/// intermediate FrameRef. Returns `false` when tooltip has no owner.
+fn tooltip_is_owned(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let candidate_id = frame_id_from_stack(state, 2).ok();
+    let matched = {
+        let sim = borrow_state(state)?;
+        let tooltip_owner = sim.widgets.get(tooltip_id).and_then(|f| f.tooltip_owner_id);
+        match (tooltip_owner, candidate_id) {
+            (Some(owner), Some(candidate)) => owner == candidate,
+            _ => false,
+        }
+    };
+    state.push(Val::Bool(matched));
+    Ok(1)
 }
 
 fn tooltip_set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
@@ -3086,6 +3197,8 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetUnitDebuff", tooltip_set_unit_debuff)?;
     table_set_rust_fn(state, metatable, "SetUnitAura", tooltip_set_unit_aura)?;
     table_set_rust_fn(state, metatable, "SetOwner", tooltip_set_owner)?;
+    table_set_rust_fn(state, metatable, "GetOwner", tooltip_get_owner)?;
+    table_set_rust_fn(state, metatable, "IsOwned", tooltip_is_owned)?;
     table_set_rust_fn(state, metatable, "SetAnchorType", tooltip_set_anchor_type)?;
     table_set_rust_fn(state, metatable, "CopyTooltip", tooltip_copy_tooltip)?;
     table_set_rust_fn(state, metatable, "SetFrameStack", tooltip_set_frame_stack)?;

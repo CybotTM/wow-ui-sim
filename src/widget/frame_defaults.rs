@@ -254,6 +254,7 @@ macro_rules! frame_defaults {
             forbidden: false,
             is_protected: false,
             prevent_secret_values: false,
+            tooltip_owner_id: None,
         }
     };
 }
