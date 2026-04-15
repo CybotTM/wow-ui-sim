@@ -188,10 +188,52 @@ pub fn t_index_of(state: &mut LuaState) -> LuaResult<u32> {
 
 /// tInvert(t) — return a new table with keys/values swapped.
 ///
-/// TODO: rilua table iteration/creation API needed.
+/// `tInvert(tbl)` — return `{[v] = k for k, v in pairs(tbl)}`.
+///
+/// Mirrors Blizzard_SharedXMLBase/TableUtil.lua. Implemented in Rust
+/// because the stub version (which pushed `nil`) shadows the Lua
+/// definition — `EnumUtil.MakeEnum(...)` goes through this and every
+/// downstream enum (ObjectiveTrackerModuleState, etc.) ends up nil
+/// when the stub wins.
 pub fn t_invert(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: build inverted table
-    state.push(Val::Nil);
+    let input = stack_val(state, 1);
+    let Val::Table(tbl_ref) = input else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let array_values: Vec<Val> = state
+        .gc
+        .tables
+        .get(tbl_ref)
+        .map(|t| t.array_slice().to_vec())
+        .unwrap_or_default();
+    let hash_entries = state
+        .gc
+        .tables
+        .get(tbl_ref)
+        .map(|t| t.hash_entries())
+        .unwrap_or_default();
+
+    let inverted_ref = state.gc.alloc_table(rilua::vm::table::Table::new());
+    for (index, value) in array_values.into_iter().enumerate() {
+        if matches!(value, Val::Nil) {
+            continue;
+        }
+        let key = Val::Num((index + 1) as f64);
+        if let Some(t) = state.gc.tables.get_mut(inverted_ref) {
+            let _ = t.raw_set(value, key, &state.gc.string_arena);
+        }
+    }
+    for (key, value) in hash_entries {
+        if matches!(value, Val::Nil) {
+            continue;
+        }
+        if let Some(t) = state.gc.tables.get_mut(inverted_ref) {
+            let _ = t.raw_set(value, key, &state.gc.string_arena);
+        }
+    }
+    state.push(Val::Table(inverted_ref));
     Ok(1)
 }
 

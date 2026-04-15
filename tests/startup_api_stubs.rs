@@ -130,6 +130,48 @@ fn menu_util_create_root_menu_description_falls_back_after_menu_addon() {
 }
 
 #[test]
+fn t_invert_inverts_array_and_hash_entries() {
+    // Blizzard_SharedXMLBase's TableUtil.lua defines tInvert to build
+    // `{[value] = key}`, and EnumUtil.MakeEnum uses it to produce every
+    // addon-side enum (ObjectiveTrackerModuleState, PhotoSharingStatus,
+    // MapPinHighlightType, ...). Our stub used to push nil, silently
+    // nilling every such enum and cascading into "attempt to index
+    // global 'X' (a nil value)" on every addon load.
+    let env = env();
+    let (inv_x, inv_y, inv_z, inv_foo): (f64, f64, f64, String) = env
+        .eval(
+            r#"
+            local r = tInvert({"X", "Y", "Z", foo = "bar"})
+            return r.X, r.Y, r.Z, tostring(r.bar)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(inv_x, 1.0, "array index 1 inverts to key");
+    assert_eq!(inv_y, 2.0);
+    assert_eq!(inv_z, 3.0);
+    assert_eq!(inv_foo, "foo", "hash entries invert value->key");
+}
+
+#[test]
+fn enum_util_make_enum_returns_valid_enum() {
+    // Direct consequence of tInvert working: MakeEnum now yields a real
+    // enum. Blizzard_ObjectiveTrackerModule.lua:1 relies on this to set
+    // ObjectiveTrackerModuleState before downstream tables reference
+    // `ObjectiveTrackerModuleState.Skipped`.
+    let env = env();
+    let (skipped, shown_fully): (f64, f64) = env
+        .eval(
+            r#"
+            local e = EnumUtil.MakeEnum("Skipped", "NoObjectives", "NotShown", "ShownPartially", "ShownFully")
+            return e.Skipped, e.ShownFully
+            "#,
+        )
+        .unwrap();
+    assert_eq!(skipped, 1.0);
+    assert_eq!(shown_fully, 5.0);
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env
