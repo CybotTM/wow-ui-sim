@@ -14,12 +14,11 @@
 #[path = "saved_variables_serialize.rs"]
 mod saved_variables_serialize;
 
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
 
+use crate::lua_api::rilua_methods::call_function_state;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};
@@ -125,7 +124,7 @@ impl SavedVariablesManager {
     /// Returns the number of files loaded (0, 1, or 2 for account + character).
     pub fn load_wtf_for_addon(
         &mut self,
-        lua: &Rc<RefCell<rilua::Lua>>,
+        state: &mut LuaState,
         addon_name: &str,
     ) -> crate::Result<usize> {
         let Some(config) = self.wtf_config.clone() else {
@@ -151,7 +150,7 @@ impl SavedVariablesManager {
             if !path.exists() {
                 continue;
             }
-            match self.load_lua_file(lua, &path, "@WTF") {
+            match self.load_lua_file(state, &path, "@WTF") {
                 Ok(()) => loaded += 1,
                 Err(error) => tracing::warn!("Failed to load {description}: {error}"),
             }
@@ -164,27 +163,26 @@ impl SavedVariablesManager {
     /// Initialize saved variables for an addon before it loads.
     pub fn init_for_addon(
         &mut self,
-        lua: &Rc<RefCell<rilua::Lua>>,
+        state: &mut LuaState,
         addon_name: &str,
         saved_vars: &[String],
         saved_vars_per_char: &[String],
     ) -> crate::Result<()> {
-        self.init_registered_globals(lua, addon_name, saved_vars, false)?;
-        self.init_registered_globals(lua, addon_name, saved_vars_per_char, true)?;
+        self.init_registered_globals(state, addon_name, saved_vars, false)?;
+        self.init_registered_globals(state, addon_name, saved_vars_per_char, true)?;
         self.remember_registered_vars(addon_name, saved_vars, saved_vars_per_char);
         Ok(())
     }
 
     /// Save all registered variables for an addon in WoW-compatible Lua format.
-    pub fn save_addon(&self, lua: &Rc<RefCell<rilua::Lua>>, addon_name: &str) -> crate::Result<()> {
-        let mut lua = lua.borrow_mut();
-        self.write_registered_file(lua.state_mut(), addon_name, false)?;
-        self.write_registered_file(lua.state_mut(), addon_name, true)?;
+    pub fn save_addon(&self, state: &mut LuaState, addon_name: &str) -> crate::Result<()> {
+        self.write_registered_file(state, addon_name, false)?;
+        self.write_registered_file(state, addon_name, true)?;
         Ok(())
     }
 
     /// Save all registered variables for all addons.
-    pub fn save_all(&self, lua: &Rc<RefCell<rilua::Lua>>) -> crate::Result<()> {
+    pub fn save_all(&self, state: &mut LuaState) -> crate::Result<()> {
         let addon_names: Vec<String> = self
             .registered
             .keys()
@@ -192,7 +190,7 @@ impl SavedVariablesManager {
             .cloned()
             .collect();
         for addon_name in addon_names {
-            self.save_addon(lua, &addon_name)?;
+            self.save_addon(state, &addon_name)?;
         }
         Ok(())
     }
@@ -206,21 +204,18 @@ impl SavedVariablesManager {
 
     fn init_registered_globals(
         &self,
-        lua: &Rc<RefCell<rilua::Lua>>,
+        state: &mut LuaState,
         addon_name: &str,
         variable_names: &[String],
         per_character: bool,
     ) -> crate::Result<()> {
         for variable_name in variable_names {
-            let already_present = {
-                let mut lua = lua.borrow_mut();
-                !matches!(get_global(lua.state_mut(), variable_name), Val::Nil)
-            };
+            let already_present = !matches!(get_global(state, variable_name), Val::Nil);
             if already_present {
                 continue;
             }
-            let table = self.load_variable(lua, addon_name, variable_name, per_character)?;
-            set_global(lua.borrow_mut().state_mut(), variable_name, table);
+            let table = self.load_variable(state, addon_name, variable_name, per_character)?;
+            set_global(state, variable_name, table);
         }
         Ok(())
     }
@@ -243,31 +238,28 @@ impl SavedVariablesManager {
 
     fn load_variable(
         &self,
-        lua: &Rc<RefCell<rilua::Lua>>,
+        state: &mut LuaState,
         addon_name: &str,
         var_name: &str,
         per_character: bool,
     ) -> crate::Result<Val> {
         let path = self.storage_path(addon_name, per_character);
         if !path.exists() {
-            return Ok(create_empty_table(lua.borrow_mut().state_mut()));
+            return Ok(create_empty_table(state));
         }
 
-        self.load_lua_file(lua, &path, "@SavedVariables")?;
-        let value = {
-            let mut lua = lua.borrow_mut();
-            get_global(lua.state_mut(), var_name)
-        };
+        self.load_lua_file(state, &path, "@SavedVariables")?;
+        let value = get_global(state, var_name);
         if matches!(value, Val::Table(_)) {
             return Ok(value);
         }
 
-        Ok(create_empty_table(lua.borrow_mut().state_mut()))
+        Ok(create_empty_table(state))
     }
 
     fn load_lua_file(
         &self,
-        lua: &Rc<RefCell<rilua::Lua>>,
+        state: &mut LuaState,
         path: &Path,
         chunk_prefix: &str,
     ) -> crate::Result<()> {
@@ -278,9 +270,8 @@ impl SavedVariablesManager {
             chunk_prefix,
             path.file_name().unwrap_or_default().to_string_lossy()
         );
-        let mut lua = lua.borrow_mut();
-        let func = LuaApiMut::load_bytes(&mut *lua, content.as_bytes(), &chunk_name)?;
-        lua.call_function(&func, &[])?;
+        let func = LuaApiMut::load_bytes(state, content.as_bytes(), &chunk_name)?;
+        call_function_state(state, Val::Function(func.gc_ref()), &[])?;
         Ok(())
     }
 

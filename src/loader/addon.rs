@@ -32,7 +32,7 @@ fn init_saved_variables(
     mgr: &mut SavedVariablesManager,
 ) -> Vec<String> {
     let mut warnings = Vec::new();
-    match mgr.load_wtf_for_addon(env.lua(), folder_name) {
+    match env.with_state(|state| mgr.load_wtf_for_addon(state, folder_name)) {
         Ok(count) if count > 0 => {
             tracing::debug!(
                 "Loaded {} WTF SavedVariables file(s) for {}",
@@ -44,8 +44,9 @@ fn init_saved_variables(
             let saved_vars = toc.saved_variables();
             let saved_vars_per_char = toc.saved_variables_per_character();
             if (!saved_vars.is_empty() || !saved_vars_per_char.is_empty())
-                && let Err(e) =
-                    mgr.init_for_addon(env.lua(), folder_name, &saved_vars, &saved_vars_per_char)
+                && let Err(e) = env.with_state(|state| {
+                    mgr.init_for_addon(state, folder_name, &saved_vars, &saved_vars_per_char)
+                })
             {
                 warnings.push(format!(
                     "Failed to initialize saved variables for {}: {}",

@@ -196,6 +196,7 @@ mod tests {
 
     use super::*;
     use rilua::LuaApi;
+    use rilua::LuaApiMut;
     use tempfile::tempdir;
 
     use crate::lua_api::WowLuaEnv;
@@ -205,14 +206,21 @@ mod tests {
         WowLuaEnv::new().unwrap()
     }
 
+    fn with_state<T>(env: &WowLuaEnv, f: impl FnOnce(&mut LuaState) -> T) -> T {
+        let mut lua = env.rilua_mut();
+        f(lua.state_mut())
+    }
+
     #[test]
     fn test_init_empty_variables() {
         let env = new_env();
         let dir = tempdir().unwrap();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env, |state| {
+            mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         let is_empty: bool = env
             .eval("return type(TestDB) == 'table' and next(TestDB) == nil")
@@ -228,21 +236,25 @@ mod tests {
             let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-            mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-                .unwrap();
+            with_state(&env, |state| {
+                mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+            })
+            .unwrap();
 
             env.exec(r#"TestDB.setting1 = "hello"; TestDB.setting2 = 42"#)
                 .unwrap();
 
-            mgr.save_addon(&env.lua, "TestAddon").unwrap();
+            with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
         }
 
         {
             let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-            mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-                .unwrap();
+            with_state(&env, |state| {
+                mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+            })
+            .unwrap();
 
             let val1: String = env.eval("return TestDB.setting1").unwrap();
             let val2: i64 = env.eval("return TestDB.setting2").unwrap();
@@ -258,13 +270,15 @@ mod tests {
         let env = new_env();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env, |state| {
+            mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         env.exec(r#"TestDB.name = "Haky"; TestDB.level = 70; TestDB.active = true"#)
             .unwrap();
 
-        mgr.save_addon(&env.lua, "TestAddon").unwrap();
+        with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
 
         let content = fs::read_to_string(dir.path().join("TestAddon.lua")).unwrap();
         assert!(content.contains("TestDB = {"), "should have Lua assignment");
@@ -288,8 +302,10 @@ mod tests {
         let env = new_env();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env, |state| {
+            mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         env.exec(
             r#"
@@ -299,12 +315,14 @@ mod tests {
         )
         .unwrap();
 
-        mgr.save_addon(&env.lua, "TestAddon").unwrap();
+        with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
 
         let env2 = new_env();
         let mut mgr2 = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
-        mgr2.init_for_addon(&env2.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env2, |state| {
+            mgr2.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         let deep: String = env2.eval("return TestDB.nested.b.c").unwrap();
         assert_eq!(deep, "deep");
@@ -322,18 +340,22 @@ mod tests {
         let env = new_env();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env, |state| {
+            mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         env.exec(r#"TestDB.msg = "line1\nline2"; TestDB.path = "C:\\Users\\test""#)
             .unwrap();
 
-        mgr.save_addon(&env.lua, "TestAddon").unwrap();
+        with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
 
         let env2 = new_env();
         let mut mgr2 = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
-        mgr2.init_for_addon(&env2.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env2, |state| {
+            mgr2.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         let msg: String = env2.eval("return TestDB.msg").unwrap();
         assert_eq!(msg, "line1\nline2");
@@ -351,11 +373,13 @@ mod tests {
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
             mgr.set_character("Thrall", "Hyjal");
 
-            mgr.init_for_addon(&env.lua, "TestAddon", &[], &["CharDB".to_string()])
-                .unwrap();
+            with_state(&env, |state| {
+                mgr.init_for_addon(state, "TestAddon", &[], &["CharDB".to_string()])
+            })
+            .unwrap();
 
             env.exec("CharDB.level = 70").unwrap();
-            mgr.save_addon(&env.lua, "TestAddon").unwrap();
+            with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
         }
 
         {
@@ -363,8 +387,10 @@ mod tests {
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
             mgr.set_character("Thrall", "Hyjal");
 
-            mgr.init_for_addon(&env.lua, "TestAddon", &[], &["CharDB".to_string()])
-                .unwrap();
+            with_state(&env, |state| {
+                mgr.init_for_addon(state, "TestAddon", &[], &["CharDB".to_string()])
+            })
+            .unwrap();
 
             let level: i64 = env.eval("return CharDB.level").unwrap();
             assert_eq!(level, 70);
@@ -375,8 +401,10 @@ mod tests {
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
             mgr.set_character("Jaina", "Hyjal");
 
-            mgr.init_for_addon(&env.lua, "TestAddon", &[], &["CharDB".to_string()])
-                .unwrap();
+            with_state(&env, |state| {
+                mgr.init_for_addon(state, "TestAddon", &[], &["CharDB".to_string()])
+            })
+            .unwrap();
 
             let level: Val = env.eval("return CharDB.level").unwrap();
             assert!(matches!(level, Val::Nil));
@@ -391,15 +419,17 @@ mod tests {
             let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-            mgr.init_for_addon(
-                &env.lua,
-                "Angleur",
-                &[
-                    "AngleurConfig".to_string(),
-                    "AngleurMinimapButton".to_string(),
-                ],
-                &["AngleurCharacter".to_string()],
-            )
+            with_state(&env, |state| {
+                mgr.init_for_addon(
+                    state,
+                    "Angleur",
+                    &[
+                        "AngleurConfig".to_string(),
+                        "AngleurMinimapButton".to_string(),
+                    ],
+                    &["AngleurCharacter".to_string()],
+                )
+            })
             .unwrap();
 
             env.exec(
@@ -411,22 +441,24 @@ mod tests {
             )
             .unwrap();
 
-            mgr.save_addon(&env.lua, "Angleur").unwrap();
+            with_state(&env, |state| mgr.save_addon(state, "Angleur")).unwrap();
         }
 
         {
             let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-            mgr.init_for_addon(
-                &env.lua,
-                "Angleur",
-                &[
-                    "AngleurConfig".to_string(),
-                    "AngleurMinimapButton".to_string(),
-                ],
-                &["AngleurCharacter".to_string()],
-            )
+            with_state(&env, |state| {
+                mgr.init_for_addon(
+                    state,
+                    "Angleur",
+                    &[
+                        "AngleurConfig".to_string(),
+                        "AngleurMinimapButton".to_string(),
+                    ],
+                    &["AngleurCharacter".to_string()],
+                )
+            })
             .unwrap();
 
             let method: String = env.eval("return AngleurConfig.method").unwrap();
@@ -471,10 +503,12 @@ mod tests {
             "Character",
         ));
 
-        let loaded = mgr.load_wtf_for_addon(&env.lua, "TestAddon").unwrap();
+        let loaded = with_state(&env, |state| mgr.load_wtf_for_addon(state, "TestAddon")).unwrap();
         assert_eq!(loaded, 1);
-        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
-            .unwrap();
+        with_state(&env, |state| {
+            mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
 
         let source: String = env.eval("return TestDB.source").unwrap();
         assert_eq!(source, "wtf");
