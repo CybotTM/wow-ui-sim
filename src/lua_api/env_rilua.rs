@@ -30,6 +30,19 @@ impl WowLuaEnv {
         LuaApiMut::load_bytes(&mut *lua, code.as_bytes(), name)
     }
 
+    /// Compile Lua code, retarget its fenv to the registry secureenv, and
+    /// run it — the end-to-end secure-addon load path used by files marked
+    /// `[LoadIntoEnvironment secure]` in their TOC. Exposed primarily so
+    /// integration tests can exercise fenv isolation without staging an
+    /// entire addon directory.
+    pub fn exec_rilua_secure(&self, code: &str) -> rilua::LuaResult<()> {
+        let mut lua = self.lua.borrow_mut();
+        let func = LuaApiMut::load(&mut *lua, code)?;
+        super::globals::rilua_security::mark_secure(&mut *lua, &func)?;
+        lua.call_function(&func, &[])?;
+        Ok(())
+    }
+
     /// Call a rilua function handle with arguments.
     pub fn call_rilua(
         &self,
