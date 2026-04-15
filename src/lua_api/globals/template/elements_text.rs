@@ -254,11 +254,7 @@ pub(super) fn create_bar_texture_from_template(
     parent_name: &str,
     subst_parent: &str,
 ) {
-    let child_name = bar
-        .name
-        .as_ref()
-        .map(|name| name.replace("$parent", subst_parent))
-        .unwrap_or_else(|| format!("__bar_{}", rand_id()));
+    let child_name = template_texture_name(bar, subst_parent, "__bar_");
 
     let mut code = format!(
         r#"
@@ -289,59 +285,83 @@ pub(super) fn create_thumb_texture_from_template(
     parent_name: &str,
     subst_parent: &str,
 ) {
-    let child_name = thumb
+    let child_name = template_texture_name(thumb, subst_parent, "__thumb_");
+    let mut code = build_thumb_texture_create_preamble(parent_name, &child_name);
+    append_thumb_texture_size_and_file(&mut code, thumb);
+    code.push_str("            parent:SetThumbTexture(thumb)\n");
+    append_thumb_texture_parent_binding(&mut code, thumb.parent_key.as_deref());
+
+    code.push_str("        end\n");
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
+}
+
+fn template_texture_name(
+    texture: &crate::xml::TextureXml,
+    subst_parent: &str,
+    anonymous_prefix: &str,
+) -> String {
+    texture
         .name
         .as_ref()
         .map(|name| name.replace("$parent", subst_parent))
-        .unwrap_or_else(|| format!("__thumb_{}", rand_id()));
+        .unwrap_or_else(|| format!("{anonymous_prefix}{}", rand_id()))
+}
 
-    let mut code = format!(
+fn build_thumb_texture_create_preamble(parent_name: &str, child_name: &str) -> String {
+    format!(
         r#"
         local parent = {}
         if parent and parent.SetThumbTexture then
             local thumb = parent:CreateTexture("{}", "ARTWORK")
         "#,
         lua_global_ref(parent_name),
-        escape_lua_string(&child_name),
-    );
+        escape_lua_string(child_name),
+    )
+}
 
-    if let Some(size) = &thumb.size {
-        let (width, height) = get_size_values(size);
-        match (width, height) {
-            (Some(width), Some(height)) => {
-                code.push_str(&format!(
-                    "            thumb:SetSize({}, {})\n",
-                    width, height
-                ));
-            }
-            (Some(width), None) => {
-                code.push_str(&format!("            thumb:SetWidth({})\n", width));
-            }
-            (None, Some(height)) => {
-                code.push_str(&format!("            thumb:SetHeight({})\n", height));
-            }
-            _ => {}
+fn append_thumb_texture_size_and_file(code: &mut String, thumb: &crate::xml::TextureXml) {
+    append_thumb_texture_size(code, thumb.size.as_ref());
+    append_thumb_texture_file(code, thumb.file.as_deref());
+}
+
+fn append_thumb_texture_size(code: &mut String, size: Option<&crate::xml::SizeXml>) {
+    let Some(size) = size else {
+        return;
+    };
+    let (width, height) = get_size_values(size);
+    match (width, height) {
+        (Some(width), Some(height)) => {
+            code.push_str(&format!(
+                "            thumb:SetSize({}, {})\n",
+                width, height
+            ));
         }
+        (Some(width), None) => {
+            code.push_str(&format!("            thumb:SetWidth({})\n", width));
+        }
+        (None, Some(height)) => {
+            code.push_str(&format!("            thumb:SetHeight({})\n", height));
+        }
+        _ => {}
     }
-    if let Some(file) = &thumb.file {
-        code.push_str(&format!(
-            "            thumb:SetTexture(\"{}\")\n",
-            escape_lua_string(file)
-        ));
-    }
+}
 
-    code.push_str("            parent:SetThumbTexture(thumb)\n");
-    if let Some(parent_key) = &thumb.parent_key {
-        code.push_str(&format!(
-            "            parent[\"{}\"] = thumb\n",
-            escape_lua_string(parent_key)
-        ));
-    } else {
-        code.push_str("            parent[\"ThumbTexture\"] = thumb\n");
-    }
+fn append_thumb_texture_file(code: &mut String, file: Option<&str>) {
+    let Some(file) = file else {
+        return;
+    };
+    code.push_str(&format!(
+        "            thumb:SetTexture(\"{}\")\n",
+        escape_lua_string(file)
+    ));
+}
 
-    code.push_str("        end\n");
-    let _ = chunk_cache::exec(lua, &code, "template-elements");
+fn append_thumb_texture_parent_binding(code: &mut String, parent_key: Option<&str>) {
+    let binding = parent_key.unwrap_or("ThumbTexture");
+    code.push_str(&format!(
+        "            parent[\"{}\"] = thumb\n",
+        escape_lua_string(binding)
+    ));
 }
 
 pub(super) fn create_button_texture_from_template_direct(
@@ -639,7 +659,10 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
 
 #[cfg(test)]
 mod tests {
-    use super::{build_fontstring_create_preamble, quoted_fontstring_inherits};
+    use super::{
+        append_thumb_texture_parent_binding, build_fontstring_create_preamble,
+        quoted_fontstring_inherits,
+    };
 
     #[test]
     fn quoted_fontstring_inherits_uses_nil_for_missing_or_empty_values() {
@@ -664,5 +687,17 @@ mod tests {
         assert!(code.contains(
             "parent:CreateFontString(\"Frame\\\"Title\", \"OVERLAY\", \"GameFontNormal\")"
         ));
+    }
+
+    #[test]
+    fn append_thumb_texture_parent_binding_defaults_to_thumb_texture() {
+        let mut code = String::new();
+        append_thumb_texture_parent_binding(&mut code, None);
+
+        assert!(code.contains("parent[\"ThumbTexture\"] = thumb"));
+
+        code.clear();
+        append_thumb_texture_parent_binding(&mut code, Some("Thumb\"Key"));
+        assert!(code.contains("parent[\"Thumb\\\"Key\"] = thumb"));
     }
 }
