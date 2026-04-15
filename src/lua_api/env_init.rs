@@ -5,7 +5,6 @@
 
 use super::builtin_frames::create_builtin_frames;
 use super::state::{AddonRuntimeMetrics, SimState};
-use crate::loader::helpers::resolve_lua_escapes;
 use crate::lua_api::frame::methods::{
     rilua_button_anchor_hierarchy, rilua_core_state, rilua_misc, rilua_text_attribute_event,
     rilua_widgets,
@@ -1286,13 +1285,11 @@ pub(super) fn init_lua_state(
     lua: &mut rilua::Lua,
     state: Rc<RefCell<SimState>>,
 ) -> crate::Result<()> {
-    register_pure_lua_taint_stubs(lua)?;
     init_registry_tables(lua, &state)?;
     init_shared_bootstrap(lua)?;
     init_enum_globals(lua)?;
-    init_generated_global_strings(lua)?;
     init_frame_metatable(lua)?;
-    register_rilua_globals(lua)?;
+    super::globals::register_globals(lua, state.clone())?;
     init_runtime_surface_bootstrap(lua)?;
     super::globals::rilua_security::create_secure_environment(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
@@ -1300,17 +1297,6 @@ pub(super) fn init_lua_state(
     crate::loader::precompiled::init(lua)?;
     remove_sandbox_globals(lua)?;
     init_frame_metatable(lua)?;
-    Ok(())
-}
-
-/// Register pure-Lua taint stubs replacing Elune's C security library.
-///
-/// Provides the same API surface as Elune's `luaopen_security` and
-/// `luaopen_securecalls` without the C library dependency. Taint tracking
-/// is permissive — `issecure()` always returns true, `issecurevariable()`
-/// always returns true, `securecall` just calls the function directly.
-fn register_pure_lua_taint_stubs(lua: &mut rilua::Lua) -> crate::Result<()> {
-    super::globals::rilua_security::register_all(lua)?;
     Ok(())
 }
 
@@ -1347,17 +1333,6 @@ fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     )?;
     lua.exec(MISSING_CONSTANTS_LUA)?;
     lua.exec(CONSTANTS_VALUES_LUA)?;
-    Ok(())
-}
-
-fn init_generated_global_strings(lua: &mut rilua::Lua) -> crate::Result<()> {
-    let state = lua.state_mut();
-    let global = Val::Table(state.global);
-    for (name, value) in crate::global_strings::GLOBAL_STRINGS.entries() {
-        let resolved = resolve_lua_escapes(value);
-        let lua_value = crate::lua_api::rilua_methods::create_string(state, &resolved);
-        table_set(state, global, name, lua_value);
-    }
     Ok(())
 }
 
@@ -1406,16 +1381,6 @@ fn enable_taint_and_wrap_loadstring(lua: &mut rilua::Lua) -> crate::Result<()> {
 /// Remove globals that WoW's sandbox doesn't expose and internal helpers
 /// now stored in the Lua registry.
 fn remove_sandbox_globals(_lua: &mut rilua::Lua) -> crate::Result<()> {
-    Ok(())
-}
-
-fn register_rilua_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
-    super::globals::rilua_stubs::register_all(lua.state_mut());
-    super::globals::rilua_create_frame::register_all(lua)?;
-    super::globals::rilua_font_strings_collection::register_all(lua)?;
-    super::globals::rilua_utility_system_spell::register_all(lua)?;
-    super::globals::rilua_admin::register_all(lua)?;
-    super::rilua_timer_layout::register_all(lua)?;
     Ok(())
 }
 

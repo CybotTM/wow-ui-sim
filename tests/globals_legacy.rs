@@ -1,4 +1,4 @@
-//! Tests for globals_legacy.rs: print, ipairs, getmetatable overrides.
+//! Tests for global bootstrap/runtime overrides.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 

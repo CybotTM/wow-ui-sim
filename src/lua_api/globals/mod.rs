@@ -7,6 +7,7 @@ pub mod environment_restore;
 pub mod global_frames;
 pub mod hero_talents;
 pub mod lua_duration_object;
+pub mod register;
 pub mod rilua_admin;
 pub mod rilua_create_frame;
 pub mod rilua_font_strings_collection;
@@ -19,5 +20,5 @@ pub mod strings;
 pub mod template;
 pub mod unit_api;
 
-pub use super::globals_legacy::register_globals;
+pub use register::register_globals;
 pub use strings::register_all_ui_strings;

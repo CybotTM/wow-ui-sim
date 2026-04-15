@@ -12,7 +12,6 @@ pub(crate) mod frame;
 mod frame_methods;
 pub(crate) mod game_data;
 pub mod globals;
-mod globals_legacy;
 mod key_dispatch;
 pub(crate) mod keybindings;
 mod layout;
