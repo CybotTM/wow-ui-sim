@@ -204,6 +204,101 @@ fn fire_events_and_timers(env: &WowLuaEnv) {
     let _ = env.process_timers();
 }
 
+/// Audit: every `[LoadIntoEnvironment secure]` annotation in Blizzard TOCs
+/// must match this explicit list.
+///
+/// Fails if a new annotation is introduced (we want to know about it
+/// deliberately, not silently), or if an existing annotation disappears
+/// (so we can track Blizzard's secure-env footprint across patches).
+#[test]
+fn test_secure_env_toc_annotations_are_exhaustive() {
+    let ui = blizzard_ui_dir();
+    let toc_paths = wow_ui_sim::loader::discover_all_blizzard_addons(&ui)
+        .into_iter()
+        .map(|(_, path)| path)
+        .collect::<Vec<_>>();
+
+    let mut secure_files: Vec<String> = Vec::new();
+    for toc_path in &toc_paths {
+        let Ok(toc) = wow_ui_sim::toc::TocFile::from_file(toc_path) else {
+            continue;
+        };
+        for (index, file) in toc.files.iter().enumerate() {
+            if toc.file_use_secure_env(index) == Some(true) {
+                let addon = toc_path
+                    .parent()
+                    .and_then(|p| p.file_name())
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("?");
+                secure_files.push(format!("{addon}/{}", file.display()));
+            }
+        }
+    }
+    secure_files.sort();
+
+    let expected = vec![
+        "Blizzard_ChatFrameBase/Shared/ChatFrameFiltersSecure.lua".to_string(),
+        "Blizzard_RestrictedAddOnEnvironment/RestrictedEnvironment.lua".to_string(),
+    ];
+    assert_eq!(
+        secure_files, expected,
+        "the set of [LoadIntoEnvironment secure] files drifted; update this test \
+         only after confirming the new/removed entries actually run under secureenv"
+    );
+}
+
+/// Every annotated secure file should load without warnings and its
+/// downstream surface should be reachable — a smoke test that our per-file
+/// TOC secureenv dispatch is wired end-to-end.
+#[test]
+fn test_secure_env_annotated_files_load_cleanly() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+        let mut warnings: Vec<String> = Vec::new();
+        for (name, toc_path) in &addons {
+            let result = load_addon(&env.loader_env(), toc_path)
+                .unwrap_or_else(|e| panic!("{name} should load: {e}"));
+            warnings.extend(result.warnings);
+            // Stop once both secure-annotated addons have loaded.
+            if name == "Blizzard_ChatFrameBase" || name == "Blizzard_RestrictedAddOnEnvironment" {
+                continue;
+            }
+        }
+
+        let noisy_secure = warnings
+            .iter()
+            .filter(|w| {
+                w.contains("ChatFrameFiltersSecure.lua") || w.contains("RestrictedEnvironment.lua")
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        assert!(
+            noisy_secure.is_empty(),
+            "secure-annotated files should load cleanly, got:\n{}",
+            noisy_secure.join("\n")
+        );
+
+        // Downstream surfaces exposed by secure files.
+        let (restricted_scope_ty, secure_filters_delegate_ty): (String, String) = env
+            .eval(
+                r#"
+                -- RESTRICTED_FUNCTIONS_SCOPE lands on the addon table, not _G,
+                -- so we probe the scope via a known descendent global that
+                -- Blizzard_RestrictedAddOnEnvironment registers once loaded.
+                return type(CallRestrictedClosure),
+                       type(SecureTypes and SecureTypes.CreateSecureArray)
+                "#,
+            )
+            .expect("secure surface should be introspectable");
+        assert_eq!(restricted_scope_ty, "function");
+        assert_eq!(secure_filters_delegate_ty, "function");
+    }
+}
+
 #[test]
 fn test_restricted_addon_environment_exposes_execution_surface() {
     test_timeout! {
