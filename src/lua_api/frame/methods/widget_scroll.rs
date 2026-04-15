@@ -15,6 +15,14 @@ pub fn add_scrollframe_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_scrollbox_register_callback_method(methods);
+    add_scrollbox_for_each_frame_method(methods);
+    add_scrollbox_unregister_callback_method(methods);
+    add_scrollbox_can_interpolate_scroll_method(methods);
+    add_scrollbox_set_interpolate_scroll_method(methods);
+}
+
+fn add_scrollbox_register_callback_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("RegisterCallback", |lua, this, args: MultiValue| {
         if let Some(result) =
             call_scrollbox_mixin_override(lua, this.0, "RegisterCallback", args.clone())?
@@ -23,17 +31,19 @@ pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         }
         register_scrollbox_callback_fallback(lua, this.0, args)
     });
+}
+
+fn add_scrollbox_for_each_frame_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("ForEachFrame", |lua, this, cb: Function| {
-        if let Some(result) = call_scrollbox_mixin_override(
-            lua,
-            this.0,
-            "ForEachFrame",
-            MultiValue::from_vec(vec![Value::Function(cb.clone())]),
-        )? {
+        let args = MultiValue::from_vec(vec![Value::Function(cb.clone())]);
+        if let Some(result) = call_scrollbox_mixin_override(lua, this.0, "ForEachFrame", args)? {
             return Ok(result);
         }
         for_each_scrollbox_frame_fallback(lua, this.0, cb)
     });
+}
+
+fn add_scrollbox_unregister_callback_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("UnregisterCallback", |lua, this, args: MultiValue| {
         if let Some(result) =
             call_scrollbox_mixin_override(lua, this.0, "UnregisterCallback", args.clone())?
@@ -42,6 +52,11 @@ pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         }
         unregister_scrollbox_callback_fallback(lua, this.0, args)
     });
+}
+
+fn add_scrollbox_can_interpolate_scroll_method<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+) {
     methods.add_method("CanInterpolateScroll", |lua, this, ()| {
         if let Some(result) =
             call_scrollbox_mixin_override(lua, this.0, "CanInterpolateScroll", MultiValue::new())?
@@ -50,13 +65,16 @@ pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         }
         can_interpolate_scroll_fallback(lua, this.0)
     });
+}
+
+fn add_scrollbox_set_interpolate_scroll_method<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+) {
     methods.add_method("SetInterpolateScroll", |lua, this, enabled: bool| {
-        if let Some(result) = call_scrollbox_mixin_override(
-            lua,
-            this.0,
-            "SetInterpolateScroll",
-            MultiValue::from_vec(vec![Value::Boolean(enabled)]),
-        )? {
+        let args = MultiValue::from_vec(vec![Value::Boolean(enabled)]);
+        if let Some(result) =
+            call_scrollbox_mixin_override(lua, this.0, "SetInterpolateScroll", args)?
+        {
             return Ok(result);
         }
         set_interpolate_scroll_fallback(lua, this.0, enabled)?;
