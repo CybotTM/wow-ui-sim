@@ -439,6 +439,9 @@ fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
     let Some(name) = val_to_string(state, name_val) else {
         return Ok(0);
     };
+    if protected_write_blocked(state, id) {
+        return Ok(0);
+    }
     let name_arg = create_string(state, &name);
     store_simple_attribute(state, id, &name, value)?;
     if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
@@ -446,6 +449,24 @@ fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
         dispatch_attribute_changed(state, handler, frame, name_arg, value);
     }
     Ok(0)
+}
+
+/// True when the target frame is protected and the current call is
+/// running under addon taint, matching Blizzard's "protected frames
+/// reject insecure attribute writes" rule. When blocked, `SetAttribute`
+/// / `SetAttributeNoHandler` silently skip the mutation — matching real
+/// WoW, which drops the write and surfaces it through
+/// `ADDON_ACTION_FORBIDDEN` instead of a Lua error. The event dispatch
+/// is a follow-up; silent skip already gives insecure addons the
+/// "nothing happened" outcome they'd see in-game.
+fn protected_write_blocked(state: &mut LuaState, id: u64) -> bool {
+    if rilua::api::state_is_secure(state) {
+        return false;
+    }
+    let Ok(sim) = borrow_state(state) else {
+        return false;
+    };
+    sim.widgets.get(id).is_some_and(|f| f.is_protected)
 }
 
 fn dispatch_attribute_changed(
@@ -486,6 +507,9 @@ fn set_attribute_no_handler(state: &mut LuaState) -> LuaResult<u32> {
     let Some(name) = val_to_string(state, name_val) else {
         return Ok(0);
     };
+    if protected_write_blocked(state, id) {
+        return Ok(0);
+    }
     store_simple_attribute(state, id, &name, value)?;
     Ok(0)
 }
