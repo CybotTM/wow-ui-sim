@@ -365,6 +365,124 @@ fn test_runtime_spellfx_template_creates_nested_inherited_children() {
 }
 
 #[test]
+fn test_runtime_button_template_inherits_texture_slots() {
+    let t = load_test_xml(
+        "runtime-button-template-textures",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Button name="InheritedTextureButtonTemplate" virtual="true">
+                <NormalTexture atlas="ui-questtrackerbutton-secondary-collapse" useAtlasSize="true"/>
+                <PushedTexture atlas="ui-questtrackerbutton-secondary-collapse-pressed" useAtlasSize="true"/>
+            </Button>
+            <Frame name="TextureButtonHolder">
+                <Frames>
+                    <Button parentKey="TemplateButton" inherits="InheritedTextureButtonTemplate"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local button = TextureButtonHolder.TemplateButton
+            assert(button ~= nil, "template child button should exist")
+            assert(button:GetNormalTexture() ~= nil, "template normal texture should exist")
+            assert(button:GetPushedTexture() ~= nil, "template pushed texture should exist")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_runtime_template_creates_inherited_layer_regions() {
+    let t = load_test_xml(
+        "runtime-template-layer-regions",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="HeaderTemplate" virtual="true">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="Text" justifyH="LEFT" maxLines="1"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+            <Frame name="ContainerTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="Header" inherits="HeaderTemplate"/>
+                </Frames>
+            </Frame>
+            <Frame name="ContainerInstance" inherits="ContainerTemplate"/>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(ContainerInstance.Header ~= nil, "template child frame should exist")
+            assert(ContainerInstance.Header.Text ~= nil, "inherited fontstring should exist")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_runtime_create_frame_creates_inherited_layer_regions() {
+    let t = load_test_xml(
+        "runtime-create-frame-template-layer-regions",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="HeaderTemplate" virtual="true">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="Text" justifyH="LEFT" maxLines="1"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+            <Frame name="ContainerTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="Header" inherits="HeaderTemplate"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(r#"CreateFrame("Frame", "RuntimeTemplateLayerFrame", UIParent, "ContainerTemplate")"#)
+        .unwrap();
+
+    {
+        let state = t.env.state().borrow();
+        let parent_id = state
+            .widgets
+            .get_id_by_name("RuntimeTemplateLayerFrame")
+            .expect("runtime frame should exist");
+        let parent = state
+            .widgets
+            .get(parent_id)
+            .expect("runtime frame should be registered");
+        assert!(
+            parent.children_keys.contains_key("Header"),
+            "runtime template should assign Header in Rust children_keys"
+        );
+    }
+
+    t.env
+        .exec(
+            r#"
+            local frame = RuntimeTemplateLayerFrame
+            assert(rawget(frame, "Header") ~= nil, "template child frame should exist in raw table")
+            assert(frame.Header ~= nil, "template child frame should exist")
+            assert(frame.Header.Text ~= nil, "inherited fontstring should exist")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
     let t = load_test_xml(
         "runtime-minimal-scrollbar-direct-grandchildren",
@@ -556,6 +674,29 @@ fn test_runtime_template_method_scripts_apply() {
             assert(type(onEvent) == "function", "OnEvent method script should be installed")
             onEvent(frame, "TEST_EVENT", "payload")
             assert(frame.lastMethodEvent == "TEST_EVENT:payload", "method script should dispatch through frame method")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_runtime_template_parent_array_registers_instance_on_parent() {
+    let t = load_test_xml(
+        "runtime-template-parent-array",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeParentArrayTemplate" virtual="true" parentArray="Slots"/>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local parent = CreateFrame("Frame", "RuntimeParentArrayParent", UIParent)
+            local child = CreateFrame("Frame", "RuntimeParentArrayChild", parent, "RuntimeParentArrayTemplate")
+            assert(type(parent.Slots) == "table", "runtime template parentArray should create parent table")
+            assert(parent.Slots[1] == child, "runtime template parentArray should register frame instance")
         "#,
         )
         .unwrap();

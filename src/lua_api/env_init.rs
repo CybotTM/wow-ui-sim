@@ -372,6 +372,29 @@ if UnitSex == nil then
   end
 end
 
+if UnitIsGhost == nil then
+  function UnitIsGhost(_unit)
+    return false
+  end
+end
+
+if UnitIsDead == nil then
+  function UnitIsDead(_unit)
+    return false
+  end
+end
+
+if CanAutoSetGamePadCursorControl == nil then
+  function CanAutoSetGamePadCursorControl(_enabled)
+    return false
+  end
+end
+
+if SetGamePadCursorControl == nil then
+  function SetGamePadCursorControl(_enabled)
+  end
+end
+
 if LocalizedClassList == nil then
   function LocalizedClassList(_female)
     return {

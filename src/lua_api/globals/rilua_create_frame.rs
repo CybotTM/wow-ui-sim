@@ -7,9 +7,10 @@
 //!
 //! `register_all` registers all globals on a rilua Lua state.
 
+use crate::lua_api::LoaderEnv;
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id, frame_ref,
-    registry_get, registry_table_or_create, table_get, table_set,
+    borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id,
+    frame_ref, registry_get, registry_table_or_create, state_handle, table_get, table_set,
 };
 use crate::lua_bridge::FromStack;
 use crate::widget::WidgetType;
@@ -690,8 +691,21 @@ fn apply_runtime_template_chain(
 
     let state_rc = sim_state_rc(state)?;
     let frame_name = frame_lookup_name(state, frame_id);
+    let template_parent_array = chain
+        .iter()
+        .find_map(|entry| entry.frame.parent_array.as_deref());
+    let parent_id = borrow_state(state)?
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.parent_id);
+    if let Some(parent_array) = template_parent_array
+        && let Some(parent_id) = parent_id
+    {
+        append_parent_array_entry(state, parent_id, parent_array, frame_id);
+    }
 
     for entry in &chain {
+        ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
         apply_template_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
         if let Some(scripts) = entry.frame.scripts() {
@@ -707,6 +721,12 @@ fn apply_runtime_template_chain(
         )?;
     }
 
+    apply_runtime_template_loader_effects(
+        state,
+        &frame_name,
+        &crate::xml::FrameXml::default(),
+        Some(inherits),
+    )?;
     apply_runtime_template_direct_properties(&state_rc, frame_id, inherits, &frame_name);
     if fire_on_load {
         fire_frame_on_load(state, frame_id)?;
@@ -816,6 +836,8 @@ fn create_template_child_frame(
     create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
 
     apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
+    ensure_runtime_button_texture_slots(state, child_id, frame)?;
+    apply_runtime_template_loader_effects(state, &child_name, frame, inherited_chain.as_deref())?;
     apply_template_mixins(state, child_id, frame.combined_mixin().as_deref());
     apply_template_key_values(state, child_id, frame.all_key_values());
     if let Some(scripts) = frame.scripts() {
@@ -823,6 +845,87 @@ fn create_template_child_frame(
     }
     fire_frame_on_load(state, child_id)?;
     Ok(Some(child_id))
+}
+
+fn apply_runtime_template_loader_effects(
+    state: &mut LuaState,
+    frame_name: &str,
+    frame: &crate::xml::FrameXml,
+    inherits: Option<&str>,
+) -> LuaResult<()> {
+    let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
+    let inherits = inherits.unwrap_or("");
+    let mut timing = crate::loader::LoadTiming::default();
+
+    for entry in crate::xml::get_template_chain(inherits) {
+        crate::loader::xml_layer_batch::create_layer_children_batched(
+            &loader_env,
+            &entry.frame,
+            frame_name,
+            &mut timing,
+        )
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    }
+    crate::loader::xml_layer_batch::create_layer_children_batched(
+        &loader_env,
+        frame,
+        frame_name,
+        &mut timing,
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::button::apply_button_textures(&loader_env, frame, frame_name, inherits)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::button::apply_button_text(&loader_env, frame, frame_name, inherits)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::apply_animation_groups(
+        &loader_env,
+        frame,
+        frame_name,
+        inherits,
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::apply_bar_texture(&loader_env, frame, frame_name)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::init_action_bar_tables(&loader_env, frame, frame_name);
+    Ok(())
+}
+
+fn ensure_runtime_button_texture_slots(
+    state: &mut LuaState,
+    frame_id: u64,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<()> {
+    let is_button = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(frame_id)
+            .map(|widget| {
+                matches!(
+                    widget.widget_type,
+                    WidgetType::Button | WidgetType::CheckButton
+                )
+            })
+            .unwrap_or(false)
+    };
+    if !is_button {
+        return Ok(());
+    }
+
+    let slots = [
+        ("NormalTexture", frame.normal_texture()),
+        ("PushedTexture", frame.pushed_texture()),
+        ("HighlightTexture", frame.highlight_texture()),
+        ("DisabledTexture", frame.disabled_texture()),
+    ];
+    let mut sim = borrow_state_mut(state)?;
+    for (key, texture) in slots {
+        if texture.is_some() {
+            crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture(
+                &mut sim, frame_id, key,
+            );
+        }
+    }
+    Ok(())
 }
 
 fn apply_runtime_template_direct_properties(

@@ -357,6 +357,41 @@ fn test_animation_runtime_exposes_core_configuration_methods() {
 }
 
 #[test]
+fn test_gamepad_cursor_bootstrap_functions_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (auto_ty, auto_value, set_ty): (String, bool, String) = env
+        .eval(
+            r#"
+            return type(CanAutoSetGamePadCursorControl),
+                CanAutoSetGamePadCursorControl(true),
+                type(SetGamePadCursorControl)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(auto_ty, "function");
+    assert!(!auto_value);
+    assert_eq!(set_ty, "function");
+}
+
+#[test]
+fn test_unit_state_bootstrap_functions_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (ghost_ty, ghost_value, dead_ty, dead_value): (String, bool, String, bool) = env
+        .eval(
+            r#"
+            return type(UnitIsGhost), UnitIsGhost("player"), type(UnitIsDead), UnitIsDead("player")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(ghost_ty, "function");
+    assert!(!ghost_value);
+    assert_eq!(dead_ty, "function");
+    assert!(!dead_value);
+}
+
+#[test]
 fn test_ui_special_frames_table() {
     let env = WowLuaEnv::new().unwrap();
     let ty: String = env.eval("return type(UISpecialFrames)").unwrap();
