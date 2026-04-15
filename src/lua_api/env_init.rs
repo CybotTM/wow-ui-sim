@@ -197,6 +197,30 @@ if GetErrorCallstackHeight == nil then
   end
 end
 
+if GetBackgroundLoadingStatus == nil then
+  function GetBackgroundLoadingStatus()
+    return 0
+  end
+end
+
+if debugstack == nil then
+  function debugstack()
+    return ""
+  end
+end
+
+if debuglocals == nil then
+  function debuglocals()
+    return ""
+  end
+end
+
+if issecure == nil then
+  function issecure()
+    return true
+  end
+end
+
 local function __wow_namespace(defaults)
   return setmetatable(defaults or {}, {
     __index = function(t, key)
@@ -221,6 +245,45 @@ local function __wow_merge_namespace(existing, defaults)
     setmetatable(namespace, getmetatable(__wow_namespace()))
   end
   return namespace
+end
+
+local function __wow_copy_table(source)
+  local copy = {}
+  for key, value in pairs(source or {}) do
+    copy[key] = value
+  end
+  return copy
+end
+
+local function __wow_make_calendar_time(dayOffset, minuteOffset)
+  local day = 14 + (tonumber(dayOffset) or 0)
+  local totalMinutes = (12 * 60) + (tonumber(minuteOffset) or 0)
+  local hour = math.floor(totalMinutes / 60)
+  local minute = totalMinutes % 60
+  while minute < 0 do
+    minute = minute + 60
+    hour = hour - 1
+  end
+  while minute >= 60 do
+    minute = minute - 60
+    hour = hour + 1
+  end
+  while hour < 0 do
+    hour = hour + 24
+    day = day - 1
+  end
+  while hour >= 24 do
+    hour = hour - 24
+    day = day + 1
+  end
+  return {
+    year = 2026,
+    month = 4,
+    monthDay = day,
+    weekday = 3,
+    hour = hour,
+    minute = minute,
+  }
 end
 
 Kiosk = __wow_merge_namespace(Kiosk, {
@@ -252,6 +315,11 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
   IsChannelRegionalForChannelID = function() return false end,
 })
 
+C_VoiceChat = __wow_merge_namespace(C_VoiceChat, {
+  GetTtsVoices = function() return {} end,
+  IsTranscriptionAllowed = function() return false end,
+})
+
 C_Navigation = __wow_merge_namespace(C_Navigation, {
   WasClampedToScreen = function() return false end,
   GetTargetState = function() return 0 end,
@@ -259,6 +327,76 @@ C_Navigation = __wow_merge_namespace(C_Navigation, {
   GetDistance = function() return 0 end,
   GetNearestPartyMemberToken = function() return nil end,
   GetFrame = function() return UIParent end,
+})
+
+C_DateAndTime = __wow_merge_namespace(C_DateAndTime, {
+  GetCurrentCalendarTime = function()
+    return __wow_make_calendar_time(0, 0)
+  end,
+  AdjustTimeByDays = function(calendarTime, deltaDays)
+    local time = __wow_copy_table(calendarTime)
+    time.monthDay = (time.monthDay or 14) + (tonumber(deltaDays) or 0)
+    return time
+  end,
+  AdjustTimeByMinutes = function(calendarTime, deltaMinutes)
+    local base = __wow_copy_table(calendarTime)
+    local totalMinutes = ((base.hour or 12) * 60) + (base.minute or 0) + (tonumber(deltaMinutes) or 0)
+    local hour = math.floor(totalMinutes / 60)
+    local minute = totalMinutes % 60
+    while minute < 0 do
+      minute = minute + 60
+      hour = hour - 1
+    end
+    while minute >= 60 do
+      minute = minute - 60
+      hour = hour + 1
+    end
+    while hour < 0 do
+      hour = hour + 24
+      base.monthDay = (base.monthDay or 14) - 1
+    end
+    while hour >= 24 do
+      hour = hour - 24
+      base.monthDay = (base.monthDay or 14) + 1
+    end
+    base.hour = hour
+    base.minute = minute
+    return base
+  end,
+  GetCalendarTimeFromEpoch = function(epoch)
+    return __wow_make_calendar_time(0, math.floor((tonumber(epoch) or 0) / 60))
+  end,
+  GetWeeklyResetStartTime = function()
+    return 0
+  end,
+  GetSecondsUntilDailyReset = function()
+    return 0
+  end,
+})
+
+C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
+  IsShop2Enabled = function() return false end,
+  HasNewProducts = function() return false end,
+  GetAvailableCategoryIDs = function() return {} end,
+  GetFailureInfo = function() return nil, nil end,
+  RefreshVirtualCurrencyBalance = __wow_noop,
+  GetVirtualCurrencyBalance = function() return 0 end,
+  OpenCatalogShopInteractionFromShop = function() return nil end,
+  OpenCatalogShopInteractionFromHouse = function() return nil end,
+  CloseCatalogShopInteraction = __wow_noop,
+  GetFirstCategoryByProductID = function() return nil end,
+  ShouldShowHousingWarning = function() return false end,
+  GetProductInfo = function() return nil end,
+  GetCatalogShopProductDisplayInfo = function() return nil end,
+  GetProductIDsForBundle = function() return {} end,
+  GetSpellVisualInfoForMount = function() return nil end,
+  PurchaseProduct = __wow_noop,
+  ConfirmHousingPurchase = __wow_noop,
+  ProductDisplayedTelemetry = __wow_noop,
+  OnLegalDisclaimerClicked = __wow_noop,
+  FindBestCurrencyProductForNeededAmount = function() return nil end,
+  IsProductIncludedInAnyBundle = function() return false end,
+  GetProductAvailabilityTimeRemainingSecs = function() return 0 end,
 })
 
 C_WowTokenPublic = __wow_merge_namespace(C_WowTokenPublic, {
@@ -270,6 +408,24 @@ C_WowTokenPublic = __wow_merge_namespace(C_WowTokenPublic, {
   UpdateListedAuctionableTokens = __wow_noop,
   UpdateMarketPrice = __wow_noop,
   IsAuctionableWowToken = function() return false end,
+})
+
+C_WowTokenSecure = __wow_merge_namespace(C_WowTokenSecure, {
+  CancelRedeem = __wow_noop,
+  GetBalanceRedeemAmount = function() return 0 end,
+  SetBalanceAmountString = __wow_noop,
+  GetBalanceRedemptionInfo = function() return 0, 0, false, nil end,
+  GetGameTimeRedemptionInfo = function() return false, 0 end,
+  GetRemainingGameTime = function() return 0 end,
+  CanRedeemForBalance = function() return false end,
+  RedeemToken = __wow_noop,
+  WillKickFromWorld = function() return false end,
+  GetTokenCount = function() return 0 end,
+  RedeemTokenConfirm = __wow_noop,
+  IsRedemptionStillValid = function() return false end,
+  ConfirmSellToken = __wow_noop,
+  ConfirmBuyToken = __wow_noop,
+  GetPriceLockDuration = function() return 0 end,
 })
 
 if EnumUtil == nil then

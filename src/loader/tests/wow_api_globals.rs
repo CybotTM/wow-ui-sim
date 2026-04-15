@@ -564,6 +564,109 @@ fn test_startup_bootstrap_namespaces_exist() {
 }
 
 #[test]
+fn test_startup_service_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (background_ty, background_status, debugstack_ty, debugstack_value, issecure_ty, secure): (
+        String,
+        i64,
+        String,
+        String,
+        String,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            return type(GetBackgroundLoadingStatus),
+                GetBackgroundLoadingStatus(),
+                type(debugstack),
+                debugstack(1),
+                type(issecure),
+                issecure()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(background_ty, "function");
+    assert_eq!(background_status, 0);
+    assert_eq!(debugstack_ty, "function");
+    assert_eq!(debugstack_value, "");
+    assert_eq!(issecure_ty, "function");
+    assert!(secure);
+}
+
+#[test]
+fn test_startup_service_namespaces_exist() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        voices_ty,
+        voices_len,
+        transcription_ty,
+        transcription_allowed,
+        calendar_ty,
+        month_day,
+        adjusted_day,
+        reset_ty,
+        reset_start,
+    ): (String, i64, String, bool, String, i64, i64, String, i64) = env
+        .eval(
+            r#"
+            local now = C_DateAndTime.GetCurrentCalendarTime()
+            local tomorrow = C_DateAndTime.AdjustTimeByDays(now, 1)
+            return type(C_VoiceChat.GetTtsVoices),
+                #C_VoiceChat.GetTtsVoices(),
+                type(C_VoiceChat.IsTranscriptionAllowed),
+                C_VoiceChat.IsTranscriptionAllowed(),
+                type(now),
+                now.monthDay or 0,
+                tomorrow.monthDay or 0,
+                type(C_DateAndTime.GetWeeklyResetStartTime),
+                C_DateAndTime.GetWeeklyResetStartTime()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(voices_ty, "function");
+    assert_eq!(voices_len, 0);
+    assert_eq!(transcription_ty, "function");
+    assert!(!transcription_allowed);
+    assert_eq!(calendar_ty, "table");
+    assert!(month_day > 0);
+    assert_eq!(adjusted_day, month_day + 1);
+    assert_eq!(reset_ty, "function");
+    assert_eq!(reset_start, 0);
+
+    let (
+        shop_ty,
+        shop_enabled,
+        has_new_products_ty,
+        has_new_products,
+        token_secure_ty,
+        price_lock_duration,
+        token_count,
+    ): (String, bool, String, bool, String, i64, i64) = env
+        .eval(
+            r#"
+            return type(C_CatalogShop.IsShop2Enabled),
+                C_CatalogShop.IsShop2Enabled(),
+                type(C_CatalogShop.HasNewProducts),
+                C_CatalogShop.HasNewProducts(),
+                type(C_WowTokenSecure.GetPriceLockDuration),
+                C_WowTokenSecure.GetPriceLockDuration(),
+                C_WowTokenSecure.GetTokenCount()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(shop_ty, "function");
+    assert!(!shop_enabled);
+    assert_eq!(has_new_products_ty, "function");
+    assert!(!has_new_products);
+    assert_eq!(token_secure_ty, "function");
+    assert_eq!(price_lock_duration, 0);
+    assert_eq!(token_count, 0);
+}
+
+#[test]
 fn test_c_texture_exposes_atlas_lookup() {
     let env = WowLuaEnv::new().unwrap();
     let (exists_ty, exists, info_ty, width, height, tile_h, tile_v): (
