@@ -31,7 +31,7 @@ fn get_number(v: &Value) -> Option<f32> {
 /// to the corresponding frame object.
 fn get_frame_id(lua: &mlua::Lua, v: &Value) -> Option<usize> {
     match v {
-        ref v @ Value::UserData(_) => extract_frame_id(v).map(|id| id as usize),
+        v @ Value::UserData(_) => extract_frame_id(v).map(|id| id as usize),
         Value::Table(t) => {
             if let Ok(inner) = t.raw_get::<Value>("__lud") {
                 return extract_frame_id(&inner).map(|id| id as usize);
@@ -145,17 +145,19 @@ fn add_set_point_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 /// Parse and validate SetPoint args, returning (point, relative_to, rel_point, x, y).
+struct ParsedSetPoint {
+    point: crate::widget::AnchorPoint,
+    relative_to: Option<usize>,
+    relative_point: crate::widget::AnchorPoint,
+    x_ofs: f32,
+    y_ofs: f32,
+}
+
 fn parse_validated_set_point(
     lua: &mlua::Lua,
     id: u64,
     args: Vec<Value>,
-) -> mlua::Result<(
-    crate::widget::AnchorPoint,
-    Option<usize>,
-    crate::widget::AnchorPoint,
-    f32,
-    f32,
-)> {
+) -> mlua::Result<ParsedSetPoint> {
     let point_str = extract_point_str(args.first());
     let point = crate::widget::AnchorPoint::from_str(&point_str).ok_or_else(|| {
         lua_error(
@@ -174,7 +176,13 @@ fn parse_validated_set_point(
             relative_to = frame.parent_id.map(|pid| pid as usize);
         }
     }
-    Ok((point, relative_to, relative_point, x_ofs, y_ofs))
+    Ok(ParsedSetPoint {
+        point,
+        relative_to,
+        relative_point,
+        x_ofs,
+        y_ofs,
+    })
 }
 
 fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
@@ -182,32 +190,40 @@ fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Resul
     if should_skip_set_point(lua, id, &args)? {
         return Ok(());
     }
-    let (point, relative_to, relative_point, x_ofs, y_ofs) =
-        parse_validated_set_point(lua, id, args)?;
+    let parsed = parse_validated_set_point(lua, id, args)?;
     let state_rc = get_sim_state(lua);
-
-    check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
-    if has_duplicate_set_point(
-        &state_rc.borrow(),
-        id,
-        relative_to,
-        point,
-        relative_point,
-        x_ofs,
-        y_ofs,
-    ) {
+    if should_skip_redundant_set_point(lua, &state_rc, id, &parsed)? {
         return Ok(());
     }
     apply_set_point(
         &state_rc,
         id,
-        point,
-        relative_to,
-        relative_point,
-        x_ofs,
-        y_ofs,
+        parsed.point,
+        parsed.relative_to,
+        parsed.relative_point,
+        parsed.x_ofs,
+        parsed.y_ofs,
     );
     Ok(())
+}
+
+fn should_skip_redundant_set_point(
+    lua: &mlua::Lua,
+    state_rc: &std::cell::RefCell<crate::lua_api::SimState>,
+    id: u64,
+    parsed: &ParsedSetPoint,
+) -> mlua::Result<bool> {
+    let state = state_rc.borrow();
+    check_anchor_cycle(lua, &state, id, parsed.relative_to, "Frame:SetPoint")?;
+    Ok(has_duplicate_set_point(
+        &state,
+        id,
+        parsed.relative_to,
+        parsed.point,
+        parsed.relative_point,
+        parsed.x_ofs,
+        parsed.y_ofs,
+    ))
 }
 
 fn should_skip_set_point(lua: &mlua::Lua, id: u64, args: &[Value]) -> mlua::Result<bool> {
@@ -376,12 +392,13 @@ fn apply_set_point(
     y_ofs: f32,
 ) {
     let mut state = state_rc.borrow_mut();
-    if let Some(frame) = state.widgets.get(id) {
-        if let Some(old) = frame.anchors.iter().find(|a| a.point == point) {
-            if let Some(old_target) = old.relative_to_id {
-                state.widgets.remove_anchor_dependent(old_target as u64, id);
-            }
-        }
+    if let Some(old_target) = state
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.anchors.iter().find(|a| a.point == point))
+        .and_then(|anchor| anchor.relative_to_id)
+    {
+        state.widgets.remove_anchor_dependent(old_target as u64, id);
     }
     if let Some(rel_id) = relative_to {
         state.widgets.add_anchor_dependent(rel_id as u64, id);
@@ -483,7 +500,7 @@ fn add_adjust_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_set_all_points_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetAllPoints", |lua, this, arg: mlua::MultiValue| {
         let id = this.0;
-        let first = arg.get(0).cloned().unwrap_or(Value::Nil);
+        let first = arg.front().cloned().unwrap_or(Value::Nil);
         let has_arg = !arg.is_empty();
         let (should_set, relative_to_id) = resolve_set_all_points_target(lua, id, &first, has_arg);
         if should_set {
@@ -520,7 +537,7 @@ fn resolve_set_all_points_target(
                 .map(|p| p as usize);
             (true, parent_id)
         }
-        ref v @ Value::UserData(_) => (true, extract_frame_id(v).map(|id| id as usize)),
+        v @ Value::UserData(_) => (true, extract_frame_id(v).map(|id| id as usize)),
         _ if has_arg => (true, None),
         _ => {
             let state_rc = get_sim_state(lua);
