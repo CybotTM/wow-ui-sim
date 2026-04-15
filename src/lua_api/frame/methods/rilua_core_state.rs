@@ -5,7 +5,10 @@
 //! counterpart using `frame_id_from_stack` + `borrow_state`/`borrow_state_mut`.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, extract_frame_id,
+    borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_ref, val_to_string,
+};
+use crate::lua_api::rilua_script_helpers::{
+    call_error_handler_state, get_script as get_rilua_script, protected_call_state,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -229,28 +232,57 @@ pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn show(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs Lua function calling (fires OnShow handlers on children)
     let id = frame_id(state, 1)?;
-    let mut sim = borrow_state_mut(state)?;
-    sim.set_frame_visible(id, true);
+    let changed = set_frame_visible(state, id, true)?;
+    if changed {
+        fire_visibility_handler(state, id, "OnShow");
+    }
     Ok(0)
 }
 
 pub fn hide(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs Lua function calling (fires OnHide handlers on children)
     let id = frame_id(state, 1)?;
-    let mut sim = borrow_state_mut(state)?;
-    sim.set_frame_visible(id, false);
+    let changed = set_frame_visible(state, id, false)?;
+    if changed {
+        fire_visibility_handler(state, id, "OnHide");
+    }
     Ok(0)
 }
 
 pub fn set_shown(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs Lua function calling (fires OnShow/OnHide handlers on children)
     let id = frame_id(state, 1)?;
     let shown = arg_bool(state, 2);
-    let mut sim = borrow_state_mut(state)?;
-    sim.set_frame_visible(id, shown);
+    let changed = set_frame_visible(state, id, shown)?;
+    if changed {
+        let handler_name = if shown { "OnShow" } else { "OnHide" };
+        fire_visibility_handler(state, id, handler_name);
+    }
     Ok(0)
+}
+
+fn set_frame_visible(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<bool> {
+    let mut sim = borrow_state_mut(state)?;
+    let was_visible = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.visible)
+        .unwrap_or(false);
+    sim.set_frame_visible(id, shown);
+    Ok(was_visible != shown)
+}
+
+fn fire_visibility_handler(state: &mut LuaState, frame_id: u64, handler_name: &str) {
+    let Some(handler) = get_rilua_script(state, frame_id, handler_name) else {
+        return;
+    };
+    let Ok(frame) = frame_ref(state, frame_id) else {
+        return;
+    };
+    if let Err(err) = protected_call_state(state, handler, &[frame]) {
+        let error_msg = val_to_string(state, err)
+            .unwrap_or_else(|| format!("script error ({})", err.type_name()));
+        call_error_handler_state(state, &error_msg);
+    }
 }
 
 // ---------------------------------------------------------------------------

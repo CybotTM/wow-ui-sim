@@ -7,8 +7,8 @@ use super::env_init::{
 use super::state::{AddonInfo, PendingTimer, SimState};
 use crate::Result;
 use crate::lua_api::rilua_methods::{
-    call_function as call_rilua_function, create_string, frame_ref, registry_get, table_set,
-    val_to_string,
+    call_function as call_rilua_function, create_string, frame_ref, registry_get, registry_set,
+    table_set, val_to_string,
 };
 use crate::lua_api::rilua_script_helpers::{call_error_handler, get_event_listeners, get_script};
 use crate::render::font::WowFontSystem;
@@ -20,6 +20,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
 static NEXT_TIMER_ID: AtomicU64 = AtomicU64::new(1);
+const EVAL_RESULTS_REGISTRY_KEY: &str = "__wow_eval_results";
 
 /// Generate a unique timer ID.
 pub(crate) fn next_timer_id() -> u64 {
@@ -41,11 +42,11 @@ impl WowLuaAppData {
     }
 }
 
-trait FromRiluaResults: Sized {
+pub trait FromRiluaResults: Sized {
     fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self>;
 }
 
-trait FromRiluaValue: Sized {
+pub trait FromRiluaValue: Sized {
     fn from_value(state: &rilua::vm::state::LuaState, value: Val) -> Result<Self>;
 }
 
@@ -232,11 +233,9 @@ where
         let Some(table) = state.gc.tables.get(table_ref) else {
             return Err(crate::Error::Other("table result was collected".into()));
         };
-        table
-            .array_slice()
-            .iter()
-            .copied()
-            .map(|value| T::from_value(state, value))
+        let len = table.len(&state.gc.string_arena);
+        (1..=len)
+            .map(|idx| T::from_value(state, table.get_int(idx as i64)))
             .collect()
     }
 }
@@ -390,8 +389,22 @@ impl WowLuaEnv {
     /// Execute Lua code and return the result.
     pub fn eval<T: FromRiluaResults>(&self, code: &str) -> Result<T> {
         let mut lua = self.lua.borrow_mut();
-        let func = LuaApiMut::load(&mut *lua, code)?;
-        let results = lua.call_function(&func, &[])?;
+        {
+            let state = lua.state_mut();
+            registry_set(state, EVAL_RESULTS_REGISTRY_KEY, Val::Nil);
+        }
+        let wrapped = format!(
+            "local function __wow_eval()\n{code}\nend\ndebug.getregistry().{EVAL_RESULTS_REGISTRY_KEY} = {{ __wow_eval() }}"
+        );
+        let exec_result = lua.exec(&wrapped);
+        let packed_results = {
+            let state = lua.state_mut();
+            let packed = registry_get(state, EVAL_RESULTS_REGISTRY_KEY);
+            registry_set(state, EVAL_RESULTS_REGISTRY_KEY, Val::Nil);
+            packed
+        };
+        exec_result?;
+        let results = unpack_eval_results(lua.state(), packed_results)?;
         T::from_results(lua.state(), results)
     }
 
@@ -932,6 +945,22 @@ impl WowLuaEnv {
         let mut lua = self.lua.borrow_mut();
         crate::lua_api::rilua_timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
     }
+}
+
+fn unpack_eval_results(state: &rilua::vm::state::LuaState, results: Val) -> Result<Vec<Val>> {
+    let Val::Table(table_ref) = results else {
+        return Ok(match results {
+            Val::Nil => Vec::new(),
+            value => vec![value],
+        });
+    };
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return Err(crate::Error::Other(
+            "eval result table was collected".into(),
+        ));
+    };
+    let len = table.len(&state.gc.string_arena);
+    Ok((1..=len).map(|idx| table.get_int(idx as i64)).collect())
 }
 
 fn global_hash_entries(

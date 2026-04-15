@@ -11,6 +11,8 @@ use crate::lua_api::rilua_script_helpers::{
     set_script as set_rilua_script,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::widget::WidgetType;
+use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -373,10 +375,16 @@ fn set_script(state: &mut LuaState) -> LuaResult<u32> {
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("SetScript: handler name required"))?;
     let handler = stack_val(state, 3);
+    ensure_script_supported(state, frame_id, &handler_name)?;
 
     if matches!(handler, Val::Nil) {
         remove_rilua_script(state, frame_id, &handler_name);
     } else {
+        if !matches!(handler, Val::Function(_)) {
+            return Err(runtime_error(format!(
+                "SetScript: handler for '{handler_name}' must be a function or nil"
+            )));
+        }
         set_rilua_script(state, frame_id, &handler_name, handler);
     }
 
@@ -396,9 +404,109 @@ fn has_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("HasScript: handler name required"))?;
-    let has_handler = get_rilua_script(state, frame_id, &handler_name).is_some();
-    state.push(Val::Bool(has_handler));
+    state.push(Val::Bool(script_supported(state, frame_id, &handler_name)));
     Ok(1)
+}
+
+fn hook_script(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let handler_name = val_to_string(state, stack_val(state, 2))
+        .ok_or_else(|| runtime_error("HookScript: handler name required"))?;
+    ensure_script_supported(state, frame_id, &handler_name)?;
+    let hook = stack_val(state, 3);
+    if !matches!(hook, Val::Function(_)) {
+        return Err(runtime_error(format!(
+            "HookScript: hook for '{handler_name}' must be a function"
+        )));
+    }
+    let old = get_rilua_script(state, frame_id, &handler_name).unwrap_or(Val::Nil);
+    let chained = build_hooked_script(state, old, hook)?;
+    set_rilua_script(state, frame_id, &handler_name, chained);
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn build_hooked_script(state: &mut LuaState, old: Val, hook: Val) -> LuaResult<Val> {
+    let func = state.load(
+        r#"
+        local old, hook = ...
+        if old == nil then
+            return hook
+        end
+        return function(...)
+            old(...)
+            hook(...)
+        end
+    "#,
+    )?;
+    let call_base = state.top;
+    state.ensure_stack(call_base + 4);
+    state.stack_set(call_base, Val::Function(func.gc_ref()));
+    state.stack_set(call_base + 1, old);
+    state.stack_set(call_base + 2, hook);
+    state.top = call_base + 3;
+    state.call_function(call_base, 1)?;
+    let result = state.stack_get(call_base);
+    state.top = call_base;
+    Ok(result)
+}
+
+fn ensure_script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> LuaResult<()> {
+    if script_supported(state, frame_id, handler_name) {
+        return Ok(());
+    }
+    Err(runtime_error(format!(
+        "invalid script handler '{handler_name}'"
+    )))
+}
+
+fn script_supported(state: &LuaState, frame_id: u64, handler_name: &str) -> bool {
+    let Ok(sim) = borrow_state(state) else {
+        return false;
+    };
+    let Some(widget_type) = sim.widgets.get(frame_id).map(|frame| frame.widget_type) else {
+        return false;
+    };
+    script_supported_for_widget(widget_type, handler_name)
+}
+
+fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> bool {
+    match handler_name {
+        "OnLoad" | "OnEvent" | "OnUpdate" | "OnShow" | "OnHide" | "OnEnter" | "OnLeave"
+        | "OnMouseDown" | "OnMouseUp" | "OnMouseWheel" | "OnDragStart" | "OnDragStop"
+        | "OnReceiveDrag" | "OnSizeChanged" | "OnAttributeChanged" => true,
+        "OnClick" | "PreClick" | "PostClick" => {
+            matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
+        }
+        "OnEnable" | "OnDisable" => matches!(
+            widget_type,
+            WidgetType::Button
+                | WidgetType::CheckButton
+                | WidgetType::EditBox
+                | WidgetType::Slider
+                | WidgetType::ScrollFrame
+        ),
+        "OnEnterPressed"
+        | "OnEscapePressed"
+        | "OnTabPressed"
+        | "OnSpacePressed"
+        | "OnTextChanged"
+        | "OnTextSet"
+        | "OnChar"
+        | "OnEditFocusGained"
+        | "OnEditFocusLost"
+        | "OnInputLanguageChanged"
+        | "OnKeyDown"
+        | "OnKeyUp" => matches!(widget_type, WidgetType::EditBox),
+        "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
+        "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave" => {
+            matches!(
+                widget_type,
+                WidgetType::SimpleHTML | WidgetType::MessageFrame | WidgetType::GameTooltip
+            )
+        }
+        _ => false,
+    }
 }
 
 fn set_clips_children(state: &mut LuaState) -> LuaResult<u32> {
@@ -993,5 +1101,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetScript", set_script)?;
     table_set_rust_fn(state, table, "GetScript", get_script)?;
     table_set_rust_fn(state, table, "HasScript", has_script)?;
+    table_set_rust_fn(state, table, "HookScript", hook_script)?;
     Ok(())
 }

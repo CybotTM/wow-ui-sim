@@ -7,13 +7,15 @@
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaApi, LuaApiMut, Val};
+use rilua::{LuaApiMut, Val};
 
 // ── Registry helpers ────────────────────────────────────────────────
 
 const SCRIPTS_KEY: &str = "__scripts";
 const ON_UPDATE_SCRIPTS_KEY: &str = "__on_update_scripts";
 const ON_POST_UPDATE_SCRIPTS_KEY: &str = "__on_post_update_scripts";
+const ERROR_HANDLER_KEY: &str = "__error_handler";
+const LUA_MULTRET: i32 = -1;
 
 /// Get a named table from rilua's registry, returning None if absent.
 fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
@@ -100,24 +102,145 @@ fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str
     if let Some(table) = state.gc.tables.get_mut(table_ref) {
         let _ = table.raw_set(Val::Num(widget_id as f64), value, &state.gc.string_arena);
     }
+    sync_on_update_runtime_cache(state, widget_id);
 }
 
 // ── Error handler ───────────────────────────────────────────────────
 
 /// Call the WoW error handler and log to stderr.
 pub fn call_error_handler(lua: &mut rilua::Lua, error_msg: &str) {
-    if collect_lua_error(lua.state(), error_msg) {
+    call_error_handler_state(lua.state_mut(), error_msg);
+}
+
+/// State-only variant for RustFn call sites that only hold `&mut LuaState`.
+pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
+    if collect_lua_error(state, error_msg) {
         eprintln!("Lua error: {error_msg}");
     }
-    let handler_code = r#"
-        local handler = geterrorhandler()
-        if handler then handler((...)) end
-    "#;
-    let Ok(func) = lua.load(handler_code) else {
+    let Ok(handler) = ensure_error_handler(state) else {
         return;
     };
-    let msg_ref = lua.state_mut().gc.intern_string(error_msg.as_bytes());
-    let _ = lua.call_function(&func, &[Val::Str(msg_ref)]);
+    let Val::Function(_) = handler else {
+        return;
+    };
+    let msg_ref = state.gc.intern_string(error_msg.as_bytes());
+    let _ = protected_call_state(state, handler, &[Val::Str(msg_ref)]);
+}
+
+pub fn protected_call_state(
+    state: &mut LuaState,
+    func: Val,
+    args: &[Val],
+) -> Result<Vec<Val>, Val> {
+    let saved_top = state.top;
+    let call_base = saved_top;
+    let saved_ci = state.ci;
+    let saved_n_ccalls = state.n_ccalls;
+    let saved_call_depth = state.call_depth;
+    state.error_object = None;
+
+    state.ensure_stack(call_base + 1 + args.len());
+    state.stack_set(call_base, func);
+    for (index, arg) in args.iter().copied().enumerate() {
+        state.stack_set(call_base + 1 + index, arg);
+    }
+    state.top = call_base + 1 + args.len();
+
+    let call_result = state.call_function(call_base, LUA_MULTRET);
+    match call_result {
+        Ok(()) => {
+            let results = (call_base..state.top)
+                .map(|idx| state.stack_get(idx))
+                .collect();
+            state.top = saved_top;
+            Ok(results)
+        }
+        Err(err) => {
+            state.ci = saved_ci;
+            state.base = state.call_stack[state.ci].base;
+            state.n_ccalls = saved_n_ccalls;
+            state.call_depth = saved_call_depth;
+            if state.ci < rilua::vm::state::MAXCALLS {
+                state.ci_overflow = false;
+            }
+            state.close_upvalues(call_base);
+            let error_val = state.error_object.take().unwrap_or_else(|| {
+                let r = state.gc.intern_string(err.to_string().as_bytes());
+                Val::Str(r)
+            });
+            state.top = saved_top;
+            Err(error_val)
+        }
+    }
+}
+
+fn sync_on_update_runtime_cache(state: &mut LuaState, widget_id: u64) {
+    use super::env::WowLuaAppData;
+
+    let has_on_update = cached_handler_present(state, ON_UPDATE_SCRIPTS_KEY, widget_id);
+    let has_on_post_update = cached_handler_present(state, ON_POST_UPDATE_SCRIPTS_KEY, widget_id);
+    let should_track = has_on_update || has_on_post_update;
+
+    let Some(app) = state.app_data::<WowLuaAppData>() else {
+        return;
+    };
+    let Ok(mut sim) = app.sim_state.try_borrow_mut() else {
+        return;
+    };
+
+    if should_track {
+        sim.on_update_frames.insert(widget_id);
+    } else {
+        sim.on_update_frames.remove(&widget_id);
+    }
+    sim.visible_on_update_cache = None;
+}
+
+fn cached_handler_present(state: &mut LuaState, cache_key: &str, widget_id: u64) -> bool {
+    let Some(table_ref) = registry_table(state, cache_key) else {
+        return false;
+    };
+    state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| !matches!(table.get_int(widget_id as i64), Val::Nil))
+        .unwrap_or(false)
+}
+
+fn ensure_error_handler(state: &mut LuaState) -> rilua::LuaResult<Val> {
+    let existing = registry_value(state, ERROR_HANDLER_KEY);
+    if existing != Val::Nil {
+        return Ok(existing);
+    }
+
+    let func = state.load("return function(_msg) end")?;
+    let call_base = state.top;
+    state.ensure_stack(call_base + 2);
+    state.stack_set(call_base, Val::Function(func.gc_ref()));
+    state.top = call_base + 1;
+    state.call_function(call_base, 1)?;
+    let handler = state.stack_get(call_base);
+    state.top = call_base;
+    set_registry_value(state, ERROR_HANDLER_KEY, handler);
+    Ok(handler)
+}
+
+fn registry_value(state: &mut LuaState, key: &str) -> Val {
+    let key_ref = state.gc.intern_string(key.as_bytes());
+    state
+        .gc
+        .tables
+        .get(state.registry)
+        .map(|table| table.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+}
+
+fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
+    let key_ref = state.gc.intern_string(key.as_bytes());
+    if let Some(table) = state.gc.tables.get_mut(state.registry) {
+        let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
 }
 
 /// Collect a Lua error into SimState for later retrieval.
