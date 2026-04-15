@@ -1267,6 +1267,29 @@ if BNGetNumFriendInvites == nil then
   function BNGetNumFriendInvites() return 0 end
 end
 
+-- Friend list: sim has no social layer.
+C_FriendList = C_FriendList or __wow_namespace()
+if rawget(C_FriendList, "GetNumFriends") == nil then
+  function C_FriendList.GetNumFriends() return 0 end
+end
+if rawget(C_FriendList, "GetNumOnlineFriends") == nil then
+  function C_FriendList.GetNumOnlineFriends() return 0 end
+end
+
+-- Region / language / battlefield stubs.
+if GetCurrentRegionName == nil then
+  function GetCurrentRegionName() return "US" end
+end
+if GetDefaultLanguage == nil then
+  function GetDefaultLanguage() return "Common", 1 end
+end
+if GetMaxBattlefieldID == nil then
+  function GetMaxBattlefieldID() return 0 end
+end
+if IsActiveBattlefieldArena == nil then
+  function IsActiveBattlefieldArena() return false end
+end
+
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
 

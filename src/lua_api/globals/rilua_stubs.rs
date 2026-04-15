@@ -378,6 +378,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitIsGroupAssistant",
     "UnitIsGroupLeader",
     "UnitIsOwnerOrControllerOfUnit",
+    "UnitHasVehicleUI",
     "UnitIsPVPSanctioned",
     "UnitIsQuestBoss",
     "UnitIsTapDenied",
