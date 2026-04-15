@@ -308,6 +308,42 @@ fn c_pvp_and_zone_text_defaults_are_neutral() {
 }
 
 #[test]
+fn strsplit_returns_multiple_values() {
+    // Blizzard uses `local a, b, c = strsplit(".", "12.0.5")` all over
+    // the place; the previous stub pushed the whole input string back
+    // as a single return, so `b` and `c` always landed as nil and
+    // downstream arithmetic crashed (PingSystem.lua:92).
+    let env = env();
+    let (major, minor, revision): (String, String, String) =
+        env.eval(r#"return strsplit(".", "12.0.5")"#).unwrap();
+    assert_eq!(major, "12");
+    assert_eq!(minor, "0");
+    assert_eq!(revision, "5");
+
+    // Multi-character delimiter set — each char is a delimiter.
+    let (a, b, c): (String, String, String) =
+        env.eval(r#"return strsplit(":-", "a:b-c")"#).unwrap();
+    assert_eq!(a, "a");
+    assert_eq!(b, "b");
+    assert_eq!(c, "c");
+
+    // Limit caps the piece count; trailing delimiters land in the last piece.
+    let (first, rest): (String, String) =
+        env.eval(r#"return strsplit(",", "a,b,c,d", 2)"#).unwrap();
+    assert_eq!(first, "a");
+    assert_eq!(rest, "b,c,d");
+}
+
+#[test]
+fn strjoin_concatenates_with_delimiter() {
+    let env = env();
+    let joined: String = env.eval(r#"return strjoin("-", "a", "b", "c")"#).unwrap();
+    assert_eq!(joined, "a-b-c");
+    let empty: String = env.eval(r#"return strjoin(",")"#).unwrap();
+    assert_eq!(empty, "");
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env

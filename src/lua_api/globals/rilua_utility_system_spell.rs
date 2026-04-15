@@ -295,24 +295,87 @@ pub fn nop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// strsplit(delimiter, str [, limit]) — split str on delimiter, return multiple values.
+/// `strsplit(delimiter, str [, limit])` — split `str` on any character in
+/// `delimiter` and push each piece as a separate return value.
 ///
-/// TODO: full varargs return requires pushing multiple values.
+/// Blizzard uses the multi-return shape all over the place:
+/// `local major, minor, revision = strsplit(".", "12.0.5")`. The former
+/// stub pushed the original string back as a single return, so every
+/// downstream variable past the first landed as nil.
 pub fn strsplit(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: implement multi-return string split
-    let input = stack_val(state, 2);
-    state.push(input);
+    let delim = val_to_string_bytes(state, stack_val(state, 1));
+    let input = val_to_string_bytes(state, stack_val(state, 2));
+    let limit = match stack_val(state, 3) {
+        Val::Num(n) if n > 0.0 => Some(n as usize),
+        _ => None,
+    };
+    let (Some(delim), Some(input)) = (delim, input) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let pieces = split_on_delimiter_set(&input, &delim, limit);
+    let count = pieces.len() as u32;
+    for piece in pieces {
+        let s = state.gc.intern_string(&piece);
+        state.push(Val::Str(s));
+    }
+    Ok(count.max(1))
+}
+
+/// Split `input` on any byte present in `delim` (WoW's multi-char
+/// delimiter semantics). `limit` caps the resulting piece count:
+/// everything after `limit - 1` splits ends up in the last piece.
+fn split_on_delimiter_set(input: &[u8], delim: &[u8], limit: Option<usize>) -> Vec<Vec<u8>> {
+    let mut pieces = Vec::new();
+    let mut current: Vec<u8> = Vec::new();
+    let max_pieces = limit.unwrap_or(usize::MAX);
+    for &byte in input {
+        let is_delim = delim.contains(&byte);
+        let can_split = pieces.len() + 1 < max_pieces;
+        if is_delim && can_split {
+            pieces.push(std::mem::take(&mut current));
+        } else {
+            current.push(byte);
+        }
+    }
+    pieces.push(current);
+    pieces
+}
+
+/// `strjoin(delimiter, ...)` — concatenate the variadic string arguments
+/// separated by `delimiter`. Previous stub returned the empty string
+/// unconditionally, silently dropping everything the caller passed in.
+pub fn strjoin(state: &mut LuaState) -> LuaResult<u32> {
+    let delim = val_to_string_bytes(state, stack_val(state, 1)).unwrap_or_default();
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let mut out: Vec<u8> = Vec::new();
+    for index in 2..=nargs {
+        if !out.is_empty() {
+            out.extend_from_slice(&delim);
+        }
+        let slot = state.base + index - 1;
+        if let Some(bytes) = val_to_string_bytes(state, state.stack_get(slot)) {
+            out.extend_from_slice(&bytes);
+        }
+    }
+    let joined = state.gc.intern_string(&out);
+    state.push(Val::Str(joined));
     Ok(1)
 }
 
-/// strjoin(delimiter, ...) — join variadic string args with delimiter.
-///
-/// TODO: full varargs collection.
-pub fn strjoin(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: collect all variadic args and join
-    let empty = state.gc.intern_string(b"");
-    state.push(Val::Str(empty));
-    Ok(1)
+/// Convert a Lua value to its byte representation for string-like ops.
+fn val_to_string_bytes(state: &LuaState, val: Val) -> Option<Vec<u8>> {
+    match val {
+        Val::Str(s) => state.gc.string_arena.get(s).map(|s| s.data().to_vec()),
+        Val::Num(n) => Some(format!("{n}").into_bytes()),
+        Val::Bool(b) => Some(if b {
+            b"true".to_vec()
+        } else {
+            b"false".to_vec()
+        }),
+        _ => None,
+    }
 }
 
 // ── System API ───────────────────────────────────────────────────────────────
