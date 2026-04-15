@@ -75,20 +75,47 @@ Triggering via `GameTooltip:SetSpellByID(853); GameTooltip:Show()` shows one
 `GameTooltip` visible at TOOLTIP:2. None of the other tooltip frames become
 visible in this path.
 
+## Backdrop double-render check (PLAN.md #53 checkbox 2)
+
+**The spell tooltip itself does NOT take the Frame+BackdropTemplate path.**
+`GameTooltip:SetSpellByID(...)` dispatches through `emit_tooltip_quads` →
+`build_tooltip_quads` → `emit_nine_slice_with_center_color`
+(`src/iced_app/tooltip.rs:266`). One tooltip, one render call.
+
+However, `build_frame_quads` (`src/iced_app/quad_builders.rs:50-52`)
+unconditionally emits a 2 px `(0.6, 0.45, 0.15)` gold fallback border on
+any `WidgetType::Frame` / `WidgetType::StatusBar` whose
+`nine_slice_layout.is_some()`:
+
+```rust
+if f.nine_slice_layout.is_some() {
+    batch.push_border(bounds, 2.0, [0.6, 0.45, 0.15, alpha]);
+}
+```
+
+There is no matching "real" nine-slice rendering for a plain `Frame`; the
+nine-slice pieces actually draw through the child textures
+(`quad_builders_textures.rs:22` → `emit_nine_slice_atlas`). When a
+`NineSliceContainer` child renders the proper slice and the parent Frame
+ALSO emits that 2 px debug border, the visible result is a solid
+tooltip-looking frame with a thin gold rectangle behind it — the exact
+"offset border box" symptom the user reported.
+
+This affects Frame+BackdropTemplate widgets (which is the path other
+tooltip-like frames might take), not `GameTooltip`-typed widgets. It
+still needs removal because the fallback is a leftover debug marker:
+nothing relies on it for correctness, and any frame with a
+`nine_slice_layout` set already has a proper nine-slice render path
+through its child textures.
+
 ## Outstanding items (see PLAN.md #53)
 
-- [ ] Check whether the spell tooltip path the spellbook button uses is a
-  different widget (a Frame+BackdropTemplate) that gets both
-  `build_frame_quads` AND nine-slice child rendering (the "double render"
-  hypothesis). If the spellbook uses `SharedTooltipDefaultContainer` wrapper
-  rather than `GameTooltip` directly, the duplicated container is the
-  visible "second box".
 - [ ] Track the orphaned `SharedTooltipDefaultContainer`: the LOW:1 copy vs
   LOW:2 copy — which one gets tooltip content parented to it at runtime,
   and does the other one render anything?
-- [ ] Fix either by suppressing the frame backdrop for `GameTooltip`-typed
-  widgets when a nine-slice child is present, or by reparenting /
-  deleting the orphaned `SharedTooltipDefaultContainer`.
+- [ ] Fix the root cause — remove the unconditional 2 px fallback in
+  `build_frame_quads`, and/or reparent / delete the orphaned
+  `SharedTooltipDefaultContainer`.
 
 ## Screenshots
 
