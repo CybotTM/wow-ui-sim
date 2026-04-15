@@ -12,8 +12,6 @@ pub(crate) mod frame;
 mod frame_methods;
 pub(crate) mod game_data;
 pub mod globals;
-mod key_dispatch;
-pub(crate) mod keybindings;
 mod layout;
 pub(crate) mod loader_env;
 pub mod message_frame;
@@ -27,7 +25,6 @@ pub(crate) mod rilua_taint;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod rilua_timer_layout;
 pub(crate) mod script_helpers;
-pub(crate) mod secure_env;
 pub mod simple_html;
 pub(crate) mod state;
 mod state_defaults;

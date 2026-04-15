@@ -11,6 +11,7 @@ pub mod register;
 pub mod rilua_admin;
 pub mod rilua_create_frame;
 pub mod rilua_font_strings_collection;
+pub mod rilua_keybindings;
 pub mod rilua_security;
 pub mod rilua_stubs;
 pub mod rilua_utility_system_spell;

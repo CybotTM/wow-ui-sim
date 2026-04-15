@@ -1503,7 +1503,6 @@ pub(super) fn init_lua_state(
     init_runtime_surface_bootstrap(lua)?;
     super::globals::rilua_security::create_secure_environment(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
-    super::keybindings::init_keybindings(&mut *lua.state_mut())?;
     crate::loader::precompiled::init(lua)?;
     remove_sandbox_globals(lua)?;
     init_frame_metatable(lua)?;
