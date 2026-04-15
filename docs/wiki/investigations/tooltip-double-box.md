@@ -108,14 +108,34 @@ nothing relies on it for correctness, and any frame with a
 `nine_slice_layout` set already has a proper nine-slice render path
 through its child textures.
 
+## Orphaned tooltip frame check (PLAN.md #53 checkbox 3)
+
+- **`GameTooltip` itself is not duplicated.** `dump-tree | grep
+  '^GameTooltip \[GameTooltip\]'` produces exactly one entry parented to
+  `UIParent`. The spell-tooltip path is not hitting the frame
+  re-creation pattern from `CLAUDE.md`.
+- **`SharedTooltipDefaultContainer` is duplicated** (LOW:1 and LOW:2,
+  both `250x150` at the same screen-space anchor
+  `$parent:BOTTOMRIGHT offset(-9,85) → (1591,1115)`). The `_G`
+  lookup resolves to only one of them; the other is unreachable from
+  Lua.
+- The global reference reports `parent == nil` and `numChildren == 0`
+  at startup, so the orphan is not being populated during the GameTooltip
+  spell path. Both copies stay hidden through the spell-tooltip
+  reproduction, and neither emits quads while hidden — so the orphan is
+  **not** the visible "second box" for the spell-tooltip case the user
+  reported.
+- It is still a bug to leave a dead frame in the registry: it adds to
+  the 19-way GameTooltip proliferation, shows up in every
+  `collect_sorted_frames` scan, and breaks any code that walks tooltip
+  frames by name. Tracked as a cleanup on the remaining checkbox.
+
 ## Outstanding items (see PLAN.md #53)
 
-- [ ] Track the orphaned `SharedTooltipDefaultContainer`: the LOW:1 copy vs
-  LOW:2 copy — which one gets tooltip content parented to it at runtime,
-  and does the other one render anything?
 - [ ] Fix the root cause — remove the unconditional 2 px fallback in
-  `build_frame_quads`, and/or reparent / delete the orphaned
-  `SharedTooltipDefaultContainer`.
+  `build_frame_quads` (identified in the previous section) and reparent
+  or delete the orphaned `SharedTooltipDefaultContainer` copy so it
+  stops showing up in the tree twice.
 
 ## Screenshots
 
