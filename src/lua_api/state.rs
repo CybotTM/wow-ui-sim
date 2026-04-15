@@ -56,6 +56,7 @@ macro_rules! build_empty_sim_state {
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
+            suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
             mouse_position: $runtime.mouse_position,
             hovered_frame: $runtime.hovered_frame,
             active_drag_frame: $runtime.active_drag_frame,
@@ -273,6 +274,9 @@ pub struct SimState {
     /// One-shot override for XML frame creation: whether the next CreateFrame
     /// should start hidden before registration/render eligibility.
     pub create_frame_initial_hidden: Option<bool>,
+    /// Depth-counted suppression for runtime CreateFrame OnLoad firing while
+    /// XML loader code is still building the frame tree.
+    pub suppress_runtime_on_load_depth: u32,
     /// Current mouse position in UI coordinates (for ANCHOR_CURSOR tooltip positioning).
     pub mouse_position: Option<(f32, f32)>,
     /// Currently hovered frame ID (for IsMouseMotionFocus / GetMouseFocus).
@@ -453,6 +457,7 @@ struct EmptyRuntimeState {
     visible_on_update_cache: Option<Vec<u64>>,
     strata_buckets: Option<Vec<Vec<u64>>>,
     create_frame_initial_hidden: Option<bool>,
+    suppress_runtime_on_load_depth: u32,
     mouse_position: Option<(f32, f32)>,
     hovered_frame: Option<u64>,
     active_drag_frame: Option<u64>,
@@ -492,6 +497,7 @@ impl EmptyRuntimeState {
             visible_on_update_cache: None,
             strata_buckets: None,
             create_frame_initial_hidden: None,
+            suppress_runtime_on_load_depth: 0,
             mouse_position: None,
             hovered_frame: None,
             active_drag_frame: None,

@@ -19,6 +19,24 @@ fn create_animation_group() {
 }
 
 #[test]
+fn named_animation_group_registers_global() {
+    let env = setup();
+    let same_group: bool = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", "TestAnimFrameNamedGlobal", UIParent)
+            local ag = f:CreateAnimationGroup("TestAnimGroupGlobal")
+            return _G.TestAnimGroupGlobal == ag
+            "#,
+        )
+        .unwrap();
+    assert!(
+        same_group,
+        "named animation groups should bind their name in _G like other named UI objects"
+    );
+}
+
+#[test]
 fn initial_state() {
     let env = setup();
     env.exec(

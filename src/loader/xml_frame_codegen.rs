@@ -4,7 +4,7 @@
 //! instantiate a frame: CreateFrame call, parentKey, mixins, KeyValues,
 //! attributes, and script handlers.
 
-use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref};
+use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref, lua_table_field_ref};
 
 /// Build the complete Lua code string for creating a frame from XML.
 pub(super) fn build_frame_lua_code(
@@ -17,9 +17,7 @@ pub(super) fn build_frame_lua_code(
 ) -> String {
     let mut lua_code = build_create_frame_code(widget_type, name, explicit_parent, inherits);
     append_parent_key_code(&mut lua_code, frame, parent);
-    append_template_mixins_code(&mut lua_code, inherits);
     append_mixins_code(&mut lua_code, frame, inherits);
-    append_template_key_values_code(&mut lua_code, inherits);
     append_key_values_code(&mut lua_code, frame, inherits);
     append_xml_attributes_code(&mut lua_code, frame);
     // SetID must be in the Lua chunk (not deferred to Rust direct-set) because
@@ -28,9 +26,7 @@ pub(super) fn build_frame_lua_code(
     if let Some(id) = frame.xml_id {
         lua_code.push_str(&format!("\n        frame:SetID({})", id));
     }
-    append_template_scripts_code(&mut lua_code, inherits);
     append_scripts_code(&mut lua_code, frame);
-    append_inherited_on_load_code(&mut lua_code, inherits);
     lua_code
 }
 
@@ -87,18 +83,20 @@ fn append_parent_key_code(lua_code: &mut String, frame: &crate::xml::FrameXml, p
     if let Some(parent_key) = &frame.parent_key {
         let parent_ref = lua_global_ref(parent);
         if let Some(key) = parent_key.strip_prefix("$parent.") {
+            let parent_field = lua_table_field_ref("__pk", key);
             lua_code.push_str(&format!(
                 r#"
-        do local __pk = {}:GetParent(); if __pk then __pk.{} = frame end end
+        do local __pk = {}:GetParent(); if __pk then {} = frame end end
         "#,
-                parent_ref, key
+                parent_ref, parent_field
             ));
         } else {
+            let parent_field = lua_table_field_ref(&parent_ref, parent_key);
             lua_code.push_str(&format!(
                 r#"
-        {}.{} = frame
+        {} = frame
         "#,
-                parent_ref, parent_key
+                parent_field
             ));
         }
     }
@@ -112,9 +110,10 @@ fn append_parent_key_code(lua_code: &mut String, frame: &crate::xml::FrameXml, p
 fn append_parent_array_code(lua_code: &mut String, frame: &crate::xml::FrameXml, parent: &str) {
     if let Some(parent_array) = &frame.parent_array {
         let parent_ref = lua_global_ref(parent);
+        let array_ref = lua_table_field_ref(&parent_ref, parent_array);
         lua_code.push_str(&format!(
-            "\n        {parent_ref}.{parent_array} = {parent_ref}.{parent_array} or {{}}\n        \
-             table.insert({parent_ref}.{parent_array}, frame)\n        ",
+            "\n        {array_ref} = {array_ref} or {{}}\n        \
+             table.insert({array_ref}, frame)\n        ",
         ));
     }
 }
@@ -134,20 +133,6 @@ fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inhe
         lua_code.push_str(&format!(
             "\n        do local m = {m} or (__secureenv and rawget(__secureenv, \"{m}\")) \
              if m then Mixin(frame, m) end end"
-        ));
-    }
-}
-
-fn append_template_mixins_code(lua_code: &mut String, inherits: &str) {
-    let mut all_mixins: Vec<String> = Vec::new();
-    for entry in crate::xml::get_template_chain(inherits) {
-        collect_mixins_from_attr(&mut all_mixins, entry.frame.combined_mixin().as_deref());
-    }
-
-    for mixin_name in &all_mixins {
-        lua_code.push_str(&format!(
-            "\n        do local m = {mixin_name} or (__secureenv and rawget(__secureenv, \
-             \"{mixin_name}\")) if m then Mixin(frame, m) end end"
         ));
     }
 }
@@ -173,14 +158,6 @@ fn append_key_values_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _
     }
 }
 
-fn append_template_key_values_code(lua_code: &mut String, inherits: &str) {
-    for entry in crate::xml::get_template_chain(inherits) {
-        for key_values in entry.frame.all_key_values() {
-            append_key_values_from_xml(lua_code, Some(key_values));
-        }
-    }
-}
-
 /// Append `frame.key = value` assignments for a KeyValues block.
 fn append_key_values_from_xml(
     lua_code: &mut String,
@@ -189,11 +166,12 @@ fn append_key_values_from_xml(
     if let Some(key_values) = key_values {
         for kv in &key_values.values {
             let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
+            let field_ref = lua_table_field_ref("frame", &kv.key);
             lua_code.push_str(&format!(
                 r#"
-        frame.{} = {}
+        {} = {}
         "#,
-                kv.key, value
+                field_ref, value
             ));
         }
     }
@@ -210,9 +188,9 @@ pub(super) fn generate_key_values_code(
     let mut code = String::new();
     for kv in &key_values.values {
         let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
+        let field_ref = lua_table_field_ref(var_name, &kv.key);
         code.push_str(&format!(
-            "\n        {var_name}.{} = {value}\n        ",
-            kv.key
+            "\n        {field_ref} = {value}\n        "
         ));
     }
     code
@@ -255,35 +233,5 @@ fn append_xml_attributes_code(lua_code: &mut String, frame: &crate::xml::FrameXm
 fn append_scripts_code(lua_code: &mut String, frame: &crate::xml::FrameXml) {
     if let Some(scripts) = frame.scripts() {
         lua_code.push_str(&generate_scripts_code(scripts));
-    }
-}
-
-fn append_template_scripts_code(lua_code: &mut String, inherits: &str) {
-    for entry in crate::xml::get_template_chain(inherits) {
-        if let Some(scripts) = entry.frame.scripts() {
-            lua_code.push_str(&generate_scripts_code(scripts));
-        }
-    }
-}
-
-fn append_inherited_on_load_code(lua_code: &mut String, inherits: &str) {
-    let has_inherited_on_load = crate::xml::get_template_chain(inherits)
-        .into_iter()
-        .any(|entry| {
-            entry
-                .frame
-                .scripts()
-                .is_some_and(|scripts| !scripts.on_load.is_empty())
-        });
-
-    if has_inherited_on_load {
-        lua_code.push_str(
-            r#"
-        do
-            local onLoad = frame:GetScript("OnLoad")
-            if onLoad then onLoad(frame) end
-        end
-        "#,
-        );
     }
 }

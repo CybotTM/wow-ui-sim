@@ -44,22 +44,18 @@ end
 const MENU_DESCRIPTOR_FALLBACK_LUA: &str = r#"
 if Menu == nil then Menu = {} end
 local function __wow_menu_empty_iterator() return nil end
+local __wow_menu_iterator_methods = {
+    EnumerateElementDescriptions = true,
+    EnumerateActiveElementDescriptions = true,
+    EnumerateChildren = true,
+    EnumerateInitializers = true,
+    EnumerateFrames = true,
+}
 local function __wow_menu_descriptor_stub()
     local desc = {}
-    -- Methods that return an iterator tuple need a callable generator,
-    -- not the descriptor table itself — otherwise
-    -- `for k, v in desc:EnumerateFoo() do` errors with "attempt to call
-    -- a table value" when the for-loop tries to invoke the generator.
-    local iterator_methods = {
-        EnumerateElementDescriptions = true,
-        EnumerateActiveElementDescriptions = true,
-        EnumerateChildren = true,
-        EnumerateInitializers = true,
-        EnumerateFrames = true,
-    }
     setmetatable(desc, {
         __index = function(_, key)
-            if iterator_methods[key] then
+            if __wow_menu_iterator_methods[key] then
                 return function()
                     return __wow_menu_empty_iterator
                 end
@@ -71,28 +67,75 @@ local function __wow_menu_descriptor_stub()
     })
     return desc
 end
-if Menu.CreateRootMenuDescription == nil then
-    function Menu.CreateRootMenuDescription(_menuMixin)
+
+local function __wow_wrap_menu_descriptor(desc)
+    if type(desc) ~= "table" then
         return __wow_menu_descriptor_stub()
     end
+    local previous_mt = getmetatable(desc)
+    local previous_index = previous_mt and previous_mt.__index or nil
+    setmetatable(desc, {
+        __index = function(self, key)
+            local existing = rawget(self, key)
+            if existing ~= nil then
+                return existing
+            end
+            if previous_index ~= nil then
+                if type(previous_index) == "function" then
+                    existing = previous_index(self, key)
+                else
+                    existing = previous_index[key]
+                end
+                if existing ~= nil then
+                    return existing
+                end
+            end
+            if __wow_menu_iterator_methods[key] then
+                return function()
+                    return __wow_menu_empty_iterator
+                end
+            end
+            return function(inner_self)
+                return inner_self
+            end
+        end,
+    })
+    return desc
 end
-if Menu.CreateMenuElementDescription == nil then
-    function Menu.CreateMenuElementDescription()
+
+if not rawget(_G, "__wow_menu_fallback_installed") then
+    rawset(_G, "__wow_menu_fallback_installed", true)
+
+    local __wow_existing_create_root = Menu.CreateRootMenuDescription
+    function Menu.CreateRootMenuDescription(menuMixin)
+        if type(__wow_existing_create_root) == "function" then
+            local ok, desc = pcall(__wow_existing_create_root, menuMixin)
+            if ok then
+                return __wow_wrap_menu_descriptor(desc)
+            end
+        end
         return __wow_menu_descriptor_stub()
     end
-end
-if Menu.PopulateDescription == nil then
-    -- Real PopulateDescription invokes the generator against a mutable
-    -- descriptor. With our stub descriptor the generator's calls are
-    -- no-ops already, so we just let the generator run and discard it.
+
+    local __wow_existing_create_element = Menu.CreateMenuElementDescription
+    function Menu.CreateMenuElementDescription(...)
+        if type(__wow_existing_create_element) == "function" then
+            local ok, desc = pcall(__wow_existing_create_element, ...)
+            if ok then
+                return __wow_wrap_menu_descriptor(desc)
+            end
+        end
+        return __wow_menu_descriptor_stub()
+    end
+
     function Menu.PopulateDescription(menuGenerator, ownerRegion, description)
+        local wrapped = __wow_wrap_menu_descriptor(description)
         if type(menuGenerator) == "function" then
-            pcall(menuGenerator, ownerRegion, description)
+            pcall(menuGenerator, ownerRegion, wrapped)
         end
     end
-end
-if MenuUtil == nil then MenuUtil = {} end
-if MenuUtil.CreateRootMenuDescription == nil then
+
+    if MenuUtil == nil then MenuUtil = {} end
     function MenuUtil.CreateRootMenuDescription(menuMixin)
         return Menu.CreateRootMenuDescription(menuMixin)
     end

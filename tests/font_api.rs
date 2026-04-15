@@ -185,6 +185,23 @@ fn test_create_font_get_font_object_for_alphabet() {
     assert!(same);
 }
 
+#[test]
+fn text_region_reports_truncation_when_text_exceeds_width() {
+    let env = env();
+    let truncated: bool = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "FontTruncationProbeParent", UIParent)
+            local fs = frame:CreateFontString("FontTruncationProbe", "ARTWORK", "GameFontNormal")
+            fs:SetWidth(20)
+            fs:SetText("This is wider than twenty pixels")
+            return fs:IsTruncated()
+            "#,
+        )
+        .unwrap();
+    assert!(truncated, "FontString:IsTruncated() should report overflow");
+}
+
 // ============================================================================
 // GetFonts / GetFontInfo
 // ============================================================================

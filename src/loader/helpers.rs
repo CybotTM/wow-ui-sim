@@ -172,6 +172,28 @@ pub fn escape_lua_string(s: &str) -> String {
         .replace('\r', "\\r")
 }
 
+fn is_lua_identifier(key: &str) -> bool {
+    let mut chars = key.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    if !(first == '_' || first.is_ascii_alphabetic()) {
+        return false;
+    }
+    chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+}
+
+/// Return a Lua field access expression for a string key.
+///
+/// Uses dot syntax for identifier-safe keys and bracket syntax otherwise.
+pub fn lua_table_field_ref(table_expr: &str, key: &str) -> String {
+    if is_lua_identifier(key) {
+        format!("{table_expr}.{key}")
+    } else {
+        format!(r#"{table_expr}["{}"]"#, escape_lua_string(key))
+    }
+}
+
 /// Return a Lua expression that references a frame by its global name.
 ///
 /// Uses `_G["name"]` to safely handle frame names containing characters
@@ -181,7 +203,7 @@ pub fn lua_global_ref(name: &str) -> String {
         .strip_prefix("__frame_")
         .and_then(|suffix| suffix.parse::<u64>().ok())
     {
-        return format!("debug.getregistry().__frame_refs[{id}]");
+        return format!("debug.getregistry().__rilua_frame_refs[{id}]");
     }
     format!("_G[\"{}\"]", escape_lua_string(name))
 }
@@ -389,15 +411,20 @@ fn emit_chained_handler(
             local __report = debug.getregistry()["__report_script_error"]
             if __old then
                 {target}:SetScript("{handler_name}", function(self, ...)
-                    local __ok1, __err1 = pcall({first}, self, ...)
-                    local __ok2, __err2 = pcall({second}, self, ...)
-                    if not __ok1 then
-                        local name = self.GetName and self:GetName() or "?"
-                        __report("[script:{handler_name}] " .. name .. ": " .. tostring(__err1))
-                    end
-                    if not __ok2 then
-                        local name = self.GetName and self:GetName() or "?"
-                        __report("[script:{handler_name}] " .. name .. ": " .. tostring(__err2))
+                    if securecall then
+                        securecall({first}, self, ...)
+                        securecall({second}, self, ...)
+                    else
+                        local __ok1, __err1 = pcall({first}, self, ...)
+                        local __ok2, __err2 = pcall({second}, self, ...)
+                        if not __ok1 then
+                            local name = self.GetName and self:GetName() or "?"
+                            __report("[script:{handler_name}] " .. name .. ": " .. tostring(__err1))
+                        end
+                        if not __ok2 then
+                            local name = self.GetName and self:GetName() or "?"
+                            __report("[script:{handler_name}] " .. name .. ": " .. tostring(__err2))
+                        end
                     end
                 end)
             else

@@ -1,5 +1,8 @@
 //! Tests for XML template registration and frame creation from XML.
 
+use std::io::Write;
+
+use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, clear_templates, get_template, parse_xml, register_template};
@@ -27,6 +30,18 @@ fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
     let mut state = env.state().borrow_mut();
     let _ = state.get_strata_buckets();
     state.strata_buckets.as_ref().unwrap().clone()
+}
+
+fn create_test_addon(xml: &str, addon_name: &str) -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let toc_path = dir.path().join(format!("{addon_name}.toc"));
+    let xml_path = dir.path().join(format!("{addon_name}.xml"));
+    let mut toc = std::fs::File::create(&toc_path).unwrap();
+    writeln!(toc, "## Title: {addon_name}").unwrap();
+    writeln!(toc, "{addon_name}.xml").unwrap();
+    let mut xml_file = std::fs::File::create(&xml_path).unwrap();
+    write!(xml_file, "{xml}").unwrap();
+    dir
 }
 
 /// Parse XML and register the first element as a template.
@@ -187,6 +202,115 @@ fn test_create_scrollframe_from_xml_registers_scroll_child() {
     assert!(
         matches_child,
         "XML ScrollChild should be registered as the ScrollFrame's scroll child"
+    );
+}
+
+#[test]
+fn test_button_text_without_parent_key_registers_as_text_fontstring() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    let ui = parse_xml(
+        r#"<Ui><Button name="XmlButtonText" parent="UIParent">
+        <ButtonText name="$parentText"/>
+    </Button></Ui>"#,
+    )
+    .unwrap();
+    match &ui.elements[0] {
+        XmlElement::Button(f) => {
+            create_frame_from_xml(
+                &env.loader_env(),
+                f,
+                "Button",
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+        _ => panic!("Expected Button element"),
+    }
+
+    let same_text_region: bool = env
+        .eval("return XmlButtonText:GetFontString() == XmlButtonTextText")
+        .unwrap();
+    assert!(
+        same_text_region,
+        "ButtonText without an explicit parentKey should still back GetFontString()"
+    );
+}
+
+#[test]
+fn item_button_xml_uses_item_button_intrinsic_template() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_test_addon(
+        r#"<Ui>
+    <Button name="ItemButton" intrinsic="true">
+        <NormalTexture name="$parentIcon" parentKey="icon"/>
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture parentKey="IconBorder"/>
+            </Layer>
+        </Layers>
+    </Button>
+    <ItemButton name="XmlIntrinsicItemButton" parent="UIParent"/>
+</Ui>"#,
+        "TestItemButtonIntrinsic",
+    );
+    let toc_path = dir.path().join("TestItemButtonIntrinsic.toc");
+
+    load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
+
+    let (has_icon, has_border): (bool, bool) = env
+        .eval(
+            r#"
+            return XmlIntrinsicItemButton.icon ~= nil,
+                   XmlIntrinsicItemButton.IconBorder ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_icon,
+        "top-level <ItemButton> should inherit the intrinsic ItemButton icon child"
+    );
+    assert!(
+        has_border,
+        "top-level <ItemButton> should inherit the intrinsic ItemButton border child"
+    );
+}
+
+#[test]
+fn inherited_statusbar_bar_texture_creates_live_bar_child() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    let dir = create_test_addon(
+        r#"<Ui>
+    <StatusBar name="SharedStatusBarTemplate" virtual="true">
+        <BarTexture parentKey="Bar" file="Interface\Buttons\WHITE8X8"/>
+    </StatusBar>
+    <StatusBar name="XmlInheritedStatusBar" parent="UIParent" inherits="SharedStatusBarTemplate"/>
+</Ui>"#,
+        "TestInheritedStatusBarBarTexture",
+    );
+    let toc_path = dir.path().join("TestInheritedStatusBarBarTexture.toc");
+
+    load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
+
+    let (has_status_bar_texture, has_bar_field): (bool, bool) = env
+        .eval(
+            r#"
+            return XmlInheritedStatusBar:GetStatusBarTexture() ~= nil,
+                   XmlInheritedStatusBar.Bar ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_status_bar_texture,
+        "StatusBar should create a live bar texture from inherited <BarTexture>"
+    );
+    assert!(
+        has_bar_field,
+        "StatusBar should expose inherited <BarTexture parentKey='Bar'> as .Bar"
     );
 }
 

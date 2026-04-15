@@ -16,6 +16,7 @@ use crate::lua_api::rilua_methods::{
     frame_ref, sync_child_to_rilua, val_to_string,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
+use crate::widget::WidgetType;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -383,6 +384,47 @@ fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn get_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    if let Some(frame) = sim.widgets.get(id) {
+        if let Some(quad) = frame.tex_coords_quad {
+            drop(sim);
+            for value in quad {
+                state.push(Val::Num(value as f64));
+            }
+            return Ok(8);
+        }
+        if let Some((left, right, top, bottom)) = frame.tex_coords {
+            drop(sim);
+            return (left as f64, right as f64, top as f64, bottom as f64).into_stack(state);
+        }
+    }
+    drop(sim);
+    (0.0, 1.0, 0.0, 1.0).into_stack(state)
+}
+
+fn set_thickness(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let thickness = val_to_f64(stack_val(state, 2)) as f32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.line_thickness = thickness;
+    }
+    Ok(0)
+}
+
+fn get_thickness(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let thickness = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.line_thickness as f64)
+        .unwrap_or(1.0);
+    state.push(Val::Num(thickness));
+    Ok(1)
+}
+
 fn set_horiz_tile(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let enabled = opt_bool(state, 2).unwrap_or(false);
@@ -622,6 +664,13 @@ fn cooldown_clear(state: &mut LuaState) -> LuaResult<u32> {
 fn cooldown_pause(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = animation_group_id_for_frame(&sim, id)
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.paused = true;
+        group.playing = false;
+        return Ok(0);
+    }
     if let Some(f) = sim.widgets.get_mut_visual(id) {
         f.cooldown_paused = true;
     }
@@ -631,6 +680,13 @@ fn cooldown_pause(state: &mut LuaState) -> LuaResult<u32> {
 fn cooldown_resume(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = animation_group_id_for_frame(&sim, id)
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.paused = false;
+        group.playing = true;
+        return Ok(0);
+    }
     if let Some(f) = sim.widgets.get_mut_visual(id) {
         f.cooldown_paused = false;
     }
@@ -640,6 +696,15 @@ fn cooldown_resume(state: &mut LuaState) -> LuaResult<u32> {
 fn cooldown_is_paused(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
+    if let Some(group_id) = animation_group_id_for_frame(&sim, id) {
+        let paused = sim
+            .animation_groups
+            .get(&group_id)
+            .map(|group| group.paused)
+            .unwrap_or(false);
+        drop(sim);
+        return paused.into_stack(state);
+    }
     let v = sim
         .widgets
         .get(id)
@@ -1625,6 +1690,154 @@ fn shared_get_min_max_values(state: &mut LuaState) -> LuaResult<u32> {
     (min, max).into_stack(state)
 }
 
+fn animation_group_id_for_frame(sim: &crate::lua_api::SimState, frame_id: u64) -> Option<u64> {
+    sim.anim_frame_to_group
+        .get(&frame_id)
+        .copied()
+        .or_else(|| sim.anim_frame_to_anim.get(&frame_id).map(|(group_id, _)| *group_id))
+}
+
+fn scroll_child_extent(frame: &crate::widget::Frame, axis: char) -> f64 {
+    match (frame.scroll_child_rect_size, axis) {
+        (Some((width, _)), 'h') => width as f64,
+        (Some((_, height)), 'v') => height as f64,
+        _ => 0.0,
+    }
+}
+
+fn scroll_range(frame: &crate::widget::Frame, axis: char) -> f64 {
+    let child_extent = scroll_child_extent(frame, axis);
+    let own_extent = match axis {
+        'h' => frame.width as f64,
+        'v' => frame.height as f64,
+        _ => 0.0,
+    };
+    (child_extent - own_extent).max(0.0)
+}
+
+fn get_horizontal_scroll(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let offset = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.scroll_horizontal)
+        .unwrap_or(0.0);
+    state.push(Val::Num(offset));
+    Ok(1)
+}
+
+fn set_horizontal_scroll(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let offset = val_to_f64(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    let range = sim
+        .widgets
+        .get(id)
+        .map(|frame| scroll_range(frame, 'h'))
+        .unwrap_or(0.0);
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.scroll_horizontal = offset.clamp(0.0, range);
+    }
+    Ok(0)
+}
+
+fn get_horizontal_scroll_range(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let range = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| scroll_range(frame, 'h'))
+        .unwrap_or(0.0);
+    state.push(Val::Num(range));
+    Ok(1)
+}
+
+fn get_vertical_scroll(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let offset = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.scroll_vertical)
+        .unwrap_or(0.0);
+    state.push(Val::Num(offset));
+    Ok(1)
+}
+
+fn set_vertical_scroll(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let offset = val_to_f64(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    let range = sim
+        .widgets
+        .get(id)
+        .map(|frame| scroll_range(frame, 'v'))
+        .unwrap_or(0.0);
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.scroll_vertical = offset.clamp(0.0, range);
+    }
+    Ok(0)
+}
+
+fn get_vertical_scroll_range(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let range = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| scroll_range(frame, 'v'))
+        .unwrap_or(0.0);
+    state.push(Val::Num(range));
+    Ok(1)
+}
+
+fn get_scroll_child(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let child_id = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).and_then(|frame| frame.scroll_child_id)
+    };
+    match child_id {
+        Some(child_id) => {
+            let child = frame_ref(state, child_id)?;
+            state.push(child);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn set_scroll_child(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let child = stack_val(state, 2);
+    let Some(child_id) = extract_frame_id(state, child) else {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.scroll_child_id = None;
+            frame.scroll_child_rect_size = None;
+        }
+        return Ok(0);
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        crate::lua_api::frame::methods::widget_scroll::assign_scroll_child(&mut sim, id, child_id, true);
+    }
+    let _ = sync_child_to_rilua(state, id, "ScrollChild", child_id);
+    Ok(0)
+}
+
+fn update_scroll_child_rect(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    let scroll_child_rect_size = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.scroll_child_id)
+        .and_then(|child_id| sim.widgets.get(child_id).map(|child| (child.width, child.height)));
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.scroll_child_rect_size = scroll_child_rect_size;
+    }
+    Ok(0)
+}
+
 // ---------------------------------------------------------------------------
 // CheckButton methods
 // ---------------------------------------------------------------------------
@@ -1703,6 +1916,34 @@ fn statusbar_get_status_bar_color(state: &mut LuaState) -> LuaResult<u32> {
         .unwrap_or((1.0, 1.0, 1.0, 1.0));
     drop(sim);
     (r, g, b, a).into_stack(state)
+}
+
+fn statusbar_set_color_fill(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(color) = rgba_from_stack(state, 2) else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get(id)
+        && frame.widget_type == WidgetType::StatusBar
+    {
+        drop(frame);
+        let bar_id = statusbar_child_id_inner(&sim, id);
+        if let Some(bar_id) = bar_id
+            && let Some(bar) = sim.widgets.get_mut_visual(bar_id)
+        {
+            bar.vertex_color = Some(color);
+        }
+        return Ok(0);
+    }
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.color_texture = Some(color);
+        frame.texture = None;
+        frame.texture_file_data_id = None;
+        frame.atlas = None;
+        frame.atlas_tex_coords = None;
+    }
+    Ok(0)
 }
 
 fn statusbar_set_status_bar_texture(state: &mut LuaState) -> LuaResult<u32> {
@@ -2706,6 +2947,9 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     table_set_rust_fn(state, metatable, "SetBlendMode", set_blend_mode)?;
     table_set_rust_fn(state, metatable, "GetBlendMode", get_blend_mode)?;
     table_set_rust_fn(state, metatable, "SetTexCoord", set_tex_coord)?;
+    table_set_rust_fn(state, metatable, "GetTexCoord", get_tex_coord)?;
+    table_set_rust_fn(state, metatable, "SetThickness", set_thickness)?;
+    table_set_rust_fn(state, metatable, "GetThickness", get_thickness)?;
     table_set_rust_fn(state, metatable, "SetHorizTile", set_horiz_tile)?;
     table_set_rust_fn(state, metatable, "GetHorizTile", get_horiz_tile)?;
     table_set_rust_fn(state, metatable, "SetVertTile", set_vert_tile)?;
@@ -3010,6 +3254,40 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
         "GetMinMaxValues",
         shared_get_min_max_values,
     )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetHorizontalScroll",
+        get_horizontal_scroll,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "SetHorizontalScroll",
+        set_horizontal_scroll,
+    )?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetHorizontalScrollRange",
+        get_horizontal_scroll_range,
+    )?;
+    table_set_rust_fn(state, metatable, "GetVerticalScroll", get_vertical_scroll)?;
+    table_set_rust_fn(state, metatable, "SetVerticalScroll", set_vertical_scroll)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "GetVerticalScrollRange",
+        get_vertical_scroll_range,
+    )?;
+    table_set_rust_fn(state, metatable, "GetScrollChild", get_scroll_child)?;
+    table_set_rust_fn(state, metatable, "SetScrollChild", set_scroll_child)?;
+    table_set_rust_fn(
+        state,
+        metatable,
+        "UpdateScrollChildRect",
+        update_scroll_child_rect,
+    )?;
 
     // --- CheckButton ---
     table_set_rust_fn(state, metatable, "SetChecked", checkbutton_set_checked)?;
@@ -3022,6 +3300,7 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
         "SetStatusBarColor",
         statusbar_set_status_bar_color,
     )?;
+    table_set_rust_fn(state, metatable, "SetColorFill", statusbar_set_color_fill)?;
     table_set_rust_fn(
         state,
         metatable,

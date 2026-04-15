@@ -218,13 +218,13 @@ fn process_include(
 /// Extract the FrameXml data, widget type, and optional intrinsic name from an XmlElement.
 ///
 /// XmlElement-specific overrides vs the shared `widget_type_for_tag`:
-/// - `ItemButton`, `DropDownToggleButton`, `EventButton` all map to plain `"Button"` (no intrinsic)
+/// - `DropDownToggleButton` and `EventButton` map to plain `"Button"` (no intrinsic)
 fn resolve_frame_element(
     element: &XmlElement,
 ) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     let (f, tag) = element.as_frame_data()?;
     let (wt, intrinsic) = match tag {
-        "ItemButton" | "DropDownToggleButton" | "EventButton" => ("Button", None),
+        "DropDownToggleButton" | "EventButton" => ("Button", None),
         _ => crate::xml::widget_type_for_tag(tag)?,
     };
     Some((f, wt, intrinsic))
@@ -515,7 +515,7 @@ mod tests {
         );
         assert_eq!(
             resolve(&XmlElement::ItemButton(f.clone())),
-            Some(("Button", None))
+            Some(("Button", Some("ItemButton")))
         );
         assert_eq!(
             resolve(&XmlElement::CheckButton(f.clone())),
@@ -696,15 +696,16 @@ mod tests {
     }
 
     /// Document the differences between XmlElement and FrameElement mappings.
-    /// ItemButton maps to "Button" here but "ItemButton" in FrameElement.
+    /// ItemButton resolves as a Button with the ItemButton intrinsic base here,
+    /// while FrameElement preserves the raw alias and inherits are resolved later.
     /// DropDownToggleButton/EventButton have no intrinsic here but do in FrameElement.
     #[test]
     fn xml_vs_frame_element_divergences() {
         let f = default_frame();
-        // XmlElement::ItemButton -> ("Button", None)
+        // XmlElement::ItemButton -> ("Button", Some("ItemButton"))
         assert_eq!(
             resolve(&XmlElement::ItemButton(f.clone())),
-            Some(("Button", None))
+            Some(("Button", Some("ItemButton")))
         );
         // XmlElement::DropDownToggleButton -> ("Button", None) — no intrinsic
         assert_eq!(

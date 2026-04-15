@@ -5,11 +5,10 @@
 //! counterpart using `frame_id_from_stack` + `borrow_state`/`borrow_state_mut`.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_ref, val_to_string,
+    borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_ref,
 };
-use crate::lua_api::rilua_script_helpers::{
-    call_error_handler_state, get_script as get_rilua_script, protected_call_state,
-};
+use crate::lua_api::rilua_script_helpers::call_error_handler_state;
+use crate::lua_api::rilua_script_helpers::get_script as get_rilua_script;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -278,9 +277,9 @@ fn fire_visibility_handler(state: &mut LuaState, frame_id: u64, handler_name: &s
     let Ok(frame) = frame_ref(state, frame_id) else {
         return;
     };
-    if let Err(err) = protected_call_state(state, handler, &[frame]) {
-        let error_msg = val_to_string(state, err)
-            .unwrap_or_else(|| format!("script error ({})", err.type_name()));
+    if let Err(error_msg) =
+        crate::lua_api::rilua_script_helpers::protected_lua_pcall_state(state, handler, &[frame])
+    {
         call_error_handler_state(state, &error_msg);
     }
 }

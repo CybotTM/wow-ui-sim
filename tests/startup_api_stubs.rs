@@ -216,6 +216,59 @@ fn player_is_timerunning_returns_false() {
 }
 
 #[test]
+fn startup_expansion_and_threat_stubs_return_safe_values() {
+    let env = env();
+    let result: (f64, f64, f64, f64, f64, bool, bool, f64, f64, f64) = env
+        .eval(
+            r#"
+            local detailedStatus = select(2, UnitDetailedThreatSituation("player", "target"))
+            return UnitTrialBankedLevels("player"),
+                   GetClientDisplayExpansionLevel(),
+                   GetAccountExpansionLevel(),
+                   GetMaxLevelForExpansionLevel(0),
+                   GetMaxLevelForPlayerExpansion(),
+                   UnitIsHumanPlayer("player"),
+                   IsThreatWarningEnabled(),
+                   UnitThreatSituation("player") or 0,
+                   detailedStatus or 0,
+                   UnitThreatPercentageOfLead("player", "target") or 0
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, 0.0);
+    assert_eq!(result.1, 10.0);
+    assert_eq!(result.2, 10.0);
+    assert_eq!(result.3, 80.0);
+    assert_eq!(result.4, 80.0);
+    assert!(!result.5, "human-player probe should default false in the sim");
+    assert!(!result.6, "threat warning UI should default disabled in the sim");
+    assert_eq!(result.7, 0.0);
+    assert_eq!(result.8, 0.0);
+    assert_eq!(result.9, 0.0);
+}
+
+#[test]
+fn startup_color_and_event_toast_globals_are_seeded() {
+    let env = env();
+    let (override_is_false, color_type, a): (bool, String, f64) = env
+        .eval(
+            r#"
+            local _, _, _, a = POWERBAR_PREDICTION_COLOR_FURY:GetRGBA()
+            return EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE == false,
+                   type(POWERBAR_PREDICTION_COLOR_FURY),
+                   a
+            "#,
+        )
+        .unwrap();
+    assert!(
+        override_is_false,
+        "EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE should default false so optional-offset lookups stay falsy"
+    );
+    assert_eq!(color_type, "table");
+    assert_eq!(a, 1.0);
+}
+
+#[test]
 fn set_spacing_round_trips_on_editbox() {
     // CommunitiesGuildTextEditFrame_OnLoad does EditBox:SetSpacing(2).
     // Stored as `text_line_spacing` so GetSpacing round-trips even

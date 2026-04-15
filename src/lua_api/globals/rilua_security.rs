@@ -25,6 +25,7 @@ use crate::loader::LoadError;
 use crate::loader::lua_file::compile_with_rilua;
 use crate::lua_api::rilua_methods::registry_get;
 use crate::lua_api::rilua_methods::registry_set;
+use crate::lua_api::rilua_script_helpers::{call_error_handler_state, protected_lua_pcall_state};
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
@@ -100,15 +101,35 @@ fn parse_securecallmethod_args(
 
 /// Look up `method_name` on the table referenced by `obj_ref`.
 fn lookup_method_on_table(
-    state: &LuaState,
+    state: &mut LuaState,
     obj_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
     method_name: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
 ) -> Val {
-    state
+    let direct = state
         .gc
         .tables
         .get(obj_ref)
         .map(|t| t.get_str(method_name, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    if direct != Val::Nil {
+        return direct;
+    }
+
+    let index_key = state.gc.intern_string(b"__index");
+    let index_table = state
+        .gc
+        .tables
+        .get(obj_ref)
+        .and_then(|table| table.metatable())
+        .and_then(|mt_ref| state.gc.tables.get(mt_ref))
+        .map(|mt| mt.get_str(index_key, &state.gc.string_arena))
+        .and_then(|value| match value {
+            Val::Table(table_ref) => Some(table_ref),
+            _ => None,
+        });
+    index_table
+        .and_then(|table_ref| state.gc.tables.get(table_ref))
+        .map(|table| table.get_str(method_name, &state.gc.string_arena))
         .unwrap_or(Val::Nil)
 }
 
@@ -125,42 +146,32 @@ fn gather_self_and_extra_args(state: &LuaState, obj: Val, nargs: usize) -> Vec<V
 /// Invoke the method either through the global `securecall` wrapper or
 /// directly if `securecall` was stripped from the environment.
 fn dispatch_securecall(state: &mut LuaState, method: Val, args: &[Val]) -> LuaResult<u32> {
-    let securecall_key = state.gc.intern_string(b"securecall");
-    let securecall = state
-        .gc
-        .tables
-        .get(state.global)
-        .map(|g| g.get_str(securecall_key, &state.gc.string_arena))
-        .unwrap_or(Val::Nil);
-
-    if let Val::Function(sc_ref) = securecall {
-        drop_unused(sc_ref); // reserved for call-from-RustFn wiring
-        // TODO: invoke securecall(method, obj, ...) once rilua exposes
-        // call-from-RustFn. For now fall through to direct call.
-    }
-    call_direct(state, method, args)
-}
-
-/// Call a function value directly and push its results onto the stack.
-fn call_direct(state: &mut LuaState, func: Val, args: &[Val]) -> LuaResult<u32> {
-    let Val::Function(func_ref) = func else {
+    let Val::Function(_) = method else {
         return Ok(0);
     };
-    // Build a temporary rilua::Function handle and call it.
-    // rilua::Function wraps the GcRef with safe lifetime extension.
-    let _ = (state, func_ref, args); // suppress unused warnings until API is wired
-    // TODO: wire state.call_function(func_ref, args) once available in RustFn context.
-    Ok(0)
+    match protected_lua_pcall_state(state, method, args) {
+        Ok(results) if results.is_empty() => {
+            state.push(Val::Nil);
+            Ok(1)
+        }
+        Ok(results) => {
+            let count = results.len() as u32;
+            for value in results {
+                state.push(value);
+            }
+            Ok(count)
+        }
+        Err(error) => {
+            call_error_handler_state(state, &error);
+            state.push(Val::Nil);
+            Ok(1)
+        }
+    }
 }
-
-/// Suppress "unused" lint on variables we intentionally keep for future wiring.
-#[inline(always)]
-fn drop_unused<T>(_: T) {}
 
 // ── Value-access fallbacks ───────────────────────────────────────────────────
 
 fn register_value_access_fallbacks(lua: &mut rilua::Lua) -> LuaResult<()> {
-    use rilua::LuaApiMut;
     register_if_missing(lua, "issecretvalue", issecretvalue_fallback)?;
     register_if_missing(lua, "canaccessvalue", canaccessvalue_fallback)?;
     register_if_missing(lua, "canaccessallvalues", canaccessallvalues_fallback)?;

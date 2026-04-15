@@ -13,6 +13,7 @@ use crate::lua_api::rilua_methods::{
     extract_frame_id, frame_ref, registry_get, registry_table_or_create, state_handle, table_get,
     table_set,
 };
+use crate::lua_api::rilua_script_helpers::protected_lua_pcall_state;
 use crate::lua_bridge::FromStack;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
@@ -55,7 +56,11 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
         parent_explicit,
         id.map(|n| n as i32),
     )?;
-    apply_runtime_templates(state, frame_id, inherits.as_deref())?;
+    let fire_on_load = {
+        let sim = borrow_state(state)?;
+        sim.suppress_runtime_on_load_depth == 0
+    };
+    apply_runtime_template_chain(state, frame_id, inherits.as_deref(), fire_on_load)?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
@@ -712,6 +717,13 @@ fn apply_runtime_template_chain(
         if let Some(scripts) = entry.frame.scripts() {
             apply_template_scripts(state, frame_id, scripts)?;
         }
+    }
+
+    // The chain is base-to-derived. Install all parent-facing state first so
+    // template child OnLoad/OnShow handlers can see derived key values and
+    // mixin methods (for example ThreeSliceButtonTemplate children expect the
+    // derived template's `atlasName` to already exist on the parent button).
+    for entry in &chain {
         create_template_child_frames(
             state,
             &state_rc,
@@ -828,6 +840,11 @@ fn create_template_child_frame(
     if let Some(intrinsic) = intrinsic {
         crate::lua_api::globals::template::set_intrinsic(state, child_id, intrinsic);
     }
+    apply_frame_mixins(state, child_id, frame.combined_mixin().as_deref());
+    apply_template_key_values(state, child_id, frame.all_key_values());
+    if let Some(scripts) = frame.scripts() {
+        apply_template_scripts(state, child_id, scripts)?;
+    }
 
     let child_subst = if frame.name.is_some() {
         child_name.as_str()
@@ -839,11 +856,6 @@ fn create_template_child_frame(
     apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     apply_runtime_template_loader_effects(state, &child_name, frame, inherited_chain.as_deref())?;
-    apply_frame_mixins(state, child_id, frame.combined_mixin().as_deref());
-    apply_template_key_values(state, child_id, frame.all_key_values());
-    if let Some(scripts) = frame.scripts() {
-        apply_template_scripts(state, child_id, scripts)?;
-    }
     fire_frame_on_load(state, child_id)?;
     Ok(Some(child_id))
 }
@@ -885,7 +897,7 @@ fn apply_runtime_template_loader_effects(
         inherits,
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_bar_texture(&loader_env, frame, frame_name)
+    crate::loader::xml_frame_extras::apply_bar_texture(&loader_env, frame, frame_name, inherits)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::xml_frame_extras::init_action_bar_tables(&loader_env, frame, frame_name);
     Ok(())
@@ -1143,7 +1155,16 @@ fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str
 }
 
 fn resolve_global_path(state: &mut LuaState, path: &str) -> Val {
-    let mut current = Val::Table(state.global);
+    let current = resolve_table_path(state, Val::Table(state.global), path);
+    if current != Val::Nil {
+        return current;
+    }
+    let secureenv = registry_get(state, "__secureenv");
+    resolve_table_path(state, secureenv, path)
+}
+
+fn resolve_table_path(state: &mut LuaState, root: Val, path: &str) -> Val {
+    let mut current = root;
     for segment in path
         .split('.')
         .map(str::trim)
@@ -1172,6 +1193,29 @@ fn copy_table_into_frame(state: &mut LuaState, frame_id: u64, source: Val) {
         return;
     };
 
+    copy_table_entries_into_frame(state, frame_ref, source_ref);
+    let index_key = state.gc.intern_string(b"__index");
+    let index_table = state
+        .gc
+        .tables
+        .get(source_ref)
+        .and_then(|table| table.metatable())
+        .and_then(|mt_ref| state.gc.tables.get(mt_ref))
+        .map(|mt| mt.get_str(index_key, &state.gc.string_arena))
+        .and_then(|value| match value {
+            Val::Table(table_ref) => Some(table_ref),
+            _ => None,
+        });
+    if let Some(index_ref) = index_table {
+        copy_table_entries_into_frame(state, frame_ref, index_ref);
+    }
+}
+
+fn copy_table_entries_into_frame(
+    state: &mut LuaState,
+    frame_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    source_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) {
     let array_values = state
         .gc
         .tables
@@ -1219,7 +1263,10 @@ fn call_handler_with_frame(state: &mut LuaState, handler: Val, frame: Val) -> Lu
     let Val::Function(_) = handler else {
         return Ok(());
     };
-    call_function_state(state, handler, &[frame]).map(|_| ())
+    match protected_lua_pcall_state(state, handler, &[frame]) {
+        Ok(_) => Ok(()),
+        Err(err) => Err(rilua::runtime_error(err)),
+    }
 }
 
 /// Set a named field (arg 2) on the frame (arg 1)'s fields table.

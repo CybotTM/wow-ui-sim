@@ -363,7 +363,7 @@ pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static s
     match tag {
         "Frame" => Some(("Frame", None)),
         "Button" => Some(("Button", None)),
-        "ItemButton" => Some(("ItemButton", None)),
+        "ItemButton" => Some(("Button", Some("ItemButton"))),
         "CheckButton" => Some(("CheckButton", None)),
         "EditBox" | "EventEditBox" => Some(("EditBox", None)),
         "ScrollFrame" | "EventScrollFrame" => Some(("ScrollFrame", None)),

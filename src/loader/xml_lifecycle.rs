@@ -1,8 +1,10 @@
 //! Lifecycle script firing for XML-created frames (OnLoad, OnShow).
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::rilua_methods::{call_function_state, frame_ref, table_get};
-use crate::lua_api::rilua_script_helpers::{collect_lua_error, get_script};
+use crate::lua_api::rilua_methods::{frame_ref, table_get};
+use crate::lua_api::rilua_script_helpers::{
+    collect_lua_error, get_script, protected_lua_pcall_state,
+};
 use rilua::Val;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -72,10 +74,10 @@ fn call_handler(
         return;
     };
     let frame_name = frame_display_name(state, frame_id);
-    let result = call_function_state(state, handler, &[frame]);
+    let result = protected_lua_pcall_state(state, handler, &[frame]);
 
-    if let Err(error) = result {
-        let message = format!("[{handler_name}] {frame_name}: {error}");
+    if let Err(error_text) = result {
+        let message = format!("[{handler_name}] {frame_name}: {error_text}");
         if collect_lua_error(state, &message) {
             eprintln!("Lua error: {message}");
         }

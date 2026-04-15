@@ -7,6 +7,7 @@ use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     frame_ref, registry_table_or_create, table_get, table_set, val_to_string,
 };
+use crate::lua_api::state::SimState;
 use crate::lua_api::rilua_script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, remove_script as remove_rilua_script,
     set_script as set_rilua_script,
@@ -49,17 +50,7 @@ fn get_text(state: &mut LuaState) -> LuaResult<u32> {
     let is_editbox = frame
         .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
         .unwrap_or(false);
-    let text = frame.and_then(|f| {
-        use crate::widget::WidgetType;
-        if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
-            f.children_keys
-                .get("Text")
-                .and_then(|&cid| sim.widgets.get(cid))
-                .and_then(|c| c.text.clone())
-        } else {
-            f.text.clone()
-        }
-    });
+    let text = frame.and_then(|f| frame_text_value(&sim, f, false));
     drop(sim);
     match text {
         Some(t) => {
@@ -79,23 +70,58 @@ fn get_text(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
+fn clear_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.text = Some(String::new());
+        frame.text_stripped = Some(String::new());
+    }
+    let text_child_id = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.children_keys.get("Text").copied());
+    if let Some(text_child_id) = text_child_id
+        && let Some(child) = sim.widgets.get_mut_visual(text_child_id)
+    {
+        child.text = Some(String::new());
+        child.text_stripped = Some(String::new());
+    }
+    Ok(0)
+}
+
+fn frame_text_value(sim: &SimState, frame: &crate::widget::Frame, stripped: bool) -> Option<String> {
+    let own_text = || {
+        if stripped {
+            frame.text_stripped.clone().or_else(|| frame.text.clone())
+        } else {
+            frame.text.clone()
+        }
+    };
+
+    if !matches!(frame.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+        return own_text();
+    }
+
+    frame.children_keys
+        .get("Text")
+        .and_then(|&cid| sim.widgets.get(cid))
+        .and_then(|child| {
+            if stripped {
+                child.text_stripped.clone().or_else(|| child.text.clone())
+            } else {
+                child.text.clone()
+            }
+        })
+        .or_else(own_text)
+}
+
 fn frame_text_measurement(state: &LuaState, id: u64) -> (String, Option<String>, f32) {
     let sim = borrow_state(state).expect("sim state should exist");
     let frame = sim.widgets.get(id);
     let result = frame
         .map(|f| {
-            let text = if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
-                f.children_keys
-                    .get("Text")
-                    .and_then(|&cid| sim.widgets.get(cid))
-                    .and_then(|child| child.text_stripped.clone().or_else(|| child.text.clone()))
-                    .unwrap_or_default()
-            } else {
-                f.text_stripped
-                    .clone()
-                    .or_else(|| f.text.clone())
-                    .unwrap_or_default()
-            };
+            let text = frame_text_value(&sim, f, true).unwrap_or_default();
             (text, f.font.clone(), f.font_size)
         })
         .unwrap_or_else(|| (String::new(), None, 12.0));
@@ -103,21 +129,53 @@ fn frame_text_measurement(state: &LuaState, id: u64) -> (String, Option<String>,
     result
 }
 
+fn frame_text_scale_value(state: &LuaState, id: u64) -> f64 {
+    borrow_state(state)
+        .expect("sim state should exist")
+        .widgets
+        .get(id)
+        .map(|frame| frame.text_scale.max(0.0))
+        .unwrap_or(1.0)
+}
+
 fn measure_text_width(state: &LuaState, id: u64) -> f64 {
     let (text, font, font_size) = frame_text_measurement(state, id);
     if text.is_empty() {
         return 0.0;
     }
+    let text_scale = frame_text_scale_value(state, id);
     if let Some(app) = state.app_data::<crate::lua_api::env::WowLuaAppData>()
         && let Some(font_system) = app.font_system.as_ref()
     {
         return font_system
             .borrow_mut()
-            .measure_text_width(&text, font.as_deref(), font_size) as f64;
+            .measure_text_width(&text, font.as_deref(), font_size) as f64
+            * text_scale;
     }
 
     let mut fallback_font_system = WowFontSystem::new(std::path::Path::new("./fonts"));
-    fallback_font_system.measure_text_width(&text, font.as_deref(), font_size) as f64
+    fallback_font_system.measure_text_width(&text, font.as_deref(), font_size) as f64 * text_scale
+}
+
+fn measure_text_height(state: &LuaState, id: u64, wrap_width: Option<f32>) -> f64 {
+    let (text, font, font_size) = frame_text_measurement(state, id);
+    if text.is_empty() {
+        return 0.0;
+    }
+    let text_scale = frame_text_scale_value(state, id);
+    if let Some(app) = state.app_data::<crate::lua_api::env::WowLuaAppData>()
+        && let Some(font_system) = app.font_system.as_ref()
+    {
+        return font_system
+            .borrow_mut()
+            .measure_text_height(&text, font.as_deref(), font_size, wrap_width)
+            as f64
+            * text_scale;
+    }
+
+    let mut fallback_font_system = WowFontSystem::new(std::path::Path::new("./fonts"));
+    fallback_font_system.measure_text_height(&text, font.as_deref(), font_size, wrap_width) as f64
+        * text_scale
 }
 
 fn get_string_width(state: &mut LuaState) -> LuaResult<u32> {
@@ -128,6 +186,58 @@ fn get_string_width(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_text_width(state: &mut LuaState) -> LuaResult<u32> {
     get_string_width(state)
+}
+
+fn get_line_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let line_height = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| (frame.font_size as f64 * frame.text_scale.max(0.0)) as f32)
+            .unwrap_or(0.0)
+    };
+    state.push(Val::Num(line_height as f64));
+    Ok(1)
+}
+
+fn is_truncated(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (width, height, word_wrap, max_lines, line_height) = {
+        let sim = borrow_state(state)?;
+        let frame = sim.widgets.get(id);
+        let width = frame.map(|f| f.width as f64).unwrap_or(0.0);
+        let height = frame.map(|f| f.height as f64).unwrap_or(0.0);
+        let word_wrap = frame.map(|f| f.word_wrap).unwrap_or(false);
+        let max_lines = frame.map(|f| f.max_lines).unwrap_or(0);
+        let line_height = frame
+            .map(|frame| frame.font_size as f64 * frame.text_scale.max(0.0))
+            .unwrap_or(0.0);
+        (width, height, word_wrap, max_lines, line_height)
+    };
+
+    let width_overflow = width > 0.0 && measure_text_width(state, id) > width + 0.5;
+    let vertical_overflow = if !word_wrap || width <= 0.0 {
+        false
+    } else {
+        let wrapped_height = measure_text_height(state, id, Some(width as f32));
+        let max_lines_height = if max_lines > 0 {
+            Some(line_height * max_lines as f64)
+        } else {
+            None
+        };
+        let available_height = match (height > 0.0, max_lines_height) {
+            (true, Some(lines_height)) => height.min(lines_height),
+            (true, None) => height,
+            (false, Some(lines_height)) => lines_height,
+            (false, None) => 0.0,
+        };
+        available_height > 0.0 && wrapped_height > available_height + 0.5
+    };
+    let truncated = width_overflow || vertical_overflow;
+
+    state.push(Val::Bool(truncated));
+    Ok(1)
 }
 
 fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
@@ -388,6 +498,69 @@ fn set_max_lines(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.max_lines = max_lines;
+    }
+    Ok(0)
+}
+
+fn get_max_lines(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let max_lines = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.max_lines)
+        .unwrap_or(0);
+    state.push(Val::Num(max_lines as f64));
+    Ok(1)
+}
+
+fn get_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let word_wrap = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.word_wrap)
+        .unwrap_or(true);
+    state.push(Val::Bool(word_wrap));
+    Ok(1)
+}
+
+fn can_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    get_word_wrap(state)
+}
+
+fn set_non_space_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = matches!(stack_val(state, 2), Val::Bool(true));
+    store_simple_attribute(state, id, "__non_space_wrap", Val::Bool(enabled))?;
+    Ok(0)
+}
+
+fn can_non_space_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.attributes.get("__non_space_wrap"))
+        .is_some_and(|value| matches!(value, crate::widget::AttributeValue::Boolean(true)));
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn get_text_scale(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    state.push(Val::Num(frame_text_scale_value(state, id)));
+    Ok(1)
+}
+
+fn set_text_scale(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let text_scale = match stack_val(state, 2) {
+        Val::Num(value) => value.max(0.0),
+        _ => return Ok(0),
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.text_scale = text_scale;
     }
     Ok(0)
 }
@@ -1479,6 +1652,7 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     // Text methods
     table_set_rust_fn(state, table, "SetText", set_text)?;
     table_set_rust_fn(state, table, "GetText", get_text)?;
+    table_set_rust_fn(state, table, "ClearText", clear_text)?;
     table_set_rust_fn(state, table, "SetFormattedText", set_formatted_text)?;
     table_set_rust_fn(state, table, "SetFont", set_font)?;
     table_set_rust_fn(state, table, "GetFont", get_font)?;
@@ -1489,6 +1663,8 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
     table_set_rust_fn(state, table, "GetStringWidth", get_string_width)?;
     table_set_rust_fn(state, table, "GetTextWidth", get_text_width)?;
+    table_set_rust_fn(state, table, "GetLineHeight", get_line_height)?;
+    table_set_rust_fn(state, table, "IsTruncated", is_truncated)?;
     table_set_rust_fn(
         state,
         table,
@@ -1500,7 +1676,14 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetJustifyV", set_justify_v)?;
     table_set_rust_fn(state, table, "GetJustifyV", get_justify_v)?;
     table_set_rust_fn(state, table, "SetWordWrap", set_word_wrap)?;
+    table_set_rust_fn(state, table, "GetWordWrap", get_word_wrap)?;
+    table_set_rust_fn(state, table, "CanWordWrap", can_word_wrap)?;
     table_set_rust_fn(state, table, "SetMaxLines", set_max_lines)?;
+    table_set_rust_fn(state, table, "GetMaxLines", get_max_lines)?;
+    table_set_rust_fn(state, table, "SetNonSpaceWrap", set_non_space_wrap)?;
+    table_set_rust_fn(state, table, "CanNonSpaceWrap", can_non_space_wrap)?;
+    table_set_rust_fn(state, table, "GetTextScale", get_text_scale)?;
+    table_set_rust_fn(state, table, "SetTextScale", set_text_scale)?;
     table_set_rust_fn(state, table, "SetTextToFit", set_text_to_fit)?;
     table_set_rust_fn(state, table, "SetTextColor", set_text_color)?;
     table_set_rust_fn(state, table, "GetTextColor", get_text_color)?;

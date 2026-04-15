@@ -3,7 +3,10 @@
 use crate::lua_api::LoaderEnv;
 use crate::xml::collect_texture_mixins;
 
-use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref};
+use super::helpers::{
+    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
+    lua_table_field_ref,
+};
 use super::helpers_anim::generate_animation_group_code;
 
 fn emit_file_code(texture: &crate::xml::TextureXml) -> String {
@@ -142,18 +145,20 @@ fn emit_tiling_flags_code(texture: &crate::xml::TextureXml) -> String {
 fn emit_parent_key_code(texture: &crate::xml::TextureXml) -> String {
     let mut code = String::new();
     if let Some(key) = &texture.parent_key {
+        let parent_field = lua_table_field_ref("parent", key);
         code.push_str(&format!(
             r#"
-        parent.{} = tex
+        {} = tex
         "#,
-            key
+            parent_field
         ));
     }
     if let Some(parent_array) = &texture.parent_array {
+        let array_ref = lua_table_field_ref("parent", parent_array);
         code.push_str(&format!(
             r#"
-        parent.{parent_array} = parent.{parent_array} or {{}}
-        table.insert(parent.{parent_array}, tex)
+        {array_ref} = {array_ref} or {{}}
+        table.insert({array_ref}, tex)
         "#,
         ));
     }
@@ -245,9 +250,10 @@ fn emit_masked_textures(texture: &crate::xml::TextureXml, is_mask: bool) -> Stri
     if let Some(ref masked) = texture.masked_textures {
         for entry in &masked.entries {
             if let Some(ref key) = entry.child_key {
+                let parent_field = lua_table_field_ref("parent", key);
                 code.push_str(&format!(
                     r#"
-        if parent.{key} then parent.{key}:AddMaskTexture(tex) end
+        if {parent_field} then {parent_field}:AddMaskTexture(tex) end
         "#,
                 ));
             }

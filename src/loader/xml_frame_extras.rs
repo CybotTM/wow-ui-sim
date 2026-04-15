@@ -53,8 +53,9 @@ pub(crate) fn apply_bar_texture(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    inherits: &str,
 ) -> Result<(), LoadError> {
-    let Some(bar) = frame.bar_texture() else {
+    let Some(bar) = resolve_bar_texture(frame, inherits) else {
         return Ok(());
     };
     let bar_name = bar
@@ -65,7 +66,7 @@ pub(crate) fn apply_bar_texture(
 
     let parent_ref = lua_global_ref(name);
     let mut code = build_bar_texture_header(&parent_ref, &bar_name);
-    append_bar_texture_properties(&mut code, bar);
+    append_bar_texture_properties(&mut code, &bar);
     code.push_str("            parent:SetStatusBarTexture(bar)\n");
     let parent_key = bar.parent_key.as_deref().unwrap_or("Bar");
     code.push_str(&format!("            parent.{} = bar\n", parent_key));
@@ -79,6 +80,20 @@ pub(crate) fn apply_bar_texture(
     env.exec(&code)
         .map_err(|e| LoadError::Lua(format!("Failed to create bar texture on {}: {}", name, e)))?;
     Ok(())
+}
+
+fn resolve_bar_texture(
+    frame: &crate::xml::FrameXml,
+    inherits: &str,
+) -> Option<crate::xml::TextureXml> {
+    if let Some(bar) = frame.bar_texture() {
+        return Some(bar.clone());
+    }
+
+    crate::xml::get_template_chain(inherits)
+        .into_iter()
+        .rev()
+        .find_map(|entry| entry.frame.bar_texture().cloned())
 }
 
 fn build_bar_texture_header(parent_ref: &str, bar_name: &str) -> String {

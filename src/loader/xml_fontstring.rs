@@ -5,7 +5,7 @@ use crate::lua_api::LoaderEnv;
 use super::error::LoadError;
 use super::helpers::{
     escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
-    resolve_child_name, resolve_lua_escapes,
+    lua_table_field_ref, resolve_child_name, resolve_lua_escapes,
 };
 
 /// Resolve a text key through the global strings table.
@@ -87,13 +87,15 @@ fn generate_fontstring_parent_code(fs: &crate::xml::FontStringXml) -> String {
     let mut code = String::new();
 
     if let Some(key) = &fs.parent_key {
-        code.push_str(&format!("\n        parent.{} = fs\n        ", key));
+        let parent_field = lua_table_field_ref("parent", key);
+        code.push_str(&format!("\n        {parent_field} = fs\n        "));
     }
 
     if let Some(parent_array) = &fs.parent_array {
+        let array_ref = lua_table_field_ref("parent", parent_array);
         code.push_str(&format!(
-            "\n        parent.{parent_array} = parent.{parent_array} or {{}}\n        \
-             table.insert(parent.{parent_array}, fs)\n        ",
+            "\n        {array_ref} = {array_ref} or {{}}\n        \
+             table.insert({array_ref}, fs)\n        ",
         ));
     }
 

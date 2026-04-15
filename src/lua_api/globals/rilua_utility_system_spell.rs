@@ -15,7 +15,10 @@ use crate::lua_api::rilua_methods::{
     frame_id_from_stack, frame_ref, registry_get, registry_set, state_handle, table_get, table_set,
     val_to_string,
 };
-use crate::lua_api::rilua_script_helpers::{get_event_listeners, get_script, protected_call_state};
+use crate::lua_api::rilua_script_helpers::{
+    call_error_handler_state, get_event_listeners, get_script, protected_call_state,
+    protected_lua_pcall_state,
+};
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
 use crate::specializations;
 use rilua::LuaApiMut;
@@ -506,11 +509,47 @@ pub fn xpcall(state: &mut LuaState) -> LuaResult<u32> {
 
 /// securecall(name_or_func, ...) — call a function by name in a secure context.
 ///
-/// TODO: taint-aware dispatch not yet implemented in rilua path.
+/// Taint-aware dispatch is not implemented on the rilua path yet, but SharedXML
+/// still depends on `securecall` returning the wrapped function's real results.
 pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: resolve function by name or Val::Function, call with taint cleared
-    state.push(Val::Nil);
-    Ok(1)
+    let func = match stack_val(state, 1) {
+        Val::Str(name_ref) => state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|table| table.get_str(name_ref, &state.gc.string_arena))
+            .unwrap_or(Val::Nil),
+        value => value,
+    };
+
+    if !matches!(func, Val::Function(_)) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let arg_count = (state.top - state.base).saturating_sub(1);
+    let args = (0..arg_count)
+        .map(|index| state.stack_get(state.base + 1 + index))
+        .collect::<Vec<_>>();
+
+    match protected_lua_pcall_state(state, func, &args) {
+        Ok(results) if results.is_empty() => {
+            state.push(Val::Nil);
+            Ok(1)
+        }
+        Ok(results) => {
+            let count = results.len() as u32;
+            for value in results {
+                state.push(value);
+            }
+            Ok(count)
+        }
+        Err(error) => {
+            call_error_handler_state(state, &error);
+            state.push(Val::Nil);
+            Ok(1)
+        }
+    }
 }
 
 const ERROR_HANDLER_KEY: &str = "__error_handler";

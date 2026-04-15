@@ -102,6 +102,18 @@ fn parse_set_point_args(
     }
 
     let relative_to = resolve_anchor_target_id(state, arg3);
+    if matches!(arg4, Val::Num(_)) {
+        let x_offset = match arg4 {
+            Val::Num(n) => n as f32,
+            _ => 0.0,
+        };
+        let y_offset = match arg5 {
+            Val::Num(n) => n as f32,
+            _ => 0.0,
+        };
+        return Ok((relative_to, point, x_offset, y_offset));
+    }
+
     let relative_point = resolve_relative_point_from_val(state, arg4, point)?;
     let x_offset = match arg5 {
         Val::Num(n) => n as f32,
@@ -112,6 +124,44 @@ fn parse_set_point_args(
         _ => 0.0,
     };
     Ok((relative_to, relative_point, x_offset, y_offset))
+}
+
+fn parse_line_anchor_args(
+    state: &mut LuaState,
+) -> LuaResult<(crate::widget::AnchorPoint, Option<u64>, f32, f32)> {
+    let point_name = String::from_stack(state, 2)?;
+    let point = crate::widget::AnchorPoint::from_str(&point_name).ok_or_else(|| {
+        runtime_error(format!(
+            "Line anchor point must be a valid region point, got {point_name}"
+        ))
+    })?;
+
+    let arg3 = stack_val(state, 3);
+    let arg4 = stack_val(state, 4);
+    let arg5 = stack_val(state, 5);
+
+    let x = match arg3 {
+        Val::Num(n) => Some(n as f32),
+        _ => None,
+    };
+    let y = match arg4 {
+        Val::Num(n) => Some(n as f32),
+        _ => None,
+    };
+    if let (Some(x_offset), Some(y_offset)) = (x, y) {
+        return Ok((point, None, x_offset, y_offset));
+    }
+
+    let target_id = resolve_anchor_target_id(state, arg3).map(|id| id as u64);
+    let x_offset = match arg4 {
+        Val::Num(n) => n as f32,
+        _ => 0.0,
+    };
+    let y_offset = match arg5 {
+        Val::Num(n) => n as f32,
+        _ => 0.0,
+    };
+    Ok((point, target_id, x_offset, y_offset))
 }
 
 fn bind_named_child_global(state: &mut LuaState, name: &str, child_id: u64) -> LuaResult<()> {
@@ -143,6 +193,80 @@ fn frame_global_or_ref(state: &mut LuaState, id: u64) -> LuaResult<Val> {
     frame_ref(state, id)
 }
 
+fn set_line_endpoint(state: &mut LuaState, is_start: bool) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (point, target_id, x_offset, y_offset) = parse_line_anchor_args(state)?;
+
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && frame.widget_type == crate::widget::WidgetType::Line
+    {
+        let anchor = crate::widget::LineAnchor {
+            point,
+            target_id,
+            x_offset,
+            y_offset,
+        };
+        if is_start {
+            frame.line_start = Some(anchor);
+        } else {
+            frame.line_end = Some(anchor);
+        }
+        sim.widgets.mark_rect_dirty(id);
+    }
+
+    Ok(0)
+}
+
+fn get_line_endpoint(state: &mut LuaState, is_start: bool) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let anchor = {
+        let sim = borrow_state(state)?;
+        let Some(frame) = sim.widgets.get(id) else {
+            return Ok(0);
+        };
+        if frame.widget_type != crate::widget::WidgetType::Line {
+            return Ok(0);
+        }
+        if is_start {
+            frame.line_start.clone()
+        } else {
+            frame.line_end.clone()
+        }
+    };
+
+    let Some(anchor) = anchor else {
+        return Ok(0);
+    };
+
+    let point_val = create_string(state, anchor.point.as_str());
+    let target_val = match anchor.target_id {
+        Some(target_id) => frame_global_or_ref(state, target_id)?,
+        None => Val::Nil,
+    };
+    state.push(point_val);
+    state.push(target_val);
+    state.push(Val::Num(anchor.x_offset as f64));
+    state.push(Val::Num(anchor.y_offset as f64));
+    Ok(4)
+}
+
+fn set_start_point(state: &mut LuaState) -> LuaResult<u32> {
+    set_line_endpoint(state, true)
+}
+
+fn get_start_point(state: &mut LuaState) -> LuaResult<u32> {
+    get_line_endpoint(state, true)
+}
+
+fn set_end_point(state: &mut LuaState) -> LuaResult<u32> {
+    set_line_endpoint(state, false)
+}
+
+fn get_end_point(state: &mut LuaState) -> LuaResult<u32> {
+    get_line_endpoint(state, false)
+}
+
 fn button_enabled(frame: &crate::widget::Frame) -> bool {
     frame
         .attributes
@@ -160,6 +284,8 @@ fn sync_button_slot_visibility(sim: &mut crate::lua_api::SimState, button_id: u6
         "PushedTexture",
         "DisabledTexture",
         "HighlightTexture",
+        "CheckedTexture",
+        "DisabledCheckedTexture",
     ] {
         let child_id = sim
             .widgets
@@ -361,6 +487,12 @@ fn get_disabled_texture(state: &mut LuaState) -> LuaResult<u32> {
     push_button_texture_child(state, id, "DisabledTexture")
 }
 
+/// GetCheckedTexture() -> texture
+fn get_checked_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    push_button_texture_child(state, id, "CheckedTexture")
+}
+
 // ── Texture setter helpers ────────────────────────────────────────────────────
 
 /// Determine visibility for a button texture child based on button state.
@@ -369,7 +501,7 @@ fn button_texture_should_show(
     button_id: u64,
     parent_key: &str,
 ) -> bool {
-    let (enabled, button_state) = sim
+    let (enabled, checked, button_state) = sim
         .widgets
         .get(button_id)
         .map(|frame| {
@@ -381,13 +513,23 @@ fn button_texture_should_show(
                     _ => None,
                 })
                 .unwrap_or(true);
-            (enabled, frame.button_state)
+            let checked = frame
+                .attributes
+                .get("__checked")
+                .and_then(|value| match value {
+                    crate::widget::AttributeValue::Boolean(value) => Some(*value),
+                    _ => None,
+                })
+                .unwrap_or(false);
+            (enabled, checked, frame.button_state)
         })
-        .unwrap_or((true, 0));
+        .unwrap_or((true, false, 0));
     match parent_key {
         "NormalTexture" => enabled && button_state == 0,
         "PushedTexture" => enabled && button_state == 1,
         "DisabledTexture" => !enabled,
+        "CheckedTexture" => enabled && checked,
+        "DisabledCheckedTexture" => !enabled && checked,
         _ => true,
     }
 }
@@ -743,34 +885,9 @@ fn set_highlight_atlas(state: &mut LuaState) -> LuaResult<u32> {
 fn set_checked_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let texture = Val::from_stack(state, 2)?;
-    let is_userdata = extract_frame_id(state, texture).is_some();
-    let path: Option<String> = if !is_userdata {
-        match texture {
-            Val::Str(_) => val_to_string(state, texture),
-            _ => None,
-        }
-    } else {
-        None
-    };
-    let mut sim = borrow_state_mut(state)?;
-    if !is_userdata {
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame.checked_texture = path.clone();
-        }
-    }
-    // TODO: get_or_create_button_texture — find/create "CheckedTexture" child
-    let tex_id_opt = sim
-        .widgets
-        .get(id)
-        .and_then(|f| f.children_keys.get("CheckedTexture").copied());
-    if let Some(tex_id) = tex_id_opt {
-        if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
-            if !is_userdata {
-                tex.texture = path;
-            }
-            tex.visible = false;
-        }
-    }
+    apply_texture_path_to_button(state, id, "CheckedTexture", texture, |f, path, _coords| {
+        f.checked_texture = path;
+    })?;
     Ok(0)
 }
 
@@ -778,33 +895,15 @@ fn set_checked_texture(state: &mut LuaState) -> LuaResult<u32> {
 fn set_disabled_checked_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let texture = Val::from_stack(state, 2)?;
-    let is_userdata = extract_frame_id(state, texture).is_some();
-    let path: Option<String> = if !is_userdata {
-        match texture {
-            Val::Str(_) => val_to_string(state, texture),
-            _ => None,
-        }
-    } else {
-        None
-    };
-    let mut sim = borrow_state_mut(state)?;
-    if !is_userdata {
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame.disabled_checked_texture = path.clone();
-        }
-    }
-    let tex_id_opt = sim
-        .widgets
-        .get(id)
-        .and_then(|f| f.children_keys.get("DisabledCheckedTexture").copied());
-    if let Some(tex_id) = tex_id_opt {
-        if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
-            if !is_userdata {
-                tex.texture = path;
-            }
-            tex.visible = false;
-        }
-    }
+    apply_texture_path_to_button(
+        state,
+        id,
+        "DisabledCheckedTexture",
+        texture,
+        |f, path, _coords| {
+            f.disabled_checked_texture = path;
+        },
+    )?;
     Ok(0)
 }
 
@@ -933,7 +1032,16 @@ fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
         let sim = borrow_state(state)?;
         sim.widgets
             .get(id)
-            .and_then(|f| f.children_keys.get("Text").copied())
+            .and_then(|frame| {
+                frame.children_keys.get("Text").copied().or_else(|| {
+                    let fallback_name = frame.name.as_ref().map(|name| format!("{name}Text"))?;
+                    let child_id = sim.widgets.get_id_by_name(&fallback_name)?;
+                    let child = sim.widgets.get(child_id)?;
+                    (child.parent_id == Some(id)
+                        && child.widget_type == crate::widget::WidgetType::FontString)
+                        .then_some(child_id)
+                })
+            })
     };
     match text_id {
         Some(tid) => {
@@ -1875,6 +1983,9 @@ fn create_animation_group(state: &mut LuaState) -> LuaResult<u32> {
         sim.widgets.add_child(parent_id, child_id);
         sim.invalidate_strata_buckets();
     }
+    if let Some(ref n) = name {
+        bind_named_child_global(state, n, child_id)?;
+    }
     let val = frame_ref(state, child_id)?;
     state.push(val);
     Ok(1)
@@ -2038,7 +2149,7 @@ fn animation_group_set_looping(state: &mut LuaState) -> LuaResult<u32> {
 fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied()
+    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id)
         && let Some(group) = sim.animation_groups.get_mut(&group_id)
     {
         group.playing = true;
@@ -2052,7 +2163,7 @@ fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
 fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied()
+    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id)
         && let Some(group) = sim.animation_groups.get_mut(&group_id)
     {
         group.playing = false;
@@ -2070,16 +2181,68 @@ fn animation_group_is_playing(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let playing = {
         let sim = borrow_state(state)?;
-        sim.anim_frame_to_group
-            .get(&group_frame_id)
-            .and_then(|group_id| {
-                sim.animation_groups
-                    .get(group_id)
-                    .map(|group| group.playing)
-            })
+        resolve_animation_group_id(&sim, group_frame_id).and_then(|group_id| {
+            sim.animation_groups
+                .get(&group_id)
+                .map(|group| group.playing)
+        })
             .unwrap_or(false)
     };
     state.push(Val::Bool(playing));
+    Ok(1)
+}
+
+fn resolve_animation_group_id(sim: &crate::lua_api::SimState, frame_id: u64) -> Option<u64> {
+    sim.anim_frame_to_group
+        .get(&frame_id)
+        .copied()
+        .or_else(|| sim.anim_frame_to_anim.get(&frame_id).map(|(group_id, _)| *group_id))
+}
+
+fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = resolve_animation_group_id(&sim, frame_id)
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.playing = true;
+        group.paused = false;
+        group.done = false;
+        group.pending_finish = false;
+        group.elapsed = 0.0;
+        for animation in &mut group.animations {
+            animation.elapsed = 0.0;
+        }
+    }
+    Ok(0)
+}
+
+fn animation_group_finish(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = resolve_animation_group_id(&sim, frame_id)
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.playing = false;
+        group.paused = false;
+        group.done = true;
+        group.pending_finish = false;
+        for animation in &mut group.animations {
+            animation.elapsed = animation.duration;
+        }
+    }
+    Ok(0)
+}
+
+fn animation_group_is_done(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let done = {
+        let sim = borrow_state(state)?;
+        resolve_animation_group_id(&sim, frame_id)
+            .and_then(|group_id| sim.animation_groups.get(&group_id).map(|group| group.done))
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(done));
     Ok(1)
 }
 
@@ -2283,6 +2446,7 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetHighlightTexture", get_highlight_texture)?;
     table_set_rust_fn(state, table, "GetPushedTexture", get_pushed_texture)?;
     table_set_rust_fn(state, table, "GetDisabledTexture", get_disabled_texture)?;
+    table_set_rust_fn(state, table, "GetCheckedTexture", get_checked_texture)?;
 
     // Button: texture setters
     table_set_rust_fn(state, table, "SetNormalTexture", set_normal_texture)?;
@@ -2343,12 +2507,16 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
 
     // Anchor methods
     table_set_rust_fn(state, table, "SetPoint", set_point)?;
+    table_set_rust_fn(state, table, "SetStartPoint", set_start_point)?;
+    table_set_rust_fn(state, table, "SetEndPoint", set_end_point)?;
     table_set_rust_fn(state, table, "ClearAllPoints", clear_all_points)?;
     table_set_rust_fn(state, table, "ClearPoint", clear_point)?;
     table_set_rust_fn(state, table, "ClearPointsOffset", clear_points_offset)?;
     table_set_rust_fn(state, table, "AdjustPointsOffset", adjust_points_offset)?;
     table_set_rust_fn(state, table, "SetAllPoints", set_all_points)?;
     table_set_rust_fn(state, table, "GetPoint", get_point)?;
+    table_set_rust_fn(state, table, "GetStartPoint", get_start_point)?;
+    table_set_rust_fn(state, table, "GetEndPoint", get_end_point)?;
     table_set_rust_fn(state, table, "GetNumPoints", get_num_points)?;
     table_set_rust_fn(state, table, "GetPointByName", get_point_by_name)?;
 
@@ -2379,8 +2547,11 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "CreateAnimationGroup", create_animation_group)?;
     table_set_rust_fn(state, table, "CreateAnimation", create_animation)?;
     table_set_rust_fn(state, table, "Play", animation_group_play)?;
+    table_set_rust_fn(state, table, "Restart", animation_group_restart)?;
     table_set_rust_fn(state, table, "Stop", animation_group_stop)?;
+    table_set_rust_fn(state, table, "Finish", animation_group_finish)?;
     table_set_rust_fn(state, table, "IsPlaying", animation_group_is_playing)?;
+    table_set_rust_fn(state, table, "IsDone", animation_group_is_done)?;
     table_set_rust_fn(state, table, "SetLooping", animation_group_set_looping)?;
     table_set_rust_fn(state, table, "SetDuration", animation_set_duration)?;
     table_set_rust_fn(state, table, "SetOrder", animation_set_order)?;

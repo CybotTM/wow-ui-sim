@@ -120,7 +120,7 @@ pub fn apply_button_textures(
 fn button_texture_slots(
     frame_xml: &crate::xml::FrameXml,
     inherits: &str,
-) -> [(&'static str, &'static str, Option<crate::xml::TextureXml>); 4] {
+) -> [(&'static str, &'static str, Option<crate::xml::TextureXml>); 6] {
     [
         (
             "SetNormalTexture",
@@ -150,6 +150,20 @@ fn button_texture_slots(
                 crate::xml::FrameXml::disabled_texture,
             ),
         ),
+        (
+            "SetCheckedTexture",
+            "CheckedTexture",
+            resolve_button_texture_slot(frame_xml, inherits, crate::xml::FrameXml::checked_texture),
+        ),
+        (
+            "SetDisabledCheckedTexture",
+            "DisabledCheckedTexture",
+            resolve_button_texture_slot(
+                frame_xml,
+                inherits,
+                crate::xml::FrameXml::disabled_checked_texture,
+            ),
+        ),
     ]
 }
 
@@ -171,7 +185,7 @@ fn resolve_button_texture_slot(
 
 fn apply_button_texture_lua(
     env: &LoaderEnv<'_>,
-    texture_slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 4],
+    texture_slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 6],
     button_name: &str,
 ) -> Result<(), LoadError> {
     let lua_code: String = texture_slots
@@ -199,7 +213,7 @@ fn apply_button_texture_lua(
 /// regardless of whether it has atlas/file attributes.
 fn ensure_button_texture_children(
     env: &LoaderEnv<'_>,
-    slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 4],
+    slots: &[(&'static str, &'static str, Option<crate::xml::TextureXml>); 6],
     button_name: &str,
 ) {
     use crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture;
@@ -228,6 +242,20 @@ fn resolve_button_text_key(frame_xml: &crate::xml::FrameXml, inherits: &str) -> 
     None
 }
 
+fn resolve_button_text_child<'a>(
+    frame_xml: &'a crate::xml::FrameXml,
+    inherits: &str,
+) -> Option<crate::xml::FontStringXml> {
+    if let Some(button_text) = frame_xml.button_text() {
+        return Some(button_text.clone());
+    }
+
+    crate::xml::get_template_chain(inherits)
+        .into_iter()
+        .rev()
+        .find_map(|entry| entry.frame.button_text().cloned())
+}
+
 /// Generate Lua code to set text on a button and its Text fontstring child.
 fn generate_set_text_code(button_name: &str, text_key: &str) -> String {
     format!(
@@ -248,8 +276,17 @@ pub fn apply_button_text(
     button_name: &str,
     inherits: &str,
 ) -> Result<(), LoadError> {
-    if let Some(bt) = frame_xml.button_text() {
-        super::xml_fontstring::create_fontstring_from_xml(env, bt, button_name, "ARTWORK", 0)?;
+    if let Some(mut button_text) = resolve_button_text_child(frame_xml, inherits) {
+        if button_text.parent_key.is_none() {
+            button_text.parent_key = Some("Text".to_string());
+        }
+        super::xml_fontstring::create_fontstring_from_xml(
+            env,
+            &button_text,
+            button_name,
+            "ARTWORK",
+            0,
+        )?;
     }
     if let Some(text_key) = resolve_button_text_key(frame_xml, inherits) {
         env.exec(&generate_set_text_code(button_name, &text_key))

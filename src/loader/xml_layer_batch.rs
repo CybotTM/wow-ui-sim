@@ -35,7 +35,8 @@ struct TextSync {
 
 struct ParentKeyAttachment {
     child_name: String,
-    parent_key: String,
+    parent_key: Option<String>,
+    parent_array: Option<String>,
 }
 
 fn exec_batch(env: &LoaderEnv<'_>, batch: &str, parent_name: &str) -> Result<(), LoadError> {
@@ -98,7 +99,14 @@ fn append_texture_code<'a>(
         if let Some(parent_key) = resolved.parent_key.as_ref() {
             attachments.push(ParentKeyAttachment {
                 child_name: tex_name.clone(),
-                parent_key: parent_key.clone(),
+                parent_key: Some(parent_key.clone()),
+                parent_array: resolved.parent_array.clone(),
+            });
+        } else if resolved.parent_array.is_some() {
+            attachments.push(ParentKeyAttachment {
+                child_name: tex_name.clone(),
+                parent_key: None,
+                parent_array: resolved.parent_array.clone(),
             });
         }
         if ct.texture.animations.is_some() {
@@ -168,7 +176,14 @@ fn append_single_fontstring(
     if let Some(parent_key) = fontstring.parent_key.as_ref() {
         attachments.push(ParentKeyAttachment {
             child_name: fs_name.clone(),
-            parent_key: parent_key.clone(),
+            parent_key: Some(parent_key.clone()),
+            parent_array: fontstring.parent_array.clone(),
+        });
+    } else if fontstring.parent_array.is_some() {
+        attachments.push(ParentKeyAttachment {
+            child_name: fs_name.clone(),
+            parent_key: None,
+            parent_array: fontstring.parent_array.clone(),
         });
     }
     if let Some(text) = resolved_text {
@@ -208,16 +223,52 @@ fn apply_parent_key_attachments(
             let (Some(parent_id), Some(child_id)) = ids else {
                 continue;
             };
-            crate::lua_api::globals::template::assign_parent_key(
-                state,
-                parent_id,
-                &attachment.parent_key,
-                child_id,
-            )
-            .map_err(|error| LoadError::Lua(error.to_string()))?;
+            if let Some(parent_key) = attachment.parent_key.as_deref() {
+                crate::lua_api::globals::template::assign_parent_key(
+                    state, parent_id, parent_key, child_id,
+                )
+                .map_err(|error| LoadError::Lua(error.to_string()))?;
+            }
+            if let Some(parent_array) = attachment.parent_array.as_deref() {
+                append_parent_array_entry(state, parent_id, parent_array, child_id)?;
+            }
         }
         Ok(())
     })
+}
+
+fn append_parent_array_entry(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    key: &str,
+    child_id: u64,
+) -> Result<(), LoadError> {
+    use crate::lua_api::rilua_methods::{create_table, frame_ref, table_get, table_set};
+    use rilua::Val;
+
+    let parent = frame_ref(state, parent_id).map_err(|error| LoadError::Lua(error.to_string()))?;
+    let child = frame_ref(state, child_id).map_err(|error| LoadError::Lua(error.to_string()))?;
+    let array = match table_get(state, parent, key) {
+        Val::Table(existing) => Val::Table(existing),
+        _ => {
+            let created = create_table(state);
+            table_set(state, parent, key, created);
+            created
+        }
+    };
+    let Val::Table(array_ref) = array else {
+        return Ok(());
+    };
+    let next_index = state
+        .gc
+        .tables
+        .get(array_ref)
+        .map(|table| table.array_slice().len() + 1)
+        .unwrap_or(1);
+    if let Some(table) = state.gc.tables.get_mut(array_ref) {
+        let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
+    }
+    Ok(())
 }
 
 fn apply_fontstring_syncs(env: &LoaderEnv<'_>, syncs: &[TextSync]) {

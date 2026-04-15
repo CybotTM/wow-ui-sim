@@ -111,8 +111,13 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     // Bounds / Position
     table_set_rust_fn(state, mt, "GetBoundsRect", get_bounds_rect)?;
     table_set_rust_fn(state, mt, "GetClampRectInsets", get_clamp_rect_insets)?;
+    table_set_rust_fn(state, mt, "GetResizeBounds", get_resize_bounds)?;
     table_set_rust_fn(state, mt, "SetClampRectInsets", set_clamp_rect_insets)?;
+    table_set_rust_fn(state, mt, "SetMinResize", set_min_resize)?;
+    table_set_rust_fn(state, mt, "SetMaxResize", set_max_resize)?;
+    table_set_rust_fn(state, mt, "SetResizeBounds", set_resize_bounds)?;
     table_set_rust_fn(state, mt, "SetPointsOffset", set_points_offset)?;
+    table_set_rust_fn(state, mt, "UpdateHeight", update_height)?;
 
     // Attribute stubs
     table_set_rust_fn(state, mt, "CanChangeAttribute", can_change_attribute)?;
@@ -170,6 +175,7 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     // Misc
     table_set_rust_fn(state, mt, "DesaturateHierarchy", desaturate_hierarchy)?;
     table_set_rust_fn(state, mt, "IsHighlightLocked", is_highlight_locked)?;
+    table_set_rust_fn(state, mt, "LockHighlight", lock_highlight)?;
     table_set_rust_fn(
         state,
         mt,
@@ -185,7 +191,10 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     )?;
     table_set_rust_fn(state, mt, "GetOrCreateGroup", get_or_create_group)?;
     table_set_rust_fn(state, mt, "ForceUpdateTimers", force_update_timers)?;
+    table_set_rust_fn(state, mt, "RegisterFontStrings", register_font_strings)?;
+    table_set_rust_fn(state, mt, "SetOwningDialog", set_owning_dialog)?;
     table_set_rust_fn(state, mt, "SetToDefaults", set_to_defaults)?;
+    table_set_rust_fn(state, mt, "UnlockHighlight", unlock_highlight)?;
 
     Ok(())
 }
@@ -665,6 +674,91 @@ pub fn set_points_offset(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn get_resize_bounds(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let (min_width, min_height, max_width, max_height) = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| {
+                let (min_width, min_height) = frame.resize_bounds_min;
+                let (max_width, max_height) =
+                    frame.resize_bounds_max.map(|(w, h)| (Val::Num(w as f64), Val::Num(h as f64))).unwrap_or((Val::Nil, Val::Nil));
+                (min_width, min_height, max_width, max_height)
+            })
+            .unwrap_or((0.0, 0.0, Val::Nil, Val::Nil))
+    };
+    state.push(Val::Num(min_width as f64));
+    state.push(Val::Num(min_height as f64));
+    state.push(max_width);
+    state.push(max_height);
+    Ok(4)
+}
+
+pub fn set_min_resize(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let min_width = match stack_val(state, 2) {
+        Val::Num(value) => value.max(0.0) as f32,
+        _ => 0.0,
+    };
+    let min_height = match stack_val(state, 3) {
+        Val::Num(value) => value.max(0.0) as f32,
+        _ => 0.0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.resize_bounds_min = (min_width, min_height);
+    }
+    Ok(0)
+}
+
+pub fn set_max_resize(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let max_width = match stack_val(state, 2) {
+        Val::Num(value) => Some(value.max(0.0) as f32),
+        Val::Nil => None,
+        _ => None,
+    };
+    let max_height = match stack_val(state, 3) {
+        Val::Num(value) => Some(value.max(0.0) as f32),
+        Val::Nil => None,
+        _ => None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.resize_bounds_max = max_width.zip(max_height);
+    }
+    Ok(0)
+}
+
+pub fn set_resize_bounds(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let min_width = match stack_val(state, 2) {
+        Val::Num(value) => value.max(0.0) as f32,
+        _ => 0.0,
+    };
+    let min_height = match stack_val(state, 3) {
+        Val::Num(value) => value.max(0.0) as f32,
+        _ => 0.0,
+    };
+    let max_width = match stack_val(state, 4) {
+        Val::Num(value) => Some(value.max(0.0) as f32),
+        Val::Nil => None,
+        _ => None,
+    };
+    let max_height = match stack_val(state, 5) {
+        Val::Num(value) => Some(value.max(0.0) as f32),
+        Val::Nil => None,
+        _ => None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.resize_bounds_min = (min_width, min_height);
+        frame.resize_bounds_max = max_width.zip(max_height);
+    }
+    Ok(0)
+}
+
 // ── Attribute stubs ───────────────────────────────────────────────────────────
 
 pub fn can_change_attribute(state: &mut LuaState) -> LuaResult<u32> {
@@ -1000,6 +1094,22 @@ pub fn is_highlight_locked(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn lock_highlight(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.highlight_locked = true;
+    }
+    if let Some(highlight_id) = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.children_keys.get("HighlightTexture").copied())
+    {
+        sim.widgets.set_visible(highlight_id, true);
+    }
+    Ok(0)
+}
+
 pub fn is_ignoring_children_for_bounds(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let val = {
@@ -1019,6 +1129,22 @@ pub fn set_highlight_locked(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.highlight_locked = locked;
+    }
+    Ok(0)
+}
+
+pub fn unlock_highlight(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.highlight_locked = false;
+    }
+    if let Some(highlight_id) = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.children_keys.get("HighlightTexture").copied())
+    {
+        sim.widgets.set_visible(highlight_id, false);
     }
     Ok(0)
 }
@@ -1087,6 +1213,35 @@ pub fn get_or_create_group(state: &mut LuaState) -> LuaResult<u32> {
 
     state.push(Val::Nil);
     Ok(1)
+}
+
+fn update_height(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
+    let self_table = Val::from_stack(state, 1)?;
+    let font_strings = create_table(state);
+    let mut out_index = 1;
+    let mut input_index = 2;
+    loop {
+        let value = stack_val(state, input_index);
+        if value == Val::Nil {
+            break;
+        }
+        table_set(state, font_strings, &out_index.to_string(), value);
+        out_index += 1;
+        input_index += 1;
+    }
+    table_set(state, self_table, "__registeredFontStrings", font_strings);
+    Ok(0)
+}
+
+pub fn set_owning_dialog(state: &mut LuaState) -> LuaResult<u32> {
+    let self_table = Val::from_stack(state, 1)?;
+    let dialog = Val::from_stack(state, 2)?;
+    table_set(state, self_table, "OwningDialog", dialog);
+    Ok(0)
 }
 
 pub fn force_update_timers(state: &mut LuaState) -> LuaResult<u32> {

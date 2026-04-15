@@ -74,6 +74,20 @@ if table.unpack == nil then
   table.unpack = unpack
 end
 
+if table.wipe == nil then
+  function table.wipe(tbl)
+    if type(tbl) ~= "table" then
+      return tbl
+    end
+    for key in pairs(tbl) do
+      tbl[key] = nil
+    end
+    return tbl
+  end
+end
+
+tWipe = tWipe or table.wipe
+
 if GetCurrentEnvironment == nil then
   function GetCurrentEnvironment()
     return _G
@@ -174,6 +188,61 @@ if GetGameTime == nil then
   end
 end
 
+if GetChatWindowInfo == nil then
+  function GetChatWindowInfo(id)
+    return "Chat " .. tostring(id or 1), 12, 1, 1, 1, 1, true, false, (id or 1) == 1, false
+  end
+end
+
+local __wow_chat_window_state = __wow_chat_window_state or {}
+
+if SetChatWindowShown == nil then
+  function SetChatWindowShown(id, shown)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.shown = shown == true
+    __wow_chat_window_state[id] = chat
+  end
+end
+
+if GetChatWindowSavedDimensions == nil then
+  function GetChatWindowSavedDimensions(id)
+    local chat = __wow_chat_window_state[id]
+    if not chat then
+      return nil, nil
+    end
+    return chat.width, chat.height
+  end
+end
+
+if SetChatWindowSavedDimensions == nil then
+  function SetChatWindowSavedDimensions(id, width, height)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.width = width
+    chat.height = height
+    __wow_chat_window_state[id] = chat
+  end
+end
+
+if GetChatWindowSavedPosition == nil then
+  function GetChatWindowSavedPosition(id)
+    local chat = __wow_chat_window_state[id]
+    if not chat then
+      return nil, nil, nil
+    end
+    return chat.point, chat.xOffset, chat.yOffset
+  end
+end
+
+if SetChatWindowSavedPosition == nil then
+  function SetChatWindowSavedPosition(id, point, xOffset, yOffset)
+    local chat = __wow_chat_window_state[id] or {}
+    chat.point = point
+    chat.xOffset = xOffset
+    chat.yOffset = yOffset
+    __wow_chat_window_state[id] = chat
+  end
+end
+
 if GetTime == nil then
   function GetTime()
     if os.clock == nil then
@@ -201,7 +270,8 @@ if GetInventorySlotInfo == nil then
     WAISTSLOT=6, LEGSSLOT=7, FEETSLOT=8, WRISTSLOT=9, HANDSSLOT=10,
     FINGER0SLOT=11, FINGER1SLOT=12, TRINKET0SLOT=13, TRINKET1SLOT=14,
     BACKSLOT=15, MAINHANDSLOT=16, SECONDARYHANDSLOT=17, RANGEDSLOT=18,
-    TABARDSLOT=19, BAG0SLOT=20,
+    TABARDSLOT=19, BAG0SLOT=20, BAG1SLOT=21, BAG2SLOT=22, BAG3SLOT=23,
+    BAG4SLOT=24, REAGENTBAG0SLOT=25, REAGENTBAGSLOT=25,
   }
   function GetInventorySlotInfo(slot_name)
     if type(slot_name) ~= "string" then
@@ -298,6 +368,58 @@ if UnitIsPlayer == nil then
       return true
     end
     return false
+  end
+end
+
+if UnitIsHumanPlayer == nil then
+  function UnitIsHumanPlayer(_unit)
+    return false
+  end
+end
+
+if IsTargetLoose == nil then
+  function IsTargetLoose()
+    return false
+  end
+end
+
+if UnitThreatSituation == nil then
+  function UnitThreatSituation(_unit, _other_unit)
+    return 0
+  end
+end
+
+if UnitDetailedThreatSituation == nil then
+  function UnitDetailedThreatSituation(_unit, _other_unit)
+    return false, 0, 0, 0, 0
+  end
+end
+
+if UnitThreatPercentageOfLead == nil then
+  function UnitThreatPercentageOfLead(_unit, _other_unit)
+    return 0
+  end
+end
+
+if UnitTrialBankedLevels == nil then
+  function UnitTrialBankedLevels(_unit)
+    return 0
+  end
+end
+
+if SetPortraitTexture == nil then
+  function SetPortraitTexture(texture, _unit, _disablePortraitMask)
+    if texture and texture.SetTexture then
+      texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
+    end
+  end
+end
+
+if SetPortraitTextureFromCreatureDisplayID == nil then
+  function SetPortraitTextureFromCreatureDisplayID(texture, _creatureDisplayID)
+    if texture and texture.SetTexture then
+      texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
+    end
   end
 end
 
@@ -526,6 +648,15 @@ C_ClassTrial = __wow_merge_namespace(C_ClassTrial, {
 
 C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
   HasRequiredBoostForClassTrial = function() return false end,
+  GetCharacterServiceDisplayData = function(_boostType)
+    return {
+      boostLevel = GetMaxPlayerLevel and GetMaxPlayerLevel() or 80,
+      flowTitle = CHARACTER_UPGRADE or "Character Upgrade",
+      popupInfo = {
+        textureKit = "characterupdate",
+      },
+    }
+  end,
 })
 
 C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
@@ -543,6 +674,18 @@ C_UnitAuras = __wow_merge_namespace(C_UnitAuras, {
   SetPrivateWarningTextAnchor = __wow_noop,
 })
 
+C_UnitAurasPrivate = __wow_merge_namespace(C_UnitAurasPrivate, {
+  SetPrivateAuraAnchorAddedCallback = function(callback)
+    C_UnitAurasPrivate._anchorAddedCallback = callback
+  end,
+  SetPrivateAuraAnchorRemovedCallback = function(callback)
+    C_UnitAurasPrivate._anchorRemovedCallback = callback
+  end,
+  GetPrivateAuraAnchors = function()
+    return {}
+  end,
+})
+
 C_PetBattles = __wow_merge_namespace(C_PetBattles, {
   GetAllEffectNames = function() return end,
 })
@@ -550,6 +693,67 @@ C_PetBattles = __wow_merge_namespace(C_PetBattles, {
 C_VoiceChat = __wow_merge_namespace(C_VoiceChat, {
   GetTtsVoices = function() return {} end,
   IsTranscriptionAllowed = function() return false end,
+})
+
+C_TTSSettings = __wow_merge_namespace(C_TTSSettings, {
+  GetSpeechVolume = function() return 100 end,
+  SetSpeechVolume = __wow_noop,
+  GetSpeechRate = function() return 0 end,
+  SetSpeechRate = __wow_noop,
+  GetVoiceOptionID = function() return 0 end,
+  SetVoiceOptionID = __wow_noop,
+})
+
+C_ClubFinder = __wow_merge_namespace(C_ClubFinder, {
+  GetClubRecruitmentSettings = function()
+    return {
+      playStyleDungeon = false,
+      playStyleRaids = false,
+      playStylePvp = false,
+      playStyleRP = false,
+      playStyleSocial = false,
+      maxLevelOnly = false,
+      enableListing = false,
+    }
+  end,
+  GetPlayerApplicantSettings = function()
+    return {
+      playStyleDungeon = false,
+      playStyleRaids = false,
+      playStylePvp = false,
+      playStyleRP = false,
+      playStyleSocial = false,
+      roleTank = false,
+      roleHealer = false,
+      roleDps = false,
+      sizeSmall = false,
+      sizeMedium = false,
+      sizeLarge = false,
+      sortRelevance = true,
+      sortMembers = false,
+      sortNewest = false,
+      crossFaction = false,
+    }
+  end,
+})
+
+C_PartyInfo = __wow_merge_namespace(C_PartyInfo, {
+  AllowedToDoPartyConversion = function() return false end,
+  IsPartyWalkIn = function() return false end,
+})
+
+C_Map = __wow_merge_namespace(C_Map, {
+  GetBestMapForUnit = function() return nil end,
+})
+
+C_Minimap = __wow_merge_namespace(C_Minimap, {
+  GetNumTrackingTypes = function() return 0 end,
+  GetTrackingInfo = function() return nil end,
+  GetTrackingFilter = function()
+    return { filterID = 0, spellID = 0 }
+  end,
+  SetTracking = __wow_noop,
+  ClearAllTracking = __wow_noop,
 })
 
 C_Navigation = __wow_merge_namespace(C_Navigation, {
@@ -715,13 +919,61 @@ end
 if SecureTypes == nil then
   SecureTypes = {}
 end
-SecureTypes.CreateSecureMap = SecureTypes.CreateSecureMap or function() return {} end
+SecureTypes.CreateSecureMap = SecureTypes.CreateSecureMap or function()
+  local map = {}
+  function map:Insert(key, value)
+    self[key] = value
+  end
+  function map:Remove(key)
+    local value = self[key]
+    self[key] = nil
+    return value
+  end
+  function map:Find(key)
+    return self[key]
+  end
+  function map:Contains(key)
+    return self[key] ~= nil
+  end
+  function map:Enumerate()
+    return next, self, nil
+  end
+  function map:Clear()
+    for key in pairs(self) do
+      self[key] = nil
+    end
+  end
+  return map
+end
 SecureTypes.CreateSecureFunction = SecureTypes.CreateSecureFunction or function(fn) return fn end
 SecureTypes.CreateSecureNumber = SecureTypes.CreateSecureNumber or function(value) return value or 0 end
 SecureTypes.CreateSecureArray = SecureTypes.CreateSecureArray or function()
   local array = {}
   function array:Insert(value)
     self[#self + 1] = value
+  end
+  function array:Remove(value)
+    for index, existing in ipairs(self) do
+      if existing == value then
+        table.remove(self, index)
+        return true
+      end
+    end
+    return false
+  end
+  function array:Clear()
+    for index = #self, 1, -1 do
+      self[index] = nil
+    end
+  end
+  function array:Enumerate()
+    local index = 0
+    return function()
+      index = index + 1
+      if index <= #self then
+        return self[index]
+      end
+    end
   end
   return array
 end
@@ -737,6 +989,287 @@ ProxyUtil.CreateProxyDirectory = ProxyUtil.CreateProxyDirectory or function()
     ToPrivate = function(_, value) return value end,
     ToPublic = function(_, value) return value end,
   }
+end
+
+if CreateFramePool == nil then
+  function CreateFramePool(frameType, parent, template, resetter)
+    local pool = {
+      frameType = frameType or "Frame",
+      parent = parent,
+      template = template,
+      resetter = resetter,
+      inactive = {},
+      active = {},
+      known = {},
+    }
+
+    function pool:Acquire()
+      local frame = table.remove(self.inactive)
+      local isNew = false
+      if frame == nil then
+        frame = CreateFrame(self.frameType, nil, self.parent, self.template)
+        isNew = true
+        self.known[frame] = true
+      end
+      self.active[frame] = true
+      return frame, isNew
+    end
+
+    function pool:Release(frame)
+      if frame == nil or not self:DoesObjectBelongToPool(frame) then
+        return false
+      end
+      self.active[frame] = nil
+      if self.resetter then
+        self.resetter(self, frame, false, self.template)
+      end
+      table.insert(self.inactive, frame)
+      return true
+    end
+
+    function pool:ReleaseAll()
+      local frames = {}
+      for frame in pairs(self.active) do
+        table.insert(frames, frame)
+      end
+      for _, frame in ipairs(frames) do
+        self:Release(frame)
+      end
+    end
+
+    function pool:GetNumActive()
+      local count = 0
+      for _ in pairs(self.active) do
+        count = count + 1
+      end
+      return count
+    end
+
+    function pool:DoesObjectBelongToPool(frame)
+      return self.known[frame] == true
+    end
+
+    function pool:EnumerateActive()
+      local frames = {}
+      for frame in pairs(self.active) do
+        frames[#frames + 1] = frame
+      end
+      local index = 0
+      return function()
+        index = index + 1
+        return frames[index]
+      end
+    end
+
+    return pool
+  end
+end
+
+local function __wow_make_region_pool(acquire_region)
+  return function(parent, layer, subLevel, template, resetter)
+    local pool = {
+      parent = parent,
+      layer = layer,
+      subLevel = subLevel,
+      template = template,
+      resetter = resetter,
+      inactive = {},
+      active = {},
+      known = {},
+    }
+
+    function pool:Acquire()
+      local region = table.remove(self.inactive)
+      local isNew = false
+      if region == nil then
+        region = acquire_region(self.parent, self.layer, self.subLevel, self.template)
+        isNew = true
+        self.known[region] = true
+      end
+      self.active[region] = true
+      return region, isNew
+    end
+
+    function pool:Release(region)
+      if region == nil or not self:DoesObjectBelongToPool(region) then
+        return false
+      end
+      self.active[region] = nil
+      if self.resetter then
+        self.resetter(self, region, false, self.template)
+      end
+      table.insert(self.inactive, region)
+      return true
+    end
+
+    function pool:GetNumActive()
+      local count = 0
+      for _ in pairs(self.active) do
+        count = count + 1
+      end
+      return count
+    end
+
+    function pool:DoesObjectBelongToPool(region)
+      return self.known[region] == true
+    end
+
+    function pool:ReleaseAll()
+      local regions = {}
+      for region in pairs(self.active) do
+        regions[#regions + 1] = region
+      end
+      for _, region in ipairs(regions) do
+        self:Release(region)
+      end
+    end
+
+    function pool:EnumerateActive()
+      local regions = {}
+      for region in pairs(self.active) do
+        regions[#regions + 1] = region
+      end
+      local index = 0
+      return function()
+        index = index + 1
+        return regions[index]
+      end
+    end
+
+    return pool
+  end
+end
+
+if CreateTexturePool == nil then
+  CreateTexturePool = __wow_make_region_pool(function(parent, layer)
+    return parent:CreateTexture(nil, layer or "ARTWORK")
+  end)
+end
+
+if CreateFontStringPool == nil then
+  CreateFontStringPool = __wow_make_region_pool(function(parent, layer)
+    return parent:CreateFontString(nil, layer or "ARTWORK")
+  end)
+end
+
+if CreateFramePoolCollection == nil then
+  function CreateFramePoolCollection()
+    local collection = { pools = {} }
+
+    local function pool_key(frameType, parent, template, specialization)
+      return table.concat({
+        tostring(frameType or "Frame"),
+        tostring(parent),
+        tostring(template),
+        tostring(specialization),
+      }, "|")
+    end
+
+    function collection:CreatePool(frameType, parent, template, resetter, _forbidden, specialization)
+      local key = pool_key(frameType, parent, template, specialization)
+      local pool = CreateFramePool(frameType, parent, template, resetter)
+      self.pools[key] = pool
+      return pool
+    end
+
+    function collection:GetOrCreatePool(frameType, parent, template, resetter, forbidden, specialization)
+      local key = pool_key(frameType, parent, template, specialization)
+      local pool = self.pools[key]
+      if pool == nil then
+        pool = self:CreatePool(frameType, parent, template, resetter, forbidden, specialization)
+      end
+      return pool
+    end
+
+    function collection:GetNumActive()
+      local total = 0
+      for _, pool in pairs(self.pools) do
+        total = total + (pool.GetNumActive and pool:GetNumActive() or 0)
+      end
+      return total
+    end
+
+    function collection:DoesObjectBelongToPool(object)
+      for _, pool in pairs(self.pools) do
+        if pool.DoesObjectBelongToPool and pool:DoesObjectBelongToPool(object) then
+          return true
+        end
+      end
+      return false
+    end
+
+    function collection:Release(object)
+      for _, pool in pairs(self.pools) do
+        if pool.Release and pool:Release(object) then
+          return true
+        end
+      end
+      return false
+    end
+
+    function collection:ReleaseAll()
+      for _, pool in pairs(self.pools) do
+        if pool.ReleaseAll then
+          pool:ReleaseAll()
+        end
+      end
+    end
+
+    function collection:EnumerateActive()
+      local objects = {}
+      for _, pool in pairs(self.pools) do
+        if pool.EnumerateActive then
+          for object in pool:EnumerateActive() do
+            objects[#objects + 1] = object
+          end
+        end
+      end
+      local index = 0
+      return function()
+        index = index + 1
+        return objects[index]
+      end
+    end
+
+    return collection
+  end
+end
+
+if CreateFrameFactory == nil then
+  function CreateFrameFactory()
+    local cache = {}
+
+    function cache:GetTemplateInfo(template)
+      if C_XMLUtil and C_XMLUtil.GetTemplateInfo then
+        local info = C_XMLUtil.GetTemplateInfo(template)
+        if info then
+          return info
+        end
+      end
+      return { width = 0, height = 0 }
+    end
+
+    local factory = {}
+
+    function factory:GetTemplateInfoCache()
+      return cache
+    end
+
+    function factory:Create(parent, frameTypeOrTemplate, resetFunc)
+      local frame = nil
+      if type(frameTypeOrTemplate) == "string" and C_XMLUtil and C_XMLUtil.GetTemplateInfo and C_XMLUtil.GetTemplateInfo(frameTypeOrTemplate) then
+        frame = CreateFrame("Frame", nil, parent, frameTypeOrTemplate)
+      else
+        frame = CreateFrame(type(frameTypeOrTemplate) == "string" and frameTypeOrTemplate or "Frame", nil, parent)
+      end
+      if resetFunc then
+        resetFunc(nil, frame, true, frameTypeOrTemplate)
+      end
+      return frame, true
+    end
+
+    return factory
+  end
 end
 
 if AddSourceLocationExclude == nil then
@@ -926,6 +1459,11 @@ if RegisterEventCallback == nil then
   end
 end
 
+if DevTools_AddMessageHandler == nil then
+  function DevTools_AddMessageHandler(_handler)
+  end
+end
+
 if UnregisterEventCallback == nil then
   function UnregisterEventCallback(_event, _callback)
   end
@@ -938,6 +1476,289 @@ end
 
 if UnregisterUnitEventCallback == nil then
   function UnregisterUnitEventCallback(_event, _callback, _unit)
+  end
+end
+
+if GetScreenWidth == nil then
+  function GetScreenWidth()
+    return 1024
+  end
+end
+
+if GetScreenHeight == nil then
+  function GetScreenHeight()
+    return 768
+  end
+end
+
+if GetPhysicalScreenSize == nil then
+  function GetPhysicalScreenSize()
+    return GetScreenWidth(), GetScreenHeight()
+  end
+end
+
+if GetNumLanguages == nil then
+  function GetNumLanguages()
+    return 0
+  end
+end
+
+if UnitName == nil then
+  function UnitName(unit)
+    return UnitNameUnmodified(unit)
+  end
+end
+
+if UnitGUID == nil then
+  function UnitGUID(unit)
+    return "Player-0-00000000-" .. tostring(unit or "player")
+  end
+end
+
+if UnitIsConnected == nil then
+  function UnitIsConnected(_unit)
+    return true
+  end
+end
+
+if UnitIsPossessed == nil then
+  function UnitIsPossessed(_unit)
+    return false
+  end
+end
+
+if LE_REALM_RELATION_SAME == nil then
+  LE_REALM_RELATION_SAME = 0
+end
+
+if UnitRealmRelationship == nil then
+  function UnitRealmRelationship(_unit)
+    return LE_REALM_RELATION_SAME
+  end
+end
+
+if UnitPosition == nil then
+  function UnitPosition(_unit)
+    return 0, 0, 0, 0
+  end
+end
+
+if UnitLevel == nil then
+  function UnitLevel(unit)
+    if unit == "player" or unit == "pet" then
+      return GetMaxPlayerLevel and GetMaxPlayerLevel() or 80
+    end
+    return 1
+  end
+end
+
+if GetMaxPlayerLevel == nil then
+  function GetMaxPlayerLevel()
+    return 80
+  end
+end
+
+if GetClientDisplayExpansionLevel == nil then
+  function GetClientDisplayExpansionLevel()
+    return 10
+  end
+end
+
+if GetAccountExpansionLevel == nil then
+  function GetAccountExpansionLevel()
+    return GetClientDisplayExpansionLevel()
+  end
+end
+
+if GetMaxLevelForExpansionLevel == nil then
+  function GetMaxLevelForExpansionLevel(_expansion_level)
+    return GetMaxPlayerLevel()
+  end
+end
+
+if GetMaxLevelForPlayerExpansion == nil then
+  function GetMaxLevelForPlayerExpansion()
+    return GetMaxLevelForExpansionLevel(GetAccountExpansionLevel())
+  end
+end
+
+if GetExpansionDisplayInfo == nil then
+  function GetExpansionDisplayInfo(_expansionLevel, _desiredReleaseType)
+    return {
+      logo = 0,
+      banner = "",
+      features = {},
+      highResBackgroundID = 0,
+      lowResBackgroundID = 0,
+      textureKit = "",
+      glueAmbianceSoundKit = nil,
+      glueMusicSoundKit = nil,
+      glueCreditsSoundKit = nil,
+    }
+  end
+end
+
+if UnitInPartyIsAI == nil then
+  function UnitInPartyIsAI(_unit)
+    return false
+  end
+end
+
+if UnitAffectingCombat == nil then
+  function UnitAffectingCombat(_unit)
+    return false
+  end
+end
+
+if GetNumShapeshiftForms == nil then
+  function GetNumShapeshiftForms()
+    return 0
+  end
+end
+
+if GetShapeshiftForm == nil then
+  function GetShapeshiftForm()
+    return 0
+  end
+end
+
+if GetShapeshiftFormInfo == nil then
+  function GetShapeshiftFormInfo(_index)
+    return nil, false, false, nil
+  end
+end
+
+if GetPetActionInfo == nil then
+  function GetPetActionInfo(_index)
+    return nil, nil, false, false, false, false, nil, false, false
+  end
+end
+
+if GetPetActionCooldown == nil then
+  function GetPetActionCooldown(_index)
+    return 0, 0, 0
+  end
+end
+
+if PetHasActionBar == nil then
+  function PetHasActionBar()
+    return false
+  end
+end
+
+if GetNumSpecializations == nil then
+  function GetNumSpecializations()
+    return 3
+  end
+end
+
+if GetSpecializationInfoForClassID == nil then
+  function GetSpecializationInfoForClassID(classID, index, _sex)
+    local specID = ((tonumber(classID) or 0) * 100) + (tonumber(index) or 1)
+    return specID, "Spec " .. tostring(index or 1), "", 0, "DAMAGER", false, true
+  end
+end
+
+if GetDifficultyInfo == nil then
+  function GetDifficultyInfo(_difficultyID)
+    return "Normal", 0, false, false, false, false
+  end
+end
+
+if GetReleaseTimeRemaining == nil then
+  function GetReleaseTimeRemaining()
+    return 0
+  end
+end
+
+if GetExpansionTrialInfo == nil then
+  function GetExpansionTrialInfo()
+    return false, 0
+  end
+end
+
+if GetInventoryItemTexture == nil then
+  function GetInventoryItemTexture(_unit, _slot)
+    return nil
+  end
+end
+
+if IsInventoryItemProfessionBag == nil then
+  function IsInventoryItemProfessionBag(_unit, _slot)
+    return false
+  end
+end
+
+if GetSendMailPrice == nil then
+  function GetSendMailPrice()
+    return 0
+  end
+end
+
+if GetMerchantFilter == nil then
+  function GetMerchantFilter()
+    return 0
+  end
+end
+
+if SetMerchantFilter == nil then
+  function SetMerchantFilter(_filter)
+  end
+end
+
+if IsVeteranTrialAccount == nil then
+  function IsVeteranTrialAccount()
+    return false
+  end
+end
+
+if IsAccountSecured == nil then
+  function IsAccountSecured()
+    return true
+  end
+end
+
+if AbbreviateNumbers == nil then
+  function AbbreviateNumbers(value)
+    return tostring(value or 0)
+  end
+end
+
+if BNGetInfo == nil then
+  function BNGetInfo()
+    return nil
+  end
+end
+
+if GetLFGDeserterExpiration == nil then
+  function GetLFGDeserterExpiration()
+    return 0
+  end
+end
+
+if StoreSecureReference == nil then
+  function StoreSecureReference(name, value)
+    if type(name) == "string" then
+      rawset(_G, name, value)
+    end
+  end
+end
+
+if UnitStagger == nil then
+  function UnitStagger(_unit)
+    return 0
+  end
+end
+
+if GetPossessInfo == nil then
+  function GetPossessInfo(_index)
+    return nil, nil, false
+  end
+end
+
+if IsInJailersTower == nil then
+  function IsInJailersTower()
+    return false
   end
 end
 
@@ -1209,6 +2030,12 @@ if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
   C_LFGInfo = C_LFGInfo or __wow_namespace()
   function C_LFGInfo.CanPlayerUseGroupFinder()
     return false, ""
+  end
+end
+if rawget(C_LFGInfo or {}, "IsInLFGFollowerDungeon") == nil then
+  C_LFGInfo = C_LFGInfo or __wow_namespace()
+  function C_LFGInfo.IsInLFGFollowerDungeon()
+    return false
   end
 end
 if GetLFGProposal == nil then
@@ -1486,9 +2313,24 @@ EVERY_X_PERCENT = EVERY_X_PERCENT or "%d%%"
 TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN = TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN or "Known"
 ERR_QUEST_SESSION_RESULT_RESYNC = ERR_QUEST_SESSION_RESULT_RESYNC or "Resync"
 CLASS_SORT_ORDER = CLASS_SORT_ORDER or { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "MONK", "DRUID", "DEMONHUNTER", "EVOKER" }
+EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE = false
 
 local __global_mt = getmetatable(_G) or {}
 local __prev_index = __global_mt.__index
+local function __wow_is_color_constant_key(key)
+  if type(key) ~= "string" then
+    return false
+  end
+  if key:match("_COLOR$") then
+    return true
+  end
+  if not key:match("_COLOR_[A-Z0-9_]+$") then
+    return false
+  end
+  return not key:match("_COLOR_CODE")
+     and not key:match("_COLOR_TABLE")
+     and not key:match("_COLOR_ATLASES")
+end
 __global_mt.__index = function(t, key)
   local value = nil
   if __prev_index ~= nil then
@@ -1504,10 +2346,14 @@ __global_mt.__index = function(t, key)
 
   if key == "HIGHLIGHT_FONT_COLOR" then
     value = __wow_make_color(1, 1, 1, 1)
+  elseif __wow_is_color_constant_key(key) then
+    value = __wow_make_color(1, 1, 1, 1)
   elseif key == "PLAYER_FACTION_COLOR_HORDE" then
     value = __wow_make_color(1, 0.1, 0.1, 1)
   elseif key == "PLAYER_FACTION_COLOR_ALLIANCE" then
     value = __wow_make_color(0.2, 0.4, 1, 1)
+  elseif type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") then
+    value = __wow_namespace()
   elseif type(key) == "string" and key:match("^ERR_") then
     value = key
   elseif type(key) == "string" and key:match("^[A-Z0-9_]+$") then

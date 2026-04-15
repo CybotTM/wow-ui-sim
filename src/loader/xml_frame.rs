@@ -245,7 +245,7 @@ fn create_children_and_finalize(
     let btn_start = Instant::now();
     apply_button_textures(env, frame, name, inherits)?;
     apply_button_text(env, frame, name, inherits)?;
-    apply_bar_texture(env, frame, name)?;
+    apply_bar_texture(env, frame, name, inherits)?;
     init_action_bar_tables(env, frame, name);
     timing.frame_button_time += btn_start.elapsed();
     let lifecycle = lifecycle_scripts(frame, inherits);
@@ -293,11 +293,19 @@ fn exec_create_frame_code(
     name: &str,
     initial_hidden: bool,
 ) -> Result<(), LoadError> {
-    env.state().borrow_mut().create_frame_initial_hidden = Some(initial_hidden);
+    {
+        let mut state = env.state().borrow_mut();
+        state.create_frame_initial_hidden = Some(initial_hidden);
+        state.suppress_runtime_on_load_depth += 1;
+    }
     let exec_result = env
         .exec(lua_code)
         .map_err(|e| LoadError::Lua(format!("Failed to create frame {}: {}", name, e)));
-    env.state().borrow_mut().create_frame_initial_hidden = None;
+    {
+        let mut state = env.state().borrow_mut();
+        state.create_frame_initial_hidden = None;
+        state.suppress_runtime_on_load_depth = state.suppress_runtime_on_load_depth.saturating_sub(1);
+    }
     exec_result
 }
 
@@ -417,14 +425,9 @@ fn create_child_frames(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
-    inherits: &str,
+    _inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    for entry in crate::xml::get_template_chain(inherits) {
-        for child in entry.frame.all_frame_elements() {
-            create_single_child_frame(env, &child, name, timing)?;
-        }
-    }
     for child in frame.all_frame_elements() {
         create_single_child_frame(env, &child, name, timing)?;
     }
@@ -609,7 +612,7 @@ mod tests {
         );
         assert_eq!(
             resolve(&FrameElement::ItemButton(f.clone())),
-            Some(("ItemButton", None))
+            Some(("Button", Some("ItemButton")))
         );
         assert_eq!(
             resolve(&FrameElement::CheckButton(f.clone())),

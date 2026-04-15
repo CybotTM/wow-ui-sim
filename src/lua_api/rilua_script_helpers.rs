@@ -10,6 +10,8 @@ use rilua::vm::table::Table;
 use rilua::{LuaApi, LuaApiMut, Val};
 use std::time::Instant;
 
+use crate::lua_api::rilua_methods::{call_function_state, val_to_string};
+
 // ── Registry helpers ────────────────────────────────────────────────
 
 const SCRIPTS_KEY: &str = "__scripts";
@@ -172,6 +174,46 @@ pub fn protected_call_state(
             state.top = saved_top;
             Err(error_val)
         }
+    }
+}
+
+/// Call a function through Lua's own `pcall` path.
+///
+/// Some handlers created from Blizzard XML work when called by Lua but trip
+/// rilua's direct Rust-side call path with "expected Lua closure in execute".
+/// Wrapping the call in a tiny Lua closure keeps dispatch on the VM's normal
+/// path and returns either the function results or a formatted error string.
+pub fn protected_lua_pcall_state(
+    state: &mut LuaState,
+    func: Val,
+    args: &[Val],
+) -> Result<Vec<Val>, String> {
+    let wrapper_factory = state
+        .load(
+            r#"
+            local func = ...
+            return function(...)
+                return pcall(func, ...)
+            end
+        "#,
+        )
+        .map_err(|error| error.to_string())?;
+    let wrapper = call_function_state(state, Val::Function(wrapper_factory.gc_ref()), &[func])
+        .map_err(|error| error.to_string())?;
+    let results = protected_call_state(state, wrapper, args).map_err(|error| {
+        val_to_string(state, error).unwrap_or_else(|| format!("script error ({})", error.type_name()))
+    })?;
+    match results.first().copied() {
+        Some(Val::Bool(true)) => Ok(results.into_iter().skip(1).collect()),
+        Some(Val::Bool(false)) => {
+            let error = results
+                .get(1)
+                .copied()
+                .and_then(|value| val_to_string(state, value))
+                .unwrap_or_else(|| "script error".to_string());
+            Err(error)
+        }
+        _ => Ok(results),
     }
 }
 
