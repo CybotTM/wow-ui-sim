@@ -1190,6 +1190,37 @@ if rawget(C_PetBattles, "GetBattleState") == nil then
   function C_PetBattles.GetBattleState() return 0 end
 end
 
+-- LFG group-finder probes. Neither applies in the sim: no group-finder
+-- usage and no active proposal. `GetLFGProposal` returns 15 values
+-- callers destructure, so match that shape.
+if rawget(C_LFGInfo or {}, "CanPlayerUseGroupFinder") == nil then
+  C_LFGInfo = C_LFGInfo or __wow_namespace()
+  function C_LFGInfo.CanPlayerUseGroupFinder()
+    return false, ""
+  end
+end
+if GetLFGProposal == nil then
+  function GetLFGProposal()
+    -- (proposalExists, id, typeID, subtypeID, name, backgroundTexture,
+    --  role, hasResponded, totalEncounters/numBosses, completedEncounters,
+    --  numMembers, isLeader, isHoliday, _, isSilent)
+    return false, 0, 0, 0, "", "", "", false, 0, 0, 0, false, false, nil, false
+  end
+end
+if GetLFGProposalEncounter == nil then
+  function GetLFGProposalEncounter(_i)
+    return "", "", false
+  end
+end
+if GetLFGInfoServer == nil then
+  function GetLFGInfoServer()
+    return false, false, false, false, false, 0, 0, 0, ""
+  end
+end
+
+-- Guild bank: not simulated; single callsite in GuildControlUI.
+C_GuildBank = C_GuildBank or __wow_namespace()
+
 -- Guild-info probes: sim has no guild, no locale variants, no ranks.
 -- Accurate "empty guild state" returns keep MainMenuBarMicroButtons
 -- and the guild UIs from crashing their OnLoad chains.
@@ -1261,6 +1292,8 @@ C_ActionBar = C_ActionBar or __wow_namespace({
   GetOverrideBarIndex = function() return 1 end,
   GetTempShapeshiftBarIndex = function() return 1 end,
   GetBonusBarIndex = function() return 1 end,
+  GetExtraBarIndex = function() return 1 end,
+  GetMultiCastBarIndex = function() return 1 end,
   GetActionBarPage = function() return 1 end,
   SetActionBarPage = __wow_noop,
   HasAction = function() return false end,
