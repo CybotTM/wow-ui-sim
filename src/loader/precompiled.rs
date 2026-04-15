@@ -28,24 +28,7 @@ pub struct PrecompiledFns {
     pub defer_onload: Function,
 }
 
-impl PrecompiledFns {
-    /// Compile all helper functions once and return the struct.
-    pub fn new(lua: &Lua) -> mlua::Result<Self> {
-        Ok(Self {
-            fire_onload: compile_fire_onload(lua)?,
-            fire_onshow: compile_fire_onshow(lua)?,
-            suppress_push: compile_suppress_push(lua)?,
-            suppress_pop: compile_suppress_pop(lua)?,
-            assign_parent_key: compile_assign_parent_key(lua)?,
-            set_intrinsic: compile_set_intrinsic(lua)?,
-            defer_onload: compile_defer_onload(lua)?,
-        })
-    }
-}
-
-fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(
-        r#"
+const FIRE_ONLOAD_SOURCE: &str = r#"
         local __report = debug.getregistry()["__report_script_error"]
         local reg = debug.getregistry()
         local function resolve_frame(arg)
@@ -75,9 +58,29 @@ fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
                 __report("[OnLoad] " .. name .. ": " .. tostring(err))
             end
         end
-    "#,
-    )
-    .into_function()
+    "#;
+
+impl PrecompiledFns {
+    /// Compile all helper functions once and return the struct.
+    pub fn new(lua: &Lua) -> mlua::Result<Self> {
+        Ok(Self {
+            fire_onload: compile_fire_onload(lua)?,
+            fire_onshow: compile_fire_onshow(lua)?,
+            suppress_push: compile_suppress_push(lua)?,
+            suppress_pop: compile_suppress_pop(lua)?,
+            assign_parent_key: compile_assign_parent_key(lua)?,
+            set_intrinsic: compile_set_intrinsic(lua)?,
+            defer_onload: compile_defer_onload(lua)?,
+        })
+    }
+}
+
+fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
+    compile_precompiled(lua, FIRE_ONLOAD_SOURCE)
+}
+
+fn compile_precompiled(lua: &Lua, source: &str) -> mlua::Result<Function> {
+    lua.load(source).into_function()
 }
 
 fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
@@ -237,4 +240,56 @@ pub struct PrecompiledFnsRef {
     pub assign_parent_key: Function,
     pub set_intrinsic: Function,
     pub defer_onload: Function,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mlua::Table;
+
+    #[test]
+    fn fire_onload_precompiled_function_resolves_registry_frame_ids() -> mlua::Result<()> {
+        let env = crate::lua_api::WowLuaEnv::new().expect("failed to create wow lua env");
+        let lua = env.lua();
+        lua.load(
+            r#"
+            reports = {}
+            debug.getregistry()["__report_script_error"] = function(msg)
+                table.insert(reports, msg)
+            end
+            local frame = {
+                OnLoad_Intrinsic = function(self)
+                    self.intrinsic_calls = (self.intrinsic_calls or 0) + 1
+                end,
+                GetScript = function(self, name)
+                    if name == "OnLoad" then
+                        return function(self)
+                            self.onload_calls = (self.onload_calls or 0) + 1
+                        end
+                    end
+                end,
+                GetName = function(self)
+                    return "PrecompiledTestFrame"
+                end,
+            }
+            local reg = debug.getregistry()
+            reg.__frame_refs = { [7] = frame }
+            return frame
+            "#,
+        )
+        .exec()?;
+
+        let frame: Table = lua
+            .load("return debug.getregistry().__frame_refs[7]")
+            .eval()?;
+        let fire_onload = compile_fire_onload(lua)?;
+        fire_onload.call::<()>("__frame_7")?;
+
+        assert_eq!(frame.get::<i64>("intrinsic_calls")?, 1);
+        assert_eq!(frame.get::<i64>("onload_calls")?, 1);
+
+        let reports: Table = lua.globals().get("reports")?;
+        assert_eq!(reports.raw_len(), 0);
+        Ok(())
+    }
 }
