@@ -110,9 +110,7 @@ fn set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
 /// `GetShadowOffset()` → (0, 0).
 fn get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
     let _ = frame_id_from_stack(state, 1);
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    Ok(2)
+    (0.0_f64, 0.0_f64).into_stack(state)
 }
 
 /// `SetShadowColor(r, g, b, a)` — stored but not rendered.
@@ -124,11 +122,7 @@ fn set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
 /// `GetShadowColor()` → (0, 0, 0, 1).
 fn get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
     let _ = frame_id_from_stack(state, 1);
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(1.0));
-    Ok(4)
+    (0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64).into_stack(state)
 }
 
 fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
@@ -1304,8 +1298,7 @@ fn text_get_spacing(state: &mut LuaState) -> LuaResult<u32> {
             .map(|f| f.text_line_spacing)
             .unwrap_or(0.0)
     };
-    state.push(Val::Num(spacing as f64));
-    Ok(1)
+    (spacing as f64).into_stack(state)
 }
 
 fn editbox_get_text_insets(state: &mut LuaState) -> LuaResult<u32> {
@@ -2270,11 +2263,7 @@ fn model_scene_get_view_insets(state: &mut LuaState) -> LuaResult<u32> {
             .map(|f| f.model_scene_state.view_insets)
             .unwrap_or((0.0, 0.0, 0.0, 0.0))
     };
-    state.push(Val::Num(l as f64));
-    state.push(Val::Num(r as f64));
-    state.push(Val::Num(t as f64));
-    state.push(Val::Num(b as f64));
-    Ok(4)
+    (l as f64, r as f64, t as f64, b as f64).into_stack(state)
 }
 
 fn model_scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResult<u32> {
