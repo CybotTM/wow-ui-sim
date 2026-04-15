@@ -104,6 +104,13 @@ pub fn load_addon_internal(
             "Failed to install Menu descriptor fallback for {folder_name}: {e}"
         ));
     }
+    if folder_name == "Blizzard_UIParent"
+        && let Err(e) = env.patch_managed_frame_mixin()
+    {
+        result.warnings.push(format!(
+            "Failed to patch UIParentManagedFrameMixin for {folder_name}: {e}"
+        ));
+    }
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     let mut state = env.state().borrow_mut();
     if let Some(addon) = state

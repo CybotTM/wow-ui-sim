@@ -17,6 +17,25 @@ use std::rc::Rc;
 
 use super::state::SimState;
 
+/// Post-load patch for Blizzard_UIParent's managed-frame mixin. Blizzard
+/// wires `layoutParent` via a template `<KeyValue type="global">` that
+/// resolves eagerly against `_G`; in the sim the container may not
+/// exist yet when a child frame fires OnHide, so guard both methods.
+const MANAGED_FRAME_MIXIN_PATCH_LUA: &str = r#"
+if UIParentManagedFrameMixin ~= nil then
+    function UIParentManagedFrameMixin:OnShow()
+        if self.layoutParent and self.layoutParent.AddManagedFrame then
+            self.layoutParent:AddManagedFrame(self)
+        end
+    end
+    function UIParentManagedFrameMixin:OnHide()
+        if self.layoutParent and self.layoutParent.RemoveManagedFrame then
+            self.layoutParent:RemoveManagedFrame(self)
+        end
+    end
+end
+"#;
+
 /// Permissive dropdown descriptor installed when Blizzard_Menu fails to
 /// define `Menu.CreateRootMenuDescription`. Every unknown method returns
 /// the table itself so method chains (e.g.
@@ -204,6 +223,19 @@ impl<'a> LoaderEnv<'a> {
             &mut lua,
             Rc::clone(&self.state),
         )
+    }
+
+    /// Patch `UIParentManagedFrameMixin:OnShow` / `OnHide` to no-op when
+    /// `self.layoutParent` is nil. Blizzard wires `layoutParent` via a
+    /// `<KeyValue type="global">` that resolves eagerly against `_G`;
+    /// in the sim that container may not exist yet when a frame
+    /// inheriting the mixin fires OnHide, producing
+    /// `attempt to index field 'layoutParent'`. Guarding the methods
+    /// post-load lets those OnHide passes succeed silently.
+    pub fn patch_managed_frame_mixin(&self) -> crate::Result<()> {
+        let mut lua = self.lua.borrow_mut();
+        lua.exec(MANAGED_FRAME_MIXIN_PATCH_LUA)?;
+        Ok(())
     }
 
     /// If `Blizzard_Menu` left `Menu.CreateRootMenuDescription` undefined
