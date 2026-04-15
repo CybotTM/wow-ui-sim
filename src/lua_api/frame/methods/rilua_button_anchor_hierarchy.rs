@@ -10,8 +10,12 @@
 //! stubbed with TODO comments where a direct translation is not yet possible.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_id_from_stack,
-    frame_ref, registry_table_or_create, sync_child_to_rilua, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
+    frame_id_from_stack, frame_ref, registry_table_or_create, sync_child_to_rilua, table_get,
+    table_set, val_to_string,
+};
+use crate::lua_api::rilua_script_helpers::{
+    call_error_handler_state, get_script as get_rilua_script,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -46,6 +50,54 @@ fn bind_named_child_global(state: &mut LuaState, name: &str, child_id: u64) -> L
     Ok(())
 }
 
+fn button_enabled(frame: &crate::widget::Frame) -> bool {
+    frame
+        .attributes
+        .get("__enabled")
+        .and_then(|value| match value {
+            crate::widget::AttributeValue::Boolean(value) => Some(*value),
+            _ => None,
+        })
+        .unwrap_or(true)
+}
+
+fn sync_button_slot_visibility(sim: &mut crate::lua_api::SimState, button_id: u64) {
+    for key in [
+        "NormalTexture",
+        "PushedTexture",
+        "DisabledTexture",
+        "HighlightTexture",
+    ] {
+        let child_id = sim
+            .widgets
+            .get(button_id)
+            .and_then(|button| button.children_keys.get(key).copied());
+        if let Some(child_id) = child_id {
+            let should_show = button_texture_should_show(sim, button_id, key);
+            sim.widgets.set_visible(child_id, should_show);
+        }
+    }
+}
+
+fn set_button_enabled_value(state: &mut LuaState, id: u64, enabled: bool) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.attributes.insert(
+            "__enabled".to_string(),
+            crate::widget::AttributeValue::Boolean(enabled),
+        );
+    }
+    sync_button_slot_visibility(&mut sim, id);
+    Ok(())
+}
+
+fn push_button_state_name(state: &mut LuaState, pushed: bool) -> LuaResult<u32> {
+    let name = if pushed { "PUSHED" } else { "NORMAL" };
+    let name_val = create_string(state, name);
+    state.push(name_val);
+    Ok(1)
+}
+
 // ── Button font object methods ────────────────────────────────────────────────
 
 /// GetOrCreate the `__button_font_objects` registry table.
@@ -58,9 +110,7 @@ fn set_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let font_object = Val::from_stack(state, 2)?;
     let store = get_or_create_button_font_store(state);
-    let key = create_string(state, &format!("{}:normal", id));
-    // TODO: store font_object into store table under key
-    let _ = (store, key, font_object);
+    table_set(state, store, &format!("{id}:normal"), font_object);
     Ok(0)
 }
 
@@ -68,9 +118,8 @@ fn set_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
 fn get_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let store = get_or_create_button_font_store(state);
-    // TODO: look up store["id:normal"] and push result
-    let _ = (store, id);
-    state.push(Val::Nil);
+    let font_object = table_get(state, store, &format!("{id}:normal"));
+    state.push(font_object);
     Ok(1)
 }
 
@@ -79,9 +128,7 @@ fn set_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let font_object = Val::from_stack(state, 2)?;
     let store = get_or_create_button_font_store(state);
-    let key = create_string(state, &format!("{}:highlight", id));
-    // TODO: store font_object into store table under key
-    let _ = (store, key, font_object);
+    table_set(state, store, &format!("{id}:highlight"), font_object);
     Ok(0)
 }
 
@@ -89,9 +136,8 @@ fn set_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> {
 fn get_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let store = get_or_create_button_font_store(state);
-    // TODO: look up store["id:highlight"] and push result
-    let _ = (store, id);
-    state.push(Val::Nil);
+    let font_object = table_get(state, store, &format!("{id}:highlight"));
+    state.push(font_object);
     Ok(1)
 }
 
@@ -100,9 +146,7 @@ fn set_disabled_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let font_object = Val::from_stack(state, 2)?;
     let store = get_or_create_button_font_store(state);
-    let key = create_string(state, &format!("{}:disabled", id));
-    // TODO: store font_object into store table under key
-    let _ = (store, key, font_object);
+    table_set(state, store, &format!("{id}:disabled"), font_object);
     Ok(0)
 }
 
@@ -110,9 +154,8 @@ fn set_disabled_font_object(state: &mut LuaState) -> LuaResult<u32> {
 fn get_disabled_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let store = get_or_create_button_font_store(state);
-    // TODO: look up store["id:disabled"] and push result
-    let _ = (store, id);
-    state.push(Val::Nil);
+    let font_object = table_get(state, store, &format!("{id}:disabled"));
+    state.push(font_object);
     Ok(1)
 }
 
@@ -304,24 +347,96 @@ fn apply_texture_path_to_button(
         set_button_field(frame, resolved_path.clone(), tex_coords);
     }
 
-    // Get or create the child texture widget
-    // TODO: get_or_create_button_texture requires mlua::Lua — use rilua equivalent
-    // For now: find existing child or skip creation
-    let tex_id_opt = sim
-        .widgets
-        .get(button_id)
-        .and_then(|f| f.children_keys.get(parent_key).copied());
-    if let Some(tex_id) = tex_id_opt {
-        if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
-            tex.texture = resolved_path;
-            tex.tex_coords = tex_coords;
-            tex.atlas_tex_coords = tex_coords;
-            tex.texture_file_data_id = file_data_id;
-        }
-        let should_show = button_texture_should_show(&sim, button_id, parent_key);
-        sim.widgets.set_visible(tex_id, should_show);
+    let tex_id =
+        super::methods_helpers::get_or_create_button_texture(&mut sim, button_id, parent_key);
+    if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
+        tex.texture = resolved_path;
+        tex.tex_coords = tex_coords;
+        tex.atlas_tex_coords = tex_coords;
+        tex.texture_file_data_id = file_data_id;
     }
+    let should_show = button_texture_should_show(&sim, button_id, parent_key);
+    sim.widgets.set_visible(tex_id, should_show);
+    drop(sim);
+    let _ = sync_child_to_rilua(state, button_id, parent_key, tex_id);
     Ok(())
+}
+
+fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).map(button_enabled).unwrap_or(true)
+    };
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+fn set_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = bool::from_stack(state, 2).ok().unwrap_or(true);
+    set_button_enabled_value(state, id, enabled)?;
+    Ok(0)
+}
+
+fn enable(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    set_button_enabled_value(state, id, true)?;
+    Ok(0)
+}
+
+fn disable(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    set_button_enabled_value(state, id, false)?;
+    Ok(0)
+}
+
+fn register_for_clicks(state: &mut LuaState) -> LuaResult<u32> {
+    let _id = frame_id_from_stack(state, 1)?;
+    Ok(0)
+}
+
+fn set_button_state(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let state_name = String::from_stack(state, 2)?;
+    let pushed = state_name.eq_ignore_ascii_case("PUSHED");
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.button_state = if pushed { 1 } else { 0 };
+        }
+        sync_button_slot_visibility(&mut sim, id);
+    }
+    Ok(0)
+}
+
+fn get_button_state(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let pushed = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.button_state == 1)
+            .unwrap_or(false)
+    };
+    push_button_state_name(state, pushed)
+}
+
+fn click(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(handler) = get_rilua_script(state, id, "OnClick") else {
+        return Ok(0);
+    };
+    if matches!(handler, Val::Nil) {
+        return Ok(0);
+    }
+    let self_ref = frame_ref(state, id)?;
+    let button = create_string(state, "LeftButton");
+    let args = [self_ref, button, Val::Bool(false)];
+    if let Err(error) = call_function_state(state, handler, &args) {
+        call_error_handler_state(state, &error.to_string());
+    }
+    Ok(0)
 }
 
 /// SetNormalTexture(texture)
@@ -668,8 +783,47 @@ fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
             Ok(1)
         }
         None => {
-            // TODO: check mixin override for GetFontString
-            state.push(Val::Nil);
+            let text_value = {
+                let sim = borrow_state(state)?;
+                sim.widgets.get(id).and_then(|frame| {
+                    if matches!(
+                        frame.widget_type,
+                        crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
+                    ) {
+                        frame.text.clone()
+                    } else {
+                        None
+                    }
+                })
+            };
+            let Some(text_value) = text_value else {
+                state.push(Val::Nil);
+                return Ok(1);
+            };
+
+            let child_id = {
+                use crate::widget::{Frame, WidgetType};
+
+                let mut font_string = Frame::new(WidgetType::FontString, None, Some(id));
+                font_string.parent_key = Some("Text".to_string());
+                font_string.text = Some(text_value.clone());
+                font_string.text_stripped = Some(crate::render::strip_wow_markup(&text_value));
+                super::methods_helpers::set_all_points_anchors_pub(&mut font_string, id);
+                let child_id = font_string.id;
+
+                let mut sim = borrow_state_mut(state)?;
+                sim.widgets.register(font_string);
+                sim.widgets.add_child(id, child_id);
+                if let Some(button) = sim.widgets.get_mut_visual(id) {
+                    button.children_keys.insert("Text".to_string(), child_id);
+                }
+                sim.invalidate_strata_buckets();
+                child_id
+            };
+
+            let _ = sync_child_to_rilua(state, id, "Text", child_id);
+            let val = frame_ref(state, child_id)?;
+            state.push(val);
             Ok(1)
         }
     }
@@ -1759,6 +1913,14 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     // Button: font string
     table_set_rust_fn(state, table, "GetFontString", get_font_string)?;
     table_set_rust_fn(state, table, "SetFontString", set_font_string)?;
+    table_set_rust_fn(state, table, "IsEnabled", is_enabled)?;
+    table_set_rust_fn(state, table, "SetEnabled", set_enabled)?;
+    table_set_rust_fn(state, table, "Enable", enable)?;
+    table_set_rust_fn(state, table, "Disable", disable)?;
+    table_set_rust_fn(state, table, "RegisterForClicks", register_for_clicks)?;
+    table_set_rust_fn(state, table, "SetButtonState", set_button_state)?;
+    table_set_rust_fn(state, table, "GetButtonState", get_button_state)?;
+    table_set_rust_fn(state, table, "Click", click)?;
 
     // Anchor methods
     table_set_rust_fn(state, table, "SetPoint", set_point)?;
