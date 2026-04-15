@@ -90,6 +90,14 @@ fn exec_addon_func(
 }
 
 /// Try loading from bytecode cache; compile and cache on miss.
+///
+/// NOTE on secureenv: this function returns a fresh `rilua::Function` handle
+/// whether the compiled body came from the cache or from source. The caller
+/// (`load_lua_file`) applies `mark_secure_state` to that handle *after* this
+/// function returns, so cache-replayed chunks and fresh compilations are
+/// indistinguishable from secureenv's point of view — both get their fenv
+/// swapped before the chunk ever runs. That ordering must be preserved if
+/// anyone wires actual cache `get`/`put` calls here.
 fn load_cached_or_compile(
     lua: &mut LuaState,
     bytes: &[u8],
@@ -164,5 +172,73 @@ mod tests {
             .expect("rilua should handle BOM-prefixed source");
         let results = lua.call_function(&func, &[]).unwrap();
         assert_eq!(results, vec![rilua::Val::Num(1.0)]);
+    }
+
+    /// A function handle reloaded from cached bytecode must accept `setfenv`
+    /// exactly like one produced by fresh compilation. This protects the
+    /// invariant documented on `load_cached_or_compile`: regardless of
+    /// whether `compile_with_rilua` consumed source or bytecode,
+    /// `state_set_fenv` can still retarget the returned closure so
+    /// downstream `mark_secure_state` works on cache hits.
+    #[test]
+    fn bytecode_replayed_function_accepts_setfenv() {
+        use rilua::LuaApiMut;
+
+        let mut lua = rilua::Lua::new().unwrap();
+        // Fresh compile -> get a Function whose prototype we can dump.
+        let func_from_source =
+            compile_with_rilua(&mut lua, b"return MARK_SECURE_PROBE", "@cache_test")
+                .expect("source compile should succeed");
+
+        let proto = {
+            let state = lua.state_mut();
+            let closure = state
+                .gc
+                .closures
+                .get(func_from_source.gc_ref())
+                .expect("closure exists");
+            match closure {
+                rilua::vm::closure::Closure::Lua(cl) => cl.proto.clone(),
+                rilua::vm::closure::Closure::Rust(_) => {
+                    panic!("compiled source should produce a Lua closure")
+                }
+            }
+        };
+
+        // Dump to Lua 5.1 bytecode bytes — what bytecode_cache would store.
+        let bytecode = {
+            let state = lua.state_mut();
+            rilua::vm::dump::dump(&proto, Some(&state.gc.string_arena), false)
+        };
+
+        // Simulate a cache hit: feed bytecode back through the same entry
+        // point the loader uses on miss.
+        let func_from_bytecode = compile_with_rilua(&mut lua, &bytecode, "@cache_test")
+            .expect("bytecode replay should succeed");
+
+        // Build a fresh env table, point it at a sentinel value.
+        let env_table = LuaApiMut::create_table(&mut lua);
+        {
+            let state = lua.state_mut();
+            let sentinel = rilua::Val::Str(state.gc.intern_string(b"from-secureenv"));
+            let key = rilua::Val::Str(state.gc.intern_string(b"MARK_SECURE_PROBE"));
+            env_table.raw_set(state, key, sentinel).unwrap();
+        }
+
+        // Swap the replayed closure's fenv — the secureenv path.
+        rilua::api::state_set_fenv(lua.state_mut(), &func_from_bytecode, &env_table)
+            .expect("state_set_fenv should accept bytecode-replayed closure");
+
+        // The replayed chunk should resolve MARK_SECURE_PROBE through the
+        // swapped env, not _G (where it's nil).
+        let results = lua.call_function(&func_from_bytecode, &[]).unwrap();
+        let resolved = results.into_iter().next().expect("chunk returns a value");
+        let rilua::Val::Str(s) = resolved else {
+            panic!("expected string, got {resolved:?}");
+        };
+        assert_eq!(
+            lua.val_as_bytes(rilua::Val::Str(s)).unwrap(),
+            b"from-secureenv"
+        );
     }
 }
