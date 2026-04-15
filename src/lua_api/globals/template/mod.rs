@@ -7,60 +7,17 @@ mod children;
 pub(crate) mod direct;
 mod elements;
 mod elements_text;
+mod layers;
+mod mixin;
 
 use crate::loader::chunk_cache;
 use crate::loader::helpers_anim::generate_animation_group_code;
 use crate::loader::precompiled;
 use crate::lua_api::SimState;
-use crate::lua_api::frame::{FrameRef, frame_ref, get_sim_state};
-use crate::xml::{
-    FrameElement, FrameXml, LayerElement, LayerXml, TemplateEntry, TextureXml, get_template_chain,
-};
+use crate::xml::{FrameElement, FrameXml, TemplateEntry, get_template_chain};
 use mlua::{Lua, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
-
-#[cfg(test)]
-pub(crate) mod test_counters {
-    use std::sync::atomic::{AtomicUsize, Ordering};
-
-    static LUA_TEMPLATE_TEXTURE_CREATES: AtomicUsize = AtomicUsize::new(0);
-    static LUA_TEMPLATE_FONTSTRING_CREATES: AtomicUsize = AtomicUsize::new(0);
-    static LUA_TEMPLATE_BUTTON_TEXTURE_CREATES: AtomicUsize = AtomicUsize::new(0);
-
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub(crate) struct Snapshot {
-        pub(crate) texture_creates: usize,
-        pub(crate) fontstring_creates: usize,
-        pub(crate) button_texture_creates: usize,
-    }
-
-    pub(crate) fn reset() {
-        LUA_TEMPLATE_TEXTURE_CREATES.store(0, Ordering::SeqCst);
-        LUA_TEMPLATE_FONTSTRING_CREATES.store(0, Ordering::SeqCst);
-        LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.store(0, Ordering::SeqCst);
-    }
-
-    pub(crate) fn snapshot() -> Snapshot {
-        Snapshot {
-            texture_creates: LUA_TEMPLATE_TEXTURE_CREATES.load(Ordering::SeqCst),
-            fontstring_creates: LUA_TEMPLATE_FONTSTRING_CREATES.load(Ordering::SeqCst),
-            button_texture_creates: LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.load(Ordering::SeqCst),
-        }
-    }
-
-    pub(crate) fn record_texture_create() {
-        LUA_TEMPLATE_TEXTURE_CREATES.fetch_add(1, Ordering::SeqCst);
-    }
-
-    pub(crate) fn record_fontstring_create() {
-        LUA_TEMPLATE_FONTSTRING_CREATES.fetch_add(1, Ordering::SeqCst);
-    }
-
-    pub(crate) fn record_button_texture_create() {
-        LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.fetch_add(1, Ordering::SeqCst);
-    }
-}
 
 /// Extract the FrameXml, widget type, and optional intrinsic name from a FrameElement.
 fn frame_element_type(
@@ -206,7 +163,7 @@ fn apply_template_setup(
     template: &FrameXml,
     frame_name: &str,
 ) {
-    apply_mixin(lua, &template.combined_mixin(), frame_name);
+    mixin::apply_mixin(lua, &template.combined_mixin(), frame_name);
     for key_values in template.all_key_values() {
         apply_key_values(lua, key_values, frame_name);
     }
@@ -222,7 +179,7 @@ fn apply_template_regions(
     frame_name: &str,
     use_direct_region_creation: bool,
 ) {
-    apply_layers(
+    layers::apply_layers(
         lua,
         state,
         template,
@@ -230,7 +187,7 @@ fn apply_template_regions(
         frame_name,
         use_direct_region_creation,
     );
-    apply_button_texture_set(
+    layers::apply_button_texture_set(
         lua,
         state,
         template,
@@ -310,10 +267,10 @@ fn apply_direct_rust_properties(
     direct::set_all_points(state, fid, template);
     direct::set_clips_children(state, fid, template);
     direct::set_hidden(state, fid, template);
-    if template.protected == Some(true) {
-        if let Some(frame) = state.borrow_mut().widgets.get_mut_visual(fid) {
-            frame.is_protected = true;
-        }
+    if template.protected == Some(true)
+        && let Some(frame) = state.borrow_mut().widgets.get_mut_visual(fid)
+    {
+        frame.is_protected = true;
     }
     if let Some(level) = template.frame_level {
         let mut s = state.borrow_mut();
@@ -338,7 +295,7 @@ fn apply_key_values_direct(
     key_values: &crate::xml::KeyValuesXml,
     frame_name: &str,
 ) -> mlua::Result<()> {
-    let Some(fields) = frame_fields_by_name(lua, frame_name)? else {
+    let Some(fields) = mixin::frame_fields_by_name(lua, frame_name)? else {
         return Ok(());
     };
     for kv in &key_values.values {
@@ -363,7 +320,7 @@ fn key_value_to_lua_value(lua: &Lua, value: &str, value_type: Option<&str>) -> m
     match value_type {
         Some("number") => parse_number_value(value),
         Some("boolean") => Ok(Value::Boolean(value.eq_ignore_ascii_case("true"))),
-        Some("global") => resolve_global_path_value(lua, value),
+        Some("global") => mixin::resolve_global_path_value(lua, value),
         _ => Ok(Value::String(lua.create_string(value)?)),
     }
 }
@@ -389,397 +346,6 @@ fn format_key_value(value: &str, value_type: Option<&str>) -> String {
         Some("global") => value.to_string(),
         _ => format!("\"{}\"", escape_lua_string(value)),
     }
-}
-
-/// Apply layers (textures and fontstrings) from a template.
-///
-/// `subst_parent` is the name used for `$parent` substitution in child names.
-/// For anonymous frames, this propagates from the nearest named ancestor.
-fn apply_layers(
-    lua: &Lua,
-    state: &Rc<RefCell<SimState>>,
-    template: &FrameXml,
-    frame_name: &str,
-    subst_parent: &str,
-    use_direct_creation: bool,
-) {
-    let region_ctx = RegionCreateContext {
-        lua,
-        state,
-        frame_name,
-        subst_parent,
-    };
-    for layers in template.layers() {
-        for layer in &layers.layers {
-            apply_layer_block(region_ctx, layer, use_direct_creation);
-        }
-    }
-}
-
-#[derive(Clone, Copy)]
-struct RegionCreateContext<'a> {
-    lua: &'a Lua,
-    state: &'a Rc<RefCell<SimState>>,
-    frame_name: &'a str,
-    subst_parent: &'a str,
-}
-
-#[derive(Clone, Copy)]
-struct LayerCreateContext<'a> {
-    region: RegionCreateContext<'a>,
-    draw_layer: &'a str,
-    use_direct_creation: bool,
-}
-
-#[derive(Clone, Copy)]
-struct ButtonTextureContext<'a> {
-    region: RegionCreateContext<'a>,
-    use_direct_creation: bool,
-}
-
-fn apply_layer_block(region: RegionCreateContext<'_>, layer: &LayerXml, use_direct_creation: bool) {
-    let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
-    let ctx = LayerCreateContext {
-        region,
-        draw_layer,
-        use_direct_creation,
-    };
-    for element in &layer.elements {
-        apply_layer_element(ctx, element);
-    }
-}
-
-fn apply_layer_element(ctx: LayerCreateContext<'_>, element: &LayerElement) {
-    match element {
-        LayerElement::Texture(texture) => create_texture_layer(ctx, texture, false, false),
-        LayerElement::Line(texture) => create_texture_layer(ctx, texture, false, true),
-        LayerElement::MaskTexture(texture) => create_texture_layer(ctx, texture, true, false),
-        LayerElement::FontString(fontstring) => create_fontstring_layer(ctx, fontstring),
-    }
-}
-
-fn create_texture_layer(
-    ctx: LayerCreateContext<'_>,
-    texture: &TextureXml,
-    is_mask: bool,
-    is_line: bool,
-) {
-    let used_direct = ctx.use_direct_creation
-        && elements::create_texture_from_template_direct(
-            ctx.region.lua,
-            ctx.region.state,
-            texture,
-            ctx.region.frame_name,
-            ctx.region.subst_parent,
-            ctx.draw_layer,
-            is_mask,
-            is_line,
-        )
-        .is_ok();
-    if used_direct {
-        return;
-    }
-
-    elements::create_texture_from_template(
-        ctx.region.lua,
-        texture,
-        ctx.region.frame_name,
-        ctx.region.subst_parent,
-        ctx.draw_layer,
-        is_mask,
-        is_line,
-    );
-}
-
-fn create_fontstring_layer(ctx: LayerCreateContext<'_>, fontstring: &crate::xml::FontStringXml) {
-    let used_direct = ctx.use_direct_creation
-        && elements_text::create_fontstring_from_template_direct(
-            ctx.region.lua,
-            ctx.region.state,
-            fontstring,
-            ctx.region.frame_name,
-            ctx.region.subst_parent,
-            ctx.draw_layer,
-        )
-        .is_ok();
-    if used_direct {
-        return;
-    }
-
-    elements_text::create_fontstring_from_template(
-        ctx.region.lua,
-        fontstring,
-        ctx.region.frame_name,
-        ctx.region.subst_parent,
-        ctx.draw_layer,
-    );
-}
-
-/// Apply button textures (NormalTexture, PushedTexture, etc.) from a frame/template.
-pub(super) fn apply_button_texture_set(
-    lua: &Lua,
-    state: &Rc<RefCell<SimState>>,
-    frame: &FrameXml,
-    frame_name: &str,
-    subst_parent: &str,
-    use_direct_creation: bool,
-) {
-    let ctx = ButtonTextureContext {
-        region: RegionCreateContext {
-            lua,
-            state,
-            frame_name,
-            subst_parent,
-        },
-        use_direct_creation,
-    };
-    for (parent_key, setter, tex_opt) in button_texture_specs(frame) {
-        let Some(texture) = tex_opt else {
-            continue;
-        };
-        apply_button_texture_spec(ctx, texture, parent_key, setter);
-    }
-}
-
-fn button_texture_specs(
-    frame: &FrameXml,
-) -> [(&'static str, &'static str, Option<&TextureXml>); 6] {
-    [
-        ("Normal", "SetNormalTexture", frame.normal_texture()),
-        ("Pushed", "SetPushedTexture", frame.pushed_texture()),
-        ("Disabled", "SetDisabledTexture", frame.disabled_texture()),
-        (
-            "Highlight",
-            "SetHighlightTexture",
-            frame.highlight_texture(),
-        ),
-        ("Checked", "SetCheckedTexture", frame.checked_texture()),
-        (
-            "DisabledChecked",
-            "SetDisabledCheckedTexture",
-            frame.disabled_checked_texture(),
-        ),
-    ]
-}
-
-fn apply_button_texture_spec(
-    ctx: ButtonTextureContext<'_>,
-    texture: &TextureXml,
-    parent_key: &str,
-    setter: &str,
-) {
-    let used_direct = ctx.use_direct_creation
-        && elements_text::create_button_texture_from_template_direct(
-            ctx.region.lua,
-            ctx.region.state,
-            texture,
-            ctx.region.frame_name,
-            ctx.region.subst_parent,
-            parent_key,
-        )
-        .is_ok();
-    if used_direct {
-        return;
-    }
-
-    elements_text::create_button_texture_from_template(
-        ctx.region.lua,
-        texture,
-        ctx.region.frame_name,
-        ctx.region.subst_parent,
-        parent_key,
-        setter,
-    );
-}
-
-/// Apply mixin to a frame.
-fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
-    let Some(mixin) = mixin else { return };
-    if apply_mixin_direct(lua, mixin, frame_name).is_ok() {
-        return;
-    }
-    apply_mixin_via_chunk(lua, mixin, frame_name);
-}
-
-fn apply_mixin_direct(lua: &Lua, mixin: &str, frame_name: &str) -> mlua::Result<()> {
-    let Some(fields) = frame_fields_by_name(lua, frame_name)? else {
-        return Ok(());
-    };
-    let secure_methods: Value = lua.globals().get("__secureMixinMethods")?;
-    for mixin_table in resolve_mixin_tables(lua, mixin)? {
-        // For secure mixins, methods are moved to __index and the table is empty.
-        // Check __secureMixinMethods for the actual methods table, same as Mixin().
-        let source = if let Value::Table(ref sm) = secure_methods {
-            if let Value::Table(t) = sm.get::<Value>(mixin_table.clone())? {
-                t
-            } else {
-                mixin_table
-            }
-        } else {
-            mixin_table
-        };
-        for pair in source.pairs::<Value, Value>() {
-            let (key, value) = pair?;
-            fields.raw_set(key, value)?;
-        }
-    }
-    let post_init = build_mixin_post_init(mixin);
-    if !post_init.is_empty() {
-        let code = format!(
-            "do local f = {} if f then {} end end",
-            lua_global_ref(frame_name),
-            post_init,
-        );
-        let _ = chunk_cache::exec(lua, &code, "template-mod");
-    }
-    Ok(())
-}
-
-fn resolve_mixin_tables(lua: &Lua, mixin: &str) -> mlua::Result<Vec<mlua::Table>> {
-    let mut mixins = Vec::new();
-    for name in mixin.split(',').map(str::trim).filter(|s| !s.is_empty()) {
-        if let Value::Table(table) = resolve_top_level_value(lua, name)? {
-            mixins.push(table);
-        }
-    }
-    Ok(mixins)
-}
-
-fn apply_mixin_via_chunk(lua: &Lua, mixin: &str, frame_name: &str) {
-    let mut parts = Vec::new();
-    for name in mixin.split(',').map(str::trim).filter(|s| !s.is_empty()) {
-        parts.push(format!(
-            "do local m = {name} or (__secureenv and rawget(__secureenv, \"{name}\")) \
-             if m then Mixin(f, m) end end"
-        ));
-    }
-    if parts.is_empty() {
-        return;
-    }
-    let post_init = build_mixin_post_init(mixin);
-    let code = format!(
-        "do local f = {} if f then {} {} end end",
-        lua_global_ref(frame_name),
-        parts.join(" "),
-        post_init,
-    );
-    let _ = chunk_cache::exec(lua, &code, "template-mod");
-}
-
-fn frame_fields_by_name(lua: &Lua, frame_name: &str) -> mlua::Result<Option<mlua::Table>> {
-    let value = resolve_frame_value_by_name(lua, frame_name)?;
-    frame_fields_from_value(value)
-}
-
-fn frame_fields_from_value(value: Value) -> mlua::Result<Option<mlua::Table>> {
-    let userdata = match value {
-        Value::UserData(ud) => Some(ud),
-        Value::Table(t) => match t.raw_get::<Value>("__lud")? {
-            Value::UserData(ud) => Some(ud),
-            _ => None,
-        },
-        _ => None,
-    };
-    let Some(userdata) = userdata else {
-        return Ok(None);
-    };
-    if userdata.is::<FrameRef>() {
-        return userdata.user_value::<mlua::Table>().map(Some);
-    }
-    Ok(None)
-}
-
-fn resolve_frame_value_by_name(lua: &Lua, frame_name: &str) -> mlua::Result<Value> {
-    if let Some(id) = frame_name
-        .strip_prefix("__frame_")
-        .and_then(|suffix| suffix.parse::<u64>().ok())
-    {
-        return frame_ref(lua, id);
-    }
-
-    let globals = lua.globals();
-    let value: Value = globals.raw_get(frame_name)?;
-    if !value.is_nil() {
-        return Ok(value);
-    }
-
-    let frame_id = get_sim_state(lua)
-        .borrow()
-        .widgets
-        .get_id_by_name(frame_name);
-    match frame_id {
-        Some(id) => frame_ref(lua, id),
-        None => Ok(Value::Nil),
-    }
-}
-
-fn resolve_global_path_value(lua: &Lua, path: &str) -> mlua::Result<Value> {
-    let mut segments = path.split('.').filter(|segment| !segment.is_empty());
-    let Some(first) = segments.next() else {
-        return Ok(Value::Nil);
-    };
-    let mut current = resolve_top_level_value(lua, first)?;
-    for segment in segments {
-        current = match current {
-            Value::Table(table) => table.get::<Value>(segment)?,
-            _ => return Ok(Value::Nil),
-        };
-    }
-    Ok(current)
-}
-
-fn resolve_top_level_value(lua: &Lua, name: &str) -> mlua::Result<Value> {
-    let globals = lua.globals();
-    let global_value = globals.get::<Value>(name)?;
-    if !global_value.is_nil() {
-        return Ok(global_value);
-    }
-    if let Ok(secureenv) = lua.named_registry_value::<mlua::Table>("__secureenv") {
-        let secure_value = secureenv.get::<Value>(name)?;
-        if !secure_value.is_nil() {
-            return Ok(secure_value);
-        }
-    }
-    Ok(Value::Nil)
-}
-
-/// Build post-initialization code for known mixins that need pre-seeded fields.
-fn build_mixin_post_init(mixin: &str) -> String {
-    let mut post_init = String::new();
-    for name in mixin.split(',').map(str::trim) {
-        match name {
-            "ActionBarMixin" => {
-                post_init.push_str("f.actionButtons = f.actionButtons or {} ");
-                post_init.push_str("f.shownButtonContainers = f.shownButtonContainers or {} ");
-            }
-            "EditModeSystemMixin" => {
-                for alias in [
-                    "SetScale",
-                    "SetPoint",
-                    "ClearAllPoints",
-                    "SetShown",
-                    "Show",
-                    "Hide",
-                    "IsShown",
-                ] {
-                    post_init.push_str(&format!("f.{alias}Base = f.{alias} "));
-                }
-            }
-            "EventFrameMixin" | "CallbackRegistryMixin" => {
-                post_init.push_str("if f.OnLoad_Intrinsic then pcall(f.OnLoad_Intrinsic, f) end ");
-                post_init.push_str("f.callbackTables = f.callbackTables or {} ");
-                post_init.push_str("f.executingEvents = f.executingEvents or {} ");
-            }
-            "UIParentManagedFrameContainerMixin" => {
-                post_init.push_str("f.showingFrames = f.showingFrames or {} ");
-            }
-            "TabSystemMixin" => {
-                post_init.push_str("f.tabs = f.tabs or {} ");
-            }
-            _ => {}
-        }
-    }
-    post_init
 }
 
 /// Push the suppress-OnLoad depth counter (prevents premature OnLoad in nested CreateFrame).
@@ -983,4 +549,46 @@ pub(super) fn lua_global_ref(name: &str) -> String {
 /// Generate a unique ID (delegates to shared atomic counter).
 fn rand_id() -> u64 {
     crate::loader::helpers::rand_id()
+}
+
+#[cfg(test)]
+pub(crate) mod test_counters {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static LUA_TEMPLATE_TEXTURE_CREATES: AtomicUsize = AtomicUsize::new(0);
+    static LUA_TEMPLATE_FONTSTRING_CREATES: AtomicUsize = AtomicUsize::new(0);
+    static LUA_TEMPLATE_BUTTON_TEXTURE_CREATES: AtomicUsize = AtomicUsize::new(0);
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub(crate) struct Snapshot {
+        pub(crate) texture_creates: usize,
+        pub(crate) fontstring_creates: usize,
+        pub(crate) button_texture_creates: usize,
+    }
+
+    pub(crate) fn reset() {
+        LUA_TEMPLATE_TEXTURE_CREATES.store(0, Ordering::SeqCst);
+        LUA_TEMPLATE_FONTSTRING_CREATES.store(0, Ordering::SeqCst);
+        LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.store(0, Ordering::SeqCst);
+    }
+
+    pub(crate) fn snapshot() -> Snapshot {
+        Snapshot {
+            texture_creates: LUA_TEMPLATE_TEXTURE_CREATES.load(Ordering::SeqCst),
+            fontstring_creates: LUA_TEMPLATE_FONTSTRING_CREATES.load(Ordering::SeqCst),
+            button_texture_creates: LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.load(Ordering::SeqCst),
+        }
+    }
+
+    pub(crate) fn record_texture_create() {
+        LUA_TEMPLATE_TEXTURE_CREATES.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(crate) fn record_fontstring_create() {
+        LUA_TEMPLATE_FONTSTRING_CREATES.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(crate) fn record_button_texture_create() {
+        LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.fetch_add(1, Ordering::SeqCst);
+    }
 }

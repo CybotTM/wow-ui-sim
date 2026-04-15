@@ -1,7 +1,7 @@
 use super::{
     apply_animation_groups, apply_button_text, apply_editbox_fontstring, apply_inline_key_values,
-    apply_mixin, apply_templates_from_registry, defer_child_onload, direct, elements,
-    elements_text, frame_element_type, lua_global_ref, pop_suppress, push_suppress, rand_id,
+    apply_templates_from_registry, defer_child_onload, direct, elements, elements_text,
+    frame_element_type, lua_global_ref, pop_suppress, push_suppress, rand_id,
 };
 use crate::loader::chunk_cache;
 use crate::loader::helpers::generate_set_point_code;
@@ -33,9 +33,11 @@ pub(super) fn create_child_frames(
             child_frame,
             child_type,
             intrinsic,
-            parent_name,
-            subst_parent,
-            use_direct_creation,
+            InlineChildContext {
+                parent_name,
+                subst_parent,
+                use_direct_creation,
+            },
         );
     }
 }
@@ -66,13 +68,15 @@ fn create_child_frame_from_template(
     frame: &FrameXml,
     widget_type: &str,
     intrinsic: Option<&str>,
-    parent_name: &str,
-    subst_parent: &str,
-    use_direct_creation: bool,
+    ctx: InlineChildContext<'_>,
 ) -> Option<String> {
     let is_named = frame.name.is_some();
-    let child_name = resolve_child_name(frame, subst_parent);
-    let child_subst = if is_named { &child_name } else { subst_parent };
+    let child_name = resolve_child_name(frame, ctx.subst_parent);
+    let child_subst = if is_named {
+        &child_name
+    } else {
+        ctx.subst_parent
+    };
 
     push_suppress(lua);
 
@@ -81,27 +85,34 @@ fn create_child_frame_from_template(
         state,
         frame,
         widget_type,
-        parent_name,
+        ctx.parent_name,
         &child_name,
-        use_direct_creation,
+        ctx.use_direct_creation,
     ) {
         pop_suppress(lua);
         return None;
     }
 
-    apply_child_templates(lua, state, frame, &child_name, intrinsic, parent_name);
+    apply_child_templates(lua, state, frame, &child_name, intrinsic, ctx.parent_name);
     apply_inline_frame_content(
         lua,
         state,
         frame,
         &child_name,
         child_subst,
-        use_direct_creation,
+        ctx.use_direct_creation,
     );
 
     pop_suppress(lua);
     defer_child_onload(lua, &child_name);
     Some(child_name)
+}
+
+#[derive(Clone, Copy)]
+struct InlineChildContext<'a> {
+    parent_name: &'a str,
+    subst_parent: &'a str,
+    use_direct_creation: bool,
 }
 
 fn resolve_child_name(frame: &FrameXml, subst_parent: &str) -> String {
@@ -451,9 +462,11 @@ pub(super) fn create_scroll_child_frames(
             child_frame,
             child_type,
             intrinsic,
-            parent_name,
-            subst_parent,
-            use_direct_creation,
+            InlineChildContext {
+                parent_name,
+                subst_parent,
+                use_direct_creation,
+            },
         ) else {
             continue;
         };
@@ -485,7 +498,7 @@ fn apply_inline_frame_content(
     subst_parent: &str,
     use_direct_creation: bool,
 ) {
-    apply_mixin(lua, &frame.combined_mixin(), frame_name);
+    super::mixin::apply_mixin(lua, &frame.combined_mixin(), frame_name);
     apply_inline_key_values(lua, frame, frame_name);
 
     let frame_id = state
@@ -528,7 +541,7 @@ fn apply_inline_frame_content(
         );
     }
 
-    super::apply_layers(
+    super::layers::apply_layers(
         lua,
         state,
         frame,
@@ -544,7 +557,7 @@ fn apply_inline_frame_content(
         elements_text::create_bar_texture_from_template(lua, bar, frame_name, subst_parent);
     }
 
-    super::apply_button_texture_set(
+    super::layers::apply_button_texture_set(
         lua,
         state,
         frame,
