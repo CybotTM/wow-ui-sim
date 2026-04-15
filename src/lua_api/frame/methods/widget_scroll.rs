@@ -165,49 +165,126 @@ fn register_scrollbox_callback_fallback(
     frame_id: u64,
     args: MultiValue,
 ) -> mlua::Result<Value> {
+    let registration = parse_scrollbox_callback_registration(lua, args)?;
+    unregister_scrollbox_callback_by_owner(
+        lua,
+        frame_id,
+        &registration.event,
+        &registration.owner,
+    )?;
+    let callback_tables = ensure_scrollbox_callback_tables(lua, frame_id)?;
+    store_scrollbox_callback(lua, &callback_tables, &registration)?;
+    Ok(registration.owner)
+}
+
+struct ScrollboxCallbackRegistration {
+    event: String,
+    func: Function,
+    owner: Value,
+    extra_args: Vec<Value>,
+}
+
+fn parse_scrollbox_callback_registration(
+    lua: &mlua::Lua,
+    args: MultiValue,
+) -> mlua::Result<ScrollboxCallbackRegistration> {
     let mut it = args.into_iter();
-    let Some(Value::String(event)) = it.next() else {
+    let event = parse_scrollbox_callback_event(it.next())?;
+    let func = parse_scrollbox_callback_function(it.next())?;
+    let owner = scrollbox_callback_owner(lua, it.next())?;
+    let extra_args = it.collect();
+    Ok(ScrollboxCallbackRegistration {
+        event,
+        func,
+        owner,
+        extra_args,
+    })
+}
+
+fn parse_scrollbox_callback_event(event: Option<Value>) -> mlua::Result<String> {
+    let Some(Value::String(event)) = event else {
         return Err(mlua::Error::runtime(
             "CallbackRegistryMixin::RegisterCallback 'event' requires string type.",
         ));
     };
-    let event = event.to_string_lossy().to_string();
-    let Some(Value::Function(func)) = it.next() else {
+    Ok(event.to_string_lossy().to_string())
+}
+
+fn parse_scrollbox_callback_function(func: Option<Value>) -> mlua::Result<Function> {
+    let Some(Value::Function(func)) = func else {
         return Err(mlua::Error::runtime(
             "CallbackRegistryMixin::RegisterCallback 'func' requires function type.",
         ));
     };
+    Ok(func)
+}
 
-    let owner = match it.next() {
-        Some(Value::Nil) | None => Value::Table(lua.create_table()?),
-        Some(value) => value,
-    };
-    unregister_scrollbox_callback_by_owner(lua, frame_id, &event, &owner)?;
-
-    let callback_tables = ensure_scrollbox_callback_tables(lua, frame_id)?;
-    let remaining: Vec<Value> = it.collect();
-    let (closure_key, function_key) = callback_type_keys(lua);
-    if remaining.is_empty() {
-        let callbacks = callback_bucket(lua, &callback_tables, function_key, &event)?;
-        callbacks.raw_set(owner.clone(), func)?;
-    } else {
-        let owner_arg = owner.clone();
-        let closure_func = func.clone();
-        let closure = lua.create_function(move |_, event_args: MultiValue| {
-            let mut call_args = MultiValue::new();
-            call_args.push_back(owner_arg.clone());
-            for extra in &remaining {
-                call_args.push_back(extra.clone());
-            }
-            for event_arg in event_args {
-                call_args.push_back(event_arg);
-            }
-            closure_func.call::<Value>(call_args)
-        })?;
-        let callbacks = callback_bucket(lua, &callback_tables, closure_key, &event)?;
-        callbacks.raw_set(owner.clone(), closure)?;
+fn scrollbox_callback_owner(lua: &mlua::Lua, owner: Option<Value>) -> mlua::Result<Value> {
+    match owner {
+        Some(Value::Nil) | None => Ok(Value::Table(lua.create_table()?)),
+        Some(value) => Ok(value),
     }
-    Ok(owner)
+}
+
+fn store_scrollbox_callback(
+    lua: &mlua::Lua,
+    callback_tables: &Table,
+    registration: &ScrollboxCallbackRegistration,
+) -> mlua::Result<()> {
+    if registration.extra_args.is_empty() {
+        return store_scrollbox_function_callback(lua, callback_tables, registration);
+    }
+    store_scrollbox_closure_callback(lua, callback_tables, registration)
+}
+
+fn store_scrollbox_function_callback(
+    lua: &mlua::Lua,
+    callback_tables: &Table,
+    registration: &ScrollboxCallbackRegistration,
+) -> mlua::Result<()> {
+    let (_, function_key) = callback_type_keys(lua);
+    let callbacks = callback_bucket(lua, callback_tables, function_key, &registration.event)?;
+    callbacks.raw_set(registration.owner.clone(), registration.func.clone())?;
+    Ok(())
+}
+
+fn store_scrollbox_closure_callback(
+    lua: &mlua::Lua,
+    callback_tables: &Table,
+    registration: &ScrollboxCallbackRegistration,
+) -> mlua::Result<()> {
+    let (closure_key, _) = callback_type_keys(lua);
+    let callbacks = callback_bucket(lua, callback_tables, closure_key, &registration.event)?;
+    let closure = build_scrollbox_callback_closure(
+        lua,
+        &registration.owner,
+        &registration.func,
+        &registration.extra_args,
+    )?;
+    callbacks.raw_set(registration.owner.clone(), closure)?;
+    Ok(())
+}
+
+fn build_scrollbox_callback_closure(
+    lua: &mlua::Lua,
+    owner: &Value,
+    func: &Function,
+    extra_args: &[Value],
+) -> mlua::Result<Function> {
+    let owner_arg = owner.clone();
+    let closure_func = func.clone();
+    let extra_args = extra_args.to_vec();
+    lua.create_function(move |_, event_args: MultiValue| {
+        let mut call_args = MultiValue::new();
+        call_args.push_back(owner_arg.clone());
+        for extra in &extra_args {
+            call_args.push_back(extra.clone());
+        }
+        for event_arg in event_args {
+            call_args.push_back(event_arg);
+        }
+        closure_func.call::<Value>(call_args)
+    })
 }
 
 fn unregister_scrollbox_callback_fallback(
