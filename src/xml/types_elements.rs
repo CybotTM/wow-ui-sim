@@ -356,33 +356,48 @@ fn preserved_frame_alias_type(tag: &str) -> Option<&'static str> {
 /// Covers the common mappings used by both `FrameElement` (inside `<Frames>`)
 /// and `XmlElement` (top-level). Callers handle divergences before calling this.
 pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
-    if let Some(widget_type) = preserved_frame_alias_type(tag) {
-        return Some((widget_type, None));
-    }
+    preserved_frame_alias_type(tag)
+        .map(|widget_type| (widget_type, None))
+        .or_else(|| direct_widget_type_for_tag(tag))
+        .or_else(|| intrinsic_widget_type_for_tag(tag))
+        .or_else(|| frame_fallback_widget_type_for_tag(tag))
+}
 
+fn direct_widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
+    let widget_type = match tag {
+        "Frame" => "Frame",
+        "Button" => "Button",
+        "ItemButton" => "ItemButton",
+        "CheckButton" => "CheckButton",
+        "EditBox" | "EventEditBox" => "EditBox",
+        "ScrollFrame" | "EventScrollFrame" => "ScrollFrame",
+        "Slider" => "Slider",
+        "StatusBar" => "StatusBar",
+        "Cooldown" => "Cooldown",
+        "GameTooltip" => "GameTooltip",
+        "ColorSelect" => "ColorSelect",
+        "Model" => "Model",
+        "ModelScene" => "ModelScene",
+        "PlayerModel" | "CinematicModel" | "TabardModel" | "DressUpModel" => "PlayerModel",
+        "MessageFrame" => "MessageFrame",
+        "SimpleHTML" => "SimpleHTML",
+        "Minimap" => "Minimap",
+        _ => return None,
+    };
+    Some((widget_type, None))
+}
+
+fn intrinsic_widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
     match tag {
-        "Frame" => Some(("Frame", None)),
-        "Button" => Some(("Button", None)),
-        "ItemButton" => Some(("ItemButton", None)),
-        "CheckButton" => Some(("CheckButton", None)),
-        "EditBox" | "EventEditBox" => Some(("EditBox", None)),
-        "ScrollFrame" | "EventScrollFrame" => Some(("ScrollFrame", None)),
-        "Slider" => Some(("Slider", None)),
-        "StatusBar" => Some(("StatusBar", None)),
-        "Cooldown" => Some(("Cooldown", None)),
-        "GameTooltip" => Some(("GameTooltip", None)),
-        "ColorSelect" => Some(("ColorSelect", None)),
-        "Model" => Some(("Model", None)),
-        "ModelScene" => Some(("ModelScene", None)),
-        "PlayerModel" | "CinematicModel" | "TabardModel" | "DressUpModel" => {
-            Some(("PlayerModel", None))
-        }
-        "MessageFrame" => Some(("MessageFrame", None)),
         "ScrollingMessageFrame" => Some(("MessageFrame", Some("ScrollingMessageFrame"))),
-        "SimpleHTML" => Some(("SimpleHTML", None)),
-        "Minimap" => Some(("Minimap", None)),
         "DropdownButton" => Some(("Button", Some("DropdownButton"))),
         "ContainedAlertFrame" => Some(("Button", Some("ContainedAlertFrame"))),
+        _ => None,
+    }
+}
+
+fn frame_fallback_widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
+    match tag {
         // Frame-like elements without a creatable alias still fall back to Frame.
         "TaxiRouteFrame"
         | "ModelFFX"
@@ -673,4 +688,37 @@ pub struct FontFamilyMemberXml {
     pub alphabet: Option<String>,
     #[serde(rename = "Font")]
     pub font: Option<FontXml>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::widget_type_for_tag;
+
+    #[test]
+    fn widget_type_for_tag_maps_direct_intrinsic_and_frame_fallback_tags() {
+        let cases = [
+            ("Button", Some(("Button", None))),
+            ("EventEditBox", Some(("EditBox", None))),
+            ("CinematicModel", Some(("PlayerModel", None))),
+            (
+                "ScrollingMessageFrame",
+                Some(("MessageFrame", Some("ScrollingMessageFrame"))),
+            ),
+            (
+                "ContainedAlertFrame",
+                Some(("Button", Some("ContainedAlertFrame"))),
+            ),
+            ("QuestPOIFrame", Some(("QuestPOIFrame", None))),
+            ("WorldFrame", Some(("Frame", None))),
+            ("MissingTag", None),
+        ];
+
+        for (tag, expected) in cases {
+            assert_eq!(
+                widget_type_for_tag(tag),
+                expected,
+                "unexpected mapping for {tag}"
+            );
+        }
+    }
 }
