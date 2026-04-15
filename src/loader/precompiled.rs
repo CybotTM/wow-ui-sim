@@ -60,32 +60,7 @@ const FIRE_ONLOAD_SOURCE: &str = r#"
         end
     "#;
 
-impl PrecompiledFns {
-    /// Compile all helper functions once and return the struct.
-    pub fn new(lua: &Lua) -> mlua::Result<Self> {
-        Ok(Self {
-            fire_onload: compile_fire_onload(lua)?,
-            fire_onshow: compile_fire_onshow(lua)?,
-            suppress_push: compile_suppress_push(lua)?,
-            suppress_pop: compile_suppress_pop(lua)?,
-            assign_parent_key: compile_assign_parent_key(lua)?,
-            set_intrinsic: compile_set_intrinsic(lua)?,
-            defer_onload: compile_defer_onload(lua)?,
-        })
-    }
-}
-
-fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
-    compile_precompiled(lua, FIRE_ONLOAD_SOURCE)
-}
-
-fn compile_precompiled(lua: &Lua, source: &str) -> mlua::Result<Function> {
-    lua.load(source).into_function()
-}
-
-fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(
-        r#"
+const FIRE_ONSHOW_SOURCE: &str = r#"
         local __report = debug.getregistry()["__report_script_error"]
         local reg = debug.getregistry()
         local function resolve_frame(arg)
@@ -117,9 +92,33 @@ fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
                 end
             end
         end
-    "#,
-    )
-    .into_function()
+    "#;
+
+impl PrecompiledFns {
+    /// Compile all helper functions once and return the struct.
+    pub fn new(lua: &Lua) -> mlua::Result<Self> {
+        Ok(Self {
+            fire_onload: compile_fire_onload(lua)?,
+            fire_onshow: compile_fire_onshow(lua)?,
+            suppress_push: compile_suppress_push(lua)?,
+            suppress_pop: compile_suppress_pop(lua)?,
+            assign_parent_key: compile_assign_parent_key(lua)?,
+            set_intrinsic: compile_set_intrinsic(lua)?,
+            defer_onload: compile_defer_onload(lua)?,
+        })
+    }
+}
+
+fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
+    compile_precompiled(lua, FIRE_ONLOAD_SOURCE)
+}
+
+fn compile_precompiled(lua: &Lua, source: &str) -> mlua::Result<Function> {
+    lua.load(source).into_function()
+}
+
+fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
+    compile_precompiled(lua, FIRE_ONSHOW_SOURCE)
 }
 
 fn compile_suppress_push(lua: &Lua) -> mlua::Result<Function> {
@@ -287,6 +286,61 @@ mod tests {
 
         assert_eq!(frame.get::<i64>("intrinsic_calls")?, 1);
         assert_eq!(frame.get::<i64>("onload_calls")?, 1);
+
+        let reports: Table = lua.globals().get("reports")?;
+        assert_eq!(reports.raw_len(), 0);
+        Ok(())
+    }
+
+    #[test]
+    fn fire_onshow_precompiled_function_only_runs_for_visible_frames() -> mlua::Result<()> {
+        let env = crate::lua_api::WowLuaEnv::new().expect("failed to create wow lua env");
+        let lua = env.lua();
+        lua.load(
+            r#"
+            reports = {}
+            debug.getregistry()["__report_script_error"] = function(msg)
+                table.insert(reports, msg)
+            end
+            local frame = {
+                visible = false,
+                OnShow_Intrinsic = function(self)
+                    self.intrinsic_calls = (self.intrinsic_calls or 0) + 1
+                end,
+                IsVisible = function(self)
+                    return self.visible
+                end,
+                GetScript = function(self, name)
+                    if name == "OnShow" then
+                        return function(self)
+                            self.onshow_calls = (self.onshow_calls or 0) + 1
+                        end
+                    end
+                end,
+                GetName = function(self)
+                    return "PrecompiledShowFrame"
+                end,
+            }
+            local reg = debug.getregistry()
+            reg.__frame_refs = { [8] = frame }
+            return frame
+            "#,
+        )
+        .exec()?;
+
+        let frame: Table = lua
+            .load("return debug.getregistry().__frame_refs[8]")
+            .eval()?;
+        let fire_onshow = compile_fire_onshow(lua)?;
+
+        fire_onshow.call::<()>("__frame_8")?;
+        assert_eq!(frame.get::<Option<i64>>("intrinsic_calls")?, None);
+        assert_eq!(frame.get::<Option<i64>>("onshow_calls")?, None);
+
+        frame.set("visible", true)?;
+        fire_onshow.call::<()>("__frame_8")?;
+        assert_eq!(frame.get::<i64>("intrinsic_calls")?, 1);
+        assert_eq!(frame.get::<i64>("onshow_calls")?, 1);
 
         let reports: Table = lua.globals().get("reports")?;
         assert_eq!(reports.raw_len(), 0);
