@@ -197,6 +197,7 @@ macro_rules! frame_defaults {
             editbox_history: Vec::new(),
             editbox_history_max: 0,
             editbox_text_insets: (0.0, 0.0, 0.0, 0.0),
+            text_line_spacing: 0.0,
             editbox_count_invisible_letters: false,
             editbox_in_ime_composition_mode: false,
             editbox_alphabetic_only: false,

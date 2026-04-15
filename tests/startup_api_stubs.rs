@@ -206,6 +206,34 @@ fn set_disabled_atlas_creates_child_texture() {
 }
 
 #[test]
+fn player_is_timerunning_returns_false() {
+    // Timerunning is a seasonal WoW mode. The sim never enters it, so
+    // the callsites (Blizzard_Collections, Blizzard_EncounterJournal,
+    // MainMenuBarMicroButtons) take the "not timerunning" branch.
+    let env = env();
+    let t: bool = env.eval("return PlayerIsTimerunning()").unwrap();
+    assert!(!t);
+}
+
+#[test]
+fn set_spacing_round_trips_on_editbox() {
+    // CommunitiesGuildTextEditFrame_OnLoad does EditBox:SetSpacing(2).
+    // Stored as `text_line_spacing` so GetSpacing round-trips even
+    // though rendering currently ignores it.
+    let env = env();
+    let spacing: f64 = env
+        .eval(
+            r#"
+            local eb = CreateFrame("EditBox", "SpacingProbeEditBox", UIParent)
+            eb:SetSpacing(2)
+            return eb:GetSpacing()
+            "#,
+        )
+        .unwrap();
+    assert!((spacing - 2.0).abs() < f64::EPSILON);
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env

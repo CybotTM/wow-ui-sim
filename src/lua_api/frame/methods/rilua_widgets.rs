@@ -1236,6 +1236,32 @@ fn editbox_set_text_insets(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `SetSpacing(spacing)` — FontString/EditBox line spacing. Stored so
+/// `GetSpacing` round-trips. Rendering ignores it today.
+fn text_set_spacing(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let spacing = val_to_f64(stack_val(state, 2)) as f32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.text_line_spacing = spacing;
+    }
+    Ok(0)
+}
+
+/// `GetSpacing()` — returns the spacing stored by `SetSpacing`.
+fn text_get_spacing(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let spacing = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| f.text_line_spacing)
+            .unwrap_or(0.0)
+    };
+    state.push(Val::Num(spacing as f64));
+    Ok(1)
+}
+
 fn editbox_get_text_insets(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
@@ -2837,6 +2863,8 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     )?;
     table_set_rust_fn(state, metatable, "ResetInputMode", editbox_reset_input_mode)?;
     table_set_rust_fn(state, metatable, "SetTextInsets", editbox_set_text_insets)?;
+    table_set_rust_fn(state, metatable, "SetSpacing", text_set_spacing)?;
+    table_set_rust_fn(state, metatable, "GetSpacing", text_get_spacing)?;
     table_set_rust_fn(state, metatable, "GetTextInsets", editbox_get_text_insets)?;
     table_set_rust_fn(state, metatable, "GetDisplayText", editbox_get_display_text)?;
     table_set_rust_fn(state, metatable, "Insert", editbox_insert)?;

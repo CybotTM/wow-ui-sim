@@ -362,6 +362,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "NeedToDisplayDisclaimer",
     "PlayerCanTeleport",
     "PlayerHasHearthstone",
+    "PlayerIsTimerunning",
     "ShouldShowLevelSquishDialog",
     "UnitCanAssist",
     "UnitCanCooperate",
