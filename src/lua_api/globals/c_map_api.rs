@@ -62,6 +62,13 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
 
 /// Map info, position, and child queries.
 fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_map_info_queries(lua, t)?;
+    register_player_map_queries(lua, t)?;
+    register_map_world_queries(lua, t)?;
+    Ok(())
+}
+
+fn register_map_info_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
     t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
     t.set("GetMapGroupID", lua.create_function(get_map_group_id)?)?;
@@ -69,6 +76,16 @@ fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetMapGroupMembersInfo",
         lua.create_function(get_map_group_members_info)?,
     )?;
+    t.set(
+        "GetMapChildrenInfo",
+        lua.create_function(
+            |lua, (_map_id, _map_type, _all): (i32, Option<i32>, Option<bool>)| lua.create_table(),
+        )?,
+    )?;
+    Ok(())
+}
+
+fn register_player_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetBestMapForUnit",
         lua.create_function(|_, _unit: String| Ok(2248i32))?,
@@ -78,12 +95,10 @@ fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetPlayerMapPosition",
         lua.create_function(create_player_map_position)?,
     )?;
-    t.set(
-        "GetMapChildrenInfo",
-        lua.create_function(
-            |lua, (_map_id, _map_type, _all): (i32, Option<i32>, Option<bool>)| lua.create_table(),
-        )?,
-    )?;
+    Ok(())
+}
+
+fn register_map_world_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetWorldPosFromMapPos",
         lua.create_function(create_world_pos_from_map_pos)?,
@@ -391,6 +406,38 @@ pub(crate) fn fog_of_war_id_for_map(map_id: i32) -> Option<i32> {
 
 pub(crate) fn fog_of_war_info_for_id(fog_of_war_id: i32) -> Option<FogOfWarInfo> {
     FOG_OF_WAR_INFO_BY_ID.get(&fog_of_war_id).copied()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn register_map_queries_installs_expected_query_methods() {
+        let lua = Lua::new();
+        let table = lua.create_table().unwrap();
+
+        register_map_queries(&lua, &table).unwrap();
+
+        for key in [
+            "GetAreaInfo",
+            "GetMapInfo",
+            "GetMapGroupID",
+            "GetMapGroupMembersInfo",
+            "GetBestMapForUnit",
+            "GetCurrentMapID",
+            "GetPlayerMapPosition",
+            "GetMapChildrenInfo",
+            "GetWorldPosFromMapPos",
+            "GetMapWorldSize",
+            "GetUserWaypointPositionForMap",
+        ] {
+            assert!(
+                matches!(table.get::<Value>(key).unwrap(), Value::Function(_)),
+                "{key} should be registered as a function"
+            );
+        }
+    }
 }
 
 fn get_fog_of_war_info_table(lua: &Lua, fog_of_war_id: Value) -> Result<mlua::Table> {
