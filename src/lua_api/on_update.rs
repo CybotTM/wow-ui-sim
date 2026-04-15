@@ -66,45 +66,66 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
 /// Register the Lua dispatch function and its Rust callback.
 pub(crate) fn register(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<()> {
     super::script_helpers::get_or_create_scripts_table(lua);
+    register_context_callbacks(lua, state)?;
+    register_dispatch_function(lua)?;
+    initialize_dispatch_ids(lua)?;
+    Ok(())
+}
 
+fn register_context_callbacks(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<()> {
+    let enter_context = create_enter_context(lua, state)?;
+    lua.set_named_registry_value("__enter_on_update_context", enter_context)?;
+
+    let leave_context = create_leave_context(lua, state)?;
+    lua.set_named_registry_value("__leave_on_update_context", leave_context)?;
+    Ok(())
+}
+
+fn create_enter_context(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<mlua::Function> {
     let enter_state = Rc::clone(state);
-    let enter_context = lua.create_function(
+    lua.create_function(
         move |_, (frame_id, addon_idx, is_post_update): (u64, Option<u16>, bool)| {
-            let method = if is_post_update {
-                "OnPostUpdate"
-            } else {
-                "OnUpdate"
-            };
             let mut state = enter_state.borrow_mut();
             state.executing_addon_index = addon_idx;
             state
                 .widgets
                 .set_render_dirty_source(Some(crate::widget::RenderDirtySource {
                     frame_id,
-                    method,
+                    method: on_update_method_name(is_post_update),
                 }));
             Ok(())
         },
-    )?;
-    lua.set_named_registry_value("__enter_on_update_context", enter_context)?;
+    )
+}
 
+fn create_leave_context(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<mlua::Function> {
     let leave_state = Rc::clone(state);
-    let leave_context = lua.create_function(move |_, ()| {
+    lua.create_function(move |_, ()| {
         let mut state = leave_state.borrow_mut();
         state.executing_addon_index = None;
         state.widgets.set_render_dirty_source(None);
         Ok(())
-    })?;
-    lua.set_named_registry_value("__leave_on_update_context", leave_context)?;
+    })
+}
 
+fn on_update_method_name(is_post_update: bool) -> &'static str {
+    if is_post_update {
+        "OnPostUpdate"
+    } else {
+        "OnUpdate"
+    }
+}
+
+fn register_dispatch_function(lua: &Lua) -> mlua::Result<()> {
     let factory: mlua::Function = lua.load(ON_UPDATE_DISPATCH_LUA).into_function()?;
     let dispatch = factory.call::<mlua::Function>(())?;
-    lua.set_named_registry_value("__dispatch_on_update", dispatch)?;
+    lua.set_named_registry_value("__dispatch_on_update", dispatch)
+}
 
+fn initialize_dispatch_ids(lua: &Lua) -> mlua::Result<()> {
     // Pre-allocate a reusable table for passing frame IDs.
     lua.set_named_registry_value("__dispatch_ids", lua.create_table()?)?;
     lua.set_named_registry_value("__dispatch_ids_len", 0usize)?;
-
     Ok(())
 }
 
@@ -224,6 +245,35 @@ mod tests {
                 frame_id: driver_id,
                 method: "OnPostUpdate",
             }])
+        );
+    }
+
+    #[test]
+    fn register_installs_on_update_registry_entries() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let lua = &env.lua;
+
+        let _: mlua::Function = lua
+            .named_registry_value("__enter_on_update_context")
+            .expect("enter callback should be registered");
+        let _: mlua::Function = lua
+            .named_registry_value("__leave_on_update_context")
+            .expect("leave callback should be registered");
+        let _: mlua::Function = lua
+            .named_registry_value("__dispatch_on_update")
+            .expect("dispatch callback should be registered");
+        let dispatch_ids: mlua::Table = lua
+            .named_registry_value("__dispatch_ids")
+            .expect("dispatch id table should be registered");
+        let dispatch_ids_len: usize = lua
+            .named_registry_value("__dispatch_ids_len")
+            .expect("dispatch id length should be registered");
+
+        assert_eq!(dispatch_ids_len, 0);
+        assert_eq!(
+            dispatch_ids.raw_len(),
+            0,
+            "dispatch table should start empty and be reused across ticks"
         );
     }
 
