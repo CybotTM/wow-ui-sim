@@ -431,8 +431,22 @@ fn patch_map_canvas_zoom(env: &WowLuaEnv) {
 /// before any scale change callback. Other full-canvas map pins already handle
 /// size changes directly, so patch fog to follow the same rule.
 fn patch_fog_of_war_pin_canvas_resize(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(
-        r#"
+    if let Err(e) = env.exec(&build_fog_of_war_pin_canvas_resize_lua()) {
+        eprintln!("[workaround] patch_fog_of_war_pin_canvas_resize failed: {e}");
+    }
+}
+
+fn build_fog_of_war_pin_canvas_resize_lua() -> String {
+    [
+        fog_of_war_pin_resize_helpers_lua(),
+        fog_of_war_pin_mixin_patch_lua(),
+        fog_of_war_existing_pin_patch_lua(),
+    ]
+    .join("\n")
+}
+
+fn fog_of_war_pin_resize_helpers_lua() -> &'static str {
+    r#"
         local function resizeToCanvas(self)
             if not self or type(self.GetMap) ~= "function" then
                 return
@@ -460,7 +474,11 @@ fn patch_fog_of_war_pin_canvas_resize(env: &WowLuaEnv) {
 
             pin.OnCanvasSizeChanged = resizeToCanvas
         end
+    "#
+}
 
+fn fog_of_war_pin_mixin_patch_lua() -> &'static str {
+    r#"
         if FogOfWarPinMixin then
             local originalOnCanvasScaleChanged = FogOfWarPinMixin.OnCanvasScaleChanged
             function FogOfWarPinMixin:OnCanvasScaleChanged(...)
@@ -472,16 +490,17 @@ fn patch_fog_of_war_pin_canvas_resize(env: &WowLuaEnv) {
 
             FogOfWarPinMixin.OnCanvasSizeChanged = resizeToCanvas
         end
+    "#
+}
 
+fn fog_of_war_existing_pin_patch_lua() -> &'static str {
+    r#"
         if WorldMapFrame and type(WorldMapFrame.EnumeratePinsByTemplate) == "function" then
             for pin in WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate") do
                 installFogCallbacks(pin)
             end
         end
-    "#,
-    ) {
-        eprintln!("[workaround] patch_fog_of_war_pin_canvas_resize failed: {e}");
-    }
+    "#
 }
 
 /// Guard POIButtonDisplayLayerMixin:UpdatePoint against nil parent.
@@ -709,5 +728,69 @@ mod tests {
 
         assert_eq!(map_id, 4242);
         assert!(patched, "quest map guard patch should be marked installed");
+    }
+
+    #[test]
+    fn fog_of_war_pin_patch_installs_canvas_resize_handler() {
+        let env = env();
+        env.exec(
+            r#"
+            local map = {
+                DenormalizeHorizontalSize = function(_, value) return value * 512 end,
+                DenormalizeVerticalSize = function(_, value) return value * 384 end,
+            }
+
+            local pin = {
+                width = 0,
+                height = 0,
+                GetMap = function() return map end,
+                SetSize = function(self, width, height)
+                    self.width = width
+                    self.height = height
+                end,
+            }
+
+            FogOfWarPinMixin = {}
+            WorldMapFrame = {
+                EnumeratePinsByTemplate = function(_, template)
+                    assert(template == "FogOfWarPinTemplate")
+                    local yielded = false
+                    return function()
+                        if yielded then
+                            return nil
+                        end
+                        yielded = true
+                        return pin
+                    end
+                end,
+            }
+            __fog_test_pin = pin
+        "#,
+        )
+        .unwrap();
+
+        patch_fog_of_war_pin_canvas_resize(&env);
+
+        let (width, height, has_handler, mixin_handler): (i64, i64, bool, bool) = env
+            .eval(
+                r#"
+                __fog_test_pin:OnCanvasSizeChanged()
+                return __fog_test_pin.width,
+                    __fog_test_pin.height,
+                    type(__fog_test_pin.OnCanvasSizeChanged) == "function",
+                    type(FogOfWarPinMixin.OnCanvasSizeChanged) == "function"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!((width, height), (512, 384));
+        assert!(
+            has_handler,
+            "existing fog pin should receive OnCanvasSizeChanged"
+        );
+        assert!(
+            mixin_handler,
+            "FogOfWarPinMixin should receive OnCanvasSizeChanged"
+        );
     }
 }
