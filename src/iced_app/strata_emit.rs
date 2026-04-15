@@ -55,53 +55,77 @@ pub(super) fn emit_single_strata(
     let render_list = build_render_list(params.bucket, params.registry);
     let statusbar_fills = collect_statusbar_fills(&render_list, params.registry);
 
-    for &(id, rect, clip_rect, eff_alpha) in &render_list {
-        let Some(f) = params.registry.get(id) else {
-            continue;
-        };
-        if super::button_vis::should_skip_frame(
-            f,
-            id,
-            eff_alpha,
-            params.visible_ids,
-            params.registry,
-            params.pressed_frame,
-            params.hovered_frame,
-        ) {
-            continue;
-        }
-        let is_fontstring = matches!(f.widget_type, WidgetType::FontString);
-        let is_line = matches!(f.widget_type, WidgetType::Line);
-        if (rect.height <= 0.0 && !is_line) || (rect.width <= 0.0 && !is_fontstring && !is_line) {
-            continue;
-        }
-        let bounds = Rectangle::new(
-            Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
-            Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
-        );
-        let bar_fill = statusbar_fills.get(&id);
-        emit_frame_quads(
-            batch,
-            text_ctx,
-            FrameQuadEmit {
-                id,
-                widget: f,
-                bounds,
-                clip_bounds: clip_rect.map(layout_rect_to_screen_rect),
-                bar_fill,
-                pressed_frame: params.pressed_frame,
-                hovered_frame: params.hovered_frame,
-                message_frames: params.message_frames,
-                tooltip_data: params.tooltip_data,
-                quest_blobs: params.quest_blobs,
-                registry: params.registry,
-                elapsed_secs: params.elapsed_secs,
-                eff_alpha,
-            },
-        );
+    for entry in &render_list {
+        emit_render_list_entry(batch, text_ctx, &statusbar_fills, params, *entry);
     }
 }
 
+fn emit_render_list_entry(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    statusbar_fills: &std::collections::HashMap<u64, super::statusbar::StatusBarFill>,
+    params: SingleStrataEmit<'_>,
+    entry: (u64, crate::LayoutRect, Option<crate::LayoutRect>, f32),
+) {
+    let (id, rect, clip_rect, eff_alpha) = entry;
+    let Some(frame) = render_list_frame(params, id, rect, eff_alpha) else {
+        return;
+    };
+    let bounds = layout_rect_to_screen_rect(rect);
+    emit_frame_quads(
+        batch,
+        text_ctx,
+        FrameQuadEmit {
+            id,
+            widget: frame,
+            bounds,
+            clip_bounds: clip_rect.map(layout_rect_to_screen_rect),
+            bar_fill: statusbar_fills.get(&id),
+            pressed_frame: params.pressed_frame,
+            hovered_frame: params.hovered_frame,
+            message_frames: params.message_frames,
+            tooltip_data: params.tooltip_data,
+            quest_blobs: params.quest_blobs,
+            registry: params.registry,
+            elapsed_secs: params.elapsed_secs,
+            eff_alpha,
+        },
+    );
+}
+
+fn render_list_frame(
+    params: SingleStrataEmit<'_>,
+    id: u64,
+    rect: crate::LayoutRect,
+    eff_alpha: f32,
+) -> Option<&crate::widget::Frame> {
+    let frame = params.registry.get(id)?;
+    if super::button_vis::should_skip_frame(
+        frame,
+        id,
+        eff_alpha,
+        params.visible_ids,
+        params.registry,
+        params.pressed_frame,
+        params.hovered_frame,
+    ) {
+        return None;
+    }
+    renderable_frame_with_bounds(frame, rect)
+}
+
+fn renderable_frame_with_bounds(
+    frame: &crate::widget::Frame,
+    rect: crate::LayoutRect,
+) -> Option<&crate::widget::Frame> {
+    let is_fontstring = matches!(frame.widget_type, WidgetType::FontString);
+    let is_line = matches!(frame.widget_type, WidgetType::Line);
+    let has_height = rect.height > 0.0 || is_line;
+    let has_width = rect.width > 0.0 || is_fontstring || is_line;
+    (has_height && has_width).then_some(frame)
+}
+
+#[derive(Clone, Copy)]
 pub(super) struct SingleStrataEmit<'a> {
     bucket: &'a [u64],
     registry: &'a crate::widget::WidgetRegistry,
