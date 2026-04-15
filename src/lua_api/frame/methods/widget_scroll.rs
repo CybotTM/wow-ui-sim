@@ -422,60 +422,96 @@ pub(crate) fn assign_scroll_child(
 }
 
 fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_scroll_child_method(methods);
+    add_get_scroll_child_method(methods);
+    add_update_scroll_child_rect_method(methods);
+}
+
+fn add_set_scroll_child_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetScrollChild", |lua, this, child: Value| {
-        let id = this.0;
-        {
-            let state_rc = get_sim_state(lua);
-            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetScrollChild") {
-                return Ok(());
-            }
-        }
-        let child_id = match extract_frame_id(&child) {
-            Some(cid) => cid,
-            None => {
-                return Err(mlua::Error::runtime(
-                    "Usage: ScrollFrame:SetScrollChild(child)",
-                ));
-            }
-        };
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        assign_scroll_child(&mut state, id, child_id, true);
-        Ok(())
+        set_scroll_child_fallback(lua, this.0, child)
     });
+}
 
+fn add_get_scroll_child_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetScrollChild", |lua, this, ()| {
-        let child_id = {
-            let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            state.widgets.get(this.0).and_then(|f| f.scroll_child_id)
-        };
-        match child_id {
-            Some(cid) => frame_ref(lua, cid),
-            None => Ok(Value::Nil),
-        }
+        get_scroll_child_fallback(lua, this.0)
     });
+}
 
+fn add_update_scroll_child_rect_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("UpdateScrollChildRect", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        let scroll_child_id = state
-            .widgets
-            .get(this.0)
-            .and_then(|frame| frame.scroll_child_id);
-        let bounds = match scroll_child_id {
-            Some(child_id) => {
-                state.invalidate_layout(child_id);
-                state.ensure_layout_rects();
-                scroll_child_rect_size(&state.widgets, child_id)
-            }
-            None => None,
-        };
-        if let Some(frame) = state.widgets.get_mut(this.0) {
-            frame.scroll_child_rect_size = bounds;
-        }
-        Ok(())
+        update_scroll_child_rect_fallback(lua, this.0)
     });
+}
+
+fn set_scroll_child_fallback(lua: &mlua::Lua, frame_id: u64, child: Value) -> mlua::Result<()> {
+    if scroll_child_assignment_blocked(lua, frame_id) {
+        return Ok(());
+    }
+    let child_id = require_scroll_child_id(&child)?;
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    assign_scroll_child(&mut state, frame_id, child_id, true);
+    Ok(())
+}
+
+fn scroll_child_assignment_blocked(lua: &mlua::Lua, frame_id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    combat_lockdown::check_and_fire(lua, &state_rc, frame_id, "SetScrollChild")
+}
+
+fn require_scroll_child_id(child: &Value) -> mlua::Result<u64> {
+    extract_frame_id(child)
+        .ok_or_else(|| mlua::Error::runtime("Usage: ScrollFrame:SetScrollChild(child)"))
+}
+
+fn get_scroll_child_fallback(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<Value> {
+    let child_id = scroll_child_id(lua, frame_id);
+    match child_id {
+        Some(child_id) => frame_ref(lua, child_id),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn scroll_child_id(lua: &mlua::Lua, frame_id: u64) -> Option<u64> {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.scroll_child_id)
+}
+
+fn update_scroll_child_rect_fallback(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let bounds = scroll_child_bounds(&mut state, frame_id);
+    store_scroll_child_bounds(&mut state.widgets, frame_id, bounds);
+    Ok(())
+}
+
+fn scroll_child_bounds(state: &mut crate::lua_api::SimState, frame_id: u64) -> Option<(f32, f32)> {
+    let scroll_child_id = state
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.scroll_child_id);
+    let Some(child_id) = scroll_child_id else {
+        return None;
+    };
+    state.invalidate_layout(child_id);
+    state.ensure_layout_rects();
+    scroll_child_rect_size(&state.widgets, child_id)
+}
+
+fn store_scroll_child_bounds(
+    widgets: &mut WidgetRegistry,
+    frame_id: u64,
+    bounds: Option<(f32, f32)>,
+) {
+    if let Some(frame) = widgets.get_mut(frame_id) {
+        frame.scroll_child_rect_size = bounds;
+    }
 }
 
 fn scroll_child_rect_size(widgets: &WidgetRegistry, root_id: u64) -> Option<(f32, f32)> {
