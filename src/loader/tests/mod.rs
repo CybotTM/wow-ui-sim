@@ -702,6 +702,35 @@ fn test_runtime_template_parent_array_registers_instance_on_parent() {
         .unwrap();
 }
 
+#[test]
+fn test_xml_animation_parent_keys_attach_group_and_child_animation() {
+    let t = load_test_xml(
+        "xml-animation-parent-keys",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="AnimParentKeyFrame">
+                <Animations>
+                    <AnimationGroup parentKey="pulseAnim" looping="BOUNCE">
+                        <Alpha parentKey="AlphaAnim" fromAlpha=".75" toAlpha=".2" duration="0.5236"/>
+                    </AnimationGroup>
+                </Animations>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(type(AnimParentKeyFrame.pulseAnim) == "table", "AnimationGroup parentKey should attach on the frame")
+            assert(type(AnimParentKeyFrame.pulseAnim.AlphaAnim) == "table", "child animation parentKey should attach on the animation group")
+            assert(type(AnimParentKeyFrame.pulseAnim.Play) == "function", "animation group should keep methods")
+            assert(type(AnimParentKeyFrame.pulseAnim.AlphaAnim.SetFromAlpha) == "function", "child animation should keep methods")
+        "#,
+        )
+        .unwrap();
+}
+
 const MULTI_FILE_WIDGETS_LUA: &str = r#"
     local _, addon = ...
     local function updateKeyDirection(self) return "updated: " .. tostring(self) end

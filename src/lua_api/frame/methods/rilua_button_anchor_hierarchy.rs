@@ -1525,6 +1525,54 @@ fn animation_group_set_looping(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
+    let group_frame_id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.playing = true;
+        group.paused = false;
+        group.done = false;
+        group.pending_finish = false;
+    }
+    Ok(0)
+}
+
+fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
+    let group_frame_id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(group_id) = sim.anim_frame_to_group.get(&group_frame_id).copied()
+        && let Some(group) = sim.animation_groups.get_mut(&group_id)
+    {
+        group.playing = false;
+        group.paused = false;
+        group.pending_finish = false;
+        group.elapsed = 0.0;
+        for animation in &mut group.animations {
+            animation.elapsed = 0.0;
+        }
+    }
+    Ok(0)
+}
+
+fn animation_group_is_playing(state: &mut LuaState) -> LuaResult<u32> {
+    let group_frame_id = frame_id_from_stack(state, 1)?;
+    let playing = {
+        let sim = borrow_state(state)?;
+        sim.anim_frame_to_group
+            .get(&group_frame_id)
+            .and_then(|group_id| {
+                sim.animation_groups
+                    .get(group_id)
+                    .map(|group| group.playing)
+            })
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(playing));
+    Ok(1)
+}
+
 fn animation_config_noop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
@@ -1662,6 +1710,9 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetAnimationGroups", get_animation_groups)?;
     table_set_rust_fn(state, table, "CreateAnimationGroup", create_animation_group)?;
     table_set_rust_fn(state, table, "CreateAnimation", create_animation)?;
+    table_set_rust_fn(state, table, "Play", animation_group_play)?;
+    table_set_rust_fn(state, table, "Stop", animation_group_stop)?;
+    table_set_rust_fn(state, table, "IsPlaying", animation_group_is_playing)?;
     table_set_rust_fn(state, table, "SetLooping", animation_group_set_looping)?;
     table_set_rust_fn(state, table, "SetDuration", animation_set_duration)?;
     table_set_rust_fn(state, table, "SetOrder", animation_set_order)?;
