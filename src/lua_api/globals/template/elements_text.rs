@@ -30,38 +30,67 @@ pub(super) fn create_fontstring_from_template(
     subst_parent: &str,
     draw_layer: &str,
 ) {
-    let child_name = fontstring
-        .name
-        .as_ref()
-        .map(|name| name.replace("$parent", subst_parent))
-        .unwrap_or_else(|| format!("__fs_{}", rand_id()));
-
-    let inherits = fontstring.inherits.as_deref().unwrap_or("");
+    let child_name = template_fontstring_name(fontstring, subst_parent);
 
     #[cfg(test)]
     super::test_counters::record_fontstring_create();
 
-    let mut code = format!(
+    let mut code = build_fontstring_create_preamble(
+        parent_name,
+        &child_name,
+        draw_layer,
+        fontstring.inherits.as_deref(),
+    );
+    append_fontstring_template_properties(&mut code, fontstring, parent_name);
+    append_fontstring_visibility(&mut code, fontstring.hidden, fontstring.alpha);
+    code.push_str("        end\n");
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
+}
+
+fn template_fontstring_name(fontstring: &crate::xml::FontStringXml, subst_parent: &str) -> String {
+    fontstring
+        .name
+        .as_ref()
+        .map(|name| name.replace("$parent", subst_parent))
+        .unwrap_or_else(|| format!("__fs_{}", rand_id()))
+}
+
+fn build_fontstring_create_preamble(
+    parent_name: &str,
+    child_name: &str,
+    draw_layer: &str,
+    inherits: Option<&str>,
+) -> String {
+    format!(
         r#"
         local parent = {}
         if parent then
             local fs = parent:CreateFontString("{}", "{}", {})
         "#,
         lua_global_ref(parent_name),
-        escape_lua_string(&child_name),
+        escape_lua_string(child_name),
         draw_layer,
-        if inherits.is_empty() {
-            "nil".to_string()
-        } else {
-            format!("\"{}\"", inherits)
-        }
-    );
+        quoted_fontstring_inherits(inherits)
+    )
+}
 
-    append_fontstring_size_and_text(&mut code, fontstring);
-    append_fontstring_justify_and_color(&mut code, fontstring);
-    append_fontstring_shadow(&mut code, fontstring);
+fn quoted_fontstring_inherits(inherits: Option<&str>) -> String {
+    inherits
+        .filter(|inherits| !inherits.is_empty())
+        .map(|inherits| format!("\"{}\"", inherits))
+        .unwrap_or_else(|| "nil".to_string())
+}
+
+fn append_fontstring_template_properties(
+    code: &mut String,
+    fontstring: &crate::xml::FontStringXml,
+    parent_name: &str,
+) {
+    append_fontstring_size_and_text(code, fontstring);
+    append_fontstring_justify_and_color(code, fontstring);
+    append_fontstring_shadow(code, fontstring);
     append_anchors_and_parent_refs(
-        &mut code,
+        code,
         &fontstring.anchors,
         fontstring.set_all_points,
         AnchorParentContext {
@@ -72,18 +101,17 @@ pub(super) fn create_fontstring_from_template(
             parent_name,
         },
     );
-    append_fontstring_wrap_and_lines(&mut code, fontstring);
-    append_key_values(&mut code, fontstring.key_values.as_ref(), "fs");
+    append_fontstring_wrap_and_lines(code, fontstring);
+    append_key_values(code, fontstring.key_values.as_ref(), "fs");
+}
 
-    if fontstring.hidden == Some(true) {
+fn append_fontstring_visibility(code: &mut String, hidden: Option<bool>, alpha: Option<f32>) {
+    if hidden == Some(true) {
         code.push_str("            fs:Hide()\n");
     }
-    if let Some(alpha) = fontstring.alpha {
-        code.push_str(&format!("            fs:SetAlpha({})\n", alpha));
+    if let Some(alpha) = alpha {
+        code.push_str(&format!("            fs:SetAlpha({alpha})\n"));
     }
-
-    code.push_str("        end\n");
-    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 pub(super) fn create_fontstring_from_template_direct(
@@ -102,11 +130,7 @@ pub(super) fn create_fontstring_from_template_direct(
             parent_name
         ))
     })?;
-    let child_name = fontstring
-        .name
-        .as_ref()
-        .map(|name| name.replace("$parent", subst_parent))
-        .unwrap_or_else(|| format!("__fs_{}", rand_id()));
+    let child_name = template_fontstring_name(fontstring, subst_parent);
 
     let mut child = Frame::new(
         WidgetType::FontString,
@@ -611,4 +635,34 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
          end end"
     );
     let _ = chunk_cache::exec(lua, &code, "template-elements");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{build_fontstring_create_preamble, quoted_fontstring_inherits};
+
+    #[test]
+    fn quoted_fontstring_inherits_uses_nil_for_missing_or_empty_values() {
+        assert_eq!(quoted_fontstring_inherits(None), "nil");
+        assert_eq!(quoted_fontstring_inherits(Some("")), "nil");
+        assert_eq!(
+            quoted_fontstring_inherits(Some("GameFontNormal")),
+            "\"GameFontNormal\""
+        );
+    }
+
+    #[test]
+    fn build_fontstring_create_preamble_uses_escaped_name_and_inherits() {
+        let code = build_fontstring_create_preamble(
+            "Parent.Frame",
+            "Frame\"Title",
+            "OVERLAY",
+            Some("GameFontNormal"),
+        );
+
+        assert!(code.contains("local parent = _G[\"Parent.Frame\"]"));
+        assert!(code.contains(
+            "parent:CreateFontString(\"Frame\\\"Title\", \"OVERLAY\", \"GameFontNormal\")"
+        ));
+    }
 }
