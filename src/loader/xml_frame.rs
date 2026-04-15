@@ -34,16 +34,7 @@ pub fn create_frame_from_xml(
     let Some(prepared) = prepare_frame_creation(env, frame, parent_override, intrinsic_base) else {
         return Ok(None);
     };
-    let build_start = Instant::now();
-    let lua_code = build_frame_lua_code(
-        widget_type,
-        &prepared.name,
-        prepared.explicit_parent.as_deref(),
-        &prepared.inherits,
-        frame,
-        &prepared.parent,
-    );
-    timing.frame_code_build_time += build_start.elapsed();
+    let lua_code = build_frame_creation_lua(widget_type, frame, &prepared, timing);
     let frame_id = setup_frame(
         env,
         timing,
@@ -66,6 +57,25 @@ pub fn create_frame_from_xml(
         timing,
     )?;
     Ok(Some(prepared.name))
+}
+
+fn build_frame_creation_lua(
+    widget_type: &str,
+    frame: &crate::xml::FrameXml,
+    prepared: &PreparedFrameCreation,
+    timing: &mut LoadTiming,
+) -> String {
+    let build_start = Instant::now();
+    let lua_code = build_frame_lua_code(
+        widget_type,
+        &prepared.name,
+        prepared.explicit_parent.as_deref(),
+        &prepared.inherits,
+        frame,
+        &prepared.parent,
+    );
+    timing.frame_code_build_time += build_start.elapsed();
+    lua_code
 }
 
 struct PreparedFrameCreation {
