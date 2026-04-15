@@ -327,19 +327,32 @@ fn apply_intrinsic_and_templates(
             apply_parent_array_from_template(lua, tmpl, ctx.frame_id, ctx.ref_name);
         }
     }
+    apply_create_frame_onloads(lua, ctx.ref_name, ctx.profile_runtime_call, &mut timing)?;
+    Ok(timing)
+}
+
+fn apply_create_frame_onloads(
+    lua: &Lua,
+    ref_name: &str,
+    profile_runtime_call: bool,
+    timing: &mut CreateFrameTemplateTiming,
+) -> mlua::Result<()> {
     let suppress_depth: i32 = lua
         .globals()
         .get("__suppress_create_frame_onload")
         .unwrap_or(0);
-    if suppress_depth <= 0 {
-        let deferred_start = ctx.profile_runtime_call.then(Instant::now);
-        timing.deferred_child_count = fire_deferred_child_onloads(lua);
-        timing.deferred_child_onloads = deferred_start.map(|t| t.elapsed()).unwrap_or_default();
-        let onload_start = ctx.profile_runtime_call.then(Instant::now);
-        fire_on_load(lua, ctx.ref_name);
-        timing.self_onload = onload_start.map(|t| t.elapsed()).unwrap_or_default();
+    if suppress_depth > 0 {
+        return Ok(());
     }
-    Ok(timing)
+
+    let deferred_start = profile_runtime_call.then(Instant::now);
+    timing.deferred_child_count = fire_deferred_child_onloads(lua);
+    timing.deferred_child_onloads = deferred_start.map(|t| t.elapsed()).unwrap_or_default();
+
+    let onload_start = profile_runtime_call.then(Instant::now);
+    fire_on_load(lua, ref_name);
+    timing.self_onload = onload_start.map(|t| t.elapsed()).unwrap_or_default();
+    Ok(())
 }
 
 struct CreateFrameArgs {
