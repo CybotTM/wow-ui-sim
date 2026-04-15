@@ -167,6 +167,12 @@ pub(super) fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
 }
 
 fn register_task_quest_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_task_quest_core_queries(lua, t)?;
+    register_task_quest_time_queries(lua, t)?;
+    Ok(())
+}
+
+fn register_task_quest_core_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsActive",
         lua.create_function(|_, quest_id: i32| Ok(is_world_quest(quest_id)))?,
@@ -184,25 +190,29 @@ fn register_task_quest_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetQuestsForPlayerByMapID",
         lua.create_function(build_quests_on_map)?,
     )?;
+    Ok(())
+}
+
+fn register_task_quest_time_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetQuestTimeLeftMinutes",
         lua.create_function(|_, quest_id: i32| {
-            Ok(match quest_time_left_minutes(quest_id) {
-                Some(minutes) => Value::Integer(i64::from(minutes)),
-                None => Value::Nil,
-            })
+            Ok(quest_time_left_value(quest_time_left_minutes(quest_id)))
         })?,
     )?;
     t.set(
         "GetQuestTimeLeftSeconds",
         lua.create_function(|_, quest_id: i32| {
-            Ok(match quest_time_left_seconds(quest_id) {
-                Some(seconds) => Value::Integer(i64::from(seconds)),
-                None => Value::Nil,
-            })
+            Ok(quest_time_left_value(quest_time_left_seconds(quest_id)))
         })?,
     )?;
     Ok(())
+}
+
+fn quest_time_left_value(time_left: Option<i32>) -> Value {
+    time_left
+        .map(|value| Value::Integer(i64::from(value)))
+        .unwrap_or(Value::Nil)
 }
 
 fn register_task_quest_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
@@ -252,5 +262,45 @@ fn build_quest_info_by_id(_lua: &Lua, quest_id: i32) -> Result<mlua::MultiValue>
             Value::Boolean(false), // displayAsObjective
         ])),
         None => Ok(mlua::MultiValue::new()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES, WORLD_QUESTS, quest_time_left_value};
+    use crate::lua_api::WowLuaEnv;
+    use mlua::Value;
+
+    #[test]
+    fn quest_time_left_value_converts_some_and_none() {
+        assert!(matches!(quest_time_left_value(None), Value::Nil));
+        assert!(matches!(
+            quest_time_left_value(Some(45)),
+            Value::Integer(45)
+        ));
+    }
+
+    #[test]
+    fn task_quest_time_left_queries_return_minutes_seconds_and_nil() {
+        let quest_id = WORLD_QUESTS[0].quest_id;
+        let env = WowLuaEnv::new().expect("failed to create lua env");
+        let result: (i64, i64, bool) = env
+            .eval(&format!(
+                r#"
+                return C_TaskQuest.GetQuestTimeLeftMinutes({quest_id}),
+                    C_TaskQuest.GetQuestTimeLeftSeconds({quest_id}),
+                    C_TaskQuest.GetQuestTimeLeftMinutes(999999) == nil
+                "#
+            ))
+            .expect("task quest time queries should run");
+
+        assert_eq!(
+            result,
+            (
+                i64::from(SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES),
+                i64::from(SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES * 60),
+                true,
+            )
+        );
     }
 }
