@@ -38,6 +38,50 @@ fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
     }
 }
 
+const NAMED_COLOR_GLOBALS: &[(&str, (f64, f64, f64, f64))] = &[
+    (
+        "PLAYER_FACTION_COLOR_HORDE",
+        (0.90196, 0.05098, 0.07059, 1.0),
+    ),
+    (
+        "PLAYER_FACTION_COLOR_ALLIANCE",
+        (0.29412, 0.33333, 0.91373, 1.0),
+    ),
+    ("NORMAL_FONT_COLOR", (1.0, 0.82, 0.0, 1.0)),
+    ("HIGHLIGHT_FONT_COLOR", (1.0, 1.0, 1.0, 1.0)),
+    ("RED_FONT_COLOR", (1.0, 0.1, 0.1, 1.0)),
+    ("GREEN_FONT_COLOR", (0.1, 1.0, 0.1, 1.0)),
+    ("GRAY_FONT_COLOR", (0.5, 0.5, 0.5, 1.0)),
+    ("PASSIVE_SPELL_FONT_COLOR", (0.5, 0.5, 0.5, 1.0)),
+    ("BLACK_FONT_COLOR", (0.0, 0.0, 0.0, 1.0)),
+    ("YELLOW_FONT_COLOR", (1.0, 1.0, 0.0, 1.0)),
+    ("LIGHTYELLOW_FONT_COLOR", (1.0, 1.0, 0.6, 1.0)),
+    ("ORANGE_FONT_COLOR", (1.0, 0.5, 0.25, 1.0)),
+    ("WHITE_FONT_COLOR", (1.0, 1.0, 1.0, 1.0)),
+    ("DISABLED_FONT_COLOR", (0.5, 0.5, 0.5, 1.0)),
+    ("DIM_RED_FONT_COLOR", (0.8, 0.1, 0.1, 1.0)),
+    ("LIGHTBLUE_FONT_COLOR", (0.51176, 0.77255, 1.0, 1.0)),
+    ("ACTIONBAR_HOTKEY_FONT_COLOR", (0.6, 0.6, 0.6, 1.0)),
+];
+
+const RAID_CLASS_COLORS_DATA: &[(&str, (f64, f64, f64, f64))] = &[
+    ("WARRIOR", (0.78, 0.61, 0.43, 1.0)),
+    ("PALADIN", (0.96, 0.55, 0.73, 1.0)),
+    ("HUNTER", (0.67, 0.83, 0.45, 1.0)),
+    ("ROGUE", (1.00, 0.96, 0.41, 1.0)),
+    ("PRIEST", (1.00, 1.00, 1.00, 1.0)),
+    ("DEATHKNIGHT", (0.77, 0.12, 0.23, 1.0)),
+    ("SHAMAN", (0.00, 0.44, 0.87, 1.0)),
+    ("MAGE", (0.25, 0.78, 0.92, 1.0)),
+    ("WARLOCK", (0.53, 0.53, 0.93, 1.0)),
+    ("MONK", (0.00, 1.00, 0.60, 1.0)),
+    ("DRUID", (1.00, 0.49, 0.04, 1.0)),
+    ("DEMONHUNTER", (0.64, 0.19, 0.79, 1.0)),
+    ("EVOKER", (0.20, 0.58, 0.50, 1.0)),
+    ("ADVENTURER", (1.00, 1.00, 1.00, 1.0)),
+    ("TRAVELER", (1.00, 1.00, 1.00, 1.0)),
+];
+
 // ============================================================================
 // Section 1: font_api — CreateFont, GetFonts, GetFontInfo, CreateFontFamily,
 //             create_standard_font_objects
@@ -638,6 +682,42 @@ pub fn register_rilua_icon_list(lua: &mut rilua::Lua) -> LuaResult<()> {
     Ok(())
 }
 
+pub fn register_rilua_color_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let state = lua.state_mut();
+    for &(name, (r, g, b, a)) in NAMED_COLOR_GLOBALS {
+        let color = make_rilua_color_table(state, r, g, b, a)?;
+        set_global_val(state, name, color);
+    }
+
+    let raid_class_colors = create_table(state);
+    for &(class_name, (r, g, b, a)) in RAID_CLASS_COLORS_DATA {
+        let color = make_rilua_color_table(state, r, g, b, a)?;
+        table_set(state, raid_class_colors, class_name, color);
+    }
+    set_global_val(state, "RAID_CLASS_COLORS", raid_class_colors);
+
+    let class_color_namespace = create_table(state);
+    let Val::Table(class_color_ref) = class_color_namespace else {
+        unreachable!("create_table must return a table");
+    };
+    table_set_rust_fn(state, class_color_ref, "GetClassColor", |state| {
+        let class_name = val_to_string(state, Val::from_stack(state, 1)?)
+            .unwrap_or_default()
+            .to_ascii_uppercase();
+        let (r, g, b, a) = RAID_CLASS_COLORS_DATA
+            .iter()
+            .find(|(name, _)| *name == class_name)
+            .map(|(_, color)| *color)
+            .unwrap_or((1.0, 1.0, 1.0, 1.0));
+        let color = make_rilua_color_table(state, r, g, b, a)?;
+        state.push(color);
+        Ok(1)
+    })?;
+    set_global_val(state, "C_ClassColor", class_color_namespace);
+
+    Ok(())
+}
+
 // ── Keybinding functions ──────────────────────────────────────────────────────
 //
 // Keybinding state lives in SimState. Full wiring is a TODO; stubs return
@@ -1067,6 +1147,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_rilua_item_quality_colors(lua)?;
     register_rilua_class_name_tables(lua)?;
     register_rilua_icon_list(lua)?;
+    register_rilua_color_globals(lua)?;
     register_rilua_keybinding_functions(lua)?;
 
     // Collection namespaces

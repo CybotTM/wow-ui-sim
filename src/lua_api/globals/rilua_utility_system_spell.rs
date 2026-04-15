@@ -15,11 +15,20 @@ use crate::lua_api::rilua_methods::{
 };
 use crate::lua_api::rilua_script_helpers::protected_call_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::specializations;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
 use std::path::PathBuf;
+
+fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
+    let key = state.gc.intern_string(name.as_bytes());
+    let global = state.global;
+    if let Some(g) = state.gc.tables.get_mut(global) {
+        let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
+    }
+}
 
 // ── Utility API ─────────────────────────────────────────────────────────────
 
@@ -369,6 +378,133 @@ pub fn cast_spell_by_name(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn unit_casting_info(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    if unit != "player" {
+        return Ok(0);
+    }
+
+    let cast = {
+        let sim = borrow_state(state)?;
+        sim.casting.as_ref().map(|cast| {
+            (
+                cast.spell_name.clone(),
+                cast.icon_path.clone(),
+                cast.start_time,
+                cast.end_time,
+                cast.cast_id,
+                cast.spell_id,
+            )
+        })
+    };
+
+    let Some((spell_name, icon_path, start_time, end_time, cast_id, spell_id)) = cast else {
+        return Ok(0);
+    };
+
+    let spell_name_val = create_string(state, &spell_name);
+    let spell_name_display_val = create_string(state, &spell_name);
+    let icon_path_val = create_string(state, &icon_path);
+    state.push(spell_name_val);
+    state.push(spell_name_display_val);
+    state.push(icon_path_val);
+    state.push(Val::Num(start_time * 1000.0));
+    state.push(Val::Num(end_time * 1000.0));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(cast_id as f64));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(spell_id as f64));
+    Ok(9)
+}
+
+fn unit_channel_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_spec_get_specialization(state: &mut LuaState) -> LuaResult<u32> {
+    let active_spec_index = borrow_state(state)?.player.active_spec_index;
+    state.push(Val::Num(active_spec_index as f64));
+    Ok(1)
+}
+
+fn c_spec_get_specialization_info(state: &mut LuaState) -> LuaResult<u32> {
+    let requested_index = match stack_val(state, 1) {
+        Val::Num(n) => n as i32,
+        _ => 1,
+    };
+
+    let (class_id, active_spec_index) = {
+        let sim = borrow_state(state)?;
+        (sim.player.class_index as u32, sim.player.active_spec_index)
+    };
+
+    let fallback = requested_index.max(1);
+    let spec = specializations::specs_for_class(class_id)
+        .nth((fallback - 1) as usize)
+        .or_else(|| {
+            let active = active_spec_index.max(1);
+            specializations::specs_for_class(class_id).nth((active - 1) as usize)
+        });
+
+    let Some(spec) = spec else {
+        return Ok(0);
+    };
+
+    state.push(Val::Num(spec.id as f64));
+    let spec_name = create_string(state, spec.name);
+    let spec_description = create_string(state, spec.description);
+    let spec_role = create_string(state, spec.role);
+    state.push(spec_name);
+    state.push(spec_description);
+    state.push(Val::Num(spec.icon_file_data_id as f64));
+    state.push(spec_role);
+    state.push(Val::Num(spec.primary_stat as f64));
+    Ok(6)
+}
+
+fn c_spec_get_class_id_from_spec_id(state: &mut LuaState) -> LuaResult<u32> {
+    let spec_id = match stack_val(state, 1) {
+        Val::Num(n) => n as u32,
+        _ => 0,
+    };
+    let class_id = specializations::spec_by_id(spec_id)
+        .map(|spec| spec.class_id as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Num(class_id));
+    Ok(1)
+}
+
+fn c_spec_get_num_specializations_for_class_id(state: &mut LuaState) -> LuaResult<u32> {
+    let class_id = match stack_val(state, 1) {
+        Val::Num(n) => n as u32,
+        _ => 0,
+    };
+    let count = specializations::specs_for_class(class_id).count() as f64;
+    state.push(Val::Num(count));
+    Ok(1)
+}
+
+fn c_model_info_get_model_scene_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let camera_ids = create_table(state);
+    let actor_ids = create_table(state);
+    state.push(Val::Num(0.0));
+    state.push(camera_ids);
+    state.push(actor_ids);
+    state.push(Val::Num(0.0));
+    Ok(4)
+}
+
+fn c_model_info_get_empty_table(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    state.push(table);
+    Ok(1)
+}
+
+fn player_get_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 // ── Registration ─────────────────────────────────────────────────────────────
 
 /// Register all functions in this module as rilua globals.
@@ -427,9 +563,18 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     // Spell: cast globals (stubbed)
     LuaApiMut::register_function(lua, "CastSpellByID", cast_spell_by_id)?;
     LuaApiMut::register_function(lua, "CastSpellByName", cast_spell_by_name)?;
+    LuaApiMut::register_function(lua, "UnitCastingInfo", unit_casting_info)?;
+    LuaApiMut::register_function(lua, "UnitChannelInfo", unit_channel_info)?;
+    LuaApiMut::register_function(
+        lua,
+        "PlayerGetTimerunningSeasonID",
+        player_get_timerunning_season_id,
+    )?;
     register_table_util(lua.state_mut())?;
     register_c_addons(lua.state_mut())?;
     register_c_addon_profiler(lua.state_mut())?;
+    register_c_specialization_info(lua.state_mut())?;
+    register_c_model_info(lua.state_mut())?;
     register_c_texture(lua.state_mut())?;
     register_legacy_addon_globals(lua.state_mut())?;
     register_widget_container_mixin(lua.state_mut())?;
@@ -453,6 +598,71 @@ fn register_table_util(state: &mut LuaState) -> LuaResult<()> {
             &state.gc.string_arena,
         );
     }
+    Ok(())
+}
+
+fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
+    let t = create_table(state);
+    let Val::Table(t_ref) = t else {
+        unreachable!("create_table must return a table");
+    };
+    table_set_rust_fn(state, t_ref, "GetSpecialization", c_spec_get_specialization)?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetSpecializationInfo",
+        c_spec_get_specialization_info,
+    )?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetClassIDFromSpecID",
+        c_spec_get_class_id_from_spec_id,
+    )?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetNumSpecializationsForClassID",
+        c_spec_get_num_specializations_for_class_id,
+    )?;
+    set_global_val(state, "C_SpecializationInfo", t);
+    Ok(())
+}
+
+fn register_c_model_info(state: &mut LuaState) -> LuaResult<()> {
+    let t = create_table(state);
+    let Val::Table(t_ref) = t else {
+        unreachable!("create_table must return a table");
+    };
+    table_set_rust_fn(state, t_ref, "AddActiveModelScene", |_state| Ok(0))?;
+    table_set_rust_fn(state, t_ref, "AddActiveModelSceneActor", |_state| Ok(0))?;
+    table_set_rust_fn(state, t_ref, "ClearActiveModelScene", |_state| Ok(0))?;
+    table_set_rust_fn(state, t_ref, "ClearActiveModelSceneActor", |_state| Ok(0))?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetModelSceneActorDisplayInfoByID",
+        c_model_info_get_empty_table,
+    )?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetModelSceneActorInfoByID",
+        c_model_info_get_empty_table,
+    )?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetModelSceneCameraInfoByID",
+        c_model_info_get_empty_table,
+    )?;
+    table_set_rust_fn(
+        state,
+        t_ref,
+        "GetModelSceneInfoByID",
+        c_model_info_get_model_scene_info_by_id,
+    )?;
+    set_global_val(state, "C_ModelInfo", t);
     Ok(())
 }
 

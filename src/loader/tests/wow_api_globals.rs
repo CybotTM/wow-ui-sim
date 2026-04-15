@@ -754,6 +754,92 @@ fn test_startup_runtime_method_and_namespace_gaps_exist() {
 }
 
 #[test]
+fn test_old_stack_startup_globals_exist_on_rilua_path() {
+    let env = WowLuaEnv::new().unwrap();
+    let (
+        actionbar_color_method_ty,
+        actionbar_r,
+        actionbar_g,
+        actionbar_b,
+        red_rgba_ty,
+        raid_class_rgb_ty,
+        class_color_ty,
+        class_color_rgb_ty,
+        spec_get_ty,
+        spec_info_ty,
+        spec_class_ty,
+        model_info_ty,
+        timerunning_ty,
+        timerunning_season,
+        unit_casting_ty,
+        unit_casting_nil,
+        active_spec_id,
+        active_spec_name,
+    ): (
+        String,
+        f64,
+        f64,
+        f64,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        i64,
+        String,
+        bool,
+        i64,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local hotkeyR, hotkeyG, hotkeyB = ACTIONBAR_HOTKEY_FONT_COLOR:GetRGB()
+            local classColor = C_ClassColor.GetClassColor("PALADIN")
+            local activeSpecIndex = C_SpecializationInfo.GetSpecialization()
+            local activeSpecID, activeSpecName = C_SpecializationInfo.GetSpecializationInfo(activeSpecIndex)
+            return type(ACTIONBAR_HOTKEY_FONT_COLOR.GetRGB),
+                hotkeyR, hotkeyG, hotkeyB,
+                type(RED_FONT_COLOR.GetRGBA),
+                type(RAID_CLASS_COLORS.WARRIOR.GetRGB),
+                type(C_ClassColor.GetClassColor),
+                type(classColor and classColor.GetRGB),
+                type(C_SpecializationInfo.GetSpecialization),
+                type(C_SpecializationInfo.GetSpecializationInfo),
+                type(C_SpecializationInfo.GetClassIDFromSpecID),
+                type(C_ModelInfo.GetModelSceneInfoByID),
+                type(PlayerGetTimerunningSeasonID),
+                PlayerGetTimerunningSeasonID(),
+                type(UnitCastingInfo),
+                UnitCastingInfo("player") == nil,
+                activeSpecID,
+                activeSpecName
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(actionbar_color_method_ty, "function");
+    assert_eq!((actionbar_r, actionbar_g, actionbar_b), (0.6, 0.6, 0.6));
+    assert_eq!(red_rgba_ty, "function");
+    assert_eq!(raid_class_rgb_ty, "function");
+    assert_eq!(class_color_ty, "function");
+    assert_eq!(class_color_rgb_ty, "function");
+    assert_eq!(spec_get_ty, "function");
+    assert_eq!(spec_info_ty, "function");
+    assert_eq!(spec_class_ty, "function");
+    assert_eq!(model_info_ty, "function");
+    assert_eq!(timerunning_ty, "function");
+    assert_eq!(timerunning_season, 0);
+    assert_eq!(unit_casting_ty, "function");
+    assert!(unit_casting_nil);
+    assert!(active_spec_id > 0);
+    assert!(!active_spec_name.is_empty());
+}
+
+#[test]
 fn test_startup_social_and_lfg_globals_exist() {
     let env = WowLuaEnv::new().unwrap();
     let (
