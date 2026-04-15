@@ -252,6 +252,17 @@ if IsAltKeyDown == nil then function IsAltKeyDown() return false end end
 if IsModifierKeyDown == nil then function IsModifierKeyDown() return false end end
 if IsMetaKeyDown == nil then function IsMetaKeyDown() return false end end
 
+-- Guild logo: the sim has no guild, so all colour channels are black
+-- and the emblem filename is empty. Returns 10 values matching
+-- Blizzard's (bkgR, bkgG, bkgB, borderR, borderG, borderB, emblemR,
+-- emblemG, emblemB, emblemFilename) tuple that guild-related UI
+-- destructures.
+if GetGuildLogoInfo == nil then
+  function GetGuildLogoInfo()
+    return 0, 0, 0, 0, 0, 0, 0, 0, 0, ""
+  end
+end
+
 -- Network-stats: no real socket in the sim, so bandwidth and latency are 0.
 -- Returns four values so `local a, b, c, d = GetNetStats()` works for the
 -- latency comparisons in Blizzard_MicroMenu and friends.

@@ -43,10 +43,27 @@ end
 /// matching the shape downstream code expects.
 const MENU_DESCRIPTOR_FALLBACK_LUA: &str = r#"
 if Menu == nil then Menu = {} end
+local function __wow_menu_empty_iterator() return nil end
 local function __wow_menu_descriptor_stub()
     local desc = {}
+    -- Methods that return an iterator tuple need a callable generator,
+    -- not the descriptor table itself — otherwise
+    -- `for k, v in desc:EnumerateFoo() do` errors with "attempt to call
+    -- a table value" when the for-loop tries to invoke the generator.
+    local iterator_methods = {
+        EnumerateElementDescriptions = true,
+        EnumerateActiveElementDescriptions = true,
+        EnumerateChildren = true,
+        EnumerateInitializers = true,
+        EnumerateFrames = true,
+    }
     setmetatable(desc, {
-        __index = function(_, _key)
+        __index = function(_, key)
+            if iterator_methods[key] then
+                return function()
+                    return __wow_menu_empty_iterator
+                end
+            end
             return function(self)
                 return self
             end
