@@ -172,6 +172,40 @@ fn enum_util_make_enum_returns_valid_enum() {
 }
 
 #[test]
+fn set_disabled_atlas_creates_child_texture() {
+    // Blizzard's `LoadMicroButtonTextures` chains
+    //     button:SetDisabledAtlas(...)
+    //     SetDesaturation(button:GetDisabledTexture(), true)
+    // So SetDisabledAtlas must leave the button with a real child
+    // Texture that GetDisabledTexture can return. The previous
+    // apply_atlas_setter stubbed this step as a TODO, and
+    // LFDMicroButton:OnLoad errored on a nil texture.
+    let env = env();
+    let (disabled_ty, normal_ty, pushed_ty, highlight_ty): (String, String, String, String) = env
+        .eval(
+            r#"
+            local btn = CreateFrame("Button", "AtlasChildProbeButton", UIParent)
+            btn:SetNormalAtlas("UI-HUD-MicroMenu-Groupfinder-Up")
+            btn:SetPushedAtlas("UI-HUD-MicroMenu-Groupfinder-Down")
+            btn:SetDisabledAtlas("UI-HUD-MicroMenu-Groupfinder-Disabled")
+            btn:SetHighlightAtlas("UI-HUD-MicroMenu-Groupfinder-Mouseover")
+            return type(btn:GetDisabledTexture()),
+                   type(btn:GetNormalTexture()),
+                   type(btn:GetPushedTexture()),
+                   type(btn:GetHighlightTexture())
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        disabled_ty, "table",
+        "SetDisabledAtlas must create the DisabledTexture child"
+    );
+    assert_eq!(normal_ty, "table");
+    assert_eq!(pushed_ty, "table");
+    assert_eq!(highlight_ty, "table");
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env

@@ -631,22 +631,15 @@ fn apply_atlas_setter(
         lookup.info.bottom_tex_coord,
     );
     let file = lookup.info.file.to_string();
+    let tex_id = ensure_button_texture_child(state, button_id, parent_key)?;
     let mut sim = borrow_state_mut(state)?;
-    // Find existing child texture (TODO: create if missing, requires rilua CreateFrame)
-    let tex_id_opt = sim
-        .widgets
-        .get(button_id)
-        .and_then(|f| f.children_keys.get(parent_key).copied());
-    if let Some(tex_id) = tex_id_opt {
+    if let Some(tid) = tex_id {
         let already_set = sim
             .widgets
-            .get(tex_id)
+            .get(tid)
             .map(|t| t.atlas.as_deref() == Some(atlas_name))
             .unwrap_or(false);
-        if already_set {
-            return Ok(());
-        }
-        if let Some(tex) = sim.widgets.get_mut_visual(tex_id) {
+        if !already_set && let Some(tex) = sim.widgets.get_mut_visual(tid) {
             tex.atlas = Some(atlas_name.to_string());
             tex.texture = Some(file.clone());
             tex.tex_coords = Some(tex_coords);
@@ -656,6 +649,44 @@ fn apply_atlas_setter(
         set_button_field(frame, file, tex_coords);
     }
     Ok(())
+}
+
+/// Return the button's existing named texture child (`NormalTexture`,
+/// `DisabledTexture`, etc.), creating it on demand.
+///
+/// Blizzard's `Set{Normal,Pushed,Disabled,Highlight}Atlas` is expected
+/// to leave the button with a real child Texture so subsequent
+/// `Get{Normal,...}Texture()` calls return it. Without this, code like
+/// `SetDesaturation(self:GetDisabledTexture(), true)` in
+/// LFDMicroButtonMixin:OnLoad errors on a nil texture.
+fn ensure_button_texture_child(
+    state: &mut LuaState,
+    button_id: u64,
+    parent_key: &str,
+) -> LuaResult<Option<u64>> {
+    use crate::widget::{Frame, WidgetType};
+    {
+        let sim = borrow_state(state)?;
+        if let Some(existing) = sim
+            .widgets
+            .get(button_id)
+            .and_then(|f| f.children_keys.get(parent_key).copied())
+        {
+            return Ok(Some(existing));
+        }
+    }
+    let texture = Frame::new(WidgetType::Texture, None, Some(button_id));
+    let child_id = texture.id;
+    let mut sim = borrow_state_mut(state)?;
+    sim.widgets.register(texture);
+    sim.widgets.add_child(button_id, child_id);
+    if let Some(parent) = sim.widgets.get_mut(button_id) {
+        parent
+            .children_keys
+            .insert(parent_key.to_string(), child_id);
+    }
+    sim.invalidate_strata_buckets();
+    Ok(Some(child_id))
 }
 
 /// SetNormalAtlas(atlasName)
