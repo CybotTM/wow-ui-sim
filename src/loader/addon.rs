@@ -97,6 +97,13 @@ pub fn load_addon_internal(
             "Failed to restore post-cleanup globals for {folder_name}: {e}"
         ));
     }
+    if folder_name == "Blizzard_Menu"
+        && let Err(e) = env.ensure_menu_descriptor_fallback()
+    {
+        result.warnings.push(format!(
+            "Failed to install Menu descriptor fallback for {folder_name}: {e}"
+        ));
+    }
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     let mut state = env.state().borrow_mut();
     if let Some(addon) = state

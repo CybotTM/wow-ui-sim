@@ -75,6 +75,61 @@ fn named_fontstring_is_globally_reachable() {
 }
 
 #[test]
+fn menu_util_create_root_menu_description_falls_back_after_menu_addon() {
+    // Blizzard_Menu's Menu.lua currently fails mid-load in the sim, so
+    // `Menu.CreateRootMenuDescription` never gets defined and every
+    // downstream `MenuUtil.CreateRootMenuDescription(mixin)` crashes the
+    // calling frame's OnLoad. The loader installs a permissive
+    // descriptor fallback after Blizzard_Menu loads; here we replay the
+    // scenario to pin the behaviour.
+    use wow_ui_sim::loader::load_addon;
+
+    let env = env();
+    env.set_screen_size(1024.0, 768.0);
+
+    let ui = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    let addons = wow_ui_sim::loader::discover_blizzard_addons(&ui);
+    let mut loaded_menu = false;
+    for (name, toc_path) in addons {
+        load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|e| panic!("{name} should load: {e}"));
+        if name == "Blizzard_Menu" {
+            loaded_menu = true;
+            break;
+        }
+    }
+    assert!(loaded_menu, "Blizzard_Menu should be in the addon order");
+
+    // Fallback must make both Menu.CreateRootMenuDescription and
+    // MenuUtil.CreateRootMenuDescription callable, and the returned
+    // descriptor must accept arbitrary method chains without erroring.
+    let (ty_menu, ty_util, chain_result): (String, String, bool) = env
+        .eval(
+            r#"
+            local function try()
+                local root = MenuUtil.CreateRootMenuDescription({})
+                root:SetTag("UNIT_TEST_MENU")
+                root:CreateRadio("Alpha", function() end, function() end, 1)
+                    :SetEnabled(false)
+                    :SetTooltip(nil)
+                root:SetScrollMode(10)
+                return true
+            end
+            return type(Menu.CreateRootMenuDescription),
+                   type(MenuUtil.CreateRootMenuDescription),
+                   (pcall(try))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(ty_menu, "function");
+    assert_eq!(ty_util, "function");
+    assert!(
+        chain_result,
+        "descriptor stub must accept chained method calls silently"
+    );
+}
+
+#[test]
 fn c_photo_sharing_reports_disabled() {
     let env = env();
     let (is_enabled, is_authorized): (bool, bool) = env

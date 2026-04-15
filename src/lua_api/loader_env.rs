@@ -17,6 +17,42 @@ use std::rc::Rc;
 
 use super::state::SimState;
 
+/// Permissive dropdown descriptor installed when Blizzard_Menu fails to
+/// define `Menu.CreateRootMenuDescription`. Every unknown method returns
+/// the table itself so method chains (e.g.
+/// `rootDescription:CreateRadio(...):SetEnabled(false)`) don't blow up,
+/// matching the shape downstream code expects.
+const MENU_DESCRIPTOR_FALLBACK_LUA: &str = r#"
+if Menu == nil then Menu = {} end
+local function __wow_menu_descriptor_stub()
+    local desc = {}
+    setmetatable(desc, {
+        __index = function(_, _key)
+            return function(self)
+                return self
+            end
+        end,
+    })
+    return desc
+end
+if Menu.CreateRootMenuDescription == nil then
+    function Menu.CreateRootMenuDescription(_menuMixin)
+        return __wow_menu_descriptor_stub()
+    end
+end
+if Menu.CreateMenuElementDescription == nil then
+    function Menu.CreateMenuElementDescription()
+        return __wow_menu_descriptor_stub()
+    end
+end
+if MenuUtil == nil then MenuUtil = {} end
+if MenuUtil.CreateRootMenuDescription == nil then
+    function MenuUtil.CreateRootMenuDescription(menuMixin)
+        return Menu.CreateRootMenuDescription(menuMixin)
+    end
+end
+"#;
+
 pub struct LoaderEnv<'a> {
     lua: Rc<std::cell::RefCell<rilua::Lua>>,
     state: Rc<std::cell::RefCell<SimState>>,
@@ -158,6 +194,17 @@ impl<'a> LoaderEnv<'a> {
             &mut lua,
             Rc::clone(&self.state),
         )
+    }
+
+    /// If `Blizzard_Menu` left `Menu.CreateRootMenuDescription` undefined
+    /// (its top-level `do ... end` touches subsystems the sim doesn't
+    /// fully implement), install a permissive descriptor fallback so
+    /// downstream `MenuUtil.CreateRootMenuDescription(...)` doesn't blow
+    /// up every dropdown-bearing frame.
+    pub fn ensure_menu_descriptor_fallback(&self) -> crate::Result<()> {
+        let mut lua = self.lua.borrow_mut();
+        lua.exec(MENU_DESCRIPTOR_FALLBACK_LUA)?;
+        Ok(())
     }
 
     pub fn create_addon_table(&self) -> Result<Val> {
