@@ -4,13 +4,32 @@ use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::{WowLuaEnv, compute_frame_rect};
 use wow_ui_sim::startup::{fire_one_on_update_tick, fire_startup_events, process_pending_timers};
 
+const TEST_SCREEN_WIDTH: f32 = 1600.0;
+const TEST_SCREEN_HEIGHT: f32 = 1200.0;
+const RECT_QUERY_TOLERANCE: f32 = 0.1;
+
+#[derive(Debug)]
+struct FrameRectQuery {
+    left: f32,
+    bottom: f32,
+    width: f32,
+    height: f32,
+}
+
+#[derive(Debug)]
+struct FrameRectQueries {
+    scaled: FrameRectQuery,
+    unscaled: FrameRectQuery,
+    effective_scale: f32,
+}
+
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
 fn full_game_env_after_edit_mode_init() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1600.0, 1200.0);
+    env.set_screen_size(TEST_SCREEN_WIDTH, TEST_SCREEN_HEIGHT);
 
     {
         let mut state = env.state().borrow_mut();
@@ -83,7 +102,7 @@ fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
         .widgets
         .get_id_by_name(name)
         .unwrap_or_else(|| panic!("Frame '{name}' not found"));
-    let rect = compute_frame_rect(&state.widgets, id, 1600.0, 1200.0);
+    let rect = compute_frame_rect(&state.widgets, id, TEST_SCREEN_WIDTH, TEST_SCREEN_HEIGHT);
     (rect.x, rect.y, rect.width, rect.height)
 }
 
@@ -105,20 +124,8 @@ fn visible_bag_frame_name(env: &WowLuaEnv) -> String {
     .unwrap()
 }
 
-fn assert_rect_queries_match_layout_rect(env: &WowLuaEnv, name: &str) {
-    env.state().borrow_mut().ensure_layout_rects();
-
-    let (
-        scaled_left,
-        scaled_bottom,
-        scaled_width,
-        scaled_height,
-        left,
-        bottom,
-        width,
-        height,
-        effective_scale,
-    ): (f32, f32, f32, f32, f32, f32, f32, f32, f32) = env
+fn queried_frame_rects(env: &WowLuaEnv, name: &str) -> FrameRectQueries {
+    let rects: (f32, f32, f32, f32, f32, f32, f32, f32, f32) = env
         .eval(&format!(
             r#"
             local frame = assert(_G[{name:?}], "missing frame: {name}")
@@ -129,46 +136,77 @@ fn assert_rect_queries_match_layout_rect(env: &WowLuaEnv, name: &str) {
         ))
         .unwrap();
 
-    let (render_x, render_y, render_width, render_height) = frame_rect(env, name);
-    let render_bottom = 1200.0 - render_y - render_height;
-    let tol = 0.1;
+    FrameRectQueries {
+        scaled: FrameRectQuery {
+            left: rects.0,
+            bottom: rects.1,
+            width: rects.2,
+            height: rects.3,
+        },
+        unscaled: FrameRectQuery {
+            left: rects.4,
+            bottom: rects.5,
+            width: rects.6,
+            height: rects.7,
+        },
+        effective_scale: rects.8,
+    }
+}
 
+fn expected_frame_rects(env: &WowLuaEnv, name: &str, effective_scale: f32) -> FrameRectQueries {
+    let (render_x, render_y, render_width, render_height) = frame_rect(env, name);
+    let render_bottom = TEST_SCREEN_HEIGHT - render_y - render_height;
+
+    FrameRectQueries {
+        scaled: FrameRectQuery {
+            left: render_x,
+            bottom: render_bottom,
+            width: render_width,
+            height: render_height,
+        },
+        unscaled: FrameRectQuery {
+            left: render_x / effective_scale,
+            bottom: render_bottom / effective_scale,
+            width: render_width / effective_scale,
+            height: render_height / effective_scale,
+        },
+        effective_scale,
+    }
+}
+
+fn assert_rect_component_matches(
+    name: &str,
+    rect_name: &str,
+    component: &str,
+    expected: f32,
+    actual: f32,
+) {
     assert!(
-        (scaled_left - render_x).abs() <= tol,
-        "{name} GetScaledRect left mismatch: expected {render_x}, got {scaled_left}"
+        (actual - expected).abs() <= RECT_QUERY_TOLERANCE,
+        "{name} {rect_name} {component} mismatch: expected {expected}, got {actual}"
     );
-    assert!(
-        (scaled_bottom - render_bottom).abs() <= tol,
-        "{name} GetScaledRect bottom mismatch: expected {render_bottom}, got {scaled_bottom}"
-    );
-    assert!(
-        (scaled_width - render_width).abs() <= tol,
-        "{name} GetScaledRect width mismatch: expected {render_width}, got {scaled_width}"
-    );
-    assert!(
-        (scaled_height - render_height).abs() <= tol,
-        "{name} GetScaledRect height mismatch: expected {render_height}, got {scaled_height}"
-    );
-    assert!(
-        (left - render_x / effective_scale).abs() <= tol,
-        "{name} GetRect left mismatch: expected {}, got {left}",
-        render_x / effective_scale
-    );
-    assert!(
-        (bottom - render_bottom / effective_scale).abs() <= tol,
-        "{name} GetRect bottom mismatch: expected {}, got {bottom}",
-        render_bottom / effective_scale
-    );
-    assert!(
-        (width - render_width / effective_scale).abs() <= tol,
-        "{name} GetRect width mismatch: expected {}, got {width}",
-        render_width / effective_scale
-    );
-    assert!(
-        (height - render_height / effective_scale).abs() <= tol,
-        "{name} GetRect height mismatch: expected {}, got {height}",
-        render_height / effective_scale
-    );
+}
+
+fn assert_rect_matches(
+    name: &str,
+    rect_name: &str,
+    actual: &FrameRectQuery,
+    expected: &FrameRectQuery,
+) {
+    assert_rect_component_matches(name, rect_name, "left", expected.left, actual.left);
+    assert_rect_component_matches(name, rect_name, "bottom", expected.bottom, actual.bottom);
+    assert_rect_component_matches(name, rect_name, "width", expected.width, actual.width);
+    assert_rect_component_matches(name, rect_name, "height", expected.height, actual.height);
+}
+
+fn assert_rect_queries_match_layout_rect(env: &WowLuaEnv, name: &str) {
+    env.state().borrow_mut().ensure_layout_rects();
+
+    let actual = queried_frame_rects(env, name);
+    let expected = expected_frame_rects(env, name, actual.effective_scale);
+
+    assert_rect_matches(name, "GetScaledRect", &actual.scaled, &expected.scaled);
+    assert_rect_matches(name, "GetRect", &actual.unscaled, &expected.unscaled);
 }
 
 #[test]
