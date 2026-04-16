@@ -322,6 +322,12 @@ pub fn collapses_layout(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Stub: menus are never open in the simulator.
+pub fn is_menu_open(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 pub fn is_collapsed(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
@@ -1234,6 +1240,9 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetShown", set_shown)?;
     table_set_rust_fn(state, mt, "IsVisible", is_visible)?;
     table_set_rust_fn(state, mt, "IsShown", is_shown)?;
+    // DropdownButtonMixin fallback — buttons without the mixin still need this
+    // because GetWowStyle1ArrowButtonState calls button:IsMenuOpen().
+    table_set_rust_fn(state, mt, "IsMenuOpen", is_menu_open)?;
     // CollapseLayout
     table_set_rust_fn(state, mt, "SetCollapsesLayout", set_collapses_layout)?;
     table_set_rust_fn(state, mt, "CollapsesLayout", collapses_layout)?;

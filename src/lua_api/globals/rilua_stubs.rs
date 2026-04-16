@@ -487,6 +487,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetPetTimeInCombat",
     "GetPvpTalentSlotInfo",
     "GetQuestLogTimeLeft",
+    "QuestMapUpdateAllQuests",
     "GetRaidRosterInfo",
     "GetRelicSlotType",
     "GetRestState",
