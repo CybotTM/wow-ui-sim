@@ -1,10 +1,51 @@
 //! Tests for professions: GetProfessions, GetProfessionInfo, C_TradeSkillUI.
 
+mod common;
+
+use std::path::PathBuf;
+
 use wow_ui_sim::event::EventArg;
+use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn env_with_professions_util() -> WowLuaEnv {
+    let env = env();
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+
+    let ui = blizzard_ui_dir();
+    let addons = [
+        (
+            "Blizzard_SharedXMLGame",
+            ui.join("Blizzard_SharedXMLGame/Blizzard_SharedXMLGame.toc"),
+        ),
+        (
+            "Blizzard_Colors",
+            ui.join("Blizzard_Colors/Blizzard_Colors_Mainline.toc"),
+        ),
+        (
+            "Blizzard_StaticPopup",
+            ui.join("Blizzard_StaticPopup/Blizzard_StaticPopup.toc"),
+        ),
+        (
+            "Blizzard_FrameXMLUtil",
+            ui.join("Blizzard_FrameXMLUtil/Blizzard_FrameXMLUtil.toc"),
+        ),
+    ];
+
+    for (name, toc_path) in &addons {
+        load_addon(&env.loader_env(), toc_path)
+            .unwrap_or_else(|err| panic!("Failed to load Blizzard addon {name}: {err}"));
+    }
+
+    env
 }
 
 // ============================================================================
@@ -260,6 +301,28 @@ fn test_greatsword_recipe_has_three_reagents() {
         .eval("return #C_TradeSkillUI.GetRecipeSchematic(100005).reagentSlotSchematics")
         .unwrap();
     assert_eq!(count, 3);
+}
+
+#[test]
+fn test_professions_util_resolves_basic_reagents_from_recipe_schematic() {
+    test_timeout! {
+        let env = env_with_professions_util();
+        let (count, reagent_ids): (i32, String) = env
+            .eval(
+                r#"
+                local reagents = ProfessionsUtil.CreateRecipeReagentsForAllBasicReagents(100005)
+                local ids = {}
+                for index, reagent in ipairs(reagents) do
+                    ids[index] = tostring(reagent.itemID)
+                end
+                return #reagents, table.concat(ids, ",")
+                "#,
+            )
+            .unwrap();
+
+        assert_eq!(count, 3);
+        assert_eq!(reagent_ids, "210934,210937,210935");
+    }
 }
 
 #[test]
