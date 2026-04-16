@@ -181,6 +181,9 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
 }
 
 /// Attach the shared frame metatable to a table (if registered).
+///
+/// Methods are accessed via `__index` in the metatable, not copied directly.
+/// This avoids ~636 raw_set calls per frame and reduces memory/GC pressure.
 fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
     let mt_key = state.gc.intern_string(b"__rilua_frame_mt");
     let mt_val = state
@@ -193,7 +196,7 @@ fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
         if let Some(t) = state.gc.tables.get_mut(table_ref) {
             t.set_metatable(Some(mt_ref));
         }
-        copy_frame_methods_from_metatable(state, table_ref, mt_ref);
+        // Methods accessed via __index, no need to copy
     }
 }
 

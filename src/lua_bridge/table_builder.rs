@@ -44,10 +44,10 @@ pub fn table_set_rust_fn(
 /// The returned table is still a normal Lua table: Lua code can `rawset`,
 /// iterate, and attach a metatable as usual.
 ///
-/// Pre-sizes hash part to 1024 slots to avoid rehashing when ~636 frame
-/// methods are copied from the shared metatable.
+/// Pre-sizes hash part to 64 slots for typical frame properties/children.
+/// Methods are accessed via metatable __index, not stored directly.
 pub fn create_frame_table(state: &mut LuaState, index: u32, generation: u32) -> GcRef<RiluaTable> {
-    let mut table = RiluaTable::with_sizes(0, 1024);
+    let mut table = RiluaTable::with_sizes(0, 64);
     table.set_backing(Some((index, generation)));
     state.gc.alloc_table(table)
 }
