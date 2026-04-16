@@ -190,6 +190,7 @@ if CreateSecureDelegate == nil then
   end
 end
 
+
 -- Rilua's C-level secureexecuterange is a no-op stub (taint.rs TODO).
 -- Always install our Lua implementation to override it. Must match Elune:
 --   1. Iterate with lua_next (i.e. `pairs`), NOT ipairs — hash-keyed tables
@@ -1018,6 +1019,28 @@ C_Scenario = __wow_merge_namespace(C_Scenario, {
   end,
   IsInScenario = function() return false end,
   GetStepInfo = function() return nil, 0, 0, false, false, 0, 0, 0, 0, false, false end,
+})
+
+-- AccountStore / DamageMeter / CooldownViewer: Blizzard data-provider init
+-- iterates the returned category / session / cooldown list with ipairs.
+-- None of these subsystems are simulated; return empty tables.
+C_AccountStore = __wow_merge_namespace(C_AccountStore, {
+  GetCategories = function() return {} end,
+  GetCategoryInfo = function() return nil end,
+  GetItemInfo = function() return nil end,
+  GetCurrencyAvailable = function() return 0 end,
+})
+
+C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
+  GetAvailableCombatSessions = function() return {} end,
+  GetCurrentCombatSessionID = function() return nil end,
+  GetDamageMeterEntries = function() return {} end,
+})
+
+C_CooldownViewer = __wow_merge_namespace(C_CooldownViewer, {
+  GetCooldownViewerCategorySet = function() return {} end,
+  GetCooldownViewerCooldownInfo = function() return nil end,
+  GetCooldownID = function() return nil end,
 })
 
 C_Minimap = __wow_merge_namespace(C_Minimap, {
@@ -2687,6 +2710,10 @@ C_TradeSkillUI = __wow_merge_namespace(C_TradeSkillUI, {
   GetTradeSkillDisplayName = function()
     return ""
   end,
+  -- ProfessionsRecipeTracker iterates the tracked-recipe list with ipairs.
+  -- No recipes tracked in the sim; return empty.
+  GetRecipesTracked = function() return {} end,
+  IsRecipeTracked = function() return false end,
 })
 
 C_QuestLog = __wow_merge_namespace(C_QuestLog, {
