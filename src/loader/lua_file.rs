@@ -395,8 +395,8 @@ mod tests {
         let env_table = LuaApiMut::create_table(&mut lua);
         {
             let state = lua.state_mut();
-            let sentinel = rilua::Val::Str(state.gc.intern_string(b"from-secureenv"));
-            let key = rilua::Val::Str(state.gc.intern_string(b"MARK_SECURE_PROBE"));
+            let sentinel = rilua::Val::Str(state.gc.intern_string_static(b"from-secureenv"));
+            let key = rilua::Val::Str(state.gc.intern_string_static(b"MARK_SECURE_PROBE"));
             env_table.raw_set(state, key, sentinel).unwrap();
         }
 
