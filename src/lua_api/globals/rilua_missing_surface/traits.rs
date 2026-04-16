@@ -254,7 +254,7 @@ fn register_c_traits(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
-fn register_c_class_talents_query_fns(
+fn register_c_class_talents_hero_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
@@ -270,6 +270,13 @@ fn register_c_class_talents_query_fns(
         "GetActiveHeroTalentSpec",
         c_class_talents_get_active_hero_talent_spec,
     )?;
+    Ok(())
+}
+
+fn register_c_class_talents_config_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
@@ -294,6 +301,15 @@ fn register_c_class_talents_query_fns(
         "GetTraitTreeForSpec",
         c_class_talents_get_trait_tree_for_spec,
     )?;
+    Ok(())
+}
+
+fn register_c_class_talents_query_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_c_class_talents_hero_fns(state, table_ref)?;
+    register_c_class_talents_config_fns(state, table_ref)?;
     Ok(())
 }
 

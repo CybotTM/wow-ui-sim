@@ -384,6 +384,10 @@ fn unit_tooltip_info(state: &LuaState, unit: &str) -> Option<UnitTooltipInfo> {
     }
 }
 
+fn push_plain_line(state: &mut LuaState, lines: Val, index: i64, text: &str) {
+    push_tooltip_line(state, lines, index, LINE_TYPE_SPELL_NAME, text, None, false);
+}
+
 fn push_unit_tooltip_lines(state: &mut LuaState, lines: Val, info: &UnitTooltipInfo) {
     push_tooltip_line(
         state,
@@ -395,33 +399,9 @@ fn push_unit_tooltip_lines(state: &mut LuaState, lines: Val, info: &UnitTooltipI
         false,
     );
     let level_text = format!("Level {}", info.level);
-    push_tooltip_line(
-        state,
-        lines,
-        2,
-        LINE_TYPE_SPELL_NAME,
-        &level_text,
-        None,
-        false,
-    );
-    push_tooltip_line(
-        state,
-        lines,
-        3,
-        LINE_TYPE_SPELL_NAME,
-        &info.race,
-        None,
-        false,
-    );
-    push_tooltip_line(
-        state,
-        lines,
-        4,
-        LINE_TYPE_SPELL_NAME,
-        &info.class_name,
-        None,
-        false,
-    );
+    push_plain_line(state, lines, 2, &level_text);
+    push_plain_line(state, lines, 3, &info.race);
+    push_plain_line(state, lines, 4, &info.class_name);
 }
 
 fn tooltip_for_unit(state: &mut LuaState, unit: &str) -> Val {
