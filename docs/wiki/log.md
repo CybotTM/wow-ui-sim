@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] update | intern_string perf re-profile correction
+
+Corrected the earlier PLAN/wiki summary for the post-migration interning
+profile. Fresh release `perf` on `wow-sim --no-saved-vars lua-errors` shows
+`Gc::intern_string` at 179.5M cycles (2.98%), `StringTable::intern_hashed`
+at 169.2M (2.81%), and inline `lua_hash` at only ~4.8M (0.08%). The original
+"lua_hash essentially flat" note was wrong; the hash primitive is no longer
+the bottleneck, and the remaining cost sits in bucket traversal / dedup work.
+
 ## [2026-04-16] update | intern_string_static mid-cycle fix + migration landed
 
 Found the root cause of the earlier migration breakage. `intern_string_static`

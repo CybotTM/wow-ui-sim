@@ -79,6 +79,40 @@ Regression test: `intern_string_static_mid_cycle_survives_sweep` (vm/state.rs). 
 
 Intern counter: **1,250,287 → 1,096,266 (−12%)** in the cold-startup path. Release wall time: **1.18s → 1.15s** median (n=5). Smaller than the raw call-count delta suggests because `intern_string_static` hits are themselves fast but not free, and we only migrated sites whose keys are known `&'static`.
 
+## Post-migration perf re-profile
+
+After landing the static-intern migration, re-profiled release startup on the
+same workload (`wow-sim --no-saved-vars lua-errors`) with:
+
+```bash
+perf record -o /tmp/intern-reprofile.perf.data -F 997 -g --call-graph dwarf -- \
+  env LD_LIBRARY_PATH="$PWD/target/release" ./target/release/wow-sim --no-saved-vars lua-errors
+perf report -i /tmp/intern-reprofile.perf.data --stdio --no-children \
+  -F overhead,period,symbol
+```
+
+`cargo flamegraph` was attempted first, but the `sudo` path could not see
+`libiced_dynamic.so`; the saved `perf` data still gives the same flat profile
+numbers the flamegraph would be built from.
+
+Current startup profile:
+
+- Total sampled event count: **6.03B cycles** (`1966` samples)
+- `rilua::vm::state::Gc::intern_string`: **179.5M cycles (2.98%)**
+- `rilua::vm::string::StringTable::intern_hashed`: **169.2M cycles (2.81%)**
+- inline `lua_hash`: **~4.8M cycles (0.08%)**
+
+Interpretation:
+
+- The old startup note in `PLAN.md` had string interning / `lua_hash` as an
+  early headline hotspot at roughly **25% / 136M** samples.
+- Post-migration, the **hash primitive itself is basically gone** as a
+  bottleneck. The remaining interning cost is now the surrounding
+  bucket-walk / dedup work inside `intern_string` and `intern_hashed`.
+- `frame_ref_cache` (`__rilua_frame_refs`, 286K calls/startup) is still the
+  highest-leverage deferred site if the `OnLoad` regression chain can be
+  resolved.
+
 ### Still deferred: `rilua_methods::frame_ref_cache`
 
 `frame_ref_cache` is the single biggest intern call site (286K calls of `__rilua_frame_refs`) but migrating it causes a secondary cascade: ~300 Blizzard addons fail with "attempt to call method 'OnLoad' (a nil value)". The rilua-side GC-colour fix does not cover this path. Root cause not yet identified; left as a follow-up. Call-site is commented in `frame_ref_cache` so the next migration attempt doesn't repeat the experiment blind.
@@ -95,6 +129,7 @@ Intern counter: **1,250,287 → 1,096,266 (−12%)** in the cold-startup path. R
 - `src/lua_errors.rs` `print_intern_stats` — dump path
 - `src/lua_api/rilua_methods.rs` — `frame_ref_cache`, `attach_frame_metatable`, registry helpers
 - `src/lua_api/rilua_script_helpers.rs` — `registry_table`, script storage
+- `/tmp/intern-reprofile.perf.data` + `perf report --stdio` — post-migration release profile
 
 ## See Also
 
