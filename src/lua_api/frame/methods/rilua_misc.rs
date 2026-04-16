@@ -8,7 +8,8 @@
 
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
-    extract_frame_id, frame_id_from_stack, get_or_create_frame_fields, table_get, table_set,
+    extract_frame_id, frame_id_from_stack, get_or_create_frame_fields, table_get, table_get_static,
+    table_set,
     val_to_string,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
@@ -1359,7 +1360,7 @@ pub fn force_update_timers(state: &mut LuaState) -> LuaResult<u32> {
         .map(|table| table.hash_entries())
         .unwrap_or_default();
     for (_, timer) in timers {
-        let update_fn = table_get(state, timer, "OnUpdate");
+        let update_fn = table_get_static(state, timer, "OnUpdate");
         if matches!(update_fn, Val::Function(_)) {
             let _ = call_function_state(state, update_fn, &[timer]);
         }

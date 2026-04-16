@@ -1713,21 +1713,24 @@ fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
         unreachable!("create_table must return a table");
     };
 
-    let set_str = |state: &mut LuaState, key: &str, value: &str| {
-        let key = state.gc.intern_string(key.as_bytes());
+    // `key` is a compile-time literal at every call site below, so use
+    // the pointer-keyed static intern to skip the lua_hash + bucket scan
+    // on repeat atlas-info calls (5K+ per startup, × 10 keys per call).
+    let set_str = |state: &mut LuaState, key: &'static str, value: &str| {
+        let key = state.gc.intern_string_static(key.as_bytes());
         let value = create_string(state, value);
         if let Some(table) = state.gc.tables.get_mut(info_ref) {
             let _ = table.raw_set(Val::Str(key), value, &state.gc.string_arena);
         }
     };
-    let set_num = |state: &mut LuaState, key: &str, value: f64| {
-        let key = state.gc.intern_string(key.as_bytes());
+    let set_num = |state: &mut LuaState, key: &'static str, value: f64| {
+        let key = state.gc.intern_string_static(key.as_bytes());
         if let Some(table) = state.gc.tables.get_mut(info_ref) {
             let _ = table.raw_set(Val::Str(key), Val::Num(value), &state.gc.string_arena);
         }
     };
-    let set_bool = |state: &mut LuaState, key: &str, value: bool| {
-        let key = state.gc.intern_string(key.as_bytes());
+    let set_bool = |state: &mut LuaState, key: &'static str, value: bool| {
+        let key = state.gc.intern_string_static(key.as_bytes());
         if let Some(table) = state.gc.tables.get_mut(info_ref) {
             let _ = table.raw_set(Val::Str(key), Val::Bool(value), &state.gc.string_arena);
         }
@@ -1757,7 +1760,7 @@ fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
     set_bool(state, "tilesVertically", lookup.info.tiles_vertically);
     set_str(state, "filename", lookup.info.file);
 
-    let raw_size_key = state.gc.intern_string(b"rawSize");
+    let raw_size_key = state.gc.intern_string_static(b"rawSize");
     if let Some(table) = state.gc.tables.get_mut(info_ref) {
         let _ = table.raw_set(Val::Str(raw_size_key), raw_size, &state.gc.string_arena);
     }

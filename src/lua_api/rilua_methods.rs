@@ -473,12 +473,40 @@ pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
     }
 }
 
+/// Like [`table_set`] but interns `key` through the pointer-keyed static
+/// cache. Callers must pass the same `&'static str` pointer that the
+/// matching `table_get_static` uses for lookup — content-dedupe works
+/// too, but the fast path only triggers when the pointer matches.
+pub fn table_set_static(state: &mut LuaState, table: Val, key: &'static str, value: Val) {
+    let Val::Table(table_ref) = table else { return };
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
+    if let Some(t) = state.gc.tables.get_mut(table_ref) {
+        let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
+}
+
 /// Get a string key from a table Val.
 pub fn table_get(state: &mut LuaState, table: Val, key: &str) -> Val {
     let Val::Table(table_ref) = table else {
         return Val::Nil;
     };
     let key_ref = state.gc.intern_string(key.as_bytes());
+    state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|t| t.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+}
+
+/// Like [`table_get`] but interns `key` through the pointer-keyed static
+/// cache. Use when the key is a compile-time literal hit on a hot path
+/// (script handler dispatch, XML attribute lookup, etc.).
+pub fn table_get_static(state: &mut LuaState, table: Val, key: &'static str) -> Val {
+    let Val::Table(table_ref) = table else {
+        return Val::Nil;
+    };
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     state
         .gc
         .tables

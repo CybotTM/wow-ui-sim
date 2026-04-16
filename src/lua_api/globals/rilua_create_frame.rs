@@ -10,7 +10,8 @@
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::rilua_methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id,
-    frame_ref, get_or_create_frame_fields, registry_get, state_handle, table_get, table_set,
+    frame_ref, get_or_create_frame_fields, registry_get, state_handle, table_get, table_get_static,
+    table_set,
 };
 use crate::lua_api::rilua_script_helpers::set_script;
 use crate::lua_bridge::FromStack;
@@ -1084,7 +1085,7 @@ fn apply_runtime_child_direct_properties_with_inherits(
 
 fn fire_frame_on_load(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
     let frame = frame_ref(state, frame_id)?;
-    let intrinsic = table_get(state, frame, "OnLoad_Intrinsic");
+    let intrinsic = table_get_static(state, frame, "OnLoad_Intrinsic");
     call_handler_with_frame(state, intrinsic, frame)?;
     if let Some(on_load) =
         crate::lua_api::rilua_script_helpers::get_script(state, frame_id, "OnLoad")
