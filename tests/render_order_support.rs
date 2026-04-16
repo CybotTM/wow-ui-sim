@@ -11,7 +11,7 @@ use wow_ui_sim::texture::TextureManager;
 use wow_ui_sim::toc::TocFile;
 use wow_ui_sim::widget::WidgetRegistry;
 
-pub(super) fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
+pub(crate) fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
     let mut state = env.state().borrow_mut();
     let _ = state.get_strata_buckets();
     state.strata_buckets.as_ref().unwrap().clone()
@@ -21,7 +21,7 @@ fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
     Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
 }
 
-pub(super) fn make_texture_manager() -> Option<TextureManager> {
+pub(crate) fn make_texture_manager() -> Option<TextureManager> {
     let home = dirs::home_dir().unwrap_or_default();
     let local_textures = PathBuf::from("./textures");
     let textures_path = if local_textures.exists() {
@@ -42,7 +42,7 @@ pub(super) fn make_texture_manager() -> Option<TextureManager> {
     Some(mgr)
 }
 
-pub(super) fn build_screenshot_like_batch(
+pub(crate) fn build_screenshot_like_batch(
     env: &WowLuaEnv,
     width: u32,
     height: u32,
@@ -77,7 +77,7 @@ pub(super) fn build_screenshot_like_batch(
     )
 }
 
-pub(super) fn is_descendant_of(
+pub(crate) fn is_descendant_of(
     widgets: &WidgetRegistry,
     mut frame_id: u64,
     ancestor_id: u64,
@@ -93,7 +93,7 @@ pub(super) fn is_descendant_of(
     }
 }
 
-pub(super) fn diff_pixels_in_rect(
+pub(crate) fn diff_pixels_in_rect(
     before: &RgbaImage,
     after: &RgbaImage,
     rect: (u32, u32, u32, u32),
@@ -130,13 +130,13 @@ fn quad_bounds_from_vertices(verts: &[QuadVertex]) -> (f32, f32, f32, f32) {
     (min_x, min_y, max_x, max_y)
 }
 
-pub(super) fn quad_bounds(batch: &QuadBatch, request: &TextureRequest) -> (f32, f32, f32, f32) {
+pub(crate) fn quad_bounds(batch: &QuadBatch, request: &TextureRequest) -> (f32, f32, f32, f32) {
     let start = request.vertex_start as usize;
     let end = start + request.vertex_count as usize;
     quad_bounds_from_vertices(&batch.vertices[start..end])
 }
 
-pub(super) fn request_overlaps_rect(
+pub(crate) fn request_overlaps_rect(
     batch: &QuadBatch,
     request: &TextureRequest,
     rect: (f32, f32, f32, f32),
@@ -147,7 +147,7 @@ pub(super) fn request_overlaps_rect(
     bounds.0 < rect_right && bounds.2 > rect.0 && bounds.1 < rect_bottom && bounds.3 > rect.1
 }
 
-pub(super) fn vertex_range_bounds(
+pub(crate) fn vertex_range_bounds(
     batch: &QuadBatch,
     vertex_start: usize,
     vertex_count: usize,
@@ -155,7 +155,7 @@ pub(super) fn vertex_range_bounds(
     quad_bounds_from_vertices(&batch.vertices[vertex_start..vertex_start + vertex_count])
 }
 
-pub(super) fn bounds_overlap_rect(
+pub(crate) fn bounds_overlap_rect(
     bounds: (f32, f32, f32, f32),
     rect: (f32, f32, f32, f32),
 ) -> bool {
@@ -164,7 +164,7 @@ pub(super) fn bounds_overlap_rect(
     bounds.0 < rect_right && bounds.2 > rect.0 && bounds.1 < rect_bottom && bounds.3 > rect.1
 }
 
-pub(super) fn request_path_for_frame_texture(
+pub(crate) fn request_path_for_frame_texture(
     texture: &str,
     atlas_tex_coords: Option<(f32, f32, f32, f32)>,
 ) -> String {
@@ -182,7 +182,7 @@ pub(super) fn request_path_for_frame_texture(
     }
 }
 
-pub(super) fn world_quest_pin_pairs(
+pub(crate) fn world_quest_pin_pairs(
     state: &SimState,
 ) -> Vec<(u64, u64, wow_ui_sim::LayoutRect, String, String)> {
     world_quest_icon_ids(state)
@@ -245,11 +245,11 @@ fn frame_request_path(state: &SimState, id: u64) -> Option<String> {
     ))
 }
 
-pub(super) fn blizzard_ui_dir() -> PathBuf {
+pub(crate) fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
-pub(super) const ISOLATED_WORLD_MAP_ROOT_ADDONS: &[&str] = &[
+pub(crate) const ISOLATED_WORLD_MAP_ROOT_ADDONS: &[&str] = &[
     "Blizzard_FrameEffects",
     "Blizzard_StoreUI",
     "Blizzard_UIPanels_Game",
@@ -263,7 +263,7 @@ pub(super) const ISOLATED_WORLD_MAP_ROOT_ADDONS: &[&str] = &[
     "Blizzard_TimerunningUtil",
 ];
 
-pub(super) fn discover_blizzard_addon_closure_for_screen(
+pub(crate) fn discover_blizzard_addon_closure_for_screen(
     blizzard_ui_dir: &Path,
     screen: ScreenKind,
     roots: &[&str],
@@ -311,7 +311,7 @@ fn collect_declared_dependency_closure(
     wanted
 }
 
-pub(super) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
+pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
@@ -334,17 +334,17 @@ pub(super) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
     env
 }
 
-pub(super) fn env_with_isolated_world_map_ui() -> WowLuaEnv {
+pub(crate) fn env_with_isolated_world_map_ui() -> WowLuaEnv {
     env_with_root_addons_ui(ISOLATED_WORLD_MAP_ROOT_ADDONS)
 }
 
-pub(super) fn env_with_isolated_world_map() -> WowLuaEnv {
+pub(crate) fn env_with_isolated_world_map() -> WowLuaEnv {
     let env = env_with_isolated_world_map_ui();
     open_world_map(&env);
     env
 }
 
-pub(super) fn open_world_map(env: &WowLuaEnv) {
+pub(crate) fn open_world_map(env: &WowLuaEnv) {
     env.exec("ToggleWorldMap()")
         .expect("failed to toggle world map after startup");
     wow_ui_sim::startup::process_pending_timers(env);

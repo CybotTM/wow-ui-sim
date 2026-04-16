@@ -1,6 +1,9 @@
-use super::*;
+mod render_order_support;
+
+use render_order_support::*;
 use std::collections::HashSet;
 use wow_ui_sim::iced_app::compute_frame_rect;
+use wow_ui_sim::render::headless::render_to_image;
 use wow_ui_sim::screen::ScreenKind;
 
 #[test]

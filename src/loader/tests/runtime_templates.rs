@@ -281,6 +281,41 @@ fn test_runtime_action_button_template_avoids_lua_layer_and_button_texture_metho
 }
 
 #[test]
+fn test_runtime_template_nested_anonymous_layers_keep_outer_parent_name() {
+    let t = load_test_xml(
+        "runtime-anon-wrapper-layer-names",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Button name="NestedLayerTemplate" virtual="true">
+                <Frames>
+                    <Frame>
+                        <Frames>
+                            <Frame>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <Texture name="$parentGlow"/>
+                                    </Layer>
+                                </Layers>
+                            </Frame>
+                        </Frames>
+                    </Frame>
+                </Frames>
+            </Button>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local frame = CreateFrame("Button", "NestedLayerRuntimeProbe", UIParent, "NestedLayerTemplate")
+            assert(NestedLayerRuntimeProbeGlow ~= nil, "nested layer child should keep the outer $parent name through anonymous wrappers")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias() {
     let t = load_test_xml(
         "runtime-anon-template-registry-ref",

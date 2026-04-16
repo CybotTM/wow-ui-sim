@@ -70,6 +70,7 @@ fn collect_textures<'a>(frame: &'a xml::FrameXml) -> Vec<CollectedTexture<'a>> {
 fn append_texture_code<'a>(
     textures: &[CollectedTexture<'a>],
     parent_name: &str,
+    name_parent: &str,
     batch: &mut String,
     attachments: &mut Vec<ParentKeyAttachment>,
     anim_entries: &mut Vec<AnimEntry<'a>>,
@@ -83,7 +84,7 @@ fn append_texture_code<'a>(
             continue;
         }
         let resolved = xml::resolve_texture_inheritance(ct.texture);
-        let tex_name = resolve_child_name(resolved.name.as_deref(), parent_name, "__tex_");
+        let tex_name = resolve_child_name(resolved.name.as_deref(), name_parent, "__tex_");
         let code = build_texture_lua(
             &tex_name,
             &resolved,
@@ -122,6 +123,7 @@ fn append_texture_code<'a>(
 fn append_fontstring_code(
     frame: &xml::FrameXml,
     parent_name: &str,
+    name_parent: &str,
     batch: &mut String,
     attachments: &mut Vec<ParentKeyAttachment>,
     text_syncs: &mut Vec<TextSync>,
@@ -135,6 +137,7 @@ fn append_fontstring_code(
                 append_single_fontstring(
                     fs,
                     parent_name,
+                    name_parent,
                     draw_layer,
                     sub_level,
                     batch,
@@ -150,6 +153,7 @@ fn append_fontstring_code(
 fn append_single_fontstring(
     fontstring: &xml::FontStringXml,
     parent_name: &str,
+    name_parent: &str,
     draw_layer: &str,
     sub_level: i32,
     batch: &mut String,
@@ -160,7 +164,7 @@ fn append_single_fontstring(
     if fontstring.is_virtual == Some(true) {
         return;
     }
-    let fs_name = resolve_child_name(fontstring.name.as_deref(), parent_name, "__fs_");
+    let fs_name = resolve_child_name(fontstring.name.as_deref(), name_parent, "__fs_");
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
     let code = build_fontstring_lua(
         fontstring,
@@ -278,10 +282,11 @@ fn apply_fontstring_syncs(env: &LoaderEnv<'_>, syncs: &[TextSync]) {
 }
 
 /// Create all textures and fontstrings for a frame in a single batched Lua exec.
-pub fn create_layer_children_batched(
+pub fn create_layer_children_batched_with_name_parent(
     env: &LoaderEnv<'_>,
     frame: &xml::FrameXml,
     parent_name: &str,
+    name_parent: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let mut batch = String::with_capacity(4096);
@@ -293,6 +298,7 @@ pub fn create_layer_children_batched(
     append_texture_code(
         &all_textures,
         parent_name,
+        name_parent,
         &mut batch,
         &mut attachments,
         &mut anim_entries,
@@ -301,6 +307,7 @@ pub fn create_layer_children_batched(
     append_fontstring_code(
         frame,
         parent_name,
+        name_parent,
         &mut batch,
         &mut attachments,
         &mut text_syncs,
@@ -311,4 +318,14 @@ pub fn create_layer_children_batched(
     apply_texture_anims(env, &anim_entries);
     apply_fontstring_syncs(env, &text_syncs);
     Ok(())
+}
+
+/// Create all textures and fontstrings for a frame in a single batched Lua exec.
+pub fn create_layer_children_batched(
+    env: &LoaderEnv<'_>,
+    frame: &xml::FrameXml,
+    parent_name: &str,
+    timing: &mut LoadTiming,
+) -> Result<(), LoadError> {
+    create_layer_children_batched_with_name_parent(env, frame, parent_name, parent_name, timing)
 }

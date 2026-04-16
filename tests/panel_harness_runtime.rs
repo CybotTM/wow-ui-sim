@@ -1,0 +1,462 @@
+mod common;
+
+use std::path::PathBuf;
+use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
+    ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
+    ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
+    ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
+    ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
+    ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
+    ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
+    ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
+    ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
+    ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
+    ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
+    ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
+    ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
+    ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
+    ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+    ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
+    ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
+    ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
+    ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+    ("Blizzard_Menu", "Blizzard_Menu.toc"),
+    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
+    ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
+    ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
+    ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
+    ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
+    ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+];
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {
+    let toc_path = blizzard_ui_dir().join(addon_name).join(toc_name);
+    load_addon(&env.loader_env(), &toc_path)
+        .unwrap_or_else(|error| panic!("{addon_name} should load in panel harness: {error}"));
+}
+
+fn load_panel_harness(env: &WowLuaEnv) {
+    let ui = blizzard_ui_dir();
+    for (addon_name, toc_name) in PANEL_HARNESS_ADDONS {
+        let toc_path = ui.join(addon_name).join(toc_name);
+        if toc_path.exists() {
+            load_addon(&env.loader_env(), &toc_path).unwrap_or_else(|error| {
+                panic!("{addon_name} should load in panel harness: {error}")
+            });
+        }
+    }
+
+    env.apply_post_load_workarounds();
+    common::fire_addon_loaded(env, "WoWUISim");
+    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
+        let _ = env.fire_event(event);
+    }
+    common::fire_player_entering_world(env, true, false);
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
+        let _ = env.fire_event(event);
+    }
+}
+
+#[test]
+fn achievement_addon_reports_runtime_load_reason() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    let (loaded, reason, frame_exists): (bool, Option<String>, bool) = env
+        .eval(
+            r#"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_AchievementUI")
+            return loaded, reason, AchievementFrame ~= nil
+            "#,
+        )
+        .expect("LoadAddOn should return");
+
+    assert!(
+        loaded,
+        "Blizzard_AchievementUI should load in the panel harness, reason: {}",
+        reason.unwrap_or_else(|| "<nil>".to_string())
+    );
+    assert!(
+        frame_exists,
+        "Blizzard_AchievementUI should create AchievementFrame when loaded"
+    );
+}
+
+#[test]
+fn achievement_uiparent_load_matches_raw_load_addon() {
+    let ui_parent_env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    ui_parent_env.set_screen_size(1024.0, 768.0);
+    ui_parent_env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&ui_parent_env);
+
+    let (ui_parent_loaded, ui_parent_is_loaded): (bool, bool) = ui_parent_env
+        .eval(
+            r#"
+            return UIParentLoadAddOn("Blizzard_AchievementUI"), C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI")
+            "#,
+        )
+        .expect("load comparison should return");
+
+    assert!(
+        ui_parent_loaded,
+        "UIParentLoadAddOn should succeed in a fresh panel harness"
+    );
+    assert!(
+        ui_parent_is_loaded,
+        "UIParentLoadAddOn should mark the addon loaded"
+    );
+
+    let raw_env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    raw_env.set_screen_size(1024.0, 768.0);
+    raw_env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&raw_env);
+
+    let (raw_loaded, raw_is_loaded): (bool, bool) = raw_env
+        .eval(
+            r#"
+            local loaded = C_AddOns.LoadAddOn("Blizzard_AchievementUI")
+            return loaded, C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI")
+            "#,
+        )
+        .expect("raw load comparison should return");
+
+    assert!(raw_loaded, "raw C_AddOns.LoadAddOn should succeed");
+    assert!(raw_is_loaded, "raw load should mark the addon loaded");
+}
+
+#[test]
+fn collections_addon_load_creates_collections_journal() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    let (loaded, reason, frame_exists): (bool, Option<String>, bool) = env
+        .eval(
+            r#"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_Collections")
+            return loaded, reason, CollectionsJournal ~= nil
+            "#,
+        )
+        .expect("collections load should return");
+
+    assert!(
+        loaded,
+        "Blizzard_Collections should load in the panel harness, reason: {}",
+        reason.unwrap_or_else(|| "<nil>".to_string())
+    );
+    assert!(
+        frame_exists,
+        "Blizzard_Collections should create CollectionsJournal when loaded"
+    );
+}
+
+#[test]
+fn encounter_journal_addon_load_creates_frame() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    let (loaded, reason, frame_exists): (bool, Option<String>, bool) = env
+        .eval(
+            r#"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_EncounterJournal")
+            return loaded, reason, EncounterJournal ~= nil
+            "#,
+        )
+        .expect("encounter journal load should return");
+
+    assert!(
+        loaded,
+        "Blizzard_EncounterJournal should load in the panel harness, reason: {}",
+        reason.unwrap_or_else(|| "<nil>".to_string())
+    );
+    assert!(
+        frame_exists,
+        "Blizzard_EncounterJournal should create EncounterJournal when loaded"
+    );
+}
+
+#[test]
+fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+    load_blizzard_addon(&env, "Blizzard_BuffFrame", "BuffFrame.toc");
+    load_blizzard_addon(
+        &env,
+        "Blizzard_UnitFrame",
+        "Blizzard_UnitFrame_Mainline.toc",
+    );
+
+    let has_glow: bool = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Button", "CompactUnitRuntimeProbe", UIParent, "CompactUnitFrameTemplate")
+            return frame.overHealAbsorbGlow ~= nil
+                and CompactUnitRuntimeProbeOverHealAbsorbGlow == frame.overHealAbsorbGlow
+            "#,
+        )
+        .expect("compact unit frame probe should return");
+
+    assert!(
+        has_glow,
+        "CompactUnitFrameTemplate should attach overHealAbsorbGlow as a parentKey child"
+    );
+}
+
+#[test]
+fn group_members_pin_acquire_keeps_data_provider_on_pin() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+    load_blizzard_addon(
+        &env,
+        "Blizzard_MapCanvasSecureUtil",
+        "Blizzard_MapCanvasSecureUtil.toc",
+    );
+    load_blizzard_addon(&env, "Blizzard_MapCanvas", "Blizzard_MapCanvas.toc");
+    load_blizzard_addon(
+        &env,
+        "Blizzard_SharedMapDataProviders",
+        "Blizzard_SharedMapDataProviders_Mainline.toc",
+    );
+
+    let has_provider: bool = env
+        .eval(
+            r#"
+            local map = CreateFrame("Frame", "GroupMembersMapProbe", UIParent, "MapCanvasFrameTemplate")
+            local scroll = CreateFrame("ScrollFrame", nil, map, "MapCanvasFrameScrollContainerTemplate")
+            map:SetMapID(C_Map.GetCurrentMapID())
+
+            local provider = CreateFromMixins(GroupMembersDataProviderMixin)
+            map:AddDataProvider(provider)
+
+            return provider.pin ~= nil and provider.pin.dataProvider == provider
+            "#,
+        )
+        .expect("group members pin probe should return");
+
+    assert!(
+        has_provider,
+        "GroupMembersDataProvider should keep the acquired pin wired to its data provider"
+    );
+}
+
+#[test]
+fn achievement_toggle_loads_and_shows_frame() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    let (pre_toggle_source, pre_toggle_line): (Option<String>, i64) = env
+        .eval(
+            r#"
+            local info = debug.getinfo(ToggleAchievementFrame)
+            return info and info.short_src or nil, info and info.linedefined or 0
+            "#,
+        )
+        .expect("pre-wrap toggle info should return");
+
+    env.exec(
+        r#"
+        __achievement_toggle_called_load_ui = false
+        __achievement_toggle_called_uiparent_load_addon = nil
+        __achievement_toggle_called_toggle = false
+        __achievement_toggle_called_kiosk = false
+        __achievement_toggle_called_completed_any = false
+        __achievement_toggle_called_can_show = false
+        __achievement_toggle_called_c_addons_load_addon = nil
+        __achievement_toggle_c_addons_load_result = false
+
+        local originalCAddOnsLoadAddOn = C_AddOns.LoadAddOn
+        C_AddOns.LoadAddOn = function(name, ...)
+            __achievement_toggle_called_c_addons_load_addon = name
+            local loaded = originalCAddOnsLoadAddOn(name, ...)
+            __achievement_toggle_c_addons_load_result = loaded == true
+            return loaded
+        end
+
+        local originalToggleAchievementFrame = ToggleAchievementFrame
+        ToggleAchievementFrame = function(...)
+            __achievement_toggle_called_toggle = true
+            return originalToggleAchievementFrame(...)
+        end
+
+        local originalKioskIsEnabled = Kiosk.IsEnabled
+        Kiosk.IsEnabled = function(...)
+            __achievement_toggle_called_kiosk = true
+            return originalKioskIsEnabled(...)
+        end
+
+        local originalHasCompletedAnyAchievement = HasCompletedAnyAchievement
+        HasCompletedAnyAchievement = function(...)
+            __achievement_toggle_called_completed_any = true
+            return originalHasCompletedAnyAchievement(...)
+        end
+
+        local originalCanShowAchievementUI = CanShowAchievementUI
+        CanShowAchievementUI = function(...)
+            __achievement_toggle_called_can_show = true
+            return originalCanShowAchievementUI(...)
+        end
+
+        local originalAchievementFrameLoadUI = AchievementFrame_LoadUI
+        AchievementFrame_LoadUI = function(...)
+            __achievement_toggle_called_load_ui = true
+            return originalAchievementFrameLoadUI(...)
+        end
+
+        local originalUIParentLoadAddOn = UIParentLoadAddOn
+        UIParentLoadAddOn = function(name, ...)
+            __achievement_toggle_called_uiparent_load_addon = name
+            return originalUIParentLoadAddOn(name, ...)
+        end
+        "#,
+    )
+    .expect("achievement toggle instrumentation should install");
+
+    env.exec("ToggleAchievementFrame()")
+        .expect("ToggleAchievementFrame should execute");
+
+    let probe = format!(
+        r#"
+            local toggleInfo = debug.getinfo(ToggleAchievementFrame)
+            local loadUIInfo = debug.getinfo(AchievementFrame_LoadUI)
+            local toggleEnv = debug.getfenv(ToggleAchievementFrame)
+            local loaded = C_AddOns.IsAddOnLoaded("Blizzard_AchievementUI")
+            local shown = AchievementFrame and AchievementFrame:IsShown() or false
+            local summary = string.format(
+                "pre=%s:%d toggle=%s:%d load_ui=%s called_toggle=%s called_kiosk=%s called_completed=%s called_can_show=%s c_addons=%s c_addons_result=%s patch=%s toggle_env_is_global=%s toggle_env_completed=%s toggle_env_can_show=%s called_load_ui=%s called_uiparent=%s kiosk=%s disallow=%s completed=%s in_guild=%s can_show=%s",
+                tostring({pre_toggle_source}),
+                {pre_toggle_line},
+                tostring(toggleInfo and toggleInfo.short_src or nil),
+                toggleInfo and toggleInfo.linedefined or 0,
+                tostring(loadUIInfo and loadUIInfo.short_src or nil),
+                tostring(__achievement_toggle_called_toggle),
+                tostring(__achievement_toggle_called_kiosk),
+                tostring(__achievement_toggle_called_completed_any),
+                tostring(__achievement_toggle_called_can_show),
+                tostring(__achievement_toggle_called_c_addons_load_addon),
+                tostring(__achievement_toggle_c_addons_load_result),
+                tostring(__wow_toggle_achievement_patch_applied == true),
+                tostring(toggleEnv == _G),
+                tostring(toggleEnv and toggleEnv.HasCompletedAnyAchievement and toggleEnv.HasCompletedAnyAchievement() or false),
+                tostring(toggleEnv and toggleEnv.CanShowAchievementUI and toggleEnv.CanShowAchievementUI() or false),
+                tostring(__achievement_toggle_called_load_ui),
+                tostring(__achievement_toggle_called_uiparent_load_addon),
+                tostring(Kiosk.IsEnabled()),
+                tostring(DISALLOW_FRAME_TOGGLING == true),
+                tostring(HasCompletedAnyAchievement()),
+                tostring(IsInGuild()),
+                tostring(CanShowAchievementUI())
+            )
+            return loaded, shown, summary
+            "#,
+        pre_toggle_source = format!("{:?}", pre_toggle_source.as_deref().unwrap_or("<nil>")),
+        pre_toggle_line = pre_toggle_line,
+    );
+    let (loaded, shown, summary): (bool, bool, String) = env
+        .eval(&probe)
+        .expect("achievement toggle probe should return");
+
+    assert!(
+        loaded,
+        "achievement toggle should load the addon ({summary})"
+    );
+    assert!(
+        shown,
+        "achievement toggle should show the frame ({summary})"
+    );
+}
+
+#[test]
+fn collections_toggle_loads_and_shows_frame() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    env.exec("ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS)")
+        .expect("ToggleCollectionsJournal should execute");
+
+    let (loaded, shown): (bool, bool) = env
+        .eval(
+            r#"return C_AddOns.IsAddOnLoaded("Blizzard_Collections"), CollectionsJournal and CollectionsJournal:IsShown() or false"#,
+        )
+        .expect("collections toggle probe should return");
+
+    assert!(loaded, "collections toggle should load the addon");
+    assert!(shown, "collections toggle should show the frame");
+}
+
+#[test]
+fn encounter_toggle_loads_and_shows_frame() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    env.exec("ToggleEncounterJournal()")
+        .expect("ToggleEncounterJournal should execute");
+
+    let (loaded, shown): (bool, bool) = env
+        .eval(
+            r#"return C_AddOns.IsAddOnLoaded("Blizzard_EncounterJournal"), EncounterJournal and EncounterJournal:IsShown() or false"#,
+        )
+        .expect("encounter journal toggle probe should return");
+
+    assert!(loaded, "encounter journal toggle should load the addon");
+    assert!(shown, "encounter journal toggle should show the frame");
+}

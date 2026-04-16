@@ -2,7 +2,6 @@
 
 mod common;
 mod render_order_support;
-mod render_order_world_map;
 
 use common::env_with_shared_xml;
 use render_order_support::*;

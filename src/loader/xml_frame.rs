@@ -189,18 +189,23 @@ fn recover_frame_after_loader_vm_error(
 }
 
 fn apply_direct_frame_mixins(env: &LoaderEnv<'_>, name: &str, frame: &crate::xml::FrameXml) {
-    let Some(mixins) = frame.combined_mixin() else {
-        return;
-    };
     let _ = env.with_state(|state| {
         let global = rilua::Val::Table(state.global);
         let frame_val = crate::lua_api::rilua_methods::table_get(state, global, name);
         let frame_id = crate::lua_api::rilua_methods::extract_frame_id(state, frame_val);
         if let Some(frame_id) = frame_id {
+            for template in crate::xml::get_template_chain(frame.inherits.as_deref().unwrap_or(""))
+            {
+                crate::lua_api::globals::rilua_create_frame::apply_frame_mixins(
+                    state,
+                    frame_id,
+                    template.frame.combined_mixin().as_deref(),
+                );
+            }
             crate::lua_api::globals::rilua_create_frame::apply_frame_mixins(
                 state,
                 frame_id,
-                Some(&mixins),
+                frame.combined_mixin().as_deref(),
             );
         }
         Ok::<(), crate::Error>(())

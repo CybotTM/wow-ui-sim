@@ -60,10 +60,20 @@ pub fn get_template(name: &str) -> Option<TemplateEntry> {
 }
 
 /// Template info for C_XMLUtil.GetTemplateInfo.
+#[derive(Debug, Clone)]
+pub struct TemplateKeyValueInfo {
+    pub key: String,
+    pub value: String,
+    pub value_type: Option<String>,
+}
+
+#[derive(Debug, Clone)]
 pub struct TemplateInfo {
     pub frame_type: String,
+    pub template_name: String,
     pub width: f32,
     pub height: f32,
+    pub key_values: Vec<TemplateKeyValueInfo>,
 }
 
 /// Get template info (type, width, height) by resolving inheritance chain.
@@ -91,11 +101,27 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
         .unwrap_or_else(|| "Frame".to_string());
 
     let (width, height) = resolve_chain_size(&chain);
+    let template_name = chain
+        .last()
+        .map(|entry| entry.name.clone())
+        .unwrap_or_else(|| name.to_string());
+    let key_values = chain
+        .iter()
+        .flat_map(|entry| entry.frame.all_key_values())
+        .flat_map(|key_values| key_values.values.iter())
+        .map(|key_value| TemplateKeyValueInfo {
+            key: key_value.key.clone(),
+            value: key_value.value.clone(),
+            value_type: key_value.value_type.clone(),
+        })
+        .collect();
 
     Some(TemplateInfo {
         frame_type,
+        template_name,
         width,
         height,
+        key_values,
     })
 }
 

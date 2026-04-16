@@ -703,6 +703,7 @@ fn apply_runtime_template_chain(
     apply_runtime_template_loader_effects(
         state,
         &frame_name,
+        &frame_name,
         &crate::xml::FrameXml::default(),
         Some(inherits),
     )?;
@@ -821,7 +822,13 @@ fn create_template_child_frame(
 
     apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
-    apply_runtime_template_loader_effects(state, &child_name, frame, inherited_chain.as_deref())?;
+    apply_runtime_template_loader_effects(
+        state,
+        &child_name,
+        child_subst,
+        frame,
+        inherited_chain.as_deref(),
+    )?;
     fire_frame_on_load(state, child_id)?;
     Ok(Some(child_id))
 }
@@ -829,6 +836,7 @@ fn create_template_child_frame(
 fn apply_runtime_template_loader_effects(
     state: &mut LuaState,
     frame_name: &str,
+    name_parent: &str,
     frame: &crate::xml::FrameXml,
     inherits: Option<&str>,
 ) -> LuaResult<()> {
@@ -837,18 +845,20 @@ fn apply_runtime_template_loader_effects(
     let mut timing = crate::loader::LoadTiming::default();
 
     for entry in crate::xml::get_template_chain(inherits) {
-        crate::loader::xml_layer_batch::create_layer_children_batched(
+        crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
             &loader_env,
             &entry.frame,
             frame_name,
+            name_parent,
             &mut timing,
         )
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     }
-    crate::loader::xml_layer_batch::create_layer_children_batched(
+    crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
         &loader_env,
         frame,
         frame_name,
+        name_parent,
         &mut timing,
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
