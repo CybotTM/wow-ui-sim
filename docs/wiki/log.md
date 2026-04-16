@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] ingest | table rehashing investigation
+
+Added `investigations/table-rehashing.md`. Profiled startup rehash counts via a
+new `rehash-stats` feature in rilua. Found 97K rehashes — 98% from non-frame
+tables (`OP_NEWTABLE(0,0)` from addon `local t = {}` pattern), 81% landing at
+hash size ≤ 16. Frame-table pre-sizing (64 slots) is working: only 1.6K frame
+rehashes. Documented three candidate fixes; none applied in this card.
+
 ## [2026-04-14] ingest | world-map exploration seed follow-up
 
 Updated `investigations/world-map-fog-of-war-overlay-model.md` with the current

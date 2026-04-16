@@ -62,6 +62,7 @@ sha2 = "0.10"
 default = ["sound", "gui"]
 sound = ["rodio"]
 gui = ["dep:iced", "dep:iced_wgpu", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
+rehash-stats = ["rilua/rehash-stats"]
 
 [profile.release]
 lto = false

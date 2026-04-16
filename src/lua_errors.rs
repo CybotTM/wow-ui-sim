@@ -37,10 +37,42 @@ pub fn run_lua_errors(
     // Restore stdout so println goes to real stdout (not stderr redirect)
     restore_stdout(saved_stdout);
 
+    print_rehash_stats();
+
     let errors = collect_unique_errors(env);
     let json = serde_json::to_string_pretty(&errors).expect("JSON serialization failed");
     println!("{json}");
 }
+
+#[cfg(feature = "rehash-stats")]
+fn print_rehash_stats() {
+    let s = rilua::vm::rehash_stats::snapshot();
+    eprintln!(
+        "[rehash-stats] total={} from_empty={} grow={} frame_backed={} nonframe={}",
+        s.total, s.from_empty, s.grow, s.frame_backed, s.nonframe
+    );
+    print_size_histogram("by new hash size (2^i)", &s.by_new_size, "size");
+    print_size_histogram(
+        "resizes to hash=0, grouped by old hash size",
+        &s.to_zero_from,
+        "from",
+    );
+}
+
+#[cfg(feature = "rehash-stats")]
+fn print_size_histogram(header: &str, buckets: &[u64; 16], entry_prefix: &str) {
+    eprintln!("[rehash-stats] {header}:");
+    for (i, count) in buckets.iter().enumerate() {
+        if *count == 0 {
+            continue;
+        }
+        let size = if i == 0 { 0 } else { 1u32 << i };
+        eprintln!("  {entry_prefix} {size:>6}: {count}");
+    }
+}
+
+#[cfg(not(feature = "rehash-stats"))]
+fn print_rehash_stats() {}
 
 /// Deduplicate collected Lua errors by their first line. Preserves first-seen order.
 fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
