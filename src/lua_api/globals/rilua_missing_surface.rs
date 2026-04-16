@@ -17,6 +17,7 @@ use crate::spells;
 use crate::traits::{
     TRAIT_COND_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_SUBTREE_DB, TRAIT_TREE_DB,
 };
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -1248,64 +1249,47 @@ fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
 
 fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Container")?;
-    table_set_rust_fn(
+    register_container_methods(
         state,
         table_ref,
-        "GetContainerNumSlots",
-        c_container_get_num_slots,
+        &[
+            ("GetContainerNumSlots", c_container_get_num_slots),
+            ("GetContainerNumFreeSlots", c_container_get_num_free_slots),
+            ("GetContainerItemInfo", c_container_get_item_info),
+            ("GetContainerItemID", c_container_get_item_id),
+            ("GetContainerItemLink", c_container_get_item_link),
+            ("ContainerIDToInventoryID", c_container_id_to_inventory_id),
+            ("GetBagName", c_container_get_bag_name),
+            (
+                "GetContainerItemPurchaseInfo",
+                c_container_get_item_purchase_info,
+            ),
+            ("GetContainerItemQuestInfo", c_container_get_item_quest_info),
+            ("IsBattlePayItem", c_container_is_battle_pay_item),
+        ],
     )?;
-    table_set_rust_fn(
+    register_container_methods(
         state,
         table_ref,
-        "GetContainerNumFreeSlots",
-        c_container_get_num_free_slots,
+        &[
+            ("UseContainerItem", c_container_noop),
+            ("PickupContainerItem", c_container_noop),
+            ("SplitContainerItem", c_container_noop),
+        ],
     )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetContainerItemInfo",
-        c_container_get_item_info,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetContainerItemID",
-        c_container_get_item_id,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetContainerItemLink",
-        c_container_get_item_link,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "ContainerIDToInventoryID",
-        c_container_id_to_inventory_id,
-    )?;
-    table_set_rust_fn(state, table_ref, "GetBagName", c_container_get_bag_name)?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetContainerItemPurchaseInfo",
-        c_container_get_item_purchase_info,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetContainerItemQuestInfo",
-        c_container_get_item_quest_info,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "IsBattlePayItem",
-        c_container_is_battle_pay_item,
-    )?;
-    table_set_rust_fn(state, table_ref, "UseContainerItem", c_container_noop)?;
-    table_set_rust_fn(state, table_ref, "PickupContainerItem", c_container_noop)?;
-    table_set_rust_fn(state, table_ref, "SplitContainerItem", c_container_noop)?;
+    Ok(())
+}
+
+type ContainerScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+
+fn register_container_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    entries: &[(&str, ContainerScriptFn)],
+) -> LuaResult<()> {
+    for &(name, func) in entries {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
