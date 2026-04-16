@@ -19,22 +19,34 @@ use crate::lua_bridge::{FromStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-// Split modules (extracted to keep rilua_admin.rs under the 750-line cap).
-use super::rilua_admin_extras::{
-    add_buff, add_transmog, add_transmog_appearance, clear_buffs, collect_heirloom, collect_mount,
-    collect_pet, collect_toy, earn_achievement, equip_item, has_achievement, remove_buff,
-    remove_transmog, reset_talents, set_achievement_earned, set_falling, set_flying,
-    set_in_instance, set_instance_info, set_item_level, set_money, set_mount_collected,
-    set_mounted, set_moving, set_pet_collected, set_spec, set_sub_zone, set_swimming,
-    set_talent_rank, set_talent_selection, set_toy_collected, set_transmog_for_slot, set_zone,
-    uncollect_heirloom, uncollect_mount, uncollect_pet, uncollect_toy, unequip_item,
+// Focused sub-modules — each holds one A_Admin section and keeps the
+// entry-point file small. The parent TableBuilder chain wires these up.
+use super::rilua_admin_actionbars_bags::{
+    add_bag_item, clear_action_bars, clear_action_slot, clear_bags, remove_bag_item,
+    set_action_slot,
 };
-use super::rilua_admin_world::{
-    add_bag_item, add_mail, add_premade_listing, clear_action_bars, clear_action_slot, clear_bags,
-    clear_guild, clear_inbox, clear_premade_listings, clear_vault, end_loot_roll, fire_event_admin,
-    join_guild, leave_guild, remove_bag_item, set_action_slot, set_guild_info, set_honor_level,
-    set_inbox_count, set_pvp_enabled, set_vault_activity, set_vault_rewards, simulate_boss_kill,
-    start_loot_roll, toggle_debug_anchors, toggle_debug_borders, update_premade_listing,
+use super::rilua_admin_buffs::{add_buff, clear_buffs, remove_buff};
+use super::rilua_admin_collections::{
+    add_transmog, add_transmog_appearance, collect_heirloom, collect_mount, collect_pet,
+    collect_toy, earn_achievement, has_achievement, remove_transmog, set_achievement_earned,
+    set_mount_collected, set_pet_collected, set_toy_collected, set_transmog_for_slot,
+    uncollect_heirloom, uncollect_mount, uncollect_pet, uncollect_toy,
+};
+use super::rilua_admin_encounter::{end_loot_roll, simulate_boss_kill, start_loot_roll};
+use super::rilua_admin_equipment::{equip_item, unequip_item};
+use super::rilua_admin_events::{fire_event_admin, toggle_debug_anchors, toggle_debug_borders};
+use super::rilua_admin_mail::{add_mail, clear_inbox, set_inbox_count};
+use super::rilua_admin_movement::{set_falling, set_flying, set_mounted, set_moving, set_swimming};
+use super::rilua_admin_premade::{
+    add_premade_listing, clear_premade_listings, update_premade_listing,
+};
+use super::rilua_admin_pvp_guild::{
+    clear_guild, join_guild, leave_guild, set_guild_info, set_honor_level, set_pvp_enabled,
+};
+use super::rilua_admin_spec::{reset_talents, set_spec, set_talent_rank, set_talent_selection};
+use super::rilua_admin_vault::{clear_vault, set_vault_activity, set_vault_rewards};
+use super::rilua_admin_zone_economy::{
+    set_in_instance, set_instance_info, set_item_level, set_money, set_sub_zone, set_zone,
 };
 
 // ── Entry point ──────────────────────────────────────────────────────────────
