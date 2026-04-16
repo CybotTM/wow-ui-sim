@@ -176,8 +176,8 @@ pub fn get_size(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let width = arg_f32(state, 2)?;
-    let height = arg_f32(state, 3)?;
+    let width = opt_f32(state, 2);
+    let height = opt_f32(state, 3);
     let mut sim = borrow_state_mut(state)?;
     let Some(current) = current_explicit_size_state(&sim, id) else {
         return Ok(0);
@@ -197,7 +197,7 @@ pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let width = arg_f32(state, 2)?;
+    let width = opt_f32(state, 2);
     let mut sim = borrow_state_mut(state)?;
     let Some(current) = current_explicit_size_state(&sim, id) else {
         return Ok(0);
@@ -216,7 +216,7 @@ pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let height = arg_f32(state, 2)?;
+    let height = opt_f32(state, 2);
     let mut sim = borrow_state_mut(state)?;
     let Some(current_height) = sim.widgets.get(id).map(|frame| frame.height) else {
         return Ok(0);
@@ -370,7 +370,7 @@ fn is_collapsed_impl(state: &crate::lua_api::SimState, id: u64) -> bool {
 
 pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let alpha = arg_f32(state, 2)?;
+    let alpha = opt_f32(state, 2);
     let clamped = alpha.clamp(0.0, 1.0);
     let mut sim = borrow_state_mut(state)?;
     let changed = sim
@@ -881,7 +881,10 @@ pub fn get_effective_scale(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn set_scale(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let scale = arg_f32(state, 2)?;
+    let scale = match stack_val(state, 2) {
+        Val::Num(n) => n as f32,
+        _ => return Ok(0),
+    };
     if scale <= 0.0 {
         return Err(runtime_error("Frame:SetScale(): Scale must be > 0"));
     }
