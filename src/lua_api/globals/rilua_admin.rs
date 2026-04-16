@@ -14,10 +14,28 @@
 use crate::lua_api::game_data::{
     AuraInfo, CastingState, PartyMember, SpellCooldownState, TargetInfo,
 };
-use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::rilua_methods::borrow_state_mut;
 use crate::lua_bridge::{FromStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+
+// Split modules (extracted to keep rilua_admin.rs under the 750-line cap).
+use super::rilua_admin_extras::{
+    add_buff, add_transmog, add_transmog_appearance, clear_buffs, collect_heirloom, collect_mount,
+    collect_pet, collect_toy, earn_achievement, equip_item, has_achievement, remove_buff,
+    remove_transmog, reset_talents, set_achievement_earned, set_falling, set_flying,
+    set_in_instance, set_instance_info, set_item_level, set_money, set_mount_collected,
+    set_mounted, set_moving, set_pet_collected, set_spec, set_sub_zone, set_swimming,
+    set_talent_rank, set_talent_selection, set_toy_collected, set_transmog_for_slot, set_zone,
+    uncollect_heirloom, uncollect_mount, uncollect_pet, uncollect_toy, unequip_item,
+};
+use super::rilua_admin_world::{
+    add_bag_item, add_mail, add_premade_listing, clear_action_bars, clear_action_slot, clear_bags,
+    clear_guild, clear_inbox, clear_premade_listings, clear_vault, end_loot_roll, fire_event_admin,
+    join_guild, leave_guild, remove_bag_item, set_action_slot, set_guild_info, set_honor_level,
+    set_inbox_count, set_pvp_enabled, set_vault_activity, set_vault_rewards, simulate_boss_kill,
+    start_loot_roll, toggle_debug_anchors, toggle_debug_borders, update_premade_listing,
+};
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
@@ -147,6 +165,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         .build();
 
     LuaApiMut::set_global_val(lua, "A_Admin", admin_val)?;
+    super::rilua_group_queries::register_all(lua.state_mut());
     Ok(())
 }
 
@@ -419,13 +438,29 @@ fn set_focus_health(state: &mut LuaState) -> LuaResult<u32> {
 // ── Party ─────────────────────────────────────────────────────────────────────
 
 fn set_party_size(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::Event;
+
     let n = i32::from_stack(state, 1)?;
     let size = n.max(0) as usize;
     let mut st = borrow_state_mut(state)?;
+    let changed = st.party_members.len() != size;
     while st.party_members.len() < size {
         st.party_members.push(default_party_member());
     }
     st.party_members.truncate(size);
+    st.party_group_active = size > 0;
+    if changed {
+        // Match the mlua admin_api: fire GROUP_ROSTER_UPDATE so
+        // `PartyFrameMixin:OnEvent` runs its `self:Layout()` pass and
+        // `PartyFrame:ShouldShow()` flips to true (UnitExists("party1"),
+        // GetNumGroupMembers, IsInGroup all read state.party_members).
+        // Without this, UpdatePartyFrames sees zero active members and
+        // the frame stays at its XML 4x2 placeholder.
+        st.events.push(Event {
+            name: "GROUP_ROSTER_UPDATE".to_string(),
+            args: Vec::new(),
+        });
+    }
     Ok(0)
 }
 
@@ -476,791 +511,6 @@ fn res_party_member(state: &mut LuaState) -> LuaResult<u32> {
 fn set_rot_damage(state: &mut LuaState) -> LuaResult<u32> {
     let level = i32::from_stack(state, 1)?;
     borrow_state_mut(state)?.rot_damage_level = level as usize;
-    Ok(0)
-}
-
-// ── Movement ──────────────────────────────────────────────────────────────────
-
-fn set_moving(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.movement.moving = v;
-    Ok(0)
-}
-
-fn set_mounted(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.movement.mounted = v;
-    Ok(0)
-}
-
-fn set_flying(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.movement.flying = v;
-    Ok(0)
-}
-
-fn set_falling(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.movement.falling = v;
-    Ok(0)
-}
-
-fn set_swimming(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.movement.swimming = v;
-    Ok(0)
-}
-
-// ── Spec & talents ────────────────────────────────────────────────────────────
-
-fn set_spec(state: &mut LuaState) -> LuaResult<u32> {
-    let spec_index = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.active_spec_index = spec_index;
-    Ok(0)
-}
-
-fn set_talent_rank(state: &mut LuaState) -> LuaResult<u32> {
-    let node_id = u32::from_stack(state, 1)?;
-    let rank = u32::from_stack(state, 2)?;
-    borrow_state_mut(state)?
-        .talents
-        .set_node_rank(node_id, rank);
-    Ok(0)
-}
-
-fn set_talent_selection(state: &mut LuaState) -> LuaResult<u32> {
-    let node_id = u32::from_stack(state, 1)?;
-    let entry_id = u32::from_stack(state, 2)?;
-    borrow_state_mut(state)?
-        .talents
-        .set_node_selection(node_id, Some(entry_id));
-    Ok(0)
-}
-
-fn reset_talents(state: &mut LuaState) -> LuaResult<u32> {
-    let mut st = borrow_state_mut(state)?;
-    st.talents.clear_ranks();
-    st.talents.node_selections.clear();
-    st.talents.active_hero_subtree_id = None;
-    Ok(0)
-}
-
-// ── Buffs ─────────────────────────────────────────────────────────────────────
-
-fn add_buff(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = i32::from_stack(state, 1)?;
-    let name = String::from_stack(state, 2)?;
-    let icon = String::from_stack(state, 3)?;
-    let duration = f64::from_stack(state, 4)?;
-    let stacks = i32::from_stack(state, 5)?;
-    let mut st = borrow_state_mut(state)?;
-    let buff = build_admin_buff(&st, spell_id, name, icon, duration, stacks);
-    st.player.buffs.push(buff);
-    Ok(0)
-}
-
-fn remove_buff(state: &mut LuaState) -> LuaResult<u32> {
-    let spell_id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .player
-        .buffs
-        .retain(|a| a.spell_id != spell_id);
-    Ok(0)
-}
-
-fn clear_buffs(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.player.buffs.clear();
-    Ok(0)
-}
-
-// ── Equipment ─────────────────────────────────────────────────────────────────
-
-fn equip_item(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state_types::{CharacterStats, EquippedItem};
-    let slot = i32::from_stack(state, 1)?;
-    let item_id = u32::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    st.player.equipped_items.insert(
-        slot,
-        EquippedItem {
-            item_id,
-            enchant_id: 0,
-            gem_ids: [0, 0, 0],
-        },
-    );
-    st.player.stats = CharacterStats::compute(&st.player.equipped_items, st.player.class_index);
-    Ok(0)
-}
-
-fn unequip_item(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state_types::CharacterStats;
-    let slot = i32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.player.equipped_items.remove(&slot);
-    st.player.stats = CharacterStats::compute(&st.player.equipped_items, st.player.class_index);
-    Ok(0)
-}
-
-// ── Zone ──────────────────────────────────────────────────────────────────────
-
-fn set_zone(state: &mut LuaState) -> LuaResult<u32> {
-    let name = String::from_stack(state, 1)?;
-    let id = i32::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.zone_name = name;
-    st.world.zone_id = id;
-    Ok(0)
-}
-
-fn set_sub_zone(state: &mut LuaState) -> LuaResult<u32> {
-    let name = String::from_stack(state, 1)?;
-    borrow_state_mut(state)?.world.sub_zone_name = name;
-    Ok(0)
-}
-
-fn set_instance_info(state: &mut LuaState) -> LuaResult<u32> {
-    let name = String::from_stack(state, 1)?;
-    let inst_type = String::from_stack(state, 2)?;
-    let difficulty = i32::from_stack(state, 3)?;
-    let max_players = i32::from_stack(state, 4)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.instance_name = name;
-    st.world.instance_type = inst_type;
-    st.world.instance_difficulty = difficulty;
-    st.world.instance_max_players = max_players;
-    st.world.in_instance = true;
-    Ok(0)
-}
-
-fn set_in_instance(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.world.in_instance = v;
-    Ok(0)
-}
-
-// ── Economy ───────────────────────────────────────────────────────────────────
-
-fn set_money(state: &mut LuaState) -> LuaResult<u32> {
-    let copper = i64::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.money = copper;
-    Ok(0)
-}
-
-fn set_item_level(state: &mut LuaState) -> LuaResult<u32> {
-    let ilvl = f64::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.item_level = ilvl as f32;
-    Ok(0)
-}
-
-// ── Transmog & collections ────────────────────────────────────────────────────
-
-fn add_transmog(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .world
-        .collected_transmogs
-        .insert(id);
-    Ok(0)
-}
-
-fn remove_transmog(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .world
-        .collected_transmogs
-        .remove(&id);
-    Ok(0)
-}
-
-fn add_transmog_appearance(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state_types::TransmogAppearance;
-    let source_id = i32::from_stack(state, 1)?;
-    let category_id = i32::from_stack(state, 2)?;
-    let item_id = i32::from_stack(state, 3)?;
-    let mut st = borrow_state_mut(state)?;
-    let visual_id = st
-        .world
-        .transmog_appearances
-        .iter()
-        .map(|a| a.visual_id)
-        .max()
-        .unwrap_or(0)
-        + 1;
-    st.world.transmog_appearances.push(TransmogAppearance {
-        source_id,
-        visual_id,
-        category_id,
-        item_id,
-        is_collected: true,
-        source_type: 0,
-        item_mod_id: 0,
-    });
-    Ok(0)
-}
-
-fn set_transmog_for_slot(state: &mut LuaState) -> LuaResult<u32> {
-    let slot_id = i32::from_stack(state, 1)?;
-    let source_id = i32::from_stack(state, 2)?;
-    borrow_state_mut(state)?
-        .world
-        .applied_transmog_slots
-        .insert(slot_id, source_id);
-    Ok(0)
-}
-
-fn collect_heirloom(state: &mut LuaState) -> LuaResult<u32> {
-    let item_id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .world
-        .collected_heirlooms
-        .insert(item_id as u32);
-    Ok(0)
-}
-
-fn uncollect_heirloom(state: &mut LuaState) -> LuaResult<u32> {
-    let item_id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?
-        .world
-        .collected_heirlooms
-        .remove(&(item_id as u32));
-    Ok(0)
-}
-
-fn set_mount_collected(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    let collected = bool::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    if collected {
-        st.world.collected_mounts.insert(id);
-    } else {
-        st.world.collected_mounts.remove(&id);
-    }
-    Ok(0)
-}
-
-fn set_pet_collected(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    let collected = bool::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    if collected {
-        st.world.collected_pets.insert(id);
-    } else {
-        st.world.collected_pets.remove(&id);
-    }
-    Ok(0)
-}
-
-fn set_toy_collected(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    let collected = bool::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    if collected {
-        st.world.collected_toys.insert(id);
-    } else {
-        st.world.collected_toys.remove(&id);
-    }
-    Ok(0)
-}
-
-fn set_achievement_earned(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    let collected = bool::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    if collected {
-        st.world.earned_achievements.insert(id);
-    } else {
-        st.world.earned_achievements.remove(&id);
-    }
-    Ok(0)
-}
-
-fn has_achievement(state: &mut LuaState) -> LuaResult<u32> {
-    let id = i32::from_stack(state, 1)?;
-    let result = borrow_state(state)?.world.earned_achievements.contains(&id);
-    state.push(Val::Bool(result));
-    Ok(1)
-}
-
-fn earn_achievement(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
-    let id = i32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.earned_achievements.insert(id);
-    st.events.push(Event {
-        name: "ACHIEVEMENT_EARNED".to_string(),
-        args: vec![EventArg::Number(id as f64)],
-    });
-    Ok(0)
-}
-
-fn collect_mount(state: &mut LuaState) -> LuaResult<u32> {
-    let mount_id = u32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.collected_mounts.insert(mount_id as i32);
-    if let Some(m) = st.world.mounts.iter_mut().find(|m| m.mount_id == mount_id) {
-        m.is_collected = true;
-        m.is_usable = true;
-    }
-    Ok(0)
-}
-
-fn uncollect_mount(state: &mut LuaState) -> LuaResult<u32> {
-    let mount_id = u32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.collected_mounts.remove(&(mount_id as i32));
-    if let Some(m) = st.world.mounts.iter_mut().find(|m| m.mount_id == mount_id) {
-        m.is_collected = false;
-        m.is_usable = false;
-    }
-    Ok(0)
-}
-
-fn collect_pet(state: &mut LuaState) -> LuaResult<u32> {
-    let species_id = u32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.collected_pets.insert(species_id as i32);
-    if let Some(p) = st
-        .world
-        .pets
-        .iter_mut()
-        .find(|p| p.species_id == species_id)
-    {
-        p.is_collected = true;
-    }
-    Ok(0)
-}
-
-fn uncollect_pet(state: &mut LuaState) -> LuaResult<u32> {
-    let species_id = u32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.collected_pets.remove(&(species_id as i32));
-    if let Some(p) = st
-        .world
-        .pets
-        .iter_mut()
-        .find(|p| p.species_id == species_id)
-    {
-        p.is_collected = false;
-    }
-    Ok(0)
-}
-
-fn collect_toy(state: &mut LuaState) -> LuaResult<u32> {
-    let item_id = u32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.collected_toys.insert(item_id as i32);
-    if let Some(toy) = st.world.toys.iter_mut().find(|t| t.item_id == item_id) {
-        toy.is_collected = true;
-        toy.is_usable = true;
-    }
-    Ok(0)
-}
-
-fn uncollect_toy(state: &mut LuaState) -> LuaResult<u32> {
-    let item_id = u32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.collected_toys.remove(&(item_id as i32));
-    if let Some(toy) = st.world.toys.iter_mut().find(|t| t.item_id == item_id) {
-        toy.is_collected = false;
-        toy.is_usable = false;
-    }
-    Ok(0)
-}
-
-// ── PvP & guild ───────────────────────────────────────────────────────────────
-
-fn set_pvp_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    let v = bool::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.pvp_enabled = v;
-    Ok(0)
-}
-
-fn set_honor_level(state: &mut LuaState) -> LuaResult<u32> {
-    let level = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?.player.honor_level = level;
-    Ok(0)
-}
-
-fn set_guild_info(state: &mut LuaState) -> LuaResult<u32> {
-    let name = String::from_stack(state, 1)?;
-    let rank = String::from_stack(state, 2)?;
-    let num_members = i32::from_stack(state, 3)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.guild_name = Some(name);
-    st.world.guild_rank = Some(rank);
-    st.world.guild_num_members = num_members;
-    Ok(0)
-}
-
-fn join_guild(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
-    let name = String::from_stack(state, 1)?;
-    let rank = String::from_stack(state, 2)?;
-    let num_members = i32::from_stack(state, 3)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.guild_name = Some(name);
-    st.world.guild_rank = Some(rank);
-    st.world.guild_num_members = num_members;
-    st.events.push(Event {
-        name: "PLAYER_GUILD_UPDATE".to_string(),
-        args: vec![],
-    });
-    Ok(0)
-}
-
-fn clear_guild(state: &mut LuaState) -> LuaResult<u32> {
-    let mut st = borrow_state_mut(state)?;
-    st.world.guild_name = None;
-    st.world.guild_rank = None;
-    st.world.guild_num_members = 0;
-    Ok(0)
-}
-
-fn leave_guild(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
-    let mut st = borrow_state_mut(state)?;
-    st.world.guild_name = None;
-    st.world.guild_rank = None;
-    st.world.guild_num_members = 0;
-    st.events.push(Event {
-        name: "PLAYER_GUILD_UPDATE".to_string(),
-        args: vec![],
-    });
-    Ok(0)
-}
-
-// ── Events ────────────────────────────────────────────────────────────────────
-
-fn fire_event_admin(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
-    use crate::lua_bridge::stack_val;
-
-    let event_name = String::from_stack(state, 1)?;
-    let nargs = state.top as i32 - state.base as i32;
-    let mut event_args = Vec::new();
-    for i in 2..=nargs {
-        let val = stack_val(state, i);
-        event_args.push(lua_val_to_event_arg(state, val));
-    }
-    borrow_state_mut(state)?.events.push(Event {
-        name: event_name,
-        args: event_args,
-    });
-    Ok(0)
-}
-
-// ── Debug toggles ─────────────────────────────────────────────────────────────
-
-fn toggle_debug_borders(state: &mut LuaState) -> LuaResult<u32> {
-    let mut st = borrow_state_mut(state)?;
-    st.debug_borders = !st.debug_borders;
-    st.invalidate_strata_buckets();
-    let result = st.debug_borders;
-    drop(st);
-    state.push(Val::Bool(result));
-    Ok(1)
-}
-
-fn toggle_debug_anchors(state: &mut LuaState) -> LuaResult<u32> {
-    let mut st = borrow_state_mut(state)?;
-    st.debug_anchors = !st.debug_anchors;
-    st.invalidate_strata_buckets();
-    let result = st.debug_anchors;
-    drop(st);
-    state.push(Val::Bool(result));
-    Ok(1)
-}
-
-// ── Vault ─────────────────────────────────────────────────────────────────────
-
-fn set_vault_activity(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state::GreatVaultActivity;
-    let atype = i32::from_stack(state, 1)?;
-    let index = i32::from_stack(state, 2)?;
-    let threshold = i32::from_stack(state, 3)?;
-    let progress = i32::from_stack(state, 4)?;
-    let level = i32::from_stack(state, 5)?;
-    let activity = GreatVaultActivity {
-        activity_type: atype,
-        index,
-        threshold,
-        progress,
-        level,
-    };
-    let mut st = borrow_state_mut(state)?;
-    if let Some(existing) = st
-        .world
-        .great_vault_activities
-        .iter_mut()
-        .find(|a| a.activity_type == atype && a.index == index)
-    {
-        *existing = activity;
-    } else {
-        st.world.great_vault_activities.push(activity);
-    }
-    Ok(0)
-}
-
-fn set_vault_rewards(state: &mut LuaState) -> LuaResult<u32> {
-    let has = bool::from_stack(state, 1)?;
-    let can_claim = Option::<bool>::from_stack(state, 2)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.great_vault_has_rewards = has;
-    st.world.great_vault_can_claim = can_claim.unwrap_or(has);
-    Ok(0)
-}
-
-fn clear_vault(state: &mut LuaState) -> LuaResult<u32> {
-    let mut st = borrow_state_mut(state)?;
-    st.world.great_vault_activities.clear();
-    st.world.great_vault_has_rewards = false;
-    st.world.great_vault_can_claim = false;
-    Ok(0)
-}
-
-// ── Action bars ───────────────────────────────────────────────────────────────
-
-fn set_action_slot(state: &mut LuaState) -> LuaResult<u32> {
-    let slot = u32::from_stack(state, 1)?;
-    let spell_id = u32::from_stack(state, 2)?;
-    borrow_state_mut(state)?.action_bars.insert(slot, spell_id);
-    Ok(0)
-}
-
-fn clear_action_slot(state: &mut LuaState) -> LuaResult<u32> {
-    let slot = u32::from_stack(state, 1)?;
-    borrow_state_mut(state)?.action_bars.remove(&slot);
-    Ok(0)
-}
-
-fn clear_action_bars(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.action_bars.clear();
-    Ok(0)
-}
-
-// ── Bags ──────────────────────────────────────────────────────────────────────
-
-fn add_bag_item(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state::BagItem;
-    let bag = i32::from_stack(state, 1)?;
-    let slot = i32::from_stack(state, 2)?;
-    let item_id = u32::from_stack(state, 3)?;
-    let stack = Option::<i32>::from_stack(state, 4)?;
-    borrow_state_mut(state)?.bag_items.insert(
-        (bag, slot),
-        BagItem {
-            item_id,
-            stack_count: stack.unwrap_or(1),
-        },
-    );
-    Ok(0)
-}
-
-fn remove_bag_item(state: &mut LuaState) -> LuaResult<u32> {
-    let bag = i32::from_stack(state, 1)?;
-    let slot = i32::from_stack(state, 2)?;
-    borrow_state_mut(state)?.bag_items.remove(&(bag, slot));
-    Ok(0)
-}
-
-fn clear_bags(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.bag_items.clear();
-    Ok(0)
-}
-
-// ── Mail ──────────────────────────────────────────────────────────────────────
-
-fn add_mail(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_bridge::stack_val;
-
-    let sender = opt_string_stack(state, 1, "Unknown");
-    let subject = opt_string_stack(state, 2, "No Subject");
-    let body = opt_string_stack(state, 3, "");
-    let money = match stack_val(state, 4) {
-        Val::Num(n) => n as u64,
-        _ => 0,
-    };
-    // items table at arg 5 — parsed as empty for now (no mlua Table access in rilua path)
-    let items = Vec::new();
-
-    let mut st = borrow_state_mut(state)?;
-    let id = st.player.next_mail_id;
-    st.player.next_mail_id += 1;
-    st.player
-        .inbox
-        .push(build_mail(id, sender, subject, body, money, items));
-    Ok(0)
-}
-
-fn clear_inbox(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.player.inbox.clear();
-    Ok(0)
-}
-
-fn set_inbox_count(state: &mut LuaState) -> LuaResult<u32> {
-    let count = i32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.player.inbox.clear();
-    for i in 0..count {
-        let id = st.player.next_mail_id;
-        st.player.next_mail_id += 1;
-        let sender = format!("Player{}", i + 1);
-        let subject = format!("Test Mail #{}", i + 1);
-        let body = format!("This is test mail message {}.", i + 1);
-        st.player
-            .inbox
-            .push(build_mail(id, sender, subject, body, 0, Vec::new()));
-    }
-    Ok(0)
-}
-
-// ── Premade listings ──────────────────────────────────────────────────────────
-
-fn add_premade_listing(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state_types::PremadeListing;
-    let name = String::from_stack(state, 1)?;
-    let comment = String::from_stack(state, 2)?;
-    let activity_id = u32::from_stack(state, 3)?;
-    let num = i32::from_stack(state, 4)?;
-    let max = i32::from_stack(state, 5)?;
-    let mut st = borrow_state_mut(state)?;
-    let id = st.world.premade_listings.len() as u32 + 1;
-    st.world.premade_listings.push(PremadeListing {
-        search_result_id: id,
-        name,
-        comment,
-        leader_name: "Player".to_string(),
-        activity_id,
-        num_members: num,
-        max_members: max,
-        voice_chat: false,
-        auto_accept: false,
-        is_delisted: false,
-    });
-    drop(st);
-    state.push(Val::Num(id as f64));
-    Ok(1)
-}
-
-fn clear_premade_listings(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.world.premade_listings.clear();
-    Ok(0)
-}
-
-fn update_premade_listing(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_bridge::stack_val;
-    let result_id = u32::from_stack(state, 1)?;
-    let field = String::from_stack(state, 2)?;
-    let value = stack_val(state, 3);
-    let mut st = borrow_state_mut(state)?;
-    let Some(listing) = st
-        .world
-        .premade_listings
-        .iter_mut()
-        .find(|l| l.search_result_id == result_id)
-    else {
-        return Ok(0);
-    };
-    match field.as_str() {
-        "numMembers" => {
-            if let Val::Num(n) = value {
-                listing.num_members = n as i32;
-            }
-        }
-        "isDelisted" => {
-            if let Val::Bool(b) = value {
-                listing.is_delisted = b;
-            }
-        }
-        _ => {}
-    }
-    Ok(0)
-}
-
-// ── Encounter ─────────────────────────────────────────────────────────────────
-
-fn simulate_boss_kill(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
-    let encounter_id = i32::from_stack(state, 1)?;
-    let name = String::from_stack(state, 2)?;
-    let difficulty_id = i32::from_stack(state, 3)?;
-    let group_size = i32::from_stack(state, 4)?;
-    let mut st = borrow_state_mut(state)?;
-    st.events.push(Event {
-        name: "ENCOUNTER_END".to_string(),
-        args: vec![
-            EventArg::Number(encounter_id as f64),
-            EventArg::String(name.clone()),
-            EventArg::Number(difficulty_id as f64),
-            EventArg::Number(group_size as f64),
-            EventArg::Number(1.0), // success
-        ],
-    });
-    st.events.push(Event {
-        name: "BOSS_KILL".to_string(),
-        args: vec![
-            EventArg::Number(encounter_id as f64),
-            EventArg::String(name),
-        ],
-    });
-    Ok(0)
-}
-
-fn start_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
-    use crate::lua_api::state::LootRollInfo;
-    use crate::lua_bridge::stack_val;
-
-    let roll_id = i32::from_stack(state, 1)?;
-    let roll_time = f64::from_stack(state, 2)?;
-    let item_name = opt_string_stack(state, 3, "");
-    let item_texture = opt_string_stack(state, 4, "");
-    let item_quality = match stack_val(state, 5) {
-        Val::Num(n) => n as i32,
-        _ => 4,
-    };
-    let item_level = match stack_val(state, 6) {
-        Val::Num(n) => n as i32,
-        _ => 0,
-    };
-    let item_link = opt_string_stack(state, 7, "");
-
-    let info = LootRollInfo {
-        roll_id,
-        roll_time,
-        texture: item_texture,
-        name: item_name,
-        count: 1,
-        quality: item_quality,
-        bind_on_pickup: true,
-        can_need: true,
-        can_greed: true,
-        can_disenchant: false,
-        disenchant_level: 0,
-        item_level,
-        item_link,
-    };
-    let mut st = borrow_state_mut(state)?;
-    st.world.loot_rolls.insert(roll_id, info);
-    st.events.push(Event {
-        name: "START_LOOT_ROLL".to_string(),
-        args: vec![
-            EventArg::Number(roll_id as f64),
-            EventArg::Number(roll_time),
-        ],
-    });
-    Ok(0)
-}
-
-fn end_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
-    let roll_id = i32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.loot_rolls.remove(&roll_id);
-    st.events.push(Event {
-        name: "LOOT_ROLLS_COMPLETE".to_string(),
-        args: vec![EventArg::Number(roll_id as f64)],
-    });
     Ok(0)
 }
 
@@ -1321,7 +571,7 @@ fn default_party_member() -> PartyMember {
 }
 
 /// Build an AuraInfo for admin-added buffs.
-fn build_admin_buff(
+pub(super) fn build_admin_buff(
     st: &crate::lua_api::state::SimState,
     spell_id: i32,
     name: String,
@@ -1351,7 +601,7 @@ fn build_admin_buff(
 }
 
 /// Build a MailMessage for admin inbox functions.
-fn build_mail(
+pub(super) fn build_mail(
     id: u64,
     sender: String,
     subject: String,
@@ -1377,7 +627,7 @@ fn build_mail(
 }
 
 /// Convert a rilua `Val` to an `EventArg`.
-fn lua_val_to_event_arg(state: &LuaState, val: Val) -> crate::event::EventArg {
+pub(super) fn lua_val_to_event_arg(state: &LuaState, val: Val) -> crate::event::EventArg {
     use crate::event::EventArg;
     match val {
         Val::Str(s) => {
@@ -1396,7 +646,7 @@ fn lua_val_to_event_arg(state: &LuaState, val: Val) -> crate::event::EventArg {
 }
 
 /// Extract a string from the stack, returning a default if nil or absent.
-fn opt_string_stack(state: &LuaState, index: i32, default: &str) -> String {
+pub(super) fn opt_string_stack(state: &LuaState, index: i32, default: &str) -> String {
     match crate::lua_bridge::stack_val(state, index) {
         Val::Str(s) => state
             .gc

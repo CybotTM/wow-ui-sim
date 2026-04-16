@@ -63,6 +63,7 @@ macro_rules! build_empty_sim_state {
             active_slider_thumb_drag_frame: $runtime.active_slider_thumb_drag_frame,
             next_report_token: $runtime.next_report_token,
             party_members: $collections.party_members,
+            party_group_active: $runtime.party_group_active,
             current_target: $runtime.current_target,
             current_focus: $runtime.current_focus,
             sound_manager: $runtime.sound_manager,
@@ -289,6 +290,8 @@ pub struct SimState {
     pub next_report_token: i64,
     /// Simulated party members (empty = not in group).
     pub party_members: Vec<PartyMember>,
+    /// Whether group-wide APIs should expose the simulated party to Blizzard UI.
+    pub party_group_active: bool,
     /// Current target (None = no target).
     pub current_target: Option<TargetInfo>,
     /// Current focus target (None = no focus).
@@ -463,6 +466,7 @@ struct EmptyRuntimeState {
     active_drag_frame: Option<u64>,
     active_slider_thumb_drag_frame: Option<u64>,
     next_report_token: i64,
+    party_group_active: bool,
     current_target: Option<TargetInfo>,
     current_focus: Option<TargetInfo>,
     sound_manager: Option<SoundManager>,
@@ -510,6 +514,7 @@ macro_rules! build_empty_runtime_state {
             active_drag_frame: None,
             active_slider_thumb_drag_frame: None,
             next_report_token: $next_report_token,
+            party_group_active: false,
             current_target: None,
             current_focus: None,
             sound_manager: None,

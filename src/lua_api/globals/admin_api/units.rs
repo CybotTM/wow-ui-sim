@@ -358,6 +358,7 @@ fn add_party_size_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>
             let mut state = state.borrow_mut();
             let changed = state.party_members.len() != size;
             resize_party_members(&mut state, size);
+            state.party_group_active = size > 0;
             changed
         };
         if changed {

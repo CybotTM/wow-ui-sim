@@ -337,9 +337,18 @@ fn test_unit_exists_pet() {
 #[test]
 fn test_unit_exists_party_member() {
     let env = env();
-    // Default state has 4 party members
-    let exists: bool = env.eval("return UnitExists('party1')").unwrap();
-    assert!(exists, "party1 should exist with default party");
+    let exists: bool = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            return UnitExists('party1')
+            "#,
+        )
+        .unwrap();
+    assert!(
+        exists,
+        "party1 should exist after the admin group roster is activated"
+    );
 }
 
 #[test]
