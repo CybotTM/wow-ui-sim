@@ -2,6 +2,7 @@
 
 pub mod action_bar_api;
 pub mod create_frame;
+pub mod currency_data;
 pub mod enum_data;
 pub mod environment_restore;
 pub mod global_frames;
@@ -11,6 +12,7 @@ pub mod rilua_admin;
 pub mod rilua_create_frame;
 pub mod rilua_font_strings_collection;
 pub mod rilua_keybindings;
+pub mod rilua_missing_surface;
 pub mod rilua_security;
 pub mod rilua_stubs;
 pub mod rilua_utility_system_spell;

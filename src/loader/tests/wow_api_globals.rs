@@ -860,6 +860,7 @@ fn test_old_stack_startup_globals_exist_on_rilua_path() {
 fn test_old_stack_power_lfg_and_cleanup_globals_exist_on_rilua_path() {
     let env = WowLuaEnv::new().unwrap();
     env.exec("C_WowTokenSecure = nil").unwrap();
+    env.exec("LE_GAME_ERR_SPELL_COOLDOWN = nil").unwrap();
     env.restore_post_cleanup_globals();
 
     let (
@@ -876,6 +877,7 @@ fn test_old_stack_power_lfg_and_cleanup_globals_exist_on_rilua_path() {
         token_secure_ty,
         token_count,
         price_lock_duration,
+        spell_cooldown_err,
     ): (
         i64,
         i64,
@@ -888,6 +890,7 @@ fn test_old_stack_power_lfg_and_cleanup_globals_exist_on_rilua_path() {
         bool,
         String,
         String,
+        i64,
         i64,
         i64,
     ) = env
@@ -908,7 +911,8 @@ fn test_old_stack_power_lfg_and_cleanup_globals_exist_on_rilua_path() {
                 type(FACTION_RED_COLOR.GetRGBA),
                 type(C_WowTokenSecure.GetTokenCount),
                 C_WowTokenSecure.GetTokenCount(),
-                C_WowTokenSecure.GetPriceLockDuration()
+                C_WowTokenSecure.GetPriceLockDuration(),
+                LE_GAME_ERR_SPELL_COOLDOWN
             "#,
         )
         .unwrap();
@@ -926,6 +930,7 @@ fn test_old_stack_power_lfg_and_cleanup_globals_exist_on_rilua_path() {
     assert_eq!(token_secure_ty, "function");
     assert_eq!(token_count, 2);
     assert_eq!(price_lock_duration, 900);
+    assert_eq!(spell_cooldown_err, 61);
 }
 
 #[test]

@@ -119,7 +119,14 @@ pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
         .gc
         .tables
         .get(fields_reg_ref)
-        .map(|t| t.get_int(frame_id as i64))
+        .map(|t| {
+            let int_val = t.get_int(frame_id as i64);
+            if int_val != Val::Nil {
+                int_val
+            } else {
+                t.get(Val::Num(frame_id as f64), &state.gc.string_arena)
+            }
+        })
         .unwrap_or(Val::Nil);
     let fields = if let Val::Table(_) = existing {
         existing
@@ -240,7 +247,12 @@ fn table_get_num(state: &LuaState, table: GcRef<Table>, key: f64) -> Val {
 /// Set a numeric-keyed value in a table.
 fn table_set_num(state: &mut LuaState, table: GcRef<Table>, key: f64, value: Val) {
     if let Some(t) = state.gc.tables.get_mut(table) {
-        let _ = t.raw_set(Val::Num(key), value, &state.gc.string_arena);
+        let int_key = key as i64;
+        if int_key > 0 && int_key as f64 == key {
+            let _ = t.raw_set(Val::Num(int_key as f64), value, &state.gc.string_arena);
+        } else {
+            let _ = t.raw_set(Val::Num(key), value, &state.gc.string_arena);
+        }
     }
 }
 
@@ -389,6 +401,30 @@ pub fn registry_table_or_create(state: &mut LuaState, key: &str) -> Val {
     let table = Val::Table(state.gc.alloc_table(Table::new()));
     registry_set(state, key, table);
     table
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{borrow_state, frame_ref};
+    use crate::lua_api::WowLuaEnv;
+    use rilua::LuaApiMut;
+
+    #[test]
+    fn frame_ref_returns_same_table_for_same_widget_id() {
+        let env = WowLuaEnv::new().expect("env");
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+        let ui_parent_id = borrow_state(state)
+            .expect("borrow state")
+            .widgets
+            .get_id_by_name("UIParent")
+            .expect("UIParent");
+
+        let first = frame_ref(state, ui_parent_id).expect("first frame ref");
+        let second = frame_ref(state, ui_parent_id).expect("second frame ref");
+
+        assert_eq!(first, second, "frame_ref should reuse cached table refs");
+    }
 }
 
 // ── Table creation ──────────────────────────────────────────────────

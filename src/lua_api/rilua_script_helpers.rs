@@ -297,10 +297,15 @@ pub fn collect_lua_error(state: &LuaState, msg: &str) -> bool {
         return false;
     };
     sim.lua_errors.push(msg.to_string());
+    let addon_name = sim
+        .executing_addon_index
+        .or(sim.loading_addon_index)
+        .and_then(|idx| sim.addons.get(idx as usize))
+        .map(|addon| addon.folder_name.clone());
     sim.lua_error_records
         .push(crate::lua_api::state::LuaErrorRecord {
             message: msg.to_string(),
-            addon_name: None,
+            addon_name,
         });
     let normalized = crate::lua_errors::extract_error_message(msg);
     let entry = sim.lua_error_counts.entry(normalized).or_insert(0);

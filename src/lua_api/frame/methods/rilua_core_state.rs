@@ -663,13 +663,67 @@ pub fn get_map_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {
-    get_map_id(state)
+    let id = frame_id(state, 1)?;
+    let sim = borrow_state(state)?;
+    let result = sim
+        .fog_of_war_frames
+        .get(&id)
+        .and_then(|fog| fog.ui_map_id)
+        .or_else(|| {
+            sim.unit_position_frames
+                .get(&id)
+                .and_then(|unit_state| unit_state.ui_map_id)
+        })
+        .unwrap_or_else(|| {
+            sim.quest_blobs
+                .get(&id)
+                .map(|b| b.map_id as i32)
+                .unwrap_or(0)
+        });
+    drop(sim);
+    state.push(Val::Num(result as f64));
+    Ok(1)
 }
 
 pub fn set_map_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let map_id = i32::from_stack(state, 2)?;
     let mut sim = borrow_state_mut(state)?;
+    let is_fog = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.object_type_name.as_deref())
+        .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"));
+    if is_fog {
+        sim.fog_of_war_frames.entry(id).or_default().ui_map_id = Some(map_id);
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.fog_of_war_ui_map_id = Some(map_id);
+        }
+        return Ok(0);
+    }
+    if sim.widgets.get(id).is_some_and(|frame| {
+        frame
+            .object_type_name
+            .as_deref()
+            .is_some_and(|name| name.eq_ignore_ascii_case("UnitPositionFrame"))
+    }) {
+        sim.unit_position_frames
+            .entry(id)
+            .or_insert_with(|| crate::lua_api::state::UnitPositionFrameState {
+                ui_map_id: None,
+                units: Vec::new(),
+                unit_colors: std::collections::HashMap::new(),
+                mouse_over_units: Vec::new(),
+                player_ping_scale: 1.0,
+                player_ping_textures: std::collections::HashMap::new(),
+                player_ping_active: false,
+                player_ping_duration: None,
+                player_ping_fade_duration: None,
+                is_finalized: false,
+            })
+            .ui_map_id = Some(map_id);
+        return Ok(0);
+    }
     let blob = sim.quest_blobs.entry(id).or_default();
     blob.map_id = map_id as u32;
     Ok(0)
@@ -1104,6 +1158,25 @@ pub fn get_name(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_debug_name(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let debug_name = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| {
+                frame
+                    .name
+                    .clone()
+                    .unwrap_or_else(|| format!("{}:{id}", frame.widget_type.as_str()))
+            })
+            .unwrap_or_else(|| format!("Frame:{id}"))
+    };
+    let debug_name_val = create_string(state, &debug_name);
+    state.push(debug_name_val);
+    Ok(1)
+}
+
 pub fn get_object_type(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let object_type = {
@@ -1111,6 +1184,9 @@ pub fn get_object_type(state: &mut LuaState) -> LuaResult<u32> {
         sim.widgets
             .get(id)
             .map(|frame| {
+                if matches!(frame.widget_type, crate::widget::WidgetType::WorldFrame) {
+                    return "Frame".to_string();
+                }
                 frame
                     .object_type_name
                     .clone()
@@ -1131,6 +1207,10 @@ pub fn is_object_type(state: &mut LuaState) -> LuaResult<u32> {
         sim.widgets
             .get(id)
             .map(|frame| {
+                if matches!(frame.widget_type, crate::widget::WidgetType::WorldFrame) {
+                    return requested.eq_ignore_ascii_case("WorldFrame")
+                        || requested.eq_ignore_ascii_case("Region");
+                }
                 let actual = frame
                     .object_type_name
                     .as_deref()
@@ -1186,6 +1266,7 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "HasFixedFrameLevel", has_fixed_frame_level)?;
     // Identity
     table_set_rust_fn(state, mt, "GetName", get_name)?;
+    table_set_rust_fn(state, mt, "GetDebugName", get_debug_name)?;
     table_set_rust_fn(state, mt, "GetObjectType", get_object_type)?;
     table_set_rust_fn(state, mt, "IsObjectType", is_object_type)?;
     // Toplevel
@@ -1197,6 +1278,7 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "GetMapID", get_map_id)?;
     table_set_rust_fn(state, mt, "GetUiMapID", get_ui_map_id)?;
     table_set_rust_fn(state, mt, "SetMapID", set_map_id)?;
+    table_set_rust_fn(state, mt, "SetUiMapID", set_map_id)?;
     // Mouse / keyboard
     table_set_rust_fn(state, mt, "EnableMouse", enable_mouse)?;
     table_set_rust_fn(state, mt, "IsMouseEnabled", is_mouse_enabled)?;

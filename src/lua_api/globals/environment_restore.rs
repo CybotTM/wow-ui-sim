@@ -10,5 +10,6 @@ pub fn restore_post_cleanup_globals(
 ) -> crate::Result<()> {
     crate::lua_api::env_init::init_shared_bootstrap(lua)?;
     crate::lua_api::env_init::init_runtime_surface_bootstrap(lua)?;
+    crate::lua_api::env_init::init_enum_globals(lua)?;
     super::register::register_globals(lua, state)
 }

@@ -238,7 +238,7 @@ mod tests {
         env.exec(
             r#"
             local frame = CreateFrame("Frame")
-            frame:RegisterEvent("TEST_EVENT")
+            frame:RegisterEvent("PLAYER_LOGIN")
             frame:SetScript("OnEvent", function(_, _, value)
                 fired = value == 17
             end)
@@ -246,7 +246,7 @@ mod tests {
         )
         .unwrap();
 
-        env.fire_event_with_args("TEST_EVENT", &[rilua::Val::Num(17.0)])
+        env.fire_event_with_args("PLAYER_LOGIN", &[rilua::Val::Num(17.0)])
             .unwrap();
 
         assert!(env.eval::<bool>("return fired").unwrap());

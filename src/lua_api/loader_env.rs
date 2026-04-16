@@ -216,11 +216,12 @@ impl<'a> LoaderEnv<'a> {
             if self.loading_addon_uses_secure_env() {
                 mark_secure_state(state, &func)?;
             }
-            crate::lua_api::rilua_methods::call_function_state(
+            crate::lua_api::rilua_script_helpers::protected_lua_pcall_state(
                 state,
                 Val::Function(func.gc_ref()),
                 &[],
-            )?;
+            )
+            .map_err(crate::Error::Other)?;
             Ok(())
         })
     }

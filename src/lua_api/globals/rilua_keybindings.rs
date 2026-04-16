@@ -76,6 +76,14 @@ pub fn set_binding_macro(state: &mut LuaState) -> LuaResult<u32> {
     true.into_stack(state)
 }
 
+pub fn set_override_binding(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+pub fn clear_override_bindings(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 pub fn save_bindings(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
@@ -99,6 +107,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "SetBindingSpell", set_binding_spell)?;
     LuaApiMut::register_function(lua, "SetBindingItem", set_binding_item)?;
     LuaApiMut::register_function(lua, "SetBindingMacro", set_binding_macro)?;
+    LuaApiMut::register_function(lua, "SetOverrideBinding", set_override_binding)?;
+    LuaApiMut::register_function(lua, "ClearOverrideBindings", clear_override_bindings)?;
     LuaApiMut::register_function(lua, "SaveBindings", save_bindings)?;
     LuaApiMut::register_function(lua, "LoadBindings", load_bindings)?;
     Ok(())

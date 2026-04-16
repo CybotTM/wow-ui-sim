@@ -110,6 +110,24 @@ fn create_engine_frames(
         o,
     );
 
+    register_frame(
+        widgets,
+        WidgetType::Minimap,
+        "Minimap",
+        Some(ui_parent_id),
+        Some((140.0, 140.0)),
+        o,
+    );
+
+    register_hidden_frame(
+        widgets,
+        WidgetType::GameTooltip,
+        "GameTooltip",
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        o,
+    );
+
     // DEFAULT_CHAT_FRAME fallback (overwritten by show_chat_frame workaround when chat addons load)
     register_frame(
         widgets,

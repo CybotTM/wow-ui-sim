@@ -38,6 +38,26 @@ pub fn stub_zero(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Returns `"NONE"` for role APIs that expect a string token.
+pub fn stub_role_none(state: &mut LuaState) -> LuaResult<u32> {
+    let value = state.gc.intern_string(b"NONE");
+    state.push(Val::Str(value));
+    Ok(1)
+}
+
+/// Returns the no-role enum value used by Blizzard APIs.
+pub fn stub_role_none_enum(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(-1.0));
+    Ok(1)
+}
+
+/// Returns `(0, false)` for merchant repair cost checks.
+pub fn stub_repair_all_cost(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
+    Ok(2)
+}
+
 /// Returns a fresh empty table `{}`.
 pub fn stub_empty_table(state: &mut LuaState) -> LuaResult<u32> {
     let table_ref = state.gc.alloc_table(Table::new());
@@ -222,6 +242,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "PickupTalent",
     "PlaceAction",
     "PlayMusic",
+    "PlaySound",
     "PlaySoundFile",
     "QueueForLFG",
     "QuestChoiceFrame_SetActiveChoice",
@@ -238,10 +259,14 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "RequestPartyLootMethod",
     "RequestRaidInfo",
     "GetUnitPowerBarInfo",
+    "GetInventoryItemID",
+    "GetInventoryItemQuality",
     "ResetCameraPosition",
     "ResurrectGetOfferer",
     "RetrieveCorpse",
     "RunMacro",
+    "GetChatWindowMessages",
+    "GetChatWindowChannels",
     "SendAddonMessage",
     "SendChatMessage",
     "SendMail",
@@ -345,6 +370,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "IsEquippableItem",
     "IsEveryoneAssistant",
     "IsFlyableArea",
+    "IsInventoryItemLocked",
     "IsGroupLeader",
     "IsHarmfulSpell",
     "IsHelpfulSpell",
@@ -378,6 +404,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitFactionGroup",
     "UnitInAura",
     "UnitInBattleground",
+    "UnitHasIncomingResurrection",
     "UnitInOtherParty",
     "UnitInParty",
     "UnitInRaid",
@@ -489,7 +516,6 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "UnitDamage",
     "UnitDefense",
     "UnitDodge",
-    "UnitGroupRolesAssigned",
     "UnitHasVehiclePlayerFrameUI",
     "UnitHealthMax",
     "UnitIsAFK",
@@ -509,6 +535,14 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "UnitXPMax",
 ];
 
+static GLOBAL_CUSTOM_STUBS: &[(&str, RustFn)] = &[
+    ("GetReadyCheckStatus", stub_nil),
+    ("GetReadyCheckTimeLeft", stub_zero),
+    ("GetRepairAllCost", stub_repair_all_cost),
+    ("UnitGroupRolesAssigned", stub_role_none),
+    ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
+];
+
 fn register_global_stubs(state: &mut LuaState) {
     for &name in GLOBAL_NIL_STUBS {
         if is_nil_global(state, name) {
@@ -523,6 +557,11 @@ fn register_global_stubs(state: &mut LuaState) {
     for &name in GLOBAL_ZERO_STUBS {
         if is_nil_global(state, name) {
             set_global_fn(state, name, stub_zero);
+        }
+    }
+    for &(name, func) in GLOBAL_CUSTOM_STUBS {
+        if is_nil_global(state, name) {
+            set_global_fn(state, name, func);
         }
     }
 }
@@ -551,6 +590,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AchievementInfo
     ("C_AchievementInfo", "GetRewardItemID", stub_nil),
     ("C_AchievementInfo", "GetAchievementInfo", stub_nil),
+    ("C_AddOnProfiler", "CheckForPerformanceMessage", stub_nil),
     // C_AreaPoiInfo
     ("C_AreaPoiInfo", "GetAreaPOIInfo", stub_nil),
     ("C_AreaPoiInfo", "GetAreaPOISecondsLeft", stub_nil),
@@ -919,6 +959,8 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_NamePlate", "GetNamePlates", stub_empty_table),
     // C_PartyInfo
     ("C_PartyInfo", "GetActiveCategories", stub_empty_table),
+    // C_ZoneAbility
+    ("C_ZoneAbility", "GetActiveAbilities", stub_empty_table),
     // C_QuestLog
     ("C_QuestLog", "GetAllCompletedQuestIDs", stub_empty_table),
     // C_Social

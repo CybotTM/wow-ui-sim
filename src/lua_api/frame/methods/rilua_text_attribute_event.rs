@@ -338,6 +338,10 @@ fn set_font_height(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn set_text_height(state: &mut LuaState) -> LuaResult<u32> {
+    set_font_height(state)
+}
+
 fn get_font_height(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
@@ -386,6 +390,61 @@ fn get_unbounded_string_width(state: &mut LuaState) -> LuaResult<u32> {
 
 fn set_text_to_fit(state: &mut LuaState) -> LuaResult<u32> {
     set_text(state)
+}
+
+fn scale_text_to_fit(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn apply_default_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let default_text = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.attributes.insert(
+            "__default_text".to_string(),
+            crate::widget::AttributeValue::String(default_text.clone()),
+        );
+        frame.attributes.insert(
+            "__default_text_enabled".to_string(),
+            crate::widget::AttributeValue::Boolean(true),
+        );
+        if frame.text.as_deref().unwrap_or_default().is_empty() {
+            frame.text = Some(default_text);
+            frame.attributes.insert(
+                "__defaulted".to_string(),
+                crate::widget::AttributeValue::Boolean(true),
+            );
+        }
+    }
+    Ok(0)
+}
+
+fn try_apply_default_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let default_text = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| match frame.attributes.get("__default_text") {
+                Some(crate::widget::AttributeValue::String(text)) => Some(text.clone()),
+                _ => None,
+            })
+    };
+    let Some(default_text) = default_text else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && frame.text.as_deref().unwrap_or_default().is_empty()
+    {
+        frame.text = Some(default_text);
+        frame.attributes.insert(
+            "__defaulted".to_string(),
+            crate::widget::AttributeValue::Boolean(true),
+        );
+    }
+    Ok(0)
 }
 
 fn set_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
@@ -1682,6 +1741,7 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetFontObjectsToTry", set_font_objects_to_try)?;
     table_set_rust_fn(state, table, "GetFontObject", get_font_object)?;
     table_set_rust_fn(state, table, "SetFontHeight", set_font_height)?;
+    table_set_rust_fn(state, table, "SetTextHeight", set_text_height)?;
     table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
     table_set_rust_fn(state, table, "GetStringWidth", get_string_width)?;
     table_set_rust_fn(state, table, "GetStringHeight", get_string_height)?;
@@ -1708,6 +1768,9 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetTextScale", get_text_scale)?;
     table_set_rust_fn(state, table, "SetTextScale", set_text_scale)?;
     table_set_rust_fn(state, table, "SetTextToFit", set_text_to_fit)?;
+    table_set_rust_fn(state, table, "ScaleTextToFit", scale_text_to_fit)?;
+    table_set_rust_fn(state, table, "ApplyDefaultText", apply_default_text)?;
+    table_set_rust_fn(state, table, "TryApplyDefaultText", try_apply_default_text)?;
     table_set_rust_fn(state, table, "SetTextColor", set_text_color)?;
     table_set_rust_fn(state, table, "GetTextColor", get_text_color)?;
     table_set_rust_fn(state, table, "SetHyperlinksEnabled", set_hyperlinks_enabled)?;

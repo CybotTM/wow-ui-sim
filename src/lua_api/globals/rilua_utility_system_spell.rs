@@ -145,11 +145,28 @@ fn power_type_name(power_type: i32) -> &'static str {
 // ── Utility API ─────────────────────────────────────────────────────────────
 
 /// wipe(t) — clear all entries from a table and return it.
-///
-/// TODO: rilua table iteration API needed to implement fully.
 pub fn wipe(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: iterate table pairs and set each key to nil
     let t = stack_val(state, 1);
+    let Val::Table(table_ref) = t else {
+        state.push(t);
+        return Ok(1);
+    };
+
+    let mut keys = Vec::new();
+    if let Some(table) = state.gc.tables.get(table_ref) {
+        let mut key = Val::Nil;
+        while let Some((next_key, _)) = table.next(key, &state.gc.string_arena)? {
+            keys.push(next_key);
+            key = next_key;
+        }
+    }
+
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        for key in keys {
+            let _ = table.raw_set(key, Val::Nil, &state.gc.string_arena);
+        }
+    }
+
     state.push(t);
     Ok(1)
 }
@@ -1231,6 +1248,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     register_c_lfg_info(lua.state_mut())?;
     register_c_wowtoken_secure(lua.state_mut())?;
     register_c_texture(lua.state_mut())?;
+    register_c_xml_util(lua.state_mut())?;
     register_legacy_addon_globals(lua.state_mut())?;
     register_widget_container_mixin(lua.state_mut())?;
 
@@ -1513,6 +1531,12 @@ fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
         "GetAddOnMetric",
         c_addon_profiler_get_addon_metric,
     )?;
+    table_set_rust_fn(
+        state,
+        profiler_ref,
+        "CheckForPerformanceMessage",
+        c_addon_profiler_check_for_performance_message,
+    )?;
     let key_ref = state.gc.intern_string(b"C_AddOnProfiler");
     if let Some(global) = state.gc.tables.get_mut(state.global) {
         let _ = global.raw_set(Val::Str(key_ref), profiler, &state.gc.string_arena);
@@ -1548,6 +1572,28 @@ fn register_c_texture(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
+fn register_c_xml_util(state: &mut LuaState) -> LuaResult<()> {
+    let c_xml_util = create_table(state);
+    let Val::Table(c_xml_util_ref) = c_xml_util else {
+        unreachable!("create_table must return a table");
+    };
+    table_set_rust_fn(
+        state,
+        c_xml_util_ref,
+        "GetTemplateInfo",
+        c_xml_util_get_template_info,
+    )?;
+    let key_ref = state.gc.intern_string(b"C_XMLUtil");
+    if let Some(global) = state.gc.tables.get_mut(state.global) {
+        let _ = global.raw_set(
+            Val::Str(key_ref),
+            Val::Table(c_xml_util_ref),
+            &state.gc.string_arena,
+        );
+    }
+    Ok(())
+}
+
 fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
     let mixin = create_table(state);
     let Val::Table(mixin_ref) = mixin else {
@@ -1574,6 +1620,77 @@ fn c_texture_get_atlas_exists(state: &mut LuaState) -> LuaResult<u32> {
             .and_then(crate::atlas::get_atlas_info)
             .is_some(),
     ));
+    Ok(1)
+}
+
+fn c_xml_util_get_template_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(template_name) = val_to_string(state, stack_val(state, 1)) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let Some(info) = crate::xml::get_template_info(&template_name) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let info_table = create_table(state);
+    let Val::Table(info_ref) = info_table else {
+        unreachable!("create_table must return a table");
+    };
+    let key_values = create_table(state);
+    let Val::Table(key_values_ref) = key_values else {
+        unreachable!("create_table must return a table");
+    };
+
+    let set_str = |state: &mut LuaState, table_ref, key: &str, value: &str| {
+        let key_ref = state.gc.intern_string(key.as_bytes());
+        let value = create_string(state, value);
+        if let Some(table) = state.gc.tables.get_mut(table_ref) {
+            let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+        }
+    };
+    let set_num = |state: &mut LuaState, table_ref, key: &str, value: f64| {
+        let key_ref = state.gc.intern_string(key.as_bytes());
+        if let Some(table) = state.gc.tables.get_mut(table_ref) {
+            let _ = table.raw_set(Val::Str(key_ref), Val::Num(value), &state.gc.string_arena);
+        }
+    };
+
+    for (index, key_value) in info.key_values.iter().enumerate() {
+        let key_value_table = create_table(state);
+        let Val::Table(key_value_ref) = key_value_table else {
+            unreachable!("create_table must return a table");
+        };
+        set_str(state, key_value_ref, "key", &key_value.key);
+        set_str(state, key_value_ref, "value", &key_value.value);
+        if let Some(value_type) = &key_value.value_type {
+            set_str(state, key_value_ref, "type", value_type);
+        }
+        if let Some(table) = state.gc.tables.get_mut(key_values_ref) {
+            let _ = table.raw_set(
+                Val::Num((index + 1) as f64),
+                Val::Table(key_value_ref),
+                &state.gc.string_arena,
+            );
+        }
+    }
+
+    set_str(state, info_ref, "type", &info.frame_type);
+    set_str(state, info_ref, "frameType", &info.frame_type);
+    set_str(state, info_ref, "frameTemplate", &info.template_name);
+    set_str(state, info_ref, "template", &info.template_name);
+    set_num(state, info_ref, "width", info.width as f64);
+    set_num(state, info_ref, "height", info.height as f64);
+    let key_ref = state.gc.intern_string(b"keyValues");
+    if let Some(table) = state.gc.tables.get_mut(info_ref) {
+        let _ = table.raw_set(
+            Val::Str(key_ref),
+            Val::Table(key_values_ref),
+            &state.gc.string_arena,
+        );
+    }
+
+    state.push(info_table);
     Ok(1)
 }
 
@@ -2156,4 +2273,8 @@ fn c_addon_profiler_get_addon_metric(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Num(value));
     Ok(1)
+}
+
+fn c_addon_profiler_check_for_performance_message(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }

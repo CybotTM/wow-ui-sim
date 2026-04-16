@@ -160,3 +160,65 @@ fn test_suppressed_lua_error_summary_lines_report_repeat_counts() {
         "Lua error suppressed 1 additional times: repeated boom"
     );
 }
+
+#[test]
+fn test_collect_lua_error_records_loading_addon_name() {
+    let env = WowLuaEnv::new().unwrap();
+    super::register_loading_test_addon(&env);
+
+    crate::lua_api::rilua_script_helpers::collect_lua_error(env.rilua().state(), "boom");
+
+    let state = env.state().borrow();
+    assert_eq!(state.lua_error_records.len(), 1);
+    assert_eq!(
+        state.lua_error_records[0].addon_name.as_deref(),
+        Some("TestAddon")
+    );
+}
+
+#[test]
+fn test_collect_lua_error_prefers_executing_addon_name() {
+    let env = WowLuaEnv::new().unwrap();
+    env.register_addon(crate::lua_api::AddonInfo {
+        folder_name: "LoadingAddon".to_string(),
+        title: "LoadingAddon".to_string(),
+        enabled: true,
+        loaded: true,
+        ..Default::default()
+    });
+    env.register_addon(crate::lua_api::AddonInfo {
+        folder_name: "ExecutingAddon".to_string(),
+        title: "ExecutingAddon".to_string(),
+        enabled: true,
+        loaded: true,
+        ..Default::default()
+    });
+    let (loading_idx, executing_idx) = {
+        let state = env.state().borrow();
+        let loading_idx = state
+            .addons
+            .iter()
+            .position(|addon| addon.folder_name == "LoadingAddon")
+            .expect("LoadingAddon should be registered");
+        let executing_idx = state
+            .addons
+            .iter()
+            .position(|addon| addon.folder_name == "ExecutingAddon")
+            .expect("ExecutingAddon should be registered");
+        (loading_idx as u16, executing_idx as u16)
+    };
+    {
+        let mut state = env.state().borrow_mut();
+        state.loading_addon_index = Some(loading_idx);
+        state.executing_addon_index = Some(executing_idx);
+    }
+
+    crate::lua_api::rilua_script_helpers::collect_lua_error(env.rilua().state(), "boom");
+
+    let state = env.state().borrow();
+    assert_eq!(state.lua_error_records.len(), 1);
+    assert_eq!(
+        state.lua_error_records[0].addon_name.as_deref(),
+        Some("ExecutingAddon")
+    );
+}

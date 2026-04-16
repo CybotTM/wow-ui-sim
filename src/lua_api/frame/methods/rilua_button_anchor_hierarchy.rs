@@ -1396,7 +1396,7 @@ fn get_parent(state: &mut LuaState) -> LuaResult<u32> {
     };
     match parent_id {
         Some(pid) => {
-            let val = frame_ref(state, pid)?;
+            let val = frame_global_or_ref(state, pid)?;
             state.push(val);
             Ok(1)
         }
@@ -2256,6 +2256,13 @@ fn animation_config_noop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn set_scale_dispatch(state: &mut LuaState) -> LuaResult<u32> {
+    if crate::lua_api::rilua_methods::extract_frame_id(state, stack_val(state, 1)).is_some() {
+        return crate::lua_api::frame::methods::rilua_core_state::set_scale(state);
+    }
+    animation_config_noop(state)
+}
+
 fn animation_numeric_arg(state: &LuaState, index: i32) -> f64 {
     match stack_val(state, index) {
         Val::Num(value) => value.max(0.0),
@@ -2573,7 +2580,7 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetFromAlpha", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetToAlpha", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetOffset", animation_config_noop)?;
-    table_set_rust_fn(state, table, "SetScale", animation_config_noop)?;
+    table_set_rust_fn(state, table, "SetScale", set_scale_dispatch)?;
     table_set_rust_fn(state, table, "SetScaleFrom", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetScaleTo", animation_config_noop)?;
     table_set_rust_fn(state, table, "SetDegrees", animation_config_noop)?;

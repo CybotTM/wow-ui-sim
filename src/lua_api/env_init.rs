@@ -6,8 +6,8 @@
 use super::builtin_frames::create_builtin_frames;
 use super::state::{AddonRuntimeMetrics, SimState};
 use crate::lua_api::frame::methods::{
-    rilua_button_anchor_hierarchy, rilua_core_state, rilua_misc, rilua_text_attribute_event,
-    rilua_widgets,
+    rilua_button_anchor_hierarchy, rilua_core_state, rilua_map_frames, rilua_misc,
+    rilua_text_attribute_event, rilua_widgets,
 };
 use crate::lua_api::globals::enum_data::{EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
 use crate::lua_api::rilua_methods::{
@@ -74,6 +74,8 @@ if table.unpack == nil then
   table.unpack = unpack
 end
 
+format = format or string.format
+
 if table.wipe == nil then
   function table.wipe(tbl)
     if type(tbl) ~= "table" then
@@ -87,6 +89,83 @@ if table.wipe == nil then
 end
 
 tWipe = tWipe or table.wipe
+
+local function __wow_pack_results(...)
+  return { n = select("#", ...), ... }
+end
+
+function hooksecurefunc(target, methodName, hook)
+  local object = target
+  local key = methodName
+  local callback = hook
+
+  if type(target) == "string" and type(methodName) == "function" and hook == nil then
+    object = _G
+    key = target
+    callback = methodName
+  end
+
+  if type(object) ~= "table" or type(key) ~= "string" or type(callback) ~= "function" then
+    return
+  end
+
+  local original = object[key]
+  if type(original) ~= "function" then
+    return
+  end
+
+  object[key] = function(...)
+    local results = __wow_pack_results(original(...))
+    callback(...)
+    return unpack(results, 1, results.n)
+  end
+end
+
+if getn == nil then
+  function getn(tbl)
+    if type(tbl) ~= "table" then
+      return nil
+    end
+    return #tbl
+  end
+end
+
+if table.getn == nil then
+  table.getn = getn
+end
+
+if strtrim == nil then
+  function strtrim(value)
+    value = tostring(value or "")
+    return (value:gsub("^%s+", ""):gsub("%s+$", ""))
+  end
+end
+
+local function __wow_deep_copy_table(source, seen)
+  if type(source) ~= "table" then
+    return source
+  end
+  seen = seen or {}
+  if seen[source] ~= nil then
+    return seen[source]
+  end
+  local copy = {}
+  seen[source] = copy
+  for key, value in pairs(source) do
+    copy[__wow_deep_copy_table(key, seen)] = __wow_deep_copy_table(value, seen)
+  end
+  local mt = getmetatable(source)
+  if mt ~= nil then
+    setmetatable(copy, __wow_deep_copy_table(mt, seen))
+  end
+  return copy
+end
+
+if CopyTable == nil then
+  function CopyTable(source)
+    return __wow_deep_copy_table(source)
+  end
+end
 
 if GetCurrentEnvironment == nil then
   function GetCurrentEnvironment()
@@ -210,9 +289,81 @@ if BreakUpLargeNumbers == nil then
   end
 end
 
+if StaticPopup_Hide == nil then
+  function StaticPopup_Hide(_which, _data)
+  end
+end
+
+if StaticPopup_Show == nil then
+  function StaticPopup_Show(_which, _text_arg1, _text_arg2, _data)
+    return nil
+  end
+end
+
+if ReloadUI == nil then
+  function ReloadUI()
+  end
+end
+
 if GetGameTime == nil then
   function GetGameTime()
     return 12, 0
+  end
+end
+
+if GetLocale == nil then
+  function GetLocale()
+    return "enUS"
+  end
+end
+
+if GetMoney == nil then
+  function GetMoney()
+    return 0
+  end
+end
+
+if GetFramerate == nil then
+  function GetFramerate()
+    return 60
+  end
+end
+
+if GetCategoryList == nil then
+  function GetCategoryList()
+    return {}
+  end
+end
+
+if UI_SPECIAL_FRAMES == nil then
+  UI_SPECIAL_FRAMES = {}
+end
+
+if UISpecialFrames == nil then
+  UISpecialFrames = UI_SPECIAL_FRAMES
+end
+
+if GetGuildCategoryList == nil then
+  function GetGuildCategoryList()
+    return {}
+  end
+end
+
+if GetStatisticsCategoryList == nil then
+  function GetStatisticsCategoryList()
+    return {}
+  end
+end
+
+if GetDefaultScale == nil then
+  function GetDefaultScale()
+    return 1
+  end
+end
+
+if GetInventoryItemLink == nil then
+  function GetInventoryItemLink(_unit, _slot)
+    return nil
   end
 end
 
@@ -353,6 +504,21 @@ if GetMinimapZoneText == nil then
 end
 if GetRealZoneText == nil then
   function GetRealZoneText() return "" end
+end
+if UnitGroupRolesAssigned == nil then
+  function UnitGroupRolesAssigned() return "NONE" end
+end
+if UnitGroupRolesAssignedEnum == nil then
+  function UnitGroupRolesAssignedEnum() return -1 end
+end
+if GetInventoryItemID == nil then
+  function GetInventoryItemID() return nil end
+end
+if GetChatWindowChannels == nil then
+  function GetChatWindowChannels() return end
+end
+if IsInventoryItemLocked == nil then
+  function IsInventoryItemLocked() return false end
 end
 
 -- Modifier-key state. Sim never has modifier keys pressed at load
@@ -659,6 +825,7 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
 C_LFGList = __wow_merge_namespace(C_LFGList, {
   GetApplications = function() return {} end,
   GetApplicationInfo = function() return nil end,
+  GetAvailableCategories = function() return {} end,
   GetAvailableRoles = function() return false, false, false end,
   GetNumApplications = function() return 0, 0 end,
   GetNumApplicants = function() return 0, 0 end,
@@ -673,6 +840,18 @@ C_LFGList = __wow_merge_namespace(C_LFGList, {
   CanCreateScenarioGroup = function() return false end,
   IsPremadeGroupFinderEnabled = function() return false end,
   RemoveListing = __wow_noop,
+})
+
+C_AddOnProfiler = __wow_merge_namespace(C_AddOnProfiler, {
+  CheckForPerformanceMessage = function() return nil end,
+})
+
+C_Ping = __wow_merge_namespace(C_Ping, {
+  GetDefaultPingOptions = function() return {} end,
+})
+
+C_ZoneAbility = __wow_merge_namespace(C_ZoneAbility, {
+  GetActiveAbilities = function() return {} end,
 })
 
 C_AuthChallenge = __wow_merge_namespace(C_AuthChallenge, {
@@ -1610,6 +1789,12 @@ if GetMaxPlayerLevel == nil then
   end
 end
 
+if EJ_GetInstanceInfo == nil then
+  function EJ_GetInstanceInfo(_instanceID)
+    return "", "", 0, 0, 0, 0, 0, 0, false, 0, 0, false
+  end
+end
+
 if GetClientDisplayExpansionLevel == nil then
   function GetClientDisplayExpansionLevel()
     return 10
@@ -2156,8 +2341,16 @@ if GetLFGRoleUpdate == nil then
     return false, 0, 0, 0, 0, false
   end
 end
-if HasCompletedAnyAchievement == nil then
-  function HasCompletedAnyAchievement() return false end
+function HasCompletedAnyAchievement()
+  return true
+end
+function CanShowAchievementUI()
+  return true
+end
+if GetTotalAchievementPoints == nil then
+  function GetTotalAchievementPoints()
+    return 0
+  end
 end
 if GetPartyLFGID == nil then
   function GetPartyLFGID() return 0 end
@@ -2433,6 +2626,12 @@ C_ColorOverrides = __wow_merge_namespace(C_ColorOverrides, {
   end,
 })
 
+C_PvP = __wow_merge_namespace(C_PvP, {
+  IsInBrawl = function() return false end,
+  IsSoloShuffle = function() return false end,
+  GetArenaCrowdControlInfo = function() return nil, 0, 0 end,
+})
+
 C_ScriptedAnimations = __wow_merge_namespace(C_ScriptedAnimations, {
   GetAllScriptedAnimationEffects = function()
     return {}
@@ -2443,6 +2642,65 @@ C_XMLUtil = C_XMLUtil or __wow_namespace({
   GetTemplateInfo = function()
     return nil
   end,
+})
+
+C_ToyBoxInfo = __wow_merge_namespace(C_ToyBoxInfo, {
+  IsUsingDefaultFilters = function() return true end,
+})
+
+C_HeirloomInfo = __wow_merge_namespace(C_HeirloomInfo, {
+  IsUsingDefaultFilters = function() return true end,
+})
+
+C_TransmogCollection = __wow_merge_namespace(C_TransmogCollection, {
+  IsUsingDefaultFilters = function() return true end,
+})
+
+C_MountJournal = __wow_merge_namespace(C_MountJournal, {
+  IsUsingDefaultFilters = function() return true end,
+  GetDynamicFlightModeSpellID = function() return 0 end,
+})
+
+C_PetJournal = __wow_merge_namespace(C_PetJournal, {
+  IsUsingDefaultFilters = function() return true end,
+  GetSummonBattlePetCooldown = function() return 0, 0, false end,
+})
+
+C_SpecializationInfo = __wow_merge_namespace(C_SpecializationInfo, {
+  GetInspectSelectedPvpTalent = function() return nil end,
+})
+
+C_PerksActivities = __wow_merge_namespace(C_PerksActivities, {
+  AddTrackedPerksActivity = function(_id) end,
+  ClearPerksActivitiesPendingCompletion = function() end,
+  GetAllPerksActivityTags = function()
+    return { tagName = {} }
+  end,
+  GetPerksActivitiesInfo = function()
+    return {
+      activePerksMonth = 0,
+      displayMonthName = "",
+      secondsRemaining = 0,
+      activities = {},
+      thresholds = {},
+    }
+  end,
+  GetPerksActivitiesPendingCompletion = function()
+    return { pendingIDs = {} }
+  end,
+  GetPerksActivityChatLink = function(_id)
+    return ""
+  end,
+  GetPerksActivityInfo = function(_id)
+    return nil
+  end,
+  GetPerksUIThemePrefix = function()
+    return ""
+  end,
+  GetTrackedPerksActivities = function()
+    return { trackedIDs = {} }
+  end,
+  RemoveTrackedPerksActivity = function(_id) end,
 })
 
 if CreateTemplateInfoCache == nil then
@@ -2489,6 +2747,7 @@ TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN = TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN or
 ERR_QUEST_SESSION_RESULT_RESYNC = ERR_QUEST_SESSION_RESULT_RESYNC or "Resync"
 CLASS_SORT_ORDER = CLASS_SORT_ORDER or { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "MONK", "DRUID", "DEMONHUNTER", "EVOKER" }
 EVENT_TOAST_MANAGER_OFFSET_Y_OVERRIDE = false
+CLOCK_TICKER_Y_OVERRIDE = CLOCK_TICKER_Y_OVERRIDE or false
 
 local __global_mt = getmetatable(_G) or {}
 local __prev_index = __global_mt.__index
@@ -2541,8 +2800,6 @@ __global_mt.__index = function(t, key)
   elseif type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") then
     value = __wow_namespace()
   elseif type(key) == "string" and key:match("^ERR_") then
-    value = key
-  elseif type(key) == "string" and key:match("^[A-Z0-9_]+$") then
     value = key
   end
 
@@ -2648,7 +2905,7 @@ pub(super) fn init_lua_state(
     Ok(())
 }
 
-fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+pub(super) fn init_enum_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let enum_table = ensure_global_table(state, "Enum");
     for &(enum_name, entries) in EXPLICIT_ENUMS.iter() {
@@ -2781,6 +3038,7 @@ fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::rilua_timer_layout::register_layout_fns_on_table(state, frame_mt_ref)?;
     rilua_core_state::register_all(state, frame_mt_ref)?;
     rilua_misc::register_all(state, frame_mt_ref)?;
+    rilua_map_frames::register_all(state, frame_mt_ref)?;
     rilua_text_attribute_event::register_all(state, frame_mt_ref)?;
     rilua_button_anchor_hierarchy::register_all(state, frame_mt_ref)?;
     rilua_widgets::register_all(state, frame_mt_ref)?;

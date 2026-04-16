@@ -417,3 +417,66 @@ fn test_get_available_locale_info_returns_locale_id() {
         .unwrap();
     assert_eq!(id, 1);
 }
+
+// ============================================================================
+// Startup Surface Parity
+// ============================================================================
+
+#[test]
+fn test_c_addon_profiler_check_for_performance_message_is_callable() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_AddOnProfiler.CheckForPerformanceMessage() == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn test_get_repair_all_cost_returns_zero_and_false() {
+    let env = env();
+    let (cost, can_repair): (i32, bool) = env.eval("return GetRepairAllCost()").unwrap();
+    assert_eq!(cost, 0);
+    assert!(!can_repair);
+}
+
+#[test]
+fn test_c_ping_get_default_ping_options_returns_empty_table() {
+    let env = env();
+    let count: i32 = env
+        .eval("local options = C_Ping.GetDefaultPingOptions(); return #options")
+        .unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
+fn test_c_lfg_list_get_available_categories_returns_empty_table() {
+    let env = env();
+    let count: i32 = env
+        .eval("local categories = C_LFGList.GetAvailableCategories(); return #categories")
+        .unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
+fn test_ready_check_globals_report_no_active_check() {
+    let env = env();
+    let (status_is_nil, time_left): (bool, i32) = env
+        .eval(
+            r#"
+            return GetReadyCheckStatus("player") == nil,
+                   GetReadyCheckTimeLeft()
+            "#,
+        )
+        .unwrap();
+    assert!(status_is_nil);
+    assert_eq!(time_left, 0);
+}
+
+#[test]
+fn test_unit_has_incoming_resurrection_returns_false() {
+    let env = env();
+    let has_resurrection: bool = env
+        .eval(r#"return UnitHasIncomingResurrection("player")"#)
+        .unwrap();
+    assert!(!has_resurrection);
+}

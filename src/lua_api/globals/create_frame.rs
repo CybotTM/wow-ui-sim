@@ -1,7 +1,7 @@
 //! Minimal CreateFrame helpers kept alive while the implementation moves to rilua.
 
 use crate::lua_api::SimState;
-use crate::lua_api::rilua_methods::{borrow_state_mut, frame_ref};
+use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut, frame_ref};
 use crate::widget::{Frame, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -18,6 +18,13 @@ pub fn create_frame_instance(
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
     if widget_type.as_str() != frame_type {
         frame.object_type_name = Some(frame_type.to_string());
+    }
+    let initial_hidden = borrow_state(state)?
+        .create_frame_initial_hidden
+        .unwrap_or(false);
+    if initial_hidden {
+        frame.visible = false;
+        frame.effective_alpha = 0.0;
     }
 
     {

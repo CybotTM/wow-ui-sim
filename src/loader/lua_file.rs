@@ -139,6 +139,16 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "function EditModeManagerFrameMixin:UpdateLayoutInfo(layoutInfo, reconcileLayouts)\n\tself.layoutApplyInProgress = true;\n\tself.layoutInfo = layoutInfo or self.layoutInfo or { layouts = {}, activeLayout = 1 };\n\tif type(self.layoutInfo.layouts) ~= \"table\" then\n\t\tself.layoutInfo.layouts = {};\n\tend",
                 1,
             )
+    } else if chunk_name.ends_with("/MainMenuBarMicroButtons.lua") {
+        source
+            .replace(
+                "local wasShown = CatalogShopInboundInterface.IsShown();",
+                "local wasShown = false;\n\t\tif CatalogShopInboundInterface and type(CatalogShopInboundInterface.IsShown) == \"function\" then\n\t\t\tlocal ok, value = pcall(CatalogShopInboundInterface.IsShown);\n\t\t\twasShown = ok and value or false;\n\t\tend",
+            )
+            .replace(
+                "local wasShown = StoreFrame_IsShown();",
+                "local wasShown = false;\n\t\tif type(StoreFrame_IsShown) == \"function\" then\n\t\t\tlocal ok, value = pcall(StoreFrame_IsShown);\n\t\t\twasShown = ok and value or false;\n\t\tend",
+            )
     } else if chunk_name.ends_with("/UIParent.lua") {
         source
             .replacen(
@@ -149,6 +159,11 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
             .replacen(
                 "NPETutorial_AttemptToBegin(event);",
                 "if type(NPETutorial_AttemptToBegin) == \"function\" then NPETutorial_AttemptToBegin(event); end",
+                1,
+            )
+            .replacen(
+                "UpdateMicroButtons();",
+                "pcall(UpdateMicroButtons);",
                 1,
             )
             .replacen(
@@ -166,6 +181,11 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "-- EventUtil.TriggerOnVariablesLoaded() skipped in rilua startup",
                 1,
             )
+    } else if chunk_name.ends_with("/Blizzard_Shared_StoreUIInbound.lua") {
+        source.replace(
+            "function StoreFrame_IsShown()\n\treturn StoreFrame:GetAttribute(\"isshown\");\nend",
+            "function StoreFrame_IsShown()\n\tif type(StoreFrame) ~= \"table\" or type(StoreFrame.GetAttribute) ~= \"function\" then\n\t\treturn false;\n\tend\n\tlocal ok, shown = pcall(StoreFrame.GetAttribute, StoreFrame, \"isshown\");\n\treturn ok and shown or false;\nend",
+        )
     } else if chunk_name.ends_with("/MinimalSlider.lua") {
         source.replace(
             "self.Slider.Thumb:SetAlpha(alpha);",
