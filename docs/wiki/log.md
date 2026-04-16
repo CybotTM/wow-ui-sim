@@ -2,6 +2,22 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] update | intern_string_static mid-cycle fix + migration landed
+
+Found the root cause of the earlier migration breakage. `intern_string_static`
+inserts into `static_intern_cache`, but `mark_gc_roots` only scans that cache
+at cycle start — a mid-Propagate insert is still pre-flip current-white, gets
+swept at cycle end, and the cache ends up pointing at a freed slot. Fixed in
+rilua by colouring the new ref Black during Propagate/Sweep/Finalize; added
+`intern_string_static_mid_cycle_survives_sweep` regression test.
+
+Applied the migration for `registry_get/set/table_or_create`, `registry_table`,
+`attach_frame_metatable`, and fan-out callers — intern counter 1,250,287 →
+1,096,266 (−12%), release startup 1.18s → 1.15s median (n=5). `frame_ref_cache`
+(the biggest single call site, 286K/startup) remains deferred: even with the
+GC fix, migrating that path cascades into "OnLoad (a nil value)" failures
+for ~300 addons and the root cause isn't yet understood.
+
 ## [2026-04-16] ingest | intern_string call-site ranking
 
 Added `investigations/intern-string-ranking.md` and the rilua

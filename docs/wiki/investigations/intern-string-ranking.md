@@ -54,21 +54,34 @@ Call sites that reach `intern_string` via a `&'static str`:
 
 The `registry_*` helpers route every call site listed above through a single `intern_string(key.as_bytes())`. Migrating those three functions to `intern_string_static` would eliminate most of the top 5.
 
-## Attempted migration
+## Root cause of the original breakage
 
-Tried migrating (on this branch, later reverted):
+`intern_string_static` inserts its newly-interned string into `static_intern_cache`, but `mark_gc_roots` only iterates that cache at cycle start (the Pause→Propagate transition via `mark_roots`). If the insert happens mid-Propagate, the new string is still the pre-flip current-white; the atomic flip turns that colour into "other white" = dead; sweep frees the slot and `sweep_dead` removes the ref from the string bucket. The cache is left pointing at a freed object.
 
-- `rilua_methods::frame_ref_cache` → direct `intern_string_static(FRAME_REFS_KEY.as_bytes())`
-- `rilua_methods::attach_frame_metatable` → direct `intern_string_static(b"__rilua_frame_mt")`
-- `rilua_methods::{registry_get, registry_set, registry_table_or_create}` → `key: &'static str`, internally use `intern_string_static`
-- `rilua_script_helpers::{registry_table, registry_table_or_create}` → same
-- Fan-out callers (`precompiled::store_precompiled`, etc.) → `&'static str` params
+A later plain `intern_string` for the same content does a bucket lookup, doesn't find the (now-removed) ref, and allocates a **new** `GcRef`. Writes that used the cached static ref and reads that used the plain ref therefore land on different keys in the same table, and every Blizzard call site that registered a script handler or metatable before the simulator caught up ended up firing on a frame without methods.
 
-Build passed. Runtime intern-stats count dropped **1,250,287 → 318,410 (−74.5%)**.
+Traced end-to-end with a diagnostic in `raw_set`: stored ref was `GcRef(9106)`, later readers saw `GcRef(57980)` for the same bytes. The string buckets confirmed 9106 was pulled out between the write and the read.
 
-**But release startup produced 22 new Lua errors** ("attempt to call method 'SetForbidden'/'IsVisible'/'RegisterEvent' on a nil value" — frames without their shared metatable). Bisected to: *using `intern_string_static` inside `registry_set` alone is sufficient to break frame metatable lookup*. Using `intern_string_static` only in `registry_get` is fine. So the written key and the read key must resolve to different `GcRef<LuaString>` values for the same content, at least sometimes.
+### Fix (rilua)
 
-This is surprising because `intern_string_static`'s miss path falls back to `intern_string`, which is content-deduped, so it should return the same `GcRef` as a parallel plain `intern_string` call. Not reproduced in rilua's 685-test suite. Blocking the migration until the rilua behaviour is understood — filed as a follow-up.
+`intern_string_static` now colours the newly-interned ref `Black` when the GC is in Propagate / SweepString / Sweep / Finalize. Black survives the current cycle's sweep; the next cycle's `mark_gc_roots` takes over as usual.
+
+Regression test: `intern_string_static_mid_cycle_survives_sweep` (vm/state.rs). Fails without the fix, passes with it. All 686 rilua tests pass.
+
+## Applied migration
+
+`wow-ui-sim` now routes these through `intern_string_static`:
+
+- `rilua_methods::{registry_get, registry_set, registry_table_or_create}` (`key: &'static str`)
+- `rilua_methods::attach_frame_metatable` (`b"__rilua_frame_mt"` direct)
+- `rilua_script_helpers::{registry_table, registry_table_or_create}` (`key: &'static str`)
+- Fan-out callers (`precompiled::store_precompiled`, `rilua_utility_system_spell::set_registry_bool`, etc.) tightened to `&'static str` params.
+
+Intern counter: **1,250,287 → 1,096,266 (−12%)** in the cold-startup path. Release wall time: **1.18s → 1.15s** median (n=5). Smaller than the raw call-count delta suggests because `intern_string_static` hits are themselves fast but not free, and we only migrated sites whose keys are known `&'static`.
+
+### Still deferred: `rilua_methods::frame_ref_cache`
+
+`frame_ref_cache` is the single biggest intern call site (286K calls of `__rilua_frame_refs`) but migrating it causes a secondary cascade: ~300 Blizzard addons fail with "attempt to call method 'OnLoad' (a nil value)". The rilua-side GC-colour fix does not cover this path. Root cause not yet identified; left as a follow-up. Call-site is commented in `frame_ref_cache` so the next migration attempt doesn't repeat the experiment blind.
 
 ## Follow-ups
 

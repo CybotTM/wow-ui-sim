@@ -167,6 +167,12 @@ pub fn sync_child_to_rilua(
 /// Get or create the frame ref cache table in the registry.
 /// Pre-sized for ~3000 frames (typical Blizzard UI load).
 fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
+    // NOTE: Do NOT use intern_string_static here. Even with the mid-cycle
+    // Black-colour fix in rilua, migrating this specific call site to the
+    // pointer-keyed cache makes ~300 Blizzard addons error out with
+    // "OnLoad (a nil value)". Root cause not yet understood; other
+    // registry helpers migrate cleanly. See
+    // docs/wiki/investigations/intern-string-ranking.md.
     let key_ref = state.gc.intern_string(FRAME_REFS_KEY.as_bytes());
     let registry = state.gc.tables.get(state.registry);
     if let Some(reg) = registry {
@@ -187,7 +193,7 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
 /// Methods are accessed via `__index` in the metatable, not copied directly.
 /// This avoids ~636 raw_set calls per frame and reduces memory/GC pressure.
 fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
-    let mt_key = state.gc.intern_string(b"__rilua_frame_mt");
+    let mt_key = state.gc.intern_string_static(b"__rilua_frame_mt");
     let mt_val = state
         .gc
         .tables
@@ -375,8 +381,8 @@ pub fn pcall_function(lua: &mut rilua::Lua, func: Val, args: &[Val]) -> Vec<Val>
 /// Get a named value from rilua's registry table.
 ///
 /// Equivalent to mlua's `lua.named_registry_value(key)`.
-pub fn registry_get(state: &mut LuaState, key: &str) -> Val {
-    let key_ref = state.gc.intern_string(key.as_bytes());
+pub fn registry_get(state: &mut LuaState, key: &'static str) -> Val {
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     state
         .gc
         .tables
@@ -388,8 +394,8 @@ pub fn registry_get(state: &mut LuaState, key: &str) -> Val {
 /// Set a named value in rilua's registry table.
 ///
 /// Equivalent to mlua's `lua.set_named_registry_value(key, value)`.
-pub fn registry_set(state: &mut LuaState, key: &str, value: Val) {
-    let key_ref = state.gc.intern_string(key.as_bytes());
+pub fn registry_set(state: &mut LuaState, key: &'static str, value: Val) {
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     if let Some(reg) = state.gc.tables.get_mut(state.registry) {
         let _ = reg.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
@@ -398,7 +404,7 @@ pub fn registry_set(state: &mut LuaState, key: &str, value: Val) {
 /// Get or create a named table in rilua's registry.
 ///
 /// Equivalent to mlua's pattern: `lua.named_registry_value(key).unwrap_or_else(|| { create + set })`.
-pub fn registry_table_or_create(state: &mut LuaState, key: &str) -> Val {
+pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> Val {
     let existing = registry_get(state, key);
     if let Val::Table(_) = existing {
         return existing;

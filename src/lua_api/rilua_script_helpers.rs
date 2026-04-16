@@ -23,8 +23,9 @@ const LUA_MULTRET: i32 = -1;
 const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
 
 /// Get a named table from rilua's registry, returning None if absent.
-pub fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
-    let key_ref = state.gc.intern_string(key.as_bytes());
+/// `key` is `&'static str` so the intern hits the pointer-keyed fast path.
+pub fn registry_table(state: &mut LuaState, key: &'static str) -> Option<GcRef<Table>> {
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     let registry = state.gc.tables.get(state.registry)?;
     match registry.get_str(key_ref, &state.gc.string_arena) {
         Val::Table(t) => Some(t),
@@ -33,12 +34,12 @@ pub fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
 }
 
 /// Get or create a named table in rilua's registry.
-pub fn registry_table_or_create(state: &mut LuaState, key: &str) -> GcRef<Table> {
+pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> GcRef<Table> {
     if let Some(existing) = registry_table(state, key) {
         return existing;
     }
     let new_table = state.gc.alloc_table(Table::new());
-    let key_ref = state.gc.intern_string(key.as_bytes());
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
     if let Some(reg) = state.gc.tables.get_mut(state.registry) {
         let _ = reg.raw_set(
             Val::Str(key_ref),
@@ -275,7 +276,7 @@ fn sync_on_update_runtime_cache(state: &mut LuaState, widget_id: u64) {
     sim.visible_on_update_cache = None;
 }
 
-fn cached_handler_present(state: &mut LuaState, cache_key: &str, widget_id: u64) -> bool {
+fn cached_handler_present(state: &mut LuaState, cache_key: &'static str, widget_id: u64) -> bool {
     let Some(table_ref) = registry_table(state, cache_key) else {
         return false;
     };
@@ -404,7 +405,7 @@ fn collect_all_event_listeners(
 
 fn resolve_event_subtable(
     state: &mut LuaState,
-    registry_key: &str,
+    registry_key: &'static str,
     event: &str,
 ) -> Option<GcRef<Table>> {
     let container_ref = registry_table(state, registry_key)?;

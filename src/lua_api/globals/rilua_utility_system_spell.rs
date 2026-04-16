@@ -1825,11 +1825,11 @@ fn call_table_util_comparator(
     Ok(!matches!(result, Val::Nil | Val::Bool(false)))
 }
 
-fn registry_bool(state: &mut LuaState, key: &str) -> bool {
+fn registry_bool(state: &mut LuaState, key: &'static str) -> bool {
     matches!(registry_get(state, key), Val::Bool(true))
 }
 
-fn set_registry_bool(state: &mut LuaState, key: &str, value: bool) {
+fn set_registry_bool(state: &mut LuaState, key: &'static str, value: bool) {
     registry_set(state, key, Val::Bool(value));
 }
 

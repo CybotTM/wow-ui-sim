@@ -62,13 +62,13 @@ pub fn fire_onshow(state: &mut LuaState, frame: Val) -> LuaResult<()> {
     call_precompiled(state, FIRE_ONSHOW_KEY, frame)
 }
 
-fn store_precompiled(state: &mut LuaState, key: &str, source: &str) -> LuaResult<()> {
+fn store_precompiled(state: &mut LuaState, key: &'static str, source: &str) -> LuaResult<()> {
     let func = LuaApiMut::load(state, source)?;
     registry_set(state, key, Val::Function(func.gc_ref()));
     Ok(())
 }
 
-fn call_precompiled(state: &mut LuaState, key: &str, frame: Val) -> LuaResult<()> {
+fn call_precompiled(state: &mut LuaState, key: &'static str, frame: Val) -> LuaResult<()> {
     let func = registry_get(state, key);
     if !matches!(func, Val::Function(_)) {
         return Err(runtime_error(format!("missing precompiled helper {key}")));
