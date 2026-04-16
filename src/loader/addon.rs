@@ -131,19 +131,18 @@ pub fn load_addon_internal(
             "Failed to patch UIParentManagedFrameMixin for {folder_name}: {e}"
         ));
     }
-    // Debug: patch CallbackRegistryMixin after SharedXMLBase loads
-    if folder_name == "Blizzard_SharedXMLBase"
-        && let Err(e) = env.patch_callback_registry_debug()
-    {
-        result.warnings.push(format!(
-            "Failed to patch CallbackRegistryMixin debug for {folder_name}: {e}"
-        ));
-    }
     if folder_name == "Blizzard_SharedMapDataProviders"
         && let Err(e) = env.patch_unit_position_frame_mixin()
     {
         result.warnings.push(format!(
             "Failed to patch UnitPositionFrameMixin for {folder_name}: {e}"
+        ));
+    }
+    if folder_name == "Blizzard_UIPanels_Game"
+        && let Err(e) = env.patch_quest_log_mixin()
+    {
+        result.warnings.push(format!(
+            "Failed to patch QuestLogMixin for {folder_name}: {e}"
         ));
     }
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);

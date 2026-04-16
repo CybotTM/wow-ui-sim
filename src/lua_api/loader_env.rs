@@ -55,28 +55,14 @@ if GroupMembersPinMixin ~= nil then
 end
 "#;
 
-const CALLBACK_REGISTRY_DEBUG_LUA: &str = r#"
-print("[DEBUG PATCH] Checking CallbackRegistryMixin...")
-print("[DEBUG PATCH] CallbackRegistryMixin type:", type(CallbackRegistryMixin))
-if CallbackRegistryMixin ~= nil then
-    print("[DEBUG PATCH] CallbackRegistryMixin.OnLoad type:", type(CallbackRegistryMixin.OnLoad))
-    if CallbackRegistryMixin.OnLoad ~= nil then
-        local orig = CallbackRegistryMixin.OnLoad
-        CallbackRegistryMixin.OnLoad = function(self, ...)
-            print("[DEBUG] CallbackRegistryMixin:OnLoad called")
-            print("[DEBUG] type(pairs):", type(pairs))
-            print("[DEBUG] type(next):", type(next))
-            print("[DEBUG] type(CallbackType):", type(CallbackType))
-            if CallbackType then
-                print("[DEBUG] CallbackType exists, testing pairs(CallbackType)...")
-                local iter, st, init = pairs(CallbackType)
-                print("[DEBUG] pairs result: iter=", type(iter), "st=", type(st), "init=", type(init))
-            else
-                print("[DEBUG] CallbackType is nil!")
-            end
-            return orig(self, ...)
+const QUEST_LOG_MIXIN_PATCH_LUA: &str = r#"
+if QuestLogMixin ~= nil then
+    QuestLogMixin.GetCurrentMapID = function(self)
+        local parent = self:GetParent()
+        if parent and parent:IsShown() then
+            return parent:GetMapID()
         end
-        print("[DEBUG PATCH] Patched CallbackRegistryMixin.OnLoad")
+        return C_Map.GetBestMapForUnit("player")
     end
 end
 "#;
@@ -366,10 +352,13 @@ impl<'a> LoaderEnv<'a> {
         Ok(())
     }
 
-    /// Debug: patch CallbackRegistryMixin:OnLoad to print diagnostic info.
-    pub fn patch_callback_registry_debug(&self) -> crate::Result<()> {
+    /// Patch `QuestLogMixin:GetCurrentMapID` to guard against nil parent.
+    /// During startup, `QUEST_LOG_UPDATE` fires before the QuestLog is
+    /// parented to WorldMapFrame, causing `self:GetParent():IsShown()`
+    /// at QuestMapFrame.lua:279 to error.
+    pub fn patch_quest_log_mixin(&self) -> crate::Result<()> {
         let mut lua = self.lua.borrow_mut();
-        lua.exec(CALLBACK_REGISTRY_DEBUG_LUA)?;
+        lua.exec(QUEST_LOG_MIXIN_PATCH_LUA)?;
         Ok(())
     }
 

@@ -24,6 +24,10 @@ const COMPAT_ENUMS_LUA: &str = include_str!("globals/enum_data/compat_enums.lua"
 const MISSING_CONSTANTS_LUA: &str = include_str!("globals/enum_data/missing_constants.lua");
 const CONSTANTS_VALUES_LUA: &str = include_str!("globals/enum_data/constants_values.lua");
 const SHARED_BOOTSTRAP_LUA: &str = r##"
+if addframetext == nil then
+  function addframetext() end
+end
+
 if Mixin == nil then
   function Mixin(object, ...)
     for i = 1, select("#", ...) do
