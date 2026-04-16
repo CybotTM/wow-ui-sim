@@ -165,6 +165,7 @@ pub fn sync_child_to_rilua(
 }
 
 /// Get or create the frame ref cache table in the registry.
+/// Pre-sized for ~3000 frames (typical Blizzard UI load).
 fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
     let key_ref = state.gc.intern_string(FRAME_REFS_KEY.as_bytes());
     let registry = state.gc.tables.get(state.registry);
@@ -173,7 +174,8 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
             return cache;
         }
     }
-    let cache = state.gc.alloc_table(Table::new());
+    // Pre-allocate for typical frame count to avoid rehashing
+    let cache = state.gc.alloc_table(Table::with_sizes(4096, 0));
     if let Some(reg) = state.gc.tables.get_mut(state.registry) {
         let _ = reg.raw_set(Val::Str(key_ref), Val::Table(cache), &state.gc.string_arena);
     }

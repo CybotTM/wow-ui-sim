@@ -42,8 +42,21 @@ pub struct WidgetRegistry {
 }
 
 impl WidgetRegistry {
+    /// Pre-allocated capacity for typical Blizzard UI load (~2500 frames).
+    const INITIAL_CAPACITY: usize = 3000;
+
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            widgets: HashMap::with_capacity(Self::INITIAL_CAPACITY),
+            names: HashMap::with_capacity(Self::INITIAL_CAPACITY),
+            ordered_ids: Vec::with_capacity(Self::INITIAL_CAPACITY),
+            render_dirty_ids: RefCell::new(HashSet::with_capacity(256)),
+            render_dirty_sources: RefCell::new(HashMap::with_capacity(64)),
+            current_dirty_source: RefCell::new(None),
+            anchor_dependents: HashMap::with_capacity(Self::INITIAL_CAPACITY),
+            rect_dirty_ids: HashSet::with_capacity(Self::INITIAL_CAPACITY),
+            pending_layout_ids: HashSet::with_capacity(Self::INITIAL_CAPACITY),
+        }
     }
 
     /// Register a new widget.
