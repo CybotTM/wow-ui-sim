@@ -51,11 +51,25 @@ rilua's `OP_NEWTABLE` honours the Lua compiler's size hint literally. Addon code
 
 Rehash is cheap individually but frequent: 97K calls × hundreds of cycles each matches the observed ~11M profile samples.
 
-## Candidate fixes (not applied here — this card was investigation only)
+## Candidate fixes
 
-1. **Minimum hash on empty `NewTable` hint.** In `vm::execute.rs OpCode::NewTable`, if `narray == 0 && nhash == 0`, use `Table::with_sizes(0, 4)`. Estimated saving: ~29K rehashes (30% of total). Cost: ~32 B per empty table. Requires rilua change; verify 684-test suite.
+1. **Minimum hash on empty `NewTable` hint.** **Applied in rilua**: `vm::execute.rs OpCode::NewTable` — when `narray == 0 && nhash == 0`, allocate 4 hash slots. Measured: 97,340 → 69,105 rehashes (−29%); release startup 1.31s → 1.21s (−8%, n=5 each). Cost: ~32 B per table that stays empty.
 2. **Short-circuit array growth.** In `raw_set_impl`, when key is an integer `== array.len() + 1` and hash is empty, extend the array inline instead of going through `new_key` → `rehash`. Eliminates the 17.6K `from=0, to=0` rehashes. Requires rilua change.
 3. **Sized `Table::new()` in hot wow-ui-sim sites.** Lower leverage — frame-backed rehashes are already only 1.6K — but the sites in `rilua_text_attribute_event.rs`, `rilua_timer_layout.rs`, `rilua_script_helpers.rs` create tables per event/timer tick; sizing them to 4–8 would remove the first rehash on each.
+
+## Post-fix profile (after #1)
+
+```
+total=69105 from_empty=23182 grow=42957 frame_backed=1602 nonframe=67503
+by new hash size (2^i):
+  size      0: 25344
+  size      2:  8523   (was 16203)
+  size      4:  7055   (was 13374)
+  size      8: 12049   (unchanged — tables that grow past 4 still rehash)
+  ...
+```
+
+Buckets 2 and 4 shrank as predicted; bucket 8 is unchanged because tables that eventually hold 5–8 entries still rehash from 4 → 8. To eliminate those, either start at 8 (doubles memory cost) or adopt fix #2.
 
 ## Sources
 

@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] update | table rehashing fix #1 applied
+
+Applied fix #1 from `investigations/table-rehashing.md`: rilua
+`OpCode::NewTable` now pre-allocates 4 hash slots when both size hints
+are zero. Measured: 97,340 → 69,105 rehashes (−29%); release startup
+median 1.31s → 1.21s (−8%, n=5 each). All 685 rilua tests pass (includes
+new `op_newtable_empty_hint_preallocates_hash_to_avoid_first_rehash`).
+
 ## [2026-04-16] ingest | table rehashing investigation
 
 Added `investigations/table-rehashing.md`. Profiled startup rehash counts via a
