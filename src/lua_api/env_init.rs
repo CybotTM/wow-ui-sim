@@ -2532,6 +2532,16 @@ if rawget(C_EditMode, "GetAccountSettings") == nil then
     table.sort(settings, function(a, b) return a.setting < b.setting end)
     return settings
   end
+
+  function C_EditMode.GetLayouts()
+    return {
+      layouts = {},
+      activeLayout = 1,
+    }
+  end
+
+  function C_EditMode.SetActiveLayout(_layoutIndex)
+  end
 end
 if WorldLootObjectExists == nil then
   function WorldLootObjectExists(_unit)
