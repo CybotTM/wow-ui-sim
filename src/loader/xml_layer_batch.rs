@@ -272,6 +272,7 @@ fn append_parent_array_entry(
     if let Some(table) = state.gc.tables.get_mut(array_ref) {
         let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
     }
+    state.gc.barrier_back(array_ref);
     Ok(())
 }
 

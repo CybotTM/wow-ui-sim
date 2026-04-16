@@ -80,6 +80,7 @@ fn set_global_fn(state: &mut LuaState, name: &'static str, func: RustFn) {
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(global);
 }
 
 /// Get or create a C_* namespace table in globals, then set a `RustFn` on it.
@@ -113,6 +114,7 @@ fn set_namespace_fn(
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(global);
             new_table
         }
     };
@@ -128,6 +130,7 @@ fn set_namespace_fn(
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(ns_ref);
 }
 
 // ── Registration entry point ──────────────────────────────────────────────────

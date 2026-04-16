@@ -219,6 +219,7 @@ fn copy_info_to_button_fields(state: &mut LuaState, btn_id: u64, info: Val) {
             if let Some(t) = state.gc.tables.get_mut(fields_ref) {
                 let _ = t.raw_set(k, v, &state.gc.string_arena);
             }
+            state.gc.barrier_back(fields_ref);
         }
     }
 }
@@ -1179,6 +1180,7 @@ fn append_parent_array_entry(state: &mut LuaState, parent_id: u64, key: &str, ch
     if let Some(table) = state.gc.tables.get_mut(array_ref) {
         let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
     }
+    state.gc.barrier_back(array_ref);
 }
 
 pub(crate) fn apply_frame_mixins(state: &mut LuaState, frame_id: u64, mixins: Option<&str>) {
@@ -1213,6 +1215,7 @@ fn apply_template_key_values<'a>(
             if let Some(table) = state.gc.tables.get_mut(frame_ref) {
                 let _ = table.raw_set(key, value, &state.gc.string_arena);
             }
+            state.gc.barrier_back(frame_ref);
         }
     }
 }
@@ -1472,6 +1475,7 @@ fn copy_table_entries_into_frame(
             let _ = fields_table.raw_set(key, value, &state.gc.string_arena);
         }
     }
+    state.gc.barrier_back(frame_ref);
 }
 
 fn collect_filtered_hash_entries(
@@ -1527,6 +1531,7 @@ fn set_frame_field(state: &mut LuaState, field_name: &str) -> LuaResult<u32> {
             if let Some(t) = state.gc.tables.get_mut(fields_ref) {
                 let _ = t.raw_set(key, value, &state.gc.string_arena);
             }
+            state.gc.barrier_back(fields_ref);
         }
     }
     Ok(0)
@@ -1598,6 +1603,7 @@ fn set_global_raw(state: &mut LuaState, name: &str, value: Val) {
     if let Some(g) = state.gc.tables.get_mut(global) {
         let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global);
 }
 
 fn parse_frame_strata(strata: &str) -> crate::widget::FrameStrata {

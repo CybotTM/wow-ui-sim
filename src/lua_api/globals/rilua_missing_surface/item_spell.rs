@@ -193,9 +193,11 @@ fn global_table(state: &mut LuaState, name: &str) -> Val {
         return current;
     }
     let table = create_table(state);
-    if let Some(globals) = state.gc.tables.get_mut(state.global) {
+    let global = state.global;
+    if let Some(globals) = state.gc.tables.get_mut(global) {
         let _ = globals.raw_set(Val::Str(key_ref), table, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global);
     table
 }
 

@@ -37,6 +37,7 @@ fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
     if let Some(g) = state.gc.tables.get_mut(global) {
         let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global);
 }
 
 const NAMED_COLOR_GLOBALS: &[(&str, (f64, f64, f64, f64))] = &[

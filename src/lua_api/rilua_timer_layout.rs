@@ -75,6 +75,7 @@ pub(crate) fn store_timer_callback(state: &mut LuaState, timer_id: u64, callback
     if let Some(t) = state.gc.tables.get_mut(table) {
         let _ = t.raw_set(Val::Num(timer_id as f64), callback, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table);
 }
 
 /// Remove a timer callback from the registry table (called after firing/cancel).
@@ -89,6 +90,7 @@ pub fn remove_timer_callback(state: &mut LuaState, timer_id: u64) {
     if let Some(t) = state.gc.tables.get_mut(callback_table) {
         let _ = t.raw_set(Val::Num(timer_id as f64), Val::Nil, &state.gc.string_arena);
     }
+    state.gc.barrier_back(callback_table);
 }
 
 /// Retrieve a stored timer callback by ID.

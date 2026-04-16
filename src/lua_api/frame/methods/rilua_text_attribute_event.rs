@@ -1261,6 +1261,7 @@ fn callback_event_table(
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(frame_ref);
             table_ref
         }
         _ => return Ok(None),
@@ -1284,6 +1285,7 @@ fn callback_event_table(
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(callbacks);
             table_ref
         }
         _ => return Ok(None),
@@ -1336,6 +1338,7 @@ fn rewrite_callback_entries(state: &mut LuaState, event_table: GcRef<Table>, ent
             );
         }
     }
+    state.gc.barrier_back(event_table);
 }
 
 fn register_callback(state: &mut LuaState) -> LuaResult<u32> {
@@ -1372,6 +1375,7 @@ fn register_callback(state: &mut LuaState) -> LuaResult<u32> {
             let _ = entry_table.raw_set(Val::Str(owner_key), owner, &state.gc.string_arena);
             let _ = entry_table.raw_set(Val::Str(func_key), func, &state.gc.string_arena);
         }
+        state.gc.barrier_back(entry_ref);
         entries.push(Val::Table(entry_ref));
         rewrite_callback_entries(state, event_table, &entries);
     }
@@ -1513,6 +1517,7 @@ fn rilua_hlist_register_individual(state: &mut LuaState, id: u64, event: &str) -
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(individual);
             new_tbl
         }
     };
@@ -1596,6 +1601,7 @@ fn rilua_hlist_insert(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(tbl);
     if let Some(s) = state.gc.tables.get_mut(set) {
         let _ = s.raw_set(
             Val::Num(id as f64),
@@ -1603,6 +1609,7 @@ fn rilua_hlist_insert(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(set);
     Ok(())
 }
 
@@ -1637,6 +1644,7 @@ fn rilua_hlist_remove(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(tbl);
             if let Some(s) = state.gc.tables.get_mut(set) {
                 let _ = s.raw_set(
                     Val::Num(lid as f64),
@@ -1644,14 +1652,17 @@ fn rilua_hlist_remove(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaRe
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(set);
         }
     }
     if let Some(t) = state.gc.tables.get_mut(tbl) {
         let _ = t.raw_set(Val::Num(n as f64), Val::Nil, &state.gc.string_arena);
     }
+    state.gc.barrier_back(tbl);
     if let Some(s) = state.gc.tables.get_mut(set) {
         let _ = s.raw_set(Val::Num(id as f64), Val::Nil, &state.gc.string_arena);
     }
+    state.gc.barrier_back(set);
     Ok(())
 }
 
@@ -1674,6 +1685,7 @@ fn rilua_hlist_set(state: &mut LuaState, tbl: GcRef<Table>) -> GcRef<Table> {
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(tbl);
     new_set
 }
 

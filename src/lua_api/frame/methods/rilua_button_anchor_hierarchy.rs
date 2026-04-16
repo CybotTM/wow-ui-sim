@@ -167,9 +167,11 @@ fn parse_line_anchor_args(
 fn bind_named_child_global(state: &mut LuaState, name: &str, child_id: u64) -> LuaResult<()> {
     let child_ref = frame_ref(state, child_id)?;
     let key = state.gc.intern_string(name.as_bytes());
-    if let Some(globals) = state.gc.tables.get_mut(state.global) {
+    let global = state.global;
+    if let Some(globals) = state.gc.tables.get_mut(global) {
         let _ = globals.raw_set(Val::Str(key), child_ref, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global);
     Ok(())
 }
 

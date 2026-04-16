@@ -1119,6 +1119,7 @@ fn table_set_array_value(state: &mut LuaState, table: Val, index: i64, value: Va
     if let Some(table) = state.gc.tables.get_mut(table_ref) {
         let _ = table.raw_set(Val::Num(index as f64), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table_ref);
 }
 
 pub fn desaturate_hierarchy(state: &mut LuaState) -> LuaResult<u32> {
@@ -1280,6 +1281,7 @@ pub fn get_or_create_group(state: &mut LuaState) -> LuaResult<u32> {
                 &state.gc.string_arena,
             );
         }
+        state.gc.barrier_back(groups_ref);
         state.push(group);
         return Ok(1);
     }

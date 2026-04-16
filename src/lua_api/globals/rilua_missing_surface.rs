@@ -152,13 +152,15 @@ pub(super) fn ensure_namespace(state: &mut LuaState, name: &str) -> LuaResult<Gc
         Val::Table(table_ref) => table_ref,
         _ => {
             let table_ref = state.gc.alloc_table(Table::new());
-            if let Some(globals) = state.gc.tables.get_mut(state.global) {
+            let global = state.global;
+            if let Some(globals) = state.gc.tables.get_mut(global) {
                 let _ = globals.raw_set(
                     Val::Str(key_ref),
                     Val::Table(table_ref),
                     &state.gc.string_arena,
                 );
             }
+            state.gc.barrier_back(global);
             table_ref
         }
     };
@@ -170,4 +172,5 @@ pub(super) fn set_table_array(state: &mut LuaState, table: Val, index: i64, valu
     if let Some(table) = state.gc.tables.get_mut(table_ref) {
         let _ = table.raw_set(Val::Num(index as f64), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table_ref);
 }

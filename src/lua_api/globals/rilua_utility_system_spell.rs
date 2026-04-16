@@ -43,6 +43,7 @@ fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
     if let Some(g) = state.gc.tables.get_mut(global) {
         let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global);
 }
 
 fn global_val(state: &mut LuaState, name: &str) -> Val {
@@ -166,6 +167,7 @@ pub fn wipe(state: &mut LuaState) -> LuaResult<u32> {
             let _ = table.raw_set(key, Val::Nil, &state.gc.string_arena);
         }
     }
+    state.gc.barrier_back(table_ref);
 
     state.push(t);
     Ok(1)
@@ -244,6 +246,7 @@ pub fn t_invert(state: &mut LuaState) -> LuaResult<u32> {
         if let Some(t) = state.gc.tables.get_mut(inverted_ref) {
             let _ = t.raw_set(value, key, &state.gc.string_arena);
         }
+        state.gc.barrier_back(inverted_ref);
     }
     for (key, value) in hash_entries {
         if matches!(value, Val::Nil) {
@@ -252,6 +255,7 @@ pub fn t_invert(state: &mut LuaState) -> LuaResult<u32> {
         if let Some(t) = state.gc.tables.get_mut(inverted_ref) {
             let _ = t.raw_set(value, key, &state.gc.string_arena);
         }
+        state.gc.barrier_back(inverted_ref);
     }
     state.push(Val::Table(inverted_ref));
     Ok(1)
@@ -307,6 +311,7 @@ pub fn setglobal(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(t) = state.gc.tables.get_mut(global) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global);
     Ok(0)
 }
 
@@ -1264,13 +1269,15 @@ fn register_table_util(state: &mut LuaState) -> LuaResult<()> {
         table_util_find_indexed_mismatch,
     )?;
     let key_ref = state.gc.intern_string(b"C_TableUtil");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(
             Val::Str(key_ref),
             Val::Table(table_ref),
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1463,13 +1470,15 @@ fn register_c_addons(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn(state, c_addons_ref, "LoadAddOn", c_addons_load_addon)?;
 
     let key_ref = state.gc.intern_string(b"C_AddOns");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(
             Val::Str(key_ref),
             Val::Table(c_addons_ref),
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1502,9 +1511,11 @@ fn register_legacy_addon_globals(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn(state, state.global, "LoadAddOn", c_addons_load_addon)?;
     let blocked = create_table(state);
     let key_ref = state.gc.intern_string(b"ADDON_ACTIONS_BLOCKED");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(Val::Str(key_ref), blocked, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1538,9 +1549,11 @@ fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
         c_addon_profiler_check_for_performance_message,
     )?;
     let key_ref = state.gc.intern_string(b"C_AddOnProfiler");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(Val::Str(key_ref), profiler, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1562,13 +1575,15 @@ fn register_c_texture(state: &mut LuaState) -> LuaResult<()> {
         c_texture_get_atlas_exists,
     )?;
     let key_ref = state.gc.intern_string(b"C_Texture");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(
             Val::Str(key_ref),
             Val::Table(c_texture_ref),
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1584,13 +1599,15 @@ fn register_c_xml_util(state: &mut LuaState) -> LuaResult<()> {
         c_xml_util_get_template_info,
     )?;
     let key_ref = state.gc.intern_string(b"C_XMLUtil");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(
             Val::Str(key_ref),
             Val::Table(c_xml_util_ref),
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1606,9 +1623,11 @@ fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
         ui_widget_container_get_num_widgets_showing,
     )?;
     let key_ref = state.gc.intern_string(b"UIWidgetContainerMixin");
-    if let Some(global) = state.gc.tables.get_mut(state.global) {
+    let global_ref = state.global;
+    if let Some(global) = state.gc.tables.get_mut(global_ref) {
         let _ = global.raw_set(Val::Str(key_ref), mixin, &state.gc.string_arena);
     }
+    state.gc.barrier_back(global_ref);
     Ok(())
 }
 
@@ -1648,12 +1667,14 @@ fn c_xml_util_get_template_info(state: &mut LuaState) -> LuaResult<u32> {
         if let Some(table) = state.gc.tables.get_mut(table_ref) {
             let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
         }
+        state.gc.barrier_back(table_ref);
     };
     let set_num = |state: &mut LuaState, table_ref, key: &str, value: f64| {
         let key_ref = state.gc.intern_string(key.as_bytes());
         if let Some(table) = state.gc.tables.get_mut(table_ref) {
             let _ = table.raw_set(Val::Str(key_ref), Val::Num(value), &state.gc.string_arena);
         }
+        state.gc.barrier_back(table_ref);
     };
 
     for (index, key_value) in info.key_values.iter().enumerate() {
@@ -1673,6 +1694,7 @@ fn c_xml_util_get_template_info(state: &mut LuaState) -> LuaResult<u32> {
                 &state.gc.string_arena,
             );
         }
+        state.gc.barrier_back(key_values_ref);
     }
 
     set_str(state, info_ref, "type", &info.frame_type);
@@ -1689,6 +1711,7 @@ fn c_xml_util_get_template_info(state: &mut LuaState) -> LuaResult<u32> {
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(info_ref);
 
     state.push(info_table);
     Ok(1)
@@ -1722,18 +1745,21 @@ fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
         if let Some(table) = state.gc.tables.get_mut(info_ref) {
             let _ = table.raw_set(Val::Str(key), value, &state.gc.string_arena);
         }
+        state.gc.barrier_back(info_ref);
     };
     let set_num = |state: &mut LuaState, key: &'static str, value: f64| {
         let key = state.gc.intern_string_static(key.as_bytes());
         if let Some(table) = state.gc.tables.get_mut(info_ref) {
             let _ = table.raw_set(Val::Str(key), Val::Num(value), &state.gc.string_arena);
         }
+        state.gc.barrier_back(info_ref);
     };
     let set_bool = |state: &mut LuaState, key: &'static str, value: bool| {
         let key = state.gc.intern_string_static(key.as_bytes());
         if let Some(table) = state.gc.tables.get_mut(info_ref) {
             let _ = table.raw_set(Val::Str(key), Val::Bool(value), &state.gc.string_arena);
         }
+        state.gc.barrier_back(info_ref);
     };
 
     if let Some(table) = state.gc.tables.get_mut(raw_size_ref) {
@@ -1748,6 +1774,7 @@ fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(raw_size_ref);
 
     set_str(state, "elementName", &atlas_name);
     set_num(state, "width", lookup.width() as f64);
@@ -1764,6 +1791,7 @@ fn c_texture_get_atlas_info(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(table) = state.gc.tables.get_mut(info_ref) {
         let _ = table.raw_set(Val::Str(raw_size_key), raw_size, &state.gc.string_arena);
     }
+    state.gc.barrier_back(info_ref);
 
     state.push(info);
     Ok(1)
@@ -1803,9 +1831,11 @@ fn registry_value(state: &mut LuaState, key: &str) -> Val {
 
 fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
     let key_ref = state.gc.intern_string(key.as_bytes());
-    if let Some(table) = state.gc.tables.get_mut(state.registry) {
+    let registry = state.registry;
+    if let Some(table) = state.gc.tables.get_mut(registry) {
         let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(registry);
 }
 
 fn call_table_util_comparator(

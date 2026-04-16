@@ -70,9 +70,11 @@ pub fn create_frame_instance(
     if let Some(name) = name {
         let frame_val = frame_ref(state, frame_id)?;
         let key = state.gc.intern_string(name.as_bytes());
-        if let Some(globals) = state.gc.tables.get_mut(state.global) {
+        let global = state.global;
+        if let Some(globals) = state.gc.tables.get_mut(global) {
             let _ = globals.raw_set(Val::Str(key), frame_val, &state.gc.string_arena);
         }
+        state.gc.barrier_back(global);
     }
 
     Ok(frame_id)

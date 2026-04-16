@@ -135,6 +135,7 @@ pub fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
         if let Some(reg) = state.gc.tables.get_mut(fields_reg_ref) {
             let _ = reg.raw_set(Val::Num(frame_id as f64), created, &state.gc.string_arena);
         }
+        state.gc.barrier_back(fields_reg_ref);
         created
     };
 
@@ -161,6 +162,7 @@ pub fn sync_child_to_rilua(
     if let Some(t) = state.gc.tables.get_mut(parent_ref) {
         let _ = t.raw_set(Val::Str(key_ref), child_val, &state.gc.string_arena);
     }
+    state.gc.barrier_back(parent_ref);
     Ok(())
 }
 
@@ -182,9 +184,11 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
     }
     // Pre-allocate for typical frame count to avoid rehashing
     let cache = state.gc.alloc_table(Table::with_sizes(4096, 0));
-    if let Some(reg) = state.gc.tables.get_mut(state.registry) {
+    let registry = state.registry;
+    if let Some(reg) = state.gc.tables.get_mut(registry) {
         let _ = reg.raw_set(Val::Str(key_ref), Val::Table(cache), &state.gc.string_arena);
     }
+    state.gc.barrier_back(registry);
     cache
 }
 
@@ -235,6 +239,7 @@ fn copy_frame_methods_from_metatable(
         if let Some(table) = state.gc.tables.get_mut(table_ref) {
             let _ = table.raw_set(key, value, &state.gc.string_arena);
         }
+        state.gc.barrier_back(table_ref);
     }
 }
 
@@ -265,6 +270,7 @@ fn table_set_num(state: &mut LuaState, table: GcRef<Table>, key: f64, value: Val
             let _ = t.raw_set(Val::Num(key), value, &state.gc.string_arena);
         }
     }
+    state.gc.barrier_back(table);
 }
 
 fn bind_frame_fields_env_slot(state: &mut LuaState, frame_id: u64, fields: Val) {
@@ -276,6 +282,7 @@ fn bind_frame_fields_env_slot(state: &mut LuaState, frame_id: u64, fields: Val) 
     if let Some(table) = state.gc.tables.get_mut(frame_ref) {
         let _ = table.raw_set(Val::Num(1.0), fields, &state.gc.string_arena);
     }
+    state.gc.barrier_back(frame_ref);
 }
 
 // ── ID encoding ─────────────────────────────────────────────────────
