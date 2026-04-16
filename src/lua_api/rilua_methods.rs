@@ -434,9 +434,16 @@ pub fn create_table(state: &mut LuaState) -> Val {
     Val::Table(state.gc.alloc_table(Table::new()))
 }
 
+/// Create a new table with pre-allocated hash capacity.
+/// `hash_capacity` is rounded up to the next power of 2.
+pub fn create_table_with_capacity(state: &mut LuaState, hash_capacity: usize) -> Val {
+    Val::Table(state.gc.alloc_table(Table::with_sizes(0, hash_capacity)))
+}
+
 /// Create a new table and set string-keyed fields on it.
+/// Pre-sizes the hash part to avoid rehashing.
 pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&str, Val)]) -> Val {
-    let table_ref = state.gc.alloc_table(Table::new());
+    let table_ref = state.gc.alloc_table(Table::with_sizes(0, fields.len()));
     for &(key, value) in fields {
         let key_ref = state.gc.intern_string(key.as_bytes());
         if let Some(t) = state.gc.tables.get_mut(table_ref) {
