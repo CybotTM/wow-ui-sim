@@ -500,6 +500,7 @@ mod tests {
     use crate::render::{FrameQuadSnapshot, GlyphAtlas, WowFontSystem};
     use crate::screen::ScreenKind;
     use crate::texture::{TextureManager, normalize_wow_path};
+    use rustc_hash::FxHashSet;
     use std::cell::RefCell;
     use std::collections::HashMap;
     use std::fs;
@@ -583,7 +584,7 @@ mod tests {
 
     #[test]
     fn prune_irrelevant_dirty_strata_skips_cached_strata_without_bucket_or_snapshot_hits() {
-        let dirty_ids = HashSet::from([99_u64]);
+        let dirty_ids = FxHashSet::from_iter([99_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];
         let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
         let snapshots = std::array::from_fn(|i| {
@@ -606,7 +607,7 @@ mod tests {
 
     #[test]
     fn prune_irrelevant_dirty_strata_keeps_strata_when_snapshot_must_be_removed() {
-        let dirty_ids = HashSet::from([3_u64]);
+        let dirty_ids = FxHashSet::from_iter([3_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];
         let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
         let snapshots = std::array::from_fn(|i| {
@@ -630,7 +631,7 @@ mod tests {
 
     #[test]
     fn prune_irrelevant_dirty_strata_keeps_strata_when_bucket_contains_dirty_frame() {
-        let dirty_ids = HashSet::from([2_u64]);
+        let dirty_ids = FxHashSet::from_iter([2_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];
         let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
         let snapshots = std::array::from_fn(|i| {
