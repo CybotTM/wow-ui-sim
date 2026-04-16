@@ -430,7 +430,10 @@ mod tests {
         }
         .expect("first compile should succeed");
         let first_results = first_lua.call_function(&first_func, &[]).unwrap();
-        let first_value = first_results.into_iter().next().expect("first call returns value");
+        let first_value = first_results
+            .into_iter()
+            .next()
+            .expect("first call returns value");
         assert_eq!(first_timing.cache_hits, 0);
         assert_eq!(first_timing.cache_misses, 1);
         assert_eq!(

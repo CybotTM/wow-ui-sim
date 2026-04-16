@@ -56,7 +56,15 @@ pub fn create_frame_from_xml(
             intrinsic_base,
         },
     )?;
-    finalize_frame(env, frame, &prepared.name, &prepared.inherits, timing)?;
+    let frame_id = created_frame_id(env, &prepared.name)?;
+    finalize_frame(
+        env,
+        frame,
+        frame_id,
+        &prepared.name,
+        &prepared.inherits,
+        timing,
+    )?;
     Ok(Some(prepared.name))
 }
 
@@ -129,9 +137,9 @@ fn setup_frame(
     }
     timing.frame_exec_lua_time += exec_start.elapsed();
     let props_start = Instant::now();
-    apply_direct_frame_mixins(env, setup.name, setup.frame);
-    apply_xml_properties_direct(env, setup.name, setup.frame, setup.inherits, setup.parent);
-    apply_intrinsic_property(env, setup.intrinsic_base, setup.name);
+    let frame_id = created_frame_id(env, setup.name)?;
+    apply_xml_properties_direct(env, frame_id, setup.frame, setup.inherits, setup.parent);
+    apply_intrinsic_property(env, setup.intrinsic_base, frame_id);
     timing.frame_apply_props_time += props_start.elapsed();
     timing.xml_frame_setup_time += setup_start.elapsed();
     timing.frame_count += 1;
@@ -188,30 +196,6 @@ fn recover_frame_after_loader_vm_error(
     Ok(true)
 }
 
-fn apply_direct_frame_mixins(env: &LoaderEnv<'_>, name: &str, frame: &crate::xml::FrameXml) {
-    let _ = env.with_state(|state| {
-        let global = rilua::Val::Table(state.global);
-        let frame_val = crate::lua_api::rilua_methods::table_get(state, global, name);
-        let frame_id = crate::lua_api::rilua_methods::extract_frame_id(state, frame_val);
-        if let Some(frame_id) = frame_id {
-            for template in crate::xml::get_template_chain(frame.inherits.as_deref().unwrap_or(""))
-            {
-                crate::lua_api::globals::rilua_create_frame::apply_frame_mixins(
-                    state,
-                    frame_id,
-                    template.frame.combined_mixin().as_deref(),
-                );
-            }
-            crate::lua_api::globals::rilua_create_frame::apply_frame_mixins(
-                state,
-                frame_id,
-                frame.combined_mixin().as_deref(),
-            );
-        }
-        Ok::<(), crate::Error>(())
-    });
-}
-
 struct SetupFrame<'a> {
     lua_code: &'a str,
     name: &'a str,
@@ -226,12 +210,13 @@ struct SetupFrame<'a> {
 fn finalize_frame(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
+    frame_id: u64,
     name: &str,
     inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let finalize_start = Instant::now();
-    create_children_and_finalize(env, frame, name, inherits, timing)?;
+    create_children_and_finalize(env, frame, frame_id, name, inherits, timing)?;
     timing.xml_frame_finalize_time += finalize_start.elapsed();
     Ok(())
 }
@@ -281,11 +266,8 @@ fn build_inherits_chain(
 /// Note: `id` is set here in Lua (not deferred to Rust) because template child
 /// OnLoad handlers may reference parent IDs during fire_deferred_child_onloads.
 /// Set the `intrinsic` property on intrinsic frames (e.g. frame.intrinsic = "DropdownButton").
-fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, name: &str) {
+fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, frame_id: u64) {
     if let Some(base) = intrinsic_base {
-        let Some(frame_id) = env.state().borrow().widgets.get_id_by_name(name) else {
-            return;
-        };
         let _ = env.with_state(|state| {
             crate::lua_api::globals::template::set_intrinsic(state, frame_id, base);
             Ok::<(), crate::Error>(())
@@ -297,6 +279,7 @@ fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, n
 fn create_children_and_finalize(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
+    frame_id: u64,
     name: &str,
     inherits: &str,
     timing: &mut LoadTiming,
@@ -317,11 +300,19 @@ fn create_children_and_finalize(
     let lifecycle = lifecycle_scripts(frame, inherits);
     if lifecycle.any() {
         let lc_start = Instant::now();
-        fire_lifecycle_scripts(env, name, lifecycle);
+        fire_lifecycle_scripts(env, frame_id, name, lifecycle);
         timing.frame_lifecycle_time += lc_start.elapsed();
         timing.lifecycle_fire_count += 1;
     }
     Ok(())
+}
+
+fn created_frame_id(env: &LoaderEnv<'_>, name: &str) -> Result<u64, LoadError> {
+    env.state()
+        .borrow()
+        .widgets
+        .get_id_by_name(name)
+        .ok_or_else(|| LoadError::Lua(format!("Failed to locate created frame {name}")))
 }
 
 fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleScripts {
@@ -392,29 +383,27 @@ fn resolve_xml_hidden(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
 /// Set declarative frame properties directly in Rust after the Lua CreateFrame chunk.
 fn apply_xml_properties_direct(
     env: &LoaderEnv<'_>,
-    name: &str,
+    frame_id: u64,
     frame: &crate::xml::FrameXml,
     inherits: &str,
     parent: &str,
 ) {
     use crate::lua_api::globals::template::direct;
     let state = env.state();
-    let fid = state.borrow().widgets.get_id_by_name(name);
-    let Some(fid) = fid else { return };
-    direct::apply_xml_size(state, fid, frame, inherits);
-    direct::apply_xml_anchors(state, fid, frame, inherits, parent);
-    direct::apply_xml_frame_strata(state, fid, frame, inherits);
-    direct::apply_xml_frame_level(state, fid, frame, inherits);
-    direct::apply_xml_hidden(state, fid, frame, inherits);
-    direct::apply_xml_toplevel(state, fid, frame, inherits);
-    direct::apply_xml_alpha(state, fid, frame, inherits);
-    direct::apply_xml_enable_mouse(state, fid, frame, inherits);
-    direct::apply_xml_clips_children(state, fid, frame, inherits);
-    direct::apply_xml_hit_rect_insets(state, fid, frame);
-    direct::apply_xml_clamped_to_screen(state, fid, frame, inherits);
-    direct::apply_xml_set_all_points(state, fid, frame, inherits);
-    direct::apply_xml_protected(state, fid, frame, inherits);
-    direct::apply_xml_id(state, fid, frame);
+    direct::apply_xml_size(state, frame_id, frame, inherits);
+    direct::apply_xml_anchors(state, frame_id, frame, inherits, parent);
+    direct::apply_xml_frame_strata(state, frame_id, frame, inherits);
+    direct::apply_xml_frame_level(state, frame_id, frame, inherits);
+    direct::apply_xml_hidden(state, frame_id, frame, inherits);
+    direct::apply_xml_toplevel(state, frame_id, frame, inherits);
+    direct::apply_xml_alpha(state, frame_id, frame, inherits);
+    direct::apply_xml_enable_mouse(state, frame_id, frame, inherits);
+    direct::apply_xml_clips_children(state, frame_id, frame, inherits);
+    direct::apply_xml_hit_rect_insets(state, frame_id, frame);
+    direct::apply_xml_clamped_to_screen(state, frame_id, frame, inherits);
+    direct::apply_xml_set_all_points(state, frame_id, frame, inherits);
+    direct::apply_xml_protected(state, frame_id, frame, inherits);
+    direct::apply_xml_id(state, frame_id, frame);
 }
 
 /// Resolve the frame name, applying `$parent` substitution and generating anonymous names.

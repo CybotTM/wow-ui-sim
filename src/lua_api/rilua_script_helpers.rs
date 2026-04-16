@@ -20,6 +20,7 @@ const ON_POST_UPDATE_SCRIPTS_KEY: &str = "__on_post_update_scripts";
 const ERROR_HANDLER_KEY: &str = "__error_handler";
 const PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY: &str = "__protected_lua_pcall_wrapper_factory";
 const LUA_MULTRET: i32 = -1;
+const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
 
 /// Get a named table from rilua's registry, returning None if absent.
 fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
@@ -182,21 +183,23 @@ pub fn protected_call_state(
 ///
 /// Some handlers created from Blizzard XML work when called by Lua but trip
 /// rilua's direct Rust-side call path with "expected Lua closure in execute".
-/// Wrapping the call in a tiny Lua closure keeps dispatch on the VM's normal
-/// path and returns either the function results or a formatted error string.
+/// A cached bridge keeps dispatch on the VM's normal path without rebuilding a
+/// per-handler wrapper every time.
 pub fn protected_lua_pcall_state(
     state: &mut LuaState,
     func: Val,
     args: &[Val],
 ) -> Result<Vec<Val>, String> {
-    let wrapper_factory =
+    let bridge =
         ensure_protected_lua_pcall_wrapper_factory(state).map_err(|error| error.to_string())?;
-    let wrapper = call_function_state(state, Val::Function(wrapper_factory.gc_ref()), &[func])
-        .map_err(|error| error.to_string())?;
-    let results = protected_call_state(state, wrapper, args).map_err(|error| {
-        val_to_string(state, error)
-            .unwrap_or_else(|| format!("script error ({})", error.type_name()))
-    })?;
+    let mut protected_args = Vec::with_capacity(args.len() + 1);
+    protected_args.push(func);
+    protected_args.extend_from_slice(args);
+    let results = protected_call_state(state, Val::Function(bridge.gc_ref()), &protected_args)
+        .map_err(|error| {
+            val_to_string(state, error)
+                .unwrap_or_else(|| format!("script error ({})", error.type_name()))
+        })?;
     match results.first().copied() {
         Some(Val::Bool(true)) => Ok(results.into_iter().skip(1).collect()),
         Some(Val::Bool(false)) => {
@@ -211,7 +214,26 @@ pub fn protected_lua_pcall_state(
     }
 }
 
-fn ensure_protected_lua_pcall_wrapper_factory(state: &mut LuaState) -> rilua::LuaResult<rilua::Function> {
+pub fn call_void_function_with_fallback_state(
+    state: &mut LuaState,
+    func: Val,
+    args: &[Val],
+) -> Result<(), String> {
+    match call_function_state(state, func, args) {
+        Ok(_) => Ok(()),
+        Err(error) => {
+            let message = error.to_string();
+            if !message.contains(DIRECT_CALL_FALLBACK_ERROR) {
+                return Err(message);
+            }
+            protected_lua_pcall_state(state, func, args).map(|_| ())
+        }
+    }
+}
+
+fn ensure_protected_lua_pcall_wrapper_factory(
+    state: &mut LuaState,
+) -> rilua::LuaResult<rilua::Function> {
     let existing = registry_value(state, PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY);
     if let Val::Function(func_ref) = existing {
         return Ok(rilua::Function::from_gc_ref(func_ref));
@@ -220,9 +242,7 @@ fn ensure_protected_lua_pcall_wrapper_factory(state: &mut LuaState) -> rilua::Lu
     let factory = state.load(
         r#"
         local func = ...
-        return function(...)
-            return pcall(func, ...)
-        end
+        return pcall(func, select(2, ...))
     "#,
     )?;
     set_registry_value(
@@ -517,36 +537,31 @@ mod tests {
             .state_mut()
             .load("return function(value) return value end")
             .expect("wrapper source should compile");
-        let direct_func = call_function_state(
-            lua.state_mut(),
-            Val::Function(direct.gc_ref()),
-            &[],
-        )
-        .expect("direct function should build");
+        let direct_func = call_function_state(lua.state_mut(), Val::Function(direct.gc_ref()), &[])
+            .expect("direct function should build");
 
-        let first_results = protected_lua_pcall_state(
-            lua.state_mut(),
-            direct_func,
-            &[Val::Num(7.0)],
-        )
-        .expect("first protected call should succeed");
+        let first_results =
+            protected_lua_pcall_state(lua.state_mut(), direct_func, &[Val::Num(7.0)])
+                .expect("first protected call should succeed");
         assert_eq!(first_results, vec![Val::Num(7.0)]);
 
-        let first_factory = registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
+        let first_factory =
+            registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
         assert!(
             !matches!(first_factory, Val::Nil),
             "wrapper factory should be cached in the registry"
         );
 
-        let second_results = protected_lua_pcall_state(
-            lua.state_mut(),
-            direct_func,
-            &[Val::Num(9.0)],
-        )
-        .expect("second protected call should succeed");
+        let second_results =
+            protected_lua_pcall_state(lua.state_mut(), direct_func, &[Val::Num(9.0)])
+                .expect("second protected call should succeed");
         assert_eq!(second_results, vec![Val::Num(9.0)]);
 
-        let second_factory = registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
-        assert_eq!(first_factory, second_factory, "cached wrapper factory should be reused");
+        let second_factory =
+            registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
+        assert_eq!(
+            first_factory, second_factory,
+            "cached wrapper factory should be reused"
+        );
     }
 }

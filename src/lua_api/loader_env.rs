@@ -55,6 +55,32 @@ if GroupMembersPinMixin ~= nil then
 end
 "#;
 
+const CALLBACK_REGISTRY_DEBUG_LUA: &str = r#"
+print("[DEBUG PATCH] Checking CallbackRegistryMixin...")
+print("[DEBUG PATCH] CallbackRegistryMixin type:", type(CallbackRegistryMixin))
+if CallbackRegistryMixin ~= nil then
+    print("[DEBUG PATCH] CallbackRegistryMixin.OnLoad type:", type(CallbackRegistryMixin.OnLoad))
+    if CallbackRegistryMixin.OnLoad ~= nil then
+        local orig = CallbackRegistryMixin.OnLoad
+        CallbackRegistryMixin.OnLoad = function(self, ...)
+            print("[DEBUG] CallbackRegistryMixin:OnLoad called")
+            print("[DEBUG] type(pairs):", type(pairs))
+            print("[DEBUG] type(next):", type(next))
+            print("[DEBUG] type(CallbackType):", type(CallbackType))
+            if CallbackType then
+                print("[DEBUG] CallbackType exists, testing pairs(CallbackType)...")
+                local iter, st, init = pairs(CallbackType)
+                print("[DEBUG] pairs result: iter=", type(iter), "st=", type(st), "init=", type(init))
+            else
+                print("[DEBUG] CallbackType is nil!")
+            end
+            return orig(self, ...)
+        end
+        print("[DEBUG PATCH] Patched CallbackRegistryMixin.OnLoad")
+    end
+end
+"#;
+
 /// Permissive dropdown descriptor installed when Blizzard_Menu fails to
 /// define `Menu.CreateRootMenuDescription`. Every unknown method returns
 /// the table itself so method chains (e.g.
@@ -235,7 +261,7 @@ impl<'a> LoaderEnv<'a> {
             if self.loading_addon_uses_secure_env() {
                 mark_secure_state(state, &func)?;
             }
-            crate::lua_api::rilua_script_helpers::protected_lua_pcall_state(
+            crate::lua_api::rilua_script_helpers::call_void_function_with_fallback_state(
                 state,
                 Val::Function(func.gc_ref()),
                 &[],
@@ -337,6 +363,13 @@ impl<'a> LoaderEnv<'a> {
     pub fn ensure_menu_descriptor_fallback(&self) -> crate::Result<()> {
         let mut lua = self.lua.borrow_mut();
         lua.exec(MENU_DESCRIPTOR_FALLBACK_LUA)?;
+        Ok(())
+    }
+
+    /// Debug: patch CallbackRegistryMixin:OnLoad to print diagnostic info.
+    pub fn patch_callback_registry_debug(&self) -> crate::Result<()> {
+        let mut lua = self.lua.borrow_mut();
+        lua.exec(CALLBACK_REGISTRY_DEBUG_LUA)?;
         Ok(())
     }
 
