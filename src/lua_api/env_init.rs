@@ -2604,7 +2604,23 @@ C_RestrictedActions = C_RestrictedActions or __wow_namespace()
 C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
-C_ContentTracking = C_ContentTracking or __wow_namespace()
+C_ContentTracking = __wow_merge_namespace(C_ContentTracking, {
+  -- AchievementObjectiveTracker iterates `#trackedAchievements` at load.
+  -- Return an empty list so the subsequent for-loop is a no-op.
+  GetTrackedIDs = function() return {} end,
+  IsTracking = function() return false end,
+})
+
+-- InitiativeTasksObjectiveTracker indexes `.trackedIDs` on the returned
+-- value, so return a real table even when there are no initiatives.
+C_NeighborhoodInitiative = __wow_merge_namespace(C_NeighborhoodInitiative, {
+  GetTrackedInitiativeTasks = function()
+    return { trackedIDs = {} }
+  end,
+  GetInitiativeTaskInfo = function() return nil end,
+  RemoveTrackedInitiativeTask = __wow_noop,
+  AddTrackedInitiativeTask = __wow_noop,
+})
 C_Widget = C_Widget or __wow_namespace()
 C_SuperTrack = __wow_merge_namespace(C_SuperTrack, {
   GetSuperTrackedQuestID = function() return 0 end,
