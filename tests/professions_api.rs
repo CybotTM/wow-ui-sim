@@ -1,5 +1,6 @@
 //! Tests for professions: GetProfessions, GetProfessionInfo, C_TradeSkillUI.
 
+use wow_ui_sim::event::EventArg;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -259,6 +260,39 @@ fn test_greatsword_recipe_has_three_reagents() {
         .eval("return #C_TradeSkillUI.GetRecipeSchematic(100005).reagentSlotSchematics")
         .unwrap();
     assert_eq!(count, 3);
+}
+
+#[test]
+fn test_set_recipe_tracked_updates_state_and_fires_event() {
+    let env = env();
+
+    env.eval::<()>(
+        r#"
+        C_TradeSkillUI.SetRecipeTracked(100005, true, false)
+        C_TradeSkillUI.SetRecipeTracked(100005, true, false)
+        C_TradeSkillUI.SetRecipeTracked(100005, true, true)
+        "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    assert_eq!(state.tracked_recipes.list(false), &[100005]);
+    assert_eq!(state.tracked_recipes.list(true), &[100005]);
+    drop(state);
+
+    let events = env.state().borrow_mut().events.drain();
+    assert_eq!(events.len(), 2, "only real state changes should fire");
+
+    let normal_event = &events[0];
+    assert_eq!(normal_event.name, "TRACKED_RECIPE_UPDATE");
+    assert_eq!(normal_event.args.len(), 2);
+    assert!(matches!(normal_event.args[0], EventArg::Number(id) if id == 100005.0));
+    assert!(matches!(normal_event.args[1], EventArg::Boolean(true)));
+
+    let recraft_event = &events[1];
+    assert_eq!(recraft_event.name, "TRACKED_RECIPE_UPDATE");
+    assert!(matches!(recraft_event.args[0], EventArg::Number(id) if id == 100005.0));
+    assert!(matches!(recraft_event.args[1], EventArg::Boolean(true)));
 }
 
 // ============================================================================

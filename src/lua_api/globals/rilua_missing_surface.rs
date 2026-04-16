@@ -1,6 +1,7 @@
 //! Restored rilua API surface for item, spell, tooltip, and small legacy globals.
 
 mod item_spell;
+mod professions;
 mod tooltip_info;
 mod traits;
 
@@ -47,6 +48,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     ensure_global_table(state, "UIPanelWindows");
     ensure_global_table(state, "SOUNDKIT");
     item_spell::register_item_and_spell_surfaces(state)?;
+    professions::register_profession_surface(state)?;
     traits::register_trait_surfaces(state)?;
     tooltip_info::register_tooltip_surface(state)?;
     Ok(())
