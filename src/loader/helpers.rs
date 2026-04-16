@@ -101,7 +101,11 @@ pub fn rand_id() -> u64 {
 /// Global strings from WoW CSV contain Lua escape sequences like `\32` (space)
 /// that are stored as literal backslash + digits in our Rust data. This function
 /// interprets them the same way Lua would when parsing a string literal.
-pub fn resolve_lua_escapes(s: &str) -> String {
+pub fn resolve_lua_escapes(s: &str) -> std::borrow::Cow<'_, str> {
+    // Fast path: no backslashes means no escapes to resolve
+    if !s.contains('\\') {
+        return std::borrow::Cow::Borrowed(s);
+    }
     let bytes = s.as_bytes();
     let mut result = String::with_capacity(s.len());
     let mut i = 0;
@@ -113,7 +117,7 @@ pub fn resolve_lua_escapes(s: &str) -> String {
             i += 1;
         }
     }
-    result
+    std::borrow::Cow::Owned(result)
 }
 
 /// Decode one Lua escape sequence starting at `i` (which must be `\\`).

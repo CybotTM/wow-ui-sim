@@ -12,7 +12,7 @@ use super::helpers::{
 pub(super) fn resolve_fontstring_text(text_key: Option<&str>) -> Option<String> {
     text_key.map(|key| {
         crate::global_strings::get_global_string(key)
-            .map(|s| resolve_lua_escapes(s))
+            .map(|s| resolve_lua_escapes(s).into_owned())
             .unwrap_or_else(|| key.to_string())
     })
 }
