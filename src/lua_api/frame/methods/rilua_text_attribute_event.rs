@@ -4,7 +4,8 @@
 //! the corresponding mlua method. Complex operations are stubbed with TODO.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_string_static,
+    frame_id_from_stack,
     frame_ref, registry_table_or_create, table_get, table_set, val_to_string,
 };
 use crate::lua_api::rilua_script_helpers::{
@@ -529,7 +530,7 @@ fn get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
             .map(|frame| frame.justify_h.as_h_str())
             .unwrap_or("LEFT")
     };
-    let justify = create_string(state, justify);
+    let justify = create_string_static(state, justify);
     state.push(justify);
     Ok(1)
 }
@@ -555,7 +556,7 @@ fn get_justify_v(state: &mut LuaState) -> LuaResult<u32> {
             .map(|frame| frame.justify_v.as_v_str())
             .unwrap_or("TOP")
     };
-    let justify = create_string(state, justify);
+    let justify = create_string_static(state, justify);
     state.push(justify);
     Ok(1)
 }

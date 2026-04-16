@@ -20,7 +20,8 @@
 //! - `C_PetJournal::GetPetInfoByPetID / GetPetInfoBySpeciesID`: lookup by ID.
 
 use crate::lua_api::rilua_methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table, table_get,
+    table_set,
     val_to_string,
 };
 use crate::lua_bridge::table_set_rust_fn;
@@ -114,9 +115,9 @@ fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&str>) {
     table_set(state, font, "__shadowColorA", Val::Num(0.0));
     table_set(state, font, "__shadowOffsetX", Val::Num(0.0));
     table_set(state, font, "__shadowOffsetY", Val::Num(0.0));
-    let center = create_string(state, "CENTER");
+    let center = create_string_static(state, "CENTER");
     table_set(state, font, "__justifyH", center);
-    let middle = create_string(state, "MIDDLE");
+    let middle = create_string_static(state, "MIDDLE");
     table_set(state, font, "__justifyV", middle);
     let name_val = match name {
         Some(n) => create_string(state, n),

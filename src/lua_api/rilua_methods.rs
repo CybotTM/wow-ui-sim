@@ -297,6 +297,14 @@ pub fn create_string(state: &mut LuaState, s: &str) -> Val {
     Val::Str(state.gc.intern_string(s.as_bytes()))
 }
 
+/// Like [`create_string`] but interns `s` through the pointer-keyed
+/// static cache. Use when the string is a compile-time literal hit on a
+/// hot path (`"CENTER"`, `"MIDDLE"`, `"LEFT"` / `"TOP"` fallbacks from
+/// small `&'static str`-returning methods, etc.).
+pub fn create_string_static(state: &mut LuaState, s: &'static str) -> Val {
+    Val::Str(state.gc.intern_string_static(s.as_bytes()))
+}
+
 /// Create a Lua string Val from raw bytes.
 pub fn create_string_bytes(state: &mut LuaState, bytes: &[u8]) -> Val {
     Val::Str(state.gc.intern_string(bytes))
