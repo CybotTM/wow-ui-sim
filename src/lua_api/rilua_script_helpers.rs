@@ -40,13 +40,15 @@ pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> GcRe
     }
     let new_table = state.gc.alloc_table(Table::new());
     let key_ref = state.gc.intern_string_static(key.as_bytes());
-    if let Some(reg) = state.gc.tables.get_mut(state.registry) {
+    let registry = state.registry;
+    if let Some(reg) = state.gc.tables.get_mut(registry) {
         let _ = reg.raw_set(
             Val::Str(key_ref),
             Val::Table(new_table),
             &state.gc.string_arena,
         );
     }
+    state.gc.barrier_back(registry);
     new_table
 }
 
@@ -56,6 +58,7 @@ pub fn table_set_str(state: &mut LuaState, table: GcRef<Table>, key: &str, value
     if let Some(t) = state.gc.tables.get_mut(table) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table);
 }
 
 /// Get a string-keyed value from a table.
@@ -108,6 +111,7 @@ fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str
     if let Some(table) = state.gc.tables.get_mut(table_ref) {
         let _ = table.raw_set(Val::Num(widget_id as f64), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table_ref);
     sync_on_update_runtime_cache(state, widget_id);
 }
 
@@ -318,9 +322,11 @@ fn registry_value(state: &mut LuaState, key: &str) -> Val {
 
 fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
     let key_ref = state.gc.intern_string(key.as_bytes());
-    if let Some(table) = state.gc.tables.get_mut(state.registry) {
+    let registry = state.registry;
+    if let Some(table) = state.gc.tables.get_mut(registry) {
         let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(registry);
 }
 
 /// Collect a Lua error into SimState for later retrieval.

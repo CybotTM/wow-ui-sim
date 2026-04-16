@@ -404,9 +404,15 @@ pub fn registry_get(state: &mut LuaState, key: &'static str) -> Val {
 /// Equivalent to mlua's `lua.set_named_registry_value(key, value)`.
 pub fn registry_set(state: &mut LuaState, key: &'static str, value: Val) {
     let key_ref = state.gc.intern_string_static(key.as_bytes());
-    if let Some(reg) = state.gc.tables.get_mut(state.registry) {
+    let registry = state.registry;
+    if let Some(reg) = state.gc.tables.get_mut(registry) {
         let _ = reg.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    // Required: rilua's GC needs a back-barrier whenever a value is
+    // raw-written into a table that may already be black this cycle.
+    // Without it, mid-Propagate writes leave the new value un-marked
+    // and it gets swept (see investigations/intern-string-ranking.md).
+    state.gc.barrier_back(registry);
 }
 
 /// Get or create a named table in rilua's registry.
@@ -479,6 +485,7 @@ pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
     if let Some(t) = state.gc.tables.get_mut(table_ref) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table_ref);
 }
 
 /// Like [`table_set`] but interns `key` through the pointer-keyed static
@@ -491,6 +498,7 @@ pub fn table_set_static(state: &mut LuaState, table: Val, key: &'static str, val
     if let Some(t) = state.gc.tables.get_mut(table_ref) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
+    state.gc.barrier_back(table_ref);
 }
 
 /// Get a string key from a table Val.
