@@ -262,7 +262,11 @@ pub fn register_intrinsic_templates() {
 pub fn clear_templates() {
     let mut registry = template_registry().write().unwrap();
     registry.entries.clear();
+    registry.entries_ci.clear();
     registry.chain_cache.clear();
+
+    texture_template_registry().write().unwrap().clear();
+    anim_group_template_registry().write().unwrap().clear();
 }
 
 // ---------------------------------------------------------------------------

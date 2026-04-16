@@ -8,6 +8,7 @@ use wow_ui_sim::lua_errors::grouped_errors_by_addon;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 use wow_ui_sim::toc::TocFile;
+use wow_ui_sim::xml::{clear_templates, register_intrinsic_templates};
 
 const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_AccountSaveUI", 3),
@@ -548,7 +549,13 @@ fn silence_lua_error_handler(env: &WowLuaEnv) {
         .expect("seterrorhandler should accept a no-op test handler");
 }
 
+fn reset_template_state() {
+    clear_templates();
+    register_intrinsic_templates();
+}
+
 fn load_startup_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
+    reset_template_state();
     let known_blizzard_addons: HashSet<_> = discover_all_blizzard_addons(&blizzard_ui_dir())
         .into_iter()
         .map(|(name, _)| name)
@@ -589,6 +596,7 @@ fn fire_panel_harness_startup_events(env: &WowLuaEnv) {
 }
 
 fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
+    reset_template_state();
     let ui = blizzard_ui_dir();
     for (addon_name, toc_name) in PANEL_COVERAGE_ADDONS {
         let toc_path = ui.join(addon_name).join(toc_name);
@@ -629,6 +637,7 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             let env = WowLuaEnv::new().expect("Failed to create Lua environment");
             env.set_screen_size(1024.0, 768.0);
             env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+            reset_template_state();
 
             assert_eq!(
                 count_blizzard_directories(),
@@ -848,6 +857,49 @@ fn first_unloaded_addon_in_family_respects_family_order() {
     let first = first_unloaded_addon_in_family(&env, &family);
 
     assert_eq!(first.as_deref(), Some("Blizzard_First"));
+}
+
+#[test]
+fn generic_trait_ui_runtime_load_survives_prior_force_load_process_state() {
+    common::with_perf_lock(|| {
+        common::with_timeout(600, move || {
+            let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+            env.set_screen_size(1024.0, 768.0);
+            env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+
+            for (_, toc_path) in discover_all_blizzard_addons(&blizzard_ui_dir()) {
+                let _ = load_addon(&env.loader_env(), &toc_path);
+            }
+            drop(env);
+
+            let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+            env.set_screen_size(1024.0, 768.0);
+            env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+            load_startup_blizzard_ui(&env);
+
+            let was_loaded: bool = env
+                .eval("return C_AddOns.IsAddOnLoaded(\"Blizzard_GenericTraitUI\")")
+                .expect("precondition query should return");
+            let (loaded, reason): (bool, Option<String>) = env
+                .eval("return C_AddOns.LoadAddOn(\"Blizzard_GenericTraitUI\")")
+                .expect("GenericTraitUI load should return");
+            let now_loaded: bool = env
+                .eval("return C_AddOns.IsAddOnLoaded(\"Blizzard_GenericTraitUI\")")
+                .expect("postcondition query should return");
+
+            assert!(
+                loaded && now_loaded,
+                "GenericTraitUI should load after a prior force-load pass; was_loaded={was_loaded}, loaded={loaded}, reason={reason:?}, now_loaded={now_loaded}",
+            );
+        })
+    })
+}
+
+#[test]
+fn shard_14_runtime_load_survives_prior_runtime_shards_in_process() {
+    for shard_index in 9..14 {
+        run_load_on_demand_blizzard_addon_shard(shard_index, 16);
+    }
 }
 
 #[test]
