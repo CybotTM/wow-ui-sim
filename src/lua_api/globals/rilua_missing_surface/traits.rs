@@ -176,7 +176,10 @@ fn current_config_ids(state: &LuaState) -> Vec<i32> {
         .unwrap_or_default()
 }
 
-fn register_c_traits_query_fns(state: &mut LuaState, table_ref: Val) -> LuaResult<()> {
+fn register_c_traits_query_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
@@ -209,7 +212,10 @@ fn register_c_traits_query_fns(state: &mut LuaState, table_ref: Val) -> LuaResul
     Ok(())
 }
 
-fn register_c_traits_action_fns(state: &mut LuaState, table_ref: Val) -> LuaResult<()> {
+fn register_c_traits_action_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(state, table_ref, "GetAllTreeIDs", c_traits_get_all_tree_ids)?;
     table_set_rust_fn(
         state,
@@ -248,7 +254,10 @@ fn register_c_traits(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
-fn register_c_class_talents_query_fns(state: &mut LuaState, table_ref: Val) -> LuaResult<()> {
+fn register_c_class_talents_query_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
@@ -288,7 +297,10 @@ fn register_c_class_talents_query_fns(state: &mut LuaState, table_ref: Val) -> L
     Ok(())
 }
 
-fn register_c_class_talents_action_fns(state: &mut LuaState, table_ref: Val) -> LuaResult<()> {
+fn register_c_class_talents_action_fns(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
@@ -449,7 +461,7 @@ fn c_traits_get_loadout_serialization_version(state: &mut LuaState) -> LuaResult
 fn push_subtree_base_fields(
     state: &mut LuaState,
     info: Val,
-    subtree: &crate::traits::TraitSubtree,
+    subtree: &crate::traits::TraitSubTreeInfo,
 ) {
     table_set(state, info, "ID", Val::Num(subtree.id as f64));
     table_set(state, info, "id", Val::Num(subtree.id as f64));

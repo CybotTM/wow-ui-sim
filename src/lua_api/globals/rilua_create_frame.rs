@@ -1212,41 +1212,44 @@ fn copy_table_entries_into_frame(
         .get(source_ref)
         .map(|table| table.array_slice().to_vec())
         .unwrap_or_default();
-    let hash_entries = state
-        .gc
-        .tables
-        .get(source_ref)
-        .map(|table| table.hash_entries())
-        .unwrap_or_default();
-
+    let hash_entries = collect_filtered_hash_entries(state, source_ref);
     if let Some(fields_table) = state.gc.tables.get_mut(frame_ref) {
         for (index, value) in array_values.into_iter().enumerate() {
             let _ =
                 fields_table.raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena);
         }
         for (key, value) in hash_entries {
-            let should_skip = match key {
-                Val::Str(str_ref) => state
-                    .gc
-                    .string_arena
-                    .get(str_ref)
-                    .map(|name| {
-                        matches!(
-                            name.as_str(),
-                            Some("RegisterCallback")
-                                | Some("UnregisterCallback")
-                                | Some("TriggerEvent")
-                        )
-                    })
-                    .unwrap_or(false),
-                _ => false,
-            };
-            if should_skip {
-                continue;
-            }
             let _ = fields_table.raw_set(key, value, &state.gc.string_arena);
         }
     }
+}
+
+fn collect_filtered_hash_entries(
+    state: &LuaState,
+    source_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> Vec<(Val, Val)> {
+    state
+        .gc
+        .tables
+        .get(source_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|(key, _)| {
+            let Val::Str(str_ref) = key else { return true };
+            !state
+                .gc
+                .string_arena
+                .get(*str_ref)
+                .and_then(|name| name.as_str())
+                .is_some_and(|s| {
+                    matches!(
+                        s,
+                        "RegisterCallback" | "UnregisterCallback" | "TriggerEvent"
+                    )
+                })
+        })
+        .collect()
 }
 
 fn call_handler_with_frame(state: &mut LuaState, handler: Val, frame: Val) -> LuaResult<()> {
