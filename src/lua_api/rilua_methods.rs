@@ -171,9 +171,11 @@ pub fn sync_child_to_rilua(
 fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
     // NOTE: Do NOT use intern_string_static here. Even with the mid-cycle
     // Black-colour fix in rilua, migrating this specific call site to the
-    // pointer-keyed cache makes ~300 Blizzard addons error out with
-    // "OnLoad (a nil value)". Root cause not yet understood; other
-    // registry helpers migrate cleanly. See
+    // pointer-keyed cache still destabilizes the Blizzard startup path.
+    // The original symptom was a broad "OnLoad (a nil value)" cascade; later
+    // attempts also hung PartyFrame/CompactUnitFrame regressions behind group
+    // UI startup. Root cause is still not isolated, so this site stays on the
+    // content-keyed intern path until that investigation is complete. See
     // docs/wiki/investigations/intern-string-ranking.md.
     let key_ref = state.gc.intern_string(FRAME_REFS_KEY.as_bytes());
     let registry = state.gc.tables.get(state.registry);
