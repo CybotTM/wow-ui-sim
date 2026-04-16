@@ -28,6 +28,7 @@ if addframetext == nil then
   function addframetext() end
 end
 
+
 if Mixin == nil then
   function Mixin(object, ...)
     for i = 1, select("#", ...) do

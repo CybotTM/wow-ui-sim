@@ -331,6 +331,12 @@ pub fn is_collapsed(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// IsMenuOpen() — returns false (menus are never open in headless mode).
+pub fn is_menu_open(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 fn is_collapsed_impl(state: &crate::lua_api::SimState, id: u64) -> bool {
     let frame = match state.widgets.get(id) {
         Some(f) => f,
@@ -1238,6 +1244,8 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetCollapsesLayout", set_collapses_layout)?;
     table_set_rust_fn(state, mt, "CollapsesLayout", collapses_layout)?;
     table_set_rust_fn(state, mt, "IsCollapsed", is_collapsed)?;
+    // Dropdown menus (always closed in headless mode)
+    table_set_rust_fn(state, mt, "IsMenuOpen", is_menu_open)?;
     // Alpha
     table_set_rust_fn(state, mt, "SetAlpha", set_alpha)?;
     table_set_rust_fn(state, mt, "GetAlpha", get_alpha)?;
