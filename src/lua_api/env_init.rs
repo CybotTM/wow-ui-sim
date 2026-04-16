@@ -990,6 +990,36 @@ C_Map = __wow_merge_namespace(C_Map, {
   GetBestMapForUnit = function() return nil end,
 })
 
+-- Bonus / world-quest objective trackers iterate the task list at startup.
+-- Return an empty table so the `for ... in ipairs(tasksTable)` loops no-op.
+if GetTasksTable == nil then
+  function GetTasksTable()
+    return {}
+  end
+end
+
+-- Auto quest popups (tutorial toasts). Not simulated; `for i = 1, N do`
+-- loops in AutoQuestPopUpTracker iterate zero times.
+if GetNumAutoQuestPopUps == nil then
+  function GetNumAutoQuestPopUps() return 0 end
+end
+if GetAutoQuestPopUp == nil then
+  function GetAutoQuestPopUp(_index) return nil, nil end
+end
+
+-- Not in a scenario by default. Blizzard_ScenarioObjectiveTracker.lua:186
+-- calls `numStages > 0` on the returned value, so numStages must be a
+-- real zero, not nil.
+C_Scenario = __wow_merge_namespace(C_Scenario, {
+  GetInfo = function()
+    -- scenarioName, currentStage, numStages, flags, _, _, _, xp, money,
+    -- scenarioType, _, textureKit, scenarioID
+    return nil, 0, 0, 0, nil, nil, nil, 0, 0, 0, nil, "evergreen-scenario", 0
+  end,
+  IsInScenario = function() return false end,
+  GetStepInfo = function() return nil, 0, 0, false, false, 0, 0, 0, 0, false, false end,
+})
+
 C_Minimap = __wow_merge_namespace(C_Minimap, {
   GetNumTrackingTypes = function() return 0 end,
   GetTrackingInfo = function() return nil end,
@@ -2647,6 +2677,12 @@ C_QuestLog = __wow_merge_namespace(C_QuestLog, {
   ReadyForTurnIn = function()
     return false
   end,
+  -- World-quest watch list: empty (no watched quests).
+  GetNumWorldQuestWatches = function() return 0 end,
+  GetQuestIDForWorldQuestWatchIndex = function() return nil end,
+  -- Objective-tracker iteration for active quests: empty.
+  GetNumQuestWatches = function() return 0 end,
+  GetQuestIDForQuestWatchIndex = function() return nil end,
 })
 
 C_ColorOverrides = __wow_merge_namespace(C_ColorOverrides, {
