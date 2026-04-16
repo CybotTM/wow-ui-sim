@@ -471,30 +471,54 @@ if GetActionInfo == nil then
   end
 end
 
--- `GetInventorySlotInfo(slotName)` — canonical WoW slot id + icon name.
+-- `GetInventorySlotInfo(slotName)` — canonical WoW slot id + icon fileDataID.
 -- Callsites use the numeric return as a TABLE KEY (e.g.
 -- `CANCELABLE_ITEMS[GetInventorySlotInfo("MainHandSlot")] = 1`), so a
--- nil return crashes the chunk with "table index is nil". Provide the
--- stable mapping Blizzard has shipped for years; texture name and
--- `checkRelic` aren't used by sim callers yet, returned as placeholders.
+-- nil return crashes the chunk with "table index is nil". The fileDataID
+-- mirrors `PaperDollItemFrame.SlotIconFileID` — DB maps ItemButtonName to
+-- a specific icon, not a naive `UI-PaperDoll-Slot-<slotName>` concat.
+-- Mismatches (WristSlot→Wrists, BackSlot→Rear, Bag*Slot→Bag,
+-- ReagentBag0Slot→Bag, AmmoSlot→Ammo) cause "Not found" warnings for
+-- visible slots.
 if GetInventorySlotInfo == nil then
   local __wow_inventory_slots = {
-    HEADSLOT=1, NECKSLOT=2, SHOULDERSLOT=3, SHIRTSLOT=4, CHESTSLOT=5,
-    WAISTSLOT=6, LEGSSLOT=7, FEETSLOT=8, WRISTSLOT=9, HANDSSLOT=10,
-    FINGER0SLOT=11, FINGER1SLOT=12, TRINKET0SLOT=13, TRINKET1SLOT=14,
-    BACKSLOT=15, MAINHANDSLOT=16, SECONDARYHANDSLOT=17, RANGEDSLOT=18,
-    TABARDSLOT=19, BAG0SLOT=20, BAG1SLOT=21, BAG2SLOT=22, BAG3SLOT=23,
-    BAG4SLOT=24, REAGENTBAG0SLOT=25, REAGENTBAGSLOT=25,
+    HEADSLOT          = {1,  136516},
+    NECKSLOT          = {2,  136519},
+    SHOULDERSLOT      = {3,  136526},
+    SHIRTSLOT         = {4,  136525},
+    CHESTSLOT         = {5,  136512},
+    WAISTSLOT         = {6,  136529},
+    LEGSSLOT          = {7,  136517},
+    FEETSLOT          = {8,  136513},
+    WRISTSLOT         = {9,  136530},
+    HANDSSLOT         = {10, 136515},
+    FINGER0SLOT       = {11, 136514},
+    FINGER1SLOT       = {12, 136514},
+    TRINKET0SLOT      = {13, 136528},
+    TRINKET1SLOT      = {14, 136528},
+    BACKSLOT          = {15, 136521},
+    MAINHANDSLOT      = {16, 136518},
+    SECONDARYHANDSLOT = {17, 136524},
+    RANGEDSLOT        = {18, 136520},
+    TABARDSLOT        = {19, 136527},
+    AMMOSLOT          = {0,  136510},
+    BAG0SLOT          = {20, 136511},
+    BAG1SLOT          = {21, 136511},
+    BAG2SLOT          = {22, 136511},
+    BAG3SLOT          = {23, 136511},
+    BAG4SLOT          = {24, 136511},
+    REAGENTBAG0SLOT   = {25, 136511},
+    REAGENTBAGSLOT    = {25, 136511},
   }
   function GetInventorySlotInfo(slot_name)
     if type(slot_name) ~= "string" then
       return nil
     end
-    local id = __wow_inventory_slots[slot_name:upper()]
-    if id == nil then
+    local entry = __wow_inventory_slots[slot_name:upper()]
+    if entry == nil then
       return nil
     end
-    return id, "Interface\\PaperDoll\\UI-PaperDoll-Slot-" .. slot_name, false
+    return entry[1], entry[2]
   end
 end
 
