@@ -26,7 +26,7 @@ pub fn create_frame_from_xml(
     intrinsic_base: Option<&str>,
     timing: &mut LoadTiming,
 ) -> Result<Option<String>, LoadError> {
-    if let Some(early) = register_virtual_or_intrinsic(env, frame, widget_type, parent_override) {
+    if let Some(early) = register_virtual_or_intrinsic(env, frame, widget_type, parent_override, intrinsic_base) {
         return Ok(early);
     }
 
@@ -228,12 +228,22 @@ fn register_virtual_or_intrinsic(
     frame: &crate::xml::FrameXml,
     widget_type: &str,
     parent_override: Option<&str>,
+    intrinsic_base: Option<&str>,
 ) -> Option<Option<String>> {
     if frame.is_virtual != Some(true) && frame.intrinsic != Some(true) {
         return None;
     }
     if let Some(ref name) = frame.name {
-        crate::xml::register_template(name, widget_type, frame.clone());
+        // Prepend intrinsic base to inherits so the template chain includes
+        // the intrinsic mixin (e.g. DropdownButton → DropdownButtonMixin).
+        let mut registered = frame.clone();
+        if let Some(base) = intrinsic_base {
+            registered.inherits = Some(match &registered.inherits {
+                Some(existing) if !existing.is_empty() => format!("{base}, {existing}"),
+                _ => base.to_string(),
+            });
+        }
+        crate::xml::register_template(name, widget_type, registered);
     }
     if let Some(ref sm) = frame.secure_mixin {
         apply_secure_mixins(env, sm);
