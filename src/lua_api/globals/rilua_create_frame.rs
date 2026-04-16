@@ -33,14 +33,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
 
     let widget_type = WidgetType::from_str(&frame_type)
         .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))?;
-    let parent_explicit = !matches!(parent_val, Val::Nil);
-    let parent_id = if parent_explicit {
-        extract_frame_id(state, parent_val)
-            .ok_or_else(|| rilua::runtime_error("CreateFrame parent must be a frame or nil"))?
-    } else {
-        let sim = borrow_state(state)?;
-        sim.widgets.get_id_by_name("UIParent").unwrap_or_default()
-    };
+    let (parent_id, parent_explicit) = resolve_parent_id(state, parent_val)?;
 
     let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
         state,
@@ -63,6 +56,18 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
+}
+
+fn resolve_parent_id(state: &mut LuaState, parent_val: Val) -> LuaResult<(u64, bool)> {
+    let parent_explicit = !matches!(parent_val, Val::Nil);
+    let parent_id = if parent_explicit {
+        extract_frame_id(state, parent_val)
+            .ok_or_else(|| rilua::runtime_error("CreateFrame parent must be a frame or nil"))?
+    } else {
+        let sim = borrow_state(state)?;
+        sim.widgets.get_id_by_name("UIParent").unwrap_or_default()
+    };
+    Ok((parent_id, parent_explicit))
 }
 
 // ---------------------------------------------------------------------------
@@ -162,8 +167,20 @@ pub fn ui_dropdown_menu_add_button(state: &mut LuaState) -> LuaResult<u32> {
     let Some(list_id) = extract_frame_id(state, list_val) else {
         return Ok(0);
     };
+    let new_index = increment_list_button_count(state, list_id);
 
-    // Increment numButtons on the list's fields
+    let btn_name = format!("DropDownList{}Button{}", level, new_index);
+    let btn_val = get_global(state, &btn_name);
+    let Some(btn_id) = extract_frame_id(state, btn_val) else {
+        return Ok(0);
+    };
+
+    copy_info_to_button_fields(state, btn_id, info);
+    apply_button_text_from_info(state, btn_id, info)?;
+    Ok(0)
+}
+
+fn increment_list_button_count(state: &mut LuaState, list_id: u64) -> i32 {
     let list_fields = get_or_create_frame_fields(state, list_id);
     let num_buttons = match table_get_str(state, list_fields, "numButtons") {
         Val::Num(n) => n as i32,
@@ -171,48 +188,41 @@ pub fn ui_dropdown_menu_add_button(state: &mut LuaState) -> LuaResult<u32> {
     };
     let new_index = num_buttons + 1;
     table_set(state, list_fields, "numButtons", Val::Num(new_index as f64));
+    new_index
+}
 
-    // Find the button frame for this slot
-    let btn_name = format!("DropDownList{}Button{}", level, new_index);
-    let btn_val = get_global(state, &btn_name);
-    let Some(btn_id) = extract_frame_id(state, btn_val) else {
-        return Ok(0);
-    };
-
-    // Copy all info fields onto the button's fields table
+fn copy_info_to_button_fields(state: &mut LuaState, btn_id: u64, info: Val) {
     let btn_fields = get_or_create_frame_fields(state, btn_id);
-    if let Val::Table(info_ref) = info {
-        // Collect all (key, value) pairs from the info table
-        let array_pairs: Vec<(Val, Val)> = state
-            .gc
-            .tables
-            .get(info_ref)
-            .map(|t| {
-                t.array_slice()
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, v)| !matches!(v, Val::Nil))
-                    .map(|(i, v)| (Val::Num((i + 1) as f64), *v))
-                    .collect()
-            })
-            .unwrap_or_default();
-        let hash_pairs: Vec<(Val, Val)> = state
-            .gc
-            .tables
-            .get(info_ref)
-            .map(|t| t.hash_entries())
-            .unwrap_or_default();
-
-        if let Val::Table(fields_ref) = btn_fields {
-            for (k, v) in array_pairs.into_iter().chain(hash_pairs) {
-                if let Some(t) = state.gc.tables.get_mut(fields_ref) {
-                    let _ = t.raw_set(k, v, &state.gc.string_arena);
-                }
+    let Val::Table(info_ref) = info else { return };
+    let array_pairs: Vec<(Val, Val)> = state
+        .gc
+        .tables
+        .get(info_ref)
+        .map(|t| {
+            t.array_slice()
+                .iter()
+                .enumerate()
+                .filter(|(_, v)| !matches!(v, Val::Nil))
+                .map(|(i, v)| (Val::Num((i + 1) as f64), *v))
+                .collect()
+        })
+        .unwrap_or_default();
+    let hash_pairs: Vec<(Val, Val)> = state
+        .gc
+        .tables
+        .get(info_ref)
+        .map(|t| t.hash_entries())
+        .unwrap_or_default();
+    if let Val::Table(fields_ref) = btn_fields {
+        for (k, v) in array_pairs.into_iter().chain(hash_pairs) {
+            if let Some(t) = state.gc.tables.get_mut(fields_ref) {
+                let _ = t.raw_set(k, v, &state.gc.string_arena);
             }
         }
     }
+}
 
-    // Apply text field to widget state
+fn apply_button_text_from_info(state: &mut LuaState, btn_id: u64, info: Val) -> LuaResult<()> {
     let text_key = state.gc.intern_string(b"text");
     let info_text = if let Val::Table(info_ref) = info {
         state
@@ -224,35 +234,34 @@ pub fn ui_dropdown_menu_add_button(state: &mut LuaState) -> LuaResult<u32> {
     } else {
         Val::Nil
     };
-
-    if let Val::Str(text_str_ref) = info_text {
-        let text_bytes = state
-            .gc
-            .string_arena
-            .get(text_str_ref)
-            .map(|s| s.data().to_vec())
-            .unwrap_or_default();
-        let text_string = String::from_utf8_lossy(&text_bytes).into_owned();
-        let mut sim = borrow_state_mut(state)?;
-        let stripped = crate::render::strip_wow_markup(&text_string);
-        if let Some(f) = sim.widgets.get_mut_visual(btn_id) {
-            f.text_stripped = Some(stripped.clone());
-            f.text = Some(text_string.clone());
-        }
-        let text_child = sim
-            .widgets
-            .get(btn_id)
-            .and_then(|f| f.children_keys.get("Text").copied());
-        if let Some(tc_id) = text_child {
-            if let Some(tc) = sim.widgets.get_mut_visual(tc_id) {
-                tc.text_stripped = Some(stripped);
-                tc.text = Some(text_string);
-            }
-        }
-        sim.set_frame_visible(btn_id, true);
+    let Val::Str(text_str_ref) = info_text else {
+        return Ok(());
+    };
+    let text_bytes = state
+        .gc
+        .string_arena
+        .get(text_str_ref)
+        .map(|s| s.data().to_vec())
+        .unwrap_or_default();
+    let text_string = String::from_utf8_lossy(&text_bytes).into_owned();
+    let mut sim = borrow_state_mut(state)?;
+    let stripped = crate::render::strip_wow_markup(&text_string);
+    if let Some(f) = sim.widgets.get_mut_visual(btn_id) {
+        f.text_stripped = Some(stripped.clone());
+        f.text = Some(text_string.clone());
     }
-
-    Ok(0)
+    let text_child = sim
+        .widgets
+        .get(btn_id)
+        .and_then(|f| f.children_keys.get("Text").copied());
+    if let Some(tc_id) = text_child {
+        if let Some(tc) = sim.widgets.get_mut_visual(tc_id) {
+            tc.text_stripped = Some(stripped);
+            tc.text = Some(text_string);
+        }
+    }
+    sim.set_frame_visible(btn_id, true);
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -1129,6 +1138,8 @@ fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str
         Some("number") => value.parse::<f64>().map(Val::Num).unwrap_or(Val::Nil),
         Some("boolean") => Val::Bool(value.eq_ignore_ascii_case("true")),
         Some("global") => resolve_global_path(state, value),
+        // Auto-detect numbers when type is not specified (WoW behavior)
+        None if value.parse::<f64>().is_ok() => Val::Num(value.parse().unwrap()),
         _ => create_string(state, value),
     }
 }

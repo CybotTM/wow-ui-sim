@@ -203,6 +203,8 @@ fn format_key_value_lua(value: &str, value_type: Option<&str>) -> String {
         Some("boolean") => value.to_lowercase(),
         Some("global") if !value.is_empty() => value.to_string(),
         Some("global") => "nil".to_string(),
+        // Auto-detect numbers when type is not specified (WoW behavior)
+        None if value.parse::<f64>().is_ok() => value.to_string(),
         _ => format!("\"{}\"", escape_lua_string(value)),
     }
 }
