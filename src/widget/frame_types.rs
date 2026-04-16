@@ -3,11 +3,20 @@
 use super::AnchorPoint;
 
 /// Attribute value stored on frames.
+///
+/// Scalar types (`String`, `Number`, `Boolean`) are stored inline. Lua
+/// reference types (tables, functions, userdata) that WoW attributes must
+/// also support — Blizzard uses `SetAttribute` + `OnAttributeChanged` as a
+/// secure message bus, passing tables and closures across the taint
+/// barrier — are stored in a Lua registry table and referenced here by
+/// key. See `rilua_text_attribute_event::val_to_attribute`.
 #[derive(Debug, Clone)]
 pub enum AttributeValue {
     String(String),
     Number(f64),
     Boolean(bool),
+    /// Key into the `__wow_attr_refs__` registry table.
+    LuaRef(String),
     Nil,
 }
 

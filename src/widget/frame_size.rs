@@ -103,7 +103,7 @@ fn hash_map_string_attribute_value_bytes(values: &HashMap<String, AttributeValue
 
 fn attribute_value_bytes(value: &AttributeValue) -> usize {
     match value {
-        AttributeValue::String(text) => text.capacity(),
+        AttributeValue::String(text) | AttributeValue::LuaRef(text) => text.capacity(),
         AttributeValue::Number(_) | AttributeValue::Boolean(_) | AttributeValue::Nil => 0,
     }
 }

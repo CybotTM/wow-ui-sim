@@ -191,18 +191,21 @@ if CreateSecureDelegate == nil then
 end
 
 -- Rilua's C-level secureexecuterange is a no-op stub (taint.rs TODO).
--- Always install our Lua implementation to override it.
--- WoW's secureexecuterange continues iterating even if the callback errors
--- (errors are routed to the error handler but don't abort the loop), so
--- wrap each invocation in pcall to match that behavior.
+-- Always install our Lua implementation to override it. Must match Elune:
+--   1. Iterate with lua_next (i.e. `pairs`), NOT ipairs — hash-keyed tables
+--      (CallbackRegistryMixin stores callbacks keyed by owner ID) must be
+--      visited, not just the array part.
+--   2. Continue iterating even if the callback errors — WoW routes errors
+--      to the error handler but the loop keeps going, so each invocation
+--      is wrapped in pcall.
 function secureexecuterange(tbl, callback, ...)
   if type(tbl) ~= "table" or type(callback) ~= "function" then
     return
   end
   local extra = {...}
   local n = select("#", ...)
-  for index, value in ipairs(tbl) do
-    pcall(callback, index, value, unpack(extra, 1, n))
+  for key, value in pairs(tbl) do
+    pcall(callback, key, value, unpack(extra, 1, n))
   end
 end
 

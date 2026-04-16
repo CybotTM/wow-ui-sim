@@ -23,7 +23,7 @@ const LUA_MULTRET: i32 = -1;
 const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
 
 /// Get a named table from rilua's registry, returning None if absent.
-fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
+pub fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
     let key_ref = state.gc.intern_string(key.as_bytes());
     let registry = state.gc.tables.get(state.registry)?;
     match registry.get_str(key_ref, &state.gc.string_arena) {
@@ -33,7 +33,7 @@ fn registry_table(state: &mut LuaState, key: &str) -> Option<GcRef<Table>> {
 }
 
 /// Get or create a named table in rilua's registry.
-fn registry_table_or_create(state: &mut LuaState, key: &str) -> GcRef<Table> {
+pub fn registry_table_or_create(state: &mut LuaState, key: &str) -> GcRef<Table> {
     if let Some(existing) = registry_table(state, key) {
         return existing;
     }
@@ -50,7 +50,7 @@ fn registry_table_or_create(state: &mut LuaState, key: &str) -> GcRef<Table> {
 }
 
 /// Set a string-keyed value in a table.
-fn table_set_str(state: &mut LuaState, table: GcRef<Table>, key: &str, value: Val) {
+pub fn table_set_str(state: &mut LuaState, table: GcRef<Table>, key: &str, value: Val) {
     let key_ref = state.gc.intern_string(key.as_bytes());
     if let Some(t) = state.gc.tables.get_mut(table) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
@@ -58,7 +58,7 @@ fn table_set_str(state: &mut LuaState, table: GcRef<Table>, key: &str, value: Va
 }
 
 /// Get a string-keyed value from a table.
-fn table_get_str(state: &mut LuaState, table: GcRef<Table>, key: &str) -> Val {
+pub fn table_get_str(state: &mut LuaState, table: GcRef<Table>, key: &str) -> Val {
     let key_ref = state.gc.intern_string(key.as_bytes());
     state
         .gc

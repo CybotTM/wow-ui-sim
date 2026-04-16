@@ -1685,6 +1685,12 @@ fn val_to_f32(val: Val, default: f32) -> f32 {
     }
 }
 
+const ATTR_REFS_KEY: &str = "__wow_attr_refs__";
+
+fn attr_ref_key(frame_id: u64, name: &str) -> String {
+    format!("{frame_id}\0{name}")
+}
+
 fn attribute_to_val(state: &mut LuaState, attr: Option<&crate::widget::AttributeValue>) -> Val {
     match attr {
         None => Val::Nil,
@@ -1692,10 +1698,25 @@ fn attribute_to_val(state: &mut LuaState, attr: Option<&crate::widget::Attribute
         Some(crate::widget::AttributeValue::Boolean(b)) => Val::Bool(*b),
         Some(crate::widget::AttributeValue::Number(n)) => Val::Num(*n),
         Some(crate::widget::AttributeValue::String(s)) => create_string(state, s),
+        Some(crate::widget::AttributeValue::LuaRef(key)) => {
+            match crate::lua_api::rilua_script_helpers::registry_table(state, ATTR_REFS_KEY) {
+                Some(table) => crate::lua_api::rilua_script_helpers::table_get_str(state, table, key),
+                None => Val::Nil,
+            }
+        }
     }
 }
 
-fn val_to_attribute(val: Val, state: &LuaState) -> crate::widget::AttributeValue {
+/// Convert a Lua value into the storage representation. For scalar types,
+/// this is lossless. For reference types (Table / Function / UserData),
+/// the value is rooted in a Lua registry table and represented here as a
+/// `LuaRef` keyed by `{frame_id}\0{name}`. Callers that need registry
+/// storage must pass a non-None `ref_key` — Nil / scalar paths ignore it.
+fn val_to_attribute(
+    val: Val,
+    state: &mut LuaState,
+    ref_key: Option<&str>,
+) -> crate::widget::AttributeValue {
     match val {
         Val::Nil => crate::widget::AttributeValue::Nil,
         Val::Bool(b) => crate::widget::AttributeValue::Boolean(b),
@@ -1709,18 +1730,48 @@ fn val_to_attribute(val: Val, state: &LuaState) -> crate::widget::AttributeValue
                 .unwrap_or_default();
             crate::widget::AttributeValue::String(text)
         }
-        _ => crate::widget::AttributeValue::Nil,
+        _ => {
+            // Table / Function / UserData: root in registry, store key.
+            let Some(key) = ref_key else {
+                return crate::widget::AttributeValue::Nil;
+            };
+            let refs = crate::lua_api::rilua_script_helpers::registry_table_or_create(
+                state,
+                ATTR_REFS_KEY,
+            );
+            crate::lua_api::rilua_script_helpers::table_set_str(state, refs, key, val);
+            crate::widget::AttributeValue::LuaRef(key.to_string())
+        }
     }
 }
 
 fn store_simple_attribute(state: &mut LuaState, id: u64, name: &str, value: Val) -> LuaResult<()> {
-    let attr = val_to_attribute(value, state);
+    let ref_key = attr_ref_key(id, name);
+    let attr = val_to_attribute(value, state, Some(&ref_key));
+    // If the previous value was a LuaRef with the same key, releasing from
+    // registry is skipped — insertion overwrites the stored Val. If the new
+    // value is Nil and the old was a LuaRef, drop the registry slot too so
+    // the reference doesn't root the Lua value forever.
+    let replace_with_nil = matches!(attr, crate::widget::AttributeValue::Nil);
     let mut sim = borrow_state_mut(state)?;
+    let old_was_ref = sim
+        .widgets
+        .get(id)
+        .and_then(|f| f.attributes.get(name))
+        .is_some_and(|v| matches!(v, crate::widget::AttributeValue::LuaRef(_)));
     if let Some(frame) = sim.widgets.get_mut(id) {
-        if matches!(attr, crate::widget::AttributeValue::Nil) {
+        if replace_with_nil {
             frame.attributes.remove(name);
         } else {
             frame.attributes.insert(name.to_string(), attr);
+        }
+    }
+    drop(sim);
+    if replace_with_nil && old_was_ref {
+        if let Some(refs) =
+            crate::lua_api::rilua_script_helpers::registry_table(state, ATTR_REFS_KEY)
+        {
+            crate::lua_api::rilua_script_helpers::table_set_str(state, refs, &ref_key, Val::Nil);
         }
     }
     Ok(())
