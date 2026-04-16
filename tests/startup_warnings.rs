@@ -141,49 +141,6 @@ fn test_no_warnings_on_startup() {
     }
 }
 
-#[test]
-fn test_startup_warnings_env_smoke() {
-    test_timeout! {
-        eprintln!("[startup_warnings] env smoke before new");
-        let _env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        eprintln!("[startup_warnings] env smoke after new");
-    }
-}
-
-#[test]
-fn test_startup_warnings_encounter_timeline_smoke() {
-    test_timeout! {
-        eprintln!("[startup_warnings] encounter timeline smoke before load");
-        let (_env, warnings) = load_blizzard_addon_by_folder("Blizzard_EncounterTimeline");
-        eprintln!(
-            "[startup_warnings] encounter timeline smoke after load warnings={}",
-            warnings.len()
-        );
-    }
-}
-
-#[test]
-fn test_startup_warnings_encounter_warnings_smoke() {
-    test_timeout! {
-        eprintln!("[startup_warnings] encounter warnings smoke before load");
-        let (_env, warnings) = load_blizzard_addon_by_folder("Blizzard_EncounterWarnings");
-        eprintln!(
-            "[startup_warnings] encounter warnings smoke after load warnings={}",
-            warnings.len()
-        );
-    }
-}
-
-#[test]
-fn test_startup_warnings_bulk_load_smoke() {
-    let start = std::time::Instant::now();
-    let _warnings = load_and_startup();
-    eprintln!(
-        "[startup_warnings] bulk load elapsed={:.2?}",
-        start.elapsed()
-    );
-}
-
 /// Load all Blizzard addons and apply workarounds (no startup events).
 fn load_all_addons() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
