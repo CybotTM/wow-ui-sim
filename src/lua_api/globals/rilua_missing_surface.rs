@@ -669,75 +669,96 @@ fn class_color(class_index: i32) -> (f64, f64, f64) {
     }
 }
 
-fn tooltip_for_unit(state: &mut LuaState, unit: &str) -> Val {
-    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_UNIT);
-    let lines = table_get(state, tooltip, "lines");
-    let (name, level, race, class_name, color) = {
-        let sim = borrow_state(state).expect("state");
-        if unit == "target" {
-            if let Some(target) = &sim.current_target {
-                (
-                    target.name.clone(),
-                    target.level,
-                    target.creature_type.clone(),
-                    CLASS_LABELS
-                        .get((target.class_index - 1).max(0) as usize)
-                        .copied()
-                        .unwrap_or("Unknown")
-                        .to_string(),
-                    class_color(target.class_index),
-                )
-            } else {
-                return tooltip;
-            }
-        } else if unit == "player" {
+struct UnitTooltipInfo {
+    name: String,
+    level: i32,
+    race: String,
+    class_name: String,
+    color: (f64, f64, f64),
+}
+
+fn class_label(class_index: i32) -> String {
+    CLASS_LABELS
+        .get((class_index - 1).max(0) as usize)
+        .copied()
+        .unwrap_or("Unknown")
+        .to_string()
+}
+
+fn unit_tooltip_info(state: &LuaState, unit: &str) -> Option<UnitTooltipInfo> {
+    let sim = borrow_state(state).ok()?;
+    match unit {
+        "target" => sim.current_target.as_ref().map(|target| UnitTooltipInfo {
+            name: target.name.clone(),
+            level: target.level,
+            race: target.creature_type.clone(),
+            class_name: class_label(target.class_index),
+            color: class_color(target.class_index),
+        }),
+        "player" => {
             let player = &sim.player;
-            (
-                player.name.clone(),
-                player.level,
-                RACE_DATA
-                    .get(player.race_index)
-                    .map(|(name, _, _)| (*name).to_string())
-                    .unwrap_or_else(|| "Unknown".to_string()),
-                CLASS_LABELS
-                    .get((player.class_index - 1).max(0) as usize)
-                    .copied()
-                    .unwrap_or("Unknown")
-                    .to_string(),
-                class_color(player.class_index),
-            )
-        } else {
-            return tooltip;
+            let race = RACE_DATA
+                .get(player.race_index)
+                .map(|(name, _, _)| (*name).to_string())
+                .unwrap_or_else(|| "Unknown".to_string());
+            Some(UnitTooltipInfo {
+                name: player.name.clone(),
+                level: player.level,
+                race,
+                class_name: class_label(player.class_index),
+                color: class_color(player.class_index),
+            })
         }
-    };
+        _ => None,
+    }
+}
+
+fn push_unit_tooltip_lines(state: &mut LuaState, lines: Val, info: &UnitTooltipInfo) {
     push_tooltip_line(
         state,
         lines,
         1,
         LINE_TYPE_UNIT_NAME,
-        &name,
-        Some(color),
+        &info.name,
+        Some(info.color),
         false,
     );
+    let level_text = format!("Level {}", info.level);
     push_tooltip_line(
         state,
         lines,
         2,
         LINE_TYPE_SPELL_NAME,
-        &format!("Level {level}"),
+        &level_text,
         None,
         false,
     );
-    push_tooltip_line(state, lines, 3, LINE_TYPE_SPELL_NAME, &race, None, false);
+    push_tooltip_line(
+        state,
+        lines,
+        3,
+        LINE_TYPE_SPELL_NAME,
+        &info.race,
+        None,
+        false,
+    );
     push_tooltip_line(
         state,
         lines,
         4,
         LINE_TYPE_SPELL_NAME,
-        &class_name,
+        &info.class_name,
         None,
         false,
     );
+}
+
+fn tooltip_for_unit(state: &mut LuaState, unit: &str) -> Val {
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_UNIT);
+    let lines = table_get(state, tooltip, "lines");
+    if let Some(info) = unit_tooltip_info(state, unit) {
+        push_unit_tooltip_lines(state, lines, &info);
+    }
     tooltip
 }
 
@@ -770,6 +791,7 @@ fn fire_named_event(state: &mut LuaState, event_name: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lua_api::env::WowLuaEnv;
     use rilua::Lua;
 
     #[test]
@@ -798,6 +820,30 @@ mod tests {
             line_text(&mut state, level_line).as_deref(),
             Some("Item Level 1")
         );
+    }
+
+    #[test]
+    fn tooltip_for_unit_player_shows_name_and_level() {
+        let env = WowLuaEnv::new().expect("should create WowLuaEnv");
+        {
+            let mut sim = env.state().borrow_mut();
+            sim.player.name = "Tester".to_string();
+            sim.player.level = 99;
+            sim.player.class_index = 3;
+            sim.player.race_index = 1;
+        }
+        let tooltip = {
+            let mut lua = env.rilua_mut();
+            tooltip_for_unit(lua.state_mut(), "player")
+        };
+        let mut lua = env.rilua_mut();
+        let state = lua.state_mut();
+        let lines = table_get(state, tooltip, "lines");
+        let name_line = get_array_element(state, lines, 1);
+        assert_eq!(line_text(state, name_line).as_deref(), Some("Tester"));
+
+        let level_line = get_array_element(state, lines, 2);
+        assert_eq!(line_text(state, level_line).as_deref(), Some("Level 99"));
     }
 
     fn get_array_element(state: &mut LuaState, table: Val, index: i64) -> Val {
