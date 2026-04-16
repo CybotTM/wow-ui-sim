@@ -2734,10 +2734,10 @@ C_TradeSkillUI = __wow_merge_namespace(C_TradeSkillUI, {
   GetTradeSkillDisplayName = function()
     return ""
   end,
-  -- ProfessionsRecipeTracker iterates the tracked-recipe list with ipairs.
-  -- No recipes tracked in the sim; return empty.
-  GetRecipesTracked = function() return {} end,
-  IsRecipeTracked = function() return false end,
+  -- GetRecipesTracked / IsRecipeTracked / SetRecipeTracked are now backed
+  -- by Rust functions in `globals/rilua_missing_surface/professions.rs`.
+  -- The merge here is a no-op because those names are already populated
+  -- by `register_profession_surface` before runtime-surface bootstrap runs.
 })
 
 C_QuestLog = __wow_merge_namespace(C_QuestLog, {

@@ -52,6 +52,36 @@ fn set_recipe_tracked_queues_update_event_only_on_real_change() {
 }
 
 #[test]
+fn is_recipe_tracked_reflects_set_recipe_tracked_state() {
+    let env = WowLuaEnv::new().expect("Lua env");
+
+    // Untouched state: nothing tracked.
+    let absent: bool = env
+        .eval("return C_TradeSkillUI.IsRecipeTracked(101, false)")
+        .expect("query absent recipe");
+    assert!(!absent);
+
+    env.exec("C_TradeSkillUI.SetRecipeTracked(101, true, false)")
+        .expect("track normal");
+
+    let normal_present: bool = env
+        .eval("return C_TradeSkillUI.IsRecipeTracked(101, false)")
+        .expect("query normal");
+    let recraft_absent: bool = env
+        .eval("return C_TradeSkillUI.IsRecipeTracked(101, true)")
+        .expect("query recraft");
+    assert!(normal_present, "tracked normal recipe must report tracked");
+    assert!(!recraft_absent, "recrafting bucket must stay independent");
+
+    env.exec("C_TradeSkillUI.SetRecipeTracked(101, false, false)")
+        .expect("untrack");
+    let after_untrack: bool = env
+        .eval("return C_TradeSkillUI.IsRecipeTracked(101, false)")
+        .expect("re-query");
+    assert!(!after_untrack, "untracked recipe must report not tracked");
+}
+
+#[test]
 fn set_recipe_tracked_keeps_normal_and_recrafting_independent() {
     let env = WowLuaEnv::new().expect("Lua env");
 
