@@ -81,6 +81,8 @@ end
 
 format = format or string.format
 
+SlashCmdList = SlashCmdList or {}
+
 if table.wipe == nil then
   function table.wipe(tbl)
     if type(tbl) ~= "table" then

@@ -110,42 +110,61 @@ pub fn load_addon_internal(
     let addon_name = result.name.clone();
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);
-    if folder_name == "Blizzard_EnvironmentCleanup"
-        && let Err(e) = env.restore_post_cleanup_globals()
-    {
-        result.warnings.push(format!(
-            "Failed to restore post-cleanup globals for {folder_name}: {e}"
-        ));
-    }
-    if folder_name == "Blizzard_Menu"
-        && let Err(e) = env.ensure_menu_descriptor_fallback()
-    {
-        result.warnings.push(format!(
-            "Failed to install Menu descriptor fallback for {folder_name}: {e}"
-        ));
-    }
-    if folder_name == "Blizzard_UIParent"
-        && let Err(e) = env.patch_managed_frame_mixin()
-    {
-        result.warnings.push(format!(
-            "Failed to patch UIParentManagedFrameMixin for {folder_name}: {e}"
-        ));
-    }
-    if folder_name == "Blizzard_SharedMapDataProviders"
-        && let Err(e) = env.patch_unit_position_frame_mixin()
-    {
-        result.warnings.push(format!(
-            "Failed to patch UnitPositionFrameMixin for {folder_name}: {e}"
-        ));
-    }
-    if folder_name == "Blizzard_UIPanels_Game"
-        && let Err(e) = env.patch_quest_log_mixin()
-    {
-        result.warnings.push(format!(
-            "Failed to patch QuestLogMixin for {folder_name}: {e}"
-        ));
-    }
+    apply_blizzard_post_load_patches(env, folder_name, &mut result);
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
+    mark_addon_loaded(env, folder_name);
+    Ok(result)
+}
+
+/// Run hand-written workarounds that must fire after specific Blizzard addons
+/// finish loading (e.g. restoring globals the addon's cleanup wiped, or
+/// monkey-patching mixins that don't quite line up with our stub state).
+/// Each patch is keyed by addon folder name and only fires for that addon.
+fn apply_blizzard_post_load_patches(
+    env: &LoaderEnv<'_>,
+    folder_name: &str,
+    result: &mut LoadResult,
+) {
+    let push_warning = |result: &mut LoadResult, what: &str, e: &dyn std::fmt::Display| {
+        result
+            .warnings
+            .push(format!("Failed to {what} for {folder_name}: {e}"));
+    };
+
+    match folder_name {
+        "Blizzard_EnvironmentCleanup" => {
+            if let Err(e) = env.restore_post_cleanup_globals() {
+                push_warning(result, "restore post-cleanup globals", &e);
+            }
+        }
+        "Blizzard_Menu" => {
+            if let Err(e) = env.ensure_menu_descriptor_fallback() {
+                push_warning(result, "install Menu descriptor fallback", &e);
+            }
+        }
+        "Blizzard_UIParent" => {
+            if let Err(e) = env.patch_managed_frame_mixin() {
+                push_warning(result, "patch UIParentManagedFrameMixin", &e);
+            }
+        }
+        "Blizzard_SharedMapDataProviders" => {
+            if let Err(e) = env.patch_unit_position_frame_mixin() {
+                push_warning(result, "patch UnitPositionFrameMixin", &e);
+            }
+        }
+        "Blizzard_UIPanels_Game" => {
+            if let Err(e) = env.patch_quest_log_mixin() {
+                push_warning(result, "patch QuestLogMixin", &e);
+            }
+        }
+        _ => {}
+    }
+}
+
+/// Flip the addon's `loaded` flag in `SimState.addons` and clear the
+/// "currently loading" index so that subsequent `IsAddOnLoaded` calls and
+/// nested-load detection see the correct state.
+fn mark_addon_loaded(env: &LoaderEnv<'_>, folder_name: &str) {
     let mut state = env.state().borrow_mut();
     if let Some(addon) = state
         .addons
@@ -155,7 +174,6 @@ pub fn load_addon_internal(
         addon.loaded = true;
     }
     state.loading_addon_index = None;
-    Ok(result)
 }
 
 fn maybe_init_saved_variables(

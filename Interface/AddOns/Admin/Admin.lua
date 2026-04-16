@@ -20,6 +20,102 @@ local function Err(msg)
     print("[Admin] |cffff4444Error:|r " .. msg)
 end
 
+SlashCmdList = SlashCmdList or {}
+
+local function NormalizeTrackedRecipeBucket(bucket)
+    local cleaned = {}
+    local seen = {}
+    if type(bucket) ~= "table" then
+        return cleaned
+    end
+
+    for i = 1, #bucket do
+        local recipeID = tonumber(bucket[i])
+        if recipeID ~= nil then
+            recipeID = math.floor(recipeID)
+        end
+        if recipeID ~= nil and recipeID > 0 and not seen[recipeID] then
+            seen[recipeID] = true
+            cleaned[#cleaned + 1] = recipeID
+        end
+    end
+
+    return cleaned
+end
+
+local function EnsureTrackedRecipeDB()
+    local db = WowSimTrackedRecipesDB
+    if type(db) ~= "table" then
+        db = {}
+    end
+    db.normal = NormalizeTrackedRecipeBucket(db.normal)
+    db.recrafting = NormalizeTrackedRecipeBucket(db.recrafting)
+    WowSimTrackedRecipesDB = db
+    return db
+end
+
+local function TrackedRecipeBucket(db, isRecrafting)
+    return isRecrafting and db.recrafting or db.normal
+end
+
+local function UpdateTrackedRecipeDB(recipeID, tracked, isRecrafting)
+    recipeID = tonumber(recipeID)
+    if recipeID == nil then
+        return
+    end
+    recipeID = math.floor(recipeID)
+    if recipeID <= 0 then
+        return
+    end
+
+    local bucket = TrackedRecipeBucket(EnsureTrackedRecipeDB(), not not isRecrafting)
+    local existingIndex = nil
+    for i = 1, #bucket do
+        if bucket[i] == recipeID then
+            existingIndex = i
+            break
+        end
+    end
+
+    if tracked then
+        if existingIndex == nil then
+            bucket[#bucket + 1] = recipeID
+        end
+    elseif existingIndex ~= nil then
+        table.remove(bucket, existingIndex)
+    end
+end
+
+local function ReplayTrackedRecipeBucket(bucket, isRecrafting)
+    for i = 1, #bucket do
+        C_TradeSkillUI.SetRecipeTracked(bucket[i], true, isRecrafting)
+    end
+end
+
+local function InstallTrackedRecipePersistence()
+    EnsureTrackedRecipeDB()
+
+    if not __wow_sim_admin_tracked_recipe_hook_installed and C_TradeSkillUI and C_TradeSkillUI.SetRecipeTracked then
+        __wow_sim_admin_tracked_recipe_hook_installed = true
+        hooksecurefunc(C_TradeSkillUI, "SetRecipeTracked", function(recipeID, tracked, isRecrafting)
+            UpdateTrackedRecipeDB(recipeID, tracked, isRecrafting)
+        end)
+    end
+
+    if not __wow_sim_admin_tracked_recipe_frame then
+        local frame = CreateFrame("Frame")
+        frame:RegisterEvent("PLAYER_LOGIN")
+        frame:SetScript("OnEvent", function()
+            local db = EnsureTrackedRecipeDB()
+            ReplayTrackedRecipeBucket(db.normal, false)
+            ReplayTrackedRecipeBucket(db.recrafting, true)
+        end)
+        __wow_sim_admin_tracked_recipe_frame = frame
+    end
+end
+
+InstallTrackedRecipePersistence()
+
 -- ---------------------------------------------------------------------------
 -- Help text
 -- ---------------------------------------------------------------------------
