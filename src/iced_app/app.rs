@@ -6,7 +6,6 @@ use std::rc::Rc;
 
 use iced::{Point, Size, Task};
 use rilua::LuaApiMut;
-use rustc_hash::FxHashSet;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 

@@ -190,14 +190,19 @@ if CreateSecureDelegate == nil then
   end
 end
 
-if secureexecuterange == nil then
-  function secureexecuterange(tbl, callback, ...)
-    if type(tbl) ~= "table" or type(callback) ~= "function" then
-      return
-    end
-    for index, value in ipairs(tbl) do
-      callback(index, value, ...)
-    end
+-- Rilua's C-level secureexecuterange is a no-op stub (taint.rs TODO).
+-- Always install our Lua implementation to override it.
+-- WoW's secureexecuterange continues iterating even if the callback errors
+-- (errors are routed to the error handler but don't abort the loop), so
+-- wrap each invocation in pcall to match that behavior.
+function secureexecuterange(tbl, callback, ...)
+  if type(tbl) ~= "table" or type(callback) ~= "function" then
+    return
+  end
+  local extra = {...}
+  local n = select("#", ...)
+  for index, value in ipairs(tbl) do
+    pcall(callback, index, value, unpack(extra, 1, n))
   end
 end
 
@@ -380,7 +385,13 @@ end
 
 if GetChatWindowInfo == nil then
   function GetChatWindowInfo(id)
-    return "Chat " .. tostring(id or 1), 12, 1, 1, 1, 1, true, false, (id or 1) == 1, false
+    -- Default chat frame color: black with 25% alpha (DEFAULT_CHATFRAME_COLOR / DEFAULT_CHATFRAME_ALPHA)
+    -- Only ChatFrame1 (General) and ChatFrame2 (CombatLog) shown by default;
+    -- ChatFrame3-10 exist in XML but stay hidden until user creates them.
+    local realId = id or 1
+    local shown = (realId == 1) or (realId == 2)
+    local docked = (realId == 1)
+    return "Chat " .. tostring(realId), 12, 0, 0, 0, 0.25, shown, false, docked, false
   end
 end
 
