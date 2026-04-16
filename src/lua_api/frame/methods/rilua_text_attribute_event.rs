@@ -1243,7 +1243,7 @@ fn callback_event_table(
         return Ok(None);
     };
 
-    let callbacks_key = state.gc.intern_string(FRAME_CALLBACKS_KEY.as_bytes());
+    let callbacks_key = state.gc.intern_string_static(FRAME_CALLBACKS_KEY.as_bytes());
     let callbacks = match state
         .gc
         .tables
@@ -1307,8 +1307,8 @@ fn callback_entry_fields(state: &mut LuaState, entry: Val) -> Option<(Val, Val)>
     let Val::Table(entry_ref) = entry else {
         return None;
     };
-    let owner_key = state.gc.intern_string(b"owner");
-    let func_key = state.gc.intern_string(b"func");
+    let owner_key = state.gc.intern_string_static(b"owner");
+    let func_key = state.gc.intern_string_static(b"func");
     let table = state.gc.tables.get(entry_ref)?;
     Some((
         table.get_str(owner_key, &state.gc.string_arena),
@@ -1369,8 +1369,8 @@ fn register_callback(state: &mut LuaState) -> LuaResult<u32> {
             .collect::<Vec<_>>();
 
         let entry_ref = state.gc.alloc_table(Table::new());
-        let owner_key = state.gc.intern_string(b"owner");
-        let func_key = state.gc.intern_string(b"func");
+        let owner_key = state.gc.intern_string_static(b"owner");
+        let func_key = state.gc.intern_string_static(b"func");
         if let Some(entry_table) = state.gc.tables.get_mut(entry_ref) {
             let _ = entry_table.raw_set(Val::Str(owner_key), owner, &state.gc.string_arena);
             let _ = entry_table.raw_set(Val::Str(func_key), func, &state.gc.string_arena);
