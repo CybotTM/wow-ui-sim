@@ -54,7 +54,11 @@ Rehash is cheap individually but frequent: 97K calls × hundreds of cycles each 
 ## Candidate fixes
 
 1. **Minimum hash on empty `NewTable` hint.** **Applied in rilua**: `vm::execute.rs OpCode::NewTable` — when `narray == 0 && nhash == 0`, allocate 4 hash slots. Measured: 97,340 → 69,105 rehashes (−29%); release startup 1.31s → 1.21s (−8%, n=5 each). Cost: ~32 B per table that stays empty.
-2. **Short-circuit array growth.** In `raw_set_impl`, when key is an integer `== array.len() + 1` and hash is empty, extend the array inline instead of going through `new_key` → `rehash`. Eliminates the 17.6K `from=0, to=0` rehashes. Requires rilua change.
+2. **Short-circuit array growth.** ~~Eliminates the 17.6K `from=0, to=0` rehashes.~~ **Tried, net regression both ways:**
+   - `array.push(value)` (grow by exactly 1): rehashes went *up* from 69,105 → 85,894. Killing the "from 0 to 0" bucket means `compute_sizes` no longer over-allocates the array geometrically, so subsequent integer inserts each trigger their own rehash. Wall time effectively tied.
+   - `array.resize((array_len + 1).next_power_of_two())`: rehashes down to 56,631 (−18% vs fix #1 baseline) but wall time *worse* by ~30% (1.14s → 1.55s median). Every boundary insert eagerly pays the resize + nil-fill cost; rehash-driven `compute_sizes` only pays it amortized.
+
+   Lesson: rehash count is a poor proxy for wall time once the growth amortization changes. The current rehash path's `compute_sizes` is already a decent amortization; replacing it requires preserving the geometric growth behaviour without the eager fill.
 3. **Sized `Table::new()` in hot wow-ui-sim sites.** Lower leverage — frame-backed rehashes are already only 1.6K — but the sites in `rilua_text_attribute_event.rs`, `rilua_timer_layout.rs`, `rilua_script_helpers.rs` create tables per event/timer tick; sizing them to 4–8 would remove the first rehash on each.
 
 ## Post-fix profile (after #1)

@@ -2,6 +2,20 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] update | table rehashing fix #2 declined
+
+Tried fix #2 (short-circuit `raw_set_impl` for sequential integer keys
+when hash is empty). Two variants both net-negative:
+- `array.push` (grow by 1): rehashes 69K → 86K (+25%), wall time tied.
+- `array.resize(next_power_of_two)`: rehashes 69K → 57K (−18%) but
+  wall time +30% from eager nil-fill on each boundary.
+
+Conclusion documented in `investigations/table-rehashing.md`: the
+existing rehash path's `compute_sizes` already does good amortization;
+naive replacements either skip the over-allocation (more rehashes
+later) or pay the over-allocation eagerly (worse wall time). Status
+quo retained.
+
 ## [2026-04-16] update | table rehashing fix #1 applied
 
 Applied fix #1 from `investigations/table-rehashing.md`: rilua
