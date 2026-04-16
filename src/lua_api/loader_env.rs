@@ -36,6 +36,25 @@ if UIParentManagedFrameMixin ~= nil then
 end
 "#;
 
+const UNIT_POSITION_FRAME_MIXIN_PATCH_LUA: &str = r#"
+if UnitPositionFrameMixin ~= nil then
+    local orig = UnitPositionFrameMixin.OnHide
+    UnitPositionFrameMixin.OnHide = function(self, ...)
+        if self.dataProvider then
+            return orig(self, ...)
+        end
+    end
+end
+if GroupMembersPinMixin ~= nil then
+    local orig = GroupMembersPinMixin.OnHide
+    GroupMembersPinMixin.OnHide = function(self, ...)
+        if self.dataProvider then
+            return orig(self, ...)
+        end
+    end
+end
+"#;
+
 /// Permissive dropdown descriptor installed when Blizzard_Menu fails to
 /// define `Menu.CreateRootMenuDescription`. Every unknown method returns
 /// the table itself so method chains (e.g.
@@ -296,6 +315,17 @@ impl<'a> LoaderEnv<'a> {
     pub fn patch_managed_frame_mixin(&self) -> crate::Result<()> {
         let mut lua = self.lua.borrow_mut();
         lua.exec(MANAGED_FRAME_MIXIN_PATCH_LUA)?;
+        Ok(())
+    }
+
+    /// Patch `UnitPositionFrameMixin:OnHide` to no-op when `self.dataProvider`
+    /// is nil. `OnHide` fires before `SetDataProvider`/`OnAcquired` when a
+    /// frame inheriting the mixin is hidden during initial load, producing
+    /// `attempt to index field 'dataProvider' (a nil value)` at
+    /// GroupMembersDataProvider.lua:90.
+    pub fn patch_unit_position_frame_mixin(&self) -> crate::Result<()> {
+        let mut lua = self.lua.borrow_mut();
+        lua.exec(UNIT_POSITION_FRAME_MIXIN_PATCH_LUA)?;
         Ok(())
     }
 

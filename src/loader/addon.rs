@@ -131,6 +131,13 @@ pub fn load_addon_internal(
             "Failed to patch UIParentManagedFrameMixin for {folder_name}: {e}"
         ));
     }
+    if folder_name == "Blizzard_SharedMapDataProviders"
+        && let Err(e) = env.patch_unit_position_frame_mixin()
+    {
+        result.warnings.push(format!(
+            "Failed to patch UnitPositionFrameMixin for {folder_name}: {e}"
+        ));
+    }
     append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     let mut state = env.state().borrow_mut();
     if let Some(addon) = state
