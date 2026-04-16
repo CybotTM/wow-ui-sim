@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] ingest | intern_string call-site ranking
+
+Added `investigations/intern-string-ranking.md` and the rilua
+`intern-stats` feature. Startup runs 1.25M `intern_string` calls with
+top 5 literals accounting for 40%. Attempted migrating the
+registry/frame helpers to `intern_string_static` (counter dropped
+−74.5%) but release triggered 22 new Lua errors — frames lose their
+metatable methods when `registry_set` uses `intern_string_static`.
+Reverted the migration; filed as a rilua follow-up.
+
 ## [2026-04-16] ingest | layout computation profile
 
 Added `investigations/layout-profile.md`. Release `perf` on `lua-errors`

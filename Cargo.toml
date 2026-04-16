@@ -63,6 +63,7 @@ default = ["sound", "gui"]
 sound = ["rodio"]
 gui = ["dep:iced", "dep:iced_wgpu", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
 rehash-stats = ["rilua/rehash-stats"]
+intern-stats = ["rilua/intern-stats"]
 
 [profile.release]
 lto = false

@@ -38,6 +38,7 @@ pub fn run_lua_errors(
     restore_stdout(saved_stdout);
 
     print_rehash_stats();
+    print_intern_stats();
 
     let errors = collect_unique_errors(env);
     let json = serde_json::to_string_pretty(&errors).expect("JSON serialization failed");
@@ -73,6 +74,26 @@ fn print_size_histogram(header: &str, buckets: &[u64; 16], entry_prefix: &str) {
 
 #[cfg(not(feature = "rehash-stats"))]
 fn print_rehash_stats() {}
+
+#[cfg(feature = "intern-stats")]
+fn print_intern_stats() {
+    const TOP_N: usize = 40;
+    let top = rilua::vm::intern_stats::snapshot_top(TOP_N);
+    let total = rilua::vm::intern_stats::total_calls();
+    let unique = rilua::vm::intern_stats::unique_strings();
+    eprintln!(
+        "[intern-stats] total_calls={total} unique_strings={unique} top_{TOP_N}:",
+    );
+    for (data, count) in top {
+        let preview = String::from_utf8_lossy(&data);
+        let shown: String = preview.chars().take(48).collect();
+        let suffix = if preview.len() > 48 { "…" } else { "" };
+        eprintln!("  {count:>10} x {shown:?}{suffix}");
+    }
+}
+
+#[cfg(not(feature = "intern-stats"))]
+fn print_intern_stats() {}
 
 /// Deduplicate collected Lua errors by their first line. Preserves first-seen order.
 fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
