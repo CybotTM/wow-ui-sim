@@ -5,8 +5,7 @@
 
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_string_static,
-    frame_id_from_stack,
-    frame_ref, registry_table_or_create, table_get, table_set, val_to_string,
+    frame_id_from_stack, frame_ref, registry_table_or_create, table_get, table_set, val_to_string,
 };
 use crate::lua_api::rilua_script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, remove_script as remove_rilua_script,
@@ -1243,7 +1242,9 @@ fn callback_event_table(
         return Ok(None);
     };
 
-    let callbacks_key = state.gc.intern_string_static(FRAME_CALLBACKS_KEY.as_bytes());
+    let callbacks_key = state
+        .gc
+        .intern_string_static(FRAME_CALLBACKS_KEY.as_bytes());
     let callbacks = match state
         .gc
         .tables
@@ -1713,7 +1714,9 @@ fn attribute_to_val(state: &mut LuaState, attr: Option<&crate::widget::Attribute
         Some(crate::widget::AttributeValue::String(s)) => create_string(state, s),
         Some(crate::widget::AttributeValue::LuaRef(key)) => {
             match crate::lua_api::rilua_script_helpers::registry_table(state, ATTR_REFS_KEY) {
-                Some(table) => crate::lua_api::rilua_script_helpers::table_get_str(state, table, key),
+                Some(table) => {
+                    crate::lua_api::rilua_script_helpers::table_get_str(state, table, key)
+                }
                 None => Val::Nil,
             }
         }

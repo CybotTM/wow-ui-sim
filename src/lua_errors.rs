@@ -81,9 +81,7 @@ fn print_intern_stats() {
     let top = rilua::vm::intern_stats::snapshot_top(TOP_N);
     let total = rilua::vm::intern_stats::total_calls();
     let unique = rilua::vm::intern_stats::unique_strings();
-    eprintln!(
-        "[intern-stats] total_calls={total} unique_strings={unique} top_{TOP_N}:",
-    );
+    eprintln!("[intern-stats] total_calls={total} unique_strings={unique} top_{TOP_N}:",);
     for (data, count) in top {
         let preview = String::from_utf8_lossy(&data);
         let shown: String = preview.chars().take(48).collect();

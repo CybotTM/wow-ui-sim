@@ -48,15 +48,33 @@ impl WidgetRegistry {
 
     pub fn new() -> Self {
         Self {
-            widgets: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
+            widgets: FxHashMap::with_capacity_and_hasher(
+                Self::INITIAL_CAPACITY,
+                Default::default(),
+            ),
             names: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
             ordered_ids: Vec::with_capacity(Self::INITIAL_CAPACITY),
-            render_dirty_ids: RefCell::new(FxHashSet::with_capacity_and_hasher(256, Default::default())),
-            render_dirty_sources: RefCell::new(FxHashMap::with_capacity_and_hasher(64, Default::default())),
+            render_dirty_ids: RefCell::new(FxHashSet::with_capacity_and_hasher(
+                256,
+                Default::default(),
+            )),
+            render_dirty_sources: RefCell::new(FxHashMap::with_capacity_and_hasher(
+                64,
+                Default::default(),
+            )),
             current_dirty_source: RefCell::new(None),
-            anchor_dependents: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
-            rect_dirty_ids: FxHashSet::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
-            pending_layout_ids: FxHashSet::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
+            anchor_dependents: FxHashMap::with_capacity_and_hasher(
+                Self::INITIAL_CAPACITY,
+                Default::default(),
+            ),
+            rect_dirty_ids: FxHashSet::with_capacity_and_hasher(
+                Self::INITIAL_CAPACITY,
+                Default::default(),
+            ),
+            pending_layout_ids: FxHashSet::with_capacity_and_hasher(
+                Self::INITIAL_CAPACITY,
+                Default::default(),
+            ),
         }
     }
 
@@ -320,7 +338,10 @@ impl WidgetRegistry {
         (mask, false)
     }
 
-    fn drain_render_dirty_ids(ids: &mut FxHashSet<u64>, has_sentinel: bool) -> Option<FxHashSet<u64>> {
+    fn drain_render_dirty_ids(
+        ids: &mut FxHashSet<u64>,
+        has_sentinel: bool,
+    ) -> Option<FxHashSet<u64>> {
         if has_sentinel {
             ids.clear();
             None

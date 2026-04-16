@@ -21,8 +21,7 @@
 
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static, create_table, table_get,
-    table_set,
-    val_to_string,
+    table_set, val_to_string,
 };
 use crate::lua_bridge::table_set_rust_fn;
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};

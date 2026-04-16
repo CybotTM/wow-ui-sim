@@ -26,7 +26,9 @@ pub fn create_frame_from_xml(
     intrinsic_base: Option<&str>,
     timing: &mut LoadTiming,
 ) -> Result<Option<String>, LoadError> {
-    if let Some(early) = register_virtual_or_intrinsic(env, frame, widget_type, parent_override, intrinsic_base) {
+    if let Some(early) =
+        register_virtual_or_intrinsic(env, frame, widget_type, parent_override, intrinsic_base)
+    {
         return Ok(early);
     }
 

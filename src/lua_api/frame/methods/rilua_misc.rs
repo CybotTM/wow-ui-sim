@@ -9,8 +9,7 @@
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
     extract_frame_id, frame_id_from_stack, get_or_create_frame_fields, table_get, table_get_static,
-    table_set,
-    val_to_string,
+    table_set, val_to_string,
 };
 use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
