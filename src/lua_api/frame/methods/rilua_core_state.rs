@@ -30,17 +30,6 @@ fn arg_bool(state: &LuaState, index: i32) -> bool {
 }
 
 /// Extract an f32 from argument `index`. Falls back to 0.0 on error.
-fn arg_f32(state: &LuaState, index: i32) -> LuaResult<f32> {
-    let v = stack_val(state, index);
-    match v {
-        Val::Num(n) => Ok(n as f32),
-        _ => Err(runtime_error(format!(
-            "expected number, got {} at argument {index}",
-            v.type_name()
-        ))),
-    }
-}
-
 /// Extract an optional f32 from argument `index`. Returns 0.0 for nil/absent.
 fn opt_f32(state: &LuaState, index: i32) -> f32 {
     match stack_val(state, index) {

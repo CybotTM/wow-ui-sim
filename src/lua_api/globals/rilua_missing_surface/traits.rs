@@ -365,7 +365,9 @@ fn c_traits_get_config_id_by_system_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_get_config_id_by_tree_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _tree_id = i32::from_stack(state, 1)?;
+    let Val::Num(_) = stack_val(state, 1) else {
+        return Ok(0);
+    };
     state.push(Val::Num(1.0));
     Ok(1)
 }
