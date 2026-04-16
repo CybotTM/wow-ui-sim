@@ -1,6 +1,6 @@
 //! Layout computation helpers for WoW frame positioning.
 
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 #[path = "layout_line.rs"]
 mod layout_line;
@@ -21,7 +21,10 @@ pub struct CachedFrameLayout {
 ///
 /// Each frame is computed at most once per cache lifetime; siblings share
 /// the cached parent result instead of redundantly walking the parent chain.
-pub type LayoutCache = HashMap<u64, CachedFrameLayout>;
+/// `FxHashMap` keeps the lookup cost low — `u64` frame IDs don't need a
+/// DOS-resistant hash, and the default siphash dominated the layout
+/// profile (~1% of total wall time).
+pub type LayoutCache = FxHashMap<u64, CachedFrameLayout>;
 
 /// Resolved edge constraints from multiple anchors.
 struct AnchorEdges {
@@ -518,7 +521,7 @@ pub fn compute_frame_rect(
     screen_width: f32,
     screen_height: f32,
 ) -> LayoutRect {
-    let mut cache = LayoutCache::new();
+    let mut cache = LayoutCache::default();
     compute_frame_rect_cached(registry, id, screen_width, screen_height, &mut cache).rect
 }
 
