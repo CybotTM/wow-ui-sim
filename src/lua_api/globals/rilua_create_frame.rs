@@ -12,7 +12,7 @@ use crate::lua_api::rilua_methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id,
     frame_ref, get_or_create_frame_fields, registry_get, state_handle, table_get, table_set,
 };
-use crate::lua_api::rilua_script_helpers::protected_lua_pcall_state;
+use crate::lua_api::rilua_script_helpers::set_script;
 use crate::lua_bridge::FromStack;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
@@ -1221,19 +1221,165 @@ fn apply_template_scripts(
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
 ) -> LuaResult<()> {
+    if apply_method_only_scripts_fast(state, frame_id, scripts)? {
+        return Ok(());
+    }
+
     let script_code = crate::loader::helpers::generate_scripts_code(scripts);
     if script_code.trim().is_empty() {
         return Ok(());
     }
 
     let chunk = format!("local frame = ...\n{script_code}");
-    let func = LuaApiMut::load(state, &chunk)?;
+    let func = crate::loader::chunk_cache::load_chunk(state, &chunk, "template-scripts")
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
     let frame = frame_ref(state, frame_id)?;
-    match protected_lua_pcall_state(state, Val::Function(func.gc_ref()), &[frame]) {
+    match crate::lua_api::rilua_script_helpers::call_void_function_with_fallback_state(
+        state,
+        Val::Function(func.gc_ref()),
+        &[frame],
+    ) {
         Ok(_) => {}
         Err(error) => return Err(rilua::runtime_error(error)),
     }
     Ok(())
+}
+
+fn apply_method_only_scripts_fast(
+    state: &mut LuaState,
+    frame_id: u64,
+    scripts: &crate::xml::ScriptsXml,
+) -> LuaResult<bool> {
+    let Some(handlers) = collect_method_only_handlers(scripts) else {
+        return Ok(false);
+    };
+    if handlers.is_empty() {
+        return Ok(true);
+    }
+
+    for (handler_name, method_name) in handlers {
+        let handler = build_method_handler(state, method_name)?;
+        set_script(state, frame_id, handler_name, handler);
+    }
+
+    Ok(true)
+}
+
+fn collect_method_only_handlers(
+    scripts: &crate::xml::ScriptsXml,
+) -> Option<Vec<(&'static str, &str)>> {
+    let mut handlers = Vec::new();
+    collect_method_only_handler_group(&mut handlers, base_method_only_handlers(scripts))?;
+    collect_method_only_handler_group(&mut handlers, pointer_method_only_handlers(scripts))?;
+    collect_method_only_handler_group(&mut handlers, text_method_only_handlers(scripts))?;
+    collect_method_only_handler_group(&mut handlers, state_method_only_handlers(scripts))?;
+    Some(handlers)
+}
+
+type MethodOnlyScript<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
+
+fn collect_method_only_handler_group<'a>(
+    handlers: &mut Vec<(&'static str, &'a str)>,
+    group: impl IntoIterator<Item = MethodOnlyScript<'a>>,
+) -> Option<()> {
+    for (handler_name, script) in group {
+        let Some(script) = script else {
+            continue;
+        };
+        if script.intrinsic_order.is_some() || script.inherit.is_some() || script.function.is_some()
+        {
+            return None;
+        }
+        let method_name = script.method.as_deref()?;
+        if script
+            .body
+            .as_deref()
+            .is_some_and(|body| !body.trim().is_empty())
+        {
+            return None;
+        }
+        handlers.push((handler_name, method_name));
+    }
+    Some(())
+}
+
+fn base_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 8] {
+    [
+        ("OnLoad", scripts.on_load.last()),
+        ("OnEvent", scripts.on_event.last()),
+        ("OnUpdate", scripts.on_update.last()),
+        ("OnClick", scripts.on_click.last()),
+        ("PreClick", scripts.pre_click.last()),
+        ("PostClick", scripts.post_click.last()),
+        ("OnShow", scripts.on_show.last()),
+        ("OnHide", scripts.on_hide.last()),
+    ]
+}
+
+fn pointer_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 8] {
+    [
+        ("OnEnter", scripts.on_enter.last()),
+        ("OnLeave", scripts.on_leave.last()),
+        ("OnMouseDown", scripts.on_mouse_down.last()),
+        ("OnMouseUp", scripts.on_mouse_up.last()),
+        ("OnMouseWheel", scripts.on_mouse_wheel.last()),
+        ("OnDragStart", scripts.on_drag_start.last()),
+        ("OnDragStop", scripts.on_drag_stop.last()),
+        ("OnReceiveDrag", scripts.on_receive_drag.last()),
+    ]
+}
+
+fn text_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 10] {
+    [
+        ("OnEnterPressed", scripts.on_enter_pressed.last()),
+        ("OnEscapePressed", scripts.on_escape_pressed.last()),
+        ("OnTabPressed", scripts.on_tab_pressed.last()),
+        ("OnSpacePressed", scripts.on_space_pressed.last()),
+        ("OnTextChanged", scripts.on_text_changed.last()),
+        ("OnTextSet", scripts.on_text_set.last()),
+        ("OnChar", scripts.on_char.last()),
+        ("OnEditFocusGained", scripts.on_edit_focus_gained.last()),
+        ("OnEditFocusLost", scripts.on_edit_focus_lost.last()),
+        (
+            "OnInputLanguageChanged",
+            scripts.on_input_language_changed.last(),
+        ),
+    ]
+}
+
+fn state_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 10] {
+    [
+        ("OnKeyDown", scripts.on_key_down.last()),
+        ("OnKeyUp", scripts.on_key_up.last()),
+        ("OnValueChanged", scripts.on_value_changed.last()),
+        ("OnEnable", scripts.on_enable.last()),
+        ("OnDisable", scripts.on_disable.last()),
+        ("OnSizeChanged", scripts.on_size_changed.last()),
+        ("OnAttributeChanged", scripts.on_attribute_changed.last()),
+        ("OnHyperlinkClick", scripts.on_hyperlink_click.last()),
+        ("OnHyperlinkEnter", scripts.on_hyperlink_enter.last()),
+        ("OnHyperlinkLeave", scripts.on_hyperlink_leave.last()),
+    ]
+}
+
+fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local method_name = ...
+            return function(self, ...)
+                return self[method_name](self, ...)
+            end
+        "#,
+        "template-method-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let method_name = create_string(state, method_name);
+    crate::lua_api::rilua_methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name],
+    )
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
@@ -1359,7 +1505,11 @@ fn call_handler_with_frame(state: &mut LuaState, handler: Val, frame: Val) -> Lu
     let Val::Function(_) = handler else {
         return Ok(());
     };
-    match protected_lua_pcall_state(state, handler, &[frame]) {
+    match crate::lua_api::rilua_script_helpers::call_void_function_with_fallback_state(
+        state,
+        handler,
+        &[frame],
+    ) {
         Ok(_) => Ok(()),
         Err(err) => Err(rilua::runtime_error(err)),
     }

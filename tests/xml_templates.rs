@@ -137,6 +137,39 @@ fn test_create_frame_finds_xml_template() {
     assert!(env.eval::<bool>("return TestWithTemplate ~= nil").unwrap());
 }
 
+#[test]
+fn test_create_frame_method_only_template_script_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        TestMethodOnlyTemplateMixin = {}
+        function TestMethodOnlyTemplateMixin:OnLoad()
+            self.methodOnlyLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    register_first_template(
+        r#"<Ui><Frame name="TestMethodOnlyTemplate" virtual="true" mixin="TestMethodOnlyTemplateMixin">
+            <Scripts><OnLoad method="OnLoad"/></Scripts>
+        </Frame></Ui>"#,
+        "TestMethodOnlyTemplate",
+        "Frame",
+    );
+
+    env.exec(
+        r#"local f = CreateFrame("Frame", "TestMethodOnlyFrame", UIParent, "TestMethodOnlyTemplate")"#,
+    )
+    .unwrap();
+
+    let loaded: bool = env
+        .eval("return TestMethodOnlyFrame.methodOnlyLoaded == true")
+        .unwrap();
+    assert!(loaded, "method-only template OnLoad should fire");
+}
+
 // ============================================================================
 // Frame Creation from XML Tests
 // ============================================================================
@@ -162,6 +195,34 @@ fn test_create_frame_from_xml_basic() {
         env.eval::<f32>("return XmlTestFrame:GetHeight()").unwrap(),
         100.0
     );
+}
+
+#[test]
+fn test_create_frame_from_xml_method_only_onload_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlMethodOnlyMixin = {}
+        function XmlMethodOnlyMixin:OnLoad()
+            self.xmlMethodLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlMethodOnlyFrame" parent="UIParent" mixin="XmlMethodOnlyMixin">
+        <Scripts><OnLoad method="OnLoad"/></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let loaded: bool = env
+        .eval("return XmlMethodOnlyFrame.xmlMethodLoaded == true")
+        .unwrap();
+    assert!(loaded, "XML method-only OnLoad should fire");
 }
 
 #[test]
@@ -468,6 +529,40 @@ fn test_create_frame_from_xml_template_inheritance_chain() {
         env.eval::<bool>("return TestFinalFrameChain.Title ~= nil")
             .unwrap()
     );
+}
+
+#[test]
+fn test_create_frame_from_xml_inherited_template_mixin_available() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        TestTemplateMixin = {}
+        function TestTemplateMixin:GetProbeValue()
+            return 42
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="TestMixinTemplate" virtual="true" mixin="TestTemplateMixin">
+        <Size x="100" y="50"/>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="TestMixinFrame" parent="UIParent" inherits="TestMixinTemplate">
+        <Anchors><Anchor point="CENTER"/></Anchors>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let probe_value: i32 = env.eval("return TestMixinFrame:GetProbeValue()").unwrap();
+    assert_eq!(probe_value, 42, "template mixin method should be available");
 }
 
 #[test]
