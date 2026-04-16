@@ -222,7 +222,7 @@ fn copy_info_to_button_fields(state: &mut LuaState, btn_id: u64, info: Val) {
     }
 }
 
-fn apply_button_text_from_info(state: &mut LuaState, btn_id: u64, info: Val) -> LuaResult<()> {
+fn get_info_text_string(state: &mut LuaState, info: Val) -> Option<String> {
     let text_key = state.gc.intern_string(b"text");
     let info_text = if let Val::Table(info_ref) = info {
         state
@@ -235,7 +235,7 @@ fn apply_button_text_from_info(state: &mut LuaState, btn_id: u64, info: Val) -> 
         Val::Nil
     };
     let Val::Str(text_str_ref) = info_text else {
-        return Ok(());
+        return None;
     };
     let text_bytes = state
         .gc
@@ -243,12 +243,14 @@ fn apply_button_text_from_info(state: &mut LuaState, btn_id: u64, info: Val) -> 
         .get(text_str_ref)
         .map(|s| s.data().to_vec())
         .unwrap_or_default();
-    let text_string = String::from_utf8_lossy(&text_bytes).into_owned();
-    let mut sim = borrow_state_mut(state)?;
-    let stripped = crate::render::strip_wow_markup(&text_string);
+    Some(String::from_utf8_lossy(&text_bytes).into_owned())
+}
+
+fn set_button_text_on_widget(sim: &mut crate::lua_api::SimState, btn_id: u64, text_string: &str) {
+    let stripped = crate::render::strip_wow_markup(text_string);
     if let Some(f) = sim.widgets.get_mut_visual(btn_id) {
         f.text_stripped = Some(stripped.clone());
-        f.text = Some(text_string.clone());
+        f.text = Some(text_string.to_owned());
     }
     let text_child = sim
         .widgets
@@ -257,9 +259,17 @@ fn apply_button_text_from_info(state: &mut LuaState, btn_id: u64, info: Val) -> 
     if let Some(tc_id) = text_child {
         if let Some(tc) = sim.widgets.get_mut_visual(tc_id) {
             tc.text_stripped = Some(stripped);
-            tc.text = Some(text_string);
+            tc.text = Some(text_string.to_owned());
         }
     }
+}
+
+fn apply_button_text_from_info(state: &mut LuaState, btn_id: u64, info: Val) -> LuaResult<()> {
+    let Some(text_string) = get_info_text_string(state, info) else {
+        return Ok(());
+    };
+    let mut sim = borrow_state_mut(state)?;
+    set_button_text_on_widget(&mut sim, btn_id, &text_string);
     sim.set_frame_visible(btn_id, true);
     Ok(())
 }
@@ -558,10 +568,15 @@ pub fn ui_dropdown_menu_handle_global_mouse_event(_state: &mut LuaState) -> LuaR
 /// onto the rilua Lua state.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "CreateFrame", create_frame)?;
-
     register_global_frames(lua)?;
     register_dropdown_constants(lua)?;
+    register_dropdown_mutators(lua)?;
+    register_dropdown_selections(lua)?;
+    register_dropdown_queries(lua)?;
+    Ok(())
+}
 
+fn register_dropdown_mutators(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(
         lua,
         "UIDropDownMenu_CreateInfo",
@@ -576,6 +591,34 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "UIDropDownMenu_SetWidth", ui_dropdown_menu_set_width)?;
     LuaApiMut::register_function(lua, "UIDropDownMenu_SetText", ui_dropdown_menu_set_text)?;
     LuaApiMut::register_function(lua, "UIDropDownMenu_GetText", ui_dropdown_menu_get_text)?;
+    LuaApiMut::register_function(
+        lua,
+        "UIDropDownMenu_EnableDropDown",
+        ui_dropdown_menu_enable,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "UIDropDownMenu_DisableDropDown",
+        ui_dropdown_menu_disable,
+    )?;
+    LuaApiMut::register_function(lua, "ToggleDropDownMenu", toggle_dropdown_menu)?;
+    LuaApiMut::register_function(lua, "CloseDropDownMenus", close_dropdown_menus)?;
+    LuaApiMut::register_function(lua, "UIDropDownMenu_SetAnchor", ui_dropdown_menu_set_anchor)?;
+    LuaApiMut::register_function(
+        lua,
+        "UIDropDownMenu_SetFrameStrata",
+        ui_dropdown_menu_set_frame_strata,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "UIDropDownMenu_AddSeparator",
+        ui_dropdown_menu_add_separator,
+    )?;
+    LuaApiMut::register_function(lua, "UIDropDownMenu_AddSpace", ui_dropdown_menu_add_space)?;
+    Ok(())
+}
+
+fn register_dropdown_selections(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(
         lua,
         "UIDropDownMenu_SetSelectedID",
@@ -601,30 +644,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "UIDropDownMenu_SetSelectedName",
         ui_dropdown_menu_set_selected_name,
     )?;
-    LuaApiMut::register_function(
-        lua,
-        "UIDropDownMenu_EnableDropDown",
-        ui_dropdown_menu_enable,
-    )?;
-    LuaApiMut::register_function(
-        lua,
-        "UIDropDownMenu_DisableDropDown",
-        ui_dropdown_menu_disable,
-    )?;
-    LuaApiMut::register_function(lua, "ToggleDropDownMenu", toggle_dropdown_menu)?;
-    LuaApiMut::register_function(lua, "CloseDropDownMenus", close_dropdown_menus)?;
-    LuaApiMut::register_function(lua, "UIDropDownMenu_SetAnchor", ui_dropdown_menu_set_anchor)?;
-    LuaApiMut::register_function(
-        lua,
-        "UIDropDownMenu_SetFrameStrata",
-        ui_dropdown_menu_set_frame_strata,
-    )?;
-    LuaApiMut::register_function(
-        lua,
-        "UIDropDownMenu_AddSeparator",
-        ui_dropdown_menu_add_separator,
-    )?;
-    LuaApiMut::register_function(lua, "UIDropDownMenu_AddSpace", ui_dropdown_menu_add_space)?;
+    Ok(())
+}
+
+fn register_dropdown_queries(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(
         lua,
         "UIDropDownMenu_GetCurrentDropDown",
@@ -647,7 +670,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "UIDropDownMenu_HandleGlobalMouseEvent",
         ui_dropdown_menu_handle_global_mouse_event,
     )?;
-
     Ok(())
 }
 
@@ -664,7 +686,6 @@ fn apply_runtime_template_chain(
     let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
         return Ok(());
     };
-
     let chain = crate::xml::get_template_chain(inherits);
     if chain.is_empty() {
         return Ok(());
@@ -672,27 +693,8 @@ fn apply_runtime_template_chain(
 
     let state_rc = sim_state_rc(state)?;
     let frame_name = frame_lookup_name(state, frame_id);
-    let template_parent_array = chain
-        .iter()
-        .find_map(|entry| entry.frame.parent_array.as_deref());
-    let parent_id = borrow_state(state)?
-        .widgets
-        .get(frame_id)
-        .and_then(|frame| frame.parent_id);
-    if let Some(parent_array) = template_parent_array
-        && let Some(parent_id) = parent_id
-    {
-        append_parent_array_entry(state, parent_id, parent_array, frame_id);
-    }
-
-    for entry in &chain {
-        ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
-        apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
-        apply_template_key_values(state, frame_id, entry.frame.all_key_values());
-        if let Some(scripts) = entry.frame.scripts() {
-            apply_template_scripts(state, frame_id, scripts)?;
-        }
-    }
+    apply_template_parent_array(state, frame_id, &chain);
+    apply_chain_entries(state, frame_id, &chain)?;
 
     // The chain is base-to-derived. Install all parent-facing state first so
     // template child OnLoad/OnShow handlers can see derived key values and
@@ -709,14 +711,66 @@ fn apply_runtime_template_chain(
         )?;
     }
 
+    finalize_template_frame(
+        state,
+        &state_rc,
+        frame_id,
+        inherits,
+        &frame_name,
+        fire_on_load,
+    )
+}
+
+fn apply_template_parent_array(
+    state: &mut LuaState,
+    frame_id: u64,
+    chain: &[crate::xml::TemplateEntry],
+) {
+    let template_parent_array = chain
+        .iter()
+        .find_map(|entry| entry.frame.parent_array.as_deref());
+    let parent_id = borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.widgets.get(frame_id).and_then(|frame| frame.parent_id));
+    if let Some(parent_array) = template_parent_array
+        && let Some(parent_id) = parent_id
+    {
+        append_parent_array_entry(state, parent_id, parent_array, frame_id);
+    }
+}
+
+fn apply_chain_entries(
+    state: &mut LuaState,
+    frame_id: u64,
+    chain: &[crate::xml::TemplateEntry],
+) -> LuaResult<()> {
+    for entry in chain {
+        ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
+        apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
+        apply_template_key_values(state, frame_id, entry.frame.all_key_values());
+        if let Some(scripts) = entry.frame.scripts() {
+            apply_template_scripts(state, frame_id, scripts)?;
+        }
+    }
+    Ok(())
+}
+
+fn finalize_template_frame(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    inherits: &str,
+    frame_name: &str,
+    fire_on_load: bool,
+) -> LuaResult<()> {
     apply_runtime_template_loader_effects(
         state,
-        &frame_name,
-        &frame_name,
+        frame_name,
+        frame_name,
         &crate::xml::FrameXml::default(),
         Some(inherits),
     )?;
-    apply_runtime_template_direct_properties(&state_rc, frame_id, inherits, &frame_name);
+    apply_runtime_template_direct_properties(state_rc, frame_id, inherits, frame_name);
     if fire_on_load {
         fire_frame_on_load(state, frame_id)?;
     }
@@ -779,48 +833,11 @@ fn create_template_child_frame(
     let Some((frame, widget_type_name, intrinsic)) = template_child_type(child) else {
         return Ok(None);
     };
-
     let child_name = template_child_name(frame.name.as_deref(), subst_parent);
-    let child_id = crate::lua_api::globals::create_frame::create_frame_instance(
-        state,
-        WidgetType::from_str(widget_type_name).ok_or_else(|| {
-            rilua::runtime_error(format!("unknown widget type '{widget_type_name}'"))
-        })?,
-        widget_type_name,
-        Some(child_name.clone()),
-        Some(parent_id),
-        true,
-        frame.xml_id,
-    )?;
-
-    let inherited_parent_key =
-        resolve_inherited_string(frame, |template| template.parent_key.as_ref());
-    if let Some(parent_key) = inherited_parent_key {
-        crate::lua_api::globals::template::assign_parent_key(
-            state,
-            parent_id,
-            &parent_key,
-            child_id,
-        )?;
-    }
-    if let Some(parent_array) =
-        resolve_inherited_string(frame, |template| template.parent_array.as_ref())
-    {
-        append_parent_array_entry(state, parent_id, &parent_array, child_id);
-    }
-
-    let inherited_chain = build_child_inherits(intrinsic, frame.inherits.as_deref());
-    if let Some(chain) = inherited_chain.as_deref() {
-        apply_runtime_template_chain(state, child_id, Some(chain), false)?;
-    }
-    if let Some(intrinsic) = intrinsic {
-        crate::lua_api::globals::template::set_intrinsic(state, child_id, intrinsic);
-    }
-    apply_frame_mixins(state, child_id, frame.combined_mixin().as_deref());
-    apply_template_key_values(state, child_id, frame.all_key_values());
-    if let Some(scripts) = frame.scripts() {
-        apply_template_scripts(state, child_id, scripts)?;
-    }
+    let child_id =
+        instantiate_template_child(state, parent_id, frame, widget_type_name, &child_name)?;
+    assign_child_parent_refs(state, parent_id, child_id, frame);
+    apply_child_template_properties(state, child_id, frame, intrinsic)?;
 
     let child_subst = if frame.name.is_some() {
         child_name.as_str()
@@ -829,6 +846,7 @@ fn create_template_child_frame(
     };
     create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
 
+    let inherited_chain = build_child_inherits(intrinsic, frame.inherits.as_deref());
     apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     apply_runtime_template_loader_effects(
@@ -842,6 +860,66 @@ fn create_template_child_frame(
     Ok(Some(child_id))
 }
 
+fn instantiate_template_child(
+    state: &mut LuaState,
+    parent_id: u64,
+    frame: &crate::xml::FrameXml,
+    widget_type_name: &str,
+    child_name: &str,
+) -> LuaResult<u64> {
+    crate::lua_api::globals::create_frame::create_frame_instance(
+        state,
+        WidgetType::from_str(widget_type_name).ok_or_else(|| {
+            rilua::runtime_error(format!("unknown widget type '{widget_type_name}'"))
+        })?,
+        widget_type_name,
+        Some(child_name.to_owned()),
+        Some(parent_id),
+        true,
+        frame.xml_id,
+    )
+}
+
+fn assign_child_parent_refs(
+    state: &mut LuaState,
+    parent_id: u64,
+    child_id: u64,
+    frame: &crate::xml::FrameXml,
+) {
+    if let Some(parent_key) = resolve_inherited_string(frame, |t| t.parent_key.as_ref()) {
+        let _ = crate::lua_api::globals::template::assign_parent_key(
+            state,
+            parent_id,
+            &parent_key,
+            child_id,
+        );
+    }
+    if let Some(parent_array) = resolve_inherited_string(frame, |t| t.parent_array.as_ref()) {
+        append_parent_array_entry(state, parent_id, &parent_array, child_id);
+    }
+}
+
+fn apply_child_template_properties(
+    state: &mut LuaState,
+    child_id: u64,
+    frame: &crate::xml::FrameXml,
+    intrinsic: Option<&str>,
+) -> LuaResult<()> {
+    let inherited_chain = build_child_inherits(intrinsic, frame.inherits.as_deref());
+    if let Some(chain) = inherited_chain.as_deref() {
+        apply_runtime_template_chain(state, child_id, Some(chain), false)?;
+    }
+    if let Some(intrinsic) = intrinsic {
+        crate::lua_api::globals::template::set_intrinsic(state, child_id, intrinsic);
+    }
+    apply_frame_mixins(state, child_id, frame.combined_mixin().as_deref());
+    apply_template_key_values(state, child_id, frame.all_key_values());
+    if let Some(scripts) = frame.scripts() {
+        apply_template_scripts(state, child_id, scripts)?;
+    }
+    Ok(())
+}
+
 fn apply_runtime_template_loader_effects(
     state: &mut LuaState,
     frame_name: &str,
@@ -852,39 +930,64 @@ fn apply_runtime_template_loader_effects(
     let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
     let inherits = inherits.unwrap_or("");
     let mut timing = crate::loader::LoadTiming::default();
-
-    for entry in crate::xml::get_template_chain(inherits) {
-        crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
-            &loader_env,
-            &entry.frame,
-            frame_name,
-            name_parent,
-            &mut timing,
-        )
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    }
-    crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
+    apply_loader_chain_layers(&loader_env, inherits, frame_name, name_parent, &mut timing)?;
+    apply_loader_frame_extras(
         &loader_env,
         frame,
         frame_name,
         name_parent,
+        inherits,
         &mut timing,
     )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_textures(&loader_env, frame, frame_name, inherits)
+}
+
+fn apply_loader_chain_layers(
+    loader_env: &LoaderEnv,
+    inherits: &str,
+    frame_name: &str,
+    name_parent: &str,
+    timing: &mut crate::loader::LoadTiming,
+) -> LuaResult<()> {
+    for entry in crate::xml::get_template_chain(inherits) {
+        crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
+            loader_env,
+            &entry.frame,
+            frame_name,
+            name_parent,
+            timing,
+        )
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::button::apply_button_text(&loader_env, frame, frame_name, inherits)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_animation_groups(
-        &loader_env,
+    }
+    Ok(())
+}
+
+fn apply_loader_frame_extras(
+    loader_env: &LoaderEnv,
+    frame: &crate::xml::FrameXml,
+    frame_name: &str,
+    name_parent: &str,
+    inherits: &str,
+    timing: &mut crate::loader::LoadTiming,
+) -> LuaResult<()> {
+    crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
+        loader_env,
         frame,
         frame_name,
-        inherits,
+        name_parent,
+        timing,
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::apply_bar_texture(&loader_env, frame, frame_name, inherits)
+    crate::loader::button::apply_button_textures(loader_env, frame, frame_name, inherits)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::loader::xml_frame_extras::init_action_bar_tables(&loader_env, frame, frame_name);
+    crate::loader::button::apply_button_text(loader_env, frame, frame_name, inherits)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::apply_animation_groups(
+        loader_env, frame, frame_name, inherits,
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::apply_bar_texture(loader_env, frame, frame_name, inherits)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::xml_frame_extras::init_action_bar_tables(loader_env, frame, frame_name);
     Ok(())
 }
 
