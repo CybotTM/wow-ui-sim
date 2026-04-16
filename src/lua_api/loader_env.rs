@@ -56,14 +56,20 @@ end
 "#;
 
 const QUEST_LOG_MIXIN_PATCH_LUA: &str = r#"
-if QuestLogMixin ~= nil then
-    QuestLogMixin.GetCurrentMapID = function(self)
-        local parent = self:GetParent()
-        if parent and parent:IsShown() then
-            return parent:GetMapID()
-        end
-        return C_Map.GetBestMapForUnit("player")
+local function SafeGetCurrentMapID(self)
+    local parent = self:GetParent()
+    if parent and parent:IsShown() then
+        return parent:GetMapID()
     end
+    return C_Map.GetBestMapForUnit("player")
+end
+-- Patch the mixin for future frames
+if QuestLogMixin ~= nil then
+    QuestLogMixin.GetCurrentMapID = SafeGetCurrentMapID
+end
+-- Patch the existing QuestMapFrame instance directly
+if QuestMapFrame then
+    QuestMapFrame.GetCurrentMapID = SafeGetCurrentMapID
 end
 "#;
 
