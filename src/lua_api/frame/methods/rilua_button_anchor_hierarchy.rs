@@ -1544,15 +1544,12 @@ fn get_parent_key(state: &mut LuaState) -> LuaResult<u32> {
 
 /// SetParentKey(key [, removeOld])
 ///
-/// Attaches the child frame to its parent's Lua table under `key`, so that
-/// `parent.key` resolves to the child frame. Without this wiring, Blizzard
-/// code like `PartyFrameMixin:InitializePartyMemberFrames` — which calls
-/// `memberFrame:SetParentKey("MemberFrame1")` after pooling — cannot find
-/// `PartyFrame.MemberFrame1` later, and the party-frame layout never
-/// populates.
-///
-/// Also tracks the key in the Rust `children_keys` map so lookups on the
-/// Rust side (for anchor resolution, hit testing, etc.) stay in sync.
+/// Should attach the child to its parent table under `key` so that
+/// `parent.key` resolves to the child. Currently a no-op that reads the
+/// stack args — enabling the real `sync_child_to_rilua` + `children_keys`
+/// update caused the Blizzard UI load to hang. See the investigation
+/// notes in `docs/wiki/investigations/partyframe-tree.md`. Once the root
+/// cause of the hang is found, restore the two-sided sync.
 fn set_parent_key(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let key = String::from_stack(state, 2)?;
@@ -1564,14 +1561,9 @@ fn set_parent_key(state: &mut LuaState) -> LuaResult<u32> {
     let Some(pid) = parent_id else {
         return Ok(0);
     };
-    // Sync the Lua side: parent_table[key] = child_val.
-    crate::lua_api::rilua_methods::sync_child_to_rilua(state, pid, &key, id)?;
-    // Sync the Rust side: parent.children_keys[key] = child_id.
-    if let Ok(mut sim) = borrow_state_mut(state) {
-        if let Some(parent) = sim.widgets.get_mut(pid) {
-            parent.children_keys.insert(key, id);
-        }
-    }
+    let child_val = frame_ref(state, id)?;
+    let parent_val = frame_ref(state, pid)?;
+    let _ = (child_val, parent_val, key);
     Ok(0)
 }
 
