@@ -447,12 +447,7 @@ fn global_table(state: &mut LuaState, name: &str) -> Val {
     table
 }
 
-fn tooltip_for_item_id(state: &mut LuaState, item_id: u32) -> Val {
-    let Some(item) = items::get_item(item_id) else {
-        return empty_tooltip(state, TOOLTIP_TYPE_ITEM);
-    };
-    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_ITEM);
-    let lines = table_get(state, tooltip, "lines");
+fn push_item_name_line(state: &mut LuaState, lines: Val, item: &items::ItemInfo) {
     push_tooltip_line(
         state,
         lines,
@@ -462,49 +457,94 @@ fn tooltip_for_item_id(state: &mut LuaState, item_id: u32) -> Val {
         Some(item_quality_color(item.quality)),
         false,
     );
+}
+
+fn push_item_level_line(state: &mut LuaState, lines: Val, item: &items::ItemInfo) {
+    let item_level = format!("Item Level {}", item.item_level);
     push_tooltip_line(
         state,
         lines,
         2,
         LINE_TYPE_ITEM_LEVEL,
-        &format!("Item Level {}", item.item_level),
+        &item_level,
         None,
         false,
     );
-    let mut next_index = 3;
-    let equip_slot = item_equip_slot_label(item.inventory_type);
-    if !equip_slot.is_empty() {
-        push_tooltip_line(
-            state,
-            lines,
-            next_index,
-            LINE_TYPE_EQUIP_SLOT,
-            equip_slot,
-            None,
-            false,
-        );
-        next_index += 1;
+}
+
+fn item_binding_text(state: &mut LuaState, bonding: u8) -> Option<String> {
+    if bonding != 1 {
+        return None;
     }
-    if item.bonding == 1 {
-        let item_bind_key = state.gc.intern_string(b"ITEM_BIND_ON_PICKUP");
-        let binding = state
-            .gc
-            .tables
-            .get(state.global)
-            .map(|globals| globals.get_str(item_bind_key, &state.gc.string_arena))
-            .and_then(|value| val_to_string(state, value))
-            .unwrap_or_else(|| "Binds when picked up".to_string());
-        push_tooltip_line(
-            state,
-            lines,
-            next_index,
-            LINE_TYPE_ITEM_BINDING,
-            &binding,
-            None,
-            false,
-        );
+    let item_bind_key = state.gc.intern_string(b"ITEM_BIND_ON_PICKUP");
+    state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(item_bind_key, &state.gc.string_arena))
+        .and_then(|value| val_to_string(state, value))
+        .or_else(|| Some("Binds when picked up".to_string()))
+}
+
+fn push_item_equip_slot_line(
+    state: &mut LuaState,
+    lines: Val,
+    inventory_type: u8,
+    next_index: &mut i64,
+) {
+    let equip_slot = item_equip_slot_label(inventory_type);
+    if equip_slot.is_empty() {
+        return;
     }
+    push_tooltip_line(
+        state,
+        lines,
+        *next_index,
+        LINE_TYPE_EQUIP_SLOT,
+        equip_slot,
+        None,
+        false,
+    );
+    *next_index += 1;
+}
+
+fn push_item_binding_line(
+    state: &mut LuaState,
+    lines: Val,
+    next_index: i64,
+    item: &items::ItemInfo,
+) {
+    let Some(binding) = item_binding_text(state, item.bonding) else {
+        return;
+    };
+    push_tooltip_line(
+        state,
+        lines,
+        next_index,
+        LINE_TYPE_ITEM_BINDING,
+        &binding,
+        None,
+        false,
+    );
+}
+
+fn tooltip_for_item_id(state: &mut LuaState, item_id: u32) -> Val {
+    let Some(item) = items::get_item(item_id) else {
+        return empty_tooltip(state, TOOLTIP_TYPE_ITEM);
+    };
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_ITEM);
+    populate_item_tooltip_lines(state, tooltip, item);
     tooltip
+}
+
+fn populate_item_tooltip_lines(state: &mut LuaState, tooltip: Val, item: &items::ItemInfo) {
+    let lines = table_get(state, tooltip, "lines");
+    push_item_name_line(state, lines, item);
+    push_item_level_line(state, lines, item);
+
+    let mut next_index = 3;
+    push_item_equip_slot_line(state, lines, item.inventory_type, &mut next_index);
+    push_item_binding_line(state, lines, next_index, item);
 }
 
 fn spell_cost_line(spell_id: u32) -> Option<&'static str> {
@@ -724,6 +764,64 @@ fn fire_named_event(state: &mut LuaState, event_name: &str) {
         };
         let event_name_val = create_string(state, event_name);
         let _ = call_function_state(state, handler, &[frame, event_name_val]);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rilua::Lua;
+
+    #[test]
+    fn tooltip_for_item_id_populates_name_and_level_lines() {
+        let mut lua = Lua::new().expect("should create rilua state");
+        let tooltip = {
+            let state = lua.state_mut();
+            tooltip_for_item_id(state, 6948)
+        };
+        let mut state = lua.state_mut();
+        let lines = table_get(&mut state, tooltip, "lines");
+
+        let name_line = get_array_element(&mut state, lines, 1);
+        assert_eq!(line_type(&mut state, name_line), Some(LINE_TYPE_ITEM_NAME));
+        assert_eq!(
+            line_text(&mut state, name_line).as_deref(),
+            Some("Hearthstone")
+        );
+
+        let level_line = get_array_element(&mut state, lines, 2);
+        assert_eq!(
+            line_type(&mut state, level_line),
+            Some(LINE_TYPE_ITEM_LEVEL)
+        );
+        assert_eq!(
+            line_text(&mut state, level_line).as_deref(),
+            Some("Item Level 1")
+        );
+    }
+
+    fn get_array_element(state: &mut LuaState, table: Val, index: i64) -> Val {
+        let Val::Table(table_ref) = table else {
+            return Val::Nil;
+        };
+        state
+            .gc
+            .tables
+            .get(table_ref)
+            .map(|table| table.get_int(index))
+            .unwrap_or(Val::Nil)
+    }
+
+    fn line_type(state: &mut LuaState, line: Val) -> Option<f64> {
+        match table_get(state, line, "type") {
+            Val::Num(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    fn line_text(state: &mut LuaState, line: Val) -> Option<String> {
+        let text_val = table_get(state, line, "leftText");
+        val_to_string(state, text_val)
     }
 }
 
