@@ -1,6 +1,6 @@
 use super::ensure_namespace;
 use crate::event::{Event, EventArg};
-use crate::lua_api::rilua_methods::{borrow_state_mut, create_table};
+use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut, create_table};
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -12,6 +12,12 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
         table_ref,
         "GetRecipesTracked",
         c_trade_skill_ui_get_recipes_tracked,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "IsRecipeTracked",
+        c_trade_skill_ui_is_recipe_tracked,
     )?;
     table_set_rust_fn(
         state,
@@ -43,12 +49,19 @@ fn c_trade_skill_ui_set_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn c_trade_skill_ui_is_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = u32::from_stack(state, 1)?;
+    let is_recrafting = bool::from_stack(state, 2)?;
+
+    let tracked = borrow_state(state)?.tracked_recipes.contains(recipe_id, is_recrafting);
+
+    state.push(Val::Bool(tracked));
+    Ok(1)
+}
+
 fn c_trade_skill_ui_get_recipes_tracked(state: &mut LuaState) -> LuaResult<u32> {
     let is_recrafting = bool::from_stack(state, 1)?;
-    let recipe_ids = {
-        let sim = borrow_state_mut(state)?;
-        sim.tracked_recipes.list(is_recrafting).to_vec()
-    };
+    let recipe_ids = borrow_state(state)?.tracked_recipes.list(is_recrafting).to_vec();
 
     let table = create_table(state);
     let Val::Table(table_ref) = table else {

@@ -328,6 +328,40 @@ fn test_get_recipes_tracked_returns_lua_lists_per_bucket() {
     assert_eq!(recraft_ids, "200001");
 }
 
+#[test]
+fn test_is_recipe_tracked_returns_membership_per_bucket() {
+    let env = env();
+
+    let (before_normal, before_recraft, after_normal, after_recraft, other_recipe): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local beforeNormal = C_TradeSkillUI.IsRecipeTracked(100005, false)
+            local beforeRecraft = C_TradeSkillUI.IsRecipeTracked(100005, true)
+
+            C_TradeSkillUI.SetRecipeTracked(100005, true, true)
+
+            local afterNormal = C_TradeSkillUI.IsRecipeTracked(100005, false)
+            local afterRecraft = C_TradeSkillUI.IsRecipeTracked(100005, true)
+            local otherRecipe = C_TradeSkillUI.IsRecipeTracked(200001, true)
+
+            return beforeNormal, beforeRecraft, afterNormal, afterRecraft, otherRecipe
+            "#,
+        )
+        .unwrap();
+
+    assert!(!before_normal);
+    assert!(!before_recraft);
+    assert!(!after_normal);
+    assert!(after_recraft);
+    assert!(!other_recipe);
+}
+
 // ============================================================================
 // Profession spells in SPELL_DB
 // ============================================================================
