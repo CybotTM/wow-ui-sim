@@ -18,6 +18,7 @@ const SCRIPTS_KEY: &str = "__scripts";
 const ON_UPDATE_SCRIPTS_KEY: &str = "__on_update_scripts";
 const ON_POST_UPDATE_SCRIPTS_KEY: &str = "__on_post_update_scripts";
 const ERROR_HANDLER_KEY: &str = "__error_handler";
+const PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY: &str = "__protected_lua_pcall_wrapper_factory";
 const LUA_MULTRET: i32 = -1;
 
 /// Get a named table from rilua's registry, returning None if absent.
@@ -188,16 +189,8 @@ pub fn protected_lua_pcall_state(
     func: Val,
     args: &[Val],
 ) -> Result<Vec<Val>, String> {
-    let wrapper_factory = state
-        .load(
-            r#"
-            local func = ...
-            return function(...)
-                return pcall(func, ...)
-            end
-        "#,
-        )
-        .map_err(|error| error.to_string())?;
+    let wrapper_factory =
+        ensure_protected_lua_pcall_wrapper_factory(state).map_err(|error| error.to_string())?;
     let wrapper = call_function_state(state, Val::Function(wrapper_factory.gc_ref()), &[func])
         .map_err(|error| error.to_string())?;
     let results = protected_call_state(state, wrapper, args).map_err(|error| {
@@ -216,6 +209,28 @@ pub fn protected_lua_pcall_state(
         }
         _ => Ok(results),
     }
+}
+
+fn ensure_protected_lua_pcall_wrapper_factory(state: &mut LuaState) -> rilua::LuaResult<rilua::Function> {
+    let existing = registry_value(state, PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY);
+    if let Val::Function(func_ref) = existing {
+        return Ok(rilua::Function::from_gc_ref(func_ref));
+    }
+
+    let factory = state.load(
+        r#"
+        local func = ...
+        return function(...)
+            return pcall(func, ...)
+        end
+    "#,
+    )?;
+    set_registry_value(
+        state,
+        PROTECTED_LUA_PCALL_WRAPPER_FACTORY_KEY,
+        Val::Function(factory.gc_ref()),
+    );
+    Ok(factory)
 }
 
 fn sync_on_update_runtime_cache(state: &mut LuaState, widget_id: u64) {
@@ -489,4 +504,49 @@ fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Insta
         return;
     };
     addon.runtime.current_frame_ms += start.elapsed().as_secs_f64() * 1000.0;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn protected_lua_pcall_state_caches_wrapper_factory() {
+        let mut lua = rilua::Lua::new().expect("lua should initialize");
+        let direct = lua
+            .state_mut()
+            .load("return function(value) return value end")
+            .expect("wrapper source should compile");
+        let direct_func = call_function_state(
+            lua.state_mut(),
+            Val::Function(direct.gc_ref()),
+            &[],
+        )
+        .expect("direct function should build");
+
+        let first_results = protected_lua_pcall_state(
+            lua.state_mut(),
+            direct_func,
+            &[Val::Num(7.0)],
+        )
+        .expect("first protected call should succeed");
+        assert_eq!(first_results, vec![Val::Num(7.0)]);
+
+        let first_factory = registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
+        assert!(
+            !matches!(first_factory, Val::Nil),
+            "wrapper factory should be cached in the registry"
+        );
+
+        let second_results = protected_lua_pcall_state(
+            lua.state_mut(),
+            direct_func,
+            &[Val::Num(9.0)],
+        )
+        .expect("second protected call should succeed");
+        assert_eq!(second_results, vec![Val::Num(9.0)]);
+
+        let second_factory = registry_value(lua.state_mut(), "__protected_lua_pcall_wrapper_factory");
+        assert_eq!(first_factory, second_factory, "cached wrapper factory should be reused");
+    }
 }

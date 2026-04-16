@@ -9,6 +9,7 @@ pub(crate) mod helpers;
 pub(crate) mod helpers_anim;
 pub(crate) mod lua_file;
 pub(crate) mod precompiled;
+pub(crate) mod rilua_bytecode;
 mod xml_file;
 mod xml_fontstring;
 mod xml_frame;

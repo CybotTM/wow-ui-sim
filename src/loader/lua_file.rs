@@ -256,10 +256,24 @@ fn load_cached_or_compile(
     chunk_name: &str,
     timing: &mut LoadTiming,
 ) -> Result<rilua::Function, LoadError> {
+    let hash = bytecode_cache::content_hash(bytes, chunk_name);
+
     if !bytecode_cache::is_disabled() {
-        timing.cache_misses += 1;
+        if let Some(bytecode) = bytecode_cache::get(hash)
+            && let Ok(func) = compile_with_rilua(lua, &bytecode, chunk_name)
+        {
+            timing.cache_hits += 1;
+            return Ok(func);
+        }
     }
-    compile_from_source(lua, bytes, chunk_name)
+
+    timing.cache_misses += 1;
+    let func = compile_from_source(lua, bytes, chunk_name)?;
+    if !bytecode_cache::is_disabled() {
+        let bytecode = crate::loader::rilua_bytecode::dump_function(lua, &func)?;
+        bytecode_cache::put(hash, &bytecode);
+    }
+    Ok(func)
 }
 
 /// Set taint on a Lua function's GC object header via `debug.setobjecttaint`.
@@ -306,6 +320,15 @@ pub fn compile_with_rilua<L: LuaApiMut>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn unique_cache_chunk_name(prefix: &str) -> String {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time before unix epoch")
+            .as_nanos();
+        format!("@{prefix}_{}_{}", std::process::id(), nanos)
+    }
 
     #[test]
     fn rilua_compilation_matches_source_semantics() {
@@ -391,6 +414,50 @@ mod tests {
         assert_eq!(
             lua.val_as_bytes(rilua::Val::Str(s)).unwrap(),
             b"from-secureenv"
+        );
+    }
+
+    #[test]
+    fn load_cached_or_compile_hits_bytecode_cache_on_second_load() {
+        let chunk_name = unique_cache_chunk_name("lua_file_cache");
+        let source = format!("return {:?}", chunk_name);
+
+        let mut first_lua = rilua::Lua::new().unwrap();
+        let mut first_timing = LoadTiming::default();
+        let first_func = {
+            let state = first_lua.state_mut();
+            load_cached_or_compile(state, source.as_bytes(), &chunk_name, &mut first_timing)
+        }
+        .expect("first compile should succeed");
+        let first_results = first_lua.call_function(&first_func, &[]).unwrap();
+        let first_value = first_results.into_iter().next().expect("first call returns value");
+        assert_eq!(first_timing.cache_hits, 0);
+        assert_eq!(first_timing.cache_misses, 1);
+        assert_eq!(
+            first_lua.val_as_bytes(first_value).unwrap(),
+            chunk_name.as_bytes()
+        );
+
+        let mut second_lua = rilua::Lua::new().unwrap();
+        let mut second_timing = LoadTiming::default();
+        let second_func = {
+            let state = second_lua.state_mut();
+            load_cached_or_compile(state, source.as_bytes(), &chunk_name, &mut second_timing)
+        }
+        .expect("second compile should succeed");
+        let second_results = second_lua.call_function(&second_func, &[]).unwrap();
+        let second_value = second_results
+            .into_iter()
+            .next()
+            .expect("second call returns value");
+        assert_eq!(
+            second_timing.cache_hits, 1,
+            "second load should reuse cached bytecode"
+        );
+        assert_eq!(second_timing.cache_misses, 0);
+        assert_eq!(
+            second_lua.val_as_bytes(second_value).unwrap(),
+            chunk_name.as_bytes()
         );
     }
 }
