@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 use iced::{Point, Size, Task};
 use rilua::LuaApiMut;
+use rustc_hash::FxHashSet;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 
@@ -99,7 +100,7 @@ pub struct App {
             crate::widget::FrameStrata::COUNT],
     >,
     /// Dirty frame IDs from the last timer tick. `None` means full rebuild needed.
-    pub(crate) pending_dirty_ids: RefCell<Option<std::collections::HashSet<u64>>>,
+    pub(crate) pending_dirty_ids: RefCell<Option<rustc_hash::FxHashSet<u64>>>,
     /// Spatial grid for fast hit testing (rebuilt when layout changes).
     pub(crate) cached_hittable: RefCell<Option<super::hit_grid::HitGrid>>,
     /// Per-strata dirty bitmask — bit `i` means strata index `i` needs re-emit.

@@ -1,8 +1,9 @@
 //! Global widget registry for tracking all widgets.
 
 use super::Frame;
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::VecDeque;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RenderDirtySource {
@@ -13,32 +14,32 @@ pub struct RenderDirtySource {
 #[derive(Debug, Default)]
 pub struct RenderDirtyBatch {
     pub strata_mask: u16,
-    pub frame_ids: Option<HashSet<u64>>,
-    pub sources: HashMap<u64, HashSet<RenderDirtySource>>,
+    pub frame_ids: Option<FxHashSet<u64>>,
+    pub sources: FxHashMap<u64, FxHashSet<RenderDirtySource>>,
 }
 
 /// Registry of all widgets in the UI.
 #[derive(Debug, Default)]
 pub struct WidgetRegistry {
     /// Widgets by ID.
-    widgets: HashMap<u64, Frame>,
+    widgets: FxHashMap<u64, Frame>,
     /// Widget IDs by name.
-    names: HashMap<String, u64>,
+    names: FxHashMap<String, u64>,
     /// Widget IDs in creation order (monotonically increasing, always sorted).
     ordered_ids: Vec<u64>,
     /// Frame IDs whose visual properties changed since last render.
     /// Checked and drained by the render loop.
-    render_dirty_ids: RefCell<HashSet<u64>>,
+    render_dirty_ids: RefCell<FxHashSet<u64>>,
     /// Dirty provenance captured while a specific script/method is running.
-    render_dirty_sources: RefCell<HashMap<u64, HashSet<RenderDirtySource>>>,
+    render_dirty_sources: RefCell<FxHashMap<u64, FxHashSet<RenderDirtySource>>>,
     /// Current source context for dirty attribution.
     current_dirty_source: RefCell<Option<RenderDirtySource>>,
     /// Reverse index: target_id → set of frame IDs anchored to it.
-    anchor_dependents: HashMap<u64, HashSet<u64>>,
+    anchor_dependents: FxHashMap<u64, FxHashSet<u64>>,
     /// Frames with `rect_dirty = true`, for fast lookup in `ensure_layout_rects`.
-    rect_dirty_ids: HashSet<u64>,
+    rect_dirty_ids: FxHashSet<u64>,
     /// Frames with `layout_rect = None` that need layout computation.
-    pending_layout_ids: HashSet<u64>,
+    pending_layout_ids: FxHashSet<u64>,
 }
 
 impl WidgetRegistry {
@@ -47,15 +48,15 @@ impl WidgetRegistry {
 
     pub fn new() -> Self {
         Self {
-            widgets: HashMap::with_capacity(Self::INITIAL_CAPACITY),
-            names: HashMap::with_capacity(Self::INITIAL_CAPACITY),
+            widgets: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
+            names: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
             ordered_ids: Vec::with_capacity(Self::INITIAL_CAPACITY),
-            render_dirty_ids: RefCell::new(HashSet::with_capacity(256)),
-            render_dirty_sources: RefCell::new(HashMap::with_capacity(64)),
+            render_dirty_ids: RefCell::new(FxHashSet::with_capacity_and_hasher(256, Default::default())),
+            render_dirty_sources: RefCell::new(FxHashMap::with_capacity_and_hasher(64, Default::default())),
             current_dirty_source: RefCell::new(None),
-            anchor_dependents: HashMap::with_capacity(Self::INITIAL_CAPACITY),
-            rect_dirty_ids: HashSet::with_capacity(Self::INITIAL_CAPACITY),
-            pending_layout_ids: HashSet::with_capacity(Self::INITIAL_CAPACITY),
+            anchor_dependents: FxHashMap::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
+            rect_dirty_ids: FxHashSet::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
+            pending_layout_ids: FxHashSet::with_capacity_and_hasher(Self::INITIAL_CAPACITY, Default::default()),
         }
     }
 
@@ -212,7 +213,7 @@ impl WidgetRegistry {
 
     /// Collect unique texture paths from all visible frames.
     pub fn visible_texture_paths(&self) -> Vec<String> {
-        let mut paths = std::collections::HashSet::new();
+        let mut paths = FxHashSet::default();
         for frame in self.widgets.values() {
             if !frame.visible {
                 continue;
@@ -269,7 +270,7 @@ impl WidgetRegistry {
     /// Drain the dirty set, returning both the strata bitmask and the set of
     /// dirty frame IDs. Returns `None` for the ID set when the sentinel
     /// (`u64::MAX`) was present, signalling that a full rebuild is needed.
-    pub fn take_render_dirty_with_ids(&self) -> (u16, Option<HashSet<u64>>) {
+    pub fn take_render_dirty_with_ids(&self) -> (u16, Option<FxHashSet<u64>>) {
         let batch = self.take_render_dirty_batch();
         (batch.strata_mask, batch.frame_ids)
     }
@@ -283,7 +284,7 @@ impl WidgetRegistry {
         self.build_render_dirty_batch(&mut ids)
     }
 
-    fn build_render_dirty_batch(&self, ids: &mut HashSet<u64>) -> RenderDirtyBatch {
+    fn build_render_dirty_batch(&self, ids: &mut FxHashSet<u64>) -> RenderDirtyBatch {
         let (strata_mask, has_sentinel) = self.render_dirty_mask(ids);
         let frame_ids = Self::drain_render_dirty_ids(ids, has_sentinel);
 
@@ -297,12 +298,12 @@ impl WidgetRegistry {
     fn empty_render_dirty_batch(&self) -> RenderDirtyBatch {
         RenderDirtyBatch {
             strata_mask: 0,
-            frame_ids: Some(HashSet::new()),
-            sources: HashMap::new(),
+            frame_ids: Some(FxHashSet::default()),
+            sources: FxHashMap::default(),
         }
     }
 
-    fn render_dirty_mask(&self, ids: &HashSet<u64>) -> (u16, bool) {
+    fn render_dirty_mask(&self, ids: &FxHashSet<u64>) -> (u16, bool) {
         let all_mask = (1u16 << super::FrameStrata::COUNT) - 1;
         let has_sentinel = ids.contains(&u64::MAX);
         if has_sentinel {
@@ -319,7 +320,7 @@ impl WidgetRegistry {
         (mask, false)
     }
 
-    fn drain_render_dirty_ids(ids: &mut HashSet<u64>, has_sentinel: bool) -> Option<HashSet<u64>> {
+    fn drain_render_dirty_ids(ids: &mut FxHashSet<u64>, has_sentinel: bool) -> Option<FxHashSet<u64>> {
         if has_sentinel {
             ids.clear();
             None
@@ -328,7 +329,7 @@ impl WidgetRegistry {
         }
     }
 
-    fn take_render_dirty_sources(&self) -> HashMap<u64, HashSet<RenderDirtySource>> {
+    fn take_render_dirty_sources(&self) -> FxHashMap<u64, FxHashSet<RenderDirtySource>> {
         std::mem::take(&mut *self.render_dirty_sources.borrow_mut())
     }
 
@@ -532,12 +533,12 @@ impl WidgetRegistry {
     }
 
     /// Drain rect_dirty_ids. Returns the set for callers that need it.
-    pub fn drain_rect_dirty(&mut self) -> HashSet<u64> {
+    pub fn drain_rect_dirty(&mut self) -> FxHashSet<u64> {
         std::mem::take(&mut self.rect_dirty_ids)
     }
 
     /// Drain pending_layout_ids (frames missing layout_rect).
-    pub fn drain_pending_layout(&mut self) -> HashSet<u64> {
+    pub fn drain_pending_layout(&mut self) -> FxHashSet<u64> {
         std::mem::take(&mut self.pending_layout_ids)
     }
 
@@ -555,7 +556,7 @@ impl WidgetRegistry {
 
     fn anchor_dependency_reaches_frame(&self, start_id: u64, target_id: u64) -> bool {
         let mut queue = VecDeque::from([start_id]);
-        let mut seen = HashSet::from([start_id]);
+        let mut seen = FxHashSet::from_iter([start_id]);
 
         while let Some(check_id) = queue.pop_front() {
             if self.enqueue_anchor_dependencies(check_id, target_id, &mut queue, &mut seen) {
@@ -571,7 +572,7 @@ impl WidgetRegistry {
         frame_id: u64,
         target_id: u64,
         queue: &mut VecDeque<u64>,
-        seen: &mut HashSet<u64>,
+        seen: &mut FxHashSet<u64>,
     ) -> bool {
         for anchor_target_id in self.anchor_target_ids(frame_id) {
             if anchor_target_id == target_id {
@@ -630,7 +631,7 @@ impl WidgetRegistry {
     }
 
     /// Get frame IDs anchored to `target_id`.
-    pub fn get_anchor_dependents(&self, target_id: u64) -> Option<&HashSet<u64>> {
+    pub fn get_anchor_dependents(&self, target_id: u64) -> Option<&FxHashSet<u64>> {
         self.anchor_dependents.get(&target_id)
     }
 
@@ -669,7 +670,7 @@ impl WidgetRegistry {
     }
 }
 
-fn hash_set_u64_bytes(values: &HashSet<u64>) -> usize {
+fn hash_set_u64_bytes(values: &FxHashSet<u64>) -> usize {
     values.capacity() * std::mem::size_of::<u64>()
 }
 
@@ -677,20 +678,20 @@ fn dirty_source_bytes(value: &Option<RenderDirtySource>) -> usize {
     usize::from(value.is_some()) * std::mem::size_of::<RenderDirtySource>()
 }
 
-fn render_dirty_sources_bytes(values: &HashMap<u64, HashSet<RenderDirtySource>>) -> usize {
-    values.capacity() * std::mem::size_of::<(u64, HashSet<RenderDirtySource>)>()
+fn render_dirty_sources_bytes(values: &FxHashMap<u64, FxHashSet<RenderDirtySource>>) -> usize {
+    values.capacity() * std::mem::size_of::<(u64, FxHashSet<RenderDirtySource>)>()
         + values
             .values()
             .map(render_dirty_source_set_bytes)
             .sum::<usize>()
 }
 
-fn render_dirty_source_set_bytes(values: &HashSet<RenderDirtySource>) -> usize {
+fn render_dirty_source_set_bytes(values: &FxHashSet<RenderDirtySource>) -> usize {
     values.capacity() * std::mem::size_of::<RenderDirtySource>()
 }
 
-fn hash_map_u64_hash_set_u64_bytes(values: &HashMap<u64, HashSet<u64>>) -> usize {
-    values.capacity() * std::mem::size_of::<(u64, HashSet<u64>)>()
+fn hash_map_u64_hash_set_u64_bytes(values: &FxHashMap<u64, FxHashSet<u64>>) -> usize {
+    values.capacity() * std::mem::size_of::<(u64, FxHashSet<u64>)>()
         + values.values().map(hash_set_u64_bytes).sum::<usize>()
 }
 
@@ -731,10 +732,10 @@ mod tests {
         let batch = registry.take_render_dirty_batch();
 
         assert_eq!(batch.strata_mask, 1u16 << FrameStrata::High.as_index());
-        assert_eq!(batch.frame_ids, Some(HashSet::from([2])));
+        assert_eq!(batch.frame_ids, Some(FxHashSet::from_iter([2])));
         assert_eq!(
             batch.sources.get(&2),
-            Some(&HashSet::from([RenderDirtySource {
+            Some(&FxHashSet::from_iter([RenderDirtySource {
                 frame_id: 42,
                 method: "TestMethod",
             }]))

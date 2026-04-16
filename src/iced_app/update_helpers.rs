@@ -1,14 +1,16 @@
 //! Helper functions extracted from update.rs for hit-grid, checkbutton, and dirty-ID merging.
 
+use rustc_hash::FxHashSet;
+
 /// Merge optional dirty-ID sets into one.
 ///
 /// If any input is `None`, the result must stay `None` because a full rebuild
 /// is required and the exact frame set is incomplete.
-pub(super) fn merge_dirty_ids<I>(ids: I) -> Option<std::collections::HashSet<u64>>
+pub(super) fn merge_dirty_ids<I>(ids: I) -> Option<FxHashSet<u64>>
 where
-    I: IntoIterator<Item = Option<std::collections::HashSet<u64>>>,
+    I: IntoIterator<Item = Option<FxHashSet<u64>>>,
 {
-    let mut merged = std::collections::HashSet::new();
+    let mut merged = FxHashSet::default();
     for dirty_ids in ids {
         let ids = dirty_ids?;
         merged.extend(ids);

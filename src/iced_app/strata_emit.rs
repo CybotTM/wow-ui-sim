@@ -1,6 +1,7 @@
 //! Strata-level quad emission for headless and screenshot paths.
 
 use iced::{Point, Rectangle, Size};
+use rustc_hash::FxHashSet;
 
 use crate::render::QuadBatch;
 use crate::render::font::WowFontSystem;
@@ -129,7 +130,7 @@ fn renderable_frame_with_bounds(
 pub(super) struct SingleStrataEmit<'a> {
     bucket: &'a [u64],
     registry: &'a crate::widget::WidgetRegistry,
-    visible_ids: &'a Option<std::collections::HashSet<u64>>,
+    visible_ids: &'a Option<FxHashSet<u64>>,
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
     message_frames:

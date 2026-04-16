@@ -4,7 +4,7 @@ use iced::mouse;
 use iced::widget::shader;
 use iced::{Event, Point, Rectangle, Size};
 
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
@@ -361,7 +361,7 @@ impl App {
         effective_dirty
     }
 
-    fn prune_dirty_strata(&self, dirty: u16, dirty_ids: Option<&HashSet<u64>>) -> u16 {
+    fn prune_dirty_strata(&self, dirty: u16, dirty_ids: Option<&FxHashSet<u64>>) -> u16 {
         let env = self.env.borrow();
         let state = env.state().borrow();
         let strata_cache = self.cached_strata_quads.borrow();
@@ -384,7 +384,7 @@ impl App {
     fn emit_dirty_strata_batches(
         &self,
         dirty: u16,
-        dirty_ids: Option<&HashSet<u64>>,
+        dirty_ids: Option<&FxHashSet<u64>>,
         size: Size,
         strata_buckets: &[Vec<u64>],
         state: &crate::lua_api::SimState,
@@ -659,7 +659,7 @@ mod tests {
         app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(QuadBatch::new()));
         app.cached_frame_snapshots.borrow_mut()[0] =
             Some(HashMap::from([(1_u64, FrameQuadSnapshot::default())]));
-        *app.pending_dirty_ids.borrow_mut() = Some(HashSet::from([99_u64]));
+        *app.pending_dirty_ids.borrow_mut() = Some(rustc_hash::FxHashSet::from_iter([99_u64]));
         app.env.borrow().state().borrow_mut().strata_buckets = Some(vec![vec![1_u64, 2_u64]]);
 
         let rebuilt = app.rebuild_dirty_strata(Size::new(64.0, 64.0), dirty_mask(0));

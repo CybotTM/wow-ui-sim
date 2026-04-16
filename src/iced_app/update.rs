@@ -2,6 +2,7 @@
 
 use iced::Task;
 use iced_layout_inspector::server::ScreenshotData;
+use rustc_hash::FxHashSet;
 
 use crate::lua_api::WowLuaEnv;
 
@@ -325,7 +326,7 @@ impl App {
         (m0 | m1 | m2 | m3, layout_dur)
     }
 
-    fn take_render_dirty_with_ids(&self) -> (u16, Option<std::collections::HashSet<u64>>) {
+    fn take_render_dirty_with_ids(&self) -> (u16, Option<FxHashSet<u64>>) {
         self.env
             .borrow()
             .state()
@@ -334,7 +335,7 @@ impl App {
             .take_render_dirty_with_ids()
     }
 
-    pub(super) fn merge_pending_dirty_ids(&self, ids: Option<std::collections::HashSet<u64>>) {
+    pub(super) fn merge_pending_dirty_ids(&self, ids: Option<FxHashSet<u64>>) {
         let current = self.pending_dirty_ids.borrow_mut().take();
         *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids([current, ids]);
     }

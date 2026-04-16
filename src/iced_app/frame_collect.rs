@@ -1,5 +1,7 @@
 //! Frame collection and sorting helpers for rendering.
 
+use rustc_hash::FxHashSet;
+
 use crate::widget::{FrameStrata, WidgetType};
 
 /// Frame names excluded from hit testing (full-screen or non-interactive overlays).
@@ -25,8 +27,8 @@ pub struct CollectedFrames {
 pub fn collect_subtree_ids(
     registry: &crate::widget::WidgetRegistry,
     root_name: &str,
-) -> std::collections::HashSet<u64> {
-    let mut ids = std::collections::HashSet::new();
+) -> FxHashSet<u64> {
+    let mut ids = FxHashSet::default();
     let root_id = registry.iter_ids().find(|&id| {
         registry
             .get(id)

@@ -1,6 +1,7 @@
 use iced::{Point, Rectangle, Size};
 
-use std::collections::{HashMap, HashSet};
+use rustc_hash::FxHashSet;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::render::font::WowFontSystem;
@@ -64,7 +65,7 @@ fn rebuild_strata_batches(
 
 struct RebuildStrataBatches<'a> {
     dirty: u16,
-    dirty_ids: Option<&'a HashSet<u64>>,
+    dirty_ids: Option<&'a FxHashSet<u64>>,
     size: Size,
     strata_buckets: &'a [Vec<u64>],
     widgets: &'a crate::widget::WidgetRegistry,
@@ -129,7 +130,7 @@ fn emit_one_frame(
         return false;
     };
 
-    let no_visible_ids: Option<HashSet<u64>> = None;
+    let no_visible_ids: Option<FxHashSet<u64>> = None;
     if super::super::button_vis::should_skip_frame(
         frame,
         id,
@@ -193,7 +194,7 @@ fn emit_strata_cached(
     batch: &mut QuadBatch,
     snapshots: &mut HashMap<u64, FrameQuadSnapshot>,
     bucket: &[u64],
-    dirty_ids: Option<&HashSet<u64>>,
+    dirty_ids: Option<&FxHashSet<u64>>,
     registry: &crate::widget::WidgetRegistry,
     pressed_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
@@ -247,7 +248,7 @@ fn emit_strata_cached(
 fn try_use_cached(
     batch: &mut QuadBatch,
     snapshots: &HashMap<u64, FrameQuadSnapshot>,
-    dirty_ids: Option<&HashSet<u64>>,
+    dirty_ids: Option<&FxHashSet<u64>>,
     id: u64,
 ) -> bool {
     let Some(dirty_ids) = dirty_ids else {
@@ -275,7 +276,7 @@ fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
 
 pub(super) fn prune_irrelevant_dirty_strata(
     dirty: u16,
-    dirty_ids: Option<&HashSet<u64>>,
+    dirty_ids: Option<&FxHashSet<u64>>,
     strata_buckets: Option<&[Vec<u64>]>,
     cached_strata: &StrataBatchCache,
     snapshot_cache: &StrataSnapshotCache,
@@ -310,7 +311,7 @@ pub(super) fn prune_irrelevant_dirty_strata(
 
 fn strata_needs_rebuild(
     strata_idx: usize,
-    dirty_ids: &HashSet<u64>,
+    dirty_ids: &FxHashSet<u64>,
     strata_buckets: &[Vec<u64>],
     cached_strata: &StrataBatchCache,
     snapshot_cache: &StrataSnapshotCache,
@@ -343,7 +344,7 @@ pub fn rebuild_dirty_strata_batches_for_registry(
     snapshot_cache: &mut StrataSnapshotCache,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     dirty: u16,
-    dirty_ids: Option<&HashSet<u64>>,
+    dirty_ids: Option<&FxHashSet<u64>>,
     size: Size,
     strata_buckets: &[Vec<u64>],
     widgets: &crate::widget::WidgetRegistry,

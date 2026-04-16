@@ -4,6 +4,8 @@
 //! HighlightTexture, DisabledTexture) and WoW HIGHLIGHT draw layer semantics
 //! (regions only visible when parent is hovered).
 
+use rustc_hash::FxHashSet;
+
 use crate::widget::{DrawLayer, WidgetRegistry, WidgetType};
 
 /// Decide whether a frame should be skipped during rendering.
@@ -14,7 +16,7 @@ pub fn should_skip_frame(
     f: &crate::widget::Frame,
     id: u64,
     eff_alpha: f32,
-    visible_ids: &Option<std::collections::HashSet<u64>>,
+    visible_ids: &Option<FxHashSet<u64>>,
     registry: &WidgetRegistry,
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
