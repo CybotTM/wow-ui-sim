@@ -295,6 +295,39 @@ fn test_set_recipe_tracked_updates_state_and_fires_event() {
     assert!(matches!(recraft_event.args[1], EventArg::Boolean(true)));
 }
 
+#[test]
+fn test_get_recipes_tracked_returns_lua_lists_per_bucket() {
+    let env = env();
+
+    let (normal_len, normal_ids, recraft_len, recraft_ids): (i32, String, i32, String) = env
+        .eval(
+            r#"
+            C_TradeSkillUI.SetRecipeTracked(100005, true, false)
+            C_TradeSkillUI.SetRecipeTracked(100006, true, false)
+            C_TradeSkillUI.SetRecipeTracked(200001, true, true)
+
+            local normal = C_TradeSkillUI.GetRecipesTracked(false)
+            local recraft = C_TradeSkillUI.GetRecipesTracked(true)
+
+            local function join_ids(list)
+                local out = {}
+                for _, recipeID in ipairs(list) do
+                    out[#out + 1] = tostring(recipeID)
+                end
+                return table.concat(out, ",")
+            end
+
+            return #normal, join_ids(normal), #recraft, join_ids(recraft)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(normal_len, 2);
+    assert_eq!(normal_ids, "100005,100006");
+    assert_eq!(recraft_len, 1);
+    assert_eq!(recraft_ids, "200001");
+}
+
 // ============================================================================
 // Profession spells in SPELL_DB
 // ============================================================================
