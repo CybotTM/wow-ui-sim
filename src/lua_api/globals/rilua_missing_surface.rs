@@ -2046,93 +2046,65 @@ fn c_class_talents_get_trait_tree_for_spec(state: &mut LuaState) -> LuaResult<u3
 
 fn register_c_tooltip_info(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_TooltipInfo")?;
-    table_set_rust_fn(state, table_ref, "GetTraitEntry", c_tooltip_get_trait_entry)?;
-    table_set_rust_fn(state, table_ref, "GetAction", c_tooltip_get_action)?;
-    table_set_rust_fn(state, table_ref, "GetItemByID", c_tooltip_get_item_by_id)?;
-    table_set_rust_fn(
+    register_tooltip_methods(
         state,
         table_ref,
-        "GetItemByGUID",
-        c_tooltip_get_item_by_guid,
+        &[
+            ("GetTraitEntry", c_tooltip_get_trait_entry),
+            ("GetAction", c_tooltip_get_action),
+            ("GetItemByID", c_tooltip_get_item_by_id),
+            ("GetItemByGUID", c_tooltip_get_item_by_guid),
+            ("GetOwnedItemByID", c_tooltip_get_owned_item_by_id),
+            ("GetRecipeResultItem", c_tooltip_get_recipe_result_item),
+            (
+                "GetRecipeResultItemForOrder",
+                c_tooltip_get_recipe_result_item_for_order,
+            ),
+            ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
+            ("GetUpgradeItem", c_tooltip_get_upgrade_item),
+            ("GetInventoryItem", c_tooltip_get_inventory_item),
+            ("GetSpellBookItem", c_tooltip_get_spell_book_item),
+            ("GetSpellByID", c_tooltip_get_spell_by_id),
+            ("GetUnitBuff", c_tooltip_get_unit_buff),
+            (
+                "GetUnitBuffByAuraInstanceID",
+                c_tooltip_get_unit_buff_by_aura_instance_id,
+            ),
+            ("GetUnitDebuff", c_tooltip_get_unit_debuff),
+            (
+                "GetUnitDebuffByAuraInstanceID",
+                c_tooltip_get_unit_debuff_by_aura_instance_id,
+            ),
+            ("GetUnitAura", c_tooltip_get_unit_aura),
+            (
+                "GetUnitAuraByAuraInstanceID",
+                c_tooltip_get_unit_aura_by_aura_instance_id,
+            ),
+            ("GetHyperlink", c_tooltip_get_hyperlink),
+        ],
     )?;
-    table_set_rust_fn(
+    register_tooltip_methods(
         state,
         table_ref,
-        "GetOwnedItemByID",
-        c_tooltip_get_owned_item_by_id,
+        &[
+            ("GetWorldCursor", c_tooltip_get_world_cursor),
+            ("GetWorldLootObject", c_tooltip_get_world_loot_object),
+            ("GetUnit", c_tooltip_get_unit),
+        ],
     )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetRecipeResultItem",
-        c_tooltip_get_recipe_result_item,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetRecipeResultItemForOrder",
-        c_tooltip_get_recipe_result_item_for_order,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetMinimapMouseover",
-        c_tooltip_get_minimap_mouseover,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetUpgradeItem",
-        c_tooltip_get_upgrade_item,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetInventoryItem",
-        c_tooltip_get_inventory_item,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetSpellBookItem",
-        c_tooltip_get_spell_book_item,
-    )?;
-    table_set_rust_fn(state, table_ref, "GetSpellByID", c_tooltip_get_spell_by_id)?;
-    table_set_rust_fn(state, table_ref, "GetUnitBuff", c_tooltip_get_unit_buff)?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetUnitBuffByAuraInstanceID",
-        c_tooltip_get_unit_buff_by_aura_instance_id,
-    )?;
-    table_set_rust_fn(state, table_ref, "GetUnitDebuff", c_tooltip_get_unit_debuff)?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetUnitDebuffByAuraInstanceID",
-        c_tooltip_get_unit_debuff_by_aura_instance_id,
-    )?;
-    table_set_rust_fn(state, table_ref, "GetUnitAura", c_tooltip_get_unit_aura)?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetUnitAuraByAuraInstanceID",
-        c_tooltip_get_unit_aura_by_aura_instance_id,
-    )?;
-    table_set_rust_fn(state, table_ref, "GetHyperlink", c_tooltip_get_hyperlink)?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetWorldCursor",
-        c_tooltip_get_world_cursor,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetWorldLootObject",
-        c_tooltip_get_world_loot_object,
-    )?;
-    table_set_rust_fn(state, table_ref, "GetUnit", c_tooltip_get_unit)?;
+    Ok(())
+}
+
+type TooltipScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+
+fn register_tooltip_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    entries: &[(&str, TooltipScriptFn)],
+) -> LuaResult<()> {
+    for &(name, func) in entries {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
