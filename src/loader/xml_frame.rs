@@ -321,7 +321,7 @@ fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleS
         return lifecycle;
     }
 
-    for entry in &crate::xml::get_template_chain(inherits) {
+    for entry in &*crate::xml::get_template_chain(inherits) {
         let inherited = lifecycle_scripts_for_frame(&entry.frame);
         lifecycle.on_load |= inherited.on_load;
         lifecycle.on_show |= inherited.on_show;
@@ -370,7 +370,7 @@ fn exec_create_frame_code(
 fn resolve_xml_hidden(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
     let mut hidden = frame.hidden;
     if hidden.is_none() && !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(h) = entry.frame.hidden {
                 hidden = Some(h);
                 break;

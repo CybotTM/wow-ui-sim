@@ -177,7 +177,7 @@ fn resolve_button_texture_slot(
     }
 
     crate::xml::get_template_chain(inherits)
-        .into_iter()
+        .iter()
         .rev()
         .find_map(|entry| slot(&entry.frame).cloned())
         .map(|texture| crate::xml::resolve_texture_inheritance(&texture))
@@ -251,7 +251,7 @@ fn resolve_button_text_child<'a>(
     }
 
     crate::xml::get_template_chain(inherits)
-        .into_iter()
+        .iter()
         .rev()
         .find_map(|entry| entry.frame.button_text().cloned())
 }

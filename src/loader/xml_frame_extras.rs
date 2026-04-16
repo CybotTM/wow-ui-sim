@@ -17,7 +17,7 @@ pub(crate) fn apply_animation_groups(
         exec_animation_groups(env, anims, name);
     }
     if !inherits.is_empty() {
-        for template_entry in &crate::xml::get_template_chain(inherits) {
+        for template_entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(anims) = template_entry.frame.animations() {
                 exec_animation_groups(env, anims, name);
             }
@@ -91,7 +91,7 @@ fn resolve_bar_texture(
     }
 
     crate::xml::get_template_chain(inherits)
-        .into_iter()
+        .iter()
         .rev()
         .find_map(|entry| entry.frame.bar_texture().cloned())
 }

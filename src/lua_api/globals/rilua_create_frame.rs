@@ -700,7 +700,7 @@ fn apply_runtime_template_chain(
     // template child OnLoad/OnShow handlers can see derived key values and
     // mixin methods (for example ThreeSliceButtonTemplate children expect the
     // derived template's `atlasName` to already exist on the parent button).
-    for entry in &chain {
+    for entry in &*chain {
         create_template_child_frames(
             state,
             &state_rc,
@@ -948,7 +948,7 @@ fn apply_loader_chain_layers(
     name_parent: &str,
     timing: &mut crate::loader::LoadTiming,
 ) -> LuaResult<()> {
-    for entry in crate::xml::get_template_chain(inherits) {
+    for entry in &*crate::xml::get_template_chain(inherits) {
         crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
             loader_env,
             &entry.frame,
@@ -1147,7 +1147,7 @@ fn resolve_inherited_string(
     }
     let inherits = frame.inherits.as_deref()?;
     crate::xml::get_template_chain(inherits)
-        .into_iter()
+        .iter()
         .find_map(|entry| project(&entry.frame).cloned())
 }
 

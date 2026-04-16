@@ -2,7 +2,7 @@
 
 use super::types::FrameXml;
 use std::collections::{HashMap, HashSet};
-use std::sync::{OnceLock, RwLock};
+use std::sync::{Arc, OnceLock, RwLock};
 
 /// Stores a template (virtual frame) with its widget type.
 #[derive(Debug, Clone)]
@@ -16,7 +16,7 @@ pub struct TemplateEntry {
 struct TemplateRegistry {
     entries: HashMap<String, TemplateEntry>,
     entries_ci: HashMap<String, String>,
-    chain_cache: HashMap<String, Vec<TemplateEntry>>,
+    chain_cache: HashMap<String, Arc<Vec<TemplateEntry>>>,
 }
 
 /// Global registry of XML templates (virtual frames).
@@ -154,10 +154,11 @@ fn resolve_chain_size(chain: &[TemplateEntry]) -> (f32, f32) {
 
 /// Get the full inheritance chain for a template (including the template itself).
 /// Returns templates in order from most base to most derived.
-pub fn get_template_chain(names: &str) -> Vec<TemplateEntry> {
+/// Returns Arc to avoid cloning the chain on every access.
+pub fn get_template_chain(names: &str) -> Arc<Vec<TemplateEntry>> {
     let key = names.trim().to_string();
     if key.is_empty() {
-        return Vec::new();
+        return Arc::new(Vec::new());
     }
 
     if let Some(cached) = template_registry()
@@ -181,12 +182,13 @@ pub fn get_template_chain(names: &str) -> Vec<TemplateEntry> {
         collect_template_chain(name, &mut chain, &mut visited);
     }
 
+    let arc_chain = Arc::new(chain);
     template_registry()
         .write()
         .unwrap()
         .chain_cache
-        .insert(key, chain.clone());
-    chain
+        .insert(key, Arc::clone(&arc_chain));
+    arc_chain
 }
 
 /// Recursively collect templates in the inheritance chain.

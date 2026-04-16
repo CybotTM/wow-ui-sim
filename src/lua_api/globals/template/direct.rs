@@ -291,7 +291,7 @@ pub fn apply_xml_size(
     let mut final_height: Option<f32> = None;
 
     if !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             merge_size(&mut final_width, &mut final_height, entry.frame.size());
         }
     }
@@ -383,7 +383,7 @@ pub fn apply_xml_hidden(
 ) {
     let mut hidden = frame.hidden;
     if hidden.is_none() && !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(h) = entry.frame.hidden {
                 hidden = Some(h);
                 break;
@@ -424,7 +424,7 @@ pub fn apply_xml_alpha(
 ) {
     let mut alpha = frame.alpha;
     if alpha.is_none() && !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(a) = entry.frame.alpha {
                 alpha = Some(a);
                 break;
@@ -445,7 +445,7 @@ pub fn apply_xml_enable_mouse(
 ) {
     let mut em = frame.enable_mouse;
     if em.is_none() && !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(e) = entry.frame.enable_mouse {
                 em = Some(e);
             }
@@ -465,7 +465,7 @@ pub fn apply_xml_clips_children(
 ) {
     let mut clips_children = frame.clip_children;
     if clips_children.is_none() && !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(c) = entry.frame.clip_children {
                 clips_children = Some(c);
             }
@@ -501,7 +501,7 @@ pub fn apply_xml_clamped_to_screen(
 ) {
     let mut clamped = frame.clamped_to_screen;
     if clamped.is_none() && !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(c) = entry.frame.clamped_to_screen {
                 clamped = Some(c);
             }
@@ -521,7 +521,7 @@ pub fn apply_xml_set_all_points(
 ) {
     let mut has = false;
     if !inherits.is_empty() {
-        for entry in &crate::xml::get_template_chain(inherits) {
+        for entry in &*crate::xml::get_template_chain(inherits) {
             if entry.frame.set_all_points == Some(true) {
                 has = true;
                 break;
