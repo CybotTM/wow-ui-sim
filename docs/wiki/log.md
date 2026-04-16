@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-16] ingest | layout computation profile
+
+Added `investigations/layout-profile.md`. Release `perf` on `lua-errors`
+showed layout-attributed samples at 7.5% of total (470M of 6.3B), with
+the biggest single contributor being `LayoutCache::get` via siphash —
+the cache was a default `HashMap<u64, CachedFrameLayout>`. Swapped to
+`FxHashMap`. Layout 7.5% → 5.0%, total siphash 295M → 76M, release
+startup median 1.21s → 1.18s (n=10). Remaining layout cost is real
+anchor arithmetic and `resolve_parent_rect` recursion — no further
+easy wins.
+
 ## [2026-04-16] update | table rehashing fix #2 declined
 
 Tried fix #2 (short-circuit `raw_set_impl` for sequential integer keys

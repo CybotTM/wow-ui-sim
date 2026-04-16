@@ -56,6 +56,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks the compact-raid cleanup, remaining leave-button/BuffFrame churn, and the same-day `GameTimeFrame_SetDate()` calendar-atlas no-op fix |
 | [[startup-createframe-profile]] | Runtime `CreateFrame` profiling shows action-bar button template expansion is the biggest script-created startup cost; nested SpellFX, scrollbar, ActionButtonTemplate region fast paths, and XML lifecycle frame-id threading all reduced loader overhead |
 | [[table-rehashing]] | 97K rehashes on startup; 98% from non-frame Lua tables, 81% land at hash size ≤16; root cause is `OP_NEWTABLE(0,0)` for addon `local t = {}` patterns |
+| [[layout-profile]] | Layout was 7.5% of release startup; `LayoutCache` siphash dominated. `FxHashMap` switch drops to 5.0%, −170M layout samples, −219M total siphash samples |
 | [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, empty `UIParent` worklists short-circuit, but the fresh 90s world-map profile still sits at 31 steady-state handlers |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
