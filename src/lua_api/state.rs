@@ -104,6 +104,7 @@ macro_rules! build_empty_sim_state {
             can_use_premade_group: false,
             photo_sharing_authorized: false,
             photo_sharing_enabled: false,
+            tutorial_flags: $collections.tutorial_flags,
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -352,6 +353,9 @@ pub struct SimState {
     /// authorization — a user can decline the feature after authorizing.
     /// Default false. Admin: `A_Admin.SetPhotoSharingEnabled(b?)`.
     pub photo_sharing_enabled: bool,
+    /// Tutorial/account flags acknowledged through `C_Tutorial`.
+    /// Default empty: a fresh sim has not seen any account tutorials.
+    pub tutorial_flags: HashSet<u32>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -399,6 +403,7 @@ struct EmptyStateCollections {
     party_members: Vec<PartyMember>,
     bag_items: HashMap<(i32, i32), BagItem>,
     tracked_recipes: TrackedRecipes,
+    tutorial_flags: HashSet<u32>,
 }
 
 impl EmptyStateCollections {
@@ -433,6 +438,7 @@ impl EmptyStateCollections {
             party_members: Vec::new(),
             bag_items: default_backpack_items(),
             tracked_recipes: TrackedRecipes::default(),
+            tutorial_flags: HashSet::new(),
         }
     }
 }
