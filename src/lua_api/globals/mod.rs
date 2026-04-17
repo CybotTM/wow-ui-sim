@@ -27,6 +27,7 @@ pub mod font_strings_collection;
 pub mod game_rules;
 pub mod global_frames;
 pub mod group_queries;
+pub mod group_verbs;
 pub mod guild_control;
 pub mod guild_info;
 pub mod guild_logo;

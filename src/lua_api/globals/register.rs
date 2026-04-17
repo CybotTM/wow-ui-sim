@@ -62,6 +62,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_verbs::register_all(lua)?;
     super::inventory_verbs::register_all(lua)?;
     super::mail_verbs::register_all(lua)?;
+    super::group_verbs::register_all(lua)?;
     super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;
