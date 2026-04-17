@@ -363,7 +363,7 @@ fn test_unit_exists_unknown() {
 // ============================================================================
 
 #[test]
-fn test_unit_faction_group() {
+fn test_unit_faction_group_player() {
     let env = env();
     let (english, localized): (String, String) =
         env.eval("return UnitFactionGroup('player')").unwrap();
