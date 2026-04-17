@@ -57,6 +57,7 @@ pub mod panel_toggle_verbs;
 pub mod pet_battles;
 pub mod photo_sharing;
 pub mod profession_data;
+pub mod pvp_probes;
 pub mod quest_verbs;
 pub mod register;
 pub mod security;

@@ -141,6 +141,7 @@ macro_rules! build_empty_sim_state {
             harmful_spells: ::std::collections::HashSet::new(),
             helpful_spells: ::std::collections::HashSet::new(),
             pet_spells: ::std::collections::HashSet::new(),
+            pvp_last_honor_gain: 0,
             message_log: Vec::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
@@ -491,6 +492,9 @@ pub struct SimState {
     /// Pet spells the player currently has learned (BM Hunter /
     /// Warlock pets). Empty when no pet active. Drives `HasPetSpells`.
     pub pet_spells: ::std::collections::HashSet<u32>,
+    /// Most recent honor amount the player gained. Drives
+    /// `GetPVPLastHonorGain`. Default 0.
+    pub pvp_last_honor_gain: i32,
     /// Append-only log of outbound chat / addon messages sent via
     /// `SendChatMessage` / `SendAddonMessage`. Most recent at the tail.
     pub message_log: Vec<MessageLogEntry>,

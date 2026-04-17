@@ -625,10 +625,15 @@ enum FastHandlerRef<'a> {
     FunctionNoArgs(&'a str),
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
+    FunctionWithParentIdArg(&'a str),
     FunctionWithEventVarargs(&'a str),
     FunctionWithButton(&'a str),
     FunctionWithElapsed(&'a str),
     SetFrameLevelFromParent(i32),
+    AssignAncestorRef {
+        field: &'a str,
+        depth: usize,
+    },
     AssignLiteral {
         field: &'a str,
         value: FastLiteralValue<'a>,
@@ -834,6 +839,9 @@ fn build_fast_handler(
         FastHandlerRef::FunctionWithGrandparentArg(function_name) => {
             build_ancestor_function_handler(state, function_name, 2).map(Some)
         }
+        FastHandlerRef::FunctionWithParentIdArg(function_name) => {
+            build_ancestor_id_function_handler(state, function_name, 1).map(Some)
+        }
         FastHandlerRef::FunctionWithEventVarargs(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::EventVarargs)
                 .map(Some)
@@ -846,6 +854,9 @@ fn build_fast_handler(
         }
         FastHandlerRef::SetFrameLevelFromParent(delta) => {
             build_set_frame_level_from_parent_handler(state, delta).map(Some)
+        }
+        FastHandlerRef::AssignAncestorRef { field, depth } => {
+            build_ancestor_assignment_handler(state, field, depth).map(Some)
         }
         FastHandlerRef::AssignLiteral { field, value } => {
             build_assignment_handler(state, field, value).map(Some)
@@ -1049,6 +1060,68 @@ fn build_set_frame_level_from_parent_handler(state: &mut LuaState, delta: i32) -
     )
 }
 
+fn build_ancestor_id_function_handler(
+    state: &mut LuaState,
+    function_name: &str,
+    depth: usize,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local fn, depth = ...
+            return function(self, ...)
+                local target = self
+                for _ = 1, depth do
+                    target = target and target:GetParent()
+                end
+                if not target then
+                    return
+                end
+                return fn(target:GetID())
+            end
+        "#,
+        "template-inline-function-ancestor-id",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, function_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, Val::Num(depth as f64)],
+    )
+}
+
+fn build_ancestor_assignment_handler(
+    state: &mut LuaState,
+    field: &str,
+    depth: usize,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, depth = ...
+            return function(self, ...)
+                local target = self
+                for _ = 1, depth do
+                    target = target and target:GetParent()
+                end
+                if not target then
+                    return
+                end
+                self[field_name] = target
+            end
+        "#,
+        "template-inline-assignment-ancestor",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, Val::Num(depth as f64)],
+    )
+}
+
 fn parse_inline_fast_handler<'a>(
     _handler_name: &'static str,
     body: &'a str,
@@ -1073,6 +1146,9 @@ fn parse_inline_fast_handler<'a>(
     }
     if let Some(delta) = parse_inline_set_frame_level_from_parent(stmt) {
         return Some(FastHandlerRef::SetFrameLevelFromParent(delta));
+    }
+    if let Some(assign) = parse_inline_ancestor_assignment(stmt) {
+        return Some(assign);
     }
     if let Some(assign) = parse_inline_assignment(stmt) {
         return Some(assign);
@@ -1107,6 +1183,13 @@ fn parse_inline_fast_handler<'a>(
         .filter(|name| is_fast_handler_path(name))
     {
         return Some(FastHandlerRef::FunctionWithGrandparentArg(function_name));
+    }
+    if let Some(function_name) = stmt
+        .strip_suffix("(self:GetParent():GetID())")
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+    {
+        return Some(FastHandlerRef::FunctionWithParentIdArg(function_name));
     }
     if let Some(function_name) = stmt
         .strip_suffix("(self, event, ...)")
@@ -1163,6 +1246,31 @@ fn parse_inline_set_frame_level_from_parent(stmt: &str) -> Option<i32> {
         }
     }
     None
+}
+
+fn parse_inline_ancestor_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let (field, depth) =
+        if let Some((field, _)) = stmt.strip_prefix("self.")?.split_once("= self:GetParent()") {
+            let field = field.trim();
+            if let Some(suffix) = stmt.trim().strip_prefix(&format!("self.{field} = ")) {
+                let depth = if suffix.trim() == "self:GetParent()" {
+                    1
+                } else if suffix.trim() == "self:GetParent():GetParent()" {
+                    2
+                } else {
+                    return None;
+                };
+                (field, depth)
+            } else {
+                return None;
+            }
+        } else {
+            return None;
+        };
+    if !is_fast_identifier(field) {
+        return None;
+    }
+    Some(FastHandlerRef::AssignAncestorRef { field, depth })
 }
 
 fn parse_inline_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {

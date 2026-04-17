@@ -379,6 +379,40 @@ fn test_create_frame_from_xml_inline_grandparent_function_call_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_parent_id_function_call_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineParentIdValue = 0
+        function XmlInlineParentIdFunction(id)
+            XmlInlineParentIdValue = id
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentIdFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>XmlInlineParentIdFunction(self:GetParent():GetID())</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineParentIdFrame.Child:GetScript('OnClick')(XmlInlineParentIdFrame.Child)")
+        .unwrap();
+
+    let parent_id: f64 = env.eval("return XmlInlineParentIdFrame:GetID()").unwrap();
+    let captured_id: f64 = env.eval("return XmlInlineParentIdValue").unwrap();
+    assert_eq!(captured_id, parent_id, "parent-id inline function should see parent id");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -404,6 +438,65 @@ fn test_create_frame_from_xml_inline_self_method_runs() {
         .eval("return XmlInlineMethodFrame.xmlInlineMethodLoaded == true")
         .unwrap();
     assert!(loaded, "self-method inline OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_assign_parent_ref_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineAssignParentRefFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>self.parentRef = self:GetParent()</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineAssignParentRefFrame.Child:GetScript('OnClick')(XmlInlineAssignParentRefFrame.Child)")
+        .unwrap();
+
+    let same_ref: bool = env
+        .eval("return XmlInlineAssignParentRefFrame.Child.parentRef == XmlInlineAssignParentRefFrame")
+        .unwrap();
+    assert!(same_ref, "inline parent-ref assignment should store parent on self");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_assign_grandparent_ref_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineAssignGrandparentRefFrame" parent="UIParent">
+        <Frames>
+            <Frame parentKey="Middle">
+                <Frames>
+                    <Button parentKey="Child">
+                        <Scripts><OnClick>self.ownerRef = self:GetParent():GetParent()</OnClick></Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineAssignGrandparentRefFrame.Middle.Child:GetScript('OnClick')(XmlInlineAssignGrandparentRefFrame.Middle.Child)")
+        .unwrap();
+
+    let same_ref: bool = env
+        .eval("return XmlInlineAssignGrandparentRefFrame.Middle.Child.ownerRef == XmlInlineAssignGrandparentRefFrame")
+        .unwrap();
+    assert!(
+        same_ref,
+        "inline grandparent-ref assignment should store grandparent on self"
+    );
 }
 
 #[test]

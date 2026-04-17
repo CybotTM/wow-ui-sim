@@ -290,6 +290,33 @@ fn test_chat_editbox_text_color_after_activation() {
 }
 
 #[test]
+fn test_chat_background_uses_default_black_tint_and_alpha() {
+    test_timeout! {
+        let env = setup_env();
+
+        let (r, g, b, a): (f64, f64, f64, f64) = env
+            .eval("return ChatFrame1Background:GetVertexColor()")
+            .expect("ChatFrame1Background:GetVertexColor failed");
+        assert!(
+            r.abs() < 0.01 && g.abs() < 0.01 && b.abs() < 0.01,
+            "ChatFrame1Background should be tinted black after startup, got ({r}, {g}, {b}, {a})"
+        );
+        assert!(
+            (a - 1.0).abs() < 0.01,
+            "ChatFrame1Background vertex alpha should stay 1.0, got {a}"
+        );
+
+        let alpha: f64 = env
+            .eval("return ChatFrame1Background:GetAlpha()")
+            .expect("ChatFrame1Background:GetAlpha failed");
+        assert!(
+            (alpha - 0.25).abs() < 0.01,
+            "ChatFrame1Background alpha should be 0.25 after startup, got {alpha}"
+        );
+    }
+}
+
+#[test]
 fn test_chat_scrollbar_stays_attached_to_chat_frame_right_edge() {
     test_timeout! {
         let env = setup_env();

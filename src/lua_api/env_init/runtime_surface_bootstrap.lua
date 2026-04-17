@@ -209,6 +209,18 @@ if SetChatWindowSavedPosition == nil then
   end
 end
 
+if GetChannelName == nil then
+  function GetChannelName(channel)
+    if type(channel) == "number" then
+      return 0, nil, 0, false
+    end
+    if type(channel) == "string" then
+      return 0, channel, 0, false
+    end
+    return 0, nil, 0, false
+  end
+end
+
 if GetTime == nil then
   function GetTime()
     if os.clock == nil then
