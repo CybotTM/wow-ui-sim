@@ -466,7 +466,7 @@ fn debug_player_spells_onload_subcalls() {
     let env = setup_env();
     let report: String = env
         .eval(
-            r#"
+            r##"
             C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
 
             local function attempt(label, fn)
@@ -617,7 +617,7 @@ fn debug_player_spells_onload_subcalls() {
             table.insert(lines, attempt("spellbook.InitializeSearch", function() return spellBookFrame:InitializeSearch() end))
 
             return table.concat(lines, "\n")
-            "#,
+            "##,
         )
         .expect("diagnostic evaluation should return");
     panic!("{report}");
@@ -631,7 +631,7 @@ fn debug_keybind_n_nil_width_callsite() {
 
     let report: String = env
         .eval(
-            r#"
+            r##"
             local ok, result = xpcall(
                 function()
                     PlayerSpellsUtil.ToggleClassTalentFrame()
@@ -660,7 +660,7 @@ fn debug_player_spells_visible_onupdate_handlers() {
     let env = setup_env();
     let report: String = env
         .eval(
-            r#"
+            r##"
             PlayerSpellsUtil.ToggleClassTalentFrame()
 
             local lines = {}
@@ -684,9 +684,68 @@ fn debug_player_spells_visible_onupdate_handlers() {
 
             visit(PlayerSpellsFrame, "PlayerSpellsFrame")
             return table.concat(lines, "\n")
-            "#,
+            "##,
         )
         .expect("diagnostic OnUpdate scan should return");
+
+    panic!("{report}");
+}
+
+#[test]
+#[ignore = "diagnostic"]
+fn debug_player_spells_nil_numeric_calls() {
+    let env = setup_env();
+    let report: String = env
+        .eval(
+            r##"
+            local lines = {}
+
+            local function wrap_nil_arg(namespace, fnName)
+                local original = namespace and namespace[fnName]
+                if type(original) ~= "function" then
+                    table.insert(lines, fnName .. "=missing")
+                    return
+                end
+
+                namespace[fnName] = function(...)
+                    local arg1 = select(1, ...)
+                    local arg2 = select(2, ...)
+                    if arg1 == nil or arg2 == nil then
+                        table.insert(
+                            lines,
+                            fnName
+                                .. "(arg1="
+                                .. tostring(arg1)
+                                .. ",arg2="
+                                .. tostring(arg2)
+                                .. ",argc="
+                                .. tostring(select("#", ...))
+                                .. ")"
+                        )
+                    end
+                    return original(...)
+                end
+            end
+
+            wrap_nil_arg(C_Traits, "GetDefinitionInfo")
+            wrap_nil_arg(C_Traits, "GetEntryInfo")
+            wrap_nil_arg(C_Traits, "GetSubTreeInfo")
+            wrap_nil_arg(C_Traits, "GetConditionInfo")
+            wrap_nil_arg(C_Traits, "GetNodeInfo")
+            wrap_nil_arg(C_Traits, "GetNodeCost")
+            wrap_nil_arg(C_Traits, "GetTraitCurrencyInfo")
+            wrap_nil_arg(C_Traits, "GetTreeInfo")
+            wrap_nil_arg(C_Traits, "GetTreeCurrencyInfo")
+            wrap_nil_arg(C_Spell, "IsSpellPassive")
+            wrap_nil_arg(C_Spell, "GetSpellLink")
+            wrap_nil_arg(C_SpellBook, "GetSpellBookItemInfo")
+
+            PlayerSpellsUtil.ToggleClassTalentFrame()
+
+            return table.concat(lines, "\n")
+            "##,
+        )
+        .expect("diagnostic nil-arg scan should return");
 
     panic!("{report}");
 }
