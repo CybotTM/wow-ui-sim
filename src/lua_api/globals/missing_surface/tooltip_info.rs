@@ -531,28 +531,43 @@ fn register_item_spell_aura_methods(
     state: &mut LuaState,
     table_ref: GcRef<Table>,
 ) -> LuaResult<()> {
+    register_item_container_methods(state, table_ref)?;
+    register_quest_and_recipe_methods(state, table_ref)?;
+    register_socket_and_currency_methods(state, table_ref)?;
+    register_misc_content_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_item_container_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     register_tooltip_methods(
         state,
         table_ref,
         &[
-            ("GetTraitEntry", c_tooltip_get_trait_entry),
-            ("GetAction", c_tooltip_get_action),
-            ("GetAchievementByID", c_tooltip_get_achievement_by_id),
-            ("GetAura", c_tooltip_get_aura),
             ("GetBagItem", c_tooltip_get_bag_item),
-            ("GetCurrencyByID", c_tooltip_get_currency_by_id),
-            ("GetCurrencyToken", c_tooltip_get_currency_token),
             ("GetGuildBankItem", c_tooltip_get_guild_bank_item),
-            (
-                "GetInstanceLockEncountersComplete",
-                c_tooltip_get_instance_lock_encounters_complete,
-            ),
             ("GetItem", c_tooltip_get_item),
             ("GetItemByID", c_tooltip_get_item_by_id),
             ("GetItemByGUID", c_tooltip_get_item_by_guid),
-            ("GetLFGDungeon", c_tooltip_get_lfg_dungeon),
             ("GetOwnedItemByID", c_tooltip_get_owned_item_by_id),
-            ("GetPetAction", c_tooltip_get_pet_action),
+            ("GetInventoryItem", c_tooltip_get_inventory_item),
+            ("GetMerchantItem", c_tooltip_get_merchant_item),
+            ("GetUpgradeItem", c_tooltip_get_upgrade_item),
+            ("GetTooltipDataForItem", c_tooltip_get_tooltip_data_for_item),
+        ],
+    )
+}
+
+fn register_quest_and_recipe_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_tooltip_methods(
+        state,
+        table_ref,
+        &[
             ("GetQuestCurrency", c_tooltip_get_quest_currency),
             ("GetQuestItem", c_tooltip_get_quest_item),
             ("GetQuestLogCurrency", c_tooltip_get_quest_log_currency),
@@ -563,22 +578,54 @@ fn register_item_spell_aura_methods(
                 "GetRecipeResultItemForOrder",
                 c_tooltip_get_recipe_result_item_for_order,
             ),
-            ("GetShapeshift", c_tooltip_get_shapeshift),
             ("GetTradeSkillItem", c_tooltip_get_trade_skill_item),
             ("GetTradePlayerItem", c_tooltip_get_trade_player_item),
             ("GetTradeTargetItem", c_tooltip_get_trade_target_item),
             ("GetTrainerService", c_tooltip_get_trainer_service),
+        ],
+    )
+}
+
+fn register_socket_and_currency_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_tooltip_methods(
+        state,
+        table_ref,
+        &[
+            ("GetCurrencyByID", c_tooltip_get_currency_by_id),
+            ("GetCurrencyToken", c_tooltip_get_currency_token),
             ("GetSocketedItem", c_tooltip_get_socketed_item),
             ("GetSocketGem", c_tooltip_get_socket_gem),
             ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
+        ],
+    )
+}
+
+fn register_misc_content_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_tooltip_methods(
+        state,
+        table_ref,
+        &[
+            ("GetTraitEntry", c_tooltip_get_trait_entry),
+            ("GetAction", c_tooltip_get_action),
+            ("GetAchievementByID", c_tooltip_get_achievement_by_id),
+            ("GetAura", c_tooltip_get_aura),
+            (
+                "GetInstanceLockEncountersComplete",
+                c_tooltip_get_instance_lock_encounters_complete,
+            ),
+            ("GetLFGDungeon", c_tooltip_get_lfg_dungeon),
+            ("GetPetAction", c_tooltip_get_pet_action),
+            ("GetShapeshift", c_tooltip_get_shapeshift),
             ("GetMountBySpellID", c_tooltip_get_mount_by_spell_id),
             ("GetTalent", c_tooltip_get_talent),
             ("GetToyByItemID", c_tooltip_get_toy_by_item_id),
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
-            ("GetUpgradeItem", c_tooltip_get_upgrade_item),
-            ("GetInventoryItem", c_tooltip_get_inventory_item),
-            ("GetMerchantItem", c_tooltip_get_merchant_item),
-            ("GetTooltipDataForItem", c_tooltip_get_tooltip_data_for_item),
         ],
     )
 }
