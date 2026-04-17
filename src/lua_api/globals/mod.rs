@@ -46,6 +46,7 @@ pub mod lfg_list;
 pub mod locale_info;
 pub mod lua_duration_object;
 pub mod mail_verbs;
+pub mod message_verbs;
 pub mod missing_surface;
 pub mod modifier_keys;
 pub mod movement_verbs;

@@ -134,6 +134,7 @@ macro_rules! build_empty_sim_state {
             active_trade: None,
             open_panels: ::std::collections::HashSet::new(),
             voice_chat: VoiceChatState::default(),
+            message_log: Vec::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -464,6 +465,9 @@ pub struct SimState {
     pub open_panels: ::std::collections::HashSet<String>,
     /// Voice chat volume + mute/deafen/headset state.
     pub voice_chat: VoiceChatState,
+    /// Append-only log of outbound chat / addon messages sent via
+    /// `SendChatMessage` / `SendAddonMessage`. Most recent at the tail.
+    pub message_log: Vec<MessageLogEntry>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -478,9 +482,9 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
-    Keybindings, LfgListCounts, ModifierKeys, NetStats, PetBattleState, TradeState, VoiceChatState,
-    WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
-    WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    Keybindings, LfgListCounts, MessageLogEntry, ModifierKeys, NetStats, PetBattleState,
+    TradeState, VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
+    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {

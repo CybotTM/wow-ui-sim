@@ -93,6 +93,18 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// A single chat / addon message entry in the simulator's outbound log.
+/// `kind` is `"chat"` for `SendChatMessage` or `"addon"` for
+/// `SendAddonMessage`.
+#[derive(Debug, Clone)]
+pub struct MessageLogEntry {
+    pub kind: String,
+    pub prefix: String,
+    pub message: String,
+    pub channel: String,
+    pub target: String,
+}
+
 /// Voice chat presentation state: volume sliders + mute/deafen flags.
 /// Volumes are `[0.0, 1.0]`. `headset_mode` reflects whether the
 /// headset-check confirmation dialog has been accepted.
