@@ -703,13 +703,9 @@ impl App {
             let Some(frame) = state.widgets.get(current) else {
                 break;
             };
-            let child_hit = frame
-                .children
-                .iter()
-                .rev()
-                .find(|&&cid| grid.contains(cid, pos));
+            let child_hit = topmost_child_at(&state.widgets, grid, frame, pos);
             match child_hit {
-                Some(&cid) => current = cid,
+                Some(cid) => current = cid,
                 None => break,
             }
         }
@@ -738,13 +734,12 @@ fn deepest_click_target(
     button_name: &str,
 ) -> Option<u64> {
     let frame = widgets.get(frame_id)?;
-    for &child_id in frame.children.iter().rev() {
-        if !grid.contains(child_id, pos) {
-            continue;
-        }
+    let mut child_hit = topmost_child_at(widgets, grid, frame, pos);
+    while let Some(child_id) = child_hit {
         if let Some(target) = deepest_click_target(widgets, grid, child_id, pos, button_name) {
             return Some(target);
         }
+        child_hit = next_lower_child_at(widgets, grid, frame, pos, child_id);
     }
 
     if frame_accepts_mouse_button(frame, button_name) {
@@ -752,6 +747,59 @@ fn deepest_click_target(
     } else {
         None
     }
+}
+
+fn topmost_child_at(
+    widgets: &crate::widget::WidgetRegistry,
+    grid: &crate::iced_app::hit_grid::HitGrid,
+    frame: &crate::widget::Frame,
+    pos: iced::Point,
+) -> Option<u64> {
+    frame
+        .children
+        .iter()
+        .copied()
+        .filter(|&child_id| grid.contains(child_id, pos))
+        .max_by_key(|&child_id| {
+            widgets
+                .get(child_id)
+                .map(|child| hit_sort_key(child, child_id))
+                .unwrap_or_default()
+        })
+}
+
+fn next_lower_child_at(
+    widgets: &crate::widget::WidgetRegistry,
+    grid: &crate::iced_app::hit_grid::HitGrid,
+    frame: &crate::widget::Frame,
+    pos: iced::Point,
+    topmost_child_id: u64,
+) -> Option<u64> {
+    let topmost_key = widgets
+        .get(topmost_child_id)
+        .map(|child| hit_sort_key(child, topmost_child_id))?;
+
+    frame
+        .children
+        .iter()
+        .copied()
+        .filter(|&child_id| child_id != topmost_child_id && grid.contains(child_id, pos))
+        .filter_map(|child_id| {
+            let child = widgets.get(child_id)?;
+            let key = hit_sort_key(child, child_id);
+            (key < topmost_key).then_some((key, child_id))
+        })
+        .max_by_key(|&(key, _)| key)
+        .map(|(_, child_id)| child_id)
+}
+
+fn hit_sort_key(frame: &crate::widget::Frame, id: u64) -> (crate::widget::FrameStrata, i32, i32, u64) {
+    (
+        frame.frame_strata,
+        frame.frame_level.saturating_add(frame.raise_order),
+        frame.frame_level,
+        id,
+    )
 }
 
 fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {

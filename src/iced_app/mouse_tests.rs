@@ -560,6 +560,80 @@ fn pass_through_buttons_reroute_clicks_and_can_be_cleared() {
 }
 
 #[test]
+fn hover_and_click_use_child_render_order_when_parent_wins_phase_one() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            HitOrderParent = CreateFrame("Button", "HitOrderParent", UIParent)
+            HitOrderParent:SetSize(100, 100)
+            HitOrderParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            HitOrderParent:SetFrameLevel(10)
+            HitOrderParent:EnableMouse(true)
+
+            HitOrderHigh = CreateFrame("Button", "HitOrderHigh", HitOrderParent)
+            HitOrderHigh:SetAllPoints(HitOrderParent)
+            HitOrderHigh:SetFrameLevel(3)
+            HitOrderHigh:EnableMouse(true)
+            HitOrderHigh:SetScript("OnClick", function()
+                __hit_order_high_clicks = (__hit_order_high_clicks or 0) + 1
+            end)
+
+            HitOrderLow = CreateFrame("Button", "HitOrderLow", HitOrderParent)
+            HitOrderLow:SetAllPoints(HitOrderParent)
+            HitOrderLow:SetFrameLevel(1)
+            HitOrderLow:EnableMouse(true)
+            HitOrderLow:SetScript("OnClick", function()
+                __hit_order_low_clicks = (__hit_order_low_clicks or 0) + 1
+            end)
+
+            __hit_order_high_clicks = 0
+            __hit_order_low_clicks = 0
+            "#,
+        )
+        .expect("hit-order test setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    let hover_pos = Point::new(150.0, 150.0);
+    app.handle_mouse_move(hover_pos);
+
+    let hovered_name = {
+        let env = app.env.borrow();
+        let state = env.state().borrow();
+        let hovered_id = state.hovered_frame.expect("a child should be hovered");
+        state
+            .widgets
+            .get(hovered_id)
+            .and_then(|frame| frame.name.clone())
+            .expect("hovered frame should have a name")
+    };
+    assert_eq!(
+        hovered_name, "HitOrderHigh",
+        "hover should resolve to the highest-rendered child, not the last-created child"
+    );
+
+    app.handle_mouse_down(hover_pos);
+    app.handle_mouse_up(hover_pos);
+
+    let (high_clicks, low_clicks): (f64, f64) = app
+        .env
+        .borrow()
+        .eval("return __hit_order_high_clicks, __hit_order_low_clicks")
+        .expect("click counters should be readable");
+    assert_eq!(
+        high_clicks, 1.0,
+        "click should go to the highest-rendered child when the parent wins phase one"
+    );
+    assert_eq!(
+        low_clicks, 0.0,
+        "lower-rendered sibling should not steal the click by creation order"
+    );
+}
+
+#[test]
 fn disabled_buttons_only_run_hover_motion_scripts_when_opted_in() {
     let mut app = build_test_app(ScreenKind::Game);
 
