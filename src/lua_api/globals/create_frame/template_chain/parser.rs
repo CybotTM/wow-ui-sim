@@ -64,11 +64,7 @@ fn parse_assignment_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
 }
 
 fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
-    let parts = stmt
-        .split(';')
-        .map(str::trim)
-        .filter(|part| !part.is_empty())
-        .collect::<Vec<_>>();
+    let parts = split_inline_sequence_parts(stmt);
     match parts.as_slice() {
         [first, second] => Some(FastHandlerRef::Sequence2(Box::new((
             parse_inline_single_fast_handler(first)?,
@@ -81,6 +77,74 @@ fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
         )))),
         _ => None,
     }
+}
+
+fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
+    let mut parts = Vec::new();
+    let mut start = 0usize;
+    let mut chars = stmt.char_indices().peekable();
+    let mut in_string = false;
+    let mut quote = '\0';
+    let mut escaped = false;
+    let mut in_comment = false;
+
+    while let Some((idx, ch)) = chars.next() {
+        if in_comment {
+            if ch == '\n' {
+                in_comment = false;
+                start = idx + ch.len_utf8();
+            }
+            continue;
+        }
+
+        if in_string {
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
+            if ch == quote {
+                in_string = false;
+            }
+            continue;
+        }
+
+        if ch == '"' || ch == '\'' {
+            in_string = true;
+            quote = ch;
+            continue;
+        }
+
+        if ch == '-' && matches!(chars.peek(), Some((_, '-'))) {
+            let part = stmt[start..idx].trim();
+            if !part.is_empty() {
+                parts.push(part);
+            }
+            let _ = chars.next();
+            in_comment = true;
+            continue;
+        }
+
+        if ch == ';' {
+            let part = stmt[start..idx].trim();
+            if !part.is_empty() {
+                parts.push(part);
+            }
+            start = idx + ch.len_utf8();
+        }
+    }
+
+    if !in_comment {
+        let part = stmt[start..].trim();
+        if !part.is_empty() {
+            parts.push(part);
+        }
+    }
+
+    parts
 }
 
 fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {

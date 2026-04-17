@@ -378,6 +378,11 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         arg: &'a str,
     },
+    FunctionWithStringNumberArgs {
+        function_name: &'a str,
+        first: &'a str,
+        second: f64,
+    },
     FunctionWithNoArgFunctionResult {
         function_name: &'a str,
         arg_function_name: &'a str,
@@ -645,6 +650,24 @@ pub(super) fn build_child_inherits(
         (None, Some(inherits)) => Some(inherits.to_string()),
         (None, None) => None,
     }
+}
+
+pub(super) fn resolve_inherited_hidden(
+    frame: &crate::xml::FrameXml,
+    inherits: Option<&str>,
+) -> bool {
+    if let Some(hidden) = frame.hidden {
+        return hidden;
+    }
+
+    let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
+        return false;
+    };
+
+    crate::xml::get_template_chain(inherits)
+        .iter()
+        .find_map(|entry| entry.frame.hidden)
+        .unwrap_or(false)
 }
 
 pub(super) fn frame_lookup_name(state: &LuaState, frame_id: u64) -> String {

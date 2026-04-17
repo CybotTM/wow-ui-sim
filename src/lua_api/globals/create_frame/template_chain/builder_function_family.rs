@@ -55,6 +55,12 @@ fn build_function_with_arg_variants(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
+        FastHandlerRef::FunctionWithStringNumberArgs {
+            function_name,
+            first,
+            second,
+        } => build_function_handler_with_string_number_args(state, function_name, first, *second)
+            .map(Some),
         FastHandlerRef::FunctionWithStringArg { function_name, arg } => {
             build_function_handler_with_string_only_arg(state, function_name, arg).map(Some)
         }
@@ -253,6 +259,31 @@ fn build_function_handler_with_string_only_arg(
         state,
         Val::Function(builder.gc_ref()),
         &[target, arg],
+    )
+}
+
+fn build_function_handler_with_string_number_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first: &str,
+    second: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first, second = ...
+            return function(self, ...)
+                return fn(first, second)
+            end
+        "#,
+        "template-inline-function-string-number-args",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first = create_string(state, first);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first, Val::Num(second)],
     )
 }
 

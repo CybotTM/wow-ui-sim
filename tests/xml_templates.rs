@@ -1863,11 +1863,47 @@ fn test_create_frame_from_xml_inline_function_with_global_method_result_runs() {
         "Button",
     );
 
-    env.exec("XmlInlineGlobalMethodResultFrame:GetScript('OnClick')(XmlInlineGlobalMethodResultFrame)")
-        .unwrap();
+    env.exec(
+        "XmlInlineGlobalMethodResultFrame:GetScript('OnClick')(XmlInlineGlobalMethodResultFrame)",
+    )
+    .unwrap();
 
     let captured: String = env.eval("return XmlInlineCapturedFilterName").unwrap();
     assert_eq!(captured, "filter name");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_string_number_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineCVarKey = nil
+        XmlInlineCVarValue = nil
+        function XmlInlineSetCVar(key, value)
+            XmlInlineCVarKey = key
+            XmlInlineCVarValue = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineStringNumberArgsFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineSetCVar("addFriendInfoShown", 1)</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineStringNumberArgsFrame:GetScript('OnClick')(XmlInlineStringNumberArgsFrame)")
+        .unwrap();
+
+    let result: (String, i32) = env
+        .eval("return XmlInlineCVarKey, XmlInlineCVarValue")
+        .unwrap();
+    assert_eq!(result.0, "addFriendInfoShown");
+    assert_eq!(result.1, 1);
 }
 
 #[test]
@@ -1892,7 +1928,9 @@ fn test_create_frame_from_xml_inline_global_assignment_runs() {
     env.exec("XmlInlineGlobalAssignFrame:GetScript('OnClick')(XmlInlineGlobalAssignFrame)")
         .unwrap();
 
-    let flag: bool = env.eval("return XmlInlineGlobalAssignTarget.flag == true").unwrap();
+    let flag: bool = env
+        .eval("return XmlInlineGlobalAssignTarget.flag == true")
+        .unwrap();
     assert!(flag);
 }
 
