@@ -8,6 +8,23 @@ pub(super) fn build_function_family_handler(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_plain_function_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_function_with_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_ancestor_function_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    Ok(None)
+}
+
+/// Kind-dispatched bindings: `fn(...)`, `fn(self:GetID())`, `fn(self, event, ...)`, etc.
+fn build_plain_function_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
@@ -18,6 +35,26 @@ pub(super) fn build_function_family_handler(
         FastHandlerRef::FunctionWithSelfIdArg(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::SelfId).map(Some)
         }
+        FastHandlerRef::FunctionWithEventVarargs(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::EventVarargs)
+                .map(Some)
+        }
+        FastHandlerRef::FunctionWithButton(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::Button).map(Some)
+        }
+        FastHandlerRef::FunctionWithElapsed(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::Elapsed).map(Some)
+        }
+        _ => Ok(None),
+    }
+}
+
+/// Per-argument shapes: string / number / global / self+field / global+self combinations.
+fn build_function_with_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
             build_function_handler_with_string_arg(state, function_name, arg).map(Some)
         }
@@ -39,6 +76,16 @@ pub(super) fn build_function_family_handler(
             field,
         } => build_function_handler_with_self_and_parent_field_arg(state, function_name, field)
             .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Parent / grandparent / parent-id shapes.
+fn build_ancestor_function_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::FunctionWithParentArg(function_name) => {
             build_ancestor_function_handler(state, function_name, 1).map(Some)
         }
@@ -47,16 +94,6 @@ pub(super) fn build_function_family_handler(
         }
         FastHandlerRef::FunctionWithParentIdArg(function_name) => {
             build_ancestor_id_function_handler(state, function_name, 1).map(Some)
-        }
-        FastHandlerRef::FunctionWithEventVarargs(function_name) => {
-            build_function_handler(state, function_name, FunctionHandlerKind::EventVarargs)
-                .map(Some)
-        }
-        FastHandlerRef::FunctionWithButton(function_name) => {
-            build_function_handler(state, function_name, FunctionHandlerKind::Button).map(Some)
-        }
-        FastHandlerRef::FunctionWithElapsed(function_name) => {
-            build_function_handler(state, function_name, FunctionHandlerKind::Elapsed).map(Some)
         }
         _ => Ok(None),
     }
