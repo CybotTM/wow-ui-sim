@@ -66,14 +66,9 @@ fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleS
         return lifecycle;
     }
 
-    for entry in &*crate::xml::get_template_chain(inherits) {
-        let inherited = lifecycle_scripts_for_frame(&entry.frame);
-        lifecycle.on_load |= inherited.on_load;
-        lifecycle.on_show |= inherited.on_show;
-        if lifecycle.on_load && lifecycle.on_show {
-            break;
-        }
-    }
+    let (inherited_on_load, inherited_on_show) = crate::xml::get_template_lifecycle_flags(inherits);
+    lifecycle.on_load |= inherited_on_load;
+    lifecycle.on_show |= inherited_on_show;
 
     lifecycle
 }

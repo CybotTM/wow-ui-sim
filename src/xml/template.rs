@@ -17,6 +17,7 @@ struct TemplateRegistry {
     entries: HashMap<String, TemplateEntry>,
     entries_ci: HashMap<String, String>,
     chain_cache: HashMap<String, Arc<Vec<TemplateEntry>>>,
+    lifecycle_cache: HashMap<String, (bool, bool)>,
 }
 
 /// Global registry of XML templates (virtual frames).
@@ -39,6 +40,7 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
     );
     registry.entries_ci.insert(lower, name.to_string());
     registry.chain_cache.clear();
+    registry.lifecycle_cache.clear();
 }
 
 /// Get a template by name from the registry (case-insensitive).
@@ -199,6 +201,46 @@ pub fn get_template_chain(names: &str) -> Arc<Vec<TemplateEntry>> {
     arc_chain
 }
 
+/// Get cached lifecycle flags (OnLoad, OnShow) for a template inheritance chain.
+pub fn get_template_lifecycle_flags(names: &str) -> (bool, bool) {
+    let key = names.trim().to_string();
+    if key.is_empty() {
+        return (false, false);
+    }
+
+    if let Some(cached) = template_registry()
+        .read()
+        .unwrap()
+        .lifecycle_cache
+        .get(&key)
+        .copied()
+    {
+        return cached;
+    }
+
+    let chain = get_template_chain(&key);
+    let mut on_load = false;
+    let mut on_show = false;
+    for entry in chain.iter() {
+        let Some(scripts) = entry.frame.scripts() else {
+            continue;
+        };
+        on_load |= !scripts.on_load.is_empty();
+        on_show |= !scripts.on_show.is_empty();
+        if on_load && on_show {
+            break;
+        }
+    }
+
+    let flags = (on_load, on_show);
+    template_registry()
+        .write()
+        .unwrap()
+        .lifecycle_cache
+        .insert(key, flags);
+    flags
+}
+
 /// Recursively collect templates in the inheritance chain.
 fn collect_template_chain(
     name: &str,
@@ -274,6 +316,7 @@ pub fn clear_templates() {
     registry.entries.clear();
     registry.entries_ci.clear();
     registry.chain_cache.clear();
+    registry.lifecycle_cache.clear();
 
     texture_template_registry().write().unwrap().clear();
     anim_group_template_registry().write().unwrap().clear();
