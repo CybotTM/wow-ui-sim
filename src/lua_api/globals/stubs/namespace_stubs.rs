@@ -179,7 +179,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ),
     ("C_TooltipInfo", "GetInventoryItem", stub_nil),
     ("C_TooltipInfo", "GetLFGDungeon", stub_nil),
-    ("C_TooltipInfo", "GetMerchantItem", stub_nil),
     ("C_TooltipInfo", "GetPetAction", stub_nil),
     ("C_TooltipInfo", "GetQuestCurrency", stub_nil),
     ("C_TooltipInfo", "GetQuestItem", stub_nil),

@@ -543,6 +543,7 @@ fn register_item_spell_aura_methods(
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
             ("GetUpgradeItem", c_tooltip_get_upgrade_item),
             ("GetInventoryItem", c_tooltip_get_inventory_item),
+            ("GetMerchantItem", c_tooltip_get_merchant_item),
             ("GetTooltipDataForItem", c_tooltip_get_tooltip_data_for_item),
         ],
     )
@@ -872,6 +873,16 @@ fn trade_slot_item_id(state: &mut LuaState, slot: i32, player_side: bool) -> Opt
     (item_id != 0).then_some(item_id)
 }
 
+fn merchant_item_id(state: &LuaState, slot: i32) -> Option<u32> {
+    let zero_based = usize::try_from(slot.saturating_sub(1)).ok()?;
+    borrow_state(state)
+        .ok()?
+        .merchant_items
+        .get(zero_based)
+        .copied()
+        .filter(|item_id| *item_id != 0)
+}
+
 fn c_tooltip_get_trade_player_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let tooltip = trade_slot_item_id(state, slot, true)
@@ -884,6 +895,15 @@ fn c_tooltip_get_trade_player_item(state: &mut LuaState) -> LuaResult<u32> {
 fn c_tooltip_get_trade_target_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let tooltip = trade_slot_item_id(state, slot, false)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_merchant_item(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let tooltip = merchant_item_id(state, slot)
         .map(|item_id| tooltip_for_item_id(state, item_id))
         .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
     state.push(tooltip);
