@@ -196,3 +196,75 @@ Items 1-5 are big "branch-unblocking" wins. Items 6-7 are cleanup.
 Each row in this matrix is a candidate PLAN task. The intent is to open ONE
 subsystem at a time: fetch its master file, diff against HEAD, port or upgrade,
 commit before starting the next.
+
+---
+
+## Deleted Helper Module Audit (PLAN.md line 32)
+
+**Summary:** Four master-era helper modules (script_helpers, secure_env, key_dispatch, keybindings) account for 37 public symbols. The rilua tree has ported 11 (script_helpers: 7 + secure_env: 4), regressed 1 (send_key_press), and left 25 missing (script_helpers: 12 + key_dispatch internal methods absorbed, keybindings: 7). **Suggested restore order by subsystem priority (lowest surface-area first):** (1) secure_env polish (apply_secure_env absorbed into mark_secure; small gap), (2) script_helpers frame/error helpers (add_frame_unit_event_callback, dispatch_frame_unit_event_callbacks, get_frame_ref, get_stack_taint, LuaApiError, lua_error variants), (3) keybindings full table (init_keybindings, dispatch_key_binding, get_binding_*), (4) key_dispatch rewrite (send_key_press + internal dispatch tree).
+
+### script_helpers.rs (401 lines, 19 public symbols)
+
+| Symbol | Master lines | Rilua location | Status | Notes |
+|--------|--------------|----------------|--------|-------|
+| get_scripts_table | 20 | — | missing | Registry table reader; no equivalent in rilua |
+| get_or_create_scripts_table | 25 | — | missing | Registry table creation; no equivalent |
+| get_script | 35 | src/lua_api/script_helpers.rs:78 | ported | Lookup handler; mlua::Function → Val |
+| set_script | 42 | src/lua_api/script_helpers.rs:88 | ported | Store handler; signature adapted |
+| remove_script | 50 | src/lua_api/script_helpers.rs:96 | ported | Delete handler; Val::Nil signature |
+| clear_on_update_script_caches | 58 | src/lua_api/script_helpers.rs:104-116 (sync_on_update_cache) | ported | Cache sync; merged into sync_on_update_cache |
+| get_frame_fields_table | 96 | — | missing | Registry table reader |
+| get_or_create_frame_fields_table | 101 | — | missing | Registry creation for frame fields |
+| get_or_create_frame_fields | 112 | — | missing | Per-frame field table creation |
+| add_frame_unit_event_callback | 133 | — | missing | Frame event callback registration; 30-line impl |
+| dispatch_frame_unit_event_callbacks | 164 | — | missing | Frame event callback dispatch; 43-line impl |
+| get_frame_ref | 250 | — | missing | Frame userdata lookup; likely maps to frame_ref in methods.rs |
+| call_error_handler | 260 | src/lua_api/script_helpers.rs:121 | ported | Error handler invocation; both mlua + rilua variants |
+| get_stack_taint | 283 | — | missing | Addon taint detection from Lua stack; 24-line master impl |
+| collect_lua_error | 325 | src/lua_api/script_helpers.rs:351 | ported | Collect error into SimState; signature preserved |
+| get_event_listeners_lua_order | 353 | src/lua_api/script_helpers.rs:380 (get_event_listeners) | ported | Event listener query; renamed (Lua order assumed) |
+| LuaApiError | 384 | — | missing | Error struct; used by lua_error macros |
+| lua_error | 393 | — | missing | mlua::Error creation wrapper; no rilua equivalent |
+| lua_error_val | 398 | — | missing | mlua::Error creation without Lua ref; no rilua equivalent |
+
+**Porting priorities:** Frame callbacks (unit events) and frame_ref lookup are high-value. Error struct can be deferred (lua_error is only used internally by script dispatch).
+
+### secure_env.rs (69 lines, 3 public symbols)
+
+| Symbol | Master lines | Rilua location | Status | Notes |
+|--------|--------------|----------------|--------|-------|
+| create_secure_environment | 21 | src/lua_api/globals/security.rs:400 | ported | Shallow copy + __index fallback; logic preserved |
+| apply_secure_env | 53 | src/lua_api/globals/security.rs:432 (mark_secure) | regressed | Calls setfenv on a function; rilua uses mark_secure(lua, func) instead; signature change is API-surface regression |
+| set_in_both_envs | 62 | src/lua_api/globals/security.rs:448 (set_in_both_envs_rilua) | ported | Set in _G + secureenv; name changed; functionality preserved |
+
+**Porting priorities:** apply_secure_env is the regression; callers currently use mark_secure but should use apply_secure_env for API consistency with master. Small rename/wrapper task.
+
+### key_dispatch.rs (383 lines, 1 public method in WowLuaEnv impl)
+
+| Symbol | Master lines | Rilua location | Status | Notes |
+|--------|--------------|----------------|--------|-------|
+| send_key_press | 25 (WowLuaEnv method) | src/lua_api/env.rs:390 | regressed | Key dispatch root; rilua implementation is a no-op stub returning Ok(()), master has 350+ lines of dispatch tree (escape → focus → editbox → keybinding → OnKeyDown) |
+
+**Porting priorities:** send_key_press is the top blocker for interactive testing; full dispatch tree required (dispatch_escape, dispatch_key, clear_target_if_any, close_special_windows, close_all_windows, toggle_game_menu, editbox_insert_text, editbox_backspace, editbox_delete, editbox_move_cursor, editbox_cursor_home, editbox_cursor_end, fire_handler_returns_truthy, fire_on_key_down, dispatch_on_key_down). ~350 lines of plumbing.
+
+### keybindings.rs (424 lines, 7 public functions)
+
+| Symbol | Master lines | Rilua location | Status | Notes |
+|--------|--------------|----------------|--------|-------|
+| init_keybindings | 333 | — | missing | Initialize __wow_binding_actions + __wow_key_bindings registry tables; 20-line const-driven setup |
+| dispatch_key_binding | 358 | — | missing | Dispatch a key binding to Lua code; 15-line function |
+| get_binding_key | 378 | — | missing | Query key(s) for an action; 10-line pairs loop |
+| get_binding_action | 391 | — | missing | Query action for a key; 3-line registry lookup |
+| set_binding | 397 | — | missing | Set or clear a binding; 5-line registry mutation |
+| get_num_bindings | 407 | — | missing | Return BINDING_ACTIONS.len(); 1-line |
+| get_binding_at | 412 | — | missing | Get binding by index (1-based); 10-line lookup |
+
+**Porting priorities:** init_keybindings + dispatch_key_binding unlock keybinding support; the query/set functions are low-cost add-ons. All 7 functions are straightforward registry-table wrappers (60 lines total).
+
+**Grand total status:** 37 symbols: 11 ported, 1 regressed, 25 missing. Porting work is three discrete chunks:
+1. **script_helpers frame/error missing** (add_frame_unit_event_callback, dispatch_frame_unit_event_callbacks, get_frame_ref, get_stack_taint, LuaApiError, lua_error): ~100 lines.
+2. **keybindings full module** (all 7 functions): ~60 lines.
+3. **key_dispatch rewrite** (send_key_press + 10 internal helpers): ~350 lines (highest effort).
+4. **secure_env polish** (apply_secure_env wrapper): ~5 lines.
+
+Recommend tackling in order: 4 → 1 → 2 → 3 (lowest-surface first to unblock other work).
