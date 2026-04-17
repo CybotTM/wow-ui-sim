@@ -1983,15 +1983,20 @@ fn test_create_frame_from_xml_inline_parent_field_method_with_self_result_runs()
 }
 
 #[test]
-fn test_create_frame_from_xml_inline_conditional_global_field_eq_string_runs() {
+fn test_create_frame_from_xml_inline_function_with_two_global_args_sequence_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
     env.exec(
         r#"
-        PetitionFrame = { petitionType = "guild" }
-        XmlInlinePopupShown = nil
-        function StaticPopup_Show(name)
-            XmlInlinePopupShown = name
+        Settings = { INTERFACE_CATEGORY_ID = 7, OpenedCategory = nil }
+        RAID_FRAMES_LABEL = "Raid Frames"
+        SOUNDKIT = { IG_MAINMENU_OPTION = 5 }
+        XmlInlinePlayedSound = nil
+        function Settings.OpenToCategory(category_id, label)
+            Settings.OpenedCategory = { category_id, label }
+        end
+        function PlaySound(sound_id)
+            XmlInlinePlayedSound = sound_id
         end
     "#,
     )
@@ -1999,27 +2004,27 @@ fn test_create_frame_from_xml_inline_conditional_global_field_eq_string_runs() {
 
     create_first_frame(
         &env,
-        r#"<Ui><Button name="XmlInlineConditionalPopupFrame" parent="UIParent">
-        <Scripts><OnClick>if ( PetitionFrame.petitionType == "guild" ) then StaticPopup_Show("RENAME_GUILD"); end</OnClick></Scripts>
+        r#"<Ui><Button name="XmlInlineTwoGlobalArgsFrame" parent="UIParent">
+        <Scripts><OnClick>Settings.OpenToCategory(Settings.INTERFACE_CATEGORY_ID, RAID_FRAMES_LABEL); PlaySound(SOUNDKIT.IG_MAINMENU_OPTION)</OnClick></Scripts>
     </Button></Ui>"#,
         "Button",
     );
 
-    env.exec("XmlInlineConditionalPopupFrame:GetScript('OnClick')(XmlInlineConditionalPopupFrame)")
+    env.exec("XmlInlineTwoGlobalArgsFrame:GetScript('OnClick')(XmlInlineTwoGlobalArgsFrame)")
         .unwrap();
-    let shown: String = env.eval("return XmlInlinePopupShown").unwrap();
-    assert_eq!(shown, "RENAME_GUILD");
 
-    env.exec(
-        r#"
-        PetitionFrame.petitionType = "arena"
-        XmlInlinePopupShown = nil
-        XmlInlineConditionalPopupFrame:GetScript('OnClick')(XmlInlineConditionalPopupFrame)
-    "#,
-    )
-    .unwrap();
-    let skipped: Option<String> = env.eval("return XmlInlinePopupShown").unwrap();
-    assert_eq!(skipped, None);
+    let result: (i32, String, i32) = env
+        .eval(
+            r#"
+            return Settings.OpenedCategory[1],
+                   Settings.OpenedCategory[2],
+                   XmlInlinePlayedSound
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, 7);
+    assert_eq!(result.1, "Raid Frames");
+    assert_eq!(result.2, 5);
 }
 
 #[test]

@@ -39,6 +39,15 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some((function_name, arg)) = parse_inline_function_with_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithStringArg { function_name, arg });
     }
+    if let Some((function_name, first_arg_path, second_arg_path)) =
+        parse_inline_function_with_two_global_args(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithTwoGlobalArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+        });
+    }
     if let Some((function_name, arg_function_name)) =
         parse_inline_function_with_noarg_function_result(stmt)
     {
@@ -163,9 +172,20 @@ fn parse_inline_function_with_string_number_args(stmt: &str) -> Option<(&str, &s
     is_fast_handler_path(function_name).then_some((function_name, first, second))
 }
 
-fn parse_inline_function_with_string_nil_nil_global_args(
-    stmt: &str,
-) -> Option<(&str, &str, &str)> {
+fn parse_inline_function_with_two_global_args(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (first_arg_path, second_arg_path) = args.split_once(',')?;
+    let function_name = function_name.trim();
+    let first_arg_path = first_arg_path.trim();
+    let second_arg_path = second_arg_path.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(first_arg_path)
+        && is_fast_handler_path(second_arg_path))
+    .then_some((function_name, first_arg_path, second_arg_path))
+}
+
+fn parse_inline_function_with_string_nil_nil_global_args(stmt: &str) -> Option<(&str, &str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
     let mut parts = args.split(',').map(str::trim);
@@ -177,8 +197,11 @@ fn parse_inline_function_with_string_nil_nil_global_args(
         return None;
     }
     let function_name = function_name.trim();
-    (is_fast_handler_path(function_name) && is_fast_handler_path(fourth))
-        .then_some((function_name, first, fourth))
+    (is_fast_handler_path(function_name) && is_fast_handler_path(fourth)).then_some((
+        function_name,
+        first,
+        fourth,
+    ))
 }
 
 fn parse_inline_function_with_noarg_function_result(stmt: &str) -> Option<(&str, &str)> {

@@ -110,6 +110,17 @@ fn build_function_with_arg_variants(
             function_name,
             arg_path,
         } => build_function_handler_with_global_arg(state, function_name, arg_path).map(Some),
+        FastHandlerRef::FunctionWithTwoGlobalArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+        } => build_function_handler_with_two_global_args(
+            state,
+            function_name,
+            first_arg_path,
+            second_arg_path,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
             function_name,
             global_arg_path,
@@ -441,6 +452,32 @@ fn build_function_handler_with_global_arg(
         state,
         Val::Function(builder.gc_ref()),
         &[target, arg],
+    )
+}
+
+fn build_function_handler_with_two_global_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first_arg_path: &str,
+    second_arg_path: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first_arg, second_arg = ...
+            return function(self, ...)
+                return fn(first_arg, second_arg)
+            end
+        "#,
+        "template-inline-function-two-global-args",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first_arg = resolve_global_path(state, first_arg_path);
+    let second_arg = resolve_global_path(state, second_arg_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first_arg, second_arg],
     )
 }
 

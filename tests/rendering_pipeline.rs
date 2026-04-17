@@ -419,6 +419,56 @@ fn layer4_quad_batch_direct_push() {
 }
 
 #[test]
+fn layer4_texture_widget_with_file_data_id_emits_texture_request() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local tex = UIParent:CreateTexture("RenderFileDataTexture")
+        tex:SetSize(32, 32)
+        tex:SetPoint("CENTER")
+        tex:SetTexture(136243)
+        tex:Show()
+    "#,
+    )
+    .unwrap();
+
+    let expected_path = format!(
+        "Interface\\{}",
+        wow_ui_sim::manifest_interface_data::get_texture_path(136243)
+            .expect("default icon should exist in manifest")
+            .replace('/', "\\")
+    );
+
+    let buckets = build_strata_buckets(&env);
+    let state = env.state().borrow();
+    let batch = build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        Some("RenderFileDataTexture"),
+        None,
+        None,
+        None,
+        None,
+        None,
+        &buckets,
+    );
+
+    assert!(
+        batch
+            .texture_requests
+            .iter()
+            .any(|request| request.path == expected_path),
+        "file-data-id texture should emit a texture request for {expected_path}, got {:?}",
+        batch
+            .texture_requests
+            .iter()
+            .map(|request| request.path.as_str())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn layer4_quad_batch_vertex_positions_match_layout() {
     let env = env_with_shared_xml();
 
