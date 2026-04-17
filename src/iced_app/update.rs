@@ -50,6 +50,7 @@ impl App {
                 self.frames_panel_collapsed = !self.frames_panel_collapsed
             }
             Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
+            Message::PartySizeChanged(ref label) => self.handle_party_size_changed(label),
             Message::KeyPress(ref key, ref text) => {
                 self.handle_simple_key_press(key, text.as_deref())
             }
@@ -155,6 +156,20 @@ impl App {
             if let Err(e) = env.fire_event(event) {
                 self.log_messages.push(format!("XP event error: {}", e));
             }
+        }
+        self.save_config();
+        self.invalidate();
+    }
+
+    fn handle_party_size_changed(&mut self, label: &str) {
+        let size = label.parse::<usize>().unwrap_or(0).min(4);
+        self.selected_party_size = size.to_string();
+        {
+            let env = self.env.borrow();
+            let mut state = env.state().borrow_mut();
+            super::app::resize_party_state(&mut state, size);
+            drop(state);
+            crate::startup::refresh_party_frames(&env);
         }
         self.save_config();
         self.invalidate();
@@ -456,6 +471,7 @@ impl App {
         config.player_race = self.selected_race.clone();
         config.rot_damage_level = self.selected_rot_level.clone();
         config.xp_level = self.selected_xp_level.clone();
+        config.party_size = self.selected_party_size.parse::<u8>().unwrap_or(0).min(4);
         config.movement = self.movement.clone();
         config.save();
     }
@@ -695,6 +711,22 @@ mod tests {
         assert!(
             pending.contains(&frame_id),
             "pre-tick dirty frame should survive collect_tick_dirty"
+        );
+    }
+
+    #[test]
+    fn party_size_change_updates_group_state_and_selection() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        app.dispatch_simple_message(Message::PartySizeChanged("4".to_string()));
+
+        assert_eq!(app.selected_party_size, "4");
+        let env = app.env.borrow();
+        let state = env.state().borrow();
+        assert_eq!(state.party_members.len(), 4);
+        assert!(
+            state.party_group_active,
+            "party size > 0 should mark the player as grouped"
         );
     }
 }

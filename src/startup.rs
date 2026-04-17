@@ -278,8 +278,7 @@ fn fire_post_login_events(env: &WowLuaEnv) {
 
     fire("BAG_UPDATE_DELAYED");
     fire("QUEST_LOG_UPDATE");
-    fire("GROUP_ROSTER_UPDATE");
-    force_show_party_member_frames(env);
+    refresh_party_frames(env);
     fire("UPDATE_BINDINGS");
     fire("DISPLAY_SIZE_CHANGED");
     fire("UI_SCALE_CHANGED");
@@ -328,6 +327,11 @@ fn fire_unit_aura(env: &WowLuaEnv) {
 /// CompactRaidFrameManager_UpdateShown() which errors on missing dividerVerticalPool,
 /// preventing PartyFrame:UpdatePartyFrames() from re-showing them.
 /// This safety net shows each member frame individually with pcall wrappers.
+pub(crate) fn refresh_party_frames(env: &WowLuaEnv) {
+    fire_simple_event(env, "GROUP_ROSTER_UPDATE");
+    force_show_party_member_frames(env);
+}
+
 fn force_show_party_member_frames(env: &WowLuaEnv) {
     if let Err(e) = env.exec(FORCE_SHOW_PARTY_MEMBER_FRAMES_LUA) {
         log_with_timestamp(env, &format!("[startup] party frame safety-net error: {e}"));

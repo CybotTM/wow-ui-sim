@@ -30,6 +30,7 @@ pub struct TargetInfo {
 }
 
 /// A simulated party member.
+#[derive(Clone)]
 pub struct PartyMember {
     pub name: String,
     /// 1-based class index into CLASS_DATA.

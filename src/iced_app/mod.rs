@@ -149,6 +149,8 @@ pub enum Message {
     ToggleFramesPanel,
     /// XP bar level changed via dropdown.
     XpLevelChanged(String),
+    /// Party size changed via dropdown.
+    PartySizeChanged(String),
     /// Keyboard input dispatched to Lua (WoW key name, e.g. "ESCAPE", "ENTER", "A")
     /// plus optional raw text for character input into focused EditBox.
     KeyPress(String, Option<String>),

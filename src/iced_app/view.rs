@@ -297,6 +297,7 @@ impl App {
         let class_opts: Vec<String> = CLASS_LABELS.iter().map(|s| s.to_string()).collect();
         let race_opts: Vec<String> = RACE_DATA.iter().map(|(n, _, _)| n.to_string()).collect();
         let xp_opts: Vec<String> = XP_LEVELS.iter().map(|(l, _)| l.to_string()).collect();
+        let party_size_opts: Vec<String> = (0..=4).map(|n| n.to_string()).collect();
         let rot_opts: Vec<String> = ROT_DAMAGE_LEVELS
             .iter()
             .map(|(l, _)| l.to_string())
@@ -320,6 +321,12 @@ impl App {
                 xp_opts,
                 &self.selected_xp_level,
                 Message::XpLevelChanged
+            ),
+            labeled_pick_list(
+                "Party:",
+                party_size_opts,
+                &self.selected_party_size,
+                Message::PartySizeChanged
             ),
             labeled_pick_list(
                 "Rot Damage:",

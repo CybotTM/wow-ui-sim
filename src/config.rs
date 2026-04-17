@@ -26,6 +26,8 @@ pub struct SimConfig {
     pub rot_damage_level: String,
     #[serde(default = "default_xp_level")]
     pub xp_level: String,
+    #[serde(default)]
+    pub party_size: u8,
     /// Player movement state toggles.
     #[serde(default)]
     pub movement: MovementConfig,
@@ -69,6 +71,7 @@ impl Default for SimConfig {
             player_race: default_race(),
             rot_damage_level: default_rot_level(),
             xp_level: default_xp_level(),
+            party_size: 0,
             movement: MovementConfig::default(),
             path: default_path(),
         }
@@ -95,5 +98,18 @@ impl SimConfig {
         if let Ok(json) = serde_json::to_string_pretty(self) {
             let _ = std::fs::write(&self.path, json);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SimConfig;
+
+    #[test]
+    fn missing_party_size_deserializes_to_solo_default() {
+        let config: SimConfig =
+            serde_json::from_str(r#"{"player_class":"Paladin","xp_level":"33%"}"#).unwrap();
+
+        assert_eq!(config.party_size, 0);
     }
 }

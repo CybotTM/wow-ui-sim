@@ -139,6 +139,8 @@ pub struct App {
     pub(crate) pending_exec_lua: Option<(String, bool)>,
     /// Currently selected XP bar level label.
     pub(crate) selected_xp_level: String,
+    /// Currently selected party size label.
+    pub(crate) selected_party_size: String,
     /// Last time party health was ticked (random walk every 2 seconds).
     pub(crate) last_party_health_tick: std::time::Instant,
     /// Currently selected player class name (for picker display).
@@ -258,6 +260,7 @@ impl App {
             saved_vars,
             pending_exec_lua: INIT_EXEC_LUA.with(|cell| cell.borrow_mut().take()),
             selected_xp_level: config.xp_level.clone(),
+            selected_party_size: config.party_size.to_string(),
             last_party_health_tick: now,
             selected_class: config.player_class,
             selected_race: config.player_race,
@@ -292,6 +295,7 @@ impl App {
             falling: config.movement.falling,
             swimming: config.movement.swimming,
         };
+        resize_party_state(&mut state, usize::from(config.party_size.min(4)));
     }
 
     /// Extract init params from thread-local storage.
@@ -423,6 +427,20 @@ impl App {
         }
         (debug_borders, debug_anchors)
     }
+}
+
+pub(crate) fn resize_party_state(state: &mut crate::lua_api::SimState, size: usize) {
+    let clamped_size = size.min(4);
+    let defaults = crate::lua_api::game_data::default_party();
+    while state.party_members.len() < clamped_size {
+        let next_idx = state.party_members.len();
+        let Some(member) = defaults.get(next_idx).cloned() else {
+            break;
+        };
+        state.party_members.push(member);
+    }
+    state.party_members.truncate(clamped_size);
+    state.party_group_active = clamped_size > 0;
 }
 
 impl App {
