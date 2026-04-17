@@ -11,6 +11,11 @@ struct LuaError {
     count: usize,
 }
 
+struct UniqueLuaError {
+    key: String,
+    message: String,
+}
+
 /// Run headless startup, collect Lua errors, and print unique errors as JSON to stdout.
 ///
 /// `saved_stdout` is the original stdout fd (redirected to stderr during loading).
@@ -96,11 +101,11 @@ fn print_intern_stats() {}
 /// Deduplicate collected Lua errors by their first line. Preserves first-seen order.
 fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
     let state = env.state().borrow();
-    unique_error_order(&state)
+    unique_error_messages(&state)
         .into_iter()
-        .map(|message| LuaError {
-            count: state.lua_error_counts.get(&message).copied().unwrap_or(0),
-            message,
+        .map(|error| LuaError {
+            count: state.lua_error_counts.get(&error.key).copied().unwrap_or(0),
+            message: error.message,
         })
         .collect()
 }
@@ -113,7 +118,7 @@ pub fn grouped_errors_by_addon(state: &SimState) -> BTreeMap<String, Vec<String>
             .addon_name
             .clone()
             .unwrap_or_else(|| "<unknown>".to_string());
-        let message = extract_error_message(&record.message);
+        let message = format_error_for_display(&record.message);
         grouped
             .entry(addon_name)
             .or_insert_with(Vec::new)
@@ -146,12 +151,22 @@ pub(crate) fn print_suppressed_error_summary(state: &SimState) {
 }
 
 fn unique_error_order(state: &SimState) -> Vec<String> {
+    unique_error_messages(state)
+        .into_iter()
+        .map(|error| error.key)
+        .collect()
+}
+
+fn unique_error_messages(state: &SimState) -> Vec<UniqueLuaError> {
     let mut order = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for raw in &state.lua_errors {
-        let msg = extract_error_message(raw);
-        if state.lua_error_counts.contains_key(&msg) && seen.insert(msg.clone()) {
-            order.push(msg);
+        let key = extract_error_message(raw);
+        if state.lua_error_counts.contains_key(&key) && seen.insert(key.clone()) {
+            order.push(UniqueLuaError {
+                message: format_error_for_display(raw),
+                key,
+            });
         }
     }
     order
@@ -160,10 +175,25 @@ fn unique_error_order(state: &SimState) -> Vec<String> {
 /// Extract the core error message, stripping "runtime error: " prefix.
 pub(crate) fn extract_error_message(raw: &str) -> String {
     let first_line = raw.lines().next().unwrap_or(raw);
+    normalize_error_headline(first_line).to_string()
+}
+
+fn format_error_for_display(raw: &str) -> String {
+    let mut lines = raw.lines();
+    let first_line = lines.next().unwrap_or(raw);
+    let mut formatted = normalize_error_headline(first_line).to_string();
+    for line in lines {
+        formatted.push('\n');
+        formatted.push_str(line);
+    }
+    formatted
+}
+
+fn normalize_error_headline(first_line: &str) -> &str {
     let stripped = first_line
         .strip_prefix("runtime error: ")
         .unwrap_or(first_line);
-    strip_lua_location_prefix(stripped).to_string()
+    strip_lua_location_prefix(stripped)
 }
 
 fn strip_lua_location_prefix(msg: &str) -> &str {
@@ -227,5 +257,65 @@ fn restore_stderr(saved: Option<i32>) {
             libc::dup2(fd, 2);
             libc::close(fd);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{collect_unique_errors, grouped_errors_by_addon};
+    use crate::lua_api::AddonInfo;
+    use crate::lua_api::WowLuaEnv;
+    use rilua::LuaApi;
+
+    #[test]
+    fn collect_unique_errors_preserves_traceback_in_output_message() {
+        let env = WowLuaEnv::new().expect("lua env");
+        crate::lua_api::script_helpers::collect_lua_error(
+            env.rilua().state(),
+            "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
+        );
+
+        let errors = collect_unique_errors(&env);
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].count, 1);
+        assert_eq!(
+            errors[0].message,
+            "repeated boom\nstack traceback:\n\t[C]: in function 'error'"
+        );
+    }
+
+    #[test]
+    fn grouped_errors_by_addon_preserves_traceback_lines() {
+        let env = WowLuaEnv::new().expect("lua env");
+        env.register_addon(AddonInfo {
+            folder_name: "TestAddon".to_string(),
+            title: "TestAddon".to_string(),
+            enabled: true,
+            loaded: true,
+            ..Default::default()
+        });
+        let loading_index = {
+            let state = env.state().borrow();
+            state
+                .addons
+                .iter()
+                .position(|addon| addon.folder_name == "TestAddon")
+                .expect("TestAddon should be registered") as u16
+        };
+        env.state().borrow_mut().loading_addon_index = Some(loading_index);
+
+        crate::lua_api::script_helpers::collect_lua_error(
+            env.rilua().state(),
+            "runtime error: [OnLoad] SomeFrame: Interface/AddOns/TestAddon/Main.lua:9: boom\nstack traceback:\n\t[C]: in function 'error'",
+        );
+
+        let state = env.state().borrow();
+        let grouped = grouped_errors_by_addon(&state);
+        assert_eq!(
+            grouped.get("TestAddon"),
+            Some(&vec![String::from(
+                "[OnLoad] SomeFrame: boom\nstack traceback:\n\t[C]: in function 'error'"
+            )])
+        );
     }
 }
