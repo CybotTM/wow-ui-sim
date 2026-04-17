@@ -12,6 +12,7 @@ mod helpers;
 pub mod helpers_shared;
 mod template_chain;
 
+pub(crate) use helpers::apply_frame_mixins;
 pub(crate) use helpers_shared::{apply_parent_sub, create_frame_instance};
 
 use crate::lua_api::methods::{borrow_state, extract_frame_id, frame_ref};

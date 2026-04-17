@@ -150,7 +150,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
             && setup.name != setup.parent
             && setup.frame.parent_key.is_none()
             && setup.frame.parent_array.is_none()
-            && setup.frame.combined_mixin().is_none()
             && setup.frame.all_key_values().next().is_none()
             && setup.frame.xml_attributes().is_none()
             && setup.frame.scripts().is_none();
@@ -169,9 +168,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     }
     if setup.frame.parent_array.is_some() {
         miss_reasons.push("parent_array");
-    }
-    if setup.frame.combined_mixin().is_some() {
-        miss_reasons.push("mixins");
     }
     if setup.frame.all_key_values().next().is_some() {
         miss_reasons.push("key_values");
@@ -213,6 +209,11 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             false,
         )
         .map_err(|error| crate::Error::Other(error.to_string()))?;
+        crate::lua_api::globals::create_frame::apply_frame_mixins(
+            state,
+            frame_id,
+            setup.frame.combined_mixin().as_deref(),
+        );
         Ok::<(), crate::Error>(())
     })
     .map_err(|error| LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, error)))
