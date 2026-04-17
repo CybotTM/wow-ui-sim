@@ -1,8 +1,8 @@
 //! Frame size methods: GetWidth, GetHeight, GetSize, SetSize, SetWidth, SetHeight.
 
 use super::helpers::{
-    apply_explicit_height, apply_explicit_size, apply_explicit_width,
-    clear_auto_width_flag, current_explicit_size_state, frame_id, frame_size, opt_f32,
+    apply_explicit_height, apply_explicit_size, apply_explicit_width, clear_auto_width_flag,
+    current_explicit_size_state, frame_id, frame_size, opt_f32,
 };
 use crate::lua_api::rilua_methods::borrow_state_mut;
 use crate::lua_bridge::FromStack;

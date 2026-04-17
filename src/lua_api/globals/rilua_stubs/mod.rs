@@ -94,10 +94,7 @@ fn set_global_fn(state: &mut LuaState, name: &'static str, func: RustFn) {
 }
 
 /// Resolve an existing namespace table, or create and register a new one.
-fn ensure_namespace_table(
-    state: &mut LuaState,
-    namespace: &'static str,
-) -> GcRef<Table> {
+fn ensure_namespace_table(state: &mut LuaState, namespace: &'static str) -> GcRef<Table> {
     let ns_key = state.gc.intern_string(namespace.as_bytes());
     let global = state.global;
     let existing = state
