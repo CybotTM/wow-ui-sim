@@ -47,6 +47,7 @@ pub mod modifier_keys;
 pub mod net_stats;
 pub mod pet_battles;
 pub mod photo_sharing;
+pub mod quest_verbs;
 pub mod register;
 pub mod security;
 pub mod spell_api;
@@ -60,6 +61,7 @@ pub mod template;
 pub mod unit_api;
 pub mod unit_probes;
 pub mod utility_system_spell;
+pub mod wowlabs;
 pub mod zone_text;
 
 pub use register::register_globals;

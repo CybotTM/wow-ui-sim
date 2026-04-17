@@ -105,6 +105,13 @@ macro_rules! build_empty_sim_state {
             photo_sharing_authorized: false,
             photo_sharing_enabled: false,
             tutorial_flags: $collections.tutorial_flags,
+            wowlabs: WowLabsState::default(),
+            quest_log: Vec::new(),
+            pending_quest_offer: None,
+            quest_choice_id: None,
+            selected_quest_log_id: None,
+            abandon_quest_id: None,
+            tracked_achievements: ::std::collections::HashSet::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -356,6 +363,27 @@ pub struct SimState {
     /// Tutorial/account flags acknowledged through `C_Tutorial`.
     /// Default empty: a fresh sim has not seen any account tutorials.
     pub tutorial_flags: HashSet<u32>,
+    /// Seeded WoW Labs / Plunderstorm matchmaking state used by the
+    /// `C_WowLabs*` namespaces.
+    pub wowlabs: WowLabsState,
+    /// Active quests in the player's log (quest IDs). Order reflects
+    /// accept order. Drives `GetNumQuestLogEntries` and the quest-verbs
+    /// module in `globals/quest_verbs.rs`.
+    pub quest_log: Vec<u32>,
+    /// Pending quest offer displayed in the quest detail frame. Consumed
+    /// by `ConfirmAcceptQuest`. `None` means no pending offer.
+    pub pending_quest_offer: Option<u32>,
+    /// Active quest-choice dialog id set by `QuestChoiceFrame_SetActiveChoice`.
+    pub quest_choice_id: Option<u32>,
+    /// Quest id most recently clicked in the quest map log via
+    /// `QuestMapLogTitleButton_OnClick`.
+    pub selected_quest_log_id: Option<u32>,
+    /// Quest id marked for abandonment via `SetAbandonQuest`. `AbandonQuest`
+    /// would complete the flow in real WoW; the sim just records the mark.
+    pub abandon_quest_id: Option<u32>,
+    /// Achievements the player is actively tracking. Drives
+    /// `SetTrackedAchievement` / `UntrackAchievement`.
+    pub tracked_achievements: HashSet<i32>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -370,7 +398,8 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     GameRuleValue, GameRulesState, Keybindings, LfgListCounts, ModifierKeys, NetStats,
-    PetBattleState,
+    PetBattleState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
+    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {
