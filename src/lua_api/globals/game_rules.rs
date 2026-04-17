@@ -30,12 +30,66 @@ use rilua::{LuaResult, Val};
 /// Canonical mode id for Plunderstorm, used by `IsPlunderstorm()`.
 const PLUNDERSTORM_MODE: i32 = 1;
 
-fn read_string_arg(state: &mut LuaState, index: i32) -> LuaResult<Option<String>> {
-    Option::<String>::from_stack(state, index)
+/// Resolve the rule-key arg at stack index 1. Accepts either a string name
+/// or an `Enum.GameRule` integer id (reverse-looked-up by scanning
+/// `Enum.GameRule` for the matching value). Returns `None` when no key.
+fn read_rule_key(state: &mut LuaState) -> LuaResult<Option<String>> {
+    match crate::lua_bridge::stack_val(state, 1) {
+        Val::Str(s) => Ok(state
+            .gc
+            .string_arena
+            .get(s)
+            .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+            .map(str::to_owned)),
+        Val::Num(n) => Ok(resolve_rule_name_from_enum_id(state, n as i64)),
+        _ => Ok(None),
+    }
+}
+
+/// Reverse-lookup `Enum.GameRule` to find the rule name whose numeric id
+/// matches `id`. Returns `None` when the enum table is missing or has no
+/// entry with that id.
+fn resolve_rule_name_from_enum_id(state: &mut LuaState, id: i64) -> Option<String> {
+    let enum_key = state.gc.intern_string_static(b"Enum");
+    let enum_val = state
+        .gc
+        .tables
+        .get(state.global)?
+        .get_str(enum_key, &state.gc.string_arena);
+    let Val::Table(enum_table) = enum_val else {
+        return None;
+    };
+    let rule_key = state.gc.intern_string_static(b"GameRule");
+    let rule_val = state
+        .gc
+        .tables
+        .get(enum_table)?
+        .get_str(rule_key, &state.gc.string_arena);
+    let Val::Table(rule_table) = rule_val else {
+        return None;
+    };
+    // Walk the hash part: `next(table, key)` gives us (name, id) pairs.
+    let mut key = Val::Nil;
+    while let Some((next_key, next_value)) =
+        state.gc.tables.get(rule_table)?.next(key, &state.gc.string_arena).ok()?
+    {
+        if let (Val::Str(name_ref), Val::Num(value)) = (next_key, next_value) {
+            if value as i64 == id {
+                return state
+                    .gc
+                    .string_arena
+                    .get(name_ref)
+                    .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+                    .map(str::to_owned);
+            }
+        }
+        key = next_key;
+    }
+    None
 }
 
 pub fn is_game_rule_active(state: &mut LuaState) -> LuaResult<u32> {
-    let active = match read_string_arg(state, 1)? {
+    let active = match read_rule_key(state)? {
         Some(name) => borrow_state(state)?.game_rules.rules.contains_key(&name),
         None => false,
     };
@@ -44,7 +98,12 @@ pub fn is_game_rule_active(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_game_rule_as_float(state: &mut LuaState) -> LuaResult<u32> {
-    let value = match read_string_arg(state, 1)? {
+    // Optional second arg is a fixed-point decimal-shift count: `shift = 2`
+    // divides the stored integer by 100 (e.g. 125 → 1.25). Matches
+    // Blizzard's `GetGameRuleAsFloat(ruleID, decimalPlaces)` contract.
+    let shift = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0) as i32;
+    let divisor = 10f64.powi(shift.max(0));
+    let value = match read_rule_key(state)? {
         Some(name) => borrow_state(state)?
             .game_rules
             .rules
@@ -53,12 +112,12 @@ pub fn get_game_rule_as_float(state: &mut LuaState) -> LuaResult<u32> {
             .unwrap_or(0.0),
         None => 0.0,
     };
-    state.push(Val::Num(value));
+    state.push(Val::Num(value / divisor));
     Ok(1)
 }
 
 pub fn get_game_rule_as_int(state: &mut LuaState) -> LuaResult<u32> {
-    let value = match read_string_arg(state, 1)? {
+    let value = match read_rule_key(state)? {
         Some(name) => borrow_state(state)?
             .game_rules
             .rules
@@ -72,7 +131,7 @@ pub fn get_game_rule_as_int(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_game_rule_as_string(state: &mut LuaState) -> LuaResult<u32> {
-    let value = match read_string_arg(state, 1)? {
+    let value = match read_rule_key(state)? {
         Some(name) => borrow_state(state)?
             .game_rules
             .rules

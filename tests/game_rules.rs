@@ -205,3 +205,20 @@ fn multiple_rules_coexist() {
     assert_eq!(b, "bee");
     assert!(c);
 }
+
+#[test]
+fn numeric_enum_game_rule_ids_resolve_to_rule_names() {
+    let env = env();
+    env.exec(r#"A_Admin.SetGameRule("ForcedPartyFrameScale", 125)"#)
+        .unwrap();
+    let (active, value): (bool, f64) = env
+        .eval(
+            r#"
+            return C_GameRules.IsGameRuleActive(Enum.GameRule.ForcedPartyFrameScale),
+                   C_GameRules.GetGameRuleAsFloat(Enum.GameRule.ForcedPartyFrameScale, 2)
+            "#,
+        )
+        .unwrap();
+    assert!(active, "Enum.GameRule id should resolve to the named rule");
+    assert_eq!(value, 1.25);
+}
