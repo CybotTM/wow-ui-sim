@@ -106,13 +106,140 @@ fn push_i32_array(state: &mut LuaState, values: impl IntoIterator<Item = i32>) -
     table
 }
 
+fn node_max_ranks(node: &crate::traits::TraitNodeInfo) -> u32 {
+    node.entry_ids
+        .first()
+        .and_then(|entry_id| TRAIT_ENTRY_DB.get(entry_id))
+        .map(|entry| entry.max_ranks)
+        .unwrap_or(1)
+}
+
+fn total_node_max_ranks(node: &crate::traits::TraitNodeInfo) -> u32 {
+    let total: u32 = node
+        .entry_ids
+        .iter()
+        .filter_map(|entry_id| TRAIT_ENTRY_DB.get(entry_id))
+        .map(|entry| entry.max_ranks)
+        .sum();
+    if total > 0 {
+        total
+    } else {
+        node_max_ranks(node)
+    }
+}
+
+fn spec_set_contains_active_spec(spec_set_id: u32, state: &crate::lua_api::SimState) -> bool {
+    if spec_set_id == 0 {
+        return true;
+    }
+    let active_spec_id = specializations::specs_for_class(state.player.class_index as u32)
+        .nth((state.player.active_spec_index - 1).max(0) as usize)
+        .map(|spec| spec.id)
+        .unwrap_or(66);
+    match spec_set_id {
+        27 => active_spec_id == 65,
+        28 => active_spec_id == 66,
+        29 => active_spec_id == 70,
+        _ => true,
+    }
+}
+
+fn check_spec_conditions_met(
+    node: &crate::traits::TraitNodeInfo,
+    state: &crate::lua_api::SimState,
+) -> bool {
+    for &cond_id in node.cond_ids.iter().chain(node.group_cond_ids.iter()) {
+        let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
+            continue;
+        };
+        if cond.cond_type == 1 && !spec_set_contains_active_spec(cond.spec_set_id, state) {
+            return false;
+        }
+    }
+    true
+}
+
+fn check_node_available(
+    node: &crate::traits::TraitNodeInfo,
+    state: &crate::lua_api::SimState,
+) -> bool {
+    for &cond_id in node.cond_ids {
+        let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
+            continue;
+        };
+        if cond.cond_type != 0 || cond.currency_id == 0 {
+            continue;
+        }
+        if state.talents.spent_for_currency(cond.currency_id) < cond.spent_amount {
+            return false;
+        }
+    }
+    true
+}
+
+fn check_edge_requirements(
+    node: &crate::traits::TraitNodeInfo,
+    state: &crate::lua_api::SimState,
+) -> bool {
+    let mut has_sufficient = false;
+    let mut any_sufficient_met = false;
+    for edge in node.edges {
+        let purchased = state
+            .talents
+            .node_ranks
+            .get(&edge.source_node_id)
+            .copied()
+            .unwrap_or(0)
+            > 0;
+        match edge.edge_type {
+            2 => {
+                has_sufficient = true;
+                if purchased {
+                    any_sufficient_met = true;
+                }
+            }
+            3 => {
+                if !purchased {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+    }
+    !has_sufficient || any_sufficient_met
+}
+
+fn max_points_for_currency(currency_id: u32) -> u32 {
+    let Some(currency) = TRAIT_CURRENCY_DB.get(&currency_id) else {
+        return 0;
+    };
+    match currency.flags {
+        4 => 31,
+        8 => 30,
+        _ => 0,
+    }
+}
+
+fn check_has_currency(node_id: u32, state: &crate::lua_api::SimState) -> bool {
+    let Some(&currency_id) = state.talents.node_currency_map.get(&node_id) else {
+        return true;
+    };
+    let max_points = max_points_for_currency(currency_id);
+    max_points == 0 || state.talents.spent_for_currency(currency_id) < max_points
+}
+
 fn push_node_active_entry(state: &mut LuaState, info: Val, lookup_node_id: Option<u32>) {
     let active_entry = create_table(state);
     let entry_id = borrow_state(state)
         .ok()
         .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_selections.get(&id).copied()))
         .unwrap_or(0);
+    let rank = borrow_state(state)
+        .ok()
+        .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_ranks.get(&id).copied()))
+        .unwrap_or(0);
     table_set(state, active_entry, "entryID", Val::Num(entry_id as f64));
+    table_set(state, active_entry, "rank", Val::Num(rank as f64));
     table_set(state, info, "activeEntry", active_entry);
 }
 
@@ -135,30 +262,172 @@ fn push_node_rank_fields(state: &mut LuaState, info: Val, lookup_node_id: Option
     );
 }
 
+fn push_node_array_fields(state: &mut LuaState, info: Val, node: &crate::traits::TraitNodeInfo) {
+    let entry_ids = push_u32_array(state, node.entry_ids.iter().copied());
+    table_set(state, info, "entryIDs", entry_ids);
+
+    let condition_ids = push_u32_array(state, node.cond_ids.iter().copied());
+    table_set(state, info, "conditionIDs", condition_ids);
+
+    let group_ids = push_u32_array(state, node.group_ids.iter().copied());
+    table_set(state, info, "groupIDs", group_ids);
+}
+
+fn push_node_visible_edges(
+    state: &mut LuaState,
+    info: Val,
+    node: &crate::traits::TraitNodeInfo,
+    active_source_nodes: &[u32],
+) {
+    let visible_edges = create_table(state);
+    for (index, edge) in node.edges.iter().enumerate() {
+        let edge_info = create_table(state);
+        table_set(
+            state,
+            edge_info,
+            "targetNode",
+            Val::Num(edge.source_node_id as f64),
+        );
+        table_set(state, edge_info, "type", Val::Num(edge.edge_type as f64));
+        table_set(
+            state,
+            edge_info,
+            "visualStyle",
+            Val::Num(edge.visual_style as f64),
+        );
+        let is_active = active_source_nodes.contains(&edge.source_node_id);
+        table_set(state, edge_info, "isActive", Val::Bool(is_active));
+        set_table_array(state, visible_edges, index as i64 + 1, edge_info);
+    }
+    table_set(state, info, "visibleEdges", visible_edges);
+}
+
 fn push_node_db_fields(state: &mut LuaState, info: Val, lookup_node_id: Option<u32>) {
     if let Some(node) = lookup_node_id.and_then(|id| TRAIT_NODE_DB.get(&id)) {
-        let entry_ids = push_u32_array(state, node.entry_ids.iter().copied());
-        table_set(state, info, "entryIDs", entry_ids);
-        let total_max_ranks = node
-            .entry_ids
-            .iter()
-            .filter_map(|entry_id| TRAIT_ENTRY_DB.get(entry_id))
-            .map(|entry| entry.max_ranks)
-            .max()
-            .unwrap_or(0);
+        let (
+            ranks_purchased,
+            active_entry_id,
+            active_hero_subtree,
+            is_spec_visible,
+            is_available,
+            meets_edge_requirements,
+            has_currency,
+            active_source_nodes,
+        ) = match borrow_state(state).ok() {
+            Some(sim) => (
+                lookup_node_id
+                    .and_then(|id| sim.talents.node_ranks.get(&id).copied())
+                    .unwrap_or(0),
+                lookup_node_id.and_then(|id| sim.talents.node_selections.get(&id).copied()),
+                sim.talents.active_hero_subtree(),
+                check_spec_conditions_met(node, &sim),
+                check_node_available(node, &sim),
+                check_edge_requirements(node, &sim),
+                lookup_node_id.is_none_or(|node_id| check_has_currency(node_id, &sim)),
+                sim.talents
+                    .node_ranks
+                    .iter()
+                    .filter_map(|(&node_id, &rank)| (rank > 0).then_some(node_id))
+                    .collect::<Vec<_>>(),
+            ),
+            None => (0, None, None, true, false, false, true, Vec::new()),
+        };
+        let total_max_ranks = total_node_max_ranks(node);
+        let is_visible =
+            lookup_node_id.is_some_and(|id| trait_node_is_visible(state, id)) && is_spec_visible;
+        let can_purchase_rank = ranks_purchased < total_max_ranks
+            && is_available
+            && meets_edge_requirements
+            && has_currency;
+
+        table_set(state, info, "posX", Val::Num(node.pos_x as f64));
+        table_set(state, info, "posY", Val::Num(node.pos_y as f64));
+        table_set(state, info, "type", Val::Num(node.node_type as f64));
+        table_set(state, info, "flags", Val::Num(node.flags as f64));
+        push_node_array_fields(state, info, node);
+
+        let entry_ids_with_committed_ranks = create_table(state);
+        if let Some(active_entry_id) = active_entry_id.filter(|_| ranks_purchased > 0) {
+            set_table_array(
+                state,
+                entry_ids_with_committed_ranks,
+                1,
+                Val::Num(active_entry_id as f64),
+            );
+        }
+        table_set(
+            state,
+            info,
+            "entryIDsWithCommittedRanks",
+            entry_ids_with_committed_ranks,
+        );
+
+        table_set(
+            state,
+            info,
+            "maxRanks",
+            Val::Num(node_max_ranks(node) as f64),
+        );
         table_set(
             state,
             info,
             "totalMaxRanks",
             Val::Num(total_max_ranks as f64),
         );
-        let is_visible = lookup_node_id.is_some_and(|id| trait_node_is_visible(state, id));
         table_set(state, info, "isVisible", Val::Bool(is_visible));
+        table_set(state, info, "isAvailable", Val::Bool(is_available));
+        table_set(state, info, "isDisplayError", Val::Bool(false));
+        table_set(state, info, "canPurchaseRank", Val::Bool(can_purchase_rank));
+        table_set(state, info, "canRefundRank", Val::Bool(ranks_purchased > 0));
+        table_set(
+            state,
+            info,
+            "meetsEdgeRequirements",
+            Val::Bool(meets_edge_requirements),
+        );
+        table_set(state, info, "isCascadeRepurchasable", Val::Bool(false));
+        table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
+        if node.sub_tree_id != 0 {
+            table_set(state, info, "subTreeID", Val::Num(node.sub_tree_id as f64));
+            let sub_tree_active = active_hero_subtree == Some(node.sub_tree_id);
+            table_set(state, info, "subTreeActive", Val::Bool(sub_tree_active));
+        } else {
+            table_set(state, info, "subTreeID", Val::Nil);
+            table_set(state, info, "subTreeActive", Val::Nil);
+        }
+        push_node_visible_edges(state, info, node, &active_source_nodes);
     } else {
+        table_set(state, info, "posX", Val::Num(0.0));
+        table_set(state, info, "posY", Val::Num(0.0));
+        table_set(state, info, "type", Val::Num(0.0));
+        table_set(state, info, "flags", Val::Num(0.0));
         let entry_ids = create_table(state);
         table_set(state, info, "entryIDs", entry_ids);
+        let entry_ids_with_committed_ranks = create_table(state);
+        table_set(
+            state,
+            info,
+            "entryIDsWithCommittedRanks",
+            entry_ids_with_committed_ranks,
+        );
+        let condition_ids = create_table(state);
+        table_set(state, info, "conditionIDs", condition_ids);
+        let group_ids = create_table(state);
+        table_set(state, info, "groupIDs", group_ids);
+        let visible_edges = create_table(state);
+        table_set(state, info, "visibleEdges", visible_edges);
+        table_set(state, info, "maxRanks", Val::Num(0.0));
         table_set(state, info, "totalMaxRanks", Val::Num(0.0));
-        table_set(state, info, "isVisible", Val::Bool(true));
+        table_set(state, info, "isVisible", Val::Bool(false));
+        table_set(state, info, "isAvailable", Val::Bool(false));
+        table_set(state, info, "isDisplayError", Val::Bool(false));
+        table_set(state, info, "canPurchaseRank", Val::Bool(false));
+        table_set(state, info, "canRefundRank", Val::Bool(false));
+        table_set(state, info, "meetsEdgeRequirements", Val::Bool(false));
+        table_set(state, info, "isCascadeRepurchasable", Val::Bool(false));
+        table_set(state, info, "cascadeRepurchaseEntryID", Val::Nil);
+        table_set(state, info, "subTreeID", Val::Nil);
+        table_set(state, info, "subTreeActive", Val::Nil);
     }
 }
 
@@ -211,6 +480,12 @@ fn register_c_traits_query_fns(
     table_set_rust_fn(state, table_ref, "GetConfigInfo", c_traits_get_config_info)?;
     table_set_rust_fn(state, table_ref, "GetNodeInfo", c_traits_get_node_info)?;
     table_set_rust_fn(state, table_ref, "GetEntryInfo", c_traits_get_entry_info)?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetConditionInfo",
+        c_traits_get_condition_info,
+    )?;
     table_set_rust_fn(
         state,
         table_ref,
@@ -476,6 +751,111 @@ fn c_traits_get_entry_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_traits_get_condition_info(state: &mut LuaState) -> LuaResult<u32> {
+    let _config_id = i32::from_stack(state, 1)?;
+    let cond_id = u32::from_stack(state, 2)?;
+    let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let info = create_table(state);
+    table_set(state, info, "condID", Val::Num(cond_id as f64));
+    table_set(
+        state,
+        info,
+        "ranksGranted",
+        Val::Num(cond.granted_ranks as f64),
+    );
+    table_set(
+        state,
+        info,
+        "isAlwaysMet",
+        Val::Bool(cond.currency_id == 0 && cond.spec_set_id == 0),
+    );
+
+    let is_met = match borrow_state(state).ok() {
+        Some(sim) => match cond.cond_type {
+            0 => {
+                cond.currency_id == 0
+                    || sim.talents.spent_for_currency(cond.currency_id) >= cond.spent_amount
+            }
+            1 => spec_set_contains_active_spec(cond.spec_set_id, &sim),
+            2 => sim.player.level as u32 >= cond.required_level,
+            _ => true,
+        },
+        None => false,
+    };
+    table_set(state, info, "isMet", Val::Bool(is_met));
+    table_set(state, info, "isGate", Val::Bool(cond.currency_id != 0));
+    table_set(state, info, "isSufficient", Val::Bool(is_met));
+    table_set(state, info, "type", Val::Num(cond.cond_type as f64));
+    table_set(
+        state,
+        info,
+        "questID",
+        if cond.quest_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(cond.quest_id as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "achievementID",
+        if cond.achievement_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(cond.achievement_id as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "specSetID",
+        if cond.spec_set_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(cond.spec_set_id as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "playerLevel",
+        if cond.required_level == 0 {
+            Val::Nil
+        } else {
+            Val::Num(cond.required_level as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "traitCurrencyID",
+        if cond.currency_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(cond.currency_id as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "spentAmountRequired",
+        if cond.spent_amount == 0 {
+            Val::Nil
+        } else {
+            Val::Num(cond.spent_amount as f64)
+        },
+    );
+    table_set(state, info, "tooltipFormat", Val::Nil);
+    table_set(state, info, "traitCondAccountElementID", Val::Nil);
+    state.push(info);
+    Ok(1)
+}
+
 fn c_traits_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
     let _config_id = i32::from_stack(state, 1)?;
     let _tree_id = i32::from_stack(state, 2)?;
@@ -580,6 +960,10 @@ fn c_traits_get_trait_currency_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
+    let config_id = match stack_val(state, 1) {
+        Val::Num(value) => value as i32,
+        _ => 0,
+    };
     let tree_id = match stack_val(state, 2) {
         Val::Num(value) => value as u32,
         _ => u32::from_stack(state, 1)?,
@@ -590,6 +974,24 @@ fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
     };
     let info = create_table(state);
     table_set(state, info, "ID", Val::Num(tree.id as f64));
+    table_set(state, info, "configID", Val::Num(config_id as f64));
+    let gates = create_table(state);
+    table_set(state, info, "gates", gates);
+    table_set(state, info, "hideSinglePurchaseNodes", Val::Bool(false));
+    table_set(state, info, "minZoom", Val::Num(0.75));
+    table_set(state, info, "maxZoom", Val::Num(1.2));
+    table_set(state, info, "buttonSize", Val::Num(40.0));
+    table_set(state, info, "isLinkedToActiveConfigID", Val::Bool(true));
+    table_set(
+        state,
+        info,
+        "rootNodeID",
+        if tree.first_node_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(tree.first_node_id as f64)
+        },
+    );
     let currency_ids = push_u32_array(state, tree.currency_ids.iter().copied());
     table_set(state, info, "currencyIDs", currency_ids);
     state.push(info);
@@ -691,6 +1093,11 @@ fn push_subtree_hero_fields(state: &mut LuaState, info: Val, subtree_id: u32) {
     let (pos_x, pos_y) = hero_talents::subtree_position(subtree_id);
     table_set(state, info, "posX", Val::Num(pos_x as f64));
     table_set(state, info, "posY", Val::Num(pos_y as f64));
+    let is_active = borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.talents.active_hero_subtree())
+        == Some(subtree_id);
+    table_set(state, info, "isActive", Val::Bool(is_active));
     if let Some(currency_id) = subtree_trait_currency_id(subtree_id) {
         table_set(state, info, "traitCurrencyID", Val::Num(currency_id as f64));
     }

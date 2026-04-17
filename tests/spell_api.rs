@@ -375,6 +375,33 @@ fn test_traits_get_node_info_unknown() {
 }
 
 #[test]
+fn test_traits_get_node_info_exposes_position_fields() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local nodeID = C_Traits.GetTreeNodes(201, 790)[1]
+            local info = C_Traits.GetNodeInfo(201, nodeID)
+            if type(info) ~= "table" then
+                return "expected_table"
+            end
+            if info.posX == nil or info.posY == nil then
+                return "missing_position"
+            end
+            if info.type == nil or info.flags == nil then
+                return "missing_node_shape"
+            end
+            if type(info.visibleEdges) ~= "table" then
+                return "missing_edges"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_traits_get_entry_info_nil() {
     let env = env();
     let is_nil: bool = env
