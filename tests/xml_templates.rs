@@ -594,6 +594,62 @@ fn test_create_frame_from_xml_inline_conditional_tooltip_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_tooltip_settext_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.ARTIFACT_XP_REWARD = "artifact xp"
+        _G.HIGHLIGHT_FONT_COLOR = { r = 0.1, g = 0.2, b = 0.3 }
+        _G.GameTooltip = {}
+        function _G.GameTooltip:SetOwner(frame, anchor)
+            self.owner = frame
+            self.anchor = anchor
+        end
+        function _G.GameTooltip:SetText(text, r, g, b, a, wrap)
+            self.text = text
+            self.r = r
+            self.g = g
+            self.b = b
+            self.a = a
+            self.wrap = wrap
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineTooltipGlobalFrame" parent="UIParent">
+        <Scripts><OnEnter>GameTooltip:SetOwner(self, "ANCHOR_RIGHT"); GameTooltip:SetText(ARTIFACT_XP_REWARD, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, nil, true)</OnEnter></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineTooltipGlobalFrame:GetScript('OnEnter')(XmlInlineTooltipGlobalFrame)")
+        .unwrap();
+
+    let result: (String, String, f64, f64, f64, bool) = env
+        .eval(
+            r#"
+            return GameTooltip.anchor,
+                   GameTooltip.text,
+                   GameTooltip.r,
+                   GameTooltip.g,
+                   GameTooltip.b,
+                   GameTooltip.wrap
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_RIGHT");
+    assert_eq!(result.1, "artifact xp");
+    assert_eq!(result.2, 0.1);
+    assert_eq!(result.3, 0.2);
+    assert_eq!(result.4, 0.3);
+    assert!(result.5);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_field_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -1486,6 +1542,57 @@ fn test_create_frame_from_xml_inline_nested_assignment_sequence_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inherit_prepend_nested_table_assignment_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.ShoppingTooltip1 = { name = "ShoppingTooltip1" }
+        _G.ShoppingTooltip2 = { name = "ShoppingTooltip2" }
+    "#,
+    )
+    .unwrap();
+
+    register_first_template(
+        r#"<Ui>
+        <Frame name="XmlInlineShoppingTooltipTemplate" virtual="true">
+            <Frames>
+                <Frame parentKey="Tooltip"/>
+            </Frames>
+            <Scripts>
+                <OnLoad>self.inheritedRan = true</OnLoad>
+            </Scripts>
+        </Frame>
+    </Ui>"#,
+        "XmlInlineShoppingTooltipTemplate",
+        "Frame",
+    );
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineShoppingTooltipFrame" parent="UIParent" inherits="XmlInlineShoppingTooltipTemplate">
+        <Scripts>
+            <OnLoad inherit="prepend">self.Tooltip.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2 }</OnLoad>
+        </Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let result: (bool, String, String) = env
+        .eval(
+            r#"
+            return XmlInlineShoppingTooltipFrame.inheritedRan == true,
+                   XmlInlineShoppingTooltipFrame.Tooltip.shoppingTooltips[1].name,
+                   XmlInlineShoppingTooltipFrame.Tooltip.shoppingTooltips[2].name
+        "#,
+        )
+        .unwrap();
+    assert!(result.0);
+    assert_eq!(result.1, "ShoppingTooltip1");
+    assert_eq!(result.2, "ShoppingTooltip2");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_function_with_self_and_parent_field_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -1549,6 +1656,36 @@ fn test_create_frame_from_xml_inline_function_with_number_arg_runs() {
 
     let delta: i32 = env.eval("return XmlInlinePageChange").unwrap();
     assert_eq!(delta, -1, "inline numeric function arg should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_self_number_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineSelectMailTab(self, tab_index)
+            self.selectedTab = tab_index
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineSelfNumberArgFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineSelectMailTab(self, 2)</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineSelfNumberArgFrame:GetScript('OnClick')(XmlInlineSelfNumberArgFrame)")
+        .unwrap();
+
+    let selected: i32 = env
+        .eval("return XmlInlineSelfNumberArgFrame.selectedTab")
+        .unwrap();
+    assert_eq!(selected, 2, "inline self+number function arg should fire");
 }
 
 #[test]

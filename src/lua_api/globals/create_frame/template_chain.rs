@@ -330,6 +330,15 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         field: &'a str,
     },
+    GlobalTooltipSetOwnerThenSetText {
+        target_path: &'a str,
+        anchor: &'a str,
+        text_path: &'a str,
+        red_path: &'a str,
+        green_path: &'a str,
+        blue_path: &'a str,
+        wrap: bool,
+    },
     ConditionalTooltip {
         target_path: &'a str,
         field: &'a str,
@@ -355,6 +364,10 @@ enum FastHandlerRef<'a> {
     FunctionWithSelfStringArg {
         function_name: &'a str,
         arg: &'a str,
+    },
+    FunctionWithSelfNumberArg {
+        function_name: &'a str,
+        value: f64,
     },
     FunctionWithNumberArg {
         function_name: &'a str,
@@ -398,6 +411,12 @@ enum FastHandlerRef<'a> {
         parent_field: &'a str,
         field: &'a str,
         value: FastLiteralValue<'a>,
+    },
+    AssignNestedGlobalPairTable {
+        parent_field: &'a str,
+        field: &'a str,
+        first_path: &'a str,
+        second_path: &'a str,
     },
     AssignParentField {
         field: &'a str,

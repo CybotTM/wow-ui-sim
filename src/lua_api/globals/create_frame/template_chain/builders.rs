@@ -150,6 +150,19 @@ fn build_terminal_fast_handler(
             field,
             value,
         } => build_nested_assignment_handler(state, parent_field, field, value).map(Some),
+        FastHandlerRef::AssignNestedGlobalPairTable {
+            parent_field,
+            field,
+            first_path,
+            second_path,
+        } => build_nested_global_pair_table_assignment_handler(
+            state,
+            parent_field,
+            field,
+            first_path,
+            second_path,
+        )
+        .map(Some),
         FastHandlerRef::AssignParentField { field, value } => {
             build_parent_assignment_handler(state, field, value).map(Some)
         }
@@ -409,6 +422,38 @@ fn build_nested_assignment_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[parent_field_name, field_name, assigned_value],
+    )
+}
+
+fn build_nested_global_pair_table_assignment_handler(
+    state: &mut LuaState,
+    parent_field: &str,
+    field: &str,
+    first_path: &str,
+    second_path: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local parent_field_name, field_name, first_value, second_value = ...
+            return function(self, ...)
+                local target = self[parent_field_name]
+                if not target then
+                    return
+                end
+                target[field_name] = { first_value, second_value }
+            end
+        "#,
+        "template-inline-nested-global-pair-table-assignment",
+    )?;
+    let parent_field_name = create_string(state, parent_field);
+    let field_name = create_string(state, field);
+    let first_value = resolve_global_path(state, first_path);
+    let second_value = resolve_global_path(state, second_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[parent_field_name, field_name, first_value, second_value],
     )
 }
 

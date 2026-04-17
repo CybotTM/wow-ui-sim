@@ -57,6 +57,7 @@ fn parse_registration_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
 fn parse_assignment_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     parse_inline_ancestor_assignment(stmt)
         .or_else(|| parse_inline_assignment(stmt))
+        .or_else(|| parse_inline_nested_global_pair_table_assignment(stmt))
         .or_else(|| parse_inline_nested_assignment(stmt))
         .or_else(|| parse_inline_parent_assignment(stmt))
 }
@@ -266,6 +267,32 @@ fn parse_inline_nested_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
             parent_field,
             field,
             value,
+        },
+    )
+}
+
+fn parse_inline_nested_global_pair_table_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let (lhs, rhs) = stmt.split_once('=')?;
+    let lhs = lhs.trim().strip_prefix("self.")?;
+    let (parent_field, field) = lhs.split_once('.')?;
+    if !(is_fast_identifier(parent_field) && is_fast_identifier(field)) {
+        return None;
+    }
+
+    let rhs = rhs.trim().strip_prefix('{')?.strip_suffix('}')?.trim();
+    let mut parts = rhs.split(',').map(str::trim);
+    let first_path = parts.next()?;
+    let second_path = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+
+    (is_fast_handler_path(first_path) && is_fast_handler_path(second_path)).then_some(
+        FastHandlerRef::AssignNestedGlobalPairTable {
+            parent_field,
+            field,
+            first_path,
+            second_path,
         },
     )
 }

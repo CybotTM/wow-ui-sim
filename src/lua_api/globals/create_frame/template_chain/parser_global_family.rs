@@ -32,6 +32,19 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             method_name,
         });
     }
+    if let Some((target_path, anchor, text_path, red_path, green_path, blue_path, wrap)) =
+        parse_global_tooltip_set_owner_then_set_text(stmt)
+    {
+        return Some(FastHandlerRef::GlobalTooltipSetOwnerThenSetText {
+            target_path,
+            anchor,
+            text_path,
+            red_path,
+            green_path,
+            blue_path,
+            wrap,
+        });
+    }
     if let Some((target_path, field, anchor, red_path, green_path, blue_path)) =
         parse_conditional_tooltip(stmt)
     {
@@ -108,6 +121,51 @@ fn parse_inline_global_method_with_self_field_arg(stmt: &str) -> Option<(&str, &
         && is_fast_identifier(method_name)
         && is_fast_identifier(field))
     .then_some((target_path, method_name, field))
+}
+
+fn parse_global_tooltip_set_owner_then_set_text(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, &str, &str, bool)> {
+    let (first, second) = stmt.split_once(';')?;
+    let (target_path, method_name, anchor) =
+        parse_inline_global_method_with_self_string_arg(first.trim())?;
+    if method_name != "SetOwner" {
+        return None;
+    }
+
+    let (text_target_path, text_remainder) = second.trim().rsplit_once(':')?;
+    let (text_method_name, text_args) = text_remainder.split_once('(')?;
+    let text_args = text_args.strip_suffix(')')?.trim();
+    if text_target_path.trim() != target_path || text_method_name.trim() != "SetText" {
+        return None;
+    }
+
+    let mut parts = text_args.split(',').map(str::trim);
+    let text_path = parts.next()?;
+    let red_path = parts.next()?;
+    let green_path = parts.next()?;
+    let blue_path = parts.next()?;
+    let maybe_nil = parts.next()?;
+    let wrap = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+
+    (is_fast_handler_path(text_path)
+        && is_fast_handler_path(red_path)
+        && is_fast_handler_path(green_path)
+        && is_fast_handler_path(blue_path)
+        && maybe_nil == "nil"
+        && matches!(wrap, "true" | "false"))
+    .then_some((
+        target_path,
+        anchor,
+        text_path,
+        red_path,
+        green_path,
+        blue_path,
+        wrap == "true",
+    ))
 }
 
 fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str, &str)> {

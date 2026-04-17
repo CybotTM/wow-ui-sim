@@ -58,6 +58,10 @@ fn build_function_with_arg_variants(
         FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
             build_function_handler_with_string_arg(state, function_name, arg).map(Some)
         }
+        FastHandlerRef::FunctionWithSelfNumberArg {
+            function_name,
+            value,
+        } => build_function_handler_with_self_number_arg(state, function_name, *value).map(Some),
         FastHandlerRef::FunctionWithNumberArg {
             function_name,
             value,
@@ -206,6 +210,29 @@ fn build_function_handler_with_number_arg(
             end
         "#,
         "template-inline-function-number-arg",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, Val::Num(value)],
+    )
+}
+
+fn build_function_handler_with_self_number_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    value: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, number_arg = ...
+            return function(self, ...)
+                return fn(self, number_arg)
+            end
+        "#,
+        "template-inline-function-self-number-arg",
     )?;
     let target = resolve_global_path(state, function_name);
     crate::lua_api::methods::call_function_state(

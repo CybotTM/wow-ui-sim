@@ -21,6 +21,12 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some((function_name, arg)) = parse_inline_function_with_self_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithSelfStringArg { function_name, arg });
     }
+    if let Some((function_name, value)) = parse_inline_function_with_self_number_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithSelfNumberArg {
+            function_name,
+            value,
+        });
+    }
     if let Some((function_name, value)) = parse_inline_function_with_number_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithNumberArg {
             function_name,
@@ -93,6 +99,16 @@ fn parse_inline_function_with_number_arg(stmt: &str) -> Option<(&str, f64)> {
     let value = args.strip_suffix(')')?.trim().parse::<f64>().ok()?;
     let function_name = function_name.trim();
     is_fast_handler_path(function_name).then_some((function_name, value))
+}
+
+fn parse_inline_function_with_self_number_arg(stmt: &str) -> Option<(&str, f64)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (self_arg, raw_number_arg) = args.split_once(',')?;
+    let value = raw_number_arg.trim().parse::<f64>().ok()?;
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && self_arg.trim() == "self")
+        .then_some((function_name, value))
 }
 
 fn parse_inline_function_with_global_arg(stmt: &str) -> Option<(&str, &str)> {
