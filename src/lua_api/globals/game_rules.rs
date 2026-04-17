@@ -50,6 +50,15 @@ fn read_rule_key(state: &mut LuaState) -> LuaResult<Option<String>> {
 /// matches `id`. Returns `None` when the enum table is missing or has no
 /// entry with that id.
 fn resolve_rule_name_from_enum_id(state: &mut LuaState, id: i64) -> Option<String> {
+    let rule_table = resolve_enum_game_rule_table(state)?;
+    find_rule_name_for_id(state, rule_table, id)
+}
+
+/// Resolve `_G.Enum.GameRule` to its backing table, or `None` if either
+/// `Enum` or `Enum.GameRule` is missing / non-table.
+fn resolve_enum_game_rule_table(
+    state: &mut LuaState,
+) -> Option<rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>> {
     let enum_key = state.gc.intern_string_static(b"Enum");
     let enum_val = state
         .gc
@@ -65,10 +74,19 @@ fn resolve_rule_name_from_enum_id(state: &mut LuaState, id: i64) -> Option<Strin
         .tables
         .get(enum_table)?
         .get_str(rule_key, &state.gc.string_arena);
-    let Val::Table(rule_table) = rule_val else {
-        return None;
-    };
-    // Walk the hash part: `next(table, key)` gives us (name, id) pairs.
+    match rule_val {
+        Val::Table(rule_table) => Some(rule_table),
+        _ => None,
+    }
+}
+
+/// Walk the hash part of `rule_table` (name → numeric id pairs) and
+/// return the first name whose id matches. None when no entry matches.
+fn find_rule_name_for_id(
+    state: &mut LuaState,
+    rule_table: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    id: i64,
+) -> Option<String> {
     let mut key = Val::Nil;
     while let Some((next_key, next_value)) = state
         .gc
