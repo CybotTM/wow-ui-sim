@@ -582,6 +582,13 @@ pub(crate) fn scripts_support_fast_install(scripts: &crate::xml::ScriptsXml) -> 
     collect_fast_handlers(scripts).is_some()
 }
 
+pub(crate) fn first_fast_install_miss(scripts: &crate::xml::ScriptsXml) -> Option<String> {
+    first_fast_handler_miss_in_group(base_method_only_handlers(scripts))
+        .or_else(|| first_fast_handler_miss_in_group(pointer_method_only_handlers(scripts)))
+        .or_else(|| first_fast_handler_miss_in_group(text_method_only_handlers(scripts)))
+        .or_else(|| first_fast_handler_miss_in_group(state_method_only_handlers(scripts)))
+}
+
 fn apply_fast_scripts(
     state: &mut LuaState,
     frame_id: u64,
@@ -619,8 +626,52 @@ type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 enum FastHandlerRef<'a> {
     NoOp,
     Sequence2(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>)>),
+    Sequence3(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>, FastHandlerRef<'a>)>),
     Method(&'a str),
+    MethodWithBoolArg {
+        method_name: &'a str,
+        value: bool,
+    },
+    MethodWithStringArg {
+        method_name: &'a str,
+        arg: &'a str,
+    },
+    SelfFieldMethod {
+        field: &'a str,
+        method_name: &'a str,
+    },
+    SelfFieldMethodWithStringArg {
+        field: &'a str,
+        method_name: &'a str,
+        arg: &'a str,
+    },
+    SelfFieldMethodWithNumberArg {
+        field: &'a str,
+        method_name: &'a str,
+        value: f64,
+    },
+    SelfFieldMethodWithGlobalArg {
+        field: &'a str,
+        method_name: &'a str,
+        arg_path: &'a str,
+    },
+    SelfFieldMethodWithSelfFieldArg {
+        field: &'a str,
+        method_name: &'a str,
+        arg_field: &'a str,
+    },
+    SelfFieldMethodWithStringNumberNumberArgs {
+        field: &'a str,
+        method_name: &'a str,
+        first: &'a str,
+        second: f64,
+        third: f64,
+    },
     ParentMethod(&'a str),
+    ParentMethodWithStringArg {
+        method_name: &'a str,
+        arg: &'a str,
+    },
     GrandparentMethod(&'a str),
     GlobalMethod {
         target_path: &'a str,
@@ -653,9 +704,21 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         arg: &'a str,
     },
+    FunctionWithNumberArg {
+        function_name: &'a str,
+        value: f64,
+    },
     FunctionWithGlobalArg {
         function_name: &'a str,
         arg_path: &'a str,
+    },
+    FunctionWithGlobalAndSelfArg {
+        function_name: &'a str,
+        global_arg_path: &'a str,
+    },
+    FunctionWithSelfAndParentFieldArg {
+        function_name: &'a str,
+        field: &'a str,
     },
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
@@ -676,6 +739,11 @@ enum FastHandlerRef<'a> {
         depth: usize,
     },
     AssignLiteral {
+        field: &'a str,
+        value: FastLiteralValue<'a>,
+    },
+    AssignNestedLiteral {
+        parent_field: &'a str,
         field: &'a str,
         value: FastLiteralValue<'a>,
     },
@@ -711,34 +779,71 @@ fn collect_fast_handler_group<'a>(
         let Some(script) = script else {
             continue;
         };
-        let handler = if let Some(method_name) = script.method.as_deref() {
-            FastHandlerRef::Method(method_name)
-        } else if let Some(function_name) = script.function.as_deref() {
-            FastHandlerRef::Function(function_name)
-        } else if let Some(body) = script.body.as_deref() {
-            parse_inline_fast_handler(handler_name, body)?
-        } else {
-            FastHandlerRef::NoOp
-        };
-        let install = match script.intrinsic_order.as_deref() {
-            Some("precall" | "postcall") => FastScriptInstall::Intrinsic(handler),
-            Some(_) => return None,
-            None => match script.inherit.as_deref() {
-                Some("append") => FastScriptInstall::Chain {
-                    handler,
-                    new_first: true,
-                },
-                Some("prepend") => FastScriptInstall::Chain {
-                    handler,
-                    new_first: false,
-                },
-                Some(_) => return None,
-                None => FastScriptInstall::Set(handler),
-            },
-        };
+        let install = fast_script_install(handler_name, script)?;
         handlers.push((handler_name, install));
     }
     Some(())
+}
+
+fn first_fast_handler_miss_in_group<'a>(
+    group: impl IntoIterator<Item = FastHandler<'a>>,
+) -> Option<String> {
+    for (handler_name, script) in group {
+        let Some(script) = script else {
+            continue;
+        };
+        if fast_script_install(handler_name, script).is_none() {
+            return Some(describe_fast_script_miss(handler_name, script));
+        }
+    }
+    None
+}
+
+fn fast_script_install<'a>(
+    handler_name: &'static str,
+    script: &'a crate::xml::ScriptBodyXml,
+) -> Option<FastScriptInstall<'a>> {
+    let handler = if let Some(method_name) = script.method.as_deref() {
+        FastHandlerRef::Method(method_name)
+    } else if let Some(function_name) = script.function.as_deref() {
+        FastHandlerRef::Function(function_name)
+    } else if let Some(body) = script.body.as_deref() {
+        parse_inline_fast_handler(handler_name, body)?
+    } else {
+        FastHandlerRef::NoOp
+    };
+    match script.intrinsic_order.as_deref() {
+        Some("precall" | "postcall") => Some(FastScriptInstall::Intrinsic(handler)),
+        Some(_) => None,
+        None => match script.inherit.as_deref() {
+            Some("append") => Some(FastScriptInstall::Chain {
+                handler,
+                new_first: true,
+            }),
+            Some("prepend") => Some(FastScriptInstall::Chain {
+                handler,
+                new_first: false,
+            }),
+            Some(_) => None,
+            None => Some(FastScriptInstall::Set(handler)),
+        },
+    }
+}
+
+fn describe_fast_script_miss(handler_name: &str, script: &crate::xml::ScriptBodyXml) -> String {
+    let body = script.body.as_deref().unwrap_or("");
+    let body = body.trim().replace('\n', " ");
+    if let Some(intrinsic_order) = script.intrinsic_order.as_deref() {
+        format!("{handler_name}|intrinsic={intrinsic_order}|{body}")
+    } else if let Some(inherit) = script.inherit.as_deref() {
+        format!("{handler_name}|inherit={inherit}|{body}")
+    } else if let Some(method_name) = script.method.as_deref() {
+        format!("{handler_name}|method={method_name}|{body}")
+    } else if let Some(function_name) = script.function.as_deref() {
+        format!("{handler_name}|function={function_name}|{body}")
+    } else {
+        format!("{handler_name}|{body}")
+    }
 }
 
 fn base_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlyScript<'_>; 8] {
@@ -820,8 +925,264 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
     )
 }
 
+fn build_method_with_bool_arg_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    value: bool,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local method_name, value = ...
+            return function(self, ...)
+                return self[method_name](self, value)
+            end
+        "#,
+        "template-method-bool-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let method_name = create_string(state, method_name);
+    let value = if value {
+        Val::Bool(true)
+    } else {
+        Val::Bool(false)
+    };
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, value],
+    )
+}
+
+fn build_method_with_string_arg_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local method_name, literal_arg = ...
+            return function(self, ...)
+                return self[method_name](self, literal_arg)
+            end
+        "#,
+        "template-method-string-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let method_name = create_string(state, method_name);
+    let literal_arg = create_string(state, arg);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, literal_arg],
+    )
+}
+
+fn build_self_field_method_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, method_name = ...
+            return function(self, ...)
+                local target = self[field_name]
+                return target[method_name](target, ...)
+            end
+        "#,
+        "template-self-field-method-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name],
+    )
+}
+
+fn build_self_field_method_with_string_arg_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, method_name, literal_arg = ...
+            return function(self, ...)
+                local target = self[field_name]
+                return target[method_name](target, literal_arg)
+            end
+        "#,
+        "template-self-field-method-string-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    let literal_arg = create_string(state, arg);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name, literal_arg],
+    )
+}
+
+fn build_self_field_method_with_number_arg_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    value: f64,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, method_name, number_arg = ...
+            return function(self, ...)
+                local target = self[field_name]
+                return target[method_name](target, number_arg)
+            end
+        "#,
+        "template-self-field-method-number-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name, Val::Num(value)],
+    )
+}
+
+fn build_self_field_method_with_global_arg_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    arg_path: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, method_name, resolved_arg = ...
+            return function(self, ...)
+                local target = self[field_name]
+                return target[method_name](target, resolved_arg)
+            end
+        "#,
+        "template-self-field-method-global-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    let resolved_arg = resolve_global_path(state, arg_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name, resolved_arg],
+    )
+}
+
+fn build_self_field_method_with_self_field_arg_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    arg_field: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, method_name, arg_field_name = ...
+            return function(self, ...)
+                local target = self[field_name]
+                return target[method_name](target, self[arg_field_name])
+            end
+        "#,
+        "template-self-field-method-self-field-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    let arg_field_name = create_string(state, arg_field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name, arg_field_name],
+    )
+}
+
+fn build_self_field_method_with_string_number_number_args_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    first: &str,
+    second: f64,
+    third: f64,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, method_name, first_arg, second_arg, third_arg = ...
+            return function(self, ...)
+                local target = self[field_name]
+                return target[method_name](target, first_arg, second_arg, third_arg)
+            end
+        "#,
+        "template-self-field-method-string-number-number-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    let first_arg = create_string(state, first);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[
+            field_name,
+            method_name,
+            first_arg,
+            Val::Num(second),
+            Val::Num(third),
+        ],
+    )
+}
+
 fn build_parent_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
     build_ancestor_method_handler(state, method_name, 1)
+}
+
+fn build_parent_method_with_string_arg_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local method_name, literal_arg = ...
+            return function(self, ...)
+                local target = self:GetParent()
+                if not target then
+                    return
+                end
+                return target[method_name](target, literal_arg)
+            end
+        "#,
+        "template-parent-method-string-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let method_name = create_string(state, method_name);
+    let literal_arg = create_string(state, arg);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, literal_arg],
+    )
 }
 
 fn build_ancestor_method_handler(
@@ -1094,9 +1455,91 @@ fn build_fast_handler(
                 (None, None) => Ok(None),
             }
         }
+        FastHandlerRef::Sequence3(parts) => {
+            let (first_ref, second_ref, third_ref) = &*parts;
+            let first = build_fast_handler(state, first_ref.clone())?;
+            let second = build_fast_handler(state, second_ref.clone())?;
+            let third = build_fast_handler(state, third_ref.clone())?;
+            match (first, second, third) {
+                (Some(first), Some(second), Some(third)) => {
+                    let chained =
+                        build_chained_handler(state, first, second, "inline-sequence", false)?;
+                    build_chained_handler(state, chained, third, "inline-sequence", false).map(Some)
+                }
+                (Some(first), Some(second), None) => {
+                    build_chained_handler(state, first, second, "inline-sequence", false).map(Some)
+                }
+                (Some(first), None, Some(third)) => {
+                    build_chained_handler(state, first, third, "inline-sequence", false).map(Some)
+                }
+                (None, Some(second), Some(third)) => {
+                    build_chained_handler(state, second, third, "inline-sequence", false).map(Some)
+                }
+                (Some(first), None, None) => Ok(Some(first)),
+                (None, Some(second), None) => Ok(Some(second)),
+                (None, None, Some(third)) => Ok(Some(third)),
+                (None, None, None) => Ok(None),
+            }
+        }
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
+        FastHandlerRef::MethodWithBoolArg { method_name, value } => {
+            build_method_with_bool_arg_handler(state, method_name, value).map(Some)
+        }
+        FastHandlerRef::MethodWithStringArg { method_name, arg } => {
+            build_method_with_string_arg_handler(state, method_name, arg).map(Some)
+        }
+        FastHandlerRef::SelfFieldMethod { field, method_name } => {
+            build_self_field_method_handler(state, field, method_name).map(Some)
+        }
+        FastHandlerRef::SelfFieldMethodWithStringArg {
+            field,
+            method_name,
+            arg,
+        } => build_self_field_method_with_string_arg_handler(state, field, method_name, arg)
+            .map(Some),
+        FastHandlerRef::SelfFieldMethodWithNumberArg {
+            field,
+            method_name,
+            value,
+        } => build_self_field_method_with_number_arg_handler(state, field, method_name, value)
+            .map(Some),
+        FastHandlerRef::SelfFieldMethodWithGlobalArg {
+            field,
+            method_name,
+            arg_path,
+        } => build_self_field_method_with_global_arg_handler(state, field, method_name, arg_path)
+            .map(Some),
+        FastHandlerRef::SelfFieldMethodWithSelfFieldArg {
+            field,
+            method_name,
+            arg_field,
+        } => build_self_field_method_with_self_field_arg_handler(
+            state,
+            field,
+            method_name,
+            arg_field,
+        )
+        .map(Some),
+        FastHandlerRef::SelfFieldMethodWithStringNumberNumberArgs {
+            field,
+            method_name,
+            first,
+            second,
+            third,
+        } => build_self_field_method_with_string_number_number_args_handler(
+            state,
+            field,
+            method_name,
+            first,
+            second,
+            third,
+        )
+        .map(Some),
         FastHandlerRef::ParentMethod(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
+        }
+        FastHandlerRef::ParentMethodWithStringArg { method_name, arg } => {
+            build_parent_method_with_string_arg_handler(state, method_name, arg).map(Some)
         }
         FastHandlerRef::GrandparentMethod(method_name) => {
             build_ancestor_method_handler(state, method_name, 2).map(Some)
@@ -1140,10 +1583,24 @@ fn build_fast_handler(
         FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
             build_function_handler_with_string_arg(state, function_name, arg).map(Some)
         }
+        FastHandlerRef::FunctionWithNumberArg {
+            function_name,
+            value,
+        } => build_function_handler_with_number_arg(state, function_name, value).map(Some),
         FastHandlerRef::FunctionWithGlobalArg {
             function_name,
             arg_path,
         } => build_function_handler_with_global_arg(state, function_name, arg_path).map(Some),
+        FastHandlerRef::FunctionWithGlobalAndSelfArg {
+            function_name,
+            global_arg_path,
+        } => build_function_handler_with_global_and_self_arg(state, function_name, global_arg_path)
+            .map(Some),
+        FastHandlerRef::FunctionWithSelfAndParentFieldArg {
+            function_name,
+            field,
+        } => build_function_handler_with_self_and_parent_field_arg(state, function_name, field)
+            .map(Some),
         FastHandlerRef::FunctionWithParentArg(function_name) => {
             build_ancestor_function_handler(state, function_name, 1).map(Some)
         }
@@ -1181,6 +1638,11 @@ fn build_fast_handler(
         FastHandlerRef::AssignLiteral { field, value } => {
             build_assignment_handler(state, field, value).map(Some)
         }
+        FastHandlerRef::AssignNestedLiteral {
+            parent_field,
+            field,
+            value,
+        } => build_nested_assignment_handler(state, parent_field, field, value).map(Some),
         FastHandlerRef::AssignParentField { field, value } => {
             build_parent_assignment_handler(state, field, value).map(Some)
         }
@@ -1361,6 +1823,30 @@ fn build_function_handler_with_string_arg(
     )
 }
 
+fn build_function_handler_with_number_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    value: f64,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local fn, number_arg = ...
+            return function(self, ...)
+                return fn(number_arg)
+            end
+        "#,
+        "template-inline-function-number-arg",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, function_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, Val::Num(value)],
+    )
+}
+
 fn build_function_handler_with_global_arg(
     state: &mut LuaState,
     function_name: &str,
@@ -1383,6 +1869,60 @@ fn build_function_handler_with_global_arg(
         state,
         Val::Function(builder.gc_ref()),
         &[target, arg],
+    )
+}
+
+fn build_function_handler_with_global_and_self_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    global_arg_path: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local fn, global_arg = ...
+            return function(self, ...)
+                return fn(global_arg, self)
+            end
+        "#,
+        "template-inline-function-global-self-arg",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, function_name);
+    let global_arg = resolve_global_path(state, global_arg_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, global_arg],
+    )
+}
+
+fn build_function_handler_with_self_and_parent_field_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    field: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local fn, field_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                return fn(self, parent[field_name])
+            end
+        "#,
+        "template-inline-function-self-parent-field-arg",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, function_name);
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, field_name],
     )
 }
 
@@ -1506,7 +2046,7 @@ fn parse_inline_fast_handler<'a>(
     _handler_name: &'static str,
     body: &'a str,
 ) -> Option<FastHandlerRef<'a>> {
-    let trimmed = body.trim();
+    let trimmed = strip_leading_comment_lines(body.trim());
     if trimmed.is_empty() {
         return Some(FastHandlerRef::NoOp);
     }
@@ -1521,8 +2061,64 @@ fn parse_inline_fast_handler<'a>(
 }
 
 fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((method_name, value)) = parse_inline_self_method_with_bool_arg(stmt) {
+        return Some(FastHandlerRef::MethodWithBoolArg { method_name, value });
+    }
+    if let Some((method_name, arg)) = parse_inline_self_method_with_string_arg(stmt) {
+        return Some(FastHandlerRef::MethodWithStringArg { method_name, arg });
+    }
     if let Some(method_name) = parse_inline_self_method(stmt) {
         return Some(FastHandlerRef::Method(method_name));
+    }
+    if let Some((field, method_name, arg)) = parse_inline_self_field_method_with_string_arg(stmt) {
+        return Some(FastHandlerRef::SelfFieldMethodWithStringArg {
+            field,
+            method_name,
+            arg,
+        });
+    }
+    if let Some((field, method_name, value)) = parse_inline_self_field_method_with_number_arg(stmt)
+    {
+        return Some(FastHandlerRef::SelfFieldMethodWithNumberArg {
+            field,
+            method_name,
+            value,
+        });
+    }
+    if let Some((field, method_name, first, second, third)) =
+        parse_inline_self_field_method_with_string_number_number_args(stmt)
+    {
+        return Some(FastHandlerRef::SelfFieldMethodWithStringNumberNumberArgs {
+            field,
+            method_name,
+            first,
+            second,
+            third,
+        });
+    }
+    if let Some((field, method_name, arg_field)) =
+        parse_inline_self_field_method_with_self_field_arg(stmt)
+    {
+        return Some(FastHandlerRef::SelfFieldMethodWithSelfFieldArg {
+            field,
+            method_name,
+            arg_field,
+        });
+    }
+    if let Some((field, method_name, arg_path)) =
+        parse_inline_self_field_method_with_global_arg(stmt)
+    {
+        return Some(FastHandlerRef::SelfFieldMethodWithGlobalArg {
+            field,
+            method_name,
+            arg_path,
+        });
+    }
+    if let Some((field, method_name)) = parse_inline_self_field_method(stmt) {
+        return Some(FastHandlerRef::SelfFieldMethod { field, method_name });
+    }
+    if let Some((method_name, arg)) = parse_inline_parent_method_with_string_arg(stmt) {
+        return Some(FastHandlerRef::ParentMethodWithStringArg { method_name, arg });
     }
     if let Some(method_name) = parse_inline_parent_method(stmt) {
         return Some(FastHandlerRef::ParentMethod(method_name));
@@ -1592,6 +2188,9 @@ fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some(assign) = parse_inline_assignment(stmt) {
         return Some(assign);
     }
+    if let Some(assign) = parse_inline_nested_assignment(stmt) {
+        return Some(assign);
+    }
     if let Some(assign) = parse_inline_parent_assignment(stmt) {
         return Some(assign);
     }
@@ -1619,10 +2218,31 @@ fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some((function_name, arg)) = parse_inline_function_with_self_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithSelfStringArg { function_name, arg });
     }
+    if let Some((function_name, value)) = parse_inline_function_with_number_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithNumberArg {
+            function_name,
+            value,
+        });
+    }
     if let Some((function_name, arg_path)) = parse_inline_function_with_global_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithGlobalArg {
             function_name,
             arg_path,
+        });
+    }
+    if let Some((function_name, global_arg_path)) =
+        parse_inline_function_with_global_and_self_arg(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithGlobalAndSelfArg {
+            function_name,
+            global_arg_path,
+        });
+    }
+    if let Some((function_name, field)) = parse_inline_function_with_self_and_parent_field_arg(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithSelfAndParentFieldArg {
+            function_name,
+            field,
         });
     }
     if let Some(function_name) = stmt
@@ -1672,20 +2292,130 @@ fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
         .map(str::trim)
         .filter(|part| !part.is_empty())
         .collect::<Vec<_>>();
-    if parts.len() != 2 {
-        return None;
+    match parts.as_slice() {
+        [first, second] => Some(FastHandlerRef::Sequence2(Box::new((
+            parse_inline_single_fast_handler(first)?,
+            parse_inline_single_fast_handler(second)?,
+        )))),
+        [first, second, third] => Some(FastHandlerRef::Sequence3(Box::new((
+            parse_inline_single_fast_handler(first)?,
+            parse_inline_single_fast_handler(second)?,
+            parse_inline_single_fast_handler(third)?,
+        )))),
+        _ => None,
     }
-    let first = parse_inline_single_fast_handler(parts[0])?;
-    let second = parse_inline_single_fast_handler(parts[1])?;
-    Some(FastHandlerRef::Sequence2(Box::new((first, second))))
 }
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
     parse_inline_method_call(stmt, "self:")
 }
 
+fn parse_inline_self_method_with_bool_arg(stmt: &str) -> Option<(&str, bool)> {
+    let remainder = stmt.strip_prefix("self:")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let value = parse_single_bool_literal(args.strip_suffix(')')?.trim())?;
+    let method_name = method_name.trim();
+    is_fast_identifier(method_name).then_some((method_name, value))
+}
+
+fn parse_inline_self_method_with_string_arg(stmt: &str) -> Option<(&str, &str)> {
+    let remainder = stmt.strip_prefix("self:")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg = parse_single_string_literal(args.strip_suffix(')')?.trim())?;
+    let method_name = method_name.trim();
+    is_fast_identifier(method_name).then_some((method_name, arg))
+}
+
+fn parse_inline_self_field_method(stmt: &str) -> Option<(&str, &str)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name) && is_fast_passthrough_args(args))
+        .then_some((field, method_name))
+}
+
+fn parse_inline_self_field_method_with_string_arg(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg = parse_single_string_literal(args.strip_suffix(')')?.trim())?;
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name)).then_some((
+        field,
+        method_name,
+        arg,
+    ))
+}
+
+fn parse_inline_self_field_method_with_number_arg(stmt: &str) -> Option<(&str, &str, f64)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let value = args.strip_suffix(')')?.trim().parse::<f64>().ok()?;
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name)).then_some((
+        field,
+        method_name,
+        value,
+    ))
+}
+
+fn parse_inline_self_field_method_with_string_number_number_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, f64, f64)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?;
+    let mut parts = args.split(',').map(str::trim);
+    let first = parse_single_string_literal(parts.next()?)?;
+    let second = parts.next()?.parse::<f64>().ok()?;
+    let third = parts.next()?.parse::<f64>().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name)).then_some((
+        field,
+        method_name,
+        first,
+        second,
+        third,
+    ))
+}
+
+fn parse_inline_self_field_method_with_self_field_arg(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg_field = args.strip_suffix(')')?.trim().strip_prefix("self.")?.trim();
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name) && is_fast_identifier(arg_field))
+        .then_some((field, method_name, arg_field))
+}
+
+fn parse_inline_self_field_method_with_global_arg(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg_path = args.strip_suffix(')')?.trim();
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name) && is_fast_handler_path(arg_path))
+        .then_some((field, method_name, arg_path))
+}
+
 fn parse_inline_parent_method(stmt: &str) -> Option<&str> {
     parse_inline_method_call(stmt, "self:GetParent():")
+}
+
+fn parse_inline_parent_method_with_string_arg(stmt: &str) -> Option<(&str, &str)> {
+    let remainder = stmt.strip_prefix("self:GetParent():")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg = parse_single_string_literal(args.strip_suffix(')')?.trim())?;
+    let method_name = method_name.trim();
+    is_fast_identifier(method_name).then_some((method_name, arg))
 }
 
 fn parse_inline_grandparent_method(stmt: &str) -> Option<&str> {
@@ -1770,12 +2500,46 @@ fn parse_inline_function_with_self_string_arg(stmt: &str) -> Option<(&str, &str)
         .then_some((function_name, arg))
 }
 
+fn parse_inline_function_with_number_arg(stmt: &str) -> Option<(&str, f64)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let value = args.strip_suffix(')')?.trim().parse::<f64>().ok()?;
+    let function_name = function_name.trim();
+    is_fast_handler_path(function_name).then_some((function_name, value))
+}
+
 fn parse_inline_function_with_global_arg(stmt: &str) -> Option<(&str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let arg_path = args.strip_suffix(')')?.trim();
     let function_name = function_name.trim();
     (is_fast_handler_path(function_name) && is_fast_handler_path(arg_path))
         .then_some((function_name, arg_path))
+}
+
+fn parse_inline_function_with_global_and_self_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (global_arg_path, self_arg) = args.split_once(',')?;
+    let function_name = function_name.trim();
+    let global_arg_path = global_arg_path.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(global_arg_path)
+        && self_arg.trim() == "self")
+        .then_some((function_name, global_arg_path))
+}
+
+fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (self_arg, parent_field) = args.split_once(',')?;
+    let field = self_arg
+        .trim()
+        .eq("self")
+        .then_some(parent_field.trim())?
+        .strip_prefix("self:GetParent().")?
+        .trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_identifier(field))
+        .then_some((function_name, field))
 }
 
 fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {
@@ -1907,6 +2671,27 @@ fn parse_single_string_literal(arg: &str) -> Option<&str> {
     arg.strip_prefix('"')?.strip_suffix('"')
 }
 
+fn parse_single_bool_literal(arg: &str) -> Option<bool> {
+    match arg {
+        "true" => Some(true),
+        "false" => Some(false),
+        _ => None,
+    }
+}
+
+fn strip_leading_comment_lines(mut stmt: &str) -> &str {
+    loop {
+        let trimmed = stmt.trim_start();
+        let Some(comment) = trimmed.strip_prefix("--") else {
+            return trimmed;
+        };
+        let Some((_, rest)) = comment.split_once('\n') else {
+            return "";
+        };
+        stmt = rest;
+    }
+}
+
 fn is_fast_handler_path(path: &str) -> bool {
     path.split('.').all(is_fast_identifier)
 }
@@ -1942,6 +2727,22 @@ fn parse_fast_literal_value(raw_value: &str) -> Option<FastLiteralValue<'_>> {
     }
 }
 
+fn parse_inline_nested_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let (lhs, rhs) = stmt.split_once('=')?;
+    let lhs = lhs.trim();
+    let rhs = rhs.trim();
+    let lhs = lhs.strip_prefix("self.")?;
+    let (parent_field, field) = lhs.split_once('.')?;
+    let value = parse_fast_literal_value(rhs)?;
+    (is_fast_identifier(parent_field) && is_fast_identifier(field)).then_some(
+        FastHandlerRef::AssignNestedLiteral {
+            parent_field,
+            field,
+            value,
+        },
+    )
+}
+
 fn build_assignment_handler(
     state: &mut LuaState,
     field: &str,
@@ -1964,6 +2765,37 @@ fn build_assignment_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[field_name, assigned_value],
+    )
+}
+
+fn build_nested_assignment_handler(
+    state: &mut LuaState,
+    parent_field: &str,
+    field: &str,
+    value: FastLiteralValue<'_>,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local parent_field_name, field_name, assigned_value = ...
+            return function(self, ...)
+                local target = self[parent_field_name]
+                if not target then
+                    return
+                end
+                target[field_name] = assigned_value
+            end
+        "#,
+        "template-inline-nested-assignment",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let parent_field_name = create_string(state, parent_field);
+    let field_name = create_string(state, field);
+    let assigned_value = fast_literal_value(state, value);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[parent_field_name, field_name, assigned_value],
     )
 }
 

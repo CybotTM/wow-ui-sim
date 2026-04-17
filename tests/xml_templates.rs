@@ -477,6 +477,159 @@ fn test_create_frame_from_xml_inline_global_method_with_self_string_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_self_field_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfFieldMethodFrame" parent="UIParent">
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture parentKey="Highlight" hidden="true"/>
+            </Layer>
+        </Layers>
+        <Scripts><OnLoad>self.Highlight:Show()</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let shown: bool = env
+        .eval("return XmlInlineSelfFieldMethodFrame.Highlight:IsShown()")
+        .unwrap();
+    assert!(shown);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_self_field_method_with_string_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfFieldStringFrame" parent="UIParent">
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString parentKey="Name"/>
+            </Layer>
+        </Layers>
+        <Scripts><OnLoad>self.Name:SetText("Hello")</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let text: String = env
+        .eval("return XmlInlineSelfFieldStringFrame.Name:GetText()")
+        .unwrap();
+    assert_eq!(text, "Hello");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_self_field_method_with_number_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfFieldNumberFrame" parent="UIParent">
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture parentKey="texture"/>
+            </Layer>
+        </Layers>
+        <Scripts><OnLoad>self.texture:SetAlpha(0.5)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let alpha: f64 = env
+        .eval("return XmlInlineSelfFieldNumberFrame.texture:GetAlpha()")
+        .unwrap();
+    assert_eq!(alpha, 0.5);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_self_field_method_with_string_number_number_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfFieldPointFrame" parent="UIParent">
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture parentKey="texture"/>
+            </Layer>
+        </Layers>
+        <Scripts><OnLoad>self.texture:SetPoint("TOPLEFT", 1, -1)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let (point, relative_point, x, y): (String, String, f64, f64) = env
+        .eval(
+            "local point, _, relativePoint, x, y = XmlInlineSelfFieldPointFrame.texture:GetPoint(1); return point, relativePoint, x, y",
+        )
+        .unwrap();
+    assert_eq!(point, "TOPLEFT");
+    assert_eq!(relative_point, "TOPLEFT");
+    assert_eq!(x, 1.0);
+    assert_eq!(y, -1.0);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_self_field_method_with_global_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"XML_INLINE_LABEL = "GlobalHello""#).unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfFieldGlobalFrame" parent="UIParent">
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString parentKey="Name"/>
+            </Layer>
+        </Layers>
+        <Scripts><OnLoad>self.Name:SetText(XML_INLINE_LABEL)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let text: String = env
+        .eval("return XmlInlineSelfFieldGlobalFrame.Name:GetText()")
+        .unwrap();
+    assert_eq!(text, "GlobalHello");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_self_field_method_with_self_field_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfFieldArgFrame" parent="UIParent">
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString parentKey="Name"/>
+            </Layer>
+        </Layers>
+        <KeyValues>
+            <KeyValue key="tooltipText" value="TooltipValue" type="string"/>
+        </KeyValues>
+        <Scripts><OnLoad>self.Name:SetText(self.tooltipText)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let text: String = env
+        .eval("return XmlInlineSelfFieldArgFrame.Name:GetText()")
+        .unwrap();
+    assert_eq!(text, "TooltipValue");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_method_with_self_id_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -986,6 +1139,39 @@ fn test_create_frame_from_xml_inline_parent_method_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_parent_method_with_empty_string_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineParentStringFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>self:GetParent():SetText("")</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec(r#"XmlInlineParentStringFrame:SetText("Seed")"#)
+        .unwrap();
+    env.exec(
+        "XmlInlineParentStringFrame.Child:GetScript('OnClick')(XmlInlineParentStringFrame.Child)",
+    )
+    .unwrap();
+
+    let value: String = env
+        .eval("return XmlInlineParentStringFrame:GetText()")
+        .unwrap();
+    assert_eq!(
+        value, "",
+        "parent-method inline empty-string arg should fire"
+    );
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_grandparent_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -1021,6 +1207,49 @@ fn test_create_frame_from_xml_inline_grandparent_method_runs() {
         .eval("return XmlInlineGrandparentFrame.grandparentPrimed == true")
         .unwrap();
     assert!(loaded, "grandparent-method inline OnClick should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_method_with_bool_arg_after_comment_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineBoolFrame" parent="UIParent">
+        <Scripts><OnLoad>-- disabled by request
+            self:EnableMouse(false);
+        </OnLoad></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let enabled: bool = env
+        .eval("return XmlInlineBoolFrame:IsMouseEnabled()")
+        .unwrap();
+    assert!(
+        !enabled,
+        "inline bool-arg method should run after leading comment"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_method_with_string_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineStringArgFrame" parent="UIParent">
+        <Scripts><OnLoad>self:RegisterEvent("UPDATE_INVENTORY_DURABILITY")</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let registered: bool = env
+        .eval(r#"return XmlInlineStringArgFrame:IsEventRegistered("UPDATE_INVENTORY_DURABILITY")"#)
+        .unwrap();
+    assert!(registered, "inline string-arg self method should fire");
 }
 
 #[test]
@@ -1067,6 +1296,188 @@ fn test_create_frame_from_xml_inline_assignment_runs() {
         .eval("return XmlInlineAssignmentFrame.layoutIndex")
         .unwrap();
     assert_eq!(value, 7.0, "inline assignment OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_global_and_self_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGlobalContainer = {}
+        function XmlInlineRemoveFrame(container, frame)
+            container.last = frame
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalSelfFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>XmlInlineRemoveFrame(XmlInlineGlobalContainer, self)</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineGlobalSelfFrame.Child:GetScript('OnClick')(XmlInlineGlobalSelfFrame.Child)")
+        .unwrap();
+
+    let matched: bool = env
+        .eval("return XmlInlineGlobalContainer.last == XmlInlineGlobalSelfFrame.Child")
+        .unwrap();
+    assert!(matched, "inline global+self function call should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_nested_assignment_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineAssignedClick(self)
+            self.assignedClickRan = true
+        end
+        function XmlInlineRunAssignedClick(self)
+            self.checkButton.onClick(self.checkButton)
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineNestedAssignFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="checkButton"/>
+        </Frames>
+        <Scripts>
+            <OnLoad>self.checkButton.onClick = XmlInlineAssignedClick; XmlInlineRunAssignedClick(self)</OnLoad>
+        </Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let assigned: bool = env
+        .eval("return XmlInlineNestedAssignFrame.checkButton.assignedClickRan == true")
+        .unwrap();
+    assert!(assigned, "inline nested assignment sequence should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_self_and_parent_field_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineParentFieldSetup(self, value)
+            self.capturedPartyBackfill = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentFieldFrame" parent="UIParent">
+        <KeyValues>
+            <KeyValue key="PartyBackfill" value="true" type="boolean"/>
+        </KeyValues>
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnLoad>XmlInlineParentFieldSetup(self, self:GetParent().PartyBackfill)</OnLoad></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let captured: bool = env
+        .eval("return XmlInlineParentFieldFrame.Child.capturedPartyBackfill == true")
+        .unwrap();
+    assert!(
+        captured,
+        "inline self+parent-field function call should fire"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_number_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlinePageChange = 0
+        function XmlInlineSetPage(delta)
+            XmlInlinePageChange = delta
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineNumberArgFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineSetPage(-1)</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineNumberArgFrame:GetScript('OnClick')(XmlInlineNumberArgFrame)")
+        .unwrap();
+
+    let delta: i32 = env.eval("return XmlInlinePageChange").unwrap();
+    assert_eq!(delta, -1, "inline numeric function arg should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_sequence3_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineSequence3Mark(self)
+            self.sequence3Marked = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSequence3Frame" parent="UIParent">
+        <Scripts>
+            <OnLoad>self.layoutIndex = 145; XmlInlineSequence3Mark(self); self:RegisterEvent("UPDATE_INVENTORY_DURABILITY")</OnLoad>
+        </Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let marked: bool = env
+        .eval("return XmlInlineSequence3Frame.sequence3Marked == true")
+        .unwrap();
+    let registered: bool = env
+        .eval(r#"return XmlInlineSequence3Frame:IsEventRegistered("UPDATE_INVENTORY_DURABILITY")"#)
+        .unwrap();
+    let layout_index: i32 = env
+        .eval("return XmlInlineSequence3Frame.layoutIndex")
+        .unwrap();
+    assert!(
+        marked,
+        "inline three-step sequence should run middle function"
+    );
+    assert!(
+        registered,
+        "inline three-step sequence should run trailing method"
+    );
+    assert_eq!(
+        layout_index, 145,
+        "inline three-step sequence should run leading assignment"
+    );
 }
 
 #[test]
