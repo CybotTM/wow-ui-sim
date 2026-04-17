@@ -366,97 +366,88 @@ pub(super) fn scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResul
 // register_model
 // ---------------------------------------------------------------------------
 
+const MODEL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    // Model source + transform
+    ("SetModel", set_model),
+    ("GetModel", get_model),
+    ("SetModelScale", set_model_scale),
+    ("GetModelScale", get_model_scale),
+    ("SetPosition", set_position),
+    ("GetPosition", get_position),
+    ("SetFacing", set_facing),
+    ("GetFacing", get_facing),
+    ("SetRotation", set_rotation),
+    // Animation / display info
+    ("SetAnimation", set_animation),
+    ("SetDisplayInfo", set_display_info),
+    ("SetCreature", set_creature),
+    ("ClearModel", clear_model),
+    ("GetModelFileID", get_model_file_id),
+    ("SetModelAlpha", set_model_alpha),
+    ("GetModelAlpha", get_model_alpha),
+    ("SetSequence", set_sequence),
+    ("SetSequenceTime", set_sequence_time),
+    // Camera
+    ("GetCameraDistance", get_camera_distance),
+    ("SetCameraDistance", set_camera_distance),
+    ("GetCameraFacing", get_camera_facing),
+    ("SetCameraFacing", set_camera_facing),
+    ("GetCameraTarget", get_camera_target),
+    ("SetCameraTarget", set_camera_target),
+    // Variadic no-op stubs — 3D rendering is intentionally out of scope
+    ("SetAutoDress", stub_variadic),
+    ("SetCamDistanceScale", stub_variadic),
+    ("SetCamera", stub_variadic),
+    ("SetPortraitZoom", stub_variadic),
+    ("SetDesaturation", stub_variadic),
+    ("SetLight", stub_variadic),
+    ("ResetLights", stub_variadic),
+    ("RefreshUnit", stub_variadic),
+    ("RefreshCamera", stub_variadic),
+    ("TransitionToModelSceneID", stub_variadic),
+    ("SetFromModelSceneID", stub_variadic),
+    ("CycleVariation", stub_variadic),
+    ("AdvanceTime", stub_variadic),
+    ("ClearTransform", stub_variadic),
+    ("SetTransform", stub_variadic),
+    ("SetPitch", stub_variadic),
+    ("SetRoll", stub_variadic),
+    ("UseModelCenterToTransform", stub_variadic),
+    ("SetViewTranslation", stub_variadic),
+    ("SetModelDrawLayer", stub_variadic),
+    ("ReplaceIconTexture", stub_variadic),
+    ("SetGlow", stub_variadic),
+    ("SetGradientMask", stub_variadic),
+    ("SetShadowEffect", stub_variadic),
+    ("SetParticlesEnabled", stub_variadic),
+    ("SetUseGBuffer", stub_variadic),
+    ("SetCustomCamera", stub_variadic),
+    ("MakeCurrentCameraCustom", stub_variadic),
+    // Typed return stubs
+    ("GetModelSceneID", stub_zero),
+    ("GetCamDistanceScale", stub_one),
+    ("HasCustomCamera", stub_false),
+    ("GetPaused", stub_false),
+    ("HasAttachmentPoints", stub_false),
+    ("GetLight", stub_nil),
+    ("GetPitch", stub_zero),
+    ("GetRoll", stub_zero),
+    ("GetWorldScale", stub_one),
+    ("TransformCameraSpaceToModelSpace", stub_nil),
+    ("IsUsingModelCenterToTransform", stub_false),
+    ("GetShadowEffect", stub_zero),
+    ("GetUpperEmblemTexture", stub_nil),
+    ("GetLowerEmblemTexture", stub_nil),
+    // ModelScene-specific (round-tripped state)
+    ("SetAllowOverlappedModels", scene_set_allow_overlapped_models),
+    ("IsAllowOverlappedModels", scene_is_allow_overlapped_models),
+    ("SetViewInsets", scene_set_view_insets),
+    ("GetViewInsets", scene_get_view_insets),
+];
+
 pub(super) fn register_model(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetModel", set_model)?;
-    table_set_rust_fn(state, metatable, "GetModel", get_model)?;
-    table_set_rust_fn(state, metatable, "SetModelScale", set_model_scale)?;
-    table_set_rust_fn(state, metatable, "GetModelScale", get_model_scale)?;
-    table_set_rust_fn(state, metatable, "SetPosition", set_position)?;
-    table_set_rust_fn(state, metatable, "GetPosition", get_position)?;
-    table_set_rust_fn(state, metatable, "SetFacing", set_facing)?;
-    table_set_rust_fn(state, metatable, "GetFacing", get_facing)?;
-    table_set_rust_fn(state, metatable, "SetRotation", set_rotation)?;
-    table_set_rust_fn(state, metatable, "SetAnimation", set_animation)?;
-    table_set_rust_fn(state, metatable, "SetDisplayInfo", set_display_info)?;
-    table_set_rust_fn(state, metatable, "SetCreature", set_creature)?;
-    table_set_rust_fn(state, metatable, "ClearModel", clear_model)?;
-    table_set_rust_fn(state, metatable, "GetModelFileID", get_model_file_id)?;
-    table_set_rust_fn(state, metatable, "SetModelAlpha", set_model_alpha)?;
-    table_set_rust_fn(state, metatable, "GetModelAlpha", get_model_alpha)?;
-    table_set_rust_fn(state, metatable, "SetSequence", set_sequence)?;
-    table_set_rust_fn(state, metatable, "SetSequenceTime", set_sequence_time)?;
-    table_set_rust_fn(state, metatable, "GetCameraDistance", get_camera_distance)?;
-    table_set_rust_fn(state, metatable, "SetCameraDistance", set_camera_distance)?;
-    table_set_rust_fn(state, metatable, "GetCameraFacing", get_camera_facing)?;
-    table_set_rust_fn(state, metatable, "SetCameraFacing", set_camera_facing)?;
-    table_set_rust_fn(state, metatable, "GetCameraTarget", get_camera_target)?;
-    table_set_rust_fn(state, metatable, "SetCameraTarget", set_camera_target)?;
-    // Stubs
-    table_set_rust_fn(state, metatable, "SetAutoDress", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetCamDistanceScale", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetCamera", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetPortraitZoom", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetDesaturation", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetLight", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "ResetLights", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "RefreshUnit", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "RefreshCamera", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "TransitionToModelSceneID", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetFromModelSceneID", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "CycleVariation", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "GetModelSceneID", stub_zero)?;
-    table_set_rust_fn(state, metatable, "GetCamDistanceScale", stub_one)?;
-    table_set_rust_fn(state, metatable, "HasCustomCamera", stub_false)?;
-    table_set_rust_fn(state, metatable, "GetPaused", stub_false)?;
-    table_set_rust_fn(state, metatable, "HasAttachmentPoints", stub_false)?;
-    table_set_rust_fn(state, metatable, "GetLight", stub_nil)?;
-    table_set_rust_fn(state, metatable, "AdvanceTime", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "ClearTransform", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetTransform", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetPitch", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "GetPitch", stub_zero)?;
-    table_set_rust_fn(state, metatable, "SetRoll", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "GetRoll", stub_zero)?;
-    table_set_rust_fn(state, metatable, "GetWorldScale", stub_one)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "TransformCameraSpaceToModelSpace",
-        stub_nil,
-    )?;
-    table_set_rust_fn(state, metatable, "UseModelCenterToTransform", stub_variadic)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "IsUsingModelCenterToTransform",
-        stub_false,
-    )?;
-    table_set_rust_fn(state, metatable, "SetViewTranslation", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetModelDrawLayer", stub_variadic)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetAllowOverlappedModels",
-        scene_set_allow_overlapped_models,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "IsAllowOverlappedModels",
-        scene_is_allow_overlapped_models,
-    )?;
-    table_set_rust_fn(state, metatable, "SetViewInsets", scene_set_view_insets)?;
-    table_set_rust_fn(state, metatable, "GetViewInsets", scene_get_view_insets)?;
-    table_set_rust_fn(state, metatable, "ReplaceIconTexture", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetGlow", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetGradientMask", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetShadowEffect", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "GetShadowEffect", stub_zero)?;
-    table_set_rust_fn(state, metatable, "SetParticlesEnabled", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetUseGBuffer", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "SetCustomCamera", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "MakeCurrentCameraCustom", stub_variadic)?;
-    table_set_rust_fn(state, metatable, "GetUpperEmblemTexture", stub_nil)?;
-    table_set_rust_fn(state, metatable, "GetLowerEmblemTexture", stub_nil)?;
+    for (name, func) in MODEL_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
