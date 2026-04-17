@@ -48,6 +48,7 @@ pub mod spellbook_data;
 pub mod store_frame;
 pub mod strings;
 pub mod stubs;
+pub mod system_api_runtime;
 pub mod template;
 pub mod unit_api;
 pub mod unit_probes;
