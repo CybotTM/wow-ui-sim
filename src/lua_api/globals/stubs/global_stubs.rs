@@ -125,7 +125,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // not a stub.
     "GetCurrentGuildBankTab",
     "GetCursorPosition",
-    "GetArenaOpponentSpec",
+    // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
+    // not a stub.
     "GetFactionInfoByID",
     "GetGossipNumOptions",
     "GetGossipNumAvailableQuests",
@@ -162,28 +163,28 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetNumLootItems is SimState-backed in inventory_counts.rs, not a stub.
     // GetNumQuestLogEntries is SimState-backed in quest_surface.rs, not a stub.
     "GetNumShapeshiftForms",
-    "GetNumSkillLines",
-    "GetNumSpellTabs",
-    "GetNumTalentTabs",
+    // GetNumSkillLines / GetNumSpellTabs / GetNumTalentTabs are
+    // SimState-backed in talent_spec_probes.rs, not stubs.
     "GetNumTitles",
     // GetPetExperience / GetPetHappiness / GetPetLoyalty /
     // GetPetTimeInCombat are SimState-backed in pet_stats.rs, not stubs.
-    "GetPvpTalentSlotInfo",
+    // GetPvpTalentSlotInfo is SimState-backed in talent_spec_probes.rs,
+    // not a stub.
     // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in
     // quest_surface.rs, not stubs.
     "GetRaidRosterInfo",
     "GetRelicSlotType",
     "GetRestState",
-    "GetSelectedSkill",
+    // GetSelectedSkill / GetSkillLineInfo are SimState-backed in
+    // talent_spec_probes.rs, not stubs.
     "GetSelectedSocial",
-    "GetSkillLineInfo",
     // GetSpellAutocast / GetSpellBonusDamage / GetSpellBonusHealing /
     // GetSpellCooldown / GetSpellLevelLearned are SimState-backed in
     // cooldown_probes.rs, not stubs.
-    "GetSpellTabInfo",
+    // GetSpellTabInfo / GetTalentInfo are SimState-backed in
+    // talent_spec_probes.rs, not stubs.
     "GetSummonConfirmSummoner",
     "GetSummonConfirmTimeLeft",
-    "GetTalentInfo",
     "GetTitleName",
     "GetTradePlayerItemInfo",
     "GetTradeSkillInfo",
