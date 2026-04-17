@@ -63,6 +63,15 @@ fn config_name(config_id: i32) -> &'static str {
     }
 }
 
+fn config_spec_id(config_id: i32) -> Option<u32> {
+    match config_id {
+        101 | 102 => Some(65),
+        201 | 202 => Some(66),
+        301 | 302 => Some(70),
+        _ => None,
+    }
+}
+
 fn trait_node_spec_set(cond_ids: &[u32]) -> u32 {
     cond_ids
         .iter()
@@ -273,52 +282,32 @@ fn register_c_class_talents_hero_fns(
     Ok(())
 }
 
+const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
+    ("GetConfigIDsBySpecID", c_class_talents_get_config_ids_by_spec_id),
+    ("GetActiveConfigID", c_class_talents_get_active_config_id),
+    (
+        "GetLastSelectedSavedConfigID",
+        c_class_talents_get_last_selected_saved_config_id,
+    ),
+    ("GetTraitTreeForSpec", c_class_talents_get_trait_tree_for_spec),
+    ("CanChangeTalents", c_class_talents_can_change_talents),
+    ("GetHasStarterBuild", c_class_talents_get_has_starter_build),
+    ("IsStarterBuildActive", c_class_talents_is_starter_build_active),
+    ("GetStarterBuildActive", c_class_talents_is_starter_build_active),
+    ("SetStarterBuildActive", c_class_talents_set_starter_build_active),
+    (
+        "GetNextStarterBuildPurchase",
+        c_class_talents_get_next_starter_build_purchase,
+    ),
+];
+
 fn register_c_class_talents_config_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetConfigIDsBySpecID",
-        c_class_talents_get_config_ids_by_spec_id,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetActiveConfigID",
-        c_class_talents_get_active_config_id,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetLastSelectedSavedConfigID",
-        c_class_talents_get_last_selected_saved_config_id,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetTraitTreeForSpec",
-        c_class_talents_get_trait_tree_for_spec,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "CanChangeTalents",
-        c_class_talents_can_change_talents,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetHasStarterBuild",
-        c_class_talents_get_has_starter_build,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "IsStarterBuildActive",
-        c_class_talents_is_starter_build_active,
-    )?;
+    for &(name, func) in CLASS_TALENTS_CONFIG_METHODS {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
@@ -397,6 +386,14 @@ fn c_traits_get_config_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "id", Val::Num(config_id as f64));
     let name = create_string(state, config_name(config_id));
     table_set(state, info, "name", name);
+    let tree_ids = push_u32_array(
+        state,
+        config_spec_id(config_id)
+            .map(|spec_id| [c_class_talents_trait_tree_for_spec(spec_id)])
+            .into_iter()
+            .flatten(),
+    );
+    table_set(state, info, "treeIDs", tree_ids);
     state.push(info);
     Ok(1)
 }
@@ -697,8 +694,8 @@ fn c_class_talents_switch_to_specialization_by_index(state: &mut LuaState) -> Lu
 }
 
 fn c_class_talents_get_trait_tree_for_spec(state: &mut LuaState) -> LuaResult<u32> {
-    let _spec_id = u32::from_stack(state, 1)?;
-    state.push(Val::Num(790.0));
+    let spec_id = u32::from_stack(state, 1)?;
+    state.push(Val::Num(c_class_talents_trait_tree_for_spec(spec_id) as f64));
     Ok(1)
 }
 
@@ -725,4 +722,21 @@ fn c_class_talents_is_starter_build_active(state: &mut LuaState) -> LuaResult<u3
     let is_active = borrow_state(state)?.talents.is_starter_build_active;
     state.push(Val::Bool(is_active));
     Ok(1)
+}
+
+fn c_class_talents_set_starter_build_active(state: &mut LuaState) -> LuaResult<u32> {
+    let is_active = bool::from_stack(state, 1)?;
+    borrow_state_mut(state)?.talents.is_starter_build_active = is_active;
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_class_talents_get_next_starter_build_purchase(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(2)
+}
+
+fn c_class_talents_trait_tree_for_spec(_spec_id: u32) -> u32 {
+    790
 }
