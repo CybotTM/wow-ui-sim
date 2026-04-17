@@ -28,6 +28,7 @@ pub mod group_queries;
 pub mod guild_logo;
 pub mod inventory_slot;
 pub mod keybindings;
+pub mod locale_info;
 pub mod missing_surface;
 pub mod modifier_keys;
 pub mod net_stats;
