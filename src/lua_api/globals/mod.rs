@@ -17,6 +17,7 @@ pub mod admin_spec;
 pub mod admin_vault;
 pub mod admin_zone_economy;
 pub mod auras;
+pub mod compat_overrides;
 pub mod create_frame;
 pub mod currency_data;
 pub mod enum_data;

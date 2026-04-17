@@ -41,6 +41,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::lfg_info::register_all(lua)?;
     super::locale_info::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
+    super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;
     Ok(())
