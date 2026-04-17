@@ -467,6 +467,29 @@ use super::state_defaults::*;
 /// sim's seeded defaults (Stormwind zone, "Heroes of Azeroth" guild,
 /// populated collections) live in `seeded_world_state` and are applied
 /// by `SimState::Default`.
+/// A mirror timer (breath / exhaustion / feign death) currently active
+/// on the player. Drives `GetMirrorTimerInfo` /
+/// `GetMirrorTimerProgress`.
+#[derive(Debug, Default, Clone)]
+pub struct MirrorTimer {
+    /// Timer name token ("BREATH", "EXHAUSTION", "FEIGNDEATH").
+    pub name: String,
+    /// Starting value when the timer was last reset.
+    pub start_value: f64,
+    /// Maximum value this timer counts toward.
+    pub max_value: f64,
+    /// Rate of change per second (negative = counting down).
+    pub scale: f64,
+    /// 0 when ticking, 1 when paused.
+    pub paused: i32,
+    /// Localised label shown on the HUD.
+    pub label: String,
+    /// Spell id associated with the timer (0 when none).
+    pub spell_id: i32,
+    /// Current progress reading. Drives `GetMirrorTimerProgress`.
+    pub progress: f64,
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct WorldState {
     pub zone_name: String,
@@ -477,6 +500,27 @@ pub struct WorldState {
     pub instance_difficulty: i32,
     pub instance_max_players: i32,
     pub in_instance: bool,
+    /// Difficulty display string (e.g. "Normal", "Heroic", "Mythic").
+    /// Drives the 4th return of `GetInstanceInfo`. Empty outside instances.
+    pub instance_difficulty_name: String,
+    /// `dynamicDifficulty` from `GetInstanceInfo` (6th return). `0` when
+    /// the instance does not have dynamic scaling.
+    pub instance_dynamic_difficulty: i32,
+    /// Whether the instance dynamically scales its difficulty. 7th return
+    /// of `GetInstanceInfo`.
+    pub instance_is_dynamic: bool,
+    /// Instance map id (mapID). 8th return of `GetInstanceInfo`.
+    pub instance_id: i32,
+    /// Current group size inside the instance. 9th return of
+    /// `GetInstanceInfo`. Usually matches `instance_max_players` or 0.
+    pub instance_group_size: i32,
+    /// LFG dungeon id for the current instance, if queued via the Group
+    /// Finder. 10th return of `GetInstanceInfo` (nilable).
+    pub instance_lfg_dungeon_id: Option<i32>,
+    /// Mirror timers (underwater breath, exhaustion, feign death).
+    /// `GetMirrorTimerInfo(index)` reads by 1-based index;
+    /// `GetMirrorTimerProgress(name)` reads by name.
+    pub mirror_timers: Vec<MirrorTimer>,
     /// Whether an encounter is currently in progress (boss pull active).
     /// Drives `IsEncounterInProgress`.
     pub encounter_in_progress: bool,
@@ -593,6 +637,7 @@ pub fn seeded_world_state() -> WorldState {
         zone_id: 1519,
         sub_zone_name: "Trade District".into(),
         instance_type: "none".into(),
+        instance_difficulty_name: String::new(),
         guild_name: Some("Heroes of Azeroth".into()),
         guild_rank: Some("Member".into()),
         guild_num_members: 150,

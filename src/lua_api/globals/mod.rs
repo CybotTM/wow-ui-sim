@@ -44,6 +44,7 @@ pub mod guild_probes;
 pub mod guild_verbs;
 pub mod hero_talents;
 pub mod housing;
+pub mod instance_info;
 pub mod inventory_counts;
 pub mod inventory_probes;
 pub mod inventory_slot;

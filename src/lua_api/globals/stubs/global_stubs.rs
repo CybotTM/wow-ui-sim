@@ -141,7 +141,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetGuildRosterInfo / GetGuildRosterMOTD / GetGuildRosterSize are
     // SimState-backed in guild_probes.rs, not stubs.
     "GetGuildTabardInfo",
-    "GetInstanceInfo",
+    // GetInstanceInfo is SimState-backed in instance_info.rs, not a stub.
     "GetInventoryAlertStatus",
     // GetInventoryItemCooldown is SimState-backed in cooldown_probes.rs,
     // not a stub.
@@ -149,8 +149,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetLFGDungeonInfo / GetLFGDungeonNumEncounters / GetLFGMode are
     // SimState-backed in battlefield_lfg_probes.rs, not stubs.
     // GetMerchantNumItems is SimState-backed in inventory_counts.rs, not a stub.
-    "GetMirrorTimerInfo",
-    "GetMirrorTimerProgress",
+    // GetMirrorTimerInfo / GetMirrorTimerProgress are SimState-backed in
+    // instance_info.rs, not stubs.
     // GetMouseFocus is SimState-backed in mouse_probes.rs, not a stub.
     "GetNextInteractUnit",
     // GetNumAuctionItems is SimState-backed in inventory_counts.rs, not a stub.
