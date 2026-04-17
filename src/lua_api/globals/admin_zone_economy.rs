@@ -98,3 +98,21 @@ pub(super) fn set_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> 
     borrow_state_mut(state)?.timerunning_season_id = season;
     Ok(0)
 }
+
+/// `A_Admin.SetZonePVP(pvpType, isSubZonePvP, factionName)` — drives the
+/// three return values of `C_PvP.GetZonePVPInfo()`. `pvpType` defaults to
+/// `"contested"`, `isSubZonePvP` defaults to `false`, `factionName` defaults
+/// to `nil` (neutral zone). Pass an empty string for `factionName` to clear
+/// an earlier faction assignment.
+pub(super) fn set_zone_pvp(state: &mut LuaState) -> LuaResult<u32> {
+    let pvp_type = Option::<String>::from_stack(state, 1)?
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "contested".into());
+    let is_sub_zone = Option::<bool>::from_stack(state, 2)?.unwrap_or(false);
+    let faction = Option::<String>::from_stack(state, 3)?.filter(|s| !s.is_empty());
+    let mut st = borrow_state_mut(state)?;
+    st.world.pvp_type = pvp_type;
+    st.world.is_sub_zone_pvp = is_sub_zone;
+    st.world.pvp_faction_name = faction;
+    Ok(0)
+}

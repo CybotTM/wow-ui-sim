@@ -229,18 +229,9 @@ end
 -- (slotId, textureFileID, checkRelic) triple; case-insensitive on the
 -- slot-name key.
 
--- `C_PvP` namespace used by ZoneText. The sim has no PVP zone concept,
--- so `GetZonePVPInfo` reports a neutral zone. Full namespace defined
--- because the callsite dereferences the field directly.
-if C_PvP == nil then
-  C_PvP = {}
-end
-if C_PvP.GetZonePVPInfo == nil then
-  function C_PvP.GetZonePVPInfo()
-    -- (pvpType, isSubZonePvP, factionName) — neutral zone, no subzone PVP
-    return "contested", false, nil
-  end
-end
+-- C_PvP.GetZonePVPInfo is registered from Rust
+-- (src/lua_api/globals/zone_text.rs) — reads SimState::world.pvp_type /
+-- .is_sub_zone_pvp / .pvp_faction_name. Admin: A_Admin.SetZonePVP.
 
 -- GetZoneText / GetSubZoneText / GetMinimapZoneText / GetRealZoneText are
 -- registered from Rust (src/lua_api/globals/zone_text.rs), backed by

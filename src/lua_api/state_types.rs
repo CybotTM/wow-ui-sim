@@ -456,6 +456,16 @@ pub struct WorldState {
     pub collected_heirlooms: HashSet<u32>,
     pub earned_achievements: HashSet<i32>,
     pub premade_listings: Vec<PremadeListing>,
+    /// Current zone's PvP type, returned by `C_PvP.GetZonePVPInfo()` as its
+    /// first value. Canonical WoW tokens: `"contested"`, `"sanctuary"`,
+    /// `"arena"`, `"friendly"`, `"hostile"`, `"combat"`. Default `"contested"`.
+    pub pvp_type: String,
+    /// Whether the current sub-zone applies its own PvP rules (e.g. a PvP
+    /// district inside a contested zone). Returned as the second value.
+    pub is_sub_zone_pvp: bool,
+    /// For faction-locked zones, the faction whose PvP rules apply
+    /// (`"Alliance"` / `"Horde"`); `None` on neutral zones. Third return.
+    pub pvp_faction_name: Option<String>,
 }
 
 impl Default for WorldState {
@@ -490,6 +500,9 @@ impl Default for WorldState {
             collected_heirlooms: default_heirlooms().iter().map(|h| h.item_id).collect(),
             earned_achievements: HashSet::new(),
             premade_listings: default_premade_listings(),
+            pvp_type: "contested".into(),
+            is_sub_zone_pvp: false,
+            pvp_faction_name: None,
         }
     }
 }

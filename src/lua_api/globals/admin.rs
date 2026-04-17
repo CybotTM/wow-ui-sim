@@ -47,7 +47,7 @@ use super::admin_spec::{reset_talents, set_spec, set_talent_rank, set_talent_sel
 use super::admin_vault::{clear_vault, set_vault_activity, set_vault_rewards};
 use super::admin_zone_economy::{
     set_in_instance, set_instance_info, set_item_level, set_money, set_net_stats,
-    set_store_frame_shown, set_sub_zone, set_timerunning_season_id, set_zone,
+    set_store_frame_shown, set_sub_zone, set_timerunning_season_id, set_zone, set_zone_pvp,
 };
 
 // ── Entry point ──────────────────────────────────────────────────────────────
@@ -133,6 +133,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetNetStats", set_net_stats)?
         .set_function("SetStoreFrameShown", set_store_frame_shown)?
         .set_function("SetTimerunningSeasonID", set_timerunning_season_id)?
+        .set_function("SetZonePVP", set_zone_pvp)?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?
