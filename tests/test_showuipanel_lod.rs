@@ -159,6 +159,64 @@ fn show_macro_frame_loads_and_populates_selector() {
 }
 
 #[test]
+fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__spellbook_keybind_errors");
+
+        let result: String = env.eval(r#"
+            local loadedBefore = C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")
+            if loadedBefore then
+                return "addon_preloaded"
+            end
+
+            if not PlayerSpellsUtil or type(PlayerSpellsUtil.ToggleSpellBookFrame) ~= "function" then
+                return "missing_toggle_spellbook_frame"
+            end
+
+            if GetBindingAction("S") ~= "" then
+                return "unexpected_binding_store_seed"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Test harness should start with Blizzard_PlayerSpells unloaded and the keybinding store unseeded: {result}"
+        );
+
+        env.send_key_press("S", None).expect("S keybind failed");
+
+        let errors = common::drain_string_table(&env, "__spellbook_keybind_errors");
+        assert!(
+            errors.is_empty(),
+            "Opening spellbook through S produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+
+        let result: String = env.eval(r#"
+            if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+                return "addon_not_loaded"
+            end
+            if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+                return "player_spells_not_shown"
+            end
+            if not PlayerSpellsFrame.SpellBookFrame or not PlayerSpellsFrame.SpellBookFrame:IsShown() then
+                return "spellbook_tab_not_shown"
+            end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Pressing S should demand-load Blizzard_PlayerSpells and show the SpellBook tab: {result}"
+        );
+    }
+}
+
+#[test]
 fn show_mail_frame_loads_and_populates_inbox_rows() {
     test_timeout! {
         let env = setup_env();
