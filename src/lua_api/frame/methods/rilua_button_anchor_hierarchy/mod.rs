@@ -300,6 +300,22 @@ fn register_hierarchy(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()
 }
 
 fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_animation_creation(state, table)?;
+    register_animation_group_control(state, table)?;
+    register_animation_timing(state, table)?;
+    register_animation_config(state, table)?;
+    register_animation_target(state, table)?;
+    register_animation_flipbook(state, table)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "CreateControlPoint",
+        animations::create_control_point,
+    )?;
+    Ok(())
+}
+
+fn register_animation_creation(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -319,6 +335,10 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
         "CreateAnimation",
         animations::create_animation,
     )?;
+    Ok(())
+}
+
+fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "Play", animations::animation_group_play)?;
     table_set_rust_fn(state, table, "Restart", animations::animation_group_restart)?;
     table_set_rust_fn(state, table, "Stop", animations::animation_group_stop)?;
@@ -339,6 +359,16 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
     table_set_rust_fn(
         state,
         table,
+        "SetToFinalAlpha",
+        animations::animation_group_set_to_final_alpha,
+    )?;
+    Ok(())
+}
+
+fn register_animation_timing(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn(
+        state,
+        table,
         "SetDuration",
         animations::animation_set_duration,
     )?;
@@ -355,50 +385,26 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
         "SetEndDelay",
         animations::animation_set_end_delay,
     )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetToFinalAlpha",
-        animations::animation_group_set_to_final_alpha,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
+    Ok(())
+}
+
+fn register_animation_config(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    for name in [
         "SetSmoothing",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
         "SetFromAlpha",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
         "SetToAlpha",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn(state, table, "SetOffset", animations::animation_config_noop)?;
-    table_set_rust_fn(state, table, "SetScale", animations::set_scale_dispatch)?;
-    table_set_rust_fn(
-        state,
-        table,
+        "SetOffset",
         "SetScaleFrom",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
         "SetScaleTo",
-        animations::animation_config_noop,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
         "SetDegrees",
-        animations::animation_config_noop,
-    )?;
+    ] {
+        table_set_rust_fn(state, table, name, animations::animation_config_noop)?;
+    }
+    table_set_rust_fn(state, table, "SetScale", animations::set_scale_dispatch)?;
+    Ok(())
+}
+
+fn register_animation_target(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetTarget", animations::get_animation_target)?;
     table_set_rust_fn(
         state,
@@ -424,6 +430,10 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
         "SetTargetKey",
         animations::animation_config_noop,
     )?;
+    Ok(())
+}
+
+fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -483,12 +493,6 @@ fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<(
         table,
         "GetFlipBookFrameHeight",
         animations::animation_get_flipbook_frame_height,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "CreateControlPoint",
-        animations::create_control_point,
     )?;
     Ok(())
 }
