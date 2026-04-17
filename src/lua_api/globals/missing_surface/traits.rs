@@ -625,6 +625,7 @@ const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
         "UpdateLastSelectedSavedConfigID",
         c_class_talents_update_last_selected_saved_config_id,
     ),
+    ("CanEditTalents", c_class_talents_can_edit_talents),
     ("CanChangeTalents", c_class_talents_can_change_talents),
     ("GetHasStarterBuild", c_class_talents_get_has_starter_build),
     (
@@ -1428,6 +1429,18 @@ fn c_class_talents_can_change_talents(state: &mut LuaState) -> LuaResult<u32> {
         state.push(reason);
     }
     Ok(3)
+}
+
+fn c_class_talents_can_edit_talents(state: &mut LuaState) -> LuaResult<u32> {
+    let can_edit = borrow_state(state)?.talents.can_change_talents;
+    state.push(Val::Bool(can_edit));
+    if can_edit {
+        state.push(Val::Nil);
+    } else {
+        let reason = create_string(state, "You can't do that right now.");
+        state.push(reason);
+    }
+    Ok(2)
 }
 
 fn c_class_talents_get_has_starter_build(state: &mut LuaState) -> LuaResult<u32> {
