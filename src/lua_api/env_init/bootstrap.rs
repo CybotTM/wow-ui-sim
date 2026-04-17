@@ -2512,15 +2512,27 @@ end
 if rawget(C_GuildInfo, "CanSpeakInGuildChat") == nil then
   function C_GuildInfo.CanSpeakInGuildChat() return true end
 end
+-- `GetAvailableLocaleInfo()` — list of shipped retail locales.
+-- Each entry mirrors the Blizzard LocaleInfo shape:
+--   { localeId: integer, localeName: "xxYY", englishName, displayName }.
+-- localeId values follow Blizzard's internal 1..N enumeration; consumers
+-- (Settings/Language dropdown, Blizzard_Settings) iterate the list and
+-- match by localeName, so the numbering only matters for stable order.
 if GetAvailableLocaleInfo == nil then
   function GetAvailableLocaleInfo()
     return {
-      {
-        localeId = 1,
-        localeName = "enUS",
-        englishName = "English (US)",
-        displayName = "English (US)",
-      }
+      { localeId = 1,  localeName = "enUS", englishName = "English (US)",         displayName = "English (US)"         },
+      { localeId = 2,  localeName = "enGB", englishName = "English (UK)",         displayName = "English (UK)"         },
+      { localeId = 3,  localeName = "frFR", englishName = "French",               displayName = "Français"             },
+      { localeId = 4,  localeName = "deDE", englishName = "German",               displayName = "Deutsch"              },
+      { localeId = 5,  localeName = "esES", englishName = "Spanish (Spain)",      displayName = "Español (EU)"         },
+      { localeId = 6,  localeName = "esMX", englishName = "Spanish (Latin America)", displayName = "Español (AL)"      },
+      { localeId = 7,  localeName = "itIT", englishName = "Italian",              displayName = "Italiano"             },
+      { localeId = 8,  localeName = "ptBR", englishName = "Portuguese (Brazil)",  displayName = "Português (Brasil)"   },
+      { localeId = 9,  localeName = "ruRU", englishName = "Russian",              displayName = "Русский"              },
+      { localeId = 10, localeName = "koKR", englishName = "Korean",               displayName = "한국어"                },
+      { localeId = 11, localeName = "zhCN", englishName = "Chinese (Simplified)", displayName = "简体中文"              },
+      { localeId = 12, localeName = "zhTW", englishName = "Chinese (Traditional)",displayName = "繁體中文"              },
     }
   end
 end
