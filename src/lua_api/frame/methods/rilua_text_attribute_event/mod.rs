@@ -110,6 +110,15 @@ fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<
 }
 
 fn register_attribute_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_attribute_core(state, table)?;
+    register_attribute_frame_refs(state, table)?;
+    register_attribute_protection(state, table)?;
+    register_attribute_behavior_flags(state, table)?;
+    register_attribute_hit_rect(state, table)?;
+    Ok(())
+}
+
+fn register_attribute_core(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetAttribute", attributes::get_attribute)?;
     table_set_rust_fn(state, table, "SetAttribute", attributes::set_attribute)?;
     table_set_rust_fn(
@@ -130,8 +139,16 @@ fn register_attribute_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaR
         "ExecuteAttribute",
         attributes::execute_attribute,
     )?;
+    Ok(())
+}
+
+fn register_attribute_frame_refs(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetFrameRef", attributes::set_frame_ref)?;
     table_set_rust_fn(state, table, "GetFrameRef", attributes::get_frame_ref)?;
+    Ok(())
+}
+
+fn register_attribute_protection(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetForbidden", attributes::set_forbidden)?;
     table_set_rust_fn(state, table, "IsForbidden", attributes::is_forbidden)?;
     table_set_rust_fn(
@@ -140,6 +157,10 @@ fn register_attribute_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaR
         "CanChangeProtectedState",
         attributes::can_change_protected_state,
     )?;
+    Ok(())
+}
+
+fn register_attribute_behavior_flags(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -176,6 +197,10 @@ fn register_attribute_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaR
         "DoesClipChildren",
         attributes::does_clip_children,
     )?;
+    Ok(())
+}
+
+fn register_attribute_hit_rect(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
