@@ -221,6 +221,16 @@ fn max_points_for_currency(currency_id: u32) -> u32 {
     }
 }
 
+fn has_unspent_talent_points(state: &crate::lua_api::SimState) -> bool {
+    let Some(tree) = TRAIT_TREE_DB.get(&790) else {
+        return false;
+    };
+    tree.currency_ids.iter().any(|&currency_id| {
+        let max_points = max_points_for_currency(currency_id);
+        max_points > 0 && state.talents.spent_for_currency(currency_id) < max_points
+    })
+}
+
 fn check_has_currency(node_id: u32, state: &crate::lua_api::SimState) -> bool {
     let Some(&currency_id) = state.talents.node_currency_map.get(&node_id) else {
         return true;
@@ -643,6 +653,14 @@ const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
     (
         "GetNextStarterBuildPurchase",
         c_class_talents_get_next_starter_build_purchase,
+    ),
+    (
+        "HasUnspentTalentPoints",
+        c_class_talents_has_unspent_talent_points,
+    ),
+    (
+        "HasUnspentHeroTalentPoints",
+        c_class_talents_has_unspent_hero_talent_points,
     ),
 ];
 
@@ -1286,8 +1304,13 @@ fn hero_specs_for_spec(spec_id: u32) -> &'static [u32] {
 }
 
 fn c_class_talents_get_hero_talent_specs_for_class_spec(state: &mut LuaState) -> LuaResult<u32> {
-    let _class_id = i32::from_stack(state, 1)?;
-    let spec_id = u32::from_stack(state, 2)?;
+    let spec_id = match (stack_val(state, 1), stack_val(state, 2)) {
+        (_, Val::Num(value)) => value as u32,
+        (Val::Num(value), Val::Nil) => config_spec_id(value as i32)
+            .or_else(|| current_spec_id(state))
+            .unwrap_or(0),
+        _ => current_spec_id(state).unwrap_or(0),
+    };
     let hero_specs = push_u32_array(state, hero_specs_for_spec(spec_id).iter().copied());
     state.push(hero_specs);
     state.push(Val::Num(71.0));
@@ -1466,6 +1489,20 @@ fn c_class_talents_get_next_starter_build_purchase(state: &mut LuaState) -> LuaR
     state.push(Val::Nil);
     state.push(Val::Nil);
     Ok(2)
+}
+
+fn c_class_talents_has_unspent_talent_points(state: &mut LuaState) -> LuaResult<u32> {
+    let has_unspent = {
+        let sim = borrow_state(state)?;
+        has_unspent_talent_points(&sim)
+    };
+    state.push(Val::Bool(has_unspent));
+    Ok(1)
+}
+
+fn c_class_talents_has_unspent_hero_talent_points(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
 }
 
 fn c_class_talents_trait_tree_for_spec(_spec_id: u32) -> u32 {
