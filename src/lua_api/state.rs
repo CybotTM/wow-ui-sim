@@ -92,6 +92,7 @@ macro_rules! build_empty_sim_state {
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
             net_stats: NetStats::default(),
+            store_frame_shown: false,
             debug_borders: false,
             debug_anchors: false,
         }
@@ -359,6 +360,12 @@ pub struct SimState {
     /// to exercise UI paths that depend on latency or bandwidth thresholds
     /// (e.g. Blizzard_MicroMenu's status-icon color ramp).
     pub net_stats: NetStats,
+    /// Whether the in-game Store window is currently shown. The sim doesn't
+    /// actually render the Store, but `MainMenuBarMicroButtons` colours the
+    /// Store micro-button as pushed when `StoreFrame_IsShown()` returns true,
+    /// so tests can flip this flag via `A_Admin.SetStoreFrameShown(true)` to
+    /// exercise that pushed-state rendering.
+    pub store_frame_shown: bool,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.

@@ -78,3 +78,12 @@ pub(super) fn set_net_stats(state: &mut LuaState) -> LuaResult<u32> {
     st.net_stats.latency_world_ms = latency_world;
     Ok(0)
 }
+
+/// `A_Admin.SetStoreFrameShown(shown)`. Missing arg defaults to `true` so
+/// `A_Admin.SetStoreFrameShown()` opens the store. Drives `StoreFrame_IsShown`
+/// (registered in `rilua_store_frame.rs`).
+pub(super) fn set_store_frame_shown(state: &mut LuaState) -> LuaResult<u32> {
+    let shown = Option::<bool>::from_stack(state, 1)?.unwrap_or(true);
+    borrow_state_mut(state)?.store_frame_shown = shown;
+    Ok(0)
+}

@@ -30,6 +30,7 @@ pub mod rilua_keybindings;
 pub mod rilua_missing_surface;
 pub mod rilua_net_stats;
 pub mod rilua_security;
+pub mod rilua_store_frame;
 pub mod rilua_stubs;
 pub mod rilua_utility_system_spell;
 pub mod spell_api;

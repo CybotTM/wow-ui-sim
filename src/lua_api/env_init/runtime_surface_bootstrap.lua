@@ -342,14 +342,10 @@ end
 -- and reads from SimState::net_stats so tests can inject values via
 -- A_Admin.SetNetStats(bandwidthIn, bandwidthOut, latencyHome, latencyWorld).
 
--- Store UI is never shown in the sim, so the "is it visible" probe
--- reports false. Used by MainMenuBarMicroButtons to decide whether the
--- Store micro-button should render as pushed.
-if StoreFrame_IsShown == nil then
-  function StoreFrame_IsShown()
-    return false
-  end
-end
+-- StoreFrame_IsShown is registered from Rust (src/lua_api/globals/rilua_store_frame.rs)
+-- and reads from SimState::store_frame_shown so tests can toggle it via
+-- A_Admin.SetStoreFrameShown(true) to exercise MainMenuBarMicroButtons'
+-- pushed-state rendering for the Store micro-button.
 
 -- `UnitIsPlayer(unit)` — true when `unit` resolves to a player-character
 -- entity. In the sim, "player" and party/raid slots are players; other

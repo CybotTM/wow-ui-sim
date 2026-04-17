@@ -46,8 +46,8 @@ use super::rilua_admin_pvp_guild::{
 use super::rilua_admin_spec::{reset_talents, set_spec, set_talent_rank, set_talent_selection};
 use super::rilua_admin_vault::{clear_vault, set_vault_activity, set_vault_rewards};
 use super::rilua_admin_zone_economy::{
-    set_in_instance, set_instance_info, set_item_level, set_money, set_net_stats, set_sub_zone,
-    set_zone,
+    set_in_instance, set_instance_info, set_item_level, set_money, set_net_stats,
+    set_store_frame_shown, set_sub_zone, set_zone,
 };
 
 // ── Entry point ──────────────────────────────────────────────────────────────
@@ -131,6 +131,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetMoney", set_money)?
         .set_function("SetItemLevel", set_item_level)?
         .set_function("SetNetStats", set_net_stats)?
+        .set_function("SetStoreFrameShown", set_store_frame_shown)?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?

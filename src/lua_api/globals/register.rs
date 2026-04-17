@@ -25,6 +25,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::rilua_font_strings_collection::register_all(lua)?;
     super::rilua_utility_system_spell::register_all(lua)?;
     super::rilua_net_stats::register_all(lua)?;
+    super::rilua_store_frame::register_all(lua)?;
     super::rilua_missing_surface::register_all(lua)?;
     super::rilua_admin::register_all(lua)?;
     super::super::rilua_timer_layout::register_all(lua)?;
