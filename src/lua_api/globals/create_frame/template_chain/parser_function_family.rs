@@ -1,0 +1,131 @@
+use super::{FastHandlerRef, is_fast_handler_path, is_fast_identifier};
+
+pub(super) fn parse_function_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_direct_function_shapes(stmt)
+        .or_else(|| parse_inline_function_arg_shapes(stmt))
+        .or_else(|| parse_ancestor_function_shapes(stmt))
+        .or_else(|| parse_event_function_shapes(stmt))
+}
+
+fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some(function_name) = parse_global_function_suffix(stmt, "(self)") {
+        return Some(FastHandlerRef::Function(function_name));
+    }
+    if let Some(function_name) = parse_global_function_suffix(stmt, "()") {
+        return Some(FastHandlerRef::FunctionNoArgs(function_name));
+    }
+    parse_global_function_suffix(stmt, "(self:GetID())").map(FastHandlerRef::FunctionWithSelfIdArg)
+}
+
+fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((function_name, arg)) = parse_inline_function_with_self_string_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithSelfStringArg { function_name, arg });
+    }
+    if let Some((function_name, value)) = parse_inline_function_with_number_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithNumberArg {
+            function_name,
+            value,
+        });
+    }
+    if let Some((function_name, arg_path)) = parse_inline_function_with_global_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithGlobalArg {
+            function_name,
+            arg_path,
+        });
+    }
+    if let Some((function_name, global_arg_path)) =
+        parse_inline_function_with_global_and_self_arg(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithGlobalAndSelfArg {
+            function_name,
+            global_arg_path,
+        });
+    }
+    parse_inline_function_with_self_and_parent_field_arg(stmt).map(|(function_name, field)| {
+        FastHandlerRef::FunctionWithSelfAndParentFieldArg {
+            function_name,
+            field,
+        }
+    })
+}
+
+fn parse_ancestor_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some(function_name) = parse_global_function_suffix(stmt, "(self:GetParent())") {
+        return Some(FastHandlerRef::FunctionWithParentArg(function_name));
+    }
+    if let Some(function_name) =
+        parse_global_function_suffix(stmt, "(self:GetParent():GetParent())")
+    {
+        return Some(FastHandlerRef::FunctionWithGrandparentArg(function_name));
+    }
+    parse_global_function_suffix(stmt, "(self:GetParent():GetID())")
+        .map(FastHandlerRef::FunctionWithParentIdArg)
+}
+
+fn parse_event_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some(function_name) = parse_global_function_suffix(stmt, "(self, event, ...)") {
+        return Some(FastHandlerRef::FunctionWithEventVarargs(function_name));
+    }
+    if let Some(function_name) = parse_global_function_suffix(stmt, "(self, button)") {
+        return Some(FastHandlerRef::FunctionWithButton(function_name));
+    }
+    parse_global_function_suffix(stmt, "(self, elapsed)").map(FastHandlerRef::FunctionWithElapsed)
+}
+
+fn parse_global_function_suffix<'a>(stmt: &'a str, suffix: &str) -> Option<&'a str> {
+    stmt.strip_suffix(suffix)
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+}
+
+fn parse_inline_function_with_self_string_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (self_arg, raw_string_arg) = args.split_once(',')?;
+    let function_name = function_name.trim();
+    let arg = super::parse_single_string_literal(raw_string_arg.trim())?;
+    (is_fast_handler_path(function_name) && self_arg.trim() == "self")
+        .then_some((function_name, arg))
+}
+
+fn parse_inline_function_with_number_arg(stmt: &str) -> Option<(&str, f64)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let value = args.strip_suffix(')')?.trim().parse::<f64>().ok()?;
+    let function_name = function_name.trim();
+    is_fast_handler_path(function_name).then_some((function_name, value))
+}
+
+fn parse_inline_function_with_global_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let arg_path = args.strip_suffix(')')?.trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_handler_path(arg_path))
+        .then_some((function_name, arg_path))
+}
+
+fn parse_inline_function_with_global_and_self_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (global_arg_path, self_arg) = args.split_once(',')?;
+    let function_name = function_name.trim();
+    let global_arg_path = global_arg_path.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(global_arg_path)
+        && self_arg.trim() == "self")
+        .then_some((function_name, global_arg_path))
+}
+
+fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (self_arg, parent_field) = args.split_once(',')?;
+    let field = self_arg
+        .trim()
+        .eq("self")
+        .then_some(parent_field.trim())?
+        .strip_prefix("self:GetParent().")?
+        .trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_identifier(field))
+        .then_some((function_name, field))
+}
