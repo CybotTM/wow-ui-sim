@@ -402,6 +402,49 @@ fn test_traits_get_tree_info_valid() {
 }
 
 #[test]
+fn test_traits_get_tree_currency_info_exposes_currency_fields() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local info = C_Traits.GetTreeCurrencyInfo(201, 790, false)
+            if type(info) ~= "table" then
+                return "expected_table"
+            end
+            if type(info[1]) ~= "table" then
+                return "expected_entry"
+            end
+            if info[1].traitCurrencyID == nil then
+                return "missing_currency_id"
+            end
+            if info[1].quantity == nil then
+                return "missing_quantity"
+            end
+            if info[1].spent == nil then
+                return "missing_spent"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_traits_get_trait_currency_info_returns_currency_type() {
+    let env = env();
+    let has_currency_type: bool = env
+        .eval(
+            r#"
+            local _, _, currencyTypesID = C_Traits.GetTraitCurrencyInfo(2801)
+            return currencyTypesID ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(has_currency_type);
+}
+
+#[test]
 fn test_traits_get_tree_info_nil_invalid() {
     let env = env();
     let is_nil: bool = env

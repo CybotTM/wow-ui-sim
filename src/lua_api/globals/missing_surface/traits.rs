@@ -9,7 +9,8 @@ use crate::lua_api::talent_state;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use crate::specializations;
 use crate::traits::{
-    TRAIT_COND_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_SUBTREE_DB, TRAIT_TREE_DB,
+    TRAIT_COND_DB, TRAIT_CURRENCY_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_SUBTREE_DB,
+    TRAIT_TREE_DB,
 };
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -215,6 +216,18 @@ fn register_c_traits_query_fns(
         table_ref,
         "InitializeViewLoadout",
         c_traits_initialize_view_loadout,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetTreeCurrencyInfo",
+        c_traits_get_tree_currency_info,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetTraitCurrencyInfo",
+        c_traits_get_trait_currency_info,
     )?;
     table_set_rust_fn(state, table_ref, "GetTreeInfo", c_traits_get_tree_info)?;
     table_set_rust_fn(state, table_ref, "GetTreeNodes", c_traits_get_tree_nodes)?;
@@ -470,6 +483,102 @@ fn c_traits_initialize_view_loadout(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn subtree_trait_currency_id(subtree_id: u32) -> Option<u32> {
+    match subtree_id {
+        48 => Some(2986),
+        49 => Some(2987),
+        50 => Some(2988),
+        _ => None,
+    }
+}
+
+fn active_hero_currency_id(state: &LuaState) -> Option<u32> {
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.talents.active_hero_subtree())
+        .and_then(subtree_trait_currency_id)
+}
+
+fn tree_currency_budget(state: &LuaState, index: usize, currency_id: u32) -> Option<u32> {
+    match index {
+        0 => Some(31),
+        1 => Some(30),
+        _ if active_hero_currency_id(state) == Some(currency_id) => Some(11),
+        _ => None,
+    }
+}
+
+fn push_tree_currency_info(
+    state: &mut LuaState,
+    trait_currency_id: u32,
+    quantity: u32,
+    max_quantity: Option<u32>,
+    spent: u32,
+) -> Val {
+    let info = create_table(state);
+    table_set(
+        state,
+        info,
+        "traitCurrencyID",
+        Val::Num(trait_currency_id as f64),
+    );
+    table_set(state, info, "quantity", Val::Num(quantity as f64));
+    match max_quantity {
+        Some(max_quantity) => table_set(state, info, "maxQuantity", Val::Num(max_quantity as f64)),
+        None => table_set(state, info, "maxQuantity", Val::Nil),
+    }
+    table_set(state, info, "spent", Val::Num(spent as f64));
+    info
+}
+
+fn c_traits_get_tree_currency_info(state: &mut LuaState) -> LuaResult<u32> {
+    let _config_id = i32::from_stack(state, 1)?;
+    let tree_id = u32::from_stack(state, 2)?;
+    let _exclude_staged_changes = bool::from_stack(state, 3)?;
+    let currencies = create_table(state);
+    let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
+        state.push(currencies);
+        return Ok(1);
+    };
+
+    let spent_by_currency = borrow_state(state)
+        .ok()
+        .map(|sim| sim.talents.currency_spent.clone())
+        .unwrap_or_default();
+
+    for (index, &currency_id) in tree.currency_ids.iter().enumerate() {
+        let spent = spent_by_currency.get(&currency_id).copied().unwrap_or(0);
+        let budget = tree_currency_budget(state, index, currency_id);
+        let quantity = budget.unwrap_or(0).saturating_sub(spent);
+        let info = push_tree_currency_info(state, currency_id, quantity, budget, spent);
+        set_table_array(state, currencies, index as i64 + 1, info);
+    }
+
+    state.push(currencies);
+    Ok(1)
+}
+
+fn c_traits_get_trait_currency_info(state: &mut LuaState) -> LuaResult<u32> {
+    let trait_currency_id = u32::from_stack(state, 1)?;
+    let Some(currency) = TRAIT_CURRENCY_DB.get(&trait_currency_id) else {
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        return Ok(4);
+    };
+
+    state.push(Val::Num(currency.flags as f64));
+    state.push(Val::Num(0.0));
+    if currency.currency_type == 0 {
+        state.push(Val::Nil);
+    } else {
+        state.push(Val::Num(currency.currency_type as f64));
+    }
+    state.push(Val::Nil);
+    Ok(4)
+}
+
 fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {
     let tree_id = match stack_val(state, 2) {
         Val::Num(value) => value as u32,
@@ -582,6 +691,9 @@ fn push_subtree_hero_fields(state: &mut LuaState, info: Val, subtree_id: u32) {
     let (pos_x, pos_y) = hero_talents::subtree_position(subtree_id);
     table_set(state, info, "posX", Val::Num(pos_x as f64));
     table_set(state, info, "posY", Val::Num(pos_y as f64));
+    if let Some(currency_id) = subtree_trait_currency_id(subtree_id) {
+        table_set(state, info, "traitCurrencyID", Val::Num(currency_id as f64));
+    }
 }
 
 fn c_traits_get_subtree_info(state: &mut LuaState) -> LuaResult<u32> {
