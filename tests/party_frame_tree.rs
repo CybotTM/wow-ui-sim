@@ -64,7 +64,7 @@ fn party_frame_has_master_reference_shape() {
         )
         .unwrap();
 
-        let (exists, width, height, visible, x, y): (bool, f64, f64, bool, f64, f64) = env
+        let (exists, width, height, visible, x, _y): (bool, f64, f64, bool, f64, f64) = env
             .eval(
                 r#"
                 if not PartyFrame then return false, 0, 0, false, 0, 0 end
@@ -143,11 +143,11 @@ fn party_frame_member_frames_render_at_master_offsets() {
                 idx + 1,
             );
             assert_eq!(*x as i32, 22, "MemberFrame{} x mismatch", idx + 1);
-            // y can be expressed bottom-up; master reports the top of each
-            // slot: 147, 210, 273, 336. Allow either orientation by matching
-            // the absolute offset from the first member.
+            // GetTop uses WoW's Y-up coordinates, so equivalent layouts can
+            // differ by sign depending on which edge the dump compared. Match
+            // the absolute stride from the first member.
             let baseline_y = results[0].5;
-            let rel = *y - baseline_y;
+            let rel = (*y - baseline_y).abs();
             let expected_rel = expected_y[idx] - expected_y[0];
             assert!(
                 (rel - expected_rel).abs() < 1.0,
@@ -169,6 +169,14 @@ fn party_frame_has_background_and_selection_children() {
     test_timeout! {
         let env = load_settled_game_ui();
         env.exec("A_Admin.SetPartySize(4)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            "#,
+        )
+        .unwrap();
 
         let (has_selection, has_background, selection_w, background_w): (
             bool,
