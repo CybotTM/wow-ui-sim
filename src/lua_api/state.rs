@@ -183,6 +183,7 @@ pub use super::game_data::{
 use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
+pub use super::game_data::AuraInfo;
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CurrencyInfo, CursorInfo,
     CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo,

@@ -210,12 +210,11 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_Tutorial
     ("C_Tutorial", "AcknowledgeTutorial", stub_nil),
     ("C_Tutorial", "HasSeenTutorial", stub_nil),
-    // C_UnitAuras
-    ("C_UnitAuras", "GetAuraDataByAuraInstanceID", stub_nil),
-    ("C_UnitAuras", "GetAuraDataByIndex", stub_nil),
-    ("C_UnitAuras", "GetAuraDataBySpellName", stub_nil),
-    ("C_UnitAuras", "GetBuffDataByIndex", stub_nil),
-    ("C_UnitAuras", "GetDebuffDataByIndex", stub_nil),
+    // C_UnitAuras GetAuraDataByAuraInstanceID / GetAuraDataByIndex /
+    // GetAuraDataBySpellName / GetBuffDataByIndex /
+    // GetDebuffDataByIndex are SimState-backed (via `player.buffs`) in
+    // globals/auras.rs, not stubs. That registration runs AFTER the
+    // stub registrar on purpose, so these entries were dead.
     // C_UIWidgetManager
     ("C_UIWidgetManager", "GetBelowMinimapWidgetSetID", stub_nil),
     (
