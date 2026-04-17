@@ -330,6 +330,14 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         field: &'a str,
     },
+    ConditionalTooltip {
+        target_path: &'a str,
+        field: &'a str,
+        anchor: &'a str,
+        red_path: &'a str,
+        green_path: &'a str,
+        blue_path: &'a str,
+    },
     NamedGlobalMethodWithGlobalArg {
         suffix: &'a str,
         method_name: &'a str,

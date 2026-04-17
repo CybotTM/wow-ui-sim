@@ -32,6 +32,23 @@ pub(super) fn build_global_family_handler(
             field,
         } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
             .map(Some),
+        FastHandlerRef::ConditionalTooltip {
+            target_path,
+            field,
+            anchor,
+            red_path,
+            green_path,
+            blue_path,
+        } => build_conditional_tooltip_handler(
+            state,
+            target_path,
+            field,
+            anchor,
+            red_path,
+            green_path,
+            blue_path,
+        )
+        .map(Some),
         FastHandlerRef::NamedGlobalMethodWithGlobalArg {
             suffix,
             method_name,
@@ -150,6 +167,59 @@ fn build_global_method_then_assign_handler(
     let method = build_global_method_handler(state, target_path, method_name)?;
     let assign = build_assignment_handler(state, field, value)?;
     build_chained_handler(state, method, assign, "inline-global-method-assign", false)
+}
+
+fn build_conditional_tooltip_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    field: &str,
+    anchor: &str,
+    red_path: &str,
+    green_path: &str,
+    blue_path: &str,
+) -> LuaResult<Val> {
+    let field = create_string(state, field);
+    let anchor = create_string(state, anchor);
+    let red_path = create_string(state, red_path);
+    let green_path = create_string(state, green_path);
+    let blue_path = create_string(state, blue_path);
+    call_global_method_builder(
+        state,
+        target_path,
+        "SetText",
+        r#"
+            local target_ref, _ignored_method_name, field, anchor, red_path, green_path, blue_path = ...
+            local function resolve_global(path)
+                local value = _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
+            return function(self, ...)
+                local target = target_ref
+                if type(target) == "string" then
+                    target = resolve_global(target)
+                end
+                if not target then
+                    return
+                end
+                local text = self[field]
+                if not text then
+                    return
+                end
+                target:SetOwner(self, anchor)
+                return target:SetText(
+                    text,
+                    resolve_global(red_path),
+                    resolve_global(green_path),
+                    resolve_global(blue_path)
+                )
+            end
+        "#,
+        "template-conditional-tooltip-handler",
+        &[field, anchor, red_path, green_path, blue_path],
+    )
 }
 
 fn build_named_global_method_with_global_arg_handler(

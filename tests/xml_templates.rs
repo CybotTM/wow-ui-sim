@@ -538,6 +538,62 @@ fn test_create_frame_from_xml_inline_named_global_method_sequence_with_assignmen
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_conditional_tooltip_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.TEST_FAST_TOOLTIP_COLOR = { r = 0.1, g = 0.2, b = 0.3 }
+        _G.GameTooltip = {}
+        function _G.GameTooltip:SetOwner(frame, anchor)
+            self.owner = frame
+            self.anchor = anchor
+        end
+        function _G.GameTooltip:SetText(text, r, g, b)
+            self.text = text
+            self.r = r
+            self.g = g
+            self.b = b
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineTooltipConditionalFrame" parent="UIParent">
+        <Scripts>
+            <OnLoad>self.tooltip = "tooltip text"</OnLoad>
+            <OnEnter>if (self.tooltip) then GameTooltip:SetOwner(self, "ANCHOR_RIGHT"); GameTooltip:SetText(self.tooltip, TEST_FAST_TOOLTIP_COLOR.r, TEST_FAST_TOOLTIP_COLOR.g, TEST_FAST_TOOLTIP_COLOR.b); end</OnEnter>
+        </Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        "XmlInlineTooltipConditionalFrame:GetScript('OnEnter')(XmlInlineTooltipConditionalFrame)",
+    )
+    .unwrap();
+
+    let result: (String, String, f64, f64, f64) = env
+        .eval(
+            r#"
+            return GameTooltip.anchor,
+                   GameTooltip.text,
+                   GameTooltip.r,
+                   GameTooltip.g,
+                   GameTooltip.b
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_RIGHT");
+    assert_eq!(result.1, "tooltip text");
+    assert_eq!(result.2, 0.1);
+    assert_eq!(result.3, 0.2);
+    assert_eq!(result.4, 0.3);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_field_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

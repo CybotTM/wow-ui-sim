@@ -32,6 +32,18 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             method_name,
         });
     }
+    if let Some((target_path, field, anchor, red_path, green_path, blue_path)) =
+        parse_conditional_tooltip(stmt)
+    {
+        return Some(FastHandlerRef::ConditionalTooltip {
+            target_path,
+            field,
+            anchor,
+            red_path,
+            green_path,
+            blue_path,
+        });
+    }
     if let Some((suffix, method_name, arg_path)) =
         parse_inline_named_global_method_with_global_arg(stmt)
     {
@@ -96,6 +108,52 @@ fn parse_inline_global_method_with_self_field_arg(stmt: &str) -> Option<(&str, &
         && is_fast_identifier(method_name)
         && is_fast_identifier(field))
     .then_some((target_path, method_name, field))
+}
+
+fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str, &str)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let remainder = remainder.strip_prefix("self.")?;
+    let (field, remainder) = remainder.split_once(')')?;
+    if !is_fast_identifier(field.trim()) {
+        return None;
+    }
+    let remainder = remainder.trim_start().strip_prefix("then")?.trim_start();
+    let (first, second_with_end) = remainder.split_once(";")?;
+    let second = second_with_end.trim().strip_suffix("end")?.trim();
+
+    let (target_path, method_name, anchor) =
+        parse_inline_global_method_with_self_string_arg(first.trim())?;
+    if method_name != "SetOwner" {
+        return None;
+    }
+
+    let (text_target_path, text_remainder) = second.rsplit_once(':')?;
+    let (text_method_name, text_args) = text_remainder.split_once('(')?;
+    let text_args = text_args.strip_suffix(')')?.trim();
+    if text_target_path.trim() != target_path || text_method_name.trim() != "SetText" {
+        return None;
+    }
+    let mut parts = text_args.split(',').map(str::trim);
+    let text_field = parts.next()?.strip_prefix("self.")?;
+    let red_path = parts.next()?;
+    let green_path = parts.next()?;
+    let blue_path = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    (text_field == field.trim()
+        && is_fast_handler_path(red_path)
+        && is_fast_handler_path(green_path)
+        && is_fast_handler_path(blue_path))
+    .then_some((
+        target_path,
+        field.trim(),
+        anchor,
+        red_path,
+        green_path,
+        blue_path,
+    ))
 }
 
 fn parse_inline_named_global_method_with_global_arg(stmt: &str) -> Option<(&str, &str, &str)> {
