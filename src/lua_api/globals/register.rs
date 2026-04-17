@@ -5,6 +5,7 @@
 //! type, ipairs, pairs, getmetatable, and setmetatable.
 
 use super::super::SimState;
+use super::super::methods::mark_frame_ref_cache_no_traverse;
 use rilua::LuaApiMut;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -23,6 +24,12 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     register_bootstrap_globals(lua)?;
     register_frame_globals(lua)?;
     register_tail_globals(lua)?;
+    // Now that every registrar has run and any frames created during
+    // bootstrap have landed in __rilua_frame_refs, mark the cache
+    // table skip-traverse. Entries are pinned individually by frame_ref,
+    // so the mark phase can stop walking the 47k-entry registry each
+    // cycle.
+    mark_frame_ref_cache_no_traverse(lua.state_mut());
     Ok(())
 }
 

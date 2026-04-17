@@ -184,6 +184,17 @@ pub fn sync_child_to_rilua(
     Ok(())
 }
 
+/// Mark the frame-ref cache as skip-traverse.
+///
+/// The cache's entries (frame backing tables) are individually pinned by
+/// `frame_ref` at creation, so the mark phase does not need to walk the
+/// 47k-entry registry to keep them alive. Call once at the end of
+/// `register_globals`.
+pub fn mark_frame_ref_cache_no_traverse(state: &mut LuaState) {
+    let cache = frame_ref_cache(state);
+    state.gc.mark_table_no_traverse(cache);
+}
+
 /// Get or create the frame ref cache table in the registry.
 /// Pre-sized for ~3000 frames (typical Blizzard UI load).
 fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
