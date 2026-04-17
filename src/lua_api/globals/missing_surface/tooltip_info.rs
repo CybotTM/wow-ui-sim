@@ -18,6 +18,7 @@ use crate::lua_api::state::RACE_DATA;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use crate::spell_descriptions;
 use crate::spells;
+use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -540,6 +541,7 @@ fn register_item_spell_aura_methods(
             ("GetSocketedItem", c_tooltip_get_socketed_item),
             ("GetSocketGem", c_tooltip_get_socket_gem),
             ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
+            ("GetTalent", c_tooltip_get_talent),
             ("GetToyByItemID", c_tooltip_get_toy_by_item_id),
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
             ("GetUpgradeItem", c_tooltip_get_upgrade_item),
@@ -914,6 +916,40 @@ fn tooltip_for_toy_item_id(state: &mut LuaState, item_id: u32) -> Val {
     tooltip
 }
 
+fn preferred_trait_spell_id(definition_id: u32) -> Option<u32> {
+    let definition = TRAIT_DEFINITION_DB.get(&definition_id)?;
+    [
+        definition.visible_spell_id,
+        definition.overrides_spell_id,
+        definition.spell_id,
+    ]
+    .into_iter()
+    .find(|spell_id| *spell_id != 0)
+}
+
+fn spell_id_for_trait_entry(entry_id: u32) -> Option<u32> {
+    let mut current_id = entry_id;
+    for _ in 0..8 {
+        if let Some(spell_id) = preferred_trait_spell_id(current_id) {
+            return Some(spell_id);
+        }
+        current_id = TRAIT_ENTRY_DB.get(&current_id)?.definition_id;
+    }
+    None
+}
+
+fn spell_id_for_talent_id(state: &LuaState, talent_id: u32) -> Option<u32> {
+    if let Some(node) = TRAIT_NODE_DB.get(&talent_id) {
+        let selected_entry_id = borrow_state(state)
+            .ok()
+            .and_then(|sim| sim.talents.node_selections.get(&talent_id).copied());
+        let entry_id = selected_entry_id.or_else(|| node.entry_ids.first().copied())?;
+        return spell_id_for_trait_entry(entry_id);
+    }
+
+    spell_id_for_trait_entry(talent_id).or_else(|| preferred_trait_spell_id(talent_id))
+}
+
 fn c_tooltip_get_trade_player_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let tooltip = trade_slot_item_id(state, slot, true)
@@ -937,6 +973,15 @@ fn c_tooltip_get_merchant_item(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip = merchant_item_id(state, slot)
         .map(|item_id| tooltip_for_item_id(state, item_id))
         .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_talent(state: &mut LuaState) -> LuaResult<u32> {
+    let talent_id = u32::from_stack(state, 1)?;
+    let tooltip = spell_id_for_talent_id(state, talent_id)
+        .map(|spell_id| tooltip_for_spell_id(state, spell_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_SPELL));
     state.push(tooltip);
     Ok(1)
 }
