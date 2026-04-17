@@ -242,20 +242,10 @@ if C_PvP.GetZonePVPInfo == nil then
   end
 end
 
--- Zone / sub-zone text probes: sim has no world, so empty string is
--- the accurate "no zone info" answer that OnLoad handlers expect.
-if GetZoneText == nil then
-  function GetZoneText() return "" end
-end
-if GetSubZoneText == nil then
-  function GetSubZoneText() return "" end
-end
-if GetMinimapZoneText == nil then
-  function GetMinimapZoneText() return "" end
-end
-if GetRealZoneText == nil then
-  function GetRealZoneText() return "" end
-end
+-- GetZoneText / GetSubZoneText / GetMinimapZoneText / GetRealZoneText are
+-- registered from Rust (src/lua_api/globals/zone_text.rs), backed by
+-- SimState::world. Tests drive the values via A_Admin.SetZone / SetSubZone
+-- / SetInstanceInfo.
 if UnitGroupRolesAssigned == nil then
   function UnitGroupRolesAssigned() return "NONE" end
 end

@@ -39,6 +39,7 @@ pub mod spellbook_data;
 pub mod strings;
 pub mod template;
 pub mod unit_api;
+pub mod zone_text;
 
 pub use register::register_globals;
 pub use strings::register_all_ui_strings;
