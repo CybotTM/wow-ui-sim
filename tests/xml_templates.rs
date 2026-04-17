@@ -409,7 +409,10 @@ fn test_create_frame_from_xml_inline_parent_id_function_call_runs() {
 
     let parent_id: f64 = env.eval("return XmlInlineParentIdFrame:GetID()").unwrap();
     let captured_id: f64 = env.eval("return XmlInlineParentIdValue").unwrap();
-    assert_eq!(captured_id, parent_id, "parent-id inline function should see parent id");
+    assert_eq!(
+        captured_id, parent_id,
+        "parent-id inline function should see parent id"
+    );
 }
 
 #[test]
@@ -461,9 +464,14 @@ fn test_create_frame_from_xml_inline_assign_parent_ref_runs() {
         .unwrap();
 
     let same_ref: bool = env
-        .eval("return XmlInlineAssignParentRefFrame.Child.parentRef == XmlInlineAssignParentRefFrame")
+        .eval(
+            "return XmlInlineAssignParentRefFrame.Child.parentRef == XmlInlineAssignParentRefFrame",
+        )
         .unwrap();
-    assert!(same_ref, "inline parent-ref assignment should store parent on self");
+    assert!(
+        same_ref,
+        "inline parent-ref assignment should store parent on self"
+    );
 }
 
 #[test]

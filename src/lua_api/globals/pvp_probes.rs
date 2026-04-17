@@ -17,10 +17,7 @@ use rilua::{LuaApiMut, LuaResult, Val};
 fn is_in_active_world_pvp(state: &mut LuaState) -> LuaResult<u32> {
     let active = {
         let st = borrow_state(state)?;
-        matches!(
-            st.world.pvp_type.as_str(),
-            "combat" | "hostile" | "arena"
-        )
+        matches!(st.world.pvp_type.as_str(), "combat" | "hostile" | "arena")
     };
     state.push(Val::Bool(active));
     Ok(1)
