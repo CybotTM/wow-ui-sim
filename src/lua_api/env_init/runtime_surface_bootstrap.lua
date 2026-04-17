@@ -330,8 +330,30 @@ if UnitTrialBankedLevels == nil then
 end
 
 if SetPortraitTexture == nil then
-  function SetPortraitTexture(texture, _unit, _disablePortraitMask)
-    if texture and texture.SetTexture then
+  function SetPortraitTexture(texture, unit, _disablePortraitMask)
+    if not texture then
+      return
+    end
+
+    if UnitIsPlayer ~= nil and UnitIsPlayer(unit) then
+      local _, classFile = UnitClass(unit)
+      if classFile then
+        local atlas = GetClassAtlas and GetClassAtlas(classFile)
+        if atlas and texture.SetAtlas then
+          texture:SetAtlas(atlas)
+          return
+        end
+
+        local coords = CLASS_ICON_TCOORDS and CLASS_ICON_TCOORDS[classFile]
+        if coords and texture.SetTexture and texture.SetTexCoord then
+          texture:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
+          texture:SetTexCoord(unpack(coords))
+          return
+        end
+      end
+    end
+
+    if texture.SetTexture then
       texture:SetTexture("Interface\\ICONS\\INV_Misc_QuestionMark")
     end
   end

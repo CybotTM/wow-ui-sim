@@ -188,8 +188,8 @@ fn player_and_party_portraits_use_class_icon_atlases() {
                 r#"
                 local playerPortrait = PlayerFrame and PlayerFrame.PlayerFrameContainer and PlayerFrame.PlayerFrameContainer.PlayerPortrait
                 local partyPortrait = PartyFrame and PartyFrame.MemberFrame1 and PartyFrame.MemberFrame1.Portrait
-                return (playerPortrait and playerPortrait:GetAtlas()) or "",
-                       (partyPortrait and partyPortrait:GetAtlas()) or "",
+                return string.lower((playerPortrait and playerPortrait:GetAtlas()) or ""),
+                       string.lower((partyPortrait and partyPortrait:GetAtlas()) or ""),
                        tostring(playerPortrait and playerPortrait:GetTexture()),
                        tostring(partyPortrait and partyPortrait:GetTexture())
                 "#,
