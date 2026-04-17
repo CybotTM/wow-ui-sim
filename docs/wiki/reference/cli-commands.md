@@ -8,7 +8,7 @@ Two binaries: `wow-sim` (full UI load, GUI capable) and `wow-cli` (connects to r
 
 ### `lua-errors`
 
-Check for Lua errors during startup. Outputs unique errors as JSON to stdout (all other output to stderr). Run this after any stub or API change.
+Check for Lua errors during startup. Outputs unique errors as JSON to stdout (all other output to stderr). Each JSON `message` keeps the normalized headline plus any traceback lines from the first occurrence. Run this after any stub or API change.
 
 ```bash
 wow-sim --no-addons --no-saved-vars lua-errors 2>/dev/null
