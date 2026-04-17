@@ -80,8 +80,15 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "SetActionUIButton", set_action_ui_button)?;
     LuaApiMut::register_function(lua, "MapSceneCharacterHighlightStart", noop)?;
     LuaApiMut::register_function(lua, "MapSceneCharacterHighlightEnd", noop)?;
+    LuaApiMut::register_function(lua, "MultiActionBar_ShowAllGrids", noop)?;
+    LuaApiMut::register_function(lua, "MultiActionBar_HideAllGrids", noop)?;
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetMaxLevelForLatestExpansion",
+        get_max_level_for_latest_expansion,
+    )?;
     LuaApiMut::register_function(lua, "strsub", strsub)?;
     LuaApiMut::register_function(lua, "strcmputf8i", strcmputf8i)?;
     Ok(())
@@ -173,6 +180,11 @@ fn get_repair_all_cost(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     state.push(Val::Bool(false));
     Ok(2)
+}
+
+fn get_max_level_for_latest_expansion(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(80.0));
+    Ok(1)
 }
 
 fn set_action_ui_button(state: &mut LuaState) -> LuaResult<u32> {
