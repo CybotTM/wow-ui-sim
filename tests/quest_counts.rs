@@ -1,0 +1,107 @@
+//! Integration tests for the top-level quest-count globals routed through
+//! `src/lua_api/globals/quest_surface.rs`.
+//!
+//! Covers the three globals migrated off `GLOBAL_ZERO_STUBS`:
+//! - `GetNumQuestLogEntries`
+//! - `QuestMapUpdateAllQuests`
+//! - `GetQuestLogTimeLeft`
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+#[test]
+fn get_num_quest_log_entries_matches_c_quest_log_method() {
+    let env = env();
+    let (top_entries, top_quests, c_entries, c_quests): (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local ta, tb = GetNumQuestLogEntries()
+            local ca, cb = C_QuestLog.GetNumQuestLogEntries()
+            return ta, tb, ca, cb
+            "#,
+        )
+        .unwrap();
+    assert_eq!(top_entries, c_entries);
+    assert_eq!(top_quests, c_quests);
+    assert!(
+        top_entries > 0,
+        "seeded quest log should expose at least one entry"
+    );
+    assert!(
+        top_quests > 0,
+        "seeded quest log should expose at least one non-header quest"
+    );
+    assert!(
+        top_entries >= top_quests,
+        "total entries (including headers) cannot be below quest count"
+    );
+}
+
+#[test]
+fn quest_map_update_all_quests_returns_seeded_quest_count() {
+    let env = env();
+    let (num_pois, num_quests): (i32, i32) = env
+        .eval(
+            r#"
+            local pois = QuestMapUpdateAllQuests()
+            local _, quests = C_QuestLog.GetNumQuestLogEntries()
+            return pois, quests
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        num_pois, num_quests,
+        "sim treats every quest-log entry as having a POI"
+    );
+}
+
+#[test]
+fn get_quest_log_time_left_nil_when_no_selection() {
+    let env = env();
+    let v: Option<f64> = env.eval("return GetQuestLogTimeLeft()").unwrap();
+    assert_eq!(
+        v, None,
+        "unselected quest log should not expose a time limit"
+    );
+}
+
+#[test]
+fn get_quest_log_time_left_nil_when_selected_quest_is_not_world_quest() {
+    let env = env();
+    // Pick any quest that's in the seeded QUEST_LOG but not in WORLD_QUESTS —
+    // C_QuestLog.GetQuestIDForLogIndex(1) is always a real quest in the sim.
+    env.exec(
+        r#"
+        local qid = C_QuestLog.GetQuestIDForLogIndex(1)
+        if qid then C_QuestLog.SetSelectedQuest(qid) end
+        "#,
+    )
+    .unwrap();
+    let v: Option<f64> = env.eval("return GetQuestLogTimeLeft()").unwrap();
+    assert_eq!(
+        v, None,
+        "a normal selected quest should not report a time limit"
+    );
+}
+
+#[test]
+fn get_quest_log_time_left_reports_seeded_minutes_for_world_quest() {
+    let env = env();
+    // Pick the first seeded world quest id via C_TaskQuest.
+    env.exec(
+        r#"
+        local quests = C_TaskQuest.GetQuestsOnMap(2025)
+        if quests and quests[1] then
+            C_QuestLog.SetSelectedQuest(quests[1].questID)
+        end
+        "#,
+    )
+    .unwrap();
+    let seconds: f64 = env.eval("return GetQuestLogTimeLeft()").unwrap();
+    // Seeded value lives in quest_surface.rs as
+    // SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES = 120 → 7_200 seconds.
+    assert_eq!(seconds, 7_200.0);
+}

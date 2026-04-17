@@ -158,7 +158,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetNumGuildBankTabs",
     // GetNumGuildMembers is SimState-backed in guild_probes.rs, not a stub.
     "GetNumLootItems",
-    "GetNumQuestLogEntries",
+    // GetNumQuestLogEntries is SimState-backed in quest_surface.rs, not a stub.
     "GetNumShapeshiftForms",
     "GetNumSkillLines",
     "GetNumSpellTabs",
@@ -169,8 +169,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetPetLoyalty",
     "GetPetTimeInCombat",
     "GetPvpTalentSlotInfo",
-    "GetQuestLogTimeLeft",
-    "QuestMapUpdateAllQuests",
+    // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in
+    // quest_surface.rs, not stubs.
     "GetRaidRosterInfo",
     "GetRelicSlotType",
     "GetRestState",

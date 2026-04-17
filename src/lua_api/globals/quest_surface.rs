@@ -251,14 +251,17 @@ const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
 
 const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetNumQuestLeaderBoards", get_num_quest_leaderboards),
+    ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("GetQuestLogLeaderBoard", get_quest_log_leaderboard),
     ("GetQuestLogQuestText", get_quest_log_quest_text),
+    ("GetQuestLogTimeLeft", get_quest_log_time_left),
     ("GetQuestPOIBlobCount", get_quest_poi_blob_count),
     ("HaveQuestData", have_quest_data),
     ("HaveQuestRewardData", have_quest_data),
     ("IsQuestSequenced", is_quest_sequenced),
     ("GetQuestLogCompletionText", get_quest_log_completion_text),
     ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),
+    ("QuestMapUpdateAllQuests", quest_map_update_all_quests),
     (
         "QuestMapFrame_GetFocusedQuestID",
         quest_map_frame_get_focused_quest_id,
@@ -677,6 +680,31 @@ fn get_quest_progress_bar_percent(state: &mut LuaState) -> LuaResult<u32> {
 fn quest_map_frame_get_focused_quest_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
+}
+
+/// `QuestMapUpdateAllQuests()` — retail returns the number of POIs that
+/// were found on the current world map. The sim approximates POI count as
+/// the number of quest-log entries that are actual quests (not headers).
+fn quest_map_update_all_quests(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(quest_count() as f64));
+    Ok(1)
+}
+
+/// `GetQuestLogTimeLeft()` — retail returns seconds remaining on a
+/// time-limited quest, or `nil` when the currently selected quest isn't
+/// timed. The seeded quest-log has no time-limited entries, so we only
+/// return a value when the selected quest resolves to one of the seeded
+/// world quests.
+fn get_quest_log_time_left(state: &mut LuaState) -> LuaResult<u32> {
+    let selected = borrow_state(state)?.selected_quest_log_id;
+    match selected {
+        Some(quest_id) if is_world_quest(quest_id as i32) => {
+            let seconds = SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES as f64 * 60.0;
+            state.push(Val::Num(seconds));
+            Ok(1)
+        }
+        _ => Ok(0),
+    }
 }
 
 fn get_quest_log_special_item_info(_state: &mut LuaState) -> LuaResult<u32> {
