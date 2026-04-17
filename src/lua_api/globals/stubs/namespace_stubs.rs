@@ -168,6 +168,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_Timer", "NewTimerID", stub_nil),
     // C_TooltipInfo
     ("C_TooltipInfo", "GetAction", stub_nil),
+    ("C_TooltipInfo", "GetAchievementByID", stub_nil),
     ("C_TooltipInfo", "GetAura", stub_nil),
     ("C_TooltipInfo", "GetGuildBankItem", stub_nil),
     ("C_TooltipInfo", "GetHyperlink", stub_nil),
@@ -184,7 +185,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TooltipInfo", "GetQuestItem", stub_nil),
     ("C_TooltipInfo", "GetQuestLogCurrency", stub_nil),
     ("C_TooltipInfo", "GetQuestLogItem", stub_nil),
-    ("C_TooltipInfo", "GetRecipeReagentItem", stub_nil),
     ("C_TooltipInfo", "GetRecipeResultItem", stub_nil),
     ("C_TooltipInfo", "GetShapeshift", stub_nil),
     ("C_TooltipInfo", "GetTalent", stub_nil),

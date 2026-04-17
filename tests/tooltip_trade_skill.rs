@@ -3,17 +3,25 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 #[test]
 fn c_tooltip_info_trade_skill_item_routes_recipe_outputs_and_reagents() {
     let env = WowLuaEnv::new().expect("should create WowLuaEnv");
-    let (result_name, result_level, reagent_name, reagent_level): (String, String, String, String) =
-        env.eval(
+    let (
+        result_name,
+        result_level,
+        reagent_name,
+        reagent_level,
+        recipe_reagent_name,
+        recipe_reagent_level,
+    ): (String, String, String, String, String, String) = env
+        .eval(
             r#"
             local result = C_TooltipInfo.GetTradeSkillItem(100005)
             local reagent = C_TooltipInfo.GetTradeSkillItem(100005, 1)
-            local baselineResult = C_TooltipInfo.GetItemByID(229181)
-            local baselineReagent = C_TooltipInfo.GetItemByID(210934)
+            local recipeReagent = C_TooltipInfo.GetRecipeReagentItem(100005, 1)
             return result.lines[1].leftText,
                    result.lines[2].leftText,
                    reagent.lines[1].leftText,
-                   reagent.lines[2].leftText
+                   reagent.lines[2].leftText,
+                   recipeReagent.lines[1].leftText,
+                   recipeReagent.lines[2].leftText
             "#,
         )
         .unwrap();
@@ -40,6 +48,8 @@ fn c_tooltip_info_trade_skill_item_routes_recipe_outputs_and_reagents() {
     assert_eq!(result_level, expected_result_level);
     assert_eq!(reagent_name, expected_reagent_name);
     assert_eq!(reagent_level, expected_reagent_level);
+    assert_eq!(recipe_reagent_name, expected_reagent_name);
+    assert_eq!(recipe_reagent_level, expected_reagent_level);
 }
 
 #[test]

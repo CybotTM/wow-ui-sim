@@ -94,7 +94,6 @@ pub static GAMETOOLTIP_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "RotateTextures",
         "SetAllowShowWithNoLines",
         "SetAlphaGradient",
-        "SetAchievementByID",
         "SetAnchorType",
         "SetAttribute",
         "SetAttributeNoHandler",
