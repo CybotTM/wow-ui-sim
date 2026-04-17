@@ -47,78 +47,100 @@ fn register_mount_counts(tb: TableBuilder) -> LuaResult<TableBuilder> {
     })
 }
 
-fn register_mount_info(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("GetDisplayedMountInfo", |state| {
-        let index = i32::from_stack(state, 1)?;
+struct MountInfoSnapshot {
+    name: String,
+    spell_id: f64,
+    icon: f64,
+    is_usable: bool,
+    is_collected: bool,
+    mount_id: f64,
+}
+
+impl MountInfoSnapshot {
+    fn from_mount(m: &crate::lua_api::state_types::MountData) -> Self {
+        Self {
+            name: m.name.clone(),
+            spell_id: m.spell_id as f64,
+            icon: m.icon as f64,
+            is_usable: m.is_usable,
+            is_collected: m.is_collected,
+            mount_id: m.mount_id as f64,
+        }
+    }
+
+    fn push(self, state: &mut LuaState) -> u32 {
+        push_mount_info(
+            state,
+            &self.name,
+            self.spell_id,
+            self.icon,
+            self.is_usable,
+            self.is_collected,
+            self.mount_id,
+        )
+    }
+}
+
+fn mount_get_displayed_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let snapshot = {
         let st = borrow_state(state)?;
         let i = (index - 1) as usize;
-        let Some(m) = st.world.mounts.get(i) else {
-            drop(st);
-            return Ok(0);
-        };
-        let name = m.name.clone();
-        let spell_id = m.spell_id as f64;
-        let icon = m.icon as f64;
-        let is_usable = m.is_usable;
-        let is_collected = m.is_collected;
-        let mount_id = m.mount_id as f64;
-        drop(st);
-        Ok(push_mount_info(
-            state,
-            &name,
-            spell_id,
-            icon,
-            is_usable,
-            is_collected,
-            mount_id,
-        ))
-    })?
-    .set_function("GetMountInfoByID", |state| {
-        let mount_id = u32::from_stack(state, 1)?;
+        st.world.mounts.get(i).map(MountInfoSnapshot::from_mount)
+    };
+    let Some(snapshot) = snapshot else {
+        return Ok(0);
+    };
+    Ok(snapshot.push(state))
+}
+
+fn mount_get_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let mount_id = u32::from_stack(state, 1)?;
+    let snapshot = {
         let st = borrow_state(state)?;
-        let Some(m) = st.world.mounts.iter().find(|m| m.mount_id == mount_id) else {
-            drop(st);
-            return Ok(0);
-        };
-        let name = m.name.clone();
-        let spell_id = m.spell_id as f64;
-        let icon = m.icon as f64;
-        let is_usable = m.is_usable;
-        let is_collected = m.is_collected;
-        let mid = m.mount_id as f64;
-        drop(st);
-        Ok(push_mount_info(
-            state,
-            &name,
-            spell_id,
-            icon,
-            is_usable,
-            is_collected,
-            mid,
-        ))
-    })?
-    .set_function("GetMountInfoExtraByID", |state| {
-        let mount_id = u32::from_stack(state, 1)?;
+        st.world
+            .mounts
+            .iter()
+            .find(|m| m.mount_id == mount_id)
+            .map(MountInfoSnapshot::from_mount)
+    };
+    let Some(snapshot) = snapshot else {
+        return Ok(0);
+    };
+    Ok(snapshot.push(state))
+}
+
+fn mount_get_info_extra_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let mount_id = u32::from_stack(state, 1)?;
+    let mount_type = {
         let st = borrow_state(state)?;
-        let Some(m) = st.world.mounts.iter().find(|m| m.mount_id == mount_id) else {
-            drop(st);
-            return Ok(0);
-        };
-        let mount_type = m.mount_type as f64;
-        drop(st);
-        let empty = create_string(state, "");
-        let source = create_string(state, "Drop");
-        state.push(Val::Num(0.0));
-        state.push(empty);
-        state.push(source);
-        state.push(Val::Bool(false));
-        state.push(Val::Num(mount_type));
-        state.push(Val::Num(0.0));
-        state.push(Val::Num(0.0));
-        state.push(Val::Num(0.0));
-        state.push(Val::Bool(false));
-        Ok(9)
-    })
+        st.world
+            .mounts
+            .iter()
+            .find(|m| m.mount_id == mount_id)
+            .map(|m| m.mount_type as f64)
+    };
+    let Some(mount_type) = mount_type else {
+        return Ok(0);
+    };
+    let empty = create_string(state, "");
+    let source = create_string(state, "Drop");
+    state.push(Val::Num(0.0));
+    state.push(empty);
+    state.push(source);
+    state.push(Val::Bool(false));
+    state.push(Val::Num(mount_type));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
+    Ok(9)
+}
+
+fn register_mount_info(tb: TableBuilder) -> LuaResult<TableBuilder> {
+    tb.set_function("GetDisplayedMountInfo", mount_get_displayed_info)?
+        .set_function("GetMountInfoByID", mount_get_info_by_id)?
+        .set_function("GetMountInfoExtraByID", mount_get_info_extra_by_id)
 }
 
 fn register_mount_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
