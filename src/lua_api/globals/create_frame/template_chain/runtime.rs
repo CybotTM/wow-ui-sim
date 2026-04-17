@@ -17,6 +17,19 @@ pub(super) fn create_template_child_frames(
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
+    create_direct_child_frames(state, state_rc, parent_id, parent_name, subst_parent, frame)?;
+    create_scroll_child_frames(state, state_rc, parent_id, parent_name, subst_parent, frame)?;
+    Ok(())
+}
+
+fn create_direct_child_frames(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    parent_id: u64,
+    parent_name: &str,
+    subst_parent: &str,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<()> {
     frame.try_for_each_frame_element(|child_frame, child_tag| {
         create_template_child_frame(
             state,
@@ -28,8 +41,17 @@ pub(super) fn create_template_child_frames(
             child_tag,
         )?;
         Ok::<(), rilua::LuaError>(())
-    })?;
+    })
+}
 
+fn create_scroll_child_frames(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    parent_id: u64,
+    parent_name: &str,
+    subst_parent: &str,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<()> {
     let Some(scroll_child) = frame.scroll_child() else {
         return Ok(());
     };
