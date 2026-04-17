@@ -328,44 +328,6 @@ fn test_create_frame_from_xml_inline_assignment_runs() {
 }
 
 #[test]
-fn test_create_frame_from_xml_inline_multistatement_body_runs() {
-    clear_templates();
-    let env = WowLuaEnv::new().unwrap();
-    env.exec(
-        r#"
-        function XmlInlineBodyPrime(self)
-            self.xmlInlinePrimed = true
-        end
-        XmlInlineBodyGlobal = 11
-    "#,
-    )
-    .unwrap();
-
-    create_first_frame(
-        &env,
-        r#"<Ui><Frame name="XmlInlineBodyFrame" parent="UIParent">
-        <Scripts><OnLoad>
-            XmlInlineBodyPrime(self);
-            self.layoutIndex = XmlInlineBodyGlobal;
-        </OnLoad></Scripts>
-    </Frame></Ui>"#,
-        "Frame",
-    );
-
-    let (primed, layout_index): (bool, f64) = env
-        .eval("return XmlInlineBodyFrame.xmlInlinePrimed == true, XmlInlineBodyFrame.layoutIndex")
-        .unwrap();
-    assert!(
-        primed,
-        "multi-statement inline OnLoad should run global call"
-    );
-    assert_eq!(
-        layout_index, 11.0,
-        "multi-statement inline OnLoad should run assignment"
-    );
-}
-
-#[test]
 fn test_create_frame_from_xml_empty_scripts_are_noops() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

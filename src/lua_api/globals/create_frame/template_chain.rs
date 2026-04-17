@@ -620,10 +620,6 @@ enum FastHandlerRef<'a> {
     FunctionWithEventVarargs(&'a str),
     FunctionWithButton(&'a str),
     FunctionWithElapsed(&'a str),
-    InlineBody {
-        body: &'a str,
-        signature: InlineBodySignature,
-    },
     AssignLiteral {
         field: &'a str,
         value: FastLiteralValue<'a>,
@@ -636,15 +632,6 @@ enum FastLiteralValue<'a> {
     Number(f64),
     Nil,
     Bool(bool),
-}
-
-#[derive(Copy, Clone)]
-enum InlineBodySignature {
-    SelfOnly,
-    EventVarargs,
-    Elapsed,
-    ButtonVarargs,
-    MouseWheel,
 }
 
 #[derive(Copy, Clone)]
@@ -794,9 +781,6 @@ fn build_fast_handler(
         FastHandlerRef::FunctionWithElapsed(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::Elapsed).map(Some)
         }
-        FastHandlerRef::InlineBody { body, signature } => {
-            build_inline_body_handler(state, body, signature).map(Some)
-        }
         FastHandlerRef::AssignLiteral { field, value } => {
             build_assignment_handler(state, field, value).map(Some)
         }
@@ -932,7 +916,10 @@ fn build_function_handler(
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
 }
 
-fn parse_inline_fast_handler(handler_name: &'static str, body: &str) -> Option<FastHandlerRef<'_>> {
+fn parse_inline_fast_handler<'a>(
+    _handler_name: &'static str,
+    body: &'a str,
+) -> Option<FastHandlerRef<'a>> {
     let trimmed = body.trim();
     if trimmed.is_empty() {
         return Some(FastHandlerRef::NoOp);
@@ -973,12 +960,6 @@ fn parse_inline_fast_handler(handler_name: &'static str, body: &str) -> Option<F
         .map(str::trim)
         .filter(|name| is_fast_handler_path(name))
         .map(FastHandlerRef::FunctionWithElapsed)
-        .or_else(|| {
-            inline_body_signature(handler_name).map(|signature| FastHandlerRef::InlineBody {
-                body: trimmed,
-                signature,
-            })
-        })
 }
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
@@ -1023,20 +1004,6 @@ fn is_fast_identifier(value: &str) -> bool {
     chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
 }
 
-fn inline_body_signature(handler_name: &str) -> Option<InlineBodySignature> {
-    match handler_name {
-        "OnLoad" | "OnShow" | "OnHide" | "OnEnter" | "OnLeave" | "OnEnable" | "OnDisable"
-        | "OnEnterPressed" | "OnEscapePressed" | "OnTabPressed" | "OnSpacePressed"
-        | "OnEditFocusGained" | "OnEditFocusLost" => Some(InlineBodySignature::SelfOnly),
-        "OnEvent" => Some(InlineBodySignature::EventVarargs),
-        "OnUpdate" => Some(InlineBodySignature::Elapsed),
-        "OnClick" | "PreClick" | "PostClick" | "OnMouseDown" | "OnMouseUp" | "OnDragStart"
-        | "OnDragStop" | "OnReceiveDrag" => Some(InlineBodySignature::ButtonVarargs),
-        "OnMouseWheel" => Some(InlineBodySignature::MouseWheel),
-        _ => None,
-    }
-}
-
 fn build_assignment_handler(
     state: &mut LuaState,
     field: &str,
@@ -1065,24 +1032,6 @@ fn build_assignment_handler(
         Val::Function(builder.gc_ref()),
         &[field_name, assigned_value],
     )
-}
-
-fn build_inline_body_handler(
-    state: &mut LuaState,
-    body: &str,
-    signature: InlineBodySignature,
-) -> LuaResult<Val> {
-    let params = match signature {
-        InlineBodySignature::SelfOnly => "self, ...",
-        InlineBodySignature::EventVarargs => "self, event, ...",
-        InlineBodySignature::Elapsed => "self, elapsed, ...",
-        InlineBodySignature::ButtonVarargs => "self, button, ...",
-        InlineBodySignature::MouseWheel => "self, delta, ...",
-    };
-    let source = format!("return function({params})\n{body}\nend");
-    let builder = crate::loader::chunk_cache::load_chunk(state, &source, "template-inline-body")
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[])
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
