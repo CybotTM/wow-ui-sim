@@ -97,6 +97,7 @@ macro_rules! build_empty_sim_state {
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
             housing_service_enabled: false,
+            pet_battles: PetBattleState::default(),
             debug_borders: false,
             debug_anchors: false,
         }
@@ -389,6 +390,9 @@ pub struct SimState {
     /// MainMenuBarMicroButtons' decision to render the Housing micro-button.
     /// Default false (sim has no housing service).
     pub housing_service_enabled: bool,
+    /// Backing state for `C_PetBattles.GetNumPets(owner)` and
+    /// `C_PetBattles.GetBattleState()`. Default zeros (no active battle).
+    pub pet_battles: PetBattleState,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
@@ -458,6 +462,18 @@ pub struct GameRuleValue {
     pub as_float: f64,
     pub as_int: i64,
     pub as_string: String,
+}
+
+/// Pet-battle state backing `C_PetBattles.GetNumPets(owner)` /
+/// `GetBattleState()`. WoW's `owner` argument is 1 (player) or 2 (enemy);
+/// other values return 0. `battle_state` mirrors
+/// `Enum.PetbattleState` — default 0 (`PVEInvitationSent` / "no active
+/// battle"). Non-zero = some battle phase is active.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct PetBattleState {
+    pub num_pets_player: i32,
+    pub num_pets_enemy: i32,
+    pub battle_state: i32,
 }
 
 impl ModifierKeys {

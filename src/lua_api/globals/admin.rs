@@ -154,6 +154,14 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetHousingServiceEnabled",
             super::housing::admin_set_housing_service_enabled,
         )?
+        .set_function(
+            "SetPetBattleCounts",
+            super::pet_battles::admin_set_pet_battle_counts,
+        )?
+        .set_function(
+            "SetPetBattleState",
+            super::pet_battles::admin_set_pet_battle_state,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?

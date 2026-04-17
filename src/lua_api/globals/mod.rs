@@ -35,6 +35,7 @@ pub mod locale_info;
 pub mod missing_surface;
 pub mod modifier_keys;
 pub mod net_stats;
+pub mod pet_battles;
 pub mod security;
 pub mod store_frame;
 pub mod stubs;

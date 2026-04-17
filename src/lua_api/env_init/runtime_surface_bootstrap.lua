@@ -2022,15 +2022,11 @@ C_GameRules = __wow_merge_namespace(C_GameRules, {})
 -- Pet battles: not simulated. `GetNumPets` is compared numerically
 -- during PetBattleFrame OnLoad refresh, so returning nil crashes
 -- `petIndex > GetNumPets(owner)`. Zero is the accurate "no pets" answer.
-C_PetBattles = C_PetBattles or __wow_namespace()
-if rawget(C_PetBattles, "GetNumPets") == nil then
-  function C_PetBattles.GetNumPets(_owner) return 0 end
-end
-if rawget(C_PetBattles, "GetBattleState") == nil then
-  -- Enum.PetbattleState.PVEInvitationSent = 0 in Blizzard's enums; return
-  -- 0 as a safe "no active battle" sentinel.
-  function C_PetBattles.GetBattleState() return 0 end
-end
+-- C_PetBattles.GetNumPets / GetBattleState are registered from Rust
+-- (src/lua_api/globals/pet_battles.rs), backed by SimState::pet_battles.
+-- The earlier __wow_merge_namespace at the top of this file already
+-- installed the C_PetBattles namespace with stub methods; our Rust
+-- registration overrides the two that the PLAN called out.
 
 -- LFG group-finder probes. Neither applies in the sim: no group-finder
 -- usage and no active proposal. `GetLFGProposal` returns 15 values
