@@ -74,9 +74,8 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_RaidFrames
     ("C_RaidFrames", "GetProfile", stub_nil),
-    // C_Spell
-    ("C_Spell", "GetMountFromSpell", stub_nil),
-    ("C_Spell", "GetSpellInfo", stub_nil),
+    // C_Spell GetMountFromSpell / GetSpellInfo are SimState/spell-data-backed in
+    // missing_surface/c_spell.rs, not stubs.
     // C_SummonInfo GetSummonReason / GetSummonConfirmTimeLeft /
     // IsSummonSkippingStartExperience are SimState-backed in
     // missing_surface/summon_info.rs, not stubs.
@@ -175,14 +174,8 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_PhotoSharing.IsAuthorized / IsEnabled are SimState-backed in photo_sharing.rs.
     // C_PlayerInfo probes are registered in missing_surface/player_info.rs.
     // C_QuestLog probes are registered in missing_surface/quest_log.rs.
-    // C_Spell
-    ("C_Spell", "GetVisibilityInfo", stub_false),
-    ("C_Spell", "IsPriorityAura", stub_false),
-    ("C_Spell", "IsSelfBuff", stub_false),
-    ("C_Spell", "IsSpellUsable", stub_false),
-    ("C_Spell", "TargetSpellIsEnchanting", stub_false),
-    ("C_Spell", "TargetSpellJumpsUpgradeTrack", stub_false),
-    ("C_Spell", "TargetSpellReplacesBonusTree", stub_false),
+    // C_Spell GetVisibilityInfo / IsPriorityAura / IsSelfBuff / IsSpellUsable /
+    // TargetSpell* are SimState/spell-data-backed in missing_surface/c_spell.rs.
     // C_SummonInfo IsSummonSkippingStartExperience is SimState-backed in
     // missing_surface/summon_info.rs, not a stub.
     // C_StableInfo.IsAtPetStable is registered in
@@ -204,8 +197,7 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // in missing_surface/mythic_plus.rs, not stubs.
     // C_PartyInfo GetActiveGroupType is registered in missing_surface/party_info.rs.
     // C_QuestLog probes are registered in missing_surface/quest_log.rs.
-    // C_Spell
-    ("C_Spell", "GetSpellCooldown", stub_zero),
+    // C_Spell GetSpellCooldown is SimState-backed in missing_surface/c_spell.rs.
     // C_SummonInfo GetSummonConfirmTimeLeft is SimState-backed in
     // missing_surface/summon_info.rs, not a stub.
     // C_TradeSkillUI

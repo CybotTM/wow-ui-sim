@@ -4,6 +4,7 @@ mod achievement_info;
 mod area_poi;
 mod auction_house;
 mod battle_net;
+mod c_spell;
 mod c_map;
 mod character_services;
 mod chat_bubbles;
@@ -89,6 +90,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     area_poi::register_area_poi_surface(state)?;
     auction_house::register_auction_house_surface(state)?;
     battle_net::register_battle_net_surface(state)?;
+    c_spell::register_c_spell_surface(state)?;
     character_services::register_character_services_surface(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_info::register_club_info_surface(state)?;
