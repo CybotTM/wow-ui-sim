@@ -134,6 +134,8 @@ macro_rules! build_empty_sim_state {
             maps: default_maps(),
             achievements: default_achievements(),
             area_pois: default_area_pois(),
+            auction_browse_results: default_auction_browse_results(),
+            auction_replicate_items: default_auction_replicate_items(),
             player_map_position: (0.5, 0.5),
             factions: Vec::new(),
             selected_faction_index: 0,
@@ -187,10 +189,11 @@ use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
-    AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo, BagItem,
-    CurrencyInfo, CursorInfo, CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember,
-    GuildRank, LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState,
-    NilSymbolAccess, PendingTimer, PlayerState, SecondaryPowerState, WorldState,
+    AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
+    AuctionBrowseResult, AuctionReplicateItem, BagItem, CurrencyInfo, CursorInfo, CursorItemOrigin,
+    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo, LuaErrorRecord,
+    MacroInfo, MapData, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer, PlayerState,
+    SecondaryPowerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -518,6 +521,14 @@ pub struct SimState {
     /// Seeded with a tiny fixture (Mage Tower Stormwind +
     /// one time-limited world event).
     pub area_pois: HashMap<i32, AreaPoiInfo>,
+    /// Browse-tab results on the Auction House. Drives
+    /// `C_AuctionHouse.GetBrowseResults`. Seeded with a couple of
+    /// representative listings.
+    pub auction_browse_results: Vec<AuctionBrowseResult>,
+    /// Replicate-scan snapshot for the Auction House. Drives
+    /// `C_AuctionHouse.GetReplicateItemInfo`. Seeded with a couple of
+    /// commodity rows.
+    pub auction_replicate_items: Vec<AuctionReplicateItem>,
     /// Player's normalized position (0..=1) in the current map.
     /// Drives `C_Map.GetPlayerMapPosition`. Default `(0.5, 0.5)`.
     pub player_map_position: (f64, f64),
@@ -836,6 +847,53 @@ fn default_area_pois() -> HashMap<i32, AreaPoiInfo> {
     .into_iter()
     .map(|p| (p.area_poi_id, p))
     .collect()
+}
+
+/// Seed the `SimState.auction_browse_results` list with two
+/// representative Browse-tab rows (a crafting mat and a gear piece).
+fn default_auction_browse_results() -> Vec<AuctionBrowseResult> {
+    vec![
+        AuctionBrowseResult {
+            item_id: 210935,
+            item_level: 70,
+            min_price: 25_000,
+            total_quantity: 400,
+            contains_owner_item: false,
+        },
+        AuctionBrowseResult {
+            item_id: 122245,
+            item_level: 50,
+            min_price: 1_500_000,
+            total_quantity: 1,
+            contains_owner_item: true,
+        },
+    ]
+}
+
+/// Seed the `SimState.auction_replicate_items` list with two
+/// commodity rows so `GetReplicateItemInfo(index)` returns data for
+/// both index 1 and 2.
+fn default_auction_replicate_items() -> Vec<AuctionReplicateItem> {
+    vec![
+        AuctionReplicateItem {
+            name: "Aqirite".into(),
+            texture: 0,
+            count: 20,
+            quality_id: 2,
+            usable: true,
+            level: 70,
+            level_type: "Item Level".into(),
+        },
+        AuctionReplicateItem {
+            name: "Burnished Helm of Might".into(),
+            texture: 133071,
+            count: 1,
+            quality_id: 3,
+            usable: true,
+            level: 50,
+            level_type: "Item Level".into(),
+        },
+    ]
 }
 
 /// Default items in bag 0 (backpack) at startup. Slots are 1-based (WoW convention).

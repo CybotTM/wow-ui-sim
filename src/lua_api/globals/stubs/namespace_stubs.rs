@@ -23,9 +23,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AreaPoiInfo GetAreaPOIInfo / GetAreaPOISecondsLeft are
     // SimState-backed (via `area_pois` map) in
     // missing_surface/area_poi.rs, not stubs.
-    // C_AuctionHouse
-    ("C_AuctionHouse", "GetAuctionItemSubClasses", stub_nil),
-    ("C_AuctionHouse", "GetReplicateItemInfo", stub_nil),
+    // C_AuctionHouse GetAuctionItemSubClasses / GetReplicateItemInfo
+    // are SimState-backed in missing_surface/auction_house.rs, not
+    // stubs.
     // C_BattleNet
     ("C_BattleNet", "GetAccountInfoByGUID", stub_nil),
     ("C_BattleNet", "GetFriendAccountInfo", stub_nil),
@@ -358,8 +358,8 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
 ];
 
 static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
-    // C_AuctionHouse
-    ("C_AuctionHouse", "GetBrowseResults", stub_empty_table),
+    // C_AuctionHouse GetBrowseResults is SimState-backed in
+    // missing_surface/auction_house.rs, not a stub.
     // C_CinematicList
     ("C_CinematicList", "GetUICinematicList", stub_empty_table),
     // C_ClassTalents GetConfigIDsBySpecID is TalentState-backed in

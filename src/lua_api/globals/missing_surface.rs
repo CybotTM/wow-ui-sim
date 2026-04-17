@@ -2,6 +2,7 @@
 
 mod achievement_info;
 mod area_poi;
+mod auction_house;
 mod c_map;
 mod heirloom;
 mod item_socket_info;
@@ -66,6 +67,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     c_map::register_c_map_surface(state)?;
     achievement_info::register_achievement_info_surface(state)?;
     area_poi::register_area_poi_surface(state)?;
+    auction_house::register_auction_house_surface(state)?;
     Ok(())
 }
 
