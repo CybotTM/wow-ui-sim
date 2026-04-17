@@ -96,9 +96,16 @@ fn create_template_child_frame(
     else {
         return Ok(None);
     };
+    let inherited_chain = super::build_child_inherits(intrinsic, frame.inherits.as_deref());
     let child_name = super::template_child_name(frame.name.as_deref(), subst_parent);
-    let child_id =
-        instantiate_template_child(state, parent_id, frame, widget_type_name, &child_name)?;
+    let child_id = instantiate_template_child(
+        state,
+        parent_id,
+        frame,
+        widget_type_name,
+        inherited_chain.as_deref(),
+        &child_name,
+    )?;
     assign_child_parent_refs(state, parent_id, child_id, frame);
     apply_child_template_properties(state, child_id, frame, intrinsic)?;
 
@@ -109,7 +116,6 @@ fn create_template_child_frame(
     };
     create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
 
-    let inherited_chain = super::build_child_inherits(intrinsic, frame.inherits.as_deref());
     apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     apply_runtime_template_loader_effects(
@@ -128,9 +134,18 @@ fn instantiate_template_child(
     parent_id: u64,
     frame: &crate::xml::FrameXml,
     widget_type_name: &str,
+    inherited_chain: Option<&str>,
     child_name: &str,
 ) -> LuaResult<u64> {
-    crate::lua_api::globals::create_frame::create_frame_instance(
+    let previous_hidden = {
+        let mut sim = borrow_state_mut(state)?;
+        let previous_hidden = sim.create_frame_initial_hidden;
+        sim.create_frame_initial_hidden =
+            Some(super::resolve_inherited_hidden(frame, inherited_chain));
+        previous_hidden
+    };
+
+    let result = crate::lua_api::globals::create_frame::create_frame_instance(
         state,
         WidgetType::from_str(widget_type_name).ok_or_else(|| {
             rilua::runtime_error(format!("unknown widget type '{widget_type_name}'"))
@@ -140,7 +155,10 @@ fn instantiate_template_child(
         Some(parent_id),
         true,
         frame.xml_id,
-    )
+    );
+
+    borrow_state_mut(state)?.create_frame_initial_hidden = previous_hidden;
+    result
 }
 
 fn assign_child_parent_refs(

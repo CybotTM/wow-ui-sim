@@ -159,6 +159,40 @@ fn test_runtime_spellfx_template_creates_nested_inherited_children() {
 }
 
 #[test]
+fn test_hidden_runtime_parent_does_not_hide_shown_template_children() {
+    let t = load_test_xml(
+        "runtime-hidden-parent-template-children",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeVisibleChildTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="ShownChild">
+                        <Size x="10" y="10"/>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local parent = CreateFrame("Frame", "RuntimeHiddenTemplateParent", UIParent, "RuntimeVisibleChildTemplate")
+            parent:Hide()
+            assert(parent.ShownChild ~= nil, "template child should exist")
+            assert(parent.ShownChild:IsShown(), "template child should keep its own shown flag while parent is hidden")
+            assert(not parent.ShownChild:IsVisible(), "template child should not be effectively visible while parent is hidden")
+
+            parent:Show()
+            assert(parent.ShownChild:IsShown(), "template child shown flag should survive parent show")
+            assert(parent.ShownChild:IsVisible(), "template child should become visible once parent is shown")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
     let t = load_test_xml(
         "runtime-minimal-scrollbar-direct-grandchildren",
