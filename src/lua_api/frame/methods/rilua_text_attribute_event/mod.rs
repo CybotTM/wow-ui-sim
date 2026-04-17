@@ -161,6 +161,13 @@ fn register_attribute_protection(state: &mut LuaState, table: GcRef<Table>) -> L
 }
 
 fn register_attribute_behavior_flags(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_attribute_input_render_flags(state, table)?;
+    register_attribute_motion_scripts(state, table)?;
+    register_attribute_clip_children(state, table)?;
+    Ok(())
+}
+
+fn register_attribute_input_render_flags(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -173,6 +180,10 @@ fn register_attribute_behavior_flags(state: &mut LuaState, table: GcRef<Table>) 
         "SetFlattensRenderLayers",
         attributes::set_flattens_render_layers,
     )?;
+    Ok(())
+}
+
+fn register_attribute_motion_scripts(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -185,6 +196,10 @@ fn register_attribute_behavior_flags(state: &mut LuaState, table: GcRef<Table>) 
         "GetMotionScriptsWhileDisabled",
         attributes::get_motion_scripts_while_disabled,
     )?;
+    Ok(())
+}
+
+fn register_attribute_clip_children(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
