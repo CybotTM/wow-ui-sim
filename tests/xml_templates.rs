@@ -681,6 +681,36 @@ fn test_create_frame_from_xml_inline_register_for_drag_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineSequenceButton" parent="UIParent">
+        <Scripts><OnLoad>self:RegisterForClicks("LeftButtonUp", "RightButtonUp"); self:RegisterForDrag("LeftButton")</OnLoad></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let state = env.state().borrow();
+    let frame = state
+        .widgets
+        .iter_ids()
+        .find_map(|id| {
+            state
+                .widgets
+                .get(id)
+                .filter(|frame| frame.name.as_deref() == Some("XmlInlineSequenceButton"))
+        })
+        .expect("button should exist");
+    assert!(
+        frame.registered_drag_buttons.contains("LeftButton"),
+        "inline handler sequence should run both statements"
+    );
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_set_alpha_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

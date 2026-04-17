@@ -615,9 +615,10 @@ fn collect_fast_handlers(
 type MethodOnlyScript<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 enum FastHandlerRef<'a> {
     NoOp,
+    Sequence2(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>)>),
     Method(&'a str),
     ParentMethod(&'a str),
     GrandparentMethod(&'a str),
@@ -669,7 +670,7 @@ enum FastLiteralValue<'a> {
     Bool(bool),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 enum FastScriptInstall<'a> {
     Set(FastHandlerRef<'a>),
     Intrinsic(FastHandlerRef<'a>),
@@ -969,6 +970,19 @@ fn build_fast_handler(
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::NoOp => Ok(None),
+        FastHandlerRef::Sequence2(parts) => {
+            let (first_ref, second_ref) = &*parts;
+            let first = build_fast_handler(state, first_ref.clone())?;
+            let second = build_fast_handler(state, second_ref.clone())?;
+            match (first, second) {
+                (Some(first), Some(second)) => {
+                    build_chained_handler(state, first, second, "inline-sequence", false).map(Some)
+                }
+                (Some(first), None) => Ok(Some(first)),
+                (None, Some(second)) => Ok(Some(second)),
+                (None, None) => Ok(None),
+            }
+        }
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::ParentMethod(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
@@ -1303,7 +1317,13 @@ fn parse_inline_fast_handler<'a>(
     if stmt.is_empty() {
         return Some(FastHandlerRef::NoOp);
     }
+    if let Some(sequence) = parse_inline_sequence(stmt) {
+        return Some(sequence);
+    }
+    parse_inline_single_fast_handler(stmt)
+}
 
+fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some(method_name) = parse_inline_self_method(stmt) {
         return Some(FastHandlerRef::Method(method_name));
     }
@@ -1407,6 +1427,20 @@ fn parse_inline_fast_handler<'a>(
         .map(str::trim)
         .filter(|name| is_fast_handler_path(name))
         .map(FastHandlerRef::FunctionWithElapsed)
+}
+
+fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let parts = stmt
+        .split(';')
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>();
+    if parts.len() != 2 {
+        return None;
+    }
+    let first = parse_inline_single_fast_handler(parts[0])?;
+    let second = parse_inline_single_fast_handler(parts[1])?;
+    Some(FastHandlerRef::Sequence2(Box::new((first, second))))
 }
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
