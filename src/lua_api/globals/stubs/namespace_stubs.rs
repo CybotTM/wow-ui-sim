@@ -43,11 +43,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ),
     // C_ChatBubbles
     ("C_ChatBubbles", "GetAllChatBubbles", stub_nil),
-    // C_ClassTalents
-    ("C_ClassTalents", "GetActiveConfigID", stub_nil),
-    ("C_ClassTalents", "GetConfigIDsBySpecID", stub_nil),
-    ("C_ClassTalents", "GetHeroTalentSpecsForClassSpec", stub_nil),
-    ("C_ClassTalents", "GetTraitTreeForSpec", stub_nil),
+    // C_ClassTalents GetActiveConfigID / GetConfigIDsBySpecID /
+    // GetHeroTalentSpecsForClassSpec / GetTraitTreeForSpec are
+    // TalentState-backed in missing_surface/traits.rs, not stubs.
     // C_Club
     ("C_Club", "GetClubMembers", stub_nil),
     ("C_Club", "GetSubscribedClubs", stub_nil),
@@ -367,8 +365,8 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_AuctionHouse", "GetBrowseResults", stub_empty_table),
     // C_CinematicList
     ("C_CinematicList", "GetUICinematicList", stub_empty_table),
-    // C_ClassTalents
-    ("C_ClassTalents", "GetConfigIDsBySpecID", stub_empty_table),
+    // C_ClassTalents GetConfigIDsBySpecID is TalentState-backed in
+    // missing_surface/traits.rs, not a stub.
     // C_Club
     ("C_Club", "GetClubMembers", stub_empty_table),
     ("C_Club", "GetSubscribedClubs", stub_empty_table),
