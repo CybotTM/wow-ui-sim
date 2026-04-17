@@ -1002,7 +1002,13 @@ fn parse_inline_fast_handler<'a>(
     if let Some(method_name) = parse_inline_parent_method(stmt) {
         return Some(FastHandlerRef::ParentMethodNoArgs(method_name));
     }
+    if let Some(method_name) = parse_inline_grandparent_method(stmt) {
+        return Some(FastHandlerRef::GrandparentMethodNoArgs(method_name));
+    }
     if let Some(assign) = parse_inline_assignment(stmt) {
+        return Some(assign);
+    }
+    if let Some(assign) = parse_inline_parent_assignment(stmt) {
         return Some(assign);
     }
     if let Some(function_name) = stmt
@@ -1051,6 +1057,12 @@ fn parse_inline_parent_method(stmt: &str) -> Option<&str> {
     is_fast_identifier(method_name).then_some(method_name)
 }
 
+fn parse_inline_grandparent_method(stmt: &str) -> Option<&str> {
+    let remainder = stmt.strip_prefix("self:GetParent():GetParent():")?;
+    let method_name = remainder.strip_suffix("()")?.trim();
+    is_fast_identifier(method_name).then_some(method_name)
+}
+
 fn parse_inline_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
     let (field, raw_value) = stmt.strip_prefix("self.")?.split_once('=')?;
     let field = field.trim();
@@ -1074,6 +1086,17 @@ fn parse_inline_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
     Some(FastHandlerRef::AssignLiteral { field, value })
 }
 
+fn parse_inline_parent_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let (field, raw_value) = stmt.strip_prefix("self:GetParent().")?.split_once('=')?;
+    let field = field.trim();
+    let raw_value = raw_value.trim();
+    if !is_fast_identifier(field) {
+        return None;
+    }
+    let value = parse_fast_literal_value(raw_value)?;
+    Some(FastHandlerRef::AssignParentField { field, value })
+}
+
 fn is_fast_handler_path(path: &str) -> bool {
     path.split('.').all(is_fast_identifier)
 }
@@ -1085,6 +1108,22 @@ fn is_fast_identifier(value: &str) -> bool {
         _ => return false,
     }
     chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+}
+
+fn parse_fast_literal_value(raw_value: &str) -> Option<FastLiteralValue<'_>> {
+    if raw_value.eq("nil") {
+        Some(FastLiteralValue::Nil)
+    } else if raw_value.eq("true") {
+        Some(FastLiteralValue::Bool(true))
+    } else if raw_value.eq("false") {
+        Some(FastLiteralValue::Bool(false))
+    } else if let Ok(number) = raw_value.parse::<f64>() {
+        Some(FastLiteralValue::Number(number))
+    } else if is_fast_handler_path(raw_value) {
+        Some(FastLiteralValue::Global(raw_value))
+    } else {
+        None
+    }
 }
 
 fn build_assignment_handler(
@@ -1104,17 +1143,50 @@ fn build_assignment_handler(
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
     let field_name = create_string(state, field);
-    let assigned_value = match value {
-        FastLiteralValue::Global(path) => resolve_global_path(state, path),
-        FastLiteralValue::Number(value) => Val::Num(value),
-        FastLiteralValue::Nil => Val::Nil,
-        FastLiteralValue::Bool(value) => Val::Bool(value),
-    };
+    let assigned_value = fast_literal_value(state, value);
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
         &[field_name, assigned_value],
     )
+}
+
+fn build_parent_assignment_handler(
+    state: &mut LuaState,
+    field: &str,
+    value: FastLiteralValue<'_>,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, assigned_value = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                parent[field_name] = assigned_value
+            end
+        "#,
+        "template-parent-assignment",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let assigned_value = fast_literal_value(state, value);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, assigned_value],
+    )
+}
+
+fn fast_literal_value(state: &mut LuaState, value: FastLiteralValue<'_>) -> Val {
+    match value {
+        FastLiteralValue::Global(path) => resolve_global_path(state, path),
+        FastLiteralValue::Number(value) => Val::Num(value),
+        FastLiteralValue::Nil => Val::Nil,
+        FastLiteralValue::Bool(value) => Val::Bool(value),
+    }
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {

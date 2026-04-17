@@ -369,6 +369,70 @@ fn test_create_frame_from_xml_inline_parent_method_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_grandparent_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGrandparentMixin = {}
+        function XmlInlineGrandparentMixin:Prime()
+            self.grandparentPrimed = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGrandparentFrame" parent="UIParent" mixin="XmlInlineGrandparentMixin">
+        <Frames>
+            <Frame parentKey="Middle">
+                <Frames>
+                    <Button parentKey="Child">
+                        <Scripts><OnClick>self:GetParent():GetParent():Prime()</OnClick></Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineGrandparentFrame.Middle.Child:GetScript('OnClick')(XmlInlineGrandparentFrame.Middle.Child)").unwrap();
+
+    let loaded: bool = env
+        .eval("return XmlInlineGrandparentFrame.grandparentPrimed == true")
+        .unwrap();
+    assert!(loaded, "grandparent-method inline OnClick should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_parent_assignment_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("XmlInlineParentAssignmentValue = 13").unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentAssignmentFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>self:GetParent().layoutIndex = XmlInlineParentAssignmentValue</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineParentAssignmentFrame.Child:GetScript('OnClick')(XmlInlineParentAssignmentFrame.Child)").unwrap();
+
+    let value: f64 = env
+        .eval("return XmlInlineParentAssignmentFrame.layoutIndex")
+        .unwrap();
+    assert_eq!(value, 13.0, "parent assignment inline OnClick should fire");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_assignment_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

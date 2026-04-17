@@ -14,7 +14,7 @@ use crate::lua_api::methods::{
     val_to_string,
 };
 use crate::lua_api::state::RACE_DATA;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use crate::spell_descriptions;
 use crate::spells;
 use rilua::vm::gc::arena::GcRef;
@@ -520,6 +520,8 @@ fn register_item_spell_aura_methods(
         &[
             ("GetTraitEntry", c_tooltip_get_trait_entry),
             ("GetAction", c_tooltip_get_action),
+            ("GetBagItem", c_tooltip_get_bag_item),
+            ("GetItem", c_tooltip_get_item),
             ("GetItemByID", c_tooltip_get_item_by_id),
             ("GetItemByGUID", c_tooltip_get_item_by_guid),
             ("GetOwnedItemByID", c_tooltip_get_owned_item_by_id),
@@ -534,6 +536,7 @@ fn register_item_spell_aura_methods(
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
             ("GetUpgradeItem", c_tooltip_get_upgrade_item),
             ("GetInventoryItem", c_tooltip_get_inventory_item),
+            ("GetTooltipDataForItem", c_tooltip_get_tooltip_data_for_item),
         ],
     )
 }
@@ -564,6 +567,7 @@ fn register_spell_aura_unit_methods(
                 c_tooltip_get_unit_aura_by_aura_instance_id,
             ),
             ("GetHyperlink", c_tooltip_get_hyperlink),
+            ("GetSpell", c_tooltip_get_spell),
             ("GetWorldCursor", c_tooltip_get_world_cursor),
             ("GetWorldLootObject", c_tooltip_get_world_loot_object),
             ("GetUnit", c_tooltip_get_unit),
@@ -607,6 +611,84 @@ fn c_tooltip_get_action(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
+    Ok(1)
+}
+
+fn tooltip_for_bag_item(state: &mut LuaState, bag: i32, slot: i32) -> Val {
+    let item_id = borrow_state(state)
+        .ok()
+        .and_then(|st| st.get_bag_item(bag, slot).map(|(item_id, _)| item_id))
+        .unwrap_or(0);
+    tooltip_for_item_id(state, item_id)
+}
+
+fn tooltip_for_inventory_slot(state: &mut LuaState, slot: i32) -> Val {
+    let item_id = borrow_state(state)
+        .ok()
+        .and_then(|st| st.player.equipped_items.get(&slot).map(|item| item.item_id))
+        .unwrap_or(0);
+    tooltip_for_item_id(state, item_id)
+}
+
+fn tooltip_for_item_source(state: &mut LuaState, value: Val) -> Val {
+    match value {
+        Val::Table(location) => {
+            let slot = match table_get(state, Val::Table(location), "equipmentSlotIndex") {
+                Val::Num(value) => Some(value as i32),
+                _ => None,
+            };
+            if let Some(slot) = slot {
+                return tooltip_for_inventory_slot(state, slot);
+            }
+
+            let bag = match table_get(state, Val::Table(location), "bagID") {
+                Val::Num(value) => Some(value as i32),
+                _ => None,
+            };
+            let slot = match table_get(state, Val::Table(location), "slotIndex") {
+                Val::Num(value) => Some(value as i32),
+                _ => None,
+            };
+            match (bag, slot) {
+                (Some(bag), Some(slot)) => tooltip_for_bag_item(state, bag, slot),
+                _ => empty_tooltip(state, TOOLTIP_TYPE_ITEM),
+            }
+        }
+        other => {
+            let item_id = match other {
+                Val::Num(value) if value > 0.0 => Some(value as u32),
+                Val::Str(_) => val_to_string(state, other).and_then(|text| {
+                    parse_prefixed_id(&text, "item").or_else(|| text.parse().ok())
+                }),
+                _ => None,
+            };
+            item_id
+                .map(|item_id| tooltip_for_item_id(state, item_id))
+                .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM))
+        }
+    }
+}
+
+fn parse_spell_source(state: &mut LuaState, value: Val) -> Option<u32> {
+    match value {
+        Val::Num(value) if value > 0.0 => Some(value as u32),
+        Val::Str(_) => val_to_string(state, value)
+            .and_then(|text| parse_prefixed_id(&text, "spell").or_else(|| text.parse().ok())),
+        _ => None,
+    }
+}
+
+fn c_tooltip_get_bag_item(state: &mut LuaState) -> LuaResult<u32> {
+    let bag = i32::from_stack(state, 1)?;
+    let slot = i32::from_stack(state, 2)?;
+    let tooltip = tooltip_for_bag_item(state, bag, slot);
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip = tooltip_for_item_source(state, stack_val(state, 1));
+    state.push(tooltip);
     Ok(1)
 }
 
@@ -744,13 +826,13 @@ fn c_tooltip_get_upgrade_item(state: &mut LuaState) -> LuaResult<u32> {
 fn c_tooltip_get_inventory_item(state: &mut LuaState) -> LuaResult<u32> {
     let _unit = String::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
-    let item_id = borrow_state(state)?
-        .player
-        .equipped_items
-        .get(&slot)
-        .map(|item| item.item_id)
-        .unwrap_or(0);
-    let tooltip = tooltip_for_item_id(state, item_id);
+    let tooltip = tooltip_for_inventory_slot(state, slot);
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_tooltip_data_for_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip = tooltip_for_item_source(state, stack_val(state, 1));
     state.push(tooltip);
     Ok(1)
 }
@@ -860,6 +942,14 @@ fn c_tooltip_get_hyperlink(state: &mut LuaState) -> LuaResult<u32> {
     } else {
         empty_tooltip(state, TOOLTIP_TYPE_ITEM)
     };
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip = parse_spell_source(state, stack_val(state, 1))
+        .map(|spell_id| tooltip_for_spell_id(state, spell_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_SPELL));
     state.push(tooltip);
     Ok(1)
 }

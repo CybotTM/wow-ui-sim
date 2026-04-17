@@ -55,6 +55,15 @@ pub fn register_all(state: &mut LuaState) {
     set_global(state, "UnitFactionGroup", unit_faction_group);
     set_global(state, "UnitIsGroupLeader", unit_is_group_leader);
     set_global(state, "UnitIsGroupAssistant", unit_is_group_assistant);
+    set_global(state, "UnitIsDeadOrGhost", unit_is_dead_or_ghost);
+    set_global(state, "UnitIsCorpse", unit_is_corpse);
+    set_global(state, "UnitIsUnconscious", unit_is_unconscious);
+    set_global(
+        state,
+        "UnitHasIncomingResurrection",
+        unit_has_incoming_resurrection,
+    );
+    set_global(state, "UnitIsVisible", unit_is_visible);
     set_global(state, "UnitSelectionColor", unit_selection_color);
     set_global(state, "IsPartyWorldPVP", always_false);
     set_global(state, "UnitHasLFGDeserter", always_false);
@@ -666,4 +675,86 @@ fn resolve_unit_party_index(st: &crate::lua_api::state::SimState, unit: &str) ->
         }
     }
     None
+}
+
+// ── Unit liveness probes ─────────────────────────────────────────────────────
+
+fn is_unit_dead(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
+    match unit {
+        "player" | "pet" | "vehicle" => st.player.health <= 0,
+        "target" => st
+            .current_target
+            .as_ref()
+            .is_some_and(|t| t.health <= 0),
+        "focus" => st
+            .current_focus
+            .as_ref()
+            .is_some_and(|t| t.health <= 0),
+        other => visible_party_member(st, other).is_some_and(|m| m.dead_since.is_some()),
+    }
+}
+
+/// `UnitIsDeadOrGhost(unit)` — true when the unit is dead or in ghost form.
+/// Sim treats health ≤ 0 as dead and has no separate ghost state.
+fn unit_is_dead_or_ghost(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let dead = {
+        let st = borrow_state(state)?;
+        is_unit_dead(&st, &unit)
+    };
+    state.push(Val::Bool(dead));
+    Ok(1)
+}
+
+/// `UnitIsCorpse(unit)` — true when the unit is dead (same as DeadOrGhost
+/// for the sim, which doesn't distinguish ghost runs from corpse runs).
+fn unit_is_corpse(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let corpse = {
+        let st = borrow_state(state)?;
+        is_unit_dead(&st, &unit)
+    };
+    state.push(Val::Bool(corpse));
+    Ok(1)
+}
+
+/// `UnitIsUnconscious(unit)` — unconscious state is specific to DK
+/// start-zone / Monk Transcendence flavour retail mechanics that the
+/// sim doesn't model; always false.
+fn unit_is_unconscious(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// `UnitHasIncomingResurrection(unit)` — true for the player when
+/// `pending_resurrect.is_some()`. Party members do not carry per-unit
+/// incoming-resurrect state today; returns false.
+fn unit_has_incoming_resurrection(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let incoming = {
+        let st = borrow_state(state)?;
+        matches!(unit.as_str(), "player" | "pet" | "vehicle")
+            && st.pending_resurrect.is_some()
+    };
+    state.push(Val::Bool(incoming));
+    Ok(1)
+}
+
+/// `UnitIsVisible(unit)` — the sim has no fog-of-war / range-based
+/// visibility, so any known unit is visible.
+fn unit_is_visible(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let visible = {
+        let st = borrow_state(state)?;
+        match unit.as_str() {
+            "" => false,
+            "player" | "pet" | "vehicle" => true,
+            "target" => st.current_target.is_some(),
+            "focus" => st.current_focus.is_some(),
+            other => visible_party_member(&st, other).is_some(),
+        }
+    };
+    state.push(Val::Bool(visible));
+    Ok(1)
 }
