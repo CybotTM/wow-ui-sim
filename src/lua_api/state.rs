@@ -91,6 +91,7 @@ macro_rules! build_empty_sim_state {
             world: WorldState::default(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
+            net_stats: NetStats::default(),
             debug_borders: false,
             debug_anchors: false,
         }
@@ -352,10 +353,30 @@ pub struct SimState {
     /// `is_recrafting`. Drives `C_TradeSkillUI.GetRecipesTracked` /
     /// `IsRecipeTracked` / `SetRecipeTracked`. Empty by default.
     pub tracked_recipes: TrackedRecipes,
+    /// Simulated network stats returned by `GetNetStats`. All fields default to 0
+    /// because the sim has no real network socket; tests can inject values via
+    /// `A_Admin.SetNetStats(bandwidthIn, bandwidthOut, latencyHome, latencyWorld)`
+    /// to exercise UI paths that depend on latency or bandwidth thresholds
+    /// (e.g. Blizzard_MicroMenu's status-icon color ramp).
+    pub net_stats: NetStats,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
     pub debug_anchors: bool,
+}
+
+/// Simulated network statistics returned by `GetNetStats()`.
+///
+/// WoW's real `GetNetStats` returns `(bandwidthIn, bandwidthOut, latencyHome,
+/// latencyWorld)` in (kB/s, kB/s, ms, ms). The sim has no socket, so these are
+/// purely a state knob — tests set values via the admin API to drive UI code
+/// that renders latency/bandwidth indicators.
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
+pub struct NetStats {
+    pub bandwidth_in_kbps: f64,
+    pub bandwidth_out_kbps: f64,
+    pub latency_home_ms: f64,
+    pub latency_world_ms: f64,
 }
 
 struct EmptyStateCollections {

@@ -60,3 +60,21 @@ pub(super) fn set_item_level(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.player.item_level = ilvl as f32;
     Ok(0)
 }
+
+// ── Network stats (for GetNetStats) ───────────────────────────────────────────
+
+/// `A_Admin.SetNetStats(bandwidthIn, bandwidthOut, latencyHome, latencyWorld)`.
+/// All four arguments are optional; missing values default to 0. Drives the
+/// values returned by `GetNetStats` (registered in `rilua_net_stats.rs`).
+pub(super) fn set_net_stats(state: &mut LuaState) -> LuaResult<u32> {
+    let bandwidth_in = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0);
+    let bandwidth_out = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0);
+    let latency_home = Option::<f64>::from_stack(state, 3)?.unwrap_or(0.0);
+    let latency_world = Option::<f64>::from_stack(state, 4)?.unwrap_or(0.0);
+    let mut st = borrow_state_mut(state)?;
+    st.net_stats.bandwidth_in_kbps = bandwidth_in;
+    st.net_stats.bandwidth_out_kbps = bandwidth_out;
+    st.net_stats.latency_home_ms = latency_home;
+    st.net_stats.latency_world_ms = latency_world;
+    Ok(0)
+}

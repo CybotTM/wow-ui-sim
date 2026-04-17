@@ -338,14 +338,9 @@ if GetGuildLogoInfo == nil then
   end
 end
 
--- Network-stats: no real socket in the sim, so bandwidth and latency are 0.
--- Returns four values so `local a, b, c, d = GetNetStats()` works for the
--- latency comparisons in Blizzard_MicroMenu and friends.
-if GetNetStats == nil then
-  function GetNetStats()
-    return 0, 0, 0, 0
-  end
-end
+-- GetNetStats is registered from Rust (src/lua_api/globals/rilua_net_stats.rs)
+-- and reads from SimState::net_stats so tests can inject values via
+-- A_Admin.SetNetStats(bandwidthIn, bandwidthOut, latencyHome, latencyWorld).
 
 -- Store UI is never shown in the sim, so the "is it visible" probe
 -- reports false. Used by MainMenuBarMicroButtons to decide whether the
