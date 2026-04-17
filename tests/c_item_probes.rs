@@ -1,0 +1,101 @@
+//! Tests for `C_Item` probe methods backed by the static `ITEM_DB`
+//! (seeded item-db table in `data/items.rs`):
+//!
+//! - `C_Item.GetItemIconByID(itemID)` — returns the icon fileDataID
+//!   or the generic-placeholder `134400` when unknown.
+//! - `C_Item.GetItemNameByID(itemID)` — returns the item name or
+//!   `"Unknown"` when unknown.
+//! - `C_Item.GetItemQualityByID(itemID)` — returns the quality index
+//!   (0–7) or `0` (Poor) when unknown.
+//!
+//! All three were listed in `NAMESPACE_NIL_STUBS` even though the real
+//! implementations already ran (the stub registrar skips non-nil
+//! namespace methods). Drop the dead entries.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+/// An item id known to be present in `data/items.rs` (Aqirite, seeded
+/// at the top of the db).
+const KNOWN_ITEM_ID: u32 = 210935;
+
+#[test]
+fn get_item_name_by_id_returns_db_name_for_known_item() {
+    let env = env();
+    let name: String = env
+        .eval(&format!(
+            "return C_Item.GetItemNameByID({KNOWN_ITEM_ID})"
+        ))
+        .unwrap();
+    assert_eq!(name, "Aqirite");
+}
+
+#[test]
+fn get_item_name_by_id_falls_back_to_unknown_for_missing_item() {
+    let env = env();
+    let name: String = env
+        .eval("return C_Item.GetItemNameByID(999999999)")
+        .unwrap();
+    assert_eq!(name, "Unknown");
+}
+
+#[test]
+fn get_item_quality_by_id_returns_db_quality() {
+    let env = env();
+    let quality: i32 = env
+        .eval(&format!(
+            "return C_Item.GetItemQualityByID({KNOWN_ITEM_ID})"
+        ))
+        .unwrap();
+    // Aqirite is quality 2 (Uncommon) per the seeded db.
+    assert_eq!(quality, 2);
+}
+
+#[test]
+fn get_item_quality_by_id_returns_zero_for_missing_item() {
+    let env = env();
+    let quality: i32 = env
+        .eval("return C_Item.GetItemQualityByID(999999999)")
+        .unwrap();
+    assert_eq!(quality, 0, "unknown items default to Poor (0)");
+}
+
+#[test]
+fn get_item_icon_by_id_returns_generic_placeholder_for_missing_icon() {
+    let env = env();
+    // Aqirite has icon_file_data_id = 0 in the seeded db, so the
+    // handler swaps in the generic placeholder (INV_MISC_QUESTIONMARK).
+    let icon: i32 = env
+        .eval(&format!(
+            "return C_Item.GetItemIconByID({KNOWN_ITEM_ID})"
+        ))
+        .unwrap();
+    assert_eq!(icon, 134400);
+}
+
+#[test]
+fn get_item_icon_by_id_returns_placeholder_for_missing_item() {
+    let env = env();
+    let icon: i32 = env
+        .eval("return C_Item.GetItemIconByID(999999999)")
+        .unwrap();
+    assert_eq!(icon, 134400);
+}
+
+#[test]
+fn c_item_probes_accept_item_hyperlinks() {
+    let env = env();
+    let (name, quality): (String, i32) = env
+        .eval(&format!(
+            r#"
+            local link = "|cff1eff00|Hitem:{KNOWN_ITEM_ID}::::::::80:::::|h[Aqirite]|h|r"
+            return C_Item.GetItemNameByID(link), C_Item.GetItemQualityByID(link)
+            "#
+        ))
+        .unwrap();
+    assert_eq!(name, "Aqirite");
+    assert_eq!(quality, 2);
+}

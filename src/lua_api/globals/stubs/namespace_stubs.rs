@@ -71,10 +71,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_IncomingSummon
     ("C_IncomingSummon", "HasIncomingSummon", stub_nil),
     ("C_IncomingSummon", "IncomingSummonStatus", stub_nil),
-    // C_Item
-    ("C_Item", "GetItemIconByID", stub_nil),
-    ("C_Item", "GetItemNameByID", stub_nil),
-    ("C_Item", "GetItemQualityByID", stub_nil),
+    // C_Item GetItemIconByID / GetItemNameByID / GetItemQualityByID
+    // are ITEM_DB-backed in missing_surface/item_spell/c_item.rs, not
+    // stubs.
     // C_LFGInfo
     ("C_LFGInfo", "CanPlayerUseLFD", stub_nil),
     ("C_LFGInfo", "GetLFGCategoryInfo", stub_nil),
