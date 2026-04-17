@@ -25,9 +25,9 @@ pub mod global_strings;
 pub mod iced_app;
 #[path = "../data/items.rs"]
 pub mod items;
+pub mod layout;
 pub mod loader;
 pub mod logging;
-pub mod layout;
 pub mod lua_api;
 pub mod lua_bridge;
 pub mod lua_errors;

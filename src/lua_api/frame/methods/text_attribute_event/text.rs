@@ -1,13 +1,13 @@
 //! Text-related RustFn methods: SetText, GetText, font, color, justification, wrapping.
 
 use super::helpers::{store_simple_attribute, val_to_f32};
+use crate::font::WowFontSystem;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static, frame_id_from_stack,
     registry_table_or_create, table_get, table_set, val_to_string,
 };
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
-use crate::render::font::WowFontSystem;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};

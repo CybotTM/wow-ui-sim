@@ -8,12 +8,12 @@ use super::env_init::{
 use super::state::{AddonInfo, PendingTimer, SimState};
 use super::timer_processing::{reschedule_timer, timer_should_wait};
 use crate::Result;
+use crate::font::WowFontSystem;
 use crate::lua_api::methods::{
     call_function as call_rilua_function, create_string, frame_ref, registry_get, registry_set,
     table_set, val_to_string,
 };
 use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, get_script};
-use crate::render::font::WowFontSystem;
 use crate::screen::ScreenKind;
 use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;

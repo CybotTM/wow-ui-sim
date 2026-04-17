@@ -144,8 +144,8 @@ impl WowLuaEnv {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::font::WowFontSystem;
     use crate::lua_api::env::WowLuaAppData;
-    use crate::render::font::WowFontSystem;
     use rilua::LuaApi;
     use std::cell::RefCell;
     use std::path::PathBuf;

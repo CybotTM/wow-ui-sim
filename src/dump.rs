@@ -4,7 +4,7 @@
 //! the connected `wow-cli dump-tree` (via iced_app debug server).
 
 use crate::LayoutRect;
-use crate::iced_app::layout::{anchor_position, compute_frame_rect};
+use crate::layout::{anchor_position, compute_frame_rect};
 use crate::widget::{Anchor, Frame, WidgetRegistry, WidgetType};
 use regex::RegexBuilder;
 
