@@ -235,38 +235,45 @@ impl WowLuaEnv {
     /// Iterate `UISpecialFrames` and hide any visible frames. Returns `true`
     /// if at least one was closed.
     fn close_special_windows(&self) -> Result<bool> {
-        // Read the UISpecialFrames sequence from Lua globals.
-        let names: Vec<String> = {
-            let mut lua = self.lua.borrow_mut();
-            let state = lua.state_mut();
-            let global_key = state.gc.intern_string_static(b"UISpecialFrames");
-            let global = state
-                .gc
-                .tables
-                .get(state.global)
-                .map(|t| t.get_str(global_key, &state.gc.string_arena))
-                .unwrap_or(Val::Nil);
-            let Val::Table(tref) = global else {
-                return Ok(false);
-            };
-            let Some(table) = state.gc.tables.get(tref) else {
-                return Ok(false);
-            };
-            let len = table.len(&state.gc.string_arena);
-            let mut out = Vec::with_capacity(len);
-            for i in 1..=len {
-                let v = table.get_int(i as i64);
-                if let Val::Str(s) = v {
-                    if let Some(ls) = state.gc.string_arena.get(s) {
-                        out.push(String::from_utf8_lossy(ls.data()).into_owned());
-                    }
+        let names = self.read_special_frame_names()?;
+        Ok(self.hide_visible_frames(&names))
+    }
+
+    /// Read the `UISpecialFrames` sequence from Lua globals.
+    fn read_special_frame_names(&self) -> Result<Vec<String>> {
+        let mut lua = self.lua.borrow_mut();
+        let state = lua.state_mut();
+        let global_key = state.gc.intern_string_static(b"UISpecialFrames");
+        let global = state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|t| t.get_str(global_key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+        let Val::Table(tref) = global else {
+            return Ok(vec![]);
+        };
+        let Some(table) = state.gc.tables.get(tref) else {
+            return Ok(vec![]);
+        };
+        let len = table.len(&state.gc.string_arena);
+        let mut out = Vec::with_capacity(len);
+        for i in 1..=len {
+            let v = table.get_int(i as i64);
+            if let Val::Str(s) = v {
+                if let Some(ls) = state.gc.string_arena.get(s) {
+                    out.push(String::from_utf8_lossy(ls.data()).into_owned());
                 }
             }
-            out
-        };
+        }
+        Ok(out)
+    }
 
+    /// Hide each named frame that is currently visible. Returns `true` if any
+    /// frame was hidden.
+    fn hide_visible_frames(&self, names: &[String]) -> bool {
         let mut closed = false;
-        for name in &names {
+        for name in names {
             let id = self.state.borrow().widgets.get_id_by_name(name);
             if let Some(id) = id {
                 let is_visible = self
@@ -282,7 +289,7 @@ impl WowLuaEnv {
                 }
             }
         }
-        Ok(closed)
+        closed
     }
 
     /// Call the Lua `CloseAllWindows()` global. Returns `false` if it is not
@@ -342,29 +349,35 @@ impl WowLuaEnv {
             .get(fid)
             .map(|f| f.editbox_numeric)
             .unwrap_or(false);
-        if numeric
-            && !text
-                .chars()
-                .all(|c| c.is_ascii_digit() || c == '.' || c == '-')
-        {
+        let is_valid_numeric = text.chars().all(|c| c.is_ascii_digit() || c == '.' || c == '-');
+        if numeric && !is_valid_numeric {
             return Ok(());
         }
+        self.splice_text_at_cursor(fid, text);
+        self.fire_char_events(fid, text)?;
+        self.fire_script_handler(fid, "OnTextChanged", vec![Val::Bool(true)])?;
+        Ok(())
+    }
 
-        {
-            let mut state = self.state.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut_visual(fid) {
-                let current = frame.text.get_or_insert_with(String::new);
-                let char_pos = frame.editbox_cursor_pos as usize;
-                let byte_pos = current
-                    .char_indices()
-                    .nth(char_pos)
-                    .map(|(i, _)| i)
-                    .unwrap_or(current.len());
-                current.insert_str(byte_pos, text);
-                frame.editbox_cursor_pos += text.chars().count() as i32;
-            }
+    /// Write `text` into the frame's text buffer at the cursor position and
+    /// advance the cursor by the number of characters inserted.
+    fn splice_text_at_cursor(&self, fid: u64, text: &str) {
+        let mut state = self.state.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(fid) {
+            let current = frame.text.get_or_insert_with(String::new);
+            let char_pos = frame.editbox_cursor_pos as usize;
+            let byte_pos = current
+                .char_indices()
+                .nth(char_pos)
+                .map(|(i, _)| i)
+                .unwrap_or(current.len());
+            current.insert_str(byte_pos, text);
+            frame.editbox_cursor_pos += text.chars().count() as i32;
         }
+    }
 
+    /// Fire `OnChar` for each character in `text`.
+    fn fire_char_events(&self, fid: u64, text: &str) -> Result<()> {
         for ch in text.chars() {
             let ch_str = ch.to_string();
             let char_val = {
@@ -373,8 +386,6 @@ impl WowLuaEnv {
             };
             self.fire_script_handler(fid, "OnChar", vec![char_val])?;
         }
-
-        self.fire_script_handler(fid, "OnTextChanged", vec![Val::Bool(true)])?;
         Ok(())
     }
 

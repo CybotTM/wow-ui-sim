@@ -304,39 +304,24 @@ fn ensure_metatable(state: &mut LuaState) {
 /// Build the shared methods table installed as the fallback for `__index`.
 fn build_methods_table(state: &mut LuaState) -> Val {
     let methods = create_table(state);
-
-    install_method(
-        state,
-        methods,
-        "Assign",
-        "LuaDurationObject.Assign",
-        m_assign,
-    );
-    install_method(state, methods, "Copy", "LuaDurationObject.Copy", m_copy);
+    install_lifecycle_methods(state, methods);
     install_zero_methods(state, methods);
-    install_method(
-        state,
-        methods,
-        "GetModRate",
-        "LuaDurationObject.GetModRate",
-        m_get_mod_rate,
-    );
-    install_method(
-        state,
-        methods,
-        "HasSecretValues",
-        "LuaDurationObject.HasSecretValues",
-        m_has_secret_values,
-    );
-    install_method(
-        state,
-        methods,
-        "IsZero",
-        "LuaDurationObject.IsZero",
-        m_is_zero,
-    );
+    install_query_methods(state, methods);
     install_noop_methods(state, methods);
     methods
+}
+
+/// Install Assign and Copy — methods that write or clone the duration object.
+fn install_lifecycle_methods(state: &mut LuaState, methods: Val) {
+    install_method(state, methods, "Assign", "LuaDurationObject.Assign", m_assign);
+    install_method(state, methods, "Copy", "LuaDurationObject.Copy", m_copy);
+}
+
+/// Install GetModRate, HasSecretValues, IsZero — read-only query methods.
+fn install_query_methods(state: &mut LuaState, methods: Val) {
+    install_method(state, methods, "GetModRate", "LuaDurationObject.GetModRate", m_get_mod_rate);
+    install_method(state, methods, "HasSecretValues", "LuaDurationObject.HasSecretValues", m_has_secret_values);
+    install_method(state, methods, "IsZero", "LuaDurationObject.IsZero", m_is_zero);
 }
 
 fn install_method(
