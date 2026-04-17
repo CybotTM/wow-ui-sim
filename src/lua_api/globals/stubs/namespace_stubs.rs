@@ -20,9 +20,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AchievementInfo GetRewardItemID / GetAchievementInfo are
     // SimState-backed (via `achievements` map) in
     // missing_surface/achievement_info.rs, not stubs.
-    // C_AreaPoiInfo
-    ("C_AreaPoiInfo", "GetAreaPOIInfo", stub_nil),
-    ("C_AreaPoiInfo", "GetAreaPOISecondsLeft", stub_nil),
+    // C_AreaPoiInfo GetAreaPOIInfo / GetAreaPOISecondsLeft are
+    // SimState-backed (via `area_pois` map) in
+    // missing_surface/area_poi.rs, not stubs.
     // C_AuctionHouse
     ("C_AuctionHouse", "GetAuctionItemSubClasses", stub_nil),
     ("C_AuctionHouse", "GetReplicateItemInfo", stub_nil),

@@ -1,6 +1,7 @@
 //! Restored rilua API surface for item, spell, tooltip, and small legacy globals.
 
 mod achievement_info;
+mod area_poi;
 mod c_map;
 mod heirloom;
 mod item_socket_info;
@@ -64,6 +65,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     heirloom::register_heirloom_surface(state)?;
     c_map::register_c_map_surface(state)?;
     achievement_info::register_achievement_info_surface(state)?;
+    area_poi::register_area_poi_surface(state)?;
     Ok(())
 }
 

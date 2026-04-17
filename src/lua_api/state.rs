@@ -133,6 +133,7 @@ macro_rules! build_empty_sim_state {
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             maps: default_maps(),
             achievements: default_achievements(),
+            area_pois: default_area_pois(),
             player_map_position: (0.5, 0.5),
             factions: Vec::new(),
             selected_faction_index: 0,
@@ -176,6 +177,7 @@ macro_rules! build_empty_sim_state {
 }
 
 // Re-export game data types so existing `crate::lua_api::state::X` imports keep working.
+pub use super::game_data::AuraInfo;
 pub use super::game_data::SpellCooldownState;
 pub use super::game_data::{
     CLASS_LABELS, CastingState, PartyMember, RACE_DATA, ROT_DAMAGE_LEVELS, TargetInfo, XP_LEVELS,
@@ -184,12 +186,11 @@ pub use super::game_data::{
 use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
-pub use super::game_data::AuraInfo;
 pub use super::state_types::{
-    AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CurrencyInfo,
-    CursorInfo, CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
-    LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, NilSymbolAccess,
-    PendingTimer, PlayerState, SecondaryPowerState, WorldState,
+    AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo, BagItem,
+    CurrencyInfo, CursorInfo, CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember,
+    GuildRank, LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState,
+    NilSymbolAccess, PendingTimer, PlayerState, SecondaryPowerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -512,6 +513,11 @@ pub struct SimState {
     /// Feats of Strength headers). Completion state is derived from
     /// `world.earned_achievements` at read time.
     pub achievements: HashMap<i32, AchievementInfo>,
+    /// Area-POI metadata keyed by area poi id. Drives
+    /// `C_AreaPoiInfo.GetAreaPOIInfo` / `GetAreaPOISecondsLeft`.
+    /// Seeded with a tiny fixture (Mage Tower Stormwind +
+    /// one time-limited world event).
+    pub area_pois: HashMap<i32, AreaPoiInfo>,
     /// Player's normalized position (0..=1) in the current map.
     /// Drives `C_Map.GetPlayerMapPosition`. Default `(0.5, 0.5)`.
     pub player_map_position: (f64, f64),
@@ -766,7 +772,8 @@ fn default_achievements() -> HashMap<i32, AchievementInfo> {
             achievement_id: 42,
             name: "Explore Eastern Kingdoms".into(),
             points: 30,
-            description: "Explore Eastern Kingdoms, revealing the covered areas of the world map.".into(),
+            description: "Explore Eastern Kingdoms, revealing the covered areas of the world map."
+                .into(),
             flags: 0,
             icon: 236541,
             reward_text: String::new(),
@@ -789,6 +796,45 @@ fn default_achievements() -> HashMap<i32, AchievementInfo> {
     ]
     .into_iter()
     .map(|a| (a.achievement_id, a))
+    .collect()
+}
+
+/// Seed the `SimState.area_pois` table with one permanent and one
+/// time-limited POI so tests can exercise both the nil and the
+/// number return paths of `GetAreaPOISecondsLeft`.
+fn default_area_pois() -> HashMap<i32, AreaPoiInfo> {
+    [
+        AreaPoiInfo {
+            area_poi_id: 7000,
+            name: "Stormwind Portal Room".into(),
+            ui_map_id: Some(84),
+            position: (0.52, 0.38),
+            atlas_name: Some("Mage-Portal".into()),
+            description: Some("Portals to every capital city.".into()),
+            faction_id: None,
+            icon_widget_set: None,
+            linked_ui_map_id: None,
+            is_current_event: false,
+            should_glow: false,
+            seconds_left: None,
+        },
+        AreaPoiInfo {
+            area_poi_id: 7001,
+            name: "Legion Invasion".into(),
+            ui_map_id: Some(13),
+            position: (0.41, 0.62),
+            atlas_name: Some("DemonInvasion3".into()),
+            description: Some("A demonic incursion.".into()),
+            faction_id: None,
+            icon_widget_set: None,
+            linked_ui_map_id: None,
+            is_current_event: true,
+            should_glow: true,
+            seconds_left: Some(3600),
+        },
+    ]
+    .into_iter()
+    .map(|p| (p.area_poi_id, p))
     .collect()
 }
 
