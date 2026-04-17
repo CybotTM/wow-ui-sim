@@ -63,12 +63,7 @@ fn get_spell_tab_info(state: &mut LuaState) -> LuaResult<u32> {
     }
     let (class_label, spec_id) = {
         let sim = borrow_state(state)?;
-        let class_idx = sim
-            .player
-            .class_index
-            .max(1)
-            .min(CLASS_LABELS.len() as i32) as usize
-            - 1;
+        let class_idx = sim.player.class_index.max(1).min(CLASS_LABELS.len() as i32) as usize - 1;
         (CLASS_LABELS[class_idx], sim.player.active_spec_index)
     };
     let name = create_string(state, class_label);

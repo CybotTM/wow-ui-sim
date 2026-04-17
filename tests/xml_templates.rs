@@ -444,6 +444,38 @@ fn test_create_frame_from_xml_inline_global_method_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_method_then_assign_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGlobalMethodAssignTarget = {}
+        function XmlInlineGlobalMethodAssignTarget:Hide()
+            self.hidden = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalMethodAssignFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalMethodAssignTarget:Hide(); self.showingTooltip = false</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let target_hidden: bool = env
+        .eval("return XmlInlineGlobalMethodAssignTarget.hidden == true")
+        .unwrap();
+    let flag: bool = env
+        .eval("return XmlInlineGlobalMethodAssignFrame.showingTooltip == false")
+        .unwrap();
+    assert!(target_hidden);
+    assert!(flag);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -594,6 +626,88 @@ fn test_create_frame_from_xml_inline_set_frame_level_from_parent_runs() {
         frame_level, 7.0,
         "inline frame-level adjustment should use parent frame level"
     );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_register_for_clicks_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineRegisterClicksButton" parent="UIParent">
+        <Scripts><OnLoad>self:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")</OnLoad></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let exists: bool = env
+        .eval("return XmlInlineRegisterClicksButton ~= nil")
+        .unwrap();
+    assert!(exists, "inline RegisterForClicks should not break frame creation");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_register_for_drag_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineRegisterDragButton" parent="UIParent">
+        <Scripts><OnLoad>self:RegisterForDrag("LeftButton")</OnLoad></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let state = env.state().borrow();
+    let frame = state
+        .widgets
+        .iter()
+        .find_map(|(_, frame)| {
+            (frame.name.as_deref() == Some("XmlInlineRegisterDragButton")).then_some(frame)
+        })
+        .expect("button should exist");
+    assert!(
+        frame.registered_drag_buttons.contains("LeftButton"),
+        "inline RegisterForDrag should populate drag buttons"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_set_alpha_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSetAlphaFrame" parent="UIParent">
+        <Scripts><OnLoad>self:SetAlpha(0)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let alpha: f64 = env.eval("return XmlInlineSetAlphaFrame:GetAlpha()").unwrap();
+    assert_eq!(alpha, 0.0);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_set_checked_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><CheckButton name="XmlInlineSetCheckedButton" parent="UIParent">
+        <Scripts><OnLoad>self:SetChecked(false)</OnLoad></Scripts>
+    </CheckButton></Ui>"#,
+        "CheckButton",
+    );
+
+    let checked: bool = env
+        .eval("return XmlInlineSetCheckedButton:GetChecked() == true")
+        .unwrap();
+    assert!(!checked);
 }
 
 #[test]

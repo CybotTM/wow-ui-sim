@@ -625,6 +625,12 @@ enum FastHandlerRef<'a> {
         target_path: &'a str,
         method_name: &'a str,
     },
+    GlobalMethodThenAssignLiteral {
+        target_path: &'a str,
+        method_name: &'a str,
+        field: &'a str,
+        value: FastLiteralValue<'a>,
+    },
     Function(&'a str),
     FunctionNoArgs(&'a str),
     FunctionWithParentArg(&'a str),
@@ -633,6 +639,14 @@ enum FastHandlerRef<'a> {
     FunctionWithEventVarargs(&'a str),
     FunctionWithButton(&'a str),
     FunctionWithElapsed(&'a str),
+    RegisterForClicks {
+        first: &'a str,
+        second: Option<&'a str>,
+        third: Option<&'a str>,
+    },
+    RegisterForDrag(&'a str),
+    SetAlpha(f64),
+    SetChecked(bool),
     SetFrameLevelFromParent(i32),
     AssignAncestorRef {
         field: &'a str,
@@ -846,6 +860,125 @@ fn build_global_method_handler(
     )
 }
 
+fn build_global_method_then_assign_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    field: &str,
+    value: FastLiteralValue<'_>,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local target, method_name, field_name, assigned_value = ...
+            return function(self, ...)
+                if target then
+                    target[method_name](target)
+                end
+                self[field_name] = assigned_value
+            end
+        "#,
+        "template-global-method-assign-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, target_path);
+    let method_name = create_string(state, method_name);
+    let field_name = create_string(state, field);
+    let assigned_value = fast_literal_value(state, value);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, method_name, field_name, assigned_value],
+    )
+}
+
+fn build_register_for_clicks_handler(
+    state: &mut LuaState,
+    first: &str,
+    second: Option<&str>,
+    third: Option<&str>,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local first, second, third = ...
+            return function(self, ...)
+                if third ~= nil then
+                    self:RegisterForClicks(first, second, third)
+                elseif second ~= nil then
+                    self:RegisterForClicks(first, second)
+                else
+                    self:RegisterForClicks(first)
+                end
+            end
+        "#,
+        "template-register-for-clicks",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let first = create_string(state, first);
+    let second = second.map(|value| create_string(state, value)).unwrap_or(Val::Nil);
+    let third = third.map(|value| create_string(state, value)).unwrap_or(Val::Nil);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[first, second, third],
+    )
+}
+
+fn build_register_for_drag_handler(state: &mut LuaState, button: &str) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local button = ...
+            return function(self, ...)
+                self:RegisterForDrag(button)
+            end
+        "#,
+        "template-register-for-drag",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let button = create_string(state, button);
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[button])
+}
+
+fn build_set_alpha_handler(state: &mut LuaState, alpha: f64) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local alpha = ...
+            return function(self, ...)
+                self:SetAlpha(alpha)
+            end
+        "#,
+        "template-set-alpha",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[Val::Num(alpha)],
+    )
+}
+
+fn build_set_checked_handler(state: &mut LuaState, checked: bool) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local checked = ...
+            return function(self, ...)
+                self:SetChecked(checked)
+            end
+        "#,
+        "template-set-checked",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[Val::Bool(checked)],
+    )
+}
+
 fn build_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
@@ -863,6 +996,13 @@ fn build_fast_handler(
             target_path,
             method_name,
         } => build_global_method_handler(state, target_path, method_name).map(Some),
+        FastHandlerRef::GlobalMethodThenAssignLiteral {
+            target_path,
+            method_name,
+            field,
+            value,
+        } => build_global_method_then_assign_handler(state, target_path, method_name, field, value)
+            .map(Some),
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
         }
@@ -888,6 +1028,16 @@ fn build_fast_handler(
         FastHandlerRef::FunctionWithElapsed(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::Elapsed).map(Some)
         }
+        FastHandlerRef::RegisterForClicks {
+            first,
+            second,
+            third,
+        } => build_register_for_clicks_handler(state, first, second, third).map(Some),
+        FastHandlerRef::RegisterForDrag(button) => {
+            build_register_for_drag_handler(state, button).map(Some)
+        }
+        FastHandlerRef::SetAlpha(alpha) => build_set_alpha_handler(state, alpha).map(Some),
+        FastHandlerRef::SetChecked(checked) => build_set_checked_handler(state, checked).map(Some),
         FastHandlerRef::SetFrameLevelFromParent(delta) => {
             build_set_frame_level_from_parent_handler(state, delta).map(Some)
         }
@@ -1180,11 +1330,36 @@ fn parse_inline_fast_handler<'a>(
     if let Some(method_name) = parse_inline_grandparent_method(stmt) {
         return Some(FastHandlerRef::GrandparentMethod(method_name));
     }
+    if let Some((target_path, method_name, field, value)) = parse_inline_global_method_then_assign(stmt)
+    {
+        return Some(FastHandlerRef::GlobalMethodThenAssignLiteral {
+            target_path,
+            method_name,
+            field,
+            value,
+        });
+    }
     if let Some((target_path, method_name)) = parse_inline_global_method(stmt) {
         return Some(FastHandlerRef::GlobalMethod {
             target_path,
             method_name,
         });
+    }
+    if let Some((first, second, third)) = parse_inline_register_for_clicks(stmt) {
+        return Some(FastHandlerRef::RegisterForClicks {
+            first,
+            second,
+            third,
+        });
+    }
+    if let Some(button) = parse_inline_register_for_drag(stmt) {
+        return Some(FastHandlerRef::RegisterForDrag(button));
+    }
+    if let Some(alpha) = parse_inline_set_alpha(stmt) {
+        return Some(FastHandlerRef::SetAlpha(alpha));
+    }
+    if let Some(checked) = parse_inline_set_checked(stmt) {
+        return Some(FastHandlerRef::SetChecked(checked));
     }
     if let Some(delta) = parse_inline_set_frame_level_from_parent(stmt) {
         return Some(FastHandlerRef::SetFrameLevelFromParent(delta));
@@ -1285,6 +1460,59 @@ fn parse_inline_global_method(stmt: &str) -> Option<(&str, &str)> {
     .then_some((target_path, method_name))
 }
 
+fn parse_inline_global_method_then_assign(
+    stmt: &str,
+) -> Option<(&str, &str, &str, FastLiteralValue<'_>)> {
+    let (first, second) = stmt.split_once(';')?;
+    let (target_path, method_name) = parse_inline_global_method(first.trim())?;
+    let FastHandlerRef::AssignLiteral { field, value } = parse_inline_assignment(second.trim())? else {
+        return None;
+    };
+    Some((target_path, method_name, field, value))
+}
+
+fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {
+    let args = stmt
+        .strip_prefix("self:RegisterForClicks(")?
+        .strip_suffix(')')?
+        .trim();
+    let args = parse_string_literal_args(args)?;
+    match args.as_slice() {
+        [first] => Some((first, None, None)),
+        [first, second] => Some((first, Some(second), None)),
+        [first, second, third] => Some((first, Some(second), Some(third))),
+        _ => None,
+    }
+}
+
+fn parse_inline_register_for_drag(stmt: &str) -> Option<&str> {
+    let args = stmt
+        .strip_prefix("self:RegisterForDrag(")?
+        .strip_suffix(')')?
+        .trim();
+    let args = parse_string_literal_args(args)?;
+    match args.as_slice() {
+        [button] => Some(button),
+        _ => None,
+    }
+}
+
+fn parse_inline_set_alpha(stmt: &str) -> Option<f64> {
+    stmt.strip_prefix("self:SetAlpha(")?
+        .strip_suffix(')')?
+        .trim()
+        .parse::<f64>()
+        .ok()
+}
+
+fn parse_inline_set_checked(stmt: &str) -> Option<bool> {
+    match stmt.strip_prefix("self:SetChecked(")?.strip_suffix(')')?.trim() {
+        "true" => Some(true),
+        "false" => Some(false),
+        _ => None,
+    }
+}
+
 fn parse_inline_set_frame_level_from_parent(stmt: &str) -> Option<i32> {
     let remainder = stmt
         .strip_prefix("self:SetFrameLevel(self:GetParent():GetFrameLevel()")?
@@ -1361,6 +1589,19 @@ fn parse_inline_parent_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
     }
     let value = parse_fast_literal_value(raw_value)?;
     Some(FastHandlerRef::AssignParentField { field, value })
+}
+
+fn parse_string_literal_args(args: &str) -> Option<Vec<&str>> {
+    if args.is_empty() {
+        return Some(Vec::new());
+    }
+    let mut values = Vec::new();
+    for part in args.split(',') {
+        let part = part.trim();
+        let value = part.strip_prefix('"')?.strip_suffix('"')?;
+        values.push(value);
+    }
+    Some(values)
 }
 
 fn is_fast_handler_path(path: &str) -> bool {

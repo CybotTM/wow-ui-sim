@@ -37,8 +37,14 @@ fn get_spell_tab_info_returns_class_name_and_spec_id() {
     // Seeded player is Paladin (class_index 2), Retribution spec
     // (active_spec_index 2) by default — set Retribution specifically.
     env.state().borrow_mut().player.active_spec_index = 70;
-    let (name, _icon, offset, num_spells, is_guild, spec_id): (String, String, i32, i32, bool, i32) =
-        env.eval("return GetSpellTabInfo(1)").unwrap();
+    let (name, _icon, offset, num_spells, is_guild, spec_id): (
+        String,
+        String,
+        i32,
+        i32,
+        bool,
+        i32,
+    ) = env.eval("return GetSpellTabInfo(1)").unwrap();
     assert_eq!(name, "Paladin");
     assert_eq!(offset, 0);
     assert_eq!(num_spells, 0);
