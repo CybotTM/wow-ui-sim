@@ -45,9 +45,20 @@ gc_stop → bootstrap → full_gc → freeze_table(_G) → freeze_table(__secure
 
 ### Phases
 
-- [ ] Phase -1a — Wow-sim: at start of `register_globals`, call `state.gc_stop()`. After bootstrap + addon loads, call `state.full_gc()` then `state.gc_restart()`.
-- [ ] Phase -1b — Wow-sim: in the OnUpdate dispatch loop, wrap each tick — `gc_stop` at entry, `gc_step(budget)` at exit. Tune `budget` from measurement.
-- [ ] Phase -1c — Measure wall time before/after.
+- [x] Phase -1a — Wow-sim: at start of `register_globals`, call `state.gc_stop()`. After bootstrap + addon loads, call `state.full_gc()` then `state.gc_restart()`. (landed 651334c1)
+- [x] Phase -1b — Wow-sim: in the OnUpdate dispatch loop, wrap each tick — `gc_stop` at entry, `gc_step(budget)` at exit. Starting budget 1024 (one `GCSTEPSIZE`). (landed 0376da7b)
+- [x] Phase -1c — Measure wall time before/after. See "Measured results" below.
+
+### Measured results (2026-04-17)
+
+`lua-errors` wall time, release build, 5 runs `--no-addons --no-saved-vars`, 3 runs with Blizzard + third-party addons. Medians reported. Baseline = commit `8ef4b347` (pre-Track -1); after = tip with both brackets installed.
+
+| Path | Before | After | Delta |
+|---|---|---|---|
+| `--no-addons --no-saved-vars lua-errors` | 2.753 s | 1.682 s | **-39%** |
+| `--no-saved-vars lua-errors` (with addons) | 2.965 s | 1.652 s | **-44%** |
+
+Bigger than projected: deferring the collector across the monotonic startup region avoids both the mark-phase walks and the auto-step checks that piled up as `_G` and the frame registry grew. The with-addons path shows the larger absolute win because addon loading contributes the bulk of the allocation.
 
 ## Track 0: Quick win (independent)
 
