@@ -461,6 +461,14 @@ pub struct WorldState {
     pub instance_difficulty: i32,
     pub instance_max_players: i32,
     pub in_instance: bool,
+    /// Whether an encounter is currently in progress (boss pull active).
+    /// Drives `IsEncounterInProgress`.
+    pub encounter_in_progress: bool,
+    /// Whether the current area allows flying. Drives `IsFlyableArea`.
+    pub flyable_area: bool,
+    /// Whether the current instance is an arena battleground. Drives
+    /// `IsBattlefieldArena`.
+    pub battlefield_arena: bool,
     pub guild_name: Option<String>,
     pub guild_rank: Option<String>,
     pub guild_num_members: i32,
