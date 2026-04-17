@@ -13,6 +13,7 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::state_types::MythicPlusRatingMapSummary;
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -79,39 +80,52 @@ fn get_player_mythic_plus_rating_summary(state: &mut LuaState) -> LuaResult<u32>
         "currentSeasonScore",
         Val::Num(summary.current_season_score),
     );
-    let runs_table = create_table(state);
-    for (i, run) in summary.runs.into_iter().enumerate() {
-        let entry = create_table(state);
-        table_set(
-            state,
-            entry,
-            "challengeModeID",
-            Val::Num(run.challenge_mode_id as f64),
-        );
-        table_set(state, entry, "mapScore", Val::Num(run.map_score));
-        table_set(
-            state,
-            entry,
-            "bestRunLevel",
-            Val::Num(run.best_run_level as f64),
-        );
-        table_set(
-            state,
-            entry,
-            "bestRunDurationMS",
-            Val::Num(run.best_run_duration_ms as f64),
-        );
-        table_set(
-            state,
-            entry,
-            "finishedSuccess",
-            Val::Bool(run.finished_success),
-        );
-        set_table_array(state, runs_table, i as i64 + 1, entry);
-    }
+    let runs_table = build_mythic_plus_runs_table(state, summary.runs);
     table_set(state, result, "runs", runs_table);
     state.push(result);
     Ok(1)
+}
+
+fn build_mythic_plus_runs_table(
+    state: &mut LuaState,
+    runs: Vec<MythicPlusRatingMapSummary>,
+) -> Val {
+    let runs_table = create_table(state);
+    for (i, run) in runs.into_iter().enumerate() {
+        let entry = build_mythic_plus_run_entry(state, &run);
+        set_table_array(state, runs_table, i as i64 + 1, entry);
+    }
+    runs_table
+}
+
+fn build_mythic_plus_run_entry(state: &mut LuaState, run: &MythicPlusRatingMapSummary) -> Val {
+    let entry = create_table(state);
+    table_set(
+        state,
+        entry,
+        "challengeModeID",
+        Val::Num(run.challenge_mode_id as f64),
+    );
+    table_set(state, entry, "mapScore", Val::Num(run.map_score));
+    table_set(
+        state,
+        entry,
+        "bestRunLevel",
+        Val::Num(run.best_run_level as f64),
+    );
+    table_set(
+        state,
+        entry,
+        "bestRunDurationMS",
+        Val::Num(run.best_run_duration_ms as f64),
+    );
+    table_set(
+        state,
+        entry,
+        "finishedSuccess",
+        Val::Bool(run.finished_success),
+    );
+    entry
 }
 
 fn is_player_eligible_for_npe(state: &mut LuaState) -> LuaResult<u32> {
