@@ -6,7 +6,7 @@ use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, frame_ref, state_handle,
 };
-use crate::lua_api::script_helpers::set_script;
+use crate::lua_api::script_helpers::{get_script, set_script};
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -522,7 +522,7 @@ pub(crate) fn apply_template_scripts(
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
 ) -> LuaResult<()> {
-    if apply_method_only_scripts_fast(state, frame_id, scripts)? {
+    if apply_fast_scripts(state, frame_id, scripts)? {
         return Ok(());
     }
 
@@ -550,21 +550,20 @@ pub(crate) fn scripts_support_fast_install(scripts: &crate::xml::ScriptsXml) -> 
     collect_fast_handlers(scripts).is_some()
 }
 
-fn apply_method_only_scripts_fast(
+fn apply_fast_scripts(
     state: &mut LuaState,
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
 ) -> LuaResult<bool> {
-    let Some(handlers) = collect_fast_handlers(scripts) else {
+    let Some(installs) = collect_fast_handlers(scripts) else {
         return Ok(false);
     };
-    if handlers.is_empty() {
+    if installs.is_empty() {
         return Ok(true);
     }
 
-    for (handler_name, handler_ref) in handlers {
-        let handler = build_fast_handler(state, handler_ref)?;
-        set_script(state, frame_id, handler_name, handler);
+    for (handler_name, install) in installs {
+        install_fast_handler(state, frame_id, handler_name, install)?;
     }
 
     Ok(true)
@@ -572,7 +571,7 @@ fn apply_method_only_scripts_fast(
 
 fn collect_fast_handlers(
     scripts: &crate::xml::ScriptsXml,
-) -> Option<Vec<(&'static str, FastHandlerRef<'_>)>> {
+) -> Option<Vec<(&'static str, FastScriptInstall<'_>)>> {
     let mut handlers = Vec::new();
     collect_fast_handler_group(&mut handlers, base_method_only_handlers(scripts))?;
     collect_fast_handler_group(&mut handlers, pointer_method_only_handlers(scripts))?;
@@ -586,36 +585,57 @@ type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 
 #[derive(Copy, Clone)]
 enum FastHandlerRef<'a> {
+    NoOp,
     Method(&'a str),
     Function(&'a str),
+    InlineBody(&'a str),
+}
+
+#[derive(Copy, Clone)]
+enum FastScriptInstall<'a> {
+    Set(FastHandlerRef<'a>),
+    Chain {
+        handler: FastHandlerRef<'a>,
+        new_first: bool,
+    },
 }
 
 fn collect_fast_handler_group<'a>(
-    handlers: &mut Vec<(&'static str, FastHandlerRef<'a>)>,
+    handlers: &mut Vec<(&'static str, FastScriptInstall<'a>)>,
     group: impl IntoIterator<Item = FastHandler<'a>>,
 ) -> Option<()> {
     for (handler_name, script) in group {
         let Some(script) = script else {
             continue;
         };
-        if script.intrinsic_order.is_some() || script.inherit.is_some() {
+        if script.intrinsic_order.is_some() {
             return None;
         }
-        if script
+        let body = script
             .body
             .as_deref()
-            .is_some_and(|body| !body.trim().is_empty())
-        {
-            return None;
-        }
-        let handler = if let Some(method_name) = script.method.as_deref() {
-            FastHandlerRef::Method(method_name)
-        } else if let Some(function_name) = script.function.as_deref() {
-            FastHandlerRef::Function(function_name)
-        } else {
-            return None;
+            .map(str::trim)
+            .filter(|body| !body.is_empty());
+        let handler = match (script.method.as_deref(), script.function.as_deref(), body) {
+            (Some(method_name), None, None) => FastHandlerRef::Method(method_name),
+            (None, Some(function_name), None) => FastHandlerRef::Function(function_name),
+            (None, None, Some(body)) => FastHandlerRef::InlineBody(body),
+            (None, None, None) => FastHandlerRef::NoOp,
+            _ => return None,
         };
-        handlers.push((handler_name, handler));
+        let install = match script.inherit.as_deref() {
+            Some("append") => FastScriptInstall::Chain {
+                handler,
+                new_first: true,
+            },
+            Some("prepend") => FastScriptInstall::Chain {
+                handler,
+                new_first: false,
+            },
+            Some(_) => return None,
+            None => FastScriptInstall::Set(handler),
+        };
+        handlers.push((handler_name, install));
     }
     Some(())
 }
@@ -699,10 +719,129 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
     )
 }
 
-fn build_fast_handler(state: &mut LuaState, handler_ref: FastHandlerRef<'_>) -> LuaResult<Val> {
+fn build_fast_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &'static str,
+    handler_ref: FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
-        FastHandlerRef::Method(method_name) => build_method_handler(state, method_name),
-        FastHandlerRef::Function(function_name) => Ok(resolve_global_path(state, function_name)),
+        FastHandlerRef::NoOp => Ok(None),
+        FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
+        FastHandlerRef::Function(function_name) => {
+            Ok(Some(resolve_global_path(state, function_name)))
+        }
+        FastHandlerRef::InlineBody(body) => {
+            build_inline_body_handler(state, frame_id, handler_name, body).map(Some)
+        }
+    }
+}
+
+fn install_fast_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &'static str,
+    install: FastScriptInstall<'_>,
+) -> LuaResult<()> {
+    match install {
+        FastScriptInstall::Set(handler_ref) => {
+            if let Some(handler) = build_fast_handler(state, frame_id, handler_name, handler_ref)? {
+                set_script(state, frame_id, handler_name, handler);
+            }
+        }
+        FastScriptInstall::Chain { handler, new_first } => {
+            let Some(new_handler) = build_fast_handler(state, frame_id, handler_name, handler)?
+            else {
+                return Ok(());
+            };
+            let Some(old_handler) = get_script(state, frame_id, handler_name) else {
+                set_script(state, frame_id, handler_name, new_handler);
+                return Ok(());
+            };
+            let chained =
+                build_chained_handler(state, old_handler, new_handler, handler_name, new_first)?;
+            set_script(state, frame_id, handler_name, chained);
+        }
+    }
+    Ok(())
+}
+
+fn build_chained_handler(
+    state: &mut LuaState,
+    old_handler: Val,
+    new_handler: Val,
+    handler_name: &str,
+    new_first: bool,
+) -> LuaResult<Val> {
+    let (first, second) = if new_first {
+        (new_handler, old_handler)
+    } else {
+        (old_handler, new_handler)
+    };
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local handler_name, first, second = ...
+            local report = debug.getregistry()["__report_script_error"]
+            return function(self, ...)
+                if securecall then
+                    securecall(first, self, ...)
+                    securecall(second, self, ...)
+                else
+                    local ok1, err1 = pcall(first, self, ...)
+                    local ok2, err2 = pcall(second, self, ...)
+                    if not ok1 then
+                        local name = self.GetName and self:GetName() or "?"
+                        report("[script:" .. handler_name .. "] " .. name .. ": " .. tostring(err1))
+                    end
+                    if not ok2 then
+                        local name = self.GetName and self:GetName() or "?"
+                        report("[script:" .. handler_name .. "] " .. name .. ": " .. tostring(err2))
+                    end
+                end
+            end
+        "#,
+        "template-chained-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let handler_name = create_string(state, handler_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[handler_name, first, second],
+    )
+}
+
+fn build_inline_body_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &'static str,
+    body: &str,
+) -> LuaResult<Val> {
+    let params = inline_handler_params(handler_name);
+    let chunk = format!(
+        "local frame = ...
+return function({params})
+{body}
+end"
+    );
+    let builder = crate::loader::chunk_cache::load_chunk(state, &chunk, "template-inline-handler")
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let frame = frame_ref(state, frame_id)?;
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[frame])
+}
+
+fn inline_handler_params(handler_name: &str) -> &'static str {
+    match handler_name {
+        "OnUpdate" => "self, elapsed",
+        "OnEvent" => "self, event, ...",
+        "OnClick" => "self, button, down",
+        "OnEnter" | "OnLeave" => "self, motion",
+        "OnMouseDown" | "OnMouseUp" => "self, button",
+        "OnValueChanged" => "self, value",
+        "OnTextChanged" => "self, userInput",
+        "OnChar" => "self, text",
+        _ => "self, ...",
     }
 }
 

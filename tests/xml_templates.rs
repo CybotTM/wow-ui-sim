@@ -253,6 +253,90 @@ fn test_create_frame_from_xml_function_only_onload_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_empty_scripts_are_noops() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlEmptyScriptFrame" parent="UIParent">
+        <Scripts>
+            <OnEvent></OnEvent>
+            <OnShow></OnShow>
+            <OnUpdate></OnUpdate>
+        </Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let exists: bool = env.eval("return XmlEmptyScriptFrame ~= nil").unwrap();
+    assert!(
+        exists,
+        "XML frame with empty script tags should still be created"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_function_inherit_append_preserves_order() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlScriptOrder = {}
+        function XmlBaseOnLoad(self)
+            table.insert(XmlScriptOrder, "base")
+        end
+        function XmlChildOnLoad(self)
+            table.insert(XmlScriptOrder, "child")
+        end
+    "#,
+    )
+    .unwrap();
+
+    register_first_template(
+        r#"<Ui><Frame name="XmlInheritedScriptTemplate" virtual="true">
+        <Scripts><OnLoad function="XmlBaseOnLoad"/></Scripts>
+    </Frame></Ui>"#,
+        "XmlInheritedScriptTemplate",
+        "Frame",
+    );
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInheritedScriptFrame" parent="UIParent" inherits="XmlInheritedScriptTemplate">
+        <Scripts><OnLoad function="XmlChildOnLoad" inherit="append"/></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let order: String = env
+        .eval("return table.concat(XmlScriptOrder, ',')")
+        .unwrap();
+    assert_eq!(
+        order, "child,base",
+        "inherit='append' should run the new handler before the inherited one"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_onload_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineBodyFrame" parent="UIParent">
+        <Scripts><OnLoad>self.inlineBodyLoaded = true</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let loaded: bool = env
+        .eval("return XmlInlineBodyFrame.inlineBodyLoaded == true")
+        .unwrap();
+    assert!(loaded, "XML inline-body OnLoad should fire");
+}
+
+#[test]
 fn test_create_scrollframe_from_xml_registers_scroll_child() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
