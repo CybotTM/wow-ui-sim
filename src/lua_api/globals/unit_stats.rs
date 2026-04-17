@@ -188,6 +188,40 @@ fn stats_for(state: &LuaState) -> UnitStats {
     lookup_unit_stats(&sim, &unit)
 }
 
+fn requested_power_type(state: &LuaState) -> Option<i32> {
+    match stack_val(state, 2) {
+        Val::Num(n) => Some(n as i32),
+        _ => None,
+    }
+}
+
+fn secondary_power_max(power_type: i32) -> i32 {
+    match power_type {
+        4 => 7,
+        5 => 6,
+        9 => 5,
+        16 => 4,
+        _ => 5,
+    }
+}
+
+fn is_secondary_power_type(power_type: i32) -> bool {
+    matches!(
+        power_type,
+        4 | 5 | 6 | 7 | 8 | 9 | 11 | 12 | 13 | 16 | 17 | 18
+    )
+}
+
+fn player_secondary_power_max(state: &LuaState, power_type: i32) -> i32 {
+    borrow_state(state)
+        .expect("sim state should exist")
+        .player
+        .secondary_powers
+        .get(&power_type)
+        .map(|power| power.max)
+        .unwrap_or_else(|| secondary_power_max(power_type))
+}
+
 // ── Stat probes ──────────────────────────────────────────────────────────────
 
 /// `UnitArmor(unit)` — retail: `(base, armor, posBuff, negBuff)`.
@@ -297,10 +331,24 @@ fn unit_health_max(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `UnitPowerMax(unit)` — retail: `(maxPower, powerType)`.
 fn unit_power_max(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = unit_token(state);
     let stats = stats_for(state);
+    let Some(requested) = requested_power_type(state) else {
+        state.push(Val::Num(stats.power_max as f64));
+        state.push(Val::Num(stats.power_type as f64));
+        return Ok(2);
+    };
+    if requested == stats.power_type {
+        state.push(Val::Num(stats.power_max as f64));
+        return Ok(1);
+    }
+    if unit == "player" && is_secondary_power_type(requested) {
+        let power_max = player_secondary_power_max(state, requested);
+        state.push(Val::Num(power_max as f64));
+        return Ok(1);
+    }
     state.push(Val::Num(stats.power_max as f64));
-    state.push(Val::Num(stats.power_type as f64));
-    Ok(2)
+    Ok(1)
 }
 
 /// `UnitXP(unit)` — player-only in retail; returns 0 for other units.

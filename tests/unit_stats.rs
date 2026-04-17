@@ -5,6 +5,7 @@
 //! 2. Falls back to 0 for units the sim doesn't model (e.g. `"mouseover"`).
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state_types::SecondaryPowerState;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
@@ -26,9 +27,8 @@ fn unit_armor_returns_four_values_for_player() {
 #[test]
 fn unit_attack_power_returns_three_values() {
     let env = env();
-    let (base, pos, neg): (i32, i32, i32) = env
-        .eval(r#"return UnitAttackPower("player")"#)
-        .unwrap();
+    let (base, pos, neg): (i32, i32, i32) =
+        env.eval(r#"return UnitAttackPower("player")"#).unwrap();
     assert!(base > 0);
     assert_eq!(pos, 0);
     assert_eq!(neg, 0);
@@ -158,11 +158,24 @@ fn unit_power_max_returns_value_and_type() {
         st.player.power_max = 1000;
         st.player.power_type = 3; // ENERGY
     }
-    let (max, power_type): (i32, i32) = env
-        .eval(r#"return UnitPowerMax("player")"#)
-        .unwrap();
+    let (max, power_type): (i32, i32) = env.eval(r#"return UnitPowerMax("player")"#).unwrap();
     assert_eq!(max, 1000);
     assert_eq!(power_type, 3);
+}
+
+#[test]
+fn unit_power_max_returns_requested_secondary_pool_only() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.power_max = 1000;
+        st.player.power_type = 0;
+        st.player
+            .secondary_powers
+            .insert(9, SecondaryPowerState { current: 3, max: 5 });
+    }
+    let holy_max: i32 = env.eval(r#"return UnitPowerMax("player", 9)"#).unwrap();
+    assert_eq!(holy_max, 5);
 }
 
 // ── XP / XPMax ────────────────────────────────────────────────────────────────
@@ -222,9 +235,8 @@ fn unit_stat_indexes_map_to_strength_agility_stamina_intellect() {
 #[test]
 fn unit_resistance_returns_four_zero_values() {
     let env = env();
-    let (base, res, pos, neg): (i32, i32, i32, i32) = env
-        .eval(r#"return UnitResistance("player", 2)"#)
-        .unwrap();
+    let (base, res, pos, neg): (i32, i32, i32, i32) =
+        env.eval(r#"return UnitResistance("player", 2)"#).unwrap();
     assert_eq!((base, res, pos, neg), (0, 0, 0, 0));
 }
 
