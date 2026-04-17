@@ -159,17 +159,10 @@ fn unit_get_total_heal_absorbs(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-// ── Cast functions ───────────────────────────────────────────────────────────
-
-/// CastSpellByID(spellId [, unit]) — cast a spell by ID.
-pub(super) fn cast_spell_by_id(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
-/// CastSpellByName(name [, unit]) — cast a spell by name.
-pub(super) fn cast_spell_by_name(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
+// ── Cast info readers ────────────────────────────────────────────────────────
+//
+// CastSpellByID / CastSpellByName are registered from
+// `src/lua_api/globals/combat_verbs.rs` — they drive `SimState.casting`.
 
 fn unit_casting_info(state: &mut LuaState) -> LuaResult<u32> {
     let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
@@ -240,8 +233,6 @@ pub(super) fn register_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "UnitGetIncomingHeals", unit_get_incoming_heals)?;
     LuaApiMut::register_function(lua, "UnitGetTotalAbsorbs", unit_get_total_absorbs)?;
     LuaApiMut::register_function(lua, "UnitGetTotalHealAbsorbs", unit_get_total_heal_absorbs)?;
-    LuaApiMut::register_function(lua, "CastSpellByID", cast_spell_by_id)?;
-    LuaApiMut::register_function(lua, "CastSpellByName", cast_spell_by_name)?;
     LuaApiMut::register_function(lua, "UnitCastingInfo", unit_casting_info)?;
     LuaApiMut::register_function(lua, "UnitChannelInfo", unit_channel_info)?;
     LuaApiMut::register_function(
