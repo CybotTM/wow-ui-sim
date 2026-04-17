@@ -1,0 +1,113 @@
+//! Method-table constants and namespace registration for the quest surface.
+
+use crate::lua_bridge::table_set_rust_fn;
+use rilua::vm::state::LuaState;
+use rilua::{LuaApiMut, LuaResult, Val};
+
+use super::handlers::*;
+use super::SurfaceFn;
+
+pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
+    ("GetNumQuestLogEntries", get_num_quest_log_entries),
+    ("GetInfo", get_quest_log_info),
+    ("GetQuestIDForLogIndex", get_quest_id_for_log_index),
+    ("GetLogIndexForQuestID", get_log_index_for_quest_id),
+    ("GetTitleForQuestID", get_title_for_quest_id),
+    ("GetNumQuestWatches", get_num_quest_watches),
+    ("GetQuestIDForQuestWatchIndex", get_quest_id_for_quest_watch_index),
+    ("GetNumWorldQuestWatches", get_num_world_quest_watches),
+    ("GetQuestIDForWorldQuestWatchIndex", get_quest_id_for_world_quest_watch_index),
+    ("AddQuestWatch", noop),
+    ("RemoveQuestWatch", noop),
+    ("SortQuestWatches", noop),
+    ("IsQuestFlaggedCompleted", return_false),
+    ("IsComplete", return_false),
+    ("ReadyForTurnIn", return_false),
+    ("IsFailed", return_false),
+    ("IsQuestDisabledForSession", return_false),
+    ("IsPushableQuest", return_false),
+    ("IsRepeatableQuest", return_false),
+    ("IsImportantQuest", return_false),
+    ("IsMetaQuest", return_false),
+    ("IsOnMap", return_false),
+    ("IsOnQuest", is_on_quest),
+    ("IsWorldQuest", is_world_quest_fn),
+    ("IsQuestTask", is_quest_task),
+    ("IsQuestBounty", return_false),
+    ("GetQuestTagInfo", get_quest_tag_info),
+    ("GetRequiredMoney", get_required_money),
+    ("GetNextWaypointText", get_next_waypoint_text),
+    ("GetTimeAllowed", get_time_allowed),
+    ("GetQuestDetailsTheme", return_nil),
+    ("RequestLoadQuestByID", request_load_quest_by_id),
+    ("SetSelectedQuest", set_selected_quest),
+    ("GetSelectedQuest", get_selected_quest),
+];
+
+pub const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
+    ("IsActive", task_quest_is_active),
+    ("GetQuestsOnMap", build_task_quest_info),
+    ("GetQuestsForPlayerByMapID", build_task_quest_info),
+    ("GetQuestInfoByQuestID", task_quest_get_quest_info_by_id),
+    ("GetQuestLocation", task_quest_get_quest_location),
+    ("GetQuestTimeLeftMinutes", task_quest_time_left_minutes),
+    ("GetQuestTimeLeftSeconds", task_quest_time_left_seconds),
+];
+
+pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
+    ("GetNumQuestLeaderBoards", get_num_quest_leaderboards),
+    ("GetNumQuestLogEntries", get_num_quest_log_entries),
+    ("GetQuestLogLeaderBoard", get_quest_log_leaderboard),
+    ("GetQuestLogQuestText", get_quest_log_quest_text),
+    ("GetQuestLogTimeLeft", get_quest_log_time_left),
+    ("GetQuestPOIBlobCount", get_quest_poi_blob_count),
+    ("HaveQuestData", have_quest_data),
+    ("HaveQuestRewardData", have_quest_data),
+    ("IsQuestSequenced", is_quest_sequenced),
+    ("GetQuestLogCompletionText", get_quest_log_completion_text),
+    ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),
+    ("QuestMapUpdateAllQuests", quest_map_update_all_quests),
+    ("QuestMapFrame_GetFocusedQuestID", quest_map_frame_get_focused_quest_id),
+    ("GetQuestLogSpecialItemInfo", get_quest_log_special_item_info),
+];
+
+pub fn register_quest_info_handlers(state: &mut LuaState) -> LuaResult<()> {
+    let table_ref = super::ensure_global_table(state, "C_QuestLog");
+    for (name, func) in QUEST_LOG_METHODS {
+        table_set_rust_fn(state, table_ref, name, *func)?;
+    }
+    Ok(())
+}
+
+pub fn register_task_quest_handlers(state: &mut LuaState) -> LuaResult<()> {
+    let table_ref = super::ensure_global_table(state, "C_TaskQuest");
+    for (name, func) in TASK_QUEST_METHODS {
+        table_set_rust_fn(state, table_ref, name, *func)?;
+    }
+    Ok(())
+}
+
+pub fn register_quest_classification_handler(state: &mut LuaState) -> LuaResult<()> {
+    fn get_quest_classification(state: &mut LuaState) -> LuaResult<u32> {
+        use crate::lua_bridge::FromStack;
+        let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+        let classification = if super::is_world_quest(quest_id) { 10.0 } else { 7.0 };
+        state.push(Val::Num(classification));
+        Ok(1)
+    }
+
+    let table_ref = super::ensure_global_table(state, "C_QuestInfoSystem");
+    table_set_rust_fn(state, table_ref, "GetQuestClassification", get_quest_classification)?;
+    Ok(())
+}
+
+pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    for (name, func) in GLOBAL_QUEST_FUNCTIONS {
+        LuaApiMut::register_function(lua, name, *func)?;
+    }
+    let state = lua.state_mut();
+    register_quest_info_handlers(state)?;
+    register_task_quest_handlers(state)?;
+    register_quest_classification_handler(state)?;
+    Ok(())
+}
