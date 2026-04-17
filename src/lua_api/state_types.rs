@@ -341,6 +341,68 @@ impl Default for MythicPlusState {
     }
 }
 
+/// One step within an active scenario. Drives
+/// `C_ScenarioInfo.GetScenarioStepInfo(stepID)`.
+#[derive(Debug, Clone)]
+pub struct ScenarioStep {
+    /// Scenario step id (1-based index used by `GetScenarioStepInfo`).
+    pub step_id: i32,
+    /// Display title shown in the scenario tracker.
+    pub title: String,
+    /// Longer description shown in the step panel.
+    pub description: String,
+    /// Number of objectives/criteria for this step.
+    pub num_criteria: i32,
+    /// Whether this step has been completed.
+    pub completed: bool,
+    /// True when this is an optional bonus step.
+    pub is_bonus_step: bool,
+    /// Quest rewarded upon completing a bonus step, if any.
+    /// Drives `C_ScenarioInfo.GetScenarioBonusStepRewardQuestID`.
+    pub bonus_reward_quest_id: Option<i32>,
+}
+
+/// Backing state for `C_ScenarioInfo.*` probes.
+/// `in_scenario` defaults to false (no active scenario).
+#[derive(Debug, Clone)]
+pub struct ScenarioState {
+    /// Whether the player is currently inside a scenario.
+    pub in_scenario: bool,
+    /// Display name of the scenario (e.g. "Assault on Violet Hold").
+    pub name: String,
+    /// Scenario id as reported by the server.
+    pub scenario_id: i32,
+    /// Current active step index (1-based).
+    pub current_step: i32,
+    /// Total number of steps in the scenario.
+    pub num_steps: i32,
+    /// Scenario type flag (matches `Enum.ScenarioType` values).
+    pub scenario_type: i32,
+    /// UI texture kit name for the scenario tracker background.
+    pub texture_kit: String,
+    /// Whether this is a tiered entrance scenario. Drives
+    /// `C_ScenarioInfo.IsTieredEntranceScenario`.
+    pub is_tiered_entrance: bool,
+    /// Ordered list of steps. Indexed by `step_id - 1`.
+    pub steps: Vec<ScenarioStep>,
+}
+
+impl Default for ScenarioState {
+    fn default() -> Self {
+        Self {
+            in_scenario: false,
+            name: String::new(),
+            scenario_id: 0,
+            current_step: 1,
+            num_steps: 0,
+            scenario_type: 0,
+            texture_kit: String::new(),
+            is_tiered_entrance: false,
+            steps: Vec::new(),
+        }
+    }
+}
+
 /// One killing-blow entry within a death recap event. Drives
 /// `C_DeathRecap.GetKillingBlows`. The spell_id / ability_name /
 /// caster_name / amount fields mirror the retail multiret documented
@@ -688,6 +750,25 @@ pub struct SecondaryPowerState {
     pub max: i32,
 }
 
+/// One map entry in a player's Mythic+ rating summary.
+/// Mirrors `C_PlayerInfo.MythicPlusRatingMapSummary`.
+#[derive(Debug, Clone)]
+pub struct MythicPlusRatingMapSummary {
+    pub challenge_mode_id: i32,
+    pub map_score: f64,
+    pub best_run_level: i32,
+    pub best_run_duration_ms: i64,
+    pub finished_success: bool,
+}
+
+/// Overall Mythic+ rating summary for the player.
+/// Mirrors `C_PlayerInfo.MythicPlusRatingSummary`.
+#[derive(Debug, Clone)]
+pub struct MythicPlusRatingSummary {
+    pub current_season_score: f64,
+    pub runs: Vec<MythicPlusRatingMapSummary>,
+}
+
 /// Player character state: identity, combat, power, health, buffs, spec.
 #[derive(Debug, Clone)]
 pub struct PlayerState {
@@ -729,6 +810,18 @@ pub struct PlayerState {
     pub xp: i64,
     /// Experience required to ding the next level. Drives `UnitXPMax("player")`.
     pub xp_max: i64,
+    /// True when the player is currently in their alternate form (e.g. worgen, druid).
+    pub is_alternate_form: bool,
+    /// True when the alternate form is the default/native form.
+    pub alternate_form_is_default: bool,
+    /// True when the player is eligible for the New Player Experience.
+    pub is_npe_eligible: bool,
+    /// True when the player is restricted by NPE (starter zone limits).
+    pub is_npe_restricted: bool,
+    /// True when the player is currently in the Returning Player Experience.
+    pub is_in_rpe: bool,
+    /// Mythic+ rating summary for the player. None = no rating data.
+    pub mythic_plus_rating_summary: Option<MythicPlusRatingSummary>,
 }
 
 impl Default for PlayerState {
@@ -764,6 +857,12 @@ impl Default for PlayerState {
             next_mail_id: 1,
             xp: 0,
             xp_max: 180_000,
+            is_alternate_form: false,
+            alternate_form_is_default: true,
+            is_npe_eligible: false,
+            is_npe_restricted: false,
+            is_in_rpe: false,
+            mythic_plus_rating_summary: None,
         }
     }
 }
@@ -1105,6 +1204,43 @@ pub struct BnetGameAccount {
     pub region_id: i32,
     /// Player GUID string (character GUID, distinct from bnet/game account GUIDs).
     pub player_guid: String,
+}
+
+/// One WoW friends-list entry. Drives `C_Social.GetFriendInfo`,
+/// `C_Social.GetFriends`, and `C_FriendList.GetNumFriends`.
+/// Maps to the `C_FriendList.FriendInfo` retail structure.
+#[derive(Debug, Clone)]
+pub struct SocialFriend {
+    /// Display name (character name or BattleTag).
+    pub name: String,
+    /// Character level.
+    pub level: i32,
+    /// Current zone/area.
+    pub area: String,
+    /// Class name (e.g. "Paladin").
+    pub class_name: String,
+    /// Player note set on this friend.
+    pub note: String,
+    /// Whether the friend is currently online.
+    pub is_online: bool,
+    /// Player GUID string (format: "Player-<realm>-<id>").
+    pub guid: String,
+}
+
+/// Pending summon-request state. Drives `C_SummonInfo.*` and
+/// `C_IncomingSummon.*`. Defaults to inactive (no active summon).
+#[derive(Debug, Clone, Default)]
+pub struct SummonRequestState {
+    /// Whether a summon request is currently active.
+    pub active: bool,
+    /// Numeric summon reason code (see `Enum.SummonReason`).
+    pub reason: i32,
+    /// Time remaining on the summon confirmation timer, in milliseconds.
+    pub time_left_ms: i32,
+    /// Whether the summon skips the start experience flow.
+    pub skips_start_experience: bool,
+    /// Name of the player who initiated the summon.
+    pub target_name: String,
 }
 
 #[cfg(test)]

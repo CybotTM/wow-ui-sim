@@ -29,17 +29,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_BattleNet GetAccountInfoByGUID / GetFriendAccountInfo /
     // GetGameAccountInfoByGUID / GetFriendNumAccounts / GetNumFriends
     // are SimState-backed in missing_surface/battle_net.rs, not stubs.
-    // C_CharacterServices
-    (
-        "C_CharacterServices",
-        "GetActiveCharacterUpgradeBoostType",
-        stub_nil,
-    ),
-    (
-        "C_CharacterServices",
-        "GetActiveClassTrialBoostType",
-        stub_nil,
-    ),
+    // C_CharacterServices GetActiveCharacterUpgradeBoostType /
+    // GetActiveClassTrialBoostType are SimState-backed in
+    // missing_surface/character_services.rs, not stubs.
     // C_ChatBubbles.GetAllChatBubbles — real impl in missing_surface/chat_bubbles.rs
     // C_ClassTalents GetActiveConfigID / GetConfigIDsBySpecID /
     // GetHeroTalentSpecsForClassSpec / GetTraitTreeForSpec are
@@ -61,22 +53,17 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // missing_surface/heirloom.rs, not a stub.
     // GetHeirloomItemIDFromDisplayedSlot was a misnamed stub (the real
     // API is `FromDisplayedIndex`, now registered in heirloom.rs).
-    // C_IncomingSummon
-    ("C_IncomingSummon", "HasIncomingSummon", stub_nil),
-    ("C_IncomingSummon", "IncomingSummonStatus", stub_nil),
+    // C_IncomingSummon HasIncomingSummon / IncomingSummonStatus are
+    // SimState-backed in missing_surface/summon_info.rs, not stubs.
     // C_Item GetItemIconByID / GetItemNameByID / GetItemQualityByID
     // are ITEM_DB-backed in missing_surface/item_spell/c_item.rs, not
     // stubs.
     // C_LFGInfo CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
     // IsLFGModeActiveForCategory are SimState-backed in
     // missing_surface/lfg_info.rs, not stubs.
-    // C_LossOfControl
-    ("C_LossOfControl", "GetActiveLossOfControlData", stub_nil),
-    (
-        "C_LossOfControl",
-        "GetActiveLossOfControlDataCount",
-        stub_nil,
-    ),
+    // C_LossOfControl.GetActiveLossOfControlData /
+    // GetActiveLossOfControlDataCount are registered in
+    // missing_surface/small_namespaces.rs, not stubs.
     // C_Map GetMapArtID / GetMapChildrenInfo / GetPlayerMapPosition
     // are SimState-backed (via `maps` + `player_map_position`) in
     // missing_surface/c_map.rs, not stubs.
@@ -86,85 +73,25 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_NamePlate GetNamePlateForUnit / GetNamePlates are registered in
     // missing_surface/nameplate.rs (nil and empty-table respectively).
     // C_PartyInfo probes are registered in missing_surface/party_info.rs.
-    // C_PetBattles
-    ("C_PetBattles", "GetAbilityInfoByID", stub_nil),
-    ("C_PetBattles", "GetActivePet", stub_nil),
-    ("C_PetBattles", "GetAllEffectiveAbilityIDs", stub_nil),
-    // GetBattleState / GetNumPets intentionally omitted: zero-returning
-    // stubs live in env_init.rs so `petIndex > GetNumPets(...)` stays
-    // a number comparison and doesn't crash PetBattleFrame OnLoad.
-    ("C_PetBattles", "GetMaxAbilityCharges", stub_nil),
-    ("C_PetBattles", "GetPetAbilityInfo", stub_nil),
-    ("C_PetBattles", "GetPetAbilityList", stub_nil),
-    ("C_PetBattles", "GetPetInfo", stub_nil),
-    ("C_PetBattles", "GetPetInfoByPetID", stub_nil),
-    ("C_PetBattles", "GetPetStats", stub_nil),
-    ("C_PetBattles", "GetPlayerInfo", stub_nil),
-    ("C_PetBattles", "GetRoundTimingInfo", stub_nil),
-    ("C_PetBattles", "GetTurnResult", stub_nil),
-    ("C_PetBattles", "GetXP", stub_nil),
-    ("C_PetBattles", "IsPlayerNPC", stub_nil),
-    ("C_PetBattles", "StartPVPMatchmaking", stub_nil),
-    // C_PlayerInfo
-    ("C_PlayerInfo", "GetAlternateFormInfo", stub_false_false),
-    (
-        "C_PlayerInfo",
-        "GetContentDifficultyCreatureForPlayer",
-        stub_nil,
-    ),
-    ("C_PlayerInfo", "GetPlayerMythicPlusRatingSummary", stub_nil),
-    // C_QuestLog
-    ("C_QuestLog", "GetBountySetInfoForMapID", stub_nil),
-    ("C_QuestLog", "GetInfo", stub_nil),
-    ("C_QuestLog", "GetNextWaypoint", stub_nil),
-    ("C_QuestLog", "GetQuestDetailsTheme", stub_nil),
-    ("C_QuestLog", "GetQuestTagInfo", stub_nil),
-    ("C_QuestLog", "GetWorldQuestInfo", stub_nil),
+    // C_PetBattles 15 probes are registered in missing_surface/pet_battles.rs.
+    // GetBattleState / GetNumPets remain in pet_battles.rs (env_init) so
+    // `petIndex > GetNumPets(...)` keeps working as a numeric comparison.
+    // C_PlayerInfo probes are registered in missing_surface/player_info.rs.
+    // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_RaidFrames
     ("C_RaidFrames", "GetProfile", stub_nil),
-    // C_ScenarioInfo
-    (
-        "C_ScenarioInfo",
-        "GetScenarioBonusStepRewardQuestID",
-        stub_nil,
-    ),
-    ("C_ScenarioInfo", "GetScenarioInfo", stub_nil),
-    ("C_ScenarioInfo", "GetScenarioStepInfo", stub_nil),
-    // C_Social
-    ("C_Social", "GetFriendInfo", stub_nil),
-    ("C_Social", "GetFriends", stub_nil),
     // C_Spell
     ("C_Spell", "GetMountFromSpell", stub_nil),
     ("C_Spell", "GetSpellInfo", stub_nil),
-    // C_SummonInfo
-    ("C_SummonInfo", "GetSummonReason", stub_nil),
-    // C_System
-    ("C_System", "GetFrameStack", stub_nil),
-    // C_Timer (already has real impl for After/NewTicker; these are stubs)
-    ("C_Timer", "NewTimerID", stub_nil),
-    // C_TooltipInfo
-    ("C_TooltipInfo", "GetAction", stub_nil),
-    ("C_TooltipInfo", "GetAchievementByID", stub_nil),
-    ("C_TooltipInfo", "GetAura", stub_nil),
-    ("C_TooltipInfo", "GetGuildBankItem", stub_nil),
-    ("C_TooltipInfo", "GetHyperlink", stub_nil),
-    (
-        "C_TooltipInfo",
-        "GetInstanceLockEncountersComplete",
-        stub_nil,
-    ),
-    ("C_TooltipInfo", "GetInventoryItem", stub_nil),
-    ("C_TooltipInfo", "GetLFGDungeon", stub_nil),
-    ("C_TooltipInfo", "GetPetAction", stub_nil),
-    ("C_TooltipInfo", "GetQuestCurrency", stub_nil),
-    ("C_TooltipInfo", "GetQuestItem", stub_nil),
-    ("C_TooltipInfo", "GetQuestLogCurrency", stub_nil),
-    ("C_TooltipInfo", "GetQuestLogItem", stub_nil),
-    ("C_TooltipInfo", "GetRecipeResultItem", stub_nil),
-    ("C_TooltipInfo", "GetShapeshift", stub_nil),
-    ("C_TooltipInfo", "GetTrainerService", stub_nil),
-    ("C_TooltipInfo", "GetUnit", stub_nil),
-    ("C_TooltipInfo", "GetUpgradeItem", stub_nil),
+    // C_SummonInfo GetSummonReason / GetSummonConfirmTimeLeft /
+    // IsSummonSkippingStartExperience are SimState-backed in
+    // missing_surface/summon_info.rs, not stubs.
+    // C_System.GetFrameStack is backed by SimState.hovered_frame in
+    // missing_surface/small_probes.rs, not a stub.
+    // C_Timer.NewTimerID is backed by next_timer_id() in
+    // missing_surface/small_probes.rs, not a stub.
+    // C_TooltipInfo: all Get* variants are now real implementations in
+    // missing_surface/tooltip_info.rs; no stubs needed here.
     // C_TradeSkillUI
     (
         "C_TradeSkillUI",
@@ -184,8 +111,8 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TradeSkillUI", "GetRecipeReagentItemLink", stub_nil),
     ("C_TradeSkillUI", "GetRecipeSchematic", stub_nil),
     ("C_TradeSkillUI", "GetTradeSkillListLink", stub_nil),
-    // C_TrophyHall (stub all nil)
-    ("C_TrophyHall", "GetTrophyInfo", stub_nil),
+    // C_TrophyHall.GetTrophyInfo is registered in
+    // missing_surface/small_namespaces.rs, not a stub.
     // C_Tutorial
     ("C_Tutorial", "AcknowledgeTutorial", stub_nil),
     ("C_Tutorial", "HasSeenTutorial", stub_nil),
@@ -204,18 +131,10 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_UIWidgetManager", "GetPowerBarWidgetSetID", stub_zero),
     ("C_UIWidgetManager", "GetTopCenterWidgetSetID", stub_nil),
     ("C_UIWidgetManager", "GetWidgetSetInfo", stub_nil),
-    // C_VoiceChat
-    ("C_VoiceChat", "GetActiveChannelID", stub_nil),
-    ("C_VoiceChat", "GetChannel", stub_nil),
-    ("C_VoiceChat", "GetChannels", stub_nil),
-    (
-        "C_VoiceChat",
-        "GetCurrentVoiceChatConnectionStatusCode",
-        stub_nil,
-    ),
-    ("C_VoiceChat", "GetMasterVolumeScale", stub_nil),
-    ("C_VoiceChat", "GetMicrophoneVolume", stub_nil),
-    ("C_VoiceChat", "GetOutputVolume", stub_nil),
+    // C_VoiceChat GetActiveChannelID / GetChannel / GetChannels /
+    // GetCurrentVoiceChatConnectionStatusCode / GetMasterVolumeScale /
+    // GetMicrophoneVolume / GetOutputVolume are SimState-backed in
+    // missing_surface/voice_chat.rs, not stubs.
     // C_WowEntitlements
     ("C_WowEntitlements", "GetAllEntitlementsByType", stub_nil),
     // C_WowLabs
@@ -229,22 +148,18 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
 static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_AchievementInfo IsValidAchievement is SimState-backed in
     // missing_surface/achievement_info.rs, not a stub.
-    // C_Bank
-    ("C_Bank", "HasFullBankAccess", stub_false),
+    // C_Bank.HasFullBankAccess is registered (returns true) in
+    // missing_surface/small_namespaces.rs, not a stub.
     // C_BattleNet
     ("C_BattleNet", "IsAccountMuted", stub_false),
-    // C_CharacterServices
-    (
-        "C_CharacterServices",
-        "HasRequiredServiceForCharacterUpgrade",
-        stub_false,
-    ),
+    // C_CharacterServices HasRequiredServiceForCharacterUpgrade is
+    // SimState-backed in missing_surface/character_services.rs, not a stub.
     // C_ClassTalents CanChangeTalents / GetHasStarterBuild /
     // IsStarterBuildActive are TalentState-backed in
     // missing_surface/traits.rs, not stubs.
     // C_Club IsEnabled is WorldState-backed in missing_surface/club_info.rs, not a stub.
-    // C_GarrisonInfo
-    ("C_GarrisonInfo", "HasGarrison", stub_false),
+    // C_GarrisonInfo.HasGarrison is registered in
+    // missing_surface/small_namespaces.rs, not a stub.
     // C_IncomingSummon
     (
         "C_IncomingSummon",
@@ -256,29 +171,16 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_LFGInfo — CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
     // IsLFGModeActiveForCategory are SimState-backed in missing_surface/lfg_info.rs.
     // CanPlayerUsePremadeGroup is SimState-backed in lfg_info.rs.
-    // C_Map
-    ("C_Map", "IsMapValidForNavigation", stub_false),
+    // C_Map.IsMapValidForNavigation is registered in
+    // missing_surface/small_namespaces.rs, not a stub.
     // C_MythicPlus IsMythicPlusActive / IsWeeklyRewardAvailable are SimState-backed
     // in missing_surface/mythic_plus.rs, not stubs.
     // C_PartyInfo probes are registered in missing_surface/party_info.rs.
-    // C_PvP
-    ("C_PvP", "IsMatchConsideredArena", stub_false),
+    // C_PvP.IsMatchConsideredArena is registered in
+    // missing_surface/small_namespaces.rs, not a stub.
     // C_PhotoSharing.IsAuthorized / IsEnabled are SimState-backed in photo_sharing.rs.
-    // C_PlayerInfo
-    ("C_PlayerInfo", "IsPlayerEligibleForNPE", stub_false),
-    ("C_PlayerInfo", "IsPlayerInRPE", stub_false),
-    ("C_PlayerInfo", "IsPlayerNPERestricted", stub_false),
-    // C_QuestLog
-    ("C_QuestLog", "IsComplete", stub_false),
-    ("C_QuestLog", "IsFailed", stub_false),
-    ("C_QuestLog", "IsMetaQuest", stub_false),
-    ("C_QuestLog", "IsOnMap", stub_false),
-    ("C_QuestLog", "IsOnQuest", stub_false),
-    ("C_QuestLog", "IsQuestFlaggedCompleted", stub_false),
-    ("C_QuestLog", "IsQuestReplayable", stub_false),
-    ("C_QuestLog", "IsWorldQuest", stub_false),
-    // C_ScenarioInfo
-    ("C_ScenarioInfo", "IsTieredEntranceScenario", stub_false),
+    // C_PlayerInfo probes are registered in missing_surface/player_info.rs.
+    // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_Spell
     ("C_Spell", "GetVisibilityInfo", stub_false),
     ("C_Spell", "IsPriorityAura", stub_false),
@@ -287,20 +189,12 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ("C_Spell", "TargetSpellIsEnchanting", stub_false),
     ("C_Spell", "TargetSpellJumpsUpgradeTrack", stub_false),
     ("C_Spell", "TargetSpellReplacesBonusTree", stub_false),
-    // C_SummonInfo
-    (
-        "C_SummonInfo",
-        "IsSummonSkippingStartExperience",
-        stub_false,
-    ),
-    // C_StableInfo
-    ("C_StableInfo", "IsAtPetStable", stub_false),
-    // C_VoiceChat
-    ("C_VoiceChat", "IsDeafened", stub_false),
-    ("C_VoiceChat", "IsEnabled", stub_false),
-    ("C_VoiceChat", "IsMuted", stub_false),
-    ("C_VoiceChat", "IsParentalDisabled", stub_false),
-    ("C_VoiceChat", "IsTalking", stub_false),
+    // C_SummonInfo IsSummonSkippingStartExperience is SimState-backed in
+    // missing_surface/summon_info.rs, not a stub.
+    // C_StableInfo.IsAtPetStable is registered in
+    // missing_surface/small_namespaces.rs, not a stub.
+    // C_VoiceChat IsDeafened / IsEnabled / IsMuted / IsParentalDisabled /
+    // IsTalking are SimState-backed in missing_surface/voice_chat.rs, not stubs.
     // C_WowLabs
     ("C_WowLabs", "IsEnabled", stub_false),
 ];
@@ -310,24 +204,21 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // C_BattleNet GetFriendNumAccounts / GetNumFriends are
     // SimState-backed in missing_surface/battle_net.rs, not stubs.
     // C_Club GetClubCapacity is WorldState-backed in missing_surface/club_info.rs, not a stub.
-    // C_GarrisonInfo
-    ("C_GarrisonInfo", "GetGarrisonType", stub_zero),
+    // C_GarrisonInfo.GetGarrisonType is registered in
+    // missing_surface/small_namespaces.rs, not a stub.
     // C_MythicPlus GetOwnedKeystoneLevel / GetWeeklyBestForMap are SimState-backed
     // in missing_surface/mythic_plus.rs, not stubs.
     // C_PartyInfo GetActiveGroupType is registered in missing_surface/party_info.rs.
-    // C_QuestLog
-    ("C_QuestLog", "GetLogIndexForQuestID", stub_zero),
-    ("C_QuestLog", "GetNumQuestLogEntries", stub_zero),
+    // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_Spell
     ("C_Spell", "GetSpellCooldown", stub_zero),
-    // C_SummonInfo
-    ("C_SummonInfo", "GetSummonConfirmTimeLeft", stub_zero),
+    // C_SummonInfo GetSummonConfirmTimeLeft is SimState-backed in
+    // missing_surface/summon_info.rs, not a stub.
     // C_TradeSkillUI
     ("C_TradeSkillUI", "GetNumRecipes", stub_zero),
     ("C_TradeSkillUI", "GetNumTradeSkills", stub_zero),
-    // C_VoiceChat
-    ("C_VoiceChat", "GetNumActiveChannels", stub_zero),
-    ("C_VoiceChat", "GetNumMembers", stub_zero),
+    // C_VoiceChat GetNumActiveChannels / GetNumMembers are SimState-backed in
+    // missing_surface/voice_chat.rs, not stubs.
 ];
 
 static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
@@ -346,11 +237,7 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     // C_PartyInfo GetActiveCategories is registered in missing_surface/party_info.rs.
     // C_ZoneAbility
     ("C_ZoneAbility", "GetActiveAbilities", stub_empty_table),
-    // C_QuestLog
-    ("C_QuestLog", "GetAllCompletedQuestIDs", stub_empty_table),
-    // C_Social
-    ("C_Social", "GetFriends", stub_empty_table),
-    // C_TooltipInfo: these return nil not empty table, handled above
+    // C_QuestLog probes are registered in missing_surface/quest_log.rs.
     // C_TradeSkillUI
     (
         "C_TradeSkillUI",
@@ -364,8 +251,7 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     // (Blizzard_FrameXMLUtil/AuraUtil.lua:114-117). Returning an empty table
     // as the first value makes that token truthy and loops forever.
     ("C_UnitAuras", "GetAuraSlots", stub_nil),
-    // C_VoiceChat
-    ("C_VoiceChat", "GetChannels", stub_empty_table),
+    // C_VoiceChat GetChannels is SimState-backed in missing_surface/voice_chat.rs, not a stub.
     // C_WowLabs
     ("C_WowLabs", "GetAvailableQueues", stub_empty_table),
 ];

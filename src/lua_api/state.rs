@@ -111,6 +111,7 @@ macro_rules! build_empty_sim_state {
             tutorial_flags: $collections.tutorial_flags,
             wowlabs: WowLabsState::default(),
             quest_log: Vec::new(),
+            quest_log_entries: QuestLogState::seeded(),
             pending_quest_offer: None,
             quest_choice_id: None,
             selected_quest_log_id: None,
@@ -130,6 +131,7 @@ macro_rules! build_empty_sim_state {
             auction_browse_items: Vec::new(),
             loot_method: LootMethodState::default(),
             gossip: GossipState::default(),
+            torghast: TorghastState::default(),
             titles: Vec::new(),
             shapeshift_forms: Vec::new(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
@@ -137,11 +139,15 @@ macro_rules! build_empty_sim_state {
             achievements: default_achievements(),
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
+            social_friends: default_social_friends(),
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
             mythic_plus: MythicPlusState::default(),
+            character_services: CharacterServicesState::default(),
+            scenario: ScenarioState::default(),
             death_recaps: Vec::new(),
             chat_bubbles: Vec::new(),
+            summon_request: SummonRequestState::default(),
             player_map_position: (0.5, 0.5),
             factions: Vec::new(),
             selected_faction_index: 0,
@@ -200,8 +206,9 @@ pub use super::state_types::{
     CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity,
     GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord,
     MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRun,
-    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, PendingTimer, PlayerState,
-    SecondaryPowerState, WorldState,
+    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusState, MythicPlusWeeklyBest,
+    NilSymbolAccess, PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState,
+    SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -455,6 +462,9 @@ pub struct SimState {
     /// accept order. Drives `GetNumQuestLogEntries` and the quest-verbs
     /// module in `globals/quest_verbs.rs`.
     pub quest_log: Vec<u32>,
+    /// Rich quest metadata for `C_QuestLog.*` probes (GetInfo, IsComplete,
+    /// GetNextWaypoint, etc.). Seeded at init; tests mutate via `st.quest_log_entries`.
+    pub quest_log_entries: QuestLogState,
     /// Pending quest offer displayed in the quest detail frame. Consumed
     /// by `ConfirmAcceptQuest`. `None` means no pending offer.
     pub pending_quest_offer: Option<u32>,
@@ -507,6 +517,9 @@ pub struct SimState {
     /// `GetGossipNumAvailableQuests` / `GetGossipNumActiveQuests`.
     /// Defaults to inactive with zero counts.
     pub gossip: GossipState,
+    /// Torghast (Jailer's Tower) run state. Drives
+    /// `IsOnGroundFloorInJailersTower()`. Defaults to inactive / floor 0.
+    pub torghast: TorghastState,
     /// Title names the player has unlocked, in display order. Drives
     /// `GetNumTitles` / `GetTitleName(index)`. Empty by default.
     pub titles: Vec<String>,
@@ -541,6 +554,10 @@ pub struct SimState {
     /// `GetGameAccountInfoByGUID`, and `GetFriendNumAccounts`.
     /// Seeded with one online and one offline friend.
     pub bnet_friends: Vec<BnetFriend>,
+    /// WoW friends list. Drives `C_Social.GetFriendInfo`,
+    /// `C_Social.GetFriends`, and `C_FriendList.GetNumFriends`.
+    /// Seeded with two representative entries.
+    pub social_friends: Vec<SocialFriend>,
     /// Browse-tab results on the Auction House. Drives
     /// `C_AuctionHouse.GetBrowseResults`. Seeded with a couple of
     /// representative listings.
@@ -553,6 +570,15 @@ pub struct SimState {
     /// with season 14, affix id=9 (Tyrannical), no run history, no
     /// owned key (level 0), no weekly best.
     pub mythic_plus: MythicPlusState,
+    /// Character-boost / trial service state.  Drives
+    /// `C_CharacterServices.GetActiveCharacterUpgradeBoostType` and
+    /// `C_CharacterServices.GetActiveClassTrialBoostType`.  Both
+    /// default to None (no active service).
+    pub character_services: CharacterServicesState,
+    /// Scenario probe state. Drives `C_ScenarioInfo.*` methods.
+    /// Defaults to not-in-scenario. Seed via tests to exercise
+    /// scenario tracker addons.
+    pub scenario: ScenarioState,
     /// Death-recap log. Each entry represents one player death. Drives
     /// `C_DeathRecap.GetKillingBlows` (from the most-recent entry) and
     /// `C_DeathRecap.GetMostRecentDeathRecap`. Empty by default; seed
@@ -562,6 +588,11 @@ pub struct SimState {
     /// `C_ChatBubbles.GetAllChatBubbles`. Empty by default; seed via
     /// tests or admin helpers.
     pub chat_bubbles: Vec<ChatBubble>,
+    /// Pending summon request. Drives `C_SummonInfo.GetSummonReason`,
+    /// `GetSummonConfirmTimeLeft`, `IsSummonSkippingStartExperience`,
+    /// `C_IncomingSummon.HasIncomingSummon`, and `IncomingSummonStatus`.
+    /// Defaults to inactive.
+    pub summon_request: SummonRequestState,
     /// Player's normalized position (0..=1) in the current map.
     /// Drives `C_Map.GetPlayerMapPosition`. Default `(0.5, 0.5)`.
     pub player_map_position: (f64, f64),
@@ -679,11 +710,15 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, FactionEntry, GameRuleValue,
+    BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow,
+    FactionEntry, GameRuleValue,
     GameRulesState, GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts,
-    LootMethodState, MessageLogEntry, ModifierKeys, NetStats, PetBattleState, PetState, TradeState,
-    VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
+    LootMethodState, MessageLogEntry, ModifierKeys, NetStats, PetBattlePet, PetBattleState,
+    PetState, TorghastState, TradeState,
+    VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
+    WowLabsDataManagerState,
     WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    QuestLogEntry, QuestLogState,
 };
 
 struct EmptyStateCollections {
@@ -721,6 +756,12 @@ struct EmptyStateCollections {
 
 impl EmptyStateCollections {
     fn new() -> Self {
+        let mut c = Self::empty();
+        c.bag_items = default_backpack_items();
+        c
+    }
+
+    fn empty() -> Self {
         Self {
             console_output: Vec::new(),
             timers: VecDeque::new(),
@@ -749,7 +790,7 @@ impl EmptyStateCollections {
             spell_cooldowns: HashMap::new(),
             action_ui_buttons: Vec::new(),
             party_members: Vec::new(),
-            bag_items: default_backpack_items(),
+            bag_items: HashMap::new(),
             tracked_recipes: TrackedRecipes::default(),
             tutorial_flags: HashSet::new(),
         }
@@ -1046,6 +1087,41 @@ fn default_bnet_friends() -> Vec<BnetFriend> {
             last_online_time: 1700000000,
             raf_link_type: 0,
             game_accounts: vec![],
+        },
+    ]
+}
+
+/// Seed the `SimState.social_friends` list with three representative
+/// WoW friends: two online and one offline. Provides coverage for all
+/// C_Social probes out of the box.
+fn default_social_friends() -> Vec<SocialFriend> {
+    vec![
+        SocialFriend {
+            name: "Arthax".into(),
+            level: 70,
+            area: "Stormwind City".into(),
+            class_name: "Paladin".into(),
+            note: String::new(),
+            is_online: true,
+            guid: "Player-1-0000A001".into(),
+        },
+        SocialFriend {
+            name: "Durotan".into(),
+            level: 65,
+            area: "Orgrimmar".into(),
+            class_name: "Shaman".into(),
+            note: "old guildie".into(),
+            is_online: false,
+            guid: "Player-2-0000A002".into(),
+        },
+        SocialFriend {
+            name: "Sylvara".into(),
+            level: 60,
+            area: "Ironforge".into(),
+            class_name: "Mage".into(),
+            note: String::new(),
+            is_online: true,
+            guid: "Player-1-0000A003".into(),
         },
     ]
 }
