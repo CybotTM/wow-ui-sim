@@ -2194,18 +2194,10 @@ if GetGuildFactionGroup == nil then
     return 1
   end
 end
-if GuildControlSetRank == nil then
-  function GuildControlSetRank(_rankIndex) end
-end
-if GuildControlGetRankName == nil then
-  function GuildControlGetRankName(_index) return "" end
-end
-if GuildControlGetNumRanks == nil then
-  function GuildControlGetNumRanks() return 0 end
-end
-if GuildControlGetRankFlags == nil then
-  function GuildControlGetRankFlags() return {} end
-end
+-- GuildControlSetRank / GuildControlGetRankName / GuildControlGetNumRanks /
+-- GuildControlGetRankFlags are registered from Rust
+-- (src/lua_api/globals/guild_control.rs), backed by SimState::world.guild_ranks.
+-- Admin: A_Admin.SetGuildRanks({ {name="Leader", flags={true,...}}, ... }).
 if GetGroupMemberCounts == nil then
   function GetGroupMemberCounts()
     return {

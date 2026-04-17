@@ -130,6 +130,86 @@ pub(super) fn set_meta_key_down(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `A_Admin.SetGuildRanks({ {name, flags}, ... })` — replaces the guild
+/// roster. Each entry is `{ name = string, flags = { bool, bool, ... } }`.
+/// Pass no arg or an empty table to clear the roster (no guild).
+pub(super) fn set_guild_ranks(state: &mut LuaState) -> LuaResult<u32> {
+    use rilua::Val;
+    let arg = crate::lua_bridge::stack_val(state, 1);
+    let Val::Table(list_ref) = arg else {
+        let mut st = borrow_state_mut(state)?;
+        st.world.guild_ranks.clear();
+        st.world.guild_selected_rank = 0;
+        return Ok(0);
+    };
+    // Snapshot the list's array part before we touch state mutably.
+    let entry_refs: Vec<rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>> = match state
+        .gc
+        .tables
+        .get(list_ref)
+    {
+        Some(list) => list
+            .array_slice()
+            .iter()
+            .filter_map(|v| match v {
+                Val::Table(r) => Some(*r),
+                _ => None,
+            })
+            .collect(),
+        None => Vec::new(),
+    };
+    let ranks: Vec<_> = entry_refs
+        .into_iter()
+        .map(|entry_ref| read_rank_entry(state, entry_ref))
+        .collect();
+    let mut st = borrow_state_mut(state)?;
+    st.world.guild_ranks = ranks;
+    if st.world.guild_selected_rank as usize > st.world.guild_ranks.len() {
+        st.world.guild_selected_rank = 0;
+    }
+    Ok(0)
+}
+
+fn read_rank_entry(
+    state: &mut LuaState,
+    entry_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> crate::lua_api::state_types::GuildRank {
+    use rilua::Val;
+    let name_key = state.gc.intern_string_static(b"name");
+    let flags_key = state.gc.intern_string_static(b"flags");
+    let (name_val, flags_val) = {
+        let Some(table) = state.gc.tables.get(entry_ref) else {
+            return crate::lua_api::state_types::GuildRank::default();
+        };
+        (
+            table.get_str(name_key, &state.gc.string_arena),
+            table.get_str(flags_key, &state.gc.string_arena),
+        )
+    };
+    let name = match name_val {
+        Val::Str(s) => state
+            .gc
+            .string_arena
+            .get(s)
+            .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+            .map(str::to_owned)
+            .unwrap_or_default(),
+        _ => String::new(),
+    };
+    let flags: Vec<bool> = match flags_val {
+        Val::Table(flags_ref) => match state.gc.tables.get(flags_ref) {
+            Some(flags_table) => flags_table
+                .array_slice()
+                .iter()
+                .map(|v| matches!(v, Val::Bool(true)))
+                .collect(),
+            None => Vec::new(),
+        },
+        _ => Vec::new(),
+    };
+    crate::lua_api::state_types::GuildRank { name, flags }
+}
+
 /// `A_Admin.SetGuildEmblem(filename, bkgR, bkgG, bkgB, borderR, borderG,
 /// borderB, emblemR, emblemG, emblemB)` — every arg is optional; missing
 /// values default to `0.0` (colours) or `""` (filename). Drives

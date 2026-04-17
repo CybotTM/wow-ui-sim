@@ -470,6 +470,23 @@ pub struct WorldState {
     /// channels (background RGB, border RGB, emblem RGB) plus the emblem
     /// texture filename. All zeros + empty filename when no guild.
     pub guild_logo: GuildLogo,
+    /// Guild ranks in display order (index 0 = rank 1). Empty when no
+    /// guild. Drives `GuildControlGetNumRanks` / `GuildControlGetRankName` /
+    /// `GuildControlGetRankFlags`.
+    pub guild_ranks: Vec<GuildRank>,
+    /// 1-based rank index currently "selected" by `GuildControlSetRank`.
+    /// `GuildControlGetRankName()` / `GetRankFlags()` without an explicit
+    /// index return the selected rank's fields. `0` = nothing selected.
+    pub guild_selected_rank: i32,
+}
+
+/// A single guild rank row. `name` is the display name; `flags` is a bag of
+/// arbitrary permission booleans — callers iterate and index by flag name
+/// (WoW's real API returns a dense numeric-keyed table of flag values).
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct GuildRank {
+    pub name: String,
+    pub flags: Vec<bool>,
 }
 
 /// Guild tabard crest data returned by `GetGuildLogoInfo()`.
@@ -517,6 +534,8 @@ impl Default for WorldState {
             is_sub_zone_pvp: false,
             pvp_faction_name: None,
             guild_logo: GuildLogo::default(),
+            guild_ranks: Vec::new(),
+            guild_selected_rank: 0,
         }
     }
 }

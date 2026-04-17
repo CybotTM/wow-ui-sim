@@ -46,9 +46,10 @@ use super::admin_pvp_guild::{
 use super::admin_spec::{reset_talents, set_spec, set_talent_rank, set_talent_selection};
 use super::admin_vault::{clear_vault, set_vault_activity, set_vault_rewards};
 use super::admin_zone_economy::{
-    set_alt_key_down, set_control_key_down, set_guild_emblem, set_in_instance, set_instance_info,
-    set_item_level, set_meta_key_down, set_money, set_net_stats, set_shift_key_down,
-    set_store_frame_shown, set_sub_zone, set_timerunning_season_id, set_zone, set_zone_pvp,
+    set_alt_key_down, set_control_key_down, set_guild_emblem, set_guild_ranks, set_in_instance,
+    set_instance_info, set_item_level, set_meta_key_down, set_money, set_net_stats,
+    set_shift_key_down, set_store_frame_shown, set_sub_zone, set_timerunning_season_id, set_zone,
+    set_zone_pvp,
 };
 
 // ── Entry point ──────────────────────────────────────────────────────────────
@@ -140,6 +141,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetAltKeyDown", set_alt_key_down)?
         .set_function("SetMetaKeyDown", set_meta_key_down)?
         .set_function("SetGuildEmblem", set_guild_emblem)?
+        .set_function("SetGuildRanks", set_guild_ranks)?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?
