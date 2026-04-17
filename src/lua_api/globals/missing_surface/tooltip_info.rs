@@ -541,6 +541,7 @@ fn register_item_spell_aura_methods(
             ("GetSocketedItem", c_tooltip_get_socketed_item),
             ("GetSocketGem", c_tooltip_get_socket_gem),
             ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
+            ("GetMountBySpellID", c_tooltip_get_mount_by_spell_id),
             ("GetTalent", c_tooltip_get_talent),
             ("GetToyByItemID", c_tooltip_get_toy_by_item_id),
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
@@ -916,6 +917,46 @@ fn tooltip_for_toy_item_id(state: &mut LuaState, item_id: u32) -> Val {
     tooltip
 }
 
+fn tooltip_for_mount_spell_id(state: &mut LuaState, spell_id: u32) -> Val {
+    if spells::get_spell(spell_id).is_some() {
+        return tooltip_for_spell_id(state, spell_id);
+    }
+
+    let mount_name = borrow_state(state).ok().and_then(|st| {
+        st.world
+            .mounts
+            .iter()
+            .find(|mount| mount.spell_id == spell_id)
+            .map(|mount| mount.name.clone())
+    });
+    let Some(mount_name) = mount_name else {
+        return empty_tooltip(state, TOOLTIP_TYPE_SPELL);
+    };
+
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_SPELL);
+    let lines = table_get(state, tooltip, "lines");
+    push_tooltip_line(
+        state,
+        lines,
+        1,
+        LINE_TYPE_SPELL_NAME,
+        &mount_name,
+        None,
+        false,
+    );
+    push_tooltip_line(
+        state,
+        lines,
+        3,
+        LINE_TYPE_SPELL_DESCRIPTION,
+        "Summons this mount.",
+        None,
+        true,
+    );
+    table_set(state, tooltip, "id", Val::Num(spell_id as f64));
+    tooltip
+}
+
 fn preferred_trait_spell_id(definition_id: u32) -> Option<u32> {
     let definition = TRAIT_DEFINITION_DB.get(&definition_id)?;
     [
@@ -982,6 +1023,13 @@ fn c_tooltip_get_talent(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip = spell_id_for_talent_id(state, talent_id)
         .map(|spell_id| tooltip_for_spell_id(state, spell_id))
         .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_SPELL));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_mount_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let tooltip = tooltip_for_mount_spell_id(state, spell_id);
     state.push(tooltip);
     Ok(1)
 }

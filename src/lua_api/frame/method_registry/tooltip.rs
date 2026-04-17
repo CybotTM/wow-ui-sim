@@ -119,6 +119,7 @@ pub static GAMETOOLTIP_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "SetIgnoringChildrenForBounds",
         "SetIsFrameBuffer",
         "SetItemByID",
+        "SetMountBySpellID",
         "SetToyByItemID",
         "SetInventoryItem",
         "SetInboxItem",

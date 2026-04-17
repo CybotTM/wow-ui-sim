@@ -398,6 +398,21 @@ pub(super) fn set_talent(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_mount_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let args = [stack_val(state, 2), stack_val(state, 3)];
+    let spell_id = match args[0] {
+        Val::Num(value) if value > 0.0 => Some(value as u32),
+        _ => None,
+    };
+    let has_lines =
+        populate_tooltip_from_method(state, tooltip_id, "GetMountBySpellID", &args, spell_id)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetSpell");
+    }
+    Ok(0)
+}
+
 pub(super) fn set_hyperlink(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let Some(link) = opt_string(state, 2) else {
@@ -763,6 +778,7 @@ const TOOLTIP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("SetSpellByID", set_spell_by_id),
     ("SetSpellBookItem", set_spell_book_item),
     ("SetItemByID", set_item_by_id),
+    ("SetMountBySpellID", set_mount_by_spell_id),
     ("SetTalent", set_talent),
     ("SetToyByItemID", set_toy_by_item_id),
     ("SetHyperlink", set_hyperlink),
