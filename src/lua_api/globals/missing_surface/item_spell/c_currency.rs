@@ -1,48 +1,32 @@
 use crate::lua_api::globals::{currency_data, missing_surface::ensure_namespace};
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, table_set, val_to_string,
+};
 use crate::lua_api::state::CurrencyInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
-    let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetCurrencyListSize",
-        c_currency_get_list_size,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetCurrencyListInfo",
-        c_currency_get_list_info,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetCoinTextureString",
-        c_currency_get_coin_texture_string,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetCurrencyInfo",
-        c_currency_get_currency_info,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
+const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
+    ("GetCurrencyListSize", c_currency_get_list_size),
+    ("GetCurrencyListInfo", c_currency_get_list_info),
+    ("GetCoinTextureString", c_currency_get_coin_texture_string),
+    ("GetCurrencyInfo", c_currency_get_currency_info),
+    (
         "GetCurrencyInfoFromLink",
         c_currency_get_currency_info_from_link,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
+    ),
+    (
         "GetCurrencyContainerInfo",
         c_currency_get_currency_container_info,
-    )?;
+    ),
+];
+
+pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
+    let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
+    for &(name, func) in CURRENCY_INFO_METHODS {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
@@ -117,7 +101,12 @@ fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
         Val::Bool(info.is_show_in_backpack),
     );
     table_set(state, t, "discovered", Val::Bool(info.discovered));
-    table_set(state, t, "canEarnPerWeek", Val::Bool(info.can_earn_per_week));
+    table_set(
+        state,
+        t,
+        "canEarnPerWeek",
+        Val::Bool(info.can_earn_per_week),
+    );
     table_set(
         state,
         t,
