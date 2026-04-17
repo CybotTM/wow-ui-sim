@@ -159,7 +159,6 @@ fn apply_xml_properties_direct(
     direct::apply_xml_set_all_points(state, frame_id, frame, inherits);
     direct::apply_xml_protected(state, frame_id, frame, inherits);
     direct::apply_xml_id(state, frame_id, frame);
-    apply_xml_scripts(env, frame_id, frame);
 }
 
 /// Set the `intrinsic` property on intrinsic frames (e.g. frame.intrinsic = "DropdownButton").
@@ -170,15 +169,4 @@ fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, f
             Ok::<(), crate::Error>(())
         });
     }
-}
-
-fn apply_xml_scripts(env: &LoaderEnv<'_>, frame_id: u64, frame: &crate::xml::FrameXml) {
-    let Some(scripts) = frame.scripts() else {
-        return;
-    };
-    let _ = env.with_state(|state| {
-        crate::lua_api::globals::rilua_create_frame::apply_template_scripts(state, frame_id, scripts)
-            .map_err(|error| crate::Error::Other(error.to_string()))?;
-        Ok::<(), crate::Error>(())
-    });
 }
