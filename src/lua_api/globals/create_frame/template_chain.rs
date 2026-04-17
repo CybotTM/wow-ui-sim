@@ -276,6 +276,11 @@ enum FastHandlerRef<'a> {
         then_ref: Box<FastHandlerRef<'a>>,
         else_ref: Box<FastHandlerRef<'a>>,
     },
+    ConditionalSelfFieldTruthy {
+        field: &'a str,
+        then_ref: Box<FastHandlerRef<'a>>,
+        else_ref: Box<FastHandlerRef<'a>>,
+    },
     Method(&'a str),
     MethodWithBoolArg {
         method_name: &'a str,
