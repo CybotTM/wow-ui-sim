@@ -542,6 +542,28 @@ pub(super) fn set_existing_socket_gem(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_trade_player_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let slot = stack_val(state, 2);
+    let has_lines =
+        populate_tooltip_from_method(state, tooltip_id, "GetTradePlayerItem", &[slot], None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    Ok(0)
+}
+
+pub(super) fn set_trade_target_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let slot = stack_val(state, 2);
+    let has_lines =
+        populate_tooltip_from_method(state, tooltip_id, "GetTradeTargetItem", &[slot], None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    Ok(0)
+}
+
 /// `Tooltip:SetOwner(frame, anchor, xOffset, yOffset)`
 pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
@@ -689,6 +711,8 @@ const TOOLTIP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("SetSocketedItem", set_socketed_item),
     ("SetSocketGem", set_socket_gem),
     ("SetExistingSocketGem", set_existing_socket_gem),
+    ("SetTradePlayerItem", set_trade_player_item),
+    ("SetTradeTargetItem", set_trade_target_item),
     ("SetUnit", set_unit),
     ("SetUnitBuff", set_unit_buff),
     (

@@ -282,10 +282,7 @@ fn startup_expansion_and_threat_stubs_return_safe_values() {
     assert_eq!(result.2, 10.0);
     assert_eq!(result.3, 80.0);
     assert_eq!(result.4, 80.0);
-    assert!(
-        !result.5,
-        "human-player probe should default false in the sim"
-    );
+    assert!(result.5, "player should resolve as a human player in the sim");
     assert!(
         !result.6,
         "threat warning UI should default disabled in the sim"
@@ -293,6 +290,28 @@ fn startup_expansion_and_threat_stubs_return_safe_values() {
     assert_eq!(result.7, 0.0);
     assert_eq!(result.8, 0.0);
     assert_eq!(result.9, 0.0);
+}
+
+#[test]
+fn unit_is_human_player_matches_simulated_player_tokens() {
+    let env = env();
+    let (player, party, target, pet): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return UnitIsHumanPlayer("player"),
+                   UnitIsHumanPlayer("party1"),
+                   UnitIsHumanPlayer("target"),
+                   UnitIsHumanPlayer("pet")
+            "#,
+        )
+        .unwrap();
+    assert!(player, "player should be treated as a human-controlled player");
+    assert!(
+        party,
+        "party slots should be treated as human-controlled players by default"
+    );
+    assert!(!target, "unset target should not be treated as a human player");
+    assert!(!pet, "pet should not be treated as a human player");
 }
 
 #[test]

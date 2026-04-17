@@ -291,7 +291,10 @@ end
 -- checks sim.party_members[N-1] is populated, everything else false.
 
 if UnitIsHumanPlayer == nil then
-  function UnitIsHumanPlayer(_unit)
+  function UnitIsHumanPlayer(unit)
+    if UnitIsPlayer ~= nil then
+      return UnitIsPlayer(unit)
+    end
     return false
   end
 end

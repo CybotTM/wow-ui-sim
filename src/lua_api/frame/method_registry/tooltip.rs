@@ -132,6 +132,8 @@ pub static GAMETOOLTIP_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "SetSocketedItem",
         "SetSocketGem",
         "SetExistingSocketGem",
+        "SetTradePlayerItem",
+        "SetTradeTargetItem",
         "SetSpellBookItem",
         "SetSpellByID",
         "SetText",

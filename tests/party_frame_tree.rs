@@ -161,6 +161,52 @@ fn party_frame_member_frames_render_at_master_offsets() {
     }
 }
 
+#[test]
+fn player_and_party_portraits_use_class_icon_atlases() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+        env.exec("A_Admin.SetPartySize(4)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            if PlayerFrame_Update then
+                pcall(PlayerFrame_Update)
+            end
+            "#,
+        )
+        .unwrap();
+
+        let (player_atlas, party_atlas, player_texture, party_texture): (
+            String,
+            String,
+            String,
+            String,
+        ) = env
+            .eval(
+                r#"
+                local playerPortrait = PlayerFrame and PlayerFrame.PlayerFrameContainer and PlayerFrame.PlayerFrameContainer.PlayerPortrait
+                local partyPortrait = PartyFrame and PartyFrame.MemberFrame1 and PartyFrame.MemberFrame1.Portrait
+                return (playerPortrait and playerPortrait:GetAtlas()) or "",
+                       (partyPortrait and partyPortrait:GetAtlas()) or "",
+                       tostring(playerPortrait and playerPortrait:GetTexture()),
+                       tostring(partyPortrait and partyPortrait:GetTexture())
+                "#,
+            )
+            .expect("eval portrait atlases");
+
+        assert_eq!(
+            player_atlas, "classicon-paladin",
+            "player portrait should use the Paladin class icon atlas, got texture {player_texture}"
+        );
+        assert_eq!(
+            party_atlas, "classicon-paladin",
+            "party1 portrait should use the Paladin class icon atlas, got texture {party_texture}"
+        );
+    }
+}
+
 /// Structural sanity: the four decorative templates master emits
 /// (Selection + Background + Selection.MouseOverHighlight.Center) are
 /// present on the branch too.

@@ -533,6 +533,8 @@ fn register_item_spell_aura_methods(
                 "GetRecipeResultItemForOrder",
                 c_tooltip_get_recipe_result_item_for_order,
             ),
+            ("GetTradePlayerItem", c_tooltip_get_trade_player_item),
+            ("GetTradeTargetItem", c_tooltip_get_trade_target_item),
             ("GetSocketedItem", c_tooltip_get_socketed_item),
             ("GetSocketGem", c_tooltip_get_socket_gem),
             ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
@@ -818,6 +820,36 @@ fn c_tooltip_get_recipe_result_item_for_order(state: &mut LuaState) -> LuaResult
     } else {
         empty_tooltip(state, TOOLTIP_TYPE_ITEM)
     };
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn trade_slot_item_id(state: &mut LuaState, slot: i32, player_side: bool) -> Option<u32> {
+    let zero_based = usize::try_from(slot.saturating_sub(1)).ok()?;
+    let st = borrow_state(state).ok()?;
+    let trade = st.active_trade.as_ref()?;
+    let item_id = if player_side {
+        *trade.player_slots.get(zero_based)?
+    } else {
+        *trade.target_slots.get(zero_based)?
+    };
+    (item_id != 0).then_some(item_id)
+}
+
+fn c_tooltip_get_trade_player_item(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let tooltip = trade_slot_item_id(state, slot, true)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_trade_target_item(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let tooltip = trade_slot_item_id(state, slot, false)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
     state.push(tooltip);
     Ok(1)
 }

@@ -81,6 +81,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_probes::register_all(lua)?;
     super::spell_state_probes::register_all(lua)?;
     super::pvp_probes::register_all(lua)?;
+    super::player_probes::register_all(lua)?;
     super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;

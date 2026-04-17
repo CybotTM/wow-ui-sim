@@ -91,6 +91,7 @@ fn fire_startup_events(env: &WowLuaEnv) {
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",
         "UI_SCALE_CHANGED",
+        "UPDATE_CHAT_WINDOWS",
     ] {
         let _ = env.fire_event(event);
     }

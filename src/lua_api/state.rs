@@ -142,6 +142,10 @@ macro_rules! build_empty_sim_state {
             helpful_spells: ::std::collections::HashSet::new(),
             pet_spells: ::std::collections::HashSet::new(),
             pvp_last_honor_gain: 0,
+            menu_open: false,
+            xp_disabled: false,
+            can_teleport: true,
+            has_hearthstone: true,
             message_log: Vec::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
@@ -495,6 +499,18 @@ pub struct SimState {
     /// Most recent honor amount the player gained. Drives
     /// `GetPVPLastHonorGain`. Default 0.
     pub pvp_last_honor_gain: i32,
+    /// Whether the game-system menu (ESC menu) is open. Drives global
+    /// `IsMenuOpen`. Default false.
+    pub menu_open: bool,
+    /// Whether XP gain is disabled for this character. Drives
+    /// `IsXPUserDisabled`. Default false.
+    pub xp_disabled: bool,
+    /// Whether the player can hearthstone / teleport. Drives
+    /// `PlayerCanTeleport` and `PlayerHasHearthstone`. Default true
+    /// — retail assumes the bag hearthstone until a quest removes it.
+    pub can_teleport: bool,
+    /// Whether the player has a hearthstone item. Default true.
+    pub has_hearthstone: bool,
     /// Append-only log of outbound chat / addon messages sent via
     /// `SendChatMessage` / `SendAddonMessage`. Most recent at the tail.
     pub message_log: Vec<MessageLogEntry>,
