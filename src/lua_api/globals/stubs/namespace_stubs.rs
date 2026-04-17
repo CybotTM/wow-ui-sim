@@ -294,9 +294,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ("C_PartyInfo", "IsPartyInJailersTower", stub_false),
     // C_PvP
     ("C_PvP", "IsMatchConsideredArena", stub_false),
-    // C_PhotoSharing — in sim we never upload/authorize, so both are false
-    ("C_PhotoSharing", "IsAuthorized", stub_false),
-    ("C_PhotoSharing", "IsEnabled", stub_false),
+    // C_PhotoSharing.IsAuthorized / IsEnabled are SimState-backed in photo_sharing.rs.
     // C_PlayerInfo
     ("C_PlayerInfo", "IsPlayerEligibleForNPE", stub_false),
     ("C_PlayerInfo", "IsPlayerNPERestricted", stub_false),

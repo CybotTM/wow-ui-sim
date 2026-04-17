@@ -186,6 +186,14 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetCanUsePremadeGroup",
             super::lfg_info::admin_set_can_use_premade_group,
         )?
+        .set_function(
+            "SetPhotoSharingAuthorized",
+            super::photo_sharing::admin_set_photo_sharing_authorized,
+        )?
+        .set_function(
+            "SetPhotoSharingEnabled",
+            super::photo_sharing::admin_set_photo_sharing_enabled,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?

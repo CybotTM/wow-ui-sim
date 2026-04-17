@@ -36,6 +36,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::guild_info::register_all(lua)?;
     super::housing::register_all(lua)?;
     super::pet_battles::register_all(lua)?;
+    super::photo_sharing::register_all(lua)?;
     super::lfg_list::register_all(lua)?;
     super::lfg_info::register_all(lua)?;
     super::locale_info::register_all(lua)?;

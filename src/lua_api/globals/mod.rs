@@ -39,6 +39,7 @@ pub mod missing_surface;
 pub mod modifier_keys;
 pub mod net_stats;
 pub mod pet_battles;
+pub mod photo_sharing;
 pub mod security;
 pub mod store_frame;
 pub mod stubs;

@@ -100,6 +100,8 @@ macro_rules! build_empty_sim_state {
             pet_battles: PetBattleState::default(),
             lfg_list_counts: LfgListCounts::default(),
             can_use_premade_group: false,
+            photo_sharing_authorized: false,
+            photo_sharing_enabled: false,
             debug_borders: false,
             debug_anchors: false,
         }
@@ -404,6 +406,14 @@ pub struct SimState {
     /// default is false — the Premade Group Finder UI is gated off in a
     /// fresh env. Admin: `A_Admin.SetCanUsePremadeGroup(b?)`.
     pub can_use_premade_group: bool,
+    /// Whether `C_PhotoSharing.IsAuthorized()` reports true. Sim has no
+    /// real photo-sharing service; default false. Admin:
+    /// `A_Admin.SetPhotoSharingAuthorized(b?)`.
+    pub photo_sharing_authorized: bool,
+    /// Whether `C_PhotoSharing.IsEnabled()` reports true. Separate from
+    /// authorization — a user can decline the feature after authorizing.
+    /// Default false. Admin: `A_Admin.SetPhotoSharingEnabled(b?)`.
+    pub photo_sharing_enabled: bool,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
