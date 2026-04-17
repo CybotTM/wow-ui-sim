@@ -162,6 +162,14 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetPetBattleState",
             super::pet_battles::admin_set_pet_battle_state,
         )?
+        .set_function(
+            "SetLfgApplicationCounts",
+            super::lfg_list::admin_set_application_counts,
+        )?
+        .set_function(
+            "SetLfgApplicantCounts",
+            super::lfg_list::admin_set_applicant_counts,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?

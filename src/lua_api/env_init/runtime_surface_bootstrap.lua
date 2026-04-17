@@ -526,8 +526,8 @@ C_LFGList = __wow_merge_namespace(C_LFGList, {
   GetApplicationInfo = function() return nil end,
   GetAvailableCategories = function() return {} end,
   GetAvailableRoles = function() return false, false, false end,
-  GetNumApplications = function() return 0, 0 end,
-  GetNumApplicants = function() return 0, 0 end,
+  -- GetNumApplications / GetNumApplicants overridden from Rust
+  -- (src/lua_api/globals/lfg_list.rs), backed by SimState::lfg_list_counts.
   GetPremadeGroupFinderStyle = function() return 0 end,
   GetActivityFullName = function() return "" end,
   GetActivityInfoTable = function() return nil end,

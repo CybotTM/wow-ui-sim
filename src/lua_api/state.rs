@@ -98,6 +98,7 @@ macro_rules! build_empty_sim_state {
             game_rules: GameRulesState::default(),
             housing_service_enabled: false,
             pet_battles: PetBattleState::default(),
+            lfg_list_counts: LfgListCounts::default(),
             debug_borders: false,
             debug_anchors: false,
         }
@@ -393,6 +394,11 @@ pub struct SimState {
     /// Backing state for `C_PetBattles.GetNumPets(owner)` and
     /// `C_PetBattles.GetBattleState()`. Default zeros (no active battle).
     pub pet_battles: PetBattleState,
+    /// Backing state for `C_LFGList.GetNumApplications` /
+    /// `GetNumApplicants`. Each probe returns `(total, viewed)` — the sim
+    /// exposes both knobs so tests can assert `total > 0 && viewed == 0`
+    /// scroll behaviour without standing up a real LFG listing.
+    pub lfg_list_counts: LfgListCounts,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
@@ -474,6 +480,17 @@ pub struct PetBattleState {
     pub num_pets_player: i32,
     pub num_pets_enemy: i32,
     pub battle_state: i32,
+}
+
+/// LFG-list counts backing `C_LFGList.GetNumApplications()` and
+/// `GetNumApplicants()`. Each returns `(total, viewed)` — shape matters
+/// because callers destructure both values in one statement.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct LfgListCounts {
+    pub applications_total: i32,
+    pub applications_viewed: i32,
+    pub applicants_total: i32,
+    pub applicants_viewed: i32,
 }
 
 impl ModifierKeys {

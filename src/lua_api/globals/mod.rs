@@ -31,6 +31,7 @@ pub mod guild_logo;
 pub mod housing;
 pub mod inventory_slot;
 pub mod keybindings;
+pub mod lfg_list;
 pub mod locale_info;
 pub mod missing_surface;
 pub mod modifier_keys;
