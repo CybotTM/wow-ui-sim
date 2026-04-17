@@ -75,6 +75,12 @@ impl EventQueue {
         std::mem::take(&mut self.pending)
     }
 
+    /// Read-only view into the pending queue — useful for tests that want to
+    /// observe dispatched events without consuming them.
+    pub fn pending(&self) -> &[Event] {
+        &self.pending
+    }
+
     pub fn is_empty(&self) -> bool {
         self.pending.is_empty()
     }

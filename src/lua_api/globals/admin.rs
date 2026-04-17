@@ -653,7 +653,7 @@ pub(super) fn build_admin_buff(
 }
 
 /// Build a MailMessage for admin inbox functions.
-pub(super) fn build_mail(
+pub(crate) fn build_mail(
     id: u64,
     sender: String,
     subject: String,
