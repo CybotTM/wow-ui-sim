@@ -55,6 +55,15 @@ fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
 }
 
 fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_core_surfaces(lua)?;
+    register_action_verbs(lua)?;
+    register_state_probes(lua)?;
+    register_compat_and_admin(lua)?;
+    super::super::timer_layout::register_all(lua)?;
+    Ok(())
+}
+
+fn register_core_surfaces(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::lfg_list::register_all(lua)?;
     super::lfg_info::register_all(lua)?;
     super::locale_info::register_all(lua)?;
@@ -62,6 +71,10 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::quest_surface::register_all(lua)?;
     super::missing_surface::register_quest_log_overrides(lua)?;
     super::lua_duration_object::register_lua_duration_object(lua)?;
+    Ok(())
+}
+
+fn register_action_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_verbs::register_all(lua)?;
     super::inventory_verbs::register_all(lua)?;
     super::mail_verbs::register_all(lua)?;
@@ -80,6 +93,10 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::voice_chat_verbs::register_all(lua)?;
     super::message_verbs::register_all(lua)?;
     super::set_cvar_verb::register_all(lua)?;
+    Ok(())
+}
+
+fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_probes::register_all(lua)?;
     super::spell_state_probes::register_all(lua)?;
     super::pvp_probes::register_all(lua)?;
@@ -100,9 +117,12 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::instance_info::register_all(lua)?;
     super::guild_probes::register_all(lua)?;
     super::voice_chat_probes::register_all(lua)?;
+    Ok(())
+}
+
+fn register_compat_and_admin(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
-    super::super::timer_layout::register_all(lua)?;
     Ok(())
 }
 
