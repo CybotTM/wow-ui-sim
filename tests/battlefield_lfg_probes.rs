@@ -58,7 +58,9 @@ fn get_battlefield_status_none_for_mismatched_index() {
 #[test]
 fn get_battlefield_status_returns_nine_values() {
     let env = env();
-    let arity: i32 = env.eval("return select('#', GetBattlefieldStatus(1))").unwrap();
+    let arity: i32 = env
+        .eval("return select('#', GetBattlefieldStatus(1))")
+        .unwrap();
     assert_eq!(arity, 9);
 }
 

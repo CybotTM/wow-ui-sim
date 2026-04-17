@@ -916,8 +916,12 @@ fn build_register_for_clicks_handler(
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
     let first = create_string(state, first);
-    let second = second.map(|value| create_string(state, value)).unwrap_or(Val::Nil);
-    let third = third.map(|value| create_string(state, value)).unwrap_or(Val::Nil);
+    let second = second
+        .map(|value| create_string(state, value))
+        .unwrap_or(Val::Nil);
+    let third = third
+        .map(|value| create_string(state, value))
+        .unwrap_or(Val::Nil);
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
@@ -1330,7 +1334,8 @@ fn parse_inline_fast_handler<'a>(
     if let Some(method_name) = parse_inline_grandparent_method(stmt) {
         return Some(FastHandlerRef::GrandparentMethod(method_name));
     }
-    if let Some((target_path, method_name, field, value)) = parse_inline_global_method_then_assign(stmt)
+    if let Some((target_path, method_name, field, value)) =
+        parse_inline_global_method_then_assign(stmt)
     {
         return Some(FastHandlerRef::GlobalMethodThenAssignLiteral {
             target_path,
@@ -1465,7 +1470,8 @@ fn parse_inline_global_method_then_assign(
 ) -> Option<(&str, &str, &str, FastLiteralValue<'_>)> {
     let (first, second) = stmt.split_once(';')?;
     let (target_path, method_name) = parse_inline_global_method(first.trim())?;
-    let FastHandlerRef::AssignLiteral { field, value } = parse_inline_assignment(second.trim())? else {
+    let FastHandlerRef::AssignLiteral { field, value } = parse_inline_assignment(second.trim())?
+    else {
         return None;
     };
     Some((target_path, method_name, field, value))
@@ -1506,7 +1512,11 @@ fn parse_inline_set_alpha(stmt: &str) -> Option<f64> {
 }
 
 fn parse_inline_set_checked(stmt: &str) -> Option<bool> {
-    match stmt.strip_prefix("self:SetChecked(")?.strip_suffix(')')?.trim() {
+    match stmt
+        .strip_prefix("self:SetChecked(")?
+        .strip_suffix(')')?
+        .trim()
+    {
         "true" => Some(true),
         "false" => Some(false),
         _ => None,

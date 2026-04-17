@@ -644,7 +644,10 @@ fn test_create_frame_from_xml_inline_register_for_clicks_runs() {
     let exists: bool = env
         .eval("return XmlInlineRegisterClicksButton ~= nil")
         .unwrap();
-    assert!(exists, "inline RegisterForClicks should not break frame creation");
+    assert!(
+        exists,
+        "inline RegisterForClicks should not break frame creation"
+    );
 }
 
 #[test]
@@ -663,9 +666,12 @@ fn test_create_frame_from_xml_inline_register_for_drag_runs() {
     let state = env.state().borrow();
     let frame = state
         .widgets
-        .iter()
-        .find_map(|(_, frame)| {
-            (frame.name.as_deref() == Some("XmlInlineRegisterDragButton")).then_some(frame)
+        .iter_ids()
+        .find_map(|id| {
+            state
+                .widgets
+                .get(*id)
+                .filter(|frame| frame.name.as_deref() == Some("XmlInlineRegisterDragButton"))
         })
         .expect("button should exist");
     assert!(
@@ -687,7 +693,9 @@ fn test_create_frame_from_xml_inline_set_alpha_runs() {
         "Frame",
     );
 
-    let alpha: f64 = env.eval("return XmlInlineSetAlphaFrame:GetAlpha()").unwrap();
+    let alpha: f64 = env
+        .eval("return XmlInlineSetAlphaFrame:GetAlpha()")
+        .unwrap();
     assert_eq!(alpha, 0.0);
 }
 
