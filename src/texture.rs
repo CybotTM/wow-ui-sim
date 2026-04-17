@@ -146,6 +146,13 @@ impl TextureManager {
 }
 
 /// Result of a BC-compressed texture load.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BcTextureFormat {
+    Bc1,
+    Bc3,
+}
+
+/// Result of a BC-compressed texture load.
 #[derive(Debug, Clone)]
 pub struct BcTextureResult {
     pub width: u32,
@@ -153,7 +160,7 @@ pub struct BcTextureResult {
     /// Raw BC block data (mip level 0 only).
     pub bc_data: Arc<[u8]>,
     /// BC compression format.
-    pub format: crate::render::shader::atlas::BcFormat,
+    pub format: BcTextureFormat,
 }
 
 impl TextureManager {
@@ -191,15 +198,13 @@ fn bc_texture_result(width: u32, height: u32, content: BlpContent) -> Option<BcT
     })
 }
 
-fn bc_texture_data(
-    content: BlpContent,
-) -> Option<(Arc<[u8]>, crate::render::shader::atlas::BcFormat)> {
-    use crate::render::shader::atlas::BcFormat;
-
+fn bc_texture_data(content: BlpContent) -> Option<(Arc<[u8]>, BcTextureFormat)> {
     match content {
-        BlpContent::Dxt1(dxtn) => first_bc_image(dxtn).map(|bc_data| (bc_data, BcFormat::Bc1)),
+        BlpContent::Dxt1(dxtn) => {
+            first_bc_image(dxtn).map(|bc_data| (bc_data, BcTextureFormat::Bc1))
+        }
         BlpContent::Dxt3(dxtn) | BlpContent::Dxt5(dxtn) => {
-            first_bc_image(dxtn).map(|bc_data| (bc_data, BcFormat::Bc3))
+            first_bc_image(dxtn).map(|bc_data| (bc_data, BcTextureFormat::Bc3))
         }
         _ => None,
     }
@@ -483,7 +488,7 @@ mod tests {
                 width: 4,
                 height: 4,
                 bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
-                format: crate::render::shader::atlas::BcFormat::Bc1,
+                format: BcTextureFormat::Bc1,
             },
         );
 
@@ -493,7 +498,7 @@ mod tests {
 
         assert_eq!(cached.width, 4);
         assert_eq!(cached.height, 4);
-        assert_eq!(cached.format, crate::render::shader::atlas::BcFormat::Bc1);
+        assert_eq!(cached.format, BcTextureFormat::Bc1);
         assert_eq!(cached.bc_data.as_ref(), [0xaa; 8]);
     }
 
@@ -513,7 +518,7 @@ mod tests {
             BlpContent::Dxt1(test_dxtn(vec![0x11; 8], DxtnFormat::Dxt1)),
         )
         .expect("DXT1 content should map to a BC texture result");
-        assert_eq!(dxt1.format, crate::render::shader::atlas::BcFormat::Bc1);
+        assert_eq!(dxt1.format, BcTextureFormat::Bc1);
         assert_eq!(dxt1.bc_data.as_ref(), [0x11; 8]);
 
         let dxt3 = bc_texture_result(
@@ -522,7 +527,7 @@ mod tests {
             BlpContent::Dxt3(test_dxtn(vec![0x22; 16], DxtnFormat::Dxt3)),
         )
         .expect("DXT3 content should map to a BC texture result");
-        assert_eq!(dxt3.format, crate::render::shader::atlas::BcFormat::Bc3);
+        assert_eq!(dxt3.format, BcTextureFormat::Bc3);
 
         let dxt5 = bc_texture_result(
             8,
@@ -530,7 +535,7 @@ mod tests {
             BlpContent::Dxt5(test_dxtn(vec![0x33; 16], DxtnFormat::Dxt5)),
         )
         .expect("DXT5 content should map to a BC texture result");
-        assert_eq!(dxt5.format, crate::render::shader::atlas::BcFormat::Bc3);
+        assert_eq!(dxt5.format, BcTextureFormat::Bc3);
     }
 
     #[test]
@@ -565,7 +570,7 @@ mod tests {
                 width: 4,
                 height: 4,
                 bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
-                format: crate::render::shader::atlas::BcFormat::Bc1,
+                format: BcTextureFormat::Bc1,
             },
         );
 
@@ -585,7 +590,7 @@ mod tests {
                 width: 4,
                 height: 4,
                 bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
-                format: crate::render::shader::atlas::BcFormat::Bc1,
+                format: BcTextureFormat::Bc1,
             },
         );
         let prev_bc_supported = crate::render::shader::atlas::set_bc_supported_for_tests(true);

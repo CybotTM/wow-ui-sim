@@ -113,7 +113,7 @@ fn try_load_bc_texture(
         width: bc_result.width,
         height: bc_result.height,
         bc_data: Arc::clone(&bc_result.bc_data),
-        bc_format: bc_result.format,
+        bc_format: bc_result.format.into(),
     }))
 }
 

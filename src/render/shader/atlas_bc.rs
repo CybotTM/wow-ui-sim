@@ -58,6 +58,15 @@ impl BcFormat {
     }
 }
 
+impl From<crate::texture::BcTextureFormat> for BcFormat {
+    fn from(value: crate::texture::BcTextureFormat) -> Self {
+        match value {
+            crate::texture::BcTextureFormat::Bc1 => Self::Bc1,
+            crate::texture::BcTextureFormat::Bc3 => Self::Bc3,
+        }
+    }
+}
+
 /// Entry for a BC-compressed texture in the BC atlas.
 #[derive(Debug, Clone, Copy)]
 pub struct BcTextureEntry {

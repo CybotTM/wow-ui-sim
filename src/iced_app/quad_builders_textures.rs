@@ -1,4 +1,5 @@
 use iced::{Point, Rectangle, Size};
+use std::borrow::Cow;
 
 use crate::atlas::{AtlasSliceMode, get_atlas_slice_info};
 use crate::render::{BlendMode, QuadBatch};
@@ -43,11 +44,24 @@ pub(crate) fn build_texture_quads(
         return;
     }
 
-    let Some(tex_path) = &f.texture else {
+    let Some(tex_path) = resolve_texture_path(f) else {
         emit_bar_fill_fallback(batch, bar_fill, bounds, alpha);
         return;
     };
-    emit_textured_quad(batch, bounds, f, bar_fill, tex_path, tint, alpha);
+    emit_textured_quad(batch, bounds, f, bar_fill, tex_path.as_ref(), tint, alpha);
+}
+
+fn resolve_texture_path(f: &crate::widget::Frame) -> Option<Cow<'_, str>> {
+    if let Some(path) = f.texture.as_deref() {
+        return Some(Cow::Borrowed(path));
+    }
+
+    let file_data_id = u32::try_from(f.texture_file_data_id?).ok()?;
+    let path = crate::manifest_interface_data::get_texture_path(file_data_id)?;
+    Some(Cow::Owned(format!(
+        "Interface\\{}",
+        path.replace('/', "\\")
+    )))
 }
 
 /// Compute the vertex color tint from vertex_color and bar fill override.
