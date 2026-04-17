@@ -1,0 +1,253 @@
+//! Spell-related globals: UnitHealth, UnitPower, UnitCastingInfo, CastSpellBy*.
+
+use crate::lua_api::globals::unit_api::parse_party_index;
+use crate::lua_api::rilua_methods::{borrow_state, create_string, val_to_string};
+use crate::lua_bridge::stack_val;
+use rilua::LuaApiMut;
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
+
+// ── Unit vitals ──────────────────────────────────────────────────────────────
+
+#[derive(Clone)]
+pub(super) struct UnitVitals {
+    pub(super) health: i32,
+    pub(super) health_max: i32,
+    pub(super) power: i32,
+    pub(super) power_max: i32,
+    pub(super) power_type: i32,
+    pub(super) power_type_name: String,
+}
+
+pub(super) fn lookup_unit_vitals(state: &LuaState, unit: &str) -> UnitVitals {
+    let sim = borrow_state(state).expect("sim state should exist");
+    if unit == "target"
+        && let Some(target) = &sim.current_target
+    {
+        return UnitVitals {
+            health: target.health,
+            health_max: target.health_max,
+            power: target.power,
+            power_max: target.power_max,
+            power_type: target.power_type,
+            power_type_name: target.power_type_name.clone(),
+        };
+    }
+    if let Some(index) = parse_party_index(unit)
+        && let Some(member) = sim.party_members.get(index)
+    {
+        return UnitVitals {
+            health: member.health,
+            health_max: member.health_max,
+            power: member.power,
+            power_max: member.power_max,
+            power_type: member.power_type,
+            power_type_name: member.power_type_name.clone(),
+        };
+    }
+    UnitVitals {
+        health: sim.player.health,
+        health_max: sim.player.health_max,
+        power: sim.player.power,
+        power_max: sim.player.power_max,
+        power_type: sim.player.power_type,
+        power_type_name: power_type_name(sim.player.power_type).to_string(),
+    }
+}
+
+fn requested_power_type(state: &LuaState) -> Option<i64> {
+    match stack_val(state, 2) {
+        Val::Num(n) => Some(n as i64),
+        _ => None,
+    }
+}
+
+fn is_secondary_power_type(power_type: Option<i64>) -> bool {
+    matches!(power_type, Some(power_type) if power_type != 0)
+}
+
+fn secondary_power_max(power_type: i64) -> i32 {
+    match power_type {
+        4 => 7,
+        5 => 6,
+        9 => 5,
+        16 => 4,
+        _ => 5,
+    }
+}
+
+pub(super) fn power_type_name(power_type: i32) -> &'static str {
+    match power_type {
+        0 => "MANA",
+        1 => "RAGE",
+        2 => "FOCUS",
+        3 => "ENERGY",
+        5 => "RUNES",
+        6 => "RUNIC_POWER",
+        7 => "SOUL_SHARDS",
+        8 => "LUNAR_POWER",
+        9 => "HOLY_POWER",
+        11 => "MAELSTROM",
+        13 => "INSANITY",
+        17 => "FURY",
+        18 => "PAIN",
+        _ => "MANA",
+    }
+}
+
+// ── Unit stat functions ──────────────────────────────────────────────────────
+
+fn unit_health(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.health as f64));
+    Ok(1)
+}
+
+fn unit_health_max(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.health_max as f64));
+    Ok(1)
+}
+
+fn unit_power(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    if is_secondary_power_type(requested_power_type(state)) {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    }
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.power as f64));
+    Ok(1)
+}
+
+fn unit_power_max(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    if let Some(power_type) = requested_power_type(state)
+        && is_secondary_power_type(Some(power_type))
+    {
+        state.push(Val::Num(secondary_power_max(power_type) as f64));
+        return Ok(1);
+    }
+    let vitals = lookup_unit_vitals(state, &unit);
+    state.push(Val::Num(vitals.power_max as f64));
+    Ok(1)
+}
+
+fn unit_power_type(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
+    let vitals = lookup_unit_vitals(state, &unit);
+    let power_type_name_val = create_string(state, &vitals.power_type_name);
+    state.push(Val::Num(vitals.power_type as f64));
+    state.push(power_type_name_val);
+    Ok(2)
+}
+
+fn unit_get_incoming_heals(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn unit_get_total_absorbs(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn unit_get_total_heal_absorbs(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+// ── Cast functions ───────────────────────────────────────────────────────────
+
+/// CastSpellByID(spellId [, unit]) — cast a spell by ID.
+pub(super) fn cast_spell_by_id(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+/// CastSpellByName(name [, unit]) — cast a spell by name.
+pub(super) fn cast_spell_by_name(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn unit_casting_info(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    if unit != "player" {
+        return Ok(0);
+    }
+    let cast = extract_cast_info(state)?;
+    let Some((spell_name, icon_path, start_time, end_time, cast_id, spell_id)) = cast else {
+        return Ok(0);
+    };
+    push_cast_info(
+        state, spell_name, icon_path, start_time, end_time, cast_id, spell_id,
+    );
+    Ok(9)
+}
+
+fn extract_cast_info(
+    state: &mut LuaState,
+) -> LuaResult<Option<(String, String, f64, f64, u32, u32)>> {
+    let sim = borrow_state(state)?;
+    Ok(sim.casting.as_ref().map(|cast| {
+        (
+            cast.spell_name.clone(),
+            cast.icon_path.clone(),
+            cast.start_time,
+            cast.end_time,
+            cast.cast_id,
+            cast.spell_id,
+        )
+    }))
+}
+
+fn push_cast_info(
+    state: &mut LuaState,
+    spell_name: String,
+    icon_path: String,
+    start_time: f64,
+    end_time: f64,
+    cast_id: u32,
+    spell_id: u32,
+) {
+    let spell_name_val = create_string(state, &spell_name);
+    let spell_name_display_val = create_string(state, &spell_name);
+    let icon_path_val = create_string(state, &icon_path);
+    state.push(spell_name_val);
+    state.push(spell_name_display_val);
+    state.push(icon_path_val);
+    state.push(Val::Num(start_time * 1000.0));
+    state.push(Val::Num(end_time * 1000.0));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(cast_id as f64));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(spell_id as f64));
+}
+
+fn unit_channel_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+// ── Registration ─────────────────────────────────────────────────────────────
+
+pub(super) fn register_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "UnitHealth", unit_health)?;
+    LuaApiMut::register_function(lua, "UnitHealthMax", unit_health_max)?;
+    LuaApiMut::register_function(lua, "UnitPower", unit_power)?;
+    LuaApiMut::register_function(lua, "UnitPowerMax", unit_power_max)?;
+    LuaApiMut::register_function(lua, "UnitPowerType", unit_power_type)?;
+    LuaApiMut::register_function(lua, "UnitGetIncomingHeals", unit_get_incoming_heals)?;
+    LuaApiMut::register_function(lua, "UnitGetTotalAbsorbs", unit_get_total_absorbs)?;
+    LuaApiMut::register_function(lua, "UnitGetTotalHealAbsorbs", unit_get_total_heal_absorbs)?;
+    LuaApiMut::register_function(lua, "CastSpellByID", cast_spell_by_id)?;
+    LuaApiMut::register_function(lua, "CastSpellByName", cast_spell_by_name)?;
+    LuaApiMut::register_function(lua, "UnitCastingInfo", unit_casting_info)?;
+    LuaApiMut::register_function(lua, "UnitChannelInfo", unit_channel_info)?;
+    LuaApiMut::register_function(
+        lua,
+        "PlayerGetTimerunningSeasonID",
+        crate::lua_api::globals::rilua_utility_system_spell::c_spec::player_get_timerunning_season_id,
+    )?;
+    Ok(())
+}

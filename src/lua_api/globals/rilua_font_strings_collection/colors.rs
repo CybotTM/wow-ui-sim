@@ -95,6 +95,37 @@ fn hex_from_rgb(r: f64, g: f64, b: f64) -> String {
 
 // ── Color table constructor ───────────────────────────────────────────────────
 
+fn register_color_methods(
+    state: &mut LuaState,
+    t_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn(state, t_ref, "GetRGB", |state| {
+        let this = stack_val(state, 1);
+        let (r, g, b) = color_rgb(state, this);
+        (r, g, b).into_stack(state)
+    })?;
+    table_set_rust_fn(state, t_ref, "GetRGBA", |state| {
+        let this = stack_val(state, 1);
+        let (r, g, b) = color_rgb(state, this);
+        let a = color_channel(state, this, "a", 1.0);
+        (r, g, b, a).into_stack(state)
+    })?;
+    table_set_rust_fn(state, t_ref, "GenerateHexColor", |state| {
+        let this = stack_val(state, 1);
+        let (r, g, b) = color_rgb(state, this);
+        let hex = hex_from_rgb(r, g, b);
+        create_string(state, &hex).into_stack(state)
+    })?;
+    table_set_rust_fn(state, t_ref, "WrapTextInColorCode", |state| {
+        let this = stack_val(state, 1);
+        let text = String::from_stack(state, 2)?;
+        let (r, g, b) = color_rgb(state, this);
+        let wrapped = format!("|cff{}{}|r", hex_from_rgb(r, g, b), text);
+        create_string(state, &wrapped).into_stack(state)
+    })?;
+    Ok(())
+}
+
 /// Build a rilua color table {r, g, b, a} with GetRGB/GetRGBA/GenerateHexColor/WrapTextInColorCode.
 pub fn make_rilua_color_table(
     state: &mut LuaState,
@@ -108,37 +139,8 @@ pub fn make_rilua_color_table(
     table_set(state, t, "g", Val::Num(g));
     table_set(state, t, "b", Val::Num(b));
     table_set(state, t, "a", Val::Num(a));
-
     let Val::Table(t_ref) = t else { unreachable!() };
-
-    table_set_rust_fn(state, t_ref, "GetRGB", |state| {
-        let this = stack_val(state, 1);
-        let (r, g, b) = color_rgb(state, this);
-        (r, g, b).into_stack(state)
-    })?;
-
-    table_set_rust_fn(state, t_ref, "GetRGBA", |state| {
-        let this = stack_val(state, 1);
-        let (r, g, b) = color_rgb(state, this);
-        let a = color_channel(state, this, "a", 1.0);
-        (r, g, b, a).into_stack(state)
-    })?;
-
-    table_set_rust_fn(state, t_ref, "GenerateHexColor", |state| {
-        let this = stack_val(state, 1);
-        let (r, g, b) = color_rgb(state, this);
-        let hex = hex_from_rgb(r, g, b);
-        create_string(state, &hex).into_stack(state)
-    })?;
-
-    table_set_rust_fn(state, t_ref, "WrapTextInColorCode", |state| {
-        let this = stack_val(state, 1);
-        let text = String::from_stack(state, 2)?;
-        let (r, g, b) = color_rgb(state, this);
-        let wrapped = format!("|cff{}{}|r", hex_from_rgb(r, g, b), text);
-        create_string(state, &wrapped).into_stack(state)
-    })?;
-
+    register_color_methods(state, t_ref)?;
     Ok(t)
 }
 

@@ -175,8 +175,40 @@ pub(super) fn set_parent_key(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── Create methods ────────────────────────────────────────────────────────────
 
+fn apply_draw_layer(frame: &mut crate::widget::Frame, layer: Option<String>) {
+    use crate::widget::DrawLayer;
+    if let Some(layer_str) = layer {
+        if let Some(draw_layer) = DrawLayer::from_str(&layer_str) {
+            frame.draw_layer = draw_layer;
+        }
+    }
+}
+
+fn register_child_with_strata(
+    state: &mut LuaState,
+    parent_id: u64,
+    child_id: u64,
+    widget: crate::widget::Frame,
+) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    let parent_props = sim
+        .widgets
+        .get(parent_id)
+        .map(|p| (p.frame_strata, p.frame_level));
+    sim.widgets.register(widget);
+    sim.widgets.add_child(parent_id, child_id);
+    sim.invalidate_strata_buckets();
+    if let Some((parent_strata, parent_level)) = parent_props {
+        if let Some(f) = sim.widgets.get_mut_visual(child_id) {
+            f.frame_strata = parent_strata;
+            f.frame_level = parent_level + 1;
+        }
+    }
+    Ok(())
+}
+
 pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::widget::{DrawLayer, Frame, WidgetType};
+    use crate::widget::{Frame, WidgetType};
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
     let layer = opt_string(state, 3);
@@ -184,39 +216,18 @@ pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
     let sub_level = super::shared::opt_f32(state, 5).map(|n| n as i32);
 
     let name = resolve_child_name(state, name_raw, parent_id);
-
     let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(parent_id));
-    if let Some(layer_str) = layer {
-        if let Some(draw_layer) = DrawLayer::from_str(&layer_str) {
-            texture.draw_layer = draw_layer;
-        }
-    }
+    apply_draw_layer(&mut texture, layer);
     if let Some(sub_level) = sub_level {
         texture.draw_sub_layer = sub_level;
     }
 
     let child_id = texture.id;
-    {
-        let mut sim = borrow_state_mut(state)?;
-        let parent_props = sim
-            .widgets
-            .get(parent_id)
-            .map(|p| (p.frame_strata, p.frame_level));
-        sim.widgets.register(texture);
-        sim.widgets.add_child(parent_id, child_id);
-        sim.invalidate_strata_buckets();
-        if let Some((parent_strata, parent_level)) = parent_props {
-            if let Some(f) = sim.widgets.get_mut_visual(child_id) {
-                f.frame_strata = parent_strata;
-                f.frame_level = parent_level + 1;
-            }
-        }
-    }
+    register_child_with_strata(state, parent_id, child_id, texture)?;
 
     if let Some(ref n) = name {
         bind_named_child_global(state, n, child_id)?;
     }
-
     let val = frame_ref(state, child_id)?;
     state.push(val);
     Ok(1)
@@ -316,18 +327,14 @@ pub(super) fn get_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn create_line(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::widget::{DrawLayer, Frame, WidgetType};
+    use crate::widget::{Frame, WidgetType};
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
     let layer = opt_string(state, 3);
     let _inherits = opt_string(state, 4);
     let name = resolve_child_name(state, name_raw, parent_id);
     let mut line = Frame::new(WidgetType::Line, name.clone(), Some(parent_id));
-    if let Some(layer_str) = layer {
-        if let Some(draw_layer) = DrawLayer::from_str(&layer_str) {
-            line.draw_layer = draw_layer;
-        }
-    }
+    apply_draw_layer(&mut line, layer);
     let child_id = line.id;
     register_child_widget(state, parent_id, child_id, line)?;
     let val = frame_ref(state, child_id)?;

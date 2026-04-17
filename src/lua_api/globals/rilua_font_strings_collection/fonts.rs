@@ -216,102 +216,123 @@ fn font_get_font(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn add_font_text_color_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetTextColor", |state| {
-        let font = stack_val(state, 1);
-        let r = f64::from_stack(state, 2)?;
-        let g = f64::from_stack(state, 3)?;
-        let b = f64::from_stack(state, 4)?;
-        let a = Option::<f64>::from_stack(state, 5)?.unwrap_or(1.0);
-        table_set(state, font, "__textColorR", Val::Num(r));
-        table_set(state, font, "__textColorG", Val::Num(g));
-        table_set(state, font, "__textColorB", Val::Num(b));
-        table_set(state, font, "__textColorA", Val::Num(a));
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetTextColor", |state| {
-        let font = stack_val(state, 1);
-        let r = font_f64(state, font, "__textColorR");
-        let g = font_f64(state, font, "__textColorG");
-        let b = font_f64(state, font, "__textColorB");
-        let a = font_f64(state, font, "__textColorA");
-        (r, g, b, a).into_stack(state)
-    })?;
+    table_set_rust_fn(state, font_ref, "SetTextColor", font_set_text_color)?;
+    table_set_rust_fn(state, font_ref, "GetTextColor", font_get_text_color)?;
     Ok(())
+}
+
+fn font_set_text_color(state: &mut LuaState) -> LuaResult<u32> {
+    set_rgba_component_fields(state, "__textColor")
+}
+
+fn font_get_text_color(state: &mut LuaState) -> LuaResult<u32> {
+    get_rgba_component_fields(state, "__textColor")
 }
 
 fn add_font_shadow_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetShadowColor", |state| {
-        let font = stack_val(state, 1);
-        let r = f64::from_stack(state, 2)?;
-        let g = f64::from_stack(state, 3)?;
-        let b = f64::from_stack(state, 4)?;
-        let a = Option::<f64>::from_stack(state, 5)?.unwrap_or(1.0);
-        table_set(state, font, "__shadowColorR", Val::Num(r));
-        table_set(state, font, "__shadowColorG", Val::Num(g));
-        table_set(state, font, "__shadowColorB", Val::Num(b));
-        table_set(state, font, "__shadowColorA", Val::Num(a));
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetShadowColor", |state| {
-        let font = stack_val(state, 1);
-        let r = font_f64(state, font, "__shadowColorR");
-        let g = font_f64(state, font, "__shadowColorG");
-        let b = font_f64(state, font, "__shadowColorB");
-        let a = font_f64(state, font, "__shadowColorA");
-        (r, g, b, a).into_stack(state)
-    })?;
-    table_set_rust_fn(state, font_ref, "SetShadowOffset", |state| {
-        let font = stack_val(state, 1);
-        let x = f64::from_stack(state, 2)?;
-        let y = f64::from_stack(state, 3)?;
-        table_set(state, font, "__shadowOffsetX", Val::Num(x));
-        table_set(state, font, "__shadowOffsetY", Val::Num(y));
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetShadowOffset", |state| {
-        let font = stack_val(state, 1);
-        let x = font_f64(state, font, "__shadowOffsetX");
-        let y = font_f64(state, font, "__shadowOffsetY");
-        (x, y).into_stack(state)
-    })?;
+    table_set_rust_fn(state, font_ref, "SetShadowColor", font_set_shadow_color)?;
+    table_set_rust_fn(state, font_ref, "GetShadowColor", font_get_shadow_color)?;
+    table_set_rust_fn(state, font_ref, "SetShadowOffset", font_set_shadow_offset)?;
+    table_set_rust_fn(state, font_ref, "GetShadowOffset", font_get_shadow_offset)?;
     Ok(())
 }
 
+fn font_set_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
+    set_rgba_component_fields(state, "__shadowColor")
+}
+
+fn font_get_shadow_color(state: &mut LuaState) -> LuaResult<u32> {
+    get_rgba_component_fields(state, "__shadowColor")
+}
+
+fn font_set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let x = f64::from_stack(state, 2)?;
+    let y = f64::from_stack(state, 3)?;
+    table_set(state, font, "__shadowOffsetX", Val::Num(x));
+    table_set(state, font, "__shadowOffsetY", Val::Num(y));
+    Ok(0)
+}
+
+fn font_get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let x = font_f64(state, font, "__shadowOffsetX");
+    let y = font_f64(state, font, "__shadowOffsetY");
+    (x, y).into_stack(state)
+}
+
+/// Read r,g,b,a from stack (2..=5, a defaulting to 1.0) and store on the
+/// font under `{prefix}R`, `{prefix}G`, `{prefix}B`, `{prefix}A`.
+fn set_rgba_component_fields(state: &mut LuaState, prefix: &str) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let r = f64::from_stack(state, 2)?;
+    let g = f64::from_stack(state, 3)?;
+    let b = f64::from_stack(state, 4)?;
+    let a = Option::<f64>::from_stack(state, 5)?.unwrap_or(1.0);
+    let components = [("R", r), ("G", g), ("B", b), ("A", a)];
+    for (suffix, value) in components {
+        let key = format!("{prefix}{suffix}");
+        table_set(state, font, &key, Val::Num(value));
+    }
+    Ok(0)
+}
+
+fn get_rgba_component_fields(state: &mut LuaState, prefix: &str) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let r = font_f64(state, font, &format!("{prefix}R"));
+    let g = font_f64(state, font, &format!("{prefix}G"));
+    let b = font_f64(state, font, &format!("{prefix}B"));
+    let a = font_f64(state, font, &format!("{prefix}A"));
+    (r, g, b, a).into_stack(state)
+}
+
+fn font_set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let j = String::from_stack(state, 2)?;
+    let jv = create_string(state, &j);
+    table_set(state, font, "__justifyH", jv);
+    Ok(0)
+}
+
+fn font_get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let j = font_str(state, font, "__justifyH");
+    create_string(state, &j).into_stack(state)
+}
+
+fn font_set_justify_v(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let j = String::from_stack(state, 2)?;
+    let jv = create_string(state, &j);
+    table_set(state, font, "__justifyV", jv);
+    Ok(0)
+}
+
+fn font_get_justify_v(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let j = font_str(state, font, "__justifyV");
+    create_string(state, &j).into_stack(state)
+}
+
+fn font_set_spacing(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let spacing = f64::from_stack(state, 2)?;
+    table_set(state, font, "__spacing", Val::Num(spacing));
+    Ok(0)
+}
+
+fn font_get_spacing(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    font_f64(state, font, "__spacing").into_stack(state)
+}
+
 fn add_font_justify_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetJustifyH", |state| {
-        let font = stack_val(state, 1);
-        let j = String::from_stack(state, 2)?;
-        let jv = create_string(state, &j);
-        table_set(state, font, "__justifyH", jv);
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetJustifyH", |state| {
-        let font = stack_val(state, 1);
-        let j = font_str(state, font, "__justifyH");
-        create_string(state, &j).into_stack(state)
-    })?;
-    table_set_rust_fn(state, font_ref, "SetJustifyV", |state| {
-        let font = stack_val(state, 1);
-        let j = String::from_stack(state, 2)?;
-        let jv = create_string(state, &j);
-        table_set(state, font, "__justifyV", jv);
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetJustifyV", |state| {
-        let font = stack_val(state, 1);
-        let j = font_str(state, font, "__justifyV");
-        create_string(state, &j).into_stack(state)
-    })?;
-    table_set_rust_fn(state, font_ref, "SetSpacing", |state| {
-        let font = stack_val(state, 1);
-        let spacing = f64::from_stack(state, 2)?;
-        table_set(state, font, "__spacing", Val::Num(spacing));
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetSpacing", |state| {
-        let font = stack_val(state, 1);
-        font_f64(state, font, "__spacing").into_stack(state)
-    })?;
+    table_set_rust_fn(state, font_ref, "SetJustifyH", font_set_justify_h)?;
+    table_set_rust_fn(state, font_ref, "GetJustifyH", font_get_justify_h)?;
+    table_set_rust_fn(state, font_ref, "SetJustifyV", font_set_justify_v)?;
+    table_set_rust_fn(state, font_ref, "GetJustifyV", font_get_justify_v)?;
+    table_set_rust_fn(state, font_ref, "SetSpacing", font_set_spacing)?;
+    table_set_rust_fn(state, font_ref, "GetSpacing", font_get_spacing)?;
     Ok(())
 }
 
@@ -347,44 +368,63 @@ fn add_font_wrap_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaRes
     Ok(())
 }
 
+fn font_get_name(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let name = table_get(state, font, "__name");
+    match name {
+        Val::Str(_) => name.into_stack(state),
+        _ => Val::Nil.into_stack(state),
+    }
+}
+
+fn font_get_font_object_for_alphabet(state: &mut LuaState) -> LuaResult<u32> {
+    stack_val(state, 1).into_stack(state)
+}
+
+// TODO: full cycle-safe property copy (mlua: copy_font_properties)
+fn font_copy_font_object(state: &mut LuaState) -> LuaResult<u32> {
+    let _font = stack_val(state, 1);
+    let _src = stack_val(state, 2);
+    Ok(0)
+}
+
+fn font_get_object_type(state: &mut LuaState) -> LuaResult<u32> {
+    create_string(state, "Font").into_stack(state)
+}
+
+fn font_is_object_type(state: &mut LuaState) -> LuaResult<u32> {
+    let name = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    name.eq_ignore_ascii_case("Font").into_stack(state)
+}
+
+fn font_get_font_object(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    table_get(state, font, "__fontObject").into_stack(state)
+}
+
+// TODO: cycle detection (mlua: detect_font_object_cycle)
+fn font_set_font_object(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let target = stack_val(state, 2);
+    if matches!(target, Val::Table(_)) {
+        table_set(state, font, "__fontObject", target);
+    }
+    Ok(0)
+}
+
 fn add_font_meta_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "GetName", |state| {
-        let font = stack_val(state, 1);
-        let name = table_get(state, font, "__name");
-        match name {
-            Val::Str(_) => name.into_stack(state),
-            _ => Val::Nil.into_stack(state),
-        }
-    })?;
-    table_set_rust_fn(state, font_ref, "GetFontObjectForAlphabet", |state| {
-        stack_val(state, 1).into_stack(state)
-    })?;
-    // TODO: full cycle-safe property copy (mlua: copy_font_properties)
-    table_set_rust_fn(state, font_ref, "CopyFontObject", |state| {
-        let _font = stack_val(state, 1);
-        let _src = stack_val(state, 2);
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetObjectType", |state| {
-        create_string(state, "Font").into_stack(state)
-    })?;
-    table_set_rust_fn(state, font_ref, "IsObjectType", |state| {
-        let name = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
-        name.eq_ignore_ascii_case("Font").into_stack(state)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetFontObject", |state| {
-        let font = stack_val(state, 1);
-        table_get(state, font, "__fontObject").into_stack(state)
-    })?;
-    // TODO: cycle detection (mlua: detect_font_object_cycle)
-    table_set_rust_fn(state, font_ref, "SetFontObject", |state| {
-        let font = stack_val(state, 1);
-        let target = stack_val(state, 2);
-        if matches!(target, Val::Table(_)) {
-            table_set(state, font, "__fontObject", target);
-        }
-        Ok(0)
-    })?;
+    table_set_rust_fn(state, font_ref, "GetName", font_get_name)?;
+    table_set_rust_fn(
+        state,
+        font_ref,
+        "GetFontObjectForAlphabet",
+        font_get_font_object_for_alphabet,
+    )?;
+    table_set_rust_fn(state, font_ref, "CopyFontObject", font_copy_font_object)?;
+    table_set_rust_fn(state, font_ref, "GetObjectType", font_get_object_type)?;
+    table_set_rust_fn(state, font_ref, "IsObjectType", font_is_object_type)?;
+    table_set_rust_fn(state, font_ref, "GetFontObject", font_get_font_object)?;
+    table_set_rust_fn(state, font_ref, "SetFontObject", font_set_font_object)?;
     Ok(())
 }
 

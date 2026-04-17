@@ -23,10 +23,28 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
 }
 
 fn register_text_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_plain_text(state, table)?;
+    register_font_methods(state, table)?;
+    register_text_layout(state, table)?;
+    register_styled_text(state, table)
+}
+
+fn register_plain_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetText", text::set_text)?;
     table_set_rust_fn(state, table, "GetText", text::get_text)?;
     table_set_rust_fn(state, table, "ClearText", text::clear_text)?;
     table_set_rust_fn(state, table, "SetFormattedText", text::set_formatted_text)?;
+    table_set_rust_fn(state, table, "ApplyDefaultText", text::apply_default_text)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "TryApplyDefaultText",
+        text::try_apply_default_text,
+    )?;
+    Ok(())
+}
+
+fn register_font_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetFont", text::set_font)?;
     table_set_rust_fn(state, table, "GetFont", text::get_font)?;
     table_set_rust_fn(state, table, "SetFontObject", text::set_font_object)?;
@@ -40,6 +58,10 @@ fn register_text_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult
     table_set_rust_fn(state, table, "SetFontHeight", text::set_font_height)?;
     table_set_rust_fn(state, table, "SetTextHeight", text::set_text_height)?;
     table_set_rust_fn(state, table, "GetFontHeight", text::get_font_height)?;
+    Ok(())
+}
+
+fn register_text_layout(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetStringWidth", text::get_string_width)?;
     table_set_rust_fn(state, table, "GetStringHeight", text::get_string_height)?;
     table_set_rust_fn(state, table, "GetTextWidth", text::get_text_width)?;
@@ -66,13 +88,10 @@ fn register_text_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult
     table_set_rust_fn(state, table, "SetTextScale", text::set_text_scale)?;
     table_set_rust_fn(state, table, "SetTextToFit", text::set_text_to_fit)?;
     table_set_rust_fn(state, table, "ScaleTextToFit", text::scale_text_to_fit)?;
-    table_set_rust_fn(state, table, "ApplyDefaultText", text::apply_default_text)?;
-    table_set_rust_fn(
-        state,
-        table,
-        "TryApplyDefaultText",
-        text::try_apply_default_text,
-    )?;
+    Ok(())
+}
+
+fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetTextColor", text::set_text_color)?;
     table_set_rust_fn(state, table, "GetTextColor", text::get_text_color)?;
     table_set_rust_fn(

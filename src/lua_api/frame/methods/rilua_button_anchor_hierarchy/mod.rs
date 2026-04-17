@@ -23,9 +23,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
-/// Register all button, anchor, hierarchy, and create methods on the given metatable.
-pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    // Button: font objects
+fn register_buttons(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -62,8 +60,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "GetDisabledFontObject",
         buttons::get_disabled_font_object,
     )?;
-
-    // Button: pushed text offset
     table_set_rust_fn(
         state,
         table,
@@ -76,8 +72,32 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "GetPushedTextOffset",
         buttons::get_pushed_text_offset,
     )?;
+    table_set_rust_fn(state, table, "GetFontString", font_strings::get_font_string)?;
+    table_set_rust_fn(state, table, "SetFontString", font_strings::set_font_string)?;
+    table_set_rust_fn(state, table, "IsEnabled", buttons::is_enabled)?;
+    table_set_rust_fn(state, table, "SetEnabled", buttons::set_enabled)?;
+    table_set_rust_fn(state, table, "Enable", buttons::enable)?;
+    table_set_rust_fn(state, table, "Disable", buttons::disable)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "RegisterForClicks",
+        buttons::register_for_clicks,
+    )?;
+    table_set_rust_fn(state, table, "SetButtonState", buttons::set_button_state)?;
+    table_set_rust_fn(state, table, "GetButtonState", buttons::get_button_state)?;
+    table_set_rust_fn(state, table, "Click", buttons::click)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetItemButtonScale",
+        buttons::set_item_button_scale,
+    )?;
+    table_set_rust_fn(state, table, "CalculateAction", buttons::calculate_action)?;
+    Ok(())
+}
 
-    // Button: texture getters
+fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -108,8 +128,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "GetCheckedTexture",
         textures::get_checked_texture,
     )?;
-
-    // Button: texture setters
     table_set_rust_fn(
         state,
         table,
@@ -134,8 +152,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "SetDisabledTexture",
         textures::set_disabled_texture,
     )?;
-
-    // Button: atlas setters
     table_set_rust_fn(state, table, "SetNormalAtlas", textures::set_normal_atlas)?;
     table_set_rust_fn(state, table, "SetPushedAtlas", textures::set_pushed_atlas)?;
     table_set_rust_fn(
@@ -150,8 +166,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "SetHighlightAtlas",
         textures::set_highlight_atlas,
     )?;
-
-    // Button: checked textures
     table_set_rust_fn(
         state,
         table,
@@ -170,8 +184,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "GetDisabledCheckedTexture",
         textures::get_disabled_checked_texture,
     )?;
-
-    // Button: clear textures
     table_set_rust_fn(
         state,
         table,
@@ -196,8 +208,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "ClearDisabledTexture",
         textures::clear_disabled_texture,
     )?;
-
-    // Button: three-slice
     table_set_rust_fn(state, table, "SetLeftTexture", textures::set_left_texture)?;
     table_set_rust_fn(
         state,
@@ -206,32 +216,10 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         textures::set_middle_texture,
     )?;
     table_set_rust_fn(state, table, "SetRightTexture", textures::set_right_texture)?;
+    Ok(())
+}
 
-    // Button: font string + state
-    table_set_rust_fn(state, table, "GetFontString", font_strings::get_font_string)?;
-    table_set_rust_fn(state, table, "SetFontString", font_strings::set_font_string)?;
-    table_set_rust_fn(state, table, "IsEnabled", buttons::is_enabled)?;
-    table_set_rust_fn(state, table, "SetEnabled", buttons::set_enabled)?;
-    table_set_rust_fn(state, table, "Enable", buttons::enable)?;
-    table_set_rust_fn(state, table, "Disable", buttons::disable)?;
-    table_set_rust_fn(
-        state,
-        table,
-        "RegisterForClicks",
-        buttons::register_for_clicks,
-    )?;
-    table_set_rust_fn(state, table, "SetButtonState", buttons::set_button_state)?;
-    table_set_rust_fn(state, table, "GetButtonState", buttons::get_button_state)?;
-    table_set_rust_fn(state, table, "Click", buttons::click)?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetItemButtonScale",
-        buttons::set_item_button_scale,
-    )?;
-    table_set_rust_fn(state, table, "CalculateAction", buttons::calculate_action)?;
-
-    // Anchor methods
+fn register_anchors(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetPoint", anchors::set_point)?;
     table_set_rust_fn(state, table, "SetStartPoint", anchors::set_start_point)?;
     table_set_rust_fn(state, table, "SetEndPoint", anchors::set_end_point)?;
@@ -255,8 +243,10 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "GetEndPoint", anchors::get_end_point)?;
     table_set_rust_fn(state, table, "GetNumPoints", anchors::get_num_points)?;
     table_set_rust_fn(state, table, "GetPointByName", anchors::get_point_by_name)?;
+    Ok(())
+}
 
-    // Hierarchy methods
+fn register_hierarchy(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetParent", hierarchy::get_parent)?;
     table_set_rust_fn(state, table, "SetParent", hierarchy::set_parent)?;
     table_set_rust_fn(state, table, "GetNumChildren", hierarchy::get_num_children)?;
@@ -271,8 +261,6 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     )?;
     table_set_rust_fn(state, table, "GetParentKey", hierarchy::get_parent_key)?;
     table_set_rust_fn(state, table, "SetParentKey", hierarchy::set_parent_key)?;
-
-    // Create methods
     table_set_rust_fn(state, table, "CreateTexture", hierarchy::create_texture)?;
     table_set_rust_fn(
         state,
@@ -308,8 +296,10 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "AttachFontString",
         hierarchy::attach_font_string,
     )?;
+    Ok(())
+}
 
-    // Animation methods
+fn register_animations(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -500,6 +490,15 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "CreateControlPoint",
         animations::create_control_point,
     )?;
+    Ok(())
+}
 
+/// Register all button, anchor, hierarchy, and create methods on the given metatable.
+pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_buttons(state, table)?;
+    register_textures(state, table)?;
+    register_anchors(state, table)?;
+    register_hierarchy(state, table)?;
+    register_animations(state, table)?;
     Ok(())
 }

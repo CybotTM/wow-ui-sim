@@ -30,6 +30,16 @@ fn register_c_addons_methods(
     state: &mut LuaState,
     t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
+    register_c_addons_queries(state, t)?;
+    register_c_addons_state(state, t)?;
+    Ok(())
+}
+
+/// Query/info methods: read-only addon introspection.
+fn register_c_addons_queries(
+    state: &mut LuaState,
+    t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(state, t, "GetNumAddOns", c_addons_get_num_addons)?;
     table_set_rust_fn(state, t, "GetAddOnInfo", c_addons_get_addon_info)?;
     table_set_rust_fn(state, t, "IsAddOnLoaded", c_addons_is_addon_loaded)?;
@@ -45,16 +55,24 @@ fn register_c_addons_methods(
         "GetAddOnEnableState",
         c_addons_get_addon_enable_state,
     )?;
-    table_set_rust_fn(state, t, "EnableAddOn", c_addons_enable_addon)?;
-    table_set_rust_fn(state, t, "DisableAddOn", c_addons_disable_addon)?;
-    table_set_rust_fn(state, t, "EnableAllAddOns", c_addons_enable_all_addons)?;
-    table_set_rust_fn(state, t, "DisableAllAddOns", c_addons_disable_all_addons)?;
     table_set_rust_fn(state, t, "GetAddOnMetadata", c_addons_get_addon_metadata)?;
     table_set_rust_fn(state, t, "DoesAddOnExist", c_addons_does_addon_exist)?;
     table_set_rust_fn(state, t, "GetAddOnName", c_addons_get_addon_name)?;
     table_set_rust_fn(state, t, "GetAddOnTitle", c_addons_get_addon_title)?;
     table_set_rust_fn(state, t, "GetAddOnNotes", c_addons_get_addon_notes)?;
     table_set_rust_fn(state, t, "GetAddOnSecurity", c_addons_get_addon_security)?;
+    Ok(())
+}
+
+/// State-mutation methods: enable/disable, version check, load.
+fn register_c_addons_state(
+    state: &mut LuaState,
+    t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn(state, t, "EnableAddOn", c_addons_enable_addon)?;
+    table_set_rust_fn(state, t, "DisableAddOn", c_addons_disable_addon)?;
+    table_set_rust_fn(state, t, "EnableAllAddOns", c_addons_enable_all_addons)?;
+    table_set_rust_fn(state, t, "DisableAllAddOns", c_addons_disable_all_addons)?;
     table_set_rust_fn(
         state,
         t,
@@ -72,6 +90,12 @@ fn register_c_addons_methods(
 }
 
 pub fn register_legacy_addon_globals(state: &mut LuaState) -> LuaResult<()> {
+    register_legacy_addon_fns(state)?;
+    register_addon_actions_blocked(state);
+    Ok(())
+}
+
+fn register_legacy_addon_fns(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn(state, state.global, "GetNumAddOns", c_addons_get_num_addons)?;
     table_set_rust_fn(
         state,
@@ -98,6 +122,10 @@ pub fn register_legacy_addon_globals(state: &mut LuaState) -> LuaResult<()> {
         c_addons_is_addon_load_on_demand,
     )?;
     table_set_rust_fn(state, state.global, "LoadAddOn", c_addons_load_addon)?;
+    Ok(())
+}
+
+fn register_addon_actions_blocked(state: &mut LuaState) {
     let blocked = create_table(state);
     let key_ref = state.gc.intern_string(b"ADDON_ACTIONS_BLOCKED");
     let global_ref = state.global;
@@ -105,7 +133,6 @@ pub fn register_legacy_addon_globals(state: &mut LuaState) -> LuaResult<()> {
         let _ = global.raw_set(Val::Str(key_ref), blocked, &state.gc.string_arena);
     }
     state.gc.barrier_back(global_ref);
-    Ok(())
 }
 
 // ── Addon query helpers ───────────────────────────────────────────────────────

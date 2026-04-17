@@ -38,42 +38,48 @@ fn push_pet_info(
     17
 }
 
+fn pet_get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
+    let st = borrow_state(state)?;
+    let total = st.world.pets.len() as i32;
+    let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
+    drop(st);
+    (total, owned).into_stack(state)
+}
+
+fn pet_get_num_collected_info(state: &mut LuaState) -> LuaResult<u32> {
+    let st = borrow_state(state)?;
+    let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
+    let total = st.world.pets.len() as i32;
+    drop(st);
+    (owned, total).into_stack(state)
+}
+
+fn pet_get_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let st = borrow_state(state)?;
+    let i = (index - 1) as usize;
+    let Some(p) = st.world.pets.get(i) else {
+        drop(st);
+        return Ok(0);
+    };
+    let species = p.species_id as f64;
+    let level = p.level as f64;
+    let icon = p.icon as f64;
+    let pet_type = p.pet_type as f64;
+    let name_str = p.name.clone();
+    drop(st);
+    // speciesId, nil, level, 0, 0, 0, false, name, icon, petType, 0, "", "", false, true, false, false
+    Ok(push_pet_info(
+        state, &name_str, species, level, icon, pet_type,
+    ))
+}
+
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
     let t = TableBuilder::new(lua.state_mut())
-        .set_function("GetNumPets", |state| {
-            let st = borrow_state(state)?;
-            let total = st.world.pets.len() as i32;
-            let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
-            drop(st);
-            (total, owned).into_stack(state)
-        })?
-        .set_function("GetNumCollectedInfo", |state| {
-            let st = borrow_state(state)?;
-            let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
-            let total = st.world.pets.len() as i32;
-            drop(st);
-            (owned, total).into_stack(state)
-        })?
+        .set_function("GetNumPets", pet_get_num_pets)?
+        .set_function("GetNumCollectedInfo", pet_get_num_collected_info)?
         .set_function("GetNumPetsNeedingFanfare", |state| (0i32).into_stack(state))?
-        .set_function("GetPetInfoByIndex", |state| {
-            let index = i32::from_stack(state, 1)?;
-            let st = borrow_state(state)?;
-            let i = (index - 1) as usize;
-            let Some(p) = st.world.pets.get(i) else {
-                drop(st);
-                return Ok(0);
-            };
-            let species = p.species_id as f64;
-            let level = p.level as f64;
-            let icon = p.icon as f64;
-            let pet_type = p.pet_type as f64;
-            let name_str = p.name.clone();
-            drop(st);
-            // speciesId, nil, level, 0, 0, 0, false, name, icon, petType, 0, "", "", false, true, false, false
-            Ok(push_pet_info(
-                state, &name_str, species, level, icon, pet_type,
-            ))
-        })?
+        .set_function("GetPetInfoByIndex", pet_get_info_by_index)?
         .set_function("GetPetInfoByPetID", |_state| {
             // TODO: lookup by pet_id string
             Ok(0)
