@@ -12,6 +12,8 @@
 //!                                       2 => Extra Attack marker
 //! - `SpellTargetUnit(unit)`  — no-op when no cast pending; consumes the
 //!                               pending cast target when one exists
+//! - `SpellIsTargeting()`     — false until the sim models spell targeting
+//! - `SpellStopTargeting()`   — no-op companion to `SpellIsTargeting`
 //!
 //! The sim has no spell DB, so CastSpellByID synthesizes
 //! `spell_name = "Spell <id>"` and reuses `"Interface/Icons/INV_Misc_QuestionMark"`.
@@ -142,6 +144,17 @@ fn spell_target_unit(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `SpellIsTargeting()` — targeting cursor is not modeled yet.
+fn spell_is_targeting(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// `SpellStopTargeting()` — silent no-op until targeting cursor state exists.
+fn spell_stop_targeting(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "AttackTarget", attack_target)?;
     LuaApiMut::register_function(lua, "StopAttack", stop_attack)?;
@@ -150,5 +163,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CastSpellByName", cast_spell_by_name)?;
     LuaApiMut::register_function(lua, "ClickSpecialAbility", click_special_ability)?;
     LuaApiMut::register_function(lua, "SpellTargetUnit", spell_target_unit)?;
+    LuaApiMut::register_function(lua, "SpellIsTargeting", spell_is_targeting)?;
+    LuaApiMut::register_function(lua, "SpellStopTargeting", spell_stop_targeting)?;
     Ok(())
 }

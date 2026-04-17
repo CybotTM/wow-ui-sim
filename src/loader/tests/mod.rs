@@ -827,6 +827,28 @@ fn test_get_attribute_multi_arg_and_wildcard() {
 }
 
 #[test]
+fn test_xml_propagate_mouse_input_mask_sets_frame_flags() {
+    let t = load_test_xml(
+        "test-propagate-mouse-input-mask",
+        r#"<Ui>
+            <Frame name="ClicksTemplate" virtual="true" propagateMouseInputMask="Clicks"/>
+            <Frame name="MotionTemplate" virtual="true" propagateMouseInput="Motion"/>
+            <Frame name="CombinedTemplate" inherits="ClicksTemplate, MotionTemplate" virtual="true"/>
+            <Frame name="XmlPropagationFrame" parent="UIParent" inherits="CombinedTemplate"/>
+        </Ui>"#,
+    );
+
+    t.assert_lua_true(
+        "return XmlPropagationFrame:CanPropagateMouseClicks()",
+        "propagateMouseInputMask=\"Clicks\" should enable click propagation",
+    );
+    t.assert_lua_true(
+        "return XmlPropagationFrame:CanPropagateMouseMotion()",
+        "propagateMouseInput=\"Motion\" should enable motion propagation",
+    );
+}
+
+#[test]
 fn test_set_get_hit_rect_insets() {
     let (t, _) = load_test_lua(
         "test-hit-rect-insets",

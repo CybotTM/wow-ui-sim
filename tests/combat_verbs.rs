@@ -181,6 +181,13 @@ fn spell_target_unit_preserves_pending_cast() {
     assert_eq!(name, "Polymorph");
 }
 
+#[test]
+fn spell_is_targeting_defaults_false() {
+    let env = env();
+    let targeting: bool = env.eval("return SpellIsTargeting()").unwrap();
+    assert!(!targeting, "SpellIsTargeting should default false");
+}
+
 // ── Monotonic cast ids ────────────────────────────────────────────────────────
 
 #[test]

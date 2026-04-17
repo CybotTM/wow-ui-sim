@@ -414,6 +414,81 @@ fn blizzard_secure_unit_button_click_targets_party() {
 }
 
 #[test]
+fn blizzard_player_frame_click_targets_player() {
+    test_timeout! {
+        let env = env_with_full_ui();
+        install_test_error_handler(&env);
+        env.exec("ClearTarget()").expect("ClearTarget");
+
+        env.exec(r#"
+        local handler = PlayerFrame and PlayerFrame:GetScript("OnClick")
+        assert(handler, "PlayerFrame should have an OnClick handler")
+        handler(PlayerFrame, "LeftButton", false)
+    "#)
+        .expect("click PlayerFrame");
+
+        let fatal_errors: Vec<String> = drain_test_errors(&env)
+            .into_iter()
+            .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
+            .collect();
+        assert!(
+            fatal_errors.is_empty(),
+            "PlayerFrame click errors:\n{}",
+            fatal_errors.join("\n")
+        );
+
+        let target_name: String = env.eval("return UnitName('target')").unwrap();
+        assert_eq!(target_name, "Player", "PlayerFrame click should target player");
+    }
+}
+
+#[test]
+fn blizzard_party_member_frame_click_targets_party1() {
+    test_timeout! {
+        let env = env_with_full_ui();
+        install_test_error_handler(&env);
+        env.exec("ClearTarget()").expect("ClearTarget");
+
+        env.exec(r#"
+        A_Admin.SetPartySize(1)
+        A_Admin.SetPartyMember(1, "Healer", 5, 80)
+        if PartyFrame and PartyFrame.UpdatePartyFrames then
+            pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+        end
+
+        local member
+        if PartyFrame and PartyFrame.PartyMemberFramePool then
+            for frame in PartyFrame.PartyMemberFramePool:EnumerateActive() do
+                if frame.unitToken == "party1" then
+                    member = frame
+                    break
+                end
+            end
+        end
+
+        assert(member, "party1 member frame should be active")
+        local handler = member:GetScript("OnClick")
+        assert(handler, "party1 member frame should have an OnClick handler")
+        handler(member, "LeftButton", false)
+    "#)
+        .expect("click party1 member frame");
+
+        let fatal_errors: Vec<String> = drain_test_errors(&env)
+            .into_iter()
+            .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
+            .collect();
+        assert!(
+            fatal_errors.is_empty(),
+            "party member click errors:\n{}",
+            fatal_errors.join("\n")
+        );
+
+        let target_name: String = env.eval("return UnitName('target')").unwrap();
+        assert_eq!(target_name, "Healer", "party member click should target party1");
+    }
+}
+
+#[test]
 fn blizzard_secure_action_button_click_casts_spell() {
     test_timeout! {
         let env = env_with_full_ui();

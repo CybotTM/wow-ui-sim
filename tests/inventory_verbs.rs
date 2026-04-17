@@ -92,6 +92,32 @@ fn pickup_merchant_item_synthesizes_item_on_cursor() {
     ));
 }
 
+#[test]
+fn cursor_has_item_tracks_item_cursor_only() {
+    let env = env();
+
+    let empty: bool = env.eval("return CursorHasItem()").unwrap();
+    assert!(!empty, "empty cursor should not report an item");
+
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 100,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+    let item: bool = env.eval("return CursorHasItem()").unwrap();
+    assert!(item, "item cursor should report true");
+
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Spell { spell_id: 12345 });
+    }
+    let spell: bool = env.eval("return CursorHasItem()").unwrap();
+    assert!(!spell, "spell cursor should not report true");
+}
+
 // ── EquipCursorItem ───────────────────────────────────────────────────────────
 
 #[test]
