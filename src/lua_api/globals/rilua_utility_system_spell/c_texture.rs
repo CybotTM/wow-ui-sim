@@ -84,30 +84,24 @@ fn fill_atlas_info_table(
     set_str_static(state, info_ref, "elementName", atlas_name);
     set_num_static(state, info_ref, "width", lookup.width() as f64);
     set_num_static(state, info_ref, "height", lookup.height() as f64);
-    set_num_static(
-        state,
-        info_ref,
-        "leftTexCoord",
-        lookup.info.left_tex_coord as f64,
-    );
-    set_num_static(
-        state,
-        info_ref,
-        "rightTexCoord",
-        lookup.info.right_tex_coord as f64,
-    );
-    set_num_static(
-        state,
-        info_ref,
-        "topTexCoord",
-        lookup.info.top_tex_coord as f64,
-    );
-    set_num_static(
-        state,
-        info_ref,
-        "bottomTexCoord",
-        lookup.info.bottom_tex_coord as f64,
-    );
+    fill_atlas_tex_coords(state, info_ref, lookup);
+    fill_atlas_tile_flags(state, info_ref, lookup);
+    set_str_static(state, info_ref, "filename", lookup.info.file);
+}
+
+fn fill_atlas_tex_coords(state: &mut LuaState, info_ref: GcRef<Table>, lookup: &AtlasLookup) {
+    let coords: [(&'static str, f32); 4] = [
+        ("leftTexCoord", lookup.info.left_tex_coord),
+        ("rightTexCoord", lookup.info.right_tex_coord),
+        ("topTexCoord", lookup.info.top_tex_coord),
+        ("bottomTexCoord", lookup.info.bottom_tex_coord),
+    ];
+    for (key, value) in coords {
+        set_num_static(state, info_ref, key, value as f64);
+    }
+}
+
+fn fill_atlas_tile_flags(state: &mut LuaState, info_ref: GcRef<Table>, lookup: &AtlasLookup) {
     set_bool_static(
         state,
         info_ref,
@@ -120,7 +114,6 @@ fn fill_atlas_info_table(
         "tilesVertically",
         lookup.info.tiles_vertically,
     );
-    set_str_static(state, info_ref, "filename", lookup.info.file);
 }
 
 fn attach_raw_size(state: &mut LuaState, info_ref: GcRef<Table>, raw_size: Val) {
