@@ -365,6 +365,8 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
 static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     // C_AuctionHouse
     ("C_AuctionHouse", "GetBrowseResults", stub_empty_table),
+    // C_CinematicList
+    ("C_CinematicList", "GetUICinematicList", stub_empty_table),
     // C_ClassTalents
     ("C_ClassTalents", "GetConfigIDsBySpecID", stub_empty_table),
     // C_Club
