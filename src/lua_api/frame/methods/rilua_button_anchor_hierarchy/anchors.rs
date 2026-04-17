@@ -422,43 +422,47 @@ fn validate_and_apply_set_point(
 
 /// SetAllPoints([relativeTo])
 pub(super) fn set_all_points(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::rilua_methods::extract_frame_id;
     let id = frame_id_from_stack(state, 1)?;
     let arg = stack_val(state, 2);
     if arg == Val::Bool(false) {
         return Ok(0);
     }
-    let relative_to_id: Option<usize> = if extract_frame_id(state, arg).is_some() {
-        extract_frame_id(state, arg).map(|rid| rid as usize)
-    } else {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|f| f.parent_id)
-            .map(|p| p as usize)
-    };
+    let relative_to_id = resolve_set_all_points_target(state, id, arg)?;
     let mut sim = borrow_state_mut(state)?;
     sim.widgets.remove_all_anchor_dependents_for(id);
     if let Some(rel_id) = relative_to_id {
         sim.widgets.add_anchor_dependent(rel_id as u64, id);
     }
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.clear_all_points();
-        frame.set_point(
-            crate::widget::AnchorPoint::TopLeft,
-            relative_to_id,
-            crate::widget::AnchorPoint::TopLeft,
-            0.0,
-            0.0,
-        );
-        frame.set_point(
-            crate::widget::AnchorPoint::BottomRight,
-            relative_to_id,
-            crate::widget::AnchorPoint::BottomRight,
-            0.0,
-            0.0,
-        );
+        anchor_frame_to_all_corners(frame, relative_to_id);
     }
     sim.widgets.mark_rect_dirty(id);
     Ok(0)
+}
+
+fn resolve_set_all_points_target(
+    state: &mut LuaState,
+    id: u64,
+    arg: Val,
+) -> LuaResult<Option<usize>> {
+    use crate::lua_api::rilua_methods::extract_frame_id;
+    if let Some(rid) = extract_frame_id(state, arg) {
+        return Ok(Some(rid as usize));
+    }
+    let sim = borrow_state(state)?;
+    Ok(sim
+        .widgets
+        .get(id)
+        .and_then(|f| f.parent_id)
+        .map(|p| p as usize))
+}
+
+fn anchor_frame_to_all_corners(frame: &mut crate::widget::Frame, relative_to_id: Option<usize>) {
+    frame.clear_all_points();
+    for corner in [
+        crate::widget::AnchorPoint::TopLeft,
+        crate::widget::AnchorPoint::BottomRight,
+    ] {
+        frame.set_point(corner, relative_to_id, corner, 0.0, 0.0);
+    }
 }
