@@ -670,7 +670,7 @@ fn test_create_frame_from_xml_inline_register_for_drag_runs() {
         .find_map(|id| {
             state
                 .widgets
-                .get(*id)
+                .get(id)
                 .filter(|frame| frame.name.as_deref() == Some("XmlInlineRegisterDragButton"))
         })
         .expect("button should exist");
@@ -697,25 +697,6 @@ fn test_create_frame_from_xml_inline_set_alpha_runs() {
         .eval("return XmlInlineSetAlphaFrame:GetAlpha()")
         .unwrap();
     assert_eq!(alpha, 0.0);
-}
-
-#[test]
-fn test_create_frame_from_xml_inline_set_checked_runs() {
-    clear_templates();
-    let env = WowLuaEnv::new().unwrap();
-
-    create_first_frame(
-        &env,
-        r#"<Ui><CheckButton name="XmlInlineSetCheckedButton" parent="UIParent">
-        <Scripts><OnLoad>self:SetChecked(false)</OnLoad></Scripts>
-    </CheckButton></Ui>"#,
-        "CheckButton",
-    );
-
-    let checked: bool = env
-        .eval("return XmlInlineSetCheckedButton:GetChecked() == true")
-        .unwrap();
-    assert!(!checked);
 }
 
 #[test]

@@ -646,7 +646,6 @@ enum FastHandlerRef<'a> {
     },
     RegisterForDrag(&'a str),
     SetAlpha(f64),
-    SetChecked(bool),
     SetFrameLevelFromParent(i32),
     AssignAncestorRef {
         field: &'a str,
@@ -964,25 +963,6 @@ fn build_set_alpha_handler(state: &mut LuaState, alpha: f64) -> LuaResult<Val> {
     )
 }
 
-fn build_set_checked_handler(state: &mut LuaState, checked: bool) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
-        state,
-        r#"
-            local checked = ...
-            return function(self, ...)
-                self:SetChecked(checked)
-            end
-        "#,
-        "template-set-checked",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[Val::Bool(checked)],
-    )
-}
-
 fn build_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
@@ -1041,7 +1021,6 @@ fn build_fast_handler(
             build_register_for_drag_handler(state, button).map(Some)
         }
         FastHandlerRef::SetAlpha(alpha) => build_set_alpha_handler(state, alpha).map(Some),
-        FastHandlerRef::SetChecked(checked) => build_set_checked_handler(state, checked).map(Some),
         FastHandlerRef::SetFrameLevelFromParent(delta) => {
             build_set_frame_level_from_parent_handler(state, delta).map(Some)
         }
@@ -1363,9 +1342,6 @@ fn parse_inline_fast_handler<'a>(
     if let Some(alpha) = parse_inline_set_alpha(stmt) {
         return Some(FastHandlerRef::SetAlpha(alpha));
     }
-    if let Some(checked) = parse_inline_set_checked(stmt) {
-        return Some(FastHandlerRef::SetChecked(checked));
-    }
     if let Some(delta) = parse_inline_set_frame_level_from_parent(stmt) {
         return Some(FastHandlerRef::SetFrameLevelFromParent(delta));
     }
@@ -1509,18 +1485,6 @@ fn parse_inline_set_alpha(stmt: &str) -> Option<f64> {
         .trim()
         .parse::<f64>()
         .ok()
-}
-
-fn parse_inline_set_checked(stmt: &str) -> Option<bool> {
-    match stmt
-        .strip_prefix("self:SetChecked(")?
-        .strip_suffix(')')?
-        .trim()
-    {
-        "true" => Some(true),
-        "false" => Some(false),
-        _ => None,
-    }
 }
 
 fn parse_inline_set_frame_level_from_parent(stmt: &str) -> Option<i32> {
