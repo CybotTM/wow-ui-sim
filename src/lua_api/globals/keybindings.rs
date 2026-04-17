@@ -10,11 +10,372 @@
 //! shadow base bindings during lookup and are matched by WoW's
 //! `GetBindingAction(key, checkOverride=true)` / `GetBindingKey`
 //! semantics.
+//!
+//! `init_keybindings` / `dispatch_key_binding` are called by the key
+//! dispatch module to seed default bindings and execute bound actions.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::{FromStack, IntoStack};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+
+// ── Binding action registry ───────────────────────────────────────────────────
+
+/// A binding action definition: action name → the Lua statement(s) to execute.
+pub struct BindingAction {
+    pub action: &'static str,
+    pub lua_code: &'static str,
+}
+
+/// A default key→action assignment seeded into `SimState.keybindings` on init.
+struct DefaultKey {
+    key: &'static str,
+    action: &'static str,
+}
+
+/// Full set of binding actions (mirrors master `keybindings.rs`).
+pub const BINDING_ACTIONS: &[BindingAction] = &[
+    BindingAction {
+        action: "TOGGLEGAMEMENU",
+        lua_code: "ToggleGameMenu()",
+    },
+    BindingAction {
+        action: "TOGGLEBACKPACK",
+        lua_code: "ToggleBackpack()",
+    },
+    BindingAction {
+        action: "TOGGLEBAG1",
+        lua_code: "ToggleBag(4)",
+    },
+    BindingAction {
+        action: "TOGGLEBAG2",
+        lua_code: "ToggleBag(3)",
+    },
+    BindingAction {
+        action: "TOGGLEBAG3",
+        lua_code: "ToggleBag(2)",
+    },
+    BindingAction {
+        action: "TOGGLEBAG4",
+        lua_code: "ToggleBag(1)",
+    },
+    BindingAction {
+        action: "OPENALLBAGS",
+        lua_code: "ToggleAllBags()",
+    },
+    BindingAction {
+        action: "TOGGLECHARACTER0",
+        lua_code: "ToggleCharacter(\"PaperDollFrame\")",
+    },
+    BindingAction {
+        action: "TOGGLECHARACTER2",
+        lua_code: "ToggleCharacter(\"ReputationFrame\")",
+    },
+    BindingAction {
+        action: "TOGGLESPELLBOOK",
+        lua_code: "PlayerSpellsUtil.ToggleSpellBookFrame()",
+    },
+    BindingAction {
+        action: "TOGGLETALENTS",
+        lua_code: "PlayerSpellsUtil.ToggleClassTalentFrame()",
+    },
+    BindingAction {
+        action: "TOGGLEACHIEVEMENT",
+        lua_code: "ToggleAchievementFrame()",
+    },
+    BindingAction {
+        action: "TOGGLEGROUPFINDER",
+        lua_code: "if not PVEFrame_ToggleFrame then LoadAddOn('Blizzard_GroupFinder') end if PVEFrame_ToggleFrame then PVEFrame_ToggleFrame() end",
+    },
+    BindingAction {
+        action: "TOGGLECOLLECTIONS",
+        lua_code: "ToggleCollectionsJournal()",
+    },
+    BindingAction {
+        action: "TOGGLEENCOUNTERJOURNAL",
+        lua_code: "ToggleEncounterJournal()",
+    },
+    BindingAction {
+        action: "TOGGLEWORLDMAP",
+        lua_code: "ToggleWorldMap()",
+    },
+    BindingAction {
+        action: "TOGGLESOCIAL",
+        lua_code: "if not ToggleFriendsFrame then LoadAddOn('Blizzard_FriendsFrame') end if ToggleFriendsFrame then ToggleFriendsFrame() end",
+    },
+    BindingAction {
+        action: "TOGGLEGUILDTAB",
+        lua_code: "ToggleGuildFrame()",
+    },
+    BindingAction {
+        action: "TOGGLEQUESTLOG",
+        lua_code: "ToggleQuestLog()",
+    },
+    BindingAction {
+        action: "TARGETSELF",
+        lua_code: "TargetUnit('player')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER1",
+        lua_code: "TargetUnit('party1')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER2",
+        lua_code: "TargetUnit('party2')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER3",
+        lua_code: "TargetUnit('party3')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER4",
+        lua_code: "TargetUnit('party4')",
+    },
+    BindingAction {
+        action: "TARGETNEARESTENEMY",
+        lua_code: "TargetUnit('enemy1')",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON1",
+        lua_code: "ActionButtonDown(1) UseAction(1) ActionButtonUp(1)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON2",
+        lua_code: "ActionButtonDown(2) UseAction(2) ActionButtonUp(2)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON3",
+        lua_code: "ActionButtonDown(3) UseAction(3) ActionButtonUp(3)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON4",
+        lua_code: "ActionButtonDown(4) UseAction(4) ActionButtonUp(4)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON5",
+        lua_code: "ActionButtonDown(5) UseAction(5) ActionButtonUp(5)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON6",
+        lua_code: "ActionButtonDown(6) UseAction(6) ActionButtonUp(6)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON7",
+        lua_code: "ActionButtonDown(7) UseAction(7) ActionButtonUp(7)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON8",
+        lua_code: "ActionButtonDown(8) UseAction(8) ActionButtonUp(8)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON9",
+        lua_code: "ActionButtonDown(9) UseAction(9) ActionButtonUp(9)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON10",
+        lua_code: "ActionButtonDown(10) UseAction(10) ActionButtonUp(10)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON11",
+        lua_code: "ActionButtonDown(11) UseAction(11) ActionButtonUp(11)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON12",
+        lua_code: "ActionButtonDown(12) UseAction(12) ActionButtonUp(12)",
+    },
+    // Simulator-only bindings
+    BindingAction {
+        action: "TOGGLESIMCOMMANDS",
+        lua_code: "if SimCommands then SimCommands:Toggle() end",
+    },
+];
+
+/// Default key→action assignments seeded by `init_keybindings`.
+const DEFAULT_KEYS: &[DefaultKey] = &[
+    DefaultKey {
+        key: "BACKSPACE",
+        action: "TOGGLEBACKPACK",
+    },
+    DefaultKey {
+        key: "F8",
+        action: "TOGGLEBAG1",
+    },
+    DefaultKey {
+        key: "F9",
+        action: "TOGGLEBAG2",
+    },
+    DefaultKey {
+        key: "F10",
+        action: "TOGGLEBAG3",
+    },
+    DefaultKey {
+        key: "F11",
+        action: "TOGGLEBAG4",
+    },
+    DefaultKey {
+        key: "B",
+        action: "OPENALLBAGS",
+    },
+    DefaultKey {
+        key: "C",
+        action: "TOGGLECHARACTER0",
+    },
+    DefaultKey {
+        key: "U",
+        action: "TOGGLECHARACTER2",
+    },
+    DefaultKey {
+        key: "S",
+        action: "TOGGLESPELLBOOK",
+    },
+    DefaultKey {
+        key: "N",
+        action: "TOGGLETALENTS",
+    },
+    DefaultKey {
+        key: "A",
+        action: "TOGGLEACHIEVEMENT",
+    },
+    DefaultKey {
+        key: "L",
+        action: "TOGGLEGROUPFINDER",
+    },
+    DefaultKey {
+        key: "O",
+        action: "TOGGLESOCIAL",
+    },
+    DefaultKey {
+        key: "J",
+        action: "TOGGLEGUILDTAB",
+    },
+    DefaultKey {
+        key: "M",
+        action: "TOGGLEWORLDMAP",
+    },
+    DefaultKey {
+        key: "F1",
+        action: "TARGETSELF",
+    },
+    DefaultKey {
+        key: "F2",
+        action: "TARGETPARTYMEMBER1",
+    },
+    DefaultKey {
+        key: "F3",
+        action: "TARGETPARTYMEMBER2",
+    },
+    DefaultKey {
+        key: "F4",
+        action: "TARGETPARTYMEMBER3",
+    },
+    DefaultKey {
+        key: "F5",
+        action: "TARGETPARTYMEMBER4",
+    },
+    DefaultKey {
+        key: "F6",
+        action: "TARGETNEARESTENEMY",
+    },
+    DefaultKey {
+        key: "TAB",
+        action: "TARGETNEARESTENEMY",
+    },
+    DefaultKey {
+        key: "1",
+        action: "ACTIONBUTTON1",
+    },
+    DefaultKey {
+        key: "2",
+        action: "ACTIONBUTTON2",
+    },
+    DefaultKey {
+        key: "3",
+        action: "ACTIONBUTTON3",
+    },
+    DefaultKey {
+        key: "4",
+        action: "ACTIONBUTTON4",
+    },
+    DefaultKey {
+        key: "5",
+        action: "ACTIONBUTTON5",
+    },
+    DefaultKey {
+        key: "6",
+        action: "ACTIONBUTTON6",
+    },
+    DefaultKey {
+        key: "7",
+        action: "ACTIONBUTTON7",
+    },
+    DefaultKey {
+        key: "8",
+        action: "ACTIONBUTTON8",
+    },
+    DefaultKey {
+        key: "9",
+        action: "ACTIONBUTTON9",
+    },
+    DefaultKey {
+        key: "0",
+        action: "ACTIONBUTTON10",
+    },
+    DefaultKey {
+        key: "-",
+        action: "ACTIONBUTTON11",
+    },
+    DefaultKey {
+        key: "=",
+        action: "ACTIONBUTTON12",
+    },
+    DefaultKey {
+        key: "CTRL-P",
+        action: "TOGGLESIMCOMMANDS",
+    },
+];
+
+/// Seed `SimState.keybindings` with the simulator's default key→action table.
+///
+/// Must be called once after the env is constructed. Idempotent if called
+/// again (duplicate `set` calls for the same key overwrite cleanly).
+pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
+    for dk in DEFAULT_KEYS {
+        state.keybindings.set(dk.key, dk.action);
+    }
+}
+
+/// Look up `key` in the binding registry and execute the bound Lua code.
+///
+/// Lookup priority:
+/// 1. `SimState.keybindings` — user-set bindings (via `SetBinding`), which
+///    also holds overrides. Shadows the defaults for the matched key.
+/// 2. `DEFAULT_KEYS` — simulator defaults; NOT stored in `SimState` so they
+///    do not inflate `GetNumBindings`.
+///
+/// Returns `true` if a binding was found and executed, `false` otherwise.
+pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bool> {
+    let user_action = borrow_state(lua.state_mut())?
+        .keybindings
+        .action_for_key(key);
+    let action = if !user_action.is_empty() {
+        user_action
+    } else {
+        DEFAULT_KEYS
+            .iter()
+            .find(|dk| dk.key == key)
+            .map(|dk| dk.action.to_string())
+            .unwrap_or_default()
+    };
+    if action.is_empty() {
+        return Ok(false);
+    }
+    let Some(ba) = BINDING_ACTIONS.iter().find(|b| b.action == action) else {
+        return Ok(false);
+    };
+    eprintln!("[keybind] {} → {} → {}", key, action, ba.lua_code);
+    lua.exec(ba.lua_code)?;
+    Ok(true)
+}
 
 fn push_opt_string(state: &mut LuaState, val: Option<String>) {
     match val {

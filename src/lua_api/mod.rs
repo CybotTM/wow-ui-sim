@@ -13,6 +13,7 @@ pub(crate) mod frame;
 pub(crate) mod frame_substates;
 pub(crate) mod game_data;
 pub mod globals;
+mod key_dispatch;
 mod layout;
 pub(crate) mod loader_env;
 pub mod message_frame;

@@ -387,10 +387,6 @@ impl WowLuaEnv {
         self.rilua()
     }
 
-    pub fn send_key_press(&self, _key: &str, _text: Option<&str>) -> Result<()> {
-        Ok(())
-    }
-
     /// Execute Lua code with a custom chunk name (for better error messages and debugstack).
     pub fn exec_named(&self, code: &str, name: &str) -> Result<()> {
         self.exec_rilua_named(code, name)?;
