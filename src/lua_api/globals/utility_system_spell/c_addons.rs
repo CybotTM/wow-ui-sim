@@ -1,6 +1,7 @@
 //! C_AddOns, legacy addon globals, and LoadAddOn implementation.
 
 use crate::lua_api::LoaderEnv;
+use crate::loader::LoadError;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, registry_get,
     registry_set, state_handle, val_to_string,
@@ -9,6 +10,7 @@ use crate::lua_bridge::{stack_val, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::path::PathBuf;
+use std::{collections::HashSet, io};
 
 use super::set_global_val;
 
@@ -413,19 +415,84 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
     if with_addon(state, stack_val(state, 1), |a| a.loaded).unwrap_or(false) {
         return push_load_result(state, true, None);
     }
-    let Some(toc_path) = find_runtime_addon_toc(state, &addon_name) else {
-        return push_load_result(state, false, Some("MISSING"));
-    };
     let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
-    match crate::loader::load_addon(&loader_env, &toc_path) {
-        Ok(_) => {
-            mark_addon_loaded(&loader_env, &addon_name);
-            let addon_name_val = create_string(state, &addon_name);
-            let _ = loader_env.fire_event_with_args("ADDON_LOADED", &[addon_name_val]);
-            push_load_result(state, true, None)
-        }
+    let mut loading = HashSet::new();
+    match load_runtime_addon_recursive(state, &loader_env, &addon_name, &mut loading) {
+        Ok(()) => push_load_result(state, true, None),
         Err(error) => push_load_result(state, false, Some(&error.to_string())),
     }
+}
+
+fn load_runtime_addon_recursive(
+    state: &mut LuaState,
+    loader_env: &LoaderEnv<'_>,
+    addon_name: &str,
+    loading: &mut HashSet<String>,
+) -> Result<(), LoadError> {
+    if is_addon_loaded_by_name(state, addon_name) {
+        return Ok(());
+    }
+    if !loading.insert(addon_name.to_string()) {
+        return Ok(());
+    }
+
+    let result = load_runtime_addon_with_dependencies(state, loader_env, addon_name, loading);
+    loading.remove(addon_name);
+    result
+}
+
+fn load_runtime_addon_with_dependencies(
+    state: &mut LuaState,
+    loader_env: &LoaderEnv<'_>,
+    addon_name: &str,
+    loading: &mut HashSet<String>,
+) -> Result<(), LoadError> {
+    let toc_path = find_runtime_addon_toc(state, addon_name)
+        .ok_or_else(|| missing_runtime_addon_error(addon_name))?;
+    let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
+
+    for dependency in runtime_addon_dependencies(state, &toc) {
+        load_runtime_addon_recursive(state, loader_env, &dependency, loading)?;
+    }
+
+    crate::loader::load_addon_from_toc(loader_env, &toc)?;
+    mark_addon_loaded(loader_env, addon_name);
+    fire_addon_loaded(state, loader_env, addon_name);
+    Ok(())
+}
+
+fn runtime_addon_dependencies(state: &LuaState, toc: &crate::toc::TocFile) -> Vec<String> {
+    let mut deps = toc.dependencies();
+    for dep in toc.optional_deps() {
+        if find_runtime_addon_toc(state, &dep).is_some() && !deps.contains(&dep) {
+            deps.push(dep);
+        }
+    }
+    deps
+}
+
+fn is_addon_loaded_by_name(state: &LuaState, addon_name: &str) -> bool {
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| {
+            sim.addons
+                .iter()
+                .find(|addon| addon.folder_name == addon_name)
+                .map(|addon| addon.loaded)
+        })
+        .unwrap_or(false)
+}
+
+fn missing_runtime_addon_error(addon_name: &str) -> LoadError {
+    LoadError::Io(io::Error::new(
+        io::ErrorKind::NotFound,
+        format!("runtime addon not found: {addon_name}"),
+    ))
+}
+
+fn fire_addon_loaded(state: &mut LuaState, loader_env: &LoaderEnv<'_>, addon_name: &str) {
+    let addon_name_val = create_string(state, addon_name);
+    let _ = loader_env.fire_event_with_args("ADDON_LOADED", &[addon_name_val]);
 }
 
 fn mark_addon_loaded(loader_env: &LoaderEnv, addon_name: &str) {
