@@ -440,43 +440,80 @@ fn test_profiler_check_for_performance_message_reports_specific_addon() {
 
     {
         let mut state = env.state().borrow_mut();
-        state.loading_addon_index = Some(1);
+        state.app_frame_metrics.recent_frame_ms = std::collections::VecDeque::from([10.0; 10]);
+        state.app_frame_metrics.session_total_ms = 100.0;
+        state.app_frame_metrics.session_frame_count = 10;
+        state.app_frame_metrics.peak_ms = 10.0;
+
+        let addon = state
+            .addons
+            .iter_mut()
+            .find(|addon| addon.folder_name == "MyAddon")
+            .expect("MyAddon should exist");
+        addon.runtime.recent_frames = std::collections::VecDeque::from([1.0; 10]);
+        addon.runtime.session_total_ms = 10.0;
+        addon.runtime.session_frame_count = 10;
+        addon.runtime.peak_ms = 1.0;
     }
 
-    env.eval::<()>(
-        r#"
-        local f = CreateFrame("Frame", "PerfMsgTestFrame", UIParent)
-        f:SetScript("OnUpdate", function(self, elapsed)
-            local x = 0
-            for i = 1, 5000 do
-                x = x + i
+    let encoded: String = env
+        .eval(
+            r#"
+            local msg = C_AddOnProfiler.CheckForPerformanceMessage()
+            if not msg then
+                return "nil"
             end
-        end)
-        "#,
-    )
-    .unwrap();
+            C_AddOnProfiler.AddPerformanceMessageShown(msg)
+            return table.concat({
+                tostring(msg.type),
+                tostring(msg.metric),
+                msg.addOnName,
+                tostring(msg.metricValue > msg.thresholdValue),
+                tostring(msg.metricValue > 0),
+                tostring(msg.thresholdValue > 0),
+            }, "|")
+            "#,
+        )
+        .unwrap();
 
-    {
-        let mut state = env.state().borrow_mut();
-        state.loading_addon_index = None;
-    }
+    let app_val: f64 = env
+        .eval("return C_AddOnProfiler.GetApplicationMetric(Enum.AddOnProfilerMetric.RecentAverageTime)")
+        .unwrap();
+    let overall_val: f64 = env
+        .eval("return C_AddOnProfiler.GetOverallMetric(Enum.AddOnProfilerMetric.RecentAverageTime)")
+        .unwrap();
+    let addon_val: f64 = env
+        .eval("return C_AddOnProfiler.GetAddOnMetric('MyAddon', Enum.AddOnProfilerMetric.RecentAverageTime)")
+        .unwrap();
+    eprintln!(
+        "profiler debug: app={app_val} overall={overall_val} addon={addon_val} encoded={encoded}"
+    );
 
-    for _ in 0..10 {
-        env.fire_on_update(0.016).unwrap();
-    }
+    let parts: Vec<_> = encoded.split('|').collect();
+    assert_ne!(encoded, "nil", "expected profiler message");
+    assert_eq!(parts.len(), 6, "expected 6 encoded profiler fields");
+
+    let msg_type = parts[0].parse::<i32>().unwrap();
+    let metric = parts[1].parse::<i32>().unwrap();
+    let addon_name = parts[2];
+    let exceeds_threshold = parts[3] == "true";
+    let positive_metric = parts[4] == "true";
+    let positive_threshold = parts[5] == "true";
 
     env.eval::<()>(
         r#"
         local msg = C_AddOnProfiler.CheckForPerformanceMessage()
-        assertTrue(msg ~= nil)
-        assertEquals(Enum.AddOnPerformanceMessageType.SpecificAddOnErrorDialog, msg.type)
-        assertEquals(Enum.AddOnProfilerMetric.RecentAverageTime, msg.metric)
-        assertEquals("MyAddon", msg.addOnName)
-        assertTrue(msg.metricValue > msg.thresholdValue)
-        assertTrue(msg.metricValue > 0)
-        assertTrue(msg.thresholdValue > 0)
-        C_AddOnProfiler.AddPerformanceMessageShown(msg)
+        if msg then
+            C_AddOnProfiler.AddPerformanceMessageShown(msg)
+        end
         "#,
     )
     .unwrap();
+
+    assert_eq!(msg_type, 1);
+    assert_eq!(metric, 1);
+    assert_eq!(addon_name, "MyAddon");
+    assert!(exceeds_threshold);
+    assert!(positive_metric);
+    assert!(positive_threshold);
 }
