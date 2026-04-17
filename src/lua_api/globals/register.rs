@@ -95,6 +95,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::faction_probes::register_all(lua)?;
     super::gossip_probes::register_all(lua)?;
     super::social_probes::register_all(lua)?;
+    super::torghast::register_all(lua)?;
     super::instance_info::register_all(lua)?;
     super::guild_probes::register_all(lua)?;
     super::voice_chat_probes::register_all(lua)?;

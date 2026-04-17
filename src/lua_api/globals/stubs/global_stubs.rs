@@ -93,7 +93,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     // loot_method.rs, not stubs.
     "HasNewMail",
     "InCinematic",
-    "IsOnGroundFloorInJailersTower",
+    // IsOnGroundFloorInJailersTower is SimState-backed in torghast.rs, not a stub.
     "IsInCinematicScene",
     // IsShiftKeyDown is SimState-backed in modifier_keys.rs, not a stub.
     "IsThreatWarningEnabled",

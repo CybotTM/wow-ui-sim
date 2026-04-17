@@ -86,6 +86,7 @@ pub mod stubs;
 pub mod system_api_runtime;
 pub mod talent_spec_probes;
 pub mod targeting_verbs;
+pub mod torghast;
 pub mod template;
 pub mod trade_verbs;
 pub mod unit_api;

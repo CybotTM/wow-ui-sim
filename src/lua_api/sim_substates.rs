@@ -6,7 +6,7 @@
 //! API surface for each struct is defined by `A_Admin.Set*` setters
 //! and the corresponding `C_*`/global probes in `lua_api::globals`.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// Simulated network statistics returned by `GetNetStats()`.
 ///
@@ -86,11 +86,103 @@ pub struct GameRuleValue {
 /// other values return 0. `battle_state` mirrors
 /// `Enum.PetbattleState` — default 0 (`PVEInvitationSent` / "no active
 /// battle"). Non-zero = some battle phase is active.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+///
+/// Extended fields back the full 15-method C_PetBattles surface: per-side
+/// active-pet index, per-pet stat records, round timing, turn result, and
+/// PvP matchmaking flag.
+#[derive(Debug, Clone, PartialEq)]
 pub struct PetBattleState {
     pub num_pets_player: i32,
     pub num_pets_enemy: i32,
     pub battle_state: i32,
+    /// 1-based active pet slot for the player side.
+    pub active_pet_player: i32,
+    /// 1-based active pet slot for the enemy side.
+    pub active_pet_enemy: i32,
+    /// Pets on the player's side (up to 3).
+    pub player_pets: Vec<PetBattlePet>,
+    /// Pets on the enemy's side (up to 3).
+    pub enemy_pets: Vec<PetBattlePet>,
+    /// Milliseconds left in the current round (0 = no round active).
+    pub round_time_left_ms: f64,
+    /// Total duration of a round in milliseconds.
+    pub round_time_ms: f64,
+    /// Last-turn result code (0 = not set / in-progress).
+    pub turn_result: i32,
+    /// Whether StartPVPMatchmaking has been called without a cancellation.
+    pub is_matchmaking: bool,
+}
+
+impl Default for PetBattleState {
+    fn default() -> Self {
+        Self {
+            num_pets_player: 1,
+            num_pets_enemy: 1,
+            battle_state: 0,
+            active_pet_player: 1,
+            active_pet_enemy: 1,
+            player_pets: vec![PetBattlePet::default_player()],
+            enemy_pets: vec![PetBattlePet::default_enemy()],
+            round_time_left_ms: 0.0,
+            round_time_ms: 30_000.0,
+            turn_result: 0,
+            is_matchmaking: false,
+        }
+    }
+}
+
+/// Stats and ability list for a single pet in a pet battle.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PetBattlePet {
+    pub name: String,
+    pub species_id: i32,
+    pub level: i32,
+    pub max_health: i32,
+    pub current_health: i32,
+    pub power: i32,
+    pub speed: i32,
+    /// Enum.BattlePetType — 1 = Humanoid, 2 = Dragonkin, …
+    pub pet_type: i32,
+    /// Ability IDs available to this pet (up to 6).
+    pub ability_ids: Vec<i32>,
+    /// Current XP for this pet.
+    pub xp: i32,
+    /// Max XP until next level.
+    pub max_xp: i32,
+}
+
+impl PetBattlePet {
+    pub fn default_player() -> Self {
+        Self {
+            name: "Squirrel".into(),
+            species_id: 1,
+            level: 1,
+            max_health: 289,
+            current_health: 289,
+            power: 10,
+            speed: 20,
+            pet_type: 1,
+            ability_ids: vec![110, 111, 112],
+            xp: 0,
+            max_xp: 100,
+        }
+    }
+
+    pub fn default_enemy() -> Self {
+        Self {
+            name: "Rabbit".into(),
+            species_id: 2,
+            level: 1,
+            max_health: 305,
+            current_health: 305,
+            power: 9,
+            speed: 22,
+            pet_type: 1,
+            ability_ids: vec![120, 121, 122],
+            xp: 0,
+            max_xp: 100,
+        }
+    }
 }
 
 /// Hunter / warlock pet state — drives the four legacy pet-stat
@@ -137,6 +229,24 @@ pub struct MessageLogEntry {
     pub target: String,
 }
 
+/// A member inside a simulated voice-chat channel.
+#[derive(Debug, Clone)]
+pub struct VoiceMember {
+    pub member_id: i32,
+    pub name: String,
+    pub is_active_speaker: bool,
+    pub volume: f64,
+}
+
+/// A simulated voice-chat channel with its member list.
+#[derive(Debug, Clone)]
+pub struct VoiceChannel {
+    pub channel_id: i32,
+    pub name: String,
+    pub channel_type: i32,
+    pub members: Vec<VoiceMember>,
+}
+
 /// Voice chat presentation state: volume sliders + mute/deafen flags.
 /// Volumes are `[0.0, 1.0]`. `headset_mode` reflects whether the
 /// headset-check confirmation dialog has been accepted.
@@ -159,10 +269,42 @@ pub struct VoiceChatState {
     /// Whether the local player is currently transmitting voice.
     /// Drives `VoiceChat_IsTalking`.
     pub talking: bool,
+    /// Simulated channel list. Drives `GetChannels`, `GetChannel`, etc.
+    pub channels: Vec<VoiceChannel>,
+    /// ID of the currently active channel, or None. Drives `GetActiveChannelID`.
+    pub active_channel_id: Option<i32>,
+    /// Connection status code (0=Disconnected, 1=Connecting, 2=Connected).
+    /// Drives `GetCurrentVoiceChatConnectionStatusCode`.
+    pub connection_status: i32,
+    /// Master volume scale `[0.0, 1.0]`. Drives `GetMasterVolumeScale`.
+    pub master_volume_scale: f64,
+    /// Whether parental controls have disabled voice chat.
+    /// Drives `IsParentalDisabled`.
+    pub is_parental_disabled: bool,
 }
 
 impl Default for VoiceChatState {
     fn default() -> Self {
+        let members = vec![
+            VoiceMember {
+                member_id: 1,
+                name: "Player1".to_string(),
+                is_active_speaker: true,
+                volume: 1.0,
+            },
+            VoiceMember {
+                member_id: 2,
+                name: "Player2".to_string(),
+                is_active_speaker: false,
+                volume: 0.8,
+            },
+        ];
+        let channels = vec![VoiceChannel {
+            channel_id: 1,
+            name: "Party".to_string(),
+            channel_type: 1,
+            members,
+        }];
         Self {
             microphone_volume: 1.0,
             output_volume: 1.0,
@@ -173,6 +315,11 @@ impl Default for VoiceChatState {
             using: false,
             connecting: false,
             talking: false,
+            channels,
+            active_channel_id: Some(1),
+            connection_status: 2,
+            master_volume_scale: 1.0,
+            is_parental_disabled: false,
         }
     }
 }
@@ -223,6 +370,15 @@ pub struct GossipState {
     pub options: Vec<GossipOption>,
     pub active_quests: Vec<GossipQuestRow>,
     pub available_quests: Vec<GossipQuestRow>,
+}
+
+/// Torghast (Jailer's Tower) run state.  Drives
+/// `IsOnGroundFloorInJailersTower()` — returns true when `active` and
+/// `floor == 1`.  Both default to false/0 (no active run).
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct TorghastState {
+    pub active: bool,
+    pub floor: i32,
 }
 
 /// Single reputation-tab row. Drives `GetFactionInfoByID(id)` and the
@@ -658,4 +814,112 @@ impl Default for WowLabsState {
             data_manager: WowLabsDataManagerState::default(),
         }
     }
+}
+
+/// Rich quest-log entry used by `C_QuestLog.*` probes.
+///
+/// Mirrors the fields needed by the 17 ported methods.  The
+/// `quest_log: Vec<u32>` in `SimState` is kept as the lightweight
+/// accept/abandon list for `quest_verbs.rs`; `quest_log_entries` carries
+/// the rich metadata for the probe surface.
+#[derive(Debug, Clone)]
+pub struct QuestLogEntry {
+    pub quest_id: i32,
+    pub title: String,
+    pub level: i32,
+    pub is_complete: bool,
+    pub is_failed: bool,
+    pub is_meta: bool,
+    pub is_world_quest: bool,
+    pub is_replayable: bool,
+    pub is_flagged_completed: bool,
+    pub map_id: Option<i32>,
+    /// Normalised map x/y (0.0–1.0).
+    pub waypoint: Option<(f64, f64)>,
+    /// `tagID` value for `GetQuestTagInfo`.
+    pub tag_id: Option<i32>,
+    /// Theme key returned by `GetQuestDetailsTheme`.
+    pub details_theme: Option<String>,
+}
+
+/// Backing state for `C_QuestLog.*` probes.
+#[derive(Debug, Clone, Default)]
+pub struct QuestLogState {
+    pub entries: Vec<QuestLogEntry>,
+    /// Quest IDs already turned in / permanently completed.
+    /// Drives `GetAllCompletedQuestIDs` and `IsQuestFlaggedCompleted`.
+    pub completed_quest_ids: HashSet<i32>,
+}
+
+impl QuestLogState {
+    pub fn seeded() -> Self {
+        let entries = vec![
+            QuestLogEntry {
+                quest_id: 80000,
+                title: "The Lost Expedition".into(),
+                level: 80,
+                is_complete: false,
+                is_failed: false,
+                is_meta: false,
+                is_world_quest: false,
+                is_replayable: false,
+                is_flagged_completed: false,
+                map_id: Some(2248),
+                waypoint: Some((0.45, 0.35)),
+                tag_id: Some(0),
+                details_theme: None,
+            },
+            QuestLogEntry {
+                quest_id: 80001,
+                title: "Defending the Gates".into(),
+                level: 80,
+                is_complete: true,
+                is_failed: false,
+                is_meta: false,
+                is_world_quest: false,
+                is_replayable: false,
+                is_flagged_completed: false,
+                map_id: Some(2248),
+                waypoint: None,
+                tag_id: Some(0),
+                details_theme: None,
+            },
+            QuestLogEntry {
+                quest_id: 90101,
+                title: "Earthen Relic Recovery".into(),
+                level: 80,
+                is_complete: false,
+                is_failed: false,
+                is_meta: false,
+                is_world_quest: true,
+                is_replayable: true,
+                is_flagged_completed: false,
+                map_id: Some(2248),
+                waypoint: Some((0.62, 0.58)),
+                tag_id: Some(2),
+                details_theme: None,
+            },
+        ];
+        let mut completed_quest_ids = HashSet::new();
+        completed_quest_ids.insert(79999);
+        completed_quest_ids.insert(80001);
+        Self {
+            entries,
+            completed_quest_ids,
+        }
+    }
+}
+
+/// Character-boost / trial service state.  Drives
+/// `C_CharacterServices.GetActiveCharacterUpgradeBoostType` and
+/// `C_CharacterServices.GetActiveClassTrialBoostType`.  Both default to
+/// `None` (no active service).
+#[derive(Debug, Default, Clone)]
+pub struct CharacterServicesState {
+    /// Active character-upgrade boost type id, or `None` when no boost
+    /// purchase is pending.  Retail values: 5 = Level-60 boost, etc.
+    pub active_upgrade_boost_type: Option<i32>,
+    /// Active class-trial boost type id, or `None` when no trial is
+    /// running.
+    pub active_class_trial_boost_type: Option<i32>,
 }

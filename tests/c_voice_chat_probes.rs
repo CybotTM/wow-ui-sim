@@ -1,0 +1,249 @@
+//! Tests for `C_VoiceChat` probes backed by `SimState.voice_chat`.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::VoiceChannel;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+// ── GetActiveChannelID ────────────────────────────────────────────────────────
+
+#[test]
+fn get_active_channel_id_returns_seeded_id() {
+    let env = env();
+    let id: i32 = env
+        .eval("return C_VoiceChat.GetActiveChannelID()")
+        .unwrap();
+    assert_eq!(id, 1);
+}
+
+#[test]
+fn get_active_channel_id_returns_nil_when_none() {
+    let env = env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.voice_chat.active_channel_id = None;
+    }
+    let count: i32 = env
+        .eval(
+            r#"
+            local function count(...)
+                return select('#', ...)
+            end
+            return count(C_VoiceChat.GetActiveChannelID())
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 1, "returns nil, not nothing");
+}
+
+// ── GetChannels ───────────────────────────────────────────────────────────────
+
+#[test]
+fn get_channels_returns_seeded_channel() {
+    let env = env();
+    let (count, channel_id): (i32, i32) = env
+        .eval(
+            r#"
+            local ch = C_VoiceChat.GetChannels()
+            return #ch, ch[1].channelID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 1);
+    assert_eq!(channel_id, 1);
+}
+
+#[test]
+fn get_channels_reflects_mutation() {
+    let env = env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.voice_chat.channels = vec![
+            VoiceChannel {
+                channel_id: 1,
+                name: "Party".into(),
+                channel_type: 1,
+                members: vec![],
+            },
+            VoiceChannel {
+                channel_id: 2,
+                name: "Guild".into(),
+                channel_type: 2,
+                members: vec![],
+            },
+        ];
+    }
+    let count: i32 = env
+        .eval("return #C_VoiceChat.GetChannels()")
+        .unwrap();
+    assert_eq!(count, 2);
+}
+
+// ── GetChannel ────────────────────────────────────────────────────────────────
+
+#[test]
+fn get_channel_returns_channel_for_valid_id() {
+    let env = env();
+    let name: String = env
+        .eval(
+            r#"
+            local ch = C_VoiceChat.GetChannel(1)
+            return ch.channelName
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Party");
+}
+
+#[test]
+fn get_channel_returns_nothing_for_invalid_id() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            local function count(...)
+                return select('#', ...)
+            end
+            return count(C_VoiceChat.GetChannel(999))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 0, "unknown channel = mayreturnnothing");
+}
+
+// ── GetCurrentVoiceChatConnectionStatusCode ───────────────────────────────────
+
+#[test]
+fn get_connection_status_returns_seeded_code() {
+    let env = env();
+    // Default seed: 2 = Connected
+    let code: i32 = env
+        .eval("return C_VoiceChat.GetCurrentVoiceChatConnectionStatusCode()")
+        .unwrap();
+    assert_eq!(code, 2);
+}
+
+#[test]
+fn get_connection_status_reflects_mutation() {
+    let env = env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.voice_chat.connection_status = 0;
+    }
+    let code: i32 = env
+        .eval("return C_VoiceChat.GetCurrentVoiceChatConnectionStatusCode()")
+        .unwrap();
+    assert_eq!(code, 0);
+}
+
+// ── GetMasterVolumeScale ──────────────────────────────────────────────────────
+
+#[test]
+fn get_master_volume_scale_returns_one_by_default() {
+    let env = env();
+    let scale: f64 = env
+        .eval("return C_VoiceChat.GetMasterVolumeScale()")
+        .unwrap();
+    assert!((scale - 1.0).abs() < 1e-6);
+}
+
+// ── GetMicrophoneVolume / GetOutputVolume ─────────────────────────────────────
+
+#[test]
+fn get_microphone_volume_returns_seeded_value() {
+    let env = env();
+    let vol: f64 = env
+        .eval("return C_VoiceChat.GetMicrophoneVolume()")
+        .unwrap();
+    assert!((vol - 1.0).abs() < 1e-6);
+}
+
+#[test]
+fn get_output_volume_returns_seeded_value() {
+    let env = env();
+    let vol: f64 = env
+        .eval("return C_VoiceChat.GetOutputVolume()")
+        .unwrap();
+    assert!((vol - 1.0).abs() < 1e-6);
+}
+
+// ── GetNumActiveChannels / GetNumMembers ──────────────────────────────────────
+
+#[test]
+fn get_num_active_channels_returns_one_by_default() {
+    let env = env();
+    let n: i32 = env
+        .eval("return C_VoiceChat.GetNumActiveChannels()")
+        .unwrap();
+    assert_eq!(n, 1);
+}
+
+#[test]
+fn get_num_members_returns_two_for_seeded_channel() {
+    let env = env();
+    let n: i32 = env
+        .eval("return C_VoiceChat.GetNumMembers(1)")
+        .unwrap();
+    assert_eq!(n, 2);
+}
+
+#[test]
+fn get_num_members_returns_zero_for_unknown_channel() {
+    let env = env();
+    let n: i32 = env
+        .eval("return C_VoiceChat.GetNumMembers(999)")
+        .unwrap();
+    assert_eq!(n, 0);
+}
+
+// ── IsDeafened / IsEnabled / IsMuted / IsParentalDisabled / IsTalking ─────────
+
+#[test]
+fn is_deafened_false_by_default() {
+    let env = env();
+    let v: bool = env.eval("return C_VoiceChat.IsDeafened()").unwrap();
+    assert!(!v);
+}
+
+#[test]
+fn is_enabled_true_by_default() {
+    let env = env();
+    let v: bool = env.eval("return C_VoiceChat.IsEnabled()").unwrap();
+    assert!(v);
+}
+
+#[test]
+fn is_muted_false_by_default() {
+    let env = env();
+    let v: bool = env.eval("return C_VoiceChat.IsMuted()").unwrap();
+    assert!(!v);
+}
+
+#[test]
+fn is_parental_disabled_false_by_default() {
+    let env = env();
+    let v: bool = env
+        .eval("return C_VoiceChat.IsParentalDisabled()")
+        .unwrap();
+    assert!(!v);
+}
+
+#[test]
+fn is_talking_false_by_default() {
+    let env = env();
+    let v: bool = env.eval("return C_VoiceChat.IsTalking()").unwrap();
+    assert!(!v);
+}
+
+#[test]
+fn is_muted_toggle() {
+    let env = env();
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.voice_chat.muted = true;
+    }
+    let v: bool = env.eval("return C_VoiceChat.IsMuted()").unwrap();
+    assert!(v);
+}
