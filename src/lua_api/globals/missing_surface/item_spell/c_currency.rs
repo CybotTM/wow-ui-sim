@@ -78,15 +78,49 @@ fn c_currency_get_coin_texture_string(state: &mut LuaState) -> LuaResult<u32> {
 
 fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
     let t = create_table(state);
+    write_currency_identity_fields(state, t, info);
+    write_currency_quantity_fields(state, t, info);
+    write_currency_flag_fields(state, t, info);
+    write_currency_weekly_fields(state, t, info);
+    write_currency_transfer_fields(state, t, info);
+    t
+}
+
+fn write_currency_identity_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
     let name = create_string(state, &info.name);
     let description = create_string(state, &info.description);
     table_set(state, t, "currencyID", Val::Num(info.currency_id as f64));
     table_set(state, t, "name", name);
     table_set(state, t, "description", description);
     table_set(state, t, "iconFileID", Val::Num(info.icon_file_id as f64));
+    table_set(state, t, "quality", Val::Num(info.quality as f64));
+    table_set(
+        state,
+        t,
+        "currencyListDepth",
+        Val::Num(info.currency_list_depth as f64),
+    );
+}
+
+fn write_currency_quantity_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
     table_set(state, t, "quantity", Val::Num(info.quantity as f64));
     table_set(state, t, "maxQuantity", Val::Num(info.max_quantity as f64));
-    table_set(state, t, "quality", Val::Num(info.quality as f64));
+    table_set(state, t, "totalEarned", Val::Num(info.total_earned as f64));
+    table_set(
+        state,
+        t,
+        "trackedQuantity",
+        Val::Num(info.tracked_quantity as f64),
+    );
+    table_set(
+        state,
+        t,
+        "useTotalEarnedForMaxQty",
+        Val::Bool(info.use_total_earned_for_max_qty),
+    );
+}
+
+fn write_currency_flag_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
     table_set(state, t, "isHeader", Val::Bool(info.is_header));
     table_set(
         state,
@@ -101,6 +135,11 @@ fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
         Val::Bool(info.is_show_in_backpack),
     );
     table_set(state, t, "discovered", Val::Bool(info.discovered));
+    table_set(state, t, "isTradeable", Val::Bool(info.is_tradeable));
+    table_set(state, t, "isTypeUnused", Val::Bool(info.is_type_unused));
+}
+
+fn write_currency_weekly_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
     table_set(
         state,
         t,
@@ -122,21 +161,6 @@ fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
     table_set(
         state,
         t,
-        "isAccountTransferable",
-        Val::Bool(info.is_account_transferable),
-    );
-    table_set(state, t, "isAccountWide", Val::Bool(info.is_account_wide));
-    table_set(state, t, "isTradeable", Val::Bool(info.is_tradeable));
-    table_set(state, t, "isTypeUnused", Val::Bool(info.is_type_unused));
-    table_set(
-        state,
-        t,
-        "currencyListDepth",
-        Val::Num(info.currency_list_depth as f64),
-    );
-    table_set(
-        state,
-        t,
         "rechargingAmountPerCycle",
         Val::Num(info.recharging_amount_per_cycle as f64),
     );
@@ -146,24 +170,20 @@ fn push_currency_info_table(state: &mut LuaState, info: &CurrencyInfo) -> Val {
         "rechargingCycleDurationMS",
         Val::Num(info.recharging_cycle_duration_ms as f64),
     );
-    table_set(state, t, "totalEarned", Val::Num(info.total_earned as f64));
+}
+
+fn write_currency_transfer_fields(state: &mut LuaState, t: Val, info: &CurrencyInfo) {
     table_set(
         state,
         t,
-        "trackedQuantity",
-        Val::Num(info.tracked_quantity as f64),
+        "isAccountTransferable",
+        Val::Bool(info.is_account_transferable),
     );
+    table_set(state, t, "isAccountWide", Val::Bool(info.is_account_wide));
     match info.transfer_percentage {
         Some(pct) => table_set(state, t, "transferPercentage", Val::Num(pct)),
         None => table_set(state, t, "transferPercentage", Val::Nil),
     }
-    table_set(
-        state,
-        t,
-        "useTotalEarnedForMaxQty",
-        Val::Bool(info.use_total_earned_for_max_qty),
-    );
-    t
 }
 
 fn c_currency_get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
