@@ -617,6 +617,21 @@ enum FastHandlerRef<'a> {
     NoOp,
     Method(&'a str),
     Function(&'a str),
+    FunctionWithEventVarargs(&'a str),
+    FunctionWithButton(&'a str),
+    FunctionWithElapsed(&'a str),
+    AssignLiteral {
+        field: &'a str,
+        value: FastLiteralValue<'a>,
+    },
+}
+
+#[derive(Copy, Clone)]
+enum FastLiteralValue<'a> {
+    Global(&'a str),
+    Number(f64),
+    Nil,
+    Bool(bool),
 }
 
 #[derive(Copy, Clone)]
@@ -637,17 +652,12 @@ fn collect_fast_handler_group<'a>(
         let Some(script) = script else {
             continue;
         };
-        if script
-            .body
-            .as_deref()
-            .is_some_and(|body| !body.trim().is_empty())
-        {
-            return None;
-        }
         let handler = if let Some(method_name) = script.method.as_deref() {
             FastHandlerRef::Method(method_name)
         } else if let Some(function_name) = script.function.as_deref() {
             FastHandlerRef::Function(function_name)
+        } else if let Some(body) = script.body.as_deref() {
+            parse_inline_fast_handler(body)?
         } else {
             FastHandlerRef::NoOp
         };
@@ -761,6 +771,19 @@ fn build_fast_handler(
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
         }
+        FastHandlerRef::FunctionWithEventVarargs(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::EventVarargs)
+                .map(Some)
+        }
+        FastHandlerRef::FunctionWithButton(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::Button).map(Some)
+        }
+        FastHandlerRef::FunctionWithElapsed(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::Elapsed).map(Some)
+        }
+        FastHandlerRef::AssignLiteral { field, value } => {
+            build_assignment_handler(state, field, value).map(Some)
+        }
     }
 }
 
@@ -843,6 +866,168 @@ fn build_chained_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[handler_name, first, second],
+    )
+}
+
+#[derive(Copy, Clone)]
+enum FunctionHandlerKind {
+    EventVarargs,
+    Button,
+    Elapsed,
+}
+
+fn build_function_handler(
+    state: &mut LuaState,
+    function_name: &str,
+    kind: FunctionHandlerKind,
+) -> LuaResult<Val> {
+    let (source, tag) = match kind {
+        FunctionHandlerKind::EventVarargs => (
+            r#"
+                local fn = ...
+                return function(self, event, ...)
+                    return fn(self, event, ...)
+                end
+            "#,
+            "template-inline-function-event",
+        ),
+        FunctionHandlerKind::Button => (
+            r#"
+                local fn = ...
+                return function(self, button, ...)
+                    return fn(self, button, ...)
+                end
+            "#,
+            "template-inline-function-button",
+        ),
+        FunctionHandlerKind::Elapsed => (
+            r#"
+                local fn = ...
+                return function(self, elapsed, ...)
+                    return fn(self, elapsed, ...)
+                end
+            "#,
+            "template-inline-function-elapsed",
+        ),
+    };
+    let builder = crate::loader::chunk_cache::load_chunk(state, source, tag)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, function_name);
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
+}
+
+fn parse_inline_fast_handler(body: &str) -> Option<FastHandlerRef<'_>> {
+    let trimmed = body.trim();
+    if trimmed.is_empty() {
+        return Some(FastHandlerRef::NoOp);
+    }
+    let stmt = trimmed.strip_suffix(';').unwrap_or(trimmed).trim();
+    if stmt.is_empty() {
+        return Some(FastHandlerRef::NoOp);
+    }
+
+    if let Some(method_name) = parse_inline_self_method(stmt) {
+        return Some(FastHandlerRef::Method(method_name));
+    }
+    if let Some(assign) = parse_inline_assignment(stmt) {
+        return Some(assign);
+    }
+    if let Some(function_name) = stmt
+        .strip_suffix("(self)")
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+    {
+        return Some(FastHandlerRef::Function(function_name));
+    }
+    if let Some(function_name) = stmt
+        .strip_suffix("(self, event, ...)")
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+    {
+        return Some(FastHandlerRef::FunctionWithEventVarargs(function_name));
+    }
+    if let Some(function_name) = stmt
+        .strip_suffix("(self, button)")
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+    {
+        return Some(FastHandlerRef::FunctionWithButton(function_name));
+    }
+    stmt.strip_suffix("(self, elapsed)")
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+        .map(FastHandlerRef::FunctionWithElapsed)
+}
+
+fn parse_inline_self_method(stmt: &str) -> Option<&str> {
+    let remainder = stmt.strip_prefix("self:")?;
+    let method_name = remainder.strip_suffix("()")?.trim();
+    is_fast_identifier(method_name).then_some(method_name)
+}
+
+fn parse_inline_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let (field, raw_value) = stmt.strip_prefix("self.")?.split_once('=')?;
+    let field = field.trim();
+    let raw_value = raw_value.trim();
+    if !is_fast_identifier(field) {
+        return None;
+    }
+    let value = if raw_value.eq("nil") {
+        FastLiteralValue::Nil
+    } else if raw_value.eq("true") {
+        FastLiteralValue::Bool(true)
+    } else if raw_value.eq("false") {
+        FastLiteralValue::Bool(false)
+    } else if let Ok(number) = raw_value.parse::<f64>() {
+        FastLiteralValue::Number(number)
+    } else if is_fast_handler_path(raw_value) {
+        FastLiteralValue::Global(raw_value)
+    } else {
+        return None;
+    };
+    Some(FastHandlerRef::AssignLiteral { field, value })
+}
+
+fn is_fast_handler_path(path: &str) -> bool {
+    path.split('.').all(is_fast_identifier)
+}
+
+fn is_fast_identifier(value: &str) -> bool {
+    let mut chars = value.chars();
+    match chars.next() {
+        Some(ch) if ch == '_' || ch.is_ascii_alphabetic() => {}
+        _ => return false,
+    }
+    chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+}
+
+fn build_assignment_handler(
+    state: &mut LuaState,
+    field: &str,
+    value: FastLiteralValue<'_>,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local field_name, assigned_value = ...
+            return function(self, ...)
+                self[field_name] = assigned_value
+            end
+        "#,
+        "template-inline-assignment",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let field_name = create_string(state, field);
+    let assigned_value = match value {
+        FastLiteralValue::Global(path) => resolve_global_path(state, path),
+        FastLiteralValue::Number(value) => Val::Num(value),
+        FastLiteralValue::Nil => Val::Nil,
+        FastLiteralValue::Bool(value) => Val::Bool(value),
+    };
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, assigned_value],
     )
 }
 

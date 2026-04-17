@@ -779,7 +779,10 @@ fn children_at_point_by_z_order(
     child_ids
 }
 
-fn hit_sort_key(frame: &crate::widget::Frame, id: u64) -> (crate::widget::FrameStrata, i32, i32, u64) {
+fn hit_sort_key(
+    frame: &crate::widget::Frame,
+    id: u64,
+) -> (crate::widget::FrameStrata, i32, i32, u64) {
     (
         frame.frame_strata,
         frame.frame_level.saturating_add(frame.raise_order),

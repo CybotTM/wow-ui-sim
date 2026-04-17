@@ -253,6 +253,81 @@ fn test_create_frame_from_xml_function_only_onload_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_call_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineBodyOnLoad(self)
+            self.xmlInlineLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineFunctionFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineBodyOnLoad(self);</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let loaded: bool = env
+        .eval("return XmlInlineFunctionFrame.xmlInlineLoaded == true")
+        .unwrap();
+    assert!(loaded, "single-call inline OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_self_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineMethodMixin = {}
+        function XmlInlineMethodMixin:Prime()
+            self.xmlInlineMethodLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineMethodFrame" parent="UIParent" mixin="XmlInlineMethodMixin">
+        <Scripts><OnLoad>self:Prime();</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let loaded: bool = env
+        .eval("return XmlInlineMethodFrame.xmlInlineMethodLoaded == true")
+        .unwrap();
+    assert!(loaded, "self-method inline OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_assignment_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("XmlInlineAssignmentValue = 7").unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineAssignmentFrame" parent="UIParent">
+        <Scripts><OnLoad>self.layoutIndex = XmlInlineAssignmentValue;</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let value: f64 = env
+        .eval("return XmlInlineAssignmentFrame.layoutIndex")
+        .unwrap();
+    assert_eq!(value, 7.0, "inline assignment OnLoad should fire");
+}
+
+#[test]
 fn test_create_frame_from_xml_empty_scripts_are_noops() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

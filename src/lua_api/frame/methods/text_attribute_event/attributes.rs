@@ -201,8 +201,15 @@ pub(super) fn can_change_protected_state(state: &mut LuaState) -> LuaResult<u32>
 
 pub(super) fn set_pass_through_buttons(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    // TODO: parse variadic button names from stack
-    let _ = id;
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let buttons = (2..=nargs)
+        .filter_map(|index| val_to_string(state, stack_val(state, index as i32)))
+        .map(|button| button.to_ascii_lowercase())
+        .collect();
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.pass_through_buttons = buttons;
+    }
     Ok(0)
 }
 
