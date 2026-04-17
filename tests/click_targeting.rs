@@ -437,8 +437,12 @@ fn blizzard_player_frame_click_targets_player() {
             fatal_errors.join("\n")
         );
 
-        let target_name: String = env.eval("return UnitName('target')").unwrap();
-        assert_eq!(target_name, "Player", "PlayerFrame click should target player");
+        let (target_name, player_name): (String, String) =
+            env.eval("return UnitName('target'), UnitName('player')").unwrap();
+        assert_eq!(
+            target_name, player_name,
+            "PlayerFrame click should target the player unit"
+        );
     }
 }
 

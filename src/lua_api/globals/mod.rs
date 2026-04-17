@@ -51,6 +51,7 @@ pub mod modifier_keys;
 pub mod movement_verbs;
 pub mod net_stats;
 pub mod offer_verbs;
+pub mod panel_toggle_verbs;
 pub mod pet_battles;
 pub mod photo_sharing;
 pub mod profession_data;

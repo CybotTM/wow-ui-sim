@@ -132,6 +132,7 @@ macro_rules! build_empty_sim_state {
             pending_resurrect: None,
             corpse_available: false,
             active_trade: None,
+            open_panels: ::std::collections::HashSet::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -455,6 +456,11 @@ pub struct SimState {
     pub corpse_available: bool,
     /// Active trade window state. `None` means no trade in progress.
     pub active_trade: Option<TradeState>,
+    /// UI panels the player has opened via `Toggle*` verbs. Entries are
+    /// the canonical panel token (`"Character"`, `"SpellBook"`, …).
+    /// Drives the fallback for panels whose backing frame doesn't exist
+    /// yet in the sim.
+    pub open_panels: ::std::collections::HashSet<String>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
