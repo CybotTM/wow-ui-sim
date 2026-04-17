@@ -170,6 +170,43 @@ fn test_create_frame_method_only_template_script_runs() {
     assert!(loaded, "method-only template OnLoad should fire");
 }
 
+#[test]
+fn test_create_frame_method_only_template_script_reuses_handler() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        TestMethodOnlyCacheMixin = {}
+        function TestMethodOnlyCacheMixin:OnLoad()
+            self.methodOnlyLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    register_first_template(
+        r#"<Ui><Frame name="TestMethodOnlyCacheTemplate" virtual="true" mixin="TestMethodOnlyCacheMixin">
+            <Scripts><OnLoad method="OnLoad"/></Scripts>
+        </Frame></Ui>"#,
+        "TestMethodOnlyCacheTemplate",
+        "Frame",
+    );
+
+    let reused: bool = env
+        .eval(
+            r#"
+            local a = CreateFrame("Frame", "TestMethodOnlyCacheFrameA", UIParent, "TestMethodOnlyCacheTemplate")
+            local b = CreateFrame("Frame", "TestMethodOnlyCacheFrameB", UIParent, "TestMethodOnlyCacheTemplate")
+            return a:GetScript("OnLoad") == b:GetScript("OnLoad")
+        "#,
+        )
+        .unwrap();
+    assert!(
+        reused,
+        "same method-only script should reuse cached handler"
+    );
+}
+
 // ============================================================================
 // Frame Creation from XML Tests
 // ============================================================================

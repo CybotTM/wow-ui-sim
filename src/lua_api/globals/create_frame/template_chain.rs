@@ -4,8 +4,8 @@
 use super::helpers::{append_parent_array_entry, apply_frame_mixins, resolve_global_path};
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
-    borrow_lua, borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_ref,
-    state_handle,
+    borrow_lua, borrow_state, borrow_state_mut, create_string, frame_ref, registry_table_or_create,
+    state_handle, table_get, table_set,
 };
 use crate::lua_api::script_helpers::set_script;
 use crate::widget::WidgetType;
@@ -13,6 +13,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+const METHOD_HANDLER_CACHE_KEY: &str = "__template_method_handler_cache";
 
 // ---------------------------------------------------------------------------
 // Public entry point
@@ -652,6 +654,12 @@ fn state_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlySc
 }
 
 fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
+    let cache = registry_table_or_create(state, METHOD_HANDLER_CACHE_KEY);
+    let cached = table_get(state, cache, method_name);
+    if matches!(cached, Val::Function(_)) {
+        return Ok(cached);
+    }
+
     let builder = crate::loader::chunk_cache::load_chunk(
         state,
         r#"
@@ -663,12 +671,14 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
         "template-method-handler",
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    let method_name = create_string(state, method_name);
-    crate::lua_api::methods::call_function_state(
+    let method_name_val = create_string(state, method_name);
+    let handler = crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[method_name],
-    )
+        &[method_name_val],
+    )?;
+    table_set(state, cache, method_name, handler);
+    Ok(handler)
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
