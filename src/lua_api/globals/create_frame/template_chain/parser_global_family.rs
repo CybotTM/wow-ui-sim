@@ -26,7 +26,8 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             arg,
         });
     }
-    if let Some((target_path, method_name, arg)) = parse_inline_global_method_with_string_arg(stmt) {
+    if let Some((target_path, method_name, arg)) = parse_inline_global_method_with_string_arg(stmt)
+    {
         return Some(FastHandlerRef::GlobalMethodWithStringArg {
             target_path,
             method_name,
@@ -37,6 +38,18 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
             method_name,
+        });
+    }
+    if let Some((target_path, anchor, text, red, green, blue)) =
+        parse_global_tooltip_set_owner_then_set_text_literal(stmt)
+    {
+        return Some(FastHandlerRef::GlobalTooltipSetOwnerThenSetTextLiteral {
+            target_path,
+            anchor,
+            text,
+            red,
+            green,
+            blue,
         });
     }
     if let Some((target_path, anchor, text_path, red_path, green_path, blue_path, wrap)) =
@@ -114,8 +127,11 @@ fn parse_inline_global_method_with_string_arg(stmt: &str) -> Option<(&str, &str,
     let arg = super::parse_single_string_literal(args.strip_suffix(')')?.trim())?;
     let target_path = target_path.trim();
     let method_name = method_name.trim();
-    (is_fast_handler_path(target_path) && is_fast_identifier(method_name))
-        .then_some((target_path, method_name, arg))
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name)).then_some((
+        target_path,
+        method_name,
+        arg,
+    ))
 }
 
 fn parse_inline_global_method_with_self_id_arg(stmt: &str) -> Option<(&str, &str)> {
@@ -183,6 +199,35 @@ fn parse_global_tooltip_set_owner_then_set_text(
         blue_path,
         wrap == "true",
     ))
+}
+
+fn parse_global_tooltip_set_owner_then_set_text_literal(
+    stmt: &str,
+) -> Option<(&str, &str, &str, f64, f64, f64)> {
+    let (first, second) = stmt.split_once(';')?;
+    let (target_path, method_name, anchor) =
+        parse_inline_global_method_with_self_string_arg(first.trim())?;
+    if method_name != "SetOwner" {
+        return None;
+    }
+
+    let (text_target_path, text_remainder) = second.trim().rsplit_once(':')?;
+    let (text_method_name, text_args) = text_remainder.split_once('(')?;
+    let text_args = text_args.strip_suffix(')')?.trim();
+    if text_target_path.trim() != target_path || text_method_name.trim() != "SetText" {
+        return None;
+    }
+
+    let mut parts = text_args.split(',').map(str::trim);
+    let text = super::parse_single_string_literal(parts.next()?)?;
+    let red = parts.next()?.parse::<f64>().ok()?;
+    let green = parts.next()?.parse::<f64>().ok()?;
+    let blue = parts.next()?.parse::<f64>().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+
+    Some((target_path, anchor, text, red, green, blue))
 }
 
 fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str, &str)> {

@@ -344,6 +344,14 @@ enum FastHandlerRef<'a> {
         blue_path: &'a str,
         wrap: bool,
     },
+    GlobalTooltipSetOwnerThenSetTextLiteral {
+        target_path: &'a str,
+        anchor: &'a str,
+        text: &'a str,
+        red: f64,
+        green: f64,
+        blue: f64,
+    },
     ConditionalTooltip {
         target_path: &'a str,
         field: &'a str,
@@ -366,6 +374,14 @@ enum FastHandlerRef<'a> {
     Function(&'a str),
     FunctionNoArgs(&'a str),
     FunctionWithSelfIdArg(&'a str),
+    FunctionWithStringArg {
+        function_name: &'a str,
+        arg: &'a str,
+    },
+    FunctionWithNoArgFunctionResult {
+        function_name: &'a str,
+        arg_function_name: &'a str,
+    },
     FunctionWithSelfStringArg {
         function_name: &'a str,
         arg: &'a str,

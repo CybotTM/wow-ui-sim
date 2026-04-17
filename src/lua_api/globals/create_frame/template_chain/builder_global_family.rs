@@ -26,7 +26,9 @@ pub(super) fn build_global_family_handler(
             target_path,
             method_name,
             arg,
-        } => build_global_method_with_string_handler(state, target_path, method_name, arg).map(Some),
+        } => {
+            build_global_method_with_string_handler(state, target_path, method_name, arg).map(Some)
+        }
         FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
             method_name,
@@ -54,6 +56,23 @@ pub(super) fn build_global_family_handler(
             green_path,
             blue_path,
             *wrap,
+        )
+        .map(Some),
+        FastHandlerRef::GlobalTooltipSetOwnerThenSetTextLiteral {
+            target_path,
+            anchor,
+            text,
+            red,
+            green,
+            blue,
+        } => build_global_tooltip_set_owner_then_set_text_literal_handler(
+            state,
+            target_path,
+            anchor,
+            text,
+            *red,
+            *green,
+            *blue,
         )
         .map(Some),
         FastHandlerRef::ConditionalTooltip {
@@ -335,6 +354,47 @@ fn build_global_tooltip_set_owner_then_set_text_handler(
             blue_path,
             Val::Bool(wrap),
         ],
+    )
+}
+
+fn build_global_tooltip_set_owner_then_set_text_literal_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    anchor: &str,
+    text: &str,
+    red: f64,
+    green: f64,
+    blue: f64,
+) -> LuaResult<Val> {
+    let anchor = create_string(state, anchor);
+    let text = create_string(state, text);
+    call_global_method_builder(
+        state,
+        target_path,
+        "SetText",
+        r#"
+            local target_ref, _ignored_method_name, anchor, text, red, green, blue = ...
+            local function resolve_global(path)
+                local value = _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
+            return function(self, ...)
+                local target = target_ref
+                if type(target) == "string" then
+                    target = resolve_global(target)
+                end
+                if not target then
+                    return
+                end
+                target:SetOwner(self, anchor)
+                return target:SetText(text, red, green, blue)
+            end
+        "#,
+        "template-global-tooltip-settext-literal-handler",
+        &[anchor, text, Val::Num(red), Val::Num(green), Val::Num(blue)],
     )
 }
 

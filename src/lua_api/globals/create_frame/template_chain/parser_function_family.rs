@@ -18,6 +18,17 @@ fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>>
 }
 
 fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((function_name, arg)) = parse_inline_function_with_string_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithStringArg { function_name, arg });
+    }
+    if let Some((function_name, arg_function_name)) =
+        parse_inline_function_with_noarg_function_result(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithNoArgFunctionResult {
+            function_name,
+            arg_function_name,
+        });
+    }
     if let Some((function_name, arg)) = parse_inline_function_with_self_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithSelfStringArg { function_name, arg });
     }
@@ -100,6 +111,21 @@ fn parse_inline_function_with_self_string_arg(stmt: &str) -> Option<(&str, &str)
     let arg = super::parse_single_string_literal(raw_string_arg.trim())?;
     (is_fast_handler_path(function_name) && self_arg.trim() == "self")
         .then_some((function_name, arg))
+}
+
+fn parse_inline_function_with_string_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let arg = super::parse_single_string_literal(args.strip_suffix(')')?.trim())?;
+    let function_name = function_name.trim();
+    is_fast_handler_path(function_name).then_some((function_name, arg))
+}
+
+fn parse_inline_function_with_noarg_function_result(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let arg_function_name = args.strip_suffix("())")?.trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_handler_path(arg_function_name))
+        .then_some((function_name, arg_function_name))
 }
 
 fn parse_inline_function_with_number_arg(stmt: &str) -> Option<(&str, f64)> {

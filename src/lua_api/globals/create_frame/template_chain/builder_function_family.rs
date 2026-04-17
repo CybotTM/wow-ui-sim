@@ -55,6 +55,18 @@ fn build_function_with_arg_variants(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
+        FastHandlerRef::FunctionWithStringArg { function_name, arg } => {
+            build_function_handler_with_string_only_arg(state, function_name, arg).map(Some)
+        }
+        FastHandlerRef::FunctionWithNoArgFunctionResult {
+            function_name,
+            arg_function_name,
+        } => build_function_handler_with_noarg_function_result(
+            state,
+            function_name,
+            arg_function_name,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
             build_function_handler_with_string_arg(state, function_name, arg).map(Some)
         }
@@ -73,8 +85,12 @@ fn build_function_with_arg_variants(
         FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
             function_name,
             global_arg_path,
-        } => build_function_handler_with_global_and_self_id_arg(state, function_name, global_arg_path)
-            .map(Some),
+        } => build_function_handler_with_global_and_self_id_arg(
+            state,
+            function_name,
+            global_arg_path,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithGlobalAndSelfArg {
             function_name,
             global_arg_path,
@@ -198,6 +214,54 @@ fn build_function_handler_with_string_arg(
         state,
         Val::Function(builder.gc_ref()),
         &[target, arg],
+    )
+}
+
+fn build_function_handler_with_string_only_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, literal_arg = ...
+            return function(self, ...)
+                return fn(literal_arg)
+            end
+        "#,
+        "template-inline-function-string-arg",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let arg = create_string(state, arg);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, arg],
+    )
+}
+
+fn build_function_handler_with_noarg_function_result(
+    state: &mut LuaState,
+    function_name: &str,
+    arg_function_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, arg_fn = ...
+            return function(self, ...)
+                return fn(arg_fn())
+            end
+        "#,
+        "template-inline-function-noarg-function-result",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let arg_function = resolve_global_path(state, arg_function_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, arg_function],
     )
 }
 

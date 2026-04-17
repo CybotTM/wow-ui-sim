@@ -650,6 +650,56 @@ fn test_create_frame_from_xml_inline_global_tooltip_settext_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_tooltip_literal_settext_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.GameTooltip = {}
+        function _G.GameTooltip:SetOwner(frame, anchor)
+            self.owner = frame
+            self.anchor = anchor
+        end
+        function _G.GameTooltip:SetText(text, r, g, b)
+            self.text = text
+            self.r = r
+            self.g = g
+            self.b = b
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineTooltipLiteralFrame" parent="UIParent">
+        <Scripts><OnEnter>GameTooltip:SetOwner(self, "ANCHOR_RIGHT"); GameTooltip:SetText("", 1.0, 1.0, 1.0)</OnEnter></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineTooltipLiteralFrame:GetScript('OnEnter')(XmlInlineTooltipLiteralFrame)")
+        .unwrap();
+
+    let result: (String, String, f64, f64, f64) = env
+        .eval(
+            r#"
+            return GameTooltip.anchor,
+                   GameTooltip.text,
+                   GameTooltip.r,
+                   GameTooltip.g,
+                   GameTooltip.b
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_RIGHT");
+    assert_eq!(result.1, "");
+    assert_eq!(result.2, 1.0);
+    assert_eq!(result.3, 1.0);
+    assert_eq!(result.4, 1.0);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_field_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -1689,6 +1739,69 @@ fn test_create_frame_from_xml_inline_function_with_self_number_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_with_string_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineDebugMessage = nil
+        function XmlInlineDebug(message)
+            XmlInlineDebugMessage = message
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineStringArgFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineDebug("debug line")</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineStringArgFrame:GetScript('OnClick')(XmlInlineStringArgFrame)")
+        .unwrap();
+
+    let message: String = env.eval("return XmlInlineDebugMessage").unwrap();
+    assert_eq!(message, "debug line");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_noarg_function_result_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineTrackedQuestId = nil
+        function XmlInlineGetQuestId()
+            return 42
+        end
+        function XmlInlineTrackQuest(quest_id)
+            XmlInlineTrackedQuestId = quest_id
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineNoArgFunctionResultFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineTrackQuest(XmlInlineGetQuestId())</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        "XmlInlineNoArgFunctionResultFrame:GetScript('OnClick')(XmlInlineNoArgFunctionResultFrame)",
+    )
+    .unwrap();
+
+    let tracked: i32 = env.eval("return XmlInlineTrackedQuestId").unwrap();
+    assert_eq!(tracked, 42);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_function_with_global_and_self_id_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -1710,12 +1823,113 @@ fn test_create_frame_from_xml_inline_function_with_global_and_self_id_arg_runs()
         "Button",
     );
 
-    let frame_id: f64 = env.eval("return XmlInlineGlobalSelfIdFrame:GetID()").unwrap();
+    let frame_id: f64 = env
+        .eval("return XmlInlineGlobalSelfIdFrame:GetID()")
+        .unwrap();
     env.exec("XmlInlineGlobalSelfIdFrame:GetScript('OnClick')(XmlInlineGlobalSelfIdFrame)")
         .unwrap();
 
-    let selected: f64 = env.eval("return XmlInlineGlobalSelfIdTarget.selectedTab").unwrap();
-    assert_eq!(selected, frame_id, "inline global+self-id function arg should fire");
+    let selected: f64 = env
+        .eval("return XmlInlineGlobalSelfIdTarget.selectedTab")
+        .unwrap();
+    assert_eq!(
+        selected, frame_id,
+        "inline global+self-id function arg should fire"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_lfg_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.SOUNDKIT = { IG_CHARACTER_INFO_TAB = 7 }
+        _G.LFGDungeonReadyPopup = {}
+        _G.LfgSequence = {}
+        function PlaySound(sound_id)
+            LfgSequence.soundId = sound_id
+        end
+        function LFGDebug(message)
+            LfgSequence.message = message
+        end
+        function StaticPopupSpecial_Hide(frame)
+            LfgSequence.hidden = frame
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineLfgSequenceFrame" parent="UIParent">
+        <Scripts><OnClick>PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB); LFGDebug("ready dialog close"); StaticPopupSpecial_Hide(LFGDungeonReadyPopup)</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineLfgSequenceFrame:GetScript('OnClick')(XmlInlineLfgSequenceFrame)")
+        .unwrap();
+
+    let result: (f64, String, bool) = env
+        .eval(
+            r#"
+            return LfgSequence.soundId,
+                   LfgSequence.message,
+                   LfgSequence.hidden == LFGDungeonReadyPopup
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, 7.0);
+    assert_eq!(result.1, "ready dialog close");
+    assert!(result.2);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_commented_invite_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.SOUNDKIT = { IG_MAINMENU_OPTION_CHECKBOX_ON = 9 }
+        _G.InviteSequence = {}
+        function PlaySound(sound_id)
+            InviteSequence.soundId = sound_id
+        end
+        function BNSendVerifiedBattleTagInvite()
+            InviteSequence.sent = true
+        end
+        function StaticPopupSpecial_Hide(frame)
+            InviteSequence.hidden = frame
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineInviteSequenceFrame" parent="UIParent">
+        <Scripts><OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON); BNSendVerifiedBattleTagInvite(); -- unit should have been set with BNCheckBattleTagInviteToUnit or BNCheckBattleTagInviteToGuildMember
+        StaticPopupSpecial_Hide(self:GetParent())</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineInviteSequenceFrame:GetScript('OnClick')(XmlInlineInviteSequenceFrame)")
+        .unwrap();
+
+    let result: (f64, bool, bool) = env
+        .eval(
+            r#"
+            return InviteSequence.soundId,
+                   InviteSequence.sent == true,
+                   InviteSequence.hidden == XmlInlineInviteSequenceFrame:GetParent()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, 9.0);
+    assert!(result.1);
+    assert!(result.2);
 }
 
 #[test]
@@ -1747,7 +1961,9 @@ fn test_create_frame_from_xml_inline_merchant_tab_sequence_runs() {
         "Button",
     );
 
-    let frame_id: f64 = env.eval("return XmlInlineMerchantTabFrame:GetID()").unwrap();
+    let frame_id: f64 = env
+        .eval("return XmlInlineMerchantTabFrame:GetID()")
+        .unwrap();
     env.exec("XmlInlineMerchantTabFrame:GetScript('OnClick')(XmlInlineMerchantTabFrame)")
         .unwrap();
 
