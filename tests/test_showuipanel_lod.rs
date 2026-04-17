@@ -43,6 +43,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
+    ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),

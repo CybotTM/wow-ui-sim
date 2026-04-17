@@ -19,7 +19,9 @@ fn get_cursor_position_defaults_to_zero() {
 #[test]
 fn get_cursor_position_reads_mouse_position() {
     let env = env();
-    env.state().borrow_mut().set_mouse_position(Some((320.5, 240.25)));
+    env.state()
+        .borrow_mut()
+        .set_mouse_position(Some((320.5, 240.25)));
     let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
     assert!((x - 320.5).abs() < 1e-3);
     assert!((y - 240.25).abs() < 1e-3);

@@ -1,7 +1,7 @@
 //! C_AddOns, legacy addon globals, and LoadAddOn implementation.
 
-use crate::lua_api::LoaderEnv;
 use crate::loader::LoadError;
+use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, registry_get,
     registry_set, state_handle, val_to_string,

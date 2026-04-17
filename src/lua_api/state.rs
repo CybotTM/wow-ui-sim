@@ -578,9 +578,9 @@ pub struct SimState {
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
     Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, NetStats,
-    PetBattleState, PetState,
-    TradeState, VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
-    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    PetBattleState, PetState, TradeState, VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo,
+    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
+    WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {
