@@ -275,50 +275,35 @@ fn debug_direct_spellbook_toggle_error() {
     let result: String = env
         .eval(
             r#"
-            local markers = {}
-            local function mark(label, value)
-                table.insert(markers, label .. "=" .. type(value) .. ":" .. tostring(value))
-            end
-
-            mark("PlayerSpellsFrame_LoadUI", PlayerSpellsFrame_LoadUI)
-            mark("UIParentLoadAddOn", UIParentLoadAddOn)
-            mark("C_AddOns", C_AddOns)
-            if C_AddOns then
-                mark("C_AddOns.LoadAddOn", C_AddOns.LoadAddOn)
-            end
-            local ok, err = pcall(PlayerSpellsFrame_LoadUI)
+            local ok, loaded, reason = pcall(function()
+                return C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
+            end)
             if not ok then
-                return "load_ui:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")
+                return "c_addons_load:" .. tostring(loaded)
+            end
+            if not loaded then
+                return "load_failed:" .. tostring(reason)
             end
 
             if not PlayerSpellsFrame then
-                return "missing_player_spells_frame\n" .. table.concat(markers, "\n")
+                return "missing_player_spells_frame"
             end
 
-            mark("TrySetTab", PlayerSpellsFrame.TrySetTab)
-            mark("IsShown", PlayerSpellsFrame.IsShown)
-            mark("ShowUIPanel", ShowUIPanel)
-            mark("SpellBookFrame", PlayerSpellsFrame.SpellBookFrame)
-            if PlayerSpellsFrame.SpellBookFrame then
-                mark("TrySetCategory", PlayerSpellsFrame.SpellBookFrame.TrySetCategory)
-                mark("IsCategoryActive", PlayerSpellsFrame.SpellBookFrame.IsCategoryActive)
-            end
-
-            ok, err = pcall(function()
+            local ok_tab, err_tab = pcall(function()
                 return PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook)
             end)
-            if not ok then
-                return "try_set_tab:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")
+            if not ok_tab then
+                return "try_set_tab:" .. tostring(err_tab)
             end
 
-            ok, err = pcall(function()
+            local ok_show, err_show = pcall(function()
                 return ShowUIPanel(PlayerSpellsFrame)
             end)
-            if not ok then
-                return "show_ui_panel:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")
+            if not ok_show then
+                return "show_ui_panel:" .. tostring(err_show)
             end
 
-            return "ok\n" .. table.concat(markers, "\n")
+            return "ok"
             "#,
         )
         .expect("diagnostic evaluation should return");

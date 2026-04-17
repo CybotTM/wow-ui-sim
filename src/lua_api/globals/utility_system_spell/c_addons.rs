@@ -447,17 +447,23 @@ fn load_runtime_addon_with_dependencies(
     addon_name: &str,
     loading: &mut HashSet<String>,
 ) -> Result<(), LoadError> {
+    eprintln!("[load_addon] begin {addon_name}");
     let toc_path = find_runtime_addon_toc(state, addon_name)
         .ok_or_else(|| missing_runtime_addon_error(addon_name))?;
+    eprintln!("[load_addon] toc {}", toc_path.display());
     let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
 
     for dependency in runtime_addon_dependencies(state, &toc) {
+        eprintln!("[load_addon] {addon_name} -> dep {dependency}");
         load_runtime_addon_recursive(state, loader_env, &dependency, loading)?;
     }
 
+    eprintln!("[load_addon] files {addon_name}");
     crate::loader::load_addon_from_toc(loader_env, &toc)?;
+    eprintln!("[load_addon] loaded {addon_name}");
     mark_addon_loaded(loader_env, addon_name);
     fire_addon_loaded(state, loader_env, addon_name);
+    eprintln!("[load_addon] event {addon_name}");
     Ok(())
 }
 
