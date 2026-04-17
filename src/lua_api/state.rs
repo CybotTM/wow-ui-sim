@@ -88,7 +88,7 @@ macro_rules! build_empty_sim_state {
             global_show_hide_depth: 0,
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::default(),
-            world: WorldState::default(),
+            world: super::state_types::seeded_world_state(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
             net_stats: NetStats::default(),

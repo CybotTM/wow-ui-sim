@@ -424,7 +424,12 @@ impl Default for PlayerState {
 use super::state_defaults::*;
 
 /// World/instance state: zone, guild, collections, vault, loot.
-#[derive(Debug, Clone)]
+///
+/// `Default::default()` produces a fully-empty / zero-valued state. The
+/// sim's seeded defaults (Stormwind zone, "Heroes of Azeroth" guild,
+/// populated collections) live in `seeded_world_state` and are applied
+/// by `SimState::Default`.
+#[derive(Debug, Default, Clone)]
 pub struct WorldState {
     pub zone_name: String,
     pub zone_id: i32,
@@ -508,68 +513,25 @@ pub struct GuildLogo {
     pub emblem_filename: String,
 }
 
-impl Default for WorldState {
-    fn default() -> Self {
-        let mut ws = default_zone_and_instance();
-        apply_guild_defaults(&mut ws);
-        apply_collection_defaults(&mut ws);
-        ws
-    }
-}
-
-/// Zone/instance/PvP shell + zero-valued collection stubs. The collection
-/// fields are overwritten by `apply_collection_defaults`; they sit here
-/// only to satisfy the exhaustive struct literal.
-fn default_zone_and_instance() -> WorldState {
-    WorldState {
+/// Build the sim's seeded default `WorldState` — Stormwind zone,
+/// "Heroes of Azeroth" guild, populated collections. `WorldState::default`
+/// still returns a fully zero/empty state (the derived `Default`); this
+/// function is what `SimState::Default` reaches for.
+pub fn seeded_world_state() -> WorldState {
+    let mut ws = WorldState {
         zone_name: "Stormwind City".into(),
         zone_id: 1519,
         sub_zone_name: "Trade District".into(),
-        instance_name: String::new(),
         instance_type: "none".into(),
-        instance_difficulty: 0,
-        instance_max_players: 0,
-        in_instance: false,
         guild_name: Some("Heroes of Azeroth".into()),
         guild_rank: Some("Member".into()),
         guild_num_members: 150,
         pvp_type: "contested".into(),
-        is_sub_zone_pvp: false,
-        pvp_faction_name: None,
-        great_vault_activities: Vec::new(),
-        great_vault_has_rewards: false,
-        great_vault_can_claim: false,
-        loot_rolls: HashMap::new(),
-        collected_transmogs: HashSet::new(),
-        transmog_appearances: Vec::new(),
-        applied_transmog_slots: HashMap::new(),
-        collected_mounts: HashSet::new(),
-        mounts: Vec::new(),
-        collected_pets: HashSet::new(),
-        pets: Vec::new(),
-        collected_toys: HashSet::new(),
-        toys: Vec::new(),
-        favorite_toys: HashSet::new(),
-        heirlooms: Vec::new(),
-        collected_heirlooms: HashSet::new(),
-        earned_achievements: HashSet::new(),
-        premade_listings: Vec::new(),
-        guild_logo: GuildLogo::default(),
-        guild_ranks: Vec::new(),
-        guild_selected_rank: 0,
-        guild_club_id: None,
-        guild_is_officer: false,
         guild_can_speak_in_chat: true,
-    }
-}
-
-fn apply_guild_defaults(ws: &mut WorldState) {
-    ws.guild_logo = GuildLogo::default();
-    ws.guild_ranks = Vec::new();
-    ws.guild_selected_rank = 0;
-    ws.guild_club_id = None;
-    ws.guild_is_officer = false;
-    ws.guild_can_speak_in_chat = true;
+        ..WorldState::default()
+    };
+    apply_collection_defaults(&mut ws);
+    ws
 }
 
 fn apply_collection_defaults(ws: &mut WorldState) {
@@ -628,14 +590,26 @@ pub struct LootRollInfo {
 mod tests {
     use super::*;
 
-    /// Pins that `WorldState::default` → `default_zone_and_instance`
-    /// → `apply_guild_defaults` → `apply_collection_defaults` chain
-    /// leaves every collection populated (not left as the zero
-    /// placeholder from `default_zone_and_instance`). Regression cover
-    /// for the 3-helper split of `Default::default`.
+    /// `WorldState::default()` returns a *fully empty* state (zero
+    /// fields, empty collections). Seeded defaults come from
+    /// `seeded_world_state()` — pin both contracts so callers that
+    /// want "vanilla WoW-like" state reach for the seeded helper and
+    /// anyone wiring a fresh sub-state can rely on Default being inert.
     #[test]
-    fn world_default_populates_collections_after_shell() {
+    fn world_default_is_empty_and_zeroed() {
         let world = WorldState::default();
+        assert!(world.transmog_appearances.is_empty());
+        assert!(world.heirlooms.is_empty());
+        assert!(world.collected_heirlooms.is_empty());
+        assert_eq!(world.zone_id, 0);
+        assert!(world.zone_name.is_empty());
+        assert!(world.guild_name.is_none());
+        assert!(!world.guild_can_speak_in_chat);
+    }
+
+    #[test]
+    fn seeded_world_populates_collections_and_seed_fields() {
+        let world = seeded_world_state();
         assert!(!world.transmog_appearances.is_empty());
         assert!(!world.mounts.is_empty());
         assert!(!world.pets.is_empty());
@@ -643,7 +617,6 @@ mod tests {
         assert!(!world.heirlooms.is_empty());
         assert!(!world.premade_listings.is_empty());
         assert_eq!(world.collected_heirlooms.len(), world.heirlooms.len());
-        // Shell-owned non-collection fields still live.
         assert_eq!(world.zone_id, 1519);
         assert_eq!(world.pvp_type, "contested");
         assert!(world.guild_can_speak_in_chat);
@@ -651,7 +624,7 @@ mod tests {
 
     #[test]
     fn transmog_default_appearances_populated() {
-        let world = WorldState::default();
+        let world = seeded_world_state();
         // 12 slots × 5 appearances each = 60
         assert_eq!(world.transmog_appearances.len(), 60);
 
@@ -676,7 +649,7 @@ mod tests {
 
     #[test]
     fn heirloom_defaults_populated() {
-        let world = WorldState::default();
+        let world = seeded_world_state();
         assert_eq!(
             world.heirlooms.len(),
             11,
