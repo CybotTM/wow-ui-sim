@@ -10,9 +10,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn get_num_friends_returns_seeded_count() {
     let env = env();
-    let count: i32 = env
-        .eval("return C_BattleNet.GetNumFriends()")
-        .unwrap();
+    let count: i32 = env.eval("return C_BattleNet.GetNumFriends()").unwrap();
     assert_eq!(count, 2, "two seeded friends");
 }
 
@@ -36,14 +34,8 @@ fn get_friend_account_info_returns_table_for_valid_index() {
 #[test]
 fn get_friend_account_info_returns_nested_game_account() {
     let env = env();
-    let (character_name, realm_name, class_id, level, faction): (
-        String,
-        String,
-        i32,
-        i32,
-        String,
-    ) = env
-        .eval(
+    let (character_name, realm_name, class_id, level, faction): (String, String, i32, i32, String) =
+        env.eval(
             r#"
             local info = C_BattleNet.GetFriendAccountInfo(1)
             local ga = info.gameAccountInfo
