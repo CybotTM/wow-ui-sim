@@ -235,45 +235,59 @@ fn spell_cast_line(spell_id: u32) -> String {
 }
 
 fn push_spell_tooltip_lines(state: &mut LuaState, lines: Val, spell_id: u32, spell_name: &str) {
+    let mut index = 1;
+    push_spell_name_line(state, lines, index, spell_name);
+    index += 1;
+    if push_spell_cost_line(state, lines, index, spell_id) {
+        index += 1;
+    }
+    push_spell_cast_line(state, lines, index, spell_id);
+    index += 1;
+    push_spell_description_line(state, lines, index, spell_id);
+}
+
+fn push_spell_name_line(state: &mut LuaState, lines: Val, index: i64, spell_name: &str) {
     push_tooltip_line(
         state,
         lines,
-        1,
+        index,
         LINE_TYPE_SPELL_NAME,
         spell_name,
         None,
         false,
     );
-    let mut next_index = 2;
-    if let Some(cost) = spell_cost_line(spell_id) {
-        push_tooltip_line(
-            state,
-            lines,
-            next_index,
-            LINE_TYPE_SPELL_NAME,
-            cost,
-            None,
-            false,
-        );
-        next_index += 1;
-    }
+}
+
+/// Returns true when a cost line was written, so the caller can advance
+/// the running index.
+fn push_spell_cost_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) -> bool {
+    let Some(cost) = spell_cost_line(spell_id) else {
+        return false;
+    };
+    push_tooltip_line(state, lines, index, LINE_TYPE_SPELL_NAME, cost, None, false);
+    true
+}
+
+fn push_spell_cast_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) {
     let cast_line = spell_cast_line(spell_id);
     push_tooltip_line(
         state,
         lines,
-        next_index,
+        index,
         LINE_TYPE_SPELL_NAME,
         &cast_line,
         None,
         false,
     );
-    next_index += 1;
+}
+
+fn push_spell_description_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) {
     let description =
         spell_descriptions::get_spell_description(spell_id).unwrap_or("No description available.");
     push_tooltip_line(
         state,
         lines,
-        next_index,
+        index,
         LINE_TYPE_SPELL_DESCRIPTION,
         description,
         None,
