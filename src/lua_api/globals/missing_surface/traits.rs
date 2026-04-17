@@ -8,9 +8,10 @@ use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_api::talent_state;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use crate::specializations;
+use crate::spell_descriptions;
 use crate::traits::{
-    TRAIT_COND_DB, TRAIT_CURRENCY_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_SUBTREE_DB,
-    TRAIT_TREE_DB,
+    TRAIT_COND_DB, TRAIT_CURRENCY_DB, TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB,
+    TRAIT_SUBTREE_DB, TRAIT_TREE_DB,
 };
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -163,7 +164,7 @@ fn check_node_available(
     node: &crate::traits::TraitNodeInfo,
     state: &crate::lua_api::SimState,
 ) -> bool {
-    for &cond_id in node.cond_ids {
+    for &cond_id in node.cond_ids.iter() {
         let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
             continue;
         };
@@ -488,6 +489,18 @@ fn register_c_traits_query_fns(
     table_set_rust_fn(
         state,
         table_ref,
+        "GetDefinitionInfo",
+        c_traits_get_definition_info,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetTraitDescription",
+        c_traits_get_trait_description,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
         "GetConditionInfo",
         c_traits_get_condition_info,
     )?;
@@ -561,6 +574,7 @@ fn register_c_traits_action_fns(
         "GetSubTreeInfo",
         c_traits_get_subtree_info,
     )?;
+    table_set_rust_fn(state, table_ref, "GetNodeCost", c_traits_get_node_cost)?;
     table_set_rust_fn(state, table_ref, "SetSelection", c_traits_set_selection)?;
     table_set_rust_fn(state, table_ref, "PurchaseRank", c_traits_purchase_rank)?;
     table_set_rust_fn(state, table_ref, "RefundRank", c_traits_refund_rank)?;
@@ -763,6 +777,75 @@ fn c_traits_get_entry_info(state: &mut LuaState) -> LuaResult<u32> {
         table_set(state, info, "subTreeID", Val::Num(entry.sub_tree_id as f64));
     }
     state.push(info);
+    Ok(1)
+}
+
+fn c_traits_get_definition_info(state: &mut LuaState) -> LuaResult<u32> {
+    let definition_id = u32::from_stack(state, 1)?;
+    let Some(definition) = TRAIT_DEFINITION_DB.get(&definition_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let info = create_table(state);
+    table_set(
+        state,
+        info,
+        "spellID",
+        if definition.spell_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(definition.spell_id as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "overriddenSpellID",
+        if definition.overrides_spell_id == 0 {
+            Val::Nil
+        } else {
+            Val::Num(definition.overrides_spell_id as f64)
+        },
+    );
+    table_set(
+        state,
+        info,
+        "overrideIcon",
+        if definition.override_icon == 0 {
+            Val::Nil
+        } else {
+            Val::Num(definition.override_icon as f64)
+        },
+    );
+    let override_name = create_string(state, definition.override_name);
+    table_set(state, info, "overrideName", override_name);
+    let override_subtext = create_string(state, definition.override_subtext);
+    table_set(state, info, "overrideSubtext", override_subtext);
+    let override_description = create_string(state, definition.override_description);
+    table_set(state, info, "overrideDescription", override_description);
+    state.push(info);
+    Ok(1)
+}
+
+fn c_traits_get_trait_description(state: &mut LuaState) -> LuaResult<u32> {
+    let entry_id = u32::from_stack(state, 1)?;
+    let _rank = u32::from_stack(state, 2)?;
+    let description = TRAIT_ENTRY_DB
+        .get(&entry_id)
+        .and_then(|entry| TRAIT_DEFINITION_DB.get(&entry.definition_id))
+        .map(|definition| {
+            if definition.override_description.is_empty() {
+                spell_descriptions::get_spell_description(definition.spell_id)
+                    .unwrap_or("")
+                    .to_string()
+            } else {
+                definition.override_description.to_string()
+            }
+        })
+        .unwrap_or_default();
+    let description = create_string(state, &description);
+    state.push(description);
     Ok(1)
 }
 
@@ -1129,6 +1212,23 @@ fn c_traits_get_subtree_info(state: &mut LuaState) -> LuaResult<u32> {
     push_subtree_base_fields(state, info, subtree);
     push_subtree_hero_fields(state, info, subtree_id);
     state.push(info);
+    Ok(1)
+}
+
+fn c_traits_get_node_cost(state: &mut LuaState) -> LuaResult<u32> {
+    let _config_id = i32::from_stack(state, 1)?;
+    let node_id = u32::from_stack(state, 2)?;
+    let costs = create_table(state);
+    let currency_id = borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.talents.node_currency_map.get(&node_id).copied());
+    if let Some(currency_id) = currency_id {
+        let cost = create_table(state);
+        table_set(state, cost, "ID", Val::Num(currency_id as f64));
+        table_set(state, cost, "amount", Val::Num(1.0));
+        set_table_array(state, costs, 1, cost);
+    }
+    state.push(costs);
     Ok(1)
 }
 
