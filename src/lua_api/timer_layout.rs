@@ -535,97 +535,11 @@ pub fn register_layout_fns_on_table(
 }
 
 // ── String format patch ──────────────────────────────────────────────────────
+// Rust implementation lives in `crate::lua_api::string_format` — ported from
+// the master-era mlua module. This stays as a re-export so existing callers
+// continue to work.
 
-/// Lua shim that patches `string.format` with WoW-compatible extensions.
-///
-/// Handles `%F` (uppercase float → `%f`) and positional arguments (`%1$s`).
-/// This is a pure Lua implementation loaded into the rilua VM.
-const STRING_FORMAT_PATCH_LUA: &str = r#"
-do
-    local _orig = string.format
-    local function _has_special(fmt)
-        return fmt:find("F", 1, true) or fmt:find("$", 1, true)
-    end
-
-    local function _reorder_args(fmt, args)
-        local out_fmt = ""
-        local reordered = {}
-        local seq = 0
-        local has_pos = false
-        local i = 1
-        local len = #fmt
-        while i <= len do
-            local c = fmt:sub(i, i)
-            if c ~= "%" then
-                out_fmt = out_fmt .. c
-                i = i + 1
-            elseif fmt:sub(i + 1, i + 1) == "%" then
-                out_fmt = out_fmt .. "%%"
-                i = i + 2
-            else
-                -- parse specifier
-                local spec_start = i
-                i = i + 1
-                -- check for positional N$
-                local pos_n, pos_end = fmt:match("^(%d+)%$()", i)
-                if pos_n then
-                    has_pos = true
-                    reordered[#reordered + 1] = args[tonumber(pos_n)]
-                    i = pos_end
-                else
-                    seq = seq + 1
-                    reordered[#reordered + 1] = args[seq]
-                end
-                -- flags, width, precision
-                while i <= len and fmt:sub(i, i):match("[-+%s#0]") do
-                    out_fmt = out_fmt .. "%"
-                    i = i + 1
-                end
-                out_fmt = out_fmt .. "%"
-                while i <= len and fmt:sub(i, i):match("%d") do
-                    out_fmt = out_fmt .. fmt:sub(i, i)
-                    i = i + 1
-                end
-                if i <= len and fmt:sub(i, i) == "." then
-                    out_fmt = out_fmt .. "."
-                    i = i + 1
-                    while i <= len and fmt:sub(i, i):match("%d") do
-                        out_fmt = out_fmt .. fmt:sub(i, i)
-                        i = i + 1
-                    end
-                end
-                -- conversion char
-                local conv = fmt:sub(i, i)
-                out_fmt = out_fmt .. (conv == "F" and "f" or conv)
-                i = i + 1
-            end
-        end
-        return out_fmt, reordered, has_pos
-    end
-
-    string.format = function(fmt, ...)
-        if type(fmt) ~= "string" then
-            return _orig(fmt, ...)
-        end
-        if not _has_special(fmt) then
-            return _orig(fmt, ...)
-        end
-        local args = {...}
-        local new_fmt, new_args = _reorder_args(fmt, args)
-        return _orig(new_fmt, table.unpack(new_args))
-    end
-    format = string.format
-end
-"#;
-
-/// Patch `string.format` in a rilua VM with WoW-compatible extensions.
-///
-/// Called once during rilua environment setup. On success the patched `format`
-/// global and `string.format` field both handle `%F` and positional arguments.
-pub fn patch_string_format(lua: &mut rilua::Lua) -> LuaResult<()> {
-    lua.exec(STRING_FORMAT_PATCH_LUA)
-        .map_err(|e| runtime_error(format!("string.format patch failed: {e}")))
-}
+pub use crate::lua_api::string_format::patch_string_format;
 
 // ── register_all ─────────────────────────────────────────────────────────────
 

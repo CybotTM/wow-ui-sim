@@ -25,6 +25,7 @@ pub(crate) mod state;
 mod state_defaults;
 pub(crate) mod state_render;
 pub(crate) mod state_types;
+pub(crate) mod string_format;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod taint;
 pub(crate) mod talent_state;
