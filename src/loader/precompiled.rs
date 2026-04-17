@@ -1,6 +1,6 @@
 //! Precompiled rilua loader helpers.
 
-use crate::lua_api::rilua_methods::{call_function_state, registry_get, registry_set};
+use crate::lua_api::methods::{call_function_state, registry_get, registry_set};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 

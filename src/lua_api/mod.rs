@@ -15,13 +15,13 @@ pub(crate) mod loader_env;
 pub mod message_frame;
 pub(crate) mod on_update;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_methods;
+pub(crate) mod methods;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_script_helpers;
+pub(crate) mod script_helpers;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_taint;
+pub(crate) mod taint;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_timer_layout;
+pub(crate) mod timer_layout;
 pub mod simple_html;
 pub(crate) mod state;
 mod state_defaults;

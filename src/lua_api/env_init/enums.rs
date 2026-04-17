@@ -1,7 +1,7 @@
 //! Enum and constant globals: `Enum.*`, `Constants.*`, LE_* values.
 
 use crate::lua_api::globals::enum_data::{EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
-use crate::lua_api::rilua_methods::{create_table, table_get, table_set};
+use crate::lua_api::methods::{create_table, table_get, table_set};
 use rilua::LuaApiMut;
 use rilua::Val;
 

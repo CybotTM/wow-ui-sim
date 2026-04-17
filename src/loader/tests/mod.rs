@@ -9,7 +9,7 @@ use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
 use super::*;
 use crate::lua_api::WowLuaEnv;
-use crate::lua_api::rilua_methods::{call_function as call_rilua_function, val_to_string};
+use crate::lua_api::methods::{call_function as call_rilua_function, val_to_string};
 use rilua::{LuaApi, LuaApiMut, Val};
 
 /// Test context holding environment and temp directory for cleanup.

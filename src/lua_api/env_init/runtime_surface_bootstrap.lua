@@ -347,25 +347,10 @@ end
 -- A_Admin.SetStoreFrameShown(true) to exercise MainMenuBarMicroButtons'
 -- pushed-state rendering for the Store micro-button.
 
--- `UnitIsPlayer(unit)` — true when `unit` resolves to a player-character
--- entity. In the sim, "player" and party/raid slots are players; other
--- unit IDs (target/focus/mouseover/etc.) only exist when the GUI wires
--- them up to a player, so default to false. Callers in TargetFrame,
--- PlayerFrame, etc. check this before running player-specific rendering.
-if UnitIsPlayer == nil then
-  function UnitIsPlayer(unit)
-    if type(unit) ~= "string" then
-      return false
-    end
-    if unit == "player" or unit == "self" then
-      return true
-    end
-    if unit:match("^party[1-4]$") or unit:match("^raid%d+$") then
-      return true
-    end
-    return false
-  end
-end
+-- UnitIsPlayer is registered from Rust (src/lua_api/globals/rilua_unit_probes.rs).
+-- It resolves tokens against SimState: "player"/"self" always true, "target"/
+-- "focus" read the respective TargetInfo.is_player flag, "partyN" (N=1..4)
+-- checks sim.party_members[N-1] is populated, everything else false.
 
 if UnitIsHumanPlayer == nil then
   function UnitIsHumanPlayer(_unit)

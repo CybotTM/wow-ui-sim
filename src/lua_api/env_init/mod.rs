@@ -36,7 +36,7 @@ pub(super) fn init_lua_state(
     frames::init_frame_metatable(lua)?;
     super::globals::register_globals(lua, state.clone())?;
     bootstrap::init_runtime_surface_bootstrap(lua)?;
-    super::globals::rilua_security::create_secure_environment(lua)?;
+    super::globals::security::create_secure_environment(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
     crate::loader::precompiled::init(lua)?;
     remove_sandbox_globals(lua)?;
@@ -46,7 +46,7 @@ pub(super) fn init_lua_state(
 
 /// Enable Elune taint tracking and wrap loadstring as secure.
 fn enable_taint_and_wrap_loadstring(lua: &mut rilua::Lua) -> crate::Result<()> {
-    super::rilua_taint::enable_taint_mode(lua);
+    super::taint::enable_taint_mode(lua);
     Ok(())
 }
 

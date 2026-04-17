@@ -205,7 +205,7 @@ pub struct SimState {
     /// Pending timer callbacks.
     pub timers: VecDeque<PendingTimer>,
     /// Pending timer callbacks for the rilua VM.
-    pub rilua_timers: VecDeque<crate::lua_api::rilua_timer_layout::RiluaPendingTimer>,
+    pub rilua_timers: VecDeque<crate::lua_api::timer_layout::RiluaPendingTimer>,
     /// Currently focused frame ID (for keyboard input).
     pub focused_frame_id: Option<u64>,
     /// Registered addons (includes all scanned addons, not just loaded ones).

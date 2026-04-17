@@ -2,8 +2,8 @@
 
 use crate::loader::precompiled;
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::rilua_methods::frame_ref;
-use crate::lua_api::rilua_script_helpers::collect_lua_error;
+use crate::lua_api::methods::frame_ref;
+use crate::lua_api::script_helpers::collect_lua_error;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(super) struct LifecycleScripts {
@@ -26,7 +26,7 @@ pub fn fire_lifecycle_scripts(
 ) {
     let _ = env.with_state(|state| {
         let frame_visible = if lifecycle.on_show {
-            let Ok(sim) = crate::lua_api::rilua_methods::borrow_state(state) else {
+            let Ok(sim) = crate::lua_api::methods::borrow_state(state) else {
                 return Ok::<(), crate::Error>(());
             };
             sim.widgets.is_ancestor_visible(frame_id)

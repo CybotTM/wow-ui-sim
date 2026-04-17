@@ -2,7 +2,7 @@
 
 pub(crate) mod direct;
 
-use crate::lua_api::rilua_methods::{frame_ref, sync_child_to_rilua, table_set};
+use crate::lua_api::methods::{frame_ref, sync_child_to_rilua, table_set};
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
@@ -10,7 +10,7 @@ pub fn set_intrinsic(state: &mut LuaState, frame_id: u64, base: &str) {
     let Ok(frame) = frame_ref(state, frame_id) else {
         return;
     };
-    let value = crate::lua_api::rilua_methods::create_string(state, base);
+    let value = crate::lua_api::methods::create_string(state, base);
     table_set(state, frame, "intrinsic", value);
 }
 
@@ -26,7 +26,7 @@ pub fn assign_parent_key(
     };
 
     {
-        let mut sim = crate::lua_api::rilua_methods::borrow_state_mut(state)?;
+        let mut sim = crate::lua_api::methods::borrow_state_mut(state)?;
         if let Some(parent) = sim.widgets.get_mut_visual(target_parent_id) {
             parent.children_keys.insert(resolved_key.clone(), child_id);
         }
@@ -41,7 +41,7 @@ fn resolve_parent_key_target(
     parent_key: &str,
 ) -> (Option<u64>, String) {
     if let Some(key) = parent_key.strip_prefix("$parent.") {
-        let target_parent = crate::lua_api::rilua_methods::borrow_state(state)
+        let target_parent = crate::lua_api::methods::borrow_state(state)
             .ok()
             .and_then(|sim| {
                 sim.widgets

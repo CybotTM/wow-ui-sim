@@ -1,9 +1,9 @@
 //! XML file loading and element processing.
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::globals::rilua_security::mark_secure_state;
-use crate::lua_api::rilua_methods::create_string;
-use crate::lua_api::rilua_script_helpers::call_error_handler_state;
+use crate::lua_api::globals::security::mark_secure_state;
+use crate::lua_api::methods::create_string;
+use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::xml::{FrameXml, XmlElement, parse_xml_file};
 use rilua::LuaApiMut;
 use std::path::Path;
@@ -177,7 +177,7 @@ fn run_inline_script(
     // error handler and don't abort XML file processing.
     env.with_state(|state| {
         let addon_name = create_string(state, ctx.name);
-        if let Err(e) = crate::lua_api::rilua_methods::call_function_state(
+        if let Err(e) = crate::lua_api::methods::call_function_state(
             state,
             rilua::Val::Function(func.gc_ref()),
             &[addon_name, table],

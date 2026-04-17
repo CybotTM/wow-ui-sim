@@ -3,7 +3,7 @@
 use crate::lua_api::game_data::AuraInfo;
 use std::collections::{HashMap, HashSet, VecDeque};
 
-pub use crate::lua_api::rilua_timer_layout::RiluaPendingTimer as PendingTimer;
+pub use crate::lua_api::timer_layout::RiluaPendingTimer as PendingTimer;
 
 /// What is currently held on the cursor (drag-and-drop state).
 #[derive(Debug, Clone)]

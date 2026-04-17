@@ -16,7 +16,7 @@
 //! with zero member frames. That's a visible regression vs. `master`, so
 //! this test is expected to fail on the branch until the Blizzard UnitFrame
 //! load path is restored (see `intern_string_static` registry-key mismatch
-//! in `rilua_methods.rs`). Once it passes here, it becomes a guard against
+//! in `methods.rs`). Once it passes here, it becomes a guard against
 //! future regressions in party-frame layout or member enumeration.
 
 mod common;

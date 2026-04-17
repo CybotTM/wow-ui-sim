@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::lua_api::rilua_methods::call_function_state;
+use crate::lua_api::methods::call_function_state;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};

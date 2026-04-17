@@ -1,11 +1,11 @@
 //! Lightweight loader environment for addon loading.
 
 use super::env::WowLuaEnv;
-use super::globals::rilua_security::mark_secure_state;
-use super::rilua_methods::create_string;
+use super::globals::security::mark_secure_state;
+use super::methods::create_string;
 use crate::Result;
-use crate::lua_api::rilua_methods::create_table;
-use crate::lua_api::rilua_script_helpers::call_error_handler_state;
+use crate::lua_api::methods::create_table;
+use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::LuaApiMut;
 use rilua::Val;
@@ -253,7 +253,7 @@ impl<'a> LoaderEnv<'a> {
             if self.loading_addon_uses_secure_env() {
                 mark_secure_state(state, &func)?;
             }
-            crate::lua_api::rilua_script_helpers::call_void_function_with_fallback_state(
+            crate::lua_api::script_helpers::call_void_function_with_fallback_state(
                 state,
                 Val::Function(func.gc_ref()),
                 &[],
@@ -273,7 +273,7 @@ impl<'a> LoaderEnv<'a> {
         self.with_state(|state| {
             let func = LuaApiMut::load_bytes(state, code.as_bytes(), name)?;
             let addon_name = create_string(state, addon_name);
-            crate::lua_api::rilua_methods::call_function_state(
+            crate::lua_api::methods::call_function_state(
                 state,
                 Val::Function(func.gc_ref()),
                 &[addon_name, addon_table],
@@ -284,25 +284,25 @@ impl<'a> LoaderEnv<'a> {
 
     pub fn fire_event_with_args(&self, event: &str, args: &[Val]) -> Result<()> {
         let listeners = self.with_state(|state| {
-            Ok::<Vec<u64>, crate::Error>(crate::lua_api::rilua_script_helpers::get_event_listeners(
+            Ok::<Vec<u64>, crate::Error>(crate::lua_api::script_helpers::get_event_listeners(
                 state, event,
             ))
         })?;
         for widget_id in listeners {
             let result: std::result::Result<(), crate::Error> = self.with_state(|state| {
                 let handler =
-                    crate::lua_api::rilua_script_helpers::get_script(state, widget_id, "OnEvent");
+                    crate::lua_api::script_helpers::get_script(state, widget_id, "OnEvent");
                 let Some(handler) = handler else {
                     return Ok(());
                 };
-                let frame = crate::lua_api::rilua_methods::frame_ref(state, widget_id)?;
-                let event_name = crate::lua_api::rilua_methods::create_string(state, event);
+                let frame = crate::lua_api::methods::frame_ref(state, widget_id)?;
+                let event_name = crate::lua_api::methods::create_string(state, event);
                 let mut call_args = Vec::with_capacity(args.len() + 2);
                 call_args.push(frame);
                 call_args.push(event_name);
                 call_args.extend_from_slice(args);
                 let _ =
-                    crate::lua_api::rilua_methods::call_function_state(state, handler, &call_args);
+                    crate::lua_api::methods::call_function_state(state, handler, &call_args);
                 Ok(())
             });
             if let Err(error) = result {

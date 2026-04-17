@@ -1,0 +1,535 @@
+//! rilua RustFn equivalents of globals from utility_api, system_api, and spell_api.
+//!
+//! Each `pub fn` matches the `RustFn` signature:
+//!   `fn(state: &mut LuaState) -> LuaResult<u32>`
+//!
+//! Arguments are extracted with `stack_val(state, n)` (1-based).
+//! Return values are pushed with `state.push(val)` and counted in the return.
+//!
+//! Complex operations (pcall, xpcall, securecall) are stubbed with TODO.
+
+mod c_addon_profiler;
+mod c_addons;
+mod c_model_info;
+mod c_spec;
+mod c_texture;
+mod c_xml_util;
+mod spell_api;
+mod table_util;
+
+use crate::lua_api::methods::create_table;
+use crate::lua_api::script_helpers::{
+    call_error_handler_state, protected_call_state, protected_lua_pcall_state,
+};
+use crate::lua_bridge::stack_val;
+use rilua::LuaApiMut;
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val, runtime_error};
+
+// ── Global table helpers ─────────────────────────────────────────────────────
+
+pub(super) fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
+    let key = state.gc.intern_string(name.as_bytes());
+    let global = state.global;
+    if let Some(g) = state.gc.tables.get_mut(global) {
+        let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(global);
+}
+
+pub(super) fn global_val(state: &mut LuaState, name: &str) -> Val {
+    let key = state.gc.intern_string(name.as_bytes());
+    state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|table| table.get_str(key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+}
+
+pub(super) fn ensure_global_table(state: &mut LuaState, name: &str) -> Val {
+    match global_val(state, name) {
+        table @ Val::Table(_) => table,
+        _ => {
+            let table = create_table(state);
+            set_global_val(state, name, table);
+            table
+        }
+    }
+}
+
+// ── Utility API ─────────────────────────────────────────────────────────────
+
+/// wipe(t) — clear all entries from a table and return it.
+pub fn wipe(state: &mut LuaState) -> LuaResult<u32> {
+    let t = stack_val(state, 1);
+    let Val::Table(table_ref) = t else {
+        state.push(t);
+        return Ok(1);
+    };
+
+    let mut keys = Vec::new();
+    if let Some(table) = state.gc.tables.get(table_ref) {
+        let mut key = Val::Nil;
+        while let Some((next_key, _)) = table.next(key, &state.gc.string_arena)? {
+            keys.push(next_key);
+            key = next_key;
+        }
+    }
+
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        for key in keys {
+            let _ = table.raw_set(key, Val::Nil, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+
+    state.push(t);
+    Ok(1)
+}
+
+/// tinsert(t [, pos], value) — append or insert a value into an array table.
+pub fn tinsert(_state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: implement via table array ops
+    Ok(0)
+}
+
+/// tremove(t [, pos]) — remove and return a value from an array table.
+pub fn tremove(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: implement via table array ops
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+/// tContains(t, value) — return true if value is present in the array part of t.
+pub fn t_contains(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: iterate array part and compare
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// tIndexOf(t, value) — return the integer index of value in t, or nil.
+pub fn t_index_of(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: iterate array part and compare
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+pub use table_util::t_invert;
+pub use table_util::table_util_find_indexed_mismatch;
+
+/// getglobal(name) — return the global named `name`.
+pub fn getglobal(state: &mut LuaState) -> LuaResult<u32> {
+    let name_val = stack_val(state, 1);
+    let Val::Str(name_ref) = name_val else {
+        return Err(runtime_error("getglobal: expected string argument"));
+    };
+    let name = {
+        let lua_str = state
+            .gc
+            .string_arena
+            .get(name_ref)
+            .ok_or_else(|| runtime_error("getglobal: invalid string ref"))?;
+        String::from_utf8(lua_str.data().to_vec())
+            .map_err(|_| runtime_error("getglobal: non-UTF8 name"))?
+    };
+    let global = state.global;
+    let key_ref = state.gc.intern_string(name.as_bytes());
+    let val = state
+        .gc
+        .tables
+        .get(global)
+        .map(|t| t.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    state.push(val);
+    Ok(1)
+}
+
+/// setglobal(name, value) — set the global named `name` to `value`.
+pub fn setglobal(state: &mut LuaState) -> LuaResult<u32> {
+    let name_val = stack_val(state, 1);
+    let value = stack_val(state, 2);
+    let Val::Str(name_ref) = name_val else {
+        return Err(runtime_error(
+            "setglobal: expected string as first argument",
+        ));
+    };
+    let name = {
+        let lua_str = state
+            .gc
+            .string_arena
+            .get(name_ref)
+            .ok_or_else(|| runtime_error("setglobal: invalid string ref"))?;
+        String::from_utf8(lua_str.data().to_vec())
+            .map_err(|_| runtime_error("setglobal: non-UTF8 name"))?
+    };
+    let global = state.global;
+    let key_ref = state.gc.intern_string(name.as_bytes());
+    if let Some(t) = state.gc.tables.get_mut(global) {
+        let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(global);
+    Ok(0)
+}
+
+/// nop(...) — no-operation, discards all arguments.
+pub fn nop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+/// `strsplit(delimiter, str [, limit])` — split `str` on any character in
+/// `delimiter` and push each piece as a separate return value.
+pub fn strsplit(state: &mut LuaState) -> LuaResult<u32> {
+    let delim = val_to_string_bytes(state, stack_val(state, 1));
+    let input = val_to_string_bytes(state, stack_val(state, 2));
+    let limit = match stack_val(state, 3) {
+        Val::Num(n) if n > 0.0 => Some(n as usize),
+        _ => None,
+    };
+    let (Some(delim), Some(input)) = (delim, input) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let pieces = split_on_delimiter_set(&input, &delim, limit);
+    let count = pieces.len() as u32;
+    for piece in pieces {
+        let s = state.gc.intern_string(&piece);
+        state.push(Val::Str(s));
+    }
+    Ok(count.max(1))
+}
+
+fn split_on_delimiter_set(input: &[u8], delim: &[u8], limit: Option<usize>) -> Vec<Vec<u8>> {
+    let mut pieces = Vec::new();
+    let mut current: Vec<u8> = Vec::new();
+    let max_pieces = limit.unwrap_or(usize::MAX);
+    for &byte in input {
+        let is_delim = delim.contains(&byte);
+        let can_split = pieces.len() + 1 < max_pieces;
+        if is_delim && can_split {
+            pieces.push(std::mem::take(&mut current));
+        } else {
+            current.push(byte);
+        }
+    }
+    pieces.push(current);
+    pieces
+}
+
+/// `strjoin(delimiter, ...)` — concatenate the variadic string arguments
+/// separated by `delimiter`.
+pub fn strjoin(state: &mut LuaState) -> LuaResult<u32> {
+    let delim = val_to_string_bytes(state, stack_val(state, 1)).unwrap_or_default();
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let mut out: Vec<u8> = Vec::new();
+    for index in 2..=nargs {
+        if !out.is_empty() {
+            out.extend_from_slice(&delim);
+        }
+        let slot = state.base + index - 1;
+        if let Some(bytes) = val_to_string_bytes(state, state.stack_get(slot)) {
+            out.extend_from_slice(&bytes);
+        }
+    }
+    let joined = state.gc.intern_string(&out);
+    state.push(Val::Str(joined));
+    Ok(1)
+}
+
+fn val_to_string_bytes(state: &LuaState, val: Val) -> Option<Vec<u8>> {
+    match val {
+        Val::Str(s) => state.gc.string_arena.get(s).map(|s| s.data().to_vec()),
+        Val::Num(n) => Some(format!("{n}").into_bytes()),
+        Val::Bool(b) => Some(if b {
+            b"true".to_vec()
+        } else {
+            b"false".to_vec()
+        }),
+        _ => None,
+    }
+}
+
+// ── System API ───────────────────────────────────────────────────────────────
+
+/// type(v) — return the Lua type name of v as a string.
+pub fn type_fn(state: &mut LuaState) -> LuaResult<u32> {
+    let val = stack_val(state, 1);
+    let type_name: &str = match val {
+        Val::Nil => "nil",
+        Val::Bool(_) => "boolean",
+        Val::Num(_) => "number",
+        Val::Str(_) => "string",
+        Val::Table(_) => "table",
+        Val::Function(_) => "function",
+        Val::Userdata(_) | Val::LightUserdata(_) | Val::Thread(_) => "userdata",
+    };
+    let s = state.gc.intern_string(type_name.as_bytes());
+    state.push(Val::Str(s));
+    Ok(1)
+}
+
+/// IsPublicTestClient() — always false in the simulator.
+pub fn is_public_test_client(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// IsBetaBuild() — always false in the simulator.
+pub fn is_beta_build(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// IsPublicBuild() — always true in the simulator.
+pub fn is_public_build(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+/// BNFeaturesEnabled() — always false (no Battle.net in sim).
+pub fn bn_features_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// BNFeaturesEnabledAndConnected() — always false.
+pub fn bn_features_enabled_and_connected(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// BNConnected() — always true (sim pretends connected).
+pub fn bn_connected(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+/// IsGMClient() — always false.
+pub fn is_gm_client(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+/// RegisterStaticConstants(t) — no-op stub.
+pub fn register_static_constants(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+/// pcall(f, ...) — protected call.
+pub fn pcall(state: &mut LuaState) -> LuaResult<u32> {
+    let func = stack_val(state, 1);
+    let args: Vec<Val> = ((state.base + 1)..state.top)
+        .map(|index| state.stack_get(index))
+        .collect();
+    match protected_call_state(state, func, &args) {
+        Ok(results) => {
+            state.push(Val::Bool(true));
+            for result in &results {
+                state.push(*result);
+            }
+            Ok(1 + results.len() as u32)
+        }
+        Err(error) => {
+            state.push(Val::Bool(false));
+            state.push(error);
+            Ok(2)
+        }
+    }
+}
+
+/// xpcall(f, handler, ...) — protected call with error handler.
+pub fn xpcall(state: &mut LuaState) -> LuaResult<u32> {
+    let func = stack_val(state, 1);
+    let handler = stack_val(state, 2);
+    let args: Vec<Val> = ((state.base + 2)..state.top)
+        .map(|index| state.stack_get(index))
+        .collect();
+    match protected_call_state(state, func, &args) {
+        Ok(results) => {
+            state.push(Val::Bool(true));
+            for result in &results {
+                state.push(*result);
+            }
+            Ok(1 + results.len() as u32)
+        }
+        Err(error) => {
+            let handled = if matches!(handler, Val::Function(_)) {
+                protected_call_state(state, handler, &[error])
+                    .ok()
+                    .and_then(|results| results.into_iter().next())
+                    .unwrap_or(error)
+            } else {
+                error
+            };
+            state.push(Val::Bool(false));
+            state.push(handled);
+            Ok(2)
+        }
+    }
+}
+
+/// securecall(name_or_func, ...) — call a function by name in a secure context.
+pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
+    let func = match stack_val(state, 1) {
+        Val::Str(name_ref) => state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|table| table.get_str(name_ref, &state.gc.string_arena))
+            .unwrap_or(Val::Nil),
+        value => value,
+    };
+
+    if !matches!(func, Val::Function(_)) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let arg_count = (state.top - state.base).saturating_sub(1);
+    let args = (0..arg_count)
+        .map(|index| state.stack_get(state.base + 1 + index))
+        .collect::<Vec<_>>();
+
+    match protected_lua_pcall_state(state, func, &args) {
+        Ok(results) if results.is_empty() => {
+            state.push(Val::Nil);
+            Ok(1)
+        }
+        Ok(results) => {
+            let count = results.len() as u32;
+            for value in results {
+                state.push(value);
+            }
+            Ok(count)
+        }
+        Err(error) => {
+            call_error_handler_state(state, &error);
+            state.push(Val::Nil);
+            Ok(1)
+        }
+    }
+}
+
+const ERROR_HANDLER_KEY: &str = "__error_handler";
+
+pub fn seterrorhandler(state: &mut LuaState) -> LuaResult<u32> {
+    let handler = stack_val(state, 1);
+    if !matches!(handler, Val::Function(_)) {
+        return Err(runtime_error("seterrorhandler: expected function"));
+    }
+    let previous = registry_value(state, ERROR_HANDLER_KEY);
+    set_registry_value(state, ERROR_HANDLER_KEY, handler);
+    state.push(previous);
+    Ok(1)
+}
+
+pub fn geterrorhandler(state: &mut LuaState) -> LuaResult<u32> {
+    let handler = ensure_error_handler(state)?;
+    state.push(handler);
+    Ok(1)
+}
+
+fn ensure_error_handler(state: &mut LuaState) -> LuaResult<Val> {
+    let existing = registry_value(state, ERROR_HANDLER_KEY);
+    if existing != Val::Nil {
+        return Ok(existing);
+    }
+    let default_handler = build_default_error_handler(state)?;
+    set_registry_value(state, ERROR_HANDLER_KEY, default_handler);
+    Ok(default_handler)
+}
+
+fn build_default_error_handler(state: &mut LuaState) -> LuaResult<Val> {
+    let func = state.load("return function(_msg) end")?;
+    let call_base = state.top;
+    state.ensure_stack(call_base + 2);
+    state.stack_set(call_base, Val::Function(func.gc_ref()));
+    state.top = call_base + 1;
+    state.call_function(call_base, 1)?;
+    let result = state.stack_get(call_base);
+    state.top = call_base;
+    Ok(result)
+}
+
+fn registry_value(state: &mut LuaState, key: &str) -> Val {
+    let key_ref = state.gc.intern_string(key.as_bytes());
+    state
+        .gc
+        .tables
+        .get(state.registry)
+        .map(|table| table.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+}
+
+fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
+    let key_ref = state.gc.intern_string(key.as_bytes());
+    let registry = state.registry;
+    if let Some(table) = state.gc.tables.get_mut(registry) {
+        let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(registry);
+}
+
+// ── Registration ─────────────────────────────────────────────────────────────
+
+/// Register all functions in this module as rilua globals.
+///
+/// Call this once after the rilua `Lua` instance is created.
+pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
+    register_utility_globals(lua)?;
+    register_system_globals(lua)?;
+    spell_api::register_spell_globals(lua)?;
+
+    let state = lua.state_mut();
+    table_util::register_table_util(state)?;
+    c_addons::register_c_addons(state)?;
+    c_addon_profiler::register_c_addon_profiler(state)?;
+    c_spec::register_c_specialization_info(state)?;
+    c_model_info::register_c_model_info(state)?;
+    c_model_info::register_c_lfg_info(state)?;
+    c_model_info::register_c_wowtoken_secure(state)?;
+    c_texture::register_c_texture(state)?;
+    c_xml_util::register_c_xml_util(state)?;
+    c_addons::register_legacy_addon_globals(state)?;
+    c_spec::register_widget_container_mixin(state)?;
+
+    Ok(())
+}
+
+fn register_utility_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "wipe", wipe)?;
+    LuaApiMut::register_function(lua, "tinsert", tinsert)?;
+    LuaApiMut::register_function(lua, "tremove", tremove)?;
+    LuaApiMut::register_function(lua, "tContains", t_contains)?;
+    LuaApiMut::register_function(lua, "tIndexOf", t_index_of)?;
+    LuaApiMut::register_function(lua, "tInvert", t_invert)?;
+    LuaApiMut::register_function(lua, "getglobal", getglobal)?;
+    LuaApiMut::register_function(lua, "setglobal", setglobal)?;
+    LuaApiMut::register_function(lua, "nop", nop)?;
+    LuaApiMut::register_function(lua, "strsplit", strsplit)?;
+    LuaApiMut::register_function(lua, "strjoin", strjoin)?;
+    Ok(())
+}
+
+fn register_system_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "type", type_fn)?;
+    LuaApiMut::register_function(lua, "IsPublicTestClient", is_public_test_client)?;
+    LuaApiMut::register_function(lua, "IsBetaBuild", is_beta_build)?;
+    LuaApiMut::register_function(lua, "IsPublicBuild", is_public_build)?;
+    LuaApiMut::register_function(lua, "BNFeaturesEnabled", bn_features_enabled)?;
+    LuaApiMut::register_function(
+        lua,
+        "BNFeaturesEnabledAndConnected",
+        bn_features_enabled_and_connected,
+    )?;
+    LuaApiMut::register_function(lua, "BNConnected", bn_connected)?;
+    LuaApiMut::register_function(lua, "IsGMClient", is_gm_client)?;
+    LuaApiMut::register_function(lua, "RegisterStaticConstants", register_static_constants)?;
+    LuaApiMut::register_function(lua, "pcall", pcall)?;
+    LuaApiMut::register_function(lua, "xpcall", xpcall)?;
+    LuaApiMut::register_function(lua, "securecall", securecall)?;
+    LuaApiMut::register_function(lua, "seterrorhandler", seterrorhandler)?;
+    LuaApiMut::register_function(lua, "geterrorhandler", geterrorhandler)?;
+    Ok(())
+}

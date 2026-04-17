@@ -24,7 +24,7 @@ pub fn load_chunk<L: LuaApiMut>(
     let func = LuaApiMut::load_bytes(lua, code.as_bytes(), &chunk_name)
         .map_err(|e| LoadError::Lua(e.to_string()))?;
     if !bytecode_cache::is_disabled() {
-        let bytecode = crate::loader::rilua_bytecode::dump_function(lua.state_mut(), &func)?;
+        let bytecode = crate::loader::bytecode::dump_function(lua.state_mut(), &func)?;
         bytecode_cache::put(hash, &bytecode);
     }
     Ok(func)

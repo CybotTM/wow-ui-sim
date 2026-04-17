@@ -151,7 +151,7 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
     env.with_state(|state| {
         let widget_type = crate::widget::WidgetType::from_str(setup.widget_type)
             .ok_or_else(|| crate::Error::Other(format!("unknown widget type '{}'", setup.widget_type)))?;
-        let parent_id = crate::lua_api::rilua_methods::borrow_state(state)?
+        let parent_id = crate::lua_api::methods::borrow_state(state)?
             .widgets
             .get_id_by_name(setup.parent)
             .ok_or_else(|| crate::Error::Other(format!("missing parent '{}'", setup.parent)))?;
@@ -164,7 +164,7 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             true,
             setup.frame.xml_id,
         )?;
-        crate::lua_api::globals::rilua_create_frame::apply_runtime_template_chain(
+        crate::lua_api::globals::create_frame::apply_runtime_template_chain(
             state,
             frame_id,
             (!setup.inherits.is_empty()).then_some(setup.inherits),

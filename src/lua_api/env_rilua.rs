@@ -38,7 +38,7 @@ impl WowLuaEnv {
     pub fn exec_rilua_secure(&self, code: &str) -> rilua::LuaResult<()> {
         let mut lua = self.lua.borrow_mut();
         let func = LuaApiMut::load(&mut *lua, code)?;
-        super::globals::rilua_security::mark_secure(&mut *lua, &func)?;
+        super::globals::security::mark_secure(&mut *lua, &func)?;
         lua.call_function(&func, &[])?;
         Ok(())
     }

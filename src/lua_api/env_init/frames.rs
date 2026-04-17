@@ -1,10 +1,10 @@
 //! Frame metatable and builtin-frame initialisation.
 
 use crate::lua_api::frame::methods::{
-    rilua_button_anchor_hierarchy, rilua_core_state, rilua_map_frames, rilua_misc,
-    rilua_text_attribute_event, rilua_widgets,
+    button_anchor_hierarchy, core_state, map_frames, misc,
+    text_attribute_event, widgets,
 };
-use crate::lua_api::rilua_methods::{registry_set, table_set};
+use crate::lua_api::methods::{registry_set, table_set};
 use rilua::{LuaApiMut, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -37,13 +37,13 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     let Val::Table(frame_mt_ref) = frame_mt else {
         unreachable!("frame metatable must be a table");
     };
-    super::super::rilua_timer_layout::register_layout_fns_on_table(state, frame_mt_ref)?;
-    rilua_core_state::register_all(state, frame_mt_ref)?;
-    rilua_misc::register_all(state, frame_mt_ref)?;
-    rilua_map_frames::register_all(state, frame_mt_ref)?;
-    rilua_text_attribute_event::register_all(state, frame_mt_ref)?;
-    rilua_button_anchor_hierarchy::register_all(state, frame_mt_ref)?;
-    rilua_widgets::register_all(state, frame_mt_ref)?;
+    super::super::timer_layout::register_layout_fns_on_table(state, frame_mt_ref)?;
+    core_state::register_all(state, frame_mt_ref)?;
+    misc::register_all(state, frame_mt_ref)?;
+    map_frames::register_all(state, frame_mt_ref)?;
+    text_attribute_event::register_all(state, frame_mt_ref)?;
+    button_anchor_hierarchy::register_all(state, frame_mt_ref)?;
+    widgets::register_all(state, frame_mt_ref)?;
 
     // Replace the self-referencing `__index` with a shallow clone that omits
     // metamethod keys. Blizzard's restricted code does

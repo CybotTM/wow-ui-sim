@@ -3,7 +3,7 @@
 pub mod string_data;
 
 use crate::loader::helpers::resolve_lua_escapes;
-use crate::lua_api::rilua_methods::{create_string, table_set};
+use crate::lua_api::methods::{create_string, table_set};
 use rilua::LuaApiMut;
 use rilua::Val;
 

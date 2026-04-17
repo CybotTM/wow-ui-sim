@@ -6,11 +6,11 @@ use super::env_init::{
 };
 use super::state::{AddonInfo, PendingTimer, SimState};
 use crate::Result;
-use crate::lua_api::rilua_methods::{
+use crate::lua_api::methods::{
     call_function as call_rilua_function, create_string, frame_ref, registry_get, registry_set,
     table_set, val_to_string,
 };
-use crate::lua_api::rilua_script_helpers::{call_error_handler, get_event_listeners, get_script};
+use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, get_script};
 use crate::render::font::WowFontSystem;
 use crate::screen::ScreenKind;
 use rilua::{LuaApi, LuaApiMut, Val};
@@ -775,7 +775,7 @@ impl WowLuaEnv {
         let id = next_timer_id();
         {
             let mut lua = self.lua.borrow_mut();
-            crate::lua_api::rilua_timer_layout::store_timer_callback(lua.state_mut(), id, callback);
+            crate::lua_api::timer_layout::store_timer_callback(lua.state_mut(), id, callback);
         }
         let owner_addon = {
             let state = self.state.borrow();
@@ -938,7 +938,7 @@ impl WowLuaEnv {
     fn timer_callback(&self, timer_id: u64) -> Option<Val> {
         let mut lua = self.lua.borrow_mut();
         let callback =
-            crate::lua_api::rilua_timer_layout::get_timer_callback(lua.state_mut(), timer_id);
+            crate::lua_api::timer_layout::get_timer_callback(lua.state_mut(), timer_id);
         (!matches!(callback, Val::Nil)).then_some(callback)
     }
 
@@ -959,7 +959,7 @@ impl WowLuaEnv {
 
     fn remove_timer_callback(&self, timer_id: u64) {
         let mut lua = self.lua.borrow_mut();
-        crate::lua_api::rilua_timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
+        crate::lua_api::timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
     }
 }
 

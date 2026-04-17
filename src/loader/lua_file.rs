@@ -1,10 +1,10 @@
 //! Lua file loading functionality.
 
 use crate::lua_api::LoaderEnv;
-use crate::lua_api::globals::rilua_security::mark_secure_state;
-use crate::lua_api::rilua_methods::create_string;
-use crate::lua_api::rilua_script_helpers::call_error_handler_state;
-use crate::lua_api::rilua_taint::stamp_addon_taint_state;
+use crate::lua_api::globals::security::mark_secure_state;
+use crate::lua_api::methods::create_string;
+use crate::lua_api::script_helpers::call_error_handler_state;
+use crate::lua_api::taint::stamp_addon_taint_state;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use std::borrow::Cow;
@@ -232,7 +232,7 @@ fn exec_addon_func(
     ctx: &AddonContext,
 ) -> Result<(), LoadError> {
     let name = create_string(state, ctx.name);
-    crate::lua_api::rilua_methods::call_function_state(
+    crate::lua_api::methods::call_function_state(
         state,
         rilua::Val::Function(func.gc_ref()),
         &[name, ctx.table],
@@ -270,7 +270,7 @@ fn load_cached_or_compile(
     timing.cache_misses += 1;
     let func = compile_from_source(lua, bytes, chunk_name)?;
     if !bytecode_cache::is_disabled() {
-        let bytecode = crate::loader::rilua_bytecode::dump_function(lua, &func)?;
+        let bytecode = crate::loader::bytecode::dump_function(lua, &func)?;
         bytecode_cache::put(hash, &bytecode);
     }
     Ok(func)

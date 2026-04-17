@@ -1,6 +1,6 @@
 //! Registry table initialisation and script-error reporter setup.
 
-use crate::lua_api::rilua_methods::{registry_set, registry_table_or_create};
+use crate::lua_api::methods::{registry_set, registry_table_or_create};
 use rilua::LuaApiMut;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -45,7 +45,7 @@ fn register_script_error_reporter(state: &mut rilua::vm::state::LuaState) {
             other => format!("{other:?}"),
         };
         eprintln!("Lua error: {msg}");
-        crate::lua_api::rilua_script_helpers::call_error_handler_state(state, &msg);
+        crate::lua_api::script_helpers::call_error_handler_state(state, &msg);
         Ok(0)
     }
 

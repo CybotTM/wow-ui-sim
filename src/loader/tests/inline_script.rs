@@ -116,15 +116,15 @@ fn test_load_lua_file_runtime_error_collects_lua_error() {
 fn test_collect_lua_error_tracks_seen_message_counts() {
     let env = WowLuaEnv::new().unwrap();
 
-    let first_seen = crate::lua_api::rilua_script_helpers::collect_lua_error(
+    let first_seen = crate::lua_api::script_helpers::collect_lua_error(
         env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    let second_seen = crate::lua_api::rilua_script_helpers::collect_lua_error(
+    let second_seen = crate::lua_api::script_helpers::collect_lua_error(
         env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    let third_seen = crate::lua_api::rilua_script_helpers::collect_lua_error(
+    let third_seen = crate::lua_api::script_helpers::collect_lua_error(
         env.rilua().state(),
         "different boom",
     );
@@ -142,15 +142,15 @@ fn test_collect_lua_error_tracks_seen_message_counts() {
 fn test_suppressed_lua_error_summary_lines_report_repeat_counts() {
     let env = WowLuaEnv::new().unwrap();
 
-    crate::lua_api::rilua_script_helpers::collect_lua_error(
+    crate::lua_api::script_helpers::collect_lua_error(
         env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    crate::lua_api::rilua_script_helpers::collect_lua_error(
+    crate::lua_api::script_helpers::collect_lua_error(
         env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    crate::lua_api::rilua_script_helpers::collect_lua_error(env.rilua().state(), "different boom");
+    crate::lua_api::script_helpers::collect_lua_error(env.rilua().state(), "different boom");
 
     let state = env.state().borrow();
     let summary = crate::lua_errors::suppressed_error_summary_lines(&state);
@@ -166,7 +166,7 @@ fn test_collect_lua_error_records_loading_addon_name() {
     let env = WowLuaEnv::new().unwrap();
     super::register_loading_test_addon(&env);
 
-    crate::lua_api::rilua_script_helpers::collect_lua_error(env.rilua().state(), "boom");
+    crate::lua_api::script_helpers::collect_lua_error(env.rilua().state(), "boom");
 
     let state = env.state().borrow();
     assert_eq!(state.lua_error_records.len(), 1);
@@ -213,7 +213,7 @@ fn test_collect_lua_error_prefers_executing_addon_name() {
         state.executing_addon_index = Some(executing_idx);
     }
 
-    crate::lua_api::rilua_script_helpers::collect_lua_error(env.rilua().state(), "boom");
+    crate::lua_api::script_helpers::collect_lua_error(env.rilua().state(), "boom");
 
     let state = env.state().borrow();
     assert_eq!(state.lua_error_records.len(), 1);

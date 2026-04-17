@@ -207,7 +207,7 @@ fn test_create_frame_exposes_core_event_methods() {
     let registry_mt_type: String = {
         let mut lua = env.lua.borrow_mut();
         let state = lua.state_mut();
-        match crate::lua_api::rilua_methods::registry_get(state, "__rilua_frame_mt") {
+        match crate::lua_api::methods::registry_get(state, "__rilua_frame_mt") {
             rilua::Val::Table(_) => "table".to_string(),
             other => other.type_name().to_string(),
         }

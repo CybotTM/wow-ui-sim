@@ -15,20 +15,21 @@ use std::rc::Rc;
 /// one entry point for the current global surface again.
 pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> crate::Result<()> {
     super::strings::register_all_ui_strings(lua)?;
-    super::rilua_security::register_all(lua)?;
-    super::rilua_keybindings::register_all(lua)?;
-    super::rilua_stubs::register_all(lua.state_mut());
-    // Must run after rilua_stubs so the fixture aura data overrides the
+    super::security::register_all(lua)?;
+    super::keybindings::register_all(lua)?;
+    super::stubs::register_all(lua.state_mut());
+    // Must run after stubs so the fixture aura data overrides the
     // stub_nil registrations for C_UnitAuras.GetAuraSlots & friends.
-    super::rilua_auras::register_all(lua.state_mut());
-    super::rilua_create_frame::register_all(lua)?;
-    super::rilua_font_strings_collection::register_all(lua)?;
-    super::rilua_utility_system_spell::register_all(lua)?;
-    super::rilua_net_stats::register_all(lua)?;
-    super::rilua_store_frame::register_all(lua)?;
-    super::rilua_missing_surface::register_all(lua)?;
-    super::rilua_admin::register_all(lua)?;
-    super::super::rilua_timer_layout::register_all(lua)?;
+    super::auras::register_all(lua.state_mut());
+    super::create_frame::register_all(lua)?;
+    super::font_strings_collection::register_all(lua)?;
+    super::utility_system_spell::register_all(lua)?;
+    super::net_stats::register_all(lua)?;
+    super::store_frame::register_all(lua)?;
+    super::unit_probes::register_all(lua)?;
+    super::missing_surface::register_all(lua)?;
+    super::admin::register_all(lua)?;
+    super::super::timer_layout::register_all(lua)?;
     Ok(())
 }
 

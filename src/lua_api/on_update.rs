@@ -26,7 +26,7 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
 
     {
         let mut lua = env.rilua_mut();
-        super::rilua_script_helpers::dispatch_on_update(&mut lua, &frame_ids, elapsed)?;
+        super::script_helpers::dispatch_on_update(&mut lua, &frame_ids, elapsed)?;
     }
 
     for frame_id in &frame_ids {

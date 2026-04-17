@@ -9,7 +9,7 @@ use super::AnchorPoint;
 /// also support — Blizzard uses `SetAttribute` + `OnAttributeChanged` as a
 /// secure message bus, passing tables and closures across the taint
 /// barrier — are stored in a Lua registry table and referenced here by
-/// key. See `rilua_text_attribute_event::val_to_attribute`.
+/// key. See `text_attribute_event::val_to_attribute`.
 #[derive(Debug, Clone)]
 pub enum AttributeValue {
     String(String),

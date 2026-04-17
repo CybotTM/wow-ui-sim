@@ -238,7 +238,7 @@ fn apply_parent_key_attachments(
     env.with_state(|state| {
         for attachment in attachments {
             let ids = {
-                let sim = crate::lua_api::rilua_methods::borrow_state(state)
+                let sim = crate::lua_api::methods::borrow_state(state)
                     .map_err(|error| LoadError::Lua(error.to_string()))?;
                 (
                     sim.widgets.get_id_by_name(parent_name),
@@ -268,7 +268,7 @@ fn append_parent_array_entry(
     key: &str,
     child_id: u64,
 ) -> Result<(), LoadError> {
-    use crate::lua_api::rilua_methods::{create_table, frame_ref, table_get, table_set};
+    use crate::lua_api::methods::{create_table, frame_ref, table_get, table_set};
     use rilua::Val;
 
     let parent = frame_ref(state, parent_id).map_err(|error| LoadError::Lua(error.to_string()))?;
