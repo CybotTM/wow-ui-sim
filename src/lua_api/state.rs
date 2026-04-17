@@ -898,39 +898,44 @@ fn achievement_veteran_of_the_alliance() -> AchievementInfo {
 /// time-limited POI so tests can exercise both the nil and the
 /// number return paths of `GetAreaPOISecondsLeft`.
 fn default_area_pois() -> HashMap<i32, AreaPoiInfo> {
-    [
-        AreaPoiInfo {
-            area_poi_id: 7000,
-            name: "Stormwind Portal Room".into(),
-            ui_map_id: Some(84),
-            position: (0.52, 0.38),
-            atlas_name: Some("Mage-Portal".into()),
-            description: Some("Portals to every capital city.".into()),
-            faction_id: None,
-            icon_widget_set: None,
-            linked_ui_map_id: None,
-            is_current_event: false,
-            should_glow: false,
-            seconds_left: None,
-        },
-        AreaPoiInfo {
-            area_poi_id: 7001,
-            name: "Legion Invasion".into(),
-            ui_map_id: Some(13),
-            position: (0.41, 0.62),
-            atlas_name: Some("DemonInvasion3".into()),
-            description: Some("A demonic incursion.".into()),
-            faction_id: None,
-            icon_widget_set: None,
-            linked_ui_map_id: None,
-            is_current_event: true,
-            should_glow: true,
-            seconds_left: Some(3600),
-        },
-    ]
-    .into_iter()
-    .map(|p| (p.area_poi_id, p))
-    .collect()
+    [stormwind_portal_room_poi(), legion_invasion_poi()]
+        .into_iter()
+        .map(|p| (p.area_poi_id, p))
+        .collect()
+}
+
+fn stormwind_portal_room_poi() -> AreaPoiInfo {
+    AreaPoiInfo {
+        area_poi_id: 7000,
+        name: "Stormwind Portal Room".into(),
+        ui_map_id: Some(84),
+        position: (0.52, 0.38),
+        atlas_name: Some("Mage-Portal".into()),
+        description: Some("Portals to every capital city.".into()),
+        faction_id: None,
+        icon_widget_set: None,
+        linked_ui_map_id: None,
+        is_current_event: false,
+        should_glow: false,
+        seconds_left: None,
+    }
+}
+
+fn legion_invasion_poi() -> AreaPoiInfo {
+    AreaPoiInfo {
+        area_poi_id: 7001,
+        name: "Legion Invasion".into(),
+        ui_map_id: Some(13),
+        position: (0.41, 0.62),
+        atlas_name: Some("DemonInvasion3".into()),
+        description: Some("A demonic incursion.".into()),
+        faction_id: None,
+        icon_widget_set: None,
+        linked_ui_map_id: None,
+        is_current_event: true,
+        should_glow: true,
+        seconds_left: Some(3600),
+    }
 }
 
 /// Seed `SimState.lfg_category_info` with the two standard retail categories:
