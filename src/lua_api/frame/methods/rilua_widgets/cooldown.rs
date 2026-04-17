@@ -481,114 +481,57 @@ pub(super) fn set_tex_coord_range(_state: &mut LuaState) -> LuaResult<u32> {
 // register_cooldown
 // ---------------------------------------------------------------------------
 
+const COOLDOWN_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    // Duration / expiration configuration
+    ("SetCooldown", set_cooldown),
+    ("SetCooldownUNIX", set_cooldown_unix),
+    ("SetCooldownFromExpirationTime", set_cooldown_from_expiration_time),
+    ("SetCooldownDuration", set_cooldown_duration),
+    ("SetCooldownFromDurationObject", set_from_duration_object),
+    ("GetCooldownTimes", get_cooldown_times),
+    ("GetCooldownDuration", get_cooldown_duration),
+    ("GetCooldownDisplayDuration", get_cooldown_display_duration),
+    // Playback controls
+    ("Clear", clear),
+    ("Pause", pause),
+    ("Resume", resume),
+    ("IsPaused", is_paused),
+    // Drawing flags
+    ("SetDrawSwipe", set_draw_swipe),
+    ("GetDrawSwipe", get_draw_swipe),
+    ("SetDrawEdge", set_draw_edge),
+    ("GetDrawEdge", get_draw_edge),
+    ("SetDrawBling", set_draw_bling),
+    ("GetDrawBling", get_draw_bling),
+    ("SetReverse", set_reverse),
+    ("GetReverse", get_reverse),
+    // Countdown number formatting
+    ("SetHideCountdownNumbers", set_hide_countdown_numbers),
+    ("GetHideCountdownNumbers", get_hide_countdown_numbers),
+    ("SetMinimumCountdownDuration", set_minimum_countdown_duration),
+    ("GetMinimumCountdownDuration", get_minimum_countdown_duration),
+    ("SetCountdownAbbrevThreshold", set_countdown_abbrev_threshold),
+    // Edge scaling
+    ("SetEdgeScale", set_edge_scale),
+    ("GetEdgeScale", get_edge_scale),
+    // Aura-display-time mode + circular edge
+    ("SetUseAuraDisplayTime", set_use_aura_display_time),
+    ("GetUseAuraDisplayTime", get_use_aura_display_time),
+    ("SetUseCircularEdge", set_use_circular_edge),
+    // Textures / fonts / colors
+    ("SetSwipeTexture", set_swipe_texture),
+    ("SetEdgeTexture", set_edge_texture),
+    ("SetBlingTexture", set_bling_texture),
+    ("SetCountdownFont", set_countdown_font),
+    ("GetCountdownFontString", get_countdown_font_string),
+    ("SetSwipeColor", set_swipe_color),
+    ("SetEdgeColor", set_edge_color),
+    ("SetTexCoordRange", set_tex_coord_range),
+];
+
 pub(super) fn register_cooldown(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetCooldown", set_cooldown)?;
-    table_set_rust_fn(state, metatable, "SetCooldownUNIX", set_cooldown_unix)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetCooldownFromExpirationTime",
-        set_cooldown_from_expiration_time,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetCooldownDuration",
-        set_cooldown_duration,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetCooldownFromDurationObject",
-        set_from_duration_object,
-    )?;
-    table_set_rust_fn(state, metatable, "GetCooldownTimes", get_cooldown_times)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetCooldownDuration",
-        get_cooldown_duration,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetCooldownDisplayDuration",
-        get_cooldown_display_duration,
-    )?;
-    table_set_rust_fn(state, metatable, "Clear", clear)?;
-    table_set_rust_fn(state, metatable, "Pause", pause)?;
-    table_set_rust_fn(state, metatable, "Resume", resume)?;
-    table_set_rust_fn(state, metatable, "IsPaused", is_paused)?;
-    table_set_rust_fn(state, metatable, "SetDrawSwipe", set_draw_swipe)?;
-    table_set_rust_fn(state, metatable, "GetDrawSwipe", get_draw_swipe)?;
-    table_set_rust_fn(state, metatable, "SetDrawEdge", set_draw_edge)?;
-    table_set_rust_fn(state, metatable, "GetDrawEdge", get_draw_edge)?;
-    table_set_rust_fn(state, metatable, "SetDrawBling", set_draw_bling)?;
-    table_set_rust_fn(state, metatable, "GetDrawBling", get_draw_bling)?;
-    table_set_rust_fn(state, metatable, "SetReverse", set_reverse)?;
-    table_set_rust_fn(state, metatable, "GetReverse", get_reverse)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetHideCountdownNumbers",
-        set_hide_countdown_numbers,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetHideCountdownNumbers",
-        get_hide_countdown_numbers,
-    )?;
-    table_set_rust_fn(state, metatable, "SetEdgeScale", set_edge_scale)?;
-    table_set_rust_fn(state, metatable, "GetEdgeScale", get_edge_scale)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetMinimumCountdownDuration",
-        set_minimum_countdown_duration,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetMinimumCountdownDuration",
-        get_minimum_countdown_duration,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetUseAuraDisplayTime",
-        set_use_aura_display_time,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetUseAuraDisplayTime",
-        get_use_aura_display_time,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetUseCircularEdge",
-        set_use_circular_edge,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetCountdownAbbrevThreshold",
-        set_countdown_abbrev_threshold,
-    )?;
-    table_set_rust_fn(state, metatable, "SetSwipeTexture", set_swipe_texture)?;
-    table_set_rust_fn(state, metatable, "SetEdgeTexture", set_edge_texture)?;
-    table_set_rust_fn(state, metatable, "SetBlingTexture", set_bling_texture)?;
-    table_set_rust_fn(state, metatable, "SetCountdownFont", set_countdown_font)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetCountdownFontString",
-        get_countdown_font_string,
-    )?;
-    table_set_rust_fn(state, metatable, "SetSwipeColor", set_swipe_color)?;
-    table_set_rust_fn(state, metatable, "SetEdgeColor", set_edge_color)?;
-    table_set_rust_fn(state, metatable, "SetTexCoordRange", set_tex_coord_range)?;
+    for (name, func) in COOLDOWN_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
