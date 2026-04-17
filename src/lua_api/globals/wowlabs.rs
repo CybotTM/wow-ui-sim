@@ -1,6 +1,8 @@
 //! Seeded WoW Labs / Plunderstorm namespaces used by Blizzard UI tests.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table, table_set};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
 use crate::lua_api::state::{
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint,
@@ -165,13 +167,10 @@ fn push_party_members(state: &mut LuaState, members: &[WowLabsPartyMember]) -> L
     };
     for (index, member) in members.iter().enumerate() {
         let member_table = create_table(state);
-        table_set(state, member_table, "playerName", create_string(state, &member.player_name));
-        table_set(
-            state,
-            member_table,
-            "partyMemberGUID",
-            create_string(state, &member.party_member_guid),
-        );
+        let player_name = create_string(state, &member.player_name);
+        let party_member_guid = create_string(state, &member.party_member_guid);
+        table_set(state, member_table, "playerName", player_name);
+        table_set(state, member_table, "partyMemberGUID", party_member_guid);
         table_set(
             state,
             member_table,
@@ -245,12 +244,20 @@ fn snapshot_party_members(state: &mut LuaState) -> LuaResult<Vec<WowLabsPartyMem
 }
 
 fn snapshot_invites(state: &mut LuaState) -> LuaResult<Vec<WowLabsPartyInvite>> {
-    Ok(borrow_state(state)?.wowlabs.matchmaking.party_invites.clone())
+    Ok(borrow_state(state)?
+        .wowlabs
+        .matchmaking
+        .party_invites
+        .clone())
 }
 
 fn snapshot_matchmaking(state: &mut LuaState) -> LuaResult<WowLabsMatchmakingState> {
     let mut snapshot = borrow_state(state)?.wowlabs.matchmaking.clone();
-    if let Some(member) = snapshot.party_members.iter_mut().find(|member| member.is_local_player) {
+    if let Some(member) = snapshot
+        .party_members
+        .iter_mut()
+        .find(|member| member.is_local_player)
+    {
         member.player_name = borrow_state(state)?.player.name.clone();
     }
     Ok(snapshot)
@@ -336,7 +343,11 @@ fn select_wowlabs_area(state: &mut LuaState) -> LuaResult<u32> {
     let selected = {
         let mut sim = borrow_state_mut(state)?;
         let data = &mut sim.wowlabs.data_manager;
-        if data.areas.iter().any(|area| area.wow_labs_area_id == area_id) {
+        if data
+            .areas
+            .iter()
+            .any(|area| area.wow_labs_area_id == area_id)
+        {
             data.selected_area_id = Some(area_id);
             data.confirmed_area_id = Some(area_id);
             true
@@ -395,7 +406,10 @@ fn decline_party_invite(state: &mut LuaState) -> LuaResult<u32> {
     let declined = {
         let mut sim = borrow_state_mut(state)?;
         let invites = &mut sim.wowlabs.matchmaking.party_invites;
-        if let Some(index) = invites.iter().position(|invite| invite.invite_id == invite_id) {
+        if let Some(index) = invites
+            .iter()
+            .position(|invite| invite.invite_id == invite_id)
+        {
             invites.remove(index);
             true
         } else {
@@ -432,8 +446,10 @@ fn get_party_invite_by_index(state: &mut LuaState) -> LuaResult<u32> {
     let index = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0).max(0.0) as usize;
     match snapshot_invites(state)?.get(index) {
         Some(invite) => {
-            state.push(create_string(state, &invite.inviter_name));
-            state.push(create_string(state, &invite.invite_id));
+            let inviter_name = create_string(state, &invite.inviter_name);
+            let invite_id = create_string(state, &invite.invite_id);
+            state.push(inviter_name);
+            state.push(invite_id);
             Ok(2)
         }
         None => Ok(0),
@@ -441,17 +457,23 @@ fn get_party_invite_by_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_party_playlist_entry(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(snapshot_matchmaking(state)?.party_playlist_entry as f64));
+    state.push(Val::Num(
+        snapshot_matchmaking(state)?.party_playlist_entry as f64,
+    ));
     Ok(1)
 }
 
 fn get_party_size(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(snapshot_matchmaking(state)?.party_members.len() as f64));
+    state.push(Val::Num(
+        snapshot_matchmaking(state)?.party_members.len() as f64
+    ));
     Ok(1)
 }
 
 fn is_alone_in_wowlabs_party(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(snapshot_matchmaking(state)?.party_members.len() <= 1));
+    state.push(Val::Bool(
+        snapshot_matchmaking(state)?.party_members.len() <= 1,
+    ));
     Ok(1)
 }
 
@@ -466,7 +488,9 @@ fn is_finding_match(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_party_full(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(snapshot_matchmaking(state)?.party_members.len() >= 3));
+    state.push(Val::Bool(
+        snapshot_matchmaking(state)?.party_members.len() >= 3,
+    ));
     Ok(1)
 }
 
@@ -590,6 +614,13 @@ fn set_player_ready(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     let matchmaking = &mut sim.wowlabs.matchmaking;
     matchmaking.is_player_ready = is_ready;
+    if let Some(local_member) = matchmaking
+        .party_members
+        .iter_mut()
+        .find(|member| member.is_local_player)
+    {
+        local_member.is_ready = is_ready;
+    }
     if is_ready && can_queue(matchmaking) && local_player_is_leader(matchmaking) {
         matchmaking.is_finding_match = true;
         matchmaking.in_queue_time_start = 1.0;
