@@ -46,7 +46,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ResetCameraPosition",
     "SetActionBarToggles",
     "SetChannelPassword",
-    "SetCVar",
     "SetInsertItemsLeftToRight",
     "SetLootThreshold",
     "SetPartyLeader",

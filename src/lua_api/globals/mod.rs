@@ -59,6 +59,7 @@ pub mod profession_data;
 pub mod quest_verbs;
 pub mod register;
 pub mod security;
+pub mod set_cvar_verb;
 pub mod spell_api;
 pub mod spell_macro_verbs;
 pub mod spellbook_data;
