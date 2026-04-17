@@ -9,13 +9,13 @@ mod handlers;
 mod register;
 
 use crate::lua_api::methods::create_table;
+use rilua::Val;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::Val;
 
-pub use register::register_all;
 pub(super) use handlers::is_world_quest;
+pub use register::register_all;
 
 pub(super) type SurfaceFn = fn(&mut LuaState) -> rilua::LuaResult<u32>;
 

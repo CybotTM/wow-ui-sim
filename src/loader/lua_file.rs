@@ -203,6 +203,11 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha(), chatFrame.oldAlpha), chatFrame.oldAlpha);",
                 "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha() or 0, chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA), chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA);",
             )
+    } else if chunk_name.ends_with("/TextToSpeechFrame.lua") {
+        source.replace(
+            "TextToSpeechFrame_SetupVoiceDropdown(self);\n\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown(self);",
+            "if type(TextToSpeechFrame_SetupVoiceDropdown) ~= \"function\" then\n\t\t\tfunction TextToSpeechFrame_SetupVoiceDropdown(self)\n\t\t\t\tSetupVoiceMenu(self.PanelContainer.TtsVoiceDropdown, Enum.TtsVoiceType.Standard);\n\t\t\tend\n\t\tend\n\t\tif type(TextToSpeechFrame_SetupAlternateVoiceDropdown) ~= \"function\" then\n\t\t\tfunction TextToSpeechFrame_SetupAlternateVoiceDropdown(self)\n\t\t\t\tSetupVoiceMenu(self.PanelContainer.TtsVoiceAlternateDropdown, Enum.TtsVoiceType.Alternate);\n\t\t\tend\n\t\tend\n\n\t\tTextToSpeechFrame_SetupVoiceDropdown(self);\n\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown(self);",
+        )
     } else if chunk_name.ends_with("/Blizzard_PetBattleUI.lua") {
         source
             .replace(

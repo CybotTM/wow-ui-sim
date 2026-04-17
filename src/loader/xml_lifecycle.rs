@@ -4,6 +4,7 @@ use crate::loader::precompiled;
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::frame_ref;
 use crate::lua_api::script_helpers::collect_lua_error;
+use crate::lua_api::script_helpers::get_script;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(super) struct LifecycleScripts {
@@ -37,6 +38,7 @@ pub fn fire_lifecycle_scripts(
             return Ok::<(), crate::Error>(());
         };
         if lifecycle.on_load {
+            debug_onload_handler_state(state, frame_id, name);
             fire_handler(state, name, "OnLoad", precompiled::fire_onload, frame);
         }
         if lifecycle.on_show && frame_visible {
@@ -44,6 +46,34 @@ pub fn fire_lifecycle_scripts(
         }
         Ok::<(), crate::Error>(())
     });
+}
+
+fn debug_onload_handler_state(
+    state: &mut rilua::vm::state::LuaState,
+    frame_id: u64,
+    frame_name: &str,
+) {
+    if !frame_name.starts_with("__Blizzard_PlayerSpells_") {
+        return;
+    }
+    let Some(handler) = get_script(state, frame_id, "OnLoad") else {
+        eprintln!("[onload-debug] {frame_name} handler=nil");
+        return;
+    };
+    match handler {
+        rilua::Val::Function(func_ref) => {
+            let closure_exists = state.gc.closures.get(func_ref).is_some();
+            eprintln!(
+                "[onload-debug] {frame_name} handler=function closure_exists={closure_exists}"
+            );
+        }
+        other => {
+            eprintln!(
+                "[onload-debug] {frame_name} handler_type={}",
+                other.type_name()
+            );
+        }
+    }
 }
 
 fn fire_handler(

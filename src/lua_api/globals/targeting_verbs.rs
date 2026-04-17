@@ -67,10 +67,7 @@ fn player_target_info(st: &crate::lua_api::state::SimState) -> TargetInfo {
     }
 }
 
-fn resolve_party_token(
-    st: &crate::lua_api::state::SimState,
-    token: &str,
-) -> Option<TargetInfo> {
+fn resolve_party_token(st: &crate::lua_api::state::SimState, token: &str) -> Option<TargetInfo> {
     let idx = parse_party_slot(token)?;
     if st.party_group_active {
         st.party_members.get(idx).map(party_member_to_target_info)

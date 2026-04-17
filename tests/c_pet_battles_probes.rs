@@ -76,9 +76,7 @@ fn get_pet_info_enemy_returns_rabbit() {
 #[test]
 fn get_pet_info_out_of_range_returns_nil() {
     let env = env();
-    let result: Option<String> = env
-        .eval("return C_PetBattles.GetPetInfo(1, 99)")
-        .unwrap();
+    let result: Option<String> = env.eval("return C_PetBattles.GetPetInfo(1, 99)").unwrap();
     assert!(result.is_none(), "out-of-range slot should return nil");
 }
 
@@ -87,9 +85,8 @@ fn get_pet_info_out_of_range_returns_nil() {
 #[test]
 fn get_pet_stats_returns_seeded_values() {
     let env = env();
-    let (hp, max_hp, power, speed, pet_type): (i32, i32, i32, i32, i32) = env
-        .eval("return C_PetBattles.GetPetStats(1, 1)")
-        .unwrap();
+    let (hp, max_hp, power, speed, pet_type): (i32, i32, i32, i32, i32) =
+        env.eval("return C_PetBattles.GetPetStats(1, 1)").unwrap();
     assert_eq!(hp, 289);
     assert_eq!(max_hp, 289);
     assert_eq!(power, 10);
@@ -105,9 +102,8 @@ fn get_pet_stats_mutation_reflects() {
         sim.pet_battles.player_pets[0].current_health = 150;
         sim.pet_battles.player_pets[0].power = 25;
     }
-    let (hp, _max_hp, power, _speed, _pt): (i32, i32, i32, i32, i32) = env
-        .eval("return C_PetBattles.GetPetStats(1, 1)")
-        .unwrap();
+    let (hp, _max_hp, power, _speed, _pt): (i32, i32, i32, i32, i32) =
+        env.eval("return C_PetBattles.GetPetStats(1, 1)").unwrap();
     assert_eq!(hp, 150);
     assert_eq!(power, 25);
 }
@@ -184,9 +180,7 @@ fn get_round_timing_info_reflects_mutation() {
 #[test]
 fn get_turn_result_default_zero() {
     let env = env();
-    let result: i32 = env
-        .eval("return C_PetBattles.GetTurnResult(1)")
-        .unwrap();
+    let result: i32 = env.eval("return C_PetBattles.GetTurnResult(1)").unwrap();
     assert_eq!(result, 0);
 }
 
@@ -195,9 +189,7 @@ fn get_turn_result_default_zero() {
 #[test]
 fn get_xp_returns_zero_by_default() {
     let env = env();
-    let (xp, max_xp): (i32, i32) = env
-        .eval("return C_PetBattles.GetXP(1, 1)")
-        .unwrap();
+    let (xp, max_xp): (i32, i32) = env.eval("return C_PetBattles.GetXP(1, 1)").unwrap();
     assert_eq!(xp, 0);
     assert_eq!(max_xp, 100);
 }
@@ -220,7 +212,8 @@ fn start_pvp_matchmaking_sets_flag() {
         !env.state().borrow().pet_battles.is_matchmaking,
         "default false"
     );
-    env.eval::<()>("C_PetBattles.StartPVPMatchmaking()").unwrap();
+    env.eval::<()>("C_PetBattles.StartPVPMatchmaking()")
+        .unwrap();
     assert!(
         env.state().borrow().pet_battles.is_matchmaking,
         "flag set after call"
@@ -261,8 +254,6 @@ fn custom_seeded_pet_reflects_in_get_pet_info() {
         }];
         sim.pet_battles.num_pets_player = 1;
     }
-    let name: String = env
-        .eval("return C_PetBattles.GetPetInfo(1, 1)")
-        .unwrap();
+    let name: String = env.eval("return C_PetBattles.GetPetInfo(1, 1)").unwrap();
     assert_eq!(name, "Lil' Ragnaros");
 }

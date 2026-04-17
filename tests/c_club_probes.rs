@@ -55,9 +55,10 @@ fn get_club_members_returns_guild_roster() {
     let env = env();
     {
         let mut state = env.state().borrow_mut();
-        state.world.guild_members = vec![
-            GuildMember { name: "Uther".into(), rank_index: 1 },
-        ];
+        state.world.guild_members = vec![GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+        }];
     }
     let count: i32 = env
         .eval("return #C_Club.GetClubMembers('guild-0')")
@@ -70,9 +71,10 @@ fn get_club_members_entry_has_required_fields() {
     let env = env();
     {
         let mut state = env.state().borrow_mut();
-        state.world.guild_members = vec![
-            GuildMember { name: "Uther".into(), rank_index: 1 },
-        ];
+        state.world.guild_members = vec![GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+        }];
     }
     let (name, is_self, presence): (String, bool, i32) = env
         .eval(

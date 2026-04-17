@@ -29,6 +29,10 @@ pub fn table_set_rust_fn(
     let key = Val::Str(key_ref);
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);
+    let stack_slot = state.top;
+    state.ensure_stack(stack_slot + 1);
+    state.stack_set(stack_slot, Val::Function(closure_ref));
+    state.top = stack_slot + 1;
     let table = state.gc.tables.get_mut(table_ref).ok_or_else(|| {
         LuaError::Runtime(RuntimeError {
             message: "table has been collected".into(),
@@ -36,7 +40,10 @@ pub fn table_set_rust_fn(
             traceback: vec![],
         })
     })?;
-    table.raw_set(key, Val::Function(closure_ref), &state.gc.string_arena)
+    let result = table.raw_set(key, Val::Function(closure_ref), &state.gc.string_arena);
+    state.gc.barrier_back(table_ref);
+    state.top = stack_slot;
+    result
 }
 
 /// Allocate a Lua table with wow-ui-sim's frame backing metadata attached.

@@ -34,7 +34,12 @@ pub(super) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn(state, ns, "IsPriorityAura", is_priority_aura)?;
     table_set_rust_fn(state, ns, "IsSelfBuff", is_self_buff)?;
     table_set_rust_fn(state, ns, "IsSpellUsable", is_spell_usable)?;
-    table_set_rust_fn(state, ns, "TargetSpellIsEnchanting", target_spell_is_enchanting)?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "TargetSpellIsEnchanting",
+        target_spell_is_enchanting,
+    )?;
     table_set_rust_fn(
         state,
         ns,
@@ -62,8 +67,18 @@ fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
     let info = create_table(state);
     let name = create_string(state, spell.name);
     table_set(state, info, "name", name);
-    table_set(state, info, "iconID", Val::Num(spell.icon_file_data_id as f64));
-    table_set(state, info, "originalIconID", Val::Num(spell.icon_file_data_id as f64));
+    table_set(
+        state,
+        info,
+        "iconID",
+        Val::Num(spell.icon_file_data_id as f64),
+    );
+    table_set(
+        state,
+        info,
+        "originalIconID",
+        Val::Num(spell.icon_file_data_id as f64),
+    );
     table_set(state, info, "castTime", Val::Num(0.0));
     table_set(state, info, "minRange", Val::Num(0.0));
     table_set(state, info, "maxRange", Val::Num(0.0));

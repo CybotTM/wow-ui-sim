@@ -503,11 +503,17 @@ pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&str, Val)]) ->
 /// Set a string key on an existing table Val.
 pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
     let Val::Table(table_ref) = table else { return };
+    let stack_slot = state.top;
+    state.ensure_stack(stack_slot + 1);
+    state.stack_set(stack_slot, value);
+    state.top = stack_slot + 1;
+
     let key_ref = state.gc.intern_string(key.as_bytes());
     if let Some(t) = state.gc.tables.get_mut(table_ref) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
     state.gc.barrier_back(table_ref);
+    state.top = stack_slot;
 }
 
 /// Like [`table_set`] but interns `key` through the pointer-keyed static
@@ -516,11 +522,17 @@ pub fn table_set(state: &mut LuaState, table: Val, key: &str, value: Val) {
 /// too, but the fast path only triggers when the pointer matches.
 pub fn table_set_static(state: &mut LuaState, table: Val, key: &'static str, value: Val) {
     let Val::Table(table_ref) = table else { return };
+    let stack_slot = state.top;
+    state.ensure_stack(stack_slot + 1);
+    state.stack_set(stack_slot, value);
+    state.top = stack_slot + 1;
+
     let key_ref = state.gc.intern_string_static(key.as_bytes());
     if let Some(t) = state.gc.tables.get_mut(table_ref) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
     state.gc.barrier_back(table_ref);
+    state.top = stack_slot;
 }
 
 /// Get a string key from a table Val.

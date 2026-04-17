@@ -79,7 +79,14 @@ fn c_heirloom_get_item_id_from_displayed_index(state: &mut LuaState) -> LuaResul
     let index = i32::from_stack(state, 1)?;
     let item_id = usize::try_from(index.saturating_sub(1))
         .ok()
-        .and_then(|idx| borrow_state(state).ok()?.world.heirlooms.get(idx).map(|h| h.item_id));
+        .and_then(|idx| {
+            borrow_state(state)
+                .ok()?
+                .world
+                .heirlooms
+                .get(idx)
+                .map(|h| h.item_id)
+        });
     match item_id {
         Some(id) => state.push(Val::Num(id as f64)),
         None => state.push(Val::Nil),

@@ -350,9 +350,16 @@ fn register_animation_creation(state: &mut LuaState, table: GcRef<Table>) -> Lua
 
 fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "Play", animations::animation_group_play)?;
+    table_set_rust_fn(state, table, "PlaySynced", animations::animation_group_play)?;
     table_set_rust_fn(state, table, "Restart", animations::animation_group_restart)?;
     table_set_rust_fn(state, table, "Stop", animations::animation_group_stop)?;
     table_set_rust_fn(state, table, "Finish", animations::animation_group_finish)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetPlaying",
+        animations::animation_group_set_playing,
+    )?;
     table_set_rust_fn(
         state,
         table,

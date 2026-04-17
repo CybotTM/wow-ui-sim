@@ -81,6 +81,40 @@ fn test_spellbook_has_pet_spells() {
 }
 
 #[test]
+fn test_spellbook_namespace_functions_survive_gc() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            collectgarbage("collect")
+
+            if type(C_SpellBook.GetNumSpellBookSkillLines) ~= "function" then
+                return "missing_count_fn"
+            end
+
+            if type(C_SpellBook.GetSpellBookSkillLineInfo) ~= "function" then
+                return "missing_info_fn"
+            end
+
+            local count = C_SpellBook.GetNumSpellBookSkillLines()
+            if count < 1 then
+                return "bad_count"
+            end
+
+            local info = C_SpellBook.GetSpellBookSkillLineInfo(1)
+            if type(info) ~= "table" then
+                return "bad_info"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_spellbook_get_override_spell() {
     let env = env();
     let id: i32 = env.eval("return C_SpellBook.GetOverrideSpell(42)").unwrap();
@@ -321,6 +355,15 @@ fn test_traits_get_config_info() {
         .eval("return type(C_Traits.GetConfigInfo(1)) == 'table'")
         .unwrap();
     assert!(is_table);
+}
+
+#[test]
+fn test_traits_get_config_info_exposes_tree_ids() {
+    let env = env();
+    let first_tree_id: i32 = env
+        .eval("return C_Traits.GetConfigInfo(201).treeIDs[1]")
+        .unwrap();
+    assert_eq!(first_tree_id, 790);
 }
 
 #[test]

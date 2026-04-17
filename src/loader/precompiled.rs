@@ -22,7 +22,8 @@ const FIRE_ONLOAD_SOURCE: &str = r#"
         local ok, err = pcall(handler, frame)
         if not ok then
             local name = frame.GetName and frame:GetName() or "?"
-            __report("[OnLoad] " .. name .. ": " .. tostring(err))
+            local stack = debugstack and debugstack() or ""
+            __report("[OnLoad] " .. name .. ": " .. tostring(err) .. (stack ~= "" and ("\n" .. stack) or ""))
         end
     end
 "#;

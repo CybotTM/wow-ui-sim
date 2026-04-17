@@ -12,9 +12,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn trophy_hall_get_trophy_info_returns_nil() {
     let env = env();
-    let result: Option<bool> = env
-        .eval("return C_TrophyHall.GetTrophyInfo(1)")
-        .unwrap();
+    let result: Option<bool> = env.eval("return C_TrophyHall.GetTrophyInfo(1)").unwrap();
     assert!(result.is_none(), "GetTrophyInfo must return nil");
 }
 
@@ -23,9 +21,7 @@ fn trophy_hall_get_trophy_info_returns_nil() {
 #[test]
 fn stable_info_is_at_pet_stable_false_by_default() {
     let env = env();
-    let result: bool = env
-        .eval("return C_StableInfo.IsAtPetStable()")
-        .unwrap();
+    let result: bool = env.eval("return C_StableInfo.IsAtPetStable()").unwrap();
     assert!(!result, "IsAtPetStable() must be false when stables closed");
 }
 
@@ -36,10 +32,11 @@ fn stable_info_is_at_pet_stable_reflects_sim_state() {
         let mut sim = env.state().borrow_mut();
         sim.pet_stables_open = true;
     }
-    let result: bool = env
-        .eval("return C_StableInfo.IsAtPetStable()")
-        .unwrap();
-    assert!(result, "IsAtPetStable() must be true when pet_stables_open=true");
+    let result: bool = env.eval("return C_StableInfo.IsAtPetStable()").unwrap();
+    assert!(
+        result,
+        "IsAtPetStable() must be true when pet_stables_open=true"
+    );
 }
 
 // ── C_GarrisonInfo ───────────────────────────────────────────────────────────
@@ -47,18 +44,14 @@ fn stable_info_is_at_pet_stable_reflects_sim_state() {
 #[test]
 fn garrison_info_has_garrison_false() {
     let env = env();
-    let result: bool = env
-        .eval("return C_GarrisonInfo.HasGarrison()")
-        .unwrap();
+    let result: bool = env.eval("return C_GarrisonInfo.HasGarrison()").unwrap();
     assert!(!result, "HasGarrison() must be false");
 }
 
 #[test]
 fn garrison_info_get_garrison_type_zero() {
     let env = env();
-    let result: i32 = env
-        .eval("return C_GarrisonInfo.GetGarrisonType()")
-        .unwrap();
+    let result: i32 = env.eval("return C_GarrisonInfo.GetGarrisonType()").unwrap();
     assert_eq!(result, 0, "GetGarrisonType() must return 0");
 }
 
@@ -78,9 +71,7 @@ fn map_is_map_valid_for_navigation_false() {
 #[test]
 fn pvp_is_match_considered_arena_false() {
     let env = env();
-    let result: bool = env
-        .eval("return C_PvP.IsMatchConsideredArena()")
-        .unwrap();
+    let result: bool = env.eval("return C_PvP.IsMatchConsideredArena()").unwrap();
     assert!(!result, "IsMatchConsideredArena() must be false");
 }
 
@@ -92,7 +83,10 @@ fn loss_of_control_get_active_data_returns_nil() {
     let result: Option<bool> = env
         .eval("return C_LossOfControl.GetActiveLossOfControlData(1)")
         .unwrap();
-    assert!(result.is_none(), "GetActiveLossOfControlData() must return nil");
+    assert!(
+        result.is_none(),
+        "GetActiveLossOfControlData() must return nil"
+    );
 }
 
 #[test]
@@ -109,8 +103,6 @@ fn loss_of_control_get_active_data_count_is_zero() {
 #[test]
 fn bank_has_full_bank_access_true() {
     let env = env();
-    let result: bool = env
-        .eval("return C_Bank.HasFullBankAccess()")
-        .unwrap();
+    let result: bool = env.eval("return C_Bank.HasFullBankAccess()").unwrap();
     assert!(result, "HasFullBankAccess() must return true");
 }

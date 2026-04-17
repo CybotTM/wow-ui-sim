@@ -60,7 +60,10 @@ fn get_area_poi_info_ui_map_id_filters_when_non_nil() {
         )
         .unwrap();
     assert_eq!(match_name, "Stormwind Portal Room");
-    assert_eq!(mismatch_count, 0, "mismatched uiMapID should return nothing");
+    assert_eq!(
+        mismatch_count, 0,
+        "mismatched uiMapID should return nothing"
+    );
 }
 
 #[test]

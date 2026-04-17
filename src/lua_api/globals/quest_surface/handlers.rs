@@ -13,8 +13,8 @@ use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 use super::data::{
-    Objective, QuestLogEntry, WorldQuest, QUEST_LOG, SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES,
-    WORLD_QUESTS,
+    Objective, QUEST_LOG, QuestLogEntry, SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES, WORLD_QUESTS,
+    WorldQuest,
 };
 
 // ---------------------------------------------------------------------------
@@ -86,8 +86,7 @@ fn selected_quest_id(state: &LuaState) -> LuaResult<i32> {
 }
 
 fn set_selected_quest_id(state: &mut LuaState, quest_id: i32) -> LuaResult<()> {
-    borrow_state_mut(state)?.selected_quest_log_id =
-        (quest_id > 0).then_some(quest_id as u32);
+    borrow_state_mut(state)?.selected_quest_log_id = (quest_id > 0).then_some(quest_id as u32);
     Ok(())
 }
 
@@ -172,9 +171,9 @@ pub fn get_quest_log_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "questLogIndex", Val::Num(index as f64));
     match entry {
         QuestLogEntry::Header { title } => write_quest_header_fields(state, info, title),
-        QuestLogEntry::Quest { quest_id, title, .. } => {
-            write_quest_entry_fields(state, info, *quest_id, title)
-        }
+        QuestLogEntry::Quest {
+            quest_id, title, ..
+        } => write_quest_entry_fields(state, info, *quest_id, title),
     }
     state.push(info);
     Ok(1)
@@ -358,8 +357,14 @@ pub fn get_quest_log_leaderboard(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_quest_log_quest_text(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = selected_quest_id(state)?;
-    let Some((_, QuestLogEntry::Quest { description, objectives, .. })) =
-        find_quest_by_id(quest_id)
+    let Some((
+        _,
+        QuestLogEntry::Quest {
+            description,
+            objectives,
+            ..
+        },
+    )) = find_quest_by_id(quest_id)
     else {
         let empty1 = create_string_static(state, "");
         state.push(empty1);
@@ -382,13 +387,17 @@ pub fn get_quest_log_quest_text(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_quest_poi_blob_count(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as u32;
-    state.push(Val::Num(quest_poi_blobs::get_quest_blobs(quest_id).len() as f64));
+    state.push(Val::Num(
+        quest_poi_blobs::get_quest_blobs(quest_id).len() as f64
+    ));
     Ok(1)
 }
 
 pub fn have_quest_data(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-    state.push(Val::Bool(quest_exists(quest_id) || is_world_quest(quest_id)));
+    state.push(Val::Bool(
+        quest_exists(quest_id) || is_world_quest(quest_id),
+    ));
     Ok(1)
 }
 
@@ -457,7 +466,12 @@ pub fn build_task_quest_info(state: &mut LuaState) -> LuaResult<u32> {
         table_set(state, info, "x", Val::Num(quest.x));
         table_set(state, info, "y", Val::Num(quest.y));
         table_set(state, info, "mapID", Val::Num(quest.map_id as f64));
-        table_set(state, info, "numObjectives", Val::Num(quest.num_objectives as f64));
+        table_set(
+            state,
+            info,
+            "numObjectives",
+            Val::Num(quest.num_objectives as f64),
+        );
         table_set(state, info, "isMapIndicatorQuest", Val::Bool(false));
         set_array_value(state, result_ref, out_index, info);
         out_index += 1;

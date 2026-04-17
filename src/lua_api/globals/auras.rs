@@ -97,23 +97,22 @@ fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> V
         return Vec::new();
     };
     use crate::lua_api::globals::unit_api::parse_party_index;
-    let auras: Vec<&AuraInfo> =
-        if let Some(idx) = parse_party_index(unit) {
-            if let Some(member) = sim.party_members.get(idx) {
-                match filter {
-                    AuraFilter::Helpful => member.buffs.iter().collect(),
-                    AuraFilter::Harmful => member.debuffs.iter().collect(),
-                }
-            } else {
-                return Vec::new();
+    let auras: Vec<&AuraInfo> = if let Some(idx) = parse_party_index(unit) {
+        if let Some(member) = sim.party_members.get(idx) {
+            match filter {
+                AuraFilter::Helpful => member.buffs.iter().collect(),
+                AuraFilter::Harmful => member.debuffs.iter().collect(),
             }
         } else {
-            sim.player
-                .buffs
-                .iter()
-                .filter(|a| aura_matches_filter(a, filter))
-                .collect()
-        };
+            return Vec::new();
+        }
+    } else {
+        sim.player
+            .buffs
+            .iter()
+            .filter(|a| aura_matches_filter(a, filter))
+            .collect()
+    };
     auras.into_iter().cloned().collect()
 }
 

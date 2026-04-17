@@ -97,18 +97,14 @@ fn get_log_index_for_unknown_quest_returns_nil() {
 #[test]
 fn is_on_quest_true_for_seeded_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsOnQuest(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsOnQuest(80000)").unwrap();
     assert!(result);
 }
 
 #[test]
 fn is_on_quest_false_for_unknown_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsOnQuest(12345)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsOnQuest(12345)").unwrap();
     assert!(!result);
 }
 
@@ -117,18 +113,14 @@ fn is_on_quest_false_for_unknown_quest() {
 #[test]
 fn is_complete_true_for_completed_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsComplete(80001)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsComplete(80001)").unwrap();
     assert!(result);
 }
 
 #[test]
 fn is_complete_false_for_incomplete_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsComplete(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsComplete(80000)").unwrap();
     assert!(!result);
 }
 
@@ -137,9 +129,7 @@ fn is_complete_false_for_incomplete_quest() {
 #[test]
 fn is_failed_false_by_default() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsFailed(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsFailed(80000)").unwrap();
     assert!(!result);
 }
 
@@ -150,9 +140,7 @@ fn is_failed_true_when_mutated() {
         let mut st = env.state().borrow_mut();
         st.quest_log_entries.entries[0].is_failed = true;
     }
-    let result: bool = env
-        .eval("return C_QuestLog.IsFailed(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsFailed(80000)").unwrap();
     assert!(result);
 }
 
@@ -161,9 +149,7 @@ fn is_failed_true_when_mutated() {
 #[test]
 fn is_meta_quest_false_for_normal_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsMetaQuest(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsMetaQuest(80000)").unwrap();
     assert!(!result);
 }
 
@@ -172,18 +158,14 @@ fn is_meta_quest_false_for_normal_quest() {
 #[test]
 fn is_world_quest_true_for_world_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsWorldQuest(90101)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsWorldQuest(90101)").unwrap();
     assert!(result);
 }
 
 #[test]
 fn is_world_quest_false_for_normal_quest() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsWorldQuest(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsWorldQuest(80000)").unwrap();
     assert!(!result);
 }
 
@@ -203,9 +185,7 @@ fn is_quest_replayable_true_for_world_quest() {
 #[test]
 fn is_on_map_true_when_map_id_set() {
     let env = env();
-    let result: bool = env
-        .eval("return C_QuestLog.IsOnMap(80000)")
-        .unwrap();
+    let result: bool = env.eval("return C_QuestLog.IsOnMap(80000)").unwrap();
     assert!(result);
 }
 

@@ -131,6 +131,9 @@ fn print_blizzard_summary(
     if let Some(report) = wow_ui_sim::loader::fast_create_frame_profile_report() {
         println!("  {report}");
     }
+    if let Some(report) = wow_ui_sim::loader::fast_create_frame_profile_body_report() {
+        println!("  {report}");
+    }
 }
 
 /// Scan, load, and register third-party addons; print summary.

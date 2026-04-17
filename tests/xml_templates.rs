@@ -477,6 +477,108 @@ fn test_create_frame_from_xml_inline_global_method_with_self_string_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_method_with_literal_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        ARTIFACT_XP_REWARD = "Artifact XP"
+        HIGHLIGHT_FONT_COLOR = { r = 0.1, g = 0.2, b = 0.3 }
+        XmlInlineGlobalMethodLiteralTarget = {}
+        function XmlInlineGlobalMethodLiteralTarget:SetText(text, r, g, b, extra, flag)
+            self.text = text
+            self.r = r
+            self.g = g
+            self.b = b
+            self.extra = extra
+            self.flag = flag
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalMethodLiteralFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalMethodLiteralTarget:SetText(ARTIFACT_XP_REWARD, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, nil, true)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let result: (String, f64, f64, f64, bool, bool) = env
+        .eval(
+            r#"
+            return XmlInlineGlobalMethodLiteralTarget.text,
+                   XmlInlineGlobalMethodLiteralTarget.r,
+                   XmlInlineGlobalMethodLiteralTarget.g,
+                   XmlInlineGlobalMethodLiteralTarget.b,
+                   XmlInlineGlobalMethodLiteralTarget.extra == nil,
+                   XmlInlineGlobalMethodLiteralTarget.flag
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "Artifact XP");
+    assert_eq!(result.1, 0.1);
+    assert_eq!(result.2, 0.2);
+    assert_eq!(result.3, 0.3);
+    assert!(result.4);
+    assert!(result.5);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_global_method_sequence_with_literal_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        ARTIFACT_XP_REWARD = "Artifact XP"
+        HIGHLIGHT_FONT_COLOR = { r = 0.1, g = 0.2, b = 0.3 }
+        XmlInlineTooltipTarget = {}
+        function XmlInlineTooltipTarget:SetOwner(frame, anchor)
+            self.owner = frame
+            self.anchor = anchor
+        end
+        function XmlInlineTooltipTarget:SetText(text, r, g, b, extra, flag)
+            self.text = text
+            self.r = r
+            self.g = g
+            self.b = b
+            self.extra = extra
+            self.flag = flag
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineTooltipFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineTooltipTarget:SetOwner(self, "ANCHOR_RIGHT"); XmlInlineTooltipTarget:SetText(ARTIFACT_XP_REWARD, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, nil, true)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let result: (String, f64, f64, f64, bool, bool) = env
+        .eval(
+            r#"
+            return XmlInlineTooltipTarget.anchor,
+                   XmlInlineTooltipTarget.r,
+                   XmlInlineTooltipTarget.g,
+                   XmlInlineTooltipTarget.b,
+                   XmlInlineTooltipTarget.extra == nil,
+                   XmlInlineTooltipTarget.flag
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_RIGHT");
+    assert_eq!(result.1, 0.1);
+    assert_eq!(result.2, 0.2);
+    assert_eq!(result.3, 0.3);
+    assert!(result.4);
+    assert!(result.5);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_field_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

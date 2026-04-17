@@ -23,9 +23,12 @@ const LUA_MULTRET: i32 = -1;
 const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
 
 /// Get a named table from rilua's registry, returning None if absent.
-/// `key` is `&'static str` so the intern hits the pointer-keyed fast path.
+///
+/// Use the content-keyed intern path here. The registry table itself is
+/// hot, but script handler storage is also where LoD XML lifecycle failures
+/// surface first when the static-intern path goes unstable mid-cycle.
 pub fn registry_table(state: &mut LuaState, key: &'static str) -> Option<GcRef<Table>> {
-    let key_ref = state.gc.intern_string_static(key.as_bytes());
+    let key_ref = state.gc.intern_string(key.as_bytes());
     let registry = state.gc.tables.get(state.registry)?;
     match registry.get_str(key_ref, &state.gc.string_arena) {
         Val::Table(t) => Some(t),
@@ -39,7 +42,7 @@ pub fn registry_table_or_create(state: &mut LuaState, key: &'static str) -> GcRe
         return existing;
     }
     let new_table = state.gc.alloc_table(Table::new());
-    let key_ref = state.gc.intern_string_static(key.as_bytes());
+    let key_ref = state.gc.intern_string(key.as_bytes());
     let registry = state.registry;
     if let Some(reg) = state.gc.tables.get_mut(registry) {
         let _ = reg.raw_set(
@@ -86,10 +89,21 @@ pub fn get_script(state: &mut LuaState, widget_id: u64, handler_name: &str) -> O
 
 /// Set a script handler for a given frame + handler name.
 pub fn set_script(state: &mut LuaState, widget_id: u64, handler_name: &str, func: Val) {
+    // Fast-installed script handlers are often freshly-allocated closures.
+    // Root them on the Lua stack before any key interning/allocation below,
+    // otherwise a GC step in that gap can invalidate the closure ref before
+    // it ever reaches the __scripts registry table.
+    let stack_slot = state.top;
+    state.ensure_stack(stack_slot + 1);
+    state.stack_set(stack_slot, func);
+    state.top = stack_slot + 1;
+
     let scripts = registry_table_or_create(state, SCRIPTS_KEY);
     let key = format!("{}_{}", widget_id, handler_name);
     table_set_str(state, scripts, &key, func);
     sync_on_update_cache(state, widget_id, handler_name, func);
+
+    state.top = stack_slot;
 }
 
 /// Remove a script handler.

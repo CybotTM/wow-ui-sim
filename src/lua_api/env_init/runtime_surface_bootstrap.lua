@@ -1039,17 +1039,20 @@ if GetOrCreateTableEntry == nil then
 end
 
 if GenerateClosure == nil then
-  function GenerateClosure(fn, _owner, ...)
-    local bound = {...}
+  function GenerateClosure(fn, ...)
+    local bound = { n = select("#", ...), ... }
     return function(...)
       local args = {}
-      for i = 1, #bound do
-        args[#args + 1] = bound[i]
+      local argCount = 0
+      for i = 1, bound.n do
+        argCount = argCount + 1
+        args[argCount] = bound[i]
       end
       for i = 1, select("#", ...) do
-        args[#args + 1] = select(i, ...)
+        argCount = argCount + 1
+        args[argCount] = select(i, ...)
       end
-      return fn(unpack(args))
+      return fn(unpack(args, 1, argCount))
     end
   end
 end
@@ -2578,6 +2581,42 @@ C_PetJournal = __wow_merge_namespace(C_PetJournal, {
 C_SpecializationInfo = __wow_merge_namespace(C_SpecializationInfo, {
   GetInspectSelectedPvpTalent = function() return nil end,
 })
+
+if IsPlayerInWorld == nil then
+  function IsPlayerInWorld()
+    return true
+  end
+end
+
+AssistedCombatManager = AssistedCombatManager or {}
+if AssistedCombatManager.HasActionSpell == nil then
+  function AssistedCombatManager:HasActionSpell()
+    return false
+  end
+end
+if AssistedCombatManager.GetActionSpellID == nil then
+  function AssistedCombatManager:GetActionSpellID()
+    return 0
+  end
+end
+if AssistedCombatManager.GetActionSpellDescription == nil then
+  function AssistedCombatManager:GetActionSpellDescription()
+    return ""
+  end
+end
+if AssistedCombatManager.SetCanHighlightSpellbookSpells == nil then
+  function AssistedCombatManager:SetCanHighlightSpellbookSpells(_enabled)
+  end
+end
+if AssistedCombatManager.ShouldHighlightSpellbookSpell == nil then
+  function AssistedCombatManager:ShouldHighlightSpellbookSpell(_spellID)
+    return false
+  end
+end
+if AssistedCombatManager.AddSpellTooltipLine == nil then
+  function AssistedCombatManager:AddSpellTooltipLine(_tooltip, _spellID, _overriddenSpellID)
+  end
+end
 
 C_PerksActivities = __wow_merge_namespace(C_PerksActivities, {
   AddTrackedPerksActivity = function(_id) end,

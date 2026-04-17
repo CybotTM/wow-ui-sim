@@ -62,9 +62,7 @@ fn build_node_currency_map(group_currency_map: &HashMap<u32, u32>) -> HashMap<u3
     map
 }
 
-fn seed_hero_spec_nodes(
-    active_spec_id: u32,
-) -> (HashMap<u32, u32>, HashMap<u32, u32>) {
+fn seed_hero_spec_nodes(active_spec_id: u32) -> (HashMap<u32, u32>, HashMap<u32, u32>) {
     let mut node_ranks = HashMap::new();
     let mut node_selections = HashMap::new();
     super::globals::hero_talents::auto_select_hero_spec_for_spec(

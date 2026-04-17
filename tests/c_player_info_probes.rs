@@ -103,7 +103,10 @@ fn is_player_eligible_for_npe_default_false() {
         .eval("return C_PlayerInfo.IsPlayerEligibleForNPE()")
         .unwrap();
     assert!(!eligible, "default: not eligible for NPE");
-    assert!(!reason.is_empty(), "failure reason non-empty when ineligible");
+    assert!(
+        !reason.is_empty(),
+        "failure reason non-empty when ineligible"
+    );
 }
 
 #[test]
@@ -142,9 +145,7 @@ fn is_player_npe_restricted_reflects_mutation() {
 #[test]
 fn is_player_in_rpe_default_false() {
     let env = env();
-    let in_rpe: bool = env
-        .eval("return C_PlayerInfo.IsPlayerInRPE()")
-        .unwrap();
+    let in_rpe: bool = env.eval("return C_PlayerInfo.IsPlayerInRPE()").unwrap();
     assert!(!in_rpe);
 }
 
@@ -152,8 +153,6 @@ fn is_player_in_rpe_default_false() {
 fn is_player_in_rpe_reflects_mutation() {
     let env = env();
     env.state().borrow_mut().player.is_in_rpe = true;
-    let in_rpe: bool = env
-        .eval("return C_PlayerInfo.IsPlayerInRPE()")
-        .unwrap();
+    let in_rpe: bool = env.eval("return C_PlayerInfo.IsPlayerInRPE()").unwrap();
     assert!(in_rpe);
 }

@@ -60,21 +60,21 @@ fn c_auction_house_get_auction_item_sub_classes(state: &mut LuaState) -> LuaResu
 /// 0 and produce an empty array.
 fn standard_subclass_count(class_id: i32) -> i32 {
     match class_id {
-        0 => 12, // Consumable
-        1 => 8,  // Container
-        2 => 21, // Weapon
-        3 => 11, // Gem
-        4 => 12, // Armor
-        5 => 5,  // Reagent
-        6 => 6,  // Projectile
-        7 => 21, // Tradegoods
-        9 => 11, // Recipe
-        12 => 1, // Quest
-        13 => 1, // Key
-        15 => 5, // Miscellaneous
+        0 => 12,  // Consumable
+        1 => 8,   // Container
+        2 => 21,  // Weapon
+        3 => 11,  // Gem
+        4 => 12,  // Armor
+        5 => 5,   // Reagent
+        6 => 6,   // Projectile
+        7 => 21,  // Tradegoods
+        9 => 11,  // Recipe
+        12 => 1,  // Quest
+        13 => 1,  // Key
+        15 => 5,  // Miscellaneous
         16 => 10, // Glyph
-        17 => 8, // Battle Pet
-        19 => 1, // Wow Token
+        17 => 8,  // Battle Pet
+        19 => 1,  // Wow Token
         _ => 0,
     }
 }
@@ -119,7 +119,12 @@ fn push_browse_result_table(state: &mut LuaState, row: &AuctionBrowseResult) -> 
     let t = create_table(state);
     let item_key = create_table(state);
     table_set(state, item_key, "itemID", Val::Num(row.item_id as f64));
-    table_set(state, item_key, "itemLevel", Val::Num(row.item_level as f64));
+    table_set(
+        state,
+        item_key,
+        "itemLevel",
+        Val::Num(row.item_level as f64),
+    );
     table_set(state, item_key, "itemSuffix", Val::Num(0.0));
     table_set(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
 
@@ -140,4 +145,3 @@ fn push_browse_result_table(state: &mut LuaState, row: &AuctionBrowseResult) -> 
     table_set(state, t, "appearanceLink", Val::Nil);
     t
 }
-

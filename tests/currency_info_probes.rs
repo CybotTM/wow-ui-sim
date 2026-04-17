@@ -180,9 +180,7 @@ fn get_currency_container_info_returns_display_info_with_passed_quantity() {
 fn get_currency_container_info_returns_nothing_for_unknown_id() {
     let env = env();
     let nret: i32 = env
-        .eval(
-            "return select('#', C_CurrencyInfo.GetCurrencyContainerInfo(999999, 1))",
-        )
+        .eval("return select('#', C_CurrencyInfo.GetCurrencyContainerInfo(999999, 1))")
         .unwrap();
     assert_eq!(nret, 0);
 }

@@ -221,6 +221,10 @@ pub(super) fn trigger_callback_event(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn setup_menu(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn collect_trigger_args(state: &LuaState) -> Vec<Val> {
     let arg_count = state.top.saturating_sub(state.base) as i32;
     if arg_count >= 3 {

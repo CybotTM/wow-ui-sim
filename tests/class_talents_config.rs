@@ -22,7 +22,10 @@ fn get_active_config_id_returns_protection_default() {
     let active: i32 = env
         .eval("return C_ClassTalents.GetActiveConfigID()")
         .unwrap();
-    assert_eq!(active, 201, "seeded Protection Paladin starts on config 201");
+    assert_eq!(
+        active, 201,
+        "seeded Protection Paladin starts on config 201"
+    );
 }
 
 #[test]

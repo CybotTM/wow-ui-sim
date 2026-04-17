@@ -247,6 +247,24 @@ fn register_c_traits_action_fns(
     table_set_rust_fn(
         state,
         table_ref,
+        "ConfigHasStagedChanges",
+        c_traits_config_has_staged_changes,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetStagedChanges",
+        c_traits_get_staged_changes,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetStagedChangesCost",
+        c_traits_get_staged_changes_cost,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
         "GetSubTreeInfo",
         c_traits_get_subtree_info,
     )?;
@@ -283,18 +301,37 @@ fn register_c_class_talents_hero_fns(
 }
 
 const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
-    ("GetConfigIDsBySpecID", c_class_talents_get_config_ids_by_spec_id),
+    (
+        "GetConfigIDsBySpecID",
+        c_class_talents_get_config_ids_by_spec_id,
+    ),
     ("GetActiveConfigID", c_class_talents_get_active_config_id),
     (
         "GetLastSelectedSavedConfigID",
         c_class_talents_get_last_selected_saved_config_id,
     ),
-    ("GetTraitTreeForSpec", c_class_talents_get_trait_tree_for_spec),
+    (
+        "GetTraitTreeForSpec",
+        c_class_talents_get_trait_tree_for_spec,
+    ),
+    (
+        "UpdateLastSelectedSavedConfigID",
+        c_class_talents_update_last_selected_saved_config_id,
+    ),
     ("CanChangeTalents", c_class_talents_can_change_talents),
     ("GetHasStarterBuild", c_class_talents_get_has_starter_build),
-    ("IsStarterBuildActive", c_class_talents_is_starter_build_active),
-    ("GetStarterBuildActive", c_class_talents_is_starter_build_active),
-    ("SetStarterBuildActive", c_class_talents_set_starter_build_active),
+    (
+        "IsStarterBuildActive",
+        c_class_talents_is_starter_build_active,
+    ),
+    (
+        "GetStarterBuildActive",
+        c_class_talents_is_starter_build_active,
+    ),
+    (
+        "SetStarterBuildActive",
+        c_class_talents_set_starter_build_active,
+    ),
     (
         "GetNextStarterBuildPurchase",
         c_class_talents_get_next_starter_build_purchase,
@@ -491,6 +528,30 @@ fn c_traits_get_loadout_serialization_version(state: &mut LuaState) -> LuaResult
     Ok(1)
 }
 
+fn c_traits_config_has_staged_changes(state: &mut LuaState) -> LuaResult<u32> {
+    let _config_id = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_traits_get_staged_changes(state: &mut LuaState) -> LuaResult<u32> {
+    let _config_id = i32::from_stack(state, 1)?;
+    let purchases = create_table(state);
+    let refunds = create_table(state);
+    let swaps = create_table(state);
+    state.push(purchases);
+    state.push(refunds);
+    state.push(swaps);
+    Ok(3)
+}
+
+fn c_traits_get_staged_changes_cost(state: &mut LuaState) -> LuaResult<u32> {
+    let _config_id = i32::from_stack(state, 1)?;
+    let costs = create_table(state);
+    state.push(costs);
+    Ok(1)
+}
+
 fn push_subtree_base_fields(
     state: &mut LuaState,
     info: Val,
@@ -633,6 +694,29 @@ fn c_class_talents_get_last_selected_saved_config_id(state: &mut LuaState) -> Lu
         .unwrap_or(0);
     state.push(Val::Num(config_id as f64));
     Ok(1)
+}
+
+fn c_class_talents_update_last_selected_saved_config_id(state: &mut LuaState) -> LuaResult<u32> {
+    let spec_id = u32::from_stack(state, 1)?;
+    let config_id = match stack_val(state, 2) {
+        Val::Nil => None,
+        Val::Num(value) => Some(value as i32),
+        _ => None,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    match config_id {
+        Some(config_id) => {
+            sim.talents
+                .last_selected_config_id_by_spec_id
+                .insert(spec_id, config_id);
+        }
+        None => {
+            sim.talents
+                .last_selected_config_id_by_spec_id
+                .remove(&spec_id);
+        }
+    }
+    Ok(0)
 }
 
 fn c_class_talents_switch_to_loadout_by_name(state: &mut LuaState) -> LuaResult<u32> {

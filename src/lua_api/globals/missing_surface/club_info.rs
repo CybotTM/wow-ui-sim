@@ -15,6 +15,7 @@
 //! - `C_Club.GetClubCapacity(clubId)` — returns 1000 (hard-coded guild
 //!   capacity; retail is unbounded in practice).
 //! - `C_Club.IsEnabled()` — returns true unconditionally.
+//! - `C_Club.IsRestricted()` — returns `ClubRestrictionReason.None`.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
@@ -42,6 +43,7 @@ pub(super) fn register_club_info_surface(state: &mut LuaState) -> LuaResult<()> 
         c_club_get_club_capacity,
     )?;
     table_set_rust_fn(state, table_ref, "IsEnabled", c_club_is_enabled)?;
+    table_set_rust_fn(state, table_ref, "IsRestricted", c_club_is_restricted)?;
     Ok(())
 }
 
@@ -75,6 +77,11 @@ fn c_club_get_club_capacity(_state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_club_is_enabled(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_club_is_restricted(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
     Ok(1)
 }
 

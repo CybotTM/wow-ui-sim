@@ -4,8 +4,8 @@ use crate::lua_bridge::table_set_rust_fn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
-use super::handlers::*;
 use super::SurfaceFn;
+use super::handlers::*;
 
 pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
@@ -14,9 +14,15 @@ pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetLogIndexForQuestID", get_log_index_for_quest_id),
     ("GetTitleForQuestID", get_title_for_quest_id),
     ("GetNumQuestWatches", get_num_quest_watches),
-    ("GetQuestIDForQuestWatchIndex", get_quest_id_for_quest_watch_index),
+    (
+        "GetQuestIDForQuestWatchIndex",
+        get_quest_id_for_quest_watch_index,
+    ),
     ("GetNumWorldQuestWatches", get_num_world_quest_watches),
-    ("GetQuestIDForWorldQuestWatchIndex", get_quest_id_for_world_quest_watch_index),
+    (
+        "GetQuestIDForWorldQuestWatchIndex",
+        get_quest_id_for_world_quest_watch_index,
+    ),
     ("AddQuestWatch", noop),
     ("RemoveQuestWatch", noop),
     ("SortQuestWatches", noop),
@@ -67,8 +73,14 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
     ("GetQuestLogCompletionText", get_quest_log_completion_text),
     ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),
     ("QuestMapUpdateAllQuests", quest_map_update_all_quests),
-    ("QuestMapFrame_GetFocusedQuestID", quest_map_frame_get_focused_quest_id),
-    ("GetQuestLogSpecialItemInfo", get_quest_log_special_item_info),
+    (
+        "QuestMapFrame_GetFocusedQuestID",
+        quest_map_frame_get_focused_quest_id,
+    ),
+    (
+        "GetQuestLogSpecialItemInfo",
+        get_quest_log_special_item_info,
+    ),
 ];
 
 pub fn register_quest_info_handlers(state: &mut LuaState) -> LuaResult<()> {
@@ -91,13 +103,22 @@ pub fn register_quest_classification_handler(state: &mut LuaState) -> LuaResult<
     fn get_quest_classification(state: &mut LuaState) -> LuaResult<u32> {
         use crate::lua_bridge::FromStack;
         let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
-        let classification = if super::is_world_quest(quest_id) { 10.0 } else { 7.0 };
+        let classification = if super::is_world_quest(quest_id) {
+            10.0
+        } else {
+            7.0
+        };
         state.push(Val::Num(classification));
         Ok(1)
     }
 
     let table_ref = super::ensure_global_table(state, "C_QuestInfoSystem");
-    table_set_rust_fn(state, table_ref, "GetQuestClassification", get_quest_classification)?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetQuestClassification",
+        get_quest_classification,
+    )?;
     Ok(())
 }
 

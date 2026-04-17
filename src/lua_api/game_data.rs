@@ -232,6 +232,32 @@ pub const CLASS_LABELS: &[&str] = &[
     "Evoker",
 ];
 
+/// Class file tokens (index 0 = class_index 1, etc.).
+pub const CLASS_FILES: &[&str] = &[
+    "WARRIOR",
+    "PALADIN",
+    "HUNTER",
+    "ROGUE",
+    "PRIEST",
+    "DEATHKNIGHT",
+    "SHAMAN",
+    "MAGE",
+    "WARLOCK",
+    "MONK",
+    "DRUID",
+    "DEMONHUNTER",
+    "EVOKER",
+];
+
+/// Shared class lookup used by both global `GetClassInfo` and
+/// `C_CreatureInfo.GetClassInfo`.
+pub fn class_info_by_index(class_index: i32) -> (&'static str, &'static str, i32) {
+    match usize::try_from(class_index.saturating_sub(1)) {
+        Ok(idx) if idx < CLASS_LABELS.len() => (CLASS_LABELS[idx], CLASS_FILES[idx], class_index),
+        _ => ("Unknown", "UNKNOWN", class_index.max(1)),
+    }
+}
+
 /// Race data: (display_name, file_name, faction).
 pub const RACE_DATA: &[(&str, &str, &str)] = &[
     ("Human", "Human", "Alliance"),

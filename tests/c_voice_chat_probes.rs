@@ -12,9 +12,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn get_active_channel_id_returns_seeded_id() {
     let env = env();
-    let id: i32 = env
-        .eval("return C_VoiceChat.GetActiveChannelID()")
-        .unwrap();
+    let id: i32 = env.eval("return C_VoiceChat.GetActiveChannelID()").unwrap();
     assert_eq!(id, 1);
 }
 
@@ -75,9 +73,7 @@ fn get_channels_reflects_mutation() {
             },
         ];
     }
-    let count: i32 = env
-        .eval("return #C_VoiceChat.GetChannels()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_VoiceChat.GetChannels()").unwrap();
     assert_eq!(count, 2);
 }
 
@@ -163,9 +159,7 @@ fn get_microphone_volume_returns_seeded_value() {
 #[test]
 fn get_output_volume_returns_seeded_value() {
     let env = env();
-    let vol: f64 = env
-        .eval("return C_VoiceChat.GetOutputVolume()")
-        .unwrap();
+    let vol: f64 = env.eval("return C_VoiceChat.GetOutputVolume()").unwrap();
     assert!((vol - 1.0).abs() < 1e-6);
 }
 
@@ -183,18 +177,14 @@ fn get_num_active_channels_returns_one_by_default() {
 #[test]
 fn get_num_members_returns_two_for_seeded_channel() {
     let env = env();
-    let n: i32 = env
-        .eval("return C_VoiceChat.GetNumMembers(1)")
-        .unwrap();
+    let n: i32 = env.eval("return C_VoiceChat.GetNumMembers(1)").unwrap();
     assert_eq!(n, 2);
 }
 
 #[test]
 fn get_num_members_returns_zero_for_unknown_channel() {
     let env = env();
-    let n: i32 = env
-        .eval("return C_VoiceChat.GetNumMembers(999)")
-        .unwrap();
+    let n: i32 = env.eval("return C_VoiceChat.GetNumMembers(999)").unwrap();
     assert_eq!(n, 0);
 }
 
@@ -224,9 +214,7 @@ fn is_muted_false_by_default() {
 #[test]
 fn is_parental_disabled_false_by_default() {
     let env = env();
-    let v: bool = env
-        .eval("return C_VoiceChat.IsParentalDisabled()")
-        .unwrap();
+    let v: bool = env.eval("return C_VoiceChat.IsParentalDisabled()").unwrap();
     assert!(!v);
 }
 

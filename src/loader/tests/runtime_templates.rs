@@ -521,3 +521,49 @@ fn test_runtime_template_method_scripts_apply() {
         )
         .unwrap();
 }
+
+#[test]
+fn test_runtime_template_inherited_method_onload_append_chain_runs() {
+    let t = load_test_xml(
+        "runtime-template-inherited-method-onload-chain",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeMethodScriptBaseTemplate" virtual="true" mixin="RuntimeMethodScriptBaseMixin">
+                <Scripts>
+                    <OnLoad method="OnLoad"/>
+                </Scripts>
+            </Frame>
+            <Frame name="RuntimeMethodScriptChildTemplate" virtual="true" inherits="RuntimeMethodScriptBaseTemplate" mixin="RuntimeMethodScriptChildMixin">
+                <Scripts>
+                    <OnLoad method="OnLoad" inherit="append"/>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            RuntimeMethodScriptOrder = {}
+            RuntimeMethodScriptBaseMixin = {
+                OnLoad = function(self)
+                    table.insert(RuntimeMethodScriptOrder, "base")
+                end,
+            }
+            RuntimeMethodScriptChildMixin = {
+                OnLoad = function(self)
+                    table.insert(RuntimeMethodScriptOrder, "child")
+                end,
+            }
+
+            local frame = CreateFrame("Frame", "RuntimeMethodScriptChainedFrame", UIParent, "RuntimeMethodScriptChildTemplate")
+            collectgarbage("collect")
+            local onLoad = frame:GetScript("OnLoad")
+            assert(type(onLoad) == "function", "runtime template OnLoad handler should stay callable")
+            onLoad(frame)
+            assert(table.concat(RuntimeMethodScriptOrder, ",") == "child,base,child,base", "append chain should run child then base both on creation and direct call")
+        "#,
+        )
+        .unwrap();
+}

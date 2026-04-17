@@ -33,9 +33,7 @@ fn sample_death_recap() -> DeathRecapEntry {
 #[test]
 fn get_killing_blows_returns_empty_array_when_no_deaths() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_DeathRecap.GetKillingBlows()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_DeathRecap.GetKillingBlows()").unwrap();
     assert_eq!(count, 0, "default state has no death recaps");
 }
 
@@ -55,9 +53,7 @@ fn get_killing_blows_returns_array_after_seeding() {
         let mut state = env.state().borrow_mut();
         state.death_recaps.push(sample_death_recap());
     }
-    let count: i32 = env
-        .eval("return #C_DeathRecap.GetKillingBlows()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_DeathRecap.GetKillingBlows()").unwrap();
     assert_eq!(count, 2, "seeded recap has 2 killing blows");
 }
 
@@ -68,7 +64,13 @@ fn get_killing_blows_fields_match_seeded_data() {
         let mut state = env.state().borrow_mut();
         state.death_recaps.push(sample_death_recap());
     }
-    let (spell_id, ability_name, caster_name, amount, is_overkill): (i32, String, String, i64, bool) = env
+    let (spell_id, ability_name, caster_name, amount, is_overkill): (
+        i32,
+        String,
+        String,
+        i64,
+        bool,
+    ) = env
         .eval(
             r#"
             local blows = C_DeathRecap.GetKillingBlows()
@@ -160,5 +162,8 @@ fn get_killing_blows_reflects_most_recent_death() {
         )
         .unwrap();
     assert_eq!(blow_count, 3, "GetKillingBlows uses the most recent death");
-    assert_eq!(recap_id, 2_i32, "GetMostRecentDeathRecap uses the most recent death");
+    assert_eq!(
+        recap_id, 2_i32,
+        "GetMostRecentDeathRecap uses the most recent death"
+    );
 }

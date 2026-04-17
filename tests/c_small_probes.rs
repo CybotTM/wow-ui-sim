@@ -1,8 +1,8 @@
 //! Tests for C_Timer.NewTimerID, C_System.GetFrameStack, and
 //! C_AddOnProfiler.CheckForPerformanceMessage.
 
-use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
 use wow_ui_sim::lua_api::state::AddonRuntimeMetrics;
+use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -39,18 +39,14 @@ fn new_timer_id_returns_monotonically_increasing_ids() {
 #[test]
 fn get_frame_stack_returns_empty_when_no_hover() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_System.GetFrameStack()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_System.GetFrameStack()").unwrap();
     assert_eq!(count, 0, "no hover → empty stack");
 }
 
 #[test]
 fn get_frame_stack_returns_table() {
     let env = env();
-    let ty: String = env
-        .eval("return type(C_System.GetFrameStack())")
-        .unwrap();
+    let ty: String = env.eval("return type(C_System.GetFrameStack())").unwrap();
     assert_eq!(ty, "table");
 }
 
@@ -61,9 +57,7 @@ fn get_frame_stack_returns_one_frame_when_hovered() {
     let _: () = env
         .eval(r#"_G.__test_frame = CreateFrame("Frame", "TestHoverFrame", UIParent)"#)
         .unwrap();
-    let frame_id: f64 = env
-        .eval("return __test_frame:GetID() or 0")
-        .unwrap();
+    let frame_id: f64 = env.eval("return __test_frame:GetID() or 0").unwrap();
     // Use the frame's widget id via name lookup in WidgetRegistry.
     {
         let state = env.state().borrow();
@@ -74,9 +68,7 @@ fn get_frame_stack_returns_one_frame_when_hovered() {
         }
     }
     let _ = frame_id; // suppress unused warning
-    let count: i32 = env
-        .eval("return #C_System.GetFrameStack()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_System.GetFrameStack()").unwrap();
     assert_eq!(count, 1, "one hovered frame → stack has one element");
 }
 

@@ -26,9 +26,7 @@ const KNOWN_ITEM_ID: u32 = 210935;
 fn get_item_name_by_id_returns_db_name_for_known_item() {
     let env = env();
     let name: String = env
-        .eval(&format!(
-            "return C_Item.GetItemNameByID({KNOWN_ITEM_ID})"
-        ))
+        .eval(&format!("return C_Item.GetItemNameByID({KNOWN_ITEM_ID})"))
         .unwrap();
     assert_eq!(name, "Aqirite");
 }
@@ -69,9 +67,7 @@ fn get_item_icon_by_id_returns_generic_placeholder_for_missing_icon() {
     // Aqirite has icon_file_data_id = 0 in the seeded db, so the
     // handler swaps in the generic placeholder (INV_MISC_QUESTIONMARK).
     let icon: i32 = env
-        .eval(&format!(
-            "return C_Item.GetItemIconByID({KNOWN_ITEM_ID})"
-        ))
+        .eval(&format!("return C_Item.GetItemIconByID({KNOWN_ITEM_ID})"))
         .unwrap();
     assert_eq!(icon, 134400);
 }

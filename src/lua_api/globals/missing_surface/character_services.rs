@@ -39,12 +39,7 @@ pub(super) fn register_character_services_surface(state: &mut LuaState) -> LuaRe
         "HasRequiredServiceForCharacterUpgrade",
         has_required_service_for_character_upgrade,
     )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "AssignUpgradeDistribution",
-        assign_noop,
-    )?;
+    table_set_rust_fn(state, table_ref, "AssignUpgradeDistribution", assign_noop)?;
     table_set_rust_fn(state, table_ref, "AssignPCTDistribution", assign_noop)?;
     Ok(())
 }

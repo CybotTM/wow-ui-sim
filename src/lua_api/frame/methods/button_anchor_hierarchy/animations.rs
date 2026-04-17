@@ -190,6 +190,19 @@ pub(super) fn animation_group_is_playing(state: &mut LuaState) -> LuaResult<u32>
     Ok(1)
 }
 
+pub(super) fn animation_group_set_playing(state: &mut LuaState) -> LuaResult<u32> {
+    let playing = match stack_val(state, 2) {
+        Val::Bool(value) => value,
+        Val::Nil => false,
+        _ => true,
+    };
+    if playing {
+        animation_group_play(state)
+    } else {
+        animation_group_stop(state)
+    }
+}
+
 pub(super) fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;

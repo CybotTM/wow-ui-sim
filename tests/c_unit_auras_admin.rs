@@ -26,12 +26,7 @@ fn clear_buffs_and_insert(env: &WowLuaEnv, auras: Vec<AuraInfo>) {
     state.player.buffs.extend(auras);
 }
 
-fn admin_buff(
-    name: &str,
-    spell_id: i32,
-    aura_instance_id: i32,
-    is_helpful: bool,
-) -> AuraInfo {
+fn admin_buff(name: &str, spell_id: i32, aura_instance_id: i32, is_helpful: bool) -> AuraInfo {
     AuraInfo {
         name: name.into(),
         spell_id,
@@ -51,10 +46,7 @@ fn admin_buff(
 #[test]
 fn admin_buff_is_findable_by_index_instance_id_and_name() {
     let env = env();
-    clear_buffs_and_insert(
-        &env,
-        vec![admin_buff("Admin Buff", 11111, 555, true)],
-    );
+    clear_buffs_and_insert(&env, vec![admin_buff("Admin Buff", 11111, 555, true)]);
 
     let (by_index, by_instance, by_name): (String, String, String) = env
         .eval(
@@ -122,10 +114,7 @@ fn get_aura_data_by_index_harmful_walks_only_debuffs() {
 #[test]
 fn get_buff_data_by_index_past_end_returns_nil() {
     let env = env();
-    clear_buffs_and_insert(
-        &env,
-        vec![admin_buff("Only Buff", 1, 1, true)],
-    );
+    clear_buffs_and_insert(&env, vec![admin_buff("Only Buff", 1, 1, true)]);
     let is_nil: bool = env
         .eval(r#"return C_UnitAuras.GetBuffDataByIndex("player", 99) == nil"#)
         .unwrap();
@@ -135,10 +124,7 @@ fn get_buff_data_by_index_past_end_returns_nil() {
 #[test]
 fn get_debuff_data_by_index_returns_nil_when_no_debuffs() {
     let env = env();
-    clear_buffs_and_insert(
-        &env,
-        vec![admin_buff("Buff Only", 1, 1, true)],
-    );
+    clear_buffs_and_insert(&env, vec![admin_buff("Buff Only", 1, 1, true)]);
     let is_nil: bool = env
         .eval(r#"return C_UnitAuras.GetDebuffDataByIndex("player", 1) == nil"#)
         .unwrap();
@@ -148,10 +134,7 @@ fn get_debuff_data_by_index_returns_nil_when_no_debuffs() {
 #[test]
 fn get_aura_data_by_aura_instance_id_returns_nil_for_unknown_id() {
     let env = env();
-    clear_buffs_and_insert(
-        &env,
-        vec![admin_buff("Buff", 1, 111, true)],
-    );
+    clear_buffs_and_insert(&env, vec![admin_buff("Buff", 1, 111, true)]);
     let is_nil: bool = env
         .eval(r#"return C_UnitAuras.GetAuraDataByAuraInstanceID("player", 222) == nil"#)
         .unwrap();
@@ -161,10 +144,7 @@ fn get_aura_data_by_aura_instance_id_returns_nil_for_unknown_id() {
 #[test]
 fn get_aura_data_by_spell_name_returns_nil_for_unknown_name() {
     let env = env();
-    clear_buffs_and_insert(
-        &env,
-        vec![admin_buff("Buff", 1, 111, true)],
-    );
+    clear_buffs_and_insert(&env, vec![admin_buff("Buff", 1, 111, true)]);
     let is_nil: bool = env
         .eval(r#"return C_UnitAuras.GetAuraDataBySpellName("player", "Nope") == nil"#)
         .unwrap();
@@ -174,18 +154,9 @@ fn get_aura_data_by_spell_name_returns_nil_for_unknown_name() {
 #[test]
 fn aura_data_table_carries_retail_fields() {
     let env = env();
-    clear_buffs_and_insert(
-        &env,
-        vec![admin_buff("Shield", 21562, 999, true)],
-    );
+    clear_buffs_and_insert(&env, vec![admin_buff("Shield", 21562, 999, true)]);
 
-    let (name, spell_id, instance_id, is_helpful, is_harmful): (
-        String,
-        i32,
-        i32,
-        bool,
-        bool,
-    ) = env
+    let (name, spell_id, instance_id, is_helpful, is_harmful): (String, i32, i32, bool, bool) = env
         .eval(
             r#"
             local a = C_UnitAuras.GetAuraDataByIndex("player", 1, "HELPFUL")

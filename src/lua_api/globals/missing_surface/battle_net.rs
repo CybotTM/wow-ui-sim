@@ -21,7 +21,7 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_api::state::{BnetFriend, BnetGameAccount};
+use crate::lua_api::state_types::{BnetFriend, BnetGameAccount};
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -161,62 +161,9 @@ fn push_account_info_table(
     game_account: Option<&BnetGameAccount>,
 ) -> Val {
     let t = create_table(state);
-
-    let account_name = create_string(state, &friend.account_name);
-    let battle_tag = create_string(state, &friend.battle_tag);
-    let note = create_string(state, &friend.note);
-    let custom_message = create_string(state, &friend.custom_message);
-
-    table_set(state, t, "accountName", account_name);
-    table_set(state, t, "battleTag", battle_tag);
-    table_set(
-        state,
-        t,
-        "bnetAccountID",
-        Val::Num(friend.bnet_account_id as f64),
-    );
-    table_set(state, t, "note", note);
-    table_set(state, t, "customMessage", custom_message);
-    table_set(
-        state,
-        t,
-        "customMessageTime",
-        Val::Num(friend.custom_message_time as f64),
-    );
-    table_set(state, t, "appearOffline", Val::Bool(friend.appear_offline));
-    table_set(
-        state,
-        t,
-        "isBattleTagFriend",
-        Val::Bool(friend.is_battle_tag_friend),
-    );
-    table_set(state, t, "isFriend", Val::Bool(friend.is_friend));
-    table_set(state, t, "isFavorite", Val::Bool(friend.is_favorite));
-    table_set(state, t, "isAFK", Val::Bool(friend.is_afk));
-    table_set(state, t, "isDND", Val::Bool(friend.is_dnd));
-    table_set(
-        state,
-        t,
-        "lastOnlineTime",
-        Val::Num(friend.last_online_time as f64),
-    );
-    table_set(
-        state,
-        t,
-        "rafLinkType",
-        Val::Num(friend.raf_link_type as f64),
-    );
-
-    match game_account {
-        Some(ga) => {
-            let ga_table = push_game_account_info_table(state, ga);
-            table_set(state, t, "gameAccountInfo", ga_table);
-        }
-        None => {
-            table_set(state, t, "gameAccountInfo", Val::Nil);
-        }
-    }
-
+    write_account_identity_fields(state, t, friend);
+    write_account_status_fields(state, t, friend);
+    attach_game_account_field(state, t, game_account);
     t
 }
 
@@ -280,4 +227,62 @@ fn push_game_account_info_table(state: &mut LuaState, ga: &BnetGameAccount) -> V
     table_set(state, t, "playerGuid", player_guid);
 
     t
+}
+
+fn write_account_identity_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
+    let battle_tag = create_string(state, &friend.battle_tag);
+    let account_name = create_string(state, &friend.account_name);
+    let note = create_string(state, &friend.note);
+    let guid = create_string(state, &friend.bnet_account_guid);
+    table_set(state, t, "battleTag", battle_tag);
+    table_set(state, t, "accountName", account_name);
+    table_set(state, t, "note", note);
+    table_set(state, t, "bnetAccountGUID", guid);
+    table_set(
+        state,
+        t,
+        "bnetAccountID",
+        Val::Num(friend.bnet_account_id as f64),
+    );
+}
+
+fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
+    let custom_message = create_string(state, &friend.custom_message);
+    table_set(state, t, "customMessage", custom_message);
+    table_set(
+        state,
+        t,
+        "customMessageTime",
+        Val::Num(friend.custom_message_time as f64),
+    );
+    table_set(state, t, "appearOffline", Val::Bool(friend.appear_offline));
+    table_set(
+        state,
+        t,
+        "isBattleTagFriend",
+        Val::Bool(friend.is_battle_tag_friend),
+    );
+    table_set(state, t, "isFriend", Val::Bool(friend.is_friend));
+    table_set(state, t, "isFavorite", Val::Bool(friend.is_favorite));
+    table_set(state, t, "isAFK", Val::Bool(friend.is_afk));
+    table_set(state, t, "isDND", Val::Bool(friend.is_dnd));
+    table_set(
+        state,
+        t,
+        "lastOnlineTime",
+        Val::Num(friend.last_online_time as f64),
+    );
+    table_set(
+        state,
+        t,
+        "rafLinkType",
+        Val::Num(friend.raf_link_type as f64),
+    );
+}
+
+fn attach_game_account_field(state: &mut LuaState, t: Val, game_account: Option<&BnetGameAccount>) {
+    let value = game_account
+        .map(|ga| push_game_account_info_table(state, ga))
+        .unwrap_or(Val::Nil);
+    table_set(state, t, "gameAccountInfo", value);
 }

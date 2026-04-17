@@ -132,9 +132,7 @@ fn test_get_spell_cooldown_active_after_set() {
 fn test_get_mount_from_spell_known_mount_spell() {
     let env = env();
     // Mount ID 6 ("Brown Horse") uses spell_id 458 in state_defaults.rs
-    let mount_id: i64 = env
-        .eval("return C_Spell.GetMountFromSpell(458)")
-        .unwrap();
+    let mount_id: i64 = env.eval("return C_Spell.GetMountFromSpell(458)").unwrap();
     assert_eq!(mount_id, 6);
 }
 
@@ -168,9 +166,7 @@ fn test_get_visibility_info_returns_three_booleans() {
 #[test]
 fn test_is_priority_aura_returns_false() {
     let env = env();
-    let result: bool = env
-        .eval("return C_Spell.IsPriorityAura(116)")
-        .unwrap();
+    let result: bool = env.eval("return C_Spell.IsPriorityAura(116)").unwrap();
     assert!(!result);
 }
 
@@ -180,9 +176,7 @@ fn test_is_priority_aura_returns_false() {
 fn test_is_self_buff_true_for_self_target_spell() {
     let env = env();
     // Spell 1272138 "Keen Edge" has implicit_target=1 (self)
-    let result: bool = env
-        .eval("return C_Spell.IsSelfBuff(1272138)")
-        .unwrap();
+    let result: bool = env.eval("return C_Spell.IsSelfBuff(1272138)").unwrap();
     assert!(result, "spell with implicit_target=1 should be a self-buff");
 }
 
@@ -190,18 +184,14 @@ fn test_is_self_buff_true_for_self_target_spell() {
 fn test_is_self_buff_false_for_enemy_spell() {
     let env = env();
     // Spell 116 "Frostbolt" has implicit_target=6 (enemy)
-    let result: bool = env
-        .eval("return C_Spell.IsSelfBuff(116)")
-        .unwrap();
+    let result: bool = env.eval("return C_Spell.IsSelfBuff(116)").unwrap();
     assert!(!result, "enemy-targeted spell should not be a self-buff");
 }
 
 #[test]
 fn test_is_self_buff_false_for_unknown_spell() {
     let env = env();
-    let result: bool = env
-        .eval("return C_Spell.IsSelfBuff(999999999)")
-        .unwrap();
+    let result: bool = env.eval("return C_Spell.IsSelfBuff(999999999)").unwrap();
     assert!(!result);
 }
 

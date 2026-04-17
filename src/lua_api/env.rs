@@ -1,12 +1,12 @@
 //! WoW Lua environment.
 
 use super::env_convert::{FromRiluaResults, unpack_eval_results};
-use super::timer_processing::{reschedule_timer, timer_should_wait};
 use super::env_init::{
     addon_taint_name, init_builtin_frames, init_lua_state, is_blizzard_addon, record_addon_time,
     update_threshold_counters,
 };
 use super::state::{AddonInfo, PendingTimer, SimState};
+use super::timer_processing::{reschedule_timer, timer_should_wait};
 use crate::Result;
 use crate::lua_api::methods::{
     call_function as call_rilua_function, create_string, frame_ref, registry_get, registry_set,
@@ -45,7 +45,6 @@ impl WowLuaAppData {
         }
     }
 }
-
 
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
@@ -727,4 +726,3 @@ fn matching_slash_handlers(
 
     matches
 }
-

@@ -28,21 +28,46 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_QuestLog")?;
-    table_set_rust_fn(state, ns, "GetBountySetInfoForMapID", get_bounty_set_info_for_map_id)?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "GetBountySetInfoForMapID",
+        get_bounty_set_info_for_map_id,
+    )?;
     table_set_rust_fn(state, ns, "GetInfo", get_info)?;
     table_set_rust_fn(state, ns, "GetNextWaypoint", get_next_waypoint)?;
     table_set_rust_fn(state, ns, "GetQuestDetailsTheme", get_quest_details_theme)?;
     table_set_rust_fn(state, ns, "GetQuestTagInfo", get_quest_tag_info)?;
     table_set_rust_fn(state, ns, "GetWorldQuestInfo", get_world_quest_info)?;
-    table_set_rust_fn(state, ns, "GetAllCompletedQuestIDs", get_all_completed_quest_ids)?;
-    table_set_rust_fn(state, ns, "GetLogIndexForQuestID", get_log_index_for_quest_id)?;
-    table_set_rust_fn(state, ns, "GetNumQuestLogEntries", get_num_quest_log_entries)?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "GetAllCompletedQuestIDs",
+        get_all_completed_quest_ids,
+    )?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "GetLogIndexForQuestID",
+        get_log_index_for_quest_id,
+    )?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "GetNumQuestLogEntries",
+        get_num_quest_log_entries,
+    )?;
     table_set_rust_fn(state, ns, "IsComplete", is_complete)?;
     table_set_rust_fn(state, ns, "IsFailed", is_failed)?;
     table_set_rust_fn(state, ns, "IsMetaQuest", is_meta_quest)?;
     table_set_rust_fn(state, ns, "IsOnMap", is_on_map)?;
     table_set_rust_fn(state, ns, "IsOnQuest", is_on_quest)?;
-    table_set_rust_fn(state, ns, "IsQuestFlaggedCompleted", is_quest_flagged_completed)?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "IsQuestFlaggedCompleted",
+        is_quest_flagged_completed,
+    )?;
     table_set_rust_fn(state, ns, "IsQuestReplayable", is_quest_replayable)?;
     table_set_rust_fn(state, ns, "IsWorldQuest", is_world_quest)?;
     Ok(())
@@ -82,12 +107,7 @@ fn get_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, t, "isTask", Val::Bool(entry.is_world_quest));
     table_set(state, t, "isBounty", Val::Bool(false));
     table_set(state, t, "isStory", Val::Bool(false));
-    table_set(
-        state,
-        t,
-        "isOnMap",
-        Val::Bool(entry.map_id.is_some()),
-    );
+    table_set(state, t, "isOnMap", Val::Bool(entry.map_id.is_some()));
     table_set(state, t, "hasLocalPOI", Val::Bool(false));
     table_set(state, t, "isHidden", Val::Bool(false));
     table_set(state, t, "isAutoComplete", Val::Bool(false));
@@ -152,7 +172,11 @@ fn get_quest_tag_info(state: &mut LuaState) -> LuaResult<u32> {
     let t = create_table(state);
     let tag_id = entry.tag_id.unwrap_or(0);
     table_set(state, t, "tagID", Val::Num(tag_id as f64));
-    let tag_name = if entry.is_world_quest { "World Quest" } else { "Quest" };
+    let tag_name = if entry.is_world_quest {
+        "World Quest"
+    } else {
+        "Quest"
+    };
     let tag_name_val = create_string(state, tag_name);
     table_set(state, t, "tagName", tag_name_val);
     if entry.is_world_quest {
@@ -215,7 +239,13 @@ fn get_log_index_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
         .entries
         .iter()
         .enumerate()
-        .find_map(|(i, e)| if e.quest_id == quest_id { Some(i as i32 + 1) } else { None });
+        .find_map(|(i, e)| {
+            if e.quest_id == quest_id {
+                Some(i as i32 + 1)
+            } else {
+                None
+            }
+        });
     match idx {
         Some(i) => {
             state.push(Val::Num(i as f64));
@@ -233,7 +263,10 @@ fn get_num_quest_log_entries(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-fn quest_bool_field(state: &mut LuaState, f: fn(&crate::lua_api::sim_substates::QuestLogEntry) -> bool) -> LuaResult<u32> {
+fn quest_bool_field(
+    state: &mut LuaState,
+    f: fn(&crate::lua_api::sim_substates::QuestLogEntry) -> bool,
+) -> LuaResult<u32> {
     let quest_id = i32::from_stack(state, 1)?;
     let val = borrow_state(state)?
         .quest_log_entries

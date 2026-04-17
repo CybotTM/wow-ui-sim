@@ -27,6 +27,7 @@ use rilua::{LuaResult, Val};
 use super::item_spell::{current_item_upgrade_location, parse_item_guid, parse_prefixed_id};
 
 pub(super) fn register_tooltip_surface(state: &mut LuaState) -> LuaResult<()> {
+    ensure_pet_info_state(state);
     register_c_tooltip_info(state)
 }
 
@@ -522,22 +523,37 @@ fn register_item_spell_aura_methods(
         &[
             ("GetTraitEntry", c_tooltip_get_trait_entry),
             ("GetAction", c_tooltip_get_action),
+            ("GetAchievementByID", c_tooltip_get_achievement_by_id),
+            ("GetAura", c_tooltip_get_aura),
             ("GetBagItem", c_tooltip_get_bag_item),
             ("GetCurrencyByID", c_tooltip_get_currency_by_id),
             ("GetCurrencyToken", c_tooltip_get_currency_token),
+            ("GetGuildBankItem", c_tooltip_get_guild_bank_item),
+            (
+                "GetInstanceLockEncountersComplete",
+                c_tooltip_get_instance_lock_encounters_complete,
+            ),
             ("GetItem", c_tooltip_get_item),
             ("GetItemByID", c_tooltip_get_item_by_id),
             ("GetItemByGUID", c_tooltip_get_item_by_guid),
+            ("GetLFGDungeon", c_tooltip_get_lfg_dungeon),
             ("GetOwnedItemByID", c_tooltip_get_owned_item_by_id),
+            ("GetPetAction", c_tooltip_get_pet_action),
+            ("GetQuestCurrency", c_tooltip_get_quest_currency),
+            ("GetQuestItem", c_tooltip_get_quest_item),
+            ("GetQuestLogCurrency", c_tooltip_get_quest_log_currency),
+            ("GetQuestLogItem", c_tooltip_get_quest_log_item),
             ("GetRecipeReagentItem", c_tooltip_get_recipe_reagent_item),
             ("GetRecipeResultItem", c_tooltip_get_recipe_result_item),
             (
                 "GetRecipeResultItemForOrder",
                 c_tooltip_get_recipe_result_item_for_order,
             ),
+            ("GetShapeshift", c_tooltip_get_shapeshift),
             ("GetTradeSkillItem", c_tooltip_get_trade_skill_item),
             ("GetTradePlayerItem", c_tooltip_get_trade_player_item),
             ("GetTradeTargetItem", c_tooltip_get_trade_target_item),
+            ("GetTrainerService", c_tooltip_get_trainer_service),
             ("GetSocketedItem", c_tooltip_get_socketed_item),
             ("GetSocketGem", c_tooltip_get_socket_gem),
             ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
@@ -1305,5 +1321,178 @@ fn c_tooltip_get_unit(state: &mut LuaState) -> LuaResult<u32> {
     let unit = String::from_stack(state, 1)?;
     let tooltip = tooltip_for_unit(state, &unit);
     state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_achievement_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let name = borrow_state(state)?
+        .achievements
+        .get(&achievement_id)
+        .map(|a| a.name.clone());
+    let Some(name) = name else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_SPELL);
+    let lines = table_get(state, tooltip, "lines");
+    push_plain_line(state, lines, 1, &name);
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_aura(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = String::from_stack(state, 1)?;
+    let index = i32::from_stack(state, 2)?;
+    let filter = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
+    let tooltip = if filter.eq_ignore_ascii_case("HARMFUL") {
+        empty_tooltip(state, TOOLTIP_TYPE_UNIT_AURA)
+    } else {
+        let aura = lookup_player_aura(state, index);
+        tooltip_for_unit_aura(state, aura)
+    };
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_guild_bank_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _tab = i32::from_stack(state, 1)?;
+    let _slot = i32::from_stack(state, 2)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_tooltip_get_instance_lock_encounters_complete(state: &mut LuaState) -> LuaResult<u32> {
+    let _difficulty_id = Option::<i32>::from_stack(state, 1)?;
+    let _lock_id = Option::<i32>::from_stack(state, 2)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_tooltip_get_lfg_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let _dungeon_id = Option::<i32>::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+/// Ensure `C_PetInfo` namespace exists, register `_state()` accessor,
+/// and return the mutable state sub-table.
+fn ensure_pet_info_state(state: &mut LuaState) -> Val {
+    let ns_ref = super::ensure_namespace(state, "C_PetInfo").expect("C_PetInfo namespace");
+    let ns = Val::Table(ns_ref);
+    let pet_state = match table_get(state, ns, "_pet_state_data") {
+        table @ Val::Table(_) => table,
+        _ => {
+            let t = create_table(state);
+            // sub-tables used by tests / C_PetInfo._state()
+            let spell_map = create_table(state);
+            table_set(state, t, "spellByPetActionID", spell_map);
+            let action_map = create_table(state);
+            table_set(state, t, "petActionsByID", action_map);
+            table_set(state, ns, "_pet_state_data", t);
+            // register _state() as a Rust function the first time
+            let _ = table_set_rust_fn(state, ns_ref, "_state", c_pet_info_get_state);
+            t
+        }
+    };
+    pet_state
+}
+
+fn c_pet_info_get_state(state: &mut LuaState) -> LuaResult<u32> {
+    let pet_state = ensure_pet_info_state(state);
+    state.push(pet_state);
+    Ok(1)
+}
+
+fn table_get_int(state: &LuaState, table: Val, index: i32) -> Val {
+    let Val::Table(table_ref) = table else {
+        return Val::Nil;
+    };
+    state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|t| t.get_int(index as i64))
+        .unwrap_or(Val::Nil)
+}
+
+fn pet_action_spell_id(state: &mut LuaState, slot: i32) -> Option<u32> {
+    let pet_state = ensure_pet_info_state(state);
+    // spellByPetActionID[slot] → spell id (direct integer key mapping)
+    let spell_map = table_get(state, pet_state, "spellByPetActionID");
+    if let Val::Num(n) = table_get_int(state, spell_map, slot) {
+        return Some(n as u32);
+    }
+    // petActionsByID[slot].spellID fallback
+    let action_map = table_get(state, pet_state, "petActionsByID");
+    let entry = table_get_int(state, action_map, slot);
+    if let Val::Num(n) = table_get(state, entry, "spellID") {
+        return Some(n as u32);
+    }
+    None
+}
+
+fn c_tooltip_get_pet_action(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    match pet_action_spell_id(state, slot) {
+        Some(spell_id) => {
+            let tooltip = tooltip_for_spell_id(state, spell_id);
+            state.push(tooltip);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_tooltip_get_quest_currency(state: &mut LuaState) -> LuaResult<u32> {
+    let _quest_id = Option::<i32>::from_stack(state, 1)?;
+    let _currency_type = Option::<i32>::from_stack(state, 2)?;
+    let _index = Option::<i32>::from_stack(state, 3)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_tooltip_get_quest_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _quest_type = Option::<String>::from_stack(state, 1)?;
+    let _slot = Option::<i32>::from_stack(state, 2)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_tooltip_get_quest_log_currency(state: &mut LuaState) -> LuaResult<u32> {
+    let _currency_type = Option::<i32>::from_stack(state, 1)?;
+    let _index = Option::<i32>::from_stack(state, 2)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_tooltip_get_quest_log_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _quest_type = Option::<String>::from_stack(state, 1)?;
+    let _slot = Option::<i32>::from_stack(state, 2)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_tooltip_get_shapeshift(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let name = {
+        let sim = borrow_state(state)?;
+        let zero_based = usize::try_from(slot.saturating_sub(1)).unwrap_or(usize::MAX);
+        sim.shapeshift_forms.get(zero_based).cloned()
+    };
+    let Some(name) = name else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_SPELL);
+    let lines = table_get(state, tooltip, "lines");
+    push_plain_line(state, lines, 1, &name);
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_trainer_service(state: &mut LuaState) -> LuaResult<u32> {
+    let _service_index = Option::<i32>::from_stack(state, 1)?;
+    state.push(Val::Nil);
     Ok(1)
 }

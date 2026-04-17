@@ -256,6 +256,101 @@ fn test_multi_file_closures() {
 }
 
 #[test]
+fn test_text_to_speech_checkload_recovers_clobbered_dropdown_globals() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = std::env::temp_dir().join("wow-sim-test-tts-frame");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let lua_path = temp_dir.join("TextToSpeechFrame.lua");
+    std::fs::write(
+        &lua_path,
+        r#"
+        Enum = { TtsVoiceType = { Standard = "standard", Alternate = "alternate" } }
+        CALLS = {}
+
+        function SetupVoiceMenu(_, voiceType)
+            table.insert(CALLS, voiceType)
+        end
+
+        function TextToSpeechFrame_SetupVoiceDropdown(self)
+            SetupVoiceMenu(self.PanelContainer.TtsVoiceDropdown, Enum.TtsVoiceType.Standard);
+        end
+
+        function TextToSpeechFrame_SetupAlternateVoiceDropdown(self)
+            SetupVoiceMenu(self.PanelContainer.TtsVoiceAlternateDropdown, Enum.TtsVoiceType.Alternate);
+        end
+
+        function IsReadyToLoad()
+            return true
+        end
+
+        function TextToSpeechFrame_CheckLoad(self)
+            if not self.loaded and IsReadyToLoad(self.loadedEvents) then
+                self.loaded = true;
+
+                TextToSpeechFrame_SetupVoiceDropdown(self);
+                TextToSpeechFrame_SetupAlternateVoiceDropdown(self);
+            end
+        end
+        "#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_lua_file(
+        &env.loader_env(),
+        &lua_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+
+    env.exec(
+        r#"
+        TextToSpeechFrame_SetupVoiceDropdown = true
+        TextToSpeechFrame_SetupAlternateVoiceDropdown = false
+        TTS_TEST_FRAME = {
+            loaded = false,
+            loadedEvents = {},
+            PanelContainer = {
+                TtsVoiceDropdown = {},
+                TtsVoiceAlternateDropdown = {},
+            },
+        }
+        TextToSpeechFrame_CheckLoad(TTS_TEST_FRAME)
+        "#,
+    )
+    .unwrap();
+
+    let (voice_ty, alt_ty): (String, String) = env
+        .eval(
+            "return type(TextToSpeechFrame_SetupVoiceDropdown), type(TextToSpeechFrame_SetupAlternateVoiceDropdown)",
+        )
+        .unwrap();
+    assert_eq!(voice_ty, "function");
+    assert_eq!(alt_ty, "function");
+
+    let calls: (String, String) = env.eval("return CALLS[1], CALLS[2]").unwrap();
+    assert_eq!(calls.0, "standard");
+    assert_eq!(calls.1, "alternate");
+
+    let loaded: bool = env.eval("return TTS_TEST_FRAME.loaded").unwrap();
+    assert!(
+        loaded,
+        "TextToSpeechFrame_CheckLoad should still mark the frame loaded"
+    );
+
+    std::fs::remove_file(&lua_path).ok();
+    std::fs::remove_dir_all(&temp_dir).ok();
+}
+
+#[test]
 fn test_runtime_action_button_template_creates_named_children() {
     let t = load_test_xml(
         "runtime-action-button-template",

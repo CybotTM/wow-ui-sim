@@ -271,9 +271,27 @@ fn c_addons_get_addon_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_addons_is_addon_loaded(state: &mut LuaState) -> LuaResult<u32> {
-    let loaded = with_addon(state, stack_val(state, 1), |a| a.loaded).unwrap_or(false);
+    let addon_name = addon_name_from_value(state, stack_val(state, 1)).unwrap_or_default();
+    let (loaded_or_loading, loaded) = if addon_name.is_empty() {
+        (false, false)
+    } else {
+        let sim = borrow_state(state)?;
+        let loaded = sim
+            .addons
+            .iter()
+            .find(|addon| addon.folder_name == addon_name)
+            .map(|addon| addon.loaded)
+            .unwrap_or(false);
+        let loading = sim
+            .loading_addon_index
+            .and_then(|idx| sim.addons.get(idx as usize))
+            .map(|addon| addon.folder_name == addon_name)
+            .unwrap_or(false);
+        (loaded || loading, loaded)
+    };
+    state.push(Val::Bool(loaded_or_loading));
     state.push(Val::Bool(loaded));
-    Ok(1)
+    Ok(2)
 }
 
 fn c_addons_is_addon_load_on_demand(state: &mut LuaState) -> LuaResult<u32> {
@@ -459,7 +477,10 @@ fn load_runtime_addon_with_dependencies(
     }
 
     eprintln!("[load_addon] files {addon_name}");
-    crate::loader::load_addon_from_toc(loader_env, &toc)?;
+    let result = crate::loader::load_addon_from_toc(loader_env, &toc)?;
+    for warning in &result.warnings {
+        eprintln!("[load_addon] warning {addon_name}: {warning}");
+    }
     eprintln!("[load_addon] loaded {addon_name}");
     mark_addon_loaded(loader_env, addon_name);
     fire_addon_loaded(state, loader_env, addon_name);

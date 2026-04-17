@@ -196,6 +196,10 @@ fn player_spells_panel_debug_snapshot(env: &WowLuaEnv) -> String {
             end
             return PlayerSpellsFrame.SpellBookFrame:GetTab()
         end)
+        local playerMinimizedWidth = PlayerSpellsFrame.minimizedWidth
+        local playerMaximizedWidth = PlayerSpellsFrame.maximizedWidth
+        local spellbookMinimizedWidth = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.minimizedWidth or nil
+        local spellbookMaximizedWidth = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.maximizedWidth or nil
         local specFrameName = PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame:GetName() or "missing"
         local talentsFrameName = PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame:GetName() or "missing"
         local spellbookFrameName = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:GetName() or "missing"
@@ -266,11 +270,15 @@ fn player_spells_panel_debug_snapshot(env: &WowLuaEnv) -> String {
             "frame.setMinimizedFunc=" .. tostring(type(frameSetMinimized)),
             "PlayerSpellsFrame.OnLoadScript=" .. tostring(type(onLoadScript)),
             "PlayerSpellsFrame.internalTabTracker=" .. tostring(type(PlayerSpellsFrame.internalTabTracker)),
+            "PlayerSpellsFrame.minimizedWidth=" .. tostring(playerMinimizedWidth),
+            "PlayerSpellsFrame.maximizedWidth=" .. tostring(playerMaximizedWidth),
             "PlayerSpellsFrame.GetTab()=" .. tostring(playerGetTabOk) .. ":" .. tostring(playerGetTabResult),
             "SpecFrame.name=" .. tostring(specFrameName),
             "TalentsFrame.name=" .. tostring(talentsFrameName),
             "SpellBookFrame.name=" .. tostring(spellbookFrameName),
             "SpellBookFrame.internalTabTracker=" .. tostring(spellbookTrackerType),
+            "SpellBookFrame.minimizedWidth=" .. tostring(spellbookMinimizedWidth),
+            "SpellBookFrame.maximizedWidth=" .. tostring(spellbookMaximizedWidth),
             "SpellBookFrame.GetTab()=" .. tostring(spellbookGetTabOk) .. ":" .. tostring(spellbookGetTabResult),
             "missing.OnLoad.methods=" .. table.concat(missingOnLoadMethods, " | "),
             "call.autoMinimizeOnCondition=" .. tostring(autoCallOk) .. ":" .. tostring(autoCallResult),
@@ -480,6 +488,8 @@ fn debug_player_spells_onload_subcalls() {
             table.insert(lines, attempt("talents.UpdateClassVisuals", function() return talentsFrame:UpdateClassVisuals() end))
             table.insert(lines, attempt("talents.InitializeLoadSystem", function() return talentsFrame:InitializeLoadSystem() end))
             table.insert(lines, attempt("talents.InitializeSearch", function() return talentsFrame:InitializeSearch() end))
+            table.insert(lines, attempt("talents.RefreshLoadoutOptions", function() return talentsFrame:RefreshLoadoutOptions() end))
+            table.insert(lines, attempt("talents.RefreshConfigID", function() return talentsFrame:RefreshConfigID() end))
 
             table.insert(lines, attempt("talents.LoadSystem.GetDropdown", function() return talentsFrame.LoadSystem:GetDropdown() end))
             table.insert(lines, attempt("talents.LoadSystem.dropdown.SetWidth", function()
@@ -538,6 +548,32 @@ fn debug_player_spells_onload_subcalls() {
             table.insert(lines, attempt("spellbook.CreateAndInit.PetCategory", function()
                 return CreateAndInitFromMixin(SpellBookPetCategoryMixin, spellBookFrame)
             end))
+            table.insert(lines, attempt("spellbook.C_SpellBook.GetNumSpellBookSkillLines", function()
+                return C_SpellBook.GetNumSpellBookSkillLines()
+            end))
+            table.insert(lines, attempt("spellbook.C_SpellBook.GetSpellBookSkillLineInfo.Class", function()
+                local info = C_SpellBook.GetSpellBookSkillLineInfo(Enum.SpellBookSkillLineIndex.Class)
+                return info and info.name or "nil"
+            end))
+            table.insert(lines, attempt("spellbook.C_SpellBook.GetSpellBookSkillLineInfo.General", function()
+                local info = C_SpellBook.GetSpellBookSkillLineInfo(Enum.SpellBookSkillLineIndex.General)
+                return info and info.name or "nil"
+            end))
+            table.insert(lines, attempt("spellbook.C_SpellBook.HasPetSpells", function()
+                return C_SpellBook.HasPetSpells()
+            end))
+            table.insert(lines, attempt("spellbook.ClassCategory.InitDirect", function()
+                local category = CreateFromMixins(SpellBookClassCategoryMixin)
+                return category:Init(spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.GeneralCategory.InitDirect", function()
+                local category = CreateFromMixins(SpellBookGeneralCategoryMixin)
+                return category:Init(spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.PetCategory.InitDirect", function()
+                local category = CreateFromMixins(SpellBookPetCategoryMixin)
+                return category:Init(spellBookFrame)
+            end))
             table.insert(lines, attempt("spellbook.PagedSpellsFrame.SetElementTemplateData", function()
                 return spellBookFrame.PagedSpellsFrame:SetElementTemplateData(Templates)
             end))
@@ -572,6 +608,60 @@ fn debug_player_spells_onload_subcalls() {
         )
         .expect("diagnostic evaluation should return");
     panic!("{report}");
+}
+
+#[test]
+#[ignore = "diagnostic"]
+fn debug_keybind_n_nil_width_callsite() {
+    let env = setup_env();
+    common::install_error_collector(&env, "__nil_width_errors");
+    clear_recorded_lua_errors(&env);
+
+    env.exec(
+        r#"
+        do
+            local probe = CreateFrame("Frame", "NilWidthProbeFrame", UIParent)
+            local mt = getmetatable(probe)
+            local idx = mt and mt.__index
+            if type(idx) == "table" and not _G.__frame_nil_number_probe_installed then
+                _G.__frame_nil_number_probe_installed = true
+                for methodName, original in pairs(idx) do
+                    if type(methodName) == "string" and type(original) == "function" then
+                        idx[methodName] = function(self, ...)
+                            local results = { pcall(original, self, ...) }
+                            if results[1] then
+                                return unpack(results, 2, table.maxn(results))
+                            end
+
+                            local err = tostring(results[2])
+                            if string.find(err, "expected number, got nil at argument 1", 1, true) then
+                                local name = self and self.GetName and self:GetName() or "<unnamed>"
+                                local objectType = self and self.GetObjectType and self:GetObjectType() or "?"
+                                local stack = type(debugstack) == "function" and debugstack() or ""
+                                error(
+                                    "frame method " .. tostring(methodName) .. " on " .. tostring(name) .. " [" .. tostring(objectType) .. "] -> " .. err .. "\n" .. tostring(stack)
+                                )
+                            end
+
+                            error(results[2])
+                        end
+                    end
+                end
+            end
+        end
+        "#,
+    )
+    .expect("failed to install SetWidth diagnostic");
+
+    let send_result = env.send_key_press("N", None);
+    let recorded_errors = recorded_lua_errors(&env);
+    let handler_errors = common::drain_string_table(&env, "__nil_width_errors");
+
+    panic!(
+        "send_result={send_result:?}\nrecorded_errors={recorded_errors:#?}\nhandler_errors=\n{}\n{}",
+        handler_errors.join("\n---\n"),
+        player_spells_panel_debug_snapshot(&env),
+    );
 }
 
 #[test]

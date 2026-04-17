@@ -142,6 +142,35 @@ fn apply_blizzard_post_load_patches(
                 push_warning(result, "install Menu descriptor fallback", &e);
             }
         }
+        "Blizzard_SharedXML" => {
+            if let Err(e) = env.exec(
+                r#"
+                local mixins = {
+                    VisibleWhilePlayingAnimGroupMixin,
+                    TargetsVisibleWhilePlayingAnimGroupMixin,
+                    SyncedAnimGroupMixin,
+                }
+
+                for _, mixin in ipairs(mixins) do
+                    if type(mixin) == "table" and type(mixin.SetPlaying) ~= "function" then
+                        function mixin:SetPlaying(playing)
+                            if playing then
+                                if type(self.PlaySynced) == "function" then
+                                    self:PlaySynced()
+                                else
+                                    self:Play()
+                                end
+                            else
+                                self:Stop()
+                            end
+                        end
+                    end
+                end
+                "#,
+            ) {
+                push_warning(result, "patch Blizzard_SharedXML animation mixins", &e);
+            }
+        }
         "Blizzard_UIParent" => {
             if let Err(e) = env.patch_managed_frame_mixin() {
                 push_warning(result, "patch UIParentManagedFrameMixin", &e);
@@ -155,6 +184,42 @@ fn apply_blizzard_post_load_patches(
         "Blizzard_UIPanels_Game" => {
             if let Err(e) = env.patch_quest_log_mixin() {
                 push_warning(result, "patch QuestLogMixin", &e);
+            }
+        }
+        "Blizzard_PlayerSpells" => {
+            if let Err(e) = env.exec(
+                r#"
+                HasAttachedGlyph = HasAttachedGlyph or function()
+                    return false
+                end
+
+                IsSpellValidForPendingGlyph = IsSpellValidForPendingGlyph or function()
+                    return false
+                end
+
+                local function backfill_onload(frame, needs_init)
+                    if not frame or not needs_init then
+                        return
+                    end
+                    if type(frame.OnLoad) == "function" then
+                        frame:OnLoad()
+                        return
+                    end
+                    local handler = frame.GetScript and frame:GetScript("OnLoad")
+                    if type(handler) == "function" then
+                        handler(frame)
+                    end
+                end
+
+                if PlayerSpellsFrame then
+                    backfill_onload(PlayerSpellsFrame, PlayerSpellsFrame.internalTabTracker == nil)
+                    backfill_onload(PlayerSpellsFrame.SpecFrame, PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame.SpecContentFramePool == nil)
+                    backfill_onload(PlayerSpellsFrame.TalentsFrame, PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.initialBasePanOffsetX == nil)
+                    backfill_onload(PlayerSpellsFrame.SpellBookFrame, PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.internalTabTracker == nil)
+                end
+                "#,
+            ) {
+                push_warning(result, "backfill PlayerSpells OnLoad state", &e);
             }
         }
         _ => {}

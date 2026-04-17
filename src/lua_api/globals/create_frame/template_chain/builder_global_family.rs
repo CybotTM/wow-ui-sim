@@ -77,8 +77,19 @@ fn build_global_method_with_self_string_handler(
         target_path,
         method_name,
         r#"
-            local target, method_name, literal_arg = ...
+            local target_path, method_name, literal_arg = ...
+            local path = {}
+            for segment in string.gmatch(target_path, "[^%.]+") do
+                table.insert(path, segment)
+            end
             return function(self, ...)
+                local target = getfenv(0) or _G
+                for i = 1, #path do
+                    target = target and target[path[i]]
+                end
+                if not target then
+                    return
+                end
                 return target[method_name](target, self, literal_arg)
             end
         "#,
@@ -107,8 +118,19 @@ fn build_global_method_with_self_field_handler(
         target_path,
         method_name,
         r#"
-            local target, method_name, field_name = ...
+            local target_path, method_name, field_name = ...
+            local path = {}
+            for segment in string.gmatch(target_path, "[^%.]+") do
+                table.insert(path, segment)
+            end
             return function(self, ...)
+                local target = getfenv(0) or _G
+                for i = 1, #path do
+                    target = target and target[path[i]]
+                end
+                if not target then
+                    return
+                end
                 return target[method_name](target, self[field_name])
             end
         "#,
@@ -174,8 +196,19 @@ fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str
     match mode {
         GlobalMethodMode::Passthrough => (
             r#"
-                local target, method_name = ...
+                local target_path, method_name = ...
+                local path = {}
+                for segment in string.gmatch(target_path, "[^%.]+") do
+                    table.insert(path, segment)
+                end
                 return function(self, ...)
+                    local target = getfenv(0) or _G
+                    for i = 1, #path do
+                        target = target and target[path[i]]
+                    end
+                    if not target then
+                        return
+                    end
                     return target[method_name](target, ...)
                 end
             "#,
@@ -183,8 +216,19 @@ fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str
         ),
         GlobalMethodMode::SelfId => (
             r#"
-                local target, method_name = ...
+                local target_path, method_name = ...
+                local path = {}
+                for segment in string.gmatch(target_path, "[^%.]+") do
+                    table.insert(path, segment)
+                end
                 return function(self, ...)
+                    local target = getfenv(0) or _G
+                    for i = 1, #path do
+                        target = target and target[path[i]]
+                    end
+                    if not target then
+                        return
+                    end
                     return target[method_name](target, self:GetID())
                 end
             "#,
@@ -203,7 +247,7 @@ fn call_global_method_builder(
 ) -> LuaResult<Val> {
     let builder = load_template(state, source, tag)?;
     let mut args = Vec::with_capacity(2 + extra_args.len());
-    args.push(resolve_global_path(state, target_path));
+    args.push(create_string(state, target_path));
     args.push(create_string(state, method_name));
     args.extend_from_slice(extra_args);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &args)

@@ -51,9 +51,18 @@ fn create_children_and_finalize(
     init_action_bar_tables(env, frame, name);
     timing.frame_button_time += btn_start.elapsed();
     let lifecycle = lifecycle_scripts(frame, inherits);
+    if name == "PlayerSpellsFrame" {
+        eprintln!(
+            "[lifecycle] {} on_load={} on_show={}",
+            name, lifecycle.on_load, lifecycle.on_show
+        );
+    }
     if lifecycle.any() {
         let lc_start = Instant::now();
         fire_lifecycle_scripts(env, frame_id, name, lifecycle);
+        if name == "PlayerSpellsFrame" {
+            eprintln!("[lifecycle] {} fired", name);
+        }
         timing.frame_lifecycle_time += lc_start.elapsed();
         timing.lifecycle_fire_count += 1;
     }

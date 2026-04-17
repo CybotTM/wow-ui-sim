@@ -9,7 +9,7 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_api::state::SocialFriend;
+use crate::lua_api::state_types::SocialFriend;
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -47,11 +47,7 @@ fn c_social_get_friends(state: &mut LuaState) -> LuaResult<u32> {
         let entry = push_friend_info_table(state, friend);
         let Val::Table(arr_ref) = arr else { continue };
         if let Some(tbl) = state.gc.tables.get_mut(arr_ref) {
-            let _ = tbl.raw_set(
-                Val::Num((i + 1) as f64),
-                entry,
-                &state.gc.string_arena,
-            );
+            let _ = tbl.raw_set(Val::Num((i + 1) as f64), entry, &state.gc.string_arena);
         }
         state.gc.barrier_back(arr_ref);
     }

@@ -10,18 +10,14 @@ fn env() -> WowLuaEnv {
 #[test]
 fn get_options_returns_empty_array_by_default() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_GossipInfo.GetOptions()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_GossipInfo.GetOptions()").unwrap();
     assert_eq!(count, 0);
 }
 
 #[test]
 fn get_active_quests_returns_empty_array_by_default() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_GossipInfo.GetActiveQuests()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_GossipInfo.GetActiveQuests()").unwrap();
     assert_eq!(count, 0);
 }
 

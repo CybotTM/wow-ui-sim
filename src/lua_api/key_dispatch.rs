@@ -349,7 +349,9 @@ impl WowLuaEnv {
             .get(fid)
             .map(|f| f.editbox_numeric)
             .unwrap_or(false);
-        let is_valid_numeric = text.chars().all(|c| c.is_ascii_digit() || c == '.' || c == '-');
+        let is_valid_numeric = text
+            .chars()
+            .all(|c| c.is_ascii_digit() || c == '.' || c == '-');
         if numeric && !is_valid_numeric {
             return Ok(());
         }

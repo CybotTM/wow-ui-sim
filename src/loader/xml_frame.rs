@@ -67,6 +67,10 @@ pub fn fast_create_frame_profile_report() -> Option<String> {
     setup::fast_create_frame_profile_report()
 }
 
+pub fn fast_create_frame_profile_body_report() -> Option<String> {
+    setup::fast_create_frame_profile_body_report()
+}
+
 /// Build the CreateFrame Lua code and run the setup phase.
 fn build_and_setup_frame(
     env: &LoaderEnv<'_>,

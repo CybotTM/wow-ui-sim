@@ -8,10 +8,11 @@ fn env() -> WowLuaEnv {
 #[test]
 fn default_returns_false() {
     let env = env();
-    let result: bool = env
-        .eval("return IsOnGroundFloorInJailersTower()")
-        .unwrap();
-    assert!(!result, "should return false when no Torghast run is active");
+    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
+    assert!(
+        !result,
+        "should return false when no Torghast run is active"
+    );
 }
 
 #[test]
@@ -20,11 +21,12 @@ fn active_floor_1_returns_true() {
     {
         let state = env.state();
         let mut s = state.borrow_mut();
-        s.torghast = TorghastState { active: true, floor: 1 };
+        s.torghast = TorghastState {
+            active: true,
+            floor: 1,
+        };
     }
-    let result: bool = env
-        .eval("return IsOnGroundFloorInJailersTower()")
-        .unwrap();
+    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
     assert!(result, "active run on floor 1 should return true");
 }
 
@@ -34,11 +36,12 @@ fn active_floor_2_returns_false() {
     {
         let state = env.state();
         let mut s = state.borrow_mut();
-        s.torghast = TorghastState { active: true, floor: 2 };
+        s.torghast = TorghastState {
+            active: true,
+            floor: 2,
+        };
     }
-    let result: bool = env
-        .eval("return IsOnGroundFloorInJailersTower()")
-        .unwrap();
+    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
     assert!(!result, "active run on floor 2 should return false");
 }
 
@@ -48,11 +51,12 @@ fn inactive_floor_1_returns_false() {
     {
         let state = env.state();
         let mut s = state.borrow_mut();
-        s.torghast = TorghastState { active: false, floor: 1 };
+        s.torghast = TorghastState {
+            active: false,
+            floor: 1,
+        };
     }
-    let result: bool = env
-        .eval("return IsOnGroundFloorInJailersTower()")
-        .unwrap();
+    let result: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
     assert!(!result, "inactive run even on floor 1 should return false");
 }
 
@@ -60,19 +64,18 @@ fn inactive_floor_1_returns_false() {
 fn mutation_reflects_live() {
     let env = env();
 
-    let before: bool = env
-        .eval("return IsOnGroundFloorInJailersTower()")
-        .unwrap();
+    let before: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
     assert!(!before, "should start false");
 
     {
         let state = env.state();
         let mut s = state.borrow_mut();
-        s.torghast = TorghastState { active: true, floor: 1 };
+        s.torghast = TorghastState {
+            active: true,
+            floor: 1,
+        };
     }
 
-    let after: bool = env
-        .eval("return IsOnGroundFloorInJailersTower()")
-        .unwrap();
+    let after: bool = env.eval("return IsOnGroundFloorInJailersTower()").unwrap();
     assert!(after, "should reflect state mutation");
 }

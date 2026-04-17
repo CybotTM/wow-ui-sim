@@ -10,10 +10,11 @@ fn env() -> WowLuaEnv {
 #[test]
 fn get_scenario_info_returns_nothing_when_not_in_scenario() {
     let env = env();
-    let result: Option<i32> = env
-        .eval("return C_ScenarioInfo.GetScenarioInfo()")
-        .unwrap();
-    assert!(result.is_none(), "GetScenarioInfo should return nothing out of scenario");
+    let result: Option<i32> = env.eval("return C_ScenarioInfo.GetScenarioInfo()").unwrap();
+    assert!(
+        result.is_none(),
+        "GetScenarioInfo should return nothing out of scenario"
+    );
 }
 
 #[test]
@@ -22,7 +23,10 @@ fn get_scenario_step_info_returns_nothing_when_not_in_scenario() {
     let result: Option<i32> = env
         .eval("return C_ScenarioInfo.GetScenarioStepInfo()")
         .unwrap();
-    assert!(result.is_none(), "GetScenarioStepInfo should return nothing out of scenario");
+    assert!(
+        result.is_none(),
+        "GetScenarioStepInfo should return nothing out of scenario"
+    );
 }
 
 #[test]
@@ -236,7 +240,10 @@ fn is_tiered_entrance_reflects_state() {
     let result: bool = env
         .eval("return C_ScenarioInfo.IsTieredEntranceScenario()")
         .unwrap();
-    assert!(result, "IsTieredEntranceScenario should reflect seeded flag");
+    assert!(
+        result,
+        "IsTieredEntranceScenario should reflect seeded flag"
+    );
 }
 
 #[test]

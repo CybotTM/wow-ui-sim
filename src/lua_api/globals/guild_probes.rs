@@ -122,22 +122,22 @@ fn push_roster_row_values(state: &mut LuaState, row: &RosterRow) {
     let class_file = create_string(state, row.class_file);
     let empty = create_string(state, "");
 
-    state.push(name);             // 1: name
-    state.push(rank);             // 2: rankName
+    state.push(name); // 1: name
+    state.push(rank); // 2: rankName
     state.push(Val::Num(row.rank_index)); // 3: rankIndex
-    state.push(Val::Num(row.level));      // 4: level
-    state.push(class_label);      // 5: class
-    state.push(empty.clone());    // 6: zone
-    state.push(empty.clone());    // 7: note
-    state.push(empty);            // 8: officernote
-    state.push(Val::Bool(true));  // 9: online
-    state.push(Val::Num(0.0));    // 10: status
-    state.push(class_file);       // 11: classFileName
-    state.push(Val::Num(0.0));    // 12: achievementPoints
-    state.push(Val::Num(0.0));    // 13: achievementRank
+    state.push(Val::Num(row.level)); // 4: level
+    state.push(class_label); // 5: class
+    state.push(empty.clone()); // 6: zone
+    state.push(empty.clone()); // 7: note
+    state.push(empty); // 8: officernote
+    state.push(Val::Bool(true)); // 9: online
+    state.push(Val::Num(0.0)); // 10: status
+    state.push(class_file); // 11: classFileName
+    state.push(Val::Num(0.0)); // 12: achievementPoints
+    state.push(Val::Num(0.0)); // 13: achievementRank
     state.push(Val::Bool(false)); // 14: isMobile
     state.push(Val::Bool(false)); // 15: isSoREligible
-    state.push(Val::Num(0.0));    // 16: standingID
+    state.push(Val::Num(0.0)); // 16: standingID
 }
 
 struct RosterRow {

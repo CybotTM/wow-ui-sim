@@ -25,6 +25,7 @@ struct FastCreateFrameProfile {
     fast_hits: u64,
     slow_fallbacks: u64,
     miss_reasons: BTreeMap<&'static str, u64>,
+    miss_bodies: BTreeMap<String, u64>,
 }
 
 /// Execute CreateFrame Lua, apply XML properties, and record setup timing.
@@ -171,7 +172,14 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
         miss_reasons.push("scripts");
     }
 
-    record_fast_create_frame_profile(&miss_reasons);
+    let miss_body = if scripts_need_slow_path {
+        setup.frame.scripts().and_then(|scripts| {
+            crate::lua_api::globals::create_frame::first_fast_install_miss(scripts)
+        })
+    } else {
+        None
+    };
+    record_fast_create_frame_profile(&miss_reasons, miss_body.as_deref());
     miss_reasons.is_empty()
 }
 
@@ -277,7 +285,7 @@ fn fast_create_frame_profile() -> &'static Mutex<FastCreateFrameProfile> {
     PROFILE.get_or_init(|| Mutex::new(FastCreateFrameProfile::default()))
 }
 
-fn record_fast_create_frame_profile(miss_reasons: &[&'static str]) {
+fn record_fast_create_frame_profile(miss_reasons: &[&'static str], miss_body: Option<&str>) {
     if !fast_create_frame_profiling_enabled() {
         return;
     }
@@ -291,6 +299,12 @@ fn record_fast_create_frame_profile(miss_reasons: &[&'static str]) {
     profile.slow_fallbacks += 1;
     for reason in miss_reasons {
         *profile.miss_reasons.entry(reason).or_default() += 1;
+    }
+    if let Some(miss_body) = miss_body {
+        *profile
+            .miss_bodies
+            .entry(miss_body.to_string())
+            .or_default() += 1;
     }
 }
 
@@ -331,4 +345,29 @@ pub(super) fn fast_create_frame_profile_report() -> Option<String> {
             top
         }
     ))
+}
+
+pub(super) fn fast_create_frame_profile_body_report() -> Option<String> {
+    if !fast_create_frame_profiling_enabled() {
+        return None;
+    }
+    let Ok(profile) = fast_create_frame_profile().lock() else {
+        return None;
+    };
+    if profile.miss_bodies.is_empty() {
+        return None;
+    }
+    let mut bodies = profile
+        .miss_bodies
+        .iter()
+        .map(|(body, count)| (body.as_str(), *count))
+        .collect::<Vec<_>>();
+    bodies.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(b.0)));
+    let top = bodies
+        .into_iter()
+        .take(8)
+        .map(|(body, count)| format!("{count}x {body}"))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    Some(format!("xml fast path script misses: {top}"))
 }

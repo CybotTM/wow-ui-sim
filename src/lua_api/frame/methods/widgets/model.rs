@@ -186,6 +186,104 @@ pub(super) fn set_model_alpha(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_do_blend(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = opt_bool(state, 2).unwrap_or(false);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.do_blend = enabled;
+    }
+    Ok(0)
+}
+
+pub(super) fn get_do_blend(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.player_model_state.do_blend)
+        .unwrap_or(false);
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+pub(super) fn set_keep_model_on_hide(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let keep = opt_bool(state, 2).unwrap_or(false);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.keep_model_on_hide = keep;
+    }
+    Ok(0)
+}
+
+pub(super) fn get_keep_model_on_hide(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let keep = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.player_model_state.keep_model_on_hide)
+        .unwrap_or(false);
+    state.push(Val::Bool(keep));
+    Ok(1)
+}
+
+pub(super) fn set_item(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let item = stringish_arg(state, 2);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.last_item = item;
+    }
+    Ok(0)
+}
+
+pub(super) fn set_item_appearance(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let appearance = stringish_arg(state, 2);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.last_item_appearance = appearance;
+    }
+    Ok(0)
+}
+
+pub(super) fn play_anim_kit(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let anim_kit = val_to_f64(stack_val(state, 2)) as i32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.active_anim_kit = Some(anim_kit);
+    }
+    Ok(0)
+}
+
+pub(super) fn stop_anim_kit(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.player_model_state.active_anim_kit = None;
+    }
+    Ok(0)
+}
+
+pub(super) fn can_set_unit(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn stringish_arg(state: &LuaState, index: i32) -> Option<String> {
+    match stack_val(state, index) {
+        Val::Str(str_ref) => {
+            let lua_str = state.gc.string_arena.get(str_ref)?;
+            String::from_utf8(lua_str.data().to_vec()).ok()
+        }
+        Val::Num(n) if n.fract() == 0.0 => Some((n as i64).to_string()),
+        Val::Num(n) => Some(n.to_string()),
+        _ => None,
+    }
+}
+
 pub(super) fn get_model_alpha(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
@@ -383,6 +481,15 @@ const MODEL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetModelFileID", get_model_file_id),
     ("SetModelAlpha", set_model_alpha),
     ("GetModelAlpha", get_model_alpha),
+    ("SetDoBlend", set_do_blend),
+    ("GetDoBlend", get_do_blend),
+    ("SetKeepModelOnHide", set_keep_model_on_hide),
+    ("GetKeepModelOnHide", get_keep_model_on_hide),
+    ("SetItem", set_item),
+    ("SetItemAppearance", set_item_appearance),
+    ("PlayAnimKit", play_anim_kit),
+    ("StopAnimKit", stop_anim_kit),
+    ("CanSetUnit", can_set_unit),
     ("SetSequence", set_sequence),
     ("SetSequenceTime", set_sequence_time),
     // Camera

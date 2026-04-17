@@ -58,12 +58,7 @@ fn build_channel_table(state: &mut LuaState, channel_id: i32) -> Option<Val> {
         Val::Str(s)
     };
     table_set(state, tbl, "channelName", name_val);
-    table_set(
-        state,
-        tbl,
-        "numMembers",
-        Val::Num(ch.members.len() as f64),
-    );
+    table_set(state, tbl, "numMembers", Val::Num(ch.members.len() as f64));
     Some(tbl)
 }
 
@@ -99,11 +94,7 @@ fn get_channels(state: &mut LuaState) -> LuaResult<u32> {
         if let Some(tbl) = build_channel_table(state, id) {
             if let Val::Table(arr_ref) = array {
                 if let Some(t) = state.gc.tables.get_mut(arr_ref) {
-                    let _ = t.raw_set(
-                        Val::Num(i as f64 + 1.0),
-                        tbl,
-                        &state.gc.string_arena,
-                    );
+                    let _ = t.raw_set(Val::Num(i as f64 + 1.0), tbl, &state.gc.string_arena);
                 }
                 state.gc.barrier_back(arr_ref);
             }

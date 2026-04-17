@@ -89,6 +89,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "GetCVarBool",
     "GetLFGDungeonEncounterInfo",
     "GetLFGRoles",
+    "HasLFGRestrictions",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
     // loot_method.rs, not stubs.
     "HasNewMail",

@@ -10,9 +10,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn get_friend_info_returns_seeded_count_via_get_friends() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_Social.GetFriends()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_Social.GetFriends()").unwrap();
     assert_eq!(count, 3, "three seeded friends");
 }
 
@@ -53,9 +51,7 @@ fn get_friend_info_offline_friend() {
 #[test]
 fn get_friend_info_returns_nil_for_index_zero() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return C_Social.GetFriendInfo(0) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return C_Social.GetFriendInfo(0) == nil").unwrap();
     assert!(is_nil, "index 0 is out of range (1-based)");
 }
 

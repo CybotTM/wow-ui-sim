@@ -21,7 +21,12 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_summon_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let summon_info = ensure_namespace(state, "C_SummonInfo")?;
-    table_set_rust_fn(state, summon_info, "GetSummonReason", c_summon_info_get_reason)?;
+    table_set_rust_fn(
+        state,
+        summon_info,
+        "GetSummonReason",
+        c_summon_info_get_reason,
+    )?;
     table_set_rust_fn(
         state,
         summon_info,

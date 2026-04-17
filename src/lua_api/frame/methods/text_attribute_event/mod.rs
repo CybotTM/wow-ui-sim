@@ -313,6 +313,7 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         "TriggerEvent",
         callbacks::trigger_callback_event,
     )?;
+    table_set_rust_fn(state, table, "SetupMenu", callbacks::setup_menu)?;
     Ok(())
 }
 

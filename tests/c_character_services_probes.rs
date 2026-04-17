@@ -55,8 +55,14 @@ fn get_active_class_trial_boost_type_reflects_seeded_value() {
 #[test]
 fn clearing_upgrade_boost_type_returns_nil_again() {
     let env = env();
-    env.state().borrow_mut().character_services.active_upgrade_boost_type = Some(3);
-    env.state().borrow_mut().character_services.active_upgrade_boost_type = None;
+    env.state()
+        .borrow_mut()
+        .character_services
+        .active_upgrade_boost_type = Some(3);
+    env.state()
+        .borrow_mut()
+        .character_services
+        .active_upgrade_boost_type = None;
     let is_nil: bool = env
         .eval("return C_CharacterServices.GetActiveCharacterUpgradeBoostType() == nil")
         .unwrap();
@@ -69,7 +75,10 @@ fn has_required_service_for_character_upgrade_returns_false() {
     let result: bool = env
         .eval("return C_CharacterServices.HasRequiredServiceForCharacterUpgrade()")
         .unwrap();
-    assert!(!result, "should return false — no active service by default");
+    assert!(
+        !result,
+        "should return false — no active service by default"
+    );
 }
 
 #[test]

@@ -35,7 +35,12 @@ pub(super) fn register_player_info_surface(state: &mut LuaState) -> LuaResult<()
         "GetPlayerMythicPlusRatingSummary",
         get_player_mythic_plus_rating_summary,
     )?;
-    table_set_rust_fn(state, ns, "IsPlayerEligibleForNPE", is_player_eligible_for_npe)?;
+    table_set_rust_fn(
+        state,
+        ns,
+        "IsPlayerEligibleForNPE",
+        is_player_eligible_for_npe,
+    )?;
     table_set_rust_fn(state, ns, "IsPlayerNPERestricted", is_player_npe_restricted)?;
     table_set_rust_fn(state, ns, "IsPlayerInRPE", is_player_in_rpe)?;
     Ok(())
@@ -60,7 +65,10 @@ fn get_content_difficulty_creature(state: &mut LuaState) -> LuaResult<u32> {
 
 fn get_player_mythic_plus_rating_summary(state: &mut LuaState) -> LuaResult<u32> {
     // Ignores playerToken — always returns the local player's data.
-    let summary = borrow_state(state)?.player.mythic_plus_rating_summary.clone();
+    let summary = borrow_state(state)?
+        .player
+        .mythic_plus_rating_summary
+        .clone();
     let Some(summary) = summary else {
         return Ok(0); // mayreturnnothing
     };
@@ -93,7 +101,12 @@ fn get_player_mythic_plus_rating_summary(state: &mut LuaState) -> LuaResult<u32>
             "bestRunDurationMS",
             Val::Num(run.best_run_duration_ms as f64),
         );
-        table_set(state, entry, "finishedSuccess", Val::Bool(run.finished_success));
+        table_set(
+            state,
+            entry,
+            "finishedSuccess",
+            Val::Bool(run.finished_success),
+        );
         set_table_array(state, runs_table, i as i64 + 1, entry);
     }
     table_set(state, result, "runs", runs_table);

@@ -16,7 +16,10 @@ fn get_summon_reason_returns_nil_when_inactive() {
     let is_nil: bool = env
         .eval("return C_SummonInfo.GetSummonReason() == nil")
         .unwrap();
-    assert!(is_nil, "GetSummonReason() should be nil when no summon is active");
+    assert!(
+        is_nil,
+        "GetSummonReason() should be nil when no summon is active"
+    );
 }
 
 #[test]
@@ -70,9 +73,7 @@ fn get_summon_reason_returns_seeded_reason() {
             target_name: "Thrall".into(),
         };
     }
-    let reason: i32 = env
-        .eval("return C_SummonInfo.GetSummonReason()")
-        .unwrap();
+    let reason: i32 = env.eval("return C_SummonInfo.GetSummonReason()").unwrap();
     assert_eq!(reason, 3);
 }
 

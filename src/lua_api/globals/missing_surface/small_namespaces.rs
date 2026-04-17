@@ -21,16 +21,36 @@ use rilua::{LuaResult, Val};
 pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
     // C_TrophyHall
     let trophy_hall = ensure_namespace(state, "C_TrophyHall")?;
-    table_set_rust_fn(state, trophy_hall, "GetTrophyInfo", c_trophy_hall_get_trophy_info)?;
+    table_set_rust_fn(
+        state,
+        trophy_hall,
+        "GetTrophyInfo",
+        c_trophy_hall_get_trophy_info,
+    )?;
 
     // C_StableInfo
     let stable_info = ensure_namespace(state, "C_StableInfo")?;
-    table_set_rust_fn(state, stable_info, "IsAtPetStable", c_stable_info_is_at_pet_stable)?;
+    table_set_rust_fn(
+        state,
+        stable_info,
+        "IsAtPetStable",
+        c_stable_info_is_at_pet_stable,
+    )?;
 
     // C_GarrisonInfo
     let garrison_info = ensure_namespace(state, "C_GarrisonInfo")?;
-    table_set_rust_fn(state, garrison_info, "HasGarrison", c_garrison_info_has_garrison)?;
-    table_set_rust_fn(state, garrison_info, "GetGarrisonType", c_garrison_info_get_garrison_type)?;
+    table_set_rust_fn(
+        state,
+        garrison_info,
+        "HasGarrison",
+        c_garrison_info_has_garrison,
+    )?;
+    table_set_rust_fn(
+        state,
+        garrison_info,
+        "GetGarrisonType",
+        c_garrison_info_get_garrison_type,
+    )?;
 
     // C_Map
     let c_map = ensure_namespace(state, "C_Map")?;
@@ -48,6 +68,24 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
         c_pvp,
         "IsMatchConsideredArena",
         c_pvp_is_match_considered_arena,
+    )?;
+    table_set_rust_fn(
+        state,
+        c_pvp,
+        "GetPvpTalentsUnlockedLevel",
+        c_pvp_get_pvp_talents_unlocked_level,
+    )?;
+    table_set_rust_fn(
+        state,
+        c_pvp,
+        "GetWarModeRewardBonusDefault",
+        c_pvp_get_war_mode_reward_bonus_default,
+    )?;
+    table_set_rust_fn(
+        state,
+        c_pvp,
+        "GetWarModeRewardBonus",
+        c_pvp_get_war_mode_reward_bonus,
     )?;
 
     // C_LossOfControl
@@ -67,7 +105,12 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
 
     // C_Bank
     let c_bank = ensure_namespace(state, "C_Bank")?;
-    table_set_rust_fn(state, c_bank, "HasFullBankAccess", c_bank_has_full_bank_access)?;
+    table_set_rust_fn(
+        state,
+        c_bank,
+        "HasFullBankAccess",
+        c_bank_has_full_bank_access,
+    )?;
 
     Ok(())
 }
@@ -100,6 +143,21 @@ fn c_map_is_map_valid_for_navigation(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_pvp_is_match_considered_arena(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_get_pvp_talents_unlocked_level(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(20.0));
+    Ok(1)
+}
+
+fn c_pvp_get_war_mode_reward_bonus_default(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(10.0));
+    Ok(1)
+}
+
+fn c_pvp_get_war_mode_reward_bonus(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(10.0));
     Ok(1)
 }
 
