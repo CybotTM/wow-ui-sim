@@ -233,6 +233,11 @@ fn push_node_active_entry(state: &mut LuaState, info: Val, lookup_node_id: Optio
     let entry_id = borrow_state(state)
         .ok()
         .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_selections.get(&id).copied()))
+        .or_else(|| {
+            lookup_node_id
+                .and_then(|id| TRAIT_NODE_DB.get(&id))
+                .and_then(|node| node.entry_ids.first().copied())
+        })
         .unwrap_or(0);
     let rank = borrow_state(state)
         .ok()
@@ -746,7 +751,17 @@ fn c_traits_get_entry_info(state: &mut LuaState) -> LuaResult<u32> {
         "definitionID",
         Val::Num(entry.definition_id as f64),
     );
-    table_set(state, info, "subTreeID", Val::Num(entry.sub_tree_id as f64));
+    table_set(state, info, "type", Val::Num(entry.entry_type as f64));
+    table_set(state, info, "maxRanks", Val::Num(entry.max_ranks as f64));
+    table_set(state, info, "isAvailable", Val::Bool(true));
+    table_set(state, info, "isDisplayError", Val::Bool(false));
+    let condition_ids = create_table(state);
+    table_set(state, info, "conditionIDs", condition_ids);
+    if entry.sub_tree_id == 0 {
+        table_set(state, info, "subTreeID", Val::Nil);
+    } else {
+        table_set(state, info, "subTreeID", Val::Num(entry.sub_tree_id as f64));
+    }
     state.push(info);
     Ok(1)
 }
