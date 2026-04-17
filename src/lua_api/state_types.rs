@@ -466,6 +466,19 @@ pub struct WorldState {
     /// For faction-locked zones, the faction whose PvP rules apply
     /// (`"Alliance"` / `"Horde"`); `None` on neutral zones. Third return.
     pub pvp_faction_name: Option<String>,
+    /// Guild tabard crest — `GetGuildLogoInfo()` returns nine colour
+    /// channels (background RGB, border RGB, emblem RGB) plus the emblem
+    /// texture filename. All zeros + empty filename when no guild.
+    pub guild_logo: GuildLogo,
+}
+
+/// Guild tabard crest data returned by `GetGuildLogoInfo()`.
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct GuildLogo {
+    pub background: (f64, f64, f64),
+    pub border: (f64, f64, f64),
+    pub emblem: (f64, f64, f64),
+    pub emblem_filename: String,
 }
 
 impl Default for WorldState {
@@ -503,6 +516,7 @@ impl Default for WorldState {
             pvp_type: "contested".into(),
             is_sub_zone_pvp: false,
             pvp_faction_name: None,
+            guild_logo: GuildLogo::default(),
         }
     }
 }

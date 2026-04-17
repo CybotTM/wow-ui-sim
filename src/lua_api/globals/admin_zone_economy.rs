@@ -130,6 +130,30 @@ pub(super) fn set_meta_key_down(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `A_Admin.SetGuildEmblem(filename, bkgR, bkgG, bkgB, borderR, borderG,
+/// borderB, emblemR, emblemG, emblemB)` — every arg is optional; missing
+/// values default to `0.0` (colours) or `""` (filename). Drives
+/// `GetGuildLogoInfo()`.
+pub(super) fn set_guild_emblem(state: &mut LuaState) -> LuaResult<u32> {
+    let filename = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let bkg_r = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0);
+    let bkg_g = Option::<f64>::from_stack(state, 3)?.unwrap_or(0.0);
+    let bkg_b = Option::<f64>::from_stack(state, 4)?.unwrap_or(0.0);
+    let border_r = Option::<f64>::from_stack(state, 5)?.unwrap_or(0.0);
+    let border_g = Option::<f64>::from_stack(state, 6)?.unwrap_or(0.0);
+    let border_b = Option::<f64>::from_stack(state, 7)?.unwrap_or(0.0);
+    let emblem_r = Option::<f64>::from_stack(state, 8)?.unwrap_or(0.0);
+    let emblem_g = Option::<f64>::from_stack(state, 9)?.unwrap_or(0.0);
+    let emblem_b = Option::<f64>::from_stack(state, 10)?.unwrap_or(0.0);
+    let mut st = borrow_state_mut(state)?;
+    let logo = &mut st.world.guild_logo;
+    logo.emblem_filename = filename;
+    logo.background = (bkg_r, bkg_g, bkg_b);
+    logo.border = (border_r, border_g, border_b);
+    logo.emblem = (emblem_r, emblem_g, emblem_b);
+    Ok(0)
+}
+
 /// `A_Admin.SetZonePVP(pvpType, isSubZonePvP, factionName)` — drives the
 /// three return values of `C_PvP.GetZonePVPInfo()`. `pvpType` defaults to
 /// `"contested"`, `isSubZonePvP` defaults to `false`, `factionName` defaults

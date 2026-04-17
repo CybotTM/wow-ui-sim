@@ -259,16 +259,10 @@ end
 -- Admin: A_Admin.SetShiftKeyDown(b) / SetControlKeyDown / SetAltKeyDown /
 -- SetMetaKeyDown toggle individual keys.
 
--- Guild logo: the sim has no guild, so all colour channels are black
--- and the emblem filename is empty. Returns 10 values matching
--- Blizzard's (bkgR, bkgG, bkgB, borderR, borderG, borderB, emblemR,
--- emblemG, emblemB, emblemFilename) tuple that guild-related UI
--- destructures.
-if GetGuildLogoInfo == nil then
-  function GetGuildLogoInfo()
-    return 0, 0, 0, 0, 0, 0, 0, 0, 0, ""
-  end
-end
+-- GetGuildLogoInfo is registered from Rust (src/lua_api/globals/guild_logo.rs),
+-- backed by SimState::world.guild_logo. Admin: A_Admin.SetGuildEmblem(filename,
+-- bkgR, bkgG, bkgB, borderR, borderG, borderB, emblemR, emblemG, emblemB) —
+-- all args optional, missing = 0 or "".
 
 -- GetNetStats is registered from Rust (src/lua_api/globals/rilua_net_stats.rs)
 -- and reads from SimState::net_stats so tests can inject values via
