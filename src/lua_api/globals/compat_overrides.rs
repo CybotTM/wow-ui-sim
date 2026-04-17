@@ -129,11 +129,14 @@ fn append_val(state: &LuaState, val: Val, out: &mut String) {
 // ── next(frame, ...) terminator ──────────────────────────────────────────────
 
 fn install_next(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let original = LuaApiMut::get_global_val(lua, "next");
-    if !matches!(original, Val::Function(_)) {
-        return Err(runtime_error("next missing"));
+    let existing = registry_get(lua.state_mut(), ORIGINAL_NEXT_KEY);
+    if !matches!(existing, Val::Function(_)) {
+        let original = LuaApiMut::get_global_val(lua, "next");
+        if !matches!(original, Val::Function(_)) {
+            return Err(runtime_error("next missing"));
+        }
+        registry_set(lua.state_mut(), ORIGINAL_NEXT_KEY, original);
     }
-    registry_set(lua.state_mut(), ORIGINAL_NEXT_KEY, original);
     LuaApiMut::register_function(lua, "next", custom_next)?;
     Ok(())
 }
@@ -155,11 +158,14 @@ fn custom_next(state: &mut LuaState) -> LuaResult<u32> {
 // ── ipairs(frame) children iterator ──────────────────────────────────────────
 
 fn install_ipairs(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let original = LuaApiMut::get_global_val(lua, "ipairs");
-    if !matches!(original, Val::Function(_)) {
-        return Err(runtime_error("ipairs missing"));
+    let existing = registry_get(lua.state_mut(), ORIGINAL_IPAIRS_KEY);
+    if !matches!(existing, Val::Function(_)) {
+        let original = LuaApiMut::get_global_val(lua, "ipairs");
+        if !matches!(original, Val::Function(_)) {
+            return Err(runtime_error("ipairs missing"));
+        }
+        registry_set(lua.state_mut(), ORIGINAL_IPAIRS_KEY, original);
     }
-    registry_set(lua.state_mut(), ORIGINAL_IPAIRS_KEY, original);
 
     // Register a Rust iterator body once and stash it in the registry so
     // the dispatch custom_ipairs can return it without re-registering on

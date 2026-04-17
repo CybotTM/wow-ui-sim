@@ -2,6 +2,7 @@ use crate::loader::chunk_cache;
 use crate::loader::helpers::generate_set_point_code;
 use crate::loader::helpers_anim::generate_animation_group_code;
 use mlua::Lua;
+use std::sync::Arc;
 
 use super::super::super::{escape_lua_string, get_size_values, lua_global_ref};
 use super::AnchorParentContext;
@@ -334,7 +335,7 @@ pub(crate) fn append_anchors_and_parent_refs(
 pub(crate) fn apply_deferred_mask_atlases(
     lua: &Lua,
     frame_name: &str,
-    chain: &[crate::xml::TemplateEntry],
+    chain: &[Arc<crate::xml::TemplateEntry>],
 ) {
     let atlas_kvs = collect_atlas_key_values(chain);
     let masks = collect_unatlased_masks(chain);
@@ -358,7 +359,7 @@ pub(crate) fn apply_deferred_mask_atlases(
     let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
-fn collect_atlas_key_values(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, String)> {
+fn collect_atlas_key_values(chain: &[Arc<crate::xml::TemplateEntry>]) -> Vec<(String, String)> {
     let mut result = Vec::new();
     for entry in chain {
         for kvs in entry.frame.all_key_values() {
@@ -375,7 +376,7 @@ fn collect_atlas_key_values(chain: &[crate::xml::TemplateEntry]) -> Vec<(String,
     result
 }
 
-fn collect_unatlased_masks(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, bool)> {
+fn collect_unatlased_masks(chain: &[Arc<crate::xml::TemplateEntry>]) -> Vec<(String, bool)> {
     chain
         .iter()
         .flat_map(|entry| entry.frame.layers())

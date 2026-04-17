@@ -201,6 +201,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "CanInspect",
     "CanLootUnit",
     "CanMerchant",
+    "CanPartyLFGBackfill",
     "CanReplaceGuildMaster",
     "CanSendAuctionQuery",
     "CanShowAchievementUI",

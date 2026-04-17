@@ -25,8 +25,11 @@ const ORIG_REGISTRY_KEY: &str = "__original_string_format";
 /// that handles `%F` and positional args before delegating to the
 /// original implementation (stashed under a registry key).
 pub fn patch_string_format(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let original = read_string_format(lua)?;
-    registry_set(lua.state_mut(), ORIG_REGISTRY_KEY, original);
+    let existing = registry_get(lua.state_mut(), ORIG_REGISTRY_KEY);
+    if !matches!(existing, Val::Function(_)) {
+        let original = read_string_format(lua)?;
+        registry_set(lua.state_mut(), ORIG_REGISTRY_KEY, original);
+    }
 
     LuaApiMut::register_function(lua, "format", wow_string_format)?;
     install_on_string_table(lua)?;
@@ -137,6 +140,26 @@ fn delegate(state: &mut LuaState, original: Val, args: &[Val]) -> LuaResult<u32>
             Ok(1)
         }
         Err(e) => Err(e),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::patch_string_format;
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn patch_string_format_is_idempotent() {
+        let env = WowLuaEnv::new().expect("env");
+        {
+            let loader = env.loader_env();
+            let mut lua = loader.rilua_mut();
+            patch_string_format(&mut lua).expect("second patch should succeed");
+        }
+        let out: String = env
+            .eval(r#"return string.format("%2$s %1$s %.1F", "first", "second", 3.25)"#)
+            .expect("patched format should still work");
+        assert_eq!(out, "second first 3.2");
     }
 }
 

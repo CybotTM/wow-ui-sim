@@ -14,9 +14,9 @@ pub struct TemplateEntry {
 
 #[derive(Default)]
 struct TemplateRegistry {
-    entries: HashMap<String, TemplateEntry>,
+    entries: HashMap<String, Arc<TemplateEntry>>,
     entries_ci: HashMap<String, String>,
-    chain_cache: HashMap<String, Arc<Vec<TemplateEntry>>>,
+    chain_cache: HashMap<String, Arc<Vec<Arc<TemplateEntry>>>>,
     lifecycle_cache: HashMap<String, (bool, bool)>,
 }
 
@@ -32,11 +32,11 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
     let lower = name.to_ascii_lowercase();
     registry.entries.insert(
         name.to_string(),
-        TemplateEntry {
+        Arc::new(TemplateEntry {
             name: name.to_string(),
             widget_type: widget_type.to_string(),
             frame,
-        },
+        }),
     );
     registry.entries_ci.insert(lower, name.to_string());
     registry.chain_cache.clear();
@@ -49,9 +49,13 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
 /// from Lua vs "DropdownButton" from XML). The registry stores the canonical
 /// PascalCase name from the XML definition.
 pub fn get_template(name: &str) -> Option<TemplateEntry> {
+    get_template_arc(name).map(|entry| entry.as_ref().clone())
+}
+
+fn get_template_arc(name: &str) -> Option<Arc<TemplateEntry>> {
     let registry = template_registry().read().unwrap();
     if let Some(entry) = registry.entries.get(name) {
-        return Some(entry.clone());
+        return Some(Arc::clone(entry));
     }
     let lower = name.to_ascii_lowercase();
     registry
@@ -107,7 +111,7 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
 /// However, many templates inherit from Frame-based parents without explicitly
 /// redefining their type. The last entry in the chain is the template itself
 /// (most derived) — use its type if non-empty, otherwise fall back to parents.
-fn resolve_frame_type(chain: &[TemplateEntry]) -> String {
+fn resolve_frame_type(chain: &[Arc<TemplateEntry>]) -> String {
     chain
         .last()
         .filter(|e| !e.widget_type.is_empty())
@@ -122,7 +126,7 @@ fn resolve_frame_type(chain: &[TemplateEntry]) -> String {
 }
 
 /// Collect key-value pairs from all entries in the inheritance chain.
-fn collect_key_values(chain: &[TemplateEntry]) -> Vec<TemplateKeyValueInfo> {
+fn collect_key_values(chain: &[Arc<TemplateEntry>]) -> Vec<TemplateKeyValueInfo> {
     chain
         .iter()
         .flat_map(|entry| entry.frame.all_key_values())
@@ -137,7 +141,7 @@ fn collect_key_values(chain: &[TemplateEntry]) -> Vec<TemplateKeyValueInfo> {
 
 /// Resolve (width, height) across the inheritance chain.
 /// Most derived entry wins. Within an entry, direct `x`/`y` attrs override `AbsDimension`.
-fn resolve_chain_size(chain: &[TemplateEntry]) -> (f32, f32) {
+fn resolve_chain_size(chain: &[Arc<TemplateEntry>]) -> (f32, f32) {
     let mut width: f32 = 0.0;
     let mut height: f32 = 0.0;
     for entry in chain {
@@ -165,7 +169,7 @@ fn resolve_chain_size(chain: &[TemplateEntry]) -> (f32, f32) {
 /// Get the full inheritance chain for a template (including the template itself).
 /// Returns templates in order from most base to most derived.
 /// Returns Arc to avoid cloning the chain on every access.
-pub fn get_template_chain(names: &str) -> Arc<Vec<TemplateEntry>> {
+pub fn get_template_chain(names: &str) -> Arc<Vec<Arc<TemplateEntry>>> {
     let key = names.trim().to_string();
     if key.is_empty() {
         return Arc::new(Vec::new());
@@ -244,7 +248,7 @@ pub fn get_template_lifecycle_flags(names: &str) -> (bool, bool) {
 /// Recursively collect templates in the inheritance chain.
 fn collect_template_chain(
     name: &str,
-    chain: &mut Vec<TemplateEntry>,
+    chain: &mut Vec<Arc<TemplateEntry>>,
     visited: &mut HashSet<String>,
 ) {
     if visited.contains(name) {
@@ -252,7 +256,7 @@ fn collect_template_chain(
     }
     visited.insert(name.to_string());
 
-    if let Some(entry) = get_template(name) {
+    if let Some(entry) = get_template_arc(name) {
         // First, process parent templates (if this template inherits from others)
         if let Some(ref inherits) = entry.frame.inherits {
             for parent in inherits.split(',').map(|s| s.trim()) {

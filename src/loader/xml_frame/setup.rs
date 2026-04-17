@@ -148,8 +148,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     if !fast_create_frame_profiling_enabled() {
         return setup.explicit_parent
             && setup.name != setup.parent
-            && setup.frame.parent_key.is_none()
-            && setup.frame.parent_array.is_none()
             && setup.frame.all_key_values().next().is_none()
             && setup.frame.xml_attributes().is_none()
             && setup.frame.scripts().is_none();
@@ -162,12 +160,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     }
     if setup.name == setup.parent {
         miss_reasons.push("root_frame_reuse");
-    }
-    if setup.frame.parent_key.is_some() {
-        miss_reasons.push("parent_key");
-    }
-    if setup.frame.parent_array.is_some() {
-        miss_reasons.push("parent_array");
     }
     if setup.frame.all_key_values().next().is_some() {
         miss_reasons.push("key_values");
@@ -209,6 +201,20 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             false,
         )
         .map_err(|error| crate::Error::Other(error.to_string()))?;
+        if let Some(parent_key) = setup.frame.parent_key.as_deref() {
+            crate::lua_api::globals::template::assign_parent_key(
+                state, parent_id, parent_key, frame_id,
+            )
+            .map_err(|error| crate::Error::Other(error.to_string()))?;
+        }
+        if let Some(parent_array) = setup.frame.parent_array.as_deref() {
+            crate::lua_api::globals::create_frame::append_parent_array_entry(
+                state,
+                parent_id,
+                parent_array,
+                frame_id,
+            );
+        }
         crate::lua_api::globals::create_frame::apply_frame_mixins(
             state,
             frame_id,

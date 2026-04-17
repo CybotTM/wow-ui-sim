@@ -13,6 +13,33 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn compat_override_registration_is_idempotent() {
+    let env = env();
+    {
+        let loader = env.loader_env();
+        let mut lua = loader.rilua_mut();
+        wow_ui_sim::lua_api::globals::compat_overrides::register_all(&mut lua)
+            .expect("second compat registration should succeed");
+    }
+    let (sum, child_count): (i64, i64) = env
+        .eval(
+            r#"
+            local total = 0
+            for _, v in pairs({ a = 1, b = 2, c = 3 }) do total = total + v end
+            local parent = CreateFrame("Frame", nil, UIParent)
+            CreateFrame("Frame", nil, parent)
+            CreateFrame("Frame", nil, parent)
+            local n = 0
+            for _, child in ipairs(parent) do n = n + 1 end
+            return total, n
+            "#,
+        )
+        .unwrap();
+    assert_eq!(sum, 6);
+    assert_eq!(child_count, 2);
+}
+
+#[test]
 fn print_writes_to_console_output() {
     let env = env();
     env.exec(r#"print("hello", 42, true)"#).unwrap();
@@ -144,6 +171,25 @@ fn ipairs_on_plain_array_still_works() {
         )
         .unwrap();
     assert_eq!(total, 60);
+}
+
+#[test]
+fn restored_runtime_patches_match_master_shape() {
+    let env = env();
+    let (has_alternate_form, in_alternate_form, widget_set_id): (bool, bool, i64) = env
+        .eval(
+            r#"
+            UpdateUIParentPosition()
+            local has_alt, in_alt = C_PlayerInfo.GetAlternateFormInfo()
+            local widget_set_id = C_UIWidgetManager.GetPowerBarWidgetSetID()
+            return has_alt, in_alt, widget_set_id
+            "#,
+        )
+        .unwrap();
+
+    assert!(!has_alternate_form);
+    assert!(!in_alternate_form);
+    assert_eq!(widget_set_id, 0);
 }
 
 #[test]

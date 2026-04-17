@@ -4,8 +4,7 @@
 use super::helpers::{append_parent_array_entry, apply_frame_mixins, resolve_global_path};
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
-    borrow_lua, borrow_state, borrow_state_mut, create_string, frame_ref, registry_table_or_create,
-    state_handle, table_get, table_set,
+    borrow_lua, borrow_state, borrow_state_mut, create_string, frame_ref, state_handle,
 };
 use crate::lua_api::script_helpers::set_script;
 use crate::widget::WidgetType;
@@ -13,8 +12,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
-
-const METHOD_HANDLER_CACHE_KEY: &str = "__template_method_handler_cache";
+use std::sync::Arc;
 
 // ---------------------------------------------------------------------------
 // Public entry point
@@ -36,7 +34,7 @@ pub(crate) fn apply_runtime_template_chain(
 
     let state_rc = sim_state_rc(state)?;
     let frame_name = frame_lookup_name(state, frame_id);
-    apply_template_parent_array(state, frame_id, &chain);
+    apply_template_parent_links(state, frame_id, &chain)?;
     apply_chain_entries(state, frame_id, &chain)?;
 
     // The chain is base-to-derived. Install all parent-facing state first so
@@ -68,28 +66,40 @@ pub(crate) fn apply_runtime_template_chain(
 // Chain application
 // ---------------------------------------------------------------------------
 
-fn apply_template_parent_array(
+fn apply_template_parent_links(
     state: &mut LuaState,
     frame_id: u64,
-    chain: &[crate::xml::TemplateEntry],
-) {
+    chain: &[Arc<crate::xml::TemplateEntry>],
+) -> LuaResult<()> {
+    let template_parent_key = chain
+        .iter()
+        .rev()
+        .find_map(|entry| entry.frame.parent_key.as_deref());
     let template_parent_array = chain
         .iter()
+        .rev()
         .find_map(|entry| entry.frame.parent_array.as_deref());
     let parent_id = borrow_state(state)
         .ok()
         .and_then(|sim| sim.widgets.get(frame_id).and_then(|frame| frame.parent_id));
-    if let Some(parent_array) = template_parent_array
-        && let Some(parent_id) = parent_id
-    {
+    let Some(parent_id) = parent_id else {
+        return Ok(());
+    };
+    if let Some(parent_key) = template_parent_key {
+        crate::lua_api::globals::template::assign_parent_key(
+            state, parent_id, parent_key, frame_id,
+        )?;
+    }
+    if let Some(parent_array) = template_parent_array {
         append_parent_array_entry(state, parent_id, parent_array, frame_id);
     }
+    Ok(())
 }
 
 fn apply_chain_entries(
     state: &mut LuaState,
     frame_id: u64,
-    chain: &[crate::xml::TemplateEntry],
+    chain: &[Arc<crate::xml::TemplateEntry>],
 ) -> LuaResult<()> {
     for entry in chain {
         ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
@@ -654,12 +664,6 @@ fn state_method_only_handlers(scripts: &crate::xml::ScriptsXml) -> [MethodOnlySc
 }
 
 fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
-    let cache = registry_table_or_create(state, METHOD_HANDLER_CACHE_KEY);
-    let cached = table_get(state, cache, method_name);
-    if matches!(cached, Val::Function(_)) {
-        return Ok(cached);
-    }
-
     let builder = crate::loader::chunk_cache::load_chunk(
         state,
         r#"
@@ -671,14 +675,12 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
         "template-method-handler",
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    let method_name_val = create_string(state, method_name);
-    let handler = crate::lua_api::methods::call_function_state(
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[method_name_val],
-    )?;
-    table_set(state, cache, method_name, handler);
-    Ok(handler)
+        &[method_name],
+    )
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
