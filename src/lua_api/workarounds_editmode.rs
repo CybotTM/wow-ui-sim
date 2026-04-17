@@ -284,6 +284,12 @@ mod tests {
                 },
             }
 
+            function tAppendAll(tbl, addedArray)
+                for i, element in ipairs(addedArray) do
+                    table.insert(tbl, element)
+                end
+            end
+
             EditModeManagerFrame = {}
             "#,
         )
