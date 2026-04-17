@@ -124,6 +124,15 @@ fn register_targeting_party(b: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
+    let b = register_zone_and_economy(b)?;
+    let b = register_modifier_keys(b)?;
+    let b = register_guild_and_game_rules(b)?;
+    let b = register_services(b)?;
+    let b = register_inventory_and_mail(b)?;
+    register_vault_and_premade(b)
+}
+
+fn register_zone_and_economy(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("SetZone", set_zone)?
         .set_function("SetSubZone", set_sub_zone)?
         .set_function("SetInstanceInfo", set_instance_info)?
@@ -133,37 +142,23 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetNetStats", set_net_stats)?
         .set_function("SetStoreFrameShown", set_store_frame_shown)?
         .set_function("SetTimerunningSeasonID", set_timerunning_season_id)?
-        .set_function("SetZonePVP", set_zone_pvp)?
-        .set_function("SetShiftKeyDown", set_shift_key_down)?
+        .set_function("SetZonePVP", set_zone_pvp)
+}
+
+fn register_modifier_keys(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetShiftKeyDown", set_shift_key_down)?
         .set_function("SetControlKeyDown", set_control_key_down)?
         .set_function("SetAltKeyDown", set_alt_key_down)?
-        .set_function("SetMetaKeyDown", set_meta_key_down)?
-        .set_function("SetGuildEmblem", set_guild_emblem)?
+        .set_function("SetMetaKeyDown", set_meta_key_down)
+}
+
+fn register_guild_and_game_rules(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetGuildEmblem", set_guild_emblem)?
         .set_function("SetGuildRanks", set_guild_ranks)?
         .set_function("SetGameRule", super::game_rules::admin_set_game_rule)?
         .set_function(
             "SetActiveGameMode",
             super::game_rules::admin_set_active_game_mode,
-        )?
-        .set_function(
-            "SetHousingServiceEnabled",
-            super::housing::admin_set_housing_service_enabled,
-        )?
-        .set_function(
-            "SetPetBattleCounts",
-            super::pet_battles::admin_set_pet_battle_counts,
-        )?
-        .set_function(
-            "SetPetBattleState",
-            super::pet_battles::admin_set_pet_battle_state,
-        )?
-        .set_function(
-            "SetLfgApplicationCounts",
-            super::lfg_list::admin_set_application_counts,
-        )?
-        .set_function(
-            "SetLfgApplicantCounts",
-            super::lfg_list::admin_set_applicant_counts,
         )?
         .set_function("SetGuildClubId", super::guild_info::admin_set_guild_club_id)?
         .set_function(
@@ -173,23 +168,46 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function(
             "SetGuildCanSpeakInChat",
             super::guild_info::admin_set_guild_can_speak_in_chat,
-        )?
-        .set_function(
-            "SetCanUsePremadeGroup",
-            super::lfg_info::admin_set_can_use_premade_group,
-        )?
-        .set_function(
-            "SetPhotoSharingAuthorized",
-            super::photo_sharing::admin_set_photo_sharing_authorized,
-        )?
-        .set_function(
-            "SetPhotoSharingEnabled",
-            super::photo_sharing::admin_set_photo_sharing_enabled,
-        )?
-        .set_function("SetVaultActivity", set_vault_activity)?
-        .set_function("SetVaultRewards", set_vault_rewards)?
-        .set_function("ClearVault", clear_vault)?
-        .set_function("SetActionSlot", set_action_slot)?
+        )
+}
+
+fn register_services(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function(
+        "SetHousingServiceEnabled",
+        super::housing::admin_set_housing_service_enabled,
+    )?
+    .set_function(
+        "SetPetBattleCounts",
+        super::pet_battles::admin_set_pet_battle_counts,
+    )?
+    .set_function(
+        "SetPetBattleState",
+        super::pet_battles::admin_set_pet_battle_state,
+    )?
+    .set_function(
+        "SetLfgApplicationCounts",
+        super::lfg_list::admin_set_application_counts,
+    )?
+    .set_function(
+        "SetLfgApplicantCounts",
+        super::lfg_list::admin_set_applicant_counts,
+    )?
+    .set_function(
+        "SetCanUsePremadeGroup",
+        super::lfg_info::admin_set_can_use_premade_group,
+    )?
+    .set_function(
+        "SetPhotoSharingAuthorized",
+        super::photo_sharing::admin_set_photo_sharing_authorized,
+    )?
+    .set_function(
+        "SetPhotoSharingEnabled",
+        super::photo_sharing::admin_set_photo_sharing_enabled,
+    )
+}
+
+fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetActionSlot", set_action_slot)?
         .set_function("ClearActionSlot", clear_action_slot)?
         .set_function("ClearActionBars", clear_action_bars)?
         .set_function("AddBagItem", add_bag_item)?
@@ -197,7 +215,13 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ClearBags", clear_bags)?
         .set_function("AddMail", add_mail)?
         .set_function("ClearInbox", clear_inbox)?
-        .set_function("SetInboxCount", set_inbox_count)?
+        .set_function("SetInboxCount", set_inbox_count)
+}
+
+fn register_vault_and_premade(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetVaultActivity", set_vault_activity)?
+        .set_function("SetVaultRewards", set_vault_rewards)?
+        .set_function("ClearVault", clear_vault)?
         .set_function("AddPremadeListing", add_premade_listing)?
         .set_function("ClearPremadeListings", clear_premade_listings)?
         .set_function("UpdatePremadeListing", update_premade_listing)
