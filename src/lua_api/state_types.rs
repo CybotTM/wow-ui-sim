@@ -207,6 +207,71 @@ pub struct HeirloomData {
     pub max_level: i32,
 }
 
+/// Per-currency info keyed by currency id in `SimState.currency_info`.
+/// Drives `C_CurrencyInfo.GetCurrencyInfo`, `GetCurrencyInfoFromLink`,
+/// and `GetCurrencyContainerInfo`. Matches the 25-field retail struct;
+/// most fields default to 0 / false for simplicity.
+#[derive(Debug, Clone)]
+pub struct CurrencyInfo {
+    pub currency_id: i32,
+    pub name: String,
+    pub description: String,
+    pub icon_file_id: u32,
+    pub quantity: i32,
+    pub max_quantity: i32,
+    pub quality: i32,
+    pub is_header: bool,
+    pub is_header_expanded: bool,
+    pub is_show_in_backpack: bool,
+    pub discovered: bool,
+    pub can_earn_per_week: bool,
+    pub max_weekly_quantity: i32,
+    pub quantity_earned_this_week: i32,
+    pub is_account_transferable: bool,
+    pub is_account_wide: bool,
+    pub is_tradeable: bool,
+    pub is_type_unused: bool,
+    pub currency_list_depth: i32,
+    pub recharging_amount_per_cycle: i32,
+    pub recharging_cycle_duration_ms: i32,
+    pub total_earned: i32,
+    pub tracked_quantity: i32,
+    pub transfer_percentage: Option<f64>,
+    pub use_total_earned_for_max_qty: bool,
+}
+
+impl Default for CurrencyInfo {
+    fn default() -> Self {
+        Self {
+            currency_id: 0,
+            name: String::new(),
+            description: String::new(),
+            icon_file_id: 0,
+            quantity: 0,
+            max_quantity: 0,
+            quality: 0,
+            is_header: false,
+            is_header_expanded: false,
+            is_show_in_backpack: false,
+            discovered: true,
+            can_earn_per_week: false,
+            max_weekly_quantity: 0,
+            quantity_earned_this_week: 0,
+            is_account_transferable: false,
+            is_account_wide: false,
+            is_tradeable: false,
+            is_type_unused: false,
+            currency_list_depth: 0,
+            recharging_amount_per_cycle: 0,
+            recharging_cycle_duration_ms: 0,
+            total_earned: 0,
+            tracked_quantity: 0,
+            transfer_percentage: None,
+            use_total_earned_for_max_qty: false,
+        }
+    }
+}
+
 /// A transmog appearance source (one way to obtain a visual appearance).
 ///
 /// WoW's transmog system has three levels:

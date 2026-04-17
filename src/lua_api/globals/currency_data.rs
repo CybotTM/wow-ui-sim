@@ -102,3 +102,34 @@ pub fn backpack_currencies() -> impl Iterator<Item = &'static CurrencyEntry> {
         .iter()
         .filter(|c| c.is_show_in_backpack && !c.is_header)
 }
+
+/// Build the initial `SimState.currency_info` map by projecting each
+/// non-header `CurrencyEntry` into a `CurrencyInfo`. Non-seeded fields
+/// (weekly caps, transfer metadata, etc.) default to 0 / false so the
+/// map still drives `C_CurrencyInfo.GetCurrencyInfo` for the commonly-
+/// referenced ids in `CURRENCY_LIST`.
+pub fn seeded_currency_info_map()
+-> std::collections::HashMap<i32, crate::lua_api::state::CurrencyInfo> {
+    use crate::lua_api::state::CurrencyInfo;
+    CURRENCY_LIST
+        .iter()
+        .filter(|c| !c.is_header)
+        .map(|c| {
+            (
+                c.currency_id,
+                CurrencyInfo {
+                    currency_id: c.currency_id,
+                    name: c.name.to_string(),
+                    icon_file_id: c.icon_file_id,
+                    quantity: c.quantity,
+                    max_quantity: c.max_quantity,
+                    quality: c.quality,
+                    is_show_in_backpack: c.is_show_in_backpack,
+                    discovered: c.is_discovered,
+                    currency_list_depth: c.depth,
+                    ..CurrencyInfo::default()
+                },
+            )
+        })
+        .collect()
+}

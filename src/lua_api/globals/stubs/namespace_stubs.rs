@@ -49,10 +49,10 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_Club
     ("C_Club", "GetClubMembers", stub_nil),
     ("C_Club", "GetSubscribedClubs", stub_nil),
-    // C_CurrencyInfo
-    ("C_CurrencyInfo", "GetCurrencyContainerInfo", stub_nil),
-    ("C_CurrencyInfo", "GetCurrencyInfo", stub_nil),
-    ("C_CurrencyInfo", "GetCurrencyInfoFromLink", stub_nil),
+    // C_CurrencyInfo GetCurrencyInfo / GetCurrencyInfoFromLink /
+    // GetCurrencyContainerInfo are SimState-backed (via
+    // `currency_info` map) in missing_surface/item_spell/c_currency.rs,
+    // not stubs.
     // C_DeathRecap
     ("C_DeathRecap", "GetKillingBlows", stub_nil),
     ("C_DeathRecap", "GetMostRecentDeathRecap", stub_nil),

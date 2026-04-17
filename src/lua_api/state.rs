@@ -130,6 +130,7 @@ macro_rules! build_empty_sim_state {
             gossip: GossipState::default(),
             titles: Vec::new(),
             shapeshift_forms: Vec::new(),
+            currency_info: super::globals::currency_data::seeded_currency_info_map(),
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
@@ -181,10 +182,10 @@ use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
-    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, CursorItemOrigin,
-    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo, LuaErrorRecord,
-    MacroInfo, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer, PlayerState,
-    SecondaryPowerState, WorldState,
+    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CurrencyInfo, CursorInfo,
+    CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo,
+    LuaErrorRecord, MacroInfo, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer,
+    PlayerState, SecondaryPowerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -490,6 +491,11 @@ pub struct SimState {
     /// tokens). Drives `GetNumShapeshiftForms`. Empty by default; the
     /// seeded Paladin player has no forms.
     pub shapeshift_forms: Vec<String>,
+    /// Currency info keyed by currency id. Drives
+    /// `C_CurrencyInfo.GetCurrencyInfo`, `GetCurrencyInfoFromLink`,
+    /// and `GetCurrencyContainerInfo`. Seeded at startup from the
+    /// static `currency_data::CURRENCY_LIST`.
+    pub currency_info: HashMap<i32, CurrencyInfo>,
     /// Reputation rows in reputation-window display order. Drives
     /// `GetFactionInfoByID`, `GetGuildFactionInfo`, and the selected /
     /// watched faction getters / setters. Empty by default.
