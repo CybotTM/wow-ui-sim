@@ -614,15 +614,6 @@ fn spellbook_passive_item_border_and_icon_match_master_geometry() {
         let env = setup_full_ui();
         open_spellbook(&env);
 
-        let buckets = build_strata_buckets(&env);
-        let state = env.state().borrow();
-        let registry = &state.widgets;
-        let item_ids = find_spell_item_ids(registry);
-        assert!(!item_ids.is_empty(), "Should have spell items");
-
-        let (button_id, icon_id, border_id, mask_id) = find_first_passive_spell_item(registry, &item_ids)
-            .expect("Should find a passive spellbook item with the circle border art set");
-
         let (
             lua_button_w,
             lua_button_h,
@@ -688,6 +679,15 @@ fn spellbook_passive_item_border_and_icon_match_master_geometry() {
                 "#,
             )
             .expect("Passive spell item geometry should be queryable from Lua");
+
+        let buckets = build_strata_buckets(&env);
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let item_ids = find_spell_item_ids(registry);
+        assert!(!item_ids.is_empty(), "Should have spell items");
+
+        let (button_id, icon_id, border_id, mask_id) = find_first_passive_spell_item(registry, &item_ids)
+            .expect("Should find a passive spellbook item with the circle border art set");
 
         let button_rect = compute_frame_rect(registry, button_id, 1024.0, 768.0);
         let icon_rect = compute_frame_rect(registry, icon_id, 1024.0, 768.0);
