@@ -18,6 +18,15 @@ fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>>
 }
 
 fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((function_name, first, fourth)) =
+        parse_inline_function_with_string_nil_nil_global_args(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
+            function_name,
+            first,
+            fourth,
+        });
+    }
     if let Some((function_name, first, second)) =
         parse_inline_function_with_string_number_args(stmt)
     {
@@ -152,6 +161,24 @@ fn parse_inline_function_with_string_number_args(stmt: &str) -> Option<(&str, &s
     let second = raw_number_arg.trim().parse::<f64>().ok()?;
     let function_name = function_name.trim();
     is_fast_handler_path(function_name).then_some((function_name, first, second))
+}
+
+fn parse_inline_function_with_string_nil_nil_global_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first = super::parse_single_string_literal(parts.next()?)?;
+    (parts.next()? == "nil").then_some(())?;
+    (parts.next()? == "nil").then_some(())?;
+    let fourth = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_handler_path(fourth))
+        .then_some((function_name, first, fourth))
 }
 
 fn parse_inline_function_with_noarg_function_result(stmt: &str) -> Option<(&str, &str)> {

@@ -1907,6 +1907,82 @@ fn test_create_frame_from_xml_inline_function_with_string_number_args_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_with_string_nil_nil_global_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHATCONFIG_SELECTED_FILTER = "SelectedFilter"
+        XmlInlinePopupName = nil
+        XmlInlinePopupData = nil
+        function StaticPopup_Show(name, _, _, data)
+            XmlInlinePopupName = name
+            XmlInlinePopupData = data
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlinePopupShowFrame" parent="UIParent">
+        <Scripts><OnClick>StaticPopup_Show("COPY_COMBAT_FILTER", nil, nil, CHATCONFIG_SELECTED_FILTER)</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlinePopupShowFrame:GetScript('OnClick')(XmlInlinePopupShowFrame)")
+        .unwrap();
+
+    let result: (String, String) = env
+        .eval("return XmlInlinePopupName, XmlInlinePopupData")
+        .unwrap();
+    assert_eq!(result.0, "COPY_COMBAT_FILTER");
+    assert_eq!(result.1, "SelectedFilter");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_parent_field_method_with_self_result_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentFieldMethodFrame" parent="UIParent">
+        <Button parentKey="BuyButton"/>
+        <CheckButton name="XmlInlineParentFieldMethodToggle" parent="XmlInlineParentFieldMethodFrame">
+            <Scripts><OnClick>self:GetParent().BuyButton:SetEnabled(self:GetChecked())</OnClick></Scripts>
+        </CheckButton>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineParentFieldMethodToggle:SetChecked(false)
+        XmlInlineParentFieldMethodToggle:GetScript("OnClick")(XmlInlineParentFieldMethodToggle)
+    "#,
+    )
+    .unwrap();
+    let disabled: bool = env
+        .eval("return XmlInlineParentFieldMethodFrame.BuyButton:IsEnabled()")
+        .unwrap();
+    assert!(!disabled);
+
+    env.exec(
+        r#"
+        XmlInlineParentFieldMethodToggle:SetChecked(true)
+        XmlInlineParentFieldMethodToggle:GetScript("OnClick")(XmlInlineParentFieldMethodToggle)
+    "#,
+    )
+    .unwrap();
+    let enabled: bool = env
+        .eval("return XmlInlineParentFieldMethodFrame.BuyButton:IsEnabled()")
+        .unwrap();
+    assert!(enabled);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_assignment_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

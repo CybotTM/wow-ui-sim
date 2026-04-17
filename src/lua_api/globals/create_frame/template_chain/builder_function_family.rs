@@ -61,6 +61,17 @@ fn build_function_with_arg_variants(
             second,
         } => build_function_handler_with_string_number_args(state, function_name, first, *second)
             .map(Some),
+        FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
+            function_name,
+            first,
+            fourth,
+        } => build_function_handler_with_string_nil_nil_global_args(
+            state,
+            function_name,
+            first,
+            fourth,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithStringArg { function_name, arg } => {
             build_function_handler_with_string_only_arg(state, function_name, arg).map(Some)
         }
@@ -284,6 +295,32 @@ fn build_function_handler_with_string_number_args(
         state,
         Val::Function(builder.gc_ref()),
         &[target, first, Val::Num(second)],
+    )
+}
+
+fn build_function_handler_with_string_nil_nil_global_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first: &str,
+    fourth: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first, fourth = ...
+            return function(self, ...)
+                return fn(first, nil, nil, fourth)
+            end
+        "#,
+        "template-inline-function-string-nil-nil-global-args",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first = create_string(state, first);
+    let fourth = resolve_global_path(state, fourth);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first, fourth],
     )
 }
 

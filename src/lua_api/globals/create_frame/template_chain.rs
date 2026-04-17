@@ -311,6 +311,11 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         arg: &'a str,
     },
+    ParentFieldMethodWithSelfNoArgMethodResult {
+        field: &'a str,
+        method_name: &'a str,
+        self_method_name: &'a str,
+    },
     GrandparentMethod(&'a str),
     GlobalMethod {
         target_path: &'a str,
@@ -382,6 +387,11 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         first: &'a str,
         second: f64,
+    },
+    FunctionWithStringNilNilGlobalArgs {
+        function_name: &'a str,
+        first: &'a str,
+        fourth: &'a str,
     },
     FunctionWithNoArgFunctionResult {
         function_name: &'a str,
