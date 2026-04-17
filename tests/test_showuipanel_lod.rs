@@ -63,6 +63,10 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
     ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+    ("Blizzard_Menu", "Blizzard_Menu.toc"),
+    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
+    ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
+    ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
@@ -76,11 +80,21 @@ fn setup_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
 
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
+    seed_addon_search_paths(&env);
+    load_panel_addons(&env);
+    install_lua_harness_stubs(&env);
 
+    env.apply_post_load_workarounds();
+    fire_startup_events(&env);
+    env
+}
+
+fn seed_addon_search_paths(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.addon_base_paths = vec![blizzard_ui_dir()];
+}
+
+fn load_panel_addons(env: &WowLuaEnv) {
     let ui = blizzard_ui_dir();
     for (name, toc) in PANEL_ADDONS {
         let toc_path = ui.join(name).join(toc);
@@ -91,7 +105,9 @@ fn setup_env() -> WowLuaEnv {
             eprintln!("[load {name}] FAILED: {e}");
         }
     }
+}
 
+fn install_lua_harness_stubs(env: &WowLuaEnv) {
     env.exec(
         r#"
         if type(UIParentLoadAddOn) == "function" and not __test_original_uiparent_load_addon then
@@ -129,10 +145,6 @@ fn setup_env() -> WowLuaEnv {
         "#,
     )
     .expect("failed to install ActionButtonUtil harness stub");
-
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
@@ -159,6 +171,114 @@ fn clear_recorded_lua_errors(env: &WowLuaEnv) {
 
 fn recorded_lua_errors(env: &WowLuaEnv) -> Vec<String> {
     env.state().borrow().lua_errors.clone()
+}
+
+fn player_spells_panel_debug_snapshot(env: &WowLuaEnv) -> String {
+    env.eval(
+        r#"
+        if not PlayerSpellsFrame then
+            return "player_spells_frame=nil"
+        end
+
+        local panelSettings = UIPanelWindows and UIPanelWindows[PlayerSpellsFrame:GetName()]
+        local storedAutoMinimize = panelSettings and panelSettings.autoMinimizeOnCondition
+        local storedSetMinimized = panelSettings and panelSettings.setMinimizedFunc
+        local frameAutoMinimize = PlayerSpellsFrame:GetAttribute("UIPanelLayout-autoMinimizeOnCondition")
+        local frameSetMinimized = PlayerSpellsFrame:GetAttribute("UIPanelLayout-setMinimizedFunc")
+        local onLoadScript = PlayerSpellsFrame:GetScript("OnLoad")
+        local playerGetTabOk, playerGetTabResult = pcall(function()
+            return PlayerSpellsFrame:GetTab()
+        end)
+        local spellbookTrackerType = PlayerSpellsFrame.SpellBookFrame and type(PlayerSpellsFrame.SpellBookFrame.internalTabTracker) or "missing"
+        local spellbookGetTabOk, spellbookGetTabResult = pcall(function()
+            if not PlayerSpellsFrame.SpellBookFrame then
+                return "missing"
+            end
+            return PlayerSpellsFrame.SpellBookFrame:GetTab()
+        end)
+        local specFrameName = PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame:GetName() or "missing"
+        local talentsFrameName = PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame:GetName() or "missing"
+        local spellbookFrameName = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:GetName() or "missing"
+        local missingOnLoadMethods = {}
+        local function childAliases(parent, child)
+            if not debug or not debug.getfenv then
+                return ""
+            end
+            local env = debug.getfenv(parent)
+            local fields = env and env[1]
+            if type(fields) ~= "table" then
+                return ""
+            end
+            local aliases = {}
+            for key, value in pairs(fields) do
+                if value == child and type(key) == "string" then
+                    table.insert(aliases, key)
+                end
+            end
+            table.sort(aliases)
+            return table.concat(aliases, ",")
+        end
+        local function childSegment(index, child, alias)
+            local childName = child.GetName and child:GetName() or nil
+            if childName then
+                if alias ~= "" then
+                    return childName .. ":" .. alias
+                end
+                return childName
+            end
+            return 'child_' .. tostring(index) .. (alias ~= "" and ':' .. alias or '')
+        end
+        local function appendMissing(frame, path)
+            local frameOnLoadScript = frame.GetScript and frame:GetScript("OnLoad")
+            if frameOnLoadScript and type(frame.OnLoad) ~= "function" then
+                local objectType = frame.GetObjectType and frame:GetObjectType() or "?"
+                table.insert(missingOnLoadMethods, path .. " type=" .. tostring(objectType) .. " OnLoad=" .. tostring(type(frame.OnLoad)))
+            end
+            local children = { frame:GetChildren() }
+            for index, child in ipairs(children) do
+                local alias = childAliases(frame, child)
+                local segment = childSegment(index, child, alias)
+                appendMissing(child, path .. "." .. segment)
+            end
+        end
+        appendMissing(PlayerSpellsFrame, "PlayerSpellsFrame")
+        local autoCallOk, autoCallResult = pcall(function()
+            if type(storedAutoMinimize) ~= "function" then
+                return "skip"
+            end
+            return storedAutoMinimize(PlayerSpellsFrame)
+        end)
+        local setCallOk, setCallResult = pcall(function()
+            if type(storedSetMinimized) ~= "function" then
+                return "skip"
+            end
+            return storedSetMinimized(PlayerSpellsFrame, false)
+        end)
+
+        return table.concat({
+            "PlayerSpellsFrame=" .. tostring(type(PlayerSpellsFrame)),
+            "ShouldAutoMinimize=" .. tostring(type(PlayerSpellsFrame.ShouldAutoMinimize)),
+            "SetMinimized=" .. tostring(type(PlayerSpellsFrame.SetMinimized)),
+            "UIPanelWindows.PlayerSpellsFrame=" .. tostring(type(panelSettings)),
+            "stored.autoMinimizeOnCondition=" .. tostring(type(storedAutoMinimize)),
+            "stored.setMinimizedFunc=" .. tostring(type(storedSetMinimized)),
+            "frame.autoMinimizeOnCondition=" .. tostring(type(frameAutoMinimize)),
+            "frame.setMinimizedFunc=" .. tostring(type(frameSetMinimized)),
+            "PlayerSpellsFrame.OnLoadScript=" .. tostring(type(onLoadScript)),
+            "PlayerSpellsFrame.internalTabTracker=" .. tostring(type(PlayerSpellsFrame.internalTabTracker)),
+            "PlayerSpellsFrame.GetTab()=" .. tostring(playerGetTabOk) .. ":" .. tostring(playerGetTabResult),
+            "SpecFrame.name=" .. tostring(specFrameName),
+            "TalentsFrame.name=" .. tostring(talentsFrameName),
+            "SpellBookFrame.name=" .. tostring(spellbookFrameName),
+            "SpellBookFrame.internalTabTracker=" .. tostring(spellbookTrackerType),
+            "SpellBookFrame.GetTab()=" .. tostring(spellbookGetTabOk) .. ":" .. tostring(spellbookGetTabResult),
+            "missing.OnLoad.methods=" .. table.concat(missingOnLoadMethods, " | "),
+            "call.autoMinimizeOnCondition=" .. tostring(autoCallOk) .. ":" .. tostring(autoCallResult),
+            "call.setMinimizedFunc=" .. tostring(setCallOk) .. ":" .. tostring(setCallResult),
+        }, "\n")
+        "#,
+    )
+    .unwrap_or_else(|error| format!("snapshot_error={error:?}"))
 }
 
 #[test]
@@ -233,20 +353,17 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
         env.send_key_press("S", None).expect("S keybind failed");
 
         let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__spellbook_keybind_errors");
         assert!(
             recorded_errors.is_empty(),
-            "Opening spellbook through S produced {} recorded Lua error(s):\n{:#?}",
+            "Opening spellbook through S produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
             recorded_errors.len(),
             recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
         );
 
-        let errors = common::drain_string_table(&env, "__spellbook_keybind_errors");
-        assert!(
-            errors.is_empty(),
-            "Opening spellbook through S produced {} Lua error(s):\n{}",
-            errors.len(),
-            errors.join("\n"),
-        );
+        assert!(handler_errors.is_empty(), "Opening spellbook through S produced {} Lua error(s):\n{}", handler_errors.len(), handler_errors.join("\n"));
 
         let result: String = env.eval(r#"
             if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
@@ -266,48 +383,6 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
             "Pressing S should demand-load Blizzard_PlayerSpells and show the SpellBook tab: {result}"
         );
     }
-}
-
-#[test]
-#[ignore = "diagnostic"]
-fn debug_direct_spellbook_toggle_error() {
-    let env = setup_env();
-    let result: String = env
-        .eval(
-            r#"
-            local ok, loaded, reason = pcall(function()
-                return C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
-            end)
-            if not ok then
-                return "c_addons_load:" .. tostring(loaded)
-            end
-            if not loaded then
-                return "load_failed:" .. tostring(reason)
-            end
-
-            if not PlayerSpellsFrame then
-                return "missing_player_spells_frame"
-            end
-
-            local ok_tab, err_tab = pcall(function()
-                return PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook)
-            end)
-            if not ok_tab then
-                return "try_set_tab:" .. tostring(err_tab)
-            end
-
-            local ok_show, err_show = pcall(function()
-                return ShowUIPanel(PlayerSpellsFrame)
-            end)
-            if not ok_show then
-                return "show_ui_panel:" .. tostring(err_show)
-            end
-
-            return "ok"
-            "#,
-        )
-        .expect("diagnostic evaluation should return");
-    panic!("{result}");
 }
 
 #[test]
@@ -342,20 +417,17 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
         env.send_key_press("N", None).expect("N keybind failed");
 
         let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__talents_keybind_errors");
         assert!(
             recorded_errors.is_empty(),
-            "Opening talents through N produced {} recorded Lua error(s):\n{:#?}",
+            "Opening talents through N produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
             recorded_errors.len(),
             recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
         );
 
-        let errors = common::drain_string_table(&env, "__talents_keybind_errors");
-        assert!(
-            errors.is_empty(),
-            "Opening talents through N produced {} Lua error(s):\n{}",
-            errors.len(),
-            errors.join("\n"),
-        );
+        assert!(handler_errors.is_empty(), "Opening talents through N produced {} Lua error(s):\n{}", handler_errors.len(), handler_errors.join("\n"));
 
         let result: String = env.eval(r#"
             if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
@@ -378,6 +450,128 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
             "Pressing N should demand-load Blizzard_PlayerSpells and show the talents tab: {result}"
         );
     }
+}
+
+#[test]
+#[ignore = "diagnostic"]
+fn debug_player_spells_onload_subcalls() {
+    let env = setup_env();
+    let report: String = env
+        .eval(
+            r#"
+            C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
+
+            local function attempt(label, fn)
+                local ok, value = pcall(fn)
+                return label .. "=" .. tostring(ok) .. ":" .. tostring(value)
+            end
+
+            local lines = {}
+            local specFrame = PlayerSpellsFrame and PlayerSpellsFrame.SpecFrame
+            local talentsFrame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+            local spellBookFrame = PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame
+
+            table.insert(lines, attempt("spec.ClassSpecFrameMixin.OnLoad", function() return ClassSpecFrameMixin.OnLoad(specFrame) end))
+            table.insert(lines, attempt("spec.UpdateSpecContents", function() return specFrame:UpdateSpecContents() end))
+            table.insert(lines, attempt("spec.UpdateSpecFrame", function() return specFrame:UpdateSpecFrame() end))
+
+            table.insert(lines, attempt("talents.ClassTalentsFrameMixin.OnLoad", function() return ClassTalentsFrameMixin.OnLoad(talentsFrame) end))
+            table.insert(lines, attempt("talents.TalentFrameBaseMixin.OnLoad", function() return TalentFrameBaseMixin.OnLoad(talentsFrame) end))
+            table.insert(lines, attempt("talents.UpdateClassVisuals", function() return talentsFrame:UpdateClassVisuals() end))
+            table.insert(lines, attempt("talents.InitializeLoadSystem", function() return talentsFrame:InitializeLoadSystem() end))
+            table.insert(lines, attempt("talents.InitializeSearch", function() return talentsFrame:InitializeSearch() end))
+
+            table.insert(lines, attempt("talents.LoadSystem.GetDropdown", function() return talentsFrame.LoadSystem:GetDropdown() end))
+            table.insert(lines, attempt("talents.LoadSystem.dropdown.SetWidth", function()
+                local dropdown = talentsFrame.LoadSystem:GetDropdown()
+                return dropdown:SetWidth(200)
+            end))
+            table.insert(lines, attempt("talents.LoadSystem.SetMenuTag", function() return talentsFrame.LoadSystem:SetMenuTag("MENU_CLASS_TALENT_PROFILE") end))
+            table.insert(lines, attempt("talents.LoadSystem.SetDropdownDefaultText", function()
+                return talentsFrame.LoadSystem:SetDropdownDefaultText(WrapTextInColor(TALENT_FRAME_DROP_DOWN_DEFAULT, GRAY_FONT_COLOR))
+            end))
+            table.insert(lines, attempt("talents.LoadSystem.SetSelectionEnabled", function()
+                local function SelectionEnabledCallback(selectionID, isUserInput)
+                    return true
+                end
+                return talentsFrame.LoadSystem:SetSelectionEnabled(SelectionEnabledCallback)
+            end))
+            table.insert(lines, attempt("talents.LoadSystem.SetNewEntryCallbackCustomPopup", function()
+                local function NewEntryCallback(entryName)
+                    return nil
+                end
+                local function NewEntryDisabledCallback()
+                    return false, "", nil, nil
+                end
+                return talentsFrame.LoadSystem:SetNewEntryCallbackCustomPopup(NewEntryCallback, TALENT_FRAME_DROP_DOWN_NEW_LOADOUT, ClassTalentLoadoutCreateDialog, NewEntryDisabledCallback)
+            end))
+            table.insert(lines, attempt("talents.LoadSystem.SetEditEntryCallback", function()
+                local function EditLoadoutCallback(configID)
+                end
+                local function CanEditLoadoutCallback(configID)
+                    return true
+                end
+                return talentsFrame.LoadSystem:SetEditEntryCallback(EditLoadoutCallback, TALENT_FRAME_DROP_DOWN_TOOLTIP_EDIT, CanEditLoadoutCallback)
+            end))
+            table.insert(lines, attempt("talents.LoadSystem.AddSentinelValue", function()
+                return talentsFrame.LoadSystem:AddSentinelValue({ text = TALENT_FRAME_DROP_DOWN_IMPORT, color = WHITE_FONT_COLOR, callback = function() end })
+            end))
+            table.insert(lines, attempt("talents.LoadSystem.SetLoadCallback", function()
+                local function LoadConfiguration(configID, isUserInput)
+                end
+                return talentsFrame.LoadSystem:SetLoadCallback(LoadConfiguration)
+            end))
+
+            table.insert(lines, attempt("spellbook.SpellBookFrameMixin.OnLoad", function() return SpellBookFrameMixin.OnLoad(spellBookFrame) end))
+            table.insert(lines, attempt("spellbook.TabSystemOwnerMixin.OnLoad", function() return TabSystemOwnerMixin.OnLoad(spellBookFrame) end))
+            table.insert(lines, attempt("spellbook.SetupSettingsDropdown", function() return spellBookFrame:SetupSettingsDropdown() end))
+            table.insert(lines, attempt("spellbook.SpellBookFrameTutorialsMixin.OnLoad", function() return SpellBookFrameTutorialsMixin.OnLoad(spellBookFrame) end))
+            table.insert(lines, attempt("spellbook.CategoryTabSystem.SetScript", function()
+                return spellBookFrame.CategoryTabSystem:SetScript("OnSizeChanged", GenerateClosure(spellBookFrame.ResizeSearchBox, spellBookFrame))
+            end))
+            table.insert(lines, attempt("spellbook.CreateAndInit.ClassCategory", function()
+                return CreateAndInitFromMixin(SpellBookClassCategoryMixin, spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.CreateAndInit.GeneralCategory", function()
+                return CreateAndInitFromMixin(SpellBookGeneralCategoryMixin, spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.CreateAndInit.PetCategory", function()
+                return CreateAndInitFromMixin(SpellBookPetCategoryMixin, spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.PagedSpellsFrame.SetElementTemplateData", function()
+                return spellBookFrame.PagedSpellsFrame:SetElementTemplateData(Templates)
+            end))
+            table.insert(lines, attempt("spellbook.PagedSpellsFrame.RegisterCallback", function()
+                return spellBookFrame.PagedSpellsFrame:RegisterCallback(PagedContentFrameBaseMixin.Event.OnUpdate, spellBookFrame.OnPagedSpellsUpdate, spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.EventRegistry.ClickBinding", function()
+                return EventRegistry:RegisterCallback("ClickBindingFrame.UpdateFrames", spellBookFrame.OnClickBindingUpdate, spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.EventRegistry.AssistedCombatActionSpell", function()
+                return EventRegistry:RegisterCallback("AssistedCombatManager.OnSetActionSpell", function(o)
+                    spellBookFrame:UpdateAttic()
+                    spellBookFrame:CheckShowHelpTips()
+                end)
+            end))
+            table.insert(lines, attempt("spellbook.EventRegistry.AssistedCombatHighlight", function()
+                return EventRegistry:RegisterCallback("AssistedCombatManager.OnSetCanHighlightSpellbookSpells", spellBookFrame.MarkSpellDataDirty, spellBookFrame)
+            end))
+            table.insert(lines, attempt("spellbook.SetButtonHoverCallbacks", function()
+                local onPagingButtonEnter = GenerateClosure(spellBookFrame.OnPagingButtonEnter, spellBookFrame)
+                local onPagingButtonLeave = GenerateClosure(spellBookFrame.OnPagingButtonLeave, spellBookFrame)
+                return spellBookFrame.PagedSpellsFrame.PagingControls:SetButtonHoverCallbacks(onPagingButtonEnter, onPagingButtonLeave)
+            end))
+            table.insert(lines, attempt("spellbook.BookCornerFlipbook.PlayPause", function()
+                spellBookFrame.BookCornerFlipbook.Anim:Play()
+                return spellBookFrame.BookCornerFlipbook.Anim:Pause()
+            end))
+            table.insert(lines, attempt("spellbook.InitializeSearch", function() return spellBookFrame:InitializeSearch() end))
+
+            return table.concat(lines, "\n")
+            "#,
+        )
+        .expect("diagnostic evaluation should return");
+    panic!("{report}");
 }
 
 #[test]
