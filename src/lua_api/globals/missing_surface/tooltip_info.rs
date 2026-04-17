@@ -1,3 +1,4 @@
+use super::item_socket_info;
 use super::{
     LINE_TYPE_EQUIP_SLOT, LINE_TYPE_ITEM_BINDING, LINE_TYPE_ITEM_LEVEL, LINE_TYPE_ITEM_NAME,
     LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME, LINE_TYPE_UNIT_NAME, TOOLTIP_TYPE_ITEM,
@@ -527,6 +528,9 @@ fn register_item_spell_aura_methods(
                 "GetRecipeResultItemForOrder",
                 c_tooltip_get_recipe_result_item_for_order,
             ),
+            ("GetSocketedItem", c_tooltip_get_socketed_item),
+            ("GetSocketGem", c_tooltip_get_socket_gem),
+            ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
             ("GetUpgradeItem", c_tooltip_get_upgrade_item),
             ("GetInventoryItem", c_tooltip_get_inventory_item),
@@ -666,6 +670,32 @@ fn c_tooltip_get_recipe_result_item_for_order(state: &mut LuaState) -> LuaResult
     } else {
         empty_tooltip(state, TOOLTIP_TYPE_ITEM)
     };
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_socketed_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip = item_socket_info::socketed_item_id(state)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_socket_gem(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let tooltip = item_socket_info::new_socket_item_id(state, index)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_existing_socket_gem(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let tooltip = item_socket_info::existing_socket_item_id(state, index)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
     state.push(tooltip);
     Ok(1)
 }

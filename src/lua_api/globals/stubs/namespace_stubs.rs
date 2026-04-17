@@ -194,7 +194,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TooltipInfo", "GetRecipeResultItem", stub_nil),
     ("C_TooltipInfo", "GetSendMailItem", stub_nil),
     ("C_TooltipInfo", "GetShapeshift", stub_nil),
-    ("C_TooltipInfo", "GetSocketedItem", stub_nil),
     ("C_TooltipInfo", "GetSpell", stub_nil),
     ("C_TooltipInfo", "GetTalent", stub_nil),
     ("C_TooltipInfo", "GetTooltipDataForItem", stub_nil),
