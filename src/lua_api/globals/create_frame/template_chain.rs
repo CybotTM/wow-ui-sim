@@ -620,12 +620,17 @@ enum FastHandlerRef<'a> {
     NoOp,
     Method(&'a str),
     ParentMethodNoArgs(&'a str),
+    GrandparentMethodNoArgs(&'a str),
     Function(&'a str),
     FunctionNoArgs(&'a str),
     FunctionWithEventVarargs(&'a str),
     FunctionWithButton(&'a str),
     FunctionWithElapsed(&'a str),
     AssignLiteral {
+        field: &'a str,
+        value: FastLiteralValue<'a>,
+    },
+    AssignParentField {
         field: &'a str,
         value: FastLiteralValue<'a>,
     },
@@ -767,26 +772,37 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
 }
 
 fn build_parent_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
+    build_ancestor_method_handler(state, method_name, 1)
+}
+
+fn build_ancestor_method_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    depth: usize,
+) -> LuaResult<Val> {
     let builder = crate::loader::chunk_cache::load_chunk(
         state,
         r#"
-            local method_name = ...
+            local method_name, depth = ...
             return function(self, ...)
-                local parent = self:GetParent()
-                if not parent then
+                local target = self
+                for _ = 1, depth do
+                    target = target and target:GetParent()
+                end
+                if not target then
                     return
                 end
-                return parent[method_name](parent)
+                return target[method_name](target)
             end
         "#,
-        "template-parent-method-handler",
+        "template-ancestor-method-handler",
     )
     .map_err(|error| rilua::runtime_error(error.to_string()))?;
     let method_name = create_string(state, method_name);
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[method_name],
+        &[method_name, Val::Num(depth as f64)],
     )
 }
 
@@ -799,6 +815,9 @@ fn build_fast_handler(
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::ParentMethodNoArgs(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
+        }
+        FastHandlerRef::GrandparentMethodNoArgs(method_name) => {
+            build_ancestor_method_handler(state, method_name, 2).map(Some)
         }
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
@@ -818,6 +837,9 @@ fn build_fast_handler(
         }
         FastHandlerRef::AssignLiteral { field, value } => {
             build_assignment_handler(state, field, value).map(Some)
+        }
+        FastHandlerRef::AssignParentField { field, value } => {
+            build_parent_assignment_handler(state, field, value).map(Some)
         }
     }
 }
