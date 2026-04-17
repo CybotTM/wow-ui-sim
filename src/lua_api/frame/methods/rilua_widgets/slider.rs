@@ -466,40 +466,21 @@ pub(super) fn register_checkbutton(state: &mut LuaState, metatable: GcRef<Table>
     Ok(())
 }
 
+const SCROLLFRAME_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    ("GetHorizontalScroll", get_horizontal_scroll),
+    ("SetHorizontalScroll", set_horizontal_scroll),
+    ("GetHorizontalScrollRange", get_horizontal_scroll_range),
+    ("GetVerticalScroll", get_vertical_scroll),
+    ("SetVerticalScroll", set_vertical_scroll),
+    ("GetVerticalScrollRange", get_vertical_scroll_range),
+    ("GetScrollChild", get_scroll_child),
+    ("SetScrollChild", set_scroll_child),
+    ("UpdateScrollChildRect", update_scroll_child_rect),
+];
+
 pub(super) fn register_scrollframe(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetHorizontalScroll",
-        get_horizontal_scroll,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetHorizontalScroll",
-        set_horizontal_scroll,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetHorizontalScrollRange",
-        get_horizontal_scroll_range,
-    )?;
-    table_set_rust_fn(state, metatable, "GetVerticalScroll", get_vertical_scroll)?;
-    table_set_rust_fn(state, metatable, "SetVerticalScroll", set_vertical_scroll)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetVerticalScrollRange",
-        get_vertical_scroll_range,
-    )?;
-    table_set_rust_fn(state, metatable, "GetScrollChild", get_scroll_child)?;
-    table_set_rust_fn(state, metatable, "SetScrollChild", set_scroll_child)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "UpdateScrollChildRect",
-        update_scroll_child_rect,
-    )?;
+    for (name, func) in SCROLLFRAME_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
