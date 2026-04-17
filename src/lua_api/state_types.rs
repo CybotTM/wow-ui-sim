@@ -508,6 +508,20 @@ pub struct WorldState {
     /// Default true — matches retail's "no explicit mute" baseline so addons
     /// that gate chat input on this probe don't silence themselves on startup.
     pub guild_can_speak_in_chat: bool,
+    /// Guild Message of the Day. Empty string when not set.
+    pub guild_motd: String,
+    /// Guild members (names + 1-based rank indices). Populated by
+    /// `GuildInvite` / `GuildUninvite` / `GuildKick` / `GuildPromote`.
+    /// Empty when the player has no guild.
+    pub guild_members: Vec<GuildMember>,
+}
+
+/// A guild member: display name + 1-based rank index. Rank 1 is highest
+/// (Guild Master). Higher values = lower rank.
+#[derive(Debug, Clone)]
+pub struct GuildMember {
+    pub name: String,
+    pub rank_index: i32,
 }
 
 /// A single guild rank row. `name` is the display name; `flags` is a bag of

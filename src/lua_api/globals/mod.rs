@@ -31,6 +31,7 @@ pub mod group_verbs;
 pub mod guild_control;
 pub mod guild_info;
 pub mod guild_logo;
+pub mod guild_verbs;
 pub mod hero_talents;
 pub mod housing;
 pub mod inventory_slot;

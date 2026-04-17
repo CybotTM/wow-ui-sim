@@ -123,8 +123,8 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, CursorItemOrigin,
-    EquippedItem, GreatVaultActivity, LootRollInfo, LuaErrorRecord, MovementState, NilSymbolAccess,
-    PendingTimer, PlayerState, WorldState,
+    EquippedItem, GreatVaultActivity, GuildMember, LootRollInfo, LuaErrorRecord, MovementState,
+    NilSymbolAccess, PendingTimer, PlayerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
