@@ -490,6 +490,19 @@ fn debug_player_spells_onload_subcalls() {
             table.insert(lines, attempt("talents.InitializeSearch", function() return talentsFrame:InitializeSearch() end))
             table.insert(lines, attempt("talents.RefreshLoadoutOptions", function() return talentsFrame:RefreshLoadoutOptions() end))
             table.insert(lines, attempt("talents.RefreshConfigID", function() return talentsFrame:RefreshConfigID() end))
+            table.insert(lines, attempt("talents.ClassTalentsFrameMixin.OnShow", function() return ClassTalentsFrameMixin.OnShow(talentsFrame) end))
+            table.insert(lines, attempt("talents.TalentFrameBaseMixin.OnShow", function() return TalentFrameBaseMixin.OnShow(talentsFrame) end))
+            table.insert(lines, attempt("talents.UpdateSpecBackground", function() return talentsFrame:UpdateSpecBackground() end))
+            table.insert(lines, attempt("talents.CheckSetSelectedConfigID", function() return talentsFrame:CheckSetSelectedConfigID() end))
+            table.insert(lines, attempt("talents.UpdateConfigButtonsState", function() return talentsFrame:UpdateConfigButtonsState() end))
+            table.insert(lines, attempt("talents.UpdateAllButtons", function() return talentsFrame:UpdateAllButtons() end))
+            table.insert(lines, attempt("talents.UpdateStarterBuildHighlights", function() return talentsFrame:UpdateStarterBuildHighlights() end))
+            table.insert(lines, attempt("talents.HeroTalentsContainer.UpdateHeroTalentInfo", function() return talentsFrame.HeroTalentsContainer:UpdateHeroTalentInfo() end))
+            table.insert(lines, attempt("talents.SetBackgroundAnimationsPlaying", function() return talentsFrame:SetBackgroundAnimationsPlaying(true) end))
+            table.insert(lines, attempt("talents.CheckLoadSystemTutorials", function() return talentsFrame:CheckLoadSystemTutorials() end))
+            table.insert(lines, attempt("talents.ClassTalentsFrameMixin.OnUpdate", function() return ClassTalentsFrameMixin.OnUpdate(talentsFrame, 0.016) end))
+            table.insert(lines, attempt("talents.TalentFrameBaseMixin.OnUpdate", function() return TalentFrameBaseMixin.OnUpdate(talentsFrame, 0.016) end))
+            table.insert(lines, attempt("talents.UpdateFullSearchResults", function() return talentsFrame:UpdateFullSearchResults() end))
 
             table.insert(lines, attempt("talents.LoadSystem.GetDropdown", function() return talentsFrame.LoadSystem:GetDropdown() end))
             table.insert(lines, attempt("talents.LoadSystem.dropdown.SetWidth", function()
@@ -614,52 +627,29 @@ fn debug_player_spells_onload_subcalls() {
 #[ignore = "diagnostic"]
 fn debug_keybind_n_nil_width_callsite() {
     let env = setup_env();
-    common::install_error_collector(&env, "__nil_width_errors");
     clear_recorded_lua_errors(&env);
 
-    env.exec(
-        r#"
-        do
-            local probe = CreateFrame("Frame", "NilWidthProbeFrame", UIParent)
-            local mt = getmetatable(probe)
-            local idx = mt and mt.__index
-            if type(idx) == "table" and not _G.__frame_nil_number_probe_installed then
-                _G.__frame_nil_number_probe_installed = true
-                for methodName, original in pairs(idx) do
-                    if type(methodName) == "string" and type(original) == "function" then
-                        idx[methodName] = function(self, ...)
-                            local results = { pcall(original, self, ...) }
-                            if results[1] then
-                                return unpack(results, 2, table.maxn(results))
-                            end
-
-                            local err = tostring(results[2])
-                            if string.find(err, "expected number, got nil at argument 1", 1, true) then
-                                local name = self and self.GetName and self:GetName() or "<unnamed>"
-                                local objectType = self and self.GetObjectType and self:GetObjectType() or "?"
-                                local stack = type(debugstack) == "function" and debugstack() or ""
-                                error(
-                                    "frame method " .. tostring(methodName) .. " on " .. tostring(name) .. " [" .. tostring(objectType) .. "] -> " .. err .. "\n" .. tostring(stack)
-                                )
-                            end
-
-                            error(results[2])
-                        end
-                    end
+    let report: String = env
+        .eval(
+            r#"
+            local ok, result = xpcall(
+                function()
+                    PlayerSpellsUtil.ToggleClassTalentFrame()
+                    return "ok"
+                end,
+                function(msg)
+                    return tostring(msg) .. "\n" .. debug.traceback()
                 end
-            end
-        end
-        "#,
-    )
-    .expect("failed to install SetWidth diagnostic");
+            )
 
-    let send_result = env.send_key_press("N", None);
+            return "ok=" .. tostring(ok) .. "\nresult=" .. tostring(result)
+            "#,
+        )
+        .expect("diagnostic xpcall should return");
     let recorded_errors = recorded_lua_errors(&env);
-    let handler_errors = common::drain_string_table(&env, "__nil_width_errors");
 
     panic!(
-        "send_result={send_result:?}\nrecorded_errors={recorded_errors:#?}\nhandler_errors=\n{}\n{}",
-        handler_errors.join("\n---\n"),
+        "{report}\nrecorded_errors={recorded_errors:#?}\n{}",
         player_spells_panel_debug_snapshot(&env),
     );
 }
