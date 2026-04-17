@@ -175,13 +175,13 @@ fn unique_error_messages(state: &SimState) -> Vec<UniqueLuaError> {
 /// Extract the core error message, stripping "runtime error: " prefix.
 pub(crate) fn extract_error_message(raw: &str) -> String {
     let first_line = raw.lines().next().unwrap_or(raw);
-    normalize_error_headline(first_line).to_string()
+    normalize_error_headline(first_line)
 }
 
 fn format_error_for_display(raw: &str) -> String {
     let mut lines = raw.lines();
     let first_line = lines.next().unwrap_or(raw);
-    let mut formatted = normalize_error_headline(first_line).to_string();
+    let mut formatted = normalize_error_headline(first_line);
     for line in lines {
         formatted.push('\n');
         formatted.push_str(line);
@@ -189,24 +189,27 @@ fn format_error_for_display(raw: &str) -> String {
     formatted
 }
 
-fn normalize_error_headline(first_line: &str) -> &str {
+fn normalize_error_headline(first_line: &str) -> String {
     let stripped = first_line
         .strip_prefix("runtime error: ")
         .unwrap_or(first_line);
     strip_lua_location_prefix(stripped)
 }
 
-fn strip_lua_location_prefix(msg: &str) -> &str {
+fn strip_lua_location_prefix(msg: &str) -> String {
     let Some((prefix, body)) = msg.rsplit_once(": ") else {
-        return msg;
+        return msg.to_string();
     };
-    let Some((_source, line)) = prefix.rsplit_once(':') else {
-        return msg;
+    let Some((before_line, line)) = prefix.rsplit_once(':') else {
+        return msg.to_string();
     };
-    if line.parse::<usize>().is_ok() {
-        body
-    } else {
-        msg
+    if line.parse::<usize>().is_err() {
+        return msg.to_string();
+    }
+
+    match before_line.rsplit_once(": ") {
+        Some((context, _source)) => format!("{context}: {body}"),
+        None => body.to_string(),
     }
 }
 
