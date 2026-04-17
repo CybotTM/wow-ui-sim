@@ -1,9 +1,7 @@
 //! Layout computation helpers for frame positioning.
 
 pub use crate::LayoutRect;
-pub use crate::layout::{
-    CachedFrameLayout, LayoutCache, anchor_position, frame_position_from_anchor,
-};
+pub use crate::layout::{anchor_position, frame_position_from_anchor};
 use crate::widget::WidgetRegistry;
 
 /// Get depth in parent hierarchy (for indentation).
