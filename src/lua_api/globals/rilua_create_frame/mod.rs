@@ -23,42 +23,54 @@ use rilua::{LuaApiMut, LuaResult, Val};
 // ---------------------------------------------------------------------------
 
 pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
-    let frame_type: String = FromStack::from_stack(state, 1)?;
-    let name: Option<String> = FromStack::from_stack(state, 2)?;
-    let parent_val: Val = FromStack::from_stack(state, 3)?;
-    let inherits: Option<String> = FromStack::from_stack(state, 4)?;
-    let id: Option<f64> = FromStack::from_stack(state, 5)?;
-
-    let widget_type = WidgetType::from_str(&frame_type)
-        .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))?;
-    let (parent_id, parent_explicit) = resolve_parent_id(state, parent_val)?;
-
+    let args = parse_create_frame_args(state)?;
+    let (parent_id, parent_explicit) = resolve_parent_id(state, args.parent_val)?;
     let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
         state,
-        widget_type,
-        &frame_type,
-        name,
-        if parent_id == 0 {
-            None
-        } else {
-            Some(parent_id)
-        },
+        args.widget_type,
+        &args.frame_type,
+        args.name,
+        (parent_id != 0).then_some(parent_id),
         parent_explicit,
-        id.map(|n| n as i32),
+        args.id,
     )?;
-    let fire_on_load = {
-        let sim = borrow_state(state)?;
-        sim.suppress_runtime_on_load_depth == 0
-    };
+    let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
     template_chain::apply_runtime_template_chain(
         state,
         frame_id,
-        inherits.as_deref(),
+        args.inherits.as_deref(),
         fire_on_load,
     )?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
+}
+
+struct CreateFrameArgs {
+    frame_type: String,
+    widget_type: WidgetType,
+    name: Option<String>,
+    parent_val: Val,
+    inherits: Option<String>,
+    id: Option<i32>,
+}
+
+fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
+    let frame_type: String = FromStack::from_stack(state, 1)?;
+    let name: Option<String> = FromStack::from_stack(state, 2)?;
+    let parent_val: Val = FromStack::from_stack(state, 3)?;
+    let inherits: Option<String> = FromStack::from_stack(state, 4)?;
+    let id: Option<f64> = FromStack::from_stack(state, 5)?;
+    let widget_type = WidgetType::from_str(&frame_type)
+        .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))?;
+    Ok(CreateFrameArgs {
+        frame_type,
+        widget_type,
+        name,
+        parent_val,
+        inherits,
+        id: id.map(|n| n as i32),
+    })
 }
 
 fn resolve_parent_id(state: &mut LuaState, parent_val: Val) -> LuaResult<(u64, bool)> {
