@@ -327,60 +327,36 @@ pub(super) fn get_status_bar_desaturated(state: &mut LuaState) -> LuaResult<u32>
 // register_statusbar
 // ---------------------------------------------------------------------------
 
+const STATUSBAR_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    // Colors + texture
+    ("SetStatusBarColor", set_status_bar_color),
+    ("SetColorFill", set_color_fill),
+    ("SetStatusBarTexture", set_status_bar_texture),
+    ("GetStatusBarTexture", get_status_bar_texture),
+    ("GetStatusBarColor", get_status_bar_color),
+    // Fill direction / reverse
+    ("SetFillStyle", set_fill_style),
+    ("GetFillStyle", get_fill_style),
+    ("SetReverseFill", set_reverse_fill),
+    ("GetReverseFill", get_reverse_fill),
+    // Interpolation (smooth value changes)
+    ("GetInterpolatedValue", get_interpolated_value),
+    ("IsInterpolating", is_interpolating),
+    ("SetToTargetValue", set_to_target_value),
+    // Desaturation
+    ("SetStatusBarDesaturated", set_desaturated),
+    ("GetStatusBarDesaturated", get_status_bar_desaturated),
+    ("SetStatusBarDesaturation", set_desaturation),
+    ("GetStatusBarDesaturation", get_status_bar_desaturation),
+    ("IsStatusBarDesaturated", is_status_bar_desaturated),
+    // Rotation
+    ("SetRotatesTexture", set_rotates_texture),
+    ("GetRotatesTexture", get_rotates_texture),
+];
+
 pub(super) fn register_statusbar(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetStatusBarColor", set_status_bar_color)?;
-    table_set_rust_fn(state, metatable, "SetColorFill", set_color_fill)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetStatusBarTexture",
-        set_status_bar_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetStatusBarTexture",
-        get_status_bar_texture,
-    )?;
-    table_set_rust_fn(state, metatable, "GetStatusBarColor", get_status_bar_color)?;
-    table_set_rust_fn(state, metatable, "SetFillStyle", set_fill_style)?;
-    table_set_rust_fn(state, metatable, "GetFillStyle", get_fill_style)?;
-    table_set_rust_fn(state, metatable, "SetReverseFill", set_reverse_fill)?;
-    table_set_rust_fn(state, metatable, "GetReverseFill", get_reverse_fill)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetInterpolatedValue",
-        get_interpolated_value,
-    )?;
-    table_set_rust_fn(state, metatable, "IsInterpolating", is_interpolating)?;
-    table_set_rust_fn(state, metatable, "SetToTargetValue", set_to_target_value)?;
-    table_set_rust_fn(state, metatable, "SetStatusBarDesaturated", set_desaturated)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetStatusBarDesaturated",
-        get_status_bar_desaturated,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetStatusBarDesaturation",
-        set_desaturation,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetStatusBarDesaturation",
-        get_status_bar_desaturation,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "IsStatusBarDesaturated",
-        is_status_bar_desaturated,
-    )?;
-    table_set_rust_fn(state, metatable, "SetRotatesTexture", set_rotates_texture)?;
-    table_set_rust_fn(state, metatable, "GetRotatesTexture", get_rotates_texture)?;
+    for (name, func) in STATUSBAR_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
