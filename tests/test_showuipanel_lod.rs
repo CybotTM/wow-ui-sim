@@ -281,6 +281,11 @@ fn debug_direct_spellbook_toggle_error() {
             end
 
             mark("PlayerSpellsFrame_LoadUI", PlayerSpellsFrame_LoadUI)
+            mark("UIParentLoadAddOn", UIParentLoadAddOn)
+            mark("C_AddOns", C_AddOns)
+            if C_AddOns then
+                mark("C_AddOns.LoadAddOn", C_AddOns.LoadAddOn)
+            end
             local ok, err = pcall(PlayerSpellsFrame_LoadUI)
             if not ok then
                 return "load_ui:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")

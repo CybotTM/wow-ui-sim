@@ -51,7 +51,9 @@ pub fn load_lua_file(
         }
         exec_addon_func(state, func, ctx).map_err(|e| {
             if let LoadError::Lua(msg) = &e {
-                call_error_handler_state(state, msg);
+                let contextual = format!("{chunk_name}: {msg}");
+                call_error_handler_state(state, &contextual);
+                return LoadError::Lua(contextual);
             }
             e
         })

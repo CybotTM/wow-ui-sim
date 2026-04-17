@@ -883,12 +883,12 @@ fn build_global_method_with_self_string_handler(
     let builder = crate::loader::chunk_cache::load_chunk(
         state,
         r#"
-            local target, method_name, arg = ...
+            local target, method_name, literal_arg = ...
             return function(self, ...)
                 if not target then
                     return
                 end
-                return target[method_name](target, self, arg)
+                return target[method_name](target, self, literal_arg)
             end
         "#,
         "template-global-method-self-string-handler",
@@ -1267,9 +1267,9 @@ fn build_function_handler_with_string_arg(
     let builder = crate::loader::chunk_cache::load_chunk(
         state,
         r#"
-            local fn, arg = ...
+            local fn, literal_arg = ...
             return function(self, ...)
-                return fn(self, arg)
+                return fn(self, literal_arg)
             end
         "#,
         "template-inline-function-self-string",
@@ -1292,9 +1292,9 @@ fn build_function_handler_with_global_arg(
     let builder = crate::loader::chunk_cache::load_chunk(
         state,
         r#"
-            local fn, arg = ...
+            local fn, resolved_arg = ...
             return function(self, ...)
-                return fn(arg)
+                return fn(resolved_arg)
             end
         "#,
         "template-inline-function-global-arg",
