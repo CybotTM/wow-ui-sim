@@ -128,6 +128,8 @@ macro_rules! build_empty_sim_state {
             auction_browse_items: Vec::new(),
             loot_method: LootMethodState::default(),
             gossip: GossipState::default(),
+            titles: Vec::new(),
+            shapeshift_forms: Vec::new(),
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
@@ -481,6 +483,13 @@ pub struct SimState {
     /// `GetGossipNumAvailableQuests` / `GetGossipNumActiveQuests`.
     /// Defaults to inactive with zero counts.
     pub gossip: GossipState,
+    /// Title names the player has unlocked, in display order. Drives
+    /// `GetNumTitles` / `GetTitleName(index)`. Empty by default.
+    pub titles: Vec<String>,
+    /// Currently-available shapeshift forms (druid / shaman / priest
+    /// tokens). Drives `GetNumShapeshiftForms`. Empty by default; the
+    /// seeded Paladin player has no forms.
+    pub shapeshift_forms: Vec<String>,
     /// Reputation rows in reputation-window display order. Drives
     /// `GetFactionInfoByID`, `GetGuildFactionInfo`, and the selected /
     /// watched faction getters / setters. Empty by default.

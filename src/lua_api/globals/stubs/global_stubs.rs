@@ -156,7 +156,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetNumAuctionItems is SimState-backed in inventory_counts.rs, not a stub.
     // GetNumBattlegroundEntries is SimState-backed in
     // battlefield_lfg_probes.rs, not a stub.
-    "GetNumClasses",
+    // GetNumClasses is SimState-backed in social_probes.rs, not a stub.
     // GetNumGroupMembers / GetNumPartyMembers / GetNumRaidMembers /
     // GetNumSubgroupMembers are SimState-backed in group_queries.rs,
     // not stubs.
@@ -164,10 +164,10 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetNumGuildMembers is SimState-backed in guild_probes.rs, not a stub.
     // GetNumLootItems is SimState-backed in inventory_counts.rs, not a stub.
     // GetNumQuestLogEntries is SimState-backed in quest_surface.rs, not a stub.
-    "GetNumShapeshiftForms",
+    // GetNumShapeshiftForms is SimState-backed in social_probes.rs, not a stub.
     // GetNumSkillLines / GetNumSpellTabs / GetNumTalentTabs are
     // SimState-backed in talent_spec_probes.rs, not stubs.
-    "GetNumTitles",
+    // GetNumTitles is SimState-backed in social_probes.rs, not a stub.
     // GetPetExperience / GetPetHappiness / GetPetLoyalty /
     // GetPetTimeInCombat are SimState-backed in pet_stats.rs, not stubs.
     // GetPvpTalentSlotInfo is SimState-backed in talent_spec_probes.rs,
@@ -187,7 +187,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // talent_spec_probes.rs, not stubs.
     "GetSummonConfirmSummoner",
     "GetSummonConfirmTimeLeft",
-    "GetTitleName",
+    // GetTitleName is SimState-backed in social_probes.rs, not a stub.
     "GetTradePlayerItemInfo",
     "GetTradeSkillInfo",
     "GetTradeTargetItemInfo",
