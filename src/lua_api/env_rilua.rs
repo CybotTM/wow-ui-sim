@@ -93,10 +93,20 @@ impl WowLuaEnv {
         let _ = LuaApiMut::gc_collect(&mut *lua);
     }
 
-    /// Run an incremental GC step.
+    /// Run an incremental GC step with rilua's default budget.
     pub fn gc_step(&self) {
         let mut lua = self.lua.borrow_mut();
         let _ = LuaApiMut::gc_step(&mut *lua, 0);
+    }
+
+    /// Run an incremental GC step with an explicit work budget.
+    ///
+    /// `budget` is measured in GC work units (see `GCSTEPSIZE` in rilua
+    /// — currently 1024). Returns whether the full cycle completed. Used
+    /// by the OnUpdate tick path to bound collection work per frame.
+    pub fn gc_step_with_budget(&self, budget: i64) -> crate::Result<bool> {
+        let mut lua = self.lua.borrow_mut();
+        Ok(LuaApiMut::gc_step(&mut *lua, budget)?)
     }
 
     // ── rilua global access ──────────────────────────────────────────
