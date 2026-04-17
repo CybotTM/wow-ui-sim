@@ -631,6 +631,15 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         arg: &'a str,
     },
+    GlobalMethodWithSelfIdArg {
+        target_path: &'a str,
+        method_name: &'a str,
+    },
+    GlobalMethodWithSelfFieldArg {
+        target_path: &'a str,
+        method_name: &'a str,
+        field: &'a str,
+    },
     GlobalMethodThenAssignLiteral {
         target_path: &'a str,
         method_name: &'a str,
@@ -904,6 +913,64 @@ fn build_global_method_with_self_string_handler(
     )
 }
 
+fn build_global_method_with_self_id_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local target, method_name = ...
+            return function(self, ...)
+                if not target then
+                    return
+                end
+                return target[method_name](target, self:GetID())
+            end
+        "#,
+        "template-global-method-self-id-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, target_path);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, method_name],
+    )
+}
+
+fn build_global_method_with_self_field_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    field: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local target, method_name, field_name = ...
+            return function(self, ...)
+                if not target then
+                    return
+                end
+                return target[method_name](target, self[field_name])
+            end
+        "#,
+        "template-global-method-self-field-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, target_path);
+    let method_name = create_string(state, method_name);
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, method_name, field_name],
+    )
+}
+
 fn build_global_method_then_assign_handler(
     state: &mut LuaState,
     target_path: &str,
@@ -1043,6 +1110,16 @@ fn build_fast_handler(
             method_name,
             arg,
         } => build_global_method_with_self_string_handler(state, target_path, method_name, arg)
+            .map(Some),
+        FastHandlerRef::GlobalMethodWithSelfIdArg {
+            target_path,
+            method_name,
+        } => build_global_method_with_self_id_handler(state, target_path, method_name).map(Some),
+        FastHandlerRef::GlobalMethodWithSelfFieldArg {
+            target_path,
+            method_name,
+            field,
+        } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
             .map(Some),
         FastHandlerRef::GlobalMethodThenAssignLiteral {
             target_path,
@@ -1478,6 +1555,21 @@ fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             arg,
         });
     }
+    if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
+        return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
+            target_path,
+            method_name,
+        });
+    }
+    if let Some((target_path, method_name, field)) =
+        parse_inline_global_method_with_self_field_arg(stmt)
+    {
+        return Some(FastHandlerRef::GlobalMethodWithSelfFieldArg {
+            target_path,
+            method_name,
+            field,
+        });
+    }
     if let Some((first, second, third)) = parse_inline_register_for_clicks(stmt) {
         return Some(FastHandlerRef::RegisterForClicks {
             first,
@@ -1632,6 +1724,28 @@ fn parse_inline_global_method_with_self_string_arg(stmt: &str) -> Option<(&str, 
         && is_fast_identifier(method_name)
         && self_arg.trim() == "self")
         .then_some((target_path, method_name, arg))
+}
+
+fn parse_inline_global_method_with_self_id_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name) && args == "self:GetID()")
+        .then_some((target_path, method_name))
+}
+
+fn parse_inline_global_method_with_self_field_arg(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let field = args.strip_suffix(')')?.trim().strip_prefix("self.")?.trim();
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    (is_fast_handler_path(target_path)
+        && is_fast_identifier(method_name)
+        && is_fast_identifier(field))
+    .then_some((target_path, method_name, field))
 }
 
 fn parse_inline_global_method_then_assign(

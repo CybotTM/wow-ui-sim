@@ -477,6 +477,109 @@ fn test_create_frame_from_xml_inline_global_method_with_self_string_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_method_with_self_id_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGlobalMethodSelfIdTarget = {}
+        function XmlInlineGlobalMethodSelfIdTarget:SetThing(id)
+            self.id = id
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineGlobalMethodSelfIdButton" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalMethodSelfIdTarget:SetThing(self:GetID())</OnLoad></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let button_id: f64 = env
+        .eval("return XmlInlineGlobalMethodSelfIdButton:GetID()")
+        .unwrap();
+    let captured_id: f64 = env
+        .eval("return XmlInlineGlobalMethodSelfIdTarget.id")
+        .unwrap();
+    assert_eq!(captured_id, button_id);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_global_method_with_self_field_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGlobalMethodFieldTarget = {}
+        function XmlInlineGlobalMethodFieldTarget:SetThing(value)
+            self.value = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalMethodFieldFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalMethodFieldTarget:SetThing(self.tooltipText)</OnLoad></Scripts>
+        <KeyValues>
+            <KeyValue key="tooltipText" value="TooltipValue" type="string"/>
+        </KeyValues>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let value: String = env
+        .eval("return XmlInlineGlobalMethodFieldTarget.value")
+        .unwrap();
+    assert_eq!(value, "TooltipValue");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_global_method_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineSequenceTarget = {}
+        function XmlInlineSequenceTarget:SetOwner(frame, anchor)
+            self.owner = frame
+            self.anchor = anchor
+        end
+        function XmlInlineSequenceTarget:SetThing(value)
+            self.value = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalMethodSequenceFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineSequenceTarget:SetOwner(self, "ANCHOR_RIGHT"); XmlInlineSequenceTarget:SetThing(self.currencyID)</OnLoad></Scripts>
+        <KeyValues>
+            <KeyValue key="currencyID" value="42" type="number"/>
+        </KeyValues>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let owner_matches: bool = env
+        .eval("return XmlInlineSequenceTarget.owner == XmlInlineGlobalMethodSequenceFrame")
+        .unwrap();
+    let anchor_matches: bool = env
+        .eval("return XmlInlineSequenceTarget.anchor == 'ANCHOR_RIGHT'")
+        .unwrap();
+    let value: f64 = env.eval("return XmlInlineSequenceTarget.value").unwrap();
+    assert!(owner_matches);
+    assert!(anchor_matches);
+    assert_eq!(value, 42.0);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_method_then_assign_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
