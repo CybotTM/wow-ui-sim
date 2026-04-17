@@ -16,11 +16,22 @@ use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::table_set_rust_fn;
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
+    register_group_membership_probes(state, table_ref)?;
+    register_invite_and_tower_stubs(state, table_ref)?;
+    Ok(())
+}
+
+fn register_group_membership_probes(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
@@ -34,6 +45,13 @@ pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()>
         c_party_info_get_active_group_type,
     )?;
     table_set_rust_fn(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
+    Ok(())
+}
+
+fn register_invite_and_tower_stubs(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
