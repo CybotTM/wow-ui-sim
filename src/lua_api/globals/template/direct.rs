@@ -234,23 +234,6 @@ pub fn enable_mouse(state: &Rc<RefCell<SimState>>, frame_id: u64, enable: bool) 
     }
 }
 
-/// Set XML-declared mouse propagation flags directly.
-pub fn set_propagate_mouse_input(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    propagate_spec: &str,
-) {
-    let mut clicks = false;
-    let mut motion = false;
-    merge_propagate_mouse_input_spec(propagate_spec, &mut clicks, &mut motion);
-
-    let mut s = state.borrow_mut();
-    if let Some(frame) = s.widgets.get_mut(frame_id) {
-        frame.propagate_mouse_clicks = clicks;
-        frame.propagate_mouse_motion = motion;
-    }
-}
-
 /// Set hit rect insets directly.
 pub fn set_hit_rect_insets(
     state: &Rc<RefCell<SimState>>,
