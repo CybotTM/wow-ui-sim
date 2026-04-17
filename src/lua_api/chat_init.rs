@@ -64,8 +64,11 @@ fn register_fake_chat_data(env: &WowLuaEnv) {
 }
 
 fn register_fake_chat_messages(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
+    let _ = env.exec(fake_chat_messages_lua());
+}
+
+fn fake_chat_messages_lua() -> &'static str {
+    r#"
         if not ChatFrame1 then return end
         _FakeChat = { msgs = {}, names = {}, idx = {} }
         _FakeChat.msgs.general = {
@@ -98,8 +101,7 @@ fn register_fake_chat_messages(env: &WowLuaEnv) {
             "Raid signup is up on the calendar",
             "I just finished the attunement quest chain",
         }
-    "#,
-    );
+    "#
 }
 
 fn register_fake_chat_names(env: &WowLuaEnv) {
