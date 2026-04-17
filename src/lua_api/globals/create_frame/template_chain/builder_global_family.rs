@@ -3,7 +3,6 @@ use super::{
     load_template,
 };
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
-use crate::lua_api::globals::create_frame::template_chain::FastValueExpr;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -32,12 +31,6 @@ pub(super) fn build_global_family_handler(
             method_name,
             field,
         } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
-            .map(Some),
-        FastHandlerRef::GlobalMethodWithRuntimeArgs {
-            target_path,
-            method_name,
-            args,
-        } => build_global_method_with_runtime_args_handler(state, target_path, method_name, args)
             .map(Some),
         FastHandlerRef::GlobalMethodThenAssignLiteral {
             target_path,
@@ -151,48 +144,6 @@ fn build_global_method_then_assign_handler(
     build_chained_handler(state, method, assign, "inline-global-method-assign", false)
 }
 
-fn build_global_method_with_runtime_args_handler(
-    state: &mut LuaState,
-    target_path: &str,
-    method_name: &str,
-    args: &[FastValueExpr<'_>],
-) -> LuaResult<Val> {
-    let mut captured_args = Vec::with_capacity(args.len());
-    for arg in args {
-        captured_args.push(resolve_fast_value_expr(state, arg));
-    }
-    call_global_method_builder(
-        state,
-        target_path,
-        method_name,
-        r#"
-            local target_ref, method_name, arg_count = ...
-            local args = { select(4, ...) }
-            return function(self, ...)
-                local target = target_ref
-                if type(target) == "string" then
-                    local env = getfenv(0) or _G
-                    for segment in string.gmatch(target, "[^%.]+") do
-                        env = env and env[segment]
-                    end
-                    target = env
-                end
-                if not target then
-                    return
-                end
-                return target[method_name](target, unpack(args, 1, arg_count))
-            end
-        "#,
-        "template-global-method-runtime-args-handler",
-        &{
-            let mut args = Vec::with_capacity(1 + captured_args.len());
-            args.push(Val::Num(args.len() as f64));
-            args.extend(captured_args);
-            args
-        },
-    )
-}
-
 enum GlobalMethodMode {
     Passthrough,
     SelfId,
@@ -272,14 +223,4 @@ fn call_global_method_builder(
     args.push(create_string(state, method_name));
     args.extend_from_slice(extra_args);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &args)
-}
-
-fn resolve_fast_value_expr(state: &mut LuaState, arg: &FastValueExpr<'_>) -> Val {
-    match arg {
-        FastValueExpr::String(value) => create_string(state, value),
-        FastValueExpr::Literal(FastLiteralValue::Global(path)) => resolve_global_path(state, path),
-        FastValueExpr::Literal(FastLiteralValue::Number(value)) => Val::Num(*value),
-        FastValueExpr::Literal(FastLiteralValue::Bool(value)) => Val::Bool(*value),
-        FastValueExpr::Literal(FastLiteralValue::Nil) => Val::Nil,
-    }
 }
