@@ -217,6 +217,14 @@ fn register_attribute_hit_rect(state: &mut LuaState, table: GcRef<Table>) -> Lua
 }
 
 fn register_event_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_event_registration(state, table)?;
+    register_event_callbacks(state, table)?;
+    register_event_keyboard_propagation(state, table)?;
+    register_event_script_handlers(state, table)?;
+    Ok(())
+}
+
+fn register_event_registration(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "RegisterEvent", events::register_event)?;
     table_set_rust_fn(
         state,
@@ -243,6 +251,10 @@ fn register_event_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResul
         "IsEventRegistered",
         events::is_event_registered,
     )?;
+    Ok(())
+}
+
+fn register_event_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -273,6 +285,13 @@ fn register_event_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResul
         "RegisterUnitEventCallback",
         events::register_unit_event_callback,
     )?;
+    Ok(())
+}
+
+fn register_event_keyboard_propagation(
+    state: &mut LuaState,
+    table: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -285,6 +304,10 @@ fn register_event_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResul
         "GetPropagateKeyboardInput",
         events::get_propagate_keyboard_input,
     )?;
+    Ok(())
+}
+
+fn register_event_script_handlers(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetScript", events::set_script)?;
     table_set_rust_fn(state, table, "GetScript", events::get_script)?;
     table_set_rust_fn(state, table, "HasScript", events::has_script)?;
