@@ -540,6 +540,7 @@ fn register_item_spell_aura_methods(
             ("GetSocketedItem", c_tooltip_get_socketed_item),
             ("GetSocketGem", c_tooltip_get_socket_gem),
             ("GetExistingSocketGem", c_tooltip_get_existing_socket_gem),
+            ("GetToyByItemID", c_tooltip_get_toy_by_item_id),
             ("GetMinimapMouseover", c_tooltip_get_minimap_mouseover),
             ("GetUpgradeItem", c_tooltip_get_upgrade_item),
             ("GetInventoryItem", c_tooltip_get_inventory_item),
@@ -883,6 +884,36 @@ fn merchant_item_id(state: &LuaState, slot: i32) -> Option<u32> {
         .filter(|item_id| *item_id != 0)
 }
 
+fn tooltip_for_toy_item_id(state: &mut LuaState, item_id: u32) -> Val {
+    if items::get_item(item_id).is_some() {
+        return tooltip_for_item_id(state, item_id);
+    }
+
+    let toy_name = borrow_state(state).ok().and_then(|st| {
+        st.world
+            .toys
+            .iter()
+            .find(|toy| toy.item_id == item_id)
+            .map(|toy| toy.name.clone())
+    });
+    let Some(toy_name) = toy_name else {
+        return empty_tooltip(state, TOOLTIP_TYPE_ITEM);
+    };
+
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_ITEM);
+    let lines = table_get(state, tooltip, "lines");
+    push_tooltip_line(
+        state,
+        lines,
+        1,
+        LINE_TYPE_ITEM_NAME,
+        &toy_name,
+        Some(item_quality_color(1)),
+        false,
+    );
+    tooltip
+}
+
 fn c_tooltip_get_trade_player_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let tooltip = trade_slot_item_id(state, slot, true)
@@ -906,6 +937,13 @@ fn c_tooltip_get_merchant_item(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip = merchant_item_id(state, slot)
         .map(|item_id| tooltip_for_item_id(state, item_id))
         .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_toy_by_item_id(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = u32::from_stack(state, 1)?;
+    let tooltip = tooltip_for_toy_item_id(state, item_id);
     state.push(tooltip);
     Ok(1)
 }
