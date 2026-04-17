@@ -91,6 +91,11 @@ pub fn frame_ref(state: &mut LuaState, id: u64) -> LuaResult<Val> {
     let (lo, hi) = unpack_id(id);
     let table_ref = create_frame_table(state, lo, hi);
     attach_frame_metatable(state, table_ref);
+    // Frame backing tables are never deleted — wow-sim never removes a
+    // frame from the registry. Pin so GC skips marking the 47k+ entries
+    // in __rilua_frame_refs each cycle. The companion skip-traverse
+    // flag on __rilua_frame_refs itself is set once in globals init.
+    state.gc.pin_object(Val::Table(table_ref));
     let val = Val::Table(table_ref);
     table_set_num(state, cache, id as f64, val);
     let _ = get_or_create_frame_fields(state, id);

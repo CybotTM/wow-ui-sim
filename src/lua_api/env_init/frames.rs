@@ -53,6 +53,12 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     // here at init).
     let frame_index = build_frame_index_table(state, frame_mt_ref);
     table_set(state, frame_mt, "__index", Val::Table(frame_index));
+
+    // Pin the shared frame metatable + its __index clone for the lifetime
+    // of the VM. Method registration only happens here at init, so the
+    // pair is effectively immutable — GC never needs to walk it.
+    state.gc.pin_object(Val::Table(frame_mt_ref));
+    state.gc.pin_object(Val::Table(frame_index));
     Ok(())
 }
 
