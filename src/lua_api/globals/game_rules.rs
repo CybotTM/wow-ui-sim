@@ -228,35 +228,47 @@ enum RuleOp {
 
 fn read_rule_op(state: &mut LuaState) -> RuleOp {
     match stack_val(state, 2) {
-        Val::Nil => RuleOp::Remove,
-        Val::Num(n) => RuleOp::Set(GameRuleValue {
-            as_float: n,
-            as_int: n as i64,
-            as_string: format!("{}", n),
-        }),
-        Val::Bool(true) => RuleOp::Set(GameRuleValue {
-            as_float: 1.0,
-            as_int: 1,
-            as_string: "true".into(),
-        }),
-        Val::Bool(false) => RuleOp::Remove,
-        Val::Str(s) => {
-            let text = state
-                .gc
-                .string_arena
-                .get(s)
-                .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
-                .map(str::to_owned)
-                .unwrap_or_default();
-            let parsed_f = text.parse::<f64>().unwrap_or(0.0);
-            let parsed_i = text.parse::<i64>().unwrap_or(parsed_f as i64);
-            RuleOp::Set(GameRuleValue {
-                as_float: parsed_f,
-                as_int: parsed_i,
-                as_string: text,
-            })
-        }
+        Val::Num(n) => RuleOp::Set(rule_value_from_number(n)),
+        Val::Bool(true) => RuleOp::Set(rule_value_true_marker()),
+        Val::Str(s) => RuleOp::Set(rule_value_from_string(state, s)),
+        Val::Nil | Val::Bool(false) => RuleOp::Remove,
         _ => RuleOp::Remove,
+    }
+}
+
+fn rule_value_from_number(n: f64) -> GameRuleValue {
+    GameRuleValue {
+        as_float: n,
+        as_int: n as i64,
+        as_string: format!("{}", n),
+    }
+}
+
+fn rule_value_true_marker() -> GameRuleValue {
+    GameRuleValue {
+        as_float: 1.0,
+        as_int: 1,
+        as_string: "true".into(),
+    }
+}
+
+fn rule_value_from_string(
+    state: &mut LuaState,
+    s: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
+) -> GameRuleValue {
+    let text = state
+        .gc
+        .string_arena
+        .get(s)
+        .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+        .map(str::to_owned)
+        .unwrap_or_default();
+    let parsed_f = text.parse::<f64>().unwrap_or(0.0);
+    let parsed_i = text.parse::<i64>().unwrap_or(parsed_f as i64);
+    GameRuleValue {
+        as_float: parsed_f,
+        as_int: parsed_i,
+        as_string: text,
     }
 }
 
