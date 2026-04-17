@@ -207,6 +207,30 @@ pub struct HeirloomData {
     pub max_level: i32,
 }
 
+/// Per-map metadata keyed by ui-map id in `SimState.maps`. Drives
+/// `C_Map.GetMapArtID`, `GetMapChildrenInfo`, and
+/// `GetPlayerMapPosition`. Only the handful of ids commonly referenced
+/// by Blizzard UI / addons are seeded (Azeroth world map, Eastern
+/// Kingdoms continent, Stormwind City zone).
+#[derive(Debug, Clone)]
+pub struct MapData {
+    pub ui_map_id: i32,
+    pub name: String,
+    /// `UIMapType` token (1=World, 2=Continent, 3=Zone, 4=Dungeon).
+    pub map_type: i32,
+    /// Parent map id in the hierarchy. `0` for the Cosmic root.
+    pub parent_map_id: i32,
+    /// Art tileset id returned by `GetMapArtID`. Non-zero for real
+    /// zones; `0` for purely-logical maps (Cosmic).
+    pub art_id: i32,
+    /// `UIMapFlag` bitmask (0 = no flags).
+    pub flags: i32,
+    /// Direct children of this map in display order. Drives
+    /// `GetMapChildrenInfo` (filtered by mapType when the caller
+    /// passes one).
+    pub child_map_ids: Vec<i32>,
+}
+
 /// Per-currency info keyed by currency id in `SimState.currency_info`.
 /// Drives `C_CurrencyInfo.GetCurrencyInfo`, `GetCurrencyInfoFromLink`,
 /// and `GetCurrencyContainerInfo`. Matches the 25-field retail struct;

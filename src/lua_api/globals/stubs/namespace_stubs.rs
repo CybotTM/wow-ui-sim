@@ -84,10 +84,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
         "GetActiveLossOfControlDataCount",
         stub_nil,
     ),
-    // C_Map
-    ("C_Map", "GetMapArtID", stub_nil),
-    ("C_Map", "GetMapChildrenInfo", stub_nil),
-    ("C_Map", "GetPlayerMapPosition", stub_nil),
+    // C_Map GetMapArtID / GetMapChildrenInfo / GetPlayerMapPosition
+    // are SimState-backed (via `maps` + `player_map_position`) in
+    // missing_surface/c_map.rs, not stubs.
     // C_MythicPlus
     ("C_MythicPlus", "GetCurrentAffixes", stub_nil),
     ("C_MythicPlus", "GetCurrentSeason", stub_nil),

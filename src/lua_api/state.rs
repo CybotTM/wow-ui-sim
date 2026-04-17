@@ -131,6 +131,8 @@ macro_rules! build_empty_sim_state {
             titles: Vec::new(),
             shapeshift_forms: Vec::new(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            maps: default_maps(),
+            player_map_position: (0.5, 0.5),
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
@@ -184,7 +186,7 @@ use super::game_data::{
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CurrencyInfo, CursorInfo,
     CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer,
+    LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer,
     PlayerState, SecondaryPowerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
@@ -496,6 +498,14 @@ pub struct SimState {
     /// and `GetCurrencyContainerInfo`. Seeded at startup from the
     /// static `currency_data::CURRENCY_LIST`.
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Map metadata keyed by ui-map id. Drives `C_Map.GetMapArtID`,
+    /// `GetMapChildrenInfo`, `GetPlayerMapPosition`. Seeded with the
+    /// Azeroth world map, Eastern Kingdoms continent, and Stormwind
+    /// City zone.
+    pub maps: HashMap<i32, MapData>,
+    /// Player's normalized position (0..=1) in the current map.
+    /// Drives `C_Map.GetPlayerMapPosition`. Default `(0.5, 0.5)`.
+    pub player_map_position: (f64, f64),
     /// Reputation rows in reputation-window display order. Drives
     /// `GetFactionInfoByID`, `GetGuildFactionInfo`, and the selected /
     /// watched faction getters / setters. Empty by default.
@@ -685,6 +695,45 @@ impl EmptyStateCollections {
             tutorial_flags: HashSet::new(),
         }
     }
+}
+
+/// Seed the `SimState.maps` table with the handful of ui-map ids
+/// commonly referenced by Blizzard UI (Azeroth world map, Eastern
+/// Kingdoms continent, Stormwind City zone). Retail ids from
+/// wago.tools / Wowpedia.
+fn default_maps() -> HashMap<i32, MapData> {
+    [
+        MapData {
+            ui_map_id: 946,
+            name: "Azeroth".into(),
+            map_type: 1,
+            parent_map_id: 0,
+            art_id: 0,
+            flags: 0,
+            child_map_ids: vec![13],
+        },
+        MapData {
+            ui_map_id: 13,
+            name: "Eastern Kingdoms".into(),
+            map_type: 2,
+            parent_map_id: 946,
+            art_id: 62,
+            flags: 0,
+            child_map_ids: vec![84],
+        },
+        MapData {
+            ui_map_id: 84,
+            name: "Stormwind City".into(),
+            map_type: 3,
+            parent_map_id: 13,
+            art_id: 104,
+            flags: 0,
+            child_map_ids: Vec::new(),
+        },
+    ]
+    .into_iter()
+    .map(|m| (m.ui_map_id, m))
+    .collect()
 }
 
 /// Default items in bag 0 (backpack) at startup. Slots are 1-based (WoW convention).
