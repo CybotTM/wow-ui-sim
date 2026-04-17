@@ -37,6 +37,65 @@ pub fn default_class_talent_config_id(spec_id: u32) -> Option<i32> {
         .map(|config| config.id)
 }
 
+fn build_group_currency_map() -> HashMap<u32, u32> {
+    use crate::traits::TRAIT_COND_DB;
+    let mut map = HashMap::new();
+    for (_, cond) in TRAIT_COND_DB.entries() {
+        if cond.cond_type == 0 && cond.group_id != 0 && cond.currency_id != 0 {
+            map.insert(cond.group_id, cond.currency_id);
+        }
+    }
+    map
+}
+
+fn build_node_currency_map(group_currency_map: &HashMap<u32, u32>) -> HashMap<u32, u32> {
+    use crate::traits::TRAIT_NODE_DB;
+    let mut map = HashMap::new();
+    for (&node_id, node) in TRAIT_NODE_DB.entries() {
+        for &gid in node.group_ids {
+            if let Some(&cid) = group_currency_map.get(&gid) {
+                map.insert(node_id, cid);
+                break;
+            }
+        }
+    }
+    map
+}
+
+fn seed_hero_spec_nodes(
+    active_spec_id: u32,
+) -> (HashMap<u32, u32>, HashMap<u32, u32>) {
+    let mut node_ranks = HashMap::new();
+    let mut node_selections = HashMap::new();
+    super::globals::hero_talents::auto_select_hero_spec_for_spec(
+        active_spec_id,
+        &mut node_ranks,
+        &mut node_selections,
+    );
+    (node_ranks, node_selections)
+}
+
+fn tally_currency_spent(
+    node_ranks: &HashMap<u32, u32>,
+    node_currency_map: &HashMap<u32, u32>,
+) -> HashMap<u32, u32> {
+    let mut spent = HashMap::new();
+    for (&node_id, &ranks) in node_ranks {
+        if let Some(&currency_id) = node_currency_map.get(&node_id) {
+            *spent.entry(currency_id).or_insert(0) += ranks;
+        }
+    }
+    spent
+}
+
+fn detect_active_hero_subtree(node_selections: &HashMap<u32, u32>) -> Option<u32> {
+    node_selections.values().find_map(|entry_id| {
+        crate::traits::TRAIT_ENTRY_DB
+            .get(entry_id)
+            .and_then(|entry| (entry.sub_tree_id != 0).then_some(entry.sub_tree_id))
+    })
+}
+
 fn default_last_selected_config_ids() -> HashMap<u32, i32> {
     [65u32, 66, 70]
         .into_iter()
@@ -85,49 +144,11 @@ impl TalentState {
 
     /// Build talent state seeded for a specific specialization.
     pub fn for_spec_id(active_spec_id: u32) -> Self {
-        use crate::traits::{TRAIT_COND_DB, TRAIT_NODE_DB};
-
-        // Build group → currency map from gate conditions (cond_type == 0).
-        let mut group_currency_map = HashMap::new();
-        for (_, cond) in TRAIT_COND_DB.entries() {
-            if cond.cond_type == 0 && cond.group_id != 0 && cond.currency_id != 0 {
-                group_currency_map.insert(cond.group_id, cond.currency_id);
-            }
-        }
-
-        // Build node → currency map from each node's group membership.
-        let mut node_currency_map = HashMap::new();
-        for (&node_id, node) in TRAIT_NODE_DB.entries() {
-            for &gid in node.group_ids {
-                if let Some(&cid) = group_currency_map.get(&gid) {
-                    node_currency_map.insert(node_id, cid);
-                    break;
-                }
-            }
-        }
-
-        let mut node_ranks = HashMap::new();
-        let mut node_selections = HashMap::new();
-
-        // Auto-select the first hero spec so hero talent UI displays by default.
-        super::globals::hero_talents::auto_select_hero_spec_for_spec(
-            active_spec_id,
-            &mut node_ranks,
-            &mut node_selections,
-        );
-
-        let mut currency_spent = HashMap::new();
-        for (&node_id, &ranks) in &node_ranks {
-            if let Some(&currency_id) = node_currency_map.get(&node_id) {
-                *currency_spent.entry(currency_id).or_insert(0) += ranks;
-            }
-        }
-        let active_hero_subtree_id = node_selections.values().find_map(|entry_id| {
-            crate::traits::TRAIT_ENTRY_DB
-                .get(entry_id)
-                .and_then(|entry| (entry.sub_tree_id != 0).then_some(entry.sub_tree_id))
-        });
-
+        let group_currency_map = build_group_currency_map();
+        let node_currency_map = build_node_currency_map(&group_currency_map);
+        let (node_ranks, node_selections) = seed_hero_spec_nodes(active_spec_id);
+        let currency_spent = tally_currency_spent(&node_ranks, &node_currency_map);
+        let active_hero_subtree_id = detect_active_hero_subtree(&node_selections);
         let last_selected_config_id_by_spec_id = default_last_selected_config_ids();
         let active_config_id = last_selected_config_id_by_spec_id
             .get(&active_spec_id)
@@ -188,31 +209,28 @@ impl TalentState {
 
     /// Update a node's selected entry and refresh the cached hero subtree when relevant.
     pub fn set_node_selection(&mut self, node_id: u32, entry_id: Option<u32>) {
-        match entry_id {
-            Some(entry_id) => {
-                self.node_selections.insert(node_id, entry_id);
-                if let Some(entry) = crate::traits::TRAIT_ENTRY_DB.get(&entry_id)
-                    && entry.sub_tree_id != 0
-                {
-                    self.active_hero_subtree_id = Some(entry.sub_tree_id);
-                }
+        let Some(entry_id) = entry_id else {
+            self.deselect_node(node_id);
+            return;
+        };
+        self.node_selections.insert(node_id, entry_id);
+        if let Some(entry) = crate::traits::TRAIT_ENTRY_DB.get(&entry_id) {
+            if entry.sub_tree_id != 0 {
+                self.active_hero_subtree_id = Some(entry.sub_tree_id);
             }
-            None => {
-                let removed = self.node_selections.remove(&node_id);
-                if removed
-                    .and_then(|entry_id| crate::traits::TRAIT_ENTRY_DB.get(&entry_id))
-                    .is_some_and(|entry| Some(entry.sub_tree_id) == self.active_hero_subtree_id)
-                {
-                    self.active_hero_subtree_id =
-                        self.node_selections.values().find_map(|entry_id| {
-                            crate::traits::TRAIT_ENTRY_DB
-                                .get(entry_id)
-                                .and_then(|entry| {
-                                    (entry.sub_tree_id != 0).then_some(entry.sub_tree_id)
-                                })
-                        });
-                }
-            }
+        }
+    }
+
+    fn deselect_node(&mut self, node_id: u32) {
+        let removed_entry_id = self.node_selections.remove(&node_id);
+        let removed_sub_tree = removed_entry_id
+            .and_then(|eid| crate::traits::TRAIT_ENTRY_DB.get(&eid))
+            .map(|entry| entry.sub_tree_id);
+        let was_active = removed_sub_tree
+            .zip(self.active_hero_subtree_id)
+            .is_some_and(|(removed, active)| removed == active);
+        if was_active {
+            self.active_hero_subtree_id = detect_active_hero_subtree(&self.node_selections);
         }
     }
 

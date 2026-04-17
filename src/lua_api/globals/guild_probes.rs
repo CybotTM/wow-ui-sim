@@ -111,31 +111,33 @@ fn get_guild_roster_info(state: &mut LuaState) -> LuaResult<u32> {
         return push_nil_roster_row(state);
     };
 
+    push_roster_row_values(state, &row);
+    Ok(16)
+}
+
+fn push_roster_row_values(state: &mut LuaState, row: &RosterRow) {
     let name = create_string(state, &row.name);
     let rank = create_string(state, &row.rank_name);
     let class_label = create_string(state, row.class_label);
     let class_file = create_string(state, row.class_file);
-    let empty_zone = create_string(state, "");
-    let empty_note = create_string(state, "");
-    let empty_officer = create_string(state, "");
+    let empty = create_string(state, "");
 
-    state.push(name); // 1: name
-    state.push(rank); // 2: rankName
+    state.push(name);             // 1: name
+    state.push(rank);             // 2: rankName
     state.push(Val::Num(row.rank_index)); // 3: rankIndex
-    state.push(Val::Num(row.level)); // 4: level
-    state.push(class_label); // 5: class
-    state.push(empty_zone); // 6: zone
-    state.push(empty_note); // 7: note
-    state.push(empty_officer); // 8: officernote
-    state.push(Val::Bool(true)); // 9: online
-    state.push(Val::Num(0.0)); // 10: status
-    state.push(class_file); // 11: classFileName
-    state.push(Val::Num(0.0)); // 12: achievementPoints
-    state.push(Val::Num(0.0)); // 13: achievementRank
+    state.push(Val::Num(row.level));      // 4: level
+    state.push(class_label);      // 5: class
+    state.push(empty.clone());    // 6: zone
+    state.push(empty.clone());    // 7: note
+    state.push(empty);            // 8: officernote
+    state.push(Val::Bool(true));  // 9: online
+    state.push(Val::Num(0.0));    // 10: status
+    state.push(class_file);       // 11: classFileName
+    state.push(Val::Num(0.0));    // 12: achievementPoints
+    state.push(Val::Num(0.0));    // 13: achievementRank
     state.push(Val::Bool(false)); // 14: isMobile
     state.push(Val::Bool(false)); // 15: isSoREligible
-    state.push(Val::Num(0.0)); // 16: standingID
-    Ok(16)
+    state.push(Val::Num(0.0));    // 16: standingID
 }
 
 struct RosterRow {
