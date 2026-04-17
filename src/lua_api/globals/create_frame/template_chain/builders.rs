@@ -218,15 +218,25 @@ fn build_chained_handler(
     } else {
         (old_handler, new_handler)
     };
+    // Root both handlers before any allocation so the returned closure cannot
+    // capture a dangling function ref in its upvalues.
+    let stack_slot = state.top;
+    state.ensure_stack(stack_slot + 2);
+    state.stack_set(stack_slot, first);
+    state.stack_set(stack_slot + 1, second);
+    state.top = stack_slot + 2;
+
     let (source, tag) = chained_handler_template();
     let builder = crate::loader::chunk_cache::load_chunk(state, source, tag)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     let handler_name = create_string(state, handler_name);
-    crate::lua_api::methods::call_function_state(
+    let result = crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
         &[handler_name, first, second],
-    )
+    );
+    state.top = stack_slot;
+    result
 }
 
 fn chained_handler_template() -> (&'static str, &'static str) {
