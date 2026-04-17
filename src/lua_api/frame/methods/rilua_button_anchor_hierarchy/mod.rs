@@ -107,54 +107,19 @@ fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()>
 }
 
 fn register_texture_button_slots(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(
-        state,
-        table,
-        "GetNormalTexture",
-        textures::get_normal_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "GetHighlightTexture",
-        textures::get_highlight_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "GetPushedTexture",
-        textures::get_pushed_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "GetDisabledTexture",
-        textures::get_disabled_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetNormalTexture",
-        textures::set_normal_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetHighlightTexture",
-        textures::set_highlight_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetPushedTexture",
-        textures::set_pushed_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetDisabledTexture",
-        textures::set_disabled_texture,
-    )?;
+    let entries: &[(&str, rilua::vm::closure::RustFn)] = &[
+        ("GetNormalTexture", textures::get_normal_texture),
+        ("GetHighlightTexture", textures::get_highlight_texture),
+        ("GetPushedTexture", textures::get_pushed_texture),
+        ("GetDisabledTexture", textures::get_disabled_texture),
+        ("SetNormalTexture", textures::set_normal_texture),
+        ("SetHighlightTexture", textures::set_highlight_texture),
+        ("SetPushedTexture", textures::set_pushed_texture),
+        ("SetDisabledTexture", textures::set_disabled_texture),
+    ];
+    for (name, func) in entries {
+        table_set_rust_fn(state, table, name, *func)?;
+    }
     Ok(())
 }
 
