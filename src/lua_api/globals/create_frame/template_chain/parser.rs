@@ -19,6 +19,14 @@ pub(super) fn parse_inline_fast_handler<'a>(
 }
 
 fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_method_family(stmt)
+        .or_else(|| parse_global_family(stmt))
+        .or_else(|| parse_registration_family(stmt))
+        .or_else(|| parse_assignment_family(stmt))
+        .or_else(|| parse_function_family(stmt))
+}
+
+fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some((method_name, value)) = parse_inline_self_method_with_bool_arg(stmt) {
         return Some(FastHandlerRef::MethodWithBoolArg { method_name, value });
     }
@@ -81,9 +89,10 @@ fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some(method_name) = parse_inline_parent_method(stmt) {
         return Some(FastHandlerRef::ParentMethod(method_name));
     }
-    if let Some(method_name) = parse_inline_grandparent_method(stmt) {
-        return Some(FastHandlerRef::GrandparentMethod(method_name));
-    }
+    parse_inline_grandparent_method(stmt).map(FastHandlerRef::GrandparentMethod)
+}
+
+fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some((target_path, method_name, field, value)) =
         parse_inline_global_method_then_assign(stmt)
     {
@@ -115,15 +124,16 @@ fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             method_name,
         });
     }
-    if let Some((target_path, method_name, field)) =
-        parse_inline_global_method_with_self_field_arg(stmt)
-    {
-        return Some(FastHandlerRef::GlobalMethodWithSelfFieldArg {
+    parse_inline_global_method_with_self_field_arg(stmt).map(|(target_path, method_name, field)| {
+        FastHandlerRef::GlobalMethodWithSelfFieldArg {
             target_path,
             method_name,
             field,
-        });
-    }
+        }
+    })
+}
+
+fn parse_registration_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some((first, second, third)) = parse_inline_register_for_clicks(stmt) {
         return Some(FastHandlerRef::RegisterForClicks {
             first,
@@ -137,21 +147,17 @@ fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some(alpha) = parse_inline_set_alpha(stmt) {
         return Some(FastHandlerRef::SetAlpha(alpha));
     }
-    if let Some(delta) = parse_inline_set_frame_level_from_parent(stmt) {
-        return Some(FastHandlerRef::SetFrameLevelFromParent(delta));
-    }
-    if let Some(assign) = parse_inline_ancestor_assignment(stmt) {
-        return Some(assign);
-    }
-    if let Some(assign) = parse_inline_assignment(stmt) {
-        return Some(assign);
-    }
-    if let Some(assign) = parse_inline_nested_assignment(stmt) {
-        return Some(assign);
-    }
-    if let Some(assign) = parse_inline_parent_assignment(stmt) {
-        return Some(assign);
-    }
+    parse_inline_set_frame_level_from_parent(stmt).map(FastHandlerRef::SetFrameLevelFromParent)
+}
+
+fn parse_assignment_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_inline_ancestor_assignment(stmt)
+        .or_else(|| parse_inline_assignment(stmt))
+        .or_else(|| parse_inline_nested_assignment(stmt))
+        .or_else(|| parse_inline_parent_assignment(stmt))
+}
+
+fn parse_function_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some(function_name) = stmt
         .strip_suffix("(self)")
         .map(str::trim)

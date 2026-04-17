@@ -514,50 +514,99 @@ pub(super) fn build_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_sequence_fast_handler(state, &handler_ref)? {
+        return Ok(result);
+    }
+    if let Some(result) = build_method_family_handler(state, &handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_global_family_handler(state, &handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_function_family_handler(state, &handler_ref)? {
+        return Ok(Some(result));
+    }
     match handler_ref {
         FastHandlerRef::NoOp => Ok(None),
+        FastHandlerRef::RegisterForClicks {
+            first,
+            second,
+            third,
+        } => build_register_for_clicks_handler(state, first, second, third).map(Some),
+        FastHandlerRef::RegisterForDrag(button) => {
+            build_register_for_drag_handler(state, button).map(Some)
+        }
+        FastHandlerRef::SetAlpha(alpha) => build_set_alpha_handler(state, alpha).map(Some),
+        FastHandlerRef::SetFrameLevelFromParent(delta) => {
+            build_set_frame_level_from_parent_handler(state, delta).map(Some)
+        }
+        FastHandlerRef::AssignAncestorRef { field, depth } => {
+            build_ancestor_assignment_handler(state, field, depth).map(Some)
+        }
+        FastHandlerRef::AssignLiteral { field, value } => {
+            build_assignment_handler(state, field, value).map(Some)
+        }
+        FastHandlerRef::AssignNestedLiteral {
+            parent_field,
+            field,
+            value,
+        } => build_nested_assignment_handler(state, parent_field, field, value).map(Some),
+        FastHandlerRef::AssignParentField { field, value } => {
+            build_parent_assignment_handler(state, field, value).map(Some)
+        }
+        _ => unreachable!(
+            "FastHandlerRef variant not dispatched by any family handler or the final match; \
+             this is a bug — every variant must be handled"
+        ),
+    }
+}
+
+fn build_sequence_fast_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Option<Val>>> {
+    match handler_ref {
         FastHandlerRef::Sequence2(parts) => {
-            let (first_ref, second_ref) = &*parts;
+            let (first_ref, second_ref) = &**parts;
             let first = build_fast_handler(state, first_ref.clone())?;
             let second = build_fast_handler(state, second_ref.clone())?;
-            match (first, second) {
-                (Some(first), Some(second)) => {
-                    build_chained_handler(state, first, second, "inline-sequence", false).map(Some)
-                }
-                (Some(first), None) => Ok(Some(first)),
-                (None, Some(second)) => Ok(Some(second)),
-                (None, None) => Ok(None),
-            }
+            Ok(Some(chain_optional_handlers(state, first, second)?))
         }
         FastHandlerRef::Sequence3(parts) => {
-            let (first_ref, second_ref, third_ref) = &*parts;
+            let (first_ref, second_ref, third_ref) = &**parts;
             let first = build_fast_handler(state, first_ref.clone())?;
             let second = build_fast_handler(state, second_ref.clone())?;
             let third = build_fast_handler(state, third_ref.clone())?;
-            match (first, second, third) {
-                (Some(first), Some(second), Some(third)) => {
-                    let chained =
-                        build_chained_handler(state, first, second, "inline-sequence", false)?;
-                    build_chained_handler(state, chained, third, "inline-sequence", false).map(Some)
-                }
-                (Some(first), Some(second), None) => {
-                    build_chained_handler(state, first, second, "inline-sequence", false).map(Some)
-                }
-                (Some(first), None, Some(third)) => {
-                    build_chained_handler(state, first, third, "inline-sequence", false).map(Some)
-                }
-                (None, Some(second), Some(third)) => {
-                    build_chained_handler(state, second, third, "inline-sequence", false).map(Some)
-                }
-                (Some(first), None, None) => Ok(Some(first)),
-                (None, Some(second), None) => Ok(Some(second)),
-                (None, None, Some(third)) => Ok(Some(third)),
-                (None, None, None) => Ok(None),
-            }
+            let first_pair = chain_optional_handlers(state, first, second)?;
+            Ok(Some(chain_optional_handlers(state, first_pair, third)?))
         }
+        _ => Ok(None),
+    }
+}
+
+fn chain_optional_handlers(
+    state: &mut LuaState,
+    first: Option<Val>,
+    second: Option<Val>,
+) -> LuaResult<Option<Val>> {
+    match (first, second) {
+        (Some(first), Some(second)) => {
+            build_chained_handler(state, first, second, "inline-sequence", false).map(Some)
+        }
+        (Some(first), None) => Ok(Some(first)),
+        (None, Some(second)) => Ok(Some(second)),
+        (None, None) => Ok(None),
+    }
+}
+
+fn build_method_family_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::MethodWithBoolArg { method_name, value } => {
-            build_method_with_bool_arg_handler(state, method_name, value).map(Some)
+            build_method_with_bool_arg_handler(state, method_name, *value).map(Some)
         }
         FastHandlerRef::MethodWithStringArg { method_name, arg } => {
             build_method_with_string_arg_handler(state, method_name, arg).map(Some)
@@ -575,7 +624,7 @@ pub(super) fn build_fast_handler(
             field,
             method_name,
             value,
-        } => build_self_field_method_with_number_arg_handler(state, field, method_name, value)
+        } => build_self_field_method_with_number_arg_handler(state, field, method_name, *value)
             .map(Some),
         FastHandlerRef::SelfFieldMethodWithGlobalArg {
             field,
@@ -605,8 +654,8 @@ pub(super) fn build_fast_handler(
             field,
             method_name,
             first,
-            second,
-            third,
+            *second,
+            *third,
         )
         .map(Some),
         FastHandlerRef::ParentMethod(method_name) => {
@@ -618,6 +667,15 @@ pub(super) fn build_fast_handler(
         FastHandlerRef::GrandparentMethod(method_name) => {
             build_ancestor_method_handler(state, method_name, 2).map(Some)
         }
+        _ => Ok(None),
+    }
+}
+
+fn build_global_family_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethod {
             target_path,
             method_name,
@@ -643,8 +701,19 @@ pub(super) fn build_fast_handler(
             method_name,
             field,
             value,
-        } => build_global_method_then_assign_handler(state, target_path, method_name, field, value)
-            .map(Some),
+        } => {
+            build_global_method_then_assign_handler(state, target_path, method_name, field, *value)
+                .map(Some)
+        }
+        _ => Ok(None),
+    }
+}
+
+fn build_function_family_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
         }
@@ -660,7 +729,7 @@ pub(super) fn build_fast_handler(
         FastHandlerRef::FunctionWithNumberArg {
             function_name,
             value,
-        } => build_function_handler_with_number_arg(state, function_name, value).map(Some),
+        } => build_function_handler_with_number_arg(state, function_name, *value).map(Some),
         FastHandlerRef::FunctionWithGlobalArg {
             function_name,
             arg_path,
@@ -694,32 +763,7 @@ pub(super) fn build_fast_handler(
         FastHandlerRef::FunctionWithElapsed(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::Elapsed).map(Some)
         }
-        FastHandlerRef::RegisterForClicks {
-            first,
-            second,
-            third,
-        } => build_register_for_clicks_handler(state, first, second, third).map(Some),
-        FastHandlerRef::RegisterForDrag(button) => {
-            build_register_for_drag_handler(state, button).map(Some)
-        }
-        FastHandlerRef::SetAlpha(alpha) => build_set_alpha_handler(state, alpha).map(Some),
-        FastHandlerRef::SetFrameLevelFromParent(delta) => {
-            build_set_frame_level_from_parent_handler(state, delta).map(Some)
-        }
-        FastHandlerRef::AssignAncestorRef { field, depth } => {
-            build_ancestor_assignment_handler(state, field, depth).map(Some)
-        }
-        FastHandlerRef::AssignLiteral { field, value } => {
-            build_assignment_handler(state, field, value).map(Some)
-        }
-        FastHandlerRef::AssignNestedLiteral {
-            parent_field,
-            field,
-            value,
-        } => build_nested_assignment_handler(state, parent_field, field, value).map(Some),
-        FastHandlerRef::AssignParentField { field, value } => {
-            build_parent_assignment_handler(state, field, value).map(Some)
-        }
+        _ => Ok(None),
     }
 }
 
