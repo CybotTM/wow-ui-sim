@@ -30,6 +30,7 @@ pub(super) fn register_c_spell(state: &mut LuaState) -> LuaResult<()> {
     )?;
     table_set_rust_fn(state, table_ref, "GetSpellLink", c_spell_get_spell_link)?;
     table_set_rust_fn(state, table_ref, "GetSpellName", c_spell_get_spell_name)?;
+    table_set_rust_fn(state, table_ref, "IsSpellPassive", c_spell_is_spell_passive)?;
     table_set_rust_fn(
         state,
         table_ref,
@@ -91,6 +92,12 @@ fn c_spell_get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
         .unwrap_or("Unknown");
     let name = create_string(state, name);
     state.push(name);
+    Ok(1)
+}
+
+fn c_spell_is_spell_passive(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
