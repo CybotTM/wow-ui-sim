@@ -18,6 +18,8 @@ pub mod dump_texture;
 pub mod error;
 pub mod event;
 pub mod extract_textures;
+#[path = "render/font.rs"]
+pub mod font;
 #[path = "../data/global_strings.rs"]
 pub mod global_strings;
 pub mod iced_app;
@@ -25,6 +27,7 @@ pub mod iced_app;
 pub mod items;
 pub mod loader;
 pub mod logging;
+pub mod layout;
 pub mod lua_api;
 pub mod lua_bridge;
 pub mod lua_errors;

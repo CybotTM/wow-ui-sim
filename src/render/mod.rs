@@ -2,7 +2,9 @@
 //!
 //! Provides both canvas-based (CPU) and shader-based (GPU) rendering.
 
-pub mod font;
+pub mod font {
+    pub use crate::font::*;
+}
 #[cfg(feature = "gui")]
 pub mod glyph;
 #[cfg(feature = "gui")]
@@ -15,7 +17,7 @@ pub mod text;
 pub mod texture;
 
 pub use crate::BlendMode;
-pub use font::WowFontSystem;
+pub use crate::font::WowFontSystem;
 
 /// Strip WoW markup from text: textures (`|T...|t`), atlases (`|A...|a`),
 /// colors (`|cXXXXXXXX`/`|r`), and hyperlinks (`|H...|h`/`|h`).
