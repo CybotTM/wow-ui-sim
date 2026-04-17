@@ -90,6 +90,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::cooldown_probes::register_all(lua)?;
     super::talent_spec_probes::register_all(lua)?;
     super::battlefield_lfg_probes::register_all(lua)?;
+    super::loot_method::register_all(lua)?;
     super::guild_probes::register_all(lua)?;
     super::voice_chat_probes::register_all(lua)?;
     super::compat_overrides::register_all(lua)?;

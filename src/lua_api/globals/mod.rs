@@ -50,6 +50,7 @@ pub mod keybindings;
 pub mod lfg_info;
 pub mod lfg_list;
 pub mod locale_info;
+pub mod loot_method;
 pub mod lua_duration_object;
 pub mod mail_verbs;
 pub mod message_verbs;

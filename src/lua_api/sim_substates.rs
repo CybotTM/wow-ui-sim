@@ -177,6 +177,35 @@ impl Default for VoiceChatState {
     }
 }
 
+/// Party loot-method state — drives `GetLootMethod()` and
+/// `GetMasterLooterThreshold()`. `method` is the retail token
+/// (`"group"`, `"master"`, `"freeforall"`, `"roundrobin"`,
+/// `"needbeforegreed"`, `"personalloot"`). `party_master_index` /
+/// `raid_master_index` are 1-based loot-candidate indices that matter
+/// only when `method == "master"`; 0 means "no master assigned".
+/// `threshold` is the master-loot item-quality threshold: 0 Poor ..
+/// 4 Epic.
+#[derive(Debug, Clone)]
+pub struct LootMethodState {
+    pub method: String,
+    pub party_master_index: i32,
+    pub raid_master_index: i32,
+    pub threshold: i32,
+}
+
+impl Default for LootMethodState {
+    fn default() -> Self {
+        Self {
+            // Retail's modern default is personal loot; classic-era
+            // addons still probe GetLootMethod, so keep the token there.
+            method: "personalloot".into(),
+            party_master_index: 0,
+            raid_master_index: 0,
+            threshold: 2, // Uncommon — retail's default master-loot threshold.
+        }
+    }
+}
+
 /// Active trade window state. `None` means no trade in progress.
 #[derive(Debug, Default, Clone)]
 pub struct TradeState {

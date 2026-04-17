@@ -38,7 +38,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ReportCheating",
     "RequestInspectData",
     "RequestLFDPlayerLockInfo",
-    "RequestPartyLootMethod",
+    // RequestPartyLootMethod is SimState-backed in loot_method.rs, not a stub.
     "RequestRaidInfo",
     "GetUnitPowerBarInfo",
     "GetInventoryItemID",
@@ -89,8 +89,8 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "GetCVarBool",
     "GetLFGDungeonEncounterInfo",
     "GetLFGRoles",
-    "GetLootMethod",
-    "GetMasterLooterThreshold",
+    // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
+    // loot_method.rs, not stubs.
     "HasNewMail",
     "IsOnGroundFloorInJailersTower",
     // IsShiftKeyDown is SimState-backed in modifier_keys.rs, not a stub.

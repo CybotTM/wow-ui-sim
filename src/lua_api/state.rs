@@ -126,6 +126,7 @@ macro_rules! build_empty_sim_state {
             merchant_items: Vec::new(),
             loot_slots: Vec::new(),
             auction_browse_items: Vec::new(),
+            loot_method: LootMethodState::default(),
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),
@@ -468,6 +469,10 @@ pub struct SimState {
     /// `"owner"` / `"bidder"` are always 0. Empty when no browse has
     /// completed.
     pub auction_browse_items: Vec<u32>,
+    /// Party / raid loot-method state — drives `GetLootMethod()`,
+    /// `GetMasterLooterThreshold()`, and the `RequestPartyLootMethod()`
+    /// event refresh. Defaults to personal loot, threshold 2 (Uncommon).
+    pub loot_method: LootMethodState,
     /// PvP / battlefield queue state — a single slot for the active
     /// battleground, arena, or LFG queue. See `BattlefieldQueue`.
     pub battlefield_queue: BattlefieldQueue,
@@ -572,7 +577,8 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
-    Keybindings, LfgListCounts, MessageLogEntry, ModifierKeys, NetStats, PetBattleState, PetState,
+    Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, NetStats,
+    PetBattleState, PetState,
     TradeState, VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
     WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
