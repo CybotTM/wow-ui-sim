@@ -118,7 +118,7 @@ impl SimState {
     pub fn invalidate_layout(&mut self, id: u64) {
         let sw = self.screen_width;
         let sh = self.screen_height;
-        let mut cache = crate::iced_app::layout::LayoutCache::default();
+        let mut cache = crate::layout::LayoutCache::default();
         Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
         // Frame positions may have changed — schedule hit grid re-insertion
         // so apply_hit_grid_changes updates stale rectangles.
@@ -132,7 +132,7 @@ impl SimState {
     pub fn invalidate_layout_with_dependents(&mut self, id: u64) {
         let sw = self.screen_width;
         let sh = self.screen_height;
-        let mut cache = crate::iced_app::layout::LayoutCache::default();
+        let mut cache = crate::layout::LayoutCache::default();
         Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
         Self::recompute_anchor_dependents(&mut self.widgets, id, sw, sh, &mut cache, 0);
         self.pending_hit_grid_changes.push((id, true));
@@ -143,11 +143,11 @@ impl SimState {
         id: u64,
         screen_width: f32,
         screen_height: f32,
-        cache: &mut crate::iced_app::layout::LayoutCache,
+        cache: &mut crate::layout::LayoutCache,
     ) {
         // Remove stale entry so compute_frame_rect_cached recomputes.
         cache.remove(&id);
-        let rect = crate::iced_app::compute_frame_rect_cached(
+        let rect = crate::layout::compute_frame_rect_cached(
             widgets,
             id,
             screen_width,
@@ -177,7 +177,7 @@ impl SimState {
         target_id: u64,
         sw: f32,
         sh: f32,
-        cache: &mut crate::iced_app::layout::LayoutCache,
+        cache: &mut crate::layout::LayoutCache,
         depth: u32,
     ) {
         if depth > 16 {
@@ -201,7 +201,7 @@ impl SimState {
         if !pending.is_empty() {
             let sw = self.screen_width;
             let sh = self.screen_height;
-            let mut cache = crate::iced_app::layout::LayoutCache::default();
+            let mut cache = crate::layout::LayoutCache::default();
             let pending_root_ids: Vec<u64> = pending
                 .iter()
                 .copied()
@@ -228,7 +228,7 @@ impl SimState {
         if !dirty.is_empty() {
             let sw = self.screen_width;
             let sh = self.screen_height;
-            let mut cache = crate::iced_app::layout::LayoutCache::default();
+            let mut cache = crate::layout::LayoutCache::default();
             for id in &dirty {
                 Self::recompute_layout_subtree(&mut self.widgets, *id, sw, sh, &mut cache);
                 Self::recompute_anchor_dependents(&mut self.widgets, *id, sw, sh, &mut cache, 0);
@@ -271,7 +271,7 @@ impl SimState {
         }
         let sw = self.screen_width;
         let sh = self.screen_height;
-        let mut cache = crate::iced_app::layout::LayoutCache::default();
+        let mut cache = crate::layout::LayoutCache::default();
         // Process topmost first (reverse of bottom-up collection order).
         // Recompute the full subtree so siblings of `id` also get updated
         // layout_rects before we clear the dirty flag.
