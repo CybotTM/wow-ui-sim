@@ -1,5 +1,6 @@
 /target
 /target-codex
+/target_codex_*
 /iced-dynamic/target
 /iced-dynamic/Cargo.lock
 /elune-src/target
