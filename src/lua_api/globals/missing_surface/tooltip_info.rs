@@ -538,10 +538,7 @@ fn register_item_spell_aura_methods(
     Ok(())
 }
 
-fn register_item_container_methods(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-) -> LuaResult<()> {
+fn register_item_container_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     register_tooltip_methods(
         state,
         table_ref,
@@ -603,10 +600,7 @@ fn register_socket_and_currency_methods(
     )
 }
 
-fn register_misc_content_methods(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-) -> LuaResult<()> {
+fn register_misc_content_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     register_tooltip_methods(
         state,
         table_ref,
