@@ -42,38 +42,10 @@ pub(super) fn simulate_boss_kill(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn start_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
     use crate::event::{Event, EventArg};
-    use crate::lua_api::state::LootRollInfo;
-    use crate::lua_bridge::stack_val;
 
     let roll_id = i32::from_stack(state, 1)?;
     let roll_time = f64::from_stack(state, 2)?;
-    let item_name = opt_string_stack(state, 3, "");
-    let item_texture = opt_string_stack(state, 4, "");
-    let item_quality = match stack_val(state, 5) {
-        Val::Num(n) => n as i32,
-        _ => 4,
-    };
-    let item_level = match stack_val(state, 6) {
-        Val::Num(n) => n as i32,
-        _ => 0,
-    };
-    let item_link = opt_string_stack(state, 7, "");
-
-    let info = LootRollInfo {
-        roll_id,
-        roll_time,
-        texture: item_texture,
-        name: item_name,
-        count: 1,
-        quality: item_quality,
-        bind_on_pickup: true,
-        can_need: true,
-        can_greed: true,
-        can_disenchant: false,
-        disenchant_level: 0,
-        item_level,
-        item_link,
-    };
+    let info = build_loot_roll_info(state, roll_id, roll_time);
     let mut st = borrow_state_mut(state)?;
     st.world.loot_rolls.insert(roll_id, info);
     st.events.push(Event {
@@ -84,6 +56,37 @@ pub(super) fn start_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
         ],
     });
     Ok(0)
+}
+
+fn build_loot_roll_info(
+    state: &LuaState,
+    roll_id: i32,
+    roll_time: f64,
+) -> crate::lua_api::state::LootRollInfo {
+    use crate::lua_bridge::stack_val;
+    let item_quality = match stack_val(state, 5) {
+        Val::Num(n) => n as i32,
+        _ => 4,
+    };
+    let item_level = match stack_val(state, 6) {
+        Val::Num(n) => n as i32,
+        _ => 0,
+    };
+    crate::lua_api::state::LootRollInfo {
+        roll_id,
+        roll_time,
+        texture: opt_string_stack(state, 4, ""),
+        name: opt_string_stack(state, 3, ""),
+        count: 1,
+        quality: item_quality,
+        bind_on_pickup: true,
+        can_need: true,
+        can_greed: true,
+        can_disenchant: false,
+        disenchant_level: 0,
+        item_level,
+        item_link: opt_string_stack(state, 7, ""),
+    }
 }
 
 pub(super) fn end_loot_roll(state: &mut LuaState) -> LuaResult<u32> {

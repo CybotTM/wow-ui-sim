@@ -255,55 +255,54 @@ fn timer_handle_cancel(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+// ── Shared timer helpers ─────────────────────────────────────────────────────
+
+/// Parse and validate the seconds argument (stack index 1) for `NewTicker`/`NewTimer`.
+fn parse_validated_seconds(state: &LuaState, fn_name: &str) -> LuaResult<f64> {
+    match stack_val(state, 1) {
+        Val::Num(n) => validate_seconds(n),
+        got => Err(runtime_error(format!(
+            "bad argument #1 to '{fn_name}' (number expected, got {})",
+            got.type_name()
+        ))),
+    }
+}
+
+/// Read the current addon index and enqueue `timer` onto `rilua_timers`.
+fn enqueue_timer(state: &mut LuaState, mut timer: RiluaPendingTimer) -> LuaResult<()> {
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let mut sim = app.sim_state.borrow_mut();
+    timer.owner_addon = sim.loading_addon_index.or(sim.executing_addon_index);
+    sim.rilua_timers.push_back(timer);
+    Ok(())
+}
+
 // ── C_Timer.NewTicker ────────────────────────────────────────────────────────
 
 /// `C_Timer.NewTicker(seconds, callback, iterations?)` — repeating timer with handle.
 fn timer_new_ticker(state: &mut LuaState) -> LuaResult<u32> {
-    let seconds = match stack_val(state, 1) {
-        Val::Num(n) => validate_seconds(n)?,
-        got => {
-            return Err(runtime_error(format!(
-                "bad argument #1 to 'NewTicker' (number expected, got {})",
-                got.type_name()
-            )));
-        }
-    };
+    let seconds = parse_validated_seconds(state, "NewTicker")?;
     let callback = extract_callback(state, 2)?;
     let iterations: Option<i32> = match stack_val(state, 3) {
         Val::Num(n) => Some(n as i32),
-        Val::Nil => None,
         _ => None,
     };
 
     let id = next_timer_id();
     store_timer_callback(state, id, callback);
 
-    let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
     let interval = Duration::from_secs_f64(seconds);
-
-    let owner_addon = {
-        let app = state
-            .app_data::<WowLuaAppData>()
-            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-        let s = app.sim_state.borrow();
-        s.loading_addon_index.or(s.executing_addon_index)
-    };
-
     let timer = RiluaPendingTimer {
         id,
-        fire_at,
+        fire_at: Instant::now() + interval,
         interval: Some(interval),
         remaining: iterations,
         cancelled: false,
-        owner_addon,
+        owner_addon: None,
     };
-
-    {
-        let app = state
-            .app_data::<WowLuaAppData>()
-            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-        app.sim_state.borrow_mut().rilua_timers.push_back(timer);
-    }
+    enqueue_timer(state, timer)?;
 
     let handle = create_timer_handle_table(state, id)?;
     state.push(handle);
@@ -314,45 +313,21 @@ fn timer_new_ticker(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `C_Timer.NewTimer(seconds, callback)` — one-shot timer with handle.
 fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
-    let seconds = match stack_val(state, 1) {
-        Val::Num(n) => validate_seconds(n)?,
-        got => {
-            return Err(runtime_error(format!(
-                "bad argument #1 to 'NewTimer' (number expected, got {})",
-                got.type_name()
-            )));
-        }
-    };
+    let seconds = parse_validated_seconds(state, "NewTimer")?;
     let callback = extract_callback(state, 2)?;
 
     let id = next_timer_id();
     store_timer_callback(state, id, callback);
 
-    let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
-
-    let owner_addon = {
-        let app = state
-            .app_data::<WowLuaAppData>()
-            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-        let s = app.sim_state.borrow();
-        s.loading_addon_index.or(s.executing_addon_index)
-    };
-
     let timer = RiluaPendingTimer {
         id,
-        fire_at,
+        fire_at: Instant::now() + Duration::from_secs_f64(seconds),
         interval: None,
         remaining: None,
         cancelled: false,
-        owner_addon,
+        owner_addon: None,
     };
-
-    {
-        let app = state
-            .app_data::<WowLuaAppData>()
-            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
-        app.sim_state.borrow_mut().rilua_timers.push_back(timer);
-    }
+    enqueue_timer(state, timer)?;
 
     let handle = create_timer_handle_table(state, id)?;
     state.push(handle);

@@ -166,22 +166,40 @@ pub fn protected_call_state(
             Ok(results)
         }
         Err(err) => {
-            state.ci = saved_ci;
-            state.base = state.call_stack[state.ci].base;
-            state.n_ccalls = saved_n_ccalls;
-            state.call_depth = saved_call_depth;
-            if state.ci < rilua::vm::state::MAXCALLS {
-                state.ci_overflow = false;
-            }
-            state.close_upvalues(call_base);
-            let error_val = state.error_object.take().unwrap_or_else(|| {
-                let r = state.gc.intern_string(err.to_string().as_bytes());
-                Val::Str(r)
-            });
+            let error_val = recover_call_state(
+                state,
+                saved_ci,
+                saved_n_ccalls,
+                saved_call_depth,
+                call_base,
+                err,
+            );
             state.top = saved_top;
             Err(error_val)
         }
     }
+}
+
+fn recover_call_state(
+    state: &mut LuaState,
+    saved_ci: usize,
+    saved_n_ccalls: u16,
+    saved_call_depth: u16,
+    call_base: usize,
+    err: rilua::LuaError,
+) -> Val {
+    state.ci = saved_ci;
+    state.base = state.call_stack[state.ci].base;
+    state.n_ccalls = saved_n_ccalls;
+    state.call_depth = saved_call_depth;
+    if state.ci < rilua::vm::state::MAXCALLS {
+        state.ci_overflow = false;
+    }
+    state.close_upvalues(call_base);
+    state.error_object.take().unwrap_or_else(|| {
+        let r = state.gc.intern_string(err.to_string().as_bytes());
+        Val::Str(r)
+    })
 }
 
 /// Call a function through Lua's own `pcall` path.

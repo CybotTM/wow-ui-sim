@@ -82,13 +82,31 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
     if chain.is_empty() {
         return None;
     }
+    let frame_type = resolve_frame_type(&chain);
+    let (width, height) = resolve_chain_size(&chain);
+    let template_name = chain
+        .last()
+        .map(|entry| entry.name.clone())
+        .unwrap_or_else(|| name.to_string());
+    let key_values = collect_key_values(&chain);
+    Some(TemplateInfo {
+        frame_type,
+        template_name,
+        width,
+        height,
+        key_values,
+    })
+}
 
-    // The most derived entry's widget_type wins. The chain is base-to-derived;
-    // e.g. `<Button inherits="FrameTemplate">` is a Button, not a Frame.
-    // However, many templates inherit from Frame-based parents without explicitly
-    // redefining their type. The last entry in the chain is the template itself
-    // (most derived) — use its type if non-empty, otherwise fall back to parents.
-    let frame_type = chain
+/// Resolve the frame type from an inheritance chain.
+///
+/// The most derived entry's widget_type wins. The chain is base-to-derived;
+/// e.g. `<Button inherits="FrameTemplate">` is a Button, not a Frame.
+/// However, many templates inherit from Frame-based parents without explicitly
+/// redefining their type. The last entry in the chain is the template itself
+/// (most derived) — use its type if non-empty, otherwise fall back to parents.
+fn resolve_frame_type(chain: &[TemplateEntry]) -> String {
+    chain
         .last()
         .filter(|e| !e.widget_type.is_empty())
         .map(|e| e.widget_type.clone())
@@ -98,14 +116,12 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
                 .find(|e| !e.widget_type.is_empty())
                 .map(|e| e.widget_type.clone())
         })
-        .unwrap_or_else(|| "Frame".to_string());
+        .unwrap_or_else(|| "Frame".to_string())
+}
 
-    let (width, height) = resolve_chain_size(&chain);
-    let template_name = chain
-        .last()
-        .map(|entry| entry.name.clone())
-        .unwrap_or_else(|| name.to_string());
-    let key_values = chain
+/// Collect key-value pairs from all entries in the inheritance chain.
+fn collect_key_values(chain: &[TemplateEntry]) -> Vec<TemplateKeyValueInfo> {
+    chain
         .iter()
         .flat_map(|entry| entry.frame.all_key_values())
         .flat_map(|key_values| key_values.values.iter())
@@ -114,15 +130,7 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
             value: key_value.value.clone(),
             value_type: key_value.value_type.clone(),
         })
-        .collect();
-
-    Some(TemplateInfo {
-        frame_type,
-        template_name,
-        width,
-        height,
-        key_values,
-    })
+        .collect()
 }
 
 /// Resolve (width, height) across the inheritance chain.

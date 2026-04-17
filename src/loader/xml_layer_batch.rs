@@ -67,6 +67,59 @@ fn collect_textures<'a>(frame: &'a xml::FrameXml) -> Vec<CollectedTexture<'a>> {
     result
 }
 
+fn push_parent_key_attachment(
+    attachments: &mut Vec<ParentKeyAttachment>,
+    child_name: String,
+    parent_key: Option<String>,
+    parent_array: Option<String>,
+) {
+    if parent_key.is_some() || parent_array.is_some() {
+        attachments.push(ParentKeyAttachment {
+            child_name,
+            parent_key,
+            parent_array,
+        });
+    }
+}
+
+fn append_single_texture<'a>(
+    ct: &CollectedTexture<'a>,
+    parent_name: &str,
+    name_parent: &str,
+    batch: &mut String,
+    attachments: &mut Vec<ParentKeyAttachment>,
+    anim_entries: &mut Vec<AnimEntry<'a>>,
+    timing: &mut LoadTiming,
+) {
+    let resolved = xml::resolve_texture_inheritance(ct.texture);
+    let tex_name = resolve_child_name(resolved.name.as_deref(), name_parent, "__tex_");
+    let code = build_texture_lua(
+        &tex_name,
+        &resolved,
+        parent_name,
+        &ct.draw_layer,
+        ct.is_mask,
+        ct.is_line,
+        ct.sub_level,
+    );
+    batch.push_str("do ");
+    batch.push_str(&code);
+    batch.push_str(" end\n");
+    push_parent_key_attachment(
+        attachments,
+        tex_name.clone(),
+        resolved.parent_key.clone(),
+        resolved.parent_array.clone(),
+    );
+    if ct.texture.animations.is_some() {
+        anim_entries.push(AnimEntry {
+            texture: ct.texture,
+            tex_name,
+        });
+    }
+    timing.texture_count += 1;
+}
+
 fn append_texture_code<'a>(
     textures: &[CollectedTexture<'a>],
     parent_name: &str,
@@ -83,40 +136,15 @@ fn append_texture_code<'a>(
             }
             continue;
         }
-        let resolved = xml::resolve_texture_inheritance(ct.texture);
-        let tex_name = resolve_child_name(resolved.name.as_deref(), name_parent, "__tex_");
-        let code = build_texture_lua(
-            &tex_name,
-            &resolved,
+        append_single_texture(
+            ct,
             parent_name,
-            &ct.draw_layer,
-            ct.is_mask,
-            ct.is_line,
-            ct.sub_level,
+            name_parent,
+            batch,
+            attachments,
+            anim_entries,
+            timing,
         );
-        batch.push_str("do ");
-        batch.push_str(&code);
-        batch.push_str(" end\n");
-        if let Some(parent_key) = resolved.parent_key.as_ref() {
-            attachments.push(ParentKeyAttachment {
-                child_name: tex_name.clone(),
-                parent_key: Some(parent_key.clone()),
-                parent_array: resolved.parent_array.clone(),
-            });
-        } else if resolved.parent_array.is_some() {
-            attachments.push(ParentKeyAttachment {
-                child_name: tex_name.clone(),
-                parent_key: None,
-                parent_array: resolved.parent_array.clone(),
-            });
-        }
-        if ct.texture.animations.is_some() {
-            anim_entries.push(AnimEntry {
-                texture: ct.texture,
-                tex_name,
-            });
-        }
-        timing.texture_count += 1;
     }
 }
 
@@ -177,19 +205,12 @@ fn append_single_fontstring(
     batch.push_str("do ");
     batch.push_str(&code);
     batch.push_str(" end\n");
-    if let Some(parent_key) = fontstring.parent_key.as_ref() {
-        attachments.push(ParentKeyAttachment {
-            child_name: fs_name.clone(),
-            parent_key: Some(parent_key.clone()),
-            parent_array: fontstring.parent_array.clone(),
-        });
-    } else if fontstring.parent_array.is_some() {
-        attachments.push(ParentKeyAttachment {
-            child_name: fs_name.clone(),
-            parent_key: None,
-            parent_array: fontstring.parent_array.clone(),
-        });
-    }
+    push_parent_key_attachment(
+        attachments,
+        fs_name.clone(),
+        fontstring.parent_key.clone(),
+        fontstring.parent_array.clone(),
+    );
     if let Some(text) = resolved_text {
         text_syncs.push(TextSync {
             name: fs_name,

@@ -30,6 +30,7 @@ pub(crate) mod state_types;
 pub(crate) mod talent_state;
 mod timer_processing;
 pub mod tooltip;
+pub(crate) mod tracked_recipes;
 pub(crate) mod workarounds;
 pub(crate) mod workarounds_editmode;
 

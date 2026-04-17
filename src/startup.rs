@@ -8,6 +8,74 @@ use crate::lua_api::WowLuaEnv;
 use crate::screen::ScreenKind;
 use rilua::Val;
 
+const UNIT_FRAME_SET_UNIT_LUA: &str = r#"
+    if not UnitFrame_SetUnit then return end
+
+    local frames = {
+        {
+            frame = PlayerFrame,
+            unit = "player",
+            healthbar = PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar(),
+            manabar = PlayerFrame_GetManaBar and PlayerFrame_GetManaBar(),
+        },
+        {
+            frame = PetFrame,
+            unit = "pet",
+            healthbar = PetFrameHealthBar,
+            manabar = PetFrameManaBar,
+        },
+        {
+            frame = TargetFrame,
+            unit = "target",
+            healthbar = TargetFrame and TargetFrame.healthbar,
+            manabar = TargetFrame and TargetFrame.manabar,
+        },
+        {
+            frame = FocusFrame,
+            unit = "focus",
+            healthbar = FocusFrame and FocusFrame.healthbar,
+            manabar = FocusFrame and FocusFrame.manabar,
+        },
+    }
+
+    for _, info in ipairs(frames) do
+        if info.frame and info.healthbar then
+            local ok, err = pcall(UnitFrame_SetUnit,
+                info.frame, info.unit, info.healthbar, info.manabar)
+            if not ok then
+                print("[startup] UnitFrame_SetUnit("
+                    .. (info.frame:GetName() or "?") .. ", "
+                    .. info.unit .. ") failed: " .. tostring(err))
+            end
+        end
+    end
+"#;
+
+const FORCE_SHOW_PARTY_MEMBER_FRAMES_LUA: &str = r#"
+    if not PartyFrame or not PartyFrame.PartyMemberFramePool then return end
+    local pool = PartyFrame.PartyMemberFramePool
+    local i = 0
+    for mf in pool:EnumerateActive() do
+        i = i + 1
+        if not mf.layoutIndex then mf.layoutIndex = i end
+        if not mf.unitToken then
+            mf.unitToken = "party" .. mf.layoutIndex
+        end
+        pcall(function() mf:Setup() end)
+    end
+    for mf in pool:EnumerateActive() do
+        if PartyFrame:ShouldShow() and UnitExists(mf.unitToken) then
+            mf:Show()
+            pcall(function() UnitFrame_Update(mf, true) end)
+            pcall(function() mf:UpdatePet() end)
+            pcall(function() mf:UpdateAuras() end)
+            pcall(function() mf:UpdateOnlineStatus() end)
+            pcall(function() mf:UpdateArt() end)
+        end
+    end
+    PartyFrame:Layout()
+"#;
+
 const GLUE_HIDE_CHAT: &str = r#"
     if GeneralDockManager then GeneralDockManager:Hide() end
     if ChatFrame1 then ChatFrame1:Hide() end
@@ -235,50 +303,7 @@ fn fire_simple_event(env: &WowLuaEnv, name: &str) {
 /// If something in the event chain errors before reaching `UnitFrame_SetUnit`,
 /// the unit binding is incomplete. This ensures the call happens for each frame.
 pub fn call_unit_frame_set_unit(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(
-        r#"
-        if not UnitFrame_SetUnit then return end
-
-        local frames = {
-            {
-                frame = PlayerFrame,
-                unit = "player",
-                healthbar = PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar(),
-                manabar = PlayerFrame_GetManaBar and PlayerFrame_GetManaBar(),
-            },
-            {
-                frame = PetFrame,
-                unit = "pet",
-                healthbar = PetFrameHealthBar,
-                manabar = PetFrameManaBar,
-            },
-            {
-                frame = TargetFrame,
-                unit = "target",
-                healthbar = TargetFrame and TargetFrame.healthbar,
-                manabar = TargetFrame and TargetFrame.manabar,
-            },
-            {
-                frame = FocusFrame,
-                unit = "focus",
-                healthbar = FocusFrame and FocusFrame.healthbar,
-                manabar = FocusFrame and FocusFrame.manabar,
-            },
-        }
-
-        for _, info in ipairs(frames) do
-            if info.frame and info.healthbar then
-                local ok, err = pcall(UnitFrame_SetUnit,
-                    info.frame, info.unit, info.healthbar, info.manabar)
-                if not ok then
-                    print("[startup] UnitFrame_SetUnit("
-                        .. (info.frame:GetName() or "?") .. ", "
-                        .. info.unit .. ") failed: " .. tostring(err))
-                end
-            end
-        end
-    "#,
-    ) {
+    if let Err(e) = env.exec(UNIT_FRAME_SET_UNIT_LUA) {
         log_with_timestamp(
             env,
             &format!("[startup] call_unit_frame_set_unit error: {e}"),
@@ -304,32 +329,7 @@ fn fire_unit_aura(env: &WowLuaEnv) {
 /// preventing PartyFrame:UpdatePartyFrames() from re-showing them.
 /// This safety net shows each member frame individually with pcall wrappers.
 fn force_show_party_member_frames(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(
-        r#"
-        if not PartyFrame or not PartyFrame.PartyMemberFramePool then return end
-        local pool = PartyFrame.PartyMemberFramePool
-        local i = 0
-        for mf in pool:EnumerateActive() do
-            i = i + 1
-            if not mf.layoutIndex then mf.layoutIndex = i end
-            if not mf.unitToken then
-                mf.unitToken = "party" .. mf.layoutIndex
-            end
-            pcall(function() mf:Setup() end)
-        end
-        for mf in pool:EnumerateActive() do
-            if PartyFrame:ShouldShow() and UnitExists(mf.unitToken) then
-                mf:Show()
-                pcall(function() UnitFrame_Update(mf, true) end)
-                pcall(function() mf:UpdatePet() end)
-                pcall(function() mf:UpdateAuras() end)
-                pcall(function() mf:UpdateOnlineStatus() end)
-                pcall(function() mf:UpdateArt() end)
-            end
-        end
-        PartyFrame:Layout()
-    "#,
-    ) {
+    if let Err(e) = env.exec(FORCE_SHOW_PARTY_MEMBER_FRAMES_LUA) {
         log_with_timestamp(env, &format!("[startup] party frame safety-net error: {e}"));
     }
 }

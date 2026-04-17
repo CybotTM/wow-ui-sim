@@ -55,71 +55,99 @@ use super::rilua_admin_zone_economy::{
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
 
-    let admin_val = TableBuilder::new(lua.state_mut())
-        // Identity
-        .set_function("SetPlayerName", set_player_name)?
+    let builder = TableBuilder::new(lua.state_mut());
+    let builder = register_player(builder)?;
+    let builder = register_combat_casting(builder)?;
+    let builder = register_targeting_party(builder)?;
+    let builder = register_world(builder)?;
+    let builder = register_collections_pvp(builder)?;
+    let builder = register_inventory_misc(builder)?;
+    let admin_val = builder.build();
+
+    LuaApiMut::set_global_val(lua, "A_Admin", admin_val)?;
+    super::rilua_group_queries::register_all(lua.state_mut());
+    Ok(())
+}
+
+fn register_player(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetPlayerName", set_player_name)?
         .set_function("SetPlayerClass", set_player_class)?
         .set_function("SetPlayerRace", set_player_race)?
         .set_function("SetPlayerLevel", set_player_level)?
         .set_function("SetPlayerSex", set_player_sex)?
-        // Combat
-        .set_function("SetInCombat", set_in_combat)?
+        .set_function("SetPlayerHealth", set_player_health)?
+        .set_function("SetPlayerPower", set_player_power)?
+        .set_function("SetSpec", set_spec)?
+        .set_function("SetTalentRank", set_talent_rank)?
+        .set_function("SetTalentSelection", set_talent_selection)?
+        .set_function("ResetTalents", reset_talents)?
+        .set_function("AddBuff", add_buff)?
+        .set_function("RemoveBuff", remove_buff)?
+        .set_function("ClearBuffs", clear_buffs)?
+        .set_function("EquipItem", equip_item)?
+        .set_function("UnequipItem", unequip_item)
+}
+
+fn register_combat_casting(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetInCombat", set_in_combat)?
         .set_function("SetResting", set_resting)?
         .set_function("SetFrameProtected", set_frame_protected)?
-        // Casting & cooldowns
         .set_function("SetCasting", set_casting)?
         .set_function("StopCasting", stop_casting)?
         .set_function("SetGCD", set_gcd)?
         .set_function("SetSpellCooldown", set_spell_cooldown)?
-        // Health & power
-        .set_function("SetPlayerHealth", set_player_health)?
-        .set_function("SetPlayerPower", set_player_power)?
-        .set_function("SetTargetHealth", set_target_health)?
-        // Targeting
-        .set_function("SetTarget", set_target)?
+        .set_function("SetMoving", set_moving)?
+        .set_function("SetMounted", set_mounted)?
+        .set_function("SetFlying", set_flying)?
+        .set_function("SetFalling", set_falling)?
+        .set_function("SetSwimming", set_swimming)
+}
+
+fn register_targeting_party(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetTarget", set_target)?
         .set_function("ClearTarget", clear_target)?
         .set_function("SetFocus", set_focus)?
         .set_function("ClearFocus", clear_focus)?
+        .set_function("SetTargetHealth", set_target_health)?
         .set_function("SetTargetPower", set_target_power)?
         .set_function("SetFocusPower", set_focus_power)?
         .set_function("SetTargetType", set_target_type)?
         .set_function("SetFocusType", set_focus_type)?
         .set_function("SetFocusHealth", set_focus_health)?
-        // Party
         .set_function("SetPartySize", set_party_size)?
         .set_function("SetPartyMember", set_party_member)?
         .set_function("SetPartyMemberHealth", set_party_member_health)?
         .set_function("KillPartyMember", kill_party_member)?
         .set_function("ResPartyMember", res_party_member)?
-        .set_function("SetRotDamage", set_rot_damage)?
-        // Movement
-        .set_function("SetMoving", set_moving)?
-        .set_function("SetMounted", set_mounted)?
-        .set_function("SetFlying", set_flying)?
-        .set_function("SetFalling", set_falling)?
-        .set_function("SetSwimming", set_swimming)?
-        // Spec & talents
-        .set_function("SetSpec", set_spec)?
-        .set_function("SetTalentRank", set_talent_rank)?
-        .set_function("SetTalentSelection", set_talent_selection)?
-        .set_function("ResetTalents", reset_talents)?
-        // Buffs
-        .set_function("AddBuff", add_buff)?
-        .set_function("RemoveBuff", remove_buff)?
-        .set_function("ClearBuffs", clear_buffs)?
-        // Equipment
-        .set_function("EquipItem", equip_item)?
-        .set_function("UnequipItem", unequip_item)?
-        // World: zone
-        .set_function("SetZone", set_zone)?
+        .set_function("SetRotDamage", set_rot_damage)
+}
+
+fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("SetZone", set_zone)?
         .set_function("SetSubZone", set_sub_zone)?
         .set_function("SetInstanceInfo", set_instance_info)?
         .set_function("SetInInstance", set_in_instance)?
-        // World: economy
         .set_function("SetMoney", set_money)?
         .set_function("SetItemLevel", set_item_level)?
-        // World: transmog & collections
-        .set_function("AddTransmog", add_transmog)?
+        .set_function("SetVaultActivity", set_vault_activity)?
+        .set_function("SetVaultRewards", set_vault_rewards)?
+        .set_function("ClearVault", clear_vault)?
+        .set_function("SetActionSlot", set_action_slot)?
+        .set_function("ClearActionSlot", clear_action_slot)?
+        .set_function("ClearActionBars", clear_action_bars)?
+        .set_function("AddBagItem", add_bag_item)?
+        .set_function("RemoveBagItem", remove_bag_item)?
+        .set_function("ClearBags", clear_bags)?
+        .set_function("AddMail", add_mail)?
+        .set_function("ClearInbox", clear_inbox)?
+        .set_function("SetInboxCount", set_inbox_count)?
+        .set_function("AddPremadeListing", add_premade_listing)?
+        .set_function("ClearPremadeListings", clear_premade_listings)?
+        .set_function("UpdatePremadeListing", update_premade_listing)
+}
+
+fn register_collections_pvp(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("AddTransmog", add_transmog)?
         .set_function("RemoveTransmog", remove_transmog)?
         .set_function("AddTransmogAppearance", add_transmog_appearance)?
         .set_function("SetTransmogForSlot", set_transmog_for_slot)?
@@ -136,49 +164,22 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         .set_function("UncollectPet", uncollect_pet)?
         .set_function("CollectToy", collect_toy)?
         .set_function("UncollectToy", uncollect_toy)?
-        // World: PvP & guild
+        .set_function("EarnAchievement", earn_achievement)?
         .set_function("SetPvPEnabled", set_pvp_enabled)?
         .set_function("SetHonorLevel", set_honor_level)?
         .set_function("SetGuildInfo", set_guild_info)?
         .set_function("JoinGuild", join_guild)?
         .set_function("ClearGuild", clear_guild)?
-        .set_function("LeaveGuild", leave_guild)?
-        // World: events
-        .set_function("FireEvent", fire_event_admin)?
-        // World: vault
-        .set_function("SetVaultActivity", set_vault_activity)?
-        .set_function("SetVaultRewards", set_vault_rewards)?
-        .set_function("ClearVault", clear_vault)?
-        // World: action bars
-        .set_function("SetActionSlot", set_action_slot)?
-        .set_function("ClearActionSlot", clear_action_slot)?
-        .set_function("ClearActionBars", clear_action_bars)?
-        // World: bags
-        .set_function("AddBagItem", add_bag_item)?
-        .set_function("RemoveBagItem", remove_bag_item)?
-        .set_function("ClearBags", clear_bags)?
-        // Mail
-        .set_function("AddMail", add_mail)?
-        .set_function("ClearInbox", clear_inbox)?
-        .set_function("SetInboxCount", set_inbox_count)?
-        // Premade listings
-        .set_function("AddPremadeListing", add_premade_listing)?
-        .set_function("ClearPremadeListings", clear_premade_listings)?
-        .set_function("UpdatePremadeListing", update_premade_listing)?
-        // Debug toggles
+        .set_function("LeaveGuild", leave_guild)
+}
+
+fn register_inventory_misc(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("FireEvent", fire_event_admin)?
         .set_function("ToggleDebugBorders", toggle_debug_borders)?
         .set_function("ToggleDebugAnchors", toggle_debug_anchors)?
-        // Encounter
         .set_function("SimulateBossKill", simulate_boss_kill)?
         .set_function("StartLootRoll", start_loot_roll)?
-        .set_function("EndLootRoll", end_loot_roll)?
-        // Achievements (fire-event variant)
-        .set_function("EarnAchievement", earn_achievement)?
-        .build();
-
-    LuaApiMut::set_global_val(lua, "A_Admin", admin_val)?;
-    super::rilua_group_queries::register_all(lua.state_mut());
-    Ok(())
+        .set_function("EndLootRoll", end_loot_roll)
 }
 
 // ── Player identity ──────────────────────────────────────────────────────────

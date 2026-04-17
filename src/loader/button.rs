@@ -117,54 +117,52 @@ pub fn apply_button_textures(
     apply_button_texture_lua(env, &texture_slots, button_name)
 }
 
+type SlotAccessor = fn(&crate::xml::FrameXml) -> Option<&crate::xml::TextureXml>;
+
+const BUTTON_TEXTURE_SLOT_DEFS: [(&str, &str, SlotAccessor); 6] = [
+    (
+        "SetNormalTexture",
+        "NormalTexture",
+        crate::xml::FrameXml::normal_texture,
+    ),
+    (
+        "SetPushedTexture",
+        "PushedTexture",
+        crate::xml::FrameXml::pushed_texture,
+    ),
+    (
+        "SetHighlightTexture",
+        "HighlightTexture",
+        crate::xml::FrameXml::highlight_texture,
+    ),
+    (
+        "SetDisabledTexture",
+        "DisabledTexture",
+        crate::xml::FrameXml::disabled_texture,
+    ),
+    (
+        "SetCheckedTexture",
+        "CheckedTexture",
+        crate::xml::FrameXml::checked_texture,
+    ),
+    (
+        "SetDisabledCheckedTexture",
+        "DisabledCheckedTexture",
+        crate::xml::FrameXml::disabled_checked_texture,
+    ),
+];
+
 fn button_texture_slots(
     frame_xml: &crate::xml::FrameXml,
     inherits: &str,
 ) -> [(&'static str, &'static str, Option<crate::xml::TextureXml>); 6] {
-    [
+    BUTTON_TEXTURE_SLOT_DEFS.map(|(method, parent_key, accessor)| {
         (
-            "SetNormalTexture",
-            "NormalTexture",
-            resolve_button_texture_slot(frame_xml, inherits, crate::xml::FrameXml::normal_texture),
-        ),
-        (
-            "SetPushedTexture",
-            "PushedTexture",
-            resolve_button_texture_slot(frame_xml, inherits, crate::xml::FrameXml::pushed_texture),
-        ),
-        (
-            "SetHighlightTexture",
-            "HighlightTexture",
-            resolve_button_texture_slot(
-                frame_xml,
-                inherits,
-                crate::xml::FrameXml::highlight_texture,
-            ),
-        ),
-        (
-            "SetDisabledTexture",
-            "DisabledTexture",
-            resolve_button_texture_slot(
-                frame_xml,
-                inherits,
-                crate::xml::FrameXml::disabled_texture,
-            ),
-        ),
-        (
-            "SetCheckedTexture",
-            "CheckedTexture",
-            resolve_button_texture_slot(frame_xml, inherits, crate::xml::FrameXml::checked_texture),
-        ),
-        (
-            "SetDisabledCheckedTexture",
-            "DisabledCheckedTexture",
-            resolve_button_texture_slot(
-                frame_xml,
-                inherits,
-                crate::xml::FrameXml::disabled_checked_texture,
-            ),
-        ),
-    ]
+            method,
+            parent_key,
+            resolve_button_texture_slot(frame_xml, inherits, accessor),
+        )
+    })
 }
 
 fn resolve_button_texture_slot(
