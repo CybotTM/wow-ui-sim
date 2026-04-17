@@ -92,6 +92,21 @@ pub(super) fn build_global_family_handler(
             blue_path,
         )
         .map(Some),
+        FastHandlerRef::ConditionalGlobalFieldEqStringThenFunctionStringArg {
+            target_path,
+            field,
+            expected,
+            function_name,
+            arg,
+        } => build_conditional_global_field_eq_string_then_function_string_arg_handler(
+            state,
+            target_path,
+            field,
+            expected,
+            function_name,
+            arg,
+        )
+        .map(Some),
         FastHandlerRef::NamedGlobalMethodWithGlobalArg {
             suffix,
             method_name,
@@ -295,6 +310,44 @@ fn build_conditional_tooltip_handler(
         "#,
         "template-conditional-tooltip-handler",
         &[field, anchor, red_path, green_path, blue_path],
+    )
+}
+
+fn build_conditional_global_field_eq_string_then_function_string_arg_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    field: &str,
+    expected: &str,
+    function_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    let field = create_string(state, field);
+    let expected = create_string(state, expected);
+    let function_name = resolve_global_path(state, function_name);
+    let arg = create_string(state, arg);
+    call_global_method_builder(
+        state,
+        target_path,
+        "__ignored__",
+        r#"
+            local target_ref, _ignored_method_name, field, expected, fn, arg = ...
+            local target = target_ref
+            return function(self, ...)
+                if type(target) == "string" then
+                    local env = getfenv(0) or _G
+                    for segment in string.gmatch(target, "[^%.]+") do
+                        env = env and env[segment]
+                    end
+                    target = env
+                end
+                if not target or target[field] ~= expected then
+                    return
+                end
+                return fn(arg)
+            end
+        "#,
+        "template-conditional-global-field-eq-string-function-string",
+        &[field, expected, function_name, arg],
     )
 }
 

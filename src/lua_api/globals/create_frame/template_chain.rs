@@ -365,6 +365,13 @@ enum FastHandlerRef<'a> {
         green_path: &'a str,
         blue_path: &'a str,
     },
+    ConditionalGlobalFieldEqStringThenFunctionStringArg {
+        target_path: &'a str,
+        field: &'a str,
+        expected: &'a str,
+        function_name: &'a str,
+        arg: &'a str,
+    },
     NamedGlobalMethodWithGlobalArg {
         suffix: &'a str,
         method_name: &'a str,

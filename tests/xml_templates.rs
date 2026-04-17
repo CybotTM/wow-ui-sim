@@ -1983,6 +1983,46 @@ fn test_create_frame_from_xml_inline_parent_field_method_with_self_result_runs()
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_conditional_global_field_eq_string_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        PetitionFrame = { petitionType = "guild" }
+        XmlInlinePopupShown = nil
+        function StaticPopup_Show(name)
+            XmlInlinePopupShown = name
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineConditionalPopupFrame" parent="UIParent">
+        <Scripts><OnClick>if ( PetitionFrame.petitionType == "guild" ) then StaticPopup_Show("RENAME_GUILD"); end</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineConditionalPopupFrame:GetScript('OnClick')(XmlInlineConditionalPopupFrame)")
+        .unwrap();
+    let shown: String = env.eval("return XmlInlinePopupShown").unwrap();
+    assert_eq!(shown, "RENAME_GUILD");
+
+    env.exec(
+        r#"
+        PetitionFrame.petitionType = "arena"
+        XmlInlinePopupShown = nil
+        XmlInlineConditionalPopupFrame:GetScript('OnClick')(XmlInlineConditionalPopupFrame)
+    "#,
+    )
+    .unwrap();
+    let skipped: Option<String> = env.eval("return XmlInlinePopupShown").unwrap();
+    assert_eq!(skipped, None);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_assignment_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

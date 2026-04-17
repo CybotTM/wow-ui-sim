@@ -77,6 +77,19 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             blue_path,
         });
     }
+    if let Some((target_path, field, expected, function_name, arg)) =
+        parse_conditional_global_field_eq_string_then_function_string_arg(stmt)
+    {
+        return Some(
+            FastHandlerRef::ConditionalGlobalFieldEqStringThenFunctionStringArg {
+                target_path,
+                field,
+                expected,
+                function_name,
+                arg,
+            },
+        );
+    }
     if let Some((suffix, method_name, arg_path)) =
         parse_inline_named_global_method_with_global_arg(stmt)
     {
@@ -273,6 +286,32 @@ fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str
         red_path,
         green_path,
         blue_path,
+    ))
+}
+
+fn parse_conditional_global_field_eq_string_then_function_string_arg(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, &str)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once(')')?;
+    let (lhs, rhs) = condition.split_once("==")?;
+    let rhs = super::parse_single_string_literal(rhs.trim())?;
+    let (target_path, field) = lhs.trim().rsplit_once('.')?;
+    let remainder = remainder.trim_start().strip_prefix("then")?.trim_start();
+    let end_body = remainder.trim().strip_suffix("end")?.trim();
+    let then_stmt = end_body.strip_suffix(';').map(str::trim).unwrap_or(end_body);
+    let (function_name, args) = then_stmt.split_once('(')?;
+    let arg = super::parse_single_string_literal(args.strip_suffix(')')?.trim())?;
+    (is_fast_handler_path(target_path.trim())
+        && is_fast_identifier(field.trim())
+        && is_fast_handler_path(function_name.trim()))
+    .then_some((
+        target_path.trim(),
+        field.trim(),
+        rhs,
+        function_name.trim(),
+        arg,
     ))
 }
 
