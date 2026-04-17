@@ -58,6 +58,7 @@ pub mod net_stats;
 pub mod offer_verbs;
 pub mod panel_toggle_verbs;
 pub mod pet_battles;
+pub mod pet_stats;
 pub mod photo_sharing;
 pub mod player_probes;
 pub mod profession_data;

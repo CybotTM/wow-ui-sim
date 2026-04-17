@@ -100,6 +100,7 @@ macro_rules! build_empty_sim_state {
             game_rules: GameRulesState::default(),
             housing_service_enabled: false,
             pet_battles: PetBattleState::default(),
+            pet: PetState::default(),
             lfg_list_counts: LfgListCounts::default(),
             can_use_premade_group: false,
             photo_sharing_authorized: false,
@@ -174,7 +175,8 @@ use super::game_data::{
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, CursorItemOrigin,
     EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo, LuaErrorRecord,
-    MacroInfo, MovementState, NilSymbolAccess, PendingTimer, PlayerState, WorldState,
+    MacroInfo, MovementState, NilSymbolAccess, PendingTimer, PlayerState, SecondaryPowerState,
+    WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -386,6 +388,10 @@ pub struct SimState {
     /// Backing state for `C_PetBattles.GetNumPets(owner)` and
     /// `C_PetBattles.GetBattleState()`. Default zeros (no active battle).
     pub pet_battles: PetBattleState,
+    /// Hunter / warlock pet stats. Drives the legacy `GetPetExperience`
+    /// / `GetPetHappiness` / `GetPetLoyalty` / `GetPetTimeInCombat`
+    /// probes. Default all-zero (no pet).
+    pub pet: PetState,
     /// Backing state for `C_LFGList.GetNumApplications` /
     /// `GetNumApplicants`. Each probe returns `(total, viewed)` — the sim
     /// exposes both knobs so tests can assert `total > 0 && viewed == 0`
@@ -561,7 +567,7 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
-    Keybindings, LfgListCounts, MessageLogEntry, ModifierKeys, NetStats, PetBattleState,
+    Keybindings, LfgListCounts, MessageLogEntry, ModifierKeys, NetStats, PetBattleState, PetState,
     TradeState, VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
     WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };

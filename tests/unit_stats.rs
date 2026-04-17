@@ -5,7 +5,7 @@
 //! 2. Falls back to 0 for units the sim doesn't model (e.g. `"mouseover"`).
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state_types::SecondaryPowerState;
+use wow_ui_sim::lua_api::state::SecondaryPowerState;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")

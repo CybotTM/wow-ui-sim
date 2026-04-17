@@ -165,10 +165,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetNumSpellTabs",
     "GetNumTalentTabs",
     "GetNumTitles",
-    "GetPetExperience",
-    "GetPetHappiness",
-    "GetPetLoyalty",
-    "GetPetTimeInCombat",
+    // GetPetExperience / GetPetHappiness / GetPetLoyalty /
+    // GetPetTimeInCombat are SimState-backed in pet_stats.rs, not stubs.
     "GetPvpTalentSlotInfo",
     // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in
     // quest_surface.rs, not stubs.

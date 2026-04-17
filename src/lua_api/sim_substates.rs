@@ -93,6 +93,38 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// Hunter / warlock pet state — drives the four legacy pet-stat
+/// probes (`GetPetExperience` / `GetPetHappiness` / `GetPetLoyalty` /
+/// `GetPetTimeInCombat`).
+///
+/// Modern WoW no longer exposes happiness / loyalty for hunter pets
+/// (they were removed in Cataclysm), so the sim defaults all four
+/// fields to 0 / empty. Addons that still query these probes receive
+/// retail's modern shape unless a test seeds the struct.
+#[derive(Debug, Default, Clone)]
+pub struct PetState {
+    /// Current XP within the pet's level. Drives `GetPetExperience`
+    /// (first return).
+    pub xp: i32,
+    /// XP required for the pet to ding. Drives `GetPetExperience`
+    /// (second return).
+    pub xp_max: i32,
+    /// Classic-era happiness level (1 = Unhappy, 2 = Content,
+    /// 3 = Happy). Drives `GetPetHappiness` (first return). 0 = no pet.
+    pub happiness: i32,
+    /// Classic-era damage percentage (75/100/125 depending on
+    /// happiness). Drives `GetPetHappiness` (second return).
+    pub damage_percent: i32,
+    /// Classic-era loyalty gain rate (internal counter). Drives
+    /// `GetPetHappiness` (third return).
+    pub loyalty_rate: i32,
+    /// Classic-era loyalty level as a localized string (e.g.
+    /// `"Loyal"`). Drives `GetPetLoyalty`. Empty when no pet.
+    pub loyalty_label: String,
+    /// Seconds the pet has been in combat. Drives `GetPetTimeInCombat`.
+    pub time_in_combat: i32,
+}
+
 /// A single chat / addon message entry in the simulator's outbound log.
 /// `kind` is `"chat"` for `SendChatMessage` or `"addon"` for
 /// `SendAddonMessage`.
