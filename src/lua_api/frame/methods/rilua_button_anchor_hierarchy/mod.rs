@@ -33,42 +33,17 @@ fn register_buttons(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
 }
 
 fn register_button_font_objects(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(
-        state,
-        table,
-        "SetNormalFontObject",
-        buttons::set_normal_font_object,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "GetNormalFontObject",
-        buttons::get_normal_font_object,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetHighlightFontObject",
-        buttons::set_highlight_font_object,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "GetHighlightFontObject",
-        buttons::get_highlight_font_object,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetDisabledFontObject",
-        buttons::set_disabled_font_object,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "GetDisabledFontObject",
-        buttons::get_disabled_font_object,
-    )?;
+    let entries: &[(&str, rilua::vm::closure::RustFn)] = &[
+        ("SetNormalFontObject", buttons::set_normal_font_object),
+        ("GetNormalFontObject", buttons::get_normal_font_object),
+        ("SetHighlightFontObject", buttons::set_highlight_font_object),
+        ("GetHighlightFontObject", buttons::get_highlight_font_object),
+        ("SetDisabledFontObject", buttons::set_disabled_font_object),
+        ("GetDisabledFontObject", buttons::get_disabled_font_object),
+    ];
+    for (name, func) in entries {
+        table_set_rust_fn(state, table, name, *func)?;
+    }
     Ok(())
 }
 
