@@ -18,7 +18,7 @@ use std::rc::Rc;
 // Public entry point
 // ---------------------------------------------------------------------------
 
-pub(super) fn apply_runtime_template_chain(
+pub(crate) fn apply_runtime_template_chain(
     state: &mut LuaState,
     frame_id: u64,
     inherits: Option<&str>,

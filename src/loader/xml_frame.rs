@@ -86,8 +86,10 @@ fn build_and_setup_frame(
         env,
         timing,
         SetupFrame {
+            widget_type,
             lua_code: &lua_code,
             name: &prepared.name,
+            explicit_parent: prepared.explicit_parent.is_some(),
             initial_hidden: prepared.initial_hidden,
             frame,
             inherits: &prepared.inherits,
