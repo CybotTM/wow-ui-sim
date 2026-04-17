@@ -89,34 +89,48 @@ pub fn table_util_find_indexed_mismatch(state: &mut LuaState) -> LuaResult<u32> 
         state.push(Val::Nil);
         return Ok(1);
     };
-    let left_values = state
+    let left_values = copy_array_slice(state, left_ref);
+    let right_values = copy_array_slice(state, right_ref);
+    let mismatch = find_first_mismatch(state, &left_values, &right_values, comparator)?;
+    match mismatch {
+        Some(index) => state.push(Val::Num(index as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn copy_array_slice(
+    state: &LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> Vec<Val> {
+    state
         .gc
         .tables
-        .get(left_ref)
+        .get(table_ref)
         .map(|table| table.array_slice().to_vec())
-        .unwrap_or_default();
-    let right_values = state
-        .gc
-        .tables
-        .get(right_ref)
-        .map(|table| table.array_slice().to_vec())
-        .unwrap_or_default();
-    let count = left_values.len().max(right_values.len());
+        .unwrap_or_default()
+}
+
+fn find_first_mismatch(
+    state: &mut LuaState,
+    left: &[Val],
+    right: &[Val],
+    comparator: Val,
+) -> LuaResult<Option<usize>> {
+    let count = left.len().max(right.len());
     for index in 0..count {
-        let left_val = left_values.get(index).copied().unwrap_or(Val::Nil);
-        let right_val = right_values.get(index).copied().unwrap_or(Val::Nil);
+        let left_val = left.get(index).copied().unwrap_or(Val::Nil);
+        let right_val = right.get(index).copied().unwrap_or(Val::Nil);
         let equal = if matches!(comparator, Val::Function(_)) {
             call_table_util_comparator(state, comparator, left_val, right_val, index + 1)?
         } else {
             left_val == right_val
         };
         if !equal {
-            state.push(Val::Num((index + 1) as f64));
-            return Ok(1);
+            return Ok(Some(index + 1));
         }
     }
-    state.push(Val::Nil);
-    Ok(1)
+    Ok(None)
 }
 
 fn call_table_util_comparator(
