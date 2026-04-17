@@ -102,6 +102,7 @@ macro_rules! build_empty_sim_state {
             can_use_premade_group: false,
             photo_sharing_authorized: false,
             photo_sharing_enabled: false,
+            keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
         }
@@ -414,6 +415,8 @@ pub struct SimState {
     /// authorization — a user can decline the feature after authorizing.
     /// Default false. Admin: `A_Admin.SetPhotoSharingEnabled(b?)`.
     pub photo_sharing_enabled: bool,
+    /// User-set keybinding store (base + overrides). See `Keybindings`.
+    pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
@@ -506,6 +509,93 @@ pub struct LfgListCounts {
     pub applications_viewed: i32,
     pub applicants_total: i32,
     pub applicants_viewed: i32,
+}
+
+/// Minimal keybinding store. In retail WoW the binding registry is
+/// populated from `Bindings.xml` at load; here we only back the
+/// *user-set* side (`SetBinding(key, action)` / `SetOverrideBinding`)
+/// because the sim has no Bindings.xml to pre-register from. Overrides
+/// shadow the base bindings during lookup, matching WoW's
+/// `GetBindingAction(key, checkOverride=true)` semantics.
+#[derive(Debug, Default, Clone)]
+pub struct Keybindings {
+    /// Insertion-ordered base bindings set by `SetBinding(key, action)`.
+    /// Keyed by key name; the value is the bound action. Actions can be
+    /// bound to at most 2 keys (WoW's documented limit).
+    pub base: Vec<(String, String)>,
+    /// Override bindings set by `SetOverrideBinding(owner, isPriority, key, action)`.
+    /// Stored as a flat list so `ClearOverrideBindings` can drop the
+    /// whole set.
+    pub overrides: Vec<(String, String)>,
+}
+
+impl Keybindings {
+    /// Return up to 2 keys currently bound to `action`. Overrides take
+    /// precedence over base — an overridden key shadows its base entry.
+    pub fn keys_for_action(&self, action: &str) -> (Option<String>, Option<String>) {
+        let mut found: Vec<String> = self
+            .overrides
+            .iter()
+            .filter(|(_, a)| a == action)
+            .map(|(k, _)| k.clone())
+            .collect();
+        for (k, a) in &self.base {
+            if a == action && self.overrides.iter().all(|(ok, _)| ok != k) {
+                found.push(k.clone());
+            }
+        }
+        let first = found.first().cloned();
+        let second = found.get(1).cloned();
+        (first, second)
+    }
+
+    /// Return the action bound to `key`, preferring an override. Empty
+    /// string when unbound — WoW returns `""` (not nil) for
+    /// `GetBindingAction`.
+    pub fn action_for_key(&self, key: &str) -> String {
+        if let Some((_, a)) = self.overrides.iter().rev().find(|(k, _)| k == key) {
+            return a.clone();
+        }
+        self.base
+            .iter()
+            .find(|(k, _)| k == key)
+            .map(|(_, a)| a.clone())
+            .unwrap_or_default()
+    }
+
+    /// Bind `key` to `action`. An empty action unbinds `key`. A second
+    /// key binding to the same action evicts the oldest key still bound
+    /// (WoW's 2-keys-per-action limit).
+    pub fn set(&mut self, key: &str, action: &str) {
+        self.base.retain(|(k, _)| k != key);
+        if action.is_empty() {
+            return;
+        }
+        let bound: Vec<usize> = self
+            .base
+            .iter()
+            .enumerate()
+            .filter(|(_, (_, a))| a == action)
+            .map(|(i, _)| i)
+            .collect();
+        if bound.len() >= 2 {
+            self.base.remove(bound[0]);
+        }
+        self.base.push((key.to_string(), action.to_string()));
+    }
+
+    /// Install an override for `key` → `action`. Does NOT touch base.
+    pub fn set_override(&mut self, key: &str, action: &str) {
+        self.overrides.retain(|(k, _)| k != key);
+        if !action.is_empty() {
+            self.overrides.push((key.to_string(), action.to_string()));
+        }
+    }
+
+    /// Drop every override; base bindings unaffected.
+    pub fn clear_overrides(&mut self) {
+        self.overrides.clear();
+    }
 }
 
 impl ModifierKeys {
