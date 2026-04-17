@@ -510,47 +510,77 @@ pub struct GuildLogo {
 
 impl Default for WorldState {
     fn default() -> Self {
-        Self {
-            zone_name: "Stormwind City".into(),
-            zone_id: 1519,
-            sub_zone_name: "Trade District".into(),
-            instance_name: String::new(),
-            instance_type: "none".into(),
-            instance_difficulty: 0,
-            instance_max_players: 0,
-            in_instance: false,
-            guild_name: Some("Heroes of Azeroth".into()),
-            guild_rank: Some("Member".into()),
-            guild_num_members: 150,
-            great_vault_activities: Vec::new(),
-            great_vault_has_rewards: false,
-            great_vault_can_claim: false,
-            loot_rolls: HashMap::new(),
-            collected_transmogs: HashSet::new(),
-            transmog_appearances: default_transmog_appearances(),
-            applied_transmog_slots: HashMap::new(),
-            collected_mounts: HashSet::new(),
-            mounts: default_mounts(),
-            collected_pets: HashSet::new(),
-            pets: default_pets(),
-            collected_toys: HashSet::new(),
-            toys: default_toys(),
-            favorite_toys: HashSet::new(),
-            heirlooms: default_heirlooms(),
-            collected_heirlooms: default_heirlooms().iter().map(|h| h.item_id).collect(),
-            earned_achievements: HashSet::new(),
-            premade_listings: default_premade_listings(),
-            pvp_type: "contested".into(),
-            is_sub_zone_pvp: false,
-            pvp_faction_name: None,
-            guild_logo: GuildLogo::default(),
-            guild_ranks: Vec::new(),
-            guild_selected_rank: 0,
-            guild_club_id: None,
-            guild_is_officer: false,
-            guild_can_speak_in_chat: true,
-        }
+        let mut ws = default_zone_and_instance();
+        apply_guild_defaults(&mut ws);
+        apply_collection_defaults(&mut ws);
+        ws
     }
+}
+
+/// Zone/instance/PvP shell + zero-valued collection stubs. The collection
+/// fields are overwritten by `apply_collection_defaults`; they sit here
+/// only to satisfy the exhaustive struct literal.
+fn default_zone_and_instance() -> WorldState {
+    WorldState {
+        zone_name: "Stormwind City".into(),
+        zone_id: 1519,
+        sub_zone_name: "Trade District".into(),
+        instance_name: String::new(),
+        instance_type: "none".into(),
+        instance_difficulty: 0,
+        instance_max_players: 0,
+        in_instance: false,
+        guild_name: Some("Heroes of Azeroth".into()),
+        guild_rank: Some("Member".into()),
+        guild_num_members: 150,
+        pvp_type: "contested".into(),
+        is_sub_zone_pvp: false,
+        pvp_faction_name: None,
+        great_vault_activities: Vec::new(),
+        great_vault_has_rewards: false,
+        great_vault_can_claim: false,
+        loot_rolls: HashMap::new(),
+        collected_transmogs: HashSet::new(),
+        transmog_appearances: Vec::new(),
+        applied_transmog_slots: HashMap::new(),
+        collected_mounts: HashSet::new(),
+        mounts: Vec::new(),
+        collected_pets: HashSet::new(),
+        pets: Vec::new(),
+        collected_toys: HashSet::new(),
+        toys: Vec::new(),
+        favorite_toys: HashSet::new(),
+        heirlooms: Vec::new(),
+        collected_heirlooms: HashSet::new(),
+        earned_achievements: HashSet::new(),
+        premade_listings: Vec::new(),
+        guild_logo: GuildLogo::default(),
+        guild_ranks: Vec::new(),
+        guild_selected_rank: 0,
+        guild_club_id: None,
+        guild_is_officer: false,
+        guild_can_speak_in_chat: true,
+    }
+}
+
+fn apply_guild_defaults(ws: &mut WorldState) {
+    ws.guild_logo = GuildLogo::default();
+    ws.guild_ranks = Vec::new();
+    ws.guild_selected_rank = 0;
+    ws.guild_club_id = None;
+    ws.guild_is_officer = false;
+    ws.guild_can_speak_in_chat = true;
+}
+
+fn apply_collection_defaults(ws: &mut WorldState) {
+    let heirlooms = default_heirlooms();
+    ws.collected_heirlooms = heirlooms.iter().map(|h| h.item_id).collect();
+    ws.heirlooms = heirlooms;
+    ws.transmog_appearances = default_transmog_appearances();
+    ws.mounts = default_mounts();
+    ws.pets = default_pets();
+    ws.toys = default_toys();
+    ws.premade_listings = default_premade_listings();
 }
 
 /// Simulated player movement flags (all false = stationary).
@@ -597,6 +627,27 @@ pub struct LootRollInfo {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Pins that `WorldState::default` → `default_zone_and_instance`
+    /// → `apply_guild_defaults` → `apply_collection_defaults` chain
+    /// leaves every collection populated (not left as the zero
+    /// placeholder from `default_zone_and_instance`). Regression cover
+    /// for the 3-helper split of `Default::default`.
+    #[test]
+    fn world_default_populates_collections_after_shell() {
+        let world = WorldState::default();
+        assert!(!world.transmog_appearances.is_empty());
+        assert!(!world.mounts.is_empty());
+        assert!(!world.pets.is_empty());
+        assert!(!world.toys.is_empty());
+        assert!(!world.heirlooms.is_empty());
+        assert!(!world.premade_listings.is_empty());
+        assert_eq!(world.collected_heirlooms.len(), world.heirlooms.len());
+        // Shell-owned non-collection fields still live.
+        assert_eq!(world.zone_id, 1519);
+        assert_eq!(world.pvp_type, "contested");
+        assert!(world.guild_can_speak_in_chat);
+    }
 
     #[test]
     fn transmog_default_appearances_populated() {
