@@ -1,5 +1,9 @@
-use super::{FastHandlerRef, FastLiteralValue, build_assignment_handler, build_chained_handler, load_template};
+use super::{
+    FastHandlerRef, FastLiteralValue, build_assignment_handler, build_chained_handler,
+    load_template,
+};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
+use crate::lua_api::globals::create_frame::template_chain::FastValueArg;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -28,6 +32,12 @@ pub(super) fn build_global_family_handler(
             method_name,
             field,
         } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
+            .map(Some),
+        FastHandlerRef::GlobalMethodWithLiteralArgs {
+            target_path,
+            method_name,
+            args,
+        } => build_global_method_with_literal_args_handler(state, target_path, method_name, args)
             .map(Some),
         FastHandlerRef::GlobalMethodThenAssignLiteral {
             target_path,
@@ -107,6 +117,32 @@ fn build_global_method_with_self_field_handler(
     )
 }
 
+fn build_global_method_with_literal_args_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    args: &[FastValueArg<'_>],
+) -> LuaResult<Val> {
+    let mut captured_args = Vec::with_capacity(args.len());
+    for arg in args {
+        captured_args.push(resolve_fast_value_arg(state, arg));
+    }
+    call_global_method_builder(
+        state,
+        target_path,
+        method_name,
+        r#"
+            local target, method_name = ...
+            local args = {select(3, ...)}
+            return function(self, ...)
+                return target[method_name](target, unpack(args))
+            end
+        "#,
+        "template-global-method-literal-args-handler",
+        &captured_args,
+    )
+}
+
 fn build_global_method_then_assign_handler(
     state: &mut LuaState,
     target_path: &str,
@@ -171,4 +207,16 @@ fn call_global_method_builder(
     args.push(create_string(state, method_name));
     args.extend_from_slice(extra_args);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &args)
+}
+
+fn resolve_fast_value_arg(state: &mut LuaState, arg: &FastValueArg<'_>) -> Val {
+    match arg {
+        FastValueArg::String(value) => create_string(state, value),
+        FastValueArg::Literal(value) => match *value {
+            FastLiteralValue::Global(path) => resolve_global_path(state, path),
+            FastLiteralValue::Number(value) => Val::Num(value),
+            FastLiteralValue::Nil => Val::Nil,
+            FastLiteralValue::Bool(value) => Val::Bool(value),
+        },
+    }
 }

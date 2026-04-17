@@ -8,6 +8,23 @@ pub(super) fn build_method_family_handler(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_direct_method_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_self_field_method_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_ancestor_method_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    Ok(None)
+}
+
+/// `self[method](self, ...)` shapes.
+fn build_direct_method_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::MethodWithBoolArg { method_name, value } => {
@@ -16,6 +33,17 @@ pub(super) fn build_method_family_handler(
         FastHandlerRef::MethodWithStringArg { method_name, arg } => {
             build_method_with_string_arg_handler(state, method_name, arg).map(Some)
         }
+        _ => Ok(None),
+    }
+}
+
+/// `self[field][method](target, ...)` shapes that cover the child-field
+/// method bindings used by XML templates.
+fn build_self_field_method_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::SelfFieldMethod { field, method_name } => {
             build_self_field_method_handler(state, field, method_name).map(Some)
         }
@@ -63,6 +91,16 @@ pub(super) fn build_method_family_handler(
             *third,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// `parent[method](...)` / `grandparent[method](...)` shapes.
+fn build_ancestor_method_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::ParentMethod(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
         }
