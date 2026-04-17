@@ -1,14 +1,13 @@
 # PartyFrame tree: master reference vs rilua-migration regression
 
 ## Status
-**rilua-migration regression** — PartyFrame renders as `(4x2)` at
-`(22, 147)` with zero member frames. On `master` at commit `322eba4a` the
-same environment produces a fully-sized `(120x244)` frame with four
-visible `MemberFrame1..4` children.
+
+Startup hang is fixed. PartyFrame renders at `(120x244)` matching master.
+1 of 3 regression tests passes (`party_frame_has_master_reference_shape`);
+remaining failures are follow-up issues unrelated to the hang.
 
 Test: [`tests/party_frame_tree.rs`](../../../tests/party_frame_tree.rs) —
-three assertions pinned against the master dump. Currently fails on this
-branch and will start passing once the underlying bug is fixed.
+three assertions pinned against the master dump at commit `322eba4a`.
 
 ## Reference dump (master, commit `322eba4a`)
 
@@ -30,71 +29,89 @@ LD_LIBRARY_PATH=target/debug/deps \
   ./target/debug/wow-sim dump-tree --filter-key PartyFrame
 ```
 
-Full 2316-line dump saved at `/tmp/claude/master_partyframe.txt` during
-the capture session.
+## Resolved issues
 
-## Current branch output
-
-```
-PartyFrame          [Frame]  (4x2) visible LOW:2 x=22  y=147  alpha=1.00
-  (no member frames, no decorative children)
-```
-
-## Contributing causes (in order discovered)
-
-### 1. intern_string_static / intern_string ref mismatch (fixed)
+### 1. `intern_string_static` / `intern_string` ref mismatch (fixed)
 
 The unit-frame load path lost the shared frame metatable partway through
 Blizzard UI bootstrap. `registry_set` stored the metatable under
 `intern_string_static("__rilua_frame_mt")` while `attach_frame_metatable`
 read via `intern_string("__rilua_frame_mt")`; those returned different
 `GcRef<LuaString>` values whenever the static pointer cache diverged
-from the content-keyed intern table, so new frames silently got no
-metatable. Landed in the rilua static-intern fix — tests 1 and 3
-(shape, decorative children) now pass.
+from the content-keyed intern table. Fixed upstream in the rilua static-
+intern landing.
 
 ### 2. Missing group-state globals (fixed)
 
 `UnitExists("partyN")`, `GetNumGroupMembers`, `GetNumSubgroupMembers`,
 `IsInGroup`, `UnitName`, `UnitClass`, `UnitLevel` had no real
-implementations — env_init.rs only covered `UnitExists` as a
-player-only stub. `PartyFrame:ShouldShow()` returned `nil` so the
-members never rendered even with the metatable wired up.
+implementations. `PartyFrame:ShouldShow()` returned `nil` so the members
+never rendered. Backed by `SimState::party_members` in
+`src/lua_api/globals/rilua_group_queries.rs`. Additionally
+`A_Admin.SetPartySize(N)` pushes a synthetic `GROUP_ROSTER_UPDATE` event.
 
-Fix: `src/lua_api/globals/rilua_group_queries.rs` now backs these
-globals by `SimState::party_members`. Additionally
-`A_Admin.SetPartySize(N)` pushes a synthetic `GROUP_ROSTER_UPDATE`
-event so `PartyFrameMixin:OnEvent` runs its `Layout()` pass after a
-test bumps the group size.
+### 3. `SetParentKey` stub (fixed)
 
-### 3. SetParentKey is a no-op (open)
+`src/lua_api/frame/methods/rilua_button_anchor_hierarchy/hierarchy.rs::set_parent_key`
+now calls `sync_child_to_rilua(parent_id, key, child_id)` so Lua-side
+`parent.key == child` resolves. A short-circuit in `sync_child_to_rilua`
+avoids redundant writes when `parent[key]` already points at the child —
+important because `PartyFrame:InitializePartyMemberFrames` re-runs on
+every `OnShow` pass.
 
-`src/lua_api/frame/methods/rilua_button_anchor_hierarchy.rs::set_parent_key`
-reads the stack args, extracts the parent id, then throws the result
-away — it never does `parent_table[key] = child_val`. As a result
-`PartyFrameMixin:InitializePartyMemberFrames`'s
-`memberFrame:SetParentKey("MemberFrame1")` calls are silent no-ops,
-and `PartyFrame.MemberFrame1 == nil` in Lua even though the pool has
-four active frames.
+### 4. `C_UnitAuras.GetAuraSlots` infinite loop (fixed)
 
-Attempting a direct fix (wire up via `sync_child_to_rilua` +
-`children_keys.insert`) made the Blizzard UI load hang indefinitely —
-all three tests timed out at 120s. Suspect a downstream layout or
-`Setup()` / `UpdateAuras` recursion triggered by `MemberFrame1..4`
-becoming addressable for the first time. Needs bisection:
+`AuraUtil.ForEachAura` drives its iteration via a `repeat ... until
+continuationToken == nil` loop (Blizzard_FrameXMLUtil/AuraUtil.lua:114-117).
+The first return value of `GetAuraSlots` becomes `continuationToken`.
+Our stub returned an empty table, which is truthy in Lua, so the loop
+never terminated — hanging `EditModeManagerFrame:UpdateSystems()` at
+`TargetFrame:UpdateSystem -> UpdateSystemSettingBuffsOnTop -> UpdateAuras
+-> ParseAllAuras`.
 
-1. Try sync_child_to_rilua alone (no `children_keys.insert`) — isolates
-   Lua-side impact from Rust-side layout-dirty propagation.
-2. Try `children_keys.insert` alone (no Lua sync) — conversely.
-3. If both hang, add timing logs in `PartyFrameMixin:Layout` and
-   `PartyMemberFrameMixin:Setup` to see which Blizzard path loops once
-   the key becomes visible.
+Fix: `stub_nil` in `src/lua_api/globals/rilua_stubs/namespace_stubs.rs`
+so the continuation token is `nil` and the loop exits on first iteration.
 
-## Verification plan
+### Bisection that found it
 
-1. Resolve the SetParentKey hang per the bisection above.
-2. Run `cargo test --test party_frame_tree -- --test-threads=1` — expect
-   all three tests to pass.
-3. Render check: `wow-sim screenshot` should show four stacked party
-   member frames on the left side of the screen, matching the master
-   reference screenshot saved during the initial investigation.
+Added per-call timestamp prints through `apply_post_load_workarounds →
+workarounds::apply → init_edit_mode_layout → apply_system_anchors`, then
+manually iterated `emm.registeredSystemFrames` calling each frame's
+`UpdateSystem` one by one. Frame 29 (`PartyFrame`) completed. Frame 30
+(`TargetFrame`) hung. Bisected `EditModeSystemMixin:UpdateSystem`'s body
+down to the settings loop where setting id 2 (`BuffsOnTop`) hangs in
+`ParseAllAuras`.
+
+## Open follow-ups (post-hang)
+
+### A. `PartyFrame.Selection:GetWidth()` returns 4, not 120
+
+The Selection child has explicit `TOPLEFT/BOTTOMRIGHT -> PartyFrame` so
+its resolved rect matches the parent (`120x244`). But `GetWidth()`
+returns the *stored* width (the explicit size set via `SetWidth/SetSize`)
+which is 4. Master returns 120. Either something on master forces a
+stored size on Selection, or master's GetWidth returns the anchor-
+resolved rect when no explicit size was set.
+
+Affects `party_frame_has_background_and_selection_children`.
+
+### B. MemberFrame y offsets have inverted sign
+
+Test computes `MF2:GetTop() - MF1:GetTop()` and expects +63 (master
+dump values 147, 210, 273, 336 — visually top-down increasing). WoW
+coordinate Y is bottom-up though, so MF2 below MF1 yields a negative
+delta. Either the test's `expected_y` table is in dump-coordinate space
+and the test should match +63 by taking the absolute, or master's
+`GetTop` returned dump-space values too.
+
+Affects `party_frame_member_frames_render_at_master_offsets`.
+
+## Verification
+
+```bash
+cargo test --test party_frame_tree -- --test-threads=1
+# Expected: 1 passed; 2 failed; 31s (no timeouts).
+```
+
+`party_frame_has_master_reference_shape` passes (120x244 visible at
+x=22). The other two tests fail but no longer time out at 120s.

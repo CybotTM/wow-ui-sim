@@ -7,8 +7,10 @@ use crate::loader::error::LoadError;
 use crate::lua_api::LoaderEnv;
 
 pub(super) struct SetupFrame<'a> {
+    pub(super) widget_type: &'a str,
     pub(super) lua_code: &'a str,
     pub(super) name: &'a str,
+    pub(super) explicit_parent: bool,
     pub(super) initial_hidden: bool,
     pub(super) frame: &'a crate::xml::FrameXml,
     pub(super) inherits: &'a str,
@@ -24,7 +26,7 @@ pub(super) fn setup_frame(
 ) -> Result<(), LoadError> {
     let setup_start = Instant::now();
     let exec_start = Instant::now();
-    match exec_create_frame_code(env, setup.lua_code, setup.name, setup.initial_hidden) {
+    match exec_create_frame_code(env, &setup) {
         Ok(()) => {}
         Err(error)
             if recover_frame_after_loader_vm_error(
@@ -112,20 +114,19 @@ fn build_parent_link_repair_script(
 }
 
 /// Execute CreateFrame Lua with OnLoad suppression (depth-counted for recursion).
-fn exec_create_frame_code(
-    env: &LoaderEnv<'_>,
-    lua_code: &str,
-    name: &str,
-    initial_hidden: bool,
-) -> Result<(), LoadError> {
+fn exec_create_frame_code(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {
     {
         let mut state = env.state().borrow_mut();
-        state.create_frame_initial_hidden = Some(initial_hidden);
+        state.create_frame_initial_hidden = Some(setup.initial_hidden);
         state.suppress_runtime_on_load_depth += 1;
     }
-    let exec_result = env
-        .exec(lua_code)
-        .map_err(|e| LoadError::Lua(format!("Failed to create frame {}: {}", name, e)));
+    let exec_result = if can_fast_create_frame(setup) {
+        fast_create_frame(env, setup)
+    } else {
+        env.exec(setup.lua_code).map_err(|e| {
+            LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, e))
+        })
+    };
     {
         let mut state = env.state().borrow_mut();
         state.create_frame_initial_hidden = None;
@@ -133,6 +134,47 @@ fn exec_create_frame_code(
             state.suppress_runtime_on_load_depth.saturating_sub(1);
     }
     exec_result
+}
+
+fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
+    setup.explicit_parent
+        && setup.name != setup.parent
+        && setup.frame.parent_key.is_none()
+        && setup.frame.parent_array.is_none()
+        && setup.frame.combined_mixin().is_none()
+        && setup.frame.all_key_values().next().is_none()
+        && setup.frame.xml_attributes().is_none()
+        && setup.frame.xml_id.is_none()
+        && setup.frame.scripts().is_none()
+}
+
+fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {
+    env.with_state(|state| {
+        let widget_type = crate::widget::WidgetType::from_str(setup.widget_type)
+            .ok_or_else(|| crate::Error::Other(format!("unknown widget type '{}'", setup.widget_type)))?;
+        let parent_id = crate::lua_api::rilua_methods::borrow_state(state)?
+            .widgets
+            .get_id_by_name(setup.parent)
+            .ok_or_else(|| crate::Error::Other(format!("missing parent '{}'", setup.parent)))?;
+        let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
+            state,
+            widget_type,
+            setup.widget_type,
+            Some(setup.name.to_string()),
+            Some(parent_id),
+            true,
+            None,
+        )?;
+        crate::lua_api::globals::rilua_create_frame::apply_runtime_template_chain(
+            state,
+            frame_id,
+            (!setup.inherits.is_empty()).then_some(setup.inherits),
+            false,
+        )
+        .map_err(|error| crate::Error::Other(error.to_string()))?;
+        Ok::<(), crate::Error>(())
+    })
+    .map_err(|error| LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, error)))
 }
 
 /// Set declarative frame properties directly in Rust after the Lua CreateFrame chunk.
