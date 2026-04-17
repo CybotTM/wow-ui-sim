@@ -658,7 +658,9 @@ fn tooltip_for_item_source(state: &mut LuaState, value: Val) -> Val {
             let item_id = match other {
                 Val::Num(value) if value > 0.0 => Some(value as u32),
                 Val::Str(_) => val_to_string(state, other).and_then(|text| {
-                    parse_prefixed_id(&text, "item").or_else(|| text.parse().ok())
+                    parse_prefixed_id(&text, "item")
+                        .or_else(|| text.strip_prefix("item:")?.split(':').next()?.parse().ok())
+                        .or_else(|| text.parse().ok())
                 }),
                 _ => None,
             };
@@ -672,8 +674,11 @@ fn tooltip_for_item_source(state: &mut LuaState, value: Val) -> Val {
 fn parse_spell_source(state: &mut LuaState, value: Val) -> Option<u32> {
     match value {
         Val::Num(value) if value > 0.0 => Some(value as u32),
-        Val::Str(_) => val_to_string(state, value)
-            .and_then(|text| parse_prefixed_id(&text, "spell").or_else(|| text.parse().ok())),
+        Val::Str(_) => val_to_string(state, value).and_then(|text| {
+            parse_prefixed_id(&text, "spell")
+                .or_else(|| text.strip_prefix("spell:")?.split(':').next()?.parse().ok())
+                .or_else(|| text.parse().ok())
+        }),
         _ => None,
     }
 }
