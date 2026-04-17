@@ -703,9 +703,8 @@ impl App {
             let Some(frame) = state.widgets.get(current) else {
                 break;
             };
-            let child_hit = topmost_child_at(&state.widgets, grid, frame, pos);
-            match child_hit {
-                Some(cid) => current = cid,
+            match topmost_child_at(&state.widgets, grid, frame, pos) {
+                Some(child_id) => current = child_id,
                 None => break,
             }
         }
@@ -734,12 +733,10 @@ fn deepest_click_target(
     button_name: &str,
 ) -> Option<u64> {
     let frame = widgets.get(frame_id)?;
-    let mut child_hit = topmost_child_at(widgets, grid, frame, pos);
-    while let Some(child_id) = child_hit {
+    for child_id in children_at_point_by_z_order(widgets, grid, frame, pos) {
         if let Some(target) = deepest_click_target(widgets, grid, child_id, pos, button_name) {
             return Some(target);
         }
-        child_hit = next_lower_child_at(widgets, grid, frame, pos, child_id);
     }
 
     if frame_accepts_mouse_button(frame, button_name) {
@@ -755,42 +752,31 @@ fn topmost_child_at(
     frame: &crate::widget::Frame,
     pos: iced::Point,
 ) -> Option<u64> {
-    frame
-        .children
-        .iter()
-        .copied()
-        .filter(|&child_id| grid.contains(child_id, pos))
-        .max_by_key(|&child_id| {
-            widgets
-                .get(child_id)
-                .map(|child| hit_sort_key(child, child_id))
-                .unwrap_or_default()
-        })
+    children_at_point_by_z_order(widgets, grid, frame, pos)
+        .into_iter()
+        .next()
 }
 
-fn next_lower_child_at(
+fn children_at_point_by_z_order(
     widgets: &crate::widget::WidgetRegistry,
     grid: &crate::iced_app::hit_grid::HitGrid,
     frame: &crate::widget::Frame,
     pos: iced::Point,
-    topmost_child_id: u64,
-) -> Option<u64> {
-    let topmost_key = widgets
-        .get(topmost_child_id)
-        .map(|child| hit_sort_key(child, topmost_child_id))?;
-
-    frame
+) -> Vec<u64> {
+    let mut child_ids: Vec<_> = frame
         .children
         .iter()
         .copied()
-        .filter(|&child_id| child_id != topmost_child_id && grid.contains(child_id, pos))
-        .filter_map(|child_id| {
-            let child = widgets.get(child_id)?;
-            let key = hit_sort_key(child, child_id);
-            (key < topmost_key).then_some((key, child_id))
-        })
-        .max_by_key(|&(key, _)| key)
-        .map(|(_, child_id)| child_id)
+        .filter(|&child_id| grid.contains(child_id, pos))
+        .collect();
+    child_ids.sort_by_key(|&child_id| {
+        widgets
+            .get(child_id)
+            .map(|child| hit_sort_key(child, child_id))
+            .unwrap_or_default()
+    });
+    child_ids.reverse();
+    child_ids
 }
 
 fn hit_sort_key(frame: &crate::widget::Frame, id: u64) -> (crate::widget::FrameStrata, i32, i32, u64) {
