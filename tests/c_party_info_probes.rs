@@ -1,0 +1,133 @@
+//! Tests for `C_PartyInfo` probes backed by
+//! `SimState.party_members` / `party_group_active`.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+// ── GetActiveGroupType ────────────────────────────────────────────────────────
+
+#[test]
+fn get_active_group_type_nil_when_solo() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_PartyInfo.GetActiveGroupType() == nil")
+        .unwrap();
+    assert!(is_nil, "solo player should return nil group type");
+}
+
+#[test]
+fn get_active_group_type_zero_for_party() {
+    let env = env();
+    let group_type: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(3)
+            return C_PartyInfo.GetActiveGroupType()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(group_type, 0, "party of 3 should return 0 (Party)");
+}
+
+#[test]
+fn get_active_group_type_one_for_raid() {
+    let env = env();
+    let group_type: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(10)
+            return C_PartyInfo.GetActiveGroupType()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(group_type, 1, "party of 10 (≥6) should return 1 (Raid)");
+}
+
+// ── IsPartyFull ───────────────────────────────────────────────────────────────
+
+#[test]
+fn is_party_full_false_when_solo() {
+    let env = env();
+    let full: bool = env.eval("return C_PartyInfo.IsPartyFull()").unwrap();
+    assert!(!full, "solo player is not in a full party");
+}
+
+#[test]
+fn is_party_full_false_for_small_party() {
+    let env = env();
+    let full: bool = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(2)
+            return C_PartyInfo.IsPartyFull()
+            "#,
+        )
+        .unwrap();
+    assert!(!full, "party of 2 others + player is not full");
+}
+
+#[test]
+fn is_party_full_true_when_party_at_capacity() {
+    let env = env();
+    let full: bool = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            return C_PartyInfo.IsPartyFull()
+            "#,
+        )
+        .unwrap();
+    assert!(full, "4 others + player = 5 total = full party");
+}
+
+// ── IsPartyInJailersTower ─────────────────────────────────────────────────────
+
+#[test]
+fn is_party_in_jailers_tower_always_false() {
+    let env = env();
+    let in_tower: bool = env
+        .eval("return C_PartyInfo.IsPartyInJailersTower()")
+        .unwrap();
+    assert!(!in_tower, "Torghast is not modelled; always false");
+}
+
+// ── GetActiveCategories ───────────────────────────────────────────────────────
+
+#[test]
+fn get_active_categories_empty_when_solo() {
+    let env = env();
+    let count: i32 = env
+        .eval("return #C_PartyInfo.GetActiveCategories()")
+        .unwrap();
+    assert_eq!(count, 0, "solo player has no active party categories");
+}
+
+#[test]
+fn get_active_categories_home_when_grouped() {
+    let env = env();
+    let (count, first): (i32, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(2)
+            local cats = C_PartyInfo.GetActiveCategories()
+            return #cats, cats[1]
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 1, "one active category when grouped");
+    assert_eq!(first, 1, "category id 1 = Home (Enum.PartyCategory.Home)");
+}
+
+// ── GetInviteConfirmationInfo ─────────────────────────────────────────────────
+
+#[test]
+fn get_invite_confirmation_info_returns_nil() {
+    let env = env();
+    let count: i32 = env
+        .eval(r#"return select('#', C_PartyInfo.GetInviteConfirmationInfo("Player-1234-ABCDEF"))"#)
+        .unwrap();
+    assert_eq!(count, 0, "no pending invite returns nothing");
+}
