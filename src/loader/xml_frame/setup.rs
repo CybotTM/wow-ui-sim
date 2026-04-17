@@ -144,7 +144,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
         && setup.frame.combined_mixin().is_none()
         && setup.frame.all_key_values().next().is_none()
         && setup.frame.xml_attributes().is_none()
-        && setup.frame.xml_id.is_none()
         && setup.frame.scripts().is_none()
 }
 
@@ -163,7 +162,7 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             Some(setup.name.to_string()),
             Some(parent_id),
             true,
-            None,
+            setup.frame.xml_id,
         )?;
         crate::lua_api::globals::rilua_create_frame::apply_runtime_template_chain(
             state,
