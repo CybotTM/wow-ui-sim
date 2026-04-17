@@ -172,6 +172,12 @@ fn register_guild_and_game_rules(b: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_services(b: TableBuilder) -> LuaResult<TableBuilder> {
+    let b = register_housing_and_pet_battles(b)?;
+    let b = register_lfg_services(b)?;
+    register_photo_sharing(b)
+}
+
+fn register_housing_and_pet_battles(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function(
         "SetHousingServiceEnabled",
         super::housing::admin_set_housing_service_enabled,
@@ -183,8 +189,11 @@ fn register_services(b: TableBuilder) -> LuaResult<TableBuilder> {
     .set_function(
         "SetPetBattleState",
         super::pet_battles::admin_set_pet_battle_state,
-    )?
-    .set_function(
+    )
+}
+
+fn register_lfg_services(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function(
         "SetLfgApplicationCounts",
         super::lfg_list::admin_set_application_counts,
     )?
@@ -195,8 +204,11 @@ fn register_services(b: TableBuilder) -> LuaResult<TableBuilder> {
     .set_function(
         "SetCanUsePremadeGroup",
         super::lfg_info::admin_set_can_use_premade_group,
-    )?
-    .set_function(
+    )
+}
+
+fn register_photo_sharing(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function(
         "SetPhotoSharingAuthorized",
         super::photo_sharing::admin_set_photo_sharing_authorized,
     )?
