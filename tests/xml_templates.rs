@@ -226,6 +226,33 @@ fn test_create_frame_from_xml_method_only_onload_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_function_only_onload_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlFunctionOnlyOnLoad(self)
+            self.xmlFunctionLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlFunctionOnlyFrame" parent="UIParent">
+        <Scripts><OnLoad function="XmlFunctionOnlyOnLoad"/></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let loaded: bool = env
+        .eval("return XmlFunctionOnlyFrame.xmlFunctionLoaded == true")
+        .unwrap();
+    assert!(loaded, "XML function-only OnLoad should fire");
+}
+
+#[test]
 fn test_create_scrollframe_from_xml_registers_scroll_child() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

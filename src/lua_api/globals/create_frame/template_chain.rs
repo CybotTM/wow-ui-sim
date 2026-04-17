@@ -547,7 +547,7 @@ pub(crate) fn apply_template_scripts(
 }
 
 pub(crate) fn scripts_support_fast_install(scripts: &crate::xml::ScriptsXml) -> bool {
-    collect_method_only_handlers(scripts).is_some()
+    collect_fast_handlers(scripts).is_some()
 }
 
 fn apply_method_only_scripts_fast(
@@ -555,47 +555,52 @@ fn apply_method_only_scripts_fast(
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
 ) -> LuaResult<bool> {
-    let Some(handlers) = collect_method_only_handlers(scripts) else {
+    let Some(handlers) = collect_fast_handlers(scripts) else {
         return Ok(false);
     };
     if handlers.is_empty() {
         return Ok(true);
     }
 
-    for (handler_name, method_name) in handlers {
-        let handler = build_method_handler(state, method_name)?;
+    for (handler_name, handler_ref) in handlers {
+        let handler = build_fast_handler(state, handler_ref)?;
         set_script(state, frame_id, handler_name, handler);
     }
 
     Ok(true)
 }
 
-fn collect_method_only_handlers(
+fn collect_fast_handlers(
     scripts: &crate::xml::ScriptsXml,
-) -> Option<Vec<(&'static str, &str)>> {
+) -> Option<Vec<(&'static str, FastHandlerRef<'_>)>> {
     let mut handlers = Vec::new();
-    collect_method_only_handler_group(&mut handlers, base_method_only_handlers(scripts))?;
-    collect_method_only_handler_group(&mut handlers, pointer_method_only_handlers(scripts))?;
-    collect_method_only_handler_group(&mut handlers, text_method_only_handlers(scripts))?;
-    collect_method_only_handler_group(&mut handlers, state_method_only_handlers(scripts))?;
+    collect_fast_handler_group(&mut handlers, base_method_only_handlers(scripts))?;
+    collect_fast_handler_group(&mut handlers, pointer_method_only_handlers(scripts))?;
+    collect_fast_handler_group(&mut handlers, text_method_only_handlers(scripts))?;
+    collect_fast_handler_group(&mut handlers, state_method_only_handlers(scripts))?;
     Some(handlers)
 }
 
 type MethodOnlyScript<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
+type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 
-fn collect_method_only_handler_group<'a>(
-    handlers: &mut Vec<(&'static str, &'a str)>,
-    group: impl IntoIterator<Item = MethodOnlyScript<'a>>,
+#[derive(Copy, Clone)]
+enum FastHandlerRef<'a> {
+    Method(&'a str),
+    Function(&'a str),
+}
+
+fn collect_fast_handler_group<'a>(
+    handlers: &mut Vec<(&'static str, FastHandlerRef<'a>)>,
+    group: impl IntoIterator<Item = FastHandler<'a>>,
 ) -> Option<()> {
     for (handler_name, script) in group {
         let Some(script) = script else {
             continue;
         };
-        if script.intrinsic_order.is_some() || script.inherit.is_some() || script.function.is_some()
-        {
+        if script.intrinsic_order.is_some() || script.inherit.is_some() {
             return None;
         }
-        let method_name = script.method.as_deref()?;
         if script
             .body
             .as_deref()
@@ -603,7 +608,14 @@ fn collect_method_only_handler_group<'a>(
         {
             return None;
         }
-        handlers.push((handler_name, method_name));
+        let handler = if let Some(method_name) = script.method.as_deref() {
+            FastHandlerRef::Method(method_name)
+        } else if let Some(function_name) = script.function.as_deref() {
+            FastHandlerRef::Function(function_name)
+        } else {
+            return None;
+        };
+        handlers.push((handler_name, handler));
     }
     Some(())
 }
@@ -685,6 +697,13 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
         Val::Function(builder.gc_ref()),
         &[method_name],
     )
+}
+
+fn build_fast_handler(state: &mut LuaState, handler_ref: FastHandlerRef<'_>) -> LuaResult<Val> {
+    match handler_ref {
+        FastHandlerRef::Method(method_name) => build_method_handler(state, method_name),
+        FastHandlerRef::Function(function_name) => Ok(resolve_global_path(state, function_name)),
+    }
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
