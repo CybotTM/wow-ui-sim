@@ -121,6 +121,8 @@ macro_rules! build_empty_sim_state {
             loot_frame_open: false,
             guild_registrar_open: false,
             pet_stables_open: false,
+            battlefield_queue: BattlefieldQueue::default(),
+            battlefield_minimap_visible: false,
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -411,6 +413,11 @@ pub struct SimState {
     pub guild_registrar_open: bool,
     /// Whether the pet-stables UI is open.
     pub pet_stables_open: bool,
+    /// PvP / battlefield queue state — a single slot for the active
+    /// battleground, arena, or LFG queue. See `BattlefieldQueue`.
+    pub battlefield_queue: BattlefieldQueue,
+    /// Whether the battlefield minimap overlay is visible.
+    pub battlefield_minimap_visible: bool,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -424,9 +431,10 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    GameRuleValue, GameRulesState, Keybindings, LfgListCounts, ModifierKeys, NetStats,
-    PetBattleState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
-    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    BattlefieldQueue, BattlefieldStatus, GameRuleValue, GameRulesState, Keybindings,
+    LfgListCounts, ModifierKeys, NetStats, PetBattleState, WowLabsAreaInfo, WowLabsCircleInfo,
+    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
+    WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {

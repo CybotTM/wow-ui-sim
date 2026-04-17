@@ -93,6 +93,42 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// Battlefield / arena / LFG queue state. A single slot models the
+/// active queue — retail supports multiple concurrent slots, the sim
+/// does not need them yet. `index` is the 1-based slot id callers
+/// reference (e.g. `GetBattlefieldStatus(i)`); `name` is the
+/// human-readable queue name for display.
+#[derive(Debug, Default, Clone)]
+pub struct BattlefieldQueue {
+    pub status: BattlefieldStatus,
+    pub index: i32,
+    pub name: String,
+}
+
+/// Battlefield-queue status machine. Mirrors retail's
+/// `GetBattlefieldStatus(index)` return strings — callers compare to
+/// `"none" / "queued" / "confirm" / "active"`.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum BattlefieldStatus {
+    #[default]
+    None,
+    Queued,
+    Confirm,
+    Active,
+}
+
+impl BattlefieldStatus {
+    /// Canonical WoW status string returned by `GetBattlefieldStatus`.
+    pub fn as_wow_str(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Queued => "queued",
+            Self::Confirm => "confirm",
+            Self::Active => "active",
+        }
+    }
+}
+
 /// LFG-list counts backing `C_LFGList.GetNumApplications()` and
 /// `GetNumApplicants()`. Each returns `(total, viewed)` — shape matters
 /// because callers destructure both values in one statement.
