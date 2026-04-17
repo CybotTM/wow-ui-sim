@@ -1,18 +1,20 @@
 use super::item_socket_info;
 use super::{
     LINE_TYPE_EQUIP_SLOT, LINE_TYPE_ITEM_BINDING, LINE_TYPE_ITEM_LEVEL, LINE_TYPE_ITEM_NAME,
-    LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME, LINE_TYPE_UNIT_NAME, TOOLTIP_TYPE_CURRENCY,
-    TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_MINIMAP_MOUSEOVER, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT,
-    TOOLTIP_TYPE_UNIT_AURA, WORLD_CURSOR_GUID, WORLD_LOOT_TOOLTIP_INVENTORY_TYPE,
-    WORLD_LOOT_TOOLTIP_SPELL_ID, ensure_namespace, set_table_array,
+    LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME, LINE_TYPE_UNIT_NAME,
+    TOOLTIP_TYPE_ACHIEVEMENT, TOOLTIP_TYPE_CURRENCY, TOOLTIP_TYPE_ITEM,
+    TOOLTIP_TYPE_MINIMAP_MOUSEOVER, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT, TOOLTIP_TYPE_UNIT_AURA,
+    WORLD_CURSOR_GUID, WORLD_LOOT_TOOLTIP_INVENTORY_TYPE, WORLD_LOOT_TOOLTIP_SPELL_ID,
+    ensure_namespace, set_table_array,
 };
 use crate::items;
+use crate::loader::lua_file::compile_with_rilua;
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::globals::{currency_data, profession_data};
 use crate::lua_api::globals::{spell_api, spellbook_data};
 use crate::lua_api::methods::{
-    borrow_state, call_function_state, create_string, create_table, table_get, table_set,
-    val_to_string,
+    borrow_lua, borrow_state, call_function as call_rilua_function, call_function_state,
+    create_string, create_table, registry_get, registry_set, table_get, table_set, val_to_string,
 };
 use crate::lua_api::state::RACE_DATA;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
@@ -75,6 +77,81 @@ fn empty_tooltip(state: &mut LuaState, tooltip_type: f64) -> Val {
     let lines = create_table(state);
     table_set(state, tooltip, "type", Val::Num(tooltip_type));
     table_set(state, tooltip, "lines", lines);
+    tooltip
+}
+
+const ACHIEVEMENT_INFO_HELPER_KEY: &str = "__tooltip_achievement_info_helper";
+const ACHIEVEMENT_INFO_HELPER_SOURCE: &str = r#"
+return function(id)
+    local _, name, points, completed, month, day, year, description = GetAchievementInfo(id)
+    if name == nil then
+        return nil
+    end
+    return {
+        name = name,
+        points = points,
+        completed = completed,
+        month = month,
+        day = day,
+        year = year,
+        description = description,
+    }
+end
+"#;
+
+fn achievement_info_helper(state: &mut LuaState) -> LuaResult<Val> {
+    let existing = registry_get(state, ACHIEVEMENT_INFO_HELPER_KEY);
+    if matches!(existing, Val::Function(_)) {
+        return Ok(existing);
+    }
+
+    let helper = {
+        let lua_rc = borrow_lua(state)?;
+        let mut lua = lua_rc.borrow_mut();
+        let chunk = compile_with_rilua(
+            &mut *lua,
+            ACHIEVEMENT_INFO_HELPER_SOURCE.as_bytes(),
+            "@tooltip_achievement_info",
+        )
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+        call_rilua_function(&mut lua, Val::Function(chunk.gc_ref()), &[])?
+    };
+    registry_set(state, ACHIEVEMENT_INFO_HELPER_KEY, helper);
+    Ok(helper)
+}
+
+fn tooltip_for_achievement_id(state: &mut LuaState, achievement_id: i32) -> Val {
+    let Ok(helper) = achievement_info_helper(state) else {
+        return empty_tooltip(state, TOOLTIP_TYPE_ACHIEVEMENT);
+    };
+    let Ok(info) = call_function_state(state, helper, &[Val::Num(achievement_id as f64)]) else {
+        return empty_tooltip(state, TOOLTIP_TYPE_ACHIEVEMENT);
+    };
+    if !matches!(info, Val::Table(_)) {
+        return empty_tooltip(state, TOOLTIP_TYPE_ACHIEVEMENT);
+    }
+
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_ACHIEVEMENT);
+    let lines = table_get(state, tooltip, "lines");
+    let name_value = table_get(state, info, "name");
+    if let Some(name) = val_to_string(state, name_value) {
+        push_tooltip_line(state, lines, 1, LINE_TYPE_SPELL_NAME, &name, None, false);
+    }
+    let description_value = table_get(state, info, "description");
+    if let Some(description) = val_to_string(state, description_value)
+        && !description.is_empty()
+    {
+        push_tooltip_line(
+            state,
+            lines,
+            2,
+            LINE_TYPE_SPELL_DESCRIPTION,
+            &description,
+            None,
+            true,
+        );
+    }
+    table_set(state, tooltip, "id", Val::Num(achievement_id as f64));
     tooltip
 }
 
@@ -519,6 +596,7 @@ fn register_item_spell_aura_methods(
         state,
         table_ref,
         &[
+            ("GetAchievementByID", c_tooltip_get_achievement_by_id),
             ("GetTraitEntry", c_tooltip_get_trait_entry),
             ("GetAction", c_tooltip_get_action),
             ("GetBagItem", c_tooltip_get_bag_item),
@@ -605,6 +683,13 @@ fn register_tooltip_methods(
 
 fn c_tooltip_get_trait_entry(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip = tooltip_for_spell_id(state, 19750);
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_achievement_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let tooltip = tooltip_for_achievement_id(state, achievement_id);
     state.push(tooltip);
     Ok(1)
 }

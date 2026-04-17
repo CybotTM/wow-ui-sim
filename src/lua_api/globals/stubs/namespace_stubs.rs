@@ -168,7 +168,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_Timer", "NewTimerID", stub_nil),
     // C_TooltipInfo
     ("C_TooltipInfo", "GetAction", stub_nil),
-    ("C_TooltipInfo", "GetAchievementByID", stub_nil),
     ("C_TooltipInfo", "GetAura", stub_nil),
     ("C_TooltipInfo", "GetGuildBankItem", stub_nil),
     ("C_TooltipInfo", "GetHyperlink", stub_nil),

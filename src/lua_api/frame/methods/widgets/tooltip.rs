@@ -596,6 +596,19 @@ pub(super) fn set_trade_skill_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_achievement_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let achievement_id = stack_val(state, 2);
+    let _ = populate_tooltip_from_method(
+        state,
+        tooltip_id,
+        "GetAchievementByID",
+        &[achievement_id],
+        None,
+    )?;
+    Ok(0)
+}
+
 /// `Tooltip:SetOwner(frame, anchor, xOffset, yOffset)`
 pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
@@ -735,6 +748,7 @@ const TOOLTIP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetSpell", get_spell),
     ("GetUnit", get_unit),
     ("GetItem", get_item),
+    ("SetAchievementByID", set_achievement_by_id),
     ("SetSpellByID", set_spell_by_id),
     ("SetSpellBookItem", set_spell_book_item),
     ("SetItemByID", set_item_by_id),
