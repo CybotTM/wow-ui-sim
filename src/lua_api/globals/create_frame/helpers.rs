@@ -259,7 +259,7 @@ fn collect_filtered_hash_entries(
 // Parent array helpers
 // ---------------------------------------------------------------------------
 
-pub(crate) fn append_parent_array_entry(
+pub(super) fn append_parent_array_entry(
     state: &mut LuaState,
     parent_id: u64,
     key: &str,
