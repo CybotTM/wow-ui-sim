@@ -17,6 +17,7 @@ pub mod admin_spec;
 pub mod admin_vault;
 pub mod admin_zone_economy;
 pub mod auras;
+pub mod battlefield_lfg_probes;
 pub mod battlefield_verbs;
 pub mod channel_verbs;
 pub mod chat_window_verbs;

@@ -119,8 +119,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetActionCooldown is SimState-backed in cooldown_probes.rs, not a stub.
     "GetAuctionHouseDepositRate",
     "GetBackpackCurrencyInfo",
-    "GetBattlefieldInstanceRunTime",
-    "GetBattlefieldStatus",
+    // GetBattlefieldInstanceRunTime / GetBattlefieldStatus are
+    // SimState-backed in battlefield_lfg_probes.rs, not stubs.
     // GetContainerNumFreeSlots is SimState-backed in inventory_counts.rs,
     // not a stub.
     "GetCurrentGuildBankTab",
@@ -144,16 +144,16 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetInventoryItemCooldown is SimState-backed in cooldown_probes.rs,
     // not a stub.
     "GetItemQualityColor",
-    "GetLFGDungeonInfo",
-    "GetLFGDungeonNumEncounters",
-    "GetLFGMode",
+    // GetLFGDungeonInfo / GetLFGDungeonNumEncounters / GetLFGMode are
+    // SimState-backed in battlefield_lfg_probes.rs, not stubs.
     // GetMerchantNumItems is SimState-backed in inventory_counts.rs, not a stub.
     "GetMirrorTimerInfo",
     "GetMirrorTimerProgress",
     "GetMouseFocus",
     "GetNextInteractUnit",
     // GetNumAuctionItems is SimState-backed in inventory_counts.rs, not a stub.
-    "GetNumBattlegroundEntries",
+    // GetNumBattlegroundEntries is SimState-backed in
+    // battlefield_lfg_probes.rs, not a stub.
     "GetNumClasses",
     // GetNumGroupMembers / GetNumPartyMembers / GetNumRaidMembers /
     // GetNumSubgroupMembers are SimState-backed in group_queries.rs,
