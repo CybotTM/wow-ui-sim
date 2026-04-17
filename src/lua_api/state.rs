@@ -142,6 +142,8 @@ macro_rules! build_empty_sim_state {
             helpful_spells: ::std::collections::HashSet::new(),
             pet_spells: ::std::collections::HashSet::new(),
             pvp_last_honor_gain: 0,
+            equippable_items: ::std::collections::HashSet::new(),
+            consumable_items: ::std::collections::HashSet::new(),
             menu_open: false,
             xp_disabled: false,
             can_teleport: true,
@@ -499,6 +501,11 @@ pub struct SimState {
     /// Most recent honor amount the player gained. Drives
     /// `GetPVPLastHonorGain`. Default 0.
     pub pvp_last_honor_gain: i32,
+    /// Item ids classified as equippable. Drives `IsEquippableItem`.
+    pub equippable_items: ::std::collections::HashSet<u32>,
+    /// Item ids classified as consumable (potions, food, runes…).
+    /// Drives `IsConsumableItem`.
+    pub consumable_items: ::std::collections::HashSet<u32>,
     /// Whether the game-system menu (ESC menu) is open. Drives global
     /// `IsMenuOpen`. Default false.
     pub menu_open: bool,
