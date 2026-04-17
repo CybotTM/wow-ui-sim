@@ -76,6 +76,7 @@ macro_rules! build_empty_sim_state {
             next_cast_id: $runtime.next_cast_id,
             gcd: $runtime.gcd,
             spell_cooldowns: $collections.spell_cooldowns,
+            inventory_item_cooldowns: ::std::collections::HashMap::new(),
             action_ui_buttons: $collections.action_ui_buttons,
             cursor_item: $runtime.cursor_item,
             loading_addon_index: $runtime.loading_addon_index,
@@ -316,6 +317,10 @@ pub struct SimState {
     pub gcd: Option<(f64, f64)>,
     /// Per-spell cooldowns: spell_id → SpellCooldownState.
     pub spell_cooldowns: HashMap<u32, SpellCooldownState>,
+    /// Per-inventory-slot cooldowns keyed by equipment slot id (same slot
+    /// values as `PlayerState.equipped_items`). Drives
+    /// `GetInventoryItemCooldown(unit, slot)`. Empty by default.
+    pub inventory_item_cooldowns: HashMap<i32, SpellCooldownState>,
     /// Buttons registered via SetActionUIButton(button, action, cooldownFrame).
     pub action_ui_buttons: Vec<(u64, u32)>,
     /// What is currently held on the cursor (drag-and-drop).

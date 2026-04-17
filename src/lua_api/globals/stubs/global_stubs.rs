@@ -116,7 +116,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
 ];
 
 static GLOBAL_ZERO_STUBS: &[&str] = &[
-    "GetActionCooldown",
+    // GetActionCooldown is SimState-backed in cooldown_probes.rs, not a stub.
     "GetAuctionHouseDepositRate",
     "GetBackpackCurrencyInfo",
     "GetBattlefieldInstanceRunTime",
@@ -140,7 +140,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetGuildTabardInfo",
     "GetInstanceInfo",
     "GetInventoryAlertStatus",
-    "GetInventoryItemCooldown",
+    // GetInventoryItemCooldown is SimState-backed in cooldown_probes.rs,
+    // not a stub.
     "GetItemQualityColor",
     "GetLFGDungeonInfo",
     "GetLFGDungeonNumEncounters",
@@ -176,11 +177,9 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetSelectedSkill",
     "GetSelectedSocial",
     "GetSkillLineInfo",
-    "GetSpellAutocast",
-    "GetSpellBonusDamage",
-    "GetSpellBonusHealing",
-    "GetSpellCooldown",
-    "GetSpellLevelLearned",
+    // GetSpellAutocast / GetSpellBonusDamage / GetSpellBonusHealing /
+    // GetSpellCooldown / GetSpellLevelLearned are SimState-backed in
+    // cooldown_probes.rs, not stubs.
     "GetSpellTabInfo",
     "GetSummonConfirmSummoner",
     "GetSummonConfirmTimeLeft",
