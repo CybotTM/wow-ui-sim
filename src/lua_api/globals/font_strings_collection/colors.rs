@@ -1,9 +1,7 @@
 //! Color tables — make_rilua_color_table, named color globals, RAID_CLASS_COLORS,
 //! C_ClassColor, and tooltip / item-quality / class-name / icon-list stubs.
 
-use crate::lua_api::methods::{
-    create_string, create_table, table_get, table_set, val_to_string,
-};
+use crate::lua_api::methods::{create_string, create_table, table_get, table_set, val_to_string};
 use crate::lua_bridge::table_set_rust_fn;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::state::LuaState;

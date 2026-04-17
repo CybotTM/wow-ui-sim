@@ -18,7 +18,7 @@
 //! `A_Admin.SetGuildRanks({ {name, flags}, ... })` to install a roster.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
-use crate::lua_bridge::{table_set_rust_fn, FromStack};
+use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 

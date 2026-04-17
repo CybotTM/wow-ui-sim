@@ -37,9 +37,7 @@ use super::admin_equipment::{equip_item, unequip_item};
 use super::admin_events::{fire_event_admin, toggle_debug_anchors, toggle_debug_borders};
 use super::admin_mail::{add_mail, clear_inbox, set_inbox_count};
 use super::admin_movement::{set_falling, set_flying, set_mounted, set_moving, set_swimming};
-use super::admin_premade::{
-    add_premade_listing, clear_premade_listings, update_premade_listing,
-};
+use super::admin_premade::{add_premade_listing, clear_premade_listings, update_premade_listing};
 use super::admin_pvp_guild::{
     clear_guild, join_guild, leave_guild, set_guild_info, set_honor_level, set_pvp_enabled,
 };
@@ -142,10 +140,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetMetaKeyDown", set_meta_key_down)?
         .set_function("SetGuildEmblem", set_guild_emblem)?
         .set_function("SetGuildRanks", set_guild_ranks)?
-        .set_function(
-            "SetGameRule",
-            super::game_rules::admin_set_game_rule,
-        )?
+        .set_function("SetGameRule", super::game_rules::admin_set_game_rule)?
         .set_function(
             "SetActiveGameMode",
             super::game_rules::admin_set_active_game_mode,
@@ -170,10 +165,7 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetLfgApplicantCounts",
             super::lfg_list::admin_set_applicant_counts,
         )?
-        .set_function(
-            "SetGuildClubId",
-            super::guild_info::admin_set_guild_club_id,
-        )?
+        .set_function("SetGuildClubId", super::guild_info::admin_set_guild_club_id)?
         .set_function(
             "SetGuildIsOfficer",
             super::guild_info::admin_set_guild_is_officer,

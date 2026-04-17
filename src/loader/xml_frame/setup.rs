@@ -132,9 +132,8 @@ fn exec_create_frame_code(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result
     let exec_result = if can_fast_create_frame(setup) {
         fast_create_frame(env, setup)
     } else {
-        env.exec(setup.lua_code).map_err(|e| {
-            LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, e))
-        })
+        env.exec(setup.lua_code)
+            .map_err(|e| LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, e)))
     };
     {
         let mut state = env.state().borrow_mut();
@@ -190,8 +189,10 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
 
 fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {
     env.with_state(|state| {
-        let widget_type = crate::widget::WidgetType::from_str(setup.widget_type)
-            .ok_or_else(|| crate::Error::Other(format!("unknown widget type '{}'", setup.widget_type)))?;
+        let widget_type =
+            crate::widget::WidgetType::from_str(setup.widget_type).ok_or_else(|| {
+                crate::Error::Other(format!("unknown widget type '{}'", setup.widget_type))
+            })?;
         let parent_id = crate::lua_api::methods::borrow_state(state)?
             .widgets
             .get_id_by_name(setup.parent)
@@ -311,6 +312,10 @@ pub(super) fn fast_create_frame_profile_report() -> Option<String> {
         profile.fast_hits,
         profile.slow_fallbacks,
         total,
-        if top.is_empty() { "none".to_string() } else { top }
+        if top.is_empty() {
+            "none".to_string()
+        } else {
+            top
+        }
     ))
 }

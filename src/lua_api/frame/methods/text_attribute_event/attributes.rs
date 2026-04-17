@@ -4,9 +4,7 @@ use super::helpers::{attribute_to_val, store_simple_attribute, val_to_f32};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, val_to_string,
 };
-use crate::lua_api::script_helpers::{
-    call_error_handler_state, get_script as get_rilua_script,
-};
+use crate::lua_api::script_helpers::{call_error_handler_state, get_script as get_rilua_script};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};

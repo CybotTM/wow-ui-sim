@@ -1,8 +1,6 @@
 //! C_SpecializationInfo and UIWidgetContainerMixin implementations.
 
-use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, frame_id_from_stack,
-};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, frame_id_from_stack};
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
 use crate::specializations;
 use rilua::vm::state::LuaState;

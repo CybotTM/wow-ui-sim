@@ -29,7 +29,10 @@ fn set_shift_flips_shift_and_any_modifier() {
     env.exec("A_Admin.SetShiftKeyDown(true)").unwrap();
     let (shift, _, _, _, any) = all(&env);
     assert!(shift);
-    assert!(any, "IsModifierKeyDown should report true when shift is held");
+    assert!(
+        any,
+        "IsModifierKeyDown should report true when shift is held"
+    );
 }
 
 #[test]

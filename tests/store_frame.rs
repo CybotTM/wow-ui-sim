@@ -16,11 +16,17 @@ fn admin_set_store_frame_shown_flips_the_flag() {
     let env = WowLuaEnv::new().expect("env");
     env.exec("A_Admin.SetStoreFrameShown(true)").unwrap();
     let shown: bool = env.eval("return StoreFrame_IsShown()").unwrap();
-    assert!(shown, "StoreFrame_IsShown should report true after admin flip");
+    assert!(
+        shown,
+        "StoreFrame_IsShown should report true after admin flip"
+    );
 
     env.exec("A_Admin.SetStoreFrameShown(false)").unwrap();
     let shown: bool = env.eval("return StoreFrame_IsShown()").unwrap();
-    assert!(!shown, "StoreFrame_IsShown should report false after admin flip back");
+    assert!(
+        !shown,
+        "StoreFrame_IsShown should report false after admin flip back"
+    );
 }
 
 #[test]

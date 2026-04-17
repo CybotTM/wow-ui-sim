@@ -30,15 +30,7 @@ fn game_rules_hardcore_flag_defaults_to_false() {
 
 #[test]
 fn defaults_no_rules_standard_mode_character_select() {
-    let (active, f, i, s, plunder, mode, glue): (
-        bool,
-        f64,
-        i64,
-        String,
-        bool,
-        i64,
-        String,
-    ) = env()
+    let (active, f, i, s, plunder, mode, glue): (bool, f64, i64, String, bool, i64, String) = env()
         .eval(
             r#"
             return C_GameRules.IsGameRuleActive("Anything"),
@@ -63,7 +55,8 @@ fn defaults_no_rules_standard_mode_character_select() {
 #[test]
 fn number_rule_round_trips_as_float_int_and_string() {
     let env = env();
-    env.exec(r#"A_Admin.SetGameRule("MAX_PLAYERS", 42)"#).unwrap();
+    env.exec(r#"A_Admin.SetGameRule("MAX_PLAYERS", 42)"#)
+        .unwrap();
     let (active, f, i, s): (bool, f64, i64, String) = env
         .eval(
             r#"
@@ -83,7 +76,8 @@ fn number_rule_round_trips_as_float_int_and_string() {
 #[test]
 fn string_rule_parses_numeric_form_when_possible() {
     let env = env();
-    env.exec(r#"A_Admin.SetGameRule("LEVEL_CAP", "80")"#).unwrap();
+    env.exec(r#"A_Admin.SetGameRule("LEVEL_CAP", "80")"#)
+        .unwrap();
     let (f, i, s): (f64, i64, String) = env
         .eval(
             r#"
@@ -120,7 +114,8 @@ fn non_numeric_string_keeps_string_form_but_numbers_default_to_zero() {
 #[test]
 fn bool_true_is_active_false_removes() {
     let env = env();
-    env.exec(r#"A_Admin.SetGameRule("FEATURE_FOO", true)"#).unwrap();
+    env.exec(r#"A_Admin.SetGameRule("FEATURE_FOO", true)"#)
+        .unwrap();
     let active: bool = env
         .eval(r#"return C_GameRules.IsGameRuleActive("FEATURE_FOO")"#)
         .unwrap();

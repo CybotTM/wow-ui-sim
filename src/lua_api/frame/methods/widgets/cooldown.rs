@@ -485,7 +485,10 @@ const COOLDOWN_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     // Duration / expiration configuration
     ("SetCooldown", set_cooldown),
     ("SetCooldownUNIX", set_cooldown_unix),
-    ("SetCooldownFromExpirationTime", set_cooldown_from_expiration_time),
+    (
+        "SetCooldownFromExpirationTime",
+        set_cooldown_from_expiration_time,
+    ),
     ("SetCooldownDuration", set_cooldown_duration),
     ("SetCooldownFromDurationObject", set_from_duration_object),
     ("GetCooldownTimes", get_cooldown_times),
@@ -508,9 +511,18 @@ const COOLDOWN_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     // Countdown number formatting
     ("SetHideCountdownNumbers", set_hide_countdown_numbers),
     ("GetHideCountdownNumbers", get_hide_countdown_numbers),
-    ("SetMinimumCountdownDuration", set_minimum_countdown_duration),
-    ("GetMinimumCountdownDuration", get_minimum_countdown_duration),
-    ("SetCountdownAbbrevThreshold", set_countdown_abbrev_threshold),
+    (
+        "SetMinimumCountdownDuration",
+        set_minimum_countdown_duration,
+    ),
+    (
+        "GetMinimumCountdownDuration",
+        get_minimum_countdown_duration,
+    ),
+    (
+        "SetCountdownAbbrevThreshold",
+        set_countdown_abbrev_threshold,
+    ),
     // Edge scaling
     ("SetEdgeScale", set_edge_scale),
     ("GetEdgeScale", get_edge_scale),

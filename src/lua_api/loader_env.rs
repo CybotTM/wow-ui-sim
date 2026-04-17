@@ -301,8 +301,7 @@ impl<'a> LoaderEnv<'a> {
                 call_args.push(frame);
                 call_args.push(event_name);
                 call_args.extend_from_slice(args);
-                let _ =
-                    crate::lua_api::methods::call_function_state(state, handler, &call_args);
+                let _ = crate::lua_api::methods::call_function_state(state, handler, &call_args);
                 Ok(())
             });
             if let Err(error) = result {

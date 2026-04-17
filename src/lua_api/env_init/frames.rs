@@ -1,8 +1,7 @@
 //! Frame metatable and builtin-frame initialisation.
 
 use crate::lua_api::frame::methods::{
-    button_anchor_hierarchy, core_state, map_frames, misc,
-    text_attribute_event, widgets,
+    button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
 use crate::lua_api::methods::{registry_set, table_set};
 use rilua::{LuaApiMut, Val};

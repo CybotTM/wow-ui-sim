@@ -1,8 +1,6 @@
 //! Animation group and animation creation/control methods.
 
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};

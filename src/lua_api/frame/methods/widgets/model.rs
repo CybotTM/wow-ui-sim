@@ -1,9 +1,7 @@
 //! Model and ModelScene widget methods (stubs + partial impl).
 
 use super::shared::{opt_bool, val_to_f64};
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -439,7 +437,10 @@ const MODEL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetUpperEmblemTexture", stub_nil),
     ("GetLowerEmblemTexture", stub_nil),
     // ModelScene-specific (round-tripped state)
-    ("SetAllowOverlappedModels", scene_set_allow_overlapped_models),
+    (
+        "SetAllowOverlappedModels",
+        scene_set_allow_overlapped_models,
+    ),
     ("IsAllowOverlappedModels", scene_is_allow_overlapped_models),
     ("SetViewInsets", scene_set_view_insets),
     ("GetViewInsets", scene_get_view_insets),

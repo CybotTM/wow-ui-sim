@@ -16,9 +16,7 @@
 //! share no code with it.
 
 use crate::lua_api::game_data::CLASS_LABELS;
-use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_get, table_set,
-};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
 use crate::lua_bridge::FromStack;
 use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::state::LuaState;

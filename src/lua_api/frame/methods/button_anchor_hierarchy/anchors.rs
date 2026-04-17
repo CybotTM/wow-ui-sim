@@ -1,8 +1,6 @@
 //! Anchor methods: SetPoint, GetPoint, ClearAllPoints, line endpoints, etc.
 
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};

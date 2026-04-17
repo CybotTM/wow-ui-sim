@@ -1,8 +1,6 @@
 //! CallbackRegistryMixin equivalents: RegisterCallback, UnregisterCallback, TriggerEvent.
 
-use crate::lua_api::methods::{
-    call_function_state, frame_id_from_stack, frame_ref, val_to_string,
-};
+use crate::lua_api::methods::{call_function_state, frame_id_from_stack, frame_ref, val_to_string};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::stack_val;
 use rilua::vm::gc::arena::GcRef;

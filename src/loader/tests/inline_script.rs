@@ -124,10 +124,8 @@ fn test_collect_lua_error_tracks_seen_message_counts() {
         env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    let third_seen = crate::lua_api::script_helpers::collect_lua_error(
-        env.rilua().state(),
-        "different boom",
-    );
+    let third_seen =
+        crate::lua_api::script_helpers::collect_lua_error(env.rilua().state(), "different boom");
 
     let state = env.state().borrow();
     assert_eq!(state.lua_errors.len(), 3);

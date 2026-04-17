@@ -143,21 +143,18 @@ pub(super) fn set_guild_ranks(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     // Snapshot the list's array part before we touch state mutably.
-    let entry_refs: Vec<rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>> = match state
-        .gc
-        .tables
-        .get(list_ref)
-    {
-        Some(list) => list
-            .array_slice()
-            .iter()
-            .filter_map(|v| match v {
-                Val::Table(r) => Some(*r),
-                _ => None,
-            })
-            .collect(),
-        None => Vec::new(),
-    };
+    let entry_refs: Vec<rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>> =
+        match state.gc.tables.get(list_ref) {
+            Some(list) => list
+                .array_slice()
+                .iter()
+                .filter_map(|v| match v {
+                    Val::Table(r) => Some(*r),
+                    _ => None,
+                })
+                .collect(),
+            None => Vec::new(),
+        };
     let ranks: Vec<_> = entry_refs
         .into_iter()
         .map(|entry_ref| read_rank_entry(state, entry_ref))

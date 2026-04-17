@@ -3,9 +3,7 @@
 //! IsDrawLayerEnabled, SetDrawLayerEnabled.
 
 use super::helpers::{frame_id, opt_f32};
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, extract_frame_id,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, extract_frame_id};
 use crate::lua_bridge::FromStack;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;

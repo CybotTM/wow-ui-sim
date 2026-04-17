@@ -25,7 +25,10 @@ fn entries_have_four_canonical_fields() {
             "#,
         )
         .unwrap();
-    assert_eq!((a.as_str(), b.as_str(), c.as_str(), d.as_str()), ("ok", "ok", "ok", "ok"));
+    assert_eq!(
+        (a.as_str(), b.as_str(), c.as_str(), d.as_str()),
+        ("ok", "ok", "ok", "ok")
+    );
 }
 
 #[test]

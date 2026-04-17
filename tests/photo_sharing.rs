@@ -57,6 +57,7 @@ fn no_arg_setters_default_to_true() {
 fn admin_can_toggle_back_to_false() {
     let env = WowLuaEnv::new().unwrap();
     env.exec("A_Admin.SetPhotoSharingAuthorized(true)").unwrap();
-    env.exec("A_Admin.SetPhotoSharingAuthorized(false)").unwrap();
+    env.exec("A_Admin.SetPhotoSharingAuthorized(false)")
+        .unwrap();
     assert_eq!(probes(&env).0, false);
 }

@@ -30,8 +30,8 @@
 //! `string_format.rs` stays on the mlua side only.
 
 use crate::lua_api::env::WowLuaAppData;
-use crate::lua_api::next_timer_id;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
+use crate::lua_api::next_timer_id;
 use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;

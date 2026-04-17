@@ -4,9 +4,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
     frame_id_from_stack, frame_ref, table_get,
 };
-use crate::lua_api::script_helpers::{
-    call_error_handler_state, get_script as get_rilua_script,
-};
+use crate::lua_api::script_helpers::{call_error_handler_state, get_script as get_rilua_script};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};

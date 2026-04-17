@@ -317,13 +317,22 @@ mod tests {
             )
             .expect("read cloned layout info");
 
-        assert_eq!(layout_count, 2, "preset and saved layouts should both be present");
-        assert_eq!(lock_to_player, 1, "cast bar setting should be forced on cloned preset");
+        assert_eq!(
+            layout_count, 2,
+            "preset and saved layouts should both be present"
+        );
+        assert_eq!(
+            lock_to_player, 1,
+            "cast bar setting should be forced on cloned preset"
+        );
         assert_eq!(
             cast_bar_underneath, 1,
             "player frame setting should be forced on cloned preset"
         );
-        assert_eq!(saved_layout_name, "Saved", "saved layouts should be appended");
+        assert_eq!(
+            saved_layout_name, "Saved",
+            "saved layouts should be appended"
+        );
 
         env.exec(
             r#"
@@ -342,8 +351,14 @@ mod tests {
             )
             .expect("read cloned preset after source mutation");
 
-        assert_eq!(copied_value, 1, "cloned settings must not alias preset source");
-        assert_eq!(copied_point, "TOP", "cloned anchor info must not alias preset source");
+        assert_eq!(
+            copied_value, 1,
+            "cloned settings must not alias preset source"
+        );
+        assert_eq!(
+            copied_point, "TOP",
+            "cloned anchor info must not alias preset source"
+        );
     }
 }
 

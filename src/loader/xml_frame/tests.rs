@@ -57,9 +57,9 @@ fn frame_element_parts(elem: &FrameElement) -> (&FrameXml, &'static str) {
         FrameElement::ContainedAlertFrame(f) => (f, "ContainedAlertFrame"),
         FrameElement::MapScene(f) => (f, "MapScene"),
         FrameElement::Line(f) => (f, "Line"),
-        FrameElement::ScopedModifier(_) => unreachable!(
-            "ScopedModifier is not a frame element in frame_element_to_type tests"
-        ),
+        FrameElement::ScopedModifier(_) => {
+            unreachable!("ScopedModifier is not a frame element in frame_element_to_type tests")
+        }
     }
 }
 

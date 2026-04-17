@@ -3,7 +3,8 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn apps(env: &WowLuaEnv) -> (i64, i64) {
-    env.eval(r#"return C_LFGList.GetNumApplications()"#).unwrap()
+    env.eval(r#"return C_LFGList.GetNumApplications()"#)
+        .unwrap()
 }
 
 fn applicants(env: &WowLuaEnv) -> (i64, i64) {

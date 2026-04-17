@@ -937,8 +937,7 @@ impl WowLuaEnv {
 
     fn timer_callback(&self, timer_id: u64) -> Option<Val> {
         let mut lua = self.lua.borrow_mut();
-        let callback =
-            crate::lua_api::timer_layout::get_timer_callback(lua.state_mut(), timer_id);
+        let callback = crate::lua_api::timer_layout::get_timer_callback(lua.state_mut(), timer_id);
         (!matches!(callback, Val::Nil)).then_some(callback)
     }
 

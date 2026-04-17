@@ -457,12 +457,9 @@ fn apply_runtime_child_direct_properties_with_inherits(
 
 pub(super) fn fire_frame_on_load(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
     let frame = frame_ref(state, frame_id)?;
-    let intrinsic =
-        crate::lua_api::methods::table_get_static(state, frame, "OnLoad_Intrinsic");
+    let intrinsic = crate::lua_api::methods::table_get_static(state, frame, "OnLoad_Intrinsic");
     call_handler_with_frame(state, intrinsic, frame)?;
-    if let Some(on_load) =
-        crate::lua_api::script_helpers::get_script(state, frame_id, "OnLoad")
-    {
+    if let Some(on_load) = crate::lua_api::script_helpers::get_script(state, frame_id, "OnLoad") {
         call_handler_with_frame(state, on_load, frame)?;
     }
     Ok(())

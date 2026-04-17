@@ -13,21 +13,21 @@ pub mod globals;
 mod layout;
 pub(crate) mod loader_env;
 pub mod message_frame;
-pub(crate) mod on_update;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod methods;
+pub(crate) mod on_update;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod taint;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod timer_layout;
 pub mod simple_html;
 pub(crate) mod state;
 mod state_defaults;
 pub(crate) mod state_render;
 pub(crate) mod state_types;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
+pub(crate) mod taint;
 pub(crate) mod talent_state;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
+pub(crate) mod timer_layout;
 mod timer_processing;
 pub mod tooltip;
 pub(crate) mod tracked_recipes;

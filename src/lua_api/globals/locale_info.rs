@@ -101,12 +101,7 @@ const LOCALES: &[LocaleInfo] = &[
     },
 ];
 
-fn set_entry_field(
-    state: &mut LuaState,
-    table_val: Val,
-    key: &'static str,
-    value: Val,
-) {
+fn set_entry_field(state: &mut LuaState, table_val: Val, key: &'static str, value: Val) {
     let Val::Table(table_ref) = table_val else {
         return;
     };
@@ -191,8 +186,8 @@ mod tests {
     #[test]
     fn all_twelve_retail_locales_present() {
         let expected = [
-            "enUS", "enGB", "frFR", "deDE", "esES", "esMX", "itIT", "ptBR", "ruRU", "koKR",
-            "zhCN", "zhTW",
+            "enUS", "enGB", "frFR", "deDE", "esES", "esMX", "itIT", "ptBR", "ruRU", "koKR", "zhCN",
+            "zhTW",
         ];
         let actual: Vec<_> = LOCALES.iter().map(|l| l.locale_name).collect();
         assert_eq!(actual, expected);

@@ -1,8 +1,6 @@
 //! Event registration, script handlers, and hlist data structure helpers.
 
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, frame_id_from_stack, val_to_string,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, val_to_string};
 use crate::lua_api::script_helpers::{
     get_script as get_rilua_script, remove_script as remove_rilua_script,
     set_script as set_rilua_script,

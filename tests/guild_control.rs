@@ -24,9 +24,7 @@ fn defaults_no_guild() {
     assert_eq!(count, 0);
     assert_eq!(name, "");
 
-    let flags_count: i32 = env
-        .eval(r#"return #GuildControlGetRankFlags()"#)
-        .unwrap();
+    let flags_count: i32 = env.eval(r#"return #GuildControlGetRankFlags()"#).unwrap();
     assert_eq!(flags_count, 0);
 }
 

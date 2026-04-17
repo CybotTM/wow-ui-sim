@@ -20,7 +20,10 @@ fn admin_set_timerunning_season_id_enables_and_clears() {
     let (is_active, season_id): (bool, f64) = env
         .eval("return PlayerIsTimerunning(), PlayerGetTimerunningSeasonID()")
         .unwrap();
-    assert!(is_active, "non-zero season id should mark player timerunning");
+    assert!(
+        is_active,
+        "non-zero season id should mark player timerunning"
+    );
     assert_eq!(season_id, 2.0);
 
     env.exec("A_Admin.SetTimerunningSeasonID(0)").unwrap();

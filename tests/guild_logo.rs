@@ -2,9 +2,7 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-fn all_ten(
-    env: &WowLuaEnv,
-) -> (f64, f64, f64, f64, f64, f64, f64, f64, f64, String) {
+fn all_ten(env: &WowLuaEnv) -> (f64, f64, f64, f64, f64, f64, f64, f64, f64, String) {
     env.eval(
         r#"
         local bkgR, bkgG, bkgB, borderR, borderG, borderB,
@@ -96,7 +94,8 @@ fn no_arg_admin_resets_to_defaults() {
 #[test]
 fn emblem_filename_can_be_set_without_colours() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"A_Admin.SetGuildEmblem("foo/bar.tga")"#).unwrap();
+    env.exec(r#"A_Admin.SetGuildEmblem("foo/bar.tga")"#)
+        .unwrap();
     let (_, _, _, _, _, _, _, _, _, fname) = all_ten(&env);
     assert_eq!(fname, "foo/bar.tga");
 }

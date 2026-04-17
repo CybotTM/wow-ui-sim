@@ -1,9 +1,7 @@
 //! EditBox and text-spacing widget methods.
 
 use super::shared::{opt_bool, opt_string, val_to_bool, val_to_f64};
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack,
-};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;

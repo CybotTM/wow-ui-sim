@@ -16,7 +16,7 @@
 //! `A_Admin.SetLfgApplicantCounts(total, viewed)` drives the values.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::{table_set_rust_fn, FromStack};
+use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;

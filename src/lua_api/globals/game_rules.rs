@@ -23,7 +23,7 @@
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::state::GameRuleValue;
-use crate::lua_bridge::{stack_val, table_set_rust_fn, FromStack};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -70,8 +70,12 @@ fn resolve_rule_name_from_enum_id(state: &mut LuaState, id: i64) -> Option<Strin
     };
     // Walk the hash part: `next(table, key)` gives us (name, id) pairs.
     let mut key = Val::Nil;
-    while let Some((next_key, next_value)) =
-        state.gc.tables.get(rule_table)?.next(key, &state.gc.string_arena).ok()?
+    while let Some((next_key, next_value)) = state
+        .gc
+        .tables
+        .get(rule_table)?
+        .next(key, &state.gc.string_arena)
+        .ok()?
     {
         if let (Val::Str(name_ref), Val::Num(value)) = (next_key, next_value) {
             if value as i64 == id {
