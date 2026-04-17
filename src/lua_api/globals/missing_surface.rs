@@ -1,5 +1,6 @@
 //! Restored rilua API surface for item, spell, tooltip, and small legacy globals.
 
+mod heirloom;
 mod item_socket_info;
 mod item_spell;
 mod professions;
@@ -58,6 +59,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     tooltip_info::register_tooltip_surface(state)?;
     transmog::register_transmog_surface(state)?;
     tutorial::register_tutorial_surface(state)?;
+    heirloom::register_heirloom_surface(state)?;
     Ok(())
 }
 

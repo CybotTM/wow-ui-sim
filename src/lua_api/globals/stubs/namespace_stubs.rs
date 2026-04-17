@@ -64,9 +64,10 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_GossipInfo", "GetAvailableQuests", stub_nil),
     ("C_GossipInfo", "GetOptions", stub_nil),
     ("C_GossipInfo", "GetPoiForUiMapID", stub_nil),
-    // C_Heirloom
-    ("C_Heirloom", "GetHeirloomInfo", stub_nil),
-    ("C_Heirloom", "GetHeirloomItemIDFromDisplayedSlot", stub_nil),
+    // C_Heirloom GetHeirloomInfo is WorldState-backed in
+    // missing_surface/heirloom.rs, not a stub.
+    // GetHeirloomItemIDFromDisplayedSlot was a misnamed stub (the real
+    // API is `FromDisplayedIndex`, now registered in heirloom.rs).
     // C_IncomingSummon
     ("C_IncomingSummon", "HasIncomingSummon", stub_nil),
     ("C_IncomingSummon", "IncomingSummonStatus", stub_nil),
