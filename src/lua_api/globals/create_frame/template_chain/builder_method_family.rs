@@ -1,4 +1,4 @@
-use super::FastHandlerRef;
+use super::{FastHandlerRef, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
@@ -77,7 +77,7 @@ pub(super) fn build_method_family_handler(
 }
 
 fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local method_name = ...
@@ -86,8 +86,7 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
             end
         "#,
         "template-method-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let method_name = create_string(state, method_name);
     crate::lua_api::methods::call_function_state(
         state,
@@ -101,7 +100,7 @@ fn build_method_with_bool_arg_handler(
     method_name: &str,
     value: bool,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local method_name, value = ...
@@ -110,14 +109,9 @@ fn build_method_with_bool_arg_handler(
             end
         "#,
         "template-method-bool-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let method_name = create_string(state, method_name);
-    let value = if value {
-        Val::Bool(true)
-    } else {
-        Val::Bool(false)
-    };
+    let value = Val::Bool(value);
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
@@ -130,7 +124,7 @@ fn build_method_with_string_arg_handler(
     method_name: &str,
     arg: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local method_name, literal_arg = ...
@@ -139,8 +133,7 @@ fn build_method_with_string_arg_handler(
             end
         "#,
         "template-method-string-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let method_name = create_string(state, method_name);
     let literal_arg = create_string(state, arg);
     crate::lua_api::methods::call_function_state(
@@ -155,7 +148,7 @@ fn build_self_field_method_handler(
     field: &str,
     method_name: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, method_name = ...
@@ -165,8 +158,7 @@ fn build_self_field_method_handler(
             end
         "#,
         "template-self-field-method-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let method_name = create_string(state, method_name);
     crate::lua_api::methods::call_function_state(
@@ -182,7 +174,7 @@ fn build_self_field_method_with_string_arg_handler(
     method_name: &str,
     arg: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, method_name, literal_arg = ...
@@ -192,8 +184,7 @@ fn build_self_field_method_with_string_arg_handler(
             end
         "#,
         "template-self-field-method-string-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let method_name = create_string(state, method_name);
     let literal_arg = create_string(state, arg);
@@ -210,7 +201,7 @@ fn build_self_field_method_with_number_arg_handler(
     method_name: &str,
     value: f64,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, method_name, number_arg = ...
@@ -220,8 +211,7 @@ fn build_self_field_method_with_number_arg_handler(
             end
         "#,
         "template-self-field-method-number-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let method_name = create_string(state, method_name);
     crate::lua_api::methods::call_function_state(
@@ -237,7 +227,7 @@ fn build_self_field_method_with_global_arg_handler(
     method_name: &str,
     arg_path: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, method_name, resolved_arg = ...
@@ -247,8 +237,7 @@ fn build_self_field_method_with_global_arg_handler(
             end
         "#,
         "template-self-field-method-global-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let method_name = create_string(state, method_name);
     let resolved_arg = resolve_global_path(state, arg_path);
@@ -265,7 +254,7 @@ fn build_self_field_method_with_self_field_arg_handler(
     method_name: &str,
     arg_field: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, method_name, arg_field_name = ...
@@ -275,8 +264,7 @@ fn build_self_field_method_with_self_field_arg_handler(
             end
         "#,
         "template-self-field-method-self-field-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let method_name = create_string(state, method_name);
     let arg_field_name = create_string(state, arg_field);
@@ -295,7 +283,7 @@ fn build_self_field_method_with_string_number_number_args_handler(
     second: f64,
     third: f64,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, method_name, first_arg, second_arg, third_arg = ...
@@ -305,8 +293,7 @@ fn build_self_field_method_with_string_number_number_args_handler(
             end
         "#,
         "template-self-field-method-string-number-number-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let method_name = create_string(state, method_name);
     let first_arg = create_string(state, first);
@@ -332,7 +319,7 @@ fn build_parent_method_with_string_arg_handler(
     method_name: &str,
     arg: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local method_name, literal_arg = ...
@@ -345,8 +332,7 @@ fn build_parent_method_with_string_arg_handler(
             end
         "#,
         "template-parent-method-string-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let method_name = create_string(state, method_name);
     let literal_arg = create_string(state, arg);
     crate::lua_api::methods::call_function_state(
@@ -361,7 +347,7 @@ fn build_ancestor_method_handler(
     method_name: &str,
     depth: usize,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local method_name, depth = ...
@@ -377,8 +363,7 @@ fn build_ancestor_method_handler(
             end
         "#,
         "template-ancestor-method-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let method_name = create_string(state, method_name);
     crate::lua_api::methods::call_function_state(
         state,

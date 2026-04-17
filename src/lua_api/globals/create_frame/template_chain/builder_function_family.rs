@@ -1,4 +1,4 @@
-use super::FastHandlerRef;
+use super::{FastHandlerRef, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
@@ -76,80 +76,59 @@ fn build_function_handler(
     kind: FunctionHandlerKind,
 ) -> LuaResult<Val> {
     let (source, tag) = function_handler_template(kind);
-    let builder = crate::loader::chunk_cache::load_chunk(state, source, tag)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let builder = load_template(state, source, tag)?;
     let target = resolve_global_path(state, function_name);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
 }
 
 fn function_handler_template(kind: FunctionHandlerKind) -> (&'static str, &'static str) {
     match kind {
-        FunctionHandlerKind::NoArgs => no_args_handler_template(),
-        FunctionHandlerKind::SelfId => self_id_handler_template(),
-        FunctionHandlerKind::EventVarargs => event_varargs_handler_template(),
-        FunctionHandlerKind::Button => button_handler_template(),
-        FunctionHandlerKind::Elapsed => elapsed_handler_template(),
+        FunctionHandlerKind::NoArgs => (
+            r#"
+                local fn = ...
+                return function(self, ...)
+                    return fn()
+                end
+            "#,
+            "template-inline-function-noargs",
+        ),
+        FunctionHandlerKind::SelfId => (
+            r#"
+                local fn = ...
+                return function(self, ...)
+                    return fn(self:GetID())
+                end
+            "#,
+            "template-inline-function-self-id",
+        ),
+        FunctionHandlerKind::EventVarargs => (
+            r#"
+                local fn = ...
+                return function(self, event, ...)
+                    return fn(self, event, ...)
+                end
+            "#,
+            "template-inline-function-event-varargs",
+        ),
+        FunctionHandlerKind::Button => (
+            r#"
+                local fn = ...
+                return function(self, button, ...)
+                    return fn(self, button, ...)
+                end
+            "#,
+            "template-inline-function-button",
+        ),
+        FunctionHandlerKind::Elapsed => (
+            r#"
+                local fn = ...
+                return function(self, elapsed, ...)
+                    return fn(self, elapsed, ...)
+                end
+            "#,
+            "template-inline-function-elapsed",
+        ),
     }
-}
-
-fn no_args_handler_template() -> (&'static str, &'static str) {
-    (
-        r#"
-            local fn = ...
-            return function(self, ...)
-                return fn()
-            end
-        "#,
-        "template-inline-function-noargs",
-    )
-}
-
-fn self_id_handler_template() -> (&'static str, &'static str) {
-    (
-        r#"
-            local fn = ...
-            return function(self, ...)
-                return fn(self:GetID())
-            end
-        "#,
-        "template-inline-function-self-id",
-    )
-}
-
-fn event_varargs_handler_template() -> (&'static str, &'static str) {
-    (
-        r#"
-            local fn = ...
-            return function(self, event, ...)
-                return fn(self, event, ...)
-            end
-        "#,
-        "template-inline-function-event-varargs",
-    )
-}
-
-fn button_handler_template() -> (&'static str, &'static str) {
-    (
-        r#"
-            local fn = ...
-            return function(self, button, ...)
-                return fn(self, button, ...)
-            end
-        "#,
-        "template-inline-function-button",
-    )
-}
-
-fn elapsed_handler_template() -> (&'static str, &'static str) {
-    (
-        r#"
-            local fn = ...
-            return function(self, elapsed, ...)
-                return fn(self, elapsed, ...)
-            end
-        "#,
-        "template-inline-function-elapsed",
-    )
 }
 
 fn build_function_handler_with_string_arg(
@@ -157,7 +136,7 @@ fn build_function_handler_with_string_arg(
     function_name: &str,
     arg: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local fn, literal_arg = ...
@@ -166,8 +145,7 @@ fn build_function_handler_with_string_arg(
             end
         "#,
         "template-inline-function-self-string",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let target = resolve_global_path(state, function_name);
     let arg = create_string(state, arg);
     crate::lua_api::methods::call_function_state(
@@ -182,7 +160,7 @@ fn build_function_handler_with_number_arg(
     function_name: &str,
     value: f64,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local fn, number_arg = ...
@@ -191,8 +169,7 @@ fn build_function_handler_with_number_arg(
             end
         "#,
         "template-inline-function-number-arg",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let target = resolve_global_path(state, function_name);
     crate::lua_api::methods::call_function_state(
         state,
@@ -206,7 +183,7 @@ fn build_function_handler_with_global_arg(
     function_name: &str,
     arg_path: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local fn, resolved_arg = ...
@@ -215,8 +192,7 @@ fn build_function_handler_with_global_arg(
             end
         "#,
         "template-inline-function-global-arg",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let target = resolve_global_path(state, function_name);
     let arg = resolve_global_path(state, arg_path);
     crate::lua_api::methods::call_function_state(
@@ -231,7 +207,7 @@ fn build_function_handler_with_global_and_self_arg(
     function_name: &str,
     global_arg_path: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local fn, global_arg = ...
@@ -240,8 +216,7 @@ fn build_function_handler_with_global_and_self_arg(
             end
         "#,
         "template-inline-function-global-self-arg",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let target = resolve_global_path(state, function_name);
     let global_arg = resolve_global_path(state, global_arg_path);
     crate::lua_api::methods::call_function_state(
@@ -256,7 +231,7 @@ fn build_function_handler_with_self_and_parent_field_arg(
     function_name: &str,
     field: &str,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local fn, field_name = ...
@@ -269,8 +244,7 @@ fn build_function_handler_with_self_and_parent_field_arg(
             end
         "#,
         "template-inline-function-self-parent-field-arg",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let target = resolve_global_path(state, function_name);
     let field_name = create_string(state, field);
     crate::lua_api::methods::call_function_state(
@@ -308,8 +282,7 @@ fn build_ancestor_function_handler_with_mode(
     mode: AncestorArgMode,
 ) -> LuaResult<Val> {
     let (source, tag) = ancestor_function_handler_template(mode);
-    let builder = crate::loader::chunk_cache::load_chunk(state, source, tag)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let builder = load_template(state, source, tag)?;
     let target = resolve_global_path(state, function_name);
     crate::lua_api::methods::call_function_state(
         state,
@@ -320,58 +293,37 @@ fn build_ancestor_function_handler_with_mode(
 
 fn ancestor_function_handler_template(mode: AncestorArgMode) -> (&'static str, &'static str) {
     match mode {
-        AncestorArgMode::Target => {
-            ancestor_function_template("fn(target)", "template-inline-function-ancestor")
-        }
-        AncestorArgMode::Id => {
-            ancestor_function_template("fn(target:GetID())", "template-inline-function-ancestor-id")
-        }
+        AncestorArgMode::Target => (
+            r#"
+                local fn, depth = ...
+                return function(self, ...)
+                    local target = self
+                    for _ = 1, depth do
+                        target = target and target:GetParent()
+                    end
+                    if not target then
+                        return
+                    end
+                    return fn(target)
+                end
+            "#,
+            "template-inline-function-ancestor",
+        ),
+        AncestorArgMode::Id => (
+            r#"
+                local fn, depth = ...
+                return function(self, ...)
+                    local target = self
+                    for _ = 1, depth do
+                        target = target and target:GetParent()
+                    end
+                    if not target then
+                        return
+                    end
+                    return fn(target:GetID())
+                end
+            "#,
+            "template-inline-function-ancestor-id",
+        ),
     }
-}
-
-fn ancestor_function_template(
-    return_expr: &'static str,
-    tag: &'static str,
-) -> (&'static str, &'static str) {
-    (ancestor_function_source(return_expr), tag)
-}
-
-fn ancestor_function_source(return_expr: &'static str) -> &'static str {
-    match return_expr {
-        "fn(target)" => ancestor_target_source(),
-        "fn(target:GetID())" => ancestor_id_source(),
-        _ => unreachable!("unsupported ancestor function return expression"),
-    }
-}
-
-fn ancestor_target_source() -> &'static str {
-    r#"
-        local fn, depth = ...
-        return function(self, ...)
-            local target = self
-            for _ = 1, depth do
-                target = target and target:GetParent()
-            end
-            if not target then
-                return
-            end
-            return fn(target)
-        end
-    "#
-}
-
-fn ancestor_id_source() -> &'static str {
-    r#"
-        local fn, depth = ...
-        return function(self, ...)
-            local target = self
-            for _ = 1, depth do
-                target = target and target:GetParent()
-            end
-            if not target then
-                return
-            end
-            return fn(target:GetID())
-        end
-    "#
 }

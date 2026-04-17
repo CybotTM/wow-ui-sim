@@ -15,13 +15,23 @@ use crate::lua_api::script_helpers::{get_script, set_script};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+/// Load a cached Lua chunk, converting loader errors into runtime errors.
+pub(super) fn load_template(
+    state: &mut LuaState,
+    source: &str,
+    tag: &str,
+) -> LuaResult<rilua::Function> {
+    crate::loader::chunk_cache::load_chunk(state, source, tag)
+        .map_err(|error| rilua::runtime_error(error.to_string()))
+}
+
 fn build_register_for_clicks_handler(
     state: &mut LuaState,
     first: &str,
     second: Option<&str>,
     third: Option<&str>,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local first, second, third = ...
@@ -30,8 +40,7 @@ fn build_register_for_clicks_handler(
             end
         "#,
         "template-register-for-clicks-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let first = create_string(state, first);
     let second = second
         .map(|value| create_string(state, value))
@@ -47,7 +56,7 @@ fn build_register_for_clicks_handler(
 }
 
 fn build_register_for_drag_handler(state: &mut LuaState, button: &str) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local button = ...
@@ -56,14 +65,13 @@ fn build_register_for_drag_handler(state: &mut LuaState, button: &str) -> LuaRes
             end
         "#,
         "template-register-for-drag-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let button = create_string(state, button);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[button])
 }
 
 fn build_set_alpha_handler(state: &mut LuaState, alpha: f64) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local alpha = ...
@@ -72,8 +80,7 @@ fn build_set_alpha_handler(state: &mut LuaState, alpha: f64) -> LuaResult<Val> {
             end
         "#,
         "template-set-alpha-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
@@ -206,7 +213,7 @@ pub(super) fn install_fast_handler(
     Ok(())
 }
 
-fn build_chained_handler(
+pub(super) fn build_chained_handler(
     state: &mut LuaState,
     old_handler: Val,
     new_handler: Val,
@@ -220,23 +227,38 @@ fn build_chained_handler(
     };
     // Root both handlers before any allocation so the returned closure cannot
     // capture a dangling function ref in its upvalues.
+    let stack_slot = root_vals_on_stack(state, first, second);
+    let result = invoke_chained_template(state, handler_name, first, second);
+    state.top = stack_slot;
+    result
+}
+
+/// Push two values onto the Lua stack to root them for GC safety.
+/// Returns the original stack top so the caller can restore it.
+fn root_vals_on_stack(state: &mut LuaState, first: Val, second: Val) -> usize {
     let stack_slot = state.top;
     state.ensure_stack(stack_slot + 2);
     state.stack_set(stack_slot, first);
     state.stack_set(stack_slot + 1, second);
     state.top = stack_slot + 2;
+    stack_slot
+}
 
+/// Load the chained-handler template and call it with `(handler_name, first, second)`.
+fn invoke_chained_template(
+    state: &mut LuaState,
+    handler_name: &str,
+    first: Val,
+    second: Val,
+) -> LuaResult<Val> {
     let (source, tag) = chained_handler_template();
-    let builder = crate::loader::chunk_cache::load_chunk(state, source, tag)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let builder = load_template(state, source, tag)?;
     let handler_name = create_string(state, handler_name);
-    let result = crate::lua_api::methods::call_function_state(
+    crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
         &[handler_name, first, second],
-    );
-    state.top = stack_slot;
-    result
+    )
 }
 
 fn chained_handler_template() -> (&'static str, &'static str) {
@@ -267,7 +289,7 @@ fn chained_handler_template() -> (&'static str, &'static str) {
 }
 
 fn build_set_frame_level_from_parent_handler(state: &mut LuaState, delta: i32) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local delta = ...
@@ -280,8 +302,7 @@ fn build_set_frame_level_from_parent_handler(state: &mut LuaState, delta: i32) -
             end
         "#,
         "template-set-frame-level-parent-handler",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
@@ -294,7 +315,7 @@ fn build_ancestor_assignment_handler(
     field: &str,
     depth: usize,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, depth = ...
@@ -307,8 +328,7 @@ fn build_ancestor_assignment_handler(
             end
         "#,
         "template-inline-ancestor-assignment",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     crate::lua_api::methods::call_function_state(
         state,
@@ -317,12 +337,12 @@ fn build_ancestor_assignment_handler(
     )
 }
 
-fn build_assignment_handler(
+pub(super) fn build_assignment_handler(
     state: &mut LuaState,
     field: &str,
     value: FastLiteralValue<'_>,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, assigned_value = ...
@@ -331,8 +351,7 @@ fn build_assignment_handler(
             end
         "#,
         "template-inline-assignment",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let assigned_value = fast_literal_value(state, value);
     crate::lua_api::methods::call_function_state(
@@ -348,7 +367,7 @@ fn build_nested_assignment_handler(
     field: &str,
     value: FastLiteralValue<'_>,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local parent_field_name, field_name, assigned_value = ...
@@ -361,8 +380,7 @@ fn build_nested_assignment_handler(
             end
         "#,
         "template-inline-nested-assignment",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let parent_field_name = create_string(state, parent_field);
     let field_name = create_string(state, field);
     let assigned_value = fast_literal_value(state, value);
@@ -378,7 +396,7 @@ fn build_parent_assignment_handler(
     field: &str,
     value: FastLiteralValue<'_>,
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(
+    let builder = load_template(
         state,
         r#"
             local field_name, assigned_value = ...
@@ -391,8 +409,7 @@ fn build_parent_assignment_handler(
             end
         "#,
         "template-parent-assignment",
-    )
-    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    )?;
     let field_name = create_string(state, field);
     let assigned_value = fast_literal_value(state, value);
     crate::lua_api::methods::call_function_state(

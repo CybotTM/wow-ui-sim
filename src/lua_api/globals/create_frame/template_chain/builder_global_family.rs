@@ -1,4 +1,4 @@
-use super::{FastHandlerRef, FastLiteralValue, build_assignment_handler, build_chained_handler};
+use super::{FastHandlerRef, FastLiteralValue, build_assignment_handler, build_chained_handler, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
@@ -131,7 +131,7 @@ fn build_global_method_with_mode(
     mode: GlobalMethodMode,
 ) -> LuaResult<Val> {
     let (source, tag) = global_method_template(mode);
-    call_global_method_builder_without_extra(state, target_path, method_name, source, tag)
+    call_global_method_builder(state, target_path, method_name, source, tag, &[])
 }
 
 fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str) {
@@ -165,21 +165,10 @@ fn call_global_method_builder(
     tag: &str,
     extra_args: &[Val],
 ) -> LuaResult<Val> {
-    let builder = crate::loader::chunk_cache::load_chunk(state, source, tag)
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let builder = load_template(state, source, tag)?;
     let mut args = Vec::with_capacity(2 + extra_args.len());
     args.push(resolve_global_path(state, target_path));
     args.push(create_string(state, method_name));
     args.extend_from_slice(extra_args);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &args)
-}
-
-fn call_global_method_builder_without_extra(
-    state: &mut LuaState,
-    target_path: &str,
-    method_name: &str,
-    source: &str,
-    tag: &str,
-) -> LuaResult<Val> {
-    call_global_method_builder(state, target_path, method_name, source, tag, &[])
 }
