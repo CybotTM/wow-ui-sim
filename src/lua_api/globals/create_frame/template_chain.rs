@@ -382,6 +382,11 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         arg_function_name: &'a str,
     },
+    FunctionWithGlobalMethodNoArgsResult {
+        function_name: &'a str,
+        target_path: &'a str,
+        method_name: &'a str,
+    },
     FunctionWithSelfStringArg {
         function_name: &'a str,
         arg: &'a str,
@@ -433,6 +438,11 @@ enum FastHandlerRef<'a> {
         depth: usize,
     },
     AssignLiteral {
+        field: &'a str,
+        value: FastLiteralValue<'a>,
+    },
+    AssignGlobalFieldLiteral {
+        target_path: &'a str,
         field: &'a str,
         value: FastLiteralValue<'a>,
     },

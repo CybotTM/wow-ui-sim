@@ -1838,6 +1838,109 @@ fn test_create_frame_from_xml_inline_function_with_parent_field_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_with_global_method_result_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.XmlInlineEditBox = {}
+        function _G.XmlInlineEditBox:GetText()
+            return "filter name"
+        end
+        XmlInlineCapturedFilterName = nil
+        function XmlInlineSetFilterName(name)
+            XmlInlineCapturedFilterName = name
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineGlobalMethodResultFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineSetFilterName(XmlInlineEditBox:GetText())</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineGlobalMethodResultFrame:GetScript('OnClick')(XmlInlineGlobalMethodResultFrame)")
+        .unwrap();
+
+    let captured: String = env.eval("return XmlInlineCapturedFilterName").unwrap();
+    assert_eq!(captured, "filter name");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_global_assignment_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.XmlInlineGlobalAssignTarget = {}
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineGlobalAssignFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineGlobalAssignTarget.flag = true</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec("XmlInlineGlobalAssignFrame:GetScript('OnClick')(XmlInlineGlobalAssignFrame)")
+        .unwrap();
+
+    let flag: bool = env.eval("return XmlInlineGlobalAssignTarget.flag == true").unwrap();
+    assert!(flag);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_global_assignment_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.GuildInviteFrame = {}
+        function AcceptGuild()
+            GuildInviteFrame.acceptedByFn = true
+        end
+        function _G.GuildInviteFrame:Hide()
+            self.hidden = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineGlobalAssignSequenceFrame" parent="UIParent">
+        <Scripts><OnClick>AcceptGuild(); GuildInviteFrame.accepted = true; GuildInviteFrame:Hide()</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        "XmlInlineGlobalAssignSequenceFrame:GetScript('OnClick')(XmlInlineGlobalAssignSequenceFrame)",
+    )
+    .unwrap();
+
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return GuildInviteFrame.acceptedByFn == true,
+                   GuildInviteFrame.accepted == true,
+                   GuildInviteFrame.hidden == true
+        "#,
+        )
+        .unwrap();
+    assert!(result.0);
+    assert!(result.1);
+    assert!(result.2);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_function_with_global_and_self_id_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

@@ -145,6 +145,11 @@ fn build_terminal_fast_handler(
         FastHandlerRef::AssignLiteral { field, value } => {
             build_assignment_handler(state, field, value).map(Some)
         }
+        FastHandlerRef::AssignGlobalFieldLiteral {
+            target_path,
+            field,
+            value,
+        } => build_global_assignment_handler(state, target_path, field, value).map(Some),
         FastHandlerRef::AssignNestedLiteral {
             parent_field,
             field,
@@ -392,6 +397,35 @@ pub(super) fn build_assignment_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[field_name, assigned_value],
+    )
+}
+
+fn build_global_assignment_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    field: &str,
+    value: FastLiteralValue<'_>,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local target, field_name, assigned_value = ...
+            return function(self, ...)
+                if not target then
+                    return
+                end
+                target[field_name] = assigned_value
+            end
+        "#,
+        "template-inline-global-assignment",
+    )?;
+    let target = resolve_global_path(state, target_path);
+    let field_name = create_string(state, field);
+    let assigned_value = fast_literal_value(state, value);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, field_name, assigned_value],
     )
 }
 

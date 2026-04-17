@@ -56,6 +56,7 @@ fn parse_registration_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
 
 fn parse_assignment_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     parse_inline_ancestor_assignment(stmt)
+        .or_else(|| parse_inline_global_assignment(stmt))
         .or_else(|| parse_inline_assignment(stmt))
         .or_else(|| parse_inline_nested_global_pair_table_assignment(stmt))
         .or_else(|| parse_inline_nested_assignment(stmt))
@@ -169,6 +170,27 @@ fn parse_inline_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
     }
     let value = parse_fast_literal_value(raw_value)?;
     Some(FastHandlerRef::AssignLiteral { field, value })
+}
+
+fn parse_inline_global_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
+    let (lhs, raw_value) = stmt.split_once('=')?;
+    let lhs = lhs.trim();
+    let raw_value = raw_value.trim();
+    if lhs.starts_with("self.") || lhs.starts_with("self:GetParent().") {
+        return None;
+    }
+    let (target_path, field) = lhs.rsplit_once('.')?;
+    let target_path = target_path.trim();
+    let field = field.trim();
+    if !(is_fast_handler_path(target_path) && is_fast_identifier(field)) {
+        return None;
+    }
+    let value = parse_fast_literal_value(raw_value)?;
+    Some(FastHandlerRef::AssignGlobalFieldLiteral {
+        target_path,
+        field,
+        value,
+    })
 }
 
 fn parse_inline_parent_assignment(stmt: &str) -> Option<FastHandlerRef<'_>> {
