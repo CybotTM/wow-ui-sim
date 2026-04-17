@@ -94,6 +94,7 @@ macro_rules! build_empty_sim_state {
             net_stats: NetStats::default(),
             store_frame_shown: false,
             timerunning_season_id: None,
+            modifier_keys: ModifierKeys::default(),
             debug_borders: false,
             debug_anchors: false,
         }
@@ -373,6 +374,11 @@ pub struct SimState {
     /// WoW uses 0 as "not timerunning" on the integer-returning API).
     /// Admin: `A_Admin.SetTimerunningSeasonID(id?)` — nil/0 clears.
     pub timerunning_season_id: Option<u32>,
+    /// Modifier key state backing `IsShiftKeyDown` / `IsControlKeyDown` /
+    /// `IsAltKeyDown` / `IsMetaKeyDown` / `IsModifierKeyDown`. All default
+    /// false (no input to the sim). Admin: `A_Admin.SetShiftKeyDown(b)` and
+    /// friends toggle individual keys.
+    pub modifier_keys: ModifierKeys,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
@@ -391,6 +397,25 @@ pub struct NetStats {
     pub bandwidth_out_kbps: f64,
     pub latency_home_ms: f64,
     pub latency_world_ms: f64,
+}
+
+/// Modifier-key down state. `IsModifierKeyDown()` returns true iff any of
+/// shift/control/alt is held — matches real WoW's inclusive-or semantic,
+/// excluding the meta key (meta tests via the dedicated `IsMetaKeyDown`).
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct ModifierKeys {
+    pub shift: bool,
+    pub control: bool,
+    pub alt: bool,
+    pub meta: bool,
+}
+
+impl ModifierKeys {
+    /// True iff shift, control, or alt is currently down. Does not include
+    /// meta — WoW keeps that on its own `IsMetaKeyDown()` probe.
+    pub fn any_modifier(&self) -> bool {
+        self.shift || self.control || self.alt
+    }
 }
 
 struct EmptyStateCollections {

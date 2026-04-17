@@ -241,7 +241,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "IsMenuOpen",
     "IsPartyLFG",
     "IsResting",
-    "IsShiftKeyDown",
+    // IsShiftKeyDown is SimState-backed in modifier_keys.rs, not a stub.
     "IsSpellInRange",
     "IsSpellKnown",
     "IsSpellKnownOrOverridesKnown",

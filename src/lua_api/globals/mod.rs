@@ -28,6 +28,7 @@ pub mod group_queries;
 pub mod inventory_slot;
 pub mod keybindings;
 pub mod missing_surface;
+pub mod modifier_keys;
 pub mod net_stats;
 pub mod security;
 pub mod store_frame;

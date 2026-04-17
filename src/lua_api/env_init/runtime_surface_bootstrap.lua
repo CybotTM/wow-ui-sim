@@ -253,14 +253,11 @@ if IsInventoryItemLocked == nil then
   function IsInventoryItemLocked() return false end
 end
 
--- Modifier-key state. Sim never has modifier keys pressed at load
--- time, so `Is{Shift,Control,Alt}KeyDown` return false. IsShiftKeyDown
--- is already in GLOBAL_FALSE_STUBS; add the three remaining modifiers
--- inline here so SecureTemplates / binding code doesn't crash.
-if IsControlKeyDown == nil then function IsControlKeyDown() return false end end
-if IsAltKeyDown == nil then function IsAltKeyDown() return false end end
-if IsModifierKeyDown == nil then function IsModifierKeyDown() return false end end
-if IsMetaKeyDown == nil then function IsMetaKeyDown() return false end end
+-- IsShiftKeyDown / IsControlKeyDown / IsAltKeyDown / IsMetaKeyDown /
+-- IsModifierKeyDown are registered from Rust
+-- (src/lua_api/globals/modifier_keys.rs), backed by SimState::modifier_keys.
+-- Admin: A_Admin.SetShiftKeyDown(b) / SetControlKeyDown / SetAltKeyDown /
+-- SetMetaKeyDown toggle individual keys.
 
 -- Guild logo: the sim has no guild, so all colour channels are black
 -- and the emblem filename is empty. Returns 10 values matching

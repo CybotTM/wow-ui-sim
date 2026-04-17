@@ -99,6 +99,37 @@ pub(super) fn set_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> 
     Ok(0)
 }
 
+/// `A_Admin.SetShiftKeyDown(down?)` — missing arg defaults to `true` so
+/// `A_Admin.SetShiftKeyDown()` presses the key. Drives `IsShiftKeyDown()`
+/// and contributes to `IsModifierKeyDown()`.
+pub(super) fn set_shift_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    let down = Option::<bool>::from_stack(state, 1)?.unwrap_or(true);
+    borrow_state_mut(state)?.modifier_keys.shift = down;
+    Ok(0)
+}
+
+/// `A_Admin.SetControlKeyDown(down?)` — see `SetShiftKeyDown`.
+pub(super) fn set_control_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    let down = Option::<bool>::from_stack(state, 1)?.unwrap_or(true);
+    borrow_state_mut(state)?.modifier_keys.control = down;
+    Ok(0)
+}
+
+/// `A_Admin.SetAltKeyDown(down?)` — see `SetShiftKeyDown`.
+pub(super) fn set_alt_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    let down = Option::<bool>::from_stack(state, 1)?.unwrap_or(true);
+    borrow_state_mut(state)?.modifier_keys.alt = down;
+    Ok(0)
+}
+
+/// `A_Admin.SetMetaKeyDown(down?)` — see `SetShiftKeyDown`. Does NOT
+/// contribute to `IsModifierKeyDown()` (matches WoW semantics).
+pub(super) fn set_meta_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    let down = Option::<bool>::from_stack(state, 1)?.unwrap_or(true);
+    borrow_state_mut(state)?.modifier_keys.meta = down;
+    Ok(0)
+}
+
 /// `A_Admin.SetZonePVP(pvpType, isSubZonePvP, factionName)` — drives the
 /// three return values of `C_PvP.GetZonePVPInfo()`. `pvpType` defaults to
 /// `"contested"`, `isSubZonePvP` defaults to `false`, `factionName` defaults
