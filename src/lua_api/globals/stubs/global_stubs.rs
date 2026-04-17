@@ -9,7 +9,6 @@ use super::{
 };
 
 static GLOBAL_NIL_STUBS: &[&str] = &[
-    "AcceptBattlefieldPort",
     "AcceptDuel",
     "AcceptResurrect",
     "AcceptTrade",
@@ -42,10 +41,8 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ForceTaint",
     "InitiateTrade",
     "InspectUnit",
-    "JoinBattlefield",
     "JoinChannelByName",
     "JoinTemporaryChannel",
-    "LeaveBattlefield",
     "LeaveMythicPlusGroup",
     "LogoutStatusFrame_StartLogout",
     "LootSlot",
@@ -61,11 +58,9 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "PlayMusic",
     "PlaySound",
     "PlaySoundFile",
-    "QueueForLFG",
     "RaidGroupSetRole",
     "RepairAllItems",
     "ReportCheating",
-    "RequestBattlefieldPositions",
     "RequestInspectData",
     "RequestLFDPlayerLockInfo",
     "RequestPartyLootMethod",
@@ -110,7 +105,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "SwapChatChannelLinks",
     "SwapRangedWeapon",
     "TaxiNodeSetFocus",
-    "ToggleBattlefieldMinimap",
     "ToggleCharacter",
     "ToggleDropDownMenu",
     "ToggleFriendsFrame",

@@ -431,8 +431,8 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    BattlefieldQueue, BattlefieldStatus, GameRuleValue, GameRulesState, Keybindings,
-    LfgListCounts, ModifierKeys, NetStats, PetBattleState, WowLabsAreaInfo, WowLabsCircleInfo,
+    BattlefieldQueue, BattlefieldStatus, GameRuleValue, GameRulesState, Keybindings, LfgListCounts,
+    ModifierKeys, NetStats, PetBattleState, WowLabsAreaInfo, WowLabsCircleInfo,
     WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
     WowLabsPoint, WowLabsState,
 };
