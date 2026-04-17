@@ -224,6 +224,12 @@ fn push_aura_for_slot(state: &mut LuaState, slot: f64) {
 fn build_aura_table(state: &mut LuaState, f: &AuraFixture) -> Val {
     let aura = create_table(state);
     let now = current_time_seconds(state);
+    write_aura_identity(state, aura, f, now);
+    write_aura_flags(state, aura, f);
+    aura
+}
+
+fn write_aura_identity(state: &mut LuaState, aura: Val, f: &AuraFixture, now: f64) {
     let name = create_string(state, f.name);
     let dispel = create_string(state, f.dispel_name);
     let source = create_string(state, "player");
@@ -243,21 +249,23 @@ fn build_aura_table(state: &mut LuaState, f: &AuraFixture) -> Val {
         Val::Num(now + f.expiration_offset),
     );
     table_set(state, aura, "sourceUnit", source);
+    table_set(state, aura, "spellId", Val::Num(f.spell_id));
+    table_set(state, aura, "timeMod", Val::Num(1.0));
+    table_set(state, aura, "points", empty_points);
+    table_set(state, aura, "auraInstanceID", Val::Num(f.aura_instance_id));
+}
+
+fn write_aura_flags(state: &mut LuaState, aura: Val, f: &AuraFixture) {
     table_set(state, aura, "isStealable", Val::Bool(false));
     table_set(state, aura, "nameplateShowPersonal", Val::Bool(false));
-    table_set(state, aura, "spellId", Val::Num(f.spell_id));
     table_set(state, aura, "canApplyAura", Val::Bool(true));
     table_set(state, aura, "isBossAura", Val::Bool(false));
     table_set(state, aura, "isFromPlayerOrPlayerPet", Val::Bool(true));
     table_set(state, aura, "nameplateShowAll", Val::Bool(false));
-    table_set(state, aura, "timeMod", Val::Num(1.0));
-    table_set(state, aura, "points", empty_points);
     table_set(state, aura, "isHelpful", Val::Bool(f.is_helpful));
     table_set(state, aura, "isHarmful", Val::Bool(f.is_harmful));
     table_set(state, aura, "isNameplateOnly", Val::Bool(false));
     table_set(state, aura, "isRaid", Val::Bool(f.is_helpful));
-    table_set(state, aura, "auraInstanceID", Val::Num(f.aura_instance_id));
-    aura
 }
 
 fn current_time_seconds(state: &mut LuaState) -> f64 {
