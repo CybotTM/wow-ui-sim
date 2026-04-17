@@ -10,51 +10,49 @@ const SOCKET_STATE_KEY: &str = "_state";
 
 type SocketFn = fn(&mut LuaState) -> LuaResult<u32>;
 
+const SOCKET_METHODS: &[(&str, SocketFn)] = &[
+    ("AcceptSockets", c_item_socket_info_accept_sockets),
+    ("ClickSocketButton", c_item_socket_info_click_socket_button),
+    ("CloseSocketInfo", c_item_socket_info_close_socket_info),
+    ("CompleteSocketing", c_item_socket_info_complete_socketing),
+    ("GetCurrUIType", c_item_socket_info_get_curr_ui_type),
+    (
+        "GetExistingSocketInfo",
+        c_item_socket_info_get_existing_socket_info,
+    ),
+    (
+        "GetExistingSocketLink",
+        c_item_socket_info_get_existing_socket_link,
+    ),
+    ("GetNewSocketInfo", c_item_socket_info_get_new_socket_info),
+    ("GetNewSocketLink", c_item_socket_info_get_new_socket_link),
+    ("GetNumSockets", c_item_socket_info_get_num_sockets),
+    (
+        "GetSocketItemBoundTradeable",
+        c_item_socket_info_get_socket_item_bound_tradeable,
+    ),
+    ("GetSocketItemInfo", c_item_socket_info_get_socket_item_info),
+    (
+        "GetSocketItemRefundable",
+        c_item_socket_info_get_socket_item_refundable,
+    ),
+    ("GetSocketTypes", c_item_socket_info_get_socket_types),
+    (
+        "HasBoundGemProposed",
+        c_item_socket_info_has_bound_gem_proposed,
+    ),
+    (
+        "IsArtifactRelicItem",
+        c_item_socket_info_is_artifact_relic_item,
+    ),
+];
+
 pub(super) fn register_item_socket_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, SOCKET_NAMESPACE)?;
     ensure_socket_state_table(state);
-
-    const METHODS: &[(&str, SocketFn)] = &[
-        ("AcceptSockets", c_item_socket_info_accept_sockets),
-        ("ClickSocketButton", c_item_socket_info_click_socket_button),
-        ("CloseSocketInfo", c_item_socket_info_close_socket_info),
-        ("CompleteSocketing", c_item_socket_info_complete_socketing),
-        ("GetCurrUIType", c_item_socket_info_get_curr_ui_type),
-        (
-            "GetExistingSocketInfo",
-            c_item_socket_info_get_existing_socket_info,
-        ),
-        (
-            "GetExistingSocketLink",
-            c_item_socket_info_get_existing_socket_link,
-        ),
-        ("GetNewSocketInfo", c_item_socket_info_get_new_socket_info),
-        ("GetNewSocketLink", c_item_socket_info_get_new_socket_link),
-        ("GetNumSockets", c_item_socket_info_get_num_sockets),
-        (
-            "GetSocketItemBoundTradeable",
-            c_item_socket_info_get_socket_item_bound_tradeable,
-        ),
-        ("GetSocketItemInfo", c_item_socket_info_get_socket_item_info),
-        (
-            "GetSocketItemRefundable",
-            c_item_socket_info_get_socket_item_refundable,
-        ),
-        ("GetSocketTypes", c_item_socket_info_get_socket_types),
-        (
-            "HasBoundGemProposed",
-            c_item_socket_info_has_bound_gem_proposed,
-        ),
-        (
-            "IsArtifactRelicItem",
-            c_item_socket_info_is_artifact_relic_item,
-        ),
-    ];
-
-    for &(name, func) in METHODS {
+    for &(name, func) in SOCKET_METHODS {
         table_set_rust_fn(state, table_ref, name, func)?;
     }
-
     Ok(())
 }
 

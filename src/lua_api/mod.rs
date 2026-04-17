@@ -7,6 +7,7 @@ mod builtin_frames;
 pub mod chat_init;
 mod diagnostics;
 mod env;
+mod env_convert;
 mod env_init;
 mod env_rilua;
 pub(crate) mod frame;

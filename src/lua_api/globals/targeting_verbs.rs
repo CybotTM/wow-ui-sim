@@ -38,42 +38,45 @@ fn resolve_token_to_target_info(
 ) -> LuaResult<Option<TargetInfo>> {
     let st = borrow_state_mut(state)?;
     let result = match token.to_ascii_lowercase().as_str() {
-        "player" | "self" => {
-            let t = TargetInfo {
-                unit_id: "player".to_string(),
-                name: st.player.name.clone(),
-                class_index: st.player.class_index,
-                level: st.player.level,
-                health: st.player.health,
-                health_max: st.player.health_max,
-                power: st.player.power,
-                power_max: st.player.power_max,
-                power_type: st.player.power_type,
-                power_type_name: "MANA".to_string(),
-                is_player: true,
-                is_enemy: false,
-                guid: "Player-0000-00000000".to_string(),
-                classification: "normal".to_string(),
-                creature_type: "Humanoid".to_string(),
-                reaction: 5,
-            };
-            Some(t)
-        }
+        "player" | "self" => Some(player_target_info(&st)),
         "target" => st.current_target.clone(),
         "focus" => st.current_focus.clone(),
-        other => {
-            if let Some(idx) = parse_party_slot(other) {
-                if st.party_group_active {
-                    st.party_members.get(idx).map(party_member_to_target_info)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        }
+        other => resolve_party_token(&st, other),
     };
     Ok(result)
+}
+
+fn player_target_info(st: &crate::lua_api::state::SimState) -> TargetInfo {
+    TargetInfo {
+        unit_id: "player".to_string(),
+        name: st.player.name.clone(),
+        class_index: st.player.class_index,
+        level: st.player.level,
+        health: st.player.health,
+        health_max: st.player.health_max,
+        power: st.player.power,
+        power_max: st.player.power_max,
+        power_type: st.player.power_type,
+        power_type_name: "MANA".to_string(),
+        is_player: true,
+        is_enemy: false,
+        guid: "Player-0000-00000000".to_string(),
+        classification: "normal".to_string(),
+        creature_type: "Humanoid".to_string(),
+        reaction: 5,
+    }
+}
+
+fn resolve_party_token(
+    st: &crate::lua_api::state::SimState,
+    token: &str,
+) -> Option<TargetInfo> {
+    let idx = parse_party_slot(token)?;
+    if st.party_group_active {
+        st.party_members.get(idx).map(party_member_to_target_info)
+    } else {
+        None
+    }
 }
 
 fn parse_party_slot(token: &str) -> Option<usize> {

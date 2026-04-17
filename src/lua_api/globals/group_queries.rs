@@ -23,6 +23,14 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, RustFn, Val};
 
 pub fn register_all(state: &mut LuaState) {
+    register_group_status(state);
+    register_unit_queries(state);
+    register_unit_relationships(state);
+    register_unit_liveness(state);
+    ensure_string_join(state);
+}
+
+fn register_group_status(state: &mut LuaState) {
     set_global(state, "GetNumGroupMembers", get_num_group_members);
     set_global(state, "GetNumSubgroupMembers", get_num_subgroup_members);
     set_global(state, "GetNumPartyMembers", get_num_subgroup_members);
@@ -32,6 +40,10 @@ pub fn register_all(state: &mut LuaState) {
     set_global(state, "IsPartyLFG", is_party_lfg);
     set_global(state, "IsGroupLeader", is_group_leader);
     set_global(state, "IsEveryoneAssistant", is_everyone_assistant);
+    set_global(state, "IsPartyWorldPVP", always_false);
+}
+
+fn register_unit_queries(state: &mut LuaState) {
     set_global(state, "UnitExists", unit_exists);
     set_global(state, "UnitName", unit_name);
     set_global(state, "UnitNameUnmodified", unit_name_unmodified);
@@ -39,11 +51,14 @@ pub fn register_all(state: &mut LuaState) {
     set_global(state, "UnitLevel", unit_level);
     set_global(state, "UnitClassification", unit_classification);
     set_global(state, "UnitCreatureType", unit_creature_type);
-    set_global(
-        state,
-        "UnitTreatAsPlayerForDisplay",
-        unit_treat_as_player_for_display,
-    );
+    set_global(state, "UnitTreatAsPlayerForDisplay", unit_treat_as_player_for_display);
+    set_global(state, "UnitSelectionColor", unit_selection_color);
+    set_global(state, "UnitFactionGroup", unit_faction_group);
+    set_global(state, "UnitInRange", unit_in_range);
+    set_global(state, "UnitInBattleground", unit_in_battleground);
+}
+
+fn register_unit_relationships(state: &mut LuaState) {
     set_global(state, "UnitIsFriend", unit_is_friend);
     set_global(state, "UnitCanAttack", unit_can_attack);
     set_global(state, "UnitCanAssist", unit_can_assist);
@@ -51,24 +66,17 @@ pub fn register_all(state: &mut LuaState) {
     set_global(state, "UnitInParty", unit_in_party);
     set_global(state, "UnitInRaid", unit_in_raid);
     set_global(state, "UnitInOtherParty", unit_in_other_party);
-    set_global(state, "UnitInRange", unit_in_range);
-    set_global(state, "UnitInBattleground", unit_in_battleground);
-    set_global(state, "UnitFactionGroup", unit_faction_group);
     set_global(state, "UnitIsGroupLeader", unit_is_group_leader);
     set_global(state, "UnitIsGroupAssistant", unit_is_group_assistant);
+    set_global(state, "UnitHasLFGDeserter", always_false);
+}
+
+fn register_unit_liveness(state: &mut LuaState) {
     set_global(state, "UnitIsDeadOrGhost", unit_is_dead_or_ghost);
     set_global(state, "UnitIsCorpse", unit_is_corpse);
     set_global(state, "UnitIsUnconscious", unit_is_unconscious);
-    set_global(
-        state,
-        "UnitHasIncomingResurrection",
-        unit_has_incoming_resurrection,
-    );
+    set_global(state, "UnitHasIncomingResurrection", unit_has_incoming_resurrection);
     set_global(state, "UnitIsVisible", unit_is_visible);
-    set_global(state, "UnitSelectionColor", unit_selection_color);
-    set_global(state, "IsPartyWorldPVP", always_false);
-    set_global(state, "UnitHasLFGDeserter", always_false);
-    ensure_string_join(state);
 }
 
 fn set_global(state: &mut LuaState, name: &'static str, func: RustFn) {
@@ -100,12 +108,11 @@ fn ensure_string_join(state: &mut LuaState) {
     if matches!(table_get(state, string_table, "join"), Val::Function(_)) {
         return;
     }
+    fn string_join(state: &mut LuaState) -> LuaResult<u32> {
+        super::utility_system_spell::strjoin(state)
+    }
     let join = make_function(state, "string.join", string_join);
     table_set(state, string_table, "join", join);
-}
-
-fn string_join(state: &mut LuaState) -> LuaResult<u32> {
-    super::utility_system_spell::strjoin(state)
 }
 
 fn get_num_subgroup_members(state: &mut LuaState) -> LuaResult<u32> {
@@ -212,11 +219,7 @@ fn unit_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn unit_name_unmodified(state: &mut LuaState) -> LuaResult<u32> {
-    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
-    let name = unit_name_for(state, &unit)?;
-    let value = create_string(state, &name);
-    state.push(value);
-    Ok(1)
+    unit_name(state)
 }
 
 fn unit_name_for(state: &mut LuaState, unit: &str) -> LuaResult<String> {
@@ -571,10 +574,11 @@ fn player_faction_name(st: &crate::lua_api::state::SimState) -> &'static str {
 }
 
 fn opposing_faction_name(faction: &str) -> &'static str {
-    match faction {
-        "Horde" => "Alliance",
-        _ => "Horde",
-    }
+    if faction == "Horde" { "Alliance" } else { "Horde" }
+}
+
+fn target_faction<'a>(is_enemy: bool, player_faction: &'a str) -> &'a str {
+    if is_enemy { opposing_faction_name(player_faction) } else { player_faction }
 }
 
 /// `UnitFactionGroup(unit)` — returns `(english, localized)` faction tokens
@@ -584,34 +588,20 @@ fn unit_faction_group(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let faction = {
         let st = borrow_state(state)?;
-        let player_faction = player_faction_name(&st);
+        let pf = player_faction_name(&st);
         match unit.as_str() {
-            "player" | "pet" | "vehicle" => Some(player_faction),
-            "target" => st.current_target.as_ref().map(|target| {
-                if target.is_enemy {
-                    opposing_faction_name(player_faction)
-                } else {
-                    player_faction
-                }
-            }),
-            "focus" => st.current_focus.as_ref().map(|target| {
-                if target.is_enemy {
-                    opposing_faction_name(player_faction)
-                } else {
-                    player_faction
-                }
-            }),
-            other if visible_party_member(&st, other).is_some() => Some(player_faction),
+            "player" | "pet" | "vehicle" => Some(pf),
+            "target" => st.current_target.as_ref().map(|t| target_faction(t.is_enemy, pf)),
+            "focus" => st.current_focus.as_ref().map(|t| target_faction(t.is_enemy, pf)),
+            other if visible_party_member(&st, other).is_some() => Some(pf),
             _ => None,
         }
     };
-
     match faction {
         Some(name) => {
-            let english = create_string(state, name);
-            let localized = create_string(state, name);
-            state.push(english);
-            state.push(localized);
+            let s = create_string(state, name);
+            state.push(s);
+            state.push(s);
         }
         None => {
             state.push(Val::Nil);
@@ -673,19 +663,14 @@ fn unit_is_group_assistant(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn resolve_unit_party_index(st: &crate::lua_api::state::SimState, unit: &str) -> Option<usize> {
+    let party_len = st.party_members.len();
     if let Some(idx) = crate::lua_api::globals::unit_api::parse_party_index(unit) {
-        if idx < st.party_members.len() {
-            return Some(idx);
-        }
+        if idx < party_len { return Some(idx); }
     }
-    if let Some(rest) = unit.strip_prefix("raid") {
-        if let Some(n) = rest.parse::<usize>().ok().and_then(|n| n.checked_sub(1))
-            && n < st.party_members.len()
-        {
-            return Some(n);
-        }
-    }
-    None
+    unit.strip_prefix("raid")
+        .and_then(|s| s.parse::<usize>().ok())
+        .and_then(|n| n.checked_sub(1))
+        .filter(|&n| n < party_len)
 }
 
 // ── Unit liveness probes ─────────────────────────────────────────────────────
