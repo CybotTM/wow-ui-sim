@@ -99,6 +99,7 @@ macro_rules! build_empty_sim_state {
             housing_service_enabled: false,
             pet_battles: PetBattleState::default(),
             lfg_list_counts: LfgListCounts::default(),
+            can_use_premade_group: false,
             debug_borders: false,
             debug_anchors: false,
         }
@@ -399,6 +400,10 @@ pub struct SimState {
     /// exposes both knobs so tests can assert `total > 0 && viewed == 0`
     /// scroll behaviour without standing up a real LFG listing.
     pub lfg_list_counts: LfgListCounts,
+    /// Whether `C_LFGInfo.CanPlayerUsePremadeGroup()` reports true. Sim
+    /// default is false — the Premade Group Finder UI is gated off in a
+    /// fresh env. Admin: `A_Admin.SetCanUsePremadeGroup(b?)`.
+    pub can_use_premade_group: bool,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.

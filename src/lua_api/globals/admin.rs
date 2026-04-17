@@ -182,6 +182,10 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetGuildCanSpeakInChat",
             super::guild_info::admin_set_guild_can_speak_in_chat,
         )?
+        .set_function(
+            "SetCanUsePremadeGroup",
+            super::lfg_info::admin_set_can_use_premade_group,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?

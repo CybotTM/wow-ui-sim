@@ -282,8 +282,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ),
     // C_Item
     ("C_Item", "IsItemTransmogrifiable", stub_false),
-    // C_LFGInfo
-    ("C_LFGInfo", "CanPlayerUsePremadeGroup", stub_false),
+    // C_LFGInfo — CanPlayerUsePremadeGroup is SimState-backed in lfg_info.rs.
     ("C_LFGInfo", "IsLFGModeActiveForCategory", stub_false),
     // C_Map
     ("C_Map", "IsMapValidForNavigation", stub_false),
