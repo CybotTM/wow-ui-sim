@@ -160,17 +160,24 @@ fn build_named_global_method_with_global_arg_handler(
 ) -> LuaResult<Val> {
     let suffix = create_string(state, suffix);
     let method_name = create_string(state, method_name);
-    let arg = resolve_global_path(state, arg_path);
+    let arg_path = create_string(state, arg_path);
     let builder = load_template(
         state,
         r#"
-            local suffix, method_name, arg = ...
+            local suffix, method_name, arg_path = ...
+            local function resolve_global(path)
+                local value = _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
             return function(self, ...)
                 local target = _G[self:GetName() .. suffix]
                 if not target then
                     return
                 end
-                return target[method_name](target, arg)
+                return target[method_name](target, resolve_global(arg_path))
             end
         "#,
         "template-named-global-method-global-arg-handler",
@@ -178,7 +185,7 @@ fn build_named_global_method_with_global_arg_handler(
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[suffix, method_name, arg],
+        &[suffix, method_name, arg_path],
     )
 }
 
