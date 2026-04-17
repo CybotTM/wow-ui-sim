@@ -287,28 +287,10 @@ fn ensure_button_texture_child(
     button_id: u64,
     parent_key: &str,
 ) -> LuaResult<Option<u64>> {
-    use crate::widget::{Frame, WidgetType};
-    {
-        let sim = borrow_state(state)?;
-        if let Some(existing) = sim
-            .widgets
-            .get(button_id)
-            .and_then(|f| f.children_keys.get(parent_key).copied())
-        {
-            return Ok(Some(existing));
-        }
-    }
-    let texture = Frame::new(WidgetType::Texture, None, Some(button_id));
-    let child_id = texture.id;
     let mut sim = borrow_state_mut(state)?;
-    sim.widgets.register(texture);
-    sim.widgets.add_child(button_id, child_id);
-    if let Some(parent) = sim.widgets.get_mut(button_id) {
-        parent
-            .children_keys
-            .insert(parent_key.to_string(), child_id);
-    }
-    sim.invalidate_strata_buckets();
+    let child_id = super::super::methods_helpers::get_or_create_button_texture(
+        &mut sim, button_id, parent_key,
+    );
     Ok(Some(child_id))
 }
 
@@ -347,6 +329,14 @@ fn apply_atlas_setter(
     }
     if let Some(frame) = sim.widgets.get_mut_visual(button_id) {
         set_button_field(frame, file, tex_coords);
+    }
+    let should_show = button_texture_should_show(&sim, button_id, parent_key);
+    if let Some(tid) = tex_id {
+        sim.widgets.set_visible(tid, should_show);
+    }
+    drop(sim);
+    if let Some(tid) = tex_id {
+        let _ = sync_child_to_rilua(state, button_id, parent_key, tid);
     }
     Ok(())
 }

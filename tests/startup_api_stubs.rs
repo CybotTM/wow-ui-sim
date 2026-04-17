@@ -181,10 +181,22 @@ fn set_disabled_atlas_creates_child_texture() {
     // apply_atlas_setter stubbed this step as a TODO, and
     // LFDMicroButton:OnLoad errored on a nil texture.
     let env = env();
-    let (disabled_ty, normal_ty, pushed_ty, highlight_ty): (String, String, String, String) = env
+    let (
+        disabled_ty,
+        normal_ty,
+        pushed_ty,
+        highlight_ty,
+        normal_points,
+        normal_width,
+        normal_height,
+        disabled_points,
+        disabled_width,
+        disabled_height,
+    ): (String, String, String, String, f64, f64, f64, f64, f64, f64) = env
         .eval(
             r#"
             local btn = CreateFrame("Button", "AtlasChildProbeButton", UIParent)
+            btn:SetSize(32, 40)
             btn:SetNormalAtlas("UI-HUD-MicroMenu-Groupfinder-Up")
             btn:SetPushedAtlas("UI-HUD-MicroMenu-Groupfinder-Down")
             btn:SetDisabledAtlas("UI-HUD-MicroMenu-Groupfinder-Disabled")
@@ -192,7 +204,13 @@ fn set_disabled_atlas_creates_child_texture() {
             return type(btn:GetDisabledTexture()),
                    type(btn:GetNormalTexture()),
                    type(btn:GetPushedTexture()),
-                   type(btn:GetHighlightTexture())
+                   type(btn:GetHighlightTexture()),
+                   btn:GetNormalTexture():GetNumPoints(),
+                   btn:GetNormalTexture():GetWidth(),
+                   btn:GetNormalTexture():GetHeight(),
+                   btn:GetDisabledTexture():GetNumPoints(),
+                   btn:GetDisabledTexture():GetWidth(),
+                   btn:GetDisabledTexture():GetHeight()
             "#,
         )
         .unwrap();
@@ -203,6 +221,30 @@ fn set_disabled_atlas_creates_child_texture() {
     assert_eq!(normal_ty, "table");
     assert_eq!(pushed_ty, "table");
     assert_eq!(highlight_ty, "table");
+    assert_eq!(
+        normal_points, 2.0,
+        "SetNormalAtlas should anchor the texture child with SetAllPoints semantics"
+    );
+    assert_eq!(
+        normal_width, 32.0,
+        "normal atlas child should match button width"
+    );
+    assert_eq!(
+        normal_height, 40.0,
+        "normal atlas child should match button height"
+    );
+    assert_eq!(
+        disabled_points, 2.0,
+        "SetDisabledAtlas should anchor the texture child with SetAllPoints semantics"
+    );
+    assert_eq!(
+        disabled_width, 32.0,
+        "disabled atlas child should match button width"
+    );
+    assert_eq!(
+        disabled_height, 40.0,
+        "disabled atlas child should match button height"
+    );
 }
 
 #[test]

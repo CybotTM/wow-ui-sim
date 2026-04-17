@@ -133,6 +133,9 @@ macro_rules! build_empty_sim_state {
             corpse_available: false,
             active_trade: None,
             open_panels: ::std::collections::HashSet::new(),
+            is_party_lfg: false,
+            everyone_assistant: false,
+            party_leader_index: None,
             voice_chat: VoiceChatState::default(),
             message_log: Vec::new(),
             keybindings: Keybindings::default(),
@@ -463,6 +466,14 @@ pub struct SimState {
     /// Drives the fallback for panels whose backing frame doesn't exist
     /// yet in the sim.
     pub open_panels: ::std::collections::HashSet<String>,
+    /// Whether the current party was formed via LFG. Drives `IsPartyLFG`.
+    pub is_party_lfg: bool,
+    /// Whether raid-wide "everyone assist" is enabled. Drives
+    /// `IsEveryoneAssistant`.
+    pub everyone_assistant: bool,
+    /// Group leader — `None` means the player is the leader; `Some(i)`
+    /// means `party_members[i]` is the leader. Default `None`.
+    pub party_leader_index: Option<usize>,
     /// Voice chat volume + mute/deafen/headset state.
     pub voice_chat: VoiceChatState,
     /// Append-only log of outbound chat / addon messages sent via

@@ -28,6 +28,9 @@ pub fn register_all(state: &mut LuaState) {
     set_global(state, "GetNumPartyMembers", get_num_subgroup_members);
     set_global(state, "IsInGroup", is_in_group);
     set_global(state, "IsInRaid", is_in_raid);
+    set_global(state, "IsPartyLFG", is_party_lfg);
+    set_global(state, "IsGroupLeader", is_group_leader);
+    set_global(state, "IsEveryoneAssistant", is_everyone_assistant);
     set_global(state, "UnitExists", unit_exists);
     set_global(state, "UnitName", unit_name);
     set_global(state, "UnitNameUnmodified", unit_name_unmodified);
@@ -111,6 +114,27 @@ fn is_in_raid(state: &mut LuaState) -> LuaResult<u32> {
     // Sim currently models party only; treat a party ≥ 6 as a raid.
     let in_raid = active_party_count(state)? >= 6;
     state.push(Val::Bool(in_raid));
+    Ok(1)
+}
+
+fn is_party_lfg(state: &mut LuaState) -> LuaResult<u32> {
+    let lfg = borrow_state(state)?.is_party_lfg;
+    state.push(Val::Bool(lfg));
+    Ok(1)
+}
+
+/// `IsGroupLeader()` — true when the player is in a group AND leads it.
+/// `SimState.party_leader_index = None` means the player is the leader.
+fn is_group_leader(state: &mut LuaState) -> LuaResult<u32> {
+    let in_group = active_party_count(state)? > 0;
+    let leader = in_group && borrow_state(state)?.party_leader_index.is_none();
+    state.push(Val::Bool(leader));
+    Ok(1)
+}
+
+fn is_everyone_assistant(state: &mut LuaState) -> LuaResult<u32> {
+    let flag = borrow_state(state)?.everyone_assistant;
+    state.push(Val::Bool(flag));
     Ok(1)
 }
 
