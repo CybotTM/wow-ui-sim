@@ -2180,6 +2180,55 @@ fn test_create_frame_from_xml_inline_conditional_self_method_sequence_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_conditional_self_field_then_else_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        HelpBrowser = { ticket = nil, home = nil }
+        function HelpBrowser:OpenTicket(index)
+            self.ticket = index
+        end
+        function HelpBrowser:NavigateHome(page)
+            self.home = page
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineCaseIndexButton" parent="UIParent">
+            <Scripts><OnClick>if (self.caseIndex) then HelpBrowser:OpenTicket(self.caseIndex) else HelpBrowser:NavigateHome("GMTicketStatus") end</OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCaseIndexButton.caseIndex = 42
+        XmlInlineCaseIndexButton:GetScript("OnClick")(XmlInlineCaseIndexButton)
+    "#,
+    )
+    .unwrap();
+    let ticket: i32 = env.eval("return HelpBrowser.ticket").unwrap();
+    assert_eq!(ticket, 42);
+
+    env.exec(
+        r#"
+        XmlInlineCaseIndexButton.caseIndex = nil
+        HelpBrowser.home = nil
+        XmlInlineCaseIndexButton:GetScript("OnClick")(XmlInlineCaseIndexButton)
+    "#,
+    )
+    .unwrap();
+    let home: String = env.eval("return HelpBrowser.home").unwrap();
+    assert_eq!(home, "GMTicketStatus");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_assignment_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

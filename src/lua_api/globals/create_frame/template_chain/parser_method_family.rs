@@ -10,6 +10,13 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             else_ref: Box::new(else_ref),
         });
     }
+    if let Some((field, then_ref, else_ref)) = parse_conditional_self_field_then_else(stmt) {
+        return Some(FastHandlerRef::ConditionalSelfFieldTruthy {
+            field,
+            then_ref: Box::new(then_ref),
+            else_ref: Box::new(else_ref),
+        });
+    }
     if let Some((method_name, value)) = parse_inline_self_method_with_bool_arg(stmt) {
         return Some(FastHandlerRef::MethodWithBoolArg { method_name, value });
     }
@@ -113,6 +120,34 @@ fn parse_conditional_self_noarg_method_then_else<'a>(
     let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
     let else_ref = super::parse_inline_fast_handler("OnClick", else_stmt)?;
     Some((method_name, then_ref, else_ref))
+}
+
+fn parse_conditional_self_field_then_else<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, FastHandlerRef<'a>, FastHandlerRef<'a>)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    let condition = condition.trim_end().strip_suffix(')')?.trim();
+    let field = condition.strip_prefix("self.")?.trim();
+    if !is_fast_identifier(field) {
+        return None;
+    }
+    let remainder = remainder.trim_start();
+    let (then_stmt, else_tail) = remainder.split_once("else")?;
+    let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
+    let then_stmt = then_stmt
+        .trim()
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(then_stmt.trim());
+    let else_stmt = else_stmt
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(else_stmt);
+    let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
+    let else_ref = super::parse_inline_fast_handler("OnClick", else_stmt)?;
+    Some((field, then_ref, else_ref))
 }
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {

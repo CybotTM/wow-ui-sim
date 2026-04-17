@@ -272,6 +272,38 @@ fn build_sequence_fast_handler(
                 ],
             )?)))
         }
+        FastHandlerRef::ConditionalSelfFieldTruthy {
+            field,
+            then_ref,
+            else_ref,
+        } => {
+            let then_handler = build_fast_handler(state, (**then_ref).clone())?;
+            let else_handler = build_fast_handler(state, (**else_ref).clone())?;
+            let field = create_string(state, field);
+            let builder = load_template(
+                state,
+                r#"
+                    local field, then_handler, else_handler = ...
+                    return function(self, ...)
+                        if self[field] then
+                            if then_handler then
+                                return then_handler(self, ...)
+                            end
+                            return
+                        end
+                        if else_handler then
+                            return else_handler(self, ...)
+                        end
+                    end
+                "#,
+                "template-inline-conditional-self-field",
+            )?;
+            Ok(Some(Some(crate::lua_api::methods::call_function_state(
+                state,
+                Val::Function(builder.gc_ref()),
+                &[field, then_handler.unwrap_or(Val::Nil), else_handler.unwrap_or(Val::Nil)],
+            )?)))
+        }
         _ => Ok(None),
     }
 }
