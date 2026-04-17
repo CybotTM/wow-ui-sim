@@ -444,6 +444,39 @@ fn test_create_frame_from_xml_inline_global_method_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_method_with_self_string_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGlobalMethodStringTarget = {}
+        function XmlInlineGlobalMethodStringTarget:SetOwner(frame, anchor)
+            self.owner = frame
+            self.anchor = anchor
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalMethodStringFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalMethodStringTarget:SetOwner(self, "ANCHOR_RIGHT")</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let owner_matches: bool = env
+        .eval("return XmlInlineGlobalMethodStringTarget.owner == XmlInlineGlobalMethodStringFrame")
+        .unwrap();
+    let anchor_matches: bool = env
+        .eval("return XmlInlineGlobalMethodStringTarget.anchor == 'ANCHOR_RIGHT'")
+        .unwrap();
+    assert!(owner_matches);
+    assert!(anchor_matches);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_method_then_assign_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -473,6 +506,91 @@ fn test_create_frame_from_xml_inline_global_method_then_assign_runs() {
         .unwrap();
     assert!(target_hidden);
     assert!(flag);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_self_id_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineSelfIdValue = nil
+        function XmlInlineSelfIdFunction(id)
+            XmlInlineSelfIdValue = id
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineSelfIdButton" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineSelfIdFunction(self:GetID())</OnLoad></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let button_id: f64 = env.eval("return XmlInlineSelfIdButton:GetID()").unwrap();
+    let captured_id: f64 = env.eval("return XmlInlineSelfIdValue").unwrap();
+    assert_eq!(captured_id, button_id);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_self_string_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineSelfStringArg = nil
+        function XmlInlineSelfStringFunction(frame, mode)
+            XmlInlineSelfStringArg = mode
+            frame.selfStringApplied = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineSelfStringFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineSelfStringFunction(self, "STATIC")</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let applied: bool = env
+        .eval("return XmlInlineSelfStringFrame.selfStringApplied == true")
+        .unwrap();
+    let arg: String = env.eval("return XmlInlineSelfStringArg").unwrap();
+    assert!(applied);
+    assert_eq!(arg, "STATIC");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_function_with_global_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        SOUNDKIT = { XML_INLINE_SOUND = 77 }
+        XmlInlineGlobalArgValue = nil
+        function XmlInlineGlobalArgFunction(value)
+            XmlInlineGlobalArgValue = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalArgFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalArgFunction(SOUNDKIT.XML_INLINE_SOUND)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let value: f64 = env.eval("return XmlInlineGlobalArgValue").unwrap();
+    assert_eq!(value, 77.0);
 }
 
 #[test]
