@@ -6,10 +6,44 @@
 //! - `CanReplaceGuildMaster()`     -> `SimState.can_replace_guild_master`
 //! - `GetAutoDeclineGuildInvites()` -> `SimState.auto_decline_guild_invites`
 //! - `GetGuildRosterShowOffline()` -> `SimState.guild_roster_show_offline`
+//!
+//! Migrates 4 roster-count entries off `GLOBAL_ZERO_STUBS`:
+//!
+//! - `GetNumGuildMembers()`   -> `world.guild_members.len()`
+//! - `GetGuildRosterSize()`   -> `world.guild_members.len()`
+//! - `GetGuildRosterInfo(i)`  -> synth row from `guild_members[i-1]` +
+//!   `guild_ranks[rank_index-1]`
+//! - `GetGuildRosterMOTD()`   -> `world.guild_motd`
 
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::game_data::CLASS_LABELS;
+use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+
+const CLASS_FILES: &[&str] = &[
+    "WARRIOR",
+    "PALADIN",
+    "HUNTER",
+    "ROGUE",
+    "PRIEST",
+    "DEATHKNIGHT",
+    "SHAMAN",
+    "MAGE",
+    "WARLOCK",
+    "MONK",
+    "DRUID",
+    "DEMONHUNTER",
+    "EVOKER",
+];
+
+fn player_class_info(class_index: i32) -> (&'static str, &'static str) {
+    let idx = class_index
+        .max(1)
+        .min(CLASS_LABELS.len() as i32)
+        .saturating_sub(1) as usize;
+    (CLASS_LABELS[idx], CLASS_FILES[idx])
+}
 
 fn is_in_guild(state: &mut LuaState) -> LuaResult<u32> {
     let b = borrow_state(state)?.world.guild_name.is_some();
@@ -35,6 +69,110 @@ fn get_guild_roster_show_offline(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetNumGuildMembers()` — retail returns (total, online, onlineAndMobile).
+/// The sim treats every roster member as online and no mobile sessions.
+fn get_num_guild_members(state: &mut LuaState) -> LuaResult<u32> {
+    let n = borrow_state(state)?.world.guild_members.len() as f64;
+    state.push(Val::Num(n));
+    state.push(Val::Num(n));
+    state.push(Val::Num(0.0));
+    Ok(3)
+}
+
+/// `GetGuildRosterSize()` — single-value variant. Retail returns the total
+/// roster size (including offline members).
+fn get_guild_roster_size(state: &mut LuaState) -> LuaResult<u32> {
+    let n = borrow_state(state)?.world.guild_members.len() as f64;
+    state.push(Val::Num(n));
+    Ok(1)
+}
+
+/// `GetGuildRosterMOTD()` — guild Message of the Day, empty string when unset.
+fn get_guild_roster_motd(state: &mut LuaState) -> LuaResult<u32> {
+    let motd = borrow_state(state)?.world.guild_motd.clone();
+    let val = create_string(state, &motd);
+    state.push(val);
+    Ok(1)
+}
+
+/// `GetGuildRosterInfo(index)` — retail returns 16 values per roster row.
+/// The sim only models `{name, rank_index}` per member, so we synth the
+/// remaining fields from the player's own level/class and harmless defaults.
+fn get_guild_roster_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let Ok(zero_based) = usize::try_from(index.saturating_sub(1)) else {
+        return push_nil_roster_row(state);
+    };
+    let maybe_row = {
+        let st = borrow_state(state)?;
+        build_roster_row(&st, zero_based)
+    };
+    let Some(row) = maybe_row else {
+        return push_nil_roster_row(state);
+    };
+
+    let name = create_string(state, &row.name);
+    let rank = create_string(state, &row.rank_name);
+    let class_label = create_string(state, row.class_label);
+    let class_file = create_string(state, row.class_file);
+    let empty_zone = create_string(state, "");
+    let empty_note = create_string(state, "");
+    let empty_officer = create_string(state, "");
+
+    state.push(name); // 1: name
+    state.push(rank); // 2: rankName
+    state.push(Val::Num(row.rank_index)); // 3: rankIndex
+    state.push(Val::Num(row.level)); // 4: level
+    state.push(class_label); // 5: class
+    state.push(empty_zone); // 6: zone
+    state.push(empty_note); // 7: note
+    state.push(empty_officer); // 8: officernote
+    state.push(Val::Bool(true)); // 9: online
+    state.push(Val::Num(0.0)); // 10: status
+    state.push(class_file); // 11: classFileName
+    state.push(Val::Num(0.0)); // 12: achievementPoints
+    state.push(Val::Num(0.0)); // 13: achievementRank
+    state.push(Val::Bool(false)); // 14: isMobile
+    state.push(Val::Bool(false)); // 15: isSoREligible
+    state.push(Val::Num(0.0)); // 16: standingID
+    Ok(16)
+}
+
+struct RosterRow {
+    name: String,
+    rank_name: String,
+    rank_index: f64,
+    level: f64,
+    class_label: &'static str,
+    class_file: &'static str,
+}
+
+fn build_roster_row(st: &crate::lua_api::state::SimState, zero_based: usize) -> Option<RosterRow> {
+    let member = st.world.guild_members.get(zero_based)?;
+    let rank_name = st
+        .world
+        .guild_ranks
+        .get((member.rank_index.saturating_sub(1)).max(0) as usize)
+        .map(|r| r.name.clone())
+        .unwrap_or_else(|| "Member".into());
+    let (class_label, class_file) = player_class_info(st.player.class_index);
+    Some(RosterRow {
+        name: member.name.clone(),
+        rank_name,
+        rank_index: member.rank_index as f64 - 1.0,
+        level: st.player.level as f64,
+        class_label,
+        class_file,
+    })
+}
+
+fn push_nil_roster_row(state: &mut LuaState) -> LuaResult<u32> {
+    for _ in 0..16 {
+        state.push(Val::Nil);
+    }
+    Ok(16)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsInGuild", is_in_guild)?;
     LuaApiMut::register_function(lua, "CanReplaceGuildMaster", can_replace_guild_master)?;
@@ -48,5 +186,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetGuildRosterShowOffline",
         get_guild_roster_show_offline,
     )?;
+    LuaApiMut::register_function(lua, "GetNumGuildMembers", get_num_guild_members)?;
+    LuaApiMut::register_function(lua, "GetGuildRosterSize", get_guild_roster_size)?;
+    LuaApiMut::register_function(lua, "GetGuildRosterMOTD", get_guild_roster_motd)?;
+    LuaApiMut::register_function(lua, "GetGuildRosterInfo", get_guild_roster_info)?;
     Ok(())
 }

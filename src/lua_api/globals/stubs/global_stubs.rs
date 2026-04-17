@@ -134,9 +134,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetGuildBankTabInfo",
     "GetGuildBankText",
     "GetGuildFactionInfo",
-    "GetGuildRosterInfo",
-    "GetGuildRosterMOTD",
-    "GetGuildRosterSize",
+    // GetGuildRosterInfo / GetGuildRosterMOTD / GetGuildRosterSize are
+    // SimState-backed in guild_probes.rs, not stubs.
     "GetGuildTabardInfo",
     "GetInstanceInfo",
     "GetInventoryAlertStatus",
@@ -153,17 +152,16 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetNumAuctionItems",
     "GetNumBattlegroundEntries",
     "GetNumClasses",
-    "GetNumGroupMembers",
+    // GetNumGroupMembers / GetNumPartyMembers / GetNumRaidMembers /
+    // GetNumSubgroupMembers are SimState-backed in group_queries.rs,
+    // not stubs.
     "GetNumGuildBankTabs",
-    "GetNumGuildMembers",
+    // GetNumGuildMembers is SimState-backed in guild_probes.rs, not a stub.
     "GetNumLootItems",
-    "GetNumPartyMembers",
     "GetNumQuestLogEntries",
-    "GetNumRaidMembers",
     "GetNumShapeshiftForms",
     "GetNumSkillLines",
     "GetNumSpellTabs",
-    "GetNumSubgroupMembers",
     "GetNumTalentTabs",
     "GetNumTitles",
     "GetPetExperience",

@@ -26,6 +26,7 @@ pub fn register_all(state: &mut LuaState) {
     set_global(state, "GetNumGroupMembers", get_num_group_members);
     set_global(state, "GetNumSubgroupMembers", get_num_subgroup_members);
     set_global(state, "GetNumPartyMembers", get_num_subgroup_members);
+    set_global(state, "GetNumRaidMembers", get_num_raid_members);
     set_global(state, "IsInGroup", is_in_group);
     set_global(state, "IsInRaid", is_in_raid);
     set_global(state, "IsPartyLFG", is_party_lfg);
@@ -132,6 +133,16 @@ fn is_in_raid(state: &mut LuaState) -> LuaResult<u32> {
     // Sim currently models party only; treat a party ≥ 6 as a raid.
     let in_raid = active_party_count(state)? >= 6;
     state.push(Val::Bool(in_raid));
+    Ok(1)
+}
+
+/// `GetNumRaidMembers()` — retail returns total raid size (player + others)
+/// when in a raid, else 0. Follows the same ≥ 6-party raid threshold as
+/// `IsInRaid`.
+fn get_num_raid_members(state: &mut LuaState) -> LuaResult<u32> {
+    let party_count = active_party_count(state)?;
+    let n = if party_count >= 6 { party_count + 1 } else { 0 };
+    state.push(Val::Num(n as f64));
     Ok(1)
 }
 

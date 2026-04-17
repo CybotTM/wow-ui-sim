@@ -80,6 +80,54 @@ fn test_get_num_group_members_zero_when_no_party() {
 }
 
 #[test]
+fn test_get_num_raid_members_zero_for_party_size_under_six() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(4)
+            return GetNumRaidMembers()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        count, 0,
+        "GetNumRaidMembers() should be 0 while the group is still a party"
+    );
+}
+
+#[test]
+fn test_get_num_raid_members_counts_raid_including_player() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(9)
+            return GetNumRaidMembers()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        count, 10,
+        "GetNumRaidMembers() should return party size + 1 once the raid threshold is crossed"
+    );
+}
+
+#[test]
+fn test_get_num_party_members_matches_subgroup_count() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(3)
+            return GetNumPartyMembers()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 3, "GetNumPartyMembers aliases GetNumSubgroupMembers");
+}
+
+#[test]
 fn test_get_num_subgroup_members_matches_party_size() {
     let env = env();
     let count: i32 = env
