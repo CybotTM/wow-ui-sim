@@ -167,7 +167,10 @@ fn register_attribute_behavior_flags(state: &mut LuaState, table: GcRef<Table>) 
     Ok(())
 }
 
-fn register_attribute_input_render_flags(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+fn register_attribute_input_render_flags(
+    state: &mut LuaState,
+    table: GcRef<Table>,
+) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -313,10 +316,7 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
     Ok(())
 }
 
-fn register_event_keyboard_propagation(
-    state: &mut LuaState,
-    table: GcRef<Table>,
-) -> LuaResult<()> {
+fn register_event_keyboard_propagation(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,

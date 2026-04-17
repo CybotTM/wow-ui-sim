@@ -508,7 +508,7 @@ fn apply_template_key_values<'a>(
     }
 }
 
-fn apply_template_scripts(
+pub(crate) fn apply_template_scripts(
     state: &mut LuaState,
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,

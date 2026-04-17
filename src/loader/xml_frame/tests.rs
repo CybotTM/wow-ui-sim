@@ -7,7 +7,60 @@ fn default_frame() -> FrameXml {
 
 /// Helper: call frame_element_to_type and return (widget_type, intrinsic).
 fn resolve(elem: &FrameElement) -> Option<(&'static str, Option<&'static str>)> {
-    frame_element_to_type(elem).map(|(_, wt, intr)| (wt, intr))
+    let (frame, tag) = frame_element_parts(elem);
+    frame_element_to_type(frame, tag).map(|(_, wt, intr)| (wt, intr))
+}
+
+fn frame_element_parts(elem: &FrameElement) -> (&FrameXml, &'static str) {
+    match elem {
+        FrameElement::Frame(f) => (f, "Frame"),
+        FrameElement::Button(f) => (f, "Button"),
+        FrameElement::ItemButton(f) => (f, "ItemButton"),
+        FrameElement::CheckButton(f) => (f, "CheckButton"),
+        FrameElement::EditBox(f) => (f, "EditBox"),
+        FrameElement::ScrollFrame(f) => (f, "ScrollFrame"),
+        FrameElement::Slider(f) => (f, "Slider"),
+        FrameElement::StatusBar(f) => (f, "StatusBar"),
+        FrameElement::GameTooltip(f) => (f, "GameTooltip"),
+        FrameElement::ColorSelect(f) => (f, "ColorSelect"),
+        FrameElement::Model(f) => (f, "Model"),
+        FrameElement::ModelScene(f) => (f, "ModelScene"),
+        FrameElement::EventFrame(f) => (f, "EventFrame"),
+        FrameElement::CinematicModel(f) => (f, "CinematicModel"),
+        FrameElement::PlayerModel(f) => (f, "PlayerModel"),
+        FrameElement::DressUpModel(f) => (f, "DressUpModel"),
+        FrameElement::Browser(f) => (f, "Browser"),
+        FrameElement::Minimap(f) => (f, "Minimap"),
+        FrameElement::MessageFrame(f) => (f, "MessageFrame"),
+        FrameElement::MovieFrame(f) => (f, "MovieFrame"),
+        FrameElement::ScrollingMessageFrame(f) => (f, "ScrollingMessageFrame"),
+        FrameElement::SimpleHTML(f) => (f, "SimpleHTML"),
+        FrameElement::WorldFrame(f) => (f, "WorldFrame"),
+        FrameElement::DropDownToggleButton(f) => (f, "DropDownToggleButton"),
+        FrameElement::DropdownButton(f) => (f, "DropdownButton"),
+        FrameElement::EventButton(f) => (f, "EventButton"),
+        FrameElement::EventEditBox(f) => (f, "EventEditBox"),
+        FrameElement::Cooldown(f) => (f, "Cooldown"),
+        FrameElement::TaxiRouteFrame(f) => (f, "TaxiRouteFrame"),
+        FrameElement::ModelFFX(f) => (f, "ModelFFX"),
+        FrameElement::TabardModel(f) => (f, "TabardModel"),
+        FrameElement::UiCamera(f) => (f, "UiCamera"),
+        FrameElement::UnitPositionFrame(f) => (f, "UnitPositionFrame"),
+        FrameElement::OffScreenFrame(f) => (f, "OffScreenFrame"),
+        FrameElement::Checkout(f) => (f, "Checkout"),
+        FrameElement::FogOfWarFrame(f) => (f, "FogOfWarFrame"),
+        FrameElement::QuestPOIFrame(f) => (f, "QuestPOIFrame"),
+        FrameElement::ArchaeologyDigSiteFrame(f) => (f, "ArchaeologyDigSiteFrame"),
+        FrameElement::ScenarioPOIFrame(f) => (f, "ScenarioPOIFrame"),
+        FrameElement::UIThemeContainerFrame(f) => (f, "UIThemeContainerFrame"),
+        FrameElement::EventScrollFrame(f) => (f, "EventScrollFrame"),
+        FrameElement::ContainedAlertFrame(f) => (f, "ContainedAlertFrame"),
+        FrameElement::MapScene(f) => (f, "MapScene"),
+        FrameElement::Line(f) => (f, "Line"),
+        FrameElement::ScopedModifier(_) => unreachable!(
+            "ScopedModifier is not a frame element in frame_element_to_type tests"
+        ),
+    }
 }
 
 #[test]

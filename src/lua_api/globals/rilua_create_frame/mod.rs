@@ -9,7 +9,7 @@
 
 mod dropdown_api;
 mod helpers;
-mod template_chain;
+pub(crate) mod template_chain;
 
 use crate::lua_api::rilua_methods::{borrow_state, extract_frame_id, frame_ref};
 use crate::lua_bridge::FromStack;
@@ -45,6 +45,8 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     state.push(frame_val);
     Ok(1)
 }
+
+pub(crate) use template_chain::apply_template_scripts;
 
 struct CreateFrameArgs {
     frame_type: String,

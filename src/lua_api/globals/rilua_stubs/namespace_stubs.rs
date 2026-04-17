@@ -397,7 +397,11 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ),
     ("C_TradeSkillUI", "GetFilteredRecipeIDs", stub_empty_table),
     // C_UnitAuras
-    ("C_UnitAuras", "GetAuraSlots", stub_empty_table),
+    // GetAuraSlots returns (continuationToken, slot1, slot2, ...). Callers
+    // drive AuraUtil.ForEachAura via a `repeat ... until token == nil` loop
+    // (Blizzard_FrameXMLUtil/AuraUtil.lua:114-117). Returning an empty table
+    // as the first value makes that token truthy and loops forever.
+    ("C_UnitAuras", "GetAuraSlots", stub_nil),
     // C_VoiceChat
     ("C_VoiceChat", "GetChannels", stub_empty_table),
     // C_WowLabs

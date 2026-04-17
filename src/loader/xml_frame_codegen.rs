@@ -5,7 +5,7 @@
 //! attributes, and script handlers.
 
 use super::helpers::{
-    escape_lua_string, generate_scripts_code, lua_global_ref, lua_table_field_ref,
+    escape_lua_string, lua_global_ref, lua_table_field_ref,
 };
 
 /// Build the complete Lua code string for creating a frame from XML.
@@ -28,7 +28,6 @@ pub(super) fn build_frame_lua_code(
     if let Some(id) = frame.xml_id {
         lua_code.push_str(&format!("\n        frame:SetID({})", id));
     }
-    append_scripts_code(&mut lua_code, frame);
     lua_code
 }
 
@@ -228,12 +227,5 @@ fn append_xml_attributes_code(lua_code: &mut String, frame: &crate::xml::FrameXm
                 value
             ));
         }
-    }
-}
-
-/// Append script handler registrations from the frame's Scripts element.
-fn append_scripts_code(lua_code: &mut String, frame: &crate::xml::FrameXml) {
-    if let Some(scripts) = frame.scripts() {
-        lua_code.push_str(&generate_scripts_code(scripts));
     }
 }

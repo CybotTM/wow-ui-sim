@@ -1,0 +1,41 @@
+//! rilua RustFn equivalents of widget-specific frame methods.
+//!
+//! Covers: Texture/DrawLayer, Cooldown, EditBox, Slider/CheckButton/StatusBar
+//! shared value, StatusBar, ScrollFrame, Model/ModelScene, and GameTooltip
+//! widget methods.
+//!
+//! Each method is a plain `fn(&mut LuaState) -> LuaResult<u32>` (i.e. a
+//! `RustFn`) that uses the helpers in `rilua_methods` to extract the frame
+//! ID from the first stack argument and borrow `SimState`.
+
+mod cooldown;
+mod editbox;
+mod model;
+mod shared;
+mod slider;
+mod statusbar;
+mod texture;
+mod tooltip;
+
+use rilua::LuaResult;
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
+
+/// Register all widget-specific methods on the frame metatable.
+///
+/// Call this after the standard frame metatable has been created,
+/// passing its `GcRef<Table>` as `metatable`.
+pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
+    texture::register_texture(state, metatable)?;
+    cooldown::register_cooldown(state, metatable)?;
+    editbox::register_editbox(state, metatable)?;
+    slider::register_slider(state, metatable)?;
+    slider::register_shared_value(state, metatable)?;
+    slider::register_checkbutton(state, metatable)?;
+    slider::register_scrollframe(state, metatable)?;
+    statusbar::register_statusbar(state, metatable)?;
+    model::register_model(state, metatable)?;
+    tooltip::register_tooltip(state, metatable)?;
+    Ok(())
+}

@@ -19,6 +19,64 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         table.insert(systemInfo.settings, { setting = setting, value = value })
     end
 
+    local function copyAnchorInfo(anchorInfo)
+        if type(anchorInfo) ~= "table" then
+            return anchorInfo
+        end
+        local copy = {}
+        for key, value in pairs(anchorInfo) do
+            copy[key] = value
+        end
+        return copy
+    end
+
+    local function copySettings(settings)
+        local copy = {}
+        if type(settings) ~= "table" then
+            return copy
+        end
+        for i, settingInfo in ipairs(settings) do
+            copy[i] = {
+                setting = settingInfo.setting,
+                value = settingInfo.value,
+            }
+        end
+        return copy
+    end
+
+    local function copySystems(systems)
+        local copy = {}
+        if type(systems) ~= "table" then
+            return copy
+        end
+        for i, systemInfo in ipairs(systems) do
+            copy[i] = {
+                system = systemInfo.system,
+                systemIndex = systemInfo.systemIndex,
+                isInDefaultPosition = systemInfo.isInDefaultPosition,
+                anchorInfo = copyAnchorInfo(systemInfo.anchorInfo),
+                settings = copySettings(systemInfo.settings),
+            }
+        end
+        return copy
+    end
+
+    local function copyLayouts(layouts)
+        local copy = {}
+        if type(layouts) ~= "table" then
+            return copy
+        end
+        for i, layoutInfo in ipairs(layouts) do
+            copy[i] = {
+                layoutIndex = layoutInfo.layoutIndex,
+                layoutName = layoutInfo.layoutName,
+                layoutType = layoutInfo.layoutType,
+                systems = copySystems(layoutInfo.systems),
+            }
+        end
+        return copy
+    end
+
     local function forceCastBarUnderPlayerFrame(layoutInfo)
         if not layoutInfo or not layoutInfo.layouts then return end
         local activeLayout = layoutInfo.layouts[layoutInfo.activeLayout]
@@ -38,8 +96,8 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     if not emm.layoutInfo then
         local layoutInfo = C_EditMode.GetLayouts()
         emm.layoutInfo = layoutInfo
-        local savedLayouts = emm.layoutInfo.layouts
-        emm.layoutInfo.layouts = EditModePresetLayoutManager:GetCopyOfPresetLayouts()
+        local savedLayouts = copyLayouts(emm.layoutInfo.layouts)
+        emm.layoutInfo.layouts = copyLayouts(EditModePresetLayoutManager.presetLayoutInfo)
         tAppendAll(emm.layoutInfo.layouts, savedLayouts)
     end
     forceCastBarUnderPlayerFrame(emm.layoutInfo)
@@ -138,6 +196,149 @@ pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
     guard_action_bar_limits(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SETUP_LAYOUT_INFO_LUA, WowLuaEnv};
+
+    #[test]
+    fn setup_layout_info_clones_preset_layouts_without_copytable() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            Enum = {
+                EditModeSystem = {
+                    CastBar = 1,
+                    UnitFrame = 2,
+                },
+                EditModeCastBarSetting = {
+                    LockToPlayerFrame = 101,
+                },
+                EditModeUnitFrameSetting = {
+                    CastBarUnderneath = 201,
+                },
+                EditModeUnitFrameSystemIndices = {
+                    Player = 301,
+                },
+            }
+
+            C_EditMode = {
+                GetLayouts = function()
+                    return {
+                        layouts = {
+                            {
+                                layoutIndex = 99,
+                                layoutName = "Saved",
+                                layoutType = 2,
+                                systems = {
+                                    {
+                                        system = 77,
+                                        systemIndex = 88,
+                                        isInDefaultPosition = false,
+                                        anchorInfo = { point = "BOTTOM" },
+                                        settings = {
+                                            { setting = 501, value = 601 },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        activeLayout = 1,
+                    }
+                end,
+                GetAccountSettings = function()
+                    return {
+                        { setting = 1, value = 0 },
+                    }
+                end,
+            }
+
+            EditModePresetLayoutManager = {
+                presetLayoutInfo = {
+                    {
+                        layoutIndex = 1,
+                        layoutName = "Preset",
+                        layoutType = 0,
+                        systems = {
+                            {
+                                system = Enum.EditModeSystem.CastBar,
+                                systemIndex = 1,
+                                isInDefaultPosition = true,
+                                anchorInfo = { point = "TOP" },
+                                settings = {
+                                    { setting = Enum.EditModeCastBarSetting.LockToPlayerFrame, value = 0 },
+                                },
+                            },
+                            {
+                                system = Enum.EditModeSystem.UnitFrame,
+                                systemIndex = Enum.EditModeUnitFrameSystemIndices.Player,
+                                isInDefaultPosition = true,
+                                anchorInfo = { point = "LEFT" },
+                                settings = {
+                                    { setting = Enum.EditModeUnitFrameSetting.CastBarUnderneath, value = 0 },
+                                },
+                            },
+                        },
+                    },
+                },
+            }
+
+            EditModeManagerFrame = {}
+            "#,
+        )
+        .expect("install edit mode stubs");
+
+        env.exec(SETUP_LAYOUT_INFO_LUA)
+            .expect("run setup layout info");
+
+        let (layout_count, lock_to_player, cast_bar_underneath, saved_layout_name): (
+            i32,
+            i32,
+            i32,
+            String,
+        ) = env
+            .eval(
+                r#"
+                local layouts = EditModeManagerFrame.layoutInfo.layouts
+                local presetSystems = layouts[1].systems
+                local savedLayout = layouts[2]
+                return #layouts,
+                    presetSystems[1].settings[1].value,
+                    presetSystems[2].settings[1].value,
+                    savedLayout.layoutName
+                "#,
+            )
+            .expect("read cloned layout info");
+
+        assert_eq!(layout_count, 2, "preset and saved layouts should both be present");
+        assert_eq!(lock_to_player, 1, "cast bar setting should be forced on cloned preset");
+        assert_eq!(
+            cast_bar_underneath, 1,
+            "player frame setting should be forced on cloned preset"
+        );
+        assert_eq!(saved_layout_name, "Saved", "saved layouts should be appended");
+
+        env.exec(
+            r#"
+            EditModePresetLayoutManager.presetLayoutInfo[1].systems[1].settings[1].value = 999
+            EditModePresetLayoutManager.presetLayoutInfo[1].systems[1].anchorInfo.point = "BROKEN"
+            "#,
+        )
+        .expect("mutate original preset");
+
+        let (copied_value, copied_point): (i32, String) = env
+            .eval(
+                r#"
+                local system = EditModeManagerFrame.layoutInfo.layouts[1].systems[1]
+                return system.settings[1].value, system.anchorInfo.point
+                "#,
+            )
+            .expect("read cloned preset after source mutation");
+
+        assert_eq!(copied_value, 1, "cloned settings must not alias preset source");
+        assert_eq!(copied_point, "TOP", "cloned anchor info must not alias preset source");
+    }
 }
 
 /// Guard ApplySystemAnchor against nil systemInfo.

@@ -123,6 +123,15 @@ fn register_button_misc(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<
 }
 
 fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_texture_button_slots(state, table)?;
+    register_texture_checked(state, table)?;
+    register_texture_atlas(state, table)?;
+    register_texture_clear(state, table)?;
+    register_texture_three_slice(state, table)?;
+    Ok(())
+}
+
+fn register_texture_button_slots(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -150,12 +159,6 @@ fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()>
     table_set_rust_fn(
         state,
         table,
-        "GetCheckedTexture",
-        textures::get_checked_texture,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
         "SetNormalTexture",
         textures::set_normal_texture,
     )?;
@@ -177,19 +180,15 @@ fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()>
         "SetDisabledTexture",
         textures::set_disabled_texture,
     )?;
-    table_set_rust_fn(state, table, "SetNormalAtlas", textures::set_normal_atlas)?;
-    table_set_rust_fn(state, table, "SetPushedAtlas", textures::set_pushed_atlas)?;
+    Ok(())
+}
+
+fn register_texture_checked(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
-        "SetDisabledAtlas",
-        textures::set_disabled_atlas,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "SetHighlightAtlas",
-        textures::set_highlight_atlas,
+        "GetCheckedTexture",
+        textures::get_checked_texture,
     )?;
     table_set_rust_fn(
         state,
@@ -209,6 +208,28 @@ fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()>
         "GetDisabledCheckedTexture",
         textures::get_disabled_checked_texture,
     )?;
+    Ok(())
+}
+
+fn register_texture_atlas(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn(state, table, "SetNormalAtlas", textures::set_normal_atlas)?;
+    table_set_rust_fn(state, table, "SetPushedAtlas", textures::set_pushed_atlas)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetDisabledAtlas",
+        textures::set_disabled_atlas,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetHighlightAtlas",
+        textures::set_highlight_atlas,
+    )?;
+    Ok(())
+}
+
+fn register_texture_clear(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -233,6 +254,10 @@ fn register_textures(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()>
         "ClearDisabledTexture",
         textures::clear_disabled_texture,
     )?;
+    Ok(())
+}
+
+fn register_texture_three_slice(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "SetLeftTexture", textures::set_left_texture)?;
     table_set_rust_fn(
         state,
@@ -272,10 +297,22 @@ fn register_anchors(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
 }
 
 fn register_hierarchy(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_hierarchy_parent_children(state, table)?;
+    register_hierarchy_regions(state, table)?;
+    register_hierarchy_creation(state, table)?;
+    register_hierarchy_masks(state, table)?;
+    Ok(())
+}
+
+fn register_hierarchy_parent_children(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetParent", hierarchy::get_parent)?;
     table_set_rust_fn(state, table, "SetParent", hierarchy::set_parent)?;
     table_set_rust_fn(state, table, "GetNumChildren", hierarchy::get_num_children)?;
     table_set_rust_fn(state, table, "GetChildren", hierarchy::get_children)?;
+    Ok(())
+}
+
+fn register_hierarchy_regions(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "GetNumRegions", hierarchy::get_num_regions)?;
     table_set_rust_fn(state, table, "GetRegions", hierarchy::get_regions)?;
     table_set_rust_fn(
@@ -286,6 +323,10 @@ fn register_hierarchy(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()
     )?;
     table_set_rust_fn(state, table, "GetParentKey", hierarchy::get_parent_key)?;
     table_set_rust_fn(state, table, "SetParentKey", hierarchy::set_parent_key)?;
+    Ok(())
+}
+
+fn register_hierarchy_creation(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "CreateTexture", hierarchy::create_texture)?;
     table_set_rust_fn(
         state,
@@ -293,6 +334,17 @@ fn register_hierarchy(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()
         "CreateMaskTexture",
         hierarchy::create_mask_texture,
     )?;
+    table_set_rust_fn(state, table, "CreateLine", hierarchy::create_line)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "CreateFontString",
+        font_strings::create_font_string,
+    )?;
+    Ok(())
+}
+
+fn register_hierarchy_masks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "AddMaskTexture", hierarchy::add_mask_texture)?;
     table_set_rust_fn(
         state,
@@ -307,13 +359,6 @@ fn register_hierarchy(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()
         hierarchy::get_num_mask_textures,
     )?;
     table_set_rust_fn(state, table, "GetMaskTexture", hierarchy::get_mask_texture)?;
-    table_set_rust_fn(state, table, "CreateLine", hierarchy::create_line)?;
-    table_set_rust_fn(
-        state,
-        table,
-        "CreateFontString",
-        font_strings::create_font_string,
-    )?;
     table_set_rust_fn(state, table, "AttachTexture", hierarchy::attach_texture)?;
     table_set_rust_fn(
         state,
@@ -459,6 +504,13 @@ fn register_animation_target(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
 }
 
 fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_flipbook_grid(state, table)?;
+    register_flipbook_frames(state, table)?;
+    register_flipbook_frame_dimensions(state, table)?;
+    Ok(())
+}
+
+fn register_flipbook_grid(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -483,6 +535,10 @@ fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> Lua
         "GetFlipBookColumns",
         animations::animation_get_flipbook_columns,
     )?;
+    Ok(())
+}
+
+fn register_flipbook_frames(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -495,6 +551,10 @@ fn register_animation_flipbook(state: &mut LuaState, table: GcRef<Table>) -> Lua
         "GetFlipBookFrames",
         animations::animation_get_flipbook_frames,
     )?;
+    Ok(())
+}
+
+fn register_flipbook_frame_dimensions(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
