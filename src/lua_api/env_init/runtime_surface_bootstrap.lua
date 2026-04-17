@@ -2148,19 +2148,12 @@ end
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
 
--- Guild-info probes: sim has no guild, no locale variants, no ranks.
--- Accurate "empty guild state" returns keep MainMenuBarMicroButtons
--- and the guild UIs from crashing their OnLoad chains.
-C_GuildInfo = C_GuildInfo or __wow_namespace()
-if rawget(C_GuildInfo, "GetClubId") == nil then
-  function C_GuildInfo.GetClubId() return nil end
-end
-if rawget(C_GuildInfo, "IsGuildOfficer") == nil then
-  function C_GuildInfo.IsGuildOfficer() return false end
-end
-if rawget(C_GuildInfo, "CanSpeakInGuildChat") == nil then
-  function C_GuildInfo.CanSpeakInGuildChat() return true end
-end
+-- C_GuildInfo.GetClubId / IsGuildOfficer / CanSpeakInGuildChat are
+-- registered from Rust (src/lua_api/globals/guild_info.rs), backed by
+-- SimState::world.guild_club_id / guild_is_officer / guild_can_speak_in_chat.
+-- Merge the stub-namespace __index fallback so other unimplemented
+-- C_GuildInfo members resolve to the no-op metamethod.
+C_GuildInfo = __wow_merge_namespace(C_GuildInfo, {})
 -- GetAvailableLocaleInfo is registered from Rust
 -- (src/lua_api/globals/locale_info.rs). Returns the 12-locale retail list
 -- as { localeId, localeName, englishName, displayName } entries.

@@ -478,6 +478,16 @@ pub struct WorldState {
     /// `GuildControlGetRankName()` / `GetRankFlags()` without an explicit
     /// index return the selected rank's fields. `0` = nothing selected.
     pub guild_selected_rank: i32,
+    /// Club id exposed by `C_GuildInfo.GetClubId()`. WoW returns a string
+    /// (Battle.net community id) or nil when the player has no guild.
+    pub guild_club_id: Option<String>,
+    /// Whether the player holds officer rank in their guild. Drives
+    /// `C_GuildInfo.IsGuildOfficer()`. Default false (no guild).
+    pub guild_is_officer: bool,
+    /// Whether the player can speak in guild chat. `C_GuildInfo.CanSpeakInGuildChat()`.
+    /// Default true — matches retail's "no explicit mute" baseline so addons
+    /// that gate chat input on this probe don't silence themselves on startup.
+    pub guild_can_speak_in_chat: bool,
 }
 
 /// A single guild rank row. `name` is the display name; `flags` is a bag of
@@ -536,6 +546,9 @@ impl Default for WorldState {
             guild_logo: GuildLogo::default(),
             guild_ranks: Vec::new(),
             guild_selected_rank: 0,
+            guild_club_id: None,
+            guild_is_officer: false,
+            guild_can_speak_in_chat: true,
         }
     }
 }

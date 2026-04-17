@@ -170,6 +170,18 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetLfgApplicantCounts",
             super::lfg_list::admin_set_applicant_counts,
         )?
+        .set_function(
+            "SetGuildClubId",
+            super::guild_info::admin_set_guild_club_id,
+        )?
+        .set_function(
+            "SetGuildIsOfficer",
+            super::guild_info::admin_set_guild_is_officer,
+        )?
+        .set_function(
+            "SetGuildCanSpeakInChat",
+            super::guild_info::admin_set_guild_can_speak_in_chat,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?
