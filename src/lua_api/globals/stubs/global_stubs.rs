@@ -218,6 +218,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "GetPVPLastHonorGain",
     "HasNewMail",
     "HasPetSpells",
+    "IsOnGroundFloorInJailersTower",
     "InCombatLockdown",
     "IsBattlefieldArena",
     "IsConsumableItem",

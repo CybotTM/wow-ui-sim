@@ -297,6 +297,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_PhotoSharing.IsAuthorized / IsEnabled are SimState-backed in photo_sharing.rs.
     // C_PlayerInfo
     ("C_PlayerInfo", "IsPlayerEligibleForNPE", stub_false),
+    ("C_PlayerInfo", "IsPlayerInRPE", stub_false),
     ("C_PlayerInfo", "IsPlayerNPERestricted", stub_false),
     // C_QuestLog
     ("C_QuestLog", "IsComplete", stub_false),
@@ -307,6 +308,8 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ("C_QuestLog", "IsQuestFlaggedCompleted", stub_false),
     ("C_QuestLog", "IsQuestReplayable", stub_false),
     ("C_QuestLog", "IsWorldQuest", stub_false),
+    // C_ScenarioInfo
+    ("C_ScenarioInfo", "IsTieredEntranceScenario", stub_false),
     // C_Spell
     ("C_Spell", "GetVisibilityInfo", stub_false),
     ("C_Spell", "IsPriorityAura", stub_false),
