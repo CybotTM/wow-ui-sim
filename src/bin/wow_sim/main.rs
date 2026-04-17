@@ -198,6 +198,11 @@ fn init_and_load(
     init_environment(args, &env, &font_system);
     env.set_screen_mode(screen);
 
+    // Pause GC across addon loading — addons allocate monotonically
+    // (closures + frame tables + registry entries stay live), and we'd
+    // rather walk them once in a final full_gc than mark them on every
+    // threshold hit.
+    env.gc_stop();
     let mut saved_vars = configure_saved_vars(args);
     addon_loading::load_blizzard_addons(&env, screen);
     addon_loading::load_third_party_addons(
@@ -209,6 +214,8 @@ fn init_and_load(
     );
     env.sync_addon_names_to_lua();
     env.apply_post_load_workarounds();
+    env.gc_restart_after_bootstrap()
+        .expect("post-bootstrap full_gc failed");
     (env, font_system, saved_vars)
 }
 

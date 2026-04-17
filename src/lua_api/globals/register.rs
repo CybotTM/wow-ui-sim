@@ -14,6 +14,12 @@ use std::rc::Rc;
 /// This native registrar owns the split-module wiring so `env_init` can use
 /// one entry point for the current global surface again.
 pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> crate::Result<()> {
+    // Bootstrap allocates monotonically — frames/globals/metatables/bytecode
+    // stay live through startup. Pause the collector so the mark phase
+    // doesn't walk the growing `_G` and frame trees on every threshold
+    // trigger. Caller must match with full_gc() + gc_restart() once
+    // bootstrap (and, in the binary, addon loading) completes.
+    lua.gc_stop();
     register_bootstrap_globals(lua)?;
     register_frame_globals(lua)?;
     register_tail_globals(lua)?;

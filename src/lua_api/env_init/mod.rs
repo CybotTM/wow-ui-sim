@@ -34,6 +34,9 @@ pub(super) fn init_lua_state(
     bootstrap::init_shared_bootstrap(lua)?;
     enums::init_enum_globals(lua)?;
     frames::init_frame_metatable(lua)?;
+    // register_globals calls gc_stop at its entry; finalize_bootstrap_gc
+    // below restores the collector once bootstrap is complete. Between
+    // those two points the mark phase is paused.
     super::globals::register_globals(lua, state.clone())?;
     bootstrap::init_runtime_surface_bootstrap(lua)?;
     super::globals::security::create_secure_environment(lua)?;
@@ -41,6 +44,18 @@ pub(super) fn init_lua_state(
     crate::loader::precompiled::init(lua)?;
     remove_sandbox_globals(lua)?;
     frames::init_frame_metatable(lua)?;
+    finalize_bootstrap_gc(lua)?;
+    Ok(())
+}
+
+/// Run a full collection to drop bootstrap transients, then re-enable
+/// the incremental collector. Called at the end of `init_lua_state`
+/// (and should be called again by the binary after addon loading, with
+/// a matching `gc_stop` before the addon loads).
+fn finalize_bootstrap_gc(lua: &mut rilua::Lua) -> crate::Result<()> {
+    use rilua::LuaApiMut;
+    lua.gc_collect()?;
+    lua.gc_restart();
     Ok(())
 }
 

@@ -133,6 +133,20 @@ impl WowLuaEnv {
         create_string(lua.state_mut(), text)
     }
 
+    /// Run a full GC cycle then re-enable the incremental collector.
+    ///
+    /// Pairs with [`Self::gc_stop`] to bracket bootstrap / addon-load
+    /// allocations. The full collection drops transients allocated
+    /// while the collector was paused; `gc_restart` resets the debt
+    /// threshold so the incremental collector resumes normally.
+    pub fn gc_restart_after_bootstrap(&self) -> crate::Result<()> {
+        use rilua::LuaApiMut;
+        let mut lua = self.lua.borrow_mut();
+        lua.gc_collect()?;
+        lua.gc_restart();
+        Ok(())
+    }
+
     /// Populate the `__addon_names` registry table mapping addon index → folder name.
     pub fn sync_addon_names_to_lua(&self) {
         let addon_names = {
