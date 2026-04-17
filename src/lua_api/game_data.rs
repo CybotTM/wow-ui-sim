@@ -46,6 +46,10 @@ pub struct PartyMember {
     pub is_leader: bool,
     /// When the member died (for auto-rez after 30s).
     pub dead_since: Option<std::time::Instant>,
+    /// Active buffs (helpful auras) on this party member.
+    pub buffs: Vec<AuraInfo>,
+    /// Active debuffs (harmful auras) on this party member.
+    pub debuffs: Vec<AuraInfo>,
 }
 
 /// A simulated aura (buff or debuff).
@@ -303,15 +307,74 @@ const DEFAULT_PARTY_MEMBERS: &[(&str, i32, i32, i32, i32, i32, &str)] = &[
     ("Jaina", 8, 90_000, 64_000, 80_000, 0, "MANA"),   // Mage
 ];
 
+/// A simple buff AuraInfo for seeding party member aura lists.
+fn make_party_buff(
+    name: &str,
+    spell_id: i32,
+    icon: i32,
+    source_unit: &str,
+    aura_instance_id: i32,
+) -> AuraInfo {
+    AuraInfo {
+        name: name.to_string(),
+        spell_id,
+        icon,
+        duration: 3600.0,
+        expiration_time: 3600.0,
+        applications: 0,
+        source_unit: source_unit.to_string(),
+        is_helpful: true,
+        is_stealable: false,
+        can_apply_aura: true,
+        is_from_player_or_player_pet: source_unit == "player",
+        aura_instance_id,
+    }
+}
+
+/// A simple debuff AuraInfo for seeding party member aura lists.
+fn make_party_debuff(
+    name: &str,
+    spell_id: i32,
+    icon: i32,
+    source_unit: &str,
+    aura_instance_id: i32,
+) -> AuraInfo {
+    AuraInfo {
+        name: name.to_string(),
+        spell_id,
+        icon,
+        duration: 30.0,
+        expiration_time: 30.0,
+        applications: 1,
+        source_unit: source_unit.to_string(),
+        is_helpful: false,
+        is_stealable: false,
+        can_apply_aura: false,
+        is_from_player_or_player_pet: false,
+        aura_instance_id,
+    }
+}
+
 /// Default 4-member party (disabled by WOW_SIM_NO_PARTY=1).
+///
+/// Aura distribution:
+/// - party1 (Thrynn):   buff only
+/// - party2 (Kazzara):  debuff only
+/// - party3 (Sylvanas): buff + debuff
+/// - party4 (Jaina):    neither
 pub fn default_party() -> Vec<PartyMember> {
     if std::env::var("WOW_SIM_NO_PARTY").is_ok() {
         return Vec::new();
     }
     DEFAULT_PARTY_MEMBERS
         .iter()
+        .enumerate()
         .map(
-            |&(name, class_index, health_max, power, power_max, power_type, power_type_name)| {
+            |(
+                i,
+                &(name, class_index, health_max, power, power_max, power_type, power_type_name),
+            )| {
+                let (buffs, debuffs) = default_party_auras(i);
                 PartyMember {
                     name: name.to_string(),
                     class_index,
@@ -324,10 +387,31 @@ pub fn default_party() -> Vec<PartyMember> {
                     power_type_name: power_type_name.to_string(),
                     is_leader: false,
                     dead_since: None,
+                    buffs,
+                    debuffs,
                 }
             },
         )
         .collect()
+}
+
+/// Build (buffs, debuffs) for the i-th party member (0-based).
+///
+/// Distribution:
+/// - 0 (party1): buff only
+/// - 1 (party2): debuff only
+/// - 2 (party3): buff + debuff
+/// - 3+ (party4): neither
+fn default_party_auras(i: usize) -> (Vec<AuraInfo>, Vec<AuraInfo>) {
+    // Spell: Power Word: Fortitude (buff), Weakened Armor (debuff)
+    let buff = make_party_buff("Power Word: Fortitude", 21562, 135987, "player", 1);
+    let debuff = make_party_debuff("Weakened Armor", 113746, 136127, "target", 2);
+    match i {
+        0 => (vec![buff], vec![]),
+        1 => (vec![], vec![debuff]),
+        2 => (vec![buff], vec![debuff]),
+        _ => (vec![], vec![]),
+    }
 }
 
 /// Randomly damage party members, auto-resurrect after 30s dead.

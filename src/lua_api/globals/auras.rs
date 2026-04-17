@@ -92,16 +92,29 @@ fn aura_matches_filter(aura: &AuraInfo, filter: AuraFilter) -> bool {
     }
 }
 
-fn collect_player_auras(state: &mut LuaState, filter: AuraFilter) -> Vec<AuraInfo> {
+fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> Vec<AuraInfo> {
     let Ok(sim) = borrow_state(state) else {
         return Vec::new();
     };
-    sim.player
-        .buffs
-        .iter()
-        .filter(|a| aura_matches_filter(a, filter))
-        .cloned()
-        .collect()
+    use crate::lua_api::globals::unit_api::parse_party_index;
+    let auras: Vec<&AuraInfo> =
+        if let Some(idx) = parse_party_index(unit) {
+            if let Some(member) = sim.party_members.get(idx) {
+                match filter {
+                    AuraFilter::Helpful => member.buffs.iter().collect(),
+                    AuraFilter::Harmful => member.debuffs.iter().collect(),
+                }
+            } else {
+                return Vec::new();
+            }
+        } else {
+            sim.player
+                .buffs
+                .iter()
+                .filter(|a| aura_matches_filter(a, filter))
+                .collect()
+        };
+    auras.into_iter().cloned().collect()
 }
 
 // ── GetAuraSlots ─────────────────────────────────────────────────────────────
@@ -112,7 +125,7 @@ fn collect_player_auras(state: &mut LuaState, filter: AuraFilter) -> Vec<AuraInf
 // Slot IDs map 1:1 to `aura_instance_id` so `GetAuraDataBySlot(slot)`
 // is equivalent to `GetAuraDataByAuraInstanceID(slot)`.
 fn get_aura_slots(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit: Option<String> = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let filter_str: String = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
     let token = Option::<f64>::from_stack(state, 4)?;
 
@@ -121,7 +134,7 @@ fn get_aura_slots(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
 
-    let auras = collect_player_auras(state, filter_from_str(&filter_str));
+    let auras = collect_unit_auras(state, &unit, filter_from_str(&filter_str));
 
     // continuationToken = nil (done after this batch)
     state.push(Val::Nil);
@@ -133,9 +146,9 @@ fn get_aura_slots(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── GetAuraDataBySlot ────────────────────────────────────────────────────────
 fn get_aura_data_by_slot(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let slot = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
-    push_aura_by_instance_id(state, slot);
+    push_aura_by_instance_id(state, &unit, slot);
     Ok(1)
 }
 
@@ -144,29 +157,40 @@ fn get_aura_data_by_slot(state: &mut LuaState) -> LuaResult<u32> {
 // `(unit, index, filter)` — filter decides whether the index addresses a buff
 // or a debuff list. 1-based index into the filtered list.
 fn get_aura_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
     let filter_str = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
-    push_aura_at_filtered_index(state, filter_from_str(&filter_str), index);
+    push_aura_at_filtered_index(state, &unit, filter_from_str(&filter_str), index);
     Ok(1)
 }
 
 fn get_aura_data_by_aura_instance_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let aura_id = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
-    push_aura_by_instance_id(state, aura_id);
+    push_aura_by_instance_id(state, &unit, aura_id);
     Ok(1)
 }
 
 fn get_aura_data_by_spell_name(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let name = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    use crate::lua_api::globals::unit_api::parse_party_index;
     let found = {
         let Ok(sim) = borrow_state(state) else {
             state.push(Val::Nil);
             return Ok(1);
         };
-        sim.player.buffs.iter().find(|a| a.name == name).cloned()
+        if let Some(idx) = parse_party_index(&unit) {
+            sim.party_members.get(idx).and_then(|m| {
+                m.buffs
+                    .iter()
+                    .chain(m.debuffs.iter())
+                    .find(|a| a.name == name)
+                    .cloned()
+            })
+        } else {
+            sim.player.buffs.iter().find(|a| a.name == name).cloned()
+        }
     };
     match found {
         Some(aura) => {
@@ -179,32 +203,43 @@ fn get_aura_data_by_spell_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_buff_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
-    push_aura_at_filtered_index(state, AuraFilter::Helpful, index);
+    push_aura_at_filtered_index(state, &unit, AuraFilter::Helpful, index);
     Ok(1)
 }
 
 fn get_debuff_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = Option::<String>::from_stack(state, 1)?;
+    let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
-    push_aura_at_filtered_index(state, AuraFilter::Harmful, index);
+    push_aura_at_filtered_index(state, &unit, AuraFilter::Harmful, index);
     Ok(1)
 }
 
 // ── Aura lookup helpers ──────────────────────────────────────────────────────
 
-fn push_aura_by_instance_id(state: &mut LuaState, aura_instance_id: i32) {
+fn push_aura_by_instance_id(state: &mut LuaState, unit: &str, aura_instance_id: i32) {
+    use crate::lua_api::globals::unit_api::parse_party_index;
     let found = {
         let Ok(sim) = borrow_state(state) else {
             state.push(Val::Nil);
             return;
         };
-        sim.player
-            .buffs
-            .iter()
-            .find(|a| a.aura_instance_id == aura_instance_id)
-            .cloned()
+        if let Some(idx) = parse_party_index(unit) {
+            sim.party_members.get(idx).and_then(|m| {
+                m.buffs
+                    .iter()
+                    .chain(m.debuffs.iter())
+                    .find(|a| a.aura_instance_id == aura_instance_id)
+                    .cloned()
+            })
+        } else {
+            sim.player
+                .buffs
+                .iter()
+                .find(|a| a.aura_instance_id == aura_instance_id)
+                .cloned()
+        }
     };
     match found {
         Some(aura) => {
@@ -215,12 +250,12 @@ fn push_aura_by_instance_id(state: &mut LuaState, aura_instance_id: i32) {
     }
 }
 
-fn push_aura_at_filtered_index(state: &mut LuaState, filter: AuraFilter, index: i32) {
+fn push_aura_at_filtered_index(state: &mut LuaState, unit: &str, filter: AuraFilter, index: i32) {
     if index < 1 {
         state.push(Val::Nil);
         return;
     }
-    let auras = collect_player_auras(state, filter);
+    let auras = collect_unit_auras(state, unit, filter);
     match auras.get((index - 1) as usize) {
         Some(aura) => {
             let table = build_aura_table(state, aura);

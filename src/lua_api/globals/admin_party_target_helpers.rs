@@ -63,5 +63,7 @@ pub(super) fn default_party_member() -> PartyMember {
         power_type_name: "RAGE".to_string(),
         is_leader: false,
         dead_since: None,
+        buffs: vec![],
+        debuffs: vec![],
     }
 }

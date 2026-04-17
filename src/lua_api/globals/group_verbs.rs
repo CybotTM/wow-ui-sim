@@ -58,6 +58,8 @@ fn synthesize_party_member(name: String) -> PartyMember {
         power_type_name: "MANA".to_string(),
         is_leader: false,
         dead_since: None,
+        buffs: vec![],
+        debuffs: vec![],
     }
 }
 
