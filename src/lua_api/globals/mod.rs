@@ -36,6 +36,7 @@ pub mod keybindings;
 pub mod lfg_info;
 pub mod lfg_list;
 pub mod locale_info;
+pub mod lua_duration_object;
 pub mod missing_surface;
 pub mod modifier_keys;
 pub mod net_stats;

@@ -14,6 +14,13 @@ use std::rc::Rc;
 /// This native registrar owns the split-module wiring so `env_init` can use
 /// one entry point for the current global surface again.
 pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> crate::Result<()> {
+    register_bootstrap_globals(lua)?;
+    register_frame_globals(lua)?;
+    register_tail_globals(lua)?;
+    Ok(())
+}
+
+fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::strings::register_all_ui_strings(lua)?;
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
@@ -22,6 +29,10 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     // Must run after stubs so the fixture aura data overrides the
     // stub_nil registrations for C_UnitAuras.GetAuraSlots & friends.
     super::auras::register_all(lua.state_mut());
+    Ok(())
+}
+
+fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::create_frame::register_all(lua)?;
     super::font_strings_collection::register_all(lua)?;
     super::utility_system_spell::register_all(lua)?;
@@ -38,10 +49,15 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::housing::register_all(lua)?;
     super::pet_battles::register_all(lua)?;
     super::photo_sharing::register_all(lua)?;
+    Ok(())
+}
+
+fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::lfg_list::register_all(lua)?;
     super::lfg_info::register_all(lua)?;
     super::locale_info::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
+    super::lua_duration_object::register_lua_duration_object(lua)?;
     super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;
