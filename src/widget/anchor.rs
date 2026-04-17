@@ -18,18 +18,27 @@ pub enum AnchorPoint {
 impl AnchorPoint {
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
-        match s.to_uppercase().as_str() {
-            "CENTER" => Some(Self::Center),
-            "TOP" => Some(Self::Top),
-            "BOTTOM" => Some(Self::Bottom),
-            "LEFT" => Some(Self::Left),
-            "RIGHT" => Some(Self::Right),
-            "TOPLEFT" => Some(Self::TopLeft),
-            "TOPRIGHT" => Some(Self::TopRight),
-            "BOTTOMLEFT" => Some(Self::BottomLeft),
-            "BOTTOMRIGHT" => Some(Self::BottomRight),
-            _ => None,
-        }
+        Some(if s.eq_ignore_ascii_case("CENTER") {
+            Self::Center
+        } else if s.eq_ignore_ascii_case("TOP") {
+            Self::Top
+        } else if s.eq_ignore_ascii_case("BOTTOM") {
+            Self::Bottom
+        } else if s.eq_ignore_ascii_case("LEFT") {
+            Self::Left
+        } else if s.eq_ignore_ascii_case("RIGHT") {
+            Self::Right
+        } else if s.eq_ignore_ascii_case("TOPLEFT") {
+            Self::TopLeft
+        } else if s.eq_ignore_ascii_case("TOPRIGHT") {
+            Self::TopRight
+        } else if s.eq_ignore_ascii_case("BOTTOMLEFT") {
+            Self::BottomLeft
+        } else if s.eq_ignore_ascii_case("BOTTOMRIGHT") {
+            Self::BottomRight
+        } else {
+            return None;
+        })
     }
 
     /// WoW canonical sort order for GetPoint indexing.

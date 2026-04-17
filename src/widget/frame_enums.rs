@@ -26,18 +26,27 @@ impl FrameStrata {
 
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
-        match s.to_uppercase().as_str() {
-            "WORLD" => Some(Self::World),
-            "BACKGROUND" => Some(Self::Background),
-            "LOW" => Some(Self::Low),
-            "MEDIUM" => Some(Self::Medium),
-            "HIGH" => Some(Self::High),
-            "DIALOG" => Some(Self::Dialog),
-            "FULLSCREEN" => Some(Self::Fullscreen),
-            "FULLSCREEN_DIALOG" => Some(Self::FullscreenDialog),
-            "TOOLTIP" => Some(Self::Tooltip),
-            _ => None,
-        }
+        Some(if s.eq_ignore_ascii_case("WORLD") {
+            Self::World
+        } else if s.eq_ignore_ascii_case("BACKGROUND") {
+            Self::Background
+        } else if s.eq_ignore_ascii_case("LOW") {
+            Self::Low
+        } else if s.eq_ignore_ascii_case("MEDIUM") {
+            Self::Medium
+        } else if s.eq_ignore_ascii_case("HIGH") {
+            Self::High
+        } else if s.eq_ignore_ascii_case("DIALOG") {
+            Self::Dialog
+        } else if s.eq_ignore_ascii_case("FULLSCREEN") {
+            Self::Fullscreen
+        } else if s.eq_ignore_ascii_case("FULLSCREEN_DIALOG") {
+            Self::FullscreenDialog
+        } else if s.eq_ignore_ascii_case("TOOLTIP") {
+            Self::Tooltip
+        } else {
+            return None;
+        })
     }
 
     pub fn as_str(&self) -> &'static str {
@@ -70,14 +79,19 @@ pub enum DrawLayer {
 impl DrawLayer {
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Option<Self> {
-        match s.to_uppercase().as_str() {
-            "BACKGROUND" => Some(Self::Background),
-            "BORDER" => Some(Self::Border),
-            "ARTWORK" => Some(Self::Artwork),
-            "OVERLAY" => Some(Self::Overlay),
-            "HIGHLIGHT" => Some(Self::Highlight),
-            _ => None,
-        }
+        Some(if s.eq_ignore_ascii_case("BACKGROUND") {
+            Self::Background
+        } else if s.eq_ignore_ascii_case("BORDER") {
+            Self::Border
+        } else if s.eq_ignore_ascii_case("ARTWORK") {
+            Self::Artwork
+        } else if s.eq_ignore_ascii_case("OVERLAY") {
+            Self::Overlay
+        } else if s.eq_ignore_ascii_case("HIGHLIGHT") {
+            Self::Highlight
+        } else {
+            return None;
+        })
     }
 
     pub fn as_str(&self) -> &'static str {

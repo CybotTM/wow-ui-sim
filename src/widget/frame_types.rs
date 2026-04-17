@@ -236,11 +236,14 @@ pub enum TextJustify {
 impl TextJustify {
     /// Parse from WoW string (case-insensitive).
     pub fn from_wow_str(s: &str) -> Self {
-        match s.to_uppercase().as_str() {
-            "LEFT" | "TOP" => TextJustify::Left,
-            "CENTER" | "MIDDLE" => TextJustify::Center,
-            "RIGHT" | "BOTTOM" => TextJustify::Right,
-            _ => TextJustify::Left, // WoW defaults to LEFT
+        if s.eq_ignore_ascii_case("LEFT") || s.eq_ignore_ascii_case("TOP") {
+            TextJustify::Left
+        } else if s.eq_ignore_ascii_case("CENTER") || s.eq_ignore_ascii_case("MIDDLE") {
+            TextJustify::Center
+        } else if s.eq_ignore_ascii_case("RIGHT") || s.eq_ignore_ascii_case("BOTTOM") {
+            TextJustify::Right
+        } else {
+            TextJustify::Left
         }
     }
 
@@ -277,15 +280,24 @@ pub enum TextOutline {
 impl TextOutline {
     /// Parse from WoW flag string (e.g., "OUTLINE", "THICKOUTLINE", "OUTLINE, MONOCHROME").
     pub fn from_wow_str(s: &str) -> Self {
-        let upper = s.to_uppercase();
-        if upper.contains("THICKOUTLINE") {
+        if contains_ascii_case_insensitive(s, "THICKOUTLINE") {
             TextOutline::ThickOutline
-        } else if upper.contains("OUTLINE") || upper.contains("NORMAL") {
+        } else if contains_ascii_case_insensitive(s, "OUTLINE")
+            || contains_ascii_case_insensitive(s, "NORMAL")
+        {
             TextOutline::Outline
         } else {
             TextOutline::None
         }
     }
+}
+
+fn contains_ascii_case_insensitive(haystack: &str, needle: &str) -> bool {
+    haystack.len() >= needle.len()
+        && haystack
+            .as_bytes()
+            .windows(needle.len())
+            .any(|window| window.eq_ignore_ascii_case(needle.as_bytes()))
 }
 
 /// Backdrop configuration for frames.

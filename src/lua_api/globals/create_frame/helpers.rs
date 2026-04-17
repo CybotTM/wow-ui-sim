@@ -106,16 +106,24 @@ pub(super) fn table_get_str(state: &mut LuaState, table: Val, key: &str) -> Val 
 // ---------------------------------------------------------------------------
 
 pub(super) fn parse_frame_strata(strata: &str) -> crate::widget::FrameStrata {
-    match strata.to_uppercase().as_str() {
-        "WORLD" | "BACKGROUND" => crate::widget::FrameStrata::Background,
-        "LOW" => crate::widget::FrameStrata::Low,
-        "MEDIUM" => crate::widget::FrameStrata::Medium,
-        "HIGH" => crate::widget::FrameStrata::High,
-        "DIALOG" => crate::widget::FrameStrata::Dialog,
-        "FULLSCREEN" => crate::widget::FrameStrata::Fullscreen,
-        "FULLSCREEN_DIALOG" => crate::widget::FrameStrata::FullscreenDialog,
-        "TOOLTIP" => crate::widget::FrameStrata::Tooltip,
-        _ => crate::widget::FrameStrata::Medium,
+    if strata.eq_ignore_ascii_case("WORLD") || strata.eq_ignore_ascii_case("BACKGROUND") {
+        crate::widget::FrameStrata::Background
+    } else if strata.eq_ignore_ascii_case("LOW") {
+        crate::widget::FrameStrata::Low
+    } else if strata.eq_ignore_ascii_case("MEDIUM") {
+        crate::widget::FrameStrata::Medium
+    } else if strata.eq_ignore_ascii_case("HIGH") {
+        crate::widget::FrameStrata::High
+    } else if strata.eq_ignore_ascii_case("DIALOG") {
+        crate::widget::FrameStrata::Dialog
+    } else if strata.eq_ignore_ascii_case("FULLSCREEN") {
+        crate::widget::FrameStrata::Fullscreen
+    } else if strata.eq_ignore_ascii_case("FULLSCREEN_DIALOG") {
+        crate::widget::FrameStrata::FullscreenDialog
+    } else if strata.eq_ignore_ascii_case("TOOLTIP") {
+        crate::widget::FrameStrata::Tooltip
+    } else {
+        crate::widget::FrameStrata::Medium
     }
 }
 
@@ -251,7 +259,7 @@ fn collect_filtered_hash_entries(
 // Parent array helpers
 // ---------------------------------------------------------------------------
 
-pub(super) fn append_parent_array_entry(
+pub(crate) fn append_parent_array_entry(
     state: &mut LuaState,
     parent_id: u64,
     key: &str,
