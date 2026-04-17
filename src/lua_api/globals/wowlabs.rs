@@ -8,6 +8,7 @@ use crate::lua_api::state::{
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint,
 };
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -273,12 +274,14 @@ fn get_available_queues(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_matchmaking_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(borrow_state(state)?.wowlabs.matchmaking_enabled));
+    let enabled = borrow_state(state)?.wowlabs.matchmaking_enabled;
+    state.push(Val::Bool(enabled));
     Ok(1)
 }
 
 fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(borrow_state(state)?.wowlabs.enabled));
+    let enabled = borrow_state(state)?.wowlabs.enabled;
+    state.push(Val::Bool(enabled));
     Ok(1)
 }
 
@@ -296,7 +299,8 @@ fn get_wowlabs_area_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_in_prematch(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(snapshot_data_manager(state)?.in_prematch));
+    let in_prematch = snapshot_data_manager(state)?.in_prematch;
+    state.push(Val::Bool(in_prematch));
     Ok(1)
 }
 
@@ -392,7 +396,8 @@ fn accept_party_invite(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn can_enter_matchmaking(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(can_queue(&snapshot_matchmaking(state)?)));
+    let matchmaking = snapshot_matchmaking(state)?;
+    state.push(Val::Bool(can_queue(&matchmaking)));
     Ok(1)
 }
 
@@ -433,12 +438,14 @@ fn get_current_party(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_in_queue_time_start(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(snapshot_matchmaking(state)?.in_queue_time_start));
+    let in_queue_time_start = snapshot_matchmaking(state)?.in_queue_time_start;
+    state.push(Val::Num(in_queue_time_start));
     Ok(1)
 }
 
 fn get_num_party_invites(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(snapshot_invites(state)?.len() as f64));
+    let invite_count = snapshot_invites(state)?.len() as f64;
+    state.push(Val::Num(invite_count));
     Ok(1)
 }
 
@@ -457,40 +464,38 @@ fn get_party_invite_by_index(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_party_playlist_entry(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(
-        snapshot_matchmaking(state)?.party_playlist_entry as f64,
-    ));
+    let party_playlist_entry = snapshot_matchmaking(state)?.party_playlist_entry as f64;
+    state.push(Val::Num(party_playlist_entry));
     Ok(1)
 }
 
 fn get_party_size(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(
-        snapshot_matchmaking(state)?.party_members.len() as f64
-    ));
+    let party_size = snapshot_matchmaking(state)?.party_members.len() as f64;
+    state.push(Val::Num(party_size));
     Ok(1)
 }
 
 fn is_alone_in_wowlabs_party(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(
-        snapshot_matchmaking(state)?.party_members.len() <= 1,
-    ));
+    let is_alone = snapshot_matchmaking(state)?.party_members.len() <= 1;
+    state.push(Val::Bool(is_alone));
     Ok(1)
 }
 
 fn is_fast_login(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(snapshot_matchmaking(state)?.fast_login));
+    let fast_login = snapshot_matchmaking(state)?.fast_login;
+    state.push(Val::Bool(fast_login));
     Ok(1)
 }
 
 fn is_finding_match(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(snapshot_matchmaking(state)?.is_finding_match));
+    let is_finding_match = snapshot_matchmaking(state)?.is_finding_match;
+    state.push(Val::Bool(is_finding_match));
     Ok(1)
 }
 
 fn is_party_full(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(
-        snapshot_matchmaking(state)?.party_members.len() >= 3,
-    ));
+    let is_party_full = snapshot_matchmaking(state)?.party_members.len() >= 3;
+    state.push(Val::Bool(is_party_full));
     Ok(1)
 }
 
@@ -516,7 +521,8 @@ fn is_player(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn is_player_ready(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(snapshot_matchmaking(state)?.is_player_ready));
+    let is_player_ready = snapshot_matchmaking(state)?.is_player_ready;
+    state.push(Val::Bool(is_player_ready));
     Ok(1)
 }
 
