@@ -104,6 +104,8 @@ macro_rules! build_empty_sim_state {
             pet: PetState::default(),
             lfg_list_counts: LfgListCounts::default(),
             can_use_premade_group: false,
+            lfg_category_info: default_lfg_category_info(),
+            lfg_active_categories: ::std::collections::HashSet::new(),
             photo_sharing_authorized: false,
             photo_sharing_enabled: false,
             tutorial_flags: $collections.tutorial_flags,
@@ -134,8 +136,12 @@ macro_rules! build_empty_sim_state {
             maps: default_maps(),
             achievements: default_achievements(),
             area_pois: default_area_pois(),
+            bnet_friends: default_bnet_friends(),
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
+            mythic_plus: MythicPlusState::default(),
+            death_recaps: Vec::new(),
+            chat_bubbles: Vec::new(),
             player_map_position: (0.5, 0.5),
             factions: Vec::new(),
             selected_faction_index: 0,
@@ -190,9 +196,11 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
-    AuctionBrowseResult, AuctionReplicateItem, BagItem, CurrencyInfo, CursorInfo, CursorItemOrigin,
-    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo, LuaErrorRecord,
-    MacroInfo, MapData, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer, PlayerState,
+    AuctionBrowseResult, AuctionReplicateItem, BagItem, BnetFriend, BnetGameAccount, ChatBubble,
+    CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity,
+    GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord,
+    MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRun,
+    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, PendingTimer, PlayerState,
     SecondaryPowerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
@@ -422,6 +430,13 @@ pub struct SimState {
     /// default is false — the Premade Group Finder UI is gated off in a
     /// fresh env. Admin: `A_Admin.SetCanUsePremadeGroup(b?)`.
     pub can_use_premade_group: bool,
+    /// Category metadata for `C_LFGInfo.GetLFGCategoryInfo(id)`.
+    /// Seeded with category 2 (Dungeons) and 3 (Raids). Unknown ids
+    /// return nil.
+    pub lfg_category_info: std::collections::HashMap<i32, LfgCategoryInfo>,
+    /// Set of category ids for which `C_LFGInfo.IsLFGModeActiveForCategory`
+    /// returns true. Default empty (no active LFG modes).
+    pub lfg_active_categories: std::collections::HashSet<i32>,
     /// Whether `C_PhotoSharing.IsAuthorized()` reports true. Sim has no
     /// real photo-sharing service; default false. Admin:
     /// `A_Admin.SetPhotoSharingAuthorized(b?)`.
@@ -521,6 +536,11 @@ pub struct SimState {
     /// Seeded with a tiny fixture (Mage Tower Stormwind +
     /// one time-limited world event).
     pub area_pois: HashMap<i32, AreaPoiInfo>,
+    /// BattleNet friends list. Drives `C_BattleNet.GetNumFriends`,
+    /// `GetFriendAccountInfo`, `GetAccountInfoByGUID`,
+    /// `GetGameAccountInfoByGUID`, and `GetFriendNumAccounts`.
+    /// Seeded with one online and one offline friend.
+    pub bnet_friends: Vec<BnetFriend>,
     /// Browse-tab results on the Auction House. Drives
     /// `C_AuctionHouse.GetBrowseResults`. Seeded with a couple of
     /// representative listings.
@@ -529,6 +549,19 @@ pub struct SimState {
     /// `C_AuctionHouse.GetReplicateItemInfo`. Seeded with a couple of
     /// commodity rows.
     pub auction_replicate_items: Vec<AuctionReplicateItem>,
+    /// Mythic+ probe state. Drives `C_MythicPlus.*` methods. Seeded
+    /// with season 14, affix id=9 (Tyrannical), no run history, no
+    /// owned key (level 0), no weekly best.
+    pub mythic_plus: MythicPlusState,
+    /// Death-recap log. Each entry represents one player death. Drives
+    /// `C_DeathRecap.GetKillingBlows` (from the most-recent entry) and
+    /// `C_DeathRecap.GetMostRecentDeathRecap`. Empty by default; seed
+    /// via tests to exercise the UI.
+    pub death_recaps: Vec<DeathRecapEntry>,
+    /// Chat bubbles visible in the world. Drives
+    /// `C_ChatBubbles.GetAllChatBubbles`. Empty by default; seed via
+    /// tests or admin helpers.
+    pub chat_bubbles: Vec<ChatBubble>,
     /// Player's normalized position (0..=1) in the current map.
     /// Drives `C_Map.GetPlayerMapPosition`. Default `(0.5, 0.5)`.
     pub player_map_position: (f64, f64),
@@ -647,10 +680,10 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, FactionEntry, GameRuleValue,
-    GameRulesState, GossipState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry,
-    ModifierKeys, NetStats, PetBattleState, PetState, TradeState, VoiceChatState, WowLabsAreaInfo,
-    WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite,
-    WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    GameRulesState, GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts,
+    LootMethodState, MessageLogEntry, ModifierKeys, NetStats, PetBattleState, PetState, TradeState,
+    VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
+    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {
@@ -849,6 +882,27 @@ fn default_area_pois() -> HashMap<i32, AreaPoiInfo> {
     .collect()
 }
 
+/// Seed `SimState.lfg_category_info` with the two standard retail categories:
+/// category 2 = Dungeons, category 3 = Raids.
+fn default_lfg_category_info() -> std::collections::HashMap<i32, LfgCategoryInfo> {
+    let mut map = std::collections::HashMap::new();
+    map.insert(
+        2,
+        LfgCategoryInfo {
+            name: "Dungeons".into(),
+            order: 1,
+        },
+    );
+    map.insert(
+        3,
+        LfgCategoryInfo {
+            name: "Raids".into(),
+            order: 2,
+        },
+    );
+    map
+}
+
 /// Seed the `SimState.auction_browse_results` list with two
 /// representative Browse-tab rows (a crafting mat and a gear piece).
 fn default_auction_browse_results() -> Vec<AuctionBrowseResult> {
@@ -892,6 +946,106 @@ fn default_auction_replicate_items() -> Vec<AuctionReplicateItem> {
             usable: true,
             level: 50,
             level_type: "Item Level".into(),
+        },
+    ]
+}
+
+/// Seed the `SimState.bnet_friends` list with two representative
+/// entries: one online Alliance Paladin with two game accounts, and
+/// one offline friend. Provides coverage for all five C_BattleNet
+/// probes out of the box.
+fn default_bnet_friends() -> Vec<BnetFriend> {
+    vec![
+        BnetFriend {
+            friend_index: 1,
+            bnet_account_guid: "BNet-0-100001".into(),
+            bnet_account_id: 100001,
+            battle_tag: "Uther#1000".into(),
+            account_name: "Uther".into(),
+            note: String::new(),
+            custom_message: String::new(),
+            custom_message_time: 0,
+            appear_offline: false,
+            is_battle_tag_friend: true,
+            is_friend: true,
+            is_favorite: false,
+            is_afk: false,
+            is_dnd: false,
+            last_online_time: 0,
+            raf_link_type: 0,
+            game_accounts: vec![
+                BnetGameAccount {
+                    wow_account_guid: "Player-1-00000001".into(),
+                    game_account_id: 200001,
+                    character_name: "Uther".into(),
+                    realm_name: "Stormwind".into(),
+                    realm_display_name: "Stormwind".into(),
+                    realm_id: 1,
+                    class_id: 2,
+                    class_name: "Paladin".into(),
+                    character_level: 70,
+                    area_name: "Stormwind City".into(),
+                    is_online: true,
+                    is_game_afk: false,
+                    is_game_busy: false,
+                    client_program: "WoW".into(),
+                    faction_name: "Alliance".into(),
+                    race_name: "Human".into(),
+                    rich_presence: "In Stormwind City".into(),
+                    can_summon: true,
+                    is_in_current_region: true,
+                    has_focus: true,
+                    wow_project_id: 1,
+                    timerunning_season_id: 0,
+                    region_id: 1,
+                    player_guid: String::new(),
+                },
+                BnetGameAccount {
+                    wow_account_guid: "Player-1-00000002".into(),
+                    game_account_id: 200002,
+                    character_name: "Lightbringer".into(),
+                    realm_name: "Stormwind".into(),
+                    realm_display_name: "Stormwind".into(),
+                    realm_id: 1,
+                    class_id: 2,
+                    class_name: "Paladin".into(),
+                    character_level: 60,
+                    area_name: "Ironforge".into(),
+                    is_online: false,
+                    is_game_afk: false,
+                    is_game_busy: false,
+                    client_program: "WoW".into(),
+                    faction_name: "Alliance".into(),
+                    race_name: "Dwarf".into(),
+                    rich_presence: String::new(),
+                    can_summon: false,
+                    is_in_current_region: true,
+                    has_focus: false,
+                    wow_project_id: 1,
+                    timerunning_season_id: 0,
+                    region_id: 1,
+                    player_guid: String::new(),
+                },
+            ],
+        },
+        BnetFriend {
+            friend_index: 2,
+            bnet_account_guid: "BNet-0-100002".into(),
+            bnet_account_id: 100002,
+            battle_tag: "Thrall#2000".into(),
+            account_name: "Thrall".into(),
+            note: "old friend".into(),
+            custom_message: String::new(),
+            custom_message_time: 0,
+            appear_offline: false,
+            is_battle_tag_friend: true,
+            is_friend: true,
+            is_favorite: true,
+            is_afk: false,
+            is_dnd: false,
+            last_online_time: 1700000000,
+            raf_link_type: 0,
+            game_accounts: vec![],
         },
     ]
 }

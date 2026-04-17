@@ -207,6 +207,22 @@ pub struct HeirloomData {
     pub max_level: i32,
 }
 
+/// One chat bubble visible in the world (NPC speech, emote, say, etc.).
+/// Drives `C_ChatBubbles.GetAllChatBubbles`. Since we don't render 3D
+/// world chat bubbles the frame_id is advisory only — callers get a
+/// lightweight table per bubble rather than a real Frame.
+#[derive(Debug, Clone)]
+pub struct ChatBubble {
+    /// The message text shown in the bubble.
+    pub message: String,
+    /// Name of the unit speaking (e.g. "Thrall").
+    pub sender: String,
+    /// Chat type string (e.g. "SAY", "YELL", "EMOTE").
+    pub chat_type: String,
+    /// Frame id of the owning frame when one exists.
+    pub frame_id: Option<u64>,
+}
+
 /// One row of the Auction House Browse results list. Drives
 /// `C_AuctionHouse.GetBrowseResults`. Seeded with a couple of
 /// representative entries.
@@ -231,6 +247,131 @@ pub struct AuctionReplicateItem {
     pub usable: bool,
     pub level: i32,
     pub level_type: String,
+}
+
+/// Metadata for an LFG category (Dungeons, Raids, etc.). Drives
+/// `C_LFGInfo.GetLFGCategoryInfo(categoryID)`. Seeded with the two
+/// standard retail categories: 2 = Dungeons, 3 = Raids.
+#[derive(Debug, Clone)]
+pub struct LfgCategoryInfo {
+    /// Display name shown in the Group Finder tab.
+    pub name: String,
+    /// Whether the category is available to the player.
+    pub order: i32,
+}
+
+/// One affix in the active Mythic+ season. Drives
+/// `C_MythicPlus.GetCurrentAffixes`.
+#[derive(Debug, Clone)]
+pub struct MythicPlusAffix {
+    /// Dungeon Journal affix id (e.g. 9 = Tyrannical).
+    pub id: i32,
+    /// Season in which this affix rotates.
+    pub season_id: i32,
+}
+
+/// Weekly best result for a specific Mythic+ map. Drives
+/// `C_MythicPlus.GetWeeklyBestForMap`.
+#[derive(Debug, Clone)]
+pub struct MythicPlusWeeklyBest {
+    /// Challenge-mode dungeon id.
+    pub map_challenge_mode_id: i32,
+    /// Keystone level completed this week.
+    pub level: i32,
+    /// Completion time in seconds.
+    pub duration_sec: i32,
+    /// Mythic+ score contribution for this run.
+    pub score: f64,
+}
+
+/// One completed or in-progress Mythic+ run. Drives
+/// `C_MythicPlus.GetRunHistory`.
+#[derive(Debug, Clone)]
+pub struct MythicPlusRun {
+    /// Challenge-mode dungeon id.
+    pub map_challenge_mode_id: i32,
+    /// Keystone level.
+    pub level: i32,
+    /// True when the run was completed in time.
+    pub completed: bool,
+    /// Season the run belongs to.
+    pub season: i32,
+    /// Run score contribution.
+    pub run_score: f64,
+    /// Whether this run is from the current week.
+    pub this_week: bool,
+    /// Completion time in seconds.
+    pub duration_sec: i32,
+}
+
+/// Backing state for `C_MythicPlus.*` probes.
+#[derive(Debug, Clone)]
+pub struct MythicPlusState {
+    /// Active affixes for the current weekly rotation.
+    pub current_affixes: Vec<MythicPlusAffix>,
+    /// Current M+ season id (e.g. 14 = Dragonflight Season 4).
+    pub current_season: i32,
+    /// Keystone level of the key the player currently owns.
+    /// 0 = no key.
+    pub owned_keystone_level: i32,
+    /// Run history for the player.
+    pub run_history: Vec<MythicPlusRun>,
+    /// Per-map weekly best, keyed by mapChallengeModeID.
+    pub weekly_best_per_map: HashMap<i32, MythicPlusWeeklyBest>,
+    /// Whether a Mythic+ run is currently in progress.
+    pub is_active: bool,
+    /// Whether the weekly Mythic+ reward is available to claim.
+    pub is_weekly_reward_available: bool,
+}
+
+impl Default for MythicPlusState {
+    fn default() -> Self {
+        Self {
+            current_affixes: vec![MythicPlusAffix {
+                id: 9,
+                season_id: 14,
+            }],
+            current_season: 14,
+            owned_keystone_level: 0,
+            run_history: Vec::new(),
+            weekly_best_per_map: HashMap::new(),
+            is_active: false,
+            is_weekly_reward_available: false,
+        }
+    }
+}
+
+/// One killing-blow entry within a death recap event. Drives
+/// `C_DeathRecap.GetKillingBlows`. The spell_id / ability_name /
+/// caster_name / amount fields mirror the retail multiret documented
+/// on Wowhead/WoWDB.
+#[derive(Debug, Clone)]
+pub struct KillingBlowInfo {
+    /// Spell or ability ID responsible for the killing blow.
+    pub spell_id: u32,
+    /// Display name of the spell/ability (may be empty if unknown).
+    pub ability_name: String,
+    /// Name of the caster that delivered the blow.
+    pub caster_name: String,
+    /// Raw damage or healing amount for the killing hit.
+    pub amount: i64,
+    /// True when the hit was an overkill (damage > remaining health).
+    pub is_overkill: bool,
+}
+
+/// One death event on the `SimState.death_recaps` list. Each entry
+/// represents a single death and carries zero or more killing blows.
+/// Drives `C_DeathRecap.GetKillingBlows` (blows for the most recent
+/// entry) and `C_DeathRecap.GetMostRecentDeathRecap`.
+#[derive(Debug, Clone)]
+pub struct DeathRecapEntry {
+    /// Internal recap id — mirrors the `recapID` concept used by
+    /// `C_DeathRecap.GetRecapEvents`; 1-based.
+    pub recap_id: u32,
+    /// Zone / encounter name where the player died (informational).
+    pub zone_name: String,
+    /// Killing blows list (ordered from most damaging to least).
+    pub killing_blows: Vec<KillingBlowInfo>,
 }
 
 /// Minimal area-POI metadata keyed by area poi id in
@@ -867,6 +1008,103 @@ pub struct LootRollInfo {
     pub item_level: i32,
     /// Item link string.
     pub item_link: String,
+}
+
+/// One BattleNet friend entry. Drives `C_BattleNet.GetAccountInfoByGUID`,
+/// `GetFriendAccountInfo`, `GetFriendNumAccounts`, and `GetNumFriends`.
+/// The `game_accounts` vec holds all WoW (and other Blizzard game)
+/// accounts attached to this BNet account that are currently online or
+/// were recently seen.
+#[derive(Debug, Clone)]
+pub struct BnetFriend {
+    /// 1-based index in the friends list (display order).
+    pub friend_index: i32,
+    /// Unique GUID for the BNet account (format: "BNet-0-<id>").
+    pub bnet_account_guid: String,
+    /// Numeric BNet account id (maps to `bnetAccountID` in the retail struct).
+    pub bnet_account_id: i32,
+    /// BattleTag display name (e.g. "Thrall#1234").
+    pub battle_tag: String,
+    /// Account name shown in the BNet friends list.
+    pub account_name: String,
+    /// Custom note set on this friend.
+    pub note: String,
+    /// Custom away message ("customMessage" in the retail struct).
+    pub custom_message: String,
+    /// Timestamp of the custom message (0 when not set).
+    pub custom_message_time: i32,
+    /// Whether this friend appears offline intentionally.
+    pub appear_offline: bool,
+    /// Whether this is a BattleTag friend (vs. RealID).
+    pub is_battle_tag_friend: bool,
+    /// Whether this entry represents a real friend vs. a pending request.
+    pub is_friend: bool,
+    /// Whether the friend is marked as a favorite.
+    pub is_favorite: bool,
+    /// Whether the friend has AFK status set.
+    pub is_afk: bool,
+    /// Whether the friend has DND status set.
+    pub is_dnd: bool,
+    /// Last-online timestamp (0 when currently online or unknown).
+    pub last_online_time: i32,
+    /// RAF link type (0 = none).
+    pub raf_link_type: i32,
+    /// Nested game-account list (one per Blizzard game logged in).
+    pub game_accounts: Vec<BnetGameAccount>,
+}
+
+/// One Blizzard game account (WoW character, D3 account, etc.) attached
+/// to a `BnetFriend`. Drives `C_BattleNet.GetGameAccountInfoByGUID`.
+#[derive(Debug, Clone)]
+pub struct BnetGameAccount {
+    /// Unique GUID for this WoW/game account (format: "Player-<realm>-<id>").
+    pub wow_account_guid: String,
+    /// Numeric game account id (maps to `gameAccountID` in the retail struct).
+    pub game_account_id: i32,
+    /// Character name, or empty string when not in WoW.
+    pub character_name: String,
+    /// Realm name as shown in the UI.
+    pub realm_name: String,
+    /// Realm display name (may differ from `realm_name` in cross-realm contexts).
+    pub realm_display_name: String,
+    /// Numeric realm id.
+    pub realm_id: i32,
+    /// Character class id (1=Warrior … 13=Evoker); 0 when not applicable.
+    pub class_id: i32,
+    /// Class name string (e.g. "Paladin").
+    pub class_name: String,
+    /// Character level; 0 when not in WoW.
+    pub character_level: i32,
+    /// Current zone name.
+    pub area_name: String,
+    /// Whether this account is currently online.
+    pub is_online: bool,
+    /// Whether the game client is currently AFK.
+    pub is_game_afk: bool,
+    /// Whether the game client has DND set.
+    pub is_game_busy: bool,
+    /// Blizzard client program identifier (e.g. "WoW", "D3", "S2").
+    pub client_program: String,
+    /// Faction string: "Alliance", "Horde", or "" for neutral/non-WoW.
+    pub faction_name: String,
+    /// Race name string (e.g. "Human").
+    pub race_name: String,
+    /// Rich-presence text (game/activity description).
+    pub rich_presence: String,
+    /// Whether the player can be summoned.
+    pub can_summon: bool,
+    /// Whether this account is in the current region.
+    pub is_in_current_region: bool,
+    /// Whether this account has game focus.
+    pub has_focus: bool,
+    /// WoW project id (e.g. 1 for retail, 2 for classic).
+    pub wow_project_id: i32,
+    /// Timerunning season id (0 when not in a timerunning season).
+    pub timerunning_season_id: i32,
+    /// Numeric region id.
+    pub region_id: i32,
+    /// Player GUID string (character GUID, distinct from bnet/game account GUIDs).
+    pub player_guid: String,
 }
 
 #[cfg(test)]
