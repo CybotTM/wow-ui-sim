@@ -177,6 +177,19 @@ impl Default for VoiceChatState {
     }
 }
 
+/// Active gossip-dialog state. Retail fires `GOSSIP_SHOW` when a
+/// gossip window opens against an NPC and `GOSSIP_CLOSED` when the
+/// player walks away. The sim exposes three count knobs that probes
+/// return + an `active` flag so listeners know whether a dialog is
+/// up (the `open` half of the event pair).
+#[derive(Debug, Default, Clone)]
+pub struct GossipState {
+    pub active: bool,
+    pub num_options: i32,
+    pub num_available_quests: i32,
+    pub num_active_quests: i32,
+}
+
 /// Single reputation-tab row. Drives `GetFactionInfoByID(id)` and the
 /// broader reputation window. `standing` is the 1-8 reputation tier
 /// (1 Hated .. 8 Exalted). `bottom` / `top` bracket the current

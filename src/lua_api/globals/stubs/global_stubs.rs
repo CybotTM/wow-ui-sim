@@ -130,9 +130,9 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
     // not a stub.
     // GetFactionInfoByID is SimState-backed in faction_probes.rs, not a stub.
-    "GetGossipNumOptions",
-    "GetGossipNumAvailableQuests",
-    "GetGossipNumActiveQuests",
+    // GetGossipNumOptions / GetGossipNumAvailableQuests /
+    // GetGossipNumActiveQuests are SimState-backed in gossip_probes.rs,
+    // not stubs.
     "GetChannelName",
     "GetGuildBankTabCost",
     "GetGuildBankTabInfo",

@@ -127,6 +127,7 @@ macro_rules! build_empty_sim_state {
             loot_slots: Vec::new(),
             auction_browse_items: Vec::new(),
             loot_method: LootMethodState::default(),
+            gossip: GossipState::default(),
             factions: Vec::new(),
             selected_faction_index: 0,
             watched_faction_index: 0,
@@ -476,6 +477,10 @@ pub struct SimState {
     /// `GetMasterLooterThreshold()`, and the `RequestPartyLootMethod()`
     /// event refresh. Defaults to personal loot, threshold 2 (Uncommon).
     pub loot_method: LootMethodState,
+    /// Active gossip-dialog state. Drives `GetGossipNumOptions` /
+    /// `GetGossipNumAvailableQuests` / `GetGossipNumActiveQuests`.
+    /// Defaults to inactive with zero counts.
+    pub gossip: GossipState,
     /// Reputation rows in reputation-window display order. Drives
     /// `GetFactionInfoByID`, `GetGuildFactionInfo`, and the selected /
     /// watched faction getters / setters. Empty by default.
@@ -591,8 +596,8 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, FactionEntry, GameRuleValue,
-    GameRulesState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys,
-    NetStats, PetBattleState, PetState, TradeState, VoiceChatState, WowLabsAreaInfo,
+    GameRulesState, GossipState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry,
+    ModifierKeys, NetStats, PetBattleState, PetState, TradeState, VoiceChatState, WowLabsAreaInfo,
     WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite,
     WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
