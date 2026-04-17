@@ -45,8 +45,10 @@ pub struct WidgetRegistry {
 }
 
 impl WidgetRegistry {
-    /// Pre-allocated capacity for typical Blizzard UI load (~2500 frames).
-    const INITIAL_CAPACITY: usize = 3000;
+    /// Pre-allocated capacity for typical Blizzard UI load (~45k frames measured
+    /// 2026-04 via `dump-tree` with --no-addons --no-saved-vars). Sized to avoid
+    /// the 3k→6k→12k→24k→48k rehash cascade that dominated startup page faults.
+    const INITIAL_CAPACITY: usize = 65536;
 
     pub fn new() -> Self {
         Self {
