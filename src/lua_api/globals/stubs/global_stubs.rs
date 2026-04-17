@@ -192,32 +192,19 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetTradeSkillInfo",
     "GetTradeTargetItemInfo",
     "GetXPExhaustion",
-    "UnitArmor",
+    // UnitArmor / UnitAttackPower / UnitCriticalStrike / UnitDamage /
+    // UnitDefense / UnitDodge / UnitParry / UnitSpellHaste / UnitStat /
+    // UnitResistance / UnitRangedAttackPower / UnitRangedCriticalStrike /
+    // UnitRangedDamage / UnitReaction / UnitHealthMax / UnitPowerMax /
+    // UnitXP / UnitXPMax are SimState-backed in unit_stats.rs, not stubs.
     "UnitAttackBothHands",
-    "UnitAttackPower",
     "UnitAttackSpeed",
     "UnitBattlePetLevel",
-    "UnitCriticalStrike",
-    "UnitDamage",
-    "UnitDefense",
-    "UnitDodge",
     "UnitHasVehiclePlayerFrameUI",
-    "UnitHealthMax",
     "UnitIsAFK",
     "UnitIsDND",
     "UnitIsUnit",
-    "UnitParry",
-    "UnitPowerMax",
     "UnitRangedAttack",
-    "UnitRangedAttackPower",
-    "UnitRangedCriticalStrike",
-    "UnitRangedDamage",
-    "UnitReaction",
-    "UnitResistance",
-    "UnitSpellHaste",
-    "UnitStat",
-    "UnitXP",
-    "UnitXPMax",
 ];
 
 static GLOBAL_CUSTOM_STUBS: &[(&str, RustFn)] = &[

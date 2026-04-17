@@ -373,6 +373,13 @@ impl CharacterStats {
 }
 
 /// Player character state: identity, combat, power, health, buffs, spec.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SecondaryPowerState {
+    pub current: i32,
+    pub max: i32,
+}
+
+/// Player character state: identity, combat, power, health, buffs, spec.
 #[derive(Debug, Clone)]
 pub struct PlayerState {
     pub name: String,
@@ -385,6 +392,8 @@ pub struct PlayerState {
     pub power: i32,
     pub power_max: i32,
     pub power_type: i32,
+    /// Secondary power pools keyed by Enum.PowerType value (e.g. Holy Power).
+    pub secondary_powers: HashMap<i32, SecondaryPowerState>,
     pub in_combat: bool,
     pub is_resting: bool,
     pub money: i64,
@@ -407,6 +416,10 @@ pub struct PlayerState {
     pub send_mail_cod: u64,
     /// Counter for generating unique mail IDs.
     pub next_mail_id: u64,
+    /// Current experience within the player's level. Drives `UnitXP("player")`.
+    pub xp: i64,
+    /// Experience required to ding the next level. Drives `UnitXPMax("player")`.
+    pub xp_max: i64,
 }
 
 impl Default for PlayerState {
@@ -422,6 +435,7 @@ impl Default for PlayerState {
             power: 100,
             power_max: 100,
             power_type: 0,
+            secondary_powers: HashMap::new(),
             in_combat: false,
             is_resting: false,
             money: 0,
@@ -439,6 +453,8 @@ impl Default for PlayerState {
             send_mail_money: 0,
             send_mail_cod: 0,
             next_mail_id: 1,
+            xp: 0,
+            xp_max: 180_000,
         }
     }
 }
