@@ -416,6 +416,34 @@ fn test_create_frame_from_xml_inline_parent_id_function_call_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_global_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineGlobalMethodTarget = {}
+        function XmlInlineGlobalMethodTarget:Hide()
+            self.hidden = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGlobalMethodFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineGlobalMethodTarget:Hide()</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let hidden: bool = env
+        .eval("return XmlInlineGlobalMethodTarget.hidden == true")
+        .unwrap();
+    assert!(hidden, "inline global-target method call should fire");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -441,6 +469,41 @@ fn test_create_frame_from_xml_inline_self_method_runs() {
         .eval("return XmlInlineMethodFrame.xmlInlineMethodLoaded == true")
         .unwrap();
     assert!(loaded, "self-method inline OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_parent_method_with_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineParentArgsMixin = {}
+        function XmlInlineParentArgsMixin:Prime(button)
+            self.parentButton = button
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentArgsFrame" parent="UIParent" mixin="XmlInlineParentArgsMixin">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>self:GetParent():Prime(button)</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineParentArgsFrame.Child:GetScript('OnClick')(XmlInlineParentArgsFrame.Child, 'LeftButton')")
+        .unwrap();
+
+    let button: String = env
+        .eval("return XmlInlineParentArgsFrame.parentButton")
+        .unwrap();
+    assert_eq!(button, "LeftButton");
 }
 
 #[test]

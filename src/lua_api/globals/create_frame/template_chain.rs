@@ -619,8 +619,12 @@ type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 enum FastHandlerRef<'a> {
     NoOp,
     Method(&'a str),
-    ParentMethodNoArgs(&'a str),
-    GrandparentMethodNoArgs(&'a str),
+    ParentMethod(&'a str),
+    GrandparentMethod(&'a str),
+    GlobalMethod {
+        target_path: &'a str,
+        method_name: &'a str,
+    },
     Function(&'a str),
     FunctionNoArgs(&'a str),
     FunctionWithParentArg(&'a str),
@@ -800,7 +804,7 @@ fn build_ancestor_method_handler(
                 if not target then
                     return
                 end
-                return target[method_name](target)
+                return target[method_name](target, ...)
             end
         "#,
         "template-ancestor-method-handler",
@@ -814,6 +818,34 @@ fn build_ancestor_method_handler(
     )
 }
 
+fn build_global_method_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local target, method_name = ...
+            return function(self, ...)
+                if not target then
+                    return
+                end
+                return target[method_name](target, ...)
+            end
+        "#,
+        "template-global-method-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let target = resolve_global_path(state, target_path);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, method_name],
+    )
+}
+
 fn build_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
@@ -821,12 +853,16 @@ fn build_fast_handler(
     match handler_ref {
         FastHandlerRef::NoOp => Ok(None),
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
-        FastHandlerRef::ParentMethodNoArgs(method_name) => {
+        FastHandlerRef::ParentMethod(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
         }
-        FastHandlerRef::GrandparentMethodNoArgs(method_name) => {
+        FastHandlerRef::GrandparentMethod(method_name) => {
             build_ancestor_method_handler(state, method_name, 2).map(Some)
         }
+        FastHandlerRef::GlobalMethod {
+            target_path,
+            method_name,
+        } => build_global_method_handler(state, target_path, method_name).map(Some),
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
         }
@@ -1139,10 +1175,16 @@ fn parse_inline_fast_handler<'a>(
         return Some(FastHandlerRef::Method(method_name));
     }
     if let Some(method_name) = parse_inline_parent_method(stmt) {
-        return Some(FastHandlerRef::ParentMethodNoArgs(method_name));
+        return Some(FastHandlerRef::ParentMethod(method_name));
     }
     if let Some(method_name) = parse_inline_grandparent_method(stmt) {
-        return Some(FastHandlerRef::GrandparentMethodNoArgs(method_name));
+        return Some(FastHandlerRef::GrandparentMethod(method_name));
+    }
+    if let Some((target_path, method_name)) = parse_inline_global_method(stmt) {
+        return Some(FastHandlerRef::GlobalMethod {
+            target_path,
+            method_name,
+        });
     }
     if let Some(delta) = parse_inline_set_frame_level_from_parent(stmt) {
         return Some(FastHandlerRef::SetFrameLevelFromParent(delta));
@@ -1212,21 +1254,35 @@ fn parse_inline_fast_handler<'a>(
 }
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
-    let remainder = stmt.strip_prefix("self:")?;
-    let method_name = remainder.strip_suffix("()")?.trim();
-    is_fast_identifier(method_name).then_some(method_name)
+    parse_inline_method_call(stmt, "self:")
 }
 
 fn parse_inline_parent_method(stmt: &str) -> Option<&str> {
-    let remainder = stmt.strip_prefix("self:GetParent():")?;
-    let method_name = remainder.strip_suffix("()")?.trim();
-    is_fast_identifier(method_name).then_some(method_name)
+    parse_inline_method_call(stmt, "self:GetParent():")
 }
 
 fn parse_inline_grandparent_method(stmt: &str) -> Option<&str> {
-    let remainder = stmt.strip_prefix("self:GetParent():GetParent():")?;
-    let method_name = remainder.strip_suffix("()")?.trim();
-    is_fast_identifier(method_name).then_some(method_name)
+    parse_inline_method_call(stmt, "self:GetParent():GetParent():")
+}
+
+fn parse_inline_method_call<'a>(stmt: &'a str, prefix: &str) -> Option<&'a str> {
+    let remainder = stmt.strip_prefix(prefix)?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(method_name) && is_fast_passthrough_args(args)).then_some(method_name)
+}
+
+fn parse_inline_global_method(stmt: &str) -> Option<(&str, &str)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    (is_fast_handler_path(target_path)
+        && is_fast_identifier(method_name)
+        && is_fast_passthrough_args(args))
+    .then_some((target_path, method_name))
 }
 
 fn parse_inline_set_frame_level_from_parent(stmt: &str) -> Option<i32> {
@@ -1318,6 +1374,12 @@ fn is_fast_identifier(value: &str) -> bool {
         _ => return false,
     }
     chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+}
+
+fn is_fast_passthrough_args(args: &str) -> bool {
+    args.split(',')
+        .map(str::trim)
+        .all(|arg| arg.is_empty() || arg == "..." || is_fast_identifier(arg))
 }
 
 fn parse_fast_literal_value(raw_value: &str) -> Option<FastLiteralValue<'_>> {
