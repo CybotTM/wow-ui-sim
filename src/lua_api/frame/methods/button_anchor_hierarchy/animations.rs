@@ -250,6 +250,19 @@ pub(super) fn animation_group_is_done(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn animation_group_get_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let duration = {
+        let sim = borrow_state(state)?;
+        resolve_animation_group_id(&sim, frame_id)
+            .and_then(|group_id| sim.animation_groups.get(&group_id))
+            .map(animation_group_total_duration)
+            .unwrap_or(0.0)
+    };
+    state.push(Val::Num(duration));
+    Ok(1)
+}
+
 pub(super) fn animation_group_set_looping(state: &mut LuaState) -> LuaResult<u32> {
     use super::shared::opt_string;
     let group_frame_id = frame_id_from_stack(state, 1)?;
@@ -304,6 +317,10 @@ pub(super) fn animation_set_duration(state: &mut LuaState) -> LuaResult<u32> {
     let duration = animation_numeric_arg(state, 2);
     with_animation_state_mut(state, |a| a.duration = duration)?;
     Ok(0)
+}
+
+pub(super) fn animation_get_duration(state: &mut LuaState) -> LuaResult<u32> {
+    push_anim_field(state, |a| a.duration)
 }
 
 pub(super) fn animation_set_order(state: &mut LuaState) -> LuaResult<u32> {
@@ -412,6 +429,18 @@ where
     };
     state.push(Val::Num(value));
     Ok(1)
+}
+
+fn animation_group_total_duration(group: &crate::lua_api::animation::AnimGroupState) -> f64 {
+    let mut duration_by_order = std::collections::BTreeMap::<u32, f64>::new();
+    for animation in &group.animations {
+        let total_time = animation.total_time();
+        duration_by_order
+            .entry(animation.order)
+            .and_modify(|current| *current = current.max(total_time))
+            .or_insert(total_time);
+    }
+    duration_by_order.into_values().sum()
 }
 
 // ── No-op stubs ───────────────────────────────────────────────────────────────

@@ -370,6 +370,12 @@ fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -
     table_set_rust_fn(
         state,
         table,
+        "GetDuration",
+        animations::animation_group_get_duration,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
         "SetLooping",
         animations::animation_group_set_looping,
     )?;
@@ -388,6 +394,12 @@ fn register_animation_timing(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
         table,
         "SetDuration",
         animations::animation_set_duration,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetDuration",
+        animations::animation_get_duration,
     )?;
     table_set_rust_fn(state, table, "SetOrder", animations::animation_set_order)?;
     table_set_rust_fn(
