@@ -92,18 +92,39 @@ pub(super) fn build_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
-    if let Some(result) = build_sequence_fast_handler(state, &handler_ref)? {
+    if let Some(result) = try_family_dispatchers(state, &handler_ref)? {
         return Ok(result);
     }
-    if let Some(result) = build_method_family_handler(state, &handler_ref)? {
+    build_terminal_fast_handler(state, handler_ref)
+}
+
+/// Try each family dispatcher in turn; return `Some(outer)` on first
+/// match (where the inner option encodes NoOp-style non-results).
+fn try_family_dispatchers(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Option<Val>>> {
+    if let Some(result) = build_sequence_fast_handler(state, handler_ref)? {
         return Ok(Some(result));
     }
-    if let Some(result) = build_global_family_handler(state, &handler_ref)? {
-        return Ok(Some(result));
+    if let Some(result) = build_method_family_handler(state, handler_ref)? {
+        return Ok(Some(Some(result)));
     }
-    if let Some(result) = build_function_family_handler(state, &handler_ref)? {
-        return Ok(Some(result));
+    if let Some(result) = build_global_family_handler(state, handler_ref)? {
+        return Ok(Some(Some(result)));
     }
+    if let Some(result) = build_function_family_handler(state, handler_ref)? {
+        return Ok(Some(Some(result)));
+    }
+    Ok(None)
+}
+
+/// Final match for variants that don't belong to a family dispatcher
+/// (click/drag registration, alpha/frame-level setters, assignments).
+fn build_terminal_fast_handler(
+    state: &mut LuaState,
+    handler_ref: FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::NoOp => Ok(None),
         FastHandlerRef::RegisterForClicks {
@@ -133,7 +154,7 @@ pub(super) fn build_fast_handler(
             build_parent_assignment_handler(state, field, value).map(Some)
         }
         _ => unreachable!(
-            "FastHandlerRef variant not dispatched by any family handler or the final match; \
+            "FastHandlerRef variant not dispatched by any family handler or the terminal match; \
              this is a bug — every variant must be handled"
         ),
     }
