@@ -201,3 +201,57 @@ fn party_frame_has_background_and_selection_children() {
         );
     }
 }
+
+#[test]
+fn party_frame_selection_tracks_parent_size_in_registry() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+        env.exec("A_Admin.SetPartySize(4)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            "#,
+        )
+        .unwrap();
+        env.state().borrow_mut().ensure_layout_rects();
+
+        let state = env.state();
+        let sim = state.borrow();
+        let party_id = sim
+            .widgets
+            .get_id_by_name("PartyFrame")
+            .expect("PartyFrame id");
+        let party = sim.widgets.get(party_id).expect("PartyFrame widget");
+        let selection_id = *party
+            .children_keys
+            .get("Selection")
+            .expect("PartyFrame.Selection child id");
+        let selection = sim.widgets.get(selection_id).expect("Selection widget");
+
+        let party_rect = party.layout_rect.expect("PartyFrame layout rect");
+        let selection_rect = selection.layout_rect.expect("Selection layout rect");
+
+        assert_eq!(
+            selection.parent_id,
+            Some(party_id),
+            "PartyFrame.Selection must stay parented to PartyFrame",
+        );
+        assert_eq!(
+            selection.anchors.len(),
+            2,
+            "PartyFrame.Selection must keep TOPLEFT/BOTTOMRIGHT anchors",
+        );
+        assert_eq!(
+            selection_rect.width as i32,
+            party_rect.width as i32,
+            "PartyFrame.Selection cached width must track PartyFrame width (selection={selection_rect:?}, party={party_rect:?})",
+        );
+        assert_eq!(
+            selection_rect.height as i32,
+            party_rect.height as i32,
+            "PartyFrame.Selection cached height must track PartyFrame height (selection={selection_rect:?}, party={party_rect:?})",
+        );
+    }
+}
