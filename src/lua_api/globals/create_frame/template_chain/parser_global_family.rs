@@ -77,6 +77,9 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             blue_path,
         });
     }
+    if let Some(target_path) = parse_toggle_global_visibility(stmt) {
+        return Some(FastHandlerRef::ToggleGlobalVisibility { target_path });
+    }
     if let Some((suffix, method_name, arg_path)) =
         parse_inline_named_global_method_with_global_arg(stmt)
     {
@@ -274,6 +277,26 @@ fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str
         green_path,
         blue_path,
     ))
+}
+
+fn parse_toggle_global_visibility(stmt: &str) -> Option<&str> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once(')')?;
+    let (target_path, method_name) = condition.trim().rsplit_once(':')?;
+    if method_name.trim() != "IsShown()" {
+        return None;
+    }
+    let remainder = remainder.trim_start().strip_prefix("then")?.trim_start();
+    let (then_stmt, else_tail) = remainder.split_once("else")?;
+    let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
+    let target_path = target_path.trim();
+    let then_stmt = then_stmt.trim().strip_suffix(';').map(str::trim).unwrap_or(then_stmt.trim());
+    let else_stmt = else_stmt.trim().strip_suffix(';').map(str::trim).unwrap_or(else_stmt);
+    let hide_stmt = format!("{target_path}:Hide()");
+    let show_stmt = format!("{target_path}:Show()");
+    (is_fast_handler_path(target_path) && then_stmt == hide_stmt && else_stmt == show_stmt)
+        .then_some(target_path)
 }
 
 fn parse_inline_named_global_method_with_global_arg(stmt: &str) -> Option<(&str, &str, &str)> {

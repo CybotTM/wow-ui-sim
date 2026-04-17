@@ -92,6 +92,9 @@ pub(super) fn build_global_family_handler(
             blue_path,
         )
         .map(Some),
+        FastHandlerRef::ToggleGlobalVisibility { target_path } => {
+            build_toggle_global_visibility_handler(state, target_path).map(Some)
+        }
         FastHandlerRef::NamedGlobalMethodWithGlobalArg {
             suffix,
             method_name,
@@ -295,6 +298,42 @@ fn build_conditional_tooltip_handler(
         "#,
         "template-conditional-tooltip-handler",
         &[field, anchor, red_path, green_path, blue_path],
+    )
+}
+
+fn build_toggle_global_visibility_handler(
+    state: &mut LuaState,
+    target_path: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local target_ref = ...
+            return function(self, ...)
+                local target = target_ref
+                if type(target) == "string" then
+                    local env = getfenv(0) or _G
+                    for segment in string.gmatch(target, "[^%.]+") do
+                        env = env and env[segment]
+                    end
+                    target = env
+                end
+                if not target then
+                    return
+                end
+                if target:IsShown() then
+                    return target:Hide()
+                end
+                return target:Show()
+            end
+        "#,
+        "template-toggle-global-visibility-handler",
+    )?;
+    let target = resolve_global_path(state, target_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target],
     )
 }
 

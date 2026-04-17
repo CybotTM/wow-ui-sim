@@ -2028,6 +2028,36 @@ fn test_create_frame_from_xml_inline_function_with_two_global_args_sequence_runs
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_toggle_global_visibility_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineToggleRoot" parent="UIParent">
+            <Frame name="XmlInlineToggleTarget" parent="XmlInlineToggleRoot"/>
+            <Button name="XmlInlineToggleButton" parent="XmlInlineToggleRoot">
+                <Scripts><OnClick>if ( XmlInlineToggleTarget:IsShown() ) then XmlInlineToggleTarget:Hide(); else XmlInlineToggleTarget:Show(); end</OnClick></Scripts>
+            </Button>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineToggleTarget:Show()").unwrap();
+    env.exec("XmlInlineToggleButton:GetScript('OnClick')(XmlInlineToggleButton)")
+        .unwrap();
+    let hidden: bool = env.eval("return not XmlInlineToggleTarget:IsShown()").unwrap();
+    assert!(hidden);
+
+    env.exec("XmlInlineToggleButton:GetScript('OnClick')(XmlInlineToggleButton)")
+        .unwrap();
+    let shown: bool = env.eval("return XmlInlineToggleTarget:IsShown()").unwrap();
+    assert!(shown);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_assignment_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

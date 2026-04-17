@@ -365,6 +365,9 @@ enum FastHandlerRef<'a> {
         green_path: &'a str,
         blue_path: &'a str,
     },
+    ToggleGlobalVisibility {
+        target_path: &'a str,
+    },
     NamedGlobalMethodWithGlobalArg {
         suffix: &'a str,
         method_name: &'a str,
