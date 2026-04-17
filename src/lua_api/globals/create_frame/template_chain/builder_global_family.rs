@@ -22,6 +22,11 @@ pub(super) fn build_global_family_handler(
             arg,
         } => build_global_method_with_self_string_handler(state, target_path, method_name, arg)
             .map(Some),
+        FastHandlerRef::GlobalMethodWithStringArg {
+            target_path,
+            method_name,
+            arg,
+        } => build_global_method_with_string_handler(state, target_path, method_name, arg).map(Some),
         FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
             method_name,
@@ -131,6 +136,39 @@ fn build_global_method_with_self_string_handler(
             end
         "#,
         "template-global-method-self-string-handler",
+        &[literal_arg],
+    )
+}
+
+fn build_global_method_with_string_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    arg: &str,
+) -> LuaResult<Val> {
+    let literal_arg = create_string(state, arg);
+    call_global_method_builder(
+        state,
+        target_path,
+        method_name,
+        r#"
+            local target_ref, method_name, literal_arg = ...
+            return function(self, ...)
+                local target = target_ref
+                if type(target) == "string" then
+                    local env = getfenv(0) or _G
+                    for segment in string.gmatch(target, "[^%.]+") do
+                        env = env and env[segment]
+                    end
+                    target = env
+                end
+                if not target then
+                    return
+                end
+                return target[method_name](target, literal_arg)
+            end
+        "#,
+        "template-global-method-string-handler",
         &[literal_arg],
     )
 }

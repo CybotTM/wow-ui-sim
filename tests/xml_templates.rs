@@ -1689,6 +1689,83 @@ fn test_create_frame_from_xml_inline_function_with_self_number_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_with_global_and_self_id_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.XmlInlineGlobalSelfIdTarget = {}
+        function XmlInlineSelectTab(frame, tab_id)
+            frame.selectedTab = tab_id
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineGlobalSelfIdFrame" parent="UIParent">
+        <Scripts><OnClick>XmlInlineSelectTab(XmlInlineGlobalSelfIdTarget, self:GetID())</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let frame_id: f64 = env.eval("return XmlInlineGlobalSelfIdFrame:GetID()").unwrap();
+    env.exec("XmlInlineGlobalSelfIdFrame:GetScript('OnClick')(XmlInlineGlobalSelfIdFrame)")
+        .unwrap();
+
+    let selected: f64 = env.eval("return XmlInlineGlobalSelfIdTarget.selectedTab").unwrap();
+    assert_eq!(selected, frame_id, "inline global+self-id function arg should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_merchant_tab_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.MerchantFrame = {}
+        _G.EventRegistry = {}
+        function PanelTemplates_SetTab(frame, tab_id)
+            frame.selectedTab = tab_id
+        end
+        function MerchantFrame_Update()
+            MerchantFrame.updated = true
+        end
+        function EventRegistry:TriggerEvent(event_name)
+            self.lastEvent = event_name
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Button name="XmlInlineMerchantTabFrame" parent="UIParent">
+        <Scripts><OnClick>PanelTemplates_SetTab(MerchantFrame, self:GetID()); MerchantFrame_Update(); EventRegistry:TriggerEvent("MerchantFrame.MerchantTabShow")</OnClick></Scripts>
+    </Button></Ui>"#,
+        "Button",
+    );
+
+    let frame_id: f64 = env.eval("return XmlInlineMerchantTabFrame:GetID()").unwrap();
+    env.exec("XmlInlineMerchantTabFrame:GetScript('OnClick')(XmlInlineMerchantTabFrame)")
+        .unwrap();
+
+    let result: (f64, bool, String) = env
+        .eval(
+            r#"
+            return MerchantFrame.selectedTab,
+                   MerchantFrame.updated == true,
+                   EventRegistry.lastEvent
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, frame_id);
+    assert!(result.1);
+    assert_eq!(result.2, "MerchantFrame.MerchantTabShow");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_sequence3_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

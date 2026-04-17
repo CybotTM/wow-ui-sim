@@ -40,6 +40,14 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
         });
     }
     if let Some((function_name, global_arg_path)) =
+        parse_inline_function_with_global_and_self_id_arg(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
+            function_name,
+            global_arg_path,
+        });
+    }
+    if let Some((function_name, global_arg_path)) =
         parse_inline_function_with_global_and_self_arg(stmt)
     {
         return Some(FastHandlerRef::FunctionWithGlobalAndSelfArg {
@@ -128,6 +136,18 @@ fn parse_inline_function_with_global_and_self_arg(stmt: &str) -> Option<(&str, &
     (is_fast_handler_path(function_name)
         && is_fast_handler_path(global_arg_path)
         && self_arg.trim() == "self")
+        .then_some((function_name, global_arg_path))
+}
+
+fn parse_inline_function_with_global_and_self_id_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (global_arg_path, self_arg) = args.split_once(',')?;
+    let function_name = function_name.trim();
+    let global_arg_path = global_arg_path.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(global_arg_path)
+        && self_arg.trim() == "self:GetID()")
         .then_some((function_name, global_arg_path))
 }
 

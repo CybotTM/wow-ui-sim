@@ -321,6 +321,11 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         arg: &'a str,
     },
+    GlobalMethodWithStringArg {
+        target_path: &'a str,
+        method_name: &'a str,
+        arg: &'a str,
+    },
     GlobalMethodWithSelfIdArg {
         target_path: &'a str,
         method_name: &'a str,
@@ -378,6 +383,10 @@ enum FastHandlerRef<'a> {
         arg_path: &'a str,
     },
     FunctionWithGlobalAndSelfArg {
+        function_name: &'a str,
+        global_arg_path: &'a str,
+    },
+    FunctionWithGlobalAndSelfIdArg {
         function_name: &'a str,
         global_arg_path: &'a str,
     },

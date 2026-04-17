@@ -26,6 +26,13 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             arg,
         });
     }
+    if let Some((target_path, method_name, arg)) = parse_inline_global_method_with_string_arg(stmt) {
+        return Some(FastHandlerRef::GlobalMethodWithStringArg {
+            target_path,
+            method_name,
+            arg,
+        });
+    }
     if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
@@ -98,6 +105,16 @@ fn parse_inline_global_method_with_self_string_arg(stmt: &str) -> Option<(&str, 
     (is_fast_handler_path(target_path)
         && is_fast_identifier(method_name)
         && self_arg.trim() == "self")
+        .then_some((target_path, method_name, arg))
+}
+
+fn parse_inline_global_method_with_string_arg(stmt: &str) -> Option<(&str, &str, &str)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg = super::parse_single_string_literal(args.strip_suffix(')')?.trim())?;
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name))
         .then_some((target_path, method_name, arg))
 }
 
