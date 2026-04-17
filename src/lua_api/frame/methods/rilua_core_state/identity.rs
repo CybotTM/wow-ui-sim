@@ -66,44 +66,50 @@ pub fn set_map_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let map_id = i32::from_stack(state, 2)?;
     let mut sim = borrow_state_mut(state)?;
-    let is_fog = sim
-        .widgets
+    if frame_object_type_matches(&sim, id, "FogOfWarFrame") {
+        set_fog_of_war_map_id(&mut sim, id, map_id);
+    } else if frame_object_type_matches(&sim, id, "UnitPositionFrame") {
+        set_unit_position_map_id(&mut sim, id, map_id);
+    } else {
+        sim.quest_blobs.entry(id).or_default().map_id = map_id as u32;
+    }
+    Ok(0)
+}
+
+fn frame_object_type_matches(
+    sim: &crate::lua_api::state::SimState,
+    id: u64,
+    expected: &str,
+) -> bool {
+    sim.widgets
         .get(id)
         .and_then(|frame| frame.object_type_name.as_deref())
-        .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"));
-    if is_fog {
-        sim.fog_of_war_frames.entry(id).or_default().ui_map_id = Some(map_id);
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame.fog_of_war_ui_map_id = Some(map_id);
-        }
-        return Ok(0);
+        .is_some_and(|name| name.eq_ignore_ascii_case(expected))
+}
+
+fn set_fog_of_war_map_id(sim: &mut crate::lua_api::state::SimState, id: u64, map_id: i32) {
+    sim.fog_of_war_frames.entry(id).or_default().ui_map_id = Some(map_id);
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.fog_of_war_ui_map_id = Some(map_id);
     }
-    if sim.widgets.get(id).is_some_and(|frame| {
-        frame
-            .object_type_name
-            .as_deref()
-            .is_some_and(|name| name.eq_ignore_ascii_case("UnitPositionFrame"))
-    }) {
-        sim.unit_position_frames
-            .entry(id)
-            .or_insert_with(|| crate::lua_api::state::UnitPositionFrameState {
-                ui_map_id: None,
-                units: Vec::new(),
-                unit_colors: std::collections::HashMap::new(),
-                mouse_over_units: Vec::new(),
-                player_ping_scale: 1.0,
-                player_ping_textures: std::collections::HashMap::new(),
-                player_ping_active: false,
-                player_ping_duration: None,
-                player_ping_fade_duration: None,
-                is_finalized: false,
-            })
-            .ui_map_id = Some(map_id);
-        return Ok(0);
-    }
-    let blob = sim.quest_blobs.entry(id).or_default();
-    blob.map_id = map_id as u32;
-    Ok(0)
+}
+
+fn set_unit_position_map_id(sim: &mut crate::lua_api::state::SimState, id: u64, map_id: i32) {
+    sim.unit_position_frames
+        .entry(id)
+        .or_insert_with(|| crate::lua_api::state::UnitPositionFrameState {
+            ui_map_id: None,
+            units: Vec::new(),
+            unit_colors: std::collections::HashMap::new(),
+            mouse_over_units: Vec::new(),
+            player_ping_scale: 1.0,
+            player_ping_textures: std::collections::HashMap::new(),
+            player_ping_active: false,
+            player_ping_duration: None,
+            player_ping_fade_duration: None,
+            is_finalized: false,
+        })
+        .ui_map_id = Some(map_id);
 }
 
 pub fn get_name(state: &mut LuaState) -> LuaResult<u32> {
