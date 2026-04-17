@@ -9,12 +9,22 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 pub fn apply_post_event(_env: &crate::lua_api::WowLuaEnv) {}
 
 fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
-    const PANEL_TOGGLE_PATCHES: &str = r#"
+    let _ = env.exec(GETGLOBAL_HELPER_LUA);
+    let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
+    let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
+    let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
+}
+
+const GETGLOBAL_HELPER_LUA: &str = r#"
 local function __wow_getglobal(name)
     return getglobal(name)
 end
+_G.__wow_panel_getglobal = __wow_getglobal
+"#;
 
-if __wow_getglobal("getglobal") ~= nil then
+const TOGGLE_ACHIEVEMENT_FRAME_LUA: &str = r#"
+if __wow_panel_getglobal ~= nil then
+    local __wow_getglobal = __wow_panel_getglobal
     function ToggleAchievementFrame(stats)
         local kiosk = __wow_getglobal("Kiosk")
         if ( (kiosk and kiosk.IsEnabled and kiosk.IsEnabled()) or __wow_getglobal("DISALLOW_FRAME_TOGGLING") ) then
@@ -39,8 +49,11 @@ if __wow_getglobal("getglobal") ~= nil then
         end
     end
 end
+"#;
 
-if __wow_getglobal("getglobal") ~= nil then
+const TOGGLE_ENCOUNTER_JOURNAL_LUA: &str = r#"
+if __wow_panel_getglobal ~= nil then
+    local __wow_getglobal = __wow_panel_getglobal
     function ToggleEncounterJournal()
         local kiosk = __wow_getglobal("Kiosk")
         if ( (kiosk and kiosk.IsEnabled and kiosk.IsEnabled()) or __wow_getglobal("DISALLOW_FRAME_TOGGLING") ) then
@@ -65,8 +78,11 @@ if __wow_getglobal("getglobal") ~= nil then
         return false;
     end
 end
+"#;
 
-if __wow_getglobal("getglobal") ~= nil then
+const TOGGLE_COLLECTIONS_JOURNAL_LUA: &str = r#"
+if __wow_panel_getglobal ~= nil then
+    local __wow_getglobal = __wow_panel_getglobal
     function ToggleCollectionsJournal(tabIndex)
         if __wow_getglobal("DISALLOW_FRAME_TOGGLING") then
             return;
@@ -92,6 +108,3 @@ if __wow_getglobal("getglobal") ~= nil then
     end
 end
 "#;
-
-    let _ = env.exec(PANEL_TOGGLE_PATCHES);
-}
