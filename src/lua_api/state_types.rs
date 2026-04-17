@@ -207,6 +207,32 @@ pub struct HeirloomData {
     pub max_level: i32,
 }
 
+/// Seeded achievement metadata keyed by achievement id in
+/// `SimState.achievements`. Drives
+/// `C_AchievementInfo.GetAchievementInfo`, `GetRewardItemID`, and
+/// `IsValidAchievement`. Only the commonly-referenced few are
+/// seeded; everything else returns `IsValidAchievement == false`.
+///
+/// `completed` / `was_earned_by_me` are derived from
+/// `WorldState.earned_achievements` at read time, not stored on the
+/// row, so `admin::mark_achievement_earned` flips the right bits
+/// without having to touch this map.
+#[derive(Debug, Clone)]
+pub struct AchievementInfo {
+    pub achievement_id: i32,
+    pub name: String,
+    pub points: i32,
+    pub description: String,
+    pub flags: i32,
+    pub icon: i32,
+    pub reward_text: String,
+    pub is_guild: bool,
+    pub is_statistic: bool,
+    /// Item id rewarded when the achievement is earned; `None` when
+    /// there is no item reward.
+    pub reward_item_id: Option<i32>,
+}
+
 /// Per-map metadata keyed by ui-map id in `SimState.maps`. Drives
 /// `C_Map.GetMapArtID`, `GetMapChildrenInfo`, and
 /// `GetPlayerMapPosition`. Only the handful of ids commonly referenced

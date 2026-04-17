@@ -132,6 +132,7 @@ macro_rules! build_empty_sim_state {
             shapeshift_forms: Vec::new(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             maps: default_maps(),
+            achievements: default_achievements(),
             player_map_position: (0.5, 0.5),
             factions: Vec::new(),
             selected_faction_index: 0,
@@ -185,10 +186,10 @@ use super::game_data::{
 };
 pub use super::game_data::AuraInfo;
 pub use super::state_types::{
-    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CurrencyInfo, CursorInfo,
-    CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, NilSymbolAccess, PendingTimer,
-    PlayerState, SecondaryPowerState, WorldState,
+    AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CurrencyInfo,
+    CursorInfo, CursorItemOrigin, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
+    LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, NilSymbolAccess,
+    PendingTimer, PlayerState, SecondaryPowerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -504,6 +505,13 @@ pub struct SimState {
     /// Azeroth world map, Eastern Kingdoms continent, and Stormwind
     /// City zone.
     pub maps: HashMap<i32, MapData>,
+    /// Achievement metadata keyed by achievement id. Drives
+    /// `C_AchievementInfo.GetAchievementInfo` / `GetRewardItemID` /
+    /// `IsValidAchievement`. Seeded with a handful of well-known
+    /// retail ids (Level 10, Explore Eastern Kingdoms, World Defender,
+    /// Feats of Strength headers). Completion state is derived from
+    /// `world.earned_achievements` at read time.
+    pub achievements: HashMap<i32, AchievementInfo>,
     /// Player's normalized position (0..=1) in the current map.
     /// Drives `C_Map.GetPlayerMapPosition`. Default `(0.5, 0.5)`.
     pub player_map_position: (f64, f64),
@@ -734,6 +742,53 @@ fn default_maps() -> HashMap<i32, MapData> {
     ]
     .into_iter()
     .map(|m| (m.ui_map_id, m))
+    .collect()
+}
+
+/// Seed the `SimState.achievements` table with a handful of the
+/// commonly-referenced retail achievement ids. Unknown ids are
+/// treated as invalid by `IsValidAchievement`.
+fn default_achievements() -> HashMap<i32, AchievementInfo> {
+    [
+        AchievementInfo {
+            achievement_id: 6,
+            name: "Level 10".into(),
+            points: 10,
+            description: "Reach Level 10.".into(),
+            flags: 0,
+            icon: 236377,
+            reward_text: String::new(),
+            is_guild: false,
+            is_statistic: false,
+            reward_item_id: None,
+        },
+        AchievementInfo {
+            achievement_id: 42,
+            name: "Explore Eastern Kingdoms".into(),
+            points: 30,
+            description: "Explore Eastern Kingdoms, revealing the covered areas of the world map.".into(),
+            flags: 0,
+            icon: 236541,
+            reward_text: String::new(),
+            is_guild: false,
+            is_statistic: false,
+            reward_item_id: None,
+        },
+        AchievementInfo {
+            achievement_id: 558,
+            name: "Veteran of the Alliance".into(),
+            points: 25,
+            description: "Earn 100 honorable kills in a single battleground.".into(),
+            flags: 0,
+            icon: 236412,
+            reward_text: "Tabard reward".into(),
+            is_guild: false,
+            is_statistic: false,
+            reward_item_id: Some(43155),
+        },
+    ]
+    .into_iter()
+    .map(|a| (a.achievement_id, a))
     .collect()
 }
 

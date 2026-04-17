@@ -17,9 +17,9 @@ fn stub_false_false(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 static NAMESPACE_NIL_STUBS: &[NsStub] = &[
-    // C_AchievementInfo
-    ("C_AchievementInfo", "GetRewardItemID", stub_nil),
-    ("C_AchievementInfo", "GetAchievementInfo", stub_nil),
+    // C_AchievementInfo GetRewardItemID / GetAchievementInfo are
+    // SimState-backed (via `achievements` map) in
+    // missing_surface/achievement_info.rs, not stubs.
     // C_AreaPoiInfo
     ("C_AreaPoiInfo", "GetAreaPOIInfo", stub_nil),
     ("C_AreaPoiInfo", "GetAreaPOISecondsLeft", stub_nil),
@@ -248,8 +248,8 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
 ];
 
 static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
-    // C_AchievementInfo
-    ("C_AchievementInfo", "IsValidAchievement", stub_false),
+    // C_AchievementInfo IsValidAchievement is SimState-backed in
+    // missing_surface/achievement_info.rs, not a stub.
     // C_Bank
     ("C_Bank", "HasFullBankAccess", stub_false),
     // C_BattleNet
