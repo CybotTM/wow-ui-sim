@@ -75,6 +75,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::trade_verbs::register_all(lua)?;
     super::movement_verbs::register_all(lua)?;
     super::panel_toggle_verbs::register_all(lua)?;
+    super::voice_chat_verbs::register_all(lua)?;
     super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;

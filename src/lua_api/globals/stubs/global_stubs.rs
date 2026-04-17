@@ -76,10 +76,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "UseContainerItem",
     "UseInventoryItem",
     "UseItemByName",
-    "VoiceChat_GetMicrophoneVolume",
-    "VoiceChat_SetMicrophoneVolume",
-    "VoiceChat_SetOutputVolume",
-    "VoiceChatHeadsetModeCheck",
     "WardrobeFrame_OpenTransmogToItem",
 ];
 

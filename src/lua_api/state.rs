@@ -133,6 +133,7 @@ macro_rules! build_empty_sim_state {
             corpse_available: false,
             active_trade: None,
             open_panels: ::std::collections::HashSet::new(),
+            voice_chat: VoiceChatState::default(),
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -461,6 +462,8 @@ pub struct SimState {
     /// Drives the fallback for panels whose backing frame doesn't exist
     /// yet in the sim.
     pub open_panels: ::std::collections::HashSet<String>,
+    /// Voice chat volume + mute/deafen/headset state.
+    pub voice_chat: VoiceChatState,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -475,7 +478,7 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
-    Keybindings, LfgListCounts, ModifierKeys, NetStats, PetBattleState, TradeState,
+    Keybindings, LfgListCounts, ModifierKeys, NetStats, PetBattleState, TradeState, VoiceChatState,
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };

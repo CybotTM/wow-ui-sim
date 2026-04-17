@@ -93,6 +93,30 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// Voice chat presentation state: volume sliders + mute/deafen flags.
+/// Volumes are `[0.0, 1.0]`. `headset_mode` reflects whether the
+/// headset-check confirmation dialog has been accepted.
+#[derive(Debug, Clone)]
+pub struct VoiceChatState {
+    pub microphone_volume: f32,
+    pub output_volume: f32,
+    pub muted: bool,
+    pub deafened: bool,
+    pub headset_mode: bool,
+}
+
+impl Default for VoiceChatState {
+    fn default() -> Self {
+        Self {
+            microphone_volume: 1.0,
+            output_volume: 1.0,
+            muted: false,
+            deafened: false,
+            headset_mode: false,
+        }
+    }
+}
+
 /// Active trade window state. `None` means no trade in progress.
 #[derive(Debug, Default, Clone)]
 pub struct TradeState {
