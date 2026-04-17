@@ -18,6 +18,16 @@ fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>>
 }
 
 fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((target_path, field, on_change_function, on_sound_function)) =
+        parse_checked_assignment_then_callbacks(stmt)
+    {
+        return Some(FastHandlerRef::CheckedAssignmentThenCallbacks {
+            target_path,
+            field,
+            on_change_function,
+            on_sound_function,
+        });
+    }
     if let Some((function_name, first, fourth)) =
         parse_inline_function_with_string_nil_nil_global_args(stmt)
     {
@@ -115,6 +125,19 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             function_name,
             field,
         });
+    }
+    if let Some((function_name, first_field, second_field, third_field, method_name)) =
+        parse_inline_function_with_parent_field_and_nested_parent_field_method_result(stmt)
+    {
+        return Some(
+            FastHandlerRef::FunctionWithParentFieldAndNestedParentFieldMethodResult {
+                function_name,
+                first_field,
+                second_field,
+                third_field,
+                method_name,
+            },
+        );
     }
     parse_inline_function_with_self_and_parent_field_arg(stmt).map(|(function_name, field)| {
         FastHandlerRef::FunctionWithSelfAndParentFieldArg {
@@ -311,6 +334,42 @@ fn parse_inline_function_with_parent_field_arg(stmt: &str) -> Option<(&str, &str
         .then_some((function_name, field))
 }
 
+fn parse_inline_function_with_parent_field_and_nested_parent_field_method_result(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (first_arg, second_arg) = args.split_once(',')?;
+    let first_field = first_arg.trim().strip_prefix("self:GetParent().")?.trim();
+    if !is_fast_identifier(first_field) {
+        return None;
+    }
+
+    let second_arg = second_arg.trim();
+    let second_arg = second_arg.strip_prefix("self:GetParent().")?.trim();
+    let (target_path, method_name) = second_arg.rsplit_once(':')?;
+    let method_name = method_name.strip_suffix("()")?.trim();
+    let mut fields = target_path.split('.').map(str::trim);
+    let second_field = fields.next()?;
+    let third_field = fields.next()?;
+    if fields.next().is_some() {
+        return None;
+    }
+
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_identifier(second_field)
+        && is_fast_identifier(third_field)
+        && is_fast_identifier(method_name))
+    .then_some((
+        function_name,
+        first_field,
+        second_field,
+        third_field,
+        method_name,
+    ))
+}
+
 fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
@@ -324,4 +383,59 @@ fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&
     let function_name = function_name.trim();
     (is_fast_handler_path(function_name) && is_fast_identifier(field))
         .then_some((function_name, field))
+}
+
+fn parse_checked_assignment_then_callbacks(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str)> {
+    let stmt = stmt.trim();
+    let prefix = "local checked = self:GetChecked()";
+    let remainder = stmt.strip_prefix(prefix)?.trim_start();
+    let remainder = remainder.strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    if condition.trim_end().strip_suffix(')')?.trim() != "checked" {
+        return None;
+    }
+    let remainder = remainder.trim_start();
+    let (then_stmt, else_tail) = remainder.split_once("else")?;
+    let else_tail = else_tail.trim_start();
+    let (else_stmt, after_end) = else_tail.split_once("end")?;
+    let then_stmt = then_stmt.trim().strip_suffix(';')?.trim();
+    let else_stmt = else_stmt.trim().strip_suffix(';')?.trim();
+
+    let (then_path, then_field, then_value) = parse_global_bool_assignment(then_stmt)?;
+    let (else_path, else_field, else_value) = parse_global_bool_assignment(else_stmt)?;
+    if then_path != else_path || then_field != else_field || then_value != true || else_value != false
+    {
+        return None;
+    }
+
+    let after_end = after_end.trim();
+    let parts = super::split_inline_sequence_parts(after_end);
+    let [on_change_stmt, on_sound_stmt] = parts.as_slice() else {
+        return None;
+    };
+    let on_change_function = parse_global_function_suffix(on_change_stmt.trim(), "()")?;
+    let (on_sound_function, args) = on_sound_stmt.trim().split_once('(')?;
+    if args.strip_suffix(')')?.trim() != "checked" {
+        return None;
+    }
+    (is_fast_handler_path(then_path)
+        && is_fast_identifier(then_field)
+        && is_fast_handler_path(on_change_function)
+        && is_fast_handler_path(on_sound_function.trim()))
+    .then_some((
+        then_path,
+        then_field,
+        on_change_function,
+        on_sound_function.trim(),
+    ))
+}
+
+fn parse_global_bool_assignment(stmt: &str) -> Option<(&str, &str, bool)> {
+    let (lhs, rhs) = stmt.split_once('=')?;
+    let value = super::parse_single_bool_literal(rhs.trim())?;
+    let (target_path, field) = lhs.trim().rsplit_once('.')?;
+    Some((target_path.trim(), field.trim(), value))
 }

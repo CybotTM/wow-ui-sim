@@ -20,12 +20,6 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             value,
         });
     }
-    if let Some((target_path, method_name)) = parse_inline_global_method(stmt) {
-        return Some(FastHandlerRef::GlobalMethod {
-            target_path,
-            method_name,
-        });
-    }
     if let Some((target_path, method_name, arg)) =
         parse_inline_global_method_with_self_string_arg(stmt)
     {
@@ -54,6 +48,12 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
     }
     if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
+            target_path,
+            method_name,
+        });
+    }
+    if let Some((target_path, method_name)) = parse_inline_global_method(stmt) {
+        return Some(FastHandlerRef::GlobalMethod {
             target_path,
             method_name,
         });
@@ -351,8 +351,16 @@ fn parse_toggle_global_visibility(stmt: &str) -> Option<&str> {
     let (then_stmt, else_tail) = remainder.split_once("else")?;
     let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
     let target_path = target_path.trim();
-    let then_stmt = then_stmt.trim().strip_suffix(';').map(str::trim).unwrap_or(then_stmt.trim());
-    let else_stmt = else_stmt.trim().strip_suffix(';').map(str::trim).unwrap_or(else_stmt);
+    let then_stmt = then_stmt
+        .trim()
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(then_stmt.trim());
+    let else_stmt = else_stmt
+        .trim()
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(else_stmt);
     let hide_stmt = format!("{target_path}:Hide()");
     let show_stmt = format!("{target_path}:Show()");
     (is_fast_handler_path(target_path) && then_stmt == hide_stmt && else_stmt == show_stmt)

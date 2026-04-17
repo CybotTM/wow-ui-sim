@@ -207,13 +207,20 @@ fn build_global_method_with_global_handler(
     method_name: &str,
     arg_path: &str,
 ) -> LuaResult<Val> {
-    let resolved_arg = resolve_global_path(state, arg_path);
+    let arg_path = create_string(state, arg_path);
     call_global_method_builder(
         state,
         target_path,
         method_name,
         r#"
-            local target_ref, method_name, resolved_arg = ...
+            local target_ref, method_name, arg_path = ...
+            local function resolve_global(path)
+                local value = getfenv(0) or _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
             return function(self, ...)
                 local target = target_ref
                 if type(target) == "string" then
@@ -226,11 +233,11 @@ fn build_global_method_with_global_handler(
                 if not target then
                     return
                 end
-                return target[method_name](target, resolved_arg)
+                return target[method_name](target, resolve_global(arg_path))
             end
         "#,
         "template-global-method-global-arg-handler",
-        &[resolved_arg],
+        &[arg_path],
     )
 }
 
@@ -369,11 +376,7 @@ fn build_toggle_global_visibility_handler(
         "template-toggle-global-visibility-handler",
     )?;
     let target = resolve_global_path(state, target_path);
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[target],
-    )
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
 }
 
 fn build_global_tooltip_set_owner_then_set_text_handler(

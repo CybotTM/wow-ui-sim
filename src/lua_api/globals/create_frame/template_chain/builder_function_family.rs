@@ -87,12 +87,10 @@ fn build_function_with_arg_variants(
         FastHandlerRef::FunctionWithSelfNoArgsMethodResult {
             function_name,
             method_name,
-        } => build_function_handler_with_self_noarg_method_result(
-            state,
-            function_name,
-            method_name,
-        )
-        .map(Some),
+        } => {
+            build_function_handler_with_self_noarg_method_result(state, function_name, method_name)
+                .map(Some)
+        }
         FastHandlerRef::FunctionWithGlobalMethodNoArgsResult {
             function_name,
             target_path,
@@ -148,11 +146,39 @@ fn build_function_with_arg_variants(
             function_name,
             field,
         } => build_function_handler_with_parent_field_arg(state, function_name, field).map(Some),
+        FastHandlerRef::FunctionWithParentFieldAndNestedParentFieldMethodResult {
+            function_name,
+            first_field,
+            second_field,
+            third_field,
+            method_name,
+        } => build_function_handler_with_parent_field_and_nested_parent_field_method_result(
+            state,
+            function_name,
+            first_field,
+            second_field,
+            third_field,
+            method_name,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithSelfAndParentFieldArg {
             function_name,
             field,
         } => build_function_handler_with_self_and_parent_field_arg(state, function_name, field)
             .map(Some),
+        FastHandlerRef::CheckedAssignmentThenCallbacks {
+            target_path,
+            field,
+            on_change_function,
+            on_sound_function,
+        } => build_checked_assignment_then_callbacks_handler(
+            state,
+            target_path,
+            field,
+            on_change_function,
+            on_sound_function,
+        )
+        .map(Some),
         _ => Ok(None),
     }
 }
@@ -590,6 +616,45 @@ fn build_function_handler_with_parent_field_arg(
     )
 }
 
+fn build_function_handler_with_parent_field_and_nested_parent_field_method_result(
+    state: &mut LuaState,
+    function_name: &str,
+    first_field: &str,
+    second_field: &str,
+    third_field: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first_field, second_field, third_field, method_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                local second = parent[second_field]
+                local third = second and second[third_field]
+                if not third or not third[method_name] then
+                    return
+                end
+                return fn(parent[first_field], third[method_name](third))
+            end
+        "#,
+        "template-inline-function-parent-field-nested-parent-method-result",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first_field = create_string(state, first_field);
+    let second_field = create_string(state, second_field);
+    let third_field = create_string(state, third_field);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first_field, second_field, third_field, method_name],
+    )
+}
+
 fn build_function_handler_with_self_and_parent_field_arg(
     state: &mut LuaState,
     function_name: &str,
@@ -615,6 +680,51 @@ fn build_function_handler_with_self_and_parent_field_arg(
         state,
         Val::Function(builder.gc_ref()),
         &[target, field_name],
+    )
+}
+
+fn build_checked_assignment_then_callbacks_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    field: &str,
+    on_change_function: &str,
+    on_sound_function: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local target_path, field_name, on_change, on_sound = ...
+            local function resolve_global(path)
+                local value = getfenv(0) or _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
+            return function(self, ...)
+                local checked = self:GetChecked()
+                local target = resolve_global(target_path)
+                if target then
+                    target[field_name] = checked and true or false
+                end
+                if on_change then
+                    on_change()
+                end
+                if on_sound then
+                    on_sound(checked)
+                end
+            end
+        "#,
+        "template-inline-checked-assignment-then-callbacks",
+    )?;
+    let target_path = create_string(state, target_path);
+    let field_name = create_string(state, field);
+    let on_change = resolve_global_path(state, on_change_function);
+    let on_sound = resolve_global_path(state, on_sound_function);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target_path, field_name, on_change, on_sound],
     )
 }
 

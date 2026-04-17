@@ -301,7 +301,11 @@ fn build_sequence_fast_handler(
             Ok(Some(Some(crate::lua_api::methods::call_function_state(
                 state,
                 Val::Function(builder.gc_ref()),
-                &[field, then_handler.unwrap_or(Val::Nil), else_handler.unwrap_or(Val::Nil)],
+                &[
+                    field,
+                    then_handler.unwrap_or(Val::Nil),
+                    else_handler.unwrap_or(Val::Nil),
+                ],
             )?)))
         }
         _ => Ok(None),

@@ -2048,7 +2048,9 @@ fn test_create_frame_from_xml_inline_toggle_global_visibility_runs() {
     env.exec("XmlInlineToggleTarget:Show()").unwrap();
     env.exec("XmlInlineToggleButton:GetScript('OnClick')(XmlInlineToggleButton)")
         .unwrap();
-    let hidden: bool = env.eval("return not XmlInlineToggleTarget:IsShown()").unwrap();
+    let hidden: bool = env
+        .eval("return not XmlInlineToggleTarget:IsShown()")
+        .unwrap();
     assert!(hidden);
 
     env.exec("XmlInlineToggleButton:GetScript('OnClick')(XmlInlineToggleButton)")
@@ -2091,7 +2093,8 @@ fn test_create_frame_from_xml_inline_conditional_global_noarg_then_else_runs() {
         "Frame",
     );
 
-    env.exec(r#"MerchantFrame:RegisterEvent("PLAYER_MONEY")"#).unwrap();
+    env.exec(r#"MerchantFrame:RegisterEvent("PLAYER_MONEY")"#)
+        .unwrap();
     env.exec(r#"XmlInlineRepairButton:GetScript("OnClick")(XmlInlineRepairButton)"#)
         .unwrap();
     let repair_mode_result: (bool, bool) = env
@@ -2177,6 +2180,87 @@ fn test_create_frame_from_xml_inline_conditional_self_method_sequence_runs() {
         .unwrap();
     assert_eq!(unchecked_result.0, 12);
     assert!(!unchecked_result.1);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_checked_assignment_then_callbacks_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHATCONFIG_SELECTED_FILTER = { settings = { lineHighlighting = false } }
+        XmlInlineCheckedAssignmentUpdateCount = 0
+        XmlInlineCheckedAssignmentSound = nil
+        function CombatConfig_Colorize_Update()
+            XmlInlineCheckedAssignmentUpdateCount = XmlInlineCheckedAssignmentUpdateCount + 1
+        end
+        function ChatConfigFrame_PlayCheckboxSound(checked)
+            XmlInlineCheckedAssignmentSound = checked
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineCheckedAssignmentRoot" parent="UIParent">
+            <CheckButton name="XmlInlineCheckedAssignmentButton" parent="XmlInlineCheckedAssignmentRoot">
+                <Scripts><OnClick>
+                    local checked = self:GetChecked()
+                    if ( checked ) then
+                        CHATCONFIG_SELECTED_FILTER.settings.lineHighlighting = true;
+                    else
+                        CHATCONFIG_SELECTED_FILTER.settings.lineHighlighting = false;
+                    end
+                    CombatConfig_Colorize_Update();
+                    ChatConfigFrame_PlayCheckboxSound(checked);
+                </OnClick></Scripts>
+            </CheckButton>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCheckedAssignmentButton:SetChecked(true)
+        XmlInlineCheckedAssignmentButton:GetScript("OnClick")(XmlInlineCheckedAssignmentButton)
+    "#,
+    )
+    .unwrap();
+    let checked_result: (bool, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.settings.lineHighlighting,
+                   XmlInlineCheckedAssignmentUpdateCount,
+                   XmlInlineCheckedAssignmentSound
+        "#,
+        )
+        .unwrap();
+    assert!(checked_result.0);
+    assert_eq!(checked_result.1, 1);
+    assert!(checked_result.2);
+
+    env.exec(
+        r#"
+        XmlInlineCheckedAssignmentButton:SetChecked(false)
+        XmlInlineCheckedAssignmentButton:GetScript("OnClick")(XmlInlineCheckedAssignmentButton)
+    "#,
+    )
+    .unwrap();
+    let unchecked_result: (bool, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.settings.lineHighlighting,
+                   XmlInlineCheckedAssignmentUpdateCount,
+                   XmlInlineCheckedAssignmentSound
+        "#,
+        )
+        .unwrap();
+    assert!(!unchecked_result.0);
+    assert_eq!(unchecked_result.1, 2);
+    assert!(!unchecked_result.2);
 }
 
 #[test]
@@ -2288,6 +2372,42 @@ end</OnClick></Scripts>
     .unwrap();
     let without_case: String = env.eval("return HelpBrowser.home").unwrap();
     assert_eq!(without_case, "GMTicketStatus");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_global_method_with_late_bound_global_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        HelpFrame = { shown = nil }
+        function HelpFrame:ShowFrame(page)
+            self.shown = page
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineLateBoundGlobalMethodButton" parent="UIParent">
+            <Scripts><OnClick>HelpFrame:ShowFrame(HELPFRAME_SUBMIT_TICKET)</OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(r#"HELPFRAME_SUBMIT_TICKET = "submit""#).unwrap();
+    env.exec(
+        r#"
+        XmlInlineLateBoundGlobalMethodButton:GetScript("OnClick")(XmlInlineLateBoundGlobalMethodButton)
+    "#,
+    )
+    .unwrap();
+
+    let shown: String = env.eval("return HelpFrame.shown").unwrap();
+    assert_eq!(shown, "submit");
 }
 
 #[test]
@@ -2490,6 +2610,65 @@ fn test_create_frame_from_xml_inline_commented_invite_sequence_runs() {
         .unwrap();
     assert_eq!(result.0, 9.0);
     assert!(result.1);
+    assert!(result.2);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_report_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.ReportSequence = {}
+        C_ReportSystem = {}
+        function C_ReportSystem.SendReportPlayer(token, comment)
+            ReportSequence.token = token
+            ReportSequence.comment = comment
+        end
+        function StaticPopupSpecial_Hide(frame)
+            ReportSequence.hidden = frame
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineReportRoot" parent="UIParent">
+        <Button name="XmlInlineReportButton" parent="XmlInlineReportRoot">
+            <Scripts><OnClick>C_ReportSystem.SendReportPlayer(self:GetParent().reportToken, self:GetParent().CommentFrame.EditBox:GetText()); StaticPopupSpecial_Hide(self:GetParent())</OnClick></Scripts>
+        </Button>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineReportRoot.reportToken = 42
+        XmlInlineReportRoot.CommentFrame = {
+            EditBox = {
+                value = "spam report",
+                GetText = function(self)
+                    return self.value
+                end,
+            },
+        }
+        XmlInlineReportButton:GetScript("OnClick")(XmlInlineReportButton)
+    "#,
+    )
+    .unwrap();
+
+    let result: (i32, String, bool) = env
+        .eval(
+            r#"
+            return ReportSequence.token,
+                   ReportSequence.comment,
+                   ReportSequence.hidden == XmlInlineReportRoot
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, 42);
+    assert_eq!(result.1, "spam report");
     assert!(result.2);
 }
 

@@ -462,9 +462,22 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         field: &'a str,
     },
+    FunctionWithParentFieldAndNestedParentFieldMethodResult {
+        function_name: &'a str,
+        first_field: &'a str,
+        second_field: &'a str,
+        third_field: &'a str,
+        method_name: &'a str,
+    },
     FunctionWithSelfAndParentFieldArg {
         function_name: &'a str,
         field: &'a str,
+    },
+    CheckedAssignmentThenCallbacks {
+        target_path: &'a str,
+        field: &'a str,
+        on_change_function: &'a str,
+        on_sound_function: &'a str,
     },
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
