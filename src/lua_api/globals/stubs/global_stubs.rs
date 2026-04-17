@@ -121,7 +121,8 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetBackpackCurrencyInfo",
     "GetBattlefieldInstanceRunTime",
     "GetBattlefieldStatus",
-    "GetContainerNumFreeSlots",
+    // GetContainerNumFreeSlots is SimState-backed in inventory_counts.rs,
+    // not a stub.
     "GetCurrentGuildBankTab",
     "GetCursorPosition",
     "GetArenaOpponentSpec",
@@ -144,12 +145,12 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetLFGDungeonInfo",
     "GetLFGDungeonNumEncounters",
     "GetLFGMode",
-    "GetMerchantNumItems",
+    // GetMerchantNumItems is SimState-backed in inventory_counts.rs, not a stub.
     "GetMirrorTimerInfo",
     "GetMirrorTimerProgress",
     "GetMouseFocus",
     "GetNextInteractUnit",
-    "GetNumAuctionItems",
+    // GetNumAuctionItems is SimState-backed in inventory_counts.rs, not a stub.
     "GetNumBattlegroundEntries",
     "GetNumClasses",
     // GetNumGroupMembers / GetNumPartyMembers / GetNumRaidMembers /
@@ -157,7 +158,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // not stubs.
     "GetNumGuildBankTabs",
     // GetNumGuildMembers is SimState-backed in guild_probes.rs, not a stub.
-    "GetNumLootItems",
+    // GetNumLootItems is SimState-backed in inventory_counts.rs, not a stub.
     // GetNumQuestLogEntries is SimState-backed in quest_surface.rs, not a stub.
     "GetNumShapeshiftForms",
     "GetNumSkillLines",

@@ -121,6 +121,9 @@ macro_rules! build_empty_sim_state {
             loot_frame_open: false,
             guild_registrar_open: false,
             pet_stables_open: false,
+            merchant_items: Vec::new(),
+            loot_slots: Vec::new(),
+            auction_browse_items: Vec::new(),
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),
@@ -442,6 +445,18 @@ pub struct SimState {
     pub guild_registrar_open: bool,
     /// Whether the pet-stables UI is open.
     pub pet_stables_open: bool,
+    /// Items currently on the active merchant's page. Retail's
+    /// `GetMerchantNumItems` returns this length. Empty when no merchant
+    /// is open.
+    pub merchant_items: Vec<u32>,
+    /// Loot slots on the active loot window. Retail's `GetNumLootItems`
+    /// returns this length. Empty when no loot window is open.
+    pub loot_slots: Vec<u32>,
+    /// Auction-house browse results (first return of
+    /// `GetNumAuctionItems("list")`). We only model the `"list"` bucket;
+    /// `"owner"` / `"bidder"` are always 0. Empty when no browse has
+    /// completed.
+    pub auction_browse_items: Vec<u32>,
     /// PvP / battlefield queue state — a single slot for the active
     /// battleground, arena, or LFG queue. See `BattlefieldQueue`.
     pub battlefield_queue: BattlefieldQueue,
