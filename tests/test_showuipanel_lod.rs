@@ -43,7 +43,6 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
-    ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
@@ -92,6 +91,44 @@ fn setup_env() -> WowLuaEnv {
             eprintln!("[load {name}] FAILED: {e}");
         }
     }
+
+    env.exec(
+        r#"
+        if type(UIParentLoadAddOn) == "function" and not __test_original_uiparent_load_addon then
+            __test_original_uiparent_load_addon = UIParentLoadAddOn
+            UIParentLoadAddOn = function(name)
+                if name == "Blizzard_CooldownBroadcaster" then
+                    return false
+                end
+                return __test_original_uiparent_load_addon(name)
+            end
+        end
+
+        if not ActionButtonUtil then
+            ActionButtonUtil = {
+                ActionBarActionStatus = {
+                    NotMissing = 1,
+                    MissingFromAllBars = 2,
+                    OnInactiveBonusBar = 3,
+                    OnDisabledActionBar = 4,
+                },
+            }
+
+            function ActionButtonUtil.GetActionBarStatusForSpell()
+                return ActionButtonUtil.ActionBarActionStatus.NotMissing
+            end
+
+            function ActionButtonUtil.GetActionBarStatusForPetAction()
+                return ActionButtonUtil.ActionBarActionStatus.NotMissing
+            end
+
+            function ActionButtonUtil.GetActionBarStatusForFlyout()
+                return ActionButtonUtil.ActionBarActionStatus.NotMissing
+            end
+        end
+        "#,
+    )
+    .expect("failed to install ActionButtonUtil harness stub");
 
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
@@ -229,6 +266,58 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
             "Pressing S should demand-load Blizzard_PlayerSpells and show the SpellBook tab: {result}"
         );
     }
+}
+
+#[test]
+#[ignore = "diagnostic"]
+fn debug_direct_spellbook_toggle_error() {
+    let env = setup_env();
+    let result: String = env
+        .eval(
+            r#"
+            local markers = {}
+            local function mark(label, value)
+                table.insert(markers, label .. "=" .. type(value) .. ":" .. tostring(value))
+            end
+
+            mark("PlayerSpellsFrame_LoadUI", PlayerSpellsFrame_LoadUI)
+            local ok, err = pcall(PlayerSpellsFrame_LoadUI)
+            if not ok then
+                return "load_ui:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")
+            end
+
+            if not PlayerSpellsFrame then
+                return "missing_player_spells_frame\n" .. table.concat(markers, "\n")
+            end
+
+            mark("TrySetTab", PlayerSpellsFrame.TrySetTab)
+            mark("IsShown", PlayerSpellsFrame.IsShown)
+            mark("ShowUIPanel", ShowUIPanel)
+            mark("SpellBookFrame", PlayerSpellsFrame.SpellBookFrame)
+            if PlayerSpellsFrame.SpellBookFrame then
+                mark("TrySetCategory", PlayerSpellsFrame.SpellBookFrame.TrySetCategory)
+                mark("IsCategoryActive", PlayerSpellsFrame.SpellBookFrame.IsCategoryActive)
+            end
+
+            ok, err = pcall(function()
+                return PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook)
+            end)
+            if not ok then
+                return "try_set_tab:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")
+            end
+
+            ok, err = pcall(function()
+                return ShowUIPanel(PlayerSpellsFrame)
+            end)
+            if not ok then
+                return "show_ui_panel:" .. tostring(err) .. "\n" .. table.concat(markers, "\n")
+            end
+
+            return "ok\n" .. table.concat(markers, "\n")
+            "#,
+        )
+        .expect("diagnostic evaluation should return");
+    panic!("{result}");
 }
 
 #[test]
