@@ -8,6 +8,7 @@ mod env;
 mod env_init;
 mod env_rilua;
 pub(crate) mod frame;
+pub(crate) mod frame_substates;
 pub(crate) mod game_data;
 pub mod globals;
 mod layout;
@@ -18,6 +19,7 @@ pub(crate) mod methods;
 pub(crate) mod on_update;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
+pub(crate) mod sim_substates;
 pub mod simple_html;
 pub(crate) mod state;
 mod state_defaults;
