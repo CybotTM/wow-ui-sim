@@ -215,7 +215,14 @@ fn party_frame_selection_tracks_parent_size_in_registry() {
             "#,
         )
         .unwrap();
-        env.state().borrow_mut().ensure_layout_rects();
+        let selection_width_before_ensure: f64 = env
+            .eval(
+                r#"
+                if not PartyFrame or not PartyFrame.Selection then return 0 end
+                return PartyFrame.Selection:GetWidth()
+                "#,
+            )
+            .expect("read PartyFrame.Selection width before ensure_layout_rects");
 
         let state = env.state();
         let sim = state.borrow();
@@ -230,18 +237,36 @@ fn party_frame_selection_tracks_parent_size_in_registry() {
             .expect("PartyFrame.Selection child id");
         let selection = sim.widgets.get(selection_id).expect("Selection widget");
 
-        let party_rect = party.layout_rect.expect("PartyFrame layout rect");
-        let selection_rect = selection.layout_rect.expect("Selection layout rect");
-
         assert_eq!(
             selection.parent_id,
             Some(party_id),
             "PartyFrame.Selection must stay parented to PartyFrame",
         );
+        assert!(
+            party.children.contains(&selection_id),
+            "PartyFrame.Selection must stay in PartyFrame.children",
+        );
         assert_eq!(
             selection.anchors.len(),
             2,
             "PartyFrame.Selection must keep TOPLEFT/BOTTOMRIGHT anchors",
+        );
+        assert!(
+            sim.widgets.is_rect_dirty(selection_id) || selection.layout_rect.is_some(),
+            "PartyFrame.Selection must either be dirty or already have a layout rect",
+        );
+        drop(sim);
+
+        state.borrow_mut().ensure_layout_rects();
+        let sim = state.borrow();
+        let party = sim.widgets.get(party_id).expect("PartyFrame widget");
+        let selection = sim.widgets.get(selection_id).expect("Selection widget");
+        let party_rect = party.layout_rect.expect("PartyFrame layout rect");
+        let selection_rect = selection.layout_rect.expect("Selection layout rect");
+        assert_eq!(
+            selection_width_before_ensure as i32,
+            selection_rect.width as i32,
+            "Lua GetWidth() must agree with the resolved registry width",
         );
         assert_eq!(
             selection_rect.width as i32,
