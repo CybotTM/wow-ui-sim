@@ -24,7 +24,7 @@ pub(crate) mod on_update;
 pub(crate) mod script_helpers;
 pub(crate) mod sim_substates;
 pub mod simple_html;
-pub(crate) mod state;
+pub mod state;
 mod state_defaults;
 pub(crate) mod state_render;
 pub(crate) mod state_types;

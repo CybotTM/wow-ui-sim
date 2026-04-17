@@ -1,0 +1,242 @@
+//! Integration tests for `src/lua_api/globals/inventory_verbs.rs`.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::{BagItem, CursorInfo, CursorItemOrigin, EquippedItem};
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("WowLuaEnv init")
+}
+
+// ── PickupContainerItem ───────────────────────────────────────────────────────
+
+#[test]
+fn pickup_container_item_moves_bag_item_to_cursor() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.bag_items.insert(
+            (0, 5),
+            BagItem {
+                item_id: 6948, // Hearthstone
+                stack_count: 1,
+            },
+        );
+    }
+    env.exec("PickupContainerItem(0, 5)").unwrap();
+    let st = env.state().borrow();
+    assert!(!st.bag_items.contains_key(&(0, 5)), "item must leave bag");
+    match &st.cursor_item {
+        Some(CursorInfo::Item {
+            item_id,
+            stack_count,
+            origin,
+        }) => {
+            assert_eq!(*item_id, 6948);
+            assert_eq!(*stack_count, 1);
+            assert!(matches!(origin, CursorItemOrigin::Bag { bag: 0, slot: 5 }));
+        }
+        other => panic!("cursor should carry the Hearthstone, got {other:?}"),
+    }
+}
+
+#[test]
+fn pickup_container_item_empty_slot_is_noop() {
+    let env = env();
+    env.exec("PickupContainerItem(0, 5)").unwrap();
+    assert!(env.state().borrow().cursor_item.is_none());
+}
+
+// ── PickupInventoryItem ───────────────────────────────────────────────────────
+
+#[test]
+fn pickup_inventory_item_moves_equipped_slot_to_cursor() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.equipped_items.insert(
+            16, // main hand
+            EquippedItem {
+                item_id: 19019, // Thunderfury
+                enchant_id: 0,
+                gem_ids: [0; 3],
+            },
+        );
+    }
+    env.exec("PickupInventoryItem(16)").unwrap();
+    let st = env.state().borrow();
+    assert!(!st.player.equipped_items.contains_key(&16));
+    assert!(matches!(
+        st.cursor_item,
+        Some(CursorInfo::Item {
+            item_id: 19019,
+            origin: CursorItemOrigin::Equipped { slot: 16 },
+            ..
+        })
+    ));
+}
+
+// ── PickupMerchantItem ────────────────────────────────────────────────────────
+
+#[test]
+fn pickup_merchant_item_synthesizes_item_on_cursor() {
+    let env = env();
+    env.exec("PickupMerchantItem(3)").unwrap();
+    let st = env.state().borrow();
+    assert!(matches!(
+        st.cursor_item,
+        Some(CursorInfo::Item {
+            item_id: 100_003,
+            origin: CursorItemOrigin::Merchant { index: 3 },
+            ..
+        })
+    ));
+}
+
+// ── EquipCursorItem ───────────────────────────────────────────────────────────
+
+#[test]
+fn equip_cursor_item_writes_to_equipped_slot() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        // Default player has main-hand already populated; clear it so we can
+        // observe the "empty slot" equip path.
+        st.player.equipped_items.remove(&16);
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 19019,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+    env.exec("EquipCursorItem(16)").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(
+        st.player
+            .equipped_items
+            .get(&16)
+            .map(|e| e.item_id)
+            .unwrap_or_default(),
+        19019
+    );
+    assert!(
+        st.cursor_item.is_none(),
+        "cursor must clear after equip when slot was empty"
+    );
+}
+
+#[test]
+fn equip_cursor_item_swaps_with_existing_slot() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.equipped_items.insert(
+            16,
+            EquippedItem {
+                item_id: 100,
+                enchant_id: 0,
+                gem_ids: [0; 3],
+            },
+        );
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 200,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+    env.exec("EquipCursorItem(16)").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(
+        st.player.equipped_items.get(&16).map(|e| e.item_id),
+        Some(200)
+    );
+    assert!(matches!(
+        st.cursor_item,
+        Some(CursorInfo::Item { item_id: 100, .. })
+    ));
+}
+
+// ── DeleteCursorItem ──────────────────────────────────────────────────────────
+
+#[test]
+fn delete_cursor_item_clears_cursor() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 42,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+    env.exec("DeleteCursorItem()").unwrap();
+    assert!(env.state().borrow().cursor_item.is_none());
+}
+
+// ── PlaceAction ───────────────────────────────────────────────────────────────
+
+#[test]
+fn place_action_writes_spell_id_to_action_bar_slot() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Spell { spell_id: 12345 });
+    }
+    env.exec("PlaceAction(7)").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(st.action_bars.get(&7).copied(), Some(12345));
+    assert!(st.cursor_item.is_none());
+}
+
+#[test]
+fn place_action_with_item_cursor_is_noop() {
+    let env = env();
+    // Snapshot the pre-call value of slot 7 so we can assert it is untouched.
+    let before = env.state().borrow().action_bars.get(&7).copied();
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 999,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+    env.exec("PlaceAction(7)").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(
+        st.action_bars.get(&7).copied(),
+        before,
+        "items cannot be placed on action bars"
+    );
+    assert!(
+        st.cursor_item.is_some(),
+        "cursor must keep the item when place is refused"
+    );
+}
+
+// ── PickupBagFromSlot (alias) ─────────────────────────────────────────────────
+
+#[test]
+fn pickup_bag_from_slot_aliases_pickup_inventory_item() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.equipped_items.insert(
+            20,
+            EquippedItem {
+                item_id: 5571, // small red pouch
+                enchant_id: 0,
+                gem_ids: [0; 3],
+            },
+        );
+    }
+    env.exec("PickupBagFromSlot(20)").unwrap();
+    let st = env.state().borrow();
+    assert!(matches!(
+        st.cursor_item,
+        Some(CursorInfo::Item {
+            item_id: 5571,
+            origin: CursorItemOrigin::Equipped { slot: 20 },
+            ..
+        })
+    ));
+}

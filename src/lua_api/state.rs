@@ -121,9 +121,9 @@ use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
-    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, GreatVaultActivity,
-    LootRollInfo, LuaErrorRecord, MovementState, NilSymbolAccess, PendingTimer, PlayerState,
-    WorldState,
+    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, CursorItemOrigin,
+    EquippedItem, GreatVaultActivity, LootRollInfo, LuaErrorRecord, MovementState, NilSymbolAccess,
+    PendingTimer, PlayerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 

@@ -33,6 +33,7 @@ pub mod guild_logo;
 pub mod hero_talents;
 pub mod housing;
 pub mod inventory_slot;
+pub mod inventory_verbs;
 pub mod keybindings;
 pub mod lfg_info;
 pub mod lfg_list;

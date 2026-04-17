@@ -12,6 +12,21 @@ pub enum CursorInfo {
     Action { slot: u32, spell_id: u32 },
     /// A spell from the spellbook (doesn't remove from spellbook).
     Spell { spell_id: u32 },
+    /// An item picked up from a bag slot, equipment slot, or merchant.
+    Item {
+        item_id: u32,
+        stack_count: i32,
+        origin: CursorItemOrigin,
+    },
+}
+
+/// Where a cursor-carried item came from — used to route drops back.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CursorItemOrigin {
+    Bag { bag: i32, slot: i32 },
+    Equipped { slot: i32 },
+    Merchant { index: u32 },
+    Unknown,
 }
 
 /// Per-addon runtime profiler metrics, updated each frame.
