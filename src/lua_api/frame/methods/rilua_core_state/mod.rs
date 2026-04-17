@@ -33,26 +33,42 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
 pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    // Size
+    register_size(state, mt)?;
+    register_visibility(state, mt)?;
+    register_alpha(state, mt)?;
+    register_strata_level(state, mt)?;
+    register_identity(state, mt)?;
+    register_input(state, mt)?;
+    register_scale(state, mt)?;
+    register_region(state, mt)?;
+    Ok(())
+}
+
+fn register_size(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "GetWidth", get_width)?;
     table_set_rust_fn(state, mt, "GetHeight", get_height)?;
     table_set_rust_fn(state, mt, "GetSize", get_size)?;
     table_set_rust_fn(state, mt, "SetSize", set_size)?;
     table_set_rust_fn(state, mt, "SetWidth", set_width)?;
     table_set_rust_fn(state, mt, "SetHeight", set_height)?;
-    // Visibility
+    Ok(())
+}
+
+fn register_visibility(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "Show", show)?;
     table_set_rust_fn(state, mt, "Hide", hide)?;
     table_set_rust_fn(state, mt, "SetShown", set_shown)?;
     table_set_rust_fn(state, mt, "IsVisible", is_visible)?;
     table_set_rust_fn(state, mt, "IsShown", is_shown)?;
-    // CollapseLayout
     table_set_rust_fn(state, mt, "SetCollapsesLayout", set_collapses_layout)?;
     table_set_rust_fn(state, mt, "CollapsesLayout", collapses_layout)?;
     table_set_rust_fn(state, mt, "IsCollapsed", is_collapsed)?;
     // Dropdown menus (always closed in headless mode)
     table_set_rust_fn(state, mt, "IsMenuOpen", is_menu_open)?;
-    // Alpha
+    Ok(())
+}
+
+fn register_alpha(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetAlpha", set_alpha)?;
     table_set_rust_fn(state, mt, "GetAlpha", get_alpha)?;
     table_set_rust_fn(state, mt, "GetEffectiveAlpha", get_effective_alpha)?;
@@ -60,32 +76,38 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetIgnoreParentAlpha", set_ignore_parent_alpha)?;
     table_set_rust_fn(state, mt, "GetIgnoreParentAlpha", get_ignore_parent_alpha)?;
     table_set_rust_fn(state, mt, "IsIgnoringParentAlpha", is_ignoring_parent_alpha)?;
-    // Frame strata
+    Ok(())
+}
+
+fn register_strata_level(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetFrameStrata", set_frame_strata)?;
     table_set_rust_fn(state, mt, "GetFrameStrata", get_frame_strata)?;
     table_set_rust_fn(state, mt, "SetFixedFrameStrata", set_fixed_frame_strata)?;
     table_set_rust_fn(state, mt, "HasFixedFrameStrata", has_fixed_frame_strata)?;
-    // Frame level
     table_set_rust_fn(state, mt, "SetFrameLevel", set_frame_level)?;
     table_set_rust_fn(state, mt, "GetFrameLevel", get_frame_level)?;
     table_set_rust_fn(state, mt, "SetFixedFrameLevel", set_fixed_frame_level)?;
     table_set_rust_fn(state, mt, "HasFixedFrameLevel", has_fixed_frame_level)?;
-    // Identity
+    table_set_rust_fn(state, mt, "SetToplevel", set_toplevel)?;
+    table_set_rust_fn(state, mt, "IsToplevel", is_toplevel)?;
+    Ok(())
+}
+
+fn register_identity(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "GetName", get_name)?;
     table_set_rust_fn(state, mt, "GetDebugName", get_debug_name)?;
     table_set_rust_fn(state, mt, "GetObjectType", get_object_type)?;
     table_set_rust_fn(state, mt, "IsObjectType", is_object_type)?;
-    // Toplevel
-    table_set_rust_fn(state, mt, "SetToplevel", set_toplevel)?;
-    table_set_rust_fn(state, mt, "IsToplevel", is_toplevel)?;
-    // ID / MapID
     table_set_rust_fn(state, mt, "SetID", set_id)?;
     table_set_rust_fn(state, mt, "GetID", get_id)?;
     table_set_rust_fn(state, mt, "GetMapID", get_map_id)?;
     table_set_rust_fn(state, mt, "GetUiMapID", get_ui_map_id)?;
     table_set_rust_fn(state, mt, "SetMapID", set_map_id)?;
     table_set_rust_fn(state, mt, "SetUiMapID", set_map_id)?;
-    // Mouse / keyboard
+    Ok(())
+}
+
+fn register_input(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "EnableMouse", enable_mouse)?;
     table_set_rust_fn(state, mt, "IsMouseEnabled", is_mouse_enabled)?;
     table_set_rust_fn(state, mt, "EnableMouseWheel", enable_mouse_wheel)?;
@@ -98,14 +120,20 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "SetMouseMotionEnabled", set_mouse_motion_enabled)?;
     table_set_rust_fn(state, mt, "SetMouseClickEnabled", set_mouse_click_enabled)?;
     table_set_rust_fn(state, mt, "IsMouseClickEnabled", is_mouse_click_enabled)?;
-    // Scale
+    Ok(())
+}
+
+fn register_scale(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "GetScale", get_scale)?;
     table_set_rust_fn(state, mt, "GetEffectiveScale", get_effective_scale)?;
     table_set_rust_fn(state, mt, "SetScale", set_scale)?;
     table_set_rust_fn(state, mt, "SetIgnoreParentScale", set_ignore_parent_scale)?;
     table_set_rust_fn(state, mt, "GetIgnoreParentScale", get_ignore_parent_scale)?;
     table_set_rust_fn(state, mt, "IsIgnoringParentScale", is_ignoring_parent_scale)?;
-    // Region queries
+    Ok(())
+}
+
+fn register_region(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, mt, "IsRectValid", is_rect_valid)?;
     table_set_rust_fn(state, mt, "IsMouseMotionFocus", is_mouse_motion_focus)?;
     table_set_rust_fn(state, mt, "IsObjectLoaded", is_object_loaded)?;
