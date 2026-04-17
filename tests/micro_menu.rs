@@ -266,6 +266,46 @@ fn micro_menu_game_menu_button_opens_game_menu() {
 }
 
 #[test]
+fn micro_menu_buttons_have_sized_atlas_textures() {
+    let env = setup_env();
+    let (profession_w, profession_h, spells_w, spells_h, menu_w, menu_h): (
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+    ) = env
+        .eval(
+            r#"
+            return ProfessionMicroButton:GetNormalTexture():GetWidth(),
+                   ProfessionMicroButton:GetNormalTexture():GetHeight(),
+                   PlayerSpellsMicroButton:GetNormalTexture():GetWidth(),
+                   PlayerSpellsMicroButton:GetNormalTexture():GetHeight(),
+                   MainMenuMicroButton:GetNormalTexture():GetWidth(),
+                   MainMenuMicroButton:GetNormalTexture():GetHeight()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        (profession_w, profession_h),
+        (32.0, 40.0),
+        "ProfessionMicroButton normal texture should fill the button"
+    );
+    assert_eq!(
+        (spells_w, spells_h),
+        (32.0, 40.0),
+        "PlayerSpellsMicroButton normal texture should fill the button"
+    );
+    assert_eq!(
+        (menu_w, menu_h),
+        (32.0, 40.0),
+        "MainMenuMicroButton normal texture should fill the button"
+    );
+}
+
+#[test]
 fn micro_menu_professions_button_loads_and_opens_panel() {
     let env = setup_env();
     assert!(

@@ -337,6 +337,9 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
         }
         "OnColorSelect" => matches!(widget_type, WidgetType::ColorSelect),
         "OnHyperlinkClick" | "OnHyperlinkEnter" | "OnHyperlinkLeave" => true,
+        "OnTooltipCleared" | "OnTooltipSetSpell" | "OnTooltipSetItem" => {
+            matches!(widget_type, WidgetType::GameTooltip)
+        }
         _ => false,
     }
 }
