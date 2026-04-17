@@ -655,6 +655,43 @@ fn debug_keybind_n_nil_width_callsite() {
 }
 
 #[test]
+#[ignore = "diagnostic"]
+fn debug_player_spells_visible_onupdate_handlers() {
+    let env = setup_env();
+    let report: String = env
+        .eval(
+            r#"
+            PlayerSpellsUtil.ToggleClassTalentFrame()
+
+            local lines = {}
+            local function visit(frame, path)
+                if not frame then
+                    return
+                end
+
+                local onUpdate = frame.GetScript and frame:GetScript("OnUpdate")
+                if type(onUpdate) == "function" and frame.IsVisible and frame:IsVisible() then
+                    local ok, value = pcall(onUpdate, frame, 0.016)
+                    table.insert(lines, path .. ".OnUpdate=" .. tostring(ok) .. ":" .. tostring(value))
+                end
+
+                local children = frame.GetChildren and { frame:GetChildren() } or {}
+                for index, child in ipairs(children) do
+                    local childName = child.GetName and child:GetName() or ("child_" .. tostring(index))
+                    visit(child, path .. "." .. tostring(childName))
+                end
+            end
+
+            visit(PlayerSpellsFrame, "PlayerSpellsFrame")
+            return table.concat(lines, "\n")
+            "#,
+        )
+        .expect("diagnostic OnUpdate scan should return");
+
+    panic!("{report}");
+}
+
+#[test]
 fn show_mail_frame_loads_and_populates_inbox_rows() {
     test_timeout! {
         let env = setup_env();
