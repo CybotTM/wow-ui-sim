@@ -91,7 +91,6 @@ fn fire_startup_events(env: &WowLuaEnv) {
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",
         "UI_SCALE_CHANGED",
-        "UPDATE_CHAT_WINDOWS",
     ] {
         let _ = env.fire_event(event);
     }
@@ -294,6 +293,7 @@ fn test_chat_editbox_text_color_after_activation() {
 fn test_chat_background_uses_default_black_tint_and_alpha() {
     test_timeout! {
         let env = setup_env();
+        let _ = env.fire_event("UPDATE_CHAT_WINDOWS");
 
         let (r, g, b, a): (f64, f64, f64, f64) = env
             .eval("return ChatFrame1Background:GetVertexColor()")
