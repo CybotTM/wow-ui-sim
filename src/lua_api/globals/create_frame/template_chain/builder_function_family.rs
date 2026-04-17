@@ -333,40 +333,45 @@ fn ancestor_function_template(
     return_expr: &'static str,
     tag: &'static str,
 ) -> (&'static str, &'static str) {
-    (
-        match return_expr {
-            "fn(target)" => {
-                r#"
-                    local fn, depth = ...
-                    return function(self, ...)
-                        local target = self
-                        for _ = 1, depth do
-                            target = target and target:GetParent()
-                        end
-                        if not target then
-                            return
-                        end
-                        return fn(target)
-                    end
-                "#
-            }
-            "fn(target:GetID())" => {
-                r#"
-                    local fn, depth = ...
-                    return function(self, ...)
-                        local target = self
-                        for _ = 1, depth do
-                            target = target and target:GetParent()
-                        end
-                        if not target then
-                            return
-                        end
-                        return fn(target:GetID())
-                    end
-                "#
-            }
-            _ => unreachable!("unsupported ancestor function return expression"),
-        },
-        tag,
-    )
+    (ancestor_function_source(return_expr), tag)
+}
+
+fn ancestor_function_source(return_expr: &'static str) -> &'static str {
+    match return_expr {
+        "fn(target)" => ancestor_target_source(),
+        "fn(target:GetID())" => ancestor_id_source(),
+        _ => unreachable!("unsupported ancestor function return expression"),
+    }
+}
+
+fn ancestor_target_source() -> &'static str {
+    r#"
+        local fn, depth = ...
+        return function(self, ...)
+            local target = self
+            for _ = 1, depth do
+                target = target and target:GetParent()
+            end
+            if not target then
+                return
+            end
+            return fn(target)
+        end
+    "#
+}
+
+fn ancestor_id_source() -> &'static str {
+    r#"
+        local fn, depth = ...
+        return function(self, ...)
+            local target = self
+            for _ = 1, depth do
+                target = target and target:GetParent()
+            end
+            if not target then
+                return
+            end
+            return fn(target:GetID())
+        end
+    "#
 }
