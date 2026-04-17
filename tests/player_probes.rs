@@ -50,7 +50,10 @@ fn is_xp_user_disabled_reads_sim_state() {
 fn player_can_teleport_defaults_true() {
     let env = env();
     let b: bool = env.eval("return PlayerCanTeleport()").unwrap();
-    assert!(b, "default retail behaviour is that the player can teleport");
+    assert!(
+        b,
+        "default retail behaviour is that the player can teleport"
+    );
 }
 
 #[test]
