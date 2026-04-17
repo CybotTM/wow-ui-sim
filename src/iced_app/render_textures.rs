@@ -197,7 +197,10 @@ impl App {
         let spell_id = match &state.cursor_item {
             Some(crate::lua_api::state::CursorInfo::Action { spell_id, .. }) => *spell_id,
             Some(crate::lua_api::state::CursorInfo::Spell { spell_id }) => *spell_id,
+            Some(crate::lua_api::state::CursorInfo::PetAction { spell_id, .. }) => *spell_id,
             Some(crate::lua_api::state::CursorInfo::Item { .. }) => return,
+            Some(crate::lua_api::state::CursorInfo::Talent { .. }) => return,
+            Some(crate::lua_api::state::CursorInfo::Macro { .. }) => return,
             None => return,
         };
         let Some(spell) = crate::spells::get_spell(spell_id) else {

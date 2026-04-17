@@ -124,6 +124,8 @@ macro_rules! build_empty_sim_state {
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),
+            macros: Vec::new(),
+            running_macro: None,
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -142,8 +144,8 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, CursorItemOrigin,
-    EquippedItem, GreatVaultActivity, GuildMember, LootRollInfo, LuaErrorRecord, MovementState,
-    NilSymbolAccess, PendingTimer, PlayerState, WorldState,
+    EquippedItem, GreatVaultActivity, GuildMember, LootRollInfo, LuaErrorRecord, MacroInfo,
+    MovementState, NilSymbolAccess, PendingTimer, PlayerState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -423,6 +425,11 @@ pub struct SimState {
     /// drives channel numbers (slot 1 = channel #1). Drives the
     /// `Channel*` verb family and `SwapChatChannelLinks`.
     pub chat_channels: Vec<ChatChannel>,
+    /// Player macros by 1-based slot index. Drives `PickupMacro`,
+    /// `RunMacro`, `EditMacro`, `StopMacro`.
+    pub macros: Vec<MacroInfo>,
+    /// Macro slot currently executing. `None` when no macro is running.
+    pub running_macro: Option<u32>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.

@@ -12,6 +12,13 @@ pub enum CursorInfo {
     Action { slot: u32, spell_id: u32 },
     /// A spell from the spellbook (doesn't remove from spellbook).
     Spell { spell_id: u32 },
+    /// A talent picked from the talent frame. `pvp=true` when sourced
+    /// from the PvP talent pane.
+    Talent { talent_id: u32, pvp: bool },
+    /// A pet-action spell picked from the pet action bar.
+    PetAction { slot: u32, spell_id: u32 },
+    /// A macro picked up by slot index.
+    Macro { macro_index: u32 },
     /// An item picked up from a bag slot, equipment slot, or merchant.
     Item {
         item_id: u32,
@@ -522,6 +529,16 @@ pub struct WorldState {
 pub struct GuildMember {
     pub name: String,
     pub rank_index: i32,
+}
+
+/// A macro slot. Matches the `/macro` addon view: name, icon, body text.
+/// `icon` is the texture path passed to `EditMacro` (retail uses a mix
+/// of texture ids and paths; the sim stores whatever the caller provides).
+#[derive(Debug, Default, Clone)]
+pub struct MacroInfo {
+    pub name: String,
+    pub icon: String,
+    pub body: String,
 }
 
 /// A single guild rank row. `name` is the display name; `flags` is a bag of

@@ -152,8 +152,11 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let spell_id = match cursor {
-        CursorInfo::Action { spell_id, .. } | CursorInfo::Spell { spell_id } => spell_id,
-        CursorInfo::Item { .. } => return Ok(0),
+        CursorInfo::Action { spell_id, .. }
+        | CursorInfo::Spell { spell_id }
+        | CursorInfo::PetAction { spell_id, .. } => spell_id,
+        CursorInfo::Talent { talent_id, .. } => talent_id,
+        CursorInfo::Item { .. } | CursorInfo::Macro { .. } => return Ok(0),
     };
     st.action_bars.insert(slot, spell_id);
     st.cursor_item = None;

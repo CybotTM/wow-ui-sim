@@ -54,6 +54,7 @@ pub mod quest_verbs;
 pub mod register;
 pub mod security;
 pub mod spell_api;
+pub mod spell_macro_verbs;
 pub mod spellbook_data;
 pub mod store_frame;
 pub mod strings;
