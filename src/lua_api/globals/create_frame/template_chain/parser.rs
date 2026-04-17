@@ -87,6 +87,7 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
     let mut quote = '\0';
     let mut escaped = false;
     let mut in_comment = false;
+    let mut block_depth = 0usize;
 
     while let Some((idx, ch)) = chars.next() {
         if in_comment {
@@ -118,6 +119,24 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
             continue;
         }
 
+        if ch.is_ascii_alphabetic() || ch == '_' {
+            let mut end = idx + ch.len_utf8();
+            while let Some((next_idx, next_ch)) = chars.peek().copied() {
+                if next_ch.is_ascii_alphanumeric() || next_ch == '_' {
+                    end = next_idx + next_ch.len_utf8();
+                    let _ = chars.next();
+                } else {
+                    break;
+                }
+            }
+            match &stmt[idx..end] {
+                "if" => block_depth += 1,
+                "end" if block_depth > 0 => block_depth -= 1,
+                _ => {}
+            }
+            continue;
+        }
+
         if ch == '-' && matches!(chars.peek(), Some((_, '-'))) {
             let part = stmt[start..idx].trim();
             if !part.is_empty() {
@@ -128,7 +147,7 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
             continue;
         }
 
-        if ch == ';' {
+        if ch == ';' && block_depth == 0 {
             let part = stmt[start..idx].trim();
             if !part.is_empty() {
                 parts.push(part);

@@ -2058,6 +2058,128 @@ fn test_create_frame_from_xml_inline_toggle_global_visibility_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_conditional_global_noarg_then_else_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineRepairMode = true
+        XmlInlineRepairCursorVisible = nil
+        function InRepairMode()
+            return XmlInlineRepairMode
+        end
+        function ShowRepairCursor()
+            XmlInlineRepairCursorVisible = true
+        end
+        function HideRepairCursor()
+            XmlInlineRepairCursorVisible = false
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineRepairRoot" parent="UIParent">
+            <Frame name="MerchantFrame" parent="XmlInlineRepairRoot"/>
+            <Button name="XmlInlineRepairButton" parent="XmlInlineRepairRoot">
+                <Scripts><OnClick>if ( InRepairMode() ) then MerchantFrame:UnregisterEvent("PLAYER_MONEY"); HideRepairCursor(); else MerchantFrame:RegisterEvent("PLAYER_MONEY"); ShowRepairCursor(); end</OnClick></Scripts>
+            </Button>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(r#"MerchantFrame:RegisterEvent("PLAYER_MONEY")"#).unwrap();
+    env.exec(r#"XmlInlineRepairButton:GetScript("OnClick")(XmlInlineRepairButton)"#)
+        .unwrap();
+    let repair_mode_result: (bool, bool) = env
+        .eval(
+            r#"return MerchantFrame:IsEventRegistered("PLAYER_MONEY"), XmlInlineRepairCursorVisible"#,
+        )
+        .unwrap();
+    assert!(!repair_mode_result.0);
+    assert!(!repair_mode_result.1);
+
+    env.exec(
+        r#"
+        XmlInlineRepairMode = false
+        XmlInlineRepairButton:GetScript("OnClick")(XmlInlineRepairButton)
+    "#,
+    )
+    .unwrap();
+    let normal_mode_result: (bool, bool) = env
+        .eval(
+            r#"return MerchantFrame:IsEventRegistered("PLAYER_MONEY"), XmlInlineRepairCursorVisible"#,
+        )
+        .unwrap();
+    assert!(normal_mode_result.0);
+    assert!(normal_mode_result.1);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_conditional_self_method_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        SOUNDKIT = {
+            IG_MAINMENU_OPTION_CHECKBOX_ON = 11,
+            IG_MAINMENU_OPTION_CHECKBOX_OFF = 12,
+        }
+        XmlInlinePlayedSound = nil
+        XmlInlineAutoAccept = nil
+        function PlaySound(sound_id)
+            XmlInlinePlayedSound = sound_id
+        end
+        function LFGListUtil_SetAutoAccept(value)
+            XmlInlineAutoAccept = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineCheckedRoot" parent="UIParent">
+            <CheckButton name="XmlInlineCheckedButton" parent="XmlInlineCheckedRoot">
+                <Scripts><OnClick>if ( self:GetChecked() ) then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON); else PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF); end; LFGListUtil_SetAutoAccept(self:GetChecked())</OnClick></Scripts>
+            </CheckButton>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCheckedButton:SetChecked(true)
+        XmlInlineCheckedButton:GetScript("OnClick")(XmlInlineCheckedButton)
+    "#,
+    )
+    .unwrap();
+    let checked_result: (i32, bool) = env
+        .eval("return XmlInlinePlayedSound, XmlInlineAutoAccept")
+        .unwrap();
+    assert_eq!(checked_result.0, 11);
+    assert!(checked_result.1);
+
+    env.exec(
+        r#"
+        XmlInlineCheckedButton:SetChecked(false)
+        XmlInlineCheckedButton:GetScript("OnClick")(XmlInlineCheckedButton)
+    "#,
+    )
+    .unwrap();
+    let unchecked_result: (i32, bool) = env
+        .eval("return XmlInlinePlayedSound, XmlInlineAutoAccept")
+        .unwrap();
+    assert_eq!(unchecked_result.0, 12);
+    assert!(!unchecked_result.1);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_global_assignment_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

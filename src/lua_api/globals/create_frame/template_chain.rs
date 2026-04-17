@@ -266,6 +266,16 @@ enum FastHandlerRef<'a> {
     NoOp,
     Sequence2(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>)>),
     Sequence3(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>, FastHandlerRef<'a>)>),
+    ConditionalGlobalNoArgs {
+        function_name: &'a str,
+        then_ref: Box<FastHandlerRef<'a>>,
+        else_ref: Box<FastHandlerRef<'a>>,
+    },
+    ConditionalSelfNoArgsMethod {
+        method_name: &'a str,
+        then_ref: Box<FastHandlerRef<'a>>,
+        else_ref: Box<FastHandlerRef<'a>>,
+    },
     Method(&'a str),
     MethodWithBoolArg {
         method_name: &'a str,
@@ -403,6 +413,10 @@ enum FastHandlerRef<'a> {
     FunctionWithGlobalMethodNoArgsResult {
         function_name: &'a str,
         target_path: &'a str,
+        method_name: &'a str,
+    },
+    FunctionWithSelfNoArgsMethodResult {
+        function_name: &'a str,
         method_name: &'a str,
     },
     FunctionWithSelfStringArg {

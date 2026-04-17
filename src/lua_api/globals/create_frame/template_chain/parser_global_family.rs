@@ -1,6 +1,15 @@
 use super::{FastHandlerRef, FastLiteralValue, is_fast_handler_path, is_fast_identifier};
 
 pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((function_name, then_ref, else_ref)) =
+        parse_conditional_global_noarg_then_else(stmt)
+    {
+        return Some(FastHandlerRef::ConditionalGlobalNoArgs {
+            function_name,
+            then_ref: Box::new(then_ref),
+            else_ref: Box::new(else_ref),
+        });
+    }
     if let Some((target_path, method_name, field, value)) =
         parse_inline_global_method_then_assign(stmt)
     {
@@ -96,6 +105,35 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             field,
         }
     })
+}
+
+fn parse_conditional_global_noarg_then_else<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, FastHandlerRef<'a>, FastHandlerRef<'a>)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    let condition = condition.trim_end().strip_suffix(')')?.trim();
+    let function_name = condition.strip_suffix("()")?.trim();
+    if !is_fast_handler_path(function_name) {
+        return None;
+    }
+
+    let (then_stmt, else_tail) = remainder.split_once("else")?;
+    let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
+    let then_stmt = then_stmt
+        .trim()
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(then_stmt.trim());
+    let else_stmt = else_stmt
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(else_stmt);
+
+    let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
+    let else_ref = super::parse_inline_fast_handler("OnClick", else_stmt)?;
+    Some((function_name, then_ref, else_ref))
 }
 
 fn parse_inline_global_method(stmt: &str) -> Option<(&str, &str)> {
@@ -282,12 +320,12 @@ fn parse_conditional_tooltip(stmt: &str) -> Option<(&str, &str, &str, &str, &str
 fn parse_toggle_global_visibility(stmt: &str) -> Option<&str> {
     let remainder = stmt.trim().strip_prefix("if")?.trim_start();
     let remainder = remainder.strip_prefix('(')?.trim_start();
-    let (condition, remainder) = remainder.split_once(')')?;
+    let (condition, remainder) = remainder.split_once("then")?;
+    let condition = condition.trim_end().strip_suffix(')')?.trim();
     let (target_path, method_name) = condition.trim().rsplit_once(':')?;
     if method_name.trim() != "IsShown()" {
         return None;
     }
-    let remainder = remainder.trim_start().strip_prefix("then")?.trim_start();
     let (then_stmt, else_tail) = remainder.split_once("else")?;
     let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
     let target_path = target_path.trim();

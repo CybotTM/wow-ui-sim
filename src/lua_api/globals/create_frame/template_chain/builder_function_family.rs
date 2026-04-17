@@ -84,6 +84,15 @@ fn build_function_with_arg_variants(
             arg_function_name,
         )
         .map(Some),
+        FastHandlerRef::FunctionWithSelfNoArgsMethodResult {
+            function_name,
+            method_name,
+        } => build_function_handler_with_self_noarg_method_result(
+            state,
+            function_name,
+            method_name,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithGlobalMethodNoArgsResult {
             function_name,
             target_path,
@@ -356,6 +365,30 @@ fn build_function_handler_with_noarg_function_result(
         state,
         Val::Function(builder.gc_ref()),
         &[target, arg_function],
+    )
+}
+
+fn build_function_handler_with_self_noarg_method_result(
+    state: &mut LuaState,
+    function_name: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, method_name = ...
+            return function(self, ...)
+                return fn(self[method_name](self))
+            end
+        "#,
+        "template-inline-function-self-noarg-method-result",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, method_name],
     )
 }
 

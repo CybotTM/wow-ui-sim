@@ -56,6 +56,14 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             arg_function_name,
         });
     }
+    if let Some((function_name, method_name)) =
+        parse_inline_function_with_self_noarg_method_result(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithSelfNoArgsMethodResult {
+            function_name,
+            method_name,
+        });
+    }
     if let Some((function_name, target_path, method_name)) =
         parse_inline_function_with_global_method_noargs_result(stmt)
     {
@@ -212,6 +220,18 @@ fn parse_inline_function_with_noarg_function_result(stmt: &str) -> Option<(&str,
     let function_name = function_name.trim();
     (is_fast_handler_path(function_name) && is_fast_handler_path(arg_function_name))
         .then_some((function_name, arg_function_name))
+}
+
+fn parse_inline_function_with_self_noarg_method_result(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let method_name = args
+        .strip_suffix("())")?
+        .trim()
+        .strip_prefix("self:")?
+        .trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_identifier(method_name))
+        .then_some((function_name, method_name))
 }
 
 fn parse_inline_function_with_global_method_noargs_result(
