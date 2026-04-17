@@ -224,6 +224,61 @@ behavior change directly by firing lifecycle handlers with:
 The handlers still run, which means lifecycle dispatch no longer depends on a
 second global name lookup during XML finalize.
 
+### XML loader fast-path follow-up (2026-04-17)
+
+After the first round of runtime `CreateFrame` hot-path work, the next large
+bucket was the XML loader's own generated `CreateFrame(...)` chunk and the
+template-chain work layered on top of it. That path was paying repeated costs
+for:
+
+- template inheritance walks
+- per-frame generated Lua setup chunks
+- parent-key / parent-array wiring
+- key-value replay
+- simple XML script installation
+
+The current loader path in `src/loader/xml_frame/setup.rs` now uses a narrow
+Rust-side fast path for XML frames that do not need the full generated setup
+chunk. That fast path was widened in small verified steps instead of a generic
+"fast everything" branch:
+
+- direct template-chain reuse instead of repeated inheritance walks
+- `xml_id` support
+- direct `parentKey` / `parentArray` application through the runtime template
+  chain
+- direct key-value installation before template child `OnLoad`, matching loader
+  chunk order
+- safe script installation for method-only, function-only, and a limited set of
+  inline handlers
+
+To keep that path maintainable while it grew, the runtime template-chain
+machinery was split out of the old monolith into parser, builder, and runtime
+families under `src/lua_api/globals/create_frame/template_chain/`.
+
+On the user's master sample, `wow-sim --no-saved-vars --no-addons` loaded
+Blizzard addons in about `8.23s` in debug. On the current shared worktree, the
+same debug path now lands around `4.8s` to `5.8s` on clean no-addons/no-saved-vars
+runs, depending on machine contention.
+
+One clean profiled `lua-errors` run on the current safe state showed:
+
+- `xml fast path: hits=1868 slow=350 total=2218`
+- misses:
+  - `scripts=234`
+  - `no_explicit_parent=114`
+  - `xml_attributes=8`
+  - `root_frame_reuse=2`
+
+That means the dominant remaining XML-loader miss bucket is no longer parent
+linking or key values. It is still XML script bodies that do not fit the narrow
+safe installer shapes.
+
+One attempted widening did not hold: generic global-method handlers with static
+literal/global arguments looked promising in targeted tests but regressed real
+startup with `attempt to call field '?' (a nil value)` from the generated fast
+handler. That broader form should stay out until it is proven safe on full
+startup, not just isolated template tests.
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.
@@ -239,6 +294,8 @@ Most promising direction:
 - [create_frame.rs](../../src/lua_api/globals/create_frame.rs) — runtime `CreateFrame` profiling hooks and timing buckets
 - [template/elements.rs](../../src/lua_api/globals/template/elements.rs) — method-only XML script fast path
 - [template/children.rs](../../src/lua_api/globals/template/children.rs) — direct Rust child creation hot-path selector
+- [setup.rs](../../src/loader/xml_frame/setup.rs) — XML frame fast-path gating, miss counters, and direct loader setup
+- [template_chain.rs](../../src/lua_api/globals/create_frame/template_chain.rs) — runtime template-chain application and fast script install
 - [ActionBar.lua](../../Interface/BlizzardUI/Blizzard_ActionBar/Shared/ActionBar.lua) — `ActionBar_OnLoad()` runtime button creation loop
 - [ActionButton.lua](../../Interface/BlizzardUI/Blizzard_ActionBar/Shared/ActionButton.lua) — action-button `OnLoad` handlers for comparison against template cost
 - [ActionButtonTemplate.xml](../../Interface/BlizzardUI/Blizzard_ActionBar/Mainline/ActionButtonTemplate.xml) — action-button template inheritance and child regions

@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-17] update | startup XML loader fast-path follow-up
+
+Updated `investigations/startup-createframe-profile.md` with the current XML
+loader fast-path state after the runtime `CreateFrame` work. Recorded the
+safe widening steps in `xml_frame/setup.rs` and the split
+`template_chain/` machinery, the current clean `xml fast path` counters
+(`hits=1868`, `slow=350`, `scripts=234`), the shared-worktree debug startup
+range (~`4.8s`-`5.8s` on `--no-addons --no-saved-vars`), and the failed
+generic global-method literal-arg experiment that still regresses real
+startup. Refreshed the `index.md` summary for the page.
+
 ## [2026-04-16] update | intern_string perf re-profile correction
 
 Corrected the earlier PLAN/wiki summary for the post-migration interning

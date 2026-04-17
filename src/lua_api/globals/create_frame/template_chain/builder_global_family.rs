@@ -3,7 +3,6 @@ use super::{
     load_template,
 };
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
-use crate::lua_api::globals::create_frame::template_chain::FastValueArg;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -32,12 +31,6 @@ pub(super) fn build_global_family_handler(
             method_name,
             field,
         } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
-            .map(Some),
-        FastHandlerRef::GlobalMethodWithLiteralArgs {
-            target_path,
-            method_name,
-            args,
-        } => build_global_method_with_literal_args_handler(state, target_path, method_name, args)
             .map(Some),
         FastHandlerRef::GlobalMethodThenAssignLiteral {
             target_path,
@@ -77,15 +70,15 @@ fn build_global_method_with_self_string_handler(
         target_path,
         method_name,
         r#"
-            local target_path, method_name, literal_arg = ...
-            local path = {}
-            for segment in string.gmatch(target_path, "[^%.]+") do
-                table.insert(path, segment)
-            end
+            local target_ref, method_name, literal_arg = ...
             return function(self, ...)
-                local target = getfenv(0) or _G
-                for i = 1, #path do
-                    target = target and target[path[i]]
+                local target = target_ref
+                if type(target) == "string" then
+                    local env = getfenv(0) or _G
+                    for segment in string.gmatch(target, "[^%.]+") do
+                        env = env and env[segment]
+                    end
+                    target = env
                 end
                 if not target then
                     return
@@ -118,15 +111,15 @@ fn build_global_method_with_self_field_handler(
         target_path,
         method_name,
         r#"
-            local target_path, method_name, field_name = ...
-            local path = {}
-            for segment in string.gmatch(target_path, "[^%.]+") do
-                table.insert(path, segment)
-            end
+            local target_ref, method_name, field_name = ...
             return function(self, ...)
-                local target = getfenv(0) or _G
-                for i = 1, #path do
-                    target = target and target[path[i]]
+                local target = target_ref
+                if type(target) == "string" then
+                    local env = getfenv(0) or _G
+                    for segment in string.gmatch(target, "[^%.]+") do
+                        env = env and env[segment]
+                    end
+                    target = env
                 end
                 if not target then
                     return
@@ -136,32 +129,6 @@ fn build_global_method_with_self_field_handler(
         "#,
         "template-global-method-self-field-handler",
         &[field_name],
-    )
-}
-
-fn build_global_method_with_literal_args_handler(
-    state: &mut LuaState,
-    target_path: &str,
-    method_name: &str,
-    args: &[FastValueArg<'_>],
-) -> LuaResult<Val> {
-    let mut captured_args = Vec::with_capacity(args.len());
-    for arg in args {
-        captured_args.push(resolve_fast_value_arg(state, arg));
-    }
-    call_global_method_builder(
-        state,
-        target_path,
-        method_name,
-        r#"
-            local target, method_name = ...
-            local args = {select(3, ...)}
-            return function(self, ...)
-                return target[method_name](target, unpack(args))
-            end
-        "#,
-        "template-global-method-literal-args-handler",
-        &captured_args,
     )
 }
 
@@ -196,15 +163,15 @@ fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str
     match mode {
         GlobalMethodMode::Passthrough => (
             r#"
-                local target_path, method_name = ...
-                local path = {}
-                for segment in string.gmatch(target_path, "[^%.]+") do
-                    table.insert(path, segment)
-                end
+                local target_ref, method_name = ...
                 return function(self, ...)
-                    local target = getfenv(0) or _G
-                    for i = 1, #path do
-                        target = target and target[path[i]]
+                    local target = target_ref
+                    if type(target) == "string" then
+                        local env = getfenv(0) or _G
+                        for segment in string.gmatch(target, "[^%.]+") do
+                            env = env and env[segment]
+                        end
+                        target = env
                     end
                     if not target then
                         return
@@ -216,15 +183,15 @@ fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str
         ),
         GlobalMethodMode::SelfId => (
             r#"
-                local target_path, method_name = ...
-                local path = {}
-                for segment in string.gmatch(target_path, "[^%.]+") do
-                    table.insert(path, segment)
-                end
+                local target_ref, method_name = ...
                 return function(self, ...)
-                    local target = getfenv(0) or _G
-                    for i = 1, #path do
-                        target = target and target[path[i]]
+                    local target = target_ref
+                    if type(target) == "string" then
+                        local env = getfenv(0) or _G
+                        for segment in string.gmatch(target, "[^%.]+") do
+                            env = env and env[segment]
+                        end
+                        target = env
                     end
                     if not target then
                         return
@@ -246,21 +213,14 @@ fn call_global_method_builder(
     extra_args: &[Val],
 ) -> LuaResult<Val> {
     let builder = load_template(state, source, tag)?;
+    let target = resolve_global_path(state, target_path);
     let mut args = Vec::with_capacity(2 + extra_args.len());
-    args.push(create_string(state, target_path));
+    args.push(if target == Val::Nil {
+        create_string(state, target_path)
+    } else {
+        target
+    });
     args.push(create_string(state, method_name));
     args.extend_from_slice(extra_args);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &args)
-}
-
-fn resolve_fast_value_arg(state: &mut LuaState, arg: &FastValueArg<'_>) -> Val {
-    match arg {
-        FastValueArg::String(value) => create_string(state, value),
-        FastValueArg::Literal(value) => match *value {
-            FastLiteralValue::Global(path) => resolve_global_path(state, path),
-            FastLiteralValue::Number(value) => Val::Num(value),
-            FastLiteralValue::Nil => Val::Nil,
-            FastLiteralValue::Bool(value) => Val::Bool(value),
-        },
-    }
 }
