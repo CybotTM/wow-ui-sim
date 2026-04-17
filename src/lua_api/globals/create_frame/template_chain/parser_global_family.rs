@@ -1,4 +1,5 @@
 use super::{FastHandlerRef, FastLiteralValue, is_fast_handler_path, is_fast_identifier};
+use crate::lua_api::globals::create_frame::template_chain::FastValueExpr;
 
 pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     if let Some((target_path, method_name, field, value)) =
@@ -32,11 +33,20 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             method_name,
         });
     }
-    parse_inline_global_method_with_self_field_arg(stmt).map(|(target_path, method_name, field)| {
-        FastHandlerRef::GlobalMethodWithSelfFieldArg {
+    if let Some((target_path, method_name, field)) =
+        parse_inline_global_method_with_self_field_arg(stmt)
+    {
+        return Some(FastHandlerRef::GlobalMethodWithSelfFieldArg {
             target_path,
             method_name,
             field,
+        });
+    }
+    parse_inline_global_method_with_runtime_args(stmt).map(|(target_path, method_name, args)| {
+        FastHandlerRef::GlobalMethodWithRuntimeArgs {
+            target_path,
+            method_name,
+            args,
         }
     })
 }
@@ -89,6 +99,26 @@ fn parse_inline_global_method_with_self_field_arg(stmt: &str) -> Option<(&str, &
     .then_some((target_path, method_name, field))
 }
 
+fn parse_inline_global_method_with_runtime_args(
+    stmt: &str,
+) -> Option<(&str, &str, Vec<FastValueExpr<'_>>)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    if !is_fast_handler_path(target_path) || !is_fast_identifier(method_name) || args.is_empty() {
+        return None;
+    }
+
+    let parsed_args = args
+        .split(',')
+        .map(str::trim)
+        .map(parse_fast_value_expr)
+        .collect::<Option<Vec<_>>>()?;
+    Some((target_path, method_name, parsed_args))
+}
+
 fn parse_inline_global_method_then_assign(
     stmt: &str,
 ) -> Option<(&str, &str, &str, FastLiteralValue<'_>)> {
@@ -100,4 +130,10 @@ fn parse_inline_global_method_then_assign(
         return None;
     };
     Some((target_path, method_name, field, value))
+}
+
+fn parse_fast_value_expr(raw_value: &str) -> Option<FastValueExpr<'_>> {
+    super::parse_single_string_literal(raw_value)
+        .map(FastValueExpr::String)
+        .or_else(|| super::parse_fast_literal_value(raw_value).map(FastValueExpr::Literal))
 }

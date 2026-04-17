@@ -330,6 +330,11 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         field: &'a str,
     },
+    GlobalMethodWithRuntimeArgs {
+        target_path: &'a str,
+        method_name: &'a str,
+        args: Vec<FastValueExpr<'a>>,
+    },
     GlobalMethodThenAssignLiteral {
         target_path: &'a str,
         method_name: &'a str,
@@ -398,6 +403,12 @@ enum FastLiteralValue<'a> {
     Number(f64),
     Nil,
     Bool(bool),
+}
+
+#[derive(Clone)]
+enum FastValueExpr<'a> {
+    String(&'a str),
+    Literal(FastLiteralValue<'a>),
 }
 
 #[derive(Clone)]
