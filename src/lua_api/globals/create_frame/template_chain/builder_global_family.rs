@@ -47,17 +47,11 @@ fn build_global_method_handler(
     target_path: &str,
     method_name: &str,
 ) -> LuaResult<Val> {
-    call_global_method_builder_without_extra(
+    build_global_method_with_mode(
         state,
         target_path,
         method_name,
-        r#"
-            local target, method_name = ...
-            return function(self, ...)
-                return target[method_name](target, ...)
-            end
-        "#,
-        "template-global-method-handler",
+        GlobalMethodMode::Passthrough,
     )
 }
 
@@ -88,18 +82,7 @@ fn build_global_method_with_self_id_handler(
     target_path: &str,
     method_name: &str,
 ) -> LuaResult<Val> {
-    call_global_method_builder_without_extra(
-        state,
-        target_path,
-        method_name,
-        r#"
-            local target, method_name = ...
-            return function(self, ...)
-                return target[method_name](target, self:GetID())
-            end
-        "#,
-        "template-global-method-self-id-handler",
-    )
+    build_global_method_with_mode(state, target_path, method_name, GlobalMethodMode::SelfId)
 }
 
 fn build_global_method_with_self_field_handler(
@@ -134,6 +117,44 @@ fn build_global_method_then_assign_handler(
     let method = build_global_method_handler(state, target_path, method_name)?;
     let assign = build_assignment_handler(state, field, value)?;
     build_chained_handler(state, method, assign, "inline-global-method-assign", false)
+}
+
+enum GlobalMethodMode {
+    Passthrough,
+    SelfId,
+}
+
+fn build_global_method_with_mode(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    mode: GlobalMethodMode,
+) -> LuaResult<Val> {
+    let (source, tag) = global_method_template(mode);
+    call_global_method_builder_without_extra(state, target_path, method_name, source, tag)
+}
+
+fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str) {
+    match mode {
+        GlobalMethodMode::Passthrough => (
+            r#"
+                local target, method_name = ...
+                return function(self, ...)
+                    return target[method_name](target, ...)
+                end
+            "#,
+            "template-global-method-handler",
+        ),
+        GlobalMethodMode::SelfId => (
+            r#"
+                local target, method_name = ...
+                return function(self, ...)
+                    return target[method_name](target, self:GetID())
+                end
+            "#,
+            "template-global-method-self-id-handler",
+        ),
+    }
 }
 
 fn call_global_method_builder(

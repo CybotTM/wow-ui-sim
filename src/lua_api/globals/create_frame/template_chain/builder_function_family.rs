@@ -320,45 +320,53 @@ fn build_ancestor_function_handler_with_mode(
 
 fn ancestor_function_handler_template(mode: AncestorArgMode) -> (&'static str, &'static str) {
     match mode {
-        AncestorArgMode::Target => ancestor_target_handler_template(),
-        AncestorArgMode::Id => ancestor_id_handler_template(),
+        AncestorArgMode::Target => {
+            ancestor_function_template("fn(target)", "template-inline-function-ancestor")
+        }
+        AncestorArgMode::Id => {
+            ancestor_function_template("fn(target:GetID())", "template-inline-function-ancestor-id")
+        }
     }
 }
 
-fn ancestor_target_handler_template() -> (&'static str, &'static str) {
+fn ancestor_function_template(
+    return_expr: &'static str,
+    tag: &'static str,
+) -> (&'static str, &'static str) {
     (
-        r#"
-            local fn, depth = ...
-            return function(self, ...)
-                local target = self
-                for _ = 1, depth do
-                    target = target and target:GetParent()
-                end
-                if not target then
-                    return
-                end
-                return fn(target)
-            end
-        "#,
-        "template-inline-function-ancestor",
-    )
-}
-
-fn ancestor_id_handler_template() -> (&'static str, &'static str) {
-    (
-        r#"
-            local fn, depth = ...
-            return function(self, ...)
-                local target = self
-                for _ = 1, depth do
-                    target = target and target:GetParent()
-                end
-                if not target then
-                    return
-                end
-                return fn(target:GetID())
-            end
-        "#,
-        "template-inline-function-ancestor-id",
+        match return_expr {
+            "fn(target)" => {
+                r#"
+                    local fn, depth = ...
+                    return function(self, ...)
+                        local target = self
+                        for _ = 1, depth do
+                            target = target and target:GetParent()
+                        end
+                        if not target then
+                            return
+                        end
+                        return fn(target)
+                    end
+                "#
+            }
+            "fn(target:GetID())" => {
+                r#"
+                    local fn, depth = ...
+                    return function(self, ...)
+                        local target = self
+                        for _ = 1, depth do
+                            target = target and target:GetParent()
+                        end
+                        if not target then
+                            return
+                        end
+                        return fn(target:GetID())
+                    end
+                "#
+            }
+            _ => unreachable!("unsupported ancestor function return expression"),
+        },
+        tag,
     )
 }
