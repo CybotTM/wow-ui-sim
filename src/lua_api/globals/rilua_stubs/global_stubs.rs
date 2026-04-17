@@ -253,7 +253,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "NeedToDisplayDisclaimer",
     "PlayerCanTeleport",
     "PlayerHasHearthstone",
-    "PlayerIsTimerunning",
+    // PlayerIsTimerunning is SimState-backed in rilua_timerunning.rs, not a stub.
     "ShouldShowLevelSquishDialog",
     "UnitCanAssist",
     "UnitCanCooperate",

@@ -93,6 +93,7 @@ macro_rules! build_empty_sim_state {
             tracked_recipes: $collections.tracked_recipes,
             net_stats: NetStats::default(),
             store_frame_shown: false,
+            timerunning_season_id: None,
             debug_borders: false,
             debug_anchors: false,
         }
@@ -366,6 +367,12 @@ pub struct SimState {
     /// so tests can flip this flag via `A_Admin.SetStoreFrameShown(true)` to
     /// exercise that pushed-state rendering.
     pub store_frame_shown: bool,
+    /// Active Timerunning season id, or `None` when the player is not in a
+    /// seasonal mode. Drives both `PlayerIsTimerunning()` (returns `is_some`)
+    /// and `PlayerGetTimerunningSeasonID()` (returns the id, or 0 when none —
+    /// WoW uses 0 as "not timerunning" on the integer-returning API).
+    /// Admin: `A_Admin.SetTimerunningSeasonID(id?)` — nil/0 clears.
+    pub timerunning_season_id: Option<u32>,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.

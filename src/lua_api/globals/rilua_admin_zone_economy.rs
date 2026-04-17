@@ -87,3 +87,14 @@ pub(super) fn set_store_frame_shown(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.store_frame_shown = shown;
     Ok(0)
 }
+
+/// `A_Admin.SetTimerunningSeasonID(id)` — pass `nil` or `0` to clear
+/// (no active seasonal mode), or a positive id to enable. Drives
+/// `PlayerIsTimerunning()` (returns whether id is non-zero) and
+/// `PlayerGetTimerunningSeasonID()` (returns the id, or 0 when none).
+pub(super) fn set_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> {
+    let id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i64;
+    let season = if id > 0 { Some(id as u32) } else { None };
+    borrow_state_mut(state)?.timerunning_season_id = season;
+    Ok(0)
+}

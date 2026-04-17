@@ -249,5 +249,10 @@ pub(super) fn register_spell_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
         "PlayerGetTimerunningSeasonID",
         crate::lua_api::globals::rilua_utility_system_spell::c_spec::player_get_timerunning_season_id,
     )?;
+    LuaApiMut::register_function(
+        lua,
+        "PlayerIsTimerunning",
+        crate::lua_api::globals::rilua_utility_system_spell::c_spec::player_is_timerunning,
+    )?;
     Ok(())
 }

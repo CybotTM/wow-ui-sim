@@ -118,7 +118,14 @@ fn c_spec_get_num_specializations_for_class_id(state: &mut LuaState) -> LuaResul
 }
 
 pub fn player_get_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let id = borrow_state(state)?.timerunning_season_id.unwrap_or(0);
+    state.push(Val::Num(id as f64));
+    Ok(1)
+}
+
+pub fn player_is_timerunning(state: &mut LuaState) -> LuaResult<u32> {
+    let active = borrow_state(state)?.timerunning_season_id.is_some();
+    state.push(Val::Bool(active));
     Ok(1)
 }
 
