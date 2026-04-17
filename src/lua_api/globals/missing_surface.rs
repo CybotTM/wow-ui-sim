@@ -98,7 +98,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     mythic_plus::register_mythic_plus_surface(state)?;
     nameplate::register_nameplate_surface(state)?;
     party_info::register_party_info_surface(state)?;
-    quest_log::register_quest_log_surface(state)?;
     player_info::register_player_info_surface(state)?;
     lfg_info::register_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
@@ -109,6 +108,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     small_namespaces::register_small_namespaces(state)?;
     small_probes::register_small_probes_surface(state)?;
     Ok(())
+}
+
+/// Register the `C_QuestLog` SimState-backed surface.
+///
+/// Must be called **after** `quest_surface::register_all` because quest_surface
+/// seeds the same C_QuestLog namespace first; calling this second lets our
+/// SimState-backed handlers win.
+pub fn register_quest_log_overrides(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let state = lua.state_mut();
+    quest_log::register_quest_log_surface(state)
 }
 
 fn noop(_state: &mut LuaState) -> LuaResult<u32> {
