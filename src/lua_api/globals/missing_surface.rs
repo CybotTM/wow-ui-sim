@@ -4,6 +4,7 @@ mod item_spell;
 mod professions;
 mod tooltip_info;
 mod traits;
+mod transmog;
 mod tutorial;
 
 use crate::lua_api::methods::{borrow_state_mut, create_string, val_to_string};
@@ -52,6 +53,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     professions::register_profession_surface(state)?;
     traits::register_trait_surfaces(state)?;
     tooltip_info::register_tooltip_surface(state)?;
+    transmog::register_transmog_surface(state)?;
     tutorial::register_tutorial_surface(state)?;
     Ok(())
 }

@@ -223,9 +223,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TradeSkillUI", "GetRecipeReagentItemLink", stub_nil),
     ("C_TradeSkillUI", "GetRecipeSchematic", stub_nil),
     ("C_TradeSkillUI", "GetTradeSkillListLink", stub_nil),
-    // C_Transmog
-    ("C_Transmog", "GetAppliedAlteredAppearance", stub_nil),
-    ("C_Transmog", "GetCreatureDisplayIDForSource", stub_nil),
     // C_TrophyHall (stub all nil)
     ("C_TrophyHall", "GetTrophyInfo", stub_nil),
     // C_Tutorial
@@ -342,9 +339,6 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ),
     // C_StableInfo
     ("C_StableInfo", "IsAtPetStable", stub_false),
-    // C_Transmog
-    ("C_Transmog", "IsAtTransmogNPC", stub_false),
-    ("C_Transmog", "PlayerHasTransmogByItemInfo", stub_false),
     // C_VoiceChat
     ("C_VoiceChat", "IsDeafened", stub_false),
     ("C_VoiceChat", "IsEnabled", stub_false),
