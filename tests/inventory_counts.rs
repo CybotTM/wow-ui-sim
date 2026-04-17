@@ -86,12 +86,10 @@ fn get_num_auction_items_list_reports_browse_size() {
 fn get_num_auction_items_owner_and_bidder_always_zero() {
     let env = env();
     env.state().borrow_mut().auction_browse_items = vec![6948; 5];
-    let (owner_n, owner_total): (i32, i32) = env
-        .eval(r#"return GetNumAuctionItems("owner")"#)
-        .unwrap();
-    let (bidder_n, bidder_total): (i32, i32) = env
-        .eval(r#"return GetNumAuctionItems("bidder")"#)
-        .unwrap();
+    let (owner_n, owner_total): (i32, i32) =
+        env.eval(r#"return GetNumAuctionItems("owner")"#).unwrap();
+    let (bidder_n, bidder_total): (i32, i32) =
+        env.eval(r#"return GetNumAuctionItems("bidder")"#).unwrap();
     assert_eq!((owner_n, owner_total), (0, 0));
     assert_eq!((bidder_n, bidder_total), (0, 0));
 }

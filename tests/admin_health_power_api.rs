@@ -145,6 +145,26 @@ fn test_set_player_power_without_type_keeps_existing() {
     assert_eq!(power, 42000);
 }
 
+#[test]
+fn test_set_player_holy_power_uses_separate_pool() {
+    let env = env();
+    let (mana, mana_max, holy, holy_max, power_type): (i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerPower(42000, 90000, 0)
+            A_Admin.SetPlayerPower(3, 5, 9)
+            local pt = select(1, UnitPowerType("player"))
+            return UnitPower("player"), UnitPowerMax("player"), UnitPower("player", 9), UnitPowerMax("player", 9), pt
+            "#,
+        )
+        .unwrap();
+    assert_eq!(mana, 42000);
+    assert_eq!(mana_max, 90000);
+    assert_eq!(holy, 3);
+    assert_eq!(holy_max, 5);
+    assert_eq!(power_type, 0);
+}
+
 // ============================================================================
 // SetTargetHealth
 // ============================================================================

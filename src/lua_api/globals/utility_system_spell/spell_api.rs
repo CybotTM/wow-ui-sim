@@ -2,6 +2,7 @@
 
 use crate::lua_api::globals::unit_api::parse_party_index;
 use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
+use crate::lua_api::state_types::SecondaryPowerState;
 use crate::lua_bridge::stack_val;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
@@ -63,7 +64,10 @@ fn requested_power_type(state: &LuaState) -> Option<i64> {
 }
 
 fn is_secondary_power_type(power_type: Option<i64>) -> bool {
-    matches!(power_type, Some(power_type) if power_type != 0)
+    matches!(
+        power_type,
+        Some(4 | 5 | 6 | 7 | 8 | 9 | 11 | 12 | 13 | 16 | 17 | 18)
+    )
 }
 
 fn secondary_power_max(power_type: i64) -> i32 {
@@ -113,26 +117,59 @@ fn unit_health_max(state: &mut LuaState) -> LuaResult<u32> {
 
 fn unit_power(state: &mut LuaState) -> LuaResult<u32> {
     let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
-    if is_secondary_power_type(requested_power_type(state)) {
-        state.push(Val::Num(0.0));
-        return Ok(1);
-    }
     let vitals = lookup_unit_vitals(state, &unit);
-    state.push(Val::Num(vitals.power as f64));
+    let power = requested_power_values(state, &unit, &vitals).current;
+    state.push(Val::Num(power as f64));
     Ok(1)
 }
 
 fn unit_power_max(state: &mut LuaState) -> LuaResult<u32> {
     let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string());
-    if let Some(power_type) = requested_power_type(state)
-        && is_secondary_power_type(Some(power_type))
-    {
-        state.push(Val::Num(secondary_power_max(power_type) as f64));
-        return Ok(1);
-    }
     let vitals = lookup_unit_vitals(state, &unit);
-    state.push(Val::Num(vitals.power_max as f64));
+    let power_max = requested_power_values(state, &unit, &vitals).max;
+    state.push(Val::Num(power_max as f64));
     Ok(1)
+}
+
+fn requested_power_values(
+    state: &LuaState,
+    unit: &str,
+    vitals: &UnitVitals,
+) -> SecondaryPowerState {
+    let Some(requested) = requested_power_type(state) else {
+        return SecondaryPowerState {
+            current: vitals.power,
+            max: vitals.power_max,
+        };
+    };
+    let requested = requested as i32;
+    if requested == vitals.power_type {
+        return SecondaryPowerState {
+            current: vitals.power,
+            max: vitals.power_max,
+        };
+    }
+    if unit == "player"
+        && is_secondary_power_type(Some(requested.into()))
+        && let Some(power) = lookup_secondary_player_power(state, requested)
+    {
+        return power;
+    }
+    if is_secondary_power_type(Some(requested.into())) {
+        return SecondaryPowerState {
+            current: 0,
+            max: secondary_power_max(requested.into()),
+        };
+    }
+    SecondaryPowerState {
+        current: vitals.power,
+        max: vitals.power_max,
+    }
+}
+
+fn lookup_secondary_player_power(state: &LuaState, power_type: i32) -> Option<SecondaryPowerState> {
+    let sim = borrow_state(state).expect("sim state should exist");
+    sim.player.secondary_powers.get(&power_type).copied()
 }
 
 fn unit_power_type(state: &mut LuaState) -> LuaResult<u32> {

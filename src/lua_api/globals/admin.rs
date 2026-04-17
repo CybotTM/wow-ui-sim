@@ -13,6 +13,7 @@
 
 use crate::lua_api::game_data::{AuraInfo, CastingState, SpellCooldownState};
 use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::state_types::SecondaryPowerState;
 use crate::lua_bridge::{FromStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -399,12 +400,25 @@ fn set_player_power(state: &mut LuaState) -> LuaResult<u32> {
     let max = i32::from_stack(state, 2)?;
     let power_type = Option::<i32>::from_stack(state, 3)?;
     let mut st = borrow_state_mut(state)?;
-    st.player.power = cur;
-    st.player.power_max = max;
     if let Some(pt) = power_type {
+        if is_secondary_player_power_type(pt) {
+            st.player
+                .secondary_powers
+                .insert(pt, SecondaryPowerState { current: cur, max });
+            return Ok(0);
+        }
         st.player.power_type = pt;
     }
+    st.player.power = cur;
+    st.player.power_max = max;
     Ok(0)
+}
+
+fn is_secondary_player_power_type(power_type: i32) -> bool {
+    matches!(
+        power_type,
+        4 | 5 | 6 | 7 | 8 | 9 | 11 | 12 | 13 | 16 | 17 | 18
+    )
 }
 
 fn set_target_health(state: &mut LuaState) -> LuaResult<u32> {
