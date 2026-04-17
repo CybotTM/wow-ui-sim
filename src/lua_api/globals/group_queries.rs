@@ -682,14 +682,8 @@ fn resolve_unit_party_index(st: &crate::lua_api::state::SimState, unit: &str) ->
 fn is_unit_dead(st: &crate::lua_api::state::SimState, unit: &str) -> bool {
     match unit {
         "player" | "pet" | "vehicle" => st.player.health <= 0,
-        "target" => st
-            .current_target
-            .as_ref()
-            .is_some_and(|t| t.health <= 0),
-        "focus" => st
-            .current_focus
-            .as_ref()
-            .is_some_and(|t| t.health <= 0),
+        "target" => st.current_target.as_ref().is_some_and(|t| t.health <= 0),
+        "focus" => st.current_focus.as_ref().is_some_and(|t| t.health <= 0),
         other => visible_party_member(st, other).is_some_and(|m| m.dead_since.is_some()),
     }
 }
@@ -734,8 +728,7 @@ fn unit_has_incoming_resurrection(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let incoming = {
         let st = borrow_state(state)?;
-        matches!(unit.as_str(), "player" | "pet" | "vehicle")
-            && st.pending_resurrect.is_some()
+        matches!(unit.as_str(), "player" | "pet" | "vehicle") && st.pending_resurrect.is_some()
     };
     state.push(Val::Bool(incoming));
     Ok(1)

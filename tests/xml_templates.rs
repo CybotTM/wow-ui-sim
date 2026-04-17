@@ -306,6 +306,79 @@ fn test_create_frame_from_xml_inline_noarg_function_call_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_parent_function_call_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineParentFunction(target)
+            target.parentFunctionHit = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentFunctionFrame" parent="UIParent">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>XmlInlineParentFunction(self:GetParent())</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineParentFunctionFrame.Child:GetScript('OnClick')(XmlInlineParentFunctionFrame.Child)").unwrap();
+
+    let loaded: bool = env
+        .eval("return XmlInlineParentFunctionFrame.parentFunctionHit == true")
+        .unwrap();
+    assert!(loaded, "parent-arg inline function OnClick should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_grandparent_function_call_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        function XmlInlineGrandparentFunction(target)
+            target.grandparentFunctionHit = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineGrandparentFunctionFrame" parent="UIParent">
+        <Frames>
+            <Frame parentKey="Middle">
+                <Frames>
+                    <Button parentKey="Child">
+                        <Scripts><OnClick>XmlInlineGrandparentFunction(self:GetParent():GetParent())</OnClick></Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineGrandparentFunctionFrame.Middle.Child:GetScript('OnClick')(XmlInlineGrandparentFunctionFrame.Middle.Child)").unwrap();
+
+    let loaded: bool = env
+        .eval("return XmlInlineGrandparentFunctionFrame.grandparentFunctionHit == true")
+        .unwrap();
+    assert!(
+        loaded,
+        "grandparent-arg inline function OnClick should fire"
+    );
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -331,6 +404,32 @@ fn test_create_frame_from_xml_inline_self_method_runs() {
         .eval("return XmlInlineMethodFrame.xmlInlineMethodLoaded == true")
         .unwrap();
     assert!(loaded, "self-method inline OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_set_frame_level_from_parent_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineFrameLevelFrame" parent="UIParent">
+        <Frame parentKey="Child">
+            <Scripts><OnLoad>self:SetFrameLevel(self:GetParent():GetFrameLevel() + 7)</OnLoad></Scripts>
+        </Frame>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let frame_level: f64 = env
+        .eval(
+            "return XmlInlineFrameLevelFrame.Child:GetFrameLevel() - XmlInlineFrameLevelFrame:GetFrameLevel()",
+        )
+        .unwrap();
+    assert_eq!(
+        frame_level, 7.0,
+        "inline frame-level adjustment should use parent frame level"
+    );
 }
 
 #[test]

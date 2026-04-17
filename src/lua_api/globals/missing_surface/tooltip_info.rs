@@ -1,13 +1,14 @@
 use super::item_socket_info;
 use super::{
     LINE_TYPE_EQUIP_SLOT, LINE_TYPE_ITEM_BINDING, LINE_TYPE_ITEM_LEVEL, LINE_TYPE_ITEM_NAME,
-    LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME, LINE_TYPE_UNIT_NAME, TOOLTIP_TYPE_ITEM,
-    TOOLTIP_TYPE_MINIMAP_MOUSEOVER, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT, TOOLTIP_TYPE_UNIT_AURA,
-    WORLD_CURSOR_GUID, WORLD_LOOT_TOOLTIP_INVENTORY_TYPE, WORLD_LOOT_TOOLTIP_SPELL_ID,
-    ensure_namespace, set_table_array,
+    LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME, LINE_TYPE_UNIT_NAME, TOOLTIP_TYPE_CURRENCY,
+    TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_MINIMAP_MOUSEOVER, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT,
+    TOOLTIP_TYPE_UNIT_AURA, WORLD_CURSOR_GUID, WORLD_LOOT_TOOLTIP_INVENTORY_TYPE,
+    WORLD_LOOT_TOOLTIP_SPELL_ID, ensure_namespace, set_table_array,
 };
 use crate::items;
 use crate::lua_api::game_data::CLASS_LABELS;
+use crate::lua_api::globals::currency_data;
 use crate::lua_api::globals::{spell_api, spellbook_data};
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, table_get, table_set,
@@ -521,6 +522,8 @@ fn register_item_spell_aura_methods(
             ("GetTraitEntry", c_tooltip_get_trait_entry),
             ("GetAction", c_tooltip_get_action),
             ("GetBagItem", c_tooltip_get_bag_item),
+            ("GetCurrencyByID", c_tooltip_get_currency_by_id),
+            ("GetCurrencyToken", c_tooltip_get_currency_token),
             ("GetItem", c_tooltip_get_item),
             ("GetItemByID", c_tooltip_get_item_by_id),
             ("GetItemByGUID", c_tooltip_get_item_by_guid),
@@ -614,6 +617,44 @@ fn c_tooltip_get_action(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn tooltip_for_currency(
+    state: &mut LuaState,
+    currency: &currency_data::CurrencyEntry,
+    amount_override: Option<i32>,
+) -> Val {
+    let tooltip = empty_tooltip(state, TOOLTIP_TYPE_CURRENCY);
+    let lines = table_get(state, tooltip, "lines");
+    let amount = amount_override.unwrap_or(currency.quantity);
+    let max_display = if currency.max_quantity > 0 {
+        format!("{amount} / {}", currency.max_quantity)
+    } else {
+        amount.to_string()
+    };
+
+    push_tooltip_line(
+        state,
+        lines,
+        1,
+        LINE_TYPE_SPELL_NAME,
+        currency.name,
+        Some(item_quality_color(currency.quality as u8)),
+        false,
+    );
+    push_tooltip_line(
+        state,
+        lines,
+        2,
+        LINE_TYPE_SPELL_DESCRIPTION,
+        &format!("Amount: {max_display}"),
+        None,
+        false,
+    );
+
+    table_set(state, tooltip, "id", Val::Num(currency.currency_id as f64));
+    table_set(state, tooltip, "quantity", Val::Num(amount as f64));
+    tooltip
+}
+
 fn tooltip_for_bag_item(state: &mut LuaState, bag: i32, slot: i32) -> Val {
     let item_id = borrow_state(state)
         .ok()
@@ -687,6 +728,26 @@ fn c_tooltip_get_bag_item(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let slot = i32::from_stack(state, 2)?;
     let tooltip = tooltip_for_bag_item(state, bag, slot);
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_currency_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let currency_id = i32::from_stack(state, 1)?;
+    let amount = Option::<i32>::from_stack(state, 2)?;
+    let tooltip = currency_data::get_currency_by_id(currency_id)
+        .map(|currency| tooltip_for_currency(state, currency, amount))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_CURRENCY));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_currency_token(state: &mut LuaState) -> LuaResult<u32> {
+    let token_index = i32::from_stack(state, 1)?;
+    let tooltip = currency_data::backpack_currencies()
+        .nth((token_index - 1).max(0) as usize)
+        .map(|currency| tooltip_for_currency(state, currency, None))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_CURRENCY));
     state.push(tooltip);
     Ok(1)
 }

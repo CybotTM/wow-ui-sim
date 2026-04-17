@@ -18,6 +18,7 @@ use rilua::{LuaApiMut, LuaResult, Val};
 const TOOLTIP_TYPE_ITEM: f64 = 0.0;
 const TOOLTIP_TYPE_SPELL: f64 = 1.0;
 const TOOLTIP_TYPE_UNIT: f64 = 2.0;
+const TOOLTIP_TYPE_CURRENCY: f64 = 5.0;
 const TOOLTIP_TYPE_UNIT_AURA: f64 = 7.0;
 const TOOLTIP_TYPE_MINIMAP_MOUSEOVER: f64 = 21.0;
 

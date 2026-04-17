@@ -137,6 +137,10 @@ macro_rules! build_empty_sim_state {
             everyone_assistant: false,
             party_leader_index: None,
             voice_chat: VoiceChatState::default(),
+            known_spells: ::std::collections::HashSet::new(),
+            harmful_spells: ::std::collections::HashSet::new(),
+            helpful_spells: ::std::collections::HashSet::new(),
+            pet_spells: ::std::collections::HashSet::new(),
             message_log: Vec::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
@@ -476,6 +480,17 @@ pub struct SimState {
     pub party_leader_index: Option<usize>,
     /// Voice chat volume + mute/deafen/headset state.
     pub voice_chat: VoiceChatState,
+    /// Spell IDs the player has learned. Drives `IsSpellKnown` and
+    /// `IsSpellKnownOrOverridesKnown`.
+    pub known_spells: ::std::collections::HashSet<u32>,
+    /// Spell IDs classified as harmful (damage / debuff). Seeded empty;
+    /// admin tests can populate before invoking `IsHarmfulSpell`.
+    pub harmful_spells: ::std::collections::HashSet<u32>,
+    /// Spell IDs classified as helpful (heal / buff). Seeded empty.
+    pub helpful_spells: ::std::collections::HashSet<u32>,
+    /// Pet spells the player currently has learned (BM Hunter /
+    /// Warlock pets). Empty when no pet active. Drives `HasPetSpells`.
+    pub pet_spells: ::std::collections::HashSet<u32>,
     /// Append-only log of outbound chat / addon messages sent via
     /// `SendChatMessage` / `SendAddonMessage`. Most recent at the tail.
     pub message_log: Vec<MessageLogEntry>,

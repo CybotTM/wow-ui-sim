@@ -63,6 +63,7 @@ pub mod security;
 pub mod set_cvar_verb;
 pub mod spell_api;
 pub mod spell_macro_verbs;
+pub mod spell_state_probes;
 pub mod spellbook_data;
 pub mod store_frame;
 pub mod strings;
