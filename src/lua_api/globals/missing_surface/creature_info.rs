@@ -10,7 +10,12 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_creature_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CreatureInfo")?;
-    table_set_rust_fn(state, table_ref, "GetClassInfo", c_creature_info_get_class_info)?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetClassInfo",
+        c_creature_info_get_class_info,
+    )?;
     Ok(())
 }
 

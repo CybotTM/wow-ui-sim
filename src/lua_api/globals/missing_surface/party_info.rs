@@ -48,10 +48,7 @@ fn register_group_membership_probes(
     Ok(())
 }
 
-fn register_invite_and_tower_stubs(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-) -> LuaResult<()> {
+fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
