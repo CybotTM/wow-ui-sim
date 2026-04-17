@@ -11,6 +11,7 @@ use std::path::PathBuf;
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::{QuadBatch, QuadVertex, TextureRequest};
 use wow_ui_sim::widget::{Frame, WidgetRegistry};
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -314,6 +315,51 @@ fn build_quads_with_textures(env: &WowLuaEnv) -> (usize, Vec<String>) {
     (batch.quad_count(), textures)
 }
 
+fn quad_bounds_from_vertices(verts: &[QuadVertex]) -> (f32, f32, f32, f32) {
+    let mut min_x = f32::INFINITY;
+    let mut min_y = f32::INFINITY;
+    let mut max_x = f32::NEG_INFINITY;
+    let mut max_y = f32::NEG_INFINITY;
+    for vert in verts {
+        min_x = min_x.min(vert.position[0]);
+        min_y = min_y.min(vert.position[1]);
+        max_x = max_x.max(vert.position[0]);
+        max_y = max_y.max(vert.position[1]);
+    }
+    (min_x, min_y, max_x, max_y)
+}
+
+fn quad_bounds(batch: &QuadBatch, request: &TextureRequest) -> (f32, f32, f32, f32) {
+    let start = request.vertex_start as usize;
+    let end = start + request.vertex_count as usize;
+    quad_bounds_from_vertices(&batch.vertices[start..end])
+}
+
+fn bounds_match_rect(bounds: (f32, f32, f32, f32), rect: wow_ui_sim::LayoutRect) -> bool {
+    let tolerance = 0.1;
+    (bounds.0 - rect.x).abs() <= tolerance
+        && (bounds.1 - rect.y).abs() <= tolerance
+        && (bounds.2 - (rect.x + rect.width)).abs() <= tolerance
+        && (bounds.3 - (rect.y + rect.height)).abs() <= tolerance
+}
+
+fn find_first_passive_spell_item(
+    registry: &WidgetRegistry,
+    item_ids: &[u64],
+) -> Option<(u64, u64, u64, u64)> {
+    item_ids.iter().find_map(|&item_id| {
+        let item = registry.get(item_id)?;
+        let &button_id = item.children_keys.get("Button")?;
+        let button = registry.get(button_id)?;
+        let &icon_id = button.children_keys.get("Icon")?;
+        let &border_id = button.children_keys.get("Border")?;
+        let &mask_id = button.children_keys.get("IconMask")?;
+        let border = registry.get(border_id)?;
+        (border.atlas.as_deref() == Some("talents-node-circle-gray"))
+            .then_some((button_id, icon_id, border_id, mask_id))
+    })
+}
+
 /// Check that a frame is reachable from root via the children chain.
 /// Returns (reachable, detail_string).
 fn check_frame_reachability(registry: &WidgetRegistry, frame_id: u64) -> (bool, String) {
@@ -559,6 +605,156 @@ fn spellbook_icon_textures_in_ancestor_visible() {
         eprintln!("Icons: found={icons_found} missing={icons_missing}");
         assert_eq!(icons_missing, 0,
             "All spell icon textures should have effective_alpha > 0");
+    }
+}
+
+#[test]
+fn spellbook_passive_item_border_and_icon_match_master_geometry() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
+
+        let buckets = build_strata_buckets(&env);
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let item_ids = find_spell_item_ids(registry);
+        assert!(!item_ids.is_empty(), "Should have spell items");
+
+        let (button_id, icon_id, border_id, mask_id) = find_first_passive_spell_item(registry, &item_ids)
+            .expect("Should find a passive spellbook item with the circle border art set");
+
+        let (
+            lua_button_w,
+            lua_button_h,
+            lua_icon_w,
+            lua_icon_h,
+            lua_border_w,
+            lua_border_h,
+            lua_mask_w,
+            lua_mask_h,
+            scaled_button_w,
+            scaled_button_h,
+            scaled_icon_w,
+            scaled_icon_h,
+            scaled_border_w,
+            scaled_border_h,
+            scaled_mask_w,
+            scaled_mask_h,
+        ): (
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+            f32,
+        ) = env
+            .eval(
+                r#"
+                local paged = assert(PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame, "missing paged spells frame")
+                for _, frame in paged:EnumerateFrames() do
+                    if frame
+                        and frame:IsShown()
+                        and frame.HasValidData
+                        and frame:HasValidData()
+                        and frame.spellBookItemInfo
+                        and frame.spellBookItemInfo.isPassive
+                        and frame.Button
+                        and frame.Button.Icon
+                        and frame.Button.Border
+                        and frame.Button.IconMask
+                    then
+                        local _, _, bw, bh = frame.Button:GetRect()
+                        local _, _, iw, ih = frame.Button.Icon:GetRect()
+                        local _, _, rw, rh = frame.Button.Border:GetRect()
+                        local _, _, mw, mh = frame.Button.IconMask:GetRect()
+                        local _, _, sbw, sbh = frame.Button:GetScaledRect()
+                        local _, _, siw, sih = frame.Button.Icon:GetScaledRect()
+                        local _, _, srw, srh = frame.Button.Border:GetScaledRect()
+                        local _, _, smw, smh = frame.Button.IconMask:GetScaledRect()
+                        return bw, bh, iw, ih, rw, rh, mw, mh, sbw, sbh, siw, sih, srw, srh, smw, smh
+                    end
+                end
+                error("no passive item found")
+                "#,
+            )
+            .expect("Passive spell item geometry should be queryable from Lua");
+
+        let button_rect = compute_frame_rect(registry, button_id, 1024.0, 768.0);
+        let icon_rect = compute_frame_rect(registry, icon_id, 1024.0, 768.0);
+        let border_rect = compute_frame_rect(registry, border_id, 1024.0, 768.0);
+        let mask_rect = compute_frame_rect(registry, mask_id, 1024.0, 768.0);
+
+        assert!((lua_button_w - 40.0).abs() <= 0.1, "Passive button GetRect width should be 40, got {}", lua_button_w);
+        assert!((lua_button_h - 40.0).abs() <= 0.1, "Passive button GetRect height should be 40, got {}", lua_button_h);
+        assert!((lua_icon_w - 36.0).abs() <= 0.1, "Passive icon GetRect width should be 36, got {}", lua_icon_w);
+        assert!((lua_icon_h - 36.0).abs() <= 0.1, "Passive icon GetRect height should be 36, got {}", lua_icon_h);
+        assert!((lua_border_w - 40.0).abs() <= 0.1, "Passive border GetRect width should stay 40, got {}", lua_border_w);
+        assert!((lua_border_h - 40.0).abs() <= 0.1, "Passive border GetRect height should stay 40, got {}", lua_border_h);
+        assert!((lua_mask_w - 36.0).abs() <= 0.1, "Passive mask GetRect width should be 36, got {}", lua_mask_w);
+        assert!((lua_mask_h - 36.0).abs() <= 0.1, "Passive mask GetRect height should be 36, got {}", lua_mask_h);
+
+        assert!((button_rect.width - scaled_button_w).abs() <= 0.1, "Rendered passive button width should match GetScaledRect: render={} lua={}", button_rect.width, scaled_button_w);
+        assert!((button_rect.height - scaled_button_h).abs() <= 0.1, "Rendered passive button height should match GetScaledRect: render={} lua={}", button_rect.height, scaled_button_h);
+        assert!((icon_rect.width - scaled_icon_w).abs() <= 0.1, "Rendered passive icon width should match GetScaledRect: render={} lua={}", icon_rect.width, scaled_icon_w);
+        assert!((icon_rect.height - scaled_icon_h).abs() <= 0.1, "Rendered passive icon height should match GetScaledRect: render={} lua={}", icon_rect.height, scaled_icon_h);
+        assert!((border_rect.width - scaled_border_w).abs() <= 0.1, "Rendered passive border width should match GetScaledRect: render={} lua={}", border_rect.width, scaled_border_w);
+        assert!((border_rect.height - scaled_border_h).abs() <= 0.1, "Rendered passive border height should match GetScaledRect: render={} lua={}", border_rect.height, scaled_border_h);
+        assert!((mask_rect.width - scaled_mask_w).abs() <= 0.1, "Rendered passive mask width should match GetScaledRect: render={} lua={}", mask_rect.width, scaled_mask_w);
+        assert!((mask_rect.height - scaled_mask_h).abs() <= 0.1, "Rendered passive mask height should match GetScaledRect: render={} lua={}", mask_rect.height, scaled_mask_h);
+
+        let batch = build_quad_batch_for_registry(
+            registry,
+            (1024.0, 768.0),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            &buckets,
+        );
+
+        let border_request = batch
+            .texture_requests
+            .iter()
+            .find(|request| bounds_match_rect(quad_bounds(&batch, request), border_rect))
+            .expect("Passive border should emit a textured quad matching its layout rect");
+        let icon_request = batch
+            .texture_requests
+            .iter()
+            .find(|request| bounds_match_rect(quad_bounds(&batch, request), icon_rect))
+            .expect("Passive icon should emit a textured quad matching its layout rect");
+        let mask_request = batch
+            .mask_texture_requests
+            .iter()
+            .find(|request| bounds_match_rect(quad_bounds(&batch, request), mask_rect))
+            .expect("Passive icon mask should emit a mask quad matching its layout rect");
+
+        assert!(
+            border_request.path.contains(r"Interface\talentframe\talents"),
+            "Passive border should come from the talents atlas, got {}",
+            border_request.path
+        );
+        assert!(
+            mask_request.path.contains(r"Interface\talentframe\talentsmasknodecircle"),
+            "Passive mask should come from the circle mask texture, got {}",
+            mask_request.path
+        );
+        assert_ne!(
+            icon_request.path,
+            border_request.path,
+            "Passive icon and border should not collapse onto the same textured quad request"
+        );
     }
 }
 

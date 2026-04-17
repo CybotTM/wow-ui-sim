@@ -2145,7 +2145,7 @@ fn test_create_frame_from_xml_inline_conditional_self_method_sequence_runs() {
         r#"<Ui>
         <Frame name="XmlInlineCheckedRoot" parent="UIParent">
             <CheckButton name="XmlInlineCheckedButton" parent="XmlInlineCheckedRoot">
-                <Scripts><OnClick>if ( self:GetChecked() ) then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON); else PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF); end; LFGListUtil_SetAutoAccept(self:GetChecked())</OnClick></Scripts>
+                <Scripts><OnClick>if ( self:GetChecked() ) then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON); else PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF); end LFGListUtil_SetAutoAccept(self:GetChecked())</OnClick></Scripts>
             </CheckButton>
         </Frame>
     </Ui>"#,
@@ -2226,6 +2226,68 @@ fn test_create_frame_from_xml_inline_conditional_self_field_then_else_runs() {
     .unwrap();
     let home: String = env.eval("return HelpBrowser.home").unwrap();
     assert_eq!(home, "GMTicketStatus");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_newline_then_conditional_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        HelpFrame = { shown = nil }
+        HelpBrowser = { ticket = nil, home = nil }
+        function HelpFrame:ShowFrame(page)
+            self.shown = page
+        end
+        function HelpBrowser:OpenTicket(index)
+            self.ticket = index
+        end
+        function HelpBrowser:NavigateHome(page)
+            self.home = page
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineNewlineConditionalButton" parent="UIParent">
+            <Scripts><OnClick>HelpFrame:ShowFrame(HELPFRAME_SUBMIT_TICKET)
+if (self.caseIndex) then
+    HelpBrowser:OpenTicket(self.caseIndex)
+else
+    HelpBrowser:NavigateHome("GMTicketStatus")
+end</OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(r#"HELPFRAME_SUBMIT_TICKET = "submit""#).unwrap();
+    env.exec(
+        r#"
+        XmlInlineNewlineConditionalButton.caseIndex = 7
+        XmlInlineNewlineConditionalButton:GetScript("OnClick")(XmlInlineNewlineConditionalButton)
+    "#,
+    )
+    .unwrap();
+    let with_case: (String, i32) = env
+        .eval("return HelpFrame.shown, HelpBrowser.ticket")
+        .unwrap();
+    assert_eq!(with_case.0, "submit");
+    assert_eq!(with_case.1, 7);
+
+    env.exec(
+        r#"
+        XmlInlineNewlineConditionalButton.caseIndex = nil
+        HelpBrowser.home = nil
+        XmlInlineNewlineConditionalButton:GetScript("OnClick")(XmlInlineNewlineConditionalButton)
+    "#,
+    )
+    .unwrap();
+    let without_case: String = env.eval("return HelpBrowser.home").unwrap();
+    assert_eq!(without_case, "GMTicketStatus");
 }
 
 #[test]

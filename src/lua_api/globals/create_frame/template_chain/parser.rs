@@ -88,6 +88,7 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
     let mut escaped = false;
     let mut in_comment = false;
     let mut block_depth = 0usize;
+    let mut paren_depth = 0usize;
 
     while let Some((idx, ch)) = chars.next() {
         if in_comment {
@@ -119,6 +120,26 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
             continue;
         }
 
+        match ch {
+            '(' => {
+                paren_depth += 1;
+                continue;
+            }
+            ')' => {
+                paren_depth = paren_depth.saturating_sub(1);
+                continue;
+            }
+            '\n' if block_depth == 0 && paren_depth == 0 => {
+                let part = stmt[start..idx].trim();
+                if !part.is_empty() {
+                    parts.push(part);
+                }
+                start = idx + ch.len_utf8();
+                continue;
+            }
+            _ => {}
+        }
+
         if ch.is_ascii_alphabetic() || ch == '_' {
             let mut end = idx + ch.len_utf8();
             while let Some((next_idx, next_ch)) = chars.peek().copied() {
@@ -131,7 +152,19 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
             }
             match &stmt[idx..end] {
                 "if" => block_depth += 1,
-                "end" if block_depth > 0 => block_depth -= 1,
+                "end" if block_depth > 0 => {
+                    block_depth -= 1;
+                    if block_depth == 0 {
+                        let rest = stmt[end..].trim_start();
+                        if !rest.is_empty() && !rest.starts_with(';') {
+                            let part = stmt[start..end].trim();
+                            if !part.is_empty() {
+                                parts.push(part);
+                            }
+                            start = end;
+                        }
+                    }
+                }
                 _ => {}
             }
             continue;
@@ -147,7 +180,7 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
             continue;
         }
 
-        if ch == ';' && block_depth == 0 {
+        if ch == ';' && block_depth == 0 && paren_depth == 0 {
             let part = stmt[start..idx].trim();
             if !part.is_empty() {
                 parts.push(part);
