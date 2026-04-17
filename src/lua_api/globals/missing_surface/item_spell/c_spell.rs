@@ -21,6 +21,12 @@ pub(super) fn register_c_spell(state: &mut LuaState) -> LuaResult<()> {
         "GetSpellTexture",
         c_spell_get_spell_texture,
     )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetMawPowerBorderAtlasBySpellID",
+        c_spell_get_maw_power_border_atlas_by_spell_id,
+    )?;
     table_set_rust_fn(state, table_ref, "GetSpellLink", c_spell_get_spell_link)?;
     table_set_rust_fn(state, table_ref, "GetSpellName", c_spell_get_spell_name)?;
     Ok(())
@@ -45,6 +51,12 @@ fn c_spell_get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
     state.push(texture);
     state.push(Val::Num(icon as f64));
     Ok(2)
+}
+
+fn c_spell_get_maw_power_border_atlas_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
 }
 
 fn c_spell_get_spell_link(state: &mut LuaState) -> LuaResult<u32> {

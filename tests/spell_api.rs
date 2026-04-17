@@ -237,6 +237,15 @@ fn test_spell_get_spell_name_unknown() {
 }
 
 #[test]
+fn test_spell_get_maw_power_border_atlas_by_spell_id_is_stubbed() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_Spell.GetMawPowerBorderAtlasBySpellID(12345) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
 fn test_spell_pickup_fires_cursor_changed() {
     let env = env();
     let changed_count: i32 = env
