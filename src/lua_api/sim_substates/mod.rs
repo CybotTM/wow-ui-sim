@@ -294,26 +294,6 @@ pub struct VoiceChatState {
 
 impl Default for VoiceChatState {
     fn default() -> Self {
-        let members = vec![
-            VoiceMember {
-                member_id: 1,
-                name: "Player1".to_string(),
-                is_active_speaker: true,
-                volume: 1.0,
-            },
-            VoiceMember {
-                member_id: 2,
-                name: "Player2".to_string(),
-                is_active_speaker: false,
-                volume: 0.8,
-            },
-        ];
-        let channels = vec![VoiceChannel {
-            channel_id: 1,
-            name: "Party".to_string(),
-            channel_type: 1,
-            members,
-        }];
         Self {
             microphone_volume: 1.0,
             output_volume: 1.0,
@@ -324,13 +304,39 @@ impl Default for VoiceChatState {
             using: false,
             connecting: false,
             talking: false,
-            channels,
+            channels: seeded_voice_channels(),
             active_channel_id: Some(1),
             connection_status: 2,
             master_volume_scale: 1.0,
             is_parental_disabled: false,
         }
     }
+}
+
+fn seeded_voice_channels() -> Vec<VoiceChannel> {
+    vec![VoiceChannel {
+        channel_id: 1,
+        name: "Party".to_string(),
+        channel_type: 1,
+        members: seeded_voice_members(),
+    }]
+}
+
+fn seeded_voice_members() -> Vec<VoiceMember> {
+    vec![
+        VoiceMember {
+            member_id: 1,
+            name: "Player1".to_string(),
+            is_active_speaker: true,
+            volume: 1.0,
+        },
+        VoiceMember {
+            member_id: 2,
+            name: "Player2".to_string(),
+            is_active_speaker: false,
+            volume: 0.8,
+        },
+    ]
 }
 
 /// Single gossip option row matching `C_GossipInfo.GossipOptionUIInfo`.
