@@ -93,6 +93,21 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// A joined chat channel with its membership, moderators, and ban list.
+/// Matches the shape retail addons expect when iterating the player's
+/// channel list.
+#[derive(Debug, Default, Clone)]
+pub struct ChatChannel {
+    /// Display name (e.g. `"General"`, `"Trade"`, a custom name).
+    pub name: String,
+    /// Channel members by display name. The local player is implicit.
+    pub members: ::std::collections::BTreeSet<String>,
+    /// Names granted moderator status in this channel.
+    pub moderators: ::std::collections::BTreeSet<String>,
+    /// Names banned from this channel — banning also removes membership.
+    pub banned: ::std::collections::BTreeSet<String>,
+}
+
 /// Battlefield / arena / LFG queue state. A single slot models the
 /// active queue — retail supports multiple concurrent slots, the sim
 /// does not need them yet. `index` is the 1-based slot id callers
