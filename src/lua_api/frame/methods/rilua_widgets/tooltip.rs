@@ -349,64 +349,50 @@ pub(super) fn add_font_strings(_state: &mut LuaState) -> LuaResult<u32> {
 // register_tooltip
 // ---------------------------------------------------------------------------
 
+const TOOLTIP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    // Lines
+    ("ClearLines", clear_lines),
+    ("AddLine", add_line),
+    ("AddDoubleLine", add_double_line),
+    ("NumLines", num_lines),
+    ("GetNumLines", num_lines),
+    // Layout (spacing, width, padding)
+    ("SetCustomLineSpacing", set_custom_line_spacing),
+    ("GetCustomLineSpacing", get_custom_line_spacing),
+    ("SetMinimumWidth", set_minimum_width),
+    ("GetMinimumWidth", get_minimum_width),
+    ("SetAllowShowWithNoLines", set_allow_show_with_no_lines),
+    ("SetCustomWordWrapMinWidth", set_custom_word_wrap_min_width),
+    ("SetShrinkToFitWrapped", set_shrink_to_fit_wrapped),
+    ("SetPadding", set_padding),
+    ("GetPadding", get_padding),
+    ("ClearPadding", clear_padding),
+    ("AppendText", append_text),
+    // Content — spell/unit/item getters + setters
+    ("GetSpell", get_spell),
+    ("GetUnit", get_unit),
+    ("GetItem", get_item),
+    ("SetSpellByID", set_spell_by_id),
+    ("SetItemByID", set_item_by_id),
+    ("SetHyperlink", set_hyperlink),
+    ("SetUnit", set_unit),
+    ("SetUnitBuff", set_unit_buff),
+    ("SetUnitDebuff", set_unit_debuff),
+    ("SetUnitAura", set_unit_aura),
+    // Ownership + anchoring
+    ("SetOwner", set_owner),
+    ("GetOwner", get_owner),
+    ("IsOwned", is_owned),
+    ("SetAnchorType", set_anchor_type),
+    // Misc
+    ("CopyTooltip", copy_tooltip),
+    ("SetFrameStack", set_frame_stack),
+    ("AddFontStrings", add_font_strings),
+];
+
 pub(super) fn register_tooltip(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "ClearLines", clear_lines)?;
-    table_set_rust_fn(state, metatable, "AddLine", add_line)?;
-    table_set_rust_fn(state, metatable, "AddDoubleLine", add_double_line)?;
-    table_set_rust_fn(state, metatable, "NumLines", num_lines)?;
-    table_set_rust_fn(state, metatable, "GetNumLines", num_lines)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetCustomLineSpacing",
-        set_custom_line_spacing,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetCustomLineSpacing",
-        get_custom_line_spacing,
-    )?;
-    table_set_rust_fn(state, metatable, "SetMinimumWidth", set_minimum_width)?;
-    table_set_rust_fn(state, metatable, "GetMinimumWidth", get_minimum_width)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetAllowShowWithNoLines",
-        set_allow_show_with_no_lines,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetCustomWordWrapMinWidth",
-        set_custom_word_wrap_min_width,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetShrinkToFitWrapped",
-        set_shrink_to_fit_wrapped,
-    )?;
-    table_set_rust_fn(state, metatable, "GetSpell", get_spell)?;
-    table_set_rust_fn(state, metatable, "GetUnit", get_unit)?;
-    table_set_rust_fn(state, metatable, "GetItem", get_item)?;
-    table_set_rust_fn(state, metatable, "SetPadding", set_padding)?;
-    table_set_rust_fn(state, metatable, "GetPadding", get_padding)?;
-    table_set_rust_fn(state, metatable, "ClearPadding", clear_padding)?;
-    table_set_rust_fn(state, metatable, "AppendText", append_text)?;
-    table_set_rust_fn(state, metatable, "SetSpellByID", set_spell_by_id)?;
-    table_set_rust_fn(state, metatable, "SetItemByID", set_item_by_id)?;
-    table_set_rust_fn(state, metatable, "SetHyperlink", set_hyperlink)?;
-    table_set_rust_fn(state, metatable, "SetUnit", set_unit)?;
-    table_set_rust_fn(state, metatable, "SetUnitBuff", set_unit_buff)?;
-    table_set_rust_fn(state, metatable, "SetUnitDebuff", set_unit_debuff)?;
-    table_set_rust_fn(state, metatable, "SetUnitAura", set_unit_aura)?;
-    table_set_rust_fn(state, metatable, "SetOwner", set_owner)?;
-    table_set_rust_fn(state, metatable, "GetOwner", get_owner)?;
-    table_set_rust_fn(state, metatable, "IsOwned", is_owned)?;
-    table_set_rust_fn(state, metatable, "SetAnchorType", set_anchor_type)?;
-    table_set_rust_fn(state, metatable, "CopyTooltip", copy_tooltip)?;
-    table_set_rust_fn(state, metatable, "SetFrameStack", set_frame_stack)?;
-    table_set_rust_fn(state, metatable, "AddFontStrings", add_font_strings)?;
+    for (name, func) in TOOLTIP_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
