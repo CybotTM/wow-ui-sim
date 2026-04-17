@@ -19,28 +19,7 @@ pub fn register_c_model_info(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(t_ref) = t else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(state, t_ref, "AddActiveModelScene", |_state| Ok(0))?;
-    table_set_rust_fn(state, t_ref, "AddActiveModelSceneActor", |_state| Ok(0))?;
-    table_set_rust_fn(state, t_ref, "ClearActiveModelScene", |_state| Ok(0))?;
-    table_set_rust_fn(state, t_ref, "ClearActiveModelSceneActor", |_state| Ok(0))?;
-    table_set_rust_fn(
-        state,
-        t_ref,
-        "GetModelSceneActorDisplayInfoByID",
-        empty_table_result,
-    )?;
-    table_set_rust_fn(
-        state,
-        t_ref,
-        "GetModelSceneActorInfoByID",
-        empty_table_result,
-    )?;
-    table_set_rust_fn(
-        state,
-        t_ref,
-        "GetModelSceneCameraInfoByID",
-        empty_table_result,
-    )?;
+    register_model_scene_stubs(state, t_ref)?;
     table_set_rust_fn(
         state,
         t_ref,
@@ -48,6 +27,27 @@ pub fn register_c_model_info(state: &mut LuaState) -> LuaResult<()> {
         c_model_info_get_model_scene_info_by_id,
     )?;
     set_global_val(state, "C_ModelInfo", t);
+    Ok(())
+}
+
+fn register_model_scene_stubs(state: &mut LuaState, t_ref: GcRef<Table>) -> LuaResult<()> {
+    const NOOPS: &[&str] = &[
+        "AddActiveModelScene",
+        "AddActiveModelSceneActor",
+        "ClearActiveModelScene",
+        "ClearActiveModelSceneActor",
+    ];
+    const EMPTY_TABLE_GETTERS: &[&str] = &[
+        "GetModelSceneActorDisplayInfoByID",
+        "GetModelSceneActorInfoByID",
+        "GetModelSceneCameraInfoByID",
+    ];
+    for name in NOOPS {
+        table_set_rust_fn(state, t_ref, name, |_state| Ok(0))?;
+    }
+    for name in EMPTY_TABLE_GETTERS {
+        table_set_rust_fn(state, t_ref, name, empty_table_result)?;
+    }
     Ok(())
 }
 

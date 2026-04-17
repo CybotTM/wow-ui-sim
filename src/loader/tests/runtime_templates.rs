@@ -50,6 +50,61 @@ fn lifecycle_scripts_use_passed_frame_id_instead_of_name_lookup() {
 }
 
 #[test]
+fn lifecycle_scripts_preserve_intrinsic_and_script_order() {
+    let t = load_test_xml(
+        "lifecycle-order",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="LifecycleOrderFrame" parent="UIParent">
+                <Scripts>
+                    <OnLoad>ORDER_LOG = (ORDER_LOG or "") .. "S"</OnLoad>
+                    <OnShow>ORDER_LOG = (ORDER_LOG or "") .. "S"</OnShow>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            ORDER_LOG = ""
+            LifecycleOrderFrame.OnLoad_Intrinsic = function(self)
+                ORDER_LOG = ORDER_LOG .. "I"
+            end
+            LifecycleOrderFrame.OnShow_Intrinsic = function(self)
+                ORDER_LOG = ORDER_LOG .. "I"
+            end
+        "#,
+        )
+        .unwrap();
+
+    let frame_id = t
+        .env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("LifecycleOrderFrame")
+        .expect("LifecycleOrderFrame should exist");
+
+    fire_lifecycle_scripts(
+        &t.env.loader_env(),
+        frame_id,
+        "LifecycleOrderFrame",
+        LifecycleScripts {
+            on_load: true,
+            on_show: true,
+        },
+    );
+
+    let order_log: String = t.env.eval("return ORDER_LOG").unwrap();
+    assert_eq!(
+        order_log, "ISSI",
+        "OnLoad should fire intrinsic before script, OnShow should fire script before intrinsic"
+    );
+}
+
+#[test]
 fn test_runtime_action_button_template_creates_named_children() {
     let t = load_test_xml(
         "runtime-action-button-template",
