@@ -29,50 +29,58 @@ fn stack_string(state: &LuaState, index: i32) -> Option<String> {
     val_to_string(state, stack_val(state, index))
 }
 
-fn get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
-    let (
-        name,
-        instance_type,
-        difficulty_id,
-        difficulty_name,
-        max_players,
-        dynamic_difficulty,
-        is_dynamic,
-        instance_id,
-        group_size,
-        lfg_dungeon_id,
-    ) = {
-        let w = &borrow_state(state)?.world;
-        (
-            w.instance_name.clone(),
-            w.instance_type.clone(),
-            w.instance_difficulty,
-            w.instance_difficulty_name.clone(),
-            w.instance_max_players,
-            w.instance_dynamic_difficulty,
-            w.instance_is_dynamic,
-            w.instance_id,
-            w.instance_group_size,
-            w.instance_lfg_dungeon_id,
-        )
-    };
+struct InstanceInfoSnapshot {
+    name: String,
+    instance_type: String,
+    difficulty_id: i32,
+    difficulty_name: String,
+    max_players: i32,
+    dynamic_difficulty: i32,
+    is_dynamic: bool,
+    instance_id: i32,
+    group_size: i32,
+    lfg_dungeon_id: Option<i32>,
+}
 
-    let name_val = create_string(state, &name);
+fn snapshot_instance_info(state: &LuaState) -> LuaResult<InstanceInfoSnapshot> {
+    let sim = borrow_state(state)?;
+    let w = &sim.world;
+    Ok(InstanceInfoSnapshot {
+        name: w.instance_name.clone(),
+        instance_type: w.instance_type.clone(),
+        difficulty_id: w.instance_difficulty,
+        difficulty_name: w.instance_difficulty_name.clone(),
+        max_players: w.instance_max_players,
+        dynamic_difficulty: w.instance_dynamic_difficulty,
+        is_dynamic: w.instance_is_dynamic,
+        instance_id: w.instance_id,
+        group_size: w.instance_group_size,
+        lfg_dungeon_id: w.instance_lfg_dungeon_id,
+    })
+}
+
+fn push_instance_info_fields(state: &mut LuaState, snap: InstanceInfoSnapshot) {
+    let name_val = create_string(state, &snap.name);
     state.push(name_val);
-    let type_val = create_string(state, &instance_type);
+    let type_val = create_string(state, &snap.instance_type);
     state.push(type_val);
-    state.push(Val::Num(difficulty_id as f64));
-    let diff_name_val = create_string(state, &difficulty_name);
+    state.push(Val::Num(snap.difficulty_id as f64));
+    let diff_name_val = create_string(state, &snap.difficulty_name);
     state.push(diff_name_val);
-    state.push(Val::Num(max_players as f64));
-    state.push(Val::Num(dynamic_difficulty as f64));
-    state.push(Val::Bool(is_dynamic));
-    state.push(Val::Num(instance_id as f64));
-    state.push(Val::Num(group_size as f64));
-    match lfg_dungeon_id {
+    state.push(Val::Num(snap.max_players as f64));
+    state.push(Val::Num(snap.dynamic_difficulty as f64));
+    state.push(Val::Bool(snap.is_dynamic));
+    state.push(Val::Num(snap.instance_id as f64));
+    state.push(Val::Num(snap.group_size as f64));
+    match snap.lfg_dungeon_id {
         Some(id) => state.push(Val::Num(id as f64)),
         None => state.push(Val::Nil),
     }
+}
+
+fn get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
+    let snap = snapshot_instance_info(state)?;
+    push_instance_info_fields(state, snap);
     Ok(10)
 }
 
@@ -80,7 +88,14 @@ fn get_mirror_timer_info(state: &mut LuaState) -> LuaResult<u32> {
     let index = stack_i32(state, 1).unwrap_or(0);
     let timer = usize::try_from(index.saturating_sub(1))
         .ok()
-        .and_then(|idx| borrow_state(state).ok()?.world.mirror_timers.get(idx).cloned());
+        .and_then(|idx| {
+            borrow_state(state)
+                .ok()?
+                .world
+                .mirror_timers
+                .get(idx)
+                .cloned()
+        });
     let Some(t) = timer else {
         return Ok(0);
     };
