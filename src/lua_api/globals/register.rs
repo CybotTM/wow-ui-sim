@@ -27,6 +27,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::net_stats::register_all(lua)?;
     super::store_frame::register_all(lua)?;
     super::unit_probes::register_all(lua)?;
+    super::inventory_slot::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;

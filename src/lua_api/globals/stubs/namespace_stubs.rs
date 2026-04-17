@@ -311,6 +311,9 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ("C_QuestLog", "IsQuestReplayable", stub_false),
     ("C_QuestLog", "IsWorldQuest", stub_false),
     // C_Spell
+    ("C_Spell", "GetVisibilityInfo", stub_false),
+    ("C_Spell", "IsPriorityAura", stub_false),
+    ("C_Spell", "IsSelfBuff", stub_false),
     ("C_Spell", "IsSpellUsable", stub_false),
     ("C_Spell", "TargetSpellIsEnchanting", stub_false),
     ("C_Spell", "TargetSpellJumpsUpgradeTrack", stub_false),

@@ -25,6 +25,7 @@ pub mod admin_zone_economy;
 pub mod auras;
 pub mod font_strings_collection;
 pub mod group_queries;
+pub mod inventory_slot;
 pub mod keybindings;
 pub mod missing_surface;
 pub mod net_stats;
