@@ -517,7 +517,7 @@ fn apply_template_key_values<'a>(
     }
 }
 
-fn apply_template_scripts(
+pub(crate) fn apply_template_scripts(
     state: &mut LuaState,
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
@@ -544,6 +544,10 @@ fn apply_template_scripts(
         Err(error) => return Err(rilua::runtime_error(error)),
     }
     Ok(())
+}
+
+pub(crate) fn scripts_support_fast_install(scripts: &crate::xml::ScriptsXml) -> bool {
+    collect_method_only_handlers(scripts).is_some()
 }
 
 fn apply_method_only_scripts_fast(

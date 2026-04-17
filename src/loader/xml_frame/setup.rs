@@ -145,12 +145,16 @@ fn exec_create_frame_code(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result
 }
 
 fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
+    let scripts_need_slow_path = setup.frame.scripts().is_some_and(|scripts| {
+        !crate::lua_api::globals::create_frame::scripts_support_fast_install(scripts)
+    });
+
     if !fast_create_frame_profiling_enabled() {
         return setup.explicit_parent
             && setup.name != setup.parent
             && setup.frame.all_key_values().next().is_none()
             && setup.frame.xml_attributes().is_none()
-            && setup.frame.scripts().is_none();
+            && !scripts_need_slow_path;
     }
 
     let mut miss_reasons = Vec::new();
@@ -167,7 +171,7 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     if setup.frame.xml_attributes().is_some() {
         miss_reasons.push("xml_attributes");
     }
-    if setup.frame.scripts().is_some() {
+    if scripts_need_slow_path {
         miss_reasons.push("scripts");
     }
 
@@ -220,6 +224,10 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             frame_id,
             setup.frame.combined_mixin().as_deref(),
         );
+        if let Some(scripts) = setup.frame.scripts() {
+            crate::lua_api::globals::create_frame::apply_template_scripts(state, frame_id, scripts)
+                .map_err(|error| crate::Error::Other(error.to_string()))?;
+        }
         Ok::<(), crate::Error>(())
     })
     .map_err(|error| LoadError::Lua(format!("Failed to create frame {}: {}", setup.name, error)))

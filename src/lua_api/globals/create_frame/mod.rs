@@ -50,7 +50,9 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-pub(crate) use template_chain::apply_runtime_template_chain;
+pub(crate) use template_chain::{
+    apply_runtime_template_chain, apply_template_scripts, scripts_support_fast_install,
+};
 struct CreateFrameArgs {
     frame_type: String,
     widget_type: WidgetType,
