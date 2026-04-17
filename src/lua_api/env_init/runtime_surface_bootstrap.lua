@@ -2260,10 +2260,12 @@ end
 -- Housing: not simulated. The only surface accessed at load is
 -- IsHousingServiceEnabled (MainMenuBarMicroButtons gates the housing
 -- micro-button on it).
-C_Housing = C_Housing or __wow_namespace()
-if rawget(C_Housing, "IsHousingServiceEnabled") == nil then
-  function C_Housing.IsHousingServiceEnabled() return false end
-end
+-- C_Housing.IsHousingServiceEnabled is registered from Rust
+-- (src/lua_api/globals/housing.rs), backed by SimState::housing_service_enabled.
+-- Admin: A_Admin.SetHousingServiceEnabled(b?).
+-- Merge stub-namespace fallback so other unimplemented C_Housing members
+-- resolve to the no-op metamethod.
+C_Housing = __wow_merge_namespace(C_Housing, {})
 C_RestrictedActions = C_RestrictedActions or __wow_namespace()
 C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()

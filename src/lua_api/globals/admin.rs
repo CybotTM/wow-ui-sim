@@ -150,6 +150,10 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
             "SetActiveGameMode",
             super::game_rules::admin_set_active_game_mode,
         )?
+        .set_function(
+            "SetHousingServiceEnabled",
+            super::housing::admin_set_housing_service_enabled,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?

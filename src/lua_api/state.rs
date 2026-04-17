@@ -96,6 +96,7 @@ macro_rules! build_empty_sim_state {
             timerunning_season_id: None,
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
+            housing_service_enabled: false,
             debug_borders: false,
             debug_anchors: false,
         }
@@ -384,6 +385,10 @@ pub struct SimState {
     /// a rules map. Default: Standard mode, `CharacterSelect` glue screen,
     /// empty rules.
     pub game_rules: GameRulesState,
+    /// Whether `C_Housing.IsHousingServiceEnabled()` reports true. Drives
+    /// MainMenuBarMicroButtons' decision to render the Housing micro-button.
+    /// Default false (sim has no housing service).
+    pub housing_service_enabled: bool,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
