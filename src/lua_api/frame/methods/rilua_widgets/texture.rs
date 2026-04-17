@@ -480,76 +480,55 @@ pub(super) fn set_snap_to_pixel_grid(state: &mut LuaState) -> LuaResult<u32> {
 // register_texture
 // ---------------------------------------------------------------------------
 
+const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    // Draw layer + shadow
+    ("SetDrawLayer", set_draw_layer),
+    ("GetDrawLayer", get_draw_layer),
+    ("SetShadowOffset", set_shadow_offset),
+    ("GetShadowOffset", get_shadow_offset),
+    ("SetShadowColor", set_shadow_color),
+    ("GetShadowColor", get_shadow_color),
+    // Nine-slice
+    ("GetTextureSliceMargins", get_texture_slice_margins),
+    ("GetTextureSliceMode", get_texture_slice_mode),
+    // Atlas / texture source
+    ("SetAtlas", set_atlas),
+    ("GetAtlas", get_atlas),
+    ("SetTexture", set_texture),
+    ("GetTexture", get_texture),
+    ("GetTextureFileID", get_texture_file_id),
+    ("GetTextureFilePath", get_texture_file_path),
+    // Desaturation
+    ("SetDesaturated", set_desaturated),
+    ("IsDesaturated", is_desaturated),
+    ("SetDesaturation", set_desaturation),
+    ("GetDesaturation", get_desaturation),
+    // Color + blend
+    ("SetColorTexture", set_color_texture),
+    ("SetVertexColor", set_vertex_color),
+    ("GetVertexColor", get_vertex_color),
+    ("SetBlendMode", set_blend_mode),
+    ("GetBlendMode", get_blend_mode),
+    // Tex coords + thickness
+    ("SetTexCoord", set_tex_coord),
+    ("GetTexCoord", get_tex_coord),
+    ("SetThickness", set_thickness),
+    ("GetThickness", get_thickness),
+    // Tiling
+    ("SetHorizTile", set_horiz_tile),
+    ("GetHorizTile", get_horiz_tile),
+    ("SetVertTile", set_vert_tile),
+    ("GetVertTile", get_vert_tile),
+    // Pixel snapping + security
+    ("SetTexelSnappingBias", set_texel_snapping_bias),
+    ("GetTexelSnappingBias", get_texel_snapping_bias),
+    ("SetSnapToPixelGrid", set_snap_to_pixel_grid),
+    ("SetSecurityDisableSetText", set_security_disable_set_text),
+];
+
 pub(super) fn register_texture(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetDrawLayer", set_draw_layer)?;
-    table_set_rust_fn(state, metatable, "GetDrawLayer", get_draw_layer)?;
-    table_set_rust_fn(state, metatable, "SetShadowOffset", set_shadow_offset)?;
-    table_set_rust_fn(state, metatable, "GetShadowOffset", get_shadow_offset)?;
-    table_set_rust_fn(state, metatable, "SetShadowColor", set_shadow_color)?;
-    table_set_rust_fn(state, metatable, "GetShadowColor", get_shadow_color)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetTextureSliceMargins",
-        get_texture_slice_margins,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetTextureSliceMode",
-        get_texture_slice_mode,
-    )?;
-    table_set_rust_fn(state, metatable, "SetAtlas", set_atlas)?;
-    table_set_rust_fn(state, metatable, "GetAtlas", get_atlas)?;
-    table_set_rust_fn(state, metatable, "SetTexture", set_texture)?;
-    table_set_rust_fn(state, metatable, "GetTexture", get_texture)?;
-    table_set_rust_fn(state, metatable, "GetTextureFileID", get_texture_file_id)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetTextureFilePath",
-        get_texture_file_path,
-    )?;
-    table_set_rust_fn(state, metatable, "SetDesaturated", set_desaturated)?;
-    table_set_rust_fn(state, metatable, "IsDesaturated", is_desaturated)?;
-    table_set_rust_fn(state, metatable, "SetDesaturation", set_desaturation)?;
-    table_set_rust_fn(state, metatable, "GetDesaturation", get_desaturation)?;
-    table_set_rust_fn(state, metatable, "SetColorTexture", set_color_texture)?;
-    table_set_rust_fn(state, metatable, "SetVertexColor", set_vertex_color)?;
-    table_set_rust_fn(state, metatable, "GetVertexColor", get_vertex_color)?;
-    table_set_rust_fn(state, metatable, "SetBlendMode", set_blend_mode)?;
-    table_set_rust_fn(state, metatable, "GetBlendMode", get_blend_mode)?;
-    table_set_rust_fn(state, metatable, "SetTexCoord", set_tex_coord)?;
-    table_set_rust_fn(state, metatable, "GetTexCoord", get_tex_coord)?;
-    table_set_rust_fn(state, metatable, "SetThickness", set_thickness)?;
-    table_set_rust_fn(state, metatable, "GetThickness", get_thickness)?;
-    table_set_rust_fn(state, metatable, "SetHorizTile", set_horiz_tile)?;
-    table_set_rust_fn(state, metatable, "GetHorizTile", get_horiz_tile)?;
-    table_set_rust_fn(state, metatable, "SetVertTile", set_vert_tile)?;
-    table_set_rust_fn(state, metatable, "GetVertTile", get_vert_tile)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetTexelSnappingBias",
-        set_texel_snapping_bias,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetTexelSnappingBias",
-        get_texel_snapping_bias,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetSnapToPixelGrid",
-        set_snap_to_pixel_grid,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetSecurityDisableSetText",
-        set_security_disable_set_text,
-    )?;
+    for (name, func) in TEXTURE_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
