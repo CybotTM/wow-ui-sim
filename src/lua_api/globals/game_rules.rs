@@ -169,31 +169,7 @@ pub fn get_game_mode_glue_screen_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn install_on_c_game_rules(state: &mut LuaState) -> LuaResult<()> {
-    use rilua::vm::gc::arena::GcRef;
-    use rilua::vm::table::Table;
-
-    let key = state.gc.intern_string_static(b"C_GameRules");
-    let global = state.global;
-    let existing = state
-        .gc
-        .tables
-        .get(global)
-        .map(|t| t.get_str(key, &state.gc.string_arena));
-    let table_ref: GcRef<Table> = match existing {
-        Some(Val::Table(r)) => r,
-        _ => {
-            let new_val = create_table(state);
-            let Val::Table(new_ref) = new_val else {
-                unreachable!("create_table must return a table");
-            };
-            if let Some(global_table) = state.gc.tables.get_mut(global) {
-                let _ = global_table.raw_set(Val::Str(key), new_val, &state.gc.string_arena);
-            }
-            state.gc.barrier_back(global);
-            new_ref
-        }
-    };
-
+    let table_ref = ensure_c_game_rules_table(state);
     let entries: &[(&str, rilua::vm::closure::RustFn)] = &[
         ("IsGameRuleActive", is_game_rule_active),
         ("GetGameRuleAsFloat", get_game_rule_as_float),
@@ -207,6 +183,33 @@ fn install_on_c_game_rules(state: &mut LuaState) -> LuaResult<()> {
         table_set_rust_fn(state, table_ref, name, *func)?;
     }
     Ok(())
+}
+
+/// Resolve `_G.C_GameRules` to a `GcRef<Table>`, creating the namespace
+/// table if it doesn't exist yet. Mirrors the pattern used by
+/// `ensure_c_*_table` in the other `C_*` modules.
+fn ensure_c_game_rules_table(
+    state: &mut LuaState,
+) -> rilua::vm::gc::arena::GcRef<rilua::vm::table::Table> {
+    let key = state.gc.intern_string_static(b"C_GameRules");
+    let global = state.global;
+    let existing = state
+        .gc
+        .tables
+        .get(global)
+        .map(|t| t.get_str(key, &state.gc.string_arena));
+    if let Some(Val::Table(r)) = existing {
+        return r;
+    }
+    let new_val = create_table(state);
+    let Val::Table(new_ref) = new_val else {
+        unreachable!("create_table must return a table");
+    };
+    if let Some(global_table) = state.gc.tables.get_mut(global) {
+        let _ = global_table.raw_set(Val::Str(key), new_val, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(global);
+    new_ref
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
