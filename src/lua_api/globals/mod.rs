@@ -19,6 +19,7 @@ pub mod admin_zone_economy;
 pub mod auras;
 pub mod battlefield_verbs;
 pub mod channel_verbs;
+pub mod chat_window_verbs;
 pub mod close_frames;
 pub mod combat_verbs;
 pub mod compat_overrides;

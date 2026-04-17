@@ -126,6 +126,8 @@ macro_rules! build_empty_sim_state {
             chat_channels: Vec::new(),
             macros: Vec::new(),
             running_macro: None,
+            chat_windows: ::std::collections::HashMap::new(),
+            chat_type_colors: ::std::collections::HashMap::new(),
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -430,6 +432,13 @@ pub struct SimState {
     pub macros: Vec<MacroInfo>,
     /// Macro slot currently executing. `None` when no macro is running.
     pub running_macro: Option<u32>,
+    /// Chat window presentation + subscription state keyed by 1-based
+    /// chat-frame index (`ChatFrame1` → 1). Windows are lazily created
+    /// on first `SetChatWindow*` / `AddChatWindowChannel` call.
+    pub chat_windows: ::std::collections::HashMap<i32, ChatWindow>,
+    /// Per-chat-type color overrides set by `ChangeChatColor`. Keyed by
+    /// the uppercase chat-type token (`"SAY"`, `"CHANNEL"`, etc.).
+    pub chat_type_colors: ::std::collections::HashMap<String, (f32, f32, f32)>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -443,10 +452,10 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    BattlefieldQueue, BattlefieldStatus, ChatChannel, GameRuleValue, GameRulesState, Keybindings,
-    LfgListCounts, ModifierKeys, NetStats, PetBattleState, WowLabsAreaInfo, WowLabsCircleInfo,
-    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
-    WowLabsPoint, WowLabsState,
+    BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
+    Keybindings, LfgListCounts, ModifierKeys, NetStats, PetBattleState, WowLabsAreaInfo,
+    WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite,
+    WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {

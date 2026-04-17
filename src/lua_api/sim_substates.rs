@@ -93,6 +93,39 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// A chat window's presentation + subscription state. Keyed by the
+/// window's 1-based chat-frame index (e.g. ChatFrame1 → index 1).
+/// Drives the `SetChatWindow*` / `AddChatWindowChannel` /
+/// `GetChatWindow*` verb family.
+#[derive(Debug, Clone)]
+pub struct ChatWindow {
+    pub alpha: f32,
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub locked: bool,
+    pub uninteractable: bool,
+    /// Channels subscribed to this window, in insertion order.
+    pub channels: Vec<String>,
+    /// Message-type names this window receives (e.g. `"SAY"`, `"YELL"`).
+    pub messages: Vec<String>,
+}
+
+impl Default for ChatWindow {
+    fn default() -> Self {
+        Self {
+            alpha: 1.0,
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
+            locked: false,
+            uninteractable: false,
+            channels: Vec::new(),
+            messages: Vec::new(),
+        }
+    }
+}
+
 /// A joined chat channel with its membership, moderators, and ban list.
 /// Matches the shape retail addons expect when iterating the player's
 /// channel list.
