@@ -217,6 +217,67 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
 }
 
 #[test]
+fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__talents_keybind_errors");
+
+        let result: String = env.eval(r#"
+            local loadedBefore = C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")
+            if loadedBefore then
+                return "addon_preloaded"
+            end
+
+            if not PlayerSpellsUtil or type(PlayerSpellsUtil.ToggleClassTalentFrame) ~= "function" then
+                return "missing_toggle_class_talent_frame"
+            end
+
+            if GetBindingAction("N") ~= "" then
+                return "unexpected_binding_store_seed"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Test harness should start with Blizzard_PlayerSpells unloaded and the keybinding store unseeded: {result}"
+        );
+
+        env.send_key_press("N", None).expect("N keybind failed");
+
+        let errors = common::drain_string_table(&env, "__talents_keybind_errors");
+        assert!(
+            errors.is_empty(),
+            "Opening talents through N produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+
+        let result: String = env.eval(r#"
+            if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+                return "addon_not_loaded"
+            end
+            if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+                return "player_spells_not_shown"
+            end
+            if not PlayerSpellsFrame.TalentsFrame or not PlayerSpellsFrame.TalentsFrame:IsShown() then
+                return "talents_tab_not_shown"
+            end
+            if not (PlayerSpellsUtil and PlayerSpellsUtil.FrameTabs and PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.ClassTalents)) then
+                return "talents_tab_not_active"
+            end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Pressing N should demand-load Blizzard_PlayerSpells and show the talents tab: {result}"
+        );
+    }
+}
+
+#[test]
 fn show_mail_frame_loads_and_populates_inbox_rows() {
     test_timeout! {
         let env = setup_env();
