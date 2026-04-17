@@ -65,6 +65,7 @@ pub mod stubs;
 pub mod system_api_runtime;
 pub mod targeting_verbs;
 pub mod template;
+pub mod trade_verbs;
 pub mod unit_api;
 pub mod unit_probes;
 pub mod utility_system_spell;

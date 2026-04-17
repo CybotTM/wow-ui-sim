@@ -93,6 +93,26 @@ pub struct PetBattleState {
     pub battle_state: i32,
 }
 
+/// Active trade window state. `None` means no trade in progress.
+#[derive(Debug, Default, Clone)]
+pub struct TradeState {
+    /// Opponent's display name.
+    pub target: String,
+    /// Item ids in the 7 player trade slots (retail has 7 including the
+    /// non-tradable slot). `0` means empty.
+    pub player_slots: [u32; 7],
+    /// Item ids in the 7 opponent trade slots.
+    pub target_slots: [u32; 7],
+    /// Copper offered by the player.
+    pub player_money: u64,
+    /// Copper offered by the opponent.
+    pub target_money: u64,
+    /// Whether the player has pressed Accept.
+    pub player_accepted: bool,
+    /// Whether the opponent has pressed Accept.
+    pub target_accepted: bool,
+}
+
 /// A chat window's presentation + subscription state. Keyed by the
 /// window's 1-based chat-frame index (e.g. ChatFrame1 → index 1).
 /// Drives the `SetChatWindow*` / `AddChatWindowChannel` /

@@ -131,6 +131,7 @@ macro_rules! build_empty_sim_state {
             pending_duel: None,
             pending_resurrect: None,
             corpse_available: false,
+            active_trade: None,
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -452,6 +453,8 @@ pub struct SimState {
     /// Whether the player has a corpse waiting to be retrieved at a
     /// graveyard. Cleared by `RetrieveCorpse`.
     pub corpse_available: bool,
+    /// Active trade window state. `None` means no trade in progress.
+    pub active_trade: Option<TradeState>,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
@@ -466,9 +469,9 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
-    Keybindings, LfgListCounts, ModifierKeys, NetStats, PetBattleState, WowLabsAreaInfo,
-    WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite,
-    WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    Keybindings, LfgListCounts, ModifierKeys, NetStats, PetBattleState, TradeState,
+    WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
+    WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {
