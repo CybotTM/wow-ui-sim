@@ -270,12 +270,28 @@ fn register_event_registration(state: &mut LuaState, table: GcRef<Table>) -> Lua
 }
 
 fn register_event_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_event_callback_listeners(state, table)?;
+    register_named_callback_table(state, table)?;
+    Ok(())
+}
+
+fn register_event_callback_listeners(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
         "RegisterEventCallback",
         events::register_event_callback,
     )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "RegisterUnitEventCallback",
+        events::register_unit_event_callback,
+    )?;
+    Ok(())
+}
+
+fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -293,12 +309,6 @@ fn register_event_callbacks(state: &mut LuaState, table: GcRef<Table>) -> LuaRes
         table,
         "TriggerEvent",
         callbacks::trigger_callback_event,
-    )?;
-    table_set_rust_fn(
-        state,
-        table,
-        "RegisterUnitEventCallback",
-        events::register_unit_event_callback,
     )?;
     Ok(())
 }
