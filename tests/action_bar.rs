@@ -171,6 +171,30 @@ fn test_main_action_bar_visible_after_startup() {
 }
 
 #[test]
+fn test_main_action_bar_end_caps_visible_after_startup() {
+    let env = env_with_action_bar();
+
+    let (shown, left_atlas, right_atlas): (bool, String, String) = env
+        .eval(
+            r#"
+            if not MainActionBar or not MainActionBar.EndCaps then
+                return false, "", ""
+            end
+            local left = MainActionBar.EndCaps.LeftEndCap
+            local right = MainActionBar.EndCaps.RightEndCap
+            return MainActionBar.EndCaps:IsShown(),
+                   (left and left.GetAtlas and left:GetAtlas()) or "",
+                   (right and right.GetAtlas and right:GetAtlas()) or ""
+            "#,
+        )
+        .unwrap();
+
+    assert!(shown, "MainActionBar.EndCaps should be shown after startup");
+    assert_eq!(left_atlas, "ui-hud-actionbar-gryphon-left");
+    assert_eq!(right_atlas, "ui-hud-actionbar-gryphon-right");
+}
+
+#[test]
 fn test_action_buttons_visible_after_startup() {
     let env = env_with_action_bar();
 
