@@ -4,11 +4,12 @@ mod achievement_info;
 mod area_poi;
 mod auction_house;
 mod battle_net;
-mod c_spell;
 mod c_map;
+mod c_spell;
 mod character_services;
 mod chat_bubbles;
 mod club_info;
+mod creature_info;
 mod death_recap;
 mod encounter_journal;
 mod gossip_info;
@@ -19,19 +20,19 @@ mod lfg_info;
 mod mythic_plus;
 mod nameplate;
 mod party_info;
-mod quest_log;
-mod scenario_info;
 mod pet_battles;
 mod player_info;
 mod professions;
+mod quest_log;
+mod scenario_info;
 mod small_namespaces;
 mod small_probes;
+mod social;
 mod summon_info;
 mod tooltip_info;
 mod traits;
 mod transmog;
 mod tutorial;
-mod social;
 mod voice_chat;
 
 use crate::lua_api::methods::{borrow_state_mut, create_string, val_to_string};
@@ -60,6 +61,17 @@ const WORLD_LOOT_TOOLTIP_INVENTORY_TYPE: f64 = 13.0;
 const WORLD_CURSOR_GUID: &str = "WorldLootObject-0000-0000C0DE";
 
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
+    register_legacy_global_shims(lua)?;
+    let state = lua.state_mut();
+    seed_placeholder_global_tables(state);
+    register_item_trait_surfaces(state)?;
+    register_world_namespace_surfaces(state)?;
+    register_social_namespace_surfaces(state)?;
+    register_group_activity_surfaces(state)?;
+    Ok(())
+}
+
+fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "PlaySound", noop)?;
     LuaApiMut::register_function(lua, "PlaySoundFile", noop)?;
     LuaApiMut::register_function(lua, "StopSound", noop)?;
@@ -71,12 +83,17 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
     LuaApiMut::register_function(lua, "strsub", strsub)?;
+    Ok(())
+}
 
-    let state = lua.state_mut();
+fn seed_placeholder_global_tables(state: &mut LuaState) {
     ensure_global_table(state, "UISpecialFrames");
     ensure_global_table(state, "StaticPopupDialogs");
     ensure_global_table(state, "UIPanelWindows");
     ensure_global_table(state, "SOUNDKIT");
+}
+
+fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     item_spell::register_item_and_spell_surfaces(state)?;
     item_socket_info::register_item_socket_info_surface(state)?;
     professions::register_profession_surface(state)?;
@@ -85,28 +102,41 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     transmog::register_transmog_surface(state)?;
     tutorial::register_tutorial_surface(state)?;
     heirloom::register_heirloom_surface(state)?;
+    c_spell::register_c_spell_surface(state)?;
+    Ok(())
+}
+
+fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_map::register_c_map_surface(state)?;
     achievement_info::register_achievement_info_surface(state)?;
     area_poi::register_area_poi_surface(state)?;
     auction_house::register_auction_house_surface(state)?;
-    battle_net::register_battle_net_surface(state)?;
-    c_spell::register_c_spell_surface(state)?;
-    character_services::register_character_services_surface(state)?;
-    chat_bubbles::register_chat_bubbles_surface(state)?;
-    club_info::register_club_info_surface(state)?;
-    death_recap::register_death_recap_surface(state)?;
+    creature_info::register_creature_info_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;
     gossip_info::register_gossip_info_surface(state)?;
     mythic_plus::register_mythic_plus_surface(state)?;
+    scenario_info::register_scenario_info_surface(state)?;
     nameplate::register_nameplate_surface(state)?;
+    Ok(())
+}
+
+fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
+    battle_net::register_battle_net_surface(state)?;
+    character_services::register_character_services_surface(state)?;
+    chat_bubbles::register_chat_bubbles_surface(state)?;
+    club_info::register_club_info_surface(state)?;
+    voice_chat::register_voice_chat_surface(state)?;
+    social::register_social_surface(state)?;
+    summon_info::register_summon_info_surface(state)?;
+    Ok(())
+}
+
+fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
+    death_recap::register_death_recap_surface(state)?;
     party_info::register_party_info_surface(state)?;
     player_info::register_player_info_surface(state)?;
     lfg_info::register_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
-    scenario_info::register_scenario_info_surface(state)?;
-    summon_info::register_summon_info_surface(state)?;
-    voice_chat::register_voice_chat_surface(state)?;
-    social::register_social_surface(state)?;
     small_namespaces::register_small_namespaces(state)?;
     small_probes::register_small_probes_surface(state)?;
     Ok(())
