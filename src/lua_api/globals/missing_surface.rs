@@ -83,6 +83,7 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
     LuaApiMut::register_function(lua, "strsub", strsub)?;
+    LuaApiMut::register_function(lua, "strcmputf8i", strcmputf8i)?;
     Ok(())
 }
 
@@ -233,6 +234,19 @@ fn strsub(state: &mut LuaState) -> LuaResult<u32> {
     };
     let value = create_string(state, &result);
     state.push(value);
+    Ok(1)
+}
+
+fn strcmputf8i(state: &mut LuaState) -> LuaResult<u32> {
+    let left = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    let right = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let ordering = left.to_lowercase().cmp(&right.to_lowercase());
+    let result = match ordering {
+        std::cmp::Ordering::Less => -1.0,
+        std::cmp::Ordering::Equal => 0.0,
+        std::cmp::Ordering::Greater => 1.0,
+    };
+    state.push(Val::Num(result));
     Ok(1)
 }
 
