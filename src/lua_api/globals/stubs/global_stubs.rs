@@ -95,8 +95,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "IsOnGroundFloorInJailersTower",
     // IsShiftKeyDown is SimState-backed in modifier_keys.rs, not a stub.
     "IsThreatWarningEnabled",
-    "IsUsingVoiceChat",
-    "IsVoiceEnabled",
     "NeedToDisplayDisclaimer",
     "PetUsesPetFrame",
     // PlayerIsTimerunning is SimState-backed in rilua_timerunning.rs, not a stub.
@@ -115,10 +113,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitOnTaxi",
     "UnitPVPName",
     "UnitPlayerControlled",
-    "VoiceChat_IsConnecting",
-    "VoiceChat_IsDeafened",
-    "VoiceChat_IsMuted",
-    "VoiceChat_IsTalking",
 ];
 
 static GLOBAL_ZERO_STUBS: &[&str] = &[

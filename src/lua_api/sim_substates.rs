@@ -115,6 +115,18 @@ pub struct VoiceChatState {
     pub muted: bool,
     pub deafened: bool,
     pub headset_mode: bool,
+    /// Whether voice chat is enabled in settings. Drives `IsVoiceEnabled`.
+    /// Default true — retail ships with voice chat enabled by default.
+    pub enabled: bool,
+    /// Whether the player is actively using voice chat (connected and
+    /// in a channel). Drives `IsUsingVoiceChat`. Default false.
+    pub using: bool,
+    /// Whether the voice-chat client is currently establishing a
+    /// connection. Drives `VoiceChat_IsConnecting`.
+    pub connecting: bool,
+    /// Whether the local player is currently transmitting voice.
+    /// Drives `VoiceChat_IsTalking`.
+    pub talking: bool,
 }
 
 impl Default for VoiceChatState {
@@ -125,6 +137,10 @@ impl Default for VoiceChatState {
             muted: false,
             deafened: false,
             headset_mode: false,
+            enabled: true,
+            using: false,
+            connecting: false,
+            talking: false,
         }
     }
 }

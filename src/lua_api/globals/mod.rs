@@ -80,6 +80,7 @@ pub mod trade_verbs;
 pub mod unit_api;
 pub mod unit_probes;
 pub mod utility_system_spell;
+pub mod voice_chat_probes;
 pub mod voice_chat_verbs;
 pub mod wowlabs;
 pub mod zone_text;
