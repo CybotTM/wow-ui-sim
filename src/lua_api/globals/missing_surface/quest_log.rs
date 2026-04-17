@@ -22,6 +22,7 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::sim_substates::QuestLogEntry;
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -93,21 +94,44 @@ fn get_info(state: &mut LuaState) -> LuaResult<u32> {
     let Some(entry) = entry else { return Ok(0) };
 
     let t = create_table(state);
+    write_quest_identity_fields(state, t, &entry, log_index);
+    write_quest_classification_flags(state, t, &entry);
+    write_quest_constant_stub_fields(state, t, &entry);
+    state.push(t);
+    Ok(1)
+}
+
+fn write_quest_identity_fields(
+    state: &mut LuaState,
+    t: Val,
+    entry: &QuestLogEntry,
+    log_index: i32,
+) {
     table_set(state, t, "questID", Val::Num(entry.quest_id as f64));
     let title = create_string(state, &entry.title);
     table_set(state, t, "title", title);
     table_set(state, t, "level", Val::Num(entry.level as f64));
     table_set(state, t, "questLogIndex", Val::Num(log_index as f64));
+    table_set(state, t, "difficultyLevel", Val::Num(entry.level as f64));
     table_set(state, t, "isComplete", Val::Bool(entry.is_complete));
     table_set(state, t, "isFailed", Val::Bool(entry.is_failed));
+}
+
+fn write_quest_classification_flags(state: &mut LuaState, t: Val, entry: &QuestLogEntry) {
     table_set(state, t, "isMeta", Val::Bool(entry.is_meta));
     table_set(state, t, "isWorldQuest", Val::Bool(entry.is_world_quest));
+    table_set(state, t, "isTask", Val::Bool(entry.is_world_quest));
+    table_set(state, t, "isOnMap", Val::Bool(entry.map_id.is_some()));
+}
+
+/// Fields that the sim always reports with a constant value — headers,
+/// bounty/story categories, POI flags, sort/scaling toggles, and the
+/// campaign/suggestedGroup identifiers we don't model.
+fn write_quest_constant_stub_fields(state: &mut LuaState, t: Val, _entry: &QuestLogEntry) {
     table_set(state, t, "isHeader", Val::Bool(false));
     table_set(state, t, "isCollapsed", Val::Bool(false));
-    table_set(state, t, "isTask", Val::Bool(entry.is_world_quest));
     table_set(state, t, "isBounty", Val::Bool(false));
     table_set(state, t, "isStory", Val::Bool(false));
-    table_set(state, t, "isOnMap", Val::Bool(entry.map_id.is_some()));
     table_set(state, t, "hasLocalPOI", Val::Bool(false));
     table_set(state, t, "isHidden", Val::Bool(false));
     table_set(state, t, "isAutoComplete", Val::Bool(false));
@@ -116,10 +140,7 @@ fn get_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, t, "isScaling", Val::Bool(false));
     table_set(state, t, "readyForTranslation", Val::Bool(false));
     table_set(state, t, "campaignID", Val::Num(0.0));
-    table_set(state, t, "difficultyLevel", Val::Num(entry.level as f64));
     table_set(state, t, "suggestedGroup", Val::Num(0.0));
-    state.push(t);
-    Ok(1)
 }
 
 fn get_next_waypoint(state: &mut LuaState) -> LuaResult<u32> {
