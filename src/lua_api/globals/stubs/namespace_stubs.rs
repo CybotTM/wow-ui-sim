@@ -10,12 +10,6 @@ use super::{
 
 type NsStub = (&'static str, &'static str, RustFn);
 
-fn stub_false_false(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    state.push(Val::Bool(false));
-    Ok(2)
-}
-
 static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AchievementInfo GetRewardItemID / GetAchievementInfo are
     // SimState-backed (via `achievements` map) in
