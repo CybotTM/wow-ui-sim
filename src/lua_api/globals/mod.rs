@@ -10,6 +10,7 @@ pub mod admin_equipment;
 pub mod admin_events;
 pub mod admin_mail;
 pub mod admin_movement;
+pub mod admin_party_target_helpers;
 pub mod admin_premade;
 pub mod admin_pvp_guild;
 pub mod admin_spec;
