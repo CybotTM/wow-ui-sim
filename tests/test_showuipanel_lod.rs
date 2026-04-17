@@ -18,10 +18,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    (
-        "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame_Mainline.toc",
-    ),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -65,10 +62,7 @@ const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    (
-        "Blizzard_FrameXMLUtil",
-        "Blizzard_FrameXMLUtil_Mainline.toc",
-    ),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
@@ -118,6 +112,17 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
+fn clear_recorded_lua_errors(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.lua_errors.clear();
+    state.lua_error_records.clear();
+    state.lua_error_counts.clear();
+}
+
+fn recorded_lua_errors(env: &WowLuaEnv) -> Vec<String> {
+    env.state().borrow().lua_errors.clone()
+}
+
 #[test]
 fn show_macro_frame_loads_and_populates_selector() {
     test_timeout! {
@@ -163,6 +168,7 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
     test_timeout! {
         let env = setup_env();
         common::install_error_collector(&env, "__spellbook_keybind_errors");
+        clear_recorded_lua_errors(&env);
 
         let result: String = env.eval(r#"
             local loadedBefore = C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")
@@ -187,6 +193,14 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
         );
 
         env.send_key_press("S", None).expect("S keybind failed");
+
+        let recorded_errors = recorded_lua_errors(&env);
+        assert!(
+            recorded_errors.is_empty(),
+            "Opening spellbook through S produced {} recorded Lua error(s):\n{:#?}",
+            recorded_errors.len(),
+            recorded_errors,
+        );
 
         let errors = common::drain_string_table(&env, "__spellbook_keybind_errors");
         assert!(
@@ -221,6 +235,7 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
     test_timeout! {
         let env = setup_env();
         common::install_error_collector(&env, "__talents_keybind_errors");
+        clear_recorded_lua_errors(&env);
 
         let result: String = env.eval(r#"
             local loadedBefore = C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")
@@ -245,6 +260,14 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
         );
 
         env.send_key_press("N", None).expect("N keybind failed");
+
+        let recorded_errors = recorded_lua_errors(&env);
+        assert!(
+            recorded_errors.is_empty(),
+            "Opening talents through N produced {} recorded Lua error(s):\n{:#?}",
+            recorded_errors.len(),
+            recorded_errors,
+        );
 
         let errors = common::drain_string_table(&env, "__talents_keybind_errors");
         assert!(

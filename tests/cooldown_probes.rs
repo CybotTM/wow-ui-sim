@@ -33,7 +33,10 @@ fn get_spell_cooldown_reads_spell_cooldowns_entry() {
     );
     let (start, duration, _enable, _mod): (f64, f64, i32, f64) =
         env.eval("return GetSpellCooldown(12345)").unwrap();
-    assert!((start - now).abs() < 0.5, "start should match the seeded cooldown");
+    assert!(
+        (start - now).abs() < 0.5,
+        "start should match the seeded cooldown"
+    );
     assert_eq!(duration, 30.0);
 }
 
@@ -121,8 +124,7 @@ fn spell_bonus_damage_and_healing_share_intellect_bucket() {
 #[test]
 fn get_spell_autocast_always_false() {
     let env = env();
-    let (castable, casting): (bool, bool) =
-        env.eval("return GetSpellAutocast(12345)").unwrap();
+    let (castable, casting): (bool, bool) = env.eval("return GetSpellAutocast(12345)").unwrap();
     assert!(!castable);
     assert!(!casting);
 }
