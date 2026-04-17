@@ -468,59 +468,59 @@ fn normalize_highlight_range(start: i32, end: i32, len: i32) -> (i32, i32) {
 // register_editbox
 // ---------------------------------------------------------------------------
 
+const EDITBOX_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    // Focus state
+    ("SetFocus", set_focus),
+    ("ClearFocus", clear_focus),
+    ("HasFocus", has_focus),
+    ("HasText", has_text),
+    // Cursor + length
+    ("SetCursorPosition", set_cursor_position),
+    ("GetCursorPosition", get_cursor_position),
+    ("GetNumLetters", get_num_letters),
+    ("SetMaxLetters", set_max_letters),
+    ("GetMaxLetters", get_max_letters),
+    // Mode flags
+    ("SetMultiLine", set_multi_line),
+    ("IsMultiLine", is_multi_line),
+    ("SetAutoFocus", set_auto_focus),
+    ("IsAutoFocus", is_auto_focus),
+    ("SetNumeric", set_numeric),
+    ("IsNumeric", is_numeric),
+    ("SetPassword", set_password),
+    ("IsPassword", is_password),
+    // Numeric helpers
+    ("SetNumber", set_number),
+    ("GetNumber", get_number),
+    // Input history
+    ("AddHistoryLine", add_history_line),
+    ("GetHistoryLines", get_history_lines),
+    ("SetHistoryLines", set_history_lines),
+    ("ClearHistory", clear_history),
+    // IME / language
+    ("GetInputLanguage", get_input_language),
+    ("ToggleInputLanguage", toggle_input_language),
+    ("ResetInputMode", reset_input_mode),
+    // Layout / display
+    ("SetTextInsets", set_text_insets),
+    ("SetSpacing", set_spacing),
+    ("GetSpacing", get_spacing),
+    ("GetTextInsets", get_text_insets),
+    ("GetDisplayText", get_display_text),
+    ("Insert", insert),
+    // Cursor blink + nav
+    ("SetBlinkSpeed", set_blink_speed),
+    ("GetBlinkSpeed", get_blink_speed),
+    ("SetAltArrowKeyMode", set_alt_arrow_key_mode),
+    ("GetAltArrowKeyMode", get_alt_arrow_key_mode),
+    // Selection
+    ("HighlightText", highlight_text),
+    ("ClearHighlightText", clear_highlight_text),
+];
+
 pub(super) fn register_editbox(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetFocus", set_focus)?;
-    table_set_rust_fn(state, metatable, "ClearFocus", clear_focus)?;
-    table_set_rust_fn(state, metatable, "HasFocus", has_focus)?;
-    table_set_rust_fn(state, metatable, "HasText", has_text)?;
-    table_set_rust_fn(state, metatable, "SetCursorPosition", set_cursor_position)?;
-    table_set_rust_fn(state, metatable, "GetCursorPosition", get_cursor_position)?;
-    table_set_rust_fn(state, metatable, "GetNumLetters", get_num_letters)?;
-    table_set_rust_fn(state, metatable, "SetMaxLetters", set_max_letters)?;
-    table_set_rust_fn(state, metatable, "GetMaxLetters", get_max_letters)?;
-    table_set_rust_fn(state, metatable, "SetMultiLine", set_multi_line)?;
-    table_set_rust_fn(state, metatable, "IsMultiLine", is_multi_line)?;
-    table_set_rust_fn(state, metatable, "SetAutoFocus", set_auto_focus)?;
-    table_set_rust_fn(state, metatable, "IsAutoFocus", is_auto_focus)?;
-    table_set_rust_fn(state, metatable, "SetNumeric", set_numeric)?;
-    table_set_rust_fn(state, metatable, "IsNumeric", is_numeric)?;
-    table_set_rust_fn(state, metatable, "SetPassword", set_password)?;
-    table_set_rust_fn(state, metatable, "IsPassword", is_password)?;
-    table_set_rust_fn(state, metatable, "SetNumber", set_number)?;
-    table_set_rust_fn(state, metatable, "GetNumber", get_number)?;
-    table_set_rust_fn(state, metatable, "AddHistoryLine", add_history_line)?;
-    table_set_rust_fn(state, metatable, "GetHistoryLines", get_history_lines)?;
-    table_set_rust_fn(state, metatable, "SetHistoryLines", set_history_lines)?;
-    table_set_rust_fn(state, metatable, "ClearHistory", clear_history)?;
-    table_set_rust_fn(state, metatable, "GetInputLanguage", get_input_language)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "ToggleInputLanguage",
-        toggle_input_language,
-    )?;
-    table_set_rust_fn(state, metatable, "ResetInputMode", reset_input_mode)?;
-    table_set_rust_fn(state, metatable, "SetTextInsets", set_text_insets)?;
-    table_set_rust_fn(state, metatable, "SetSpacing", set_spacing)?;
-    table_set_rust_fn(state, metatable, "GetSpacing", get_spacing)?;
-    table_set_rust_fn(state, metatable, "GetTextInsets", get_text_insets)?;
-    table_set_rust_fn(state, metatable, "GetDisplayText", get_display_text)?;
-    table_set_rust_fn(state, metatable, "Insert", insert)?;
-    table_set_rust_fn(state, metatable, "SetBlinkSpeed", set_blink_speed)?;
-    table_set_rust_fn(state, metatable, "GetBlinkSpeed", get_blink_speed)?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "SetAltArrowKeyMode",
-        set_alt_arrow_key_mode,
-    )?;
-    table_set_rust_fn(
-        state,
-        metatable,
-        "GetAltArrowKeyMode",
-        get_alt_arrow_key_mode,
-    )?;
-    table_set_rust_fn(state, metatable, "HighlightText", highlight_text)?;
-    table_set_rust_fn(state, metatable, "ClearHighlightText", clear_highlight_text)?;
+    for (name, func) in EDITBOX_METHODS {
+        table_set_rust_fn(state, metatable, name, *func)?;
+    }
     Ok(())
 }
