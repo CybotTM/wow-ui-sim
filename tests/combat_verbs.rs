@@ -188,6 +188,19 @@ fn spell_is_targeting_defaults_false() {
     assert!(!targeting, "SpellIsTargeting should default false");
 }
 
+#[test]
+fn spell_item_targeting_helpers_default_false() {
+    let env = env();
+    let (can_target_item, can_target_item_id): (bool, bool) = env
+        .eval("return SpellCanTargetItem(), SpellCanTargetItemID()")
+        .unwrap();
+    assert!(!can_target_item, "SpellCanTargetItem should default false");
+    assert!(
+        !can_target_item_id,
+        "SpellCanTargetItemID should default false"
+    );
+}
+
 // ── Monotonic cast ids ────────────────────────────────────────────────────────
 
 #[test]

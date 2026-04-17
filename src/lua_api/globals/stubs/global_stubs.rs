@@ -30,8 +30,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "LogoutStatusFrame_StartLogout",
     "LootSlot",
     "MacroFrameTab_OnClick",
-    "MoveForwardStart",
-    "MoveForwardStop",
     "OpenWorldMap",
     "PlayMusic",
     "PlaySound",

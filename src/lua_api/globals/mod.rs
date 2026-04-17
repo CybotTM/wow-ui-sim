@@ -48,6 +48,7 @@ pub mod lua_duration_object;
 pub mod mail_verbs;
 pub mod missing_surface;
 pub mod modifier_keys;
+pub mod movement_verbs;
 pub mod net_stats;
 pub mod offer_verbs;
 pub mod pet_battles;
