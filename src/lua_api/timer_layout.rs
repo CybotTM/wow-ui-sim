@@ -257,6 +257,12 @@ fn timer_handle_cancel(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── Shared timer helpers ─────────────────────────────────────────────────────
 
+/// `C_Timer.NewTimerID()` — hand out a fresh opaque timer id.
+fn timer_new_timer_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(next_timer_id() as f64));
+    Ok(1)
+}
+
 /// Parse and validate the seconds argument (stack index 1) for `NewTicker`/`NewTimer`.
 fn parse_validated_seconds(state: &LuaState, fn_name: &str) -> LuaResult<f64> {
     match stack_val(state, 1) {
@@ -569,6 +575,7 @@ fn register_c_timer(lua: &mut rilua::Lua) -> LuaResult<()> {
     let c_timer_ref = {
         let builder = TableBuilder::new(state)
             .set_function("After", timer_after)?
+            .set_function("NewTimerID", timer_new_timer_id)?
             .set_function("NewTicker", timer_new_ticker)?
             .set_function("NewTimer", timer_new_timer)?;
         builder.table_ref()
