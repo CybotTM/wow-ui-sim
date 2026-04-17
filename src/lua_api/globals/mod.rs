@@ -56,6 +56,7 @@ pub mod mail_verbs;
 pub mod message_verbs;
 pub mod missing_surface;
 pub mod modifier_keys;
+pub mod mouse_probes;
 pub mod movement_verbs;
 pub mod net_stats;
 pub mod offer_verbs;

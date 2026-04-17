@@ -1,0 +1,56 @@
+//! Integration tests for `src/lua_api/globals/mouse_probes.rs`.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("WowLuaEnv init")
+}
+
+// ── GetCursorPosition ─────────────────────────────────────────────────────────
+
+#[test]
+fn get_cursor_position_defaults_to_zero() {
+    let env = env();
+    let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+    assert_eq!(x, 0.0);
+    assert_eq!(y, 0.0);
+}
+
+#[test]
+fn get_cursor_position_reads_mouse_position() {
+    let env = env();
+    env.state().borrow_mut().set_mouse_position(Some((320.5, 240.25)));
+    let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+    assert!((x - 320.5).abs() < 1e-3);
+    assert!((y - 240.25).abs() < 1e-3);
+}
+
+// ── GetMouseFocus ─────────────────────────────────────────────────────────────
+
+#[test]
+fn get_mouse_focus_nil_when_no_hovered_frame() {
+    let env = env();
+    let v: Option<String> = env.eval("return GetMouseFocus()").unwrap();
+    assert_eq!(v, None);
+}
+
+#[test]
+fn get_mouse_focus_returns_hovered_frame_userdata() {
+    let env = env();
+    let frame_id: i64 = env
+        .eval(r#"local f = CreateFrame("Frame", "MouseFocusTestFrame"); return f:GetID()"#)
+        .unwrap();
+
+    {
+        let mut st = env.state().borrow_mut();
+        let id = st
+            .widgets
+            .get_id_by_name("MouseFocusTestFrame")
+            .expect("test frame should exist");
+        st.hovered_frame = Some(id);
+        let _ = frame_id; // silence unused when GetID returned 0
+    }
+
+    let name: String = env.eval("return GetMouseFocus():GetName()").unwrap();
+    assert_eq!(name, "MouseFocusTestFrame");
+}

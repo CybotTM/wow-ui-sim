@@ -124,7 +124,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetContainerNumFreeSlots is SimState-backed in inventory_counts.rs,
     // not a stub.
     "GetCurrentGuildBankTab",
-    "GetCursorPosition",
+    // GetCursorPosition is SimState-backed in mouse_probes.rs, not a stub.
     // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
     // not a stub.
     "GetFactionInfoByID",
@@ -149,7 +149,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetMerchantNumItems is SimState-backed in inventory_counts.rs, not a stub.
     "GetMirrorTimerInfo",
     "GetMirrorTimerProgress",
-    "GetMouseFocus",
+    // GetMouseFocus is SimState-backed in mouse_probes.rs, not a stub.
     "GetNextInteractUnit",
     // GetNumAuctionItems is SimState-backed in inventory_counts.rs, not a stub.
     // GetNumBattlegroundEntries is SimState-backed in
