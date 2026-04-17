@@ -60,6 +60,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::locale_info::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
     super::quest_surface::register_all(lua)?;
+    super::missing_surface::register_quest_log_overrides(lua)?;
     super::lua_duration_object::register_lua_duration_object(lua)?;
     super::combat_verbs::register_all(lua)?;
     super::inventory_verbs::register_all(lua)?;

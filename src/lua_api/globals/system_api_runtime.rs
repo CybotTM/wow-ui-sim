@@ -9,8 +9,8 @@
 //! # Ported surface
 //!
 //! - `C_UIWidgetManager.GetPowerBarWidgetSetID` → returns `0`
-//! - `C_PlayerInfo.IsPlayerInRPE`               → returns `false`
-//! - `C_PlayerInfo.GetAlternateFormInfo`         → returns `false, false`
+//! - `C_PlayerInfo.IsPlayerInRPE`               → now in `missing_surface/player_info.rs`
+//! - `C_PlayerInfo.GetAlternateFormInfo`         → now in `missing_surface/player_info.rs`
 //!
 //! `UpdateUIParentPosition` is NOT here — it is already registered in
 //! `register.rs` by a parallel agent.
