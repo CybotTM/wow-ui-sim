@@ -205,10 +205,10 @@ pub use super::state_types::{
     AuctionBrowseResult, AuctionReplicateItem, BagItem, BnetFriend, BnetGameAccount, ChatBubble,
     CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity,
     GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord,
-    MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRun,
-    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusState, MythicPlusWeeklyBest,
-    NilSymbolAccess, PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState,
-    SocialFriend, SummonRequestState, WorldState,
+    MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
+    MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
+    PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
+    SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -711,14 +711,12 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow,
-    FactionEntry, GameRuleValue,
-    GameRulesState, GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts,
-    LootMethodState, MessageLogEntry, ModifierKeys, NetStats, PetBattlePet, PetBattleState,
-    PetState, TorghastState, TradeState,
-    VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
-    WowLabsDataManagerState,
-    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
-    QuestLogEntry, QuestLogState,
+    FactionEntry, GameRuleValue, GameRulesState, GossipOption, GossipQuestRow, GossipState,
+    Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, NetStats,
+    PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState, TorghastState,
+    TradeState, VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
+    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
+    WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {
@@ -841,47 +839,59 @@ fn default_maps() -> HashMap<i32, MapData> {
 /// treated as invalid by `IsValidAchievement`.
 fn default_achievements() -> HashMap<i32, AchievementInfo> {
     [
-        AchievementInfo {
-            achievement_id: 6,
-            name: "Level 10".into(),
-            points: 10,
-            description: "Reach Level 10.".into(),
-            flags: 0,
-            icon: 236377,
-            reward_text: String::new(),
-            is_guild: false,
-            is_statistic: false,
-            reward_item_id: None,
-        },
-        AchievementInfo {
-            achievement_id: 42,
-            name: "Explore Eastern Kingdoms".into(),
-            points: 30,
-            description: "Explore Eastern Kingdoms, revealing the covered areas of the world map."
-                .into(),
-            flags: 0,
-            icon: 236541,
-            reward_text: String::new(),
-            is_guild: false,
-            is_statistic: false,
-            reward_item_id: None,
-        },
-        AchievementInfo {
-            achievement_id: 558,
-            name: "Veteran of the Alliance".into(),
-            points: 25,
-            description: "Earn 100 honorable kills in a single battleground.".into(),
-            flags: 0,
-            icon: 236412,
-            reward_text: "Tabard reward".into(),
-            is_guild: false,
-            is_statistic: false,
-            reward_item_id: Some(43155),
-        },
+        achievement_level_ten(),
+        achievement_explore_eastern_kingdoms(),
+        achievement_veteran_of_the_alliance(),
     ]
     .into_iter()
     .map(|a| (a.achievement_id, a))
     .collect()
+}
+
+fn achievement_level_ten() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 6,
+        name: "Level 10".into(),
+        points: 10,
+        description: "Reach Level 10.".into(),
+        flags: 0,
+        icon: 236377,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_explore_eastern_kingdoms() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 42,
+        name: "Explore Eastern Kingdoms".into(),
+        points: 30,
+        description: "Explore Eastern Kingdoms, revealing the covered areas of the world map."
+            .into(),
+        flags: 0,
+        icon: 236541,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_veteran_of_the_alliance() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 558,
+        name: "Veteran of the Alliance".into(),
+        points: 25,
+        description: "Earn 100 honorable kills in a single battleground.".into(),
+        flags: 0,
+        icon: 236412,
+        reward_text: "Tabard reward".into(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: Some(43155),
+    }
 }
 
 /// Seed the `SimState.area_pois` table with one permanent and one
