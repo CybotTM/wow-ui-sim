@@ -6,6 +6,7 @@
 //! - `C_StableInfo.IsAtPetStable()` — reads `SimState.pet_stables_open`
 //! - `C_GarrisonInfo.HasGarrison()` — false (garrison not simulated)
 //! - `C_GarrisonInfo.GetGarrisonType()` — 0 (no garrison type)
+//! - `C_AssistedCombat.*` — empty rotation/action spell state by default
 //! - `C_Map.IsMapValidForNavigation(uiMapID)` — false (no nav mesh)
 //! - `C_PvP.IsMatchConsideredArena()` — false (not in arena by default)
 //! - `C_LossOfControl.GetActiveLossOfControlData(index)` — nil
@@ -13,7 +14,7 @@
 //! - `C_Bank.HasFullBankAccess()` — true (permissive default)
 
 use super::ensure_namespace;
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::methods::{borrow_state, create_string, create_table};
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -50,6 +51,33 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
         garrison_info,
         "GetGarrisonType",
         c_garrison_info_get_garrison_type,
+    )?;
+
+    // C_AssistedCombat
+    let assisted_combat = ensure_namespace(state, "C_AssistedCombat")?;
+    table_set_rust_fn(
+        state,
+        assisted_combat,
+        "GetActionSpell",
+        c_assisted_combat_get_action_spell,
+    )?;
+    table_set_rust_fn(
+        state,
+        assisted_combat,
+        "GetNextCastSpell",
+        c_assisted_combat_get_next_cast_spell,
+    )?;
+    table_set_rust_fn(
+        state,
+        assisted_combat,
+        "GetRotationSpells",
+        c_assisted_combat_get_rotation_spells,
+    )?;
+    table_set_rust_fn(
+        state,
+        assisted_combat,
+        "IsAvailable",
+        c_assisted_combat_is_available,
     )?;
 
     // C_Map
@@ -134,6 +162,30 @@ fn c_garrison_info_has_garrison(state: &mut LuaState) -> LuaResult<u32> {
 fn c_garrison_info_get_garrison_type(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
+}
+
+fn c_assisted_combat_get_action_spell(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_assisted_combat_get_next_cast_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_assisted_combat_get_rotation_spells(state: &mut LuaState) -> LuaResult<u32> {
+    let spells = create_table(state);
+    state.push(spells);
+    Ok(1)
+}
+
+fn c_assisted_combat_is_available(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    let reason = create_string(state, "Not available");
+    state.push(reason);
+    Ok(2)
 }
 
 fn c_map_is_map_valid_for_navigation(state: &mut LuaState) -> LuaResult<u32> {

@@ -74,6 +74,18 @@ fn test_spellbook_get_item_info_nil_invalid() {
 }
 
 #[test]
+fn test_spellbook_get_item_texture_valid() {
+    let env = env();
+    let is_number: bool = env
+        .eval("return type(C_SpellBook.GetSpellBookItemTexture(1, Enum.SpellBookSpellBank.Player)) == 'number'")
+        .unwrap();
+    assert!(
+        is_number,
+        "Slot 1 texture should return an icon file data id"
+    );
+}
+
+#[test]
 fn test_spellbook_has_pet_spells() {
     let env = env();
     let has: bool = env.eval("return C_SpellBook.HasPetSpells()").unwrap();
@@ -239,6 +251,45 @@ fn test_spell_get_school_string() {
     // Bitmask 1 = Physical, 2 = Holy, etc.
     let school: String = env.eval("return C_Spell.GetSchoolString(1)").unwrap();
     assert!(!school.is_empty());
+}
+
+// ============================================================================
+// C_AssistedCombat
+// ============================================================================
+
+#[test]
+fn test_assisted_combat_rotation_spells_returns_table() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local spells = C_AssistedCombat.GetRotationSpells()
+            if type(spells) ~= "table" then
+                return "not_table:" .. tostring(type(spells))
+            end
+            local count = 0
+            for _ in ipairs(spells) do
+                count = count + 1
+            end
+            return "ok:" .. tostring(count)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok:0");
+}
+
+#[test]
+fn test_assisted_combat_is_available_shape() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local available, reason = C_AssistedCombat.IsAvailable()
+            return tostring(available) .. ":" .. tostring(reason)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "false:Not available");
 }
 
 #[test]

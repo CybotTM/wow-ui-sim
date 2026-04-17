@@ -154,6 +154,12 @@ pub(super) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table_ref,
+        "GetSpellBookItemTexture",
+        c_spell_book_get_spell_book_item_texture,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
         "GetSpellBookItemAutoCast",
         c_spell_book_get_spell_book_item_auto_cast,
     )?;
@@ -218,6 +224,20 @@ fn c_spell_book_get_spell_book_item_cooldown(state: &mut LuaState) -> LuaResult<
     table_set(state, cooldown, "isEnabled", Val::Bool(false));
     table_set(state, cooldown, "modRate", Val::Num(1.0));
     state.push(cooldown);
+    Ok(1)
+}
+
+fn c_spell_book_get_spell_book_item_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let _spell_bank = Option::<i32>::from_stack(state, 2)?;
+    let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let icon_id = spells::get_spell(entry.spell_id)
+        .map(|spell| spell.icon_file_data_id)
+        .unwrap_or(136243);
+    state.push(Val::Num(icon_id as f64));
     Ok(1)
 }
 
