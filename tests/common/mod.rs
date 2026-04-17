@@ -143,7 +143,11 @@ pub fn install_error_collector(env: &WowLuaEnv, global_name: &str) {
         local target = {global_name:?}
         _G[target] = {{}}
         seterrorhandler(function(msg)
-            table.insert(_G[target], tostring(msg))
+            local trace = ""
+            if type(debugstack) == "function" then
+                trace = "\n" .. tostring(debugstack())
+            end
+            table.insert(_G[target], tostring(msg) .. trace)
         end)
         "#
     ))

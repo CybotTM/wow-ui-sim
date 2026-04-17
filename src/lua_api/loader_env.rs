@@ -301,7 +301,13 @@ impl<'a> LoaderEnv<'a> {
                 call_args.push(frame);
                 call_args.push(event_name);
                 call_args.extend_from_slice(args);
-                let _ = crate::lua_api::methods::call_function_state(state, handler, &call_args);
+                if let Err(error) =
+                    crate::lua_api::script_helpers::call_void_function_with_fallback_state(
+                        state, handler, &call_args,
+                    )
+                {
+                    call_error_handler_state(state, &error);
+                }
                 Ok(())
             });
             if let Err(error) = result {

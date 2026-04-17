@@ -15,6 +15,7 @@
 //! dispatch module to seed default bindings and execute bound actions.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::{FromStack, IntoStack};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -373,7 +374,9 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
         return Ok(false);
     };
     eprintln!("[keybind] {} → {} → {}", key, action, ba.lua_code);
-    lua.exec(ba.lua_code)?;
+    if let Err(error) = lua.exec(ba.lua_code) {
+        call_error_handler_state(lua.state_mut(), &error.to_string());
+    }
     Ok(true)
 }
 
