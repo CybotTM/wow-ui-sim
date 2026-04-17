@@ -6,16 +6,55 @@
 //! them into the A_Admin TableBuilder chain.
 
 use super::admin::{build_mail, opt_string_stack};
-use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_bridge::FromStack;
+use crate::items;
+use crate::lua_api::methods::{borrow_state_mut, table_get};
+use crate::lua_api::state_types::MailAttachment;
+use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 // ── Mail ──────────────────────────────────────────────────────────────────────
 
-pub(super) fn add_mail(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_bridge::stack_val;
+fn parse_mail_items(state: &mut LuaState, value: Val) -> Vec<MailAttachment> {
+    let Val::Table(items_ref) = value else {
+        return Vec::new();
+    };
+    let Some(entries) = state
+        .gc
+        .tables
+        .get(items_ref)
+        .map(|table| table.array_slice().to_vec())
+    else {
+        return Vec::new();
+    };
 
+    entries
+        .iter()
+        .filter_map(|entry| {
+            let item_id = match table_get(state, *entry, "item_id") {
+                Val::Num(value) if value > 0.0 => value as u32,
+                _ => return None,
+            };
+            let count = match table_get(state, *entry, "count") {
+                Val::Num(value) if value > 0.0 => value as i32,
+                _ => 1,
+            };
+            let quality = match table_get(state, *entry, "quality") {
+                Val::Num(value) if value >= 0.0 => value as i32,
+                _ => items::get_item(item_id)
+                    .map(|item| item.quality as i32)
+                    .unwrap_or(1),
+            };
+            Some(MailAttachment {
+                item_id,
+                count,
+                quality,
+            })
+        })
+        .collect()
+}
+
+pub(super) fn add_mail(state: &mut LuaState) -> LuaResult<u32> {
     let sender = opt_string_stack(state, 1, "Unknown");
     let subject = opt_string_stack(state, 2, "No Subject");
     let body = opt_string_stack(state, 3, "");
@@ -23,8 +62,7 @@ pub(super) fn add_mail(state: &mut LuaState) -> LuaResult<u32> {
         Val::Num(n) => n as u64,
         _ => 0,
     };
-    // items table at arg 5 — parsed as empty for now (no mlua Table access in rilua path)
-    let items = Vec::new();
+    let items = parse_mail_items(state, stack_val(state, 5));
 
     let mut st = borrow_state_mut(state)?;
     let id = st.player.next_mail_id;

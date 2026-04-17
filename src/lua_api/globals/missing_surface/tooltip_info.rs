@@ -8,7 +8,7 @@ use super::{
 };
 use crate::items;
 use crate::lua_api::game_data::CLASS_LABELS;
-use crate::lua_api::globals::currency_data;
+use crate::lua_api::globals::{currency_data, profession_data};
 use crate::lua_api::globals::{spell_api, spellbook_data};
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, table_get, table_set,
@@ -533,6 +533,7 @@ fn register_item_spell_aura_methods(
                 "GetRecipeResultItemForOrder",
                 c_tooltip_get_recipe_result_item_for_order,
             ),
+            ("GetTradeSkillItem", c_tooltip_get_trade_skill_item),
             ("GetTradePlayerItem", c_tooltip_get_trade_player_item),
             ("GetTradeTargetItem", c_tooltip_get_trade_target_item),
             ("GetSocketedItem", c_tooltip_get_socketed_item),
@@ -572,6 +573,8 @@ fn register_spell_aura_unit_methods(
                 c_tooltip_get_unit_aura_by_aura_instance_id,
             ),
             ("GetHyperlink", c_tooltip_get_hyperlink),
+            ("GetInboxItem", c_tooltip_get_inbox_item),
+            ("GetSendMailItem", c_tooltip_get_send_mail_item),
             ("GetSpell", c_tooltip_get_spell),
             ("GetWorldCursor", c_tooltip_get_world_cursor),
             ("GetWorldLootObject", c_tooltip_get_world_loot_object),
@@ -796,10 +799,22 @@ fn c_tooltip_get_owned_item_by_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn recipe_output_item(recipe_id: i32) -> Option<u32> {
-    match recipe_id {
-        100005 => Some(229181),
-        _ => None,
+    profession_data::get_recipe(recipe_id)
+        .and_then(|recipe| (recipe.output_item_id != 0).then_some(recipe.output_item_id))
+}
+
+fn trade_skill_item_id(recipe_id: i32, reagent_index: Option<i32>) -> Option<u32> {
+    let recipe = profession_data::get_recipe(recipe_id)?;
+    let reagent_index = reagent_index.unwrap_or(0);
+    if reagent_index <= 0 {
+        return (recipe.output_item_id != 0).then_some(recipe.output_item_id);
     }
+
+    let zero_based = usize::try_from(reagent_index.saturating_sub(1)).ok()?;
+    recipe
+        .reagents
+        .get(zero_based)
+        .map(|reagent| reagent.item_id)
 }
 
 fn c_tooltip_get_recipe_result_item(state: &mut LuaState) -> LuaResult<u32> {
@@ -820,6 +835,16 @@ fn c_tooltip_get_recipe_result_item_for_order(state: &mut LuaState) -> LuaResult
     } else {
         empty_tooltip(state, TOOLTIP_TYPE_ITEM)
     };
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_trade_skill_item(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let reagent_index = Option::<i32>::from_stack(state, 2)?;
+    let tooltip = trade_skill_item_id(recipe_id, reagent_index)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
     state.push(tooltip);
     Ok(1)
 }
@@ -1040,6 +1065,55 @@ fn c_tooltip_get_hyperlink(state: &mut LuaState) -> LuaResult<u32> {
     } else {
         empty_tooltip(state, TOOLTIP_TYPE_ITEM)
     };
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn inbox_attachment_item_id(
+    state: &mut LuaState,
+    message_index: i32,
+    attachment_index: Option<i32>,
+) -> Option<u32> {
+    let zero_based_message = usize::try_from(message_index.saturating_sub(1)).ok()?;
+    let zero_based_attachment =
+        usize::try_from(attachment_index.unwrap_or(1).saturating_sub(1)).ok()?;
+    let st = borrow_state(state).ok()?;
+    st.player
+        .inbox
+        .get(zero_based_message)?
+        .items
+        .get(zero_based_attachment)
+        .map(|item| item.item_id)
+}
+
+fn send_mail_attachment_item_id(
+    state: &mut LuaState,
+    attachment_index: Option<i32>,
+) -> Option<u32> {
+    let zero_based = usize::try_from(attachment_index.unwrap_or(1).saturating_sub(1)).ok()?;
+    let st = borrow_state(state).ok()?;
+    st.player
+        .send_mail_items
+        .get(zero_based)
+        .and_then(|item| item.as_ref())
+        .map(|item| item.item_id)
+}
+
+fn c_tooltip_get_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
+    let message_index = i32::from_stack(state, 1)?;
+    let attachment_index = Option::<i32>::from_stack(state, 2)?;
+    let tooltip = inbox_attachment_item_id(state, message_index, attachment_index)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
+    state.push(tooltip);
+    Ok(1)
+}
+
+fn c_tooltip_get_send_mail_item(state: &mut LuaState) -> LuaResult<u32> {
+    let attachment_index = Option::<i32>::from_stack(state, 1)?;
+    let tooltip = send_mail_attachment_item_id(state, attachment_index)
+        .map(|item_id| tooltip_for_item_id(state, item_id))
+        .unwrap_or_else(|| empty_tooltip(state, TOOLTIP_TYPE_ITEM));
     state.push(tooltip);
     Ok(1)
 }

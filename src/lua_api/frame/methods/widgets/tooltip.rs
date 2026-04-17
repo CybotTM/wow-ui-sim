@@ -564,6 +564,38 @@ pub(super) fn set_trade_target_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_inbox_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let args = [stack_val(state, 2), stack_val(state, 3)];
+    let has_lines = populate_tooltip_from_method(state, tooltip_id, "GetInboxItem", &args, None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    Ok(0)
+}
+
+pub(super) fn set_send_mail_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let args = [stack_val(state, 2)];
+    let has_lines =
+        populate_tooltip_from_method(state, tooltip_id, "GetSendMailItem", &args, None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    Ok(0)
+}
+
+pub(super) fn set_trade_skill_item(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let args = [stack_val(state, 2), stack_val(state, 3)];
+    let has_lines =
+        populate_tooltip_from_method(state, tooltip_id, "GetTradeSkillItem", &args, None)?;
+    if has_lines {
+        fire_tooltip_script(state, tooltip_id, "OnTooltipSetItem");
+    }
+    Ok(0)
+}
+
 /// `Tooltip:SetOwner(frame, anchor, xOffset, yOffset)`
 pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
@@ -713,6 +745,9 @@ const TOOLTIP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("SetExistingSocketGem", set_existing_socket_gem),
     ("SetTradePlayerItem", set_trade_player_item),
     ("SetTradeTargetItem", set_trade_target_item),
+    ("SetInboxItem", set_inbox_item),
+    ("SetSendMailItem", set_send_mail_item),
+    ("SetTradeSkillItem", set_trade_skill_item),
     ("SetUnit", set_unit),
     ("SetUnitBuff", set_unit_buff),
     (
