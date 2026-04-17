@@ -9,44 +9,49 @@ fn env() -> WowLuaEnv {
 
 fn seed_factions(env: &WowLuaEnv) {
     let mut st = env.state().borrow_mut();
-    st.factions = vec![
-        FactionEntry {
-            faction_id: 1090,
-            name: "Kirin Tor".into(),
-            description: "The archmages of Dalaran.".into(),
-            standing: 8, // Exalted
-            bottom: 21_000,
-            top: 42_999,
-            earned: 32_000,
-            at_war: false,
-            can_toggle_at_war: false,
-            is_header: false,
-            is_collapsed: false,
-            has_rep: true,
-            is_watched: false,
-            is_child: false,
-            has_bonus_rep_gain: false,
-            can_be_lfg_bonus: false,
-        },
-        FactionEntry {
-            faction_id: 1091,
-            name: "The Wyrmrest Accord".into(),
-            description: "Defenders of Wyrmrest Temple.".into(),
-            standing: 6, // Honored
-            bottom: 3_000,
-            top: 8_999,
-            earned: 5_500,
-            at_war: true,
-            can_toggle_at_war: true,
-            is_header: false,
-            is_collapsed: false,
-            has_rep: true,
-            is_watched: false,
-            is_child: false,
-            has_bonus_rep_gain: true,
-            can_be_lfg_bonus: false,
-        },
-    ];
+    st.factions = vec![kirin_tor_entry(), wyrmrest_accord_entry()];
+}
+
+fn kirin_tor_entry() -> FactionEntry {
+    FactionEntry {
+        faction_id: 1090,
+        name: "Kirin Tor".into(),
+        description: "The archmages of Dalaran.".into(),
+        standing: 8, // Exalted
+        bottom: 21_000,
+        top: 42_999,
+        earned: 32_000,
+        at_war: false,
+        can_toggle_at_war: false,
+        is_header: false,
+        is_collapsed: false,
+        has_rep: true,
+        is_watched: false,
+        is_child: false,
+        has_bonus_rep_gain: false,
+        can_be_lfg_bonus: false,
+    }
+}
+
+fn wyrmrest_accord_entry() -> FactionEntry {
+    FactionEntry {
+        faction_id: 1091,
+        name: "The Wyrmrest Accord".into(),
+        description: "Defenders of Wyrmrest Temple.".into(),
+        standing: 6, // Honored
+        bottom: 3_000,
+        top: 8_999,
+        earned: 5_500,
+        at_war: true,
+        can_toggle_at_war: true,
+        is_header: false,
+        is_collapsed: false,
+        has_rep: true,
+        is_watched: false,
+        is_child: false,
+        has_bonus_rep_gain: true,
+        can_be_lfg_bonus: false,
+    }
 }
 
 fn fired(env: &WowLuaEnv, name: &str) -> bool {
