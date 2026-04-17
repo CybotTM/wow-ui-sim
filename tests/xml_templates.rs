@@ -318,6 +318,34 @@ fn test_create_frame_from_xml_function_inherit_append_preserves_order() {
 }
 
 #[test]
+fn test_create_frame_from_xml_intrinsic_method_onload_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlIntrinsicFastMixin = {}
+        function XmlIntrinsicFastMixin:OnPreLoad()
+            self.xmlIntrinsicLoaded = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlIntrinsicFastFrame" parent="UIParent" mixin="XmlIntrinsicFastMixin">
+        <Scripts><OnLoad method="OnPreLoad" intrinsicOrder="precall"/></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let loaded: bool = env
+        .eval("return XmlIntrinsicFastFrame.xmlIntrinsicLoaded == true")
+        .unwrap();
+    assert!(loaded, "XML intrinsic OnLoad should fire");
+}
+
+#[test]
 fn test_create_frame_from_xml_key_values_exist_before_template_child_onload() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

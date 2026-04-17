@@ -4,7 +4,7 @@
 use super::helpers::{append_parent_array_entry, apply_frame_mixins, resolve_global_path};
 use crate::lua_api::LoaderEnv;
 use crate::lua_api::methods::{
-    borrow_lua, borrow_state, borrow_state_mut, create_string, frame_ref, state_handle,
+    borrow_lua, borrow_state, borrow_state_mut, create_string, frame_ref, state_handle, table_set,
 };
 use crate::lua_api::script_helpers::{get_script, set_script};
 use crate::widget::WidgetType;
@@ -46,7 +46,6 @@ fn apply_runtime_template_chain_impl(
 ) -> LuaResult<()> {
     let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
         if let Some(frame) = direct_frame {
-            apply_frame_mixins(state, frame_id, frame.combined_mixin().as_deref());
             apply_template_key_values(state, frame_id, frame.all_key_values());
         }
         return Ok(());
@@ -62,9 +61,8 @@ fn apply_runtime_template_chain_impl(
     apply_chain_entries(state, frame_id, &chain)?;
 
     if let Some(frame) = direct_frame {
-        // XML direct mixins/key-values must exist before template child
-        // OnLoad handlers run, matching the loader chunk order.
-        apply_frame_mixins(state, frame_id, frame.combined_mixin().as_deref());
+        // XML direct key-values must exist before template child OnLoad
+        // handlers run, matching the loader chunk order.
         apply_template_key_values(state, frame_id, frame.all_key_values());
     }
 
@@ -624,6 +622,7 @@ enum FastHandlerRef<'a> {
 #[derive(Copy, Clone)]
 enum FastScriptInstall<'a> {
     Set(FastHandlerRef<'a>),
+    Intrinsic(FastHandlerRef<'a>),
     Chain {
         handler: FastHandlerRef<'a>,
         new_first: bool,
@@ -638,9 +637,6 @@ fn collect_fast_handler_group<'a>(
         let Some(script) = script else {
             continue;
         };
-        if script.intrinsic_order.is_some() {
-            return None;
-        }
         if script
             .body
             .as_deref()
@@ -655,17 +651,21 @@ fn collect_fast_handler_group<'a>(
         } else {
             FastHandlerRef::NoOp
         };
-        let install = match script.inherit.as_deref() {
-            Some("append") => FastScriptInstall::Chain {
-                handler,
-                new_first: true,
-            },
-            Some("prepend") => FastScriptInstall::Chain {
-                handler,
-                new_first: false,
-            },
+        let install = match script.intrinsic_order.as_deref() {
+            Some("precall" | "postcall") => FastScriptInstall::Intrinsic(handler),
             Some(_) => return None,
-            None => FastScriptInstall::Set(handler),
+            None => match script.inherit.as_deref() {
+                Some("append") => FastScriptInstall::Chain {
+                    handler,
+                    new_first: true,
+                },
+                Some("prepend") => FastScriptInstall::Chain {
+                    handler,
+                    new_first: false,
+                },
+                Some(_) => return None,
+                None => FastScriptInstall::Set(handler),
+            },
         };
         handlers.push((handler_name, install));
     }
@@ -775,6 +775,14 @@ fn install_fast_handler(
             if let Some(handler) = build_fast_handler(state, handler_ref)? {
                 set_script(state, frame_id, handler_name, handler);
             }
+        }
+        FastScriptInstall::Intrinsic(handler_ref) => {
+            let Some(handler) = build_fast_handler(state, handler_ref)? else {
+                return Ok(());
+            };
+            let frame = frame_ref(state, frame_id)?;
+            let intrinsic_name = format!("{handler_name}_Intrinsic");
+            table_set(state, frame, &intrinsic_name, handler);
         }
         FastScriptInstall::Chain { handler, new_first } => {
             let Some(new_handler) = build_fast_handler(state, handler)? else {

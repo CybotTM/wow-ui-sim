@@ -216,6 +216,11 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
                 frame_id,
             );
         }
+        crate::lua_api::globals::create_frame::apply_frame_mixins(
+            state,
+            frame_id,
+            setup.frame.combined_mixin().as_deref(),
+        );
         if let Some(scripts) = setup.frame.scripts() {
             crate::lua_api::globals::create_frame::apply_template_scripts(state, frame_id, scripts)
                 .map_err(|error| crate::Error::Other(error.to_string()))?;
