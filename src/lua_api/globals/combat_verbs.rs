@@ -54,7 +54,11 @@ fn clear_cast_if_named(state: &mut LuaState, expected_name: &str) {
     let Ok(mut st) = borrow_state_mut(state) else {
         return;
     };
-    if st.casting.as_ref().is_some_and(|c| c.spell_name == expected_name) {
+    if st
+        .casting
+        .as_ref()
+        .is_some_and(|c| c.spell_name == expected_name)
+    {
         st.casting = None;
     }
 }

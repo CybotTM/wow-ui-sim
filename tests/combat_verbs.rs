@@ -30,7 +30,10 @@ fn cast_spell_by_id_no_arg_is_silent_noop() {
     let name: Option<String> = env
         .eval("CastSpellByID(); return (UnitCastingInfo('player'))")
         .unwrap();
-    assert!(name.is_none(), "no-arg CastSpellByID should leave casting nil");
+    assert!(
+        name.is_none(),
+        "no-arg CastSpellByID should leave casting nil"
+    );
 }
 
 // ── CastSpellByName ───────────────────────────────────────────────────────────
@@ -116,7 +119,10 @@ fn stop_attack_clears_auto_attack_only() {
         after_cast, "Fireball",
         "StopAttack must not clear a non-auto-attack cast"
     );
-    assert_eq!(after_stop, "", "StopAttack must clear the Auto Attack marker");
+    assert_eq!(
+        after_stop, "",
+        "StopAttack must clear the Auto Attack marker"
+    );
 }
 
 // ── ClickSpecialAbility ───────────────────────────────────────────────────────

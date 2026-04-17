@@ -429,17 +429,11 @@ fn test_profiler_app_vs_overall_metric_differ() {
 fn test_profiler_check_for_performance_message_reports_specific_addon() {
     let env = env_with_addons();
 
-    env.eval::<()>(
-        r#"
-        SetCVar("addonPerformanceMsgWarning", "0.01")
-        SetCVar("addonPerformanceMsgError", "0.02")
-        SetCVar("addonPerformanceMsgOverall", "0.75")
-        "#,
-    )
-    .unwrap();
-
     {
         let mut state = env.state().borrow_mut();
+        state.cvars.set("addonPerformanceMsgWarning", "0.01");
+        state.cvars.set("addonPerformanceMsgError", "0.02");
+        state.cvars.set("addonPerformanceMsgOverall", "0.75");
         state.app_frame_metrics.recent_frame_ms = std::collections::VecDeque::from([10.0; 10]);
         state.app_frame_metrics.session_total_ms = 100.0;
         state.app_frame_metrics.session_frame_count = 10;
@@ -475,19 +469,6 @@ fn test_profiler_check_for_performance_message_reports_specific_addon() {
             "#,
         )
         .unwrap();
-
-    let app_val: f64 = env
-        .eval("return C_AddOnProfiler.GetApplicationMetric(Enum.AddOnProfilerMetric.RecentAverageTime)")
-        .unwrap();
-    let overall_val: f64 = env
-        .eval("return C_AddOnProfiler.GetOverallMetric(Enum.AddOnProfilerMetric.RecentAverageTime)")
-        .unwrap();
-    let addon_val: f64 = env
-        .eval("return C_AddOnProfiler.GetAddOnMetric('MyAddon', Enum.AddOnProfilerMetric.RecentAverageTime)")
-        .unwrap();
-    eprintln!(
-        "profiler debug: app={app_val} overall={overall_val} addon={addon_val} encoded={encoded}"
-    );
 
     let parts: Vec<_> = encoded.split('|').collect();
     assert_ne!(encoded, "nil", "expected profiler message");

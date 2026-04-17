@@ -152,7 +152,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     if !fast_create_frame_profiling_enabled() {
         return setup.explicit_parent
             && setup.name != setup.parent
-            && setup.frame.all_key_values().next().is_none()
             && setup.frame.xml_attributes().is_none()
             && !scripts_need_slow_path;
     }
@@ -164,9 +163,6 @@ fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
     }
     if setup.name == setup.parent {
         miss_reasons.push("root_frame_reuse");
-    }
-    if setup.frame.all_key_values().next().is_some() {
-        miss_reasons.push("key_values");
     }
     if setup.frame.xml_attributes().is_some() {
         miss_reasons.push("xml_attributes");
@@ -198,11 +194,12 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             true,
             setup.frame.xml_id,
         )?;
-        crate::lua_api::globals::create_frame::apply_runtime_template_chain(
+        crate::lua_api::globals::create_frame::apply_runtime_template_chain_with_frame_overrides(
             state,
             frame_id,
             (!setup.inherits.is_empty()).then_some(setup.inherits),
             false,
+            setup.frame,
         )
         .map_err(|error| crate::Error::Other(error.to_string()))?;
         if let Some(parent_key) = setup.frame.parent_key.as_deref() {
@@ -219,11 +216,6 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
                 frame_id,
             );
         }
-        crate::lua_api::globals::create_frame::apply_frame_mixins(
-            state,
-            frame_id,
-            setup.frame.combined_mixin().as_deref(),
-        );
         if let Some(scripts) = setup.frame.scripts() {
             crate::lua_api::globals::create_frame::apply_template_scripts(state, frame_id, scripts)
                 .map_err(|error| crate::Error::Other(error.to_string()))?;

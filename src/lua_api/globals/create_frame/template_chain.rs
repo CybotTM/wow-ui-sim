@@ -24,7 +24,31 @@ pub(crate) fn apply_runtime_template_chain(
     inherits: Option<&str>,
     fire_on_load: bool,
 ) -> LuaResult<()> {
+    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, None)
+}
+
+pub(crate) fn apply_runtime_template_chain_with_frame_overrides(
+    state: &mut LuaState,
+    frame_id: u64,
+    inherits: Option<&str>,
+    fire_on_load: bool,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<()> {
+    apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, Some(frame))
+}
+
+fn apply_runtime_template_chain_impl(
+    state: &mut LuaState,
+    frame_id: u64,
+    inherits: Option<&str>,
+    fire_on_load: bool,
+    direct_frame: Option<&crate::xml::FrameXml>,
+) -> LuaResult<()> {
     let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
+        if let Some(frame) = direct_frame {
+            apply_frame_mixins(state, frame_id, frame.combined_mixin().as_deref());
+            apply_template_key_values(state, frame_id, frame.all_key_values());
+        }
         return Ok(());
     };
     let chain = crate::xml::get_template_chain(inherits);
@@ -36,6 +60,13 @@ pub(crate) fn apply_runtime_template_chain(
     let frame_name = frame_lookup_name(state, frame_id);
     apply_template_parent_links(state, frame_id, &chain)?;
     apply_chain_entries(state, frame_id, &chain)?;
+
+    if let Some(frame) = direct_frame {
+        // XML direct mixins/key-values must exist before template child
+        // OnLoad handlers run, matching the loader chunk order.
+        apply_frame_mixins(state, frame_id, frame.combined_mixin().as_deref());
+        apply_template_key_values(state, frame_id, frame.all_key_values());
+    }
 
     // The chain is base-to-derived. Install all parent-facing state first so
     // template child OnLoad/OnShow handlers can see derived key values and
@@ -588,7 +619,6 @@ enum FastHandlerRef<'a> {
     NoOp,
     Method(&'a str),
     Function(&'a str),
-    InlineBody(&'a str),
 }
 
 #[derive(Copy, Clone)]
@@ -611,17 +641,19 @@ fn collect_fast_handler_group<'a>(
         if script.intrinsic_order.is_some() {
             return None;
         }
-        let body = script
+        if script
             .body
             .as_deref()
-            .map(str::trim)
-            .filter(|body| !body.is_empty());
-        let handler = match (script.method.as_deref(), script.function.as_deref(), body) {
-            (Some(method_name), None, None) => FastHandlerRef::Method(method_name),
-            (None, Some(function_name), None) => FastHandlerRef::Function(function_name),
-            (None, None, Some(body)) => FastHandlerRef::InlineBody(body),
-            (None, None, None) => FastHandlerRef::NoOp,
-            _ => return None,
+            .is_some_and(|body| !body.trim().is_empty())
+        {
+            return None;
+        }
+        let handler = if let Some(method_name) = script.method.as_deref() {
+            FastHandlerRef::Method(method_name)
+        } else if let Some(function_name) = script.function.as_deref() {
+            FastHandlerRef::Function(function_name)
+        } else {
+            FastHandlerRef::NoOp
         };
         let install = match script.inherit.as_deref() {
             Some("append") => FastScriptInstall::Chain {
@@ -721,8 +753,6 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
 
 fn build_fast_handler(
     state: &mut LuaState,
-    frame_id: u64,
-    handler_name: &'static str,
     handler_ref: FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
@@ -730,9 +760,6 @@ fn build_fast_handler(
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
-        }
-        FastHandlerRef::InlineBody(body) => {
-            build_inline_body_handler(state, frame_id, handler_name, body).map(Some)
         }
     }
 }
@@ -745,13 +772,12 @@ fn install_fast_handler(
 ) -> LuaResult<()> {
     match install {
         FastScriptInstall::Set(handler_ref) => {
-            if let Some(handler) = build_fast_handler(state, frame_id, handler_name, handler_ref)? {
+            if let Some(handler) = build_fast_handler(state, handler_ref)? {
                 set_script(state, frame_id, handler_name, handler);
             }
         }
         FastScriptInstall::Chain { handler, new_first } => {
-            let Some(new_handler) = build_fast_handler(state, frame_id, handler_name, handler)?
-            else {
+            let Some(new_handler) = build_fast_handler(state, handler)? else {
                 return Ok(());
             };
             let Some(old_handler) = get_script(state, frame_id, handler_name) else {
@@ -810,39 +836,6 @@ fn build_chained_handler(
         Val::Function(builder.gc_ref()),
         &[handler_name, first, second],
     )
-}
-
-fn build_inline_body_handler(
-    state: &mut LuaState,
-    frame_id: u64,
-    handler_name: &'static str,
-    body: &str,
-) -> LuaResult<Val> {
-    let params = inline_handler_params(handler_name);
-    let chunk = format!(
-        "local frame = ...
-return function({params})
-{body}
-end"
-    );
-    let builder = crate::loader::chunk_cache::load_chunk(state, &chunk, "template-inline-handler")
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    let frame = frame_ref(state, frame_id)?;
-    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[frame])
-}
-
-fn inline_handler_params(handler_name: &str) -> &'static str {
-    match handler_name {
-        "OnUpdate" => "self, elapsed",
-        "OnEvent" => "self, event, ...",
-        "OnClick" => "self, button, down",
-        "OnEnter" | "OnLeave" => "self, motion",
-        "OnMouseDown" | "OnMouseUp" => "self, button",
-        "OnValueChanged" => "self, value",
-        "OnTextChanged" => "self, userInput",
-        "OnChar" => "self, text",
-        _ => "self, ...",
-    }
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {

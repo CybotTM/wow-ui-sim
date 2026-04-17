@@ -318,22 +318,41 @@ fn test_create_frame_from_xml_function_inherit_append_preserves_order() {
 }
 
 #[test]
-fn test_create_frame_from_xml_inline_onload_runs() {
+fn test_create_frame_from_xml_key_values_exist_before_template_child_onload() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
 
+    register_first_template(
+        r#"<Ui><Frame name="XmlKeyValueTemplate" virtual="true">
+        <Frames>
+            <Frame parentKey="Child">
+                <Scripts>
+                    <OnLoad>self.parentLayoutIndex = self:GetParent().layoutIndex</OnLoad>
+                </Scripts>
+            </Frame>
+        </Frames>
+    </Frame></Ui>"#,
+        "XmlKeyValueTemplate",
+        "Frame",
+    );
+
     create_first_frame(
         &env,
-        r#"<Ui><Frame name="XmlInlineBodyFrame" parent="UIParent">
-        <Scripts><OnLoad>self.inlineBodyLoaded = true</OnLoad></Scripts>
+        r#"<Ui><Frame name="XmlKeyValueFastFrame" parent="UIParent" inherits="XmlKeyValueTemplate">
+        <KeyValues>
+            <KeyValue key="layoutIndex" value="7" type="number"/>
+        </KeyValues>
     </Frame></Ui>"#,
         "Frame",
     );
 
-    let loaded: bool = env
-        .eval("return XmlInlineBodyFrame.inlineBodyLoaded == true")
+    let layout_index: i32 = env
+        .eval("return XmlKeyValueFastFrame.Child.parentLayoutIndex")
         .unwrap();
-    assert!(loaded, "XML inline-body OnLoad should fire");
+    assert_eq!(
+        layout_index, 7,
+        "template child OnLoad should see direct frame key values"
+    );
 }
 
 #[test]
