@@ -234,6 +234,36 @@ pub fn enable_mouse(state: &Rc<RefCell<SimState>>, frame_id: u64, enable: bool) 
     }
 }
 
+/// Set XML-declared mouse propagation flags directly.
+pub fn set_propagate_mouse_input(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    propagate_spec: &str,
+) {
+    let mut clicks = false;
+    let mut motion = false;
+    for token in propagate_spec
+        .split(|ch: char| ch == ',' || ch.is_ascii_whitespace())
+        .filter(|token| !token.is_empty())
+    {
+        match token.to_ascii_lowercase().as_str() {
+            "all" => {
+                clicks = true;
+                motion = true;
+            }
+            "clicks" => clicks = true,
+            "motion" => motion = true,
+            _ => {}
+        }
+    }
+
+    let mut s = state.borrow_mut();
+    if let Some(frame) = s.widgets.get_mut(frame_id) {
+        frame.propagate_mouse_clicks = clicks;
+        frame.propagate_mouse_motion = motion;
+    }
+}
+
 /// Set hit rect insets directly.
 pub fn set_hit_rect_insets(
     state: &Rc<RefCell<SimState>>,
@@ -453,6 +483,36 @@ pub fn apply_xml_enable_mouse(
     }
     if let Some(enabled) = em {
         enable_mouse(state, frame_id, enabled);
+    }
+}
+
+/// Resolve and apply propagateMouseInput / propagateMouseInputMask from XML.
+pub fn apply_xml_propagate_mouse_input(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let propagate_spec = frame
+        .propagate_mouse_input_mask
+        .clone()
+        .or_else(|| frame.propagate_mouse_input.clone())
+        .or_else(|| {
+            if inherits.is_empty() {
+                return None;
+            }
+            crate::xml::get_template_chain(inherits)
+                .iter()
+                .find_map(|entry| {
+                    entry
+                        .frame
+                        .propagate_mouse_input_mask
+                        .clone()
+                        .or_else(|| entry.frame.propagate_mouse_input.clone())
+                })
+        });
+    if let Some(spec) = propagate_spec {
+        set_propagate_mouse_input(state, frame_id, &spec);
     }
 }
 

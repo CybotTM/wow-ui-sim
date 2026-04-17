@@ -16,7 +16,7 @@
 //! Registered from `register_tail_globals` after `missing_surface` so the
 //! Rust impls supersede any `stub_nil` entries that slipped through.
 
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_api::state_types::{CursorInfo, CursorItemOrigin, EquippedItem};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -138,6 +138,16 @@ fn delete_cursor_item(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `CursorHasItem()` — true when the cursor carries an item stack.
+fn cursor_has_item(state: &mut LuaState) -> LuaResult<u32> {
+    let has_item = borrow_state(state)?
+        .cursor_item
+        .as_ref()
+        .is_some_and(|cursor| matches!(cursor, CursorInfo::Item { .. }));
+    state.push(Val::Bool(has_item));
+    Ok(1)
+}
+
 /// `PlaceAction(slot)` — if the cursor is carrying a spell/action, write
 /// the spell id into `action_bars[slot]` and clear the cursor. Items are
 /// not placeable on action bars; silent no-op in that case.
@@ -172,6 +182,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "PickupMerchantItem", pickup_merchant_item)?;
     LuaApiMut::register_function(lua, "EquipCursorItem", equip_cursor_item)?;
     LuaApiMut::register_function(lua, "DeleteCursorItem", delete_cursor_item)?;
+    LuaApiMut::register_function(lua, "CursorHasItem", cursor_has_item)?;
     LuaApiMut::register_function(lua, "PlaceAction", place_action)?;
     Ok(())
 }

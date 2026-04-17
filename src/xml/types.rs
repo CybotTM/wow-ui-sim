@@ -189,6 +189,8 @@ pub struct FrameXml {
     pub intrinsic: Option<bool>,
     #[serde(rename = "@propagateMouseInput")]
     pub propagate_mouse_input: Option<String>,
+    #[serde(rename = "@propagateMouseInputMask")]
+    pub propagate_mouse_input_mask: Option<String>,
     #[serde(rename = "@setAllPoints")]
     pub set_all_points: Option<bool>,
     #[serde(rename = "@clipChildren")]
