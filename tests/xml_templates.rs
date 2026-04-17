@@ -1802,6 +1802,42 @@ fn test_create_frame_from_xml_inline_function_with_noarg_function_result_runs() 
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_with_parent_field_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineTrackedQuestId = nil
+        function XmlInlineTrackQuest(quest_id)
+            XmlInlineTrackedQuestId = quest_id
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentFieldOnlyFrame" parent="UIParent">
+        <KeyValues>
+            <KeyValue key="questID" value="42" type="number"/>
+        </KeyValues>
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>XmlInlineTrackQuest(self:GetParent().questID)</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineParentFieldOnlyFrame.Child:GetScript('OnClick')(XmlInlineParentFieldOnlyFrame.Child)")
+        .unwrap();
+
+    let tracked: i32 = env.eval("return XmlInlineTrackedQuestId").unwrap();
+    assert_eq!(tracked, 42);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_function_with_global_and_self_id_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

@@ -406,6 +406,10 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         global_arg_path: &'a str,
     },
+    FunctionWithParentFieldArg {
+        function_name: &'a str,
+        field: &'a str,
+    },
     FunctionWithSelfAndParentFieldArg {
         function_name: &'a str,
         field: &'a str,

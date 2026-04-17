@@ -66,6 +66,12 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             global_arg_path,
         });
     }
+    if let Some((function_name, field)) = parse_inline_function_with_parent_field_arg(stmt) {
+        return Some(FastHandlerRef::FunctionWithParentFieldArg {
+            function_name,
+            field,
+        });
+    }
     parse_inline_function_with_self_and_parent_field_arg(stmt).map(|(function_name, field)| {
         FastHandlerRef::FunctionWithSelfAndParentFieldArg {
             function_name,
@@ -175,6 +181,18 @@ fn parse_inline_function_with_global_and_self_id_arg(stmt: &str) -> Option<(&str
         && is_fast_handler_path(global_arg_path)
         && self_arg.trim() == "self:GetID()")
         .then_some((function_name, global_arg_path))
+}
+
+fn parse_inline_function_with_parent_field_arg(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let field = args
+        .strip_suffix(')')?
+        .trim()
+        .strip_prefix("self:GetParent().")?
+        .trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && is_fast_identifier(field))
+        .then_some((function_name, field))
 }
 
 fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&str, &str)> {

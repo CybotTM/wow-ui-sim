@@ -96,6 +96,10 @@ fn build_function_with_arg_variants(
             global_arg_path,
         } => build_function_handler_with_global_and_self_arg(state, function_name, global_arg_path)
             .map(Some),
+        FastHandlerRef::FunctionWithParentFieldArg {
+            function_name,
+            field,
+        } => build_function_handler_with_parent_field_arg(state, function_name, field).map(Some),
         FastHandlerRef::FunctionWithSelfAndParentFieldArg {
             function_name,
             field,
@@ -380,6 +384,34 @@ fn build_function_handler_with_global_and_self_id_arg(
         state,
         Val::Function(builder.gc_ref()),
         &[target, global_arg],
+    )
+}
+
+fn build_function_handler_with_parent_field_arg(
+    state: &mut LuaState,
+    function_name: &str,
+    field: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, field_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                return fn(parent[field_name])
+            end
+        "#,
+        "template-inline-function-parent-field-arg",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, field_name],
     )
 }
 
