@@ -424,3 +424,59 @@ fn test_profiler_app_vs_overall_metric_differ() {
         "Addon CPU percentage should be < 100%, got {pct:.1}%"
     );
 }
+
+#[test]
+fn test_profiler_check_for_performance_message_reports_specific_addon() {
+    let env = env_with_addons();
+
+    env.eval::<()>(
+        r#"
+        SetCVar("addonPerformanceMsgWarning", "0.01")
+        SetCVar("addonPerformanceMsgError", "0.02")
+        SetCVar("addonPerformanceMsgOverall", "0.75")
+        "#,
+    )
+    .unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.loading_addon_index = Some(1);
+    }
+
+    env.eval::<()>(
+        r#"
+        local f = CreateFrame("Frame", "PerfMsgTestFrame", UIParent)
+        f:SetScript("OnUpdate", function(self, elapsed)
+            local x = 0
+            for i = 1, 5000 do
+                x = x + i
+            end
+        end)
+        "#,
+    )
+    .unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.loading_addon_index = None;
+    }
+
+    for _ in 0..10 {
+        env.fire_on_update(0.016).unwrap();
+    }
+
+    env.eval::<()>(
+        r#"
+        local msg = C_AddOnProfiler.CheckForPerformanceMessage()
+        assertTrue(msg ~= nil)
+        assertEquals(Enum.AddOnPerformanceMessageType.SpecificAddOnErrorDialog, msg.type)
+        assertEquals(Enum.AddOnProfilerMetric.RecentAverageTime, msg.metric)
+        assertEquals("MyAddon", msg.addOnName)
+        assertTrue(msg.metricValue > msg.thresholdValue)
+        assertTrue(msg.metricValue > 0)
+        assertTrue(msg.thresholdValue > 0)
+        C_AddOnProfiler.AddPerformanceMessageShown(msg)
+        "#,
+    )
+    .unwrap();
+}

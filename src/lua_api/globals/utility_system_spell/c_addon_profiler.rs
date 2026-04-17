@@ -1,11 +1,19 @@
 //! C_AddOnProfiler: per-addon and application performance metrics.
 
 use crate::lua_api::methods::{borrow_state, create_table, val_to_string};
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 use super::set_global_val;
+
+const ADDON_PROFILER_METRIC_RECENT_AVERAGE_TIME: i32 = 1;
+const ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_CHAT_WARNING: i32 = 0;
+const ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_ERROR_DIALOG: i32 = 1;
+const ADDON_PERFORMANCE_MESSAGE_TYPE_OVERALL_ERROR_DIALOG: i32 = 2;
+const ADDON_PERFORMANCE_WARNING_CVAR: &str = "addonPerformanceMsgWarning";
+const ADDON_PERFORMANCE_ERROR_CVAR: &str = "addonPerformanceMsgError";
+const ADDON_PERFORMANCE_OVERALL_CVAR: &str = "addonPerformanceMsgOverall";
 
 pub fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
     let profiler = create_table(state);
@@ -33,8 +41,20 @@ pub fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         profiler_ref,
+        "AddPerformanceMessageShown",
+        c_addon_profiler_add_performance_message_shown,
+    )?;
+    table_set_rust_fn(
+        state,
+        profiler_ref,
         "CheckForPerformanceMessage",
         c_addon_profiler_check_for_performance_message,
+    )?;
+    table_set_rust_fn(
+        state,
+        profiler_ref,
+        "IsEnabled",
+        c_addon_profiler_is_enabled,
     )?;
     set_global_val(state, "C_AddOnProfiler", profiler);
     Ok(())
@@ -94,6 +114,176 @@ fn application_metric_value(state: &crate::lua_api::SimState, metric: i32) -> f6
     }
 }
 
+fn read_cvar_fraction(sim: &crate::lua_api::SimState, name: &str) -> Option<f64> {
+    let value = sim.cvars.get(name)?;
+    let parsed = value.parse::<f64>().ok()?;
+    if parsed > 0.0 && parsed < 1.0 {
+        Some(parsed)
+    } else {
+        None
+    }
+}
+
+fn overall_metric_value(state: &crate::lua_api::SimState, metric: i32) -> f64 {
+    state
+        .addons
+        .iter()
+        .filter(|addon| addon.folder_name != "__BuiltIn")
+        .map(|addon| addon_metric_value(addon, metric))
+        .sum()
+}
+
+#[derive(Debug, Clone)]
+struct PerformanceMessage {
+    add_on_name: Option<String>,
+    metric: i32,
+    metric_value: f64,
+    threshold_value: f64,
+    message_type: i32,
+}
+
+fn find_highest_specific_addon_metric(
+    sim: &crate::lua_api::SimState,
+    metric: i32,
+) -> Option<(String, f64, f64, f64)> {
+    let app_value = application_metric_value(sim, metric);
+    let overall_value = overall_metric_value(sim, metric);
+
+    sim.addons
+        .iter()
+        .filter(|addon| addon.folder_name != "__BuiltIn")
+        .filter_map(|addon| {
+            let metric_value = addon_metric_value(addon, metric);
+            if metric_value <= 0.0 {
+                return None;
+            }
+
+            let denominator = app_value - overall_value + metric_value;
+            if denominator <= 0.0 {
+                return None;
+            }
+
+            let percentage = metric_value / denominator;
+            Some((
+                addon.folder_name.clone(),
+                metric_value,
+                denominator,
+                percentage,
+            ))
+        })
+        .max_by(|left, right| left.3.total_cmp(&right.3))
+}
+
+fn threshold_value_for_specific_message(
+    sim: &crate::lua_api::SimState,
+    metric: i32,
+    add_on_name: &str,
+    threshold: f64,
+) -> f64 {
+    let app_value = application_metric_value(sim, metric);
+    let overall_value = overall_metric_value(sim, metric);
+    let addon_value = sim
+        .addons
+        .iter()
+        .find(|addon| addon.folder_name == add_on_name)
+        .map(|addon| addon_metric_value(addon, metric))
+        .unwrap_or(0.0);
+    let denominator = app_value - overall_value + addon_value;
+    denominator * threshold
+}
+
+fn find_specific_performance_message(
+    sim: &crate::lua_api::SimState,
+    metric: i32,
+    warning_threshold: Option<f64>,
+    error_threshold: Option<f64>,
+) -> Option<PerformanceMessage> {
+    let (add_on_name, metric_value, _, percentage) =
+        find_highest_specific_addon_metric(sim, metric)?;
+
+    if let Some(error_threshold) = error_threshold {
+        if percentage > error_threshold {
+            let threshold_value =
+                threshold_value_for_specific_message(sim, metric, &add_on_name, error_threshold);
+            return Some(PerformanceMessage {
+                add_on_name: Some(add_on_name),
+                metric,
+                metric_value,
+                threshold_value,
+                message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_ERROR_DIALOG,
+            });
+        }
+    }
+
+    if let Some(warning_threshold) = warning_threshold {
+        if percentage > warning_threshold {
+            let threshold_value =
+                threshold_value_for_specific_message(sim, metric, &add_on_name, warning_threshold);
+            return Some(PerformanceMessage {
+                add_on_name: Some(add_on_name),
+                metric,
+                metric_value,
+                threshold_value,
+                message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_SPECIFIC_CHAT_WARNING,
+            });
+        }
+    }
+
+    None
+}
+
+fn find_overall_performance_message(
+    sim: &crate::lua_api::SimState,
+    metric: i32,
+    threshold: f64,
+) -> Option<PerformanceMessage> {
+    let app_value = application_metric_value(sim, metric);
+    if app_value <= 0.0 {
+        return None;
+    }
+
+    let overall_value = overall_metric_value(sim, metric);
+    let percentage = overall_value / app_value;
+    if percentage <= threshold {
+        return None;
+    }
+
+    Some(PerformanceMessage {
+        add_on_name: None,
+        metric,
+        metric_value: overall_value,
+        threshold_value: app_value * threshold,
+        message_type: ADDON_PERFORMANCE_MESSAGE_TYPE_OVERALL_ERROR_DIALOG,
+    })
+}
+
+fn find_performance_message(sim: &crate::lua_api::SimState) -> Option<PerformanceMessage> {
+    let warning_threshold = read_cvar_fraction(sim, ADDON_PERFORMANCE_WARNING_CVAR);
+    let error_threshold = read_cvar_fraction(sim, ADDON_PERFORMANCE_ERROR_CVAR);
+    let overall_threshold = read_cvar_fraction(sim, ADDON_PERFORMANCE_OVERALL_CVAR);
+    let metric = ADDON_PROFILER_METRIC_RECENT_AVERAGE_TIME;
+
+    if let Some(message) =
+        find_specific_performance_message(sim, metric, warning_threshold, error_threshold)
+    {
+        return Some(message);
+    }
+
+    overall_threshold.and_then(|threshold| find_overall_performance_message(sim, metric, threshold))
+}
+
+fn push_performance_message(state: &mut LuaState, message: PerformanceMessage) -> LuaResult<u32> {
+    let table = TableBuilder::new(state)
+        .set("type", message.message_type)?
+        .set("metric", message.metric)?
+        .set("metricValue", message.metric_value)?
+        .set("thresholdValue", message.threshold_value)?
+        .set("addOnName", message.add_on_name)?
+        .build();
+    state.push(table);
+    Ok(1)
+}
+
 // ── API implementations ───────────────────────────────────────────────────────
 
 fn c_addon_profiler_get_application_metric(state: &mut LuaState) -> LuaResult<u32> {
@@ -110,11 +300,7 @@ fn c_addon_profiler_get_overall_metric(state: &mut LuaState) -> LuaResult<u32> {
     let metric = profiler_metric_kind(state, stack_val(state, 1)).unwrap_or(1);
     let value = {
         let sim = borrow_state(state)?;
-        sim.addons
-            .iter()
-            .filter(|a| a.folder_name != "__BuiltIn")
-            .map(|a| addon_metric_value(a, metric))
-            .sum::<f64>()
+        overall_metric_value(&sim, metric)
     };
     state.push(Val::Num(value));
     Ok(1)
@@ -135,6 +321,22 @@ fn c_addon_profiler_get_addon_metric(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn c_addon_profiler_check_for_performance_message(_state: &mut LuaState) -> LuaResult<u32> {
+fn c_addon_profiler_add_performance_message_shown(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_addon_profiler_is_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_addon_profiler_check_for_performance_message(state: &mut LuaState) -> LuaResult<u32> {
+    let message = {
+        let sim = borrow_state(state)?;
+        find_performance_message(&sim)
+    };
+    if let Some(message) = message {
+        return push_performance_message(state, message);
+    }
     Ok(0)
 }

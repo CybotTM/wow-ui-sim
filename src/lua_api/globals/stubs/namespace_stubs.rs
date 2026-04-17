@@ -20,7 +20,6 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AchievementInfo
     ("C_AchievementInfo", "GetRewardItemID", stub_nil),
     ("C_AchievementInfo", "GetAchievementInfo", stub_nil),
-    ("C_AddOnProfiler", "CheckForPerformanceMessage", stub_nil),
     // C_AreaPoiInfo
     ("C_AreaPoiInfo", "GetAreaPOIInfo", stub_nil),
     ("C_AreaPoiInfo", "GetAreaPOISecondsLeft", stub_nil),
