@@ -60,6 +60,15 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
     if let Some((method_name, arg)) = parse_inline_parent_method_with_string_arg(stmt) {
         return Some(FastHandlerRef::ParentMethodWithStringArg { method_name, arg });
     }
+    if let Some((field, method_name, self_method_name)) =
+        parse_inline_parent_field_method_with_self_noarg_method_result(stmt)
+    {
+        return Some(FastHandlerRef::ParentFieldMethodWithSelfNoArgMethodResult {
+            field,
+            method_name,
+            self_method_name,
+        });
+    }
     if let Some(method_name) = parse_inline_parent_method(stmt) {
         return Some(FastHandlerRef::ParentMethod(method_name));
     }
@@ -176,6 +185,24 @@ fn parse_inline_parent_method_with_string_arg(stmt: &str) -> Option<(&str, &str)
     let arg = super::parse_single_string_literal(args.strip_suffix(')')?.trim())?;
     let method_name = method_name.trim();
     is_fast_identifier(method_name).then_some((method_name, arg))
+}
+
+fn parse_inline_parent_field_method_with_self_noarg_method_result(
+    stmt: &str,
+) -> Option<(&str, &str, &str)> {
+    let (field, remainder) = stmt.strip_prefix("self:GetParent().")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let self_method_name = args
+        .strip_suffix("())")?
+        .trim()
+        .strip_prefix("self:")?
+        .trim();
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field)
+        && is_fast_identifier(method_name)
+        && is_fast_identifier(self_method_name))
+    .then_some((field, method_name, self_method_name))
 }
 
 fn parse_inline_grandparent_method(stmt: &str) -> Option<&str> {

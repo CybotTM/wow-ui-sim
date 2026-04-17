@@ -107,6 +107,17 @@ fn build_ancestor_method_variants(
         FastHandlerRef::ParentMethodWithStringArg { method_name, arg } => {
             build_parent_method_with_string_arg_handler(state, method_name, arg).map(Some)
         }
+        FastHandlerRef::ParentFieldMethodWithSelfNoArgMethodResult {
+            field,
+            method_name,
+            self_method_name,
+        } => build_parent_field_method_with_self_noarg_method_result_handler(
+            state,
+            field,
+            method_name,
+            self_method_name,
+        )
+        .map(Some),
         FastHandlerRef::GrandparentMethod(method_name) => {
             build_ancestor_method_handler(state, method_name, 2).map(Some)
         }
@@ -377,6 +388,41 @@ fn build_parent_method_with_string_arg_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[method_name, literal_arg],
+    )
+}
+
+fn build_parent_field_method_with_self_noarg_method_result_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    self_method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local field_name, method_name, self_method_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                local target = parent[field_name]
+                if not target then
+                    return
+                end
+                local value = self[self_method_name](self)
+                return target[method_name](target, value)
+            end
+        "#,
+        "template-parent-field-method-self-noarg-result-handler",
+    )?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    let self_method_name = create_string(state, self_method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name, self_method_name],
     )
 }
 
