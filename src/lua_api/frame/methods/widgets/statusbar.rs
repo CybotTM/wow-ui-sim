@@ -3,7 +3,8 @@
 use super::shared::{opt_string, rgba_from_stack, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_id_from_stack,
-    frame_ref, sync_child_to_rilua, val_to_string,
+    frame_ref, get_or_create_frame_fields, sync_child_to_rilua, table_get_static, table_set_static,
+    val_to_string,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use crate::widget::WidgetType;
@@ -15,6 +16,8 @@ use rilua::{LuaResult, Val};
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+const TIMER_DURATION_FIELD: &str = "__statusbar_timer_duration";
 
 pub(super) fn statusbar_child_id(sim: &crate::lua_api::SimState, id: u64) -> Option<u64> {
     let bar_id = sim.widgets.get(id)?.statusbar_bar_id?;
@@ -243,6 +246,22 @@ pub(super) fn set_to_target_value(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_timer_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let duration = stack_val(state, 2);
+    let fields = get_or_create_frame_fields(state, id);
+    table_set_static(state, fields, TIMER_DURATION_FIELD, duration);
+    Ok(0)
+}
+
+pub(super) fn get_timer_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let fields = get_or_create_frame_fields(state, id);
+    let duration = table_get_static(state, fields, TIMER_DURATION_FIELD);
+    state.push(duration);
+    Ok(1)
+}
+
 pub(super) fn set_desaturated(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let desat = val_to_bool(stack_val(state, 2));
@@ -343,6 +362,8 @@ const STATUSBAR_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetInterpolatedValue", get_interpolated_value),
     ("IsInterpolating", is_interpolating),
     ("SetToTargetValue", set_to_target_value),
+    ("SetTimerDuration", set_timer_duration),
+    ("GetTimerDuration", get_timer_duration),
     // Desaturation
     ("SetStatusBarDesaturated", set_desaturated),
     ("GetStatusBarDesaturated", get_status_bar_desaturated),

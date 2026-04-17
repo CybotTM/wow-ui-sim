@@ -466,7 +466,7 @@ fn test_statusbar_timer_duration_round_trips_duration_object() {
             duration.debugTag = "statusbar-timer"
             sb:SetTimerDuration(duration, Enum.StatusBarInterpolation.Immediate, Enum.StatusBarTimerDirection.RemainingTime)
             local stored = sb:GetTimerDuration()
-            return rawequal(duration, stored), stored.debugTag, type(stored) == "userdata"
+            return rawequal(duration, stored), stored.debugTag, type(stored) == "table"
         "#,
         )
         .unwrap();
@@ -478,6 +478,6 @@ fn test_statusbar_timer_duration_round_trips_duration_object() {
     assert_eq!(result.1, "statusbar-timer");
     assert!(
         result.2,
-        "status bar timer should stay a LuaDurationObject userdata"
+        "status bar timer should stay a LuaDurationObject table"
     );
 }
