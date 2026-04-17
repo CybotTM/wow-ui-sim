@@ -24,6 +24,15 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
 fn register_buttons(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_button_font_objects(state, table)?;
+    register_button_text(state, table)?;
+    register_button_enable(state, table)?;
+    register_button_clicks(state, table)?;
+    register_button_misc(state, table)?;
+    Ok(())
+}
+
+fn register_button_font_objects(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -60,6 +69,10 @@ fn register_buttons(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "GetDisabledFontObject",
         buttons::get_disabled_font_object,
     )?;
+    Ok(())
+}
+
+fn register_button_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -74,10 +87,18 @@ fn register_buttons(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     )?;
     table_set_rust_fn(state, table, "GetFontString", font_strings::get_font_string)?;
     table_set_rust_fn(state, table, "SetFontString", font_strings::set_font_string)?;
+    Ok(())
+}
+
+fn register_button_enable(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(state, table, "IsEnabled", buttons::is_enabled)?;
     table_set_rust_fn(state, table, "SetEnabled", buttons::set_enabled)?;
     table_set_rust_fn(state, table, "Enable", buttons::enable)?;
     table_set_rust_fn(state, table, "Disable", buttons::disable)?;
+    Ok(())
+}
+
+fn register_button_clicks(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
@@ -87,6 +108,10 @@ fn register_buttons(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
     table_set_rust_fn(state, table, "SetButtonState", buttons::set_button_state)?;
     table_set_rust_fn(state, table, "GetButtonState", buttons::get_button_state)?;
     table_set_rust_fn(state, table, "Click", buttons::click)?;
+    Ok(())
+}
+
+fn register_button_misc(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn(
         state,
         table,
