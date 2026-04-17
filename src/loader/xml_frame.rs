@@ -63,6 +63,10 @@ pub fn create_frame_from_xml(
     Ok(Some(prepared.name))
 }
 
+pub fn fast_create_frame_profile_report() -> Option<String> {
+    setup::fast_create_frame_profile_report()
+}
+
 /// Build the CreateFrame Lua code and run the setup phase.
 fn build_and_setup_frame(
     env: &LoaderEnv<'_>,

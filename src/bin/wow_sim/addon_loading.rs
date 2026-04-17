@@ -128,6 +128,9 @@ fn print_blizzard_summary(
         t.lua_call_time
     ));
     print_blizzard_frame_detail(t);
+    if let Some(report) = wow_ui_sim::loader::fast_create_frame_profile_report() {
+        println!("  {report}");
+    }
 }
 
 /// Scan, load, and register third-party addons; print summary.

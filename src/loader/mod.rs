@@ -30,6 +30,7 @@ use std::time::Duration;
 
 pub use error::LoadError;
 pub use xml_frame::create_frame_from_xml;
+pub use xml_frame::fast_create_frame_profile_report;
 
 /// Find the TOC file for an addon directory.
 /// Prefers Mainline variant, then exact name match, then any non-Classic TOC.
