@@ -3,10 +3,20 @@
 mod achievement_info;
 mod area_poi;
 mod auction_house;
+mod battle_net;
 mod c_map;
+mod chat_bubbles;
+mod club_info;
+mod death_recap;
+mod encounter_journal;
+mod gossip_info;
 mod heirloom;
 mod item_socket_info;
 mod item_spell;
+mod lfg_info;
+mod mythic_plus;
+mod nameplate;
+mod party_info;
 mod professions;
 mod tooltip_info;
 mod traits;
@@ -68,6 +78,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     achievement_info::register_achievement_info_surface(state)?;
     area_poi::register_area_poi_surface(state)?;
     auction_house::register_auction_house_surface(state)?;
+    battle_net::register_battle_net_surface(state)?;
+    chat_bubbles::register_chat_bubbles_surface(state)?;
+    club_info::register_club_info_surface(state)?;
+    death_recap::register_death_recap_surface(state)?;
+    encounter_journal::register_encounter_journal_surface(state)?;
+    gossip_info::register_gossip_info_surface(state)?;
+    mythic_plus::register_mythic_plus_surface(state)?;
+    nameplate::register_nameplate_surface(state)?;
+    party_info::register_party_info_surface(state)?;
+    lfg_info::register_lfg_info_surface(state)?;
     Ok(())
 }
 

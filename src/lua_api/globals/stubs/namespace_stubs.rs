@@ -26,10 +26,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AuctionHouse GetAuctionItemSubClasses / GetReplicateItemInfo
     // are SimState-backed in missing_surface/auction_house.rs, not
     // stubs.
-    // C_BattleNet
-    ("C_BattleNet", "GetAccountInfoByGUID", stub_nil),
-    ("C_BattleNet", "GetFriendAccountInfo", stub_nil),
-    ("C_BattleNet", "GetGameAccountInfoByGUID", stub_nil),
+    // C_BattleNet GetAccountInfoByGUID / GetFriendAccountInfo /
+    // GetGameAccountInfoByGUID / GetFriendNumAccounts / GetNumFriends
+    // are SimState-backed in missing_surface/battle_net.rs, not stubs.
     // C_CharacterServices
     (
         "C_CharacterServices",
@@ -41,29 +40,23 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
         "GetActiveClassTrialBoostType",
         stub_nil,
     ),
-    // C_ChatBubbles
-    ("C_ChatBubbles", "GetAllChatBubbles", stub_nil),
+    // C_ChatBubbles.GetAllChatBubbles — real impl in missing_surface/chat_bubbles.rs
     // C_ClassTalents GetActiveConfigID / GetConfigIDsBySpecID /
     // GetHeroTalentSpecsForClassSpec / GetTraitTreeForSpec are
     // TalentState-backed in missing_surface/traits.rs, not stubs.
-    // C_Club
-    ("C_Club", "GetClubMembers", stub_nil),
-    ("C_Club", "GetSubscribedClubs", stub_nil),
+    // C_Club GetClubMembers / GetSubscribedClubs / GetClubCapacity / IsEnabled
+    // are WorldState-backed in missing_surface/club_info.rs, not stubs.
     // C_CurrencyInfo GetCurrencyInfo / GetCurrencyInfoFromLink /
     // GetCurrencyContainerInfo are SimState-backed (via
     // `currency_info` map) in missing_surface/item_spell/c_currency.rs,
     // not stubs.
-    // C_DeathRecap
-    ("C_DeathRecap", "GetKillingBlows", stub_nil),
-    ("C_DeathRecap", "GetMostRecentDeathRecap", stub_nil),
-    // C_EncounterJournal
-    ("C_EncounterJournal", "GetEncounterInfo", stub_nil),
-    ("C_EncounterJournal", "GetInstanceInfo", stub_nil),
-    // C_GossipInfo
-    ("C_GossipInfo", "GetActiveQuests", stub_nil),
-    ("C_GossipInfo", "GetAvailableQuests", stub_nil),
-    ("C_GossipInfo", "GetOptions", stub_nil),
-    ("C_GossipInfo", "GetPoiForUiMapID", stub_nil),
+    // C_DeathRecap GetKillingBlows / GetMostRecentDeathRecap are
+    // SimState-backed in missing_surface/death_recap.rs, not stubs.
+    // C_EncounterJournal GetEncounterInfo / GetInstanceInfo are
+    // static-seeded in missing_surface/encounter_journal.rs, not stubs.
+    // C_GossipInfo GetActiveQuests / GetAvailableQuests / GetOptions /
+    // GetPoiForUiMapID are SimState-backed in missing_surface/gossip_info.rs,
+    // not stubs.
     // C_Heirloom GetHeirloomInfo is WorldState-backed in
     // missing_surface/heirloom.rs, not a stub.
     // GetHeirloomItemIDFromDisplayedSlot was a misnamed stub (the real
@@ -74,9 +67,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_Item GetItemIconByID / GetItemNameByID / GetItemQualityByID
     // are ITEM_DB-backed in missing_surface/item_spell/c_item.rs, not
     // stubs.
-    // C_LFGInfo
-    ("C_LFGInfo", "CanPlayerUseLFD", stub_nil),
-    ("C_LFGInfo", "GetLFGCategoryInfo", stub_nil),
+    // C_LFGInfo CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
+    // IsLFGModeActiveForCategory are SimState-backed in
+    // missing_surface/lfg_info.rs, not stubs.
     // C_LossOfControl
     ("C_LossOfControl", "GetActiveLossOfControlData", stub_nil),
     (
@@ -87,26 +80,12 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_Map GetMapArtID / GetMapChildrenInfo / GetPlayerMapPosition
     // are SimState-backed (via `maps` + `player_map_position`) in
     // missing_surface/c_map.rs, not stubs.
-    // C_MythicPlus
-    ("C_MythicPlus", "GetCurrentAffixes", stub_nil),
-    ("C_MythicPlus", "GetCurrentSeason", stub_nil),
-    ("C_MythicPlus", "GetLastWeeklyChest", stub_nil),
-    ("C_MythicPlus", "GetRunHistory", stub_nil),
-    (
-        "C_MythicPlus",
-        "GetSeasonBestAffixScoreInfoForMap",
-        stub_nil,
-    ),
-    ("C_MythicPlus", "GetWeeklyChestRewardLevel", stub_nil),
-    ("C_MythicPlus", "RequestCurrentAffixes", stub_nil),
-    ("C_MythicPlus", "RequestMapInfo", stub_nil),
-    ("C_MythicPlus", "RequestRewards", stub_nil),
-    // C_NamePlate
-    ("C_NamePlate", "GetNamePlateForUnit", stub_nil),
-    ("C_NamePlate", "GetNamePlates", stub_nil),
-    // C_PartyInfo
-    ("C_PartyInfo", "GetActiveCategories", stub_nil),
-    ("C_PartyInfo", "GetInviteConfirmationInfo", stub_nil),
+    // C_MythicPlus GetCurrentAffixes / GetCurrentSeason / GetLastWeeklyChest /
+    // GetRunHistory / GetSeasonBestAffixScoreInfoForMap / GetWeeklyChestRewardLevel /
+    // Request* are SimState-backed in missing_surface/mythic_plus.rs, not stubs.
+    // C_NamePlate GetNamePlateForUnit / GetNamePlates are registered in
+    // missing_surface/nameplate.rs (nil and empty-table respectively).
+    // C_PartyInfo probes are registered in missing_surface/party_info.rs.
     // C_PetBattles
     ("C_PetBattles", "GetAbilityInfoByID", stub_nil),
     ("C_PetBattles", "GetActivePet", stub_nil),
@@ -263,8 +242,7 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     // C_ClassTalents CanChangeTalents / GetHasStarterBuild /
     // IsStarterBuildActive are TalentState-backed in
     // missing_surface/traits.rs, not stubs.
-    // C_Club
-    ("C_Club", "IsEnabled", stub_false),
+    // C_Club IsEnabled is WorldState-backed in missing_surface/club_info.rs, not a stub.
     // C_GarrisonInfo
     ("C_GarrisonInfo", "HasGarrison", stub_false),
     // C_IncomingSummon
@@ -275,16 +253,14 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ),
     // C_Item
     ("C_Item", "IsItemTransmogrifiable", stub_false),
-    // C_LFGInfo — CanPlayerUsePremadeGroup is SimState-backed in lfg_info.rs.
-    ("C_LFGInfo", "IsLFGModeActiveForCategory", stub_false),
+    // C_LFGInfo — CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
+    // IsLFGModeActiveForCategory are SimState-backed in missing_surface/lfg_info.rs.
+    // CanPlayerUsePremadeGroup is SimState-backed in lfg_info.rs.
     // C_Map
     ("C_Map", "IsMapValidForNavigation", stub_false),
-    // C_MythicPlus
-    ("C_MythicPlus", "IsMythicPlusActive", stub_false),
-    ("C_MythicPlus", "IsWeeklyRewardAvailable", stub_false),
-    // C_PartyInfo
-    ("C_PartyInfo", "IsPartyFull", stub_false),
-    ("C_PartyInfo", "IsPartyInJailersTower", stub_false),
+    // C_MythicPlus IsMythicPlusActive / IsWeeklyRewardAvailable are SimState-backed
+    // in missing_surface/mythic_plus.rs, not stubs.
+    // C_PartyInfo probes are registered in missing_surface/party_info.rs.
     // C_PvP
     ("C_PvP", "IsMatchConsideredArena", stub_false),
     // C_PhotoSharing.IsAuthorized / IsEnabled are SimState-backed in photo_sharing.rs.
@@ -331,17 +307,14 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
 
 static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // C_BattleNet
-    ("C_BattleNet", "GetFriendNumAccounts", stub_zero),
-    ("C_BattleNet", "GetNumFriends", stub_zero),
-    // C_Club
-    ("C_Club", "GetClubCapacity", stub_zero),
+    // C_BattleNet GetFriendNumAccounts / GetNumFriends are
+    // SimState-backed in missing_surface/battle_net.rs, not stubs.
+    // C_Club GetClubCapacity is WorldState-backed in missing_surface/club_info.rs, not a stub.
     // C_GarrisonInfo
     ("C_GarrisonInfo", "GetGarrisonType", stub_zero),
-    // C_MythicPlus
-    ("C_MythicPlus", "GetOwnedKeystoneLevel", stub_zero),
-    ("C_MythicPlus", "GetWeeklyBestForMap", stub_zero),
-    // C_PartyInfo
-    ("C_PartyInfo", "GetActiveGroupType", stub_zero),
+    // C_MythicPlus GetOwnedKeystoneLevel / GetWeeklyBestForMap are SimState-backed
+    // in missing_surface/mythic_plus.rs, not stubs.
+    // C_PartyInfo GetActiveGroupType is registered in missing_surface/party_info.rs.
     // C_QuestLog
     ("C_QuestLog", "GetLogIndexForQuestID", stub_zero),
     ("C_QuestLog", "GetNumQuestLogEntries", stub_zero),
@@ -364,19 +337,13 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_CinematicList", "GetUICinematicList", stub_empty_table),
     // C_ClassTalents GetConfigIDsBySpecID is TalentState-backed in
     // missing_surface/traits.rs, not a stub.
-    // C_Club
-    ("C_Club", "GetClubMembers", stub_empty_table),
-    ("C_Club", "GetSubscribedClubs", stub_empty_table),
-    // C_GossipInfo
-    ("C_GossipInfo", "GetActiveQuests", stub_empty_table),
-    ("C_GossipInfo", "GetAvailableQuests", stub_empty_table),
-    ("C_GossipInfo", "GetOptions", stub_empty_table),
-    // C_LFGInfo
-    ("C_LFGInfo", "GetSystemPanelData", stub_empty_table),
-    // C_NamePlate
-    ("C_NamePlate", "GetNamePlates", stub_empty_table),
-    // C_PartyInfo
-    ("C_PartyInfo", "GetActiveCategories", stub_empty_table),
+    // C_Club GetClubMembers / GetSubscribedClubs are WorldState-backed in
+    // missing_surface/club_info.rs, not stubs.
+    // C_GossipInfo GetActiveQuests / GetAvailableQuests / GetOptions are
+    // SimState-backed in missing_surface/gossip_info.rs, not stubs.
+    // C_LFGInfo GetSystemPanelData is SimState-backed in missing_surface/lfg_info.rs.
+    // C_NamePlate GetNamePlates is registered in missing_surface/nameplate.rs.
+    // C_PartyInfo GetActiveCategories is registered in missing_surface/party_info.rs.
     // C_ZoneAbility
     ("C_ZoneAbility", "GetActiveAbilities", stub_empty_table),
     // C_QuestLog
