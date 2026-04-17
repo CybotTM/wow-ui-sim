@@ -1,9 +1,6 @@
 # Rilua GC Scan Reduction
 
-Plan to cut GC mark cost in rilua. Two tracks, sequenced:
-
-1. **Freeze-after-bootstrap** — cheap, bigger single win. Eliminates `_G` and `__secureenv` (~94k entries) from every scan.
-2. **Frame-table treatment** — investigate first, then pick an approach (generational, off-heap, or segmented freeze).
+Plan to cut GC mark cost in rilua. Three sequenced tracks plus one investigation.
 
 ## Measured motivation
 
@@ -15,29 +12,86 @@ From `/tmp/claude/perf.data` (release `lua-errors`, --no-addons --no-saved-vars,
 
 Top traversed tables (measured via `dump-tree --exec-lua`):
 
-| Table | Entries | Addressable by |
+| Table | Entries | Track |
 |---|---|---|
-| `_G` | 66,331 | Freeze (track 1) |
-| `REGISTRY.__rilua_frame_refs` | 47,333 | Frame track (needs investigation) |
-| `REGISTRY.__rilua_frame_fields` | 47,333 | Frame track (needs investigation) |
-| `_G.__secureenv` | 28,327 | Freeze (track 1) |
-| `REGISTRY.__scripts` | 20,713 | Frame track (needs investigation) |
+| `_G` | 66,331 | 2 (freeze) |
+| `_G.__secureenv` | 28,327 | 2 (freeze) |
+| `REGISTRY.__rilua_frame_refs` | 47,333 | 1 (pin frame tables) |
+| `REGISTRY.__rilua_frame_fields` | 47,333 | 3 (investigate) |
+| `REGISTRY.__scripts` | 20,713 | 3 (investigate) |
 
-Track 1 alone removes **94,658 entries** from every GC mark cycle.
+Combined Tracks 0+1+2 remove **~142k entries** from every GC mark cycle. Track 3 addresses the remaining ~68k.
 
-## Track 1: Freeze-after-bootstrap
+## Track 0: Quick win (independent)
+
+`traverse_table` re-borrows the arena once per element:
+
+```rust
+// ~/Repos/rilua/src/vm/gc/collector.rs:438-460
+for i in 0..array_len {
+    let val = self.tables.get(r).and_then(|t| t.array_get(i));
+    if let Some(val) = val { self.mark_value(val); }
+}
+```
+
+For a 47k-entry table, that's 47k arena lookups per traversal. Hoist the borrow:
+
+```rust
+let mut values: SmallVec<[Val; 64]> = SmallVec::new();
+if let Some(t) = self.tables.get(r) {
+    for i in 0..array_len {
+        if let Some(v) = t.array_get(i) { values.push(v); }
+    }
+    for i in 0..hash_count {
+        if let Some((k, v)) = t.hash_node_kv(i) {
+            if v.is_nil() { continue; }
+            if !weak_keys { values.push(k); }
+            if !weak_values { values.push(v); }
+        }
+    }
+}
+for v in values { self.mark_value(v); }
+```
+
+Single arena borrow per table. Expected: ~50M fewer arena lookups (2.5% of startup cycles). No semantic change. Independent of every other track.
+
+- [ ] Phase 0a — Rilua: hoist the borrow in `traverse_table` (`~/Repos/rilua/src/vm/gc/collector.rs:438-460`).
+
+## Track 1: Pin frame backing tables (smallest change, immediate win)
 
 ### Insight
 
-`_G` and `__secureenv` grow during bootstrap (Blizzard UI load, initial addon registration) and are essentially stable afterwards. Most entries are built-ins, `Enum.*` tables, mixin definitions, global constants. Addon runtime code mostly reads these; when it writes, it writes to its own tables, not to `_G`.
+Frames in wow-ui-sim are **never deleted**. Confirmed: `WidgetRegistry::register` exists at `src/widget/registry/mod.rs:86`, but no remove/delete method anywhere. Frame re-creation (CLAUDE.md: `Blizzard_GameTooltip` orphan case) creates a NEW id; the old entry lingers. `__rilua_frame_refs` and `__rilua_frame_fields` grow monotonically.
 
-If we snapshot `_G` at the bootstrap boundary and refuse mutations to those keys thereafter, the GC can skip traversal entirely.
+Frame backing tables (the values stored in `__rilua_frame_refs`) are effectively **leaf objects** in GC terms. They hold:
 
-### Why naive pinning doesn't work
+- A `(lo, hi)` u32 backing pair — not a GcRef.
+- The shared `__rilua_frame_mt` metatable — bootstrap-allocated, lives forever.
 
-Pinning `_G` alone is unsound: `_G.UIParent` is a separate GC object. If `_G` isn't traversed, `UIParent` is seen as white and swept.
+Crucially: addon-mutated state does NOT live on the frame backing table. Per CLAUDE.md, custom fields go to `__rilua_frame_fields[id]` (the env table at `debug.getfenv(frame)[1]`). The backing table itself never gains new outgoing references after creation.
 
-Correct approach: transitively pin every object reachable from `_G` in a single walk at freeze time, then forbid mutation. Without a barrier, pinned objects can't write references to non-pinned objects (the non-pinned target would be swept). Forbidding all mutation on pinned objects removes the need for a barrier and the need for any future scan.
+### What pinning gets us
+
+If we pin the frame backing table at creation:
+
+- It stays alive without `__rilua_frame_refs` needing to mark it.
+- Its metatable is shared with all frames; either pin it once, or let Track 2 freeze it as part of `_G` (it's stored under `__rilua_frame_mt` in the registry).
+- We can mark `__rilua_frame_refs` itself as skip-traverse: its values don't need scanning to stay alive.
+
+Result: **47,333 entries off every GC cycle.**
+
+### What pinning does NOT get us
+
+`__rilua_frame_fields` is a separate problem. Field tables hold:
+
+- Custom properties (`frame.MyData = someTable`)
+- Script handlers as Lua closures with upvalues
+- EditMode overrides (`SetPointOverride`, `ClearAllPointsOverride`)
+- Mixin overrides
+
+These reference fresh closures, tables, and other Lua-heap objects that change at runtime. We can't transitively pin them. Field tables stay on the normal GC scan path.
+
+Same story for `__scripts` (closures with upvalues).
 
 ### Design
 
@@ -45,29 +99,74 @@ New rilua API:
 
 ```rust
 impl Gc {
-    /// Freezes a table and everything transitively reachable from it.
-    /// After this call:
-    ///   - All reached objects are permanently Black (never swept).
-    ///   - Writes to any frozen table raise a runtime error (or are silently
-    ///     routed to a shadow table — see policy below).
+    /// Marks an object as permanently reachable. The collector will:
+    ///   - never sweep it (treated as Black for sweep)
+    ///   - never include it in mark traversal (no descendant scan)
+    /// Caller must ensure the object holds no references to non-pinned,
+    /// non-frozen objects, or those references will dangle after sweep.
+    pub fn pin_object<T>(&mut self, r: GcRef<T>);
+
+    /// Convenience: mark a table as skip-traverse during mark, but still
+    /// participate in sweep normally. Used for "the values inside are
+    /// kept alive by other roots, so don't bother scanning."
+    pub fn mark_table_no_traverse(&mut self, r: GcRef<Table>);
+}
+```
+
+`pin_object` is for things we know are leaves and immortal (frame backing tables, the shared `__rilua_frame_mt`).
+
+`mark_table_no_traverse` is for tables whose contents are kept alive by other means (`__rilua_frame_refs` once its frame values are pinned).
+
+### Phases
+
+- [ ] Phase 1a — Rilua: add `Flag::Pinned` and `Flag::SkipTraverse` to arena entries.
+- [ ] Phase 1b — Rilua: implement `Gc::pin_object` and `Gc::mark_table_no_traverse`. Mark routine checks `Pinned` (skip mark recursion) and `SkipTraverse` (mark self black, don't traverse children). Sweep routine treats `Pinned` as kept-alive.
+- [ ] Phase 1c — Wow-sim: in `frame_ref` (`src/lua_api/methods.rs:85-98`), call `pin_object(table_ref)` after `attach_frame_metatable`. Pin the shared metatable once at registration.
+- [ ] Phase 1d — Wow-sim: at end of `register_globals`, call `mark_table_no_traverse(__rilua_frame_refs)`.
+- [ ] Phase 1e — Re-flamegraph. Target: `__rilua_frame_refs` traversal samples drop to zero; total `traverse_table` self-time drops ~25%.
+
+### Risks
+
+1. **What if a frame backing table ever does gain a non-trivial outgoing reference?** Audit `attach_frame_metatable` and any `raw_set` on a frame Val::Table. Today the only writes are during the initial setup (metatable + backing pair). If wow-sim ever caches per-frame state directly on the backing table (not in fields), pinning becomes unsafe.
+2. **Tests that rely on frame GC.** Some tests may expect frames to be collectable — e.g., `frame = nil; collectgarbage("collect"); assert(weakref:get() == nil)`. Pinning breaks weak-ref tests for frames. Audit `tests/` for weak references to frames.
+3. **Frame re-creation memory cost.** CLAUDE.md describes the orphan case where `CreateFrame` with an existing name produces a new id, leaving the old frame stranded. With pinning, the stranded old frame is now permanently retained too. Memory cost: ~200 bytes × the orphan count. Audit `register_new_frame` and `migrate_children_to_new_frame` for orphan-frequency baseline.
+
+## Track 2: Freeze `_G` and `__secureenv` after bootstrap
+
+### Insight
+
+`_G` (66k) and `__secureenv` (28k) grow during bootstrap and are essentially stable afterwards. Built-ins, `Enum.*` tables, mixin definitions, global constants. Addon runtime code mostly reads these; when it writes, it writes to its own tables.
+
+Snapshot at the bootstrap boundary, transitively pin every reached object, forbid mutation. GC skips traversal entirely.
+
+### Why naive pinning of `_G` alone doesn't work
+
+Pinning `_G` without pinning its values: `_G.UIParent` is a separate GC object. If `_G` isn't traversed, `UIParent` is seen as white and swept.
+
+Correct approach: transitively pin every object reachable from `_G` in a single walk at freeze time, then forbid mutation. Without a barrier, pinned objects can't write references to non-pinned objects (target would be swept). Forbidding all mutation removes the need for a barrier and the need for any future scan.
+
+### Design
+
+```rust
+impl Gc {
+    /// Walks the object graph from `root`, pinning every reached table,
+    /// function, closure, and userdata. After this call:
+    ///   - All reached objects are permanently retained (no sweep).
     ///   - GC mark phase skips traversal of frozen objects.
+    ///   - Writes to any frozen table raise a Lua error (initial policy).
     pub fn freeze_table(&mut self, root: GcRef<Table>);
 }
 ```
 
-Implementation sketch (`~/Repos/rilua/src/vm/gc/collector.rs`):
-
-1. Walk object graph from `root`, setting a new `Flag::Frozen` bit on each arena entry. Use the same BFS shape as mark phase.
-2. In `traverse_table`, `mark_value`, and sweep: check `Flag::Frozen` first and skip.
-3. In `raw_set` / `raw_set_impl`: if table is frozen, either raise or forward to a live shadow (decided by wow-sim-side wiring).
+Implementation reuses Track 1's `Pinned` flag, plus a `Frozen` flag that makes `raw_set` reject writes.
 
 ### Shadow-table policy (wow-sim side)
 
-Addons do occasionally overwrite built-ins (`_G.print = myprint`). To keep that working, wow-sim wraps `_G` with a metatable proxy at freeze time:
+Addons do occasionally overwrite built-ins (`_G.print = myprint`). Wrap `_G` with a metatable proxy at freeze time:
 
 ```lua
 -- _G_live is a regular Lua table, starts empty
--- _G_frozen is the pre-freeze snapshot
+-- _G_frozen is the pre-freeze snapshot (frozen via Gc::freeze_table)
 -- _G proxy: reads check live first, then frozen; writes always go to live
 ```
 
@@ -75,59 +174,47 @@ Addons do occasionally overwrite built-ins (`_G.print = myprint`). To keep that 
 
 Same treatment for `_G.__secureenv`.
 
-### Non-goals for Track 1
-
-- Runtime un-freezing (one-shot, no undo).
-- Partial freezing of subtrees (can extend later; not needed for `_G`/`__secureenv`).
-- Handling mutation to frozen *values* (they're whole-object frozen; `_G_frozen.Enum.ItemClass` itself can't be mutated either). Addon code that tries to add new `Enum` entries post-bootstrap will hit the shadow path.
-
 ### Phases
 
-- [ ] Phase 1a: Rilua: add `Flag::Frozen` bit to arena entries (`~/Repos/rilua/src/vm/gc/arena.rs`). Single bit; no size regression.
-- [ ] Phase 1b: Rilua: implement `Gc::freeze_table(root)` that walks transitively and sets Frozen on every reached object. Use BFS over `Val::Table`, `Val::Function`, `Val::Closure`, `Val::UserData`.
-- [ ] Phase 1c: Rilua: `traverse_table`, `mark_value`, and sweep routines check `is_frozen` and early-return / skip.
-- [ ] Phase 1d: Rilua: writes to frozen tables — initial policy is `raise Lua error`. Add a config toggle to switch to "silent deny" later if addon code hits this.
-- [ ] Phase 1e: Wow-sim: add `_G_live` + metatable proxy. Call `gc.freeze_table(_G)` at the end of `register_globals` / after runtime_surface_bootstrap, before any third-party addon loads.
-- [ ] Phase 1f: Wow-sim: repeat for `_G.__secureenv`.
-- [ ] Phase 1g: Re-flamegraph. Target: `traverse_table` samples drop ~50% (94k entries removed, roughly 45% of the 209k-entry total).
+- [ ] Phase 2a — Rilua: add `Flag::Frozen` (Frozen implies Pinned + reject writes).
+- [ ] Phase 2b — Rilua: implement `Gc::freeze_table(root)` — BFS over tables/functions/closures/userdata, set Frozen on each.
+- [ ] Phase 2c — Rilua: `raw_set` / `raw_set_impl` check `is_frozen` and raise on write.
+- [ ] Phase 2d — Wow-sim: add `_G_live` + metatable proxy on `_G`; call `gc.freeze_table(_G)` at the end of `register_globals` / after runtime_surface_bootstrap, before any third-party addon loads.
+- [ ] Phase 2e — Wow-sim: repeat Phase 2d for `_G.__secureenv`.
+- [ ] Phase 2f — Re-flamegraph. Target: `_G` and `__secureenv` traversal samples drop to zero; combined with Track 1, total `traverse_table` self-time drops ~70%.
 
 ### Risks
 
-1. **Bootstrap is not a clean boundary.** Some "addons" in `Interface/BlizzardUI` load late and still register globals. Need to pick the exact freeze moment: after Blizzard UI, before user addons (`WOW_SIM_NO_ADDONS` path has no user addons — freeze works trivially; full load needs a deliberate hook).
-2. **Tests that mutate `_G` mid-run.** Integration tests may set globals after bootstrap. Proxy handles it (writes go to `_G_live`), but behavior of `rawset(_G, key, value)` changes — `rawset` bypasses the metatable, and if the proxy replaces `_G` itself, callers of `rawset(_G, ...)` break unless we intercept. Audit `rawset` usages in `src/` and `tests/`.
-3. **Reentrancy during freeze.** If freeze walk triggers a metamethod (e.g. iterating a table with `__pairs`), state gets weird. The walk must use raw access only (`raw_get`, no metamethods).
-4. **Weak tables inside `_G`.** If any reached object is a weak table, freezing it breaks weak semantics (its values would never be collected). Need to skip weak tables and not descend into them; they stay on the normal GC path.
-5. **Finalizers.** Frozen objects can't be finalized. Confirm nothing in the bootstrap graph has a `__gc` equivalent (rilua doesn't expose `__gc` on userdata today — low risk).
+1. **Bootstrap is not a clean boundary.** Some Blizzard UI files load late and still register globals. Pick the freeze moment carefully: after Blizzard UI, before user addons. `WOW_SIM_NO_ADDONS` makes this trivial; full load needs a deliberate hook.
+2. **`rawset(_G, key, value)` callers.** `rawset` bypasses the metatable proxy. Audit `src/` and `tests/` for `rawset(_G, ...)` and route those through the proxy or the live table.
+3. **Reentrancy during freeze walk.** Use raw access only (`raw_get`, no metamethods).
+4. **Weak tables inside `_G`.** Skip them during the freeze walk and don't descend into them; they stay on normal GC.
+5. **Finalizers.** Confirm no `__gc` equivalents in the bootstrap graph (rilua doesn't expose `__gc` on userdata today — low risk).
 
-## Track 2: Frame-table investigation
+## Track 3: Investigate `__rilua_frame_fields` and `__scripts`
 
-`__rilua_frame_refs` (47k), `__rilua_frame_fields` (47k), `__scripts` (20k) don't fit the freeze model — they grow throughout runtime as frames and script handlers are created. Before picking an approach, we need data.
+These hold dynamic, addon-mutated state. They can't be frozen or pinned-transitively. They're the remaining ~68k entries (47k + 20k) on the GC scan path after Tracks 1–2 land.
 
-### Investigation questions
+Open questions:
 
-- [ ] What fraction of `__rilua_frame_refs` entries added during bootstrap survive to shutdown vs. get overwritten? (Hypothesis: 95%+ survive. If true, early entries are effectively "old" and a generational model would skip them.)
-- [ ] How often is a frame destroyed (entry removed from the table)? Per-startup count.
-- [ ] How many `__scripts` entries are added during bootstrap vs. during runtime? (Hypothesis: most are bootstrap.)
-- [ ] Is there a natural segmentation? E.g., all Blizzard UI frames get IDs < N, all addon frames get IDs ≥ N. If yes, a segmented freeze ("freeze everything with id < watermark") could work.
-- [ ] How expensive is it to move these tables off the Lua heap entirely? Previously rejected (they hold Lua userdata that needs GC tracing), but might be feasible if we register them as a single rooted collection with a traversal callback that reports contents without per-entry Lua-table overhead.
+- [ ] What's the actual scan cost of these two tables after Tracks 1–2? Re-flamegraph and measure. May be small enough to leave alone.
+- [ ] What fraction of `__scripts` entries are added at bootstrap (Blizzard frames' OnLoad / OnShow / OnEvent) vs. runtime?
+- [ ] Could `__rilua_frame_fields` be reshaped to keep only frequently-mutated entries in a "hot" table and stable entries in a "cold" frozen table? Most `EditMode` overrides, mixin overrides, and bootstrap-set custom properties never change.
+- [ ] Could `__scripts` use a parallel-array layout (`Vec<(frame_id, handler_id, closure)>`) instead of a hash map? Cheaper to scan; addresses different access patterns.
 
-### Candidate approaches (ranked, pending investigation)
-
-1. **Segmented freeze**: watermark ID set at end of bootstrap; entries with id ≤ watermark go into a frozen sub-table. Requires Track 1 to land first.
-2. **Generational GC in rilua**: Lua 5.4 port (scope previously drafted in this doc). 500–800 LOC, bounded. Wins on the "95% of entries are old and stable" pattern.
-3. **Off-heap storage with GC root callback**: rilua exposes a hook "here's a `Vec<GcRef<UserData>>` treated as roots, mark these and move on." Bypasses per-entry Lua table overhead. Needs rilua API work.
-
-Decision deferred until we have data from the investigation phase.
-
-## Alternatives considered
-
-- **Pure generational (original plan)**: more general, but Track 1's freeze is ~10× simpler and captures 45%+ of the entry-count savings on its own. Better to ship freeze first, then measure what's left.
-- **Immortal-root flag without transitive pinning**: unsound — cascade sweeps descendants.
-- **Mark-only-if-modified per entry**: requires full barrier tracking, which is essentially the generational machinery.
-- **Bigger GC pause multiplier**: trades heap size for less frequent collection. Doesn't touch per-collection work. Orthogonal; can stack with freeze.
+Decision deferred until Tracks 1–2 land and we re-measure.
 
 ## Sequencing
 
-1. Land Track 1 (freeze). Measure.
-2. Run Track 2 investigation. Gather data on frame-table growth and lifetime.
-3. Pick the winning Track 2 approach based on data. Generational remains the default fallback if segmentation doesn't work out.
+1. **Track 0** (traverse_table hoist) — independent, ship first. Pure perf.
+2. **Track 1** (pin frame backing tables) — smallest wow-sim change, biggest single-table win.
+3. **Track 2** (freeze `_G` + `__secureenv`) — bigger wow-sim change (proxy logic), biggest combined win.
+4. **Track 3** (investigate the rest) — only if there's still meaningful GC cost after 0–2.
+
+## Alternatives considered
+
+- **Pure generational GC (Lua 5.4 port)**: more general, but Tracks 1+2's freeze/pin approach is ~10× simpler and captures more of the entry-count savings. Frames-never-deleted invariant makes generational unnecessary for our workload.
+- **Immortal-root flag without transitive pinning**: unsound — cascade sweeps descendants.
+- **Mark-only-if-modified per entry**: requires full barrier tracking, which is essentially the generational machinery.
+- **Bigger GC pause multiplier**: trades heap size for less frequent collection. Doesn't touch per-collection work. Orthogonal; can stack.
+- **Move `__rilua_frame_refs` off the Lua heap**: rejected — values must be Lua values for `debug.getregistry().__rilua_frame_refs[id]` to work from addon Lua code.
