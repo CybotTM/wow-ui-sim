@@ -38,59 +38,69 @@ pub struct QuestLogState {
 
 impl QuestLogState {
     pub fn seeded() -> Self {
-        let entries = vec![
-            QuestLogEntry {
-                quest_id: 80000,
-                title: "The Lost Expedition".into(),
-                level: 80,
-                is_complete: false,
-                is_failed: false,
-                is_meta: false,
-                is_world_quest: false,
-                is_replayable: false,
-                is_flagged_completed: false,
-                map_id: Some(2248),
-                waypoint: Some((0.45, 0.35)),
-                tag_id: Some(0),
-                details_theme: None,
-            },
-            QuestLogEntry {
-                quest_id: 80001,
-                title: "Defending the Gates".into(),
-                level: 80,
-                is_complete: true,
-                is_failed: false,
-                is_meta: false,
-                is_world_quest: false,
-                is_replayable: false,
-                is_flagged_completed: false,
-                map_id: Some(2248),
-                waypoint: None,
-                tag_id: Some(0),
-                details_theme: None,
-            },
-            QuestLogEntry {
-                quest_id: 90101,
-                title: "Earthen Relic Recovery".into(),
-                level: 80,
-                is_complete: false,
-                is_failed: false,
-                is_meta: false,
-                is_world_quest: true,
-                is_replayable: true,
-                is_flagged_completed: false,
-                map_id: Some(2248),
-                waypoint: Some((0.62, 0.58)),
-                tag_id: Some(2),
-                details_theme: None,
-            },
-        ];
-        let mut completed_quest_ids = HashSet::new();
-        completed_quest_ids.insert(79999);
-        completed_quest_ids.insert(80001);
         Self {
-            entries,
-            completed_quest_ids,
+            entries: vec![
+                lost_expedition_entry(),
+                defending_the_gates_entry(),
+                earthen_relic_recovery_entry(),
+            ],
+            completed_quest_ids: seeded_completed_quest_ids(),
         }
     }
+}
+
+/// Shared field defaults for seeded entries: level 80, Khaz Algar map
+/// (2248), tag 0, all bool flags false, no waypoint / details theme.
+/// Per-quest builders override the distinctive fields via struct-update
+/// syntax.
+fn seed_quest_defaults() -> QuestLogEntry {
+    QuestLogEntry {
+        quest_id: 0,
+        title: String::new(),
+        level: 80,
+        is_complete: false,
+        is_failed: false,
+        is_meta: false,
+        is_world_quest: false,
+        is_replayable: false,
+        is_flagged_completed: false,
+        map_id: Some(2248),
+        waypoint: None,
+        tag_id: Some(0),
+        details_theme: None,
+    }
+}
+
+fn lost_expedition_entry() -> QuestLogEntry {
+    QuestLogEntry {
+        quest_id: 80000,
+        title: "The Lost Expedition".into(),
+        waypoint: Some((0.45, 0.35)),
+        ..seed_quest_defaults()
+    }
+}
+
+fn defending_the_gates_entry() -> QuestLogEntry {
+    QuestLogEntry {
+        quest_id: 80001,
+        title: "Defending the Gates".into(),
+        is_complete: true,
+        ..seed_quest_defaults()
+    }
+}
+
+fn earthen_relic_recovery_entry() -> QuestLogEntry {
+    QuestLogEntry {
+        quest_id: 90101,
+        title: "Earthen Relic Recovery".into(),
+        is_world_quest: true,
+        is_replayable: true,
+        waypoint: Some((0.62, 0.58)),
+        tag_id: Some(2),
+        ..seed_quest_defaults()
+    }
+}
+
+fn seeded_completed_quest_ids() -> HashSet<i32> {
+    HashSet::from([79999, 80001])
 }
