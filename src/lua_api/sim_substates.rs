@@ -177,6 +177,38 @@ impl Default for VoiceChatState {
     }
 }
 
+/// Single gossip option row matching `C_GossipInfo.GossipOptionUIInfo`.
+/// Only the fields most commonly used by retail addons are carried here;
+/// `rewards` is omitted (always empty array in the sim).
+#[derive(Debug, Default, Clone)]
+pub struct GossipOption {
+    pub gossip_option_id: u32,
+    pub order_index: u32,
+    pub name: String,
+    pub flags: u32,
+    pub icon: u32,
+    pub spell_id: Option<u32>,
+    pub select_option_when_only_option: bool,
+}
+
+/// Single quest row used by both `GetActiveQuests` and `GetAvailableQuests`.
+/// Matches `C_GossipInfo.GossipQuestUIInfo`.
+#[derive(Debug, Default, Clone)]
+pub struct GossipQuestRow {
+    pub quest_id: u32,
+    pub quest_info_id: u32,
+    pub quest_level: i32,
+    pub title: String,
+    pub is_important: bool,
+    pub is_legendary: bool,
+    pub is_meta: bool,
+    pub is_trivial: bool,
+    pub is_ignored: bool,
+    pub frequency: Option<i32>,
+    pub is_complete: Option<bool>,
+    pub repeatable: Option<bool>,
+}
+
 /// Active gossip-dialog state. Retail fires `GOSSIP_SHOW` when a
 /// gossip window opens against an NPC and `GOSSIP_CLOSED` when the
 /// player walks away. The sim exposes three count knobs that probes
@@ -188,6 +220,9 @@ pub struct GossipState {
     pub num_options: i32,
     pub num_available_quests: i32,
     pub num_active_quests: i32,
+    pub options: Vec<GossipOption>,
+    pub active_quests: Vec<GossipQuestRow>,
+    pub available_quests: Vec<GossipQuestRow>,
 }
 
 /// Single reputation-tab row. Drives `GetFactionInfoByID(id)` and the
