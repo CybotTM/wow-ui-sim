@@ -144,6 +144,9 @@ macro_rules! build_empty_sim_state {
             pvp_last_honor_gain: 0,
             equippable_items: ::std::collections::HashSet::new(),
             consumable_items: ::std::collections::HashSet::new(),
+            can_replace_guild_master: false,
+            auto_decline_guild_invites: false,
+            guild_roster_show_offline: true,
             menu_open: false,
             xp_disabled: false,
             can_teleport: true,
@@ -506,6 +509,14 @@ pub struct SimState {
     /// Item ids classified as consumable (potions, food, runes…).
     /// Drives `IsConsumableItem`.
     pub consumable_items: ::std::collections::HashSet<u32>,
+    /// Whether the player can designate a new Guild Master (retail: GM
+    /// can transfer leadership via guild-control UI). Default false.
+    pub can_replace_guild_master: bool,
+    /// Whether guild invites are auto-declined. Default false.
+    pub auto_decline_guild_invites: bool,
+    /// Whether the guild roster shows offline members. Default true
+    /// (retail's default for new accounts).
+    pub guild_roster_show_offline: bool,
     /// Whether the game-system menu (ESC menu) is open. Drives global
     /// `IsMenuOpen`. Default false.
     pub menu_open: bool,

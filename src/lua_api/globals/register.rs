@@ -59,6 +59,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::lfg_info::register_all(lua)?;
     super::locale_info::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
+    super::quest_surface::register_all(lua)?;
     super::lua_duration_object::register_lua_duration_object(lua)?;
     super::combat_verbs::register_all(lua)?;
     super::inventory_verbs::register_all(lua)?;
@@ -83,6 +84,7 @@ fn register_tail_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::pvp_probes::register_all(lua)?;
     super::player_probes::register_all(lua)?;
     super::inventory_probes::register_all(lua)?;
+    super::guild_probes::register_all(lua)?;
     super::compat_overrides::register_all(lua)?;
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;
