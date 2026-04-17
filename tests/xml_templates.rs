@@ -473,6 +473,71 @@ fn test_create_frame_from_xml_inline_global_method_with_self_string_arg_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_named_global_method_with_global_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.TEST_FAST_NAMED_GLOBAL_COLOR = "Color by school"
+        _G.XmlInlineNamedGlobalFrameText = {}
+        function _G.XmlInlineNamedGlobalFrameText:SetText(text)
+            self.text = text
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineNamedGlobalFrame" parent="UIParent">
+        <Scripts><OnLoad>_G[self:GetName().."Text"]:SetText(TEST_FAST_NAMED_GLOBAL_COLOR)</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let text: String = env
+        .eval("return XmlInlineNamedGlobalFrameText.text")
+        .unwrap();
+    assert_eq!(text, "Color by school");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_named_global_method_sequence_with_assignment_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        _G.TEST_FAST_NAMED_GLOBAL_COLOR = "Color by school"
+        _G.TEST_FAST_NAMED_GLOBAL_TOOLTIP = "school tooltip"
+        _G.XmlInlineNamedGlobalSequenceFrameText = {}
+        function _G.XmlInlineNamedGlobalSequenceFrameText:SetText(text)
+            self.text = text
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineNamedGlobalSequenceFrame" parent="UIParent">
+        <Scripts><OnLoad>_G[self:GetName().."Text"]:SetText(TEST_FAST_NAMED_GLOBAL_COLOR); self.tooltip = TEST_FAST_NAMED_GLOBAL_TOOLTIP</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let result: (String, String) = env
+        .eval(
+            r#"
+            return XmlInlineNamedGlobalSequenceFrameText.text,
+                   XmlInlineNamedGlobalSequenceFrame.tooltip
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "Color by school");
+    assert_eq!(result.1, "school tooltip");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_field_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

@@ -32,6 +32,14 @@ pub(super) fn build_global_family_handler(
             field,
         } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
             .map(Some),
+        FastHandlerRef::NamedGlobalMethodWithGlobalArg {
+            suffix,
+            method_name,
+            arg_path,
+        } => {
+            build_named_global_method_with_global_arg_handler(state, suffix, method_name, arg_path)
+                .map(Some)
+        }
         FastHandlerRef::GlobalMethodThenAssignLiteral {
             target_path,
             method_name,
@@ -142,6 +150,36 @@ fn build_global_method_then_assign_handler(
     let method = build_global_method_handler(state, target_path, method_name)?;
     let assign = build_assignment_handler(state, field, value)?;
     build_chained_handler(state, method, assign, "inline-global-method-assign", false)
+}
+
+fn build_named_global_method_with_global_arg_handler(
+    state: &mut LuaState,
+    suffix: &str,
+    method_name: &str,
+    arg_path: &str,
+) -> LuaResult<Val> {
+    let suffix = create_string(state, suffix);
+    let method_name = create_string(state, method_name);
+    let arg = resolve_global_path(state, arg_path);
+    let builder = load_template(
+        state,
+        r#"
+            local suffix, method_name, arg = ...
+            return function(self, ...)
+                local target = _G[self:GetName() .. suffix]
+                if not target then
+                    return
+                end
+                return target[method_name](target, arg)
+            end
+        "#,
+        "template-named-global-method-global-arg-handler",
+    )?;
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[suffix, method_name, arg],
+    )
 }
 
 enum GlobalMethodMode {

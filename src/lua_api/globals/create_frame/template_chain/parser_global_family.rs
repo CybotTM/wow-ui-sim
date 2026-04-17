@@ -32,6 +32,15 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             method_name,
         });
     }
+    if let Some((suffix, method_name, arg_path)) =
+        parse_inline_named_global_method_with_global_arg(stmt)
+    {
+        return Some(FastHandlerRef::NamedGlobalMethodWithGlobalArg {
+            suffix,
+            method_name,
+            arg_path,
+        });
+    }
     parse_inline_global_method_with_self_field_arg(stmt).map(|(target_path, method_name, field)| {
         FastHandlerRef::GlobalMethodWithSelfFieldArg {
             target_path,
@@ -87,6 +96,20 @@ fn parse_inline_global_method_with_self_field_arg(stmt: &str) -> Option<(&str, &
         && is_fast_identifier(method_name)
         && is_fast_identifier(field))
     .then_some((target_path, method_name, field))
+}
+
+fn parse_inline_named_global_method_with_global_arg(stmt: &str) -> Option<(&str, &str, &str)> {
+    let remainder = stmt.strip_prefix("_G[self:GetName()..")?;
+    let (raw_suffix, remainder) = remainder.split_once("]:")?;
+    let suffix = super::parse_single_string_literal(raw_suffix.trim())?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let arg_path = args.strip_suffix(')')?.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(method_name) && is_fast_handler_path(arg_path)).then_some((
+        suffix,
+        method_name,
+        arg_path,
+    ))
 }
 
 fn parse_inline_global_method_then_assign(
