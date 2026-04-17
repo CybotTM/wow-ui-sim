@@ -309,36 +309,10 @@ impl FrameXml {
         mut visit: impl FnMut(&FrameXml, &'static str) -> Result<(), E>,
     ) -> Result<(), E> {
         for child in &self.children {
-            match child {
-                FrameChildElement::Frames(frames) => {
-                    for element in &frames.elements {
-                        let Some((frame, tag)) = element.as_frame_data() else {
-                            continue;
-                        };
-                        visit(frame, tag)?;
-                    }
-                }
-                FrameChildElement::Frame(frame) => visit(frame, "Frame")?,
-                FrameChildElement::Button(frame) => visit(frame, "Button")?,
-                FrameChildElement::StatusBar(frame) => visit(frame, "StatusBar")?,
-                FrameChildElement::CheckButton(frame) => visit(frame, "CheckButton")?,
-                FrameChildElement::EditBox(frame) => visit(frame, "EditBox")?,
-                FrameChildElement::ScrollFrame(frame) => visit(frame, "ScrollFrame")?,
-                FrameChildElement::Slider(frame) => visit(frame, "Slider")?,
-                FrameChildElement::Cooldown(frame) => visit(frame, "Cooldown")?,
-                FrameChildElement::GameTooltip(frame) => visit(frame, "GameTooltip")?,
-                FrameChildElement::Model(frame) => visit(frame, "Model")?,
-                FrameChildElement::ModelScene(frame) => visit(frame, "ModelScene")?,
-                FrameChildElement::PlayerModel(frame) => visit(frame, "PlayerModel")?,
-                FrameChildElement::MessageFrame(frame) => visit(frame, "MessageFrame")?,
-                FrameChildElement::ScrollingMessageFrame(frame) => {
-                    visit(frame, "ScrollingMessageFrame")?
-                }
-                FrameChildElement::SimpleHTML(frame) => visit(frame, "SimpleHTML")?,
-                FrameChildElement::ColorSelect(frame) => visit(frame, "ColorSelect")?,
-                FrameChildElement::ItemButton(frame) => visit(frame, "ItemButton")?,
-                FrameChildElement::EventFrame(frame) => visit(frame, "EventFrame")?,
-                _ => {}
+            if let FrameChildElement::Frames(frames) = child {
+                visit_frames_section(frames, &mut visit)?;
+            } else if let Some((frame, tag)) = standalone_frame_child_tag(child) {
+                visit(frame, tag)?;
             }
         }
         Ok(())
@@ -490,6 +464,42 @@ impl FrameXml {
             ("SetHighlightFontObject", highlight),
             ("SetDisabledFontObject", disabled),
         ]
+    }
+}
+
+fn visit_frames_section<E>(
+    frames: &FramesXml,
+    visit: &mut impl FnMut(&FrameXml, &'static str) -> Result<(), E>,
+) -> Result<(), E> {
+    for element in &frames.elements {
+        if let Some((frame, tag)) = element.as_frame_data() {
+            visit(frame, tag)?;
+        }
+    }
+    Ok(())
+}
+
+fn standalone_frame_child_tag(child: &FrameChildElement) -> Option<(&FrameXml, &'static str)> {
+    match child {
+        FrameChildElement::Frame(f) => Some((f, "Frame")),
+        FrameChildElement::Button(f) => Some((f, "Button")),
+        FrameChildElement::StatusBar(f) => Some((f, "StatusBar")),
+        FrameChildElement::CheckButton(f) => Some((f, "CheckButton")),
+        FrameChildElement::EditBox(f) => Some((f, "EditBox")),
+        FrameChildElement::ScrollFrame(f) => Some((f, "ScrollFrame")),
+        FrameChildElement::Slider(f) => Some((f, "Slider")),
+        FrameChildElement::Cooldown(f) => Some((f, "Cooldown")),
+        FrameChildElement::GameTooltip(f) => Some((f, "GameTooltip")),
+        FrameChildElement::Model(f) => Some((f, "Model")),
+        FrameChildElement::ModelScene(f) => Some((f, "ModelScene")),
+        FrameChildElement::PlayerModel(f) => Some((f, "PlayerModel")),
+        FrameChildElement::MessageFrame(f) => Some((f, "MessageFrame")),
+        FrameChildElement::ScrollingMessageFrame(f) => Some((f, "ScrollingMessageFrame")),
+        FrameChildElement::SimpleHTML(f) => Some((f, "SimpleHTML")),
+        FrameChildElement::ColorSelect(f) => Some((f, "ColorSelect")),
+        FrameChildElement::ItemButton(f) => Some((f, "ItemButton")),
+        FrameChildElement::EventFrame(f) => Some((f, "EventFrame")),
+        _ => None,
     }
 }
 
