@@ -2,12 +2,19 @@
 
 use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 use super::{
     is_nil_namespace, set_namespace_fn, stub_empty_table, stub_false, stub_nil, stub_zero,
 };
 
 type NsStub = (&'static str, &'static str, RustFn);
+
+fn stub_false_false(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    Ok(2)
+}
 
 static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AchievementInfo
@@ -124,7 +131,7 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_PetBattles", "IsPlayerNPC", stub_nil),
     ("C_PetBattles", "StartPVPMatchmaking", stub_nil),
     // C_PlayerInfo
-    ("C_PlayerInfo", "GetAlternateFormInfo", stub_nil),
+    ("C_PlayerInfo", "GetAlternateFormInfo", stub_false_false),
     (
         "C_PlayerInfo",
         "GetContentDifficultyCreatureForPlayer",
@@ -231,6 +238,16 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_UnitAuras", "GetAuraDataBySpellName", stub_nil),
     ("C_UnitAuras", "GetBuffDataByIndex", stub_nil),
     ("C_UnitAuras", "GetDebuffDataByIndex", stub_nil),
+    // C_UIWidgetManager
+    ("C_UIWidgetManager", "GetBelowMinimapWidgetSetID", stub_nil),
+    (
+        "C_UIWidgetManager",
+        "GetObjectiveTrackerWidgetSetID",
+        stub_nil,
+    ),
+    ("C_UIWidgetManager", "GetPowerBarWidgetSetID", stub_zero),
+    ("C_UIWidgetManager", "GetTopCenterWidgetSetID", stub_nil),
+    ("C_UIWidgetManager", "GetWidgetSetInfo", stub_nil),
     // C_VoiceChat
     ("C_VoiceChat", "GetActiveChannelID", stub_nil),
     ("C_VoiceChat", "GetChannel", stub_nil),

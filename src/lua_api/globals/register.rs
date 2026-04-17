@@ -18,6 +18,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
     super::stubs::register_all(lua.state_mut());
+    LuaApiMut::register_function(lua, "UpdateUIParentPosition", update_ui_parent_position)?;
     // Must run after stubs so the fixture aura data overrides the
     // stub_nil registrations for C_UnitAuras.GetAuraSlots & friends.
     super::auras::register_all(lua.state_mut());
@@ -45,6 +46,10 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::admin::register_all(lua)?;
     super::super::timer_layout::register_all(lua)?;
     Ok(())
+}
+
+fn update_ui_parent_position(_state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    Ok(0)
 }
 
 #[cfg(test)]
