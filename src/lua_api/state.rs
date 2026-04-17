@@ -95,6 +95,7 @@ macro_rules! build_empty_sim_state {
             store_frame_shown: false,
             timerunning_season_id: None,
             modifier_keys: ModifierKeys::default(),
+            game_rules: GameRulesState::default(),
             debug_borders: false,
             debug_anchors: false,
         }
@@ -379,6 +380,10 @@ pub struct SimState {
     /// false (no input to the sim). Admin: `A_Admin.SetShiftKeyDown(b)` and
     /// friends toggle individual keys.
     pub modifier_keys: ModifierKeys,
+    /// `C_GameRules` backing state — active game mode + glue-screen name +
+    /// a rules map. Default: Standard mode, `CharacterSelect` glue screen,
+    /// empty rules.
+    pub game_rules: GameRulesState,
     /// Debug visualization: red borders around elements.
     pub debug_borders: bool,
     /// Debug visualization: green dots at anchor points.
@@ -408,6 +413,46 @@ pub struct ModifierKeys {
     pub control: bool,
     pub alt: bool,
     pub meta: bool,
+}
+
+/// Backing state for the `C_GameRules` namespace. WoW's retail client
+/// exposes a handful of named game rules (`"DISABLE_DUELS"`,
+/// `"ALLOW_PING_PARTY_MEMBERS"`, etc.) that the UI queries to decide which
+/// features to surface. Each rule has a float / int / string representation;
+/// we store all three on one entry so a single rule can satisfy all three
+/// getter variants without round-tripping strings.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GameRulesState {
+    /// Currently-active game mode id. Matches `Enum.GameMode`:
+    /// `0 = Standard`, `1 = Plunderstorm`, `2 = Delves`, etc. Tests that don't
+    /// care treat nonzero as "some non-standard mode".
+    pub active_game_mode: i32,
+    /// Glue screen name the current game mode opens on at the login flow.
+    /// Default `"CharacterSelect"` (Standard).
+    pub glue_screen_name: String,
+    /// Sparse rule store keyed by rule name. Missing key = inactive.
+    pub rules: std::collections::HashMap<String, GameRuleValue>,
+}
+
+impl Default for GameRulesState {
+    fn default() -> Self {
+        Self {
+            active_game_mode: 0,
+            glue_screen_name: "CharacterSelect".into(),
+            rules: std::collections::HashMap::new(),
+        }
+    }
+}
+
+/// A single `C_GameRules` rule value. Stored as all three interpretations
+/// (float/int/string) so each getter returns the "correct" form without a
+/// parse step. Admin `A_Admin.SetGameRule(name, value)` fills the right
+/// fields based on the Lua type passed in.
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct GameRuleValue {
+    pub as_float: f64,
+    pub as_int: i64,
+    pub as_string: String,
 }
 
 impl ModifierKeys {

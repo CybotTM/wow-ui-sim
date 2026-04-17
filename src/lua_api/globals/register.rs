@@ -32,6 +32,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
     super::modifier_keys::register_all(lua)?;
     super::guild_logo::register_all(lua)?;
     super::guild_control::register_all(lua)?;
+    super::game_rules::register_all(lua)?;
     super::locale_info::register_all(lua)?;
     super::missing_surface::register_all(lua)?;
     super::admin::register_all(lua)?;

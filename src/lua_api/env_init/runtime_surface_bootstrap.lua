@@ -2011,34 +2011,13 @@ C_FunctionContainers = C_FunctionContainers or __wow_namespace({
 })
 
 C_Sound = C_Sound or __wow_namespace()
-C_GameRules = C_GameRules or __wow_namespace()
--- Explicit members so their return shapes are accurate (callers multiply
--- by the return value, so nil-from-namespace-default crashes).
--- No game rules are active in the sim: IsGameRuleActive = false,
--- GetGameRuleAsFloat = 0, GetGameRuleAsInt = 0, GetGameRuleAsString = "".
-if rawget(C_GameRules, "IsGameRuleActive") == nil then
-  function C_GameRules.IsGameRuleActive(_rule) return false end
-end
-if rawget(C_GameRules, "GetGameRuleAsFloat") == nil then
-  function C_GameRules.GetGameRuleAsFloat(_rule) return 0 end
-end
-if rawget(C_GameRules, "GetGameRuleAsInt") == nil then
-  function C_GameRules.GetGameRuleAsInt(_rule) return 0 end
-end
-if rawget(C_GameRules, "GetGameRuleAsString") == nil then
-  function C_GameRules.GetGameRuleAsString(_rule) return "" end
-end
-if rawget(C_GameRules, "IsPlunderstorm") == nil then
-  function C_GameRules.IsPlunderstorm() return false end
-end
-if rawget(C_GameRules, "GetActiveGameMode") == nil then
-  function C_GameRules.GetActiveGameMode()
-    return (Enum and Enum.GameMode and Enum.GameMode.Standard) or 0
-  end
-end
-if rawget(C_GameRules, "GetGameModeGlueScreenName") == nil then
-  function C_GameRules.GetGameModeGlueScreenName() return "CharacterSelect" end
-end
+-- C_GameRules.* probes listed in PLAN are registered from Rust
+-- (src/lua_api/globals/game_rules.rs), backed by SimState::game_rules.
+-- Admin: A_Admin.SetGameRule(name, value) / A_Admin.SetActiveGameMode(mode,
+-- glueScreen?). Merge the stub-namespace __index so unimplemented members
+-- (IsHardcoreActive, etc.) still return the no-op function expected by
+-- Blizzard callsites.
+C_GameRules = __wow_merge_namespace(C_GameRules, {})
 
 -- Pet battles: not simulated. `GetNumPets` is compared numerically
 -- during PetBattleFrame OnLoad refresh, so returning nil crashes

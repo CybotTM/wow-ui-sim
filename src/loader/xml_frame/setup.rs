@@ -1,5 +1,7 @@
 //! Frame setup: CreateFrame execution, XML property application, error recovery.
 
+use std::collections::BTreeMap;
+use std::sync::{Mutex, OnceLock};
 use std::time::Instant;
 
 use crate::loader::LoadTiming;
@@ -16,6 +18,13 @@ pub(super) struct SetupFrame<'a> {
     pub(super) inherits: &'a str,
     pub(super) parent: &'a str,
     pub(super) intrinsic_base: Option<&'a str>,
+}
+
+#[derive(Default)]
+struct FastCreateFrameProfile {
+    fast_hits: u64,
+    slow_fallbacks: u64,
+    miss_reasons: BTreeMap<&'static str, u64>,
 }
 
 /// Execute CreateFrame Lua, apply XML properties, and record setup timing.
@@ -137,14 +146,46 @@ fn exec_create_frame_code(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result
 }
 
 fn can_fast_create_frame(setup: &SetupFrame<'_>) -> bool {
-    setup.explicit_parent
-        && setup.name != setup.parent
-        && setup.frame.parent_key.is_none()
-        && setup.frame.parent_array.is_none()
-        && setup.frame.combined_mixin().is_none()
-        && setup.frame.all_key_values().next().is_none()
-        && setup.frame.xml_attributes().is_none()
-        && setup.frame.scripts().is_none()
+    if !fast_create_frame_profiling_enabled() {
+        return setup.explicit_parent
+            && setup.name != setup.parent
+            && setup.frame.parent_key.is_none()
+            && setup.frame.parent_array.is_none()
+            && setup.frame.combined_mixin().is_none()
+            && setup.frame.all_key_values().next().is_none()
+            && setup.frame.xml_attributes().is_none()
+            && setup.frame.scripts().is_none();
+    }
+
+    let mut miss_reasons = Vec::new();
+
+    if !setup.explicit_parent {
+        miss_reasons.push("no_explicit_parent");
+    }
+    if setup.name == setup.parent {
+        miss_reasons.push("root_frame_reuse");
+    }
+    if setup.frame.parent_key.is_some() {
+        miss_reasons.push("parent_key");
+    }
+    if setup.frame.parent_array.is_some() {
+        miss_reasons.push("parent_array");
+    }
+    if setup.frame.combined_mixin().is_some() {
+        miss_reasons.push("mixins");
+    }
+    if setup.frame.all_key_values().next().is_some() {
+        miss_reasons.push("key_values");
+    }
+    if setup.frame.xml_attributes().is_some() {
+        miss_reasons.push("xml_attributes");
+    }
+    if setup.frame.scripts().is_some() {
+        miss_reasons.push("scripts");
+    }
+
+    record_fast_create_frame_profile(&miss_reasons);
+    miss_reasons.is_empty()
 }
 
 fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), LoadError> {
@@ -210,4 +251,66 @@ fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, f
             Ok::<(), crate::Error>(())
         });
     }
+}
+
+fn fast_create_frame_profiling_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("WOW_SIM_PROFILE_XML_FAST_PATH").is_ok())
+}
+
+fn fast_create_frame_profile() -> &'static Mutex<FastCreateFrameProfile> {
+    static PROFILE: OnceLock<Mutex<FastCreateFrameProfile>> = OnceLock::new();
+    PROFILE.get_or_init(|| Mutex::new(FastCreateFrameProfile::default()))
+}
+
+fn record_fast_create_frame_profile(miss_reasons: &[&'static str]) {
+    if !fast_create_frame_profiling_enabled() {
+        return;
+    }
+    let Ok(mut profile) = fast_create_frame_profile().lock() else {
+        return;
+    };
+    if miss_reasons.is_empty() {
+        profile.fast_hits += 1;
+        return;
+    }
+    profile.slow_fallbacks += 1;
+    for reason in miss_reasons {
+        *profile.miss_reasons.entry(reason).or_default() += 1;
+    }
+}
+
+pub(super) fn fast_create_frame_profile_report() -> Option<String> {
+    if !fast_create_frame_profiling_enabled() {
+        return None;
+    }
+    let Ok(profile) = fast_create_frame_profile().lock() else {
+        return None;
+    };
+    let total = profile.fast_hits + profile.slow_fallbacks;
+    if total == 0 {
+        return Some("xml fast path: no frames recorded".to_string());
+    }
+
+    let mut reasons = profile
+        .miss_reasons
+        .iter()
+        .map(|(reason, count)| (*reason, *count))
+        .collect::<Vec<_>>();
+    reasons.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(b.0)));
+
+    let top = reasons
+        .into_iter()
+        .take(8)
+        .map(|(reason, count)| format!("{reason}={count}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    Some(format!(
+        "xml fast path: hits={} slow={} total={} misses: {}",
+        profile.fast_hits,
+        profile.slow_fallbacks,
+        total,
+        if top.is_empty() { "none".to_string() } else { top }
+    ))
 }

@@ -24,6 +24,7 @@ pub mod admin_vault;
 pub mod admin_zone_economy;
 pub mod auras;
 pub mod font_strings_collection;
+pub mod game_rules;
 pub mod group_queries;
 pub mod guild_control;
 pub mod guild_logo;

@@ -142,6 +142,14 @@ fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetMetaKeyDown", set_meta_key_down)?
         .set_function("SetGuildEmblem", set_guild_emblem)?
         .set_function("SetGuildRanks", set_guild_ranks)?
+        .set_function(
+            "SetGameRule",
+            super::game_rules::admin_set_game_rule,
+        )?
+        .set_function(
+            "SetActiveGameMode",
+            super::game_rules::admin_set_active_game_mode,
+        )?
         .set_function("SetVaultActivity", set_vault_activity)?
         .set_function("SetVaultRewards", set_vault_rewards)?
         .set_function("ClearVault", clear_vault)?
