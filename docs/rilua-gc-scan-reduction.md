@@ -22,6 +22,33 @@ Top traversed tables (measured via `dump-tree --exec-lua`):
 
 Combined Tracks 0+1+2 remove **~142k entries** from every GC mark cycle. Track 3 addresses the remaining ~68k.
 
+## Track -1: Defer GC during bootstrap and per tick
+
+Independent of every other track. Ship first.
+
+Rilua exposes the Rust API directly — `state.gc_stop()`, `state.gc_restart()`, `state.gc_step(budget: i64)`, `state.full_gc()`, `state.gc_count()` (defined at `~/Repos/rilua/src/vm/state.rs:1612`). No need to call `collectgarbage("stop")` from Lua and pay the stringly-typed dispatch.
+
+### Why it works
+
+- **Bootstrap allocates monotonically.** Frames never deleted, globals stay around, bytecode constants retained. Almost nothing becomes garbage during startup. Stopping GC = stopping the *scan*, not stopping *cleanup*. Memory cost is near zero.
+- **Tick allocations are small.** Per-tick churn is event objects + temporary closures. Easily handled by one bounded `gc_step` at end-of-tick.
+- **Kills `barrier_back` overhead.** PLAN.md notes the barrier short-circuits when `phase != Propagate`, but stopping GC makes that 100% guaranteed during bootstrap.
+- **Cache locality.** One contiguous GC cycle is friendlier than many small interleaved slices.
+
+### Ordering with Track 2
+
+The full collect MUST run before `freeze_table`. Otherwise bootstrap transients (parser scratch, addon load temporaries, etc.) get pinned permanently by the freeze walk:
+
+```
+gc_stop → bootstrap → full_gc → freeze_table(_G) → freeze_table(__secureenv) → gc_restart
+```
+
+### Phases
+
+- [ ] Phase -1a — Wow-sim: at start of `register_globals`, call `state.gc_stop()`. After bootstrap + addon loads, call `state.full_gc()` then `state.gc_restart()`.
+- [ ] Phase -1b — Wow-sim: in the OnUpdate dispatch loop, wrap each tick — `gc_stop` at entry, `gc_step(budget)` at exit. Tune `budget` from measurement.
+- [ ] Phase -1c — Measure wall time before/after.
+
 ## Track 0: Quick win (independent)
 
 `traverse_table` re-borrows the arena once per element:
