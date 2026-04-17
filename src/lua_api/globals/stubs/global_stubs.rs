@@ -9,8 +9,6 @@ use super::{
 };
 
 static GLOBAL_NIL_STUBS: &[&str] = &[
-    "AcceptDuel",
-    "AcceptResurrect",
     "AcceptTrade",
     "AddFriend",
     "AgreeToSurvey",
@@ -23,8 +21,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ClearInspectPlayer",
     "CollapseSkillHeader",
     "ConfirmBossEmote",
-    "DeclineDuel",
-    "DeclineResurrect",
     "DismissSummon",
     "DoBattlefieldMaintenance",
     "DoEmote",
@@ -54,8 +50,6 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "GetInventoryItemID",
     "GetInventoryItemQuality",
     "ResetCameraPosition",
-    "ResurrectGetOfferer",
-    "RetrieveCorpse",
     "SendAddonMessage",
     "SendChatMessage",
     "SetActionBarToggles",

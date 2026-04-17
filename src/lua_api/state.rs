@@ -128,6 +128,9 @@ macro_rules! build_empty_sim_state {
             running_macro: None,
             chat_windows: ::std::collections::HashMap::new(),
             chat_type_colors: ::std::collections::HashMap::new(),
+            pending_duel: None,
+            pending_resurrect: None,
+            corpse_available: false,
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -439,6 +442,16 @@ pub struct SimState {
     /// Per-chat-type color overrides set by `ChangeChatColor`. Keyed by
     /// the uppercase chat-type token (`"SAY"`, `"CHANNEL"`, etc.).
     pub chat_type_colors: ::std::collections::HashMap<String, (f32, f32, f32)>,
+    /// Pending duel opponent name. `Some(name)` when a duel request is
+    /// open; cleared by `AcceptDuel` / `DeclineDuel`.
+    pub pending_duel: Option<String>,
+    /// Pending resurrect offerer name. `Some(name)` when a resurrect
+    /// offer is open; `ResurrectGetOfferer` reads it; `AcceptResurrect`
+    /// / `DeclineResurrect` clear it.
+    pub pending_resurrect: Option<String>,
+    /// Whether the player has a corpse waiting to be retrieved at a
+    /// graveyard. Cleared by `RetrieveCorpse`.
+    pub corpse_available: bool,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
