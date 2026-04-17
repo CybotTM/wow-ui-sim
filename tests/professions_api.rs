@@ -212,6 +212,35 @@ fn test_filtered_recipe_ids_nonempty() {
 }
 
 #[test]
+fn test_trade_skill_lists_and_counts_are_seeded() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local skillLines = C_TradeSkillUI.GetAllProfessionTradeSkillLines()
+            local professions = C_TradeSkillUI.GetProfessions()
+            if #skillLines ~= 2 then return "skillLines=" .. #skillLines end
+            if skillLines[1] ~= 164 or skillLines[2] ~= 186 then
+                return "skillLineIDs=" .. tostring(skillLines[1]) .. "," .. tostring(skillLines[2])
+            end
+            if #professions ~= 2 then return "professions=" .. #professions end
+            if C_TradeSkillUI.GetCraftingOrderCount() ~= 0 then
+                return "orderCount=" .. tostring(C_TradeSkillUI.GetCraftingOrderCount())
+            end
+            if C_TradeSkillUI.GetNumRecipes() ~= 10 then
+                return "numRecipes=" .. tostring(C_TradeSkillUI.GetNumRecipes())
+            end
+            if C_TradeSkillUI.GetNumTradeSkills() ~= 10 then
+                return "numTradeSkills=" .. tostring(C_TradeSkillUI.GetNumTradeSkills())
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_recipe_info_valid() {
     let env = env();
     let (id, name, learned, craftable): (i32, String, bool, bool) = env
@@ -249,12 +278,61 @@ fn test_recipe_schematic_has_reagents() {
 }
 
 #[test]
+fn test_recipe_profession_and_item_links_exist() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local info = C_TradeSkillUI.GetProfessionInfoByRecipeID(100005)
+            if info.professionID ~= 164 then return "professionID=" .. tostring(info.professionID) end
+            if info.professionName ~= "Blacksmithing" then return "professionName=" .. tostring(info.professionName) end
+
+            local recipeLink = C_TradeSkillUI.GetRecipeItemLink(100001)
+            if not recipeLink or not recipeLink:find("Hitem:211993") then return "recipeLink=" .. tostring(recipeLink) end
+
+            local tradeLink = C_TradeSkillUI.GetTradeSkillListLink()
+            if not tradeLink or not tradeLink:find("Htrade:164:80:100") then return "tradeLink=" .. tostring(tradeLink) end
+            if not tradeLink:find("%[Blacksmithing%]") then return "tradeLinkName=" .. tostring(tradeLink) end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_recipe_schematic_unknown() {
     let env = env();
     let id: i32 = env
         .eval("return C_TradeSkillUI.GetRecipeSchematic(999999).recipeID")
         .unwrap();
     assert_eq!(id, 0);
+}
+
+#[test]
+fn test_recipe_reagent_info_and_links_are_seeded() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_TradeSkillUI.GetRecipeNumReagents(100005) ~= 3 then
+                return "count=" .. tostring(C_TradeSkillUI.GetRecipeNumReagents(100005))
+            end
+
+            local reagent = C_TradeSkillUI.GetRecipeReagentInfo(100005, 2)
+            if reagent.itemID ~= 210937 then return "itemID=" .. tostring(reagent.itemID) end
+            if reagent.numRequired ~= 4 then return "numRequired=" .. tostring(reagent.numRequired) end
+            if reagent.name == nil or reagent.name == "Unknown" then return "name=" .. tostring(reagent.name) end
+
+            local link = C_TradeSkillUI.GetRecipeReagentItemLink(100005, 2)
+            if not link or not link:find("Hitem:210937") then return "link=" .. tostring(link) end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
 }
 
 #[test]

@@ -1,31 +1,220 @@
 use super::ensure_namespace;
 use crate::event::{Event, EventArg};
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
+use crate::items;
+use crate::lua_api::globals::profession_data;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+};
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+const TRADE_SKILL_NAMESPACE: &str = "C_TradeSkillUI";
+const SELECTED_PROFESSION_KEY: &str = "_selectedProfessionID";
+
 pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()> {
-    let table_ref = ensure_namespace(state, "C_TradeSkillUI")?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetRecipesTracked",
-        c_trade_skill_ui_get_recipes_tracked,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "IsRecipeTracked",
-        c_trade_skill_ui_is_recipe_tracked,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "SetRecipeTracked",
-        c_trade_skill_ui_set_recipe_tracked,
-    )?;
+    let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
+    let methods: &[(&str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
+        (
+            "GetAllProfessionTradeSkillLines",
+            c_trade_skill_ui_get_all_profession_trade_skill_lines,
+        ),
+        ("GetAllRecipeIDs", c_trade_skill_ui_get_all_recipe_ids),
+        (
+            "GetBaseProfessionInfo",
+            c_trade_skill_ui_get_base_profession_info,
+        ),
+        ("GetCategoryInfo", c_trade_skill_ui_get_category_info),
+        (
+            "GetChildProfessionInfo",
+            c_trade_skill_ui_get_child_profession_info,
+        ),
+        (
+            "GetChildProfessionInfos",
+            c_trade_skill_ui_get_child_profession_infos,
+        ),
+        (
+            "GetCraftingOrderCount",
+            c_trade_skill_ui_get_crafting_order_count,
+        ),
+        (
+            "GetFilteredRecipeIDs",
+            c_trade_skill_ui_get_filtered_recipe_ids,
+        ),
+        (
+            "GetProfessionInfoByRecipeID",
+            c_trade_skill_ui_get_profession_info_by_recipe_id,
+        ),
+        ("GetProfessions", c_trade_skill_ui_get_professions),
+        ("GetNumRecipes", c_trade_skill_ui_get_num_recipes),
+        ("GetNumTradeSkills", c_trade_skill_ui_get_num_trade_skills),
+        ("GetRecipeInfo", c_trade_skill_ui_get_recipe_info),
+        ("GetRecipeItemLink", c_trade_skill_ui_get_recipe_item_link),
+        (
+            "GetRecipeNumReagents",
+            c_trade_skill_ui_get_recipe_num_reagents,
+        ),
+        (
+            "GetRecipeReagentInfo",
+            c_trade_skill_ui_get_recipe_reagent_info,
+        ),
+        (
+            "GetRecipeReagentItemLink",
+            c_trade_skill_ui_get_recipe_reagent_item_link,
+        ),
+        ("GetRecipeSchematic", c_trade_skill_ui_get_recipe_schematic),
+        ("GetRecipesTracked", c_trade_skill_ui_get_recipes_tracked),
+        ("GetTradeSkillLine", c_trade_skill_ui_get_trade_skill_line),
+        (
+            "GetTradeSkillListLink",
+            c_trade_skill_ui_get_trade_skill_list_link,
+        ),
+        (
+            "GetTradeSkillTexture",
+            c_trade_skill_ui_get_trade_skill_texture,
+        ),
+        ("IsRecipeTracked", c_trade_skill_ui_is_recipe_tracked),
+        ("IsTradeSkillReady", c_trade_skill_ui_is_trade_skill_ready),
+        (
+            "SetProfessionChildSkillLineID",
+            c_trade_skill_ui_set_profession_child_skill_line_id,
+        ),
+        ("SetRecipeTracked", c_trade_skill_ui_set_recipe_tracked),
+    ];
+
+    for &(name, func) in methods {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
+
     Ok(())
+}
+
+fn c_trade_skill_ui_get_all_profession_trade_skill_lines(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(skill_line_id_table(state));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_all_recipe_ids(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(recipe_id_table(
+        state,
+        &profession_data::get_all_recipe_ids(),
+    ));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_base_profession_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(profession_table(
+        state,
+        profession_data::get_profession_by_index(0),
+    ));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_category_info(state: &mut LuaState) -> LuaResult<u32> {
+    let category_id = i32::from_stack(state, 1)?;
+    state.push(category_table(
+        state,
+        profession_data::get_category(category_id),
+    ));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_child_profession_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(profession_table(state, selected_profession(state)));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_child_profession_infos(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(all_profession_tables(state));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_crafting_order_count(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_filtered_recipe_ids(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(recipe_id_table(
+        state,
+        &profession_data::get_filtered_recipe_ids(),
+    ));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_profession_info_by_recipe_id(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    state.push(profession_table(state, profession_for_recipe(recipe_id)));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_professions(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(skill_line_id_table(state));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_num_recipes(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(profession_data::BLACKSMITHING_RECIPES.len() as f64));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_num_trade_skills(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(profession_data::BLACKSMITHING_RECIPES.len() as f64));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_info(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    state.push(recipe_info_table(
+        state,
+        profession_data::get_recipe(recipe_id),
+    ));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_item_link(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let link = profession_data::get_recipe(recipe_id)
+        .and_then(|recipe| item_link_value(state, recipe.output_item_id));
+    state.push(link.unwrap_or(Val::Nil));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_num_reagents(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let count = profession_data::get_recipe(recipe_id)
+        .map(|recipe| recipe.reagents.len())
+        .unwrap_or(0);
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_reagent_info(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let reagent_index = reagent_index_from_stack(state)?;
+    let reagent = profession_data::get_recipe(recipe_id)
+        .and_then(|recipe| recipe.reagents.get(reagent_index));
+    state.push(reagent_info_table(state, reagent));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_reagent_item_link(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let reagent_index = reagent_index_from_stack(state)?;
+    let link = profession_data::get_recipe(recipe_id)
+        .and_then(|recipe| recipe.reagents.get(reagent_index))
+        .and_then(|reagent| item_link_value(state, reagent.item_id));
+    state.push(link.unwrap_or(Val::Nil));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_schematic(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    state.push(recipe_schematic_table(
+        state,
+        profession_data::get_recipe(recipe_id),
+    ));
+    Ok(1)
 }
 
 fn c_trade_skill_ui_set_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
@@ -84,4 +273,412 @@ fn c_trade_skill_ui_get_recipes_tracked(state: &mut LuaState) -> LuaResult<u32> 
 
     state.push(table);
     Ok(1)
+}
+
+fn c_trade_skill_ui_get_trade_skill_line(state: &mut LuaState) -> LuaResult<u32> {
+    let profession =
+        selected_profession(state).or_else(|| profession_data::get_profession_by_index(0));
+    let (skill_line_id, skill_level, max_skill_level) = profession
+        .map(|profession| {
+            (
+                profession.skill_line_id as f64,
+                profession.skill_level as f64,
+                profession.max_skill_level as f64,
+            )
+        })
+        .unwrap_or((0.0, 0.0, 0.0));
+    state.push(Val::Num(skill_line_id));
+    state.push(Val::Nil);
+    state.push(Val::Num(skill_level));
+    state.push(Val::Num(max_skill_level));
+    Ok(4)
+}
+
+fn c_trade_skill_ui_get_trade_skill_list_link(state: &mut LuaState) -> LuaResult<u32> {
+    let profession =
+        selected_profession(state).or_else(|| profession_data::get_profession_by_index(0));
+    let link = profession
+        .map(|profession| {
+            format!(
+                "|cff71d5ff|Htrade:{}:{}:{}|h[{}]|h|r",
+                profession.profession_id,
+                profession.skill_level,
+                profession.max_skill_level,
+                profession.name
+            )
+        })
+        .unwrap_or_default();
+    state.push(create_string(state, &link));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_trade_skill_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let profession_id = Option::<i32>::from_stack(state, 1)?;
+    let icon = profession_id
+        .and_then(profession_data::get_profession)
+        .or_else(|| profession_data::get_profession_by_index(0))
+        .map(|profession| profession.icon as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Num(icon));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_trade_skill_ready(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_set_profession_child_skill_line_id(state: &mut LuaState) -> LuaResult<u32> {
+    let skill_line_id = i32::from_stack(state, 1)?;
+    if profession_data::get_profession(skill_line_id).is_none() {
+        return Ok(0);
+    }
+
+    let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
+    table_set(
+        state,
+        Val::Table(table_ref),
+        SELECTED_PROFESSION_KEY,
+        Val::Num(skill_line_id as f64),
+    );
+    Ok(0)
+}
+
+fn skill_line_id_table(state: &mut LuaState) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+
+    if let Some(entries) = state.gc.tables.get_mut(table_ref) {
+        for (index, profession) in profession_data::PROFESSIONS.iter().enumerate() {
+            let key = Val::Num((index + 1) as f64);
+            let value = Val::Num(profession.profession_id as f64);
+            let _ = entries.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn recipe_id_table(state: &mut LuaState, recipe_ids: &[i32]) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+
+    if let Some(entries) = state.gc.tables.get_mut(table_ref) {
+        for (index, recipe_id) in recipe_ids.iter().enumerate() {
+            let key = Val::Num((index + 1) as f64);
+            let value = Val::Num(*recipe_id as f64);
+            let _ = entries.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn all_profession_tables(state: &mut LuaState) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+
+    if let Some(entries) = state.gc.tables.get_mut(table_ref) {
+        for (index, profession) in profession_data::PROFESSIONS.iter().enumerate() {
+            let key = Val::Num((index + 1) as f64);
+            let value = profession_table(state, Some(profession));
+            let _ = entries.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn profession_table(
+    state: &mut LuaState,
+    profession: Option<&profession_data::ProfessionInfo>,
+) -> Val {
+    let table = create_table(state);
+    table_set(
+        state,
+        table,
+        "professionID",
+        Val::Num(
+            profession
+                .map(|profession| profession.profession_id)
+                .unwrap_or(0) as f64,
+        ),
+    );
+
+    let Some(profession) = profession else {
+        return table;
+    };
+
+    table_set(
+        state,
+        table,
+        "profession",
+        Val::Num(profession.profession as f64),
+    );
+    table_set(
+        state,
+        table,
+        "professionName",
+        create_string(state, profession.name),
+    );
+    table_set(
+        state,
+        table,
+        "parentProfessionName",
+        create_string(state, profession.parent_profession_name),
+    );
+    table_set(
+        state,
+        table,
+        "skillLevel",
+        Val::Num(profession.skill_level as f64),
+    );
+    table_set(
+        state,
+        table,
+        "maxSkillLevel",
+        Val::Num(profession.max_skill_level as f64),
+    );
+    table_set(
+        state,
+        table,
+        "skillModifier",
+        Val::Num(profession.skill_modifier as f64),
+    );
+    table_set(
+        state,
+        table,
+        "skillLineID",
+        Val::Num(profession.skill_line_id as f64),
+    );
+    table_set(state, table, "iconFileID", Val::Num(profession.icon as f64));
+    table
+}
+
+fn category_table(state: &mut LuaState, category: Option<&profession_data::RecipeCategory>) -> Val {
+    let Some(category) = category else {
+        return Val::Nil;
+    };
+
+    let table = create_table(state);
+    table_set(
+        state,
+        table,
+        "categoryID",
+        Val::Num(category.category_id as f64),
+    );
+    table_set(state, table, "name", create_string(state, category.name));
+    table_set(
+        state,
+        table,
+        "parentCategoryID",
+        Val::Num(category.parent_category_id as f64),
+    );
+    table_set(state, table, "uiOrder", Val::Num(category.ui_order as f64));
+    table
+}
+
+fn recipe_info_table(state: &mut LuaState, recipe: Option<&profession_data::RecipeEntry>) -> Val {
+    let table = create_table(state);
+    let Some(recipe) = recipe else {
+        table_set(state, table, "recipeID", Val::Num(0.0));
+        table_set(state, table, "name", Val::Nil);
+        table_set(state, table, "craftable", Val::Bool(false));
+        return table;
+    };
+
+    table_set(state, table, "recipeID", Val::Num(recipe.recipe_id as f64));
+    table_set(state, table, "name", create_string(state, recipe.name));
+    table_set(state, table, "learned", Val::Bool(recipe.learned));
+    table_set(state, table, "craftable", Val::Bool(recipe.craftable));
+    table_set(
+        state,
+        table,
+        "difficulty",
+        Val::Num(recipe.difficulty as f64),
+    );
+    table_set(
+        state,
+        table,
+        "categoryID",
+        Val::Num(recipe.category_id as f64),
+    );
+    table_set(
+        state,
+        table,
+        "itemLevel",
+        Val::Num(recipe.item_level as f64),
+    );
+    table_set(state, table, "favorite", Val::Bool(false));
+    table
+}
+
+fn reagent_info_table(state: &mut LuaState, reagent: Option<&profession_data::ReagentSlot>) -> Val {
+    let Some(reagent) = reagent else {
+        return Val::Nil;
+    };
+
+    let table = create_table(state);
+    table_set(state, table, "itemID", Val::Num(reagent.item_id as f64));
+    table_set(
+        state,
+        table,
+        "numRequired",
+        Val::Num(reagent.quantity as f64),
+    );
+    table_set(
+        state,
+        table,
+        "quantityRequired",
+        Val::Num(reagent.quantity as f64),
+    );
+    table_set(state, table, "reagentType", Val::Num(1.0));
+    let name = items::get_item(reagent.item_id)
+        .map(|item| item.name)
+        .unwrap_or("Unknown");
+    table_set(state, table, "name", create_string(state, name));
+    table
+}
+
+fn recipe_schematic_table(
+    state: &mut LuaState,
+    recipe: Option<&profession_data::RecipeEntry>,
+) -> Val {
+    let table = create_table(state);
+    let Some(recipe) = recipe else {
+        table_set(state, table, "recipeID", Val::Num(0.0));
+        return table;
+    };
+
+    table_set(state, table, "recipeID", Val::Num(recipe.recipe_id as f64));
+    table_set(state, table, "name", create_string(state, recipe.name));
+    table_set(
+        state,
+        table,
+        "outputItemID",
+        Val::Num(recipe.output_item_id as f64),
+    );
+    table_set(
+        state,
+        table,
+        "quantityMin",
+        Val::Num(recipe.output_quantity as f64),
+    );
+    table_set(
+        state,
+        table,
+        "quantityMax",
+        Val::Num(recipe.output_quantity as f64),
+    );
+    table_set(
+        state,
+        table,
+        "reagentSlotSchematics",
+        reagent_slot_schematic_table(state, recipe),
+    );
+    table
+}
+
+fn reagent_slot_schematic_table(
+    state: &mut LuaState,
+    recipe: &profession_data::RecipeEntry,
+) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+
+    if let Some(entries) = state.gc.tables.get_mut(table_ref) {
+        for (index, reagent) in recipe.reagents.iter().enumerate() {
+            let key = Val::Num((index + 1) as f64);
+            let value = reagent_slot_table(state, index, reagent);
+            let _ = entries.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn reagent_slot_table(
+    state: &mut LuaState,
+    index: usize,
+    reagent: &profession_data::ReagentSlot,
+) -> Val {
+    let table = create_table(state);
+    table_set(
+        state,
+        table,
+        "reagents",
+        reagent_entry_table(state, reagent),
+    );
+    table_set(state, table, "slotIndex", Val::Num((index + 1) as f64));
+    table_set(state, table, "dataSlotIndex", Val::Num((index + 1) as f64));
+    table_set(state, table, "reagentType", Val::Num(1.0));
+    table_set(state, table, "required", Val::Bool(true));
+    table_set(state, table, "hiddenInCraftingForm", Val::Bool(false));
+    table_set(
+        state,
+        table,
+        "quantityRequired",
+        Val::Num(reagent.quantity as f64),
+    );
+    table_set(state, table, "variableQuantities", create_table(state));
+    table
+}
+
+fn reagent_entry_table(state: &mut LuaState, reagent: &profession_data::ReagentSlot) -> Val {
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+
+    if let Some(entries) = state.gc.tables.get_mut(table_ref) {
+        let _ = entries.raw_set(
+            Val::Num(1.0),
+            reagent_info_table(state, Some(reagent)),
+            &state.gc.string_arena,
+        );
+    }
+    state.gc.barrier_back(table_ref);
+    table
+}
+
+fn profession_for_recipe(recipe_id: i32) -> Option<&'static profession_data::ProfessionInfo> {
+    profession_data::get_recipe(recipe_id).and_then(|_| profession_data::get_profession_by_index(0))
+}
+
+fn selected_profession(state: &mut LuaState) -> Option<&'static profession_data::ProfessionInfo> {
+    let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE).ok()?;
+    let selected = table_get(state, Val::Table(table_ref), SELECTED_PROFESSION_KEY);
+    let Val::Num(skill_line_id) = selected else {
+        return profession_data::get_profession_by_index(0);
+    };
+    profession_data::get_profession(skill_line_id as i32)
+        .or_else(|| profession_data::get_profession_by_index(0))
+}
+
+fn reagent_index_from_stack(state: &mut LuaState) -> LuaResult<usize> {
+    let index = i32::from_stack(state, 2)?;
+    Ok(index.saturating_sub(1) as usize)
+}
+
+fn item_link_value(state: &mut LuaState, item_id: u32) -> Option<Val> {
+    if item_id == 0 {
+        return None;
+    }
+
+    let item = items::get_item(item_id)?;
+    Some(create_string(
+        state,
+        &format!(
+            "|cffffffff|Hitem:{item_id}::::::::80:::::|h[{}]|h|r",
+            item.name
+        ),
+    ))
 }
