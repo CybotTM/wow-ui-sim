@@ -119,7 +119,8 @@ fn register_targeting_party(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetPartyMemberHealth", set_party_member_health)?
         .set_function("KillPartyMember", kill_party_member)?
         .set_function("ResPartyMember", res_party_member)?
-        .set_function("SetRotDamage", set_rot_damage)
+        .set_function("SetRotDamage", set_rot_damage)?
+        .set_function("SetEnemyPool", super::targeting_verbs::admin_set_enemy_pool)
 }
 
 fn register_world(b: TableBuilder) -> LuaResult<TableBuilder> {

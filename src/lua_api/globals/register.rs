@@ -44,6 +44,7 @@ fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::modifier_keys::register_all(lua)?;
     super::guild_logo::register_all(lua)?;
     super::guild_control::register_all(lua)?;
+    super::targeting_verbs::register_all(lua)?;
     super::game_rules::register_all(lua)?;
     super::guild_info::register_all(lua)?;
     super::housing::register_all(lua)?;

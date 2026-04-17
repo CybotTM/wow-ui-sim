@@ -65,7 +65,9 @@ macro_rules! build_empty_sim_state {
             party_members: $collections.party_members,
             party_group_active: $runtime.party_group_active,
             current_target: $runtime.current_target,
+            previous_target: None,
             current_focus: $runtime.current_focus,
+            enemy_pool: Vec::new(),
             sound_manager: $runtime.sound_manager,
             rot_damage_level: $runtime.rot_damage_level,
             fps: $runtime.fps,
@@ -237,8 +239,14 @@ pub struct SimState {
     pub party_group_active: bool,
     /// Current target (None = no target).
     pub current_target: Option<TargetInfo>,
+    /// Previous target — set to the old `current_target` value each time the
+    /// target changes or is cleared. Drives `TargetLastTarget`.
+    pub previous_target: Option<TargetInfo>,
     /// Current focus target (None = no focus).
     pub current_focus: Option<TargetInfo>,
+    /// Enemy pool for `TargetNearestEnemy`. Empty by default; seeded via
+    /// `A_Admin.SetEnemyPool(...)`. Picking always returns the first entry.
+    pub enemy_pool: Vec<TargetInfo>,
     /// Audio playback manager (None when no audio device or WOW_SIM_NO_SOUND=1).
     pub sound_manager: Option<SoundManager>,
     /// Rot damage intensity (index into ROT_DAMAGE_LEVELS).
