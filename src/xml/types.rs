@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use super::types_elements::{
     ActorXml, ActorsXml, AnimationGroupXml, AnimationXml, FontFamilyXml, FontStringXml, FontXml,
-    FrameElement, FramesXml, IncludeXml, LayersXml, ScriptXml, TextureXml,
+    FramesXml, IncludeXml, LayersXml, ScriptXml, TextureXml,
 };
 use super::types_support::{
     AnchorsXml, AnimationsXml, AttributesXml, BackdropXml, BindingXml, ColorXml, FontRefXml,
@@ -261,38 +261,47 @@ impl FrameXml {
         })
     }
 
-    /// Get all child frame elements across all `<Frames>` sections and
+    /// Visit all child frame elements across all `<Frames>` sections and
     /// standalone frame-type children (WoW XML allows frame elements outside
     /// `<Frames>` wrappers).
-    pub fn all_frame_elements(&self) -> Vec<FrameElement> {
-        use super::types_elements::FrameElement as FE;
-        self.children
-            .iter()
-            .flat_map(|child| match child {
-                FrameChildElement::Frames(frames) => frames.elements.clone(),
-                FrameChildElement::Frame(frame) => vec![FE::Frame(frame.clone())],
-                FrameChildElement::Button(frame) => vec![FE::Button(frame.clone())],
-                FrameChildElement::StatusBar(frame) => vec![FE::StatusBar(frame.clone())],
-                FrameChildElement::CheckButton(frame) => vec![FE::CheckButton(frame.clone())],
-                FrameChildElement::EditBox(frame) => vec![FE::EditBox(frame.clone())],
-                FrameChildElement::ScrollFrame(frame) => vec![FE::ScrollFrame(frame.clone())],
-                FrameChildElement::Slider(frame) => vec![FE::Slider(frame.clone())],
-                FrameChildElement::Cooldown(frame) => vec![FE::Cooldown(frame.clone())],
-                FrameChildElement::GameTooltip(frame) => vec![FE::GameTooltip(frame.clone())],
-                FrameChildElement::Model(frame) => vec![FE::Model(frame.clone())],
-                FrameChildElement::ModelScene(frame) => vec![FE::ModelScene(frame.clone())],
-                FrameChildElement::PlayerModel(frame) => vec![FE::PlayerModel(frame.clone())],
-                FrameChildElement::MessageFrame(frame) => vec![FE::MessageFrame(frame.clone())],
-                FrameChildElement::ScrollingMessageFrame(frame) => {
-                    vec![FE::ScrollingMessageFrame(frame.clone())]
+    pub fn try_for_each_frame_element<E>(
+        &self,
+        mut visit: impl FnMut(&FrameXml, &'static str) -> Result<(), E>,
+    ) -> Result<(), E> {
+        for child in &self.children {
+            match child {
+                FrameChildElement::Frames(frames) => {
+                    for element in &frames.elements {
+                        let Some((frame, tag)) = element.as_frame_data() else {
+                            continue;
+                        };
+                        visit(frame, tag)?;
+                    }
                 }
-                FrameChildElement::SimpleHTML(frame) => vec![FE::SimpleHTML(frame.clone())],
-                FrameChildElement::ColorSelect(frame) => vec![FE::ColorSelect(frame.clone())],
-                FrameChildElement::ItemButton(frame) => vec![FE::ItemButton(frame.clone())],
-                FrameChildElement::EventFrame(frame) => vec![FE::EventFrame(frame.clone())],
-                _ => Vec::new(),
-            })
-            .collect()
+                FrameChildElement::Frame(frame) => visit(frame, "Frame")?,
+                FrameChildElement::Button(frame) => visit(frame, "Button")?,
+                FrameChildElement::StatusBar(frame) => visit(frame, "StatusBar")?,
+                FrameChildElement::CheckButton(frame) => visit(frame, "CheckButton")?,
+                FrameChildElement::EditBox(frame) => visit(frame, "EditBox")?,
+                FrameChildElement::ScrollFrame(frame) => visit(frame, "ScrollFrame")?,
+                FrameChildElement::Slider(frame) => visit(frame, "Slider")?,
+                FrameChildElement::Cooldown(frame) => visit(frame, "Cooldown")?,
+                FrameChildElement::GameTooltip(frame) => visit(frame, "GameTooltip")?,
+                FrameChildElement::Model(frame) => visit(frame, "Model")?,
+                FrameChildElement::ModelScene(frame) => visit(frame, "ModelScene")?,
+                FrameChildElement::PlayerModel(frame) => visit(frame, "PlayerModel")?,
+                FrameChildElement::MessageFrame(frame) => visit(frame, "MessageFrame")?,
+                FrameChildElement::ScrollingMessageFrame(frame) => {
+                    visit(frame, "ScrollingMessageFrame")?
+                }
+                FrameChildElement::SimpleHTML(frame) => visit(frame, "SimpleHTML")?,
+                FrameChildElement::ColorSelect(frame) => visit(frame, "ColorSelect")?,
+                FrameChildElement::ItemButton(frame) => visit(frame, "ItemButton")?,
+                FrameChildElement::EventFrame(frame) => visit(frame, "EventFrame")?,
+                _ => {}
+            }
+        }
+        Ok(())
     }
 
     /// Get the Attributes element if present.

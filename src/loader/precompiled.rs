@@ -6,10 +6,10 @@ use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 const FIRE_ONLOAD_KEY: &str = "__precompiled_fire_onload";
 const FIRE_ONSHOW_KEY: &str = "__precompiled_fire_onshow";
+const REPORT_SCRIPT_ERROR_KEY: &str = "__report_script_error";
 
 const FIRE_ONLOAD_SOURCE: &str = r#"
-    local __report = debug.getregistry()["__report_script_error"]
-    local frame = ...
+    local __report, frame = ...
     if not frame then return end
     if type(frame.OnLoad_Intrinsic) == "function" then
         local ok, err = pcall(frame.OnLoad_Intrinsic, frame)
@@ -28,8 +28,7 @@ const FIRE_ONLOAD_SOURCE: &str = r#"
 "#;
 
 const FIRE_ONSHOW_SOURCE: &str = r#"
-    local __report = debug.getregistry()["__report_script_error"]
-    local frame = ...
+    local __report, frame = ...
     if not frame or not frame:IsVisible() then return end
     local handler = frame:GetScript("OnShow")
     if handler then
@@ -73,5 +72,11 @@ fn call_precompiled(state: &mut LuaState, key: &'static str, frame: Val) -> LuaR
     if !matches!(func, Val::Function(_)) {
         return Err(runtime_error(format!("missing precompiled helper {key}")));
     }
-    call_function_state(state, func, &[frame]).map(|_| ())
+    let reporter = registry_get(state, REPORT_SCRIPT_ERROR_KEY);
+    if !matches!(reporter, Val::Function(_)) {
+        return Err(runtime_error(format!(
+            "missing precompiled helper reporter {REPORT_SCRIPT_ERROR_KEY}"
+        )));
+    }
+    call_function_state(state, func, &[reporter, frame]).map(|_| ())
 }

@@ -98,16 +98,16 @@ fn create_layer_children(
 ///
 /// FrameElement-specific overrides vs the shared `widget_type_for_tag`:
 /// - `DropDownToggleButton` / `EventButton` get intrinsic names (shared treats them as unknown)
-pub(crate) fn frame_element_to_type(
-    child: &crate::xml::FrameElement,
-) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
-    let (f, tag) = child.as_frame_data()?;
-    let (wt, intrinsic) = match tag {
+pub(crate) fn frame_element_to_type<'a>(
+    child_frame: &'a crate::xml::FrameXml,
+    child_tag: &'static str,
+) -> Option<(&'a crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+    let (wt, intrinsic) = match child_tag {
         "DropDownToggleButton" => ("Button", Some("DropDownToggleButton")),
         "EventButton" => ("Button", Some("EventButton")),
-        _ => crate::xml::widget_type_for_tag(tag)?,
+        _ => crate::xml::widget_type_for_tag(child_tag)?,
     };
-    Some((f, wt, intrinsic))
+    Some((child_frame, wt, intrinsic))
 }
 
 /// Recursively create child frames and assign parentKey references.
@@ -118,9 +118,9 @@ fn create_child_frames(
     _inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    for child in frame.all_frame_elements() {
-        create_single_child_frame(env, &child, name, timing)?;
-    }
+    frame.try_for_each_frame_element(|child_frame, child_tag| {
+        create_single_child_frame(env, child_frame, child_tag, name, timing)
+    })?;
     // ScrollChild children are parented to the ScrollFrame just like regular children,
     // but the first ScrollChild element also becomes the ScrollFrame's scroll child.
     if let Some(scroll_child) = frame.scroll_child() {
@@ -137,10 +137,14 @@ fn create_scroll_child_elements(
 ) -> Result<(), LoadError> {
     let mut registered_scroll_child = false;
     for child in elements {
-        let (child_frame, child_type, intrinsic) = match frame_element_to_type(child) {
-            Some(triple) => triple,
-            None => continue,
+        let Some((child_frame, child_tag)) = child.as_frame_data() else {
+            continue;
         };
+        let (child_frame, child_type, intrinsic) =
+            match frame_element_to_type(child_frame, child_tag) {
+                Some(triple) => triple,
+                None => continue,
+            };
         let child_name = create_frame_from_xml(
             env,
             child_frame,
@@ -169,11 +173,12 @@ fn create_scroll_child_elements(
 /// Create a single child frame from a FrameElement and assign parentKey.
 fn create_single_child_frame(
     env: &LoaderEnv<'_>,
-    child: &crate::xml::FrameElement,
+    child_frame: &crate::xml::FrameXml,
+    child_tag: &'static str,
     parent_name: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    let (child_frame, child_type, intrinsic) = match frame_element_to_type(child) {
+    let (child_frame, child_type, intrinsic) = match frame_element_to_type(child_frame, child_tag) {
         Some(triple) => triple,
         None => return Ok(()),
     };

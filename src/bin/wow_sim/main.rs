@@ -376,37 +376,16 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
             );
         }
         Some(Commands::LuaErrors) => {
-            wow_ui_sim::lua_errors::run_lua_errors(
-                &dispatch.env,
-                dispatch.saved_stdout,
-                dispatch.exec_lua.as_deref(),
-                dispatch.exec_lua_secure,
-            );
+            run_lua_errors(&dispatch);
         }
         Some(Commands::SelfTest {
             max_ticks,
-            categories,
+            ref categories,
         }) => {
-            if let Some(c) = &categories {
-                wow_ui_sim::self_test::inject_category_filter(&dispatch.env, c);
-            }
-            wow_ui_sim::self_test::run_startup(&dispatch.env);
-            wow_ui_sim::self_test::run_test(
-                &dispatch.env,
-                max_ticks,
-                dispatch.exec_lua.as_deref(),
-                dispatch.exec_lua_secure,
-                dispatch.saved_stdout,
-            );
+            run_self_test(&dispatch, max_ticks, categories.as_deref());
         }
-        Some(Commands::RunTests { addon_name }) => {
-            settle_headless_startup(&dispatch.env);
-            wow_ui_sim::addon_tests::run_addon_tests(
-                &dispatch.env,
-                &addon_name,
-                dispatch.exec_lua.as_deref(),
-                dispatch.exec_lua_secure,
-            );
+        Some(Commands::RunTests { ref addon_name }) => {
+            run_addon_tests(&dispatch, addon_name);
         }
         #[cfg(feature = "gui")]
         Some(Commands::DumpTexture {
@@ -424,17 +403,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
         }
         #[cfg(feature = "gui")]
         None => {
-            let debug = wow_ui_sim::DebugOptions {
-                borders: dispatch.debug_borders || dispatch.debug_elements,
-                anchors: dispatch.debug_anchors || dispatch.debug_elements,
-            };
-            wow_ui_sim::run_iced_ui(
-                dispatch.env,
-                debug,
-                dispatch.saved_vars,
-                dispatch.exec_lua,
-                dispatch.exec_lua_secure,
-            )?;
+            run_gui(dispatch)?;
         }
         #[cfg(not(feature = "gui"))]
         None => {
@@ -443,6 +412,54 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
         }
     }
     Ok(())
+}
+
+fn run_lua_errors(dispatch: &CommandDispatch) {
+    wow_ui_sim::lua_errors::run_lua_errors(
+        &dispatch.env,
+        dispatch.saved_stdout,
+        dispatch.exec_lua.as_deref(),
+        dispatch.exec_lua_secure,
+    );
+}
+
+fn run_self_test(dispatch: &CommandDispatch, max_ticks: u32, categories: Option<&str>) {
+    if let Some(c) = categories {
+        wow_ui_sim::self_test::inject_category_filter(&dispatch.env, c);
+    }
+    wow_ui_sim::self_test::run_startup(&dispatch.env);
+    wow_ui_sim::self_test::run_test(
+        &dispatch.env,
+        max_ticks,
+        dispatch.exec_lua.as_deref(),
+        dispatch.exec_lua_secure,
+        dispatch.saved_stdout,
+    );
+}
+
+fn run_addon_tests(dispatch: &CommandDispatch, addon_name: &str) {
+    settle_headless_startup(&dispatch.env);
+    wow_ui_sim::addon_tests::run_addon_tests(
+        &dispatch.env,
+        addon_name,
+        dispatch.exec_lua.as_deref(),
+        dispatch.exec_lua_secure,
+    );
+}
+
+#[cfg(feature = "gui")]
+fn run_gui(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
+    let debug = wow_ui_sim::DebugOptions {
+        borders: dispatch.debug_borders || dispatch.debug_elements,
+        anchors: dispatch.debug_anchors || dispatch.debug_elements,
+    };
+    wow_ui_sim::run_iced_ui(
+        dispatch.env,
+        debug,
+        dispatch.saved_vars,
+        dispatch.exec_lua,
+        dispatch.exec_lua_secure,
+    )
 }
 
 #[allow(clippy::too_many_arguments)]

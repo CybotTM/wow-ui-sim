@@ -134,16 +134,18 @@ pub(super) fn create_template_child_frames(
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
-    for child in frame.all_frame_elements() {
+    frame.try_for_each_frame_element(|child_frame, child_tag| {
         create_template_child_frame(
             state,
             state_rc,
             parent_id,
             parent_name,
             subst_parent,
-            &child,
+            child_frame,
+            child_tag,
         )?;
-    }
+        Ok::<(), rilua::LuaError>(())
+    })?;
 
     let Some(scroll_child) = frame.scroll_child() else {
         return Ok(());
@@ -151,13 +153,17 @@ pub(super) fn create_template_child_frames(
 
     let mut registered_scroll_child = false;
     for child in &scroll_child.children {
+        let Some((child_frame, child_tag)) = child.as_frame_data() else {
+            continue;
+        };
         let child_id = create_template_child_frame(
             state,
             state_rc,
             parent_id,
             parent_name,
             subst_parent,
-            child,
+            child_frame,
+            child_tag,
         )?;
         if !registered_scroll_child && let Some(child_id) = child_id {
             let mut sim = borrow_state_mut(state)?;
@@ -177,9 +183,11 @@ fn create_template_child_frame(
     parent_id: u64,
     _parent_name: &str,
     subst_parent: &str,
-    child: &crate::xml::FrameElement,
+    child_frame: &crate::xml::FrameXml,
+    child_tag: &'static str,
 ) -> LuaResult<Option<u64>> {
-    let Some((frame, widget_type_name, intrinsic)) = template_child_type(child) else {
+    let Some((frame, widget_type_name, intrinsic)) = template_child_type(child_frame, child_tag)
+    else {
         return Ok(None);
     };
     let child_name = template_child_name(frame.name.as_deref(), subst_parent);
@@ -716,10 +724,10 @@ pub(super) fn sim_state_rc(state: &LuaState) -> LuaResult<Rc<RefCell<crate::lua_
         .ok_or_else(|| rilua::runtime_error("missing WowLuaAppData"))
 }
 
-fn template_child_type(
-    child: &crate::xml::FrameElement,
-) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
-    let (frame, tag) = child.as_frame_data()?;
+fn template_child_type<'a>(
+    frame: &'a crate::xml::FrameXml,
+    tag: &'static str,
+) -> Option<(&'a crate::xml::FrameXml, &'static str, Option<&'static str>)> {
     match tag {
         "DropDownToggleButton" => Some((frame, "Button", Some("DropDownToggleButton"))),
         "EventButton" => Some((frame, "Button", Some("EventButton"))),

@@ -25,24 +25,25 @@ pub fn fire_lifecycle_scripts(
     lifecycle: LifecycleScripts,
 ) {
     let _ = env.with_state(|state| {
+        let frame_visible = if lifecycle.on_show {
+            let Ok(sim) = crate::lua_api::rilua_methods::borrow_state(state) else {
+                return Ok::<(), crate::Error>(());
+            };
+            sim.widgets.is_ancestor_visible(frame_id)
+        } else {
+            false
+        };
         let Ok(frame) = frame_ref(state, frame_id) else {
             return Ok::<(), crate::Error>(());
         };
         if lifecycle.on_load {
             fire_handler(state, name, "OnLoad", precompiled::fire_onload, frame);
         }
-        if lifecycle.on_show && is_frame_visible(state, frame_id) {
+        if lifecycle.on_show && frame_visible {
             fire_handler(state, name, "OnShow", precompiled::fire_onshow, frame);
         }
         Ok::<(), crate::Error>(())
     });
-}
-
-fn is_frame_visible(state: &rilua::vm::state::LuaState, frame_id: u64) -> bool {
-    let Ok(sim) = crate::lua_api::rilua_methods::borrow_state(state) else {
-        return false;
-    };
-    sim.widgets.is_ancestor_visible(frame_id)
 }
 
 fn fire_handler(
