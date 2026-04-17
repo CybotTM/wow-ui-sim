@@ -157,11 +157,11 @@ impl Gc {
 
 ### Phases
 
-- [ ] Phase 1a — Rilua: add `Flag::Pinned` and `Flag::SkipTraverse` to arena entries.
-- [ ] Phase 1b — Rilua: implement `Gc::pin_object` and `Gc::mark_table_no_traverse`. Mark routine checks `Pinned` (skip mark recursion) and `SkipTraverse` (mark self black, don't traverse children). Sweep routine treats `Pinned` as kept-alive.
-- [ ] Phase 1c — Wow-sim: in `frame_ref` (`src/lua_api/methods.rs:85-98`), call `pin_object(table_ref)` after `attach_frame_metatable`. Pin the shared metatable once at registration.
-- [ ] Phase 1d — Wow-sim: at end of `register_globals`, call `mark_table_no_traverse(__rilua_frame_refs)`.
-- [ ] Phase 1e — Re-flamegraph. Target: `__rilua_frame_refs` traversal samples drop to zero; total `traverse_table` self-time drops ~25%.
+- [x] Phase 1a — Rilua: added `Flag::Pinned` and `Flag::SkipTraverse` bits (FLAG_PINNED = 1<<1, FLAG_SKIP_TRAVERSE = 1<<2) alongside existing `FLAG_FROZEN`. (rilua commit 16b06b3)
+- [x] Phase 1b — Rilua: `Gc::pin_object(Val)` sets Pinned; `Gc::mark_table_no_traverse(GcRef<Table>)` sets SkipTraverse. `traverse_table` short-circuits to Black when SkipTraverse is set; `Arena::sweep` / `sweep_partial` keep Pinned entries alive. (rilua commit be718b6)
+- [x] Phase 1c — Wow-sim: `frame_ref` pins each backing table after `attach_frame_metatable`; `init_frame_metatable` pins the shared metatable + its `__index` clone. (wow-sim commit 8bb02284)
+- [x] Phase 1d — Wow-sim: `register_globals` ends with `mark_frame_ref_cache_no_traverse(state)` on `__rilua_frame_refs`. (wow-sim commit f8f7db3d)
+- [x] Phase 1e — Re-flamegraph. `traverse_table` median cycles dropped from 145.9M to 126.5M (−13.3%) over 3 perf runs after Phase 1. `__rilua_frame_refs` traversal samples are zero by construction (rilua unit test `skip_traverse_and_pinned_together_survive_full_gc_without_marking_children`). The 25% target assumed a pre-Track-1 baseline; Track -1 had already taken most of the eligible walks offline, leaving Phase 1 to capture the residual. Combined Track -1 + Phase 1 drop vs the original 242M baseline is ~48%.
 
 ### Risks
 
