@@ -164,47 +164,55 @@ pub(super) fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&s
 // ── Method group registrations ────────────────────────────────────────────────
 
 fn add_font_field_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetFontHeight", |state| {
-        let font = stack_val(state, 1);
-        let height = f64::from_stack(state, 2)?;
-        table_set(state, font, "__fontHeight", Val::Num(height));
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetFontHeight", |state| {
-        let font = stack_val(state, 1);
-        font_f64(state, font, "__fontHeight").into_stack(state)
-    })?;
-    table_set_rust_fn(state, font_ref, "SetFont", |state| {
-        let font = stack_val(state, 1);
-        let path = Option::<String>::from_stack(state, 2)?;
-        let height = Option::<f64>::from_stack(state, 3)?;
-        let flags = Option::<String>::from_stack(state, 4)?;
-        let Some(path) = path else { return Ok(0) };
-        let path_val = create_string(state, &path);
-        table_set(state, font, "__fontPath", path_val);
-        if let Some(h) = height {
-            table_set(state, font, "__fontHeight", Val::Num(h));
-        }
-        let flags_val = create_string(state, flags.as_deref().unwrap_or(""));
-        table_set(state, font, "__fontFlags", flags_val);
-        Ok(0)
-    })?;
-    table_set_rust_fn(state, font_ref, "GetFont", |state| {
-        let font = stack_val(state, 1);
-        let path = table_get(state, font, "__fontPath");
-        let path_val = match path {
-            Val::Str(_) => path,
-            _ => Val::Nil,
-        };
-        let height = font_f64(state, font, "__fontHeight");
-        let flags = font_str(state, font, "__fontFlags");
-        let flags_val = create_string(state, &flags);
-        state.push(path_val);
-        state.push(Val::Num(height));
-        state.push(flags_val);
-        Ok(3)
-    })?;
+    table_set_rust_fn(state, font_ref, "SetFontHeight", font_set_font_height)?;
+    table_set_rust_fn(state, font_ref, "GetFontHeight", font_get_font_height)?;
+    table_set_rust_fn(state, font_ref, "SetFont", font_set_font)?;
+    table_set_rust_fn(state, font_ref, "GetFont", font_get_font)?;
     Ok(())
+}
+
+fn font_set_font_height(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let height = f64::from_stack(state, 2)?;
+    table_set(state, font, "__fontHeight", Val::Num(height));
+    Ok(0)
+}
+
+fn font_get_font_height(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    font_f64(state, font, "__fontHeight").into_stack(state)
+}
+
+fn font_set_font(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let path = Option::<String>::from_stack(state, 2)?;
+    let height = Option::<f64>::from_stack(state, 3)?;
+    let flags = Option::<String>::from_stack(state, 4)?;
+    let Some(path) = path else { return Ok(0) };
+    let path_val = create_string(state, &path);
+    table_set(state, font, "__fontPath", path_val);
+    if let Some(h) = height {
+        table_set(state, font, "__fontHeight", Val::Num(h));
+    }
+    let flags_val = create_string(state, flags.as_deref().unwrap_or(""));
+    table_set(state, font, "__fontFlags", flags_val);
+    Ok(0)
+}
+
+fn font_get_font(state: &mut LuaState) -> LuaResult<u32> {
+    let font = stack_val(state, 1);
+    let path = table_get(state, font, "__fontPath");
+    let path_val = match path {
+        Val::Str(_) => path,
+        _ => Val::Nil,
+    };
+    let height = font_f64(state, font, "__fontHeight");
+    let flags = font_str(state, font, "__fontFlags");
+    let flags_val = create_string(state, &flags);
+    state.push(path_val);
+    state.push(Val::Num(height));
+    state.push(flags_val);
+    Ok(3)
 }
 
 fn add_font_text_color_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
