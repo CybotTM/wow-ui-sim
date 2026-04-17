@@ -242,20 +242,7 @@ pub fn set_propagate_mouse_input(
 ) {
     let mut clicks = false;
     let mut motion = false;
-    for token in propagate_spec
-        .split(|ch: char| ch == ',' || ch.is_ascii_whitespace())
-        .filter(|token| !token.is_empty())
-    {
-        match token.to_ascii_lowercase().as_str() {
-            "all" => {
-                clicks = true;
-                motion = true;
-            }
-            "clicks" => clicks = true,
-            "motion" => motion = true,
-            _ => {}
-        }
-    }
+    merge_propagate_mouse_input_spec(propagate_spec, &mut clicks, &mut motion);
 
     let mut s = state.borrow_mut();
     if let Some(frame) = s.widgets.get_mut(frame_id) {
@@ -493,26 +480,50 @@ pub fn apply_xml_propagate_mouse_input(
     frame: &FrameXml,
     inherits: &str,
 ) {
-    let propagate_spec = frame
-        .propagate_mouse_input_mask
-        .clone()
-        .or_else(|| frame.propagate_mouse_input.clone())
-        .or_else(|| {
-            if inherits.is_empty() {
-                return None;
+    let mut clicks = false;
+    let mut motion = false;
+
+    if !inherits.is_empty() {
+        for entry in &*crate::xml::get_template_chain(inherits) {
+            if let Some(spec) = entry.frame.propagate_mouse_input_mask.as_deref() {
+                merge_propagate_mouse_input_spec(spec, &mut clicks, &mut motion);
             }
-            crate::xml::get_template_chain(inherits)
-                .iter()
-                .find_map(|entry| {
-                    entry
-                        .frame
-                        .propagate_mouse_input_mask
-                        .clone()
-                        .or_else(|| entry.frame.propagate_mouse_input.clone())
-                })
-        });
-    if let Some(spec) = propagate_spec {
-        set_propagate_mouse_input(state, frame_id, &spec);
+            if let Some(spec) = entry.frame.propagate_mouse_input.as_deref() {
+                merge_propagate_mouse_input_spec(spec, &mut clicks, &mut motion);
+            }
+        }
+    }
+
+    if let Some(spec) = frame.propagate_mouse_input_mask.as_deref() {
+        merge_propagate_mouse_input_spec(spec, &mut clicks, &mut motion);
+    }
+    if let Some(spec) = frame.propagate_mouse_input.as_deref() {
+        merge_propagate_mouse_input_spec(spec, &mut clicks, &mut motion);
+    }
+
+    if clicks || motion {
+        let mut s = state.borrow_mut();
+        if let Some(widget) = s.widgets.get_mut(frame_id) {
+            widget.propagate_mouse_clicks = clicks;
+            widget.propagate_mouse_motion = motion;
+        }
+    }
+}
+
+fn merge_propagate_mouse_input_spec(propagate_spec: &str, clicks: &mut bool, motion: &mut bool) {
+    for token in propagate_spec
+        .split(|ch: char| ch == ',' || ch.is_ascii_whitespace())
+        .filter(|token| !token.is_empty())
+    {
+        match token.to_ascii_lowercase().as_str() {
+            "all" => {
+                *clicks = true;
+                *motion = true;
+            }
+            "clicks" => *clicks = true,
+            "motion" => *motion = true,
+            _ => {}
+        }
     }
 }
 
