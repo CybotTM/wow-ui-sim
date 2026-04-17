@@ -159,6 +159,19 @@ pub fn sync_child_to_rilua(
         return Ok(());
     };
     let key_ref = state.gc.intern_string(key.as_bytes());
+    // Short-circuit if parent[key] already points at this exact child.
+    // Startup loops (e.g. PartyFrame:InitializePartyMemberFrames) call
+    // SetParentKey on every OnShow pass; a no-op second pass must not
+    // redundantly re-write the same table slot and re-barrier the parent.
+    let already_wired = state
+        .gc
+        .tables
+        .get(parent_ref)
+        .map(|t| t.get_str(key_ref, &state.gc.string_arena) == child_val)
+        .unwrap_or(false);
+    if already_wired {
+        return Ok(());
+    }
     if let Some(t) = state.gc.tables.get_mut(parent_ref) {
         let _ = t.raw_set(Val::Str(key_ref), child_val, &state.gc.string_arena);
     }
