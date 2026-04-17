@@ -64,6 +64,17 @@ pub struct TalentState {
     pub active_config_id: i32,
     /// Last selected seeded config per specialization.
     pub last_selected_config_id_by_spec_id: HashMap<u32, i32>,
+    /// Whether the player can currently change talents. Drives
+    /// `C_ClassTalents.CanChangeTalents`. Seeded true (out of combat,
+    /// not in arena preparation). Flip off before firing combat enter
+    /// events in tests.
+    pub can_change_talents: bool,
+    /// Whether the active class has a starter build available. Drives
+    /// `C_ClassTalents.GetHasStarterBuild`. Seeded false.
+    pub has_starter_build: bool,
+    /// Whether the active talent config is the starter build. Drives
+    /// `C_ClassTalents.IsStarterBuildActive`. Seeded false.
+    pub is_starter_build_active: bool,
 }
 
 impl TalentState {
@@ -132,6 +143,9 @@ impl TalentState {
             active_hero_subtree_id,
             active_config_id,
             last_selected_config_id_by_spec_id,
+            can_change_talents: true,
+            has_starter_build: false,
+            is_starter_build_active: false,
         }
     }
 
@@ -209,6 +223,8 @@ impl TalentState {
 
     pub fn switch_to_spec(&mut self, spec_id: u32) {
         let last_selected = self.last_selected_config_id_by_spec_id.clone();
+        let can_change = self.can_change_talents;
+        let has_starter = self.has_starter_build;
         *self = Self::for_spec_id(spec_id);
         self.last_selected_config_id_by_spec_id
             .extend(last_selected);
@@ -218,6 +234,8 @@ impl TalentState {
             .copied()
             .or_else(|| default_class_talent_config_id(spec_id))
             .unwrap_or(self.active_config_id);
+        self.can_change_talents = can_change;
+        self.has_starter_build = has_starter;
     }
 
     pub fn switch_to_loadout(&mut self, spec_id: u32, config_id: i32) {

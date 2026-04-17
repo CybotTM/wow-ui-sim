@@ -301,6 +301,24 @@ fn register_c_class_talents_config_fns(
         "GetTraitTreeForSpec",
         c_class_talents_get_trait_tree_for_spec,
     )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "CanChangeTalents",
+        c_class_talents_can_change_talents,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "GetHasStarterBuild",
+        c_class_talents_get_has_starter_build,
+    )?;
+    table_set_rust_fn(
+        state,
+        table_ref,
+        "IsStarterBuildActive",
+        c_class_talents_is_starter_build_active,
+    )?;
     Ok(())
 }
 
@@ -681,5 +699,30 @@ fn c_class_talents_switch_to_specialization_by_index(state: &mut LuaState) -> Lu
 fn c_class_talents_get_trait_tree_for_spec(state: &mut LuaState) -> LuaResult<u32> {
     let _spec_id = u32::from_stack(state, 1)?;
     state.push(Val::Num(790.0));
+    Ok(1)
+}
+
+fn c_class_talents_can_change_talents(state: &mut LuaState) -> LuaResult<u32> {
+    let can_change = borrow_state(state)?.talents.can_change_talents;
+    state.push(Val::Bool(can_change));
+    state.push(Val::Bool(can_change));
+    if can_change {
+        state.push(Val::Nil);
+    } else {
+        let reason = create_string(state, "You can't do that right now.");
+        state.push(reason);
+    }
+    Ok(3)
+}
+
+fn c_class_talents_get_has_starter_build(state: &mut LuaState) -> LuaResult<u32> {
+    let has_starter = borrow_state(state)?.talents.has_starter_build;
+    state.push(Val::Bool(has_starter));
+    Ok(1)
+}
+
+fn c_class_talents_is_starter_build_active(state: &mut LuaState) -> LuaResult<u32> {
+    let is_active = borrow_state(state)?.talents.is_starter_build_active;
+    state.push(Val::Bool(is_active));
     Ok(1)
 }

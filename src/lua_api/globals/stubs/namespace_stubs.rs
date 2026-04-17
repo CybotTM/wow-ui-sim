@@ -262,10 +262,9 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
         "HasRequiredServiceForCharacterUpgrade",
         stub_false,
     ),
-    // C_ClassTalents
-    ("C_ClassTalents", "CanChangeTalents", stub_false),
-    ("C_ClassTalents", "GetHasStarterBuild", stub_false),
-    ("C_ClassTalents", "IsStarterBuildActive", stub_false),
+    // C_ClassTalents CanChangeTalents / GetHasStarterBuild /
+    // IsStarterBuildActive are TalentState-backed in
+    // missing_surface/traits.rs, not stubs.
     // C_Club
     ("C_Club", "IsEnabled", stub_false),
     // C_GarrisonInfo
