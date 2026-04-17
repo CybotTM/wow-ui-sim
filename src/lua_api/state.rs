@@ -112,6 +112,15 @@ macro_rules! build_empty_sim_state {
             selected_quest_log_id: None,
             abandon_quest_id: None,
             tracked_achievements: ::std::collections::HashSet::new(),
+            bank_frame_open: false,
+            guild_bank_frame_open: false,
+            merchant_frame_open: false,
+            tabard_frame_open: false,
+            trainer_frame_open: false,
+            socket_frame_open: false,
+            loot_frame_open: false,
+            guild_registrar_open: false,
+            pet_stables_open: false,
             keybindings: Keybindings::default(),
             debug_borders: false,
             debug_anchors: false,
@@ -384,6 +393,24 @@ pub struct SimState {
     /// Achievements the player is actively tracking. Drives
     /// `SetTrackedAchievement` / `UntrackAchievement`.
     pub tracked_achievements: HashSet<i32>,
+    /// Whether the player has the bank frame open.
+    pub bank_frame_open: bool,
+    /// Whether the guild bank frame is open.
+    pub guild_bank_frame_open: bool,
+    /// Whether the merchant frame is open.
+    pub merchant_frame_open: bool,
+    /// Whether the tabard-creation UI is open.
+    pub tabard_frame_open: bool,
+    /// Whether the class/profession trainer UI is open.
+    pub trainer_frame_open: bool,
+    /// Whether the item-socket frame is open.
+    pub socket_frame_open: bool,
+    /// Whether the loot window is open.
+    pub loot_frame_open: bool,
+    /// Whether the guild registrar/petition UI is open.
+    pub guild_registrar_open: bool,
+    /// Whether the pet-stables UI is open.
+    pub pet_stables_open: bool,
     /// User-set keybinding store (base + overrides). See `Keybindings`.
     pub keybindings: Keybindings,
     /// Debug visualization: red borders around elements.
