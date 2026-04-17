@@ -177,6 +177,32 @@ impl Default for VoiceChatState {
     }
 }
 
+/// Single reputation-tab row. Drives `GetFactionInfoByID(id)` and the
+/// broader reputation window. `standing` is the 1-8 reputation tier
+/// (1 Hated .. 8 Exalted). `bottom` / `top` bracket the current
+/// standing's value range; `earned` is how far through that bracket
+/// the player is. `at_war` / `is_watched` / `is_header` /
+/// `is_collapsed` carry the flag bits that addons destructure.
+#[derive(Debug, Default, Clone)]
+pub struct FactionEntry {
+    pub faction_id: u32,
+    pub name: String,
+    pub description: String,
+    pub standing: i32,
+    pub bottom: i64,
+    pub top: i64,
+    pub earned: i64,
+    pub at_war: bool,
+    pub can_toggle_at_war: bool,
+    pub is_header: bool,
+    pub is_collapsed: bool,
+    pub has_rep: bool,
+    pub is_watched: bool,
+    pub is_child: bool,
+    pub has_bonus_rep_gain: bool,
+    pub can_be_lfg_bonus: bool,
+}
+
 /// Party loot-method state — drives `GetLootMethod()` and
 /// `GetMasterLooterThreshold()`. `method` is the retail token
 /// (`"group"`, `"master"`, `"freeforall"`, `"roundrobin"`,

@@ -30,6 +30,7 @@ pub mod create_frame;
 pub mod currency_data;
 pub mod enum_data;
 pub mod environment_restore;
+pub mod faction_probes;
 pub mod font_strings_collection;
 pub mod game_rules;
 pub mod global_frames;

@@ -50,10 +50,10 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "SetLootThreshold",
     "SetPartyLeader",
     "SetRaidSubgroup",
-    "SetSelectedFaction",
+    // SetSelectedFaction is SimState-backed in faction_probes.rs, not a stub.
     "SetUnitCritterKillCount",
     "SetView",
-    "SetWatchedFaction",
+    // SetWatchedFaction is SimState-backed in faction_probes.rs, not a stub.
     "ShowingCinematic",
     "ShowUIPanel",
     "SortBags",
@@ -92,7 +92,9 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
     // loot_method.rs, not stubs.
     "HasNewMail",
+    "InCinematic",
     "IsOnGroundFloorInJailersTower",
+    "IsInCinematicScene",
     // IsShiftKeyDown is SimState-backed in modifier_keys.rs, not a stub.
     "IsThreatWarningEnabled",
     "NeedToDisplayDisclaimer",
@@ -127,7 +129,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetCursorPosition is SimState-backed in mouse_probes.rs, not a stub.
     // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
     // not a stub.
-    "GetFactionInfoByID",
+    // GetFactionInfoByID is SimState-backed in faction_probes.rs, not a stub.
     "GetGossipNumOptions",
     "GetGossipNumAvailableQuests",
     "GetGossipNumActiveQuests",
@@ -135,7 +137,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetGuildBankTabCost",
     "GetGuildBankTabInfo",
     "GetGuildBankText",
-    "GetGuildFactionInfo",
+    // GetGuildFactionInfo is SimState-backed in faction_probes.rs, not a stub.
     // GetGuildRosterInfo / GetGuildRosterMOTD / GetGuildRosterSize are
     // SimState-backed in guild_probes.rs, not stubs.
     "GetGuildTabardInfo",

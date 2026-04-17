@@ -127,6 +127,9 @@ macro_rules! build_empty_sim_state {
             loot_slots: Vec::new(),
             auction_browse_items: Vec::new(),
             loot_method: LootMethodState::default(),
+            factions: Vec::new(),
+            selected_faction_index: 0,
+            watched_faction_index: 0,
             battlefield_queue: BattlefieldQueue::default(),
             battlefield_minimap_visible: false,
             chat_channels: Vec::new(),
@@ -473,6 +476,17 @@ pub struct SimState {
     /// `GetMasterLooterThreshold()`, and the `RequestPartyLootMethod()`
     /// event refresh. Defaults to personal loot, threshold 2 (Uncommon).
     pub loot_method: LootMethodState,
+    /// Reputation rows in reputation-window display order. Drives
+    /// `GetFactionInfoByID`, `GetGuildFactionInfo`, and the selected /
+    /// watched faction getters / setters. Empty by default.
+    pub factions: Vec<FactionEntry>,
+    /// 1-based index into `factions` currently selected in the
+    /// reputation window. 0 = nothing selected. Drives
+    /// `GetSelectedFaction()` / `SetSelectedFaction()`.
+    pub selected_faction_index: i32,
+    /// 1-based index into `factions` shown on the XP bar. 0 = none.
+    /// Drives `SetWatchedFaction()`.
+    pub watched_faction_index: i32,
     /// PvP / battlefield queue state — a single slot for the active
     /// battleground, arena, or LFG queue. See `BattlefieldQueue`.
     pub battlefield_queue: BattlefieldQueue,
@@ -576,11 +590,11 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, GameRuleValue, GameRulesState,
-    Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, NetStats,
-    PetBattleState, PetState, TradeState, VoiceChatState, WowLabsAreaInfo, WowLabsCircleInfo,
-    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
-    WowLabsPoint, WowLabsState,
+    BattlefieldQueue, BattlefieldStatus, ChatChannel, ChatWindow, FactionEntry, GameRuleValue,
+    GameRulesState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys,
+    NetStats, PetBattleState, PetState, TradeState, VoiceChatState, WowLabsAreaInfo,
+    WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite,
+    WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 struct EmptyStateCollections {
