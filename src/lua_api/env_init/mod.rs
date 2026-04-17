@@ -6,6 +6,7 @@
 mod bootstrap;
 mod enums;
 mod frames;
+mod freeze_globals;
 mod registry;
 mod runtime;
 
@@ -45,6 +46,16 @@ pub(super) fn init_lua_state(
     remove_sandbox_globals(lua)?;
     frames::init_frame_metatable(lua)?;
     finalize_bootstrap_gc(lua)?;
+    // Opt-in until the "overwrite stable global" audit is complete.
+    // Blizzard's SharedXMLBase utility files (Mixin / TableUtil /
+    // EnumUtil / FunctionUtil / Compat) overwrite existing `_G`
+    // entries during addon load; freezing `_G` rejects those writes
+    // and breaks the entire addon pipeline. The infrastructure stays
+    // available for measurement / selective freezing of known-stable
+    // subtrees (Track 3).
+    if std::env::var("WOW_SIM_FREEZE_GLOBALS").as_deref() == Ok("1") {
+        freeze_globals::freeze_globals_with_live_shadow(lua)?;
+    }
     Ok(())
 }
 
