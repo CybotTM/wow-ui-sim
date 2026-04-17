@@ -170,18 +170,19 @@ fn push_account_info_table(
 /// Build a `BNetGameAccountInfo` Lua table from a `BnetGameAccount`.
 fn push_game_account_info_table(state: &mut LuaState, ga: &BnetGameAccount) -> Val {
     let t = create_table(state);
+    write_game_account_character(state, t, ga);
+    write_game_account_presence(state, t, ga);
+    write_game_account_meta(state, t, ga);
+    t
+}
 
+fn write_game_account_character(state: &mut LuaState, t: Val, ga: &BnetGameAccount) {
     let character_name = create_string(state, &ga.character_name);
     let realm_name = create_string(state, &ga.realm_name);
     let realm_display_name = create_string(state, &ga.realm_display_name);
-    let area_name = create_string(state, &ga.area_name);
-    let client_program = create_string(state, &ga.client_program);
+    let class_name = create_string(state, &ga.class_name);
     let faction_name = create_string(state, &ga.faction_name);
     let race_name = create_string(state, &ga.race_name);
-    let rich_presence = create_string(state, &ga.rich_presence);
-    let class_name = create_string(state, &ga.class_name);
-    let player_guid = create_string(state, &ga.player_guid);
-
     table_set(state, t, "characterName", character_name);
     table_set(state, t, "realmName", realm_name);
     table_set(state, t, "realmDisplayName", realm_display_name);
@@ -194,14 +195,25 @@ fn push_game_account_info_table(state: &mut LuaState, ga: &BnetGameAccount) -> V
         "characterLevel",
         Val::Num(ga.character_level as f64),
     );
+    table_set(state, t, "factionName", faction_name);
+    table_set(state, t, "raceName", race_name);
+}
+
+fn write_game_account_presence(state: &mut LuaState, t: Val, ga: &BnetGameAccount) {
+    let area_name = create_string(state, &ga.area_name);
+    let client_program = create_string(state, &ga.client_program);
+    let rich_presence = create_string(state, &ga.rich_presence);
     table_set(state, t, "areaName", area_name);
     table_set(state, t, "isOnline", Val::Bool(ga.is_online));
     table_set(state, t, "isGameAFK", Val::Bool(ga.is_game_afk));
     table_set(state, t, "isGameBusy", Val::Bool(ga.is_game_busy));
     table_set(state, t, "clientProgram", client_program);
-    table_set(state, t, "factionName", faction_name);
-    table_set(state, t, "raceName", race_name);
     table_set(state, t, "richPresence", rich_presence);
+    table_set(state, t, "hasFocus", Val::Bool(ga.has_focus));
+}
+
+fn write_game_account_meta(state: &mut LuaState, t: Val, ga: &BnetGameAccount) {
+    let player_guid = create_string(state, &ga.player_guid);
     table_set(state, t, "canSummon", Val::Bool(ga.can_summon));
     table_set(
         state,
@@ -209,7 +221,6 @@ fn push_game_account_info_table(state: &mut LuaState, ga: &BnetGameAccount) -> V
         "isInCurrentRegion",
         Val::Bool(ga.is_in_current_region),
     );
-    table_set(state, t, "hasFocus", Val::Bool(ga.has_focus));
     table_set(
         state,
         t,
@@ -225,8 +236,6 @@ fn push_game_account_info_table(state: &mut LuaState, ga: &BnetGameAccount) -> V
     );
     table_set(state, t, "regionID", Val::Num(ga.region_id as f64));
     table_set(state, t, "playerGuid", player_guid);
-
-    t
 }
 
 fn write_account_identity_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
