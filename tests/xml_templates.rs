@@ -280,6 +280,32 @@ fn test_create_frame_from_xml_inline_function_call_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_noarg_function_call_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineNoArgCount = 0
+        function XmlInlineNoArgOnLoad()
+            XmlInlineNoArgCount = XmlInlineNoArgCount + 1
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineNoArgFrame" parent="UIParent">
+        <Scripts><OnLoad>XmlInlineNoArgOnLoad();</OnLoad></Scripts>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let calls: f64 = env.eval("return XmlInlineNoArgCount").unwrap();
+    assert_eq!(calls, 1.0, "single-call inline no-arg OnLoad should fire");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_self_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -305,6 +331,41 @@ fn test_create_frame_from_xml_inline_self_method_runs() {
         .eval("return XmlInlineMethodFrame.xmlInlineMethodLoaded == true")
         .unwrap();
     assert!(loaded, "self-method inline OnLoad should fire");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_parent_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineParentMixin = {}
+        function XmlInlineParentMixin:Prime()
+            self.parentPrimed = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlInlineParentFrame" parent="UIParent" mixin="XmlInlineParentMixin">
+        <Frames>
+            <Button parentKey="Child">
+                <Scripts><OnClick>self:GetParent():Prime()</OnClick></Scripts>
+            </Button>
+        </Frames>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    env.exec("XmlInlineParentFrame.Child:GetScript('OnClick')(XmlInlineParentFrame.Child)")
+        .unwrap();
+
+    let loaded: bool = env
+        .eval("return XmlInlineParentFrame.parentPrimed == true")
+        .unwrap();
+    assert!(loaded, "parent-method inline OnClick should fire");
 }
 
 #[test]

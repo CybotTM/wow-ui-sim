@@ -616,7 +616,9 @@ type FastHandler<'a> = (&'static str, Option<&'a crate::xml::ScriptBodyXml>);
 enum FastHandlerRef<'a> {
     NoOp,
     Method(&'a str),
+    ParentMethodNoArgs(&'a str),
     Function(&'a str),
+    FunctionNoArgs(&'a str),
     FunctionWithEventVarargs(&'a str),
     FunctionWithButton(&'a str),
     FunctionWithElapsed(&'a str),
@@ -761,6 +763,30 @@ fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Va
     )
 }
 
+fn build_parent_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {
+    let builder = crate::loader::chunk_cache::load_chunk(
+        state,
+        r#"
+            local method_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                return parent[method_name](parent)
+            end
+        "#,
+        "template-parent-method-handler",
+    )
+    .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name],
+    )
+}
+
 fn build_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
@@ -768,8 +794,14 @@ fn build_fast_handler(
     match handler_ref {
         FastHandlerRef::NoOp => Ok(None),
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
+        FastHandlerRef::ParentMethodNoArgs(method_name) => {
+            build_parent_method_handler(state, method_name).map(Some)
+        }
         FastHandlerRef::Function(function_name) => {
             Ok(Some(resolve_global_path(state, function_name)))
+        }
+        FastHandlerRef::FunctionNoArgs(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::NoArgs).map(Some)
         }
         FastHandlerRef::FunctionWithEventVarargs(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::EventVarargs)
@@ -871,6 +903,7 @@ fn build_chained_handler(
 
 #[derive(Copy, Clone)]
 enum FunctionHandlerKind {
+    NoArgs,
     EventVarargs,
     Button,
     Elapsed,
@@ -882,6 +915,15 @@ fn build_function_handler(
     kind: FunctionHandlerKind,
 ) -> LuaResult<Val> {
     let (source, tag) = match kind {
+        FunctionHandlerKind::NoArgs => (
+            r#"
+                local fn = ...
+                return function(self, ...)
+                    return fn()
+                end
+            "#,
+            "template-inline-function-noargs",
+        ),
         FunctionHandlerKind::EventVarargs => (
             r#"
                 local fn = ...
@@ -932,6 +974,9 @@ fn parse_inline_fast_handler<'a>(
     if let Some(method_name) = parse_inline_self_method(stmt) {
         return Some(FastHandlerRef::Method(method_name));
     }
+    if let Some(method_name) = parse_inline_parent_method(stmt) {
+        return Some(FastHandlerRef::ParentMethodNoArgs(method_name));
+    }
     if let Some(assign) = parse_inline_assignment(stmt) {
         return Some(assign);
     }
@@ -941,6 +986,13 @@ fn parse_inline_fast_handler<'a>(
         .filter(|name| is_fast_handler_path(name))
     {
         return Some(FastHandlerRef::Function(function_name));
+    }
+    if let Some(function_name) = stmt
+        .strip_suffix("()")
+        .map(str::trim)
+        .filter(|name| is_fast_handler_path(name))
+    {
+        return Some(FastHandlerRef::FunctionNoArgs(function_name));
     }
     if let Some(function_name) = stmt
         .strip_suffix("(self, event, ...)")
@@ -964,6 +1016,12 @@ fn parse_inline_fast_handler<'a>(
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
     let remainder = stmt.strip_prefix("self:")?;
+    let method_name = remainder.strip_suffix("()")?.trim();
+    is_fast_identifier(method_name).then_some(method_name)
+}
+
+fn parse_inline_parent_method(stmt: &str) -> Option<&str> {
+    let remainder = stmt.strip_prefix("self:GetParent():")?;
     let method_name = remainder.strip_suffix("()")?.trim();
     is_fast_identifier(method_name).then_some(method_name)
 }
