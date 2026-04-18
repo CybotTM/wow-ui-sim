@@ -506,6 +506,10 @@ enum FastHandlerRef<'a> {
     ParentFieldLocalToggleShown {
         field: &'a str,
     },
+    MethodThenUncheckedParentFieldClearAndShowText {
+        method_name: &'a str,
+        field: &'a str,
+    },
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
     FunctionWithParentIdArg(&'a str),

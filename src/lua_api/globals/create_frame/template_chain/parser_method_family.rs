@@ -1,6 +1,13 @@
 use super::{FastHandlerRef, is_fast_handler_path, is_fast_identifier, is_fast_passthrough_args};
 
 pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((method_name, field)) = parse_method_then_unchecked_parent_field_clear_and_show_text(stmt)
+    {
+        return Some(FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText {
+            method_name,
+            field,
+        });
+    }
     if let Some(field) = parse_parent_field_local_toggle_shown(stmt) {
         return Some(FastHandlerRef::ParentFieldLocalToggleShown { field });
     }
@@ -105,6 +112,37 @@ fn parse_parent_field_local_toggle_shown(stmt: &str) -> Option<&str> {
     let tail = tail.trim();
     let prefix = "infoFrame:SetShown(not infoFrame:IsShown())";
     (tail == prefix).then_some(field)
+}
+
+fn parse_method_then_unchecked_parent_field_clear_and_show_text(
+    stmt: &str,
+) -> Option<(&str, &str)> {
+    let stmt = stmt.trim();
+    let (first_stmt, rest) = stmt.split_once(';')?;
+    let method_name = parse_inline_self_method(first_stmt.trim())?;
+    let rest = rest.trim();
+    let prefix = "if (not self:GetChecked()) then";
+    let remainder = rest.strip_prefix(prefix)?.trim_start();
+    let (then_body, tail) = remainder.split_once("end")?;
+    if !tail.trim().is_empty() {
+        return None;
+    }
+    let parts = super::split_inline_sequence_parts(then_body.trim());
+    let [clear_stmt, show_stmt] = parts.as_slice() else {
+        return None;
+    };
+    let clear_field = clear_stmt
+        .trim()
+        .strip_prefix("self:GetParent().")?
+        .strip_suffix(":SetText(\"\")")?
+        .trim();
+    let show_field = show_stmt
+        .trim()
+        .strip_prefix("self:GetParent().")?
+        .strip_suffix(".Text:Show()")?
+        .trim();
+    (clear_field == show_field && is_fast_identifier(clear_field))
+        .then_some((method_name, clear_field))
 }
 
 fn parse_conditional_self_noarg_method_then_else<'a>(

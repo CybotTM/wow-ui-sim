@@ -2562,6 +2562,96 @@ fn test_create_frame_from_xml_inline_parent_field_local_toggle_shown_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_method_then_unchecked_parent_field_clear_and_show_text_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineMethodThenUncheckedCalls = 0
+        function XmlInlineWrappedOnClick(self)
+            XmlInlineMethodThenUncheckedCalls = XmlInlineMethodThenUncheckedCalls + 1
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineUncheckedRoot" parent="UIParent">
+            <CheckButton name="XmlInlineUncheckedButton" parent="XmlInlineUncheckedRoot">
+                <Scripts><OnClick>
+                    self:OnClick();
+                    if (not self:GetChecked()) then
+                        self:GetParent().EditBox:SetText("");
+                        self:GetParent().EditBox.Text:Show();
+                    end
+                </OnClick></Scripts>
+            </CheckButton>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        function XmlInlineUncheckedButton:OnClick()
+            XmlInlineWrappedOnClick(self)
+        end
+        XmlInlineUncheckedRoot.EditBox = {
+            value = "123",
+            Text = {
+                shown = false,
+                Show = function(self)
+                    self.shown = true
+                end,
+            },
+            SetText = function(self, value)
+                self.value = value
+            end,
+        }
+        XmlInlineUncheckedButton:SetChecked(false)
+        XmlInlineUncheckedButton:GetScript("OnClick")(XmlInlineUncheckedButton)
+    "#,
+    )
+    .unwrap();
+    let unchecked_result: (i32, String, bool) = env
+        .eval(
+            r#"
+            return XmlInlineMethodThenUncheckedCalls,
+                   XmlInlineUncheckedRoot.EditBox.value,
+                   XmlInlineUncheckedRoot.EditBox.Text.shown
+        "#,
+        )
+        .unwrap();
+    assert_eq!(unchecked_result.0, 1);
+    assert_eq!(unchecked_result.1, "");
+    assert!(unchecked_result.2);
+
+    env.exec(
+        r#"
+        XmlInlineUncheckedRoot.EditBox.value = "456"
+        XmlInlineUncheckedRoot.EditBox.Text.shown = false
+        XmlInlineUncheckedButton:SetChecked(true)
+        XmlInlineUncheckedButton:GetScript("OnClick")(XmlInlineUncheckedButton)
+    "#,
+    )
+    .unwrap();
+    let checked_result: (i32, String, bool) = env
+        .eval(
+            r#"
+            return XmlInlineMethodThenUncheckedCalls,
+                   XmlInlineUncheckedRoot.EditBox.value,
+                   XmlInlineUncheckedRoot.EditBox.Text.shown
+        "#,
+        )
+        .unwrap();
+    assert_eq!(checked_result.0, 2);
+    assert_eq!(checked_result.1, "456");
+    assert!(!checked_result.2);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_conditional_self_field_then_else_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

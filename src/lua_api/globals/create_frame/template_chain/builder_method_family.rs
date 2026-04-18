@@ -26,6 +26,14 @@ fn build_direct_method_variants(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
+        FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText { method_name, field } => {
+            build_method_then_unchecked_parent_field_clear_and_show_text_handler(
+                state,
+                method_name,
+                field,
+            )
+            .map(Some)
+        }
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::MethodWithBoolArg { method_name, value } => {
             build_method_with_bool_arg_handler(state, method_name, *value).map(Some)
@@ -155,6 +163,45 @@ fn build_parent_field_local_toggle_shown_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[field_name],
+    )
+}
+
+fn build_method_then_unchecked_parent_field_clear_and_show_text_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    field: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local method_name, field_name = ...
+            return function(self, ...)
+                self[method_name](self, ...)
+                if self:GetChecked() then
+                    return
+                end
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                local target = parent[field_name]
+                if not target then
+                    return
+                end
+                target:SetText("")
+                if target.Text then
+                    target.Text:Show()
+                end
+            end
+        "#,
+        "template-method-unchecked-parent-field-clear-show-text",
+    )?;
+    let method_name = create_string(state, method_name);
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, field_name],
     )
 }
 
