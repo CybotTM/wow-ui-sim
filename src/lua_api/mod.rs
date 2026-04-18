@@ -14,6 +14,8 @@ pub(crate) mod frame;
 pub(crate) mod frame_substates;
 pub(crate) mod game_data;
 pub mod globals;
+#[allow(dead_code)] // Track 1 sub-item 1: pure data, consumers land in sub-items 2-4
+pub(crate) mod hot_literals;
 mod key_dispatch;
 mod layout;
 pub(crate) mod loader_env;
