@@ -131,6 +131,10 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
             }
             '\n' if block_depth == 0 && paren_depth == 0 => {
                 let part = stmt[start..idx].trim();
+                let rest = stmt[idx + ch.len_utf8()..].trim_start();
+                if !part.is_empty() && should_keep_local_prelude_with_following_block(part, rest) {
+                    continue;
+                }
                 if !part.is_empty() {
                     parts.push(part);
                 }
@@ -197,6 +201,17 @@ fn split_inline_sequence_parts(stmt: &str) -> Vec<&str> {
     }
 
     parts
+}
+
+fn should_keep_local_prelude_with_following_block(part: &str, rest: &str) -> bool {
+    let part = part.trim_start();
+    let rest = rest.trim_start();
+    part.starts_with("local ")
+        && (rest.starts_with("local ")
+            || rest.starts_with("if ")
+            || rest.starts_with("if(")
+            || rest.starts_with("if\t")
+            || rest.starts_with("if\n"))
 }
 
 fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {
