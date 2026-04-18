@@ -1,6 +1,8 @@
 //! Collection / inventory / world-object data types.
 
-pub use super::auction_house::{AuctionBrowseResult, AuctionReplicateItem, OwnedAuction};
+pub use super::auction_house::{
+    AuctionBrowseResult, AuctionReplicateItem, BidAuction, OwnedAuction,
+};
 
 /// A Great Vault activity slot (one row/tier in the weekly rewards UI).
 #[derive(Debug, Clone)]
@@ -314,4 +316,3 @@ pub struct EquippedItem {
     pub enchant_id: u32,
     pub gem_ids: [u32; 3],
 }
-

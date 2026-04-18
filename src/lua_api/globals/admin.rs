@@ -25,8 +25,9 @@ use super::admin_actionbars_bags::{
     set_action_slot,
 };
 use super::admin_auction_house::{
-    add_auction_browse_result, add_auction_replicate_item, add_owned_auction,
-    clear_auction_browse_results, clear_auction_replicate_items, clear_owned_auctions,
+    add_auction_bid, add_auction_browse_result, add_auction_replicate_item, add_owned_auction,
+    clear_auction_bids, clear_auction_browse_results, clear_auction_replicate_items,
+    clear_owned_auctions,
 };
 use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
 use super::admin_collections::{
@@ -239,6 +240,8 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
         )?
         .set_function("AddOwnedAuction", add_owned_auction)?
         .set_function("ClearOwnedAuctions", clear_owned_auctions)?
+        .set_function("AddAuctionBid", add_auction_bid)?
+        .set_function("ClearAuctionBids", clear_auction_bids)?
         .set_function("AddMail", add_mail)?
         .set_function("ClearInbox", clear_inbox)?
         .set_function("SetInboxCount", set_inbox_count)

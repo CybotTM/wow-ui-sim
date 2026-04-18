@@ -17,7 +17,7 @@
 use super::{ensure_namespace, set_table_array};
 use crate::items;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_api::state::{AuctionBrowseResult, OwnedAuction};
+use crate::lua_api::state::{AuctionBrowseResult, BidAuction, OwnedAuction};
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -59,6 +59,8 @@ pub(super) fn register_auction_house_surface(state: &mut LuaState) -> LuaResult<
         ("HasFullBidResults", c_auction_house_has_full_bid_results),
         ("GetNumBidTypes", c_auction_house_get_num_bid_types),
         ("GetBidType", c_auction_house_get_bid_type),
+        ("GetMaxBidItemBid", c_auction_house_get_max_bid_item_bid),
+        ("GetMaxBidItemBuyout", c_auction_house_get_max_bid_item_buyout),
         ("QueryOwnedAuctions", c_auction_house_query_owned_auctions),
         ("GetNumOwnedAuctions", c_auction_house_get_num_owned_auctions),
         ("GetOwnedAuctionInfo", c_auction_house_get_owned_auction_info),
@@ -71,6 +73,14 @@ pub(super) fn register_auction_house_surface(state: &mut LuaState) -> LuaResult<
             c_auction_house_get_num_owned_auction_types,
         ),
         ("GetOwnedAuctionType", c_auction_house_get_owned_auction_type),
+        (
+            "GetMaxOwnedAuctionBid",
+            c_auction_house_get_max_owned_auction_bid,
+        ),
+        (
+            "GetMaxOwnedAuctionBuyout",
+            c_auction_house_get_max_owned_auction_buyout,
+        ),
     ];
     for &(name, func) in methods {
         table_set_rust_fn(state, table_ref, name, func)?;
@@ -264,12 +274,24 @@ fn c_auction_house_query_bids(_state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_auction_house_get_num_bids(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let count = borrow_state(state)?.auction_bids.len() as f64;
+    state.push(Val::Num(count));
     Ok(1)
 }
 
-fn c_auction_house_get_bid_info(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn c_auction_house_get_bid_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    if index < 1 {
+        return Ok(0);
+    }
+    let entry = borrow_state(state)?
+        .auction_bids
+        .get((index - 1) as usize)
+        .cloned();
+    let Some(entry) = entry else { return Ok(0) };
+    let bid = push_bid_auction_table(state, &entry);
+    state.push(bid);
+    Ok(1)
 }
 
 fn c_auction_house_has_full_bid_results(state: &mut LuaState) -> LuaResult<u32> {
@@ -278,12 +300,15 @@ fn c_auction_house_has_full_bid_results(state: &mut LuaState) -> LuaResult<u32> 
 }
 
 fn c_auction_house_get_num_bid_types(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let count = distinct_bid_item_keys(state)?.len() as f64;
+    state.push(Val::Num(count));
     Ok(1)
 }
 
-fn c_auction_house_get_bid_type(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn c_auction_house_get_bid_type(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let item_keys = distinct_bid_item_keys(state)?;
+    push_distinct_item_key_at_index(state, &item_keys, index)
 }
 
 fn c_auction_house_query_owned_auctions(_state: &mut LuaState) -> LuaResult<u32> {
@@ -320,71 +345,168 @@ fn c_auction_house_has_full_owned_auction_results(state: &mut LuaState) -> LuaRe
 }
 
 fn c_auction_house_get_num_owned_auction_types(state: &mut LuaState) -> LuaResult<u32> {
-    let count = borrow_state(state)?.auction_owned.len() as f64;
+    let count = distinct_owned_item_keys(state)?.len() as f64;
     state.push(Val::Num(count));
     Ok(1)
 }
 
 fn c_auction_house_get_owned_auction_type(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
-    if index < 1 {
-        return Ok(0);
-    }
-    let entry = borrow_state(state)?
-        .auction_owned
-        .get((index - 1) as usize)
-        .cloned();
-    let Some(entry) = entry else { return Ok(0) };
-    let t = create_table(state);
-    let item_key = create_table(state);
-    table_set(state, item_key, "itemID", Val::Num(entry.item_id as f64));
-    table_set(
-        state,
-        item_key,
-        "itemLevel",
-        Val::Num(entry.item_level as f64),
-    );
-    table_set(state, t, "itemKey", item_key);
-    state.push(t);
-    Ok(1)
+    let item_keys = distinct_owned_item_keys(state)?;
+    push_distinct_item_key_at_index(state, &item_keys, index)
+}
+
+fn c_auction_house_get_max_bid_item_bid(state: &mut LuaState) -> LuaResult<u32> {
+    push_max_price_for(state, |entry| entry.bid_amount, |sim| &sim.auction_bids)
+}
+
+fn c_auction_house_get_max_bid_item_buyout(state: &mut LuaState) -> LuaResult<u32> {
+    push_max_price_for(state, |entry| entry.buyout_amount, |sim| &sim.auction_bids)
+}
+
+fn c_auction_house_get_max_owned_auction_bid(state: &mut LuaState) -> LuaResult<u32> {
+    push_max_price_for(state, |entry| entry.bid_amount, |sim| &sim.auction_owned)
+}
+
+fn c_auction_house_get_max_owned_auction_buyout(state: &mut LuaState) -> LuaResult<u32> {
+    push_max_price_for(state, |entry| entry.buyout_amount, |sim| &sim.auction_owned)
 }
 
 fn push_owned_auction_table(state: &mut LuaState, entry: &OwnedAuction) -> Val {
     let t = create_table(state);
-    let item_key = create_table(state);
-    table_set(state, item_key, "itemID", Val::Num(entry.item_id as f64));
-    table_set(
+    let item_key = push_item_key_table(state, entry.item_id, entry.item_level);
+    set_common_auction_row_fields(
         state,
+        t,
         item_key,
-        "itemLevel",
-        Val::Num(entry.item_level as f64),
-    );
-    table_set(state, item_key, "itemSuffix", Val::Num(0.0));
-    table_set(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
-    table_set(state, t, "itemKey", item_key);
-    table_set(
-        state,
-        t,
-        "auctionID",
-        Val::Num(entry.auction_id as f64),
-    );
-    table_set(state, t, "quantity", Val::Num(entry.quantity as f64));
-    table_set(state, t, "bidAmount", Val::Num(entry.bid_amount as f64));
-    table_set(
-        state,
-        t,
-        "buyoutAmount",
-        Val::Num(entry.buyout_amount as f64),
+        entry.auction_id,
+        entry.quantity,
+        entry.bid_amount,
+        entry.buyout_amount,
+        entry.time_left,
+        entry.time_left_seconds,
     );
     table_set(state, t, "status", Val::Num(entry.status as f64));
-    table_set(state, t, "timeLeft", Val::Num(entry.time_left as f64));
-    table_set(
+    t
+}
+
+fn push_bid_auction_table(state: &mut LuaState, entry: &BidAuction) -> Val {
+    let t = create_table(state);
+    let item_key = push_item_key_table(state, entry.item_id, entry.item_level);
+    set_common_auction_row_fields(
         state,
         t,
-        "timeLeftSeconds",
-        Val::Num(entry.time_left_seconds as f64),
+        item_key,
+        entry.auction_id,
+        entry.quantity,
+        entry.bid_amount,
+        entry.buyout_amount,
+        entry.time_left,
+        entry.time_left_seconds,
     );
+    match &entry.bidder {
+        Some(bidder) => {
+            let bidder_val = create_string(state, bidder);
+            table_set(state, t, "bidder", bidder_val);
+        }
+        None => table_set(state, t, "bidder", Val::Nil),
+    }
     t
+}
+
+fn push_item_key_table(state: &mut LuaState, item_id: i32, item_level: i32) -> Val {
+    let item_key = create_table(state);
+    table_set(state, item_key, "itemID", Val::Num(item_id as f64));
+    table_set(state, item_key, "itemLevel", Val::Num(item_level as f64));
+    table_set(state, item_key, "itemSuffix", Val::Num(0.0));
+    table_set(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
+    item_key
+}
+
+fn set_common_auction_row_fields(
+    state: &mut LuaState,
+    row_table: Val,
+    item_key: Val,
+    auction_id: i32,
+    quantity: i32,
+    bid_amount: i64,
+    buyout_amount: i64,
+    time_left: i32,
+    time_left_seconds: i64,
+) {
+    table_set(state, row_table, "itemKey", item_key);
+    table_set(state, row_table, "auctionID", Val::Num(auction_id as f64));
+    table_set(state, row_table, "quantity", Val::Num(quantity as f64));
+    table_set(state, row_table, "bidAmount", Val::Num(bid_amount as f64));
+    table_set(
+        state,
+        row_table,
+        "buyoutAmount",
+        Val::Num(buyout_amount as f64),
+    );
+    table_set(state, row_table, "timeLeft", Val::Num(time_left as f64));
+    table_set(
+        state,
+        row_table,
+        "timeLeftSeconds",
+        Val::Num(time_left_seconds as f64),
+    );
+}
+
+fn push_max_money_value(state: &mut LuaState, amount: i64) {
+    state.push(Val::Num(amount as f64));
+}
+
+fn push_distinct_item_key_at_index(
+    state: &mut LuaState,
+    item_keys: &[(i32, i32)],
+    index: i32,
+) -> LuaResult<u32> {
+    if index < 1 {
+        return Ok(0);
+    }
+    let Some((item_id, item_level)) = item_keys.get((index - 1) as usize).copied() else {
+        return Ok(0);
+    };
+    let item_key = push_item_key_table(state, item_id, item_level);
+    state.push(item_key);
+    Ok(1)
+}
+
+fn push_max_price_for<T>(
+    state: &mut LuaState,
+    amount_for: impl Fn(&T) -> i64,
+    rows_for: impl Fn(&crate::lua_api::state::SimState) -> &[T],
+) -> LuaResult<u32> {
+    let amount = rows_for(&borrow_state(state)?)
+        .iter()
+        .map(amount_for)
+        .max()
+        .unwrap_or(0);
+    push_max_money_value(state, amount);
+    Ok(1)
+}
+
+fn distinct_owned_item_keys(state: &mut LuaState) -> LuaResult<Vec<(i32, i32)>> {
+    let rows = borrow_state(state)?.auction_owned.clone();
+    Ok(distinct_item_keys(rows.into_iter().map(|entry| (entry.item_id, entry.item_level))))
+}
+
+fn distinct_bid_item_keys(state: &mut LuaState) -> LuaResult<Vec<(i32, i32)>> {
+    let rows = borrow_state(state)?.auction_bids.clone();
+    Ok(distinct_item_keys(rows.into_iter().map(|entry| (entry.item_id, entry.item_level))))
+}
+
+fn distinct_item_keys(
+    rows: impl IntoIterator<Item = (i32, i32)>,
+) -> Vec<(i32, i32)> {
+    let mut distinct = Vec::new();
+    for item_key in rows {
+        if !distinct.contains(&item_key) {
+            distinct.push(item_key);
+        }
+    }
+    distinct
 }
 
 fn extract_item_key_id(state: &mut LuaState, value: Val) -> Option<u32> {

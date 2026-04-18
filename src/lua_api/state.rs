@@ -143,6 +143,7 @@ macro_rules! build_empty_sim_state {
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),
+            auction_bids: Vec::new(),
             mythic_plus: MythicPlusState::default(),
             character_services: CharacterServicesState::default(),
             scenario: ScenarioState::default(),
@@ -203,13 +204,14 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
-    AuctionBrowseResult, AuctionReplicateItem, BagItem, BnetFriend, BnetGameAccount, ChatBubble,
-    CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity,
-    GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord,
-    MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
-    MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
-    OwnedAuction, PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState,
-    SocialFriend, SummonRequestState, WorldState,
+    AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
+    ChatBubble, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem,
+    GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
+    LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
+    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
+    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
+    WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -572,6 +574,10 @@ pub struct SimState {
     /// Empty by default — tests / addons populate via
     /// `A_Admin.AddOwnedAuction`.
     pub auction_owned: Vec<OwnedAuction>,
+    /// Player bid rows (Bids tab). Drives `C_AuctionHouse.GetNumBids`
+    /// / `GetBidInfo`. Empty by default — tests / addons populate via
+    /// `A_Admin.AddAuctionBid`.
+    pub auction_bids: Vec<BidAuction>,
     /// Mythic+ probe state. Drives `C_MythicPlus.*` methods. Seeded
     /// with season 14, affix id=9 (Tyrannical), no run history, no
     /// owned key (level 0), no weekly best.

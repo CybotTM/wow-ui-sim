@@ -3,10 +3,10 @@
 //! Focused admin-only mutators for the simulator-backed Auction House data
 //! rows used by `C_AuctionHouse.GetBrowseResults`,
 //! `C_AuctionHouse.GetReplicateItemInfo`, and the player-owned auctions
-//! list (`GetNumOwnedAuctions` / `GetOwnedAuctionInfo`).
+//! / bids lists.
 
-use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_api::state::{AuctionBrowseResult, AuctionReplicateItem, OwnedAuction};
+use crate::lua_api::methods::{borrow_state_mut, val_to_string};
+use crate::lua_api::state::{AuctionBrowseResult, AuctionReplicateItem, BidAuction, OwnedAuction};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -98,5 +98,44 @@ pub(super) fn add_owned_auction(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn clear_owned_auctions(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.auction_owned.clear();
+    Ok(0)
+}
+
+/// Append one active bid row. Args, in order:
+/// `auction_id`, `item_id`, `item_level`, `quantity`, `bid_amount`,
+/// `buyout_amount`, `time_left`, `time_left_seconds`, `bidder`.
+/// Pass nil for `bidder` to model "no bid yet"; pass `UnitGUID("player")`
+/// to model a player-leading bid.
+pub(super) fn add_auction_bid(state: &mut LuaState) -> LuaResult<u32> {
+    let auction_id = i32::from_stack(state, 1)?;
+    let item_id = i32::from_stack(state, 2)?;
+    let item_level = i32::from_stack(state, 3)?;
+    let quantity = i32::from_stack(state, 4)?;
+    let bid_amount = i64::from_stack(state, 5)?;
+    let buyout_amount = i64::from_stack(state, 6)?;
+    let time_left = i32::from_stack(state, 7)?;
+    let time_left_seconds = i64::from_stack(state, 8)?;
+    let bidder_value = Val::from_stack(state, 9)?;
+    let bidder = match bidder_value {
+        Val::Nil => None,
+        value => val_to_string(state, value),
+    };
+
+    borrow_state_mut(state)?.auction_bids.push(BidAuction {
+        auction_id,
+        item_id,
+        item_level,
+        quantity,
+        bid_amount,
+        buyout_amount,
+        time_left,
+        time_left_seconds,
+        bidder,
+    });
+    Ok(0)
+}
+
+pub(super) fn clear_auction_bids(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.auction_bids.clear();
     Ok(0)
 }

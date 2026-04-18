@@ -50,3 +50,23 @@ pub struct OwnedAuction {
     /// Remaining auction duration in seconds.
     pub time_left_seconds: i64,
 }
+
+/// One row of the player's active bid list (Bids tab). Drives
+/// `C_AuctionHouse.GetNumBids` / `GetBidInfo`. The bidder field uses
+/// the same shape Blizzard expects from `GetBidStatus`: nil = no bid,
+/// player GUID = player's current high bid, anything else = another
+/// bidder currently leads.
+#[derive(Debug, Clone)]
+pub struct BidAuction {
+    pub auction_id: i32,
+    pub item_id: i32,
+    pub item_level: i32,
+    pub quantity: i32,
+    pub bid_amount: i64,
+    pub buyout_amount: i64,
+    /// `Enum.AuctionHouseTimeLeftBand` (1 = Short … 4 = VeryLong).
+    pub time_left: i32,
+    /// Remaining auction duration in seconds.
+    pub time_left_seconds: i64,
+    pub bidder: Option<String>,
+}
