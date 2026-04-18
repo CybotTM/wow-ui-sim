@@ -60,6 +60,28 @@ pub const GLOBALS_BASE: usize = 1;
 /// `NAMESPACES_BASE + i` is `HOT_NAMESPACES[i]`.
 pub const NAMESPACES_BASE: usize = GLOBALS_BASE + HOT_GLOBALS.len();
 
+pub fn tracks_name(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    HOT_GLOBALS.contains(&bytes) || HOT_NAMESPACES.contains(&bytes)
+}
+
+pub fn refresh_installed_slots_for_name(state: &mut LuaState, name: &str) {
+    if !tracks_name(name) {
+        return;
+    }
+    let Some(app) = state.app_data_mut::<crate::lua_api::env::WowLuaAppData>() else {
+        return;
+    };
+    if app.global_slots.is_none() {
+        return;
+    }
+    let slots = install(state);
+    let app = state
+        .app_data_mut::<crate::lua_api::env::WowLuaAppData>()
+        .expect("WowLuaEnv rilua app_data should always exist");
+    app.global_slots = Some(slots);
+}
+
 /// The populated slot vector, owned by the wow-ui-sim app-data.
 ///
 /// Built once during bootstrap by [`install`] and stashed on
@@ -454,6 +476,53 @@ mod tests {
                 assert_eq!(s.data(), b"shadow-sentinel");
             }
             other => panic!("expected shadow sentinel, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn tracked_named_frame_refreshes_slot_when_g_live_is_present_but_empty() {
+        use rilua::vm::table::Table;
+
+        let env = WowLuaEnv::new().expect("fresh wow lua env");
+        {
+            let mut lua = env.lua.borrow_mut();
+            let state = lua.state_mut();
+            let app = state.app_data::<WowLuaAppData>().expect("app data");
+            let slots = app.global_slots.as_ref().expect("global slots");
+            let main_action_bar_idx = HOT_GLOBALS
+                .iter()
+                .position(|&name| name == b"MainActionBar")
+                .map(|i| GLOBALS_BASE + i)
+                .expect("MainActionBar is in HOT_GLOBALS");
+            assert_eq!(slots.raw(main_action_bar_idx), Val::Nil);
+
+            let live_ref = state.gc.alloc_table(Table::new());
+            let live_key = state.gc.intern_string_static(G_LIVE_REGISTRY_KEY);
+            let registry_ref = state.registry;
+            let strings_ptr: *const _ = &state.gc.string_arena;
+            if let Some(reg_table) = state.gc.tables.get_mut(registry_ref) {
+                // SAFETY: immutable borrow of `string_arena` while the
+                // registry table is mutably borrowed for raw_set only.
+                let strings = unsafe { &*strings_ptr };
+                let _ = reg_table.raw_set(Val::Str(live_key), Val::Table(live_ref), strings);
+            }
+        }
+
+        env.exec(r#"CreateFrame("Frame", "MainActionBar", UIParent)"#)
+            .expect("create tracked named frame");
+
+        let lua = env.lua.borrow();
+        let state = lua.state();
+        let app = state.app_data::<WowLuaAppData>().expect("app data");
+        let slots = app.global_slots.as_ref().expect("global slots");
+        let main_action_bar_idx = HOT_GLOBALS
+            .iter()
+            .position(|&name| name == b"MainActionBar")
+            .map(|i| GLOBALS_BASE + i)
+            .expect("MainActionBar is in HOT_GLOBALS");
+        match slots.raw(main_action_bar_idx) {
+            Val::Table(_) => {}
+            other => panic!("expected refreshed MainActionBar slot, got {other:?}"),
         }
     }
 }

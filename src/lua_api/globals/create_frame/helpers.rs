@@ -47,6 +47,7 @@ pub(super) fn set_global_num(state: &mut LuaState, name: &str, value: f64) {
 pub(super) fn set_global_raw(state: &mut LuaState, name: &str, value: Val) {
     let key = state.gc.intern_string(name.as_bytes());
     set_global_raw_by_key(state, key, value);
+    crate::lua_api::global_slots::refresh_installed_slots_for_name(state, name);
 }
 
 /// Handle-aware variant of [`set_global_raw`]: writes `value` under

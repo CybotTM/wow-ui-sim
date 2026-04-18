@@ -108,6 +108,7 @@ fn register_global_name(
         let _ = globals.raw_set(Val::Str(key), frame_val, &state.gc.string_arena);
     }
     state.gc.barrier_back(global);
+    crate::lua_api::global_slots::refresh_installed_slots_for_name(state, &name);
     Ok(())
 }
 
