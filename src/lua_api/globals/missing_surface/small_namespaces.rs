@@ -20,128 +20,79 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
-    // C_TrophyHall
-    let trophy_hall = ensure_namespace(state, "C_TrophyHall")?;
-    table_set_rust_fn(
-        state,
-        trophy_hall,
-        "GetTrophyInfo",
-        c_trophy_hall_get_trophy_info,
-    )?;
-
-    // C_StableInfo
-    let stable_info = ensure_namespace(state, "C_StableInfo")?;
-    table_set_rust_fn(
-        state,
-        stable_info,
-        "IsAtPetStable",
-        c_stable_info_is_at_pet_stable,
-    )?;
-
-    // C_GarrisonInfo
-    let garrison_info = ensure_namespace(state, "C_GarrisonInfo")?;
-    table_set_rust_fn(
-        state,
-        garrison_info,
-        "HasGarrison",
-        c_garrison_info_has_garrison,
-    )?;
-    table_set_rust_fn(
-        state,
-        garrison_info,
-        "GetGarrisonType",
-        c_garrison_info_get_garrison_type,
-    )?;
-
-    // C_AssistedCombat
-    let assisted_combat = ensure_namespace(state, "C_AssistedCombat")?;
-    table_set_rust_fn(
-        state,
-        assisted_combat,
-        "GetActionSpell",
-        c_assisted_combat_get_action_spell,
-    )?;
-    table_set_rust_fn(
-        state,
-        assisted_combat,
-        "GetNextCastSpell",
-        c_assisted_combat_get_next_cast_spell,
-    )?;
-    table_set_rust_fn(
-        state,
-        assisted_combat,
-        "GetRotationSpells",
-        c_assisted_combat_get_rotation_spells,
-    )?;
-    table_set_rust_fn(
-        state,
-        assisted_combat,
-        "IsAvailable",
-        c_assisted_combat_is_available,
-    )?;
-
-    // C_Map
-    let c_map = ensure_namespace(state, "C_Map")?;
-    table_set_rust_fn(
-        state,
-        c_map,
-        "IsMapValidForNavigation",
-        c_map_is_map_valid_for_navigation,
-    )?;
-
-    // C_PvP
-    let c_pvp = ensure_namespace(state, "C_PvP")?;
-    table_set_rust_fn(
-        state,
-        c_pvp,
-        "IsMatchConsideredArena",
-        c_pvp_is_match_considered_arena,
-    )?;
-    table_set_rust_fn(
-        state,
-        c_pvp,
-        "GetPvpTalentsUnlockedLevel",
-        c_pvp_get_pvp_talents_unlocked_level,
-    )?;
-    table_set_rust_fn(
-        state,
-        c_pvp,
-        "GetWarModeRewardBonusDefault",
-        c_pvp_get_war_mode_reward_bonus_default,
-    )?;
-    table_set_rust_fn(
-        state,
-        c_pvp,
-        "GetWarModeRewardBonus",
-        c_pvp_get_war_mode_reward_bonus,
-    )?;
-
-    // C_LossOfControl
-    let loc = ensure_namespace(state, "C_LossOfControl")?;
-    table_set_rust_fn(
-        state,
-        loc,
-        "GetActiveLossOfControlData",
-        c_loc_get_active_loss_of_control_data,
-    )?;
-    table_set_rust_fn(
-        state,
-        loc,
-        "GetActiveLossOfControlDataCount",
-        c_loc_get_active_loss_of_control_data_count,
-    )?;
-
-    // C_Bank
-    let c_bank = ensure_namespace(state, "C_Bank")?;
-    table_set_rust_fn(
-        state,
-        c_bank,
-        "HasFullBankAccess",
-        c_bank_has_full_bank_access,
-    )?;
-
+    register_flat_namespace(state, "C_TrophyHall", C_TROPHY_HALL_METHODS)?;
+    register_flat_namespace(state, "C_StableInfo", C_STABLE_INFO_METHODS)?;
+    register_flat_namespace(state, "C_GarrisonInfo", C_GARRISON_INFO_METHODS)?;
+    register_flat_namespace(state, "C_AssistedCombat", C_ASSISTED_COMBAT_METHODS)?;
+    register_flat_namespace(state, "C_Map", C_MAP_METHODS)?;
+    register_flat_namespace(state, "C_PvP", C_PVP_METHODS)?;
+    register_flat_namespace(state, "C_LossOfControl", C_LOSS_OF_CONTROL_METHODS)?;
+    register_flat_namespace(state, "C_Bank", C_BANK_METHODS)?;
     Ok(())
 }
+
+/// Look up (or create) the namespace table and register each
+/// `(Lua name, RustFn)` pair on it. Keeps the main registrar a
+/// per-namespace pipeline.
+fn register_flat_namespace(
+    state: &mut LuaState,
+    namespace: &str,
+    methods: &[(&str, rilua::vm::closure::RustFn)],
+) -> LuaResult<()> {
+    let ns = ensure_namespace(state, namespace)?;
+    for (name, func) in methods {
+        table_set_rust_fn(state, ns, name, *func)?;
+    }
+    Ok(())
+}
+
+const C_TROPHY_HALL_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+    &[("GetTrophyInfo", c_trophy_hall_get_trophy_info)];
+
+const C_STABLE_INFO_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+    &[("IsAtPetStable", c_stable_info_is_at_pet_stable)];
+
+const C_GARRISON_INFO_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    ("HasGarrison", c_garrison_info_has_garrison),
+    ("GetGarrisonType", c_garrison_info_get_garrison_type),
+];
+
+const C_ASSISTED_COMBAT_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    ("GetActionSpell", c_assisted_combat_get_action_spell),
+    ("GetNextCastSpell", c_assisted_combat_get_next_cast_spell),
+    ("GetRotationSpells", c_assisted_combat_get_rotation_spells),
+    ("IsAvailable", c_assisted_combat_is_available),
+];
+
+const C_MAP_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+    &[("IsMapValidForNavigation", c_map_is_map_valid_for_navigation)];
+
+const C_PVP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    ("IsMatchConsideredArena", c_pvp_is_match_considered_arena),
+    (
+        "GetPvpTalentsUnlockedLevel",
+        c_pvp_get_pvp_talents_unlocked_level,
+    ),
+    (
+        "GetWarModeRewardBonusDefault",
+        c_pvp_get_war_mode_reward_bonus_default,
+    ),
+    ("GetWarModeRewardBonus", c_pvp_get_war_mode_reward_bonus),
+];
+
+const C_LOSS_OF_CONTROL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    (
+        "GetActiveLossOfControlData",
+        c_loc_get_active_loss_of_control_data,
+    ),
+    (
+        "GetActiveLossOfControlDataCount",
+        c_loc_get_active_loss_of_control_data_count,
+    ),
+];
+
+const C_BANK_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+    &[("HasFullBankAccess", c_bank_has_full_bank_access)];
 
 fn c_trophy_hall_get_trophy_info(_state: &mut LuaState) -> LuaResult<u32> {
     // No trophy-hall data in the simulator.
