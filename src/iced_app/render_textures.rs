@@ -87,45 +87,62 @@ impl App {
         let deadline = t + std::time::Duration::from_millis(10);
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
+        let mut scan_elapsed = std::time::Duration::ZERO;
+        let mut load_elapsed = std::time::Duration::ZERO;
         let mut exhausted = false;
         for batch_opt in dirty_strata {
             if exhausted {
                 break;
             }
             if let Some(batch) = batch_opt {
-                let (loaded, loaded_bc, hit) = self.load_new_textures_budgeted(batch, deadline);
+                let (loaded, loaded_bc, batch_scan, batch_load, hit) =
+                    self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(loaded);
                 bc_textures.extend(loaded_bc);
+                scan_elapsed += batch_scan;
+                load_elapsed += batch_load;
                 exhausted |= hit;
             }
         }
         if !exhausted {
-            let (loaded, loaded_bc, hit) = self.load_new_textures_budgeted(overlay, deadline);
+            let (loaded, loaded_bc, batch_scan, batch_load, hit) =
+                self.load_new_textures_budgeted(overlay, deadline);
             textures.extend(loaded);
             bc_textures.extend(loaded_bc);
+            scan_elapsed += batch_scan;
+            load_elapsed += batch_load;
             exhausted |= hit;
         }
         self.textures_pending.set(exhausted);
         let elapsed = t.elapsed();
         if elapsed.as_millis() > 10 && (!textures.is_empty() || !bc_textures.is_empty()) {
-            log_slow_texture_load(&textures, &bc_textures, elapsed);
+            log_slow_texture_load(&textures, &bc_textures, elapsed, scan_elapsed, load_elapsed);
         }
         (textures, bc_textures, elapsed)
     }
 
     /// Load new textures from the batch's requests within a time budget.
-    /// Returns (RGBA textures, BC textures, deadline_reached).
+    /// Returns (RGBA textures, BC textures, scan_elapsed, load_elapsed, deadline_reached).
     pub(super) fn load_new_textures_budgeted(
         &self,
         quads: &QuadBatch,
         deadline: std::time::Instant,
-    ) -> (Vec<GpuTextureData>, Vec<GpuBcTextureData>, bool) {
+    ) -> (
+        Vec<GpuTextureData>,
+        Vec<GpuBcTextureData>,
+        std::time::Duration,
+        std::time::Duration,
+        bool,
+    ) {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
         let mut failed = self.gpu_failed_textures.borrow_mut();
         let mut tex_mgr = self.texture_manager.borrow_mut();
+        let scan_start = std::time::Instant::now();
         let pending_paths = unresolved_texture_request_paths(quads, &uploaded, &failed);
+        let scan_elapsed = scan_start.elapsed();
+        let load_start = std::time::Instant::now();
 
         for path in pending_paths {
             if process_budgeted_texture_request(
@@ -137,10 +154,22 @@ impl App {
                 &mut textures,
                 &mut bc_textures,
             ) {
-                return (textures, bc_textures, true);
+                return (
+                    textures,
+                    bc_textures,
+                    scan_elapsed,
+                    load_start.elapsed(),
+                    true,
+                );
             }
         }
-        (textures, bc_textures, false)
+        (
+            textures,
+            bc_textures,
+            scan_elapsed,
+            load_start.elapsed(),
+            false,
+        )
     }
 
     /// Append hover highlight quads for the currently hovered button.
@@ -287,12 +316,14 @@ fn log_slow_texture_load(
     textures: &[GpuTextureData],
     bc_textures: &[GpuBcTextureData],
     elapsed: std::time::Duration,
+    scan_elapsed: std::time::Duration,
+    load_elapsed: std::time::Duration,
 ) {
     let mut preview: Vec<&str> = textures.iter().map(|tex| tex.path.as_str()).collect();
     preview.extend(bc_textures.iter().map(|tex| tex.path.as_str()));
     preview.truncate(12);
     eprintln!(
-        "{} [textures] loaded {} in {elapsed:.1?}: {} (rgba={} bc={})",
+        "{} [textures] loaded {} in {elapsed:.1?} (scan={scan_elapsed:.1?} load={load_elapsed:.1?}): {} (rgba={} bc={})",
         crate::logging::global_elapsed_prefix(),
         textures.len() + bc_textures.len(),
         preview.join(", "),

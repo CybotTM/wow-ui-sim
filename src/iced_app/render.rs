@@ -176,7 +176,8 @@ impl App {
             if dirty_strata[i].is_none()
                 && let Some(batch) = &cached[i]
             {
-                let (extra, extra_bc, hit) = self.load_new_textures_budgeted(batch, deadline);
+                let (extra, extra_bc, _scan_elapsed, _load_elapsed, hit) =
+                    self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(extra);
                 bc_textures.extend(extra_bc);
                 exhausted |= hit;
