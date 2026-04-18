@@ -10,6 +10,7 @@
 
 mod cooldown;
 mod editbox;
+pub mod message_frame;
 mod model;
 mod shared;
 mod slider;
@@ -37,5 +38,6 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     statusbar::register_statusbar(state, metatable)?;
     model::register_model(state, metatable)?;
     tooltip::register_tooltip(state, metatable)?;
+    message_frame::register_message_frame(state, metatable)?;
     Ok(())
 }
