@@ -237,6 +237,12 @@ fn build_function_with_arg_variants(
         FastHandlerRef::CopyClubTicketToClipboardFromParent => {
             build_copy_club_ticket_to_clipboard_from_parent_handler(state).map(Some)
         }
+        FastHandlerRef::PlaySoundThenCopyClubTicketToClipboardFromParent { sound_path } => {
+            build_play_sound_then_copy_club_ticket_to_clipboard_from_parent_handler(
+                state, sound_path,
+            )
+            .map(Some)
+        }
         _ => Ok(None),
     }
 }
@@ -416,6 +422,34 @@ fn build_function_handler_with_string_number_args(
         Val::Function(builder.gc_ref()),
         &[target, first, Val::Num(second)],
     )
+}
+
+fn build_play_sound_then_copy_club_ticket_to_clipboard_from_parent_handler(
+    state: &mut LuaState,
+    sound_path: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local sound = ...
+            return function(self, ...)
+                PlaySound(sound)
+                local clubId = self:GetParent():GetClubId()
+                local clubInfo = clubId and C_Club.GetClubInfo(clubId)
+                if clubInfo then
+                    return CopyToClipboard(
+                        ClubTicketUtil.FormatTicket(
+                            clubInfo,
+                            self:GetParent().LinkIDText:GetText()
+                        )
+                    )
+                end
+            end
+        "#,
+        "template-play-sound-then-copy-club-ticket",
+    )?;
+    let sound = resolve_global_path(state, sound_path);
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[sound])
 }
 
 fn build_function_handler_with_string_nil_nil_global_args(

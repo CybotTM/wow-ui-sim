@@ -33,6 +33,17 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
     if let Some((method_name, value)) = parse_inline_self_method_with_bool_arg(stmt) {
         return Some(FastHandlerRef::MethodWithBoolArg { method_name, value });
     }
+    if let Some((method_name, value)) = parse_inline_self_method_with_number_arg(stmt) {
+        return Some(FastHandlerRef::MethodWithNumberArg { method_name, value });
+    }
+    if let Some((method_name, first, second)) = parse_inline_self_method_with_two_number_args(stmt)
+    {
+        return Some(FastHandlerRef::MethodWithTwoNumberArgs {
+            method_name,
+            first,
+            second,
+        });
+    }
     if let Some((method_name, arg)) = parse_inline_self_method_with_string_arg(stmt) {
         return Some(FastHandlerRef::MethodWithStringArg { method_name, arg });
     }
@@ -236,6 +247,25 @@ fn parse_inline_self_method_with_bool_arg(stmt: &str) -> Option<(&str, bool)> {
     let value = super::parse_single_bool_literal(args.strip_suffix(')')?.trim())?;
     let method_name = method_name.trim();
     is_fast_identifier(method_name).then_some((method_name, value))
+}
+
+fn parse_inline_self_method_with_number_arg(stmt: &str) -> Option<(&str, f64)> {
+    let remainder = stmt.strip_prefix("self:")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let value = args.strip_suffix(')')?.trim().parse::<f64>().ok()?;
+    let method_name = method_name.trim();
+    is_fast_identifier(method_name).then_some((method_name, value))
+}
+
+fn parse_inline_self_method_with_two_number_args(stmt: &str) -> Option<(&str, f64, f64)> {
+    let remainder = stmt.strip_prefix("self:")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let (first, second) = args.split_once(',')?;
+    let first = first.trim().parse::<f64>().ok()?;
+    let second = second.trim().parse::<f64>().ok()?;
+    let method_name = method_name.trim();
+    is_fast_identifier(method_name).then_some((method_name, first, second))
 }
 
 fn parse_inline_self_method_with_string_arg(stmt: &str) -> Option<(&str, &str)> {

@@ -41,6 +41,15 @@ fn build_direct_method_variants(
         FastHandlerRef::MethodWithBoolArg { method_name, value } => {
             build_method_with_bool_arg_handler(state, method_name, *value).map(Some)
         }
+        FastHandlerRef::MethodWithNumberArg { method_name, value } => {
+            build_method_with_number_arg_handler(state, method_name, *value).map(Some)
+        }
+        FastHandlerRef::MethodWithTwoNumberArgs {
+            method_name,
+            first,
+            second,
+        } => build_method_with_two_number_args_handler(state, method_name, *first, *second)
+            .map(Some),
         FastHandlerRef::MethodWithStringArg { method_name, arg } => {
             build_method_with_string_arg_handler(state, method_name, arg).map(Some)
         }
@@ -114,6 +123,9 @@ fn build_ancestor_method_variants(
     match handler_ref {
         FastHandlerRef::ParentFieldLocalToggleShown { field } => {
             build_parent_field_local_toggle_shown_handler(state, field).map(Some)
+        }
+        FastHandlerRef::ParentFieldLocalClickIfEnabled { field } => {
+            build_parent_field_local_click_if_enabled_handler(state, field).map(Some)
         }
         FastHandlerRef::ParentMethod(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
@@ -189,6 +201,39 @@ fn build_parent_field_local_toggle_shown_handler(
     )
 }
 
+fn build_parent_field_local_click_if_enabled_handler(
+    state: &mut LuaState,
+    field: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local field_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                local button = parent[field_name]
+                if not button or not button:IsEnabled() then
+                    return
+                end
+                local on_click = button:GetScript("OnClick")
+                if on_click then
+                    return on_click(button)
+                end
+            end
+        "#,
+        "template-parent-field-local-click-if-enabled",
+    )?;
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name],
+    )
+}
+
 fn build_grandparent_method_with_not_self_checked_arg_handler(
     state: &mut LuaState,
     method_name: &str,
@@ -252,6 +297,53 @@ fn build_method_then_unchecked_parent_field_clear_and_show_text_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[method_name, field_name],
+    )
+}
+
+fn build_method_with_number_arg_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    value: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local method_name, value = ...
+            return function(self, ...)
+                return self[method_name](self, value)
+            end
+        "#,
+        "template-method-number-arg",
+    )?;
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, Val::Num(value)],
+    )
+}
+
+fn build_method_with_two_number_args_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    first: f64,
+    second: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local method_name, first, second = ...
+            return function(self, ...)
+                return self[method_name](self, first, second)
+            end
+        "#,
+        "template-method-two-number-args",
+    )?;
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, Val::Num(first), Val::Num(second)],
     )
 }
 

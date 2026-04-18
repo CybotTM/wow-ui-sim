@@ -141,7 +141,8 @@ fn parse_local_global_path_conditional_method(stmt: &str) -> Option<(&str, &str)
         return None;
     }
     let target_path = remainder.trim();
-    let (target_path, tail) = target_path.split_once('\n').or_else(|| target_path.split_once("if"))?;
+    let (target_path, _tail) =
+        target_path.split_once('\n').or_else(|| target_path.split_once("if"))?;
     let target_path = target_path.trim();
     let tail = stmt[stmt.find("if")?..].trim();
     let prefix = format!("if ({local_name}) then");

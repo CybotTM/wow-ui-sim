@@ -11,7 +11,7 @@ use wow_ui_sim::xml::{XmlElement, clear_templates, get_template, parse_xml, regi
 fn create_first_frame(env: &WowLuaEnv, xml: &str, widget_type: &str) {
     let ui = parse_xml(xml).unwrap();
     match &ui.elements[0] {
-        XmlElement::Frame(f) | XmlElement::Button(f) => {
+        XmlElement::Frame(f) | XmlElement::Button(f) | XmlElement::EditBox(f) => {
             create_frame_from_xml(
                 &env.loader_env(),
                 f,
@@ -22,7 +22,7 @@ fn create_first_frame(env: &WowLuaEnv, xml: &str, widget_type: &str) {
             )
             .unwrap();
         }
-        _ => panic!("Expected Frame or Button element"),
+        _ => panic!("Expected frame-like element"),
     }
 }
 
@@ -48,10 +48,10 @@ fn create_test_addon(xml: &str, addon_name: &str) -> tempfile::TempDir {
 fn register_first_template(xml: &str, name: &str, widget_type: &str) {
     let ui = parse_xml(xml).unwrap();
     match &ui.elements[0] {
-        XmlElement::Frame(f) | XmlElement::Button(f) => {
+        XmlElement::Frame(f) | XmlElement::Button(f) | XmlElement::EditBox(f) => {
             register_template(name, widget_type, f.clone());
         }
-        _ => panic!("Expected Frame or Button element"),
+        _ => panic!("Expected frame-like element"),
     }
 }
 
@@ -2817,12 +2817,26 @@ fn test_create_frame_from_xml_inline_function_with_self_gettext_result_runs() {
     env.exec(
         r#"
         XmlInlineGetTextEditBox:SetText("my-filter")
+        function XmlInlineGetTextEditBox:HighlightText(startIndex, endIndex)
+            self.highlightStart = startIndex
+            self.highlightEnd = endIndex
+        end
         XmlInlineGetTextEditBox:GetScript("OnEnterPressed")(XmlInlineGetTextEditBox)
     "#,
     )
     .unwrap();
-    let result: String = env.eval("return XmlInlineFilterName").unwrap();
-    assert_eq!(result, "my-filter");
+    let result: (String, i32, i32) = env
+        .eval(
+            r#"
+            return XmlInlineFilterName,
+                   XmlInlineGetTextEditBox.highlightStart,
+                   XmlInlineGetTextEditBox.highlightEnd
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "my-filter");
+    assert_eq!(result.1, 0);
+    assert_eq!(result.2, -1);
 }
 
 #[test]
@@ -2881,6 +2895,154 @@ fn test_create_frame_from_xml_inline_copy_club_ticket_to_clipboard_from_parent_r
     .unwrap();
     let result: String = env.eval("return XmlInlineClipboardValue").unwrap();
     assert_eq!(result, "club:17:abc123");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_play_sound_then_copy_club_ticket_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        C_Club = {}
+        ClubTicketUtil = {}
+        SOUNDKIT = { IG_MAINMENU_OPTION_CHECKBOX_ON = 42 }
+        XmlInlineClipboardValue = nil
+        XmlInlineLastSound = nil
+        function C_Club.GetClubInfo(clubId)
+            return { id = clubId }
+        end
+        function ClubTicketUtil.FormatTicket(clubInfo, linkText)
+            return string.format("club:%d:%s", clubInfo.id, linkText)
+        end
+        function CopyToClipboard(value)
+            XmlInlineClipboardValue = value
+        end
+        function PlaySound(sound)
+            XmlInlineLastSound = sound
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineClubTicketSoundRoot" parent="UIParent">
+            <Button name="XmlInlineClubTicketSoundButton" parent="XmlInlineClubTicketSoundRoot">
+                <Scripts><OnClick>
+                    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+                    local clubId = self:GetParent():GetClubId();
+                    local clubInfo = clubId and C_Club.GetClubInfo(clubId);
+                    if clubInfo then
+                        CopyToClipboard(ClubTicketUtil.FormatTicket(clubInfo, self:GetParent().LinkIDText:GetText()));
+                    end
+                </OnClick></Scripts>
+            </Button>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        function XmlInlineClubTicketSoundRoot:GetClubId()
+            return 23
+        end
+        XmlInlineClubTicketSoundRoot.LinkIDText = {
+            GetText = function()
+                return "ticket"
+            end,
+        }
+        XmlInlineClubTicketSoundButton:GetScript("OnClick")(XmlInlineClubTicketSoundButton)
+    "#,
+    )
+    .unwrap();
+    let result: (i32, String) = env
+        .eval("return XmlInlineLastSound, XmlInlineClipboardValue")
+        .unwrap();
+    assert_eq!(result.0, 42);
+    assert_eq!(result.1, "club:23:ticket");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_parent_field_local_click_if_enabled_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineCreateButtonRoot" parent="UIParent">
+            <EditBox name="XmlInlineCreateButtonEditBox" parent="XmlInlineCreateButtonRoot">
+                <Scripts><OnEnterPressed>
+                    local createButton = self:GetParent().CreateButton;
+                    if createButton:IsEnabled() then
+                        createButton:GetScript("OnClick")(createButton);
+                    end
+                </OnEnterPressed></Scripts>
+            </EditBox>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCreateButtonRoot.CreateButton = CreateFrame("Button", nil, XmlInlineCreateButtonRoot)
+        XmlInlineCreateButtonRoot.calls = 0
+        XmlInlineCreateButtonRoot.CreateButton:SetScript("OnClick", function(self)
+            XmlInlineCreateButtonRoot.calls = XmlInlineCreateButtonRoot.calls + 1
+        end)
+        XmlInlineCreateButtonRoot.CreateButton:Enable()
+        XmlInlineCreateButtonEditBox:GetScript("OnEnterPressed")(XmlInlineCreateButtonEditBox)
+        XmlInlineCreateButtonRoot.CreateButton:Disable()
+        XmlInlineCreateButtonEditBox:GetScript("OnEnterPressed")(XmlInlineCreateButtonEditBox)
+    "#,
+    )
+    .unwrap();
+    let calls: i32 = env.eval("return XmlInlineCreateButtonRoot.calls").unwrap();
+    assert_eq!(calls, 1);
+}
+
+#[test]
+fn test_create_frame_from_xml_inherited_append_number_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    register_first_template(
+        r#"<Ui>
+        <EditBox name="XmlInlineBaseAppendTemplate" virtual="true">
+            <Scripts><OnEnable method="BaseOnEnable"/></Scripts>
+        </EditBox>
+    </Ui>"#,
+        "XmlInlineBaseAppendTemplate",
+        "EditBox",
+    );
+    register_first_template(
+        r#"<Ui>
+        <EditBox name="XmlInlineDerivedAppendTemplate" inherits="XmlInlineBaseAppendTemplate" virtual="true">
+            <Scripts><OnEnable inherit="append">
+                self:SetMaxLetters(31);
+            </OnEnable></Scripts>
+        </EditBox>
+    </Ui>"#,
+        "XmlInlineDerivedAppendTemplate",
+        "EditBox",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineAppendEditBox = CreateFrame("EditBox", "XmlInlineAppendEditBox", UIParent, "XmlInlineDerivedAppendTemplate")
+        function XmlInlineAppendEditBox:BaseOnEnable()
+            self.baseOnEnableCalls = (self.baseOnEnableCalls or 0) + 1
+        end
+        XmlInlineAppendEditBox:GetScript("OnEnable")(XmlInlineAppendEditBox)
+    "#,
+    )
+    .unwrap();
+    let result: (i32, i32) = env
+        .eval("return XmlInlineAppendEditBox.baseOnEnableCalls, XmlInlineAppendEditBox:GetMaxLetters()")
+        .unwrap();
+    assert_eq!(result.0, 1);
+    assert_eq!(result.1, 31);
 }
 
 #[test]

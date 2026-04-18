@@ -7,7 +7,9 @@ mod parser_global_family;
 #[path = "parser_method_family.rs"]
 mod parser_method_family;
 
-use self::parser_function_family::parse_function_family;
+use self::parser_function_family::{
+    parse_copy_club_ticket_to_clipboard_from_parent, parse_function_family,
+};
 use self::parser_global_family::parse_global_family;
 use self::parser_method_family::parse_method_family;
 
@@ -23,10 +25,55 @@ pub(super) fn parse_inline_fast_handler<'a>(
     if stmt.is_empty() {
         return Some(FastHandlerRef::NoOp);
     }
+    if let Some(handler) = parse_pre_split_special_handler(stmt) {
+        return Some(handler);
+    }
     if let Some(sequence) = parse_inline_sequence(stmt) {
         return Some(sequence);
     }
     parse_inline_single_fast_handler(stmt)
+}
+
+fn parse_pre_split_special_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    parse_play_sound_then_copy_club_ticket(stmt)
+        .or_else(|| parse_parent_field_local_click_if_enabled(stmt))
+}
+
+fn parse_play_sound_then_copy_club_ticket<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    let stmt = stmt.trim();
+    let (first_stmt, rest) = stmt.split_once(';')?;
+    let (function_name, sound_path) = parse_global_function_call(first_stmt.trim())?;
+    if function_name != "PlaySound" || !is_fast_handler_path(sound_path) {
+        return None;
+    }
+    parse_copy_club_ticket_to_clipboard_from_parent(rest.trim()).map(
+        |_| FastHandlerRef::PlaySoundThenCopyClubTicketToClipboardFromParent { sound_path },
+    )
+}
+
+fn parse_parent_field_local_click_if_enabled<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    let stmt = stmt.trim();
+    let remainder = stmt.strip_prefix("local ")?;
+    let (local_name, remainder) = remainder.split_once('=')?;
+    let local_name = local_name.trim();
+    if !is_fast_identifier(local_name) {
+        return None;
+    }
+    let (target_expr, remainder) = remainder.split_once(';')?;
+    let field = target_expr
+        .trim()
+        .strip_prefix("self:GetParent().")?
+        .trim();
+    if !is_fast_identifier(field) {
+        return None;
+    }
+    let remainder = remainder.trim();
+    let prefix = format!("if {local_name}:IsEnabled() then");
+    let remainder = remainder.strip_prefix(&prefix)?.trim_start();
+    let body = remainder.strip_suffix("end")?.trim();
+    let expected = format!("{local_name}:GetScript(\"OnClick\")({local_name});");
+    (body == expected || body == expected.trim_end_matches(';'))
+        .then_some(FastHandlerRef::ParentFieldLocalClickIfEnabled { field })
 }
 
 fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
@@ -212,6 +259,13 @@ fn should_keep_local_prelude_with_following_block(part: &str, rest: &str) -> boo
             || rest.starts_with("if(")
             || rest.starts_with("if\t")
             || rest.starts_with("if\n"))
+}
+
+fn parse_global_function_call(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?;
+    let function_name = function_name.trim();
+    is_fast_handler_path(function_name).then_some((function_name, args.trim()))
 }
 
 fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {

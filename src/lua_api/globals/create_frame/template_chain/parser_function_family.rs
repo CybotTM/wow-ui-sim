@@ -509,7 +509,7 @@ fn parse_checked_number_assignment_then_callbacks(
     ))
 }
 
-fn parse_copy_club_ticket_to_clipboard_from_parent(stmt: &str) -> Option<()> {
+pub(super) fn parse_copy_club_ticket_to_clipboard_from_parent(stmt: &str) -> Option<()> {
     let stmt = stmt.trim();
     let prefix = "local clubId = self:GetParent():GetClubId();";
     let remainder = stmt.strip_prefix(prefix)?.trim_start();

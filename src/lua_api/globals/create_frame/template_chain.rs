@@ -286,6 +286,15 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         value: bool,
     },
+    MethodWithNumberArg {
+        method_name: &'a str,
+        value: f64,
+    },
+    MethodWithTwoNumberArgs {
+        method_name: &'a str,
+        first: f64,
+        second: f64,
+    },
     MethodWithStringArg {
         method_name: &'a str,
         arg: &'a str,
@@ -506,6 +515,9 @@ enum FastHandlerRef<'a> {
     ParentFieldLocalToggleShown {
         field: &'a str,
     },
+    ParentFieldLocalClickIfEnabled {
+        field: &'a str,
+    },
     MethodThenUncheckedParentFieldClearAndShowText {
         method_name: &'a str,
         field: &'a str,
@@ -522,6 +534,9 @@ enum FastHandlerRef<'a> {
         join_function: &'a str,
     },
     CopyClubTicketToClipboardFromParent,
+    PlaySoundThenCopyClubTicketToClipboardFromParent {
+        sound_path: &'a str,
+    },
     GrandparentMethodWithNotSelfCheckedArg {
         method_name: &'a str,
     },
