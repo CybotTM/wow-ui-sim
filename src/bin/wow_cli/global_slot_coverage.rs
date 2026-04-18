@@ -16,6 +16,13 @@ pub fn run() {
     let baseline_ms = measure_startup_ms(true);
     let (slot_ms, report) = measure_startup_with_report();
 
+    print_timing(baseline_ms, slot_ms);
+    print_coverage(&report);
+    print_unpopulated("unpopulated_globals", &report.unpopulated_globals);
+    print_unpopulated("unpopulated_namespaces", &report.unpopulated_namespaces);
+}
+
+fn print_timing(baseline_ms: f64, slot_ms: f64) {
     println!("startup_elapsed_ms_without_slots={baseline_ms:.3}");
     println!("startup_elapsed_ms_with_slots={slot_ms:.3}");
     println!("startup_delta_ms={:.3}", baseline_ms - slot_ms);
@@ -23,6 +30,9 @@ pub fn run() {
         "startup_delta_percent={:.1}",
         percent_delta(baseline_ms, slot_ms),
     );
+}
+
+fn print_coverage(report: &wow_ui_sim::global_slot_coverage::SlotCoverageReport) {
     println!("whitelist_version={}", report.version);
     println!("slot_count={}", report.slot_count);
     println!(
@@ -42,17 +52,15 @@ pub fn run() {
         report.namespaces_total,
         percent(report.populated_namespaces, report.namespaces_total),
     );
-    if !report.unpopulated_globals.is_empty() {
-        println!("unpopulated_globals=");
-        for name in &report.unpopulated_globals {
-            println!("  - {name}");
-        }
+}
+
+fn print_unpopulated(label: &str, names: &[String]) {
+    if names.is_empty() {
+        return;
     }
-    if !report.unpopulated_namespaces.is_empty() {
-        println!("unpopulated_namespaces=");
-        for name in &report.unpopulated_namespaces {
-            println!("  - {name}");
-        }
+    println!("{label}=");
+    for name in names {
+        println!("  - {name}");
     }
 }
 
