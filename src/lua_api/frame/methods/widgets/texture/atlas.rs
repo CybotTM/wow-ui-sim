@@ -16,45 +16,78 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let Some(lookup) = crate::atlas::get_atlas_info(&atlas_name) else {
         return Ok(0);
     };
-    let tex_coords = (
-        lookup.info.left_tex_coord,
-        lookup.info.right_tex_coord,
-        lookup.info.top_tex_coord,
-        lookup.info.bottom_tex_coord,
-    );
     let use_atlas_size = opt_bool(state, 3).unwrap_or(false);
     let mut sim = borrow_state_mut(state)?;
+    apply_atlas(&mut sim.widgets, id, &atlas_name, lookup.info, use_atlas_size);
+    Ok(0)
+}
 
-    // Collect parent info before mutably borrowing the child.
-    let parent_info: Option<(u64, String)> = sim.widgets.get(id).and_then(|f| {
-        let pid = f.parent_id?;
-        let key = f.parent_key.clone()?;
-        Some((pid, key))
-    });
-
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.atlas = Some(atlas_name.clone());
-        frame.texture = Some(lookup.info.file.to_string());
-        frame.tex_coords = Some(tex_coords);
-        frame.atlas_tex_coords = Some(tex_coords);
-        if use_atlas_size {
-            frame.set_size(lookup.info.width as f32, lookup.info.height as f32);
-        }
-    }
-
-    // Propagate to the parent button's texture slot when parentKey matches a
-    // standard slot name and the parent is a Button or CheckButton.
-    if let Some((parent_id, ref parent_key)) = parent_info {
+/// Write the atlas onto the child frame, then mirror the slot into the
+/// parent button's matching texture slot when applicable.
+fn apply_atlas(
+    widgets: &mut crate::widget::WidgetRegistry,
+    id: u64,
+    atlas_name: &str,
+    info: &crate::atlas::AtlasInfo,
+    use_atlas_size: bool,
+) {
+    let tex_coords = atlas_slot_tex_coords(info);
+    let parent_info = collect_parent_slot(widgets, id);
+    apply_atlas_to_frame(widgets, id, atlas_name, info, tex_coords, use_atlas_size);
+    if let Some((parent_id, parent_key)) = parent_info {
         propagate_atlas_to_button_slot(
-            &mut sim.widgets,
+            widgets,
             parent_id,
-            parent_key,
-            lookup.info.file.to_string(),
+            &parent_key,
+            info.file.to_string(),
             tex_coords,
         );
     }
+}
 
-    Ok(0)
+/// Atlas slot UV box `(left, right, top, bottom)` for the matched atlas entry.
+fn atlas_slot_tex_coords(info: &crate::atlas::AtlasInfo) -> (f32, f32, f32, f32) {
+    (
+        info.left_tex_coord,
+        info.right_tex_coord,
+        info.top_tex_coord,
+        info.bottom_tex_coord,
+    )
+}
+
+/// Parent id + parentKey when both are set. Captured before the child borrow
+/// so the propagation step can run after the child mutation without
+/// re-borrowing state.
+fn collect_parent_slot(
+    widgets: &crate::widget::WidgetRegistry,
+    id: u64,
+) -> Option<(u64, String)> {
+    let frame = widgets.get(id)?;
+    let parent_id = frame.parent_id?;
+    let parent_key = frame.parent_key.clone()?;
+    Some((parent_id, parent_key))
+}
+
+/// Write atlas name, source texture, and atlas UVs into the child frame.
+/// When `use_atlas_size` is true, also resize the frame to the slot dimensions.
+fn apply_atlas_to_frame(
+    widgets: &mut crate::widget::WidgetRegistry,
+    id: u64,
+    atlas_name: &str,
+    info: &crate::atlas::AtlasInfo,
+    tex_coords: (f32, f32, f32, f32),
+    use_atlas_size: bool,
+) {
+    let Some(frame) = widgets.get_mut_visual(id) else {
+        return;
+    };
+    frame.atlas = Some(atlas_name.to_string());
+    frame.texture = Some(info.file.to_string());
+    frame.tex_coords = Some(tex_coords);
+    frame.atlas_tex_coords = Some(tex_coords);
+    if use_atlas_size {
+        frame.set_size(info.width as f32, info.height as f32);
+    }
 }
 
 /// Copy atlas texture/UV data from a child texture onto the parent Button's
