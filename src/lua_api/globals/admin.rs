@@ -30,16 +30,16 @@ use super::admin_auction_house::{
     clear_auction_bids, clear_auction_browse_results, clear_auction_replicate_items,
     clear_owned_auctions,
 };
-use super::admin_crafting::{
-    clear_known_recipes, learn_recipe, seed_reagents_for_recipe, set_reagent_count,
-    set_selected_profession, unlearn_recipe,
-};
 use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
 use super::admin_collections::{
     add_transmog, add_transmog_appearance, collect_heirloom, collect_mount, collect_pet,
     collect_toy, earn_achievement, has_achievement, remove_transmog, set_achievement_earned,
     set_mount_collected, set_pet_collected, set_toy_collected, set_transmog_for_slot,
     uncollect_heirloom, uncollect_mount, uncollect_pet, uncollect_toy,
+};
+use super::admin_crafting::{
+    clear_known_recipes, learn_recipe, seed_reagents_for_recipe, set_reagent_count,
+    set_selected_profession, unlearn_recipe,
 };
 use super::admin_encounter::{end_loot_roll, simulate_boss_kill, start_loot_roll};
 use super::admin_equipment::{equip_item, unequip_item};
@@ -239,10 +239,7 @@ fn register_inventory_and_mail(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("AddAuctionBrowseResult", add_auction_browse_result)?
         .set_function("ClearAuctionBrowseResults", clear_auction_browse_results)?
         .set_function("AddAuctionReplicateItem", add_auction_replicate_item)?
-        .set_function(
-            "ClearAuctionReplicateItems",
-            clear_auction_replicate_items,
-        )?
+        .set_function("ClearAuctionReplicateItems", clear_auction_replicate_items)?
         .set_function("AddOwnedAuction", add_owned_auction)?
         .set_function("ClearOwnedAuctions", clear_owned_auctions)?
         .set_function("AddAuctionBid", add_auction_bid)?

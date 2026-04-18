@@ -2,15 +2,15 @@
 //! fade_duration, fade_power, insert_mode, text_copyable, has_message_by_id,
 //! get_message_info, indented_word_wrap.
 
-use super::scroll::message_frame_scroll_limit;
 use super::super::shared::{opt_string, val_to_bool, val_to_f64};
+use super::scroll::message_frame_scroll_limit;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack,
-    get_or_create_frame_fields, table_get, table_set,
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, get_or_create_frame_fields,
+    table_get, table_set,
 };
 use crate::lua_bridge::{IntoStack, stack_val};
-use rilua::{LuaResult, Val};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 const INDENTED_WORD_WRAP_FIELD: &str = "_mf_indented_word_wrap";
 

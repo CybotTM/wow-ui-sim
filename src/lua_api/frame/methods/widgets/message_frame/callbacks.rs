@@ -6,8 +6,8 @@ use crate::lua_api::methods::{
     get_or_create_frame_fields, table_get, table_set,
 };
 use crate::lua_bridge::stack_val;
-use rilua::{LuaResult, Val};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 pub(super) const ON_SCROLL_CHANGED_CB: &str = "onScrollChangedCallback";
 pub(super) const ON_LINE_RIGHT_CLICKED_CB: &str = "onLineRightClickedCallback";

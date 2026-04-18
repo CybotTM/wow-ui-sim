@@ -35,7 +35,8 @@ fn build_global_method_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
-    if let Some(result) = method_simple::build_global_method_simple_arg_variants(state, handler_ref)?
+    if let Some(result) =
+        method_simple::build_global_method_simple_arg_variants(state, handler_ref)?
     {
         return Ok(Some(result));
     }

@@ -523,4 +523,3 @@ fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
         );
     }
 }
-

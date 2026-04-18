@@ -4,8 +4,8 @@ use crate::lua_api::message_frame::Message;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref};
 use crate::lua_bridge::stack_val;
 use crate::widget::{Frame, WidgetType};
-use rilua::{LuaResult, Val};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 use super::super::shared::val_to_f64;
 
@@ -83,11 +83,7 @@ fn create_message_font_string(
     fs_id
 }
 
-fn update_message_font_string(
-    state: &mut LuaState,
-    font_string_id: u64,
-    message: &Message,
-) {
+fn update_message_font_string(state: &mut LuaState, font_string_id: u64, message: &Message) {
     let mut sim = match borrow_state_mut(state) {
         Ok(s) => s,
         Err(_) => return,

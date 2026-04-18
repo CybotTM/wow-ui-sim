@@ -283,9 +283,7 @@ pub fn player_spells_panel_debug_snapshot(env: &WowLuaEnv) -> String {
 /// the original snapshot's nil-marker line); `None` otherwise so the
 /// caller proceeds with the per-aspect probes.
 fn player_spells_frame_missing_marker(env: &WowLuaEnv) -> Option<String> {
-    let exists: bool = env
-        .eval("return PlayerSpellsFrame ~= nil")
-        .unwrap_or(false);
+    let exists: bool = env.eval("return PlayerSpellsFrame ~= nil").unwrap_or(false);
     (!exists).then(|| "player_spells_frame=nil".to_string())
 }
 

@@ -19,8 +19,8 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::create_table;
 use crate::lua_bridge::table_set_rust_fn;
-use rilua::vm::state::LuaState;
 use rilua::LuaResult;
+use rilua::vm::state::LuaState;
 
 pub(super) fn register_nameplate_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_NamePlate")?;

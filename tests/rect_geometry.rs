@@ -84,16 +84,16 @@ fn scaled_rect_is_unscaled_layout_rect() {
     // edge in GetScaledRect uses screen-space coords (no scale
     // division) so it differs from GetRect.bottom only when scale ≠ 1.
     let env = env();
-    let (
-        rect_left,
-        rect_bottom,
-        rect_w,
-        rect_h,
-        scaled_left,
-        scaled_bottom,
-        scaled_w,
-        scaled_h,
-    ): (f64, f64, f64, f64, f64, f64, f64, f64) = env
+    let (rect_left, rect_bottom, rect_w, rect_h, scaled_left, scaled_bottom, scaled_w, scaled_h): (
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+    ) = env
         .eval(
             r#"
             local f = CreateFrame("Frame", "ScaledRectProbe", UIParent)

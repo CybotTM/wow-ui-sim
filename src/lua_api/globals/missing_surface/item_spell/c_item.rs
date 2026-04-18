@@ -78,7 +78,10 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         ("GetItemSubClassInfo", c_item_get_item_sub_class_info),
         ("GetItemLink", c_item_get_item_link),
         ("GetItemGUID", c_item_get_item_guid),
-        ("GetItemInventorySlotInfo", c_item_get_item_inventory_slot_info),
+        (
+            "GetItemInventorySlotInfo",
+            c_item_get_item_inventory_slot_info,
+        ),
     ];
     for &(name, func) in methods {
         table_set_rust_fn(state, table_ref, name, func)?;

@@ -12,8 +12,8 @@
 use crate::lua_api::AddonInfo;
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_bridge::FromStack;
-use rilua::vm::state::LuaState;
 use rilua::LuaResult;
+use rilua::vm::state::LuaState;
 
 pub(super) fn register_test_addon(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;

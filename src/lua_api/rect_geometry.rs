@@ -227,10 +227,7 @@ const RECT_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
 
 /// Install the rect / geometry query family on a table (typically the
 /// frame metatable). Covered by `tests/rect_geometry.rs`.
-pub fn register_rect_methods_on_table(
-    state: &mut LuaState,
-    table: GcRef<Table>,
-) -> LuaResult<()> {
+pub fn register_rect_methods_on_table(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     for (name, func) in RECT_METHODS {
         table_set_rust_fn(state, table, name, *func)?;
     }

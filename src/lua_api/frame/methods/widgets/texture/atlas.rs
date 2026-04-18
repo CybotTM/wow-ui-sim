@@ -18,7 +18,13 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     };
     let use_atlas_size = opt_bool(state, 3).unwrap_or(false);
     let mut sim = borrow_state_mut(state)?;
-    apply_atlas(&mut sim.widgets, id, &atlas_name, lookup.info, use_atlas_size);
+    apply_atlas(
+        &mut sim.widgets,
+        id,
+        &atlas_name,
+        lookup.info,
+        use_atlas_size,
+    );
     Ok(0)
 }
 
@@ -58,10 +64,7 @@ fn atlas_slot_tex_coords(info: &crate::atlas::AtlasInfo) -> (f32, f32, f32, f32)
 /// Parent id + parentKey when both are set. Captured before the child borrow
 /// so the propagation step can run after the child mutation without
 /// re-borrowing state.
-fn collect_parent_slot(
-    widgets: &crate::widget::WidgetRegistry,
-    id: u64,
-) -> Option<(u64, String)> {
+fn collect_parent_slot(widgets: &crate::widget::WidgetRegistry, id: u64) -> Option<(u64, String)> {
     let frame = widgets.get(id)?;
     let parent_id = frame.parent_id?;
     let parent_key = frame.parent_key.clone()?;

@@ -212,7 +212,14 @@ fn build_global_tooltip_set_owner_then_set_text_handler(
     let red_path = create_string(state, red_path);
     let green_path = create_string(state, green_path);
     let blue_path = create_string(state, blue_path);
-    let args = [anchor, text_path, red_path, green_path, blue_path, Val::Bool(wrap)];
+    let args = [
+        anchor,
+        text_path,
+        red_path,
+        green_path,
+        blue_path,
+        Val::Bool(wrap),
+    ];
     call_global_method_builder(
         state,
         target_path,

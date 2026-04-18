@@ -3,12 +3,14 @@
 
 use super::callbacks::set_display_dirty_and_fire_callbacks;
 use crate::lua_api::message_frame::Message;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string,
+};
 use crate::lua_bridge::stack_val;
-use rilua::{LuaResult, Val};
 use rilua::vm::callinfo::LUA_MULTRET;
 use rilua::vm::execute::{CallResult, execute};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 use super::scroll::message_frame_scroll_limit;
 

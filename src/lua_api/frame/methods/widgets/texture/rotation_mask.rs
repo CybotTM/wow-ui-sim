@@ -1,7 +1,7 @@
 //! Rotation, mask, gradient, visuals, and sprite sheet methods.
 
-use super::color::color_from_table;
 use super::super::shared::{opt_f32, opt_string};
+use super::color::color_from_table;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -77,4 +77,3 @@ pub(super) fn set_sprite_sheet_cell(state: &mut LuaState) -> LuaResult<u32> {
     let _ = frame_id_from_stack(state, 1);
     Ok(0)
 }
-

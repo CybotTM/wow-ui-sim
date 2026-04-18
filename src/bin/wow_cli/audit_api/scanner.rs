@@ -605,5 +605,4 @@ mod tests {
             "should count bare global calls but exclude method calls and locally defined helpers"
         );
     }
-
 }

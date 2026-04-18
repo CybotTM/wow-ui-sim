@@ -446,4 +446,3 @@ fn debug_player_spells_nil_numeric_calls() {
 
     panic!("{report}");
 }
-

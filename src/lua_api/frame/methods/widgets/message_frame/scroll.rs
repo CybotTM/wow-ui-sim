@@ -1,7 +1,7 @@
 //! Scroll family: ScrollUp/Down, PageUp/Down, ScrollToTop/Bottom, offset, allowed.
 
-use super::callbacks::call_scroll_changed_callback;
 use super::super::shared::{val_to_bool, val_to_f64};
+use super::callbacks::call_scroll_changed_callback;
 use crate::lua_api::message_frame::MessageFrameData;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::{IntoStack, stack_val};

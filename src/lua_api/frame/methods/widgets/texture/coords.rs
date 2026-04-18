@@ -102,7 +102,12 @@ pub(super) fn remap_tex_coords(
     if let Some((al, ar, at, ab)) = atlas_tex_coords {
         let aw = ar - al;
         let ah = ab - at;
-        (al + left * aw, al + right * aw, at + top * ah, at + bottom * ah)
+        (
+            al + left * aw,
+            al + right * aw,
+            at + top * ah,
+            at + bottom * ah,
+        )
     } else {
         (left, right, top, bottom)
     }

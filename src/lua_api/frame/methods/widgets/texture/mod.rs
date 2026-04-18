@@ -8,10 +8,10 @@ mod draw_shadow;
 mod rotation_mask;
 
 use crate::lua_bridge::table_set_rust_fn;
+use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::LuaResult;
 
 const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     // Draw layer + shadow
@@ -69,7 +69,10 @@ const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetTexelSnappingBias", coords::get_texel_snapping_bias),
     ("SetSnapToPixelGrid", coords::set_snap_to_pixel_grid),
     ("IsSnappingToPixelGrid", coords::is_snapping_to_pixel_grid),
-    ("SetSecurityDisableSetText", draw_shadow::set_security_disable_set_text),
+    (
+        "SetSecurityDisableSetText",
+        draw_shadow::set_security_disable_set_text,
+    ),
     // Visuals
     ("SetVisuals", rotation_mask::set_visuals),
     // Sprite sheet
@@ -79,8 +82,14 @@ const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetVertexOffset", coords::get_vertex_offset),
     ("ClearVertexOffsets", coords::clear_vertex_offsets),
     // Blocking loads
-    ("SetBlockingLoadsRequested", blocking_loads::set_blocking_loads_requested),
-    ("IsBlockingLoadRequested", blocking_loads::is_blocking_load_requested),
+    (
+        "SetBlockingLoadsRequested",
+        blocking_loads::set_blocking_loads_requested,
+    ),
+    (
+        "IsBlockingLoadRequested",
+        blocking_loads::is_blocking_load_requested,
+    ),
 ];
 
 pub(super) fn register_texture(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {

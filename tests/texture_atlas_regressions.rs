@@ -86,10 +86,26 @@ fn set_tex_coord_without_atlas_passes_through() {
     let id = state.widgets.get_id_by_name("NoAtlasRemapTex").unwrap();
     let coords = state.widgets.get(id).unwrap().tex_coords.unwrap();
 
-    assert!((coords.0 - 0.1).abs() < 0.001, "left unchanged: {}", coords.0);
-    assert!((coords.1 - 0.9).abs() < 0.001, "right unchanged: {}", coords.1);
-    assert!((coords.2 - 0.2).abs() < 0.001, "top unchanged: {}", coords.2);
-    assert!((coords.3 - 0.8).abs() < 0.001, "bottom unchanged: {}", coords.3);
+    assert!(
+        (coords.0 - 0.1).abs() < 0.001,
+        "left unchanged: {}",
+        coords.0
+    );
+    assert!(
+        (coords.1 - 0.9).abs() < 0.001,
+        "right unchanged: {}",
+        coords.1
+    );
+    assert!(
+        (coords.2 - 0.2).abs() < 0.001,
+        "top unchanged: {}",
+        coords.2
+    );
+    assert!(
+        (coords.3 - 0.8).abs() < 0.001,
+        "bottom unchanged: {}",
+        coords.3
+    );
 }
 
 /// 8-arg quad form with atlas active: the bounding-box tex_coords should be

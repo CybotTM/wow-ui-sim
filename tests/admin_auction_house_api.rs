@@ -40,7 +40,10 @@ fn admin_can_seed_and_clear_auction_browse_results() {
         )
         .unwrap();
 
-    assert_eq!(result, "ok", "admin browse-result seeding should round-trip: {result}");
+    assert_eq!(
+        result, "ok",
+        "admin browse-result seeding should round-trip: {result}"
+    );
 }
 
 #[test]

@@ -1,12 +1,12 @@
 //! AddMessage / BackFillMessage / add helpers.
 
-use super::scroll::truncate_messages;
 use super::super::shared::{opt_f32, opt_string};
+use super::scroll::truncate_messages;
 use crate::lua_api::message_frame::{Message, MessageFrameData};
 use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack};
 use crate::lua_bridge::stack_val;
-use rilua::{LuaResult, Val};
 use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
 
 pub(super) fn add_message(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;

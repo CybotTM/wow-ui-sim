@@ -3,9 +3,7 @@
 
 use super::super::FastHandlerRef;
 use super::super::load_template;
-use super::{
-    GlobalMethodMode, build_global_method_with_mode, call_global_method_builder,
-};
+use super::{GlobalMethodMode, build_global_method_with_mode, call_global_method_builder};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
