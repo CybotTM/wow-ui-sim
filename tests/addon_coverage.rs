@@ -1,6 +1,7 @@
 mod common;
 
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::panic::{self, AssertUnwindSafe};
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -8,7 +9,9 @@ use wow_ui_sim::lua_errors::grouped_errors_by_addon;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 use wow_ui_sim::toc::TocFile;
-use wow_ui_sim::xml::{clear_templates, register_intrinsic_templates};
+use wow_ui_sim::xml::{
+    FrameXml, clear_templates, get_template, register_intrinsic_templates, register_template,
+};
 
 const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_AccountSaveUI", 3),
@@ -554,6 +557,15 @@ fn reset_template_state() {
     register_intrinsic_templates();
 }
 
+fn with_isolated_addon_coverage_state(f: impl FnOnce()) {
+    reset_template_state();
+    let result = panic::catch_unwind(AssertUnwindSafe(f));
+    reset_template_state();
+    if let Err(payload) = result {
+        panic::resume_unwind(payload);
+    }
+}
+
 fn load_startup_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
     let known_blizzard_addons: HashSet<_> = discover_all_blizzard_addons(&blizzard_ui_dir())
@@ -904,18 +916,40 @@ fn shard_14_runtime_load_survives_prior_runtime_shards_in_process() {
 
 #[test]
 fn perf_lock_recovers_after_prior_panicking_holder() {
-    let first = std::panic::catch_unwind(|| {
+    let first = panic::catch_unwind(|| {
         common::with_perf_lock(|| panic!("intentional perf lock poison"));
     });
     assert!(first.is_err(), "first perf-lock holder should panic");
 
-    let second = std::panic::catch_unwind(|| {
+    let second = panic::catch_unwind(|| {
         common::with_perf_lock(|| {});
     });
     assert!(
         second.is_ok(),
         "perf lock should recover after a prior panic instead of poisoning later shards"
     );
+}
+
+#[test]
+fn isolated_shard_runner_resets_template_state_after_panic() {
+    let first = panic::catch_unwind(|| {
+        with_isolated_addon_coverage_state(|| {
+            register_template("PoisonTemplate", "Frame", FrameXml::default());
+            assert!(
+                get_template("PoisonTemplate").is_some(),
+                "test setup should register the synthetic template before the panic"
+            );
+            panic!("intentional shard failure");
+        });
+    });
+    assert!(first.is_err(), "first isolated shard should panic");
+
+    with_isolated_addon_coverage_state(|| {
+        assert!(
+            get_template("PoisonTemplate").is_none(),
+            "template registry should be reset before the next isolated shard runs"
+        );
+    });
 }
 
 #[test]
@@ -1005,68 +1039,70 @@ fn load_first_unloaded_addon_in_family(
 }
 
 fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usize) {
-    common::with_perf_lock(|| {
-        common::with_timeout(600, move || {
-            let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-            env.set_screen_size(1024.0, 768.0);
-            env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    with_isolated_addon_coverage_state(|| {
+        common::with_perf_lock(|| {
+            common::with_timeout(600, move || {
+                let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+                env.set_screen_size(1024.0, 768.0);
+                env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
-            let known_blizzard_addons = load_startup_blizzard_ui(&env);
-            let lod_families = discover_blizzard_lod_addon_families();
-            let known_runtime_counts = known_load_on_demand_runtime_error_counts();
-            let shard_families = shard_load_on_demand_addon_families(
-                &lod_families,
-                shard_count,
-                &known_runtime_counts,
-            );
-            let mut family_failures = Vec::new();
-            let mut load_failures = Vec::new();
-
-            for family in &shard_families[shard_index] {
-                clear_lua_error_tracking(&env);
-                let representative =
-                    load_first_unloaded_addon_in_family(&env, family, &mut load_failures);
-                let Some(representative) = representative else {
-                    continue;
-                };
-                let state = env.state().borrow();
-                let grouped_errors = grouped_errors_by_addon(&state);
-                let actual_counts = actual_error_counts(&grouped_errors);
-                let increases = classify_error_count_increases_from_baseline(
+                let known_blizzard_addons = load_startup_blizzard_ui(&env);
+                let lod_families = discover_blizzard_lod_addon_families();
+                let known_runtime_counts = known_load_on_demand_runtime_error_counts();
+                let shard_families = shard_load_on_demand_addon_families(
+                    &lod_families,
+                    shard_count,
                     &known_runtime_counts,
-                    &actual_counts,
                 );
-                let invalid_addons: Vec<_> = grouped_errors
-                    .keys()
-                    .filter(|addon_name| {
-                        addon_name.as_str() != "<unknown>"
-                            && !known_blizzard_addons.contains(*addon_name)
-                    })
-                    .cloned()
-                    .collect();
-                let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
-                if unknown_count > 0 || !invalid_addons.is_empty() || !increases.is_empty() {
-                    family_failures.push(format!(
-                        "{representative}: increased [{}], invalid_addons={:?}, unknown_count={}, actual counts=[{}]\n{}",
-                        format_error_count_changes(&increases),
-                        invalid_addons,
-                        unknown_count,
-                        format_error_count_map(&actual_counts),
-                        format_per_addon_report(&grouped_errors),
-                    ));
-                }
-            }
+                let mut family_failures = Vec::new();
+                let mut load_failures = Vec::new();
 
-            assert!(
-                load_failures.is_empty(),
-                "runtime LoadAddOn should load every Blizzard LoD addon in shard {shard_index}/{shard_count} after startup:\n{}",
-                load_failures.join("\n"),
-            );
-            assert!(
-                family_failures.is_empty(),
-                "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one family in shard {shard_index}/{shard_count}:\n{}",
-                family_failures.join("\n\n"),
-            );
+                for family in &shard_families[shard_index] {
+                    clear_lua_error_tracking(&env);
+                    let representative =
+                        load_first_unloaded_addon_in_family(&env, family, &mut load_failures);
+                    let Some(representative) = representative else {
+                        continue;
+                    };
+                    let state = env.state().borrow();
+                    let grouped_errors = grouped_errors_by_addon(&state);
+                    let actual_counts = actual_error_counts(&grouped_errors);
+                    let increases = classify_error_count_increases_from_baseline(
+                        &known_runtime_counts,
+                        &actual_counts,
+                    );
+                    let invalid_addons: Vec<_> = grouped_errors
+                        .keys()
+                        .filter(|addon_name| {
+                            addon_name.as_str() != "<unknown>"
+                                && !known_blizzard_addons.contains(*addon_name)
+                        })
+                        .cloned()
+                        .collect();
+                    let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
+                    if unknown_count > 0 || !invalid_addons.is_empty() || !increases.is_empty() {
+                        family_failures.push(format!(
+                            "{representative}: increased [{}], invalid_addons={:?}, unknown_count={}, actual counts=[{}]\n{}",
+                            format_error_count_changes(&increases),
+                            invalid_addons,
+                            unknown_count,
+                            format_error_count_map(&actual_counts),
+                            format_per_addon_report(&grouped_errors),
+                        ));
+                    }
+                }
+
+                assert!(
+                    load_failures.is_empty(),
+                    "runtime LoadAddOn should load every Blizzard LoD addon in shard {shard_index}/{shard_count} after startup:\n{}",
+                    load_failures.join("\n"),
+                );
+                assert!(
+                    family_failures.is_empty(),
+                    "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one family in shard {shard_index}/{shard_count}:\n{}",
+                    family_failures.join("\n\n"),
+                );
+            })
         })
     })
 }
