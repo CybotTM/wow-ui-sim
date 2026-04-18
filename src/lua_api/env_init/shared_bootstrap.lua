@@ -75,6 +75,143 @@ if SetupLocalization == nil then
   end
 end
 
+if FrameUtil == nil then
+  FrameUtil = {}
+
+  function FrameUtil.RegisterFrameForEvents(frame, events)
+    if type(frame) ~= "table" or type(events) ~= "table" then
+      return
+    end
+    for index = 1, #events do
+      if type(frame.RegisterEvent) == "function" then
+        frame:RegisterEvent(events[index])
+      end
+    end
+  end
+
+  function FrameUtil.UnregisterFrameForEvents(frame, events)
+    if type(frame) ~= "table" or type(events) ~= "table" then
+      return
+    end
+    for index = 1, #events do
+      if type(frame.UnregisterEvent) == "function" then
+        frame:UnregisterEvent(events[index])
+      end
+    end
+  end
+
+  function FrameUtil.RegisterFrameForUnitEvents(frame, events, ...)
+    if type(frame) ~= "table" or type(events) ~= "table" then
+      return
+    end
+    for index = 1, #events do
+      if type(frame.RegisterUnitEvent) == "function" then
+        frame:RegisterUnitEvent(events[index], ...)
+      end
+    end
+  end
+
+  function FrameUtil.GetRootParent(frame)
+    if type(frame) ~= "table" or type(frame.GetParent) ~= "function" then
+      return nil
+    end
+
+    local parent = frame:GetParent()
+    while parent do
+      if type(parent.GetParent) ~= "function" then
+        break
+      end
+      local nextParent = parent:GetParent()
+      if not nextParent then
+        break
+      end
+      parent = nextParent
+    end
+    return parent
+  end
+
+  function FrameUtil.SetParentMaintainRenderLayering(frame, parent)
+    if type(frame) ~= "table" or parent == nil then
+      return
+    end
+
+    local origStrata = type(frame.GetFrameStrata) == "function" and frame:GetFrameStrata() or nil
+    local origFrameLevel = type(frame.GetFrameLevel) == "function" and frame:GetFrameLevel() or nil
+
+    if type(frame.SetParent) == "function" then
+      frame:SetParent(parent)
+    end
+    if origStrata ~= nil and type(frame.SetFrameStrata) == "function" then
+      frame:SetFrameStrata(origStrata)
+    end
+    if origFrameLevel ~= nil and type(frame.SetFrameLevel) == "function" then
+      frame:SetFrameLevel(origFrameLevel)
+    end
+  end
+
+  function FrameUtil.UpdateScaleForFit(frame, extraWidth, extraHeight)
+    extraWidth = extraWidth or 0
+    extraHeight = extraHeight or 0
+    FrameUtil.UpdateScaleForFitSpecific(
+      frame,
+      frame:GetWidth() + extraWidth,
+      frame:GetHeight() + extraHeight
+    )
+  end
+
+  function FrameUtil.UpdateScaleForFitSpecific(frame, specificWidth, specificHeight)
+    if type(frame) ~= "table"
+      or type(frame.SetScale) ~= "function"
+      or type(frame.GetWidth) ~= "function"
+      or type(frame.GetHeight) ~= "function"
+      or type(GetAppropriateTopLevelParent) ~= "function"
+    then
+      return
+    end
+
+    frame:SetScale(1)
+
+    local topLevelParent = GetAppropriateTopLevelParent()
+    if type(topLevelParent) ~= "table"
+      or type(topLevelParent.GetWidth) ~= "function"
+      or type(topLevelParent.GetHeight) ~= "function"
+    then
+      return
+    end
+
+    local horizRatio = topLevelParent:GetWidth() / (specificWidth or frame:GetWidth())
+    local vertRatio = topLevelParent:GetHeight() / (specificHeight or frame:GetHeight())
+
+    if horizRatio < 1 or vertRatio < 1 then
+      frame:SetScale(math.min(horizRatio, vertRatio))
+    end
+  end
+
+  function FrameUtil.UpdateTopLevelParent(frame)
+    if type(frame) ~= "table"
+      or type(frame.GetParent) ~= "function"
+      or type(GetAppropriateTopLevelParent) ~= "function"
+    then
+      return
+    end
+
+    local oldParent = frame:GetParent()
+    local newParent = GetAppropriateTopLevelParent(oldParent)
+    if oldParent ~= newParent then
+      FrameUtil.SetParentMaintainRenderLayering(frame, newParent)
+    end
+  end
+
+  function FrameUtil.RegisterForTopLevelParentChanged(frame)
+    if type(EventRegistry) ~= "table" or type(EventRegistry.RegisterCallback) ~= "function" then
+      return
+    end
+    EventRegistry:RegisterCallback("UI.AlternateTopLevelParentChanged", function()
+      FrameUtil.UpdateTopLevelParent(frame)
+    end, frame)
+  end
+end
+
 if EventUtil == nil then
   local eventUtilState = {
     allEventsWatchers = {},

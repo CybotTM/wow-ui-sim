@@ -827,6 +827,30 @@ fn test_blizzard_framexml_loads_without_setup_localization_warning() {
 }
 
 #[test]
+fn test_blizzard_framexml_loads_without_frameutil_warning() {
+    test_timeout! {
+        let (_env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let frameutil_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("FrameUtil")
+                    || warning.contains("UIErrorsFrame.lua:8")
+                    || warning.contains("LootHistory.lua:307")
+                    || warning.contains("QuestSession.lua:831")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            frameutil_warnings.is_empty(),
+            "Blizzard_FrameXML should not warn on FrameUtil helpers:\n  {}",
+            frameutil_warnings.join("\n  ")
+        );
+    }
+}
+
+#[test]
 fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
     test_timeout! {
         let (_env, warnings) = load_blizzard_addon_by_folder("Blizzard_Commentator");

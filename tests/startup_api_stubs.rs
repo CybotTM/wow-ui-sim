@@ -252,6 +252,130 @@ fn setup_localization_runs_locale_setup_now_and_frame_setup_later() {
 }
 
 #[test]
+fn frameutil_helper_family_registers_events_and_tracks_top_level_parent_callback() {
+    let env = env();
+    let (
+        registered_events,
+        unregistered_events,
+        unit_event,
+        unit_first_unit,
+        callback_event,
+        callback_owner_matches,
+        parent_was_updated,
+        scaled_down,
+        scaled_fit_extra,
+    ): (
+        String,
+        String,
+        String,
+        String,
+        String,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local registered = {}
+            local unregistered = {}
+            local unitRegistrations = {}
+            local callbackEvent = nil
+            local callbackOwner = nil
+
+            EventRegistry = {
+                RegisterCallback = function(_, event, callback, owner)
+                    callbackEvent = event
+                    callbackOwner = owner
+                end,
+            }
+
+            local newParent = {
+                name = "NewParent",
+                GetWidth = function() return 80 end,
+                GetHeight = function() return 60 end,
+            }
+            function GetAppropriateTopLevelParent()
+                return newParent
+            end
+
+            local oldParent = { name = "OldParent", GetParent = function() return nil end }
+            local frame = {
+                parent = oldParent,
+                strata = "HIGH",
+                level = 42,
+                RegisterEvent = function(self, event)
+                    registered[#registered + 1] = event
+                end,
+                UnregisterEvent = function(self, event)
+                    unregistered[#unregistered + 1] = event
+                end,
+                RegisterUnitEvent = function(self, event, ...)
+                    unitRegistrations[#unitRegistrations + 1] = { event = event, units = { ... } }
+                end,
+                GetParent = function(self)
+                    return self.parent
+                end,
+                SetParent = function(self, parent)
+                    self.parent = parent
+                end,
+                GetFrameStrata = function(self)
+                    return self.strata
+                end,
+                SetFrameStrata = function(self, strata)
+                    self.strata = strata
+                end,
+                GetFrameLevel = function(self)
+                    return self.level
+                end,
+                SetFrameLevel = function(self, level)
+                    self.level = level
+                end,
+                GetWidth = function(self)
+                    return 100
+                end,
+                GetHeight = function(self)
+                    return 100
+                end,
+                SetScale = function(self, scale)
+                    self.scale = scale
+                end,
+            }
+
+            FrameUtil.RegisterFrameForEvents(frame, { "EVENT_ONE", "EVENT_TWO" })
+            FrameUtil.UnregisterFrameForEvents(frame, { "EVENT_TWO" })
+            FrameUtil.RegisterFrameForUnitEvents(frame, { "UNIT_EVENT" }, "player", "pet")
+            FrameUtil.RegisterForTopLevelParentChanged(frame)
+            FrameUtil.UpdateTopLevelParent(frame)
+            FrameUtil.UpdateScaleForFitSpecific(frame, 100, 100)
+            local scaledDown = frame.scale < 1
+            frame.scale = nil
+            FrameUtil.UpdateScaleForFit(frame, 10, 0)
+
+            return table.concat(registered, ","),
+                   table.concat(unregistered, ","),
+                   unitRegistrations[1].event,
+                   unitRegistrations[1].units[1],
+                   callbackEvent,
+                   callbackOwner == frame,
+                   frame.parent == newParent,
+                   scaledDown,
+                   frame.scale < 1
+            "#,
+        )
+        .expect("FrameUtil helpers should be callable");
+    assert_eq!(registered_events, "EVENT_ONE,EVENT_TWO");
+    assert_eq!(unregistered_events, "EVENT_TWO");
+    assert_eq!(unit_event, "UNIT_EVENT");
+    assert_eq!(unit_first_unit, "player");
+    assert_eq!(callback_event, "UI.AlternateTopLevelParentChanged");
+    assert!(callback_owner_matches);
+    assert!(parent_was_updated);
+    assert!(scaled_down);
+    assert!(scaled_fit_extra);
+}
+
+#[test]
 fn named_fontstring_is_globally_reachable() {
     // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
     // FontString, matching how named frames and named textures behave.
