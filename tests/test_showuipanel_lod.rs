@@ -132,9 +132,24 @@ fn block_blizzard_cooldown_broadcaster(env: &WowLuaEnv) {
     .expect("failed to wrap UIParentLoadAddOn");
 }
 
-/// Install the `ActionButtonUtil` namespace + ActionBarActionStatus enum +
-/// the three `GetActionBarStatusFor*` probes, all returning `NotMissing`.
-/// Real Blizzard addon code reaches for these during ShowUIPanel paths.
+/// Install the `ActionButtonUtil` namespace used by `Blizzard_SpellSearch`
+/// (`SpellSearchUtil.GetActionBarStatusFor*`) and the talent / spellbook
+/// item templates. Loading the real `Blizzard_ActionBar` addon would drag in
+/// MainActionBar, the MultiBars, StanceBar, PetActionBar, and the C_ActionBar
+/// API surface — none of which the LoD panel tests need. Instead we install a
+/// narrower fixture that:
+///
+/// * publishes the `ActionBarActionStatus` enum literal Blizzard addons key
+///   off (NotMissing / MissingFromAllBars / OnInactiveBonusBar /
+///   OnDisabledActionBar);
+/// * defaults the three `GetActionBarStatusFor{Spell,PetAction,Flyout}`
+///   probes to `NotMissing` (matches the previous stub — keeps every
+///   currently-passing test passing);
+/// * exposes a per-id override table per probe (`__test_action_bar_status_for_spell`
+///   / `_pet_action` / `_flyout`) so future tests that *want* to drive the
+///   `MissingFromAllBars` / `OnInactiveBonusBar` / `OnDisabledActionBar`
+///   branches in `SpellSearchUtil` can do so by writing a single Lua line
+///   before invoking the panel.
 fn install_action_button_util_stub(env: &WowLuaEnv) {
     env.exec(
         r#"
@@ -148,16 +163,23 @@ fn install_action_button_util_stub(env: &WowLuaEnv) {
                 },
             }
 
-            function ActionButtonUtil.GetActionBarStatusForSpell()
-                return ActionButtonUtil.ActionBarActionStatus.NotMissing
+            __test_action_bar_status_for_spell = {}
+            __test_action_bar_status_for_pet_action = {}
+            __test_action_bar_status_for_flyout = {}
+
+            function ActionButtonUtil.GetActionBarStatusForSpell(spellID)
+                local override = spellID and __test_action_bar_status_for_spell[spellID]
+                return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
             end
 
-            function ActionButtonUtil.GetActionBarStatusForPetAction()
-                return ActionButtonUtil.ActionBarActionStatus.NotMissing
+            function ActionButtonUtil.GetActionBarStatusForPetAction(petActionID)
+                local override = petActionID and __test_action_bar_status_for_pet_action[petActionID]
+                return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
             end
 
-            function ActionButtonUtil.GetActionBarStatusForFlyout()
-                return ActionButtonUtil.ActionBarActionStatus.NotMissing
+            function ActionButtonUtil.GetActionBarStatusForFlyout(flyoutActionID)
+                local override = flyoutActionID and __test_action_bar_status_for_flyout[flyoutActionID]
+                return override or ActionButtonUtil.ActionBarActionStatus.NotMissing
             end
         end
         "#,
@@ -1248,6 +1270,92 @@ fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
         assert_eq!(
             result, "ok",
             "LossOfControlFrame should show the seeded loss-of-control overlay: {result}"
+        );
+    }
+}
+
+/// Verifies the `ActionButtonUtil` test fixture: defaults remain `NotMissing`
+/// (so existing panel tests don't change behaviour) but per-id override tables
+/// can drive `MissingFromAllBars` / `OnInactiveBonusBar` / `OnDisabledActionBar`
+/// through `SpellSearchUtil.GetActionbarStatusForSpell`. Without these branches
+/// the spell-book / talent search-filter UI cannot be exercised end-to-end.
+#[test]
+fn action_button_util_fixture_drives_all_action_bar_statuses() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local enum = ActionButtonUtil and ActionButtonUtil.ActionBarActionStatus
+            if not enum then
+                return "missing_action_bar_action_status_enum"
+            end
+            if enum.NotMissing ~= 1 or enum.MissingFromAllBars ~= 2
+               or enum.OnInactiveBonusBar ~= 3 or enum.OnDisabledActionBar ~= 4 then
+                return "wrong_enum_values"
+            end
+
+            -- Defaults: nothing configured → NotMissing for every probe.
+            if ActionButtonUtil.GetActionBarStatusForSpell(101) ~= enum.NotMissing then
+                return "default_spell_not_NotMissing"
+            end
+            if ActionButtonUtil.GetActionBarStatusForPetAction(202) ~= enum.NotMissing then
+                return "default_pet_not_NotMissing"
+            end
+            if ActionButtonUtil.GetActionBarStatusForFlyout(303) ~= enum.NotMissing then
+                return "default_flyout_not_NotMissing"
+            end
+
+            -- Overrides drive each non-default branch SpellSearchUtil cares about.
+            __test_action_bar_status_for_spell[1001] = enum.MissingFromAllBars
+            __test_action_bar_status_for_spell[1002] = enum.OnInactiveBonusBar
+            __test_action_bar_status_for_spell[1003] = enum.OnDisabledActionBar
+            __test_action_bar_status_for_pet_action[2001] = enum.OnDisabledActionBar
+            __test_action_bar_status_for_flyout[3001] = enum.OnInactiveBonusBar
+
+            if ActionButtonUtil.GetActionBarStatusForSpell(1001) ~= enum.MissingFromAllBars then
+                return "spell_override_MissingFromAllBars_failed"
+            end
+            if ActionButtonUtil.GetActionBarStatusForSpell(1002) ~= enum.OnInactiveBonusBar then
+                return "spell_override_OnInactiveBonusBar_failed"
+            end
+            if ActionButtonUtil.GetActionBarStatusForSpell(1003) ~= enum.OnDisabledActionBar then
+                return "spell_override_OnDisabledActionBar_failed"
+            end
+            if ActionButtonUtil.GetActionBarStatusForPetAction(2001) ~= enum.OnDisabledActionBar then
+                return "pet_override_failed"
+            end
+            if ActionButtonUtil.GetActionBarStatusForFlyout(3001) ~= enum.OnInactiveBonusBar then
+                return "flyout_override_failed"
+            end
+
+            -- The overrides must flow through SpellSearchUtil's wrappers
+            -- (this is the path real Blizzard search-filter UI exercises).
+            if SpellSearchUtil then
+                if SpellSearchUtil.GetActionbarStatusForSpell(1001) ~= enum.MissingFromAllBars then
+                    return "spellsearch_spell_override_failed"
+                end
+
+                local talentNode = { entryIDsWithCommittedRanks = { 1 } }
+                if SpellSearchUtil.GetActionBarStatusForTraitNode(talentNode, 1002) ~= enum.OnInactiveBonusBar then
+                    return "spellsearch_trait_override_failed"
+                end
+                if SpellSearchUtil.GetActionBarStatusForTraitNodeEntry(1, talentNode, 1003) ~= enum.OnDisabledActionBar then
+                    return "spellsearch_trait_entry_override_failed"
+                end
+
+                -- And the tooltip lookup table on SpellSearchUtil should index
+                -- non-`NotMissing` statuses (sanity: confirms the enum keys
+                -- match the ones SpellSearchUtil built its lookup tables with).
+                if SpellSearchUtil.ActionBarStatusTooltips[enum.MissingFromAllBars] == nil
+                   or SpellSearchUtil.ActionBarStatusMatchTypes[enum.OnDisabledActionBar] == nil then
+                    return "spellsearch_lookup_table_missing_entries"
+                end
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result, "ok",
+            "ActionButtonUtil fixture should drive every ActionBarActionStatus through SpellSearchUtil: {result}"
         );
     }
 }
