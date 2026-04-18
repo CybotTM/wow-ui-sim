@@ -265,15 +265,30 @@ fn get_achievement_criteria_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_previous_achievement(state: &mut LuaState) -> LuaResult<u32> {
-    let _achievement_id = i32::from_stack(state, 1)?;
-    state.push(Val::Nil);
+    let achievement_id = i32::from_stack(state, 1)?;
+    match previous_achievement_id(achievement_id) {
+        Some(previous_id) => state.push(Val::Num(previous_id as f64)),
+        None => state.push(Val::Nil),
+    }
     Ok(1)
 }
 
 fn get_next_achievement(state: &mut LuaState) -> LuaResult<u32> {
-    let _achievement_id = i32::from_stack(state, 1)?;
-    state.push(Val::Nil);
-    state.push(Val::Bool(false));
+    let achievement_id = i32::from_stack(state, 1)?;
+    match next_achievement_id(achievement_id) {
+        Some(next_id) => {
+            let completed = borrow_state(state)?
+                .world
+                .earned_achievements
+                .contains(&next_id);
+            state.push(Val::Num(next_id as f64));
+            state.push(Val::Bool(completed));
+        }
+        None => {
+            state.push(Val::Nil);
+            state.push(Val::Bool(false));
+        }
+    }
     Ok(2)
 }
 
@@ -329,10 +344,35 @@ fn find_category(category_id: i32) -> Option<&'static AchievementCategory> {
 }
 
 fn category_id_for_achievement(achievement_id: i32) -> Option<i32> {
+    category_for_achievement(achievement_id).map(|category| category.category_id)
+}
+
+fn category_for_achievement(achievement_id: i32) -> Option<&'static AchievementCategory> {
     ACHIEVEMENT_CATEGORIES
         .iter()
         .find(|category| category.achievement_ids.contains(&achievement_id))
-        .map(|category| category.category_id)
+}
+
+fn category_achievement_position(achievement_id: i32) -> Option<(&'static [i32], usize)> {
+    let category = category_for_achievement(achievement_id)?;
+    let position = category
+        .achievement_ids
+        .iter()
+        .position(|&id| id == achievement_id)?;
+    Some((category.achievement_ids, position))
+}
+
+fn previous_achievement_id(achievement_id: i32) -> Option<i32> {
+    let (achievement_ids, position) = category_achievement_position(achievement_id)?;
+    position
+        .checked_sub(1)
+        .and_then(|index| achievement_ids.get(index))
+        .copied()
+}
+
+fn next_achievement_id(achievement_id: i32) -> Option<i32> {
+    let (achievement_ids, position) = category_achievement_position(achievement_id)?;
+    achievement_ids.get(position + 1).copied()
 }
 
 fn count_completed_achievements(state: &mut LuaState, achievement_ids: &[i32]) -> LuaResult<i32> {

@@ -245,20 +245,40 @@ fn test_get_achievement_category_returns_seeded_category() {
 }
 
 #[test]
-fn test_previous_and_next_achievement_are_nil_for_unchained_seeded_rows() {
+fn test_previous_and_next_achievement_follow_category_order() {
     let env = env();
-    let (prev_is_nil, next_is_nil, next_complete): (bool, bool, bool) = env
+    let (prev, next_id, next_complete): (i32, i32, bool) = env
+        .eval(
+            r#"
+            local prev = GetPreviousAchievement(7)
+            local next_id, completed = GetNextAchievement(7)
+            return prev, next_id, completed
+            "#,
+        )
+        .unwrap();
+    assert_eq!(prev, 6);
+    assert_eq!(next_id, 8);
+    assert!(!next_complete);
+}
+
+#[test]
+fn test_previous_and_next_achievement_handle_category_edges_and_completion() {
+    let env = env();
+    env.exec("A_Admin.SetAchievementEarned(8, true)").unwrap();
+    let (prev_is_nil, next_id, next_complete, last_next_is_nil): (bool, i32, bool, bool) = env
         .eval(
             r#"
             local prev = GetPreviousAchievement(6)
-            local next_id, completed = GetNextAchievement(6)
-            return prev == nil, next_id == nil, completed == false
+            local next_id, completed = GetNextAchievement(7)
+            local last_next = GetNextAchievement(11)
+            return prev == nil, next_id, completed, last_next == nil
             "#,
         )
         .unwrap();
     assert!(prev_is_nil);
-    assert!(next_is_nil);
+    assert_eq!(next_id, 8);
     assert!(next_complete);
+    assert!(last_next_is_nil);
 }
 
 #[test]
