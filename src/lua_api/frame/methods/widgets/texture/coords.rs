@@ -39,41 +39,53 @@ pub(super) fn get_blend_mode(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let coords: Vec<f32> = (2..=9).filter_map(|index| opt_f32(state, index)).collect();
-    if coords.len() != 4 && coords.len() != 8 {
-        return Ok(0);
-    }
     let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        if coords.len() == 4 {
-            let remapped = remap_tex_coords(
-                frame.atlas_tex_coords,
-                coords[0],
-                coords[1],
-                coords[2],
-                coords[3],
-            );
-            frame.tex_coords = Some(remapped);
-            frame.tex_coords_quad = None;
-        } else {
-            let quad = [
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return Ok(0);
+    };
+    match coords.len() {
+        4 => apply_rect_tex_coords(frame, [coords[0], coords[1], coords[2], coords[3]]),
+        8 => apply_quad_tex_coords(
+            frame,
+            [
                 coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6],
                 coords[7],
-            ];
-            let left = quad[0].min(quad[2]).min(quad[4]).min(quad[6]);
-            let right = quad[0].max(quad[2]).max(quad[4]).max(quad[6]);
-            let top = quad[1].min(quad[3]).min(quad[5]).min(quad[7]);
-            let bottom = quad[1].max(quad[3]).max(quad[5]).max(quad[7]);
-            frame.tex_coords = Some(remap_tex_coords(
-                frame.atlas_tex_coords,
-                left,
-                right,
-                top,
-                bottom,
-            ));
-            frame.tex_coords_quad = Some(quad);
-        }
+            ],
+        ),
+        _ => {}
     }
     Ok(0)
+}
+
+/// Rect form `(ULx, LRx, ULy, LRy)`. Atlas remapping is applied when the
+/// frame has an active atlas slot, otherwise the values pass through.
+fn apply_rect_tex_coords(frame: &mut crate::widget::Frame, rect: [f32; 4]) {
+    frame.tex_coords = Some(remap_tex_coords(
+        frame.atlas_tex_coords,
+        rect[0],
+        rect[1],
+        rect[2],
+        rect[3],
+    ));
+    frame.tex_coords_quad = None;
+}
+
+/// Quad form (eight floats — TLx, TLy, BLx, BLy, TRx, TRy, BRx, BRy).
+/// Records the raw quad for downstream rendering and computes a
+/// rect bounding box for atlas remapping.
+fn apply_quad_tex_coords(frame: &mut crate::widget::Frame, quad: [f32; 8]) {
+    let left = quad[0].min(quad[2]).min(quad[4]).min(quad[6]);
+    let right = quad[0].max(quad[2]).max(quad[4]).max(quad[6]);
+    let top = quad[1].min(quad[3]).min(quad[5]).min(quad[7]);
+    let bottom = quad[1].max(quad[3]).max(quad[5]).max(quad[7]);
+    frame.tex_coords = Some(remap_tex_coords(
+        frame.atlas_tex_coords,
+        left,
+        right,
+        top,
+        bottom,
+    ));
+    frame.tex_coords_quad = Some(quad);
 }
 
 /// Remap UV coordinates into an atlas sub-region when one is active.
