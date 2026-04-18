@@ -41,6 +41,10 @@ if UI_LOCALE == nil then
   end
 end
 
+local function __wow_pack_results(...)
+  return { n = select("#", ...), ... }
+end
+
 if SetupLocalization == nil then
   local localizeFramesCallbacks = {}
 
@@ -479,10 +483,6 @@ if table.wipe == nil then
 end
 
 tWipe = tWipe or table.wipe
-
-local function __wow_pack_results(...)
-  return { n = select("#", ...), ... }
-end
 
 function hooksecurefunc(target, methodName, hook)
   local object = target

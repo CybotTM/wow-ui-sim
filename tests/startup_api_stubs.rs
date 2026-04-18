@@ -214,6 +214,39 @@ fn event_util_helpers_defer_until_matching_startup_events_fire() {
 }
 
 #[test]
+fn event_util_register_once_can_capture_zero_or_more_required_args() {
+    let env = env();
+    let (ok, handle_type, registered, unregister_type): (bool, String, bool, String) = env
+        .eval(
+            r#"
+            local originalCreateFrame = CreateFrame
+            CreateFrame = nil
+
+            local ok, handle = pcall(function()
+                return EventUtil.RegisterOnceFrameEventAndCallback(
+                    "ADDON_LOADED",
+                    function() end,
+                    "Blizzard_PlayerSpells"
+                )
+            end)
+
+            CreateFrame = originalCreateFrame
+
+            return ok,
+                   type(handle),
+                   ok and handle.registered == true or false,
+                   ok and type(handle.Unregister) or "nil"
+            "#,
+        )
+        .expect("EventUtil.RegisterOnceFrameEventAndCallback should be callable");
+
+    assert!(ok, "register-once helper should not fail when packing args");
+    assert_eq!(handle_type, "table");
+    assert!(registered);
+    assert_eq!(unregister_type, "function");
+}
+
+#[test]
 fn setup_localization_runs_locale_setup_now_and_frame_setup_later() {
     let env = env();
     let (before_localize, before_frames): (i32, i32) = env
