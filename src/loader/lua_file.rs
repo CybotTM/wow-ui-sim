@@ -125,9 +125,12 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
             "chatInfo = ChatTypeInfo[chatType] or ChatTypeInfo.SYSTEM or { r = 1, g = 1, b = 0, id = 1 };",
         )
     } else if chunk_name.ends_with("/EventUtil.lua") {
-        source.replace(
-            "callback();",
-            "if type(callback) == \"function\" then callback(); end",
+        format!(
+            "if EventUtil ~= nil then return end\n{}",
+            source.replace(
+                "callback();",
+                "if type(callback) == \"function\" then callback(); end",
+            )
         )
     } else if chunk_name.ends_with("/EditModeManager.lua") {
         source
