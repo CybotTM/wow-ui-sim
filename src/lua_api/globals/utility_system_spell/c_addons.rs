@@ -64,6 +64,12 @@ fn register_c_addons_queries(
     table_set_rust_fn_static(state, t, "GetAddOnTitle", c_addons_get_addon_title)?;
     table_set_rust_fn_static(state, t, "GetAddOnNotes", c_addons_get_addon_notes)?;
     table_set_rust_fn_static(state, t, "GetAddOnSecurity", c_addons_get_addon_security)?;
+    table_set_rust_fn_static(
+        state,
+        t,
+        "GetScriptsDisallowedForBeta",
+        c_addons_get_scripts_disallowed_for_beta,
+    )?;
     Ok(())
 }
 
@@ -452,6 +458,11 @@ fn c_addons_get_addon_security(state: &mut LuaState) -> LuaResult<u32> {
     .unwrap_or("INSECURE");
     let v = create_string(state, security);
     state.push(v);
+    Ok(1)
+}
+
+fn c_addons_get_scripts_disallowed_for_beta(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

@@ -138,7 +138,16 @@ pub(super) fn parse_set_point_args(
     let arg6 = stack_val(state, 6);
 
     if arg3 == Val::Nil {
-        return Ok((None, point, 0.0, 0.0));
+        if matches!(arg4, Val::Num(_)) {
+            let x_offset = num_opt(arg4).unwrap_or(0.0);
+            let y_offset = num_opt(arg5).unwrap_or(0.0);
+            return Ok((None, point, x_offset, y_offset));
+        }
+
+        let relative_point = resolve_relative_point_from_val(state, arg4, point)?;
+        let x_offset = num_opt(arg5).unwrap_or(0.0);
+        let y_offset = num_opt(arg6).unwrap_or(0.0);
+        return Ok((None, relative_point, x_offset, y_offset));
     }
 
     if let (Some(x_offset), Some(y_offset)) = (num_opt(arg3), num_opt(arg4)) {
@@ -375,6 +384,32 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
         };
     }
 
+    if relative_to == Some(id as usize) {
+        let frame_name = {
+            let sim = borrow_state(state)?;
+            sim.widgets
+                .get(id)
+                .and_then(|frame| frame.name.clone())
+                .unwrap_or_else(|| format!("__frame_{id}"))
+        };
+        let fmt_arg = |index| {
+            val_to_string(state, stack_val(state, index))
+                .unwrap_or_else(|| "<unprintable>".to_string())
+        };
+        eprintln!(
+            "self-anchor probe frame={} point={} arg3={} arg4={} arg5={} arg6={} resolved_relative_point={} x={} y={}",
+            frame_name,
+            point_name,
+            fmt_arg(3),
+            fmt_arg(4),
+            fmt_arg(5),
+            fmt_arg(6),
+            relative_point.as_str(),
+            x_offset,
+            y_offset,
+        );
+    }
+
     ensure_no_anchor_cycle(state, id, relative_to, "SetPoint")?;
 
     let mut sim = borrow_state_mut(state)?;
@@ -403,6 +438,36 @@ fn ensure_no_anchor_cycle(
         sim.widgets.describe_anchor_cycle(frame_id, rel_id as u64)
     };
     if let Some(cycle) = cycle {
+        let (frame_name, parent_name, relative_name, dependent_name) = {
+            let sim = borrow_state(state)?;
+            let name_for = |id: u64| {
+                sim.widgets
+                    .get(id)
+                    .and_then(|frame| frame.name.clone())
+                    .unwrap_or_else(|| format!("__frame_{id}"))
+            };
+            let parent_name = sim
+                .widgets
+                .get(frame_id)
+                .and_then(|frame| frame.parent_id)
+                .map(name_for)
+                .unwrap_or_else(|| "<nil>".to_string());
+            (
+                name_for(frame_id),
+                parent_name,
+                name_for(cycle.relative_to_id),
+                name_for(cycle.dependent_id),
+            )
+        };
+        eprintln!(
+            "anchor-cycle probe method={} frame={} parent={} relative={} dependent={} ancestors={:?}",
+            method_name,
+            frame_name,
+            parent_name,
+            relative_name,
+            dependent_name,
+            cycle.dependent_ancestors,
+        );
         let message = format_anchor_cycle_error(state, method_name, frame_id, &cycle)?;
         return Err(runtime_error(message));
     }

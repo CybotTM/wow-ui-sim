@@ -489,11 +489,54 @@ impl WowLuaEnv {
                 frame.height = height;
             }
         }
+        let _ = self.exec(&format!(
+            r#"
+            function GetScreenWidth()
+                return {width}
+            end
+
+            function GetScreenHeight()
+                return {height}
+            end
+
+            function GetPhysicalScreenSize()
+                return GetScreenWidth(), GetScreenHeight()
+            end
+            "#
+        ));
     }
 
     /// Select which UI surface should be loaded.
     pub fn set_screen_mode(&self, screen_kind: ScreenKind) {
         self.state.borrow_mut().set_screen_kind(screen_kind);
+        let (aurora_state, connected_to_wow, wow_connection_state, has_realm_list) =
+            screen_kind.login_state();
+        let is_glue = if screen_kind.is_glue() {
+            "true"
+        } else {
+            "false"
+        };
+        let _ = self.exec(&format!(
+            r#"
+            __wow_screen_mode_is_glue = {is_glue}
+            __wow_login_aurora_state = {aurora_state}
+            __wow_login_connected_to_wow = {connected_to_wow}
+            __wow_login_wow_connection_state = {wow_connection_state}
+            __wow_login_has_realm_list = {has_realm_list}
+
+            function InGlue()
+                return {is_glue}
+            end
+
+            if C_Glue == nil then
+                C_Glue = {{}}
+            end
+
+            function C_Glue.IsOnGlueScreen()
+                return {is_glue}
+            end
+            "#
+        ));
     }
 
     /// Toggle whether the simulated player is logged into the world.

@@ -151,6 +151,7 @@ fn push_target_changed(state: &mut LuaState) -> LuaResult<()> {
         args: Vec::new(),
     });
     fire_event_now(state, "PLAYER_TARGET_CHANGED", &[]);
+    sync_target_frame_visibility(state)?;
     Ok(())
 }
 
@@ -178,6 +179,18 @@ fn fire_event_now(state: &mut LuaState, event_name: &str, args: &[rilua::Val]) {
         call_args.extend_from_slice(args);
         let _ = call_function_state(state, handler, &call_args);
     }
+}
+
+fn sync_target_frame_visibility(state: &mut LuaState) -> LuaResult<()> {
+    let show_target_frame = borrow_state(state)?.current_target.is_some();
+    let mut sim = borrow_state_mut(state)?;
+    let Some(target_frame_id) = sim.widgets.get_id_by_name("TargetFrame") else {
+        return Ok(());
+    };
+    if let Some(frame) = sim.widgets.get_mut_visual(target_frame_id) {
+        frame.visible = show_target_frame;
+    }
+    Ok(())
 }
 
 // ── Globals ───────────────────────────────────────────────────────────────────

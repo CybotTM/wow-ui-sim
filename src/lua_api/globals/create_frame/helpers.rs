@@ -309,11 +309,36 @@ pub(crate) fn append_parent_array_entry(
     let Val::Table(array_ref) = array else {
         return;
     };
+    if parent_array_contains_child(state, array_ref, child) {
+        return;
+    }
     let next_index = next_table_array_index(state, array_ref);
     if let Some(table) = state.gc.tables.get_mut(array_ref) {
         let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
     }
     state.gc.barrier_back(array_ref);
+}
+
+fn parent_array_contains_child(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    child: Val,
+) -> bool {
+    let Some(child_id) = extract_frame_id(state, child) else {
+        return false;
+    };
+    state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| {
+            table
+                .array_slice()
+                .iter()
+                .copied()
+                .any(|entry| extract_frame_id(state, entry) == Some(child_id))
+        })
+        .unwrap_or(false)
 }
 
 fn next_table_array_index(

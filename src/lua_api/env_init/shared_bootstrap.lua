@@ -1145,7 +1145,7 @@ end
 
 if C_Glue.IsOnGlueScreen == nil then
   function C_Glue.IsOnGlueScreen()
-    return false
+    return __wow_screen_mode_is_glue == true
   end
 end
 
@@ -1183,13 +1183,28 @@ end
 
 if C_Login.GetState == nil then
   function C_Login.GetState()
-    local auroraState = 0
-    if Enum ~= nil and Enum.AuroraState ~= nil and Enum.AuroraState.None ~= nil then
-      auroraState = Enum.AuroraState.None
-    elseif LE_AURORA_STATE_NONE ~= nil then
-      auroraState = LE_AURORA_STATE_NONE
+    local auroraState = __wow_login_aurora_state
+    if auroraState == nil then
+      auroraState = 0
+      if Enum ~= nil and Enum.AuroraState ~= nil and Enum.AuroraState.None ~= nil then
+        auroraState = Enum.AuroraState.None
+      elseif LE_AURORA_STATE_NONE ~= nil then
+        auroraState = LE_AURORA_STATE_NONE
+      end
     end
-    return auroraState, false, 0, false, false
+    local connectedToWow = __wow_login_connected_to_wow
+    if connectedToWow == nil then
+      connectedToWow = false
+    end
+    local wowConnectionState = __wow_login_wow_connection_state
+    if wowConnectionState == nil then
+      wowConnectionState = 0
+    end
+    local hasRealmList = __wow_login_has_realm_list
+    if hasRealmList == nil then
+      hasRealmList = false
+    end
+    return auroraState, connectedToWow == true, wowConnectionState, hasRealmList == true, false
   end
 end
 
@@ -1225,6 +1240,12 @@ end
 if C_Login.IsNewPlayer == nil then
   function C_Login.IsNewPlayer()
     return false
+  end
+end
+
+if IsTestBuild == nil then
+  function IsTestBuild()
+    return true
   end
 end
 

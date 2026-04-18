@@ -222,7 +222,10 @@ fn create_atlas_markup(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn in_glue(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    let is_glue = crate::lua_api::methods::borrow_state(state)
+        .map(|sim| sim.screen_kind.is_glue())
+        .unwrap_or(false);
+    state.push(Val::Bool(is_glue));
     Ok(1)
 }
 

@@ -76,6 +76,7 @@ fn pet_get_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
     let t = TableBuilder::new(lua.state_mut())
+        .set_function("ClearRecentFanfares", |_state| Ok(0))?
         .set_function("GetNumPets", pet_get_num_pets)?
         .set_function("GetNumCollectedInfo", pet_get_num_collected_info)?
         .set_function("GetNumPetsNeedingFanfare", |state| (0i32).into_stack(state))?
@@ -88,6 +89,11 @@ pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             // TODO: lookup by species_id
             Ok(0)
         })?
+        .set_function("GetSummonedPetGUID", |_state| Ok(0))?
+        .set_function("GetSummonBattlePetCooldown", |state| {
+            (0.0f64, 0.0f64, false).into_stack(state)
+        })?
+        .set_function("PetNeedsFanfare", |state| false.into_stack(state))?
         .set_function("PetIsSummonable", |state| false.into_stack(state))?
         .build();
 

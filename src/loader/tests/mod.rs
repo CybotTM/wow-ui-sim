@@ -836,6 +836,7 @@ fn test_runtime_template_parent_array_registers_instance_on_parent() {
             local child = CreateFrame("Frame", "RuntimeParentArrayChild", parent, "RuntimeParentArrayTemplate")
             assert(type(parent.Slots) == "table", "runtime template parentArray should create parent table")
             assert(parent.Slots[1] == child, "runtime template parentArray should register frame instance")
+            assert(#parent.Slots == 1, "runtime template parentArray should not duplicate the same child")
         "#,
         )
         .unwrap();
@@ -859,6 +860,66 @@ fn test_anonymous_runtime_template_parent_array_registers_instance_on_parent() {
             local child = CreateFrame("Frame", nil, parent, "RuntimeAnonymousParentArrayTemplate")
             assert(type(parent.Slots) == "table", "anonymous runtime template parentArray should create parent table")
             assert(parent.Slots[1] == child, "anonymous runtime template parentArray should register frame instance")
+            assert(#parent.Slots == 1, "anonymous runtime template parentArray should not duplicate the same child")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_runtime_create_frame_inherited_child_parent_array_registers_once_in_order() {
+    let t = load_test_xml(
+        "runtime-create-frame-inherited-child-parent-array",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="InheritedParentArrayTemplate" virtual="true" parentArray="Tabs"/>
+            <Frame name="ContainerTemplate" virtual="true">
+                <Frames>
+                    <Frame name="$parentTab1" inherits="InheritedParentArrayTemplate"/>
+                    <Frame name="$parentTab2" inherits="InheritedParentArrayTemplate"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local frame = CreateFrame("Frame", "RuntimeParentArrayContainer", UIParent, "ContainerTemplate")
+            assert(type(frame.Tabs) == "table", "runtime template child parentArray should create parent table")
+            assert(#frame.Tabs == 2, "runtime template child parentArray should not duplicate inherited children")
+            assert(frame.Tabs[1] == RuntimeParentArrayContainerTab1, "first runtime inherited child should keep first slot")
+            assert(frame.Tabs[2] == RuntimeParentArrayContainerTab2, "second runtime inherited child should keep second slot")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_xml_inherited_parent_array_registers_children_once_in_order() {
+    let t = load_test_xml(
+        "xml-inherited-parent-array-once",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="InheritedParentArrayTemplate" virtual="true" parentArray="Tabs"/>
+            <Frame name="InheritedParentArrayHost">
+                <Frames>
+                    <Frame name="$parentTab1" inherits="InheritedParentArrayTemplate"/>
+                    <Frame name="$parentTab2" inherits="InheritedParentArrayTemplate"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(type(InheritedParentArrayHost.Tabs) == "table", "xml inherited parentArray should create parent table")
+            assert(#InheritedParentArrayHost.Tabs == 2, "xml inherited parentArray should not duplicate inherited children")
+            assert(InheritedParentArrayHost.Tabs[1] == InheritedParentArrayHostTab1, "first inherited child should keep first slot")
+            assert(InheritedParentArrayHost.Tabs[2] == InheritedParentArrayHostTab2, "second inherited child should keep second slot")
         "#,
         )
         .unwrap();

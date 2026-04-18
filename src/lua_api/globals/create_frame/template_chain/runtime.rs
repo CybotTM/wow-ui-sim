@@ -175,12 +175,13 @@ fn assign_child_parent_refs(
             child_id,
         );
     }
-    if let Some(parent_array) = super::resolve_inherited_string(frame, |t| t.parent_array.as_ref())
-    {
+    // Template-inherited parentArray is applied by the runtime template chain.
+    // Register only the child frame's direct parentArray here to avoid duplicates.
+    if let Some(parent_array) = frame.parent_array.as_ref() {
         crate::lua_api::globals::create_frame::append_parent_array_entry(
             state,
             parent_id,
-            &parent_array,
+            parent_array,
             child_id,
         );
     }

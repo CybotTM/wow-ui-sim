@@ -27,6 +27,12 @@ pub(super) fn register_player_info_surface(state: &mut LuaState) -> LuaResult<()
     table_set_rust_fn_static(
         state,
         ns,
+        "CanPlayerUseMountEquipment",
+        can_player_use_mount_equipment,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
         "GetContentDifficultyCreatureForPlayer",
         get_content_difficulty_creature,
     )?;
@@ -35,6 +41,24 @@ pub(super) fn register_player_info_surface(state: &mut LuaState) -> LuaResult<()
         ns,
         "GetPlayerMythicPlusRatingSummary",
         get_player_mythic_plus_rating_summary,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsTradingPostAvailable",
+        is_trading_post_available,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsTravelersLogAvailable",
+        is_travelers_log_available,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsTutorialsTabAvailable",
+        is_tutorials_tab_available,
     )?;
     table_set_rust_fn_static(
         state,
@@ -61,6 +85,12 @@ fn get_content_difficulty_creature(state: &mut LuaState) -> LuaResult<u32> {
     // Ignores unitToken — returns equal difficulty for the simulated player.
     let _ = state;
     state.push(Val::Num(RELATIVE_CONTENT_DIFFICULTY_EQUAL));
+    Ok(1)
+}
+
+fn can_player_use_mount_equipment(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
@@ -140,6 +170,24 @@ fn is_player_eligible_for_npe(state: &mut LuaState) -> LuaResult<u32> {
 fn is_player_npe_restricted(state: &mut LuaState) -> LuaResult<u32> {
     let restricted = borrow_state(state)?.player.is_npe_restricted;
     state.push(Val::Bool(restricted));
+    Ok(1)
+}
+
+fn is_trading_post_available(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn is_tutorials_tab_available(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn is_travelers_log_available(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

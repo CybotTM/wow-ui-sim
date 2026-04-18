@@ -88,7 +88,14 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
 
 pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
-    register_namespace_methods(state, table_ref, TRADE_SKILL_METHODS)
+    register_namespace_methods(state, table_ref, TRADE_SKILL_METHODS)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetProfessions",
+        c_trade_skill_ui_get_professions,
+    )?;
+    Ok(())
 }
 
 fn c_trade_skill_ui_get_all_profession_trade_skill_lines(state: &mut LuaState) -> LuaResult<u32> {

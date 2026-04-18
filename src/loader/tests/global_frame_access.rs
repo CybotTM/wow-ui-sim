@@ -205,6 +205,41 @@ fn test_button_frame_template_inset_parent_key_points_to_child() {
         INSET_NAME = inset and inset.GetName and inset:GetName() or "nil"
     "#,
     );
+    let chain = crate::xml::get_template_chain("ButtonFrameTemplate");
+    let last = chain
+        .last()
+        .expect("ButtonFrameTemplate should resolve to a non-empty template chain after env init");
+    assert_eq!(
+        last.name, "ButtonFrameTemplate",
+        "ButtonFrameTemplate chain should keep the derived template as the final entry",
+    );
+    assert!(
+        last.frame
+            .all_frame_elements()
+            .iter()
+            .any(|(frame, tag)| *tag == "Frame" && frame.parent_key.as_deref() == Some("Inset")),
+        "ButtonFrameTemplate template entry should contain the derived Inset child frame",
+    );
+    {
+        let state = t.env.state().borrow();
+        let frame_id = state
+            .widgets
+            .get_id_by_name("ButtonFrameInsetAccess")
+            .expect("parent button frame should exist in the registry");
+        let inset_id = state
+            .widgets
+            .get_id_by_name("ButtonFrameInsetAccessInset")
+            .expect("template inset child should be created in the registry");
+        let frame = state
+            .widgets
+            .get(frame_id)
+            .expect("parent button frame should resolve by id");
+        assert_eq!(
+            frame.children_keys.get("Inset").copied(),
+            Some(inset_id),
+            "template inset child should be registered in the parent's children_keys map",
+        );
+    }
     t.assert_lua_true(
         "return HAS_INSET",
         "ButtonFrameTemplate should expose its Inset child through parentKey lookup",
@@ -217,7 +252,33 @@ fn test_button_frame_template_inset_parent_key_points_to_child() {
         "return INSET_PARENT_IS_FRAME",
         "ButtonFrameTemplate inset child should be parented to the frame",
     );
-    t.assert_eq_lua("return INSET_NAME", "ButtonFrameInsetAccessInset");
+    t.assert_lua_str("return INSET_NAME", "ButtonFrameInsetAccessInset");
+}
+
+#[test]
+fn test_xml_button_frame_template_inset_parent_key_points_to_child() {
+    let t = load_test_xml(
+        "test-g-xml-button-frame-inset",
+        r#"<Ui>
+            <Frame name="XMLButtonFrameInsetAccess" parent="UIParent" inherits="ButtonFrameTemplate"/>
+        </Ui>"#,
+    );
+    t.assert_lua_true(
+        "return XMLButtonFrameInsetAccess.Inset ~= nil",
+        "XML ButtonFrameTemplate instance should expose its Inset child through parentKey lookup",
+    );
+    t.assert_lua_true(
+        "return XMLButtonFrameInsetAccess.Inset ~= XMLButtonFrameInsetAccess",
+        "XML ButtonFrameTemplate.Inset must not resolve to the parent frame itself",
+    );
+    t.assert_lua_true(
+        "return XMLButtonFrameInsetAccess.Inset:GetParent() == XMLButtonFrameInsetAccess",
+        "XML ButtonFrameTemplate inset child should be parented to the frame",
+    );
+    t.assert_lua_str(
+        "return XMLButtonFrameInsetAccess.Inset:GetName()",
+        "XMLButtonFrameInsetAccessInset",
+    );
 }
 
 #[test]

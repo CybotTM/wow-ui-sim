@@ -116,8 +116,6 @@ fn parent_array_contains_child(
 ) -> Result<bool, crate::Error> {
     let parent =
         frame_ref(state, parent_id).map_err(|error| crate::Error::Other(error.to_string()))?;
-    let child =
-        frame_ref(state, child_id).map_err(|error| crate::Error::Other(error.to_string()))?;
     let Val::Table(array_ref) = table_get(state, parent, key) else {
         return Ok(false);
     };
@@ -125,7 +123,11 @@ fn parent_array_contains_child(
         .gc
         .tables
         .get(array_ref)
-        .map(|table| table.array_slice().contains(&child))
+        .map(|table| {
+            table.array_slice().iter().copied().any(|entry| {
+                crate::lua_api::methods::extract_frame_id(state, entry) == Some(child_id)
+            })
+        })
         .unwrap_or(false))
 }
 

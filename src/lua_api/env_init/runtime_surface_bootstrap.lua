@@ -163,6 +163,12 @@ if GetCategoryList == nil then
   end
 end
 
+if GetAverageItemLevel == nil then
+  function GetAverageItemLevel()
+    return 0, 0, 0
+  end
+end
+
 if UI_SPECIAL_FRAMES == nil then
   UI_SPECIAL_FRAMES = {}
 end
@@ -1133,6 +1139,33 @@ C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
   RequestToJoin = __wow_noop,
   SignalToastDisplayed = __wow_noop,
 })
+
+C_EventScheduler = __wow_merge_namespace(C_EventScheduler, {})
+
+if type(rawget(C_EventScheduler, "_state")) ~= "table" then
+  C_EventScheduler._state = {
+    canShowEvents = nil,
+    suppressDisplay = false,
+    ongoingEvents = {},
+    scheduledEvents = {},
+  }
+end
+
+if rawget(C_EventScheduler, "CanShowEvents") == nil then
+  function C_EventScheduler.CanShowEvents()
+    local state = C_EventScheduler._state
+    if type(state) ~= "table" then
+      return false
+    end
+    if state.canShowEvents ~= nil then
+      return state.canShowEvents == true
+    end
+    if state.suppressDisplay == true then
+      return false
+    end
+    return #(state.ongoingEvents or {}) > 0 or #(state.scheduledEvents or {}) > 0
+  end
+end
 
 C_UnitAuras = __wow_merge_namespace(C_UnitAuras, {
   SetPrivateWarningTextAnchor = __wow_noop,
@@ -2556,6 +2589,18 @@ if EJ_GetInstanceInfo == nil then
   end
 end
 
+if EJ_GetLootFilter == nil then
+  function EJ_GetLootFilter()
+    return 0, 0
+  end
+end
+
+if EJ_GetNumLoot == nil then
+  function EJ_GetNumLoot()
+    return 0
+  end
+end
+
 if GetClientDisplayExpansionLevel == nil then
   function GetClientDisplayExpansionLevel()
     return 10
@@ -3729,6 +3774,9 @@ if type(DropdownButtonMixin) ~= "table" then
     end
     return nil
   end
+  function DropdownButtonMixin:EnableRegenerateOnResponse()
+    self.shouldRegenerateOnResponse = true
+  end
   function DropdownButtonMixin:CollectSelectionData() return nil, nil, {} end
   function DropdownButtonMixin:GetSelectionData() return nil, nil, {} end
   function DropdownButtonMixin:HasStickyFocus() return false end
@@ -4119,12 +4167,31 @@ C_TransmogCollection = __wow_merge_namespace(C_TransmogCollection, {
 
 C_MountJournal = __wow_merge_namespace(C_MountJournal, {
   IsUsingDefaultFilters = function() return true end,
+  ClearRecentFanfares = function() end,
   GetDynamicFlightModeSpellID = function() return 0 end,
+  GetMountEquipmentUnlockLevel = function() return 0 end,
+  IsDragonridingUnlocked = function() return false end,
 })
 
 C_PetJournal = __wow_merge_namespace(C_PetJournal, {
   IsUsingDefaultFilters = function() return true end,
+  ClearRecentFanfares = function() end,
   GetSummonBattlePetCooldown = function() return 0, 0, false end,
+  PetNeedsFanfare = function() return false end,
+})
+
+C_Calendar = __wow_merge_namespace(C_Calendar, {
+  GetDefaultGuildFilter = function()
+    return {
+      minLevel = 1,
+      maxLevel = GetMaxLevelForLatestExpansion(),
+      rank = 1,
+    }
+  end,
+})
+
+C_EncounterJournal = __wow_merge_namespace(C_EncounterJournal, {
+  OnOpen = function() end,
 })
 
 C_SpecializationInfo = __wow_merge_namespace(C_SpecializationInfo, {
@@ -4331,6 +4398,12 @@ local function __wow_register_core_frame_methods()
   if methods.SetSelectionText == nil then
     function methods:SetSelectionText(selectionFunc)
       self.selectionFunc = selectionFunc
+    end
+  end
+
+  if methods.EnableRegenerateOnResponse == nil then
+    function methods:EnableRegenerateOnResponse()
+      self.shouldRegenerateOnResponse = true
     end
   end
 

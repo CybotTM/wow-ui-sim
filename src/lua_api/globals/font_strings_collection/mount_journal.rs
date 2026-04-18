@@ -148,10 +148,22 @@ fn register_mount_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
         use crate::lua_api::methods::create_table;
         create_table(state).into_stack(state)
     })?
+    .set_function("AreMountEquipmentEffectsSuppressed", |state| {
+        false.into_stack(state)
+    })?
+    .set_function("GetAppliedMountEquipmentID", |_state| Ok(0))?
+    .set_function("ClearRecentFanfares", |_state| Ok(0))?
+    .set_function("GetDynamicFlightModeSpellID", |state| {
+        (0i32).into_stack(state)
+    })?
+    .set_function("GetMountEquipmentUnlockLevel", |state| {
+        (0i32).into_stack(state)
+    })?
     .set_function("GetNumMountsNeedingFanfare", |state| {
         (0i32).into_stack(state)
     })?
     .set_function("GetCollectedFilterSetting", |state| true.into_stack(state))?
+    .set_function("IsDragonridingUnlocked", |state| false.into_stack(state))?
     .set_function("SetCollectedFilterSetting", |_state| Ok(0))?
     .set_function("GetIsFavorite", |state| (false, false).into_stack(state))?
     .set_function("SetIsFavorite", |_state| Ok(0))?

@@ -261,6 +261,7 @@ pub(super) fn register_encounter_journal_surface(state: &mut LuaState) -> LuaRes
     let table_ref = ensure_namespace(state, "C_EncounterJournal")?;
     table_set_rust_fn_static(state, table_ref, "GetEncounterInfo", get_encounter_info)?;
     table_set_rust_fn_static(state, table_ref, "GetInstanceInfo", get_instance_info)?;
+    table_set_rust_fn_static(state, table_ref, "OnOpen", noop)?;
     Ok(())
 }
 
@@ -308,4 +309,8 @@ fn get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(row.link_raid_id as f64));
     state.push(Val::Num(row.link_dungeon_id as f64));
     Ok(9)
+}
+
+fn noop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }

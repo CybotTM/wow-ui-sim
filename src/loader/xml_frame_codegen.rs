@@ -117,14 +117,12 @@ fn append_parent_key_code(
 fn append_parent_array_code(
     lua_code: &mut String,
     frame: &crate::xml::FrameXml,
-    inherits: &str,
+    _inherits: &str,
     parent: &str,
 ) {
-    if let Some(parent_array) =
-        resolve_inherited_string(frame, inherits, |f| f.parent_array.as_ref())
-    {
+    if let Some(parent_array) = frame.parent_array.as_ref() {
         let parent_ref = lua_global_ref(parent);
-        let array_ref = lua_table_field_ref(&parent_ref, &parent_array);
+        let array_ref = lua_table_field_ref(&parent_ref, parent_array);
         lua_code.push_str(&format!(
             "\n        {array_ref} = {array_ref} or {{}}\n        \
              table.insert({array_ref}, frame)\n        ",
