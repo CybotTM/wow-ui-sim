@@ -933,6 +933,37 @@ fn build_global_method_then_assign_handler(
     build_chained_handler(state, method, assign, "inline-global-method-assign", false)
 }
 
+const TEMPLATE_CONDITIONAL_TOOLTIP: &str = r#"
+    local target_ref, _ignored_method_name, field, anchor, red_path, green_path, blue_path = ...
+    local function resolve_global(path)
+        local value = _G
+        for segment in string.gmatch(path, "[^%.]+") do
+            value = value and value[segment]
+        end
+        return value
+    end
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            target = resolve_global(target)
+        end
+        if not target then
+            return
+        end
+        local text = self[field]
+        if not text then
+            return
+        end
+        target:SetOwner(self, anchor)
+        return target:SetText(
+            text,
+            resolve_global(red_path),
+            resolve_global(green_path),
+            resolve_global(blue_path)
+        )
+    end
+"#;
+
 fn build_conditional_tooltip_handler(
     state: &mut LuaState,
     target_path: &str,
@@ -951,36 +982,7 @@ fn build_conditional_tooltip_handler(
         state,
         target_path,
         "SetText",
-        r#"
-            local target_ref, _ignored_method_name, field, anchor, red_path, green_path, blue_path = ...
-            local function resolve_global(path)
-                local value = _G
-                for segment in string.gmatch(path, "[^%.]+") do
-                    value = value and value[segment]
-                end
-                return value
-            end
-            return function(self, ...)
-                local target = target_ref
-                if type(target) == "string" then
-                    target = resolve_global(target)
-                end
-                if not target then
-                    return
-                end
-                local text = self[field]
-                if not text then
-                    return
-                end
-                target:SetOwner(self, anchor)
-                return target:SetText(
-                    text,
-                    resolve_global(red_path),
-                    resolve_global(green_path),
-                    resolve_global(blue_path)
-                )
-            end
-        "#,
+        TEMPLATE_CONDITIONAL_TOOLTIP,
         "template-conditional-tooltip-handler",
         &[field, anchor, red_path, green_path, blue_path],
     )
