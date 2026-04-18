@@ -350,80 +350,21 @@ impl CommandDispatch {
 
 fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error::Error>> {
     match dispatch.command {
-        Some(Commands::DumpTree {
-            filter,
-            filter_key,
-            visible_only,
-            verbose,
-            width,
-            height,
-        }) => {
-            run_dump_tree(
-                &dispatch.env,
-                filter,
-                filter_key,
-                visible_only,
-                verbose,
-                width,
-                height,
-                dispatch.delay,
-                dispatch.exec_lua.as_deref(),
-                dispatch.exec_lua_secure,
-            );
-        }
+        Some(Commands::DumpTree { .. }) => dispatch_dump_tree(dispatch),
         #[cfg(feature = "gui")]
-        Some(Commands::Screenshot {
-            output,
-            width,
-            height,
-            filter,
-            crop,
-            dump_tree,
-        }) => {
-            gui_commands::run_screenshot(
-                &dispatch.env,
-                &dispatch.font_system,
-                output,
-                width,
-                height,
-                filter,
-                crop,
-                dispatch.delay,
-                dispatch.exec_lua.as_deref(),
-                dispatch.exec_lua_secure,
-                dump_tree,
-            );
-        }
-        Some(Commands::LuaErrors) => {
-            run_lua_errors(&dispatch);
-        }
+        Some(Commands::Screenshot { .. }) => dispatch_screenshot(dispatch),
+        Some(Commands::LuaErrors) => run_lua_errors(&dispatch),
         Some(Commands::SelfTest {
             max_ticks,
             ref categories,
-        }) => {
-            run_self_test(&dispatch, max_ticks, categories.as_deref());
-        }
+        }) => run_self_test(&dispatch, max_ticks, categories.as_deref()),
         Some(Commands::RunTests { ref addon_name }) => {
             run_addon_tests(&dispatch, addon_name);
         }
         #[cfg(feature = "gui")]
-        Some(Commands::DumpTexture {
-            output,
-            filter,
-            frame_filter,
-        }) => {
-            gui_commands::run_dump_texture(
-                &dispatch.env,
-                &dispatch.font_system,
-                output,
-                filter,
-                frame_filter,
-            );
-        }
+        Some(Commands::DumpTexture { .. }) => dispatch_dump_texture(dispatch),
         #[cfg(feature = "gui")]
-        None => {
-            gui_commands::run_gui(dispatch)?;
-        }
+        None => return gui_commands::run_gui(dispatch),
         #[cfg(not(feature = "gui"))]
         None => {
             eprintln!("GUI not available (compiled without 'gui' feature).");
@@ -431,6 +372,79 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
         }
     }
     Ok(())
+}
+
+fn dispatch_dump_tree(dispatch: CommandDispatch) {
+    let Some(Commands::DumpTree {
+        filter,
+        filter_key,
+        visible_only,
+        verbose,
+        width,
+        height,
+    }) = dispatch.command
+    else {
+        unreachable!("dispatch_dump_tree only fires for Commands::DumpTree");
+    };
+    run_dump_tree(
+        &dispatch.env,
+        filter,
+        filter_key,
+        visible_only,
+        verbose,
+        width,
+        height,
+        dispatch.delay,
+        dispatch.exec_lua.as_deref(),
+        dispatch.exec_lua_secure,
+    );
+}
+
+#[cfg(feature = "gui")]
+fn dispatch_screenshot(dispatch: CommandDispatch) {
+    let Some(Commands::Screenshot {
+        output,
+        width,
+        height,
+        filter,
+        crop,
+        dump_tree,
+    }) = dispatch.command
+    else {
+        unreachable!("dispatch_screenshot only fires for Commands::Screenshot");
+    };
+    gui_commands::run_screenshot(
+        &dispatch.env,
+        &dispatch.font_system,
+        output,
+        width,
+        height,
+        filter,
+        crop,
+        dispatch.delay,
+        dispatch.exec_lua.as_deref(),
+        dispatch.exec_lua_secure,
+        dump_tree,
+    );
+}
+
+#[cfg(feature = "gui")]
+fn dispatch_dump_texture(dispatch: CommandDispatch) {
+    let Some(Commands::DumpTexture {
+        output,
+        filter,
+        frame_filter,
+    }) = dispatch.command
+    else {
+        unreachable!("dispatch_dump_texture only fires for Commands::DumpTexture");
+    };
+    gui_commands::run_dump_texture(
+        &dispatch.env,
+        &dispatch.font_system,
+        output,
+        filter,
+        frame_filter,
+    );
 }
 
 fn run_lua_errors(dispatch: &CommandDispatch) {
