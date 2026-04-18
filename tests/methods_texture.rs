@@ -66,6 +66,36 @@ fn test_get_texture_default_nil() {
     assert!(is_nil, "Texture path should be nil by default");
 }
 
+#[test]
+fn test_set_texture_file_data_id_resolves_path_and_round_trips() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "TexFileId");
+    env.exec(&format!(r#"{tex}:SetTexture(136243)"#)).unwrap();
+
+    let texture_value: i64 = env.eval(&format!("return {tex}:GetTexture()")).unwrap();
+    assert_eq!(texture_value, 136243);
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name(&tex).unwrap();
+    let widget = state.widgets.get(id).unwrap();
+    let expected_path = format!(
+        "Interface\\{}",
+        wow_ui_sim::manifest_interface_data::get_texture_path(136243)
+            .expect("test fileDataID should exist in the texture manifest")
+            .replace('/', "\\")
+    );
+    assert_eq!(
+        widget.texture_file_data_id,
+        Some(136243),
+        "numeric SetTexture should preserve the fileDataID for GetTexture() round-trips"
+    );
+    assert_eq!(
+        widget.texture.as_deref(),
+        Some(expected_path.as_str()),
+        "numeric SetTexture should also resolve and store the texture path immediately"
+    );
+}
+
 // ============================================================================
 // SetVertexColor / GetVertexColor
 // ============================================================================

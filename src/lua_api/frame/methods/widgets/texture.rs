@@ -110,26 +110,51 @@ pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
     let texture_val = stack_val(state, 2);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        match texture_val {
-            Val::Str(_) => {
-                frame.texture = val_to_string(state, texture_val);
-                frame.texture_file_data_id = None;
-            }
-            Val::Num(value) => {
-                frame.texture = None;
-                frame.texture_file_data_id = Some(value as i64);
-            }
-            Val::Nil => {
-                frame.texture = None;
-                frame.texture_file_data_id = None;
-            }
-            _ => return Ok(0),
-        }
+        let Some((path, file_data_id)) = resolve_texture_value(state, texture_val) else {
+            return Ok(0);
+        };
+        frame.texture = path;
+        frame.texture_file_data_id = file_data_id;
         frame.color_texture = None;
         frame.atlas = None;
         frame.atlas_tex_coords = None;
     }
     Ok(0)
+}
+
+fn resolve_texture_value(state: &LuaState, value: Val) -> Option<(Option<String>, Option<i64>)> {
+    match value {
+        Val::Str(_) => Some(resolve_texture_string(state, value)),
+        Val::Num(number) if number == 0.0 => Some((None, None)),
+        Val::Num(number) => {
+            let file_data_id = number as u32;
+            Some((
+                Some(resolve_file_data_id_path(file_data_id)),
+                Some(file_data_id as i64),
+            ))
+        }
+        Val::Nil => Some((None, None)),
+        _ => None,
+    }
+}
+
+fn resolve_texture_string(state: &LuaState, value: Val) -> (Option<String>, Option<i64>) {
+    let Some(raw) = val_to_string(state, value) else {
+        return (None, None);
+    };
+    let Ok(file_data_id) = raw.parse::<u32>() else {
+        return (Some(raw), None);
+    };
+    (
+        Some(resolve_file_data_id_path(file_data_id)),
+        Some(file_data_id as i64),
+    )
+}
+
+fn resolve_file_data_id_path(file_data_id: u32) -> String {
+    crate::manifest_interface_data::get_texture_path(file_data_id)
+        .map(|path| format!("Interface\\{}", path.replace('/', "\\")))
+        .unwrap_or_else(|| file_data_id.to_string())
 }
 
 pub(super) fn get_texture(state: &mut LuaState) -> LuaResult<u32> {
