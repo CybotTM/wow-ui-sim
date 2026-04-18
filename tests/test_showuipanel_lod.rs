@@ -254,120 +254,177 @@ fn recorded_lua_errors(env: &WowLuaEnv) -> Vec<String> {
 }
 
 fn player_spells_panel_debug_snapshot(env: &WowLuaEnv) -> String {
-    env.eval(
-        r#"
-        if not PlayerSpellsFrame then
-            return "player_spells_frame=nil"
-        end
-
-        local panelSettings = UIPanelWindows and UIPanelWindows[PlayerSpellsFrame:GetName()]
-        local storedAutoMinimize = panelSettings and panelSettings.autoMinimizeOnCondition
-        local storedSetMinimized = panelSettings and panelSettings.setMinimizedFunc
-        local frameAutoMinimize = PlayerSpellsFrame:GetAttribute("UIPanelLayout-autoMinimizeOnCondition")
-        local frameSetMinimized = PlayerSpellsFrame:GetAttribute("UIPanelLayout-setMinimizedFunc")
-        local onLoadScript = PlayerSpellsFrame:GetScript("OnLoad")
-        local playerGetTabOk, playerGetTabResult = pcall(function()
-            return PlayerSpellsFrame:GetTab()
-        end)
-        local spellbookTrackerType = PlayerSpellsFrame.SpellBookFrame and type(PlayerSpellsFrame.SpellBookFrame.internalTabTracker) or "missing"
-        local spellbookGetTabOk, spellbookGetTabResult = pcall(function()
-            if not PlayerSpellsFrame.SpellBookFrame then
-                return "missing"
-            end
-            return PlayerSpellsFrame.SpellBookFrame:GetTab()
-        end)
-        local playerMinimizedWidth = PlayerSpellsFrame.minimizedWidth
-        local playerMaximizedWidth = PlayerSpellsFrame.maximizedWidth
-        local spellbookMinimizedWidth = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.minimizedWidth or nil
-        local spellbookMaximizedWidth = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.maximizedWidth or nil
-        local specFrameName = PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame:GetName() or "missing"
-        local talentsFrameName = PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame:GetName() or "missing"
-        local spellbookFrameName = PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:GetName() or "missing"
-        local missingOnLoadMethods = {}
-        local function childAliases(parent, child)
-            if not debug or not debug.getfenv then
-                return ""
-            end
-            local env = debug.getfenv(parent)
-            local fields = env and env[1]
-            if type(fields) ~= "table" then
-                return ""
-            end
-            local aliases = {}
-            for key, value in pairs(fields) do
-                if value == child and type(key) == "string" then
-                    table.insert(aliases, key)
-                end
-            end
-            table.sort(aliases)
-            return table.concat(aliases, ",")
-        end
-        local function childSegment(index, child, alias)
-            local childName = child.GetName and child:GetName() or nil
-            if childName then
-                if alias ~= "" then
-                    return childName .. ":" .. alias
-                end
-                return childName
-            end
-            return 'child_' .. tostring(index) .. (alias ~= "" and ':' .. alias or '')
-        end
-        local function appendMissing(frame, path)
-            local frameOnLoadScript = frame.GetScript and frame:GetScript("OnLoad")
-            if frameOnLoadScript and type(frame.OnLoad) ~= "function" then
-                local objectType = frame.GetObjectType and frame:GetObjectType() or "?"
-                table.insert(missingOnLoadMethods, path .. " type=" .. tostring(objectType) .. " OnLoad=" .. tostring(type(frame.OnLoad)))
-            end
-            local children = { frame:GetChildren() }
-            for index, child in ipairs(children) do
-                local alias = childAliases(frame, child)
-                local segment = childSegment(index, child, alias)
-                appendMissing(child, path .. "." .. segment)
-            end
-        end
-        appendMissing(PlayerSpellsFrame, "PlayerSpellsFrame")
-        local autoCallOk, autoCallResult = pcall(function()
-            if type(storedAutoMinimize) ~= "function" then
-                return "skip"
-            end
-            return storedAutoMinimize(PlayerSpellsFrame)
-        end)
-        local setCallOk, setCallResult = pcall(function()
-            if type(storedSetMinimized) ~= "function" then
-                return "skip"
-            end
-            return storedSetMinimized(PlayerSpellsFrame, false)
-        end)
-
-        return table.concat({
-            "PlayerSpellsFrame=" .. tostring(type(PlayerSpellsFrame)),
-            "ShouldAutoMinimize=" .. tostring(type(PlayerSpellsFrame.ShouldAutoMinimize)),
-            "SetMinimized=" .. tostring(type(PlayerSpellsFrame.SetMinimized)),
-            "UIPanelWindows.PlayerSpellsFrame=" .. tostring(type(panelSettings)),
-            "stored.autoMinimizeOnCondition=" .. tostring(type(storedAutoMinimize)),
-            "stored.setMinimizedFunc=" .. tostring(type(storedSetMinimized)),
-            "frame.autoMinimizeOnCondition=" .. tostring(type(frameAutoMinimize)),
-            "frame.setMinimizedFunc=" .. tostring(type(frameSetMinimized)),
-            "PlayerSpellsFrame.OnLoadScript=" .. tostring(type(onLoadScript)),
-            "PlayerSpellsFrame.internalTabTracker=" .. tostring(type(PlayerSpellsFrame.internalTabTracker)),
-            "PlayerSpellsFrame.minimizedWidth=" .. tostring(playerMinimizedWidth),
-            "PlayerSpellsFrame.maximizedWidth=" .. tostring(playerMaximizedWidth),
-            "PlayerSpellsFrame.GetTab()=" .. tostring(playerGetTabOk) .. ":" .. tostring(playerGetTabResult),
-            "SpecFrame.name=" .. tostring(specFrameName),
-            "TalentsFrame.name=" .. tostring(talentsFrameName),
-            "SpellBookFrame.name=" .. tostring(spellbookFrameName),
-            "SpellBookFrame.internalTabTracker=" .. tostring(spellbookTrackerType),
-            "SpellBookFrame.minimizedWidth=" .. tostring(spellbookMinimizedWidth),
-            "SpellBookFrame.maximizedWidth=" .. tostring(spellbookMaximizedWidth),
-            "SpellBookFrame.GetTab()=" .. tostring(spellbookGetTabOk) .. ":" .. tostring(spellbookGetTabResult),
-            "missing.OnLoad.methods=" .. table.concat(missingOnLoadMethods, " | "),
-            "call.autoMinimizeOnCondition=" .. tostring(autoCallOk) .. ":" .. tostring(autoCallResult),
-            "call.setMinimizedFunc=" .. tostring(setCallOk) .. ":" .. tostring(setCallResult),
-        }, "\n")
-        "#,
-    )
-    .unwrap_or_else(|error| format!("snapshot_error={error:?}"))
+    if let Some(missing) = player_spells_frame_missing_marker(env) {
+        return missing;
+    }
+    [
+        player_spells_panel_settings_section(env),
+        player_spells_subframe_names_section(env),
+        player_spells_missing_onload_methods_section(env),
+        player_spells_callback_invocation_section(env),
+    ]
+    .join("\n")
 }
+
+/// `Some("player_spells_frame=nil")` if the frame doesn't exist (matches
+/// the original snapshot's nil-marker line); `None` otherwise so the
+/// caller proceeds with the per-aspect probes.
+fn player_spells_frame_missing_marker(env: &WowLuaEnv) -> Option<String> {
+    let exists: bool = env
+        .eval("return PlayerSpellsFrame ~= nil")
+        .unwrap_or(false);
+    (!exists).then(|| "player_spells_frame=nil".to_string())
+}
+
+/// Probes the `UIPanelWindows[PlayerSpellsFrame]` settings + the matching
+/// frame attributes / scripts / tab tracker / `GetTab()` results — the
+/// data that drives the panel-manager auto-minimize behaviour.
+fn player_spells_panel_settings_section(env: &WowLuaEnv) -> String {
+    eval_snapshot_section(env, PANEL_SETTINGS_SECTION_LUA)
+}
+
+/// Names + minimized/maximized widths of the three child panels —
+/// the data we need to confirm subframe wiring loaded correctly.
+fn player_spells_subframe_names_section(env: &WowLuaEnv) -> String {
+    eval_snapshot_section(env, SUBFRAME_NAMES_SECTION_LUA)
+}
+
+/// Walks `PlayerSpellsFrame`'s subtree and lists every frame that has
+/// an `OnLoad` script registered but no `OnLoad` method on the frame
+/// table. Surfaces template-binding gaps that only manifest at script
+/// dispatch time.
+fn player_spells_missing_onload_methods_section(env: &WowLuaEnv) -> String {
+    eval_snapshot_section(env, MISSING_ONLOAD_METHODS_SECTION_LUA)
+}
+
+/// Invokes the stored `autoMinimizeOnCondition` and `setMinimizedFunc`
+/// callbacks under `pcall` and reports the (ok, result) pairs — useful
+/// when the panel is registered but the callbacks themselves are the
+/// thing crashing.
+fn player_spells_callback_invocation_section(env: &WowLuaEnv) -> String {
+    eval_snapshot_section(env, CALLBACK_INVOCATION_SECTION_LUA)
+}
+
+fn eval_snapshot_section(env: &WowLuaEnv, lua: &str) -> String {
+    env.eval(lua)
+        .unwrap_or_else(|error| format!("snapshot_error={error:?}"))
+}
+
+const PANEL_SETTINGS_SECTION_LUA: &str = r#"
+    local panelSettings = UIPanelWindows and UIPanelWindows[PlayerSpellsFrame:GetName()]
+    local storedAutoMinimize = panelSettings and panelSettings.autoMinimizeOnCondition
+    local storedSetMinimized = panelSettings and panelSettings.setMinimizedFunc
+    local frameAutoMinimize = PlayerSpellsFrame:GetAttribute("UIPanelLayout-autoMinimizeOnCondition")
+    local frameSetMinimized = PlayerSpellsFrame:GetAttribute("UIPanelLayout-setMinimizedFunc")
+    local onLoadScript = PlayerSpellsFrame:GetScript("OnLoad")
+    local playerGetTabOk, playerGetTabResult = pcall(function()
+        return PlayerSpellsFrame:GetTab()
+    end)
+    return table.concat({
+        "PlayerSpellsFrame=" .. tostring(type(PlayerSpellsFrame)),
+        "ShouldAutoMinimize=" .. tostring(type(PlayerSpellsFrame.ShouldAutoMinimize)),
+        "SetMinimized=" .. tostring(type(PlayerSpellsFrame.SetMinimized)),
+        "UIPanelWindows.PlayerSpellsFrame=" .. tostring(type(panelSettings)),
+        "stored.autoMinimizeOnCondition=" .. tostring(type(storedAutoMinimize)),
+        "stored.setMinimizedFunc=" .. tostring(type(storedSetMinimized)),
+        "frame.autoMinimizeOnCondition=" .. tostring(type(frameAutoMinimize)),
+        "frame.setMinimizedFunc=" .. tostring(type(frameSetMinimized)),
+        "PlayerSpellsFrame.OnLoadScript=" .. tostring(type(onLoadScript)),
+        "PlayerSpellsFrame.internalTabTracker=" .. tostring(type(PlayerSpellsFrame.internalTabTracker)),
+        "PlayerSpellsFrame.minimizedWidth=" .. tostring(PlayerSpellsFrame.minimizedWidth),
+        "PlayerSpellsFrame.maximizedWidth=" .. tostring(PlayerSpellsFrame.maximizedWidth),
+        "PlayerSpellsFrame.GetTab()=" .. tostring(playerGetTabOk) .. ":" .. tostring(playerGetTabResult),
+    }, "\n")
+"#;
+
+const SUBFRAME_NAMES_SECTION_LUA: &str = r#"
+    local spellbookFrame = PlayerSpellsFrame.SpellBookFrame
+    local spellbookGetTabOk, spellbookGetTabResult = pcall(function()
+        if not spellbookFrame then
+            return "missing"
+        end
+        return spellbookFrame:GetTab()
+    end)
+    local function frameName(frame) return frame and frame:GetName() or "missing" end
+    return table.concat({
+        "SpecFrame.name=" .. frameName(PlayerSpellsFrame.SpecFrame),
+        "TalentsFrame.name=" .. frameName(PlayerSpellsFrame.TalentsFrame),
+        "SpellBookFrame.name=" .. frameName(spellbookFrame),
+        "SpellBookFrame.internalTabTracker=" .. (spellbookFrame and tostring(type(spellbookFrame.internalTabTracker)) or "missing"),
+        "SpellBookFrame.minimizedWidth=" .. tostring(spellbookFrame and spellbookFrame.minimizedWidth or nil),
+        "SpellBookFrame.maximizedWidth=" .. tostring(spellbookFrame and spellbookFrame.maximizedWidth or nil),
+        "SpellBookFrame.GetTab()=" .. tostring(spellbookGetTabOk) .. ":" .. tostring(spellbookGetTabResult),
+    }, "\n")
+"#;
+
+const MISSING_ONLOAD_METHODS_SECTION_LUA: &str = r#"
+    local missingOnLoadMethods = {}
+    local function childAliases(parent, child)
+        if not debug or not debug.getfenv then
+            return ""
+        end
+        local env = debug.getfenv(parent)
+        local fields = env and env[1]
+        if type(fields) ~= "table" then
+            return ""
+        end
+        local aliases = {}
+        for key, value in pairs(fields) do
+            if value == child and type(key) == "string" then
+                table.insert(aliases, key)
+            end
+        end
+        table.sort(aliases)
+        return table.concat(aliases, ",")
+    end
+    local function childSegment(index, child, alias)
+        local childName = child.GetName and child:GetName() or nil
+        if childName then
+            if alias ~= "" then
+                return childName .. ":" .. alias
+            end
+            return childName
+        end
+        return 'child_' .. tostring(index) .. (alias ~= "" and ':' .. alias or '')
+    end
+    local function appendMissing(frame, path)
+        local frameOnLoadScript = frame.GetScript and frame:GetScript("OnLoad")
+        if frameOnLoadScript and type(frame.OnLoad) ~= "function" then
+            local objectType = frame.GetObjectType and frame:GetObjectType() or "?"
+            table.insert(missingOnLoadMethods, path .. " type=" .. tostring(objectType) .. " OnLoad=" .. tostring(type(frame.OnLoad)))
+        end
+        local children = { frame:GetChildren() }
+        for index, child in ipairs(children) do
+            local alias = childAliases(frame, child)
+            local segment = childSegment(index, child, alias)
+            appendMissing(child, path .. "." .. segment)
+        end
+    end
+    appendMissing(PlayerSpellsFrame, "PlayerSpellsFrame")
+    return "missing.OnLoad.methods=" .. table.concat(missingOnLoadMethods, " | ")
+"#;
+
+const CALLBACK_INVOCATION_SECTION_LUA: &str = r#"
+    local panelSettings = UIPanelWindows and UIPanelWindows[PlayerSpellsFrame:GetName()]
+    local storedAutoMinimize = panelSettings and panelSettings.autoMinimizeOnCondition
+    local storedSetMinimized = panelSettings and panelSettings.setMinimizedFunc
+    local autoCallOk, autoCallResult = pcall(function()
+        if type(storedAutoMinimize) ~= "function" then
+            return "skip"
+        end
+        return storedAutoMinimize(PlayerSpellsFrame)
+    end)
+    local setCallOk, setCallResult = pcall(function()
+        if type(storedSetMinimized) ~= "function" then
+            return "skip"
+        end
+        return storedSetMinimized(PlayerSpellsFrame, false)
+    end)
+    return table.concat({
+        "call.autoMinimizeOnCondition=" .. tostring(autoCallOk) .. ":" .. tostring(autoCallResult),
+        "call.setMinimizedFunc=" .. tostring(setCallOk) .. ":" .. tostring(setCallResult),
+    }, "\n")
+"#;
 
 #[test]
 fn show_macro_frame_loads_and_populates_selector() {
