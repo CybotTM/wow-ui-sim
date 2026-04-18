@@ -357,19 +357,35 @@ fn c_auction_house_get_owned_auction_type(state: &mut LuaState) -> LuaResult<u32
 }
 
 fn c_auction_house_get_max_bid_item_bid(state: &mut LuaState) -> LuaResult<u32> {
-    push_max_price_for(state, |entry| entry.bid_amount, |sim| &sim.auction_bids)
+    push_max_price_for(
+        state,
+        |entry: &BidAuction| entry.bid_amount,
+        |sim| &sim.auction_bids,
+    )
 }
 
 fn c_auction_house_get_max_bid_item_buyout(state: &mut LuaState) -> LuaResult<u32> {
-    push_max_price_for(state, |entry| entry.buyout_amount, |sim| &sim.auction_bids)
+    push_max_price_for(
+        state,
+        |entry: &BidAuction| entry.buyout_amount,
+        |sim| &sim.auction_bids,
+    )
 }
 
 fn c_auction_house_get_max_owned_auction_bid(state: &mut LuaState) -> LuaResult<u32> {
-    push_max_price_for(state, |entry| entry.bid_amount, |sim| &sim.auction_owned)
+    push_max_price_for(
+        state,
+        |entry: &OwnedAuction| entry.bid_amount,
+        |sim| &sim.auction_owned,
+    )
 }
 
 fn c_auction_house_get_max_owned_auction_buyout(state: &mut LuaState) -> LuaResult<u32> {
-    push_max_price_for(state, |entry| entry.buyout_amount, |sim| &sim.auction_owned)
+    push_max_price_for(
+        state,
+        |entry: &OwnedAuction| entry.buyout_amount,
+        |sim| &sim.auction_owned,
+    )
 }
 
 fn push_owned_auction_table(state: &mut LuaState, entry: &OwnedAuction) -> Val {
@@ -478,11 +494,10 @@ fn push_max_price_for<T>(
     amount_for: impl Fn(&T) -> i64,
     rows_for: impl Fn(&crate::lua_api::state::SimState) -> &[T],
 ) -> LuaResult<u32> {
-    let amount = rows_for(&borrow_state(state)?)
-        .iter()
-        .map(amount_for)
-        .max()
-        .unwrap_or(0);
+    let amount = {
+        let sim = borrow_state(state)?;
+        rows_for(&sim).iter().map(amount_for).max().unwrap_or(0)
+    };
     push_max_money_value(state, amount);
     Ok(1)
 }
