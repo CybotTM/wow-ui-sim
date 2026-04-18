@@ -21,6 +21,10 @@ pub struct CVarStorage {
     defaults: HashMap<String, String>,
     /// Original-case names (lowercase key -> original name)
     original_names: HashMap<String, String>,
+    /// Runtime-registered defaults (lowercase key -> value).
+    registered_defaults: RwLock<HashMap<String, String>>,
+    /// Original-case names for runtime-registered CVars.
+    registered_original_names: RwLock<HashMap<String, String>>,
     /// Runtime overrides (lowercase key -> value), persisted to disk.
     overrides: RwLock<HashMap<String, String>>,
     /// Path to persist overrides.
@@ -36,6 +40,8 @@ impl CVarStorage {
         Self {
             defaults,
             original_names,
+            registered_defaults: RwLock::new(HashMap::new()),
+            registered_original_names: RwLock::new(HashMap::new()),
             overrides: RwLock::new(overrides),
             storage_path: path,
         }
@@ -49,6 +55,8 @@ impl CVarStorage {
         Self {
             defaults,
             original_names,
+            registered_defaults: RwLock::new(HashMap::new()),
+            registered_original_names: RwLock::new(HashMap::new()),
             overrides: RwLock::new(overrides),
             storage_path: path,
         }
@@ -62,12 +70,19 @@ impl CVarStorage {
             return Some(value.clone());
         }
         // Fall back to defaults
-        self.defaults.get(&key).cloned()
+        self.defaults
+            .get(&key)
+            .cloned()
+            .or_else(|| self.registered_defaults.read().unwrap().get(&key).cloned())
     }
 
     /// Get the default value for a CVar.
     pub fn get_default(&self, name: &str) -> Option<String> {
-        self.defaults.get(&name.to_lowercase()).cloned()
+        let key = name.to_lowercase();
+        self.defaults
+            .get(&key)
+            .cloned()
+            .or_else(|| self.registered_defaults.read().unwrap().get(&key).cloned())
     }
 
     /// Get a CVar as a boolean ("1" = true, anything else = false).
@@ -89,12 +104,27 @@ impl CVarStorage {
     /// Get all known CVar names in original case (defaults + overrides).
     pub fn all_keys(&self) -> Vec<String> {
         let mut keys: std::collections::HashSet<String> = self.defaults.keys().cloned().collect();
+        for key in self.registered_defaults.read().unwrap().keys() {
+            keys.insert(key.clone());
+        }
         for key in self.overrides.read().unwrap().keys() {
             keys.insert(key.clone());
         }
         let mut sorted: Vec<String> = keys
             .into_iter()
-            .map(|k| self.original_names.get(&k).cloned().unwrap_or(k))
+            .map(|k| {
+                self.original_names
+                    .get(&k)
+                    .cloned()
+                    .or_else(|| {
+                        self.registered_original_names
+                            .read()
+                            .unwrap()
+                            .get(&k)
+                            .cloned()
+                    })
+                    .unwrap_or(k)
+            })
             .collect();
         sorted.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
         sorted
@@ -102,16 +132,23 @@ impl CVarStorage {
 
     /// Register a new CVar with a default value.
     pub fn register(&self, name: &str, default: Option<&str>) {
-        if let Some(value) = default {
-            let key = name.to_lowercase();
-            // Only set if not already in defaults
-            if !self.defaults.contains_key(&key) {
-                self.overrides
-                    .write()
-                    .unwrap()
-                    .insert(key, value.to_string());
-            }
+        let key = name.to_lowercase();
+        if self.defaults.contains_key(&key) {
+            return;
         }
+
+        self.registered_original_names
+            .write()
+            .unwrap()
+            .entry(key.clone())
+            .or_insert_with(|| name.to_string());
+
+        let value = default.unwrap_or("0");
+        self.registered_defaults
+            .write()
+            .unwrap()
+            .entry(key)
+            .or_insert_with(|| value.to_string());
     }
 
     /// Persist current overrides to disk.
@@ -298,5 +335,15 @@ mod tests {
         // Corrupt file — should fall back to defaults
         let storage = CVarStorage::with_path(path);
         assert_eq!(storage.get("checkaddonversion"), Some("1".to_string()));
+    }
+
+    #[test]
+    fn test_register_exposes_runtime_default_without_override() {
+        let storage = CVarStorage::new();
+        storage.register("PraiseTheSun", Some("1"));
+
+        assert_eq!(storage.get("PraiseTheSun"), Some("1".to_string()));
+        assert_eq!(storage.get_default("PraiseTheSun"), Some("1".to_string()));
+        assert!(storage.all_keys().iter().any(|key| key == "PraiseTheSun"));
     }
 }

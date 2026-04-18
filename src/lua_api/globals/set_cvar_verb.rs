@@ -17,6 +17,11 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
 
+const CVAR_BITS_PER_BYTE: usize = 6;
+const CVAR_DATA_MASK: u8 = 0x3F;
+const CVAR_DATA_TAG: u8 = 0x40;
+const DEFAULT_CVAR_BITFIELD_VERSION: u8 = b'0';
+
 fn required_string(state: &mut LuaState, index: i32) -> Option<String> {
     Option::<String>::from_stack(state, index)
         .ok()
@@ -57,6 +62,20 @@ fn set_cvar(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `RegisterCVar(name, value)` — create a readable runtime CVar default
+/// without forcing an override. Retail startup paths use this to make a
+/// previously unknown CVar visible to later `GetCVar*` reads.
+fn register_cvar(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(name) = required_string(state, 1) else {
+        return Ok(0);
+    };
+    let default = Option::<String>::from_stack(state, 2)?.filter(|value| !value.is_empty());
+    borrow_state(state)?
+        .cvars
+        .register(&name, default.as_deref());
+    Ok(0)
+}
+
 /// `GetCVar(name)` — read `SimState.cvars[name]` (override → default).
 /// Returns nil for unknown names, matching retail's behaviour for
 /// CVars that haven't been registered.
@@ -93,6 +112,95 @@ fn get_cvar_bool(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetCVarBitfield(name, index)` — decode the printable 6-bit packed CVar
+/// format that Blizzard's `CVarCallbackRegistry` expects.
+fn get_cvar_bitfield(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(name) = required_string(state, 1) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let Some(index) = cvar_bit_index(state, 2) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let value = borrow_state(state)?.cvars.get(&name);
+    let enabled = value
+        .as_deref()
+        .map(|packed| packed_cvar_bit_is_set(packed, index))
+        .unwrap_or(false);
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+/// `SetCVarBitfield(name, index, enabled)` — mutate the same printable
+/// 6-bit packed format that Blizzard's Lua-side helpers parse.
+fn set_cvar_bitfield(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(name) = required_string(state, 1) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let Some(index) = cvar_bit_index(state, 2) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let enabled = Option::<bool>::from_stack(state, 3)?.unwrap_or(false);
+    let current = borrow_state(state)?.cvars.get(&name).unwrap_or_default();
+    let updated = set_packed_cvar_bit(&current, index, enabled);
+    let accepted = borrow_state_mut(state)?.cvars.set(&name, &updated);
+    state.push(Val::Bool(accepted));
+    Ok(1)
+}
+
+/// `ResetTestCvars()` — retail test harness hook. No-op for the simulator.
+fn reset_test_cvars(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn cvar_bit_index(state: &mut LuaState, index: i32) -> Option<usize> {
+    let raw = Option::<f64>::from_stack(state, index).ok().flatten()?;
+    let rounded = raw.trunc() as i64;
+    (rounded > 0).then_some((rounded - 1) as usize)
+}
+
+fn packed_cvar_bit_is_set(packed: &str, index: usize) -> bool {
+    let bytes = packed.as_bytes();
+    let byte_index = 1 + (index / CVAR_BITS_PER_BYTE);
+    let Some(encoded) = bytes.get(byte_index).copied() else {
+        return false;
+    };
+    let bit_index = index % CVAR_BITS_PER_BYTE;
+    let data = encoded & CVAR_DATA_MASK;
+    (data & (1 << bit_index)) != 0
+}
+
+fn set_packed_cvar_bit(current: &str, index: usize, enabled: bool) -> String {
+    let target_data_index = index / CVAR_BITS_PER_BYTE;
+    let mut bytes = current.as_bytes().to_vec();
+    if bytes.is_empty() {
+        bytes.push(DEFAULT_CVAR_BITFIELD_VERSION);
+    }
+    while bytes.len() <= target_data_index + 1 {
+        bytes.push(CVAR_DATA_TAG);
+    }
+
+    let bit_index = index % CVAR_BITS_PER_BYTE;
+    let slot = &mut bytes[target_data_index + 1];
+    let mut data = *slot & CVAR_DATA_MASK;
+    if enabled {
+        data |= 1 << bit_index;
+    } else {
+        data &= !(1 << bit_index);
+    }
+    *slot = CVAR_DATA_TAG | data;
+
+    while bytes.len() > 1 && bytes.last() == Some(&CVAR_DATA_TAG) {
+        bytes.pop();
+    }
+
+    String::from_utf8(bytes).expect("packed CVar bitfield should stay ASCII/UTF-8")
+}
+
 fn push_optional_string(state: &mut LuaState, value: Option<String>) {
     match value {
         Some(value) => {
@@ -108,11 +216,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetCVar", get_cvar)?;
     LuaApiMut::register_function(lua, "GetCVarDefault", get_cvar_default)?;
     LuaApiMut::register_function(lua, "GetCVarBool", get_cvar_bool)?;
+    LuaApiMut::register_function(lua, "RegisterCVar", register_cvar)?;
+    LuaApiMut::register_function(lua, "GetCVarBitfield", get_cvar_bitfield)?;
+    LuaApiMut::register_function(lua, "SetCVarBitfield", set_cvar_bitfield)?;
+    LuaApiMut::register_function(lua, "ResetTestCvars", reset_test_cvars)?;
     install_c_cvar_namespace(lua)?;
     Ok(())
 }
 
-/// Override the bootstrap-defined `C_CVar.{Set,Get,GetBool,GetDefault}CVar`
+/// Override the bootstrap-defined
+/// `C_CVar.{Set,Get,GetBool,GetDefault,Register,Get/SetBitfield}CVar`
 /// with Rust impls that route through `SimState.cvars`. The bootstrap's
 /// fallbacks read/write a Lua-only `__cvars` table — that table doesn't
 /// know about the YAML defaults (Brightness/Contrast/Gamma/etc.), so
@@ -128,6 +241,25 @@ fn install_c_cvar_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
         table_ref,
         "GetCVarDefault",
         get_cvar_default,
+    )?;
+    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "RegisterCVar", register_cvar)?;
+    crate::lua_bridge::table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetCVarBitfield",
+        get_cvar_bitfield,
+    )?;
+    crate::lua_bridge::table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetCVarBitfield",
+        set_cvar_bitfield,
+    )?;
+    crate::lua_bridge::table_set_rust_fn_static(
+        state,
+        table_ref,
+        "ResetTestCVars",
+        reset_test_cvars,
     )?;
     Ok(())
 }

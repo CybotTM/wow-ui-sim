@@ -56,11 +56,94 @@ fn set_cvar_empty_name_returns_false() {
 #[test]
 fn c_cvar_get_reads_back_the_value_set_via_global() {
     let env = env();
-    // The retail-facing global writes through SimState.cvars. C_CVar.GetCVar
-    // reads from the same bootstrap-Lua-backed store — they are separate
-    // surfaces today (C_CVar is a Lua table populated in runtime_surface_bootstrap.lua).
-    // Pin the current split so regressing it surfaces as a test change.
     env.exec(r#"SetCVar("showTimestamps", "chat")"#).unwrap();
-    let value = env.state().borrow().cvars.get("showTimestamps");
-    assert_eq!(value.as_deref(), Some("chat"));
+    let value: String = env
+        .eval(r#"return C_CVar.GetCVar("showTimestamps")"#)
+        .unwrap();
+    assert_eq!(value, "chat");
+}
+
+#[test]
+fn register_cvar_exposes_runtime_default_through_global_and_namespace() {
+    let env = env();
+    let (global_value, namespace_value, default_value): (String, String, String) = env
+        .eval(
+            r#"
+            RegisterCVar("PraiseTheSun", "1")
+            return GetCVar("PraiseTheSun"),
+                   C_CVar.GetCVar("PraiseTheSun"),
+                   GetCVarDefault("PraiseTheSun")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(global_value, "1");
+    assert_eq!(namespace_value, "1");
+    assert_eq!(default_value, "1");
+}
+
+#[test]
+fn register_cvar_makes_unknown_cvar_visible_with_zero_default() {
+    let env = env();
+    let (value, default, enabled): (String, String, bool) = env
+        .eval(
+            r#"
+            RegisterCVar("PraiseTheSun")
+            return GetCVar("PraiseTheSun"), GetCVarDefault("PraiseTheSun"), GetCVarBool("PraiseTheSun")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(value, "0");
+    assert_eq!(default, "0");
+    assert!(!enabled);
+}
+
+#[test]
+fn c_cvar_register_cvar_sets_default_without_overwriting_existing_value() {
+    let env = env();
+    let (before, after): (String, String) = env
+        .eval(
+            r#"
+            SetCVar("PraiseTheSun", "1")
+            C_CVar.RegisterCVar("PraiseTheSun", "0")
+            return GetCVar("PraiseTheSun"), GetCVarDefault("PraiseTheSun")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(before, "1");
+    assert_eq!(after, "0");
+}
+
+#[test]
+fn legacy_cvar_compat_globals_exist_before_framexml_loads() {
+    let env = env();
+    let (register_cvar, get_bitfield, set_bitfield, reset_test): (String, String, String, String) =
+        env.eval(
+            r#"
+            return type(RegisterCVar),
+                   type(GetCVarBitfield),
+                   type(SetCVarBitfield),
+                   type(ResetTestCvars)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(register_cvar, "function");
+    assert_eq!(get_bitfield, "function");
+    assert_eq!(set_bitfield, "function");
+    assert_eq!(reset_test, "function");
+}
+
+#[test]
+fn clamp_exists_during_bootstrap() {
+    let env = env();
+    let (high, low, mid, saturate): (i32, i32, i32, f64) = env
+        .eval(
+            r#"
+            return Clamp(8, 1, 5), Clamp(-2, 1, 5), Clamp(3, 1, 5), Saturate(1.5)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(high, 5);
+    assert_eq!(low, 1);
+    assert_eq!(mid, 3);
+    assert_eq!(saturate, 1.0);
 }
