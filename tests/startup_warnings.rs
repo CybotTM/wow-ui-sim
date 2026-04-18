@@ -691,7 +691,23 @@ fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
 #[test]
 fn test_blizzard_framexml_loads_role_poll_without_role_icon_warning() {
     test_timeout! {
-        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+        let mut warnings = Vec::new();
+
+        for (name, toc_path) in &addons {
+            let result = load_addon(&env.loader_env(), toc_path)
+                .unwrap_or_else(|error| panic!("{name} should load: {error}"));
+            for warning in result.warnings {
+                warnings.push(format!("[load {name}] {warning}"));
+            }
+            if name == "Blizzard_FrameXML" {
+                break;
+            }
+        }
 
         let role_icon_warnings: Vec<String> = warnings
             .iter()
@@ -761,6 +777,29 @@ fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
         assert_eq!(fade_in, 0.5);
         assert_eq!(hold, 1.0);
         assert_eq!(fade_out, 2.0);
+    }
+}
+
+#[test]
+fn test_blizzard_framexml_loads_without_eventutil_warning() {
+    test_timeout! {
+        let (_env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let eventutil_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("EventUtil")
+                    || warning.contains("MotionSickness.lua:23")
+                    || warning.contains("AlertFrames.lua:281")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            eventutil_warnings.is_empty(),
+            "Blizzard_FrameXML should not warn on EventUtil helpers:\n  {}",
+            eventutil_warnings.join("\n  ")
+        );
     }
 }
 

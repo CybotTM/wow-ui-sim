@@ -147,6 +147,73 @@ fn get_icon_for_role_enum_returns_expected_role_atlases() {
 }
 
 #[test]
+fn event_util_helpers_defer_until_matching_startup_events_fire() {
+    let env = env();
+    env.exec(
+        r#"
+        EventUtilCalls = {
+            variablesLoaded = 0,
+            allEvents = 0,
+            lateVariablesLoaded = 0,
+        }
+
+        EventUtil.ContinueOnVariablesLoaded(function()
+            EventUtilCalls.variablesLoaded = EventUtilCalls.variablesLoaded + 1
+        end)
+
+        EventUtil.ContinueAfterAllEvents(function()
+            EventUtilCalls.allEvents = EventUtilCalls.allEvents + 1
+        end, "VARIABLES_LOADED", "PLAYER_ENTERING_WORLD", "FIRST_FRAME_RENDERED")
+        "#,
+    )
+    .expect("EventUtil helpers should register callbacks");
+
+    let (before_variables_loaded, before_all_events): (i32, i32) = env
+        .eval("return EventUtilCalls.variablesLoaded, EventUtilCalls.allEvents")
+        .expect("EventUtil callback counts should be readable");
+    assert_eq!(before_variables_loaded, 0);
+    assert_eq!(before_all_events, 0);
+
+    env.fire_event("VARIABLES_LOADED")
+        .expect("VARIABLES_LOADED should dispatch");
+    let (after_variables_loaded, after_partial_events): (i32, i32) = env
+        .eval("return EventUtilCalls.variablesLoaded, EventUtilCalls.allEvents")
+        .expect("VARIABLES_LOADED should update EventUtil callback state");
+    assert_eq!(after_variables_loaded, 1);
+    assert_eq!(after_partial_events, 0);
+
+    env.exec(
+        r#"
+        EventUtil.ContinueOnVariablesLoaded(function()
+            EventUtilCalls.lateVariablesLoaded = EventUtilCalls.lateVariablesLoaded + 1
+        end)
+        "#,
+    )
+    .expect("ContinueOnVariablesLoaded should run immediately after VARIABLES_LOADED");
+    let late_variables_loaded: i32 = env
+        .eval("return EventUtilCalls.lateVariablesLoaded")
+        .expect("late VARIABLES_LOADED callback count should be readable");
+    assert_eq!(late_variables_loaded, 1);
+
+    env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[rilua::Val::Bool(true), rilua::Val::Bool(false)],
+    )
+    .expect("PLAYER_ENTERING_WORLD should dispatch");
+    let after_player_entering_world: i32 = env
+        .eval("return EventUtilCalls.allEvents")
+        .expect("EventUtil all-events count should stay readable");
+    assert_eq!(after_player_entering_world, 0);
+
+    env.fire_event("FIRST_FRAME_RENDERED")
+        .expect("FIRST_FRAME_RENDERED should dispatch");
+    let after_first_frame_rendered: i32 = env
+        .eval("return EventUtilCalls.allEvents")
+        .expect("EventUtil all-events callback should fire after the last event");
+    assert_eq!(after_first_frame_rendered, 1);
+}
+
+#[test]
 fn named_fontstring_is_globally_reachable() {
     // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
     // FontString, matching how named frames and named textures behave.
