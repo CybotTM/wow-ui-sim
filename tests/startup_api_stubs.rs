@@ -247,6 +247,34 @@ fn event_util_register_once_can_capture_zero_or_more_required_args() {
 }
 
 #[test]
+fn contribution_collector_namespace_exists_with_load_safe_defaults() {
+    let env = env();
+    let (namespace_type, close_type, state, percent, appearance_type, color_type): (
+        String,
+        String,
+        i32,
+        i32,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local state, percent = C_ContributionCollector.GetState(42)
+            local appearance = C_ContributionCollector.GetContributionAppearance(42, state)
+            return type(C_ContributionCollector), type(C_ContributionCollector.Close), state, percent, type(appearance), type(appearance.stateColor)
+            "#,
+        )
+        .expect("ContributionCollector startup stub should be callable");
+
+    assert_eq!(namespace_type, "table");
+    assert_eq!(close_type, "function");
+    assert_eq!(state, 0);
+    assert_eq!(percent, 0);
+    assert_eq!(appearance_type, "table");
+    assert_eq!(color_type, "table");
+}
+
+#[test]
 fn setup_localization_runs_locale_setup_now_and_frame_setup_later() {
     let env = env();
     let (before_localize, before_frames): (i32, i32) = env
