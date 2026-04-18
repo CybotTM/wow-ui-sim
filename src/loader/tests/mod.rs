@@ -798,6 +798,38 @@ fn test_runtime_template_parent_array_registers_instance_on_parent() {
 }
 
 #[test]
+fn test_child_onload_sees_seeded_parent_array() {
+    let t = load_test_xml(
+        "xml-parent-array-onload",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="ParentArrayOnLoadHost">
+                <Frames>
+                    <Frame name="ParentArrayOnLoadChild" parentArray="Buttons">
+                        <Scripts>
+                            <OnLoad>
+                                local parent = self:GetParent()
+                                parent.childSawButtonsTable = type(parent.Buttons) == "table"
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    let saw_buttons_table: bool = t
+        .env
+        .eval("return ParentArrayOnLoadHost.childSawButtonsTable == true")
+        .unwrap();
+    assert!(
+        saw_buttons_table,
+        "child OnLoad should see a seeded parentArray table on the parent"
+    );
+}
+
+#[test]
 fn test_xml_animation_parent_keys_attach_group_and_child_animation() {
     let t = load_test_xml(
         "xml-animation-parent-keys",

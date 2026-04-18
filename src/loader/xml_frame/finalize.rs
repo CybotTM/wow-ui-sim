@@ -1,5 +1,6 @@
 //! Frame finalization: child creation, layers, animations, lifecycle scripts.
 
+use std::collections::BTreeSet;
 use std::time::Instant;
 
 use crate::loader::LoadTiming;
@@ -37,6 +38,7 @@ fn create_children_and_finalize(
     inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
+    seed_child_parent_arrays(env, frame, frame_id)?;
     create_child_frames(env, frame, name, inherits, timing)?;
     let layer_start = Instant::now();
     create_layer_children(env, frame, name, inherits, timing)?;
@@ -90,6 +92,52 @@ fn lifecycle_scripts_for_frame(frame: &crate::xml::FrameXml) -> LifecycleScripts
         on_load: !scripts.on_load.is_empty(),
         on_show: !scripts.on_show.is_empty(),
     }
+}
+
+fn seed_child_parent_arrays(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    frame_id: u64,
+) -> Result<(), LoadError> {
+    let mut keys: BTreeSet<String> = BTreeSet::new();
+    frame
+        .try_for_each_frame_element(|child_frame, _child_tag| {
+            if let Some(parent_array) = child_frame.parent_array.as_ref() {
+                keys.insert(parent_array.clone());
+            }
+            Ok::<(), crate::Error>(())
+        })
+        .map_err(|error| LoadError::Lua(error.to_string()))?;
+    if let Some(scroll_child) = frame.scroll_child() {
+        for child in &scroll_child.children {
+            let Some((child_frame, _child_tag)) = child.as_frame_data() else {
+                continue;
+            };
+            if let Some(parent_array) = child_frame.parent_array.as_ref() {
+                keys.insert(parent_array.clone());
+            }
+        }
+    }
+    if keys.is_empty() {
+        return Ok(());
+    }
+
+    env.with_state(|state| {
+        use crate::lua_api::methods::{create_table, frame_ref, table_get, table_set};
+        use rilua::Val;
+
+        let parent =
+            frame_ref(state, frame_id).map_err(|error| crate::Error::Other(error.to_string()))?;
+        for key in keys {
+            if matches!(table_get(state, parent, &key), Val::Table(_)) {
+                continue;
+            }
+            let created = create_table(state);
+            table_set(state, parent, &key, created);
+        }
+        Ok::<(), crate::Error>(())
+    })
+    .map_err(|error| LoadError::Lua(error.to_string()))
 }
 
 /// Create textures and fontstrings from the frame's Layers.
