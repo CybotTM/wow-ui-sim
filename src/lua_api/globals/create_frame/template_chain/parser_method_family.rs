@@ -1,6 +1,9 @@
 use super::{FastHandlerRef, is_fast_handler_path, is_fast_identifier, is_fast_passthrough_args};
 
 pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if parse_conditional_self_text_empty_show_text_child(stmt).is_some() {
+        return Some(FastHandlerRef::ConditionalSelfTextEmptyShowTextChild);
+    }
     if let Some((method_name, field)) =
         parse_method_then_unchecked_parent_field_clear_and_show_text(stmt)
     {
@@ -95,6 +98,9 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             self_method_name,
         });
     }
+    if let Some(method_name) = parse_inline_grandparent_method_with_not_self_checked_arg(stmt) {
+        return Some(FastHandlerRef::GrandparentMethodWithNotSelfCheckedArg { method_name });
+    }
     if let Some(method_name) = parse_inline_parent_method(stmt) {
         return Some(FastHandlerRef::ParentMethod(method_name));
     }
@@ -143,6 +149,14 @@ fn parse_method_then_unchecked_parent_field_clear_and_show_text(
         .trim();
     (clear_field == show_field && is_fast_identifier(clear_field))
         .then_some((method_name, clear_field))
+}
+
+fn parse_conditional_self_text_empty_show_text_child(stmt: &str) -> Option<()> {
+    let stmt = stmt.trim();
+    let prefix = "if ( self:GetText() == \"\" ) then";
+    let remainder = stmt.strip_prefix(prefix)?.trim_start();
+    let body = remainder.strip_suffix("end")?.trim();
+    (body == "self.Text:Show();" || body == "self.Text:Show()").then_some(())
 }
 
 fn parse_conditional_self_noarg_method_then_else<'a>(
@@ -206,6 +220,14 @@ fn parse_conditional_self_field_then_else<'a>(
 
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
     parse_inline_method_call(stmt, "self:")
+}
+
+fn parse_inline_grandparent_method_with_not_self_checked_arg(stmt: &str) -> Option<&str> {
+    let remainder = stmt.strip_prefix("self:GetParent():GetParent():")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(method_name) && args == "not self:GetChecked()").then_some(method_name)
 }
 
 fn parse_inline_self_method_with_bool_arg(stmt: &str) -> Option<(&str, bool)> {

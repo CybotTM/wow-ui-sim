@@ -1,6 +1,22 @@
 use super::{FastHandlerRef, FastLiteralValue, is_fast_handler_path, is_fast_identifier};
 
 pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((category_path, slot_path, leave_function, join_function)) =
+        parse_get_lfg_mode_branch(stmt)
+    {
+        return Some(FastHandlerRef::GetLfgModeBranch {
+            category_path,
+            slot_path,
+            leave_function,
+            join_function,
+        });
+    }
+    if let Some((target_path, method_name)) = parse_local_global_path_conditional_method(stmt) {
+        return Some(FastHandlerRef::LocalGlobalPathConditionalMethod {
+            target_path,
+            method_name,
+        });
+    }
     if let Some((function_name, then_ref, else_ref)) =
         parse_conditional_global_noarg_then_else(stmt)
     {
@@ -114,6 +130,73 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             field,
         }
     })
+}
+
+fn parse_local_global_path_conditional_method(stmt: &str) -> Option<(&str, &str)> {
+    let stmt = stmt.trim();
+    let remainder = stmt.strip_prefix("local ")?;
+    let (local_name, remainder) = remainder.split_once('=')?;
+    let local_name = local_name.trim();
+    if !is_fast_identifier(local_name) {
+        return None;
+    }
+    let target_path = remainder.trim();
+    let (target_path, tail) = target_path.split_once('\n').or_else(|| target_path.split_once("if"))?;
+    let target_path = target_path.trim();
+    let tail = stmt[stmt.find("if")?..].trim();
+    let prefix = format!("if ({local_name}) then");
+    let remainder = tail.strip_prefix(&prefix)?.trim_start();
+    let body = remainder.strip_suffix("end")?.trim();
+    let expected_prefix = format!("{local_name}:");
+    let method_stmt = body.strip_prefix(&expected_prefix)?;
+    let method_name = method_stmt
+        .trim()
+        .trim_end_matches(';')
+        .strip_suffix("()")?
+        .trim();
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name))
+        .then_some((target_path, method_name))
+}
+
+fn parse_get_lfg_mode_branch(stmt: &str) -> Option<(&str, Option<&str>, &str, &str)> {
+    let stmt = stmt.trim();
+    let prefix = "local mode, subMode = GetLFGMode(";
+    let remainder = stmt.strip_prefix(prefix)?;
+    let (args, remainder) = remainder.split_once(");")?;
+    let mut parts = args.split(',').map(str::trim);
+    let category_path = parts.next()?;
+    let slot_path = parts.next();
+    if parts.next().is_some() || !is_fast_handler_path(category_path) {
+        return None;
+    }
+    if let Some(slot_path) = slot_path && !is_fast_handler_path(slot_path) {
+        return None;
+    }
+
+    let remainder = remainder.trim_start();
+    let condition_prefix =
+        "if ( mode == \"queued\" or mode == \"listed\" or mode == \"rolecheck\" or mode == \"suspended\" ) then";
+    let remainder = remainder.strip_prefix(condition_prefix)?.trim_start();
+    let (then_stmt, else_tail) = remainder.split_once("else")?;
+    let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
+    let (leave_function, leave_args) = parse_global_function_call(then_stmt.trim().trim_end_matches(';'))?;
+    let (join_function, join_args) = parse_global_function_call(else_stmt.trim().trim_end_matches(';'))?;
+    if !join_args.trim().is_empty() {
+        return None;
+    }
+    let expected_leave_args = match slot_path {
+        Some(slot) => format!("{category_path}, {slot}"),
+        None => category_path.to_string(),
+    };
+    (leave_args.trim() == expected_leave_args && is_fast_handler_path(leave_function) && is_fast_handler_path(join_function))
+        .then_some((category_path, slot_path, leave_function, join_function))
+}
+
+fn parse_global_function_call(stmt: &str) -> Option<(&str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?;
+    let function_name = function_name.trim();
+    is_fast_handler_path(function_name).then_some((function_name, args))
 }
 
 fn parse_conditional_global_noarg_then_else<'a>(

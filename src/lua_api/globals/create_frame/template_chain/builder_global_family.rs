@@ -12,6 +12,24 @@ pub(super) fn build_global_family_handler(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
+        FastHandlerRef::GetLfgModeBranch {
+            category_path,
+            slot_path,
+            leave_function,
+            join_function,
+        } => build_get_lfg_mode_branch_handler(
+            state,
+            category_path,
+            *slot_path,
+            leave_function,
+            join_function,
+        )
+        .map(Some),
+        FastHandlerRef::LocalGlobalPathConditionalMethod {
+            target_path,
+            method_name,
+        } => build_local_global_path_conditional_method_handler(state, target_path, method_name)
+            .map(Some),
         FastHandlerRef::GlobalMethod {
             target_path,
             method_name,
@@ -120,6 +138,91 @@ pub(super) fn build_global_family_handler(
         }
         _ => Ok(None),
     }
+}
+
+fn build_local_global_path_conditional_method_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local target_path, method_name = ...
+            local function resolve_global(path)
+                local value = getfenv(0) or _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
+            return function(self, ...)
+                local target = resolve_global(target_path)
+                if target and target[method_name] then
+                    return target[method_name](target)
+                end
+            end
+        "#,
+        "template-local-global-path-conditional-method-handler",
+    )?;
+    let target_path = create_string(state, target_path);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target_path, method_name],
+    )
+}
+
+fn build_get_lfg_mode_branch_handler(
+    state: &mut LuaState,
+    category_path: &str,
+    slot_path: Option<&str>,
+    leave_function: &str,
+    join_function: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local category_path, slot_path, leave_fn, join_fn = ...
+            local function resolve_global(path)
+                local value = getfenv(0) or _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
+            return function(self, ...)
+                local category = resolve_global(category_path)
+                local slot = slot_path ~= nil and resolve_global(slot_path) or nil
+                local mode, subMode
+                if slot_path ~= nil then
+                    mode, subMode = GetLFGMode(category, slot)
+                else
+                    mode, subMode = GetLFGMode(category)
+                end
+                if mode == "queued" or mode == "listed" or mode == "rolecheck" or mode == "suspended" then
+                    if slot_path ~= nil then
+                        return leave_fn(category, slot)
+                    end
+                    return leave_fn(category)
+                end
+                return join_fn()
+            end
+        "#,
+        "template-get-lfg-mode-branch-handler",
+    )?;
+    let category_path = create_string(state, category_path);
+    let slot_path = slot_path
+        .map(|path| create_string(state, path))
+        .unwrap_or(Val::Nil);
+    let leave_function = resolve_global_path(state, leave_function);
+    let join_function = resolve_global_path(state, join_function);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[category_path, slot_path, leave_function, join_function],
+    )
 }
 
 fn build_global_method_handler(

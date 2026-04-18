@@ -26,6 +26,9 @@ fn build_direct_method_variants(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
+        FastHandlerRef::ConditionalSelfTextEmptyShowTextChild => {
+            build_conditional_self_text_empty_show_text_child_handler(state).map(Some)
+        }
         FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText { method_name, field } => {
             build_method_then_unchecked_parent_field_clear_and_show_text_handler(
                 state,
@@ -129,11 +132,31 @@ fn build_ancestor_method_variants(
             self_method_name,
         )
         .map(Some),
+        FastHandlerRef::GrandparentMethodWithNotSelfCheckedArg { method_name } => {
+            build_grandparent_method_with_not_self_checked_arg_handler(state, method_name).map(Some)
+        }
         FastHandlerRef::GrandparentMethod(method_name) => {
             build_ancestor_method_handler(state, method_name, 2).map(Some)
         }
         _ => Ok(None),
     }
+}
+
+fn build_conditional_self_text_empty_show_text_child_handler(
+    state: &mut LuaState,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            return function(self, ...)
+                if self:GetText() == "" and self.Text then
+                    return self.Text:Show()
+                end
+            end
+        "#,
+        "template-conditional-self-text-empty-show-text-child",
+    )?;
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[])
 }
 
 fn build_parent_field_local_toggle_shown_handler(
@@ -163,6 +186,33 @@ fn build_parent_field_local_toggle_shown_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[field_name],
+    )
+}
+
+fn build_grandparent_method_with_not_self_checked_arg_handler(
+    state: &mut LuaState,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local method_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                local grandparent = parent and parent:GetParent()
+                if not grandparent then
+                    return
+                end
+                return grandparent[method_name](grandparent, not self:GetChecked())
+            end
+        "#,
+        "template-grandparent-method-not-self-checked-arg",
+    )?;
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name],
     )
 }
 

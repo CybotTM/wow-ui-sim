@@ -2656,6 +2656,210 @@ fn test_create_frame_from_xml_inline_method_then_unchecked_parent_field_clear_an
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_local_global_path_conditional_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        BrowserSettingsTooltip = {}
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineBrowserButton" parent="UIParent">
+            <Scripts><OnClick>
+                local browser = BrowserSettingsTooltip.browser
+                if (browser) then
+                    browser:DeleteCookies()
+                end
+            </OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        r#"
+        BrowserSettingsTooltip.browser = {
+            calls = 0,
+            DeleteCookies = function(self)
+                self.calls = self.calls + 1
+            end,
+        }
+        XmlInlineBrowserButton:GetScript("OnClick")(XmlInlineBrowserButton)
+    "#,
+    )
+    .unwrap();
+    let first: i32 = env.eval("return BrowserSettingsTooltip.browser.calls").unwrap();
+    assert_eq!(first, 1);
+
+    env.exec(
+        r#"
+        BrowserSettingsTooltip.browser = nil
+        XmlInlineBrowserButton:GetScript("OnClick")(XmlInlineBrowserButton)
+        return true
+    "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_conditional_self_text_empty_show_text_child_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineEmptyTextRoot" parent="UIParent">
+            <EditBox name="XmlInlineEmptyTextEditBox" parent="XmlInlineEmptyTextRoot">
+                <Scripts><OnEditFocusLost>
+                    if ( self:GetText() == "" ) then
+                        self.Text:Show();
+                    end
+                </OnEditFocusLost></Scripts>
+            </EditBox>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineEmptyTextEditBox.Text = {
+            shown = false,
+            Show = function(self) self.shown = true end,
+        }
+        XmlInlineEmptyTextEditBox:SetText("")
+        XmlInlineEmptyTextEditBox:GetScript("OnEditFocusLost")(XmlInlineEmptyTextEditBox)
+    "#,
+    )
+    .unwrap();
+    let shown: bool = env.eval("return XmlInlineEmptyTextEditBox.Text.shown").unwrap();
+    assert!(shown);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_grandparent_method_with_not_self_checked_arg_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineGrandparentRoot" parent="UIParent">
+            <Frame name="XmlInlineGrandparentParent" parent="XmlInlineGrandparentRoot">
+                <CheckButton name="XmlInlineGrandparentChild" parent="XmlInlineGrandparentParent">
+                    <Scripts><OnClick>
+                        self:GetParent():GetParent():SetDisabledStateOnCommunityFinderOptions(not self:GetChecked())
+                    </OnClick></Scripts>
+                </CheckButton>
+            </Frame>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        function XmlInlineGrandparentRoot:SetDisabledStateOnCommunityFinderOptions(value)
+            self.disabledState = value
+        end
+        XmlInlineGrandparentChild:SetChecked(false)
+        XmlInlineGrandparentChild:GetScript("OnClick")(XmlInlineGrandparentChild)
+    "#,
+    )
+    .unwrap();
+    let first: bool = env.eval("return XmlInlineGrandparentRoot.disabledState").unwrap();
+    assert!(first);
+
+    env.exec(
+        r#"
+        XmlInlineGrandparentChild:SetChecked(true)
+        XmlInlineGrandparentChild:GetScript("OnClick")(XmlInlineGrandparentChild)
+    "#,
+    )
+    .unwrap();
+    let second: bool = env.eval("return XmlInlineGrandparentRoot.disabledState").unwrap();
+    assert!(!second);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_get_lfg_mode_branch_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        LE_LFG_CATEGORY_LFD = 1
+        XmlInlineLfgBranch = {}
+        function GetLFGMode(category)
+            XmlInlineLfgBranch.modeCategory = category
+            return XmlInlineLfgBranch.mode, nil
+        end
+        function LeaveLFG(category)
+            XmlInlineLfgBranch.leaveCategory = category
+        end
+        function LFDQueueFrame_Join()
+            XmlInlineLfgBranch.joined = true
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineLfgBranchButton" parent="UIParent">
+            <Scripts><OnClick>
+                local mode, subMode = GetLFGMode(LE_LFG_CATEGORY_LFD);
+                if ( mode == "queued" or mode == "listed" or mode == "rolecheck" or mode == "suspended" ) then
+                    LeaveLFG(LE_LFG_CATEGORY_LFD);
+                else
+                    LFDQueueFrame_Join();
+                end
+            </OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineLfgBranch.mode = "queued"
+        XmlInlineLfgBranch.leaveCategory = nil
+        XmlInlineLfgBranch.joined = false
+        XmlInlineLfgBranchButton:GetScript("OnClick")(XmlInlineLfgBranchButton)
+    "#,
+    )
+    .unwrap();
+    let queued: (i32, i32, bool) = env
+        .eval(
+            r#"
+            return XmlInlineLfgBranch.modeCategory,
+                   XmlInlineLfgBranch.leaveCategory,
+                   XmlInlineLfgBranch.joined
+        "#,
+        )
+        .unwrap();
+    assert_eq!(queued.0, 1);
+    assert_eq!(queued.1, 1);
+    assert!(!queued.2);
+
+    env.exec(
+        r#"
+        XmlInlineLfgBranch.mode = "none"
+        XmlInlineLfgBranch.leaveCategory = nil
+        XmlInlineLfgBranch.joined = false
+        XmlInlineLfgBranchButton:GetScript("OnClick")(XmlInlineLfgBranchButton)
+    "#,
+    )
+    .unwrap();
+    let joined: bool = env.eval("return XmlInlineLfgBranch.joined").unwrap();
+    assert!(joined);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_conditional_self_field_then_else_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

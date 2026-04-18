@@ -510,6 +510,20 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         field: &'a str,
     },
+    ConditionalSelfTextEmptyShowTextChild,
+    LocalGlobalPathConditionalMethod {
+        target_path: &'a str,
+        method_name: &'a str,
+    },
+    GetLfgModeBranch {
+        category_path: &'a str,
+        slot_path: Option<&'a str>,
+        leave_function: &'a str,
+        join_function: &'a str,
+    },
+    GrandparentMethodWithNotSelfCheckedArg {
+        method_name: &'a str,
+    },
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
     FunctionWithParentIdArg(&'a str),
