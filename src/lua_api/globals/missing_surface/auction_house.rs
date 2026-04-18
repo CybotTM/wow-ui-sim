@@ -15,6 +15,7 @@
 //!   containsOwnerItem, appearanceLink nilable).
 
 use super::{ensure_namespace, set_table_array};
+use crate::items;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state::AuctionBrowseResult;
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
@@ -23,24 +24,57 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_auction_house_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_AuctionHouse")?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetAuctionItemSubClasses",
-        c_auction_house_get_auction_item_sub_classes,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetReplicateItemInfo",
-        c_auction_house_get_replicate_item_info,
-    )?;
-    table_set_rust_fn(
-        state,
-        table_ref,
-        "GetBrowseResults",
-        c_auction_house_get_browse_results,
-    )?;
+    let methods: &[(&str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
+        (
+            "GetAuctionItemSubClasses",
+            c_auction_house_get_auction_item_sub_classes,
+        ),
+        ("GetReplicateItemInfo", c_auction_house_get_replicate_item_info),
+        ("GetBrowseResults", c_auction_house_get_browse_results),
+        ("HasFavorites", c_auction_house_has_favorites),
+        ("HasFullBrowseResults", c_auction_house_has_full_browse_results),
+        (
+            "RequestMoreBrowseResults",
+            c_auction_house_request_more_browse_results,
+        ),
+        ("GetItemKeyInfo", c_auction_house_get_item_key_info),
+        (
+            "GetItemKeyRequiredLevel",
+            c_auction_house_get_item_key_required_level,
+        ),
+        ("GetExtraBrowseInfo", c_auction_house_get_extra_browse_info),
+        ("SupportsCopperValues", c_auction_house_supports_copper_values),
+        (
+            "FavoritesAreAvailable",
+            c_auction_house_favorites_are_available,
+        ),
+        ("HasMaxFavorites", c_auction_house_has_max_favorites),
+        ("IsFavoriteItem", c_auction_house_is_favorite_item),
+        ("SetFavoriteItem", c_auction_house_set_favorite_item),
+        ("GetFilterGroups", c_auction_house_get_filter_groups),
+        ("CloseAuctionHouse", c_auction_house_close_auction_house),
+        ("QueryBids", c_auction_house_query_bids),
+        ("GetNumBids", c_auction_house_get_num_bids),
+        ("GetBidInfo", c_auction_house_get_bid_info),
+        ("HasFullBidResults", c_auction_house_has_full_bid_results),
+        ("GetNumBidTypes", c_auction_house_get_num_bid_types),
+        ("GetBidType", c_auction_house_get_bid_type),
+        ("QueryOwnedAuctions", c_auction_house_query_owned_auctions),
+        ("GetNumOwnedAuctions", c_auction_house_get_num_owned_auctions),
+        ("GetOwnedAuctionInfo", c_auction_house_get_owned_auction_info),
+        (
+            "HasFullOwnedAuctionResults",
+            c_auction_house_has_full_owned_auction_results,
+        ),
+        (
+            "GetNumOwnedAuctionTypes",
+            c_auction_house_get_num_owned_auction_types,
+        ),
+        ("GetOwnedAuctionType", c_auction_house_get_owned_auction_type),
+    ];
+    for &(name, func) in methods {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
@@ -113,6 +147,187 @@ fn c_auction_house_get_browse_results(state: &mut LuaState) -> LuaResult<u32> {
     }
     state.push(array);
     Ok(1)
+}
+
+fn c_auction_house_has_favorites(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_auction_house_has_full_browse_results(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_auction_house_request_more_browse_results(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_auction_house_get_item_key_info(state: &mut LuaState) -> LuaResult<u32> {
+    let item_key = state.stack_get(1);
+    let item_id = match extract_item_key_id(state, item_key) {
+        Some(item_id) => item_id,
+        None => {
+            state.push(Val::Nil);
+            return Ok(1);
+        }
+    };
+    let Some(item) = items::get_item(item_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let info = create_table(state);
+    let item_name = create_string(state, item.name);
+    table_set(state, info, "itemName", item_name);
+    table_set(
+        state,
+        info,
+        "iconFileID",
+        Val::Num(if item.icon_file_data_id == 0 {
+            134400.0
+        } else {
+            item.icon_file_data_id as f64
+        }),
+    );
+    table_set(state, info, "quality", Val::Num(item.quality as f64));
+    table_set(
+        state,
+        info,
+        "isCommodity",
+        Val::Bool(item.stackable > 1 && item.inventory_type == 0),
+    );
+    table_set(state, info, "battlePetLink", Val::Nil);
+    table_set(state, info, "appearanceLink", Val::Nil);
+    state.push(info);
+    Ok(1)
+}
+
+fn c_auction_house_get_item_key_required_level(state: &mut LuaState) -> LuaResult<u32> {
+    let item_key = state.stack_get(1);
+    let level = extract_item_key_id(state, item_key)
+        .and_then(items::get_item)
+        .map(|item| item.required_level as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Num(level));
+    Ok(1)
+}
+
+fn c_auction_house_get_extra_browse_info(state: &mut LuaState) -> LuaResult<u32> {
+    let item_key = state.stack_get(1);
+    let quality = extract_item_key_id(state, item_key)
+        .and_then(items::get_item)
+        .map(|item| item.quality as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Nil);
+    state.push(Val::Num(quality));
+    Ok(2)
+}
+
+fn c_auction_house_supports_copper_values(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_auction_house_favorites_are_available(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_auction_house_has_max_favorites(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_auction_house_is_favorite_item(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_auction_house_set_favorite_item(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_get_filter_groups(state: &mut LuaState) -> LuaResult<u32> {
+    let groups = create_table(state);
+    state.push(groups);
+    Ok(1)
+}
+
+fn c_auction_house_close_auction_house(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_query_bids(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_get_num_bids(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_auction_house_get_bid_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_has_full_bid_results(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_auction_house_get_num_bid_types(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_auction_house_get_bid_type(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_query_owned_auctions(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_get_num_owned_auctions(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_auction_house_get_owned_auction_info(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_auction_house_has_full_owned_auction_results(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn c_auction_house_get_num_owned_auction_types(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_auction_house_get_owned_auction_type(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn extract_item_key_id(state: &mut LuaState, value: Val) -> Option<u32> {
+    let table_ref = match value {
+        Val::Table(table_ref) => table_ref,
+        _ => return None,
+    };
+    let item_id_key = state.gc.intern_string_static(b"itemID");
+    match state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.get_str(item_id_key, &state.gc.string_arena))
+    {
+        Some(Val::Num(item_id)) if item_id > 0.0 => Some(item_id as u32),
+        _ => None,
+    }
 }
 
 fn push_browse_result_table(state: &mut LuaState, row: &AuctionBrowseResult) -> Val {

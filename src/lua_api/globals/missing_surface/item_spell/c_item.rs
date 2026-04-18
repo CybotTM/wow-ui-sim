@@ -78,6 +78,7 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         ("GetItemSubClassInfo", c_item_get_item_sub_class_info),
         ("GetItemLink", c_item_get_item_link),
         ("GetItemGUID", c_item_get_item_guid),
+        ("GetItemInventorySlotInfo", c_item_get_item_inventory_slot_info),
     ];
     for &(name, func) in methods {
         table_set_rust_fn(state, table_ref, name, func)?;
@@ -226,5 +227,12 @@ fn c_item_get_item_guid(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
+    Ok(1)
+}
+
+fn c_item_get_item_inventory_slot_info(state: &mut LuaState) -> LuaResult<u32> {
+    let inv_type = i32::from_stack(state, 1)?;
+    let label = create_string(state, inv_type_to_subclass(inv_type.max(0) as u8));
+    state.push(label);
     Ok(1)
 }
