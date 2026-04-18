@@ -992,29 +992,26 @@ fn tooltip_for_mount_spell_id(state: &mut LuaState, spell_id: u32) -> Val {
     if spells::get_spell(spell_id).is_some() {
         return tooltip_for_spell_id(state, spell_id);
     }
+    let Some(mount_name) = find_mount_name_for_spell(state, spell_id) else {
+        return empty_tooltip(state, TOOLTIP_TYPE_SPELL);
+    };
+    build_mount_tooltip(state, spell_id, &mount_name)
+}
 
-    let mount_name = borrow_state(state).ok().and_then(|st| {
+fn find_mount_name_for_spell(state: &mut LuaState, spell_id: u32) -> Option<String> {
+    borrow_state(state).ok().and_then(|st| {
         st.world
             .mounts
             .iter()
             .find(|mount| mount.spell_id == spell_id)
             .map(|mount| mount.name.clone())
-    });
-    let Some(mount_name) = mount_name else {
-        return empty_tooltip(state, TOOLTIP_TYPE_SPELL);
-    };
+    })
+}
 
+fn build_mount_tooltip(state: &mut LuaState, spell_id: u32, mount_name: &str) -> Val {
     let tooltip = empty_tooltip(state, TOOLTIP_TYPE_SPELL);
     let lines = table_get(state, tooltip, "lines");
-    push_tooltip_line(
-        state,
-        lines,
-        1,
-        LINE_TYPE_SPELL_NAME,
-        &mount_name,
-        None,
-        false,
-    );
+    push_tooltip_line(state, lines, 1, LINE_TYPE_SPELL_NAME, mount_name, None, false);
     push_tooltip_line(
         state,
         lines,
