@@ -8,6 +8,7 @@ use super::super::{
 };
 use super::call_global_method_builder;
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
+use crate::lua_api::hot_literals::FRAME_METHOD_SET_TEXT;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -161,7 +162,7 @@ fn build_conditional_tooltip_handler(
     call_global_method_builder(
         state,
         target_path,
-        "SetText",
+        FRAME_METHOD_SET_TEXT,
         TEMPLATE_CONDITIONAL_TOOLTIP,
         "template-conditional-tooltip-handler",
         &[field, anchor, red_path, green_path, blue_path],
@@ -223,7 +224,7 @@ fn build_global_tooltip_set_owner_then_set_text_handler(
     call_global_method_builder(
         state,
         target_path,
-        "SetText",
+        FRAME_METHOD_SET_TEXT,
         TEMPLATE_GLOBAL_TOOLTIP_SET_OWNER_THEN_SET_TEXT,
         "template-global-tooltip-settext-handler",
         &args,
@@ -244,7 +245,7 @@ fn build_global_tooltip_set_owner_then_set_text_literal_handler(
     call_global_method_builder(
         state,
         target_path,
-        "SetText",
+        FRAME_METHOD_SET_TEXT,
         r#"
             local target_ref, _ignored_method_name, anchor, text, red, green, blue = ...
             local function resolve_global(path)

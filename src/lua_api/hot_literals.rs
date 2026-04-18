@@ -273,7 +273,7 @@ pub const HOT_FRAME_METHODS: &[&[u8]] = &[
     // Visuals.
     b"SetAlpha",
     b"GetAlpha",
-    b"SetText",
+    FRAME_METHOD_SET_TEXT.as_bytes(),
     b"GetText",
     b"SetFont",
     b"SetFontObject",
@@ -351,6 +351,16 @@ pub const TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG: &str = "template-inline-function-
 pub const TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS: &str =
     "template-inline-function-two-global-args";
 pub const TEMPLATE_GLOBAL_METHOD_HANDLER: &str = "template-global-method-handler";
+
+// Named `&str` constants for frame-method names that appear as
+// hardcoded literals in the template-chain builders. Entries here mirror
+// a position in [`HOT_FRAME_METHODS`] so the whitelist and call sites
+// share one source of truth. Grow this list only as new builder-site
+// consumers land — a frame-method name that is only ever passed through
+// from parsed XML (dynamic `&str`) stays in `HOT_FRAME_METHODS` without
+// a named constant.
+
+pub const FRAME_METHOD_SET_TEXT: &str = "SetText";
 
 pub const HOT_LOADER_SENTINELS: &[&[u8]] = &[
     b"getfenv",
@@ -460,6 +470,13 @@ impl HotLiteralHandles {
 pub mod metatable_idx {
     /// Position of `b"__rilua_frame_mt"` in [`super::HOT_METATABLE_KEYS`].
     pub const RILUA_FRAME_MT: usize = 18;
+}
+
+/// Index constants into [`HOT_FRAME_METHODS`]. Grows as builder call
+/// sites hardcode a method name and opt into the named constant.
+pub mod frame_method_idx {
+    /// Position of `b"SetText"` in [`super::HOT_FRAME_METHODS`].
+    pub const SET_TEXT: usize = 53;
 }
 
 /// Index constants into [`HOT_LOADER_SENTINELS`]. First four entries are
@@ -631,6 +648,11 @@ mod tests {
         assert_eq!(
             HOT_METATABLE_KEYS[metatable_idx::RILUA_FRAME_MT],
             b"__rilua_frame_mt"
+        );
+
+        assert_eq!(
+            HOT_FRAME_METHODS[frame_method_idx::SET_TEXT],
+            FRAME_METHOD_SET_TEXT.as_bytes()
         );
 
         // Loader sentinels: every named index must match the corresponding
