@@ -2,7 +2,14 @@
 //!
 //! Stores compiled Lua 5.1 bytecode on disk, keyed by content hash. Warm
 //! startup can then skip reparsing and recompiling loader chunks entirely.
+//!
+//! The pack file header carries the current [`crate::lua_api::hot_literals::WHITELIST_VERSION`]
+//! so that when the Track 3 slot ABI changes, stale entries are
+//! rejected atomically rather than accidentally interpreted against the
+//! new whitelist. Bumping `WHITELIST_VERSION` discards the entire pack
+//! on next load.
 
+use crate::lua_api::hot_literals::WHITELIST_VERSION;
 use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::ffi::OsStr;
@@ -13,7 +20,10 @@ use std::sync::{Mutex, OnceLock};
 
 const CACHE_DIR: &str = ".cache/lua-bytecode";
 const PACK_FILE: &str = "pack.bin";
-const PACK_MAGIC: &[u8; 8] = b"WOWBC001";
+// Bumped from `WOWBC001` when the version-header field was introduced.
+// Old packs without a version header are rejected on load.
+const PACK_MAGIC: &[u8; 8] = b"WOWBC002";
+const PACK_HEADER_LEN: usize = PACK_MAGIC.len() + 4;
 const MAX_PACK_SIZE: u64 = 100 * 1024 * 1024;
 
 #[derive(Default)]
@@ -103,6 +113,12 @@ fn ensure_loaded(state: &mut CacheState) {
             let mut bytes = Vec::new();
             if file.read_to_end(&mut bytes).is_ok() && load_pack_bytes(state, &bytes) {
                 state.pack_exists = true;
+            } else {
+                // Pack file existed but was wrong magic or wrong
+                // whitelist version — remove it so the next write
+                // starts a clean file.
+                drop(file);
+                let _ = std::fs::remove_file(&pack);
             }
         }
     }
@@ -115,14 +131,22 @@ fn ensure_loaded(state: &mut CacheState) {
 }
 
 fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
-    if bytes.len() < PACK_MAGIC.len() || &bytes[..PACK_MAGIC.len()] != PACK_MAGIC {
+    if bytes.len() < PACK_HEADER_LEN || &bytes[..PACK_MAGIC.len()] != PACK_MAGIC {
+        return false;
+    }
+    let version_bytes: [u8; 4] = bytes[PACK_MAGIC.len()..PACK_HEADER_LEN]
+        .try_into()
+        .expect("PACK_HEADER_LEN - PACK_MAGIC == 4");
+    if u32::from_le_bytes(version_bytes) != WHITELIST_VERSION {
+        // Slot ABI / whitelist version changed since this pack was
+        // written. Discard the whole pack so fresh entries replace it.
         return false;
     }
 
     state.values.clear();
     state.index.clear();
 
-    let mut pos = PACK_MAGIC.len();
+    let mut pos = PACK_HEADER_LEN;
     while pos + 12 <= bytes.len() {
         let hash = u64::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
         pos += 8;
@@ -178,7 +202,7 @@ fn migrate_legacy_cache(state: &mut CacheState) -> std::io::Result<()> {
 
     std::fs::create_dir_all(&dir)?;
     let mut file = std::fs::File::create(pack_path())?;
-    file.write_all(PACK_MAGIC)?;
+    write_pack_header(&mut file)?;
     for (hash, bytecode) in migrated {
         write_pack_entry(&mut file, hash, &bytecode)?;
     }
@@ -194,7 +218,7 @@ fn append_pack_entry(state: &mut CacheState, hash: u64, bytecode: &[u8]) -> std:
         std::fs::OpenOptions::new().append(true).open(&path)?
     } else {
         let mut file = std::fs::File::create(&path)?;
-        file.write_all(PACK_MAGIC)?;
+        write_pack_header(&mut file)?;
         state.pack_exists = true;
         file
     };
@@ -202,9 +226,77 @@ fn append_pack_entry(state: &mut CacheState, hash: u64, bytecode: &[u8]) -> std:
     write_pack_entry(&mut file, hash, bytecode)
 }
 
+fn write_pack_header(file: &mut std::fs::File) -> std::io::Result<()> {
+    file.write_all(PACK_MAGIC)?;
+    file.write_all(&WHITELIST_VERSION.to_le_bytes())?;
+    Ok(())
+}
+
 fn write_pack_entry(file: &mut std::fs::File, hash: u64, bytecode: &[u8]) -> std::io::Result<()> {
     file.write_all(&hash.to_le_bytes())?;
     file.write_all(&(bytecode.len() as u32).to_le_bytes())?;
     file.write_all(bytecode)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Arbitrary sentinel hash used in the load-path tests. Any u64 will
+    /// do; the value only exists so we can assert the entry landed at
+    /// the expected offset/length in the in-memory cache state.
+    const SENTINEL_HASH: u64 = 0xdead_beef_cafe_babe;
+
+    fn synth_pack_bytes(magic: &[u8; 8], version: u32, entries: &[(u64, &[u8])]) -> Vec<u8> {
+        let mut buf = Vec::new();
+        buf.extend_from_slice(magic);
+        buf.extend_from_slice(&version.to_le_bytes());
+        for (hash, bytecode) in entries {
+            buf.extend_from_slice(&hash.to_le_bytes());
+            buf.extend_from_slice(&(bytecode.len() as u32).to_le_bytes());
+            buf.extend_from_slice(bytecode);
+        }
+        buf
+    }
+
+    #[test]
+    fn load_pack_bytes_accepts_current_version_header() {
+        let bytes = synth_pack_bytes(PACK_MAGIC, WHITELIST_VERSION, &[(SENTINEL_HASH, b"xyz")]);
+        let mut state = CacheState::default();
+        assert!(load_pack_bytes(&mut state, &bytes));
+        assert_eq!(state.index.get(&SENTINEL_HASH).copied(), Some((0, 3)));
+        assert_eq!(&state.values[..3], b"xyz");
+    }
+
+    #[test]
+    fn load_pack_bytes_rejects_mismatched_whitelist_version() {
+        let stale_version = WHITELIST_VERSION.wrapping_add(1);
+        let bytes = synth_pack_bytes(PACK_MAGIC, stale_version, &[(1, b"z")]);
+        let mut state = CacheState::default();
+        assert!(!load_pack_bytes(&mut state, &bytes));
+        assert!(state.index.is_empty());
+        assert!(state.values.is_empty());
+    }
+
+    #[test]
+    fn load_pack_bytes_rejects_legacy_wowbc001_magic() {
+        // Packs written before the version header must be discarded on
+        // load so they don't get re-interpreted against the new layout.
+        let legacy_magic = *b"WOWBC001";
+        let bytes = synth_pack_bytes(&legacy_magic, WHITELIST_VERSION, &[(1, b"z")]);
+        let mut state = CacheState::default();
+        assert!(!load_pack_bytes(&mut state, &bytes));
+    }
+
+    #[test]
+    fn load_pack_bytes_rejects_truncated_header() {
+        // File shorter than magic + version — can't even check the
+        // version. Reject rather than crash on the slice try_into.
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(PACK_MAGIC);
+        bytes.extend_from_slice(&[0u8; 3]); // only 3 of 4 version bytes
+        let mut state = CacheState::default();
+        assert!(!load_pack_bytes(&mut state, &bytes));
+    }
 }
