@@ -13,7 +13,11 @@ pub(super) fn build_checked_assignment_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
-    let handler = try_build_checked_assignment_callback_variants(state, handler_ref)?
+    let handler = try_build_checked_assignment_callback_variant(state, handler_ref)?
+        .or(try_build_checked_assignments3_callback_variant(
+            state,
+            handler_ref,
+        )?)
         .or(try_build_checked_assignment_two_callback_variant(
             state,
             handler_ref,
@@ -25,7 +29,7 @@ pub(super) fn build_checked_assignment_variants(
     Ok(handler)
 }
 
-fn try_build_checked_assignment_callback_variants(
+fn try_build_checked_assignment_callback_variant(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -43,6 +47,15 @@ fn try_build_checked_assignment_callback_variants(
             on_sound_function,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_checked_assignments3_callback_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::CheckedAssignments3ThenCallbacks {
             first_target_path,
             first_field,

@@ -16,6 +16,7 @@ pub(super) fn build_global_arg_variants(
 ) -> LuaResult<Option<Val>> {
     let handler = try_build_plain_global_variants(state, handler_ref)?
         .or(try_build_mixed_global_variants(state, handler_ref)?)
+        .or(try_build_global_self_method_variant(state, handler_ref)?)
         .or(try_build_global_self_variants(state, handler_ref)?);
     Ok(handler)
 }
@@ -103,7 +104,7 @@ fn try_build_mixed_global_variants(
     }
 }
 
-fn try_build_global_self_variants(
+fn try_build_global_self_method_variant(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -123,6 +124,15 @@ fn try_build_global_self_variants(
             *fourth,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_self_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
             function_name,
             global_arg_path,

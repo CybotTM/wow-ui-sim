@@ -13,13 +13,19 @@ pub(super) fn build_global_method_multi_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
-    if let Some(result) = try_build_global_method_fixed_arg_variants(state, handler_ref)? {
+    if let Some(result) = try_build_global_method_string_arg_variants(state, handler_ref)? {
         return Ok(Some(result));
     }
-    try_build_global_method_function_result_variants(state, handler_ref)
+    if let Some(result) = try_build_global_method_global_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = try_build_global_method_function_result_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_build_global_method_self_method_variant(state, handler_ref)
 }
 
-fn try_build_global_method_fixed_arg_variants(
+fn try_build_global_method_string_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -54,6 +60,15 @@ fn try_build_global_method_fixed_arg_variants(
             *third,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_global_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithGlobalThreeGlobalBoolArgs {
             target_path,
             method_name,
@@ -154,6 +169,15 @@ fn try_build_global_method_function_result_variants(
             *fifth,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_self_method_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithGlobalSelfMethodSelfMethodBoolArgs {
             target_path,
             method_name,

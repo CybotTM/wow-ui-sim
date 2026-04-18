@@ -16,7 +16,10 @@ pub(super) fn build_global_method_simple_arg_variants(
     if let Some(result) = try_build_global_method_basic_variants(state, handler_ref)? {
         return Ok(Some(result));
     }
-    try_build_global_method_arg_variants(state, handler_ref)
+    if let Some(result) = try_build_global_method_literal_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_build_global_method_self_arg_variants(state, handler_ref)
 }
 
 fn try_build_global_method_basic_variants(
@@ -50,7 +53,7 @@ fn try_build_global_method_basic_variants(
     }
 }
 
-fn try_build_global_method_arg_variants(
+fn try_build_global_method_literal_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -74,6 +77,15 @@ fn try_build_global_method_arg_variants(
             arg_path,
         } => build_global_method_with_global_handler(state, target_path, method_name, arg_path)
             .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_self_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
             method_name,
