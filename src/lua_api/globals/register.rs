@@ -38,6 +38,11 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
     super::stubs::register_all(lua.state_mut());
+    // Replace selected namespace stub entries with constants ported from
+    // master (C_UIWidgetManager.GetPowerBarWidgetSetID, a couple of
+    // C_PlayerInfo probes). Runs right after the stub pass so the
+    // constants override the generic stub_nil fallbacks.
+    super::system_api_runtime::patch_namespace_stubs(lua.state_mut());
     LuaApiMut::register_function(lua, "UpdateUIParentPosition", update_ui_parent_position)?;
     // Must run after stubs so the fixture aura data overrides the
     // stub_nil registrations for C_UnitAuras.GetAuraSlots & friends.

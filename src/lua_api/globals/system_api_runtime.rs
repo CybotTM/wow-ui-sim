@@ -17,8 +17,10 @@
 //!
 //! # Wiring
 //!
-//! TODO: call `patch_namespace_stubs` from `register_globals` in
-//! `src/lua_api/globals/register.rs` after `stubs::register_all(lua.state_mut())`.
+//! Called from `register_bootstrap_globals` in
+//! `src/lua_api/globals/register.rs`, right after
+//! `stubs::register_all(lua.state_mut())`. Covered by
+//! `tests/namespace_stubs_patched.rs`.
 
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::vm::gc::arena::GcRef;
