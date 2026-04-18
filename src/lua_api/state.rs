@@ -719,6 +719,7 @@ pub use super::sim_substates::{
     WowLabsPoint, WowLabsState,
 };
 
+#[derive(Default)]
 struct EmptyStateCollections {
     console_output: Vec<String>,
     timers: VecDeque<PendingTimer>,
@@ -760,38 +761,7 @@ impl EmptyStateCollections {
     }
 
     fn empty() -> Self {
-        Self {
-            console_output: Vec::new(),
-            timers: VecDeque::new(),
-            addons: Vec::new(),
-            lua_errors: Vec::new(),
-            lua_error_records: Vec::new(),
-            lua_error_counts: HashMap::new(),
-            nil_symbol_accesses: Vec::new(),
-            tooltips: HashMap::new(),
-            blocked_auras_by_unit: HashMap::new(),
-            quest_blobs: HashMap::new(),
-            fog_of_war_frames: HashMap::new(),
-            unit_position_frames: HashMap::new(),
-            pending_player_reports: HashMap::new(),
-            simple_htmls: HashMap::new(),
-            message_frames: HashMap::new(),
-            animation_groups: HashMap::new(),
-            anim_sync_times: HashMap::new(),
-            anim_frame_to_group: HashMap::new(),
-            anim_frame_to_anim: HashMap::new(),
-            on_update_frames: HashSet::new(),
-            pending_hit_grid_changes: Vec::new(),
-            pending_texture_preloads: BTreeSet::new(),
-            action_bars: HashMap::new(),
-            addon_base_paths: Vec::new(),
-            spell_cooldowns: HashMap::new(),
-            action_ui_buttons: Vec::new(),
-            party_members: Vec::new(),
-            bag_items: HashMap::new(),
-            tracked_recipes: TrackedRecipes::default(),
-            tutorial_flags: HashSet::new(),
-        }
+        Self::default()
     }
 }
 
