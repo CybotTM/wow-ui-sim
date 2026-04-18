@@ -29,50 +29,31 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_QuestLog")?;
-    table_set_rust_fn(
-        state,
-        ns,
-        "GetBountySetInfoForMapID",
-        get_bounty_set_info_for_map_id,
-    )?;
-    table_set_rust_fn(state, ns, "GetInfo", get_info)?;
-    table_set_rust_fn(state, ns, "GetNextWaypoint", get_next_waypoint)?;
-    table_set_rust_fn(state, ns, "GetQuestDetailsTheme", get_quest_details_theme)?;
-    table_set_rust_fn(state, ns, "GetQuestTagInfo", get_quest_tag_info)?;
-    table_set_rust_fn(state, ns, "GetWorldQuestInfo", get_world_quest_info)?;
-    table_set_rust_fn(
-        state,
-        ns,
-        "GetAllCompletedQuestIDs",
-        get_all_completed_quest_ids,
-    )?;
-    table_set_rust_fn(
-        state,
-        ns,
-        "GetLogIndexForQuestID",
-        get_log_index_for_quest_id,
-    )?;
-    table_set_rust_fn(
-        state,
-        ns,
-        "GetNumQuestLogEntries",
-        get_num_quest_log_entries,
-    )?;
-    table_set_rust_fn(state, ns, "IsComplete", is_complete)?;
-    table_set_rust_fn(state, ns, "IsFailed", is_failed)?;
-    table_set_rust_fn(state, ns, "IsMetaQuest", is_meta_quest)?;
-    table_set_rust_fn(state, ns, "IsOnMap", is_on_map)?;
-    table_set_rust_fn(state, ns, "IsOnQuest", is_on_quest)?;
-    table_set_rust_fn(
-        state,
-        ns,
-        "IsQuestFlaggedCompleted",
-        is_quest_flagged_completed,
-    )?;
-    table_set_rust_fn(state, ns, "IsQuestReplayable", is_quest_replayable)?;
-    table_set_rust_fn(state, ns, "IsWorldQuest", is_world_quest)?;
+    for (name, func) in C_QUEST_LOG_METHODS {
+        table_set_rust_fn(state, ns, name, *func)?;
+    }
     Ok(())
 }
+
+const C_QUEST_LOG_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+    ("GetBountySetInfoForMapID", get_bounty_set_info_for_map_id),
+    ("GetInfo", get_info),
+    ("GetNextWaypoint", get_next_waypoint),
+    ("GetQuestDetailsTheme", get_quest_details_theme),
+    ("GetQuestTagInfo", get_quest_tag_info),
+    ("GetWorldQuestInfo", get_world_quest_info),
+    ("GetAllCompletedQuestIDs", get_all_completed_quest_ids),
+    ("GetLogIndexForQuestID", get_log_index_for_quest_id),
+    ("GetNumQuestLogEntries", get_num_quest_log_entries),
+    ("IsComplete", is_complete),
+    ("IsFailed", is_failed),
+    ("IsMetaQuest", is_meta_quest),
+    ("IsOnMap", is_on_map),
+    ("IsOnQuest", is_on_quest),
+    ("IsQuestFlaggedCompleted", is_quest_flagged_completed),
+    ("IsQuestReplayable", is_quest_replayable),
+    ("IsWorldQuest", is_world_quest),
+];
 
 fn get_bounty_set_info_for_map_id(state: &mut LuaState) -> LuaResult<u32> {
     let _map_id = i32::from_stack(state, 1)?;
