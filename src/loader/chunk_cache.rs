@@ -10,11 +10,12 @@ pub fn load_chunk<L: LuaApiMut>(
     code: &str,
     tag: &str,
 ) -> Result<rilua::Function, LoadError> {
-    let hash = tagged_hash(code.as_bytes(), tag);
+    let hash = bytecode_cache::content_hash(code.as_bytes(), tag);
+    let legacy_hash = tagged_hash(code.as_bytes(), tag);
     let chunk_name = format!("@generated/{tag}/{hash:016x}");
 
     if !bytecode_cache::is_disabled() {
-        if let Some(bytecode) = bytecode_cache::get(hash)
+        if let Some(bytecode) = bytecode_cache::get_with_legacy_fallback(hash, legacy_hash)
             && let Ok(func) = LuaApiMut::load_bytes(lua, &bytecode, &chunk_name)
         {
             return Ok(func);
@@ -57,7 +58,7 @@ mod tests {
     fn load_chunk_stores_bytecode_for_generated_chunks() {
         let tag = unique_tag();
         let code = format!("return {:?}", tag);
-        let hash = tagged_hash(code.as_bytes(), &tag);
+        let hash = crate::loader::bytecode_cache::content_hash(code.as_bytes(), &tag);
 
         let mut lua = rilua::Lua::new().unwrap();
         let func = load_chunk(&mut lua, &code, &tag).expect("generated chunk should compile");
@@ -65,7 +66,7 @@ mod tests {
         let value = results.into_iter().next().expect("chunk returns a value");
         assert_eq!(lua.val_as_bytes(value).unwrap(), tag.as_bytes());
         assert!(
-            crate::loader::bytecode_cache::get(hash).is_some(),
+            crate::loader::bytecode_cache::get_with_legacy_fallback(hash, hash).is_some(),
             "generated chunk should be written to bytecode cache"
         );
     }

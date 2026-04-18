@@ -63,6 +63,15 @@ pub fn content_hash(bytes: &[u8], chunk_name: &str) -> u64 {
     hasher.finish()
 }
 
+/// Legacy cache key used by standalone `.luac` files before the slot
+/// ABI version became part of the hash.
+pub fn legacy_content_hash(bytes: &[u8], chunk_name: &str) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    bytes.hash(&mut hasher);
+    chunk_name.hash(&mut hasher);
+    hasher.finish()
+}
+
 fn cache_dir() -> PathBuf {
     PathBuf::from(CACHE_DIR)
 }
@@ -71,12 +80,14 @@ fn pack_path() -> PathBuf {
     cache_dir().join(PACK_FILE)
 }
 
-/// Load cached bytecode for the given content hash.
-pub fn get(hash: u64) -> Option<Vec<u8>> {
+/// Load cached bytecode for the current hash, falling back to a
+/// migrated legacy hash when present. A successful legacy hit is
+/// promoted under the current hash immediately so subsequent lookups no
+/// longer need the fallback.
+pub fn get_with_legacy_fallback(hash: u64, legacy_hash: u64) -> Option<Vec<u8>> {
     let mut state = cache_state().lock().ok()?;
     ensure_loaded(&mut state);
-    let (offset, len) = *state.index.get(&hash)?;
-    Some(state.values[offset..offset + len].to_vec())
+    lookup_with_legacy_fallback(&mut state, hash, legacy_hash)
 }
 
 /// Save compiled bytecode to cache.
@@ -129,6 +140,26 @@ fn ensure_loaded(state: &mut CacheState) {
     }
 
     state.initialized = true;
+}
+
+fn lookup_with_legacy_fallback(
+    state: &mut CacheState,
+    hash: u64,
+    legacy_hash: u64,
+) -> Option<Vec<u8>> {
+    if let Some((offset, len)) = state.index.get(&hash).copied() {
+        return Some(state.values[offset..offset + len].to_vec());
+    }
+
+    let (offset, len) = state.index.get(&legacy_hash).copied()?;
+    let bytecode = state.values[offset..offset + len].to_vec();
+
+    let promoted_offset = state.values.len();
+    state.values.extend_from_slice(&bytecode);
+    state.index.insert(hash, (promoted_offset, len));
+    let _ = append_pack_entry(state, hash, &bytecode);
+
+    Some(bytecode)
 }
 
 fn load_pack_bytes(state: &mut CacheState, bytes: &[u8]) -> bool {
@@ -310,5 +341,33 @@ mod tests {
         WHITELIST_VERSION.wrapping_add(1).hash(&mut hasher);
         let stale = hasher.finish();
         assert_ne!(base, stale);
+    }
+
+    #[test]
+    fn legacy_content_hash_matches_pre_versioned_key() {
+        let legacy = legacy_content_hash(b"abc", "=@chunk");
+        let mut hasher = DefaultHasher::new();
+        b"abc".hash(&mut hasher);
+        "=@chunk".hash(&mut hasher);
+        assert_eq!(legacy, hasher.finish());
+    }
+
+    #[test]
+    fn legacy_lookup_promotes_entry_under_current_hash() {
+        let mut state = CacheState::default();
+        let legacy_hash = legacy_content_hash(b"abc", "=@chunk");
+        let current_hash = content_hash(b"abc", "=@chunk");
+
+        state.values.extend_from_slice(b"compiled");
+        state.index.insert(legacy_hash, (0, b"compiled".len()));
+
+        let loaded = lookup_with_legacy_fallback(&mut state, current_hash, legacy_hash)
+            .expect("legacy entry should be found");
+        assert_eq!(loaded, b"compiled");
+        assert_eq!(
+            state.index.get(&current_hash).copied(),
+            Some((b"compiled".len(), b"compiled".len()))
+        );
+        assert_eq!(&state.values[b"compiled".len()..], b"compiled");
     }
 }

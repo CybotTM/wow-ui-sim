@@ -264,9 +264,10 @@ fn load_cached_or_compile(
     timing: &mut LoadTiming,
 ) -> Result<rilua::Function, LoadError> {
     let hash = bytecode_cache::content_hash(bytes, chunk_name);
+    let legacy_hash = bytecode_cache::legacy_content_hash(bytes, chunk_name);
 
     if !bytecode_cache::is_disabled() {
-        if let Some(bytecode) = bytecode_cache::get(hash)
+        if let Some(bytecode) = bytecode_cache::get_with_legacy_fallback(hash, legacy_hash)
             && let Ok(func) = compile_with_rilua(lua, &bytecode, chunk_name)
         {
             timing.cache_hits += 1;
