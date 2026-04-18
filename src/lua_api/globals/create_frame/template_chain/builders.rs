@@ -205,11 +205,7 @@ fn build_sequence_fast_handler(
             let fourth = build_fast_handler(state, fourth_ref.clone())?;
             let first_pair = chain_optional_handlers(state, first, second)?;
             let first_triplet = chain_optional_handlers(state, first_pair, third)?;
-            Ok(Some(chain_optional_handlers(
-                state,
-                first_triplet,
-                fourth,
-            )?))
+            Ok(Some(chain_optional_handlers(state, first_triplet, fourth)?))
         }
         FastHandlerRef::ConditionalGlobalNoArgs {
             function_name,

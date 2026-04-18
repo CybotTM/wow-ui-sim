@@ -62,6 +62,24 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             arg_path,
         });
     }
+    if let Some((
+        target_path,
+        method_name,
+        first_arg_path,
+        second_arg_path,
+        third_arg_path,
+        fourth_arg_path,
+    )) = parse_inline_global_method_with_four_global_args(stmt)
+    {
+        return Some(FastHandlerRef::GlobalMethodWithFourGlobalArgs {
+            target_path,
+            method_name,
+            first_arg_path,
+            second_arg_path,
+            third_arg_path,
+            fourth_arg_path,
+        });
+    }
     if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
@@ -141,8 +159,9 @@ fn parse_local_global_path_conditional_method(stmt: &str) -> Option<(&str, &str)
         return None;
     }
     let target_path = remainder.trim();
-    let (target_path, _tail) =
-        target_path.split_once('\n').or_else(|| target_path.split_once("if"))?;
+    let (target_path, _tail) = target_path
+        .split_once('\n')
+        .or_else(|| target_path.split_once("if"))?;
     let target_path = target_path.trim();
     let tail = stmt[stmt.find("if")?..].trim();
     let prefix = format!("if ({local_name}) then");
@@ -170,18 +189,21 @@ fn parse_get_lfg_mode_branch(stmt: &str) -> Option<(&str, Option<&str>, &str, &s
     if parts.next().is_some() || !is_fast_handler_path(category_path) {
         return None;
     }
-    if let Some(slot_path) = slot_path && !is_fast_handler_path(slot_path) {
+    if let Some(slot_path) = slot_path
+        && !is_fast_handler_path(slot_path)
+    {
         return None;
     }
 
     let remainder = remainder.trim_start();
-    let condition_prefix =
-        "if ( mode == \"queued\" or mode == \"listed\" or mode == \"rolecheck\" or mode == \"suspended\" ) then";
+    let condition_prefix = "if ( mode == \"queued\" or mode == \"listed\" or mode == \"rolecheck\" or mode == \"suspended\" ) then";
     let remainder = remainder.strip_prefix(condition_prefix)?.trim_start();
     let (then_stmt, else_tail) = remainder.split_once("else")?;
     let else_stmt = else_tail.trim().strip_suffix("end")?.trim();
-    let (leave_function, leave_args) = parse_global_function_call(then_stmt.trim().trim_end_matches(';'))?;
-    let (join_function, join_args) = parse_global_function_call(else_stmt.trim().trim_end_matches(';'))?;
+    let (leave_function, leave_args) =
+        parse_global_function_call(then_stmt.trim().trim_end_matches(';'))?;
+    let (join_function, join_args) =
+        parse_global_function_call(else_stmt.trim().trim_end_matches(';'))?;
     if !join_args.trim().is_empty() {
         return None;
     }
@@ -189,8 +211,10 @@ fn parse_get_lfg_mode_branch(stmt: &str) -> Option<(&str, Option<&str>, &str, &s
         Some(slot) => format!("{category_path}, {slot}"),
         None => category_path.to_string(),
     };
-    (leave_args.trim() == expected_leave_args && is_fast_handler_path(leave_function) && is_fast_handler_path(join_function))
-        .then_some((category_path, slot_path, leave_function, join_function))
+    (leave_args.trim() == expected_leave_args
+        && is_fast_handler_path(leave_function)
+        && is_fast_handler_path(join_function))
+    .then_some((category_path, slot_path, leave_function, join_function))
 }
 
 fn parse_global_function_call(stmt: &str) -> Option<(&str, &str)> {
@@ -279,6 +303,42 @@ fn parse_inline_global_method_with_global_arg(stmt: &str) -> Option<(&str, &str,
         && is_fast_handler_path(arg_path)
         && arg_path.split('.').next() != Some("self"))
     .then_some((target_path, method_name, arg_path))
+}
+
+fn parse_inline_global_method_with_four_global_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, &str, &str)> {
+    let (target_path, remainder) = stmt.rsplit_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first_arg_path = parts.next()?;
+    let second_arg_path = parts.next()?;
+    let third_arg_path = parts.next()?;
+    let fourth_arg_path = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let target_path = target_path.trim();
+    let method_name = method_name.trim();
+    (is_fast_handler_path(target_path)
+        && is_fast_identifier(method_name)
+        && is_fast_handler_path(first_arg_path)
+        && is_fast_handler_path(second_arg_path)
+        && is_fast_handler_path(third_arg_path)
+        && is_fast_handler_path(fourth_arg_path)
+        && first_arg_path.split('.').next() != Some("self")
+        && second_arg_path.split('.').next() != Some("self")
+        && third_arg_path.split('.').next() != Some("self")
+        && fourth_arg_path.split('.').next() != Some("self"))
+    .then_some((
+        target_path,
+        method_name,
+        first_arg_path,
+        second_arg_path,
+        third_arg_path,
+        fourth_arg_path,
+    ))
 }
 
 fn parse_inline_global_method_with_self_id_arg(stmt: &str) -> Option<(&str, &str)> {

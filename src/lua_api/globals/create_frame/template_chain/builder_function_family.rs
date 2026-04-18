@@ -33,8 +33,7 @@ fn build_plain_function_variants(
             build_function_handler(state, function_name, FunctionHandlerKind::NoArgs).map(Some)
         }
         FastHandlerRef::FunctionWithSelfGetTextResult(function_name) => {
-            build_function_handler(state, function_name, FunctionHandlerKind::SelfGetText)
-                .map(Some)
+            build_function_handler(state, function_name, FunctionHandlerKind::SelfGetText).map(Some)
         }
         FastHandlerRef::FunctionWithSelfIdArg(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::SelfId).map(Some)
@@ -130,6 +129,19 @@ fn build_function_with_arg_variants(
             function_name,
             first_arg_path,
             second_arg_path,
+        )
+        .map(Some),
+        FastHandlerRef::FunctionWithThreeGlobalArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            third_arg_path,
+        } => build_function_handler_with_three_global_args(
+            state,
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            third_arg_path,
         )
         .map(Some),
         FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
@@ -450,6 +462,34 @@ fn build_play_sound_then_copy_club_ticket_to_clipboard_from_parent_handler(
     )?;
     let sound = resolve_global_path(state, sound_path);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[sound])
+}
+
+fn build_function_handler_with_three_global_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first_arg_path: &str,
+    second_arg_path: &str,
+    third_arg_path: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first, second, third = ...
+            return function(self, ...)
+                return fn(first, second, third)
+            end
+        "#,
+        "template-inline-function-three-global-args",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first = resolve_global_path(state, first_arg_path);
+    let second = resolve_global_path(state, second_arg_path);
+    let third = resolve_global_path(state, third_arg_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first, second, third],
+    )
 }
 
 fn build_function_handler_with_string_nil_nil_global_args(
@@ -1108,7 +1148,10 @@ const ANCESTOR_ID_TEMPLATE: &str = r#"
 
 fn ancestor_function_handler_template(mode: AncestorArgMode) -> (&'static str, &'static str) {
     match mode {
-        AncestorArgMode::Target => (ANCESTOR_TARGET_TEMPLATE, "template-inline-function-ancestor"),
+        AncestorArgMode::Target => (
+            ANCESTOR_TARGET_TEMPLATE,
+            "template-inline-function-ancestor",
+        ),
         AncestorArgMode::Id => (ANCESTOR_ID_TEMPLATE, "template-inline-function-ancestor-id"),
     }
 }

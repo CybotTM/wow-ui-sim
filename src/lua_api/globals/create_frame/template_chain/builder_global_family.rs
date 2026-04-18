@@ -71,6 +71,23 @@ fn build_global_method_variants(
             arg_path,
         } => build_global_method_with_global_handler(state, target_path, method_name, arg_path)
             .map(Some),
+        FastHandlerRef::GlobalMethodWithFourGlobalArgs {
+            target_path,
+            method_name,
+            first_arg_path,
+            second_arg_path,
+            third_arg_path,
+            fourth_arg_path,
+        } => build_global_method_with_four_global_args_handler(
+            state,
+            target_path,
+            method_name,
+            first_arg_path,
+            second_arg_path,
+            third_arg_path,
+            fourth_arg_path,
+        )
+        .map(Some),
         FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,
             method_name,
@@ -213,6 +230,38 @@ fn build_local_global_path_conditional_method_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[target_path, method_name],
+    )
+}
+
+fn build_global_method_with_four_global_args_handler(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    first_arg_path: &str,
+    second_arg_path: &str,
+    third_arg_path: &str,
+    fourth_arg_path: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local target, method_name, first, second, third, fourth = ...
+            return function(self, ...)
+                return target[method_name](target, first, second, third, fourth)
+            end
+        "#,
+        "template-global-method-four-global-args",
+    )?;
+    let target = resolve_global_path(state, target_path);
+    let method_name = create_string(state, method_name);
+    let first = resolve_global_path(state, first_arg_path);
+    let second = resolve_global_path(state, second_arg_path);
+    let third = resolve_global_path(state, third_arg_path);
+    let fourth = resolve_global_path(state, fourth_arg_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, method_name, first, second, third, fourth],
     )
 }
 

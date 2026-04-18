@@ -278,9 +278,7 @@ fn parse_inline_function_with_two_global_args(stmt: &str) -> Option<(&str, &str,
     .then_some((function_name, first_arg_path, second_arg_path))
 }
 
-fn parse_inline_function_with_three_global_args(
-    stmt: &str,
-) -> Option<(&str, &str, &str, &str)> {
+fn parse_inline_function_with_three_global_args(stmt: &str) -> Option<(&str, &str, &str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
     let mut parts = args.split(',').map(str::trim);
@@ -556,8 +554,7 @@ pub(super) fn parse_copy_club_ticket_to_clipboard_from_parent(stmt: &str) -> Opt
     let prefix = "if clubInfo then";
     let remainder = remainder.strip_prefix(prefix)?.trim_start();
     let body = remainder.strip_suffix("end")?.trim();
-    let expected =
-        "CopyToClipboard(ClubTicketUtil.FormatTicket(clubInfo, self:GetParent().LinkIDText:GetText()));";
+    let expected = "CopyToClipboard(ClubTicketUtil.FormatTicket(clubInfo, self:GetParent().LinkIDText:GetText()));";
     (body == expected).then_some(())
 }
 

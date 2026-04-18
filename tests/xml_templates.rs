@@ -3105,6 +3105,119 @@ fn test_create_frame_from_xml_inline_tooltip_then_parent_assign_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_tooltip_set_text_with_four_global_args_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        HIGHLIGHT_FONT_COLOR = { r = 0.6, g = 0.7, b = 0.8 }
+        LFG_LIST_REFRESH = "Refresh"
+        GameTooltip = {
+            SetOwner = function(self, owner, anchor)
+                self.anchor = anchor
+            end,
+            SetText = function(self, text, r, g, b)
+                self.text = text
+                self.rgb = { r, g, b }
+            end,
+        }
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineTooltipFourArgsButton" parent="UIParent">
+            <Scripts><OnEnter>
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+                GameTooltip:SetText(LFG_LIST_REFRESH, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
+            </OnEnter></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineTooltipFourArgsButton:GetScript("OnEnter")(XmlInlineTooltipFourArgsButton)
+    "#,
+    )
+    .unwrap();
+    let result: (String, String, f64, f64, f64) = env
+        .eval(
+            r#"
+            return GameTooltip.anchor,
+                   GameTooltip.text,
+                   GameTooltip.rgb[1],
+                   GameTooltip.rgb[2],
+                   GameTooltip.rgb[3]
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_RIGHT");
+    assert_eq!(result.1, "Refresh");
+    assert_eq!(result.2, 0.6);
+    assert_eq!(result.3, 0.7);
+    assert_eq!(result.4, 0.8);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_tooltip_title_line_show_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        BAG_CLEANUP_BAGS = "Cleanup"
+        BAG_CLEANUP_BAGS_DESCRIPTION = "Cleanup desc"
+        HIGHLIGHT_FONT_COLOR = { tag = "highlight" }
+        XmlInlineTooltipLog = {}
+        GameTooltip = {
+            SetOwner = function(self, owner)
+                table.insert(XmlInlineTooltipLog, "owner")
+            end,
+            Show = function(self)
+                table.insert(XmlInlineTooltipLog, "show")
+            end,
+        }
+        function GameTooltip_SetTitle(tooltip, text, color)
+            table.insert(XmlInlineTooltipLog, "title:" .. text .. ":" .. color.tag)
+        end
+        function GameTooltip_AddNormalLine(tooltip, text)
+            table.insert(XmlInlineTooltipLog, "line:" .. text)
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineTooltipSequenceButton" parent="UIParent">
+            <Scripts><OnEnter>
+                GameTooltip:SetOwner(self);
+                GameTooltip_SetTitle(GameTooltip, BAG_CLEANUP_BAGS, HIGHLIGHT_FONT_COLOR);
+                GameTooltip_AddNormalLine(GameTooltip, BAG_CLEANUP_BAGS_DESCRIPTION);
+                GameTooltip:Show();
+            </OnEnter></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineTooltipSequenceButton:GetScript("OnEnter")(XmlInlineTooltipSequenceButton)
+    "#,
+    )
+    .unwrap();
+    let result: String = env
+        .eval(r#"return table.concat(XmlInlineTooltipLog, ",")"#)
+        .unwrap();
+    assert_eq!(result, "owner,title:Cleanup:highlight,line:Cleanup desc,show");
+}
+
+#[test]
 fn test_create_frame_from_xml_inherited_append_number_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

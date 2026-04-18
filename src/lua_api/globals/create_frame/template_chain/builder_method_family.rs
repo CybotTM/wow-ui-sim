@@ -48,8 +48,9 @@ fn build_direct_method_variants(
             method_name,
             first,
             second,
-        } => build_method_with_two_number_args_handler(state, method_name, *first, *second)
-            .map(Some),
+        } => {
+            build_method_with_two_number_args_handler(state, method_name, *first, *second).map(Some)
+        }
         FastHandlerRef::MethodWithStringArg { method_name, arg } => {
             build_method_with_string_arg_handler(state, method_name, arg).map(Some)
         }

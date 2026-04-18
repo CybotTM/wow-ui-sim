@@ -49,9 +49,8 @@ fn parse_play_sound_then_copy_club_ticket<'a>(stmt: &'a str) -> Option<FastHandl
     if function_name != "PlaySound" || !is_fast_handler_path(sound_path) {
         return None;
     }
-    parse_copy_club_ticket_to_clipboard_from_parent(rest.trim()).map(
-        |_| FastHandlerRef::PlaySoundThenCopyClubTicketToClipboardFromParent { sound_path },
-    )
+    parse_copy_club_ticket_to_clipboard_from_parent(rest.trim())
+        .map(|_| FastHandlerRef::PlaySoundThenCopyClubTicketToClipboardFromParent { sound_path })
 }
 
 fn parse_parent_field_local_click_if_enabled<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
@@ -63,10 +62,7 @@ fn parse_parent_field_local_click_if_enabled<'a>(stmt: &'a str) -> Option<FastHa
         return None;
     }
     let (target_expr, remainder) = remainder.split_once(';')?;
-    let field = target_expr
-        .trim()
-        .strip_prefix("self:GetParent().")?
-        .trim();
+    let field = target_expr.trim().strip_prefix("self:GetParent().")?.trim();
     if !is_fast_identifier(field) {
         return None;
     }
@@ -79,13 +75,17 @@ fn parse_parent_field_local_click_if_enabled<'a>(stmt: &'a str) -> Option<FastHa
         .then_some(FastHandlerRef::ParentFieldLocalClickIfEnabled { field })
 }
 
-fn parse_global_tooltip_set_owner_then_parent_assign<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+fn parse_global_tooltip_set_owner_then_parent_assign<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
     let (tooltip_stmt, assign_stmt) = stmt.rsplit_once(';')?;
     let tooltip_stmt = tooltip_stmt.trim();
     let assign_stmt = assign_stmt.trim();
     let (target_path, anchor, text_path, red_path, green_path, blue_path, wrap) =
         parse_global_tooltip_set_owner_then_set_text(tooltip_stmt)?;
-    let FastHandlerRef::AssignParentField { field, value } = parse_inline_parent_assignment(assign_stmt)? else {
+    let FastHandlerRef::AssignParentField { field, value } =
+        parse_inline_parent_assignment(assign_stmt)?
+    else {
         return None;
     };
     Some(FastHandlerRef::Sequence2(Box::new((
