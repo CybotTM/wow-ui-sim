@@ -23,14 +23,18 @@
 //! docs/wiki/investigations/partyframe-tree.md).
 
 use crate::lua_api::game_data::AuraInfo;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{
+    borrow_state, call_function_state, create_string, create_table, table_get, table_set,
+};
 use crate::lua_bridge::FromStack;
+use crate::lua_bridge::stack_val;
 use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, RustFn, Val};
 
 pub fn register_all(state: &mut LuaState) {
     let ns = ensure_c_unit_auras(state);
+    ensure_runtime_aura_state(state, ns);
     install(state, ns, "GetAuraSlots", get_aura_slots);
     install(state, ns, "GetAuraDataBySlot", get_aura_data_by_slot);
     install(state, ns, "GetAuraDataByIndex", get_aura_data_by_index);
@@ -48,16 +52,60 @@ pub fn register_all(state: &mut LuaState) {
     );
     install(state, ns, "GetBuffDataByIndex", get_buff_data_by_index);
     install(state, ns, "GetDebuffDataByIndex", get_debuff_data_by_index);
+    install(
+        state,
+        ns,
+        "GetPlayerAuraBySpellID",
+        get_player_aura_by_spell_id,
+    );
+    install(state, ns, "AddBlockedAura", add_blocked_aura);
+    install(
+        state,
+        ns,
+        "SwitchAuraDataProvider",
+        switch_aura_data_provider,
+    );
+    install(state, ns, "ResetAuraDataProvider", reset_aura_data_provider);
+
+    install_global(state, "GetPlayerAuraBySpellID", get_player_aura_by_spell_id);
+    install_global(state, "UnitBuff", unit_buff);
+    install_global(state, "UnitDebuff", unit_debuff);
+    install_global(state, "UnitAura", unit_aura);
+
+    let aura_util = ensure_global_table(state, "AuraUtil");
+    install(
+        state,
+        aura_util,
+        "UnpackAuraData",
+        aura_util_unpack_aura_data,
+    );
+    install(state, aura_util, "ForEachAura", aura_util_for_each_aura);
+    install(state, aura_util, "FindAura", aura_util_find_aura);
+    install(
+        state,
+        aura_util,
+        "FindAuraByName",
+        aura_util_find_aura_by_name,
+    );
+    install(
+        state,
+        aura_util,
+        "GetAuraDataByAuraInstanceID",
+        aura_util_get_aura_data_by_aura_instance_id,
+    );
 }
 
 fn ensure_c_unit_auras(state: &mut LuaState) -> Val {
-    use crate::lua_api::methods::table_get;
+    ensure_global_table(state, "C_UnitAuras")
+}
+
+fn ensure_global_table(state: &mut LuaState, name: &str) -> Val {
     let global = Val::Table(state.global);
-    match table_get(state, global, "C_UnitAuras") {
+    match table_get(state, global, name) {
         ns @ Val::Table(_) => ns,
         _ => {
             let ns = create_table(state);
-            table_set(state, global, "C_UnitAuras", ns);
+            table_set(state, global, name, ns);
             ns
         }
     }
@@ -67,6 +115,20 @@ fn install(state: &mut LuaState, ns: Val, name: &'static str, func: RustFn) {
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);
     table_set(state, ns, name, Val::Function(closure_ref));
+}
+
+fn install_global(state: &mut LuaState, name: &'static str, func: RustFn) {
+    install(state, Val::Table(state.global), name, func);
+}
+
+fn ensure_runtime_aura_state(state: &mut LuaState, ns: Val) {
+    if !matches!(table_get(state, ns, "_blockedAuras"), Val::Table(_)) {
+        let blocked = create_table(state);
+        table_set(state, ns, "_blockedAuras", blocked);
+    }
+    if matches!(table_get(state, ns, "_providerSwitched"), Val::Nil) {
+        table_set(state, ns, "_providerSwitched", Val::Bool(false));
+    }
 }
 
 // ── Filter handling ──────────────────────────────────────────────────────────
@@ -92,6 +154,39 @@ fn aura_matches_filter(aura: &AuraInfo, filter: AuraFilter) -> bool {
     }
 }
 
+fn target_fixture_auras() -> Vec<AuraInfo> {
+    vec![
+        AuraInfo {
+            name: "Weakened Armor".to_string(),
+            spell_id: 113746,
+            icon: 136039,
+            duration: 15.0,
+            expiration_time: 15.0,
+            applications: 1,
+            source_unit: "target".to_string(),
+            is_helpful: false,
+            is_stealable: false,
+            can_apply_aura: false,
+            is_from_player_or_player_pet: false,
+            aura_instance_id: 1,
+        },
+        AuraInfo {
+            name: "Expose Weakness".to_string(),
+            spell_id: 53338,
+            icon: 132090,
+            duration: 12.0,
+            expiration_time: 12.0,
+            applications: 2,
+            source_unit: "target".to_string(),
+            is_helpful: false,
+            is_stealable: false,
+            can_apply_aura: false,
+            is_from_player_or_player_pet: false,
+            aura_instance_id: 2,
+        },
+    ]
+}
+
 fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> Vec<AuraInfo> {
     let Ok(sim) = borrow_state(state) else {
         return Vec::new();
@@ -106,14 +201,51 @@ fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> V
         } else {
             return Vec::new();
         }
-    } else {
+    } else if unit == "player" {
         sim.player
             .buffs
             .iter()
             .filter(|a| aura_matches_filter(a, filter))
             .collect()
+    } else if unit == "target" {
+        let target_auras = target_fixture_auras();
+        return target_auras
+            .into_iter()
+            .filter(|a| aura_matches_filter(a, filter))
+            .collect();
+    } else {
+        return Vec::new();
     };
     auras.into_iter().cloned().collect()
+}
+
+fn blocked_aura_key(unit: &str, aura_instance_id: i32) -> String {
+    format!("{unit}:{aura_instance_id}")
+}
+
+fn is_blocked_aura(state: &mut LuaState, unit: &str, aura_instance_id: i32) -> bool {
+    let ns = ensure_c_unit_auras(state);
+    let blocked = table_get(state, ns, "_blockedAuras");
+    matches!(
+        table_get(state, blocked, &blocked_aura_key(unit, aura_instance_id)),
+        Val::Bool(true)
+    )
+}
+
+fn collect_visible_unit_auras(
+    state: &mut LuaState,
+    unit: &str,
+    filter: AuraFilter,
+) -> Vec<AuraInfo> {
+    collect_unit_auras(state, unit, filter)
+        .into_iter()
+        .filter(|a| !is_blocked_aura(state, unit, a.aura_instance_id))
+        .collect()
+}
+
+fn provider_switched(state: &mut LuaState) -> bool {
+    let ns = ensure_c_unit_auras(state);
+    matches!(table_get(state, ns, "_providerSwitched"), Val::Bool(true))
 }
 
 // ── GetAuraSlots ─────────────────────────────────────────────────────────────
@@ -133,7 +265,7 @@ fn get_aura_slots(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
 
-    let auras = collect_unit_auras(state, &unit, filter_from_str(&filter_str));
+    let auras = collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str));
 
     // continuationToken = nil (done after this batch)
     state.push(Val::Nil);
@@ -173,27 +305,13 @@ fn get_aura_data_by_aura_instance_id(state: &mut LuaState) -> LuaResult<u32> {
 fn get_aura_data_by_spell_name(state: &mut LuaState) -> LuaResult<u32> {
     let unit: String = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let name = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
-    use crate::lua_api::globals::unit_api::parse_party_index;
-    let found = {
-        let Ok(sim) = borrow_state(state) else {
-            state.push(Val::Nil);
-            return Ok(1);
-        };
-        if let Some(idx) = parse_party_index(&unit) {
-            sim.party_members.get(idx).and_then(|m| {
-                m.buffs
-                    .iter()
-                    .chain(m.debuffs.iter())
-                    .find(|a| a.name == name)
-                    .cloned()
-            })
-        } else {
-            sim.player.buffs.iter().find(|a| a.name == name).cloned()
-        }
-    };
+    let found = collect_unit_auras(state, &unit, AuraFilter::Helpful)
+        .into_iter()
+        .chain(collect_unit_auras(state, &unit, AuraFilter::Harmful))
+        .find(|a| a.name == name);
     match found {
         Some(aura) => {
-            let table = build_aura_table(state, &aura);
+            let table = build_aura_table(state, &aura, &unit);
             state.push(table);
         }
         None => state.push(Val::Nil),
@@ -215,34 +333,31 @@ fn get_debuff_data_by_index(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_player_aura_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = Option::<f64>::from_stack(state, 1)?.unwrap_or_default() as i32;
+    let found = collect_unit_auras(state, "player", AuraFilter::Helpful)
+        .into_iter()
+        .find(|a| a.spell_id == spell_id);
+    match found {
+        Some(aura) => {
+            let table = build_aura_table(state, &aura, "player");
+            state.push(table);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 // ── Aura lookup helpers ──────────────────────────────────────────────────────
 
 fn push_aura_by_instance_id(state: &mut LuaState, unit: &str, aura_instance_id: i32) {
-    use crate::lua_api::globals::unit_api::parse_party_index;
-    let found = {
-        let Ok(sim) = borrow_state(state) else {
-            state.push(Val::Nil);
-            return;
-        };
-        if let Some(idx) = parse_party_index(unit) {
-            sim.party_members.get(idx).and_then(|m| {
-                m.buffs
-                    .iter()
-                    .chain(m.debuffs.iter())
-                    .find(|a| a.aura_instance_id == aura_instance_id)
-                    .cloned()
-            })
-        } else {
-            sim.player
-                .buffs
-                .iter()
-                .find(|a| a.aura_instance_id == aura_instance_id)
-                .cloned()
-        }
-    };
+    let found = collect_unit_auras(state, unit, AuraFilter::Helpful)
+        .into_iter()
+        .chain(collect_unit_auras(state, unit, AuraFilter::Harmful))
+        .find(|a| a.aura_instance_id == aura_instance_id);
     match found {
         Some(aura) => {
-            let table = build_aura_table(state, &aura);
+            let table = build_aura_table(state, &aura, unit);
             state.push(table);
         }
         None => state.push(Val::Nil),
@@ -254,28 +369,223 @@ fn push_aura_at_filtered_index(state: &mut LuaState, unit: &str, filter: AuraFil
         state.push(Val::Nil);
         return;
     }
-    let auras = collect_unit_auras(state, unit, filter);
+    let auras = collect_visible_unit_auras(state, unit, filter);
     match auras.get((index - 1) as usize) {
         Some(aura) => {
-            let table = build_aura_table(state, aura);
+            let table = build_aura_table(state, aura, unit);
             state.push(table);
         }
         None => state.push(Val::Nil),
     }
 }
 
+fn add_blocked_aura(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let aura_instance_id = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    let ns = ensure_c_unit_auras(state);
+    ensure_runtime_aura_state(state, ns);
+    let blocked = table_get(state, ns, "_blockedAuras");
+    table_set(
+        state,
+        blocked,
+        &blocked_aura_key(&unit, aura_instance_id),
+        Val::Bool(true),
+    );
+    Ok(0)
+}
+
+fn switch_aura_data_provider(state: &mut LuaState) -> LuaResult<u32> {
+    let ns = ensure_c_unit_auras(state);
+    ensure_runtime_aura_state(state, ns);
+    table_set(state, ns, "_providerSwitched", Val::Bool(true));
+    Ok(0)
+}
+
+fn reset_aura_data_provider(state: &mut LuaState) -> LuaResult<u32> {
+    let ns = ensure_c_unit_auras(state);
+    ensure_runtime_aura_state(state, ns);
+    table_set(state, ns, "_providerSwitched", Val::Bool(false));
+    Ok(0)
+}
+
+fn unit_buff(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    let aura = collect_visible_unit_auras(state, &unit, AuraFilter::Helpful)
+        .into_iter()
+        .nth(index.saturating_sub(1) as usize);
+    Ok(push_legacy_aura_result(state, aura.as_ref(), &unit))
+}
+
+fn unit_debuff(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    let aura = collect_visible_unit_auras(state, &unit, AuraFilter::Harmful)
+        .into_iter()
+        .nth(index.saturating_sub(1) as usize);
+    Ok(push_legacy_aura_result(state, aura.as_ref(), &unit))
+}
+
+fn unit_aura(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let index = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    let filter_str = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
+    let aura = collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str))
+        .into_iter()
+        .nth(index.saturating_sub(1) as usize);
+    Ok(push_legacy_aura_result(state, aura.as_ref(), &unit))
+}
+
+fn aura_util_unpack_aura_data(state: &mut LuaState) -> LuaResult<u32> {
+    Ok(push_legacy_aura_tuple(state, stack_val(state, 1)))
+}
+
+fn aura_util_for_each_aura(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let filter_str = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    let max_count = Option::<f64>::from_stack(state, 3)?.map(|n| n.max(0.0) as usize);
+    let callback = Val::from_stack(state, 4)?;
+    let Val::Function(_) = callback else {
+        return Ok(0);
+    };
+
+    for (seen, aura) in collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str))
+        .into_iter()
+        .enumerate()
+    {
+        if max_count.is_some_and(|limit| seen >= limit) {
+            break;
+        }
+        let aura_table = build_aura_table(state, &aura, &unit);
+        let result = call_function_state(state, callback, &[aura_table])?;
+        if is_truthy(result) {
+            break;
+        }
+    }
+
+    Ok(0)
+}
+
+fn aura_util_find_aura(state: &mut LuaState) -> LuaResult<u32> {
+    let predicate = Val::from_stack(state, 1)?;
+    let unit = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    let filter_str = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
+    let max_count = Option::<f64>::from_stack(state, 4)?.map(|n| n.max(0.0) as usize);
+    let Val::Function(_) = predicate else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    for (seen, aura) in collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str))
+        .into_iter()
+        .enumerate()
+    {
+        if max_count.is_some_and(|limit| seen >= limit) {
+            break;
+        }
+        let aura_table = build_aura_table(state, &aura, &unit);
+        let matched = is_truthy(call_function_state(state, predicate, &[aura_table])?);
+        if matched {
+            state.push(aura_table);
+            return Ok(1);
+        }
+    }
+
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn aura_util_find_aura_by_name(state: &mut LuaState) -> LuaResult<u32> {
+    let name = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let unit = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+    let filter_str = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
+    let found = collect_visible_unit_auras(state, &unit, filter_from_str(&filter_str))
+        .into_iter()
+        .find(|aura| aura.name == name);
+    match found {
+        Some(aura) => {
+            let table = build_aura_table(state, &aura, &unit);
+            state.push(table);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn aura_util_get_aura_data_by_aura_instance_id(state: &mut LuaState) -> LuaResult<u32> {
+    if provider_switched(state) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let aura_id = Option::<f64>::from_stack(state, 2)?.unwrap_or_default() as i32;
+    push_aura_by_instance_id(state, &unit, aura_id);
+    Ok(1)
+}
+
+fn push_legacy_aura_result(state: &mut LuaState, aura: Option<&AuraInfo>, unit: &str) -> u32 {
+    match aura {
+        Some(aura) => {
+            let aura_table = build_aura_table(state, aura, unit);
+            push_legacy_aura_tuple(state, aura_table)
+        }
+        None => {
+            state.push(Val::Nil);
+            1
+        }
+    }
+}
+
+fn push_legacy_aura_tuple(state: &mut LuaState, aura: Val) -> u32 {
+    let Val::Table(_) = aura else {
+        state.push(Val::Nil);
+        return 1;
+    };
+
+    let name = table_get(state, aura, "name");
+    let icon = table_get(state, aura, "icon");
+    let applications = table_get(state, aura, "applications");
+    let dispel_name = table_get(state, aura, "dispelName");
+    let duration = table_get(state, aura, "duration");
+    let expiration_time = table_get(state, aura, "expirationTime");
+    let source_unit = table_get(state, aura, "sourceUnit");
+    let is_stealable = table_get(state, aura, "isStealable");
+    let spell_id = table_get(state, aura, "spellId");
+
+    state.push(name);
+    state.push(icon);
+    state.push(applications);
+    state.push(dispel_name);
+    state.push(duration);
+    state.push(expiration_time);
+    state.push(source_unit);
+    state.push(is_stealable);
+    state.push(Val::Nil);
+    state.push(spell_id);
+    10
+}
+
+fn is_truthy(value: Val) -> bool {
+    !matches!(value, Val::Nil | Val::Bool(false))
+}
+
 // ── Aura table builder ───────────────────────────────────────────────────────
 
-fn build_aura_table(state: &mut LuaState, aura: &AuraInfo) -> Val {
+fn build_aura_table(state: &mut LuaState, aura: &AuraInfo, unit: &str) -> Val {
     let t = create_table(state);
-    write_aura_identity(state, t, aura);
-    write_aura_flags(state, t, aura);
+    write_aura_identity(state, t, aura, unit);
+    write_aura_flags(state, t, aura, unit);
     t
 }
 
-fn write_aura_identity(state: &mut LuaState, t: Val, aura: &AuraInfo) {
+fn write_aura_identity(state: &mut LuaState, t: Val, aura: &AuraInfo, unit: &str) {
     let name = create_string(state, &aura.name);
-    let source = create_string(state, &aura.source_unit);
+    let source_unit = if unit == "player" {
+        "player"
+    } else {
+        aura.source_unit.as_str()
+    };
+    let source = create_string(state, source_unit);
     let empty_points = create_table(state);
     let dispel = create_string(state, "");
 
@@ -299,17 +609,17 @@ fn write_aura_identity(state: &mut LuaState, t: Val, aura: &AuraInfo) {
     );
 }
 
-fn write_aura_flags(state: &mut LuaState, t: Val, aura: &AuraInfo) {
+fn write_aura_flags(state: &mut LuaState, t: Val, aura: &AuraInfo, unit: &str) {
     table_set(state, t, "isStealable", Val::Bool(aura.is_stealable));
     table_set(state, t, "nameplateShowPersonal", Val::Bool(false));
     table_set(state, t, "canApplyAura", Val::Bool(aura.can_apply_aura));
     table_set(state, t, "isBossAura", Val::Bool(false));
-    table_set(
-        state,
-        t,
-        "isFromPlayerOrPlayerPet",
-        Val::Bool(aura.is_from_player_or_player_pet),
-    );
+    let from_player = if unit == "player" {
+        true
+    } else {
+        aura.is_from_player_or_player_pet
+    };
+    table_set(state, t, "isFromPlayerOrPlayerPet", Val::Bool(from_player));
     table_set(state, t, "nameplateShowAll", Val::Bool(false));
     table_set(state, t, "isHelpful", Val::Bool(aura.is_helpful));
     table_set(state, t, "isHarmful", Val::Bool(!aura.is_helpful));

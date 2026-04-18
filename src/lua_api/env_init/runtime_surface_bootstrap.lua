@@ -756,6 +756,138 @@ C_UnitAuras = __wow_merge_namespace(C_UnitAuras, {
   SetPrivateWarningTextAnchor = __wow_noop,
 })
 
+if C_UnitAuras._blockedAuras == nil then
+  C_UnitAuras._blockedAuras = {}
+end
+
+if C_UnitAuras._providerSwitched == nil then
+  C_UnitAuras._providerSwitched = false
+end
+
+if C_UnitAuras.AddBlockedAura == nil then
+  function C_UnitAuras.AddBlockedAura(unitToken, auraInstanceID)
+    if unitToken == nil or auraInstanceID == nil then
+      return
+    end
+    C_UnitAuras._blockedAuras[tostring(unitToken) .. ":" .. tostring(auraInstanceID)] = true
+  end
+end
+
+if C_UnitAuras.SwitchAuraDataProvider == nil then
+  function C_UnitAuras.SwitchAuraDataProvider()
+    C_UnitAuras._providerSwitched = true
+  end
+end
+
+if C_UnitAuras.ResetAuraDataProvider == nil then
+  function C_UnitAuras.ResetAuraDataProvider()
+    C_UnitAuras._providerSwitched = false
+  end
+end
+
+if AuraUtil == nil then
+  AuraUtil = {}
+end
+
+if AuraUtil.UnpackAuraData == nil then
+  function AuraUtil.UnpackAuraData(aura)
+    if aura == nil then
+      return nil
+    end
+    return aura.name,
+      aura.icon,
+      aura.applications,
+      aura.dispelName,
+      aura.duration,
+      aura.expirationTime,
+      aura.sourceUnit,
+      aura.isStealable,
+      nil,
+      aura.spellId
+  end
+end
+
+if AuraUtil.ForEachAura == nil then
+  function AuraUtil.ForEachAura(unitToken, filter, maxCount, callback)
+    local seen = 0
+    local token
+    repeat
+      local results = { C_UnitAuras.GetAuraSlots(unitToken, filter, maxCount, token) }
+      token = results[1]
+      for i = 2, #results do
+        local aura = C_UnitAuras.GetAuraDataBySlot(unitToken, results[i])
+        if aura ~= nil then
+          seen = seen + 1
+          if callback ~= nil and callback(aura) then
+            return
+          end
+          if maxCount ~= nil and seen >= maxCount then
+            return
+          end
+        end
+      end
+    until token == nil
+  end
+end
+
+if AuraUtil.FindAura == nil then
+  function AuraUtil.FindAura(predicate, unitToken, filter, maxCount)
+    local found = nil
+    AuraUtil.ForEachAura(unitToken, filter, maxCount, function(aura)
+      if predicate ~= nil and predicate(aura) then
+        found = aura
+        return true
+      end
+      return false
+    end)
+    return found
+  end
+end
+
+if AuraUtil.FindAuraByName == nil then
+  function AuraUtil.FindAuraByName(name, unitToken, filter)
+    return AuraUtil.FindAura(function(aura)
+      return aura ~= nil and aura.name == name
+    end, unitToken, filter)
+  end
+end
+
+if AuraUtil.GetAuraDataByAuraInstanceID == nil then
+  function AuraUtil.GetAuraDataByAuraInstanceID(unitToken, auraInstanceID)
+    if C_UnitAuras._providerSwitched then
+      return nil
+    end
+    return C_UnitAuras.GetAuraDataByAuraInstanceID(unitToken, auraInstanceID)
+  end
+end
+
+if GetPlayerAuraBySpellID == nil then
+  function GetPlayerAuraBySpellID(spellID)
+    return C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+  end
+end
+
+if UnitBuff == nil then
+  function UnitBuff(unitToken, index)
+    local aura = C_UnitAuras.GetBuffDataByIndex(unitToken, index)
+    return AuraUtil.UnpackAuraData(aura)
+  end
+end
+
+if UnitDebuff == nil then
+  function UnitDebuff(unitToken, index)
+    local aura = C_UnitAuras.GetDebuffDataByIndex(unitToken, index)
+    return AuraUtil.UnpackAuraData(aura)
+  end
+end
+
+if UnitAura == nil then
+  function UnitAura(unitToken, index, filter)
+    local aura = C_UnitAuras.GetAuraDataByIndex(unitToken, index, filter)
+    return AuraUtil.UnpackAuraData(aura)
+  end
+end
+
 C_UnitAurasPrivate = __wow_merge_namespace(C_UnitAurasPrivate, {
   SetPrivateAuraAnchorAddedCallback = function(callback)
     C_UnitAurasPrivate._anchorAddedCallback = callback
