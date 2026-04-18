@@ -139,237 +139,6 @@ if Saturate == nil then
   end
 end
 
-local __wow_maputil_shadowlands_continent_map_id = 1550
-local __wow_maputil_oribos_ui_map_ids = { 1670, 1671, 1672, 1673 }
-
-MapUtil = MapUtil or {}
-
-if MapUtil.IsMapTypeZone == nil then
-  function MapUtil.IsMapTypeZone(mapID)
-    if not C_Map or not C_Map.GetMapInfo then
-      return false
-    end
-    local mapInfo = C_Map.GetMapInfo(mapID)
-    return mapInfo and mapInfo.mapType == Enum.UIMapType.Zone or false
-  end
-end
-
-if MapUtil.GetMapParentInfo == nil then
-  function MapUtil.GetMapParentInfo(mapID, mapType, topMost)
-    if not C_Map or not C_Map.GetMapInfo then
-      return nil
-    end
-    local candidate
-    local mapInfo = C_Map.GetMapInfo(mapID)
-    while mapInfo do
-      if mapInfo.mapType == mapType then
-        if topMost then
-          candidate = mapInfo
-        else
-          return mapInfo
-        end
-      end
-      mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
-    end
-    return candidate
-  end
-end
-
-if MapUtil.ShouldMapTypeShowQuests == nil then
-  function MapUtil.ShouldMapTypeShowQuests(mapType)
-    return mapType ~= Enum.UIMapType.World
-      and mapType ~= Enum.UIMapType.Continent
-      and mapType ~= Enum.UIMapType.Cosmic
-  end
-end
-
-if MapUtil.ShouldShowTask == nil then
-  function MapUtil.ShouldShowTask(mapID, info)
-    if type(info) ~= "table" then
-      return false
-    end
-    if info.isQuestStart and info.inProgress then
-      return false
-    end
-    if HaveQuestData and not HaveQuestData(info.questID) then
-      return false
-    end
-    if C_QuestLog and C_QuestLog.IsQuestCalling
-        and C_QuestLog.IsQuestCalling(info.questID)
-        and MapUtil.IsMapTypeZone(mapID) then
-      return true
-    end
-    return mapID == info.mapID
-  end
-end
-
-if MapUtil.MapHasUnlockedBounties == nil then
-  function MapUtil.MapHasUnlockedBounties(mapID)
-    if not C_QuestLog or not C_QuestLog.GetBountySetInfoForMapID then
-      return false
-    end
-    local displayLocation, lockedQuestID = C_QuestLog.GetBountySetInfoForMapID(mapID)
-    if displayLocation and (not lockedQuestID or not C_QuestLog.IsOnQuest
-        or not C_QuestLog.IsOnQuest(lockedQuestID)) then
-      local bounties = C_QuestLog.GetBountiesForMapID and C_QuestLog.GetBountiesForMapID(mapID)
-      return bounties and #bounties > 0 or false
-    end
-    return false
-  end
-end
-
-if MapUtil.MapHasEmissaries == nil then
-  function MapUtil.MapHasEmissaries(mapID)
-    if not C_QuestLog or not C_QuestLog.GetBountySetInfoForMapID then
-      return false
-    end
-    local displayLocation = C_QuestLog.GetBountySetInfoForMapID(mapID)
-    return displayLocation ~= nil
-  end
-end
-
-if MapUtil.FindBestAreaNameAtMouse == nil then
-  function MapUtil.FindBestAreaNameAtMouse(mapID, normalizedCursorX, normalizedCursorY)
-    if not C_MapExplorationInfo or not C_MapExplorationInfo.GetExploredAreaIDsAtPosition
-        or not CreateVector2D or not C_Map or not C_Map.GetAreaInfo then
-      return nil
-    end
-    local exploredAreaIDs = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(
-      mapID,
-      CreateVector2D(normalizedCursorX, normalizedCursorY)
-    )
-    if exploredAreaIDs then
-      for _, areaID in ipairs(exploredAreaIDs) do
-        local name = C_Map.GetAreaInfo(areaID)
-        if name then
-          return name
-        end
-      end
-    end
-    return nil
-  end
-end
-
-if MapUtil.GetDisplayableMapForPlayer == nil then
-  function MapUtil.GetDisplayableMapForPlayer()
-    if not C_Map or not C_Map.GetBestMapForUnit then
-      return nil
-    end
-    local mapID = C_Map.GetBestMapForUnit("player")
-    if mapID then
-      repeat
-        if C_Map.MapHasArt and C_Map.MapHasArt(mapID) then
-          return mapID
-        end
-        local mapInfo = C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
-        mapID = mapInfo and mapInfo.parentMapID or 0
-      until mapID == 0
-    end
-    if C_Map.GetFallbackWorldMapID then
-      return C_Map.GetFallbackWorldMapID()
-    end
-    return nil
-  end
-end
-
-if MapUtil.GetBountySetMaps == nil then
-  function MapUtil.GetBountySetMaps(bountySetID)
-    MapUtil.bountySetMaps = MapUtil.bountySetMaps or {}
-    local bountySetMaps = MapUtil.bountySetMaps[bountySetID]
-    if bountySetMaps == nil then
-      if C_Map and C_Map.GetBountySetMaps then
-        bountySetMaps = C_Map.GetBountySetMaps(bountySetID)
-      end
-      if bountySetMaps == nil then
-        bountySetMaps = {}
-      end
-      MapUtil.bountySetMaps[bountySetID] = bountySetMaps
-    end
-    return bountySetMaps
-  end
-end
-
-if MapUtil.GetMapCenterOnMap == nil then
-  function MapUtil.GetMapCenterOnMap(mapID, topMapID)
-    if not C_Map or not C_Map.GetMapRectOnMap then
-      return nil, nil
-    end
-    local left, right, top, bottom = C_Map.GetMapRectOnMap(mapID, topMapID)
-    if left == nil then
-      return nil, nil
-    end
-    local centerX = left + (right - left) * 0.5
-    local centerY = top + (bottom - top) * 0.5
-    return centerX, centerY
-  end
-end
-
-if MapUtil.IsChildMap == nil then
-  function MapUtil.IsChildMap(mapID, ancestorMapID)
-    if not C_Map or not C_Map.GetMapInfo then
-      return false
-    end
-    local mapInfo = C_Map.GetMapInfo(mapID)
-    while mapInfo and mapInfo.parentMapID do
-      if mapInfo.parentMapID == ancestorMapID then
-        return true
-      end
-      mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
-    end
-    return false
-  end
-end
-
-if MapUtil.IsChildMapCached == nil then
-  local childMapCache = {}
-  function MapUtil.IsChildMapCached(mapID, ancestorMapID)
-    local key = tostring(mapID) .. ":" .. tostring(ancestorMapID)
-    local result = childMapCache[key]
-    if result ~= nil then
-      return result
-    end
-    result = MapUtil.IsChildMap(mapID, ancestorMapID)
-    childMapCache[key] = result
-    return result
-  end
-end
-
-if MapUtil.IsOribosMap == nil then
-  function MapUtil.IsOribosMap(mapID)
-    for _, candidate in ipairs(__wow_maputil_oribos_ui_map_ids) do
-      if candidate == mapID then
-        return true
-      end
-    end
-    return false
-  end
-end
-
-if MapUtil.IsShadowlandsZoneMap == nil then
-  function MapUtil.IsShadowlandsZoneMap(mapID)
-    if mapID == __wow_maputil_shadowlands_continent_map_id or MapUtil.IsOribosMap(mapID) then
-      return true
-    end
-    if not C_Map or not C_Map.GetMapInfo then
-      return false
-    end
-    local mapInfo = C_Map.GetMapInfo(mapID)
-    if not mapInfo then
-      return false
-    end
-    if mapInfo.mapType ~= Enum.UIMapType.Zone and mapInfo.mapType ~= Enum.UIMapType.Continent then
-      return false
-    end
-    return MapUtil.IsChildMap(mapID, __wow_maputil_shadowlands_continent_map_id)
-  end
-end
-
-if MapUtil.MapShouldShowWorldQuestFilters == nil then
-  function MapUtil.MapShouldShowWorldQuestFilters(mapID)
-    return MapUtil.MapHasEmissaries(mapID) or MapUtil.IsShadowlandsZoneMap(mapID)
-  end
-end
-
 if CooldownFrame_Set == nil then
   function CooldownFrame_Set(self, start, duration, enable, forceShowDrawEdge, modRate)
     if enable and enable ~= 0 and start > 0 and duration > 0 then
@@ -497,6 +266,222 @@ end
 if CopyTable == nil then
   function CopyTable(source)
     return __wow_deep_copy_table(source)
+  end
+end
+
+if C_Map == nil then
+  C_Map = {}
+end
+
+function C_Map.GetBestMapForUnit(unitToken)
+  if unitToken ~= nil and unitToken ~= "player" then
+    return nil
+  end
+  if C_Map.GetCurrentMapID ~= nil then
+    local currentMapID = C_Map.GetCurrentMapID()
+    if currentMapID ~= nil then
+      return currentMapID
+    end
+  end
+  return 2248
+end
+
+function C_Map.GetFallbackWorldMapID()
+  if C_Map.GetCurrentMapID ~= nil then
+    local currentMapID = C_Map.GetCurrentMapID()
+    if currentMapID ~= nil then
+      return currentMapID
+    end
+  end
+  return 2248
+end
+
+function C_Map.MapHasArt(mapID)
+  if mapID == nil then
+    return false
+  end
+  if C_Map.GetMapArtID ~= nil then
+    local artID = C_Map.GetMapArtID(mapID)
+    if artID ~= nil then
+      return artID ~= 0
+    end
+  end
+  return true
+end
+
+if MapUtil == nil then
+  MapUtil = {}
+end
+
+local __wow_maputil_child_map_cache = {}
+
+local function __wow_maputil_safe_map_info(mapID)
+  if C_Map == nil or C_Map.GetMapInfo == nil or mapID == nil then
+    return nil
+  end
+  return C_Map.GetMapInfo(mapID)
+end
+
+local function __wow_maputil_safe_map_has_art(mapID)
+  if C_Map == nil then
+    return false
+  end
+  if C_Map.MapHasArt ~= nil then
+    local ok, hasArt = pcall(C_Map.MapHasArt, mapID)
+    if ok and hasArt ~= nil then
+      return hasArt
+    end
+  end
+  if C_Map.GetMapArtID ~= nil then
+    local ok, artID = pcall(C_Map.GetMapArtID, mapID)
+    if ok and artID ~= nil then
+      return artID ~= 0
+    end
+  end
+  return mapID ~= nil
+end
+
+if MapUtil.IsMapTypeZone == nil then
+  function MapUtil.IsMapTypeZone(mapID)
+    local mapInfo = __wow_maputil_safe_map_info(mapID)
+    return mapInfo ~= nil and mapInfo.mapType == Enum.UIMapType.Zone
+  end
+end
+
+if MapUtil.GetMapParentInfo == nil then
+  function MapUtil.GetMapParentInfo(mapID, mapType, topMost)
+    local candidate = nil
+    local mapInfo = __wow_maputil_safe_map_info(mapID)
+    while mapInfo do
+      if mapInfo.mapType == mapType then
+        if topMost then
+          candidate = mapInfo
+        else
+          return mapInfo
+        end
+      end
+      mapInfo = __wow_maputil_safe_map_info(mapInfo.parentMapID)
+    end
+    return candidate
+  end
+end
+
+if MapUtil.ShouldMapTypeShowQuests == nil then
+  function MapUtil.ShouldMapTypeShowQuests(mapType)
+    return mapType ~= Enum.UIMapType.World
+      and mapType ~= Enum.UIMapType.Continent
+      and mapType ~= Enum.UIMapType.Cosmic
+  end
+end
+
+if MapUtil.GetDisplayableMapForPlayer == nil then
+  function MapUtil.GetDisplayableMapForPlayer()
+    if C_Map == nil then
+      return 1
+    end
+    local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+    if mapID == nil then
+      if C_Map.GetFallbackWorldMapID then
+        mapID = C_Map.GetFallbackWorldMapID()
+      elseif C_Map.GetCurrentMapID then
+        mapID = C_Map.GetCurrentMapID()
+      else
+        return 1
+      end
+    end
+    while mapID and mapID ~= 0 do
+      if __wow_maputil_safe_map_has_art(mapID) then
+        return mapID
+      end
+      local mapInfo = __wow_maputil_safe_map_info(mapID)
+      mapID = mapInfo and mapInfo.parentMapID or 0
+    end
+    if C_Map and C_Map.GetFallbackWorldMapID then
+      local fallbackMapID = C_Map.GetFallbackWorldMapID()
+      if fallbackMapID ~= nil then
+        return fallbackMapID
+      end
+    end
+    if C_Map and C_Map.GetCurrentMapID then
+      local currentMapID = C_Map.GetCurrentMapID()
+      if currentMapID ~= nil then
+        return currentMapID
+      end
+    end
+    return 1
+  end
+end
+
+if MapUtil.GetMapCenterOnMap == nil then
+  function MapUtil.GetMapCenterOnMap(mapID, topMapID)
+    if C_Map == nil or C_Map.GetMapRectOnMap == nil then
+      return nil, nil
+    end
+    local left, right, top, bottom = C_Map.GetMapRectOnMap(mapID, topMapID)
+    if left == nil then
+      return nil, nil
+    end
+    return left + (right - left) * 0.5, top + (bottom - top) * 0.5
+  end
+end
+
+if MapUtil.IsChildMap == nil then
+  function MapUtil.IsChildMap(mapID, ancestorMapID)
+    local mapInfo = __wow_maputil_safe_map_info(mapID)
+    while mapInfo ~= nil and mapInfo.parentMapID ~= nil do
+      if mapInfo.parentMapID == ancestorMapID then
+        return true
+      end
+      mapInfo = __wow_maputil_safe_map_info(mapInfo.parentMapID)
+    end
+    return false
+  end
+end
+
+if MapUtil.IsChildMapCached == nil then
+  function MapUtil.IsChildMapCached(mapID, ancestorMapID)
+    local key = tostring(mapID) .. ":" .. tostring(ancestorMapID)
+    local cached = __wow_maputil_child_map_cache[key]
+    if cached ~= nil then
+      return cached
+    end
+    local result = MapUtil.IsChildMap(mapID, ancestorMapID)
+    __wow_maputil_child_map_cache[key] = result
+    return result
+  end
+end
+
+if MapUtil.MapHasEmissaries == nil then
+  function MapUtil.MapHasEmissaries(_mapID)
+    return false
+  end
+end
+
+if MapUtil.IsOribosMap == nil then
+  function MapUtil.IsOribosMap(mapID)
+    return mapID == 1670 or mapID == 1671 or mapID == 1672 or mapID == 1673
+  end
+end
+
+if MapUtil.IsShadowlandsZoneMap == nil then
+  function MapUtil.IsShadowlandsZoneMap(mapID)
+    if mapID == 1550 or MapUtil.IsOribosMap(mapID) then
+      return true
+    end
+    local mapInfo = __wow_maputil_safe_map_info(mapID)
+    if mapInfo == nil then
+      return false
+    end
+    if mapInfo.mapType ~= Enum.UIMapType.Zone and mapInfo.mapType ~= Enum.UIMapType.Continent then
+      return false
+    end
+    return MapUtil.IsChildMap(mapID, 1550)
+  end
+end
+
+if MapUtil.MapShouldShowWorldQuestFilters == nil then
+  function MapUtil.MapShouldShowWorldQuestFilters(mapID)
+    return MapUtil.MapHasEmissaries(mapID) or MapUtil.IsShadowlandsZoneMap(mapID)
   end
 end
 

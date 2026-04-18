@@ -1,10 +1,12 @@
 //! `C_Map` probe surface backed by `SimState.maps` +
 //! `SimState.player_map_position`.
 //!
-//! Migrates 3 entries off `NAMESPACE_NIL_STUBS`:
+//! Migrates 7 entries off `NAMESPACE_NIL_STUBS`:
 //!
 //! - `C_Map.GetMapArtID(uiMapID)` — returns the `art_id` for the
 //!   seeded map, or nothing (retail `mayreturnnothing`).
+//! - `C_Map.GetMapInfo(uiMapID)` — returns a `UiMapDetails`-shaped
+//!   table for seeded maps, or nothing for unknown ids.
 //! - `C_Map.GetMapChildrenInfo(uiMapID, mapType?, allDescendants?)`
 //!   — returns the children as an array of `UiMapDetails` tables.
 //!   `mapType` filters by the UIMapType enum; `allDescendants`
@@ -14,6 +16,11 @@
 //! - `C_Map.GetPlayerMapPosition(uiMapID, unitToken)` — returns
 //!   `{x, y}` vector2 from `SimState.player_map_position` for any
 //!   known map, or `nil` for an unknown map / non-player unit.
+//! - `C_Map.GetBestMapForUnit(unitToken)` — returns the seeded player
+//!   map id (`2248`) for `"player"`.
+//! - `C_Map.GetFallbackWorldMapID()` — returns the seeded player map
+//!   id (`2248`).
+//! - `C_Map.MapHasArt(uiMapID)` — true for positive map ids.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
@@ -28,6 +35,7 @@ use std::collections::HashSet;
 pub(super) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Map")?;
     table_set_rust_fn_static(state, table_ref, "GetMapArtID", c_map_get_map_art_id)?;
+    table_set_rust_fn_static(state, table_ref, "GetMapInfo", c_map_get_map_info)?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -40,8 +48,23 @@ pub(super) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
         "GetPlayerMapPosition",
         c_map_get_player_map_position,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetBestMapForUnit",
+        c_map_get_best_map_for_unit,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetFallbackWorldMapID",
+        c_map_get_fallback_world_map_id,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "MapHasArt", c_map_map_has_art)?;
     Ok(())
 }
+
+const DEFAULT_PLAYER_MAP_ID: i32 = 2248;
 
 fn c_map_get_map_art_id(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = i32::from_stack(state, 1)?;
@@ -50,6 +73,17 @@ fn c_map_get_map_art_id(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     state.push(Val::Num(art_id as f64));
+    Ok(1)
+}
+
+fn c_map_get_map_info(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let map = borrow_state(state)?.maps.get(&ui_map_id).cloned();
+    let Some(map) = map else {
+        return Ok(0);
+    };
+    let details = push_map_details_table(state, &map);
+    state.push(details);
     Ok(1)
 }
 
@@ -144,5 +178,25 @@ fn c_map_get_player_map_position(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, t, "x", Val::Num(position.0));
     table_set(state, t, "y", Val::Num(position.1));
     state.push(t);
+    Ok(1)
+}
+
+fn c_map_get_best_map_for_unit(state: &mut LuaState) -> LuaResult<u32> {
+    let unit_token = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    if !matches!(unit_token.as_str(), "" | "player") {
+        return Ok(0);
+    }
+    state.push(Val::Num(DEFAULT_PLAYER_MAP_ID as f64));
+    Ok(1)
+}
+
+fn c_map_get_fallback_world_map_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(DEFAULT_PLAYER_MAP_ID as f64));
+    Ok(1)
+}
+
+fn c_map_map_has_art(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(ui_map_id > 0));
     Ok(1)
 }

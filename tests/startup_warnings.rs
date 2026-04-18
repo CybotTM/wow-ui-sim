@@ -832,3 +832,111 @@ fn test_new_player_experience_loads_without_minimap_cluster_warning() {
         assert_eq!(parent_name, "UIParent");
     }
 }
+
+#[test]
+fn test_battlefield_map_startup_uses_maputil_displayable_map_helper() {
+    test_timeout! {
+        let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_BattlefieldMap");
+
+        let load_maputil_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("MapUtil")
+                    || warning.contains("GetDisplayableMapForPlayer")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            load_maputil_warnings.is_empty(),
+            "Blizzard_BattlefieldMap should not warn on MapUtil during load:\n  {}",
+            load_maputil_warnings.join("\n  ")
+        );
+
+        install_test_error_handler(&env);
+        env.exec(
+            r#"
+            RegisterCVar("showBattlefieldMinimap", "1")
+            SetCVar("showBattlefieldMinimap", "1")
+            "#,
+        )
+        .expect("battlefield map cvar should be writable");
+
+        let mut startup_warnings = Vec::new();
+        startup_warnings.extend(fire(
+            &env,
+            "ADDON_LOADED",
+            &[env.lua_string("Blizzard_BattlefieldMap")],
+        ));
+        startup_warnings.extend(fire(
+            &env,
+            "PLAYER_ENTERING_WORLD",
+            &[rilua::Val::Bool(true), rilua::Val::Bool(false)],
+        ));
+
+        let maputil_warnings: Vec<String> = startup_warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("MapUtil")
+                    || warning.contains("GetDisplayableMapForPlayer")
+                    || warning.contains("Blizzard_BattlefieldMap.lua:154")
+                    || warning.contains("Blizzard_BattlefieldMap.lua:189")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            maputil_warnings.is_empty(),
+            "Blizzard_BattlefieldMap startup should not warn on MapUtil:\n  {}",
+            maputil_warnings.join("\n  ")
+        );
+
+        let (maputil_type, helper_type, displayable_map_id): (String, String, i32) = env
+            .eval(
+                r#"
+                return type(MapUtil),
+                       type(MapUtil.GetDisplayableMapForPlayer),
+                       MapUtil.GetDisplayableMapForPlayer()
+                "#,
+            )
+            .expect("battlefield map startup should leave MapUtil displayable-map helpers callable");
+        assert_eq!(maputil_type, "table");
+        assert_eq!(helper_type, "function");
+        assert!(displayable_map_id > 0);
+    }
+}
+
+#[test]
+fn test_world_map_loads_without_maputil_warning() {
+    test_timeout! {
+        let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_WorldMap");
+
+        let maputil_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("MapUtil")
+                    || warning.contains("Blizzard_WorldMap.lua")
+                    || warning.contains("Blizzard_WorldMapTemplates.lua")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            maputil_warnings.is_empty(),
+            "Blizzard_WorldMap should not warn on MapUtil startup access:\n  {}",
+            maputil_warnings.join("\n  ")
+        );
+
+        let (has_displayable_map, has_parent_info): (bool, bool) = env
+            .eval(
+                r#"
+                local mapID = MapUtil.GetDisplayableMapForPlayer()
+                return type(mapID) == "number",
+                       pcall(function() return MapUtil.GetMapParentInfo(1, Enum.UIMapType.Zone) end)
+                "#,
+            )
+            .expect("MapUtil startup helpers should be available after world map load");
+        assert!(has_displayable_map);
+        assert!(has_parent_info);
+    }
+}

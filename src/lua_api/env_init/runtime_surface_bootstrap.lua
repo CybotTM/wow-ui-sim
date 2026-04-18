@@ -828,9 +828,43 @@ C_PartyInfo = __wow_merge_namespace(C_PartyInfo, {
   IsPartyWalkIn = function() return false end,
 })
 
-C_Map = __wow_merge_namespace(C_Map, {
-  GetBestMapForUnit = function() return nil end,
-})
+C_Map = __wow_merge_namespace(C_Map, {})
+
+C_Map.GetBestMapForUnit = function(unitToken)
+  if unitToken ~= nil and unitToken ~= "player" then
+    return nil
+  end
+  if C_Map.GetCurrentMapID ~= nil then
+    local currentMapID = C_Map.GetCurrentMapID()
+    if currentMapID ~= nil then
+      return currentMapID
+    end
+  end
+  return 2248
+end
+
+C_Map.GetFallbackWorldMapID = function()
+  if C_Map.GetCurrentMapID ~= nil then
+    local currentMapID = C_Map.GetCurrentMapID()
+    if currentMapID ~= nil then
+      return currentMapID
+    end
+  end
+  return 2248
+end
+
+C_Map.MapHasArt = function(mapID)
+  if mapID == nil then
+    return false
+  end
+  if C_Map.GetMapArtID ~= nil then
+    local artID = C_Map.GetMapArtID(mapID)
+    if artID ~= nil then
+      return artID ~= 0
+    end
+  end
+  return true
+end
 
 -- Bonus / world-quest objective trackers iterate the task list at startup.
 -- Return an empty table so the `for ... in ipairs(tasksTable)` loops no-op.
