@@ -213,6 +213,84 @@ fn test_category_num_updates_with_earned() {
     assert_eq!(incomplete, 5);
 }
 
+#[test]
+fn test_has_completed_any_achievement_is_available_for_ui_gating() {
+    let env = env();
+    let completed_any: bool = env.eval("return HasCompletedAnyAchievement()").unwrap();
+    assert!(completed_any);
+}
+
+#[test]
+fn test_can_show_achievement_ui_is_enabled() {
+    let env = env();
+    let can_show: bool = env.eval("return CanShowAchievementUI()").unwrap();
+    assert!(can_show);
+}
+
+#[test]
+fn test_get_achievement_category_returns_seeded_category() {
+    let env = env();
+    let (general, exploration, pvp): (i32, i32, i32) = env
+        .eval(
+            r#"
+            return GetAchievementCategory(6),
+                   GetAchievementCategory(776),
+                   GetAchievementCategory(558)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(general, 92);
+    assert_eq!(exploration, 97);
+    assert_eq!(pvp, 95);
+}
+
+#[test]
+fn test_previous_and_next_achievement_are_nil_for_unchained_seeded_rows() {
+    let env = env();
+    let (prev_is_nil, next_is_nil, next_complete): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local prev = GetPreviousAchievement(6)
+            local next_id, completed = GetNextAchievement(6)
+            return prev == nil, next_id == nil, completed == false
+            "#,
+        )
+        .unwrap();
+    assert!(prev_is_nil);
+    assert!(next_is_nil);
+    assert!(next_complete);
+}
+
+#[test]
+fn test_latest_completed_achievements_returns_completed_ids() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetAchievementEarned(776, true)
+        A_Admin.SetAchievementEarned(6, true)
+        "#,
+    )
+    .unwrap();
+    let (count, first, second): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local ids = GetLatestCompletedAchievements(false)
+            return #ids, ids[1], ids[2]
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 2);
+    assert_eq!(first, 6);
+    assert_eq!(second, 776);
+}
+
+#[test]
+fn test_get_achievement_guild_rep_defaults_to_nil_for_non_guild_achievements() {
+    let env = env();
+    let is_nil: bool = env.eval("return GetAchievementGuildRep(6) == nil").unwrap();
+    assert!(is_nil);
+}
+
 // ============================================================================
 // GetAchievementCriteriaInfo
 // ============================================================================

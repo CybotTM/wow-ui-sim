@@ -23,15 +23,18 @@ const COMPLETION_DAY: f64 = 15.0;
 const COMPLETION_YEAR: f64 = 2025.0;
 
 const GENERAL_ACHIEVEMENT_IDS: &[i32] = &[6, 7, 8, 9, 10, 11];
+const EXPLORATION_ACHIEVEMENT_IDS: &[i32] = &[42, 776];
+const PVP_ACHIEVEMENT_IDS: &[i32] = &[513, 558];
+const REPUTATION_ACHIEVEMENT_IDS: &[i32] = &[948];
 
 const ACHIEVEMENT_CATEGORIES: &[AchievementCategory] = &[
     AchievementCategory::new(92, "General", -1, GENERAL_ACHIEVEMENT_IDS),
     AchievementCategory::new(96, "Quests", -1, &[]),
-    AchievementCategory::new(97, "Exploration", -1, &[]),
-    AchievementCategory::new(95, "Player vs. Player", -1, &[]),
+    AchievementCategory::new(97, "Exploration", -1, EXPLORATION_ACHIEVEMENT_IDS),
+    AchievementCategory::new(95, "Player vs. Player", -1, PVP_ACHIEVEMENT_IDS),
     AchievementCategory::new(168, "Dungeons & Raids", -1, &[]),
     AchievementCategory::new(169, "Professions", -1, &[]),
-    AchievementCategory::new(201, "Reputation", -1, &[]),
+    AchievementCategory::new(201, "Reputation", -1, REPUTATION_ACHIEVEMENT_IDS),
     AchievementCategory::new(155, "World Events", -1, &[]),
     AchievementCategory::new(81, "Feats of Strength", -1, &[]),
 ];
@@ -149,6 +152,12 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         globals,
+        "GetAchievementCategory",
+        get_achievement_category,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
         "GetCategoryNumAchievements",
         get_category_num_achievements,
     )?;
@@ -163,6 +172,25 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         globals,
         "GetAchievementCriteriaInfo",
         get_achievement_criteria_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetPreviousAchievement",
+        get_previous_achievement,
+    )?;
+    table_set_rust_fn_static(state, globals, "GetNextAchievement", get_next_achievement)?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetLatestCompletedAchievements",
+        get_latest_completed_achievements,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetAchievementGuildRep",
+        get_achievement_guild_rep,
     )?;
     Ok(())
 }
@@ -197,6 +225,15 @@ fn get_category_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
+fn get_achievement_category(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    match category_id_for_achievement(achievement_id) {
+        Some(category_id) => state.push(Val::Num(category_id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 fn get_category_num_achievements(state: &mut LuaState) -> LuaResult<u32> {
     let category_id = i32::from_stack(state, 1)?;
     let Some(category) = find_category(category_id) else {
@@ -227,6 +264,51 @@ fn get_achievement_criteria_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(5)
 }
 
+fn get_previous_achievement(state: &mut LuaState) -> LuaResult<u32> {
+    let _achievement_id = i32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn get_next_achievement(state: &mut LuaState) -> LuaResult<u32> {
+    let _achievement_id = i32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    state.push(Val::Bool(false));
+    Ok(2)
+}
+
+fn get_latest_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
+    let _guild_view = bool::from_stack(state, 1).unwrap_or(false);
+    let mut earned_ids = {
+        let sim = borrow_state(state)?;
+        sim.world
+            .earned_achievements
+            .iter()
+            .copied()
+            .collect::<Vec<_>>()
+    };
+    earned_ids.sort_unstable();
+
+    let table_ref = state.gc.alloc_table(Table::new());
+    let table = Val::Table(table_ref);
+    for (index, achievement_id) in earned_ids.into_iter().enumerate() {
+        set_table_array(
+            state,
+            table,
+            (index + 1) as i64,
+            Val::Num(achievement_id as f64),
+        );
+    }
+    state.push(table);
+    Ok(1)
+}
+
+fn get_achievement_guild_rep(state: &mut LuaState) -> LuaResult<u32> {
+    let _achievement_id = i32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
 fn push_achievement_info_for_id(state: &mut LuaState, achievement_id: i32) -> LuaResult<u32> {
     let row = {
         let sim = borrow_state(state)?;
@@ -244,6 +326,13 @@ fn find_category(category_id: i32) -> Option<&'static AchievementCategory> {
     ACHIEVEMENT_CATEGORIES
         .iter()
         .find(|category| category.category_id == category_id)
+}
+
+fn category_id_for_achievement(achievement_id: i32) -> Option<i32> {
+    ACHIEVEMENT_CATEGORIES
+        .iter()
+        .find(|category| category.achievement_ids.contains(&achievement_id))
+        .map(|category| category.category_id)
 }
 
 fn count_completed_achievements(state: &mut LuaState, achievement_ids: &[i32]) -> LuaResult<i32> {
