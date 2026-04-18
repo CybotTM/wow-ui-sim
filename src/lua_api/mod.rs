@@ -21,6 +21,7 @@ pub mod message_frame;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod methods;
 pub(crate) mod on_update;
+pub(crate) mod rect_geometry;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod script_helpers;
 pub(crate) mod sim_substates;

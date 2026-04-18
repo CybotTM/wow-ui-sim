@@ -30,9 +30,8 @@
 //! `string_format.rs` stays on the mlua side only.
 
 use crate::lua_api::env::WowLuaAppData;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
 use crate::lua_api::next_timer_id;
-use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{TableBuilder, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
@@ -350,194 +349,16 @@ fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
 /// in WoW UI coordinates, or nil×4 if no rect is available.
 ///
 /// `self` is argument 1 (a frame-backed table). Returns 4 numbers or 0 values.
-fn resolve_queryable_rect(
-    state: &mut LuaState,
-    id: u64,
-) -> LuaResult<Option<(crate::LayoutRect, f32, f32)>> {
-    let needs_resolve = {
-        let sim = borrow_state(state)?;
-        let Some(frame) = sim.widgets.get(id) else {
-            return Ok(None);
-        };
-        let has_queryable_rect =
-            !frame.anchors.is_empty() || frame.name.as_deref() == Some("UIParent") || id == 1;
-        if !has_queryable_rect {
-            return Ok(None);
-        }
-        frame.layout_rect.is_none() || sim.widgets.is_rect_dirty(id)
-    };
-
-    if needs_resolve {
-        let mut sim = borrow_state_mut(state)?;
-        if sim
-            .widgets
-            .get(id)
-            .and_then(|frame| frame.layout_rect)
-            .is_none()
-        {
-            sim.invalidate_layout(id);
-        }
-        sim.resolve_rect_if_dirty(id);
-    }
-
-    let sim = borrow_state(state)?;
-    let Some(frame) = sim.widgets.get(id) else {
-        return Ok(None);
-    };
-    let Some(rect) = frame.layout_rect else {
-        return Ok(None);
-    };
-    Ok(Some((
-        rect,
-        frame.effective_scale.max(1e-6),
-        sim.screen_height,
-    )))
-}
-
-fn get_frame_rect(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let left = rect.x / eff_scale;
-    let bottom = (screen_height - rect.y - rect.height) / eff_scale;
-    let width = rect.width / eff_scale;
-    let height = rect.height / eff_scale;
-    state.push(Val::Num(left as f64));
-    state.push(Val::Num(bottom as f64));
-    state.push(Val::Num(width as f64));
-    state.push(Val::Num(height as f64));
-    Ok(4)
-}
-
-/// `frame:GetScaledRect()` — rect in screen-space coordinates.
-fn get_scaled_rect(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, _eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let left = rect.x;
-    let bottom = screen_height - rect.y - rect.height;
-    state.push(Val::Num(left as f64));
-    state.push(Val::Num(bottom as f64));
-    state.push(Val::Num(rect.width as f64));
-    state.push(Val::Num(rect.height as f64));
-    Ok(4)
-}
-
-/// `frame:GetLeft()` — left edge in WoW UI coordinates.
-fn get_left(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let left = rect.x / eff_scale;
-    state.push(Val::Num(left as f64));
-    Ok(1)
-}
-
-/// `frame:GetRight()` — right edge in WoW UI coordinates.
-fn get_right(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let right = (rect.x + rect.width) / eff_scale;
-    state.push(Val::Num(right as f64));
-    Ok(1)
-}
-
-/// `frame:GetTop()` — top edge in WoW UI coordinates (inverted: large = near top of screen).
-fn get_top(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let top = (screen_height - rect.y) / eff_scale;
-    state.push(Val::Num(top as f64));
-    Ok(1)
-}
-
-/// `frame:GetBottom()` — bottom edge in WoW UI coordinates.
-fn get_bottom(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let bottom = (screen_height - rect.y - rect.height) / eff_scale;
-    state.push(Val::Num(bottom as f64));
-    Ok(1)
-}
-
-/// `frame:GetCenter()` — center point in WoW UI coordinates.
-fn get_center(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, screen_height)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let center_x = (rect.x + rect.width / 2.0) / eff_scale;
-    let center_y = (screen_height - rect.y - rect.height / 2.0) / eff_scale;
-    state.push(Val::Num(center_x as f64));
-    state.push(Val::Num(center_y as f64));
-    Ok(2)
-}
-
-/// `frame:GetWidth()` — frame width in WoW UI coordinates.
-fn get_width(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let width = rect.width / eff_scale;
-    state.push(Val::Num(width as f64));
-    Ok(1)
-}
-
-/// `frame:GetHeight()` — frame height in WoW UI coordinates.
-fn get_height(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let height = rect.height / eff_scale;
-    state.push(Val::Num(height as f64));
-    Ok(1)
-}
-
-/// `frame:GetSize()` — (width, height) in WoW UI coordinates.
-fn get_size(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let Some((rect, eff_scale, _)) = resolve_queryable_rect(state, id)? else {
-        return Ok(0);
-    };
-    let width = rect.width / eff_scale;
-    let height = rect.height / eff_scale;
-    state.push(Val::Num(width as f64));
-    state.push(Val::Num(height as f64));
-    Ok(2)
-}
-
 // ── Layout: public table builder ─────────────────────────────────────────────
 
-/// Register layout query RustFns on an existing table (e.g. the frame metatable).
-///
-/// The registered names match WoW's frame API: `GetRect`, `GetLeft`, `GetRight`,
-/// `GetTop`, `GetBottom`, `GetWidth`, `GetHeight`, `GetSize`.
+/// Register layout query RustFns on an existing table (e.g. the frame
+/// metatable). Delegates to `rect_geometry::register_rect_methods_on_table`
+/// — kept as a name-compatible wrapper for historical callers.
 pub fn register_layout_fns_on_table(
     state: &mut LuaState,
     table: rilua::vm::gc::arena::GcRef<Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(state, table, "GetRect", get_frame_rect)?;
-    table_set_rust_fn(state, table, "GetScaledRect", get_scaled_rect)?;
-    table_set_rust_fn(state, table, "GetLeft", get_left)?;
-    table_set_rust_fn(state, table, "GetRight", get_right)?;
-    table_set_rust_fn(state, table, "GetTop", get_top)?;
-    table_set_rust_fn(state, table, "GetBottom", get_bottom)?;
-    table_set_rust_fn(state, table, "GetCenter", get_center)?;
-    table_set_rust_fn(state, table, "GetWidth", get_width)?;
-    table_set_rust_fn(state, table, "GetHeight", get_height)?;
-    table_set_rust_fn(state, table, "GetSize", get_size)?;
-    Ok(())
+    crate::lua_api::rect_geometry::register_rect_methods_on_table(state, table)
 }
 
 // ── String format patch ──────────────────────────────────────────────────────
