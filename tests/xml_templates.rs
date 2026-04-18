@@ -2548,7 +2548,9 @@ fn test_create_frame_from_xml_inline_parent_field_local_toggle_shown_runs() {
     "#,
     )
     .unwrap();
-    let first: bool = env.eval("return XmlInlineToggleRoot.UnavailableInfoFrame.shown").unwrap();
+    let first: bool = env
+        .eval("return XmlInlineToggleRoot.UnavailableInfoFrame.shown")
+        .unwrap();
     assert!(first);
 
     env.exec(
@@ -2557,7 +2559,9 @@ fn test_create_frame_from_xml_inline_parent_field_local_toggle_shown_runs() {
     "#,
     )
     .unwrap();
-    let second: bool = env.eval("return XmlInlineToggleRoot.UnavailableInfoFrame.shown").unwrap();
+    let second: bool = env
+        .eval("return XmlInlineToggleRoot.UnavailableInfoFrame.shown")
+        .unwrap();
     assert!(!second);
 }
 

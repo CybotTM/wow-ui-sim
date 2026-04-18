@@ -55,9 +55,7 @@ pub(super) fn freeze_globals_with_live_shadow(lua: &mut rilua::Lua) -> crate::Re
     Ok(())
 }
 
-fn find_secureenv(
-    lua: &mut rilua::Lua,
-) -> Option<rilua::vm::gc::arena::GcRef<Table>> {
+fn find_secureenv(lua: &mut rilua::Lua) -> Option<rilua::vm::gc::arena::GcRef<Table>> {
     match LuaApiMut::get_global_val(lua, "__secureenv") {
         Val::Table(r) => Some(r),
         _ => None,

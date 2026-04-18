@@ -429,9 +429,7 @@ fn parse_inline_function_with_self_and_parent_field_arg(stmt: &str) -> Option<(&
         .then_some((function_name, field))
 }
 
-fn parse_checked_assignment_then_callbacks(
-    stmt: &str,
-) -> Option<(&str, &str, &str, &str)> {
+fn parse_checked_assignment_then_callbacks(stmt: &str) -> Option<(&str, &str, &str, &str)> {
     let stmt = stmt.trim();
     let prefix = "local checked = self:GetChecked()";
     let remainder = stmt.strip_prefix(prefix)?.trim_start();
@@ -450,7 +448,10 @@ fn parse_checked_assignment_then_callbacks(
 
     let (then_path, then_field, then_value) = parse_global_bool_assignment(then_stmt)?;
     let (else_path, else_field, else_value) = parse_global_bool_assignment(else_stmt)?;
-    if then_path != else_path || then_field != else_field || then_value != true || else_value != false
+    if then_path != else_path
+        || then_field != else_field
+        || then_value != true
+        || else_value != false
     {
         return None;
     }
@@ -572,7 +573,10 @@ fn parse_checked_assignment_then_two_callbacks(
     };
     let (then_path, then_field, then_value) = parse_global_bool_assignment(then_stmt)?;
     let (else_path, else_field, else_value) = parse_global_bool_assignment(else_stmt)?;
-    if then_path != else_path || then_field != else_field || then_value != true || else_value != false
+    if then_path != else_path
+        || then_field != else_field
+        || then_value != true
+        || else_value != false
     {
         return None;
     }
@@ -623,7 +627,12 @@ fn parse_global_bool_assignment(stmt: &str) -> Option<(&str, &str, bool)> {
 
 fn parse_global_number_assignment(stmt: &str) -> Option<(&str, &str, f64)> {
     let (lhs, rhs) = stmt.split_once('=')?;
-    let value = rhs.trim().trim_end_matches(';').trim().parse::<f64>().ok()?;
+    let value = rhs
+        .trim()
+        .trim_end_matches(';')
+        .trim()
+        .parse::<f64>()
+        .ok()?;
     let (target_path, field) = lhs.trim().rsplit_once('.')?;
     Some((target_path.trim(), field.trim(), value))
 }

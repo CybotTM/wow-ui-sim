@@ -1,12 +1,12 @@
 use super::{FastHandlerRef, is_fast_handler_path, is_fast_identifier, is_fast_passthrough_args};
 
 pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
-    if let Some((method_name, field)) = parse_method_then_unchecked_parent_field_clear_and_show_text(stmt)
+    if let Some((method_name, field)) =
+        parse_method_then_unchecked_parent_field_clear_and_show_text(stmt)
     {
-        return Some(FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText {
-            method_name,
-            field,
-        });
+        return Some(
+            FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText { method_name, field },
+        );
     }
     if let Some(field) = parse_parent_field_local_toggle_shown(stmt) {
         return Some(FastHandlerRef::ParentFieldLocalToggleShown { field });
