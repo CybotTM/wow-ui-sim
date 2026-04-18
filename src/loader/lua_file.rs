@@ -132,6 +132,8 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "if type(callback) == \"function\" then callback(); end",
             )
         )
+    } else if chunk_name.ends_with("/LocalizationMachinery.lua") {
+        format!("if SetupLocalization ~= nil then return end\n{source}")
     } else if chunk_name.ends_with("/EditModeManager.lua") {
         source
             .replacen(

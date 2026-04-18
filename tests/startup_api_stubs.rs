@@ -214,6 +214,44 @@ fn event_util_helpers_defer_until_matching_startup_events_fire() {
 }
 
 #[test]
+fn setup_localization_runs_locale_setup_now_and_frame_setup_later() {
+    let env = env();
+    let (before_localize, before_frames): (i32, i32) = env
+        .eval(
+            r#"
+            SetupLocalizationCalls = { localize = 0, localizeFrames = 0 }
+            SetupLocalization({
+                enUS = {
+                    localize = function()
+                        SetupLocalizationCalls.localize = SetupLocalizationCalls.localize + 1
+                    end,
+                    localizeFrames = function()
+                        SetupLocalizationCalls.localizeFrames = SetupLocalizationCalls.localizeFrames + 1
+                    end,
+                },
+            })
+            return SetupLocalizationCalls.localize, SetupLocalizationCalls.localizeFrames
+            "#,
+        )
+        .expect("SetupLocalization should accept the current locale table");
+    assert_eq!(before_localize, 1);
+    assert_eq!(before_frames, 0);
+
+    let (after_first_localize_frames, after_second_localize_frames): (i32, i32) = env
+        .eval(
+            r#"
+            LocalizeFrames()
+            local first = SetupLocalizationCalls.localizeFrames
+            LocalizeFrames()
+            return first, SetupLocalizationCalls.localizeFrames
+            "#,
+        )
+        .expect("LocalizeFrames should drain queued localization callbacks once");
+    assert_eq!(after_first_localize_frames, 1);
+    assert_eq!(after_second_localize_frames, 1);
+}
+
+#[test]
 fn named_fontstring_is_globally_reachable() {
     // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
     // FontString, matching how named frames and named textures behave.

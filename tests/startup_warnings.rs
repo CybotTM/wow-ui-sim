@@ -804,6 +804,29 @@ fn test_blizzard_framexml_loads_without_eventutil_warning() {
 }
 
 #[test]
+fn test_blizzard_framexml_loads_without_setup_localization_warning() {
+    test_timeout! {
+        let (_env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let localization_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("SetupLocalization")
+                    || warning.contains("Shared/Localization.lua:55")
+                    || warning.contains("Mainline/Localization.lua:48")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            localization_warnings.is_empty(),
+            "Blizzard_FrameXML should not warn on SetupLocalization:\n  {}",
+            localization_warnings.join("\n  ")
+        );
+    }
+}
+
+#[test]
 fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
     test_timeout! {
         let (_env, warnings) = load_blizzard_addon_by_folder("Blizzard_Commentator");

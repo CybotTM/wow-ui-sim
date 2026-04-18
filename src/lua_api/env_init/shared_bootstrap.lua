@@ -33,6 +33,48 @@ if CreateAndInitFromMixin == nil then
   end
 end
 
+if UI_LOCALE == nil then
+  if type(GetLocale) == "function" then
+    UI_LOCALE = GetLocale()
+  else
+    UI_LOCALE = "enUS"
+  end
+end
+
+if SetupLocalization == nil then
+  local localizeFramesCallbacks = {}
+
+  local function call_localization_function(l10nTable, key)
+    if type(l10nTable) ~= "table" then
+      return
+    end
+    local localeTable = l10nTable[UI_LOCALE]
+    if type(localeTable) ~= "table" then
+      return
+    end
+    local localizeFn = localeTable[key]
+    if type(localizeFn) == "function" then
+      localizeFn()
+    end
+  end
+
+  function LocalizeFrames()
+    local callbacks = localizeFramesCallbacks
+    localizeFramesCallbacks = {}
+    for index = 1, #callbacks do
+      local ok = pcall(callbacks[index])
+      local _ = ok
+    end
+  end
+
+  function SetupLocalization(l10nTable)
+    call_localization_function(l10nTable, "localize")
+    table.insert(localizeFramesCallbacks, function()
+      call_localization_function(l10nTable, "localizeFrames")
+    end)
+  end
+end
+
 if EventUtil == nil then
   local eventUtilState = {
     allEventsWatchers = {},
