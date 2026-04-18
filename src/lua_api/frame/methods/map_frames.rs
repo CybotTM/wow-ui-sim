@@ -60,6 +60,122 @@ pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
         set_static_poi_arrow_texture,
     )?;
     table_set_rust_fn_static(state, mt, "SetPlayerTexture", set_minimap_player_texture)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobInsideTexture",
+        set_quest_blob_inside_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobInsideAlpha",
+        set_quest_blob_inside_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobOutsideTexture",
+        set_quest_blob_outside_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobOutsideAlpha",
+        set_quest_blob_outside_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobRingTexture",
+        set_quest_blob_ring_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobRingAlpha",
+        set_quest_blob_ring_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetQuestBlobRingScalar",
+        set_quest_blob_ring_scalar,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetTaskBlobInsideTexture",
+        set_task_blob_inside_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetTaskBlobInsideAlpha",
+        set_task_blob_inside_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetTaskBlobOutsideTexture",
+        set_task_blob_outside_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetTaskBlobOutsideAlpha",
+        set_task_blob_outside_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetTaskBlobRingTexture",
+        set_task_blob_ring_texture,
+    )?;
+    table_set_rust_fn_static(state, mt, "SetTaskBlobRingAlpha", set_task_blob_ring_alpha)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetTaskBlobRingScalar",
+        set_task_blob_ring_scalar,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetArchBlobInsideTexture",
+        set_arch_blob_inside_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetArchBlobInsideAlpha",
+        set_arch_blob_inside_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetArchBlobOutsideTexture",
+        set_arch_blob_outside_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetArchBlobOutsideAlpha",
+        set_arch_blob_outside_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetArchBlobRingTexture",
+        set_arch_blob_ring_texture,
+    )?;
+    table_set_rust_fn_static(state, mt, "SetArchBlobRingAlpha", set_arch_blob_ring_alpha)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetArchBlobRingScalar",
+        set_arch_blob_ring_scalar,
+    )?;
     table_set_rust_fn_static(state, mt, "SetZoom", set_zoom)?;
     table_set_rust_fn_static(state, mt, "GetZoom", get_zoom)?;
     table_set_rust_fn_static(state, mt, "GetZoomLevels", get_zoom_levels)?;
@@ -380,6 +496,147 @@ fn set_static_poi_arrow_texture(state: &mut LuaState) -> LuaResult<u32> {
     set_minimap_texture_field(state, |frame, texture| {
         frame.minimap_static_poi_arrow_texture = texture
     })
+}
+
+fn set_quest_blob_inside_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.quest_blob_inside.texture = texture
+    })
+}
+
+fn set_quest_blob_inside_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.quest_blob_inside.alpha = alpha)
+}
+
+fn set_quest_blob_outside_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.quest_blob_outside.texture = texture
+    })
+}
+
+fn set_quest_blob_outside_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.quest_blob_outside.alpha = alpha)
+}
+
+fn set_quest_blob_ring_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.quest_blob_ring.texture = texture
+    })
+}
+
+fn set_quest_blob_ring_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.quest_blob_ring.alpha = alpha)
+}
+
+fn set_quest_blob_ring_scalar(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_scalar(state, |frame, scalar| frame.quest_blob_ring.scalar = scalar)
+}
+
+fn set_task_blob_inside_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.task_blob_inside.texture = texture
+    })
+}
+
+fn set_task_blob_inside_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.task_blob_inside.alpha = alpha)
+}
+
+fn set_task_blob_outside_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.task_blob_outside.texture = texture
+    })
+}
+
+fn set_task_blob_outside_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.task_blob_outside.alpha = alpha)
+}
+
+fn set_task_blob_ring_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.task_blob_ring.texture = texture
+    })
+}
+
+fn set_task_blob_ring_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.task_blob_ring.alpha = alpha)
+}
+
+fn set_task_blob_ring_scalar(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_scalar(state, |frame, scalar| frame.task_blob_ring.scalar = scalar)
+}
+
+fn set_arch_blob_inside_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.arch_blob_inside.texture = texture
+    })
+}
+
+fn set_arch_blob_inside_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.arch_blob_inside.alpha = alpha)
+}
+
+fn set_arch_blob_outside_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.arch_blob_outside.texture = texture
+    })
+}
+
+fn set_arch_blob_outside_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.arch_blob_outside.alpha = alpha)
+}
+
+fn set_arch_blob_ring_texture(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_texture(state, |frame, texture| {
+        frame.arch_blob_ring.texture = texture
+    })
+}
+
+fn set_arch_blob_ring_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_alpha(state, |frame, alpha| frame.arch_blob_ring.alpha = alpha)
+}
+
+fn set_arch_blob_ring_scalar(state: &mut LuaState) -> LuaResult<u32> {
+    set_blob_scalar(state, |frame, scalar| frame.arch_blob_ring.scalar = scalar)
+}
+
+fn set_blob_texture<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
+where
+    F: Fn(&mut crate::widget::Frame, Option<String>),
+{
+    let id = frame_id_from_stack(state, 1)?;
+    let texture = val_to_string(state, stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        write(frame, texture);
+    }
+    Ok(0)
+}
+
+fn set_blob_alpha<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
+where
+    F: Fn(&mut crate::widget::Frame, f64),
+{
+    let id = frame_id_from_stack(state, 1)?;
+    let alpha = stack_num(state, 2).unwrap_or(0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        write(frame, alpha);
+    }
+    Ok(0)
+}
+
+fn set_blob_scalar<F>(state: &mut LuaState, write: F) -> LuaResult<u32>
+where
+    F: Fn(&mut crate::widget::Frame, f64),
+{
+    let id = frame_id_from_stack(state, 1)?;
+    let scalar = stack_num(state, 2).unwrap_or(0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        write(frame, scalar);
+    }
+    Ok(0)
 }
 
 fn set_minimap_texture_field<F>(state: &mut LuaState, write: F) -> LuaResult<u32>

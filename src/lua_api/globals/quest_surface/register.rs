@@ -52,6 +52,10 @@ pub const QUEST_LOG_METHODS: &[(&'static str, SurfaceFn)] = &[
 
 pub const TASK_QUEST_METHODS: &[(&'static str, SurfaceFn)] = &[
     ("IsActive", task_quest_is_active),
+    (
+        "DoesMapShowTaskQuestObjectives",
+        does_map_show_task_quest_objectives,
+    ),
     ("GetQuestsOnMap", build_task_quest_info),
     ("GetQuestsForPlayerByMapID", build_task_quest_info),
     ("GetQuestInfoByQuestID", task_quest_get_quest_info_by_id),

@@ -416,8 +416,14 @@ pub fn get_quest_progress_bar_percent(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn quest_map_frame_get_focused_quest_id(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    Ok(1)
+    let selected_quest_log_id = borrow_state(state)?.selected_quest_log_id;
+    match selected_quest_log_id {
+        Some(quest_id) => {
+            state.push(Val::Num(quest_id as f64));
+            Ok(1)
+        }
+        None => Ok(0),
+    }
 }
 
 /// `QuestMapUpdateAllQuests()` — retail returns the number of POIs that
@@ -484,6 +490,13 @@ pub fn build_task_quest_info(state: &mut LuaState) -> LuaResult<u32> {
 pub fn task_quest_is_active(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
     state.push(Val::Bool(is_world_quest(quest_id)));
+    Ok(1)
+}
+
+pub fn does_map_show_task_quest_objectives(state: &mut LuaState) -> LuaResult<u32> {
+    let map_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let shows_objectives = WORLD_QUESTS.iter().any(|quest| quest.map_id == map_id);
+    state.push(Val::Bool(shows_objectives));
     Ok(1)
 }
 

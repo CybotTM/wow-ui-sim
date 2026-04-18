@@ -21,10 +21,11 @@
 //! - `C_Map.GetFallbackWorldMapID()` — returns the seeded player map
 //!   id (`2248`).
 //! - `C_Map.MapHasArt(uiMapID)` — true for positive map ids.
+//! - `C_Map.RequestPreloadMap(uiMapID)` — queues map art + overlay textures.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_set, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, table_set, val_to_string,
 };
 use crate::lua_api::state::MapData;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -34,7 +35,25 @@ use std::collections::HashSet;
 
 pub(super) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Map")?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMapArtBackgroundAtlas",
+        c_map_get_map_art_background_atlas,
+    )?;
     table_set_rust_fn_static(state, table_ref, "GetMapArtID", c_map_get_map_art_id)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMapArtLayerTextures",
+        c_map_get_map_art_layer_textures,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMapArtLayers",
+        c_map_get_map_art_layers,
+    )?;
     table_set_rust_fn_static(state, table_ref, "GetMapInfo", c_map_get_map_info)?;
     table_set_rust_fn_static(
         state,
@@ -57,14 +76,37 @@ pub(super) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
+        "GetCurrentMapID",
+        c_map_get_current_map_id,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
         "GetFallbackWorldMapID",
         c_map_get_fallback_world_map_id,
     )?;
     table_set_rust_fn_static(state, table_ref, "MapHasArt", c_map_map_has_art)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "RequestPreloadMap",
+        c_map_request_preload_map,
+    )?;
     Ok(())
 }
 
 const DEFAULT_PLAYER_MAP_ID: i32 = 2248;
+const DEFAULT_MAP_ART_BACKGROUND_ATLAS: &str = "AdventureMap_TileBg";
+
+fn c_map_get_map_art_background_atlas(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    if crate::map_art::get_map_art(ui_map_id as u32).is_none() {
+        return Ok(0);
+    }
+    let atlas = create_string(state, DEFAULT_MAP_ART_BACKGROUND_ATLAS);
+    state.push(atlas);
+    Ok(1)
+}
 
 fn c_map_get_map_art_id(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = i32::from_stack(state, 1)?;
@@ -73,6 +115,91 @@ fn c_map_get_map_art_id(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     state.push(Val::Num(art_id as f64));
+    Ok(1)
+}
+
+fn c_map_get_map_art_layers(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let Some(map_art) = crate::map_art::get_map_art(ui_map_id as u32) else {
+        return Ok(0);
+    };
+
+    let layers = create_table(state);
+    for (index, layer) in map_art.layers.iter().enumerate() {
+        let layer_info = create_table(state);
+        table_set(
+            state,
+            layer_info,
+            "layerWidth",
+            Val::Num(layer.layer_width as f64),
+        );
+        table_set(
+            state,
+            layer_info,
+            "layerHeight",
+            Val::Num(layer.layer_height as f64),
+        );
+        table_set(
+            state,
+            layer_info,
+            "tileWidth",
+            Val::Num(layer.tile_width as f64),
+        );
+        table_set(
+            state,
+            layer_info,
+            "tileHeight",
+            Val::Num(layer.tile_height as f64),
+        );
+        table_set(
+            state,
+            layer_info,
+            "minScale",
+            Val::Num(layer.min_scale as f64),
+        );
+        table_set(
+            state,
+            layer_info,
+            "maxScale",
+            Val::Num(layer.max_scale as f64),
+        );
+        table_set(
+            state,
+            layer_info,
+            "additionalZoomSteps",
+            Val::Num(layer.additional_zoom_steps as f64),
+        );
+        set_table_array(state, layers, index as i64 + 1, layer_info);
+    }
+
+    state.push(layers);
+    Ok(1)
+}
+
+fn c_map_get_map_art_layer_textures(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let layer_index = i32::from_stack(state, 2)?;
+    if layer_index < 1 {
+        return Ok(0);
+    }
+
+    let Some(map_art) = crate::map_art::get_map_art(ui_map_id as u32) else {
+        return Ok(0);
+    };
+    let Some(textures) = map_art.tiles.get((layer_index - 1) as usize) else {
+        return Ok(0);
+    };
+
+    let texture_ids = create_table(state);
+    for (index, file_data_id) in textures.iter().copied().enumerate() {
+        set_table_array(
+            state,
+            texture_ids,
+            index as i64 + 1,
+            Val::Num(file_data_id as f64),
+        );
+    }
+    state.push(texture_ids);
     Ok(1)
 }
 
@@ -190,6 +317,11 @@ fn c_map_get_best_map_for_unit(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_map_get_current_map_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(DEFAULT_PLAYER_MAP_ID as f64));
+    Ok(1)
+}
+
 fn c_map_get_fallback_world_map_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(DEFAULT_PLAYER_MAP_ID as f64));
     Ok(1)
@@ -199,4 +331,42 @@ fn c_map_map_has_art(state: &mut LuaState) -> LuaResult<u32> {
     let ui_map_id = i32::from_stack(state, 1)?;
     state.push(Val::Bool(ui_map_id > 0));
     Ok(1)
+}
+
+fn c_map_request_preload_map(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let queued_paths = collect_preload_paths_for_map(ui_map_id);
+    borrow_state_mut(state)?.enqueue_texture_preloads(queued_paths);
+    Ok(0)
+}
+
+fn collect_preload_paths_for_map(ui_map_id: i32) -> Vec<String> {
+    let mut paths = Vec::new();
+    if let Some(art_info) = crate::map_art::get_map_art(ui_map_id as u32) {
+        for file_data_id in art_info
+            .tiles
+            .iter()
+            .flat_map(|tiles| tiles.iter().copied())
+        {
+            if let Some(path) = file_data_id_to_wow_path(file_data_id) {
+                paths.push(path);
+            }
+        }
+    }
+    if let Some(overlays) = crate::map_exploration::get_overlays_for_map(ui_map_id as u32) {
+        for file_data_id in overlays
+            .iter()
+            .flat_map(|overlay| overlay.file_data_ids.iter().copied())
+        {
+            if let Some(path) = file_data_id_to_wow_path(file_data_id) {
+                paths.push(path);
+            }
+        }
+    }
+    paths
+}
+
+fn file_data_id_to_wow_path(file_data_id: u32) -> Option<String> {
+    let path = crate::manifest_interface_data::get_texture_path(file_data_id)?;
+    Some(format!("Interface\\{}", path.replace('/', "\\")))
 }

@@ -115,6 +115,7 @@ macro_rules! build_empty_sim_state {
             quest_log_entries: QuestLogState::seeded(),
             pending_quest_offer: None,
             quest_choice_id: None,
+            quest_poi_map_id: None,
             selected_quest_log_id: None,
             abandon_quest_id: None,
             tracked_achievements: ::std::collections::HashSet::new(),
@@ -476,6 +477,8 @@ pub struct SimState {
     pub pending_quest_offer: Option<u32>,
     /// Active quest-choice dialog id set by `QuestChoiceFrame_SetActiveChoice`.
     pub quest_choice_id: Option<u32>,
+    /// Last map id passed to `C_QuestLog.SetMapForQuestPOIs`.
+    pub quest_poi_map_id: Option<i32>,
     /// Quest id most recently clicked in the quest map log via
     /// `QuestMapLogTitleButton_OnClick`.
     pub selected_quest_log_id: Option<u32>,

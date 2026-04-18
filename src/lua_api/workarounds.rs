@@ -4,6 +4,7 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
     crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
     patch_ui_parent_panel_toggles(env);
+    patch_vignette_pin_template(env);
 }
 
 pub fn apply_post_event(_env: &crate::lua_api::WowLuaEnv) {}
@@ -22,6 +23,10 @@ fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
     let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
+}
+
+fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA);
 }
 
 const GETGLOBAL_HELPER_LUA: &str = r#"
@@ -140,6 +145,46 @@ if TalentUtil and type(TalentUtil.CombineCostArrays) == "function" and not Talen
     end
     TalentUtil.__wow_ui_sim_nil_safe_combine = true
     TalentUtil.__wow_ui_sim_original_combine = original
+end
+"###;
+
+const VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA: &str = r###"
+local function __wow_patch_vignette_provider(provider)
+    if type(provider) ~= "table" then
+        return
+    end
+    if type(provider.GetPinTemplate) ~= "function" then
+        return
+    end
+    if type(provider.GetDefaultPinTemplate) ~= "function" then
+        return
+    end
+    if provider.__wow_ui_sim_nil_safe_get_pin_template then
+        return
+    end
+    if provider:GetDefaultPinTemplate() ~= "VignettePinTemplate" then
+        return
+    end
+
+    local original = provider.GetPinTemplate
+    function provider:GetPinTemplate(vignetteInfo)
+        if vignetteInfo == nil then
+            return self:GetDefaultPinTemplate()
+        end
+        return original(self, vignetteInfo)
+    end
+    provider.__wow_ui_sim_nil_safe_get_pin_template = true
+end
+
+__wow_patch_vignette_provider(VignetteDataProviderMixin)
+
+for _, mapName in ipairs({"WorldMapFrame", "BattlefieldMapFrame", "FlightMapFrame"}) do
+    local map = _G[mapName]
+    if map and type(map.dataProviders) == "table" then
+        for provider in pairs(map.dataProviders) do
+            __wow_patch_vignette_provider(provider)
+        end
+    end
 end
 "###;
 

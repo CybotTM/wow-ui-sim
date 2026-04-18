@@ -21,7 +21,12 @@
 //! - `IsWorldQuest(questID)` — returns bool.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::globals::quest_surface::data::{
+    QUEST_LOG, QuestLogEntry as SeededQuestLogEntry, WORLD_QUESTS,
+};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
 use crate::lua_api::sim_substates::QuestLogEntry;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -38,9 +43,13 @@ pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> 
 const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetBountySetInfoForMapID", get_bounty_set_info_for_map_id),
     ("GetInfo", get_info),
+    ("GetMapForQuestPOIs", get_map_for_quest_pois),
     ("GetNextWaypoint", get_next_waypoint),
+    ("GetNextWaypointForMap", get_next_waypoint_for_map),
+    ("GetNumQuestObjectives", get_num_quest_objectives),
     ("GetQuestDetailsTheme", get_quest_details_theme),
     ("GetQuestTagInfo", get_quest_tag_info),
+    ("GetQuestsOnMap", get_quests_on_map),
     ("GetWorldQuestInfo", get_world_quest_info),
     ("GetAllCompletedQuestIDs", get_all_completed_quest_ids),
     ("GetLogIndexForQuestID", get_log_index_for_quest_id),
@@ -52,7 +61,9 @@ const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("IsOnQuest", is_on_quest),
     ("IsQuestFlaggedCompleted", is_quest_flagged_completed),
     ("IsQuestReplayable", is_quest_replayable),
+    ("IsThreatQuest", is_threat_quest),
     ("IsWorldQuest", is_world_quest),
+    ("SetMapForQuestPOIs", set_map_for_quest_pois),
 ];
 
 fn get_bounty_set_info_for_map_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -142,6 +153,38 @@ fn get_next_waypoint(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
+fn get_map_for_quest_pois(state: &mut LuaState) -> LuaResult<u32> {
+    let map_id = borrow_state(state)?.quest_poi_map_id.unwrap_or(0);
+    state.push(Val::Num(map_id as f64));
+    Ok(1)
+}
+
+fn get_next_waypoint_for_map(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = i32::from_stack(state, 1)?;
+    let map_id = i32::from_stack(state, 2)?;
+    let waypoint = borrow_state(state)?
+        .quest_log_entries
+        .entries
+        .iter()
+        .find(|entry| entry.quest_id == quest_id && entry.map_id == Some(map_id))
+        .and_then(|entry| entry.waypoint);
+    match waypoint {
+        Some((x, y)) => {
+            state.push(Val::Num(x));
+            state.push(Val::Num(y));
+            Ok(2)
+        }
+        None => Ok(0),
+    }
+}
+
+fn get_num_quest_objectives(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = i32::from_stack(state, 1)?;
+    let count = objective_count_for_quest(quest_id).unwrap_or(0);
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
 fn get_quest_details_theme(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = i32::from_stack(state, 1)?;
     let theme = borrow_state(state)?
@@ -216,6 +259,26 @@ fn get_world_quest_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, t, "isElite", Val::Bool(false));
     table_set(state, t, "tradeskillLineIndex", Val::Num(0.0));
     state.push(t);
+    Ok(1)
+}
+
+fn get_quests_on_map(state: &mut LuaState) -> LuaResult<u32> {
+    let map_id = i32::from_stack(state, 1)?;
+    let quests = borrow_state(state)?
+        .quest_log_entries
+        .entries
+        .iter()
+        .filter(|entry| entry.map_id == Some(map_id))
+        .filter_map(quest_poi_map_info_for_entry)
+        .collect::<Vec<_>>();
+
+    let array = create_table(state);
+    for (index, quest) in quests.into_iter().enumerate() {
+        let info = create_table(state);
+        write_quest_poi_map_info(state, info, quest);
+        set_table_array(state, array, index as i64 + 1, info);
+    }
+    state.push(array);
     Ok(1)
 }
 
@@ -322,6 +385,78 @@ fn is_quest_replayable(state: &mut LuaState) -> LuaResult<u32> {
     quest_bool_field(state, |e| e.is_replayable)
 }
 
+fn is_threat_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let _quest_id = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 fn is_world_quest(state: &mut LuaState) -> LuaResult<u32> {
     quest_bool_field(state, |e| e.is_world_quest)
+}
+
+fn set_map_for_quest_pois(state: &mut LuaState) -> LuaResult<u32> {
+    let map_id = i32::from_stack(state, 1)?;
+    borrow_state_mut(state)?.quest_poi_map_id = Some(map_id);
+    Ok(0)
+}
+
+#[derive(Clone, Copy)]
+struct QuestPoiMapInfo {
+    quest_id: i32,
+    map_id: i32,
+    x: f64,
+    y: f64,
+    num_objectives: i32,
+    is_meta: bool,
+    in_progress: bool,
+}
+
+fn quest_poi_map_info_for_entry(entry: &QuestLogEntry) -> Option<QuestPoiMapInfo> {
+    let map_id = entry.map_id?;
+    let (x, y) = entry.waypoint?;
+    let num_objectives = objective_count_for_quest(entry.quest_id).unwrap_or(0);
+    Some(QuestPoiMapInfo {
+        quest_id: entry.quest_id,
+        map_id,
+        x,
+        y,
+        num_objectives,
+        is_meta: entry.is_meta,
+        in_progress: !entry.is_complete,
+    })
+}
+
+fn objective_count_for_quest(quest_id: i32) -> Option<i32> {
+    if let Some(quest) = WORLD_QUESTS.iter().find(|quest| quest.quest_id == quest_id) {
+        return Some(quest.num_objectives);
+    }
+
+    QUEST_LOG.iter().find_map(|entry| match entry {
+        SeededQuestLogEntry::Quest {
+            quest_id: seeded_quest_id,
+            objectives,
+            ..
+        } if *seeded_quest_id == quest_id => Some(objectives.len() as i32),
+        _ => None,
+    })
+}
+
+fn write_quest_poi_map_info(state: &mut LuaState, info: Val, quest: QuestPoiMapInfo) {
+    table_set(state, info, "questID", Val::Num(quest.quest_id as f64));
+    table_set(
+        state,
+        info,
+        "numObjectives",
+        Val::Num(quest.num_objectives as f64),
+    );
+    table_set(state, info, "mapID", Val::Num(quest.map_id as f64));
+    table_set(state, info, "x", Val::Num(quest.x));
+    table_set(state, info, "y", Val::Num(quest.y));
+    table_set(state, info, "isQuestStart", Val::Bool(false));
+    table_set(state, info, "isDaily", Val::Bool(false));
+    table_set(state, info, "isCombatAllyQuest", Val::Bool(false));
+    table_set(state, info, "isMeta", Val::Bool(quest.is_meta));
+    table_set(state, info, "inProgress", Val::Bool(quest.in_progress));
+    table_set(state, info, "isMapIndicatorQuest", Val::Bool(false));
 }

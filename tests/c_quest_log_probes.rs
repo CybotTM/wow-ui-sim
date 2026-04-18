@@ -257,6 +257,76 @@ fn get_next_waypoint_returns_nothing_for_no_waypoint() {
     assert_eq!(count, 0);
 }
 
+#[test]
+fn get_next_waypoint_for_map_returns_xy_for_matching_map() {
+    let env = env();
+    let (x, y): (f64, f64) = env
+        .eval("return C_QuestLog.GetNextWaypointForMap(80000, 2248)")
+        .unwrap();
+    assert!((x - 0.45).abs() < 0.001);
+    assert!((y - 0.35).abs() < 0.001);
+}
+
+#[test]
+fn get_quests_on_map_returns_seeded_quest_pois() {
+    let env = env();
+    let (count, first_id, first_objectives): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local quests = C_QuestLog.GetQuestsOnMap(2248)
+            return #quests, quests[1].questID, quests[1].numObjectives
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 2);
+    assert_eq!(first_id, 80000);
+    assert_eq!(first_objectives, 2);
+}
+
+#[test]
+fn get_num_quest_objectives_uses_seeded_objectives() {
+    let env = env();
+    let count: i32 = env
+        .eval("return C_QuestLog.GetNumQuestObjectives(80000)")
+        .unwrap();
+    assert_eq!(count, 2);
+}
+
+#[test]
+fn is_threat_quest_defaults_to_false() {
+    let env = env();
+    let is_threat: bool = env.eval("return C_QuestLog.IsThreatQuest(80000)").unwrap();
+    assert!(!is_threat);
+}
+
+#[test]
+fn quest_poi_map_id_round_trips() {
+    let env = env();
+    let map_id: i32 = env
+        .eval(
+            r#"
+            C_QuestLog.SetMapForQuestPOIs(2248)
+            return C_QuestLog.GetMapForQuestPOIs()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(map_id, 2248);
+}
+
+#[test]
+fn quest_map_frame_get_focused_quest_id_returns_nothing_when_unfocused() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            local values = {QuestMapFrame_GetFocusedQuestID()}
+            return #values
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 0);
+}
+
 // ── GetQuestTagInfo ───────────────────────────────────────────────────────────
 
 #[test]

@@ -1,5 +1,9 @@
 //! Tests for MapCanvas pin infrastructure and world quest pin display.
 
+mod common;
+mod render_order_support;
+
+use render_order_support::env_with_isolated_world_map;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -39,5 +43,40 @@ fn test_default_map_has_world_quests() {
     assert!(
         count > 0,
         "Default map should have seeded world quests for pin display"
+    );
+}
+
+#[test]
+fn world_map_zone_map_shows_seeded_quest_pins() {
+    let env = env_with_isolated_world_map();
+
+    let (pin_count, debug): (i32, String) = env
+        .eval(
+            r#"
+            if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                return -1, "WorldMapFrame not shown"
+            end
+
+            WorldMapFrame:SetMapID(2248)
+
+            local count = 0
+            for _pin in WorldMapFrame:EnumeratePinsByTemplate("QuestPinTemplate") do
+                count = count + 1
+            end
+
+            local quests = C_QuestLog.GetQuestsOnMap(2248)
+            local mapID = WorldMapFrame:GetMapID() or 0
+            return count, string.format(
+                "map=%s quests=%s",
+                tostring(mapID),
+                tostring(quests and #quests or -1)
+            )
+            "#,
+        )
+        .expect("world map quest pin query should run");
+
+    assert!(
+        pin_count > 0,
+        "seeded zone map should show quest pins: {debug}"
     );
 }
