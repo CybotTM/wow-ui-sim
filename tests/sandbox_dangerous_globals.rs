@@ -1,26 +1,25 @@
 //! Sandbox-parity probes for dangerous globals.
 //!
 //! Pins the behavioural expectation for five classically-restricted
-//! globals across both environments that run addon code:
+//! globals, checked separately against the insecure `_G` surface and
+//! the secure `__secureenv` surface:
 //!
 //! - `dofile`, `loadfile`, `require` — filesystem / module loaders.
-//!   Blizzard strips these from the client environment; real WoW
-//!   addons see `nil` for all three.
-//! - `string.dump` — bytecode dumper. Blocking it is part of the
-//!   restricted-execution policy because dumped bytecode can be
-//!   loaded back and side-step fenv/taint.
-//! - `math.randomseed` — not security-critical on its own but
-//!   removed from the restricted surface because it mutates a
-//!   process-global RNG shared with the rest of the UI; restricted
-//!   code shouldn't perturb it.
+//! - `string.dump` — bytecode dumper (can side-step fenv/taint).
+//! - `math.randomseed` — mutates a process-global RNG.
 //!
-//! The current secureenv is a shallow copy of `_G` with an `__index`
-//! fallback to `_G`. That means anything still present on `_G` is
-//! reachable from secureenv too — the sandbox parity check has to
-//! treat the two environments as a single attack surface.
+//! Policy split (matches Blizzard's restricted-execution model):
 //!
-//! Results drive the follow-up decision recorded in PLAN.md: if a
-//! probe surfaces a real leak, restore the missing `_G` cleanup.
+//! - Insecure addon code reads globals through `_G`. These five MUST
+//!   be `nil` there so addons cannot invoke them.
+//! - Secure chunks (audited Blizzard code) run with fenv retargeted to
+//!   `__secureenv`, which is shallow-copied from `_G` BEFORE the
+//!   cleanup. `__secureenv` therefore retains the five entries so
+//!   secure bootstrap machinery can still use them.
+//!
+//! `env_init::remove_sandbox_globals` enforces this split; the tests
+//! below pin both sides so nobody accidentally re-orders or widens
+//! the cleanup.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -40,31 +39,40 @@ fn probe(env: &WowLuaEnv, name: &str) -> (String, String) {
 }
 
 #[test]
-fn dofile_is_absent_from_both_environments() {
+fn dofile_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure) = probe(&env, "dofile");
-    assert_eq!(g, "nil", "dofile leaks into _G");
-    assert_eq!(secure, "nil", "dofile leaks into __secureenv");
+    assert_eq!(g, "nil", "dofile must be nil on _G");
+    assert_eq!(
+        secure, "function",
+        "dofile must remain on __secureenv for secure chunks"
+    );
 }
 
 #[test]
-fn loadfile_is_absent_from_both_environments() {
+fn loadfile_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure) = probe(&env, "loadfile");
-    assert_eq!(g, "nil", "loadfile leaks into _G");
-    assert_eq!(secure, "nil", "loadfile leaks into __secureenv");
+    assert_eq!(g, "nil", "loadfile must be nil on _G");
+    assert_eq!(
+        secure, "function",
+        "loadfile must remain on __secureenv for secure chunks"
+    );
 }
 
 #[test]
-fn require_is_absent_from_both_environments() {
+fn require_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure) = probe(&env, "require");
-    assert_eq!(g, "nil", "require leaks into _G");
-    assert_eq!(secure, "nil", "require leaks into __secureenv");
+    assert_eq!(g, "nil", "require must be nil on _G");
+    assert_eq!(
+        secure, "function",
+        "require must remain on __secureenv for secure chunks"
+    );
 }
 
 #[test]
-fn string_dump_is_absent_from_both_environments() {
+fn string_dump_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure): (String, String) = env
         .eval(
@@ -76,12 +84,15 @@ fn string_dump_is_absent_from_both_environments() {
             "#,
         )
         .unwrap();
-    assert_eq!(g, "nil", "string.dump leaks into _G.string");
-    assert_eq!(secure, "nil", "string.dump leaks into __secureenv.string");
+    assert_eq!(g, "nil", "string.dump must be nil on _G.string");
+    assert_eq!(
+        secure, "function",
+        "string.dump must remain on __secureenv.string"
+    );
 }
 
 #[test]
-fn math_randomseed_is_absent_from_both_environments() {
+fn math_randomseed_nil_on_g_retained_on_secureenv() {
     let env = env();
     let (g, secure): (String, String) = env
         .eval(
@@ -93,9 +104,9 @@ fn math_randomseed_is_absent_from_both_environments() {
             "#,
         )
         .unwrap();
-    assert_eq!(g, "nil", "math.randomseed leaks into _G.math");
+    assert_eq!(g, "nil", "math.randomseed must be nil on _G.math");
     assert_eq!(
-        secure, "nil",
-        "math.randomseed leaks into __secureenv.math"
+        secure, "function",
+        "math.randomseed must remain on __secureenv.math"
     );
 }

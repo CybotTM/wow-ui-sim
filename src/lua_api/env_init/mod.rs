@@ -40,13 +40,15 @@ pub(super) fn init_lua_state(
     // those two points the mark phase is paused.
     super::globals::register_globals(lua, state.clone())?;
     bootstrap::init_runtime_surface_bootstrap(lua)?;
-    // Nil out dofile / loadfile / require / string.dump / math.randomseed
-    // on `_G` BEFORE secureenv is shallow-copied so those entries don't
-    // leak through the copy to restricted addon code either.
-    remove_sandbox_globals(lua)?;
+    // secureenv is shallow-copied from `_G` here. It keeps its copy of
+    // the dangerous globals (dofile / loadfile / require / string.dump /
+    // math.randomseed) so secure chunks — which Blizzard trusts —
+    // retain them. Insecure addon code that reads through `_G` sees nil
+    // after the cleanup below.
     super::globals::security::create_secure_environment(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
     crate::loader::precompiled::init(lua)?;
+    remove_sandbox_globals(lua)?;
     frames::init_frame_metatable(lua)?;
     finalize_bootstrap_gc(lua)?;
     // Opt-in until the "overwrite stable global" audit is complete.
@@ -79,11 +81,14 @@ fn enable_taint_and_wrap_loadstring(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
-/// Nil out globals that WoW's restricted environment strips: the
-/// filesystem / module loaders (`dofile`, `loadfile`, `require`), the
-/// bytecode dumper (`string.dump`), and the process-global RNG seeder
-/// (`math.randomseed`). Must run BEFORE secureenv is shallow-copied
-/// from `_G` so the nil values land in both environments.
+/// Nil WoW-forbidden globals from `_G`: the filesystem / module
+/// loaders (`dofile`, `loadfile`, `require`), the bytecode dumper
+/// (`string.dump`), and the process-global RNG seeder
+/// (`math.randomseed`).
+///
+/// Runs AFTER `create_secure_environment` so `__secureenv` keeps its
+/// shallow copy — secure chunks (audited Blizzard code) retain these
+/// tools. Insecure addon code that reads through `_G` sees nil.
 ///
 /// Covered by `tests/sandbox_dangerous_globals.rs`.
 fn remove_sandbox_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -91,10 +96,24 @@ fn remove_sandbox_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     for name in ["dofile", "loadfile", "require"] {
         LuaApiMut::set_global_val(lua, name, rilua::Val::Nil)?;
     }
+    // `string` and `math` are shared tables: secureenv's shallow copy
+    // holds the same reference. Niling a field would mutate both. Swap
+    // `_G.string` and `_G.math` for fresh shallow copies minus the
+    // dangerous fields — secureenv keeps the originals intact.
     lua.exec(
         r#"
-        if string then string.dump = nil end
-        if math then math.randomseed = nil end
+        if string then
+            local safe_string = {}
+            for k, v in pairs(string) do safe_string[k] = v end
+            safe_string.dump = nil
+            rawset(_G, "string", safe_string)
+        end
+        if math then
+            local safe_math = {}
+            for k, v in pairs(math) do safe_math[k] = v end
+            safe_math.randomseed = nil
+            rawset(_G, "math", safe_math)
+        end
         "#,
     )?;
     Ok(())
