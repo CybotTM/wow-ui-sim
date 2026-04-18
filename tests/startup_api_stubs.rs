@@ -10,6 +10,17 @@ fn env() -> WowLuaEnv {
 }
 
 #[test]
+fn clamp_and_saturate_exist_in_shared_bootstrap() {
+    let env = env();
+    let (clamped_low, clamped_high, saturated): (f64, f64, f64) = env
+        .eval("return Clamp(-2, 0, 5), Clamp(8, 0, 5), Saturate(1.5)")
+        .expect("Clamp and Saturate should be callable");
+    assert_eq!(clamped_low, 0.0);
+    assert_eq!(clamped_high, 5.0);
+    assert_eq!(saturated, 1.0);
+}
+
+#[test]
 fn get_net_stats_returns_four_zeros() {
     let env = env();
     let (bw_in, bw_out, latency_home, latency_world): (f64, f64, f64, f64) = env

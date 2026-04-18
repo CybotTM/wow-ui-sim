@@ -122,6 +122,23 @@ if strtrim == nil then
   end
 end
 
+if Clamp == nil then
+  function Clamp(value, min, max)
+    if value > max then
+      return max
+    elseif value < min then
+      return min
+    end
+    return value
+  end
+end
+
+if Saturate == nil then
+  function Saturate(value)
+    return Clamp(value, 0.0, 1.0)
+  end
+end
+
 local function __wow_deep_copy_table(source, seen)
   if type(source) ~= "table" then
     return source
