@@ -2,7 +2,7 @@
 
 use super::shared::{opt_bool, opt_f32, opt_string, rgba_from_stack, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string,
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, table_get, val_to_string,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
@@ -501,6 +501,260 @@ pub(super) fn set_snap_to_pixel_grid(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn is_snapping_to_pixel_grid(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let snapping = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.snap_to_pixel_grid)
+        .unwrap_or(false);
+    state.push(Val::Bool(snapping));
+    Ok(1)
+}
+
+// ---------------------------------------------------------------------------
+// Nine-slice setters (counterparts to existing getters)
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_texture_slice_margins(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let left = opt_f32(state, 2).unwrap_or(0.0);
+    let right = opt_f32(state, 3).unwrap_or(0.0);
+    let top = opt_f32(state, 4).unwrap_or(0.0);
+    let bottom = opt_f32(state, 5).unwrap_or(0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.texture_slice_margins = (left, right, top, bottom);
+    }
+    Ok(0)
+}
+
+pub(super) fn set_texture_slice_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mode = match stack_val(state, 2) {
+        Val::Num(n) => n as i32,
+        _ => 0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.texture_slice_mode = mode;
+    }
+    Ok(0)
+}
+
+pub(super) fn clear_texture_slice(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.texture_slice_margins = (0.0, 0.0, 0.0, 0.0);
+        frame.texture_slice_mode = 0;
+    }
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// Rotation
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_rotation(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let radians = opt_f32(state, 2).unwrap_or(0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.rotation = radians;
+    }
+    Ok(0)
+}
+
+pub(super) fn get_rotation(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let radians = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.rotation as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Num(radians));
+    Ok(1)
+}
+
+// ---------------------------------------------------------------------------
+// SetMask — no-op stub (not implemented on master either)
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_mask(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// SetGradient
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_gradient(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let orientation = opt_string(state, 2).unwrap_or_else(|| "VERTICAL".to_string());
+    let vertical = orientation.to_ascii_uppercase() != "HORIZONTAL";
+    let min_val = stack_val(state, 3);
+    let max_val = stack_val(state, 4);
+    let min_color = color_from_table(state, min_val);
+    let max_color = color_from_table(state, max_val);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.gradient = Some(crate::widget::Gradient {
+            vertical,
+            min_color,
+            max_color,
+        });
+    }
+    Ok(0)
+}
+
+fn color_from_table(state: &mut LuaState, val: Val) -> crate::widget::Color {
+    let r = f32_from_table_field(state, val, "r");
+    let g = f32_from_table_field(state, val, "g");
+    let b = f32_from_table_field(state, val, "b");
+    let a = f32_from_table_field_or(state, val, "a", 1.0);
+    crate::widget::Color::new(r, g, b, a)
+}
+
+fn f32_from_table_field(state: &mut LuaState, table: Val, key: &str) -> f32 {
+    match table_get(state, table, key) {
+        Val::Num(n) => n as f32,
+        _ => 0.0,
+    }
+}
+
+fn f32_from_table_field_or(state: &mut LuaState, table: Val, key: &str, default: f32) -> f32 {
+    match table_get(state, table, key) {
+        Val::Num(n) => n as f32,
+        _ => default,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// SetCenterColor — no-op (matches master)
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_center_color(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// SetVisuals — no-op (matches master)
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_visuals(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// SetSpriteSheetCell — no-op stub (not implemented on master)
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_sprite_sheet_cell(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = frame_id_from_stack(state, 1);
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// Vertex offsets
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_vertex_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let index = match stack_val(state, 2) {
+        Val::Num(n) => n as usize,
+        _ => return Ok(0),
+    };
+    if index == 0 || index > 4 {
+        return Ok(0);
+    }
+    let x = opt_f32(state, 3).unwrap_or(0.0);
+    let y = opt_f32(state, 4).unwrap_or(0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        let offsets = frame.vertex_offsets.get_or_insert([(0.0, 0.0); 4]);
+        offsets[index - 1] = (x, y);
+    }
+    Ok(0)
+}
+
+pub(super) fn get_vertex_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let index = match stack_val(state, 2) {
+        Val::Num(n) => n as usize,
+        _ => {
+            state.push(Val::Num(0.0));
+            state.push(Val::Num(0.0));
+            return Ok(2);
+        }
+    };
+    if index == 0 || index > 4 {
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+        return Ok(2);
+    }
+    let (x, y) = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.vertex_offsets)
+        .map(|offsets| offsets[index - 1])
+        .unwrap_or((0.0, 0.0));
+    state.push(Val::Num(x as f64));
+    state.push(Val::Num(y as f64));
+    Ok(2)
+}
+
+pub(super) fn clear_vertex_offsets(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.vertex_offsets = None;
+    }
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// ResetTexCoord
+// ---------------------------------------------------------------------------
+
+pub(super) fn reset_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.tex_coords = frame.atlas_tex_coords;
+        frame.tex_coords_quad = None;
+    }
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// Blocking loads
+// ---------------------------------------------------------------------------
+
+pub(super) fn set_blocking_loads_requested(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let blocking = val_to_bool(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.blocking_loads_requested = blocking;
+    }
+    Ok(0)
+}
+
+pub(super) fn is_blocking_load_requested(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let blocking = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.blocking_loads_requested)
+        .unwrap_or(false);
+    state.push(Val::Bool(blocking));
+    Ok(1)
+}
+
 // ---------------------------------------------------------------------------
 // register_texture
 // ---------------------------------------------------------------------------
@@ -514,8 +768,11 @@ const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("SetShadowColor", set_shadow_color),
     ("GetShadowColor", get_shadow_color),
     // Nine-slice
+    ("SetTextureSliceMargins", set_texture_slice_margins),
     ("GetTextureSliceMargins", get_texture_slice_margins),
+    ("SetTextureSliceMode", set_texture_slice_mode),
     ("GetTextureSliceMode", get_texture_slice_mode),
+    ("ClearTextureSlice", clear_texture_slice),
     // Atlas / texture source
     ("SetAtlas", set_atlas),
     ("GetAtlas", get_atlas),
@@ -534,9 +791,18 @@ const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetVertexColor", get_vertex_color),
     ("SetBlendMode", set_blend_mode),
     ("GetBlendMode", get_blend_mode),
+    // Gradient + center color
+    ("SetGradient", set_gradient),
+    ("SetCenterColor", set_center_color),
+    // Rotation
+    ("SetRotation", set_rotation),
+    ("GetRotation", get_rotation),
+    // Mask
+    ("SetMask", set_mask),
     // Tex coords + thickness
     ("SetTexCoord", set_tex_coord),
     ("GetTexCoord", get_tex_coord),
+    ("ResetTexCoord", reset_tex_coord),
     ("SetThickness", set_thickness),
     ("GetThickness", get_thickness),
     // Tiling
@@ -548,7 +814,19 @@ const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("SetTexelSnappingBias", set_texel_snapping_bias),
     ("GetTexelSnappingBias", get_texel_snapping_bias),
     ("SetSnapToPixelGrid", set_snap_to_pixel_grid),
+    ("IsSnappingToPixelGrid", is_snapping_to_pixel_grid),
     ("SetSecurityDisableSetText", set_security_disable_set_text),
+    // Visuals
+    ("SetVisuals", set_visuals),
+    // Sprite sheet
+    ("SetSpriteSheetCell", set_sprite_sheet_cell),
+    // Vertex offsets
+    ("SetVertexOffset", set_vertex_offset),
+    ("GetVertexOffset", get_vertex_offset),
+    ("ClearVertexOffsets", clear_vertex_offsets),
+    // Blocking loads
+    ("SetBlockingLoadsRequested", set_blocking_loads_requested),
+    ("IsBlockingLoadRequested", is_blocking_load_requested),
 ];
 
 pub(super) fn register_texture(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {

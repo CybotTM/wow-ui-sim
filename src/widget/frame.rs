@@ -501,6 +501,15 @@ pub struct Frame {
     /// `IsOwned(frame)` (checks identity) to decide whether to refresh or
     /// clear tooltip contents.
     pub tooltip_owner_id: Option<u64>,
+
+    /// Whether this texture requests blocking (synchronous) loads.
+    /// Stored for round-trip via SetBlockingLoadsRequested / IsBlockingLoadRequested.
+    pub blocking_loads_requested: bool,
+
+    /// Per-vertex offset overrides set by SetVertexOffset.
+    /// Index 0..3 correspond to the four corners (TL, BL, TR, BR).
+    /// None when no overrides have been set.
+    pub vertex_offsets: Option<[(f32, f32); 4]>,
 }
 
 // The `frame_defaults!` macro lives in `frame_defaults.rs` (included here
