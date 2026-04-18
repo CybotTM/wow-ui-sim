@@ -40,10 +40,13 @@ pub(super) fn init_lua_state(
     // those two points the mark phase is paused.
     super::globals::register_globals(lua, state.clone())?;
     bootstrap::init_runtime_surface_bootstrap(lua)?;
+    // Nil out dofile / loadfile / require / string.dump / math.randomseed
+    // on `_G` BEFORE secureenv is shallow-copied so those entries don't
+    // leak through the copy to restricted addon code either.
+    remove_sandbox_globals(lua)?;
     super::globals::security::create_secure_environment(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
     crate::loader::precompiled::init(lua)?;
-    remove_sandbox_globals(lua)?;
     frames::init_frame_metatable(lua)?;
     finalize_bootstrap_gc(lua)?;
     // Opt-in until the "overwrite stable global" audit is complete.
@@ -76,8 +79,23 @@ fn enable_taint_and_wrap_loadstring(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
-/// Remove globals that WoW's sandbox doesn't expose and internal helpers
-/// now stored in the Lua registry.
-fn remove_sandbox_globals(_lua: &mut rilua::Lua) -> crate::Result<()> {
+/// Nil out globals that WoW's restricted environment strips: the
+/// filesystem / module loaders (`dofile`, `loadfile`, `require`), the
+/// bytecode dumper (`string.dump`), and the process-global RNG seeder
+/// (`math.randomseed`). Must run BEFORE secureenv is shallow-copied
+/// from `_G` so the nil values land in both environments.
+///
+/// Covered by `tests/sandbox_dangerous_globals.rs`.
+fn remove_sandbox_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    use rilua::LuaApiMut;
+    for name in ["dofile", "loadfile", "require"] {
+        LuaApiMut::set_global_val(lua, name, rilua::Val::Nil)?;
+    }
+    lua.exec(
+        r#"
+        if string then string.dump = nil end
+        if math then math.randomseed = nil end
+        "#,
+    )?;
     Ok(())
 }
