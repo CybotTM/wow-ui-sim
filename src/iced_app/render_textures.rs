@@ -679,6 +679,40 @@ mod tests {
         )
     }
 
+    fn build_texture_load_test_app() -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(ScreenKind::Game);
+
+        let home = dirs::home_dir().expect("home dir");
+        let texture_manager = Rc::new(RefCell::new(
+            TextureManager::new(PathBuf::from("./textures"))
+                .with_interface_path(home.join("Projects/wow/Interface"))
+                .with_disk_cache("./cache/textures"),
+        ));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
+            crate::iced_app::app::DEFAULT_FONTS_PATH,
+        ))));
+        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
+        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
+        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
+
+        App::build_app(
+            env,
+            Vec::new(),
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            false,
+            false,
+            None,
+            crate::config::SimConfig::default(),
+        )
+    }
+
     fn register_debug_frame(app: &App) {
         let env = app.env.borrow();
         let mut state = env.state().borrow_mut();
@@ -720,5 +754,27 @@ mod tests {
         assert_eq!(overlay.quad_count(), 5);
         assert!(overlay.texture_requests.is_empty());
         assert!(overlay.mask_texture_requests.is_empty());
+    }
+
+    #[test]
+    fn load_new_textures_budgeted_loads_spellbook_mask_via_bc_path() {
+        let app = build_texture_load_test_app();
+        let mut batch = QuadBatch::new();
+        batch
+            .mask_texture_requests
+            .push(request(r"Interface\spellbook\spellbookelementsiconmask"));
+
+        let prev_bc_supported = crate::render::shader::atlas::set_bc_supported_for_tests(true);
+        let (rgba, bc, _scan_elapsed, _load_elapsed, hit_deadline) = app
+            .load_new_textures_budgeted(
+                &batch,
+                std::time::Instant::now() + std::time::Duration::from_secs(1),
+            );
+        crate::render::shader::atlas::set_bc_supported_for_tests(prev_bc_supported);
+
+        assert!(!hit_deadline, "single mask request should not hit deadline");
+        assert!(rgba.is_empty(), "mask should not fall back to RGBA path");
+        assert_eq!(bc.len(), 1, "expected one BC texture upload");
+        assert_eq!(bc[0].path, r"Interface\spellbook\spellbookelementsiconmask");
     }
 }
