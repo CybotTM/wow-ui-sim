@@ -134,6 +134,12 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
         )
     } else if chunk_name.ends_with("/LocalizationMachinery.lua") {
         format!("if SetupLocalization ~= nil then return end\n{source}")
+    } else if chunk_name.ends_with("/Blizzard_AddOnList/AddonList.lua") {
+        source.replacen(
+            "local group = C_AddOns.GetAddOnMetadata(i, \"Group\");",
+            "local group = C_AddOns.GetAddOnMetadata(i, \"Group\");\n\t\tif type(group) ~= \"string\" or group == \"\" then\n\t\t\tgroup = C_AddOns.GetAddOnName(i);\n\t\tend",
+            1,
+        )
     } else if chunk_name.ends_with("/EditModeManager.lua") {
         source
             .replacen(

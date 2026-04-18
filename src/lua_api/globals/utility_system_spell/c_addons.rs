@@ -176,6 +176,7 @@ fn with_addon<R>(
 
 fn addon_metadata(addon: &crate::lua_api::AddonInfo, field: &str) -> Option<String> {
     match field {
+        "Group" => Some(addon.folder_name.clone()),
         "Title" => Some(addon.title.clone()),
         "Notes" => (!addon.notes.is_empty()).then(|| addon.notes.clone()),
         "Version" => Some("@project-version@".to_string()),

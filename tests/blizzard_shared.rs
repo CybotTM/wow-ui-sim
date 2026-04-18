@@ -190,3 +190,35 @@ fn test_addon_list_enable_all_button_has_texture() {
         left_atlas
     );
 }
+
+#[test]
+fn test_addon_list_update_tolerates_missing_group_metadata() {
+    let env = env_with_addon_list();
+
+    let (ok, message, has_data_provider): (bool, String, bool) = env
+        .eval(
+            r#"
+            local original = C_AddOns.GetAddOnMetadata
+            C_AddOns.GetAddOnMetadata = function(addon, field)
+                if field == "Group" and addon == 1 then
+                    return nil
+                end
+                return original(addon, field)
+            end
+
+            AddonList:Show()
+            local ok, err = pcall(AddonList_Update)
+            return ok, tostring(err), AddonList.ScrollBox:GetDataProvider() ~= nil
+        "#,
+        )
+        .expect("AddonList nil-group regression probe should return");
+
+    assert!(
+        ok,
+        "AddonList_Update should tolerate nil group metadata: {message}"
+    );
+    assert!(
+        has_data_provider,
+        "AddonList should still install a data provider when one addon has nil group metadata"
+    );
+}

@@ -106,6 +106,24 @@ fn init_addon_list(env: &WowLuaEnv) {
 }
 
 #[test]
+fn test_addon_list_update_defaults_group_metadata_to_addon_name() {
+    let env = env_with_addon_list();
+    env.exec(r#"A_Admin.RegisterTestAddon("FakeTestAddon")"#)
+        .unwrap();
+
+    let group: String = env
+        .eval(r#"return C_AddOns.GetAddOnMetadata("FakeTestAddon", "Group") or "" "#)
+        .unwrap();
+    assert_eq!(
+        group, "FakeTestAddon",
+        "AddOnList expects every addon to have a Group string, even when no TOC metadata sets one"
+    );
+
+    env.exec("AddonList:Show()").unwrap();
+    env.exec("AddonList_Update()").unwrap();
+}
+
+#[test]
 fn test_addon_list_scroll_down_changes_entries() {
     if !has_local_addons() {
         return;
