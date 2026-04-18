@@ -838,6 +838,31 @@ fn build_global_method_with_string_handler(
     )
 }
 
+const TEMPLATE_GLOBAL_METHOD_WITH_GLOBAL_ARG: &str = r#"
+    local target_ref, method_name, arg_path = ...
+    local function resolve_global(path)
+        local value = getfenv(0) or _G
+        for segment in string.gmatch(path, "[^%.]+") do
+            value = value and value[segment]
+        end
+        return value
+    end
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            local env = getfenv(0) or _G
+            for segment in string.gmatch(target, "[^%.]+") do
+                env = env and env[segment]
+            end
+            target = env
+        end
+        if not target then
+            return
+        end
+        return target[method_name](target, resolve_global(arg_path))
+    end
+"#;
+
 fn build_global_method_with_global_handler(
     state: &mut LuaState,
     target_path: &str,
@@ -849,30 +874,7 @@ fn build_global_method_with_global_handler(
         state,
         target_path,
         method_name,
-        r#"
-            local target_ref, method_name, arg_path = ...
-            local function resolve_global(path)
-                local value = getfenv(0) or _G
-                for segment in string.gmatch(path, "[^%.]+") do
-                    value = value and value[segment]
-                end
-                return value
-            end
-            return function(self, ...)
-                local target = target_ref
-                if type(target) == "string" then
-                    local env = getfenv(0) or _G
-                    for segment in string.gmatch(target, "[^%.]+") do
-                        env = env and env[segment]
-                    end
-                    target = env
-                end
-                if not target then
-                    return
-                end
-                return target[method_name](target, resolve_global(arg_path))
-            end
-        "#,
+        TEMPLATE_GLOBAL_METHOD_WITH_GLOBAL_ARG,
         "template-global-method-global-arg-handler",
         &[arg_path],
     )
