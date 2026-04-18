@@ -903,6 +903,22 @@ fn shard_14_runtime_load_survives_prior_runtime_shards_in_process() {
 }
 
 #[test]
+fn perf_lock_recovers_after_prior_panicking_holder() {
+    let first = std::panic::catch_unwind(|| {
+        common::with_perf_lock(|| panic!("intentional perf lock poison"));
+    });
+    assert!(first.is_err(), "first perf-lock holder should panic");
+
+    let second = std::panic::catch_unwind(|| {
+        common::with_perf_lock(|| {});
+    });
+    assert!(
+        second.is_ok(),
+        "perf lock should recover after a prior panic instead of poisoning later shards"
+    );
+}
+
+#[test]
 fn panel_open_runtime_paths_stay_within_known_error_baseline() {
     common::with_perf_lock(|| {
         common::with_timeout(600, move || {

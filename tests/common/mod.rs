@@ -36,10 +36,13 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
 #[allow(dead_code)]
 pub fn with_perf_lock<T>(f: impl FnOnce() -> T) -> T {
     static PERF_TEST_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
-    let _guard = PERF_TEST_LOCK
-        .get_or_init(|| Mutex::new(()))
-        .lock()
-        .expect("perf test lock should not be poisoned");
+    let perf_lock = PERF_TEST_LOCK.get_or_init(|| Mutex::new(()));
+    let _guard = match perf_lock.lock() {
+        Ok(guard) => guard,
+        // Coverage shards intentionally probe failing paths; a prior panic
+        // must not cascade into unrelated later shards in the same process.
+        Err(poisoned) => poisoned.into_inner(),
+    };
     f()
 }
 
