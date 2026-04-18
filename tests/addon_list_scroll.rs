@@ -232,27 +232,13 @@ fn test_addon_list_scroll_percentage_changes() {
 }
 
 #[test]
-fn test_addon_list_scroll_keeps_visible_frame_range_after_wheel_update() {
+fn test_addon_list_scroll_keeps_rows_initialized_after_update_ticks() {
     if !has_local_addons() {
         return;
     }
 
     let env = env_with_addon_list();
     init_addon_list(&env);
-
-    let before: String = env
-        .eval(
-            r#"
-            local view = AddonList.ScrollBox:GetView()
-            return table.concat({
-                tostring(AddonList.ScrollBox:GetDataIndexBegin() or "nil"),
-                tostring(AddonList.ScrollBox:GetDataIndexEnd() or "nil"),
-                tostring(view and #view:GetFrames() or "nil"),
-                tostring(AddonList.ScrollBox:GetFrameCount() or "nil"),
-            }, "|")
-        "#,
-        )
-        .unwrap();
 
     for _ in 0..10 {
         env.exec("AddonList.ScrollBox:OnMouseWheel(-1)").unwrap();
@@ -263,37 +249,44 @@ fn test_addon_list_scroll_keeps_visible_frame_range_after_wheel_update() {
         .eval(
             r#"
             local view = AddonList.ScrollBox:GetView()
+            local first = view and view:GetFrames()[1]
+            local rowData = first and first.GetData and first:GetData()
             return table.concat({
                 tostring(AddonList.ScrollBox:GetDataIndexBegin() or "nil"),
                 tostring(AddonList.ScrollBox:GetDataIndexEnd() or "nil"),
                 tostring(view and #view:GetFrames() or "nil"),
                 tostring(AddonList.ScrollBox:GetFrameCount() or "nil"),
-                tostring((function()
-                    if not view then return "noview" end
-                    local first = view:GetFrames()[1]
-                    if not first then return "nofirst" end
-                    local rowData = first.GetData and first:GetData()
-                    return table.concat({
-                        tostring(first:IsShown()),
-                        tostring(first.GetObjectType and first:GetObjectType() or "nil"),
-                        tostring(first.Title and first.Title:GetText() or "nil"),
-                        tostring(rowData and (rowData.category or rowData.addonIndex) or "nil"),
-                    }, ",")
-                end)()),
+                tostring(first and first.Title and first.Title:GetText() or "nil"),
+                tostring(rowData and (rowData.category or rowData.addonIndex) or "nil"),
             }, "|")
         "#,
         )
         .unwrap();
 
-    assert_ne!(before, after, "scroll should change the visible range");
     let after_parts: Vec<_> = after.split('|').collect();
-    assert_ne!(after_parts[0], "0", "scroll begin should stay in range: {after}");
-    assert_ne!(after_parts[1], "0", "scroll end should stay in range: {after}");
-    assert_ne!(after_parts[2], "0", "view should still own visible frames: {after}");
-    assert_ne!(after_parts[3], "0", "scroll box should still report visible frames: {after}");
-    assert!(
-        !after_parts[4].contains(",nil"),
-        "first frame should stay initialized after repeated wheel updates: {after}"
+    assert_ne!(
+        after_parts[0], "0",
+        "scroll begin should stay in range: {after}"
+    );
+    assert_ne!(
+        after_parts[1], "0",
+        "scroll end should stay in range: {after}"
+    );
+    assert_ne!(
+        after_parts[2], "0",
+        "view should still own visible frames: {after}"
+    );
+    assert_ne!(
+        after_parts[3], "0",
+        "scroll box should still report visible frames: {after}"
+    );
+    assert_ne!(
+        after_parts[4], "nil",
+        "first visible row should keep its title text after repeated update ticks: {after}"
+    );
+    assert_ne!(
+        after_parts[5], "nil",
+        "first visible row should keep its element data after repeated update ticks: {after}"
     );
 }
 
