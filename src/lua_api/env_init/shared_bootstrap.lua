@@ -139,6 +139,84 @@ if Saturate == nil then
   end
 end
 
+if FadingFrame_SetFadeInTime == nil then
+  function FadingFrame_SetFadeInTime(fadingFrame, time)
+    fadingFrame.fadeInTime = time
+  end
+end
+
+if FadingFrame_SetHoldTime == nil then
+  function FadingFrame_SetHoldTime(fadingFrame, time)
+    fadingFrame.holdTime = time
+  end
+end
+
+if FadingFrame_SetFadeOutTime == nil then
+  function FadingFrame_SetFadeOutTime(fadingFrame, time)
+    fadingFrame.fadeOutTime = time
+  end
+end
+
+if FadingFrame_OnLoad == nil then
+  function FadingFrame_OnLoad(fadingFrame)
+    assert(fadingFrame)
+    fadingFrame.fadeInTime = 0
+    fadingFrame.holdTime = 0
+    fadingFrame.fadeOutTime = 0
+    fadingFrame:Hide()
+  end
+end
+
+if FadingFrame_Show == nil then
+  function FadingFrame_Show(fadingFrame)
+    assert(fadingFrame)
+    fadingFrame.startTime = GetTime()
+    fadingFrame:Show()
+  end
+end
+
+if FadingFrame_OnUpdate == nil then
+  function FadingFrame_OnUpdate(fadingFrame)
+    assert(fadingFrame)
+    local elapsed = GetTime() - fadingFrame.startTime
+    local fadeInTime = fadingFrame.fadeInTime
+    if elapsed < fadeInTime then
+      fadingFrame:SetAlpha(elapsed / fadeInTime)
+      return
+    end
+
+    local holdTime = fadingFrame.holdTime
+    if elapsed < (fadeInTime + holdTime) then
+      fadingFrame:SetAlpha(1.0)
+      return
+    end
+
+    local fadeOutTime = fadingFrame.fadeOutTime
+    if elapsed < (fadeInTime + holdTime + fadeOutTime) then
+      fadingFrame:SetAlpha(1.0 - ((elapsed - holdTime - fadeInTime) / fadeOutTime))
+      return
+    end
+
+    fadingFrame:Hide()
+  end
+end
+
+if FadingFrame_GetRemainingTime == nil then
+  function FadingFrame_GetRemainingTime(fadingFrame)
+    local elapsed = GetTime() - fadingFrame.startTime
+    return fadingFrame.holdTime + fadingFrame.fadeInTime + fadingFrame.fadeOutTime - elapsed
+  end
+end
+
+if FadingFrame_CopyTimes == nil then
+  function FadingFrame_CopyTimes(src, dest)
+    dest.fadeInTime = src.fadeInTime
+    dest.holdTime = src.holdTime
+    dest.fadeOutTime = src.fadeOutTime
+    dest.startTime = src.startTime
+  end
+end
+
 local function __wow_deep_copy_table(source, seen)
   if type(source) ~= "table" then
     return source

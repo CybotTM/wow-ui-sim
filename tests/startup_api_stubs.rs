@@ -21,6 +21,30 @@ fn clamp_and_saturate_exist_in_shared_bootstrap() {
 }
 
 #[test]
+fn fading_frame_helpers_seed_default_timers_and_can_copy_them() {
+    let env = env();
+    let (hidden, fade_in, hold, fade_out, copied_hold): (bool, f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local src = CreateFrame("Frame", "CodexFadingFrameSource", UIParent)
+            local dest = CreateFrame("Frame", "CodexFadingFrameDest", UIParent)
+            FadingFrame_OnLoad(src)
+            FadingFrame_SetFadeInTime(src, 0.25)
+            FadingFrame_SetHoldTime(src, 1.5)
+            FadingFrame_SetFadeOutTime(src, 0.75)
+            FadingFrame_CopyTimes(src, dest)
+            return not src:IsShown(), src.fadeInTime, src.holdTime, src.fadeOutTime, dest.holdTime
+            "#,
+        )
+        .expect("fading-frame helpers should be callable");
+    assert!(hidden);
+    assert_eq!(fade_in, 0.25);
+    assert_eq!(hold, 1.5);
+    assert_eq!(fade_out, 0.75);
+    assert_eq!(copied_hold, 1.5);
+}
+
+#[test]
 fn get_net_stats_returns_four_zeros() {
     let env = env();
     let (bw_in, bw_out, latency_home, latency_world): (f64, f64, f64, f64) = env

@@ -661,3 +661,44 @@ fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
         assert_eq!(default_value, "0");
     }
 }
+
+#[test]
+fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
+    test_timeout! {
+        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let fading_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("FadingFrame_OnLoad")
+                    || warning.contains("FadingFrame_Show")
+                    || warning.contains("ZoneText.lua:72")
+                    || warning.contains("ZoneText.lua:124")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            fading_warnings.is_empty(),
+            "Blizzard_FrameXML should not warn on fading-frame helpers:\n  {}",
+            fading_warnings.join("\n  ")
+        );
+
+        let (zone_hidden, subzone_hidden, fade_in, hold, fade_out): (bool, bool, f64, f64, f64) = env
+            .eval(
+                r#"
+                return not ZoneTextFrame:IsShown(),
+                       not SubZoneTextFrame:IsShown(),
+                       ZoneTextFrame.fadeInTime,
+                       ZoneTextFrame.holdTime,
+                       ZoneTextFrame.fadeOutTime
+                "#,
+            )
+            .expect("zone text fading-frame state should be readable");
+        assert!(zone_hidden);
+        assert!(subzone_hidden);
+        assert_eq!(fade_in, 0.5);
+        assert_eq!(hold, 1.0);
+        assert_eq!(fade_out, 2.0);
+    }
+}
