@@ -93,8 +93,16 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     );
     let use_atlas_size = opt_bool(state, 3).unwrap_or(false);
     let mut sim = borrow_state_mut(state)?;
+
+    // Collect parent info before mutably borrowing the child.
+    let parent_info: Option<(u64, String)> = sim.widgets.get(id).and_then(|f| {
+        let pid = f.parent_id?;
+        let key = f.parent_key.clone()?;
+        Some((pid, key))
+    });
+
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.atlas = Some(atlas_name);
+        frame.atlas = Some(atlas_name.clone());
         frame.texture = Some(lookup.info.file.to_string());
         frame.tex_coords = Some(tex_coords);
         frame.atlas_tex_coords = Some(tex_coords);
@@ -102,7 +110,59 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
             frame.set_size(lookup.info.width as f32, lookup.info.height as f32);
         }
     }
+
+    // Propagate to the parent button's texture slot when parentKey matches a
+    // standard slot name and the parent is a Button or CheckButton.
+    if let Some((parent_id, ref parent_key)) = parent_info {
+        propagate_atlas_to_button_slot(
+            &mut sim.widgets,
+            parent_id,
+            parent_key,
+            lookup.info.file.to_string(),
+            tex_coords,
+        );
+    }
+
     Ok(0)
+}
+
+/// Copy atlas texture/UV data from a child texture onto the parent Button's
+/// corresponding slot field when `parent_key` is one of the four standard names.
+fn propagate_atlas_to_button_slot(
+    widgets: &mut crate::widget::WidgetRegistry,
+    parent_id: u64,
+    parent_key: &str,
+    texture_path: String,
+    tex_coords: (f32, f32, f32, f32),
+) {
+    let Some(parent) = widgets.get_mut_visual(parent_id) else {
+        return;
+    };
+    if !matches!(
+        parent.widget_type,
+        crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
+    ) {
+        return;
+    }
+    match parent_key {
+        "NormalTexture" => {
+            parent.normal_texture = Some(texture_path);
+            parent.normal_tex_coords = Some(tex_coords);
+        }
+        "PushedTexture" => {
+            parent.pushed_texture = Some(texture_path);
+            parent.pushed_tex_coords = Some(tex_coords);
+        }
+        "HighlightTexture" => {
+            parent.highlight_texture = Some(texture_path);
+            parent.highlight_tex_coords = Some(tex_coords);
+        }
+        "DisabledTexture" => {
+            parent.disabled_texture = Some(texture_path);
+            parent.disabled_tex_coords = Some(tex_coords);
+        }
+        _ => {}
+    }
 }
 
 pub(super) fn set_texture(state: &mut LuaState) -> LuaResult<u32> {
@@ -332,7 +392,14 @@ pub(super) fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         if coords.len() == 4 {
-            frame.tex_coords = Some((coords[0], coords[1], coords[2], coords[3]));
+            let remapped = remap_tex_coords(
+                frame.atlas_tex_coords,
+                coords[0],
+                coords[1],
+                coords[2],
+                coords[3],
+            );
+            frame.tex_coords = Some(remapped);
             frame.tex_coords_quad = None;
         } else {
             let quad = [
@@ -343,11 +410,37 @@ pub(super) fn set_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
             let right = quad[0].max(quad[2]).max(quad[4]).max(quad[6]);
             let top = quad[1].min(quad[3]).min(quad[5]).min(quad[7]);
             let bottom = quad[1].max(quad[3]).max(quad[5]).max(quad[7]);
-            frame.tex_coords = Some((left, right, top, bottom));
+            frame.tex_coords = Some(remap_tex_coords(
+                frame.atlas_tex_coords,
+                left,
+                right,
+                top,
+                bottom,
+            ));
             frame.tex_coords_quad = Some(quad);
         }
     }
     Ok(0)
+}
+
+/// Remap UV coordinates into an atlas sub-region when one is active.
+///
+/// When an atlas is set, the caller's [0,1] UV space maps onto the atlas slot.
+/// Without an atlas the coords pass through unchanged.
+fn remap_tex_coords(
+    atlas_tex_coords: Option<(f32, f32, f32, f32)>,
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
+) -> (f32, f32, f32, f32) {
+    if let Some((al, ar, at, ab)) = atlas_tex_coords {
+        let aw = ar - al;
+        let ah = ab - at;
+        (al + left * aw, al + right * aw, at + top * ah, at + bottom * ah)
+    } else {
+        (left, right, top, bottom)
+    }
 }
 
 pub(super) fn get_tex_coord(state: &mut LuaState) -> LuaResult<u32> {
