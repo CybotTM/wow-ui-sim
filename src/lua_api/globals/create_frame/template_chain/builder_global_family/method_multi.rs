@@ -13,6 +13,16 @@ pub(super) fn build_global_method_multi_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = try_build_global_method_fixed_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_build_global_method_function_result_variants(state, handler_ref)
+}
+
+fn try_build_global_method_fixed_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::GlobalMethodWithSelfStringNumberNumberArgs {
             target_path,
@@ -93,6 +103,15 @@ pub(super) fn build_global_method_multi_arg_variants(
             fourth_arg_path,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_function_result_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
             target_path,
             method_name,
@@ -329,6 +348,15 @@ fn build_global_method_with_global_self_method_self_method_bool_args_handler(
     third_self_method: &str,
     fourth: bool,
 ) -> LuaResult<Val> {
+    let method_args = build_global_self_method_bool_args(
+        state,
+        target_path,
+        method_name,
+        first_arg_path,
+        second_self_method,
+        third_self_method,
+        fourth,
+    );
     let builder = load_template(
         state,
         r#"
@@ -345,23 +373,30 @@ fn build_global_method_with_global_self_method_self_method_bool_args_handler(
         "#,
         "template-global-method-global-self-method-self-method-bool-args",
     )?;
-    let target = resolve_global_path(state, target_path);
-    let method_name = create_string(state, method_name);
-    let first = resolve_global_path(state, first_arg_path);
-    let second_method = create_string(state, second_self_method);
-    let third_method = create_string(state, third_self_method);
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[
-            target,
-            method_name,
-            first,
-            second_method,
-            third_method,
-            Val::Bool(fourth),
-        ],
+        &method_args,
     )
+}
+
+fn build_global_self_method_bool_args(
+    state: &mut LuaState,
+    target_path: &str,
+    method_name: &str,
+    first_arg_path: &str,
+    second_self_method: &str,
+    third_self_method: &str,
+    fourth: bool,
+) -> [Val; 6] {
+    [
+        resolve_global_path(state, target_path),
+        create_string(state, method_name),
+        resolve_global_path(state, first_arg_path),
+        create_string(state, second_self_method),
+        create_string(state, third_self_method),
+        Val::Bool(fourth),
+    ]
 }
 
 fn build_global_method_with_string_string_function_result_and_three_number_args_handler(

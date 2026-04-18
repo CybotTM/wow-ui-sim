@@ -125,36 +125,77 @@ fn build_terminal_fast_handler(
     state: &mut LuaState,
     handler_ref: FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = try_terminal_non_assignment_handler(state, &handler_ref)? {
+        return Ok(result);
+    }
+    if let Some(result) = try_terminal_assignment_handler(state, &handler_ref)? {
+        return Ok(result);
+    }
     match handler_ref {
         FastHandlerRef::NoOp => Ok(None),
+        _ => unreachable!(
+            "FastHandlerRef variant not dispatched by any family handler or the terminal match; \
+             this is a bug — every variant must be handled"
+        ),
+    }
+}
+
+fn try_terminal_non_assignment_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Option<Val>>> {
+    match handler_ref {
         FastHandlerRef::RegisterForClicks {
             first,
             second,
             third,
-        } => build_register_for_clicks_handler(state, first, second, third).map(Some),
-        FastHandlerRef::RegisterForDrag(button) => {
-            build_register_for_drag_handler(state, button).map(Some)
+        } => build_register_for_clicks_handler(state, first, *second, *third)
+            .map(Some)
+            .map(Some),
+        FastHandlerRef::RegisterForDrag(button) => build_register_for_drag_handler(state, button)
+            .map(Some)
+            .map(Some),
+        FastHandlerRef::SetAlpha(alpha) => {
+            build_set_alpha_handler(state, *alpha).map(Some).map(Some)
         }
-        FastHandlerRef::SetAlpha(alpha) => build_set_alpha_handler(state, alpha).map(Some),
         FastHandlerRef::SetFrameLevelFromParent(delta) => {
-            build_set_frame_level_from_parent_handler(state, delta).map(Some)
+            build_set_frame_level_from_parent_handler(state, *delta)
+                .map(Some)
+                .map(Some)
         }
+        _ => Ok(None),
+    }
+}
+
+fn try_terminal_assignment_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Option<Val>>> {
+    match handler_ref {
         FastHandlerRef::AssignAncestorRef { field, depth } => {
-            build_ancestor_assignment_handler(state, field, depth).map(Some)
+            build_ancestor_assignment_handler(state, field, *depth)
+                .map(Some)
+                .map(Some)
         }
         FastHandlerRef::AssignLiteral { field, value } => {
-            build_assignment_handler(state, field, value).map(Some)
+            build_assignment_handler(state, field, *value)
+                .map(Some)
+                .map(Some)
         }
         FastHandlerRef::AssignGlobalFieldLiteral {
             target_path,
             field,
             value,
-        } => build_global_assignment_handler(state, target_path, field, value).map(Some),
+        } => build_global_assignment_handler(state, target_path, field, *value)
+            .map(Some)
+            .map(Some),
         FastHandlerRef::AssignNestedLiteral {
             parent_field,
             field,
             value,
-        } => build_nested_assignment_handler(state, parent_field, field, value).map(Some),
+        } => build_nested_assignment_handler(state, parent_field, field, *value)
+            .map(Some)
+            .map(Some),
         FastHandlerRef::AssignNestedGlobalPairTable {
             parent_field,
             field,
@@ -167,18 +208,28 @@ fn build_terminal_fast_handler(
             first_path,
             second_path,
         )
+        .map(Some)
         .map(Some),
         FastHandlerRef::AssignParentField { field, value } => {
-            build_parent_assignment_handler(state, field, value).map(Some)
+            build_parent_assignment_handler(state, field, *value)
+                .map(Some)
+                .map(Some)
         }
-        _ => unreachable!(
-            "FastHandlerRef variant not dispatched by any family handler or the terminal match; \
-             this is a bug — every variant must be handled"
-        ),
+        _ => Ok(None),
     }
 }
 
 fn build_sequence_fast_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Option<Val>>> {
+    if let Some(result) = try_sequence_chain_handler(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_sequence_conditional_handler(state, handler_ref)
+}
+
+fn try_sequence_chain_handler(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Option<Val>>> {
@@ -187,7 +238,7 @@ fn build_sequence_fast_handler(
             let (first_ref, second_ref) = &**parts;
             let first = build_fast_handler(state, first_ref.clone())?;
             let second = build_fast_handler(state, second_ref.clone())?;
-            Ok(Some(chain_optional_handlers(state, first, second)?))
+            chain_optional_handlers(state, first, second).map(Some)
         }
         FastHandlerRef::Sequence3(parts) => {
             let (first_ref, second_ref, third_ref) = &**parts;
@@ -195,7 +246,7 @@ fn build_sequence_fast_handler(
             let second = build_fast_handler(state, second_ref.clone())?;
             let third = build_fast_handler(state, third_ref.clone())?;
             let first_pair = chain_optional_handlers(state, first, second)?;
-            Ok(Some(chain_optional_handlers(state, first_pair, third)?))
+            chain_optional_handlers(state, first_pair, third).map(Some)
         }
         FastHandlerRef::Sequence4(parts) => {
             let (first_ref, second_ref, third_ref, fourth_ref) = &**parts;
@@ -205,8 +256,17 @@ fn build_sequence_fast_handler(
             let fourth = build_fast_handler(state, fourth_ref.clone())?;
             let first_pair = chain_optional_handlers(state, first, second)?;
             let first_triplet = chain_optional_handlers(state, first_pair, third)?;
-            Ok(Some(chain_optional_handlers(state, first_triplet, fourth)?))
+            chain_optional_handlers(state, first_triplet, fourth).map(Some)
         }
+        _ => Ok(None),
+    }
+}
+
+fn try_sequence_conditional_handler(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Option<Val>>> {
+    match handler_ref {
         FastHandlerRef::ConditionalGlobalNoArgs {
             function_name,
             then_ref,

@@ -337,41 +337,45 @@ fn build_toggle_global_visibility_handler(
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
 }
 
+const TEMPLATE_NAMED_GLOBAL_METHOD_WITH_GLOBAL_ARG: &str = r#"
+    local suffix, method_name, arg_path = ...
+    local function resolve_global(path)
+        local value = _G
+        for segment in string.gmatch(path, "[^%.]+") do
+            value = value and value[segment]
+        end
+        return value
+    end
+    return function(self, ...)
+        local target = _G[self:GetName() .. suffix]
+        if not target then
+            return
+        end
+        return target[method_name](target, resolve_global(arg_path))
+    end
+"#;
+
 fn build_named_global_method_with_global_arg_handler(
     state: &mut LuaState,
     suffix: &str,
     method_name: &str,
     arg_path: &str,
 ) -> LuaResult<Val> {
-    let suffix = create_string(state, suffix);
-    let method_name = create_string(state, method_name);
-    let arg_path = create_string(state, arg_path);
+    let args = [
+        create_string(state, suffix),
+        create_string(state, method_name),
+        create_string(state, arg_path),
+    ];
+    call_named_global_method_builder(state, &args)
+}
+
+fn call_named_global_method_builder(state: &mut LuaState, args: &[Val]) -> LuaResult<Val> {
     let builder = load_template(
         state,
-        r#"
-            local suffix, method_name, arg_path = ...
-            local function resolve_global(path)
-                local value = _G
-                for segment in string.gmatch(path, "[^%.]+") do
-                    value = value and value[segment]
-                end
-                return value
-            end
-            return function(self, ...)
-                local target = _G[self:GetName() .. suffix]
-                if not target then
-                    return
-                end
-                return target[method_name](target, resolve_global(arg_path))
-            end
-        "#,
+        TEMPLATE_NAMED_GLOBAL_METHOD_WITH_GLOBAL_ARG,
         "template-named-global-method-global-arg-handler",
     )?;
-    crate::lua_api::methods::call_function_state(
-        state,
-        Val::Function(builder.gc_ref()),
-        &[suffix, method_name, arg_path],
-    )
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), args)
 }
 
 fn build_global_method_then_assign_handler(

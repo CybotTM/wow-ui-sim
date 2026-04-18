@@ -13,6 +13,16 @@ pub(super) fn build_global_method_simple_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = try_build_global_method_basic_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_build_global_method_arg_variants(state, handler_ref)
+}
+
+fn try_build_global_method_basic_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::GetLfgModeBranch {
             category_path,
@@ -36,6 +46,15 @@ pub(super) fn build_global_method_simple_arg_variants(
             target_path,
             method_name,
         } => build_global_method_handler(state, target_path, method_name).map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_method_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithSelfStringArg {
             target_path,
             method_name,
