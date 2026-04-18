@@ -215,7 +215,7 @@ impl PlayerState {
             active_spec_index: 2,
             next_mail_id: 1,
             xp_max: 180_000,
-            alternate_form_is_default: true,
+            alternate_form_is_default: false,
             ..Self::default()
         }
     }

@@ -16,7 +16,7 @@ fn get_alternate_form_info_default_not_in_form() {
         .eval("return C_PlayerInfo.GetAlternateFormInfo()")
         .unwrap();
     assert!(!has, "default: player has no alternate form");
-    assert!(in_form, "default: alternate_form_is_default=true");
+    assert!(!in_form, "default: alternate_form_is_default=false");
 }
 
 #[test]
