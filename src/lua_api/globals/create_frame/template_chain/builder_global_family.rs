@@ -676,46 +676,56 @@ fn build_global_method_with_mode(
     call_global_method_builder(state, target_path, method_name, source, tag, &[])
 }
 
+// ── Per-mode Lua global-method dispatch templates ────────────────────────────
+//
+// Each template closes over `target_ref` (either a pre-resolved value or
+// a dotted path string) + `method_name`, then forwards either `...` or
+// `self:GetID()` as the trailing argument shape.
+
+const GLOBAL_METHOD_PASSTHROUGH_TEMPLATE: &str = r#"
+    local target_ref, method_name = ...
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            local env = getfenv(0) or _G
+            for segment in string.gmatch(target, "[^%.]+") do
+                env = env and env[segment]
+            end
+            target = env
+        end
+        if not target then
+            return
+        end
+        return target[method_name](target, ...)
+    end
+"#;
+
+const GLOBAL_METHOD_SELF_ID_TEMPLATE: &str = r#"
+    local target_ref, method_name = ...
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            local env = getfenv(0) or _G
+            for segment in string.gmatch(target, "[^%.]+") do
+                env = env and env[segment]
+            end
+            target = env
+        end
+        if not target then
+            return
+        end
+        return target[method_name](target, self:GetID())
+    end
+"#;
+
 fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str) {
     match mode {
         GlobalMethodMode::Passthrough => (
-            r#"
-                local target_ref, method_name = ...
-                return function(self, ...)
-                    local target = target_ref
-                    if type(target) == "string" then
-                        local env = getfenv(0) or _G
-                        for segment in string.gmatch(target, "[^%.]+") do
-                            env = env and env[segment]
-                        end
-                        target = env
-                    end
-                    if not target then
-                        return
-                    end
-                    return target[method_name](target, ...)
-                end
-            "#,
+            GLOBAL_METHOD_PASSTHROUGH_TEMPLATE,
             "template-global-method-handler",
         ),
         GlobalMethodMode::SelfId => (
-            r#"
-                local target_ref, method_name = ...
-                return function(self, ...)
-                    local target = target_ref
-                    if type(target) == "string" then
-                        local env = getfenv(0) or _G
-                        for segment in string.gmatch(target, "[^%.]+") do
-                            env = env and env[segment]
-                        end
-                        target = env
-                    end
-                    if not target then
-                        return
-                    end
-                    return target[method_name](target, self:GetID())
-                end
-            "#,
+            GLOBAL_METHOD_SELF_ID_TEMPLATE,
             "template-global-method-self-id-handler",
         ),
     }
