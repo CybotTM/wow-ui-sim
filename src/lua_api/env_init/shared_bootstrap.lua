@@ -33,6 +33,236 @@ if CreateAndInitFromMixin == nil then
   end
 end
 
+if EventUtil == nil then
+  local eventUtilState = {
+    allEventsWatchers = {},
+    onceWatchers = {},
+    registeredEvents = {},
+    seenEvents = {},
+    variablesLoadedCallbacks = {},
+    variablesLoadedTriggered = false,
+  }
+
+  local dispatcher = nil
+
+  local function ensure_dispatcher()
+    if dispatcher == nil and type(CreateFrame) == "function" then
+      dispatcher = CreateFrame("Frame")
+      dispatcher:SetScript("OnEvent", function(_, event, ...)
+        eventUtilState.seenEvents[event] = true
+
+        if event == "VARIABLES_LOADED" and not eventUtilState.variablesLoadedTriggered then
+          eventUtilState.variablesLoadedTriggered = true
+          if type(UIParent) == "table" then
+            UIParent.variablesLoaded = true
+          end
+          local callbacks = eventUtilState.variablesLoadedCallbacks
+          eventUtilState.variablesLoadedCallbacks = {}
+          for i = 1, #callbacks do
+            local callback = callbacks[i]
+            if type(callback) == "function" then
+              callback()
+            end
+          end
+        end
+
+        for index = #eventUtilState.onceWatchers, 1, -1 do
+          local watcher = eventUtilState.onceWatchers[index]
+          if watcher.event == event then
+            local matches = true
+            for requiredIndex = 1, watcher.requiredArgs.n do
+              if select(requiredIndex, ...) ~= watcher.requiredArgs[requiredIndex] then
+                matches = false
+                break
+              end
+            end
+            if matches then
+              watcher.handle.registered = false
+              table.remove(eventUtilState.onceWatchers, index)
+              if type(watcher.callback) == "function" then
+                watcher.callback(...)
+              end
+            end
+          end
+        end
+
+        for index = #eventUtilState.allEventsWatchers, 1, -1 do
+          local watcher = eventUtilState.allEventsWatchers[index]
+          local haveAllEvents = true
+          for eventIndex = 1, #watcher.events do
+            if not eventUtilState.seenEvents[watcher.events[eventIndex]] then
+              haveAllEvents = false
+              break
+            end
+          end
+          if haveAllEvents then
+            table.remove(eventUtilState.allEventsWatchers, index)
+            if type(watcher.callback) == "function" then
+              watcher.callback()
+            end
+          end
+        end
+      end)
+    end
+
+    return dispatcher
+  end
+
+  local function ensure_event_registration(event)
+    local frame = ensure_dispatcher()
+    if frame == nil or eventUtilState.registeredEvents[event] then
+      return
+    end
+    eventUtilState.registeredEvents[event] = true
+    frame:RegisterEvent(event)
+  end
+
+  local function all_events_seen(events)
+    for index = 1, #events do
+      if not eventUtilState.seenEvents[events[index]] then
+        return false
+      end
+    end
+    return true
+  end
+
+  local function remove_once_watcher(handle)
+    for index = #eventUtilState.onceWatchers, 1, -1 do
+      if eventUtilState.onceWatchers[index].handle == handle then
+        table.remove(eventUtilState.onceWatchers, index)
+        break
+      end
+    end
+  end
+
+  EventUtil = {}
+
+  function EventUtil.ContinueAfterAllEvents(callback, ...)
+    local events = {}
+    for index = 1, select("#", ...) do
+      local event = select(index, ...)
+      events[index] = event
+      ensure_event_registration(event)
+    end
+
+    if all_events_seen(events) then
+      if type(callback) == "function" then
+        callback()
+      end
+      return
+    end
+
+    table.insert(eventUtilState.allEventsWatchers, {
+      callback = callback,
+      events = events,
+    })
+  end
+
+  function EventUtil.AreVariablesLoaded()
+    return eventUtilState.variablesLoadedTriggered
+      or GlueParent
+      or (type(UIParent) == "table" and UIParent.variablesLoaded)
+  end
+
+  function EventUtil.ContinueOnVariablesLoaded(callback)
+    if EventUtil.AreVariablesLoaded() then
+      if type(callback) == "function" then
+        callback()
+      end
+      return
+    end
+
+    ensure_event_registration("VARIABLES_LOADED")
+    table.insert(eventUtilState.variablesLoadedCallbacks, callback)
+  end
+
+  function EventUtil.TriggerOnVariablesLoaded()
+    local frame = ensure_dispatcher()
+    if frame ~= nil then
+      frame:GetScript("OnEvent")(frame, "VARIABLES_LOADED")
+    end
+  end
+
+  function EventUtil.ContinueOnAddOnLoaded(addOnName, callback)
+    local isLoadedOrLoading, isLoaded = C_AddOns.IsAddOnLoaded(addOnName)
+    if isLoaded then
+      if type(callback) == "function" then
+        callback()
+      end
+      return
+    end
+
+    EventUtil.RegisterOnceFrameEventAndCallback("ADDON_LOADED", callback, addOnName)
+  end
+
+  function EventUtil.ContinueOnPlayerLogin(callback)
+    if IsLoggedIn() then
+      if type(callback) == "function" then
+        callback()
+      end
+      return
+    end
+
+    EventUtil.RegisterOnceFrameEventAndCallback("PLAYER_LOGIN", callback)
+  end
+
+  function EventUtil.RegisterOnceFrameEventAndCallback(frameEvent, callback, ...)
+    ensure_event_registration(frameEvent)
+
+    local handle = { registered = true }
+    function handle:Unregister()
+      if not self.registered then
+        return
+      end
+      self.registered = false
+      remove_once_watcher(self)
+    end
+
+    table.insert(eventUtilState.onceWatchers, {
+      callback = callback,
+      event = frameEvent,
+      handle = handle,
+      requiredArgs = __wow_pack_results(...),
+    })
+
+    return handle
+  end
+
+  CallbackHandleContainerMixin = CallbackHandleContainerMixin or {}
+
+  function CallbackHandleContainerMixin:Init()
+    self.handles = {}
+  end
+
+  function CallbackHandleContainerMixin:RegisterCallback(cbr, event, callback, owner)
+    self:AddHandle(cbr:RegisterCallbackWithHandle(event, callback, owner))
+  end
+
+  function CallbackHandleContainerMixin:AddHandle(handle)
+    table.insert(self.handles, handle)
+  end
+
+  function CallbackHandleContainerMixin:Unregister()
+    for index = 1, #self.handles do
+      local handle = self.handles[index]
+      if handle and type(handle.Unregister) == "function" then
+        handle:Unregister()
+      end
+    end
+    self.handles = {}
+  end
+
+  function CallbackHandleContainerMixin:IsEmpty()
+    return #self.handles == 0
+  end
+
+  function EventUtil.CreateCallbackHandleContainer()
+    local cbrHandles = CreateFromMixins(CallbackHandleContainerMixin)
+    cbrHandles:Init()
+    return cbrHandles
+  end
+end
+
 table = table or {}
 
 if unpack == nil then
@@ -266,6 +496,243 @@ end
 if CopyTable == nil then
   function CopyTable(source)
     return __wow_deep_copy_table(source)
+  end
+end
+
+if EventUtil == nil then
+  local eventUtilFrame = CreateFrame("Frame")
+  local eventUtilVariablesLoadedCallbacks = {}
+  local eventUtilEventCallbacks = {}
+  local eventUtilVariablesLoadedTriggered = false
+  local eventUtilPlayerLoginTriggered = false
+
+  local function __wow_eventutil_are_variables_loaded()
+    if eventUtilVariablesLoadedTriggered then
+      return true
+    end
+    return GlueParent ~= nil or (UIParent ~= nil and UIParent.variablesLoaded)
+  end
+
+  local function __wow_eventutil_mark_event(event)
+    if event == "VARIABLES_LOADED" then
+      eventUtilVariablesLoadedTriggered = true
+    elseif event == "PLAYER_LOGIN" then
+      eventUtilPlayerLoginTriggered = true
+    end
+  end
+
+  local function __wow_eventutil_unregister(entry)
+    if entry == nil or entry.event == nil then
+      return
+    end
+    local callbacks = eventUtilEventCallbacks[entry.event]
+    if callbacks == nil then
+      return
+    end
+    for index = #callbacks, 1, -1 do
+      if callbacks[index] == entry then
+        table.remove(callbacks, index)
+      end
+    end
+    if #callbacks == 0 then
+      eventUtilEventCallbacks[entry.event] = nil
+      eventUtilFrame:UnregisterEvent(entry.event)
+    end
+  end
+
+  local function __wow_eventutil_register(event, callback, requiredArgs, unregisterAfterMatch)
+    local entry = {
+      event = event,
+      callback = callback,
+      requiredArgs = requiredArgs,
+      unregisterAfterMatch = unregisterAfterMatch == true,
+    }
+    local callbacks = eventUtilEventCallbacks[event]
+    if callbacks == nil then
+      callbacks = {}
+      eventUtilEventCallbacks[event] = callbacks
+      eventUtilFrame:RegisterEvent(event)
+    end
+    table.insert(callbacks, entry)
+    return entry
+  end
+
+  eventUtilFrame:SetScript("OnEvent", function(_, event, ...)
+    __wow_eventutil_mark_event(event)
+
+    if event == "VARIABLES_LOADED" and not eventUtilVariablesLoadedTriggered then
+      eventUtilVariablesLoadedTriggered = true
+    end
+
+    if event == "VARIABLES_LOADED" and #eventUtilVariablesLoadedCallbacks > 0 then
+      local callbacks = eventUtilVariablesLoadedCallbacks
+      eventUtilVariablesLoadedCallbacks = {}
+      for _, callback in ipairs(callbacks) do
+        callback()
+      end
+    end
+
+    local callbacks = eventUtilEventCallbacks[event]
+    if callbacks == nil then
+      return
+    end
+
+    local survivors = {}
+    for _, entry in ipairs(callbacks) do
+      local matches = true
+      if entry.requiredArgs ~= nil then
+        for index = 1, entry.requiredArgs.n or 0 do
+          if select(index, ...) ~= entry.requiredArgs[index] then
+            matches = false
+            break
+          end
+        end
+      end
+
+      if matches then
+        entry.callback(...)
+        if not entry.unregisterAfterMatch then
+          table.insert(survivors, entry)
+        end
+      else
+        table.insert(survivors, entry)
+      end
+    end
+
+    if #survivors == 0 then
+      eventUtilEventCallbacks[event] = nil
+      eventUtilFrame:UnregisterEvent(event)
+    else
+      eventUtilEventCallbacks[event] = survivors
+    end
+  end)
+
+  EventUtil = {}
+
+  function EventUtil.AreVariablesLoaded()
+    return __wow_eventutil_are_variables_loaded()
+  end
+
+  function EventUtil.ContinueOnVariablesLoaded(callback)
+    if EventUtil.AreVariablesLoaded() then
+      callback()
+      return
+    end
+    table.insert(eventUtilVariablesLoadedCallbacks, callback)
+    eventUtilFrame:RegisterEvent("VARIABLES_LOADED")
+  end
+
+  function EventUtil.TriggerOnVariablesLoaded()
+    if eventUtilVariablesLoadedTriggered then
+      return
+    end
+    eventUtilVariablesLoadedTriggered = true
+    local callbacks = eventUtilVariablesLoadedCallbacks
+    eventUtilVariablesLoadedCallbacks = {}
+    for _, callback in ipairs(callbacks) do
+      callback()
+    end
+  end
+
+  function EventUtil.ContinueAfterAllEvents(callback, ...)
+    local events = { n = select("#", ...), ... }
+    if events.n == 0 then
+      callback()
+      return
+    end
+
+    local state = {}
+    local function maybe_run()
+      for _, received in pairs(state) do
+        if not received then
+          return
+        end
+      end
+      callback()
+    end
+
+    for index = 1, events.n do
+      local event = events[index]
+      state[event] = false
+      __wow_eventutil_register(event, function()
+        state[event] = true
+        maybe_run()
+      end, nil, true)
+    end
+  end
+
+  function EventUtil.RegisterOnceFrameEventAndCallback(frameEvent, callback, ...)
+    local requiredArgs = { n = select("#", ...), ... }
+    local entry = __wow_eventutil_register(frameEvent, callback, requiredArgs, true)
+    return {
+      Unregister = function()
+        __wow_eventutil_unregister(entry)
+      end,
+    }
+  end
+
+  function EventUtil.ContinueOnAddOnLoaded(addOnName, callback)
+    if C_AddOns ~= nil and C_AddOns.IsAddOnLoaded ~= nil then
+      local _, isLoaded = C_AddOns.IsAddOnLoaded(addOnName)
+      if isLoaded then
+        callback()
+        return
+      end
+    end
+    EventUtil.RegisterOnceFrameEventAndCallback("ADDON_LOADED", callback, addOnName)
+  end
+
+  function EventUtil.ContinueOnPlayerLogin(callback)
+    if eventUtilPlayerLoginTriggered or IsLoggedIn() then
+      callback()
+      return
+    end
+    EventUtil.RegisterOnceFrameEventAndCallback("PLAYER_LOGIN", callback)
+  end
+
+  function EventUtil.CreateCallbackHandleContainer()
+    local container = { handles = {} }
+
+    function container:RegisterCallback(cbr, event, callback, owner)
+      if cbr == nil then
+        return
+      end
+      local handle = nil
+      if cbr.RegisterCallbackWithHandle ~= nil then
+        handle = cbr:RegisterCallbackWithHandle(event, callback, owner)
+      elseif cbr.RegisterCallback ~= nil then
+        cbr:RegisterCallback(event, callback, owner)
+        handle = {
+          Unregister = function()
+            if cbr.UnregisterCallback ~= nil then
+              cbr:UnregisterCallback(event, owner or callback)
+            end
+          end,
+        }
+      end
+      if handle ~= nil then
+        self:AddHandle(handle)
+      end
+    end
+
+    function container:AddHandle(handle)
+      table.insert(self.handles, handle)
+    end
+
+    function container:Unregister()
+      for _, handle in ipairs(self.handles) do
+        if handle ~= nil and handle.Unregister ~= nil then
+          handle:Unregister()
+        end
+      end
+      self.handles = {}
+    end
+
+    function container:IsEmpty()
+      return #self.handles == 0
+    end
+
+    return container
   end
 end
 
