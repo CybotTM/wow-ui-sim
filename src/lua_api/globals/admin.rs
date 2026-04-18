@@ -29,6 +29,9 @@ use super::admin_auction_house::{
     clear_auction_bids, clear_auction_browse_results, clear_auction_replicate_items,
     clear_owned_auctions,
 };
+use super::admin_crafting::{
+    clear_known_recipes, learn_recipe, set_selected_profession, unlearn_recipe,
+};
 use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
 use super::admin_collections::{
     add_transmog, add_transmog_appearance, collect_heirloom, collect_mount, collect_pet,
@@ -284,12 +287,21 @@ fn register_collections_pvp(b: TableBuilder) -> LuaResult<TableBuilder> {
 }
 
 fn register_inventory_misc(b: TableBuilder) -> LuaResult<TableBuilder> {
-    b.set_function("FireEvent", fire_event_admin)?
+    let b = b
+        .set_function("FireEvent", fire_event_admin)?
         .set_function("ToggleDebugBorders", toggle_debug_borders)?
         .set_function("ToggleDebugAnchors", toggle_debug_anchors)?
         .set_function("SimulateBossKill", simulate_boss_kill)?
         .set_function("StartLootRoll", start_loot_roll)?
-        .set_function("EndLootRoll", end_loot_roll)
+        .set_function("EndLootRoll", end_loot_roll)?;
+    register_crafting(b)
+}
+
+fn register_crafting(b: TableBuilder) -> LuaResult<TableBuilder> {
+    b.set_function("LearnRecipe", learn_recipe)?
+        .set_function("UnlearnRecipe", unlearn_recipe)?
+        .set_function("ClearKnownRecipes", clear_known_recipes)?
+        .set_function("SetSelectedProfession", set_selected_profession)
 }
 
 // ── Player identity ──────────────────────────────────────────────────────────

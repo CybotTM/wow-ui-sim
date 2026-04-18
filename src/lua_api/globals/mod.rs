@@ -5,6 +5,7 @@ pub mod admin;
 pub mod admin_actionbars_bags;
 pub mod admin_auction_house;
 pub mod admin_buffs;
+pub mod admin_crafting;
 pub mod admin_collections;
 pub mod admin_encounter;
 pub mod admin_equipment;

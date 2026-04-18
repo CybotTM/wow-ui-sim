@@ -1,0 +1,19 @@
+//! Crafting / profession dynamic state.
+
+use std::collections::HashSet;
+
+/// Mutable crafting state. Static profession/recipe catalogue still
+/// lives in `globals::profession_data`; this struct only carries
+/// what the player has actually done with it.
+#[derive(Debug, Clone, Default)]
+pub struct CraftingState {
+    /// Currently-selected profession id (Skill Line ID — matches the
+    /// values in `profession_data`). `None` until `C_TradeSkillUI.
+    /// SetProfessionChildSkillLineID` is called or the player opens
+    /// a trainer.
+    pub selected_profession_id: Option<i32>,
+    /// Recipes the player knows. Populated by
+    /// `A_Admin.LearnRecipe(id)` / `UnlearnRecipe(id)`. Drives
+    /// `C_TradeSkillUI.IsRecipeLearned(id)`.
+    pub known_recipe_ids: HashSet<i32>,
+}

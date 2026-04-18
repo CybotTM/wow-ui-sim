@@ -94,6 +94,7 @@ macro_rules! build_empty_sim_state {
             world: super::state_types::seeded_world_state(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
+            crafting: CraftingState::default(),
             net_stats: NetStats::default(),
             store_frame_shown: false,
             timerunning_season_id: None,
@@ -205,9 +206,9 @@ use super::game_data::{
 pub use super::state_types::{
     AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
     AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
-    ChatBubble, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem,
-    GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
+    ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
+    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo,
+    LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
     MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
     MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState,
     ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
@@ -393,6 +394,9 @@ pub struct SimState {
     /// `is_recrafting`. Drives `C_TradeSkillUI.GetRecipesTracked` /
     /// `IsRecipeTracked` / `SetRecipeTracked`. Empty by default.
     pub tracked_recipes: TrackedRecipes,
+    /// Dynamic crafting state (selected profession, known recipes).
+    /// Static recipe catalogue lives in `globals::profession_data`.
+    pub crafting: CraftingState,
     /// Simulated network stats returned by `GetNetStats`. All fields default to 0
     /// because the sim has no real network socket; tests can inject values via
     /// `A_Admin.SetNetStats(bandwidthIn, bandwidthOut, latencyHome, latencyWorld)`

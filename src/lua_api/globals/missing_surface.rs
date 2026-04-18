@@ -22,6 +22,7 @@ mod nameplate;
 mod party_info;
 mod pet_battles;
 mod player_info;
+mod profession_crafting;
 mod professions;
 mod quest_log;
 mod scenario_info;

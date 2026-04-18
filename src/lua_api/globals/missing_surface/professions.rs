@@ -1,3 +1,4 @@
+use super::profession_crafting::{craft_recipe, recipe_is_craftable};
 use super::{ensure_namespace, set_table_array};
 use crate::event::{Event, EventArg};
 use crate::items;
@@ -73,6 +74,8 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
             "GetTradeSkillTexture",
             c_trade_skill_ui_get_trade_skill_texture,
         ),
+        ("IsRecipeCraftable", c_trade_skill_ui_is_recipe_craftable),
+        ("IsRecipeLearned", c_trade_skill_ui_is_recipe_learned),
         ("IsRecipeTracked", c_trade_skill_ui_is_recipe_tracked),
         ("IsTradeSkillReady", c_trade_skill_ui_is_trade_skill_ready),
         (
@@ -80,6 +83,7 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
             c_trade_skill_ui_set_profession_child_skill_line_id,
         ),
         ("SetRecipeTracked", c_trade_skill_ui_set_recipe_tracked),
+        ("CraftRecipe", c_trade_skill_ui_craft_recipe),
     ];
 
     for &(name, func) in methods {
@@ -275,6 +279,32 @@ fn c_trade_skill_ui_get_recipes_tracked(state: &mut LuaState) -> LuaResult<u32> 
     Ok(1)
 }
 
+fn c_trade_skill_ui_is_recipe_learned(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let learned = borrow_state(state)?
+        .crafting
+        .known_recipe_ids
+        .contains(&recipe_id);
+    state.push(Val::Bool(learned));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_recipe_craftable(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let count = Option::<i32>::from_stack(state, 2)?.unwrap_or(1).max(1);
+    let craftable = recipe_is_craftable(state, recipe_id, count);
+    state.push(Val::Bool(craftable));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_craft_recipe(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let count = Option::<i32>::from_stack(state, 2)?.unwrap_or(1).max(1);
+    let success = craft_recipe(state, recipe_id, count);
+    state.push(Val::Bool(success));
+    Ok(1)
+}
+
 fn c_trade_skill_ui_get_trade_skill_line(state: &mut LuaState) -> LuaResult<u32> {
     let profession =
         selected_profession(state).or_else(|| profession_data::get_profession_by_index(0));
@@ -335,6 +365,9 @@ fn c_trade_skill_ui_set_profession_child_skill_line_id(state: &mut LuaState) -> 
         return Ok(0);
     }
 
+    // Write to SimState (primary source of truth).
+    borrow_state_mut(state)?.crafting.selected_profession_id = Some(skill_line_id);
+    // Mirror to Lua-side table so legacy call sites that read the key directly continue to work.
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
     table_set(
         state,
@@ -615,6 +648,13 @@ fn profession_for_recipe(recipe_id: i32) -> Option<&'static profession_data::Pro
 }
 
 fn selected_profession(state: &mut LuaState) -> Option<&'static profession_data::ProfessionInfo> {
+    // SimState is the primary source; fall back to the Lua-side mirror, then to first profession.
+    if let Ok(sim) = borrow_state(state) {
+        if let Some(id) = sim.crafting.selected_profession_id {
+            return profession_data::get_profession(id)
+                .or_else(|| profession_data::get_profession_by_index(0));
+        }
+    }
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE).ok()?;
     let selected = table_get(state, Val::Table(table_ref), SELECTED_PROFESSION_KEY);
     let Val::Num(skill_line_id) = selected else {
@@ -643,3 +683,4 @@ fn item_link_value(state: &mut LuaState, item_id: u32) -> Option<Val> {
         ),
     ))
 }
+
