@@ -29,36 +29,82 @@
 //! them immutable — the opposite of what we want). They are attached
 //! to `_G` AFTER freeze so the freeze walk does not follow them.
 
-use rilua::{LuaApiMut, Val};
 use rilua::vm::table::Table;
+use rilua::{LuaApiMut, Val};
 
 const G_LIVE_REGISTRY_KEY: &str = "__rilua_g_live";
 const G_PROXY_METATABLE_REGISTRY_KEY: &str = "__rilua_g_proxy_mt";
+const SECUREENV_LIVE_REGISTRY_KEY: &str = "__rilua_secureenv_live";
+const SECUREENV_PROXY_METATABLE_REGISTRY_KEY: &str = "__rilua_secureenv_proxy_mt";
 
 pub(super) fn freeze_globals_with_live_shadow(lua: &mut rilua::Lua) -> crate::Result<()> {
+    freeze_root_with_shadow(
+        lua,
+        FreezeTarget::Global,
+        G_LIVE_REGISTRY_KEY,
+        G_PROXY_METATABLE_REGISTRY_KEY,
+    )?;
+    if let Some(secureenv_ref) = find_secureenv(lua) {
+        freeze_root_with_shadow(
+            lua,
+            FreezeTarget::Secureenv(secureenv_ref),
+            SECUREENV_LIVE_REGISTRY_KEY,
+            SECUREENV_PROXY_METATABLE_REGISTRY_KEY,
+        )?;
+    }
+    Ok(())
+}
+
+fn find_secureenv(
+    lua: &mut rilua::Lua,
+) -> Option<rilua::vm::gc::arena::GcRef<Table>> {
+    match LuaApiMut::get_global_val(lua, "__secureenv") {
+        Val::Table(r) => Some(r),
+        _ => None,
+    }
+}
+
+enum FreezeTarget {
+    Global,
+    Secureenv(rilua::vm::gc::arena::GcRef<Table>),
+}
+
+fn freeze_root_with_shadow(
+    lua: &mut rilua::Lua,
+    target: FreezeTarget,
+    live_key: &'static str,
+    proxy_key: &'static str,
+) -> crate::Result<()> {
     let state = lua.state_mut();
 
-    let g_live = state.gc.alloc_table(Table::new());
-    state.gc.pin_object(Val::Table(g_live));
+    let live = state.gc.alloc_table(Table::new());
+    state.gc.pin_object(Val::Table(live));
 
-    let proxy_mt = build_proxy_metatable(state, g_live);
+    let proxy_mt = build_proxy_metatable(state, live);
     state.gc.pin_object(Val::Table(proxy_mt));
 
-    // Freeze _G and its existing transitively-reachable children
-    // BEFORE attaching the proxy, so the freeze walk does not
-    // follow into g_live / proxy_mt.
-    let g_ref = state.global;
-    let stats = state.gc.freeze_table(g_ref);
+    // Freeze the root and its existing transitively-reachable children
+    // BEFORE attaching the proxy, so the freeze walk does not follow
+    // into live / proxy_mt.
+    let root = match target {
+        FreezeTarget::Global => state.global,
+        FreezeTarget::Secureenv(r) => r,
+    };
+    let stats = state.gc.freeze_table(root);
     tracing::debug!(
+        target = ?match target {
+            FreezeTarget::Global => "_G",
+            FreezeTarget::Secureenv(_) => "__secureenv",
+        },
         tables = stats.tables,
         closures = stats.closures,
         userdata = stats.userdata,
         upvalues = stats.upvalues,
-        "freeze_table(_G) done"
+        "freeze_table done"
     );
 
-    attach_proxy_metatable(state, g_ref, proxy_mt);
-    stash_shadow_refs_in_registry(state, g_live, proxy_mt);
+    attach_proxy_metatable(state, root, proxy_mt);
+    stash_shadow_refs_in_registry(state, live_key, live, proxy_key, proxy_mt);
     Ok(())
 }
 
@@ -101,10 +147,12 @@ fn attach_proxy_metatable(
 
 fn stash_shadow_refs_in_registry(
     state: &mut rilua::vm::state::LuaState,
-    g_live: rilua::vm::gc::arena::GcRef<Table>,
+    live_key: &'static str,
+    live: rilua::vm::gc::arena::GcRef<Table>,
+    proxy_key: &'static str,
     proxy_mt: rilua::vm::gc::arena::GcRef<Table>,
 ) {
     use crate::lua_api::methods::registry_set;
-    registry_set(state, G_LIVE_REGISTRY_KEY, Val::Table(g_live));
-    registry_set(state, G_PROXY_METATABLE_REGISTRY_KEY, Val::Table(proxy_mt));
+    registry_set(state, live_key, Val::Table(live));
+    registry_set(state, proxy_key, Val::Table(proxy_mt));
 }
