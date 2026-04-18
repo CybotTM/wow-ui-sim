@@ -366,12 +366,33 @@ mod tests {
 
     #[test]
     fn test_extension_priority_order() {
-        // Verify the extension order in try_resolve_in_dir is webp first
+        // Verify BLP wins when multiple encodings exist for same texture.
         let extensions = [
-            "webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG",
+            "blp", "BLP", "webp", "WEBP", "PNG", "png", "tga", "TGA", "jpg", "JPG",
         ];
-        assert_eq!(extensions[0], "webp", "webp should be first priority");
-        assert_eq!(extensions[1], "WEBP", "WEBP should be second priority");
+        assert_eq!(extensions[0], "blp", "blp should be first priority");
+        assert_eq!(extensions[1], "BLP", "BLP should be second priority");
+    }
+
+    #[test]
+    fn test_resolve_path_prefers_interface_blp_over_local_webp() {
+        let temp_dir = TempDir::new().unwrap();
+        let textures_path = temp_dir.path().join("textures");
+        let interface_path = temp_dir.path().join("Interface");
+        fs::create_dir_all(textures_path.join("icons")).unwrap();
+        fs::create_dir_all(interface_path.join("icons")).unwrap();
+
+        let webp_path = textures_path.join("icons").join("paladin_holy.webp");
+        let blp_path = interface_path.join("icons").join("PALADIN_HOLY.BLP");
+        fs::write(&webp_path, b"webp").unwrap();
+        fs::write(&blp_path, b"blp").unwrap();
+
+        let mgr = TextureManager::new(&textures_path).with_interface_path(&interface_path);
+        let resolved = mgr
+            .resolve_path(&normalize_wow_path(r"Interface\ICONS\PALADIN_HOLY"))
+            .expect("resolver should find interface BLP");
+
+        assert_eq!(resolved, blp_path);
     }
 
     #[test]

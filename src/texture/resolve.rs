@@ -84,13 +84,13 @@ impl TextureManager {
             normalized_path
         };
 
-        if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {
-            return Some(result);
-        }
-
         if let Some(interface_path) = &self.interface_path
             && let Some(result) = self.try_resolve_in_dir(interface_path, path)
         {
+            return Some(result);
+        }
+
+        if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {
             return Some(result);
         }
 
@@ -99,9 +99,7 @@ impl TextureManager {
 
     /// Try to resolve a path within a given base directory.
     fn try_resolve_in_dir(&self, base: &Path, path: &str) -> Option<PathBuf> {
-        for ext in &[
-            "webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG",
-        ] {
+        for ext in texture_extension_priority() {
             let file_path = base.join(format!("{}.{}", path, ext));
             if file_path.exists() {
                 return Some(file_path);
@@ -129,9 +127,7 @@ impl TextureManager {
             let is_last = index == components.len() - 1;
 
             if is_last {
-                for ext in &[
-                    "webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG",
-                ] {
+                for ext in texture_extension_priority() {
                     let with_ext = format!("{}.{}", component, ext);
                     if let Some(entry) = find_case_insensitive(&current, &with_ext) {
                         return Some(entry);
@@ -152,6 +148,12 @@ impl TextureManager {
         }
         None
     }
+}
+
+fn texture_extension_priority() -> &'static [&'static str] {
+    &[
+        "blp", "BLP", "webp", "WEBP", "PNG", "png", "tga", "TGA", "jpg", "JPG",
+    ]
 }
 
 /// Find a directory entry case-insensitively.
