@@ -223,6 +223,11 @@ fn parse_format_specifier(
             ));
         }
         *has_positional = true;
+        // A positional spec `%N$` bumps `seq` to max(seq, N) without
+        // consuming. Later sequential specs then pick from `seq+1` onward,
+        // matching WoW's patched LuaJIT where sequential consumes the
+        // lowest arg slot not yet "seen" by positional refs.
+        *seq = std::cmp::max(*seq, n);
         reordered.push(args.get(n - 1).copied().unwrap_or(Val::Nil));
         out.push('%');
         i = after;
