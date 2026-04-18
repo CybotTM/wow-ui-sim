@@ -1024,6 +1024,247 @@ if C_Glue.IsOnGlueScreen == nil then
   end
 end
 
+if C_Glue.IsFirstLoadThisSession == nil then
+  function C_Glue.IsFirstLoadThisSession()
+    return false
+  end
+end
+
+if C_UI == nil then
+  C_UI = {}
+end
+
+if C_UI.ShouldUIParentAvoidNotch == nil then
+  function C_UI.ShouldUIParentAvoidNotch()
+    return false
+  end
+end
+
+if C_UI.GetTopLeftNotchSafeRegion == nil then
+  function C_UI.GetTopLeftNotchSafeRegion()
+    return 0, 0, 0, 0
+  end
+end
+
+if C_Login == nil then
+  C_Login = {}
+end
+
+if C_Login.IsLoginReady == nil then
+  function C_Login.IsLoginReady()
+    return true
+  end
+end
+
+if C_Login.GetState == nil then
+  function C_Login.GetState()
+    local auroraState = 0
+    if Enum ~= nil and Enum.AuroraState ~= nil and Enum.AuroraState.None ~= nil then
+      auroraState = Enum.AuroraState.None
+    elseif LE_AURORA_STATE_NONE ~= nil then
+      auroraState = LE_AURORA_STATE_NONE
+    end
+    return auroraState, false, 0, false, false
+  end
+end
+
+if C_Login.IsLauncherLogin == nil then
+  function C_Login.IsLauncherLogin()
+    return false
+  end
+end
+
+if C_Login.IsReconnectLoginPossible == nil then
+  function C_Login.IsReconnectLoginPossible()
+    return false
+  end
+end
+
+if C_Login.GetLastError == nil then
+  function C_Login.GetLastError()
+    return nil
+  end
+end
+
+if C_Login.ClearLastError == nil then
+  function C_Login.ClearLastError()
+  end
+end
+
+if C_Login.AttemptedLauncherLogin == nil then
+  function C_Login.AttemptedLauncherLogin()
+    return false
+  end
+end
+
+if C_Login.IsNewPlayer == nil then
+  function C_Login.IsNewPlayer()
+    return false
+  end
+end
+
+local __wow_saved_account_name = ""
+local __wow_saved_account_list = ""
+local __wow_uses_token = false
+
+if GetSavedAccountName == nil then
+  function GetSavedAccountName()
+    return __wow_saved_account_name
+  end
+end
+
+if SetSavedAccountName == nil then
+  function SetSavedAccountName(accountName)
+    __wow_saved_account_name = accountName or ""
+  end
+end
+
+if GetSavedAccountList == nil then
+  function GetSavedAccountList()
+    return __wow_saved_account_list
+  end
+end
+
+if ClearSavedAccountList == nil then
+  function ClearSavedAccountList()
+    __wow_saved_account_list = ""
+  end
+end
+
+if SetUsesToken == nil then
+  function SetUsesToken(usesToken)
+    __wow_uses_token = not not usesToken
+  end
+end
+
+if WasScreenFirstDisplayed == nil then
+  function WasScreenFirstDisplayed(_screenName)
+    return false
+  end
+end
+
+if GetLoginScreenBackground == nil then
+  function GetLoginScreenBackground(highResBackground, lowResBackground)
+    if highResBackground ~= nil then
+      return highResBackground
+    end
+    return lowResBackground
+  end
+end
+
+if GetMinimumExpansionLevel == nil then
+  function GetMinimumExpansionLevel()
+    return 0
+  end
+end
+
+if GetServerName == nil then
+  function GetServerName()
+    return nil
+  end
+end
+
+if PlayerLocation == nil then
+  PlayerLocation = {}
+
+  local function create_player_location(kind, payload)
+    local location = {
+      kind = kind,
+      payload = payload,
+    }
+
+    function location:Clear()
+      self.kind = nil
+      self.payload = nil
+    end
+
+    function location:IsGUID()
+      return self.kind == "guid"
+    end
+
+    function location:IsUnit()
+      return self.kind == "unit"
+    end
+
+    function location:IsCommunityData()
+      return self.kind == "community"
+    end
+
+    function location:IsBattleNetID()
+      return self.kind == "battle_net"
+    end
+
+    function location:GetGUID()
+      if self.kind == "guid" and self.payload then
+        return self.payload.guid
+      end
+      return nil
+    end
+
+    function location:IsValid()
+      if self.kind == "guid" and self.payload then
+        if type(C_AccountInfo) == "table"
+          and type(C_AccountInfo.IsGUIDBattleNetAccountType) == "function"
+          and C_AccountInfo.IsGUIDBattleNetAccountType(self.payload.guid)
+        then
+          return true
+        end
+        return type(C_PlayerInfo) == "table"
+          and type(C_PlayerInfo.GUIDIsPlayer) == "function"
+          and C_PlayerInfo.GUIDIsPlayer(self.payload.guid)
+          or false
+      elseif self.kind == "unit" and self.payload then
+        return type(UnitIsHumanPlayer) == "function" and UnitIsHumanPlayer(self.payload.unit) or false
+      elseif self.kind == "community" and self.payload then
+        return type(C_Club) == "table"
+          and type(C_Club.CanResolvePlayerLocationFromClubMessageData) == "function"
+          and C_Club.CanResolvePlayerLocationFromClubMessageData(
+            self.payload.clubID,
+            self.payload.streamID,
+            self.payload.epoch,
+            self.payload.position
+          )
+          or false
+      elseif self.kind == "battle_net" and self.payload then
+        return self.payload.battleNetID ~= nil
+      elseif self.kind == "voice" and self.payload then
+        return self.payload.memberID ~= nil and self.payload.channelID ~= nil
+      end
+      return false
+    end
+
+    return location
+  end
+
+  function PlayerLocation:CreateFromGUID(guid)
+    return create_player_location("guid", { guid = guid })
+  end
+
+  function PlayerLocation:CreateFromUnit(unit)
+    return create_player_location("unit", { unit = unit })
+  end
+
+  function PlayerLocation:CreateFromCommunityChatData(clubID, streamID, epoch, position)
+    return create_player_location("community", {
+      clubID = clubID,
+      streamID = streamID,
+      epoch = epoch,
+      position = position,
+    })
+  end
+
+  function PlayerLocation:CreateFromBattleNetID(battleNetID)
+    return create_player_location("battle_net", { battleNetID = battleNetID })
+  end
+
+  function PlayerLocation:CreateFromVoiceID(memberID, channelID)
+    return create_player_location("voice", {
+      memberID = memberID,
+      channelID = channelID,
+    })
+  end
+end
+
 if C_ContributionCollector == nil then
   C_ContributionCollector = {}
 end

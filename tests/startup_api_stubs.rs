@@ -76,6 +76,75 @@ fn is_character_newly_boosted_returns_false() {
 }
 
 #[test]
+fn glue_runtime_helpers_exist_with_safe_defaults() {
+    let env = env();
+    let (
+        c_ui_type,
+        avoids_notch,
+        c_glue_type,
+        first_load,
+        saved_account_name,
+        saved_account_list,
+        screen_first_displayed,
+        login_background,
+        min_expansion_level_type,
+        server_name_type,
+        player_location_kind,
+        player_location_valid,
+    ): (
+        String,
+        bool,
+        String,
+        bool,
+        String,
+        String,
+        bool,
+        f64,
+        String,
+        String,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            UnitIsHumanPlayer = function(unit)
+                return unit == "player"
+            end
+
+            local saved = GetSavedAccountList()
+            local location = PlayerLocation:CreateFromUnit("player")
+
+            return type(C_UI),
+                   C_UI.ShouldUIParentAvoidNotch(),
+                   type(C_Glue),
+                   C_Glue.IsFirstLoadThisSession(),
+                   GetSavedAccountName(),
+                   saved,
+                   WasScreenFirstDisplayed("login"),
+                   GetLoginScreenBackground(42, 7),
+                   type(GetMinimumExpansionLevel()),
+                   type(GetServerName()),
+                   location:IsUnit(),
+                   location:IsValid()
+            "#,
+        )
+        .expect("glue runtime helpers should be callable");
+
+    assert_eq!(c_ui_type, "table");
+    assert!(!avoids_notch);
+    assert_eq!(c_glue_type, "table");
+    assert!(!first_load);
+    assert_eq!(saved_account_name, "");
+    assert_eq!(saved_account_list, "");
+    assert!(!screen_first_displayed);
+    assert_eq!(login_background, 42.0);
+    assert_eq!(min_expansion_level_type, "number");
+    assert_eq!(server_name_type, "nil");
+    assert!(player_location_kind);
+    assert!(player_location_valid);
+}
+
+#[test]
 fn c_lfg_info_can_player_use_premade_group_returns_false() {
     let env = env();
     let can_use: bool = env
