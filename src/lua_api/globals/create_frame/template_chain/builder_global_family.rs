@@ -25,7 +25,22 @@ pub(super) fn build_global_family_handler(
 
 /// LFG branch + the `target[method](...)` shapes (plain, with self/string/
 /// global/self-id/self-field args).
+///
+/// Dispatches through two themed sub-helpers: single-/zero-arg variants and
+/// multi-arg variants. Each sub-helper returns `Ok(None)` for arms it does
+/// not handle so the chain falls through to the next.
 fn build_global_method_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_global_method_simple_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    build_global_method_multi_arg_variants(state, handler_ref)
+}
+
+/// Arms with 0–1 value args past the `(target, method)` pair.
+fn build_global_method_simple_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -58,6 +73,40 @@ fn build_global_method_variants(
             arg,
         } => build_global_method_with_self_string_handler(state, target_path, method_name, arg)
             .map(Some),
+        FastHandlerRef::GlobalMethodWithStringArg {
+            target_path,
+            method_name,
+            arg,
+        } => {
+            build_global_method_with_string_handler(state, target_path, method_name, arg).map(Some)
+        }
+        FastHandlerRef::GlobalMethodWithGlobalArg {
+            target_path,
+            method_name,
+            arg_path,
+        } => build_global_method_with_global_handler(state, target_path, method_name, arg_path)
+            .map(Some),
+        FastHandlerRef::GlobalMethodWithSelfIdArg {
+            target_path,
+            method_name,
+        } => build_global_method_with_self_id_handler(state, target_path, method_name).map(Some),
+        FastHandlerRef::GlobalMethodWithSelfFieldArg {
+            target_path,
+            method_name,
+            field,
+        } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
+            .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Arms with 3+ value args past the `(target, method)` pair (including
+/// function-result forwarding and self-method self-method shapes).
+fn build_global_method_multi_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalMethodWithSelfStringNumberNumberArgs {
             target_path,
             method_name,
@@ -73,19 +122,6 @@ fn build_global_method_variants(
             *third,
         )
         .map(Some),
-        FastHandlerRef::GlobalMethodWithStringArg {
-            target_path,
-            method_name,
-            arg,
-        } => {
-            build_global_method_with_string_handler(state, target_path, method_name, arg).map(Some)
-        }
-        FastHandlerRef::GlobalMethodWithGlobalArg {
-            target_path,
-            method_name,
-            arg_path,
-        } => build_global_method_with_global_handler(state, target_path, method_name, arg_path)
-            .map(Some),
         FastHandlerRef::GlobalMethodWithStringGlobalBoolArgs {
             target_path,
             method_name,
@@ -209,16 +245,6 @@ fn build_global_method_variants(
             *fourth,
         )
         .map(Some),
-        FastHandlerRef::GlobalMethodWithSelfIdArg {
-            target_path,
-            method_name,
-        } => build_global_method_with_self_id_handler(state, target_path, method_name).map(Some),
-        FastHandlerRef::GlobalMethodWithSelfFieldArg {
-            target_path,
-            method_name,
-            field,
-        } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
-            .map(Some),
         _ => Ok(None),
     }
 }
