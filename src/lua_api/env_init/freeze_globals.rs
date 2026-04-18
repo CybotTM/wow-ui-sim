@@ -29,6 +29,7 @@
 //! them immutable — the opposite of what we want). They are attached
 //! to `_G` AFTER freeze so the freeze walk does not follow them.
 
+use crate::lua_api::hot_literals::{hot_metatable_key, metatable_idx};
 use rilua::vm::table::Table;
 use rilua::{LuaApiMut, Val};
 
@@ -111,12 +112,8 @@ fn build_proxy_metatable(
     g_live: rilua::vm::gc::arena::GcRef<Table>,
 ) -> rilua::vm::gc::arena::GcRef<Table> {
     let mt = state.gc.alloc_table(Table::new());
-    let index_key = state
-        .gc
-        .intern_string_static(crate::lua_api::hot_literals::METATABLE_INDEX.as_bytes());
-    let newindex_key = state
-        .gc
-        .intern_string_static(crate::lua_api::hot_literals::METATABLE_NEWINDEX.as_bytes());
+    let index_key = hot_metatable_key(state, metatable_idx::INDEX);
+    let newindex_key = hot_metatable_key(state, metatable_idx::NEWINDEX);
     let mt_table = state
         .gc
         .tables

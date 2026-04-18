@@ -1,4 +1,5 @@
 use super::*;
+#[test]
 fn test_create_scrollframe_from_xml_registers_scroll_child() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

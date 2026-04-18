@@ -1,4 +1,5 @@
 use super::*;
+#[test]
 fn test_create_frame_from_xml_inline_tooltip_set_text_with_four_global_args_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

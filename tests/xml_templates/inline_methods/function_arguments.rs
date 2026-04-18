@@ -1,4 +1,5 @@
 use super::*;
+#[test]
 fn test_create_frame_from_xml_inline_function_with_self_and_parent_field_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

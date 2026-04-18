@@ -726,5 +726,3 @@ fn test_create_frame_from_xml_inherit_prepend_nested_table_assignment_runs() {
     assert_eq!(result.1, "ShoppingTooltip1");
     assert_eq!(result.2, "ShoppingTooltip2");
 }
-
-#[test]

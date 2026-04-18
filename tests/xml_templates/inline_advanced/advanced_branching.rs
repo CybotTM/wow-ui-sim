@@ -554,5 +554,3 @@ end</OnClick></Scripts>
     let without_case: String = env.eval("return HelpBrowser.home").unwrap();
     assert_eq!(without_case, "GMTicketStatus");
 }
-
-#[test]

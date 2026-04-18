@@ -16,8 +16,9 @@
 //! # What does NOT live here
 //!
 //! - The registry itself (sub-item 2 in Track 1).
-//! - Any `intern_string_static` call — sub-items 3 convert the hot paths
-//!   to consume the registry. This file is pure data.
+//! - Any large consumer-specific hot-path logic — sub-items 3 convert the
+//!   hot paths to consume the registry. This file stays mostly data plus
+//!   a tiny registry accessor helper.
 //! - Runtime-discovered literals. The spirit of the PLAN task is "static
 //!   and versioned, not runtime-discovered", so additions to this list
 //!   should be deliberate and reviewed.
@@ -486,6 +487,19 @@ impl HotLiteralHandles {
     pub fn loader_sentinel(&self, index: usize) -> GcRef<LuaString> {
         self.loader_sentinels[index]
     }
+}
+
+/// Get a pre-interned metatable key handle if bootstrap already installed
+/// the hot-literal registry, otherwise fall back to the static cache.
+pub(crate) fn hot_metatable_key(state: &mut LuaState, index: usize) -> GcRef<LuaString> {
+    let cached = state
+        .app_data::<crate::lua_api::env::WowLuaAppData>()
+        .and_then(|app| app.hot_literals.as_ref())
+        .map(|handles| handles.metatable_key(index));
+    if let Some(key) = cached {
+        return key;
+    }
+    state.gc.intern_string_static(HOT_METATABLE_KEYS[index])
 }
 
 // ── Named accessors (Track 1 sub-item 3 foothold) ─────────────────────────

@@ -1,4 +1,5 @@
 use super::*;
+#[test]
 fn test_create_frame_from_xml_inline_method_then_unchecked_parent_field_clear_and_show_text_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -544,5 +545,3 @@ fn test_create_frame_from_xml_inline_tooltip_then_parent_assign_runs() {
     assert!(result.2);
     assert!(result.3);
 }
-
-#[test]

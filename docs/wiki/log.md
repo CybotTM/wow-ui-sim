@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-18] update | Track 2 metatable handle threading
+
+Updated `investigations/track-2-intern-audit.md` with the current
+handle-threading progress: a shared `hot_metatable_key(...)` accessor
+now reuses the prewarmed registry handle for `__index` / `__newindex`
+lookups in `methods.rs`, `globals/create_frame/helpers.rs`,
+`globals/security.rs`, and `env_init/freeze_globals.rs`, with a static
+fallback for bootstrap-skipping tests.
+
 ## [2026-04-17] ingest | rilua vs mlua gap audit
 
 Added `investigations/rilua-mlua-gap-audit.md` after comparing the current

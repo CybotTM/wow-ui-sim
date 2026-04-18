@@ -1,4 +1,5 @@
 use super::*;
+#[test]
 fn test_create_frame_from_xml_inline_global_method_with_late_bound_global_arg_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -521,5 +522,3 @@ fn test_create_frame_from_xml_key_values_exist_before_template_child_onload() {
         "template child OnLoad should see direct frame key values"
     );
 }
-
-#[test]

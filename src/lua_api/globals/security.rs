@@ -23,6 +23,7 @@
 
 use crate::loader::LoadError;
 use crate::loader::lua_file::compile_with_rilua;
+use crate::lua_api::hot_literals::{hot_metatable_key, metatable_idx};
 use crate::lua_api::methods::registry_get;
 use crate::lua_api::methods::registry_set;
 use crate::lua_api::script_helpers::{call_error_handler_state, protected_lua_pcall_state};
@@ -115,9 +116,7 @@ fn lookup_method_on_table(
         return direct;
     }
 
-    let index_key = state
-        .gc
-        .intern_string_static(crate::lua_api::hot_literals::METATABLE_INDEX.as_bytes());
+    let index_key = hot_metatable_key(state, metatable_idx::INDEX);
     let index_table = state
         .gc
         .tables

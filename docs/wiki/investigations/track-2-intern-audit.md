@@ -36,6 +36,15 @@ Top-7 (64+ calls) entries at HEAD:
 `text_attribute_event::events.rs` and `callbacks.rs` intern
 `field_name.as_bytes()` fresh per event / per dispatch.
 
+## Progress note
+
+The shared `__index` / `__newindex` metatable key path is now threaded
+through the prewarmed hot-literal registry via `hot_metatable_key(...)`.
+`methods.rs`, `globals/create_frame/helpers.rs`, `globals/security.rs`,
+and `env_init/freeze_globals.rs` all reuse the registry handle when
+bootstrap has already installed it, and fall back to the static cache
+only in bootstrap-skipping tests.
+
 ## Call-site inventory (80 total, `src/` only)
 
 Generated via:

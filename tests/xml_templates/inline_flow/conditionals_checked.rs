@@ -581,5 +581,3 @@ fn test_create_frame_from_xml_inline_parent_field_local_toggle_shown_runs() {
         .unwrap();
     assert!(!second);
 }
-
-#[test]

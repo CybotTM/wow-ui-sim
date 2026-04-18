@@ -1,5 +1,6 @@
 //! Low-level helpers shared by the dropdown, template, and top-level modules.
 
+use crate::lua_api::hot_literals::{hot_metatable_key, metatable_idx};
 use crate::lua_api::methods::{
     create_string, create_table, extract_frame_id, frame_ref, get_or_create_frame_fields,
     registry_get, table_get, table_set,
@@ -211,9 +212,7 @@ fn copy_table_into_frame(state: &mut LuaState, frame_id: u64, source: Val) {
     };
 
     copy_table_entries_into_frame(state, frame_ref_val, source_ref);
-    let index_key = state
-        .gc
-        .intern_string_static(crate::lua_api::hot_literals::METATABLE_INDEX.as_bytes());
+    let index_key = hot_metatable_key(state, metatable_idx::INDEX);
     let index_table = state
         .gc
         .tables
