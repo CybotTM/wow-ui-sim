@@ -318,19 +318,14 @@ impl GpuTextureAtlas {
         rgba_data: &[u8],
         cell_size: u32,
     ) -> Vec<u8> {
-        // If texture fits, pad with zeros
+        // If texture fits, pad with replicated edge pixels so bilinear
+        // filtering at the texture's right / bottom edges blends against the
+        // same colour instead of zero-bleeding. This matters for narrow
+        // atlas slots (e.g. 1×N tiling strips) where bilinear sampling can
+        // otherwise mix the real pixel with transparent-black padding and
+        // produce a visibly darker interior.
         if width <= cell_size && height <= cell_size {
-            let mut padded = vec![0u8; (cell_size * cell_size * 4) as usize];
-            for y in 0..height {
-                let src_offset = (y * width * 4) as usize;
-                let dst_offset = (y * cell_size * 4) as usize;
-                let row_bytes = (width * 4) as usize;
-                if src_offset + row_bytes <= rgba_data.len() {
-                    padded[dst_offset..dst_offset + row_bytes]
-                        .copy_from_slice(&rgba_data[src_offset..src_offset + row_bytes]);
-                }
-            }
-            return padded;
+            return pad_texture_replicate(width, height, rgba_data, cell_size);
         }
 
         // Scale down to fit
@@ -480,6 +475,50 @@ pub struct TierStats {
     pub allocated_bytes: usize,
     pub used_bytes: usize,
     pub used_slots: [usize; NUM_TIERS],
+}
+
+/// Copy a `width×height` RGBA texture into a `cell_size×cell_size` slot,
+/// replicating the right and bottom edge pixels into the remaining padding.
+///
+/// Zero-padding narrow textures (e.g. a `1×42` tiling strip placed in a `64×64`
+/// slot) causes bilinear sampling to blend the real pixels with transparent
+/// black at the slot edges, which shows up as a visibly darker interior on
+/// three-slice tabs. Replicating the edge pixels keeps bilinear taps on the
+/// same colour they already sample from inside the texture.
+fn pad_texture_replicate(width: u32, height: u32, rgba_data: &[u8], cell_size: u32) -> Vec<u8> {
+    let mut padded = vec![0u8; (cell_size * cell_size * 4) as usize];
+    if width == 0 || height == 0 {
+        return padded;
+    }
+    let src_row_bytes = (width * 4) as usize;
+    let dst_row_bytes = (cell_size * 4) as usize;
+
+    for y in 0..height {
+        let src_offset = (y * width * 4) as usize;
+        let dst_offset = (y * cell_size * 4) as usize;
+        if src_offset + src_row_bytes > rgba_data.len() {
+            continue;
+        }
+        padded[dst_offset..dst_offset + src_row_bytes]
+            .copy_from_slice(&rgba_data[src_offset..src_offset + src_row_bytes]);
+        let last_pixel_offset = src_offset + src_row_bytes - 4;
+        let last_pixel: [u8; 4] = rgba_data[last_pixel_offset..last_pixel_offset + 4]
+            .try_into()
+            .unwrap_or([0; 4]);
+        for x in width..cell_size {
+            let px_offset = dst_offset + (x * 4) as usize;
+            padded[px_offset..px_offset + 4].copy_from_slice(&last_pixel);
+        }
+    }
+
+    let last_row_offset = ((height - 1) * cell_size * 4) as usize;
+    let (head, tail) = padded.split_at_mut(last_row_offset + dst_row_bytes);
+    let last_row = &head[last_row_offset..last_row_offset + dst_row_bytes];
+    for row_chunk in tail.chunks_exact_mut(dst_row_bytes) {
+        row_chunk.copy_from_slice(last_row);
+    }
+
+    padded
 }
 
 /// Upload texture data to a specific cell in a tier atlas.
@@ -644,5 +683,51 @@ mod tests {
                 .map(|entry| entry.grid_x),
             Some(1)
         );
+    }
+
+    #[test]
+    fn pad_texture_replicate_fills_right_and_bottom_with_edge_pixels() {
+        let src = [
+            0xAA, 0xBB, 0xCC, 0xFF, // row 0
+            0x10, 0x20, 0x30, 0xFF, // row 1
+        ];
+        let padded = pad_texture_replicate(1, 2, &src, 4);
+        assert_eq!(padded.len(), 4 * 4 * 4);
+
+        for x in 0..4 {
+            let off = x * 4;
+            assert_eq!(
+                &padded[off..off + 4],
+                &[0xAA, 0xBB, 0xCC, 0xFF],
+                "row 0 x={x}"
+            );
+        }
+
+        for x in 0..4 {
+            let off = 4 * 4 + x * 4;
+            assert_eq!(
+                &padded[off..off + 4],
+                &[0x10, 0x20, 0x30, 0xFF],
+                "row 1 x={x}"
+            );
+        }
+
+        for y in 2..4 {
+            for x in 0..4 {
+                let off = y * 4 * 4 + x * 4;
+                assert_eq!(
+                    &padded[off..off + 4],
+                    &[0x10, 0x20, 0x30, 0xFF],
+                    "row {y} x={x} should replicate last real row"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn pad_texture_replicate_zero_dimension_returns_zero_buffer() {
+        let padded = pad_texture_replicate(0, 2, &[], 4);
+        assert_eq!(padded.len(), 4 * 4 * 4);
+        assert!(padded.iter().all(|&b| b == 0));
     }
 }
