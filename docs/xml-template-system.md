@@ -4,6 +4,8 @@
 
 WoW UI definitions are declared in XML files with a `<Ui>` root element. The simulator parses these files using `quick_xml` serde deserialization into Rust structs, then generates and executes Lua code to create the corresponding widgets. Virtual frames (templates) are stored in a global registry and applied when frames inherit from them via the `inherits` attribute or when `CreateFrame()` is called with a template name.
 
+For startup-oriented loader details, including the XML script fast path that avoids the generic generated-Lua install path for supported inline bodies, see [startup-xml-fast-path.md](startup-xml-fast-path.md).
+
 The system spans four layers:
 
 1. **XML parsing** -- `src/xml/` deserializes XML text into typed Rust structs
