@@ -108,6 +108,14 @@ fn load_panel_addons(env: &WowLuaEnv) {
 }
 
 fn install_lua_harness_stubs(env: &WowLuaEnv) {
+    block_blizzard_cooldown_broadcaster(env);
+    install_action_button_util_stub(env);
+}
+
+/// Wrap `UIParentLoadAddOn` so the test harness refuses to load
+/// `Blizzard_CooldownBroadcaster` (the real addon depends on a runtime
+/// system the tests don't bring up).
+fn block_blizzard_cooldown_broadcaster(env: &WowLuaEnv) {
     env.exec(
         r#"
         if type(UIParentLoadAddOn) == "function" and not __test_original_uiparent_load_addon then
@@ -119,7 +127,17 @@ fn install_lua_harness_stubs(env: &WowLuaEnv) {
                 return __test_original_uiparent_load_addon(name)
             end
         end
+        "#,
+    )
+    .expect("failed to wrap UIParentLoadAddOn");
+}
 
+/// Install the `ActionButtonUtil` namespace + ActionBarActionStatus enum +
+/// the three `GetActionBarStatusFor*` probes, all returning `NotMissing`.
+/// Real Blizzard addon code reaches for these during ShowUIPanel paths.
+fn install_action_button_util_stub(env: &WowLuaEnv) {
+    env.exec(
+        r#"
         if not ActionButtonUtil then
             ActionButtonUtil = {
                 ActionBarActionStatus = {
