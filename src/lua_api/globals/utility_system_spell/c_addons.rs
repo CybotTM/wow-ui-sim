@@ -45,6 +45,7 @@ fn register_c_addons_queries(
     table_set_rust_fn_static(state, t, "GetNumAddOns", c_addons_get_num_addons)?;
     table_set_rust_fn_static(state, t, "GetAddOnInfo", c_addons_get_addon_info)?;
     table_set_rust_fn_static(state, t, "IsAddOnLoaded", c_addons_is_addon_loaded)?;
+    table_set_rust_fn_static(state, t, "IsAddOnLoadable", c_addons_is_addon_loadable)?;
     table_set_rust_fn_static(
         state,
         t,
@@ -292,6 +293,33 @@ fn c_addons_is_addon_loaded(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(loaded_or_loading));
     state.push(Val::Bool(loaded));
+    Ok(2)
+}
+
+fn c_addons_is_addon_loadable(state: &mut LuaState) -> LuaResult<u32> {
+    let addon = stack_val(state, 1);
+    let Some(addon_name) = addon_name_from_value(state, addon) else {
+        state.push(Val::Bool(false));
+        state.push(Val::Nil);
+        return Ok(2);
+    };
+
+    let reason = if !addon_exists(state, &addon_name) {
+        Some("MISSING")
+    } else if addon_is_disabled(state, &addon_name) {
+        Some("DISABLED")
+    } else {
+        None
+    };
+
+    state.push(Val::Bool(reason.is_none()));
+    match reason {
+        Some(reason) => {
+            let reason = create_string(state, reason);
+            state.push(reason);
+        }
+        None => state.push(Val::Nil),
+    }
     Ok(2)
 }
 

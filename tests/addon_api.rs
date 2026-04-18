@@ -121,6 +121,23 @@ fn test_is_addon_load_on_demand() {
     assert!(!not_lod);
 }
 
+#[test]
+fn test_is_addon_loadable_reports_enabled_and_disabled_states() {
+    let env = env_with_addons();
+
+    let (enabled_loadable, enabled_reason): (bool, Option<String>) = env
+        .eval("return C_AddOns.IsAddOnLoadable('MyAddon')")
+        .unwrap();
+    assert!(enabled_loadable);
+    assert_eq!(enabled_reason, None);
+
+    let (disabled_loadable, disabled_reason): (bool, String) = env
+        .eval("return C_AddOns.IsAddOnLoadable('LODAddon')")
+        .unwrap();
+    assert!(!disabled_loadable);
+    assert_eq!(disabled_reason, "DISABLED");
+}
+
 // ============================================================================
 // C_AddOns.EnableAddOn / DisableAddOn
 // ============================================================================
