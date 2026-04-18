@@ -96,6 +96,16 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             second,
         });
     }
+    if let Some((function_name, first_arg_path, second_arg_path, third_arg_path)) =
+        parse_inline_function_with_three_global_args(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithThreeGlobalArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            third_arg_path,
+        });
+    }
     if let Some((function_name, arg)) = parse_inline_function_with_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithStringArg { function_name, arg });
     }
@@ -266,6 +276,34 @@ fn parse_inline_function_with_two_global_args(stmt: &str) -> Option<(&str, &str,
         && is_fast_handler_path(second_arg_path)
         && second_arg_path.split('.').next() != Some("self"))
     .then_some((function_name, first_arg_path, second_arg_path))
+}
+
+fn parse_inline_function_with_three_global_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first_arg_path = parts.next()?;
+    let second_arg_path = parts.next()?;
+    let third_arg_path = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(first_arg_path)
+        && is_fast_handler_path(second_arg_path)
+        && is_fast_handler_path(third_arg_path)
+        && first_arg_path.split('.').next() != Some("self")
+        && second_arg_path.split('.').next() != Some("self")
+        && third_arg_path.split('.').next() != Some("self"))
+    .then_some((
+        function_name,
+        first_arg_path,
+        second_arg_path,
+        third_arg_path,
+    ))
 }
 
 fn parse_inline_function_with_string_nil_nil_global_args(stmt: &str) -> Option<(&str, &str, &str)> {

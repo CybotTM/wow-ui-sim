@@ -109,6 +109,9 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             self_method_name,
         });
     }
+    if let Some((field, method_name)) = parse_inline_grandparent_field_method(stmt) {
+        return Some(FastHandlerRef::GrandparentFieldMethod { field, method_name });
+    }
     if let Some(method_name) = parse_inline_grandparent_method_with_not_self_checked_arg(stmt) {
         return Some(FastHandlerRef::GrandparentMethodWithNotSelfCheckedArg { method_name });
     }
@@ -239,6 +242,17 @@ fn parse_inline_grandparent_method_with_not_self_checked_arg(stmt: &str) -> Opti
     let args = args.strip_suffix(')')?.trim();
     let method_name = method_name.trim();
     (is_fast_identifier(method_name) && args == "not self:GetChecked()").then_some(method_name)
+}
+
+fn parse_inline_grandparent_field_method(stmt: &str) -> Option<(&str, &str)> {
+    let remainder = stmt.strip_prefix("self:GetParent():GetParent().")?;
+    let (field, remainder) = remainder.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field) && is_fast_identifier(method_name) && is_fast_passthrough_args(args))
+        .then_some((field, method_name))
 }
 
 fn parse_inline_self_method_with_bool_arg(stmt: &str) -> Option<(&str, bool)> {

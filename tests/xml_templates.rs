@@ -3004,6 +3004,107 @@ fn test_create_frame_from_xml_inline_parent_field_local_click_if_enabled_runs() 
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_grandparent_field_method_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineGrandparentFieldRoot" parent="UIParent">
+            <Frame name="XmlInlineGrandparentFieldParent" parent="XmlInlineGrandparentFieldRoot">
+                <EditBox name="XmlInlineGrandparentFieldChild" parent="XmlInlineGrandparentFieldParent">
+                    <Scripts><OnEnterPressed>
+                        self:GetParent():GetParent().EditBox:SetFocus();
+                    </OnEnterPressed></Scripts>
+                </EditBox>
+            </Frame>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineGrandparentFieldRoot.EditBox = {
+            focused = false,
+            SetFocus = function(self)
+                self.focused = true
+            end,
+        }
+        XmlInlineGrandparentFieldChild:GetScript("OnEnterPressed")(XmlInlineGrandparentFieldChild)
+    "#,
+    )
+    .unwrap();
+    let focused: bool = env
+        .eval("return XmlInlineGrandparentFieldRoot.EditBox.focused")
+        .unwrap();
+    assert!(focused);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_tooltip_then_parent_assign_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        HIGHLIGHT_FONT_COLOR = { r = 0.1, g = 0.2, b = 0.3 }
+        BROWSER_DELETE_COOKIES_TOOLTIP = "Cookies"
+        GameTooltip = {
+            SetOwner = function(self, owner, anchor)
+                self.owner = owner
+                self.anchor = anchor
+            end,
+            SetText = function(self, text, r, g, b, maybe_nil, wrap)
+                self.text = text
+                self.color = { r, g, b }
+                self.maybe_nil = maybe_nil
+                self.wrap = wrap
+            end,
+        }
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineTooltipAssignRoot" parent="UIParent">
+            <Button name="XmlInlineTooltipAssignButton" parent="XmlInlineTooltipAssignRoot">
+                <Scripts><OnEnter>
+                    GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT");
+                    GameTooltip:SetText(BROWSER_DELETE_COOKIES_TOOLTIP, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, nil, true);
+                    self:GetParent().isCounting = nil;
+                </OnEnter></Scripts>
+            </Button>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineTooltipAssignRoot.isCounting = true
+        XmlInlineTooltipAssignButton:GetScript("OnEnter")(XmlInlineTooltipAssignButton)
+    "#,
+    )
+    .unwrap();
+    let result: (String, String, bool, bool) = env
+        .eval(
+            r#"
+            return GameTooltip.anchor,
+                   GameTooltip.text,
+                   GameTooltip.wrap,
+                   XmlInlineTooltipAssignRoot.isCounting == nil
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_CURSOR_RIGHT");
+    assert_eq!(result.1, "Cookies");
+    assert!(result.2);
+    assert!(result.3);
+}
+
+#[test]
 fn test_create_frame_from_xml_inherited_append_number_method_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

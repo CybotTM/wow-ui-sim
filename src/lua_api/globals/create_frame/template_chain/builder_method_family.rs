@@ -144,6 +144,9 @@ fn build_ancestor_method_variants(
             self_method_name,
         )
         .map(Some),
+        FastHandlerRef::GrandparentFieldMethod { field, method_name } => {
+            build_grandparent_field_method_handler(state, field, method_name).map(Some)
+        }
         FastHandlerRef::GrandparentMethodWithNotSelfCheckedArg { method_name } => {
             build_grandparent_method_with_not_self_checked_arg_handler(state, method_name).map(Some)
         }
@@ -258,6 +261,36 @@ fn build_grandparent_method_with_not_self_checked_arg_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[method_name],
+    )
+}
+
+fn build_grandparent_field_method_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local field_name, method_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                local grandparent = parent and parent:GetParent()
+                local target = grandparent and grandparent[field_name]
+                if not target then
+                    return
+                end
+                return target[method_name](target, ...)
+            end
+        "#,
+        "template-grandparent-field-method",
+    )?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name],
     )
 }
 

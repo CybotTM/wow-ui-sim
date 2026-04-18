@@ -303,7 +303,7 @@ fn parse_inline_global_method_with_self_field_arg(stmt: &str) -> Option<(&str, &
     .then_some((target_path, method_name, field))
 }
 
-fn parse_global_tooltip_set_owner_then_set_text(
+pub(super) fn parse_global_tooltip_set_owner_then_set_text(
     stmt: &str,
 ) -> Option<(&str, &str, &str, &str, &str, &str, bool)> {
     let (first, second) = stmt.split_once(';')?;

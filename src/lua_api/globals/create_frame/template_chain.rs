@@ -266,6 +266,14 @@ enum FastHandlerRef<'a> {
     NoOp,
     Sequence2(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>)>),
     Sequence3(Box<(FastHandlerRef<'a>, FastHandlerRef<'a>, FastHandlerRef<'a>)>),
+    Sequence4(
+        Box<(
+            FastHandlerRef<'a>,
+            FastHandlerRef<'a>,
+            FastHandlerRef<'a>,
+            FastHandlerRef<'a>,
+        )>,
+    ),
     ConditionalGlobalNoArgs {
         function_name: &'a str,
         then_ref: Box<FastHandlerRef<'a>>,
@@ -340,6 +348,10 @@ enum FastHandlerRef<'a> {
         method_name: &'a str,
         self_method_name: &'a str,
     },
+    GrandparentFieldMethod {
+        field: &'a str,
+        method_name: &'a str,
+    },
     GrandparentMethod(&'a str),
     GlobalMethod {
         target_path: &'a str,
@@ -359,6 +371,14 @@ enum FastHandlerRef<'a> {
         target_path: &'a str,
         method_name: &'a str,
         arg_path: &'a str,
+    },
+    GlobalMethodWithFourGlobalArgs {
+        target_path: &'a str,
+        method_name: &'a str,
+        first_arg_path: &'a str,
+        second_arg_path: &'a str,
+        third_arg_path: &'a str,
+        fourth_arg_path: &'a str,
     },
     GlobalMethodWithSelfIdArg {
         target_path: &'a str,
@@ -458,6 +478,12 @@ enum FastHandlerRef<'a> {
         function_name: &'a str,
         first_arg_path: &'a str,
         second_arg_path: &'a str,
+    },
+    FunctionWithThreeGlobalArgs {
+        function_name: &'a str,
+        first_arg_path: &'a str,
+        second_arg_path: &'a str,
+        third_arg_path: &'a str,
     },
     FunctionWithGlobalAndSelfArg {
         function_name: &'a str,

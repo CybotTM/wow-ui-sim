@@ -10,7 +10,9 @@ mod parser_method_family;
 use self::parser_function_family::{
     parse_copy_club_ticket_to_clipboard_from_parent, parse_function_family,
 };
-use self::parser_global_family::parse_global_family;
+use self::parser_global_family::{
+    parse_global_family, parse_global_tooltip_set_owner_then_set_text,
+};
 use self::parser_method_family::parse_method_family;
 
 pub(super) fn parse_inline_fast_handler<'a>(
@@ -36,6 +38,7 @@ pub(super) fn parse_inline_fast_handler<'a>(
 
 fn parse_pre_split_special_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     parse_play_sound_then_copy_club_ticket(stmt)
+        .or_else(|| parse_global_tooltip_set_owner_then_parent_assign(stmt))
         .or_else(|| parse_parent_field_local_click_if_enabled(stmt))
 }
 
@@ -74,6 +77,29 @@ fn parse_parent_field_local_click_if_enabled<'a>(stmt: &'a str) -> Option<FastHa
     let expected = format!("{local_name}:GetScript(\"OnClick\")({local_name});");
     (body == expected || body == expected.trim_end_matches(';'))
         .then_some(FastHandlerRef::ParentFieldLocalClickIfEnabled { field })
+}
+
+fn parse_global_tooltip_set_owner_then_parent_assign<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    let (tooltip_stmt, assign_stmt) = stmt.rsplit_once(';')?;
+    let tooltip_stmt = tooltip_stmt.trim();
+    let assign_stmt = assign_stmt.trim();
+    let (target_path, anchor, text_path, red_path, green_path, blue_path, wrap) =
+        parse_global_tooltip_set_owner_then_set_text(tooltip_stmt)?;
+    let FastHandlerRef::AssignParentField { field, value } = parse_inline_parent_assignment(assign_stmt)? else {
+        return None;
+    };
+    Some(FastHandlerRef::Sequence2(Box::new((
+        FastHandlerRef::GlobalTooltipSetOwnerThenSetText {
+            target_path,
+            anchor,
+            text_path,
+            red_path,
+            green_path,
+            blue_path,
+            wrap,
+        },
+        FastHandlerRef::AssignParentField { field, value },
+    ))))
 }
 
 fn parse_inline_single_fast_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
@@ -121,6 +147,12 @@ fn parse_inline_sequence(stmt: &str) -> Option<FastHandlerRef<'_>> {
             parse_inline_single_fast_handler(first)?,
             parse_inline_single_fast_handler(second)?,
             parse_inline_single_fast_handler(third)?,
+        )))),
+        [first, second, third, fourth] => Some(FastHandlerRef::Sequence4(Box::new((
+            parse_inline_single_fast_handler(first)?,
+            parse_inline_single_fast_handler(second)?,
+            parse_inline_single_fast_handler(third)?,
+            parse_inline_single_fast_handler(fourth)?,
         )))),
         _ => None,
     }
