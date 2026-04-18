@@ -34,7 +34,8 @@ fn global_write_and_read_round_trip() {
     // same value regardless of which one allocated the key first.
     let env = WowLuaEnv::new().expect("fresh wow lua env");
     env.exec("_G.ParityTestGlobalA = 1234").expect("set global");
-    env.exec("_G.ParityTestGlobalB = 'hello'").expect("set global");
+    env.exec("_G.ParityTestGlobalB = 'hello'")
+        .expect("set global");
     let a: f64 = env.eval("return ParityTestGlobalA").expect("read A");
     let b: String = env.eval("return ParityTestGlobalB").expect("read B");
     assert_eq!(a, 1234.0);
