@@ -13,9 +13,10 @@ mod env_rilua;
 pub(crate) mod frame;
 pub(crate) mod frame_substates;
 pub(crate) mod game_data;
-pub mod globals;
-#[allow(dead_code)] // Track 3 sub-item 2: populator + read path; compiler fast path lands in sub-items 3-5
+#[allow(dead_code)]
+// Track 3 sub-item 2: populator + read path; compiler fast path lands in sub-items 3-5
 pub(crate) mod global_slots;
+pub mod globals;
 #[allow(dead_code)] // Track 1 sub-item 1: pure data, consumers land in sub-items 2-4
 pub(crate) mod hot_literals;
 mod key_dispatch;
