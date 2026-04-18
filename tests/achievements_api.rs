@@ -83,20 +83,26 @@ fn test_achievement_info_returns_id() {
 // ============================================================================
 
 #[test]
-fn test_get_category_list_returns_nine_categories() {
+fn test_get_category_list_returns_expanded_blizzard_category_set() {
     let env = env();
-    let count: i32 = env.eval("return #GetCategoryList()").unwrap();
-    assert_eq!(count, 9);
+    let (count, fourth, penultimate, last): (i32, i32, i32, i32) = env
+        .eval("local ids = GetCategoryList(); return #ids, ids[4], ids[#ids - 1], ids[#ids]")
+        .unwrap();
+    assert_eq!(count, 13);
+    assert_eq!(fourth, 15522);
+    assert_eq!(penultimate, 15246);
+    assert_eq!(last, 81);
 }
 
 #[test]
 fn test_get_category_info_general() {
     let env = env();
-    let (name, parent): (String, i32) = env
-        .eval("local n, p = GetCategoryInfo(92); return n, p")
+    let (name, parent, flags): (String, i32, i32) = env
+        .eval("local n, p, f = GetCategoryInfo(92); return n, p, f")
         .unwrap();
     assert_eq!(name, "General");
     assert_eq!(parent, -1);
+    assert_eq!(flags, 0);
 }
 
 #[test]
@@ -123,6 +129,49 @@ fn test_get_category_num_achievements_returns_three_values() {
     assert_eq!(total, 6); // 6 General achievements (Level 10-80)
     assert_eq!(completed, 0);
     assert_eq!(incomplete, 6);
+}
+
+#[test]
+fn test_get_guild_category_list_matches_blizzard_shape() {
+    let env = env();
+    let (count, first, last): (i32, i32, i32) = env
+        .eval("local ids = GetGuildCategoryList(); return #ids, ids[1], ids[#ids]")
+        .unwrap();
+    assert_eq!(count, 8);
+    assert_eq!(first, 15076);
+    assert_eq!(last, 15093);
+}
+
+#[test]
+fn test_get_statistics_category_list_includes_root_and_children() {
+    let env = env();
+    let (count, first, second): (i32, i32, i32) = env
+        .eval("local ids = GetStatisticsCategoryList(); return #ids, ids[1], ids[2]")
+        .unwrap();
+    assert_eq!(count, 5);
+    assert_eq!(first, 130);
+    assert_eq!(second, 1);
+}
+
+#[test]
+fn test_category_info_reports_parent_for_nested_category() {
+    let env = env();
+    let (name, parent, flags): (String, i32, i32) = env
+        .eval("local n, p, f = GetCategoryInfo(202); return n, p, f")
+        .unwrap();
+    assert_eq!(name, "Exalted Reputations");
+    assert_eq!(parent, 201);
+    assert_eq!(flags, 0);
+}
+
+#[test]
+fn test_category_num_achievements_counts_nested_children() {
+    let env = env();
+    let (total, completed, incomplete): (i32, i32, i32) =
+        env.eval("return GetCategoryNumAchievements(201)").unwrap();
+    assert_eq!(total, 2);
+    assert_eq!(completed, 0);
+    assert_eq!(incomplete, 2);
 }
 
 #[test]
@@ -323,12 +372,36 @@ fn test_achievement_num_criteria() {
 }
 
 #[test]
+fn test_achievement_num_criteria_returns_zero_for_seeded_rows_without_criteria() {
+    let env = env();
+    let count: i32 = env.eval("return GetAchievementNumCriteria(6)").unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
 fn test_achievement_criteria_info_returns_name() {
     let env = env();
     let name: String = env
         .eval("return GetAchievementCriteriaInfo(948, 1)")
         .unwrap();
     assert_eq!(name, "Exalted with Stormwind");
+}
+
+#[test]
+fn test_achievement_criteria_info_defaults_progress_to_zero_before_earning() {
+    let env = env();
+    let (name, completed, qty, req): (String, bool, i32, i32) = env
+        .eval(
+            r#"
+            local n, _, c, q, r = GetAchievementCriteriaInfo(948, 2)
+            return n, c, q, r
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Exalted with Ironforge");
+    assert!(!completed);
+    assert_eq!(qty, 0);
+    assert_eq!(req, 1);
 }
 
 #[test]
@@ -354,6 +427,15 @@ fn test_achievement_criteria_nil_for_invalid_index() {
     let env = env();
     let is_nil: bool = env
         .eval("return GetAchievementCriteriaInfo(6, 99) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn test_achievement_criteria_nil_for_unknown_achievement() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return GetAchievementCriteriaInfo(999999, 1) == nil")
         .unwrap();
     assert!(is_nil);
 }

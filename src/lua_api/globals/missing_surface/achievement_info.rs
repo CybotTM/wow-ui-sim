@@ -14,6 +14,7 @@ use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string};
 use crate::lua_api::state::AchievementInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
@@ -26,17 +27,48 @@ const GENERAL_ACHIEVEMENT_IDS: &[i32] = &[6, 7, 8, 9, 10, 11];
 const EXPLORATION_ACHIEVEMENT_IDS: &[i32] = &[42, 776];
 const PVP_ACHIEVEMENT_IDS: &[i32] = &[513, 558];
 const REPUTATION_ACHIEVEMENT_IDS: &[i32] = &[948];
+const REPUTATION_EXALTED_ACHIEVEMENT_IDS: &[i32] = &[1017];
 
-const ACHIEVEMENT_CATEGORIES: &[AchievementCategory] = &[
-    AchievementCategory::new(92, "General", -1, GENERAL_ACHIEVEMENT_IDS),
-    AchievementCategory::new(96, "Quests", -1, &[]),
-    AchievementCategory::new(97, "Exploration", -1, EXPLORATION_ACHIEVEMENT_IDS),
-    AchievementCategory::new(95, "Player vs. Player", -1, PVP_ACHIEVEMENT_IDS),
-    AchievementCategory::new(168, "Dungeons & Raids", -1, &[]),
-    AchievementCategory::new(169, "Professions", -1, &[]),
-    AchievementCategory::new(201, "Reputation", -1, REPUTATION_ACHIEVEMENT_IDS),
-    AchievementCategory::new(155, "World Events", -1, &[]),
-    AchievementCategory::new(81, "Feats of Strength", -1, &[]),
+const ACHIEVEMENT_CATEGORIES: &[CategoryBucket] = &[
+    CategoryBucket::new(92, "General", -1, 0, GENERAL_ACHIEVEMENT_IDS),
+    CategoryBucket::new(96, "Quests", -1, 0, &[]),
+    CategoryBucket::new(97, "Exploration", -1, 0, EXPLORATION_ACHIEVEMENT_IDS),
+    CategoryBucket::new(15522, "Character", -1, 0, &[]),
+    CategoryBucket::new(95, "Player vs. Player", -1, 0, PVP_ACHIEVEMENT_IDS),
+    CategoryBucket::new(168, "Dungeons & Raids", -1, 0, &[]),
+    CategoryBucket::new(169, "Professions", -1, 0, &[]),
+    CategoryBucket::new(201, "Reputation", -1, 0, REPUTATION_ACHIEVEMENT_IDS),
+    CategoryBucket::new(
+        202,
+        "Exalted Reputations",
+        201,
+        0,
+        REPUTATION_EXALTED_ACHIEVEMENT_IDS,
+    ),
+    CategoryBucket::new(155, "World Events", -1, 0, &[]),
+    CategoryBucket::new(15117, "Expansion Features", -1, 0, &[]),
+    CategoryBucket::new(15246, "Collections", -1, 0, &[]),
+    CategoryBucket::new(81, "Feats of Strength", -1, 0, &[]),
+];
+
+const GUILD_CATEGORY_ID: i32 = 15076;
+const GUILD_CATEGORIES: &[CategoryBucket] = &[
+    CategoryBucket::new(15076, "Guild", -1, 0, &[]),
+    CategoryBucket::new(15088, "Guild Summary", GUILD_CATEGORY_ID, 0, &[]),
+    CategoryBucket::new(15077, "General", GUILD_CATEGORY_ID, 0, &[]),
+    CategoryBucket::new(15078, "Quests", GUILD_CATEGORY_ID, 0, &[]),
+    CategoryBucket::new(15079, "Player vs. Player", GUILD_CATEGORY_ID, 0, &[]),
+    CategoryBucket::new(15080, "Dungeons & Raids", GUILD_CATEGORY_ID, 0, &[]),
+    CategoryBucket::new(15089, "Professions", GUILD_CATEGORY_ID, 0, &[]),
+    CategoryBucket::new(15093, "Guild Feats of Strength", GUILD_CATEGORY_ID, 0, &[]),
+];
+
+const STATISTICS_CATEGORIES: &[CategoryBucket] = &[
+    CategoryBucket::new(130, "Statistics", -1, 0, &[]),
+    CategoryBucket::new(1, "General", 130, 0, &[]),
+    CategoryBucket::new(122, "Deaths", 130, 0, &[]),
+    CategoryBucket::new(124, "Player vs. Player", 130, 0, &[]),
+    CategoryBucket::new(128, "Wealth", 130, 0, &[]),
 ];
 
 const AMBASSADOR_CRITERIA: &[AchievementCriterion] = &[
@@ -51,24 +83,34 @@ const VETERAN_CRITERIA: &[AchievementCriterion] =
     &[AchievementCriterion::new("Honorable kills", 100)];
 
 #[derive(Clone, Copy)]
-struct AchievementCategory {
+enum CategoryListKind {
+    Achievement,
+    Guild,
+    Statistics,
+}
+
+#[derive(Clone, Copy)]
+struct CategoryBucket {
     category_id: i32,
     name: &'static str,
     parent_id: i32,
+    flags: i32,
     achievement_ids: &'static [i32],
 }
 
-impl AchievementCategory {
+impl CategoryBucket {
     const fn new(
         category_id: i32,
         name: &'static str,
         parent_id: i32,
+        flags: i32,
         achievement_ids: &'static [i32],
     ) -> Self {
         Self {
             category_id,
             name,
             parent_id,
+            flags,
             achievement_ids,
         }
     }
@@ -147,7 +189,32 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         "GetAchievementInfo",
         get_achievement_info_global,
     )?;
+    register_category_globals(state, globals)?;
+    register_criteria_globals(state, globals)?;
+    register_traversal_globals(state, globals)?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetAchievementGuildRep",
+        get_achievement_guild_rep,
+    )?;
+    Ok(())
+}
+
+fn register_category_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, globals, "GetCategoryList", get_category_list)?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetGuildCategoryList",
+        get_guild_category_list,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetStatisticsCategoryList",
+        get_statistics_category_list,
+    )?;
     table_set_rust_fn_static(state, globals, "GetCategoryInfo", get_category_info)?;
     table_set_rust_fn_static(
         state,
@@ -161,6 +228,10 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         "GetCategoryNumAchievements",
         get_category_num_achievements,
     )?;
+    Ok(())
+}
+
+fn register_criteria_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         globals,
@@ -173,6 +244,10 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         "GetAchievementCriteriaInfo",
         get_achievement_criteria_info,
     )?;
+    Ok(())
+}
+
+fn register_traversal_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         globals,
@@ -186,12 +261,6 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         "GetLatestCompletedAchievements",
         get_latest_completed_achievements,
     )?;
-    table_set_rust_fn_static(
-        state,
-        globals,
-        "GetAchievementGuildRep",
-        get_achievement_guild_rep,
-    )?;
     Ok(())
 }
 
@@ -200,17 +269,17 @@ fn get_achievement_info_global(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_category_list(state: &mut LuaState) -> LuaResult<u32> {
-    let table_ref = state.gc.alloc_table(Table::new());
-    let table = Val::Table(table_ref);
-    for (index, category) in ACHIEVEMENT_CATEGORIES.iter().enumerate() {
-        set_table_array(
-            state,
-            table,
-            (index + 1) as i64,
-            Val::Num(category.category_id as f64),
-        );
-    }
-    state.push(table);
+    push_category_list(state, CategoryListKind::Achievement);
+    Ok(1)
+}
+
+fn get_guild_category_list(state: &mut LuaState) -> LuaResult<u32> {
+    push_category_list(state, CategoryListKind::Guild);
+    Ok(1)
+}
+
+fn get_statistics_category_list(state: &mut LuaState) -> LuaResult<u32> {
+    push_category_list(state, CategoryListKind::Statistics);
     Ok(1)
 }
 
@@ -222,7 +291,8 @@ fn get_category_info(state: &mut LuaState) -> LuaResult<u32> {
     let name = create_string(state, category.name);
     state.push(name);
     state.push(Val::Num(category.parent_id as f64));
-    Ok(2)
+    state.push(Val::Num(category.flags as f64));
+    Ok(3)
 }
 
 fn get_achievement_category(state: &mut LuaState) -> LuaResult<u32> {
@@ -240,8 +310,9 @@ fn get_category_num_achievements(state: &mut LuaState) -> LuaResult<u32> {
         push_category_counts(state, 0, 0);
         return Ok(3);
     };
-    let completed = count_completed_achievements(state, category.achievement_ids)?;
-    push_category_counts(state, category.achievement_ids.len() as i32, completed);
+    let achievement_ids = collect_category_achievement_ids(category.category_id);
+    let completed = count_completed_achievements(state, &achievement_ids)?;
+    push_category_counts(state, achievement_ids.len() as i32, completed);
     Ok(3)
 }
 
@@ -337,9 +408,33 @@ fn push_achievement_info_for_id(state: &mut LuaState, achievement_id: i32) -> Lu
     Ok(15)
 }
 
-fn find_category(category_id: i32) -> Option<&'static AchievementCategory> {
+fn push_category_list(state: &mut LuaState, kind: CategoryListKind) {
+    let table_ref = state.gc.alloc_table(Table::new());
+    let table = Val::Table(table_ref);
+    for (index, category) in categories_for(kind).iter().enumerate() {
+        set_table_array(
+            state,
+            table,
+            (index + 1) as i64,
+            Val::Num(category.category_id as f64),
+        );
+    }
+    state.push(table);
+}
+
+fn categories_for(kind: CategoryListKind) -> &'static [CategoryBucket] {
+    match kind {
+        CategoryListKind::Achievement => ACHIEVEMENT_CATEGORIES,
+        CategoryListKind::Guild => GUILD_CATEGORIES,
+        CategoryListKind::Statistics => STATISTICS_CATEGORIES,
+    }
+}
+
+fn find_category(category_id: i32) -> Option<&'static CategoryBucket> {
     ACHIEVEMENT_CATEGORIES
         .iter()
+        .chain(GUILD_CATEGORIES.iter())
+        .chain(STATISTICS_CATEGORIES.iter())
         .find(|category| category.category_id == category_id)
 }
 
@@ -347,7 +442,7 @@ fn category_id_for_achievement(achievement_id: i32) -> Option<i32> {
     category_for_achievement(achievement_id).map(|category| category.category_id)
 }
 
-fn category_for_achievement(achievement_id: i32) -> Option<&'static AchievementCategory> {
+fn category_for_achievement(achievement_id: i32) -> Option<&'static CategoryBucket> {
     ACHIEVEMENT_CATEGORIES
         .iter()
         .find(|category| category.achievement_ids.contains(&achievement_id))
@@ -381,6 +476,25 @@ fn count_completed_achievements(state: &mut LuaState, achievement_ids: &[i32]) -
         .iter()
         .filter(|achievement_id| sim.world.earned_achievements.contains(achievement_id))
         .count() as i32)
+}
+
+fn collect_category_achievement_ids(category_id: i32) -> Vec<i32> {
+    let mut achievement_ids = Vec::new();
+    append_category_achievement_ids(category_id, &mut achievement_ids);
+    achievement_ids
+}
+
+fn append_category_achievement_ids(category_id: i32, achievement_ids: &mut Vec<i32>) {
+    let Some(category) = find_category(category_id) else {
+        return;
+    };
+    achievement_ids.extend(category.achievement_ids.iter().copied());
+    for child in ACHIEVEMENT_CATEGORIES
+        .iter()
+        .filter(|child| child.parent_id == category_id)
+    {
+        append_category_achievement_ids(child.category_id, achievement_ids);
+    }
 }
 
 fn push_category_counts(state: &mut LuaState, total: i32, completed: i32) {

@@ -5,6 +5,7 @@
 //! point in admin.rs imports these as pub(super) and weaves
 //! them into the A_Admin TableBuilder chain.
 
+use crate::event::{Event, EventArg};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
 };
@@ -153,6 +154,12 @@ pub(super) fn earn_achievement(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn fire_achievement_earned(state: &mut LuaState, achievement_id: i32) {
+    if let Ok(mut sim) = borrow_state_mut(state) {
+        sim.events.push(Event {
+            name: "ACHIEVEMENT_EARNED".to_string(),
+            args: vec![EventArg::Number(achievement_id as f64)],
+        });
+    }
     let listeners = borrow_state(state)
         .map(|sim| sim.widgets.get_event_listeners("ACHIEVEMENT_EARNED"))
         .unwrap_or_default();
