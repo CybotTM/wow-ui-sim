@@ -767,3 +767,56 @@ fn test_cross_frame_show_recursion_does_not_overflow() {
     .unwrap();
     // If we get here without a stack overflow, the guard worked.
 }
+
+#[test]
+fn test_child_onshow_fires_when_parent_becomes_visible() {
+    let env = WowLuaEnv::new().unwrap();
+    let fired: i32 = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "ChildOnShowParent", UIParent)
+            local child = CreateFrame("Frame", "ChildOnShowChild", parent)
+            parent:Hide()
+            child:Hide()
+
+            local fired = 0
+            child:SetScript("OnShow", function()
+                fired = fired + 1
+            end)
+
+            child:Show()
+            parent:Show()
+            return fired
+        "#,
+        )
+        .unwrap();
+    assert_eq!(
+        fired, 1,
+        "child OnShow should fire when a hidden parent becomes visible"
+    );
+}
+
+#[test]
+fn test_child_onhide_fires_when_parent_becomes_hidden() {
+    let env = WowLuaEnv::new().unwrap();
+    let fired: i32 = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "ChildOnHideParent", UIParent)
+            local child = CreateFrame("Frame", "ChildOnHideChild", parent)
+
+            local fired = 0
+            child:SetScript("OnHide", function()
+                fired = fired + 1
+            end)
+
+            parent:Hide()
+            return fired
+        "#,
+        )
+        .unwrap();
+    assert_eq!(
+        fired, 1,
+        "child OnHide should fire when a visible parent becomes hidden"
+    );
+}

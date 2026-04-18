@@ -6,21 +6,20 @@ use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_api::script_helpers::get_script as get_rilua_script;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+use std::collections::HashSet;
 
 pub fn show(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let changed = set_frame_visible(state, id, true)?;
-    if changed {
-        fire_visibility_handler(state, id, "OnShow");
+    for frame_id in update_frame_visibility(state, id, true)? {
+        fire_visibility_handler(state, frame_id, "OnShow");
     }
     Ok(0)
 }
 
 pub fn hide(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    let changed = set_frame_visible(state, id, false)?;
-    if changed {
-        fire_visibility_handler(state, id, "OnHide");
+    for frame_id in update_frame_visibility(state, id, false)? {
+        fire_visibility_handler(state, frame_id, "OnHide");
     }
     Ok(0)
 }
@@ -28,23 +27,59 @@ pub fn hide(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_shown(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let shown = arg_bool(state, 2);
-    let changed = set_frame_visible(state, id, shown)?;
-    if changed {
-        let handler_name = if shown { "OnShow" } else { "OnHide" };
-        fire_visibility_handler(state, id, handler_name);
+    let handler_name = if shown { "OnShow" } else { "OnHide" };
+    for frame_id in update_frame_visibility(state, id, shown)? {
+        fire_visibility_handler(state, frame_id, handler_name);
     }
     Ok(0)
 }
 
-fn set_frame_visible(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<bool> {
+fn update_frame_visibility(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<Vec<u64>> {
     let mut sim = borrow_state_mut(state)?;
-    let was_visible = sim
-        .widgets
-        .get(id)
-        .map(|frame| frame.visible)
-        .unwrap_or(false);
+    let subtree_ids = collect_subtree_ids(&sim, id);
+    let previously_visible = visible_subtree_ids(&sim, &subtree_ids);
     sim.set_frame_visible(id, shown);
-    Ok(was_visible != shown)
+    let currently_visible = visible_subtree_ids(&sim, &subtree_ids);
+    drop(sim);
+
+    let transitioned = if shown {
+        subtree_ids
+            .into_iter()
+            .filter(|frame_id| {
+                currently_visible.contains(frame_id) && !previously_visible.contains(frame_id)
+            })
+            .collect()
+    } else {
+        subtree_ids
+            .into_iter()
+            .rev()
+            .filter(|frame_id| {
+                previously_visible.contains(frame_id) && !currently_visible.contains(frame_id)
+            })
+            .collect()
+    };
+    Ok(transitioned)
+}
+
+fn collect_subtree_ids(state: &crate::lua_api::SimState, root_id: u64) -> Vec<u64> {
+    let mut ids = Vec::new();
+    let mut stack = vec![root_id];
+    while let Some(frame_id) = stack.pop() {
+        ids.push(frame_id);
+        if let Some(frame) = state.widgets.get(frame_id) {
+            for child_id in frame.children.iter().rev().copied() {
+                stack.push(child_id);
+            }
+        }
+    }
+    ids
+}
+
+fn visible_subtree_ids(state: &crate::lua_api::SimState, ids: &[u64]) -> HashSet<u64> {
+    ids.iter()
+        .copied()
+        .filter(|frame_id| state.widgets.is_ancestor_visible(*frame_id))
+        .collect()
 }
 
 fn fire_visibility_handler(state: &mut LuaState, frame_id: u64, handler_name: &str) {
