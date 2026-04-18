@@ -1,7 +1,7 @@
 use super::{FastHandlerRef, FastLiteralValue, FastScriptInstall};
 #[path = "builder_function_family/mod.rs"]
 mod builder_function_family;
-#[path = "builder_global_family.rs"]
+#[path = "builder_global_family/mod.rs"]
 mod builder_global_family;
 #[path = "builder_method_family.rs"]
 mod builder_method_family;
