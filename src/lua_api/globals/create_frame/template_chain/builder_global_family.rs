@@ -1020,6 +1020,35 @@ fn build_toggle_global_visibility_handler(
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
 }
 
+const TEMPLATE_GLOBAL_TOOLTIP_SET_OWNER_THEN_SET_TEXT: &str = r#"
+    local target_ref, _ignored_method_name, anchor, text_path, red_path, green_path, blue_path, wrap = ...
+    local function resolve_global(path)
+        local value = _G
+        for segment in string.gmatch(path, "[^%.]+") do
+            value = value and value[segment]
+        end
+        return value
+    end
+    return function(self, ...)
+        local target = target_ref
+        if type(target) == "string" then
+            target = resolve_global(target)
+        end
+        if not target then
+            return
+        end
+        target:SetOwner(self, anchor)
+        return target:SetText(
+            resolve_global(text_path),
+            resolve_global(red_path),
+            resolve_global(green_path),
+            resolve_global(blue_path),
+            nil,
+            wrap
+        )
+    end
+"#;
+
 fn build_global_tooltip_set_owner_then_set_text_handler(
     state: &mut LuaState,
     target_path: &str,
@@ -1035,47 +1064,14 @@ fn build_global_tooltip_set_owner_then_set_text_handler(
     let red_path = create_string(state, red_path);
     let green_path = create_string(state, green_path);
     let blue_path = create_string(state, blue_path);
+    let args = [anchor, text_path, red_path, green_path, blue_path, Val::Bool(wrap)];
     call_global_method_builder(
         state,
         target_path,
         "SetText",
-        r#"
-            local target_ref, _ignored_method_name, anchor, text_path, red_path, green_path, blue_path, wrap = ...
-            local function resolve_global(path)
-                local value = _G
-                for segment in string.gmatch(path, "[^%.]+") do
-                    value = value and value[segment]
-                end
-                return value
-            end
-            return function(self, ...)
-                local target = target_ref
-                if type(target) == "string" then
-                    target = resolve_global(target)
-                end
-                if not target then
-                    return
-                end
-                target:SetOwner(self, anchor)
-                return target:SetText(
-                    resolve_global(text_path),
-                    resolve_global(red_path),
-                    resolve_global(green_path),
-                    resolve_global(blue_path),
-                    nil,
-                    wrap
-                )
-            end
-        "#,
+        TEMPLATE_GLOBAL_TOOLTIP_SET_OWNER_THEN_SET_TEXT,
         "template-global-tooltip-settext-handler",
-        &[
-            anchor,
-            text_path,
-            red_path,
-            green_path,
-            blue_path,
-            Val::Bool(wrap),
-        ],
+        &args,
     )
 }
 
