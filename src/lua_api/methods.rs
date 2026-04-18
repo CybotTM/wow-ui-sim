@@ -223,12 +223,29 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
     cache
 }
 
+/// Fetch the pre-interned `__rilua_frame_mt` registry key via the hot-literal
+/// registry installed at bootstrap. Falls back to `intern_string_static` if
+/// the registry hasn't been installed yet (e.g. tests that skip the full
+/// bootstrap pass) — the static cache still short-circuits on subsequent
+/// calls, so correctness is identical either way.
+fn frame_mt_registry_key(state: &mut LuaState) -> GcRef<rilua::vm::string::LuaString> {
+    use crate::lua_api::hot_literals::metatable_idx;
+    let cached = state
+        .app_data::<WowLuaAppData>()
+        .and_then(|app| app.hot_literals.as_ref())
+        .map(|handles| handles.metatable_key(metatable_idx::RILUA_FRAME_MT));
+    if let Some(key) = cached {
+        return key;
+    }
+    state.gc.intern_string_static(b"__rilua_frame_mt")
+}
+
 /// Attach the shared frame metatable to a table (if registered).
 ///
 /// Methods are accessed via `__index` in the metatable, not copied directly.
 /// This avoids ~636 raw_set calls per frame and reduces memory/GC pressure.
 fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
-    let mt_key = state.gc.intern_string_static(b"__rilua_frame_mt");
+    let mt_key = frame_mt_registry_key(state);
     let mt_val = state
         .gc
         .tables
