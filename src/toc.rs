@@ -116,6 +116,19 @@ fn parse_load_into_environment(line: &str) -> Option<bool> {
     }
 }
 
+fn split_metadata_list(value: &str) -> Vec<String> {
+    if value.contains(',') {
+        value
+            .split(',')
+            .map(str::trim)
+            .filter(|item| !item.is_empty())
+            .map(ToString::to_string)
+            .collect()
+    } else {
+        value.split_whitespace().map(ToString::to_string).collect()
+    }
+}
+
 /// Process a non-metadata, non-comment TOC line as a file path entry.
 fn push_file_entry(
     files: &mut Vec<PathBuf>,
@@ -199,12 +212,7 @@ impl TocFile {
             .get("RequiredDep")
             .or_else(|| self.metadata.get("Dependencies"))
             .or_else(|| self.metadata.get("RequiredDeps"))
-            .map(|s| {
-                s.split(',')
-                    .map(|d| d.trim().to_string())
-                    .filter(|d| !d.is_empty())
-                    .collect()
-            })
+            .map(|s| split_metadata_list(s))
             .unwrap_or_default()
     }
 
@@ -213,12 +221,7 @@ impl TocFile {
     pub fn load_with(&self) -> Vec<String> {
         self.metadata
             .get("LoadWith")
-            .map(|s| {
-                s.split(',')
-                    .map(|d| d.trim().to_string())
-                    .filter(|d| !d.is_empty())
-                    .collect()
-            })
+            .map(|s| split_metadata_list(s))
             .unwrap_or_default()
     }
 
@@ -226,12 +229,7 @@ impl TocFile {
     pub fn optional_deps(&self) -> Vec<String> {
         self.metadata
             .get("OptionalDeps")
-            .map(|s| {
-                s.split(',')
-                    .map(|d| d.trim().to_string())
-                    .filter(|d| !d.is_empty())
-                    .collect()
-            })
+            .map(|s| split_metadata_list(s))
             .unwrap_or_default()
     }
 
@@ -411,6 +409,25 @@ UI/Options.xml
         assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
         assert_eq!(toc.files[1], PathBuf::from("UI/Main.lua"));
         assert_eq!(toc.files[2], PathBuf::from("UI/Options.xml"));
+    }
+
+    #[test]
+    fn test_parse_space_separated_dependencies() {
+        let contents = r#"
+## Title: Blizzard_BattlefieldMap
+## Dependencies: Blizzard_MapCanvas Blizzard_SharedMapDataProviders Blizzard_ObjectiveTracker
+BattlefieldMap.lua
+"#;
+        let toc = TocFile::parse(Path::new("/addons/Blizzard_BattlefieldMap"), contents);
+
+        assert_eq!(
+            toc.dependencies(),
+            vec![
+                "Blizzard_MapCanvas",
+                "Blizzard_SharedMapDataProviders",
+                "Blizzard_ObjectiveTracker",
+            ]
+        );
     }
 
     #[test]
