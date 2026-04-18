@@ -1,7 +1,7 @@
 //! C_ModelInfo, C_LFGInfo, C_WowTokenSecure stubs and wowtoken simulation.
 
 use crate::lua_api::methods::{
-    borrow_state, call_function_state, create_string, create_table, frame_ref, val_to_string,
+    call_function_state, create_string, create_table, frame_ref, val_to_string,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_bridge::{stack_val, table_set_rust_fn};

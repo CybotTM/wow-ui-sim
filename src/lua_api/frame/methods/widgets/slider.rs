@@ -1,6 +1,6 @@
 //! Slider, CheckButton, shared value (Slider+StatusBar), and ScrollFrame methods.
 
-use super::shared::{opt_bool, opt_string, val_to_bool, val_to_f64};
+use super::shared::{opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
     sync_child_to_rilua,

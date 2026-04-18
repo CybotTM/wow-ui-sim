@@ -2,7 +2,7 @@
 
 use super::shared::{animation_group_id_for_frame, opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref,
+    borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;

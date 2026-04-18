@@ -493,8 +493,7 @@ pub(super) fn create_animation_group(state: &mut LuaState) -> LuaResult<u32> {
 
 /// CreateAnimation([type [, name]]) -> animation
 pub(super) fn create_animation(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::animation::{AnimState, AnimationType};
-    use crate::widget::{Frame, WidgetType};
+    use crate::lua_api::animation::AnimationType;
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let anim_type_str = super::shared::opt_string(state, 2);
     let anim_name_raw: Option<String> = Option::<String>::from_stack(state, 3)?;

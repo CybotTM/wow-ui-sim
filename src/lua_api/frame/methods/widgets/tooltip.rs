@@ -1,6 +1,6 @@
 //! GameTooltip widget methods.
 
-use super::shared::{opt_bool, opt_f32, opt_string, val_to_bool, val_to_f64};
+use super::shared::{opt_f32, opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     frame_ref, table_get, val_to_string,

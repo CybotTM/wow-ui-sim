@@ -1,4 +1,4 @@
-use crate::lua_api::methods::{create_table, table_get, table_set};
+use crate::lua_api::methods::{create_table, table_get};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 

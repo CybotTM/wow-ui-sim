@@ -17,7 +17,6 @@
 //! Registered from `register_tail_globals` after `missing_surface`.
 
 use crate::lua_api::methods::{borrow_state_mut, create_string, create_table};
-use crate::lua_api::state::ChatWindow;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};

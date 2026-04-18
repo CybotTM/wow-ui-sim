@@ -73,7 +73,6 @@ pub(super) fn get_children(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn get_num_regions(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::widget::WidgetType;
     let id = frame_id_from_stack(state, 1)?;
     let count = {
         let sim = borrow_state(state)?;

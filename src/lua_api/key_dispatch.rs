@@ -19,7 +19,7 @@ use std::ops::Range;
 use crate::Result;
 use crate::lua_api::methods::{call_function, create_string, frame_ref};
 use crate::lua_api::script_helpers::get_script;
-use rilua::{LuaApi, LuaApiMut, Val};
+use rilua::{LuaApiMut, Val};
 
 use super::env::WowLuaEnv;
 

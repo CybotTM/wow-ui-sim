@@ -4,8 +4,6 @@
 //! stays small — see `shared_bootstrap.lua` for the pre-addon stubs and
 //! `runtime_surface_bootstrap.lua` for the large post-enum runtime surface.
 
-use rilua::LuaApiMut;
-
 const SHARED_BOOTSTRAP_LUA: &str = include_str!("shared_bootstrap.lua");
 const RUNTIME_SURFACE_BOOTSTRAP_LUA: &str = include_str!("runtime_surface_bootstrap.lua");
 

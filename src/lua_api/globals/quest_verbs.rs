@@ -26,7 +26,7 @@
 
 use crate::event::Event;
 use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_bridge::{FromStack, stack_val};
+use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 

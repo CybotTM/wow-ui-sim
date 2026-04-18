@@ -2,7 +2,6 @@
 
 use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
 
 use super::{
     is_nil_namespace, set_namespace_fn, stub_empty_table, stub_false, stub_nil, stub_zero,
