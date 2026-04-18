@@ -336,9 +336,7 @@ impl<'a> LoaderEnv<'a> {
     /// `attempt to index field 'layoutParent'`. Guarding the methods
     /// post-load lets those OnHide passes succeed silently.
     pub fn patch_managed_frame_mixin(&self) -> crate::Result<()> {
-        let mut lua = self.lua.borrow_mut();
-        lua.exec(MANAGED_FRAME_MIXIN_PATCH_LUA)?;
-        Ok(())
+        self.exec(MANAGED_FRAME_MIXIN_PATCH_LUA)
     }
 
     /// Patch `UnitPositionFrameMixin:OnHide` to no-op when `self.dataProvider`
@@ -347,9 +345,7 @@ impl<'a> LoaderEnv<'a> {
     /// `attempt to index field 'dataProvider' (a nil value)` at
     /// GroupMembersDataProvider.lua:90.
     pub fn patch_unit_position_frame_mixin(&self) -> crate::Result<()> {
-        let mut lua = self.lua.borrow_mut();
-        lua.exec(UNIT_POSITION_FRAME_MIXIN_PATCH_LUA)?;
-        Ok(())
+        self.exec(UNIT_POSITION_FRAME_MIXIN_PATCH_LUA)
     }
 
     /// If `Blizzard_Menu` left `Menu.CreateRootMenuDescription` undefined
@@ -358,9 +354,7 @@ impl<'a> LoaderEnv<'a> {
     /// downstream `MenuUtil.CreateRootMenuDescription(...)` doesn't blow
     /// up every dropdown-bearing frame.
     pub fn ensure_menu_descriptor_fallback(&self) -> crate::Result<()> {
-        let mut lua = self.lua.borrow_mut();
-        lua.exec(MENU_DESCRIPTOR_FALLBACK_LUA)?;
-        Ok(())
+        self.exec(MENU_DESCRIPTOR_FALLBACK_LUA)
     }
 
     /// Patch `QuestLogMixin:GetCurrentMapID` to guard against nil parent.
@@ -368,9 +362,7 @@ impl<'a> LoaderEnv<'a> {
     /// parented to WorldMapFrame, causing `self:GetParent():IsShown()`
     /// at QuestMapFrame.lua:279 to error.
     pub fn patch_quest_log_mixin(&self) -> crate::Result<()> {
-        let mut lua = self.lua.borrow_mut();
-        lua.exec(QUEST_LOG_MIXIN_PATCH_LUA)?;
-        Ok(())
+        self.exec(QUEST_LOG_MIXIN_PATCH_LUA)
     }
 
     pub fn create_addon_table(&self) -> Result<Val> {
