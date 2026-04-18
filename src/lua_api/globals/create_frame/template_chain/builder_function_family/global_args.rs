@@ -62,6 +62,16 @@ fn try_build_mixed_global_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = try_build_global_number_variant(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_build_string_global_variants(state, handler_ref)
+}
+
+fn try_build_global_number_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
             function_name,
@@ -76,6 +86,15 @@ fn try_build_mixed_global_variants(
             *third,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_string_global_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
             function_name,
             first,
