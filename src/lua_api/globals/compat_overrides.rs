@@ -26,7 +26,7 @@
 
 use crate::lua_api::SimState;
 use crate::lua_api::methods::{
-    extract_frame_id, frame_ref, registry_get, registry_set, state_handle,
+    extract_frame_id, frame_ref, registry_get, registry_set, state_handle, table_get_static,
 };
 use crate::lua_bridge::stack_val;
 use rilua::vm::callinfo::LUA_MULTRET;
@@ -191,8 +191,49 @@ fn custom_ipairs(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Num(0.0));
         return Ok(3);
     }
+    if !matches!(value, Val::Table(_)) {
+        let site = describe_ipairs_callsite(state);
+        let value_type = value.type_name();
+        return Err(runtime_error(format!(
+            "bad argument #1 to 'ipairs' (table expected, got {value_type}){site}"
+        )));
+    }
     let original = registry_get(state, ORIGINAL_IPAIRS_KEY);
     delegate_multivalue(state, original, &[value])
+}
+
+fn describe_ipairs_callsite(state: &mut LuaState) -> String {
+    let debug = table_get_static(state, Val::Table(state.global), "debug");
+    let getinfo = table_get_static(state, debug, "getinfo");
+    let Val::Function(_) = getinfo else {
+        return String::new();
+    };
+    let what = Val::Str(state.gc.intern_string_static(b"Sl"));
+    for level in [2.0, 3.0, 4.0] {
+        let Ok(results) = crate::lua_api::script_helpers::protected_call_state(
+            state,
+            getinfo,
+            &[Val::Num(level), what],
+        ) else {
+            continue;
+        };
+        let Some(info @ Val::Table(_)) = results.first().copied() else {
+            continue;
+        };
+        let src = table_get_static(state, info, "short_src");
+        let line = table_get_static(state, info, "currentline");
+        let (Val::Str(src_ref), Val::Num(line_no)) = (src, line) else {
+            continue;
+        };
+        if let Some(src) = state.gc.string_arena.get(src_ref) {
+            return format!(
+                " at {}:{}",
+                String::from_utf8_lossy(src.data()),
+                line_no as i64
+            );
+        }
+    }
+    String::new()
 }
 
 /// Call a Lua function and leave ALL its return values on the stack —

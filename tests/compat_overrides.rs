@@ -174,6 +174,30 @@ fn ipairs_on_plain_array_still_works() {
 }
 
 #[test]
+fn ipairs_on_non_table_reports_type_and_callsite() {
+    let env = env();
+    let (ok, err): (bool, String) = env
+        .eval(
+            r#"
+            local ok, err = pcall(function()
+                for _ in ipairs(1) do end
+            end)
+            return ok, tostring(err)
+            "#,
+        )
+        .unwrap();
+    assert!(!ok);
+    assert!(
+        err.contains("bad argument #1 to 'ipairs' (table expected, got number)"),
+        "ipairs should keep Lua's type error shape: {err}"
+    );
+    assert!(
+        err.contains("(string):"),
+        "ipairs should report the Lua callsite: {err}"
+    );
+}
+
+#[test]
 fn restored_runtime_patches_match_master_shape() {
     let env = env();
     let (has_alternate_form, in_alternate_form, widget_set_id): (bool, bool, i64) = env
