@@ -256,62 +256,96 @@ fn build_global_tooltip_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
-    match handler_ref {
-        FastHandlerRef::GlobalTooltipSetOwnerThenSetText {
-            target_path,
-            anchor,
-            text_path,
-            red_path,
-            green_path,
-            blue_path,
-            wrap,
-        } => build_global_tooltip_set_owner_then_set_text_handler(
-            state,
-            target_path,
-            anchor,
-            text_path,
-            red_path,
-            green_path,
-            blue_path,
-            *wrap,
-        )
-        .map(Some),
-        FastHandlerRef::GlobalTooltipSetOwnerThenSetTextLiteral {
-            target_path,
-            anchor,
-            text,
-            red,
-            green,
-            blue,
-        } => build_global_tooltip_set_owner_then_set_text_literal_handler(
-            state,
-            target_path,
-            anchor,
-            text,
-            *red,
-            *green,
-            *blue,
-        )
-        .map(Some),
-        FastHandlerRef::ConditionalTooltip {
-            target_path,
-            field,
-            anchor,
-            red_path,
-            green_path,
-            blue_path,
-        } => build_conditional_tooltip_handler(
-            state,
-            target_path,
-            field,
-            anchor,
-            red_path,
-            green_path,
-            blue_path,
-        )
-        .map(Some),
-        _ => Ok(None),
+    if let Some(result) = try_global_tooltip_set_owner_variant(state, handler_ref)? {
+        return Ok(Some(result));
     }
+    if let Some(result) = try_global_tooltip_set_owner_literal_variant(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    try_conditional_tooltip_variant(state, handler_ref)
+}
+
+fn try_global_tooltip_set_owner_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    let FastHandlerRef::GlobalTooltipSetOwnerThenSetText {
+        target_path,
+        anchor,
+        text_path,
+        red_path,
+        green_path,
+        blue_path,
+        wrap,
+    } = handler_ref
+    else {
+        return Ok(None);
+    };
+    build_global_tooltip_set_owner_then_set_text_handler(
+        state,
+        target_path,
+        anchor,
+        text_path,
+        red_path,
+        green_path,
+        blue_path,
+        *wrap,
+    )
+    .map(Some)
+}
+
+fn try_global_tooltip_set_owner_literal_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    let FastHandlerRef::GlobalTooltipSetOwnerThenSetTextLiteral {
+        target_path,
+        anchor,
+        text,
+        red,
+        green,
+        blue,
+    } = handler_ref
+    else {
+        return Ok(None);
+    };
+    build_global_tooltip_set_owner_then_set_text_literal_handler(
+        state,
+        target_path,
+        anchor,
+        text,
+        *red,
+        *green,
+        *blue,
+    )
+    .map(Some)
+}
+
+fn try_conditional_tooltip_variant(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    let FastHandlerRef::ConditionalTooltip {
+        target_path,
+        field,
+        anchor,
+        red_path,
+        green_path,
+        blue_path,
+    } = handler_ref
+    else {
+        return Ok(None);
+    };
+    build_conditional_tooltip_handler(
+        state,
+        target_path,
+        field,
+        anchor,
+        red_path,
+        green_path,
+        blue_path,
+    )
+    .map(Some)
 }
 
 /// Toggle visibility, suffix-named global methods, and "call method then
