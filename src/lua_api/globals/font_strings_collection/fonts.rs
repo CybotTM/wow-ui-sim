@@ -2,7 +2,8 @@
 //! register_standard_font_objects, and the per-font-object method table.
 
 use crate::lua_api::methods::{
-    create_string, create_string_static, create_table, table_get, table_set, val_to_string,
+    create_string, create_string_static, create_table, table_get, table_get_static, table_set,
+    table_set_static, val_to_string,
 };
 use crate::lua_bridge::table_set_rust_fn_static;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
@@ -124,6 +125,8 @@ const STANDARD_FONTS: &[(&'static str, f64, &str, f64, f64, f64)] = &[
 
 // ── Low-level field helpers ───────────────────────────────────────────────────
 
+/// Fetch a numeric font field by dynamic `&str` key. Prefer
+/// [`font_f64_static`] for compile-time-literal keys.
 pub(super) fn font_f64(state: &mut LuaState, font: Val, key: &str) -> f64 {
     match table_get(state, font, key) {
         Val::Num(n) => n,
@@ -131,34 +134,47 @@ pub(super) fn font_f64(state: &mut LuaState, font: Val, key: &str) -> f64 {
     }
 }
 
-pub(super) fn font_str(state: &mut LuaState, font: Val, key: &str) -> String {
-    let value = table_get(state, font, key);
+/// Fetch a numeric font field by compile-time-literal key. Routes
+/// through `table_get_static` → `intern_string_static` so the key
+/// is never content-hashed past its first insertion in the static
+/// intern cache.
+pub(super) fn font_f64_static(state: &mut LuaState, font: Val, key: &'static str) -> f64 {
+    match table_get_static(state, font, key) {
+        Val::Num(n) => n,
+        _ => 0.0,
+    }
+}
+
+/// Fetch a string font field by compile-time-literal key. Same
+/// static-cache fast path as [`font_f64_static`].
+pub(super) fn font_str_static(state: &mut LuaState, font: Val, key: &'static str) -> String {
+    let value = table_get_static(state, font, key);
     val_to_string(state, value).unwrap_or_default()
 }
 
 pub(super) fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&str>) {
-    table_set(state, font, "__fontHeight", Val::Num(0.0));
+    table_set_static(state, font, "__fontHeight", Val::Num(0.0));
     let empty = create_string(state, "");
-    table_set(state, font, "__fontFlags", empty);
-    table_set(state, font, "__textColorR", Val::Num(1.0));
-    table_set(state, font, "__textColorG", Val::Num(1.0));
-    table_set(state, font, "__textColorB", Val::Num(1.0));
-    table_set(state, font, "__textColorA", Val::Num(1.0));
-    table_set(state, font, "__shadowColorR", Val::Num(0.0));
-    table_set(state, font, "__shadowColorG", Val::Num(0.0));
-    table_set(state, font, "__shadowColorB", Val::Num(0.0));
-    table_set(state, font, "__shadowColorA", Val::Num(0.0));
-    table_set(state, font, "__shadowOffsetX", Val::Num(0.0));
-    table_set(state, font, "__shadowOffsetY", Val::Num(0.0));
+    table_set_static(state, font, "__fontFlags", empty);
+    table_set_static(state, font, "__textColorR", Val::Num(1.0));
+    table_set_static(state, font, "__textColorG", Val::Num(1.0));
+    table_set_static(state, font, "__textColorB", Val::Num(1.0));
+    table_set_static(state, font, "__textColorA", Val::Num(1.0));
+    table_set_static(state, font, "__shadowColorR", Val::Num(0.0));
+    table_set_static(state, font, "__shadowColorG", Val::Num(0.0));
+    table_set_static(state, font, "__shadowColorB", Val::Num(0.0));
+    table_set_static(state, font, "__shadowColorA", Val::Num(0.0));
+    table_set_static(state, font, "__shadowOffsetX", Val::Num(0.0));
+    table_set_static(state, font, "__shadowOffsetY", Val::Num(0.0));
     let center = create_string_static(state, "CENTER");
-    table_set(state, font, "__justifyH", center);
+    table_set_static(state, font, "__justifyH", center);
     let middle = create_string_static(state, "MIDDLE");
-    table_set(state, font, "__justifyV", middle);
+    table_set_static(state, font, "__justifyV", middle);
     let name_val = match name {
         Some(n) => create_string(state, n),
         None => Val::Nil,
     };
-    table_set(state, font, "__name", name_val);
+    table_set_static(state, font, "__name", name_val);
 }
 
 // ── Method group registrations ────────────────────────────────────────────────
@@ -174,13 +190,13 @@ fn add_font_field_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaRe
 fn font_set_font_height(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let height = f64::from_stack(state, 2)?;
-    table_set(state, font, "__fontHeight", Val::Num(height));
+    table_set_static(state, font, "__fontHeight", Val::Num(height));
     Ok(0)
 }
 
 fn font_get_font_height(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    font_f64(state, font, "__fontHeight").into_stack(state)
+    font_f64_static(state, font, "__fontHeight").into_stack(state)
 }
 
 fn font_set_font(state: &mut LuaState) -> LuaResult<u32> {
@@ -190,24 +206,24 @@ fn font_set_font(state: &mut LuaState) -> LuaResult<u32> {
     let flags = Option::<String>::from_stack(state, 4)?;
     let Some(path) = path else { return Ok(0) };
     let path_val = create_string(state, &path);
-    table_set(state, font, "__fontPath", path_val);
+    table_set_static(state, font, "__fontPath", path_val);
     if let Some(h) = height {
-        table_set(state, font, "__fontHeight", Val::Num(h));
+        table_set_static(state, font, "__fontHeight", Val::Num(h));
     }
     let flags_val = create_string(state, flags.as_deref().unwrap_or(""));
-    table_set(state, font, "__fontFlags", flags_val);
+    table_set_static(state, font, "__fontFlags", flags_val);
     Ok(0)
 }
 
 fn font_get_font(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    let path = table_get(state, font, "__fontPath");
+    let path = table_get_static(state, font, "__fontPath");
     let path_val = match path {
         Val::Str(_) => path,
         _ => Val::Nil,
     };
-    let height = font_f64(state, font, "__fontHeight");
-    let flags = font_str(state, font, "__fontFlags");
+    let height = font_f64_static(state, font, "__fontHeight");
+    let flags = font_str_static(state, font, "__fontFlags");
     let flags_val = create_string(state, &flags);
     state.push(path_val);
     state.push(Val::Num(height));
@@ -249,15 +265,15 @@ fn font_set_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let x = f64::from_stack(state, 2)?;
     let y = f64::from_stack(state, 3)?;
-    table_set(state, font, "__shadowOffsetX", Val::Num(x));
-    table_set(state, font, "__shadowOffsetY", Val::Num(y));
+    table_set_static(state, font, "__shadowOffsetX", Val::Num(x));
+    table_set_static(state, font, "__shadowOffsetY", Val::Num(y));
     Ok(0)
 }
 
 fn font_get_shadow_offset(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    let x = font_f64(state, font, "__shadowOffsetX");
-    let y = font_f64(state, font, "__shadowOffsetY");
+    let x = font_f64_static(state, font, "__shadowOffsetX");
+    let y = font_f64_static(state, font, "__shadowOffsetY");
     (x, y).into_stack(state)
 }
 
@@ -290,13 +306,13 @@ fn font_set_justify_h(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let j = String::from_stack(state, 2)?;
     let jv = create_string(state, &j);
-    table_set(state, font, "__justifyH", jv);
+    table_set_static(state, font, "__justifyH", jv);
     Ok(0)
 }
 
 fn font_get_justify_h(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    let j = font_str(state, font, "__justifyH");
+    let j = font_str_static(state, font, "__justifyH");
     create_string(state, &j).into_stack(state)
 }
 
@@ -304,26 +320,26 @@ fn font_set_justify_v(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let j = String::from_stack(state, 2)?;
     let jv = create_string(state, &j);
-    table_set(state, font, "__justifyV", jv);
+    table_set_static(state, font, "__justifyV", jv);
     Ok(0)
 }
 
 fn font_get_justify_v(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    let j = font_str(state, font, "__justifyV");
+    let j = font_str_static(state, font, "__justifyV");
     create_string(state, &j).into_stack(state)
 }
 
 fn font_set_spacing(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let spacing = f64::from_stack(state, 2)?;
-    table_set(state, font, "__spacing", Val::Num(spacing));
+    table_set_static(state, font, "__spacing", Val::Num(spacing));
     Ok(0)
 }
 
 fn font_get_spacing(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    font_f64(state, font, "__spacing").into_stack(state)
+    font_f64_static(state, font, "__spacing").into_stack(state)
 }
 
 fn add_font_justify_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
@@ -340,13 +356,13 @@ fn add_font_wrap_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaRes
     table_set_rust_fn_static(state, font_ref, "SetIndentedWordWrap", |state| {
         let font = stack_val(state, 1);
         let v = bool::from_stack(state, 2)?;
-        table_set(state, font, "__indentedWordWrap", Val::Bool(v));
+        table_set_static(state, font, "__indentedWordWrap", Val::Bool(v));
         Ok(0)
     })?;
     table_set_rust_fn_static(state, font_ref, "GetIndentedWordWrap", |state| {
         let font = stack_val(state, 1);
         let v = matches!(
-            table_get(state, font, "__indentedWordWrap"),
+            table_get_static(state, font, "__indentedWordWrap"),
             Val::Bool(true)
         );
         v.into_stack(state)
@@ -354,12 +370,12 @@ fn add_font_wrap_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaRes
     table_set_rust_fn_static(state, font_ref, "SetMaxLines", |state| {
         let font = stack_val(state, 1);
         let v = i32::from_stack(state, 2)?;
-        table_set(state, font, "__maxLines", Val::Num(v as f64));
+        table_set_static(state, font, "__maxLines", Val::Num(v as f64));
         Ok(0)
     })?;
     table_set_rust_fn_static(state, font_ref, "GetMaxLines", |state| {
         let font = stack_val(state, 1);
-        let v = match table_get(state, font, "__maxLines") {
+        let v = match table_get_static(state, font, "__maxLines") {
             Val::Num(n) => n as i32,
             _ => 0,
         };
@@ -370,7 +386,7 @@ fn add_font_wrap_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaRes
 
 fn font_get_name(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    let name = table_get(state, font, "__name");
+    let name = table_get_static(state, font, "__name");
     match name {
         Val::Str(_) => name.into_stack(state),
         _ => Val::Nil.into_stack(state),
@@ -399,7 +415,7 @@ fn font_is_object_type(state: &mut LuaState) -> LuaResult<u32> {
 
 fn font_get_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    table_get(state, font, "__fontObject").into_stack(state)
+    table_get_static(state, font, "__fontObject").into_stack(state)
 }
 
 // TODO: cycle detection (mlua: detect_font_object_cycle)
@@ -407,7 +423,7 @@ fn font_set_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let target = stack_val(state, 2);
     if matches!(target, Val::Table(_)) {
-        table_set(state, font, "__fontObject", target);
+        table_set_static(state, font, "__fontObject", target);
     }
     Ok(0)
 }
@@ -496,12 +512,12 @@ fn apply_standard_font_colors(
     g: f64,
     b: f64,
 ) {
-    table_set(state, font, "__fontHeight", Val::Num(height));
+    table_set_static(state, font, "__fontHeight", Val::Num(height));
     let flags_val = create_string(state, flags);
-    table_set(state, font, "__fontFlags", flags_val);
-    table_set(state, font, "__textColorR", Val::Num(r));
-    table_set(state, font, "__textColorG", Val::Num(g));
-    table_set(state, font, "__textColorB", Val::Num(b));
+    table_set_static(state, font, "__fontFlags", flags_val);
+    table_set_static(state, font, "__textColorR", Val::Num(r));
+    table_set_static(state, font, "__textColorG", Val::Num(g));
+    table_set_static(state, font, "__textColorB", Val::Num(b));
 }
 
 /// Create and register all standard WoW font globals on the rilua state.
