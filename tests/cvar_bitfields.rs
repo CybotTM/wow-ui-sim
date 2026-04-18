@@ -1,15 +1,18 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+const TEST_CVAR: &str = "__codex_test_bitfield";
+
 fn seed_bitfield_state(env: &WowLuaEnv) {
-    env.exec(
+    env.exec(&format!(
         r#"
-        TEST_INITIAL_BIT3 = GetCVarBitfield("closedInfoFramesAccountWide", 3)
-        SetCVarBitfield("closedInfoFramesAccountWide", 3, true)
-        TEST_AFTER_SET = GetCVarBitfield("closedInfoFramesAccountWide", 3)
-        SetCVarBitfield("closedInfoFramesAccountWide", 3, false)
-        TEST_AFTER_CLEAR = GetCVarBitfield("closedInfoFramesAccountWide", 3)
+        TEST_INITIAL_BIT3 = GetCVarBitfield("{0}", 3)
+        SetCVarBitfield("{0}", 3, true)
+        TEST_AFTER_SET = GetCVarBitfield("{0}", 3)
+        SetCVarBitfield("{0}", 3, false)
+        TEST_AFTER_CLEAR = GetCVarBitfield("{0}", 3)
         "#,
-    )
+        TEST_CVAR
+    ))
     .unwrap();
 }
 
@@ -30,14 +33,15 @@ fn cvar_bitfields_can_be_set_and_cleared() {
 #[test]
 fn c_cvar_bitfields_share_the_same_storage() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(
+    env.exec(&format!(
         r#"
-        C_CVar.SetCVarBitfield("closedInfoFramesAccountWide", 3, true)
-        TEST_GLOBAL_READ = GetCVarBitfield("closedInfoFramesAccountWide", 3)
-        SetCVarBitfield("closedInfoFramesAccountWide", 3, false)
-        TEST_NAMESPACE_READ = C_CVar.GetCVarBitfield("closedInfoFramesAccountWide", 3)
-        "#,
-    )
+            C_CVar.SetCVarBitfield("{0}", 3, true)
+            TEST_GLOBAL_READ = GetCVarBitfield("{0}", 3)
+            SetCVarBitfield("{0}", 3, false)
+            TEST_NAMESPACE_READ = C_CVar.GetCVarBitfield("{0}", 3)
+            "#,
+        TEST_CVAR
+    ))
     .unwrap();
 
     let global_read: bool = env.eval("return TEST_GLOBAL_READ").unwrap();

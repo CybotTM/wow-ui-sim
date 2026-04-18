@@ -629,3 +629,35 @@ fn test_low_health_frame_animation_bound_after_blizzard_framexml_load() {
         );
     }
 }
+
+#[test]
+fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
+    test_timeout! {
+        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let register_cvar_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("RegisterCVar")
+                    || warning.contains("CvarUtil.lua:2")
+                    || warning.contains("PraiseTheSun")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            register_cvar_warnings.is_empty(),
+            "Blizzard_FrameXML should not warn on BossBanner RegisterCVar:\n  {}",
+            register_cvar_warnings.join("\n  ")
+        );
+
+        let (value, default_value): (String, String) = env
+            .eval(r#"return GetCVar("PraiseTheSun"), GetCVarDefault("PraiseTheSun")"#)
+            .expect("BossBanner cvar should be readable after Blizzard_FrameXML load");
+        assert!(
+            value == "0" || value == "1",
+            "BossBanner cvar should be readable after registration, got {value:?}"
+        );
+        assert_eq!(default_value, "0");
+    }
+}

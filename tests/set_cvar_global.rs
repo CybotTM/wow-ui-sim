@@ -69,10 +69,10 @@ fn register_cvar_exposes_runtime_default_through_global_and_namespace() {
     let (global_value, namespace_value, default_value): (String, String, String) = env
         .eval(
             r#"
-            RegisterCVar("PraiseTheSun", "1")
-            return GetCVar("PraiseTheSun"),
-                   C_CVar.GetCVar("PraiseTheSun"),
-                   GetCVarDefault("PraiseTheSun")
+            RegisterCVar("__codex_register_default", "1")
+            return GetCVar("__codex_register_default"),
+                   C_CVar.GetCVar("__codex_register_default"),
+                   GetCVarDefault("__codex_register_default")
             "#,
         )
         .unwrap();
@@ -87,8 +87,8 @@ fn register_cvar_makes_unknown_cvar_visible_with_zero_default() {
     let (value, default, enabled): (String, String, bool) = env
         .eval(
             r#"
-            RegisterCVar("PraiseTheSun")
-            return GetCVar("PraiseTheSun"), GetCVarDefault("PraiseTheSun"), GetCVarBool("PraiseTheSun")
+            RegisterCVar("__codex_register_zero_default")
+            return GetCVar("__codex_register_zero_default"), GetCVarDefault("__codex_register_zero_default"), GetCVarBool("__codex_register_zero_default")
             "#,
         )
         .unwrap();
@@ -103,9 +103,9 @@ fn c_cvar_register_cvar_sets_default_without_overwriting_existing_value() {
     let (before, after): (String, String) = env
         .eval(
             r#"
-            SetCVar("PraiseTheSun", "1")
-            C_CVar.RegisterCVar("PraiseTheSun", "0")
-            return GetCVar("PraiseTheSun"), GetCVarDefault("PraiseTheSun")
+            SetCVar("__codex_register_preserve_override", "1")
+            C_CVar.RegisterCVar("__codex_register_preserve_override", "0")
+            return GetCVar("__codex_register_preserve_override"), GetCVarDefault("__codex_register_preserve_override")
             "#,
         )
         .unwrap();
