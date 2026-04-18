@@ -1,5 +1,7 @@
 //! Shared test helpers.
 
+pub mod panel_fixtures;
+
 use rilua::Val;
 use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
