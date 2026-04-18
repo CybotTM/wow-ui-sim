@@ -999,39 +999,42 @@ fn build_ancestor_function_handler_with_mode(
     )
 }
 
+// ── Per-mode Lua ancestor-walk templates ─────────────────────────────────────
+//
+// Both close over `fn` + `depth`, walk `:GetParent()` `depth` times, and
+// forward either the ancestor itself or its `:GetID()`.
+
+const ANCESTOR_TARGET_TEMPLATE: &str = r#"
+    local fn, depth = ...
+    return function(self, ...)
+        local target = self
+        for _ = 1, depth do
+            target = target and target:GetParent()
+        end
+        if not target then
+            return
+        end
+        return fn(target)
+    end
+"#;
+
+const ANCESTOR_ID_TEMPLATE: &str = r#"
+    local fn, depth = ...
+    return function(self, ...)
+        local target = self
+        for _ = 1, depth do
+            target = target and target:GetParent()
+        end
+        if not target then
+            return
+        end
+        return fn(target:GetID())
+    end
+"#;
+
 fn ancestor_function_handler_template(mode: AncestorArgMode) -> (&'static str, &'static str) {
     match mode {
-        AncestorArgMode::Target => (
-            r#"
-                local fn, depth = ...
-                return function(self, ...)
-                    local target = self
-                    for _ = 1, depth do
-                        target = target and target:GetParent()
-                    end
-                    if not target then
-                        return
-                    end
-                    return fn(target)
-                end
-            "#,
-            "template-inline-function-ancestor",
-        ),
-        AncestorArgMode::Id => (
-            r#"
-                local fn, depth = ...
-                return function(self, ...)
-                    local target = self
-                    for _ = 1, depth do
-                        target = target and target:GetParent()
-                    end
-                    if not target then
-                        return
-                    end
-                    return fn(target:GetID())
-                end
-            "#,
-            "template-inline-function-ancestor-id",
-        ),
+        AncestorArgMode::Target => (ANCESTOR_TARGET_TEMPLATE, "template-inline-function-ancestor"),
+        AncestorArgMode::Id => (ANCESTOR_ID_TEMPLATE, "template-inline-function-ancestor-id"),
     }
 }
