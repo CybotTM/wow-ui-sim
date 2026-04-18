@@ -105,6 +105,28 @@ fn recruit_a_friend_surface_returns_disabled_empty_defaults() {
 }
 
 #[test]
+fn map_util_helpers_exist_in_shared_bootstrap() {
+    let env = env();
+    let (displayable_map_id, is_zone, same_parent_map_id, cache_match): (f64, bool, bool, bool) =
+        env.eval(
+            r#"
+            local mapID = MapUtil.GetDisplayableMapForPlayer()
+            local mapInfo = C_Map.GetMapInfo(mapID)
+            local parentInfo = MapUtil.GetMapParentInfo(mapID, mapInfo.mapType)
+            return mapID,
+                   MapUtil.IsMapTypeZone(mapID),
+                   parentInfo and parentInfo.mapID == mapID or false,
+                   MapUtil.IsChildMapCached(mapID, mapID) == MapUtil.IsChildMap(mapID, mapID)
+            "#,
+        )
+        .expect("MapUtil fallback helpers should be callable");
+    assert!(displayable_map_id > 0.0);
+    assert!(is_zone);
+    assert!(same_parent_map_id);
+    assert!(cache_match);
+}
+
+#[test]
 fn named_fontstring_is_globally_reachable() {
     // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
     // FontString, matching how named frames and named textures behave.
