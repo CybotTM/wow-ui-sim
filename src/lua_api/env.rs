@@ -644,7 +644,33 @@ impl WowLuaEnv {
         };
 
         let info = self.eval::<Val>(
-            "return (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()",
+            r#"
+            local source = (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()
+            if type(source) ~= "table" then
+                return source
+            end
+
+            local filtered = {
+                layouts = {},
+                activeLayout = source.activeLayout or 1,
+            }
+            local editModeLayoutType = type(Enum) == "table" and Enum.EditModeLayoutType or nil
+
+            if type(source.layouts) ~= "table" then
+                return filtered
+            end
+
+            for _, layoutInfo in ipairs(source.layouts) do
+                local layoutType = type(layoutInfo) == "table" and layoutInfo.layoutType or nil
+                if editModeLayoutType == nil
+                    or layoutType == editModeLayoutType.Account
+                    or layoutType == editModeLayoutType.Character then
+                    table.insert(filtered.layouts, layoutInfo)
+                end
+            end
+
+            return filtered
+            "#,
         )?;
         self.fire_event_with_args("EDIT_MODE_LAYOUTS_UPDATED", &[info, Val::Bool(true)])
     }
