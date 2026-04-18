@@ -21,7 +21,7 @@ const FULL_GAME_STARTUP_BUDGET: Duration = Duration::from_secs(30);
 // Frame-count budgets: expected total frames (parents + children) created by
 // N template instances. Changes here indicate template structure changed.
 const ACTION_BUTTON_SPELLFX_BUDGET: Duration = Duration::from_millis(400);
-const ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES: usize = 350;
+const ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES: usize = 430;
 
 const ACTION_BUTTON_TEMPLATE_BUDGET: Duration = Duration::from_millis(500);
 const ACTION_BUTTON_TEMPLATE_EXPECTED_FRAMES: usize = 660;

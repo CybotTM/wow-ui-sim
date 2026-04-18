@@ -81,6 +81,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ),
     ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
+    (
+        "Blizzard_ActionBarController",
+        "Blizzard_ActionBarController.toc",
+    ),
     ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
     ("Blizzard_UIWidgets", "Blizzard_UIWidgets_Mainline.toc"),
     ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
@@ -107,6 +111,8 @@ fn setup_env() -> common::LockedEnv {
             }
             if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
                 eprintln!("[load {name}] FAILED: {e}");
+            } else {
+                env.apply_runtime_addon_load_workarounds(name);
             }
         }
 
@@ -181,6 +187,8 @@ fn setup_full_env() -> common::LockedEnv {
         for (name, toc_path) in &addons {
             if let Err(e) = load_addon(&env.loader_env(), toc_path) {
                 eprintln!("[load {name}] FAILED: {e}");
+            } else {
+                env.apply_runtime_addon_load_workarounds(name);
             }
         }
         env.apply_post_load_workarounds();

@@ -88,6 +88,145 @@ fn load_game_screen() -> WowLuaEnv {
     env
 }
 
+fn load_tabbed_panels_without_startup() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Game);
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![
+            PathBuf::from("./Interface/BlizzardUI"),
+            PathBuf::from("./Interface/AddOns"),
+        ];
+    }
+    wow_ui_sim::xml::register_intrinsic_templates();
+
+    let ui = blizzard_ui_dir();
+    let tabbed_panel_tocs = [
+        ui.join("Blizzard_UIPanels_Game/Blizzard_UIPanels_Game_Mainline.toc"),
+        ui.join("Blizzard_FriendsFrame/Blizzard_FriendsFrame.toc"),
+        ui.join("Blizzard_RaidFrame/Blizzard_RaidFrame_Mainline.toc"),
+        ui.join("Blizzard_GroupFinder/Blizzard_GroupFinder_Mainline.toc"),
+        ui.join("Blizzard_MailFrame/Blizzard_MailFrame.toc"),
+    ];
+
+    for toc_path in &tabbed_panel_tocs {
+        let name = toc_path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .unwrap_or("unknown-addon");
+        if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+            panic!("[load {name}] FAILED: {err}");
+        }
+    }
+
+    env.apply_post_load_workarounds();
+    env
+}
+
+fn new_game_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Game);
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![
+            PathBuf::from("./Interface/BlizzardUI"),
+            PathBuf::from("./Interface/AddOns"),
+        ];
+    }
+    wow_ui_sim::xml::register_intrinsic_templates();
+    env
+}
+
+fn first_panel_tab_divergence(env: &WowLuaEnv) -> Option<String> {
+    let summary: String = env
+        .eval(
+            r#"
+            local function first_divergence(frame_name, count)
+                local frame = _G[frame_name]
+                if not frame or type(frame.Tabs) ~= "table" then
+                    return nil
+                end
+                for i = 1, count do
+                    local tab = frame.Tabs[i]
+                    local expected = _G[frame_name .. "Tab" .. i]
+                    if expected and tab ~= expected then
+                        return table.concat({
+                            frame_name,
+                            tostring(i),
+                            tab and tab:GetName() or "nil",
+                            expected:GetName(),
+                            tab and tab:GetParent() and tab:GetParent():GetName() or "nil",
+                        }, "|")
+                    end
+                end
+                return nil
+            end
+
+            return first_divergence("CharacterFrame", 3)
+                or first_divergence("MerchantFrame", 2)
+                or first_divergence("FriendsFrame", 4)
+                or first_divergence("RaidParentFrame", 3)
+                or first_divergence("PVEFrame", 5)
+                or first_divergence("MailFrame", 2)
+                or ""
+            "#,
+        )
+        .expect("eval first panel tab divergence");
+
+    (!summary.is_empty()).then_some(summary)
+}
+
+fn install_panel_tab_anchor_trace(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        __panel_tab_trace = {}
+        __panel_tab_trace_current_addon = nil
+
+        local original_panel_templates_anchor_tabs = PanelTemplates_AnchorTabs
+
+        local function tracked_panel(frame_name)
+            return frame_name == "CharacterFrame"
+                or frame_name == "MerchantFrame"
+                or frame_name == "FriendsFrame"
+                or frame_name == "RaidParentFrame"
+                or frame_name == "PVEFrame"
+                or frame_name == "MailFrame"
+        end
+
+        local function tab_name(value)
+            return value and value.GetName and value:GetName() or "nil"
+        end
+
+        function PanelTemplates_AnchorTabs(frame, numTabs)
+            local frame_name = frame and frame.GetName and frame:GetName()
+            if frame_name and tracked_panel(frame_name) then
+                for i = 2, frame.numTabs or 0 do
+                    local last_tab = frame.Tabs and frame.Tabs[i - 1] or _G[frame_name .. "Tab" .. (i - 1)]
+                    local this_tab = frame.Tabs and frame.Tabs[i] or _G[frame_name .. "Tab" .. i]
+                    local expected_tab = _G[frame_name .. "Tab" .. i]
+                    if this_tab ~= expected_tab then
+                        __panel_tab_trace[#__panel_tab_trace + 1] = table.concat({
+                            tostring(__panel_tab_trace_current_addon),
+                            frame_name,
+                            tostring(i),
+                            tab_name(last_tab),
+                            tab_name(this_tab),
+                            tab_name(expected_tab),
+                            tostring(type(frame.Tabs) == "table" and #frame.Tabs or -1),
+                        }, "|")
+                    end
+                end
+            end
+
+            return original_panel_templates_anchor_tabs(frame, numTabs)
+        end
+        "#,
+    )
+    .expect("install panel tab anchor trace");
+}
+
 #[test]
 fn game_boot_has_no_unexpected_lua_errors() {
     test_timeout! {
@@ -99,6 +238,13 @@ fn game_boot_has_no_unexpected_lua_errors() {
             "game boot still has lua errors: {errors:#?}"
         );
     }
+}
+
+fn set_panel_tab_trace_addon(env: &WowLuaEnv, addon_name: &str) {
+    env.exec(&format!(
+        "__panel_tab_trace_current_addon = {addon_name:?}"
+    ))
+    .expect("set current panel tab trace addon");
 }
 
 #[test]
@@ -114,6 +260,158 @@ fn game_boot_lua_errors_pipeline_finishes() {
         assert!(
             errors.is_empty(),
             "game boot settle pipeline still has lua errors: {errors:#?}"
+        );
+    }
+}
+
+#[test]
+fn panel_tabs_array_keeps_distinct_children_before_startup() {
+    test_timeout! {
+        let env = load_tabbed_panels_without_startup();
+
+        let summary: String = env
+            .eval(
+                r#"
+                local function tab_summary(frame_name, count)
+                    local frame = _G[frame_name]
+                    if not frame then
+                        return frame_name .. "|missing"
+                    end
+                    local entries = {}
+                    for i = 1, count do
+                        local tab = frame.Tabs and frame.Tabs[i] or nil
+                        local global = _G[frame_name .. "Tab" .. i]
+                        entries[#entries + 1] = table.concat({
+                            frame_name,
+                            tostring(i),
+                            tab and tab:GetName() or "nil",
+                            global and global:GetName() or "nil",
+                            tostring(tab == global),
+                            tostring(tab ~= nil and tab ~= frame),
+                            tab and tab:GetParent() and tab:GetParent():GetName() or "nil",
+                        }, "|")
+                    end
+                    return table.concat(entries, "\n")
+                end
+
+                return table.concat({
+                    tab_summary("CharacterFrame", 3),
+                    tab_summary("MerchantFrame", 2),
+                    tab_summary("FriendsFrame", 4),
+                    tab_summary("RaidParentFrame", 3),
+                    tab_summary("PVEFrame", 5),
+                    tab_summary("MailFrame", 2),
+                }, "\n")
+                "#,
+            )
+            .expect("eval tab summary");
+
+        for line in summary.lines() {
+            let parts = line.split('|').collect::<Vec<_>>();
+            if parts.len() == 2 && parts[1] == "missing" {
+                continue;
+            }
+            assert_eq!(parts.len(), 7, "unexpected tab summary row: {line}");
+            assert_ne!(parts[2], "nil", "parent array entry missing: {line}");
+            assert_eq!(parts[4], "true", "Tabs array diverged from global tab: {line}");
+            assert_eq!(parts[5], "true", "Tabs array resolved to the frame itself: {line}");
+            assert_eq!(parts[6], parts[0], "tab parent mismatch: {line}");
+        }
+    }
+}
+
+#[test]
+fn panel_tabs_do_not_diverge_during_blizzard_load() {
+    test_timeout! {
+        let env = new_game_env();
+        let ui = blizzard_ui_dir();
+        let blizzard = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+        let mut after_uipanels_game = false;
+
+        for (name, toc_path) in &blizzard {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
+            if name == "Blizzard_UIPanels_Game" {
+                after_uipanels_game = true;
+            }
+            if !after_uipanels_game {
+                continue;
+            }
+            if let Some(divergence) = first_panel_tab_divergence(&env) {
+                panic!("panel tab divergence after loading {name}: {divergence}");
+            }
+        }
+    }
+}
+
+#[test]
+fn panel_tabs_are_stable_inside_anchor_tabs_during_blizzard_uipanels_load() {
+    test_timeout! {
+        let env = new_game_env();
+        let ui = blizzard_ui_dir();
+        let blizzard = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+
+        for (name, toc_path) in &blizzard {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
+            if name == "Blizzard_SharedXML" {
+                install_panel_tab_anchor_trace(&env);
+            }
+            if name != "Blizzard_UIPanels_Game" {
+                continue;
+            }
+
+            let trace: String = env
+                .eval(
+                    r#"
+                    return table.concat(__panel_tab_trace or {}, "\n")
+                    "#,
+                )
+                .expect("collect panel tab anchor trace");
+
+            assert!(
+                trace.is_empty(),
+                "PanelTemplates_AnchorTabs saw transient tab divergence:\n{trace}"
+            );
+            break;
+        }
+    }
+}
+
+#[test]
+fn panel_tabs_are_stable_inside_anchor_tabs_during_full_blizzard_load() {
+    test_timeout! {
+        let env = new_game_env();
+        let ui = blizzard_ui_dir();
+        let blizzard = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+
+        for (name, toc_path) in &blizzard {
+            if name == "Blizzard_SharedXML" {
+                load_addon(&env.loader_env(), toc_path)
+                    .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
+                install_panel_tab_anchor_trace(&env);
+                continue;
+            }
+
+            set_panel_tab_trace_addon(&env, name);
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
+        }
+
+        let trace: String = env
+            .eval(
+                r#"
+                return table.concat(__panel_tab_trace or {}, "\n")
+                "#,
+            )
+            .expect("collect full panel tab anchor trace");
+
+        assert!(
+            trace.is_empty(),
+            "PanelTemplates_AnchorTabs saw transient tab divergence:\n{trace}"
         );
     }
 }

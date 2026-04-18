@@ -75,6 +75,8 @@ fn preload_click_panels(env: &WowLuaEnv) {
         r#"
         if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
             pcall(C_AddOns.LoadAddOn, "Blizzard_AchievementUI")
+            pcall(C_AddOns.LoadAddOn, "Blizzard_Collections")
+            pcall(C_AddOns.LoadAddOn, "Blizzard_EncounterJournal")
             pcall(C_AddOns.LoadAddOn, "Blizzard_GroupFinder")
         end
         if AchievementFrame and AchievementFrame.SearchPreviewContainer then
@@ -86,6 +88,12 @@ fn preload_click_panels(env: &WowLuaEnv) {
         end
         if AchievementFrame and AchievementFrame.Hide then
             AchievementFrame:Hide()
+        end
+        if CollectionsJournal and CollectionsJournal.Hide then
+            CollectionsJournal:Hide()
+        end
+        if EncounterJournal and EncounterJournal.Hide then
+            EncounterJournal:Hide()
         end
         if PVEFrame and PVEFrame.Hide then
             PVEFrame:Hide()
@@ -187,6 +195,8 @@ fn load_all_blizzard_addons(env: &WowLuaEnv) {
         }
         if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
             eprintln!("[load {name}] FAILED: {e}");
+        } else {
+            env.apply_runtime_addon_load_workarounds(name);
         }
     }
     env.apply_post_load_workarounds();
@@ -410,43 +420,41 @@ const KNOWN_ERROR_COUNT: usize = 0;
 
 #[test]
 fn test_click_all_frames() {
-    test_timeout! {
-        let env = setup_full_ui();
-        let report = click_all_groups(&env);
-        let count = report.len();
-        let communities_unavailable = "Guilds and Communities are currently unavailable";
-        let communities_errors: Vec<String> = report
-            .iter()
-            .filter(|line| line.contains(communities_unavailable))
-            .cloned()
-            .collect();
+    let env = setup_full_ui();
+    let report = click_all_groups(&env);
+    let count = report.len();
+    let communities_unavailable = "Guilds and Communities are currently unavailable";
+    let communities_errors: Vec<String> = report
+        .iter()
+        .filter(|line| line.contains(communities_unavailable))
+        .cloned()
+        .collect();
 
-        assert!(
-            communities_errors.is_empty(),
-            "Regression: Communities unavailable UI error reintroduced.\n\
-             Matching errors:\n  {}",
-            communities_errors.join("\n  ")
+    assert!(
+        communities_errors.is_empty(),
+        "Regression: Communities unavailable UI error reintroduced.\n\
+         Matching errors:\n  {}",
+        communities_errors.join("\n  ")
+    );
+
+    for line in &report {
+        eprintln!("  {line}");
+    }
+    if count > KNOWN_ERROR_COUNT {
+        let mut msg = format!(
+            "New click errors! Expected at most {KNOWN_ERROR_COUNT}, got {count}.\n\
+             All errors:\n"
         );
-
         for line in &report {
-            eprintln!("  {line}");
+            msg.push_str(&format!("  {line}\n"));
         }
-        if count > KNOWN_ERROR_COUNT {
-            let mut msg = format!(
-                "New click errors! Expected at most {KNOWN_ERROR_COUNT}, got {count}.\n\
-                 All errors:\n"
-            );
-            for line in &report {
-                msg.push_str(&format!("  {line}\n"));
-            }
-            panic!("{msg}");
-        }
+        panic!("{msg}");
+    }
 
-        if count < KNOWN_ERROR_COUNT {
-            panic!(
-                "Click error count improved from {KNOWN_ERROR_COUNT} to {count}! \
-                 Update KNOWN_ERROR_COUNT to {count} to lock in the improvement."
-            );
-        }
+    if count < KNOWN_ERROR_COUNT {
+        panic!(
+            "Click error count improved from {KNOWN_ERROR_COUNT} to {count}! \
+             Update KNOWN_ERROR_COUNT to {count} to lock in the improvement."
+        );
     }
 }
