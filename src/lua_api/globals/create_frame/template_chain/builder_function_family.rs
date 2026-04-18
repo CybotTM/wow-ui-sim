@@ -53,7 +53,35 @@ fn build_plain_function_variants(
 }
 
 /// Per-argument shapes: string / number / global / self+field / global+self combinations.
+///
+/// The dispatch is split across six themed helpers (literal args, global-path
+/// args, ancestor-field args, method-result forwarding, checked-assignment
+/// callbacks, clipboard specials). Each helper returns `Ok(None)` for arms it
+/// does not handle so the chain falls through to the next.
 fn build_function_with_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_literal_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_global_arg_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_ancestor_field_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_method_result_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_checked_assignment_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    build_clipboard_variants(state, handler_ref)
+}
+
+/// Arms whose args are literal constants (strings, numbers) with no path resolution.
+fn build_literal_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -64,60 +92,9 @@ fn build_function_with_arg_variants(
             second,
         } => build_function_handler_with_string_number_args(state, function_name, first, *second)
             .map(Some),
-        FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
-            function_name,
-            first_arg_path,
-            second_arg_path,
-            third,
-        } => build_function_handler_with_two_global_number_args(
-            state,
-            function_name,
-            first_arg_path,
-            second_arg_path,
-            *third,
-        )
-        .map(Some),
-        FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
-            function_name,
-            first,
-            fourth,
-        } => build_function_handler_with_string_nil_nil_global_args(
-            state,
-            function_name,
-            first,
-            fourth,
-        )
-        .map(Some),
         FastHandlerRef::FunctionWithStringArg { function_name, arg } => {
             build_function_handler_with_string_only_arg(state, function_name, arg).map(Some)
         }
-        FastHandlerRef::FunctionWithNoArgFunctionResult {
-            function_name,
-            arg_function_name,
-        } => build_function_handler_with_noarg_function_result(
-            state,
-            function_name,
-            arg_function_name,
-        )
-        .map(Some),
-        FastHandlerRef::FunctionWithSelfNoArgsMethodResult {
-            function_name,
-            method_name,
-        } => {
-            build_function_handler_with_self_noarg_method_result(state, function_name, method_name)
-                .map(Some)
-        }
-        FastHandlerRef::FunctionWithGlobalMethodNoArgsResult {
-            function_name,
-            target_path,
-            method_name,
-        } => build_function_handler_with_global_method_noargs_result(
-            state,
-            function_name,
-            target_path,
-            method_name,
-        )
-        .map(Some),
         FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
             build_function_handler_with_string_arg(state, function_name, arg).map(Some)
         }
@@ -144,6 +121,40 @@ fn build_function_with_arg_variants(
             function_name,
             value,
         } => build_function_handler_with_number_arg(state, function_name, *value).map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Arms whose args come from global-path lookups (possibly mixed with literals or `self`).
+fn build_global_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
+        FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            third,
+        } => build_function_handler_with_two_global_number_args(
+            state,
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            *third,
+        )
+        .map(Some),
+        FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
+            function_name,
+            first,
+            fourth,
+        } => build_function_handler_with_string_nil_nil_global_args(
+            state,
+            function_name,
+            first,
+            fourth,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithGlobalArg {
             function_name,
             arg_path,
@@ -214,6 +225,16 @@ fn build_function_with_arg_variants(
             global_arg_path,
         } => build_function_handler_with_global_and_self_arg(state, function_name, global_arg_path)
             .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Arms that read `:GetParent()` fields (possibly nested).
+fn build_ancestor_field_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::FunctionWithParentFieldArg {
             function_name,
             field,
@@ -238,6 +259,53 @@ fn build_function_with_arg_variants(
             field,
         } => build_function_handler_with_self_and_parent_field_arg(state, function_name, field)
             .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Arms that forward the result of some method call as the argument.
+fn build_method_result_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
+        FastHandlerRef::FunctionWithNoArgFunctionResult {
+            function_name,
+            arg_function_name,
+        } => build_function_handler_with_noarg_function_result(
+            state,
+            function_name,
+            arg_function_name,
+        )
+        .map(Some),
+        FastHandlerRef::FunctionWithSelfNoArgsMethodResult {
+            function_name,
+            method_name,
+        } => {
+            build_function_handler_with_self_noarg_method_result(state, function_name, method_name)
+                .map(Some)
+        }
+        FastHandlerRef::FunctionWithGlobalMethodNoArgsResult {
+            function_name,
+            target_path,
+            method_name,
+        } => build_function_handler_with_global_method_noargs_result(
+            state,
+            function_name,
+            target_path,
+            method_name,
+        )
+        .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Arms that write `self:GetChecked()` into a global field, then fire callbacks.
+fn build_checked_assignment_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::CheckedAssignmentThenCallbacks {
             target_path,
             field,
@@ -302,6 +370,16 @@ fn build_function_with_arg_variants(
             on_sound_function,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Clipboard-copy specials (community club ticket + optional sound).
+fn build_clipboard_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::CopyClubTicketToClipboardFromParent => {
             build_copy_club_ticket_to_clipboard_from_parent_handler(state).map(Some)
         }
