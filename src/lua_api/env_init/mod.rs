@@ -61,7 +61,25 @@ pub(super) fn init_lua_state(
     if std::env::var("WOW_SIM_FREEZE_GLOBALS").as_deref() == Ok("1") {
         freeze_globals::freeze_globals_with_live_shadow(lua)?;
     }
+    install_global_slots(lua);
     Ok(())
+}
+
+/// Walk the Track 1 whitelist against post-bootstrap `_G` and stash the
+/// resulting slot vector on `WowLuaAppData`. Runs after
+/// `freeze_globals_with_live_shadow` so the captured values include any
+/// post-freeze shadow bootstrapping, but before addon load so the
+/// captured snapshot is the canonical pre-addon state.
+fn install_global_slots(lua: &mut rilua::Lua) {
+    use super::env::WowLuaAppData;
+    use super::global_slots;
+    use rilua::LuaApiMut;
+    let slots = global_slots::install(lua.state_mut());
+    let app = lua
+        .state_mut()
+        .app_data_mut::<WowLuaAppData>()
+        .expect("WowLuaEnv rilua app_data should always exist");
+    app.global_slots = Some(slots);
 }
 
 /// Run a full collection to drop bootstrap transients, then re-enable

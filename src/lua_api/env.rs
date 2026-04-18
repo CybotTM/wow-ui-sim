@@ -38,6 +38,10 @@ pub(crate) struct WowLuaAppData {
     /// `HotLiteralRegistry::install` during bootstrap (Track 1 sub-item 2).
     /// `None` on a fresh VM before the register-globals pass runs.
     pub(crate) hot_literals: Option<crate::lua_api::hot_literals::HotLiteralHandles>,
+    /// Frozen slot vector for the Track 3 global-slot fast path.
+    /// Populated by `global_slots::install` at the end of
+    /// `init_lua_state`. `None` on a fresh VM before bootstrap runs.
+    pub(crate) global_slots: Option<crate::lua_api::global_slots::GlobalSlotTable>,
 }
 
 impl WowLuaAppData {
@@ -47,6 +51,7 @@ impl WowLuaAppData {
             lua: None,
             font_system: None,
             hot_literals: None,
+            global_slots: None,
         }
     }
 }
