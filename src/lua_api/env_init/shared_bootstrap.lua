@@ -269,6 +269,65 @@ if CopyTable == nil then
   end
 end
 
+if TextureKitConstants == nil then
+  TextureKitConstants = {
+    SetVisibility = true,
+    DoNotSetVisibility = false,
+    UseAtlasSize = true,
+    IgnoreAtlasSize = false,
+    AddressModeClamp = 1,
+    AddressModeWrap = 2,
+    AddressModeAllowAssetToDetermine = 3,
+  }
+end
+
+local __wow_lfg_role_icons = {
+  GUIDE = "UI-LFG-RoleIcon-Leader",
+  TANK = "UI-LFG-RoleIcon-Tank",
+  HEALER = "UI-LFG-RoleIcon-Healer",
+  DAMAGER = "UI-LFG-RoleIcon-DPS",
+  NONE = "UI-LFG-RoleIcon-DPS",
+}
+
+local __wow_lfg_role_icons_disabled = {
+  GUIDE = "UI-LFG-RoleIcon-Leader-Disabled",
+  TANK = "UI-LFG-RoleIcon-Tank-Disabled",
+  HEALER = "UI-LFG-RoleIcon-Healer-Disabled",
+  DAMAGER = "UI-LFG-RoleIcon-DPS-Disabled",
+  NONE = "UI-LFG-RoleIcon-DPS-Disabled",
+}
+
+if GetIconForRole == nil then
+  function GetIconForRole(role, showDisabled)
+    local iconSet = showDisabled and __wow_lfg_role_icons_disabled or __wow_lfg_role_icons
+    return iconSet[role] or iconSet.NONE
+  end
+end
+
+local function __wow_lfg_role_name_from_enum(role)
+  if role == 0 then
+    return "TANK"
+  end
+  if role == 1 then
+    return "HEALER"
+  end
+  if role == 2 then
+    return "DAMAGER"
+  end
+  if Constants ~= nil
+      and Constants.LFG_ROLEConstants ~= nil
+      and role == Constants.LFG_ROLEConstants.LFG_ROLE_NO_ROLE then
+    return "GUIDE"
+  end
+  return "NONE"
+end
+
+if GetIconForRoleEnum == nil then
+  function GetIconForRoleEnum(role, showDisabled)
+    return GetIconForRole(__wow_lfg_role_name_from_enum(role), showDisabled)
+  end
+end
+
 if C_Map == nil then
   C_Map = {}
 end

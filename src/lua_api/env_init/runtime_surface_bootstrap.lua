@@ -2216,6 +2216,55 @@ C_DurationUtil = C_DurationUtil or __wow_namespace({
   end,
 })
 
+TextureKitConstants = TextureKitConstants or {
+  SetVisibility = true,
+  DoNotSetVisibility = false,
+  UseAtlasSize = true,
+  IgnoreAtlasSize = false,
+  AddressModeClamp = 1,
+  AddressModeWrap = 2,
+  AddressModeAllowAssetToDetermine = 3,
+}
+
+if GetIconForRole == nil then
+  local roleIcons = {
+    GUIDE = "UI-LFG-RoleIcon-Leader",
+    TANK = "UI-LFG-RoleIcon-Tank",
+    HEALER = "UI-LFG-RoleIcon-Healer",
+    DAMAGER = "UI-LFG-RoleIcon-DPS",
+    NONE = "UI-LFG-RoleIcon-DPS",
+  }
+  local disabledRoleIcons = {
+    GUIDE = "UI-LFG-RoleIcon-Leader-Disabled",
+    TANK = "UI-LFG-RoleIcon-Tank-Disabled",
+    HEALER = "UI-LFG-RoleIcon-Healer-Disabled",
+    DAMAGER = "UI-LFG-RoleIcon-DPS-Disabled",
+    NONE = "UI-LFG-RoleIcon-DPS-Disabled",
+  }
+  function GetIconForRole(role, showDisabled)
+    local iconSet = showDisabled and disabledRoleIcons or roleIcons
+    return iconSet[role] or iconSet.NONE
+  end
+end
+
+if GetIconForRoleEnum == nil then
+  function GetIconForRoleEnum(role, showDisabled)
+    local roleName = "NONE"
+    if role == 0 then
+      roleName = "TANK"
+    elseif role == 1 then
+      roleName = "HEALER"
+    elseif role == 2 then
+      roleName = "DAMAGER"
+    elseif Constants ~= nil
+        and Constants.LFG_ROLEConstants ~= nil
+        and role == Constants.LFG_ROLEConstants.LFG_ROLE_NO_ROLE then
+      roleName = "GUIDE"
+    end
+    return GetIconForRole(roleName, showDisabled)
+  end
+end
+
 C_Sound = C_Sound or __wow_namespace()
 -- C_GameRules.* probes listed in PLAN are registered from Rust
 -- (src/lua_api/globals/game_rules.rs), backed by SimState::game_rules.

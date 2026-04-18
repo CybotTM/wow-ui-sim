@@ -130,6 +130,23 @@ fn map_util_helpers_exist_in_shared_bootstrap() {
 }
 
 #[test]
+fn get_icon_for_role_enum_returns_expected_role_atlases() {
+    let env = env();
+    let (tank, healer_disabled, damage): (String, String, String) = env
+        .eval(
+            r#"
+            return GetIconForRoleEnum(Enum.LFGRole.Tank, false),
+                   GetIconForRoleEnum(Enum.LFGRole.Healer, true),
+                   GetIconForRoleEnum(Enum.LFGRole.Damage, false)
+            "#,
+        )
+        .expect("role icon helper should be callable");
+    assert_eq!(tank, "UI-LFG-RoleIcon-Tank");
+    assert_eq!(healer_disabled, "UI-LFG-RoleIcon-Healer-Disabled");
+    assert_eq!(damage, "UI-LFG-RoleIcon-DPS");
+}
+
+#[test]
 fn named_fontstring_is_globally_reachable() {
     // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
     // FontString, matching how named frames and named textures behave.

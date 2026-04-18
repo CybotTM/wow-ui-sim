@@ -141,6 +141,32 @@ fn test_no_warnings_on_startup() {
     }
 }
 
+#[test]
+fn test_edit_mode_layout_update_ignores_preset_layouts_during_startup() {
+    test_timeout! {
+        let env = load_all_addons();
+        install_test_error_handler(&env);
+
+        env.fire_edit_mode_layouts_updated().ok();
+        let warnings = drain_test_errors(&env);
+        let edit_mode_layout_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("Blizzard_EditMode/Shared/EditModeManager.lua:917")
+                    || warning.contains("UpdateLayoutCounts")
+                    || warning.contains("attempt to perform arithmetic on field '?'")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            edit_mode_layout_warnings.is_empty(),
+            "Edit mode layout update should ignore preset layouts when counting saved layouts:\n  {}",
+            edit_mode_layout_warnings.join("\n  ")
+        );
+    }
+}
+
 /// Load all Blizzard addons and apply workarounds (no startup events).
 fn load_all_addons() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -659,6 +685,41 @@ fn test_blizzard_framexml_load_registers_boss_banner_cvar_without_warning() {
             "BossBanner cvar should be readable after registration, got {value:?}"
         );
         assert_eq!(default_value, "0");
+    }
+}
+
+#[test]
+fn test_blizzard_framexml_loads_role_poll_without_role_icon_warning() {
+    test_timeout! {
+        let (env, warnings) = load_single_blizzard_addon("Blizzard_FrameXML");
+
+        let role_icon_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("GetIconForRoleEnum")
+                    || warning.contains("RolePollPopupRoleButton")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            role_icon_warnings.is_empty(),
+            "Blizzard_FrameXML should not warn on RolePoll role icons:\n  {}",
+            role_icon_warnings.join("\n  ")
+        );
+
+        let (tank_role, healer_role, damage_role): (i32, i32, i32) = env
+            .eval(
+                r#"
+                return RolePollPopupRoleButtonTank.role or -1,
+                       RolePollPopupRoleButtonHealer.role or -1,
+                       RolePollPopupRoleButtonDPS.role or -1
+                "#,
+            )
+            .expect("RolePoll role buttons should stay readable after FrameXML load");
+        assert_eq!(tank_role, 0);
+        assert_eq!(healer_role, 1);
+        assert_eq!(damage_role, 2);
     }
 }
 
