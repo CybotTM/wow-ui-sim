@@ -7,10 +7,10 @@ use super::ensure_namespace;
 use crate::lua_bridge::table_set_rust_fn;
 use builders::ensure_pet_info_state;
 use probes::*;
+use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::LuaResult;
 
 pub(super) fn register_tooltip_surface(state: &mut LuaState) -> LuaResult<()> {
     ensure_pet_info_state(state);
@@ -48,10 +48,7 @@ fn register_item_spell_aura_methods(
     Ok(())
 }
 
-fn register_item_container_methods(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-) -> LuaResult<()> {
+fn register_item_container_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     register_tooltip_methods(
         state,
         table_ref,
@@ -113,10 +110,7 @@ fn register_socket_and_currency_methods(
     )
 }
 
-fn register_misc_content_methods(
-    state: &mut LuaState,
-    table_ref: GcRef<Table>,
-) -> LuaResult<()> {
+fn register_misc_content_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     register_tooltip_methods(
         state,
         table_ref,
@@ -178,12 +172,12 @@ fn register_spell_aura_unit_methods(
 
 #[cfg(test)]
 mod tests {
+    use super::super::{LINE_TYPE_ITEM_LEVEL, LINE_TYPE_ITEM_NAME};
     use super::builders::tooltip_for_item_id;
     use super::spell::tooltip_for_spell_id;
     use super::unit::tooltip_for_unit;
     use crate::lua_api::env::WowLuaEnv;
     use crate::lua_api::methods::{table_get, val_to_string};
-    use super::super::{LINE_TYPE_ITEM_LEVEL, LINE_TYPE_ITEM_NAME};
     use rilua::vm::state::LuaState;
     use rilua::{Lua, LuaApiMut, Val};
 

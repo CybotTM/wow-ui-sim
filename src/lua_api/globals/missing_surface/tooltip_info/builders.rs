@@ -4,12 +4,12 @@ use super::super::{
     ensure_namespace, set_table_array,
 };
 use crate::items;
+use crate::lua_api::globals::missing_surface::item_spell::parse_prefixed_id;
 use crate::lua_api::globals::{currency_data, profession_data};
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, table_get, table_set,
     val_to_string,
 };
-use crate::lua_api::globals::missing_surface::item_spell::parse_prefixed_id;
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};

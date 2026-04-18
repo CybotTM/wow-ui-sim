@@ -1,14 +1,14 @@
-use super::builders::{empty_tooltip, push_plain_line, push_tooltip_line};
-use super::spell::tooltip_for_spell_id;
 use super::super::{
     LINE_TYPE_UNIT_NAME, TOOLTIP_TYPE_UNIT, WORLD_CURSOR_GUID, WORLD_LOOT_TOOLTIP_INVENTORY_TYPE,
     WORLD_LOOT_TOOLTIP_SPELL_ID,
 };
+use super::builders::{empty_tooltip, push_plain_line, push_tooltip_line};
+use super::spell::tooltip_for_spell_id;
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, table_set};
 use crate::lua_api::state::RACE_DATA;
-use rilua::vm::state::LuaState;
 use rilua::Val;
+use rilua::vm::state::LuaState;
 
 fn class_color(class_index: i32) -> (f64, f64, f64) {
     match class_index {

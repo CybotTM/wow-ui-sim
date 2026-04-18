@@ -1,16 +1,16 @@
-use super::builders::{empty_tooltip, item_quality_color, push_tooltip_line, tooltip_for_item_id};
 use super::super::{
-    LINE_TYPE_ITEM_NAME, LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME,
-    TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT_AURA,
+    LINE_TYPE_ITEM_NAME, LINE_TYPE_SPELL_DESCRIPTION, LINE_TYPE_SPELL_NAME, TOOLTIP_TYPE_ITEM,
+    TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT_AURA,
 };
-use crate::lua_api::methods::{borrow_state, table_get, table_set};
+use super::builders::{empty_tooltip, item_quality_color, push_tooltip_line, tooltip_for_item_id};
 use crate::lua_api::game_data;
 use crate::lua_api::globals::spell_api;
+use crate::lua_api::methods::{borrow_state, table_get, table_set};
 use crate::spell_descriptions;
 use crate::spells;
 use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB};
-use rilua::vm::state::LuaState;
 use rilua::Val;
+use rilua::vm::state::LuaState;
 
 fn spell_cost_line(spell_id: u32) -> Option<&'static str> {
     match spell_id {
@@ -186,7 +186,15 @@ fn find_mount_name_for_spell(state: &mut LuaState, spell_id: u32) -> Option<Stri
 fn build_mount_tooltip(state: &mut LuaState, spell_id: u32, mount_name: &str) -> Val {
     let tooltip = empty_tooltip(state, TOOLTIP_TYPE_SPELL);
     let lines = table_get(state, tooltip, "lines");
-    push_tooltip_line(state, lines, 1, LINE_TYPE_SPELL_NAME, mount_name, None, false);
+    push_tooltip_line(
+        state,
+        lines,
+        1,
+        LINE_TYPE_SPELL_NAME,
+        mount_name,
+        None,
+        false,
+    );
     push_tooltip_line(
         state,
         lines,
@@ -234,10 +242,7 @@ pub(super) fn spell_id_for_talent_id(state: &LuaState, talent_id: u32) -> Option
     spell_id_for_trait_entry(talent_id).or_else(|| preferred_trait_spell_id(talent_id))
 }
 
-pub(super) fn lookup_player_aura(
-    state: &LuaState,
-    index: i32,
-) -> Option<game_data::AuraInfo> {
+pub(super) fn lookup_player_aura(state: &LuaState, index: i32) -> Option<game_data::AuraInfo> {
     let sim = borrow_state(state).ok()?;
     sim.player.buffs.get((index - 1).max(0) as usize).cloned()
 }

@@ -1,3 +1,6 @@
+use super::super::{
+    LINE_TYPE_SPELL_NAME, TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT_AURA,
+};
 use super::builders::{
     empty_tooltip, inbox_attachment_item_id, merchant_item_id, parse_spell_source,
     pet_action_spell_id, push_plain_line, push_tooltip_line, recipe_output_item,
@@ -7,19 +10,16 @@ use super::builders::{
 };
 use super::spell::{
     lookup_player_aura, lookup_player_aura_by_instance_id, spell_id_for_talent_id,
-    tooltip_for_mount_spell_id, tooltip_for_toy_item_id, tooltip_for_unit_aura,
-    tooltip_for_spell_id,
+    tooltip_for_mount_spell_id, tooltip_for_spell_id, tooltip_for_toy_item_id,
+    tooltip_for_unit_aura,
 };
 use super::unit::{tooltip_for_unit, tooltip_for_world_loot};
-use super::super::{
-    LINE_TYPE_SPELL_NAME, TOOLTIP_TYPE_ITEM, TOOLTIP_TYPE_SPELL, TOOLTIP_TYPE_UNIT_AURA,
-};
 use crate::lua_api::globals::currency_data;
 use crate::lua_api::globals::missing_surface::item_spell::{
     current_item_upgrade_location, parse_item_guid, parse_prefixed_id,
 };
-use crate::lua_api::methods::{borrow_state, create_string, table_get, table_set};
 use crate::lua_api::globals::spellbook_data;
+use crate::lua_api::methods::{borrow_state, create_string, table_get, table_set};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -365,9 +365,7 @@ pub(super) fn c_tooltip_get_unit_aura(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-pub(super) fn c_tooltip_get_unit_aura_by_aura_instance_id(
-    state: &mut LuaState,
-) -> LuaResult<u32> {
+pub(super) fn c_tooltip_get_unit_aura_by_aura_instance_id(state: &mut LuaState) -> LuaResult<u32> {
     let _unit = String::from_stack(state, 1)?;
     let aura_instance_id = i32::from_stack(state, 2)?;
     let aura = lookup_player_aura_by_instance_id(state, aura_instance_id);
@@ -553,4 +551,3 @@ pub(super) fn c_tooltip_get_trainer_service(state: &mut LuaState) -> LuaResult<u
     state.push(Val::Nil);
     Ok(1)
 }
-
