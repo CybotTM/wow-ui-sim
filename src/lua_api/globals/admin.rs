@@ -30,7 +30,8 @@ use super::admin_auction_house::{
     clear_owned_auctions,
 };
 use super::admin_crafting::{
-    clear_known_recipes, learn_recipe, set_selected_profession, unlearn_recipe,
+    clear_known_recipes, learn_recipe, seed_reagents_for_recipe, set_reagent_count,
+    set_selected_profession, unlearn_recipe,
 };
 use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
 use super::admin_collections::{
@@ -301,7 +302,9 @@ fn register_crafting(b: TableBuilder) -> LuaResult<TableBuilder> {
     b.set_function("LearnRecipe", learn_recipe)?
         .set_function("UnlearnRecipe", unlearn_recipe)?
         .set_function("ClearKnownRecipes", clear_known_recipes)?
-        .set_function("SetSelectedProfession", set_selected_profession)
+        .set_function("SetSelectedProfession", set_selected_profession)?
+        .set_function("SetReagentCount", set_reagent_count)?
+        .set_function("SeedReagentsForRecipe", seed_reagents_for_recipe)
 }
 
 // ── Player identity ──────────────────────────────────────────────────────────

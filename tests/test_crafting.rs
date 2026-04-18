@@ -219,3 +219,145 @@ fn craft_recipe_returns_false_and_no_op_when_reagents_missing() {
         "CraftRecipe with missing reagents should be a no-op: {result}"
     );
 }
+
+#[test]
+fn set_reagent_count_creates_then_replaces_then_clears() {
+    let env = env();
+    let result: String = env
+        .eval(&format!(
+            r#"
+            {COUNT_ITEM}
+            A_Admin.ClearBags()
+
+            -- Create a fresh slot.
+            A_Admin.SetReagentCount(210934, 5)
+            local first = count_item(210934)
+            if first ~= 5 then return "create=" .. first end
+
+            -- Replace, not append, when the item is already present.
+            A_Admin.SetReagentCount(210934, 12)
+            local replaced = count_item(210934)
+            if replaced ~= 12 then return "replace=" .. replaced end
+
+            -- qty=0 clears every slot for that item.
+            A_Admin.SetReagentCount(210934, 0)
+            local cleared = count_item(210934)
+            if cleared ~= 0 then return "clear=" .. cleared end
+
+            return "ok"
+            "#
+        ))
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "SetReagentCount should create / replace / clear: {result}"
+    );
+}
+
+#[test]
+fn set_reagent_count_collapses_duplicate_slots_into_one() {
+    let env = env();
+    let result: String = env
+        .eval(&format!(
+            r#"
+            {COUNT_ITEM}
+            A_Admin.ClearBags()
+            -- Manually plant two stacks of the same item across two slots,
+            -- then SetReagentCount should collapse them into a single
+            -- slot with the requested total (not 2 stacks adding up).
+            A_Admin.AddBagItem(0, 1, 210934, 4)
+            A_Admin.AddBagItem(0, 2, 210934, 7)
+            local before = count_item(210934)
+            if before ~= 11 then return "before=" .. before end
+
+            A_Admin.SetReagentCount(210934, 20)
+            local after = count_item(210934)
+            if after ~= 20 then return "after=" .. after end
+
+            -- Confirm only one slot now holds the item.
+            local slot_count = 0
+            for slot = 1, C_Container.GetContainerNumSlots(0) do
+                local info = C_Container.GetContainerItemInfo(0, slot)
+                if info and info.itemID == 210934 then
+                    slot_count = slot_count + 1
+                end
+            end
+            if slot_count ~= 1 then return "slots=" .. slot_count end
+
+            return "ok"
+            "#
+        ))
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "SetReagentCount should collapse duplicate slots into one: {result}"
+    );
+}
+
+#[test]
+fn seed_reagents_for_recipe_makes_it_craftable_at_count_one() {
+    let env = env();
+    let result: String = env
+        .eval(&format!(
+            r#"
+            {COUNT_ITEM}
+            A_Admin.ClearBags()
+            local ok = A_Admin.SeedReagentsForRecipe(100001, 1)
+            if ok ~= true then return "seed_failed" end
+            if not C_TradeSkillUI.IsRecipeCraftable(100001) then
+                return "not_craftable"
+            end
+            -- Recipe 100001 needs 12 of 210934 + 2 of 210937.
+            if count_item(210934) ~= 12 then return "r1=" .. count_item(210934) end
+            if count_item(210937) ~= 2 then return "r2=" .. count_item(210937) end
+            return "ok"
+            "#
+        ))
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "SeedReagentsForRecipe(id, 1) should populate exactly one craft worth: {result}"
+    );
+}
+
+#[test]
+fn seed_reagents_for_recipe_supports_count_arg() {
+    let env = env();
+    let result: String = env
+        .eval(&format!(
+            r#"
+            {COUNT_ITEM}
+            A_Admin.ClearBags()
+            A_Admin.SeedReagentsForRecipe(100001, 4)
+            -- 4 crafts of 12+2 reagents.
+            if count_item(210934) ~= 48 then return "r1=" .. count_item(210934) end
+            if count_item(210937) ~= 8 then return "r2=" .. count_item(210937) end
+            -- And the recipe is craftable 4 times but not 5.
+            if not C_TradeSkillUI.IsRecipeCraftable(100001, 4) then return "not_4" end
+            if C_TradeSkillUI.IsRecipeCraftable(100001, 5) then return "is_5" end
+            return "ok"
+            "#
+        ))
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "SeedReagentsForRecipe should scale by count: {result}"
+    );
+}
+
+#[test]
+fn seed_reagents_for_unknown_recipe_returns_false() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.ClearBags()
+            return tostring(A_Admin.SeedReagentsForRecipe(99999, 1))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "false",
+        "SeedReagentsForRecipe with unknown id should return false"
+    );
+}

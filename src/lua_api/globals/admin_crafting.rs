@@ -1,9 +1,15 @@
 //! Rilua A_Admin handlers — Crafting / profession seeding.
 //!
-//! Provides `LearnRecipe`, `UnlearnRecipe`, `ClearKnownRecipes`, and
-//! `SetSelectedProfession` for test-side setup of the crafting surface.
+//! Provides `LearnRecipe`, `UnlearnRecipe`, `ClearKnownRecipes`,
+//! `SetSelectedProfession`, plus the higher-level reagent seeders
+//! `SetReagentCount` and `SeedReagentsForRecipe` that bypass the
+//! per-`(bag, slot)` bookkeeping the generic `A_Admin.AddBagItem`
+//! requires — the Professions crafting page just needs "the player
+//! has N of item X", not a specific slot.
 
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::globals::profession_data;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::state::BagItem;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -40,4 +46,103 @@ pub(super) fn set_selected_profession(state: &mut LuaState) -> LuaResult<u32> {
     };
     borrow_state_mut(state)?.crafting.selected_profession_id = id;
     Ok(0)
+}
+
+/// `A_Admin.SetReagentCount(item_id, qty)` — set the player's total
+/// owned count of `item_id` across all bag slots to exactly `qty`. If
+/// `qty == 0`, every slot holding that item is removed. Otherwise the
+/// first existing slot with that item is replaced; if none exists, a
+/// fresh slot is appended to bag 0 (lowest free slot).
+pub(super) fn set_reagent_count(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = u32::from_stack(state, 1)?;
+    let qty = i32::from_stack(state, 2)?;
+    apply_reagent_count(state, item_id, qty);
+    Ok(0)
+}
+
+/// `A_Admin.SeedReagentsForRecipe(recipe_id, count)` — bulk-seed every
+/// reagent in `recipe_id` at `required_count * count`, so the recipe
+/// becomes craftable exactly `count` times. Returns `true` on success;
+/// `false` (no-op) when `recipe_id` is unknown to `profession_data`.
+pub(super) fn seed_reagents_for_recipe(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let count = i32::from_stack(state, 2)?.max(0);
+    let recipe = profession_data::get_recipe(recipe_id);
+    let Some(recipe) = recipe else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let plan: Vec<(u32, i32)> = recipe
+        .reagents
+        .iter()
+        .map(|r| (r.item_id, r.quantity * count))
+        .collect();
+    for (item_id, qty) in plan {
+        apply_reagent_count(state, item_id, qty);
+    }
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn apply_reagent_count(state: &mut LuaState, item_id: u32, qty: i32) {
+    let existing_slots = collect_slots_for_item(state, item_id);
+    let mut sim = match borrow_state_mut(state) {
+        Ok(sim) => sim,
+        Err(_) => return,
+    };
+    if qty <= 0 {
+        for key in existing_slots {
+            sim.bag_items.remove(&key);
+        }
+        return;
+    }
+    if let Some(first_key) = existing_slots.first() {
+        // Collapse extras, then set the primary stack to the new total.
+        for key in existing_slots.iter().skip(1) {
+            sim.bag_items.remove(key);
+        }
+        if let Some(slot) = sim.bag_items.get_mut(first_key) {
+            slot.stack_count = qty;
+        }
+        return;
+    }
+    let next_slot = next_free_slot_in_bag(&sim, 0);
+    sim.bag_items.insert(
+        (0, next_slot),
+        BagItem {
+            item_id,
+            stack_count: qty,
+        },
+    );
+}
+
+fn collect_slots_for_item(state: &LuaState, item_id: u32) -> Vec<(i32, i32)> {
+    let Ok(sim) = borrow_state(state) else {
+        return Vec::new();
+    };
+    let mut keys: Vec<(i32, i32)> = sim
+        .bag_items
+        .iter()
+        .filter_map(|(key, item)| (item.item_id == item_id).then_some(*key))
+        .collect();
+    keys.sort();
+    keys
+}
+
+fn next_free_slot_in_bag(sim: &crate::lua_api::state::SimState, bag: i32) -> i32 {
+    let mut taken: Vec<i32> = sim
+        .bag_items
+        .keys()
+        .filter_map(|(b, slot)| (*b == bag).then_some(*slot))
+        .collect();
+    taken.sort();
+    let mut next = 1;
+    for slot in taken {
+        if slot == next {
+            next += 1;
+        } else if slot > next {
+            break;
+        }
+    }
+    next
 }
