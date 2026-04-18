@@ -8,6 +8,15 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 
 pub fn apply_post_event(_env: &crate::lua_api::WowLuaEnv) {}
 
+pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
+    if matches!(
+        addon_name,
+        "Blizzard_SharedTalentUI" | "Blizzard_PlayerSpells"
+    ) {
+        patch_shared_talent_util(env);
+    }
+}
+
 fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(GETGLOBAL_HELPER_LUA);
     let _ = env.exec(TOGGLE_ACHIEVEMENT_FRAME_LUA);
@@ -108,3 +117,32 @@ if __wow_panel_getglobal ~= nil then
     end
 end
 "#;
+
+const SHARED_TALENT_UTIL_COMBINE_COST_ARRAYS_LUA: &str = r###"
+if TalentUtil and type(TalentUtil.CombineCostArrays) == "function" and not TalentUtil.__wow_ui_sim_nil_safe_combine then
+    local original = TalentUtil.CombineCostArrays
+    function TalentUtil.CombineCostArrays(...)
+        local combinedCostMap = {}
+        for i = 1, select("#", ...) do
+            local costArray = select(i, ...)
+            if type(costArray) == "table" then
+                for _, cost in ipairs(costArray) do
+                    combinedCostMap[cost.ID] = (combinedCostMap[cost.ID] or 0) + cost.amount
+                end
+            end
+        end
+
+        local combinedCostArray = {}
+        for ID, amount in pairs(combinedCostMap) do
+            table.insert(combinedCostArray, { ID = ID, amount = amount })
+        end
+        return combinedCostArray
+    end
+    TalentUtil.__wow_ui_sim_nil_safe_combine = true
+    TalentUtil.__wow_ui_sim_original_combine = original
+end
+"###;
+
+fn patch_shared_talent_util(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(SHARED_TALENT_UTIL_COMBINE_COST_ARRAYS_LUA);
+}

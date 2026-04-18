@@ -502,6 +502,7 @@ fn load_runtime_addon_with_dependencies(
         eprintln!("[load_addon] warning {addon_name}: {warning}");
     }
     eprintln!("[load_addon] loaded {addon_name}");
+    crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
     mark_addon_loaded(loader_env, addon_name);
     fire_addon_loaded(state, loader_env, addon_name);
     eprintln!("[load_addon] event {addon_name}");
