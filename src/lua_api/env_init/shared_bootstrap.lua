@@ -139,6 +139,32 @@ if Saturate == nil then
   end
 end
 
+if CooldownFrame_Set == nil then
+  function CooldownFrame_Set(self, start, duration, enable, forceShowDrawEdge, modRate)
+    if enable and enable ~= 0 and start > 0 and duration > 0 then
+      self:SetDrawEdge(forceShowDrawEdge)
+      self:SetCooldown(start, duration, modRate)
+    else
+      CooldownFrame_Clear(self)
+    end
+  end
+end
+
+if CooldownFrame_Clear == nil then
+  function CooldownFrame_Clear(self)
+    self:Clear()
+    self:SetCooldown(0, 0)
+  end
+end
+
+if CooldownFrame_SetDisplayAsPercentage == nil then
+  function CooldownFrame_SetDisplayAsPercentage(self, percentage)
+    local seconds = 100
+    self:Pause()
+    self:SetCooldown(GetTime() - (seconds * Saturate(percentage)), seconds)
+  end
+end
+
 if FadingFrame_SetFadeInTime == nil then
   function FadingFrame_SetFadeInTime(fadingFrame, time)
     fadingFrame.fadeInTime = time

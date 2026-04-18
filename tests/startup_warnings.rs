@@ -702,3 +702,63 @@ fn test_blizzard_framexml_loads_zone_text_without_fading_frame_warning() {
         assert_eq!(fade_out, 2.0);
     }
 }
+
+#[test]
+fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
+    test_timeout! {
+        let (_env, warnings) = load_blizzard_addon_by_folder("Blizzard_Commentator");
+
+        let cooldown_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("CooldownFrame_Set")
+                    || warning.contains("CooldownFrame_Clear")
+                    || warning.contains("Blizzard_CommentatorSpell.lua:74")
+                    || warning.contains("Blizzard_CommentatorSpell.lua:87")
+                    || warning.contains("Blizzard_CommentatorSpell.lua:88")
+                    || warning.contains("Blizzard_CommentatorSpell.lua:105")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            cooldown_warnings.is_empty(),
+            "Blizzard_Commentator should not warn on cooldown-frame helpers:\n  {}",
+            cooldown_warnings.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
+    test_timeout! {
+        let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_HousingTutorials");
+
+        let bitfield_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("GetCVarBitfield")
+                    || warning.contains("CvarUtil.lua:30")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            bitfield_warnings.is_empty(),
+            "Blizzard_HousingTutorials should not warn on CVar bitfield helpers:\n  {}",
+            bitfield_warnings.join("\n  ")
+        );
+
+        let tutorial_seen: bool = env
+            .eval(
+                r#"
+                return C_CVar.GetCVarBitfield(
+                    "closedInfoFramesAccountWide",
+                    Enum.FrameTutorialAccount.HousingItemAcquisition
+                )
+                "#,
+            )
+            .expect("housing tutorial bitfield read should be callable after addon load");
+        let _ = tutorial_seen;
+    }
+}
