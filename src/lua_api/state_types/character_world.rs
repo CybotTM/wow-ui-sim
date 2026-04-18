@@ -138,7 +138,10 @@ pub struct MovementState {
 }
 
 /// Player character state: identity, combat, power, health, buffs, spec.
-#[derive(Debug, Clone)]
+///
+/// `Default` is derived: every field is its zero/empty value. The seeded
+/// "level 70 paladin" preset lives in [`PlayerState::seeded`].
+#[derive(Debug, Clone, Default)]
 pub struct PlayerState {
     pub name: String,
     pub health: i32,
@@ -192,8 +195,10 @@ pub struct PlayerState {
     pub mythic_plus_rating_summary: Option<MythicPlusRatingSummary>,
 }
 
-impl Default for PlayerState {
-    fn default() -> Self {
+impl PlayerState {
+    /// Seeded "level 70 paladin" preset used to bootstrap a fresh `Sim`.
+    /// All other fields keep their `Default`-derived zero/empty values.
+    pub fn seeded() -> Self {
         let equipped_items = default_equipped_items();
         let stats = CharacterStats::compute(&equipped_items, 2);
         Self {
@@ -211,52 +216,8 @@ impl Default for PlayerState {
             next_mail_id: 1,
             xp_max: 180_000,
             alternate_form_is_default: true,
-            ..zeroed_player_state()
+            ..Self::default()
         }
-    }
-}
-
-/// All-zero/empty `PlayerState`. The seeded values (level 70, class 2,
-/// 100k HP, etc.) are layered on top by `PlayerState::default` via the
-/// `..` struct-update syntax.
-fn zeroed_player_state() -> PlayerState {
-    PlayerState {
-        name: String::new(),
-        health: 0,
-        health_max: 0,
-        class_index: 0,
-        race_index: 0,
-        level: 0,
-        sex: 0,
-        power: 0,
-        power_max: 0,
-        power_type: 0,
-        secondary_powers: HashMap::new(),
-        in_combat: false,
-        is_resting: false,
-        money: 0,
-        item_level: 0.0,
-        equipped_items: HashMap::new(),
-        stats: CharacterStats::default(),
-        pvp_enabled: false,
-        honor_level: 0,
-        buffs: Vec::new(),
-        movement: MovementState::default(),
-        active_spec_index: 0,
-        pending_spec_change: None,
-        inbox: Vec::new(),
-        send_mail_items: Default::default(),
-        send_mail_money: 0,
-        send_mail_cod: 0,
-        next_mail_id: 0,
-        xp: 0,
-        xp_max: 0,
-        is_alternate_form: false,
-        alternate_form_is_default: false,
-        is_npe_eligible: false,
-        is_npe_restricted: false,
-        is_in_rpe: false,
-        mythic_plus_rating_summary: None,
     }
 }
 
