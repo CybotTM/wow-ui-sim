@@ -246,6 +246,76 @@ fn build_sequence_fast_handler(
                 ],
             )?)))
         }
+        FastHandlerRef::ConditionalGlobalFunctionWithNoArgFunctionResultThen {
+            function_name,
+            arg_function_name,
+            then_ref,
+        } => {
+            let then_handler = build_fast_handler(state, (**then_ref).clone())?;
+            let condition = crate::lua_api::globals::create_frame::helpers::resolve_global_path(
+                state,
+                function_name,
+            );
+            let arg_function = crate::lua_api::globals::create_frame::helpers::resolve_global_path(
+                state,
+                arg_function_name,
+            );
+            let builder = load_template(
+                state,
+                r#"
+                    local condition, arg_function, then_handler = ...
+                    return function(self, ...)
+                        if not condition(arg_function()) then
+                            return
+                        end
+                        if then_handler then
+                            return then_handler(self, ...)
+                        end
+                    end
+                "#,
+                "template-inline-conditional-global-function-noarg-result-then",
+            )?;
+            Ok(Some(Some(crate::lua_api::methods::call_function_state(
+                state,
+                Val::Function(builder.gc_ref()),
+                &[condition, arg_function, then_handler.unwrap_or(Val::Nil)],
+            )?)))
+        }
+        FastHandlerRef::ConditionalGlobalFieldEqualsStringThen {
+            target_path,
+            field,
+            value,
+            then_ref,
+        } => {
+            let then_handler = build_fast_handler(state, (**then_ref).clone())?;
+            let target = crate::lua_api::globals::create_frame::helpers::resolve_global_path(
+                state,
+                target_path,
+            );
+            let field = create_string(state, field);
+            let value = create_string(state, value);
+            let builder = load_template(
+                state,
+                r#"
+                    local target, field, value, then_handler = ...
+                    return function(self, ...)
+                        if not target or target[field] ~= value then
+                            return
+                        end
+                        if then_handler then
+                            return then_handler(self, ...)
+                        end
+                    end
+                "#,
+                "template-inline-conditional-global-field-equals-string-then",
+            )?;
+
+            Ok(Some(Some(crate::lua_api::methods::call_function_state(
+                state,
+                Val::Function(builder.gc_ref()),
+                &[target, field, value, then_handler.unwrap_or(Val::Nil)],
+            )?)))
+        }
         FastHandlerRef::ConditionalSelfNoArgsMethod {
             method_name,
             then_ref,

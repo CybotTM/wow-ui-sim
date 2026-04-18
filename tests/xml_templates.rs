@@ -2693,7 +2693,9 @@ fn test_create_frame_from_xml_inline_local_global_path_conditional_method_runs()
     "#,
     )
     .unwrap();
-    let first: i32 = env.eval("return BrowserSettingsTooltip.browser.calls").unwrap();
+    let first: i32 = env
+        .eval("return BrowserSettingsTooltip.browser.calls")
+        .unwrap();
     assert_eq!(first, 1);
 
     env.exec(
@@ -2737,7 +2739,9 @@ fn test_create_frame_from_xml_inline_conditional_self_text_empty_show_text_child
     "#,
     )
     .unwrap();
-    let shown: bool = env.eval("return XmlInlineEmptyTextEditBox.Text.shown").unwrap();
+    let shown: bool = env
+        .eval("return XmlInlineEmptyTextEditBox.Text.shown")
+        .unwrap();
     assert!(shown);
 }
 
@@ -2771,7 +2775,9 @@ fn test_create_frame_from_xml_inline_grandparent_method_with_not_self_checked_ar
     "#,
     )
     .unwrap();
-    let first: bool = env.eval("return XmlInlineGrandparentRoot.disabledState").unwrap();
+    let first: bool = env
+        .eval("return XmlInlineGrandparentRoot.disabledState")
+        .unwrap();
     assert!(first);
 
     env.exec(
@@ -2781,7 +2787,9 @@ fn test_create_frame_from_xml_inline_grandparent_method_with_not_self_checked_ar
     "#,
     )
     .unwrap();
-    let second: bool = env.eval("return XmlInlineGrandparentRoot.disabledState").unwrap();
+    let second: bool = env
+        .eval("return XmlInlineGrandparentRoot.disabledState")
+        .unwrap();
     assert!(!second);
 }
 
@@ -3214,7 +3222,10 @@ fn test_create_frame_from_xml_inline_tooltip_title_line_show_sequence_runs() {
     let result: String = env
         .eval(r#"return table.concat(XmlInlineTooltipLog, ",")"#)
         .unwrap();
-    assert_eq!(result, "owner,title:Cleanup:highlight,line:Cleanup desc,show");
+    assert_eq!(
+        result,
+        "owner,title:Cleanup:highlight,line:Cleanup desc,show"
+    );
 }
 
 #[test]
@@ -3621,6 +3632,212 @@ fn test_create_frame_from_xml_inline_conditional_not_enabled_then_add_line_runs(
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_conditional_global_field_equals_string_then_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        PetitionFrame = { petitionType = "guild" }
+        XmlInlinePopupArgs = nil
+        function StaticPopup_Show(which)
+            XmlInlinePopupArgs = { which }
+        end
+    "#,
+    )
+    .unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlinePetitionRenameButton" parent="UIParent">
+            <Scripts><OnClick>
+                if ( PetitionFrame.petitionType == "guild" ) then
+                    StaticPopup_Show("RENAME_GUILD");
+                end
+            </OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+    env.exec(
+        r#"
+        XmlInlinePetitionRenameButton:GetScript("OnClick")(XmlInlinePetitionRenameButton)
+    "#,
+    )
+    .unwrap();
+    let result: String = env.eval(r#"return XmlInlinePopupArgs[1]"#).unwrap();
+    assert_eq!(result, "RENAME_GUILD");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_petbattle_tooltip_sequence_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        Enum = { BattlePetOwner = { Weather = "weather" } }
+        PET_BATTLE_PAD_INDEX = "pad"
+        XmlInlinePetBattleTooltipLog = {}
+        function PetBattleAbilityTooltip_SetAura(owner, index, aura)
+            table.insert(XmlInlinePetBattleTooltipLog, string.format("aura:%s:%s:%s", owner, index, aura))
+        end
+        function PetBattleAbilityTooltip_Show(anchor, owner, relative, x, y)
+            table.insert(XmlInlinePetBattleTooltipLog, string.format("show:%s:%s:%s:%s", anchor, relative, x, y))
+        end
+    "#,
+    )
+    .unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlinePetBattleTooltipButton" parent="UIParent">
+            <Scripts><OnEnter>
+                PetBattleAbilityTooltip_SetAura(Enum.BattlePetOwner.Weather, PET_BATTLE_PAD_INDEX, 1);
+                PetBattleAbilityTooltip_Show("TOP", self, "BOTTOM", 0, 0);
+            </OnEnter></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+    env.exec(
+        r#"
+        XmlInlinePetBattleTooltipButton:GetScript("OnEnter")(XmlInlinePetBattleTooltipButton)
+    "#,
+    )
+    .unwrap();
+    let result: String = env
+        .eval(r#"return table.concat(XmlInlinePetBattleTooltipLog, ",")"#)
+        .unwrap();
+    assert_eq!(result, "aura:weather:pad:1,show:TOP:BOTTOM:0:0");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_hide_then_conditional_then_sound_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        ChatConfigFrame = "chat-config"
+        Blizzard_CombatLog_CurrentSettings = "settings"
+        XmlInlineChatConfigLog = {}
+        function HideUIPanel(frame)
+            table.insert(XmlInlineChatConfigLog, "hide:" .. tostring(frame))
+        end
+        function FCF_GetCurrentChatFrame()
+            table.insert(XmlInlineChatConfigLog, "frame")
+            return "frame-1"
+        end
+        function IsCombatLog(frame)
+            table.insert(XmlInlineChatConfigLog, "iscombat:" .. tostring(frame))
+            return true
+        end
+        function Blizzard_CombatLog_RefreshGlobalLinks()
+            table.insert(XmlInlineChatConfigLog, "refresh")
+        end
+        C_CombatLog = {
+            ApplyFilterSettings = function(settings)
+                table.insert(XmlInlineChatConfigLog, "apply:" .. tostring(settings))
+            end,
+            RefilterEntries = function()
+                table.insert(XmlInlineChatConfigLog, "refilter")
+            end,
+        }
+        SOUNDKIT = { GS_TITLE_OPTION_OK = "ok" }
+        function PlaySound(sound)
+            table.insert(XmlInlineChatConfigLog, "sound:" .. tostring(sound))
+        end
+    "#,
+    )
+    .unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineChatConfigButton" parent="UIParent">
+            <Scripts><OnClick>
+                HideUIPanel(ChatConfigFrame);
+                if ( IsCombatLog(FCF_GetCurrentChatFrame()) ) then
+                    Blizzard_CombatLog_RefreshGlobalLinks();
+                    C_CombatLog.ApplyFilterSettings(Blizzard_CombatLog_CurrentSettings);
+                    C_CombatLog.RefilterEntries();
+                end
+                PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
+            </OnClick></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+    env.exec(
+        r#"
+        XmlInlineChatConfigButton:GetScript("OnClick")(XmlInlineChatConfigButton)
+    "#,
+    )
+    .unwrap();
+    let result: String = env
+        .eval(r#"return table.concat(XmlInlineChatConfigLog, ",")"#)
+        .unwrap();
+    assert_eq!(
+        result,
+        "hide:chat-config,frame,iscombat:frame-1,refresh,apply:settings,refilter,sound:ok"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_shift_insert_else_parent_execute_and_clear_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineConsoleLog = {}
+        function IsShiftKeyDown()
+            return false
+        end
+    "#,
+    )
+    .unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineConsoleRoot" parent="UIParent">
+            <Frames>
+                <EditBox name="XmlInlineConsoleEditBox">
+                    <Scripts><OnEnterPressed>
+                        if IsShiftKeyDown() then
+                            self:Insert("\n");
+                        else
+                            local text = self:GetText();
+                            if text and #text > 0 then
+                                self:GetParent():ExecuteCommand(self:GetText());
+                                self:SetText("");
+                            end
+                        end
+                    </OnEnterPressed></Scripts>
+                </EditBox>
+            </Frames>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+    env.exec(
+        r#"
+        function XmlInlineConsoleRoot:ExecuteCommand(text)
+            table.insert(XmlInlineConsoleLog, text)
+        end
+        XmlInlineConsoleEditBox:SetText("run this")
+        XmlInlineConsoleEditBox:GetScript("OnEnterPressed")(XmlInlineConsoleEditBox)
+    "#,
+    )
+    .unwrap();
+    let result: (String, String) = env
+        .eval(
+            r#"
+            return XmlInlineConsoleLog[1], XmlInlineConsoleEditBox:GetText()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "run this");
+    assert_eq!(result.1, "");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_tooltip_set_text_function_result_and_three_numbers_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -3729,7 +3946,8 @@ fn test_create_frame_from_xml_inline_tooltip_set_owner_then_function_result_text
 }
 
 #[test]
-fn test_create_frame_from_xml_inline_tooltip_set_text_global_string_function_result_and_three_numbers_runs() {
+fn test_create_frame_from_xml_inline_tooltip_set_text_global_string_function_result_and_three_numbers_runs()
+ {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
     env.exec(

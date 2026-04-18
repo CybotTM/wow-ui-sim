@@ -37,6 +37,10 @@ fn build_direct_method_variants(
             )
             .map(Some)
         }
+        FastHandlerRef::ConditionalSelfGetTextNonEmptyThenParentMethodWithSelfGetTextAndClear {
+            method_name,
+        } => build_conditional_self_get_text_non_empty_then_parent_method_with_self_get_text_and_clear_handler(state, method_name)
+            .map(Some),
         FastHandlerRef::ConditionalNotSelfNoArgsMethodThen {
             method_name,
             then_ref,
@@ -200,6 +204,32 @@ fn build_conditional_self_text_empty_show_text_child_handler(
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[])
 }
 
+fn build_conditional_self_get_text_non_empty_then_parent_method_with_self_get_text_and_clear_handler(
+    state: &mut LuaState,
+    method_name: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local method_name = ...
+            return function(self, ...)
+                local text = self:GetText()
+                if text and #text > 0 then
+                    self:GetParent()[method_name](self:GetParent(), self:GetText())
+                    return self:SetText("")
+                end
+            end
+        "#,
+        "template-conditional-self-get-text-non-empty-then-parent-method-with-self-get-text-and-clear",
+    )?;
+    let method_name = create_string(state, method_name);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name],
+    )
+}
+
 fn build_conditional_not_self_noargs_method_then_handler(
     state: &mut LuaState,
     method_name: &str,
@@ -288,7 +318,14 @@ fn build_self_field_method_with_string_self_string_number_number_args_handler(
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[field_name, method_name, first, third, Val::Num(fourth), Val::Num(fifth)],
+        &[
+            field_name,
+            method_name,
+            first,
+            third,
+            Val::Num(fourth),
+            Val::Num(fifth),
+        ],
     )
 }
 

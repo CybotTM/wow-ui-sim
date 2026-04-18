@@ -11,6 +11,13 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             FastHandlerRef::MethodThenUncheckedParentFieldClearAndShowText { method_name, field },
         );
     }
+    if let Some(method_name) = parse_conditional_self_get_text_non_empty_then_parent_method(stmt) {
+        return Some(
+            FastHandlerRef::ConditionalSelfGetTextNonEmptyThenParentMethodWithSelfGetTextAndClear {
+                method_name,
+            },
+        );
+    }
     if let Some(field) = parse_parent_field_local_toggle_shown(stmt) {
         return Some(FastHandlerRef::ParentFieldLocalToggleShown { field });
     }
@@ -183,6 +190,29 @@ fn parse_method_then_unchecked_parent_field_clear_and_show_text(
         .trim();
     (clear_field == show_field && is_fast_identifier(clear_field))
         .then_some((method_name, clear_field))
+}
+
+fn parse_conditional_self_get_text_non_empty_then_parent_method(stmt: &str) -> Option<&str> {
+    let stmt = stmt.trim();
+    let prefix = "local text = self:GetText();";
+    let remainder = stmt.strip_prefix(prefix)?.trim_start();
+    let remainder = remainder
+        .strip_prefix("if text and #text > 0 then")?
+        .trim_start();
+    let (parent_stmt, tail) = remainder.split_once(';')?;
+    let method_name = parent_stmt
+        .trim()
+        .strip_prefix("self:GetParent():")?
+        .strip_suffix("(self:GetText())")?
+        .trim();
+    if !is_fast_identifier(method_name) {
+        return None;
+    }
+    let tail = tail.trim();
+    let expected = r#"self:SetText("");"#;
+    let expected_no_semi = r#"self:SetText("")"#;
+    let end_tail = tail.strip_suffix("end")?.trim();
+    (end_tail == expected || end_tail == expected_no_semi).then_some(method_name)
 }
 
 fn parse_conditional_self_text_empty_show_text_child(stmt: &str) -> Option<()> {
@@ -407,10 +437,14 @@ fn parse_inline_self_field_method_with_string_self_string_number_number_args(
     }
     let field = field.trim();
     let method_name = method_name.trim();
-    (is_fast_identifier(field)
-        && is_fast_identifier(method_name)
-        && second == "self")
-    .then_some((field, method_name, first, third, fourth, fifth))
+    (is_fast_identifier(field) && is_fast_identifier(method_name) && second == "self").then_some((
+        field,
+        method_name,
+        first,
+        third,
+        fourth,
+        fifth,
+    ))
 }
 
 fn parse_inline_self_field_method_with_self_field_arg(stmt: &str) -> Option<(&str, &str, &str)> {

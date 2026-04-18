@@ -279,6 +279,17 @@ enum FastHandlerRef<'a> {
         then_ref: Box<FastHandlerRef<'a>>,
         else_ref: Box<FastHandlerRef<'a>>,
     },
+    ConditionalGlobalFunctionWithNoArgFunctionResultThen {
+        function_name: &'a str,
+        arg_function_name: &'a str,
+        then_ref: Box<FastHandlerRef<'a>>,
+    },
+    ConditionalGlobalFieldEqualsStringThen {
+        target_path: &'a str,
+        field: &'a str,
+        value: &'a str,
+        then_ref: Box<FastHandlerRef<'a>>,
+    },
     ConditionalSelfNoArgsMethod {
         method_name: &'a str,
         then_ref: Box<FastHandlerRef<'a>>,
@@ -509,6 +520,12 @@ enum FastHandlerRef<'a> {
         first: &'a str,
         second: f64,
     },
+    FunctionWithTwoGlobalNumberArgs {
+        function_name: &'a str,
+        first_arg_path: &'a str,
+        second_arg_path: &'a str,
+        third: f64,
+    },
     FunctionWithStringNilNilGlobalArgs {
         function_name: &'a str,
         first: &'a str,
@@ -530,6 +547,13 @@ enum FastHandlerRef<'a> {
     FunctionWithSelfStringArg {
         function_name: &'a str,
         arg: &'a str,
+    },
+    FunctionWithStringSelfStringNumberNumberArgs {
+        function_name: &'a str,
+        first: &'a str,
+        third: &'a str,
+        fourth: f64,
+        fifth: f64,
     },
     FunctionWithSelfNumberArg {
         function_name: &'a str,
@@ -629,6 +653,9 @@ enum FastHandlerRef<'a> {
     MethodThenUncheckedParentFieldClearAndShowText {
         method_name: &'a str,
         field: &'a str,
+    },
+    ConditionalSelfGetTextNonEmptyThenParentMethodWithSelfGetTextAndClear {
+        method_name: &'a str,
     },
     ConditionalSelfTextEmptyShowTextChild,
     LocalGlobalPathConditionalMethod {
@@ -858,20 +885,51 @@ fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str
 
 #[cfg(test)]
 mod tests {
-    use super::{first_fast_install_miss, scripts_support_fast_install};
+    use super::{first_fast_install_miss, parser, scripts_support_fast_install};
     use crate::xml::{ScriptBodyXml, ScriptsXml};
 
     #[test]
     fn scripts_support_fast_install_for_character_frame_tooltip_body() {
-        let scripts = ScriptsXml {
-            on_enter: vec![ScriptBodyXml {
-                body: Some(
-                    r#"
+        let body = r#"
                         GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
                         GameTooltip:SetText(MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), 1.0,1.0,1.0 );
-                    "#
-                    .to_string(),
-                ),
+                    "#;
+        assert!(
+            parser::parse_inline_fast_handler("OnEnter", body).is_some(),
+            "parser miss"
+        );
+        let scripts = ScriptsXml {
+            on_enter: vec![ScriptBodyXml {
+                body: Some(body.to_string()),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        assert!(
+            scripts_support_fast_install(&scripts),
+            "miss={:?}",
+            first_fast_install_miss(&scripts)
+        );
+    }
+
+    #[test]
+    fn parser_supports_chat_config_prefix_conditional_suffix_sequence() {
+        let body = r#"
+                        HideUIPanel(ChatConfigFrame);
+                        if ( IsCombatLog(FCF_GetCurrentChatFrame()) ) then
+                            Blizzard_CombatLog_RefreshGlobalLinks();
+                            C_CombatLog.ApplyFilterSettings(Blizzard_CombatLog_CurrentSettings);
+                            C_CombatLog.RefilterEntries();
+                        end
+                        PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
+                    "#;
+        assert!(
+            parser::parse_inline_fast_handler("OnClick", body).is_some(),
+            "parser miss"
+        );
+        let scripts = ScriptsXml {
+            on_click: vec![ScriptBodyXml {
+                body: Some(body.to_string()),
                 ..Default::default()
             }],
             ..Default::default()

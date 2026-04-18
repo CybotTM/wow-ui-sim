@@ -26,6 +26,27 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             else_ref: Box::new(else_ref),
         });
     }
+    if let Some((function_name, arg_function_name, then_ref)) =
+        parse_conditional_global_function_with_noarg_function_result_then(stmt)
+    {
+        return Some(
+            FastHandlerRef::ConditionalGlobalFunctionWithNoArgFunctionResultThen {
+                function_name,
+                arg_function_name,
+                then_ref: Box::new(then_ref),
+            },
+        );
+    }
+    if let Some((target_path, field, value, then_ref)) =
+        parse_conditional_global_field_equals_string_then(stmt)
+    {
+        return Some(FastHandlerRef::ConditionalGlobalFieldEqualsStringThen {
+            target_path,
+            field,
+            value,
+            then_ref: Box::new(then_ref),
+        });
+    }
     if let Some((target_path, method_name, field, value)) =
         parse_inline_global_method_then_assign(stmt)
     {
@@ -132,16 +153,8 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             fourth_arg_path,
         });
     }
-    if let Some((
-        target_path,
-        method_name,
-        function_name,
-        first,
-        second,
-        third,
-        fourth,
-        fifth,
-    )) = parse_inline_global_method_with_string_string_function_result_and_three_number_args(stmt)
+    if let Some((target_path, method_name, function_name, first, second, third, fourth, fifth)) =
+        parse_inline_global_method_with_string_string_function_result_and_three_number_args(stmt)
     {
         return Some(
             FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
@@ -165,7 +178,8 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
         third,
         fourth,
         fifth,
-    )) = parse_inline_global_method_with_global_string_function_result_and_three_number_args(stmt)
+    )) =
+        parse_inline_global_method_with_global_string_function_result_and_three_number_args(stmt)
     {
         return Some(
             FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
@@ -189,14 +203,16 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
         fourth,
     )) = parse_inline_global_method_with_global_self_method_self_method_bool_args(stmt)
     {
-        return Some(FastHandlerRef::GlobalMethodWithGlobalSelfMethodSelfMethodBoolArgs {
-            target_path,
-            method_name,
-            first_arg_path,
-            second_self_method,
-            third_self_method,
-            fourth,
-        });
+        return Some(
+            FastHandlerRef::GlobalMethodWithGlobalSelfMethodSelfMethodBoolArgs {
+                target_path,
+                method_name,
+                first_arg_path,
+                second_self_method,
+                third_self_method,
+                fourth,
+            },
+        );
     }
     if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
@@ -346,9 +362,13 @@ fn parse_conditional_global_noarg_then_else<'a>(
     stmt: &'a str,
 ) -> Option<(&'a str, FastHandlerRef<'a>, FastHandlerRef<'a>)> {
     let remainder = stmt.trim().strip_prefix("if")?.trim_start();
-    let remainder = remainder.strip_prefix('(')?.trim_start();
-    let (condition, remainder) = remainder.split_once("then")?;
-    let condition = condition.trim_end().strip_suffix(')')?.trim();
+    let (condition, remainder) = if let Some(remainder) = remainder.strip_prefix('(') {
+        let (condition, remainder) = remainder.split_once("then")?;
+        (condition.trim_end().strip_suffix(')')?.trim(), remainder)
+    } else {
+        let (condition, remainder) = remainder.split_once("then")?;
+        (condition.trim(), remainder)
+    };
     let function_name = condition.strip_suffix("()")?.trim();
     if !is_fast_handler_path(function_name) {
         return None;
@@ -369,6 +389,53 @@ fn parse_conditional_global_noarg_then_else<'a>(
     let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
     let else_ref = super::parse_inline_fast_handler("OnClick", else_stmt)?;
     Some((function_name, then_ref, else_ref))
+}
+
+fn parse_conditional_global_function_with_noarg_function_result_then<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, &'a str, FastHandlerRef<'a>)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    let condition = condition.trim_end().strip_suffix(')')?.trim();
+    let (function_name, args) = parse_global_function_call(condition)?;
+    let args = args.trim();
+    let arg_function_name = args.strip_suffix("()")?.trim();
+    if !(is_fast_handler_path(function_name) && is_fast_handler_path(arg_function_name)) {
+        return None;
+    }
+
+    let then_stmt = remainder.trim().strip_suffix("end")?.trim();
+    let then_stmt = then_stmt
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(then_stmt);
+    let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
+    Some((function_name, arg_function_name, then_ref))
+}
+
+fn parse_conditional_global_field_equals_string_then<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, &'a str, &'a str, FastHandlerRef<'a>)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    let condition = condition.trim_end().strip_suffix(')')?.trim();
+    let (lhs, rhs) = condition.split_once("==")?;
+    let (target_path, field) = lhs.trim().rsplit_once('.')?;
+    let target_path = target_path.trim();
+    let field = field.trim();
+    let value = super::parse_single_string_literal(rhs.trim())?;
+    if !is_fast_handler_path(target_path) || !is_fast_identifier(field) {
+        return None;
+    }
+    let then_stmt = remainder.trim().strip_suffix("end")?.trim();
+    let then_stmt = then_stmt
+        .strip_suffix(';')
+        .map(str::trim)
+        .unwrap_or(then_stmt);
+    let then_ref = super::parse_inline_fast_handler("OnClick", then_stmt)?;
+    Some((target_path, field, value, then_ref))
 }
 
 fn parse_inline_global_method(stmt: &str) -> Option<(&str, &str)> {
@@ -413,9 +480,7 @@ fn parse_inline_global_method_with_self_string_number_number_args(
     }
     let target_path = target_path.trim();
     let method_name = method_name.trim();
-    (is_fast_handler_path(target_path)
-        && is_fast_identifier(method_name)
-        && self_arg == "self")
+    (is_fast_handler_path(target_path) && is_fast_identifier(method_name) && self_arg == "self")
         .then_some((target_path, method_name, first, second, third))
 }
 
@@ -613,17 +678,22 @@ fn parse_inline_global_method_with_string_string_function_result_and_three_numbe
     let (target_path, remainder) = stmt.rsplit_once(':')?;
     let (method_name, args) = remainder.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
-    let mut parts = args.split(',').map(str::trim);
-    let first_arg = parts.next()?;
-    let third = parts.next()?.parse::<f64>().ok()?;
-    let fourth = parts.next()?.parse::<f64>().ok()?;
-    let fifth = parts.next()?.parse::<f64>().ok()?;
-    if parts.next().is_some() {
+    let parts = super::split_top_level_args(args)?;
+    if parts.len() != 4 {
         return None;
     }
+    let first_arg = parts[0];
+    let third = parts[1].parse::<f64>().ok()?;
+    let fourth = parts[2].parse::<f64>().ok()?;
+    let fifth = parts[3].parse::<f64>().ok()?;
     let (function_name, call_args) = first_arg.split_once('(')?;
     let call_args = call_args.strip_suffix(')')?.trim();
-    let (raw_first, raw_second) = call_args.split_once(',')?;
+    let call_args = super::split_top_level_args(call_args)?;
+    if call_args.len() != 2 {
+        return None;
+    }
+    let raw_first = call_args[0];
+    let raw_second = call_args[1];
     let first = super::parse_single_string_literal(raw_first.trim())?;
     let second = super::parse_single_string_literal(raw_second.trim())?;
     let target_path = target_path.trim();
@@ -650,17 +720,22 @@ fn parse_inline_global_method_with_global_string_function_result_and_three_numbe
     let (target_path, remainder) = stmt.rsplit_once(':')?;
     let (method_name, args) = remainder.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
-    let mut parts = args.split(',').map(str::trim);
-    let first_arg = parts.next()?;
-    let third = parts.next()?.parse::<f64>().ok()?;
-    let fourth = parts.next()?.parse::<f64>().ok()?;
-    let fifth = parts.next()?.parse::<f64>().ok()?;
-    if parts.next().is_some() {
+    let parts = super::split_top_level_args(args)?;
+    if parts.len() != 4 {
         return None;
     }
+    let first_arg = parts[0];
+    let third = parts[1].parse::<f64>().ok()?;
+    let fourth = parts[2].parse::<f64>().ok()?;
+    let fifth = parts[3].parse::<f64>().ok()?;
     let (function_name, call_args) = first_arg.split_once('(')?;
     let call_args = call_args.strip_suffix(')')?.trim();
-    let (raw_first, raw_second) = call_args.split_once(',')?;
+    let call_args = super::split_top_level_args(call_args)?;
+    if call_args.len() != 2 {
+        return None;
+    }
+    let raw_first = call_args[0];
+    let raw_second = call_args[1];
     let first_arg_path = raw_first.trim();
     let second = super::parse_single_string_literal(raw_second.trim())?;
     let target_path = target_path.trim();

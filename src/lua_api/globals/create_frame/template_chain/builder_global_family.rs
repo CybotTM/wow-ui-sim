@@ -444,7 +444,15 @@ fn build_global_method_with_global_three_global_bool_args_handler(
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[target, method_name, first, second, third, fourth, Val::Bool(fifth)],
+        &[
+            target,
+            method_name,
+            first,
+            second,
+            third,
+            fourth,
+            Val::Bool(fifth),
+        ],
     )
 }
 
@@ -508,7 +516,14 @@ fn build_global_method_with_global_self_method_self_method_bool_args_handler(
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[target, method_name, first, second_method, third_method, Val::Bool(fourth)],
+        &[
+            target,
+            method_name,
+            first,
+            second_method,
+            third_method,
+            Val::Bool(fourth),
+        ],
     )
 }
 
@@ -541,7 +556,16 @@ fn build_global_method_with_string_string_function_result_and_three_number_args_
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[target, method_name, function_name, first, second, Val::Num(third), Val::Num(fourth), Val::Num(fifth)],
+        &[
+            target,
+            method_name,
+            function_name,
+            first,
+            second,
+            Val::Num(third),
+            Val::Num(fourth),
+            Val::Num(fifth),
+        ],
     )
 }
 
@@ -574,7 +598,16 @@ fn build_global_method_with_global_string_function_result_and_three_number_args_
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[target, method_name, function_name, first, second, Val::Num(third), Val::Num(fourth), Val::Num(fifth)],
+        &[
+            target,
+            method_name,
+            function_name,
+            first,
+            second,
+            Val::Num(third),
+            Val::Num(fourth),
+            Val::Num(fifth),
+        ],
     )
 }
 

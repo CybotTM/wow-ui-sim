@@ -38,6 +38,7 @@ pub(super) fn parse_inline_fast_handler<'a>(
 
 fn parse_pre_split_special_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     parse_play_sound_then_copy_club_ticket(stmt)
+        .or_else(|| parse_prefix_conditional_suffix_sequence(stmt))
         .or_else(|| parse_global_tooltip_set_owner_then_function_text(stmt))
         .or_else(|| parse_global_tooltip_set_owner_then_parent_assign(stmt))
         .or_else(|| parse_parent_field_local_click_if_enabled(stmt))
@@ -74,6 +75,31 @@ fn parse_parent_field_local_click_if_enabled<'a>(stmt: &'a str) -> Option<FastHa
     let expected = format!("{local_name}:GetScript(\"OnClick\")({local_name});");
     (body == expected || body == expected.trim_end_matches(';'))
         .then_some(FastHandlerRef::ParentFieldLocalClickIfEnabled { field })
+}
+
+fn parse_prefix_conditional_suffix_sequence<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    let (first_stmt, rest) = stmt.split_once(';')?;
+    let first_stmt = first_stmt.trim();
+    let rest = rest.trim();
+    if !(rest.starts_with("if ") || rest.starts_with("if(")) {
+        return None;
+    }
+
+    let end_idx = rest.rfind("end")?;
+    let conditional_stmt = rest[..end_idx + 3].trim();
+    let tail_stmt = rest[end_idx + 3..].trim();
+    if tail_stmt.is_empty() {
+        return None;
+    }
+
+    let first_ref = parse_inline_single_fast_handler(first_stmt)?;
+    let conditional_ref = parse_inline_single_fast_handler(conditional_stmt)?;
+    let tail_ref = parse_inline_single_fast_handler(tail_stmt)?;
+    Some(FastHandlerRef::Sequence3(Box::new((
+        first_ref,
+        conditional_ref,
+        tail_ref,
+    ))))
 }
 
 fn parse_global_tooltip_set_owner_then_parent_assign<'a>(
@@ -119,28 +145,8 @@ fn parse_global_tooltip_set_owner_then_function_text<'a>(
         return None;
     }
     let second_stmt = second_stmt.trim().trim_end_matches(';').trim();
-    let FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
-        target_path: text_target_path,
-        method_name: text_method_name,
-        function_name,
-        first,
-        second,
-        third,
-        fourth,
-        fifth,
-    } = parse_inline_single_fast_handler(second_stmt)?
-    else {
-        return None;
-    };
-    if text_target_path != target_path || text_method_name != "SetText" {
-        return None;
-    }
-    Some(FastHandlerRef::Sequence2(Box::new((
-        FastHandlerRef::GlobalMethodWithSelfStringArg {
-            target_path,
-            method_name,
-            arg,
-        },
+    let second_ref = parse_inline_single_fast_handler(second_stmt)?;
+    let second_ref = match second_ref {
         FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
             target_path: text_target_path,
             method_name: text_method_name,
@@ -150,7 +156,48 @@ fn parse_global_tooltip_set_owner_then_function_text<'a>(
             third,
             fourth,
             fifth,
+        } if text_target_path == target_path && text_method_name == "SetText" => {
+            FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
+                target_path: text_target_path,
+                method_name: text_method_name,
+                function_name,
+                first,
+                second,
+                third,
+                fourth,
+                fifth,
+            }
+        }
+        FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
+            target_path: text_target_path,
+            method_name: text_method_name,
+            function_name,
+            first_arg_path,
+            second,
+            third,
+            fourth,
+            fifth,
+        } if text_target_path == target_path && text_method_name == "SetText" => {
+            FastHandlerRef::GlobalMethodWithGlobalStringFunctionResultAndThreeNumberArgs {
+                target_path: text_target_path,
+                method_name: text_method_name,
+                function_name,
+                first_arg_path,
+                second,
+                third,
+                fourth,
+                fifth,
+            }
+        }
+        _ => return None,
+    };
+    Some(FastHandlerRef::Sequence2(Box::new((
+        FastHandlerRef::GlobalMethodWithSelfStringArg {
+            target_path,
+            method_name,
+            arg,
         },
+        second_ref,
     ))))
 }
 
@@ -350,6 +397,62 @@ fn parse_global_function_call(stmt: &str) -> Option<(&str, &str)> {
     let args = args.strip_suffix(')')?;
     let function_name = function_name.trim();
     is_fast_handler_path(function_name).then_some((function_name, args.trim()))
+}
+
+pub(super) fn split_top_level_args(args: &str) -> Option<Vec<&str>> {
+    let mut parts = Vec::new();
+    let mut start = 0usize;
+    let mut chars = args.char_indices().peekable();
+    let mut in_string = false;
+    let mut quote = '\0';
+    let mut escaped = false;
+    let mut paren_depth = 0usize;
+
+    while let Some((idx, ch)) = chars.next() {
+        if in_string {
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
+            if ch == quote {
+                in_string = false;
+            }
+            continue;
+        }
+
+        match ch {
+            '"' | '\'' => {
+                in_string = true;
+                quote = ch;
+            }
+            '(' => paren_depth += 1,
+            ')' => paren_depth = paren_depth.saturating_sub(1),
+            ',' if paren_depth == 0 => {
+                let part = args[start..idx].trim();
+                if part.is_empty() {
+                    return None;
+                }
+                parts.push(part);
+                start = idx + ch.len_utf8();
+            }
+            _ => {}
+        }
+    }
+
+    if in_string || paren_depth != 0 {
+        return None;
+    }
+
+    let part = args[start..].trim();
+    if part.is_empty() {
+        return None;
+    }
+    parts.push(part);
+    Some(parts)
 }
 
 fn parse_inline_register_for_clicks(stmt: &str) -> Option<(&str, Option<&str>, Option<&str>)> {

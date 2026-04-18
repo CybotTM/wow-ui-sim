@@ -64,6 +64,19 @@ fn build_function_with_arg_variants(
             second,
         } => build_function_handler_with_string_number_args(state, function_name, first, *second)
             .map(Some),
+        FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            third,
+        } => build_function_handler_with_two_global_number_args(
+            state,
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            *third,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
             function_name,
             first,
@@ -108,6 +121,21 @@ fn build_function_with_arg_variants(
         FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
             build_function_handler_with_string_arg(state, function_name, arg).map(Some)
         }
+        FastHandlerRef::FunctionWithStringSelfStringNumberNumberArgs {
+            function_name,
+            first,
+            third,
+            fourth,
+            fifth,
+        } => build_function_handler_with_string_self_string_number_number_args(
+            state,
+            function_name,
+            first,
+            third,
+            *fourth,
+            *fifth,
+        )
+        .map(Some),
         FastHandlerRef::FunctionWithSelfNumberArg {
             function_name,
             value,
@@ -464,6 +492,33 @@ fn build_function_handler_with_string_number_args(
     )
 }
 
+fn build_function_handler_with_two_global_number_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first_arg_path: &str,
+    second_arg_path: &str,
+    third: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first, second, third = ...
+            return function(self, ...)
+                return fn(first, second, third)
+            end
+        "#,
+        "template-inline-function-two-global-number-args",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first = resolve_global_path(state, first_arg_path);
+    let second = resolve_global_path(state, second_arg_path);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first, second, Val::Num(third)],
+    )
+}
+
 fn build_play_sound_then_copy_club_ticket_to_clipboard_from_parent_handler(
     state: &mut LuaState,
     sound_path: &str,
@@ -520,6 +575,34 @@ fn build_function_handler_with_three_global_args(
     )
 }
 
+fn build_function_handler_with_string_self_string_number_number_args(
+    state: &mut LuaState,
+    function_name: &str,
+    first: &str,
+    third: &str,
+    fourth: f64,
+    fifth: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local fn, first, third, fourth, fifth = ...
+            return function(self, ...)
+                return fn(first, self, third, fourth, fifth)
+            end
+        "#,
+        "template-inline-function-string-self-string-number-number-args",
+    )?;
+    let target = resolve_global_path(state, function_name);
+    let first = create_string(state, first);
+    let third = create_string(state, third);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[target, first, third, Val::Num(fourth), Val::Num(fifth)],
+    )
+}
+
 fn build_function_handler_with_string_global_bool_arg(
     state: &mut LuaState,
     function_name: &str,
@@ -572,7 +655,13 @@ fn build_function_handler_with_global_self_method_self_method_bool_args(
     crate::lua_api::methods::call_function_state(
         state,
         Val::Function(builder.gc_ref()),
-        &[target, first, second_method, third_method, Val::Bool(fourth)],
+        &[
+            target,
+            first,
+            second_method,
+            third_method,
+            Val::Bool(fourth),
+        ],
     )
 }
 

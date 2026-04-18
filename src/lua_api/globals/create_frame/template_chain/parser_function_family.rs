@@ -96,6 +96,16 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             second,
         });
     }
+    if let Some((function_name, first_arg_path, second_arg_path, third)) =
+        parse_inline_function_with_two_global_number_args(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
+            function_name,
+            first_arg_path,
+            second_arg_path,
+            third,
+        });
+    }
     if let Some((function_name, first_arg_path, second_arg_path, third_arg_path)) =
         parse_inline_function_with_three_global_args(stmt)
     {
@@ -109,13 +119,15 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     if let Some((function_name, first_arg_path, second_self_method, third_self_method, fourth)) =
         parse_inline_function_with_global_self_method_self_method_bool_args(stmt)
     {
-        return Some(FastHandlerRef::FunctionWithGlobalSelfMethodSelfMethodBoolArgs {
-            function_name,
-            first_arg_path,
-            second_self_method,
-            third_self_method,
-            fourth,
-        });
+        return Some(
+            FastHandlerRef::FunctionWithGlobalSelfMethodSelfMethodBoolArgs {
+                function_name,
+                first_arg_path,
+                second_self_method,
+                third_self_method,
+                fourth,
+            },
+        );
     }
     if let Some((function_name, first, second_arg_path, third)) =
         parse_inline_function_with_string_global_bool_arg(stmt)
@@ -166,6 +178,19 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
     }
     if let Some((function_name, arg)) = parse_inline_function_with_self_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithSelfStringArg { function_name, arg });
+    }
+    if let Some((function_name, first, third, fourth, fifth)) =
+        parse_inline_function_with_string_self_string_number_number_args(stmt)
+    {
+        return Some(
+            FastHandlerRef::FunctionWithStringSelfStringNumberNumberArgs {
+                function_name,
+                first,
+                third,
+                fourth,
+                fifth,
+            },
+        );
     }
     if let Some((function_name, value)) = parse_inline_function_with_self_number_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithSelfNumberArg {
@@ -267,6 +292,30 @@ fn parse_inline_function_with_self_string_arg(stmt: &str) -> Option<(&str, &str)
         .then_some((function_name, arg))
 }
 
+fn parse_inline_function_with_string_self_string_number_number_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, f64, f64)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let args = super::split_top_level_args(args)?;
+    if args.len() != 5 {
+        return None;
+    }
+    let first = super::parse_single_string_literal(args[0].trim())?;
+    let self_arg = args[1].trim();
+    let third = super::parse_single_string_literal(args[2].trim())?;
+    let fourth = args[3].trim().parse::<f64>().ok()?;
+    let fifth = args[4].trim().parse::<f64>().ok()?;
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name) && self_arg == "self").then_some((
+        function_name,
+        first,
+        third,
+        fourth,
+        fifth,
+    ))
+}
+
 fn parse_inline_function_with_string_arg(stmt: &str) -> Option<(&str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let arg = super::parse_single_string_literal(args.strip_suffix(')')?.trim())?;
@@ -277,20 +326,47 @@ fn parse_inline_function_with_string_arg(stmt: &str) -> Option<(&str, &str)> {
 fn parse_inline_function_with_string_number_args(stmt: &str) -> Option<(&str, &str, f64)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
-    let (raw_string_arg, raw_number_arg) = args.split_once(',')?;
-    let first = super::parse_single_string_literal(raw_string_arg.trim())?;
-    let second = raw_number_arg.trim().parse::<f64>().ok()?;
+    let args = super::split_top_level_args(args)?;
+    if args.len() != 2 {
+        return None;
+    }
+    let first = super::parse_single_string_literal(args[0].trim())?;
+    let second = args[1].trim().parse::<f64>().ok()?;
     let function_name = function_name.trim();
     is_fast_handler_path(function_name).then_some((function_name, first, second))
+}
+
+fn parse_inline_function_with_two_global_number_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, f64)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let args = super::split_top_level_args(args)?;
+    if args.len() != 3 {
+        return None;
+    }
+    let first_arg_path = args[0].trim();
+    let second_arg_path = args[1].trim();
+    let third = args[2].trim().parse::<f64>().ok()?;
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(first_arg_path)
+        && first_arg_path.split('.').next() != Some("self")
+        && is_fast_handler_path(second_arg_path)
+        && second_arg_path.split('.').next() != Some("self"))
+    .then_some((function_name, first_arg_path, second_arg_path, third))
 }
 
 fn parse_inline_function_with_two_global_args(stmt: &str) -> Option<(&str, &str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
-    let (first_arg_path, second_arg_path) = args.split_once(',')?;
+    let args = super::split_top_level_args(args)?;
+    if args.len() != 2 {
+        return None;
+    }
     let function_name = function_name.trim();
-    let first_arg_path = first_arg_path.trim();
-    let second_arg_path = second_arg_path.trim();
+    let first_arg_path = args[0].trim();
+    let second_arg_path = args[1].trim();
     (is_fast_handler_path(function_name)
         && is_fast_handler_path(first_arg_path)
         && first_arg_path.split('.').next() != Some("self")
@@ -302,13 +378,13 @@ fn parse_inline_function_with_two_global_args(stmt: &str) -> Option<(&str, &str,
 fn parse_inline_function_with_three_global_args(stmt: &str) -> Option<(&str, &str, &str, &str)> {
     let (function_name, args) = stmt.split_once('(')?;
     let args = args.strip_suffix(')')?.trim();
-    let mut parts = args.split(',').map(str::trim);
-    let first_arg_path = parts.next()?;
-    let second_arg_path = parts.next()?;
-    let third_arg_path = parts.next()?;
-    if parts.next().is_some() {
+    let args = super::split_top_level_args(args)?;
+    if args.len() != 3 {
         return None;
     }
+    let first_arg_path = args[0].trim();
+    let second_arg_path = args[1].trim();
+    let third_arg_path = args[2].trim();
     let function_name = function_name.trim();
     (is_fast_handler_path(function_name)
         && is_fast_handler_path(first_arg_path)
