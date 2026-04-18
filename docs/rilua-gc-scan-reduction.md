@@ -214,12 +214,12 @@ Same treatment for `_G.__secureenv`.
 
 ### Phases
 
-- [ ] Phase 2a — Rilua: add `Flag::Frozen` (Frozen implies Pinned + reject writes).
-- [ ] Phase 2b — Rilua: implement `Gc::freeze_table(root)` — BFS over tables/functions/closures/userdata, set Frozen on each.
-- [ ] Phase 2c — Rilua: `raw_set` / `raw_set_impl` check `is_frozen` and raise on write.
-- [ ] Phase 2d — Wow-sim: add `_G_live` + metatable proxy on `_G`; call `gc.freeze_table(_G)` at the end of `register_globals` / after runtime_surface_bootstrap, before any third-party addon loads.
-- [ ] Phase 2e — Wow-sim: repeat Phase 2d for `_G.__secureenv`.
-- [ ] Phase 2f — Re-flamegraph. Target: `_G` and `__secureenv` traversal samples drop to zero; combined with Track 1, total `traverse_table` self-time drops ~70%.
+- [x] Phase 2a — Rilua: `Flag::Frozen` already present (shared flags byte with Pinned / SkipTraverse).
+- [x] Phase 2b — Rilua: `Gc::freeze_table(root)` BFS over tables/closures/upvalues/userdata, landed in rilua commit `d0d9aec`.
+- [x] Phase 2c — Rilua: `raw_set` write path raises "attempt to modify a frozen table"; stdlib `rawset` gets equivalent inline gate. (rilua 5993351)
+- [x] Phase 2d — Wow-sim: `_G_live` shadow + proxy metatable installed around `freeze_table(_G)`, gated on `WOW_SIM_FREEZE_GLOBALS=1`. (wow-sim 1bace1dc)
+- [x] Phase 2e — Wow-sim: same flow extended to `_G.__secureenv` via `freeze_root_with_shadow`. (wow-sim 2d4fcf38)
+- [x] Phase 2f — Re-flamegraph. See "Measured results — Phase 2g" above. End-to-end measurement blocked on overwrite audit; single-run opt-in shows `traverse_table` relative share drops from 2.36% to 0.62% (~74% reduction), though ON-run total is ~3.6× smaller because the overwrite errors truncate Blizzard UI loading. Full combined measurement needs the audit to land so the opt-in can safely load the entire addon set.
 
 ### Risks
 
