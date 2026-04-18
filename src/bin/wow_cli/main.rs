@@ -11,6 +11,7 @@
 //!   wow-cli extract-textures         # Extract textures to WebP (standalone)
 //!   wow-cli convert-texture foo.BLP  # Convert single BLP to WebP (standalone)
 //!   wow-cli generate spells          # Regenerate data/spells.rs from CSVs
+//!   wow-cli startup-intern-stats      # Measure startup intern-string churn
 
 mod audit_api;
 mod csv_util;
@@ -25,6 +26,7 @@ mod gen_traits;
 mod gen_traits_emit;
 mod gen_traits_load;
 mod gen_zones;
+mod startup_intern_stats;
 
 use clap::{Parser, Subcommand};
 use std::io::{self, BufRead, Write};
@@ -127,6 +129,9 @@ enum Commands {
 
     /// Statically audit Blizzard UI API usage (standalone)
     AuditApi(AuditApiArgs),
+
+    /// Measure headless startup intern-string churn.
+    StartupInternStats,
 }
 
 #[derive(clap::Args)]
@@ -222,6 +227,7 @@ fn handle_command(command: Commands) {
         Commands::ConvertTexture { input, output } => convert_texture(&input, output.as_ref()),
         Commands::Generate { what } => run_generator(what),
         Commands::AuditApi(args) => handle_audit_api(args),
+        Commands::StartupInternStats => startup_intern_stats::run(),
     }
 }
 
