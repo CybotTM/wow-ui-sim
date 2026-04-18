@@ -433,12 +433,29 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
     if with_addon(state, stack_val(state, 1), |a| a.loaded).unwrap_or(false) {
         return push_load_result(state, true, None);
     }
+    if addon_is_disabled(state, &addon_name) {
+        return push_load_result(state, false, Some("DISABLED"));
+    }
     let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
     let mut loading = HashSet::new();
     match load_runtime_addon_recursive(state, &loader_env, &addon_name, &mut loading) {
         Ok(()) => push_load_result(state, true, None),
         Err(error) => push_load_result(state, false, Some(&error.to_string())),
     }
+}
+
+/// `true` iff the addon is registered AND its `enabled` flag is false.
+/// Unregistered addons are not considered disabled — `LoadAddOn` will
+/// fall through to `MISSING` (or auto-register at load time).
+fn addon_is_disabled(state: &LuaState, addon_name: &str) -> bool {
+    let Ok(sim) = borrow_state(state) else {
+        return false;
+    };
+    sim.addons
+        .iter()
+        .find(|a| a.folder_name == addon_name)
+        .map(|a| !a.enabled)
+        .unwrap_or(false)
 }
 
 fn load_runtime_addon_recursive(
@@ -473,6 +490,9 @@ fn load_runtime_addon_with_dependencies(
 
     for dependency in runtime_addon_dependencies(state, &toc) {
         eprintln!("[load_addon] {addon_name} -> dep {dependency}");
+        if addon_is_disabled(state, &dependency) {
+            return Err(disabled_dep_error(&dependency));
+        }
         load_runtime_addon_recursive(state, loader_env, &dependency, loading)?;
     }
 
@@ -515,6 +535,14 @@ fn missing_runtime_addon_error(addon_name: &str) -> LoadError {
         io::ErrorKind::NotFound,
         format!("runtime addon not found: {addon_name}"),
     ))
+}
+
+/// Construct the `LoadError` whose `Display` renders to exactly
+/// `"DEP_DISABLED"` — that string flows back through
+/// `c_addons_load_addon`'s `error.to_string()` and becomes the second
+/// return of `LoadAddOn`, matching real WoW.
+fn disabled_dep_error(dependency: &str) -> LoadError {
+    LoadError::DepDisabled(dependency.to_string())
 }
 
 fn fire_addon_loaded(state: &mut LuaState, loader_env: &LoaderEnv<'_>, addon_name: &str) {

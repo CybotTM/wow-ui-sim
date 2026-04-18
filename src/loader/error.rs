@@ -7,6 +7,12 @@ pub enum LoadError {
     Toc(std::io::Error),
     Xml(crate::xml::XmlLoadError),
     Lua(String),
+    /// Caller asked to load an addon whose dependency chain contains
+    /// a disabled addon. Renders to exactly `"DEP_DISABLED"` so it can
+    /// flow through `LoadAddOn`'s reason string unchanged. Tuple holds
+    /// the disabled dependency name for diagnostics (logged but not
+    /// surfaced through `Display`, matching retail's flat reason code).
+    DepDisabled(String),
 }
 
 impl From<std::io::Error> for LoadError {
@@ -28,6 +34,7 @@ impl std::fmt::Display for LoadError {
             LoadError::Toc(e) => write!(f, "TOC error: {}", e),
             LoadError::Xml(e) => write!(f, "XML error: {}", e),
             LoadError::Lua(e) => write!(f, "Lua error: {}", e),
+            LoadError::DepDisabled(_) => write!(f, "DEP_DISABLED"),
         }
     }
 }

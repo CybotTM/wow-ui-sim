@@ -24,6 +24,7 @@ use super::admin_actionbars_bags::{
     add_bag_item, clear_action_bars, clear_action_slot, clear_bags, remove_bag_item,
     set_action_slot,
 };
+use super::admin_addons::register_test_addon;
 use super::admin_auction_house::{
     add_auction_bid, add_auction_browse_result, add_auction_replicate_item, add_owned_auction,
     clear_auction_bids, clear_auction_browse_results, clear_auction_replicate_items,
@@ -304,7 +305,8 @@ fn register_crafting(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("ClearKnownRecipes", clear_known_recipes)?
         .set_function("SetSelectedProfession", set_selected_profession)?
         .set_function("SetReagentCount", set_reagent_count)?
-        .set_function("SeedReagentsForRecipe", seed_reagents_for_recipe)
+        .set_function("SeedReagentsForRecipe", seed_reagents_for_recipe)?
+        .set_function("RegisterTestAddon", register_test_addon)
 }
 
 // ── Player identity ──────────────────────────────────────────────────────────
