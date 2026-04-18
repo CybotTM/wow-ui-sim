@@ -186,7 +186,9 @@ fn copy_table_into_frame(state: &mut LuaState, frame_id: u64, source: Val) {
     };
 
     copy_table_entries_into_frame(state, frame_ref_val, source_ref);
-    let index_key = state.gc.intern_string(b"__index");
+    let index_key = state
+        .gc
+        .intern_string_static(crate::lua_api::hot_literals::METATABLE_INDEX.as_bytes());
     let index_table = state
         .gc
         .tables

@@ -6,8 +6,9 @@
 //! them into the A_Admin TableBuilder chain.
 
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string_static,
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
 };
+use crate::lua_api::script_helpers::get_script;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -152,25 +153,20 @@ pub(super) fn earn_achievement(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn fire_achievement_earned(state: &mut LuaState, achievement_id: i32) {
-    let fire_event = lookup_global(state, "FireEvent");
-    if fire_event == Val::Nil {
-        return;
+    let listeners = borrow_state(state)
+        .map(|sim| sim.widgets.get_event_listeners("ACHIEVEMENT_EARNED"))
+        .unwrap_or_default();
+    for widget_id in listeners {
+        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
+            continue;
+        };
+        let Ok(frame) = frame_ref(state, widget_id) else {
+            continue;
+        };
+        let event_name = create_string(state, "ACHIEVEMENT_EARNED");
+        let call_args = [frame, event_name, Val::Num(achievement_id as f64)];
+        let _ = call_function_state(state, handler, &call_args);
     }
-    let call_args = [
-        create_string_static(state, "ACHIEVEMENT_EARNED"),
-        Val::Num(achievement_id as f64),
-    ];
-    let _ = call_function_state(state, fire_event, &call_args);
-}
-
-fn lookup_global(state: &mut LuaState, name: &str) -> Val {
-    let key_ref = state.gc.intern_string(name.as_bytes());
-    state
-        .gc
-        .tables
-        .get(state.global)
-        .map(|globals| globals.get_str(key_ref, &state.gc.string_arena))
-        .unwrap_or(Val::Nil)
 }
 
 pub(super) fn collect_mount(state: &mut LuaState) -> LuaResult<u32> {

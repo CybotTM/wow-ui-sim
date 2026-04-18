@@ -299,32 +299,63 @@ pub const HOT_FRAME_METHODS: &[&[u8]] = &[
 // The 5.1 metamethod names plus Blizzard-convention `__*` registry keys
 // the rilua runtime uses for its own bookkeeping.
 
+// Named `&str` constants for metatable keys. [`HOT_METATABLE_KEYS`] below
+// references these via `.as_bytes()` so the whitelist and call sites
+// share one source of truth.
+
+pub const METATABLE_INDEX: &str = "__index";
+pub const METATABLE_NEWINDEX: &str = "__newindex";
+pub const METATABLE_TOSTRING: &str = "__tostring";
+pub const METATABLE_GC: &str = "__gc";
+pub const METATABLE_EQ: &str = "__eq";
+pub const METATABLE_LT: &str = "__lt";
+pub const METATABLE_LE: &str = "__le";
+pub const METATABLE_ADD: &str = "__add";
+pub const METATABLE_SUB: &str = "__sub";
+pub const METATABLE_MUL: &str = "__mul";
+pub const METATABLE_DIV: &str = "__div";
+pub const METATABLE_MOD: &str = "__mod";
+pub const METATABLE_POW: &str = "__pow";
+pub const METATABLE_UNM: &str = "__unm";
+pub const METATABLE_CONCAT: &str = "__concat";
+pub const METATABLE_LEN: &str = "__len";
+pub const METATABLE_CALL: &str = "__call";
+pub const METATABLE_METATABLE: &str = "__metatable";
+
+// rilua / wow-ui-sim registry keys.
+pub const REGISTRY_RILUA_FRAME_MT: &str = "__rilua_frame_mt";
+pub const REGISTRY_RILUA_FRAME_REFS: &str = "__rilua_frame_refs";
+pub const REGISTRY_SIM_PRINT: &str = "__sim_print";
+pub const REGISTRY_SECUREENV: &str = "__secureenv";
+pub const REGISTRY_CVARS: &str = "__cvars";
+pub const REGISTRY_ORIGINAL_STRING_FORMAT: &str = "__original_string_format";
+
 pub const HOT_METATABLE_KEYS: &[&[u8]] = &[
-    b"__index",
-    b"__newindex",
-    b"__tostring",
-    b"__gc",
-    b"__eq",
-    b"__lt",
-    b"__le",
-    b"__add",
-    b"__sub",
-    b"__mul",
-    b"__div",
-    b"__mod",
-    b"__pow",
-    b"__unm",
-    b"__concat",
-    b"__len",
-    b"__call",
-    b"__metatable",
+    METATABLE_INDEX.as_bytes(),
+    METATABLE_NEWINDEX.as_bytes(),
+    METATABLE_TOSTRING.as_bytes(),
+    METATABLE_GC.as_bytes(),
+    METATABLE_EQ.as_bytes(),
+    METATABLE_LT.as_bytes(),
+    METATABLE_LE.as_bytes(),
+    METATABLE_ADD.as_bytes(),
+    METATABLE_SUB.as_bytes(),
+    METATABLE_MUL.as_bytes(),
+    METATABLE_DIV.as_bytes(),
+    METATABLE_MOD.as_bytes(),
+    METATABLE_POW.as_bytes(),
+    METATABLE_UNM.as_bytes(),
+    METATABLE_CONCAT.as_bytes(),
+    METATABLE_LEN.as_bytes(),
+    METATABLE_CALL.as_bytes(),
+    METATABLE_METATABLE.as_bytes(),
     // rilua / wow-ui-sim registry keys.
-    b"__rilua_frame_mt",
-    b"__rilua_frame_refs",
-    b"__sim_print",
-    b"__secureenv",
-    b"__cvars",
-    b"__original_string_format",
+    REGISTRY_RILUA_FRAME_MT.as_bytes(),
+    REGISTRY_RILUA_FRAME_REFS.as_bytes(),
+    REGISTRY_SIM_PRINT.as_bytes(),
+    REGISTRY_SECUREENV.as_bytes(),
+    REGISTRY_CVARS.as_bytes(),
+    REGISTRY_ORIGINAL_STRING_FORMAT.as_bytes(),
 ];
 
 // ── Loader / compiler sentinels ───────────────────────────────────────────
@@ -468,8 +499,54 @@ impl HotLiteralHandles {
 /// slice order — adding or reordering entries there requires updating
 /// these and bumping [`WHITELIST_VERSION`].
 pub mod metatable_idx {
+    /// Position of `b"__index"` in [`super::HOT_METATABLE_KEYS`].
+    pub const INDEX: usize = 0;
+    /// Position of `b"__newindex"` in [`super::HOT_METATABLE_KEYS`].
+    pub const NEWINDEX: usize = 1;
+    /// Position of `b"__tostring"` in [`super::HOT_METATABLE_KEYS`].
+    pub const TOSTRING: usize = 2;
+    /// Position of `b"__gc"` in [`super::HOT_METATABLE_KEYS`].
+    pub const GC: usize = 3;
+    /// Position of `b"__eq"` in [`super::HOT_METATABLE_KEYS`].
+    pub const EQ: usize = 4;
+    /// Position of `b"__lt"` in [`super::HOT_METATABLE_KEYS`].
+    pub const LT: usize = 5;
+    /// Position of `b"__le"` in [`super::HOT_METATABLE_KEYS`].
+    pub const LE: usize = 6;
+    /// Position of `b"__add"` in [`super::HOT_METATABLE_KEYS`].
+    pub const ADD: usize = 7;
+    /// Position of `b"__sub"` in [`super::HOT_METATABLE_KEYS`].
+    pub const SUB: usize = 8;
+    /// Position of `b"__mul"` in [`super::HOT_METATABLE_KEYS`].
+    pub const MUL: usize = 9;
+    /// Position of `b"__div"` in [`super::HOT_METATABLE_KEYS`].
+    pub const DIV: usize = 10;
+    /// Position of `b"__mod"` in [`super::HOT_METATABLE_KEYS`].
+    pub const MOD: usize = 11;
+    /// Position of `b"__pow"` in [`super::HOT_METATABLE_KEYS`].
+    pub const POW: usize = 12;
+    /// Position of `b"__unm"` in [`super::HOT_METATABLE_KEYS`].
+    pub const UNM: usize = 13;
+    /// Position of `b"__concat"` in [`super::HOT_METATABLE_KEYS`].
+    pub const CONCAT: usize = 14;
+    /// Position of `b"__len"` in [`super::HOT_METATABLE_KEYS`].
+    pub const LEN: usize = 15;
+    /// Position of `b"__call"` in [`super::HOT_METATABLE_KEYS`].
+    pub const CALL: usize = 16;
+    /// Position of `b"__metatable"` in [`super::HOT_METATABLE_KEYS`].
+    pub const METATABLE: usize = 17;
     /// Position of `b"__rilua_frame_mt"` in [`super::HOT_METATABLE_KEYS`].
     pub const RILUA_FRAME_MT: usize = 18;
+    /// Position of `b"__rilua_frame_refs"` in [`super::HOT_METATABLE_KEYS`].
+    pub const RILUA_FRAME_REFS: usize = 19;
+    /// Position of `b"__sim_print"` in [`super::HOT_METATABLE_KEYS`].
+    pub const SIM_PRINT: usize = 20;
+    /// Position of `b"__secureenv"` in [`super::HOT_METATABLE_KEYS`].
+    pub const SECUREENV: usize = 21;
+    /// Position of `b"__cvars"` in [`super::HOT_METATABLE_KEYS`].
+    pub const CVARS: usize = 22;
+    /// Position of `b"__original_string_format"` in [`super::HOT_METATABLE_KEYS`].
+    pub const ORIGINAL_STRING_FORMAT: usize = 23;
 }
 
 /// Index constants into [`HOT_FRAME_METHODS`]. Grows as builder call

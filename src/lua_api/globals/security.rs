@@ -115,7 +115,9 @@ fn lookup_method_on_table(
         return direct;
     }
 
-    let index_key = state.gc.intern_string(b"__index");
+    let index_key = state
+        .gc
+        .intern_string_static(crate::lua_api::hot_literals::METATABLE_INDEX.as_bytes());
     let index_table = state
         .gc
         .tables

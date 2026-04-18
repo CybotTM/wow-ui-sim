@@ -111,8 +111,12 @@ fn build_proxy_metatable(
     g_live: rilua::vm::gc::arena::GcRef<Table>,
 ) -> rilua::vm::gc::arena::GcRef<Table> {
     let mt = state.gc.alloc_table(Table::new());
-    let index_key = state.gc.intern_string(b"__index");
-    let newindex_key = state.gc.intern_string(b"__newindex");
+    let index_key = state
+        .gc
+        .intern_string_static(crate::lua_api::hot_literals::METATABLE_INDEX.as_bytes());
+    let newindex_key = state
+        .gc
+        .intern_string_static(crate::lua_api::hot_literals::METATABLE_NEWINDEX.as_bytes());
     let mt_table = state
         .gc
         .tables

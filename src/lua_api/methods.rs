@@ -7,6 +7,7 @@
 
 use super::SimState;
 use super::env::WowLuaAppData;
+use super::hot_literals::{HOT_METATABLE_KEYS, metatable_idx};
 use crate::lua_bridge::create_frame_table;
 use crate::lua_bridge::stack_val;
 use rilua::vm::callinfo::LUA_MULTRET;
@@ -229,7 +230,6 @@ fn frame_ref_cache(state: &mut LuaState) -> GcRef<Table> {
 /// bootstrap pass) — the static cache still short-circuits on subsequent
 /// calls, so correctness is identical either way.
 fn frame_mt_registry_key(state: &mut LuaState) -> GcRef<rilua::vm::string::LuaString> {
-    use crate::lua_api::hot_literals::metatable_idx;
     let cached = state
         .app_data::<WowLuaAppData>()
         .and_then(|app| app.hot_literals.as_ref())
@@ -237,7 +237,9 @@ fn frame_mt_registry_key(state: &mut LuaState) -> GcRef<rilua::vm::string::LuaSt
     if let Some(key) = cached {
         return key;
     }
-    state.gc.intern_string_static(b"__rilua_frame_mt")
+    state
+        .gc
+        .intern_string_static(HOT_METATABLE_KEYS[metatable_idx::RILUA_FRAME_MT])
 }
 
 /// Attach the shared frame metatable to a table (if registered).

@@ -118,6 +118,39 @@ fn every_handle_decodes_to_its_source_bytes() {
 /// WHITELIST_VERSION and updating the index constants.
 #[test]
 fn named_indexes_map_to_expected_slice_entries() {
+    use metatable_idx as mi;
+
+    let metatable_pairs: &[(usize, &'static [u8])] = &[
+        (mi::INDEX, b"__index"),
+        (mi::NEWINDEX, b"__newindex"),
+        (mi::TOSTRING, b"__tostring"),
+        (mi::GC, b"__gc"),
+        (mi::EQ, b"__eq"),
+        (mi::LT, b"__lt"),
+        (mi::LE, b"__le"),
+        (mi::ADD, b"__add"),
+        (mi::SUB, b"__sub"),
+        (mi::MUL, b"__mul"),
+        (mi::DIV, b"__div"),
+        (mi::MOD, b"__mod"),
+        (mi::POW, b"__pow"),
+        (mi::UNM, b"__unm"),
+        (mi::CONCAT, b"__concat"),
+        (mi::LEN, b"__len"),
+        (mi::CALL, b"__call"),
+        (mi::METATABLE, b"__metatable"),
+        (mi::RILUA_FRAME_MT, b"__rilua_frame_mt"),
+        (mi::RILUA_FRAME_REFS, b"__rilua_frame_refs"),
+        (mi::SIM_PRINT, b"__sim_print"),
+        (mi::SECUREENV, b"__secureenv"),
+        (mi::CVARS, b"__cvars"),
+        (mi::ORIGINAL_STRING_FORMAT, b"__original_string_format"),
+    ];
+
+    for (index, expected) in metatable_pairs {
+        assert_eq!(HOT_METATABLE_KEYS[*index], *expected);
+    }
+
     assert_eq!(
         HOT_METATABLE_KEYS[metatable_idx::RILUA_FRAME_MT],
         b"__rilua_frame_mt"
