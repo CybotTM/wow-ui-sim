@@ -17,7 +17,7 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::create_string;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -259,8 +259,8 @@ static INSTANCES: &[InstanceRow] = &[
 
 pub(super) fn register_encounter_journal_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_EncounterJournal")?;
-    table_set_rust_fn(state, table_ref, "GetEncounterInfo", get_encounter_info)?;
-    table_set_rust_fn(state, table_ref, "GetInstanceInfo", get_instance_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetEncounterInfo", get_encounter_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetInstanceInfo", get_instance_info)?;
     Ok(())
 }
 

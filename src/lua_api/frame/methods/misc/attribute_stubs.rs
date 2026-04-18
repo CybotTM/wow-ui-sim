@@ -1,15 +1,15 @@
 //! Attribute and parent-key stub methods.
 
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "CanChangeAttribute", can_change_attribute)?;
-    table_set_rust_fn(state, mt, "ClearAttribute", clear_attribute)?;
-    table_set_rust_fn(state, mt, "ClearParentKey", clear_parent_key)?;
+    table_set_rust_fn_static(state, mt, "CanChangeAttribute", can_change_attribute)?;
+    table_set_rust_fn_static(state, mt, "ClearAttribute", clear_attribute)?;
+    table_set_rust_fn_static(state, mt, "ClearParentKey", clear_parent_key)?;
     Ok(())
 }
 

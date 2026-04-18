@@ -5,31 +5,31 @@ use crate::lua_api::methods::{
     frame_id_from_stack, get_or_create_frame_fields, table_get, table_get_static, table_set,
     val_to_string,
 };
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "GetOrCreateGroup", get_or_create_group)?;
-    table_set_rust_fn(state, mt, "ForceUpdateTimers", force_update_timers)?;
-    table_set_rust_fn(state, mt, "RegisterFontStrings", register_font_strings)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "GetOrCreateGroup", get_or_create_group)?;
+    table_set_rust_fn_static(state, mt, "ForceUpdateTimers", force_update_timers)?;
+    table_set_rust_fn_static(state, mt, "RegisterFontStrings", register_font_strings)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "RegisterBackgroundTexture",
         register_background_texture,
     )?;
-    table_set_rust_fn(state, mt, "RegisterFrames", register_frames)?;
-    table_set_rust_fn(state, mt, "SetBorderAlpha", set_border_alpha)?;
-    table_set_rust_fn(state, mt, "SetBorderScalar", set_border_scalar)?;
-    table_set_rust_fn(state, mt, "SetBorderTexture", set_border_texture)?;
-    table_set_rust_fn(state, mt, "SetFillAlpha", set_fill_alpha)?;
-    table_set_rust_fn(state, mt, "SetOwningDialog", set_owning_dialog)?;
-    table_set_rust_fn(state, mt, "SetFillTexture", set_fill_texture)?;
-    table_set_rust_fn(state, mt, "SetToDefaults", set_to_defaults)?;
-    table_set_rust_fn(state, mt, "DrawNone", draw_none)?;
+    table_set_rust_fn_static(state, mt, "RegisterFrames", register_frames)?;
+    table_set_rust_fn_static(state, mt, "SetBorderAlpha", set_border_alpha)?;
+    table_set_rust_fn_static(state, mt, "SetBorderScalar", set_border_scalar)?;
+    table_set_rust_fn_static(state, mt, "SetBorderTexture", set_border_texture)?;
+    table_set_rust_fn_static(state, mt, "SetFillAlpha", set_fill_alpha)?;
+    table_set_rust_fn_static(state, mt, "SetOwningDialog", set_owning_dialog)?;
+    table_set_rust_fn_static(state, mt, "SetFillTexture", set_fill_texture)?;
+    table_set_rust_fn_static(state, mt, "SetToDefaults", set_to_defaults)?;
+    table_set_rust_fn_static(state, mt, "DrawNone", draw_none)?;
     Ok(())
 }
 

@@ -209,7 +209,7 @@ fn test_local_function_closures() {
 fn load_test_lua_files(
     dir_suffix: &str,
     addon_name: &str,
-    files: &[(&str, &str)],
+    files: &[(&'static str, &str)],
 ) -> (TestCtx, Val) {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));

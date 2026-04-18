@@ -14,13 +14,13 @@
 //! BackSlot→Rear, Bag*Slot→Bag, ReagentBag0Slot→Bag, AmmoSlot→Ammo) cause
 //! "Not found" warnings for visible slots in the paperdoll UI.
 
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 /// `(slot_id, icon_file_id)` for every named equipment/bag slot the sim
 /// recognises. Keys are lowercase for case-insensitive lookup.
-const INVENTORY_SLOTS: &[(&str, i32, i32)] = &[
+const INVENTORY_SLOTS: &[(&'static str, i32, i32)] = &[
     ("headslot", 1, 136516),
     ("neckslot", 2, 136519),
     ("shoulderslot", 3, 136526),
@@ -91,7 +91,7 @@ pub fn get_inventory_slot_info(state: &mut LuaState) -> LuaResult<u32> {
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetInventorySlotInfo",

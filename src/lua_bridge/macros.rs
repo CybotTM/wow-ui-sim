@@ -85,7 +85,7 @@ macro_rules! define_methods {
                             let __val = __result?;
                             $crate::lua_bridge::IntoStack::into_stack(__val, state)
                         }
-                        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __method)?;
+                        $crate::lua_bridge::table_set_rust_fn_static($state, $table, $name, __method)?;
                     }
                 )*
                 Ok(())
@@ -122,7 +122,7 @@ macro_rules! __lua_bridge_define_function_entries {
             let __val = __result?;
             $crate::lua_bridge::IntoStack::into_stack(__val, state)
         }
-        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __func)?;
+        $crate::lua_bridge::table_set_rust_fn_static($state, $table, $name, __func)?;
         $crate::__lua_bridge_define_function_entries!($state, $table $(, $($rest)*)?)
     }};
     ($state:expr, $table:expr, $name:literal => |$first_pat:ident : $first_ty:ty $(, $arg_pat:ident : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block $(, $($rest:tt)*)?) => {{
@@ -135,7 +135,7 @@ macro_rules! __lua_bridge_define_function_entries {
             let __val = __result?;
             $crate::lua_bridge::IntoStack::into_stack(__val, state)
         }
-        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __func)?;
+        $crate::lua_bridge::table_set_rust_fn_static($state, $table, $name, __func)?;
         $crate::__lua_bridge_define_function_entries!($state, $table $(, $($rest)*)?)
     }};
 }

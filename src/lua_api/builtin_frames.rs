@@ -208,7 +208,7 @@ fn create_stub_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) {
     register_hidden_stub_frame_specs(widgets, ui_parent_id, o, HIDDEN_STUB_FRAMES);
 }
 
-const VISIBLE_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[
+const VISIBLE_STUB_FRAMES: &[(&'static str, Option<(f32, f32)>)] = &[
     ("ObjectiveTrackerFrame", Some((248.0, 600.0))),
     ("ScenarioObjectiveTracker", None),
     ("LFGEventFrame", None),
@@ -217,13 +217,14 @@ const VISIBLE_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[
     ("InterfaceOptionsFrame", None),
 ];
 
-const HIDDEN_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[("LFGListFrame", Some((400.0, 500.0)))];
+const HIDDEN_STUB_FRAMES: &[(&'static str, Option<(f32, f32)>)] =
+    &[("LFGListFrame", Some((400.0, 500.0)))];
 
 fn register_stub_frame_specs(
     widgets: &mut WidgetRegistry,
     ui_parent_id: u64,
     owner: u16,
-    specs: &[(&str, Option<(f32, f32)>)],
+    specs: &[(&'static str, Option<(f32, f32)>)],
 ) {
     for (name, size) in specs {
         register_frame(
@@ -241,7 +242,7 @@ fn register_hidden_stub_frame_specs(
     widgets: &mut WidgetRegistry,
     ui_parent_id: u64,
     owner: u16,
-    specs: &[(&str, Option<(f32, f32)>)],
+    specs: &[(&'static str, Option<(f32, f32)>)],
 ) {
     for (name, size) in specs {
         register_hidden_frame(

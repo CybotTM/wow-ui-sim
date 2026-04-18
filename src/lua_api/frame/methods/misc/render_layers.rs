@@ -1,29 +1,29 @@
 //! Flatten render layers, window display, and don't-save-position methods.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         mt,
         "GetEffectivelyFlattensRenderLayers",
         get_effectively_flattens_render_layers,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         mt,
         "GetFlattensRenderLayers",
         get_flattens_render_layers,
     )?;
-    table_set_rust_fn(state, mt, "GetDontSavePosition", get_dont_save_position)?;
-    table_set_rust_fn(state, mt, "SetDontSavePosition", set_dont_save_position)?;
-    table_set_rust_fn(state, mt, "GetWindow", get_window)?;
-    table_set_rust_fn(state, mt, "SetWindow", set_window)?;
+    table_set_rust_fn_static(state, mt, "GetDontSavePosition", get_dont_save_position)?;
+    table_set_rust_fn_static(state, mt, "SetDontSavePosition", set_dont_save_position)?;
+    table_set_rust_fn_static(state, mt, "GetWindow", get_window)?;
+    table_set_rust_fn_static(state, mt, "SetWindow", set_window)?;
     Ok(())
 }
 

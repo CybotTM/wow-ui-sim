@@ -1,16 +1,16 @@
 //! Frame buffer and texture rotation methods.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "IsFrameBuffer", is_frame_buffer)?;
-    table_set_rust_fn(state, mt, "RotateTextures", rotate_textures)?;
-    table_set_rust_fn(state, mt, "SetIsFrameBuffer", set_is_frame_buffer)?;
+    table_set_rust_fn_static(state, mt, "IsFrameBuffer", is_frame_buffer)?;
+    table_set_rust_fn_static(state, mt, "RotateTextures", rotate_textures)?;
+    table_set_rust_fn_static(state, mt, "SetIsFrameBuffer", set_is_frame_buffer)?;
     Ok(())
 }
 

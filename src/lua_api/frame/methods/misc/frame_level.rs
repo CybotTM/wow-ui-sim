@@ -1,19 +1,19 @@
 //! Frame level, raise/lower, and parent-level hierarchy methods.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "Lower", lower)?;
-    table_set_rust_fn(state, mt, "Raise", raise)?;
-    table_set_rust_fn(state, mt, "GetHighestFrameLevel", get_highest_frame_level)?;
-    table_set_rust_fn(state, mt, "GetRaisedFrameLevel", get_raised_frame_level)?;
-    table_set_rust_fn(state, mt, "IsUsingParentLevel", is_using_parent_level)?;
-    table_set_rust_fn(state, mt, "SetUsingParentLevel", set_using_parent_level)?;
+    table_set_rust_fn_static(state, mt, "Lower", lower)?;
+    table_set_rust_fn_static(state, mt, "Raise", raise)?;
+    table_set_rust_fn_static(state, mt, "GetHighestFrameLevel", get_highest_frame_level)?;
+    table_set_rust_fn_static(state, mt, "GetRaisedFrameLevel", get_raised_frame_level)?;
+    table_set_rust_fn_static(state, mt, "IsUsingParentLevel", is_using_parent_level)?;
+    table_set_rust_fn_static(state, mt, "SetUsingParentLevel", set_using_parent_level)?;
     Ok(())
 }
 

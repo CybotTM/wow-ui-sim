@@ -5,7 +5,7 @@
 //!   still unread.
 
 use crate::lua_api::methods::{borrow_state, create_table};
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -47,6 +47,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "HasNewMail", has_new_mail)?;
     let state = lua.state_mut();
     let table_ref = ensure_c_mail_table(state);
-    table_set_rust_fn(state, table_ref, "HasNewMail", has_new_mail)?;
+    table_set_rust_fn_static(state, table_ref, "HasNewMail", has_new_mail)?;
     Ok(())
 }

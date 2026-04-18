@@ -277,7 +277,7 @@ fn collect_template_chain(
 /// inherit from a base template and apply a mixin. Register them so the
 /// template chain resolution and CreateFrame can find them.
 pub fn register_intrinsic_templates() {
-    let intrinsics: &[(&str, &str, &str, &str)] = &[
+    let intrinsics: &[(&'static str, &str, &str, &str)] = &[
         // (name, widget_type, inherits, mixin)
         (
             "WoWScrollBoxList",

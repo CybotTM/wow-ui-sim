@@ -27,7 +27,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult};
 
 /// (panel_token, companion_frame_name)
-const PANELS: &[(&str, &str)] = &[
+const PANELS: &[(&'static str, &str)] = &[
     ("Character", "CharacterFrame"),
     ("SpellBook", "SpellBookFrame"),
     ("Talent", "PlayerTalentFrame"),

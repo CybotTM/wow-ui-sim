@@ -6,7 +6,7 @@ use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
 };
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::{gc::arena::GcRef, table::Table};
 use rilua::{LuaResult, Val};
@@ -556,7 +556,7 @@ fn register_namespace_methods(
     methods: &[NamespaceMethod],
 ) -> LuaResult<()> {
     for &(name, func) in methods {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

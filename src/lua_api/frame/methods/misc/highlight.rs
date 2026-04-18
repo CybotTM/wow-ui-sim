@@ -1,30 +1,30 @@
 //! Highlight lock and desaturate-hierarchy methods.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "DesaturateHierarchy", desaturate_hierarchy)?;
-    table_set_rust_fn(state, mt, "IsHighlightLocked", is_highlight_locked)?;
-    table_set_rust_fn(state, mt, "LockHighlight", lock_highlight)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "DesaturateHierarchy", desaturate_hierarchy)?;
+    table_set_rust_fn_static(state, mt, "IsHighlightLocked", is_highlight_locked)?;
+    table_set_rust_fn_static(state, mt, "LockHighlight", lock_highlight)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "IsIgnoringChildrenForBounds",
         is_ignoring_children_for_bounds,
     )?;
-    table_set_rust_fn(state, mt, "SetHighlightLocked", set_highlight_locked)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "SetHighlightLocked", set_highlight_locked)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "SetIgnoringChildrenForBounds",
         set_ignoring_children_for_bounds,
     )?;
-    table_set_rust_fn(state, mt, "UnlockHighlight", unlock_highlight)?;
+    table_set_rust_fn_static(state, mt, "UnlockHighlight", unlock_highlight)?;
     Ok(())
 }
 

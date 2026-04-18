@@ -522,7 +522,7 @@ pub fn create_table_with_capacity(state: &mut LuaState, hash_capacity: usize) ->
 
 /// Create a new table and set string-keyed fields on it.
 /// Pre-sizes the hash part to avoid rehashing.
-pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&str, Val)]) -> Val {
+pub fn create_table_with_fields(state: &mut LuaState, fields: &[(&'static str, Val)]) -> Val {
     let table_ref = state.gc.alloc_table(Table::with_sizes(0, fields.len()));
     for &(key, value) in fields {
         let key_ref = state.gc.intern_string(key.as_bytes());

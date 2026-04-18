@@ -1,13 +1,13 @@
 //! Method-table constants and namespace registration for the quest surface.
 
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::SurfaceFn;
 use super::handlers::*;
 
-pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
+pub const QUEST_LOG_METHODS: &[(&'static str, SurfaceFn)] = &[
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("GetInfo", get_quest_log_info),
     ("GetQuestIDForLogIndex", get_quest_id_for_log_index),
@@ -50,7 +50,7 @@ pub const QUEST_LOG_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetSelectedQuest", get_selected_quest),
 ];
 
-pub const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
+pub const TASK_QUEST_METHODS: &[(&'static str, SurfaceFn)] = &[
     ("IsActive", task_quest_is_active),
     ("GetQuestsOnMap", build_task_quest_info),
     ("GetQuestsForPlayerByMapID", build_task_quest_info),
@@ -60,7 +60,7 @@ pub const TASK_QUEST_METHODS: &[(&str, SurfaceFn)] = &[
     ("GetQuestTimeLeftSeconds", task_quest_time_left_seconds),
 ];
 
-pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
+pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
     ("GetNumQuestLeaderBoards", get_num_quest_leaderboards),
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("GetQuestLogLeaderBoard", get_quest_log_leaderboard),
@@ -86,7 +86,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&str, SurfaceFn)] = &[
 pub fn register_quest_info_handlers(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = super::ensure_global_table(state, "C_QuestLog");
     for (name, func) in QUEST_LOG_METHODS {
-        table_set_rust_fn(state, table_ref, name, *func)?;
+        table_set_rust_fn_static(state, table_ref, name, *func)?;
     }
     Ok(())
 }
@@ -94,7 +94,7 @@ pub fn register_quest_info_handlers(state: &mut LuaState) -> LuaResult<()> {
 pub fn register_task_quest_handlers(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = super::ensure_global_table(state, "C_TaskQuest");
     for (name, func) in TASK_QUEST_METHODS {
-        table_set_rust_fn(state, table_ref, name, *func)?;
+        table_set_rust_fn_static(state, table_ref, name, *func)?;
     }
     Ok(())
 }
@@ -113,7 +113,7 @@ pub fn register_quest_classification_handler(state: &mut LuaState) -> LuaResult<
     }
 
     let table_ref = super::ensure_global_table(state, "C_QuestInfoSystem");
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetQuestClassification",

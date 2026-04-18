@@ -5,7 +5,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
     sync_child_to_rilua,
 };
-use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn, table_set_rust_fn_static};
 use crate::widget::WidgetType;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -427,15 +427,15 @@ pub(super) fn update_scroll_child_rect(state: &mut LuaState) -> LuaResult<u32> {
 // ---------------------------------------------------------------------------
 
 pub(super) fn register_slider(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetValueStep", set_value_step)?;
-    table_set_rust_fn(state, metatable, "GetValueStep", get_value_step)?;
-    table_set_rust_fn(state, metatable, "SetOrientation", set_orientation)?;
-    table_set_rust_fn(state, metatable, "GetOrientation", get_orientation)?;
-    table_set_rust_fn(state, metatable, "SetObeyStepOnDrag", set_obey_step_on_drag)?;
-    table_set_rust_fn(state, metatable, "GetObeyStepOnDrag", get_obey_step_on_drag)?;
-    table_set_rust_fn(state, metatable, "SetStepsPerPage", set_steps_per_page)?;
-    table_set_rust_fn(state, metatable, "GetStepsPerPage", get_steps_per_page)?;
-    table_set_rust_fn(state, metatable, "IsDraggingThumb", is_dragging_thumb)?;
+    table_set_rust_fn_static(state, metatable, "SetValueStep", set_value_step)?;
+    table_set_rust_fn_static(state, metatable, "GetValueStep", get_value_step)?;
+    table_set_rust_fn_static(state, metatable, "SetOrientation", set_orientation)?;
+    table_set_rust_fn_static(state, metatable, "GetOrientation", get_orientation)?;
+    table_set_rust_fn_static(state, metatable, "SetObeyStepOnDrag", set_obey_step_on_drag)?;
+    table_set_rust_fn_static(state, metatable, "GetObeyStepOnDrag", get_obey_step_on_drag)?;
+    table_set_rust_fn_static(state, metatable, "SetStepsPerPage", set_steps_per_page)?;
+    table_set_rust_fn_static(state, metatable, "GetStepsPerPage", get_steps_per_page)?;
+    table_set_rust_fn_static(state, metatable, "IsDraggingThumb", is_dragging_thumb)?;
     Ok(())
 }
 
@@ -443,15 +443,15 @@ pub(super) fn register_shared_value(
     state: &mut LuaState,
     metatable: GcRef<Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetValue", shared_set_value)?;
-    table_set_rust_fn(state, metatable, "GetValue", shared_get_value)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, metatable, "SetValue", shared_set_value)?;
+    table_set_rust_fn_static(state, metatable, "GetValue", shared_get_value)?;
+    table_set_rust_fn_static(
         state,
         metatable,
         "SetMinMaxValues",
         shared_set_min_max_values,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         metatable,
         "GetMinMaxValues",
@@ -461,12 +461,12 @@ pub(super) fn register_shared_value(
 }
 
 pub(super) fn register_checkbutton(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, metatable, "SetChecked", checkbutton_set_checked)?;
-    table_set_rust_fn(state, metatable, "GetChecked", checkbutton_get_checked)?;
+    table_set_rust_fn_static(state, metatable, "SetChecked", checkbutton_set_checked)?;
+    table_set_rust_fn_static(state, metatable, "GetChecked", checkbutton_get_checked)?;
     Ok(())
 }
 
-const SCROLLFRAME_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const SCROLLFRAME_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetHorizontalScroll", get_horizontal_scroll),
     ("SetHorizontalScroll", set_horizontal_scroll),
     ("GetHorizontalScrollRange", get_horizontal_scroll_range),

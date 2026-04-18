@@ -1,7 +1,7 @@
 //! C_XMLUtil: template info lookup.
 
 use crate::lua_api::methods::{create_string, create_table, val_to_string};
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -14,7 +14,7 @@ pub fn register_c_xml_util(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(c_xml_util_ref) = c_xml_util else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         c_xml_util_ref,
         "GetTemplateInfo",

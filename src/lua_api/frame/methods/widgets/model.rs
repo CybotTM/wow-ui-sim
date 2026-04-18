@@ -462,7 +462,7 @@ pub(super) fn scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResul
 // register_model
 // ---------------------------------------------------------------------------
 
-const MODEL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Model source + transform
     ("SetModel", set_model),
     ("GetModel", get_model),

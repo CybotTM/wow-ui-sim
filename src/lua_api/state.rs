@@ -825,6 +825,7 @@ fn default_maps() -> HashMap<i32, MapData> {
 fn default_achievements() -> HashMap<i32, AchievementInfo> {
     [
         achievement_level_ten(),
+        achievement_explore_elwynn_forest(),
         achievement_explore_eastern_kingdoms(),
         achievement_veteran_of_the_alliance(),
     ]
@@ -857,6 +858,21 @@ fn achievement_explore_eastern_kingdoms() -> AchievementInfo {
             .into(),
         flags: 0,
         icon: 236541,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_explore_elwynn_forest() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 776,
+        name: "Explore Elwynn Forest".into(),
+        points: 10,
+        description: "Explore Elwynn Forest, revealing the covered areas of the world map.".into(),
+        flags: 0,
+        icon: 236809,
         reward_text: String::new(),
         is_guild: false,
         is_statistic: false,

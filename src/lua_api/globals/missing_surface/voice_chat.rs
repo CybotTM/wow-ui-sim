@@ -19,31 +19,31 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_table, table_set};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_voice_chat_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_VoiceChat")?;
-    table_set_rust_fn(state, ns, "GetActiveChannelID", get_active_channel_id)?;
-    table_set_rust_fn(state, ns, "GetChannel", get_channel)?;
-    table_set_rust_fn(state, ns, "GetChannels", get_channels)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetActiveChannelID", get_active_channel_id)?;
+    table_set_rust_fn_static(state, ns, "GetChannel", get_channel)?;
+    table_set_rust_fn_static(state, ns, "GetChannels", get_channels)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "GetCurrentVoiceChatConnectionStatusCode",
         get_current_voice_chat_connection_status_code,
     )?;
-    table_set_rust_fn(state, ns, "GetMasterVolumeScale", get_master_volume_scale)?;
-    table_set_rust_fn(state, ns, "GetMicrophoneVolume", get_microphone_volume)?;
-    table_set_rust_fn(state, ns, "GetOutputVolume", get_output_volume)?;
-    table_set_rust_fn(state, ns, "GetNumActiveChannels", get_num_active_channels)?;
-    table_set_rust_fn(state, ns, "GetNumMembers", get_num_members)?;
-    table_set_rust_fn(state, ns, "IsDeafened", is_deafened)?;
-    table_set_rust_fn(state, ns, "IsEnabled", is_enabled)?;
-    table_set_rust_fn(state, ns, "IsMuted", is_muted)?;
-    table_set_rust_fn(state, ns, "IsParentalDisabled", is_parental_disabled)?;
-    table_set_rust_fn(state, ns, "IsTalking", is_talking)?;
+    table_set_rust_fn_static(state, ns, "GetMasterVolumeScale", get_master_volume_scale)?;
+    table_set_rust_fn_static(state, ns, "GetMicrophoneVolume", get_microphone_volume)?;
+    table_set_rust_fn_static(state, ns, "GetOutputVolume", get_output_volume)?;
+    table_set_rust_fn_static(state, ns, "GetNumActiveChannels", get_num_active_channels)?;
+    table_set_rust_fn_static(state, ns, "GetNumMembers", get_num_members)?;
+    table_set_rust_fn_static(state, ns, "IsDeafened", is_deafened)?;
+    table_set_rust_fn_static(state, ns, "IsEnabled", is_enabled)?;
+    table_set_rust_fn_static(state, ns, "IsMuted", is_muted)?;
+    table_set_rust_fn_static(state, ns, "IsParentalDisabled", is_parental_disabled)?;
+    table_set_rust_fn_static(state, ns, "IsTalking", is_talking)?;
     Ok(())
 }
 

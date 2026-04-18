@@ -1,22 +1,22 @@
 //! Frame bounds, resize, and position offset methods.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, IntoStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "GetBoundsRect", get_bounds_rect)?;
-    table_set_rust_fn(state, mt, "GetClampRectInsets", get_clamp_rect_insets)?;
-    table_set_rust_fn(state, mt, "GetResizeBounds", get_resize_bounds)?;
-    table_set_rust_fn(state, mt, "SetClampRectInsets", set_clamp_rect_insets)?;
-    table_set_rust_fn(state, mt, "SetMinResize", set_min_resize)?;
-    table_set_rust_fn(state, mt, "SetMaxResize", set_max_resize)?;
-    table_set_rust_fn(state, mt, "SetResizeBounds", set_resize_bounds)?;
-    table_set_rust_fn(state, mt, "SetPointsOffset", set_points_offset)?;
-    table_set_rust_fn(state, mt, "UpdateHeight", update_height)?;
+    table_set_rust_fn_static(state, mt, "GetBoundsRect", get_bounds_rect)?;
+    table_set_rust_fn_static(state, mt, "GetClampRectInsets", get_clamp_rect_insets)?;
+    table_set_rust_fn_static(state, mt, "GetResizeBounds", get_resize_bounds)?;
+    table_set_rust_fn_static(state, mt, "SetClampRectInsets", set_clamp_rect_insets)?;
+    table_set_rust_fn_static(state, mt, "SetMinResize", set_min_resize)?;
+    table_set_rust_fn_static(state, mt, "SetMaxResize", set_max_resize)?;
+    table_set_rust_fn_static(state, mt, "SetResizeBounds", set_resize_bounds)?;
+    table_set_rust_fn_static(state, mt, "SetPointsOffset", set_points_offset)?;
+    table_set_rust_fn_static(state, mt, "UpdateHeight", update_height)?;
     Ok(())
 }
 

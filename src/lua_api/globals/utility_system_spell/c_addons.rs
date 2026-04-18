@@ -6,7 +6,7 @@ use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, create_string, create_table, registry_get,
     registry_set, state_handle, val_to_string,
 };
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::path::PathBuf;
@@ -42,27 +42,27 @@ fn register_c_addons_queries(
     state: &mut LuaState,
     t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(state, t, "GetNumAddOns", c_addons_get_num_addons)?;
-    table_set_rust_fn(state, t, "GetAddOnInfo", c_addons_get_addon_info)?;
-    table_set_rust_fn(state, t, "IsAddOnLoaded", c_addons_is_addon_loaded)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, t, "GetNumAddOns", c_addons_get_num_addons)?;
+    table_set_rust_fn_static(state, t, "GetAddOnInfo", c_addons_get_addon_info)?;
+    table_set_rust_fn_static(state, t, "IsAddOnLoaded", c_addons_is_addon_loaded)?;
+    table_set_rust_fn_static(
         state,
         t,
         "IsAddOnLoadOnDemand",
         c_addons_is_addon_load_on_demand,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t,
         "GetAddOnEnableState",
         c_addons_get_addon_enable_state,
     )?;
-    table_set_rust_fn(state, t, "GetAddOnMetadata", c_addons_get_addon_metadata)?;
-    table_set_rust_fn(state, t, "DoesAddOnExist", c_addons_does_addon_exist)?;
-    table_set_rust_fn(state, t, "GetAddOnName", c_addons_get_addon_name)?;
-    table_set_rust_fn(state, t, "GetAddOnTitle", c_addons_get_addon_title)?;
-    table_set_rust_fn(state, t, "GetAddOnNotes", c_addons_get_addon_notes)?;
-    table_set_rust_fn(state, t, "GetAddOnSecurity", c_addons_get_addon_security)?;
+    table_set_rust_fn_static(state, t, "GetAddOnMetadata", c_addons_get_addon_metadata)?;
+    table_set_rust_fn_static(state, t, "DoesAddOnExist", c_addons_does_addon_exist)?;
+    table_set_rust_fn_static(state, t, "GetAddOnName", c_addons_get_addon_name)?;
+    table_set_rust_fn_static(state, t, "GetAddOnTitle", c_addons_get_addon_title)?;
+    table_set_rust_fn_static(state, t, "GetAddOnNotes", c_addons_get_addon_notes)?;
+    table_set_rust_fn_static(state, t, "GetAddOnSecurity", c_addons_get_addon_security)?;
     Ok(())
 }
 
@@ -71,23 +71,23 @@ fn register_c_addons_state(
     state: &mut LuaState,
     t: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(state, t, "EnableAddOn", c_addons_enable_addon)?;
-    table_set_rust_fn(state, t, "DisableAddOn", c_addons_disable_addon)?;
-    table_set_rust_fn(state, t, "EnableAllAddOns", c_addons_enable_all_addons)?;
-    table_set_rust_fn(state, t, "DisableAllAddOns", c_addons_disable_all_addons)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, t, "EnableAddOn", c_addons_enable_addon)?;
+    table_set_rust_fn_static(state, t, "DisableAddOn", c_addons_disable_addon)?;
+    table_set_rust_fn_static(state, t, "EnableAllAddOns", c_addons_enable_all_addons)?;
+    table_set_rust_fn_static(state, t, "DisableAllAddOns", c_addons_disable_all_addons)?;
+    table_set_rust_fn_static(
         state,
         t,
         "IsAddonVersionCheckEnabled",
         c_addons_is_addon_version_check_enabled,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t,
         "SetAddonVersionCheck",
         c_addons_set_addon_version_check,
     )?;
-    table_set_rust_fn(state, t, "LoadAddOn", c_addons_load_addon)?;
+    table_set_rust_fn_static(state, t, "LoadAddOn", c_addons_load_addon)?;
     Ok(())
 }
 
@@ -98,32 +98,32 @@ pub fn register_legacy_addon_globals(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn register_legacy_addon_fns(state: &mut LuaState) -> LuaResult<()> {
-    table_set_rust_fn(state, state.global, "GetNumAddOns", c_addons_get_num_addons)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, state.global, "GetNumAddOns", c_addons_get_num_addons)?;
+    table_set_rust_fn_static(
         state,
         state.global,
         "IsAddOnLoaded",
         c_addons_is_addon_loaded,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetAddOnMetadata",
         c_addons_get_addon_metadata,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetAddOnEnableState",
         legacy_get_addon_enable_state,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "IsAddOnLoadOnDemand",
         c_addons_is_addon_load_on_demand,
     )?;
-    table_set_rust_fn(state, state.global, "LoadAddOn", c_addons_load_addon)?;
+    table_set_rust_fn_static(state, state.global, "LoadAddOn", c_addons_load_addon)?;
     Ok(())
 }
 

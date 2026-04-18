@@ -13,19 +13,19 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state::AreaPoiInfo;
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_area_poi_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_AreaPoiInfo")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetAreaPOIInfo",
         c_area_poi_info_get_area_poi_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetAreaPOISecondsLeft",

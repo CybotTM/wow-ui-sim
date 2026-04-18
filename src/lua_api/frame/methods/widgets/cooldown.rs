@@ -479,7 +479,7 @@ pub(super) fn set_tex_coord_range(_state: &mut LuaState) -> LuaResult<u32> {
 // register_cooldown
 // ---------------------------------------------------------------------------
 
-const COOLDOWN_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const COOLDOWN_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Duration / expiration configuration
     ("SetCooldown", set_cooldown),
     ("SetCooldownUNIX", set_cooldown_unix),

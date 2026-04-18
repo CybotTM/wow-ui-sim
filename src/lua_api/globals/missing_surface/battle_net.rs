@@ -22,32 +22,32 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state_types::{BnetFriend, BnetGameAccount};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_battle_net_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_BattleNet")?;
-    table_set_rust_fn(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetFriendAccountInfo",
         c_bnet_get_friend_account_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetAccountInfoByGUID",
         c_bnet_get_account_info_by_guid,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetGameAccountInfoByGUID",
         c_bnet_get_game_account_info_by_guid,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetFriendNumAccounts",

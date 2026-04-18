@@ -16,7 +16,7 @@
 //! `A_Admin.SetLfgApplicantCounts(total, viewed)` drives the values.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -74,8 +74,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     let table_ref = ensure_c_lfg_list_table(state);
-    table_set_rust_fn(state, table_ref, "GetNumApplications", get_num_applications)?;
-    table_set_rust_fn(state, table_ref, "GetNumApplicants", get_num_applicants)?;
+    table_set_rust_fn_static(state, table_ref, "GetNumApplications", get_num_applications)?;
+    table_set_rust_fn_static(state, table_ref, "GetNumApplicants", get_num_applicants)?;
     Ok(())
 }
 

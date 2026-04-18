@@ -1,7 +1,7 @@
 use super::ensure_namespace;
 use super::item_spell::parse_prefixed_id;
 use crate::lua_api::methods::{create_table, table_get, table_set, val_to_string};
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -10,7 +10,7 @@ const SOCKET_STATE_KEY: &str = "_state";
 
 type SocketFn = fn(&mut LuaState) -> LuaResult<u32>;
 
-const SOCKET_METHODS: &[(&str, SocketFn)] = &[
+const SOCKET_METHODS: &[(&'static str, SocketFn)] = &[
     ("AcceptSockets", c_item_socket_info_accept_sockets),
     ("ClickSocketButton", c_item_socket_info_click_socket_button),
     ("CloseSocketInfo", c_item_socket_info_close_socket_info),
@@ -51,7 +51,7 @@ pub(super) fn register_item_socket_info_surface(state: &mut LuaState) -> LuaResu
     let table_ref = ensure_namespace(state, SOCKET_NAMESPACE)?;
     ensure_socket_state_table(state);
     for &(name, func) in SOCKET_METHODS {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

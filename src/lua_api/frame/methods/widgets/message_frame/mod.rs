@@ -18,7 +18,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
-const METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Add / backfill
     ("AddMessage", add::add_message),
     ("AddMsg", add::add_msg),

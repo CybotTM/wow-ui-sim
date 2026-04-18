@@ -4,7 +4,7 @@
 use crate::lua_api::methods::{
     create_string, create_string_static, create_table, table_get, table_set, val_to_string,
 };
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -18,7 +18,7 @@ type FontTableRef = GcRef<RiluaTable>;
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 /// (name, height, flags, r, g, b)
-const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
+const STANDARD_FONTS: &[(&'static str, f64, &str, f64, f64, f64)] = &[
     ("GameFontNormal", 12.0, "", 1.0, 0.82, 0.0),
     ("GameFontNormalSmall", 10.0, "", 1.0, 0.82, 0.0),
     ("GameFontNormalLarge", 16.0, "", 1.0, 0.82, 0.0),
@@ -164,10 +164,10 @@ pub(super) fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&s
 // ── Method group registrations ────────────────────────────────────────────────
 
 fn add_font_field_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetFontHeight", font_set_font_height)?;
-    table_set_rust_fn(state, font_ref, "GetFontHeight", font_get_font_height)?;
-    table_set_rust_fn(state, font_ref, "SetFont", font_set_font)?;
-    table_set_rust_fn(state, font_ref, "GetFont", font_get_font)?;
+    table_set_rust_fn_static(state, font_ref, "SetFontHeight", font_set_font_height)?;
+    table_set_rust_fn_static(state, font_ref, "GetFontHeight", font_get_font_height)?;
+    table_set_rust_fn_static(state, font_ref, "SetFont", font_set_font)?;
+    table_set_rust_fn_static(state, font_ref, "GetFont", font_get_font)?;
     Ok(())
 }
 
@@ -216,8 +216,8 @@ fn font_get_font(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn add_font_text_color_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetTextColor", font_set_text_color)?;
-    table_set_rust_fn(state, font_ref, "GetTextColor", font_get_text_color)?;
+    table_set_rust_fn_static(state, font_ref, "SetTextColor", font_set_text_color)?;
+    table_set_rust_fn_static(state, font_ref, "GetTextColor", font_get_text_color)?;
     Ok(())
 }
 
@@ -230,10 +230,10 @@ fn font_get_text_color(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn add_font_shadow_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetShadowColor", font_set_shadow_color)?;
-    table_set_rust_fn(state, font_ref, "GetShadowColor", font_get_shadow_color)?;
-    table_set_rust_fn(state, font_ref, "SetShadowOffset", font_set_shadow_offset)?;
-    table_set_rust_fn(state, font_ref, "GetShadowOffset", font_get_shadow_offset)?;
+    table_set_rust_fn_static(state, font_ref, "SetShadowColor", font_set_shadow_color)?;
+    table_set_rust_fn_static(state, font_ref, "GetShadowColor", font_get_shadow_color)?;
+    table_set_rust_fn_static(state, font_ref, "SetShadowOffset", font_set_shadow_offset)?;
+    table_set_rust_fn_static(state, font_ref, "GetShadowOffset", font_get_shadow_offset)?;
     Ok(())
 }
 
@@ -327,23 +327,23 @@ fn font_get_spacing(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn add_font_justify_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetJustifyH", font_set_justify_h)?;
-    table_set_rust_fn(state, font_ref, "GetJustifyH", font_get_justify_h)?;
-    table_set_rust_fn(state, font_ref, "SetJustifyV", font_set_justify_v)?;
-    table_set_rust_fn(state, font_ref, "GetJustifyV", font_get_justify_v)?;
-    table_set_rust_fn(state, font_ref, "SetSpacing", font_set_spacing)?;
-    table_set_rust_fn(state, font_ref, "GetSpacing", font_get_spacing)?;
+    table_set_rust_fn_static(state, font_ref, "SetJustifyH", font_set_justify_h)?;
+    table_set_rust_fn_static(state, font_ref, "GetJustifyH", font_get_justify_h)?;
+    table_set_rust_fn_static(state, font_ref, "SetJustifyV", font_set_justify_v)?;
+    table_set_rust_fn_static(state, font_ref, "GetJustifyV", font_get_justify_v)?;
+    table_set_rust_fn_static(state, font_ref, "SetSpacing", font_set_spacing)?;
+    table_set_rust_fn_static(state, font_ref, "GetSpacing", font_get_spacing)?;
     Ok(())
 }
 
 fn add_font_wrap_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "SetIndentedWordWrap", |state| {
+    table_set_rust_fn_static(state, font_ref, "SetIndentedWordWrap", |state| {
         let font = stack_val(state, 1);
         let v = bool::from_stack(state, 2)?;
         table_set(state, font, "__indentedWordWrap", Val::Bool(v));
         Ok(0)
     })?;
-    table_set_rust_fn(state, font_ref, "GetIndentedWordWrap", |state| {
+    table_set_rust_fn_static(state, font_ref, "GetIndentedWordWrap", |state| {
         let font = stack_val(state, 1);
         let v = matches!(
             table_get(state, font, "__indentedWordWrap"),
@@ -351,13 +351,13 @@ fn add_font_wrap_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaRes
         );
         v.into_stack(state)
     })?;
-    table_set_rust_fn(state, font_ref, "SetMaxLines", |state| {
+    table_set_rust_fn_static(state, font_ref, "SetMaxLines", |state| {
         let font = stack_val(state, 1);
         let v = i32::from_stack(state, 2)?;
         table_set(state, font, "__maxLines", Val::Num(v as f64));
         Ok(0)
     })?;
-    table_set_rust_fn(state, font_ref, "GetMaxLines", |state| {
+    table_set_rust_fn_static(state, font_ref, "GetMaxLines", |state| {
         let font = stack_val(state, 1);
         let v = match table_get(state, font, "__maxLines") {
             Val::Num(n) => n as i32,
@@ -413,18 +413,18 @@ fn font_set_font_object(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn add_font_meta_methods(state: &mut LuaState, font_ref: FontTableRef) -> LuaResult<()> {
-    table_set_rust_fn(state, font_ref, "GetName", font_get_name)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, font_ref, "GetName", font_get_name)?;
+    table_set_rust_fn_static(
         state,
         font_ref,
         "GetFontObjectForAlphabet",
         font_get_font_object_for_alphabet,
     )?;
-    table_set_rust_fn(state, font_ref, "CopyFontObject", font_copy_font_object)?;
-    table_set_rust_fn(state, font_ref, "GetObjectType", font_get_object_type)?;
-    table_set_rust_fn(state, font_ref, "IsObjectType", font_is_object_type)?;
-    table_set_rust_fn(state, font_ref, "GetFontObject", font_get_font_object)?;
-    table_set_rust_fn(state, font_ref, "SetFontObject", font_set_font_object)?;
+    table_set_rust_fn_static(state, font_ref, "CopyFontObject", font_copy_font_object)?;
+    table_set_rust_fn_static(state, font_ref, "GetObjectType", font_get_object_type)?;
+    table_set_rust_fn_static(state, font_ref, "IsObjectType", font_is_object_type)?;
+    table_set_rust_fn_static(state, font_ref, "GetFontObject", font_get_font_object)?;
+    table_set_rust_fn_static(state, font_ref, "SetFontObject", font_set_font_object)?;
     Ok(())
 }
 

@@ -28,3 +28,4 @@ pub use multivalue::MultiValue;
 pub use table_builder::TableBuilder;
 pub use table_builder::create_frame_table;
 pub(crate) use table_builder::table_set_rust_fn;
+pub(crate) use table_builder::table_set_rust_fn_static;

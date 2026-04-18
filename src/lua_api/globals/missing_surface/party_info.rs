@@ -15,7 +15,7 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::methods::create_table;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -32,30 +32,30 @@ fn register_group_membership_probes(
     state: &mut LuaState,
     table_ref: GcRef<Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetActiveCategories",
         c_party_info_get_active_categories,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetActiveGroupType",
         c_party_info_get_active_group_type,
     )?;
-    table_set_rust_fn(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
+    table_set_rust_fn_static(state, table_ref, "IsPartyFull", c_party_info_is_party_full)?;
     Ok(())
 }
 
 fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "IsPartyInJailersTower",
         c_party_info_is_party_in_jailers_tower,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetInviteConfirmationInfo",

@@ -5,7 +5,7 @@ use super::helpers::{
 use crate::items;
 use crate::lua_api::globals::missing_surface::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, val_to_string};
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -65,7 +65,7 @@ pub(crate) fn parse_item_guid(guid: &str) -> Option<(i32, i32, u32)> {
 
 pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Item")?;
-    let methods: &[(&str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
+    let methods: &[(&'static str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
         ("GetItemIconByID", c_item_get_item_icon_by_id),
         ("GetItemNameByID", c_item_get_item_name_by_id),
         ("GetItemQualityByID", c_item_get_item_quality_by_id),
@@ -84,7 +84,7 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         ),
     ];
     for &(name, func) in methods {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

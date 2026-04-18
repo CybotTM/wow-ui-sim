@@ -7,7 +7,7 @@ use crate::lua_api::state::{
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint,
 };
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -84,7 +84,7 @@ fn register_namespace(
 ) -> LuaResult<()> {
     let table_ref = ensure_namespace_table(state, namespace);
     for (name, func) in methods {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

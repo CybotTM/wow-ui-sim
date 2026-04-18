@@ -10,14 +10,14 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state_types::SocialFriend;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_social_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Social")?;
-    table_set_rust_fn(state, table_ref, "GetFriendInfo", c_social_get_friend_info)?;
-    table_set_rust_fn(state, table_ref, "GetFriends", c_social_get_friends)?;
+    table_set_rust_fn_static(state, table_ref, "GetFriendInfo", c_social_get_friend_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetFriends", c_social_get_friends)?;
     Ok(())
 }
 

@@ -1,28 +1,28 @@
 //! Gamepad button/stick enable methods.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "EnableGamePadButton", enable_game_pad_button)?;
-    table_set_rust_fn(state, mt, "EnableGamePadStick", enable_game_pad_stick)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "EnableGamePadButton", enable_game_pad_button)?;
+    table_set_rust_fn_static(state, mt, "EnableGamePadStick", enable_game_pad_stick)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "IsGamePadButtonEnabled",
         is_game_pad_button_enabled,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         mt,
         "IsGamePadStickEnabled",
         is_game_pad_stick_enabled,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         mt,
         "ShouldButtonPassThrough",

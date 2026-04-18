@@ -24,7 +24,7 @@
 //! / `SetZonePVP(pvpType, isSubZonePvp, factionName)` drive the values.
 
 use crate::lua_api::methods::{borrow_state, create_string, create_table};
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -123,11 +123,11 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     let g = state.global;
-    table_set_rust_fn(state, g, "GetZoneText", get_zone_text)?;
-    table_set_rust_fn(state, g, "GetSubZoneText", get_sub_zone_text)?;
-    table_set_rust_fn(state, g, "GetMinimapZoneText", get_minimap_zone_text)?;
-    table_set_rust_fn(state, g, "GetRealZoneText", get_real_zone_text)?;
+    table_set_rust_fn_static(state, g, "GetZoneText", get_zone_text)?;
+    table_set_rust_fn_static(state, g, "GetSubZoneText", get_sub_zone_text)?;
+    table_set_rust_fn_static(state, g, "GetMinimapZoneText", get_minimap_zone_text)?;
+    table_set_rust_fn_static(state, g, "GetRealZoneText", get_real_zone_text)?;
     let c_pvp = ensure_c_pvp_table(state);
-    table_set_rust_fn(state, c_pvp, "GetZonePVPInfo", get_zone_pvp_info)?;
+    table_set_rust_fn_static(state, c_pvp, "GetZonePVPInfo", get_zone_pvp_info)?;
     Ok(())
 }

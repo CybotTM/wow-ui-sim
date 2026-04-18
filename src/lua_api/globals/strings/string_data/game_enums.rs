@@ -7,7 +7,7 @@ use super::IntDef;
 // Icon List Data (for register_icon_list)
 // ============================================================================
 
-pub const ICON_LIST_DATA: &[(&str, i32)] = &[
+pub const ICON_LIST_DATA: &[(&'static str, i32)] = &[
     ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:", 1),
     ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_2:", 2),
     ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_3:", 3),
@@ -39,7 +39,7 @@ pub const ITEM_QUALITY_COLORS_DATA: &[(i32, f64, f64, f64, &str)] = &[
 // Class Names Data (for register_class_name_tables)
 // ============================================================================
 
-pub const CLASS_NAMES_DATA: &[(&str, &str)] = &[
+pub const CLASS_NAMES_DATA: &[(&'static str, &str)] = &[
     ("WARRIOR", "Warrior"),
     ("PALADIN", "Paladin"),
     ("HUNTER", "Hunter"),

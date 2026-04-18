@@ -5,7 +5,9 @@
 //! point in admin.rs imports these as pub(super) and weaves
 //! them into the A_Admin TableBuilder chain.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_string_static,
+};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -140,15 +142,35 @@ pub(super) fn has_achievement(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn earn_achievement(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
     let id = i32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    st.world.earned_achievements.insert(id);
-    st.events.push(Event {
-        name: "ACHIEVEMENT_EARNED".to_string(),
-        args: vec![EventArg::Number(id as f64)],
-    });
+    borrow_state_mut(state)?
+        .world
+        .earned_achievements
+        .insert(id);
+    fire_achievement_earned(state, id);
     Ok(0)
+}
+
+fn fire_achievement_earned(state: &mut LuaState, achievement_id: i32) {
+    let fire_event = lookup_global(state, "FireEvent");
+    if fire_event == Val::Nil {
+        return;
+    }
+    let call_args = [
+        create_string_static(state, "ACHIEVEMENT_EARNED"),
+        Val::Num(achievement_id as f64),
+    ];
+    let _ = call_function_state(state, fire_event, &call_args);
+}
+
+fn lookup_global(state: &mut LuaState, name: &str) -> Val {
+    let key_ref = state.gc.intern_string(name.as_bytes());
+    state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
 }
 
 pub(super) fn collect_mount(state: &mut LuaState) -> LuaResult<u32> {

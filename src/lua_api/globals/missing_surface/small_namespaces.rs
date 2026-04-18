@@ -15,7 +15,7 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table};
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -37,37 +37,37 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
 fn register_flat_namespace(
     state: &mut LuaState,
     namespace: &'static str,
-    methods: &[(&str, rilua::vm::closure::RustFn)],
+    methods: &[(&'static str, rilua::vm::closure::RustFn)],
 ) -> LuaResult<()> {
     let ns = ensure_namespace(state, namespace)?;
     for (name, func) in methods {
-        table_set_rust_fn(state, ns, name, *func)?;
+        table_set_rust_fn_static(state, ns, name, *func)?;
     }
     Ok(())
 }
 
-const C_TROPHY_HALL_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+const C_TROPHY_HALL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
     &[("GetTrophyInfo", c_trophy_hall_get_trophy_info)];
 
-const C_STABLE_INFO_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+const C_STABLE_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
     &[("IsAtPetStable", c_stable_info_is_at_pet_stable)];
 
-const C_GARRISON_INFO_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const C_GARRISON_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("HasGarrison", c_garrison_info_has_garrison),
     ("GetGarrisonType", c_garrison_info_get_garrison_type),
 ];
 
-const C_ASSISTED_COMBAT_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const C_ASSISTED_COMBAT_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetActionSpell", c_assisted_combat_get_action_spell),
     ("GetNextCastSpell", c_assisted_combat_get_next_cast_spell),
     ("GetRotationSpells", c_assisted_combat_get_rotation_spells),
     ("IsAvailable", c_assisted_combat_is_available),
 ];
 
-const C_MAP_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+const C_MAP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
     &[("IsMapValidForNavigation", c_map_is_map_valid_for_navigation)];
 
-const C_PVP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("IsMatchConsideredArena", c_pvp_is_match_considered_arena),
     (
         "GetPvpTalentsUnlockedLevel",
@@ -80,7 +80,7 @@ const C_PVP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("GetWarModeRewardBonus", c_pvp_get_war_mode_reward_bonus),
 ];
 
-const C_LOSS_OF_CONTROL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const C_LOSS_OF_CONTROL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     (
         "GetActiveLossOfControlData",
         c_loc_get_active_loss_of_control_data,
@@ -91,7 +91,7 @@ const C_LOSS_OF_CONTROL_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ),
 ];
 
-const C_BANK_METHODS: &[(&str, rilua::vm::closure::RustFn)] =
+const C_BANK_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
     &[("HasFullBankAccess", c_bank_has_full_bank_access)];
 
 fn c_trophy_hall_get_trophy_info(_state: &mut LuaState) -> LuaResult<u32> {

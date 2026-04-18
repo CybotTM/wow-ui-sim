@@ -10,7 +10,7 @@ use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, table_get, table_set,
     val_to_string,
 };
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -404,7 +404,7 @@ pub(super) fn ensure_pet_info_state(state: &mut LuaState) -> Val {
             table_set(state, t, "petActionsByID", action_map);
             table_set(state, ns, "_pet_state_data", t);
             // register _state() as a Rust function the first time
-            let _ = table_set_rust_fn(state, ns_ref, "_state", c_pet_info_get_state);
+            let _ = table_set_rust_fn_static(state, ns_ref, "_state", c_pet_info_get_state);
             t
         }
     };

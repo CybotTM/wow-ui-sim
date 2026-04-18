@@ -6,7 +6,7 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_api::talent_state;
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::specializations;
 use crate::spell_descriptions;
 use crate::traits::{
@@ -475,65 +475,65 @@ fn register_c_traits_query_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GenerateImportString",
         c_traits_generate_import_string,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetConfigIDBySystemID",
         c_traits_get_config_id_by_system_id,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetConfigIDByTreeID",
         c_traits_get_config_id_by_tree_id,
     )?;
-    table_set_rust_fn(state, table_ref, "GetConfigInfo", c_traits_get_config_info)?;
-    table_set_rust_fn(state, table_ref, "GetNodeInfo", c_traits_get_node_info)?;
-    table_set_rust_fn(state, table_ref, "GetEntryInfo", c_traits_get_entry_info)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetConfigInfo", c_traits_get_config_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetNodeInfo", c_traits_get_node_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetEntryInfo", c_traits_get_entry_info)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetDefinitionInfo",
         c_traits_get_definition_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetTraitDescription",
         c_traits_get_trait_description,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetConditionInfo",
         c_traits_get_condition_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "InitializeViewLoadout",
         c_traits_initialize_view_loadout,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetTreeCurrencyInfo",
         c_traits_get_tree_currency_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetTraitCurrencyInfo",
         c_traits_get_trait_currency_info,
     )?;
-    table_set_rust_fn(state, table_ref, "GetTreeInfo", c_traits_get_tree_info)?;
-    table_set_rust_fn(state, table_ref, "GetTreeNodes", c_traits_get_tree_nodes)?;
+    table_set_rust_fn_static(state, table_ref, "GetTreeInfo", c_traits_get_tree_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetTreeNodes", c_traits_get_tree_nodes)?;
     Ok(())
 }
 
@@ -541,53 +541,53 @@ fn register_c_traits_action_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(state, table_ref, "GetAllTreeIDs", c_traits_get_all_tree_ids)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetAllTreeIDs", c_traits_get_all_tree_ids)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetTraitSystemFlags",
         c_traits_get_trait_system_flags,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "CanPurchaseRank",
         c_traits_can_purchase_rank,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetLoadoutSerializationVersion",
         c_traits_get_loadout_serialization_version,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "ConfigHasStagedChanges",
         c_traits_config_has_staged_changes,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetStagedChanges",
         c_traits_get_staged_changes,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetStagedChangesCost",
         c_traits_get_staged_changes_cost,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSubTreeInfo",
         c_traits_get_subtree_info,
     )?;
-    table_set_rust_fn(state, table_ref, "GetNodeCost", c_traits_get_node_cost)?;
-    table_set_rust_fn(state, table_ref, "SetSelection", c_traits_set_selection)?;
-    table_set_rust_fn(state, table_ref, "PurchaseRank", c_traits_purchase_rank)?;
-    table_set_rust_fn(state, table_ref, "RefundRank", c_traits_refund_rank)?;
+    table_set_rust_fn_static(state, table_ref, "GetNodeCost", c_traits_get_node_cost)?;
+    table_set_rust_fn_static(state, table_ref, "SetSelection", c_traits_set_selection)?;
+    table_set_rust_fn_static(state, table_ref, "PurchaseRank", c_traits_purchase_rank)?;
+    table_set_rust_fn_static(state, table_ref, "RefundRank", c_traits_refund_rank)?;
     Ok(())
 }
 
@@ -602,13 +602,13 @@ fn register_c_class_talents_hero_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetHeroTalentSpecsForClassSpec",
         c_class_talents_get_hero_talent_specs_for_class_spec,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetActiveHeroTalentSpec",
@@ -617,7 +617,7 @@ fn register_c_class_talents_hero_fns(
     Ok(())
 }
 
-const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
+const CLASS_TALENTS_CONFIG_METHODS: &[(&'static str, rilua::RustFn)] = &[
     (
         "GetConfigIDsBySpecID",
         c_class_talents_get_config_ids_by_spec_id,
@@ -669,7 +669,7 @@ fn register_c_class_talents_config_fns(
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
     for &(name, func) in CLASS_TALENTS_CONFIG_METHODS {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }
@@ -687,25 +687,25 @@ fn register_c_class_talents_action_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "SwitchToLoadoutByName",
         c_class_talents_switch_to_loadout_by_name,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "SwitchToLoadoutByIndex",
         c_class_talents_switch_to_loadout_by_index,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "SwitchToSpecializationByName",
         c_class_talents_switch_to_specialization_by_name,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "SwitchToSpecializationByIndex",

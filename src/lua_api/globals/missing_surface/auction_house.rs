@@ -18,14 +18,14 @@ use super::{ensure_namespace, set_table_array};
 use crate::items;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state::{AuctionBrowseResult, BidAuction, OwnedAuction};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::{gc::arena::GcRef, table::Table};
 use rilua::{LuaResult, Val};
 use std::collections::HashSet;
 
 type AuctionHouseMethod = fn(&mut LuaState) -> LuaResult<u32>;
-const AUCTION_HOUSE_METHODS: &[(&str, AuctionHouseMethod)] = &[
+const AUCTION_HOUSE_METHODS: &[(&'static str, AuctionHouseMethod)] = &[
     (
         "GetAuctionItemSubClasses",
         c_auction_house_get_auction_item_sub_classes,
@@ -112,7 +112,7 @@ pub(super) fn register_auction_house_surface(state: &mut LuaState) -> LuaResult<
 
 fn register_auction_house_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     for &(name, func) in AUCTION_HOUSE_METHODS {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

@@ -346,7 +346,7 @@ pub(super) fn get_status_bar_desaturated(state: &mut LuaState) -> LuaResult<u32>
 // register_statusbar
 // ---------------------------------------------------------------------------
 
-const STATUSBAR_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const STATUSBAR_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Colors + texture
     ("SetStatusBarColor", set_status_bar_color),
     ("SetColorFill", set_color_fill),

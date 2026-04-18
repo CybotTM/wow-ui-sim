@@ -5,7 +5,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, frame_id_from_stack, get_or_create_frame_fields, table_get,
     table_set, val_to_string,
 };
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -15,58 +15,58 @@ const MINIMAP_ZOOM_KEY: &str = "__minimapZoom";
 const MINIMAP_ZOOM_LEVELS: i32 = 6;
 
 pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "GetUiMapID", get_ui_map_id)?;
-    table_set_rust_fn(state, mt, "SetUiMapID", set_ui_map_id)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "GetUiMapID", get_ui_map_id)?;
+    table_set_rust_fn_static(state, mt, "SetUiMapID", set_ui_map_id)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "GetFogOfWarBackgroundAtlas",
         get_fog_of_war_background_atlas,
     )?;
-    table_set_rust_fn(state, mt, "GetFogOfWarMaskAtlas", get_fog_of_war_mask_atlas)?;
-    table_set_rust_fn(state, mt, "GetMaskScalar", get_fog_of_war_mask_scalar)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "GetFogOfWarMaskAtlas", get_fog_of_war_mask_atlas)?;
+    table_set_rust_fn_static(state, mt, "GetMaskScalar", get_fog_of_war_mask_scalar)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "SetFogOfWarBackgroundAtlas",
         set_fog_of_war_background_atlas,
     )?;
-    table_set_rust_fn(state, mt, "SetFogOfWarMaskAtlas", set_fog_of_war_mask_atlas)?;
-    table_set_rust_fn(state, mt, "SetMaskScalar", set_fog_of_war_mask_scalar)?;
-    table_set_rust_fn(state, mt, "ClearUnits", clear_units)?;
-    table_set_rust_fn(state, mt, "AddUnit", add_unit)?;
-    table_set_rust_fn(state, mt, "FinalizeUnits", finalize_units)?;
-    table_set_rust_fn(state, mt, "SetUnitColor", set_unit_color)?;
-    table_set_rust_fn(state, mt, "GetMouseOverUnits", get_mouse_over_units)?;
-    table_set_rust_fn(state, mt, "GetPlayerPingScale", get_player_ping_scale)?;
-    table_set_rust_fn(state, mt, "SetPlayerPingTexture", set_player_ping_texture)?;
-    table_set_rust_fn(state, mt, "SetPlayerPingScale", set_player_ping_scale)?;
-    table_set_rust_fn(state, mt, "StartPlayerPing", start_player_ping)?;
-    table_set_rust_fn(state, mt, "StopPlayerPing", stop_player_ping)?;
-    table_set_rust_fn(state, mt, "SetBlipTexture", set_blip_texture)?;
-    table_set_rust_fn(state, mt, "SetMaskTexture", set_minimap_mask_texture)?;
-    table_set_rust_fn(state, mt, "SetIconTexture", set_minimap_icon_texture)?;
-    table_set_rust_fn(state, mt, "SetPOIArrowTexture", set_poi_arrow_texture)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, mt, "SetFogOfWarMaskAtlas", set_fog_of_war_mask_atlas)?;
+    table_set_rust_fn_static(state, mt, "SetMaskScalar", set_fog_of_war_mask_scalar)?;
+    table_set_rust_fn_static(state, mt, "ClearUnits", clear_units)?;
+    table_set_rust_fn_static(state, mt, "AddUnit", add_unit)?;
+    table_set_rust_fn_static(state, mt, "FinalizeUnits", finalize_units)?;
+    table_set_rust_fn_static(state, mt, "SetUnitColor", set_unit_color)?;
+    table_set_rust_fn_static(state, mt, "GetMouseOverUnits", get_mouse_over_units)?;
+    table_set_rust_fn_static(state, mt, "GetPlayerPingScale", get_player_ping_scale)?;
+    table_set_rust_fn_static(state, mt, "SetPlayerPingTexture", set_player_ping_texture)?;
+    table_set_rust_fn_static(state, mt, "SetPlayerPingScale", set_player_ping_scale)?;
+    table_set_rust_fn_static(state, mt, "StartPlayerPing", start_player_ping)?;
+    table_set_rust_fn_static(state, mt, "StopPlayerPing", stop_player_ping)?;
+    table_set_rust_fn_static(state, mt, "SetBlipTexture", set_blip_texture)?;
+    table_set_rust_fn_static(state, mt, "SetMaskTexture", set_minimap_mask_texture)?;
+    table_set_rust_fn_static(state, mt, "SetIconTexture", set_minimap_icon_texture)?;
+    table_set_rust_fn_static(state, mt, "SetPOIArrowTexture", set_poi_arrow_texture)?;
+    table_set_rust_fn_static(
         state,
         mt,
         "SetCorpsePOIArrowTexture",
         set_corpse_poi_arrow_texture,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         mt,
         "SetStaticPOIArrowTexture",
         set_static_poi_arrow_texture,
     )?;
-    table_set_rust_fn(state, mt, "SetPlayerTexture", set_minimap_player_texture)?;
-    table_set_rust_fn(state, mt, "SetZoom", set_zoom)?;
-    table_set_rust_fn(state, mt, "GetZoom", get_zoom)?;
-    table_set_rust_fn(state, mt, "GetZoomLevels", get_zoom_levels)?;
-    table_set_rust_fn(state, mt, "PingLocation", ping_location)?;
-    table_set_rust_fn(state, mt, "GetPingPosition", get_ping_position)?;
-    table_set_rust_fn(state, mt, "UpdateBlips", update_blips)?;
-    table_set_rust_fn(state, mt, "SetToDefaults", set_to_defaults)?;
+    table_set_rust_fn_static(state, mt, "SetPlayerTexture", set_minimap_player_texture)?;
+    table_set_rust_fn_static(state, mt, "SetZoom", set_zoom)?;
+    table_set_rust_fn_static(state, mt, "GetZoom", get_zoom)?;
+    table_set_rust_fn_static(state, mt, "GetZoomLevels", get_zoom_levels)?;
+    table_set_rust_fn_static(state, mt, "PingLocation", ping_location)?;
+    table_set_rust_fn_static(state, mt, "GetPingPosition", get_ping_position)?;
+    table_set_rust_fn_static(state, mt, "UpdateBlips", update_blips)?;
+    table_set_rust_fn_static(state, mt, "SetToDefaults", set_to_defaults)?;
     Ok(())
 }
 

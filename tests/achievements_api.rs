@@ -1,5 +1,6 @@
 //! Tests for achievements: earn/remove via admin API, query via GetAchievementInfo.
 
+use wow_ui_sim::event::EventArg;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -266,21 +267,23 @@ fn test_achievement_criteria_nil_for_invalid_index() {
 #[test]
 fn test_earn_achievement_sets_earned_and_fires_event() {
     let env = env();
-    let (completed, event_fired): (bool, bool) = env
+    let completed: bool = env
         .eval(
             r#"
-            local fired = false
-            local f = CreateFrame("Frame")
-            f:RegisterEvent("ACHIEVEMENT_EARNED")
-            f:SetScript("OnEvent", function(self, event, id)
-                if event == "ACHIEVEMENT_EARNED" and id == 6 then fired = true end
-            end)
             A_Admin.EarnAchievement(6)
             local _, _, _, c = GetAchievementInfo(6)
-            return c, fired
+            return c
             "#,
         )
         .unwrap();
+    let event_fired = {
+        let state = env.state();
+        let state = state.borrow();
+        state.events.pending().iter().any(|event| {
+            event.name == "ACHIEVEMENT_EARNED"
+                && matches!(event.args.as_slice(), [EventArg::Number(id)] if *id == 6.0)
+        })
+    };
     assert!(completed);
     assert!(event_fired);
 }

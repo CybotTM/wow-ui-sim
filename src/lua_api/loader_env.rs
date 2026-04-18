@@ -6,7 +6,7 @@ use super::methods::create_string;
 use crate::Result;
 use crate::lua_api::methods::create_table;
 use crate::lua_api::script_helpers::call_error_handler_state;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaApiMut;
 use rilua::Val;
 use rilua::vm::state::LuaState;
@@ -403,7 +403,7 @@ pub(crate) fn create_addon_table_state(state: &mut LuaState) -> Result<Val> {
     let Val::Table(table_ref) = table else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(state, table_ref, "unpack", addon_table_unpack)?;
+    table_set_rust_fn_static(state, table_ref, "unpack", addon_table_unpack)?;
     Ok(table)
 }
 

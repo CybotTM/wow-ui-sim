@@ -11,13 +11,13 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_chat_bubbles_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ChatBubbles")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetAllChatBubbles",

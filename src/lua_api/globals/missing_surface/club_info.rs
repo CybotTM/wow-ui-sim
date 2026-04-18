@@ -19,7 +19,7 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -29,21 +29,21 @@ const GUILD_CLUB_CAPACITY: f64 = 1000.0;
 
 pub(super) fn register_club_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Club")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSubscribedClubs",
         c_club_get_subscribed_clubs,
     )?;
-    table_set_rust_fn(state, table_ref, "GetClubMembers", c_club_get_club_members)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetClubMembers", c_club_get_club_members)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetClubCapacity",
         c_club_get_club_capacity,
     )?;
-    table_set_rust_fn(state, table_ref, "IsEnabled", c_club_is_enabled)?;
-    table_set_rust_fn(state, table_ref, "IsRestricted", c_club_is_restricted)?;
+    table_set_rust_fn_static(state, table_ref, "IsEnabled", c_club_is_enabled)?;
+    table_set_rust_fn_static(state, table_ref, "IsRestricted", c_club_is_restricted)?;
     Ok(())
 }
 

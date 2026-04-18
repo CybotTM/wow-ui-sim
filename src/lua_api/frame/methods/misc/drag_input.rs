@@ -3,25 +3,25 @@
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, val_to_string,
 };
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "AbortDrag", abort_drag)?;
-    table_set_rust_fn(state, mt, "InterceptStartDrag", intercept_start_drag)?;
-    table_set_rust_fn(state, mt, "IsDragging", is_dragging)?;
-    table_set_rust_fn(state, mt, "RegisterForDrag", register_for_drag)?;
-    table_set_rust_fn(state, mt, "SetMovable", set_movable)?;
-    table_set_rust_fn(state, mt, "IsMovable", is_movable)?;
-    table_set_rust_fn(state, mt, "StartMoving", start_moving)?;
-    table_set_rust_fn(state, mt, "StopMovingOrSizing", stop_moving_or_sizing)?;
-    table_set_rust_fn(state, mt, "SetUserPlaced", set_user_placed)?;
-    table_set_rust_fn(state, mt, "IsUserPlaced", is_user_placed)?;
-    table_set_rust_fn(state, mt, "SetClampedToScreen", set_clamped_to_screen)?;
-    table_set_rust_fn(state, mt, "IsClampedToScreen", is_clamped_to_screen)?;
+    table_set_rust_fn_static(state, mt, "AbortDrag", abort_drag)?;
+    table_set_rust_fn_static(state, mt, "InterceptStartDrag", intercept_start_drag)?;
+    table_set_rust_fn_static(state, mt, "IsDragging", is_dragging)?;
+    table_set_rust_fn_static(state, mt, "RegisterForDrag", register_for_drag)?;
+    table_set_rust_fn_static(state, mt, "SetMovable", set_movable)?;
+    table_set_rust_fn_static(state, mt, "IsMovable", is_movable)?;
+    table_set_rust_fn_static(state, mt, "StartMoving", start_moving)?;
+    table_set_rust_fn_static(state, mt, "StopMovingOrSizing", stop_moving_or_sizing)?;
+    table_set_rust_fn_static(state, mt, "SetUserPlaced", set_user_placed)?;
+    table_set_rust_fn_static(state, mt, "IsUserPlaced", is_user_placed)?;
+    table_set_rust_fn_static(state, mt, "SetClampedToScreen", set_clamped_to_screen)?;
+    table_set_rust_fn_static(state, mt, "IsClampedToScreen", is_clamped_to_screen)?;
     Ok(())
 }
 

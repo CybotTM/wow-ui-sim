@@ -20,21 +20,21 @@ use crate::lua_api::methods::{
     borrow_state, create_string, create_table, table_set, val_to_string,
 };
 use crate::lua_api::state::MapData;
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::collections::HashSet;
 
 pub(super) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Map")?;
-    table_set_rust_fn(state, table_ref, "GetMapArtID", c_map_get_map_art_id)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetMapArtID", c_map_get_map_art_id)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetMapChildrenInfo",
         c_map_get_map_children_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetPlayerMapPosition",

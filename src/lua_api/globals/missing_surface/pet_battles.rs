@@ -21,32 +21,32 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_api::state::PetBattlePet;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_pet_battles_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_PetBattles")?;
-    table_set_rust_fn(state, ns, "GetAbilityInfoByID", get_ability_info_by_id)?;
-    table_set_rust_fn(state, ns, "GetActivePet", get_active_pet)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetAbilityInfoByID", get_ability_info_by_id)?;
+    table_set_rust_fn_static(state, ns, "GetActivePet", get_active_pet)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "GetAllEffectiveAbilityIDs",
         get_all_effective_ability_ids,
     )?;
-    table_set_rust_fn(state, ns, "GetMaxAbilityCharges", get_max_ability_charges)?;
-    table_set_rust_fn(state, ns, "GetPetAbilityInfo", get_pet_ability_info)?;
-    table_set_rust_fn(state, ns, "GetPetAbilityList", get_pet_ability_list)?;
-    table_set_rust_fn(state, ns, "GetPetInfo", get_pet_info)?;
-    table_set_rust_fn(state, ns, "GetPetInfoByPetID", get_pet_info_by_pet_id)?;
-    table_set_rust_fn(state, ns, "GetPetStats", get_pet_stats)?;
-    table_set_rust_fn(state, ns, "GetPlayerInfo", get_player_info)?;
-    table_set_rust_fn(state, ns, "GetRoundTimingInfo", get_round_timing_info)?;
-    table_set_rust_fn(state, ns, "GetTurnResult", get_turn_result)?;
-    table_set_rust_fn(state, ns, "GetXP", get_xp)?;
-    table_set_rust_fn(state, ns, "IsPlayerNPC", is_player_npc)?;
-    table_set_rust_fn(state, ns, "StartPVPMatchmaking", start_pvp_matchmaking)?;
+    table_set_rust_fn_static(state, ns, "GetMaxAbilityCharges", get_max_ability_charges)?;
+    table_set_rust_fn_static(state, ns, "GetPetAbilityInfo", get_pet_ability_info)?;
+    table_set_rust_fn_static(state, ns, "GetPetAbilityList", get_pet_ability_list)?;
+    table_set_rust_fn_static(state, ns, "GetPetInfo", get_pet_info)?;
+    table_set_rust_fn_static(state, ns, "GetPetInfoByPetID", get_pet_info_by_pet_id)?;
+    table_set_rust_fn_static(state, ns, "GetPetStats", get_pet_stats)?;
+    table_set_rust_fn_static(state, ns, "GetPlayerInfo", get_player_info)?;
+    table_set_rust_fn_static(state, ns, "GetRoundTimingInfo", get_round_timing_info)?;
+    table_set_rust_fn_static(state, ns, "GetTurnResult", get_turn_result)?;
+    table_set_rust_fn_static(state, ns, "GetXP", get_xp)?;
+    table_set_rust_fn_static(state, ns, "IsPlayerNPC", is_player_npc)?;
+    table_set_rust_fn_static(state, ns, "StartPVPMatchmaking", start_pvp_matchmaking)?;
     Ok(())
 }
 

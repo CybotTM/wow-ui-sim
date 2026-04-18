@@ -23,19 +23,19 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::sim_substates::QuestLogEntry;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_QuestLog")?;
     for (name, func) in C_QUEST_LOG_METHODS {
-        table_set_rust_fn(state, ns, name, *func)?;
+        table_set_rust_fn_static(state, ns, name, *func)?;
     }
     Ok(())
 }
 
-const C_QUEST_LOG_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetBountySetInfoForMapID", get_bounty_set_info_for_map_id),
     ("GetInfo", get_info),
     ("GetNextWaypoint", get_next_waypoint),

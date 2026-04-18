@@ -1,7 +1,7 @@
 //! C_AddOnProfiler: per-addon and application performance metrics.
 
 use crate::lua_api::methods::{borrow_state, create_table, val_to_string};
-use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -20,37 +20,37 @@ pub fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(profiler_ref) = profiler else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         profiler_ref,
         "GetApplicationMetric",
         c_addon_profiler_get_application_metric,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         profiler_ref,
         "GetOverallMetric",
         c_addon_profiler_get_overall_metric,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         profiler_ref,
         "GetAddOnMetric",
         c_addon_profiler_get_addon_metric,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         profiler_ref,
         "AddPerformanceMessageShown",
         c_addon_profiler_add_performance_message_shown,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         profiler_ref,
         "CheckForPerformanceMessage",
         c_addon_profiler_check_for_performance_message,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         profiler_ref,
         "IsEnabled",

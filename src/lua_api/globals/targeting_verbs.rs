@@ -24,7 +24,7 @@
 use crate::event::Event;
 use crate::lua_api::game_data::{PartyMember, TargetInfo};
 use crate::lua_api::methods::borrow_state_mut;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
@@ -290,11 +290,11 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     let g = state.global;
-    table_set_rust_fn(state, g, "TargetUnit", target_unit)?;
-    table_set_rust_fn(state, g, "FocusUnit", focus_unit)?;
-    table_set_rust_fn(state, g, "ClearTarget", clear_target)?;
-    table_set_rust_fn(state, g, "TargetLastTarget", target_last_target)?;
-    table_set_rust_fn(state, g, "TargetNearestEnemy", target_nearest_enemy)?;
-    table_set_rust_fn(state, g, "TargetNearestFriend", target_nearest_friend)?;
+    table_set_rust_fn_static(state, g, "TargetUnit", target_unit)?;
+    table_set_rust_fn_static(state, g, "FocusUnit", focus_unit)?;
+    table_set_rust_fn_static(state, g, "ClearTarget", clear_target)?;
+    table_set_rust_fn_static(state, g, "TargetLastTarget", target_last_target)?;
+    table_set_rust_fn_static(state, g, "TargetNearestEnemy", target_nearest_enemy)?;
+    table_set_rust_fn_static(state, g, "TargetNearestFriend", target_nearest_friend)?;
     Ok(())
 }

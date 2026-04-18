@@ -188,7 +188,7 @@ pub fn get_game_mode_glue_screen_name(state: &mut LuaState) -> LuaResult<u32> {
 
 fn install_on_c_game_rules(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_c_game_rules_table(state);
-    let entries: &[(&str, rilua::vm::closure::RustFn)] = &[
+    let entries: &[(&'static str, rilua::vm::closure::RustFn)] = &[
         ("IsGameRuleActive", is_game_rule_active),
         ("GetGameRuleAsFloat", get_game_rule_as_float),
         ("GetGameRuleAsInt", get_game_rule_as_int),

@@ -15,25 +15,25 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, val_to_string};
 use crate::lua_bridge::stack_val;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_summon_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let summon_info = ensure_namespace(state, "C_SummonInfo")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         summon_info,
         "GetSummonReason",
         c_summon_info_get_reason,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         summon_info,
         "GetSummonConfirmTimeLeft",
         c_summon_info_get_confirm_time_left,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         summon_info,
         "IsSummonSkippingStartExperience",
@@ -41,13 +41,13 @@ pub(super) fn register_summon_info_surface(state: &mut LuaState) -> LuaResult<()
     )?;
 
     let incoming = ensure_namespace(state, "C_IncomingSummon")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         incoming,
         "HasIncomingSummon",
         c_incoming_summon_has_incoming_summon,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         incoming,
         "IncomingSummonStatus",

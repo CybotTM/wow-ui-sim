@@ -13,21 +13,21 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_scenario_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_ScenarioInfo")?;
-    table_set_rust_fn(state, ns, "GetScenarioInfo", get_scenario_info)?;
-    table_set_rust_fn(state, ns, "GetScenarioStepInfo", get_scenario_step_info)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetScenarioInfo", get_scenario_info)?;
+    table_set_rust_fn_static(state, ns, "GetScenarioStepInfo", get_scenario_step_info)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "GetScenarioBonusStepRewardQuestID",
         get_scenario_bonus_step_reward_quest_id,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         ns,
         "IsTieredEntranceScenario",

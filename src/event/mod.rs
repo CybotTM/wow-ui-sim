@@ -188,7 +188,7 @@ impl ScriptHandler {
     }
 }
 
-const SCRIPT_HANDLERS_BY_NAME: &[(&str, ScriptHandler)] = &[
+const SCRIPT_HANDLERS_BY_NAME: &[(&'static str, ScriptHandler)] = &[
     ("OnEvent", ScriptHandler::OnEvent),
     ("OnUpdate", ScriptHandler::OnUpdate),
     ("OnShow", ScriptHandler::OnShow),

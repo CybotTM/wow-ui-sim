@@ -15,26 +15,26 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_LFGInfo")?;
-    table_set_rust_fn(state, table_ref, "CanPlayerUseLFD", can_player_use_lfd)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "CanPlayerUseLFD", can_player_use_lfd)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetLFGCategoryInfo",
         get_lfg_category_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSystemPanelData",
         get_system_panel_data,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "IsLFGModeActiveForCategory",

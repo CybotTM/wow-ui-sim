@@ -19,6 +19,10 @@ use crate::lua_bridge::IntoStack;
 ///
 /// Used by the `define_methods!` and `define_functions!` macros so they
 /// do not need to go through a full `TableBuilder`.
+///
+/// Prefer [`table_set_rust_fn_static`] when `name` is a compile-time
+/// literal — the pointer-keyed static intern cache short-circuits
+/// the content hash on every repeat call.
 pub fn table_set_rust_fn(
     state: &mut LuaState,
     table_ref: GcRef<RiluaTable>,
@@ -26,6 +30,31 @@ pub fn table_set_rust_fn(
     func: RustFn,
 ) -> LuaResult<()> {
     let key_ref = state.gc.intern_string(name.as_bytes());
+    install_rust_fn(state, table_ref, key_ref, name, func)
+}
+
+/// Same as [`table_set_rust_fn`] but routes the key through
+/// `intern_string_static`, skipping the content-hash lookup when the
+/// pointer is already in the static intern cache. Use this whenever
+/// `name` is a compile-time literal.
+pub fn table_set_rust_fn_static(
+    state: &mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+    name: &'static str,
+    func: RustFn,
+) -> LuaResult<()> {
+    let name_bytes: &'static [u8] = name.as_bytes();
+    let key_ref = state.gc.intern_string_static(name_bytes);
+    install_rust_fn(state, table_ref, key_ref, name, func)
+}
+
+fn install_rust_fn(
+    state: &mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+    key_ref: GcRef<rilua::vm::string::LuaString>,
+    name: &str,
+    func: RustFn,
+) -> LuaResult<()> {
     let key = Val::Str(key_ref);
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);

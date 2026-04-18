@@ -15,32 +15,32 @@
 
 use super::ensure_namespace;
 use crate::lua_api::methods::borrow_state;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_character_services_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CharacterServices")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetActiveCharacterUpgradeBoostType",
         get_active_character_upgrade_boost_type,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetActiveClassTrialBoostType",
         get_active_class_trial_boost_type,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "HasRequiredServiceForCharacterUpgrade",
         has_required_service_for_character_upgrade,
     )?;
-    table_set_rust_fn(state, table_ref, "AssignUpgradeDistribution", assign_noop)?;
-    table_set_rust_fn(state, table_ref, "AssignPCTDistribution", assign_noop)?;
+    table_set_rust_fn_static(state, table_ref, "AssignUpgradeDistribution", assign_noop)?;
+    table_set_rust_fn_static(state, table_ref, "AssignPCTDistribution", assign_noop)?;
     Ok(())
 }
 

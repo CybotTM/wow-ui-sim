@@ -752,7 +752,7 @@ pub(super) fn add_font_strings(_state: &mut LuaState) -> LuaResult<u32> {
 // register_tooltip
 // ---------------------------------------------------------------------------
 
-const TOOLTIP_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Lines
     ("ClearLines", clear_lines),
     ("AddLine", add_line),

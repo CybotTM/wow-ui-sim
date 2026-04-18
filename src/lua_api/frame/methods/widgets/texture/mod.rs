@@ -13,7 +13,7 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
-const TEXTURE_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const TEXTURE_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Draw layer + shadow
     ("SetDrawLayer", draw_shadow::set_draw_layer),
     ("GetDrawLayer", draw_shadow::get_draw_layer),

@@ -3,11 +3,11 @@ use crate::lua_api::methods::{
     borrow_state, create_string, create_table, table_set, val_to_string,
 };
 use crate::lua_api::state::CurrencyInfo;
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
+const CURRENCY_INFO_METHODS: &[(&'static str, rilua::RustFn)] = &[
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
     ("GetCoinTextureString", c_currency_get_coin_texture_string),
@@ -25,7 +25,7 @@ const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
 pub(super) fn register_c_currency_info(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CurrencyInfo")?;
     for &(name, func) in CURRENCY_INFO_METHODS {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }
@@ -252,8 +252,8 @@ fn parse_currency_id_from_link(link: &str) -> Option<i32> {
 
 pub(super) fn register_c_equipment_set(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_EquipmentSet")?;
-    table_set_rust_fn(state, table_ref, "GetEquipmentSetIDs", c_equipment_set_ids)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetEquipmentSetIDs", c_equipment_set_ids)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetEquipmentSetInfo",
@@ -275,7 +275,7 @@ fn c_equipment_set_info(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn register_c_bank(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Bank")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "FetchDepositedMoney",

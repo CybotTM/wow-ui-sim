@@ -466,7 +466,7 @@ fn normalize_highlight_range(start: i32, end: i32, len: i32) -> (i32, i32) {
 // register_editbox
 // ---------------------------------------------------------------------------
 
-const EDITBOX_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const EDITBOX_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     // Focus state
     ("SetFocus", set_focus),
     ("ClearFocus", clear_focus),

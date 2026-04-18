@@ -22,7 +22,7 @@
 //! `stubs::register_all(lua.state_mut())`. Covered by
 //! `tests/namespace_stubs_patched.rs`.
 
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -80,9 +80,9 @@ fn ensure_namespace(state: &mut LuaState, namespace: &str) -> GcRef<Table> {
 /// Safe to call after `stubs::register_all` to guarantee master-era behaviour.
 pub fn patch_namespace_stubs(state: &mut LuaState) {
     let widget_mgr = ensure_namespace(state, "C_UIWidgetManager");
-    let _ = table_set_rust_fn(state, widget_mgr, "GetPowerBarWidgetSetID", stub_zero);
+    let _ = table_set_rust_fn_static(state, widget_mgr, "GetPowerBarWidgetSetID", stub_zero);
 
     let player_info = ensure_namespace(state, "C_PlayerInfo");
-    let _ = table_set_rust_fn(state, player_info, "IsPlayerInRPE", stub_false);
-    let _ = table_set_rust_fn(state, player_info, "GetAlternateFormInfo", stub_false_false);
+    let _ = table_set_rust_fn_static(state, player_info, "IsPlayerInRPE", stub_false);
+    let _ = table_set_rust_fn_static(state, player_info, "GetAlternateFormInfo", stub_false_false);
 }

@@ -2,7 +2,7 @@
 //! C_ClassColor, and tooltip / item-quality / class-name / icon-list stubs.
 
 use crate::lua_api::methods::{create_string, create_table, table_get, table_set, val_to_string};
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -11,7 +11,7 @@ use super::set_global_val;
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
-pub(super) const NAMED_COLOR_GLOBALS: &[(&str, (f64, f64, f64, f64))] = &[
+pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = &[
     (
         "PLAYER_FACTION_COLOR_HORDE",
         (0.90196, 0.05098, 0.07059, 1.0),
@@ -48,7 +48,7 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&str, (f64, f64, f64, f64))] = &[
     ("EDIT_MODE_GRID_CENTER_LINE_COLOR", (0.0, 0.8, 1.0, 0.6)),
 ];
 
-pub(super) const RAID_CLASS_COLORS_DATA: &[(&str, (f64, f64, f64, f64))] = &[
+pub(super) const RAID_CLASS_COLORS_DATA: &[(&'static str, (f64, f64, f64, f64))] = &[
     ("WARRIOR", (0.78, 0.61, 0.43, 1.0)),
     ("PALADIN", (0.96, 0.55, 0.73, 1.0)),
     ("HUNTER", (0.67, 0.83, 0.45, 1.0)),
@@ -97,24 +97,24 @@ fn register_color_methods(
     state: &mut LuaState,
     t_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
 ) -> LuaResult<()> {
-    table_set_rust_fn(state, t_ref, "GetRGB", |state| {
+    table_set_rust_fn_static(state, t_ref, "GetRGB", |state| {
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
         (r, g, b).into_stack(state)
     })?;
-    table_set_rust_fn(state, t_ref, "GetRGBA", |state| {
+    table_set_rust_fn_static(state, t_ref, "GetRGBA", |state| {
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
         let a = color_channel(state, this, "a", 1.0);
         (r, g, b, a).into_stack(state)
     })?;
-    table_set_rust_fn(state, t_ref, "GenerateHexColor", |state| {
+    table_set_rust_fn_static(state, t_ref, "GenerateHexColor", |state| {
         let this = stack_val(state, 1);
         let (r, g, b) = color_rgb(state, this);
         let hex = hex_from_rgb(r, g, b);
         create_string(state, &hex).into_stack(state)
     })?;
-    table_set_rust_fn(state, t_ref, "WrapTextInColorCode", |state| {
+    table_set_rust_fn_static(state, t_ref, "WrapTextInColorCode", |state| {
         let this = stack_val(state, 1);
         let text = String::from_stack(state, 2)?;
         let (r, g, b) = color_rgb(state, this);
@@ -196,7 +196,7 @@ fn build_c_class_color(lua: &mut rilua::Lua) -> LuaResult<Val> {
     let Val::Table(class_color_ref) = class_color_namespace else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(state, class_color_ref, "GetClassColor", |state| {
+    table_set_rust_fn_static(state, class_color_ref, "GetClassColor", |state| {
         let class_name = val_to_string(state, stack_val(state, 1))
             .unwrap_or_default()
             .to_ascii_uppercase();

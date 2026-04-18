@@ -2,7 +2,7 @@ use super::c_item::item_link_for_id;
 use super::helpers::global_table;
 use crate::lua_api::globals::missing_surface::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -10,13 +10,13 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_c_item_upgrade(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ItemUpgrade")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "SetItemUpgradeFromLocation",
         c_item_upgrade_set_location,
     )?;
-    table_set_rust_fn(state, table_ref, "ClearItemUpgrade", c_item_upgrade_clear)?;
+    table_set_rust_fn_static(state, table_ref, "ClearItemUpgrade", c_item_upgrade_clear)?;
     Ok(())
 }
 
@@ -71,10 +71,10 @@ type ContainerScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
 fn register_container_methods(
     state: &mut LuaState,
     table_ref: GcRef<Table>,
-    entries: &[(&str, ContainerScriptFn)],
+    entries: &[(&'static str, ContainerScriptFn)],
 ) -> LuaResult<()> {
     for &(name, func) in entries {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

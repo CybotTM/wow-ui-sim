@@ -20,33 +20,33 @@
 use super::ensure_namespace;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
-    table_set_rust_fn(state, ns, "GetSpellInfo", get_spell_info)?;
-    table_set_rust_fn(state, ns, "GetSpellCooldown", get_spell_cooldown)?;
-    table_set_rust_fn(state, ns, "GetMountFromSpell", get_mount_from_spell)?;
-    table_set_rust_fn(state, ns, "GetVisibilityInfo", get_visibility_info)?;
-    table_set_rust_fn(state, ns, "IsPriorityAura", is_priority_aura)?;
-    table_set_rust_fn(state, ns, "IsSelfBuff", is_self_buff)?;
-    table_set_rust_fn(state, ns, "IsSpellUsable", is_spell_usable)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetSpellInfo", get_spell_info)?;
+    table_set_rust_fn_static(state, ns, "GetSpellCooldown", get_spell_cooldown)?;
+    table_set_rust_fn_static(state, ns, "GetMountFromSpell", get_mount_from_spell)?;
+    table_set_rust_fn_static(state, ns, "GetVisibilityInfo", get_visibility_info)?;
+    table_set_rust_fn_static(state, ns, "IsPriorityAura", is_priority_aura)?;
+    table_set_rust_fn_static(state, ns, "IsSelfBuff", is_self_buff)?;
+    table_set_rust_fn_static(state, ns, "IsSpellUsable", is_spell_usable)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "TargetSpellIsEnchanting",
         target_spell_is_enchanting,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         ns,
         "TargetSpellJumpsUpgradeTrack",
         target_spell_jumps_upgrade_track,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         ns,
         "TargetSpellReplacesBonusTree",

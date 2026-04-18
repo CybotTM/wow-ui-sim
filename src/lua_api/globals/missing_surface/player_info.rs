@@ -14,7 +14,7 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_api::state_types::MythicPlusRatingMapSummary;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -23,27 +23,27 @@ const RELATIVE_CONTENT_DIFFICULTY_EQUAL: f64 = 2.0;
 
 pub(super) fn register_player_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_PlayerInfo")?;
-    table_set_rust_fn(state, ns, "GetAlternateFormInfo", get_alternate_form_info)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetAlternateFormInfo", get_alternate_form_info)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "GetContentDifficultyCreatureForPlayer",
         get_content_difficulty_creature,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         ns,
         "GetPlayerMythicPlusRatingSummary",
         get_player_mythic_plus_rating_summary,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         ns,
         "IsPlayerEligibleForNPE",
         is_player_eligible_for_npe,
     )?;
-    table_set_rust_fn(state, ns, "IsPlayerNPERestricted", is_player_npe_restricted)?;
-    table_set_rust_fn(state, ns, "IsPlayerInRPE", is_player_in_rpe)?;
+    table_set_rust_fn_static(state, ns, "IsPlayerNPERestricted", is_player_npe_restricted)?;
+    table_set_rust_fn_static(state, ns, "IsPlayerInRPE", is_player_in_rpe)?;
     Ok(())
 }
 

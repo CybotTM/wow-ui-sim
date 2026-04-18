@@ -4,7 +4,7 @@ mod spell;
 mod unit;
 
 use super::ensure_namespace;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use builders::ensure_pet_info_state;
 use probes::*;
 use rilua::LuaResult;
@@ -29,10 +29,10 @@ type TooltipScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
 fn register_tooltip_methods(
     state: &mut LuaState,
     table_ref: GcRef<Table>,
-    entries: &[(&str, TooltipScriptFn)],
+    entries: &[(&'static str, TooltipScriptFn)],
 ) -> LuaResult<()> {
     for &(name, func) in entries {
-        table_set_rust_fn(state, table_ref, name, func)?;
+        table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
 }

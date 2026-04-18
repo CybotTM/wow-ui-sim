@@ -207,7 +207,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "UnitRangedAttack",
 ];
 
-static GLOBAL_CUSTOM_STUBS: &[(&str, RustFn)] = &[
+static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
     ("GetRepairAllCost", stub_repair_all_cost),

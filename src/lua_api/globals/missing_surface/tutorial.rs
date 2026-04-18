@@ -1,7 +1,7 @@
 //! Minimal `C_Tutorial` surface with per-id flag storage.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -9,18 +9,18 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_tutorial_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_c_tutorial_table(state);
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "AcknowledgeTutorial",
         acknowledge_tutorial,
     )?;
-    table_set_rust_fn(state, table_ref, "HasSeenTutorial", has_seen_tutorial)?;
-    table_set_rust_fn(state, table_ref, "GetTutorialStatus", get_tutorial_status)?;
-    table_set_rust_fn(state, table_ref, "SetTutorialFlag", set_tutorial_flag)?;
-    table_set_rust_fn(state, table_ref, "AbandonTutorialArea", noop)?;
-    table_set_rust_fn(state, table_ref, "ReturnToTutorialArea", noop)?;
-    table_set_rust_fn(state, table_ref, "GetCombatEventInfo", noop)?;
+    table_set_rust_fn_static(state, table_ref, "HasSeenTutorial", has_seen_tutorial)?;
+    table_set_rust_fn_static(state, table_ref, "GetTutorialStatus", get_tutorial_status)?;
+    table_set_rust_fn_static(state, table_ref, "SetTutorialFlag", set_tutorial_flag)?;
+    table_set_rust_fn_static(state, table_ref, "AbandonTutorialArea", noop)?;
+    table_set_rust_fn_static(state, table_ref, "ReturnToTutorialArea", noop)?;
+    table_set_rust_fn_static(state, table_ref, "GetCombatEventInfo", noop)?;
     Ok(())
 }
 

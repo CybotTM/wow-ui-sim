@@ -1,6 +1,6 @@
 use super::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, table_get, val_to_string};
-use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -8,20 +8,20 @@ const TRANSMOGRIFY_FRAME: &str = "TransmogrifyFrame";
 
 pub(super) fn register_transmog_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Transmog")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetAppliedAlteredAppearance",
         c_transmog_get_applied_altered_appearance,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetCreatureDisplayIDForSource",
         c_transmog_get_creature_display_id_for_source,
     )?;
-    table_set_rust_fn(state, table_ref, "IsAtTransmogNPC", c_transmog_is_at_npc)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "IsAtTransmogNPC", c_transmog_is_at_npc)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "PlayerHasTransmogByItemInfo",

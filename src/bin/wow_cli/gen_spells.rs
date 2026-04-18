@@ -18,7 +18,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 
-const POWER_TYPE_NAMES: &[(&str, &str)] = &[
+const POWER_TYPE_NAMES: &[(&'static str, &str)] = &[
     ("-2", "HEALTH"),
     ("0", "MANA"),
     ("1", "RAGE"),

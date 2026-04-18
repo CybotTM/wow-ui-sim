@@ -18,16 +18,16 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_table, frame_ref};
 use crate::lua_api::next_timer_id;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_small_probes_surface(state: &mut LuaState) -> LuaResult<()> {
     let c_timer = ensure_namespace(state, "C_Timer")?;
-    table_set_rust_fn(state, c_timer, "NewTimerID", c_timer_new_timer_id)?;
+    table_set_rust_fn_static(state, c_timer, "NewTimerID", c_timer_new_timer_id)?;
 
     let c_system = ensure_namespace(state, "C_System")?;
-    table_set_rust_fn(state, c_system, "GetFrameStack", c_system_get_frame_stack)?;
+    table_set_rust_fn_static(state, c_system, "GetFrameStack", c_system_get_frame_stack)?;
 
     Ok(())
 }

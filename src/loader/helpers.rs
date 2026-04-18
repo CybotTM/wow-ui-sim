@@ -478,7 +478,7 @@ fn build_handler_expr(handler_name: &str, script: &crate::xml::ScriptBodyXml) ->
 /// Apply a list of (handler_name, optional_script) pairs to a target.
 pub fn apply_script_handlers(
     target: &str,
-    handlers: &[(&str, Option<&crate::xml::ScriptBodyXml>)],
+    handlers: &[(&'static str, Option<&crate::xml::ScriptBodyXml>)],
 ) -> String {
     let mut code = String::new();
     for (name, script) in handlers {

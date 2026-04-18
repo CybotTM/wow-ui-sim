@@ -259,7 +259,7 @@ pub fn class_info_by_index(class_index: i32) -> (&'static str, &'static str, i32
 }
 
 /// Race data: (display_name, file_name, faction).
-pub const RACE_DATA: &[(&str, &str, &str)] = &[
+pub const RACE_DATA: &[(&'static str, &str, &str)] = &[
     ("Human", "Human", "Alliance"),
     ("Orc", "Orc", "Horde"),
     ("Dwarf", "Dwarf", "Alliance"),
@@ -278,7 +278,7 @@ pub const RACE_DATA: &[(&str, &str, &str)] = &[
 ];
 
 /// Rot damage intensity levels: (label, percentage of max HP per tick).
-pub const ROT_DAMAGE_LEVELS: &[(&str, f64)] = &[
+pub const ROT_DAMAGE_LEVELS: &[(&'static str, f64)] = &[
     ("Off", 0.0),
     ("Light (1%)", 0.01),
     ("Medium (3%)", 0.03),
@@ -287,7 +287,7 @@ pub const ROT_DAMAGE_LEVELS: &[(&str, f64)] = &[
 ];
 
 /// XP bar levels: (label, fraction of XP bar filled). "Max Level" hides the bar entirely.
-pub const XP_LEVELS: &[(&str, f64)] = &[
+pub const XP_LEVELS: &[(&'static str, f64)] = &[
     ("Max Level", 0.0),
     ("33%", 0.33),
     ("66%", 0.66),
@@ -326,7 +326,7 @@ pub fn random_player_name() -> String {
 }
 
 /// Default party member definitions: (name, class_index, health_max, power, power_max, power_type, power_type_name).
-const DEFAULT_PARTY_MEMBERS: &[(&str, i32, i32, i32, i32, i32, &str)] = &[
+const DEFAULT_PARTY_MEMBERS: &[(&'static str, i32, i32, i32, i32, i32, &str)] = &[
     ("Thrynn", 2, 120_000, 80_000, 80_000, 0, "MANA"), // Paladin
     ("Kazzara", 1, 180_000, 0, 100, 1, "RAGE"),        // Warrior
     ("Sylvanas", 3, 100_000, 100, 100, 2, "FOCUS"),    // Hunter
@@ -487,7 +487,7 @@ pub fn tick_party_health(members: &mut [PartyMember], damage_pct: f64) -> Vec<us
 }
 
 /// Buff pool: (name, spell_id, icon_file_id, duration_secs, source_unit, can_apply_aura).
-const BUFF_POOL: &[(&str, i32, i32, f64, &str, bool)] = &[
+const BUFF_POOL: &[(&'static str, i32, i32, f64, &str, bool)] = &[
     (
         "Power Word: Fortitude",
         21562,

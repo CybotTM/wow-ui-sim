@@ -5,7 +5,7 @@ use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack, table_set,
 };
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -33,84 +33,84 @@ pub fn register_c_specialization_info(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(t_ref) = t else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(state, t_ref, "GetSpecialization", c_spec_get_specialization)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, t_ref, "GetSpecialization", c_spec_get_specialization)?;
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetSpecializationInfo",
         c_spec_get_specialization_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetClassIDFromSpecID",
         c_spec_get_class_id_from_spec_id,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetNumSpecializationsForClassID",
         c_spec_get_num_specializations_for_class_id,
     )?;
-    table_set_rust_fn(state, t_ref, "IsInitialized", c_spec_is_initialized)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, t_ref, "IsInitialized", c_spec_is_initialized)?;
+    table_set_rust_fn_static(
         state,
         t_ref,
         "CanPlayerUseTalentSpecUI",
         c_spec_can_player_use_talent_spec_ui,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "CanPlayerUseTalentUI",
         c_spec_can_player_use_talent_ui,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetActiveSpecGroup",
         c_spec_get_active_spec_group,
     )?;
-    table_set_rust_fn(state, t_ref, "GetSpellsDisplay", c_spec_get_spells_display)?;
-    table_set_rust_fn(state, t_ref, "SetSpecialization", c_spec_set_specialization)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, t_ref, "GetSpellsDisplay", c_spec_get_spells_display)?;
+    table_set_rust_fn_static(state, t_ref, "SetSpecialization", c_spec_set_specialization)?;
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetPvpTalentSlotInfo",
         c_spec_get_pvp_talent_slot_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetPvpTalentSlotUnlockLevel",
         c_spec_get_pvp_talent_slot_unlock_level,
     )?;
-    table_set_rust_fn(state, t_ref, "GetPvpTalentInfo", c_spec_get_pvp_talent_info)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, t_ref, "GetPvpTalentInfo", c_spec_get_pvp_talent_info)?;
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetPvpTalentUnlockLevel",
         c_spec_get_pvp_talent_unlock_level,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetInspectSelectedPvpTalent",
         c_spec_get_inspect_selected_pvp_talent,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetAllSelectedPvpTalentIDs",
         c_spec_get_all_selected_pvp_talent_ids,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "IsPvpTalentLocked",
         c_spec_is_pvp_talent_locked,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "SetPvpTalentLocked",
@@ -126,7 +126,7 @@ pub fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(mixin_ref) = mixin else {
         unreachable!("create_table must return a table");
     };
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         mixin_ref,
         "GetNumWidgetsShowing",
@@ -336,37 +336,37 @@ fn c_spec_set_pvp_talent_locked(_state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn register_legacy_specialization_globals(state: &mut LuaState) -> LuaResult<()> {
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetNumSpecializations",
         get_num_specializations,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetSpecializationInfoByID",
         get_specialization_info_by_id,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetSpecializationRole",
         get_specialization_role,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetSpecializationRoleEnum",
         get_specialization_role_enum,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetSpecializationRoleEnumByID",
         get_specialization_role_enum_by_id,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         state.global,
         "GetLFGStringFromEnum",

@@ -18,7 +18,7 @@
 //! `A_Admin.SetGuildRanks({ {name, flags}, ... })` to install a roster.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -108,20 +108,20 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     let g = state.global;
-    table_set_rust_fn(state, g, "GuildControlSetRank", guild_control_set_rank)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, g, "GuildControlSetRank", guild_control_set_rank)?;
+    table_set_rust_fn_static(
         state,
         g,
         "GuildControlGetRankName",
         guild_control_get_rank_name,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         g,
         "GuildControlGetNumRanks",
         guild_control_get_num_ranks,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         g,
         "GuildControlGetRankFlags",

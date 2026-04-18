@@ -4,13 +4,13 @@ use super::ensure_namespace;
 use crate::lua_api::game_data::class_info_by_index;
 use crate::lua_api::methods::{create_string, create_table, table_set};
 use crate::lua_bridge::FromStack;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_creature_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_CreatureInfo")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetClassInfo",

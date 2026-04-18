@@ -21,40 +21,40 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{borrow_state, create_table, table_set};
 use crate::lua_api::state::MythicPlusWeeklyBest;
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_MythicPlus")?;
-    table_set_rust_fn(state, ns, "GetCurrentAffixes", get_current_affixes)?;
-    table_set_rust_fn(state, ns, "GetCurrentSeason", get_current_season)?;
-    table_set_rust_fn(state, ns, "GetLastWeeklyChest", get_last_weekly_chest)?;
-    table_set_rust_fn(state, ns, "GetRunHistory", get_run_history)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetCurrentAffixes", get_current_affixes)?;
+    table_set_rust_fn_static(state, ns, "GetCurrentSeason", get_current_season)?;
+    table_set_rust_fn_static(state, ns, "GetLastWeeklyChest", get_last_weekly_chest)?;
+    table_set_rust_fn_static(state, ns, "GetRunHistory", get_run_history)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "GetSeasonBestAffixScoreInfoForMap",
         get_season_best_affix_score_info_for_map,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         ns,
         "GetWeeklyChestRewardLevel",
         get_weekly_chest_reward_level,
     )?;
-    table_set_rust_fn(state, ns, "GetOwnedKeystoneLevel", get_owned_keystone_level)?;
-    table_set_rust_fn(state, ns, "GetWeeklyBestForMap", get_weekly_best_for_map)?;
-    table_set_rust_fn(state, ns, "IsMythicPlusActive", is_mythic_plus_active)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, ns, "GetOwnedKeystoneLevel", get_owned_keystone_level)?;
+    table_set_rust_fn_static(state, ns, "GetWeeklyBestForMap", get_weekly_best_for_map)?;
+    table_set_rust_fn_static(state, ns, "IsMythicPlusActive", is_mythic_plus_active)?;
+    table_set_rust_fn_static(
         state,
         ns,
         "IsWeeklyRewardAvailable",
         is_weekly_reward_available,
     )?;
-    table_set_rust_fn(state, ns, "RequestCurrentAffixes", noop)?;
-    table_set_rust_fn(state, ns, "RequestMapInfo", noop)?;
-    table_set_rust_fn(state, ns, "RequestRewards", noop)?;
+    table_set_rust_fn_static(state, ns, "RequestCurrentAffixes", noop)?;
+    table_set_rust_fn_static(state, ns, "RequestMapInfo", noop)?;
+    table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
     Ok(())
 }
 

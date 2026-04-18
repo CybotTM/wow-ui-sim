@@ -25,7 +25,7 @@
 
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::state::SimState;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -88,7 +88,7 @@ fn party_slot_index(token: &str) -> Option<usize> {
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
-    table_set_rust_fn(state, state.global, "UnitIsPlayer", unit_is_player)?;
+    table_set_rust_fn_static(state, state.global, "UnitIsPlayer", unit_is_player)?;
     Ok(())
 }
 

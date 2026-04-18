@@ -1,15 +1,15 @@
 //! Draw layer enable/disable methods.
 
 use crate::lua_api::methods::{borrow_state_mut, frame_id_from_stack};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
 pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
-    table_set_rust_fn(state, mt, "DisableDrawLayer", disable_draw_layer)?;
-    table_set_rust_fn(state, mt, "EnableDrawLayer", enable_draw_layer)?;
+    table_set_rust_fn_static(state, mt, "DisableDrawLayer", disable_draw_layer)?;
+    table_set_rust_fn_static(state, mt, "EnableDrawLayer", enable_draw_layer)?;
     Ok(())
 }
 

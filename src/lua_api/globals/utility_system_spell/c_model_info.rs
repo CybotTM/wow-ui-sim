@@ -4,7 +4,7 @@ use crate::lua_api::methods::{
     call_function_state, create_string, create_table, frame_ref, val_to_string,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -20,7 +20,7 @@ pub fn register_c_model_info(state: &mut LuaState) -> LuaResult<()> {
         unreachable!("create_table must return a table");
     };
     register_model_scene_stubs(state, t_ref)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         t_ref,
         "GetModelSceneInfoByID",
@@ -43,7 +43,7 @@ fn register_model_scene_stubs(state: &mut LuaState, t_ref: GcRef<Table>) -> LuaR
         "GetModelSceneCameraInfoByID",
     ];
     for name in NOOPS {
-        table_set_rust_fn(state, t_ref, name, |_state| Ok(0))?;
+        table_set_rust_fn_static(state, t_ref, name, |_state| Ok(0))?;
     }
     for name in EMPTY_TABLE_GETTERS {
         table_set_rust_fn(state, t_ref, name, empty_table_result)?;
@@ -74,11 +74,11 @@ pub fn register_c_lfg_info(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(t_ref) = t else {
         unreachable!("C_LFGInfo must be a table");
     };
-    table_set_rust_fn(state, t_ref, "GetDungeonInfo", empty_table_result)?;
-    table_set_rust_fn(state, t_ref, "GetLFDLockStates", empty_table_result)?;
-    table_set_rust_fn(state, t_ref, "GetAllEntriesForCategory", empty_table_result)?;
-    table_set_rust_fn(state, t_ref, "CanPlayerUseLFD", c_lfg_info_can_player_use)?;
-    table_set_rust_fn(state, t_ref, "CanPlayerUseLFR", c_lfg_info_can_player_use)?;
+    table_set_rust_fn_static(state, t_ref, "GetDungeonInfo", empty_table_result)?;
+    table_set_rust_fn_static(state, t_ref, "GetLFDLockStates", empty_table_result)?;
+    table_set_rust_fn_static(state, t_ref, "GetAllEntriesForCategory", empty_table_result)?;
+    table_set_rust_fn_static(state, t_ref, "CanPlayerUseLFD", c_lfg_info_can_player_use)?;
+    table_set_rust_fn_static(state, t_ref, "CanPlayerUseLFR", c_lfg_info_can_player_use)?;
     Ok(())
 }
 
@@ -90,7 +90,7 @@ fn c_lfg_info_can_player_use(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── C_WowTokenSecure ─────────────────────────────────────────────────────────
 
-const WOWTOKEN_SECURE_FUNCTIONS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const WOWTOKEN_SECURE_FUNCTIONS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("CanRedeemForBalance", c_wowtoken_can_redeem_for_balance),
     ("CancelRedeem", c_wowtoken_cancel_redeem),
     ("ConfirmBuyToken", c_wowtoken_confirm_buy_token),
@@ -130,7 +130,7 @@ pub fn register_c_wowtoken_secure(state: &mut LuaState) -> LuaResult<()> {
         unreachable!("C_WowTokenSecure must be a table");
     };
     for (name, func) in WOWTOKEN_SECURE_FUNCTIONS {
-        table_set_rust_fn(state, t_ref, name, *func)?;
+        table_set_rust_fn_static(state, t_ref, name, *func)?;
     }
     Ok(())
 }

@@ -1,6 +1,6 @@
 //! C_TableUtil and tInvert implementations.
 
-use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
@@ -155,7 +155,7 @@ fn call_table_util_comparator(
 
 pub fn register_table_util(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = state.gc.alloc_table(Table::new());
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "FindIndexedMismatch",

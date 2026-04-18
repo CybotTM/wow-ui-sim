@@ -11,7 +11,7 @@
 //! modifier-aware UI paths (e.g. `IsModifiedClick("CHATLINK")`).
 
 use crate::lua_api::methods::borrow_state;
-use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -49,10 +49,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
     let g = state.global;
-    table_set_rust_fn(state, g, "IsShiftKeyDown", is_shift_key_down)?;
-    table_set_rust_fn(state, g, "IsControlKeyDown", is_control_key_down)?;
-    table_set_rust_fn(state, g, "IsAltKeyDown", is_alt_key_down)?;
-    table_set_rust_fn(state, g, "IsMetaKeyDown", is_meta_key_down)?;
-    table_set_rust_fn(state, g, "IsModifierKeyDown", is_modifier_key_down)?;
+    table_set_rust_fn_static(state, g, "IsShiftKeyDown", is_shift_key_down)?;
+    table_set_rust_fn_static(state, g, "IsControlKeyDown", is_control_key_down)?;
+    table_set_rust_fn_static(state, g, "IsAltKeyDown", is_alt_key_down)?;
+    table_set_rust_fn_static(state, g, "IsMetaKeyDown", is_meta_key_down)?;
+    table_set_rust_fn_static(state, g, "IsModifierKeyDown", is_modifier_key_down)?;
     Ok(())
 }

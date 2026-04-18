@@ -120,10 +120,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
 fn install_c_cvar_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_c_cvar_table(state);
-    crate::lua_bridge::table_set_rust_fn(state, table_ref, "GetCVar", get_cvar)?;
-    crate::lua_bridge::table_set_rust_fn(state, table_ref, "SetCVar", set_cvar)?;
-    crate::lua_bridge::table_set_rust_fn(state, table_ref, "GetCVarBool", get_cvar_bool)?;
-    crate::lua_bridge::table_set_rust_fn(state, table_ref, "GetCVarDefault", get_cvar_default)?;
+    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "GetCVar", get_cvar)?;
+    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "SetCVar", set_cvar)?;
+    crate::lua_bridge::table_set_rust_fn_static(state, table_ref, "GetCVarBool", get_cvar_bool)?;
+    crate::lua_bridge::table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetCVarDefault",
+        get_cvar_default,
+    )?;
     Ok(())
 }
 

@@ -212,7 +212,7 @@ fn get_size(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-const RECT_METHODS: &[(&str, rilua::vm::closure::RustFn)] = &[
+const RECT_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetRect", get_frame_rect),
     ("GetScaledRect", get_scaled_rect),
     ("GetLeft", get_left),

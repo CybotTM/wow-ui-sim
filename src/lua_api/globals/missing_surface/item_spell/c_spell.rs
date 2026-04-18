@@ -2,7 +2,7 @@ use super::c_item::spell_link_for_id;
 use crate::lua_api::globals::{missing_surface::ensure_namespace, spellbook_data};
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::methods::{create_string, create_table, table_set};
-use crate::lua_bridge::{FromStack, table_set_rust_fn};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use crate::spell_descriptions;
 use crate::spells;
 use rilua::vm::state::LuaState;
@@ -10,34 +10,34 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_c_spell(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Spell")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellDescription",
         c_spell_get_spell_description,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellTexture",
         c_spell_get_spell_texture,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetMawPowerBorderAtlasBySpellID",
         c_spell_get_maw_power_border_atlas_by_spell_id,
     )?;
-    table_set_rust_fn(state, table_ref, "GetSpellLink", c_spell_get_spell_link)?;
-    table_set_rust_fn(state, table_ref, "GetSpellName", c_spell_get_spell_name)?;
-    table_set_rust_fn(state, table_ref, "IsSpellPassive", c_spell_is_spell_passive)?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(state, table_ref, "GetSpellLink", c_spell_get_spell_link)?;
+    table_set_rust_fn_static(state, table_ref, "GetSpellName", c_spell_get_spell_name)?;
+    table_set_rust_fn_static(state, table_ref, "IsSpellPassive", c_spell_is_spell_passive)?;
+    table_set_rust_fn_static(
         state,
         table_ref,
         "IsAutoAttackSpell",
         c_spell_is_auto_attack_spell,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "IsRangedAutoAttackSpell",
@@ -115,55 +115,55 @@ fn c_spell_is_ranged_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_SpellBook")?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetNumSpellBookSkillLines",
         c_spell_book_get_num_spell_book_skill_lines,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookSkillLineInfo",
         c_spell_book_get_spell_book_skill_line_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookItemName",
         c_spell_book_get_spell_book_item_name,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookItemInfo",
         c_spell_book_get_spell_book_item_info,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookItemType",
         c_spell_book_get_spell_book_item_type,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookItemCooldown",
         c_spell_book_get_spell_book_item_cooldown,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookItemTexture",
         c_spell_book_get_spell_book_item_texture,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "GetSpellBookItemAutoCast",
         c_spell_book_get_spell_book_item_auto_cast,
     )?;
-    table_set_rust_fn(
+    table_set_rust_fn_static(
         state,
         table_ref,
         "HasPetSpells",
