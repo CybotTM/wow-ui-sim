@@ -3,6 +3,11 @@
 
 use super::super::{FastHandlerRef, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
+use crate::lua_api::hot_literals::{
+    TEMPLATE_INLINE_FUNCTION_BUTTON, TEMPLATE_INLINE_FUNCTION_ELAPSED,
+    TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS, TEMPLATE_INLINE_FUNCTION_NOARGS,
+    TEMPLATE_INLINE_FUNCTION_SELF_ID,
+};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -108,17 +113,17 @@ const ELAPSED_TEMPLATE: &str = r#"
 
 fn function_handler_template(kind: FunctionHandlerKind) -> (&'static str, &'static str) {
     match kind {
-        FunctionHandlerKind::NoArgs => (NOARGS_TEMPLATE, "template-inline-function-noargs"),
+        FunctionHandlerKind::NoArgs => (NOARGS_TEMPLATE, TEMPLATE_INLINE_FUNCTION_NOARGS),
         FunctionHandlerKind::SelfGetText => (
             SELF_GETTEXT_TEMPLATE,
             "template-inline-function-self-gettext",
         ),
-        FunctionHandlerKind::SelfId => (SELF_ID_TEMPLATE, "template-inline-function-self-id"),
+        FunctionHandlerKind::SelfId => (SELF_ID_TEMPLATE, TEMPLATE_INLINE_FUNCTION_SELF_ID),
         FunctionHandlerKind::EventVarargs => (
             EVENT_VARARGS_TEMPLATE,
-            "template-inline-function-event-varargs",
+            TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS,
         ),
-        FunctionHandlerKind::Button => (BUTTON_TEMPLATE, "template-inline-function-button"),
-        FunctionHandlerKind::Elapsed => (ELAPSED_TEMPLATE, "template-inline-function-elapsed"),
+        FunctionHandlerKind::Button => (BUTTON_TEMPLATE, TEMPLATE_INLINE_FUNCTION_BUTTON),
+        FunctionHandlerKind::Elapsed => (ELAPSED_TEMPLATE, TEMPLATE_INLINE_FUNCTION_ELAPSED),
     }
 }

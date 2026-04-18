@@ -4,6 +4,7 @@
 
 use super::{FastHandlerRef, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
+use crate::lua_api::hot_literals::TEMPLATE_GLOBAL_METHOD_HANDLER;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -106,7 +107,7 @@ fn global_method_template(mode: GlobalMethodMode) -> (&'static str, &'static str
     match mode {
         GlobalMethodMode::Passthrough => (
             GLOBAL_METHOD_PASSTHROUGH_TEMPLATE,
-            "template-global-method-handler",
+            TEMPLATE_GLOBAL_METHOD_HANDLER,
         ),
         GlobalMethodMode::SelfId => (
             GLOBAL_METHOD_SELF_ID_TEMPLATE,

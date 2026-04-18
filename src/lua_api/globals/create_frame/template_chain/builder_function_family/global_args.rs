@@ -3,6 +3,9 @@
 
 use super::super::{FastHandlerRef, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
+use crate::lua_api::hot_literals::{
+    TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG, TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS,
+};
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -11,31 +14,17 @@ pub(super) fn build_global_arg_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    let handler = try_build_plain_global_variants(state, handler_ref)?
+        .or(try_build_mixed_global_variants(state, handler_ref)?)
+        .or(try_build_global_self_variants(state, handler_ref)?);
+    Ok(handler)
+}
+
+fn try_build_plain_global_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
-        FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
-            function_name,
-            first_arg_path,
-            second_arg_path,
-            third,
-        } => build_function_handler_with_two_global_number_args(
-            state,
-            function_name,
-            first_arg_path,
-            second_arg_path,
-            *third,
-        )
-        .map(Some),
-        FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
-            function_name,
-            first,
-            fourth,
-        } => build_function_handler_with_string_nil_nil_global_args(
-            state,
-            function_name,
-            first,
-            fourth,
-        )
-        .map(Some),
         FastHandlerRef::FunctionWithGlobalArg {
             function_name,
             arg_path,
@@ -64,19 +53,37 @@ pub(super) fn build_global_arg_variants(
             third_arg_path,
         )
         .map(Some),
-        FastHandlerRef::FunctionWithGlobalSelfMethodSelfMethodBoolArgs {
+        _ => Ok(None),
+    }
+}
+
+fn try_build_mixed_global_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
+        FastHandlerRef::FunctionWithTwoGlobalNumberArgs {
             function_name,
             first_arg_path,
-            second_self_method,
-            third_self_method,
-            fourth,
-        } => build_function_handler_with_global_self_method_self_method_bool_args(
+            second_arg_path,
+            third,
+        } => build_function_handler_with_two_global_number_args(
             state,
             function_name,
             first_arg_path,
-            second_self_method,
-            third_self_method,
-            *fourth,
+            second_arg_path,
+            *third,
+        )
+        .map(Some),
+        FastHandlerRef::FunctionWithStringNilNilGlobalArgs {
+            function_name,
+            first,
+            fourth,
+        } => build_function_handler_with_string_nil_nil_global_args(
+            state,
+            function_name,
+            first,
+            fourth,
         )
         .map(Some),
         FastHandlerRef::FunctionWithStringGlobalBoolArg {
@@ -90,6 +97,30 @@ pub(super) fn build_global_arg_variants(
             first,
             second_arg_path,
             *third,
+        )
+        .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_global_self_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
+        FastHandlerRef::FunctionWithGlobalSelfMethodSelfMethodBoolArgs {
+            function_name,
+            first_arg_path,
+            second_self_method,
+            third_self_method,
+            fourth,
+        } => build_function_handler_with_global_self_method_self_method_bool_args(
+            state,
+            function_name,
+            first_arg_path,
+            second_self_method,
+            third_self_method,
+            *fourth,
         )
         .map(Some),
         FastHandlerRef::FunctionWithGlobalAndSelfIdArg {
@@ -266,7 +297,7 @@ fn build_function_handler_with_global_arg(
                 return fn(resolved_arg)
             end
         "#,
-        "template-inline-function-global-arg",
+        TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG,
     )?;
     let target = resolve_global_path(state, function_name);
     let arg = resolve_global_path(state, arg_path);
@@ -291,7 +322,7 @@ fn build_function_handler_with_two_global_args(
                 return fn(first_arg, second_arg)
             end
         "#,
-        "template-inline-function-two-global-args",
+        TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS,
     )?;
     let target = resolve_global_path(state, function_name);
     let first_arg = resolve_global_path(state, first_arg_path);

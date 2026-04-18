@@ -334,6 +334,24 @@ pub const HOT_METATABLE_KEYS: &[&[u8]] = &[
 // intern-cache hot because every template install synthesises one and
 // compares against prior registrations.
 
+// Individual `&str` constants for the chunk tags passed to `load_template`.
+// Exposed as a single source of truth: [`HOT_LOADER_SENTINELS`] references
+// these via `.as_bytes()`, and the template-chain builders import them by
+// name so there's no risk of a call-site literal drifting from the
+// whitelist entry.
+
+pub const TEMPLATE_INLINE_FUNCTION_NOARGS: &str = "template-inline-function-noargs";
+pub const TEMPLATE_INLINE_FUNCTION_SELF_ID: &str = "template-inline-function-self-id";
+pub const TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS: &str = "template-inline-function-event-varargs";
+pub const TEMPLATE_INLINE_FUNCTION_BUTTON: &str = "template-inline-function-button";
+pub const TEMPLATE_INLINE_FUNCTION_ELAPSED: &str = "template-inline-function-elapsed";
+pub const TEMPLATE_INLINE_FUNCTION_SELF_STRING: &str = "template-inline-function-self-string";
+pub const TEMPLATE_INLINE_FUNCTION_STRING_ARG: &str = "template-inline-function-string-arg";
+pub const TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG: &str = "template-inline-function-global-arg";
+pub const TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS: &str =
+    "template-inline-function-two-global-args";
+pub const TEMPLATE_GLOBAL_METHOD_HANDLER: &str = "template-global-method-handler";
+
 pub const HOT_LOADER_SENTINELS: &[&[u8]] = &[
     b"getfenv",
     b"setfenv",
@@ -342,16 +360,16 @@ pub const HOT_LOADER_SENTINELS: &[&[u8]] = &[
     // Common `template-inline-*` chunk tags emitted by the template chain
     // builders. The full set is large and regenerated; the ten entries
     // below cover the highest-count handlers seen on `--no-addons` startup.
-    b"template-inline-function-noargs",
-    b"template-inline-function-self-id",
-    b"template-inline-function-event-varargs",
-    b"template-inline-function-button",
-    b"template-inline-function-elapsed",
-    b"template-inline-function-self-string",
-    b"template-inline-function-string-arg",
-    b"template-inline-function-global-arg",
-    b"template-inline-function-two-global-args",
-    b"template-global-method-handler",
+    TEMPLATE_INLINE_FUNCTION_NOARGS.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_SELF_ID.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_BUTTON.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_ELAPSED.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_SELF_STRING.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_STRING_ARG.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG.as_bytes(),
+    TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS.as_bytes(),
+    TEMPLATE_GLOBAL_METHOD_HANDLER.as_bytes(),
 ];
 
 /// Total count of whitelisted literals, sum of all category slices.
@@ -442,6 +460,22 @@ impl HotLiteralHandles {
 pub mod metatable_idx {
     /// Position of `b"__rilua_frame_mt"` in [`super::HOT_METATABLE_KEYS`].
     pub const RILUA_FRAME_MT: usize = 18;
+}
+
+/// Index constants into [`HOT_LOADER_SENTINELS`]. First four entries are
+/// non-template helpers (`getfenv`, `setfenv`, `MARK_SECURE_PROBE`,
+/// `from-secureenv`), so the template-inline-* indices start at 4.
+pub mod loader_sentinel_idx {
+    pub const TEMPLATE_INLINE_FUNCTION_NOARGS: usize = 4;
+    pub const TEMPLATE_INLINE_FUNCTION_SELF_ID: usize = 5;
+    pub const TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS: usize = 6;
+    pub const TEMPLATE_INLINE_FUNCTION_BUTTON: usize = 7;
+    pub const TEMPLATE_INLINE_FUNCTION_ELAPSED: usize = 8;
+    pub const TEMPLATE_INLINE_FUNCTION_SELF_STRING: usize = 9;
+    pub const TEMPLATE_INLINE_FUNCTION_STRING_ARG: usize = 10;
+    pub const TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG: usize = 11;
+    pub const TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS: usize = 12;
+    pub const TEMPLATE_GLOBAL_METHOD_HANDLER: usize = 13;
 }
 
 /// Owns the pre-intern step during VM bootstrap. Call [`install`] once
@@ -565,7 +599,11 @@ mod tests {
             ("globals", HOT_GLOBALS, &handles.globals),
             ("namespaces", HOT_NAMESPACES, &handles.namespaces),
             ("frame_methods", HOT_FRAME_METHODS, &handles.frame_methods),
-            ("metatable_keys", HOT_METATABLE_KEYS, &handles.metatable_keys),
+            (
+                "metatable_keys",
+                HOT_METATABLE_KEYS,
+                &handles.metatable_keys,
+            ),
             (
                 "loader_sentinels",
                 HOT_LOADER_SENTINELS,
@@ -586,14 +624,67 @@ mod tests {
     }
 
     /// Pins each named index constant to its expected source byte slice.
-    /// Catches drift when HOT_METATABLE_KEYS is reordered without bumping
-    /// WHITELIST_VERSION and updating the `metatable_idx` constants.
+    /// Catches drift when a category is reordered without bumping
+    /// WHITELIST_VERSION and updating the index constants.
     #[test]
     fn named_indexes_map_to_expected_slice_entries() {
         assert_eq!(
             HOT_METATABLE_KEYS[metatable_idx::RILUA_FRAME_MT],
             b"__rilua_frame_mt"
         );
+
+        // Loader sentinels: every named index must match the corresponding
+        // `&str` constant via `.as_bytes()`.
+        use loader_sentinel_idx as lsi;
+        let pairs: &[(usize, &'static str)] = &[
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_NOARGS,
+                TEMPLATE_INLINE_FUNCTION_NOARGS,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_SELF_ID,
+                TEMPLATE_INLINE_FUNCTION_SELF_ID,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS,
+                TEMPLATE_INLINE_FUNCTION_EVENT_VARARGS,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_BUTTON,
+                TEMPLATE_INLINE_FUNCTION_BUTTON,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_ELAPSED,
+                TEMPLATE_INLINE_FUNCTION_ELAPSED,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_SELF_STRING,
+                TEMPLATE_INLINE_FUNCTION_SELF_STRING,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_STRING_ARG,
+                TEMPLATE_INLINE_FUNCTION_STRING_ARG,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG,
+                TEMPLATE_INLINE_FUNCTION_GLOBAL_ARG,
+            ),
+            (
+                lsi::TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS,
+                TEMPLATE_INLINE_FUNCTION_TWO_GLOBAL_ARGS,
+            ),
+            (
+                lsi::TEMPLATE_GLOBAL_METHOD_HANDLER,
+                TEMPLATE_GLOBAL_METHOD_HANDLER,
+            ),
+        ];
+        for (idx, expected) in pairs {
+            assert_eq!(
+                HOT_LOADER_SENTINELS[*idx],
+                expected.as_bytes(),
+                "loader_sentinel_idx {idx} drift",
+            );
+        }
     }
 
     /// Second call to `install` on the same VM must return equivalent
@@ -630,7 +721,7 @@ mod tests {
     /// would panic on a missing / freed arena slot.
     #[test]
     fn handles_survive_full_gc_cycle() {
-        use rilua::{Lua, LuaApi, LuaApiMut};
+        use rilua::{Lua, LuaApiMut};
 
         let mut lua = Lua::new().expect("fresh rilua VM");
         let handles = HotLiteralRegistry::install(lua.state_mut());
@@ -647,7 +738,11 @@ mod tests {
             ("globals", HOT_GLOBALS, &handles.globals),
             ("namespaces", HOT_NAMESPACES, &handles.namespaces),
             ("frame_methods", HOT_FRAME_METHODS, &handles.frame_methods),
-            ("metatable_keys", HOT_METATABLE_KEYS, &handles.metatable_keys),
+            (
+                "metatable_keys",
+                HOT_METATABLE_KEYS,
+                &handles.metatable_keys,
+            ),
             (
                 "loader_sentinels",
                 HOT_LOADER_SENTINELS,
@@ -656,9 +751,11 @@ mod tests {
         ];
         for (name, src, refs) in categories {
             for (i, (bytes, r)) in src.iter().zip(refs.iter()).enumerate() {
-                let s = state.gc.string_arena.get(*r).unwrap_or_else(|| {
-                    panic!("{name}[{i}] handle dangling after gc_collect")
-                });
+                let s = state
+                    .gc
+                    .string_arena
+                    .get(*r)
+                    .unwrap_or_else(|| panic!("{name}[{i}] handle dangling after gc_collect"));
                 assert_eq!(
                     s.data(),
                     *bytes,

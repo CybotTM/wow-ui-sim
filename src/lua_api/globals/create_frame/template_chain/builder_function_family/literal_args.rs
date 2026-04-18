@@ -3,11 +3,24 @@
 
 use super::super::{FastHandlerRef, load_template};
 use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
+use crate::lua_api::hot_literals::{
+    TEMPLATE_INLINE_FUNCTION_SELF_STRING, TEMPLATE_INLINE_FUNCTION_STRING_ARG,
+};
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(super) fn build_literal_arg_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    let handler = try_build_string_number_variants(state, handler_ref)?
+        .or(try_build_string_variants(state, handler_ref)?)
+        .or(try_build_number_variants(state, handler_ref)?);
+    Ok(handler)
+}
+
+fn try_build_string_number_variants(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
@@ -18,12 +31,6 @@ pub(super) fn build_literal_arg_variants(
             second,
         } => build_function_handler_with_string_number_args(state, function_name, first, *second)
             .map(Some),
-        FastHandlerRef::FunctionWithStringArg { function_name, arg } => {
-            build_function_handler_with_string_only_arg(state, function_name, arg).map(Some)
-        }
-        FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
-            build_function_handler_with_string_arg(state, function_name, arg).map(Some)
-        }
         FastHandlerRef::FunctionWithStringSelfStringNumberNumberArgs {
             function_name,
             first,
@@ -39,6 +46,30 @@ pub(super) fn build_literal_arg_variants(
             *fifth,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+fn try_build_string_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
+        FastHandlerRef::FunctionWithStringArg { function_name, arg } => {
+            build_function_handler_with_string_only_arg(state, function_name, arg).map(Some)
+        }
+        FastHandlerRef::FunctionWithSelfStringArg { function_name, arg } => {
+            build_function_handler_with_string_arg(state, function_name, arg).map(Some)
+        }
+        _ => Ok(None),
+    }
+}
+
+fn try_build_number_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::FunctionWithSelfNumberArg {
             function_name,
             value,
@@ -64,7 +95,7 @@ fn build_function_handler_with_string_arg(
                 return fn(self, literal_arg)
             end
         "#,
-        "template-inline-function-self-string",
+        TEMPLATE_INLINE_FUNCTION_SELF_STRING,
     )?;
     let target = resolve_global_path(state, function_name);
     let arg = create_string(state, arg);
@@ -88,7 +119,7 @@ fn build_function_handler_with_string_only_arg(
                 return fn(literal_arg)
             end
         "#,
-        "template-inline-function-string-arg",
+        TEMPLATE_INLINE_FUNCTION_STRING_ARG,
     )?;
     let target = resolve_global_path(state, function_name);
     let arg = create_string(state, arg);
