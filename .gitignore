@@ -14,7 +14,7 @@
 /vendor/
 /docs/local/
 cache/
-PLAN.md
+PLAN*.md
 perf.data
 perf.data.old
 flamegraph.svg
