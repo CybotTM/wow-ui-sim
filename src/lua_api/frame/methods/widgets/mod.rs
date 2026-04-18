@@ -12,7 +12,7 @@ mod cooldown;
 mod editbox;
 pub mod message_frame;
 mod model;
-mod shared;
+pub(super) mod shared;
 mod slider;
 mod statusbar;
 mod texture;
