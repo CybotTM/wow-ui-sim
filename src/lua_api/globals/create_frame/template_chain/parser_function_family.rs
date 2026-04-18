@@ -14,10 +14,16 @@ fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>>
     if let Some(function_name) = parse_global_function_suffix(stmt, "()") {
         return Some(FastHandlerRef::FunctionNoArgs(function_name));
     }
+    if let Some(function_name) = parse_global_function_suffix(stmt, "(self:GetText())") {
+        return Some(FastHandlerRef::FunctionWithSelfGetTextResult(function_name));
+    }
     parse_global_function_suffix(stmt, "(self:GetID())").map(FastHandlerRef::FunctionWithSelfIdArg)
 }
 
 fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if parse_copy_club_ticket_to_clipboard_from_parent(stmt).is_some() {
+        return Some(FastHandlerRef::CopyClubTicketToClipboardFromParent);
+    }
     if let Some((target_path, field, value, on_change_function, on_sound_function)) =
         parse_checked_number_assignment_then_callbacks(stmt)
     {
@@ -501,6 +507,20 @@ fn parse_checked_number_assignment_then_callbacks(
         on_change_function,
         on_sound_function.trim(),
     ))
+}
+
+fn parse_copy_club_ticket_to_clipboard_from_parent(stmt: &str) -> Option<()> {
+    let stmt = stmt.trim();
+    let prefix = "local clubId = self:GetParent():GetClubId();";
+    let remainder = stmt.strip_prefix(prefix)?.trim_start();
+    let prefix = "local clubInfo = clubId and C_Club.GetClubInfo(clubId);";
+    let remainder = remainder.strip_prefix(prefix)?.trim_start();
+    let prefix = "if clubInfo then";
+    let remainder = remainder.strip_prefix(prefix)?.trim_start();
+    let body = remainder.strip_suffix("end")?.trim();
+    let expected =
+        "CopyToClipboard(ClubTicketUtil.FormatTicket(clubInfo, self:GetParent().LinkIDText:GetText()));";
+    (body == expected).then_some(())
 }
 
 fn parse_checked_assignments3_then_callbacks(

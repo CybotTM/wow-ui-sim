@@ -521,9 +521,11 @@ enum FastHandlerRef<'a> {
         leave_function: &'a str,
         join_function: &'a str,
     },
+    CopyClubTicketToClipboardFromParent,
     GrandparentMethodWithNotSelfCheckedArg {
         method_name: &'a str,
     },
+    FunctionWithSelfGetTextResult(&'a str),
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
     FunctionWithParentIdArg(&'a str),

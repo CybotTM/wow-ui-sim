@@ -32,6 +32,10 @@ fn build_plain_function_variants(
         FastHandlerRef::FunctionNoArgs(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::NoArgs).map(Some)
         }
+        FastHandlerRef::FunctionWithSelfGetTextResult(function_name) => {
+            build_function_handler(state, function_name, FunctionHandlerKind::SelfGetText)
+                .map(Some)
+        }
         FastHandlerRef::FunctionWithSelfIdArg(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::SelfId).map(Some)
         }
@@ -230,6 +234,9 @@ fn build_function_with_arg_variants(
             on_sound_function,
         )
         .map(Some),
+        FastHandlerRef::CopyClubTicketToClipboardFromParent => {
+            build_copy_club_ticket_to_clipboard_from_parent_handler(state).map(Some)
+        }
         _ => Ok(None),
     }
 }
@@ -255,6 +262,7 @@ fn build_ancestor_function_variants(
 
 enum FunctionHandlerKind {
     NoArgs,
+    SelfGetText,
     SelfId,
     EventVarargs,
     Button,
@@ -282,6 +290,13 @@ const NOARGS_TEMPLATE: &str = r#"
     local fn = ...
     return function(self, ...)
         return fn()
+    end
+"#;
+
+const SELF_GETTEXT_TEMPLATE: &str = r#"
+    local fn = ...
+    return function(self, ...)
+        return fn(self:GetText())
     end
 "#;
 
@@ -316,6 +331,10 @@ const ELAPSED_TEMPLATE: &str = r#"
 fn function_handler_template(kind: FunctionHandlerKind) -> (&'static str, &'static str) {
     match kind {
         FunctionHandlerKind::NoArgs => (NOARGS_TEMPLATE, "template-inline-function-noargs"),
+        FunctionHandlerKind::SelfGetText => (
+            SELF_GETTEXT_TEMPLATE,
+            "template-inline-function-self-gettext",
+        ),
         FunctionHandlerKind::SelfId => (SELF_ID_TEMPLATE, "template-inline-function-self-id"),
         FunctionHandlerKind::EventVarargs => (
             EVENT_VARARGS_TEMPLATE,
@@ -960,6 +979,27 @@ fn build_checked_number_assignment_then_callbacks_handler(
             on_sound,
         ],
     )
+}
+
+fn build_copy_club_ticket_to_clipboard_from_parent_handler(state: &mut LuaState) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                local clubId = parent:GetClubId()
+                local clubInfo = clubId and C_Club.GetClubInfo(clubId)
+                if clubInfo and parent.LinkIDText and parent.LinkIDText.GetText then
+                    return CopyToClipboard(ClubTicketUtil.FormatTicket(clubInfo, parent.LinkIDText:GetText()))
+                end
+            end
+        "#,
+        "template-inline-copy-club-ticket-to-clipboard-from-parent",
+    )?;
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[])
 }
 
 fn build_ancestor_function_handler(
