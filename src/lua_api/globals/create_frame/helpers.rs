@@ -12,8 +12,23 @@ use rilua::{LuaResult, Val};
 // ---------------------------------------------------------------------------
 
 /// Get a named global value from the Lua global table.
+///
+/// Content-hashes `name` on every call. When the caller holds a
+/// pre-interned `GcRef<LuaString>` (e.g. via `HotLiteralHandles`),
+/// prefer [`get_global_by_key`] to skip the hash.
 pub(super) fn get_global(state: &mut LuaState, name: &str) -> Val {
     let key = state.gc.intern_string(name.as_bytes());
+    get_global_by_key(state, key)
+}
+
+/// Handle-aware variant of [`get_global`]: looks up `key` directly on
+/// the global table without re-interning. Intended for callers that
+/// cache the handle (e.g. consumers of the Track 1 hot-literal
+/// registry).
+pub(super) fn get_global_by_key(
+    state: &LuaState,
+    key: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
+) -> Val {
     state
         .gc
         .tables
@@ -30,6 +45,16 @@ pub(super) fn set_global_num(state: &mut LuaState, name: &str, value: f64) {
 /// Set a named global to any Val.
 pub(super) fn set_global_raw(state: &mut LuaState, name: &str, value: Val) {
     let key = state.gc.intern_string(name.as_bytes());
+    set_global_raw_by_key(state, key, value);
+}
+
+/// Handle-aware variant of [`set_global_raw`]: writes `value` under
+/// `key` on the global table without re-interning.
+pub(super) fn set_global_raw_by_key(
+    state: &mut LuaState,
+    key: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
+    value: Val,
+) {
     let global = state.global;
     if let Some(g) = state.gc.tables.get_mut(global) {
         let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
