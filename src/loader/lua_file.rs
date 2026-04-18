@@ -215,12 +215,40 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
     } else if chunk_name.ends_with("/FloatingChatFrame.lua") {
         source
             .replace(
+                "DEFAULT_TAB_SELECTED_COLOR_TABLE = { r = 1, g = 0.5, b = 0.25 };",
+                "DEFAULT_TAB_SELECTED_COLOR_TABLE = { r = 1, g = 0.5, b = 0.25 };\n\nlocal function __wow_ensure_chat_tab_font_string(button)\n\tif not button then\n\t\treturn nil;\n\tend\n\n\tlocal fontString = button:GetFontString();\n\tif fontString then\n\t\treturn fontString;\n\tend\n\tif type(button.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\n\tlocal name = button.GetName and button:GetName();\n\tlocal childName = type(name) == \"string\" and name ~= \"\" and (name..\"Text\") or nil;\n\tfontString = button:CreateFontString(childName, \"ARTWORK\");\n\tif fontString and type(button.SetFontString) == \"function\" then\n\t\tbutton:SetFontString(fontString);\n\tend\n\treturn fontString;\nend",
+            )
+            .replace(
                 "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha, DEFAULT_CHATFRAME_ALPHA));",
                 "UIFrameFadeIn(object, CHAT_FRAME_FADE_TIME, object:GetAlpha(), max(chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA, DEFAULT_CHATFRAME_ALPHA));",
             )
             .replace(
                 "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha(), chatFrame.oldAlpha), chatFrame.oldAlpha);",
                 "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha() or 0, chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA), chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA);",
+            )
+            .replace(
+                "self:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
+                "do local fontString = __wow_ensure_chat_tab_font_string(self); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
+            )
+            .replace(
+                "self:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
+                "do local fontString = __wow_ensure_chat_tab_font_string(self); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
+            )
+            .replace(
+                "minFrame:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
+                "do local fontString = __wow_ensure_chat_tab_font_string(minFrame); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
+            )
+            .replace(
+                "minFrame:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
+                "do local fontString = __wow_ensure_chat_tab_font_string(minFrame); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
+            )
+            .replace(
+                "button:GetFontString():SetTextColor(colorTable.r, colorTable.g, colorTable.b);",
+                "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(colorTable.r, colorTable.g, colorTable.b); end end",
+            )
+            .replace(
+                "button:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
+                "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
             )
     } else if chunk_name.ends_with("TextToSpeechFrame.lua") {
         source.replace(

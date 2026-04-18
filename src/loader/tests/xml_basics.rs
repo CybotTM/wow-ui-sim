@@ -92,6 +92,24 @@ fn test_xml_onload_fires_during_load() {
 }
 
 #[test]
+fn test_inherited_button_text_is_available_immediately_after_load() {
+    let t = load_test_xml(
+        "test-inherited-button-text",
+        r#"<Ui>
+            <Button name="InheritedButtonTextTemplate" virtual="true">
+                <ButtonText name="$parentText"/>
+            </Button>
+            <Button name="InheritedButtonTextButton" parent="UIParent" inherits="InheritedButtonTextTemplate"/>
+        </Ui>"#,
+    );
+
+    t.assert_lua_true(
+        "return InheritedButtonTextButton:GetFontString() ~= nil and InheritedButtonTextButton:GetFontString() == InheritedButtonTextButtonText",
+        "buttons inheriting ButtonText should expose their text region immediately after XML load",
+    );
+}
+
+#[test]
 fn test_xml_onshow_only_fires_for_visible_frames() {
     let visible = load_test_xml(
         "test-xml-onshow-visible",
