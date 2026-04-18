@@ -126,6 +126,7 @@ pub fn register_widget_container_mixin(state: &mut LuaState) -> LuaResult<()> {
     let Val::Table(mixin_ref) = mixin else {
         unreachable!("create_table must return a table");
     };
+    table_set_rust_fn_static(state, mixin_ref, "OnLoad", ui_widget_container_on_load)?;
     table_set_rust_fn_static(
         state,
         mixin_ref,
@@ -549,4 +550,8 @@ fn ui_widget_container_get_num_widgets_showing(state: &mut LuaState) -> LuaResul
     };
     state.push(Val::Num(count));
     Ok(1)
+}
+
+fn ui_widget_container_on_load(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }

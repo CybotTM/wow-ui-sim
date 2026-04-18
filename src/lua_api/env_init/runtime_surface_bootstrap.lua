@@ -38,6 +38,10 @@ end
 local function __wow_noop()
 end
 
+if FCF_OnUpdate == nil then
+  FCF_OnUpdate = __wow_noop
+end
+
 local __wow_clock_start = os.clock and os.clock() or 0
 
 if GetText == nil then
@@ -90,6 +94,63 @@ if GetMoney == nil then
   end
 end
 
+if GetCursorMoney == nil then
+  function GetCursorMoney()
+    return 0
+  end
+end
+
+if ActionButtonUtil == nil then
+  ActionButtonUtil = {}
+end
+
+ActionButtonUtil.ActionBarActionStatus = ActionButtonUtil.ActionBarActionStatus or {
+  NotMissing = 1,
+  MissingFromAllBars = 2,
+  OnInactiveBonusBar = 3,
+  OnDisabledActionBar = 4,
+}
+
+ActionButtonUtil.ActionBarButtonNames = ActionButtonUtil.ActionBarButtonNames or {}
+
+if ActionButtonUtil.ShowAllActionButtonGrids == nil then
+  ActionButtonUtil.ShowAllActionButtonGrids = __wow_noop
+end
+
+if ActionButtonUtil.HideAllActionButtonGrids == nil then
+  ActionButtonUtil.HideAllActionButtonGrids = __wow_noop
+end
+
+if ActionButtonUtil.SetAllQuickKeybindButtonHighlights == nil then
+  ActionButtonUtil.SetAllQuickKeybindButtonHighlights = __wow_noop
+end
+
+if ActionButtonUtil.ShowAllQuickKeybindButtonHighlights == nil then
+  ActionButtonUtil.ShowAllQuickKeybindButtonHighlights = __wow_noop
+end
+
+if ActionButtonUtil.HideAllQuickKeybindButtonHighlights == nil then
+  ActionButtonUtil.HideAllQuickKeybindButtonHighlights = __wow_noop
+end
+
+if ActionButtonUtil.GetActionBarStatusForSpell == nil then
+  function ActionButtonUtil.GetActionBarStatusForSpell(_spellID, _excludeNonPlayerBars, _excludeSpecialPlayerBars)
+    return ActionButtonUtil.ActionBarActionStatus.NotMissing
+  end
+end
+
+if ActionButtonUtil.GetActionBarStatusForPetAction == nil then
+  function ActionButtonUtil.GetActionBarStatusForPetAction(_petActionID)
+    return ActionButtonUtil.ActionBarActionStatus.NotMissing
+  end
+end
+
+if ActionButtonUtil.GetActionBarStatusForFlyout == nil then
+  function ActionButtonUtil.GetActionBarStatusForFlyout(_flyoutActionID)
+    return ActionButtonUtil.ActionBarActionStatus.NotMissing
+  end
+end
+
 if GetFramerate == nil then
   function GetFramerate()
     return 60
@@ -131,6 +192,12 @@ end
 if GetInventoryItemLink == nil then
   function GetInventoryItemLink(_unit, _slot)
     return nil
+  end
+end
+
+if GetWeaponEnchantInfo == nil then
+  function GetWeaponEnchantInfo()
+    return false, 0, 0, 0, false, 0, 0, 0
   end
 end
 
@@ -298,7 +365,21 @@ end
 if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
   __wow_original_CreateFrame = CreateFrame
   function CreateFrame(...)
-    return __wow_install_frame_helpers(__wow_original_CreateFrame(...))
+    local inherits = select(4, ...)
+    if type(inherits) == "string" then
+      if string.find(inherits, "MapCanvasFrameTemplate", 1, true) or
+         string.find(inherits, "MapCanvasFrameScrollContainerTemplate", 1, true) then
+        __wow_patch_map_canvas_scroll_container_methods()
+      end
+    end
+    local created = __wow_install_frame_helpers(__wow_original_CreateFrame(...))
+    local parent = select(3, ...)
+    if type(parent) == "table" and type(inherits) == "string" then
+      if string.find(inherits, "MapCanvasFrameScrollContainerTemplate", 1, true) then
+        rawset(parent, "ScrollContainer", created)
+      end
+    end
+    return created
   end
 end
 
@@ -749,6 +830,22 @@ if issecure == nil then
   end
 end
 
+if mapvalues == nil then
+  function mapvalues(fn, ...)
+    local count = select("#", ...)
+    if count == 0 then
+      return
+    end
+
+    local values = {}
+    for index = 1, count do
+      values[index] = fn(select(index, ...))
+    end
+
+    return unpack(values, 1, count)
+  end
+end
+
 local function __wow_namespace(defaults)
   return setmetatable(defaults or {}, {
     __index = function(t, key)
@@ -1072,6 +1169,28 @@ end
 
 if AuraUtil == nil then
   AuraUtil = {}
+end
+
+if AuraUtil.AuraFilters == nil then
+  AuraUtil.AuraFilters = {
+    Helpful = "HELPFUL",
+    Harmful = "HARMFUL",
+    Raid = "RAID",
+    IncludeNameplateOnly = "INCLUDE_NAME_PLATE_ONLY",
+  }
+end
+
+if AuraUtil.CreateFilterString == nil then
+  function AuraUtil.CreateFilterString(...)
+    local filters = {}
+    for i = 1, select("#", ...) do
+      local value = select(i, ...)
+      if type(value) == "string" and value ~= "" then
+        filters[#filters + 1] = value
+      end
+    end
+    return table.concat(filters, "|")
+  end
 end
 
 if AuraUtil.UnpackAuraData == nil then
@@ -2714,6 +2833,69 @@ Settings = Settings or __wow_namespace({
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
+ActionButtonSpellAlertManager = ActionButtonSpellAlertManager or __wow_namespace({
+  _defaultAlertType = 1,
+  activeAlerts = {},
+})
+
+local function __wow_action_button_alert_fields(button)
+  local env = debug.getfenv and debug.getfenv(button)
+  if type(env) ~= "table" then
+    return nil
+  end
+  local fields = env[1]
+  if type(fields) ~= "table" then
+    fields = {}
+    env[1] = fields
+  end
+  return fields
+end
+
+if rawget(ActionButtonSpellAlertManager, "HasAlert") == nil then
+  function ActionButtonSpellAlertManager:HasAlert(button)
+    local alertType = self.activeAlerts and self.activeAlerts[button]
+    if alertType ~= nil then
+      return true, alertType
+    end
+    return false
+  end
+end
+
+if rawget(ActionButtonSpellAlertManager, "ShowAlert") == nil then
+  function ActionButtonSpellAlertManager:ShowAlert(button, alertType)
+    if button == nil then
+      return
+    end
+    alertType = alertType or self._defaultAlertType or 1
+    self.activeAlerts[button] = alertType
+    local fields = __wow_action_button_alert_fields(button)
+    local alert = fields and rawget(fields, "SpellActivationAlert")
+    if alert == nil then
+      alert = CreateFrame("Frame", nil, UIParent or button)
+      if fields then
+        rawset(fields, "SpellActivationAlert", alert)
+      end
+      button.SpellActivationAlert = alert
+    end
+    button:Show()
+    alert:Show()
+  end
+end
+
+if rawget(ActionButtonSpellAlertManager, "HideAlert") == nil then
+  function ActionButtonSpellAlertManager:HideAlert(button)
+    if button == nil then
+      return
+    end
+    self.activeAlerts[button] = nil
+    local fields = __wow_action_button_alert_fields(button)
+    local alert = fields and rawget(fields, "SpellActivationAlert")
+    if alert ~= nil then
+      alert:Hide()
+    end
+  end
+end
+
 if bit == nil then
   local function normalize(v)
     v = math.floor(tonumber(v) or 0)
@@ -3391,7 +3573,11 @@ end
 -- Merge stub-namespace fallback so other unimplemented C_Housing members
 -- resolve to the no-op metamethod.
 C_Housing = __wow_merge_namespace(C_Housing, {})
-C_RestrictedActions = C_RestrictedActions or __wow_namespace()
+C_RestrictedActions = __wow_merge_namespace(C_RestrictedActions, {
+  CheckAllowProtectedFunctions = function()
+    return true
+  end,
+})
 C_ScriptedAnimations = C_ScriptedAnimations or __wow_namespace()
 C_PaperDollInfo = C_PaperDollInfo or __wow_namespace()
 C_CombatAudioAlert = C_CombatAudioAlert or __wow_namespace()
@@ -3444,8 +3630,19 @@ C_ActionBar = C_ActionBar or __wow_namespace({
   GetMultiCastBarIndex = function() return 1 end,
   GetActionBarPage = function() return 1 end,
   SetActionBarPage = __wow_noop,
-  HasAction = function() return false end,
-  GetActionTexture = function() return nil end,
+  HasAction = function(slot)
+    if type(_G.HasAction) == "function" then
+      return _G.HasAction(slot)
+    end
+    return false
+  end,
+  IsPressHoldReleaseSpell = function() return false end,
+  GetActionTexture = function(slot)
+    if type(_G.GetActionTexture) == "function" then
+      return _G.GetActionTexture(slot)
+    end
+    return nil
+  end,
   UsesActionText = function() return false end,
   GetActionText = function() return "" end,
   FindSpellActionButtons = function() return {} end,
@@ -3453,6 +3650,394 @@ C_ActionBar = C_ActionBar or __wow_namespace({
   FindFlyoutActionButtons = function() return {} end,
   GetPetActionPetBarIndices = function() return {} end,
 })
+
+if type(_G.IsPressHoldReleaseSpell) ~= "function" then
+  function IsPressHoldReleaseSpell(...)
+    if C_Spell and type(C_Spell.IsPressHoldReleaseSpell) == "function" then
+      return C_Spell.IsPressHoldReleaseSpell(...)
+    end
+    return false
+  end
+end
+
+if type(DropdownButtonMixin) ~= "table" then
+  DropdownButtonMixin = {
+    Event = {
+      OnMenuOpen = "OnMenuOpen",
+      OnMenuClose = "OnMenuClose",
+      OnUpdate = "OnUpdate",
+    },
+  }
+
+  function DropdownButtonMixin:OnLoad()
+    self.__wow_menu_open = self.__wow_menu_open or false
+  end
+
+  function DropdownButtonMixin:OnLoad_Intrinsic()
+    self:OnLoad()
+  end
+
+  function DropdownButtonMixin:SetupMenu(generator)
+    self.__wow_menu_generator = generator
+  end
+
+  function DropdownButtonMixin:RegisterMenu(menu_description)
+    self.__wow_menu_description = menu_description
+  end
+
+  function DropdownButtonMixin:RegisterCallback() end
+  function DropdownButtonMixin:UnregisterCallback() end
+
+  function DropdownButtonMixin:IsMenuOpen()
+    return self.__wow_menu_open == true
+  end
+
+  function DropdownButtonMixin:SetMenuOpen(open)
+    self.__wow_menu_open = open and true or false
+  end
+
+  function DropdownButtonMixin:OpenMenu()
+    self:SetMenuOpen(true)
+  end
+
+  function DropdownButtonMixin:CloseMenu()
+    self:SetMenuOpen(false)
+  end
+
+  function DropdownButtonMixin:OnMenuOpened(menu)
+    self:SetMenuOpen(true)
+  end
+
+  function DropdownButtonMixin:OnMenuClosed(menu, closeReason)
+    self:SetMenuOpen(false)
+  end
+
+  function DropdownButtonMixin:OnMenuResponse(menu, description) end
+  function DropdownButtonMixin:OnMenuAssigned() end
+  function DropdownButtonMixin:OnMenuChanged() end
+  function DropdownButtonMixin:SignalUpdate() end
+  function DropdownButtonMixin:Update() end
+  function DropdownButtonMixin:GenerateMenu() return self.__wow_menu_description end
+  function DropdownButtonMixin:GetMenuDescription() return self.__wow_menu_description end
+  function DropdownButtonMixin:HasElements() return self.__wow_menu_description ~= nil end
+  function DropdownButtonMixin:SetSelectionText(selection_func)
+    self.__wow_selection_text_func = selection_func
+  end
+  function DropdownButtonMixin:GetSelectionText()
+    if type(self.__wow_selection_text_func) == "function" then
+      return self.__wow_selection_text_func({})
+    end
+    return nil
+  end
+  function DropdownButtonMixin:CollectSelectionData() return nil, nil, {} end
+  function DropdownButtonMixin:GetSelectionData() return nil, nil, {} end
+  function DropdownButtonMixin:HasStickyFocus() return false end
+end
+
+local function __wow_copy_mixin_methods(target, source)
+  if type(target) ~= "table" or type(source) ~= "table" then
+    return target
+  end
+  for key, value in pairs(source) do
+    if rawget(target, key) == nil then
+      rawset(target, key, value)
+    end
+  end
+  return target
+end
+
+if type(DropdownSelectionTextMixin) ~= "table" then
+  DropdownSelectionTextMixin = {}
+
+  function DropdownSelectionTextMixin:SetDefaultText(text)
+    self.defaultText = text
+  end
+
+  function DropdownSelectionTextMixin:SetSelectionTranslator(translator)
+    self.selectionTranslator = translator
+  end
+
+  function DropdownSelectionTextMixin:SetSelectionText(selectionFunc)
+    self.selectionFunc = selectionFunc
+  end
+
+  function DropdownSelectionTextMixin:UpdateToMenuSelections(menuDescription, currentSelections)
+    if self.disableSelectionText then
+      return
+    end
+    local text = nil
+    if type(self.selectionFunc) == "function" then
+      text = self.selectionFunc(currentSelections or {})
+    end
+    if text == nil then
+      text = self.defaultText
+    end
+    if text ~= nil and type(self.SetText) == "function" then
+      self:SetText(text)
+    end
+  end
+
+  function DropdownSelectionTextMixin:OnShow()
+    if type(self.GenerateMenu) == "function" then
+      self:GenerateMenu()
+    end
+  end
+end
+
+if type(WowStyle1DropdownMixin) ~= "table" then
+  WowStyle1DropdownMixin = __wow_copy_mixin_methods({}, DropdownButtonMixin)
+
+  function WowStyle1DropdownMixin:OnLoad()
+    DropdownButtonMixin.OnLoad(self)
+  end
+
+  function WowStyle1DropdownMixin:OnButtonStateChanged() end
+  function WowStyle1DropdownMixin:GetArrowAtlas() return nil end
+end
+__wow_copy_mixin_methods(WowStyle1DropdownMixin, DropdownSelectionTextMixin)
+
+if type(WowStyle1FilterDropdownMixin) ~= "table" then
+  WowStyle1FilterDropdownMixin = __wow_copy_mixin_methods({}, WowStyle1DropdownMixin)
+end
+__wow_copy_mixin_methods(WowStyle1FilterDropdownMixin, WowStyle1DropdownMixin)
+__wow_copy_mixin_methods(WowStyle1FilterDropdownMixin, DropdownSelectionTextMixin)
+
+if type(WowStyle1ArrowDropdownMixin) ~= "table" then
+  WowStyle1ArrowDropdownMixin = __wow_copy_mixin_methods({}, WowStyle1DropdownMixin)
+end
+__wow_copy_mixin_methods(WowStyle1ArrowDropdownMixin, WowStyle1DropdownMixin)
+__wow_copy_mixin_methods(WowStyle1ArrowDropdownMixin, DropdownSelectionTextMixin)
+
+if type(WowDropdownFilterBehaviorMixin) ~= "table" then
+  WowDropdownFilterBehaviorMixin = {}
+
+  function WowDropdownFilterBehaviorMixin:OnLoad()
+    if type(self.SetSelectionText) ~= "function" and DropdownButtonMixin ~= nil then
+      self.SetSelectionText = DropdownButtonMixin.SetSelectionText
+      self.GetSelectionText = DropdownButtonMixin.GetSelectionText
+    end
+  end
+
+  function WowDropdownFilterBehaviorMixin:OnShow() end
+  function WowDropdownFilterBehaviorMixin:SetDefaultCallback(callback)
+    self.__wow_default_callback = callback
+  end
+  function WowDropdownFilterBehaviorMixin:SetIsDefaultCallback(callback)
+    self.__wow_is_default_callback = callback
+  end
+  function WowDropdownFilterBehaviorMixin:SetUpdateCallback(callback)
+    self.__wow_update_callback = callback
+  end
+  function WowDropdownFilterBehaviorMixin:NotifyUpdate(description)
+    if type(self.__wow_update_callback) == "function" then
+      self.__wow_update_callback(description)
+    end
+  end
+  function WowDropdownFilterBehaviorMixin:Reset() end
+  function WowDropdownFilterBehaviorMixin:ValidateResetState() end
+  function WowDropdownFilterBehaviorMixin:OnMenuResponse(menu, description)
+    self:NotifyUpdate(description)
+  end
+  function WowDropdownFilterBehaviorMixin:OnMenuAssigned() end
+end
+
+if type(WowFilterButtonMixin) ~= "table" then
+  WowFilterButtonMixin = __wow_copy_mixin_methods({}, WowDropdownFilterBehaviorMixin)
+end
+__wow_copy_mixin_methods(WowFilterButtonMixin, WowDropdownFilterBehaviorMixin)
+__wow_copy_mixin_methods(WowFilterButtonMixin, DropdownSelectionTextMixin)
+
+local function __wow_ensure_achievement_search_previews()
+  local frame = AchievementFrame
+  local container = frame and frame.SearchPreviewContainer
+  if type(container) ~= "table" and type(container) ~= "userdata" then
+    return
+  end
+
+  local previews = container.searchPreviews
+  if type(previews) ~= "table" then
+    previews = {}
+    container.searchPreviews = previews
+  end
+
+  local count = ACHIEVEMENT_FRAME_NUM_SEARCH_PREVIEWS or 5
+  for index = 1, count do
+    if previews[index] == nil then
+      previews[index] = container["SearchPreview" .. index]
+    end
+  end
+end
+
+local function __wow_patch_achievement_search_preview_selection()
+  if rawget(_G, "__wow_achievement_search_preview_patched") then
+    return
+  end
+  if type(AchievementFrame_SetSearchPreviewSelection) ~= "function" then
+    return
+  end
+
+  local original = AchievementFrame_SetSearchPreviewSelection
+  AchievementFrame_SetSearchPreviewSelection = function(selectedIndex)
+    __wow_ensure_achievement_search_previews()
+    return original(selectedIndex)
+  end
+  __wow_achievement_search_preview_patched = true
+end
+
+local function __wow_find_first_scroll_frame_child(parent)
+  if parent == nil or type(parent.GetChildren) ~= "function" then
+    return nil
+  end
+
+  local count = parent:GetNumChildren()
+  for index = 1, count do
+    local child = select(index, parent:GetChildren())
+    if type(child) == "table" then
+      local isScrollFrame =
+        (type(child.IsObjectType) == "function" and child:IsObjectType("ScrollFrame")) or
+        (type(child.GetObjectType) == "function" and child:GetObjectType() == "ScrollFrame")
+      if isScrollFrame then
+        return child
+      end
+    end
+  end
+
+  return nil
+end
+
+local function __wow_ensure_map_canvas_scroll_container(frame)
+  if type(frame) ~= "table" then
+    return nil
+  end
+
+  local existing = rawget(frame, "ScrollContainer")
+  if existing ~= nil then
+    return existing
+  end
+
+  local scroll = __wow_find_first_scroll_frame_child(frame)
+  if scroll ~= nil then
+    rawset(frame, "ScrollContainer", scroll)
+  end
+  return scroll
+end
+
+local function __wow_patch_map_canvas_scroll_container_methods()
+  if rawget(_G, "__wow_map_canvas_scroll_container_patched") then
+    return
+  end
+  if type(MapCanvasMixin) ~= "table" then
+    return
+  end
+
+  if type(MapCanvasMixin.SetMapID) == "function" then
+    local originalSetMapID = MapCanvasMixin.SetMapID
+    MapCanvasMixin.SetMapID = function(self, ...)
+      if __wow_ensure_map_canvas_scroll_container(self) == nil then
+        local mapID = ...
+        self.mapID = mapID
+        if C_Map and type(C_Map.GetMapArtID) == "function" then
+          self.mapArtID = C_Map.GetMapArtID(mapID)
+        end
+        return
+      end
+      return originalSetMapID(self, ...)
+    end
+  end
+
+  if type(MapCanvasMixin.GetCanvas) == "function" then
+    MapCanvasMixin.GetCanvas = function(self, ...)
+      local scroll = __wow_ensure_map_canvas_scroll_container(self)
+      return scroll and scroll.Child or nil
+    end
+  end
+
+  if type(MapCanvasMixin.GetCanvasContainer) == "function" then
+    MapCanvasMixin.GetCanvasContainer = function(self, ...)
+      return __wow_ensure_map_canvas_scroll_container(self)
+    end
+  end
+
+  if type(MapCanvasMixin.OnFrameSizeChanged) == "function" then
+    local originalOnFrameSizeChanged = MapCanvasMixin.OnFrameSizeChanged
+    MapCanvasMixin.OnFrameSizeChanged = function(self, ...)
+      if __wow_ensure_map_canvas_scroll_container(self) == nil then
+        return
+      end
+      return originalOnFrameSizeChanged(self, ...)
+    end
+  end
+
+  __wow_map_canvas_scroll_container_patched = true
+end
+
+if rawget(_G, "PVEFrame_ToggleFrame") == nil then
+  function PVEFrame_ToggleFrame(...)
+    local loadAddOn = C_AddOns and C_AddOns.LoadAddOn
+    if type(loadAddOn) == "function" then
+      pcall(loadAddOn, "Blizzard_GroupFinder")
+    end
+
+    local loaded = rawget(_G, "PVEFrame_ToggleFrame")
+    if type(loaded) == "function" and loaded ~= PVEFrame_ToggleFrame then
+      return loaded(...)
+    end
+  end
+end
+
+__wow_patch_map_canvas_scroll_container_methods()
+
+if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
+  hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
+    if addonName == "Blizzard_AchievementUI" then
+      __wow_ensure_achievement_search_previews()
+      __wow_patch_achievement_search_preview_selection()
+    elseif addonName == "Blizzard_MapCanvas" then
+      __wow_patch_map_canvas_scroll_container_methods()
+    end
+  end)
+end
+
+if C_Container ~= nil and type(C_Container.SetBagPortraitTexture) ~= "function" then
+  function C_Container.SetBagPortraitTexture(texture, bagID)
+    if texture ~= nil and type(texture.SetTexture) == "function" then
+      texture:SetTexture(nil)
+    end
+  end
+end
+
+if C_Item ~= nil and type(C_Item.RequestLoadItemDataByID) ~= "function" then
+  function C_Item.RequestLoadItemDataByID(itemID)
+    if ItemEventListener and type(ItemEventListener.FireCallbacks) == "function" then
+      ItemEventListener:FireCallbacks(itemID)
+    end
+    return true
+  end
+end
+
+if C_Spell ~= nil and type(C_Spell.RequestLoadSpellData) ~= "function" then
+  function C_Spell.RequestLoadSpellData(spellID)
+    if SpellEventListener and type(SpellEventListener.FireCallbacks) == "function" then
+      SpellEventListener:FireCallbacks(spellID)
+    end
+    return true
+  end
+end
+
+if C_QuestLog ~= nil and type(C_QuestLog.RequestLoadQuestByID) ~= "function" then
+  function C_QuestLog.RequestLoadQuestByID(questID)
+    if QuestEventListener and type(QuestEventListener.FireCallbacks) == "function" then
+      QuestEventListener:FireCallbacks(questID)
+    end
+    return true
+  end
+end
+
+AUTOCOMPLETE_LIST = AUTOCOMPLETE_LIST or {}
+AUTOCOMPLETE_LIST.ADDFRIEND = AUTOCOMPLETE_LIST.ADDFRIEND or {}
+if type(setprinthandler) ~= "function" then
+  function setprinthandler() end
+end
 
 C_Traits = C_Traits or __wow_namespace({
   GetTreeNodes = function() return {} end,
@@ -3728,6 +4313,74 @@ local function __wow_register_core_frame_methods()
       local fields = __wow_frame_fields(self)
       local providers = fields and fields.dataProviders
       __wow_remove_array_value(providers, provider)
+    end
+  end
+
+  if methods.SetDefaultText == nil then
+    function methods:SetDefaultText(text)
+      self.defaultText = text
+    end
+  end
+
+  if methods.SetSelectionTranslator == nil then
+    function methods:SetSelectionTranslator(translator)
+      self.selectionTranslator = translator
+    end
+  end
+
+  if methods.SetSelectionText == nil then
+    function methods:SetSelectionText(selectionFunc)
+      self.selectionFunc = selectionFunc
+    end
+  end
+
+  if methods.GetSelectionText == nil then
+    function methods:GetSelectionText()
+      if type(self.selectionFunc) == "function" then
+        return self.selectionFunc({})
+      end
+      return self.defaultText
+    end
+  end
+
+  if methods.UpdateToMenuSelections == nil then
+    function methods:UpdateToMenuSelections(menuDescription, currentSelections)
+      local text = nil
+      if type(self.selectionFunc) == "function" then
+        text = self.selectionFunc(currentSelections or {})
+      end
+      if text == nil then
+        text = self.defaultText
+      end
+      if text ~= nil and type(self.SetText) == "function" then
+        self:SetText(text)
+      end
+    end
+  end
+
+  if methods.SetDefaultCallback == nil then
+    function methods:SetDefaultCallback(callback)
+      self.__wow_default_callback = callback
+    end
+  end
+
+  if methods.SetIsDefaultCallback == nil then
+    function methods:SetIsDefaultCallback(callback)
+      self.__wow_is_default_callback = callback
+    end
+  end
+
+  if methods.SetUpdateCallback == nil then
+    function methods:SetUpdateCallback(callback)
+      self.__wow_update_callback = callback
+    end
+  end
+
+  if methods.NotifyUpdate == nil then
+    function methods:NotifyUpdate(description)
+      if type(self.__wow_update_callback) == "function" then
+        self.__wow_update_callback(description)
+      end
     end
   end
 end

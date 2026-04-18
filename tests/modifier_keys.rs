@@ -102,3 +102,29 @@ fn multiple_modifiers_set_simultaneously() {
     assert!(alt);
     assert!(any);
 }
+
+#[test]
+fn is_modified_click_follows_any_non_meta_modifier() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let before: bool = env.eval("return IsModifiedClick('CHATLINK')").unwrap();
+    assert!(
+        !before,
+        "IsModifiedClick should start false when no modifiers are held"
+    );
+
+    env.exec("A_Admin.SetControlKeyDown(true)").unwrap();
+    let during: bool = env.eval("return IsModifiedClick('CHATLINK')").unwrap();
+    assert!(
+        during,
+        "IsModifiedClick should report true when a non-meta modifier is held"
+    );
+
+    env.exec("A_Admin.SetControlKeyDown(false)").unwrap();
+    env.exec("A_Admin.SetMetaKeyDown(true)").unwrap();
+    let meta_only: bool = env.eval("return IsModifiedClick('CHATLINK')").unwrap();
+    assert!(
+        !meta_only,
+        "IsModifiedClick should mirror IsModifierKeyDown semantics and ignore meta-only input"
+    );
+}

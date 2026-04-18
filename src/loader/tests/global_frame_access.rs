@@ -192,6 +192,35 @@ fn test_template_inherited_parent_key_climbs_one_level_for_nested_child() {
 }
 
 #[test]
+fn test_button_frame_template_inset_parent_key_points_to_child() {
+    let (t, _) = load_test_lua(
+        "test-g-button-frame-inset",
+        r#"
+        local frame = CreateFrame("Frame", "ButtonFrameInsetAccess", UIParent, "ButtonFrameTemplate")
+        local inset = frame.Inset
+        local insetParent = inset and inset.GetParent and inset:GetParent() or nil
+        HAS_INSET = inset ~= nil
+        INSET_IS_PARENT = inset == frame
+        INSET_PARENT_IS_FRAME = insetParent == frame
+        INSET_NAME = inset and inset.GetName and inset:GetName() or "nil"
+    "#,
+    );
+    t.assert_lua_true(
+        "return HAS_INSET",
+        "ButtonFrameTemplate should expose its Inset child through parentKey lookup",
+    );
+    t.assert_lua_true(
+        "return not INSET_IS_PARENT",
+        "ButtonFrameTemplate.Inset must not resolve to the parent frame itself",
+    );
+    t.assert_lua_true(
+        "return INSET_PARENT_IS_FRAME",
+        "ButtonFrameTemplate inset child should be parented to the frame",
+    );
+    t.assert_eq_lua("return INSET_NAME", "ButtonFrameInsetAccessInset");
+}
+
+#[test]
 fn test_button_child_globals_not_on_fresh_button() {
     let (t, _) = load_test_lua(
         "test-g-btn-no-children",

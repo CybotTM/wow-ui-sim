@@ -67,6 +67,22 @@ if SetPortraitToTexture == nil then
   end
 end
 
+if mapvalues == nil then
+  function mapvalues(fn, ...)
+    local count = select("#", ...)
+    if count == 0 then
+      return
+    end
+
+    local values = {}
+    for index = 1, count do
+      values[index] = fn(select(index, ...))
+    end
+
+    return unpack(values, 1, count)
+  end
+end
+
 if UI_LOCALE == nil then
   if type(GetLocale) == "function" then
     UI_LOCALE = GetLocale()

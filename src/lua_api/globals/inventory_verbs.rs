@@ -16,7 +16,10 @@
 //! Registered from `register_tail_globals` after `missing_surface` so the
 //! Rust impls supersede any `stub_nil` entries that slipped through.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
+};
+use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_api::state_types::{CursorInfo, CursorItemOrigin, EquippedItem};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -31,6 +34,23 @@ fn stack_i32(state: &mut LuaState, index: i32) -> Option<i32> {
 
 fn stack_u32(state: &mut LuaState, index: i32) -> Option<u32> {
     stack_i32(state, index).and_then(|n| u32::try_from(n).ok())
+}
+
+fn fire_named_event(state: &mut LuaState, event_name: &str) {
+    for widget_id in get_event_listeners(state, event_name) {
+        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
+            continue;
+        };
+        let Ok(frame) = frame_ref(state, widget_id) else {
+            continue;
+        };
+        let event_name_val = create_string(state, event_name);
+        let _ = call_function_state(state, handler, &[frame, event_name_val]);
+    }
+}
+
+fn action_spell_id(state: &mut LuaState, slot: u32) -> Option<u32> {
+    borrow_state(state).ok()?.action_bars.get(&slot).copied()
 }
 
 /// `PickupContainerItem(bag, slot)` — take an item out of a bag slot and
@@ -77,6 +97,74 @@ fn pickup_inventory_item(state: &mut LuaState) -> LuaResult<u32> {
 /// the bag container slot range. Shares the same implementation.
 fn pickup_bag_from_slot(state: &mut LuaState) -> LuaResult<u32> {
     pickup_inventory_item(state)
+}
+
+/// `PickupAction(slot [, ignoreRemoval])` — place the spell/action from the
+/// action bar on the cursor. When `ignoreRemoval` is truthy, the source slot
+/// stays populated.
+fn pickup_action(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = stack_u32(state, 1) else {
+        return Ok(0);
+    };
+    let ignore_removal = matches!(stack_val(state, 2), Val::Bool(true));
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return Ok(0);
+    };
+    let Some(spell_id) = st.action_bars.get(&slot).copied() else {
+        return Ok(0);
+    };
+    if !ignore_removal {
+        st.action_bars.remove(&slot);
+    }
+    st.cursor_item = Some(CursorInfo::Action { slot, spell_id });
+    drop(st);
+    fire_named_event(state, "CURSOR_CHANGED");
+    Ok(0)
+}
+
+fn has_action(state: &mut LuaState) -> LuaResult<u32> {
+    let has = stack_u32(state, 1)
+        .and_then(|slot| action_spell_id(state, slot))
+        .is_some();
+    state.push(Val::Bool(has));
+    Ok(1)
+}
+
+fn get_action_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let texture = stack_u32(state, 1)
+        .and_then(|slot| action_spell_id(state, slot))
+        .and_then(|spell_id| {
+            crate::spells::get_spell(spell_id).and_then(|spell| {
+                crate::manifest_interface_data::get_texture_path(spell.icon_file_data_id)
+            })
+        });
+    match texture {
+        Some(path) => {
+            let path_val = create_string(state, path);
+            state.push(path_val);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_action_info(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = stack_u32(state, 1).and_then(|slot| action_spell_id(state, slot));
+    match spell_id {
+        Some(spell_id) => {
+            let kind = create_string(state, "spell");
+            state.push(kind);
+            state.push(Val::Num(spell_id as f64));
+            state.push(Val::Nil);
+            Ok(3)
+        }
+        None => {
+            state.push(Val::Nil);
+            state.push(Val::Nil);
+            state.push(Val::Nil);
+            Ok(3)
+        }
+    }
 }
 
 /// `PickupMerchantItem(index)` — synthesize a merchant item on the cursor
@@ -135,6 +223,19 @@ fn delete_cursor_item(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     st.cursor_item = None;
+    drop(st);
+    fire_named_event(state, "CURSOR_CHANGED");
+    Ok(0)
+}
+
+/// `ClearCursor()` — clear any cursor payload and fire `CURSOR_CHANGED`.
+fn clear_cursor(state: &mut LuaState) -> LuaResult<u32> {
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return Ok(0);
+    };
+    st.cursor_item = None;
+    drop(st);
+    fire_named_event(state, "CURSOR_CHANGED");
     Ok(0)
 }
 
@@ -146,6 +247,45 @@ fn cursor_has_item(state: &mut LuaState) -> LuaResult<u32> {
         .is_some_and(|cursor| matches!(cursor, CursorInfo::Item { .. }));
     state.push(Val::Bool(has_item));
     Ok(1)
+}
+
+/// `GetCursorInfo()` — expose the cursor payload in WoW's coarse-grained
+/// `(kind, id, ...)` shape. Only the spell/item cases used by the simulator
+/// test surface are modeled.
+fn get_cursor_info(state: &mut LuaState) -> LuaResult<u32> {
+    let cursor = borrow_state(state)?.cursor_item.clone();
+    let Some(cursor) = cursor else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    match cursor {
+        CursorInfo::Action { spell_id, .. }
+        | CursorInfo::Spell { spell_id }
+        | CursorInfo::PetAction { spell_id, .. } => {
+            let kind = create_string(state, "spell");
+            state.push(kind);
+            state.push(Val::Num(spell_id as f64));
+            Ok(2)
+        }
+        CursorInfo::Talent { talent_id, .. } => {
+            let kind = create_string(state, "talent");
+            state.push(kind);
+            state.push(Val::Num(talent_id as f64));
+            Ok(2)
+        }
+        CursorInfo::Macro { macro_index } => {
+            let kind = create_string(state, "macro");
+            state.push(kind);
+            state.push(Val::Num(macro_index as f64));
+            Ok(2)
+        }
+        CursorInfo::Item { item_id, .. } => {
+            let kind = create_string(state, "item");
+            state.push(kind);
+            state.push(Val::Num(item_id as f64));
+            Ok(2)
+        }
+    }
 }
 
 /// `PlaceAction(slot)` — if the cursor is carrying a spell/action, write
@@ -170,6 +310,8 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
     };
     st.action_bars.insert(slot, spell_id);
     st.cursor_item = None;
+    drop(st);
+    fire_named_event(state, "CURSOR_CHANGED");
     Ok(0)
 }
 
@@ -179,9 +321,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "PickupContainerItem", pickup_container_item)?;
     LuaApiMut::register_function(lua, "PickupInventoryItem", pickup_inventory_item)?;
     LuaApiMut::register_function(lua, "PickupBagFromSlot", pickup_bag_from_slot)?;
+    LuaApiMut::register_function(lua, "PickupAction", pickup_action)?;
+    LuaApiMut::register_function(lua, "HasAction", has_action)?;
+    LuaApiMut::register_function(lua, "GetActionTexture", get_action_texture)?;
+    LuaApiMut::register_function(lua, "GetActionInfo", get_action_info)?;
     LuaApiMut::register_function(lua, "PickupMerchantItem", pickup_merchant_item)?;
     LuaApiMut::register_function(lua, "EquipCursorItem", equip_cursor_item)?;
     LuaApiMut::register_function(lua, "DeleteCursorItem", delete_cursor_item)?;
+    LuaApiMut::register_function(lua, "ClearCursor", clear_cursor)?;
+    LuaApiMut::register_function(lua, "GetCursorInfo", get_cursor_info)?;
     LuaApiMut::register_function(lua, "CursorHasItem", cursor_has_item)?;
     LuaApiMut::register_function(lua, "PlaceAction", place_action)?;
     Ok(())

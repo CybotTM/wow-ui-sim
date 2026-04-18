@@ -1,50 +1,23 @@
-//! Benchmark binary: load UI then measure spellbook first-open phases.
+//! Benchmark binary: measure spellbook open on the real GUI app path.
 
 use std::path::PathBuf;
-use std::time::Instant;
+
+use wow_ui_sim::iced_app::{BenchmarkPhase, benchmark_spellbook_open_in_gui};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn main() {
     let env = load_base_ui();
+    let report = benchmark_spellbook_open_in_gui(env).expect("spellbook GUI benchmark failed");
 
-    eprintln!("=== Spellbook demand-load path ===");
-    let total_start = Instant::now();
-    measure_step(
-        &env,
-        "LoadAddOn(Blizzard_PlayerSpells)",
-        "assert(C_AddOns.LoadAddOn('Blizzard_PlayerSpells'))",
-    );
-    measure_step(
-        &env,
-        "TrySetTab(SpellBook)",
-        "assert(PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook))",
-    );
-    measure_step(
-        &env,
-        "ShowUIPanel(PlayerSpellsFrame)",
-        "ShowUIPanel(PlayerSpellsFrame)",
-    );
-    eprintln!("Demand-load total: {:.2?}", total_start.elapsed());
-
-    measure_step(
-        &env,
-        "HideUIPanel(PlayerSpellsFrame)",
-        "HideUIPanel(PlayerSpellsFrame)",
-    );
-
-    eprintln!("\n=== Spellbook already-loaded toggle ===");
-    let reopen_start = Instant::now();
-    measure_step(
-        &env,
-        "ToggleSpellBookFrame()",
-        "PlayerSpellsUtil.ToggleSpellBookFrame()",
-    );
-    eprintln!("Already-loaded open total: {:.2?}", reopen_start.elapsed());
+    print_phase(&report.startup_idle);
+    print_phase(&report.first_open);
+    print_phase(&report.first_close);
+    print_phase(&report.second_open);
 }
 
 fn load_base_ui() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    let env = WowLuaEnv::new().expect("failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
 
     let ui = PathBuf::from("./Interface/BlizzardUI");
@@ -60,18 +33,20 @@ fn load_base_ui() -> WowLuaEnv {
         }
     }
     env.apply_post_load_workarounds();
-
-    wow_ui_sim::startup::fire_startup_events(&env);
-    env.apply_post_event_workarounds();
-    wow_ui_sim::startup::process_pending_timers(&env);
-    wow_ui_sim::startup::fire_one_on_update_tick(&env);
-
     env
 }
 
-fn measure_step(env: &WowLuaEnv, label: &str, lua: &str) {
-    let started = Instant::now();
-    env.exec(lua)
-        .unwrap_or_else(|error| panic!("{label} failed: {error}"));
-    eprintln!("{label}: {:.2?}", started.elapsed());
+fn print_phase(phase: &BenchmarkPhase) {
+    eprintln!("=== {} ===", phase.name);
+    eprintln!("keypress: {:?}", phase.keypress_elapsed);
+    eprintln!("settle:   {:?}", phase.settle_elapsed);
+    eprintln!("ticks:    {:?}", phase.tick_elapsed);
+    eprintln!("draws:    {:?}", phase.draw_elapsed);
+    eprintln!("frames:   {}", phase.frames);
+    eprintln!(
+        "textures: rgba={} bc={} max_pending_dirty_ids={}",
+        phase.textures_loaded, phase.bc_textures_loaded, phase.max_pending_dirty_ids
+    );
+    eprintln!("shown:    {}", phase.spellbook_shown);
+    eprintln!();
 }

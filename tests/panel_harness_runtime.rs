@@ -71,9 +71,23 @@ fn blizzard_ui_dir() -> PathBuf {
 }
 
 fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {
-    let toc_path = blizzard_ui_dir().join(addon_name).join(toc_name);
+    let addon_dir = blizzard_ui_dir().join(addon_name);
+    let requested = addon_dir.join(toc_name);
+    let toc_path = if requested.exists() {
+        requested
+    } else {
+        [
+            addon_dir.join(format!("{addon_name}.toc")),
+            addon_dir.join(format!("{addon_name}_Mainline.toc")),
+        ]
+        .into_iter()
+        .find(|candidate| candidate.exists())
+        .unwrap_or(requested)
+    };
     load_addon(&env.loader_env(), &toc_path)
         .unwrap_or_else(|error| panic!("{addon_name} should load in panel harness: {error}"));
+    env.apply_runtime_addon_load_workarounds(addon_name);
+    common::fire_addon_loaded(env, addon_name);
 }
 
 fn load_panel_harness(env: &WowLuaEnv) {
@@ -87,6 +101,14 @@ fn load_panel_harness(env: &WowLuaEnv) {
         }
     }
 
+    for addon_name in [
+        "Blizzard_MapCanvas",
+        "Blizzard_SharedTalentUI",
+        "Blizzard_PlayerSpells",
+    ] {
+        env.apply_runtime_addon_load_workarounds(addon_name);
+    }
+    common::panel_fixtures::install_lua_harness_stubs(env);
     env.apply_post_load_workarounds();
     common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
@@ -231,7 +253,7 @@ fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
-    load_blizzard_addon(&env, "Blizzard_BuffFrame", "BuffFrame.toc");
+    load_blizzard_addon(&env, "Blizzard_BuffFrame", "Blizzard_BuffFrame.toc");
     load_blizzard_addon(
         &env,
         "Blizzard_UnitFrame",
@@ -275,14 +297,17 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
     let has_provider: bool = env
         .eval(
             r#"
-            local map = CreateFrame("Frame", "GroupMembersMapProbe", UIParent, "MapCanvasFrameTemplate")
-            local scroll = CreateFrame("ScrollFrame", nil, map, "MapCanvasFrameScrollContainerTemplate")
+            local map = BattlefieldMapFrame
+            if not (map and map.ScrollContainer and map.ScrollContainer.Child) then
+                return false
+            end
             map:SetMapID(C_Map.GetCurrentMapID())
 
             local provider = CreateFromMixins(GroupMembersDataProviderMixin)
             map:AddDataProvider(provider)
 
-            return provider.pin ~= nil and provider.pin.dataProvider == provider
+            return provider.pin ~= nil
+                and provider.pin.dataProvider == provider
             "#,
         )
         .expect("group members pin probe should return");

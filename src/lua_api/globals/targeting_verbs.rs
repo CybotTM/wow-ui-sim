@@ -23,7 +23,10 @@
 
 use crate::event::Event;
 use crate::lua_api::game_data::{PartyMember, TargetInfo};
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
+};
+use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
@@ -41,7 +44,7 @@ fn resolve_token_to_target_info(
         "player" | "self" => Some(player_target_info(&st)),
         "target" => st.current_target.clone(),
         "focus" => st.current_focus.clone(),
-        other => resolve_party_token(&st, other),
+        other => resolve_party_token(&st, other).or_else(|| resolve_enemy_token(&st, other)),
     };
     Ok(result)
 }
@@ -69,10 +72,38 @@ fn player_target_info(st: &crate::lua_api::state::SimState) -> TargetInfo {
 
 fn resolve_party_token(st: &crate::lua_api::state::SimState, token: &str) -> Option<TargetInfo> {
     let idx = parse_party_slot(token)?;
-    if st.party_group_active {
-        st.party_members.get(idx).map(party_member_to_target_info)
-    } else {
-        None
+    st.party_members.get(idx).map(party_member_to_target_info)
+}
+
+fn resolve_enemy_token(st: &crate::lua_api::state::SimState, token: &str) -> Option<TargetInfo> {
+    let idx = token
+        .strip_prefix("enemy")
+        .and_then(|rest| rest.parse::<usize>().ok())
+        .and_then(|n| n.checked_sub(1))?;
+    if let Some(enemy) = st.enemy_pool.get(idx) {
+        return Some(enemy.clone());
+    }
+    (idx == 0).then(default_enemy_target_info)
+}
+
+fn default_enemy_target_info() -> TargetInfo {
+    TargetInfo {
+        unit_id: "target".to_string(),
+        name: "Hogger".to_string(),
+        class_index: 1,
+        level: 11,
+        health: 85_000,
+        health_max: 85_000,
+        power: 0,
+        power_max: 100,
+        power_type: 1,
+        power_type_name: "RAGE".to_string(),
+        is_player: false,
+        is_enemy: true,
+        guid: "Creature-0-0-0-0-448-000001".to_string(),
+        classification: "normal".to_string(),
+        creature_type: "Humanoid".to_string(),
+        reaction: 2,
     }
 }
 
@@ -119,6 +150,7 @@ fn push_target_changed(state: &mut LuaState) -> LuaResult<()> {
         name: "PLAYER_TARGET_CHANGED".to_string(),
         args: Vec::new(),
     });
+    fire_event_now(state, "PLAYER_TARGET_CHANGED", &[]);
     Ok(())
 }
 
@@ -127,7 +159,25 @@ fn push_focus_changed(state: &mut LuaState) -> LuaResult<()> {
         name: "PLAYER_FOCUS_CHANGED".to_string(),
         args: Vec::new(),
     });
+    fire_event_now(state, "PLAYER_FOCUS_CHANGED", &[]);
     Ok(())
+}
+
+fn fire_event_now(state: &mut LuaState, event_name: &str, args: &[rilua::Val]) {
+    for widget_id in get_event_listeners(state, event_name) {
+        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
+            continue;
+        };
+        let Ok(frame) = frame_ref(state, widget_id) else {
+            continue;
+        };
+        let event_name_val = create_string(state, event_name);
+        let mut call_args = Vec::with_capacity(args.len() + 2);
+        call_args.push(frame);
+        call_args.push(event_name_val);
+        call_args.extend_from_slice(args);
+        let _ = call_function_state(state, handler, &call_args);
+    }
 }
 
 // ── Globals ───────────────────────────────────────────────────────────────────
@@ -195,8 +245,11 @@ pub fn target_last_target(state: &mut LuaState) -> LuaResult<u32> {
 /// `TargetNearestEnemy()` — pick first member of `enemy_pool`. No-op when empty.
 pub fn target_nearest_enemy(state: &mut LuaState) -> LuaResult<u32> {
     let new_target = {
-        let st = borrow_state_mut(state)?;
-        st.enemy_pool.first().cloned()
+        let st = borrow_state(state)?;
+        st.enemy_pool
+            .first()
+            .cloned()
+            .or_else(|| Some(default_enemy_target_info()))
     };
     if new_target.is_none() {
         return Ok(0);
@@ -214,12 +267,8 @@ pub fn target_nearest_enemy(state: &mut LuaState) -> LuaResult<u32> {
 /// `TargetNearestFriend()` — pick first party member. No-op when party is empty.
 pub fn target_nearest_friend(state: &mut LuaState) -> LuaResult<u32> {
     let new_target = {
-        let st = borrow_state_mut(state)?;
-        if st.party_group_active {
-            st.party_members.first().map(party_member_to_target_info)
-        } else {
-            None
-        }
+        let st = borrow_state(state)?;
+        st.party_members.first().map(party_member_to_target_info)
     };
     if new_target.is_none() {
         return Ok(0);

@@ -110,16 +110,22 @@ fn unbound_key_is_silent_no_op() {
 }
 
 #[test]
-fn default_keybindings_are_seeded_on_init() {
+fn default_keybindings_dispatch_on_init() {
     let env = env();
-    // "B" should be bound to OPENALLBAGS by default.
-    let action: String = env
-        .eval(r#"return GetBindingAction("B")"#)
-        .unwrap_or_default();
-    assert_eq!(
-        action, "OPENALLBAGS",
-        "B should map to OPENALLBAGS by default"
-    );
+    env.exec(
+        r#"
+        _G.open_all_bags_fired = false
+        function ToggleAllBags()
+            _G.open_all_bags_fired = true
+        end
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("B", None).unwrap();
+
+    let fired: bool = env.eval("return _G.open_all_bags_fired").unwrap();
+    assert!(fired, "B should dispatch the default OPENALLBAGS binding");
 }
 
 // ── EditBox text input ────────────────────────────────────────────────────────

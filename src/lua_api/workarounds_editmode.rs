@@ -151,11 +151,12 @@ fn fix_action_bar_nan_size(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
         if not MainActionBar then return end
-        local w = MainActionBar:GetWidth()
-        if w == w then return end  -- not NaN, nothing to fix
-        -- Compute width from button containers only (12 slots, 45px each
-        -- with 2px gap = 47px stride). Last container offset + width.
-        local lastOx, lastW = 0, 45
+        local w, h = MainActionBar:GetSize()
+        if w == 566 and h == 52 then return end
+        -- Compute the outer frame bounds from the slot grid. The button
+        -- containers cover the 12x45 grid itself; the MainActionBar frame is
+        -- slightly wider/taller to include the action-bar frame art.
+        local lastOx = 0
         for i = 1, 12 do
             local c = _G["MainActionBarButtonContainer" .. i]
             if c and c:GetNumPoints() > 0 then
@@ -163,7 +164,7 @@ fn fix_action_bar_nan_size(env: &WowLuaEnv) {
                 if ox and ox == ox then lastOx = ox end
             end
         end
-        MainActionBar:SetSize(lastOx + lastW, lastW)
+        MainActionBar:SetSize(lastOx + 49, 52)
         pcall(EditModeManagerFrame.UpdateActionBarPositions,
               EditModeManagerFrame)
     "#,

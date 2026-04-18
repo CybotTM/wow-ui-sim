@@ -39,3 +39,24 @@ fn admin_set_store_frame_shown_defaults_to_true_when_called_with_no_arg() {
         "A_Admin.SetStoreFrameShown() with no arg should open the store",
     );
 }
+
+#[test]
+fn store_frame_set_shown_updates_the_shared_flag() {
+    let env = WowLuaEnv::new().expect("env");
+
+    let opened: bool = env
+        .eval("StoreFrame_SetShown(true); return StoreFrame_IsShown()")
+        .unwrap();
+    assert!(
+        opened,
+        "StoreFrame_SetShown(true) should mark the store as visible"
+    );
+
+    let closed: bool = env
+        .eval("StoreFrame_SetShown(false, 'StoreMicroButton'); return StoreFrame_IsShown()")
+        .unwrap();
+    assert!(
+        !closed,
+        "StoreFrame_SetShown(false, contextKey) should mark the store as hidden"
+    );
+}

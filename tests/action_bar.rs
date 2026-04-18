@@ -93,29 +93,31 @@ const ACTION_BAR_ADDONS: &[(&str, &str)] = &[
 ];
 
 /// Load addons, fire startup events, and apply post-startup fixups.
-fn env_with_action_bar() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
+fn env_with_action_bar() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
 
-    // Set addon_base_paths so runtime LoadAddOn() can find on-demand addons.
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    for (name, toc) in ACTION_BAR_ADDONS {
-        let toc_path = blizzard_toc(name, toc);
-        if !toc_path.exists() {
-            continue;
+        // Set addon_base_paths so runtime LoadAddOn() can find on-demand addons.
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![blizzard_ui_dir()];
         }
-        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("{name} failed: {e}");
-        }
-    }
 
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env
+        for (name, toc) in ACTION_BAR_ADDONS {
+            let toc_path = blizzard_toc(name, toc);
+            if !toc_path.exists() {
+                continue;
+            }
+            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                eprintln!("{name} failed: {e}");
+            }
+        }
+
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env
+    })
 }
 
 /// Replicate the startup event sequence from main.rs / app.rs.

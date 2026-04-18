@@ -250,6 +250,16 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "button:GetFontString():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);",
                 "do local fontString = __wow_ensure_chat_tab_font_string(button); if fontString then fontString:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b); end end",
             )
+    } else if chunk_name.ends_with("/MenuTemplates.lua") {
+        source
+            .replace(
+                "function DropdownTextMixin:UpdateText()\n\tself.Text:SetText(self:GetUpdateText());",
+                "local function __wow_ensure_dropdown_text_font_string(self)\n\tif self.Text then\n\t\treturn self.Text;\n\tend\n\tif not MenuVariants or type(MenuVariants.CreateFontString) ~= \"function\" then\n\t\treturn nil;\n\tend\n\tlocal ok, fontString = pcall(MenuVariants.CreateFontString, self);\n\tif not ok or fontString == nil then\n\t\treturn nil;\n\tend\n\tself.Text = fontString;\n\treturn fontString;\nend\n\nfunction DropdownTextMixin:UpdateText()\n\tlocal text = __wow_ensure_dropdown_text_font_string(self);\n\tif not text then\n\t\treturn;\n\tend\n\ttext:SetText(self:GetUpdateText());",
+            )
+            .replace(
+                "local newWidth = self.Text:GetUnboundedStringWidth();",
+                "local newWidth = text:GetUnboundedStringWidth();",
+            )
     } else if chunk_name.ends_with("TextToSpeechFrame.lua") {
         source.replace(
             "function TextToSpeechFrame_CheckLoad(self)",

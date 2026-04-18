@@ -3,7 +3,7 @@
 use crate::lua_api::LoaderEnv;
 
 use super::error::LoadError;
-use super::helpers::{escape_lua_string, lua_global_ref};
+use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref};
 
 /// Generate the setter portion of button texture Lua code (atlas or file path).
 fn generate_texture_setter_code(
@@ -53,6 +53,45 @@ fn generate_texture_global_snippet(
         .unwrap_or_default()
 }
 
+fn generate_texture_layout_snippet(
+    button_name: &str,
+    method: &str,
+    texture: &crate::xml::TextureXml,
+) -> String {
+    let getter = method.replace("Set", "Get");
+    let mut code = format!(
+        "do\n    local parent = {button_ref}\n    local tex = parent and parent:{getter}()\n    if tex then\n",
+        button_ref = lua_global_ref(button_name),
+        getter = getter,
+    );
+
+    if let Some(size) = &texture.size {
+        let (x, y) = get_size_values(size);
+        match (x, y) {
+            (Some(x), Some(y)) => code.push_str(&format!("        tex:SetSize({x}, {y})\n")),
+            (Some(x), None) => code.push_str(&format!("        tex:SetWidth({x})\n")),
+            (None, Some(y)) => code.push_str(&format!("        tex:SetHeight({y})\n")),
+            (None, None) => {}
+        }
+    }
+
+    if let Some(anchors) = &texture.anchors {
+        code.push_str("        tex:ClearAllPoints()\n");
+        code.push_str(&generate_set_point_code(
+            anchors,
+            "tex",
+            "parent",
+            button_name,
+            "parent",
+        ));
+    } else if texture.set_all_points == Some(true) {
+        code.push_str("        tex:SetAllPoints(true)\n");
+    }
+
+    code.push_str("    end\nend\n");
+    code
+}
+
 /// Generate the per-button field assignment for a button texture parentKey.
 ///
 /// WoW exposes custom parentKeys on button texture slots as fields on the button
@@ -85,6 +124,11 @@ fn generate_button_texture_code(
     texture: &crate::xml::TextureXml,
 ) -> String {
     let mut code = generate_texture_setter_code(button_name, method, texture);
+    code.push_str(&generate_texture_layout_snippet(
+        button_name,
+        method,
+        texture,
+    ));
     code.push_str(&generate_texture_parent_key_snippet(
         button_name,
         method,

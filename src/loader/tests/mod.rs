@@ -665,6 +665,42 @@ fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias
 }
 
 #[test]
+fn test_runtime_template_root_parent_key_registers_on_parent() {
+    let t = load_test_xml(
+        "runtime-root-parent-key",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <ScrollFrame name="RuntimeRootScrollTemplate" parentKey="ScrollContainer" mixin="RuntimeRootScrollMixin" virtual="true">
+                <ScrollChild>
+                    <Frame parentKey="Child"/>
+                </ScrollChild>
+                <Scripts>
+                    <OnLoad method="OnLoad"/>
+                </Scripts>
+            </ScrollFrame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            RuntimeRootScrollMixin = {
+                OnLoad = function(self)
+                    self.loaded = true
+                end,
+            }
+            local host = CreateFrame("Frame", "RuntimeRootHost", UIParent)
+            local scroll = CreateFrame("ScrollFrame", nil, host, "RuntimeRootScrollTemplate")
+            assert(host.ScrollContainer == scroll, "root template parentKey should register the runtime instance on its parent")
+            assert(scroll.Child ~= nil, "root template scroll child should still be created")
+            assert(scroll.loaded == true, "root template OnLoad should still run")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
     let t = load_test_xml(
         "runtime-anon-action-button-registry-ref",
@@ -800,6 +836,56 @@ fn test_runtime_template_parent_array_registers_instance_on_parent() {
             local child = CreateFrame("Frame", "RuntimeParentArrayChild", parent, "RuntimeParentArrayTemplate")
             assert(type(parent.Slots) == "table", "runtime template parentArray should create parent table")
             assert(parent.Slots[1] == child, "runtime template parentArray should register frame instance")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_anonymous_runtime_template_parent_array_registers_instance_on_parent() {
+    let t = load_test_xml(
+        "runtime-template-parent-array-anonymous",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeAnonymousParentArrayTemplate" virtual="true" parentArray="Slots"/>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local parent = CreateFrame("Frame", "RuntimeAnonymousParentArrayParent", UIParent)
+            local child = CreateFrame("Frame", nil, parent, "RuntimeAnonymousParentArrayTemplate")
+            assert(type(parent.Slots) == "table", "anonymous runtime template parentArray should create parent table")
+            assert(parent.Slots[1] == child, "anonymous runtime template parentArray should register frame instance")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_anonymous_runtime_scroll_template_parent_key_attaches_to_parent() {
+    let t = load_test_xml(
+        "runtime-scroll-parent-key-anonymous",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <ScrollFrame name="RuntimeScrollContainerTemplate" parentKey="ScrollContainer" virtual="true">
+                <ScrollChild>
+                    <Frame parentKey="Child"/>
+                </ScrollChild>
+            </ScrollFrame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local parent = CreateFrame("Frame", "RuntimeScrollParent", UIParent)
+            local scroll = CreateFrame("ScrollFrame", nil, parent, "RuntimeScrollContainerTemplate")
+            assert(parent.ScrollContainer == scroll, "anonymous runtime scroll template parentKey should attach the scroll frame on the parent")
+            assert(scroll.Child ~= nil, "anonymous runtime scroll template should create and wire its scroll child")
         "#,
         )
         .unwrap();

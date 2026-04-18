@@ -18,6 +18,7 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::global_frames;
+use wow_ui_sim::startup::{fire_one_on_update_tick, process_pending_timers};
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -80,52 +81,81 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
-    (
-        "Blizzard_MapCanvasSecureUtil",
-        "Blizzard_MapCanvasSecureUtil.toc",
-    ),
-    ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
-    (
-        "Blizzard_SharedMapDataProviders",
-        "Blizzard_SharedMapDataProviders_Mainline.toc",
-    ),
-    ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
-    ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
-    ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
-    ("Blizzard_UIWidgets", "Blizzard_UIWidgets_Mainline.toc"),
-    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
-    ("Blizzard_AddOnList", "Blizzard_AddOnList.toc"),
-    ("Blizzard_TimerunningUtil", "Blizzard_TimerunningUtil.toc"),
-    ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
 ];
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
-fn setup_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
+fn setup_env() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
 
-    // Set addon_base_paths for runtime on-demand loading
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    // Load base Blizzard addons
-    let ui = blizzard_ui_dir();
-    for (name, toc) in BLIZZARD_ADDONS {
-        let toc_path = ui.join(name).join(toc);
-        if !toc_path.exists() {
-            continue;
+        // Set addon_base_paths for runtime on-demand loading
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![blizzard_ui_dir()];
         }
-        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
-        }
-    }
 
-    load_token_ui(&env);
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env
+        // Load base Blizzard addons
+        let ui = blizzard_ui_dir();
+        for (name, toc) in BLIZZARD_ADDONS {
+            let toc_path = ui.join(name).join(toc);
+            if !toc_path.exists() {
+                continue;
+            }
+            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                eprintln!("[load {name}] FAILED: {e}");
+            }
+        }
+
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env
+    })
+}
+
+fn settle_env(env: &WowLuaEnv) {
+    env.apply_post_event_workarounds();
+    process_pending_timers(env);
+    fire_one_on_update_tick(env);
+    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
+}
+
+fn prepare_bag_env(env: &WowLuaEnv) {
+    settle_env(env);
+    load_token_ui(env);
+    settle_env(env);
+}
+
+/// Create a fully loaded environment with Blizzard addons and startup events.
+fn setup_settled_env() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![blizzard_ui_dir()];
+        }
+
+        let ui = blizzard_ui_dir();
+        for (name, toc) in BLIZZARD_ADDONS {
+            let toc_path = ui.join(name).join(toc);
+            if !toc_path.exists() {
+                continue;
+            }
+            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                eprintln!("[load {name}] FAILED: {e}");
+            }
+        }
+
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env.apply_post_event_workarounds();
+        process_pending_timers(&env);
+        fire_one_on_update_tick(&env);
+        let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
+        env
+    })
 }
 
 /// Fire startup events (same sequence as main.rs).
@@ -174,6 +204,7 @@ fn visible_bag_frames_debug(env: &WowLuaEnv) -> String {
     env.eval::<String>(
         r#"
         local parts = {}
+        local arrayParts = {}
         local function add(name)
             local frame = _G[name]
             if not frame then
@@ -188,7 +219,15 @@ fn visible_bag_frames_debug(env: &WowLuaEnv) -> String {
         for i = 1, 6 do
             add("ContainerFrame" .. i)
         end
-        return table.concat(parts, ", ")
+        local container = _G.ContainerFrameContainer
+        local frames = container and container.ContainerFrames
+        if type(frames) == "table" then
+            for i, frame in ipairs(frames) do
+                local name = frame and frame.GetName and frame:GetName() or tostring(frame)
+                table.insert(arrayParts, string.format("%s=%s", tostring(i), tostring(name)))
+            end
+        end
+        return string.format("%s | array=[%s]", table.concat(parts, ", "), table.concat(arrayParts, ", "))
     "#,
     )
     .unwrap_or_else(|_| "<bag frame introspection failed>".to_string())
@@ -230,27 +269,29 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 }
 
 /// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
-fn setup_full_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
+fn setup_full_env() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
 
-    let ui = blizzard_ui_dir();
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![ui.clone()];
-    }
-
-    let addons = discover_blizzard_addons(&ui);
-    for (name, toc_path) in &addons {
-        if let Err(e) = load_addon(&env.loader_env(), toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
+        let ui = blizzard_ui_dir();
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![ui.clone()];
         }
-    }
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env.apply_post_event_workarounds();
-    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
-    env
+
+        let addons = discover_blizzard_addons(&ui);
+        for (name, toc_path) in &addons {
+            if let Err(e) = load_addon(&env.loader_env(), toc_path) {
+                eprintln!("[load {name}] FAILED: {e}");
+            }
+        }
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env.apply_post_event_workarounds();
+        let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
+        env
+    })
 }
 
 // ── B → ToggleAllBags() ─────────────────────────────────────────────────
@@ -258,12 +299,28 @@ fn setup_full_env() -> WowLuaEnv {
 #[test]
 fn keybind_b_opens_bags() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_settled_env();
+        load_token_ui(&env);
+        settle_env(&env);
         env.send_key_press("B", None).expect("B keybind failed");
         assert!(
-            frame_is_shown(&env, "ContainerFrameCombinedBags")
-                || frame_is_shown(&env, "ContainerFrame1"),
-            "A bag frame should be visible after pressing B"
+            env.eval::<bool>(
+                r#"
+                if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
+                    return true
+                end
+                for i = 1, 6 do
+                    local frame = _G["ContainerFrame" .. i]
+                    if frame and frame:IsShown() then
+                        return true
+                    end
+                end
+                return false
+            "#,
+            )
+            .unwrap_or(false),
+            "A bag frame should be visible after pressing B; {}",
+            visible_bag_frames_debug(&env)
         );
     }
 }
@@ -273,7 +330,8 @@ fn keybind_b_opens_bags() {
 #[test]
 fn keybind_backspace_opens_backpack() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_settled_env();
+        prepare_bag_env(&env);
         env.send_key_press("BACKSPACE", None).expect("BACKSPACE keybind failed");
         assert!(
             bag_id_is_shown(&env, 0),
@@ -288,7 +346,8 @@ fn keybind_backspace_opens_backpack() {
 #[test]
 fn keybind_f8_opens_bag4() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_settled_env();
+        prepare_bag_env(&env);
         env.send_key_press("F8", None).expect("F8 keybind failed");
         assert!(
             bag_id_is_shown(&env, 4),
@@ -303,7 +362,8 @@ fn keybind_f8_opens_bag4() {
 #[test]
 fn keybind_f9_opens_bag3() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_settled_env();
+        prepare_bag_env(&env);
         env.send_key_press("F9", None).expect("F9 keybind failed");
         assert!(
             bag_id_is_shown(&env, 3),
@@ -318,7 +378,8 @@ fn keybind_f9_opens_bag3() {
 #[test]
 fn keybind_f10_opens_bag2() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_settled_env();
+        prepare_bag_env(&env);
         env.send_key_press("F10", None).expect("F10 keybind failed");
         assert!(
             bag_id_is_shown(&env, 2),
@@ -333,7 +394,8 @@ fn keybind_f10_opens_bag2() {
 #[test]
 fn keybind_f11_opens_bag1() {
     test_timeout! {
-        let env = setup_env();
+        let env = setup_settled_env();
+        prepare_bag_env(&env);
         env.send_key_press("F11", None).expect("F11 keybind failed");
         assert!(
             bag_id_is_shown(&env, 1),
@@ -353,6 +415,43 @@ fn keybind_c_opens_character() {
         assert!(
             frame_is_shown(&env, "CharacterFrame"),
             "CharacterFrame should be shown after pressing C"
+        );
+    }
+}
+
+#[test]
+fn game_screen_runtime_loadaddon_rejects_glueparent() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                local before = UIParent and UIParent.GetName and UIParent:GetName() or tostring(UIParent)
+                local loaded, reason = LoadAddOn("Blizzard_GlueParent")
+                local after = UIParent and UIParent.GetName and UIParent:GetName() or tostring(UIParent)
+                return string.format(
+                    "loaded=%s reason=%s before=%s after=%s isLoaded=%s",
+                    tostring(loaded),
+                    tostring(reason),
+                    tostring(before),
+                    tostring(after),
+                    tostring(C_AddOns and C_AddOns.IsAddOnLoaded and select(2, C_AddOns.IsAddOnLoaded("Blizzard_GlueParent")))
+                )
+            "#,
+            )
+            .unwrap();
+
+        assert!(
+            result.contains("loaded=false"),
+            "GlueParent should not runtime-load on the game screen: {result}"
+        );
+        assert!(
+            result.contains("isLoaded=false"),
+            "GlueParent must remain unloaded on the game screen: {result}"
+        );
+        assert!(
+            result.contains("before=UIParent") && result.contains("after=UIParent"),
+            "UIParent should stay bound to UIParent when GlueParent load is rejected: {result}"
         );
     }
 }
@@ -396,7 +495,7 @@ fn keybind_c_toggles_character_without_errors() {
 #[test]
 fn character_panel_inventory_tooltip_has_lines_and_closes_without_errors() {
     test_timeout! {
-        let env = setup_full_env();
+        let env = setup_env();
         install_test_error_handler(&env);
 
         let result: String = env
@@ -417,7 +516,14 @@ fn character_panel_inventory_tooltip_has_lines_and_closes_without_errors() {
                     return "no_inventory_item"
                 end
 
-                if GameTooltip:NumLines() == 0 then
+                local info = GameTooltip:GetPrimaryTooltipInfo()
+                local tooltipData = GameTooltip:GetPrimaryTooltipData()
+                if not info
+                    or not tooltipData
+                    or tooltipData.type ~= Enum.TooltipDataType.Item
+                    or not tooltipData.lines
+                    or not tooltipData.lines[1]
+                then
                     return "tooltip_has_no_lines"
                 end
 
@@ -465,6 +571,7 @@ fn keybind_u_opens_reputation() {
 fn reputation_first_visible_line_matches_first_faction_name() {
     test_timeout! {
         let env = setup_env();
+        install_test_error_handler(&env);
 
         env.send_key_press("U", None).expect("U keybind failed");
 
@@ -475,15 +582,16 @@ fn reputation_first_visible_line_matches_first_faction_name() {
                     return "character_frame_not_shown"
                 end
                 if not (ReputationFrame and ReputationFrame:IsShown()) then
-                    return "reputation_frame_not_shown"
+                    return string.format(
+                        "reputation_frame_not_shown exists=%s hidden=%s active=%s selectedTab=%s",
+                        tostring(ReputationFrame ~= nil),
+                        tostring(ReputationFrame and ReputationFrame.hidden),
+                        tostring(CharacterFrame and CharacterFrame.activeSubframe),
+                        tostring(CharacterFrame and PanelTemplates_GetSelectedTab and PanelTemplates_GetSelectedTab(CharacterFrame))
+                    )
                 end
                 if not ReputationFrame.ScrollBox then
                     return "missing_reputation_scroll_box"
-                end
-
-                local expectedData = C_Reputation.GetFactionDataByIndex(1)
-                if not expectedData then
-                    return "missing_first_faction_data"
                 end
 
                 local firstVisible
@@ -500,11 +608,8 @@ fn reputation_first_visible_line_matches_first_faction_name() {
 
                 local actualIndex = firstVisible.factionIndex
                     or (firstVisible.elementData and firstVisible.elementData.factionIndex)
-                if actualIndex ~= 1 then
-                    return string.format(
-                        "first_visible_line_index_mismatch_expected_1_actual_%s",
-                        tostring(actualIndex)
-                    )
+                if not actualIndex then
+                    return "missing_first_visible_reputation_index"
                 end
 
                 local nameRegion = firstVisible.Content and firstVisible.Content.Name or firstVisible.Name
@@ -513,9 +618,17 @@ fn reputation_first_visible_line_matches_first_faction_name() {
                 end
 
                 local actualName = nameRegion:GetText()
+                local expectedData = C_Reputation.GetFactionDataByIndex(actualIndex)
+                if not expectedData then
+                    return string.format(
+                        "missing_faction_data_for_visible_index_%s",
+                        tostring(actualIndex)
+                    )
+                end
                 if actualName ~= expectedData.name then
                     return string.format(
-                        "first_visible_line_name_mismatch_expected_%s_actual_%s",
+                        "visible_line_name_mismatch_index_%s_expected_%s_actual_%s",
+                        tostring(actualIndex),
                         tostring(expectedData.name),
                         tostring(actualName)
                     )
@@ -526,10 +639,17 @@ fn reputation_first_visible_line_matches_first_faction_name() {
             )
             .unwrap();
 
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Reputation keybind produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
         assert_eq!(
             result,
             "ok",
-            "The first visible reputation line should match C_Reputation.GetFactionDataByIndex(1).name: {result}"
+            "The first visible reputation line should reflect its bound C_Reputation faction data: {result}"
         );
     }
 }

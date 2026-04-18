@@ -10,6 +10,10 @@ use rilua::{LuaResult, Val};
 const CURRENCY_INFO_METHODS: &[(&'static str, rilua::RustFn)] = &[
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
+    (
+        "GetBackpackCurrencyInfo",
+        c_currency_get_backpack_currency_info,
+    ),
     ("GetCoinTextureString", c_currency_get_coin_texture_string),
     ("GetCurrencyInfo", c_currency_get_currency_info),
     (
@@ -73,6 +77,12 @@ fn c_currency_get_coin_texture_string(state: &mut LuaState) -> LuaResult<u32> {
     let amount = i64::from_stack(state, 1)?;
     let amount = create_string(state, &format!("{amount}"));
     state.push(amount);
+    Ok(1)
+}
+
+fn c_currency_get_backpack_currency_info(state: &mut LuaState) -> LuaResult<u32> {
+    let _index = i32::from_stack(state, 1)?;
+    state.push(Val::Nil);
     Ok(1)
 }
 

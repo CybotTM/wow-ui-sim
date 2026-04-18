@@ -11,6 +11,57 @@ mod common;
 use common::panel_fixtures::{
     clear_recorded_lua_errors, player_spells_panel_debug_snapshot, recorded_lua_errors, setup_env,
 };
+use wow_ui_sim::startup::prewarm_player_spells_spellbook;
+
+#[test]
+fn startup_prewarm_loads_blizzard_player_spells_and_keeps_it_hidden() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__spellbook_prewarm_errors");
+        clear_recorded_lua_errors(&env);
+
+        let unloaded_before: bool = env
+            .eval(r#"return C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")"#)
+            .expect("initial addon load probe should return");
+        assert!(
+            !unloaded_before,
+            "Test harness should start with Blizzard_PlayerSpells unloaded"
+        );
+
+        let warmed = prewarm_player_spells_spellbook(&env);
+        assert!(warmed, "SpellBook prewarm should run on the game screen");
+
+        let loaded_after: bool = env
+            .eval(r#"return C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")"#)
+            .expect("addon load probe after prewarm should return");
+        assert!(loaded_after, "SpellBook prewarm should demand-load Blizzard_PlayerSpells");
+
+        let hidden_after: bool = env
+            .eval(r#"return PlayerSpellsFrame ~= nil and not PlayerSpellsFrame:IsShown()"#)
+            .expect("panel visibility probe after prewarm should return");
+        assert!(
+            hidden_after,
+            "SpellBook prewarm should leave PlayerSpellsFrame hidden"
+        );
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__spellbook_prewarm_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "SpellBook prewarm produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "SpellBook prewarm produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n")
+        );
+    }
+}
 
 #[test]
 fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {

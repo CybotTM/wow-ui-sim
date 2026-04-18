@@ -50,27 +50,29 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 }
 
 /// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
-fn setup_full_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
+fn setup_full_env() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
 
-    let ui = blizzard_ui_dir();
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![ui.clone()];
-    }
-
-    let addons = discover_blizzard_addons(&ui);
-    for (name, toc_path) in &addons {
-        if let Err(e) = load_addon(&env.loader_env(), toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
+        let ui = blizzard_ui_dir();
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![ui.clone()];
         }
-    }
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env.apply_post_event_workarounds();
-    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
-    env
+
+        let addons = discover_blizzard_addons(&ui);
+        for (name, toc_path) in &addons {
+            if let Err(e) = load_addon(&env.loader_env(), toc_path) {
+                eprintln!("[load {name}] FAILED: {e}");
+            }
+        }
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env.apply_post_event_workarounds();
+        let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
+        env
+    })
 }
 
 // ── Target frame visibility tests (full addon load including Blizzard_UnitFrame) ──

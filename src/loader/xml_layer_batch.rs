@@ -284,17 +284,29 @@ fn append_parent_array_entry(
     let Val::Table(array_ref) = array else {
         return Ok(());
     };
-    let next_index = state
-        .gc
-        .tables
-        .get(array_ref)
-        .map(|table| table.array_slice().len() + 1)
-        .unwrap_or(1);
+    let next_index = next_table_array_index(state, array_ref);
     if let Some(table) = state.gc.tables.get_mut(array_ref) {
         let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
     }
     state.gc.barrier_back(array_ref);
     Ok(())
+}
+
+fn next_table_array_index(
+    state: &rilua::vm::state::LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> i64 {
+    let mut index = 1_i64;
+    while state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| !matches!(table.get_int(index), rilua::Val::Nil))
+        .unwrap_or(false)
+    {
+        index += 1;
+    }
+    index
 }
 
 fn apply_fontstring_syncs(env: &LoaderEnv<'_>, syncs: &[TextSync]) {

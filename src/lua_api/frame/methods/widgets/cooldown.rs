@@ -1,7 +1,10 @@
 //! Cooldown widget methods.
 
 use super::shared::{animation_group_id_for_frame, opt_string, val_to_bool, val_to_f64};
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack, frame_ref};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, frame_id_from_stack, frame_ref,
+    sync_child_to_rilua, table_get,
+};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -29,6 +32,73 @@ fn clear_cooldown_timing(frame: &mut crate::widget::Frame) {
     frame.cooldown_duration = 0.0;
     frame.cooldown_display_duration_ms = 0.0;
     frame.cooldown_mod_rate = 1.0;
+}
+
+fn font_object_from_arg(state: &mut LuaState, arg_index: i32) -> Option<Val> {
+    match stack_val(state, arg_index) {
+        table @ Val::Table(_) => Some(table),
+        Val::Str(_) => {
+            let name = opt_string(state, arg_index)?;
+            Some(table_get(state, Val::Table(state.global), &name))
+        }
+        _ => None,
+    }
+}
+
+fn font_field_string(
+    state: &mut LuaState,
+    table: Val,
+    primary: &str,
+    fallback: &str,
+) -> Option<String> {
+    let primary_value = table_get(state, table, primary);
+    let value = match primary_value {
+        Val::Str(_) => primary_value,
+        _ => table_get(state, table, fallback),
+    };
+    crate::lua_api::methods::val_to_string(state, value)
+}
+
+fn font_field_number(
+    state: &mut LuaState,
+    table: Val,
+    primary: &str,
+    fallback: &str,
+) -> Option<f64> {
+    match table_get(state, table, primary) {
+        Val::Num(value) => Some(value),
+        _ => match table_get(state, table, fallback) {
+            Val::Num(value) => Some(value),
+            _ => None,
+        },
+    }
+}
+
+fn ensure_countdown_font_string(state: &mut LuaState, parent_id: u64) -> Option<u64> {
+    if let Ok(sim) = borrow_state(state)
+        && let Some(existing) = sim
+            .widgets
+            .get(parent_id)
+            .and_then(|frame| frame.cooldown_countdown_font_string_id)
+    {
+        return Some(existing);
+    }
+
+    let child_id = {
+        let mut sim = borrow_state_mut(state).ok()?;
+        let mut child =
+            crate::widget::Frame::new(crate::widget::WidgetType::FontString, None, Some(parent_id));
+        child.object_type_name = Some("FontString".to_string());
+        let child_id = child.id;
+        sim.widgets.register(child);
+        sim.widgets.add_child(parent_id, child_id);
+        if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+            parent.cooldown_countdown_font_string_id = Some(child_id);
+        }
+        child_id
+    };
+    let _ = sync_child_to_rilua(state, parent_id, "Countdown", child_id);
+    Some(child_id)
 }
 
 pub(super) fn set_cooldown(state: &mut LuaState) -> LuaResult<u32> {
@@ -391,29 +461,28 @@ pub(super) fn set_countdown_font(state: &mut LuaState) -> LuaResult<u32> {
     let Some(font_name) = opt_string(state, 2) else {
         return Ok(0);
     };
-    let mut sim = borrow_state_mut(state)?;
-    let child_id = sim
-        .widgets
-        .get(id)
-        .and_then(|f| f.cooldown_countdown_font_string_id);
+    let font_object = font_object_from_arg(state, 2);
+    let child_id = ensure_countdown_font_string(state, id);
     if let Some(child_id) = child_id {
+        let font_path = font_object
+            .clone()
+            .and_then(|font| font_field_string(state, font, "__font", "__fontPath"));
+        let font_height =
+            font_object.and_then(|font| font_field_number(state, font, "__height", "__fontHeight"));
+        let mut sim = borrow_state_mut(state)?;
         if let Some(child) = sim.widgets.get_mut_visual(child_id) {
-            child.font = Some(font_name);
+            child.font = Some(font_path.unwrap_or(font_name));
+            if let Some(height) = font_height {
+                child.font_size = height as f32;
+            }
         }
     }
-    // TODO: create countdown FontString child if missing (requires sync_child_to_rilua)
     Ok(0)
 }
 
 pub(super) fn get_countdown_font_string(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let child_id = {
-        let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|f| f.cooldown_countdown_font_string_id)
-    };
-    // TODO: create the countdown child if missing (needs sync_child_to_rilua)
+    let child_id = ensure_countdown_font_string(state, id);
     match child_id {
         Some(cid) => {
             let val = frame_ref(state, cid)?;
@@ -426,17 +495,56 @@ pub(super) fn get_countdown_font_string(state: &mut LuaState) -> LuaResult<u32> 
     }
 }
 
-pub(super) fn set_from_duration_object(_state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: parse duration object (Table/UserData with GetStartTime/GetTotalDuration/GetModRate/IsZero)
+pub(super) fn set_from_duration_object(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let duration_object = stack_val(state, 2);
+    let zero = {
+        let is_zero = table_get(state, duration_object, "IsZero");
+        matches!(
+            call_function_state(state, is_zero, &[duration_object]),
+            Ok(Val::Bool(true))
+        )
+    };
+    if zero {
+        if let Some(frame) = borrow_state_mut(state)?.widgets.get_mut_visual(id) {
+            clear_cooldown_timing(frame);
+        }
+        return Ok(0);
+    }
+
+    let start = table_get(state, duration_object, "GetStartTime");
+    let duration = table_get(state, duration_object, "GetTotalDuration");
+    let mod_rate = table_get(state, duration_object, "GetModRate");
+    let start = match call_function_state(state, start, &[duration_object]) {
+        Ok(Val::Num(value)) => value,
+        _ => 0.0,
+    };
+    let duration = match call_function_state(state, duration, &[duration_object]) {
+        Ok(Val::Num(value)) => value,
+        _ => 0.0,
+    };
+    let mod_rate = match call_function_state(state, mod_rate, &[duration_object]) {
+        Ok(Val::Num(value)) => value,
+        _ => 1.0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return Ok(0);
+    };
+    apply_cooldown_state(frame, start, duration, mod_rate);
     Ok(0)
 }
 
 pub(super) fn set_edge_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let path = opt_string(state, 2);
+    let tint = super::shared::rgba_from_stack(state, 3);
     let mut sim = borrow_state_mut(state)?;
     if let Some(f) = sim.widgets.get_mut_visual(id) {
         f.cooldown_edge_texture = path;
+        if let Some(tint) = tint {
+            f.cooldown_edge_color = tint;
+        }
     }
     Ok(0)
 }

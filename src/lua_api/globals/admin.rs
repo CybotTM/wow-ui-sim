@@ -615,15 +615,25 @@ fn set_party_size(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn set_party_member(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::Event;
+
     let idx = i32::from_stack(state, 1)?;
     let name = String::from_stack(state, 2)?;
     let class_index = i32::from_stack(state, 3)?;
     let level = i32::from_stack(state, 4)?;
     let mut st = borrow_state_mut(state)?;
+    let mut changed = false;
     if let Some(member) = st.party_members.get_mut((idx - 1) as usize) {
+        changed = member.name != name || member.class_index != class_index || member.level != level;
         member.name = name;
         member.class_index = class_index;
         member.level = level;
+    }
+    if changed {
+        st.events.push(Event {
+            name: "GROUP_ROSTER_UPDATE".to_string(),
+            args: Vec::new(),
+        });
     }
     Ok(0)
 }

@@ -41,11 +41,13 @@ pub(super) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
         &[
             ("GetContainerNumSlots", c_container_get_num_slots),
             ("GetContainerNumFreeSlots", c_container_get_num_free_slots),
+            ("GetBagSlotFlag", c_container_get_bag_slot_flag),
             ("GetContainerItemInfo", c_container_get_item_info),
             ("GetContainerItemID", c_container_get_item_id),
             ("GetContainerItemLink", c_container_get_item_link),
             ("ContainerIDToInventoryID", c_container_id_to_inventory_id),
             ("GetBagName", c_container_get_bag_name),
+            ("SetBagSlotFlag", c_container_set_bag_slot_flag),
             (
                 "GetContainerItemPurchaseInfo",
                 c_container_get_item_purchase_info,
@@ -81,7 +83,10 @@ fn register_container_methods(
 
 fn c_container_get_num_slots(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
-    let slots = if bag == 0 { 16.0 } else { 0.0 };
+    let slots = match bag {
+        0..=4 => 16.0,
+        _ => 0.0,
+    };
     state.push(Val::Num(slots));
     Ok(1)
 }
@@ -89,10 +94,9 @@ fn c_container_get_num_slots(state: &mut LuaState) -> LuaResult<u32> {
 fn c_container_get_num_free_slots(state: &mut LuaState) -> LuaResult<u32> {
     let bag = i32::from_stack(state, 1)?;
     let occupied = borrow_state(state)?.bag_occupied_slots(bag) as f64;
-    let free = if bag == 0 {
-        (16.0 - occupied).max(0.0)
-    } else {
-        0.0
+    let free = match bag {
+        0..=4 => (16.0 - occupied).max(0.0),
+        _ => 0.0,
     };
     state.push(Val::Num(free));
     Ok(1)
@@ -156,6 +160,34 @@ fn c_container_get_bag_name(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
     }
     Ok(1)
+}
+
+fn bag_slot_flags_storage(state: &mut LuaState) -> Val {
+    global_table(state, "__bag_slot_flags")
+}
+
+fn bag_slot_flag_key(bag: i32, flag: i32) -> String {
+    format!("{bag}:{flag}")
+}
+
+fn c_container_get_bag_slot_flag(state: &mut LuaState) -> LuaResult<u32> {
+    let bag = i32::from_stack(state, 1)?;
+    let flag = i32::from_stack(state, 2)?;
+    let storage = bag_slot_flags_storage(state);
+    let key = bag_slot_flag_key(bag, flag);
+    let value = crate::lua_api::methods::table_get(state, storage, &key);
+    state.push(Val::Bool(matches!(value, Val::Bool(true))));
+    Ok(1)
+}
+
+fn c_container_set_bag_slot_flag(state: &mut LuaState) -> LuaResult<u32> {
+    let bag = i32::from_stack(state, 1)?;
+    let flag = i32::from_stack(state, 2)?;
+    let value = matches!(stack_val(state, 3), Val::Bool(true));
+    let storage = bag_slot_flags_storage(state);
+    let key = bag_slot_flag_key(bag, flag);
+    table_set(state, storage, &key, Val::Bool(value));
+    Ok(0)
 }
 
 fn c_container_get_item_purchase_info(state: &mut LuaState) -> LuaResult<u32> {

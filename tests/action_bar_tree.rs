@@ -29,30 +29,131 @@ mod common;
 
 use std::path::PathBuf;
 
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::settle_headless_startup;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
-fn load_settled_game_ui() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+fn action_bar_toc(addon: &str, toc_name: &str) -> PathBuf {
+    blizzard_ui_dir().join(addon).join(toc_name)
+}
 
-    let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
-    for (name, toc_path) in &addons {
-        load_addon(&env.loader_env(), toc_path)
-            .unwrap_or_else(|err| panic!("Failed to load Blizzard addon {name}: {err}"));
+fn action_bar_addons() -> &'static [(&'static str, &'static str)] {
+    &[
+        ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
+        ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
+        ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
+        (
+            "Blizzard_SharedXMLGame",
+            "Blizzard_SharedXMLGame_Mainline.toc",
+        ),
+        (
+            "Blizzard_UIPanelTemplates",
+            "Blizzard_UIPanelTemplates_Mainline.toc",
+        ),
+        (
+            "Blizzard_FrameXMLBase",
+            "Blizzard_FrameXMLBase_Mainline.toc",
+        ),
+        ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
+        ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
+        ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
+        (
+            "Blizzard_AccessibilityTemplates",
+            "Blizzard_AccessibilityTemplates.toc",
+        ),
+        ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
+        ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
+        ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
+        ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
+        ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
+        ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
+        ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+        ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
+        ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
+        ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
+        ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
+        (
+            "Blizzard_UIParentPanelManager",
+            "Blizzard_UIParentPanelManager_Mainline.toc",
+        ),
+        (
+            "Blizzard_Settings_Shared",
+            "Blizzard_Settings_Shared_Mainline.toc",
+        ),
+        (
+            "Blizzard_SettingsDefinitions_Shared",
+            "Blizzard_SettingsDefinitions_Shared.toc",
+        ),
+        (
+            "Blizzard_SettingsDefinitions_Frame",
+            "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+        ),
+        (
+            "Blizzard_FrameXMLUtil",
+            "Blizzard_FrameXMLUtil_Mainline.toc",
+        ),
+        ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
+        ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
+        ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
+        (
+            "Blizzard_UIPanels_Game",
+            "Blizzard_UIPanels_Game_Mainline.toc",
+        ),
+        (
+            "Blizzard_MapCanvasSecureUtil",
+            "Blizzard_MapCanvasSecureUtil.toc",
+        ),
+        ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
+        (
+            "Blizzard_SharedMapDataProviders",
+            "Blizzard_SharedMapDataProviders_Mainline.toc",
+        ),
+        ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
+        ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
+    ]
+}
+
+fn fire_startup_events(env: &WowLuaEnv) {
+    let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")]);
+    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
+        let _ = env.fire_event(event);
     }
+    let _ = env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[rilua::Val::Bool(true), rilua::Val::Bool(false)],
+    );
+    let _ = env.fire_edit_mode_layouts_updated();
+    let _ = env.fire_event("ACTIONBAR_SHOWGRID");
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
+        let _ = env.fire_event(event);
+    }
+}
 
-    env.apply_post_load_workarounds();
-    settle_headless_startup(&env);
-    env
+fn load_settled_game_ui() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+        env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+
+        for (name, toc) in action_bar_addons() {
+            let toc_path = action_bar_toc(name, toc);
+            if toc_path.exists() {
+                load_addon(&env.loader_env(), &toc_path)
+                    .unwrap_or_else(|err| panic!("Failed to load Blizzard addon {name}: {err}"));
+            }
+        }
+
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env
+    })
 }
 
 #[test]

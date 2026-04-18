@@ -7,6 +7,8 @@ use std::time::Instant;
 use crate::loader::LoadTiming;
 use crate::loader::error::LoadError;
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::methods::{frame_ref, table_get};
+use rilua::Val;
 
 pub(super) struct SetupFrame<'a> {
     pub(super) widget_type: &'a str,
@@ -43,6 +45,7 @@ pub(super) fn setup_frame(
                 env,
                 setup.name,
                 setup.frame,
+                setup.inherits,
                 setup.parent,
                 &error,
             )? => {}
@@ -51,6 +54,7 @@ pub(super) fn setup_frame(
     timing.frame_exec_lua_time += exec_start.elapsed();
     let props_start = Instant::now();
     let frame_id = created_frame_id(env, setup.name)?;
+    ensure_parent_refs_registered(env, &setup, frame_id)?;
     apply_xml_properties_direct(env, frame_id, setup.frame, setup.inherits, setup.parent);
     apply_intrinsic_property(env, setup.intrinsic_base, frame_id);
     timing.frame_apply_props_time += props_start.elapsed();
@@ -67,10 +71,69 @@ pub(super) fn created_frame_id(env: &LoaderEnv<'_>, name: &str) -> Result<u64, L
         .ok_or_else(|| LoadError::Lua(format!("Failed to locate created frame {name}")))
 }
 
+fn ensure_parent_refs_registered(
+    env: &LoaderEnv<'_>,
+    setup: &SetupFrame<'_>,
+    frame_id: u64,
+) -> Result<(), LoadError> {
+    let parent_key = resolve_inherited_parent_key(setup.frame, setup.inherits);
+    let parent_array = resolve_inherited_parent_array(setup.frame, setup.inherits);
+    if parent_key.is_none() && parent_array.is_none() {
+        return Ok(());
+    }
+
+    env.with_state(|state| {
+        let parent_id = crate::lua_api::methods::borrow_state(state)?
+            .widgets
+            .get_id_by_name(setup.parent)
+            .ok_or_else(|| crate::Error::Other(format!("missing parent '{}'", setup.parent)))?;
+        if let Some(parent_key) = parent_key.as_deref() {
+            crate::lua_api::globals::template::assign_parent_key(
+                state, parent_id, parent_key, frame_id,
+            )
+            .map_err(|error| crate::Error::Other(error.to_string()))?;
+        }
+        if let Some(parent_array) = parent_array.as_deref()
+            && !parent_array_contains_child(state, parent_id, parent_array, frame_id)?
+        {
+            crate::lua_api::globals::create_frame::append_parent_array_entry(
+                state,
+                parent_id,
+                parent_array,
+                frame_id,
+            );
+        }
+        Ok::<(), crate::Error>(())
+    })
+    .map_err(|error| LoadError::Lua(error.to_string()))
+}
+
+fn parent_array_contains_child(
+    state: &mut rilua::vm::state::LuaState,
+    parent_id: u64,
+    key: &str,
+    child_id: u64,
+) -> Result<bool, crate::Error> {
+    let parent =
+        frame_ref(state, parent_id).map_err(|error| crate::Error::Other(error.to_string()))?;
+    let child =
+        frame_ref(state, child_id).map_err(|error| crate::Error::Other(error.to_string()))?;
+    let Val::Table(array_ref) = table_get(state, parent, key) else {
+        return Ok(false);
+    };
+    Ok(state
+        .gc
+        .tables
+        .get(array_ref)
+        .map(|table| table.array_slice().contains(&child))
+        .unwrap_or(false))
+}
+
 fn recover_frame_after_loader_vm_error(
     env: &LoaderEnv<'_>,
     name: &str,
     frame: &crate::xml::FrameXml,
+    inherits: &str,
     parent: &str,
     error: &LoadError,
 ) -> Result<bool, LoadError> {
@@ -82,12 +145,17 @@ fn recover_frame_after_loader_vm_error(
     if !frame_exists {
         return Ok(false);
     }
-    let parent_key = frame.parent_key.as_deref();
-    let parent_array = frame.parent_array.as_deref();
+    let parent_key = resolve_inherited_parent_key(frame, inherits);
+    let parent_array = resolve_inherited_parent_array(frame, inherits);
     if parent_key.is_none() && parent_array.is_none() {
         return Ok(false);
     }
-    let repair = build_parent_link_repair_script(parent, name, parent_key, parent_array);
+    let repair = build_parent_link_repair_script(
+        parent,
+        name,
+        parent_key.as_deref(),
+        parent_array.as_deref(),
+    );
     env.exec(&repair).map_err(|repair_error| {
         LoadError::Lua(format!(
             "Recovered frame {name} exists but failed to repair parent links after loader VM error: {repair_error}"
@@ -121,6 +189,30 @@ fn build_parent_link_repair_script(
     }
     repair.push_str("end\n");
     repair
+}
+
+fn resolve_inherited_parent_key(frame: &crate::xml::FrameXml, inherits: &str) -> Option<String> {
+    frame.parent_key.clone().or_else(|| {
+        if inherits.is_empty() {
+            return None;
+        }
+        crate::xml::get_template_chain(inherits)
+            .iter()
+            .rev()
+            .find_map(|entry| entry.frame.parent_key.clone())
+    })
+}
+
+fn resolve_inherited_parent_array(frame: &crate::xml::FrameXml, inherits: &str) -> Option<String> {
+    frame.parent_array.clone().or_else(|| {
+        if inherits.is_empty() {
+            return None;
+        }
+        crate::xml::get_template_chain(inherits)
+            .iter()
+            .rev()
+            .find_map(|entry| entry.frame.parent_array.clone())
+    })
 }
 
 /// Execute CreateFrame Lua with OnLoad suppression (depth-counted for recursion).
@@ -210,17 +302,20 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             setup.frame,
         )
         .map_err(|error| crate::Error::Other(error.to_string()))?;
-        if let Some(parent_key) = setup.frame.parent_key.as_deref() {
+        if let Some(parent_key) = resolve_inherited_parent_key(setup.frame, setup.inherits) {
             crate::lua_api::globals::template::assign_parent_key(
-                state, parent_id, parent_key, frame_id,
+                state,
+                parent_id,
+                &parent_key,
+                frame_id,
             )
             .map_err(|error| crate::Error::Other(error.to_string()))?;
         }
-        if let Some(parent_array) = setup.frame.parent_array.as_deref() {
+        if let Some(parent_array) = resolve_inherited_parent_array(setup.frame, setup.inherits) {
             crate::lua_api::globals::create_frame::append_parent_array_entry(
                 state,
                 parent_id,
-                parent_array,
+                &parent_array,
                 frame_id,
             );
         }

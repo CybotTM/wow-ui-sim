@@ -43,6 +43,12 @@ pub(super) fn register_c_spell(state: &mut LuaState) -> LuaResult<()> {
         "IsRangedAutoAttackSpell",
         c_spell_is_ranged_auto_attack_spell,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsPressHoldReleaseSpell",
+        c_spell_is_press_hold_release_spell,
+    )?;
     Ok(())
 }
 
@@ -113,6 +119,12 @@ fn c_spell_is_ranged_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_spell_is_press_hold_release_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 pub(super) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_SpellBook")?;
     table_set_rust_fn_static(
@@ -162,6 +174,24 @@ pub(super) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "GetSpellBookItemAutoCast",
         c_spell_book_get_spell_book_item_auto_cast,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "FindSpellBookSlotForSpell",
+        c_spell_book_find_spell_book_slot_for_spell,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CastSpellBookItem",
+        c_spell_book_cast_spell_book_item,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsSpellInSpellBook",
+        c_spell_book_is_spell_in_spell_book,
     )?;
     table_set_rust_fn_static(
         state,
@@ -252,6 +282,32 @@ fn c_spell_book_get_spell_book_item_auto_cast(state: &mut LuaState) -> LuaResult
     state.push(Val::Bool(false));
     state.push(Val::Bool(false));
     Ok(2)
+}
+
+fn c_spell_book_find_spell_book_slot_for_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    match spellbook_data::find_spell_slot(spell_id) {
+        Some((slot, _spell_bank)) => state.push(Val::Num(slot as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_spell_book_cast_spell_book_item(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    let _spell_bank = Option::<i32>::from_stack(state, 2)?;
+    let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
+        return Ok(0);
+    };
+    crate::lua_api::globals::combat_verbs::execute_spell_by_id(state, entry.spell_id)?;
+    Ok(0)
+}
+
+fn c_spell_book_is_spell_in_spell_book(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let known = spellbook_data::is_spell_known(spell_id);
+    state.push(Val::Bool(known));
+    Ok(1)
 }
 
 fn c_spell_book_get_num_spell_book_skill_lines(state: &mut LuaState) -> LuaResult<u32> {

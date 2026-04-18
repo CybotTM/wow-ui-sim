@@ -62,6 +62,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
         runtime_inherits.as_deref(),
         fire_on_load,
     )?;
+    replay_runtime_template_parent_links(state, frame_id, runtime_inherits.as_deref())?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
@@ -69,7 +70,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(crate) use template_chain::{
     apply_runtime_template_chain_with_frame_overrides, apply_template_scripts,
-    first_fast_install_miss, scripts_support_fast_install,
+    first_fast_install_miss, replay_runtime_template_parent_links, scripts_support_fast_install,
 };
 struct CreateFrameArgs {
     frame_type: String,

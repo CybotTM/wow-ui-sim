@@ -45,6 +45,13 @@ pub fn is_modifier_key_down(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn is_modified_click(state: &mut LuaState) -> LuaResult<u32> {
+    let _action = crate::lua_bridge::stack_val(state, 1);
+    let any = borrow_state(state)?.modifier_keys.any_modifier();
+    state.push(Val::Bool(any));
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
@@ -54,5 +61,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "IsAltKeyDown", is_alt_key_down)?;
     table_set_rust_fn_static(state, g, "IsMetaKeyDown", is_meta_key_down)?;
     table_set_rust_fn_static(state, g, "IsModifierKeyDown", is_modifier_key_down)?;
+    table_set_rust_fn_static(state, g, "IsModifiedClick", is_modified_click)?;
     Ok(())
 }

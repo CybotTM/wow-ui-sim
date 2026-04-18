@@ -34,6 +34,21 @@ struct DefaultKey {
     action: &'static str,
 }
 
+fn default_action_for_key(key: &str) -> Option<&'static str> {
+    DEFAULT_KEYS
+        .iter()
+        .find(|entry| entry.key == key)
+        .map(|entry| entry.action)
+}
+
+fn default_keys_for_action(action: &str) -> (Option<String>, Option<String>) {
+    let mut matches = DEFAULT_KEYS
+        .iter()
+        .filter(|entry| entry.action == action)
+        .map(|entry| entry.key.to_string());
+    (matches.next(), matches.next())
+}
+
 /// Full set of binding actions (mirrors master `keybindings.rs`).
 pub const BINDING_ACTIONS: &[BindingAction] = &[
     BindingAction {
@@ -361,10 +376,8 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
     let action = if !user_action.is_empty() {
         user_action
     } else {
-        DEFAULT_KEYS
-            .iter()
-            .find(|dk| dk.key == key)
-            .map(|dk| dk.action.to_string())
+        default_action_for_key(key)
+            .map(str::to_string)
             .unwrap_or_default()
     };
     if action.is_empty() {
@@ -392,10 +405,13 @@ fn push_opt_string(state: &mut LuaState, val: Option<String>) {
 
 pub fn get_binding_key(state: &mut LuaState) -> LuaResult<u32> {
     let action = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
-    let (k1, k2) = {
+    let (mut k1, mut k2) = {
         let sim = borrow_state(state)?;
         sim.keybindings.keys_for_action(&action)
     };
+    if k1.is_none() && k2.is_none() {
+        (k1, k2) = default_keys_for_action(&action);
+    }
     push_opt_string(state, k1);
     push_opt_string(state, k2);
     Ok(2)
@@ -403,10 +419,14 @@ pub fn get_binding_key(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_binding_key_for_action(state: &mut LuaState) -> LuaResult<u32> {
     let action = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
-    let (k1, _) = {
+    let (mut k1, _) = {
         let sim = borrow_state(state)?;
         sim.keybindings.keys_for_action(&action)
     };
+    if k1.is_none() {
+        let (fallback, _) = default_keys_for_action(&action);
+        k1 = fallback;
+    }
     push_opt_string(state, k1);
     Ok(1)
 }

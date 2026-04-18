@@ -7,7 +7,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     patch_vignette_pin_template(env);
 }
 
-pub fn apply_post_event(_env: &crate::lua_api::WowLuaEnv) {}
+pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(REFRESH_ACTION_BUTTONS_LUA);
+}
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     if matches!(
@@ -15,6 +17,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         "Blizzard_SharedTalentUI" | "Blizzard_PlayerSpells"
     ) {
         patch_shared_talent_util(env);
+    }
+    if addon_name == "Blizzard_MapCanvas" {
+        patch_map_canvas_scroll_container(env);
     }
 }
 
@@ -27,6 +32,126 @@ fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA);
+}
+
+fn patch_map_canvas_scroll_container(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(
+        r#"
+local function __wow_find_first_scroll_frame_child(parent)
+  if type(parent) ~= "table" or type(parent.GetNumChildren) ~= "function" or type(parent.GetChildren) ~= "function" then
+    return nil
+  end
+  local count = parent:GetNumChildren()
+  for index = 1, count do
+    local child = select(index, parent:GetChildren())
+    if type(child) == "table" then
+      local isScrollFrame =
+        (type(child.IsObjectType) == "function" and child:IsObjectType("ScrollFrame")) or
+        (type(child.GetObjectType) == "function" and child:GetObjectType() == "ScrollFrame")
+      if isScrollFrame then
+        return child
+      end
+    end
+  end
+  return nil
+end
+
+local function __wow_ensure_map_canvas_scroll_container(frame)
+  if type(frame) ~= "table" then
+    return nil
+  end
+
+  local existing = rawget(frame, "ScrollContainer")
+  if existing ~= nil then
+    return existing
+  end
+
+  local scroll = __wow_find_first_scroll_frame_child(frame)
+  if scroll ~= nil then
+    rawset(frame, "ScrollContainer", scroll)
+  end
+  return scroll
+end
+
+local function __wow_try_init_map_canvas(frame)
+  if type(frame) ~= "table" then
+    return
+  end
+
+  __wow_ensure_map_canvas_scroll_container(frame)
+  if rawget(frame, "__wow_map_canvas_onload_ran") then
+    return
+  end
+
+  local scroll = rawget(frame, "ScrollContainer")
+  if scroll == nil then
+    return
+  end
+
+  rawset(frame, "__wow_map_canvas_onload_ran", true)
+  local originalOnLoad = rawget(_G, "__wow_map_canvas_original_onload")
+  if type(originalOnLoad) == "function" then
+    originalOnLoad(frame)
+  end
+end
+
+if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_scroll_container_patched") then
+  if rawget(_G, "__wow_map_canvas_original_onload") == nil and type(MapCanvasMixin.OnLoad) == "function" then
+    _G.__wow_map_canvas_original_onload = MapCanvasMixin.OnLoad
+    MapCanvasMixin.OnLoad = function(self, ...)
+      if rawget(self, "__wow_map_canvas_onload_ran") then
+        return
+      end
+      __wow_try_init_map_canvas(self)
+    end
+  end
+
+  if type(MapCanvasMixin.SetMapID) == "function" then
+    local originalSetMapID = MapCanvasMixin.SetMapID
+    MapCanvasMixin.SetMapID = function(self, ...)
+      __wow_try_init_map_canvas(self)
+      if rawget(self, "ScrollContainer") == nil then
+        local mapID = ...
+        self.mapID = mapID
+        if C_Map and type(C_Map.GetMapArtID) == "function" then
+          self.mapArtID = C_Map.GetMapArtID(mapID)
+        end
+        return
+      end
+      return originalSetMapID(self, ...)
+    end
+  end
+
+  if type(MapCanvasMixin.GetCanvas) == "function" then
+    MapCanvasMixin.GetCanvas = function(self, ...)
+      __wow_try_init_map_canvas(self)
+      local scroll = rawget(self, "ScrollContainer")
+      return scroll and scroll.Child or nil
+    end
+  end
+
+  if type(MapCanvasMixin.GetCanvasContainer) == "function" then
+    MapCanvasMixin.GetCanvasContainer = function(self, ...)
+      __wow_try_init_map_canvas(self)
+      return rawget(self, "ScrollContainer")
+    end
+  end
+
+  if type(MapCanvasMixin.OnFrameSizeChanged) == "function" then
+    local originalOnFrameSizeChanged = MapCanvasMixin.OnFrameSizeChanged
+    MapCanvasMixin.OnFrameSizeChanged = function(self, ...)
+      __wow_try_init_map_canvas(self)
+      if rawget(self, "ScrollContainer") == nil then
+        return
+      end
+      return originalOnFrameSizeChanged(self, ...)
+    end
+  end
+
+  __wow_map_canvas_scroll_container_patched = true
+end
+"#,
+    );
 }
 
 const GETGLOBAL_HELPER_LUA: &str = r#"
@@ -185,6 +310,24 @@ for _, mapName in ipairs({"WorldMapFrame", "BattlefieldMapFrame", "FlightMapFram
             __wow_patch_vignette_provider(provider)
         end
     end
+end
+"###;
+
+const REFRESH_ACTION_BUTTONS_LUA: &str = r###"
+local function __wow_refresh_action_button(button)
+    if type(button) ~= "table" then
+        return
+    end
+    if type(button.UpdateButtonArt) == "function" then
+        pcall(button.UpdateButtonArt, button)
+    end
+    if type(button.UpdateHotkeys) == "function" then
+        pcall(button.UpdateHotkeys, button, button.buttonType)
+    end
+end
+
+for i = 1, 12 do
+    __wow_refresh_action_button(_G["ActionButton" .. i])
 end
 "###;
 

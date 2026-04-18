@@ -3,12 +3,13 @@
 pub mod panel_fixtures;
 
 use rilua::Val;
+use std::ops::Deref;
 use std::path::PathBuf;
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Mutex, MutexGuard, OnceLock};
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
-/// Per-test timeout. Panics if the closure doesn't complete within `secs`.
+/// Per-test timeout. Exits the process if the closure doesn't complete within `secs`.
 /// Default 120s — enough for full Blizzard UI load + test logic.
 #[allow(dead_code)]
 pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
@@ -20,13 +21,15 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     match rx.recv_timeout(std::time::Duration::from_secs(secs)) {
         Ok(()) => handle.join().expect("test thread panicked"),
         Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
-            panic!("test timed out after {secs}s")
+            eprintln!("test timed out after {secs}s");
+            std::process::exit(1);
         }
         Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
             handle
                 .join()
                 .expect_err("test thread panicked but join succeeded");
-            panic!("test thread panicked (see above)")
+            eprintln!("test thread panicked (see above)");
+            std::process::exit(1);
         }
     }
 }
@@ -35,15 +38,41 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
 /// startup/load scenario at a time instead of competing with sibling tests.
 #[allow(dead_code)]
 pub fn with_perf_lock<T>(f: impl FnOnce() -> T) -> T {
+    let _guard = lock_perf_tests();
+    f()
+}
+
+fn lock_perf_tests() -> MutexGuard<'static, ()> {
     static PERF_TEST_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
     let perf_lock = PERF_TEST_LOCK.get_or_init(|| Mutex::new(()));
-    let _guard = match perf_lock.lock() {
+    match perf_lock.lock() {
         Ok(guard) => guard,
         // Coverage shards intentionally probe failing paths; a prior panic
         // must not cascade into unrelated later shards in the same process.
         Err(poisoned) => poisoned.into_inner(),
-    };
-    f()
+    }
+}
+
+/// Keep a `WowLuaEnv` alive under the global perf lock for the lifetime of a test.
+#[allow(dead_code)]
+pub struct LockedEnv {
+    _guard: MutexGuard<'static, ()>,
+    env: WowLuaEnv,
+}
+
+#[allow(dead_code)]
+pub fn lock_env(build: impl FnOnce() -> WowLuaEnv) -> LockedEnv {
+    let guard = lock_perf_tests();
+    let env = build();
+    LockedEnv { _guard: guard, env }
+}
+
+impl Deref for LockedEnv {
+    type Target = WowLuaEnv;
+
+    fn deref(&self) -> &Self::Target {
+        &self.env
+    }
 }
 
 /// Convenience macro: wraps a test body with a 120s timeout.

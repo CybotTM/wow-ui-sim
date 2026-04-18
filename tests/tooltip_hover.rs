@@ -327,6 +327,41 @@ fn test_tooltip_data_handler_set_owned_item_by_id_uses_owned_item_getter() {
 }
 
 #[test]
+fn test_tooltip_data_handler_set_inventory_item_uses_inventory_getter() {
+    let env = setup_full_env();
+
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            assert(GameTooltip.SetInventoryItem, "GameTooltip:SetInventoryItem should exist")
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            local ok = GameTooltip:SetInventoryItem("player", 1)
+            if not ok then
+                return false
+            end
+
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            local tooltipData = GameTooltip:GetPrimaryTooltipData()
+            if not info or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.Item or not tooltipData.lines then
+                return false
+            end
+
+            local nameLine = tooltipData.lines[1]
+            return info.getterName == "GetInventoryItem"
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Entombed Seraph's Casque"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_real_tooltip,
+        "TooltipDataHandler should populate GameTooltip:SetInventoryItem through C_TooltipInfo.GetInventoryItem",
+    );
+}
+
+#[test]
 fn test_tooltip_data_handler_set_recipe_result_item_uses_recipe_getters() {
     let env = setup_full_env();
 

@@ -44,7 +44,7 @@ pub(crate) mod timer_layout;
 mod timer_processing;
 pub mod tooltip;
 pub(crate) mod tracked_recipes;
-pub(crate) mod workarounds;
+pub mod workarounds;
 pub(crate) mod workarounds_editmode;
 
 // Re-export public types

@@ -37,10 +37,17 @@ fn button_texture_child_id(
     button_id: u64,
     key: &str,
 ) -> Option<u64> {
-    state
-        .widgets
-        .get(button_id)
-        .and_then(|frame| frame.children_keys.get(key).copied())
+    let button = state.widgets.get(button_id)?;
+    if let Some(tex_id) = button.children_keys.get(key).copied() {
+        return Some(tex_id);
+    }
+
+    button.children.iter().copied().find(|child_id| {
+        state
+            .widgets
+            .get(*child_id)
+            .is_some_and(|child| child.parent_key.as_deref() == Some(key))
+    })
 }
 
 fn refresh_button_texture_child(
@@ -49,6 +56,11 @@ fn refresh_button_texture_child(
     key: &str,
     tex_id: u64,
 ) -> u64 {
+    let needs_children_key = state
+        .widgets
+        .get(button_id)
+        .map(|button| button.children_keys.get(key).copied() != Some(tex_id))
+        .unwrap_or(false);
     let needs_anchors = state
         .widgets
         .get(tex_id)
@@ -59,7 +71,12 @@ fn refresh_button_texture_child(
         .get(tex_id)
         .map(|texture| texture.parent_key.as_deref() != Some(key))
         .unwrap_or(false);
-    if needs_anchors || needs_parent_key {
+    if needs_children_key || needs_anchors || needs_parent_key {
+        if needs_children_key {
+            if let Some(button) = state.widgets.get_mut_visual(button_id) {
+                button.children_keys.insert(key.to_string(), tex_id);
+            }
+        }
         if let Some(texture) = state.widgets.get_mut_visual(tex_id) {
             if needs_anchors {
                 set_all_points_anchors_pub(texture, button_id);

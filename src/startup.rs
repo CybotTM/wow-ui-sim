@@ -120,6 +120,34 @@ pub fn apply_delay(delay: Option<u64>) {
     }
 }
 
+/// Demand-load Blizzard_PlayerSpells during game-screen startup and keep it hidden.
+pub fn prewarm_player_spells_spellbook(env: &WowLuaEnv) -> bool {
+    if env.state().borrow().screen_kind != ScreenKind::Game {
+        return false;
+    }
+
+    env.eval::<bool>(
+        r#"
+        if not C_AddOns or type(C_AddOns.LoadAddOn) ~= "function" or type(C_AddOns.IsAddOnLoaded) ~= "function" then
+            return false
+        end
+
+        if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+            C_AddOns.LoadAddOn("Blizzard_PlayerSpells")
+        end
+
+        if PlayerSpellsFrame and PlayerSpellsFrame:IsShown() then
+            PlayerSpellsFrame:Hide()
+        end
+
+        return C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells")
+            and PlayerSpellsFrame ~= nil
+            and not PlayerSpellsFrame:IsShown()
+        "#,
+    )
+    .unwrap_or(false)
+}
+
 /// Fire a single OnUpdate tick so OnUpdate-dependent state (e.g. buff
 /// durations) is populated in headless modes where the GUI loop never runs.
 pub fn fire_one_on_update_tick(env: &WowLuaEnv) {

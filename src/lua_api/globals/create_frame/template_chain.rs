@@ -26,6 +26,21 @@ pub(crate) fn apply_runtime_template_chain(
     apply_runtime_template_chain_impl(state, frame_id, inherits, fire_on_load, None)
 }
 
+pub(crate) fn replay_runtime_template_parent_links(
+    state: &mut LuaState,
+    frame_id: u64,
+    inherits: Option<&str>,
+) -> LuaResult<()> {
+    let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
+        return Ok(());
+    };
+    let chain = crate::xml::get_template_chain(inherits);
+    if chain.is_empty() {
+        return Ok(());
+    }
+    apply_template_parent_links(state, frame_id, &chain)
+}
+
 pub(crate) fn apply_runtime_template_chain_with_frame_overrides(
     state: &mut LuaState,
     frame_id: u64,

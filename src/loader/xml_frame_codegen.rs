@@ -18,7 +18,7 @@ pub(super) fn build_frame_lua_code(
     parent: &str,
 ) -> String {
     let mut lua_code = build_create_frame_code(widget_type, name, explicit_parent, inherits);
-    append_parent_key_code(&mut lua_code, frame, parent);
+    append_parent_key_code(&mut lua_code, frame, inherits, parent);
     append_mixins_code(&mut lua_code, frame, inherits);
     append_key_values_code(&mut lua_code, frame, inherits);
     append_xml_attributes_code(&mut lua_code, frame);
@@ -81,8 +81,13 @@ fn build_create_frame_code(
 ///
 /// Handles `$parent` prefix in parentKey (e.g. `$parent.CloseButton`)
 /// which navigates up from the direct parent before setting the key.
-fn append_parent_key_code(lua_code: &mut String, frame: &crate::xml::FrameXml, parent: &str) {
-    if let Some(parent_key) = &frame.parent_key {
+fn append_parent_key_code(
+    lua_code: &mut String,
+    frame: &crate::xml::FrameXml,
+    inherits: &str,
+    parent: &str,
+) {
+    if let Some(parent_key) = resolve_inherited_string(frame, inherits, |f| f.parent_key.as_ref()) {
         let parent_ref = lua_global_ref(parent);
         if let Some(key) = parent_key.strip_prefix("$parent.") {
             let parent_field = lua_table_field_ref("__pk", key);
@@ -93,7 +98,7 @@ fn append_parent_key_code(lua_code: &mut String, frame: &crate::xml::FrameXml, p
                 parent_ref, parent_field
             ));
         } else {
-            let parent_field = lua_table_field_ref(&parent_ref, parent_key);
+            let parent_field = lua_table_field_ref(&parent_ref, &parent_key);
             lua_code.push_str(&format!(
                 r#"
         {} = frame
@@ -102,22 +107,45 @@ fn append_parent_key_code(lua_code: &mut String, frame: &crate::xml::FrameXml, p
             ));
         }
     }
-    append_parent_array_code(lua_code, frame, parent);
+    append_parent_array_code(lua_code, frame, inherits, parent);
 }
 
 /// Append parentArray insertion when the attribute is directly on this frame.
 ///
 /// Template-inherited parentArray is handled by `apply_parent_array_from_template`
 /// inside `CreateFrame`, so we only handle the direct-attribute case here.
-fn append_parent_array_code(lua_code: &mut String, frame: &crate::xml::FrameXml, parent: &str) {
-    if let Some(parent_array) = &frame.parent_array {
+fn append_parent_array_code(
+    lua_code: &mut String,
+    frame: &crate::xml::FrameXml,
+    inherits: &str,
+    parent: &str,
+) {
+    if let Some(parent_array) =
+        resolve_inherited_string(frame, inherits, |f| f.parent_array.as_ref())
+    {
         let parent_ref = lua_global_ref(parent);
-        let array_ref = lua_table_field_ref(&parent_ref, parent_array);
+        let array_ref = lua_table_field_ref(&parent_ref, &parent_array);
         lua_code.push_str(&format!(
             "\n        {array_ref} = {array_ref} or {{}}\n        \
              table.insert({array_ref}, frame)\n        ",
         ));
     }
+}
+
+fn resolve_inherited_string(
+    frame: &crate::xml::FrameXml,
+    inherits: &str,
+    getter: impl Fn(&crate::xml::FrameXml) -> Option<&String>,
+) -> Option<String> {
+    getter(frame).cloned().or_else(|| {
+        if inherits.is_empty() {
+            return None;
+        }
+        crate::xml::get_template_chain(inherits)
+            .iter()
+            .rev()
+            .find_map(|entry| getter(&entry.frame).cloned())
+    })
 }
 
 /// Append Mixin() calls for the frame's own (direct) mixins only.

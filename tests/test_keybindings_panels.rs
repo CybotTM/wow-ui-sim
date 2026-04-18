@@ -89,30 +89,32 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
 ];
 
-fn setup_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
+fn setup_env() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
 
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![blizzard_ui_dir()];
-    }
-
-    let ui = blizzard_ui_dir();
-    for (name, toc) in BLIZZARD_ADDONS {
-        let toc_path = ui.join(name).join(toc);
-        if !toc_path.exists() {
-            continue;
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![blizzard_ui_dir()];
         }
-        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
-        }
-    }
 
-    load_token_ui(&env);
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env
+        let ui = blizzard_ui_dir();
+        for (name, toc) in BLIZZARD_ADDONS {
+            let toc_path = ui.join(name).join(toc);
+            if !toc_path.exists() {
+                continue;
+            }
+            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                eprintln!("[load {name}] FAILED: {e}");
+            }
+        }
+
+        load_token_ui(&env);
+        env.apply_post_load_workarounds();
+        fire_startup_events(&env);
+        env
+    })
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {

@@ -17,6 +17,8 @@ pub mod layout;
 #[cfg(feature = "gui")]
 mod app;
 #[cfg(feature = "gui")]
+mod benchmark;
+#[cfg(feature = "gui")]
 mod button_vis;
 #[cfg(feature = "gui")]
 mod casting;
@@ -89,6 +91,8 @@ use crate::saved_variables::SavedVariablesManager;
 
 #[cfg(feature = "gui")]
 pub use app::App;
+#[cfg(feature = "gui")]
+pub use benchmark::{BenchmarkPhase, SpellbookBenchmarkReport, benchmark_spellbook_open_in_gui};
 #[cfg(feature = "gui")]
 pub use render::rebuild_dirty_strata_batches_for_registry;
 #[cfg(feature = "gui")]

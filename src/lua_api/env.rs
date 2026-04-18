@@ -231,6 +231,10 @@ impl WowLuaEnv {
         );
     }
 
+    pub fn apply_runtime_addon_load_workarounds(&self, addon_name: &str) {
+        super::workarounds::apply_for_runtime_addon_load(&self.loader_env(), addon_name);
+    }
+
     /// Apply workarounds that must run after startup events.
     pub fn apply_post_event_workarounds(&self) {
         super::workarounds::apply_post_event(self);

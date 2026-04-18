@@ -66,6 +66,11 @@ pub(crate) fn parse_item_guid(guid: &str) -> Option<(i32, i32, u32)> {
 pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Item")?;
     let methods: &[(&'static str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
+        ("DoesItemExist", c_item_does_item_exist),
+        ("DoesItemExistByID", c_item_does_item_exist_by_id),
+        ("GetItemID", c_item_get_item_id),
+        ("IsItemDataCached", c_item_is_item_data_cached),
+        ("IsItemDataCachedByID", c_item_is_item_data_cached_by_id),
         ("GetItemIconByID", c_item_get_item_icon_by_id),
         ("GetItemNameByID", c_item_get_item_name_by_id),
         ("GetItemQualityByID", c_item_get_item_quality_by_id),
@@ -87,6 +92,91 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
     Ok(())
+}
+
+fn c_item_does_item_exist(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    let exists = match value {
+        Val::Table(_) => {
+            let bag = match table_get(state, value, "bagID") {
+                Val::Num(number) => number as i32,
+                _ => 0,
+            };
+            let slot = match table_get(state, value, "slotIndex") {
+                Val::Num(number) => number as i32,
+                _ => 0,
+            };
+            borrow_state(state)?.get_bag_item(bag, slot).is_some()
+        }
+        _ => parse_item_id_from_val(state, value)
+            .and_then(items::get_item)
+            .is_some(),
+    };
+    state.push(Val::Bool(exists));
+    Ok(1)
+}
+
+fn c_item_does_item_exist_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let exists = parse_item_id_from_val(state, stack_val(state, 1))
+        .and_then(items::get_item)
+        .is_some();
+    state.push(Val::Bool(exists));
+    Ok(1)
+}
+
+fn c_item_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    let item_id = match value {
+        Val::Table(_) => {
+            let bag = match table_get(state, value, "bagID") {
+                Val::Num(number) => number as i32,
+                _ => 0,
+            };
+            let slot = match table_get(state, value, "slotIndex") {
+                Val::Num(number) => number as i32,
+                _ => 0,
+            };
+            borrow_state(state)?
+                .get_bag_item(bag, slot)
+                .map(|(item_id, _)| item_id)
+        }
+        _ => parse_item_id_from_val(state, value),
+    };
+    match item_id {
+        Some(item_id) => state.push(Val::Num(item_id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_item_is_item_data_cached(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    let cached = match value {
+        Val::Table(_) => {
+            let bag = match table_get(state, value, "bagID") {
+                Val::Num(number) => number as i32,
+                _ => 0,
+            };
+            let slot = match table_get(state, value, "slotIndex") {
+                Val::Num(number) => number as i32,
+                _ => 0,
+            };
+            borrow_state(state)?.get_bag_item(bag, slot).is_some()
+        }
+        _ => parse_item_id_from_val(state, value)
+            .and_then(items::get_item)
+            .is_some(),
+    };
+    state.push(Val::Bool(cached));
+    Ok(1)
+}
+
+fn c_item_is_item_data_cached_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let cached = parse_item_id_from_val(state, stack_val(state, 1))
+        .and_then(items::get_item)
+        .is_some();
+    state.push(Val::Bool(cached));
+    Ok(1)
 }
 
 fn c_item_get_item_icon_by_id(state: &mut LuaState) -> LuaResult<u32> {

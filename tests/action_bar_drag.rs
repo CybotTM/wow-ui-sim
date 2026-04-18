@@ -117,13 +117,15 @@ fn fire_action_bar_startup(env: &WowLuaEnv) {
     env.fire_event("ACTIONBAR_SHOWGRID").unwrap();
 }
 
-fn env_with_action_bar() -> WowLuaEnv {
-    let env = WowLuaEnv::new().unwrap();
-    env.set_screen_size(1024.0, 768.0);
-    load_action_bar_addons(&env);
-    env.apply_post_load_workarounds();
-    fire_action_bar_startup(&env);
-    env
+fn env_with_action_bar() -> common::LockedEnv {
+    common::lock_env(|| {
+        let env = WowLuaEnv::new().unwrap();
+        env.set_screen_size(1024.0, 768.0);
+        load_action_bar_addons(&env);
+        env.apply_post_load_workarounds();
+        fire_action_bar_startup(&env);
+        env
+    })
 }
 
 fn assert_action_button_template_has_receive_drag() {

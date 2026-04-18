@@ -64,6 +64,7 @@ fn register_unit_queries(state: &mut LuaState) {
 
 fn register_unit_relationships(state: &mut LuaState) {
     set_global(state, "UnitIsFriend", unit_is_friend);
+    set_global(state, "UnitIsEnemy", unit_can_attack);
     set_global(state, "UnitCanAttack", unit_can_attack);
     set_global(state, "UnitCanAssist", unit_can_assist);
     set_global(state, "UnitCanCooperate", unit_can_cooperate);

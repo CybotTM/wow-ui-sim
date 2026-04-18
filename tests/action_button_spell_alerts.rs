@@ -35,13 +35,14 @@ fn spell_alert_manager_tracks_button_alert_state() {
 #[test]
 fn spell_alert_manager_creates_and_toggles_alert_frame() {
     let env = env();
-    let (shown_during, shown_after, same_frame): (bool, bool, bool) = env
+    let (has_frame, shown_during, shown_after, same_frame): (bool, bool, bool, bool) = env
         .eval(
             r#"
             local button = CreateFrame("Button", "SpellAlertVisualButton", UIParent)
 
             ActionButtonSpellAlertManager:ShowAlert(button)
             local firstFrame = button.SpellActivationAlert
+            local hasFrame = firstFrame ~= nil
             local shownDuring = firstFrame ~= nil and firstFrame:IsShown()
 
             ActionButtonSpellAlertManager:HideAlert(button)
@@ -50,10 +51,14 @@ fn spell_alert_manager_creates_and_toggles_alert_frame() {
             ActionButtonSpellAlertManager:ShowAlert(button)
             local sameFrame = firstFrame ~= nil and firstFrame == button.SpellActivationAlert
 
-            return shownDuring, shownAfter, sameFrame
+            return hasFrame, shownDuring, shownAfter, sameFrame
             "#,
         )
         .unwrap();
+    assert!(
+        has_frame,
+        "ShowAlert should expose button.SpellActivationAlert"
+    );
     assert!(
         shown_during,
         "ShowAlert should create and show an alert frame"

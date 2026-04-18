@@ -9,7 +9,7 @@ use crate::lua_api::methods::{
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{collections::HashSet, io};
 
 use super::set_global_val;
@@ -219,21 +219,36 @@ fn default_runtime_addon_bases() -> Vec<PathBuf> {
 }
 
 fn find_runtime_addon_toc(state: &LuaState, addon_name: &str) -> Option<PathBuf> {
-    let bases = {
+    let (bases, screen_kind) = {
         let sim = borrow_state(state).ok()?;
-        if sim.addon_base_paths.is_empty() {
-            default_runtime_addon_bases()
-        } else {
-            sim.addon_base_paths.clone()
-        }
+        (
+            if sim.addon_base_paths.is_empty() {
+                default_runtime_addon_bases()
+            } else {
+                sim.addon_base_paths.clone()
+            },
+            sim.screen_kind,
+        )
     };
     for base in bases {
         let addon_dir = base.join(addon_name);
-        if let Some(toc_path) = crate::loader::find_toc_file(&addon_dir) {
+        if let Some(toc_path) = crate::loader::find_toc_file(&addon_dir)
+            && runtime_toc_allowed_on_current_screen(&toc_path, screen_kind)
+        {
             return Some(toc_path);
         }
     }
     None
+}
+
+fn runtime_toc_allowed_on_current_screen(
+    toc_path: &Path,
+    screen_kind: crate::screen::ScreenKind,
+) -> bool {
+    let Ok(toc) = crate::toc::TocFile::from_file(toc_path) else {
+        return false;
+    };
+    toc.allows_screen(screen_kind) && !toc.is_ptr_only() && !toc.is_game_type_restricted()
 }
 
 fn addon_exists(state: &LuaState, addon_name: &str) -> bool {
