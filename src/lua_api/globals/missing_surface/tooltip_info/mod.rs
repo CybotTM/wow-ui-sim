@@ -174,7 +174,6 @@ fn register_spell_aura_unit_methods(
 mod tests {
     use super::super::{LINE_TYPE_ITEM_LEVEL, LINE_TYPE_ITEM_NAME};
     use super::builders::tooltip_for_item_id;
-    use super::spell::tooltip_for_spell_id;
     use super::unit::tooltip_for_unit;
     use crate::lua_api::env::WowLuaEnv;
     use crate::lua_api::methods::{table_get, val_to_string};

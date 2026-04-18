@@ -411,20 +411,6 @@ mod tests {
     use super::*;
     use std::collections::BTreeSet;
 
-    fn usage(count: usize) -> SymbolUsage {
-        SymbolUsage {
-            count,
-            files: vec!["Blizzard_Test.lua".to_string()],
-        }
-    }
-
-    fn usage_in_files(count: usize, files: &[&str]) -> SymbolUsage {
-        SymbolUsage {
-            count,
-            files: files.iter().map(|file| file.to_string()).collect(),
-        }
-    }
-
     #[test]
     fn scan_xml_file_extracts_inherited_templates() {
         let patterns = Patterns::new();
@@ -620,9 +606,4 @@ mod tests {
         );
     }
 
-    // Silence unused import warnings for test helpers
-    fn _use_helpers() {
-        let _ = usage(0);
-        let _ = usage_in_files(0, &[]);
-    }
 }

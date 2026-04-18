@@ -18,7 +18,7 @@ fn plain_format_string_unchanged() {
 }
 
 #[test]
-fn uppercase_F_converts_to_lowercase_f() {
+fn uppercase_f_converts_to_lowercase_f() {
     // %F is invalid in plain Lua 5.1; WoW's patched runtime treats it as %f.
     let env = env();
     let out: String = env.eval(r#"return string.format("%.2F", 1.5)"#).unwrap();

@@ -8,7 +8,6 @@ use std::path::PathBuf;
 use wow_ui_sim::iced_app::build_quad_batch_for_registry;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::globals::global_frames;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -183,38 +182,6 @@ fn build_batch_for_root(env: &WowLuaEnv, root_name: &str) -> wow_ui_sim::render:
         None,
         &buckets,
     )
-}
-
-fn install_test_error_handler(env: &WowLuaEnv) {
-    common::install_error_collector(env, "__test_errors");
-}
-
-fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    common::drain_string_table(env, "__test_errors")
-}
-
-/// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
-fn setup_full_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-
-    let ui = blizzard_ui_dir();
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![ui.clone()];
-    }
-
-    let addons = discover_blizzard_addons(&ui);
-    for (name, toc_path) in &addons {
-        if let Err(e) = load_addon(&env.loader_env(), toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
-        }
-    }
-    env.apply_post_load_workarounds();
-    fire_startup_events(&env);
-    env.apply_post_event_workarounds();
-    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
-    env
 }
 
 // ── S → PlayerSpellsUtil.ToggleSpellBookFrame() ─────────────────────────

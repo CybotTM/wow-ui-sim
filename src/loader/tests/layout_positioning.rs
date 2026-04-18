@@ -510,15 +510,3 @@ fn assert_f64_near(t: &TestCtx, var: &str, expected: f64) {
     );
 }
 
-fn assert_lua_f64_near(t: &TestCtx, actual_var: &str, expected_var: &str) {
-    let actual: f64 = t.env.eval(&format!("return {}", actual_var)).unwrap();
-    let expected: f64 = t.env.eval(&format!("return {}", expected_var)).unwrap();
-    assert!(
-        (actual - expected).abs() < 0.01,
-        "{}: {} vs {}: {}",
-        actual_var,
-        actual,
-        expected_var,
-        expected
-    );
-}

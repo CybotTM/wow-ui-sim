@@ -1,3 +1,7 @@
+// Shared test helpers. Individual test binaries that `mod` this file use
+// a subset of the helpers, so per-binary dead_code warnings are expected.
+#![allow(dead_code)]
+
 use rilua::Val;
 use std::path::{Path, PathBuf};
 

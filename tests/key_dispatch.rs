@@ -28,7 +28,6 @@ fn esc_with_focused_editbox_fires_on_escape_pressed_and_returns_early() {
     .unwrap();
 
     // Focus the editbox by clicking it.
-    let frame_id: i64 = env.eval("return TestEscEB:GetID()").unwrap_or(0);
     let eb_id = {
         let state = env.state();
         let sim = state.borrow();
