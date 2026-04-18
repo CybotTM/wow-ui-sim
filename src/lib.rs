@@ -20,6 +20,7 @@ pub mod event;
 pub mod extract_textures;
 #[path = "render/font.rs"]
 pub mod font;
+pub mod global_slot_coverage;
 #[path = "../data/global_strings.rs"]
 pub mod global_strings;
 pub mod iced_app;

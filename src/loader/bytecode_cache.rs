@@ -59,6 +59,7 @@ pub fn content_hash(bytes: &[u8], chunk_name: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
     bytes.hash(&mut hasher);
     chunk_name.hash(&mut hasher);
+    WHITELIST_VERSION.hash(&mut hasher);
     hasher.finish()
 }
 
@@ -298,5 +299,16 @@ mod tests {
         bytes.extend_from_slice(&[0u8; 3]); // only 3 of 4 version bytes
         let mut state = CacheState::default();
         assert!(!load_pack_bytes(&mut state, &bytes));
+    }
+
+    #[test]
+    fn content_hash_changes_with_whitelist_version() {
+        let base = content_hash(b"abc", "=@chunk");
+        let mut hasher = DefaultHasher::new();
+        b"abc".hash(&mut hasher);
+        "=@chunk".hash(&mut hasher);
+        WHITELIST_VERSION.wrapping_add(1).hash(&mut hasher);
+        let stale = hasher.finish();
+        assert_ne!(base, stale);
     }
 }

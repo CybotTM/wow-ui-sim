@@ -42,6 +42,7 @@ use rilua::vm::string::LuaString;
 /// `freeze_globals_with_live_shadow`. Mirrors the constant declared
 /// in `env_init::freeze_globals` (kept private there).
 const G_LIVE_REGISTRY_KEY: &[u8] = b"__rilua_g_live";
+const DISABLE_GLOBAL_SLOTS_ENV: &str = "WOW_SIM_DISABLE_GLOBAL_SLOTS";
 
 /// Total slot count in the current ABI. Ties directly to
 /// [`WHITELIST_VERSION`] so bumping the version + the whitelist
@@ -69,9 +70,9 @@ pub const NAMESPACES_BASE: usize = GLOBALS_BASE + HOT_GLOBALS.len();
 #[derive(Clone)]
 pub struct GlobalSlotTable {
     values: Box<[Val]>,
-    /// Pre-interned key per slot. Slot 0 (`_G`) has no name; its entry
-    /// is the g_live_key sentinel, never read because [`read_slot`]
-    /// short-circuits on `idx == 0`.
+    /// Pre-interned key per slot. Slot 0 stores the real `_G` key so
+    /// rilua's slot opcode can still fall back through custom closure
+    /// environments; the wow-ui-sim read path short-circuits on `idx == 0`.
     name_keys: Box<[GcRef<LuaString>]>,
     /// Pre-interned `"__rilua_g_live"` registry key. Cached once so the
     /// read path never calls `intern_string_static` (which needs `&mut`).
@@ -127,10 +128,12 @@ pub fn install(state: &mut LuaState) -> GlobalSlotTable {
     // up the shadow without needing `&mut state`.
     let g_live_key = state.gc.intern_string_static(G_LIVE_REGISTRY_KEY);
 
+    let g_key = state.gc.intern_string_static(b"_G");
+
     // Slot 0: `_G` itself. The VM exposes the global table as a
     // `GcRef<Table>` on `state.global`; wrap it as `Val::Table`.
     values.push(Val::Table(state.global));
-    name_keys.push(g_live_key); // sentinel — never read for slot 0.
+    name_keys.push(g_key);
 
     // Slots for HOT_GLOBALS then HOT_NAMESPACES, in the whitelist
     // order. Each resolves `_G[name]` via `intern_string_static` +
@@ -150,6 +153,13 @@ pub fn install(state: &mut LuaState) -> GlobalSlotTable {
 
     debug_assert_eq!(values.len(), SLOT_COUNT);
     debug_assert_eq!(name_keys.len(), SLOT_COUNT);
+    if std::env::var(DISABLE_GLOBAL_SLOTS_ENV).as_deref() != Ok("1") {
+        state.install_global_slots(
+            values.clone().into_boxed_slice(),
+            name_keys.clone().into_boxed_slice(),
+            Some(g_live_key),
+        );
+    }
     GlobalSlotTable {
         values: values.into_boxed_slice(),
         name_keys: name_keys.into_boxed_slice(),
@@ -205,6 +215,86 @@ fn lookup_g_live(
         Val::Table(r) => Some(r),
         _ => None,
     }
+}
+
+/// Public report of slot-vector coverage after bootstrap.
+///
+/// Sub-item 3 (compiler emission of `GETGLOBAL_SLOT`) has not landed,
+/// so wall-time fast-path comparison is not yet measurable. The
+/// coverage count is the actionable proxy: how many whitelist slots
+/// resolved to a non-nil value (and therefore would hit the fast path
+/// today) versus how many fall back to the `_G_live` slow path.
+#[derive(Clone, Debug)]
+pub struct SlotCoverageReport {
+    pub version: u32,
+    pub slot_count: usize,
+    pub populated_total: usize,
+    pub globals_total: usize,
+    pub populated_globals: usize,
+    pub namespaces_total: usize,
+    pub populated_namespaces: usize,
+    pub unpopulated_globals: Vec<String>,
+    pub unpopulated_namespaces: Vec<String>,
+}
+
+/// Compute a [`SlotCoverageReport`] against a bootstrapped environment.
+pub fn slot_coverage_report(env: &crate::lua_api::WowLuaEnv) -> SlotCoverageReport {
+    use crate::lua_api::env::WowLuaAppData;
+    use rilua::LuaApi;
+
+    let lua = env.lua();
+    let state = lua.state();
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .expect("WowLuaEnv app_data should exist after bootstrap");
+    let slots = app
+        .global_slots
+        .as_ref()
+        .expect("global_slots should be populated by bootstrap");
+
+    let globals = partition_category(slots, HOT_GLOBALS, GLOBALS_BASE);
+    let namespaces = partition_category(slots, HOT_NAMESPACES, NAMESPACES_BASE);
+
+    // Slot 0 (`_G`) is always populated.
+    let populated_total = 1 + globals.populated_count + namespaces.populated_count;
+
+    SlotCoverageReport {
+        version: slots.version(),
+        slot_count: slots.len(),
+        populated_total,
+        globals_total: HOT_GLOBALS.len(),
+        populated_globals: globals.populated_count,
+        namespaces_total: HOT_NAMESPACES.len(),
+        populated_namespaces: namespaces.populated_count,
+        unpopulated_globals: globals.unpopulated_names,
+        unpopulated_namespaces: namespaces.unpopulated_names,
+    }
+}
+
+struct CategoryPartition {
+    populated_count: usize,
+    unpopulated_names: Vec<String>,
+}
+
+fn partition_category(
+    slots: &GlobalSlotTable,
+    names: &[&[u8]],
+    base_idx: usize,
+) -> CategoryPartition {
+    let mut partition = CategoryPartition {
+        populated_count: 0,
+        unpopulated_names: Vec::new(),
+    };
+    for (i, &name_bytes) in names.iter().enumerate() {
+        if slots.raw(base_idx + i) == rilua::Val::Nil {
+            partition
+                .unpopulated_names
+                .push(String::from_utf8_lossy(name_bytes).into_owned());
+        } else {
+            partition.populated_count += 1;
+        }
+    }
+    partition
 }
 
 #[cfg(test)]

@@ -12,6 +12,7 @@
 //!   wow-cli convert-texture foo.BLP  # Convert single BLP to WebP (standalone)
 //!   wow-cli generate spells          # Regenerate data/spells.rs from CSVs
 //!   wow-cli startup-intern-stats      # Measure startup intern-string churn
+//!   wow-cli global-slot-coverage      # Report Track 3 slot coverage after bootstrap
 
 mod audit_api;
 mod csv_util;
@@ -26,6 +27,7 @@ mod gen_traits;
 mod gen_traits_emit;
 mod gen_traits_load;
 mod gen_zones;
+mod global_slot_coverage;
 mod startup_intern_stats;
 
 use clap::{Parser, Subcommand};
@@ -132,6 +134,9 @@ enum Commands {
 
     /// Measure headless startup intern-string churn.
     StartupInternStats,
+
+    /// Report Track 3 global-slot coverage after headless bootstrap.
+    GlobalSlotCoverage,
 }
 
 #[derive(clap::Args)]
@@ -228,6 +233,7 @@ fn handle_command(command: Commands) {
         Commands::Generate { what } => run_generator(what),
         Commands::AuditApi(args) => handle_audit_api(args),
         Commands::StartupInternStats => startup_intern_stats::run(),
+        Commands::GlobalSlotCoverage => global_slot_coverage::run(),
     }
 }
 
