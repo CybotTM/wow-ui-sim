@@ -908,6 +908,38 @@ fn generic_trait_ui_runtime_load_survives_prior_force_load_process_state() {
 }
 
 #[test]
+fn contribution_runtime_load_survives_post_startup_state() {
+    with_isolated_addon_coverage_state(|| {
+        common::with_perf_lock(|| {
+            common::with_timeout(600, move || {
+                let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+                env.set_screen_size(1024.0, 768.0);
+                env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+                load_startup_blizzard_ui(&env);
+                clear_lua_error_tracking(&env);
+
+                let (collector_type, close_type): (String, String) = env
+                    .eval(
+                        "return type(C_ContributionCollector), type(C_ContributionCollector and C_ContributionCollector.Close)",
+                    )
+                    .expect("collector shape query should return");
+                let (loaded, reason): (bool, Option<String>) = env
+                    .eval("return C_AddOns.LoadAddOn(\"Blizzard_Contribution\")")
+                    .expect("Blizzard_Contribution load should return");
+                let state = env.state().borrow();
+                let grouped_errors = grouped_errors_by_addon(&state);
+
+                assert!(
+                    loaded,
+                    "Blizzard_Contribution should load after startup; collector_type={collector_type}, close_type={close_type}, reason={reason:?}, errors=\n{}",
+                    format_per_addon_report(&grouped_errors),
+                );
+            })
+        })
+    });
+}
+
+#[test]
 fn shard_14_runtime_load_survives_prior_runtime_shards_in_process() {
     for shard_index in 9..14 {
         run_load_on_demand_blizzard_addon_shard(shard_index, 16);
