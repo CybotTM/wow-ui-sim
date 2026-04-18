@@ -65,6 +65,14 @@ fn register_all_does_not_panic() {
 }
 
 #[test]
+fn quest_poi_update_icons_is_registered() {
+    let env = make_env();
+    let func = env.load_rilua("return QuestPOIUpdateIcons()").unwrap();
+    let result = env.call_rilua(&func, &[]).unwrap();
+    assert!(result.is_empty());
+}
+
+#[test]
 fn register_all_skips_existing_global() {
     use rilua::LuaApiMut;
     let env = make_env();

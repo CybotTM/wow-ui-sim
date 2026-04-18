@@ -40,6 +40,10 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "RequestLFDPlayerLockInfo",
     // RequestPartyLootMethod is SimState-backed in loot_method.rs, not a stub.
     "RequestRaidInfo",
+    // QuestMapFrame::UpdatePOIs still calls this legacy helper after
+    // QuestMapUpdateAllQuests; the sim's quest blob rendering is state-backed
+    // already, so no extra work is needed here.
+    "QuestPOIUpdateIcons",
     "GetUnitPowerBarInfo",
     "GetInventoryItemID",
     "GetInventoryItemQuality",
