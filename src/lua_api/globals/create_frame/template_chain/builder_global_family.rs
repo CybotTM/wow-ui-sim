@@ -11,6 +11,24 @@ pub(super) fn build_global_family_handler(
     state: &mut LuaState,
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
+    if let Some(result) = build_global_method_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_global_tooltip_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = build_global_misc_variants(state, handler_ref)? {
+        return Ok(Some(result));
+    }
+    Ok(None)
+}
+
+/// LFG branch + the `target[method](...)` shapes (plain, with self/string/
+/// global/self-id/self-field args).
+fn build_global_method_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::GetLfgModeBranch {
             category_path,
@@ -63,6 +81,18 @@ pub(super) fn build_global_family_handler(
             field,
         } => build_global_method_with_self_field_handler(state, target_path, method_name, field)
             .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// `GameTooltip:SetOwner(...)` + `:SetText(...)` shapes — both the
+/// resolved-global and the literal-text/colour variants, plus the
+/// conditional tooltip used by checkbox/option templates.
+fn build_global_tooltip_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::GlobalTooltipSetOwnerThenSetText {
             target_path,
             anchor,
@@ -116,6 +146,18 @@ pub(super) fn build_global_family_handler(
             blue_path,
         )
         .map(Some),
+        _ => Ok(None),
+    }
+}
+
+/// Toggle visibility, suffix-named global methods, and "call method then
+/// assign field" — the misc shapes that don't fit either the method or
+/// tooltip family.
+fn build_global_misc_variants(
+    state: &mut LuaState,
+    handler_ref: &FastHandlerRef<'_>,
+) -> LuaResult<Option<Val>> {
+    match handler_ref {
         FastHandlerRef::ToggleGlobalVisibility { target_path } => {
             build_toggle_global_visibility_handler(state, target_path).map(Some)
         }
