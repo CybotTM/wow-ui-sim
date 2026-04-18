@@ -622,4 +622,72 @@ mod tests {
             );
         }
     }
+
+    /// Regression: handles must survive a full GC cycle triggered after
+    /// install. Rilua's `intern_string_static` registers each cache entry
+    /// as a GC root; this test pins that contract from the wow-ui-sim side.
+    /// If the GC ever collects a static-cache entry, the decode below
+    /// would panic on a missing / freed arena slot.
+    #[test]
+    fn handles_survive_full_gc_cycle() {
+        use rilua::{Lua, LuaApi, LuaApiMut};
+
+        let mut lua = Lua::new().expect("fresh rilua VM");
+        let handles = HotLiteralRegistry::install(lua.state_mut());
+
+        // Force a complete mark-and-sweep cycle. `intern_string_static`'s
+        // mid-cycle protection is exercised implicitly since the install
+        // above runs outside GC, but the full cycle here exercises the
+        // `mark_gc_roots` path that preserves the static cache.
+        lua.gc_collect().expect("full gc");
+
+        // Every handle in every category must still decode to its source bytes.
+        let state = lua.state_mut();
+        let categories: &[(&'static str, &[&[u8]], &[GcRef<LuaString>])] = &[
+            ("globals", HOT_GLOBALS, &handles.globals),
+            ("namespaces", HOT_NAMESPACES, &handles.namespaces),
+            ("frame_methods", HOT_FRAME_METHODS, &handles.frame_methods),
+            ("metatable_keys", HOT_METATABLE_KEYS, &handles.metatable_keys),
+            (
+                "loader_sentinels",
+                HOT_LOADER_SENTINELS,
+                &handles.loader_sentinels,
+            ),
+        ];
+        for (name, src, refs) in categories {
+            for (i, (bytes, r)) in src.iter().zip(refs.iter()).enumerate() {
+                let s = state.gc.string_arena.get(*r).unwrap_or_else(|| {
+                    panic!("{name}[{i}] handle dangling after gc_collect")
+                });
+                assert_eq!(
+                    s.data(),
+                    *bytes,
+                    "{name}[{i}] handle decoded to wrong bytes after gc_collect",
+                );
+            }
+        }
+    }
+
+    /// Regression: installing through the real wow-ui-sim bootstrap path
+    /// (`WowLuaEnv::new`) populates `WowLuaAppData.hot_literals` with a
+    /// full-length `HotLiteralHandles`. Pins the invariant that the
+    /// `register_bootstrap_globals` prewarm step actually ran.
+    #[test]
+    fn bootstrap_populates_app_data_hot_literals() {
+        use crate::lua_api::WowLuaEnv;
+        use crate::lua_api::env::WowLuaAppData;
+        use rilua::LuaApi;
+
+        let env = WowLuaEnv::new().expect("fresh wow lua env");
+        let lua = env.lua.borrow();
+        let app = lua
+            .state()
+            .app_data::<WowLuaAppData>()
+            .expect("app data present");
+        let handles = app
+            .hot_literals
+            .as_ref()
+            .expect("hot_literals populated by bootstrap prewarm");
+        assert_eq!(handles.len(), HOT_LITERAL_COUNT);
+    }
 }
