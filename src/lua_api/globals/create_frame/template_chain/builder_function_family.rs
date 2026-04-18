@@ -272,53 +272,57 @@ fn build_function_handler(
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
 }
 
+// ── Per-kind Lua function-handler templates ──────────────────────────────────
+//
+// Each template closes over `fn` (the resolved global) and returns a
+// wrapper function that forwards the right argument shape. Kept as
+// named consts so `function_handler_template` is a trivial dispatch.
+
+const NOARGS_TEMPLATE: &str = r#"
+    local fn = ...
+    return function(self, ...)
+        return fn()
+    end
+"#;
+
+const SELF_ID_TEMPLATE: &str = r#"
+    local fn = ...
+    return function(self, ...)
+        return fn(self:GetID())
+    end
+"#;
+
+const EVENT_VARARGS_TEMPLATE: &str = r#"
+    local fn = ...
+    return function(self, event, ...)
+        return fn(self, event, ...)
+    end
+"#;
+
+const BUTTON_TEMPLATE: &str = r#"
+    local fn = ...
+    return function(self, button, ...)
+        return fn(self, button, ...)
+    end
+"#;
+
+const ELAPSED_TEMPLATE: &str = r#"
+    local fn = ...
+    return function(self, elapsed, ...)
+        return fn(self, elapsed, ...)
+    end
+"#;
+
 fn function_handler_template(kind: FunctionHandlerKind) -> (&'static str, &'static str) {
     match kind {
-        FunctionHandlerKind::NoArgs => (
-            r#"
-                local fn = ...
-                return function(self, ...)
-                    return fn()
-                end
-            "#,
-            "template-inline-function-noargs",
-        ),
-        FunctionHandlerKind::SelfId => (
-            r#"
-                local fn = ...
-                return function(self, ...)
-                    return fn(self:GetID())
-                end
-            "#,
-            "template-inline-function-self-id",
-        ),
+        FunctionHandlerKind::NoArgs => (NOARGS_TEMPLATE, "template-inline-function-noargs"),
+        FunctionHandlerKind::SelfId => (SELF_ID_TEMPLATE, "template-inline-function-self-id"),
         FunctionHandlerKind::EventVarargs => (
-            r#"
-                local fn = ...
-                return function(self, event, ...)
-                    return fn(self, event, ...)
-                end
-            "#,
+            EVENT_VARARGS_TEMPLATE,
             "template-inline-function-event-varargs",
         ),
-        FunctionHandlerKind::Button => (
-            r#"
-                local fn = ...
-                return function(self, button, ...)
-                    return fn(self, button, ...)
-                end
-            "#,
-            "template-inline-function-button",
-        ),
-        FunctionHandlerKind::Elapsed => (
-            r#"
-                local fn = ...
-                return function(self, elapsed, ...)
-                    return fn(self, elapsed, ...)
-                end
-            "#,
-            "template-inline-function-elapsed",
-        ),
+        FunctionHandlerKind::Button => (BUTTON_TEMPLATE, "template-inline-function-button"),
+        FunctionHandlerKind::Elapsed => (ELAPSED_TEMPLATE, "template-inline-function-elapsed"),
     }
 }
 
