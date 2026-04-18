@@ -355,12 +355,107 @@ pub const HOT_LOADER_SENTINELS: &[&[u8]] = &[
 ];
 
 /// Total count of whitelisted literals, sum of all category slices.
-/// Exposed for the future registry-size assertion in sub-item 2.
 pub const HOT_LITERAL_COUNT: usize = HOT_GLOBALS.len()
     + HOT_NAMESPACES.len()
     + HOT_FRAME_METHODS.len()
     + HOT_METATABLE_KEYS.len()
     + HOT_LOADER_SENTINELS.len();
+
+// ── Registry (Track 1 sub-item 2) ────────────────────────────────────────
+
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::string::LuaString;
+
+/// Interned handles for every entry in every category.
+///
+/// Built once during VM bootstrap via [`HotLiteralRegistry::install`] and
+/// stashed on [`crate::lua_api::env::WowLuaAppData`]. Each `GcRef<LuaString>`
+/// is a pointer into rilua's string arena; rilua's `intern_string_static`
+/// cache holds a parallel entry that keeps the string alive as a GC root,
+/// so the handles here remain valid for the life of the VM.
+///
+/// Indexed accessors mirror position in the underlying [`HOT_GLOBALS`],
+/// [`HOT_NAMESPACES`], etc. slices. Callers that want compile-time-checked
+/// symbolic access can build enums over the category in a follow-up patch
+/// (Track 1 sub-item 3).
+#[derive(Clone)]
+pub struct HotLiteralHandles {
+    globals: Box<[GcRef<LuaString>]>,
+    namespaces: Box<[GcRef<LuaString>]>,
+    frame_methods: Box<[GcRef<LuaString>]>,
+    metatable_keys: Box<[GcRef<LuaString>]>,
+    loader_sentinels: Box<[GcRef<LuaString>]>,
+}
+
+impl HotLiteralHandles {
+    /// Total number of handles stored, across all categories. Always equal
+    /// to [`HOT_LITERAL_COUNT`] after a successful [`install`].
+    pub fn len(&self) -> usize {
+        self.globals.len()
+            + self.namespaces.len()
+            + self.frame_methods.len()
+            + self.metatable_keys.len()
+            + self.loader_sentinels.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Indexed handle for [`HOT_GLOBALS`]. Panics on out-of-range index.
+    pub fn global(&self, index: usize) -> GcRef<LuaString> {
+        self.globals[index]
+    }
+
+    /// Indexed handle for [`HOT_NAMESPACES`]. Panics on out-of-range index.
+    pub fn namespace(&self, index: usize) -> GcRef<LuaString> {
+        self.namespaces[index]
+    }
+
+    /// Indexed handle for [`HOT_FRAME_METHODS`]. Panics on out-of-range index.
+    pub fn frame_method(&self, index: usize) -> GcRef<LuaString> {
+        self.frame_methods[index]
+    }
+
+    /// Indexed handle for [`HOT_METATABLE_KEYS`]. Panics on out-of-range index.
+    pub fn metatable_key(&self, index: usize) -> GcRef<LuaString> {
+        self.metatable_keys[index]
+    }
+
+    /// Indexed handle for [`HOT_LOADER_SENTINELS`]. Panics on out-of-range index.
+    pub fn loader_sentinel(&self, index: usize) -> GcRef<LuaString> {
+        self.loader_sentinels[index]
+    }
+}
+
+/// Owns the pre-intern step during VM bootstrap. Call [`install`] once
+/// before any addon load so the subsequent hot paths (sub-item 3) find
+/// every whitelisted literal already in rilua's static intern cache.
+pub struct HotLiteralRegistry;
+
+impl HotLiteralRegistry {
+    /// Pre-intern every entry in the whitelist via
+    /// `state.gc.intern_string_static(&'static [u8])`. Returns a
+    /// [`HotLiteralHandles`] populated with the resulting handles in the
+    /// same order as each category slice.
+    pub fn install(state: &mut LuaState) -> HotLiteralHandles {
+        HotLiteralHandles {
+            globals: Self::intern_all(state, HOT_GLOBALS),
+            namespaces: Self::intern_all(state, HOT_NAMESPACES),
+            frame_methods: Self::intern_all(state, HOT_FRAME_METHODS),
+            metatable_keys: Self::intern_all(state, HOT_METATABLE_KEYS),
+            loader_sentinels: Self::intern_all(state, HOT_LOADER_SENTINELS),
+        }
+    }
+
+    fn intern_all(state: &mut LuaState, slice: &[&'static [u8]]) -> Box<[GcRef<LuaString>]> {
+        slice
+            .iter()
+            .map(|entry| state.gc.intern_string_static(entry))
+            .collect()
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -406,5 +501,99 @@ mod tests {
     #[test]
     fn version_is_nonzero() {
         assert!(WHITELIST_VERSION >= 1);
+    }
+
+    /// End-to-end bootstrap: install the registry on a fresh VM and
+    /// confirm each category's handles decode back to the source bytes.
+    /// Pins the invariant that the static intern cache survives the
+    /// prewarm step.
+    #[test]
+    fn registry_install_produces_handles_that_decode_to_source_bytes() {
+        use rilua::{Lua, LuaApiMut};
+
+        let mut lua = Lua::new().expect("fresh rilua VM");
+        let handles = HotLiteralRegistry::install(lua.state_mut());
+
+        assert_eq!(handles.len(), HOT_LITERAL_COUNT);
+
+        // Spot-check one entry from each category — full roundtrip for
+        // every entry in `every_handle_decodes_to_its_source_bytes`.
+        let checks: &[(&'static [u8], GcRef<LuaString>)] = &[
+            (HOT_GLOBALS[0], handles.global(0)),
+            (HOT_NAMESPACES[0], handles.namespace(0)),
+            (HOT_FRAME_METHODS[0], handles.frame_method(0)),
+            (HOT_METATABLE_KEYS[0], handles.metatable_key(0)),
+            (HOT_LOADER_SENTINELS[0], handles.loader_sentinel(0)),
+        ];
+        for (expected, handle) in checks {
+            let s = lua
+                .state_mut()
+                .gc
+                .string_arena
+                .get(*handle)
+                .expect("interned string alive");
+            assert_eq!(s.data(), *expected);
+        }
+    }
+
+    /// Full roundtrip: every position in every category slice must decode
+    /// back to its source bytes via the arena lookup.
+    #[test]
+    fn every_handle_decodes_to_its_source_bytes() {
+        use rilua::{Lua, LuaApiMut};
+
+        let mut lua = Lua::new().expect("fresh rilua VM");
+        let handles = HotLiteralRegistry::install(lua.state_mut());
+
+        let state = lua.state_mut();
+        let categories: &[(&'static str, &[&[u8]], &[GcRef<LuaString>])] = &[
+            ("globals", HOT_GLOBALS, &handles.globals),
+            ("namespaces", HOT_NAMESPACES, &handles.namespaces),
+            ("frame_methods", HOT_FRAME_METHODS, &handles.frame_methods),
+            ("metatable_keys", HOT_METATABLE_KEYS, &handles.metatable_keys),
+            (
+                "loader_sentinels",
+                HOT_LOADER_SENTINELS,
+                &handles.loader_sentinels,
+            ),
+        ];
+        for (name, src, refs) in categories {
+            assert_eq!(src.len(), refs.len(), "{name} length mismatch");
+            for (i, (bytes, r)) in src.iter().zip(refs.iter()).enumerate() {
+                let s = state
+                    .gc
+                    .string_arena
+                    .get(*r)
+                    .unwrap_or_else(|| panic!("{name}[{i}] interned string missing"));
+                assert_eq!(s.data(), *bytes, "{name}[{i}] byte mismatch");
+            }
+        }
+    }
+
+    /// Second call to `install` on the same VM must return equivalent
+    /// handles (same arena pointers), exercising rilua's static intern
+    /// cache hit path.
+    #[test]
+    fn second_install_returns_same_handles_via_cache_hit() {
+        use rilua::{Lua, LuaApiMut};
+
+        let mut lua = Lua::new().expect("fresh rilua VM");
+        let first = HotLiteralRegistry::install(lua.state_mut());
+        let second = HotLiteralRegistry::install(lua.state_mut());
+
+        for i in 0..HOT_GLOBALS.len() {
+            assert_eq!(
+                first.global(i),
+                second.global(i),
+                "global[{i}] handle differs between installs",
+            );
+        }
+        for i in 0..HOT_NAMESPACES.len() {
+            assert_eq!(
+                first.namespace(i),
+                second.namespace(i),
+                "namespace[{i}] handle differs between installs",
+            );
+        }
     }
 }

@@ -5,10 +5,26 @@
 //! type, ipairs, pairs, getmetatable, and setmetatable.
 
 use super::super::SimState;
+use super::super::env::WowLuaAppData;
+use super::super::hot_literals::HotLiteralRegistry;
 use super::super::methods::mark_frame_ref_cache_no_traverse;
 use rilua::LuaApiMut;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+/// Pre-intern the Track 1 whitelist via `intern_string_static` and stash
+/// the resulting [`HotLiteralHandles`] on the Lua app-data so later
+/// consumers can fetch an already-interned handle without re-hashing.
+/// Must run at the top of the bootstrap pass, before any other registrar
+/// touches the string arena.
+fn prewarm_hot_literal_registry(lua: &mut rilua::Lua) {
+    let handles = HotLiteralRegistry::install(lua.state_mut());
+    let app_data = lua
+        .state_mut()
+        .app_data_mut::<WowLuaAppData>()
+        .expect("WowLuaEnv rilua app_data should always exist");
+    app_data.hot_literals = Some(handles);
+}
 
 /// Register the live rilua global surface.
 ///
@@ -34,6 +50,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
 }
 
 fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    prewarm_hot_literal_registry(lua);
     super::strings::register_all_ui_strings(lua)?;
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
