@@ -671,6 +671,34 @@ fn build_global_method_with_global_string_function_result_and_three_number_args_
     )
 }
 
+const TEMPLATE_GET_LFG_MODE_BRANCH: &str = r#"
+    local category_path, slot_path, leave_fn, join_fn = ...
+    local function resolve_global(path)
+        local value = getfenv(0) or _G
+        for segment in string.gmatch(path, "[^%.]+") do
+            value = value and value[segment]
+        end
+        return value
+    end
+    return function(self, ...)
+        local category = resolve_global(category_path)
+        local slot = slot_path ~= nil and resolve_global(slot_path) or nil
+        local mode, subMode
+        if slot_path ~= nil then
+            mode, subMode = GetLFGMode(category, slot)
+        else
+            mode, subMode = GetLFGMode(category)
+        end
+        if mode == "queued" or mode == "listed" or mode == "rolecheck" or mode == "suspended" then
+            if slot_path ~= nil then
+                return leave_fn(category, slot)
+            end
+            return leave_fn(category)
+        end
+        return join_fn()
+    end
+"#;
+
 fn build_get_lfg_mode_branch_handler(
     state: &mut LuaState,
     category_path: &str,
@@ -680,33 +708,7 @@ fn build_get_lfg_mode_branch_handler(
 ) -> LuaResult<Val> {
     let builder = load_template(
         state,
-        r#"
-            local category_path, slot_path, leave_fn, join_fn = ...
-            local function resolve_global(path)
-                local value = getfenv(0) or _G
-                for segment in string.gmatch(path, "[^%.]+") do
-                    value = value and value[segment]
-                end
-                return value
-            end
-            return function(self, ...)
-                local category = resolve_global(category_path)
-                local slot = slot_path ~= nil and resolve_global(slot_path) or nil
-                local mode, subMode
-                if slot_path ~= nil then
-                    mode, subMode = GetLFGMode(category, slot)
-                else
-                    mode, subMode = GetLFGMode(category)
-                end
-                if mode == "queued" or mode == "listed" or mode == "rolecheck" or mode == "suspended" then
-                    if slot_path ~= nil then
-                        return leave_fn(category, slot)
-                    end
-                    return leave_fn(category)
-                end
-                return join_fn()
-            end
-        "#,
+        TEMPLATE_GET_LFG_MODE_BRANCH,
         "template-get-lfg-mode-branch-handler",
     )?;
     let category_path = create_string(state, category_path);
