@@ -14,7 +14,7 @@ pub use frame::{
     MinimapBlobLayerStyle, MinimapBlobRingStyle, TextJustify, TextOutline,
 };
 pub use frame_enums::{DrawLayer, FrameStrata};
-pub use registry::{RenderDirtyBatch, RenderDirtySource, WidgetRegistry};
+pub use registry::{AnchorCyclePath, RenderDirtyBatch, RenderDirtySource, WidgetRegistry};
 
 use std::sync::atomic::{AtomicU64, Ordering};
 

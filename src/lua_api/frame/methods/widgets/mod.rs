@@ -34,6 +34,7 @@ pub fn register_all(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<
     slider::register_slider(state, metatable)?;
     slider::register_shared_value(state, metatable)?;
     slider::register_checkbutton(state, metatable)?;
+    slider::register_colorselect(state, metatable)?;
     slider::register_scrollframe(state, metatable)?;
     statusbar::register_statusbar(state, metatable)?;
     model::register_model(state, metatable)?;

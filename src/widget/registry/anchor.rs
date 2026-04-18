@@ -1,10 +1,17 @@
 //! Anchor dependency tracking: reverse index and cycle detection.
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use super::WidgetRegistry;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AnchorCyclePath {
+    pub relative_to_id: u64,
+    pub dependent_id: u64,
+    pub dependent_ancestors: Vec<u64>,
+}
 
 impl WidgetRegistry {
     /// Check if setting a point from `frame_id` to `relative_to_id` would create a cycle.
@@ -12,6 +19,34 @@ impl WidgetRegistry {
     /// depends on frame_id.
     pub fn would_create_anchor_cycle(&self, frame_id: u64, relative_to_id: u64) -> bool {
         frame_id == relative_to_id || self.anchor_dependency_reaches_frame(relative_to_id, frame_id)
+    }
+
+    pub fn describe_anchor_cycle(
+        &self,
+        frame_id: u64,
+        relative_to_id: u64,
+    ) -> Option<AnchorCyclePath> {
+        if frame_id == relative_to_id {
+            return Some(AnchorCyclePath {
+                relative_to_id,
+                dependent_id: relative_to_id,
+                dependent_ancestors: Vec::new(),
+            });
+        }
+
+        let path = self.anchor_dependency_path(relative_to_id, frame_id)?;
+        let dependent_id = path.iter().rev().nth(1).copied().unwrap_or(relative_to_id);
+        let dependent_ancestors = path[..path.len().saturating_sub(2)]
+            .iter()
+            .rev()
+            .copied()
+            .collect();
+
+        Some(AnchorCyclePath {
+            relative_to_id,
+            dependent_id,
+            dependent_ancestors,
+        })
     }
 
     fn anchor_dependency_reaches_frame(&self, start_id: u64, target_id: u64) -> bool {
@@ -25,6 +60,26 @@ impl WidgetRegistry {
         }
 
         false
+    }
+
+    fn anchor_dependency_path(&self, start_id: u64, target_id: u64) -> Option<Vec<u64>> {
+        let mut queue = VecDeque::from([start_id]);
+        let mut seen = FxHashSet::from_iter([start_id]);
+        let mut parents = HashMap::from([(start_id, start_id)]);
+
+        while let Some(check_id) = queue.pop_front() {
+            for anchor_target_id in self.anchor_target_ids(check_id) {
+                if seen.insert(anchor_target_id) {
+                    parents.insert(anchor_target_id, check_id);
+                    if anchor_target_id == target_id {
+                        return Some(rebuild_anchor_cycle_path(&parents, start_id, target_id));
+                    }
+                    queue.push_back(anchor_target_id);
+                }
+            }
+        }
+
+        None
     }
 
     fn enqueue_anchor_dependencies(
@@ -124,4 +179,21 @@ pub(super) fn hash_map_u64_hash_set_u64_bytes(values: &FxHashMap<u64, FxHashSet<
             .values()
             .map(|s| s.capacity() * std::mem::size_of::<u64>())
             .sum::<usize>()
+}
+
+fn rebuild_anchor_cycle_path(
+    parents: &HashMap<u64, u64>,
+    start_id: u64,
+    target_id: u64,
+) -> Vec<u64> {
+    let mut path = vec![target_id];
+    let mut current = target_id;
+
+    while current != start_id {
+        current = parents.get(&current).copied().unwrap_or(start_id);
+        path.push(current);
+    }
+
+    path.reverse();
+    path
 }

@@ -3,7 +3,7 @@
 use super::shared::{opt_f32, opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
-    frame_ref, table_get, val_to_string,
+    frame_ref, get_or_create_frame_fields, table_get, table_set, val_to_string,
 };
 use crate::lua_api::script_helpers::{call_void_function_with_fallback_state, get_script};
 use crate::lua_api::tooltip::TooltipLine;
@@ -651,7 +651,7 @@ pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     apply_tooltip_anchor(tooltip, &anchor_kind, owner_id, x_offset, y_offset);
     if let Some(td) = sim.tooltips.get_mut(&tooltip_id) {
         td.owner_id = owner_id;
-        td.anchor_type = anchor_kind;
+        td.anchor_type = anchor_kind.clone();
         td.anchor_x_offset = x_offset;
         td.anchor_y_offset = y_offset;
         td.lines.clear();
@@ -659,6 +659,9 @@ pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     }
     sim.set_frame_visible(tooltip_id, false);
     drop(sim);
+    let fields = get_or_create_frame_fields(state, tooltip_id);
+    let anchor_value = create_string(state, &anchor_kind);
+    table_set(state, fields, "anchor", anchor_value);
     fire_tooltip_script(state, tooltip_id, "OnTooltipCleared");
     Ok(0)
 }

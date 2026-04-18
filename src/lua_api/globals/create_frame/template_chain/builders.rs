@@ -21,8 +21,12 @@ pub(super) fn load_template(
     source: &str,
     tag: &str,
 ) -> LuaResult<rilua::Function> {
-    crate::loader::chunk_cache::load_chunk(state, source, tag)
-        .map_err(|error| rilua::runtime_error(error.to_string()))
+    let saved_slots = state.global_slots.take();
+    let cache_tag = format!("{tag}-no-global-slots");
+    let result = crate::loader::chunk_cache::load_chunk(state, source, &cache_tag)
+        .map_err(|error| rilua::runtime_error(error.to_string()));
+    state.global_slots = saved_slots;
+    result
 }
 
 fn build_register_for_clicks_handler(

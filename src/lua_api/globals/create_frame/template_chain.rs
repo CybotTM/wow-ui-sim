@@ -203,8 +203,12 @@ pub(crate) fn apply_template_scripts(
     }
 
     let chunk = format!("local frame = ...\n{script_code}");
-    let func = crate::loader::chunk_cache::load_chunk(state, &chunk, "template-scripts")
-        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let saved_slots = state.global_slots.take();
+    let func =
+        crate::loader::chunk_cache::load_chunk(state, &chunk, "template-scripts-no-global-slots")
+            .map_err(|error| rilua::runtime_error(error.to_string()));
+    state.global_slots = saved_slots;
+    let func = func?;
     let frame = frame_ref(state, frame_id)?;
     match crate::lua_api::script_helpers::call_void_function_with_fallback_state(
         state,
@@ -667,10 +671,6 @@ enum FastHandlerRef<'a> {
         slot_path: Option<&'a str>,
         leave_function: &'a str,
         join_function: &'a str,
-    },
-    CopyClubTicketToClipboardFromParent,
-    PlaySoundThenCopyClubTicketToClipboardFromParent {
-        sound_path: &'a str,
     },
     GrandparentMethodWithNotSelfCheckedArg {
         method_name: &'a str,

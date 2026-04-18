@@ -1,6 +1,9 @@
 //! CallbackRegistryMixin equivalents: RegisterCallback, UnregisterCallback, TriggerEvent.
 
-use crate::lua_api::methods::{call_function_state, frame_id_from_stack, frame_ref, val_to_string};
+use crate::lua_api::methods::{
+    call_function_state, extract_frame_id, frame_id_from_stack, frame_ref,
+    get_or_create_frame_fields, table_get, table_set, val_to_string,
+};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::stack_val;
 use rilua::vm::gc::arena::GcRef;
@@ -222,6 +225,22 @@ pub(super) fn trigger_callback_event(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn setup_menu(_state: &mut LuaState) -> LuaResult<u32> {
+    let state = _state;
+    let frame = stack_val(state, 1);
+    let Some(id) = extract_frame_id(state, frame) else {
+        return Ok(0);
+    };
+    let fields = get_or_create_frame_fields(state, id);
+    let override_fn = table_get(state, fields, "SetupMenu");
+    if matches!(override_fn, Val::Function(_)) {
+        let arg_count = state.top.saturating_sub(state.base) as i32;
+        let args: Vec<Val> = (1..=arg_count)
+            .map(|index| stack_val(state, index))
+            .collect();
+        let _ = call_function_state(state, override_fn, &args)?;
+        return Ok(0);
+    }
+    table_set(state, fields, "menuGenerator", stack_val(state, 2));
     Ok(0)
 }
 

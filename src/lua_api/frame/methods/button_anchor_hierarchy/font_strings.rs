@@ -45,39 +45,76 @@ fn create_synthetic_text_child(state: &mut LuaState, id: u64) -> LuaResult<u32> 
                     crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
                 ),
                 frame.name.as_ref().map(|name| format!("{name}Text")),
-                frame.text.clone().unwrap_or_default(),
+                frame.text.clone(),
             )
         })
     };
-    let Some((is_button, child_name, text_value)) = fallback else {
+    let Some((is_button, _child_name, text_value)) = fallback else {
         state.push(Val::Nil);
         return Ok(1);
     };
-    if !is_button {
+    let has_normal_font_object = super::buttons::has_normal_font_object(state, id);
+    if !is_button || (text_value.is_none() && !has_normal_font_object) {
         state.push(Val::Nil);
         return Ok(1);
     }
 
-    let child_id = register_font_string_child(state, id, child_name, text_value)?;
-    let _ = sync_child_to_rilua(state, id, "Text", child_id);
+    let Some(child_id) = ensure_button_text_child(state, id)? else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
     let val = frame_ref(state, child_id)?;
     state.push(val);
     Ok(1)
+}
+
+pub(super) fn ensure_button_text_child(state: &mut LuaState, id: u64) -> LuaResult<Option<u64>> {
+    if let Some(tid) = find_existing_text_child(state, id) {
+        return Ok(Some(tid));
+    }
+
+    let fallback = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).map(|frame| {
+            (
+                matches!(
+                    frame.widget_type,
+                    crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
+                ),
+                frame.name.as_ref().map(|name| format!("{name}Text")),
+                frame.text.clone(),
+            )
+        })
+    };
+
+    let Some((is_button, child_name, text_value)) = fallback else {
+        return Ok(None);
+    };
+    if !is_button {
+        return Ok(None);
+    }
+
+    let child_id = register_font_string_child(state, id, child_name, text_value)?;
+    let _ = sync_child_to_rilua(state, id, "Text", child_id);
+    Ok(Some(child_id))
 }
 
 fn register_font_string_child(
     state: &mut LuaState,
     id: u64,
     child_name: Option<String>,
-    text_value: String,
+    text_value: Option<String>,
 ) -> LuaResult<u64> {
     use crate::widget::{Frame, WidgetType};
     let mut font_string = Frame::new(WidgetType::FontString, child_name, Some(id));
     font_string.parent_key = Some("Text".to_string());
-    font_string.text = Some(text_value.clone());
-    font_string.text_stripped = Some(crate::render::strip_wow_markup(&text_value));
+    if let Some(text_value) = text_value {
+        font_string.text_stripped = Some(crate::render::strip_wow_markup(&text_value));
+        font_string.text = Some(text_value);
+    }
     super::super::methods_helpers::set_all_points_anchors_pub(&mut font_string, id);
     let child_id = font_string.id;
+    let child_global_name = font_string.name.clone();
 
     let mut sim = borrow_state_mut(state)?;
     sim.widgets.register(font_string);
@@ -86,6 +123,10 @@ fn register_font_string_child(
         button.children_keys.insert("Text".to_string(), child_id);
     }
     sim.invalidate_strata_buckets();
+    drop(sim);
+    if let Some(child_global_name) = child_global_name {
+        bind_named_child_global(state, &child_global_name, child_id)?;
+    }
     Ok(child_id)
 }
 

@@ -31,8 +31,16 @@ pub fn load_lua_file(
     let patched_source = patch_lua_source(&bytes, &chunk_name);
 
     let compile_start = Instant::now();
-    let func_result =
-        env.with_state(|state| load_cached_or_compile(state, &patched_source, &chunk_name, timing));
+    let func_result = env.with_state(|state| {
+        if chunk_name.starts_with("@Interface/") {
+            load_cached_or_compile(state, &patched_source, &chunk_name, timing)
+        } else {
+            let saved_slots = state.global_slots.take();
+            let result = load_cached_or_compile(state, &patched_source, &chunk_name, timing);
+            state.global_slots = saved_slots;
+            result
+        }
+    });
     let compile_elapsed = compile_start.elapsed();
     timing.lua_compile_time += compile_elapsed;
     timing.lua_exec_time += compile_elapsed;
@@ -214,10 +222,10 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha(), chatFrame.oldAlpha), chatFrame.oldAlpha);",
                 "UIFrameFadeOut(object, CHAT_FRAME_FADE_OUT_TIME, max(object:GetAlpha() or 0, chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA), chatFrame.oldAlpha or DEFAULT_CHATFRAME_ALPHA);",
             )
-    } else if chunk_name.ends_with("/TextToSpeechFrame.lua") {
+    } else if chunk_name.ends_with("TextToSpeechFrame.lua") {
         source.replace(
-            "TextToSpeechFrame_SetupVoiceDropdown(self);\n\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown(self);",
-            "if type(TextToSpeechFrame_SetupVoiceDropdown) ~= \"function\" then\n\t\t\tfunction TextToSpeechFrame_SetupVoiceDropdown(self)\n\t\t\t\tSetupVoiceMenu(self.PanelContainer.TtsVoiceDropdown, Enum.TtsVoiceType.Standard);\n\t\t\tend\n\t\tend\n\t\tif type(TextToSpeechFrame_SetupAlternateVoiceDropdown) ~= \"function\" then\n\t\t\tfunction TextToSpeechFrame_SetupAlternateVoiceDropdown(self)\n\t\t\t\tSetupVoiceMenu(self.PanelContainer.TtsVoiceAlternateDropdown, Enum.TtsVoiceType.Alternate);\n\t\t\tend\n\t\tend\n\n\t\tTextToSpeechFrame_SetupVoiceDropdown(self);\n\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown(self);",
+            "function TextToSpeechFrame_CheckLoad(self)",
+            "local __wow_saved_text_to_speech_voice_dropdown = TextToSpeechFrame_SetupVoiceDropdown\nlocal __wow_saved_text_to_speech_alt_voice_dropdown = TextToSpeechFrame_SetupAlternateVoiceDropdown\nlocal function __wow_ensure_text_to_speech_dropdown_helpers(self)\n\tif type(TextToSpeechFrame_SetupVoiceDropdown) ~= \"function\" then\n\t\tif type(__wow_saved_text_to_speech_voice_dropdown) == \"function\" then\n\t\t\tTextToSpeechFrame_SetupVoiceDropdown = __wow_saved_text_to_speech_voice_dropdown\n\t\telse\n\t\t\tfunction TextToSpeechFrame_SetupVoiceDropdown(frame)\n\t\t\t\tSetupVoiceMenu(frame.PanelContainer.TtsVoiceDropdown, Enum.TtsVoiceType.Standard);\n\t\t\tend\n\t\tend\n\tend\n\tif type(TextToSpeechFrame_SetupAlternateVoiceDropdown) ~= \"function\" then\n\t\tif type(__wow_saved_text_to_speech_alt_voice_dropdown) == \"function\" then\n\t\t\tTextToSpeechFrame_SetupAlternateVoiceDropdown = __wow_saved_text_to_speech_alt_voice_dropdown\n\t\telse\n\t\t\tfunction TextToSpeechFrame_SetupAlternateVoiceDropdown(frame)\n\t\t\t\tSetupVoiceMenu(frame.PanelContainer.TtsVoiceAlternateDropdown, Enum.TtsVoiceType.Alternate);\n\t\t\tend\n\t\tend\n\tend\nend\n\nfunction TextToSpeechFrame_CheckLoad(self)\n\t__wow_ensure_text_to_speech_dropdown_helpers(self)",
         )
     } else if chunk_name.ends_with("/Blizzard_PetBattleUI.lua") {
         source

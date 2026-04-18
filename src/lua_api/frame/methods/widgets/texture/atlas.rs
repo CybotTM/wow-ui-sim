@@ -14,6 +14,13 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let Some(lookup) = crate::atlas::get_atlas_info(&atlas_name) else {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.atlas = Some(atlas_name);
+            frame.texture = None;
+            frame.tex_coords = None;
+            frame.atlas_tex_coords = None;
+        }
         return Ok(0);
     };
     let use_atlas_size = opt_bool(state, 3).unwrap_or(false);

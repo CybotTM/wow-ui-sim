@@ -155,7 +155,7 @@ impl Default for ModelSceneCameraState {
             right: (1.0, 0.0, 0.0),
             up: (0.0, 1.0, 0.0),
             field_of_view: 0.785,
-            near_clip: 0.1,
+            near_clip: 1.0,
             far_clip: 100.0,
         }
     }

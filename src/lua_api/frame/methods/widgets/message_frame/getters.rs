@@ -14,6 +14,24 @@ use rilua::{LuaResult, Val};
 
 const INDENTED_WORD_WRAP_FIELD: &str = "_mf_indented_word_wrap";
 
+fn indented_word_wrap_field_name(state: &LuaState) -> String {
+    match stack_val(state, 2) {
+        Val::Bool(_) | Val::Nil => INDENTED_WORD_WRAP_FIELD.to_string(),
+        value => {
+            let suffix = match value {
+                Val::Str(raw) => state
+                    .gc
+                    .string_arena
+                    .get(raw)
+                    .map(|text| String::from_utf8_lossy(text.data()).to_string())
+                    .unwrap_or_default(),
+                _ => String::new(),
+            };
+            format!("{INDENTED_WORD_WRAP_FIELD}_{suffix}")
+        }
+    }
+}
+
 pub(super) fn clear(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
@@ -234,16 +252,22 @@ pub(super) fn get_message_info(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_indented_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let v = val_to_bool(stack_val(state, 2));
+    let value_index = match stack_val(state, 2) {
+        Val::Bool(_) => 2,
+        _ => 3,
+    };
+    let v = val_to_bool(stack_val(state, value_index));
     let fields = get_or_create_frame_fields(state, id);
-    table_set(state, fields, INDENTED_WORD_WRAP_FIELD, Val::Bool(v));
+    let field_name = indented_word_wrap_field_name(state);
+    table_set(state, fields, &field_name, Val::Bool(v));
     Ok(0)
 }
 
 pub(super) fn get_indented_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let fields = get_or_create_frame_fields(state, id);
-    let v = match table_get(state, fields, INDENTED_WORD_WRAP_FIELD) {
+    let field_name = indented_word_wrap_field_name(state);
+    let v = match table_get(state, fields, &field_name) {
         Val::Bool(b) => b,
         _ => false,
     };

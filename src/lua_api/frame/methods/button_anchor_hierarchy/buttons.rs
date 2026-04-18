@@ -2,7 +2,7 @@
 
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
-    frame_id_from_stack, frame_ref, table_get,
+    frame_id_from_stack, frame_ref, get_or_create_frame_fields, table_get, table_set,
 };
 use crate::lua_api::script_helpers::{call_error_handler_state, get_script as get_rilua_script};
 use crate::lua_bridge::{FromStack, stack_val};
@@ -142,6 +142,19 @@ pub(super) fn click(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_item_button_scale(state: &mut LuaState) -> LuaResult<u32> {
     let self_table = stack_val(state, 1);
+    if let Some(self_id) = extract_frame_id(state, self_table) {
+        let fields = get_or_create_frame_fields(state, self_id);
+        let override_fn = table_get(state, fields, "SetItemButtonScale");
+        if matches!(override_fn, Val::Function(_)) {
+            let arg_count = state.top.saturating_sub(state.base) as i32;
+            let args: Vec<Val> = (1..=arg_count)
+                .map(|index| stack_val(state, index))
+                .collect();
+            let _ = call_function_state(state, override_fn, &args)?;
+            return Ok(0);
+        }
+        table_set(state, fields, "itemButtonScale", stack_val(state, 2));
+    }
     let scale = f64::from_stack(state, 2)?;
     let count = table_get(state, self_table, "Count");
     if let Some(count_id) = extract_frame_id(state, count) {
@@ -177,10 +190,15 @@ pub(super) fn calculate_action(state: &mut LuaState) -> LuaResult<u32> {
 
 // ── Button font objects ───────────────────────────────────────────────────────
 
-use crate::lua_api::methods::{registry_table_or_create, table_set};
+use crate::lua_api::methods::registry_table_or_create;
 
 fn get_or_create_button_font_store(state: &mut LuaState) -> Val {
     registry_table_or_create(state, "__button_font_objects")
+}
+
+pub(super) fn has_normal_font_object(state: &mut LuaState, id: u64) -> bool {
+    let store = get_or_create_button_font_store(state);
+    !matches!(table_get(state, store, &format!("{id}:normal")), Val::Nil)
 }
 
 pub(super) fn set_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
@@ -188,6 +206,7 @@ pub(super) fn set_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let font_object = stack_val(state, 2);
     let store = get_or_create_button_font_store(state);
     table_set(state, store, &format!("{id}:normal"), font_object);
+    let _ = super::font_strings::ensure_button_text_child(state, id)?;
     Ok(0)
 }
 

@@ -139,6 +139,26 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
         target_path,
         method_name,
         first_arg_path,
+        second_self_method,
+        third_self_method,
+        fourth,
+    )) = parse_inline_global_method_with_global_self_method_self_method_bool_args(stmt)
+    {
+        return Some(
+            FastHandlerRef::GlobalMethodWithGlobalSelfMethodSelfMethodBoolArgs {
+                target_path,
+                method_name,
+                first_arg_path,
+                second_self_method,
+                third_self_method,
+                fourth,
+            },
+        );
+    }
+    if let Some((
+        target_path,
+        method_name,
+        first_arg_path,
         second_arg_path,
         third_arg_path,
         fourth_arg_path,
@@ -194,26 +214,9 @@ pub(super) fn parse_global_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             },
         );
     }
-    if let Some((
-        target_path,
-        method_name,
-        first_arg_path,
-        second_self_method,
-        third_self_method,
-        fourth,
-    )) = parse_inline_global_method_with_global_self_method_self_method_bool_args(stmt)
-    {
-        return Some(
-            FastHandlerRef::GlobalMethodWithGlobalSelfMethodSelfMethodBoolArgs {
-                target_path,
-                method_name,
-                first_arg_path,
-                second_self_method,
-                third_self_method,
-                fourth,
-            },
-        );
-    }
+    // This shape behaves correctly on the generic Lua path, but the current
+    // fast path is brittle when tests intentionally replace `_G.GameTooltip`
+    // with a plain table and assert exact call arguments.
     if let Some((target_path, method_name)) = parse_inline_global_method_with_self_id_arg(stmt) {
         return Some(FastHandlerRef::GlobalMethodWithSelfIdArg {
             target_path,

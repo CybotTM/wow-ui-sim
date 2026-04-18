@@ -3,10 +3,10 @@
 use super::shared::{opt_string, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
-    sync_child_to_rilua,
+    get_or_create_frame_fields, sync_child_to_rilua, table_get, table_set,
 };
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn, table_set_rust_fn_static};
-use crate::widget::WidgetType;
+use crate::widget::{Frame, WidgetType};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -111,6 +111,86 @@ pub(super) fn is_dragging_thumb(state: &mut LuaState) -> LuaResult<u32> {
     v.into_stack(state)
 }
 
+fn get_named_child_texture_id(state: &LuaState, id: u64, key: &str) -> Option<u64> {
+    borrow_state(state)
+        .ok()?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.children_keys.get(key).copied())
+}
+
+fn ensure_named_child_texture(state: &mut LuaState, id: u64, key: &str) -> LuaResult<u64> {
+    if let Some(child_id) = get_named_child_texture_id(state, id, key) {
+        return Ok(child_id);
+    }
+
+    let child = Frame::new(WidgetType::Texture, None, Some(id));
+    let child_id = child.id;
+    let mut sim = borrow_state_mut(state)?;
+    sim.widgets.register(child);
+    sim.widgets.add_child(id, child_id);
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.children_keys.insert(key.to_string(), child_id);
+    }
+    Ok(child_id)
+}
+
+fn assign_texture_payload(
+    state: &mut LuaState,
+    child_id: u64,
+    texture_value: Val,
+) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    let Some(child) = sim.widgets.get_mut_visual(child_id) else {
+        return Ok(());
+    };
+    match texture_value {
+        Val::Num(value) => {
+            child.texture_file_data_id = Some(value as i64);
+            child.texture = None;
+        }
+        Val::Str(value) => {
+            let Some(raw) = state.gc.string_arena.get(value) else {
+                return Ok(());
+            };
+            child.texture = Some(String::from_utf8_lossy(raw.data()).to_string());
+            child.texture_file_data_id = None;
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+pub(super) fn set_thumb_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let texture_value = stack_val(state, 2);
+    if let Some(child_id) = extract_frame_id(state, texture_value) {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame
+                .children_keys
+                .insert("ThumbTexture".to_string(), child_id);
+        }
+        return Ok(0);
+    }
+
+    let child_id = ensure_named_child_texture(state, id, "ThumbTexture")?;
+    assign_texture_payload(state, child_id, texture_value)?;
+    Ok(0)
+}
+
+pub(super) fn get_thumb_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    match get_named_child_texture_id(state, id, "ThumbTexture") {
+        Some(child_id) => {
+            let thumb = frame_ref(state, child_id)?;
+            state.push(thumb);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 // ---------------------------------------------------------------------------
 // Shared value (Slider + StatusBar)
 // ---------------------------------------------------------------------------
@@ -146,6 +226,7 @@ fn apply_statusbar_value(sim: &mut crate::lua_api::SimState, id: u64, value: f64
 pub(super) fn shared_set_value(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let value = val_to_f64(stack_val(state, 2));
+    let interpolation_mode = opt_string(state, 3);
     let wtype = borrow_state(state)?.widgets.get(id).map(|f| f.widget_type);
     match wtype {
         Some(WidgetType::Slider) => {
@@ -158,7 +239,17 @@ pub(super) fn shared_set_value(state: &mut LuaState) -> LuaResult<u32> {
         }
         Some(WidgetType::StatusBar) => {
             let mut sim = borrow_state_mut(state)?;
-            apply_statusbar_value(&mut sim, id, value);
+            if interpolation_mode.is_some() {
+                if let Some(f) = sim.widgets.get(id) {
+                    let clamped = value.clamp(f.statusbar_min, f.statusbar_max);
+                    if let Some(f) = sim.widgets.get_mut_visual(id) {
+                        f.statusbar_value = clamped;
+                        f.statusbar_interpolation_target = Some(clamped);
+                    }
+                }
+            } else {
+                apply_statusbar_value(&mut sim, id, value);
+            }
         }
         _ => {}
     }
@@ -436,7 +527,205 @@ pub(super) fn register_slider(state: &mut LuaState, metatable: GcRef<Table>) -> 
     table_set_rust_fn_static(state, metatable, "SetStepsPerPage", set_steps_per_page)?;
     table_set_rust_fn_static(state, metatable, "GetStepsPerPage", get_steps_per_page)?;
     table_set_rust_fn_static(state, metatable, "IsDraggingThumb", is_dragging_thumb)?;
+    table_set_rust_fn_static(state, metatable, "SetThumbTexture", set_thumb_texture)?;
+    table_set_rust_fn_static(state, metatable, "GetThumbTexture", get_thumb_texture)?;
     Ok(())
+}
+
+fn read_color_component(state: &mut LuaState, id: u64, key: &str, default: f64) -> f64 {
+    let fields = get_or_create_frame_fields(state, id);
+    match table_get(state, fields, key) {
+        Val::Num(value) => value,
+        _ => default,
+    }
+}
+
+fn write_color_components(state: &mut LuaState, id: u64, rgba: (f64, f64, f64, f64)) {
+    let fields = get_or_create_frame_fields(state, id);
+    table_set(state, fields, "__color_r", Val::Num(rgba.0));
+    table_set(state, fields, "__color_g", Val::Num(rgba.1));
+    table_set(state, fields, "__color_b", Val::Num(rgba.2));
+    table_set(state, fields, "__color_a", Val::Num(rgba.3));
+}
+
+fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
+    let max = r.max(g).max(b);
+    let min = r.min(g).min(b);
+    let delta = max - min;
+    let hue = if delta == 0.0 {
+        0.0
+    } else if max == r {
+        60.0 * ((g - b) / delta).rem_euclid(6.0)
+    } else if max == g {
+        60.0 * (((b - r) / delta) + 2.0)
+    } else {
+        60.0 * (((r - g) / delta) + 4.0)
+    };
+    let sat = if max == 0.0 { 0.0 } else { delta / max };
+    (hue, sat, max)
+}
+
+fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
+    let c = v * s;
+    let x = c * (1.0 - (((h / 60.0).rem_euclid(2.0)) - 1.0).abs());
+    let m = v - c;
+    let (r1, g1, b1) = match h.rem_euclid(360.0) {
+        h if h < 60.0 => (c, x, 0.0),
+        h if h < 120.0 => (x, c, 0.0),
+        h if h < 180.0 => (0.0, c, x),
+        h if h < 240.0 => (0.0, x, c),
+        h if h < 300.0 => (x, 0.0, c),
+        _ => (c, 0.0, x),
+    };
+    (r1 + m, g1 + m, b1 + m)
+}
+
+fn get_colorselect_texture(state: &mut LuaState, id: u64, key: &str) -> LuaResult<u32> {
+    match get_named_child_texture_id(state, id, key) {
+        Some(child_id) => {
+            let texture = frame_ref(state, child_id)?;
+            state.push(texture);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn set_colorselect_texture(state: &mut LuaState, id: u64, key: &str, value: Val) -> LuaResult<u32> {
+    if matches!(value, Val::Nil) {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.children_keys.remove(key);
+        }
+        return Ok(0);
+    }
+    if let Some(child_id) = extract_frame_id(state, value) {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.children_keys.insert(key.to_string(), child_id);
+        }
+        return Ok(0);
+    }
+    let child_id = ensure_named_child_texture(state, id, key)?;
+    assign_texture_payload(state, child_id, value)?;
+    Ok(0)
+}
+
+pub(super) fn colorselect_set_color_rgb(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let alpha = read_color_component(state, id, "__color_a", 1.0);
+    write_color_components(
+        state,
+        id,
+        (
+            val_to_f64(stack_val(state, 2)),
+            val_to_f64(stack_val(state, 3)),
+            val_to_f64(stack_val(state, 4)),
+            alpha,
+        ),
+    );
+    Ok(0)
+}
+
+pub(super) fn colorselect_get_color_rgb(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let r = read_color_component(state, id, "__color_r", 1.0);
+    let g = read_color_component(state, id, "__color_g", 1.0);
+    let b = read_color_component(state, id, "__color_b", 1.0);
+    state.push(Val::Num(r));
+    state.push(Val::Num(g));
+    state.push(Val::Num(b));
+    Ok(3)
+}
+
+pub(super) fn colorselect_set_color_hsv(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let alpha = read_color_component(state, id, "__color_a", 1.0);
+    let h = val_to_f64(stack_val(state, 2));
+    let s = val_to_f64(stack_val(state, 3));
+    let v = val_to_f64(stack_val(state, 4));
+    let (r, g, b) = hsv_to_rgb(h, s, v);
+    write_color_components(state, id, (r, g, b, alpha));
+    Ok(0)
+}
+
+pub(super) fn colorselect_get_color_hsv(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let r = read_color_component(state, id, "__color_r", 1.0);
+    let g = read_color_component(state, id, "__color_g", 1.0);
+    let b = read_color_component(state, id, "__color_b", 1.0);
+    let (h, s, v) = rgb_to_hsv(r, g, b);
+    state.push(Val::Num(h));
+    state.push(Val::Num(s));
+    state.push(Val::Num(v));
+    Ok(3)
+}
+
+pub(super) fn colorselect_set_color_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let r = read_color_component(state, id, "__color_r", 1.0);
+    let g = read_color_component(state, id, "__color_g", 1.0);
+    let b = read_color_component(state, id, "__color_b", 1.0);
+    let a = val_to_f64(stack_val(state, 2));
+    write_color_components(state, id, (r, g, b, a));
+    Ok(0)
+}
+
+pub(super) fn colorselect_get_color_alpha(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let alpha = read_color_component(state, id, "__color_a", 1.0);
+    state.push(Val::Num(alpha));
+    Ok(1)
+}
+
+macro_rules! colorselect_texture_methods {
+    ($set_fn:ident, $get_fn:ident, $key:literal) => {
+        pub(super) fn $set_fn(state: &mut LuaState) -> LuaResult<u32> {
+            let id = frame_id_from_stack(state, 1)?;
+            let value = stack_val(state, 2);
+            set_colorselect_texture(state, id, $key, value)
+        }
+        pub(super) fn $get_fn(state: &mut LuaState) -> LuaResult<u32> {
+            let id = frame_id_from_stack(state, 1)?;
+            get_colorselect_texture(state, id, $key)
+        }
+    };
+}
+
+colorselect_texture_methods!(
+    colorselect_set_color_alpha_texture,
+    colorselect_get_color_alpha_texture,
+    "ColorAlphaTexture"
+);
+colorselect_texture_methods!(
+    colorselect_set_color_alpha_thumb_texture,
+    colorselect_get_color_alpha_thumb_texture,
+    "ColorAlphaThumbTexture"
+);
+colorselect_texture_methods!(
+    colorselect_set_color_value_texture,
+    colorselect_get_color_value_texture,
+    "ColorValueTexture"
+);
+colorselect_texture_methods!(
+    colorselect_set_color_value_thumb_texture,
+    colorselect_get_color_value_thumb_texture,
+    "ColorValueThumbTexture"
+);
+colorselect_texture_methods!(
+    colorselect_set_color_wheel_texture,
+    colorselect_get_color_wheel_texture,
+    "ColorWheelTexture"
+);
+colorselect_texture_methods!(
+    colorselect_set_color_wheel_thumb_texture,
+    colorselect_get_color_wheel_thumb_texture,
+    "ColorWheelThumbTexture"
+);
+
+pub(super) fn colorselect_clear_color_wheel_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    set_colorselect_texture(state, id, "ColorWheelTexture", Val::Nil)
 }
 
 pub(super) fn register_shared_value(
@@ -463,6 +752,104 @@ pub(super) fn register_shared_value(
 pub(super) fn register_checkbutton(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, metatable, "SetChecked", checkbutton_set_checked)?;
     table_set_rust_fn_static(state, metatable, "GetChecked", checkbutton_get_checked)?;
+    Ok(())
+}
+
+pub(super) fn register_colorselect(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(state, metatable, "SetColorRGB", colorselect_set_color_rgb)?;
+    table_set_rust_fn_static(state, metatable, "GetColorRGB", colorselect_get_color_rgb)?;
+    table_set_rust_fn_static(state, metatable, "SetColorHSV", colorselect_set_color_hsv)?;
+    table_set_rust_fn_static(state, metatable, "GetColorHSV", colorselect_get_color_hsv)?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorAlpha",
+        colorselect_set_color_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorAlpha",
+        colorselect_get_color_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorAlphaTexture",
+        colorselect_set_color_alpha_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorAlphaTexture",
+        colorselect_get_color_alpha_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorAlphaThumbTexture",
+        colorselect_set_color_alpha_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorAlphaThumbTexture",
+        colorselect_get_color_alpha_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorValueTexture",
+        colorselect_set_color_value_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorValueTexture",
+        colorselect_get_color_value_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorValueThumbTexture",
+        colorselect_set_color_value_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorValueThumbTexture",
+        colorselect_get_color_value_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorWheelTexture",
+        colorselect_set_color_wheel_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorWheelTexture",
+        colorselect_get_color_wheel_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "SetColorWheelThumbTexture",
+        colorselect_set_color_wheel_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "GetColorWheelThumbTexture",
+        colorselect_get_color_wheel_thumb_texture,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        metatable,
+        "ClearColorWheelTexture",
+        colorselect_clear_color_wheel_texture,
+    )?;
     Ok(())
 }
 

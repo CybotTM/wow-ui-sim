@@ -4,6 +4,7 @@ use super::{QuadBatch, WowUiPipeline};
 use iced::Rectangle;
 use iced::widget::shader::{self, Viewport};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 /// Loaded texture data ready for GPU upload.
 #[derive(Debug, Clone)]
@@ -33,6 +34,15 @@ pub struct GpuBcTextureData {
     pub bc_data: Arc<[u8]>,
     /// BC compression format (BC1 = DXT1, BC3 = DXT3/DXT5).
     pub bc_format: BcFormat,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+pub struct TextureLoadTelemetry {
+    pub crop_decode_elapsed: Duration,
+    pub crop_extract_elapsed: Duration,
+    pub bc: crate::texture::BcLoadTelemetry,
+    pub rgba: crate::texture::RgbaLoadTelemetry,
+    pub total_elapsed: Duration,
 }
 
 /// Load a texture by path, handling `@crop:` paths by extracting a sub-region.
@@ -74,47 +84,88 @@ pub fn load_texture_prefer_bc(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
 ) -> Option<LoadedTexture> {
+    load_texture_prefer_bc_with_telemetry(tex_mgr, path).0
+}
+
+pub fn load_texture_prefer_bc_with_telemetry(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+) -> (Option<LoadedTexture>, TextureLoadTelemetry) {
+    let start = Instant::now();
     if path.contains("@crop:") {
-        return load_cropped_texture(tex_mgr, path);
+        let (loaded, mut telemetry) = load_cropped_texture_with_telemetry(tex_mgr, path);
+        telemetry.total_elapsed = start.elapsed();
+        return (loaded, telemetry);
     }
-    if let Some(bc_texture) = try_load_bc_texture(tex_mgr, path) {
-        return Some(bc_texture);
+    let (bc_texture, mut telemetry) = try_load_bc_texture_with_telemetry(tex_mgr, path);
+    if bc_texture.is_some() {
+        telemetry.total_elapsed = start.elapsed();
+        return (bc_texture, telemetry);
     }
-    load_rgba_texture(tex_mgr, path)
+    let rgba_start = Instant::now();
+    let (loaded, rgba_telemetry) = load_rgba_texture_with_telemetry(tex_mgr, path);
+    telemetry.rgba = rgba_telemetry;
+    if telemetry.rgba.total_elapsed.is_zero() {
+        telemetry.rgba.total_elapsed = rgba_start.elapsed();
+    }
+    telemetry.total_elapsed = start.elapsed();
+    (loaded, telemetry)
 }
 
-fn load_cropped_texture(
+fn load_cropped_texture_with_telemetry(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
-) -> Option<LoadedTexture> {
-    let (base_path, x, y, crop_w, crop_h) = decode_crop_request(tex_mgr, path)?;
-    let tex_data = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h)?;
-    Some(LoadedTexture::Rgba(GpuTextureData {
-        path: path.to_string(),
-        width: tex_data.width,
-        height: tex_data.height,
-        rgba: Arc::clone(&tex_data.pixels),
-    }))
+) -> (Option<LoadedTexture>, TextureLoadTelemetry) {
+    let mut telemetry = TextureLoadTelemetry::default();
+    let decode_start = Instant::now();
+    let Some((base_path, x, y, crop_w, crop_h)) = decode_crop_request(tex_mgr, path) else {
+        telemetry.crop_decode_elapsed = decode_start.elapsed();
+        return (None, telemetry);
+    };
+    telemetry.crop_decode_elapsed = decode_start.elapsed();
+    let crop_start = Instant::now();
+    let Some(tex_data) = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h) else {
+        telemetry.crop_extract_elapsed = crop_start.elapsed();
+        return (None, telemetry);
+    };
+    telemetry.crop_extract_elapsed = crop_start.elapsed();
+    (
+        Some(LoadedTexture::Rgba(GpuTextureData {
+            path: path.to_string(),
+            width: tex_data.width,
+            height: tex_data.height,
+            rgba: Arc::clone(&tex_data.pixels),
+        })),
+        telemetry,
+    )
 }
 
-fn try_load_bc_texture(
+fn try_load_bc_texture_with_telemetry(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
-) -> Option<LoadedTexture> {
+) -> (Option<LoadedTexture>, TextureLoadTelemetry) {
+    let mut telemetry = TextureLoadTelemetry::default();
     if !crate::render::shader::atlas::is_bc_supported() {
-        return None;
+        return (None, telemetry);
     }
-    let bc_result = tex_mgr.load_bc(path)?;
+    let (bc_result, bc_telemetry) = tex_mgr.load_bc_with_telemetry(path);
+    telemetry.bc = bc_telemetry;
+    let Some(bc_result) = bc_result else {
+        return (None, telemetry);
+    };
     if !bc_texture_dimensions_fit_gpu_atlas(bc_result.width, bc_result.height) {
-        return None;
+        return (None, telemetry);
     }
-    Some(LoadedTexture::Bc(GpuBcTextureData {
-        path: path.to_string(),
-        width: bc_result.width,
-        height: bc_result.height,
-        bc_data: Arc::clone(&bc_result.bc_data),
-        bc_format: bc_result.format.into(),
-    }))
+    (
+        Some(LoadedTexture::Bc(GpuBcTextureData {
+            path: path.to_string(),
+            width: bc_result.width,
+            height: bc_result.height,
+            bc_data: Arc::clone(&bc_result.bc_data),
+            bc_format: bc_result.format.into(),
+        })),
+        telemetry,
+    )
 }
 
 fn bc_texture_dimensions_fit_gpu_atlas(width: u32, height: u32) -> bool {
@@ -125,17 +176,23 @@ fn bc_texture_dimensions_fit_gpu_atlas(width: u32, height: u32) -> bool {
         && height <= crate::render::shader::atlas::BC_CELL_SIZE
 }
 
-fn load_rgba_texture(
+fn load_rgba_texture_with_telemetry(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
-) -> Option<LoadedTexture> {
-    let tex_data = tex_mgr.load(path)?;
-    Some(LoadedTexture::Rgba(GpuTextureData {
-        path: path.to_string(),
-        width: tex_data.width,
-        height: tex_data.height,
-        rgba: Arc::clone(&tex_data.pixels),
-    }))
+) -> (Option<LoadedTexture>, crate::texture::RgbaLoadTelemetry) {
+    let (tex_data, telemetry) = tex_mgr.load_with_telemetry(path);
+    let Some(tex_data) = tex_data else {
+        return (None, telemetry);
+    };
+    (
+        Some(LoadedTexture::Rgba(GpuTextureData {
+            path: path.to_string(),
+            width: tex_data.width,
+            height: tex_data.height,
+            rgba: Arc::clone(&tex_data.pixels),
+        })),
+        telemetry,
+    )
 }
 
 fn decode_crop_request<'a>(
@@ -315,6 +372,9 @@ fn upload_glyph_atlas_if_present(
 fn log_gpu_memory_once(atlas: &crate::render::shader::atlas::GpuTextureAtlas) {
     use std::sync::atomic::{AtomicBool, Ordering};
     static LOGGED: AtomicBool = AtomicBool::new(false);
+    if !crate::logging::texture_load_debug_enabled() {
+        return;
+    }
     if LOGGED.swap(true, Ordering::Relaxed) {
         return;
     }

@@ -240,6 +240,46 @@ fn test_get_font_string_nil_when_no_text() {
     );
 }
 
+#[test]
+fn test_get_font_string_exists_for_button_with_normal_font_but_no_text() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local frame = CreateFrame("Button", "TestNoTextNormalFontFrame", UIParent)
+        local font = CreateFrame("Frame", "TestNoTextNormalFontObject", UIParent)
+        frame:SetNormalFontObject(font)
+    "#,
+    )
+    .unwrap();
+
+    let not_nil: bool = env
+        .eval("return TestNoTextNormalFontFrame:GetFontString() ~= nil")
+        .unwrap();
+    assert!(
+        not_nil,
+        "GetFontString should synthesize a text region once a normal font object exists"
+    );
+
+    let obj_type: String = env
+        .eval("return TestNoTextNormalFontFrame:GetFontString():GetObjectType()")
+        .unwrap();
+    assert_eq!(
+        obj_type, "FontString",
+        "buttons with only a normal font object should still expose a FontString"
+    );
+
+    let matches_named_global: bool = env
+        .eval(
+            "return TestNoTextNormalFontFrameText ~= nil and TestNoTextNormalFontFrame:GetFontString() == TestNoTextNormalFontFrameText",
+        )
+        .unwrap();
+    assert!(
+        matches_named_global,
+        "synthetic button text child should bind the conventional $parentText global"
+    );
+}
+
 // ============================================================================
 // Enable/Disable State Methods
 // ============================================================================

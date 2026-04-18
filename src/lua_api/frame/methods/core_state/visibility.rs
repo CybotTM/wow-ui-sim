@@ -148,7 +148,10 @@ pub fn is_collapsed(state: &mut LuaState) -> LuaResult<u32> {
 
 /// IsMenuOpen() — returns false (menus are never open in headless mode).
 pub fn is_menu_open(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    let id = frame_id(state, 1)?;
+    let fields = crate::lua_api::methods::get_or_create_frame_fields(state, id);
+    let has_menu = crate::lua_api::methods::table_get(state, fields, "menu") != Val::Nil;
+    state.push(Val::Bool(has_menu));
     Ok(1)
 }
 

@@ -1,6 +1,9 @@
 //! Anchor methods: SetPoint, GetPoint, ClearAllPoints, line endpoints, etc.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
+    val_to_string,
+};
 use crate::lua_bridge::{FromStack, IntoStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
@@ -372,8 +375,10 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
         };
     }
 
+    ensure_no_anchor_cycle(state, id, relative_to, "SetPoint")?;
+
     let mut sim = borrow_state_mut(state)?;
-    validate_and_apply_set_point(
+    apply_set_point(
         &mut sim,
         id,
         relative_to,
@@ -384,7 +389,27 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
     )
 }
 
-fn validate_and_apply_set_point(
+fn ensure_no_anchor_cycle(
+    state: &mut LuaState,
+    frame_id: u64,
+    relative_to: Option<usize>,
+    method_name: &str,
+) -> LuaResult<()> {
+    let Some(rel_id) = relative_to else {
+        return Ok(());
+    };
+    let cycle = {
+        let sim = borrow_state(state)?;
+        sim.widgets.describe_anchor_cycle(frame_id, rel_id as u64)
+    };
+    if let Some(cycle) = cycle {
+        let message = format_anchor_cycle_error(state, method_name, frame_id, &cycle)?;
+        return Err(runtime_error(message));
+    }
+    Ok(())
+}
+
+fn apply_set_point(
     sim: &mut crate::lua_api::SimState,
     id: u64,
     relative_to: Option<usize>,
@@ -393,13 +418,6 @@ fn validate_and_apply_set_point(
     x_offset: f32,
     y_offset: f32,
 ) -> LuaResult<u32> {
-    if let Some(rel_id) = relative_to {
-        if sim.widgets.would_create_anchor_cycle(id, rel_id as u64) {
-            return Err(runtime_error(
-                "Action[SetPoint] failed because[Cannot anchor to itself or create anchor cycle].",
-            ));
-        }
-    }
     if let Some(old_target) = sim.widgets.get(id).and_then(|f| {
         f.anchors
             .iter()
@@ -425,7 +443,9 @@ pub(super) fn set_all_points(state: &mut LuaState) -> LuaResult<u32> {
     if arg == Val::Bool(false) {
         return Ok(0);
     }
-    let relative_to_id = resolve_set_all_points_target(state, id, arg)?;
+    let has_target_arg = state.top.saturating_sub(state.base) >= 2;
+    let relative_to_id = resolve_set_all_points_target(state, id, arg, has_target_arg)?;
+    ensure_no_anchor_cycle(state, id, relative_to_id, "SetAllPoints")?;
     let mut sim = borrow_state_mut(state)?;
     sim.widgets.remove_all_anchor_dependents_for(id);
     if let Some(rel_id) = relative_to_id {
@@ -442,8 +462,12 @@ fn resolve_set_all_points_target(
     state: &mut LuaState,
     id: u64,
     arg: Val,
+    has_target_arg: bool,
 ) -> LuaResult<Option<usize>> {
     use crate::lua_api::methods::extract_frame_id;
+    if has_target_arg && matches!(arg, Val::Nil) {
+        return Ok(None);
+    }
     if let Some(rid) = extract_frame_id(state, arg) {
         return Ok(Some(rid as usize));
     }
@@ -463,4 +487,52 @@ fn anchor_frame_to_all_corners(frame: &mut crate::widget::Frame, relative_to_id:
     ] {
         frame.set_point(corner, relative_to_id, corner, 0.0, 0.0);
     }
+}
+
+fn format_anchor_cycle_error(
+    state: &mut LuaState,
+    method_name: &str,
+    frame_id: u64,
+    cycle: &crate::widget::AnchorCyclePath,
+) -> LuaResult<String> {
+    if cycle.relative_to_id == frame_id {
+        return Ok(format!(
+            "Action[SetPoint] failed because[Cannot anchor to itself]: attempted from: Frame:{method_name}."
+        ));
+    }
+
+    let relative = frame_cycle_hex_id(state, cycle.relative_to_id)?;
+    let dependent = frame_cycle_hex_id(state, cycle.dependent_id)?;
+    let mut message = format!(
+        "Action[SetPoint] failed because[Cannot anchor to a region dependent on it]: attempted from: Frame:{method_name}.\nRelative: [{relative}]\nDependent: [{dependent}]",
+    );
+
+    if !cycle.dependent_ancestors.is_empty() {
+        message.push_str("\nDependent ancestors:");
+        for ancestor_id in &cycle.dependent_ancestors {
+            message.push_str("\n[");
+            message.push_str(&frame_cycle_hex_id(state, *ancestor_id)?);
+            message.push(']');
+        }
+    }
+
+    Ok(message)
+}
+
+fn frame_cycle_hex_id(state: &mut LuaState, frame_id: u64) -> LuaResult<String> {
+    let tostring_key = state.gc.intern_string(b"tostring");
+    let tostring_fn = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(tostring_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    let frame = frame_global_or_ref(state, frame_id)?;
+    let rendered = call_function_state(state, tostring_fn, &[frame])?;
+    let text = val_to_string(state, rendered).unwrap_or_default();
+    Ok(text
+        .rsplit("0x")
+        .next()
+        .unwrap_or(text.as_str())
+        .to_string())
 }

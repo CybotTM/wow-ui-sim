@@ -172,6 +172,62 @@ fn resolve_atlas_path(path: &str) -> (Option<String>, Option<(f32, f32, f32, f32
     }
 }
 
+fn button_texture_field_matches(
+    button: &crate::widget::Frame,
+    parent_key: &str,
+    resolved_path: Option<&str>,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+) -> bool {
+    match parent_key {
+        "NormalTexture" => {
+            button.normal_texture.as_deref() == resolved_path
+                && button.normal_tex_coords == tex_coords
+        }
+        "HighlightTexture" => {
+            button.highlight_texture.as_deref() == resolved_path
+                && button.highlight_tex_coords == tex_coords
+        }
+        "PushedTexture" => {
+            button.pushed_texture.as_deref() == resolved_path
+                && button.pushed_tex_coords == tex_coords
+        }
+        "DisabledTexture" => {
+            button.disabled_texture.as_deref() == resolved_path
+                && button.disabled_tex_coords == tex_coords
+        }
+        "CheckedTexture" => button.checked_texture.as_deref() == resolved_path,
+        "DisabledCheckedTexture" => button.disabled_checked_texture.as_deref() == resolved_path,
+        _ => false,
+    }
+}
+
+fn texture_child_matches(
+    sim: &crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+    resolved_path: Option<&str>,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    file_data_id: Option<i64>,
+) -> bool {
+    let Some(button) = sim.widgets.get(button_id) else {
+        return false;
+    };
+    if !button_texture_field_matches(button, parent_key, resolved_path, tex_coords) {
+        return false;
+    }
+    let Some(tex_id) = button.children_keys.get(parent_key).copied() else {
+        return false;
+    };
+    let Some(texture) = sim.widgets.get(tex_id) else {
+        return false;
+    };
+    texture.parent_key.as_deref() == Some(parent_key)
+        && texture.texture.as_deref() == resolved_path
+        && texture.tex_coords == tex_coords
+        && texture.atlas_tex_coords == tex_coords
+        && texture.texture_file_data_id == file_data_id
+}
+
 fn apply_texture_path(
     state: &mut LuaState,
     button_id: u64,
@@ -194,6 +250,16 @@ fn apply_texture_path(
     };
 
     let mut sim = borrow_state_mut(state)?;
+    if texture_child_matches(
+        &sim,
+        button_id,
+        parent_key,
+        resolved_path.as_deref(),
+        tex_coords,
+        file_data_id,
+    ) {
+        return Ok(());
+    }
     if let Some(frame) = sim.widgets.get_mut_visual(button_id) {
         set_button_field(frame, resolved_path.clone(), tex_coords);
     }

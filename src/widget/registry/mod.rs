@@ -3,6 +3,7 @@
 mod anchor;
 
 use super::Frame;
+pub use anchor::AnchorCyclePath;
 use anchor::hash_map_u64_hash_set_u64_bytes;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;

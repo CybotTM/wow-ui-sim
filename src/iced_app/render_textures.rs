@@ -4,13 +4,75 @@ use crate::iced_app::layout::anchor_position;
 use std::collections::HashSet;
 use std::sync::Arc;
 
-use crate::render::shader::primitive::load_texture_prefer_bc;
+use crate::render::shader::primitive::{
+    TextureLoadTelemetry, load_texture_prefer_bc_with_telemetry,
+};
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
 use crate::widget::{Frame, FrameStrata, WidgetType};
 
 use super::super::app::App;
 use super::super::quad_builders::{build_texture_quads, emit_button_highlight};
+
+#[derive(Debug, Default, Clone, Copy)]
+pub(crate) struct TextureLoadBatchTelemetry {
+    rgba_total_elapsed: std::time::Duration,
+    rgba_mem_cache_hits: usize,
+    rgba_disk_cache_hits: usize,
+    rgba_resolve_elapsed: std::time::Duration,
+    rgba_disk_probe_elapsed: std::time::Duration,
+    rgba_disk_read_elapsed: std::time::Duration,
+    rgba_disk_decompress_elapsed: std::time::Duration,
+    rgba_decode_elapsed: std::time::Duration,
+    rgba_disk_write_elapsed: std::time::Duration,
+    bc_total_elapsed: std::time::Duration,
+    bc_resolve_elapsed: std::time::Duration,
+    bc_parse_elapsed: std::time::Duration,
+    bc_extract_elapsed: std::time::Duration,
+    bc_cache_hits: usize,
+    crop_decode_elapsed: std::time::Duration,
+    crop_extract_elapsed: std::time::Duration,
+}
+
+impl TextureLoadBatchTelemetry {
+    fn record(&mut self, telemetry: TextureLoadTelemetry) {
+        self.rgba_total_elapsed += telemetry.rgba.total_elapsed;
+        self.rgba_mem_cache_hits += usize::from(telemetry.rgba.mem_cache_hit);
+        self.rgba_disk_cache_hits += usize::from(telemetry.rgba.disk_cache_hit);
+        self.rgba_resolve_elapsed += telemetry.rgba.resolve_elapsed;
+        self.rgba_disk_probe_elapsed += telemetry.rgba.disk_probe_elapsed;
+        self.rgba_disk_read_elapsed += telemetry.rgba.disk_read_elapsed;
+        self.rgba_disk_decompress_elapsed += telemetry.rgba.disk_decompress_elapsed;
+        self.rgba_decode_elapsed += telemetry.rgba.decode_elapsed;
+        self.rgba_disk_write_elapsed += telemetry.rgba.disk_write_elapsed;
+        self.bc_total_elapsed += telemetry.bc.total_elapsed;
+        self.bc_resolve_elapsed += telemetry.bc.resolve_elapsed;
+        self.bc_parse_elapsed += telemetry.bc.parse_elapsed;
+        self.bc_extract_elapsed += telemetry.bc.extract_elapsed;
+        self.bc_cache_hits += usize::from(telemetry.bc.cache_hit);
+        self.crop_decode_elapsed += telemetry.crop_decode_elapsed;
+        self.crop_extract_elapsed += telemetry.crop_extract_elapsed;
+    }
+
+    fn record_batch(&mut self, telemetry: Self) {
+        self.rgba_total_elapsed += telemetry.rgba_total_elapsed;
+        self.rgba_mem_cache_hits += telemetry.rgba_mem_cache_hits;
+        self.rgba_disk_cache_hits += telemetry.rgba_disk_cache_hits;
+        self.rgba_resolve_elapsed += telemetry.rgba_resolve_elapsed;
+        self.rgba_disk_probe_elapsed += telemetry.rgba_disk_probe_elapsed;
+        self.rgba_disk_read_elapsed += telemetry.rgba_disk_read_elapsed;
+        self.rgba_disk_decompress_elapsed += telemetry.rgba_disk_decompress_elapsed;
+        self.rgba_decode_elapsed += telemetry.rgba_decode_elapsed;
+        self.rgba_disk_write_elapsed += telemetry.rgba_disk_write_elapsed;
+        self.bc_total_elapsed += telemetry.bc_total_elapsed;
+        self.bc_resolve_elapsed += telemetry.bc_resolve_elapsed;
+        self.bc_parse_elapsed += telemetry.bc_parse_elapsed;
+        self.bc_extract_elapsed += telemetry.bc_extract_elapsed;
+        self.bc_cache_hits += telemetry.bc_cache_hits;
+        self.crop_decode_elapsed += telemetry.crop_decode_elapsed;
+        self.crop_extract_elapsed += telemetry.crop_extract_elapsed;
+    }
+}
 
 impl App {
     pub(super) fn build_overlay(&self) -> QuadBatch {
@@ -89,40 +151,50 @@ impl App {
         let mut bc_textures = Vec::new();
         let mut scan_elapsed = std::time::Duration::ZERO;
         let mut load_elapsed = std::time::Duration::ZERO;
+        let mut telemetry = TextureLoadBatchTelemetry::default();
         let mut exhausted = false;
         for batch_opt in dirty_strata {
             if exhausted {
                 break;
             }
             if let Some(batch) = batch_opt {
-                let (loaded, loaded_bc, batch_scan, batch_load, hit) =
+                let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
                     self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(loaded);
                 bc_textures.extend(loaded_bc);
                 scan_elapsed += batch_scan;
                 load_elapsed += batch_load;
+                telemetry.record_batch(batch_telemetry);
                 exhausted |= hit;
             }
         }
         if !exhausted {
-            let (loaded, loaded_bc, batch_scan, batch_load, hit) =
+            let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
                 self.load_new_textures_budgeted(overlay, deadline);
             textures.extend(loaded);
             bc_textures.extend(loaded_bc);
             scan_elapsed += batch_scan;
             load_elapsed += batch_load;
+            telemetry.record_batch(batch_telemetry);
             exhausted |= hit;
         }
         self.textures_pending.set(exhausted);
         let elapsed = t.elapsed();
         if elapsed.as_millis() > 10 && (!textures.is_empty() || !bc_textures.is_empty()) {
-            log_slow_texture_load(&textures, &bc_textures, elapsed, scan_elapsed, load_elapsed);
+            log_slow_texture_load(
+                &textures,
+                &bc_textures,
+                elapsed,
+                scan_elapsed,
+                load_elapsed,
+                telemetry,
+            );
         }
         (textures, bc_textures, elapsed)
     }
 
     /// Load new textures from the batch's requests within a time budget.
-    /// Returns (RGBA textures, BC textures, scan_elapsed, load_elapsed, deadline_reached).
+    /// Returns (RGBA textures, BC textures, scan_elapsed, load_elapsed, telemetry, deadline_reached).
     pub(super) fn load_new_textures_budgeted(
         &self,
         quads: &QuadBatch,
@@ -132,10 +204,12 @@ impl App {
         Vec<GpuBcTextureData>,
         std::time::Duration,
         std::time::Duration,
+        TextureLoadBatchTelemetry,
         bool,
     ) {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
+        let mut telemetry = TextureLoadBatchTelemetry::default();
         let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
         let mut failed = self.gpu_failed_textures.borrow_mut();
         let mut tex_mgr = self.texture_manager.borrow_mut();
@@ -153,12 +227,14 @@ impl App {
                 &mut failed,
                 &mut textures,
                 &mut bc_textures,
+                &mut telemetry,
             ) {
                 return (
                     textures,
                     bc_textures,
                     scan_elapsed,
                     load_start.elapsed(),
+                    telemetry,
                     true,
                 );
             }
@@ -168,6 +244,7 @@ impl App {
             bc_textures,
             scan_elapsed,
             load_start.elapsed(),
+            telemetry,
             false,
         )
     }
@@ -318,14 +395,34 @@ fn log_slow_texture_load(
     elapsed: std::time::Duration,
     scan_elapsed: std::time::Duration,
     load_elapsed: std::time::Duration,
+    telemetry: TextureLoadBatchTelemetry,
 ) {
+    if !crate::logging::texture_load_debug_enabled() {
+        return;
+    }
     let mut preview: Vec<&str> = textures.iter().map(|tex| tex.path.as_str()).collect();
     preview.extend(bc_textures.iter().map(|tex| tex.path.as_str()));
     preview.truncate(12);
     eprintln!(
-        "{} [textures] loaded {} in {elapsed:.1?} (scan={scan_elapsed:.1?} load={load_elapsed:.1?}): {} (rgba={} bc={})",
+        "{} [textures] loaded {} in {elapsed:.1?} (scan={scan_elapsed:.1?} load={load_elapsed:.1?} rgba={:.1?} rgba_mem_hits={} rgba_disk_hits={} rgba_resolve={:.1?} rgba_disk_probe={:.1?} rgba_disk_read={:.1?} rgba_disk_decompress={:.1?} rgba_decode={:.1?} rgba_disk_write={:.1?} bc={:.1?} bc_resolve={:.1?} bc_parse={:.1?} bc_extract={:.1?} bc_cache_hits={} crop_decode={:.1?} crop_extract={:.1?}): {} (rgba={} bc={})",
         crate::logging::global_elapsed_prefix(),
         textures.len() + bc_textures.len(),
+        telemetry.rgba_total_elapsed,
+        telemetry.rgba_mem_cache_hits,
+        telemetry.rgba_disk_cache_hits,
+        telemetry.rgba_resolve_elapsed,
+        telemetry.rgba_disk_probe_elapsed,
+        telemetry.rgba_disk_read_elapsed,
+        telemetry.rgba_disk_decompress_elapsed,
+        telemetry.rgba_decode_elapsed,
+        telemetry.rgba_disk_write_elapsed,
+        telemetry.bc_total_elapsed,
+        telemetry.bc_resolve_elapsed,
+        telemetry.bc_parse_elapsed,
+        telemetry.bc_extract_elapsed,
+        telemetry.bc_cache_hits,
+        telemetry.crop_decode_elapsed,
+        telemetry.crop_extract_elapsed,
         preview.join(", "),
         textures.len(),
         bc_textures.len(),
@@ -365,11 +462,20 @@ fn process_budgeted_texture_request(
     failed: &mut std::collections::HashSet<String>,
     textures: &mut Vec<GpuTextureData>,
     bc_textures: &mut Vec<GpuBcTextureData>,
+    telemetry: &mut TextureLoadBatchTelemetry,
 ) -> bool {
     if should_pause_texture_loading(textures, bc_textures, deadline, path, tex_mgr) {
         return true;
     }
-    load_pending_texture(tex_mgr, path, uploaded, failed, textures, bc_textures);
+    load_pending_texture(
+        tex_mgr,
+        path,
+        uploaded,
+        failed,
+        textures,
+        bc_textures,
+        telemetry,
+    );
     false
 }
 
@@ -380,10 +486,13 @@ fn load_pending_texture(
     failed: &mut std::collections::HashSet<String>,
     textures: &mut Vec<GpuTextureData>,
     bc_textures: &mut Vec<GpuBcTextureData>,
+    telemetry: &mut TextureLoadBatchTelemetry,
 ) {
     use crate::render::shader::primitive::LoadedTexture;
 
-    if let Some(loaded) = load_texture_prefer_bc(tex_mgr, path) {
+    let (loaded, load_telemetry) = load_texture_prefer_bc_with_telemetry(tex_mgr, path);
+    telemetry.record(load_telemetry);
+    if let Some(loaded) = loaded {
         uploaded.insert(path.to_string());
         match loaded {
             LoadedTexture::Rgba(data) => textures.push(data),
@@ -473,7 +582,7 @@ fn texture_request_priority(path: &str) -> (u8, u8) {
 #[cfg(test)]
 mod tests {
     use super::{
-        collect_texture_request_paths, process_budgeted_texture_request,
+        TextureLoadBatchTelemetry, collect_texture_request_paths, process_budgeted_texture_request,
         should_pause_texture_loading_state, texture_request_base_path,
         unresolved_texture_request_paths,
     };
@@ -630,6 +739,7 @@ mod tests {
             rgba: Arc::<[u8]>::from(vec![0xff; 4]),
         }];
         let mut bc_textures = Vec::new();
+        let mut telemetry = TextureLoadBatchTelemetry::default();
 
         let paused = process_budgeted_texture_request(
             std::time::Instant::now(),
@@ -639,6 +749,7 @@ mod tests {
             &mut failed,
             &mut textures,
             &mut bc_textures,
+            &mut telemetry,
         );
 
         assert!(paused);
@@ -765,7 +876,7 @@ mod tests {
             .push(request(r"Interface\spellbook\spellbookelementsiconmask"));
 
         let prev_bc_supported = crate::render::shader::atlas::set_bc_supported_for_tests(true);
-        let (rgba, bc, _scan_elapsed, _load_elapsed, hit_deadline) = app
+        let (rgba, bc, _scan_elapsed, _load_elapsed, _telemetry, hit_deadline) = app
             .load_new_textures_budgeted(
                 &batch,
                 std::time::Instant::now() + std::time::Duration::from_secs(1),

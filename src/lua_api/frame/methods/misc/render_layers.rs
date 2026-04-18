@@ -1,6 +1,9 @@
 //! Flatten render layers, window display, and don't-save-position methods.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, frame_id_from_stack, get_or_create_frame_fields, table_get,
+    table_set,
+};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -78,12 +81,20 @@ pub fn set_dont_save_position(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-pub fn get_window(_state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs frame_fields table access — requires mlua/Lua table support
-    Ok(0)
+const WINDOW_FIELD: &str = "__window";
+
+pub fn get_window(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let fields = get_or_create_frame_fields(state, id);
+    let window = table_get(state, fields, WINDOW_FIELD);
+    state.push(window);
+    Ok(1)
 }
 
-pub fn set_window(_state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs frame_fields table access — requires mlua/Lua table support
+pub fn set_window(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let window = stack_val(state, 2);
+    let fields = get_or_create_frame_fields(state, id);
+    table_set(state, fields, WINDOW_FIELD, window);
     Ok(0)
 }

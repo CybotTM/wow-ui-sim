@@ -3,8 +3,9 @@
 use super::helpers::{store_simple_attribute, val_to_f32};
 use crate::font::WowFontSystem;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_string_static, frame_id_from_stack,
-    registry_table_or_create, table_get, table_set, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
+    frame_id_from_stack, get_or_create_frame_fields, registry_table_or_create, table_get,
+    table_set, val_to_string,
 };
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
@@ -15,13 +16,90 @@ use rilua::{LuaResult, Val};
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = read_text_arg(state, 2);
+    let arg3 = stack_val(state, 3);
+    let arg4 = stack_val(state, 4);
+    let arg5 = stack_val(state, 5);
+    let arg6 = stack_val(state, 6);
+    let arg7 = stack_val(state, 7);
     // TODO: button Text child creation, HTML stripping, font measurement, tooltip lines
+    let stripped_text = {
+        let sim = borrow_state(state)?;
+        let is_simple_html = sim
+            .widgets
+            .get(id)
+            .map(|frame| frame.widget_type == WidgetType::SimpleHTML)
+            .unwrap_or(false);
+        text.as_ref().map(|value| {
+            if is_simple_html {
+                strip_html_tags(value)
+            } else {
+                crate::render::strip_wow_markup(value)
+            }
+        })
+    };
     let mut sim = borrow_state_mut(state)?;
+    let is_tooltip = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.widget_type == WidgetType::GameTooltip)
+        .unwrap_or(false);
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
-        frame.text_stripped = text.as_ref().map(|t| crate::render::strip_wow_markup(t));
+        frame.text_stripped = stripped_text;
+    }
+    drop(sim);
+    if is_tooltip {
+        mirror_tooltip_text_fields(state, id, text, arg3, arg4, arg5, arg6, arg7);
     }
     Ok(0)
+}
+
+fn strip_html_tags(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut in_tag = false;
+    for ch in text.chars() {
+        match ch {
+            '<' => in_tag = true,
+            '>' => in_tag = false,
+            _ if !in_tag => out.push(ch),
+            _ => {}
+        }
+    }
+    out
+}
+
+fn mirror_tooltip_text_fields(
+    state: &mut LuaState,
+    id: u64,
+    text: Option<String>,
+    arg3: Val,
+    arg4: Val,
+    arg5: Val,
+    arg6: Val,
+    arg7: Val,
+) {
+    let fields = get_or_create_frame_fields(state, id);
+    let text_val = text.map_or(Val::Nil, |value| create_string(state, &value));
+    table_set(state, fields, "text", text_val.clone());
+    table_set(state, fields, "r", arg3.clone());
+    table_set(state, fields, "g", arg4.clone());
+    table_set(state, fields, "b", arg5.clone());
+    table_set(state, fields, "a", arg6.clone());
+    table_set(state, fields, "wrap", arg7.clone());
+
+    let args = create_table(state);
+    if let Val::Table(args_ref) = args {
+        if let Some(table) = state.gc.tables.get_mut(args_ref) {
+            let _ = table.raw_set(Val::Num(1.0), text_val, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(2.0), arg3, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(3.0), arg4, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(4.0), arg5, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(5.0), arg6, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(6.0), arg7, &state.gc.string_arena);
+        }
+        state.gc.barrier_back(args_ref);
+    }
+    table_set(state, fields, "args", args);
 }
 
 fn read_text_arg(state: &LuaState, index: i32) -> Option<String> {
@@ -40,10 +118,13 @@ pub(super) fn get_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
     let frame = sim.widgets.get(id);
+    let use_stripped = frame
+        .map(|f| f.widget_type == WidgetType::SimpleHTML)
+        .unwrap_or(false);
     let is_editbox = frame
         .map(|f| f.widget_type == WidgetType::EditBox)
         .unwrap_or(false);
-    let text = frame.and_then(|f| frame_text_value(&sim, f, false));
+    let text = frame.and_then(|f| frame_text_value(&sim, f, use_stripped));
     drop(sim);
     push_text_result(state, text, is_editbox)
 }
@@ -485,6 +566,53 @@ pub(super) fn get_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
         .get(id)
         .and_then(|frame| frame.attributes.get("__hyperlinks_enabled"))
         .is_some_and(|value| matches!(value, crate::widget::AttributeValue::Boolean(true)));
+    state.push(Val::Bool(enabled));
+    Ok(1)
+}
+
+pub(super) fn set_hyperlink_format(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let value = stack_val(state, 2);
+    store_simple_attribute(state, id, "__hyperlink_format", value)?;
+    Ok(0)
+}
+
+pub(super) fn get_hyperlink_format(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let value = borrow_state(state)?
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.attributes.get("__hyperlink_format"))
+        .and_then(|value| match value {
+            crate::widget::AttributeValue::String(value) => Some(value.clone()),
+            _ => None,
+        });
+    match value {
+        Some(value) => {
+            let format_value = create_string(state, &value);
+            state.push(format_value);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+pub(super) fn set_indented_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let enabled = matches!(stack_val(state, 3), Val::Bool(true));
+    let fields = get_or_create_frame_fields(state, id);
+    let key = format!("__indented_word_wrap_{text_type}");
+    table_set(state, fields, &key, Val::Bool(enabled));
+    Ok(0)
+}
+
+pub(super) fn get_indented_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let fields = get_or_create_frame_fields(state, id);
+    let key = format!("__indented_word_wrap_{text_type}");
+    let enabled = table_get(state, fields, &key) == Val::Bool(true);
     state.push(Val::Bool(enabled));
     Ok(1)
 }

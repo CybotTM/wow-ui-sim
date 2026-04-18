@@ -239,5 +239,5 @@ fn test_parse_new_frame_types_as_children() {
         _ => panic!("Expected Frame"),
     };
     let frames = frame.all_frame_elements();
-    assert_eq!(frames.len(), 16);
+    assert_eq!(frames.len(), 15);
 }

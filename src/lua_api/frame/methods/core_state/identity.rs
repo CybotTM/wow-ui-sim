@@ -179,15 +179,45 @@ pub fn is_object_type(state: &mut LuaState) -> LuaResult<u32> {
                     return requested.eq_ignore_ascii_case("WorldFrame")
                         || requested.eq_ignore_ascii_case("Region");
                 }
+                if requested.eq_ignore_ascii_case("Region") {
+                    return true;
+                }
                 let actual = frame
                     .object_type_name
                     .as_deref()
                     .unwrap_or(frame.widget_type.as_str());
                 actual.eq_ignore_ascii_case(&requested)
                     || frame.widget_type.as_str().eq_ignore_ascii_case(&requested)
+                    || widget_type_inherits(frame.widget_type, &requested)
             })
             .unwrap_or(false)
     };
     state.push(Val::Bool(result));
     Ok(1)
+}
+
+fn widget_type_inherits(widget_type: crate::widget::WidgetType, requested: &str) -> bool {
+    match widget_type {
+        crate::widget::WidgetType::Button => requested.eq_ignore_ascii_case("Frame"),
+        crate::widget::WidgetType::CheckButton => {
+            requested.eq_ignore_ascii_case("Button") || requested.eq_ignore_ascii_case("Frame")
+        }
+        crate::widget::WidgetType::Cooldown
+        | crate::widget::WidgetType::EditBox
+        | crate::widget::WidgetType::GameTooltip
+        | crate::widget::WidgetType::MessageFrame
+        | crate::widget::WidgetType::Minimap
+        | crate::widget::WidgetType::Model
+        | crate::widget::WidgetType::ModelScene
+        | crate::widget::WidgetType::PlayerModel
+        | crate::widget::WidgetType::ScrollFrame
+        | crate::widget::WidgetType::SimpleHTML
+        | crate::widget::WidgetType::Slider
+        | crate::widget::WidgetType::StatusBar
+        | crate::widget::WidgetType::ColorSelect => requested.eq_ignore_ascii_case("Frame"),
+        crate::widget::WidgetType::FontString
+        | crate::widget::WidgetType::Line
+        | crate::widget::WidgetType::Texture => requested.eq_ignore_ascii_case("Region"),
+        crate::widget::WidgetType::Frame | crate::widget::WidgetType::WorldFrame => false,
+    }
 }

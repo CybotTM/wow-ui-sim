@@ -163,20 +163,26 @@ fn apply_set_button_texture_path(
     let resolved = path.as_ref().map(|path| resolve_texture_string(path));
     let resolved_path = resolved.as_ref().map(|texture| texture.path.clone());
     let tex_coords = resolved.as_ref().and_then(|texture| texture.tex_coords);
-    let tex_id = get_or_create_button_texture(lua, state, button_id, parent_key);
     let should_show = button_texture_should_show(state, button_id, parent_key);
-    if button_texture_path_is_noop(
-        state,
-        button_id,
-        tex_id,
-        parent_key,
-        resolved_path.as_deref(),
-        tex_coords,
-        file_data_id,
-        should_show,
-    ) {
-        return Ok(());
+    if let Some(existing_tex_id) = state
+        .widgets
+        .get(button_id)
+        .and_then(|frame| frame.children_keys.get(parent_key).copied())
+    {
+        if button_texture_path_is_noop(
+            state,
+            button_id,
+            existing_tex_id,
+            parent_key,
+            resolved_path.as_deref(),
+            tex_coords,
+            file_data_id,
+            should_show,
+        ) {
+            return Ok(());
+        }
     }
+    let tex_id = get_or_create_button_texture(lua, state, button_id, parent_key);
     if let Some(frame) = state.widgets.get_mut_visual(button_id) {
         set_button_field(frame, resolved_path.clone(), tex_coords);
     }
@@ -210,12 +216,10 @@ fn button_texture_path_is_noop(
         return false;
     };
     tex.parent_key.as_deref() == Some(parent_key)
-        && !tex.anchors.is_empty()
         && tex.texture.as_deref() == resolved_path
         && tex.tex_coords == tex_coords
         && tex.atlas_tex_coords == tex_coords
-        && tex.texture_file_data_id == file_data_id
-        && tex.visible == should_show
+        && tex.texture_file_data_id == file_data_id;
 }
 
 fn button_texture_field_matches(

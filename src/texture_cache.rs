@@ -9,8 +9,17 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use crate::texture::TextureData;
+
+#[derive(Debug, Default, Clone, Copy)]
+pub struct DiskCacheLoadTelemetry {
+    pub cache_hit: bool,
+    pub probe_elapsed: Duration,
+    pub read_elapsed: Duration,
+    pub decompress_elapsed: Duration,
+}
 
 /// Compute a stable hash for the normalized texture path.
 fn cache_hash(normalized_path: &str) -> u64 {
@@ -24,52 +33,90 @@ fn cache_file_path(cache_dir: &Path, normalized_path: &str) -> PathBuf {
     cache_dir.join(format!("{:016x}.rgba.lz4", cache_hash(normalized_path)))
 }
 
-/// Try to load texture data from the disk cache.
-///
-/// Returns `None` if the cache file doesn't exist or is stale (older than source).
-pub fn load_from_disk_cache(
+pub fn load_from_disk_cache_with_telemetry(
     cache_dir: &Path,
     normalized_path: &str,
     source_path: &Path,
-) -> Option<TextureData> {
+) -> (Option<TextureData>, DiskCacheLoadTelemetry) {
+    let probe_start = Instant::now();
     let cache_path = cache_file_path(cache_dir, normalized_path);
-    let cache_meta = std::fs::metadata(&cache_path).ok()?;
-    let source_meta = std::fs::metadata(source_path).ok()?;
+    let mut telemetry = DiskCacheLoadTelemetry::default();
+    let Some(cache_meta) = std::fs::metadata(&cache_path).ok() else {
+        telemetry.probe_elapsed = probe_start.elapsed();
+        return (None, telemetry);
+    };
+    let Some(source_meta) = std::fs::metadata(source_path).ok() else {
+        telemetry.probe_elapsed = probe_start.elapsed();
+        return (None, telemetry);
+    };
 
-    let cache_mtime = cache_meta.modified().ok()?;
-    let source_mtime = source_meta.modified().ok()?;
+    let Some(cache_mtime) = cache_meta.modified().ok() else {
+        telemetry.probe_elapsed = probe_start.elapsed();
+        return (None, telemetry);
+    };
+    let Some(source_mtime) = source_meta.modified().ok() else {
+        telemetry.probe_elapsed = probe_start.elapsed();
+        return (None, telemetry);
+    };
     if cache_mtime < source_mtime {
-        return None; // Cache is stale
+        telemetry.probe_elapsed = probe_start.elapsed();
+        return (None, telemetry); // Cache is stale
     }
+    telemetry.probe_elapsed = probe_start.elapsed();
 
-    read_cache_file(&cache_path)
+    let (data, read_elapsed, decompress_elapsed) = read_cache_file_with_telemetry(&cache_path);
+    telemetry.cache_hit = data.is_some();
+    telemetry.read_elapsed = read_elapsed;
+    telemetry.decompress_elapsed = decompress_elapsed;
+    (data, telemetry)
 }
 
-/// Write texture data to the disk cache.
-pub fn write_to_disk_cache(cache_dir: &Path, normalized_path: &str, data: &TextureData) {
+pub fn write_to_disk_cache_with_telemetry(
+    cache_dir: &Path,
+    normalized_path: &str,
+    data: &TextureData,
+) -> Duration {
     let cache_path = cache_file_path(cache_dir, normalized_path);
+    let start = Instant::now();
     if let Err(e) = write_cache_file(&cache_path, data) {
         eprintln!("[TexCache] Write error {}: {}", cache_path.display(), e);
     }
+    start.elapsed()
 }
 
-fn read_cache_file(path: &Path) -> Option<TextureData> {
-    let bytes = std::fs::read(path).ok()?;
+fn read_cache_file_with_telemetry(path: &Path) -> (Option<TextureData>, Duration, Duration) {
+    let read_start = Instant::now();
+    let Some(bytes) = std::fs::read(path).ok() else {
+        return (None, read_start.elapsed(), Duration::ZERO);
+    };
+    let read_elapsed = read_start.elapsed();
     if bytes.len() < 8 {
-        return None;
+        return (None, read_elapsed, Duration::ZERO);
     }
-    let width = u32::from_le_bytes(bytes[0..4].try_into().ok()?);
-    let height = u32::from_le_bytes(bytes[4..8].try_into().ok()?);
+    let Some(width) = bytes[0..4].try_into().ok().map(u32::from_le_bytes) else {
+        return (None, read_elapsed, Duration::ZERO);
+    };
+    let Some(height) = bytes[4..8].try_into().ok().map(u32::from_le_bytes) else {
+        return (None, read_elapsed, Duration::ZERO);
+    };
     let expected_size = (width as usize) * (height as usize) * 4;
-    let pixels = lz4_flex::decompress_size_prepended(&bytes[8..]).ok()?;
+    let decompress_start = Instant::now();
+    let Some(pixels) = lz4_flex::decompress_size_prepended(&bytes[8..]).ok() else {
+        return (None, read_elapsed, decompress_start.elapsed());
+    };
+    let decompress_elapsed = decompress_start.elapsed();
     if pixels.len() != expected_size {
-        return None;
+        return (None, read_elapsed, decompress_elapsed);
     }
-    Some(TextureData {
-        width,
-        height,
-        pixels: Arc::<[u8]>::from(pixels),
-    })
+    (
+        Some(TextureData {
+            width,
+            height,
+            pixels: Arc::<[u8]>::from(pixels),
+        }),
+        read_elapsed,
+        decompress_elapsed,
+    )
 }
 
 fn write_cache_file(path: &Path, data: &TextureData) -> Result<(), Box<dyn std::error::Error>> {

@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 use std::time::Instant;
 
 static PROCESS_START_TIME: OnceLock<Instant> = OnceLock::new();
+static TEXTURE_LOAD_DEBUG_ENABLED: OnceLock<bool> = OnceLock::new();
 
 /// Initialize the shared process start time for elapsed log prefixes.
 pub fn init_process_start_time(start_time: Instant) {
@@ -21,6 +22,12 @@ pub fn elapsed_prefix(start_time: Instant) -> String {
 /// Format elapsed wall time since the shared process start.
 pub fn global_elapsed_prefix() -> String {
     elapsed_prefix(process_start_time())
+}
+
+/// Whether verbose texture-load profiling logs are enabled.
+pub fn texture_load_debug_enabled() -> bool {
+    *TEXTURE_LOAD_DEBUG_ENABLED
+        .get_or_init(|| std::env::var_os("WOW_SIM_DEBUG_TEXTURE_LOADS").is_some())
 }
 
 /// Print a log line to stdout with the shared elapsed-time prefix.

@@ -129,6 +129,13 @@ fn assert_rgb_close(actual: [u8; 4], expected: [u8; 4], tolerance: u8, label: &s
     }
 }
 
+fn max_rgb_channel_diff(lhs: [u8; 4], rhs: [u8; 4]) -> u8 {
+    (0..3)
+        .map(|channel| lhs[channel].abs_diff(rhs[channel]))
+        .max()
+        .unwrap_or(0)
+}
+
 fn diff_bounds(
     before: &RgbaImage,
     after: &RgbaImage,
@@ -369,6 +376,106 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
             isolated_pixel,
             12,
             &format!("HeroSpecButton.Icon1 full render sample {label}"),
+        );
+    }
+}
+
+#[test]
+fn hero_spec_icon_mask_clips_corners_but_preserves_center_pixels() {
+    if common::try_create_gpu_device().is_none() {
+        eprintln!("Skipping GPU masking test: no adapter available");
+        return;
+    }
+
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(128.0, 128.0);
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", "MaskPixelHarness", UIParent)
+        frame:SetSize(64, 64)
+        frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 16, -16)
+
+        local icon = frame:CreateTexture("MaskPixelHarnessIcon", "ARTWORK")
+        icon:SetAllPoints()
+        icon:SetColorTexture(1, 0, 0, 1)
+
+        local mask = frame:CreateMaskTexture("MaskPixelHarnessMask", "ARTWORK")
+        mask:SetAllPoints()
+        mask:SetTexture("Interface\\Masks\\CircleMask")
+
+        icon:AddMaskTexture(mask)
+    "#,
+    )
+    .expect("failed to build mask pixel harness");
+
+    let icon_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("MaskPixelHarnessIcon")
+            .expect("MaskPixelHarnessIcon should exist")
+    };
+    let icon_rect = {
+        let state = env.state().borrow();
+        wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, icon_id, 128.0, 128.0)
+    };
+    let rendered_rect = (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height);
+
+    let mut masked_mgr = make_texture_manager().expect("texture directories should exist");
+    let masked_batch = build_screenshot_like_batch(&env, 128, 128, None);
+    let masked_render = render_to_image(&masked_batch, &mut masked_mgr, 128, 128, None);
+
+    {
+        let mut state = env.state().borrow_mut();
+        let icon = state
+            .widgets
+            .get_mut(icon_id)
+            .expect("MaskPixelHarnessIcon should exist");
+        assert!(
+            !icon.mask_textures.is_empty(),
+            "MaskPixelHarnessIcon should start with a mask"
+        );
+        icon.mask_textures.clear();
+    }
+
+    let mut unmasked_mgr = make_texture_manager().expect("texture directories should exist");
+    let unmasked_batch = build_screenshot_like_batch(&env, 128, 128, None);
+    let unmasked_render = render_to_image(&unmasked_batch, &mut unmasked_mgr, 128, 128, None);
+
+    let masked_center = sample_rect_pixel(&masked_render, rendered_rect, 0.50, 0.50);
+    let unmasked_center = sample_rect_pixel(&unmasked_render, rendered_rect, 0.50, 0.50);
+    let expected_red = [255, 0, 0, 255];
+    let expected_background = masked_render.get_pixel(4, 4).0;
+
+    assert_rgb_close(
+        masked_center,
+        expected_red,
+        16,
+        "masked center should stay red",
+    );
+    assert!(
+        max_rgb_channel_diff(unmasked_center, expected_red) <= 16,
+        "unmasked center should also stay red: unmasked={unmasked_center:?}"
+    );
+
+    for (u, v, label) in [
+        (0.08, 0.08, "top-left"),
+        (0.92, 0.08, "top-right"),
+        (0.92, 0.92, "bottom-right"),
+        (0.08, 0.92, "bottom-left"),
+    ] {
+        let masked_corner = sample_rect_pixel(&masked_render, rendered_rect, u, v);
+        let unmasked_corner = sample_rect_pixel(&unmasked_render, rendered_rect, u, v);
+
+        assert_rgb_close(
+            masked_corner,
+            expected_background,
+            8,
+            &format!("masked {label} corner should reveal the cleared background"),
+        );
+        assert!(
+            max_rgb_channel_diff(unmasked_corner, expected_red) <= 16,
+            "unmasked {label} corner should stay red without the mask: unmasked={unmasked_corner:?}"
         );
     }
 }

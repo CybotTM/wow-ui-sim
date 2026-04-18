@@ -117,24 +117,50 @@ impl WowLuaEnv {
 
     /// Execute Lua code and return the result.
     pub fn eval<T: FromRiluaResults>(&self, code: &str) -> Result<T> {
-        let mut lua = self.lua.borrow_mut();
         {
+            let mut lua = self.lua.borrow_mut();
             let state = lua.state_mut();
             registry_set(state, EVAL_RESULTS_REGISTRY_KEY, Val::Nil);
         }
+        let body = Self::normalize_eval_body(code);
         let wrapped = format!(
-            "local function __wow_eval()\n{code}\nend\ndebug.getregistry().{EVAL_RESULTS_REGISTRY_KEY} = {{ __wow_eval() }}"
+            "local function __wow_eval()\n{body}\nend\ndebug.getregistry().{EVAL_RESULTS_REGISTRY_KEY} = {{ __wow_eval() }}"
         );
-        let exec_result = lua.exec(&wrapped);
+        let exec_result = self.exec_rilua(&wrapped);
         let packed_results = {
+            let mut lua = self.lua.borrow_mut();
             let state = lua.state_mut();
             let packed = registry_get(state, EVAL_RESULTS_REGISTRY_KEY);
             registry_set(state, EVAL_RESULTS_REGISTRY_KEY, Val::Nil);
             packed
         };
         exec_result?;
+        let lua = self.lua.borrow();
         let results = unpack_eval_results(lua.state(), packed_results)?;
         T::from_results(lua.state(), results)
+    }
+
+    fn normalize_eval_body(code: &str) -> String {
+        let trimmed = code.trim();
+        if trimmed.is_empty() {
+            return String::new();
+        }
+        if Self::looks_like_lua_expression(trimmed) {
+            format!("return {trimmed}")
+        } else {
+            code.to_string()
+        }
+    }
+
+    fn looks_like_lua_expression(code: &str) -> bool {
+        if code.contains('\n') || code.contains(';') {
+            return false;
+        }
+        let lower = code.trim_start().to_ascii_lowercase();
+        !matches!(
+            lower.split_whitespace().next().unwrap_or_default(),
+            "return" | "local" | "if" | "for" | "while" | "repeat" | "do" | "function"
+        )
     }
 
     /// Create a Lua string value on the active rilua VM.

@@ -7,59 +7,57 @@ fn default_frame() -> FrameXml {
 
 /// Helper: call frame_element_to_type and return (widget_type, intrinsic).
 fn resolve(elem: &FrameElement) -> Option<(&'static str, Option<&'static str>)> {
-    let (frame, tag) = frame_element_parts(elem);
+    let (frame, tag) = frame_element_parts(elem)?;
     frame_element_to_type(frame, tag).map(|(_, wt, intr)| (wt, intr))
 }
 
-fn frame_element_parts(elem: &FrameElement) -> (&FrameXml, &'static str) {
+fn frame_element_parts(elem: &FrameElement) -> Option<(&FrameXml, &'static str)> {
     match elem {
-        FrameElement::Frame(f) => (f, "Frame"),
-        FrameElement::Button(f) => (f, "Button"),
-        FrameElement::ItemButton(f) => (f, "ItemButton"),
-        FrameElement::CheckButton(f) => (f, "CheckButton"),
-        FrameElement::EditBox(f) => (f, "EditBox"),
-        FrameElement::ScrollFrame(f) => (f, "ScrollFrame"),
-        FrameElement::Slider(f) => (f, "Slider"),
-        FrameElement::StatusBar(f) => (f, "StatusBar"),
-        FrameElement::GameTooltip(f) => (f, "GameTooltip"),
-        FrameElement::ColorSelect(f) => (f, "ColorSelect"),
-        FrameElement::Model(f) => (f, "Model"),
-        FrameElement::ModelScene(f) => (f, "ModelScene"),
-        FrameElement::EventFrame(f) => (f, "EventFrame"),
-        FrameElement::CinematicModel(f) => (f, "CinematicModel"),
-        FrameElement::PlayerModel(f) => (f, "PlayerModel"),
-        FrameElement::DressUpModel(f) => (f, "DressUpModel"),
-        FrameElement::Browser(f) => (f, "Browser"),
-        FrameElement::Minimap(f) => (f, "Minimap"),
-        FrameElement::MessageFrame(f) => (f, "MessageFrame"),
-        FrameElement::MovieFrame(f) => (f, "MovieFrame"),
-        FrameElement::ScrollingMessageFrame(f) => (f, "ScrollingMessageFrame"),
-        FrameElement::SimpleHTML(f) => (f, "SimpleHTML"),
-        FrameElement::WorldFrame(f) => (f, "WorldFrame"),
-        FrameElement::DropDownToggleButton(f) => (f, "DropDownToggleButton"),
-        FrameElement::DropdownButton(f) => (f, "DropdownButton"),
-        FrameElement::EventButton(f) => (f, "EventButton"),
-        FrameElement::EventEditBox(f) => (f, "EventEditBox"),
-        FrameElement::Cooldown(f) => (f, "Cooldown"),
-        FrameElement::TaxiRouteFrame(f) => (f, "TaxiRouteFrame"),
-        FrameElement::ModelFFX(f) => (f, "ModelFFX"),
-        FrameElement::TabardModel(f) => (f, "TabardModel"),
-        FrameElement::UiCamera(f) => (f, "UiCamera"),
-        FrameElement::UnitPositionFrame(f) => (f, "UnitPositionFrame"),
-        FrameElement::OffScreenFrame(f) => (f, "OffScreenFrame"),
-        FrameElement::Checkout(f) => (f, "Checkout"),
-        FrameElement::FogOfWarFrame(f) => (f, "FogOfWarFrame"),
-        FrameElement::QuestPOIFrame(f) => (f, "QuestPOIFrame"),
-        FrameElement::ArchaeologyDigSiteFrame(f) => (f, "ArchaeologyDigSiteFrame"),
-        FrameElement::ScenarioPOIFrame(f) => (f, "ScenarioPOIFrame"),
-        FrameElement::UIThemeContainerFrame(f) => (f, "UIThemeContainerFrame"),
-        FrameElement::EventScrollFrame(f) => (f, "EventScrollFrame"),
-        FrameElement::ContainedAlertFrame(f) => (f, "ContainedAlertFrame"),
-        FrameElement::MapScene(f) => (f, "MapScene"),
-        FrameElement::Line(f) => (f, "Line"),
-        FrameElement::ScopedModifier(_) => {
-            unreachable!("ScopedModifier is not a frame element in frame_element_to_type tests")
-        }
+        FrameElement::Frame(f) => Some((f, "Frame")),
+        FrameElement::Button(f) => Some((f, "Button")),
+        FrameElement::ItemButton(f) => Some((f, "ItemButton")),
+        FrameElement::CheckButton(f) => Some((f, "CheckButton")),
+        FrameElement::EditBox(f) => Some((f, "EditBox")),
+        FrameElement::ScrollFrame(f) => Some((f, "ScrollFrame")),
+        FrameElement::Slider(f) => Some((f, "Slider")),
+        FrameElement::StatusBar(f) => Some((f, "StatusBar")),
+        FrameElement::GameTooltip(f) => Some((f, "GameTooltip")),
+        FrameElement::ColorSelect(f) => Some((f, "ColorSelect")),
+        FrameElement::Model(f) => Some((f, "Model")),
+        FrameElement::ModelScene(f) => Some((f, "ModelScene")),
+        FrameElement::EventFrame(f) => Some((f, "EventFrame")),
+        FrameElement::CinematicModel(f) => Some((f, "CinematicModel")),
+        FrameElement::PlayerModel(f) => Some((f, "PlayerModel")),
+        FrameElement::DressUpModel(f) => Some((f, "DressUpModel")),
+        FrameElement::Browser(f) => Some((f, "Browser")),
+        FrameElement::Minimap(f) => Some((f, "Minimap")),
+        FrameElement::MessageFrame(f) => Some((f, "MessageFrame")),
+        FrameElement::MovieFrame(f) => Some((f, "MovieFrame")),
+        FrameElement::ScrollingMessageFrame(f) => Some((f, "ScrollingMessageFrame")),
+        FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML")),
+        FrameElement::WorldFrame(f) => Some((f, "WorldFrame")),
+        FrameElement::DropDownToggleButton(f) => Some((f, "DropDownToggleButton")),
+        FrameElement::DropdownButton(f) => Some((f, "DropdownButton")),
+        FrameElement::EventButton(f) => Some((f, "EventButton")),
+        FrameElement::EventEditBox(f) => Some((f, "EventEditBox")),
+        FrameElement::Cooldown(f) => Some((f, "Cooldown")),
+        FrameElement::TaxiRouteFrame(f) => Some((f, "TaxiRouteFrame")),
+        FrameElement::ModelFFX(f) => Some((f, "ModelFFX")),
+        FrameElement::TabardModel(f) => Some((f, "TabardModel")),
+        FrameElement::UiCamera(f) => Some((f, "UiCamera")),
+        FrameElement::UnitPositionFrame(f) => Some((f, "UnitPositionFrame")),
+        FrameElement::OffScreenFrame(f) => Some((f, "OffScreenFrame")),
+        FrameElement::Checkout(f) => Some((f, "Checkout")),
+        FrameElement::FogOfWarFrame(f) => Some((f, "FogOfWarFrame")),
+        FrameElement::QuestPOIFrame(f) => Some((f, "QuestPOIFrame")),
+        FrameElement::ArchaeologyDigSiteFrame(f) => Some((f, "ArchaeologyDigSiteFrame")),
+        FrameElement::ScenarioPOIFrame(f) => Some((f, "ScenarioPOIFrame")),
+        FrameElement::UIThemeContainerFrame(f) => Some((f, "UIThemeContainerFrame")),
+        FrameElement::EventScrollFrame(f) => Some((f, "EventScrollFrame")),
+        FrameElement::ContainedAlertFrame(f) => Some((f, "ContainedAlertFrame")),
+        FrameElement::MapScene(f) => Some((f, "MapScene")),
+        FrameElement::Line(f) => Some((f, "Line")),
+        FrameElement::ScopedModifier(_) => None,
     }
 }
 
@@ -76,7 +74,7 @@ fn specialized_widget_types() {
     );
     assert_eq!(
         resolve(&FrameElement::ItemButton(f.clone())),
-        Some(("ItemButton", None))
+        Some(("Button", Some("ItemButton")))
     );
     assert_eq!(
         resolve(&FrameElement::CheckButton(f.clone())),

@@ -435,12 +435,13 @@ impl SimState {
             ),
             None => return,
         };
-        let max_effective_level = self.sibling_effective_level_range(id, parent_id, strata).1;
-        if current_effective_level > max_effective_level {
-            return; // Already on top
-        }
+        let sibling_max_effective_level =
+            self.sibling_effective_level_range(id, parent_id, strata).1;
+        let target_effective_level = sibling_max_effective_level.max(current_effective_level);
         if let Some(f) = self.widgets.get_mut_visual(id) {
-            f.raise_order = max_effective_level.saturating_add(1).saturating_sub(level);
+            f.raise_order = target_effective_level
+                .saturating_add(1)
+                .saturating_sub(level);
         }
         // Re-sort the affected subtree in strata buckets.
         // Avoid setting strata_buckets = None: Show/Hide calls later in the

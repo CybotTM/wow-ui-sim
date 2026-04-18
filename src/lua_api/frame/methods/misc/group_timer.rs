@@ -30,6 +30,29 @@ pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "SetFillTexture", set_fill_texture)?;
     table_set_rust_fn_static(state, mt, "SetToDefaults", set_to_defaults)?;
     table_set_rust_fn_static(state, mt, "DrawNone", draw_none)?;
+    table_set_rust_fn_static(state, mt, "SetAlertContainer", set_alert_container)?;
+    table_set_rust_fn_static(state, mt, "SetDefaultText", set_default_text)?;
+    table_set_rust_fn_static(state, mt, "UpdateHeight", update_height)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "SetSelectionTranslator",
+        set_selection_translator,
+    )?;
+    table_set_rust_fn_static(state, mt, "SetItemButtonScale", set_item_button_scale)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "UpdateItemContextMatching",
+        update_item_context_matching,
+    )?;
+    table_set_rust_fn_static(state, mt, "RegisterForWidgetSet", register_for_widget_set)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "UnregisterForWidgetSet",
+        unregister_for_widget_set,
+    )?;
     Ok(())
 }
 
@@ -140,6 +163,9 @@ pub fn force_update_timers(state: &mut LuaState) -> LuaResult<u32> {
 // ── Frame/FontString registration ─────────────────────────────────────────────
 
 pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "RegisterFontStrings")? {
+        return Ok(0);
+    }
     let fields = frame_fields_from_self(state)?;
     let font_strings = collect_varargs_table(state, 2);
     table_set(state, fields, "fontStrings", font_strings);
@@ -148,6 +174,9 @@ pub fn register_font_strings(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_background_texture(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "RegisterBackgroundTexture")? {
+        return Ok(0);
+    }
     let fields = frame_fields_from_self(state)?;
     let background = stack_val(state, 2);
     let texture_kit = stack_val(state, 3);
@@ -157,6 +186,9 @@ pub fn register_background_texture(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn register_frames(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "RegisterFrames")? {
+        return Ok(0);
+    }
     let fields = frame_fields_from_self(state)?;
     let frames = collect_varargs_table(state, 2);
     table_set(state, fields, "frames", frames);
@@ -164,10 +196,96 @@ pub fn register_frames(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn set_owning_dialog(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "SetOwningDialog")? {
+        return Ok(0);
+    }
     let fields = frame_fields_from_self(state)?;
     let dialog = stack_val(state, 2);
     table_set(state, fields, "owningDialog", dialog);
     table_set(state, fields, "OwningDialog", dialog);
+    Ok(0)
+}
+
+pub fn set_alert_container(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "SetAlertContainer")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    table_set(state, fields, "alertContainer", stack_val(state, 2));
+    Ok(0)
+}
+
+pub fn set_default_text(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "SetDefaultText")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    table_set(state, fields, "defaultText", stack_val(state, 2));
+    Ok(0)
+}
+
+pub fn update_height(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "UpdateHeight")? {
+        return Ok(0);
+    }
+    Ok(0)
+}
+
+pub fn set_selection_translator(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "SetSelectionTranslator")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    table_set(state, fields, "selectionTranslator", stack_val(state, 2));
+    Ok(0)
+}
+
+pub fn set_item_button_scale(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "SetItemButtonScale")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    table_set(state, fields, "itemButtonScale", stack_val(state, 2));
+    Ok(0)
+}
+
+pub fn update_item_context_matching(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "UpdateItemContextMatching")? {
+        return Ok(0);
+    }
+    Ok(0)
+}
+
+pub fn register_for_widget_set(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "RegisterForWidgetSet")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    let registration = create_table(state);
+    table_set(state, registration, "widgetSetID", stack_val(state, 2));
+    table_set(
+        state,
+        registration,
+        "widgetLayoutFunction",
+        stack_val(state, 3),
+    );
+    table_set(
+        state,
+        registration,
+        "widgetInitFunction",
+        stack_val(state, 4),
+    );
+    table_set(state, registration, "attachedUnitInfo", stack_val(state, 5));
+    table_set(state, fields, "widgetSetRegistration", registration);
+    Ok(0)
+}
+
+pub fn unregister_for_widget_set(state: &mut LuaState) -> LuaResult<u32> {
+    if call_fields_override_if_present(state, "UnregisterForWidgetSet")? {
+        return Ok(0);
+    }
+    let fields = frame_fields_from_self(state)?;
+    table_set(state, fields, "widgetSetRegistration", Val::Nil);
     Ok(0)
 }
 
@@ -177,6 +295,20 @@ fn frame_fields_from_self(state: &mut LuaState) -> LuaResult<Val> {
         return Ok(Val::Nil);
     };
     Ok(get_or_create_frame_fields(state, id))
+}
+
+fn call_fields_override_if_present(state: &mut LuaState, method_name: &str) -> LuaResult<bool> {
+    let fields = frame_fields_from_self(state)?;
+    let override_fn = table_get(state, fields, method_name);
+    if !matches!(override_fn, Val::Function(_)) {
+        return Ok(false);
+    }
+    let arg_count = state.top.saturating_sub(state.base) as i32;
+    let args: Vec<Val> = (1..=arg_count)
+        .map(|index| stack_val(state, index))
+        .collect();
+    let _ = call_function_state(state, override_fn, &args)?;
+    Ok(true)
 }
 
 fn collect_varargs_table(state: &mut LuaState, start: i32) -> Val {

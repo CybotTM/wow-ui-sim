@@ -106,6 +106,30 @@ fn register_styled_text(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<
         "GetHyperlinksEnabled",
         text::get_hyperlinks_enabled,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetHyperlinkFormat",
+        text::set_hyperlink_format,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetHyperlinkFormat",
+        text::get_hyperlink_format,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetIndentedWordWrap",
+        text::set_indented_word_wrap,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetIndentedWordWrap",
+        text::get_indented_word_wrap,
+    )?;
     Ok(())
 }
 

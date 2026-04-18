@@ -6,6 +6,7 @@ mod resolve;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use image_blp::convert::blp_to_image;
 use image_blp::parser::load_blp;
@@ -77,29 +78,54 @@ impl TextureManager {
 
     /// Load a texture by its WoW path (e.g., "Interface\\DialogFrame\\UI-DialogBox-Background").
     pub fn load(&mut self, wow_path: &str) -> Option<&TextureData> {
+        self.load_with_telemetry(wow_path).0
+    }
+
+    pub fn load_with_telemetry(
+        &mut self,
+        wow_path: &str,
+    ) -> (Option<&TextureData>, RgbaLoadTelemetry) {
+        let start = Instant::now();
         // Normalize the path
         let normalized = normalize_wow_path(wow_path);
+        let mut telemetry = RgbaLoadTelemetry::default();
 
         // Check cache first
         if self.cache.contains_key(&normalized) {
-            return self.cache.get(&normalized);
+            telemetry.mem_cache_hit = true;
+            telemetry.total_elapsed = start.elapsed();
+            return (self.cache.get(&normalized), telemetry);
         }
         if self.not_found.contains(&normalized) {
-            return None;
+            telemetry.total_elapsed = start.elapsed();
+            return (None, telemetry);
         }
 
         // Try to load from disk (disk cache → decode → write cache)
+        let resolve_start = Instant::now();
         if let Some(file_path) = self.resolve_path(&normalized) {
-            if let Some(data) = self.load_with_disk_cache(&normalized, &file_path) {
+            telemetry.resolve_elapsed = resolve_start.elapsed();
+            let (loaded, load_telemetry) =
+                self.load_with_disk_cache_with_telemetry(&normalized, &file_path);
+            telemetry.disk_cache_hit = load_telemetry.disk_cache_hit;
+            telemetry.disk_probe_elapsed = load_telemetry.disk_probe_elapsed;
+            telemetry.disk_read_elapsed = load_telemetry.disk_read_elapsed;
+            telemetry.disk_decompress_elapsed = load_telemetry.disk_decompress_elapsed;
+            telemetry.decode_elapsed = load_telemetry.decode_elapsed;
+            telemetry.disk_write_elapsed = load_telemetry.disk_write_elapsed;
+            if let Some(data) = loaded {
                 self.cache.insert(normalized.clone(), data);
-                return self.cache.get(&normalized);
+                telemetry.total_elapsed = start.elapsed();
+                return (self.cache.get(&normalized), telemetry);
             }
         } else {
+            telemetry.resolve_elapsed = resolve_start.elapsed();
             crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
             self.not_found.insert(normalized);
         }
 
-        None
+        telemetry.total_elapsed = start.elapsed();
+        (None, telemetry)
     }
 
     /// Get a cached texture without loading.
@@ -114,32 +140,47 @@ impl TextureManager {
         self.cache.contains_key(&normalized) || self.bc_cache.contains_key(&normalized)
     }
 
-    /// Load a texture, checking the lz4 disk cache before falling back to decode.
-    fn load_with_disk_cache(&self, normalized: &str, file_path: &Path) -> Option<TextureData> {
+    fn load_with_disk_cache_with_telemetry(
+        &self,
+        normalized: &str,
+        file_path: &Path,
+    ) -> (Option<TextureData>, RgbaLoadTelemetry) {
+        let mut telemetry = RgbaLoadTelemetry::default();
         // Try disk cache first
         if let Some(cache_dir) = &self.disk_cache_dir {
-            if let Some(data) =
-                crate::texture_cache::load_from_disk_cache(cache_dir, normalized, file_path)
-            {
-                return Some(data);
+            let (data, disk_telemetry) = crate::texture_cache::load_from_disk_cache_with_telemetry(
+                cache_dir, normalized, file_path,
+            );
+            telemetry.disk_cache_hit = disk_telemetry.cache_hit;
+            telemetry.disk_probe_elapsed = disk_telemetry.probe_elapsed;
+            telemetry.disk_read_elapsed = disk_telemetry.read_elapsed;
+            telemetry.disk_decompress_elapsed = disk_telemetry.decompress_elapsed;
+            if data.is_some() {
+                return (data, telemetry);
             }
         }
         // Decode from source
+        let decode_start = Instant::now();
         match load_texture_file(file_path) {
             Ok(data) => {
+                telemetry.decode_elapsed = decode_start.elapsed();
                 if let Some(cache_dir) = &self.disk_cache_dir {
-                    crate::texture_cache::write_to_disk_cache(cache_dir, normalized, &data);
+                    telemetry.disk_write_elapsed =
+                        crate::texture_cache::write_to_disk_cache_with_telemetry(
+                            cache_dir, normalized, &data,
+                        );
                 }
-                Some(data)
+                (Some(data), telemetry)
             }
             Err(e) => {
+                telemetry.decode_elapsed = decode_start.elapsed();
                 crate::logging::eprintln_elapsed(&format!(
                     "[TexMgr] Load error: {} -> {}: {}",
                     normalized,
                     file_path.display(),
                     e
                 ));
-                None
+                (None, telemetry)
             }
         }
     }
@@ -163,28 +204,90 @@ pub struct BcTextureResult {
     pub format: BcTextureFormat,
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+pub struct BcLoadTelemetry {
+    pub cache_hit: bool,
+    pub resolved_blp: bool,
+    pub resolve_elapsed: Duration,
+    pub parse_elapsed: Duration,
+    pub extract_elapsed: Duration,
+    pub total_elapsed: Duration,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+pub struct RgbaLoadTelemetry {
+    pub mem_cache_hit: bool,
+    pub disk_cache_hit: bool,
+    pub resolve_elapsed: Duration,
+    pub disk_probe_elapsed: Duration,
+    pub disk_read_elapsed: Duration,
+    pub disk_decompress_elapsed: Duration,
+    pub decode_elapsed: Duration,
+    pub disk_write_elapsed: Duration,
+    pub total_elapsed: Duration,
+}
+
 impl TextureManager {
     /// Attempt to load a BLP texture's raw BC block data without CPU decoding.
     ///
     /// Returns `Some` only when the resolved file is a BLP with DXT1/DXT3/DXT5 content.
     /// Callers should fall back to `load()` (RGBA path) when this returns `None`.
     pub fn load_bc(&mut self, wow_path: &str) -> Option<&BcTextureResult> {
+        self.load_bc_with_telemetry(wow_path).0
+    }
+
+    /// Attempt to load a BLP texture's raw BC block data and capture timing breakdowns.
+    pub fn load_bc_with_telemetry(
+        &mut self,
+        wow_path: &str,
+    ) -> (Option<&BcTextureResult>, BcLoadTelemetry) {
+        let start = Instant::now();
         let normalized = normalize_wow_path(wow_path);
         if self.bc_cache.contains_key(&normalized) {
-            return self.bc_cache.get(&normalized);
+            return (
+                self.bc_cache.get(&normalized),
+                BcLoadTelemetry {
+                    cache_hit: true,
+                    total_elapsed: start.elapsed(),
+                    ..Default::default()
+                },
+            );
         }
-        let file_path = self.resolve_path(&normalized)?;
+        let mut telemetry = BcLoadTelemetry::default();
+        let resolve_start = Instant::now();
+        let Some(file_path) = self.resolve_path(&normalized) else {
+            telemetry.resolve_elapsed = resolve_start.elapsed();
+            telemetry.total_elapsed = start.elapsed();
+            return (None, telemetry);
+        };
+        telemetry.resolve_elapsed = resolve_start.elapsed();
 
         let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
         if !ext.eq_ignore_ascii_case("blp") {
-            return None;
+            telemetry.total_elapsed = start.elapsed();
+            return (None, telemetry);
         }
+        telemetry.resolved_blp = true;
 
-        let blp = load_blp(&file_path).ok()?;
-        let bc_texture = bc_texture_result(blp.header.width, blp.header.height, blp.content)?;
+        let parse_start = Instant::now();
+        let Some(blp) = load_blp(&file_path).ok() else {
+            telemetry.parse_elapsed = parse_start.elapsed();
+            telemetry.total_elapsed = start.elapsed();
+            return (None, telemetry);
+        };
+        telemetry.parse_elapsed = parse_start.elapsed();
+        let extract_start = Instant::now();
+        let Some(bc_texture) = bc_texture_result(blp.header.width, blp.header.height, blp.content)
+        else {
+            telemetry.extract_elapsed = extract_start.elapsed();
+            telemetry.total_elapsed = start.elapsed();
+            return (None, telemetry);
+        };
+        telemetry.extract_elapsed = extract_start.elapsed();
 
         self.bc_cache.insert(normalized.clone(), bc_texture);
-        self.bc_cache.get(&normalized)
+        telemetry.total_elapsed = start.elapsed();
+        (self.bc_cache.get(&normalized), telemetry)
     }
 }
 
@@ -473,6 +576,44 @@ mod tests {
     }
 
     #[test]
+    fn test_load_with_telemetry_reports_memory_cache_hit() {
+        let temp_dir = TempDir::new().unwrap();
+        let base = temp_dir.path();
+
+        let webp_path = base.join("cached.webp");
+        let img = image::RgbaImage::from_pixel(4, 4, image::Rgba([100, 100, 100, 255]));
+        img.save(&webp_path).unwrap();
+
+        let mut mgr = TextureManager::new(base);
+        assert!(
+            mgr.load("cached").is_some(),
+            "first load should populate memory cache"
+        );
+
+        let (cached, telemetry) = mgr.load_with_telemetry("cached");
+
+        assert!(cached.is_some(), "second load should still return texture");
+        assert!(
+            telemetry.mem_cache_hit,
+            "telemetry should report memory cache hits"
+        );
+        assert!(
+            !telemetry.disk_cache_hit,
+            "memory cache hit should skip disk cache"
+        );
+        assert_eq!(
+            telemetry.resolve_elapsed,
+            Duration::ZERO,
+            "memory cache hit should skip path resolution"
+        );
+        assert_eq!(
+            telemetry.decode_elapsed,
+            Duration::ZERO,
+            "memory cache hit should skip source decode"
+        );
+    }
+
+    #[test]
     fn test_sub_region_uses_cached_base_texture() {
         let temp_dir = TempDir::new().unwrap();
         let base = temp_dir.path();
@@ -521,6 +662,41 @@ mod tests {
         assert_eq!(cached.height, 4);
         assert_eq!(cached.format, BcTextureFormat::Bc1);
         assert_eq!(cached.bc_data.as_ref(), [0xaa; 8]);
+    }
+
+    #[test]
+    fn test_load_bc_with_telemetry_reports_cache_hits() {
+        let temp_dir = TempDir::new().unwrap();
+        let mut mgr = TextureManager::new(temp_dir.path());
+        mgr.bc_cache.insert(
+            "cached-dxt".to_string(),
+            BcTextureResult {
+                width: 4,
+                height: 4,
+                bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
+                format: BcTextureFormat::Bc1,
+            },
+        );
+
+        let (cached, telemetry) = mgr.load_bc_with_telemetry("cached-dxt");
+
+        assert!(cached.is_some(), "cached BC data should still be returned");
+        assert!(telemetry.cache_hit, "telemetry should record BC cache hits");
+        assert_eq!(
+            telemetry.resolve_elapsed,
+            Duration::ZERO,
+            "cached loads should not re-run path resolution"
+        );
+        assert_eq!(
+            telemetry.parse_elapsed,
+            Duration::ZERO,
+            "cached loads should not reparse the BLP file"
+        );
+        assert_eq!(
+            telemetry.extract_elapsed,
+            Duration::ZERO,
+            "cached loads should not re-extract BC blocks"
+        );
     }
 
     fn test_dxtn(content: Vec<u8>, format: DxtnFormat) -> BlpDxtn {

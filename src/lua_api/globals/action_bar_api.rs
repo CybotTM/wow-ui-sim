@@ -2,10 +2,34 @@
 
 use crate::Result;
 use crate::lua_api::SimState;
+use crate::lua_api::methods::{call_function_state, frame_ref, table_get};
+use rilua::LuaApiMut;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub fn push_action_button_state_update<T>(_state: &Rc<RefCell<SimState>>, _lua: T) -> Result<()> {
+pub fn push_action_button_state_update(
+    state: &Rc<RefCell<SimState>>,
+    lua: &mut rilua::Lua,
+) -> Result<()> {
+    let button_ids = {
+        let sim = state.borrow();
+        sim.action_ui_buttons
+            .iter()
+            .map(|(button_id, _)| *button_id)
+            .collect::<Vec<_>>()
+    };
+    if button_ids.is_empty() {
+        return Ok(());
+    }
+
+    let state = lua.state_mut();
+    for button_id in button_ids {
+        let button = frame_ref(state, button_id)?;
+        let update_state = table_get(state, button, "UpdateState");
+        if matches!(update_state, rilua::Val::Function(_)) {
+            call_function_state(state, update_state, &[button])?;
+        }
+    }
     Ok(())
 }
 

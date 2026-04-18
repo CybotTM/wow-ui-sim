@@ -532,33 +532,19 @@ fn test_model_scene_project_3d_point_uses_camera_projection() {
         scene:SetCameraFieldOfView(1.0)
         scene:SetViewInsets(10, 20, 30, 40)
         scene:SetViewTranslation(12, -6)
-
-        _G.scene_projection = {
-            center = { scene:Project3DPointTo2D(1.0, 2.0, 13.0) },
-            offset = { scene:Project3DPointTo2D(3.0, 4.0, 13.0) },
-            behind = { scene:Project3DPointTo2D(1.0, 2.0, 2.0) },
-        }
     "#,
     )
     .unwrap();
 
     let center: (f64, f64, f64) = env
-        .eval(
-            r#"
-            local p = _G.scene_projection.center
-            return p[1], p[2], p[3]
-        "#,
-        )
+        .eval("return TestModelSceneProjection:Project3DPointTo2D(1.0, 2.0, 13.0)")
         .unwrap();
     let offset: (f64, f64, f64) = env
-        .eval(
-            r#"
-            local p = _G.scene_projection.offset
-            return p[1], p[2], p[3]
-        "#,
-        )
+        .eval("return TestModelSceneProjection:Project3DPointTo2D(3.0, 4.0, 13.0)")
         .unwrap();
-    let behind: rilua::Val = env.eval("_G.scene_projection.behind[1]").unwrap();
+    let behind: rilua::Val = env
+        .eval("return TestModelSceneProjection:Project3DPointTo2D(1.0, 2.0, 2.0)")
+        .unwrap();
 
     assert!((center.0 - 197.0).abs() < 0.001);
     assert!((center.1 - 59.0).abs() < 0.001);

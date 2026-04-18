@@ -3,7 +3,6 @@
 //! exports its own `pub(super) fn build_*_variants` dispatcher.
 
 use super::{FastHandlerRef, load_template};
-use crate::lua_api::globals::create_frame::helpers::resolve_global_path;
 use crate::lua_api::hot_literals::TEMPLATE_GLOBAL_METHOD_HANDLER;
 use crate::lua_api::methods::create_string;
 use rilua::vm::state::LuaState;
@@ -125,13 +124,8 @@ pub(super) fn call_global_method_builder(
     extra_args: &[Val],
 ) -> LuaResult<Val> {
     let builder = load_template(state, source, tag)?;
-    let target = resolve_global_path(state, target_path);
     let mut args = Vec::with_capacity(2 + extra_args.len());
-    args.push(if target == Val::Nil {
-        create_string(state, target_path)
-    } else {
-        target
-    });
+    args.push(create_string(state, target_path));
     args.push(create_string(state, method_name));
     args.extend_from_slice(extra_args);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &args)

@@ -21,7 +21,12 @@ pub(super) struct TestCtx {
 impl TestCtx {
     /// Assert a Lua expression evaluates to true.
     pub(super) fn assert_lua_true(&self, expr: &str, msg: &str) {
-        let result: bool = self.env.eval(expr).unwrap();
+        let code = if expr.trim_start().starts_with("return") {
+            expr.to_string()
+        } else {
+            format!("return {expr}")
+        };
+        let result: bool = self.env.eval(&code).unwrap();
         assert!(result, "{}", msg);
     }
 
@@ -683,11 +688,14 @@ fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
         "anonymous action button should stay reachable",
     );
 
-    crate::lua_api::globals::action_bar_api::push_action_button_state_update(
-        t.env.state(),
-        &*t.env.rilua(),
-    )
-    .unwrap();
+    {
+        let mut lua = t.env.rilua_mut();
+        crate::lua_api::globals::action_bar_api::push_action_button_state_update(
+            t.env.state(),
+            &mut lua,
+        )
+        .unwrap();
+    }
 
     t.assert_lua_true(
         "__test_button.updateCalls == 1",

@@ -6,28 +6,43 @@ use rilua::LuaApiMut;
 use std::cell::{Ref, RefMut};
 
 impl WowLuaEnv {
+    fn with_dynamic_chunk_slots_disabled<R>(
+        &self,
+        f: impl FnOnce(&mut rilua::Lua) -> rilua::LuaResult<R>,
+    ) -> rilua::LuaResult<R> {
+        let mut lua = self.lua.borrow_mut();
+        let saved_slots = lua.state_mut().global_slots.take();
+        let result = f(&mut lua);
+        lua.state_mut().global_slots = saved_slots;
+        result
+    }
+
     // ── rilua execution paths ────────────────────────────────────────
 
     /// Execute Lua code on rilua's VM.
     pub fn exec_rilua(&self, code: &str) -> rilua::LuaResult<()> {
-        self.lua.borrow_mut().exec(code)
+        let func = self.load_rilua(code)?;
+        self.lua.borrow_mut().call_function(&func, &[])?;
+        Ok(())
     }
 
     /// Execute Lua code on rilua's VM with a custom chunk name.
     pub fn exec_rilua_named(&self, code: &str, name: &str) -> rilua::LuaResult<()> {
-        self.lua.borrow_mut().exec_bytes(code.as_bytes(), name)
+        let func = self.load_rilua_named(code, name)?;
+        self.lua.borrow_mut().call_function(&func, &[])?;
+        Ok(())
     }
 
     /// Compile Lua code on rilua and return a function handle.
     pub fn load_rilua(&self, code: &str) -> rilua::LuaResult<rilua::Function> {
-        let mut lua = self.lua.borrow_mut();
-        LuaApiMut::load(&mut *lua, code)
+        self.with_dynamic_chunk_slots_disabled(|lua| LuaApiMut::load(&mut *lua, code))
     }
 
     /// Compile Lua code on rilua with a custom chunk name.
     pub fn load_rilua_named(&self, code: &str, name: &str) -> rilua::LuaResult<rilua::Function> {
-        let mut lua = self.lua.borrow_mut();
-        LuaApiMut::load_bytes(&mut *lua, code.as_bytes(), name)
+        self.with_dynamic_chunk_slots_disabled(|lua| {
+            LuaApiMut::load_bytes(&mut *lua, code.as_bytes(), name)
+        })
     }
 
     /// Compile Lua code, retarget its fenv to the registry secureenv, and
@@ -36,8 +51,8 @@ impl WowLuaEnv {
     /// integration tests can exercise fenv isolation without staging an
     /// entire addon directory.
     pub fn exec_rilua_secure(&self, code: &str) -> rilua::LuaResult<()> {
+        let func = self.load_rilua(code)?;
         let mut lua = self.lua.borrow_mut();
-        let func = LuaApiMut::load(&mut *lua, code)?;
         super::globals::security::mark_secure(&mut *lua, &func)?;
         lua.call_function(&func, &[])?;
         Ok(())

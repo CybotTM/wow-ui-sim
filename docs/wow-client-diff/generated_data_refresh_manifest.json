@@ -10,9 +10,9 @@
     {
       "path": "src/lua_api/globals/enum_data/missing_constants.lua",
       "source": "docs/wow-client-diff/diff_constants_missing.txt",
-      "sha256": "4a8e43d7d3fdc4f945a5df5d6eec780bbf8099fbe3606482fb937bad57932b0a",
-      "bytes": 133993,
-      "lines": 1402
+      "sha256": "b82095842a6216d0be1074114a0d4249eb4dc35819b38c29a843384dda4e26dd",
+      "bytes": 135321,
+      "lines": 1418
     }
   ]
 }

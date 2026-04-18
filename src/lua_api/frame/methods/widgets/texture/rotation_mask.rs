@@ -2,7 +2,10 @@
 
 use super::super::shared::{opt_f32, opt_string};
 use super::color::color_from_table;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_id_from_stack};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_table, frame_id_from_stack,
+    get_or_create_frame_fields, table_get, table_set,
+};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -65,7 +68,32 @@ pub(super) fn set_gradient(state: &mut LuaState) -> LuaResult<u32> {
 // ---------------------------------------------------------------------------
 
 pub(super) fn set_visuals(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = frame_id_from_stack(state, 1);
+    let id = frame_id_from_stack(state, 1)?;
+    let fields = get_or_create_frame_fields(state, id);
+    let override_fn = table_get(state, fields, "SetVisuals");
+    if matches!(override_fn, Val::Function(_)) {
+        let arg_count = state.top.saturating_sub(state.base) as i32;
+        let args: Vec<Val> = (1..=arg_count)
+            .map(|index| stack_val(state, index))
+            .collect();
+        let _ = call_function_state(state, override_fn, &args)?;
+        return Ok(0);
+    }
+    let visual_args = create_table(state);
+    if let Val::Table(table_ref) = visual_args {
+        let arg_count = state.top.saturating_sub(state.base) as i32;
+        let values: Vec<Val> = (2..=arg_count)
+            .map(|index| stack_val(state, index))
+            .collect();
+        if let Some(table) = state.gc.tables.get_mut(table_ref) {
+            for (offset, value) in values.into_iter().enumerate() {
+                let key = (offset + 1) as f64;
+                let _ = table.raw_set(Val::Num(key), value, &state.gc.string_arena);
+            }
+        }
+        state.gc.barrier_back(table_ref);
+    }
+    table_set(state, fields, "visualArgs", visual_args);
     Ok(0)
 }
 

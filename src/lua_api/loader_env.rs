@@ -221,6 +221,19 @@ impl<'a> LoaderEnv<'a> {
         }
     }
 
+    fn load_dynamic_chunk_without_slots(
+        state: &mut LuaState,
+        code: &str,
+        tag: &str,
+    ) -> Result<rilua::Function> {
+        let saved_slots = state.global_slots.take();
+        let cache_tag = format!("{tag}-no-global-slots");
+        let result = crate::loader::chunk_cache::load_chunk(state, code, &cache_tag)
+            .map_err(|e| crate::Error::Other(e.to_string()));
+        state.global_slots = saved_slots;
+        result
+    }
+
     pub fn with_state<T, E>(
         &self,
         f: impl FnOnce(&mut LuaState) -> std::result::Result<T, E>,
@@ -248,8 +261,7 @@ impl<'a> LoaderEnv<'a> {
 
     pub fn exec(&self, code: &str) -> Result<()> {
         self.with_state(|state| {
-            let func = crate::loader::chunk_cache::load_chunk(state, code, "loader-exec")
-                .map_err(|e| crate::Error::Other(e.to_string()))?;
+            let func = Self::load_dynamic_chunk_without_slots(state, code, "loader-exec")?;
             if self.loading_addon_uses_secure_env() {
                 mark_secure_state(state, &func)?;
             }
@@ -271,7 +283,9 @@ impl<'a> LoaderEnv<'a> {
         addon_table: Val,
     ) -> Result<()> {
         self.with_state(|state| {
+            let saved_slots = state.global_slots.take();
             let func = LuaApiMut::load_bytes(state, code.as_bytes(), name)?;
+            state.global_slots = saved_slots;
             let addon_name = create_string(state, addon_name);
             crate::lua_api::methods::call_function_state(
                 state,

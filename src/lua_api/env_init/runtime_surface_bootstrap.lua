@@ -209,6 +209,291 @@ if SetChatWindowSavedPosition == nil then
   end
 end
 
+local function __wow_ensure_named_frame(frameType, name, parent)
+  local existing = rawget(_G, name)
+  if existing ~= nil then
+    return existing
+  end
+  if CreateFrame == nil then
+    return nil
+  end
+  return CreateFrame(frameType or "Frame", name, parent)
+end
+
+local function __wow_ensure_named_child(parent, key, frameType, name)
+  if parent == nil then
+    return nil
+  end
+  local existing = rawget(parent, key)
+  if existing ~= nil then
+    return existing
+  end
+  local child = CreateFrame(frameType or "Frame", name, parent)
+  rawset(parent, key, child)
+  return child
+end
+
+local function __wow_install_frame_helpers(frame)
+  if frame == nil then
+    return nil
+  end
+
+  if frame.AddDataProvider == nil then
+    function frame:AddDataProvider(provider)
+      local env = debug and debug.getfenv and debug.getfenv(self)
+      local fields = type(env) == "table" and env[1] or nil
+      if type(fields) ~= "table" then
+        fields = {}
+        if type(env) == "table" then
+          env[1] = fields
+        else
+          return
+        end
+      end
+      local providers = fields.dataProviders
+      if type(providers) ~= "table" then
+        providers = {}
+        fields.dataProviders = providers
+      end
+      for i = 1, #providers do
+        if providers[i] == provider then
+          return
+        end
+      end
+      providers[#providers + 1] = provider
+    end
+  end
+
+  if frame.RemoveDataProvider == nil then
+    function frame:RemoveDataProvider(provider)
+      local env = debug and debug.getfenv and debug.getfenv(self)
+      local providers = type(env) == "table" and env[1] and env[1].dataProviders or nil
+      if type(providers) ~= "table" then
+        return
+      end
+      for i = #providers, 1, -1 do
+        if providers[i] == provider then
+          table.remove(providers, i)
+        end
+      end
+    end
+  end
+
+  if frame.IsInitialized == nil then
+    function frame:IsInitialized()
+      return type(self.layoutInfo) == "table" or type(self.systemInfo) == "table"
+    end
+  end
+
+  if frame.IsInDefaultPosition == nil then
+    function frame:IsInDefaultPosition()
+      local info = self.systemInfo
+      return type(info) == "table" and info.isInDefaultPosition == true
+    end
+  end
+
+  return frame
+end
+
+if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
+  __wow_original_CreateFrame = CreateFrame
+  function CreateFrame(...)
+    return __wow_install_frame_helpers(__wow_original_CreateFrame(...))
+  end
+end
+
+do
+  local frameMeta = GetFrameMetatable and GetFrameMetatable()
+  local frameIndex = frameMeta and frameMeta.__index
+  if type(frameIndex) == "table" then
+    if frameIndex.AddDataProvider == nil then
+      function frameIndex:AddDataProvider(provider)
+        local fields = debug.getfenv(self)
+        local store = fields and fields[1]
+        if type(store) ~= "table" then
+          return
+        end
+        local providers = store.dataProviders
+        if type(providers) ~= "table" then
+          providers = {}
+          store.dataProviders = providers
+        end
+        for i = 1, #providers do
+          if providers[i] == provider then
+            return
+          end
+        end
+        providers[#providers + 1] = provider
+      end
+    end
+
+    if frameIndex.RemoveDataProvider == nil then
+      function frameIndex:RemoveDataProvider(provider)
+        local fields = debug.getfenv(self)
+        local providers = fields and fields[1] and fields[1].dataProviders
+        if type(providers) ~= "table" then
+          return
+        end
+        for i = #providers, 1, -1 do
+          if providers[i] == provider then
+            table.remove(providers, i)
+          end
+        end
+      end
+    end
+
+    if frameIndex.IsInitialized == nil then
+      function frameIndex:IsInitialized()
+        return type(self.layoutInfo) == "table" or type(self.systemInfo) == "table"
+      end
+    end
+
+    if frameIndex.IsInDefaultPosition == nil then
+      function frameIndex:IsInDefaultPosition()
+        local info = self.systemInfo
+        return type(info) == "table" and info.isInDefaultPosition == true
+      end
+    end
+  end
+end
+
+ChatFrameUtil = ChatFrameUtil or {}
+if ChatFrameUtil.ProcessMessageEventFilters == nil then
+  function ChatFrameUtil.ProcessMessageEventFilters(_frame, event, ...)
+    return false, event, ...
+  end
+end
+if ChatFrameUtil.GetChatWindowName == nil then
+  function ChatFrameUtil.GetChatWindowName(index)
+    return string.format("Chat Window %d", tonumber(index) or 1)
+  end
+end
+
+ChatTypeGroup = ChatTypeGroup or {
+  SYSTEM = { "SYSTEM", "ERRORS", "IGNORED", "ACHIEVEMENT", "CHANNEL_NOTICE_USER" },
+  SAY = { "SAY" },
+  YELL = { "YELL" },
+  WHISPER = { "WHISPER", "WHISPER_INFORM" },
+  PARTY = { "PARTY", "PARTY_LEADER" },
+  RAID = { "RAID", "RAID_LEADER", "RAID_WARNING" },
+  GUILD = { "GUILD", "OFFICER" },
+  CHANNEL = { "CHANNEL", "CHANNEL_JOIN", "CHANNEL_LEAVE" },
+  EMOTE = { "EMOTE" },
+  BN_WHISPER = { "BN_WHISPER", "BN_WHISPER_INFORM", "BN_INLINE_TOAST_ALERT" },
+  INSTANCE_CHAT = { "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER" },
+}
+
+do
+  local uiParent = UIParent
+  __wow_install_frame_helpers(uiParent)
+  local settingsPanel = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "SettingsPanel", uiParent))
+  local settingsContainer = __wow_ensure_named_child(settingsPanel, "Container", "Frame")
+  local settingsList = __wow_ensure_named_child(settingsContainer, "SettingsList", "Frame")
+  local scrollBox = __wow_ensure_named_child(settingsList, "ScrollBox", "Frame")
+  __wow_ensure_named_child(scrollBox, "ScrollTarget", "Frame")
+  local header = __wow_ensure_named_child(settingsList, "Header", "Frame")
+  if header ~= nil and rawget(header, "Title") == nil and header.CreateFontString ~= nil then
+    local title = header:CreateFontString(nil, "OVERLAY")
+    title:SetText("")
+    rawset(header, "Title", title)
+  end
+
+  local objectiveTracker = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ObjectiveTrackerFrame", uiParent))
+  local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
+  __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
+
+  local lfgListFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "LFGListFrame", uiParent))
+  local searchPanel = __wow_ensure_named_child(lfgListFrame, "SearchPanel", "Frame")
+  __wow_ensure_named_child(searchPanel, "SearchBox", "EditBox")
+
+  local buffFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "BuffFrame", uiParent))
+  local auraContainer = __wow_ensure_named_child(buffFrame, "AuraContainer", "Frame")
+  if auraContainer ~= nil and auraContainer.iconScale == nil then
+    auraContainer.iconScale = 1.0
+  end
+
+  local addonCompartmentFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Button", "AddonCompartmentFrame", uiParent))
+  if addonCompartmentFrame ~= nil then
+    addonCompartmentFrame.registeredAddons = addonCompartmentFrame.registeredAddons or {}
+    if addonCompartmentFrame.RegisterAddon == nil then
+      function addonCompartmentFrame:RegisterAddon(addon)
+        self.registeredAddons[#self.registeredAddons + 1] = addon or true
+      end
+    end
+    if addonCompartmentFrame.UnregisterAddon == nil then
+      function addonCompartmentFrame:UnregisterAddon()
+        table.remove(self.registeredAddons)
+      end
+    end
+  end
+
+  local alertFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "AlertFrame", uiParent))
+  if alertFrame ~= nil then
+    alertFrame.alertFrameSubSystems = alertFrame.alertFrameSubSystems or {}
+    if alertFrame.AddQueuedAlertFrameSubSystem == nil then
+      function alertFrame:AddQueuedAlertFrameSubSystem(templateName, factory, _maxVisible, anchorSlot)
+        local subsystem = {
+          templateName = templateName,
+          factory = factory,
+          anchorPriority = 1000 + math.max(0, (tonumber(anchorSlot) or 1) - 1) * 10,
+          queuedAlerts = {},
+          canShowMoreCondition = nil,
+        }
+        function subsystem:SetCanShowMoreConditionFunc(func)
+          self.canShowMoreCondition = func
+        end
+        function subsystem:AddAlert(alert)
+          if self.canShowMoreCondition ~= nil and not self.canShowMoreCondition() and #self.queuedAlerts >= 2 then
+            return false
+          end
+          self.queuedAlerts[#self.queuedAlerts + 1] = alert
+          return true
+        end
+        function subsystem:RemoveAlert(alert)
+          for i = #self.queuedAlerts, 1, -1 do
+            if self.queuedAlerts[i] == alert then
+              table.remove(self.queuedAlerts, i)
+            end
+          end
+        end
+        function subsystem:ClearAllAlerts()
+          self.queuedAlerts = {}
+        end
+        self.alertFrameSubSystems[#self.alertFrameSubSystems + 1] = subsystem
+        return subsystem
+      end
+    end
+  end
+
+  local partyFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "PartyFrame", uiParent))
+  PartyMemberFramePool = PartyMemberFramePool or {
+    EnumerateActive = function()
+      return function()
+        return nil
+      end
+    end,
+    GetNumActive = function()
+      return 0
+    end,
+  }
+  if partyFrame ~= nil and partyFrame.PartyMemberFramePool == nil then
+    partyFrame.PartyMemberFramePool = PartyMemberFramePool
+  end
+
+  ContainerFrameContainer = ContainerFrameContainer or { ContainerFrames = {} }
+  ChatFrame1 = ChatFrame1 or __wow_install_frame_helpers(__wow_ensure_named_frame("MessageFrame", "ChatFrame1", uiParent))
+  EventToastManagerFrame = EventToastManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EventToastManagerFrame", uiParent))
+  EditModeManagerFrame = EditModeManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EditModeManagerFrame", uiParent))
+  RolePollPopup = RolePollPopup or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "RolePollPopup", uiParent))
+  TimerTracker = TimerTracker or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "TimerTracker", uiParent))
+  UIErrorsFrame = UIErrorsFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("MessageFrame", "UIErrorsFrame", uiParent))
+  SideDressUpFrame = SideDressUpFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "SideDressUpFrame", uiParent))
+  ContainerFrameCombinedBags = ContainerFrameCombinedBags or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ContainerFrameCombinedBags", uiParent))
+  LootFrame = LootFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "LootFrame", uiParent))
+  GossipFrame = GossipFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "GossipFrame", uiParent))
+  FriendsFrame = FriendsFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "FriendsFrame", uiParent))
+end
+
 if GetChannelName == nil then
   function GetChannelName(channel)
     if type(channel) == "number" then
@@ -885,6 +1170,106 @@ if UnitAura == nil then
   function UnitAura(unitToken, index, filter)
     local aura = C_UnitAuras.GetAuraDataByIndex(unitToken, index, filter)
     return AuraUtil.UnpackAuraData(aura)
+  end
+end
+
+if GetContainerNumSlots == nil and C_Container ~= nil then
+  function GetContainerNumSlots(...)
+    return C_Container.GetContainerNumSlots(...)
+  end
+end
+
+if GetContainerItemID == nil and C_Container ~= nil then
+  function GetContainerItemID(...)
+    return C_Container.GetContainerItemID(...)
+  end
+end
+
+if GetContainerItemLink == nil and C_Container ~= nil then
+  function GetContainerItemLink(...)
+    return C_Container.GetContainerItemLink(...)
+  end
+end
+
+if GetItemID == nil then
+  local function __wow_extract_item_id(value)
+    if value == nil then
+      return nil
+    end
+    if type(value) == "number" then
+      return value > 0 and math.floor(value) or nil
+    end
+    if type(value) ~= "string" then
+      return nil
+    end
+
+    local link_id = value:match("|Hitem:(%d+)")
+    if link_id ~= nil then
+      return tonumber(link_id)
+    end
+
+    local raw_id = value:match("^item:(%d+)")
+    if raw_id ~= nil then
+      return tonumber(raw_id)
+    end
+
+    local numeric = tonumber(value)
+    if numeric ~= nil and numeric > 0 then
+      return math.floor(numeric)
+    end
+
+    return nil
+  end
+
+  function GetItemID(itemInfo)
+    return __wow_extract_item_id(itemInfo)
+  end
+end
+
+if GetTradeSkillTexture == nil and C_TradeSkillUI ~= nil then
+  function GetTradeSkillTexture(...)
+    return C_TradeSkillUI.GetTradeSkillTexture(...)
+  end
+end
+
+if IsArtifactRelicItem == nil and C_ItemSocketInfo ~= nil then
+  function IsArtifactRelicItem(...)
+    return C_ItemSocketInfo.IsArtifactRelicItem(...)
+  end
+end
+
+if CombatLogGetCurrentEntry == nil then
+  local __wow_combat_log_state = {
+    currentEntry = 0,
+    numEntries = 0,
+    retentionTime = 300,
+  }
+
+  function CombatLogAddFilter(_filter)
+    return true
+  end
+
+  function CombatLogAdvanceEntry(step)
+    local amount = tonumber(step) or 0
+    __wow_combat_log_state.currentEntry =
+      math.max(0, __wow_combat_log_state.currentEntry + amount)
+    return true
+  end
+
+  function CombatLogGetCurrentEntry()
+    return __wow_combat_log_state.currentEntry
+  end
+
+  function CombatLogGetCurrentEventInfo()
+    return nil
+  end
+
+  function CombatLogGetNumEntries()
+    return __wow_combat_log_state.numEntries
+  end
+
+  function CombatLogSetCurrentEntry(entry)
+    __wow_combat_log_state.currentEntry = math.max(0, tonumber(entry) or 0)
   end
 end
 
@@ -2496,16 +2881,8 @@ C_ColorUtil = C_ColorUtil or __wow_namespace({
 })
 
 C_CurveUtil = C_CurveUtil or __wow_namespace({
-  CreateCurve = function()
-    local curve = { points = {}, curveType = 0 }
-    function curve:AddPoint(x, y)
-      self.points[#self.points + 1] = { x = x, y = y }
-    end
-    function curve:SetType(curveType)
-      self.curveType = curveType
-    end
-    return curve
-  end,
+  CreateCurve = nil,
+  CreateColorCurve = nil,
 })
 
 C_EventUtils = C_EventUtils or __wow_namespace({
@@ -2513,8 +2890,205 @@ C_EventUtils = C_EventUtils or __wow_namespace({
 })
 
 C_FunctionContainers = C_FunctionContainers or __wow_namespace({
-  CreateCallback = function(fn) return fn end,
+  CreateCallback = nil,
 })
+
+C_Club = C_Club or __wow_namespace()
+
+local __wow_proxy_object_id = 1
+
+local function __wow_next_proxy_label(prefix)
+  local label = prefix .. ":" .. tostring(__wow_proxy_object_id)
+  __wow_proxy_object_id = __wow_proxy_object_id + 1
+  return label
+end
+
+local function __wow_make_proxy_object(prefix, methods, initial_state)
+  local object = initial_state or {}
+  local label = __wow_next_proxy_label(prefix)
+  return setmetatable(object, {
+    __index = function(t, key)
+      local value = rawget(t, key)
+      if value ~= nil then
+        return value
+      end
+      return methods[key]
+    end,
+    __newindex = function(t, key, value)
+      if methods[key] ~= nil then
+        error("read-only key: " .. tostring(key), 2)
+      end
+      rawset(t, key, value)
+    end,
+    __tostring = function()
+      return label
+    end,
+  })
+end
+
+local function __wow_clone_proxy_points(points)
+  local copy = {}
+  for index = 1, #(points or {}) do
+    local point = points[index]
+    copy[index] = {
+      x = point.x,
+      y = point.y,
+    }
+  end
+  return copy
+end
+
+local function __wow_curve_methods(prefix)
+  local methods = {}
+
+  function methods:AddPoint(x, y)
+    self.points[#self.points + 1] = { x = x or 0, y = y or 0 }
+  end
+
+  function methods:SetType(curveType)
+    self.curveType = curveType or 0
+  end
+
+  function methods:GetPointCount()
+    return #self.points
+  end
+
+  function methods:Evaluate(x)
+    local points = self.points
+    if #points == 0 then
+      return 0
+    end
+    if #points == 1 then
+      return points[1].y
+    end
+
+    local target = x or 0
+    for index = 1, #points - 1 do
+      local left = points[index]
+      local right = points[index + 1]
+      if target <= right.x then
+        local dx = right.x - left.x
+        if dx == 0 then
+          return right.y
+        end
+        local fraction = (target - left.x) / dx
+        return left.y + (right.y - left.y) * fraction
+      end
+    end
+
+    return points[#points].y
+  end
+
+  function methods:Copy()
+    return __wow_make_proxy_object(prefix, methods, {
+      points = __wow_clone_proxy_points(self.points),
+      curveType = self.curveType,
+    })
+  end
+
+  return methods
+end
+
+if rawget(C_CurveUtil, "CreateCurve") == nil then
+  local curveMethods = __wow_curve_methods("LuaCurveObject")
+  function C_CurveUtil.CreateCurve()
+    return __wow_make_proxy_object("LuaCurveObject", curveMethods, {
+      points = {},
+      curveType = 0,
+    })
+  end
+end
+
+if rawget(C_CurveUtil, "CreateColorCurve") == nil then
+  local colorCurveMethods = __wow_curve_methods("LuaColorCurveObject")
+  function C_CurveUtil.CreateColorCurve()
+    return __wow_make_proxy_object("LuaColorCurveObject", colorCurveMethods, {
+      points = {},
+      curveType = 0,
+    })
+  end
+end
+
+if rawget(C_FunctionContainers, "CreateCallback") == nil then
+  local functionContainerMethods = {}
+
+  function functionContainerMethods:Cancel()
+    self._cancelled = true
+  end
+
+  function functionContainerMethods:IsCancelled()
+    return self._cancelled == true
+  end
+
+  function functionContainerMethods:Invoke(...)
+    if self._cancelled or type(self._callback) ~= "function" then
+      return nil
+    end
+    return self._callback(...)
+  end
+
+  function C_FunctionContainers.CreateCallback(fn)
+    return __wow_make_proxy_object("LuaFunctionContainer", functionContainerMethods, {
+      _callback = fn,
+      _cancelled = false,
+    })
+  end
+end
+
+if rawget(C_Club, "GetClubInfo") == nil then
+  function C_Club.GetClubInfo(clubId)
+    if clubId == nil then
+      return nil
+    end
+    return { id = clubId }
+  end
+end
+
+if CreateAbbreviateConfig == nil then
+  local abbreviateMethods = {}
+
+  function abbreviateMethods:GetAbbreviateNumberData()
+    return self._abbreviateNumberData
+  end
+
+  function abbreviateMethods:SetAbbreviateNumberData(data)
+    self._abbreviateNumberData = data
+  end
+
+  function CreateAbbreviateConfig(initial)
+    local state = type(initial) == "table" and __wow_copy_table(initial) or {}
+    state._abbreviateNumberData = state._abbreviateNumberData
+    return __wow_make_proxy_object("AbbreviateConfig", abbreviateMethods, state)
+  end
+end
+
+if CreateUnitHealPredictionCalculator == nil then
+  local healPredictionMethods = {}
+
+  function healPredictionMethods:Reset()
+    self._damageAbsorbClampMode = 0
+    self._incomingHeals = 0
+  end
+
+  function healPredictionMethods:GetIncomingHeals()
+    return self._incomingHeals or 0
+  end
+
+  function healPredictionMethods:GetDamageAbsorbClampMode()
+    return self._damageAbsorbClampMode or 0
+  end
+
+  function healPredictionMethods:SetDamageAbsorbClampMode(mode)
+    self._damageAbsorbClampMode = mode or 0
+  end
+
+  function CreateUnitHealPredictionCalculator()
+    return __wow_make_proxy_object("UnitHealPredictionCalculator", healPredictionMethods, {
+      _damageAbsorbClampMode = 0,
+      _incomingHeals = 0,
+    })
+  end
+end
 
 C_DurationUtil = C_DurationUtil or __wow_namespace({
   CreateDuration = __wow_duration_object(),
@@ -3079,6 +3653,261 @@ if CreateTemplateInfoCache == nil then
     return cache
   end
 end
+
+local function __wow_frame_fields(frame)
+  local env = debug and debug.getfenv and debug.getfenv(frame)
+  if type(env) ~= "table" then
+    return nil
+  end
+  if type(env[1]) ~= "table" then
+    env[1] = {}
+  end
+  return env[1]
+end
+
+local function __wow_remove_array_value(values, target)
+  if type(values) ~= "table" then
+    return
+  end
+  for index = #values, 1, -1 do
+    if values[index] == target then
+      table.remove(values, index)
+      break
+    end
+  end
+end
+
+local function __wow_register_core_frame_methods()
+  local mt = GetFrameMetatable and GetFrameMetatable()
+  local methods = mt and mt.__index
+  if type(methods) ~= "table" then
+    return
+  end
+
+  if methods.IsInitialized == nil then
+    function methods:IsInitialized()
+      return type(self.layoutInfo) == "table" or type(self.systemInfo) == "table"
+    end
+  end
+
+  if methods.IsInDefaultPosition == nil then
+    function methods:IsInDefaultPosition()
+      local systemInfo = self.systemInfo
+      if type(systemInfo) == "table" and systemInfo.isInDefaultPosition ~= nil then
+        return systemInfo.isInDefaultPosition == true
+      end
+      return false
+    end
+  end
+
+  if methods.AddDataProvider == nil then
+    function methods:AddDataProvider(provider)
+      local fields = __wow_frame_fields(self)
+      if fields == nil or provider == nil then
+        return
+      end
+      local providers = fields.dataProviders
+      if type(providers) ~= "table" then
+        providers = {}
+        fields.dataProviders = providers
+      end
+      for _, existing in ipairs(providers) do
+        if existing == provider then
+          return
+        end
+      end
+      table.insert(providers, provider)
+      if type(provider) == "table" and provider.pin == nil then
+        provider.pin = { dataProvider = provider }
+      end
+    end
+  end
+
+  if methods.RemoveDataProvider == nil then
+    function methods:RemoveDataProvider(provider)
+      local fields = __wow_frame_fields(self)
+      local providers = fields and fields.dataProviders
+      __wow_remove_array_value(providers, provider)
+    end
+  end
+end
+
+local function __wow_make_named_frame(widgetType, name, parent)
+  local existing = rawget(_G, name)
+  if existing ~= nil then
+    return existing
+  end
+  local frame = CreateFrame(widgetType or "Frame", name, parent)
+  rawset(_G, name, frame)
+  return frame
+end
+
+local function __wow_seed_global_frame_path(root, path)
+  local current = root
+  for index = 1, #path do
+    local name = path[index]
+    local child = current[name]
+    if child == nil then
+      local child_type = (index == #path and name == "Title") and "FontString" or "Frame"
+      if child_type == "FontString" then
+        child = current:CreateFontString(nil, "OVERLAY")
+        if type(child.SetText) == "function" then
+          child:SetText("")
+        end
+      else
+        child = CreateFrame("Frame", nil, current)
+      end
+      current[name] = child
+    end
+    current = child
+  end
+  return current
+end
+
+local function __wow_register_addon_compartment()
+  local frame = __wow_make_named_frame("Frame", "AddonCompartmentFrame", UIParent)
+  frame.registeredAddons = frame.registeredAddons or {}
+  if frame.RegisterAddon == nil then
+    function frame:RegisterAddon(addon)
+      self.registeredAddons = self.registeredAddons or {}
+      table.insert(self.registeredAddons, addon)
+    end
+  end
+  if frame.UnregisterAddon == nil then
+    function frame:UnregisterAddon(addon)
+      self.registeredAddons = self.registeredAddons or {}
+      if addon == nil then
+        return
+      end
+      __wow_remove_array_value(self.registeredAddons, addon)
+    end
+  end
+end
+
+local function __wow_register_alert_frame()
+  local frame = __wow_make_named_frame("Frame", "AlertFrame", UIParent)
+  frame.alertFrameSubSystems = frame.alertFrameSubSystems or {}
+  if frame.AddQueuedAlertFrameSubSystem == nil then
+    function frame:AddQueuedAlertFrameSubSystem(template, setupFn, maxAlerts, anchorSlot)
+      local subsystem = {
+        template = template,
+        setupFn = setupFn,
+        maxAlerts = tonumber(maxAlerts) or 0,
+        anchorPriority = 1000 + ((#self.alertFrameSubSystems + 1) * 10),
+        anchorSlot = anchorSlot,
+        queuedAlerts = {},
+      }
+
+      function subsystem:SetCanShowMoreConditionFunc(fn)
+        self.canShowMoreConditionFunc = fn
+      end
+
+      function subsystem:AddAlert(alert)
+        if self.maxAlerts > 0 and #self.queuedAlerts >= self.maxAlerts then
+          return false
+        end
+        table.insert(self.queuedAlerts, alert)
+        return true
+      end
+
+      function subsystem:RemoveAlert(alert)
+        __wow_remove_array_value(self.queuedAlerts, alert)
+      end
+
+      function subsystem:ClearAllAlerts()
+        self.queuedAlerts = {}
+      end
+
+      table.insert(self.alertFrameSubSystems, subsystem)
+      return subsystem
+    end
+  end
+end
+
+local function __wow_register_chat_frame_globals()
+  if rawget(_G, "ChatFrame1") == nil then
+    CreateFrame("ScrollingMessageFrame", "ChatFrame1", UIParent)
+  end
+
+  if ChatTypeGroup == nil then
+    ChatTypeGroup = {
+      SYSTEM = { "SYSTEM", "IGNORED", "SKILL", "LOOT", "CHANNEL_NOTICE_USER" },
+      SAY = { "SAY" },
+      PARTY = { "PARTY", "PARTY_LEADER" },
+      RAID = { "RAID", "RAID_LEADER", "RAID_WARNING" },
+      GUILD = { "GUILD", "OFFICER" },
+      WHISPER = { "WHISPER", "WHISPER_INFORM" },
+      CHANNEL = { "CHANNEL", "CHANNEL_JOIN", "CHANNEL_LEAVE" },
+      EMOTE = { "EMOTE", "TEXT_EMOTE" },
+      BN_WHISPER = { "BN_WHISPER", "BN_WHISPER_INFORM", "BN_INLINE_TOAST_ALERT" },
+      YELL = { "YELL" },
+      INSTANCE_CHAT = { "INSTANCE_CHAT", "INSTANCE_CHAT_LEADER" },
+    }
+  end
+
+  if ChatFrameUtil == nil then
+    ChatFrameUtil = {}
+  end
+  if ChatFrameUtil.ProcessMessageEventFilters == nil then
+    function ChatFrameUtil.ProcessMessageEventFilters(_frame, event, ...)
+      return false, event, ...
+    end
+  end
+  if ChatFrameUtil.GetChatWindowName == nil then
+    function ChatFrameUtil.GetChatWindowName(id)
+      return "Chat Window " .. tostring(id or 1)
+    end
+  end
+end
+
+local function __wow_register_misc_global_frames()
+  __wow_make_named_frame("Frame", "EventToastManagerFrame", UIParent)
+  __wow_make_named_frame("Frame", "EditModeManagerFrame", UIParent)
+  __wow_make_named_frame("Frame", "RolePollPopup", UIParent)
+  __wow_make_named_frame("Frame", "TimerTracker", UIParent)
+  __wow_make_named_frame("Frame", "UIErrorsFrame", UIParent)
+  __wow_make_named_frame("Frame", "SideDressUpFrame", UIParent)
+  __wow_make_named_frame("Frame", "ContainerFrameCombinedBags", UIParent)
+  __wow_make_named_frame("Frame", "LootFrame", UIParent)
+  __wow_make_named_frame("Frame", "RaidWarningFrame", UIParent)
+  __wow_make_named_frame("Frame", "GossipFrame", UIParent)
+  __wow_make_named_frame("Frame", "FriendsFrame", UIParent)
+
+  local settings = __wow_make_named_frame("Frame", "SettingsPanel", UIParent)
+  __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "ScrollBox", "ScrollTarget" })
+  __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "Header", "Title" })
+
+  local objective = __wow_make_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
+  __wow_seed_global_frame_path(objective, { "Header", "MinimizeButton" })
+
+  local lfg_list = __wow_make_named_frame("Frame", "LFGListFrame", UIParent)
+  __wow_seed_global_frame_path(lfg_list, { "SearchPanel", "SearchBox" })
+
+  local buff_frame = rawget(_G, "BuffFrame")
+  local aura_container = rawget(_G, "BuffFrameAuraContainer")
+  if buff_frame ~= nil and aura_container ~= nil and buff_frame.AuraContainer == nil then
+    buff_frame.AuraContainer = aura_container
+  end
+  if buff_frame ~= nil and buff_frame.AuraContainer ~= nil and buff_frame.AuraContainer.iconScale == nil then
+    buff_frame.AuraContainer.iconScale = 1.0
+  end
+
+  if ContainerFrameContainer == nil then
+    ContainerFrameContainer = { ContainerFrames = {} }
+  elseif ContainerFrameContainer.ContainerFrames == nil then
+    ContainerFrameContainer.ContainerFrames = {}
+  end
+
+  if PartyMemberFramePool == nil then
+    PartyMemberFramePool = CreateFramePool("Frame", UIParent)
+  end
+end
+
+__wow_register_core_frame_methods()
+__wow_register_chat_frame_globals()
+__wow_register_addon_compartment()
+__wow_register_alert_frame()
+__wow_register_misc_global_frames()
 
 EVERY_X_PERCENT = EVERY_X_PERCENT or "%d%%"
 TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN = TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN or "Known"

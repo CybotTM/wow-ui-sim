@@ -148,6 +148,9 @@ fn log_slow_draw(
     rgba_count: usize,
     bc_count: usize,
 ) {
+    if !crate::logging::texture_load_debug_enabled() {
+        return;
+    }
     if quad_dur.as_millis() > 10 || tex_dur.as_millis() > 10 {
         eprintln!(
             "{} [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} (new={} rgba={} bc={})",
@@ -176,7 +179,7 @@ impl App {
             if dirty_strata[i].is_none()
                 && let Some(batch) = &cached[i]
             {
-                let (extra, extra_bc, _scan_elapsed, _load_elapsed, hit) =
+                let (extra, extra_bc, _scan_elapsed, _load_elapsed, _telemetry, hit) =
                     self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(extra);
                 bc_textures.extend(extra_bc);

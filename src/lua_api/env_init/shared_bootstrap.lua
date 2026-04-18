@@ -33,6 +33,40 @@ if CreateAndInitFromMixin == nil then
   end
 end
 
+if SetPortraitToTexture == nil then
+  function SetPortraitToTexture(texture, texturePath)
+    if type(texture) ~= "table" or type(texture.SetTexture) ~= "function" then
+      return
+    end
+
+    texture:SetTexture(texturePath)
+
+    if texture.__wowPortraitMask ~= nil then
+      return
+    end
+
+    local parent = type(texture.GetParent) == "function" and texture:GetParent() or nil
+    if type(parent) ~= "table" or type(parent.CreateMaskTexture) ~= "function" then
+      return
+    end
+
+    local mask = parent:CreateMaskTexture(nil, "BACKGROUND")
+    if type(mask) ~= "table" or type(texture.AddMaskTexture) ~= "function" then
+      return
+    end
+
+    if type(mask.SetAllPoints) == "function" then
+      mask:SetAllPoints(texture)
+    end
+    if type(mask.SetTexture) == "function" then
+      mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask")
+    end
+
+    texture:AddMaskTexture(mask)
+    texture.__wowPortraitMask = mask
+  end
+end
+
 if UI_LOCALE == nil then
   if type(GetLocale) == "function" then
     UI_LOCALE = GetLocale()
@@ -993,9 +1027,25 @@ end
 
 if debug ~= nil and debug.getfenv ~= nil then
   local __wow_debug_getfenv = debug.getfenv
+  local function __wow_is_frame_backed_table(obj)
+    if type(obj) ~= "table" then
+      return false
+    end
+    local mt = getmetatable(obj)
+    local index = mt and mt.__index
+    return type(index) == "table"
+      and (
+        type(index.GetObjectType) == "function"
+        or type(index.IsObjectType) == "function"
+        or type(index.GetName) == "function"
+      )
+  end
 
   function debug.getfenv(obj)
-    if type(obj) == "table" and rawget(obj, "GetObjectType") ~= nil then
+    if __wow_is_frame_backed_table(obj) then
+      if type(rawget(obj, 1)) ~= "table" then
+        rawset(obj, 1, {})
+      end
       return obj
     end
     return __wow_debug_getfenv(obj)
@@ -1011,6 +1061,65 @@ if GetFrameMetatable == nil then
       frame = CreateFrame("Frame")
     end
     return frame and getmetatable(frame) or nil
+  end
+end
+
+do
+  local frameMeta = GetFrameMetatable and GetFrameMetatable()
+  local frameIndex = frameMeta and frameMeta.__index
+  if type(frameIndex) == "table" then
+    if frameIndex.AddDataProvider == nil then
+      function frameIndex:AddDataProvider(provider)
+        local fields = debug.getfenv(self)
+        if type(fields) ~= "table" then
+          return
+        end
+        local store = fields[1]
+        if type(store) ~= "table" then
+          store = {}
+          fields[1] = store
+        end
+        local providers = store.dataProviders
+        if type(providers) ~= "table" then
+          providers = {}
+          store.dataProviders = providers
+        end
+        for i = 1, #providers do
+          if providers[i] == provider then
+            return
+          end
+        end
+        providers[#providers + 1] = provider
+      end
+    end
+
+    if frameIndex.RemoveDataProvider == nil then
+      function frameIndex:RemoveDataProvider(provider)
+        local fields = debug.getfenv(self)
+        local providers = fields and fields[1] and fields[1].dataProviders
+        if type(providers) ~= "table" then
+          return
+        end
+        for i = #providers, 1, -1 do
+          if providers[i] == provider then
+            table.remove(providers, i)
+          end
+        end
+      end
+    end
+
+    if frameIndex.IsInitialized == nil then
+      function frameIndex:IsInitialized()
+        return type(self.layoutInfo) == "table" or type(self.systemInfo) == "table"
+      end
+    end
+
+    if frameIndex.IsInDefaultPosition == nil then
+      function frameIndex:IsInDefaultPosition()
+        local info = self.systemInfo
+        return type(info) == "table" and info.isInDefaultPosition == true
+      end
+    end
   end
 end
 

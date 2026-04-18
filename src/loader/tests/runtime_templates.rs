@@ -426,11 +426,14 @@ fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
         "anonymous action button should stay out of _G and remain reachable through registry frame refs",
     );
 
-    crate::lua_api::globals::action_bar_api::push_action_button_state_update(
-        t.env.state(),
-        t.env.lua(),
-    )
-    .unwrap();
+    {
+        let mut lua = t.env.rilua_mut();
+        crate::lua_api::globals::action_bar_api::push_action_button_state_update(
+            t.env.state(),
+            &mut lua,
+        )
+        .unwrap();
+    }
 
     t.assert_lua_true(
         "__test_button.updateCalls == 1",

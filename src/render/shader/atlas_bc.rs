@@ -206,15 +206,17 @@ pub(super) fn init_bc_atlases(device: &wgpu::Device) -> (BcAtlasTier, BcAtlasTie
         .features()
         .contains(wgpu::Features::TEXTURE_COMPRESSION_BC);
     BC_SUPPORTED.store(has_bc_support, std::sync::atomic::Ordering::Relaxed);
-    eprintln!(
-        "{} [GPU] BC texture compression: {}",
-        crate::logging::global_elapsed_prefix(),
-        if has_bc_support {
-            "supported"
-        } else {
-            "NOT supported (using placeholders)"
-        }
-    );
+    if crate::logging::texture_load_debug_enabled() {
+        eprintln!(
+            "{} [GPU] BC texture compression: {}",
+            crate::logging::global_elapsed_prefix(),
+            if has_bc_support {
+                "supported"
+            } else {
+                "NOT supported (using placeholders)"
+            }
+        );
+    }
     let (bc1, bc3) = if has_bc_support {
         (
             BcAtlasTier::new(device, BcFormat::Bc1),

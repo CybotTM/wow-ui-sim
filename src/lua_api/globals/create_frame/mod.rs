@@ -27,8 +27,25 @@ use rilua::{LuaApiMut, LuaResult, Val};
 // ---------------------------------------------------------------------------
 
 pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
-    let args = parse_create_frame_args(state)?;
+    let mut args = parse_create_frame_args(state)?;
     let (parent_id, parent_explicit) = resolve_parent_id(state, args.parent_val)?;
+    let runtime_inherits = build_runtime_inherits(&args.frame_type, args.inherits.as_deref());
+    let parent_for_name_sub = if parent_explicit && parent_id != 0 {
+        Some(parent_id)
+    } else {
+        None
+    };
+    if let Some(name) = args.name.take() {
+        let resolved_name = {
+            let sim = borrow_state(state)?;
+            crate::lua_api::globals::create_frame::apply_parent_sub(
+                &name,
+                parent_for_name_sub,
+                &sim,
+            )
+        };
+        args.name = Some(resolved_name);
+    }
     let frame_id = crate::lua_api::globals::create_frame::create_frame_instance(
         state,
         args.widget_type,
@@ -42,7 +59,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     template_chain::apply_runtime_template_chain(
         state,
         frame_id,
-        args.inherits.as_deref(),
+        runtime_inherits.as_deref(),
         fire_on_load,
     )?;
     let frame_val = frame_ref(state, frame_id)?;
@@ -91,6 +108,12 @@ fn resolve_parent_id(state: &mut LuaState, parent_val: Val) -> LuaResult<(u64, b
         sim.widgets.get_id_by_name("UIParent").unwrap_or_default()
     };
     Ok((parent_id, parent_explicit))
+}
+
+fn build_runtime_inherits(frame_type: &str, explicit_inherits: Option<&str>) -> Option<String> {
+    let intrinsic =
+        crate::xml::widget_type_for_tag(frame_type).and_then(|(_, intrinsic)| intrinsic);
+    template_chain::build_child_inherits(intrinsic, explicit_inherits)
 }
 
 // ---------------------------------------------------------------------------

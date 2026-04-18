@@ -384,11 +384,22 @@ fn build_global_method_with_global_self_method_self_method_bool_args_handler(
     let builder = load_template(
         state,
         r#"
-            local target, method_name, first, second_method, third_method, fourth = ...
+            local target_path, method_name, first_path, second_method, third_method, fourth = ...
+            local function resolve_global(path)
+                local value = _G
+                for segment in string.gmatch(path, "[^%.]+") do
+                    value = value and value[segment]
+                end
+                return value
+            end
             return function(self, ...)
+                local target = resolve_global(target_path)
+                if not target then
+                    return
+                end
                 return target[method_name](
                     target,
-                    first,
+                    resolve_global(first_path),
                     self[second_method](self),
                     self[third_method](self),
                     fourth
@@ -414,9 +425,9 @@ fn build_global_self_method_bool_args(
     fourth: bool,
 ) -> [Val; 6] {
     [
-        resolve_global_path(state, target_path),
+        create_string(state, target_path),
         create_string(state, method_name),
-        resolve_global_path(state, first_arg_path),
+        create_string(state, first_arg_path),
         create_string(state, second_self_method),
         create_string(state, third_self_method),
         Val::Bool(fourth),

@@ -4,6 +4,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use crate::widget::AnchorPoint;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -16,7 +17,10 @@ pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "RegisterForDrag", register_for_drag)?;
     table_set_rust_fn_static(state, mt, "SetMovable", set_movable)?;
     table_set_rust_fn_static(state, mt, "IsMovable", is_movable)?;
+    table_set_rust_fn_static(state, mt, "SetResizable", set_resizable)?;
+    table_set_rust_fn_static(state, mt, "IsResizable", is_resizable)?;
     table_set_rust_fn_static(state, mt, "StartMoving", start_moving)?;
+    table_set_rust_fn_static(state, mt, "StartSizing", start_sizing)?;
     table_set_rust_fn_static(state, mt, "StopMovingOrSizing", stop_moving_or_sizing)?;
     table_set_rust_fn_static(state, mt, "SetUserPlaced", set_user_placed)?;
     table_set_rust_fn_static(state, mt, "IsUserPlaced", is_user_placed)?;
@@ -113,6 +117,27 @@ pub fn is_movable(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn set_resizable(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let resizable = bool::from_stack(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.resizable = resizable;
+    }
+    Ok(0)
+}
+
+pub fn is_resizable(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let resizable = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|f| f.resizable)
+        .unwrap_or(false);
+    state.push(Val::Bool(resizable));
+    Ok(1)
+}
+
 pub fn start_moving(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
@@ -124,14 +149,30 @@ pub fn start_moving(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn start_sizing(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sizing_point = val_to_string(state, stack_val(state, 2))
+        .and_then(|value| AnchorPoint::from_str(&value))
+        .unwrap_or(AnchorPoint::BottomRight);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && frame.resizable
+    {
+        frame.is_sizing = true;
+        frame.sizing_point = sizing_point;
+    }
+    Ok(0)
+}
+
 pub fn stop_moving_or_sizing(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        if frame.is_moving {
+        if frame.is_moving || frame.is_sizing {
             frame.user_placed = true;
         }
         frame.is_moving = false;
+        frame.is_sizing = false;
     }
     Ok(0)
 }

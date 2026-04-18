@@ -16,7 +16,7 @@ pub fn create_frame_instance(
     id: Option<i32>,
 ) -> LuaResult<u64> {
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
-    if widget_type.as_str() != frame_type {
+    if should_preserve_object_type_name(widget_type, frame_type) {
         frame.object_type_name = Some(frame_type.to_string());
     }
     apply_initial_visibility(state, &mut frame)?;
@@ -31,6 +31,21 @@ pub fn create_frame_instance(
     register_global_name(state, name, frame_id)?;
 
     Ok(frame_id)
+}
+
+fn should_preserve_object_type_name(widget_type: WidgetType, frame_type: &str) -> bool {
+    if widget_type.as_str() == frame_type {
+        return false;
+    }
+
+    !matches!(
+        frame_type.to_ascii_lowercase().as_str(),
+        "containedalertframe"
+            | "dropdownbutton"
+            | "dropdowntogglebutton"
+            | "eventbutton"
+            | "itembutton"
+    )
 }
 
 fn apply_initial_visibility(state: &mut LuaState, frame: &mut Frame) -> LuaResult<()> {
@@ -102,6 +117,7 @@ fn register_global_name(
         return Ok(());
     };
     let frame_val = frame_ref(state, frame_id)?;
+    migrate_existing_global_frame_fields(state, &name, frame_val);
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     if let Some(globals) = state.gc.tables.get_mut(global) {
@@ -110,6 +126,45 @@ fn register_global_name(
     state.gc.barrier_back(global);
     crate::lua_api::global_slots::refresh_installed_slots_for_name(state, &name);
     Ok(())
+}
+
+fn migrate_existing_global_frame_fields(state: &mut LuaState, name: &str, new_frame: Val) {
+    let Val::Table(new_ref) = new_frame else {
+        return;
+    };
+    let key = state.gc.intern_string(name.as_bytes());
+    let existing = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    let Val::Table(existing_ref) = existing else {
+        return;
+    };
+
+    let array_values = state
+        .gc
+        .tables
+        .get(existing_ref)
+        .map(|table| table.array_slice().to_vec())
+        .unwrap_or_default();
+    let hash_entries = state
+        .gc
+        .tables
+        .get(existing_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+
+    if let Some(new_table) = state.gc.tables.get_mut(new_ref) {
+        for (index, value) in array_values.into_iter().enumerate() {
+            let _ = new_table.raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena);
+        }
+        for (entry_key, value) in hash_entries {
+            let _ = new_table.raw_set(entry_key, value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(new_ref);
 }
 
 pub(crate) fn apply_parent_sub(name: &str, parent_id: Option<u64>, state: &SimState) -> String {
