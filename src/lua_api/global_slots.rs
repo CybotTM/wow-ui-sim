@@ -173,28 +173,30 @@ pub fn install(state: &mut LuaState) -> GlobalSlotTable {
 /// Walk:
 ///   1. Slot 0 (`_G`) bypasses the shadow — the frozen global table is
 ///      the shadow's `__index` target, so there's no override path.
-///   2. Resolve the shadow table via the pre-interned
-///      `__rilua_g_live` registry key. If absent (freeze never ran) or
-///      empty (common case through most of startup), return the raw
-///      slot value directly.
-///   3. Otherwise look the slot's pre-interned name key up on the
+///   2. If freeze never ran (`_G_live` absent), read the current root
+///      `_G[name]` directly. Without a shadow table there is no stable
+///      frozen view, and addon-created globals must stay visible to
+///      slotted reads.
+///   3. If `_G_live` exists but is empty, the frozen slot value is still
+///      valid, so return it directly.
+///   4. Otherwise look the slot's pre-interned name key up on the
 ///      shadow; return the override if non-nil, else the raw slot.
 pub fn read_slot(state: &LuaState, slots: &GlobalSlotTable, idx: usize) -> Val {
     if idx == SLOT_G {
         return slots.raw(idx);
     }
 
+    let key = slots.name_keys[idx];
     let Some(live_ref) = lookup_g_live(state, slots.g_live_key) else {
-        return slots.raw(idx);
+        return current_global_value(state, key);
     };
     let Some(live_table) = state.gc.tables.get(live_ref) else {
-        return slots.raw(idx);
+        return current_global_value(state, key);
     };
     if live_table.array_len() == 0 && live_table.hash_size() == 0 {
         return slots.raw(idx);
     }
 
-    let key = slots.name_keys[idx];
     let live_val = live_table.get_str(key, &state.gc.string_arena);
     if live_val != Val::Nil {
         return live_val;
@@ -215,6 +217,15 @@ fn lookup_g_live(
         Val::Table(r) => Some(r),
         _ => None,
     }
+}
+
+fn current_global_value(state: &LuaState, key: GcRef<LuaString>) -> Val {
+    state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|global| global.get_str(key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
 }
 
 /// Public report of slot-vector coverage after bootstrap.
@@ -356,6 +367,32 @@ mod tests {
             Val::Table(r) => assert_eq!(r, state.global),
             other => panic!("expected _G table, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn read_slot_tracks_current_root_global_when_freeze_is_disabled() {
+        let env = WowLuaEnv::new().expect("fresh wow lua env");
+        let lua = env.lua.borrow();
+        let state = lua.state();
+        let app = state.app_data::<WowLuaAppData>().expect("app data");
+        let slots = app.global_slots.as_ref().expect("global_slots");
+        let main_action_bar_idx = HOT_GLOBALS
+            .iter()
+            .position(|&name| name == b"MainActionBar")
+            .map(|i| GLOBALS_BASE + i)
+            .expect("MainActionBar is in HOT_GLOBALS");
+        assert_eq!(slots.raw(main_action_bar_idx), Val::Nil);
+
+        drop(lua);
+        env.exec(r#"_G.MainActionBar = true"#)
+            .expect("write live _G value");
+
+        let lua = env.lua.borrow();
+        let state = lua.state();
+        let app = state.app_data::<WowLuaAppData>().expect("app data");
+        let slots = app.global_slots.as_ref().expect("global_slots");
+        let value = read_slot(state, slots, main_action_bar_idx);
+        assert_eq!(value, Val::Bool(true));
     }
 
     #[test]
