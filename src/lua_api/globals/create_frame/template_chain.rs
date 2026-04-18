@@ -856,6 +856,34 @@ fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::{first_fast_install_miss, scripts_support_fast_install};
+    use crate::xml::{ScriptBodyXml, ScriptsXml};
+
+    #[test]
+    fn scripts_support_fast_install_for_character_frame_tooltip_body() {
+        let scripts = ScriptsXml {
+            on_enter: vec![ScriptBodyXml {
+                body: Some(
+                    r#"
+                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+                        GameTooltip:SetText(MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), 1.0,1.0,1.0 );
+                    "#
+                    .to_string(),
+                ),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        assert!(
+            scripts_support_fast_install(&scripts),
+            "miss={:?}",
+            first_fast_install_miss(&scripts)
+        );
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Small utility helpers
 // ---------------------------------------------------------------------------

@@ -3672,6 +3672,63 @@ fn test_create_frame_from_xml_inline_tooltip_set_text_function_result_and_three_
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_tooltip_set_owner_then_function_result_text_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHARACTER_INFO = "Character"
+        function MicroButtonTooltipText(label, binding)
+            return label .. ":" .. binding
+        end
+        GameTooltip = {
+            SetOwner = function(self, owner, anchor)
+                self.owner = { owner, anchor }
+            end,
+            SetText = function(self, text, r, g, b)
+                self.args = { text, r, g, b }
+            end,
+        }
+    "#,
+    )
+    .unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Button name="XmlInlineTooltipOwnerFunctionResultButton" parent="UIParent">
+            <Scripts><OnEnter>
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+                GameTooltip:SetText(MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), 1.0,1.0,1.0 );
+            </OnEnter></Scripts>
+        </Button>
+    </Ui>"#,
+        "Button",
+    );
+    env.exec(
+        r#"
+        XmlInlineTooltipOwnerFunctionResultButton:GetScript("OnEnter")(XmlInlineTooltipOwnerFunctionResultButton)
+    "#,
+    )
+    .unwrap();
+    let result: (String, String, f64, f64, f64) = env
+        .eval(
+            r#"
+            return GameTooltip.owner[2],
+                   GameTooltip.args[1],
+                   GameTooltip.args[2],
+                   GameTooltip.args[3],
+                   GameTooltip.args[4]
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, "ANCHOR_RIGHT");
+    assert_eq!(result.1, "Character:TOGGLECHARACTER0");
+    assert_eq!(result.2, 1.0);
+    assert_eq!(result.3, 1.0);
+    assert_eq!(result.4, 1.0);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_tooltip_set_text_global_string_function_result_and_three_numbers_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

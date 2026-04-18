@@ -38,6 +38,7 @@ pub(super) fn parse_inline_fast_handler<'a>(
 
 fn parse_pre_split_special_handler<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
     parse_play_sound_then_copy_club_ticket(stmt)
+        .or_else(|| parse_global_tooltip_set_owner_then_function_text(stmt))
         .or_else(|| parse_global_tooltip_set_owner_then_parent_assign(stmt))
         .or_else(|| parse_parent_field_local_click_if_enabled(stmt))
 }
@@ -99,6 +100,57 @@ fn parse_global_tooltip_set_owner_then_parent_assign<'a>(
             wrap,
         },
         FastHandlerRef::AssignParentField { field, value },
+    ))))
+}
+
+fn parse_global_tooltip_set_owner_then_function_text<'a>(
+    stmt: &'a str,
+) -> Option<FastHandlerRef<'a>> {
+    let (first_stmt, second_stmt) = stmt.split_once(';')?;
+    let FastHandlerRef::GlobalMethodWithSelfStringArg {
+        target_path,
+        method_name,
+        arg,
+    } = parse_inline_single_fast_handler(first_stmt.trim())?
+    else {
+        return None;
+    };
+    if method_name != "SetOwner" {
+        return None;
+    }
+    let second_stmt = second_stmt.trim().trim_end_matches(';').trim();
+    let FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
+        target_path: text_target_path,
+        method_name: text_method_name,
+        function_name,
+        first,
+        second,
+        third,
+        fourth,
+        fifth,
+    } = parse_inline_single_fast_handler(second_stmt)?
+    else {
+        return None;
+    };
+    if text_target_path != target_path || text_method_name != "SetText" {
+        return None;
+    }
+    Some(FastHandlerRef::Sequence2(Box::new((
+        FastHandlerRef::GlobalMethodWithSelfStringArg {
+            target_path,
+            method_name,
+            arg,
+        },
+        FastHandlerRef::GlobalMethodWithStringStringFunctionResultAndThreeNumberArgs {
+            target_path: text_target_path,
+            method_name: text_method_name,
+            function_name,
+            first,
+            second,
+            third,
+            fourth,
+            fifth,
+        },
     ))))
 }
 
