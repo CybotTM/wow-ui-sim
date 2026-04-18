@@ -36,7 +36,7 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
 /// per-namespace pipeline.
 fn register_flat_namespace(
     state: &mut LuaState,
-    namespace: &str,
+    namespace: &'static str,
     methods: &[(&str, rilua::vm::closure::RustFn)],
 ) -> LuaResult<()> {
     let ns = ensure_namespace(state, namespace)?;

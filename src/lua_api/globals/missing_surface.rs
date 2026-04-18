@@ -263,12 +263,19 @@ fn strcmputf8i(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn ensure_global_table(state: &mut LuaState, name: &str) {
+fn ensure_global_table(state: &mut LuaState, name: &'static str) {
     let _ = ensure_namespace(state, name);
 }
 
-pub(super) fn ensure_namespace(state: &mut LuaState, name: &str) -> LuaResult<GcRef<Table>> {
-    let key_ref = state.gc.intern_string(name.as_bytes());
+/// `name` must be a `&'static str` (typically a literal like `"C_Container"`)
+/// so the pointer-keyed static intern cache short-circuits on repeat calls.
+/// Every current caller passes a compile-time literal; `resolve_global_path`
+/// exists as a separate entry point for the parse-time / addon-author case.
+pub(super) fn ensure_namespace(
+    state: &mut LuaState,
+    name: &'static str,
+) -> LuaResult<GcRef<Table>> {
+    let key_ref = state.gc.intern_string_static(name.as_bytes());
     let current = state
         .gc
         .tables
