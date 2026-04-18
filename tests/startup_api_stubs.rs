@@ -64,6 +64,25 @@ fn store_frame_is_shown_returns_false() {
 }
 
 #[test]
+fn quest_poi_update_icons_is_callable() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            local ok = pcall(function()
+                QuestPOIUpdateIcons()
+            end)
+            return ok
+            "#,
+        )
+        .expect("QuestPOIUpdateIcons smoke probe should run");
+    assert!(
+        ok,
+        "QuestPOIUpdateIcons should be callable during QuestMap refresh"
+    );
+}
+
+#[test]
 fn is_character_newly_boosted_returns_false() {
     let env = env();
     let boosted: bool = env
