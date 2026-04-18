@@ -142,6 +142,7 @@ macro_rules! build_empty_sim_state {
             social_friends: default_social_friends(),
             auction_browse_results: default_auction_browse_results(),
             auction_replicate_items: default_auction_replicate_items(),
+            auction_owned: Vec::new(),
             mythic_plus: MythicPlusState::default(),
             character_services: CharacterServicesState::default(),
             scenario: ScenarioState::default(),
@@ -207,8 +208,8 @@ pub use super::state_types::{
     GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord,
     MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
     MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
-    PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, WorldState,
+    OwnedAuction, PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState,
+    SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -566,6 +567,11 @@ pub struct SimState {
     /// `C_AuctionHouse.GetReplicateItemInfo`. Seeded with a couple of
     /// commodity rows.
     pub auction_replicate_items: Vec<AuctionReplicateItem>,
+    /// Player's own posted auctions (Auctions tab). Drives
+    /// `C_AuctionHouse.GetNumOwnedAuctions` / `GetOwnedAuctionInfo`.
+    /// Empty by default — tests / addons populate via
+    /// `A_Admin.AddOwnedAuction`.
+    pub auction_owned: Vec<OwnedAuction>,
     /// Mythic+ probe state. Drives `C_MythicPlus.*` methods. Seeded
     /// with season 14, affix id=9 (Tyrannical), no run history, no
     /// owned key (level 0), no weekly best.

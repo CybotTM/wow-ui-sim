@@ -25,3 +25,28 @@ pub struct AuctionReplicateItem {
     pub level: i32,
     pub level_type: String,
 }
+
+/// One row of the player's *own* posted auctions (Auctions tab).
+/// Drives `C_AuctionHouse.GetNumOwnedAuctions` /
+/// `GetOwnedAuctionInfo`. Real retail returns a richer shape; the
+/// fields here are the ones the Auctions panel templates actually
+/// read.
+#[derive(Debug, Clone)]
+pub struct OwnedAuction {
+    /// Unique auction id assigned by the server. Tests can pass any
+    /// non-zero value; the panel uses it as the row key.
+    pub auction_id: i32,
+    pub item_id: i32,
+    pub item_level: i32,
+    pub quantity: i32,
+    /// Highest bid in copper (0 when no bid has been placed).
+    pub bid_amount: i64,
+    /// Buyout price in copper (0 when none was set).
+    pub buyout_amount: i64,
+    /// `Enum.AuctionStatus` (0 = Active, 1 = Sold).
+    pub status: i32,
+    /// `Enum.AuctionHouseTimeLeftBand` (1 = Short … 4 = VeryLong).
+    pub time_left: i32,
+    /// Remaining auction duration in seconds.
+    pub time_left_seconds: i64,
+}

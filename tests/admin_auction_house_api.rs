@@ -91,3 +91,75 @@ fn admin_can_seed_and_clear_auction_replicate_items() {
         "admin replicate-item seeding should round-trip: {result}"
     );
 }
+
+#[test]
+fn admin_can_seed_and_clear_owned_auctions() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.ClearOwnedAuctions()
+            -- (auction_id, item_id, item_level, quantity, bid, buyout, status, time_left, time_left_seconds)
+            A_Admin.AddOwnedAuction(101, 210935, 70, 200, 0, 50000, 0, 4, 86400)
+            A_Admin.AddOwnedAuction(102, 224072, 80, 1, 9000000, 9900000, 0, 3, 7200)
+
+            if C_AuctionHouse.GetNumOwnedAuctions() ~= 2 then
+                return "count=" .. tostring(C_AuctionHouse.GetNumOwnedAuctions())
+            end
+            if C_AuctionHouse.GetNumOwnedAuctionTypes() ~= 2 then
+                return "type_count=" .. tostring(C_AuctionHouse.GetNumOwnedAuctionTypes())
+            end
+            if not C_AuctionHouse.HasFullOwnedAuctionResults() then
+                return "not_full"
+            end
+
+            local first = C_AuctionHouse.GetOwnedAuctionInfo(1)
+            if first.auctionID ~= 101 then
+                return "first_id=" .. tostring(first.auctionID)
+            end
+            if first.itemKey.itemID ~= 210935 then
+                return "first_item=" .. tostring(first.itemKey.itemID)
+            end
+            if first.quantity ~= 200 then
+                return "first_qty=" .. tostring(first.quantity)
+            end
+            if first.buyoutAmount ~= 50000 then
+                return "first_buyout=" .. tostring(first.buyoutAmount)
+            end
+            if first.timeLeft ~= 4 then
+                return "first_time_left_band=" .. tostring(first.timeLeft)
+            end
+            if first.timeLeftSeconds ~= 86400 then
+                return "first_time_left_secs=" .. tostring(first.timeLeftSeconds)
+            end
+
+            local second = C_AuctionHouse.GetOwnedAuctionInfo(2)
+            if second.bidAmount ~= 9000000 then
+                return "second_bid=" .. tostring(second.bidAmount)
+            end
+
+            local typeRow = C_AuctionHouse.GetOwnedAuctionType(1)
+            if typeRow.itemKey.itemID ~= 210935 then
+                return "type_first_item=" .. tostring(typeRow.itemKey.itemID)
+            end
+
+            -- Out-of-range index returns nothing, not nil padding.
+            if C_AuctionHouse.GetOwnedAuctionInfo(99) ~= nil then
+                return "out_of_range_not_nil"
+            end
+
+            A_Admin.ClearOwnedAuctions()
+            if C_AuctionHouse.GetNumOwnedAuctions() ~= 0 then
+                return "clear_failed"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "admin owned-auction seeding should round-trip: {result}"
+    );
+}

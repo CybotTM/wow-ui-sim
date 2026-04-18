@@ -17,7 +17,7 @@
 use super::{ensure_namespace, set_table_array};
 use crate::items;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_api::state::AuctionBrowseResult;
+use crate::lua_api::state::{AuctionBrowseResult, OwnedAuction};
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -287,16 +287,31 @@ fn c_auction_house_get_bid_type(_state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_auction_house_query_owned_auctions(_state: &mut LuaState) -> LuaResult<u32> {
+    // Real WoW would fire OWNED_AUCTIONS_UPDATED; the sim has no
+    // back-end query, so it's a no-op — `auction_owned` is whatever
+    // `A_Admin.AddOwnedAuction` (or seeded defaults) put there.
     Ok(0)
 }
 
 fn c_auction_house_get_num_owned_auctions(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let count = borrow_state(state)?.auction_owned.len() as f64;
+    state.push(Val::Num(count));
     Ok(1)
 }
 
-fn c_auction_house_get_owned_auction_info(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn c_auction_house_get_owned_auction_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    if index < 1 {
+        return Ok(0);
+    }
+    let entry = borrow_state(state)?
+        .auction_owned
+        .get((index - 1) as usize)
+        .cloned();
+    let Some(entry) = entry else { return Ok(0) };
+    let owned = push_owned_auction_table(state, &entry);
+    state.push(owned);
+    Ok(1)
 }
 
 fn c_auction_house_has_full_owned_auction_results(state: &mut LuaState) -> LuaResult<u32> {
@@ -305,12 +320,71 @@ fn c_auction_house_has_full_owned_auction_results(state: &mut LuaState) -> LuaRe
 }
 
 fn c_auction_house_get_num_owned_auction_types(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let count = borrow_state(state)?.auction_owned.len() as f64;
+    state.push(Val::Num(count));
     Ok(1)
 }
 
-fn c_auction_house_get_owned_auction_type(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn c_auction_house_get_owned_auction_type(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    if index < 1 {
+        return Ok(0);
+    }
+    let entry = borrow_state(state)?
+        .auction_owned
+        .get((index - 1) as usize)
+        .cloned();
+    let Some(entry) = entry else { return Ok(0) };
+    let t = create_table(state);
+    let item_key = create_table(state);
+    table_set(state, item_key, "itemID", Val::Num(entry.item_id as f64));
+    table_set(
+        state,
+        item_key,
+        "itemLevel",
+        Val::Num(entry.item_level as f64),
+    );
+    table_set(state, t, "itemKey", item_key);
+    state.push(t);
+    Ok(1)
+}
+
+fn push_owned_auction_table(state: &mut LuaState, entry: &OwnedAuction) -> Val {
+    let t = create_table(state);
+    let item_key = create_table(state);
+    table_set(state, item_key, "itemID", Val::Num(entry.item_id as f64));
+    table_set(
+        state,
+        item_key,
+        "itemLevel",
+        Val::Num(entry.item_level as f64),
+    );
+    table_set(state, item_key, "itemSuffix", Val::Num(0.0));
+    table_set(state, item_key, "battlePetSpeciesID", Val::Num(0.0));
+    table_set(state, t, "itemKey", item_key);
+    table_set(
+        state,
+        t,
+        "auctionID",
+        Val::Num(entry.auction_id as f64),
+    );
+    table_set(state, t, "quantity", Val::Num(entry.quantity as f64));
+    table_set(state, t, "bidAmount", Val::Num(entry.bid_amount as f64));
+    table_set(
+        state,
+        t,
+        "buyoutAmount",
+        Val::Num(entry.buyout_amount as f64),
+    );
+    table_set(state, t, "status", Val::Num(entry.status as f64));
+    table_set(state, t, "timeLeft", Val::Num(entry.time_left as f64));
+    table_set(
+        state,
+        t,
+        "timeLeftSeconds",
+        Val::Num(entry.time_left_seconds as f64),
+    );
+    t
 }
 
 fn extract_item_key_id(state: &mut LuaState, value: Val) -> Option<u32> {
