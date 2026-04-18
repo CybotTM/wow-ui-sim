@@ -730,6 +730,42 @@ fn test_blizzard_commentator_loads_without_cooldown_frame_warning() {
 }
 
 #[test]
+fn test_ui_parent_panel_manager_loads_with_minimap_cluster_stub() {
+    test_timeout! {
+        let (env, warnings) = load_single_blizzard_addon("Blizzard_UIParentPanelManager");
+
+        let minimap_cluster_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("MinimapCluster")
+                    || warning.contains("UIParentPanelManager.lua:784")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            minimap_cluster_warnings.is_empty(),
+            "Blizzard_UIParentPanelManager should not warn on MinimapCluster:\n  {}",
+            minimap_cluster_warnings.join("\n  ")
+        );
+
+        let (cluster_type, minimap_is_child, cluster_height): (String, bool, f64) = env
+            .eval(
+                r#"
+                return type(MinimapCluster),
+                       Minimap:GetParent() == MinimapCluster,
+                       MinimapCluster:GetHeight()
+                "#,
+            )
+            .expect("startup MinimapCluster stub should be queryable");
+
+        assert_eq!(cluster_type, "table");
+        assert!(minimap_is_child, "startup Minimap should hang off MinimapCluster");
+        assert!(cluster_height > 0.0, "startup MinimapCluster should have a usable size");
+    }
+}
+
+#[test]
 fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
     test_timeout! {
         let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_HousingTutorials");
@@ -760,5 +796,39 @@ fn test_housing_tutorials_load_without_cvar_bitfield_warning() {
             )
             .expect("housing tutorial bitfield read should be callable after addon load");
         let _ = tutorial_seen;
+    }
+}
+
+#[test]
+fn test_new_player_experience_loads_without_minimap_cluster_warning() {
+    test_timeout! {
+        let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_NewPlayerExperience");
+
+        let minimap_cluster_warnings: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                warning.contains("MinimapCluster")
+                    || warning.contains("Blizzard_TutorialTutorials.lua:687")
+                    || warning.contains("Blizzard_TutorialTutorials.lua:692")
+                    || warning.contains("Blizzard_TutorialTutorials.lua:709")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            minimap_cluster_warnings.is_empty(),
+            "Blizzard_NewPlayerExperience should not warn on MinimapCluster startup access:\n  {}",
+            minimap_cluster_warnings.join("\n  ")
+        );
+
+        let (exists, parent_name): (bool, String) = env
+            .eval(
+                r#"
+                return MinimapCluster ~= nil, MinimapCluster:GetParent():GetName()
+                "#,
+            )
+            .expect("MinimapCluster should be available to startup addons");
+        assert!(exists);
+        assert_eq!(parent_name, "UIParent");
     }
 }

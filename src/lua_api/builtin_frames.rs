@@ -110,14 +110,7 @@ fn create_engine_frames(
         o,
     );
 
-    register_frame(
-        widgets,
-        WidgetType::Minimap,
-        "Minimap",
-        Some(ui_parent_id),
-        Some((140.0, 140.0)),
-        o,
-    );
+    create_minimap_cluster(widgets, ui_parent_id, o);
 
     register_hidden_frame(
         widgets,
@@ -139,6 +132,26 @@ fn create_engine_frames(
     );
 
     ui_parent_id
+}
+
+fn create_minimap_cluster(widgets: &mut WidgetRegistry, ui_parent_id: u64, owner: u16) {
+    let minimap_cluster_id = register_frame(
+        widgets,
+        WidgetType::Frame,
+        "MinimapCluster",
+        Some(ui_parent_id),
+        Some((256.0, 256.0)),
+        owner,
+    );
+    let minimap_id = register_frame(
+        widgets,
+        WidgetType::Minimap,
+        "Minimap",
+        Some(minimap_cluster_id),
+        Some((198.0, 198.0)),
+        owner,
+    );
+    link_child(widgets, minimap_cluster_id, "Minimap", minimap_id);
 }
 
 fn set_ui_parent_panel_attributes(widgets: &mut WidgetRegistry, ui_parent_id: u64) {
