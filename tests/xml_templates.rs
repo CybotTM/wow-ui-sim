@@ -2264,6 +2264,304 @@ fn test_create_frame_from_xml_inline_checked_assignment_then_callbacks_runs() {
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_checked_assignments3_then_callbacks_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHATCONFIG_SELECTED_FILTER = {
+            settings = {
+                unitColoring = false,
+                sourceColoring = false,
+                destColoring = false,
+            },
+        }
+        XmlInlineCheckedTripleUpdateCount = 0
+        XmlInlineCheckedTripleSound = nil
+        function CombatConfig_Colorize_Update()
+            XmlInlineCheckedTripleUpdateCount = XmlInlineCheckedTripleUpdateCount + 1
+        end
+        function ChatConfigFrame_PlayCheckboxSound(checked)
+            XmlInlineCheckedTripleSound = checked
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineCheckedTripleRoot" parent="UIParent">
+            <CheckButton name="XmlInlineCheckedTripleButton" parent="XmlInlineCheckedTripleRoot">
+                <Scripts><OnClick>
+                    local checked = self:GetChecked()
+                    if ( checked ) then
+                        CHATCONFIG_SELECTED_FILTER.settings.unitColoring = true;
+                        CHATCONFIG_SELECTED_FILTER.settings.sourceColoring = true;
+                        CHATCONFIG_SELECTED_FILTER.settings.destColoring = true;
+                    else
+                        CHATCONFIG_SELECTED_FILTER.settings.unitColoring = false;
+                        CHATCONFIG_SELECTED_FILTER.settings.sourceColoring = false;
+                        CHATCONFIG_SELECTED_FILTER.settings.destColoring = false;
+                    end
+                    CombatConfig_Colorize_Update();
+                    ChatConfigFrame_PlayCheckboxSound(checked);
+                </OnClick></Scripts>
+            </CheckButton>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCheckedTripleButton:SetChecked(true)
+        XmlInlineCheckedTripleButton:GetScript("OnClick")(XmlInlineCheckedTripleButton)
+    "#,
+    )
+    .unwrap();
+    let checked_result: (bool, bool, bool, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.settings.unitColoring,
+                   CHATCONFIG_SELECTED_FILTER.settings.sourceColoring,
+                   CHATCONFIG_SELECTED_FILTER.settings.destColoring,
+                   XmlInlineCheckedTripleUpdateCount,
+                   XmlInlineCheckedTripleSound
+        "#,
+        )
+        .unwrap();
+    assert!(checked_result.0);
+    assert!(checked_result.1);
+    assert!(checked_result.2);
+    assert_eq!(checked_result.3, 1);
+    assert!(checked_result.4);
+
+    env.exec(
+        r#"
+        XmlInlineCheckedTripleButton:SetChecked(false)
+        XmlInlineCheckedTripleButton:GetScript("OnClick")(XmlInlineCheckedTripleButton)
+    "#,
+    )
+    .unwrap();
+    let unchecked_result: (bool, bool, bool, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.settings.unitColoring,
+                   CHATCONFIG_SELECTED_FILTER.settings.sourceColoring,
+                   CHATCONFIG_SELECTED_FILTER.settings.destColoring,
+                   XmlInlineCheckedTripleUpdateCount,
+                   XmlInlineCheckedTripleSound
+        "#,
+        )
+        .unwrap();
+    assert!(!unchecked_result.0);
+    assert!(!unchecked_result.1);
+    assert!(!unchecked_result.2);
+    assert_eq!(unchecked_result.3, 2);
+    assert!(!unchecked_result.4);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_checked_assignment_then_two_callbacks_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHATCONFIG_SELECTED_FILTER = { hasQuickButton = false }
+        XmlInlineCheckedDualUpdateQuick = 0
+        XmlInlineCheckedDualUpdateSettings = 0
+        XmlInlineCheckedDualSound = nil
+        function Blizzard_CombatLog_Update_QuickButtons()
+            XmlInlineCheckedDualUpdateQuick = XmlInlineCheckedDualUpdateQuick + 1
+        end
+        function CombatConfig_Settings_Update()
+            XmlInlineCheckedDualUpdateSettings = XmlInlineCheckedDualUpdateSettings + 1
+        end
+        function ChatConfigFrame_PlayCheckboxSound(checked)
+            XmlInlineCheckedDualSound = checked
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineCheckedDualRoot" parent="UIParent">
+            <CheckButton name="XmlInlineCheckedDualButton" parent="XmlInlineCheckedDualRoot">
+                <Scripts><OnClick>
+                    local checked = self:GetChecked()
+                    if ( checked ) then
+                        CHATCONFIG_SELECTED_FILTER.hasQuickButton = true;
+                    else
+                        CHATCONFIG_SELECTED_FILTER.hasQuickButton = false;
+                    end
+                    Blizzard_CombatLog_Update_QuickButtons();
+                    CombatConfig_Settings_Update();
+                    ChatConfigFrame_PlayCheckboxSound(checked);
+                </OnClick></Scripts>
+            </CheckButton>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCheckedDualButton:SetChecked(true)
+        XmlInlineCheckedDualButton:GetScript("OnClick")(XmlInlineCheckedDualButton)
+    "#,
+    )
+    .unwrap();
+    let checked_result: (bool, i32, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.hasQuickButton,
+                   XmlInlineCheckedDualUpdateQuick,
+                   XmlInlineCheckedDualUpdateSettings,
+                   XmlInlineCheckedDualSound
+        "#,
+        )
+        .unwrap();
+    assert!(checked_result.0);
+    assert_eq!(checked_result.1, 1);
+    assert_eq!(checked_result.2, 1);
+    assert!(checked_result.3);
+
+    env.exec(
+        r#"
+        XmlInlineCheckedDualButton:SetChecked(false)
+        XmlInlineCheckedDualButton:GetScript("OnClick")(XmlInlineCheckedDualButton)
+    "#,
+    )
+    .unwrap();
+    let unchecked_result: (bool, i32, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.hasQuickButton,
+                   XmlInlineCheckedDualUpdateQuick,
+                   XmlInlineCheckedDualUpdateSettings,
+                   XmlInlineCheckedDualSound
+        "#,
+        )
+        .unwrap();
+    assert!(!unchecked_result.0);
+    assert_eq!(unchecked_result.1, 2);
+    assert_eq!(unchecked_result.2, 2);
+    assert!(!unchecked_result.3);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_checked_number_assignment_then_callbacks_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        CHATCONFIG_SELECTED_FILTER = { settings = { lineColorPriority = 0 } }
+        XmlInlineCheckedNumberUpdateCount = 0
+        XmlInlineCheckedNumberSound = nil
+        function CombatConfig_Colorize_Update()
+            XmlInlineCheckedNumberUpdateCount = XmlInlineCheckedNumberUpdateCount + 1
+        end
+        function ChatConfigFrame_PlayCheckboxSound(checked)
+            XmlInlineCheckedNumberSound = checked
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineCheckedNumberRoot" parent="UIParent">
+            <CheckButton name="XmlInlineCheckedNumberButton" parent="XmlInlineCheckedNumberRoot">
+                <Scripts><OnClick>
+                    local checked = self:GetChecked();
+                    CHATCONFIG_SELECTED_FILTER.settings.lineColorPriority = 2;
+                    CombatConfig_Colorize_Update();
+                    ChatConfigFrame_PlayCheckboxSound(checked);
+                </OnClick></Scripts>
+            </CheckButton>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineCheckedNumberButton:SetChecked(true)
+        XmlInlineCheckedNumberButton:GetScript("OnClick")(XmlInlineCheckedNumberButton)
+    "#,
+    )
+    .unwrap();
+    let result: (i32, i32, bool) = env
+        .eval(
+            r#"
+            return CHATCONFIG_SELECTED_FILTER.settings.lineColorPriority,
+                   XmlInlineCheckedNumberUpdateCount,
+                   XmlInlineCheckedNumberSound
+        "#,
+        )
+        .unwrap();
+    assert_eq!(result.0, 2);
+    assert_eq!(result.1, 1);
+    assert!(result.2);
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_parent_field_local_toggle_shown_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        FriendsUnavailableInfoMixin = {}
+        function FriendsUnavailableInfoMixin:IsShown()
+            return self.shown == true
+        end
+        function FriendsUnavailableInfoMixin:SetShown(value)
+            self.shown = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineToggleRoot" parent="UIParent">
+            <Button name="XmlInlineToggleButton" parent="XmlInlineToggleRoot">
+                <Scripts><OnClick>
+                    local infoFrame = self:GetParent().UnavailableInfoFrame;
+                    infoFrame:SetShown(not infoFrame:IsShown());
+                </OnClick></Scripts>
+            </Button>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineToggleRoot.UnavailableInfoFrame = setmetatable({ shown = false }, { __index = FriendsUnavailableInfoMixin })
+        XmlInlineToggleButton:GetScript("OnClick")(XmlInlineToggleButton)
+    "#,
+    )
+    .unwrap();
+    let first: bool = env.eval("return XmlInlineToggleRoot.UnavailableInfoFrame.shown").unwrap();
+    assert!(first);
+
+    env.exec(
+        r#"
+        XmlInlineToggleButton:GetScript("OnClick")(XmlInlineToggleButton)
+    "#,
+    )
+    .unwrap();
+    let second: bool = env.eval("return XmlInlineToggleRoot.UnavailableInfoFrame.shown").unwrap();
+    assert!(!second);
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_conditional_self_field_then_else_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

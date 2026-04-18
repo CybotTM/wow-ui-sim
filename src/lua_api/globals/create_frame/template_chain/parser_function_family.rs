@@ -18,6 +18,50 @@ fn parse_direct_function_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>>
 }
 
 fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some((target_path, field, value, on_change_function, on_sound_function)) =
+        parse_checked_number_assignment_then_callbacks(stmt)
+    {
+        return Some(FastHandlerRef::CheckedNumberAssignmentThenCallbacks {
+            target_path,
+            field,
+            value,
+            on_change_function,
+            on_sound_function,
+        });
+    }
+    if let Some((
+        first_target_path,
+        first_field,
+        second_target_path,
+        second_field,
+        third_target_path,
+        third_field,
+        on_change_function,
+        on_sound_function,
+    )) = parse_checked_assignments3_then_callbacks(stmt)
+    {
+        return Some(FastHandlerRef::CheckedAssignments3ThenCallbacks {
+            first_target_path,
+            first_field,
+            second_target_path,
+            second_field,
+            third_target_path,
+            third_field,
+            on_change_function,
+            on_sound_function,
+        });
+    }
+    if let Some((target_path, field, first_callback, second_callback, on_sound_function)) =
+        parse_checked_assignment_then_two_callbacks(stmt)
+    {
+        return Some(FastHandlerRef::CheckedAssignmentThenTwoCallbacks {
+            target_path,
+            field,
+            first_callback,
+            second_callback,
+            on_sound_function,
+        });
+    }
     if let Some((target_path, field, on_change_function, on_sound_function)) =
         parse_checked_assignment_then_callbacks(stmt)
     {
@@ -433,9 +477,153 @@ fn parse_checked_assignment_then_callbacks(
     ))
 }
 
+fn parse_checked_number_assignment_then_callbacks(
+    stmt: &str,
+) -> Option<(&str, &str, f64, &str, &str)> {
+    let stmt = stmt.trim();
+    let prefix = "local checked = self:GetChecked();";
+    let remainder = stmt.strip_prefix(prefix)?.trim_start();
+    let parts = super::split_inline_sequence_parts(remainder);
+    let [assign_stmt, on_change_stmt, on_sound_stmt] = parts.as_slice() else {
+        return None;
+    };
+    let (target_path, field, value) = parse_global_number_assignment(assign_stmt.trim())?;
+    let on_change_function = parse_global_function_suffix(on_change_stmt.trim(), "()")?;
+    let (on_sound_function, args) = on_sound_stmt.trim().split_once('(')?;
+    if args.strip_suffix(')')?.trim() != "checked" {
+        return None;
+    }
+    Some((
+        target_path,
+        field,
+        value,
+        on_change_function,
+        on_sound_function.trim(),
+    ))
+}
+
+fn parse_checked_assignments3_then_callbacks(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, &str, &str, &str, &str)> {
+    let (then_parts, else_parts, after_end) = parse_checked_then_else(stmt)?;
+    let [then_first, then_second, then_third] = then_parts.as_slice() else {
+        return None;
+    };
+    let [else_first, else_second, else_third] = else_parts.as_slice() else {
+        return None;
+    };
+    let (first_target_path, first_field, first_then_value) =
+        parse_global_bool_assignment(then_first)?;
+    let (second_target_path, second_field, second_then_value) =
+        parse_global_bool_assignment(then_second)?;
+    let (third_target_path, third_field, third_then_value) =
+        parse_global_bool_assignment(then_third)?;
+    let (first_else_path, first_else_field, first_else_value) =
+        parse_global_bool_assignment(else_first)?;
+    let (second_else_path, second_else_field, second_else_value) =
+        parse_global_bool_assignment(else_second)?;
+    let (third_else_path, third_else_field, third_else_value) =
+        parse_global_bool_assignment(else_third)?;
+    if first_then_value != true
+        || second_then_value != true
+        || third_then_value != true
+        || first_else_value != false
+        || second_else_value != false
+        || third_else_value != false
+        || first_target_path != first_else_path
+        || first_field != first_else_field
+        || second_target_path != second_else_path
+        || second_field != second_else_field
+        || third_target_path != third_else_path
+        || third_field != third_else_field
+    {
+        return None;
+    }
+    let parts = super::split_inline_sequence_parts(after_end);
+    let [on_change_stmt, on_sound_stmt] = parts.as_slice() else {
+        return None;
+    };
+    let on_change_function = parse_global_function_suffix(on_change_stmt.trim(), "()")?;
+    let (on_sound_function, args) = on_sound_stmt.trim().split_once('(')?;
+    if args.strip_suffix(')')?.trim() != "checked" {
+        return None;
+    }
+    Some((
+        first_target_path,
+        first_field,
+        second_target_path,
+        second_field,
+        third_target_path,
+        third_field,
+        on_change_function,
+        on_sound_function.trim(),
+    ))
+}
+
+fn parse_checked_assignment_then_two_callbacks(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, &str)> {
+    let (then_parts, else_parts, after_end) = parse_checked_then_else(stmt)?;
+    let [then_stmt] = then_parts.as_slice() else {
+        return None;
+    };
+    let [else_stmt] = else_parts.as_slice() else {
+        return None;
+    };
+    let (then_path, then_field, then_value) = parse_global_bool_assignment(then_stmt)?;
+    let (else_path, else_field, else_value) = parse_global_bool_assignment(else_stmt)?;
+    if then_path != else_path || then_field != else_field || then_value != true || else_value != false
+    {
+        return None;
+    }
+    let parts = super::split_inline_sequence_parts(after_end);
+    let [first_callback_stmt, second_callback_stmt, on_sound_stmt] = parts.as_slice() else {
+        return None;
+    };
+    let first_callback = parse_global_function_suffix(first_callback_stmt.trim(), "()")?;
+    let second_callback = parse_global_function_suffix(second_callback_stmt.trim(), "()")?;
+    let (on_sound_function, args) = on_sound_stmt.trim().split_once('(')?;
+    if args.strip_suffix(')')?.trim() != "checked" {
+        return None;
+    }
+    Some((
+        then_path,
+        then_field,
+        first_callback,
+        second_callback,
+        on_sound_function.trim(),
+    ))
+}
+
+fn parse_checked_then_else(stmt: &str) -> Option<(Vec<&str>, Vec<&str>, &str)> {
+    let stmt = stmt.trim();
+    let prefix = "local checked = self:GetChecked()";
+    let remainder = stmt.strip_prefix(prefix)?.trim_start();
+    let remainder = remainder.strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    if condition.trim_end().strip_suffix(')')?.trim() != "checked" {
+        return None;
+    }
+    let remainder = remainder.trim_start();
+    let (then_stmt, else_tail) = remainder.split_once("else")?;
+    let else_tail = else_tail.trim_start();
+    let (else_stmt, after_end) = else_tail.split_once("end")?;
+    let then_parts = super::split_inline_sequence_parts(then_stmt.trim());
+    let else_parts = super::split_inline_sequence_parts(else_stmt.trim());
+    Some((then_parts, else_parts, after_end.trim()))
+}
+
 fn parse_global_bool_assignment(stmt: &str) -> Option<(&str, &str, bool)> {
     let (lhs, rhs) = stmt.split_once('=')?;
     let value = super::parse_single_bool_literal(rhs.trim())?;
+    let (target_path, field) = lhs.trim().rsplit_once('.')?;
+    Some((target_path.trim(), field.trim(), value))
+}
+
+fn parse_global_number_assignment(stmt: &str) -> Option<(&str, &str, f64)> {
+    let (lhs, rhs) = stmt.split_once('=')?;
+    let value = rhs.trim().trim_end_matches(';').trim().parse::<f64>().ok()?;
     let (target_path, field) = lhs.trim().rsplit_once('.')?;
     Some((target_path.trim(), field.trim(), value))
 }

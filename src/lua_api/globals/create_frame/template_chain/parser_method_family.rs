@@ -1,6 +1,9 @@
 use super::{FastHandlerRef, is_fast_handler_path, is_fast_identifier, is_fast_passthrough_args};
 
 pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a>> {
+    if let Some(field) = parse_parent_field_local_toggle_shown(stmt) {
+        return Some(FastHandlerRef::ParentFieldLocalToggleShown { field });
+    }
     if let Some((method_name, then_ref, else_ref)) =
         parse_conditional_self_noarg_method_then_else(stmt)
     {
@@ -89,6 +92,19 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
         return Some(FastHandlerRef::ParentMethod(method_name));
     }
     parse_inline_grandparent_method(stmt).map(FastHandlerRef::GrandparentMethod)
+}
+
+fn parse_parent_field_local_toggle_shown(stmt: &str) -> Option<&str> {
+    let stmt = stmt.trim();
+    let remainder = stmt.strip_prefix("local infoFrame = self:GetParent().")?;
+    let (field, tail) = remainder.split_once(';')?;
+    let field = field.trim();
+    if !is_fast_identifier(field) {
+        return None;
+    }
+    let tail = tail.trim();
+    let prefix = "infoFrame:SetShown(not infoFrame:IsShown())";
+    (tail == prefix).then_some(field)
 }
 
 fn parse_conditional_self_noarg_method_then_else<'a>(

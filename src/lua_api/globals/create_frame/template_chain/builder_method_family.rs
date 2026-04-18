@@ -101,6 +101,9 @@ fn build_ancestor_method_variants(
     handler_ref: &FastHandlerRef<'_>,
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
+        FastHandlerRef::ParentFieldLocalToggleShown { field } => {
+            build_parent_field_local_toggle_shown_handler(state, field).map(Some)
+        }
         FastHandlerRef::ParentMethod(method_name) => {
             build_parent_method_handler(state, method_name).map(Some)
         }
@@ -123,6 +126,36 @@ fn build_ancestor_method_variants(
         }
         _ => Ok(None),
     }
+}
+
+fn build_parent_field_local_toggle_shown_handler(
+    state: &mut LuaState,
+    field: &str,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local field_name = ...
+            return function(self, ...)
+                local parent = self:GetParent()
+                if not parent then
+                    return
+                end
+                local infoFrame = parent[field_name]
+                if not infoFrame then
+                    return
+                end
+                return infoFrame:SetShown(not infoFrame:IsShown())
+            end
+        "#,
+        "template-parent-field-local-toggle-shown",
+    )?;
+    let field_name = create_string(state, field);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name],
+    )
 }
 
 fn build_method_handler(state: &mut LuaState, method_name: &str) -> LuaResult<Val> {

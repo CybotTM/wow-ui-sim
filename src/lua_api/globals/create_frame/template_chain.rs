@@ -496,6 +496,16 @@ enum FastHandlerRef<'a> {
         second_callback: &'a str,
         on_sound_function: &'a str,
     },
+    CheckedNumberAssignmentThenCallbacks {
+        target_path: &'a str,
+        field: &'a str,
+        value: f64,
+        on_change_function: &'a str,
+        on_sound_function: &'a str,
+    },
+    ParentFieldLocalToggleShown {
+        field: &'a str,
+    },
     FunctionWithParentArg(&'a str),
     FunctionWithGrandparentArg(&'a str),
     FunctionWithParentIdArg(&'a str),
