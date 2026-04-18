@@ -429,6 +429,21 @@ impl HotLiteralHandles {
     }
 }
 
+// ── Named accessors (Track 1 sub-item 3 foothold) ─────────────────────────
+//
+// Index constants for the entries that already have hot-path consumers in
+// the current codebase. New conversions add entries here so the call sites
+// stay symbolic (`handles.metatable_key(idx::RILUA_FRAME_MT)`) instead of
+// relying on raw `intern_string_static(b"...")` calls.
+
+/// Index constants into [`HOT_METATABLE_KEYS`]. Kept in lockstep with the
+/// slice order — adding or reordering entries there requires updating
+/// these and bumping [`WHITELIST_VERSION`].
+pub mod metatable_idx {
+    /// Position of `b"__rilua_frame_mt"` in [`super::HOT_METATABLE_KEYS`].
+    pub const RILUA_FRAME_MT: usize = 18;
+}
+
 /// Owns the pre-intern step during VM bootstrap. Call [`install`] once
 /// before any addon load so the subsequent hot paths (sub-item 3) find
 /// every whitelisted literal already in rilua's static intern cache.
@@ -568,6 +583,17 @@ mod tests {
                 assert_eq!(s.data(), *bytes, "{name}[{i}] byte mismatch");
             }
         }
+    }
+
+    /// Pins each named index constant to its expected source byte slice.
+    /// Catches drift when HOT_METATABLE_KEYS is reordered without bumping
+    /// WHITELIST_VERSION and updating the `metatable_idx` constants.
+    #[test]
+    fn named_indexes_map_to_expected_slice_entries() {
+        assert_eq!(
+            HOT_METATABLE_KEYS[metatable_idx::RILUA_FRAME_MT],
+            b"__rilua_frame_mt"
+        );
     }
 
     /// Second call to `install` on the same VM must return equivalent
