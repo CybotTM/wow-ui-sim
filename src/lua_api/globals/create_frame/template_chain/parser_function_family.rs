@@ -106,6 +106,27 @@ fn parse_inline_function_arg_shapes<'a>(stmt: &'a str) -> Option<FastHandlerRef<
             third_arg_path,
         });
     }
+    if let Some((function_name, first_arg_path, second_self_method, third_self_method, fourth)) =
+        parse_inline_function_with_global_self_method_self_method_bool_args(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithGlobalSelfMethodSelfMethodBoolArgs {
+            function_name,
+            first_arg_path,
+            second_self_method,
+            third_self_method,
+            fourth,
+        });
+    }
+    if let Some((function_name, first, second_arg_path, third)) =
+        parse_inline_function_with_string_global_bool_arg(stmt)
+    {
+        return Some(FastHandlerRef::FunctionWithStringGlobalBoolArg {
+            function_name,
+            first,
+            second_arg_path,
+            third,
+        });
+    }
     if let Some((function_name, arg)) = parse_inline_function_with_string_arg(stmt) {
         return Some(FastHandlerRef::FunctionWithStringArg { function_name, arg });
     }
@@ -301,6 +322,54 @@ fn parse_inline_function_with_three_global_args(stmt: &str) -> Option<(&str, &st
         first_arg_path,
         second_arg_path,
         third_arg_path,
+    ))
+}
+
+fn parse_inline_function_with_string_global_bool_arg(
+    stmt: &str,
+) -> Option<(&str, &str, &str, bool)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first = super::parse_single_string_literal(parts.next()?)?;
+    let second_arg_path = parts.next()?;
+    let third = super::parse_single_bool_literal(parts.next()?)?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(second_arg_path)
+        && second_arg_path.split('.').next() != Some("self"))
+    .then_some((function_name, first, second_arg_path, third))
+}
+
+fn parse_inline_function_with_global_self_method_self_method_bool_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, bool)> {
+    let (function_name, args) = stmt.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first_arg_path = parts.next()?;
+    let second = parts.next()?;
+    let third = parts.next()?;
+    let fourth = super::parse_single_bool_literal(parts.next()?)?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let second_self_method = second.strip_prefix("self:")?.strip_suffix("()")?.trim();
+    let third_self_method = third.strip_prefix("self:")?.strip_suffix("()")?.trim();
+    let function_name = function_name.trim();
+    (is_fast_handler_path(function_name)
+        && is_fast_handler_path(first_arg_path)
+        && is_fast_identifier(second_self_method)
+        && is_fast_identifier(third_self_method))
+    .then_some((
+        function_name,
+        first_arg_path,
+        second_self_method,
+        third_self_method,
+        fourth,
     ))
 }
 

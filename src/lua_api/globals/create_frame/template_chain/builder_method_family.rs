@@ -37,6 +37,14 @@ fn build_direct_method_variants(
             )
             .map(Some)
         }
+        FastHandlerRef::ConditionalNotSelfNoArgsMethodThen {
+            method_name,
+            then_ref,
+        } => {
+            let then_handler = super::build_fast_handler(state, (**then_ref).clone())?;
+            build_conditional_not_self_noargs_method_then_handler(state, method_name, then_handler)
+                .map(Some)
+        }
         FastHandlerRef::Method(method_name) => build_method_handler(state, method_name).map(Some),
         FastHandlerRef::MethodWithBoolArg { method_name, value } => {
             build_method_with_bool_arg_handler(state, method_name, *value).map(Some)
@@ -112,6 +120,23 @@ fn build_self_field_method_variants(
             *third,
         )
         .map(Some),
+        FastHandlerRef::SelfFieldMethodWithStringSelfStringNumberNumberArgs {
+            field,
+            method_name,
+            first,
+            third,
+            fourth,
+            fifth,
+        } => build_self_field_method_with_string_self_string_number_number_args_handler(
+            state,
+            field,
+            method_name,
+            first,
+            third,
+            *fourth,
+            *fifth,
+        )
+        .map(Some),
         _ => Ok(None),
     }
 }
@@ -175,6 +200,34 @@ fn build_conditional_self_text_empty_show_text_child_handler(
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[])
 }
 
+fn build_conditional_not_self_noargs_method_then_handler(
+    state: &mut LuaState,
+    method_name: &str,
+    then_handler: Option<Val>,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local method_name, then_handler = ...
+            return function(self, ...)
+                if not self[method_name](self) then
+                    if then_handler then
+                        return then_handler(self, ...)
+                    end
+                end
+            end
+        "#,
+        "template-conditional-not-self-noargs-method-then",
+    )?;
+    let method_name = create_string(state, method_name);
+    let then_handler = then_handler.unwrap_or(Val::Nil);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[method_name, then_handler],
+    )
+}
+
 fn build_parent_field_local_toggle_shown_handler(
     state: &mut LuaState,
     field: &str,
@@ -202,6 +255,40 @@ fn build_parent_field_local_toggle_shown_handler(
         state,
         Val::Function(builder.gc_ref()),
         &[field_name],
+    )
+}
+
+fn build_self_field_method_with_string_self_string_number_number_args_handler(
+    state: &mut LuaState,
+    field: &str,
+    method_name: &str,
+    first: &str,
+    third: &str,
+    fourth: f64,
+    fifth: f64,
+) -> LuaResult<Val> {
+    let builder = load_template(
+        state,
+        r#"
+            local field_name, method_name, first, third, fourth, fifth = ...
+            return function(self, ...)
+                local target = self[field_name]
+                if not target or not target[method_name] then
+                    return
+                end
+                return target[method_name](target, first, self, third, fourth, fifth)
+            end
+        "#,
+        "template-self-field-method-string-self-string-number-number-args",
+    )?;
+    let field_name = create_string(state, field);
+    let method_name = create_string(state, method_name);
+    let first = create_string(state, first);
+    let third = create_string(state, third);
+    crate::lua_api::methods::call_function_state(
+        state,
+        Val::Function(builder.gc_ref()),
+        &[field_name, method_name, first, third, Val::Num(fourth), Val::Num(fifth)],
     )
 }
 

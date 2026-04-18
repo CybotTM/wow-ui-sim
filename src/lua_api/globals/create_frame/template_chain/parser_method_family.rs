@@ -23,6 +23,12 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             else_ref: Box::new(else_ref),
         });
     }
+    if let Some((method_name, then_ref)) = parse_conditional_not_self_noarg_method_then(stmt) {
+        return Some(FastHandlerRef::ConditionalNotSelfNoArgsMethodThen {
+            method_name,
+            then_ref: Box::new(then_ref),
+        });
+    }
     if let Some((field, then_ref, else_ref)) = parse_conditional_self_field_then_else(stmt) {
         return Some(FastHandlerRef::ConditionalSelfFieldTruthy {
             field,
@@ -75,6 +81,20 @@ pub(super) fn parse_method_family<'a>(stmt: &'a str) -> Option<FastHandlerRef<'a
             second,
             third,
         });
+    }
+    if let Some((field, method_name, first, third, fourth, fifth)) =
+        parse_inline_self_field_method_with_string_self_string_number_number_args(stmt)
+    {
+        return Some(
+            FastHandlerRef::SelfFieldMethodWithStringSelfStringNumberNumberArgs {
+                field,
+                method_name,
+                first,
+                third,
+                fourth,
+                fifth,
+            },
+        );
     }
     if let Some((field, method_name, arg_field)) =
         parse_inline_self_field_method_with_self_field_arg(stmt)
@@ -232,6 +252,26 @@ fn parse_conditional_self_field_then_else<'a>(
     Some((field, then_ref, else_ref))
 }
 
+fn parse_conditional_not_self_noarg_method_then<'a>(
+    stmt: &'a str,
+) -> Option<(&'a str, FastHandlerRef<'a>)> {
+    let remainder = stmt.trim().strip_prefix("if")?.trim_start();
+    let remainder = remainder.strip_prefix('(')?.trim_start();
+    let (condition, remainder) = remainder.split_once("then")?;
+    let condition = condition.trim_end().strip_suffix(')')?.trim();
+    let remainder = remainder.trim_start();
+    let then_stmt = remainder.strip_suffix("end")?.trim();
+    let remainder = condition.strip_prefix("not self:")?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let method_name = method_name.trim();
+    if !(is_fast_identifier(method_name) && args.is_empty()) {
+        return None;
+    }
+    let then_ref = super::parse_inline_fast_handler("OnEnter", then_stmt)?;
+    Some((method_name, then_ref))
+}
+
 fn parse_inline_self_method(stmt: &str) -> Option<&str> {
     parse_inline_method_call(stmt, "self:")
 }
@@ -348,6 +388,29 @@ fn parse_inline_self_field_method_with_string_number_number_args(
         second,
         third,
     ))
+}
+
+fn parse_inline_self_field_method_with_string_self_string_number_number_args(
+    stmt: &str,
+) -> Option<(&str, &str, &str, &str, f64, f64)> {
+    let (field, remainder) = stmt.strip_prefix("self.")?.split_once(':')?;
+    let (method_name, args) = remainder.split_once('(')?;
+    let args = args.strip_suffix(')')?.trim();
+    let mut parts = args.split(',').map(str::trim);
+    let first = super::parse_single_string_literal(parts.next()?)?;
+    let second = parts.next()?;
+    let third = super::parse_single_string_literal(parts.next()?)?;
+    let fourth = parts.next()?.parse::<f64>().ok()?;
+    let fifth = parts.next()?.parse::<f64>().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    let field = field.trim();
+    let method_name = method_name.trim();
+    (is_fast_identifier(field)
+        && is_fast_identifier(method_name)
+        && second == "self")
+    .then_some((field, method_name, first, third, fourth, fifth))
 }
 
 fn parse_inline_self_field_method_with_self_field_arg(stmt: &str) -> Option<(&str, &str, &str)> {
