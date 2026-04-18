@@ -59,6 +59,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[layout-profile]] | Layout was 7.5% of release startup; `LayoutCache` siphash dominated. `FxHashMap` switch drops to 5.0%, −170M layout samples, −219M total siphash samples |
 | [[intern-string-ranking]] | 1.25M intern_string calls per startup; rilua bug found (mid-cycle inserts swept) + fixed. Migration landed for registry/metatable helpers: 1.25M → 1.10M (−12%), 1.18s → 1.15s, and follow-up perf shows `lua_hash` itself is down to 0.08% of startup. `frame_ref_cache` still deferred |
 | [[partyframe-tree]] | `rilua-migration` regresses `PartyFrame` from master's `(120x244)` 4-member layout down to `(4x2)` with zero member frames; regression test pinned against the master dump |
+| [[rilua-mlua-gap-audit]] | Audit of mlua-era Lua API handling still missing on rilua: sandbox cleanup parity, dropped MessageFrame methods, secure/event TODOs, and an unwired namespace patch hook |
 | [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, empty `UIParent` worklists short-circuit, but the fresh 90s world-map profile still sits at 31 steady-state handlers |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |

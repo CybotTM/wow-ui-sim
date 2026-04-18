@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-17] ingest | rilua vs mlua gap audit
+
+Added `investigations/rilua-mlua-gap-audit.md` after comparing the current
+rilua registration path against `master`'s mlua-era Lua API surface. Recorded
+the highest-signal missing handling buckets: no-op sandbox cleanup in
+`env_init`, dropped `MessageFrame` method registration, unfinished
+attribute/event/text widget parity, and the unwired `patch_namespace_stubs()`
+runtime hook. Updated `index.md` with the new investigation page.
+
 ## [2026-04-17] update | startup XML loader fast-path follow-up
 
 Updated `investigations/startup-createframe-profile.md` with the current XML
