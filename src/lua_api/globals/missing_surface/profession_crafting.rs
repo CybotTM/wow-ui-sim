@@ -7,7 +7,9 @@
 
 use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::state::BagItem;
 use rilua::vm::state::LuaState;
+use std::collections::HashMap;
 
 /// Returns true iff the recipe exists in the catalogue AND all reagents are
 /// available in `player.bag_items` for the requested `count`.
@@ -36,61 +38,88 @@ pub(super) fn recipe_is_craftable(state: &mut LuaState, recipe_id: i32, count: i
 /// Consumes reagents from bags and adds output item if all reagents are available.
 /// Returns false and changes nothing when reagents are insufficient.
 pub(super) fn craft_recipe(state: &mut LuaState, recipe_id: i32, count: i32) -> bool {
-    if !recipe_is_craftable(state, recipe_id, count) {
-        return false;
-    }
-    let Some(recipe) = profession_data::get_recipe(recipe_id) else {
+    let Some(plan) = craft_plan(state, recipe_id, count) else {
         return false;
     };
-
-    // Collect reagent changes before mutating.
-    let reagent_deltas: Vec<(u32, i32)> = recipe
-        .reagents
-        .iter()
-        .map(|r| (r.item_id, r.quantity * count))
-        .collect();
-    let output_id = recipe.output_item_id;
 
     let Ok(mut sim) = borrow_state_mut(state) else {
         return false;
     };
 
-    // Subtract each reagent from matching bag slots.
-    for (item_id, mut needed) in reagent_deltas {
-        for slot in sim.bag_items.values_mut() {
-            if slot.item_id != item_id || needed == 0 {
-                continue;
-            }
-            let take = needed.min(slot.stack_count);
-            slot.stack_count -= take;
-            needed -= take;
-        }
-    }
-    // Remove depleted bag slots.
-    sim.bag_items.retain(|_, b| b.stack_count > 0);
-
-    // Add output item: increment an existing slot or pick a free bag-0 slot.
-    if let Some(slot) = sim.bag_items.values_mut().find(|b| b.item_id == output_id) {
-        slot.stack_count += count;
-    } else {
-        let key = free_bag0_slot(&sim.bag_items);
-        sim.bag_items.insert(
-            key,
-            crate::lua_api::state::BagItem {
-                item_id: output_id,
-                stack_count: count,
-            },
-        );
-    }
+    consume_reagents(&mut sim.bag_items, &plan.reagent_deltas);
+    add_output_item(&mut sim.bag_items, plan.output_item_id, plan.output_count);
 
     true
 }
 
+struct CraftPlan {
+    reagent_deltas: Vec<(u32, i32)>,
+    output_item_id: u32,
+    output_count: i32,
+}
+
+fn craft_plan(state: &mut LuaState, recipe_id: i32, count: i32) -> Option<CraftPlan> {
+    if !recipe_is_craftable(state, recipe_id, count) {
+        return None;
+    }
+
+    let recipe = profession_data::get_recipe(recipe_id)?;
+    Some(CraftPlan {
+        reagent_deltas: reagent_deltas(recipe, count),
+        output_item_id: recipe.output_item_id,
+        output_count: count,
+    })
+}
+
+fn reagent_deltas(recipe: &profession_data::RecipeEntry, count: i32) -> Vec<(u32, i32)> {
+    recipe
+        .reagents
+        .iter()
+        .map(|reagent| (reagent.item_id, reagent.quantity * count))
+        .collect()
+}
+
+fn consume_reagents(bag_items: &mut HashMap<(i32, i32), BagItem>, reagent_deltas: &[(u32, i32)]) {
+    for &(item_id, needed) in reagent_deltas {
+        consume_item_stacks(bag_items, item_id, needed);
+    }
+    bag_items.retain(|_, item| item.stack_count > 0);
+}
+
+fn consume_item_stacks(
+    bag_items: &mut HashMap<(i32, i32), BagItem>,
+    item_id: u32,
+    mut needed: i32,
+) {
+    for slot in bag_items.values_mut() {
+        if slot.item_id != item_id || needed == 0 {
+            continue;
+        }
+        let taken = needed.min(slot.stack_count);
+        slot.stack_count -= taken;
+        needed -= taken;
+    }
+}
+
+fn add_output_item(bag_items: &mut HashMap<(i32, i32), BagItem>, item_id: u32, count: i32) {
+    if let Some(slot) = bag_items.values_mut().find(|slot| slot.item_id == item_id) {
+        slot.stack_count += count;
+        return;
+    }
+
+    let key = free_bag0_slot(bag_items);
+    bag_items.insert(
+        key,
+        BagItem {
+            item_id,
+            stack_count: count,
+        },
+    );
+}
+
 /// Find a free slot in bag 0 (slots 1–16). Falls back to negative slots if
 /// all 16 are occupied (tests rarely exceed that).
-fn free_bag0_slot(
-    bag_items: &std::collections::HashMap<(i32, i32), crate::lua_api::state::BagItem>,
-) -> (i32, i32) {
+fn free_bag0_slot(bag_items: &HashMap<(i32, i32), BagItem>) -> (i32, i32) {
     for slot in 1..=16_i32 {
         let k = (0, slot);
         if !bag_items.contains_key(&k) {

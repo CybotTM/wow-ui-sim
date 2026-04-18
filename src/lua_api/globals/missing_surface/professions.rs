@@ -8,89 +8,87 @@ use crate::lua_api::methods::{
 };
 use crate::lua_bridge::{FromStack, table_set_rust_fn};
 use rilua::vm::state::LuaState;
+use rilua::vm::{gc::arena::GcRef, table::Table};
 use rilua::{LuaResult, Val};
 
 const TRADE_SKILL_NAMESPACE: &str = "C_TradeSkillUI";
 const SELECTED_PROFESSION_KEY: &str = "_selectedProfessionID";
+type NamespaceMethod = (&'static str, fn(&mut LuaState) -> LuaResult<u32>);
+
+const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
+    (
+        "GetAllProfessionTradeSkillLines",
+        c_trade_skill_ui_get_all_profession_trade_skill_lines,
+    ),
+    ("GetAllRecipeIDs", c_trade_skill_ui_get_all_recipe_ids),
+    (
+        "GetBaseProfessionInfo",
+        c_trade_skill_ui_get_base_profession_info,
+    ),
+    ("GetCategoryInfo", c_trade_skill_ui_get_category_info),
+    (
+        "GetChildProfessionInfo",
+        c_trade_skill_ui_get_child_profession_info,
+    ),
+    (
+        "GetChildProfessionInfos",
+        c_trade_skill_ui_get_child_profession_infos,
+    ),
+    (
+        "GetCraftingOrderCount",
+        c_trade_skill_ui_get_crafting_order_count,
+    ),
+    (
+        "GetFilteredRecipeIDs",
+        c_trade_skill_ui_get_filtered_recipe_ids,
+    ),
+    (
+        "GetProfessionInfoByRecipeID",
+        c_trade_skill_ui_get_profession_info_by_recipe_id,
+    ),
+    ("GetProfessions", c_trade_skill_ui_get_professions),
+    ("GetNumRecipes", c_trade_skill_ui_get_num_recipes),
+    ("GetNumTradeSkills", c_trade_skill_ui_get_num_trade_skills),
+    ("GetRecipeInfo", c_trade_skill_ui_get_recipe_info),
+    ("GetRecipeItemLink", c_trade_skill_ui_get_recipe_item_link),
+    (
+        "GetRecipeNumReagents",
+        c_trade_skill_ui_get_recipe_num_reagents,
+    ),
+    (
+        "GetRecipeReagentInfo",
+        c_trade_skill_ui_get_recipe_reagent_info,
+    ),
+    (
+        "GetRecipeReagentItemLink",
+        c_trade_skill_ui_get_recipe_reagent_item_link,
+    ),
+    ("GetRecipeSchematic", c_trade_skill_ui_get_recipe_schematic),
+    ("GetRecipesTracked", c_trade_skill_ui_get_recipes_tracked),
+    ("GetTradeSkillLine", c_trade_skill_ui_get_trade_skill_line),
+    (
+        "GetTradeSkillListLink",
+        c_trade_skill_ui_get_trade_skill_list_link,
+    ),
+    (
+        "GetTradeSkillTexture",
+        c_trade_skill_ui_get_trade_skill_texture,
+    ),
+    ("IsRecipeCraftable", c_trade_skill_ui_is_recipe_craftable),
+    ("IsRecipeLearned", c_trade_skill_ui_is_recipe_learned),
+    ("IsRecipeTracked", c_trade_skill_ui_is_recipe_tracked),
+    ("IsTradeSkillReady", c_trade_skill_ui_is_trade_skill_ready),
+    (
+        "SetProfessionChildSkillLineID",
+        c_trade_skill_ui_set_profession_child_skill_line_id,
+    ),
+    ("SetRecipeTracked", c_trade_skill_ui_set_recipe_tracked),
+    ("CraftRecipe", c_trade_skill_ui_craft_recipe),
+];
 
 pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
-    let methods: &[(&str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
-        (
-            "GetAllProfessionTradeSkillLines",
-            c_trade_skill_ui_get_all_profession_trade_skill_lines,
-        ),
-        ("GetAllRecipeIDs", c_trade_skill_ui_get_all_recipe_ids),
-        (
-            "GetBaseProfessionInfo",
-            c_trade_skill_ui_get_base_profession_info,
-        ),
-        ("GetCategoryInfo", c_trade_skill_ui_get_category_info),
-        (
-            "GetChildProfessionInfo",
-            c_trade_skill_ui_get_child_profession_info,
-        ),
-        (
-            "GetChildProfessionInfos",
-            c_trade_skill_ui_get_child_profession_infos,
-        ),
-        (
-            "GetCraftingOrderCount",
-            c_trade_skill_ui_get_crafting_order_count,
-        ),
-        (
-            "GetFilteredRecipeIDs",
-            c_trade_skill_ui_get_filtered_recipe_ids,
-        ),
-        (
-            "GetProfessionInfoByRecipeID",
-            c_trade_skill_ui_get_profession_info_by_recipe_id,
-        ),
-        ("GetProfessions", c_trade_skill_ui_get_professions),
-        ("GetNumRecipes", c_trade_skill_ui_get_num_recipes),
-        ("GetNumTradeSkills", c_trade_skill_ui_get_num_trade_skills),
-        ("GetRecipeInfo", c_trade_skill_ui_get_recipe_info),
-        ("GetRecipeItemLink", c_trade_skill_ui_get_recipe_item_link),
-        (
-            "GetRecipeNumReagents",
-            c_trade_skill_ui_get_recipe_num_reagents,
-        ),
-        (
-            "GetRecipeReagentInfo",
-            c_trade_skill_ui_get_recipe_reagent_info,
-        ),
-        (
-            "GetRecipeReagentItemLink",
-            c_trade_skill_ui_get_recipe_reagent_item_link,
-        ),
-        ("GetRecipeSchematic", c_trade_skill_ui_get_recipe_schematic),
-        ("GetRecipesTracked", c_trade_skill_ui_get_recipes_tracked),
-        ("GetTradeSkillLine", c_trade_skill_ui_get_trade_skill_line),
-        (
-            "GetTradeSkillListLink",
-            c_trade_skill_ui_get_trade_skill_list_link,
-        ),
-        (
-            "GetTradeSkillTexture",
-            c_trade_skill_ui_get_trade_skill_texture,
-        ),
-        ("IsRecipeCraftable", c_trade_skill_ui_is_recipe_craftable),
-        ("IsRecipeLearned", c_trade_skill_ui_is_recipe_learned),
-        ("IsRecipeTracked", c_trade_skill_ui_is_recipe_tracked),
-        ("IsTradeSkillReady", c_trade_skill_ui_is_trade_skill_ready),
-        (
-            "SetProfessionChildSkillLineID",
-            c_trade_skill_ui_set_profession_child_skill_line_id,
-        ),
-        ("SetRecipeTracked", c_trade_skill_ui_set_recipe_tracked),
-        ("CraftRecipe", c_trade_skill_ui_craft_recipe),
-    ];
-
-    for &(name, func) in methods {
-        table_set_rust_fn(state, table_ref, name, func)?;
-    }
-
-    Ok(())
+    register_namespace_methods(state, table_ref, TRADE_SKILL_METHODS)
 }
 
 fn c_trade_skill_ui_get_all_profession_trade_skill_lines(state: &mut LuaState) -> LuaResult<u32> {
@@ -418,56 +416,17 @@ fn profession_table(
     profession: Option<&profession_data::ProfessionInfo>,
 ) -> Val {
     let table = create_table(state);
-    table_set(
+    set_number_field(
         state,
         table,
         "professionID",
-        Val::Num(
-            profession
-                .map(|profession| profession.profession_id)
-                .unwrap_or(0) as f64,
-        ),
+        profession
+            .map(|profession| profession.profession_id)
+            .unwrap_or(0) as f64,
     );
-
-    let Some(profession) = profession else {
-        return table;
-    };
-
-    table_set(
-        state,
-        table,
-        "profession",
-        Val::Num(profession.profession as f64),
-    );
-    let profession_name = create_string(state, profession.name);
-    let parent_profession_name = create_string(state, profession.parent_profession_name);
-    table_set(state, table, "professionName", profession_name);
-    table_set(state, table, "parentProfessionName", parent_profession_name);
-    table_set(
-        state,
-        table,
-        "skillLevel",
-        Val::Num(profession.skill_level as f64),
-    );
-    table_set(
-        state,
-        table,
-        "maxSkillLevel",
-        Val::Num(profession.max_skill_level as f64),
-    );
-    table_set(
-        state,
-        table,
-        "skillModifier",
-        Val::Num(profession.skill_modifier as f64),
-    );
-    table_set(
-        state,
-        table,
-        "skillLineID",
-        Val::Num(profession.skill_line_id as f64),
-    );
-    table_set(state, table, "iconFileID", Val::Num(profession.icon as f64));
+    if let Some(profession) = profession {
+        populate_profession_table(state, table, profession);
+    }
     table
 }
 
@@ -497,37 +456,10 @@ fn category_table(state: &mut LuaState, category: Option<&profession_data::Recip
 
 fn recipe_info_table(state: &mut LuaState, recipe: Option<&profession_data::RecipeEntry>) -> Val {
     let table = create_table(state);
-    let Some(recipe) = recipe else {
-        table_set(state, table, "recipeID", Val::Num(0.0));
-        table_set(state, table, "name", Val::Nil);
-        table_set(state, table, "craftable", Val::Bool(false));
-        return table;
-    };
-
-    table_set(state, table, "recipeID", Val::Num(recipe.recipe_id as f64));
-    let name = create_string(state, recipe.name);
-    table_set(state, table, "name", name);
-    table_set(state, table, "learned", Val::Bool(recipe.learned));
-    table_set(state, table, "craftable", Val::Bool(recipe.craftable));
-    table_set(
-        state,
-        table,
-        "difficulty",
-        Val::Num(recipe.difficulty as f64),
-    );
-    table_set(
-        state,
-        table,
-        "categoryID",
-        Val::Num(recipe.category_id as f64),
-    );
-    table_set(
-        state,
-        table,
-        "itemLevel",
-        Val::Num(recipe.item_level as f64),
-    );
-    table_set(state, table, "favorite", Val::Bool(false));
+    match recipe {
+        Some(recipe) => populate_recipe_info_table(state, table, recipe),
+        None => populate_missing_recipe_info_table(state, table),
+    }
     table
 }
 
@@ -564,39 +496,10 @@ fn recipe_schematic_table(
     recipe: Option<&profession_data::RecipeEntry>,
 ) -> Val {
     let table = create_table(state);
-    let Some(recipe) = recipe else {
-        table_set(state, table, "recipeID", Val::Num(0.0));
-        return table;
-    };
-
-    table_set(state, table, "recipeID", Val::Num(recipe.recipe_id as f64));
-    let name = create_string(state, recipe.name);
-    table_set(state, table, "name", name);
-    table_set(
-        state,
-        table,
-        "outputItemID",
-        Val::Num(recipe.output_item_id as f64),
-    );
-    table_set(
-        state,
-        table,
-        "quantityMin",
-        Val::Num(recipe.output_quantity as f64),
-    );
-    table_set(
-        state,
-        table,
-        "quantityMax",
-        Val::Num(recipe.output_quantity as f64),
-    );
-    let reagent_slot_schematics = reagent_slot_schematic_table(state, recipe);
-    table_set(
-        state,
-        table,
-        "reagentSlotSchematics",
-        reagent_slot_schematics,
-    );
+    match recipe {
+        Some(recipe) => populate_recipe_schematic_table(state, table, recipe),
+        None => set_number_field(state, table, "recipeID", 0.0),
+    }
     table
 }
 
@@ -647,6 +550,100 @@ fn profession_for_recipe(recipe_id: i32) -> Option<&'static profession_data::Pro
     profession_data::get_recipe(recipe_id).and_then(|_| profession_data::get_profession_by_index(0))
 }
 
+fn register_namespace_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    methods: &[NamespaceMethod],
+) -> LuaResult<()> {
+    for &(name, func) in methods {
+        table_set_rust_fn(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn populate_profession_table(
+    state: &mut LuaState,
+    table: Val,
+    profession: &profession_data::ProfessionInfo,
+) {
+    set_number_field(state, table, "profession", profession.profession as f64);
+    set_string_field(state, table, "professionName", profession.name);
+    set_string_field(
+        state,
+        table,
+        "parentProfessionName",
+        profession.parent_profession_name,
+    );
+    set_number_field(state, table, "skillLevel", profession.skill_level as f64);
+    set_number_field(
+        state,
+        table,
+        "maxSkillLevel",
+        profession.max_skill_level as f64,
+    );
+    set_number_field(
+        state,
+        table,
+        "skillModifier",
+        profession.skill_modifier as f64,
+    );
+    set_number_field(state, table, "skillLineID", profession.skill_line_id as f64);
+    set_number_field(state, table, "iconFileID", profession.icon as f64);
+}
+
+fn populate_missing_recipe_info_table(state: &mut LuaState, table: Val) {
+    set_number_field(state, table, "recipeID", 0.0);
+    table_set(state, table, "name", Val::Nil);
+    set_bool_field(state, table, "craftable", false);
+}
+
+fn populate_recipe_info_table(
+    state: &mut LuaState,
+    table: Val,
+    recipe: &profession_data::RecipeEntry,
+) {
+    set_number_field(state, table, "recipeID", recipe.recipe_id as f64);
+    set_string_field(state, table, "name", recipe.name);
+    set_bool_field(state, table, "learned", recipe.learned);
+    set_bool_field(state, table, "craftable", recipe.craftable);
+    set_number_field(state, table, "difficulty", recipe.difficulty as f64);
+    set_number_field(state, table, "categoryID", recipe.category_id as f64);
+    set_number_field(state, table, "itemLevel", recipe.item_level as f64);
+    set_bool_field(state, table, "favorite", false);
+}
+
+fn populate_recipe_schematic_table(
+    state: &mut LuaState,
+    table: Val,
+    recipe: &profession_data::RecipeEntry,
+) {
+    let reagent_slot_schematics = reagent_slot_schematic_table(state, recipe);
+    set_number_field(state, table, "recipeID", recipe.recipe_id as f64);
+    set_string_field(state, table, "name", recipe.name);
+    set_number_field(state, table, "outputItemID", recipe.output_item_id as f64);
+    set_number_field(state, table, "quantityMin", recipe.output_quantity as f64);
+    set_number_field(state, table, "quantityMax", recipe.output_quantity as f64);
+    table_set(
+        state,
+        table,
+        "reagentSlotSchematics",
+        reagent_slot_schematics,
+    );
+}
+
+fn set_number_field(state: &mut LuaState, table: Val, key: &str, value: f64) {
+    table_set(state, table, key, Val::Num(value));
+}
+
+fn set_bool_field(state: &mut LuaState, table: Val, key: &str, value: bool) {
+    table_set(state, table, key, Val::Bool(value));
+}
+
+fn set_string_field(state: &mut LuaState, table: Val, key: &str, value: &str) {
+    let string = create_string(state, value);
+    table_set(state, table, key, string);
+}
+
 fn selected_profession(state: &mut LuaState) -> Option<&'static profession_data::ProfessionInfo> {
     // SimState is the primary source; fall back to the Lua-side mirror, then to first profession.
     if let Ok(sim) = borrow_state(state) {
@@ -683,4 +680,3 @@ fn item_link_value(state: &mut LuaState, item_id: u32) -> Option<Val> {
         ),
     ))
 }
-

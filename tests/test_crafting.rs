@@ -69,7 +69,10 @@ fn learning_a_recipe_makes_it_visible_via_is_recipe_learned() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "LearnRecipe/UnlearnRecipe round-trip: {result}");
+    assert_eq!(
+        result, "ok",
+        "LearnRecipe/UnlearnRecipe round-trip: {result}"
+    );
 }
 
 #[test]
@@ -100,7 +103,10 @@ fn is_recipe_craftable_returns_true_when_all_reagents_present() {
             "#,
         )
         .unwrap();
-    assert!(result, "IsRecipeCraftable should be true when all reagents present");
+    assert!(
+        result,
+        "IsRecipeCraftable should be true when all reagents present"
+    );
 }
 
 #[test]
@@ -128,9 +134,8 @@ fn is_recipe_craftable_handles_count_arg() {
 fn craft_recipe_consumes_reagents_and_adds_output() {
     let env = env();
     let result: String = env
-        .eval(
-            &format!(
-                r#"
+        .eval(&format!(
+            r#"
             {COUNT_ITEM}
             A_Admin.ClearBags()
             A_Admin.AddBagItem(0, 1, 210934, 12)
@@ -149,8 +154,7 @@ fn craft_recipe_consumes_reagents_and_adds_output() {
             if out < 1 then return "output=" .. tostring(out) end
             return "ok"
             "#,
-            ),
-        )
+        ))
         .unwrap();
     assert_eq!(
         result, "ok",
@@ -162,9 +166,8 @@ fn craft_recipe_consumes_reagents_and_adds_output() {
 fn craft_recipe_with_count_consumes_proportionally() {
     let env = env();
     let result: String = env
-        .eval(
-            &format!(
-                r#"
+        .eval(&format!(
+            r#"
             {COUNT_ITEM}
             A_Admin.ClearBags()
             -- 3× reagents
@@ -182,8 +185,7 @@ fn craft_recipe_with_count_consumes_proportionally() {
             if out ~= 3 then return "output=" .. tostring(out) end
             return "ok"
             "#,
-            ),
-        )
+        ))
         .unwrap();
     assert_eq!(
         result, "ok",
@@ -195,9 +197,8 @@ fn craft_recipe_with_count_consumes_proportionally() {
 fn craft_recipe_returns_false_and_no_op_when_reagents_missing() {
     let env = env();
     let result: String = env
-        .eval(
-            &format!(
-                r#"
+        .eval(&format!(
+            r#"
             {COUNT_ITEM}
             A_Admin.ClearBags()
             local ok = C_TradeSkillUI.CraftRecipe(100001, 1)
@@ -211,8 +212,7 @@ fn craft_recipe_returns_false_and_no_op_when_reagents_missing() {
             end
             return "ok"
             "#,
-            ),
-        )
+        ))
         .unwrap();
     assert_eq!(
         result, "ok",
