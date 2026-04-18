@@ -2786,6 +2786,104 @@ fn test_create_frame_from_xml_inline_grandparent_method_with_not_self_checked_ar
 }
 
 #[test]
+fn test_create_frame_from_xml_inline_function_with_self_gettext_result_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlInlineFilterName = nil
+        function CombatConfig_SetFilterName(value)
+            XmlInlineFilterName = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineGetTextRoot" parent="UIParent">
+            <EditBox name="XmlInlineGetTextEditBox" parent="XmlInlineGetTextRoot">
+                <Scripts><OnEnterPressed>
+                    CombatConfig_SetFilterName(self:GetText());
+                    self:HighlightText(0, -1);
+                </OnEnterPressed></Scripts>
+            </EditBox>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        XmlInlineGetTextEditBox:SetText("my-filter")
+        XmlInlineGetTextEditBox:GetScript("OnEnterPressed")(XmlInlineGetTextEditBox)
+    "#,
+    )
+    .unwrap();
+    let result: String = env.eval("return XmlInlineFilterName").unwrap();
+    assert_eq!(result, "my-filter");
+}
+
+#[test]
+fn test_create_frame_from_xml_inline_copy_club_ticket_to_clipboard_from_parent_runs() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        C_Club = {}
+        ClubTicketUtil = {}
+        XmlInlineClipboardValue = nil
+        function C_Club.GetClubInfo(clubId)
+            return { id = clubId }
+        end
+        function ClubTicketUtil.FormatTicket(clubInfo, linkText)
+            return string.format("club:%d:%s", clubInfo.id, linkText)
+        end
+        function CopyToClipboard(value)
+            XmlInlineClipboardValue = value
+        end
+    "#,
+    )
+    .unwrap();
+
+    create_first_frame(
+        &env,
+        r#"<Ui>
+        <Frame name="XmlInlineClubTicketRoot" parent="UIParent">
+            <Button name="XmlInlineClubTicketButton" parent="XmlInlineClubTicketRoot">
+                <Scripts><OnClick>
+                    local clubId = self:GetParent():GetClubId();
+                    local clubInfo = clubId and C_Club.GetClubInfo(clubId);
+                    if clubInfo then
+                        CopyToClipboard(ClubTicketUtil.FormatTicket(clubInfo, self:GetParent().LinkIDText:GetText()));
+                    end
+                </OnClick></Scripts>
+            </Button>
+        </Frame>
+    </Ui>"#,
+        "Frame",
+    );
+
+    env.exec(
+        r#"
+        function XmlInlineClubTicketRoot:GetClubId()
+            return 17
+        end
+        XmlInlineClubTicketRoot.LinkIDText = {
+            GetText = function()
+                return "abc123"
+            end,
+        }
+        XmlInlineClubTicketButton:GetScript("OnClick")(XmlInlineClubTicketButton)
+    "#,
+    )
+    .unwrap();
+    let result: String = env.eval("return XmlInlineClipboardValue").unwrap();
+    assert_eq!(result, "club:17:abc123");
+}
+
+#[test]
 fn test_create_frame_from_xml_inline_get_lfg_mode_branch_runs() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
