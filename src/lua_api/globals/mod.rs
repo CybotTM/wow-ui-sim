@@ -55,6 +55,7 @@ pub mod lfg_list;
 pub mod locale_info;
 pub mod loot_method;
 pub mod lua_duration_object;
+pub mod mail_probes;
 pub mod mail_verbs;
 pub mod message_verbs;
 pub mod missing_surface;

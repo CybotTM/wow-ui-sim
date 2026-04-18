@@ -442,6 +442,33 @@ fn c_mail_has_new_mail_reflects_unread_state() {
 }
 
 #[test]
+fn has_new_mail_global_reflects_unread_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if HasNewMail() ~= false then
+                return "empty=" .. tostring(HasNewMail())
+            end
+            A_Admin.AddMail("Thrall", "Unread", "")
+            if HasNewMail() ~= true then
+                return "unread=" .. tostring(HasNewMail())
+            end
+            A_Admin.ClearInbox()
+            if HasNewMail() ~= false then
+                return "cleared=" .. tostring(HasNewMail())
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "HasNewMail should reflect unread inbox mail: {result}"
+    );
+}
+
+#[test]
 fn take_inbox_item_removes_attachment() {
     let env = env();
     let result: String = env

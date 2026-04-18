@@ -92,7 +92,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "HasLFGRestrictions",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
     // loot_method.rs, not stubs.
-    "HasNewMail",
     "InCinematic",
     // IsOnGroundFloorInJailersTower is SimState-backed in torghast.rs, not a stub.
     "IsInCinematicScene",

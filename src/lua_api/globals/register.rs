@@ -134,6 +134,7 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::torghast::register_all(lua)?;
     super::instance_info::register_all(lua)?;
     super::guild_probes::register_all(lua)?;
+    super::mail_probes::register_all(lua)?;
     super::voice_chat_probes::register_all(lua)?;
     Ok(())
 }
