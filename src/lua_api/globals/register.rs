@@ -145,6 +145,7 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::battlefield_lfg_probes::register_all(lua)?;
     super::loot_method::register_all(lua)?;
     super::mouse_probes::register_all(lua)?;
+    super::movement_probes::register_all(lua)?;
     super::faction_probes::register_all(lua)?;
     super::gossip_probes::register_all(lua)?;
     super::social_probes::register_all(lua)?;
