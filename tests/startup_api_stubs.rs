@@ -77,6 +77,34 @@ fn c_lfg_info_can_player_use_premade_group_returns_false() {
 }
 
 #[test]
+fn recruit_a_friend_surface_returns_disabled_empty_defaults() {
+    let env = env();
+    let (enabled, recruiting_enabled, versions_len, recruits_len, claim_in_progress): (
+        bool,
+        bool,
+        f64,
+        f64,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local info = C_RecruitAFriend.GetRAFInfo()
+            return C_RecruitAFriend.IsEnabled(),
+                   C_RecruitAFriend.IsRecruitingEnabled(),
+                   #info.versions,
+                   #info.recruits,
+                   info.claimInProgress
+            "#,
+        )
+        .expect("Recruit-A-Friend fallback surface should be callable");
+    assert!(!enabled);
+    assert!(!recruiting_enabled);
+    assert_eq!(versions_len, 1.0);
+    assert_eq!(recruits_len, 0.0);
+    assert!(!claim_in_progress);
+}
+
+#[test]
 fn named_fontstring_is_globally_reachable() {
     // `frame:CreateFontString("Name", ...)` should set `_G.Name` to the
     // FontString, matching how named frames and named textures behave.

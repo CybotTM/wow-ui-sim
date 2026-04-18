@@ -1,0 +1,392 @@
+//! `C_DelvesUI` probe surface for delves startup widgets and tests.
+
+use super::{ensure_namespace, set_table_array};
+use crate::lua_api::methods::{create_string, create_table, table_set};
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
+
+const ACTIVE_TIER_FIELD: &str = "__wow_ui_sim_active_tier";
+const DEFAULT_ACTIVE_TIER: i32 = 4;
+const DELVE_HEADER: &str = "Fungal Folly";
+const DELVE_DESCRIPTION: &str = "The Fungal Folly winds deeper with every tier.";
+const LOCKED_TIER_REASON: &str = "Complete Tier 4 to unlock this delve tier.";
+const UNKNOWN_TIER_REASON: &str = "Unknown tier";
+
+const COMPANION_ID: f64 = 4401.0;
+const COMPANION_PDE_ID: f64 = 9101.0;
+const COMPANION_TRAIT_TREE_ID: f64 = 9201.0;
+const COMPANION_FACTION_ID: f64 = 2507.0;
+const COMPANION_DISPLAY_ID: f64 = 111999.0;
+const ROLE_NODE_ID: f64 = 9301.0;
+const UTILITY_CURIO_NODE_ID: f64 = 9302.0;
+const COMBAT_CURIO_NODE_ID: f64 = 9303.0;
+
+pub(super) fn register_delves_ui_surface(state: &mut LuaState) -> LuaResult<()> {
+    let ns = ensure_namespace(state, "C_DelvesUI")?;
+    for (name, func) in METHODS {
+        table_set_rust_fn_static(state, ns, name, func)?;
+    }
+    store_active_tier(state, DEFAULT_ACTIVE_TIER);
+    Ok(())
+}
+
+const METHODS: [(&str, rilua::vm::closure::RustFn); 26] = [
+    ("GetActiveDelveTier", get_active_delve_tier),
+    (
+        "GetCompanionInfoForActivePlayer",
+        get_companion_info_for_active_player,
+    ),
+    (
+        "GetCreatureDisplayInfoForCompanion",
+        get_creature_display_info_for_companion,
+    ),
+    ("GetCurioLink", get_curio_link),
+    ("GetCurioNodeForCompanion", get_curio_node_for_companion),
+    (
+        "GetCurioRarityByTraitCondAccountElementID",
+        get_curio_rarity_by_trait_cond_account_element_id,
+    ),
+    (
+        "GetCurrentDelvesSeasonNumber",
+        get_current_delves_season_number,
+    ),
+    (
+        "GetDelveEntranceBackgroundWidgetSetID",
+        get_delve_entrance_background_widget_set_id,
+    ),
+    (
+        "GetDelveEntranceDescriptionString",
+        get_delve_entrance_description_string,
+    ),
+    (
+        "GetDelveEntranceHeaderString",
+        get_delve_entrance_header_string,
+    ),
+    ("GetDelveEntranceMapID", get_delve_entrance_map_id),
+    ("GetDelveEntranceTiers", get_delve_entrance_tiers),
+    ("GetDelvesMinRequiredLevel", get_delves_min_required_level),
+    ("GetFactionForCompanion", get_faction_for_companion),
+    ("GetPlayerCompanionPDEID", get_player_companion_pde_id),
+    ("GetRoleNodeForCompanion", get_role_node_for_companion),
+    ("GetRoleSubtreeForCompanion", get_role_subtree_for_companion),
+    (
+        "GetTieredEntranceOptionalAffixTraitTreeID",
+        get_tiered_entrance_optional_affix_trait_tree_id,
+    ),
+    ("GetTieredEntrancePDEID", get_tiered_entrance_pde_id),
+    ("GetTraitTreeForCompanion", get_trait_tree_for_companion),
+    ("GetUnseenCuriosBySlotType", get_unseen_curios_by_slot_type),
+    ("HasActiveDelve", has_active_delve),
+    ("IsDelveEntranceTierEnabled", is_delve_entrance_tier_enabled),
+    (
+        "RequestPartyEligibilityForDelveTiers",
+        request_party_eligibility_for_delve_tiers,
+    ),
+    ("SaveSeenCuriosBySlotType", save_seen_curios_by_slot_type),
+    ("SelectDelveEntranceTier", select_delve_entrance_tier),
+];
+
+fn get_active_delve_tier(state: &mut LuaState) -> LuaResult<u32> {
+    let active_tier = load_active_tier(state);
+    push_tier_info(state, active_tier);
+    Ok(1)
+}
+
+fn get_companion_info_for_active_player(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(COMPANION_ID));
+    Ok(1)
+}
+
+fn get_creature_display_info_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let _companion_id = f64::from_stack(state, 1).ok();
+    state.push(Val::Num(COMPANION_DISPLAY_ID));
+    Ok(1)
+}
+
+fn get_curio_link(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = i32::from_stack(state, 1).unwrap_or(0);
+    let rarity = i32::from_stack(state, 2).unwrap_or(1);
+    let link = create_string(state, &format!("|Hspell:{spell_id}:{rarity}|h[Curio]|h"));
+    state.push(link);
+    Ok(1)
+}
+
+fn get_curio_node_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let curio_type = i32::from_stack(state, 1).unwrap_or_default();
+    let node_id = match curio_type {
+        1 => UTILITY_CURIO_NODE_ID,
+        2 => COMBAT_CURIO_NODE_ID,
+        _ => UTILITY_CURIO_NODE_ID,
+    };
+    state.push(Val::Num(node_id));
+    Ok(1)
+}
+
+fn get_curio_rarity_by_trait_cond_account_element_id(state: &mut LuaState) -> LuaResult<u32> {
+    let _id = i32::from_stack(state, 1).unwrap_or_default();
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+fn get_current_delves_season_number(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+fn get_delve_entrance_background_widget_set_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(5501.0));
+    Ok(1)
+}
+
+fn get_delve_entrance_description_string(state: &mut LuaState) -> LuaResult<u32> {
+    let description = create_string(state, DELVE_DESCRIPTION);
+    state.push(description);
+    Ok(1)
+}
+
+fn get_delve_entrance_header_string(state: &mut LuaState) -> LuaResult<u32> {
+    let header = create_string(state, DELVE_HEADER);
+    state.push(header);
+    Ok(1)
+}
+
+fn get_delve_entrance_map_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(2339.0));
+    Ok(1)
+}
+
+fn get_delve_entrance_tiers(state: &mut LuaState) -> LuaResult<u32> {
+    let tiers = create_table(state);
+    for (idx, tier) in tier_rows().iter().enumerate() {
+        let entry = build_tier_info(state, *tier);
+        set_table_array(state, tiers, idx as i64 + 1, entry);
+    }
+    state.push(tiers);
+    Ok(1)
+}
+
+fn get_delves_min_required_level(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(80.0));
+    Ok(1)
+}
+
+fn get_faction_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let _companion_id = f64::from_stack(state, 1).ok();
+    state.push(Val::Num(COMPANION_FACTION_ID));
+    Ok(1)
+}
+
+fn get_player_companion_pde_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(COMPANION_PDE_ID));
+    Ok(1)
+}
+
+fn get_role_node_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let _companion_id = f64::from_stack(state, 1).ok();
+    state.push(Val::Num(ROLE_NODE_ID));
+    Ok(1)
+}
+
+fn get_role_subtree_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let role_type = i32::from_stack(state, 1).unwrap_or_default();
+    let _companion_id = f64::from_stack(state, 2).ok();
+    let subtree_id = match role_type {
+        0 => 9401.0,
+        1 => 9402.0,
+        2 => 9403.0,
+        _ => 9401.0,
+    };
+    state.push(Val::Num(subtree_id));
+    Ok(1)
+}
+
+fn get_tiered_entrance_optional_affix_trait_tree_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(77001.0));
+    Ok(1)
+}
+
+fn get_tiered_entrance_pde_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(77011.0));
+    Ok(1)
+}
+
+fn get_trait_tree_for_companion(state: &mut LuaState) -> LuaResult<u32> {
+    let _companion_id = f64::from_stack(state, 1).ok();
+    state.push(Val::Num(COMPANION_TRAIT_TREE_ID));
+    Ok(1)
+}
+
+fn get_unseen_curios_by_slot_type(state: &mut LuaState) -> LuaResult<u32> {
+    let unseen = create_table(state);
+    state.push(unseen);
+    Ok(1)
+}
+
+fn has_active_delve(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn is_delve_entrance_tier_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let tier = i32::from_stack(state, 1).unwrap_or_default();
+    if let Some(info) = tier_rows().iter().find(|info| info.tier == tier) {
+        state.push(Val::Bool(info.unlocked));
+        if info.unlocked {
+            state.push(Val::Nil);
+        } else {
+            let reason = create_string(state, info.locked_reason.unwrap_or(LOCKED_TIER_REASON));
+            state.push(reason);
+        }
+        return Ok(2);
+    }
+    state.push(Val::Bool(false));
+    let reason = create_string(state, UNKNOWN_TIER_REASON);
+    state.push(reason);
+    Ok(2)
+}
+
+fn request_party_eligibility_for_delve_tiers(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn save_seen_curios_by_slot_type(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn select_delve_entrance_tier(state: &mut LuaState) -> LuaResult<u32> {
+    let tier = i32::from_stack(state, 1).unwrap_or(DEFAULT_ACTIVE_TIER);
+    if tier_rows().iter().any(|info| info.tier == tier) {
+        store_active_tier(state, tier);
+    }
+    Ok(0)
+}
+
+#[derive(Clone, Copy)]
+struct TierInfoRow {
+    tier: i32,
+    unlocked: bool,
+    suggested_ilvl: i32,
+    modifier_widget_set_id: i32,
+    tier_description: &'static str,
+    locked_reason: Option<&'static str>,
+}
+
+fn tier_rows() -> [TierInfoRow; 5] {
+    [
+        TierInfoRow {
+            tier: 1,
+            unlocked: true,
+            suggested_ilvl: 571,
+            modifier_widget_set_id: 4401,
+            tier_description: "Tier 1",
+            locked_reason: None,
+        },
+        TierInfoRow {
+            tier: 2,
+            unlocked: true,
+            suggested_ilvl: 584,
+            modifier_widget_set_id: 4402,
+            tier_description: "Tier 2",
+            locked_reason: None,
+        },
+        TierInfoRow {
+            tier: 3,
+            unlocked: true,
+            suggested_ilvl: 597,
+            modifier_widget_set_id: 4403,
+            tier_description: "Tier 3",
+            locked_reason: None,
+        },
+        TierInfoRow {
+            tier: 4,
+            unlocked: true,
+            suggested_ilvl: 610,
+            modifier_widget_set_id: 4404,
+            tier_description: "Tier 4",
+            locked_reason: None,
+        },
+        TierInfoRow {
+            tier: 5,
+            unlocked: false,
+            suggested_ilvl: 623,
+            modifier_widget_set_id: 4405,
+            tier_description: "Tier 5",
+            locked_reason: Some(LOCKED_TIER_REASON),
+        },
+    ]
+}
+
+fn push_tier_info(state: &mut LuaState, tier: i32) {
+    let row = tier_rows()
+        .into_iter()
+        .find(|info| info.tier == tier)
+        .unwrap_or(TierInfoRow {
+            tier: DEFAULT_ACTIVE_TIER,
+            unlocked: true,
+            suggested_ilvl: 610,
+            modifier_widget_set_id: 4404,
+            tier_description: "Tier 4",
+            locked_reason: None,
+        });
+    let tier_info = build_tier_info(state, row);
+    state.push(tier_info);
+}
+
+fn build_tier_info(state: &mut LuaState, row: TierInfoRow) -> Val {
+    let entry = create_table(state);
+    table_set(state, entry, "tier", Val::Num(row.tier as f64));
+    table_set(state, entry, "unlocked", Val::Bool(row.unlocked));
+    table_set(
+        state,
+        entry,
+        "suggestedILvl",
+        Val::Num(row.suggested_ilvl as f64),
+    );
+    table_set(
+        state,
+        entry,
+        "modifierUIWidgetSetID",
+        Val::Num(row.modifier_widget_set_id as f64),
+    );
+    let tier_description = create_string(state, row.tier_description);
+    table_set(state, entry, "tierDescription", tier_description);
+    match row.locked_reason {
+        Some(reason) => {
+            let locked_reason = create_string(state, reason);
+            table_set(state, entry, "lockedReason", locked_reason);
+        }
+        None => table_set(state, entry, "lockedReason", Val::Nil),
+    }
+    entry
+}
+
+fn store_active_tier(state: &mut LuaState, tier: i32) {
+    if let Ok(ns) = ensure_namespace(state, "C_DelvesUI") {
+        let key = state.gc.intern_string_static(ACTIVE_TIER_FIELD.as_bytes());
+        if let Some(table) = state.gc.tables.get_mut(ns) {
+            let _ = table.raw_set(Val::Str(key), Val::Num(tier as f64), &state.gc.string_arena);
+        }
+        state.gc.barrier_back(ns);
+    }
+}
+
+fn load_active_tier(state: &mut LuaState) -> i32 {
+    namespace_field(state, "C_DelvesUI", ACTIVE_TIER_FIELD)
+        .and_then(|value| match value {
+            Val::Num(n) => Some(n as i32),
+            _ => None,
+        })
+        .unwrap_or(DEFAULT_ACTIVE_TIER)
+}
+
+fn namespace_field(
+    state: &mut LuaState,
+    namespace: &'static str,
+    field: &'static str,
+) -> Option<Val> {
+    let ns = ensure_namespace(state, namespace).ok()?;
+    let key = state.gc.intern_string_static(field.as_bytes());
+    let table = state.gc.tables.get(ns)?;
+    Some(table.get_str(key, &state.gc.string_arena))
+}
