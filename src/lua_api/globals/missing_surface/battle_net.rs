@@ -256,6 +256,14 @@ fn write_account_identity_fields(state: &mut LuaState, t: Val, friend: &BnetFrie
 }
 
 fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
+    write_custom_message_fields(state, t, friend);
+    write_friend_relationship_flags(state, t, friend);
+    write_presence_and_link_fields(state, t, friend);
+}
+
+/// `customMessage` + `customMessageTime` + `appearOffline` — the
+/// user-set status block visible in the Battle.net friends panel.
+fn write_custom_message_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
     let custom_message = create_string(state, &friend.custom_message);
     table_set(state, t, "customMessage", custom_message);
     table_set(
@@ -265,6 +273,11 @@ fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend
         Val::Num(friend.custom_message_time as f64),
     );
     table_set(state, t, "appearOffline", Val::Bool(friend.appear_offline));
+}
+
+/// `isBattleTagFriend` / `isFriend` / `isFavorite` — the relationship
+/// classification flags consumed by the friends list filter UI.
+fn write_friend_relationship_flags(state: &mut LuaState, t: Val, friend: &BnetFriend) {
     table_set(
         state,
         t,
@@ -273,6 +286,11 @@ fn write_account_status_fields(state: &mut LuaState, t: Val, friend: &BnetFriend
     );
     table_set(state, t, "isFriend", Val::Bool(friend.is_friend));
     table_set(state, t, "isFavorite", Val::Bool(friend.is_favorite));
+}
+
+/// `isAFK` / `isDND` / `lastOnlineTime` / `rafLinkType` — presence
+/// state + Recruit-A-Friend link type returned by GetFriendAccountInfo.
+fn write_presence_and_link_fields(state: &mut LuaState, t: Val, friend: &BnetFriend) {
     table_set(state, t, "isAFK", Val::Bool(friend.is_afk));
     table_set(state, t, "isDND", Val::Bool(friend.is_dnd));
     table_set(
