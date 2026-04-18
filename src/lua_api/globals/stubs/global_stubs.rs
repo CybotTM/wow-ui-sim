@@ -90,6 +90,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "GetLFGDungeonEncounterInfo",
     "GetLFGRoles",
     "HasLFGRestrictions",
+    "IsCharacterNewlyBoosted",
     // GetLootMethod / GetMasterLooterThreshold are SimState-backed in
     // loot_method.rs, not stubs.
     "InCinematic",

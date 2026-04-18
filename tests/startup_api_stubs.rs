@@ -64,6 +64,18 @@ fn store_frame_is_shown_returns_false() {
 }
 
 #[test]
+fn is_character_newly_boosted_returns_false() {
+    let env = env();
+    let boosted: bool = env
+        .eval("return IsCharacterNewlyBoosted()")
+        .expect("IsCharacterNewlyBoosted should be callable");
+    assert!(
+        !boosted,
+        "boosted-character help flow is not simulated, so the probe should stay false"
+    );
+}
+
+#[test]
 fn c_lfg_info_can_player_use_premade_group_returns_false() {
     let env = env();
     let can_use: bool = env
