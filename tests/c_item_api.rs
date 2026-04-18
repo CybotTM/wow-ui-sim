@@ -342,6 +342,17 @@ fn test_c_container_get_item_link_after_add() {
 }
 
 #[test]
+fn test_c_container_get_item_cooldown_zero_when_ready() {
+    let env = env();
+    let (start, duration, enable): (f64, f64, i32) = env
+        .eval("return C_Container.GetItemCooldown(6948)")
+        .unwrap();
+    assert_eq!(start, 0.0);
+    assert_eq!(duration, 0.0);
+    assert_eq!(enable, 1);
+}
+
+#[test]
 fn test_c_container_default_stack_count_is_one() {
     let env = env();
     // AddBagItem without explicit stack count defaults to 1
@@ -350,6 +361,16 @@ fn test_c_container_default_stack_count_is_one() {
         .eval("local info = C_Container.GetContainerItemInfo(0, 1); return info.stackCount")
         .unwrap();
     assert_eq!(stack, 1);
+}
+
+#[test]
+fn test_c_item_get_item_cooldown_zero_when_ready() {
+    let env = env();
+    let (start, duration, enable): (f64, f64, bool) =
+        env.eval("return C_Item.GetItemCooldown(6948)").unwrap();
+    assert_eq!(start, 0.0);
+    assert_eq!(duration, 0.0);
+    assert!(enable);
 }
 
 // ============================================================================

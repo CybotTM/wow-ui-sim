@@ -134,7 +134,39 @@ fn apply_system_anchors(env: &WowLuaEnv) {
         if not emm.layoutInfo then return end
         emm.layoutApplyInProgress = true
         emm:InitSystemAnchors()
-        pcall(emm.UpdateSystems, emm)
+
+        local function is_bootstrap_action_bar(systemFrame)
+            if not systemFrame or not EditModeUtil then
+                return false
+            end
+            return EditModeUtil:IsBottomAnchoredActionBar(systemFrame)
+                or EditModeUtil:IsRightAnchoredActionBar(systemFrame)
+        end
+
+        local function seed_action_bar_system(systemFrame)
+            local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex)
+            if not systemInfo then
+                return
+            end
+
+            systemFrame.savedSystemInfo = CopyTable(systemInfo)
+            systemFrame.systemInfo = systemInfo
+            systemFrame:SetHasActiveChanges(false)
+            systemFrame:UpdateSettingMap(true)
+        end
+
+        for _, systemFrame in ipairs(emm.registeredSystemFrames or {}) do
+            if is_bootstrap_action_bar(systemFrame) then
+                -- Full EditMode action-bar updates are expensive on the live
+                -- path and can stall startup. Seed just enough state for the
+                -- default-position layout pass to run, and let the normal bar
+                -- systems own their runtime layout afterward.
+                seed_action_bar_system(systemFrame)
+            else
+                pcall(emm.UpdateSystem, emm, systemFrame)
+            end
+        end
+
         emm.layoutApplyInProgress = false
         pcall(emm.UpdateActionBarPositions, emm)
     "#,

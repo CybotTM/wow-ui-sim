@@ -82,6 +82,7 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         ),
         ("GetItemSubClassInfo", c_item_get_item_sub_class_info),
         ("GetItemLink", c_item_get_item_link),
+        ("GetItemCooldown", c_item_get_item_cooldown),
         ("GetItemGUID", c_item_get_item_guid),
         (
             "GetItemInventorySlotInfo",
@@ -298,6 +299,14 @@ fn c_item_get_item_link(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn c_item_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let _item_info = stack_val(state, 1);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(true));
+    Ok(3)
 }
 
 fn c_item_get_item_guid(state: &mut LuaState) -> LuaResult<u32> {

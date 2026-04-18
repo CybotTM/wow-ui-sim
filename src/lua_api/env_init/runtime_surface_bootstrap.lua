@@ -2583,9 +2583,55 @@ if GetMaxPlayerLevel == nil then
   end
 end
 
+if PlayerHasToy == nil then
+  function PlayerHasToy(itemID)
+    return C_ToyBox ~= nil and C_ToyBox.GetToyInfo ~= nil and C_ToyBox.GetToyInfo(itemID) ~= nil
+  end
+end
+
 if EJ_GetInstanceInfo == nil then
   function EJ_GetInstanceInfo(_instanceID)
     return "", "", 0, 0, 0, 0, 0, 0, false, 0, 0, false
+  end
+end
+
+if EJ_GetInstanceByIndex == nil then
+  local __wow_ej_raid_instances = { 1200, 1208, 2549, 2657, 2522, 2569 }
+
+  function EJ_GetInstanceByIndex(index, isRaid)
+    if isRaid ~= true then
+      return nil
+    end
+
+    local instanceID = __wow_ej_raid_instances[index]
+    if instanceID == nil then
+      return nil
+    end
+
+    local name, description, bgImage, buttonImage1, loreImage, buttonImage2, dungeonAreaMapID, linkRaidID = C_EncounterJournal.GetInstanceInfo(instanceID)
+    return instanceID, name or "", description or "", bgImage or "", buttonImage1 or "", loreImage or "", buttonImage2 or "", 0, linkRaidID or 0, false, dungeonAreaMapID or 0
+  end
+end
+
+local __wow_ej_tier_state = rawget(_G, "__wow_ej_tier_state")
+if type(__wow_ej_tier_state) ~= "table" then
+  __wow_ej_tier_state = {
+    currentTier = GetClientDisplayExpansionLevel ~= nil and GetClientDisplayExpansionLevel() or 10,
+  }
+  rawset(_G, "__wow_ej_tier_state", __wow_ej_tier_state)
+end
+
+if EJ_GetCurrentTier == nil then
+  function EJ_GetCurrentTier()
+    return __wow_ej_tier_state.currentTier or 10
+  end
+end
+
+if EJ_SelectTier == nil then
+  function EJ_SelectTier(tier)
+    if type(tier) == "number" then
+      __wow_ej_tier_state.currentTier = tier
+    end
   end
 end
 
@@ -4190,8 +4236,58 @@ C_Calendar = __wow_merge_namespace(C_Calendar, {
   end,
 })
 
+C_MajorFactions = __wow_merge_namespace(C_MajorFactions, {
+  GetMajorFactionIDs = function(_expansionLevel)
+    return {}
+  end,
+  IsMajorFactionHiddenFromExpansionPage = function(_factionID)
+    return false
+  end,
+  ShouldDisplayMajorFactionAsJourney = function(_factionID)
+    return false
+  end,
+  GetMajorFactionData = function(factionID)
+    return {
+      factionID = factionID or 0,
+      name = "",
+      description = "",
+      textureKit = "majorfactions",
+      renownLevel = 1,
+      renownLevelThreshold = 1,
+      renownReputationEarned = 0,
+      isUnlocked = false,
+    }
+  end,
+  HasMaximumRenown = function(_factionID)
+    return false
+  end,
+  GetCurrentRenownLevel = function(_factionID)
+    return 1
+  end,
+  GetRenownLevels = function(_factionID)
+    return {
+      {
+        level = 1,
+        rewardInfo = {},
+      },
+    }
+  end,
+  GetRenownRewardsForLevel = function(_factionID, _level)
+    return {}
+  end,
+  ShouldUseJourneyRewardTrack = function(_factionID)
+    return false
+  end,
+  GetRenownNPCFactionID = function()
+    return 0
+  end,
+})
+
 C_EncounterJournal = __wow_merge_namespace(C_EncounterJournal, {
   OnOpen = function() end,
+  InitalizeSelectedTier = function()
+    __wow_ej_tier_state.currentTier = GetClientDisplayExpansionLevel ~= nil and GetClientDisplayExpansionLevel() or 10
+  end,
 })
 
 C_SpecializationInfo = __wow_merge_namespace(C_SpecializationInfo, {

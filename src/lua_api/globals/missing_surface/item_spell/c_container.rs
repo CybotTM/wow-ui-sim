@@ -43,6 +43,7 @@ pub(super) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
             ("GetContainerNumFreeSlots", c_container_get_num_free_slots),
             ("GetBagSlotFlag", c_container_get_bag_slot_flag),
             ("GetContainerItemInfo", c_container_get_item_info),
+            ("GetItemCooldown", c_container_get_item_cooldown),
             ("GetContainerItemID", c_container_get_item_id),
             ("GetContainerItemLink", c_container_get_item_link),
             ("ContainerIDToInventoryID", c_container_id_to_inventory_id),
@@ -114,6 +115,14 @@ fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "stackCount", Val::Num(stack_count as f64));
     state.push(info);
     Ok(1)
+}
+
+fn c_container_get_item_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let _item_id = u32::from_stack(state, 1)?;
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(1.0));
+    Ok(3)
 }
 
 fn c_container_get_item_id(state: &mut LuaState) -> LuaResult<u32> {

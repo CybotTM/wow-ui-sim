@@ -106,3 +106,31 @@ fn bank_has_full_bank_access_true() {
     let result: bool = env.eval("return C_Bank.HasFullBankAccess()").unwrap();
     assert!(result, "HasFullBankAccess() must return true");
 }
+
+// ── C_MajorFactions ──────────────────────────────────────────────────────────
+
+#[test]
+fn major_factions_default_to_empty_iterable_state() {
+    let env = env();
+    let (count, hidden, as_journey): (i32, bool, bool) = env
+        .eval(
+            r#"
+            local ids = C_MajorFactions.GetMajorFactionIDs(10)
+            local data = C_MajorFactions.GetMajorFactionData(2507)
+            return #ids, C_MajorFactions.IsMajorFactionHiddenFromExpansionPage(data.factionID), C_MajorFactions.ShouldDisplayMajorFactionAsJourney(data.factionID)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        count, 0,
+        "GetMajorFactionIDs() should default to an empty table"
+    );
+    assert!(
+        !hidden,
+        "IsMajorFactionHiddenFromExpansionPage() should default to false"
+    );
+    assert!(
+        !as_journey,
+        "ShouldDisplayMajorFactionAsJourney() should default to false"
+    );
+}

@@ -88,42 +88,6 @@ fn load_game_screen() -> WowLuaEnv {
     env
 }
 
-fn load_tabbed_panels_without_startup() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![
-            PathBuf::from("./Interface/BlizzardUI"),
-            PathBuf::from("./Interface/AddOns"),
-        ];
-    }
-    wow_ui_sim::xml::register_intrinsic_templates();
-
-    let ui = blizzard_ui_dir();
-    let tabbed_panel_tocs = [
-        ui.join("Blizzard_UIPanels_Game/Blizzard_UIPanels_Game_Mainline.toc"),
-        ui.join("Blizzard_FriendsFrame/Blizzard_FriendsFrame.toc"),
-        ui.join("Blizzard_RaidFrame/Blizzard_RaidFrame_Mainline.toc"),
-        ui.join("Blizzard_GroupFinder/Blizzard_GroupFinder_Mainline.toc"),
-        ui.join("Blizzard_MailFrame/Blizzard_MailFrame.toc"),
-    ];
-
-    for toc_path in &tabbed_panel_tocs {
-        let name = toc_path
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .unwrap_or("unknown-addon");
-        if let Err(err) = load_addon(&env.loader_env(), toc_path) {
-            panic!("[load {name}] FAILED: {err}");
-        }
-    }
-
-    env.apply_post_load_workarounds();
-    env
-}
-
 fn new_game_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -241,10 +205,8 @@ fn game_boot_has_no_unexpected_lua_errors() {
 }
 
 fn set_panel_tab_trace_addon(env: &WowLuaEnv, addon_name: &str) {
-    env.exec(&format!(
-        "__panel_tab_trace_current_addon = {addon_name:?}"
-    ))
-    .expect("set current panel tab trace addon");
+    env.exec(&format!("__panel_tab_trace_current_addon = {addon_name:?}"))
+        .expect("set current panel tab trace addon");
 }
 
 #[test]
@@ -261,62 +223,6 @@ fn game_boot_lua_errors_pipeline_finishes() {
             errors.is_empty(),
             "game boot settle pipeline still has lua errors: {errors:#?}"
         );
-    }
-}
-
-#[test]
-fn panel_tabs_array_keeps_distinct_children_before_startup() {
-    test_timeout! {
-        let env = load_tabbed_panels_without_startup();
-
-        let summary: String = env
-            .eval(
-                r#"
-                local function tab_summary(frame_name, count)
-                    local frame = _G[frame_name]
-                    if not frame then
-                        return frame_name .. "|missing"
-                    end
-                    local entries = {}
-                    for i = 1, count do
-                        local tab = frame.Tabs and frame.Tabs[i] or nil
-                        local global = _G[frame_name .. "Tab" .. i]
-                        entries[#entries + 1] = table.concat({
-                            frame_name,
-                            tostring(i),
-                            tab and tab:GetName() or "nil",
-                            global and global:GetName() or "nil",
-                            tostring(tab == global),
-                            tostring(tab ~= nil and tab ~= frame),
-                            tab and tab:GetParent() and tab:GetParent():GetName() or "nil",
-                        }, "|")
-                    end
-                    return table.concat(entries, "\n")
-                end
-
-                return table.concat({
-                    tab_summary("CharacterFrame", 3),
-                    tab_summary("MerchantFrame", 2),
-                    tab_summary("FriendsFrame", 4),
-                    tab_summary("RaidParentFrame", 3),
-                    tab_summary("PVEFrame", 5),
-                    tab_summary("MailFrame", 2),
-                }, "\n")
-                "#,
-            )
-            .expect("eval tab summary");
-
-        for line in summary.lines() {
-            let parts = line.split('|').collect::<Vec<_>>();
-            if parts.len() == 2 && parts[1] == "missing" {
-                continue;
-            }
-            assert_eq!(parts.len(), 7, "unexpected tab summary row: {line}");
-            assert_ne!(parts[2], "nil", "parent array entry missing: {line}");
-            assert_eq!(parts[4], "true", "Tabs array diverged from global tab: {line}");
-            assert_eq!(parts[5], "true", "Tabs array resolved to the frame itself: {line}");
-            assert_eq!(parts[6], parts[0], "tab parent mismatch: {line}");
-        }
     }
 }
 

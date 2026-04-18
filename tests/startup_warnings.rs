@@ -474,6 +474,36 @@ fn test_account_store_frame_exposes_mixin_methods_after_load() {
 }
 
 #[test]
+fn test_account_store_set_storefront_id_is_safe_after_load() {
+    test_timeout! {
+        let (env, warnings) = load_blizzard_addon_by_folder("Blizzard_AccountStore");
+
+        let (ok, stored_id, err): (bool, i64, Option<String>) = env
+            .eval(
+                r#"
+                local ok, err = pcall(function()
+                    AccountStoreFrame:SetStoreFrontID(Constants.AccountStoreConsts.PlunderstormStoreFrontID)
+                end)
+                return ok, AccountStoreFrame.storeFrontID or 0, ok and nil or tostring(err)
+                "#,
+            )
+            .expect("AccountStoreFrame:SetStoreFrontID should be callable");
+
+        assert!(
+            ok,
+            "AccountStoreFrame:SetStoreFrontID should not error; warnings:\n  {}\nerror: {:?}",
+            warnings.join("\n  "),
+            err
+        );
+        assert_eq!(
+            stored_id,
+            1,
+            "AccountStoreFrame:SetStoreFrontID should preserve the storefront id"
+        );
+    }
+}
+
+#[test]
 fn test_c_addons_load_addon_preserves_account_store_mixin_methods() {
     test_timeout! {
         let env = load_all_addons();

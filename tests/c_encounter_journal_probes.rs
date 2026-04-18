@@ -138,3 +138,20 @@ fn test_get_instance_info_amirdrassil() {
         "expected Amirdrassil in bg_image, got: {bg_image}"
     );
 }
+
+#[test]
+fn test_encounter_journal_tier_selection_round_trips() {
+    let env = env();
+    let (initial_tier, selected_tier): (i64, i64) = env
+        .eval(
+            r#"
+            C_EncounterJournal.InitalizeSelectedTier()
+            local initialTier = EJ_GetCurrentTier()
+            EJ_SelectTier(11)
+            return initialTier, EJ_GetCurrentTier()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(initial_tier, 10_i64);
+    assert_eq!(selected_tier, 11_i64);
+}
