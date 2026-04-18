@@ -125,131 +125,191 @@ fn apply_blizzard_post_load_patches(
     folder_name: &str,
     result: &mut LoadResult,
 ) {
-    let push_warning = |result: &mut LoadResult, what: &str, e: &dyn std::fmt::Display| {
-        result
-            .warnings
-            .push(format!("Failed to {what} for {folder_name}: {e}"));
-    };
-
     match folder_name {
-        "Blizzard_EnvironmentCleanup" => {
-            if let Err(e) = env.restore_post_cleanup_globals() {
-                push_warning(result, "restore post-cleanup globals", &e);
-            }
-        }
-        "Blizzard_Menu" => {
-            if let Err(e) = env.ensure_menu_descriptor_fallback() {
-                push_warning(result, "install Menu descriptor fallback", &e);
-            }
-        }
-        "Blizzard_SharedXML" => {
-            if let Err(e) = env.exec(
-                r#"
-                local mixins = {
-                    VisibleWhilePlayingAnimGroupMixin,
-                    TargetsVisibleWhilePlayingAnimGroupMixin,
-                    SyncedAnimGroupMixin,
-                }
-
-                for _, mixin in ipairs(mixins) do
-                    if type(mixin) == "table" and type(mixin.SetPlaying) ~= "function" then
-                        function mixin:SetPlaying(playing)
-                            if playing then
-                                if type(self.PlaySynced) == "function" then
-                                    self:PlaySynced()
-                                else
-                                    self:Play()
-                                end
-                            else
-                                self:Stop()
-                            end
-                        end
-                    end
-                end
-                "#,
-            ) {
-                push_warning(result, "patch Blizzard_SharedXML animation mixins", &e);
-            }
-        }
-        "Blizzard_UIParent" => {
-            if let Err(e) = env.patch_managed_frame_mixin() {
-                push_warning(result, "patch UIParentManagedFrameMixin", &e);
-            }
-        }
-        "Blizzard_GlueParent" => {
-            // Blizzard_GlueParent/Mainline/GlueParent.lua:74 does
-            // `UIParent = self` in `GlueParentMixin:OnLoad`, aliasing the
-            // global to the glue-screen frame. In real WoW that's harmless
-            // because the glue addon only loads on the character-select
-            // screen, but the simulator loads everything — so UpdateUIPanel
-            // Positions now reads `UIParent:GetAttribute("TOP_OFFSET")` off
-            // the GlueParent frame and gets nil, blowing up panel-frame
-            // anchoring. Re-apply the static `<Attribute>` block from
-            // Blizzard_UIParent/Mainline/UIParent.xml so the in-game panel
-            // manager sees the values it expects.
-            if let Err(e) = env.exec(
-                r#"
-                if UIParent and type(UIParent.SetAttribute) == "function" then
-                    UIParent:SetAttribute("DEFAULT_FRAME_WIDTH", 384)
-                    UIParent:SetAttribute("TOP_OFFSET", -116)
-                    UIParent:SetAttribute("LEFT_OFFSET", 16)
-                    UIParent:SetAttribute("CENTER_OFFSET", 384)
-                    UIParent:SetAttribute("RIGHT_OFFSET", 768)
-                    UIParent:SetAttribute("RIGHT_OFFSET_BUFFER", 80)
-                    UIParent:SetAttribute("PANEl_SPACING_X", 32)
-                end
-                "#,
-            ) {
-                push_warning(result, "restore UIParent attributes after GlueParent alias", &e);
-            }
-        }
-        "Blizzard_SharedMapDataProviders" => {
-            if let Err(e) = env.patch_unit_position_frame_mixin() {
-                push_warning(result, "patch UnitPositionFrameMixin", &e);
-            }
-        }
-        "Blizzard_UIPanels_Game" => {
-            if let Err(e) = env.patch_quest_log_mixin() {
-                push_warning(result, "patch QuestLogMixin", &e);
-            }
-        }
-        "Blizzard_PlayerSpells" => {
-            if let Err(e) = env.exec(
-                r#"
-                HasAttachedGlyph = HasAttachedGlyph or function()
-                    return false
-                end
-
-                IsSpellValidForPendingGlyph = IsSpellValidForPendingGlyph or function()
-                    return false
-                end
-
-                local function backfill_onload(frame, needs_init)
-                    if not frame or not needs_init then
-                        return
-                    end
-                    if type(frame.OnLoad) == "function" then
-                        frame:OnLoad()
-                        return
-                    end
-                    local handler = frame.GetScript and frame:GetScript("OnLoad")
-                    if type(handler) == "function" then
-                        handler(frame)
-                    end
-                end
-
-                if PlayerSpellsFrame then
-                    backfill_onload(PlayerSpellsFrame, PlayerSpellsFrame.internalTabTracker == nil)
-                    backfill_onload(PlayerSpellsFrame.SpecFrame, PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame.SpecContentFramePool == nil)
-                    backfill_onload(PlayerSpellsFrame.TalentsFrame, PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.initialBasePanOffsetX == nil)
-                    backfill_onload(PlayerSpellsFrame.SpellBookFrame, PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.internalTabTracker == nil)
-                end
-                "#,
-            ) {
-                push_warning(result, "backfill PlayerSpells OnLoad state", &e);
-            }
-        }
+        "Blizzard_EnvironmentCleanup" => patch_environment_cleanup(env, result),
+        "Blizzard_Menu" => patch_menu_descriptor_fallback(env, result),
+        "Blizzard_SharedXML" => patch_shared_xml_anim_mixins(env, result),
+        "Blizzard_UIParent" => patch_uiparent_managed_frame_mixin(env, result),
+        "Blizzard_GlueParent" => patch_glueparent_uiparent_attributes(env, result),
+        "Blizzard_SharedMapDataProviders" => patch_unit_position_frame_mixin(env, result),
+        "Blizzard_UIPanels_Game" => patch_quest_log_mixin(env, result),
+        "Blizzard_PlayerSpells" => patch_playerspells_onload_backfill(env, result),
         _ => {}
+    }
+}
+
+fn push_patch_warning(
+    result: &mut LoadResult,
+    folder_name: &str,
+    what: &str,
+    e: &dyn std::fmt::Display,
+) {
+    result
+        .warnings
+        .push(format!("Failed to {what} for {folder_name}: {e}"));
+}
+
+fn patch_environment_cleanup(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.restore_post_cleanup_globals() {
+        push_patch_warning(
+            result,
+            "Blizzard_EnvironmentCleanup",
+            "restore post-cleanup globals",
+            &e,
+        );
+    }
+}
+
+fn patch_menu_descriptor_fallback(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.ensure_menu_descriptor_fallback() {
+        push_patch_warning(
+            result,
+            "Blizzard_Menu",
+            "install Menu descriptor fallback",
+            &e,
+        );
+    }
+}
+
+const SHARED_XML_ANIM_MIXIN_PATCH: &str = r#"
+    local mixins = {
+        VisibleWhilePlayingAnimGroupMixin,
+        TargetsVisibleWhilePlayingAnimGroupMixin,
+        SyncedAnimGroupMixin,
+    }
+
+    for _, mixin in ipairs(mixins) do
+        if type(mixin) == "table" and type(mixin.SetPlaying) ~= "function" then
+            function mixin:SetPlaying(playing)
+                if playing then
+                    if type(self.PlaySynced) == "function" then
+                        self:PlaySynced()
+                    else
+                        self:Play()
+                    end
+                else
+                    self:Stop()
+                end
+            end
+        end
+    end
+"#;
+
+fn patch_shared_xml_anim_mixins(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.exec(SHARED_XML_ANIM_MIXIN_PATCH) {
+        push_patch_warning(
+            result,
+            "Blizzard_SharedXML",
+            "patch Blizzard_SharedXML animation mixins",
+            &e,
+        );
+    }
+}
+
+fn patch_uiparent_managed_frame_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.patch_managed_frame_mixin() {
+        push_patch_warning(
+            result,
+            "Blizzard_UIParent",
+            "patch UIParentManagedFrameMixin",
+            &e,
+        );
+    }
+}
+
+/// `Blizzard_GlueParent/Mainline/GlueParent.lua:74` does `UIParent = self` in
+/// `GlueParentMixin:OnLoad`, aliasing the global to the glue-screen frame.
+/// In real WoW that's harmless because the glue addon only loads on the
+/// character-select screen, but the simulator loads everything — so
+/// `UpdateUIPanelPositions` reads `UIParent:GetAttribute("TOP_OFFSET")` off
+/// the GlueParent frame and gets nil, blowing up panel-frame anchoring.
+/// Re-apply the static `<Attribute>` block from
+/// `Blizzard_UIParent/Mainline/UIParent.xml` so the in-game panel manager
+/// sees the values it expects.
+fn patch_glueparent_uiparent_attributes(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.exec(
+        r#"
+        if UIParent and type(UIParent.SetAttribute) == "function" then
+            UIParent:SetAttribute("DEFAULT_FRAME_WIDTH", 384)
+            UIParent:SetAttribute("TOP_OFFSET", -116)
+            UIParent:SetAttribute("LEFT_OFFSET", 16)
+            UIParent:SetAttribute("CENTER_OFFSET", 384)
+            UIParent:SetAttribute("RIGHT_OFFSET", 768)
+            UIParent:SetAttribute("RIGHT_OFFSET_BUFFER", 80)
+            UIParent:SetAttribute("PANEl_SPACING_X", 32)
+        end
+        "#,
+    ) {
+        push_patch_warning(
+            result,
+            "Blizzard_GlueParent",
+            "restore UIParent attributes after GlueParent alias",
+            &e,
+        );
+    }
+}
+
+fn patch_unit_position_frame_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.patch_unit_position_frame_mixin() {
+        push_patch_warning(
+            result,
+            "Blizzard_SharedMapDataProviders",
+            "patch UnitPositionFrameMixin",
+            &e,
+        );
+    }
+}
+
+fn patch_quest_log_mixin(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.patch_quest_log_mixin() {
+        push_patch_warning(
+            result,
+            "Blizzard_UIPanels_Game",
+            "patch QuestLogMixin",
+            &e,
+        );
+    }
+}
+
+const PLAYERSPELLS_ONLOAD_BACKFILL_PATCH: &str = r#"
+    HasAttachedGlyph = HasAttachedGlyph or function()
+        return false
+    end
+
+    IsSpellValidForPendingGlyph = IsSpellValidForPendingGlyph or function()
+        return false
+    end
+
+    local function backfill_onload(frame, needs_init)
+        if not frame or not needs_init then
+            return
+        end
+        if type(frame.OnLoad) == "function" then
+            frame:OnLoad()
+            return
+        end
+        local handler = frame.GetScript and frame:GetScript("OnLoad")
+        if type(handler) == "function" then
+            handler(frame)
+        end
+    end
+
+    if PlayerSpellsFrame then
+        backfill_onload(PlayerSpellsFrame, PlayerSpellsFrame.internalTabTracker == nil)
+        backfill_onload(PlayerSpellsFrame.SpecFrame, PlayerSpellsFrame.SpecFrame and PlayerSpellsFrame.SpecFrame.SpecContentFramePool == nil)
+        backfill_onload(PlayerSpellsFrame.TalentsFrame, PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.initialBasePanOffsetX == nil)
+        backfill_onload(PlayerSpellsFrame.SpellBookFrame, PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.internalTabTracker == nil)
+    end
+"#;
+
+fn patch_playerspells_onload_backfill(env: &LoaderEnv<'_>, result: &mut LoadResult) {
+    if let Err(e) = env.exec(PLAYERSPELLS_ONLOAD_BACKFILL_PATCH) {
+        push_patch_warning(
+            result,
+            "Blizzard_PlayerSpells",
+            "backfill PlayerSpells OnLoad state",
+            &e,
+        );
     }
 }
 
