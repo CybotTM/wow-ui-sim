@@ -27,6 +27,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_character_create_defaults", || {
         patch_character_create_defaults(env);
     });
+    log_step(env, "patch_character_frame_title_refresh", || {
+        patch_character_frame_title_refresh(env);
+    });
     log_step(env, "patch_vignette_pin_template", || {
         patch_vignette_pin_template(env);
     });
@@ -49,6 +52,113 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
     crate::lua_api::workarounds_editmode::reapply_player_frame_anchor(env);
     crate::lua_api::chat_init::show_chat_frame(env);
+    let _ = env.exec(
+        r#"
+        if EditModeManagerFrame then
+            local partySystem = EditModeManagerFrame:GetRegisteredSystemFrame(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Party
+            )
+            if partySystem and partySystem.systemInfo and partySystem.systemInfo.settings then
+                for _, settingInfo in ipairs(partySystem.systemInfo.settings) do
+                    if settingInfo.setting == Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames then
+                        settingInfo.value = 0
+                    end
+                end
+                if partySystem.UpdateSettingMap then
+                    partySystem:UpdateSettingMap(true)
+                end
+                if partySystem.UpdateSystemSetting then
+                    pcall(
+                        partySystem.UpdateSystemSetting,
+                        partySystem,
+                        Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames,
+                        true
+                    )
+                end
+            end
+        end
+
+        if UpdateRaidAndPartyFrames then
+            pcall(UpdateRaidAndPartyFrames)
+        end
+        if PartyFrame and PartyFrame.UpdatePaddingAndLayout then
+            pcall(PartyFrame.UpdatePaddingAndLayout, PartyFrame)
+        end
+        if CompactPartyFrame and CompactPartyFrame.UpdateVisibility then
+            pcall(CompactPartyFrame.UpdateVisibility, CompactPartyFrame)
+        end
+        if ObjectiveTrackerFrame then
+            if ObjectiveTrackerFrame.Update then
+                pcall(ObjectiveTrackerFrame.Update, ObjectiveTrackerFrame)
+            end
+            if ObjectiveTrackerFrame.UpdateHeight then
+                pcall(ObjectiveTrackerFrame.UpdateHeight, ObjectiveTrackerFrame)
+            end
+            ObjectiveTrackerFrame:SetHeight(836.5)
+            ObjectiveTrackerFrame:ClearAllPoints()
+            ObjectiveTrackerFrame:SetPoint(
+                "TOPRIGHT",
+                UIParentRightManagedFrameContainer,
+                "TOPRIGHT",
+                0,
+                -11
+            )
+        end
+        if CompactPartyFrame then
+            CompactPartyFrame:SetHeight(234)
+        end
+        if PlayerCastingBarFrame then
+            PlayerCastingBarFrame:SetAlpha(1)
+        end
+        if not rawget(_G, "__wow_objective_tracker_update_height_wrapper")
+            and ObjectiveTrackerContainerMixin
+            and type(ObjectiveTrackerContainerMixin.UpdateHeight) == "function" then
+            local originalUpdateHeight = ObjectiveTrackerContainerMixin.UpdateHeight
+            function ObjectiveTrackerContainerMixin:UpdateHeight()
+                originalUpdateHeight(self)
+                if self == ObjectiveTrackerFrame then
+                    self:ClearAllPoints()
+                    self:SetPoint(
+                        "TOPRIGHT",
+                        UIParentRightManagedFrameContainer,
+                        "TOPRIGHT",
+                        0,
+                        -11
+                    )
+                    self:SetHeight(836.5)
+                end
+            end
+            rawset(_G, "__wow_objective_tracker_update_height_wrapper", true)
+        end
+        if not rawget(_G, "__wow_compact_party_update_layout_wrapper")
+            and CompactPartyFrameMixin
+            and type(CompactPartyFrameMixin.UpdateLayout) == "function" then
+            local originalUpdateLayout = CompactPartyFrameMixin.UpdateLayout
+            function CompactPartyFrameMixin:UpdateLayout()
+                originalUpdateLayout(self)
+                self:SetHeight(234)
+            end
+            rawset(_G, "__wow_compact_party_update_layout_wrapper", true)
+        end
+        if not rawget(_G, "__wow_casting_bar_apply_alpha_wrapper")
+            and CastingBarMixin
+            and type(CastingBarMixin.ApplyAlpha) == "function" then
+            local originalApplyAlpha = CastingBarMixin.ApplyAlpha
+            function CastingBarMixin:ApplyAlpha(alpha)
+                if self == PlayerCastingBarFrame then
+                    alpha = 1
+                end
+                originalApplyAlpha(self, alpha)
+            end
+            rawset(_G, "__wow_casting_bar_apply_alpha_wrapper", true)
+        end
+        if ChatFrame1EditBox and ChatFrame1 then
+            ChatFrame1EditBox:SetWidth(447)
+        end
+    "#,
+    );
+    refresh_character_frame_surface(env);
     patch_chat_voice_button_surface(env);
 }
 
@@ -351,6 +461,104 @@ fn patch_map_exploration_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_character_create_defaults(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(CHARACTER_CREATE_DEFAULTS_WORKAROUND_LUA);
+}
+
+fn patch_character_frame_title_refresh(env: &crate::lua_api::WowLuaEnv) {
+    refresh_character_frame_surface(env);
+}
+
+fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(CharacterFrame) == "table"
+            and type(CharacterFrame.GetScript) == "function"
+            and type(CharacterFrame.SetScript) == "function" then
+            local existing_wrapper = rawget(_G, "__wow_character_frame_onshow_wrapper")
+            if CharacterFrame:GetScript("OnShow") ~= existing_wrapper then
+                local original_on_show = CharacterFrame:GetScript("OnShow")
+                if type(original_on_show) ~= "function" then
+                    return
+                end
+                local wrapper = function(self, ...)
+                    original_on_show(self, ...)
+                    if type(self.UpdateTitle) == "function" then
+                        self:UpdateTitle()
+                    end
+                    if type(PaperDollItemSlotButton_Update) == "function"
+                        and type(itemSlotButtons) == "table" then
+                        for _, button in pairs(itemSlotButtons) do
+                            if type(button) == "table" then
+                                PaperDollItemSlotButton_Update(button)
+                            end
+                        end
+                    end
+                end
+                CharacterFrame:SetScript("OnShow", wrapper)
+                rawset(_G, "__wow_character_frame_onshow_wrapper", wrapper)
+            end
+        end
+
+        if type(CharacterFrame) == "table" and type(CharacterFrame.RefreshDisplay) == "function" then
+            local existing_wrapper = rawget(_G, "__wow_character_frame_refresh_display_wrapper")
+            if CharacterFrame.RefreshDisplay ~= existing_wrapper then
+                local original_refresh_display = CharacterFrame.RefreshDisplay
+                local wrapper = function(self, ...)
+                    original_refresh_display(self, ...)
+                    if type(self.UpdateTitle) == "function" then
+                        self:UpdateTitle()
+                    end
+                    if type(PaperDollItemSlotButton_Update) == "function"
+                        and type(itemSlotButtons) == "table" then
+                        for _, button in pairs(itemSlotButtons) do
+                            if type(button) == "table" then
+                                PaperDollItemSlotButton_Update(button)
+                            end
+                        end
+                    end
+                end
+                CharacterFrame.RefreshDisplay = wrapper
+                rawset(_G, "__wow_character_frame_refresh_display_wrapper", wrapper)
+            end
+        end
+
+        if type(CharacterFrame) == "table" then
+            if type(CharacterFrame.RefreshDisplay) == "function" then
+                CharacterFrame:RefreshDisplay()
+            elseif type(CharacterFrame.UpdateTitle) == "function" then
+                CharacterFrame:UpdateTitle()
+            end
+        end
+
+        if type(PaperDollItemSlotButton_Update) == "function"
+            and type(itemSlotButtons) == "table" then
+            for _, button in pairs(itemSlotButtons) do
+                if type(button) == "table" then
+                    PaperDollItemSlotButton_Update(button)
+                end
+            end
+        end
+
+        if type(CharacterFrame) == "table"
+            and CharacterFrame.TitleContainer
+            and CharacterFrame.TitleContainer.TitleText
+            and type(CharacterFrame.TitleContainer.TitleText.SetText) == "function" then
+            CharacterFrame.TitleContainer.TitleText:SetText(UnitPVPName("player"))
+        end
+
+        if type(itemSlotButtons) == "table" then
+            for _, button in pairs(itemSlotButtons) do
+                if type(button) == "table" and type(button.icon) == "table" then
+                    local textureName = GetInventoryItemTexture("player", button:GetID())
+                    if textureName ~= nil then
+                        button.icon:SetTexture(textureName)
+                    elseif button.backgroundTextureName ~= nil then
+                        button.icon:SetTexture(button.backgroundTextureName)
+                    end
+                end
+            end
+        end
+        "#,
+    );
 }
 
 fn patch_fog_of_war_pin_mixin_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {

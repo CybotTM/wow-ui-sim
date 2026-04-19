@@ -92,6 +92,20 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         end
     end
 
+    local function forceStandardPartyFrames(layoutInfo)
+        if not layoutInfo or not layoutInfo.layouts then return end
+        for _, preset in ipairs(layoutInfo.layouts) do
+            if type(preset) == "table" and preset.systems then
+                for _, systemInfo in ipairs(preset.systems) do
+                    if systemInfo.system == Enum.EditModeSystem.UnitFrame
+                        and systemInfo.systemIndex == Enum.EditModeUnitFrameSystemIndices.Party then
+                        setSystemSetting(systemInfo, Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames, 0)
+                    end
+                end
+            end
+        end
+    end
+
     if not EditModeManagerFrame then return end
     local emm = EditModeManagerFrame
     if not emm.layoutInfo then
@@ -102,6 +116,7 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
         tAppendAll(emm.layoutInfo.layouts, savedLayouts)
     end
     forceCastBarUnderPlayerFrame(emm.layoutInfo)
+    forceStandardPartyFrames(emm.layoutInfo)
     if not emm.accountSettings then
         emm.accountSettings = C_EditMode.GetAccountSettings()
     end

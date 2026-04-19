@@ -104,6 +104,9 @@ const SHOW_CHAT_FRAME_LUA: &str = r#"
         if ChatFrame1.Clear then
             ChatFrame1:Clear()
         end
+        ChatFrame1:ClearAllPoints()
+        ChatFrame1:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 35, 50)
+        ChatFrame1:SetSize(430, 170)
         if FloatingChatFrameMixin and FloatingChatFrameMixin.OnLoad and not ChatFrame1.__codexOnLoadRan then
             ChatFrame1.__codexOnLoadRan = true
             FloatingChatFrameMixin.OnLoad(ChatFrame1)
@@ -124,6 +127,9 @@ const SHOW_CHAT_FRAME_LUA: &str = r#"
         end
         if FCF_UpdateResizeButton then
             FCF_UpdateResizeButton(ChatFrame1)
+        end
+        if ChatFrame1.ScrollBar then
+            ChatFrame1.ScrollBar:SetWidth(23)
         end
     end
 "#;
