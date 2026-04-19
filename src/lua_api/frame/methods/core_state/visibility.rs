@@ -265,6 +265,7 @@ fn is_collapsed_impl(state: &crate::lua_api::SimState, id: u64) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::lua_api::WowLuaEnv;
+    use rilua::LuaApiMut;
 
     use super::read_show_hide_state;
 
@@ -288,8 +289,9 @@ mod tests {
             .get_id_by_name("Child")
             .expect("child should exist");
 
+        let mut lua = env.rilua_mut();
         let (needs_change, in_handler, parent_id) =
-            read_show_hide_state(env.lua().state_mut(), child_id, true)
+            read_show_hide_state(lua.state_mut(), child_id, true)
                 .expect("state query should succeed");
 
         assert!(

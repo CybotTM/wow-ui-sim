@@ -290,3 +290,40 @@ fn keybind_f6_targets_enemy() {
         );
     }
 }
+
+#[test]
+fn unit_frame_onleave_fades_out_game_tooltip() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "UnitFrameTooltipRegression", UIParent)
+            frame.unit = "player"
+            UnitFrame_OnEnter(frame)
+            UnitFrame_OnLeave(frame)
+        "#,
+        )
+        .expect("UnitFrame_OnEnter/OnLeave should succeed");
+
+        let tooltip_visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+        assert!(
+            !tooltip_visible,
+            "GameTooltip should be hidden after UnitFrame_OnLeave"
+        );
+
+        let has_owner: bool = env.eval("return GameTooltip:GetOwner() ~= nil").unwrap();
+        assert!(
+            !has_owner,
+            "GameTooltip owner should be cleared after UnitFrame_OnLeave"
+        );
+
+        let update_tooltip_cleared: bool = env
+            .eval("return UnitFrameTooltipRegression.UpdateTooltip == nil")
+            .unwrap();
+        assert!(
+            update_tooltip_cleared,
+            "UnitFrame_OnLeave should clear frame.UpdateTooltip"
+        );
+    }
+}

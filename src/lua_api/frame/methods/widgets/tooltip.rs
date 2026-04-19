@@ -763,6 +763,20 @@ pub(super) fn is_owned(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn fade_out(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) {
+            tooltip.tooltip_owner_id = None;
+        }
+        if let Some(td) = sim.tooltips.get_mut(&tooltip_id) {
+            td.owner_id = None;
+        }
+    }
+    crate::lua_api::frame::methods::core_state::hide(state)
+}
+
 pub(super) fn set_anchor_type(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
@@ -843,6 +857,7 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetObjectTooltipPosition", set_object_tooltip_position),
     ("GetOwner", get_owner),
     ("IsOwned", is_owned),
+    ("FadeOut", fade_out),
     ("SetAnchorType", set_anchor_type),
     // Misc
     ("CopyTooltip", copy_tooltip),

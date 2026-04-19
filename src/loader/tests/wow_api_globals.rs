@@ -1299,7 +1299,7 @@ fn test_ui_special_frames_table() {
 #[test]
 fn test_game_tooltip_methods() {
     let env = WowLuaEnv::new().unwrap();
-    for m in &["SetOwner", "Show", "Hide"] {
+    for m in &["SetOwner", "Show", "Hide", "FadeOut"] {
         let expr = format!("return type(GameTooltip.{})", m);
         let ty: String = env.eval(&expr).unwrap();
         assert_eq!(ty, "function", "GameTooltip.{} should be function", m);
