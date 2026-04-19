@@ -25,6 +25,8 @@ pub struct TextureManager {
     disk_cache_dir: Option<PathBuf>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
+    /// Cache of texture dimensions keyed by normalized WoW path.
+    size_cache: HashMap<String, (u32, u32)>,
     /// Cache of raw BC-compressed texture data keyed by normalized WoW path.
     bc_cache: HashMap<String, BcTextureResult>,
     /// Cache of sub-region textures (path#region -> RGBA pixels).
@@ -50,6 +52,7 @@ impl TextureManager {
             addons_path: None,
             disk_cache_dir: None,
             cache: HashMap::new(),
+            size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
@@ -114,6 +117,8 @@ impl TextureManager {
             telemetry.decode_elapsed = load_telemetry.decode_elapsed;
             telemetry.disk_write_elapsed = load_telemetry.disk_write_elapsed;
             if let Some(data) = loaded {
+                self.size_cache
+                    .insert(normalized.clone(), (data.width, data.height));
                 self.cache.insert(normalized.clone(), data);
                 telemetry.total_elapsed = start.elapsed();
                 return (self.cache.get(&normalized), telemetry);
@@ -389,6 +394,35 @@ fn load_texture_file(path: &Path) -> Result<TextureData, Box<dyn std::error::Err
     }
 }
 
+pub(crate) fn read_texture_dimensions(
+    path: &Path,
+) -> Result<(u32, u32), Box<dyn std::error::Error + Send + Sync>> {
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+    if ext.eq_ignore_ascii_case("blp") {
+        return read_blp_dimensions(path);
+    }
+    Ok(image::image_dimensions(path)?)
+}
+
+fn read_blp_dimensions(
+    path: &Path,
+) -> Result<(u32, u32), Box<dyn std::error::Error + Send + Sync>> {
+    use std::io::{Read, Seek, SeekFrom};
+
+    let mut file = std::fs::File::open(path)?;
+    let mut magic = [0u8; 4];
+    file.read_exact(&mut magic)?;
+    if &magic != b"BLP2" && &magic != b"BLP1" {
+        return Err(format!("unsupported BLP magic in {}", path.display()).into());
+    }
+    file.seek(SeekFrom::Start(12))?;
+    let mut dims = [0u8; 8];
+    file.read_exact(&mut dims)?;
+    let width = u32::from_le_bytes(dims[0..4].try_into()?);
+    let height = u32::from_le_bytes(dims[4..8].try_into()?);
+    Ok((width, height))
+}
+
 #[cfg(test)]
 mod tests {
     use self::preload::should_preload_talent_atlas_key;
@@ -610,6 +644,33 @@ mod tests {
             telemetry.decode_elapsed,
             Duration::ZERO,
             "memory cache hit should skip source decode"
+        );
+    }
+
+    #[test]
+    fn test_get_or_load_texture_size_uses_metadata_without_populating_rgba_cache() {
+        let temp_dir = TempDir::new().unwrap();
+        let base = temp_dir.path();
+
+        let webp_path = base.join("metadata-only.webp");
+        let img = image::RgbaImage::from_pixel(7, 5, image::Rgba([10, 20, 30, 255]));
+        img.save(&webp_path).unwrap();
+
+        let mut mgr = TextureManager::new(base);
+        let dims = mgr
+            .get_or_load_texture_size("metadata-only")
+            .expect("metadata-only size lookup should succeed");
+
+        assert_eq!(dims, (7, 5));
+        assert_eq!(
+            mgr.cache_len(),
+            0,
+            "size-only lookup should not force full RGBA decode into the cache"
+        );
+        assert_eq!(
+            mgr.get_texture_size("metadata-only"),
+            Some((7, 5)),
+            "size-only lookup should still seed the size cache"
         );
     }
 

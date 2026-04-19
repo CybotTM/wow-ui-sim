@@ -1,7 +1,8 @@
 use super::{
     LoadedTexture, ResolvedTextureEntry, WowUiPipeline, apply_resolved_texture_entry,
     bc_texture_dimensions_fit_gpu_atlas, decode_crop_request, load_texture_prefer_bc,
-    remap_bc_entry_uv, remap_entry_uv, resolve_and_scale_quads,
+    load_texture_prefer_bc_with_telemetry, remap_bc_entry_uv, remap_entry_uv,
+    resolve_and_scale_quads,
 };
 use crate::render::BlendMode;
 use crate::render::shader::QuadBatch;
@@ -98,6 +99,40 @@ fn load_texture_prefer_bc_reuses_cached_crop_buffer() {
         upload.rgba.as_ptr(),
         cached_crop_ptr,
         "crop upload path should reuse cached crop pixels instead of cloning them"
+    );
+}
+
+#[test]
+fn load_texture_prefer_bc_cached_crop_request_skips_crop_decode_work() {
+    let mut mgr = crate::texture::TextureManager::new(".");
+    mgr.insert_test_texture(
+        r"Interface\Foo\CropSource",
+        crate::texture::TextureData {
+            width: 8,
+            height: 8,
+            pixels: Arc::<[u8]>::from(vec![0xbb; 8 * 8 * 4]),
+        },
+    );
+
+    let crop_path = r"Interface\Foo\CropSource@crop:0.250000,0.750000,0.250000,0.750000";
+    let _ = load_texture_prefer_bc_with_telemetry(&mut mgr, crop_path)
+        .0
+        .expect("first crop request should populate the crop-request cache");
+
+    let (loaded, telemetry) = load_texture_prefer_bc_with_telemetry(&mut mgr, crop_path);
+    let LoadedTexture::Rgba(_) = loaded.expect("cached crop request should still load") else {
+        panic!("crop requests should stay on the RGBA upload path");
+    };
+
+    assert_eq!(
+        telemetry.crop_decode_elapsed,
+        std::time::Duration::ZERO,
+        "cached crop requests should bypass crop decoding entirely"
+    );
+    assert_eq!(
+        telemetry.crop_extract_elapsed,
+        std::time::Duration::ZERO,
+        "cached crop requests should bypass sub-region extraction entirely"
     );
 }
 

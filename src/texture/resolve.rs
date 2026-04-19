@@ -17,15 +17,22 @@ impl TextureManager {
     /// Get the dimensions of a cached texture.
     pub fn get_texture_size(&self, wow_path: &str) -> Option<(u32, u32)> {
         let normalized = normalize_wow_path(wow_path);
-        self.cache.get(&normalized).map(|d| (d.width, d.height))
+        self.cache
+            .get(&normalized)
+            .map(|d| (d.width, d.height))
+            .or_else(|| self.size_cache.get(&normalized).copied())
     }
 
-    /// Get dimensions for a texture, loading it first if necessary.
+    /// Get dimensions for a texture, using cached metadata before falling back.
     pub fn get_or_load_texture_size(&mut self, wow_path: &str) -> Option<(u32, u32)> {
         if let Some((w, h)) = self.get_texture_size(wow_path) {
             return Some((w, h));
         }
-        self.load(wow_path).map(|d| (d.width, d.height))
+        let normalized = normalize_wow_path(wow_path);
+        let file_path = self.resolve_path(&normalized)?;
+        let dims = super::read_texture_dimensions(&file_path).ok()?;
+        self.size_cache.insert(normalized, dims);
+        Some(dims)
     }
 
     /// Load a sub-region of a texture (for texture atlases).
@@ -58,9 +65,26 @@ impl TextureManager {
         None
     }
 
+    pub fn get_cached_crop_request(&self, crop_request_path: &str) -> Option<&TextureData> {
+        self.sub_cache
+            .get(&normalize_crop_request_key(crop_request_path))
+    }
+
+    pub fn cache_crop_request_alias(
+        &mut self,
+        crop_request_path: &str,
+        data: &TextureData,
+    ) -> Option<&TextureData> {
+        let key = normalize_crop_request_key(crop_request_path);
+        self.sub_cache.insert(key.clone(), data.clone());
+        self.sub_cache.get(&key)
+    }
+
     #[cfg(test)]
     pub fn insert_test_texture(&mut self, wow_path: &str, data: TextureData) {
         let normalized = normalize_wow_path(wow_path);
+        self.size_cache
+            .insert(normalized.clone(), (data.width, data.height));
         self.cache.insert(normalized, data);
     }
 
@@ -148,6 +172,14 @@ impl TextureManager {
         }
         None
     }
+}
+
+fn normalize_crop_request_key(path: &str) -> String {
+    if let Some(index) = path.find("@crop:") {
+        let base = normalize_wow_path(&path[..index]);
+        return format!("{base}@crop:{}", &path[index + 6..]);
+    }
+    normalize_wow_path(path)
 }
 
 fn texture_extension_priority() -> &'static [&'static str] {

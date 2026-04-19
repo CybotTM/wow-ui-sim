@@ -117,6 +117,17 @@ fn load_cropped_texture_with_telemetry(
     path: &str,
 ) -> (Option<LoadedTexture>, TextureLoadTelemetry) {
     let mut telemetry = TextureLoadTelemetry::default();
+    if let Some(tex_data) = tex_mgr.get_cached_crop_request(path) {
+        return (
+            Some(LoadedTexture::Rgba(GpuTextureData {
+                path: path.to_string(),
+                width: tex_data.width,
+                height: tex_data.height,
+                rgba: Arc::clone(&tex_data.pixels),
+            })),
+            telemetry,
+        );
+    }
     let decode_start = Instant::now();
     let Some((base_path, x, y, crop_w, crop_h)) = decode_crop_request(tex_mgr, path) else {
         telemetry.crop_decode_elapsed = decode_start.elapsed();
@@ -129,12 +140,19 @@ fn load_cropped_texture_with_telemetry(
         return (None, telemetry);
     };
     telemetry.crop_extract_elapsed = crop_start.elapsed();
+    let cropped_texture = tex_data.clone();
+    if tex_mgr
+        .cache_crop_request_alias(path, &cropped_texture)
+        .is_none()
+    {
+        return (None, telemetry);
+    }
     (
         Some(LoadedTexture::Rgba(GpuTextureData {
             path: path.to_string(),
-            width: tex_data.width,
-            height: tex_data.height,
-            rgba: Arc::clone(&tex_data.pixels),
+            width: cropped_texture.width,
+            height: cropped_texture.height,
+            rgba: Arc::clone(&cropped_texture.pixels),
         })),
         telemetry,
     )
