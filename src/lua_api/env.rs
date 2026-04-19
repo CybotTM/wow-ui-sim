@@ -33,13 +33,18 @@ fn event_dispatch_trace_enabled(event: &str) -> bool {
     filter == "*" || filter.split(',').any(|name| name.trim() == event)
 }
 
-fn should_skip_startup_actionbar_fanout(state: &SimState, widget_id: u64, event: &str) -> bool {
-    event == "PLAYER_ENTERING_WORLD"
-        && state
+fn should_skip_startup_actionbar_dispatch(state: &SimState, widget_id: u64, event: &str) -> bool {
+    if event != "PLAYER_ENTERING_WORLD" {
+        return false;
+    }
+
+    matches!(
+        state
             .widgets
             .get(widget_id)
-            .and_then(|frame| frame.name.as_deref())
-            == Some("ActionBarButtonEventsFrame")
+            .and_then(|frame| frame.name.as_deref()),
+        Some("ActionBarButtonEventsFrame" | "ActionBarController")
+    )
 }
 
 /// Generate a unique timer ID.
@@ -354,11 +359,10 @@ impl WowLuaEnv {
     fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
         {
             let state = self.state.borrow();
-            // ActionBarButtonEventsFrame only fans PLAYER_ENTERING_WORLD out to
-            // action buttons so they refresh visuals. In the simulator that
-            // startup fanout can wedge the full-game headless path, and the
-            // post-event workaround pass already refreshes button art/hotkeys.
-            if should_skip_startup_actionbar_fanout(&state, widget_id, event) {
+            // These two frames still wedge the startup path on
+            // PLAYER_ENTERING_WORLD. Keep them out of the event fanout until
+            // the underlying action-bar button update path is fixed.
+            if should_skip_startup_actionbar_dispatch(&state, widget_id, event) {
                 return Ok(());
             }
         }
