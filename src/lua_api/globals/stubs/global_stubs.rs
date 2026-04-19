@@ -47,6 +47,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     // already, so no extra work is needed here.
     "QuestPOIUpdateIcons",
     "GetUnitPowerBarInfo",
+    "GetWorldMapActionButtonSpellInfo",
     "GetInventoryItemID",
     "GetInventoryItemQuality",
     "ResetCameraPosition",
@@ -106,6 +107,8 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "IsThreatWarningEnabled",
     "NeedToDisplayDisclaimer",
     "PetUsesPetFrame",
+    "PlayerIsPVPInactive",
+    "SupportsClipCursor",
     // PlayerIsTimerunning is SimState-backed in rilua_timerunning.rs, not a stub.
     "ShouldShowLevelSquishDialog",
     "UnitCanAssist",
@@ -116,6 +119,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitIsPVP",
     "UnitHasVehicleUI",
     "UnitIsGameObject",
+    "UnitIsOtherPlayersPet",
     "UnitIsPVPSanctioned",
     "UnitIsQuestBoss",
     "UnitIsTapDenied",
@@ -133,6 +137,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // GetContainerNumFreeSlots is SimState-backed in inventory_counts.rs,
     // not a stub.
     "GetCurrentGuildBankTab",
+    "GetNumBattlefieldFlagPositions",
     // GetCursorPosition is SimState-backed in mouse_probes.rs, not a stub.
     // GetArenaOpponentSpec is SimState-backed in talent_spec_probes.rs,
     // not a stub.

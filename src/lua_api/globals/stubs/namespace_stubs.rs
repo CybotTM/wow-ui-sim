@@ -2,12 +2,21 @@
 
 use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
+use rilua::{LuaResult, Val};
 
 use super::{
     is_nil_namespace, set_namespace_fn, stub_empty_table, stub_false, stub_nil, stub_zero,
 };
 
 type NsStub = (&'static str, &'static str, RustFn);
+
+fn stub_tracking_result_and_empty_table(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    let table_ref = state.gc.alloc_table(Table::new());
+    state.push(Val::Table(table_ref));
+    Ok(2)
+}
 
 static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     // C_AchievementInfo GetRewardItemID / GetAchievementInfo are
@@ -207,6 +216,9 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
 ];
 
 static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
+    ("C_AreaPoiInfo", "GetDelvesForMap", stub_empty_table),
+    ("C_AreaPoiInfo", "GetEventsForMap", stub_empty_table),
+    ("C_AreaPoiInfo", "GetQuestHubsForMap", stub_empty_table),
     // C_AuctionHouse GetBrowseResults is SimState-backed in
     // missing_surface/auction_house.rs, not a stub.
     // C_CinematicList
@@ -215,11 +227,33 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     // missing_surface/traits.rs, not a stub.
     // C_Club GetClubMembers / GetSubscribedClubs are WorldState-backed in
     // missing_surface/club_info.rs, not stubs.
+    (
+        "C_ContentTracking",
+        "GetCollectableSourceTypes",
+        stub_empty_table,
+    ),
     // C_GossipInfo GetActiveQuests / GetAvailableQuests / GetOptions are
     // SimState-backed in missing_surface/gossip_info.rs, not stubs.
+    ("C_DeathInfo", "GetGraveyardsForMap", stub_empty_table),
+    (
+        "C_EncounterJournal",
+        "GetDungeonEntrancesForMap",
+        stub_empty_table,
+    ),
+    ("C_EncounterJournal", "GetEncountersOnMap", stub_empty_table),
+    (
+        "C_Garrison",
+        "GetGarrisonPlotsInstancesForMap",
+        stub_empty_table,
+    ),
     // C_LFGInfo GetSystemPanelData is SimState-backed in missing_surface/lfg_info.rs.
+    ("C_Map", "GetMapBannersForMap", stub_empty_table),
+    ("C_Map", "GetMapLinksForMap", stub_empty_table),
     // C_NamePlate GetNamePlates is registered in missing_surface/nameplate.rs.
     // C_PartyInfo GetActiveCategories is registered in missing_surface/party_info.rs.
+    ("C_QuestLine", "GetAvailableQuestLines", stub_empty_table),
+    ("C_QuestLine", "GetForceVisibleQuests", stub_empty_table),
+    ("C_ResearchInfo", "GetDigSitesForMap", stub_empty_table),
     // C_ZoneAbility
     ("C_ZoneAbility", "GetActiveAbilities", stub_empty_table),
     // C_QuestLog probes are registered in missing_surface/quest_log.rs.
@@ -241,6 +275,12 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_WowLabs", "GetAvailableQueues", stub_empty_table),
 ];
 
+static NAMESPACE_CUSTOM_STUBS: &[NsStub] = &[(
+    "C_ContentTracking",
+    "GetTrackablesOnMap",
+    stub_tracking_result_and_empty_table,
+)];
+
 pub(super) fn register_namespace_stubs(state: &mut LuaState) {
     for &(ns, method, func) in NAMESPACE_NIL_STUBS {
         if is_nil_namespace(state, ns, method) {
@@ -258,6 +298,11 @@ pub(super) fn register_namespace_stubs(state: &mut LuaState) {
         }
     }
     for &(ns, method, func) in NAMESPACE_EMPTY_TABLE_STUBS {
+        if is_nil_namespace(state, ns, method) {
+            set_namespace_fn(state, ns, method, func);
+        }
+    }
+    for &(ns, method, func) in NAMESPACE_CUSTOM_STUBS {
         if is_nil_namespace(state, ns, method) {
             set_namespace_fn(state, ns, method, func);
         }

@@ -211,6 +211,19 @@ pub fn get_title_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_quest_link(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    let Some((_, QuestLogEntry::Quest { title, .. })) = find_quest_by_id(quest_id) else {
+        return Ok(0);
+    };
+    let link = create_string(
+        state,
+        &format!("|cffffff00|Hquest:{quest_id}|h[{title}]|h|r"),
+    );
+    state.push(link);
+    Ok(1)
+}
+
 pub fn get_num_quest_watches(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(quest_count() as f64));
     Ok(1)

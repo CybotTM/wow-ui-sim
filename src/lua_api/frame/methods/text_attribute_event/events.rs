@@ -342,6 +342,7 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
         | "OnEditFocusGained"
         | "OnEditFocusLost"
         | "OnInputLanguageChanged" => matches!(widget_type, WidgetType::EditBox),
+        "OnCooldownDone" => matches!(widget_type, WidgetType::Cooldown),
         "OnValueChanged" => matches!(widget_type, WidgetType::Slider | WidgetType::StatusBar),
         "OnVerticalScroll" | "OnScrollRangeChanged" => {
             matches!(widget_type, WidgetType::ScrollFrame | WidgetType::EditBox)

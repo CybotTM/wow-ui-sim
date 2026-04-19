@@ -341,6 +341,149 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
 }
 
 #[test]
+fn startup_resurrection_probe_defaults_false_and_is_callable() {
+    let env = env();
+    let (call_ok, can_resurrect): (bool, bool) = env
+        .eval(
+            r#"
+            local ok, value = pcall(function()
+                return CanHearthAndResurrectFromArea()
+            end)
+            return ok, value or false
+            "#,
+        )
+        .expect("resurrection probe smoke test should run");
+
+    assert!(
+        call_ok,
+        "CanHearthAndResurrectFromArea should exist during QueueStatus startup"
+    );
+    assert!(
+        !can_resurrect,
+        "the sim should default area resurrection to disabled"
+    );
+}
+
+#[test]
+fn startup_quest_link_and_date_helpers_are_callable() {
+    let env = env();
+    let (quest_link_type, quest_link, calendar_type, calendar_year_type): (
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local link = GetQuestLink(80000)
+            local calendar = date("*t", 0)
+            return type(link),
+                   link or "",
+                   type(calendar),
+                   type(calendar and calendar.year)
+            "#,
+        )
+        .expect("quest link and date helpers should be callable");
+
+    assert_eq!(quest_link_type, "string");
+    assert!(
+        quest_link.contains("|Hquest:80000|h[The Lost Expedition]|h"),
+        "GetQuestLink should return a colored quest hyperlink"
+    );
+    assert_eq!(calendar_type, "table");
+    assert_eq!(calendar_year_type, "number");
+}
+
+#[test]
+fn startup_clip_cursor_and_other_pet_probes_default_false() {
+    let env = env();
+    let (clip_cursor_ok, clip_cursor, other_pet_ok, other_pet): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local clip_ok, clip_value = pcall(function()
+                return SupportsClipCursor()
+            end)
+            local pet_ok, pet_value = pcall(function()
+                return UnitIsOtherPlayersPet("target")
+            end)
+            return clip_ok, clip_value or false, pet_ok, pet_value or false
+            "#,
+        )
+        .expect("clip-cursor and pet probe smoke tests should run");
+
+    assert!(clip_cursor_ok, "SupportsClipCursor should be callable");
+    assert!(
+        !clip_cursor,
+        "the sim should default clip-cursor support to disabled"
+    );
+    assert!(other_pet_ok, "UnitIsOtherPlayersPet should be callable");
+    assert!(
+        !other_pet,
+        "the sim should default other-player pet detection to false"
+    );
+}
+
+#[test]
+fn startup_world_map_provider_list_apis_are_iterable() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            return pcall(function()
+                for _, value in ipairs(C_QuestLine.GetAvailableQuestLines(947)) do end
+                for _, value in ipairs(C_QuestLine.GetForceVisibleQuests(947)) do end
+                for _, value in ipairs(C_AreaPoiInfo.GetQuestHubsForMap(947)) do end
+                for _, value in ipairs(C_AreaPoiInfo.GetEventsForMap(947)) do end
+                for _, value in ipairs(C_AreaPoiInfo.GetDelvesForMap(947)) do end
+                for _, value in ipairs(C_ResearchInfo.GetDigSitesForMap(947)) do end
+                for _, value in ipairs(C_Garrison.GetGarrisonPlotsInstancesForMap(947)) do end
+                for _, value in ipairs(C_EncounterJournal.GetDungeonEntrancesForMap(947)) do end
+                for _, value in ipairs(C_EncounterJournal.GetEncountersOnMap(947)) do end
+                for _, value in ipairs(C_Map.GetMapBannersForMap(947)) do end
+                for _, value in ipairs(C_Map.GetMapLinksForMap(947)) do end
+                for _, value in ipairs(C_DeathInfo.GetGraveyardsForMap(947)) do end
+                for _, value in ipairs(C_ContentTracking.GetCollectableSourceTypes()) do end
+                local _, trackables = C_ContentTracking.GetTrackablesOnMap(1, 947)
+                for _, value in ipairs(trackables) do end
+                for _, focus in ipairs(GetMouseFoci()) do end
+            end)
+            "#,
+        )
+        .expect("world-map provider iterable smoke test should run");
+
+    assert!(
+        ok,
+        "world-map provider list APIs should return empty tables rather than nil"
+    );
+}
+
+#[test]
+fn startup_world_map_auxiliary_globals_are_callable() {
+    let env = env();
+    let (mouse_foci_type, mouse_foci_len, flag_positions, pvp_inactive, spell_id_type): (
+        String,
+        i64,
+        f64,
+        bool,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local foci = GetMouseFoci()
+            local spellID = GetWorldMapActionButtonSpellInfo()
+            return type(foci), #foci, GetNumBattlefieldFlagPositions(), PlayerIsPVPInactive("player"), type(spellID)
+            "#,
+        )
+        .expect("world-map auxiliary globals should be callable");
+
+    assert_eq!(mouse_foci_type, "table");
+    assert_eq!(mouse_foci_len, 0);
+    assert_eq!(flag_positions, 0.0);
+    assert!(!pvp_inactive);
+    assert_eq!(spell_id_type, "nil");
+}
+
+#[test]
 fn startup_pvp_match_state_defaults_to_inactive() {
     let env = env();
     let state: i32 = env

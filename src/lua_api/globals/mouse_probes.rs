@@ -9,6 +9,7 @@
 //!   or `nil` when the cursor isn't over any widget.
 
 use crate::lua_api::methods::{borrow_state, frame_ref};
+use crate::lua_api::methods::{create_table, table_set_num};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -34,8 +35,22 @@ fn get_mouse_focus(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_mouse_foci(state: &mut LuaState) -> LuaResult<u32> {
+    let hovered_id = { borrow_state(state)?.hovered_frame };
+    let table = create_table(state);
+    if let (Some(id), Val::Table(table_ref)) = (hovered_id, table) {
+        let frame = frame_ref(state, id)?;
+        table_set_num(state, table_ref, 1.0, frame);
+        state.push(Val::Table(table_ref));
+    } else {
+        state.push(table);
+    }
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetCursorPosition", get_cursor_position)?;
     LuaApiMut::register_function(lua, "GetMouseFocus", get_mouse_focus)?;
+    LuaApiMut::register_function(lua, "GetMouseFoci", get_mouse_foci)?;
     Ok(())
 }

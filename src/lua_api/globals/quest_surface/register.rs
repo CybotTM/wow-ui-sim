@@ -67,6 +67,7 @@ pub const TASK_QUEST_METHODS: &[(&'static str, SurfaceFn)] = &[
 pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
     ("GetNumQuestLeaderBoards", get_num_quest_leaderboards),
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
+    ("GetQuestLink", get_quest_link),
     ("GetQuestLogLeaderBoard", get_quest_log_leaderboard),
     ("GetQuestLogQuestText", get_quest_log_quest_text),
     ("GetQuestLogTimeLeft", get_quest_log_time_left),

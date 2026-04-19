@@ -153,3 +153,24 @@ fn cooldown_widget_methods_persist_runtime_state() {
     assert_eq!(countdown.font.as_deref(), Some("Fonts\\FRIZQT__.TTF"));
     assert_eq!(countdown.font_size, 14.0);
 }
+
+#[test]
+fn cooldown_widgets_accept_on_cooldown_done_scripts() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: bool = env
+        .eval(
+            r#"
+            local cd = CreateFrame("Cooldown", "CooldownScriptProbe", UIParent)
+            return pcall(function()
+                cd:SetScript("OnCooldownDone", function() end)
+            end)
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        result,
+        "Cooldown widgets should accept the Blizzard OnCooldownDone script handler"
+    );
+}

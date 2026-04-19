@@ -46,7 +46,7 @@ mod tutorial;
 mod voice_chat;
 mod zone_ability;
 
-use crate::lua_api::methods::{borrow_state_mut, create_string, val_to_string};
+use crate::lua_api::methods::{borrow_state_mut, create_string, table_get, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val};
 use crate::spells;
 
@@ -92,6 +92,7 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "PlaySound", noop)?;
     LuaApiMut::register_function(lua, "PlaySoundFile", noop)?;
     LuaApiMut::register_function(lua, "StopSound", noop)?;
+    install_date_alias(lua)?;
     LuaApiMut::register_function(lua, "GetSpellLink", get_spell_link_global)?;
     LuaApiMut::register_function(lua, "GetSpellIcon", get_spell_icon_global)?;
     LuaApiMut::register_function(lua, "GetItemInfo", get_item_info_global)?;
@@ -104,6 +105,7 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "MultiActionBar_HideAllGrids", noop)?;
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
+    LuaApiMut::register_function(lua, "CanHearthAndResurrectFromArea", return_false)?;
     LuaApiMut::register_function(
         lua,
         "GetMaxLevelForLatestExpansion",
@@ -111,6 +113,20 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     )?;
     LuaApiMut::register_function(lua, "strsub", strsub)?;
     LuaApiMut::register_function(lua, "strcmputf8i", strcmputf8i)?;
+    Ok(())
+}
+
+fn install_date_alias(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let existing = LuaApiMut::get_global_val(lua, "date");
+    if matches!(existing, Val::Function(_)) {
+        return Ok(());
+    }
+
+    let os_table = LuaApiMut::get_global_val(lua, "os");
+    let date_fn = table_get(lua.state_mut(), os_table, "date");
+    if matches!(date_fn, Val::Function(_)) {
+        LuaApiMut::set_global_val(lua, "date", date_fn)?;
+    }
     Ok(())
 }
 
@@ -192,6 +208,11 @@ pub fn register_quest_log_overrides(lua: &mut rilua::Lua) -> LuaResult<()> {
 
 fn noop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn return_false(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
 }
 
 fn get_spell_link_global(state: &mut LuaState) -> LuaResult<u32> {
