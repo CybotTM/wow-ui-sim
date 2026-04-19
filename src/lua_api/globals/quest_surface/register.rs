@@ -58,6 +58,10 @@ pub const TASK_QUEST_METHODS: &[(&'static str, SurfaceFn)] = &[
     ),
     ("GetQuestsOnMap", build_task_quest_info),
     ("GetQuestsForPlayerByMapID", build_task_quest_info),
+    (
+        "GetQuestUIWidgetSetByType",
+        resolve_quest_ui_widget_set_by_type,
+    ),
     ("GetQuestInfoByQuestID", task_quest_get_quest_info_by_id),
     ("GetQuestLocation", task_quest_get_quest_location),
     ("GetQuestTimeLeftMinutes", task_quest_time_left_minutes),

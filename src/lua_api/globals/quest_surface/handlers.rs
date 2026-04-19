@@ -17,6 +17,8 @@ use super::data::{
     WorldQuest,
 };
 
+const QUEST_WIDGET_SET_BASE_ID: i32 = 1_000_000;
+
 // ---------------------------------------------------------------------------
 // Data lookup helpers
 // ---------------------------------------------------------------------------
@@ -620,4 +622,16 @@ pub fn task_quest_time_left_seconds(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     }
     Ok(0)
+}
+
+pub fn resolve_quest_ui_widget_set_by_type(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as i32;
+    if !is_world_quest(quest_id) {
+        return Ok(0);
+    }
+
+    let widget_type = Option::<f64>::from_stack(state, 2)?.unwrap_or(0.0) as i32;
+    let widget_set_id = QUEST_WIDGET_SET_BASE_ID + (quest_id * 10) + widget_type;
+    state.push(Val::Num(widget_set_id as f64));
+    Ok(1)
 }
