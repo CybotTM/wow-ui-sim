@@ -23,10 +23,10 @@
 
 use crate::event::Event;
 use crate::lua_api::game_data::{PartyMember, TargetInfo};
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_ref};
+use crate::lua_api::script_helpers::{
+    call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
 };
-use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
@@ -169,6 +169,9 @@ fn fire_event_now(state: &mut LuaState, event_name: &str, args: &[rilua::Val]) {
         let Some(handler) = get_script(state, widget_id, "OnEvent") else {
             continue;
         };
+        if !matches!(handler, rilua::Val::Function(_)) {
+            continue;
+        }
         let Ok(frame) = frame_ref(state, widget_id) else {
             continue;
         };
@@ -177,7 +180,9 @@ fn fire_event_now(state: &mut LuaState, event_name: &str, args: &[rilua::Val]) {
         call_args.push(frame);
         call_args.push(event_name_val);
         call_args.extend_from_slice(args);
-        let _ = call_function_state(state, handler, &call_args);
+        if let Err(error) = protected_lua_pcall_state(state, handler, &call_args) {
+            call_error_handler_state(state, &error);
+        }
     }
 }
 

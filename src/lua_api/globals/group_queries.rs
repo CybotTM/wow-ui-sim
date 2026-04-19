@@ -364,12 +364,12 @@ fn unit_creature_type(state: &mut LuaState) -> LuaResult<u32> {
                 .current_target
                 .as_ref()
                 .map(|target| target.creature_type.clone())
-                .unwrap_or_else(|| "Unknown".to_string()),
+                .unwrap_or_else(|| "Humanoid".to_string()),
             "focus" => st
                 .current_focus
                 .as_ref()
                 .map(|target| target.creature_type.clone())
-                .unwrap_or_else(|| "Unknown".to_string()),
+                .unwrap_or_else(|| "Humanoid".to_string()),
             _ => "Humanoid".to_string(),
         }
     };
@@ -445,12 +445,12 @@ fn is_friendly_unit(state: &mut LuaState, unit: &str) -> LuaResult<bool> {
             .current_target
             .as_ref()
             .map(|target| !target.is_enemy || target.reaction >= 4)
-            .unwrap_or(false),
+            .unwrap_or(true),
         "focus" => st
             .current_focus
             .as_ref()
             .map(|target| !target.is_enemy || target.reaction >= 4)
-            .unwrap_or(false),
+            .unwrap_or(true),
         other => visible_party_member(&st, other).is_some(),
     })
 }
@@ -557,7 +557,8 @@ fn unit_in_range(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     state.push(Val::Bool(in_range));
-    Ok(1)
+    state.push(Val::Bool(!unit.is_empty()));
+    Ok(2)
 }
 
 /// `UnitInBattleground(unit)` — true when the player is currently in an

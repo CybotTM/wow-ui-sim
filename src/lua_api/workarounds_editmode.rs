@@ -129,6 +129,24 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
     });
 }
 
+/// Re-run the normal player-frame anchor path after startup events settle.
+///
+/// The player frame's edit-mode anchor path re-applies the cast bar anchor as
+/// a side effect. Post-event startup leaves that path unapplied in some
+/// headless/test flows, so explicitly replay it here instead of directly
+/// attaching the cast bar.
+pub fn reapply_player_frame_anchor(env: &WowLuaEnv) {
+    log_step(env, "reapply_player_frame_anchor", || {
+        let _ = env.exec(
+            r#"
+            if PlayerFrame and type(PlayerFrame.ApplySystemAnchor) == "function" then
+                pcall(PlayerFrame.ApplySystemAnchor, PlayerFrame)
+            end
+        "#,
+        );
+    });
+}
+
 /// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
 fn setup_layout_info(env: &WowLuaEnv) {
     let _ = env.exec(SETUP_LAYOUT_INFO_LUA);

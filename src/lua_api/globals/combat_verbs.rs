@@ -24,12 +24,12 @@
 //! stub_nil entries that slipped through the stubs pass.
 
 use crate::lua_api::env::WowLuaAppData;
-use crate::lua_api::game_data::{self, CastingState};
+use crate::lua_api::game_data::{self, CastingState, SpellCooldownState, SpellTargetType};
 use crate::lua_api::globals::spell_api::spell_cast_time;
-use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_ref};
+use crate::lua_api::script_helpers::{
+    call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
 };
-use crate::lua_api::script_helpers::{get_event_listeners, get_script};
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -38,12 +38,16 @@ const DEFAULT_CAST_DURATION: f64 = 1.5;
 const AUTO_ATTACK_NAME: &str = "Auto Attack";
 const EXTRA_ATTACK_NAME: &str = "Extra Attack";
 const DEFAULT_ICON: &str = "Interface/Icons/INV_Misc_QuestionMark";
+const DEFAULT_GCD_SECONDS: f64 = 1.5;
 
 fn fire_named_event(state: &mut LuaState, event_name: &str, args: &[Val]) {
     for widget_id in get_event_listeners(state, event_name) {
         let Some(handler) = get_script(state, widget_id, "OnEvent") else {
             continue;
         };
+        if !matches!(handler, Val::Function(_)) {
+            continue;
+        }
         let Ok(frame) = frame_ref(state, widget_id) else {
             continue;
         };
@@ -52,7 +56,9 @@ fn fire_named_event(state: &mut LuaState, event_name: &str, args: &[Val]) {
         call_args.push(frame);
         call_args.push(event_name_val);
         call_args.extend_from_slice(args);
-        let _ = call_function_state(state, handler, &call_args);
+        if let Err(error) = protected_lua_pcall_state(state, handler, &call_args) {
+            call_error_handler_state(state, &error);
+        }
     }
 }
 
@@ -128,6 +134,63 @@ fn resolve_spell_id_by_name(name: &str) -> Option<u32> {
     crate::lua_api::globals::spellbook_data::find_spell_by_name(name)
 }
 
+fn instant_spell_cooldown_seconds(spell_id: u32) -> f64 {
+    match spell_id {
+        642 => 300.0,
+        _ => 0.0,
+    }
+}
+
+fn spell_can_execute_now(state: &mut LuaState, spell_id: u32) -> LuaResult<bool> {
+    let target_type = game_data::spell_target_type(spell_id);
+    let st = borrow_state(state)?;
+    Ok(match target_type {
+        SpellTargetType::Harmful => st
+            .current_target
+            .as_ref()
+            .is_some_and(|target| target.is_enemy),
+        SpellTargetType::Helpful | SpellTargetType::SelfOnly => true,
+    })
+}
+
+fn start_gcd(state: &mut LuaState, duration: f64) {
+    if duration <= 0.0 {
+        return;
+    }
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return;
+    };
+    let now = st.start_time.elapsed().as_secs_f64();
+    st.gcd = Some((now, duration));
+}
+
+fn start_spell_cooldown(state: &mut LuaState, spell_id: u32, duration: f64) {
+    if duration <= 0.0 {
+        return;
+    }
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return;
+    };
+    let now = st.start_time.elapsed().as_secs_f64();
+    st.spell_cooldowns.insert(
+        spell_id,
+        SpellCooldownState {
+            start: now,
+            duration,
+        },
+    );
+}
+
+fn start_instant_spell_cooldowns(state: &mut LuaState, spell_id: u32) {
+    match game_data::spell_target_type(spell_id) {
+        SpellTargetType::Harmful | SpellTargetType::Helpful => {
+            start_gcd(state, DEFAULT_GCD_SECONDS)
+        }
+        SpellTargetType::SelfOnly => {}
+    }
+    start_spell_cooldown(state, spell_id, instant_spell_cooldown_seconds(spell_id));
+}
+
 pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaResult<()> {
     {
         let st = borrow_state(state)?;
@@ -136,10 +199,15 @@ pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaRes
         }
     }
 
+    if !spell_can_execute_now(state, spell_id)? {
+        return Ok(());
+    }
+
     let spell_name = spell_name(spell_id);
     let icon_path = spell_icon(spell_id);
     let cast_time_ms = spell_cast_time(spell_id as i32);
     if cast_time_ms > 0 {
+        start_gcd(state, DEFAULT_GCD_SECONDS);
         start_cast(
             state,
             spell_id,
@@ -153,6 +221,7 @@ pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaRes
         return Ok(());
     }
 
+    start_instant_spell_cooldowns(state, spell_id);
     apply_spell_to_target(state, spell_id);
     Ok(())
 }

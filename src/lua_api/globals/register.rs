@@ -74,6 +74,7 @@ fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::net_stats::register_all(lua)?;
     super::store_frame::register_all(lua)?;
     super::unit_probes::register_all(lua)?;
+    super::unit_misc::register_all(lua)?;
     super::inventory_slot::register_all(lua)?;
     super::zone_text::register_all(lua)?;
     super::modifier_keys::register_all(lua)?;
@@ -139,6 +140,7 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::inventory_probes::register_all(lua)?;
     super::inventory_counts::register_all(lua)?;
     super::unit_stats::register_all(lua)?;
+    super::combat_stats::register_all(lua)?;
     super::pet_stats::register_all(lua)?;
     super::cooldown_probes::register_all(lua)?;
     super::talent_spec_probes::register_all(lua)?;

@@ -1397,7 +1397,7 @@ impl SimState {
     fn seed_default_game_state(&mut self) {
         self.action_bars = default_action_bars();
         self.party_members = default_party();
-        self.party_group_active = !self.party_members.is_empty();
+        self.party_group_active = false;
         crate::lua_api::globals::keybindings::init_keybindings(self);
         self.player.name = random_player_name();
         self.player.power = 50_000;

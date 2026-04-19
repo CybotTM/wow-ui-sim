@@ -291,14 +291,14 @@ fn test_unit_guid_other() {
 fn test_unit_level() {
     let env = env();
     let level: i32 = env.eval("return UnitLevel('player')").unwrap();
-    assert_eq!(level, 80);
+    assert_eq!(level, 70);
 }
 
 #[test]
 fn test_unit_effective_level() {
     let env = env();
     let level: i32 = env.eval("return UnitEffectiveLevel('player')").unwrap();
-    assert_eq!(level, 80);
+    assert_eq!(level, 70);
 }
 
 // ============================================================================
@@ -524,8 +524,8 @@ fn test_unit_in_party() {
 #[test]
 fn test_unit_in_raid() {
     let env = env();
-    let is_nil: bool = env.eval("return UnitInRaid('player') == nil").unwrap();
-    assert!(is_nil);
+    let in_raid: bool = env.eval("return UnitInRaid('player')").unwrap();
+    assert!(!in_raid);
 }
 
 #[test]

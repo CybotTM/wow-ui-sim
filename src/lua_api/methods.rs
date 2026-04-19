@@ -398,9 +398,10 @@ pub fn call_function_state(state: &mut LuaState, func: Val, args: &[Val]) -> Lua
     let save_base = state.base;
     state.base = func_idx + 1;
 
-    let result = match state.precall(func_idx, LUA_MULTRET)? {
-        CallResult::Lua => execute(state),
-        CallResult::Rust => Ok(()),
+    let result = match state.precall(func_idx, LUA_MULTRET) {
+        Ok(CallResult::Lua) => execute(state),
+        Ok(CallResult::Rust) => Ok(()),
+        Err(err) => Err(err),
     };
 
     let first = if result.is_ok() && state.top > func_idx {
