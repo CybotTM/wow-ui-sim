@@ -74,6 +74,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
     ("GetQuestPOIBlobCount", get_quest_poi_blob_count),
     ("HaveQuestData", have_quest_data),
     ("HaveQuestRewardData", have_quest_data),
+    ("IsCurrentQuestFailed", is_current_quest_failed),
     ("IsQuestSequenced", is_quest_sequenced),
     ("GetQuestLogCompletionText", get_quest_log_completion_text),
     ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),

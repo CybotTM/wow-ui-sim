@@ -414,6 +414,26 @@ pub fn have_quest_data(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn is_current_quest_failed(state: &mut LuaState) -> LuaResult<u32> {
+    let is_failed = {
+        let sim_state = borrow_state(state)?;
+        sim_state
+            .selected_quest_log_id
+            .map(|id| id as i32)
+            .and_then(|quest_id| {
+                sim_state
+                    .quest_log_entries
+                    .entries
+                    .iter()
+                    .find(|entry| entry.quest_id == quest_id)
+                    .map(|entry| entry.is_failed)
+            })
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(is_failed));
+    Ok(1)
+}
+
 pub fn is_quest_sequenced(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)

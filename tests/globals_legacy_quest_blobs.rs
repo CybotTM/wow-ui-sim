@@ -88,6 +88,33 @@ fn test_get_quest_log_quest_text_no_selection() {
 }
 
 #[test]
+fn test_is_current_quest_failed_tracks_selected_quest() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.quest_log_entries.entries[0].is_failed = true;
+    }
+
+    let is_failed: bool = env
+        .eval(
+            r#"
+            C_QuestLog.SetSelectedQuest(80000)
+            return IsCurrentQuestFailed()
+        "#,
+        )
+        .unwrap();
+
+    assert!(is_failed, "selected failed quest should report failed");
+}
+
+#[test]
+fn test_is_current_quest_failed_false_without_selection() {
+    let env = env();
+    let is_failed: bool = env.eval("return IsCurrentQuestFailed()").unwrap();
+    assert!(!is_failed, "no selected quest should not report failed");
+}
+
+#[test]
 fn test_get_quest_poi_blob_count_known_quest() {
     let env = env();
     let count: i32 = env.eval("return GetQuestPOIBlobCount(80000)").unwrap();
