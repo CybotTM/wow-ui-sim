@@ -1,6 +1,7 @@
 //! FontString creation from XML definitions.
 
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::methods::sync_child_to_rilua;
 
 use super::error::LoadError;
 use super::helpers::{
@@ -233,11 +234,35 @@ pub fn create_fontstring_from_xml(
         ))
     })?;
 
+    sync_fontstring_child_to_rilua(env, parent_name, &fs_name)?;
+
     if let Some(text) = &resolved_text {
         sync_fontstring_text_to_rust(env, &fs_name, text);
     }
 
     Ok(())
+}
+
+fn sync_fontstring_child_to_rilua(
+    env: &LoaderEnv<'_>,
+    parent_name: &str,
+    fs_name: &str,
+) -> Result<(), LoadError> {
+    let (parent_id, child_id) = {
+        let sim = env.state().borrow();
+        let Some(parent_id) = sim.widgets.get_id_by_name(parent_name) else {
+            return Ok(());
+        };
+        let Some(child_id) = sim.widgets.get_id_by_name(fs_name) else {
+            return Ok(());
+        };
+        (parent_id, child_id)
+    };
+    env.with_state(|state| {
+        sync_child_to_rilua(state, parent_id, "Text", child_id)
+            .map_err(|e| crate::Error::Other(e.to_string()))
+    })
+    .map_err(|e| LoadError::Lua(e.to_string()))
 }
 
 #[cfg(test)]

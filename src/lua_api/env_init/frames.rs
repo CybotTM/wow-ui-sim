@@ -4,7 +4,7 @@ use crate::lua_api::frame::methods::{
     button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
 use crate::lua_api::methods::{
-    borrow_state_mut, extract_frame_id, registry_set, sync_child_to_rilua, table_set, val_to_string,
+    borrow_state_mut, extract_frame_id, registry_set, table_set, val_to_string,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::{LuaApiMut, Val};
@@ -73,6 +73,14 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
     };
     let key_val = stack_val(state, 2);
     let value = stack_val(state, 3);
+    let Val::Table(table_ref) = frame_val else {
+        return Ok(0);
+    };
+
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(key_val, value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(table_ref);
 
     if let Val::Str(_) = key_val {
         let Some(key) = val_to_string(state, key_val) else {
@@ -84,8 +92,10 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
                 if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
                     parent.children_keys.insert(key.clone(), child_id);
                 }
+                if let Some(child) = sim.widgets.get_mut_visual(child_id) {
+                    child.parent_key = Some(key);
+                }
             }
-            sync_child_to_rilua(state, parent_id, &key, child_id)?;
             return Ok(0);
         }
 
@@ -94,14 +104,6 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
             parent.children_keys.remove(&key);
         }
     }
-
-    let Val::Table(table_ref) = frame_val else {
-        return Ok(0);
-    };
-    if let Some(table) = state.gc.tables.get_mut(table_ref) {
-        let _ = table.raw_set(key_val, value, &state.gc.string_arena);
-    }
-    state.gc.barrier_back(table_ref);
     Ok(0)
 }
 

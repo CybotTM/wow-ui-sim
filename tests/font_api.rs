@@ -307,8 +307,15 @@ fn test_standard_fonts_exist() {
         "GameFontNormal",
         "GameFontNormalSmall",
         "GameFontNormalLarge",
+        "GameFontNormalMed1",
+        "GameFontNormalMed2",
+        "GameFontNormalMed3",
         "GameFontHighlight",
+        "GameFontHighlightMedium",
+        "GameFontHighlightMed2",
         "GameFontDisable",
+        "GameTooltipHeaderText",
+        "ObjectiveFont",
         "NumberFontNormal",
         "SystemFont_Med1",
         "GameTooltipText",
@@ -333,6 +340,27 @@ fn test_standard_font_gold_color() {
     let env = env();
     let (r, g, _b, _a): (f64, f64, f64, f64) =
         env.eval("return GameFontNormal:GetTextColor()").unwrap();
+    assert_eq!(r, 1.0);
+    assert!((g - 0.82).abs() < 0.01);
+}
+
+#[test]
+fn test_named_medium_font_objects_work_with_set_font_object() {
+    let env = env();
+    let (height, r, g): (f64, f64, f64) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "NamedMediumFontProbe", UIParent)
+            local fs = frame:CreateFontString(nil, "ARTWORK")
+            fs:SetFontObject("GameFontNormalMed1")
+            local _, height = fs:GetFont()
+            local r, g = fs:GetTextColor()
+            return height, r, g
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(height, 13.0);
     assert_eq!(r, 1.0);
     assert!((g - 0.82).abs() < 0.01);
 }

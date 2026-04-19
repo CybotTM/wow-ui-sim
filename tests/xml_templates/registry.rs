@@ -63,6 +63,16 @@ fn test_xml_template_inheritance() {
     assert_eq!(derived.frame.inherits, Some("BaseTemplate".to_string()));
 }
 
+#[test]
+fn test_env_reinstalls_intrinsic_templates_after_clear() {
+    clear_templates();
+    let _env = WowLuaEnv::new().unwrap();
+    assert!(
+        get_template("WoWScrollBox").is_some(),
+        "WowLuaEnv::new should restore intrinsic XML templates after a clear"
+    );
+}
+
 // ============================================================================
 // CreateFrame with XML Template Tests
 // ============================================================================

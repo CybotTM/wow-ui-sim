@@ -53,9 +53,12 @@ impl SimState {
         // Step 2: For each strata, identify roots and DFS-emit in grouped order.
         let mut buckets = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
         for (si, ids) in strata_map.iter().enumerate() {
+            let mut region_roots = self.find_strata_region_roots(ids, si, &visible);
+            self.sort_root_regions(&mut region_roots);
             let mut roots = self.find_strata_roots(ids, si, &visible);
             self.sort_by_frame_level(&mut roots);
             let bucket = &mut buckets[si];
+            bucket.extend(region_roots);
             for root_id in roots {
                 dfs_emit(root_id, si, &self.widgets, &visible, bucket);
             }
@@ -93,6 +96,37 @@ impl SimState {
             .collect()
     }
 
+    fn find_strata_region_roots(
+        &self,
+        ids: &[u64],
+        strata_idx: usize,
+        visible: &HashSet<u64>,
+    ) -> Vec<u64> {
+        ids.iter()
+            .copied()
+            .filter(|&id| {
+                let Some(frame) = self.widgets.get(id) else {
+                    return false;
+                };
+                if !is_region(frame.widget_type) {
+                    return false;
+                }
+                match frame.parent_id {
+                    None => true,
+                    Some(parent_id) => {
+                        let Some(parent) = self.widgets.get(parent_id) else {
+                            return true;
+                        };
+                        let same_strata = self.frame_bucket_strata(parent).as_index() == strata_idx;
+                        !same_strata
+                            || !visible.contains(&parent_id)
+                            || is_strata_root_boundary(parent)
+                    }
+                }
+            })
+            .collect()
+    }
+
     /// Sort root frame IDs so explicit Raise() wins for top-level panel trees.
     fn sort_by_frame_level(&self, ids: &mut [u64]) {
         ids.sort_by(|&a, &b| {
@@ -109,6 +143,32 @@ impl SimState {
                 }
                 _ => a.cmp(&b),
             }
+        });
+    }
+
+    fn sort_root_regions(&self, ids: &mut [u64]) {
+        use std::cmp::Reverse;
+
+        ids.sort_by(|&a, &b| {
+            let (frame_a, frame_b) = match (self.widgets.get(a), self.widgets.get(b)) {
+                (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
+                _ => return a.cmp(&b),
+            };
+            let type_flag = |frame: &crate::widget::Frame| -> u8 {
+                u8::from(frame.widget_type == crate::widget::WidgetType::FontString)
+            };
+            (
+                frame_a.draw_layer as i32,
+                frame_a.draw_sub_layer,
+                type_flag(frame_a),
+                Reverse(a),
+            )
+                .cmp(&(
+                    frame_b.draw_layer as i32,
+                    frame_b.draw_sub_layer,
+                    type_flag(frame_b),
+                    Reverse(b),
+                ))
         });
     }
 

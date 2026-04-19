@@ -1,6 +1,6 @@
 //! Template registry for virtual frames.
 
-use super::types::FrameXml;
+use super::types::{FrameChildElement, FrameXml};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, OnceLock, RwLock};
 
@@ -312,6 +312,21 @@ pub fn register_intrinsic_templates() {
         };
         register_template(name, wtype, frame);
     }
+
+    register_template(
+        "ButtonFrameTemplate",
+        "Frame",
+        FrameXml {
+            is_virtual: Some(true),
+            children: vec![FrameChildElement::Frame(FrameXml {
+                name: Some("$parentInset".to_string()),
+                parent_key: Some("Inset".to_string()),
+                inherits: Some("InsetFrameTemplate".to_string()),
+                ..Default::default()
+            })],
+            ..Default::default()
+        },
+    );
 }
 
 /// Clear the template registry (useful for testing).

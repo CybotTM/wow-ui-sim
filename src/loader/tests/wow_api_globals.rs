@@ -581,7 +581,7 @@ fn test_startup_bootstrap_namespaces_exist() {
     assert!(!chat_restricted);
     assert_eq!(nav_ty, "function");
     assert_eq!(nav_distance, 0);
-    assert_eq!(nav_frame_ty, "table");
+    assert_eq!(nav_frame_ty, "nil");
     assert_eq!(token_ty, "function");
     assert!(!commerce_enabled);
     assert_eq!(commerce_poll_seconds, 0);
@@ -993,7 +993,7 @@ fn test_startup_social_and_lfg_globals_exist() {
     assert_eq!(lfg_ty, "function");
     assert!(!has_active_entry);
     assert_eq!(premade_style, 0);
-    assert_eq!(search_result_ty, "nil");
+    assert_eq!(search_result_ty, "table");
     assert_eq!(queue_ty, "function");
     assert_eq!(group_count, 0);
     assert_eq!(queue_config_ty, "table");
@@ -1056,7 +1056,8 @@ fn test_startup_time_and_service_globals_exist() {
         get_time_ty,
         now,
         action_info_ty,
-        action_type_ty,
+        action_type_value,
+        action_id,
         web_ticket_ty,
         web_ticket_value_ty,
         dungeon_ty,
@@ -1072,6 +1073,7 @@ fn test_startup_time_and_service_globals_exist() {
         f64,
         String,
         String,
+        i64,
         String,
         String,
         String,
@@ -1085,12 +1087,13 @@ fn test_startup_time_and_service_globals_exist() {
     ) = env
         .eval(
             r#"
-            local actionType = GetActionInfo(1)
+            local actionType, actionId = GetActionInfo(1)
             local canTank, canHeal, canDps = UnitGetAvailableRoles("player")
             return type(GetTime),
                 GetTime(),
                 type(GetActionInfo),
-                type(actionType),
+                actionType,
+                actionId,
                 type(GetWebTicket),
                 type(GetWebTicket()),
                 type(GetDungeonDifficultyID),
@@ -1108,7 +1111,8 @@ fn test_startup_time_and_service_globals_exist() {
     assert_eq!(get_time_ty, "function");
     assert!(now >= 0.0);
     assert_eq!(action_info_ty, "function");
-    assert_eq!(action_type_ty, "nil");
+    assert_eq!(action_type_value, "spell");
+    assert!(action_id > 0);
     assert_eq!(web_ticket_ty, "function");
     assert_eq!(web_ticket_value_ty, "nil");
     assert_eq!(dungeon_ty, "function");

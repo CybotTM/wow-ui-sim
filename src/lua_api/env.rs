@@ -16,6 +16,7 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, get_script};
 use crate::screen::ScreenKind;
+use crate::xml::register_intrinsic_templates;
 use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;
 use std::env;
@@ -100,6 +101,7 @@ impl WowLuaEnv {
         let state = Rc::new(RefCell::new(SimState::default()));
         let mut lua = Self::new_rilua(Rc::clone(&state));
         init_builtin_frames(&state);
+        register_intrinsic_templates();
         init_lua_state(&mut lua, Rc::clone(&state))?;
         let env = Self {
             lua: Rc::new(RefCell::new(lua)),

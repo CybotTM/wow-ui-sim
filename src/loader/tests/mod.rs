@@ -84,6 +84,7 @@ fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
 /// Create a test environment, write XML content, load it, return context.
 pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
     let env = WowLuaEnv::new().unwrap();
+    preload_shared_templates(&env);
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test.xml");
@@ -111,6 +112,7 @@ pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
 /// Create a test environment, write a Lua file, load it, return context + addon table.
 pub(super) fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, Val) {
     let env = WowLuaEnv::new().unwrap();
+    preload_shared_templates(&env);
     let temp_dir = std::env::temp_dir().join(format!("wow-sim-{}", dir_suffix));
     std::fs::create_dir_all(&temp_dir).unwrap();
     let lua_path = temp_dir.join("test.lua");
@@ -156,6 +158,28 @@ pub(super) fn set_loading_addon_index(env: &WowLuaEnv, addon_name: &str) {
         .position(|a| a.folder_name == addon_name)
         .unwrap();
     s.loading_addon_index = Some(idx as u16);
+}
+
+fn preload_shared_templates(env: &WowLuaEnv) {
+    if crate::xml::get_template("ButtonFrameTemplate").is_some() {
+        return;
+    }
+
+    let addon_root =
+        std::path::PathBuf::from("./vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML");
+    let xml_path = addon_root.join("Mainline/SharedUIPanelTemplates.xml");
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext::new(
+        env.lua(),
+        "Blizzard_SharedXML",
+        addon_table,
+        &addon_root,
+        false,
+        false,
+    )
+    .unwrap();
+    let loader_env = env.loader_env();
+    load_xml_file(&loader_env, &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 }
 
 #[test]

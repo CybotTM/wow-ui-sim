@@ -2,6 +2,9 @@
 
 use super::helpers::{store_simple_attribute, val_to_f32};
 use crate::font::WowFontSystem;
+use crate::lua_api::frame::methods::button_anchor_hierarchy::{
+    apply_font_object_snapshot, read_font_object_fields,
+};
 use crate::lua_api::globals::font_strings_collection::fonts::create_font_object;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_string_static,
@@ -605,6 +608,11 @@ pub(super) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
     };
     let store = get_or_create_font_object_store(state);
     table_set(state, store, &id.to_string(), font_object);
+    let fields = read_font_object_fields(state, font_object);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        apply_font_object_snapshot(frame, &fields);
+    }
     Ok(0)
 }
 

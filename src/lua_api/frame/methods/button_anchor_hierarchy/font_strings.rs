@@ -223,34 +223,72 @@ fn apply_font_inherit(
         return;
     }
 
-    if let Some(path) = font_field_string(state, font_object.clone(), "__font", "__fontPath") {
-        fontstring.font = Some(path);
+    apply_font_object_fields(state, fontstring, font_object);
+}
+
+pub(crate) fn apply_font_object_fields(
+    state: &mut LuaState,
+    fontstring: &mut crate::widget::Frame,
+    font_object: Val,
+) {
+    let fields = read_font_object_fields(state, font_object);
+    apply_font_object_snapshot(fontstring, &fields);
+}
+
+pub(crate) struct FontObjectFields {
+    font: Option<String>,
+    font_size: Option<f32>,
+    font_outline: Option<crate::widget::TextOutline>,
+    justify_h: Option<crate::widget::TextJustify>,
+    justify_v: Option<crate::widget::TextJustify>,
+    text_color: Option<crate::widget::Color>,
+    shadow_color: Option<crate::widget::Color>,
+    shadow_offset: Option<(f32, f32)>,
+}
+
+pub(crate) fn read_font_object_fields(state: &mut LuaState, font_object: Val) -> FontObjectFields {
+    FontObjectFields {
+        font: font_field_string(state, font_object.clone(), "__font", "__fontPath"),
+        font_size: font_field_number(state, font_object.clone(), "__height", "__fontHeight")
+            .map(|height| height as f32),
+        font_outline: font_field_string(state, font_object.clone(), "__outline", "__fontFlags")
+            .map(|outline| crate::widget::TextOutline::from_wow_str(&outline)),
+        justify_h: font_field_string(state, font_object.clone(), "__justifyH", "__justifyH")
+            .map(|justify| crate::widget::TextJustify::from_wow_str(&justify)),
+        justify_v: font_field_string(state, font_object.clone(), "__justifyV", "__justifyV")
+            .map(|justify| crate::widget::TextJustify::from_wow_str(&justify)),
+        text_color: read_color(state, font_object.clone(), "__textColor"),
+        shadow_color: read_color(state, font_object.clone(), "__shadowColor"),
+        shadow_offset: read_shadow_offset(state, font_object),
     }
-    if let Some(height) = font_field_number(state, font_object.clone(), "__height", "__fontHeight")
-    {
-        fontstring.font_size = height as f32;
+}
+
+pub(crate) fn apply_font_object_snapshot(
+    fontstring: &mut crate::widget::Frame,
+    fields: &FontObjectFields,
+) {
+    if let Some(path) = &fields.font {
+        fontstring.font = Some(path.clone());
     }
-    if let Some(outline) = font_field_string(state, font_object.clone(), "__outline", "__fontFlags")
-    {
-        fontstring.font_outline = crate::widget::TextOutline::from_wow_str(&outline);
+    if let Some(height) = fields.font_size {
+        fontstring.font_size = height;
     }
-    if let Some(justify_h) =
-        font_field_string(state, font_object.clone(), "__justifyH", "__justifyH")
-    {
-        fontstring.justify_h = crate::widget::TextJustify::from_wow_str(&justify_h);
+    if let Some(outline) = fields.font_outline {
+        fontstring.font_outline = outline;
     }
-    if let Some(justify_v) =
-        font_field_string(state, font_object.clone(), "__justifyV", "__justifyV")
-    {
-        fontstring.justify_v = crate::widget::TextJustify::from_wow_str(&justify_v);
+    if let Some(justify_h) = fields.justify_h {
+        fontstring.justify_h = justify_h;
     }
-    if let Some(text_color) = read_color(state, font_object.clone(), "__textColor") {
+    if let Some(justify_v) = fields.justify_v {
+        fontstring.justify_v = justify_v;
+    }
+    if let Some(text_color) = fields.text_color {
         fontstring.text_color = text_color;
     }
-    if let Some(shadow_color) = read_color(state, font_object.clone(), "__shadowColor") {
+    if let Some(shadow_color) = fields.shadow_color {
         fontstring.shadow_color = shadow_color;
     }
-    if let Some(shadow_offset) = read_shadow_offset(state, font_object) {
+    if let Some(shadow_offset) = fields.shadow_offset {
         fontstring.shadow_offset = shadow_offset;
     }
 }
