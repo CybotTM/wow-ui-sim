@@ -195,6 +195,66 @@ if GetDefaultScale == nil then
   end
 end
 
+if GetMinRenderScale == nil then
+  function GetMinRenderScale()
+    return 0.5
+  end
+end
+
+if GetMaxRenderScale == nil then
+  function GetMaxRenderScale()
+    return 1.0
+  end
+end
+
+if IsExpansionTrial == nil then
+  function IsExpansionTrial()
+    return false
+  end
+end
+
+if GetSpecializationInfoForSpecID == nil then
+  function GetSpecializationInfoForSpecID(_specID)
+    return nil, ""
+  end
+end
+
+if GetUpgradeExpansionLevel == nil then
+  function GetUpgradeExpansionLevel()
+    return 80
+  end
+end
+
+if GetCharacterUndeleteStatus == nil then
+  function GetCharacterUndeleteStatus()
+    return false, false, 0, 0
+  end
+end
+
+if IsCharacterTimerunning == nil then
+  function IsCharacterTimerunning(_characterIndex)
+    return false
+  end
+end
+
+if ShouldShowExpansionUpgradeBanner == nil then
+  function ShouldShowExpansionUpgradeBanner()
+    return false
+  end
+end
+
+if GetCameraFOVDefaults == nil then
+  function GetCameraFOVDefaults()
+    return 0, 30, 110
+  end
+end
+
+if GetCharacterListGroupsInfo == nil then
+  function GetCharacterListGroupsInfo()
+    return {}
+  end
+end
+
 if GetInventoryItemLink == nil then
   function GetInventoryItemLink(_unit, _slot)
     return nil
@@ -484,6 +544,26 @@ do
     title:SetText("")
     rawset(header, "Title", title)
   end
+
+  local function __wow_seed_settings_preview(parent, key)
+    local preview = __wow_install_frame_helpers(__wow_ensure_named_child(parent, key, "Frame"))
+    if rawget(preview, "RegisterWithSettingInitializer") == nil then
+      function preview:RegisterWithSettingInitializer(_initializer)
+      end
+    end
+    if rawget(preview, "SetValueAccessor") == nil then
+      function preview:SetValueAccessor(_getValue)
+      end
+    end
+    if rawget(preview, "UpdatePreview") == nil then
+      function preview:UpdatePreview(_value)
+      end
+    end
+    return preview
+  end
+
+  __wow_seed_settings_preview(settingsPanel, "AccessibilityFontPreview")
+  __wow_seed_settings_preview(settingsPanel, "QuestTextPreview")
 
   local objectiveTracker = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ObjectiveTrackerFrame", uiParent))
   local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
@@ -1674,6 +1754,34 @@ C_PartyInfo = __wow_merge_namespace(C_PartyInfo, {
 
 C_Map = __wow_merge_namespace(C_Map, {})
 
+local __wow_map_runtime_state = rawget(_G, "__wow_map_runtime_state")
+if type(__wow_map_runtime_state) ~= "table" then
+  __wow_map_runtime_state = {
+    currentMapID = type(C_Map.GetCurrentMapID) == "function" and C_Map.GetCurrentMapID() or 2248,
+  }
+  rawset(_G, "__wow_map_runtime_state", __wow_map_runtime_state)
+end
+
+C_Map.GetCurrentMapID = function()
+  return __wow_map_runtime_state.currentMapID or 2248
+end
+
+C_Map.SetMapForQuestLog = function(mapID)
+  if type(mapID) ~= "number" then
+    return
+  end
+
+  __wow_map_runtime_state.currentMapID = mapID
+
+  if WorldMapFrame and type(WorldMapFrame.SetMapID) == "function" then
+    WorldMapFrame:SetMapID(mapID)
+  end
+
+  if QuestMapFrame and type(QuestMapFrame.SetMapID) == "function" then
+    QuestMapFrame:SetMapID(mapID)
+  end
+end
+
 C_Map.GetBestMapForUnit = function(unitToken)
   if unitToken ~= nil and unitToken ~= "player" then
     return nil
@@ -1715,6 +1823,12 @@ end
 if GetTasksTable == nil then
   function GetTasksTable()
     return {}
+  end
+end
+
+if SpellCanTargetQuest == nil then
+  function SpellCanTargetQuest()
+    return false
   end
 end
 
@@ -3420,6 +3534,114 @@ if GetIconForRoleEnum == nil then
 end
 
 C_Sound = C_Sound or __wow_namespace()
+if C_UI == nil then
+  C_UI = __wow_namespace()
+end
+if C_UI.DoesAnyDisplayHaveNotch == nil then
+  function C_UI.DoesAnyDisplayHaveNotch()
+    return false
+  end
+end
+
+if C_CharacterCreation == nil then
+  C_CharacterCreation = __wow_namespace()
+end
+if C_CharacterCreation.GetNumCharacterTemplates == nil then
+  function C_CharacterCreation.GetNumCharacterTemplates()
+    return 0
+  end
+end
+if C_CharacterCreation.GetBlockedRaces == nil then
+  function C_CharacterCreation.GetBlockedRaces()
+    return {}
+  end
+end
+if C_CharacterCreation.GetSelectedRace == nil then
+  function C_CharacterCreation.GetSelectedRace()
+    return rawget(_G, "__wow_selected_race_id") or 1
+  end
+end
+if C_CharacterCreation.SetSelectedRace == nil then
+  function C_CharacterCreation.SetSelectedRace(raceID)
+    rawset(_G, "__wow_selected_race_id", raceID)
+  end
+end
+if C_CharacterCreation.GetRaceDataByID == nil then
+  function C_CharacterCreation.GetRaceDataByID(raceID)
+    if raceID == nil then
+      return nil
+    end
+    return {
+      raceID = raceID,
+      fileName = "human",
+      factionInternalName = "Alliance",
+      isNeutralRace = false,
+      enabled = true,
+      createScreenIconAtlas = "charactercreate-humans",
+    }
+  end
+end
+if C_CharacterCreation.GetSelectedClass == nil then
+  function C_CharacterCreation.GetSelectedClass()
+    return {
+      classID = 2,
+      classFilename = "PALADIN",
+      className = "Paladin",
+    }
+  end
+end
+if C_CharacterCreation.GetSelectedSex == nil then
+  function C_CharacterCreation.GetSelectedSex()
+    return 2
+  end
+end
+if C_CharacterCreation.GetFactionForRace == nil then
+  function C_CharacterCreation.GetFactionForRace(_raceID)
+    return "Alliance"
+  end
+end
+if C_CharacterCreation.GetNameForRace == nil then
+  function C_CharacterCreation.GetNameForRace(_raceID)
+    return "Human"
+  end
+end
+if C_CharacterCreation.GetClassAchievementRequirements == nil then
+  function C_CharacterCreation.GetClassAchievementRequirements(_raceID, _classID)
+    return {}
+  end
+end
+if C_CharacterCreation.UseBeginnerMode == nil then
+  function C_CharacterCreation.UseBeginnerMode()
+    return false
+  end
+end
+if C_CharacterCreation.SetCharacterCreateType == nil then
+  C_CharacterCreation.SetCharacterCreateType = __wow_noop
+end
+if C_CharacterCreation.SetTimerunningSeasonID == nil then
+  C_CharacterCreation.SetTimerunningSeasonID = __wow_noop
+end
+if C_CharacterCreation.ClearCharacterTemplate == nil then
+  C_CharacterCreation.ClearCharacterTemplate = __wow_noop
+end
+if C_CharacterCreation.IsCharacterNameValid == nil then
+  function C_CharacterCreation.IsCharacterNameValid(_name)
+    return true, ""
+  end
+end
+if C_CharacterCreation.IsGuildNameValid == nil then
+  function C_CharacterCreation.IsGuildNameValid(_name)
+    return true, ""
+  end
+end
+if C_CharacterCreation.CreateCharacter == nil then
+  function C_CharacterCreation.CreateCharacter(name)
+    if A_Admin and A_Admin.SetPlayerName then
+      A_Admin.SetPlayerName(name)
+    end
+  end
+end
+
 -- C_GameRules.* probes listed in PLAN are registered from Rust
 -- (src/lua_api/globals/game_rules.rs), backed by SimState::game_rules.
 -- Admin: A_Admin.SetGameRule(name, value) / A_Admin.SetActiveGameMode(mode,
@@ -4081,6 +4303,45 @@ end
 
 __wow_patch_map_canvas_scroll_container_methods()
 
+local function __wow_patch_fog_of_war_pin_methods()
+  if rawget(_G, "__wow_fog_of_war_pin_methods_patched") then
+    return
+  end
+  if type(FogOfWarPinMixin) ~= "table" then
+    return
+  end
+
+  if type(FogOfWarPinMixin.OnMapChanged) == "function" then
+    FogOfWarPinMixin.OnMapChanged = function(self)
+      local mapID = nil
+      if type(self.GetMap) == "function" then
+        local map = self:GetMap()
+        if map ~= nil and type(map.GetMapID) == "function" then
+          mapID = map:GetMapID()
+        end
+      end
+
+      if (mapID == nil or mapID == 0) and C_Map ~= nil and type(C_Map.GetCurrentMapID) == "function" then
+        mapID = C_Map.GetCurrentMapID()
+      end
+
+      if type(self.SetUiMapID) == "function" then
+        self:SetUiMapID(mapID)
+      end
+
+      if type(self.TryFindingBestFogOfWarID) == "function" then
+        self:TryFindingBestFogOfWarID(true)
+      elseif (mapID == nil or mapID == 0) and type(self.Hide) == "function" then
+        self:Hide()
+      end
+    end
+  end
+
+  rawset(_G, "__wow_fog_of_war_pin_methods_patched", true)
+end
+
+__wow_patch_fog_of_war_pin_methods()
+
 if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
   hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
     if addonName == "Blizzard_AchievementUI" then
@@ -4088,6 +4349,7 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
       __wow_patch_achievement_search_preview_selection()
     elseif addonName == "Blizzard_MapCanvas" then
       __wow_patch_map_canvas_scroll_container_methods()
+      __wow_patch_fog_of_war_pin_methods()
     end
   end)
 end
@@ -4698,6 +4960,8 @@ local function __wow_register_misc_global_frames()
   local settings = __wow_make_named_frame("Frame", "SettingsPanel", UIParent)
   __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "ScrollBox", "ScrollTarget" })
   __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "Header", "Title" })
+  __wow_seed_global_frame_path(settings, { "AccessibilityFontPreview" })
+  __wow_seed_global_frame_path(settings, { "QuestTextPreview" })
 
   local objective = __wow_make_named_frame("Frame", "ObjectiveTrackerFrame", UIParent)
   __wow_seed_global_frame_path(objective, { "Header", "MinimizeButton" })

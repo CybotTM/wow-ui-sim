@@ -173,21 +173,8 @@ fn patch_menu_descriptor_fallback(env: &LoaderEnv<'_>, result: &mut LoadResult) 
     }
 }
 
-const ACCOUNT_STORE_SET_STOREFRONT_PATCH: &str = r#"
-    local function __wow_account_store_set_storefront_id(self, storeFrontID)
-        self.storeFrontID = storeFrontID
-    end
-
-    if type(AccountStoreMixin) == "table" then
-        AccountStoreMixin.SetStoreFrontID = __wow_account_store_set_storefront_id
-    end
-    if type(AccountStoreFrame) == "table" then
-        AccountStoreFrame.SetStoreFrontID = __wow_account_store_set_storefront_id
-    end
-"#;
-
 fn patch_account_store_set_storefront(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.exec(ACCOUNT_STORE_SET_STOREFRONT_PATCH) {
+    if let Err(e) = crate::lua_api::workarounds::patch_account_store_set_storefront(env) {
         push_patch_warning(
             result,
             "Blizzard_AccountStore",

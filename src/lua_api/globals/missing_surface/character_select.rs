@@ -1,0 +1,296 @@
+//! Glue-screen character-select helpers backed by seeded battle.net game
+//! accounts.
+
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::state_types::BnetGameAccount;
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
+
+const DEFAULT_WARBAND_GROUP_COUNT: f64 = 4.0;
+
+pub(super) fn register_character_select_surface(state: &mut LuaState) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "InitializeCharacterScreenData",
+        initialize_character_screen_data,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "SetWorldFrameStrata",
+        set_world_frame_strata,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "SetCharSelectModelFrame",
+        set_char_select_model_frame,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "SetCharSelectMapSceneFrame",
+        set_char_select_map_scene_frame,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "SetInCharacterSelect",
+        set_in_character_select,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetMaxWarbandGroupCount",
+        get_max_warband_group_count,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetActiveTimerunningSeasonID",
+        get_active_timerunning_season_id,
+    )?;
+    table_set_rust_fn_static(state, state.global, "GetNumCharacters", get_num_characters)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetCharacterSelection",
+        get_character_selection,
+    )?;
+    table_set_rust_fn_static(state, state.global, "GetCharacterGUID", get_character_guid)?;
+    table_set_rust_fn_static(state, state.global, "GetCharacterRace", get_character_race)?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetBasicCharacterInfo",
+        get_basic_character_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetServiceCharacterInfo",
+        get_service_character_info,
+    )?;
+    Ok(())
+}
+
+fn initialize_character_screen_data(state: &mut LuaState) -> LuaResult<u32> {
+    table_set(
+        state,
+        Val::Table(state.global),
+        "__wow_character_screen_initialized",
+        Val::Bool(true),
+    );
+    Ok(0)
+}
+
+fn set_world_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
+    let frame = crate::lua_bridge::stack_val(state, 1);
+    let Some(frame_id) = crate::lua_api::methods::extract_frame_id(state, frame) else {
+        return Ok(0);
+    };
+    let mut sim = crate::lua_api::methods::borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(frame_id) {
+        frame.frame_strata = crate::widget::FrameStrata::Background;
+    }
+    Ok(0)
+}
+
+fn set_char_select_model_frame(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_name = match crate::lua_bridge::stack_val(state, 1) {
+        Val::Str(_) => {
+            crate::lua_api::methods::val_to_string(state, crate::lua_bridge::stack_val(state, 1))
+                .unwrap_or_default()
+        }
+        _ => String::new(),
+    };
+    let frame_name = create_string(state, &frame_name);
+    table_set(
+        state,
+        Val::Table(state.global),
+        "__wow_char_select_model_frame_name",
+        frame_name,
+    );
+    Ok(0)
+}
+
+fn set_char_select_map_scene_frame(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_name = match crate::lua_bridge::stack_val(state, 1) {
+        Val::Str(_) => {
+            crate::lua_api::methods::val_to_string(state, crate::lua_bridge::stack_val(state, 1))
+                .unwrap_or_default()
+        }
+        _ => String::new(),
+    };
+    let frame_name = create_string(state, &frame_name);
+    table_set(
+        state,
+        Val::Table(state.global),
+        "__wow_char_select_map_scene_frame_name",
+        frame_name,
+    );
+    Ok(0)
+}
+
+fn set_in_character_select(state: &mut LuaState) -> LuaResult<u32> {
+    table_set(
+        state,
+        Val::Table(state.global),
+        "__wow_in_character_select",
+        Val::Bool(true),
+    );
+    Ok(0)
+}
+
+fn get_max_warband_group_count(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(DEFAULT_WARBAND_GROUP_COUNT));
+    Ok(1)
+}
+
+fn get_active_timerunning_season_id(state: &mut LuaState) -> LuaResult<u32> {
+    let season = borrow_state(state)?.timerunning_season_id;
+    match season {
+        Some(id) => state.push(Val::Num(id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_num_characters(state: &mut LuaState) -> LuaResult<u32> {
+    let count = seeded_character_accounts(state).len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_character_selection(state: &mut LuaState) -> LuaResult<u32> {
+    let count = seeded_character_accounts(state).len();
+    state.push(Val::Num(if count > 0 { 1.0 } else { 0.0 }));
+    Ok(1)
+}
+
+fn get_character_guid(state: &mut LuaState) -> LuaResult<u32> {
+    let character_index = i32::from_stack(state, 1)?;
+    let guid = seeded_character_accounts(state)
+        .get(usize::try_from(character_index.saturating_sub(1)).unwrap_or(usize::MAX))
+        .map(|ga| ga.wow_account_guid.clone());
+    match guid {
+        Some(guid) => {
+            let guid_value = create_string(state, &guid);
+            state.push(guid_value);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_character_race(state: &mut LuaState) -> LuaResult<u32> {
+    let character_index = i32::from_stack(state, 1)?;
+    let Some(account) = seeded_character_accounts(state)
+        .get(usize::try_from(character_index.saturating_sub(1)).unwrap_or(usize::MAX))
+        .cloned()
+    else {
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        return Ok(2);
+    };
+    let race_id = match account.race_name.as_str() {
+        "Human" => 1.0,
+        "Dwarf" => 3.0,
+        _ => 0.0,
+    };
+    state.push(Val::Num(race_id));
+    let race_name = create_string(state, &account.race_name);
+    state.push(race_name);
+    Ok(2)
+}
+
+fn get_basic_character_info(state: &mut LuaState) -> LuaResult<u32> {
+    let guid = match crate::lua_bridge::stack_val(state, 1) {
+        Val::Str(_) => {
+            crate::lua_api::methods::val_to_string(state, crate::lua_bridge::stack_val(state, 1))
+                .unwrap_or_default()
+        }
+        _ => {
+            state.push(Val::Nil);
+            return Ok(1);
+        }
+    };
+    let Some(account) = seeded_character_accounts(state)
+        .into_iter()
+        .find(|ga| ga.wow_account_guid == guid)
+    else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let character_info = build_character_info_table(state, &account);
+    state.push(character_info);
+    Ok(1)
+}
+
+fn get_service_character_info(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    state.push(table);
+    Ok(1)
+}
+
+fn seeded_character_accounts(state: &mut LuaState) -> Vec<BnetGameAccount> {
+    borrow_state(state)
+        .map(|sim| {
+            sim.bnet_friends
+                .iter()
+                .flat_map(|friend| friend.game_accounts.iter())
+                .filter(|ga| ga.client_program == "WoW")
+                .cloned()
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn build_character_info_table(state: &mut LuaState, account: &BnetGameAccount) -> Val {
+    let table = create_table(state);
+    let character_name = create_string(state, &account.character_name);
+    table_set(state, table, "name", character_name);
+    let realm_name = create_string(state, &account.realm_name);
+    table_set(state, table, "realmName", realm_name);
+    let realm_address = create_string(state, &account.realm_display_name);
+    table_set(state, table, "realmAddress", realm_address);
+    let guid = create_string(state, &account.wow_account_guid);
+    table_set(state, table, "guid", guid);
+    let class_name = create_string(state, &account.class_name);
+    table_set(state, table, "className", class_name);
+    let class_filename = create_string(state, &account.class_name);
+    table_set(state, table, "classFilename", class_filename);
+    table_set(
+        state,
+        table,
+        "experienceLevel",
+        Val::Num(account.character_level as f64),
+    );
+    let area_name = create_string(state, &account.area_name);
+    table_set(state, table, "areaName", area_name);
+    let faction_name = create_string(state, &account.faction_name);
+    table_set(state, table, "faction", faction_name);
+    table_set(state, table, "raceID", Val::Num(1.0));
+    table_set(state, table, "specID", Val::Num(0.0));
+    table_set(state, table, "profession0", Val::Num(0.0));
+    table_set(state, table, "profession1", Val::Num(0.0));
+    table_set(state, table, "money", Val::Num(0.0));
+    table_set(state, table, "boostInProgress", Val::Bool(false));
+    table_set(state, table, "isTrialBoostCompleted", Val::Bool(false));
+    table_set(state, table, "revokedCharacterUpgrade", Val::Bool(false));
+    table_set(state, table, "isExpansionTrialCharacter", Val::Bool(false));
+    table_set(state, table, "isLocked", Val::Bool(false));
+    table_set(state, table, "isLockedByExpansion", Val::Bool(false));
+    table_set(state, table, "isRevokedCharacterUpgrade", Val::Bool(false));
+    table_set(state, table, "isTrialBoost", Val::Bool(false));
+    table_set(state, table, "hasCustomize", Val::Bool(false));
+    table_set(state, table, "customizeDisabled", Val::Bool(false));
+    table_set(state, table, "hasFactionChange", Val::Bool(false));
+    table_set(state, table, "hasRaceChange", Val::Bool(false));
+    table_set(state, table, "lastLoginBuild", Val::Num(0.0));
+    let mail_senders = create_table(state);
+    table_set(state, table, "mailSenders", mail_senders);
+    table
+}

@@ -163,3 +163,19 @@ fn get_player_map_position_returns_nil_for_non_player_unit() {
         .unwrap();
     assert!(is_nil);
 }
+
+#[test]
+fn set_map_for_quest_log_updates_current_map_id() {
+    let env = env();
+    let (before, after): (i32, i32) = env
+        .eval(
+            r#"
+            local before = C_Map.GetCurrentMapID()
+            C_Map.SetMapForQuestLog(1)
+            return before, C_Map.GetCurrentMapID()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(before, 2248);
+    assert_eq!(after, 1);
+}

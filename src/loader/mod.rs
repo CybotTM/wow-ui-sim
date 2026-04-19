@@ -8,6 +8,7 @@ pub(crate) mod chunk_cache;
 mod error;
 pub(crate) mod helpers;
 pub(crate) mod helpers_anim;
+mod load_addon_trace;
 pub(crate) mod lua_file;
 pub(crate) mod precompiled;
 mod xml_file;
@@ -29,6 +30,10 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 pub use error::LoadError;
+pub(crate) use load_addon_trace::{
+    LoadAddonTraceOrigin, enter_xml_load_addon_context, runtime_load_addon_origin,
+    trace_load_addon,
+};
 pub use xml_frame::create_frame_from_xml;
 pub use xml_frame::{fast_create_frame_profile_body_report, fast_create_frame_profile_report};
 
@@ -169,8 +174,7 @@ impl LoadTiming {
 
 /// Load an addon from its TOC file.
 pub fn load_addon(env: &LoaderEnv<'_>, toc_path: &Path) -> Result<LoadResult, LoadError> {
-    let toc = TocFile::from_file(toc_path)?;
-    load_addon_from_toc(env, &toc)
+    load_addon_path(env, toc_path, None)
 }
 
 /// Load an addon from its TOC file with saved variables support.
@@ -179,8 +183,35 @@ pub fn load_addon_with_saved_vars(
     toc_path: &Path,
     saved_vars_mgr: &mut SavedVariablesManager,
 ) -> Result<LoadResult, LoadError> {
+    load_addon_path(env, toc_path, Some(saved_vars_mgr))
+}
+
+fn load_addon_path(
+    env: &LoaderEnv<'_>,
+    toc_path: &Path,
+    saved_vars_mgr: Option<&mut SavedVariablesManager>,
+) -> Result<LoadResult, LoadError> {
+    let addon_name = toc_path
+        .parent()
+        .and_then(|dir| dir.file_name())
+        .and_then(|name| name.to_str())
+        .unwrap_or("Unknown");
+    trace_load_addon(LoadAddonTraceOrigin::Toc, format!("begin {addon_name}"));
+    trace_load_addon(
+        LoadAddonTraceOrigin::Toc,
+        format!("toc {}", toc_path.display()),
+    );
     let toc = TocFile::from_file(toc_path)?;
-    load_addon_from_toc_with_saved_vars(env, &toc, saved_vars_mgr)
+    trace_load_addon(LoadAddonTraceOrigin::Toc, format!("files {addon_name}"));
+    let result = addon::load_addon_internal(env, &toc, saved_vars_mgr)?;
+    for warning in &result.warnings {
+        trace_load_addon(
+            LoadAddonTraceOrigin::Toc,
+            format!("warning {addon_name}: {warning}"),
+        );
+    }
+    trace_load_addon(LoadAddonTraceOrigin::Toc, format!("loaded {addon_name}"));
+    Ok(result)
 }
 
 /// Load an addon from a parsed TOC.

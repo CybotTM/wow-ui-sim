@@ -1310,6 +1310,66 @@ if GetServerName == nil then
   end
 end
 
+if IsConnectedToServer == nil then
+  function IsConnectedToServer()
+    return false
+  end
+end
+
+local __wow_char_select_model_frame_name = nil
+local __wow_char_select_map_scene_frame_name = nil
+local __wow_character_screen_initialized = false
+
+if SetWorldFrameStrata == nil then
+  function SetWorldFrameStrata(frame)
+    if type(frame) == "table" and type(frame.SetFrameStrata) == "function" then
+      frame:SetFrameStrata("BACKGROUND")
+    end
+  end
+end
+
+if SetCharSelectModelFrame == nil then
+  function SetCharSelectModelFrame(frameName)
+    __wow_char_select_model_frame_name = frameName
+  end
+end
+
+if SetCharSelectMapSceneFrame == nil then
+  function SetCharSelectMapSceneFrame(frameName)
+    __wow_char_select_map_scene_frame_name = frameName
+  end
+end
+
+if InitializeCharacterScreenData == nil then
+  function InitializeCharacterScreenData()
+    __wow_character_screen_initialized = true
+  end
+end
+
+if GetMaxWarbandGroupCount == nil then
+  function GetMaxWarbandGroupCount()
+    return 4
+  end
+end
+
+if GetActiveTimerunningSeasonID == nil then
+  function GetActiveTimerunningSeasonID()
+    return nil
+  end
+end
+
+if GetMinRenderScale == nil then
+  function GetMinRenderScale()
+    return 0.5
+  end
+end
+
+if GetMaxRenderScale == nil then
+  function GetMaxRenderScale()
+    return 1.0
+  end
+end
+
 if PlayerLocation == nil then
   PlayerLocation = {}
 

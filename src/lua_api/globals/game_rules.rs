@@ -186,6 +186,30 @@ pub fn get_game_mode_glue_screen_name(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_num_displayed_game_modes(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+fn get_displayed_game_mode_record_id_at_index(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = i32::from_stack(state, 1)?;
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+fn does_game_mode_have_promo(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn is_game_mode_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
 fn install_on_c_game_rules(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_c_game_rules_table(state);
     let entries: &[(&'static str, rilua::vm::closure::RustFn)] = &[
@@ -196,6 +220,13 @@ fn install_on_c_game_rules(state: &mut LuaState) -> LuaResult<()> {
         ("IsPlunderstorm", is_plunderstorm),
         ("GetActiveGameMode", get_active_game_mode),
         ("GetGameModeGlueScreenName", get_game_mode_glue_screen_name),
+        ("GetNumDisplayedGameModes", get_num_displayed_game_modes),
+        (
+            "GetDisplayedGameModeRecordIDAtIndex",
+            get_displayed_game_mode_record_id_at_index,
+        ),
+        ("DoesGameModeHavePromo", does_game_mode_have_promo),
+        ("IsGameModeEnabled", is_game_mode_enabled),
     ];
     for (name, func) in entries {
         table_set_rust_fn(state, table_ref, name, *func)?;

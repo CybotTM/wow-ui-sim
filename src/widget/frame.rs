@@ -524,7 +524,10 @@ impl Default for Frame {
 
 impl Frame {
     pub fn new(widget_type: WidgetType, name: Option<String>, parent_id: Option<u64>) -> Self {
-        let mouse_enabled = matches!(widget_type, WidgetType::Button | WidgetType::CheckButton);
+        let mouse_enabled = matches!(
+            widget_type,
+            WidgetType::Button | WidgetType::CheckButton | WidgetType::EditBox
+        );
         Self {
             widget_type,
             name,

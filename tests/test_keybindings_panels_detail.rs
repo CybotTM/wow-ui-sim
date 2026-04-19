@@ -5,9 +5,8 @@
 mod common;
 
 use std::path::PathBuf;
-use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
+use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::globals::global_frames;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -169,34 +168,6 @@ fn install_test_error_handler(env: &WowLuaEnv) {
 
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     common::drain_string_table(env, "__test_errors")
-}
-
-/// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
-fn setup_full_env() -> common::LockedEnv {
-    common::lock_env(|| {
-        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        env.set_screen_size(1024.0, 768.0);
-
-        let ui = blizzard_ui_dir();
-        {
-            let mut state = env.state().borrow_mut();
-            state.addon_base_paths = vec![ui.clone()];
-        }
-
-        let addons = discover_blizzard_addons(&ui);
-        for (name, toc_path) in &addons {
-            if let Err(e) = load_addon(&env.loader_env(), toc_path) {
-                eprintln!("[load {name}] FAILED: {e}");
-            } else {
-                env.apply_runtime_addon_load_workarounds(name);
-            }
-        }
-        env.apply_post_load_workarounds();
-        fire_startup_events(&env);
-        env.apply_post_event_workarounds();
-        let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
-        env
-    })
 }
 
 // ── M → ToggleWorldMap() ────────────────────────────────────────────────
@@ -391,9 +362,9 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
                     return "missing_fog_pin"
                 end
 
-                if not fogPin:IsShown() then
+                if fogPin:IsShown() then
                     return string.format(
-                        "fog_pin_hidden:type=%s:map=%s:bg=%s:mask=%s",
+                        "fog_pin_should_be_hidden:type=%s:map=%s:bg=%s:mask=%s",
                         tostring(fogPin:GetObjectType()),
                         tostring(fogPin.GetUiMapID and fogPin:GetUiMapID()),
                         tostring(fogPin:GetFogOfWarBackgroundAtlas()),
@@ -401,8 +372,12 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
                     )
                 end
 
-                if not fogPin:GetFogOfWarBackgroundAtlas() then
-                    return "fog_pin_missing_background"
+                if fogPin:GetFogOfWarBackgroundAtlas() or fogPin:GetFogOfWarMaskAtlas() then
+                    return string.format(
+                        "fog_pin_should_not_have_assets:bg=%s:mask=%s",
+                        tostring(fogPin:GetFogOfWarBackgroundAtlas()),
+                        tostring(fogPin:GetFogOfWarMaskAtlas())
+                    )
                 end
 
                 local width, height = pin:GetSize()
@@ -665,7 +640,7 @@ fn keybind_s_opens_spellbook_no_errors() {
 #[test]
 fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_errors() {
     test_timeout! {
-        let env = setup_full_env();
+        let env = setup_env();
         install_test_error_handler(&env);
 
         let result: String = env
@@ -706,7 +681,13 @@ fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_e
                     return "no_spellbook_item"
                 end
 
-                if GameTooltip:NumLines() == 0 then
+                local info = GameTooltip:GetPrimaryTooltipInfo()
+                local tooltipData = GameTooltip:GetPrimaryTooltipData()
+                if not info
+                    or not tooltipData
+                    or not tooltipData.lines
+                    or not tooltipData.lines[1]
+                then
                     return "tooltip_has_no_lines"
                 end
 
@@ -739,7 +720,7 @@ fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_e
 #[test]
 fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
     test_timeout! {
-        let env = setup_full_env();
+        let env = setup_env();
         install_test_error_handler(&env);
 
         let result: String = env
@@ -808,7 +789,7 @@ fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
 #[test]
 fn talent_panel_has_at_least_one_visible_talent_node_frame() {
     test_timeout! {
-        let env = setup_full_env();
+        let env = setup_env();
 
         let result: String = env
             .eval(

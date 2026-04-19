@@ -194,6 +194,31 @@ fn login_boot_skips_current_known_glue_errors() {
 }
 
 #[test]
+fn login_boot_keeps_settings_preview_panels_wired_to_settings_panel() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::Login);
+
+        let (font_preview, quest_preview): (bool, bool) = env
+            .eval(
+                r#"
+                return SettingsPanel ~= nil and SettingsPanel.AccessibilityFontPreview ~= nil,
+                       SettingsPanel ~= nil and SettingsPanel.QuestTextPreview ~= nil
+                "#,
+            )
+            .expect("settings preview panel wiring should be queryable");
+
+        assert!(
+            font_preview,
+            "login boot should keep SettingsPanel.AccessibilityFontPreview wired"
+        );
+        assert!(
+            quest_preview,
+            "login boot should keep SettingsPanel.QuestTextPreview wired"
+        );
+    }
+}
+
+#[test]
 fn login_editboxes_gain_focus_when_clicking_their_visible_centers() {
     test_timeout! {
         let env = load_blizzard_screen(ScreenKind::Login);

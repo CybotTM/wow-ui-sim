@@ -10,6 +10,7 @@ pub(super) fn register_recruit_a_friend_surface(state: &mut LuaState) -> LuaResu
     let ns = ensure_namespace(state, "C_RecruitAFriend")?;
     table_set_rust_fn_static(state, ns, "GetRAFInfo", get_raf_info)?;
     table_set_rust_fn_static(state, ns, "GetRAFSystemInfo", get_raf_system_info)?;
+    table_set_rust_fn_static(state, ns, "GetRecruitInfo", get_recruit_info)?;
     table_set_rust_fn_static(state, ns, "IsEnabled", is_enabled)?;
     table_set_rust_fn_static(state, ns, "IsRecruitingEnabled", is_recruiting_enabled)?;
     Ok(())
@@ -67,4 +68,10 @@ fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {
 fn is_recruiting_enabled(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
+}
+
+fn get_recruit_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    state.push(Val::Nil);
+    Ok(2)
 }

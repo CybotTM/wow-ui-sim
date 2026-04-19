@@ -24,6 +24,7 @@ pub fn load_xml_file(
     ctx: &AddonContext,
     timing: &mut LoadTiming,
 ) -> Result<usize, LoadError> {
+    let _xml_load_addon_guard = super::enter_xml_load_addon_context(env);
     let xml_start = Instant::now();
     let ui = parse_xml_file(path).map_err(|e| {
         let _ = env.with_state(|state| {

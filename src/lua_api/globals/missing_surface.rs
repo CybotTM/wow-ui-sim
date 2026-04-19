@@ -6,6 +6,7 @@ mod auction_house;
 mod battle_net;
 mod c_map;
 mod c_spell;
+mod character_select;
 mod character_services;
 mod chat_bubbles;
 mod club_info;
@@ -143,6 +144,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     voice_chat::register_voice_chat_surface(state)?;
     social::register_social_surface(state)?;
     summon_info::register_summon_info_surface(state)?;
+    character_select::register_character_select_surface(state)?;
     Ok(())
 }
 

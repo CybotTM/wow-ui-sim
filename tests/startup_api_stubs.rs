@@ -164,6 +164,51 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
 }
 
 #[test]
+fn glue_character_select_helpers_exist_with_safe_defaults() {
+    let env = env();
+    let (
+        set_model_frame_ok,
+        set_map_scene_ok,
+        set_world_frame_ok,
+        max_groups,
+        timerunning_season_kind,
+        min_render_scale,
+        max_render_scale,
+    ): (bool, bool, bool, f64, String, f64, f64) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "CodexGlueWorldFrame", UIParent)
+            local setWorldFrameOK = pcall(function()
+                SetWorldFrameStrata(frame)
+            end)
+            local setModelFrameOK = pcall(function()
+                SetCharSelectModelFrame("ModelFFX")
+            end)
+            local setMapSceneOK = pcall(function()
+                SetCharSelectMapSceneFrame("MapScene")
+            end)
+
+            return setModelFrameOK,
+                   setMapSceneOK,
+                   setWorldFrameOK,
+                   GetMaxWarbandGroupCount(),
+                   type(GetActiveTimerunningSeasonID()),
+                   GetMinRenderScale(),
+                   GetMaxRenderScale()
+            "#,
+        )
+        .expect("glue character-select helpers should be callable");
+
+    assert!(set_model_frame_ok);
+    assert!(set_map_scene_ok);
+    assert!(set_world_frame_ok);
+    assert_eq!(max_groups, 4.0);
+    assert_eq!(timerunning_season_kind, "nil");
+    assert_eq!(min_render_scale, 0.5);
+    assert_eq!(max_render_scale, 1.0);
+}
+
+#[test]
 fn c_lfg_info_can_player_use_premade_group_returns_false() {
     let env = env();
     let can_use: bool = env
@@ -860,10 +905,10 @@ fn set_spacing_round_trips_on_editbox() {
 #[test]
 fn unit_is_player_true_for_player_and_group_slots() {
     // TargetFrame.lua:865 and other UnitFrame code call UnitIsPlayer on
-    // whatever unit the frame is tracking. "player" and party/raid
-    // slots are always player-character entities in the sim; other unit
-    // tokens (target/focus/mouseover) only exist when the GUI wires
-    // them, so default to false.
+    // whatever unit the frame is tracking. "player" and party slots are
+    // always player-character entities in the sim; raid slots remain
+    // unsupported, and other unit tokens (target/focus/mouseover) only
+    // exist when the GUI wires them, so default to false.
     let env = env();
     let (player, party, raid, target, nonstring, self_): (bool, bool, bool, bool, bool, bool) = env
         .eval(
@@ -879,7 +924,7 @@ fn unit_is_player_true_for_player_and_group_slots() {
         .unwrap();
     assert!(player);
     assert!(party);
-    assert!(raid);
+    assert!(!raid);
     assert!(self_);
     assert!(!target);
     assert!(!nonstring);
@@ -912,14 +957,12 @@ fn get_inventory_slot_info_returns_integer_id() {
 
 #[test]
 fn c_pvp_and_zone_text_defaults_are_neutral() {
-    // ZoneText.lua:7 dereferences `C_PvP.GetZonePVPInfo()` during
-    // SubZoneTextFrame OnLoad, and the same OnLoad chain accesses
-    // GetSubZoneText. The sim has no world state, so return the
-    // "neutral zone, empty text" flavor the OnLoad path tolerates.
     let env = env();
     let (pvp_type, is_sub_zone, zone_text, sub_text): (String, bool, String, String) = env
         .eval(
             r#"
+            A_Admin.SetZone("", 0)
+            A_Admin.SetSubZone("")
             local pvpType, isSubZonePvP = C_PvP.GetZonePVPInfo()
             return pvpType, isSubZonePvP, GetZoneText(), GetSubZoneText()
             "#,

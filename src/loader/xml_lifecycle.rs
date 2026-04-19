@@ -24,6 +24,7 @@ pub fn fire_lifecycle_scripts(
     name: &str,
     lifecycle: LifecycleScripts,
 ) {
+    let _xml_load_addon_guard = crate::loader::enter_xml_load_addon_context(env);
     let _ = env.with_state(|state| {
         let frame_visible = if lifecycle.on_show {
             let Ok(sim) = crate::lua_api::methods::borrow_state(state) else {

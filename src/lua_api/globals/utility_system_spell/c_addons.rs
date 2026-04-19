@@ -537,30 +537,35 @@ fn load_runtime_addon_with_dependencies(
     addon_name: &str,
     loading: &mut HashSet<String>,
 ) -> Result<(), LoadError> {
-    eprintln!("[load_addon] begin {addon_name}");
+    let origin = crate::loader::runtime_load_addon_origin(
+        borrow_state(state)
+            .map(|sim| sim.xml_load_addon_depth)
+            .unwrap_or(0),
+    );
+    crate::loader::trace_load_addon(origin, format!("begin {addon_name}"));
     let toc_path = find_runtime_addon_toc(state, addon_name)
         .ok_or_else(|| missing_runtime_addon_error(addon_name))?;
-    eprintln!("[load_addon] toc {}", toc_path.display());
+    crate::loader::trace_load_addon(origin, format!("toc {}", toc_path.display()));
     let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
 
     for dependency in runtime_addon_dependencies(state, &toc) {
-        eprintln!("[load_addon] {addon_name} -> dep {dependency}");
+        crate::loader::trace_load_addon(origin, format!("{addon_name} -> dep {dependency}"));
         if addon_is_disabled(state, &dependency) {
             return Err(disabled_dep_error(&dependency));
         }
         load_runtime_addon_recursive(state, loader_env, &dependency, loading)?;
     }
 
-    eprintln!("[load_addon] files {addon_name}");
+    crate::loader::trace_load_addon(origin, format!("files {addon_name}"));
     let result = crate::loader::load_addon_from_toc(loader_env, &toc)?;
     for warning in &result.warnings {
-        eprintln!("[load_addon] warning {addon_name}: {warning}");
+        crate::loader::trace_load_addon(origin, format!("warning {addon_name}: {warning}"));
     }
-    eprintln!("[load_addon] loaded {addon_name}");
+    crate::loader::trace_load_addon(origin, format!("loaded {addon_name}"));
     crate::lua_api::workarounds::apply_for_runtime_addon_load(loader_env, addon_name);
     mark_addon_loaded(loader_env, addon_name);
     fire_addon_loaded(state, loader_env, addon_name);
-    eprintln!("[load_addon] event {addon_name}");
+    crate::loader::trace_load_addon(origin, format!("event {addon_name}"));
     Ok(())
 }
 

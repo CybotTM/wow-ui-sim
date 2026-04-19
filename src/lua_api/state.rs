@@ -81,6 +81,7 @@ macro_rules! build_empty_sim_state {
             cursor_item: $runtime.cursor_item,
             loading_addon_index: $runtime.loading_addon_index,
             executing_addon_index: $runtime.executing_addon_index,
+            xml_load_addon_depth: $runtime.xml_load_addon_depth,
             loading_forbidden: $runtime.loading_forbidden,
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
@@ -312,6 +313,9 @@ pub struct SimState {
     /// Depth-counted suppression for runtime CreateFrame OnLoad firing while
     /// XML loader code is still building the frame tree.
     pub suppress_runtime_on_load_depth: u32,
+    /// Depth-counted marker for execution that originated from XML loader or
+    /// XML lifecycle handlers. Used to distinguish `LoadAddOn` trace output.
+    pub xml_load_addon_depth: u32,
     /// Current mouse position in UI coordinates (for ANCHOR_CURSOR tooltip positioning).
     pub mouse_position: Option<(f32, f32)>,
     /// Currently hovered frame ID (for IsMouseMotionFocus / GetMouseFocus).
@@ -1230,6 +1234,7 @@ struct EmptyRuntimeState {
     cursor_item: Option<CursorInfo>,
     loading_addon_index: Option<u16>,
     executing_addon_index: Option<u16>,
+    xml_load_addon_depth: u32,
     loading_forbidden: bool,
     next_anim_group_id: u64,
     next_cast_id: u32,
@@ -1278,6 +1283,7 @@ macro_rules! build_empty_runtime_state {
             cursor_item: None,
             loading_addon_index: None,
             executing_addon_index: None,
+            xml_load_addon_depth: 0,
             loading_forbidden: false,
             next_anim_group_id: $next_anim_group_id,
             next_cast_id: $next_cast_id,
