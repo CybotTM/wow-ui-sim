@@ -1,6 +1,32 @@
 # Compact Raid Manager Left Strip Brief
 
-Status: open investigation
+Status: root cause found
+
+## Root Cause
+
+The bug is not in rendering and not in `CompactRaidFrameManager` itself.
+
+It comes from the simulator-side GUI party-size path:
+
+- GUI party-size changes and GUI startup restore call `resize_party_state()` in [src/iced_app/app.rs](/syncthing/Sync/Projects/wow/wow-ui-sim-rilua/src/iced_app/app.rs:457)
+- before the fix, that helper resized `party_members` but left `party_leader_index` untouched
+- that let stale player-leader state survive in live GUI sessions
+- Blizzard then correctly chose the leader layout in `CompactRaidFrameManager_UpdateOptionsFlowContainer()`
+
+Concrete effect:
+
+- stale `party_leader_index = None` means player is leader
+- leader layout yields `usedY=327`
+- manager height becomes `347`
+- forward toggle ends up at `y≈296`
+
+Fresh headless `A_Admin.SetPartySize(4)` was already fine because the admin API normalized leader to `party1`. The mismatch existed because the GUI path did not.
+
+Fix:
+
+- `resize_party_state()` now normalizes leader the same way as `A_Admin.SetPartySize()`:
+  - `Some(0)` when party size > 0 (`party1` leads)
+  - `None` when party size = 0
 
 ## Problem Statement
 

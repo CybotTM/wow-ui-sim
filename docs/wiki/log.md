@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-19] ingest | partyframe status-bar texture drop
+
+Added `investigations/partyframe-statusbar-textures.md` to capture the root cause for the party health/mana bar `MISSING` render. The XML loader creates the bar child correctly, but `SetStatusBarTexture(bar)` passes a userdata frame into a setter that only accepts strings/numbers, so the status-bar source is cleared. Updated `index.md` with the new page.
+
 ## [2026-04-18] update | Track 2 metatable handle threading
 
 Updated `investigations/track-2-intern-audit.md` with the current

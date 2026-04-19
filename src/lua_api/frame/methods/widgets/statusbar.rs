@@ -88,6 +88,26 @@ fn apply_bar_texture(
     }
 }
 
+fn adopt_bar_texture(sim: &mut crate::lua_api::SimState, id: u64, bar_id: u64) {
+    let inherited_path = sim
+        .widgets
+        .get(bar_id)
+        .and_then(|bar| bar.atlas.clone().or_else(|| bar.texture.clone()));
+
+    if let Some(parent) = sim.widgets.get_mut_visual(id) {
+        parent.statusbar_bar_id = Some(bar_id);
+        parent.statusbar_texture_path = inherited_path;
+        parent
+            .children_keys
+            .insert("BarTexture".to_string(), bar_id);
+    }
+
+    if let Some(bar) = sim.widgets.get_mut_visual(bar_id) {
+        bar.parent_id = Some(id);
+        bar.parent_key = Some("BarTexture".to_string());
+    }
+}
+
 fn apply_statusbar_texture_source(frame: &mut crate::widget::Frame, path: Option<String>) {
     let Some(path) = path else {
         frame.texture = None;
@@ -182,6 +202,9 @@ pub(super) fn set_color_fill(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_status_bar_texture(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let texture_val = stack_val(state, 2);
+    let texture_is_userdata = extract_frame_id(state, texture_val).is_some();
+    let texture_has_path = val_to_string(state, texture_val).is_some();
+    let preserves_existing_source = texture_is_userdata && !texture_has_path;
     let bar_id = resolve_bar_id(state, id, texture_val)?;
     let path = val_to_string(state, texture_val);
     let file_id = match texture_val {
@@ -189,7 +212,11 @@ pub(super) fn set_status_bar_texture(state: &mut LuaState) -> LuaResult<u32> {
         _ => None,
     };
     let mut sim = borrow_state_mut(state)?;
-    apply_bar_texture(&mut sim, id, bar_id, path, file_id);
+    if preserves_existing_source && file_id.is_none() {
+        adopt_bar_texture(&mut sim, id, bar_id);
+    } else {
+        apply_bar_texture(&mut sim, id, bar_id, path, file_id);
+    }
     Ok(0)
 }
 

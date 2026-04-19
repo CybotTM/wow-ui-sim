@@ -400,6 +400,33 @@ fn test_statusbar_texture_accepts_atlas_names() {
 }
 
 #[test]
+fn test_statusbar_texture_userdata_preserves_existing_atlas_source() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (String, String) = env
+        .eval(
+            r#"
+            local sb = CreateFrame("StatusBar", "TestStatusBarTextureUserdata", UIParent)
+            local tex = sb:CreateTexture(nil, "ARTWORK")
+            tex:SetAtlas("UI-HUD-UnitFrame-Party-PortraitOn-Bar-Mana")
+            sb:SetStatusBarTexture(tex)
+            local adopted = sb:GetStatusBarTexture()
+            return adopted:GetAtlas() or "", adopted:GetTextureFilePath() or ""
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result.0, "UI-HUD-UnitFrame-Party-PortraitOn-Bar-Mana",
+        "SetStatusBarTexture(existingTexture) should preserve an atlas-backed child texture"
+    );
+    assert!(
+        result.1.starts_with("Interface\\"),
+        "atlas-backed adopted status bar texture should retain a resolved texture file path"
+    );
+}
+
+#[test]
 fn test_statusbar_interpolation_methods_track_target_and_displayed_value() {
     let env = WowLuaEnv::new().unwrap();
 
