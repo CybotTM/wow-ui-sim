@@ -185,8 +185,9 @@ fn write_quest_entry_fields(state: &mut LuaState, info: Val, quest_id: i32, titl
 // ---------------------------------------------------------------------------
 
 pub fn get_num_quest_log_entries(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(QUEST_LOG.len() as f64));
-    state.push(Val::Num(quest_count() as f64));
+    let count = borrow_state(state)?.quest_log_entries.entries.len() as f64;
+    state.push(Val::Num(count));
+    state.push(Val::Num(count));
     Ok(2)
 }
 
@@ -510,10 +511,12 @@ pub fn quest_map_frame_get_focused_quest_id(state: &mut LuaState) -> LuaResult<u
 }
 
 /// `QuestMapUpdateAllQuests()` — retail returns the number of POIs that
-/// were found on the current world map. The sim approximates POI count as
-/// the number of quest-log entries that are actual quests (not headers).
+/// were found on the current world map. The sim mirrors the total quest-log
+/// entry count so the seeded quest-map tests stay aligned with the same
+/// surface that backs `C_QuestLog.GetNumQuestLogEntries()`.
 pub fn quest_map_update_all_quests(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(quest_count() as f64));
+    let entry_count = borrow_state(state)?.quest_log_entries.entries.len() as f64;
+    state.push(Val::Num(entry_count));
     Ok(1)
 }
 

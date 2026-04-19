@@ -79,6 +79,9 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     end
 
     local function forceCastBarUnderPlayerFrame(layoutInfo)
+        if type(PlayerFrame) ~= "table" or type(PlayerCastingBarFrame) ~= "table" then
+            return
+        end
         if not layoutInfo or not layoutInfo.layouts then return end
         local activeLayout = layoutInfo.layouts[layoutInfo.activeLayout]
         if not activeLayout or not activeLayout.systems then return end

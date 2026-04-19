@@ -77,13 +77,36 @@ const C_MAP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
 const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetActiveMatchState", c_pvp_get_active_match_state),
     ("GetCustomVictoryStatID", c_pvp_get_custom_victory_stat_id),
+    ("GetPVPDesired", super::super::pvp_probes::get_pvp_desired),
+    (
+        "GetPVPLastHonorGain",
+        super::super::pvp_probes::get_pvp_last_honor_gain,
+    ),
+    (
+        "GetHolidayBGInfo",
+        super::super::pvp_probes::get_holiday_bg_info,
+    ),
+    ("GetLocklistMap", super::super::pvp_probes::get_locklist_map),
+    (
+        "GetLocklistMapName",
+        super::super::pvp_probes::get_locklist_map_name,
+    ),
     ("IsMatchConsideredArena", c_pvp_is_match_considered_arena),
+    (
+        "IsInActiveWorldPVP",
+        super::super::pvp_probes::is_in_active_world_pvp,
+    ),
+    ("IsSubZonePVP", super::super::pvp_probes::is_sub_zone_pvp),
     ("IsRatedArena", c_pvp_is_rated_arena),
     ("IsRatedBattleground", c_pvp_is_rated_battleground),
     ("IsRatedMap", c_pvp_is_rated_map),
     ("IsRatedSoloRBG", c_pvp_is_rated_solo_rbg),
     ("IsRatedSoloShuffle", c_pvp_is_rated_solo_shuffle),
     ("IsSoloRBG", c_pvp_is_solo_rbg),
+    (
+        "GetWorldPVPAreaInfo",
+        super::super::pvp_probes::get_world_pvp_area_info,
+    ),
     (
         "GetPvpTalentsUnlockedLevel",
         c_pvp_get_pvp_talents_unlocked_level,
@@ -93,6 +116,11 @@ const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
         c_pvp_get_war_mode_reward_bonus_default,
     ),
     ("GetWarModeRewardBonus", c_pvp_get_war_mode_reward_bonus),
+    ("SetLocklistMap", super::super::pvp_probes::set_locklist_map),
+    (
+        "ClearLocklistMap",
+        super::super::pvp_probes::clear_locklist_map,
+    ),
 ];
 
 const C_LOSS_OF_CONTROL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[

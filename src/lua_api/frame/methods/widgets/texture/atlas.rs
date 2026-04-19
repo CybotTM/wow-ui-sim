@@ -20,7 +20,7 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let Some(atlas_name) = atlas_name else {
         return Ok(0);
     };
-    let Some(lookup) = crate::atlas::get_atlas_info(&atlas_name) else {
+    let Some(lookup) = crate::atlas::get_render_atlas_info(&atlas_name) else {
         let mut sim = borrow_state_mut(state)?;
         if let Some(frame) = sim.widgets.get_mut_visual(id) {
             frame.atlas = Some(atlas_name);
@@ -32,13 +32,7 @@ pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     };
     let use_atlas_size = opt_bool(state, 3).unwrap_or(false);
     let mut sim = borrow_state_mut(state)?;
-    apply_atlas(
-        &mut sim.widgets,
-        id,
-        &atlas_name,
-        lookup.info,
-        use_atlas_size,
-    );
+    apply_atlas(&mut sim.widgets, id, &atlas_name, &lookup, use_atlas_size);
     Ok(0)
 }
 
@@ -48,12 +42,13 @@ fn apply_atlas(
     widgets: &mut crate::widget::WidgetRegistry,
     id: u64,
     atlas_name: &str,
-    info: &crate::atlas::AtlasInfo,
+    lookup: &crate::atlas::AtlasLookup,
     use_atlas_size: bool,
 ) {
+    let info = lookup.info;
     let tex_coords = atlas_slot_tex_coords(info);
     let parent_info = collect_parent_slot(widgets, id);
-    apply_atlas_to_frame(widgets, id, atlas_name, info, tex_coords, use_atlas_size);
+    apply_atlas_to_frame(widgets, id, atlas_name, lookup, tex_coords, use_atlas_size);
     if let Some((parent_id, parent_key)) = parent_info {
         propagate_atlas_to_button_slot(
             widgets,
@@ -89,23 +84,24 @@ fn collect_parent_slot(widgets: &crate::widget::WidgetRegistry, id: u64) -> Opti
 
 /// Write atlas name, source texture, and atlas UVs into the child frame.
 /// When `use_atlas_size` is true, also resize the frame to the slot dimensions.
-fn apply_atlas_to_frame(
+pub(crate) fn apply_atlas_to_frame(
     widgets: &mut crate::widget::WidgetRegistry,
     id: u64,
     atlas_name: &str,
-    info: &crate::atlas::AtlasInfo,
+    lookup: &crate::atlas::AtlasLookup,
     tex_coords: (f32, f32, f32, f32),
     use_atlas_size: bool,
 ) {
     let Some(frame) = widgets.get_mut_visual(id) else {
         return;
     };
+    let info = lookup.info;
     frame.atlas = Some(atlas_name.to_string());
     frame.texture = Some(info.file.to_string());
     frame.tex_coords = Some(tex_coords);
     frame.atlas_tex_coords = Some(tex_coords);
     if use_atlas_size {
-        frame.set_size(info.width as f32, info.height as f32);
+        frame.set_size(lookup.width() as f32, lookup.height() as f32);
     }
 }
 

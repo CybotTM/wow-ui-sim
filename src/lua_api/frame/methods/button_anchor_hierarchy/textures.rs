@@ -158,7 +158,7 @@ fn apply_texture_userdata(
 }
 
 fn resolve_atlas_path(path: &str) -> (Option<String>, Option<(f32, f32, f32, f32)>) {
-    if let Some(lookup) = crate::atlas::get_atlas_info(path) {
+    if let Some(lookup) = crate::atlas::get_render_atlas_info(path) {
         let info = lookup.info;
         let coords = (
             info.left_tex_coord,
@@ -367,7 +367,7 @@ fn apply_atlas_setter(
     atlas_name: &str,
     set_button_field: fn(&mut crate::widget::Frame, String, (f32, f32, f32, f32)),
 ) -> LuaResult<()> {
-    let Some(lookup) = crate::atlas::get_atlas_info(atlas_name) else {
+    let Some(lookup) = crate::atlas::get_render_atlas_info(atlas_name) else {
         return Ok(());
     };
     let tex_coords = (

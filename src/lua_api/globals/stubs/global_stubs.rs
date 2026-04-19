@@ -65,6 +65,8 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ShowUIPanel",
     "SortBags",
     "SortReagentBag",
+    "PlayerFrame_AttachCastBar",
+    "PlayerFrame_DetachCastBar",
     "StopCinematic",
     "StopMusic",
     "SwapActionSlots",

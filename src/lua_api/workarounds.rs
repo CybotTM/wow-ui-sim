@@ -286,6 +286,20 @@ fn patch_character_select_list(env: &crate::lua_api::WowLuaEnv) {
 fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(
         r#"
+        local defaultChatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
+        local defaultEditBox = rawget(_G, "ChatFrame1EditBox")
+        if type(defaultChatFrame) == "table" and type(defaultEditBox) == "table" then
+            if defaultChatFrame.editBox == nil then
+                defaultChatFrame.editBox = defaultEditBox
+            end
+            if defaultEditBox.chatFrame == nil then
+                defaultEditBox.chatFrame = defaultChatFrame
+            end
+            if DEFAULT_CHAT_FRAME == nil then
+                DEFAULT_CHAT_FRAME = defaultChatFrame
+            end
+        end
+
         local channelButton = ChatFrameChannelButton
         if type(channelButton) == "table" then
             local icon = channelButton.Icon

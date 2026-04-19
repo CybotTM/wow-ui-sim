@@ -157,6 +157,19 @@ fn reputation_entry_table(
     table_set(state, table, "factionID", Val::Num(entry.faction_id as f64));
     table_set(state, table, "reaction", Val::Num(entry.reaction as f64));
     table_set(state, table, "standing", Val::Num(entry.standing as f64));
+    table_set(state, table, "currentReactionThreshold", Val::Num(0.0));
+    table_set(
+        state,
+        table,
+        "nextReactionThreshold",
+        Val::Num(entry.top_value as f64),
+    );
+    table_set(
+        state,
+        table,
+        "currentStanding",
+        Val::Num(entry.standing as f64),
+    );
     table_set(state, table, "topValue", Val::Num(entry.top_value as f64));
     table_set(state, table, "isHeader", Val::Bool(entry.is_header));
     table_set(state, table, "isCollapsed", Val::Bool(entry.is_collapsed));
@@ -166,6 +179,19 @@ fn reputation_entry_table(
         table,
         "isAccountWide",
         Val::Bool(entry.is_account_wide),
+    );
+    table_set(state, table, "currentReactionThreshold", Val::Num(0.0));
+    table_set(
+        state,
+        table,
+        "nextReactionThreshold",
+        Val::Num(entry.top_value as f64),
+    );
+    table_set(
+        state,
+        table,
+        "currentStanding",
+        Val::Num(entry.standing as f64),
     );
     table
 }

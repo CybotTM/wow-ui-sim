@@ -1,6 +1,7 @@
 //! Attribute, frame-flag, and script-flag RustFn methods.
 
 use super::helpers::{attribute_to_val, store_simple_attribute, val_to_f32};
+use crate::lua_api::frame::methods::methods_helpers::can_change_protected_state_for;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     frame_ref, val_to_string,
@@ -9,7 +10,6 @@ use crate::lua_api::script_helpers::{
     call_error_handler_state, get_script as get_rilua_script, protected_lua_pcall_state,
 };
 use crate::lua_bridge::stack_val;
-use crate::widget::WidgetRegistry;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -91,13 +91,7 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
 /// under addon taint. Matches Blizzard's "protected frames reject insecure
 /// attribute writes" rule — the write is silently dropped.
 pub(super) fn protected_write_blocked(state: &mut LuaState, id: u64) -> bool {
-    if rilua::api::state_is_secure(state) {
-        return false;
-    }
-    let Ok(sim) = borrow_state(state) else {
-        return false;
-    };
-    sim.widgets.get(id).is_some_and(|f| f.is_protected)
+    !can_change_protected_state_for(state, id)
 }
 
 pub(super) fn dispatch_attribute_changed(
@@ -295,55 +289,10 @@ pub(super) fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn can_change_protected_state(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let sim = borrow_state(state)?;
-    let in_combat = sim.player.in_combat;
-    let blocked = in_combat
-        && !rilua::api::state_is_secure(state)
-        && frame_blocks_protected_state(&sim.widgets, id);
-    drop(sim);
-    state.push(Val::Bool(!blocked));
+    let allowed =
+        crate::lua_api::frame::methods::methods_helpers::can_change_protected_state_for(state, id);
+    state.push(Val::Bool(allowed));
     Ok(1)
-}
-
-fn frame_blocks_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {
-    frame_or_ancestor_is_protected(widgets, id)
-        || frame_has_protected_descendant(widgets, id)
-        || frame_anchor_references_protected_state(widgets, id)
-}
-
-fn frame_or_ancestor_is_protected(widgets: &WidgetRegistry, id: u64) -> bool {
-    let mut current = Some(id);
-    while let Some(frame_id) = current {
-        let Some(frame) = widgets.get(frame_id) else {
-            return false;
-        };
-        if frame.is_protected {
-            return true;
-        }
-        current = frame.parent_id;
-    }
-    false
-}
-
-fn frame_has_protected_descendant(widgets: &WidgetRegistry, id: u64) -> bool {
-    widgets.get(id).is_some_and(|frame| {
-        frame.children.iter().copied().any(|child_id| {
-            frame_or_ancestor_is_protected(widgets, child_id)
-                || frame_has_protected_descendant(widgets, child_id)
-        })
-    })
-}
-
-fn frame_anchor_references_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {
-    widgets.get(id).is_some_and(|frame| {
-        frame.anchors.iter().any(|anchor| {
-            anchor.relative_to_id.is_some_and(|relative_to_id| {
-                let relative_to_id = relative_to_id as u64;
-                frame_or_ancestor_is_protected(widgets, relative_to_id)
-                    || frame_has_protected_descendant(widgets, relative_to_id)
-            })
-        })
-    })
 }
 
 pub(super) fn set_pass_through_buttons(state: &mut LuaState) -> LuaResult<u32> {

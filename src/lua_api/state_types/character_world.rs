@@ -311,6 +311,12 @@ pub struct WorldState {
     pub collected_heirlooms: HashSet<u32>,
     pub earned_achievements: HashSet<i32>,
     pub premade_listings: Vec<PremadeListing>,
+    /// Seeded PvP battleground info returned by `C_PvP.GetWorldPVPAreaInfo()`.
+    pub world_pvp_areas: Vec<WorldPvpBattlegroundInfo>,
+    /// Seeded holiday battleground info returned by `C_PvP.GetHolidayBGInfo()`.
+    pub holiday_bg_info: Option<RandomBGInfo>,
+    /// Player-managed battleground locklist returned by `C_PvP.GetLocklistMap()`.
+    pub locklist_maps: Vec<u32>,
     /// Current zone's PvP type, returned by `C_PvP.GetZonePVPInfo()` as its
     /// first value. Canonical WoW tokens: `"contested"`, `"sanctuary"`,
     /// `"arena"`, `"friendly"`, `"hostile"`, `"combat"`. Default `"contested"`.
@@ -357,6 +363,31 @@ pub struct WorldState {
 pub struct GuildMember {
     pub name: String,
     pub rank_index: i32,
+}
+
+/// Seeded `C_PvP.GetWorldPVPAreaInfo()` row.
+#[derive(Debug, Clone, Default)]
+pub struct WorldPvpBattlegroundInfo {
+    pub bg_id: i32,
+    pub can_enter: bool,
+    pub can_queue: bool,
+    pub is_active: bool,
+    pub max_level: i32,
+    pub min_level: i32,
+    pub name: String,
+    pub start_time: i32,
+}
+
+/// Seeded `C_PvP.GetHolidayBGInfo()` row.
+#[derive(Debug, Clone, Default)]
+pub struct RandomBGInfo {
+    pub bg_id: i32,
+    pub bg_index: i32,
+    pub can_queue: bool,
+    pub has_random_win_today: bool,
+    pub max_level: i32,
+    pub min_level: i32,
+    pub name: String,
 }
 
 /// A macro slot. Matches the `/macro` addon view: name, icon, body text.
@@ -434,6 +465,37 @@ pub fn seeded_world_state() -> WorldState {
         guild_num_members: 150,
         pvp_type: "contested".into(),
         guild_can_speak_in_chat: true,
+        world_pvp_areas: vec![
+            WorldPvpBattlegroundInfo {
+                bg_id: 571,
+                can_enter: true,
+                can_queue: true,
+                is_active: true,
+                max_level: 80,
+                min_level: 80,
+                name: "Wintergrasp".into(),
+                start_time: 900,
+            },
+            WorldPvpBattlegroundInfo {
+                bg_id: 607,
+                can_enter: false,
+                can_queue: false,
+                is_active: false,
+                max_level: 85,
+                min_level: 80,
+                name: "Tol Barad".into(),
+                start_time: 0,
+            },
+        ],
+        holiday_bg_info: Some(RandomBGInfo {
+            bg_id: 108,
+            bg_index: 2,
+            can_queue: true,
+            has_random_win_today: false,
+            max_level: 80,
+            min_level: 10,
+            name: "Warsong Scramble".into(),
+        }),
         ..WorldState::default()
     };
     apply_collection_defaults(&mut ws);
@@ -485,6 +547,18 @@ mod tests {
         assert_eq!(world.zone_id, 1519);
         assert_eq!(world.pvp_type, "contested");
         assert!(world.guild_can_speak_in_chat);
+        assert_eq!(world.world_pvp_areas.len(), 2);
+        assert_eq!(world.world_pvp_areas[0].name, "Wintergrasp");
+        assert_eq!(world.world_pvp_areas[1].name, "Tol Barad");
+        assert_eq!(
+            world
+                .holiday_bg_info
+                .as_ref()
+                .expect("holiday bg info should be seeded")
+                .name,
+            "Warsong Scramble"
+        );
+        assert!(world.locklist_maps.is_empty());
     }
 
     #[test]

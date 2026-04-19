@@ -196,6 +196,7 @@ pub fn sync_child_to_rilua(
 pub fn mark_frame_ref_cache_no_traverse(state: &mut LuaState) {
     let cache = frame_ref_cache(state);
     state.gc.mark_table_no_traverse(cache);
+    registry_set(state, "__frame_refs", Val::Table(cache));
 }
 
 /// Get or create the frame ref cache table in the registry.

@@ -1,6 +1,12 @@
 use crate::widget::WidgetRegistry;
 use std::collections::HashSet;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct RegionEntry {
+    depth: u32,
+    id: u64,
+}
+
 pub(super) fn should_trace_strata_invalidations(start_time: &std::time::Instant) -> bool {
     if std::env::var_os("WOW_SIM_TRACE_STRATA_INVALIDATIONS").is_none() {
         return false;
@@ -58,44 +64,114 @@ pub(super) fn dfs_emit(
     };
     out.push(id);
 
-    let (mut regions, mut child_frames) = partition_children(frame, strata_idx, widgets, visible);
+    let mut regions = Vec::new();
+    let mut child_frames = Vec::new();
+    collect_frame_regions(
+        frame,
+        strata_idx,
+        widgets,
+        visible,
+        0,
+        &mut regions,
+        &mut child_frames,
+    );
     sort_regions(&mut regions, widgets);
-
-    let split = regions.partition_point(|&region_id| {
-        widgets
-            .get(region_id)
-            .is_none_or(|region| region.widget_type != crate::widget::WidgetType::FontString)
-    });
-    let (texture_regions, fontstring_regions) = regions.split_at(split);
-    out.extend_from_slice(texture_regions);
+    out.extend(regions.into_iter().map(|entry| entry.id));
 
     sort_child_frames(&mut child_frames, widgets);
     for child_id in child_frames {
-        dfs_emit(child_id, strata_idx, widgets, visible, out);
+        let child = widgets.get(child_id);
+        let suppress_regions = child.is_some_and(is_transparent_wrapper);
+        dfs_emit_with_region_mode(
+            child_id,
+            strata_idx,
+            widgets,
+            visible,
+            out,
+            suppress_regions,
+        );
     }
-
-    out.extend_from_slice(fontstring_regions);
 }
 
-fn partition_children(
+fn dfs_emit_with_region_mode(
+    id: u64,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    out: &mut Vec<u64>,
+    suppress_regions: bool,
+) {
+    let Some(frame) = widgets.get(id) else {
+        return;
+    };
+    out.push(id);
+
+    let mut regions = Vec::new();
+    let mut child_frames = Vec::new();
+    if !suppress_regions {
+        collect_frame_regions(
+            frame,
+            strata_idx,
+            widgets,
+            visible,
+            0,
+            &mut regions,
+            &mut child_frames,
+        );
+        sort_regions(&mut regions, widgets);
+        out.extend(regions.into_iter().map(|entry| entry.id));
+    } else {
+        collect_frame_children_only(frame, strata_idx, widgets, visible, &mut child_frames);
+    }
+
+    sort_child_frames(&mut child_frames, widgets);
+    for child_id in child_frames {
+        let child = widgets.get(child_id);
+        let child_suppress = child.is_some_and(is_transparent_wrapper);
+        dfs_emit_with_region_mode(child_id, strata_idx, widgets, visible, out, child_suppress);
+    }
+}
+
+fn collect_frame_regions(
     frame: &crate::widget::Frame,
     strata_idx: usize,
     widgets: &WidgetRegistry,
     visible: &HashSet<u64>,
-) -> (Vec<u64>, Vec<u64>) {
-    let mut regions = Vec::new();
-    let mut child_frames = Vec::new();
+    depth: u32,
+    regions: &mut Vec<RegionEntry>,
+    child_frames: &mut Vec<u64>,
+) {
+    collect_frame_regions_inner(
+        frame,
+        strata_idx,
+        widgets,
+        visible,
+        depth,
+        regions,
+        child_frames,
+    );
+}
+
+fn collect_frame_regions_inner(
+    frame: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    depth: u32,
+    regions: &mut Vec<RegionEntry>,
+    child_frames: &mut Vec<u64>,
+) {
     for &child_id in &frame.children {
         collect_child_for_emit(
             child_id,
             strata_idx,
             widgets,
             visible,
-            &mut regions,
-            &mut child_frames,
+            depth,
+            regions,
+            child_frames,
         );
     }
-    (regions, child_frames)
 }
 
 fn collect_child_for_emit(
@@ -103,7 +179,8 @@ fn collect_child_for_emit(
     strata_idx: usize,
     widgets: &WidgetRegistry,
     visible: &HashSet<u64>,
-    regions: &mut Vec<u64>,
+    depth: u32,
+    regions: &mut Vec<RegionEntry>,
     child_frames: &mut Vec<u64>,
 ) {
     if !visible.contains(&child_id) {
@@ -113,12 +190,93 @@ fn collect_child_for_emit(
         return;
     };
     if is_region(child.widget_type) {
-        regions.push(child_id);
+        regions.push(RegionEntry {
+            depth,
+            id: child_id,
+        });
         return;
     }
     if child.frame_strata.as_index() == strata_idx {
         child_frames.push(child_id);
+        if is_transparent_wrapper(child) {
+            collect_transparent_wrapper_regions(
+                child_id,
+                strata_idx,
+                widgets,
+                visible,
+                depth + 1,
+                regions,
+            );
+        }
     }
+}
+
+fn collect_transparent_wrapper_regions(
+    id: u64,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    depth: u32,
+    regions: &mut Vec<RegionEntry>,
+) {
+    let Some(frame) = widgets.get(id) else {
+        return;
+    };
+    for &child_id in &frame.children {
+        if !visible.contains(&child_id) {
+            continue;
+        }
+        let Some(child) = widgets.get(child_id) else {
+            continue;
+        };
+        if is_region(child.widget_type) {
+            regions.push(RegionEntry {
+                depth,
+                id: child_id,
+            });
+            continue;
+        }
+        if child.frame_strata.as_index() == strata_idx && is_transparent_wrapper(child) {
+            collect_transparent_wrapper_regions(
+                child_id,
+                strata_idx,
+                widgets,
+                visible,
+                depth + 1,
+                regions,
+            );
+        }
+    }
+}
+
+fn collect_frame_children_only(
+    frame: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    child_frames: &mut Vec<u64>,
+) {
+    for &child_id in &frame.children {
+        if !visible.contains(&child_id) {
+            continue;
+        }
+        let Some(child) = widgets.get(child_id) else {
+            continue;
+        };
+        if is_region(child.widget_type) {
+            continue;
+        }
+        if child.frame_strata.as_index() == strata_idx {
+            child_frames.push(child_id);
+        }
+    }
+}
+
+fn is_transparent_wrapper(frame: &crate::widget::Frame) -> bool {
+    matches!(
+        frame.widget_type,
+        crate::widget::WidgetType::Frame | crate::widget::WidgetType::ScrollFrame
+    ) && !is_strata_root_boundary(frame)
 }
 
 pub(super) fn collect_same_strata_subtree_ids(
@@ -159,28 +317,30 @@ pub(super) fn same_strata_subtree_segment_end(
     end
 }
 
-fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
+fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
     use std::cmp::Reverse;
 
-    regions.sort_by(|&a, &b| {
-        let (frame_a, frame_b) = match (widgets.get(a), widgets.get(b)) {
+    regions.sort_by(|a, b| {
+        let (frame_a, frame_b) = match (widgets.get(a.id), widgets.get(b.id)) {
             (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
-            _ => return a.cmp(&b),
+            _ => return a.id.cmp(&b.id),
         };
         let type_flag = |frame: &crate::widget::Frame| -> u8 {
             u8::from(frame.widget_type == crate::widget::WidgetType::FontString)
         };
         (
+            a.depth,
             frame_a.draw_layer as i32,
             frame_a.draw_sub_layer,
             type_flag(frame_a),
-            Reverse(a),
+            Reverse(a.id),
         )
             .cmp(&(
+                b.depth,
                 frame_b.draw_layer as i32,
                 frame_b.draw_sub_layer,
                 type_flag(frame_b),
-                Reverse(b),
+                Reverse(b.id),
             ))
     });
 }
@@ -253,12 +413,16 @@ mod tests {
                 FrameStrata::Medium.as_index(),
                 &widgets,
                 &visible,
+                0,
                 &mut regions,
                 &mut child_frames,
             );
         }
 
-        assert_eq!(regions, vec![2]);
+        assert_eq!(
+            regions.iter().map(|entry| entry.id).collect::<Vec<_>>(),
+            vec![2]
+        );
         assert_eq!(child_frames, vec![3]);
     }
 }

@@ -1,6 +1,10 @@
 //! Pure frame helper functions shared by loader code and rilua method modules.
 
-use crate::widget::{Anchor, AnchorPoint, Frame, WidgetType};
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
+use crate::lua_api::methods::borrow_state;
+use crate::widget::{Anchor, AnchorPoint, Frame, WidgetRegistry, WidgetType};
+use rilua::Val;
+use rilua::vm::state::LuaState;
 
 pub fn set_all_points_anchors_pub(frame: &mut Frame, parent_id: u64) {
     frame.anchors.push(Anchor {
@@ -30,6 +34,36 @@ pub fn get_or_create_button_texture(
         return refresh_button_texture_child(state, button_id, key, tex_id);
     }
     create_button_texture_child(state, button_id, key)
+}
+
+pub fn can_change_protected_state_for(state: &mut LuaState, id: u64) -> bool {
+    if rilua::api::state_is_secure(state) {
+        return true;
+    }
+    let Ok(sim) = borrow_state(state) else {
+        return true;
+    };
+    !sim.player.in_combat || !frame_blocks_protected_state(&sim.widgets, id)
+}
+
+pub fn frame_blocks_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {
+    frame_is_protected(widgets, id)
+        || frame_has_protected_descendant(widgets, id)
+        || frame_anchor_references_protected_state(widgets, id)
+}
+
+pub fn emit_addon_action_blocked(state: &mut LuaState, frame_id: u64, action: &str) {
+    let blocked_action = borrow_state(state)
+        .ok()
+        .and_then(|sim| {
+            sim.widgets
+                .get(frame_id)
+                .and_then(|frame| frame.name.as_deref())
+                .map(|name| format!("{name}:{action}()"))
+        })
+        .unwrap_or_else(|| action.to_string());
+    let blocked_action = crate::lua_api::methods::create_string(state, &blocked_action);
+    let _ = dispatch_event_now(state, "ADDON_ACTION_BLOCKED", &[Val::Nil, blocked_action]);
 }
 
 fn button_texture_child_id(
@@ -129,4 +163,27 @@ fn apply_button_texture_defaults(
         texture.frame_level = parent.frame_level + 1;
         texture.layout_rect = parent.layout_rect;
     }
+}
+
+fn frame_is_protected(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets.get(id).is_some_and(|frame| frame.is_protected)
+}
+
+fn frame_has_protected_descendant(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets.iter_ids().any(|child_id| {
+        widgets.get(child_id).is_some_and(|frame| {
+            frame.parent_id == Some(id)
+                && (frame.is_protected || frame_has_protected_descendant(widgets, child_id))
+        })
+    })
+}
+
+fn frame_anchor_references_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets.get(id).is_some_and(|frame| {
+        frame.anchors.iter().any(|anchor| {
+            anchor
+                .relative_to_id
+                .is_some_and(|relative_to_id| frame_is_protected(widgets, relative_to_id as u64))
+        })
+    })
 }

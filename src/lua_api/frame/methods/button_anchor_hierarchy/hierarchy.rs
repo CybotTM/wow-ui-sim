@@ -1,5 +1,8 @@
 //! Hierarchy methods (parent/children/regions) and create-region methods.
 
+use crate::lua_api::frame::methods::methods_helpers::{
+    can_change_protected_state_for, emit_addon_action_blocked,
+};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
 };
@@ -36,6 +39,10 @@ pub(super) fn set_parent(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let parent_val = stack_val(state, 2);
     let new_parent_id = extract_frame_id(state, parent_val);
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetParent");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     super::super::methods_hierarchy::reparent_widget(&mut sim.widgets, id, new_parent_id);
     if let Some(f) = sim.widgets.get_mut_visual(id) {
@@ -278,12 +285,21 @@ pub(super) fn add_mask_texture(state: &mut LuaState) -> LuaResult<u32> {
     if !is_mask {
         return Ok(0);
     }
-    if let Some(texture) = sim.widgets.get_mut_visual(texture_id)
-        && !texture.mask_textures.contains(&mask_id)
-    {
-        texture.mask_textures.push(mask_id);
+    if let Some(texture) = sim.widgets.get_mut_visual(texture_id) {
+        add_mask_texture_id(texture, mask_id);
     }
     Ok(0)
+}
+
+fn add_mask_texture_id(texture: &mut crate::widget::Frame, mask_id: u64) {
+    if texture
+        .mask_textures
+        .iter()
+        .any(|existing| *existing == mask_id)
+    {
+        return;
+    }
+    texture.mask_textures.push(mask_id);
 }
 
 pub(super) fn remove_mask_texture(state: &mut LuaState) -> LuaResult<u32> {

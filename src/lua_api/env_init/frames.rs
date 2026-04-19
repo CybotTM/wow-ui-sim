@@ -3,7 +3,10 @@
 use crate::lua_api::frame::methods::{
     button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
-use crate::lua_api::methods::{registry_set, table_set};
+use crate::lua_api::methods::{
+    borrow_state_mut, extract_frame_id, registry_set, sync_child_to_rilua, table_set, val_to_string,
+};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::{LuaApiMut, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -53,6 +56,7 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     // here at init).
     let frame_index = build_frame_index_table(state, frame_mt_ref);
     table_set(state, frame_mt, "__index", Val::Table(frame_index));
+    table_set_rust_fn_static(state, frame_mt_ref, "__newindex", frame_newindex)?;
 
     // Pin the shared frame metatable + its __index clone for the lifetime
     // of the VM. Method registration only happens here at init, so the
@@ -60,6 +64,45 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     state.gc.pin_object(Val::Table(frame_mt_ref));
     state.gc.pin_object(Val::Table(frame_index));
     Ok(())
+}
+
+fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    let frame_val = stack_val(state, 1);
+    let Some(parent_id) = extract_frame_id(state, frame_val) else {
+        return Ok(0);
+    };
+    let key_val = stack_val(state, 2);
+    let value = stack_val(state, 3);
+
+    if let Val::Str(_) = key_val {
+        let Some(key) = val_to_string(state, key_val) else {
+            return Ok(0);
+        };
+        if let Some(child_id) = extract_frame_id(state, value) {
+            {
+                let mut sim = borrow_state_mut(state)?;
+                if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+                    parent.children_keys.insert(key.clone(), child_id);
+                }
+            }
+            sync_child_to_rilua(state, parent_id, &key, child_id)?;
+            return Ok(0);
+        }
+
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+            parent.children_keys.remove(&key);
+        }
+    }
+
+    let Val::Table(table_ref) = frame_val else {
+        return Ok(0);
+    };
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(key_val, value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(table_ref);
+    Ok(0)
 }
 
 /// Build a shallow, non-cyclic clone of the frame metatable's method entries.

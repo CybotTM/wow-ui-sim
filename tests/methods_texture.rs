@@ -421,6 +421,32 @@ fn test_set_atlas_tile_slice_uses_direct_atlas_entry() {
 }
 
 #[test]
+fn test_set_atlas_uses_render_preferred_2x_texture_path() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "QuestLogTickSquareAtlas");
+    env.exec(&format!(r#"{tex}:SetAtlas("questlog-icon-ticksquare")"#))
+        .unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name(&tex).unwrap();
+    let widget = state.widgets.get(id).unwrap();
+
+    assert_eq!(widget.atlas.as_deref(), Some("questlog-icon-ticksquare"));
+    assert!(
+        widget
+            .texture
+            .as_ref()
+            .is_some_and(|path| path.contains("questlogframe2x")),
+        "questlog-icon-ticksquare should prefer questlogframe2x for rendering, got: {:?}",
+        widget.texture
+    );
+    assert_eq!(
+        widget.tex_coords, widget.atlas_tex_coords,
+        "render atlas fallback should preserve atlas UVs"
+    );
+}
+
+#[test]
 fn test_set_atlas_unknown() {
     let env = env();
     let (_, tex) = setup_texture(&env, "AtlasUnk");

@@ -77,6 +77,7 @@ fn register_unit_relationships(state: &mut LuaState) {
 }
 
 fn register_unit_liveness(state: &mut LuaState) {
+    set_global(state, "UnitIsDead", unit_is_dead);
     set_global(state, "UnitIsDeadOrGhost", unit_is_dead_or_ghost);
     set_global(state, "UnitIsCorpse", unit_is_corpse);
     set_global(state, "UnitIsUnconscious", unit_is_unconscious);
@@ -720,6 +721,11 @@ fn unit_is_dead_or_ghost(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Bool(dead));
     Ok(1)
+}
+
+/// `UnitIsDead(unit)` — true when the unit is dead.
+fn unit_is_dead(state: &mut LuaState) -> LuaResult<u32> {
+    unit_is_dead_or_ghost(state)
 }
 
 /// `UnitIsCorpse(unit)` — true when the unit is dead (same as DeadOrGhost

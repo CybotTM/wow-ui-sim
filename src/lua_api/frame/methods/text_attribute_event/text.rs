@@ -4,9 +4,9 @@ use super::helpers::{store_simple_attribute, val_to_f32};
 use crate::font::WowFontSystem;
 use crate::lua_api::globals::font_strings_collection::fonts::create_font_object;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
-    frame_id_from_stack, get_or_create_frame_fields, registry_table_or_create, table_get,
-    table_set, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_string_static,
+    create_table, frame_id_from_stack, get_or_create_frame_fields, registry_table_or_create,
+    table_get, table_set, val_to_string,
 };
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
@@ -40,38 +40,20 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
             }
         })
     };
-    let mut sim = borrow_state_mut(state)?;
-    let current_text = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame_text_value(&sim, frame, false));
-    let current_stripped_text = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame_text_value(&sim, frame, true));
-    let is_tooltip = sim
-        .widgets
-        .get(id)
-        .map(|frame| frame.widget_type == WidgetType::GameTooltip)
-        .unwrap_or(false);
-    let changed = is_tooltip || current_text != text || current_stripped_text != stripped_text;
-    if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.text = text.clone();
-        frame.text_stripped = stripped_text.clone();
-    }
-    let should_update_button_child = matches!(
-        sim.widgets.get(id).map(|frame| frame.widget_type),
-        Some(WidgetType::Button | WidgetType::CheckButton)
-    );
-    drop(sim);
+    let (is_tooltip, should_update_button_child) =
+        update_text_frame(state, id, &text, &stripped_text)?;
     if should_update_button_child && let Some(text_child_id) = ensure_button_text_child(state, id)?
     {
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
-            text_child.text = text.clone();
-            text_child.text_stripped = stripped_text.clone();
+        {
+            let mut sim = borrow_state_mut(state)?;
+            if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
+                text_child.text = text.clone();
+                text_child.text_stripped = stripped_text.clone();
+            }
         }
+        update_auto_text_width(state, text_child_id);
     }
+    update_auto_text_width(state, id);
     if is_tooltip {
         mirror_tooltip_text_fields(state, id, text.clone(), arg3, arg4, arg5, arg6, arg7);
         replace_tooltip_lines(state, id, text, arg3, arg4, arg5, arg6, arg7)?;
@@ -91,6 +73,64 @@ fn strip_html_tags(text: &str) -> String {
         }
     }
     out
+}
+
+fn update_text_frame(
+    state: &mut LuaState,
+    id: u64,
+    text: &Option<String>,
+    stripped_text: &Option<String>,
+) -> LuaResult<(bool, bool)> {
+    let mut sim = borrow_state_mut(state)?;
+    let current_text = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame_text_value(&sim, frame, false));
+    let current_stripped_text = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame_text_value(&sim, frame, true));
+    let is_tooltip = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.widget_type == WidgetType::GameTooltip)
+        .unwrap_or(false);
+    let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
+    if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.text = text.clone();
+        frame.text_stripped = stripped_text.clone();
+    }
+    let should_update_button_child = matches!(
+        sim.widgets.get(id).map(|frame| frame.widget_type),
+        Some(WidgetType::Button | WidgetType::CheckButton)
+    );
+    Ok((is_tooltip, should_update_button_child))
+}
+
+fn update_auto_text_width(state: &mut LuaState, id: u64) {
+    let should_update = {
+        let Ok(sim) = borrow_state(state) else {
+            return;
+        };
+        sim.widgets
+            .get(id)
+            .is_some_and(|frame| frame.width <= 0.0 || frame.width_is_text_auto)
+    };
+    if !should_update {
+        return;
+    }
+
+    let width = measure_text_width(state, id) as f32;
+    let Ok(mut sim) = borrow_state_mut(state) else {
+        return;
+    };
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && (frame.width <= 0.0 || frame.width_is_text_auto)
+    {
+        frame.width = width;
+        frame.width_is_text_auto = true;
+        sim.widgets.mark_rect_dirty(id);
+    }
 }
 
 fn mirror_tooltip_text_fields(
@@ -405,9 +445,38 @@ fn check_vertical_overflow(state: &LuaState, id: u64, p: &TruncationProps) -> bo
 }
 
 pub(super) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: format the text with string.format and delegate to set_text logic
     let id = frame_id_from_stack(state, 1)?;
-    let _ = id;
+    let format = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let mut args = Vec::with_capacity(nargs.saturating_sub(1));
+    args.push(create_string(state, &format));
+    for index in 3..=nargs {
+        args.push(stack_val(state, index as i32));
+    }
+    let formatter = table_get(state, Val::Table(state.global), "format");
+    let formatted = call_function_state(state, formatter, &args)?;
+    let formatted_text = val_to_string(state, formatted).unwrap_or(format);
+    let formatted_value = create_string(state, &formatted_text);
+    state.stack_set(2, formatted_value);
+
+    set_text(state)?;
+
+    let needs_intrinsic_width = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).is_some_and(|frame| {
+            frame.width <= 0.0 && !frame.text.as_deref().unwrap_or("").is_empty()
+        })
+    };
+    if needs_intrinsic_width {
+        let width = measure_text_width(state, id) as f32;
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut_visual(id)
+            && frame.width <= 0.0
+        {
+            frame.width = width;
+        }
+    }
+
     Ok(0)
 }
 

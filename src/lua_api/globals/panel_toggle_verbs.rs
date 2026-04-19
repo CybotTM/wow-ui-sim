@@ -22,7 +22,8 @@
 //!
 //! Registered from `register_tail_globals` after `missing_surface`.
 
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, call_function_state, table_get};
+use rilua::Val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult};
 
@@ -41,6 +42,11 @@ const PANELS: &[(&'static str, &str)] = &[
 ];
 
 fn toggle_panel(state: &mut LuaState, panel: &'static str, frame: &'static str) -> LuaResult<()> {
+    if try_toggle_panel_via_frame_method(state, frame)? {
+        sync_open_panel_membership(state, panel, frame);
+        return Ok(());
+    }
+
     let is_now_open = {
         let mut st = borrow_state_mut(state)?;
         if st.open_panels.contains(panel) {
@@ -55,6 +61,42 @@ fn toggle_panel(state: &mut LuaState, panel: &'static str, frame: &'static str) 
     Ok(())
 }
 
+fn try_toggle_panel_via_frame_method(state: &mut LuaState, frame_name: &str) -> LuaResult<bool> {
+    let global = Val::Table(state.global);
+    let frame = table_get(state, global, frame_name);
+    let Val::Table(_) = frame else {
+        return Ok(false);
+    };
+
+    let handler = table_get(state, frame, "HandleUserActionToggleSelf");
+    let Val::Function(_) = handler else {
+        return Ok(false);
+    };
+
+    let _ = call_function_state(state, handler, &[frame])?;
+    Ok(true)
+}
+
+fn sync_open_panel_membership(state: &mut LuaState, panel: &str, frame_name: &str) {
+    let is_open = borrow_state(state)
+        .ok()
+        .and_then(|st| {
+            st.widgets
+                .get_id_by_name(frame_name)
+                .and_then(|frame_id| st.widgets.get(frame_id).map(|frame| frame.visible))
+        })
+        .unwrap_or(false);
+
+    let Ok(mut st) = borrow_state_mut(state) else {
+        return;
+    };
+    if is_open {
+        st.open_panels.insert(panel.to_string());
+    } else {
+        st.open_panels.remove(panel);
+    }
+}
+
 fn sync_frame_visibility(state: &mut LuaState, frame_name: &str, visible: bool) {
     let Ok(mut st) = borrow_state_mut(state) else {
         return;
@@ -62,9 +104,7 @@ fn sync_frame_visibility(state: &mut LuaState, frame_name: &str, visible: bool) 
     let Some(frame_id) = st.widgets.get_id_by_name(frame_name) else {
         return;
     };
-    if let Some(frame) = st.widgets.get_mut(frame_id) {
-        frame.visible = visible;
-    }
+    st.set_frame_visible(frame_id, visible);
 }
 
 macro_rules! define_toggle {

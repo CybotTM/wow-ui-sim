@@ -3217,6 +3217,134 @@ C_EncounterTimeline = __wow_merge_namespace(C_EncounterTimeline, {
   HasVisibleEvents = function() return true end,
 })
 
+local __wow_encounter_events_state = {
+  events = {
+    [1] = {
+      encounterEventID = 1,
+      name = "Default Encounter Event",
+      color = nil,
+      sounds = {},
+    },
+  },
+  nextSoundHandle = 1,
+}
+C_EncounterEvents = __wow_merge_namespace(C_EncounterEvents, {
+  _state = __wow_encounter_events_state,
+})
+if rawget(C_EncounterEvents, "GetEventList") == nil then
+  function C_EncounterEvents.GetEventList()
+    return { 1 }
+  end
+end
+if rawget(C_EncounterEvents, "HasEventInfo") == nil then
+  function C_EncounterEvents.HasEventInfo(eventID)
+    eventID = tonumber(eventID)
+    return eventID ~= nil and C_EncounterEvents._state.events[eventID] ~= nil
+  end
+end
+if rawget(C_EncounterEvents, "GetEventInfo") == nil then
+  function C_EncounterEvents.GetEventInfo(eventID)
+    eventID = tonumber(eventID)
+    local event = eventID and C_EncounterEvents._state.events[eventID] or nil
+    if not event then
+      return nil
+    end
+    local info = {
+      encounterEventID = event.encounterEventID,
+      name = event.name,
+    }
+    if event.color ~= nil then
+      info.color = {
+        r = event.color.r,
+        g = event.color.g,
+        b = event.color.b,
+      }
+    end
+    return info
+  end
+end
+if rawget(C_EncounterEvents, "SetEventColor") == nil then
+  function C_EncounterEvents.SetEventColor(eventID, color)
+    eventID = tonumber(eventID)
+    local event = eventID and C_EncounterEvents._state.events[eventID] or nil
+    if not event then
+      return
+    end
+    if color == nil then
+      event.color = nil
+      return
+    end
+    event.color = {
+      r = tonumber(color.r) or 0,
+      g = tonumber(color.g) or 0,
+      b = tonumber(color.b) or 0,
+    }
+  end
+end
+if rawget(C_EncounterEvents, "GetEventColor") == nil then
+  function C_EncounterEvents.GetEventColor(eventID)
+    eventID = tonumber(eventID)
+    local event = eventID and C_EncounterEvents._state.events[eventID] or nil
+    if not event or event.color == nil then
+      return nil
+    end
+    return {
+      r = event.color.r,
+      g = event.color.g,
+      b = event.color.b,
+    }
+  end
+end
+if rawget(C_EncounterEvents, "SetEventSound") == nil then
+  function C_EncounterEvents.SetEventSound(eventID, triggerID, sound)
+    eventID = tonumber(eventID)
+    triggerID = tonumber(triggerID)
+    local event = eventID and C_EncounterEvents._state.events[eventID] or nil
+    if not event or triggerID == nil then
+      return
+    end
+    if sound == nil then
+      event.sounds[triggerID] = nil
+      return
+    end
+    event.sounds[triggerID] = {
+      file = tonumber(sound.file) or 0,
+      channel = tostring(sound.channel or ""),
+      volume = tonumber(sound.volume) or 0,
+    }
+  end
+end
+if rawget(C_EncounterEvents, "GetEventSound") == nil then
+  function C_EncounterEvents.GetEventSound(eventID, triggerID)
+    eventID = tonumber(eventID)
+    triggerID = tonumber(triggerID)
+    local event = eventID and C_EncounterEvents._state.events[eventID] or nil
+    if not event or triggerID == nil then
+      return nil
+    end
+    local sound = event.sounds[triggerID]
+    if sound == nil then
+      return nil
+    end
+    return {
+      file = sound.file,
+      channel = sound.channel,
+      volume = sound.volume,
+    }
+  end
+end
+if rawget(C_EncounterEvents, "PlayEventSound") == nil then
+  function C_EncounterEvents.PlayEventSound(eventID, triggerID)
+    local sound = C_EncounterEvents.GetEventSound(eventID, triggerID)
+    if sound == nil then
+      return nil
+    end
+    local handle = C_EncounterEvents._state.nextSoundHandle
+    C_EncounterEvents._state.nextSoundHandle = handle + 1
+    return handle
+  end
+end
+
 C_AccountStore = __wow_merge_namespace(C_AccountStore, {
   GetCategories = function() return {} end,
   GetCategoryInfo = function() return nil end,
@@ -4803,7 +4931,7 @@ end
 
 if UnitIsDead == nil then
   function UnitIsDead(_unit)
-    return false
+    return UnitHealth(_unit) <= 0
   end
 end
 
@@ -9151,11 +9279,211 @@ if rawget(C_TradeInfo, "ShouldShowTradeOfferWarning") == nil then
     return false
   end
 end
+local __wow_secure_transfer_state = type(C_SecureTransfer) == "table" and rawget(C_SecureTransfer, "_state") or nil
+C_SecureTransfer = __wow_merge_namespace(C_SecureTransfer, {
+  _state = __wow_secure_transfer_state or {
+    shouldShowTradeOfferWarning = false,
+    tradePartner = nil,
+    mailInfo = {
+      target = "",
+      sendMoney = 0,
+    },
+    housingPurchaseCost = 0,
+    housingPurchaseQuantity = 0,
+    housingVCPurchaseProductID = 0,
+    acceptTradeCount = 0,
+    sendMailCount = 0,
+    completeHousingPurchaseCount = 0,
+    completeHousingVCPurchaseCount = 0,
+    cancelCount = 0,
+    lastAction = nil,
+  },
+})
+if rawget(C_SecureTransfer, "GetMailInfo") == nil then
+  function C_SecureTransfer.GetMailInfo()
+    local mailInfo = C_SecureTransfer._state.mailInfo or {}
+    return {
+      target = tostring(mailInfo.target or ""),
+      sendMoney = tonumber(mailInfo.sendMoney) or 0,
+    }
+  end
+end
+if rawget(C_SecureTransfer, "GetTradePartner") == nil then
+  function C_SecureTransfer.GetTradePartner()
+    return C_SecureTransfer._state.tradePartner
+  end
+end
+if rawget(C_SecureTransfer, "ShouldShowTradeOfferWarning") == nil then
+  function C_SecureTransfer.ShouldShowTradeOfferWarning()
+    return C_SecureTransfer._state.shouldShowTradeOfferWarning == true
+  end
+end
+if rawget(C_SecureTransfer, "GetHousingPurchaseCost") == nil then
+  function C_SecureTransfer.GetHousingPurchaseCost()
+    return tonumber(C_SecureTransfer._state.housingPurchaseCost) or 0
+  end
+end
+if rawget(C_SecureTransfer, "GetHousingPurchaseQuantity") == nil then
+  function C_SecureTransfer.GetHousingPurchaseQuantity()
+    return tonumber(C_SecureTransfer._state.housingPurchaseQuantity) or 0
+  end
+end
+if rawget(C_SecureTransfer, "GetHousingVCPurchaseProductID") == nil then
+  function C_SecureTransfer.GetHousingVCPurchaseProductID()
+    return tonumber(C_SecureTransfer._state.housingVCPurchaseProductID) or 0
+  end
+end
+if rawget(C_SecureTransfer, "AcceptTrade") == nil then
+  function C_SecureTransfer.AcceptTrade()
+    C_SecureTransfer._state.acceptTradeCount = (tonumber(C_SecureTransfer._state.acceptTradeCount) or 0) + 1
+    C_SecureTransfer._state.lastAction = "AcceptTrade"
+  end
+end
+if rawget(C_SecureTransfer, "SendMail") == nil then
+  function C_SecureTransfer.SendMail()
+    C_SecureTransfer._state.sendMailCount = (tonumber(C_SecureTransfer._state.sendMailCount) or 0) + 1
+    C_SecureTransfer._state.lastAction = "SendMail"
+  end
+end
+if rawget(C_SecureTransfer, "CompleteHousingPurchase") == nil then
+  function C_SecureTransfer.CompleteHousingPurchase()
+    C_SecureTransfer._state.completeHousingPurchaseCount =
+      (tonumber(C_SecureTransfer._state.completeHousingPurchaseCount) or 0) + 1
+    C_SecureTransfer._state.lastAction = "CompleteHousingPurchase"
+  end
+end
+if rawget(C_SecureTransfer, "CompleteHousingVCPurchase") == nil then
+  function C_SecureTransfer.CompleteHousingVCPurchase()
+    C_SecureTransfer._state.completeHousingVCPurchaseCount =
+      (tonumber(C_SecureTransfer._state.completeHousingVCPurchaseCount) or 0) + 1
+    C_SecureTransfer._state.lastAction = "CompleteHousingVCPurchase"
+  end
+end
+if rawget(C_SecureTransfer, "Cancel") == nil then
+  function C_SecureTransfer.Cancel()
+    C_SecureTransfer._state.cancelCount = (tonumber(C_SecureTransfer._state.cancelCount) or 0) + 1
+    C_SecureTransfer._state.lastAction = "Cancel"
+  end
+end
+if type(UIFrameManager) ~= "table" then
+  UIFrameManager = __wow_namespace()
+end
+if type(UIFrameManager_ManagedFrameMixin) ~= "table" then
+  UIFrameManager_ManagedFrameMixin = __wow_namespace()
+end
+local __wow_ui_frame_manager_registered_frames = {}
+local __wow_ui_frame_manager_registered_frame_type_to_frames = {}
+local function __wow_ui_frame_manager_ensure_state()
+  if type(UIFrameManager) == "table" and UIFrameManager.registeredFrameTypeToFrames ~= __wow_ui_frame_manager_registered_frame_type_to_frames then
+    UIFrameManager.registeredFrameTypeToFrames = __wow_ui_frame_manager_registered_frame_type_to_frames
+  end
+end
+if rawget(UIFrameManager, "OnLoad") == nil then
+  function UIFrameManager:OnLoad()
+    __wow_ui_frame_manager_ensure_state()
+    if type(self.RegisterEvent) == "function" then
+      self:RegisterEvent("FRAME_MANAGER_UPDATE_ALL")
+      self:RegisterEvent("FRAME_MANAGER_UPDATE_FRAME")
+    end
+  end
+end
+if rawget(UIFrameManager, "OnEvent") == nil then
+  function UIFrameManager:OnEvent(event, ...)
+    __wow_ui_frame_manager_ensure_state()
+    if event == "FRAME_MANAGER_UPDATE_ALL" then
+      for frameType, frames in pairs(__wow_ui_frame_manager_registered_frame_type_to_frames) do
+        for frame in pairs(frames) do
+          frame:UpdateFrameState(C_FrameManager.GetFrameVisibilityState(frameType))
+        end
+      end
+      return
+    end
+    local frameType, show = ...
+    local frames = __wow_ui_frame_manager_registered_frame_type_to_frames[frameType]
+    if not frames then
+      return
+    end
+    for frame in pairs(frames) do
+      frame:UpdateFrameState(show)
+    end
+  end
+end
+if rawget(UIFrameManager, "RegisterFrameForFrameType") == nil then
+  function UIFrameManager:RegisterFrameForFrameType(frame, frameType)
+    __wow_ui_frame_manager_ensure_state()
+    if __wow_ui_frame_manager_registered_frames[frame] then
+      return
+    end
+    local frames = __wow_ui_frame_manager_registered_frame_type_to_frames[frameType]
+    if frames == nil then
+      frames = {}
+      __wow_ui_frame_manager_registered_frame_type_to_frames[frameType] = frames
+    end
+    frames[frame] = true
+    __wow_ui_frame_manager_registered_frames[frame] = true
+    frame:UpdateFrameState(C_FrameManager.GetFrameVisibilityState(frameType))
+  end
+end
+if rawget(UIFrameManager_ManagedFrameMixin, "OnLoad") == nil then
+  function UIFrameManager_ManagedFrameMixin:OnLoad()
+    UIFrameManager:RegisterFrameForFrameType(self, self.frameType)
+  end
+end
+if rawget(UIFrameManager_ManagedFrameMixin, "UpdateFrameState") == nil then
+  function UIFrameManager_ManagedFrameMixin:UpdateFrameState(show)
+    self:SetShown(show)
+  end
+end
 if C_ProfSpecs == nil then
   C_ProfSpecs = __wow_namespace()
 end
 if rawget(C_ProfSpecs, "ShouldShowSpecTab") == nil then
   function C_ProfSpecs.ShouldShowSpecTab() return true end
+end
+local __wow_reincarnation_state = {
+  active = false,
+  character = nil,
+}
+C_Reincarnation = __wow_merge_namespace(C_Reincarnation, {
+  _state = __wow_reincarnation_state,
+})
+if rawget(C_Reincarnation, "IsReincarnating") == nil then
+  function C_Reincarnation.IsReincarnating()
+    return C_Reincarnation._state.active == true
+  end
+end
+if rawget(C_Reincarnation, "GetReincarnatingCharacter") == nil then
+  function C_Reincarnation.GetReincarnatingCharacter()
+    return C_Reincarnation._state.character
+  end
+end
+if rawget(C_Reincarnation, "StartReincarnation") == nil then
+  function C_Reincarnation.StartReincarnation(character)
+    if C_Reincarnation._state.active then
+      return false
+    end
+    if character ~= nil and type(character) ~= "table" then
+      return false
+    end
+    local guid = character and tostring(character.guid or "") or "reincarnation-guid"
+    local name = character and tostring(character.name or "") or "Reincarnating Character"
+    C_Reincarnation._state.active = true
+    C_Reincarnation._state.character = {
+      guid = guid,
+      name = name,
+    }
+    return true
+  end
+end
+if rawget(C_Reincarnation, "StopReincarnation") == nil then
+  function C_Reincarnation.StopReincarnation()
+    if not C_Reincarnation._state.active then
+      return false
+    end
+    C_Reincarnation._state.active = false
+    C_Reincarnation._state.character = nil
+    return true
+  end
 end
 if rawget(C_ProfSpecs, "GetDefaultSpecSkillLine") == nil then
   function C_ProfSpecs.GetDefaultSpecSkillLine() return 164 end
