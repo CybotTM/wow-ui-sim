@@ -363,6 +363,77 @@ fn test_sound_stubs_exist() {
     }
 }
 
+#[test]
+fn test_sound_shims_record_latest_requests() {
+    let env = env();
+    env.eval::<()>(
+        r#"
+        PlaySound(839)
+        PlaySoundFile("sound/interface/test.ogg")
+        StopSound(17)
+        "#,
+    )
+    .unwrap();
+
+    let sim = env.state().borrow();
+    assert_eq!(
+        sim.last_sound_kit_requested,
+        Some(839),
+        "PlaySound should record the latest requested sound kit"
+    );
+    assert_eq!(
+        sim.last_sound_file_requested.as_deref(),
+        Some("sound/interface/test.ogg"),
+        "PlaySoundFile should record the latest requested file path"
+    );
+    assert_eq!(
+        sim.last_stopped_sound_handle,
+        Some(17),
+        "StopSound should record the latest stopped handle"
+    );
+}
+
+#[test]
+fn test_multi_action_bar_grid_shims_toggle_sim_state() {
+    let env = env();
+    env.eval::<()>("MultiActionBar_ShowAllGrids()").unwrap();
+    assert!(
+        env.state().borrow().multi_action_bar_grids_shown,
+        "ShowAllGrids should flip the grid-visible shim state on"
+    );
+
+    env.eval::<()>("MultiActionBar_HideAllGrids()").unwrap();
+    assert!(
+        !env.state().borrow().multi_action_bar_grids_shown,
+        "HideAllGrids should flip the grid-visible shim state off"
+    );
+}
+
+#[test]
+fn test_map_scene_character_highlight_shims_track_guid() {
+    let env = env();
+    env.eval::<()>(r#"MapSceneCharacterHighlightStart("Player-1-0000BEEF")"#)
+        .unwrap();
+    assert_eq!(
+        env.state()
+            .borrow()
+            .highlighted_map_scene_character_guid
+            .as_deref(),
+        Some("Player-1-0000BEEF"),
+        "highlight start should store the active character guid"
+    );
+
+    env.eval::<()>(r#"MapSceneCharacterHighlightEnd("Player-1-0000BEEF")"#)
+        .unwrap();
+    assert!(
+        env.state()
+            .borrow()
+            .highlighted_map_scene_character_guid
+            .is_none(),
+        "highlight end should clear the active character guid"
+    );
+}
+
 // ============================================================================
 // String library aliases
 // ============================================================================

@@ -69,6 +69,11 @@ macro_rules! build_empty_sim_state {
             current_focus: $runtime.current_focus,
             enemy_pool: Vec::new(),
             sound_manager: $runtime.sound_manager,
+            last_sound_kit_requested: $runtime.last_sound_kit_requested,
+            last_sound_file_requested: $runtime.last_sound_file_requested,
+            last_stopped_sound_handle: $runtime.last_stopped_sound_handle,
+            highlighted_map_scene_character_guid: $runtime.highlighted_map_scene_character_guid,
+            multi_action_bar_grids_shown: $runtime.multi_action_bar_grids_shown,
             rot_damage_level: $runtime.rot_damage_level,
             fps: $runtime.fps,
             start_time: $runtime.start_time,
@@ -342,6 +347,16 @@ pub struct SimState {
     pub enemy_pool: Vec<TargetInfo>,
     /// Audio playback manager (None when no audio device or WOW_SIM_NO_SOUND=1).
     pub sound_manager: Option<SoundManager>,
+    /// Most recent global `PlaySound(soundKitID)` request.
+    pub last_sound_kit_requested: Option<u32>,
+    /// Most recent global `PlaySoundFile(path)` request.
+    pub last_sound_file_requested: Option<String>,
+    /// Most recent global `StopSound(handle)` request.
+    pub last_stopped_sound_handle: Option<u32>,
+    /// Character GUID currently highlighted by glue `MapSceneCharacterHighlightStart`.
+    pub highlighted_map_scene_character_guid: Option<String>,
+    /// Whether the legacy `MultiActionBar_ShowAllGrids` shim has grids enabled.
+    pub multi_action_bar_grids_shown: bool,
     /// Rot damage intensity (index into ROT_DAMAGE_LEVELS).
     pub rot_damage_level: usize,
     /// Current framerate (FPS), updated by the app's FPS counter.
@@ -1286,6 +1301,11 @@ struct EmptyRuntimeState {
     current_target: Option<TargetInfo>,
     current_focus: Option<TargetInfo>,
     sound_manager: Option<SoundManager>,
+    last_sound_kit_requested: Option<u32>,
+    last_sound_file_requested: Option<String>,
+    last_stopped_sound_handle: Option<u32>,
+    highlighted_map_scene_character_guid: Option<String>,
+    multi_action_bar_grids_shown: bool,
     casting: Option<CastingState>,
     gcd: Option<(f64, f64)>,
     cursor_item: Option<CursorInfo>,
@@ -1335,6 +1355,11 @@ macro_rules! build_empty_runtime_state {
             current_target: None,
             current_focus: None,
             sound_manager: None,
+            last_sound_kit_requested: None,
+            last_sound_file_requested: None,
+            last_stopped_sound_handle: None,
+            highlighted_map_scene_character_guid: None,
+            multi_action_bar_grids_shown: false,
             casting: None,
             gcd: None,
             cursor_item: None,

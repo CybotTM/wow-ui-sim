@@ -89,9 +89,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "PlaySound", noop)?;
-    LuaApiMut::register_function(lua, "PlaySoundFile", noop)?;
-    LuaApiMut::register_function(lua, "StopSound", noop)?;
+    LuaApiMut::register_function(lua, "PlaySound", play_sound)?;
+    LuaApiMut::register_function(lua, "PlaySoundFile", play_sound_file)?;
+    LuaApiMut::register_function(lua, "StopSound", stop_sound)?;
     install_date_alias(lua)?;
     LuaApiMut::register_function(lua, "GetSpellLink", get_spell_link_global)?;
     LuaApiMut::register_function(lua, "GetSpellIcon", get_spell_icon_global)?;
@@ -99,10 +99,26 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "GetItemClassInfo", get_item_class_info_global)?;
     LuaApiMut::register_function(lua, "GetRepairAllCost", get_repair_all_cost)?;
     LuaApiMut::register_function(lua, "SetActionUIButton", set_action_ui_button)?;
-    LuaApiMut::register_function(lua, "MapSceneCharacterHighlightStart", noop)?;
-    LuaApiMut::register_function(lua, "MapSceneCharacterHighlightEnd", noop)?;
-    LuaApiMut::register_function(lua, "MultiActionBar_ShowAllGrids", noop)?;
-    LuaApiMut::register_function(lua, "MultiActionBar_HideAllGrids", noop)?;
+    LuaApiMut::register_function(
+        lua,
+        "MapSceneCharacterHighlightStart",
+        map_scene_character_highlight_start,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "MapSceneCharacterHighlightEnd",
+        map_scene_character_highlight_end,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "MultiActionBar_ShowAllGrids",
+        multi_action_bar_show_all_grids,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "MultiActionBar_HideAllGrids",
+        multi_action_bar_hide_all_grids,
+    )?;
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
     LuaApiMut::register_function(lua, "CanHearthAndResurrectFromArea", return_false)?;
@@ -206,10 +222,6 @@ pub fn register_quest_log_overrides(lua: &mut rilua::Lua) -> LuaResult<()> {
     quest_log::register_quest_log_surface(state)
 }
 
-fn noop(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
-}
-
 fn return_false(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
@@ -262,6 +274,36 @@ fn get_repair_all_cost(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
+fn play_sound(state: &mut LuaState) -> LuaResult<u32> {
+    let sound_kit_id = u32::from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    sim.last_sound_kit_requested = Some(sound_kit_id);
+    if let Some(manager) = sim.sound_manager.as_mut() {
+        let _ = manager.play_sound(sound_kit_id);
+    }
+    Ok(0)
+}
+
+fn play_sound_file(state: &mut LuaState) -> LuaResult<u32> {
+    let path = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    let mut sim = borrow_state_mut(state)?;
+    sim.last_sound_file_requested = Some(path.clone());
+    if let Some(manager) = sim.sound_manager.as_mut() {
+        let _ = manager.play_sound_file(&path);
+    }
+    Ok(0)
+}
+
+fn stop_sound(state: &mut LuaState) -> LuaResult<u32> {
+    let handle = u32::from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    sim.last_stopped_sound_handle = Some(handle);
+    if let Some(manager) = sim.sound_manager.as_mut() {
+        manager.stop_sound(handle);
+    }
+    Ok(0)
+}
+
 fn get_max_level_for_latest_expansion(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(80.0));
     Ok(1)
@@ -276,6 +318,27 @@ fn set_action_ui_button(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     sim.action_ui_buttons.retain(|(id, _)| *id != button_id);
     sim.action_ui_buttons.push((button_id, action));
+    Ok(0)
+}
+
+fn map_scene_character_highlight_start(state: &mut LuaState) -> LuaResult<u32> {
+    let guid = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    borrow_state_mut(state)?.highlighted_map_scene_character_guid = Some(guid);
+    Ok(0)
+}
+
+fn map_scene_character_highlight_end(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.highlighted_map_scene_character_guid = None;
+    Ok(0)
+}
+
+fn multi_action_bar_show_all_grids(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.multi_action_bar_grids_shown = true;
+    Ok(0)
+}
+
+fn multi_action_bar_hide_all_grids(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.multi_action_bar_grids_shown = false;
     Ok(0)
 }
 
