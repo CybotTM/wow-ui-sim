@@ -612,6 +612,9 @@ impl shader::Primitive for WowUiPrimitive {
             iced::Size::new(bounds.width * scale, bounds.height * scale),
         );
 
+        let prepare_started = Instant::now();
+        crate::logging::set_blocking_phase("prepare_textures");
+        let textures_started = Instant::now();
         upload_pending_textures(
             pipeline,
             queue,
@@ -620,23 +623,40 @@ impl shader::Primitive for WowUiPrimitive {
             &self.glyph_atlas_data,
             self.glyph_atlas_size,
         );
+        let textures_elapsed = textures_started.elapsed();
+        crate::logging::set_blocking_phase("prepare_projection");
         pipeline.update_projection(queue, &physical_bounds);
 
         // Upload only dirty strata (Some = dirty, None = keep previous GPU buffer).
+        crate::logging::set_blocking_phase("prepare_strata");
+        let strata_started = Instant::now();
         for (i, batch_opt) in self.strata_batches.iter().enumerate() {
             if let Some(batch) = batch_opt {
                 let resolved = resolve_and_scale_quads(pipeline, batch, scale);
                 pipeline.upload_strata(device, queue, i, &resolved);
             }
         }
+        let strata_elapsed = strata_started.elapsed();
 
         // Overlay slot (index = COUNT) — always re-uploaded since cursor moves every frame.
         let overlay_idx = FrameStrata::COUNT;
+        crate::logging::set_blocking_phase("prepare_overlay");
+        let overlay_started = Instant::now();
         if !self.overlay.vertices.is_empty() {
             let resolved = resolve_and_scale_quads(pipeline, &self.overlay, scale);
             pipeline.upload_strata(device, queue, overlay_idx, &resolved);
         } else {
             pipeline.clear_strata(overlay_idx);
+        }
+        let overlay_elapsed = overlay_started.elapsed();
+        let prepare_elapsed = prepare_started.elapsed();
+        if prepare_elapsed >= Duration::from_millis(50) {
+            crate::logging::eprintln_elapsed(&format!(
+                "[prepare] total={prepare_elapsed:.1?} textures={textures_elapsed:.1?} strata={strata_elapsed:.1?} overlay={overlay_elapsed:.1?} dirty_strata={} new_rgba={} new_bc={}",
+                self.strata_batches.iter().filter(|batch| batch.is_some()).count(),
+                self.textures.len(),
+                self.bc_textures.len()
+            ));
         }
     }
 

@@ -130,7 +130,7 @@ pub enum Message {
     ReloadUI,
     CommandInputChanged(String),
     ExecuteCommand,
-    ProcessTimers,
+    ProcessTimers(Instant),
     CanvasEvent(CanvasMessage),
     ScreenshotTaken(Screenshot),
     /// Tick for FPS display refresh.

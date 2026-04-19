@@ -108,6 +108,12 @@ pub struct App {
     pub(crate) strata_dirty: std::cell::Cell<u16>,
     /// True when texture loading was capped and more textures are pending.
     pub(crate) textures_pending: std::cell::Cell<bool>,
+    /// Most recent main-thread phase that can block event handling.
+    pub(crate) main_thread_phase: RefCell<(&'static str, std::time::Instant)>,
+    /// Count of stale timer ticks dropped since the last key log.
+    pub(crate) dropped_stale_timer_ticks: std::cell::Cell<u32>,
+    /// Oldest age among dropped stale timer ticks since the last key log.
+    pub(crate) oldest_dropped_timer_tick_age: std::cell::Cell<std::time::Duration>,
     /// FPS counter: frame count since last update (interior mutability for draw()).
     pub(crate) frame_count: std::cell::Cell<u32>,
     /// FPS counter: last FPS calculation time.
@@ -246,6 +252,9 @@ impl App {
             cached_hittable: RefCell::new(None),
             strata_dirty: std::cell::Cell::new((1u16 << crate::widget::FrameStrata::COUNT) - 1),
             textures_pending: std::cell::Cell::new(false),
+            main_thread_phase: RefCell::new(("boot", now)),
+            dropped_stale_timer_ticks: std::cell::Cell::new(0),
+            oldest_dropped_timer_tick_age: std::cell::Cell::new(std::time::Duration::ZERO),
             frame_count: std::cell::Cell::new(0),
             fps_last_time: now,
             fps: 0.0,
@@ -428,6 +437,11 @@ impl App {
             );
         }
         (debug_borders, debug_anchors)
+    }
+
+    pub(crate) fn set_main_thread_phase(&self, phase: &'static str) {
+        crate::logging::set_blocking_phase(phase);
+        *self.main_thread_phase.borrow_mut() = (phase, std::time::Instant::now());
     }
 }
 

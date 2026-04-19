@@ -20,7 +20,7 @@ impl App {
         let ipc_task = self.process_ipc();
         let task = match message {
             Message::CanvasEvent(cm) => self.handle_canvas_event(cm),
-            Message::ProcessTimers => self.handle_process_timers(),
+            Message::ProcessTimers(captured_at) => self.handle_process_timers(captured_at),
             msg => {
                 self.dispatch_simple_message(msg);
                 Task::none()
@@ -64,7 +64,7 @@ impl App {
             Message::CloseOptionsModal => self.options_modal_visible = false,
             Message::MovementToggled(field, val) => self.handle_movement_toggled(field, val),
             // Handled in update() directly:
-            Message::CanvasEvent(_) | Message::ProcessTimers => unreachable!(),
+            Message::CanvasEvent(_) | Message::ProcessTimers(_) => unreachable!(),
         }
     }
 
@@ -83,10 +83,21 @@ impl App {
     }
 
     fn handle_simple_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {
-        crate::logging::eprintln_elapsed(&format!(
-            "[key] {key} reached app in {:.1?}",
-            captured_at.elapsed()
-        ));
+        let (phase, phase_elapsed) = crate::logging::blocking_phase_snapshot();
+        let dropped_stale_ticks = self.dropped_stale_timer_ticks.take();
+        let oldest_stale_tick_age = self.oldest_dropped_timer_tick_age.take();
+        let mut message = format!(
+            "[key] {key} reached app in {:.1?} (last phase={phase} for {:.1?})",
+            captured_at.elapsed(),
+            phase_elapsed
+        );
+        if dropped_stale_ticks > 0 {
+            message.push_str(&format!(
+                " after dropping {dropped_stale_ticks} stale timer ticks (oldest {:.1?})",
+                oldest_stale_tick_age
+            ));
+        }
+        crate::logging::eprintln_elapsed(&message);
         if key == "ESCAPE" && self.options_modal_visible {
             self.options_modal_visible = false;
             return;
@@ -312,7 +323,19 @@ impl App {
         }
     }
 
-    fn handle_process_timers(&mut self) -> Task<Message> {
+    fn handle_process_timers(&mut self, captured_at: Instant) -> Task<Message> {
+        let age = captured_at.elapsed();
+        let interval = self
+            .compute_tick_interval()
+            .unwrap_or(std::time::Duration::from_secs(1));
+        if should_drop_stale_timer_tick(age, interval) {
+            let dropped = self.dropped_stale_timer_ticks.get().saturating_add(1);
+            self.dropped_stale_timer_ticks.set(dropped);
+            let oldest = self.oldest_dropped_timer_tick_age.get().max(age);
+            self.oldest_dropped_timer_tick_age.set(oldest);
+            return Task::none();
+        }
+        self.set_main_thread_phase("process_timers");
         let t0 = std::time::Instant::now();
         self.update_fps_counter();
         self.run_pending_exec_lua();
@@ -644,6 +667,16 @@ fn log_slow_tick(
     }
 }
 
+fn should_drop_stale_timer_tick(
+    age: std::time::Duration,
+    interval: std::time::Duration,
+) -> bool {
+    let stale_threshold = interval
+        .saturating_mul(2)
+        .max(std::time::Duration::from_millis(100));
+    age > stale_threshold
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -738,6 +771,65 @@ mod tests {
         assert!(
             state.party_group_active,
             "party size > 0 should mark the player as grouped"
+        );
+    }
+
+    #[test]
+    fn fast_timer_ticks_go_stale_quickly() {
+        assert!(should_drop_stale_timer_tick(
+            std::time::Duration::from_millis(150),
+            std::time::Duration::from_millis(16),
+        ));
+    }
+
+    #[test]
+    fn slow_timer_ticks_get_more_slack() {
+        assert!(!should_drop_stale_timer_tick(
+            std::time::Duration::from_millis(150),
+            std::time::Duration::from_secs(1),
+        ));
+        assert!(should_drop_stale_timer_tick(
+            std::time::Duration::from_secs(3),
+            std::time::Duration::from_secs(1),
+        ));
+    }
+
+    #[test]
+    fn queued_stale_timer_ticks_do_not_run_tick_work() {
+        let mut app = build_test_app(ScreenKind::Game);
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.textures_pending.set(true);
+        app.selected_rot_level = "Off".to_string();
+        let initial_on_update = app.last_on_update_time;
+        let stale_captured_at = Instant::now() - std::time::Duration::from_secs(1);
+
+        for _ in 0..8 {
+            let _ = app.update(Message::ProcessTimers(stale_captured_at));
+        }
+
+        assert_eq!(app.dropped_stale_timer_ticks.get(), 8);
+        assert!(
+            app.oldest_dropped_timer_tick_age.get() >= std::time::Duration::from_secs(1),
+            "stale tick age should track the queued backlog"
+        );
+        assert_eq!(
+            app.last_on_update_time, initial_on_update,
+            "stale timer ticks should not reach OnUpdate processing"
+        );
+
+        app.options_modal_visible = true;
+        app.dispatch_simple_message(Message::KeyPress("ESCAPE".to_string(), None, Instant::now()));
+
+        assert!(!app.options_modal_visible, "escape should still be handled promptly");
+        assert_eq!(
+            app.dropped_stale_timer_ticks.get(),
+            0,
+            "keypress log accounting should reset after reporting dropped ticks"
+        );
+        assert_eq!(
+            app.oldest_dropped_timer_tick_age.get(),
+            std::time::Duration::ZERO,
+            "keypress log accounting should clear the recorded backlog age"
         );
     }
 }

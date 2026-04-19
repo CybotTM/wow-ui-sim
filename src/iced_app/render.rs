@@ -89,6 +89,7 @@ impl shader::Program<Message> for &App {
         _cursor: mouse::Cursor,
         bounds: Rectangle,
     ) -> Self::Primitive {
+        self.set_main_thread_phase("draw");
         let start = std::time::Instant::now();
         self.frame_count.set(self.frame_count.get() + 1);
 

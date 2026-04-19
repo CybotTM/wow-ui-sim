@@ -395,7 +395,7 @@ impl App {
         });
 
         if let Some(interval) = self.compute_tick_interval() {
-            let timer = iced::time::every(interval).map(|_| Message::ProcessTimers);
+            let timer = iced::time::every(interval).map(Message::ProcessTimers);
             Subscription::batch([timer, keyboard])
         } else {
             keyboard

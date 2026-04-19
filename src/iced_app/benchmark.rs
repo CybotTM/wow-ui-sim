@@ -180,7 +180,7 @@ fn run_benchmark_frame(app: &mut App) -> (Duration, Duration, FrameTelemetry) {
     app.last_on_update_time = Instant::now() - FORCED_TICK_INTERVAL;
 
     let tick_started = Instant::now();
-    let _ = app.update(Message::ProcessTimers);
+    let _ = app.update(Message::ProcessTimers(Instant::now()));
     let tick_elapsed = tick_started.elapsed();
 
     let draw_started = Instant::now();
