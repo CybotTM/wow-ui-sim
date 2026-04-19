@@ -54,6 +54,18 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     crate::lua_api::chat_init::show_chat_frame(env);
     let _ = env.exec(
         r#"
+        local function reanchor_objective_tracker(frame)
+            frame:ClearAllPoints()
+            frame:SetPoint(
+                "TOPRIGHT",
+                UIParentRightManagedFrameContainer,
+                "TOPRIGHT",
+                0,
+                11
+            )
+            frame:SetHeight(836.5)
+        end
+
         if EditModeManagerFrame then
             local partySystem = EditModeManagerFrame:GetRegisteredSystemFrame(
                 Enum.EditModeSystem.UnitFrame,
@@ -95,15 +107,7 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
             if ObjectiveTrackerFrame.UpdateHeight then
                 pcall(ObjectiveTrackerFrame.UpdateHeight, ObjectiveTrackerFrame)
             end
-            ObjectiveTrackerFrame:SetHeight(836.5)
-            ObjectiveTrackerFrame:ClearAllPoints()
-            ObjectiveTrackerFrame:SetPoint(
-                "TOPRIGHT",
-                UIParentRightManagedFrameContainer,
-                "TOPRIGHT",
-                0,
-                -11
-            )
+            reanchor_objective_tracker(ObjectiveTrackerFrame)
         end
         if CompactPartyFrame then
             CompactPartyFrame:SetHeight(234)
@@ -118,15 +122,7 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
             function ObjectiveTrackerContainerMixin:UpdateHeight()
                 originalUpdateHeight(self)
                 if self == ObjectiveTrackerFrame then
-                    self:ClearAllPoints()
-                    self:SetPoint(
-                        "TOPRIGHT",
-                        UIParentRightManagedFrameContainer,
-                        "TOPRIGHT",
-                        0,
-                        -11
-                    )
-                    self:SetHeight(836.5)
+                    reanchor_objective_tracker(self)
                 end
             end
             rawset(_G, "__wow_objective_tracker_update_height_wrapper", true)
