@@ -37,7 +37,9 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "RepairAllItems",
     "ReportCheating",
     "RequestInspectData",
+    "RequestGuildPartyState",
     "RequestLFDPlayerLockInfo",
+    "RemoveChatWindowChannel",
     // RequestPartyLootMethod is SimState-backed in loot_method.rs, not a stub.
     "RequestRaidInfo",
     // QuestMapFrame::UpdatePOIs still calls this legacy helper after

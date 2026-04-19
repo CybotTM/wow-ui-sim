@@ -8,10 +8,14 @@
 //!   dungeon id).
 //! - `GetMirrorTimerInfo(index)`  → 7 values from
 //!   `WorldState.mirror_timers[index-1]` (name, startValue, maxValue,
-//!   scale, paused, label, spellID). Returns nothing for out-of-range
-//!   indices (matches `mayreturnnothing: true` in apis.yaml).
+//!   scale, paused, label, spellID). Empty slots return the retail-safe
+//!   `"UNKNOWN"` sentinel tuple because Blizzard startup iterates a fixed
+//!   three-slot range and only skips setup when the name is `"UNKNOWN"`.
 //! - `GetMirrorTimerProgress(name)` → current progress for the timer
 //!   with the matching `name`, or nil when absent.
+//! - `GetWorldElapsedTimers()`      → no active timer IDs by default.
+//! - `GetWorldElapsedTime(id)`      → `(id, 0, 0)` so scenario / challenge
+//!   timer probes avoid nil arithmetic when no timer state is seeded.
 
 use crate::lua_api::methods::{borrow_state, create_string, val_to_string};
 use crate::lua_bridge::stack_val;
@@ -97,7 +101,8 @@ fn get_mirror_timer_info(state: &mut LuaState) -> LuaResult<u32> {
                 .cloned()
         });
     let Some(t) = timer else {
-        return Ok(0);
+        push_unknown_mirror_timer(state);
+        return Ok(7);
     };
 
     let name_val = create_string(state, &t.name);
@@ -110,6 +115,18 @@ fn get_mirror_timer_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(label_val);
     state.push(Val::Num(t.spell_id as f64));
     Ok(7)
+}
+
+fn push_unknown_mirror_timer(state: &mut LuaState) {
+    let name_val = create_string(state, "UNKNOWN");
+    state.push(name_val);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    let label_val = create_string(state, "");
+    state.push(label_val);
+    state.push(Val::Num(0.0));
 }
 
 fn get_mirror_timer_progress(state: &mut LuaState) -> LuaResult<u32> {
@@ -130,9 +147,23 @@ fn get_mirror_timer_progress(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_world_elapsed_timers(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn get_world_elapsed_time(state: &mut LuaState) -> LuaResult<u32> {
+    let timer_id = stack_i32(state, 1).unwrap_or(0);
+    state.push(Val::Num(timer_id as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(3)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetInstanceInfo", get_instance_info)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerInfo", get_mirror_timer_info)?;
     LuaApiMut::register_function(lua, "GetMirrorTimerProgress", get_mirror_timer_progress)?;
+    LuaApiMut::register_function(lua, "GetWorldElapsedTimers", get_world_elapsed_timers)?;
+    LuaApiMut::register_function(lua, "GetWorldElapsedTime", get_world_elapsed_time)?;
     Ok(())
 }

@@ -190,6 +190,133 @@ fn instance_abandon_vote_and_shutdown_helpers_return_numeric_pairs() {
 }
 
 #[test]
+fn startup_party_chat_and_targeting_globals_are_callable() {
+    let env = env();
+    let (clear_focus_ok, focus_cleared, request_ok, remove_channel_ok, can_mark_player): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            A_Admin.SetFocus("Training Dummy", 72, 1)
+
+            local clearFocusOk = pcall(function()
+                ClearFocus()
+            end)
+            local requestOk = pcall(function()
+                RequestGuildPartyState()
+            end)
+            local removeChannelOk = pcall(function()
+                RemoveChatWindowChannel(1, "General")
+            end)
+
+            return clearFocusOk,
+                   not UnitExists("focus"),
+                   requestOk,
+                   removeChannelOk,
+                   CanBeRaidTarget("player")
+            "#,
+        )
+        .expect("party/chat/targeting startup globals should be callable");
+
+    assert!(clear_focus_ok, "ClearFocus should exist as a normal global");
+    assert!(
+        focus_cleared,
+        "ClearFocus should clear the simulated focus unit"
+    );
+    assert!(request_ok, "RequestGuildPartyState should be a safe no-op");
+    assert!(
+        remove_channel_ok,
+        "RemoveChatWindowChannel should be callable during chat bootstrap"
+    );
+    assert!(
+        can_mark_player,
+        "existing units should remain markable by CanBeRaidTarget"
+    );
+}
+
+#[test]
+fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
+    let env = env();
+    let (
+        queued_type,
+        queued_empty,
+        ready_check_in_progress,
+        ready_check_is_battleground,
+        elapsed_timer_count,
+        elapsed_timer_id,
+        elapsed_time,
+        elapsed_type,
+        bn_total,
+        bn_online,
+        bn_favorite,
+        bn_favorite_online,
+    ): (
+        String,
+        bool,
+        bool,
+        bool,
+        i32,
+        f64,
+        f64,
+        f64,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r##"
+            local queued = GetLFGQueuedList(1)
+            local readyCheckInProgress, readyCheckIsBattleground = GetLFGReadyCheckUpdate()
+            local timerID, elapsedTime, timerType = GetWorldElapsedTime(7)
+
+            return type(queued),
+                   next(queued) == nil,
+                   readyCheckInProgress,
+                   readyCheckIsBattleground,
+                   select("#", GetWorldElapsedTimers()),
+                   timerID,
+                   elapsedTime,
+                   timerType,
+                   BNGetNumFriends()
+            "##,
+        )
+        .expect("startup LFG/world timer/BN stubs should be callable");
+
+    assert_eq!(queued_type, "table");
+    assert!(queued_empty, "no LFG queues should be seeded by default");
+    assert!(!ready_check_in_progress);
+    assert!(!ready_check_is_battleground);
+    assert_eq!(
+        elapsed_timer_count, 0,
+        "no world elapsed timers should be active"
+    );
+    assert_eq!(elapsed_timer_id, 7.0);
+    assert_eq!(elapsed_time, 0.0);
+    assert_eq!(elapsed_type, 0.0);
+    assert_eq!(bn_total, 0);
+    assert_eq!(bn_online, 0);
+    assert_eq!(bn_favorite, 0);
+    assert_eq!(bn_favorite_online, 0);
+}
+
+#[test]
+fn startup_pvp_match_state_defaults_to_inactive() {
+    let env = env();
+    let state: i32 = env
+        .eval("return C_PvP.GetActiveMatchState()")
+        .expect("C_PvP.GetActiveMatchState should be callable");
+    assert_eq!(
+        state, 0,
+        "startup should default to inactive PvP match state"
+    );
+}
+
+#[test]
 fn is_character_newly_boosted_returns_false() {
     let env = env();
     let boosted: bool = env

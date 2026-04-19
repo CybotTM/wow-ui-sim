@@ -100,12 +100,24 @@ fn get_instance_info_returns_nil_for_absent_lfg_dungeon_id() {
 }
 
 #[test]
-fn get_mirror_timer_info_returns_nothing_when_unset() {
+fn get_mirror_timer_info_returns_unknown_sentinel_when_unset() {
     let env = env();
-    let count: i32 = env
-        .eval("return select('#', GetMirrorTimerInfo(1))")
-        .unwrap();
-    assert_eq!(count, 0, "no active timers should return nothing");
+    let (name, start, max, scale, paused, label, spell_id): (
+        String,
+        f64,
+        f64,
+        f64,
+        i32,
+        String,
+        i32,
+    ) = env.eval("return GetMirrorTimerInfo(1)").unwrap();
+    assert_eq!(name, "UNKNOWN");
+    assert_eq!(start, 0.0);
+    assert_eq!(max, 0.0);
+    assert_eq!(scale, 0.0);
+    assert_eq!(paused, 0);
+    assert_eq!(label, "");
+    assert_eq!(spell_id, 0);
 }
 
 #[test]
@@ -145,7 +157,7 @@ fn get_mirror_timer_info_returns_seven_values_by_index() {
 }
 
 #[test]
-fn get_mirror_timer_info_out_of_range_returns_nothing() {
+fn get_mirror_timer_info_out_of_range_returns_unknown_sentinel() {
     let env = env();
     {
         let mut state = env.state().borrow_mut();
@@ -155,10 +167,22 @@ fn get_mirror_timer_info_out_of_range_returns_nothing() {
         });
     }
 
-    let count: i32 = env
-        .eval("return select('#', GetMirrorTimerInfo(99))")
-        .unwrap();
-    assert_eq!(count, 0);
+    let (name, start, max, scale, paused, label, spell_id): (
+        String,
+        f64,
+        f64,
+        f64,
+        i32,
+        String,
+        i32,
+    ) = env.eval("return GetMirrorTimerInfo(99)").unwrap();
+    assert_eq!(name, "UNKNOWN");
+    assert_eq!(start, 0.0);
+    assert_eq!(max, 0.0);
+    assert_eq!(scale, 0.0);
+    assert_eq!(paused, 0);
+    assert_eq!(label, "");
+    assert_eq!(spell_id, 0);
 }
 
 #[test]

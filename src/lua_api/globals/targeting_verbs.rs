@@ -9,6 +9,8 @@
 //! | `TargetUnit`         | `PLAYER_TARGET_CHANGED`    |
 //! | `FocusUnit`          | `PLAYER_FOCUS_CHANGED`     |
 //! | `ClearTarget`        | `PLAYER_TARGET_CHANGED`    |
+//! | `ClearFocus`         | `PLAYER_FOCUS_CHANGED`     |
+//! | `CanBeRaidTarget`    | none (query only)          |
 //! | `TargetLastTarget`   | `PLAYER_TARGET_CHANGED`    |
 //! | `TargetNearestEnemy` | `PLAYER_TARGET_CHANGED`    |
 //! | `TargetNearestFriend`| `PLAYER_TARGET_CHANGED`    |
@@ -243,6 +245,27 @@ pub fn clear_target(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `ClearFocus()` — clear `current_focus`.
+pub fn clear_focus(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.current_focus = None;
+    push_focus_changed(state)?;
+    Ok(0)
+}
+
+/// `CanBeRaidTarget(unit)` — true when the token resolves to a live unit.
+pub fn can_be_raid_target(state: &mut LuaState) -> LuaResult<u32> {
+    let token = match Option::<String>::from_stack(state, 1)? {
+        Some(token) => token,
+        None => {
+            state.push(rilua::Val::Bool(false));
+            return Ok(1);
+        }
+    };
+    let can_mark = resolve_token_to_target_info(state, &token)?.is_some();
+    state.push(rilua::Val::Bool(can_mark));
+    Ok(1)
+}
+
 /// `TargetLastTarget()` — swap `current_target` ↔ `previous_target`.
 pub fn target_last_target(state: &mut LuaState) -> LuaResult<u32> {
     let has_previous = borrow_state_mut(state)?.previous_target.is_some();
@@ -360,6 +383,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "TargetUnit", target_unit)?;
     table_set_rust_fn_static(state, g, "FocusUnit", focus_unit)?;
     table_set_rust_fn_static(state, g, "ClearTarget", clear_target)?;
+    table_set_rust_fn_static(state, g, "ClearFocus", clear_focus)?;
+    table_set_rust_fn_static(state, g, "CanBeRaidTarget", can_be_raid_target)?;
     table_set_rust_fn_static(state, g, "TargetLastTarget", target_last_target)?;
     table_set_rust_fn_static(state, g, "TargetNearestEnemy", target_nearest_enemy)?;
     table_set_rust_fn_static(state, g, "TargetNearestFriend", target_nearest_friend)?;

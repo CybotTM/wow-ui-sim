@@ -6587,6 +6587,20 @@ if GetLFGRoleUpdate == nil then
     return false, 0, 0, 0, 0, false
   end
 end
+if GetLFGQueuedList == nil then
+  function GetLFGQueuedList(_category, queuedList)
+    queuedList = queuedList or {}
+    for key in pairs(queuedList) do
+      queuedList[key] = nil
+    end
+    return queuedList
+  end
+end
+if GetLFGReadyCheckUpdate == nil then
+  function GetLFGReadyCheckUpdate()
+    return false, false
+  end
+end
 function HasCompletedAnyAchievement()
   return true
 end
@@ -8118,7 +8132,7 @@ end
 
 -- Battle.net friends count: sim has no BNet connection.
 if BNGetNumFriends == nil then
-  function BNGetNumFriends() return 0, 0 end
+  function BNGetNumFriends() return 0, 0, 0, 0 end
 end
 if BNGetNumFriendInvites == nil then
   function BNGetNumFriendInvites() return 0 end

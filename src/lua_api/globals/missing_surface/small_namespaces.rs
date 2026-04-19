@@ -75,7 +75,15 @@ const C_MAP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
     &[("IsMapValidForNavigation", c_map_is_map_valid_for_navigation)];
 
 const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
+    ("GetActiveMatchState", c_pvp_get_active_match_state),
+    ("GetCustomVictoryStatID", c_pvp_get_custom_victory_stat_id),
     ("IsMatchConsideredArena", c_pvp_is_match_considered_arena),
+    ("IsRatedArena", c_pvp_is_rated_arena),
+    ("IsRatedBattleground", c_pvp_is_rated_battleground),
+    ("IsRatedMap", c_pvp_is_rated_map),
+    ("IsRatedSoloRBG", c_pvp_is_rated_solo_rbg),
+    ("IsRatedSoloShuffle", c_pvp_is_rated_solo_shuffle),
+    ("IsSoloRBG", c_pvp_is_solo_rbg),
     (
         "GetPvpTalentsUnlockedLevel",
         c_pvp_get_pvp_talents_unlocked_level,
@@ -197,6 +205,46 @@ fn c_map_is_map_valid_for_navigation(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_pvp_is_match_considered_arena(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_get_active_match_state(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_pvp_get_custom_victory_stat_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_pvp_is_rated_arena(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_is_rated_battleground(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_is_rated_map(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_is_rated_solo_rbg(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_is_rated_solo_shuffle(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_is_solo_rbg(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
 }
