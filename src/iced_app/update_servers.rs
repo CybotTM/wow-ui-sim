@@ -88,6 +88,14 @@ impl App {
                 );
                 let _ = respond.send(LuaResponse::Tree(tree));
             }
+            LuaCommand::DumpQuads {
+                filter,
+                verbose,
+                respond,
+            } => {
+                let dump = self.build_cached_quad_dump(filter.as_deref(), verbose);
+                let _ = respond.send(LuaResponse::Quads(dump));
+            }
             LuaCommand::Screenshot {
                 output,
                 width,
@@ -281,5 +289,29 @@ mod tests {
         assert!(matches!(commands[0], LuaCommand::Exec { .. }));
         assert!(matches!(commands[1], LuaCommand::DumpTree { .. }));
         assert!(drain_lua_commands(Some(&rx)).is_empty());
+    }
+
+    #[test]
+    fn drain_lua_commands_preserves_dump_quads_messages() {
+        let (tx, rx) = mpsc::channel();
+        let (respond, _recv) = mpsc::channel();
+        tx.send(LuaCommand::DumpQuads {
+            filter: Some("uigroupmanager".to_string()),
+            verbose: true,
+            respond,
+        })
+        .unwrap();
+
+        let commands = drain_lua_commands(Some(&rx));
+
+        assert_eq!(commands.len(), 1);
+        assert!(matches!(
+            &commands[0],
+            LuaCommand::DumpQuads {
+                filter: Some(filter),
+                verbose: true,
+                ..
+            } if filter == "uigroupmanager"
+        ));
     }
 }

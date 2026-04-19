@@ -7,6 +7,7 @@
 //!   wow-cli lua                      # Interactive Lua REPL
 //!   wow-cli lua -e "print('hi')"     # Execute code and exit
 //!   wow-cli dump-tree                # Dump frame tree from running server
+//!   wow-cli dump-quads               # Dump cached live GUI quads from running server
 //!   wow-cli screenshot -o out.webp   # Render screenshot via running server
 //!   wow-cli extract-textures         # Extract textures to WebP (standalone)
 //!   wow-cli convert-texture foo.BLP  # Convert single BLP to WebP (standalone)
@@ -75,6 +76,17 @@ enum Commands {
         visible_only: bool,
 
         /// Show verbose texture detail lines, including rect and UV coords
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Dump cached live GUI quads from the running server
+    DumpQuads {
+        /// Filter by texture path substring
+        #[arg(short, long)]
+        filter: Option<String>,
+
+        /// Show per-vertex detail lines
         #[arg(short, long)]
         verbose: bool,
     },
@@ -222,6 +234,7 @@ fn handle_command(command: Commands) {
             visible_only,
             verbose,
         } => dump_tree(filter, filter_key, visible_only, verbose),
+        Commands::DumpQuads { filter, verbose } => dump_quads(filter, verbose),
         Commands::Screenshot {
             output,
             width,
@@ -433,6 +446,17 @@ fn dump_tree(
     }
 }
 
+fn dump_quads(filter: Option<String>, verbose: bool) {
+    let socket = resolve_socket();
+    match client::dump_quads(&socket, filter, verbose) {
+        Ok(dump) => println!("{}", dump),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
 fn take_screenshot(
     output: &PathBuf,
     width: u32,
@@ -554,6 +578,25 @@ mod tests {
                 assert_eq!(filter_key.as_deref(), Some("PartyFrame"));
             }
             _ => panic!("expected dump-tree command"),
+        }
+    }
+
+    #[test]
+    fn dump_quads_accepts_filter_and_verbose_flags() {
+        let cli = Cli::try_parse_from([
+            "wow-cli",
+            "dump-quads",
+            "--filter",
+            "uigroupmanager",
+            "--verbose",
+        ])
+        .expect("dump-quads should parse flags");
+        match cli.command {
+            Commands::DumpQuads { filter, verbose } => {
+                assert_eq!(filter.as_deref(), Some("uigroupmanager"));
+                assert!(verbose);
+            }
+            _ => panic!("expected dump-quads command"),
         }
     }
 }

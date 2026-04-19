@@ -30,6 +30,13 @@ pub enum Request {
         /// Show verbose texture detail lines
         verbose: bool,
     },
+    /// Dump cached live GUI quads from the running client
+    DumpQuads {
+        /// Filter by texture path substring
+        filter: Option<String>,
+        /// Include per-vertex detail lines
+        verbose: bool,
+    },
     /// Render a screenshot to a file
     Screenshot {
         /// Output file path
@@ -56,6 +63,8 @@ pub enum Response {
     Pong,
     /// Frame tree dump
     Tree(String),
+    /// Live quad dump
+    Quads(String),
 }
 
 /// Command sent to the app from the Lua server.
@@ -68,6 +77,11 @@ pub enum LuaCommand {
         filter: Option<String>,
         filter_key: Option<String>,
         visible_only: bool,
+        verbose: bool,
+        respond: mpsc::Sender<Response>,
+    },
+    DumpQuads {
+        filter: Option<String>,
         verbose: bool,
         respond: mpsc::Sender<Response>,
     },
@@ -257,6 +271,13 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
             verbose,
             respond,
         }),
+        Request::DumpQuads { filter, verbose } => {
+            send_command(cmd_tx, |respond| LuaCommand::DumpQuads {
+                filter,
+                verbose,
+                respond,
+            })
+        }
         Request::Screenshot {
             output,
             width,
@@ -310,6 +331,7 @@ pub mod client {
             Response::Error(e) => Err(e),
             Response::Pong => Err("Unexpected pong".into()),
             Response::Tree(_) => Err("Unexpected tree".into()),
+            Response::Quads(_) => Err("Unexpected quads".into()),
         }
     }
 
@@ -417,5 +439,93 @@ pub mod client {
             Response::Error(e) => Err(e),
             _ => Err("Unexpected response".into()),
         }
+    }
+
+    /// Dump cached live GUI quads.
+    pub fn dump_quads<P: AsRef<Path>>(
+        socket: P,
+        filter: Option<String>,
+        verbose: bool,
+    ) -> Result<String, String> {
+        let mut stream =
+            UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
+
+        let request = Request::DumpQuads { filter, verbose };
+        writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
+            .map_err(|e| format!("Write failed: {}", e))?;
+
+        let mut reader = BufReader::new(stream);
+        let mut line = String::new();
+        reader
+            .read_line(&mut line)
+            .map_err(|e| format!("Read failed: {}", e))?;
+
+        let response: Response =
+            serde_json::from_str(&line).map_err(|e| format!("Invalid response: {}", e))?;
+
+        match response {
+            Response::Quads(s) => Ok(s),
+            Response::Error(e) => Err(e),
+            _ => Err("Unexpected response".into()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{LuaCommand, Request, Response, handle_request, parse_request};
+    use std::sync::mpsc;
+    use std::thread;
+
+    #[test]
+    fn parse_request_accepts_dump_quads_payload() {
+        let request = serde_json::to_string(&Request::DumpQuads {
+            filter: Some("uigroupmanager".to_string()),
+            verbose: true,
+        })
+        .unwrap();
+
+        let parsed = parse_request(&request).expect("dump-quads request should parse");
+
+        assert!(matches!(
+            parsed,
+            Request::DumpQuads {
+                filter: Some(filter),
+                verbose: true
+            } if filter == "uigroupmanager"
+        ));
+    }
+
+    #[test]
+    fn handle_request_dispatches_dump_quads_commands() {
+        let (cmd_tx, cmd_rx) = mpsc::channel();
+        let response_thread = thread::spawn(move || {
+            let command = cmd_rx.recv().expect("command should be sent");
+            match command {
+                LuaCommand::DumpQuads {
+                    filter,
+                    verbose,
+                    respond,
+                } => {
+                    assert_eq!(filter.as_deref(), Some("uigroupmanager"));
+                    assert!(verbose);
+                    respond
+                        .send(Response::Quads("quad dump".to_string()))
+                        .unwrap();
+                }
+                _ => panic!("expected dump-quads command"),
+            }
+        });
+
+        let response = handle_request(
+            Request::DumpQuads {
+                filter: Some("uigroupmanager".to_string()),
+                verbose: true,
+            },
+            &cmd_tx,
+        );
+
+        response_thread.join().unwrap();
+        assert!(matches!(response, Response::Quads(body) if body == "quad dump"));
     }
 }
