@@ -957,6 +957,11 @@ mod tests {
             state.party_group_active,
             "party size > 0 should mark the player as grouped"
         );
+        assert_eq!(
+            state.party_leader_index,
+            Some(0),
+            "GUI party-size changes should normalize leadership to party1 like A_Admin.SetPartySize"
+        );
     }
 
     #[test]
