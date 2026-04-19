@@ -77,7 +77,7 @@
 - [x] Re-run `cargo test --tests --no-fail-fast`, update bucket counts, and split any remaining high-volume failure groups into new unchecked subsystem tasks instead of collapsing them into one item.
   - [x] Fresh rerun captured 12 lib failures before the harness stopped, plus a separate `action_bar` cluster with 7 failures.
   - [x] The remaining clusters below are split into subsystem-sized follow-up tasks instead of one umbrella item.
-- [ ] Fix spellbook with `s` keybind not showing
+- [x] Fix spellbook with `s` keybind not showing
 
 - [x] Fix loader/global-frame access bucket (`2` failed targets): `global_frame_access` child/template key wiring regressions.
 - [x] Fix startup bootstrap namespace bucket (`3` failed targets): `wow_api_globals` startup namespace checks.
