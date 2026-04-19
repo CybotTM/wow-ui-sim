@@ -294,14 +294,7 @@ fn frame_metatable_for_widget_type(
 
     let remove: &[&str] = match widget_type {
         WidgetType::ScrollFrame => &[],
-        WidgetType::StatusBar => &[
-            "GetStatusBarDesaturated",
-            "SetStatusBarAtlas",
-            "SetStatusBarDesaturated",
-            "SetStatusBarDesaturation",
-            "GetStatusBarDesaturation",
-            "IsStatusBarDesaturated",
-        ],
+        WidgetType::StatusBar => &["SetStatusBarAtlas"],
         _ => &[
             "GetVerticalScroll",
             "SetVerticalScroll",
