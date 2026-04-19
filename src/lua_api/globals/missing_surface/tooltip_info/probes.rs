@@ -325,9 +325,13 @@ pub(super) fn c_tooltip_get_unit_buff(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn c_tooltip_get_unit_buff_by_aura_instance_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = String::from_stack(state, 1)?;
+    let unit = String::from_stack(state, 1)?;
     let aura_instance_id = i32::from_stack(state, 2)?;
-    let aura = lookup_player_aura_by_instance_id(state, aura_instance_id);
+    let aura = if unit == "player" {
+        lookup_player_aura_by_instance_id(state, aura_instance_id)
+    } else {
+        None
+    };
     let tooltip = tooltip_for_unit_aura(state, aura);
     state.push(tooltip);
     Ok(1)
@@ -366,9 +370,13 @@ pub(super) fn c_tooltip_get_unit_aura(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn c_tooltip_get_unit_aura_by_aura_instance_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _unit = String::from_stack(state, 1)?;
+    let unit = String::from_stack(state, 1)?;
     let aura_instance_id = i32::from_stack(state, 2)?;
-    let aura = lookup_player_aura_by_instance_id(state, aura_instance_id);
+    let aura = if unit == "player" {
+        lookup_player_aura_by_instance_id(state, aura_instance_id)
+    } else {
+        None
+    };
     let tooltip = tooltip_for_unit_aura(state, aura);
     state.push(tooltip);
     Ok(1)

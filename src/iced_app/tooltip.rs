@@ -73,9 +73,16 @@ pub fn update_tooltip_sizes(state: &mut SimState, font_system: &mut WowFontSyste
             continue;
         }
         let (width, height) = measure_tooltip(state, id, font_system);
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        let changed = if let Some(frame) = state.widgets.get_mut_visual(id) {
+            let changed = frame.width != width || frame.height != height;
             frame.width = width;
             frame.height = height;
+            changed
+        } else {
+            false
+        };
+        if changed {
+            state.widgets.mark_rect_dirty(id);
         }
     }
 }

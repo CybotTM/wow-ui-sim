@@ -153,6 +153,7 @@ fn register_and_attach_parent(
         };
         child.effective_scale = parent_scale * child.scale;
     }
+    sim.invalidate_strata_buckets();
     Ok(())
 }
 

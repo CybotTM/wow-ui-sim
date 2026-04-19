@@ -167,6 +167,9 @@ pub(super) fn set_parent_key(state: &mut LuaState) -> LuaResult<u32> {
         if let Some(child) = sim.widgets.get_mut(id) {
             child.parent_key = Some(key.clone());
         }
+        if let Some(parent) = sim.widgets.get_mut_visual(pid) {
+            parent.children_keys.insert(key.clone(), id);
+        }
     }
     crate::lua_api::methods::sync_child_to_rilua(state, pid, &key, id)?;
     Ok(0)

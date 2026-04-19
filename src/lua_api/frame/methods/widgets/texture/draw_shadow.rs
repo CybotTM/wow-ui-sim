@@ -31,11 +31,17 @@ pub(super) fn set_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     let mut changed = false;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.draw_layer = draw_layer;
-        if let Some(sub_level) = sub_level {
+        let layer_changed = frame.draw_layer != draw_layer;
+        let sub_level_changed = sub_level.is_some_and(|value| frame.draw_sub_layer != value);
+        if layer_changed {
+            frame.draw_layer = draw_layer;
+        }
+        if let Some(sub_level) = sub_level
+            && sub_level_changed
+        {
             frame.draw_sub_layer = sub_level;
         }
-        changed = true;
+        changed = layer_changed || sub_level_changed;
     }
     if changed {
         sim.invalidate_strata_buckets();

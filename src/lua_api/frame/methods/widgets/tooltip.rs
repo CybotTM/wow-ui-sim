@@ -369,8 +369,11 @@ fn push_tooltip_line_ref(
     right_side: bool,
     line_index: usize,
 ) -> LuaResult<u32> {
-    let index = line_index.max(1);
-    let line_id = sync_tooltip_line_frame(state, tooltip_id, right_side, index)?;
+    if line_index == 0 {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+    let line_id = sync_tooltip_line_frame(state, tooltip_id, right_side, line_index)?;
     let Some(line_id) = line_id else {
         state.push(Val::Nil);
         return Ok(1);
@@ -927,6 +930,7 @@ pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     td.anchor_y_offset = y_offset;
     td.lines.clear();
     td.spell_id = None;
+    sim.widgets.mark_rect_dirty(tooltip_id);
     // Tooltip owners commonly reapply SetOwner during periodic refreshes.
     // Keep the tooltip shown so identical refreshes don't churn show/hide state.
     sim.set_frame_visible(tooltip_id, true);
@@ -966,6 +970,7 @@ pub(super) fn set_object_tooltip_position(state: &mut LuaState) -> LuaResult<u32
         x_offset: 0.0,
         y_offset: 0.0,
     });
+    sim.widgets.mark_rect_dirty(tooltip_id);
     Ok(0)
 }
 
@@ -1128,6 +1133,7 @@ pub(super) fn set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
     td.anchor_type = anchor_kind.clone();
     td.anchor_x_offset = x_offset;
     td.anchor_y_offset = y_offset;
+    sim.widgets.mark_rect_dirty(tooltip_id);
     drop(sim);
     let fields = get_or_create_frame_fields(state, tooltip_id);
     let anchor_value = create_string(state, &anchor_kind);

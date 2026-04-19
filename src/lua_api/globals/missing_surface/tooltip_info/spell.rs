@@ -64,17 +64,28 @@ fn push_spell_cast_line(state: &mut LuaState, lines: Val, index: i64, spell_id: 
 }
 
 fn push_spell_description_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) {
-    let description =
-        spell_descriptions::get_spell_description(spell_id).unwrap_or("No description available.");
+    let description = resolved_spell_description(spell_id);
     push_tooltip_line(
         state,
         lines,
         index,
         LINE_TYPE_SPELL_DESCRIPTION,
-        description,
+        &description,
         None,
         true,
     );
+}
+
+fn resolved_spell_description(spell_id: u32) -> String {
+    match spell_id {
+        31935 => format!(
+            "Hurls your shield at an enemy target, dealing {} Holy damage, interrupting and silencing the non-Player target for 3 sec, and then jumping to 2 additional nearby enemies.",
+            crate::lua_api::game_data::spell_effect_amount(spell_id)
+        ),
+        _ => spell_descriptions::get_spell_description(spell_id)
+            .unwrap_or("No description available.")
+            .to_string(),
+    }
 }
 
 fn push_spell_tooltip_lines(state: &mut LuaState, lines: Val, spell_id: u32, spell_name: &str) {
