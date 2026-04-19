@@ -10,13 +10,13 @@
 
 mod c_addon_profiler;
 mod c_addons;
-mod c_model_info;
 mod c_spec;
 mod c_texture;
 mod c_xml_util;
 mod spell_api;
 mod table_util;
 
+use crate::c_api::c_model_info;
 use crate::lua_api::script_helpers::{
     call_error_handler_state, protected_call_state, protected_lua_pcall_state,
 };

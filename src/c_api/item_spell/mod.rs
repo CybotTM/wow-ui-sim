@@ -1,8 +1,9 @@
+mod c_container;
 mod c_currency;
 mod c_item;
 pub(crate) mod helpers;
 
-use super::temporary_shims::item_spell::{c_container, c_spell};
+use super::c_spell_book;
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;
 
@@ -20,7 +21,6 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_currency::register_c_currency_info(state)?;
     c_currency::register_c_equipment_set(state)?;
     c_currency::register_c_bank(state)?;
-    c_spell::register_c_spell(state)?;
-    c_spell::register_c_spell_book(state)?;
+    c_spell_book::register_c_spell_book(state)?;
     Ok(())
 }

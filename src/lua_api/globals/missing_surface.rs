@@ -6,7 +6,6 @@ mod area_poi;
 mod auction_house;
 mod battle_net;
 mod c_map;
-mod c_spell;
 mod character_select;
 mod character_services;
 mod chat_bubbles;
@@ -16,7 +15,6 @@ mod death_recap;
 mod delves_ui;
 mod encoding_util;
 mod encounter_journal;
-mod fog_of_war;
 mod friend_list;
 mod gossip_info;
 mod heirloom;
@@ -46,6 +44,7 @@ mod tutorial;
 mod voice_chat;
 mod zone_ability;
 
+use crate::c_api::{c_fog_of_war, c_spell};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
 };
@@ -182,7 +181,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     creature_info::register_creature_info_surface(state)?;
     delves_ui::register_delves_ui_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;
-    fog_of_war::register_fog_of_war_surface(state)?;
+    c_fog_of_war::register_fog_of_war_surface(state)?;
     gossip_info::register_gossip_info_surface(state)?;
     mythic_plus::register_mythic_plus_surface(state)?;
     scenario_info::register_scenario_info_surface(state)?;

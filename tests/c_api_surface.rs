@@ -7,7 +7,21 @@ fn env() -> WowLuaEnv {
 #[test]
 fn c_api_reorg_keeps_core_namespaces_registered() {
     let env = env();
-    let namespaces: (bool, bool, bool, bool, bool, bool, bool, bool, bool) = env
+    let namespaces: (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
             return type(C_AddOns) == "table",
@@ -16,8 +30,12 @@ fn c_api_reorg_keeps_core_namespaces_registered() {
                    type(C_Item) == "table",
                    type(C_CurrencyInfo) == "table",
                    type(C_Container) == "table",
+                   type(C_ItemUpgrade) == "table",
                    type(C_Spell) == "table",
+                   type(C_SpellBook) == "table",
                    type(C_ModelInfo) == "table",
+                   type(C_LFGInfo) == "table",
+                   type(C_WowTokenSecure) == "table",
                    type(C_FogOfWar) == "table"
         "#,
         )
@@ -29,9 +47,13 @@ fn c_api_reorg_keeps_core_namespaces_registered() {
     assert!(namespaces.3, "C_Item should stay registered");
     assert!(namespaces.4, "C_CurrencyInfo should stay registered");
     assert!(namespaces.5, "C_Container should stay registered");
-    assert!(namespaces.6, "C_Spell should stay registered");
-    assert!(namespaces.7, "C_ModelInfo should stay registered");
-    assert!(namespaces.8, "C_FogOfWar should stay registered");
+    assert!(namespaces.6, "C_ItemUpgrade should stay registered");
+    assert!(namespaces.7, "C_Spell should stay registered");
+    assert!(namespaces.8, "C_SpellBook should stay registered");
+    assert!(namespaces.9, "C_ModelInfo should stay registered");
+    assert!(namespaces.10, "C_LFGInfo should stay registered");
+    assert!(namespaces.11, "C_WowTokenSecure should stay registered");
+    assert!(namespaces.12, "C_FogOfWar should stay registered");
 }
 
 #[test]
