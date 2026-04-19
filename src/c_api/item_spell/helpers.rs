@@ -138,7 +138,7 @@ pub(crate) fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
     }
 }
 
-pub(super) fn global_table(state: &mut LuaState, name: &str) -> Val {
+pub(crate) fn global_table(state: &mut LuaState, name: &str) -> Val {
     let key_ref = state.gc.intern_string(name.as_bytes());
     let current = state
         .gc

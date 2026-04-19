@@ -375,7 +375,7 @@ fn is_fog_of_war_frame(state: &crate::lua_api::SimState, frame_id: u64) -> bool 
 }
 
 fn apply_fog_of_war_map_change(state: &mut crate::lua_api::SimState, frame_id: u64, map_id: i32) {
-    let fog_id = crate::lua_api::globals::c_map_api::fog_of_war_id_for_map(map_id);
+    let fog_id = crate::c_api::c_map_api::fog_of_war_id_for_map(map_id);
 
     let Some(fog_id) = fog_id else {
         write_fog_of_war_ui_map_id(state, frame_id, Some(map_id));
@@ -383,7 +383,7 @@ fn apply_fog_of_war_map_change(state: &mut crate::lua_api::SimState, frame_id: u
         return;
     };
 
-    let Some(fog_info) = crate::lua_api::globals::c_map_api::fog_of_war_info_for_id(fog_id) else {
+    let Some(fog_info) = crate::c_api::c_map_api::fog_of_war_info_for_id(fog_id) else {
         write_fog_of_war_ui_map_id(state, frame_id, Some(map_id));
         clear_fog_of_war_visuals(state, frame_id);
         return;

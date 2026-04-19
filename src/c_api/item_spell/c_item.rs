@@ -2,8 +2,8 @@ use super::helpers::{
     inv_type_to_class_id, inv_type_to_equip_loc, inv_type_to_subclass, item_class_from_inv_type,
     item_class_name, item_subclass_name, quality_color_hex,
 };
+use crate::c_api::ensure_namespace;
 use crate::items;
-use crate::lua_api::globals::missing_surface::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;

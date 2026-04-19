@@ -17,7 +17,6 @@ mod c_xml_util;
 mod spell_api;
 mod table_util;
 
-use crate::lua_api::methods::create_table;
 use crate::lua_api::script_helpers::{
     call_error_handler_state, protected_call_state, protected_lua_pcall_state,
 };
@@ -27,38 +26,6 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
 const BYTE_LOOKUP_SIZE: usize = 256;
-
-// ── Global table helpers ─────────────────────────────────────────────────────
-
-pub(super) fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
-    let key = state.gc.intern_string(name.as_bytes());
-    let global = state.global;
-    if let Some(g) = state.gc.tables.get_mut(global) {
-        let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
-    }
-    state.gc.barrier_back(global);
-}
-
-pub(super) fn global_val(state: &mut LuaState, name: &str) -> Val {
-    let key = state.gc.intern_string(name.as_bytes());
-    state
-        .gc
-        .tables
-        .get(state.global)
-        .map(|table| table.get_str(key, &state.gc.string_arena))
-        .unwrap_or(Val::Nil)
-}
-
-pub(super) fn ensure_global_table(state: &mut LuaState, name: &str) -> Val {
-    match global_val(state, name) {
-        table @ Val::Table(_) => table,
-        _ => {
-            let table = create_table(state);
-            set_global_val(state, name, table);
-            table
-        }
-    }
-}
 
 // ── Utility API ─────────────────────────────────────────────────────────────
 

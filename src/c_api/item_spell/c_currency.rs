@@ -1,4 +1,5 @@
-use crate::lua_api::globals::{currency_data, missing_surface::ensure_namespace};
+use crate::c_api::ensure_namespace;
+use crate::lua_api::globals::currency_data;
 use crate::lua_api::methods::{
     borrow_state, create_string, create_table, table_set, val_to_string,
 };
@@ -7,7 +8,7 @@ use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-const CURRENCY_INFO_METHODS: &[(&'static str, rilua::RustFn)] = &[
+const CURRENCY_INFO_METHODS: &[(&str, rilua::RustFn)] = &[
     ("GetCurrencyListSize", c_currency_get_list_size),
     ("GetCurrencyListInfo", c_currency_get_list_info),
     (

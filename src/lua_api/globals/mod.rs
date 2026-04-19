@@ -107,5 +107,6 @@ pub mod voice_chat_verbs;
 pub mod wowlabs;
 pub mod zone_text;
 
+pub use crate::c_api::c_map_api;
 pub use register::register_globals;
 pub use strings::register_all_ui_strings;

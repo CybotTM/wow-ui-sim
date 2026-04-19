@@ -1,0 +1,52 @@
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("failed to create Lua environment")
+}
+
+#[test]
+fn c_api_reorg_keeps_core_namespaces_registered() {
+    let env = env();
+    let namespaces: (bool, bool, bool, bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return type(C_AddOns) == "table",
+                   type(C_Texture) == "table",
+                   type(C_XMLUtil) == "table",
+                   type(C_Item) == "table",
+                   type(C_CurrencyInfo) == "table",
+                   type(C_Container) == "table",
+                   type(C_Spell) == "table",
+                   type(C_ModelInfo) == "table",
+                   type(C_FogOfWar) == "table"
+        "#,
+        )
+        .expect("failed to probe C_* namespace registration");
+
+    assert!(namespaces.0, "C_AddOns should stay registered");
+    assert!(namespaces.1, "C_Texture should stay registered");
+    assert!(namespaces.2, "C_XMLUtil should stay registered");
+    assert!(namespaces.3, "C_Item should stay registered");
+    assert!(namespaces.4, "C_CurrencyInfo should stay registered");
+    assert!(namespaces.5, "C_Container should stay registered");
+    assert!(namespaces.6, "C_Spell should stay registered");
+    assert!(namespaces.7, "C_ModelInfo should stay registered");
+    assert!(namespaces.8, "C_FogOfWar should stay registered");
+}
+
+#[test]
+fn c_fog_of_war_unknown_id_keeps_default_shape() {
+    let env = env();
+    let info: (Option<String>, Option<String>, f64) = env
+        .eval(
+            r#"
+            local info = C_FogOfWar.GetFogOfWarInfo(-1)
+            return info.backgroundAtlas, info.maskAtlas, info.maskScalar
+        "#,
+        )
+        .expect("failed to query C_FogOfWar");
+
+    assert_eq!(info.0, None);
+    assert_eq!(info.1, None);
+    assert_eq!(info.2, 1.0);
+}

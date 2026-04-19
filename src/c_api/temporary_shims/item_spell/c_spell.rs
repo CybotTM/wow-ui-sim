@@ -1,5 +1,5 @@
-use super::c_item::spell_link_for_id;
-use crate::lua_api::globals::{missing_surface::ensure_namespace, spellbook_data};
+use crate::c_api::{ensure_namespace, item_spell::spell_link_for_id};
+use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set,
     table_set_num,
@@ -14,7 +14,7 @@ use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_c_spell(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_spell(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Spell")?;
     table_set_rust_fn_static(
         state,
@@ -313,7 +313,7 @@ fn c_spell_is_press_hold_release_spell(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-pub(super) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_SpellBook")?;
     table_set_rust_fn_static(
         state,

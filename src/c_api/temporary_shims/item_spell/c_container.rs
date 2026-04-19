@@ -1,7 +1,6 @@
-use super::c_item::item_link_for_id;
-use super::helpers::global_table;
+use crate::c_api::ensure_namespace;
+use crate::c_api::item_spell::{helpers::global_table, item_link_for_id};
 use crate::items;
-use crate::lua_api::globals::missing_surface::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
@@ -9,7 +8,7 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
-pub(super) fn register_c_item_upgrade(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_item_upgrade(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ItemUpgrade")?;
     table_set_rust_fn_static(
         state,
@@ -47,7 +46,7 @@ fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-pub(super) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
+pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Container")?;
     register_container_methods(
         state,

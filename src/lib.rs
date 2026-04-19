@@ -9,6 +9,7 @@ pub mod atlas;
 mod atlas_data;
 #[path = "../data/atlas_elements.rs"]
 mod atlas_elements;
+pub mod c_api;
 pub mod config;
 pub mod cvars;
 pub mod debug_helpers;

@@ -35,6 +35,15 @@ Follow the workflow in `SCHEMA.md`: check existing pages first (update > create)
 - `docs/glow-plan.md` - Glow/shine effect plan
 - `docs/anchor-resolution.md` - Anchor resolution walkthrough: data structures, core functions, single/multi-anchor, SetPoint API, coordinate inversion
 
+## C API Boundary
+
+- Treat the WoW `C_*` API surface as a first-class simulator subsystem, not as "Lua globals" or miscellaneous glue.
+- `c_api` belongs at the same architectural level as `lua_api`, because it is a compatibility contract exposed to Lua, not a subcategory of Lua itself.
+- When a `C_*` function is missing or wrong, default to implementing the backing system or state model. Do not reach for shims just to satisfy a failing test.
+- Use **temporary shims** only as explicit stopgaps with a clear retirement path. Keep them isolated and named as temporary.
+- Use **permanent shims** only for intentionally unsupported domains with a documented rationale. The existing 3D/model gap is the baseline example, not the default pattern.
+- Do not hide the importance of the C API behind file placement, wrappers, or "just move it under globals" refactors. Preserve the architectural boundary in both module layout and language.
+
 ## Docker
 
 CI image for running `run-tests` in addon CI pipelines. Published to `ghcr.io/osso/wow-ui-sim`.
