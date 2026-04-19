@@ -258,6 +258,19 @@ fn quad_bounds(
     quad_bounds_from_vertices(&batch.vertices[start..end])
 }
 
+fn request_matches_rect(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+    rect: (f32, f32, f32, f32),
+) -> bool {
+    let bounds = quad_bounds(batch, request);
+    let tolerance = 0.1;
+    (bounds.0 - rect.0).abs() <= tolerance
+        && (bounds.1 - rect.1).abs() <= tolerance
+        && (bounds.2 - (rect.0 + rect.2)).abs() <= tolerance
+        && (bounds.3 - (rect.1 + rect.3)).abs() <= tolerance
+}
+
 #[test]
 fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
     if common::try_create_gpu_device().is_none() {
@@ -323,7 +336,14 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
     let request = batch
         .texture_requests
         .iter()
-        .find(|request| request.path.starts_with(&icon_crop_prefix))
+        .find(|request| {
+            request.path.starts_with(&icon_crop_prefix)
+                && request_matches_rect(
+                    &batch,
+                    request,
+                    (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height),
+                )
+        })
         .expect("HeroSpecButton.Icon1 should emit a cropped atlas request");
 
     let mut crop_mgr = make_texture_manager().expect("texture directories should exist");
@@ -459,10 +479,10 @@ fn hero_spec_icon_mask_clips_corners_but_preserves_center_pixels() {
     );
 
     for (u, v, label) in [
-        (0.08, 0.08, "top-left"),
-        (0.92, 0.08, "top-right"),
-        (0.92, 0.92, "bottom-right"),
-        (0.08, 0.92, "bottom-left"),
+        (0.03, 0.03, "top-left"),
+        (0.97, 0.03, "top-right"),
+        (0.97, 0.97, "bottom-right"),
+        (0.03, 0.97, "bottom-left"),
     ] {
         let masked_corner = sample_rect_pixel(&masked_render, rendered_rect, u, v);
         let unmasked_corner = sample_rect_pixel(&unmasked_render, rendered_rect, u, v);

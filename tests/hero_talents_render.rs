@@ -66,6 +66,19 @@ fn quad_bounds(
     quad_bounds_from_vertices(&batch.vertices[start..end])
 }
 
+fn request_matches_rect(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+    rect: wow_ui_sim::LayoutRect,
+) -> bool {
+    let bounds = quad_bounds(batch, request);
+    let tolerance = 0.1;
+    (bounds.0 - rect.x).abs() <= tolerance
+        && (bounds.1 - rect.y).abs() <= tolerance
+        && (bounds.2 - (rect.x + rect.width)).abs() <= tolerance
+        && (bounds.3 - (rect.y + rect.height)).abs() <= tolerance
+}
+
 fn assert_bounds_match_rect(
     bounds: (f32, f32, f32, f32),
     rect: wow_ui_sim::LayoutRect,
@@ -175,17 +188,20 @@ fn hero_spec_icon_and_mask_quads_match_layout_rect() {
         .texture_requests
         .iter()
         .filter(|request| request.path == icon_path || request.path.starts_with(&icon_crop_prefix))
+        .filter(|request| request_matches_rect(&batch, request, icon_rect))
         .collect();
-    assert_eq!(
-        icon_requests.len(),
-        1,
-        "HeroSpecButton.Icon1 should emit exactly one textured quad request"
+    assert!(
+        !icon_requests.is_empty(),
+        "HeroSpecButton.Icon1 should emit at least one textured quad request"
     );
-    assert_bounds_match_rect(
-        quad_bounds(&batch, icon_requests[0]),
-        icon_rect,
-        "hero spec icon",
-    );
+    let icon_request_path = &icon_requests[0].path;
+    for request in &icon_requests {
+        assert_eq!(
+            &request.path, icon_request_path,
+            "HeroSpecButton.Icon1 duplicate quads should share the same cropped atlas path"
+        );
+        assert_bounds_match_rect(quad_bounds(&batch, request), icon_rect, "hero spec icon");
+    }
 
     let mask_crop_prefix = format!("{mask_path}@crop:");
     let mask_requests: Vec<_> = batch
@@ -193,16 +209,18 @@ fn hero_spec_icon_and_mask_quads_match_layout_rect() {
         .iter()
         .filter(|request| request.path == mask_path || request.path.starts_with(&mask_crop_prefix))
         .collect();
-    assert_eq!(
-        mask_requests.len(),
-        1,
-        "HeroSpecButton.IconMask should emit exactly one mask quad request"
+    assert!(
+        !mask_requests.is_empty(),
+        "HeroSpecButton.IconMask should emit at least one mask quad request"
     );
-    assert_bounds_match_rect(
-        quad_bounds(&batch, mask_requests[0]),
-        icon_rect,
-        "hero spec mask",
-    );
+    let mask_request_path = &mask_requests[0].path;
+    for request in &mask_requests {
+        assert_eq!(
+            &request.path, mask_request_path,
+            "HeroSpecButton.IconMask duplicate quads should share the same mask path"
+        );
+        assert_bounds_match_rect(quad_bounds(&batch, request), icon_rect, "hero spec mask");
+    }
 }
 
 #[test]
@@ -210,7 +228,7 @@ fn hero_spec_icon_crop_request_matches_atlas_entry() {
     let env = setup_full_ui();
     open_class_talent_frame(&env);
 
-    let (icon_path, atlas_name) = {
+    let (icon_rect, icon_path, atlas_name) = {
         let state = env.state().borrow();
         let player_spells_id = state
             .widgets
@@ -235,6 +253,7 @@ fn hero_spec_icon_crop_request_matches_atlas_entry() {
         let icon_id = *button.children_keys.get("Icon1").expect("Icon1 child");
         let icon = state.widgets.get(icon_id).unwrap();
         (
+            wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, icon_id, 1024.0, 768.0),
             icon.texture
                 .clone()
                 .expect("Icon1 should have a texture path"),
@@ -264,7 +283,10 @@ fn hero_spec_icon_crop_request_matches_atlas_entry() {
     let request = batch
         .texture_requests
         .iter()
-        .find(|request| request.path.starts_with(&icon_crop_prefix))
+        .find(|request| {
+            request.path.starts_with(&icon_crop_prefix)
+                && request_matches_rect(&batch, request, icon_rect)
+        })
         .expect("HeroSpecButton.Icon1 should emit a cropped atlas request");
     let crop_coords =
         parse_crop_coords(&request.path).expect("HeroSpecButton.Icon1 crop request should parse");

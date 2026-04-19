@@ -33,8 +33,14 @@ fn push_mount_info(
 }
 
 fn register_mount_counts(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("GetNumMounts", |state| (0i32).into_stack(state))?
-        .set_function("GetNumDisplayedMounts", |state| (0i32).into_stack(state))
+    tb.set_function("GetNumMounts", |state| {
+        let count = borrow_state(state)?.world.mounts.len() as i32;
+        count.into_stack(state)
+    })?
+    .set_function("GetNumDisplayedMounts", |state| {
+        let count = borrow_state(state)?.world.mounts.len() as i32;
+        count.into_stack(state)
+    })
 }
 
 struct MountInfoSnapshot {
@@ -136,7 +142,29 @@ fn register_mount_info(tb: TableBuilder) -> LuaResult<TableBuilder> {
 fn register_mount_stubs(tb: TableBuilder) -> LuaResult<TableBuilder> {
     tb.set_function("GetMountIDs", |state| {
         use crate::lua_api::methods::create_table;
-        create_table(state).into_stack(state)
+        let ids = {
+            let st = borrow_state(state)?;
+            st.world
+                .mounts
+                .iter()
+                .map(|mount| mount.mount_id as f64)
+                .collect::<Vec<_>>()
+        };
+        let table = create_table(state);
+        for (index, mount_id) in ids.into_iter().enumerate() {
+            let Val::Table(table_ref) = table else {
+                return Ok(0);
+            };
+            if let Some(array) = state.gc.tables.get_mut(table_ref) {
+                let _ = array.raw_set(
+                    Val::Num(index as f64 + 1.0),
+                    Val::Num(mount_id),
+                    &state.gc.string_arena,
+                );
+            }
+            state.gc.barrier_back(table_ref);
+        }
+        table.into_stack(state)
     })?
     .set_function("AreMountEquipmentEffectsSuppressed", |state| {
         false.into_stack(state)

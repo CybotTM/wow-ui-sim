@@ -34,6 +34,9 @@ pub fn generate_animation_group_code(
     emit_inherited_anim_group_children(&mut code, anim_group, frame_ref);
     emit_anim_group_children(&mut code, anim_group, frame_ref);
     emit_anim_group_mixin(&mut code, anim_group);
+    code.push_str(
+        "\n        do local __onLoad = __ag.GetScript and __ag:GetScript(\"OnLoad\")\n        if type(__onLoad) == \"function\" then __onLoad(__ag) end end\n        ",
+    );
 
     code.push_str("\n        end\n        ");
     code

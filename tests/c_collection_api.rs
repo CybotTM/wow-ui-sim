@@ -37,7 +37,7 @@ fn test_pet_journal_get_num_pet_sources() {
 fn test_pet_journal_get_pet_info_by_index_nil() {
     let env = env();
     let is_nil: bool = env
-        .eval("return C_PetJournal.GetPetInfoByIndex(1) == nil")
+        .eval("return C_PetJournal.GetPetInfoByIndex(999) == nil")
         .unwrap();
     assert!(is_nil);
 }
@@ -55,7 +55,7 @@ fn test_pet_journal_get_pet_info_by_pet_id_nil() {
 fn test_pet_journal_get_pet_info_by_species_id_nil() {
     let env = env();
     let is_nil: bool = env
-        .eval("return C_PetJournal.GetPetInfoBySpeciesID(1) == nil")
+        .eval("return C_PetJournal.GetPetInfoBySpeciesID(99999) == nil")
         .unwrap();
     assert!(is_nil);
 }
@@ -75,8 +75,8 @@ fn test_pet_journal_get_num_collected_info() {
     let (collected, total): (i32, i32) = env
         .eval("return C_PetJournal.GetNumCollectedInfo(1)")
         .unwrap();
-    assert_eq!(collected, 0);
-    assert_eq!(total, 0);
+    assert_eq!(collected, 9);
+    assert_eq!(total, 10);
 }
 
 // ============================================================================
@@ -87,7 +87,7 @@ fn test_pet_journal_get_num_collected_info() {
 fn test_mount_journal_get_num_mounts() {
     let env = env();
     let count: i32 = env.eval("return C_MountJournal.GetNumMounts()").unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 10);
 }
 
 #[test]
@@ -96,14 +96,14 @@ fn test_mount_journal_get_num_displayed_mounts() {
     let count: i32 = env
         .eval("return C_MountJournal.GetNumDisplayedMounts()")
         .unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 10);
 }
 
 #[test]
 fn test_mount_journal_get_mount_info_by_id_returns_tuple() {
     let env = env();
     let is_active: bool = env
-        .eval("local _,_,_, isActive = C_MountJournal.GetMountInfoByID(1); return isActive")
+        .eval("local _,_,_, isActive = C_MountJournal.GetMountInfoByID(107); return isActive")
         .unwrap();
     assert!(!is_active);
 }
@@ -112,7 +112,7 @@ fn test_mount_journal_get_mount_info_by_id_returns_tuple() {
 fn test_mount_journal_get_mount_info_by_id_first_nil() {
     let env = env();
     let is_nil: bool = env
-        .eval("return C_MountJournal.GetMountInfoByID(1) == nil")
+        .eval("return C_MountJournal.GetMountInfoByID(99999) == nil")
         .unwrap();
     assert!(is_nil);
 }
@@ -121,7 +121,7 @@ fn test_mount_journal_get_mount_info_by_id_first_nil() {
 fn test_mount_journal_get_mount_ids_empty_table() {
     let env = env();
     let count: i32 = env.eval("return #C_MountJournal.GetMountIDs()").unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 10);
 }
 
 #[test]
@@ -293,19 +293,19 @@ fn test_toy_box_has_favorites() {
 fn test_toy_box_get_num_toys() {
     let env = env();
     let count: i32 = env.eval("return C_ToyBox.GetNumToys()").unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 10);
 }
 
 #[test]
 fn test_toy_box_get_toy_from_index() {
     let env = env();
     let id: i32 = env.eval("return C_ToyBox.GetToyFromIndex(1)").unwrap();
-    assert_eq!(id, 0);
+    assert_eq!(id, 166779);
 }
 
 #[test]
 fn test_toy_box_get_num_filtered_toys() {
     let env = env();
     let count: i32 = env.eval("return C_ToyBox.GetNumFilteredToys()").unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 10);
 }
