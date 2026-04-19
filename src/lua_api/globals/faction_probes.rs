@@ -171,8 +171,12 @@ fn reputation_entry_table(
 }
 
 fn register_reputation_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
+    let existing_reputation = LuaApiMut::get_global_val(lua, "C_Reputation");
     let state = lua.state_mut();
-    let reputation = create_table(state);
+    let reputation = match existing_reputation {
+        Val::Table(table) => Val::Table(table),
+        _ => create_table(state),
+    };
     let Val::Table(reputation_ref) = reputation else {
         unreachable!("create_table must return a table");
     };
