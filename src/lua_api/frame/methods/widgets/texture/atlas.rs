@@ -10,7 +10,14 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn set_atlas(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let Some(atlas_name) = super::super::shared::opt_string(state, 2) else {
+    let atlas_name = match stack_val(state, 2) {
+        Val::Str(_) => super::super::shared::opt_string(state, 2),
+        Val::Num(element_id) if element_id > 0.0 => {
+            crate::atlas::get_atlas_name_by_element_id(element_id as u32).map(str::to_string)
+        }
+        _ => None,
+    };
+    let Some(atlas_name) = atlas_name else {
         return Ok(0);
     };
     let Some(lookup) = crate::atlas::get_atlas_info(&atlas_name) else {

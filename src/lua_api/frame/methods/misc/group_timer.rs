@@ -1,11 +1,12 @@
 //! Group creation, timer updates, frame/font-string registration, and quest blob methods.
 
 use crate::lua_api::methods::{
-    borrow_state_mut, call_function_state, create_string, create_table, extract_frame_id,
-    frame_id_from_stack, get_or_create_frame_fields, table_get, table_get_static, table_set,
-    val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    extract_frame_id, frame_id_from_stack, get_or_create_frame_fields, table_get, table_get_static,
+    table_set, val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use crate::quest_poi_blobs;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -28,8 +29,16 @@ pub fn register(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, mt, "SetFillAlpha", set_fill_alpha)?;
     table_set_rust_fn_static(state, mt, "SetOwningDialog", set_owning_dialog)?;
     table_set_rust_fn_static(state, mt, "SetFillTexture", set_fill_texture)?;
+    table_set_rust_fn_static(state, mt, "DrawBlob", draw_blob)?;
     table_set_rust_fn_static(state, mt, "SetToDefaults", set_to_defaults)?;
     table_set_rust_fn_static(state, mt, "DrawNone", draw_none)?;
+    table_set_rust_fn_static(
+        state,
+        mt,
+        "UpdateMouseOverTooltip",
+        update_mouse_over_tooltip,
+    )?;
+    table_set_rust_fn_static(state, mt, "GetTooltipIndex", get_tooltip_index)?;
     table_set_rust_fn_static(state, mt, "SetAlertContainer", set_alert_container)?;
     table_set_rust_fn_static(state, mt, "SetDefaultText", set_default_text)?;
     table_set_rust_fn_static(state, mt, "UpdateHeight", update_height)?;
@@ -424,4 +433,43 @@ pub fn draw_none(state: &mut LuaState) -> LuaResult<u32> {
         .active_quests
         .clear();
     Ok(0)
+}
+
+pub fn draw_blob(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let quest_id = i32::from_stack(state, 2)? as u32;
+    let active = bool::from_stack(state, 3).unwrap_or(true);
+    if !active {
+        return Ok(0);
+    }
+    let mut sim = borrow_state_mut(state)?;
+    let blob = sim.quest_blobs.entry(id).or_default();
+    if !blob.active_quests.contains(&quest_id) {
+        blob.active_quests.push(quest_id);
+    }
+    Ok(0)
+}
+
+pub fn update_mouse_over_tooltip(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let x = f64::from_stack(state, 2)? as f32;
+    let y = f64::from_stack(state, 3)? as f32;
+    let hit = {
+        let sim = borrow_state(state)?;
+        sim.quest_blobs.get(&id).and_then(|blob_state| {
+            quest_poi_blobs::hit_test_blobs(&blob_state.active_quests, blob_state.map_id, x, y)
+        })
+    };
+    let Some((quest_id, count)) = hit else {
+        return Ok(0);
+    };
+    state.push(Val::Num(quest_id as f64));
+    state.push(Val::Num(count as f64));
+    Ok(2)
+}
+
+pub fn get_tooltip_index(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 2)?;
+    state.push(Val::Num(index as f64));
+    Ok(1)
 }

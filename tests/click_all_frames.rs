@@ -451,7 +451,7 @@ fn test_click_all_frames() {
         panic!("{msg}");
     }
 
-    if count < KNOWN_ERROR_COUNT {
+    if KNOWN_ERROR_COUNT > 0 && count < KNOWN_ERROR_COUNT {
         panic!(
             "Click error count improved from {KNOWN_ERROR_COUNT} to {count}! \
              Update KNOWN_ERROR_COUNT to {count} to lock in the improvement."

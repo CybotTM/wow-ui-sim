@@ -109,16 +109,17 @@ fn test_clear_texture_slice_resets_margins_and_mode() {
 #[test]
 fn test_set_rotation_roundtrip() {
     let env = env();
+    let quarter_turn = std::f64::consts::FRAC_PI_2;
     let radians: f64 = env
         .eval(
             r#"
             local tex = CreateFrame("Frame"):CreateTexture()
-            tex:SetRotation(1.5707963)
+            tex:SetRotation(math.pi / 2)
             return tex:GetRotation()
             "#,
         )
         .unwrap();
-    assert!((radians - 1.5707963).abs() < 0.0001, "got {radians}");
+    assert!((radians - quarter_turn).abs() < 0.0001, "got {radians}");
 }
 
 #[test]

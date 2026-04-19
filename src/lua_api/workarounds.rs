@@ -36,6 +36,12 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_map_exploration_pin_mixin", || {
         patch_map_exploration_pin_mixin(env);
     });
+    log_step(env, "patch_action_bar_button_event_fanout", || {
+        patch_action_bar_button_event_fanout(env);
+    });
+    log_step(env, "patch_game_time_defaults", || {
+        patch_game_time_defaults(env);
+    });
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
@@ -241,6 +247,95 @@ fn patch_item_socketing_tooltips(env: &crate::lua_api::WowLuaEnv) {
         install_socket_on_enter(container.Socket1, 1)
         install_socket_on_enter(container.Socket2, 2)
         install_socket_on_enter(container.Socket3, 3)
+        "#,
+    );
+}
+
+fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaEnv) {
+    let trace_fanout = std::env::var_os("WOW_SIM_TRACE_ACTIONBAR_BUTTON_FANOUT").is_some();
+    let script = format!(
+        r##"
+        if type(ActionBarButtonEventsFrameMixin) ~= "table" then
+            return
+        end
+
+        local traceFanout = {trace_fanout}
+
+        local function button_label(frame, index)
+            if type(frame) ~= "table" then
+                return "#" .. tostring(index)
+            end
+            if type(frame.GetName) == "function" then
+                local name = frame:GetName()
+                if name ~= nil then
+                    return name
+                end
+            end
+            if frame.action ~= nil then
+                return "action:" .. tostring(frame.action)
+            end
+            return "#" .. tostring(index)
+        end
+
+        local function for_each_button_frame(self, func)
+            local frames = self.frames
+            if type(frames) ~= "table" then
+                return
+            end
+            for i = 1, #frames do
+                local frame = rawget(frames, i)
+                if frame ~= nil then
+                    if traceFanout then
+                        print("[ActionBarFanout] begin " .. button_label(frame, i))
+                    end
+                    func(frame)
+                    if traceFanout then
+                        print("[ActionBarFanout] end " .. button_label(frame, i))
+                    end
+                end
+            end
+        end
+
+        local function on_event(self, event, ...)
+            for_each_button_frame(self, function(frame)
+                frame:OnEvent(event, ...)
+            end)
+        end
+
+        local function on_countdown_for_cooldowns_changed(self)
+            for_each_button_frame(self, function(frame)
+                ActionButton_UpdateCooldownNumberHidden(frame)
+            end)
+        end
+
+        local function for_each_frame(self, func)
+            for_each_button_frame(self, func)
+        end
+
+        ActionBarButtonEventsFrameMixin.OnEvent = on_event
+        ActionBarButtonEventsFrameMixin.OnCountdownForCooldownsChanged = on_countdown_for_cooldowns_changed
+        ActionBarButtonEventsFrameMixin.ForEachFrame = for_each_frame
+
+        if type(ActionBarButtonEventsFrame) == "table" then
+            ActionBarButtonEventsFrame.OnEvent = on_event
+            ActionBarButtonEventsFrame.OnCountdownForCooldownsChanged = on_countdown_for_cooldowns_changed
+            ActionBarButtonEventsFrame.ForEachFrame = for_each_frame
+            if type(ActionBarButtonEventsFrame.SetScript) == "function" then
+                ActionBarButtonEventsFrame:SetScript("OnEvent", on_event)
+            end
+        end
+        "##,
+        trace_fanout = if trace_fanout { "true" } else { "false" },
+    );
+    let _ = env.exec(&script);
+}
+
+fn patch_game_time_defaults(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(GameTimeFrame) == "table" and GameTimeFrame.pendingCalendarInvites == nil then
+            GameTimeFrame.pendingCalendarInvites = 0
+        end
         "#,
     );
 }

@@ -83,6 +83,113 @@ fn quest_poi_update_icons_is_callable() {
 }
 
 #[test]
+fn corruption_helpers_exist_with_safe_defaults() {
+    let env = env();
+    let (corruption, resistance, effects_ty, effects_len): (f64, f64, String, i64) = env
+        .eval(
+            r#"
+            local effects = GetNegativeCorruptionEffectInfo()
+            return GetCorruption(),
+                   GetCorruptionResistance(),
+                   type(effects),
+                   #effects
+            "#,
+        )
+        .expect("corruption helpers should be callable");
+    assert_eq!(corruption, 0.0);
+    assert_eq!(resistance, 0.0);
+    assert_eq!(effects_ty, "table");
+    assert_eq!(effects_len, 0);
+}
+
+#[test]
+fn quest_sort_helpers_are_callable_noops() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            return pcall(function()
+                SortQuestSortTypes()
+                SortQuests()
+            end)
+            "#,
+        )
+        .expect("quest sort helpers should be callable");
+    assert!(
+        ok,
+        "quest sort helpers should stay callable during QuestMap refresh"
+    );
+}
+
+#[test]
+fn nameplate_size_helper_exists_as_safe_noop() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            return pcall(function()
+                C_NamePlate.SetNamePlateSize(110, 45)
+            end)
+            "#,
+        )
+        .expect("nameplate size helper should be callable");
+    assert!(
+        ok,
+        "SetNamePlateSize should exist even though the sim renders no 3D nameplates"
+    );
+}
+
+#[test]
+fn instance_abandon_vote_and_shutdown_helpers_return_numeric_pairs() {
+    let env = env();
+    let (
+        vote_duration,
+        vote_time_left,
+        shutdown_duration,
+        shutdown_time_left,
+        response_is_nil,
+        response_set_ok,
+        vote_count,
+        can_start_vote,
+        start_vote_ok,
+    ): (f64, f64, f64, f64, bool, bool, f64, bool, bool) = env
+        .eval(
+            r#"
+            local voteDuration, voteTimeLeft = C_PartyInfo.GetInstanceAbandonVoteTime()
+            local shutdownDuration, shutdownTimeLeft = C_PartyInfo.GetInstanceAbandonShutdownTime()
+            local response = C_PartyInfo.GetInstanceAbandonVoteResponse()
+            local responseSetOk = pcall(function()
+                C_PartyInfo.SetInstanceAbandonVoteResponse(true)
+            end)
+            local startVoteOk = pcall(function()
+                C_PartyInfo.StartInstanceAbandonVote()
+            end)
+
+            return voteDuration,
+                   voteTimeLeft,
+                   shutdownDuration,
+                   shutdownTimeLeft,
+                   response == nil,
+                   responseSetOk,
+                   C_PartyInfo.GetNumInstanceAbandonGroupVoteResponses(),
+                   C_PartyInfo.CanStartInstanceAbandonVote(),
+                   startVoteOk
+            "#,
+        )
+        .expect("instance abandon helpers should be callable");
+
+    assert_eq!(vote_duration, 0.0);
+    assert_eq!(vote_time_left, 0.0);
+    assert_eq!(shutdown_duration, 0.0);
+    assert_eq!(shutdown_time_left, 0.0);
+    assert!(response_is_nil);
+    assert!(response_set_ok);
+    assert_eq!(vote_count, 0.0);
+    assert!(!can_start_vote);
+    assert!(start_vote_ok);
+}
+
+#[test]
 fn is_character_newly_boosted_returns_false() {
     let env = env();
     let boosted: bool = env

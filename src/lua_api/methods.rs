@@ -332,9 +332,7 @@ fn frame_metatable_for_widget_type(
                 .is_none_or(|name| !remove.contains(&name)),
             _ => true,
         };
-        if keep
-            && let Some(index_tbl) = state.gc.tables.get_mut(index_clone)
-        {
+        if keep && let Some(index_tbl) = state.gc.tables.get_mut(index_clone) {
             let _ = index_tbl.raw_set(entry_key, entry_value, &state.gc.string_arena);
         }
     }

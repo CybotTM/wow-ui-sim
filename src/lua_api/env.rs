@@ -33,6 +33,15 @@ fn event_dispatch_trace_enabled(event: &str) -> bool {
     filter == "*" || filter.split(',').any(|name| name.trim() == event)
 }
 
+fn should_skip_startup_actionbar_fanout(state: &SimState, widget_id: u64, event: &str) -> bool {
+    event == "PLAYER_ENTERING_WORLD"
+        && state
+            .widgets
+            .get(widget_id)
+            .and_then(|frame| frame.name.as_deref())
+            == Some("ActionBarButtonEventsFrame")
+}
+
 /// Generate a unique timer ID.
 pub(crate) fn next_timer_id() -> u64 {
     NEXT_TIMER_ID.fetch_add(1, Ordering::Relaxed)
@@ -343,6 +352,16 @@ impl WowLuaEnv {
     }
 
     fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
+        {
+            let state = self.state.borrow();
+            // ActionBarButtonEventsFrame only fans PLAYER_ENTERING_WORLD out to
+            // action buttons so they refresh visuals. In the simulator that
+            // startup fanout can wedge the full-game headless path, and the
+            // post-event workaround pass already refreshes button art/hotkeys.
+            if should_skip_startup_actionbar_fanout(&state, widget_id, event) {
+                return Ok(());
+            }
+        }
         let addon_idx = self.handler_owner_addon(widget_id);
         let trace_dispatch = event_dispatch_trace_enabled(event);
         let trace_label = if trace_dispatch {
@@ -350,7 +369,23 @@ impl WowLuaEnv {
             let frame_name = state
                 .widgets
                 .get(widget_id)
-                .and_then(|frame| frame.name.clone())
+                .map(|frame| {
+                    let name = frame
+                        .name
+                        .clone()
+                        .or_else(|| frame.parent_key.clone())
+                        .unwrap_or_else(|| format!("#{widget_id}"));
+                    let object_type = frame
+                        .object_type_name
+                        .clone()
+                        .unwrap_or_else(|| format!("{:?}", frame.widget_type));
+                    let owner = frame
+                        .owner_addon
+                        .and_then(|index| state.addons.get(index as usize))
+                        .map(|addon| addon.folder_name.clone())
+                        .unwrap_or_else(|| "?".to_string());
+                    format!("{name} [{object_type}] owner={owner}")
+                })
                 .unwrap_or_else(|| format!("#{widget_id}"));
             let start_time = state.start_time;
             Some((frame_name, start_time))

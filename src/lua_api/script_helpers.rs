@@ -189,6 +189,9 @@ pub fn protected_call_state(
                 err,
             );
             state.top = saved_top;
+            if let Some(error_msg) = val_to_string(state, error_val) {
+                let _ = collect_lua_error(state, &error_msg);
+            }
             Err(error_val)
         }
     }

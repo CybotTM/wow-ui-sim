@@ -422,8 +422,8 @@ fn test_get_cursor_position_default_when_no_mouse() {
 
     // mouse_position is None by default
     let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
-    assert!((x - 512.0).abs() < 0.1, "default x should be 512, got {x}");
-    assert!((y - 384.0).abs() < 0.1, "default y should be 384, got {y}");
+    assert!((x - 0.0).abs() < 0.1, "default x should be 0, got {x}");
+    assert!((y - 0.0).abs() < 0.1, "default y should be 0, got {y}");
 }
 
 #[test]

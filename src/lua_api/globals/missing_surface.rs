@@ -41,6 +41,7 @@ mod summon_info;
 mod tooltip_info;
 mod traits;
 mod transmog;
+mod transmog_collection;
 mod tutorial;
 mod voice_chat;
 mod zone_ability;
@@ -127,6 +128,7 @@ fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     professions::register_profession_surface(state)?;
     traits::register_trait_surfaces(state)?;
     tooltip_info::register_tooltip_surface(state)?;
+    transmog_collection::register_transmog_collection_surface(state)?;
     transmog::register_transmog_surface(state)?;
     tutorial::register_tutorial_surface(state)?;
     heirloom::register_heirloom_surface(state)?;

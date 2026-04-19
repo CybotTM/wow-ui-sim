@@ -216,6 +216,7 @@ fn test_is_public_build() {
 #[test]
 fn test_get_net_stats_returns_seeded_latency_values() {
     let env = env();
+    env.exec("A_Admin.SetNetStats(128, 64, 47, 89)").unwrap();
     let (bandwidth_in, bandwidth_out, latency_home, latency_world): (f64, f64, f64, f64) =
         env.eval("return GetNetStats()").unwrap();
     assert!(

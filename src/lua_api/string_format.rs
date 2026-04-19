@@ -162,7 +162,12 @@ fn format_requires_string_arg(fmt: &str) -> bool {
             continue;
         }
         let mut j = i + 1;
-        while j < bytes.len() && matches!(bytes[j] as char, '-' | '+' | ' ' | '#' | '0' | '.' | '1'..='9') {
+        while j < bytes.len()
+            && matches!(
+                bytes[j] as char,
+                '-' | '+' | ' ' | '#' | '0' | '.' | '1'..='9'
+            )
+        {
             j += 1;
         }
         if j < bytes.len() && matches!(bytes[j] as char, 's' | 'q') {

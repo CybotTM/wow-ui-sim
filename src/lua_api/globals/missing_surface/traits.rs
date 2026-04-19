@@ -244,11 +244,6 @@ fn push_node_active_entry(state: &mut LuaState, info: Val, lookup_node_id: Optio
     let entry_id = borrow_state(state)
         .ok()
         .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_selections.get(&id).copied()))
-        .or_else(|| {
-            lookup_node_id
-                .and_then(|id| TRAIT_NODE_DB.get(&id))
-                .and_then(|node| node.entry_ids.first().copied())
-        })
         .unwrap_or(0);
     let rank = borrow_state(state)
         .ok()

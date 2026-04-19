@@ -1,5 +1,5 @@
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, table_get, val_to_string};
+use crate::lua_api::methods::{borrow_state, create_table, table_get, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -11,8 +11,20 @@ pub(super) fn register_transmog_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
+        "GetAllSetAppearancesByID",
+        c_transmog_get_all_set_appearances_by_id,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
         "GetAppliedAlteredAppearance",
         c_transmog_get_applied_altered_appearance,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetAppliedSourceID",
+        c_transmog_get_applied_source_id,
     )?;
     table_set_rust_fn_static(
         state,
@@ -20,6 +32,7 @@ pub(super) fn register_transmog_surface(state: &mut LuaState) -> LuaResult<()> {
         "GetCreatureDisplayIDForSource",
         c_transmog_get_creature_display_id_for_source,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetSlotInfo", c_transmog_get_slot_info)?;
     table_set_rust_fn_static(state, table_ref, "IsAtTransmogNPC", c_transmog_is_at_npc)?;
     table_set_rust_fn_static(
         state,
@@ -30,18 +43,25 @@ pub(super) fn register_transmog_surface(state: &mut LuaState) -> LuaResult<()> {
     Ok(())
 }
 
+fn c_transmog_get_all_set_appearances_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let _set_id = i32::from_stack(state, 1)?;
+    let table = create_table(state);
+    state.push(table);
+    Ok(1)
+}
+
 fn c_transmog_get_applied_altered_appearance(state: &mut LuaState) -> LuaResult<u32> {
     let slot_id = i32::from_stack(state, 1)?;
-    let source_id = borrow_state(state)?
-        .world
-        .applied_transmog_slots
-        .get(&slot_id)
-        .copied();
+    let source_id = applied_source_id(state, slot_id);
     match source_id {
         Some(source_id) => state.push(Val::Num(source_id as f64)),
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn c_transmog_get_applied_source_id(state: &mut LuaState) -> LuaResult<u32> {
+    c_transmog_get_applied_altered_appearance(state)
 }
 
 fn c_transmog_get_creature_display_id_for_source(state: &mut LuaState) -> LuaResult<u32> {
@@ -57,6 +77,18 @@ fn c_transmog_get_creature_display_id_for_source(state: &mut LuaState) -> LuaRes
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn c_transmog_get_slot_info(state: &mut LuaState) -> LuaResult<u32> {
+    let slot_id = i32::from_stack(state, 1)?;
+    let is_transmogrified = applied_source_id(state, slot_id).is_some();
+    state.push(Val::Bool(is_transmogrified));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(true));
+    state.push(Val::Nil);
+    state.push(Val::Bool(is_transmogrified));
+    Ok(6)
 }
 
 fn c_transmog_is_at_npc(state: &mut LuaState) -> LuaResult<u32> {
@@ -84,6 +116,12 @@ fn c_transmog_player_has_transmog_by_item_info(state: &mut LuaState) -> LuaResul
         .unwrap_or(false);
     state.push(Val::Bool(has_transmog));
     Ok(1)
+}
+
+fn applied_source_id(state: &LuaState, slot_id: i32) -> Option<i32> {
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.world.applied_transmog_slots.get(&slot_id).copied())
 }
 
 fn parse_item_id_from_val(state: &LuaState, value: Val) -> Option<u32> {

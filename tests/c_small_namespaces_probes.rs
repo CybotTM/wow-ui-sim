@@ -78,24 +78,39 @@ fn pvp_is_match_considered_arena_false() {
 // ── C_LossOfControl ──────────────────────────────────────────────────────────
 
 #[test]
-fn loss_of_control_get_active_data_returns_nil() {
+fn loss_of_control_get_active_data_returns_seeded_entry() {
     let env = env();
-    let result: Option<bool> = env
-        .eval("return C_LossOfControl.GetActiveLossOfControlData(1)")
+    let (spell_id, display_text, icon_texture, display_type, time_remaining): (
+        i32,
+        String,
+        String,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local data = C_LossOfControl.GetActiveLossOfControlData(1)
+            return data.spellID, data.displayText, data.iconTexture, data.displayType, data.timeRemaining
+        "#,
+        )
         .unwrap();
     assert!(
-        result.is_none(),
-        "GetActiveLossOfControlData() must return nil"
+        spell_id == 408,
+        "GetActiveLossOfControlData() should expose seeded spell data"
     );
+    assert_eq!(display_text, "Kidney Shot");
+    assert_eq!(icon_texture, "Interface\\Icons\\Ability_Rogue_KidneyShot");
+    assert_eq!(display_type, 2);
+    assert_eq!(time_remaining, 4);
 }
 
 #[test]
-fn loss_of_control_get_active_data_count_is_zero() {
+fn loss_of_control_get_active_data_count_is_one() {
     let env = env();
     let count: i32 = env
         .eval("return C_LossOfControl.GetActiveLossOfControlDataCount()")
         .unwrap();
-    assert_eq!(count, 0, "GetActiveLossOfControlDataCount() must return 0");
+    assert_eq!(count, 1, "GetActiveLossOfControlDataCount() must return 1");
 }
 
 // ── C_Bank ───────────────────────────────────────────────────────────────────

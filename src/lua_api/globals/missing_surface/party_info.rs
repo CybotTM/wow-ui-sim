@@ -1,7 +1,7 @@
 //! `C_PartyInfo` probe surface backed by the existing
 //! `SimState.party_members` / `party_group_active` fields.
 //!
-//! Migrates 5 entries off the namespace stub tables:
+//! Migrates 10 entries off the namespace stub tables:
 //!
 //! - `C_PartyInfo.GetActiveCategories()` — empty array when solo;
 //!   `{1}` (Home category) when in a party or raid.
@@ -11,6 +11,12 @@
 //!   (≥5 for party, ≥40 for raid).
 //! - `C_PartyInfo.IsPartyInJailersTower()` — always false (Torghast stub).
 //! - `C_PartyInfo.GetInviteConfirmationInfo(guid)` — nil for all guids.
+//! - `C_PartyInfo.GetInstanceAbandonVoteTime()` — `0, 0`.
+//! - `C_PartyInfo.GetInstanceAbandonShutdownTime()` — `0, 0`.
+//! - `C_PartyInfo.GetInstanceAbandonVoteResponse()` — nil.
+//! - `C_PartyInfo.GetNumInstanceAbandonGroupVoteResponses()` — `0`.
+//! - `C_PartyInfo.CanStartInstanceAbandonVote()` — false.
+//! - `C_PartyInfo.StartInstanceAbandonVote()` — no-op.
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::borrow_state;
@@ -65,11 +71,22 @@ fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>
         "GetInviteConfirmationInfo",
         c_party_info_get_invite_confirmation_info,
     )?;
+    register_instance_abandon_stubs(state, table_ref)?;
+    Ok(())
+}
+
+fn register_instance_abandon_stubs(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
         "GetInstanceAbandonVoteTime",
         c_party_info_get_instance_abandon_vote_time,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetInstanceAbandonShutdownTime",
+        c_party_info_get_instance_abandon_shutdown_time,
     )?;
     table_set_rust_fn_static(
         state,
@@ -82,6 +99,24 @@ fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>
         table_ref,
         "SetInstanceAbandonVoteResponse",
         c_party_info_set_instance_abandon_vote_response,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetNumInstanceAbandonGroupVoteResponses",
+        c_party_info_get_num_instance_abandon_group_vote_responses,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanStartInstanceAbandonVote",
+        c_party_info_can_start_instance_abandon_vote,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "StartInstanceAbandonVote",
+        c_party_info_start_instance_abandon_vote,
     )?;
     Ok(())
 }
@@ -176,6 +211,12 @@ fn c_party_info_get_instance_abandon_vote_time(state: &mut LuaState) -> LuaResul
     Ok(2)
 }
 
+fn c_party_info_get_instance_abandon_shutdown_time(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(2)
+}
+
 fn c_party_info_get_instance_abandon_vote_response(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
     Ok(1)
@@ -183,6 +224,23 @@ fn c_party_info_get_instance_abandon_vote_response(state: &mut LuaState) -> LuaR
 
 fn c_party_info_set_instance_abandon_vote_response(state: &mut LuaState) -> LuaResult<u32> {
     let _ = Option::<bool>::from_stack(state, 1)?;
+    Ok(0)
+}
+
+fn c_party_info_get_num_instance_abandon_group_vote_responses(
+    state: &mut LuaState,
+) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_party_info_can_start_instance_abandon_vote(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_party_info_start_instance_abandon_vote(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
     Ok(0)
 }
 

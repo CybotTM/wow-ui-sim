@@ -35,6 +35,18 @@ pub(super) fn register_gossip_info_surface(state: &mut LuaState) -> LuaResult<()
         "GetPoiForUiMapID",
         c_gossip_info_get_poi_for_ui_map_id,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetFriendshipReputation",
+        c_gossip_info_get_friendship_reputation,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetFriendshipReputationRanks",
+        c_gossip_info_get_friendship_reputation_ranks,
+    )?;
     Ok(())
 }
 
@@ -61,6 +73,25 @@ fn c_gossip_info_get_available_quests(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_gossip_info_get_poi_for_ui_map_id(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_gossip_info_get_friendship_reputation(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    table_set(state, table, "friendshipFactionID", Val::Num(0.0));
+    table_set(state, table, "reaction", Val::Num(0.0));
+    table_set(state, table, "currentReactionThreshold", Val::Num(0.0));
+    table_set(state, table, "nextReactionThreshold", Val::Num(0.0));
+    table_set(state, table, "currentStanding", Val::Num(0.0));
+    state.push(table);
+    Ok(1)
+}
+
+fn c_gossip_info_get_friendship_reputation_ranks(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    table_set(state, table, "currentLevel", Val::Num(0.0));
+    table_set(state, table, "maxLevel", Val::Num(0.0));
+    state.push(table);
     Ok(1)
 }
 

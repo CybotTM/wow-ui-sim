@@ -11,10 +11,11 @@
 //! (`for _, plate in ipairs(C_NamePlate.GetNamePlates()) do`) will
 //! exit immediately with zero iterations.
 //!
-//! Migrates 2 entries off the namespace stub tables:
+//! Migrates 3 entries off the namespace stub tables:
 //!
 //! - `C_NamePlate.GetNamePlateForUnit(unitToken, [includeForbidden])` — nil
 //! - `C_NamePlate.GetNamePlates([includeForbidden])` — empty table
+//! - `C_NamePlate.SetNamePlateSize(width, height)` — no-op
 
 use super::ensure_namespace;
 use crate::lua_api::methods::create_table;
@@ -36,6 +37,12 @@ pub(super) fn register_nameplate_surface(state: &mut LuaState) -> LuaResult<()> 
         "GetNamePlates",
         c_nameplate_get_nameplates,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetNamePlateSize",
+        c_nameplate_set_nameplate_size,
+    )?;
     Ok(())
 }
 
@@ -49,4 +56,9 @@ fn c_nameplate_get_nameplates(state: &mut LuaState) -> LuaResult<u32> {
     let array = create_table(state);
     state.push(array);
     Ok(1)
+}
+
+fn c_nameplate_set_nameplate_size(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    Ok(0)
 }
