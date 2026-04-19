@@ -9001,6 +9001,8 @@ if rawget(C_TransmogOutfitInfo, "ClearOutfit") == nil then
   end
 end
 C_Macro = C_Macro or __wow_namespace()
+local __wow_native_has_action = rawget(_G, "HasAction")
+local __wow_native_get_action_texture = rawget(_G, "GetActionTexture")
 C_ActionBar = C_ActionBar or __wow_namespace({
   HasVehicleActionBar = function() return false end,
   HasOverrideActionBar = function() return false end,
@@ -9020,15 +9022,15 @@ C_ActionBar = C_ActionBar or __wow_namespace({
   GetActionBarPage = function() return 1 end,
   SetActionBarPage = __wow_noop,
   HasAction = function(slot)
-    if type(_G.HasAction) == "function" then
-      return _G.HasAction(slot)
+    if type(__wow_native_has_action) == "function" then
+      return __wow_native_has_action(slot)
     end
     return false
   end,
   IsPressHoldReleaseSpell = function() return false end,
   GetActionTexture = function(slot)
-    if type(_G.GetActionTexture) == "function" then
-      return _G.GetActionTexture(slot)
+    if type(__wow_native_get_action_texture) == "function" then
+      return __wow_native_get_action_texture(slot)
     end
     return nil
   end,

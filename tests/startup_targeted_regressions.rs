@@ -9,6 +9,43 @@ fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
+fn load_and_startup_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addons(&ui);
+
+    for (_name, toc_path) in &addons {
+        load_addon(&env.loader_env(), toc_path).expect("Failed to load Blizzard addon");
+    }
+
+    env.apply_post_load_workarounds();
+    common::fire_addon_loaded(&env, "WoWUISim");
+    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
+        env.fire_event(event).ok();
+    }
+    env.fire_edit_mode_layouts_updated().ok();
+    common::call_global_if_present(&env, "RequestTimePlayed");
+    common::fire_player_entering_world(&env, true, false);
+
+    for event in [
+        "UNIT_AURA",
+        "BAG_UPDATE_DELAYED",
+        "QUEST_LOG_UPDATE",
+        "GROUP_ROSTER_UPDATE",
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+        "UPDATE_CHAT_WINDOWS",
+    ] {
+        env.fire_event(event).ok();
+    }
+
+    env.fire_on_update(0.016).ok();
+    env
+}
+
 fn load_and_startup_collect_messages() -> Vec<String> {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -116,6 +153,28 @@ fn startup_omits_targeted_missing_global_errors() {
             targeted.is_empty(),
             "Startup should not report the targeted missing-global regressions:\n  {}",
             targeted.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn startup_keeps_action_bar_deprecation_fallbacks_non_recursive() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: (bool, bool, bool, bool) = env
+            .eval(
+                r#"
+                local texture_ok, texture = pcall(C_ActionBar.GetActionTexture, 13)
+                local has_action_ok, has_action = pcall(C_ActionBar.HasAction, 13)
+                return texture_ok, texture == nil, has_action_ok, has_action == false
+            "#,
+            )
+            .expect("C_ActionBar probes should return values");
+
+        assert_eq!(
+            result,
+            (true, true, true, true),
+            "Deprecated action-bar fallbacks should not recurse through C_ActionBar"
         );
     }
 }
