@@ -234,6 +234,14 @@ end
 
 __wow_ensure_glue_character_select_surface()
 
+local function __wow_ensure_spellbook_surface()
+  rawset(_G, "IsSelectedSpellBookItem", function(_slotIndex, _unit)
+    return false
+  end)
+end
+
+__wow_ensure_spellbook_surface()
+
 if GetSpecializationInfoForSpecID == nil then
   function GetSpecializationInfoForSpecID(_specID)
     return nil, ""
@@ -2961,6 +2969,12 @@ if GetInventoryItemTexture == nil then
   end
 end
 
+if IsSelectedSpellBookItem == nil then
+  function IsSelectedSpellBookItem(_slotIndex, _unit)
+    return false
+  end
+end
+
 if IsInventoryItemProfessionBag == nil then
   function IsInventoryItemProfessionBag(_unit, _slot)
     return false
@@ -5019,6 +5033,9 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
       or addonName == "Blizzard_GlueXML"
       or addonName == "Blizzard_CharacterCreate" then
       __wow_ensure_glue_character_select_surface()
+    elseif addonName == "Blizzard_ProfessionsBook"
+      or addonName == "Blizzard_PlayerSpells" then
+      __wow_ensure_spellbook_surface()
     elseif addonName == "Blizzard_CharacterSelectNavBar" then
       __wow_patch_character_select_nav_bar()
     elseif addonName == "Blizzard_MapCanvas"
