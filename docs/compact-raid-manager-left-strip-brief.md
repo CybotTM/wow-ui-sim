@@ -25,29 +25,44 @@ These values are the core discrepancy to keep in mind:
 
 So the logical layout state and the final painted result disagree.
 
-### Correction: two different fixtures were being compared
+### Effective-scale capture
 
-A follow-up probe showed the above “logical vs painted” mismatch is an artifact of comparing two fixtures, not a render-time divergence:
+An `--exec-lua` probe was used to capture scales and resolved rects at runtime. Every relevant scale in the chain is `1`:
 
-- The `222x275` / toggle-top `y=260` numbers come from a **no-party baseline** (`IsInGroup=false`, manager is hidden anyway).
-- The screenshot exhibiting the oversize strip is a **party-leader fixture** (`A_Admin.SetPartySize(4); A_Admin.SetPartyLeader(0)`).
+- `CompactRaidFrameManager`: `GetScale=1`, `GetEffectiveScale=1`
+- `CompactRaidFrameManager.Background`: `GetScale=1`, `GetEffectiveScale=1`
+- `CompactRaidFrameManager.toggleButtonForward`: `GetScale=1`, `GetEffectiveScale=1`
+- `CompactRaidFrameManager.displayFrame`: `GetEffectiveScale=1`
+- `UIParent`: `GetScale=1`, `GetEffectiveScale=1` (`1600x1200`)
 
-Running an `--exec-lua` probe after seeding that party fixture (captured in `/tmp/crfm_probe_out.txt`) gives:
+No scale multiplier is compounding anywhere in the chain, so the oversize is **not** explained by a scale factor. That rules out the scale-divergence theory.
 
-- `CompactRaidFrameManager`: `222x347`, `GetScale=1`, `GetEffectiveScale=1`
-- rect: `GetLeft=-200 GetRight=22 GetTop=1060 GetBottom=713` (WoW Y-up; dump-tree y = 1200 − wow_y ⇒ top=140, **bottom=487**)
-- `Background`: `222x347`, scale `1`, atlas `GM-bgOpen-party-leads` (native `222x344`)
-- `toggleButtonForward`: `16x35`, scale `1`, `GetTop=904 GetBottom=869` (dump-tree y top ≈ **296**)
-- `displayFrame.flowMaxPrimaryUsed = 327` ⇒ `SetHeight(usedY + 20) = 347`
-- `UIParent`: `1600x1200`, `GetScale=1`, `GetEffectiveScale=1`
+### Two fixtures, same forward-toggle quad
 
-So in the actual screenshot fixture:
+`toggleButtonForward` emitted vertices in each fixture:
 
-- logical manager bottom ≈ 487, visual painted bottom ≈ 480 — **match**
-- logical toggle top ≈ 296, visual toggle top ≈ 300 — **match**
-- every relevant scale in the chain is `1` — no scale multiplier is at play
+| Fixture | Quad rect | Size | Notes |
+|---|---|---|---|
+| `SetPartySize(4)` only (no leader) | `(-1, 260) → (15, 295)` | 16×35 | isLeader=false, `usedY≈255`, manager `222x275` |
+| `SetPartySize(4) + SetPartyLeader(0)` (screenshot) | `(-1, 296) → (15, 331)` | 16×35 | isLeader=true, `usedY=327`, manager `222x347` |
 
-There is no render-time divergence to solve. The oversize **is** the logical layout. The real question is why `usedY = 327` when retail's collapsed party-leader strip is visibly shorter.
+Same `16x35` size in both (size never stretches). The top moves from `y=260` to `y=296` because the manager grew from `275` to `347` tall and the toggle is anchored `RIGHT x=-7 y=0` (vertical center of manager).
+
+### Closing out the render-divergence theory
+
+Visual observation of the button in the screenshot fixture: approximately `y=300 → y=335`.
+Emitted `QuadBatch` vertices for that same fixture: `(-1, 296) → (15, 331)`.
+
+These agree within visual-estimation error (±4 px). **There is no post-emission Y translation.** The earlier "+40 px shift" write-up was a fixture-confusion artifact: it compared the no-leader *quad* (`y=260`) against a leader *screenshot* (`y≈300`). With matched fixtures, quad ≡ paint.
+
+Combined with the effective-scale capture (all scales `=1`), this rules out:
+
+- a render-pipeline Y translation
+- a projection/viewport offset
+- a coordinate-inversion reference-height bug
+- a scale multiplier
+
+The bug is entirely on the logical-layout side: the manager ends up `347` tall in the party-leader fixture, and the render pipeline paints that logical rect faithfully.
 
 ## What Was Compared
 
@@ -184,24 +199,61 @@ That means the manager height is flow-driven, not fixed by the collapse function
 
 ## Current Interpretation
 
-At this point, the bug is narrower than:
+Ruled out by direct evidence:
 
 - wrong source texture
 - wrong mask
 - one accidental overflowing texture
-- simple stored-rect mismatch in the basic frame tree
-- a render-time transform that paints quads at a different size than the logical rect (ruled out by scale=1 everywhere in the party-leader fixture, and matching logical/visual extents)
+- a scale-multiplier bug (effective-scale capture: chain is all `1`)
+- a render-side Y translation (live-GUI vertex capture matches the live-GUI visual within ±4 px for the toggle in the leader fixture)
+- over-sized flow children in the sim: every object the flow measures matches retail XML exactly (buttons `40x40`, `raidMarkers` `222x99`, `RestrictPingsLabel` `158x0`, `RestrictPingsDropdown` `120x25` from `WowStyle1DropdownTemplate`, `BottomButtons` `160x53`)
+- a divergent vendored source: `vendor/wow-ui-source` is at tag `12.0.5` and `Blizzard_CompactRaidFrameManager.lua` is byte-identical to the live retail copy at `~/Projects/wow/Interface/AddOns/Blizzard_CompactRaidFrames/` — so retail runs the exact same flow logic we do
 
-What remains:
+## Root Cause
 
-- `CompactRaidFrameManager_UpdateOptionsFlowContainer()` produces `usedY = 327` (⇒ manager height 347) for the `A_Admin.SetPartySize(4); A_Admin.SetPartyLeader(0)` fixture, which is bigger than the retail reference.
-- The bug is therefore in **what the flow container is accumulating**, not in how that accumulated height is painted.
+The "too tall" visual is an **upstream-state bug, not a render/layout bug**.
 
-Likely sub-causes to investigate next:
+`SimState.party_leader_index` defaults to `None` in `src/lua_api/state.rs:180`, and `src/lua_api/globals/group_queries.rs:172` documents that `party_leader_index = None` means the player is the leader. So any seeded party (including the brief's `A_Admin.SetPartySize(4)` fixture, even without explicit `SetPartyLeader`) makes `UnitIsGroupLeader("player") == true`.
 
-- children added to the flow whose `:GetHeight()` is too tall in this simulator (e.g. `raidMarkers`, `RestrictPingsDropdown`, `BottomButtons`, or any added even though they should be hidden/excluded while collapsed)
-- `UpdateOptionsFlowContainer` running while `collapsed == true` and using the leader-with-party branch, when retail's flow for this exact state produces a shorter result
-- a line-break/spacer contribution that differs from retail (e.g. `VerticalSpace(...)` values, `RestrictPingsLabel` / `RestrictPingsDropdown` rows, the raid-markers grid)
+`CompactRaidFrameManager_UpdateOptionsFlowContainer()` is gated on that flag in two places. The leader branch is **72 px taller** than the non-leader branch:
+
+- `+40 px` — second action-button row: `readyCheck`, `rolePoll`, `countdown` only show for leader (or raid+assist), so the `STRIDE=4` loop produces 5 visible buttons ⇒ 2 rows instead of 1
+- `+32 px` — `RestrictPings` block (leader-only): `VerticalSpace(5) + Label 0-tall + VerticalSpace(2) + Dropdown 25-tall = 32`
+
+Manual flow-math matches the probe exactly:
+
+```
+startingPrimary      48
++ editMode row       40
++ countdown row      40   (leader only)
++ primSpacer          10
++ raidMarkers         99
++ primSpacer           5  (leader only, before RestrictPingsLabel)
++ Label                0  (leader only)
++ primSpacer           2  (leader only, before Dropdown)
++ Dropdown            25  (leader only)
++ primSpacer           5
++ BottomButtons (lineMax) 53
+= 327                     (= flowMaxPrimaryUsed)
+⇒ SetHeight(usedY + 20) = 347
+```
+
+Non-leader trace produces `usedY = 255`, `SetHeight = 275` — matching the no-seed baseline probe that gave `manager H=275` and `toggle top y=260`.
+
+So both states behave correctly per Blizzard's source. The reason the branch "looks too tall compared with retail" is that the simulator's default seeded party makes the player the leader, while the retail reference screenshot is almost certainly a non-leader state.
+
+## Fix Direction
+
+Because the bug is upstream state, the fix belongs upstream — not in the render path, not in a flow-container workaround, not in the vendored Blizzard source.
+
+Candidate state-side fixes, ordered by scope:
+
+1. **Fixture-only** (narrowest): change the brief's reproduction fixture to explicitly pass leadership to a member (e.g. `A_Admin.SetPartyLeader(1)`) so the probed state matches the retail reference. Keeps the sim default as-is.
+2. **Sim default** (broader): change `SimState::party_leader_index`'s default from `None` (player-is-leader) to `Some(1)` (a member-is-leader) for seeded parties that weren't created by the player. This makes the "just dropped into a 4-man party" default match the more common retail scenario. Existing admin commands (`A_Admin.SetPartyLeader`) still give full control.
+3. **Semantics** (broadest): introduce a distinction between "player solo" and "player in a seeded party" at the `SimState` level, so the leader default depends on how the party was seeded instead of falling out of `None`.
+
+Whichever is chosen, the render/layout pipeline needs no change: it correctly paints the logical rect, and the logical rect correctly reflects the flow math for the seeded state.
+- `UpdateOptionsFlowContainer` running the leader branch at all while `collapsed == true`; if retail gates on `collapsed` somewhere outside this file, we don't
 
 ## Why The Button Matters
 
@@ -225,10 +277,4 @@ To avoid over-claiming:
 
 ## Next Step
 
-Effective scale has been captured (see the correction block above): every scale in the chain is `1`, and at the problematic fixture the logical rect already matches the painted result. So step 4 ("where the final painted visual extent diverges from the stored logical rect") is answered: it doesn't. The divergence was a fixture mismatch.
-
-The remaining question is purely on the flow side. Useful probes:
-
-1. With the party-leader fixture seeded, enumerate `displayFrame.flowFrames`/`flowFrameTypes` and record each child's `:GetWidth()` / `:GetHeight()` — this pinpoints which child inflates `usedY`.
-2. Compare the same enumeration to retail's expected flow content for a 4-man party with player as leader (roles-assigned, not in raid).
-3. Determine whether retail's `UpdateOptionsFlowContainer` is expected to early-exit (or skip `SetHeight`) while `collapsed == true`. Current Blizzard source in this repo does not early-exit, so this needs retail-side verification.
+Root cause is upstream state (`party_leader_index` default), not render or layout. Pick one of the three fix directions above and land it. A single re-probe afterwards with the new state default should show the collapsed strip at `222x275` (non-leader usedY=255) for the "just-joined-a-4-man-party" reference screenshot.
