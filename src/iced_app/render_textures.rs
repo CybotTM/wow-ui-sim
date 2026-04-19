@@ -530,36 +530,6 @@ fn unresolved_texture_request_paths<'a>(
     paths
 }
 
-pub(super) fn collect_texture_request_paths(
-    dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
-    overlay: &QuadBatch,
-) -> Vec<String> {
-    let mut paths = Vec::new();
-    let mut seen = HashSet::new();
-    for batch in dirty_strata.iter().flatten() {
-        for request in batch
-            .texture_requests
-            .iter()
-            .chain(&batch.mask_texture_requests)
-        {
-            if seen.insert(request.path.clone()) {
-                paths.push(request.path.clone());
-            }
-        }
-    }
-    for request in overlay
-        .texture_requests
-        .iter()
-        .chain(&overlay.mask_texture_requests)
-    {
-        if seen.insert(request.path.clone()) {
-            paths.push(request.path.clone());
-        }
-    }
-    sort_texture_request_paths(&mut paths);
-    paths
-}
-
 fn sort_texture_request_paths<T: AsRef<str>>(paths: &mut [T]) {
     paths.sort_by(|a, b| {
         texture_request_priority(a.as_ref())
@@ -582,7 +552,7 @@ fn texture_request_priority(path: &str) -> (u8, u8) {
 #[cfg(test)]
 mod tests {
     use super::{
-        TextureLoadBatchTelemetry, collect_texture_request_paths, process_budgeted_texture_request,
+        TextureLoadBatchTelemetry, process_budgeted_texture_request,
         should_pause_texture_loading_state, texture_request_base_path,
         unresolved_texture_request_paths,
     };
@@ -590,7 +560,7 @@ mod tests {
     use crate::render::{GlyphAtlas, GpuTextureData, QuadBatch, TextureRequest, WowFontSystem};
     use crate::screen::ScreenKind;
     use crate::texture::TextureManager;
-    use crate::widget::{AnchorPoint, Frame, FrameStrata, WidgetType};
+    use crate::widget::{AnchorPoint, Frame, WidgetType};
     use crate::{LayoutRect, lua_api::WowLuaEnv};
     use std::cell::RefCell;
     use std::collections::HashSet;
@@ -605,58 +575,6 @@ mod tests {
             vertex_start: 0,
             vertex_count: 4,
         }
-    }
-
-    #[test]
-    fn collect_texture_request_paths_deduplicates_across_batches() {
-        let mut strata: [Option<Arc<QuadBatch>>; FrameStrata::COUNT] =
-            std::array::from_fn(|_| None);
-        let mut batch = QuadBatch::new();
-        batch.texture_requests.push(request("foo"));
-        batch.texture_requests.push(request("foo"));
-        batch.mask_texture_requests.push(request("bar"));
-        strata[0] = Some(Arc::new(batch));
-
-        let mut overlay = QuadBatch::new();
-        overlay.texture_requests.push(request("bar"));
-        overlay.texture_requests.push(request("baz"));
-
-        let paths = collect_texture_request_paths(&strata, &overlay);
-        assert_eq!(
-            paths,
-            vec!["bar".to_string(), "baz".to_string(), "foo".to_string()]
-        );
-    }
-
-    #[test]
-    fn collect_texture_request_paths_prioritizes_non_worldmap_crops_before_tiles() {
-        let mut strata: [Option<Arc<QuadBatch>>; FrameStrata::COUNT] =
-            std::array::from_fn(|_| None);
-        let mut batch = QuadBatch::new();
-        batch
-            .texture_requests
-            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
-        batch.texture_requests.push(request(
-            r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
-        ));
-        batch
-            .texture_requests
-            .push(request(r"Interface\Minimap\UI-Minimap-Background"));
-        batch
-            .texture_requests
-            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn2"));
-        strata[0] = Some(Arc::new(batch));
-
-        let paths = collect_texture_request_paths(&strata, &QuadBatch::new());
-        assert_eq!(
-            paths,
-            vec![
-                r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4".to_string(),
-                r"Interface\Minimap\UI-Minimap-Background".to_string(),
-                r"Interface\WorldMap\IsleofDorn\IsleOfDorn1".to_string(),
-                r"Interface\WorldMap\IsleofDorn\IsleOfDorn2".to_string(),
-            ]
-        );
     }
 
     #[test]

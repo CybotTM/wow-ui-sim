@@ -142,6 +142,29 @@ impl shader::Program<Message> for &App {
 
 use crate::widget::FrameStrata;
 use std::sync::Arc;
+use std::sync::OnceLock;
+
+const TEXTURE_PRELOAD_LOG_ENV: &str = "WOW_SIM_LOG_TEXTURE_PRELOAD";
+const TEXTURE_PRELOAD_SAMPLE_LIMIT: usize = 4;
+
+#[derive(Debug, Default)]
+struct TexturePreloadPassTelemetry {
+    elapsed: std::time::Duration,
+    budget: Option<std::time::Duration>,
+    queued: usize,
+    loaded: usize,
+    remaining: usize,
+    remaining_sample: Vec<String>,
+    pending: bool,
+}
+
+#[derive(Debug, Default)]
+struct QueuedTexturePreloadProgress {
+    total: usize,
+    loaded: usize,
+    remaining: usize,
+    remaining_sample: Vec<String>,
+}
 
 fn log_slow_draw(
     quad_dur: std::time::Duration,
@@ -197,11 +220,6 @@ impl App {
         self.preload_current_render_requests(None);
     }
 
-    fn current_texture_request_batches(&self) -> [Option<Arc<QuadBatch>>; FrameStrata::COUNT] {
-        let strata = self.cached_strata_quads.borrow();
-        std::array::from_fn(|i| strata[i].clone())
-    }
-
     pub(crate) fn preload_current_render_requests_preserving_dirty(
         &self,
         budget: Option<std::time::Duration>,
@@ -216,52 +234,58 @@ impl App {
     }
 
     pub(crate) fn preload_current_render_requests(&self, budget: Option<std::time::Duration>) {
-        let dirty_strata = self.current_texture_request_batches();
-        let overlay = self.build_overlay();
-        let paths = textures::collect_texture_request_paths(&dirty_strata, &overlay);
+        let started = std::time::Instant::now();
+        let log_preload = texture_preload_logging_enabled();
+        let mut telemetry = TexturePreloadPassTelemetry {
+            budget,
+            pending: self.textures_pending.get(),
+            ..Default::default()
+        };
 
         let env = self.env.borrow();
         let is_glue_screen = env.state().borrow().screen_kind.is_glue();
         drop(env);
 
         let mut tex_mgr = self.texture_manager.borrow_mut();
-        let mut remaining = false;
         let deadline = match budget {
             Some(budget) => Some(std::time::Instant::now() + budget),
             None => (!is_glue_screen)
                 .then(|| std::time::Instant::now() + std::time::Duration::from_millis(250)),
         };
 
-        remaining |= self.preload_queued_texture_requests(&mut tex_mgr, deadline);
-
-        if !remaining {
-            for path in &paths {
-                if let Some(deadline) = deadline
-                    && std::time::Instant::now() >= deadline
-                {
-                    remaining = true;
-                    break;
-                }
-                preload_texture_request_source(&mut tex_mgr, path);
-            }
+        let queued_progress =
+            self.preload_queued_texture_requests(&mut tex_mgr, deadline, log_preload);
+        telemetry.queued = queued_progress.total;
+        telemetry.loaded = queued_progress.loaded;
+        telemetry.remaining = queued_progress.remaining;
+        telemetry.remaining_sample = queued_progress.remaining_sample;
+        if queued_progress.total != 0 {
+            telemetry.pending = queued_progress.remaining != 0;
+            self.textures_pending.set(telemetry.pending);
         }
-
-        let gpu_backlog = self.has_pending_gpu_texture_requests(&paths);
-        self.textures_pending.set(remaining || gpu_backlog);
+        telemetry.elapsed = started.elapsed();
+        if log_preload {
+            eprintln!("{}", format_texture_preload_log(&telemetry));
+        }
     }
 
     fn preload_queued_texture_requests(
         &self,
         tex_mgr: &mut crate::texture::TextureManager,
         deadline: Option<std::time::Instant>,
-    ) -> bool {
+        collect_samples: bool,
+    ) -> QueuedTexturePreloadProgress {
         let queued_paths = {
             let env = self.env.borrow();
             env.state().borrow_mut().drain_texture_preloads()
         };
         if queued_paths.is_empty() {
-            return false;
+            return QueuedTexturePreloadProgress::default();
         }
+        let mut progress = QueuedTexturePreloadProgress {
+            total: queued_paths.len(),
+            ..Default::default()
+        };
 
         for (index, path) in queued_paths.iter().enumerate() {
             if let Some(deadline) = deadline
@@ -271,20 +295,18 @@ impl App {
                 env.state()
                     .borrow_mut()
                     .enqueue_texture_preloads(queued_paths[index..].iter().cloned());
-                return true;
+                progress.remaining = queued_paths.len().saturating_sub(index);
+                if collect_samples {
+                    progress.remaining_sample =
+                        sample_texture_paths(&queued_paths[index..], TEXTURE_PRELOAD_SAMPLE_LIMIT);
+                }
+                return progress;
             }
             preload_texture_request_source(tex_mgr, path);
+            progress.loaded += 1;
         }
 
-        false
-    }
-
-    fn has_pending_gpu_texture_requests(&self, paths: &[String]) -> bool {
-        let uploaded = self.gpu_uploaded_textures.borrow();
-        let failed = self.gpu_failed_textures.borrow();
-        paths
-            .iter()
-            .any(|path| !uploaded.contains(path) && !failed.contains(path))
+        progress
     }
 
     fn record_draw_time(&self, elapsed: std::time::Duration) {
@@ -497,6 +519,52 @@ fn preload_texture_request_source(tex_mgr: &mut crate::texture::TextureManager, 
     let _ = tex_mgr.load(path);
 }
 
+fn texture_preload_logging_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var_os(TEXTURE_PRELOAD_LOG_ENV).is_some())
+}
+
+fn format_texture_preload_log(telemetry: &TexturePreloadPassTelemetry) -> String {
+    let budget_ms = telemetry
+        .budget
+        .map(duration_ms)
+        .map(|value| format!("{value:.3}"))
+        .unwrap_or_else(|| "none".to_string());
+    let reason = texture_preload_reason(telemetry);
+    format!(
+        "[texture-preload] elapsed={:.3}ms budget_ms={budget_ms} queued={} loaded={} remaining={} pending={} reason={} sample={}",
+        duration_ms(telemetry.elapsed),
+        telemetry.queued,
+        telemetry.loaded,
+        telemetry.remaining,
+        telemetry.pending,
+        reason,
+        format_texture_path_sample(&telemetry.remaining_sample),
+    )
+}
+
+fn texture_preload_reason(telemetry: &TexturePreloadPassTelemetry) -> &'static str {
+    if telemetry.remaining != 0 {
+        return "queued_budget";
+    }
+    "complete"
+}
+
+fn format_texture_path_sample(paths: &[String]) -> String {
+    if paths.is_empty() {
+        return "-".to_string();
+    }
+    paths.join(" | ")
+}
+
+fn sample_texture_paths(paths: &[String], limit: usize) -> Vec<String> {
+    paths.iter().take(limit).cloned().collect()
+}
+
+fn duration_ms(duration: std::time::Duration) -> f64 {
+    duration.as_secs_f64() * 1000.0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -544,6 +612,36 @@ mod tests {
             None,
             crate::config::SimConfig::default(),
         )
+    }
+
+    #[test]
+    fn format_texture_preload_log_reports_budget_reason_and_samples() {
+        let log = format_texture_preload_log(&TexturePreloadPassTelemetry {
+            elapsed: std::time::Duration::from_millis(26),
+            budget: Some(std::time::Duration::from_millis(25)),
+            queued: 2,
+            loaded: 1,
+            remaining: 1,
+            remaining_sample: vec!["queued-a".to_string()],
+            pending: true,
+        });
+
+        assert!(log.contains("elapsed=26.000ms"));
+        assert!(log.contains("budget_ms=25.000"));
+        assert!(log.contains("queued=2"));
+        assert!(log.contains("loaded=1"));
+        assert!(log.contains("remaining=1"));
+        assert!(log.contains("pending=true"));
+        assert!(log.contains("reason=queued_budget"));
+        assert!(log.contains("sample=queued-a"));
+    }
+
+    #[test]
+    fn texture_preload_reason_reports_complete_after_queue_drains() {
+        assert_eq!(
+            texture_preload_reason(&TexturePreloadPassTelemetry::default()),
+            "complete"
+        );
     }
 
     fn file_data_id_to_wow_path(file_data_id: u32) -> Option<String> {
