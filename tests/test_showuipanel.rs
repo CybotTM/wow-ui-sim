@@ -213,6 +213,112 @@ fn show_ui_panel_shows_frame() {
 }
 
 #[test]
+fn show_ui_panel_anchors_character_frame_to_ui_parent() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                if not CharacterFrame then
+                    return "missing_character_frame"
+                end
+
+                ShowUIPanel(CharacterFrame)
+                if not CharacterFrame:IsShown() then
+                    return "character_not_shown"
+                end
+
+                local numPoints = CharacterFrame:GetNumPoints()
+                if numPoints ~= 1 then
+                    return "num_points=" .. tostring(numPoints)
+                end
+
+                local point, relativeTo, relativePoint, x, y = CharacterFrame:GetPoint(1)
+                if point ~= "TOPLEFT" then
+                    return "point=" .. tostring(point)
+                end
+                if not relativeTo or relativeTo ~= UIParent then
+                    return "relative_to=" .. tostring(relativeTo and relativeTo:GetName())
+                end
+                if relativePoint ~= "TOPLEFT" then
+                    return "relative_point=" .. tostring(relativePoint)
+                end
+                if x ~= 16 or y ~= -116 then
+                    return string.format("offsets=%s,%s", tostring(x), tostring(y))
+                end
+
+                local left, bottom, width, height = CharacterFrame:GetRect()
+                if not (left and bottom and width and height) then
+                    return "missing_rect"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "ShowUIPanel should anchor CharacterFrame to UIParent and resolve its rect: {result}"
+        );
+    }
+}
+
+#[test]
+fn show_ui_panel_reanchors_character_frame_after_reopen() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                if not CharacterFrame then
+                    return "missing_character_frame"
+                end
+
+                ShowUIPanel(CharacterFrame)
+                if not CharacterFrame:IsShown() then
+                    return "character_not_shown_first"
+                end
+                HideUIPanel(CharacterFrame)
+                if CharacterFrame:IsShown() then
+                    return "character_not_hidden"
+                end
+
+                ShowUIPanel(CharacterFrame)
+                if not CharacterFrame:IsShown() then
+                    return "character_not_shown_second"
+                end
+
+                local numPoints = CharacterFrame:GetNumPoints()
+                if numPoints ~= 1 then
+                    return "num_points=" .. tostring(numPoints)
+                end
+
+                local point, relativeTo, relativePoint, x, y = CharacterFrame:GetPoint(1)
+                if point ~= "TOPLEFT" then
+                    return "point=" .. tostring(point)
+                end
+                if not relativeTo or relativeTo ~= UIParent then
+                    return "relative_to=" .. tostring(relativeTo and relativeTo:GetName())
+                end
+                if relativePoint ~= "TOPLEFT" then
+                    return "relative_point=" .. tostring(relativePoint)
+                end
+                if x ~= 16 or y ~= -116 then
+                    return string.format("offsets=%s,%s", tostring(x), tostring(y))
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "ShowUIPanel should restore CharacterFrame anchors after reopen: {result}"
+        );
+    }
+}
+
+#[test]
 fn hide_ui_panel_hides_frame() {
     test_timeout! {
         let env = setup_env();

@@ -82,12 +82,39 @@ fn apply_bar_texture(
     if let Some(bar) = sim.widgets.get_mut_visual(bar_id) {
         bar.parent_id = Some(id);
         bar.parent_key = Some("BarTexture".to_string());
-        bar.texture = path;
         bar.texture_file_data_id = file_id;
         bar.color_texture = None;
-        bar.atlas = None;
-        bar.atlas_tex_coords = None;
+        apply_statusbar_texture_source(bar, path);
     }
+}
+
+fn apply_statusbar_texture_source(frame: &mut crate::widget::Frame, path: Option<String>) {
+    let Some(path) = path else {
+        frame.texture = None;
+        frame.atlas = None;
+        frame.tex_coords = None;
+        frame.atlas_tex_coords = None;
+        return;
+    };
+
+    if let Some(info) = crate::atlas::get_atlas_info(&path) {
+        let tex_coords = (
+            info.info.left_tex_coord,
+            info.info.right_tex_coord,
+            info.info.top_tex_coord,
+            info.info.bottom_tex_coord,
+        );
+        frame.atlas = Some(path);
+        frame.texture = Some(info.info.file.to_string());
+        frame.tex_coords = Some(tex_coords);
+        frame.atlas_tex_coords = Some(tex_coords);
+        return;
+    }
+
+    frame.texture = Some(path);
+    frame.atlas = None;
+    frame.tex_coords = None;
+    frame.atlas_tex_coords = None;
 }
 
 // ---------------------------------------------------------------------------

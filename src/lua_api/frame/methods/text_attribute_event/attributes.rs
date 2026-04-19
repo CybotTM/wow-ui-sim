@@ -69,8 +69,14 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
     let name_arg = create_string(state, &name);
+    let force_dispatch = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).is_some_and(|frame| frame.forbidden)
+    };
     let changed = store_simple_attribute(state, id, &name, value)?;
-    if changed && let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
+    if (changed || force_dispatch)
+        && let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged")
+    {
         let frame = frame_ref(state, id)?;
         dispatch_attribute_changed(state, handler, frame, name_arg, value);
     }

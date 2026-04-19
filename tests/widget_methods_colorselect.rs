@@ -374,6 +374,32 @@ fn test_statusbar_set_color_fill_aliases_statusbar_color_state() {
 }
 
 #[test]
+fn test_statusbar_texture_accepts_atlas_names() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (String, String) = env
+        .eval(
+            r#"
+            local sb = CreateFrame("StatusBar", "TestStatusBarAtlasTexture", UIParent)
+            sb:SetStatusBarTexture("UI-HUD-UnitFrame-Player-PortraitOn-Bar-Mana")
+            local texture = sb:GetStatusBarTexture()
+            return texture:GetAtlas(), texture:GetTextureFilePath()
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(result.0, "UI-HUD-UnitFrame-Player-PortraitOn-Bar-Mana");
+    assert!(
+        result.1.starts_with("Interface\\"),
+        "atlas-backed status bar should resolve to a concrete texture path"
+    );
+    assert_ne!(
+        result.1, result.0,
+        "atlas-backed status bar should not keep the atlas name as a raw texture path"
+    );
+}
+
+#[test]
 fn test_statusbar_interpolation_methods_track_target_and_displayed_value() {
     let env = WowLuaEnv::new().unwrap();
 

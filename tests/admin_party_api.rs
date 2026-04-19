@@ -211,6 +211,24 @@ fn test_set_party_leader_to_party_member_updates_group_leader_queries() {
 }
 
 #[test]
+fn test_set_party_size_defaults_leadership_to_party1() {
+    let env = env();
+    let (player_leads, party1_leads): (bool, bool) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(2)
+            return IsGroupLeader(), UnitIsGroupLeader("party1")
+            "#,
+        )
+        .unwrap();
+    assert!(
+        !player_leads,
+        "SetPartySize should default the leader to party1, not the player"
+    );
+    assert!(party1_leads, "party1 should lead after SetPartySize");
+}
+
+#[test]
 fn test_set_party_leader_zero_restores_player_leadership() {
     let env = env();
     let (player_leads, party1_leads): (bool, bool) = env

@@ -246,9 +246,7 @@ fn push_node_active_entry(state: &mut LuaState, info: Val, lookup_node_id: Optio
             .or_else(|| {
                 lookup_node_id
                     .and_then(|id| TRAIT_NODE_DB.get(&id))
-                    .and_then(|node| {
-                        matches!(node.node_type, 0 | 1).then_some(node.entry_ids[0])
-                    })
+                    .and_then(|node| matches!(node.node_type, 0 | 1).then_some(node.entry_ids[0]))
             })
     });
     let Some(entry_id) = entry_id else {

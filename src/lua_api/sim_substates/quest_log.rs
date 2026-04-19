@@ -25,6 +25,11 @@ pub struct QuestLogEntry {
     pub tag_id: Option<i32>,
     /// Theme key returned by `GetQuestDetailsTheme`.
     pub details_theme: Option<String>,
+    /// Optional spell objective shown in `QuestInfo_ShowSpecialObjectives`.
+    pub criteria_spell_id: Option<i32>,
+    pub criteria_spell_name: Option<String>,
+    pub criteria_spell_texture: Option<String>,
+    pub criteria_spell_finished: bool,
 }
 
 /// Backing state for `C_QuestLog.*` probes.
@@ -69,6 +74,10 @@ fn seed_quest_defaults() -> QuestLogEntry {
         waypoint: None,
         tag_id: Some(0),
         details_theme: None,
+        criteria_spell_id: None,
+        criteria_spell_name: None,
+        criteria_spell_texture: None,
+        criteria_spell_finished: false,
     }
 }
 

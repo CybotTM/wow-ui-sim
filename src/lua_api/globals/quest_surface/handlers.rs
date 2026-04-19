@@ -90,6 +90,32 @@ fn set_selected_quest_id(state: &mut LuaState, quest_id: i32) -> LuaResult<()> {
     Ok(())
 }
 
+fn selected_criteria_spell(state: &LuaState) -> LuaResult<Option<(i32, String, String, bool)>> {
+    let sim_state = borrow_state(state)?;
+    let Some(quest_id) = sim_state.selected_quest_log_id.map(|id| id as i32) else {
+        return Ok(None);
+    };
+    let Some(entry) = sim_state
+        .quest_log_entries
+        .entries
+        .iter()
+        .find(|entry| entry.quest_id == quest_id)
+    else {
+        return Ok(None);
+    };
+    let Some(spell_id) = entry.criteria_spell_id else {
+        return Ok(None);
+    };
+    let spell_name = entry.criteria_spell_name.clone().unwrap_or_default();
+    let spell_texture = entry.criteria_spell_texture.clone().unwrap_or_default();
+    Ok(Some((
+        spell_id,
+        spell_name,
+        spell_texture,
+        entry.criteria_spell_finished,
+    )))
+}
+
 fn fire_event_with_args(state: &mut LuaState, event_name: &'static str, args: &[Val]) {
     for widget_id in get_event_listeners(state, event_name) {
         let Some(handler) = get_script(state, widget_id, "OnEvent") else {
@@ -441,6 +467,28 @@ pub fn is_quest_sequenced(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_quest_log_completion_text(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+pub fn get_quest_log_criteria_spell(state: &mut LuaState) -> LuaResult<u32> {
+    push_selected_criteria_spell(state)
+}
+
+pub fn get_criteria_spell(state: &mut LuaState) -> LuaResult<u32> {
+    push_selected_criteria_spell(state)
+}
+
+fn push_selected_criteria_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let Some((spell_id, spell_name, spell_texture, finished)) = selected_criteria_spell(state)?
+    else {
+        return Ok(0);
+    };
+    let spell_name = create_string(state, &spell_name);
+    let spell_texture = create_string(state, &spell_texture);
+    state.push(Val::Num(spell_id as f64));
+    state.push(spell_name);
+    state.push(spell_texture);
+    state.push(Val::Bool(finished));
+    Ok(4)
 }
 
 pub fn get_quest_progress_bar_percent(state: &mut LuaState) -> LuaResult<u32> {

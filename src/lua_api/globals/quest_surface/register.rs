@@ -77,7 +77,9 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
     ("IsCurrentQuestFailed", is_current_quest_failed),
     ("IsQuestSequenced", is_quest_sequenced),
     ("GetQuestLogCompletionText", get_quest_log_completion_text),
+    ("GetQuestLogCriteriaSpell", get_quest_log_criteria_spell),
     ("GetQuestProgressBarPercent", get_quest_progress_bar_percent),
+    ("GetCriteriaSpell", get_criteria_spell),
     ("QuestMapUpdateAllQuests", quest_map_update_all_quests),
     (
         "QuestMapFrame_GetFocusedQuestID",

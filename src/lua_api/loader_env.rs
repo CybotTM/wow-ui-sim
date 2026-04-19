@@ -71,6 +71,22 @@ end
 if QuestMapFrame then
     QuestMapFrame.GetCurrentMapID = SafeGetCurrentMapID
 end
+
+if type(QuestMapFrame_UpdateAll) == "function" and not rawget(_G, "__wow_quest_map_update_all_patched") then
+    local originalUpdateAll = QuestMapFrame_UpdateAll
+    QuestMapFrame_UpdateAll = function(numPOIs)
+        local parent = QuestMapFrame and QuestMapFrame:GetParent() or nil
+        if parent == nil then
+            QuestMapFrame.UpdatePOIs(QuestMapFrame)
+            if not numPOIs then
+                QuestMapUpdateAllQuests()
+            end
+            return
+        end
+        return originalUpdateAll(numPOIs)
+    end
+    rawset(_G, "__wow_quest_map_update_all_patched", true)
+end
 "#;
 
 /// Permissive dropdown descriptor installed when Blizzard_Menu fails to

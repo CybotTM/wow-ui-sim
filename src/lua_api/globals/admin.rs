@@ -589,77 +589,78 @@ fn set_focus_health(state: &mut LuaState) -> LuaResult<u32> {
 // ── Party ─────────────────────────────────────────────────────────────────────
 
 fn set_party_size(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
+    use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 
     let n = i32::from_stack(state, 1)?;
     let size = n.max(0) as usize;
-    let mut st = borrow_state_mut(state)?;
-    let changed = st.party_members.len() != size;
-    while st.party_members.len() < size {
-        st.party_members.push(default_party_member());
-    }
-    st.party_members.truncate(size);
-    st.party_group_active = size > 0;
-    if changed {
-        // Match the mlua admin_api: fire GROUP_ROSTER_UPDATE so
-        // `PartyFrameMixin:OnEvent` runs its `self:Layout()` pass and
-        // `PartyFrame:ShouldShow()` flips to true (UnitExists("party1"),
-        // GetNumGroupMembers, IsInGroup all read state.party_members).
-        // Without this, UpdatePartyFrames sees zero active members and
-        // the frame stays at its XML 4x2 placeholder.
-        st.events.push(Event {
-            name: "GROUP_ROSTER_UPDATE".to_string(),
-            args: Vec::new(),
-        });
+    let should_refresh = {
+        let mut st = borrow_state_mut(state)?;
+        let size_changed = st.party_members.len() != size;
+        while st.party_members.len() < size {
+            st.party_members.push(default_party_member());
+        }
+        st.party_members.truncate(size);
+        st.party_group_active = size > 0;
+        let next_leader = if size > 0 { Some(0) } else { None };
+        let leader_changed = st.party_leader_index != next_leader;
+        st.party_leader_index = next_leader;
+        size_changed || leader_changed
+    };
+    if should_refresh {
+        dispatch_event_now(state, "GROUP_ROSTER_UPDATE", &[])?;
     }
     Ok(0)
 }
 
 fn set_party_leader(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
+    use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 
     let n = i32::from_stack(state, 1)?;
-    let mut st = borrow_state_mut(state)?;
-    let next_leader = if n <= 0 {
-        Some(None)
-    } else {
-        let idx = (n - 1) as usize;
-        (idx < st.party_members.len()).then_some(Some(idx))
+    let changed = {
+        let mut st = borrow_state_mut(state)?;
+        let next_leader = if n <= 0 {
+            Some(None)
+        } else {
+            let idx = (n - 1) as usize;
+            (idx < st.party_members.len()).then_some(Some(idx))
+        };
+        let Some(next_leader) = next_leader else {
+            return Ok(0);
+        };
+        if st.party_leader_index == next_leader {
+            false
+        } else {
+            st.party_leader_index = next_leader;
+            true
+        }
     };
-    let Some(next_leader) = next_leader else {
-        return Ok(0);
-    };
-    if st.party_leader_index == next_leader {
-        return Ok(0);
+    if changed {
+        dispatch_event_now(state, "GROUP_ROSTER_UPDATE", &[])?;
     }
-    st.party_leader_index = next_leader;
-    st.events.push(Event {
-        name: "GROUP_ROSTER_UPDATE".to_string(),
-        args: Vec::new(),
-    });
     Ok(0)
 }
 
 fn set_party_member(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
+    use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 
     let idx = i32::from_stack(state, 1)?;
     let name = String::from_stack(state, 2)?;
     let class_index = i32::from_stack(state, 3)?;
     let level = i32::from_stack(state, 4)?;
-    let mut st = borrow_state_mut(state)?;
-    let mut changed = false;
-    if let Some(member) = st.party_members.get_mut((idx - 1) as usize) {
-        changed = member.name != name || member.class_index != class_index || member.level != level;
-        member.name = name;
-        member.class_index = class_index;
-        member.level = level;
-    }
+    let changed = {
+        let mut st = borrow_state_mut(state)?;
+        let mut changed = false;
+        if let Some(member) = st.party_members.get_mut((idx - 1) as usize) {
+            changed =
+                member.name != name || member.class_index != class_index || member.level != level;
+            member.name = name;
+            member.class_index = class_index;
+            member.level = level;
+        }
+        changed
+    };
     if changed {
-        st.events.push(Event {
-            name: "GROUP_ROSTER_UPDATE".to_string(),
-            args: Vec::new(),
-        });
+        dispatch_event_now(state, "GROUP_ROSTER_UPDATE", &[])?;
     }
     Ok(0)
 }

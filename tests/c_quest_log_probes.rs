@@ -17,9 +17,8 @@ fn get_num_quest_log_entries_returns_seeded_count() {
     let (shown, total): (i32, i32) = env
         .eval("return C_QuestLog.GetNumQuestLogEntries()")
         .unwrap();
-    // 3 seeded entries
-    assert_eq!(shown, 3);
-    assert_eq!(total, 3);
+    assert_eq!(shown, 4);
+    assert_eq!(total, 4);
 }
 
 #[test]
@@ -422,4 +421,43 @@ fn get_bounty_set_info_for_map_id_returns_nil() {
         .eval("return C_QuestLog.GetBountySetInfoForMapID(2248) ~= nil or nil")
         .unwrap();
     assert!(result.is_none());
+}
+
+#[test]
+fn criteria_spell_globals_return_selected_quest_spell_data() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.quest_log_entries.entries[0].criteria_spell_id = Some(19750);
+        st.quest_log_entries.entries[0].criteria_spell_name = Some("Flash of Light".into());
+        st.quest_log_entries.entries[0].criteria_spell_texture =
+            Some("Interface\\Icons\\Spell_Holy_FlashHeal".into());
+        st.quest_log_entries.entries[0].criteria_spell_finished = true;
+    }
+
+    let quest_log_result: (i32, String, String, bool) = env
+        .eval(
+            r#"
+            C_QuestLog.SetSelectedQuest(80000)
+            return GetQuestLogCriteriaSpell()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(quest_log_result.0, 19750);
+    assert_eq!(quest_log_result.1, "Flash of Light");
+    assert_eq!(quest_log_result.2, "Interface\\Icons\\Spell_Holy_FlashHeal");
+    assert!(quest_log_result.3);
+
+    let criteria_result: (i32, String, String, bool) = env
+        .eval(
+            r#"
+            C_QuestLog.SetSelectedQuest(80000)
+            return GetCriteriaSpell()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(criteria_result.0, 19750);
+    assert_eq!(criteria_result.1, "Flash of Light");
+    assert_eq!(criteria_result.2, "Interface\\Icons\\Spell_Holy_FlashHeal");
+    assert!(criteria_result.3);
 }
