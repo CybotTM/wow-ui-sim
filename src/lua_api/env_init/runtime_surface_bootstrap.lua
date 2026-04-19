@@ -3524,7 +3524,7 @@ local __wow_housing_seeded_product_infos = {
     offHandItemModifiedAppearanceID = nil,
     decorFileDataID = nil,
     houseTextureAtlas = nil,
-    productType = CatalogShopConstants.ProductType.Bundle,
+    productType = 1,
     productIDList = { 20031, 20032 },
   },
   [20031] = {
@@ -3578,7 +3578,7 @@ local __wow_housing_seeded_product_infos = {
     offHandItemModifiedAppearanceID = nil,
     decorFileDataID = 91001,
     houseTextureAtlas = nil,
-    productType = CatalogShopConstants.ProductType.Decor,
+    productType = 2,
   },
   [20032] = {
     catalogShopProductID = 20032,
@@ -3631,7 +3631,7 @@ local __wow_housing_seeded_product_infos = {
     offHandItemModifiedAppearanceID = nil,
     decorFileDataID = 91002,
     houseTextureAtlas = nil,
-    productType = CatalogShopConstants.ProductType.Decor,
+    productType = 2,
   },
 }
 
@@ -3640,6 +3640,33 @@ local __wow_housing_preview_cart_state = {}
 local __wow_housing_theme_set_names = {
   [1] = "Sunspire",
 }
+
+local function __wow_catalog_shop_emit_seeded_refresh(session_id)
+  local frame = rawget(_G, "CatalogShopFrame")
+  if type(frame) ~= "table" then
+    return
+  end
+
+  frame.shoppingSessionUUIDStr = session_id
+
+  local on_event = frame.OnEvent_CatalogShop
+  if type(on_event) ~= "function" and type(frame.GetScript) == "function" then
+    on_event = frame:GetScript("OnEvent")
+  end
+
+  if type(on_event) ~= "function" then
+    return
+  end
+
+  on_event(frame, "CATALOG_SHOP_DATA_REFRESH", session_id)
+  on_event(frame, "CATALOG_SHOP_FETCH_SUCCESS", session_id)
+
+  local category_ids = C_CatalogShop and C_CatalogShop.GetAvailableCategoryIDs and C_CatalogShop.GetAvailableCategoryIDs() or nil
+  local initial_category_id = type(category_ids) == "table" and category_ids[1] or nil
+  if initial_category_id ~= nil and type(frame.OnCategorySelected) == "function" then
+    frame:OnCategorySelected(initial_category_id)
+  end
+end
 
 local __wow_housing_customize_mode_selected_decor = {
   decorGUID = "Decor-Selection-1001",
@@ -4049,7 +4076,9 @@ C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
   HasNewProducts = function() return false end,
   GetAvailableCategoryIDs = function() return { __wow_housing_all_category_id, 101 } end,
   GetProductIDsForCategory = function(categoryID)
-    if categoryID == 101 then
+    if categoryID == __wow_housing_all_category_id then
+      return { 2003, 20031, 20032 }
+    elseif categoryID == 101 then
       return { 2003 }
     elseif categoryID == 102 then
       return { 20031, 20032 }
@@ -4066,9 +4095,9 @@ C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
     if categoryID == __wow_housing_all_category_id then
       return { ID = categoryID, displayName = "All", iconTexture = "Interface\\Icons\\INV_Misc_QuestionMark", linkTag = "all", isDisabled = false, showPersistentRefundButton = false }
     elseif categoryID == 101 then
-      return { ID = categoryID, displayName = "Featured", iconTexture = "Interface\\Icons\\INV_Misc_QuestionMark", linkTag = CatalogShopConstants.CategoryLinks.Featured, isDisabled = false, showPersistentRefundButton = false }
+      return { ID = categoryID, displayName = "Featured", iconTexture = "Interface\\Icons\\INV_Misc_QuestionMark", linkTag = "featured", isDisabled = false, showPersistentRefundButton = false }
     elseif categoryID == 102 then
-      return { ID = categoryID, displayName = "Decor", iconTexture = "Interface\\Icons\\INV_Misc_QuestionMark", linkTag = CatalogShopConstants.CategoryLinks.Housing, isDisabled = false, showPersistentRefundButton = false }
+      return { ID = categoryID, displayName = "Decor", iconTexture = "Interface\\Icons\\INV_Misc_QuestionMark", linkTag = "housing", isDisabled = false, showPersistentRefundButton = false }
     end
     return nil
   end,
@@ -4098,8 +4127,16 @@ C_CatalogShop = __wow_merge_namespace(C_CatalogShop, {
   GetFailureInfo = function() return nil, nil end,
   RefreshVirtualCurrencyBalance = __wow_noop,
   GetVirtualCurrencyBalance = function() return 0 end,
-  OpenCatalogShopInteractionFromShop = function() return nil end,
-  OpenCatalogShopInteractionFromHouse = function() return nil end,
+  OpenCatalogShopInteractionFromShop = function()
+    local session_id = "seeded-catalog-shop-session"
+    __wow_catalog_shop_emit_seeded_refresh(session_id)
+    return session_id
+  end,
+  OpenCatalogShopInteractionFromHouse = function()
+    local session_id = "seeded-catalog-house-session"
+    __wow_catalog_shop_emit_seeded_refresh(session_id)
+    return session_id
+  end,
   CloseCatalogShopInteraction = __wow_noop,
   GetFirstCategoryByProductID = function(productID)
     if productID == 2003 or productID == 20031 or productID == 20032 then
