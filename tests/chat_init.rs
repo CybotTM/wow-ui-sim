@@ -70,9 +70,10 @@ fn init_chat_type_colors_unknown_key_falls_back_to_white() {
 #[test]
 fn show_chat_frame_no_op_when_chat_frame1_absent() {
     let env = env();
-    // Ensure ChatFrame1 is nil (it normally is in a bare env).
+    env.exec("ChatFrame1 = nil").unwrap();
+    // Ensure ChatFrame1 is nil before calling the helper.
     let is_nil: bool = env.eval("return ChatFrame1 == nil").unwrap();
-    assert!(is_nil, "bare WowLuaEnv should not have ChatFrame1");
+    assert!(is_nil, "test setup should clear ChatFrame1");
     // Must not panic or error.
     wow_ui_sim::lua_api::chat_init::show_chat_frame(&env);
 }

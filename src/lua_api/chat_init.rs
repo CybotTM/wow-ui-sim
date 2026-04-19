@@ -104,9 +104,6 @@ const SHOW_CHAT_FRAME_LUA: &str = r#"
         if ChatFrame1.Clear then
             ChatFrame1:Clear()
         end
-        ChatFrame1:ClearAllPoints()
-        ChatFrame1:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 32, 32)
-        ChatFrame1:SetSize(430, 120)
         if FloatingChatFrameMixin and FloatingChatFrameMixin.OnLoad and not ChatFrame1.__codexOnLoadRan then
             ChatFrame1.__codexOnLoadRan = true
             FloatingChatFrameMixin.OnLoad(ChatFrame1)
