@@ -264,6 +264,51 @@ fn show_ui_panel_anchors_character_frame_to_ui_parent() {
 }
 
 #[test]
+fn show_ui_panel_positions_character_frame_at_expected_rect() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                if not CharacterFrame then
+                    return "missing_character_frame"
+                end
+
+                ShowUIPanel(CharacterFrame)
+                if not CharacterFrame:IsShown() then
+                    return "character_not_shown"
+                end
+
+                local left, bottom, width, height = CharacterFrame:GetRect()
+                if not (left and bottom and width and height) then
+                    return "missing_rect"
+                end
+
+                if left ~= 16 then
+                    return "left=" .. tostring(left)
+                end
+                if bottom ~= 228 then
+                    return "bottom=" .. tostring(bottom)
+                end
+                if width ~= 338 then
+                    return "width=" .. tostring(width)
+                end
+                if height ~= 424 then
+                    return "height=" .. tostring(height)
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "ShowUIPanel should place CharacterFrame at the expected screen rect: {result}"
+        );
+    }
+}
+
+#[test]
 fn show_ui_panel_reanchors_character_frame_after_reopen() {
     test_timeout! {
         let env = setup_env();
