@@ -23,6 +23,8 @@ pub enum Request {
     DumpTree {
         /// Filter by name (substring match)
         filter: Option<String>,
+        /// Filter by name and print matching subtrees
+        filter_key: Option<String>,
         /// Only show visible frames
         visible_only: bool,
         /// Show verbose texture detail lines
@@ -64,6 +66,7 @@ pub enum LuaCommand {
     },
     DumpTree {
         filter: Option<String>,
+        filter_key: Option<String>,
         visible_only: bool,
         verbose: bool,
         respond: mpsc::Sender<Response>,
@@ -244,10 +247,12 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
         }
         Request::DumpTree {
             filter,
+            filter_key,
             visible_only,
             verbose,
         } => send_command(cmd_tx, |respond| LuaCommand::DumpTree {
             filter,
+            filter_key,
             visible_only,
             verbose,
             respond,
@@ -382,6 +387,7 @@ pub mod client {
     pub fn dump_tree<P: AsRef<Path>>(
         socket: P,
         filter: Option<String>,
+        filter_key: Option<String>,
         visible_only: bool,
         verbose: bool,
     ) -> Result<String, String> {
@@ -390,6 +396,7 @@ pub mod client {
 
         let request = Request::DumpTree {
             filter,
+            filter_key,
             visible_only,
             verbose,
         };

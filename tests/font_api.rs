@@ -202,6 +202,25 @@ fn text_region_reports_truncation_when_text_exceeds_width() {
     assert!(truncated, "FontString:IsTruncated() should report overflow");
 }
 
+#[test]
+fn create_font_string_inherits_named_font_object_properties() {
+    let env = env();
+    let (path, height, flags): (String, f64, String) = env
+        .eval(
+            r#"
+            local inherited = CreateFont("InheritedFontObject")
+            inherited:SetFont("Fonts\\Custom.ttf", 18, "OUTLINE")
+            local frame = CreateFrame("Frame", "FontInheritanceProbeParent", UIParent)
+            local fs = frame:CreateFontString("FontInheritanceProbe", "ARTWORK", "InheritedFontObject")
+            return fs:GetFont()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(path, "Fonts\\Custom.ttf");
+    assert_eq!(height, 18.0);
+    assert_eq!(flags, "OUTLINE");
+}
+
 // ============================================================================
 // GetFonts / GetFontInfo
 // ============================================================================

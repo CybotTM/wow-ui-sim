@@ -75,11 +75,17 @@ impl App {
             }
             LuaCommand::DumpTree {
                 filter,
+                filter_key,
                 visible_only,
                 verbose,
                 respond,
             } => {
-                let tree = self.build_frame_tree_dump(filter.as_deref(), visible_only, verbose);
+                let tree = self.build_frame_tree_dump(
+                    filter.as_deref(),
+                    filter_key.as_deref(),
+                    visible_only,
+                    verbose,
+                );
                 let _ = respond.send(LuaResponse::Tree(tree));
             }
             LuaCommand::Screenshot {
@@ -262,6 +268,7 @@ mod tests {
         .unwrap();
         tx.send(LuaCommand::DumpTree {
             filter: Some("Foo".to_string()),
+            filter_key: Some("Bar".to_string()),
             visible_only: true,
             verbose: false,
             respond,

@@ -2,7 +2,7 @@
 
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
-    sync_child_to_rilua,
+    sync_child_to_rilua, table_get, val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
@@ -171,7 +171,7 @@ pub(super) fn create_font_string(state: &mut LuaState) -> LuaResult<u32> {
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
     let layer = opt_string(state, 3);
-    let _inherits = opt_string(state, 4);
+    let inherits = opt_string(state, 4);
 
     let name = resolve_child_name(state, name_raw, parent_id);
 
@@ -181,6 +181,7 @@ pub(super) fn create_font_string(state: &mut LuaState) -> LuaResult<u32> {
             fontstring.draw_layer = draw_layer;
         }
     }
+    apply_font_inherit(state, &mut fontstring, inherits.as_deref());
     let child_id = fontstring.id;
     {
         let mut sim = borrow_state_mut(state)?;
@@ -209,4 +210,110 @@ pub(super) fn resolve_child_name(
             n
         }
     })
+}
+
+fn apply_font_inherit(
+    state: &mut LuaState,
+    fontstring: &mut crate::widget::Frame,
+    inherits: Option<&str>,
+) {
+    let Some(inherits) = inherits else { return };
+    let font_object = table_get(state, Val::Table(state.global), inherits);
+    if !matches!(font_object, Val::Table(_)) {
+        return;
+    }
+
+    if let Some(path) = font_field_string(state, font_object.clone(), "__font", "__fontPath") {
+        fontstring.font = Some(path);
+    }
+    if let Some(height) = font_field_number(state, font_object.clone(), "__height", "__fontHeight")
+    {
+        fontstring.font_size = height as f32;
+    }
+    if let Some(outline) = font_field_string(state, font_object.clone(), "__outline", "__fontFlags")
+    {
+        fontstring.font_outline = crate::widget::TextOutline::from_wow_str(&outline);
+    }
+    if let Some(justify_h) =
+        font_field_string(state, font_object.clone(), "__justifyH", "__justifyH")
+    {
+        fontstring.justify_h = crate::widget::TextJustify::from_wow_str(&justify_h);
+    }
+    if let Some(justify_v) =
+        font_field_string(state, font_object.clone(), "__justifyV", "__justifyV")
+    {
+        fontstring.justify_v = crate::widget::TextJustify::from_wow_str(&justify_v);
+    }
+    if let Some(text_color) = read_color(state, font_object.clone(), "__textColor") {
+        fontstring.text_color = text_color;
+    }
+    if let Some(shadow_color) = read_color(state, font_object.clone(), "__shadowColor") {
+        fontstring.shadow_color = shadow_color;
+    }
+    if let Some(shadow_offset) = read_shadow_offset(state, font_object) {
+        fontstring.shadow_offset = shadow_offset;
+    }
+}
+
+fn font_field_string(
+    state: &mut LuaState,
+    table: Val,
+    primary: &str,
+    fallback: &str,
+) -> Option<String> {
+    let primary_value = table_get(state, table.clone(), primary);
+    match primary_value {
+        Val::Str(_) => val_to_string(state, primary_value),
+        _ => {
+            let fallback_value = table_get(state, table, fallback);
+            val_to_string(state, fallback_value)
+        }
+    }
+}
+
+fn font_field_number(
+    state: &mut LuaState,
+    table: Val,
+    primary: &str,
+    fallback: &str,
+) -> Option<f64> {
+    match table_get(state, table.clone(), primary) {
+        Val::Num(value) => Some(value),
+        _ => match table_get(state, table, fallback) {
+            Val::Num(value) => Some(value),
+            _ => None,
+        },
+    }
+}
+
+fn read_color(state: &mut LuaState, table: Val, prefix: &str) -> Option<crate::widget::Color> {
+    let r = font_field_number(
+        state,
+        table.clone(),
+        &format!("{prefix}R"),
+        &format!("{prefix}R"),
+    )?;
+    let g = font_field_number(
+        state,
+        table.clone(),
+        &format!("{prefix}G"),
+        &format!("{prefix}G"),
+    )?;
+    let b = font_field_number(
+        state,
+        table.clone(),
+        &format!("{prefix}B"),
+        &format!("{prefix}B"),
+    )?;
+    let a = font_field_number(state, table, &format!("{prefix}A"), &format!("{prefix}A"))
+        .unwrap_or(1.0);
+    Some(crate::widget::Color::new(
+        r as f32, g as f32, b as f32, a as f32,
+    ))
+}
+
+fn read_shadow_offset(state: &mut LuaState, table: Val) -> Option<(f32, f32)> {
+    let x = font_field_number(state, table.clone(), "__shadowOffsetX", "__shadowOffsetX")?;
+    let y = font_field_number(state, table, "__shadowOffsetY", "__shadowOffsetY")?;
+    Some((x as f32, y as f32))
 }

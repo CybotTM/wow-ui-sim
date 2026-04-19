@@ -1487,7 +1487,6 @@ do
     end
   end
 
-  local partyFrame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "PartyFrame", uiParent))
   PartyMemberFramePool = PartyMemberFramePool or {
     EnumerateActive = function()
       return function()
@@ -1498,8 +1497,8 @@ do
       return 0
     end,
   }
-  if partyFrame ~= nil and partyFrame.PartyMemberFramePool == nil then
-    partyFrame.PartyMemberFramePool = PartyMemberFramePool
+  if PartyFrame ~= nil and PartyFrame.PartyMemberFramePool == nil then
+    PartyFrame.PartyMemberFramePool = PartyMemberFramePool
   end
 
   ContainerFrameContainer = ContainerFrameContainer or { ContainerFrames = {} }

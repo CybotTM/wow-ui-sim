@@ -23,6 +23,7 @@ mod common;
 
 use std::path::PathBuf;
 
+use wow_ui_sim::dump::build_tree;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
@@ -207,6 +208,45 @@ fn player_and_party_portraits_use_class_icon_atlases() {
     }
 }
 
+#[test]
+fn party_frame_member_name_uses_master_font_size() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+        env.exec("A_Admin.SetPartySize(4)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            "#,
+        )
+        .unwrap();
+
+        let (font_path, font_size, flags): (String, f64, String) = env
+            .eval(
+                r#"
+                local name = PartyFrame and PartyFrame.MemberFrame1 and PartyFrame.MemberFrame1.Name
+                if not name then
+                    return "", 0, ""
+                end
+                local path, size, outline = name:GetFont()
+                return path or "", size or 0, outline or ""
+                "#,
+            )
+            .expect("eval PartyFrame.MemberFrame1.Name font");
+
+        let normalized_font_path = font_path.replace('/', "\\");
+        assert_eq!(
+            normalized_font_path, "Fonts\\FRIZQT__.TTF",
+            "party member names should inherit the master font path",
+        );
+        assert_eq!(
+            font_size, 10.0,
+            "party member names should inherit GameFontNormalSmall size, got {font_size} with flags {flags}",
+        );
+    }
+}
+
 /// Structural sanity: the four decorative templates master emits
 /// (Selection + Background + Selection.MouseOverHighlight.Center) are
 /// present on the branch too.
@@ -331,6 +371,56 @@ fn party_frame_selection_tracks_parent_size_in_registry() {
             selection_rect.height as i32,
             party_rect.height as i32,
             "PartyFrame.Selection cached height must track PartyFrame height (selection={selection_rect:?}, party={party_rect:?})",
+        );
+    }
+}
+
+#[test]
+fn party_frame_dump_tree_excludes_builtin_ghost_frame() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+        env.exec("A_Admin.SetPartySize(4)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            "#,
+        )
+        .unwrap();
+
+        let state = env.state();
+        let sim = state.borrow();
+        let addon_names: Vec<String> = sim.addons.iter().map(|a| a.folder_name.clone()).collect();
+        let lines = build_tree(
+            &sim.widgets,
+            &addon_names,
+            None,
+            Some("PartyFrame"),
+            true,
+            false,
+            1024.0,
+            768.0,
+        );
+        let party_roots: Vec<&String> = lines
+            .iter()
+            .filter(|line| line.contains("PartyFrame [Frame]"))
+            .collect();
+
+        assert_eq!(
+            party_roots.len(),
+            1,
+            "dump tree should expose exactly one visible PartyFrame root, got:\n{}",
+            party_roots
+                .iter()
+                .map(|line| line.as_str())
+                .collect::<Vec<_>>()
+                .join("\n"),
+        );
+        assert!(
+            party_roots[0].contains("@Blizzard_UnitFrame"),
+            "visible PartyFrame root must be owned by Blizzard_UnitFrame, got:\n{}",
+            party_roots[0],
         );
     }
 }

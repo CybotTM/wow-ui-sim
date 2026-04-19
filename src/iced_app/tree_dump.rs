@@ -18,6 +18,7 @@ impl App {
     pub(crate) fn build_frame_tree_dump(
         &self,
         filter: Option<&str>,
+        filter_key: Option<&str>,
         visible_only: bool,
         verbose: bool,
     ) -> String {
@@ -30,7 +31,7 @@ impl App {
             &state.widgets,
             &addon_names,
             filter,
-            None,
+            filter_key,
             visible_only,
             verbose,
             screen_width,

@@ -66,6 +66,10 @@ enum Commands {
         #[arg(short, long)]
         filter: Option<String>,
 
+        /// Filter by frame name and print the full subtree of matches
+        #[arg(long)]
+        filter_key: Option<String>,
+
         /// Show only visible frames
         #[arg(long)]
         visible_only: bool,
@@ -214,9 +218,10 @@ fn handle_command(command: Commands) {
         Commands::Lua { exec, file, list } => handle_lua_command(exec, file, list),
         Commands::DumpTree {
             filter,
+            filter_key,
             visible_only,
             verbose,
-        } => dump_tree(filter, visible_only, verbose),
+        } => dump_tree(filter, filter_key, visible_only, verbose),
         Commands::Screenshot {
             output,
             width,
@@ -412,9 +417,14 @@ fn execute_file_and_exit(path: &PathBuf) {
     execute_and_exit(&code);
 }
 
-fn dump_tree(filter: Option<String>, visible_only: bool, verbose: bool) {
+fn dump_tree(
+    filter: Option<String>,
+    filter_key: Option<String>,
+    visible_only: bool,
+    verbose: bool,
+) {
     let socket = resolve_socket();
-    match client::dump_tree(&socket, filter, visible_only, verbose) {
+    match client::dump_tree(&socket, filter, filter_key, visible_only, verbose) {
         Ok(tree) => println!("{}", tree),
         Err(e) => {
             eprintln!("Error: {}", e);
@@ -529,6 +539,23 @@ fn run_repl() {
     }
 
     println!("Goodbye!");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dump_tree_accepts_filter_key_flag() {
+        let cli = Cli::try_parse_from(["wow-cli", "dump-tree", "--filter-key", "PartyFrame"])
+            .expect("dump-tree should parse --filter-key");
+        match cli.command {
+            Commands::DumpTree { filter_key, .. } => {
+                assert_eq!(filter_key.as_deref(), Some("PartyFrame"));
+            }
+            _ => panic!("expected dump-tree command"),
+        }
+    }
 }
 
 /// Handle a REPL input line. Returns false to exit the loop.
