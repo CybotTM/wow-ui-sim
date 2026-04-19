@@ -1,11 +1,599 @@
-//! Minimal action-bar helpers kept alive on the rilua path.
+//! Native action-bar namespace and helpers kept alive on the rilua path.
 
 use crate::Result;
 use crate::lua_api::SimState;
-use crate::lua_api::methods::{call_function_state, frame_ref, table_get};
+use crate::lua_api::globals::lua_duration_object::new_duration_object_value;
+use crate::lua_api::methods::{
+    borrow_state, call_function_state, create_string, create_table, frame_ref, table_get, table_set,
+};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::LuaApiMut;
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
+use rilua::{LuaResult, RustFn, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+const C_ACTION_BAR: &str = "C_ActionBar";
+const NUM_ACTIONBAR_PAGES: i32 = 6;
+
+pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    let state = lua.state_mut();
+    let table_ref = ensure_namespace_table(state, C_ACTION_BAR);
+    register_general_methods(state, table_ref)?;
+    register_page_methods(state, table_ref)?;
+    register_state_queries(state, table_ref)?;
+    register_basic_slot_methods(state, table_ref)?;
+    register_cooldown_slot_methods(state, table_ref)?;
+    register_pet_slot_methods(state, table_ref)?;
+    register_stateful_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_general_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 8] = [
+        ("GetBonusBarIndexForSlot", get_bonus_bar_index_for_slot),
+        ("IsOnBarOrSpecialBar", is_on_bar_or_special_bar),
+        ("FindSpellActionButtons", find_spell_action_buttons),
+        (
+            "GetCurrentActionBarByClass",
+            get_current_action_bar_by_class,
+        ),
+        ("HasFlyoutActionButtons", has_flyout_action_buttons),
+        ("EnableActionRangeCheck", enable_action_range_check),
+        ("IsAssistedCombatAction", is_assisted_combat_action),
+        (
+            "HasAssistedCombatActionButtons",
+            has_assisted_combat_action_buttons,
+        ),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_page_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 10] = [
+        ("GetActionBarPage", get_action_bar_page),
+        ("SetActionBarPage", set_action_bar_page),
+        ("GetExtraBarIndex", get_extra_bar_index),
+        ("GetMultiCastBarIndex", get_multicast_bar_index),
+        ("GetVehicleBarIndex", get_vehicle_bar_index),
+        ("GetOverrideBarIndex", get_override_bar_index),
+        ("GetTempShapeshiftBarIndex", get_temp_shapeshift_bar_index),
+        ("GetBonusBarIndex", get_bonus_bar_index),
+        ("GetBonusBarOffset", get_bonus_bar_offset),
+        ("GetOverrideBarSkin", get_override_bar_skin),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_state_queries(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 6] = [
+        ("HasVehicleActionBar", has_vehicle_action_bar),
+        ("HasOverrideActionBar", has_override_action_bar),
+        ("HasBonusActionBar", has_bonus_action_bar),
+        ("HasTempShapeshiftActionBar", has_temp_shapeshift_action_bar),
+        ("HasExtraActionBar", has_extra_action_bar),
+        ("IsPossessBarVisible", is_possess_bar_visible),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_basic_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 14] = [
+        ("GetActionText", get_action_text),
+        ("GetActionCount", get_action_count),
+        ("GetActionDisplayCount", get_action_display_count),
+        ("GetActionUseCount", get_action_use_count),
+        ("IsConsumableAction", is_consumable_action),
+        ("IsStackableAction", is_stackable_action),
+        ("IsItemAction", is_item_action),
+        ("IsAttackAction", is_attack_action),
+        ("IsAutoRepeatAction", is_auto_repeat_action),
+        ("IsEquippedAction", is_equipped_action),
+        ("IsEquippedGearOutfitAction", is_equipped_gear_outfit_action),
+        ("IsHelpfulAction", is_helpful_action),
+        ("IsHarmfulAction", is_harmful_action),
+        ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_cooldown_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 8] = [
+        (
+            "GetActionLossOfControlCooldown",
+            get_action_loss_of_control_cooldown,
+        ),
+        (
+            "GetActionLossOfControlCooldownInfo",
+            get_action_loss_of_control_cooldown_info,
+        ),
+        ("UsesActionText", uses_action_text),
+        ("GetActionChargeDuration", get_action_charge_duration),
+        ("GetActionCooldownDuration", get_action_cooldown_duration),
+        (
+            "GetActionLossOfControlCooldownDuration",
+            get_action_loss_of_control_cooldown_duration,
+        ),
+        ("GetSpell", get_spell),
+        (
+            "GetItemActionOnEquipSpellID",
+            get_item_action_on_equip_spell_id,
+        ),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_pet_slot_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 7] = [
+        ("FindFlyoutActionButtons", find_flyout_action_buttons),
+        ("FindPetActionButtons", find_pet_action_buttons),
+        ("GetPetActionPetBarIndices", get_pet_action_pet_bar_indices),
+        ("RegisterActionUIButton", register_action_ui_button),
+        ("IsAutoCastPetAction", is_auto_cast_pet_action),
+        (
+            "IsEnabledAutoCastPetAction",
+            is_enabled_auto_cast_pet_action,
+        ),
+        ("ToggleAutoCastPetAction", toggle_auto_cast_pet_action),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_stateful_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 6] = [
+        ("HasAction", has_action),
+        ("GetActionTexture", get_action_texture),
+        ("IsUsableAction", is_usable_action),
+        ("IsCurrentAction", is_current_action),
+        ("GetActionCooldown", get_action_cooldown),
+        ("GetActionCharges", get_action_charges),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn ensure_namespace_table(state: &mut LuaState, namespace: &'static str) -> GcRef<Table> {
+    let key = state.gc.intern_string_static(namespace.as_bytes());
+    let global = state.global;
+    let existing = state
+        .gc
+        .tables
+        .get(global)
+        .map(|table| table.get_str(key, &state.gc.string_arena));
+    if let Some(Val::Table(table_ref)) = existing {
+        return table_ref;
+    }
+
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+    if let Some(global_table) = state.gc.tables.get_mut(global) {
+        let _ = global_table.raw_set(Val::Str(key), table, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(global);
+    table_ref
+}
+
+fn stack_slot(state: &LuaState) -> Option<u32> {
+    match stack_val(state, 1) {
+        Val::Num(n) if n >= 0.0 => Some(n as u32),
+        _ => None,
+    }
+}
+
+fn action_texture_path(state: &SimState, slot: u32) -> Option<String> {
+    let spell_id = state.action_bars.get(&slot)?;
+    let spell = crate::spells::get_spell(*spell_id)?;
+    crate::manifest_interface_data::get_texture_path(spell.icon_file_data_id).map(str::to_string)
+}
+
+fn current_bonus_bar_index(state: &mut LuaState) -> i32 {
+    let namespace = table_get(state, Val::Table(state.global), C_ACTION_BAR);
+    let get_bonus_bar_index = table_get(state, namespace, "GetBonusBarIndex");
+    match call_function_state(state, get_bonus_bar_index, &[]) {
+        Ok(Val::Num(n)) => n as i32,
+        _ => 0,
+    }
+}
+
+fn push_empty_table(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    state.push(table);
+    Ok(1)
+}
+
+fn push_bool(state: &mut LuaState, value: bool) -> LuaResult<u32> {
+    state.push(Val::Bool(value));
+    Ok(1)
+}
+
+fn push_i32(state: &mut LuaState, value: i32) -> LuaResult<u32> {
+    state.push(Val::Num(value as f64));
+    Ok(1)
+}
+
+fn push_nil(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn push_no_results(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn get_bonus_bar_index_for_slot(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_i32(state, 0)
+}
+
+fn is_on_bar_or_special_bar(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn find_spell_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_empty_table(state)
+}
+
+fn get_current_action_bar_by_class(state: &mut LuaState) -> LuaResult<u32> {
+    push_i32(state, 1)
+}
+
+fn has_flyout_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn enable_action_range_check(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let _ = stack_val(state, 2);
+    push_no_results(state)
+}
+
+fn is_assisted_combat_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn has_assisted_combat_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn get_action_bar_page(state: &mut LuaState) -> LuaResult<u32> {
+    push_i32(state, 1)
+}
+
+fn set_action_bar_page(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_no_results(state)
+}
+
+fn get_extra_bar_index(state: &mut LuaState) -> LuaResult<u32> {
+    push_i32(state, 13)
+}
+
+fn get_multicast_bar_index(state: &mut LuaState) -> LuaResult<u32> {
+    push_i32(state, 7)
+}
+
+fn get_vehicle_bar_index(state: &mut LuaState) -> LuaResult<u32> {
+    push_nil(state)
+}
+
+fn get_override_bar_index(state: &mut LuaState) -> LuaResult<u32> {
+    push_nil(state)
+}
+
+fn get_temp_shapeshift_bar_index(state: &mut LuaState) -> LuaResult<u32> {
+    push_nil(state)
+}
+
+fn get_bonus_bar_index(state: &mut LuaState) -> LuaResult<u32> {
+    push_i32(state, 0)
+}
+
+fn get_bonus_bar_offset(state: &mut LuaState) -> LuaResult<u32> {
+    let bonus_bar_index = current_bonus_bar_index(state);
+    push_i32(state, (bonus_bar_index - NUM_ACTIONBAR_PAGES).max(0))
+}
+
+fn get_override_bar_skin(state: &mut LuaState) -> LuaResult<u32> {
+    push_nil(state)
+}
+
+fn has_vehicle_action_bar(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn has_override_action_bar(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn has_bonus_action_bar(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn has_temp_shapeshift_action_bar(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn has_extra_action_bar(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn is_possess_bar_visible(state: &mut LuaState) -> LuaResult<u32> {
+    push_bool(state, false)
+}
+
+fn get_action_text(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_nil(state)
+}
+
+fn get_action_count(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_i32(state, 0)
+}
+
+fn get_action_display_count(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let _ = stack_val(state, 2);
+    push_nil(state)
+}
+
+fn get_action_use_count(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_i32(state, 0)
+}
+
+fn is_consumable_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_stackable_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_item_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_attack_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_auto_repeat_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_equipped_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_equipped_gear_outfit_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_helpful_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let _ = stack_val(state, 2);
+    push_bool(state, false)
+}
+
+fn is_harmful_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let _ = stack_val(state, 2);
+    push_bool(state, false)
+}
+
+fn is_press_hold_release_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn get_action_loss_of_control_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(2)
+}
+
+fn get_action_loss_of_control_cooldown_info(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let info = create_table(state);
+    table_set(state, info, "isActive", Val::Bool(false));
+    table_set(state, info, "startTime", Val::Num(0.0));
+    table_set(state, info, "duration", Val::Num(0.0));
+    table_set(state, info, "modRate", Val::Num(1.0));
+    table_set(state, info, "shouldReplaceNormalCooldown", Val::Bool(false));
+    state.push(info);
+    Ok(1)
+}
+
+fn uses_action_text(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn get_action_charge_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let duration = new_duration_object_value(state);
+    state.push(duration);
+    Ok(1)
+}
+
+fn get_action_cooldown_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let duration = new_duration_object_value(state);
+    state.push(duration);
+    Ok(1)
+}
+
+fn get_action_loss_of_control_cooldown_duration(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let duration = new_duration_object_value(state);
+    state.push(duration);
+    Ok(1)
+}
+
+fn get_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_nil(state)
+}
+
+fn get_item_action_on_equip_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_nil(state)
+}
+
+fn find_flyout_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_empty_table(state)
+}
+
+fn find_pet_action_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_empty_table(state)
+}
+
+fn get_pet_action_pet_bar_indices(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_empty_table(state)
+}
+
+fn register_action_ui_button(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let _ = stack_val(state, 2);
+    push_no_results(state)
+}
+
+fn is_auto_cast_pet_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn is_enabled_auto_cast_pet_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_bool(state, false)
+}
+
+fn toggle_auto_cast_pet_action(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    push_no_results(state)
+}
+
+fn has_action(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = stack_slot(state);
+    let has_action = {
+        let sim = borrow_state(state)?;
+        slot.is_some_and(|slot| sim.action_bars.contains_key(&slot))
+    };
+    state.push(Val::Bool(has_action));
+    Ok(1)
+}
+
+fn get_action_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = stack_slot(state);
+    let texture = {
+        let sim = borrow_state(state)?;
+        slot.and_then(|slot| action_texture_path(&sim, slot))
+    };
+
+    match texture {
+        Some(path) => {
+            let texture = create_string(state, &path);
+            state.push(texture);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn is_usable_action(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = stack_slot(state);
+    let usable = {
+        let sim = borrow_state(state)?;
+        slot.is_some_and(|slot| sim.action_bars.contains_key(&slot))
+    };
+    state.push(Val::Bool(usable));
+    state.push(Val::Bool(false));
+    Ok(2)
+}
+
+fn is_current_action(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = stack_slot(state).unwrap_or(0);
+    let is_current = {
+        let sim = borrow_state(state)?;
+        if let Some(casting) = sim.casting.as_ref().map(|cast| cast.spell_id) {
+            sim.action_bars.get(&slot).copied() == Some(casting)
+        } else {
+            false
+        }
+    };
+    state.push(Val::Bool(is_current));
+    Ok(1)
+}
+
+fn get_action_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = stack_slot(state);
+    let (start, duration) = {
+        let sim = borrow_state(state)?;
+        let now = sim.start_time.elapsed().as_secs_f64();
+        slot.and_then(|slot| sim.action_bars.get(&slot).copied())
+            .map(|spell_id| spell_cooldown_times(&sim, spell_id, now))
+            .unwrap_or((0.0, 0.0))
+    };
+    let info = create_table(state);
+    table_set(state, info, "startTime", Val::Num(start));
+    table_set(state, info, "duration", Val::Num(duration));
+    table_set(state, info, "isEnabled", Val::Bool(true));
+    table_set(state, info, "modRate", Val::Num(1.0));
+    state.push(info);
+    Ok(1)
+}
+
+fn get_action_charges(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    let info = create_table(state);
+    table_set(state, info, "currentCharges", Val::Num(0.0));
+    table_set(state, info, "maxCharges", Val::Num(0.0));
+    table_set(state, info, "cooldownStartTime", Val::Num(0.0));
+    table_set(state, info, "cooldownDuration", Val::Num(0.0));
+    table_set(state, info, "chargeModRate", Val::Num(1.0));
+    state.push(info);
+    Ok(1)
+}
 
 pub fn push_action_button_state_update(
     state: &Rc<RefCell<SimState>>,

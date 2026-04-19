@@ -98,6 +98,13 @@ pub fn register_lua_duration_object(lua: &mut rilua::Lua) -> crate::Result<()> {
     Ok(())
 }
 
+/// Create a new `LuaDurationObject` table value for callers that expose
+/// duration objects through other namespaces such as `C_ActionBar`.
+pub(crate) fn new_duration_object_value(state: &mut LuaState) -> Val {
+    ensure_metatable(state);
+    new_duration_object(state)
+}
+
 // ── Metamethod / method implementations ──────────────────────────────────────
 
 /// `C_DurationUtil.CreateDuration()` — returns a new duration proxy table.

@@ -180,6 +180,42 @@ fn startup_keeps_action_bar_deprecation_fallbacks_non_recursive() {
 }
 
 #[test]
+fn c_action_bar_matches_master_default_bar_indices() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let result: (
+            i32,
+            i32,
+            Option<i32>,
+            Option<i32>,
+            Option<i32>,
+            i32,
+            i32,
+            i32,
+        ) = env
+            .eval(
+                r#"
+                return C_ActionBar.GetCurrentActionBarByClass(),
+                       C_ActionBar.GetExtraBarIndex(),
+                       C_ActionBar.GetVehicleBarIndex(),
+                       C_ActionBar.GetOverrideBarIndex(),
+                       C_ActionBar.GetTempShapeshiftBarIndex(),
+                       C_ActionBar.GetMultiCastBarIndex(),
+                       C_ActionBar.GetBonusBarIndex(),
+                       C_ActionBar.GetBonusBarOffset()
+            "#,
+            )
+            .expect("C_ActionBar default bar indices should evaluate");
+
+        assert_eq!(
+            result,
+            (1, 13, None, None, None, 7, 0, 0),
+            "C_ActionBar should match master default bar index semantics"
+        );
+    }
+}
+
+#[test]
 fn blizzard_console_saved_variables_machine_seed_without_saved_vars_manager() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

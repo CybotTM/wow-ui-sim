@@ -55,6 +55,7 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
     super::stubs::register_all(lua.state_mut());
+    super::action_bar_api::register_all(lua)?;
     // Replace selected namespace stub entries with constants ported from
     // master (C_UIWidgetManager.GetPowerBarWidgetSetID, a couple of
     // C_PlayerInfo probes). Runs right after the stub pass so the
