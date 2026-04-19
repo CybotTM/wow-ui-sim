@@ -58,17 +58,16 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     };
     let (is_tooltip, should_update_button_child) =
         update_text_frame(state, id, &text, &stripped_text)?;
-    if should_update_button_child {
-        if let Some(text_child_id) = ensure_button_text_child(state, id)? {
-            {
-                let mut sim = borrow_state_mut(state)?;
-                if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
-                    text_child.text = text.clone();
-                    text_child.text_stripped = stripped_text.clone();
-                }
+    if should_update_button_child && let Some(text_child_id) = ensure_button_text_child(state, id)?
+    {
+        {
+            let mut sim = borrow_state_mut(state)?;
+            if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
+                text_child.text = text.clone();
+                text_child.text_stripped = stripped_text.clone();
             }
-            update_auto_text_width(state, text_child_id);
         }
+        update_auto_text_width(state, text_child_id);
     }
     update_auto_text_width(state, id);
     if is_tooltip {
@@ -113,11 +112,9 @@ fn update_text_frame(
         .map(|frame| frame.widget_type == WidgetType::GameTooltip)
         .unwrap_or(false);
     let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
-    if changed {
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame.text = text.clone();
-            frame.text_stripped = stripped_text.clone();
-        }
+    if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.text = text.clone();
+        frame.text_stripped = stripped_text.clone();
     }
     let should_update_button_child = matches!(
         sim.widgets.get(id).map(|frame| frame.widget_type),
@@ -163,7 +160,7 @@ fn mirror_tooltip_text_fields(
 ) {
     let fields = get_or_create_frame_fields(state, id);
     let text_val = text.map_or(Val::Nil, |value| create_string(state, &value));
-    table_set(state, fields, "text", text_val.clone());
+    table_set(state, fields, "text", text_val);
     table_set(state, fields, "r", tooltip.r);
     table_set(state, fields, "g", tooltip.g);
     table_set(state, fields, "b", tooltip.b);
@@ -785,14 +782,10 @@ pub(super) fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
     let a = val_to_f32(stack_val(state, 5), 1.0);
     let new_color = crate::widget::Color::new(r, g, b, a);
     let mut sim = borrow_state_mut(state)?;
-    if !sim
-        .widgets
-        .get(id)
-        .is_some_and(|f| f.text_color == new_color)
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && frame.text_color != new_color
     {
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame.text_color = new_color;
-        }
+        frame.text_color = new_color;
     }
     Ok(0)
 }
