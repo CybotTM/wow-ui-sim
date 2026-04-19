@@ -55,7 +55,7 @@
 - [x] Why are you refusing to implement to replace the shims
 - [x] Re-organize the directory structure into c_api that will contain all the c_api calls, includiding two sub folders with temporary-shims and permanent-shims, classify shims as temporary if possible
 - [x] Replace temporary shims
-- [ ] Re-organize the directory structure for lua_api to include two sub folders one with temporary-shims and permanent-shims, outside of those it should always be real implementations
+- [x] Re-organize the directory structure for lua_api to include two sub folders one with temporary-shims and permanent-shims, outside of those it should always be real implementations
 - [x] Fix compilation warnings
 - [x] Fix compilation erros
 - [x] Fix startup performance issue

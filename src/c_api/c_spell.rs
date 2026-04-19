@@ -7,6 +7,20 @@
 //!   `SimState.spell_cooldowns` (start/duration/isEnabled/isActive/modRate).
 //! - `GetSpellCastCount(spellID)` → permissive zero. The zone-ability UI
 //!   only uses this as a fallback display count when charges are absent.
+//! - `GetSpellDescription(spellID)` → localized spell description, or empty.
+//! - `GetSpellTexture(spellID)` → `(fallbackTexturePath, fileDataID)`.
+//! - `GetSpellPowerCost(spellID)` → `SpellPowerCostInfo[]` table or nil.
+//! - `GetSpellCharges(spellID)` → zeroed `SpellChargeInfo` table.
+//! - `GetOverrideSpell(spellID)` → same spell ID.
+//! - `GetSchoolString(mask)` → localized school name for a bitmask.
+//! - `GetMawPowerBorderAtlasBySpellID(spellID)` → nil.
+//! - `PickupSpell(spellID)` → sets cursor to a spell and fires `CURSOR_CHANGED`.
+//! - `GetSpellLink(spellID)` → spell hyperlink string or nil.
+//! - `GetSpellName(spellID)` → localized name or `"Unknown"`.
+//! - `IsSpellPassive(spellID)` → false.
+//! - `IsAutoAttackSpell(spellID)` → true for spell 6603.
+//! - `IsRangedAutoAttackSpell(spellID)` → false.
+//! - `IsPressHoldReleaseSpell(spellID)` → false.
 //! - `GetMountFromSpell(spellID)` → scans `world.mounts` for matching spell
 //!   id, returns mount_id or nil.
 //! - `GetVisibilityInfo(spellID, filter)` → `(false, true, false)` — most
@@ -20,16 +34,40 @@
 //! - `TargetSpellReplacesBonusTree()` → false.
 
 use super::helpers::ensure_namespace;
+use crate::c_api::item_spell::spell_link_for_id;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set,
+    table_set_num,
+};
+use crate::lua_api::script_helpers::{
+    call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
+};
+use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::spell_descriptions;
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
+    table_set_rust_fn_static(state, ns, "GetSpellDescription", get_spell_description)?;
     table_set_rust_fn_static(state, ns, "GetSpellInfo", get_spell_info)?;
+    table_set_rust_fn_static(state, ns, "GetSpellTexture", get_spell_texture)?;
+    table_set_rust_fn_static(state, ns, "GetSpellPowerCost", get_spell_power_cost)?;
+    table_set_rust_fn_static(state, ns, "GetSpellCharges", get_spell_charges)?;
+    table_set_rust_fn_static(state, ns, "GetOverrideSpell", get_override_spell)?;
+    table_set_rust_fn_static(state, ns, "GetSchoolString", get_school_string)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetMawPowerBorderAtlasBySpellID",
+        get_maw_power_border_atlas_by_spell_id,
+    )?;
+    table_set_rust_fn_static(state, ns, "PickupSpell", pickup_spell)?;
+    table_set_rust_fn_static(state, ns, "GetSpellLink", get_spell_link)?;
+    table_set_rust_fn_static(state, ns, "GetSpellName", get_spell_name)?;
     table_set_rust_fn_static(state, ns, "GetSpellCooldown", get_spell_cooldown)?;
     table_set_rust_fn_static(state, ns, "GetSpellCastCount", get_spell_cast_count)?;
     table_set_rust_fn_static(state, ns, "GetMountFromSpell", get_mount_from_spell)?;
@@ -38,6 +76,20 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "IsSpellDataCached", is_spell_data_cached)?;
     table_set_rust_fn_static(state, ns, "IsPriorityAura", is_priority_aura)?;
     table_set_rust_fn_static(state, ns, "IsSelfBuff", is_self_buff)?;
+    table_set_rust_fn_static(state, ns, "IsSpellPassive", is_spell_passive)?;
+    table_set_rust_fn_static(state, ns, "IsAutoAttackSpell", is_auto_attack_spell)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsRangedAutoAttackSpell",
+        is_ranged_auto_attack_spell,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsPressHoldReleaseSpell",
+        is_press_hold_release_spell,
+    )?;
     table_set_rust_fn_static(state, ns, "IsSpellUsable", is_spell_usable)?;
     table_set_rust_fn_static(
         state,
@@ -58,6 +110,16 @@ pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
         target_spell_replaces_bonus_tree,
     )?;
     Ok(())
+}
+
+fn get_spell_description(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let description = create_string(
+        state,
+        spell_descriptions::get_spell_description(spell_id).unwrap_or(""),
+    );
+    state.push(description);
+    Ok(1)
 }
 
 /// `C_Spell.GetSpellInfo(spellID)` → `SpellInfo` table or nil.
@@ -89,6 +151,202 @@ fn get_spell_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "maxRange", Val::Num(0.0));
     table_set(state, info, "spellID", Val::Num(spell_id as f64));
     state.push(info);
+    Ok(1)
+}
+
+fn get_spell_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let icon_id = spells::get_spell(spell_id)
+        .map(|spell| spell.icon_file_data_id)
+        .unwrap_or(136243);
+    let texture = create_string(state, "Interface\\ICONS\\INV_Misc_QuestionMark");
+    state.push(texture);
+    state.push(Val::Num(icon_id as f64));
+    Ok(2)
+}
+
+fn spell_power_min_cost(player_power_max: f32, cost: &crate::spell_power::SpellPowerCost) -> i32 {
+    if cost.mana_cost > 0 {
+        return cost.mana_cost;
+    }
+    if cost.cost_pct > 0.0 {
+        return (player_power_max * (cost.cost_pct / 100.0)).round() as i32;
+    }
+    0
+}
+
+fn build_spell_power_cost_info(
+    state: &mut LuaState,
+    cost: &crate::spell_power::SpellPowerCost,
+    player_power_max: f32,
+) -> Option<Val> {
+    let Val::Table(info) = create_table(state) else {
+        return None;
+    };
+
+    let min_cost = spell_power_min_cost(player_power_max, cost);
+    let total_cost = min_cost + cost.optional_cost.max(0);
+    let power_name = create_string(state, crate::spell_power::power_type_name(cost.power_type));
+
+    table_set(
+        state,
+        Val::Table(info),
+        "type",
+        Val::Num(cost.power_type as f64),
+    );
+    table_set(state, Val::Table(info), "name", power_name);
+    table_set(state, Val::Table(info), "cost", Val::Num(total_cost as f64));
+    table_set(
+        state,
+        Val::Table(info),
+        "minCost",
+        Val::Num(min_cost as f64),
+    );
+    table_set(
+        state,
+        Val::Table(info),
+        "costPercent",
+        Val::Num(cost.cost_pct as f64),
+    );
+    table_set(
+        state,
+        Val::Table(info),
+        "costPerSec",
+        Val::Num(cost.cost_per_sec as f64),
+    );
+    table_set(
+        state,
+        Val::Table(info),
+        "requiredAuraID",
+        Val::Num(cost.required_aura_id as f64),
+    );
+    table_set(
+        state,
+        Val::Table(info),
+        "hasRequiredAura",
+        Val::Bool(cost.required_aura_id == 0),
+    );
+
+    Some(Val::Table(info))
+}
+
+fn spell_power_costs_table(state: &mut LuaState, spell_id: u32) -> Option<Val> {
+    let costs = crate::spell_power::get_spell_power(spell_id)?;
+    if costs.is_empty() {
+        return None;
+    }
+
+    let player_power_max = borrow_state(state).ok()?.player.power_max.max(0) as f32;
+    let Val::Table(power_costs) = create_table(state) else {
+        return None;
+    };
+
+    for (index, cost) in costs.iter().enumerate() {
+        let Some(info) = build_spell_power_cost_info(state, cost, player_power_max) else {
+            continue;
+        };
+        table_set_num(state, power_costs, (index + 1) as f64, info);
+    }
+
+    Some(Val::Table(power_costs))
+}
+
+fn get_spell_power_cost(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    match spell_power_costs_table(state, spell_id) {
+        Some(power_costs) => state.push(power_costs),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_spell_charges(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    let charges = create_table(state);
+    table_set(state, charges, "currentCharges", Val::Num(0.0));
+    table_set(state, charges, "maxCharges", Val::Num(0.0));
+    table_set(state, charges, "cooldownStartTime", Val::Num(0.0));
+    table_set(state, charges, "cooldownDuration", Val::Num(0.0));
+    table_set(state, charges, "chargeModRate", Val::Num(1.0));
+    state.push(charges);
+    Ok(1)
+}
+
+fn get_override_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Num(spell_id as f64));
+    Ok(1)
+}
+
+fn get_school_string(state: &mut LuaState) -> LuaResult<u32> {
+    let school_mask = u32::from_stack(state, 1)?;
+    let school = match school_mask {
+        1 => "Physical",
+        2 => "Holy",
+        4 => "Fire",
+        8 => "Nature",
+        16 => "Frost",
+        32 => "Shadow",
+        64 => "Arcane",
+        _ => "Physical",
+    };
+    let school_string = create_string(state, school);
+    state.push(school_string);
+    Ok(1)
+}
+
+fn fire_cursor_changed(state: &mut LuaState) {
+    for widget_id in get_event_listeners(state, "CURSOR_CHANGED") {
+        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
+            continue;
+        };
+        if !matches!(handler, Val::Function(_)) {
+            continue;
+        }
+        let Ok(frame) = frame_ref(state, widget_id) else {
+            continue;
+        };
+        let event_name = create_string(state, "CURSOR_CHANGED");
+        if let Err(error) = protected_lua_pcall_state(state, handler, &[frame, event_name]) {
+            call_error_handler_state(state, &error);
+        }
+    }
+}
+
+fn pickup_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(spell_id) = Option::<u32>::from_stack(state, 1)? else {
+        return Ok(0);
+    };
+    borrow_state_mut(state)?.cursor_item = Some(CursorInfo::Spell { spell_id });
+    fire_cursor_changed(state);
+    Ok(0)
+}
+
+fn get_maw_power_border_atlas_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn get_spell_link(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    match spell_link_for_id(spell_id) {
+        Some(link) => {
+            let link_string = create_string(state, &link);
+            state.push(link_string);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_spell_name(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let name = spells::get_spell(spell_id)
+        .map(|spell| spell.name)
+        .unwrap_or("Unknown");
+    let name_string = create_string(state, name);
+    state.push(name_string);
     Ok(1)
 }
 
@@ -192,6 +450,30 @@ fn is_self_buff(state: &mut LuaState) -> LuaResult<u32> {
         .map(|s| s.implicit_target == 1)
         .unwrap_or(false);
     state.push(Val::Bool(is_self));
+    Ok(1)
+}
+
+fn is_spell_passive(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn is_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(spell_id == 6603));
+    Ok(1)
+}
+
+fn is_ranged_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn is_press_hold_release_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

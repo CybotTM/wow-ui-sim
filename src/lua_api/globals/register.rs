@@ -54,7 +54,7 @@ fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::strings::register_all_ui_strings(lua)?;
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
-    super::stubs::register_all(lua.state_mut());
+    super::permanent_shims::register_all(lua.state_mut());
     super::action_bar_api::register_all(lua)?;
     // Replace selected namespace stub entries with constants ported from
     // master (C_UIWidgetManager.GetPowerBarWidgetSetID, a couple of
@@ -104,9 +104,9 @@ fn register_core_surfaces(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::lfg_list::register_all(lua)?;
     super::lfg_info::register_all(lua)?;
     super::locale_info::register_all(lua)?;
-    super::missing_surface::register_all(lua)?;
+    super::temporary_shims::register_all(lua)?;
     super::quest_surface::register_all(lua)?;
-    super::missing_surface::register_quest_log_overrides(lua)?;
+    super::temporary_shims::register_quest_log_overrides(lua)?;
     super::lua_duration_object::register_lua_duration_object(lua)?;
     Ok(())
 }
