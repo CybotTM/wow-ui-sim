@@ -45,6 +45,8 @@ fn brightness_set_then_get_round_trips_through_simstate() {
         )
         .unwrap();
     assert_eq!(result, "75");
+    env.exec(r#"SetCVar("Brightness", GetCVarDefault("Brightness"))"#)
+        .unwrap();
 }
 
 #[test]
@@ -59,6 +61,8 @@ fn contrast_set_then_get_round_trips_through_simstate() {
         )
         .unwrap();
     assert_eq!(result, "30");
+    env.exec(r#"SetCVar("Contrast", GetCVarDefault("Contrast"))"#)
+        .unwrap();
 }
 
 #[test]
@@ -84,6 +88,8 @@ fn get_cvar_default_returns_yaml_value_after_override() {
         )
         .unwrap();
     assert_eq!(result, "50.000000");
+    env.exec(r#"SetCVar("Brightness", GetCVarDefault("Brightness"))"#)
+        .unwrap();
 }
 
 #[test]
@@ -98,6 +104,8 @@ fn c_cvar_namespace_mirrors_global_get_set() {
         )
         .unwrap();
     assert_eq!(result, "42");
+    env.exec(r#"SetCVar("Brightness", GetCVarDefault("Brightness"))"#)
+        .unwrap();
 }
 
 #[test]

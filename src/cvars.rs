@@ -5,10 +5,29 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::RwLock;
+use std::sync::{
+    RwLock,
+    atomic::{AtomicU64, Ordering},
+};
+
+static NEXT_TEST_STORAGE_ID: AtomicU64 = AtomicU64::new(1);
 
 /// Default path for persisted CVar overrides.
 fn default_storage_path() -> PathBuf {
+    let in_test_binary = std::env::current_exe()
+        .ok()
+        .and_then(|path| path.parent().map(|parent| parent.ends_with("deps")))
+        .unwrap_or(false);
+
+    if in_test_binary {
+        let storage_id = NEXT_TEST_STORAGE_ID.fetch_add(1, Ordering::Relaxed);
+        return std::env::temp_dir().join(format!(
+            "wow-sim-cvars-{}-{}.json",
+            std::process::id(),
+            storage_id
+        ));
+    }
+
     dirs::data_local_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join("wow-sim")
@@ -126,7 +145,7 @@ impl CVarStorage {
                     .unwrap_or(k)
             })
             .collect();
-        sorted.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        sorted.sort_by_key(|name| name.to_lowercase());
         sorted
     }
 
