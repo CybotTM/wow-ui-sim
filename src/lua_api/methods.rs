@@ -302,7 +302,7 @@ fn table_get_num(state: &LuaState, table: GcRef<Table>, key: f64) -> Val {
 }
 
 /// Set a numeric-keyed value in a table.
-fn table_set_num(state: &mut LuaState, table: GcRef<Table>, key: f64, value: Val) {
+pub(crate) fn table_set_num(state: &mut LuaState, table: GcRef<Table>, key: f64, value: Val) {
     if let Some(t) = state.gc.tables.get_mut(table) {
         let int_key = key as i64;
         if int_key > 0 && int_key as f64 == key {

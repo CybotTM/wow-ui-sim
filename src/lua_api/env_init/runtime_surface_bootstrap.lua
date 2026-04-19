@@ -88,6 +88,15 @@ if GetGameTime == nil then
   end
 end
 
+if time == nil then
+  function time(dateTable)
+    if os and type(os.time) == "function" then
+      return os.time(dateTable)
+    end
+    return math.floor(GetTime())
+  end
+end
+
 if GetLocale == nil then
   function GetLocale()
     return "enUS"
@@ -241,6 +250,459 @@ local function __wow_ensure_spellbook_surface()
 end
 
 __wow_ensure_spellbook_surface()
+
+local function __wow_ensure_prototype_dialog_surface()
+  local existing = rawget(_G, "C_PrototypeDialog")
+  local namespace = {
+    _activeDialogs = {},
+    _removedDialogs = {},
+    _transitionHistory = {},
+  }
+
+  if type(existing) == "table" then
+    for key, value in pairs(existing) do
+      if key ~= "_activeDialogs"
+        and key ~= "_removedDialogs"
+        and key ~= "_transitionHistory"
+        and key ~= "SelectOption"
+        and key ~= "EnsureRemoved" then
+        namespace[key] = value
+      end
+    end
+  end
+
+  function namespace.SelectOption(dialogID, optionID)
+    if type(dialogID) ~= "number" or type(optionID) ~= "number" then
+      return false
+    end
+
+    local priorState = namespace._activeDialogs[dialogID]
+    local selectionCount = 1
+    if type(priorState) == "table" and type(priorState.selectionCount) == "number" then
+      selectionCount = priorState.selectionCount + 1
+    end
+
+    namespace._activeDialogs[dialogID] = {
+      dialogID = dialogID,
+      selectedOptionID = optionID,
+      selectionCount = selectionCount,
+    }
+    namespace._removedDialogs[dialogID] = nil
+    table.insert(namespace._transitionHistory, {
+      transition = "selected",
+      dialogID = dialogID,
+      optionID = optionID,
+      selectionCount = selectionCount,
+    })
+    return true
+  end
+
+  function namespace.EnsureRemoved(dialogID)
+    if type(dialogID) ~= "number" then
+      return false
+    end
+
+    local hadActiveDialog = namespace._activeDialogs[dialogID] ~= nil
+    namespace._activeDialogs[dialogID] = nil
+    namespace._removedDialogs[dialogID] = true
+    table.insert(namespace._transitionHistory, {
+      transition = "removed",
+      dialogID = dialogID,
+    })
+    return hadActiveDialog
+  end
+
+  C_PrototypeDialog = namespace
+end
+
+__wow_ensure_prototype_dialog_surface()
+
+local function __wow_dispatcher_invoke_callback(callbackData, ...)
+  local callback = callbackData and callbackData.Callback
+  if type(callback) == "function" then
+    return callback(...)
+  end
+  if type(callback) ~= "table" then
+    return nil
+  end
+
+  local method = callback[callbackData.EventFunctionOrScript]
+  if type(method) == "function" then
+    return method(callback, ...)
+  end
+  return nil
+end
+
+local function __wow_dispatcher_find_id(callbackTable, ownerOrID)
+  if type(callbackTable) ~= "table" or ownerOrID == nil then
+    return nil
+  end
+  if type(ownerOrID) == "number" then
+    return ownerOrID
+  end
+
+  for id, callbackData in pairs(callbackTable) do
+    if type(callbackData) == "table" and callbackData.Callback == ownerOrID then
+      return id
+    end
+  end
+  return nil
+end
+
+local function __wow_dispatcher_collect_ids(callbackTable)
+  local ids = {}
+  if type(callbackTable) ~= "table" then
+    return ids
+  end
+  for id in pairs(callbackTable) do
+    table.insert(ids, id)
+  end
+  return ids
+end
+
+local function __wow_ensure_dispatcher_surface()
+  local existing = rawget(_G, "Dispatcher")
+  if type(existing) == "table" and rawget(existing, "__wow_sim_dispatcher") == true then
+    return
+  end
+
+  DISPATCHER_VERSION = 2.0
+
+  local dispatcher = {
+    __wow_sim_dispatcher = true,
+    EventFrame = nil,
+    NextEventID = 1,
+    NextFunctionID = 1,
+    NextScriptID = 1,
+    Events = {},
+    Functions = {
+      Global = {},
+      Owners = {},
+    },
+    Scripts = {},
+  }
+
+  function dispatcher:_CreateCallbackData(eventFunctionOrScript, callback, oneTime)
+    return {
+      EventFunctionOrScript = eventFunctionOrScript,
+      Callback = callback,
+      OneTime = oneTime == true,
+    }
+  end
+
+  function dispatcher:Initialize()
+    if type(self.EventFrame) == "table" then
+      return
+    end
+
+    self.EventFrame = CreateFrame("Frame", "DispatcherFrame")
+    self.EventFrame:SetScript("OnEvent", function(_, event, ...)
+      self:OnEvent(event, ...)
+    end)
+  end
+
+  function dispatcher:RegisterEvent(event, callback, oneTime)
+    self:Initialize()
+
+    if type(event) ~= "string" then
+      return nil
+    end
+    if type(callback) == "table" then
+      self:UnregisterEvent(event, callback)
+    end
+
+    local callbacks = self.Events[event]
+    if type(callbacks) ~= "table" then
+      callbacks = {}
+      self.Events[event] = callbacks
+      if event == "OnUpdate" then
+        self.EventFrame:SetScript("OnUpdate", function(_, elapsed)
+          self:OnEvent("OnUpdate", elapsed)
+        end)
+      else
+        self.EventFrame:RegisterEvent(event)
+      end
+    end
+
+    local id = self.NextEventID
+    self.NextEventID = id + 1
+    callbacks[id] = self:_CreateCallbackData(event, callback, oneTime)
+    return id
+  end
+
+  function dispatcher:UnregisterEvent(event, ownerOrID)
+    local callbacks = self.Events[event]
+    if type(callbacks) ~= "table" then
+      return
+    end
+
+    local id = __wow_dispatcher_find_id(callbacks, ownerOrID)
+    if id ~= nil then
+      callbacks[id] = nil
+    end
+
+    if next(callbacks) ~= nil then
+      return
+    end
+
+    self.Events[event] = nil
+    if type(self.EventFrame) ~= "table" then
+      return
+    end
+    if event == "OnUpdate" then
+      self.EventFrame:SetScript("OnUpdate", nil)
+    else
+      self.EventFrame:UnregisterEvent(event)
+    end
+  end
+
+  function dispatcher:UnregisterAllEvents(owner)
+    for event, callbacks in pairs(self.Events) do
+      if __wow_dispatcher_find_id(callbacks, owner) ~= nil then
+        self:UnregisterEvent(event, owner)
+      end
+    end
+  end
+
+  function dispatcher:OnEvent(event, ...)
+    local callbacks = self.Events[event]
+    if type(callbacks) ~= "table" then
+      return
+    end
+
+    local idsToRemove = {}
+    for _, id in ipairs(__wow_dispatcher_collect_ids(callbacks)) do
+      local callbackData = callbacks[id]
+      if type(callbackData) == "table" then
+        __wow_dispatcher_invoke_callback(callbackData, ...)
+        if callbackData.OneTime then
+          table.insert(idsToRemove, id)
+        end
+      end
+    end
+
+    for _, id in ipairs(idsToRemove) do
+      self:UnregisterEvent(event, id)
+    end
+  end
+
+  function dispatcher:_GetFunctionBucket(functionOwner, functionName)
+    if type(functionOwner) == "table" then
+      local owned = self.Functions.Owners[functionOwner]
+      return type(owned) == "table" and owned[functionName] or nil
+    end
+    return self.Functions.Global[functionName]
+  end
+
+  function dispatcher:_SetFunctionTarget(functionOwner, functionName, func)
+    if type(functionOwner) == "table" then
+      functionOwner[functionName] = func
+    else
+      _G[functionName] = func
+    end
+  end
+
+  function dispatcher:RegisterFunction(functionOwner, functionName, callback, oneTime)
+    if type(functionOwner) ~= "table" then
+      functionOwner, functionName, callback, oneTime = nil, functionOwner, functionName, callback
+    end
+
+    if type(functionName) ~= "string" then
+      return nil
+    end
+
+    local original = type(functionOwner) == "table" and functionOwner[functionName] or _G[functionName]
+    if type(original) ~= "function" then
+      return nil
+    end
+
+    local bucket = self:_GetFunctionBucket(functionOwner, functionName)
+    if type(bucket) ~= "table" then
+      bucket = {
+        callbacks = {},
+        original = original,
+      }
+
+      if type(functionOwner) == "table" then
+        local owned = self.Functions.Owners[functionOwner]
+        if type(owned) ~= "table" then
+          owned = {}
+          self.Functions.Owners[functionOwner] = owned
+        end
+        owned[functionName] = bucket
+      else
+        self.Functions.Global[functionName] = bucket
+      end
+
+      local dispatcher_ref = self
+      local wrapper = function(...)
+        bucket.original(...)
+        dispatcher_ref:OnSecureFunc(functionOwner, functionName, ...)
+      end
+      bucket.wrapper = wrapper
+      self:_SetFunctionTarget(functionOwner, functionName, wrapper)
+    end
+
+    local id = self.NextFunctionID
+    self.NextFunctionID = id + 1
+    bucket.callbacks[id] = self:_CreateCallbackData(functionName, callback, oneTime)
+    return id
+  end
+
+  function dispatcher:UnregisterFunction(functionOwner, functionName, ownerOrID)
+    if type(functionOwner) ~= "table" then
+      functionOwner, functionName, ownerOrID = nil, functionOwner, functionName
+    end
+
+    local bucket = self:_GetFunctionBucket(functionOwner, functionName)
+    if type(bucket) ~= "table" then
+      return
+    end
+
+    local id = __wow_dispatcher_find_id(bucket.callbacks, ownerOrID)
+    if id ~= nil then
+      bucket.callbacks[id] = nil
+    end
+
+    if next(bucket.callbacks) ~= nil then
+      return
+    end
+
+    self:_SetFunctionTarget(functionOwner, functionName, bucket.original)
+    if type(functionOwner) == "table" then
+      local owned = self.Functions.Owners[functionOwner]
+      if type(owned) == "table" then
+        owned[functionName] = nil
+        if next(owned) == nil then
+          self.Functions.Owners[functionOwner] = nil
+        end
+      end
+    else
+      self.Functions.Global[functionName] = nil
+    end
+  end
+
+  function dispatcher:UnregisterAllFunctions(owner)
+    for functionName, bucket in pairs(self.Functions.Global) do
+      if __wow_dispatcher_find_id(bucket.callbacks, owner) ~= nil then
+        self:UnregisterFunction(functionName, owner)
+      end
+    end
+
+    for functionOwner, owned in pairs(self.Functions.Owners) do
+      for functionName, bucket in pairs(owned) do
+        if __wow_dispatcher_find_id(bucket.callbacks, owner) ~= nil then
+          self:UnregisterFunction(functionOwner, functionName, owner)
+        end
+      end
+    end
+  end
+
+  function dispatcher:OnSecureFunc(functionOwner, functionName, ...)
+    local bucket = self:_GetFunctionBucket(functionOwner, functionName)
+    if type(bucket) ~= "table" then
+      return
+    end
+
+    local idsToRemove = {}
+    for _, id in ipairs(__wow_dispatcher_collect_ids(bucket.callbacks)) do
+      local callbackData = bucket.callbacks[id]
+      if type(callbackData) == "table" then
+        __wow_dispatcher_invoke_callback(callbackData, ...)
+        if callbackData.OneTime then
+          table.insert(idsToRemove, id)
+        end
+      end
+    end
+
+    for _, id in ipairs(idsToRemove) do
+      self:UnregisterFunction(functionOwner, functionName, id)
+    end
+  end
+
+  function dispatcher:RegisterScript(frame, script, callback, oneTime)
+    if type(frame) ~= "table" or type(script) ~= "string" or not frame:HasScript(script) then
+      return nil
+    end
+
+    local frameScripts = self.Scripts[frame]
+    if type(frameScripts) ~= "table" then
+      frameScripts = {}
+      self.Scripts[frame] = frameScripts
+    end
+
+    local callbacks = frameScripts[script]
+    if type(callbacks) ~= "table" then
+      callbacks = {}
+      frameScripts[script] = callbacks
+      frame:HookScript(script, function(...)
+        self:OnScript(frame, script, ...)
+      end)
+    end
+
+    local id = self.NextScriptID
+    self.NextScriptID = id + 1
+    callbacks[id] = self:_CreateCallbackData(script, callback, oneTime)
+    return id
+  end
+
+  function dispatcher:UnregisterScript(frame, script, ownerOrID)
+    local frameScripts = self.Scripts[frame]
+    local callbacks = type(frameScripts) == "table" and frameScripts[script] or nil
+    if type(callbacks) ~= "table" then
+      return
+    end
+
+    local id = __wow_dispatcher_find_id(callbacks, ownerOrID)
+    if id ~= nil then
+      callbacks[id] = nil
+    end
+  end
+
+  function dispatcher:UnregisterAllScripts(owner)
+    for frame, frameScripts in pairs(self.Scripts) do
+      for script, callbacks in pairs(frameScripts) do
+        if __wow_dispatcher_find_id(callbacks, owner) ~= nil then
+          self:UnregisterScript(frame, script, owner)
+        end
+      end
+    end
+  end
+
+  function dispatcher:OnScript(frame, script, ...)
+    local frameScripts = self.Scripts[frame]
+    local callbacks = type(frameScripts) == "table" and frameScripts[script] or nil
+    if type(callbacks) ~= "table" then
+      return
+    end
+
+    local idsToRemove = {}
+    for _, id in ipairs(__wow_dispatcher_collect_ids(callbacks)) do
+      local callbackData = callbacks[id]
+      if type(callbackData) == "table" then
+        __wow_dispatcher_invoke_callback(callbackData, ...)
+        if callbackData.OneTime then
+          table.insert(idsToRemove, id)
+        end
+      end
+    end
+
+    for _, id in ipairs(idsToRemove) do
+      self:UnregisterScript(frame, script, id)
+    end
+  end
+
+  function dispatcher:UnregisterAll(owner)
+    self:UnregisterAllEvents(owner)
+    self:UnregisterAllFunctions(owner)
+    self:UnregisterAllScripts(owner)
+  end
+
+  Dispatcher = dispatcher
+  dispatcher:Initialize()
+end
+
+__wow_ensure_dispatcher_surface()
 
 if GetSpecializationInfoForSpecID == nil then
   function GetSpecializationInfoForSpecID(_specID)
@@ -462,6 +924,179 @@ local function __wow_install_frame_helpers(frame)
 
   return frame
 end
+
+local function __wow_ensure_chat_voice_button_surface()
+  local uiParent = rawget(_G, "UIParent")
+  QuickJoinToastButton = QuickJoinToastButton or __wow_install_frame_helpers(__wow_ensure_named_frame("Button", "QuickJoinToastButton", uiParent))
+
+  local channelButton = rawget(_G, "ChatFrameChannelButton")
+  if channelButton == nil then
+    return
+  end
+
+  local icon = rawget(channelButton, "Icon")
+  if icon == nil and type(channelButton.CreateTexture) == "function" then
+    icon = channelButton:CreateTexture(nil, "ARTWORK")
+    channelButton.Icon = icon
+    if type(icon.SetParentKey) == "function" then
+      pcall(icon.SetParentKey, icon, "Icon", true)
+    end
+    if type(icon.SetAllPoints) == "function" then
+      icon:SetAllPoints(channelButton)
+    end
+  end
+
+  if icon ~= nil then
+    if type(icon.SetParentKey) == "function" then
+      pcall(icon.SetParentKey, icon, "Icon", true)
+    end
+    if type(icon.SetAtlas) == "function" then
+      icon:SetAtlas("chatframe-button-icon-voicechat", true)
+    else
+      rawset(icon, "atlas", "chatframe-button-icon-voicechat")
+    end
+    if type(icon.Show) == "function" then
+      icon:Show()
+    end
+  end
+end
+
+__wow_ensure_chat_voice_button_surface()
+
+local function __wow_ensure_startup_navigation_surface()
+  local uiParent = rawget(_G, "UIParent")
+
+  local function ensure_frame(name)
+    local frame = rawget(_G, name)
+    if frame == nil then
+      frame = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", name, uiParent))
+      rawset(_G, name, frame)
+    end
+    return frame
+  end
+
+  local function set_frame_visibility(name, visible)
+    local frame = ensure_frame(name)
+    if type(frame.Show) == "function" and visible then
+      frame:Show()
+    elseif type(frame.Hide) == "function" and not visible then
+      frame:Hide()
+    else
+      rawset(frame, "visible", visible and true or false)
+    end
+    return frame
+  end
+
+  local function toggle_single_frame(name, extraNames)
+    local frame = ensure_frame(name)
+    local isShown = type(frame.IsShown) == "function" and frame:IsShown()
+    local newVisible = not isShown
+    set_frame_visibility(name, newVisible)
+    if type(extraNames) == "table" then
+      for _, extraName in ipairs(extraNames) do
+        set_frame_visibility(extraName, newVisible)
+      end
+    end
+    return newVisible
+  end
+
+  for _, name in ipairs({
+    "MainActionBar",
+    "MultiBarBottomLeft",
+    "MultiBarBottomRight",
+    "MultiBarRight",
+    "MultiBarLeft",
+    "MailFrame",
+    "InboxFrame",
+    "PVEFrame",
+  }) do
+    local frame = ensure_frame(name)
+    if rawget(frame, "MarkAllSettingsDirty") == nil then
+      function frame:MarkAllSettingsDirty() end
+    end
+  end
+
+  if rawget(_G, "ToggleMailFrame") == nil then
+    function ToggleMailFrame()
+      toggle_single_frame("MailFrame", { "InboxFrame" })
+    end
+  end
+
+  if rawget(_G, "OpenAllBags") == nil then
+    function OpenAllBags()
+      set_frame_visibility("ContainerFrameCombinedBags", true)
+    end
+  end
+
+  if rawget(_G, "ToggleLFDParentFrame") == nil then
+    function ToggleLFDParentFrame()
+      local toggle = rawget(_G, "PVEFrame_ToggleFrame")
+      if type(toggle) == "function" and toggle ~= ToggleLFDParentFrame then
+        return toggle()
+      end
+      return toggle_single_frame("PVEFrame")
+    end
+  end
+
+  if rawget(_G, "UpdateRaidAndPartyFrames") == nil then
+    function UpdateRaidAndPartyFrames()
+      if PartyFrame and type(PartyFrame.UpdatePartyFrames) == "function" then
+        pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+      end
+    end
+  end
+
+  if rawget(_G, "HelpOpenWebTicketButton_OnUpdate") == nil then
+    function HelpOpenWebTicketButton_OnUpdate() end
+  end
+
+  if type(ContentTrackingUtil) ~= "table" then
+    ContentTrackingUtil = {}
+  end
+  if rawget(ContentTrackingUtil, "IsTrackingModifierDown") == nil then
+    function ContentTrackingUtil.IsTrackingModifierDown() return false end
+  end
+  if rawget(ContentTrackingUtil, "IsContentTrackingEnabled") == nil then
+    function ContentTrackingUtil.IsContentTrackingEnabled() return false end
+  end
+  if rawget(ContentTrackingUtil, "RegisterTrackableElement") == nil then
+    function ContentTrackingUtil.RegisterTrackableElement() end
+  end
+  if rawget(ContentTrackingUtil, "UnregisterTrackableElement") == nil then
+    function ContentTrackingUtil.UnregisterTrackableElement() end
+  end
+  if rawget(ContentTrackingUtil, "ProcessChatLink") == nil then
+    function ContentTrackingUtil.ProcessChatLink() return false end
+  end
+  if rawget(ContentTrackingUtil, "GetTrackingMapInfoByEncounterID") == nil then
+    function ContentTrackingUtil.GetTrackingMapInfoByEncounterID() return nil end
+  end
+  if rawget(ContentTrackingUtil, "IsContentTrackedInEncounter") == nil then
+    function ContentTrackingUtil.IsContentTrackedInEncounter() return false end
+  end
+  if rawget(ContentTrackingUtil, "OpenMapToTrackable") == nil then
+    function ContentTrackingUtil.OpenMapToTrackable() return false end
+  end
+  if rawget(ContentTrackingUtil, "DisplayTrackingError") == nil then
+    function ContentTrackingUtil.DisplayTrackingError() end
+  end
+  if rawget(ContentTrackingUtil, "MakeCombinedID") == nil then
+    function ContentTrackingUtil.MakeCombinedID(trackableType, trackableID)
+      return tostring(trackableType or 0) .. ":" .. tostring(trackableID or 0)
+    end
+  end
+  if rawget(ContentTrackingUtil, "SplitCombinedID") == nil then
+    function ContentTrackingUtil.SplitCombinedID(combinedID)
+      if type(combinedID) ~= "string" then
+        return nil, nil
+      end
+      local a, b = string.match(combinedID, "^(.-):(.-)$")
+      return tonumber(a), tonumber(b)
+    end
+  end
+end
+
+__wow_ensure_startup_navigation_surface()
 
 if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
   __wow_original_CreateFrame = CreateFrame
@@ -714,6 +1349,12 @@ if GetTime == nil then
       return 0
     end
     return os.clock() - __wow_clock_start
+  end
+end
+
+if rawget(_G, "time") == nil then
+  function time()
+    return GetTime()
   end
 end
 
@@ -1261,15 +1902,125 @@ C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
   SignalToastDisplayed = __wow_noop,
 })
 
+C_ArrowCalloutManager = __wow_merge_namespace(C_ArrowCalloutManager, {})
+
+if type(rawget(C_ArrowCalloutManager, "_activeCallouts")) ~= "table" then
+  C_ArrowCalloutManager._activeCallouts = {}
+end
+
+if type(rawget(C_ArrowCalloutManager, "_acknowledgedCallouts")) ~= "table" then
+  C_ArrowCalloutManager._acknowledgedCallouts = {}
+end
+
+local function __wow_arrow_callout_dispatch(eventName, payload)
+  local manager = rawget(_G, "ArrowCalloutFrameManager")
+  if type(manager) ~= "table" then
+    return
+  end
+  local onEvent = rawget(manager, "OnEvent")
+  if type(onEvent) == "function" then
+    onEvent(manager, eventName, payload)
+  end
+end
+
+if rawget(C_ArrowCalloutManager, "ShowCallout") == nil then
+  function C_ArrowCalloutManager.ShowCallout(calloutInfo)
+    if type(calloutInfo) ~= "table" or calloutInfo.calloutID == nil then
+      return false
+    end
+    C_ArrowCalloutManager._activeCallouts[calloutInfo.calloutID] = calloutInfo
+    __wow_arrow_callout_dispatch("SHOW_ARROW_CALLOUT", calloutInfo)
+    return true
+  end
+end
+
+if rawget(C_ArrowCalloutManager, "HideCallout") == nil then
+  function C_ArrowCalloutManager.HideCallout(calloutID)
+    if calloutID == nil then
+      return
+    end
+    if C_ArrowCalloutManager._activeCallouts[calloutID] ~= nil then
+      C_ArrowCalloutManager._activeCallouts[calloutID] = nil
+      __wow_arrow_callout_dispatch("HIDE_ARROW_CALLOUT", calloutID)
+    end
+  end
+end
+
+if rawget(C_ArrowCalloutManager, "AcknowledgeCallout") == nil then
+  function C_ArrowCalloutManager.AcknowledgeCallout(calloutID)
+    if calloutID == nil then
+      return
+    end
+    C_ArrowCalloutManager._acknowledgedCallouts[calloutID] = true
+    C_ArrowCalloutManager.HideCallout(calloutID)
+  end
+end
+
+if rawget(C_ArrowCalloutManager, "IsCalloutActive") == nil then
+  function C_ArrowCalloutManager.IsCalloutActive(calloutID)
+    return C_ArrowCalloutManager._activeCallouts[calloutID] ~= nil
+  end
+end
+
+if rawget(C_ArrowCalloutManager, "IsCalloutAcknowledged") == nil then
+  function C_ArrowCalloutManager.IsCalloutAcknowledged(calloutID)
+    return C_ArrowCalloutManager._acknowledgedCallouts[calloutID] == true
+  end
+end
+
 C_EventScheduler = __wow_merge_namespace(C_EventScheduler, {})
 
-if type(rawget(C_EventScheduler, "_state")) ~= "table" then
-  C_EventScheduler._state = {
+local function __wow_event_scheduler_seed_state()
+  local now = (os and type(os.time) == "function") and os.time() or 0
+  return {
     canShowEvents = nil,
     suppressDisplay = false,
-    ongoingEvents = {},
-    scheduledEvents = {},
+    ongoingEvents = {
+      {
+        areaPoiID = 1001,
+        eventID = 1001,
+        eventKey = "warsong-gulch",
+        displayInfo = {},
+        rewardsClaimed = false,
+      },
+      {
+        areaPoiID = 1002,
+        eventID = 1002,
+        eventKey = "cinderbrew-meadery",
+        displayInfo = {},
+        rewardsClaimed = false,
+      },
+    },
+    scheduledEvents = {
+      {
+        areaPoiID = 1001,
+        eventID = 2001,
+        eventKey = "pvp-brawl-blitz",
+        startTime = now + 3600,
+        endTime = now + 7200,
+        duration = 3600,
+        hasReminder = false,
+        rewardsClaimed = false,
+        displayInfo = {},
+      },
+      {
+        areaPoiID = 1004,
+        eventID = 2002,
+        eventKey = "darkmoon-island",
+        startTime = now + 7200,
+        endTime = now + 10800,
+        duration = 3600,
+        hasReminder = true,
+        rewardsClaimed = false,
+        displayInfo = {},
+      },
+    },
+    reminders = {},
   }
+end
+
+if type(rawget(C_EventScheduler, "_state")) ~= "table" then
+  C_EventScheduler._state = __wow_event_scheduler_seed_state()
 end
 
 if rawget(C_EventScheduler, "CanShowEvents") == nil then
@@ -1285,6 +2036,74 @@ if rawget(C_EventScheduler, "CanShowEvents") == nil then
       return false
     end
     return #(state.ongoingEvents or {}) > 0 or #(state.scheduledEvents or {}) > 0
+  end
+end
+
+if rawget(C_EventScheduler, "RequestEvents") == nil then
+  function C_EventScheduler.RequestEvents()
+    C_EventScheduler._state = __wow_event_scheduler_seed_state()
+  end
+end
+
+if rawget(C_EventScheduler, "GetOngoingEvents") == nil then
+  function C_EventScheduler.GetOngoingEvents()
+    return C_EventScheduler._state.ongoingEvents
+  end
+end
+
+if rawget(C_EventScheduler, "GetScheduledEvents") == nil then
+  function C_EventScheduler.GetScheduledEvents()
+    return C_EventScheduler._state.scheduledEvents
+  end
+end
+
+if rawget(C_EventScheduler, "HasData") == nil then
+  function C_EventScheduler.HasData()
+    local state = C_EventScheduler._state
+    return #(state.ongoingEvents or {}) > 0 or #(state.scheduledEvents or {}) > 0
+  end
+end
+
+if rawget(C_EventScheduler, "GetEventZoneName") == nil then
+  function C_EventScheduler.GetEventZoneName(areaPoiID)
+    local poi = C_AreaPoiInfo.GetAreaPOIInfo(nil, areaPoiID)
+    return poi and poi.name or ""
+  end
+end
+
+if rawget(C_EventScheduler, "GetEventUiMapID") == nil then
+  function C_EventScheduler.GetEventUiMapID(areaPoiID)
+    local poi = C_AreaPoiInfo.GetAreaPOIInfo(nil, areaPoiID)
+    return (poi and poi.uiMapID) or 0
+  end
+end
+
+if rawget(C_EventScheduler, "HasSavedReminders") == nil then
+  function C_EventScheduler.HasSavedReminders()
+    local reminders = C_EventScheduler._state.reminders or {}
+    return next(reminders) ~= nil
+  end
+end
+
+if rawget(C_EventScheduler, "SetReminder") == nil then
+  function C_EventScheduler.SetReminder(eventKey)
+    if eventKey ~= nil then
+      C_EventScheduler._state.reminders[tostring(eventKey)] = true
+    end
+  end
+end
+
+if rawget(C_EventScheduler, "ClearReminder") == nil then
+  function C_EventScheduler.ClearReminder(eventKey)
+    if eventKey ~= nil then
+      C_EventScheduler._state.reminders[tostring(eventKey)] = nil
+    end
+  end
+end
+
+if rawget(C_EventScheduler, "GetActiveContinentName") == nil then
+  function C_EventScheduler.GetActiveContinentName()
+    return nil
   end
 end
 
@@ -3082,6 +3901,115 @@ Settings = Settings or __wow_namespace({
   end,
 })
 
+do
+  local settingsPanel = rawget(_G, "SettingsPanel")
+  local categories = rawget(Settings, "_categories")
+  if type(categories) ~= "table" then
+    categories = {}
+    rawset(Settings, "_categories", categories)
+  end
+
+  local function ensure_category(id, name)
+    local category = categories[id]
+    if type(category) ~= "table" then
+      category = {
+        id = id,
+        name = name,
+        GetID = function(self) return self.id end,
+        GetName = function(self) return self.name end,
+      }
+      categories[id] = category
+    end
+    return category
+  end
+
+  local interfaceCategory = ensure_category(1, "Interface")
+  local audioCategory = ensure_category(2, "Audio")
+  rawset(Settings, "INTERFACE_CATEGORY_ID", interfaceCategory:GetID())
+  rawset(Settings, "AUDIO_CATEGORY_ID", audioCategory:GetID())
+
+  function Settings.GetCategory(id)
+    id = tonumber(id)
+    if categories[id] == nil then
+      if id == rawget(Settings, "INTERFACE_CATEGORY_ID") then
+        return ensure_category(id, "Interface")
+      end
+      if id == rawget(Settings, "AUDIO_CATEGORY_ID") then
+        return ensure_category(id, "Audio")
+      end
+    end
+    return categories[id]
+  end
+
+  if type(settingsPanel) == "table" then
+    settingsPanel._layouts = settingsPanel._layouts or {}
+
+    local function ensure_layout(category)
+      local categoryID = category:GetID()
+      local layout = settingsPanel._layouts[categoryID]
+      if type(layout) ~= "table" then
+        layout = {
+          _initializers = {},
+          GetInitializers = function(self) return self._initializers end,
+        }
+        settingsPanel._layouts[categoryID] = layout
+      end
+      return layout
+    end
+
+    if rawget(settingsPanel, "GetLayout") == nil then
+      function settingsPanel:GetLayout(category)
+        if type(category) ~= "table" or type(category.GetID) ~= "function" then
+          return nil
+        end
+        return self._layouts and self._layouts[category:GetID()] or nil
+      end
+    end
+
+    if rawget(settingsPanel, "GetCurrentCategory") == nil then
+      function settingsPanel:GetCurrentCategory()
+        return rawget(self, "_currentCategory")
+      end
+    end
+
+    local audioLayout = ensure_layout(audioCategory)
+    if #audioLayout:GetInitializers() == 0 then
+      local setting = {
+        GetVariable = function() return "Sound_OutputDriverIndex" end,
+      }
+      local initializer = {
+        GetSetting = function() return setting end,
+        GetOptions = function()
+          return function()
+            return {
+              { value = 0, label = "Silent Output Device" },
+            }
+          end
+        end,
+      }
+      table.insert(audioLayout:GetInitializers(), initializer)
+    end
+
+    ensure_layout(interfaceCategory)
+
+    function Settings.OpenToCategory(categoryID)
+      local category = Settings.GetCategory(categoryID)
+      if category == nil then
+        return nil
+      end
+      local panel = rawget(_G, "SettingsPanel") or settingsPanel
+      rawset(panel, "_currentCategory", category)
+      if type(panel.SetShown) == "function" then
+        pcall(panel.SetShown, panel, true)
+      end
+      if type(panel.Show) == "function" then
+        pcall(panel.Show, panel)
+      end
+      return category
+    end
+  end
+end
+
 EditModeAccountSettingsMixin = EditModeAccountSettingsMixin or {}
 BaseActionButtonMixin = BaseActionButtonMixin or {}
 
@@ -3934,6 +4862,12 @@ end
 -- (IsHardcoreActive, etc.) still return the no-op function expected by
 -- Blizzard callsites.
 C_GameRules = __wow_merge_namespace(C_GameRules, {})
+GameRulesUtil = GameRulesUtil or {}
+if rawget(GameRulesUtil, "ShouldShowPlayerCastBar") == nil then
+  function GameRulesUtil.ShouldShowPlayerCastBar()
+    return true
+  end
+end
 
 -- Pet battles: not simulated. `GetNumPets` is compared numerically
 -- during PetBattleFrame OnLoad refresh, so returning nil crashes
@@ -5024,6 +5958,72 @@ end
 
 __wow_patch_character_select_nav_bar()
 
+local function __wow_patch_uiparent_onupdate_worklists()
+  if type(FCF_OnUpdate) == "function" and rawget(_G, "__wow_fcf_onupdate_wrapper") ~= FCF_OnUpdate then
+    local original_fcf_onupdate = FCF_OnUpdate
+    local wrapper = function(elapsed)
+      if type(CHAT_FRAMES) == "table" and next(CHAT_FRAMES) == nil then
+        return
+      end
+      return original_fcf_onupdate(elapsed)
+    end
+    FCF_OnUpdate = wrapper
+    rawset(_G, "__wow_fcf_onupdate_wrapper", wrapper)
+  end
+
+  if type(ButtonPulse_OnUpdate) == "function"
+    and rawget(_G, "__wow_button_pulse_onupdate_wrapper") ~= ButtonPulse_OnUpdate then
+    local original_button_pulse_onupdate = ButtonPulse_OnUpdate
+    local wrapper = function(elapsed)
+      if type(PULSEBUTTONS) == "table" and next(PULSEBUTTONS) == nil then
+        return
+      end
+      return original_button_pulse_onupdate(elapsed)
+    end
+    ButtonPulse_OnUpdate = wrapper
+    rawset(_G, "__wow_button_pulse_onupdate_wrapper", wrapper)
+  end
+
+  if type(AnimatedShine_OnUpdate) == "function"
+    and rawget(_G, "__wow_animated_shine_onupdate_wrapper") ~= AnimatedShine_OnUpdate then
+    local original_animated_shine_onupdate = AnimatedShine_OnUpdate
+    local wrapper = function(elapsed)
+      if type(SHINES_TO_ANIMATE) == "table" and next(SHINES_TO_ANIMATE) == nil then
+        return
+      end
+      return original_animated_shine_onupdate(elapsed)
+    end
+    AnimatedShine_OnUpdate = wrapper
+    rawset(_G, "__wow_animated_shine_onupdate_wrapper", wrapper)
+  end
+
+  if type(UIParent) == "table"
+    and type(UIParent.GetScript) == "function"
+    and type(UIParent.SetScript) == "function" then
+    local wrapper = rawget(_G, "__wow_ui_parent_onupdate_worklist_wrapper")
+    if UIParent:GetScript("OnUpdate") ~= wrapper then
+      wrapper = function(self, elapsed)
+        if type(CHAT_FRAMES) ~= "table" or next(CHAT_FRAMES) ~= nil then
+          FCF_OnUpdate(elapsed)
+        end
+        if type(PULSEBUTTONS) ~= "table" or next(PULSEBUTTONS) ~= nil then
+          ButtonPulse_OnUpdate(elapsed)
+        end
+        if type(SHINES_TO_ANIMATE) ~= "table" or next(SHINES_TO_ANIMATE) ~= nil then
+          AnimatedShine_OnUpdate(elapsed)
+        end
+        if type(HelpOpenWebTicketButton_OnUpdate) == "function" then
+          HelpOpenWebTicketButton_OnUpdate(HelpOpenWebTicketButton, elapsed)
+        end
+      end
+      UIParent:SetScript("OnUpdate", wrapper)
+      rawset(_G, "__wow_ui_parent_onupdate_worklist_wrapper", wrapper)
+    end
+  end
+end
+
+__wow_patch_uiparent_onupdate_worklists()
+
 if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
   hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
     if addonName == "Blizzard_AchievementUI" then
@@ -5036,8 +6036,20 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
     elseif addonName == "Blizzard_ProfessionsBook"
       or addonName == "Blizzard_PlayerSpells" then
       __wow_ensure_spellbook_surface()
+    elseif addonName == "Blizzard_Dispatcher" then
+      __wow_ensure_dispatcher_surface()
+    elseif addonName == "Blizzard_ChatFrame"
+      or addonName == "Blizzard_QuickJoin"
+      or addonName == "Blizzard_Channels"
+      or addonName == "Blizzard_VoiceToggleButton" then
+      __wow_ensure_chat_voice_button_surface()
     elseif addonName == "Blizzard_CharacterSelectNavBar" then
       __wow_patch_character_select_nav_bar()
+    elseif addonName == "Blizzard_UIParent"
+      or addonName == "Blizzard_UIParent_Mainline"
+      or addonName == "Blizzard_FrameXML"
+      or addonName == "Blizzard_ChatFrameBase" then
+      __wow_patch_uiparent_onupdate_worklists()
     elseif addonName == "Blizzard_MapCanvas"
       or addonName == "Blizzard_SharedMapDataProviders"
       or addonName == "Blizzard_WorldMap"
@@ -5112,6 +6124,13 @@ C_TradeSkillUI = __wow_merge_namespace(C_TradeSkillUI, {
   end,
   GetTradeSkillDisplayName = function()
     return ""
+  end,
+  OpenTradeSkill = function()
+    local frame = rawget(_G, "ProfessionsFrame")
+    if frame ~= nil and type(frame.Show) == "function" then
+      frame:Show()
+    end
+    return frame ~= nil
   end,
   -- GetRecipesTracked / IsRecipeTracked / SetRecipeTracked are now backed
   -- by Rust functions in `globals/rilua_missing_surface/professions.rs`.

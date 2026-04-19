@@ -38,14 +38,23 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
         })
     };
     let mut sim = borrow_state_mut(state)?;
+    let current_text = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame_text_value(&sim, frame, false));
+    let current_stripped_text = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame_text_value(&sim, frame, true));
     let is_tooltip = sim
         .widgets
         .get(id)
         .map(|frame| frame.widget_type == WidgetType::GameTooltip)
         .unwrap_or(false);
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+    let changed = is_tooltip || current_text != text || current_stripped_text != stripped_text;
+    if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
-        frame.text_stripped = stripped_text;
+        frame.text_stripped = stripped_text.clone();
     }
     drop(sim);
     if is_tooltip {

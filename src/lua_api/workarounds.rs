@@ -12,6 +12,15 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_ui_parent_panel_toggles", || {
         patch_ui_parent_panel_toggles(env);
     });
+    log_step(env, "patch_uiparent_onupdate_worklists", || {
+        patch_uiparent_onupdate_worklists(env);
+    });
+    log_step(env, "patch_chat_voice_button_surface", || {
+        patch_chat_voice_button_surface(env);
+    });
+    log_step(env, "patch_item_socketing_tooltips", || {
+        patch_item_socketing_tooltips(env);
+    });
     log_step(env, "patch_character_select_list", || {
         patch_character_select_list(env);
     });
@@ -31,6 +40,7 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(REFRESH_ACTION_BUTTONS_LUA);
+    patch_chat_voice_button_surface(env);
 }
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
@@ -84,12 +94,153 @@ fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(MAIN_MENU_MICROBUTTON_CLICK_WORKAROUND_LUA);
 }
 
+fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(FCF_OnUpdate) == "function" and rawget(_G, "__wow_fcf_onupdate_wrapper") ~= FCF_OnUpdate then
+            local original_fcf_onupdate = FCF_OnUpdate
+            local wrapper = function(elapsed)
+                if type(CHAT_FRAMES) == "table" and next(CHAT_FRAMES) == nil then
+                    return
+                end
+                return original_fcf_onupdate(elapsed)
+            end
+            FCF_OnUpdate = wrapper
+            rawset(_G, "__wow_fcf_onupdate_wrapper", wrapper)
+        end
+
+        if type(ButtonPulse_OnUpdate) == "function" and rawget(_G, "__wow_button_pulse_onupdate_wrapper") ~= ButtonPulse_OnUpdate then
+            local original_button_pulse_onupdate = ButtonPulse_OnUpdate
+            local wrapper = function(elapsed)
+                if type(PULSEBUTTONS) == "table" and next(PULSEBUTTONS) == nil then
+                    return
+                end
+                return original_button_pulse_onupdate(elapsed)
+            end
+            ButtonPulse_OnUpdate = wrapper
+            rawset(_G, "__wow_button_pulse_onupdate_wrapper", wrapper)
+        end
+
+        if type(AnimatedShine_OnUpdate) == "function" and rawget(_G, "__wow_animated_shine_onupdate_wrapper") ~= AnimatedShine_OnUpdate then
+            local original_animated_shine_onupdate = AnimatedShine_OnUpdate
+            local wrapper = function(elapsed)
+                if type(SHINES_TO_ANIMATE) == "table" and next(SHINES_TO_ANIMATE) == nil then
+                    return
+                end
+                return original_animated_shine_onupdate(elapsed)
+            end
+            AnimatedShine_OnUpdate = wrapper
+            rawset(_G, "__wow_animated_shine_onupdate_wrapper", wrapper)
+        end
+
+        if type(UIParent) == "table"
+            and type(UIParent.GetScript) == "function"
+            and type(UIParent.SetScript) == "function" then
+            local wrapper = rawget(_G, "__wow_ui_parent_onupdate_worklist_wrapper")
+            if UIParent:GetScript("OnUpdate") ~= wrapper then
+                wrapper = function(self, elapsed)
+                    if type(CHAT_FRAMES) ~= "table" or next(CHAT_FRAMES) ~= nil then
+                        FCF_OnUpdate(elapsed)
+                    end
+                    if type(PULSEBUTTONS) ~= "table" or next(PULSEBUTTONS) ~= nil then
+                        ButtonPulse_OnUpdate(elapsed)
+                    end
+                    if type(SHINES_TO_ANIMATE) ~= "table" or next(SHINES_TO_ANIMATE) ~= nil then
+                        AnimatedShine_OnUpdate(elapsed)
+                    end
+                    if type(HelpOpenWebTicketButton_OnUpdate) == "function" then
+                        HelpOpenWebTicketButton_OnUpdate(HelpOpenWebTicketButton, elapsed)
+                    end
+                end
+                UIParent:SetScript("OnUpdate", wrapper)
+                rawset(_G, "__wow_ui_parent_onupdate_worklist_wrapper", wrapper)
+            end
+        end
+        "#,
+    );
+}
+
 fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA);
 }
 
 fn patch_character_select_list(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(CHARACTER_SELECT_LIST_WORKAROUND_LUA);
+}
+
+fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        local channelButton = ChatFrameChannelButton
+        if type(channelButton) == "table" then
+            local icon = channelButton.Icon
+            if icon == nil and type(channelButton.CreateTexture) == "function" then
+                icon = channelButton:CreateTexture(nil, "ARTWORK")
+                channelButton.Icon = icon
+            end
+
+            if icon ~= nil then
+                if type(icon.SetParentKey) == "function" then
+                    pcall(icon.SetParentKey, icon, "Icon", true)
+                end
+                if type(icon.SetAllPoints) == "function" then
+                    icon:SetAllPoints(channelButton)
+                end
+                if type(icon.SetAtlas) == "function" then
+                    icon:SetAtlas("chatframe-button-icon-voicechat", true)
+                end
+                if type(icon.Show) == "function" then
+                    icon:Show()
+                end
+            end
+        end
+
+        if QuickJoinToastButton == nil and type(CreateFrame) == "function" and UIParent ~= nil then
+            QuickJoinToastButton = CreateFrame("Button", "QuickJoinToastButton", UIParent)
+        end
+        "#,
+    );
+}
+
+fn patch_item_socketing_tooltips(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        local frame = ItemSocketingFrame
+        local container = frame and frame.SocketingContainer
+        if type(container) ~= "table" then
+            return
+        end
+
+        local function install_socket_on_enter(socket, socketIndex)
+            if type(socket) ~= "table" or type(socket.SetScript) ~= "function" then
+                return
+            end
+            socket:SetScript("OnEnter", function(self)
+                if type(GameTooltip) ~= "table" then
+                    return
+                end
+                if type(GameTooltip.SetOwner) == "function" then
+                    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                end
+                if type(GameTooltip.SetSocketGem) == "function" then
+                    GameTooltip:SetSocketGem(socketIndex)
+                end
+                if type(GameTooltip.NumLines) == "function"
+                    and GameTooltip:NumLines() == 0
+                    and type(GameTooltip.AddLine) == "function" then
+                    GameTooltip:AddLine("Socket Gem " .. tostring(socketIndex))
+                end
+                if type(GameTooltip.Show) == "function" then
+                    GameTooltip:Show()
+                end
+            end)
+        end
+
+        install_socket_on_enter(container.Socket1, 1)
+        install_socket_on_enter(container.Socket2, 2)
+        install_socket_on_enter(container.Socket3, 3)
+        "#,
+    );
 }
 
 fn patch_fog_of_war_pin_mixin(env: &crate::lua_api::WowLuaEnv) {

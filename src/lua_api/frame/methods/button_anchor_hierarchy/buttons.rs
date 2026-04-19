@@ -48,13 +48,20 @@ pub(super) fn set_button_enabled_value(
     enabled: bool,
 ) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.attributes.insert(
-            "__enabled".to_string(),
-            crate::widget::AttributeValue::Boolean(enabled),
-        );
+    let changed = sim
+        .widgets
+        .get(id)
+        .map(|frame| button_enabled(frame) != enabled)
+        .unwrap_or(false);
+    if changed {
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.attributes.insert(
+                "__enabled".to_string(),
+                crate::widget::AttributeValue::Boolean(enabled),
+            );
+        }
+        sync_button_slot_visibility(&mut sim, id);
     }
-    sync_button_slot_visibility(&mut sim, id);
     Ok(())
 }
 

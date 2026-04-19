@@ -483,6 +483,21 @@ fn apply_set_point(
     x_offset: f32,
     y_offset: f32,
 ) -> LuaResult<u32> {
+    let unchanged = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.anchors.iter().find(|anchor| anchor.point == point))
+        .map(|anchor| {
+            anchor.relative_to_id == relative_to
+                && anchor.relative_point == relative_point
+                && anchor.x_offset == x_offset
+                && anchor.y_offset == y_offset
+        })
+        .unwrap_or(false);
+    if unchanged {
+        return Ok(0);
+    }
+
     if let Some(old_target) = sim.widgets.get(id).and_then(|f| {
         f.anchors
             .iter()

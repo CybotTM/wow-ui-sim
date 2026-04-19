@@ -42,6 +42,7 @@ mod voice_chat;
 
 use crate::lua_api::methods::{borrow_state_mut, create_string, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val};
+
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -64,6 +65,10 @@ const LINE_TYPE_SPELL_DESCRIPTION: f64 = 34.0;
 const WORLD_LOOT_TOOLTIP_SPELL_ID: u32 = 19750;
 const WORLD_LOOT_TOOLTIP_INVENTORY_TYPE: f64 = 13.0;
 const WORLD_CURSOR_GUID: &str = "WorldLootObject-0000-0000C0DE";
+
+pub(crate) fn item_link_for_id(item_id: u32) -> Option<String> {
+    item_spell::item_link_for_id(item_id)
+}
 
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_legacy_global_shims(lua)?;

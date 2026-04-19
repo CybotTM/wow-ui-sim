@@ -215,6 +215,23 @@ fn animation_playback_stubs_no_error() {
     .unwrap();
 }
 
+#[test]
+fn animation_pause_uses_group_pause_state() {
+    let env = setup();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestAnimPauseAlias", UIParent)
+        local ag = f:CreateAnimationGroup()
+        local anim = ag:CreateAnimation("Alpha")
+        ag:Play()
+        anim:Pause()
+        assert(ag:IsPaused() == true, "animation Pause should pause the owning group")
+        assert(ag:IsPlaying() == false, "paused group should stop reporting playing")
+    "#,
+    )
+    .unwrap();
+}
+
 // ============================================================================
 // Anim: script handlers
 // ============================================================================

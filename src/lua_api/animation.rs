@@ -77,6 +77,9 @@ pub struct AnimState {
     pub start_delay: f64,
     pub end_delay: f64,
     pub elapsed: f64,
+    pub from_alpha: f64,
+    pub to_alpha: f64,
+    pub smoothing: String,
     pub flipbook_rows: u32,
     pub flipbook_columns: u32,
     pub flipbook_frames: u32,
@@ -96,6 +99,9 @@ impl AnimState {
             start_delay: 0.0,
             end_delay: 0.0,
             elapsed: 0.0,
+            from_alpha: 0.0,
+            to_alpha: 1.0,
+            smoothing: "NONE".to_string(),
             flipbook_rows: 0,
             flipbook_columns: 0,
             flipbook_frames: 0,
@@ -151,11 +157,6 @@ impl AnimGroupState {
     }
 
     pub fn has_visual_effects(&self) -> bool {
-        self.animations.iter().any(|anim| {
-            matches!(
-                anim.anim_type,
-                AnimationType::Alpha | AnimationType::Translation | AnimationType::FlipBook
-            )
-        })
+        !self.animations.is_empty()
     }
 }

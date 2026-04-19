@@ -17,6 +17,8 @@ mod hierarchy;
 mod shared;
 mod textures;
 
+pub(crate) use animations::advance_animation_groups;
+
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
@@ -351,6 +353,7 @@ fn register_animation_creation(state: &mut LuaState, table: GcRef<Table>) -> Lua
 fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "Play", animations::animation_group_play)?;
     table_set_rust_fn_static(state, table, "PlaySynced", animations::animation_group_play)?;
+    table_set_rust_fn_static(state, table, "Pause", animations::animation_group_pause)?;
     table_set_rust_fn_static(state, table, "Restart", animations::animation_group_restart)?;
     table_set_rust_fn_static(state, table, "Stop", animations::animation_group_stop)?;
     table_set_rust_fn_static(state, table, "Finish", animations::animation_group_finish)?;
@@ -366,12 +369,48 @@ fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -
         "IsPlaying",
         animations::animation_group_is_playing,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "IsPaused",
+        animations::animation_group_is_paused,
+    )?;
     table_set_rust_fn_static(state, table, "IsDone", animations::animation_group_is_done)?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "IsPendingFinish",
+        animations::animation_group_is_pending_finish,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "IsReverse",
+        animations::animation_group_is_reverse,
+    )?;
     table_set_rust_fn_static(
         state,
         table,
         "GetDuration",
         animations::animation_group_get_duration,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetElapsed",
+        animations::animation_group_get_elapsed,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetProgress",
+        animations::animation_group_get_progress,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetSmoothProgress",
+        animations::animation_group_get_smooth_progress,
     )?;
     table_set_rust_fn_static(
         state,
@@ -382,8 +421,50 @@ fn register_animation_group_control(state: &mut LuaState, table: GcRef<Table>) -
     table_set_rust_fn_static(
         state,
         table,
+        "GetLooping",
+        animations::animation_group_get_looping,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetLoopState",
+        animations::animation_group_get_loop_state,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetAnimationSpeedMultiplier",
+        animations::animation_group_set_animation_speed_multiplier,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetAnimationSpeedMultiplier",
+        animations::animation_group_get_animation_speed_multiplier,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
         "SetToFinalAlpha",
         animations::animation_group_set_to_final_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "IsSetToFinalAlpha",
+        animations::animation_group_is_set_to_final_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetToFinalAlpha",
+        animations::animation_group_get_to_final_alpha,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "RemoveAnimations",
+        animations::animation_group_remove_animations,
     )?;
     Ok(())
 }
@@ -402,6 +483,7 @@ fn register_animation_timing(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
         animations::animation_get_duration,
     )?;
     table_set_rust_fn_static(state, table, "SetOrder", animations::animation_set_order)?;
+    table_set_rust_fn_static(state, table, "GetOrder", animations::animation_get_order)?;
     table_set_rust_fn_static(
         state,
         table,
@@ -411,8 +493,45 @@ fn register_animation_timing(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
     table_set_rust_fn_static(
         state,
         table,
+        "GetStartDelay",
+        animations::animation_get_start_delay,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
         "SetEndDelay",
         animations::animation_set_end_delay,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetEndDelay",
+        animations::animation_get_end_delay,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetElapsed",
+        animations::animation_get_elapsed,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetProgress",
+        animations::animation_get_progress,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetSmoothProgress",
+        animations::animation_get_smooth_progress,
+    )?;
+    table_set_rust_fn_static(state, table, "IsStopped", animations::animation_is_stopped)?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "IsDelaying",
+        animations::animation_is_delaying,
     )?;
     Ok(())
 }
@@ -420,14 +539,29 @@ fn register_animation_timing(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
 fn register_animation_config(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     for name in [
         "SetSmoothing",
+        "GetSmoothing",
         "SetFromAlpha",
+        "GetFromAlpha",
         "SetToAlpha",
+        "GetToAlpha",
+        "SetChange",
         "SetOffset",
         "SetScaleFrom",
         "SetScaleTo",
         "SetDegrees",
+        "SetOrigin",
     ] {
-        table_set_rust_fn_static(state, table, name, animations::animation_config_noop)?;
+        let func = match name {
+            "SetSmoothing" => animations::animation_set_smoothing,
+            "GetSmoothing" => animations::animation_get_smoothing,
+            "SetFromAlpha" => animations::animation_set_from_alpha,
+            "GetFromAlpha" => animations::animation_get_from_alpha,
+            "SetToAlpha" => animations::animation_set_to_alpha,
+            "GetToAlpha" => animations::animation_get_to_alpha,
+            "SetChange" => animations::animation_set_change,
+            _ => animations::animation_config_noop,
+        };
+        table_set_rust_fn_static(state, table, name, func)?;
     }
     table_set_rust_fn_static(state, table, "SetScale", animations::set_scale_dispatch)?;
     Ok(())
@@ -441,6 +575,7 @@ fn register_animation_target(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
         "GetRegionParent",
         animations::get_region_parent,
     )?;
+    table_set_rust_fn_static(state, table, "SetTarget", animations::animation_config_noop)?;
     table_set_rust_fn_static(
         state,
         table,
@@ -457,6 +592,12 @@ fn register_animation_target(state: &mut LuaState, table: GcRef<Table>) -> LuaRe
         state,
         table,
         "SetTargetKey",
+        animations::animation_config_noop,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetTargetParent",
         animations::animation_config_noop,
     )?;
     Ok(())

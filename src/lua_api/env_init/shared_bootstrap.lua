@@ -722,8 +722,26 @@ local function __wow_deep_copy_table(source, seen)
   return copy
 end
 
+local function __wow_shallow_copy_table(source)
+  if type(source) ~= "table" then
+    return source
+  end
+  local copy = {}
+  for key, value in pairs(source) do
+    copy[key] = value
+  end
+  local mt = getmetatable(source)
+  if mt ~= nil then
+    setmetatable(copy, mt)
+  end
+  return copy
+end
+
 if CopyTable == nil then
-  function CopyTable(source)
+  function CopyTable(source, shallow)
+    if shallow then
+      return __wow_shallow_copy_table(source)
+    end
     return __wow_deep_copy_table(source)
   end
 end

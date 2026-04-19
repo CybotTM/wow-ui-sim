@@ -351,14 +351,16 @@ const DEFAULT_KEYS: &[DefaultKey] = &[
     },
 ];
 
-/// Seed `SimState.keybindings` with the simulator's default key→action table.
+/// Keep the user binding store empty on fresh envs.
 ///
-/// Must be called once after the env is constructed. Idempotent if called
-/// again (duplicate `set` calls for the same key overwrite cleanly).
+/// Default simulator bindings still exist, but `dispatch_key_binding()`
+/// resolves them from `DEFAULT_KEYS` directly rather than materializing them in
+/// `SimState.keybindings`. That keeps retail-like behavior for key presses
+/// without polluting `GetBindingAction()` / `GetNumBindings()` lookups, which
+/// only expose user-set bindings.
 pub fn init_keybindings(state: &mut crate::lua_api::SimState) {
-    for dk in DEFAULT_KEYS {
-        state.keybindings.set(dk.key, dk.action);
-    }
+    state.keybindings.base.clear();
+    state.keybindings.overrides.clear();
 }
 
 /// Look up `key` in the binding registry and execute the bound Lua code.

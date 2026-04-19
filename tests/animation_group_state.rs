@@ -37,6 +37,37 @@ fn is_pending_finish_after_finish() {
 }
 
 #[test]
+fn pending_finish_completes_on_next_tick() {
+    let env = setup();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestAnimPendingTick", UIParent)
+        _G.testPendingTickGroup = f:CreateAnimationGroup()
+        local anim = _G.testPendingTickGroup:CreateAnimation("Alpha")
+        anim:SetDuration(1.0)
+        _G.testPendingTickGroup:Play()
+        _G.testPendingTickGroup:Finish()
+    "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.0).unwrap();
+
+    let (done, pending): (bool, bool) = env
+        .eval(
+            r#"
+            return _G.testPendingTickGroup:IsDone(), _G.testPendingTickGroup:IsPendingFinish()
+            "#,
+        )
+        .unwrap();
+    assert!(done, "pending finish should complete on the next tick");
+    assert!(
+        !pending,
+        "pending finish flag should clear after completion"
+    );
+}
+
+#[test]
 fn loop_state_matches_looping() {
     let env = setup();
     env.exec(

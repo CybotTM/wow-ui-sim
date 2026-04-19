@@ -41,6 +41,10 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
         super::script_helpers::dispatch_on_update(&mut lua, &frame_ids, elapsed)?;
     }
 
+    crate::lua_api::frame::methods::button_anchor_hierarchy::advance_animation_groups(
+        env, elapsed,
+    )?;
+
     for frame_id in &frame_ids {
         env.fire_script_handler(*frame_id, "OnPostUpdate", vec![rilua::Val::Num(elapsed)])?;
     }

@@ -395,7 +395,8 @@ pub fn get_event_listeners(state: &mut LuaState, event: &str) -> Vec<u64> {
     let mut result = Vec::new();
     let mut seen = std::collections::HashSet::new();
     collect_individual_listeners(state, event, &mut result, &mut seen);
-    collect_all_event_listeners(state, &mut result, &seen);
+    collect_all_event_listeners(state, &mut result, &mut seen);
+    collect_widget_registry_listeners(state, event, &mut result, &mut seen);
     result
 }
 
@@ -422,7 +423,7 @@ fn collect_individual_listeners(
 fn collect_all_event_listeners(
     state: &mut LuaState,
     result: &mut Vec<u64>,
-    seen: &std::collections::HashSet<u64>,
+    seen: &mut std::collections::HashSet<u64>,
 ) {
     let Some(all_ref) = registry_table(state, "__event_all") else {
         return;
@@ -434,9 +435,30 @@ fn collect_all_event_listeners(
     for val in slice {
         if let Val::Num(id) = val {
             let id = *id as u64;
-            if !seen.contains(&id) {
+            if seen.insert(id) {
                 result.push(id);
             }
+        }
+    }
+}
+
+fn collect_widget_registry_listeners(
+    state: &LuaState,
+    event: &str,
+    result: &mut Vec<u64>,
+    seen: &mut std::collections::HashSet<u64>,
+) {
+    use super::env::WowLuaAppData;
+
+    let Some(app) = state.app_data::<WowLuaAppData>() else {
+        return;
+    };
+    let Ok(sim) = app.sim_state.try_borrow() else {
+        return;
+    };
+    for id in sim.widgets.get_event_listeners(event) {
+        if seen.insert(id) {
+            result.push(id);
         }
     }
 }

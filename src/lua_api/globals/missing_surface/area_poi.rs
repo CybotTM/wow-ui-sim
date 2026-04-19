@@ -11,7 +11,9 @@
 //!   permanent POIs / unknown ids.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, table_get, table_set, table_set_num,
+};
 use crate::lua_api::state::AreaPoiInfo;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -30,6 +32,12 @@ pub(super) fn register_area_poi_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "GetAreaPOISecondsLeft",
         c_area_poi_info_get_area_poi_seconds_left,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetAreaPOIForMap",
+        c_area_poi_info_get_area_poi_for_map,
     )?;
     Ok(())
 }
@@ -72,16 +80,50 @@ fn c_area_poi_info_get_area_poi_seconds_left(state: &mut LuaState) -> LuaResult<
     Ok(1)
 }
 
+fn c_area_poi_info_get_area_poi_for_map(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let mut area_poi_ids = {
+        let sim = borrow_state(state)?;
+        sim.area_pois
+            .values()
+            .filter(|poi| poi.ui_map_id == Some(ui_map_id))
+            .map(|poi| poi.area_poi_id)
+            .collect::<Vec<_>>()
+    };
+    area_poi_ids.sort_unstable();
+
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return table");
+    };
+    for (index, area_poi_id) in area_poi_ids.into_iter().enumerate() {
+        table_set_num(
+            state,
+            table_ref,
+            (index + 1) as f64,
+            Val::Num(area_poi_id as f64),
+        );
+    }
+    state.push(table);
+    Ok(1)
+}
+
 fn push_area_poi_info_table(state: &mut LuaState, poi: &AreaPoiInfo) -> Val {
     let t = create_table(state);
     let name = create_string(state, &poi.name);
     let position = create_table(state);
     table_set(state, position, "x", Val::Num(poi.position.0));
     table_set(state, position, "y", Val::Num(poi.position.1));
+    let Val::Table(position_ref) = position else {
+        unreachable!("create_table must return table");
+    };
+    table_set_rust_fn_static(state, position_ref, "GetXY", area_poi_position_get_xy)
+        .expect("failed to register area poi position getter");
 
     table_set(state, t, "areaPoiID", Val::Num(poi.area_poi_id as f64));
+    push_optional_number(state, t, "uiMapID", poi.ui_map_id);
     table_set(state, t, "name", name);
-    table_set(state, t, "position", position);
+    table_set(state, t, "position", Val::Table(position_ref));
     table_set(state, t, "isCurrentEvent", Val::Bool(poi.is_current_event));
     table_set(state, t, "shouldGlow", Val::Bool(poi.should_glow));
     table_set(state, t, "highlightVignettesOnHover", Val::Bool(false));
@@ -113,4 +155,19 @@ fn push_optional_number(state: &mut LuaState, t: Val, key: &str, value: Option<i
         Some(n) => table_set(state, t, key, Val::Num(n as f64)),
         None => table_set(state, t, key, Val::Nil),
     }
+}
+
+fn area_poi_position_get_xy(state: &mut LuaState) -> LuaResult<u32> {
+    let position = stack_val(state, 1);
+    let x = match table_get(state, position, "x") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    let y = match table_get(state, position, "y") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    state.push(Val::Num(x));
+    state.push(Val::Num(y));
+    Ok(2)
 }

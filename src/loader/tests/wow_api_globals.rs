@@ -82,6 +82,30 @@ fn test_copy_table_deep() {
 }
 
 #[test]
+fn test_copy_table_shallow() {
+    let (t, _) = load_test_lua(
+        "test-copytable-shallow",
+        r#"
+        local orig = {a = {value = 1}}
+        local copy = CopyTable(orig, true)
+        copy.a.value = 99
+        SHALLOW_SHARED = (orig.a == copy.a)
+        SHALLOW_VALUE = orig.a.value
+    "#,
+    );
+    let shared: bool = t.env.eval("return SHALLOW_SHARED").unwrap();
+    assert!(
+        shared,
+        "shallow CopyTable should preserve nested table identity"
+    );
+    let value: i32 = t.env.eval("return SHALLOW_VALUE").unwrap();
+    assert_eq!(
+        value, 99,
+        "shallow CopyTable should share nested table mutations"
+    );
+}
+
+#[test]
 fn test_strsplit() {
     let (t, _) = load_test_lua(
         "test-strsplit",

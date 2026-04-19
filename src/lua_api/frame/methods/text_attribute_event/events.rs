@@ -241,7 +241,12 @@ pub(super) fn has_script(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let handler_name = val_to_string(state, stack_val(state, 2))
         .ok_or_else(|| runtime_error("HasScript: handler name required"))?;
-    state.push(Val::Bool(script_supported(state, frame_id, &handler_name)));
+    let has_script = if is_animation_script_container(state, frame_id) {
+        get_rilua_script(state, frame_id, &handler_name).is_some()
+    } else {
+        script_supported(state, frame_id, &handler_name)
+    };
+    state.push(Val::Bool(has_script));
     Ok(1)
 }
 
@@ -342,6 +347,33 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
         }
         _ => false,
     }
+}
+
+fn is_animation_script_container(state: &LuaState, frame_id: u64) -> bool {
+    let Ok(sim) = borrow_state(state) else {
+        return false;
+    };
+    let Some(object_type_name) = sim
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.object_type_name.as_deref())
+    else {
+        return false;
+    };
+    matches!(
+        object_type_name,
+        "AnimationGroup"
+            | "Alpha"
+            | "Translation"
+            | "Scale"
+            | "Rotation"
+            | "LineTranslation"
+            | "LineScale"
+            | "Path"
+            | "FlipBook"
+            | "VertexColor"
+            | "Animation"
+    )
 }
 
 // ── hlist helpers ────────────────────────────────────────────────────────────

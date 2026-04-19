@@ -28,7 +28,12 @@ pub(super) fn set_vertex_color(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+    let changed = sim
+        .widgets
+        .get(id)
+        .map(|frame| frame.vertex_color != Some(color))
+        .unwrap_or(false);
+    if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.vertex_color = Some(color);
     }
     Ok(0)

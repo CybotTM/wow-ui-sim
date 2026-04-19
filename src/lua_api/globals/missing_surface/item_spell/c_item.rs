@@ -28,7 +28,7 @@ fn parse_item_id_from_val(state: &LuaState, value: Val) -> Option<u32> {
     }
 }
 
-pub(super) fn item_link_for_id(item_id: u32) -> Option<String> {
+pub(crate) fn item_link_for_id(item_id: u32) -> Option<String> {
     let item = items::get_item(item_id)?;
     Some(format!(
         "|cff{}|Hitem:{}::::::::80:::::|h[{}]|h|r",

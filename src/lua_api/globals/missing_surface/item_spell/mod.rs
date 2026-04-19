@@ -21,3 +21,7 @@ pub(super) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_spell::register_c_spell_book(state)?;
     Ok(())
 }
+
+pub(crate) fn item_link_for_id(item_id: u32) -> Option<String> {
+    c_item::item_link_for_id(item_id)
+}

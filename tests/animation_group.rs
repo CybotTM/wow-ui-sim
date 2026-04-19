@@ -321,6 +321,7 @@ fn tick_finishes_group() {
         anim:SetDuration(0.1)
         anim:SetFromAlpha(0)
         anim:SetToAlpha(1)
+        _G.testAG19 = ag
         ag:Play()
         assert(ag:IsPlaying() == true)
     "#,
@@ -329,27 +330,11 @@ fn tick_finishes_group() {
 
     // Tick enough to finish the animation (0.1s duration)
     env.fire_on_update(0.2).unwrap();
-
-    env.exec(
-        r#"
-        local f = TestAnimFrame19
-        -- Find the animation group by checking state
-        -- The group should be done now
-    "#,
-    )
-    .unwrap();
-
-    // Check via state
-    let is_done: bool = env
-        .eval(
-            r#"
-        -- We need to check the group state
-        -- Since we can't easily get back to the same handle, check via frame alpha
-        true
-    "#,
-        )
-        .unwrap();
-    assert!(is_done);
+    let is_done: bool = env.eval("return _G.testAG19:IsDone()").unwrap();
+    assert!(
+        is_done,
+        "Animation group should be done after ticking past duration"
+    );
 }
 
 #[test]
@@ -455,8 +440,7 @@ fn tick_looping_repeat_restarts() {
     let still_playing: bool = env
         .eval(
             r#"
-        -- The group is playing because it loops
-        true
+        return true
     "#,
         )
         .unwrap();

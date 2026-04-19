@@ -24,7 +24,7 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 const GUILD_CLUB_ID: &str = "guild-0";
-const GUILD_CLUB_TYPE: &str = "Guild";
+const GUILD_CLUB_TYPE: f64 = 2.0;
 const GUILD_CLUB_CAPACITY: f64 = 1000.0;
 
 pub(super) fn register_club_info_surface(state: &mut LuaState) -> LuaResult<()> {
@@ -88,10 +88,9 @@ fn c_club_is_restricted(state: &mut LuaState) -> LuaResult<u32> {
 fn build_club_info_table(state: &mut LuaState, name: &str) -> Val {
     let t = create_table(state);
     let club_id = create_string(state, GUILD_CLUB_ID);
-    let club_type = create_string(state, GUILD_CLUB_TYPE);
     let name_str = create_string(state, name);
     table_set(state, t, "clubId", club_id);
-    table_set(state, t, "clubType", club_type);
+    table_set(state, t, "clubType", Val::Num(GUILD_CLUB_TYPE));
     table_set(state, t, "name", name_str);
     let desc = create_string(state, "");
     let broadcast = create_string(state, "");

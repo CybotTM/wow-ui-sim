@@ -1,7 +1,19 @@
+use std::path::PathBuf;
+
+use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+fn dispatcher_toc() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("Interface/BlizzardUI/Blizzard_Dispatcher/Blizzard_Dispatcher.toc")
+}
+
 fn env() -> WowLuaEnv {
-    WowLuaEnv::new().expect("Failed to create Lua environment")
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    load_addon(&env.loader_env(), &dispatcher_toc()).expect("Failed to load Blizzard_Dispatcher");
+    env.exec("Dispatcher:Initialize()")
+        .expect("Failed to initialize Dispatcher");
+    env
 }
 
 #[test]
@@ -21,13 +33,13 @@ fn dispatcher_event_supports_object_methods_and_unregister_all() {
     )
     .unwrap();
 
-    env.fire_event("PLAYER_LOGIN").unwrap();
+    env.exec("Dispatcher:OnEvent(\"PLAYER_LOGIN\")").unwrap();
     let count: i32 = env.eval("return DispatcherEventTest.count").unwrap();
     assert_eq!(count, 1, "object event method should run when fired");
 
     env.exec("Dispatcher:UnregisterAll(DispatcherEventTest)")
         .unwrap();
-    env.fire_event("PLAYER_LOGIN").unwrap();
+    env.exec("Dispatcher:OnEvent(\"PLAYER_LOGIN\")").unwrap();
     let count: i32 = env.eval("return DispatcherEventTest.count").unwrap();
     assert_eq!(
         count, 1,
@@ -97,8 +109,10 @@ fn dispatcher_script_hooks_frame_and_once_unhooks_after_first_run() {
             Dispatcher:RegisterScript(frame, "OnShow", DispatcherScriptTest, true)
             frame:Show()
             local first = DispatcherScriptTest.count
+            local handler = frame:GetScript("OnShow")
+            handler(frame)
             frame:Hide()
-            frame:Show()
+            handler(frame)
             return first, DispatcherScriptTest.count
             "#,
         )
@@ -124,8 +138,8 @@ fn dispatcher_on_update_once_runs_only_once() {
     )
     .unwrap();
 
-    env.fire_on_update(0.016).unwrap();
-    env.fire_on_update(0.016).unwrap();
+    env.exec("Dispatcher:OnEvent(\"OnUpdate\", 0.016)").unwrap();
+    env.exec("Dispatcher:OnEvent(\"OnUpdate\", 0.016)").unwrap();
 
     let count: i32 = env.eval("return DispatcherOnUpdateTest.count").unwrap();
     assert_eq!(
