@@ -50,65 +50,69 @@ use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+type SpellScriptFn = fn(&mut LuaState) -> LuaResult<u32>;
+
 pub(crate) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
-    table_set_rust_fn_static(state, ns, "GetSpellDescription", get_spell_description)?;
-    table_set_rust_fn_static(state, ns, "GetSpellInfo", get_spell_info)?;
-    table_set_rust_fn_static(state, ns, "GetSpellTexture", get_spell_texture)?;
-    table_set_rust_fn_static(state, ns, "GetSpellPowerCost", get_spell_power_cost)?;
-    table_set_rust_fn_static(state, ns, "GetSpellCharges", get_spell_charges)?;
-    table_set_rust_fn_static(state, ns, "GetOverrideSpell", get_override_spell)?;
-    table_set_rust_fn_static(state, ns, "GetSchoolString", get_school_string)?;
-    table_set_rust_fn_static(
-        state,
-        ns,
+    register_spell_methods(state, ns, SPELL_QUERY_METHODS)?;
+    register_spell_methods(state, ns, SPELL_BOOLEAN_METHODS)?;
+    register_spell_methods(state, ns, SPELL_TARGET_METHODS)?;
+    Ok(())
+}
+
+const SPELL_QUERY_METHODS: &[(&'static str, SpellScriptFn)] = &[
+    ("GetSpellDescription", get_spell_description),
+    ("GetSpellInfo", get_spell_info),
+    ("GetSpellTexture", get_spell_texture),
+    ("GetSpellPowerCost", get_spell_power_cost),
+    ("GetSpellCharges", get_spell_charges),
+    ("GetOverrideSpell", get_override_spell),
+    ("GetSchoolString", get_school_string),
+    (
         "GetMawPowerBorderAtlasBySpellID",
         get_maw_power_border_atlas_by_spell_id,
-    )?;
-    table_set_rust_fn_static(state, ns, "PickupSpell", pickup_spell)?;
-    table_set_rust_fn_static(state, ns, "GetSpellLink", get_spell_link)?;
-    table_set_rust_fn_static(state, ns, "GetSpellName", get_spell_name)?;
-    table_set_rust_fn_static(state, ns, "GetSpellCooldown", get_spell_cooldown)?;
-    table_set_rust_fn_static(state, ns, "GetSpellCastCount", get_spell_cast_count)?;
-    table_set_rust_fn_static(state, ns, "GetMountFromSpell", get_mount_from_spell)?;
-    table_set_rust_fn_static(state, ns, "GetVisibilityInfo", get_visibility_info)?;
-    table_set_rust_fn_static(state, ns, "DoesSpellExist", does_spell_exist)?;
-    table_set_rust_fn_static(state, ns, "IsSpellDataCached", is_spell_data_cached)?;
-    table_set_rust_fn_static(state, ns, "IsPriorityAura", is_priority_aura)?;
-    table_set_rust_fn_static(state, ns, "IsSelfBuff", is_self_buff)?;
-    table_set_rust_fn_static(state, ns, "IsSpellPassive", is_spell_passive)?;
-    table_set_rust_fn_static(state, ns, "IsAutoAttackSpell", is_auto_attack_spell)?;
-    table_set_rust_fn_static(
-        state,
-        ns,
-        "IsRangedAutoAttackSpell",
-        is_ranged_auto_attack_spell,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        ns,
-        "IsPressHoldReleaseSpell",
-        is_press_hold_release_spell,
-    )?;
-    table_set_rust_fn_static(state, ns, "IsSpellUsable", is_spell_usable)?;
-    table_set_rust_fn_static(
-        state,
-        ns,
-        "TargetSpellIsEnchanting",
-        target_spell_is_enchanting,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        ns,
+    ),
+    ("PickupSpell", pickup_spell),
+    ("GetSpellLink", get_spell_link),
+    ("GetSpellName", get_spell_name),
+    ("GetSpellCooldown", get_spell_cooldown),
+    ("GetSpellCastCount", get_spell_cast_count),
+    ("GetMountFromSpell", get_mount_from_spell),
+    ("GetVisibilityInfo", get_visibility_info),
+];
+
+const SPELL_BOOLEAN_METHODS: &[(&'static str, SpellScriptFn)] = &[
+    ("DoesSpellExist", does_spell_exist),
+    ("IsSpellDataCached", is_spell_data_cached),
+    ("IsPriorityAura", is_priority_aura),
+    ("IsSelfBuff", is_self_buff),
+    ("IsSpellPassive", is_spell_passive),
+    ("IsAutoAttackSpell", is_auto_attack_spell),
+    ("IsRangedAutoAttackSpell", is_ranged_auto_attack_spell),
+    ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
+    ("IsSpellUsable", is_spell_usable),
+];
+
+const SPELL_TARGET_METHODS: &[(&'static str, SpellScriptFn)] = &[
+    ("TargetSpellIsEnchanting", target_spell_is_enchanting),
+    (
         "TargetSpellJumpsUpgradeTrack",
         target_spell_jumps_upgrade_track,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        ns,
+    ),
+    (
         "TargetSpellReplacesBonusTree",
         target_spell_replaces_bonus_tree,
-    )?;
+    ),
+];
+
+fn register_spell_methods(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    methods: &[(&'static str, SpellScriptFn)],
+) -> LuaResult<()> {
+    for &(name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
@@ -196,30 +200,14 @@ fn build_spell_power_cost_info(
     );
     table_set(state, Val::Table(info), "name", power_name);
     table_set(state, Val::Table(info), "cost", Val::Num(total_cost as f64));
-    table_set(
-        state,
-        Val::Table(info),
-        "minCost",
-        Val::Num(min_cost as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "costPercent",
-        Val::Num(cost.cost_pct as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "costPerSec",
-        Val::Num(cost.cost_per_sec as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "requiredAuraID",
-        Val::Num(cost.required_aura_id as f64),
-    );
+    for &(name, value) in &[
+        ("minCost", min_cost as f64),
+        ("costPercent", cost.cost_pct as f64),
+        ("costPerSec", cost.cost_per_sec as f64),
+        ("requiredAuraID", cost.required_aura_id as f64),
+    ] {
+        table_set(state, Val::Table(info), name, Val::Num(value));
+    }
     table_set(
         state,
         Val::Table(info),
