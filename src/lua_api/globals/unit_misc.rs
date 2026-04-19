@@ -48,6 +48,10 @@ fn get_unit_name(state: &mut LuaState) -> LuaResult<u32> {
     unit_name_string(state)
 }
 
+fn unit_pvp_name(state: &mut LuaState) -> LuaResult<u32> {
+    unit_name_string(state)
+}
+
 fn unit_full_name(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let name = unit_name_for(state, &unit);
@@ -200,6 +204,7 @@ fn get_negative_corruption_effect_info(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetUnitName", get_unit_name)?;
+    LuaApiMut::register_function(lua, "UnitPVPName", unit_pvp_name)?;
     LuaApiMut::register_function(lua, "UnitFullName", unit_full_name)?;
     LuaApiMut::register_function(lua, "UnitClassBase", unit_class_base)?;
     LuaApiMut::register_function(lua, "UnitGUID", unit_guid)?;

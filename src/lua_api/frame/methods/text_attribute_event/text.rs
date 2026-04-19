@@ -73,7 +73,8 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
         }
     }
     if is_tooltip {
-        mirror_tooltip_text_fields(state, id, text, arg3, arg4, arg5, arg6, arg7);
+        mirror_tooltip_text_fields(state, id, text.clone(), arg3, arg4, arg5, arg6, arg7);
+        replace_tooltip_lines(state, id, text, arg3, arg4, arg5, arg6, arg7)?;
     }
     Ok(0)
 }
@@ -124,6 +125,37 @@ fn mirror_tooltip_text_fields(
         state.gc.barrier_back(args_ref);
     }
     table_set(state, fields, "args", args);
+}
+
+fn replace_tooltip_lines(
+    state: &mut LuaState,
+    id: u64,
+    text: Option<String>,
+    arg3: Val,
+    arg4: Val,
+    arg5: Val,
+    _arg6: Val,
+    arg7: Val,
+) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    let td = sim.tooltips.entry(id).or_default();
+    td.lines.clear();
+    if let Some(text) = text {
+        td.lines.push(crate::lua_api::tooltip::TooltipLine {
+            left_text: text,
+            left_color: (
+                val_to_f32(arg3.clone(), 1.0),
+                val_to_f32(arg4.clone(), 1.0),
+                val_to_f32(arg5.clone(), 1.0),
+            ),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: matches!(arg7, Val::Bool(true)),
+            texture: None,
+        });
+    }
+    td.spell_id = None;
+    Ok(())
 }
 
 fn read_text_arg(state: &LuaState, index: i32) -> Option<String> {

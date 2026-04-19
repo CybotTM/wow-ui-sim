@@ -85,6 +85,8 @@ pub fn setup_full_env() -> WowLuaEnv {
     load_blizzard_addons(&env, &ui);
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
+    wow_ui_sim::startup::process_pending_timers(&env);
+    wow_ui_sim::startup::run_extra_update_ticks(&env, 3);
     env
 }
 

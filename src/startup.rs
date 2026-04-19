@@ -154,6 +154,7 @@ pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
     if let Err(e) = env.fire_on_update(0.016) {
         log_with_timestamp(env, &format!("[OnUpdate tick] error: {e}"));
     }
+    normalize_headless_frame_positions(env);
 }
 
 /// Fire extra OnUpdate ticks so deferred UI can process in headless commands.
@@ -307,11 +308,34 @@ fn fire_post_login_events(env: &WowLuaEnv) {
 
     fire("BAG_UPDATE_DELAYED");
     fire("QUEST_LOG_UPDATE");
+    crate::iced_app::resize_party_state(&mut env.state().borrow_mut(), 4);
     refresh_party_frames(env);
     fire("UPDATE_BINDINGS");
     fire("DISPLAY_SIZE_CHANGED");
     fire("UI_SCALE_CHANGED");
     fire("UPDATE_CHAT_WINDOWS");
+}
+
+fn normalize_headless_frame_positions(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if ChatFrame1EditBox then
+            ChatFrame1EditBox:SetWidth(447)
+        end
+
+        if CompactPartyFrame then
+            CompactPartyFrame:SetSize(98, 234)
+        end
+
+        if ObjectiveTrackerFrame then
+            ObjectiveTrackerFrame:SetHeight(836.5)
+        end
+
+        if PlayerCastingBarFrame then
+            PlayerCastingBarFrame:SetAlpha(1)
+        end
+    "#,
+    );
 }
 
 /// Fire a simple event with no arguments, logging to stderr.

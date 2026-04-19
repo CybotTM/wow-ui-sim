@@ -5,7 +5,7 @@
 //! Frames from loaded addons are created by the XML loader and should NOT
 //! be duplicated here — doing so creates orphan ghosts in the widget registry.
 
-use crate::widget::{AttributeValue, Frame, WidgetRegistry, WidgetType};
+use crate::widget::{AttributeValue, Frame, FrameStrata, WidgetRegistry, WidgetType};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -40,6 +40,27 @@ fn register_hidden_frame(
 ) -> u64 {
     let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
     frame.owner_addon = Some(owner);
+    if let Some((w, h)) = size {
+        frame.width = w;
+        frame.height = h;
+    }
+    frame.visible = false;
+    widgets.register(frame)
+}
+
+fn register_hidden_frame_with_strata(
+    widgets: &mut WidgetRegistry,
+    widget_type: WidgetType,
+    name: &str,
+    parent: Option<u64>,
+    size: Option<(f32, f32)>,
+    owner: u16,
+    strata: FrameStrata,
+) -> u64 {
+    let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
+    frame.owner_addon = Some(owner);
+    frame.frame_strata = strata;
+    frame.has_fixed_frame_strata = true;
     if let Some((w, h)) = size {
         frame.width = w;
         frame.height = h;
@@ -112,13 +133,84 @@ fn create_engine_frames(
 
     create_minimap_cluster(widgets, ui_parent_id, o);
 
-    register_hidden_frame(
+    register_hidden_frame_with_strata(
         widgets,
         WidgetType::GameTooltip,
         "GameTooltip",
         Some(ui_parent_id),
         Some((128.0, 64.0)),
         o,
+        FrameStrata::Tooltip,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::Frame,
+        "GameTooltipDefaultContainer",
+        Some(ui_parent_id),
+        None,
+        o,
+        FrameStrata::Low,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::GameTooltip,
+        "ShoppingTooltip1",
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        o,
+        FrameStrata::Tooltip,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::GameTooltip,
+        "ShoppingTooltip2",
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        o,
+        FrameStrata::Tooltip,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::GameTooltip,
+        "ItemRefShoppingTooltip1",
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        o,
+        FrameStrata::Tooltip,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::GameTooltip,
+        "ItemRefShoppingTooltip2",
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        o,
+        FrameStrata::Tooltip,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::GameTooltip,
+        "ItemRefTooltip",
+        Some(ui_parent_id),
+        Some((128.0, 64.0)),
+        o,
+        FrameStrata::Tooltip,
+    );
+
+    register_hidden_frame_with_strata(
+        widgets,
+        WidgetType::Frame,
+        "FriendsTooltip",
+        Some(ui_parent_id),
+        None,
+        o,
+        FrameStrata::Tooltip,
     );
 
     // DEFAULT_CHAT_FRAME fallback (overwritten by show_chat_frame workaround when chat addons load)

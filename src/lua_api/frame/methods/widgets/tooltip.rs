@@ -1,13 +1,17 @@
 //! GameTooltip widget methods.
 
-use super::shared::{opt_f32, opt_string, val_to_bool, val_to_f64};
+use super::shared::{opt_bool, opt_f32, opt_string, val_to_bool, val_to_f64};
+use crate::lua_api::globals::create_frame::create_frame_instance;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     frame_ref, get_or_create_frame_fields, table_get, table_set, val_to_string,
 };
-use crate::lua_api::script_helpers::{call_void_function_with_fallback_state, get_script};
-use crate::lua_api::tooltip::TooltipLine;
+use crate::lua_api::script_helpers::{
+    call_void_function_with_fallback_state, collect_lua_error, get_script,
+};
+use crate::lua_api::tooltip::{TooltipLine, TooltipTexture, build_cursor_anchor};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
+use crate::widget::{TextJustify, WidgetType};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -46,8 +50,27 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn add_double_line(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: full double-line impl (right_text / right_color parsing)
-    add_line(state)
+    let id = frame_id_from_stack(state, 1)?;
+    let left_text = opt_string(state, 2).unwrap_or_default();
+    let right_text = opt_string(state, 3);
+    let left_r = val_to_f64(stack_val(state, 4)) as f32;
+    let left_g = val_to_f64(stack_val(state, 5)) as f32;
+    let left_b = val_to_f64(stack_val(state, 6)) as f32;
+    let right_r = val_to_f64(stack_val(state, 7)) as f32;
+    let right_g = val_to_f64(stack_val(state, 8)) as f32;
+    let right_b = val_to_f64(stack_val(state, 9)) as f32;
+    let wrap = val_to_bool(stack_val(state, 10));
+    let mut sim = borrow_state_mut(state)?;
+    let td = sim.tooltips.entry(id).or_default();
+    td.lines.push(TooltipLine {
+        left_text,
+        left_color: (left_r, left_g, left_b),
+        right_text,
+        right_color: (right_r, right_g, right_b),
+        wrap,
+        texture: None,
+    });
+    Ok(0)
 }
 
 pub(super) fn num_lines(state: &mut LuaState) -> LuaResult<u32> {
@@ -62,9 +85,7 @@ pub(super) fn set_custom_line_spacing(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let spacing = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.line_spacing = Some(spacing);
-    }
+    sim.tooltips.entry(id).or_default().line_spacing = Some(spacing);
     Ok(0)
 }
 
@@ -85,9 +106,7 @@ pub(super) fn set_minimum_width(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let width = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.min_width = width;
-    }
+    sim.tooltips.entry(id).or_default().min_width = width;
     Ok(0)
 }
 
@@ -107,9 +126,7 @@ pub(super) fn set_allow_show_with_no_lines(state: &mut LuaState) -> LuaResult<u3
     let id = frame_id_from_stack(state, 1)?;
     let value = val_to_bool(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.allow_show_with_no_lines = value;
-    }
+    sim.tooltips.entry(id).or_default().allow_show_with_no_lines = value;
     Ok(0)
 }
 
@@ -117,9 +134,10 @@ pub(super) fn set_custom_word_wrap_min_width(state: &mut LuaState) -> LuaResult<
     let id = frame_id_from_stack(state, 1)?;
     let width = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.custom_word_wrap_min_width = Some(width);
-    }
+    sim.tooltips
+        .entry(id)
+        .or_default()
+        .custom_word_wrap_min_width = Some(width);
     Ok(0)
 }
 
@@ -127,9 +145,7 @@ pub(super) fn set_shrink_to_fit_wrapped(state: &mut LuaState) -> LuaResult<u32> 
     let id = frame_id_from_stack(state, 1)?;
     let value = val_to_bool(stack_val(state, 2));
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.shrink_to_fit_wrapped = value;
-    }
+    sim.tooltips.entry(id).or_default().shrink_to_fit_wrapped = value;
     Ok(0)
 }
 
@@ -173,9 +189,7 @@ pub(super) fn set_padding(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let padding = val_to_f64(stack_val(state, 2)) as f32;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.padding = padding;
-    }
+    sim.tooltips.entry(id).or_default().padding = padding;
     Ok(0)
 }
 
@@ -204,12 +218,221 @@ pub(super) fn append_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = opt_string(state, 2).unwrap_or_default();
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        if let Some(last) = td.lines.last_mut() {
-            last.left_text.push_str(&text);
-        }
+    if let Some(last) = sim.tooltips.entry(id).or_default().lines.last_mut() {
+        last.left_text.push_str(&text);
     }
     Ok(0)
+}
+
+fn tooltip_line_exists(state: &LuaState, tooltip_id: u64, line_index: usize) -> bool {
+    if line_index == 0 {
+        return false;
+    }
+    let Ok(sim) = borrow_state(state) else {
+        return false;
+    };
+    let line_count = sim.tooltips.get(&tooltip_id).map(|td| td.lines.len());
+    line_count.is_some_and(|count| line_index <= count)
+}
+
+fn tooltip_line_name(
+    state: &LuaState,
+    tooltip_id: u64,
+    right_side: bool,
+    line_index: usize,
+) -> Option<String> {
+    let sim = borrow_state(state).ok()?;
+    let tooltip_name = sim.widgets.get(tooltip_id)?.name.as_ref()?;
+    let suffix = if right_side { "Right" } else { "Left" };
+    Some(format!("{tooltip_name}Text{suffix}{line_index}"))
+}
+
+fn find_existing_tooltip_line_id(
+    state: &LuaState,
+    tooltip_id: u64,
+    right_side: bool,
+    line_index: usize,
+) -> Option<u64> {
+    let sim = borrow_state(state).ok()?;
+    let td = sim.tooltips.get(&tooltip_id)?;
+    let existing = if right_side {
+        td.right_line_ids.get(line_index - 1).copied()
+    } else {
+        td.left_line_ids.get(line_index - 1).copied()
+    };
+    if let Some(id) = existing
+        && sim.widgets.get(id).is_some_and(|frame| {
+            frame.parent_id == Some(tooltip_id) && frame.widget_type == WidgetType::FontString
+        })
+    {
+        return Some(id);
+    }
+
+    let name = tooltip_line_name(state, tooltip_id, right_side, line_index)?;
+    let child_id = sim.widgets.get_id_by_name(&name)?;
+    sim.widgets.get(child_id).and_then(|frame| {
+        (frame.parent_id == Some(tooltip_id) && frame.widget_type == WidgetType::FontString)
+            .then_some(child_id)
+    })
+}
+
+fn ensure_tooltip_line_id(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    right_side: bool,
+    line_index: usize,
+) -> LuaResult<Option<u64>> {
+    if !tooltip_line_exists(state, tooltip_id, line_index) {
+        return Ok(None);
+    }
+    if let Some(existing_id) =
+        find_existing_tooltip_line_id(state, tooltip_id, right_side, line_index)
+    {
+        return Ok(Some(existing_id));
+    }
+
+    let name = tooltip_line_name(state, tooltip_id, right_side, line_index);
+    let child_id = create_frame_instance(
+        state,
+        WidgetType::FontString,
+        "FontString",
+        name,
+        Some(tooltip_id),
+        true,
+        None,
+    )?;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(child) = sim.widgets.get_mut_visual(child_id) {
+            child.parent_key = Some(if right_side {
+                format!("TextRight{line_index}")
+            } else {
+                format!("TextLeft{line_index}")
+            });
+            child.justify_h = if right_side {
+                TextJustify::Right
+            } else {
+                TextJustify::Left
+            };
+        }
+        let td = sim.tooltips.entry(tooltip_id).or_default();
+        let ids = if right_side {
+            &mut td.right_line_ids
+        } else {
+            &mut td.left_line_ids
+        };
+        if ids.len() < line_index {
+            ids.resize(line_index, 0);
+        }
+        ids[line_index - 1] = child_id;
+    }
+    Ok(Some(child_id))
+}
+
+fn sync_tooltip_line_frame(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    right_side: bool,
+    line_index: usize,
+) -> LuaResult<Option<u64>> {
+    let Some(line_id) = ensure_tooltip_line_id(state, tooltip_id, right_side, line_index)? else {
+        return Ok(None);
+    };
+    let line = {
+        let sim = borrow_state(state)?;
+        sim.tooltips
+            .get(&tooltip_id)
+            .and_then(|td| td.lines.get(line_index - 1).cloned())
+    };
+    let Some(line) = line else {
+        return Ok(None);
+    };
+    let text = if right_side {
+        line.right_text
+    } else {
+        Some(line.left_text)
+    };
+    let stripped = text
+        .as_ref()
+        .map(|value| crate::render::strip_wow_markup(value));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(line_id) {
+        frame.text = text;
+        frame.text_stripped = stripped;
+    }
+    Ok(Some(line_id))
+}
+
+fn push_tooltip_line_ref(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    right_side: bool,
+    line_index: usize,
+) -> LuaResult<u32> {
+    let index = line_index.max(1);
+    let line_id = sync_tooltip_line_frame(state, tooltip_id, right_side, index)?;
+    let Some(line_id) = line_id else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let line_ref = frame_ref(state, line_id)?;
+    state.push(line_ref);
+    Ok(1)
+}
+
+fn add_texture_line(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    texture: TooltipTexture,
+) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.tooltips
+        .entry(tooltip_id)
+        .or_default()
+        .lines
+        .push(TooltipLine {
+            left_text: String::new(),
+            left_color: (1.0, 1.0, 1.0),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+            texture: Some(texture),
+        });
+    Ok(0)
+}
+
+pub(super) fn add_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let texture = match stack_val(state, 2) {
+        Val::Num(value) if value >= 0.0 => Some(TooltipTexture::FileDataId(value as u32)),
+        value => val_to_string(state, value)
+            .and_then(|text| text.parse::<u32>().ok())
+            .map(TooltipTexture::FileDataId),
+    };
+    let Some(texture) = texture else {
+        return Ok(0);
+    };
+    add_texture_line(state, tooltip_id, texture)
+}
+
+pub(super) fn add_atlas(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let Some(atlas) = opt_string(state, 2) else {
+        return Ok(0);
+    };
+    add_texture_line(state, tooltip_id, TooltipTexture::Atlas(atlas))
+}
+
+pub(super) fn get_left_line(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let line_index = opt_f32(state, 2).unwrap_or(0.0).max(0.0) as usize;
+    push_tooltip_line_ref(state, tooltip_id, false, line_index)
+}
+
+pub(super) fn get_right_line(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let line_index = opt_f32(state, 2).unwrap_or(0.0).max(0.0) as usize;
+    push_tooltip_line_ref(state, tooltip_id, true, line_index)
 }
 
 fn table_array_get(state: &LuaState, table: Val, index: i64) -> Val {
@@ -343,6 +566,24 @@ fn fire_tooltip_script(state: &mut LuaState, tooltip_id: u64, script_name: &str)
         return;
     };
     let _ = call_void_function_with_fallback_state(state, handler, &[self_ref]);
+}
+
+fn fire_tooltip_script_with_args(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    script_name: &str,
+    args: &[Val],
+) {
+    let Some(handler) = get_script(state, tooltip_id, script_name) else {
+        return;
+    };
+    let Ok(self_ref) = frame_ref(state, tooltip_id) else {
+        return;
+    };
+    let mut call_args = Vec::with_capacity(args.len() + 1);
+    call_args.push(self_ref);
+    call_args.extend_from_slice(args);
+    let _ = call_void_function_with_fallback_state(state, handler, &call_args);
 }
 
 pub(super) fn set_spell_by_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -638,15 +879,47 @@ pub(super) fn set_trade_skill_item(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     let tooltip_id = frame_id_from_stack(state, 1)?;
     let owner_id = frame_id_from_stack(state, 2).ok();
-    let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".into());
+    let anchor_kind = {
+        let anchor_kind = opt_string(state, 3).unwrap_or_else(|| "ANCHOR_NONE".to_string());
+        if matches!(
+            anchor_kind.as_str(),
+            "ANCHOR_NONE"
+                | "ANCHOR_PRESERVE"
+                | "ANCHOR_RIGHT"
+                | "ANCHOR_LEFT"
+                | "ANCHOR_TOP"
+                | "ANCHOR_BOTTOM"
+                | "ANCHOR_TOPRIGHT"
+                | "ANCHOR_TOPLEFT"
+                | "ANCHOR_BOTTOMRIGHT"
+                | "ANCHOR_BOTTOMLEFT"
+                | "ANCHOR_CURSOR"
+        ) {
+            anchor_kind
+        } else {
+            let _ = collect_lua_error(
+                state,
+                &format!("invalid anchor type: {anchor_kind}; defaulting to ANCHOR_LEFT"),
+            );
+            "ANCHOR_LEFT".to_string()
+        }
+    };
     let x_offset = opt_f32(state, 4).unwrap_or(0.0);
     let y_offset = opt_f32(state, 5).unwrap_or(0.0);
     let mut sim = borrow_state_mut(state)?;
+    let mouse_position = sim.mouse_position;
     let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) else {
         return Ok(0);
     };
     tooltip.tooltip_owner_id = owner_id;
-    apply_tooltip_anchor(tooltip, &anchor_kind, owner_id, x_offset, y_offset);
+    apply_tooltip_anchor(
+        tooltip,
+        &anchor_kind,
+        owner_id,
+        mouse_position,
+        x_offset,
+        y_offset,
+    );
     let td = sim.tooltips.entry(tooltip_id).or_default();
     td.owner_id = owner_id;
     td.anchor_type = anchor_kind.clone();
@@ -700,6 +973,7 @@ fn apply_tooltip_anchor(
     tooltip: &mut crate::widget::Frame,
     anchor_kind: &str,
     owner_id: Option<u64>,
+    mouse_position: Option<(f32, f32)>,
     x_offset: f32,
     y_offset: f32,
 ) {
@@ -710,6 +984,14 @@ fn apply_tooltip_anchor(
         return;
     }
     tooltip.anchors.clear();
+    if anchor_kind == "ANCHOR_CURSOR" {
+        if let Some((mx, my)) = mouse_position {
+            tooltip
+                .anchors
+                .push(build_cursor_anchor(mx, my, x_offset, y_offset));
+        }
+        return;
+    }
     let Some(owner_id) = owner_id else {
         return;
     };
@@ -779,19 +1061,217 @@ pub(super) fn fade_out(state: &mut LuaState) -> LuaResult<u32> {
     crate::lua_api::frame::methods::core_state::hide(state)
 }
 
-pub(super) fn set_anchor_type(_state: &mut LuaState) -> LuaResult<u32> {
+pub(super) fn get_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let anchor = {
+        let sim = borrow_state(state)?;
+        sim.tooltips
+            .get(&tooltip_id)
+            .map(|td| td.anchor_type.clone())
+            .unwrap_or_else(|| "ANCHOR_NONE".to_string())
+    };
+    let anchor_val = create_string(state, &anchor);
+    state.push(anchor_val);
+    Ok(1)
+}
+
+pub(super) fn set_anchor_type(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let anchor_kind = {
+        let anchor_kind = opt_string(state, 2).unwrap_or_else(|| "ANCHOR_NONE".to_string());
+        if matches!(
+            anchor_kind.as_str(),
+            "ANCHOR_NONE"
+                | "ANCHOR_PRESERVE"
+                | "ANCHOR_RIGHT"
+                | "ANCHOR_LEFT"
+                | "ANCHOR_TOP"
+                | "ANCHOR_BOTTOM"
+                | "ANCHOR_TOPRIGHT"
+                | "ANCHOR_TOPLEFT"
+                | "ANCHOR_BOTTOMRIGHT"
+                | "ANCHOR_BOTTOMLEFT"
+                | "ANCHOR_CURSOR"
+        ) {
+            anchor_kind
+        } else {
+            let _ = collect_lua_error(
+                state,
+                &format!("invalid anchor type: {anchor_kind}; defaulting to ANCHOR_LEFT"),
+            );
+            "ANCHOR_LEFT".to_string()
+        }
+    };
+    let x_offset = opt_f32(state, 3).unwrap_or(0.0);
+    let y_offset = opt_f32(state, 4).unwrap_or(0.0);
+    let owner_id = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(tooltip_id)
+            .and_then(|tooltip| tooltip.tooltip_owner_id)
+            .or_else(|| sim.tooltips.get(&tooltip_id).and_then(|td| td.owner_id))
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let mouse_position = sim.mouse_position;
+    let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) else {
+        return Ok(0);
+    };
+    apply_tooltip_anchor(
+        tooltip,
+        &anchor_kind,
+        owner_id,
+        mouse_position,
+        x_offset,
+        y_offset,
+    );
+    let td = sim.tooltips.entry(tooltip_id).or_default();
+    td.anchor_type = anchor_kind.clone();
+    td.anchor_x_offset = x_offset;
+    td.anchor_y_offset = y_offset;
+    drop(sim);
+    let fields = get_or_create_frame_fields(state, tooltip_id);
+    let anchor_value = create_string(state, &anchor_kind);
+    table_set(state, fields, "anchor", anchor_value);
     Ok(0)
 }
 
-pub(super) fn copy_tooltip(_state: &mut LuaState) -> LuaResult<u32> {
+pub(super) fn copy_tooltip(state: &mut LuaState) -> LuaResult<u32> {
+    let target_id = frame_id_from_stack(state, 1)?;
+    let Ok(source_id) = frame_id_from_stack(state, 2) else {
+        return Ok(0);
+    };
+    let source = {
+        let sim = borrow_state(state)?;
+        sim.tooltips.get(&source_id).cloned()
+    };
+    let Some(source) = source else {
+        return Ok(0);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let target = sim.tooltips.entry(target_id).or_default();
+    let preserved_owner = target.owner_id;
+    let preserved_anchor = target.anchor_type.clone();
+    let preserved_x = target.anchor_x_offset;
+    let preserved_y = target.anchor_y_offset;
+    *target = source;
+    target.owner_id = preserved_owner;
+    target.anchor_type = preserved_anchor;
+    target.anchor_x_offset = preserved_x;
+    target.anchor_y_offset = preserved_y;
     Ok(0)
 }
 
-pub(super) fn set_frame_stack(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+pub(super) fn set_frame_stack(state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let _show_hidden = opt_bool(state, 2).unwrap_or(false);
+    let _show_regions = opt_bool(state, 3).unwrap_or(false);
+    let frame_stack_index = opt_f32(state, 4).unwrap_or(0.0).max(0.0) as usize;
+    let highlight_id = {
+        let sim = borrow_state(state)?;
+        sim.hovered_frame
+    };
+    let Some(highlight_id) = highlight_id else {
+        clear_tooltip_lines(state, tooltip_id)?;
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let frame_info = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(highlight_id).map(|frame| {
+            let primary = frame.name.clone().unwrap_or_else(|| {
+                frame
+                    .object_type_name
+                    .clone()
+                    .unwrap_or_else(|| "Frame".into())
+            });
+            let parent_label = frame
+                .parent_id
+                .and_then(|pid| sim.widgets.get(pid))
+                .and_then(|parent| parent.name.clone())
+                .unwrap_or_else(|| frame.widget_type.as_str().to_string());
+            (primary, parent_label)
+        })
+    };
+    let Some((primary, parent_label)) = frame_info else {
+        clear_tooltip_lines(state, tooltip_id)?;
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let highlight = frame_global_or_ref_local(state, highlight_id)?;
+
+    {
+        let mut sim = borrow_state_mut(state)?;
+        let td = sim.tooltips.entry(tooltip_id).or_default();
+        td.frame_stack_index = frame_stack_index;
+        td.lines.clear();
+        td.lines.push(TooltipLine {
+            left_text: primary,
+            left_color: (1.0, 1.0, 1.0),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+            texture: None,
+        });
+        td.lines.push(TooltipLine {
+            left_text: format!("Parent: {parent_label}"),
+            left_color: (0.8, 0.8, 0.8),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+            texture: None,
+        });
+        sim.set_frame_visible(tooltip_id, true);
+    }
+    fire_tooltip_script_with_args(
+        state,
+        tooltip_id,
+        "OnTooltipSetFramestack",
+        &[highlight.clone()],
+    );
+    state.push(highlight);
+    Ok(1)
+}
+
+fn clear_tooltip_lines(state: &mut LuaState, tooltip_id: u64) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.tooltips.entry(tooltip_id).or_default().lines.clear();
+    Ok(())
+}
+
+fn frame_global_or_ref_local(state: &mut LuaState, id: u64) -> LuaResult<Val> {
+    let frame_name = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).and_then(|frame| frame.name.clone())
+    };
+    if let Some(name) = frame_name {
+        let key = state.gc.intern_string(name.as_bytes());
+        let global = state
+            .gc
+            .tables
+            .get(state.global)
+            .map(|table| table.get_str(key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+        if global != Val::Nil {
+            return Ok(global);
+        }
+    }
+    frame_ref(state, id)
 }
 
 pub(super) fn add_font_strings(_state: &mut LuaState) -> LuaResult<u32> {
+    let tooltip_id = frame_id_from_stack(_state, 1)?;
+    let line_count = {
+        let sim = borrow_state(_state)?;
+        sim.tooltips
+            .get(&tooltip_id)
+            .map(|td| td.lines.len())
+            .unwrap_or(0)
+    };
+    for line_index in 1..=line_count {
+        let _ = sync_tooltip_line_frame(_state, tooltip_id, false, line_index)?;
+        let _ = sync_tooltip_line_frame(_state, tooltip_id, true, line_index)?;
+    }
     Ok(0)
 }
 
@@ -804,8 +1284,12 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("ClearLines", clear_lines),
     ("AddLine", add_line),
     ("AddDoubleLine", add_double_line),
+    ("AddTexture", add_texture),
+    ("AddAtlas", add_atlas),
     ("NumLines", num_lines),
     ("GetNumLines", num_lines),
+    ("GetLeftLine", get_left_line),
+    ("GetRightLine", get_right_line),
     // Layout (spacing, width, padding)
     ("SetCustomLineSpacing", set_custom_line_spacing),
     ("GetCustomLineSpacing", get_custom_line_spacing),
@@ -860,6 +1344,7 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetOwner", get_owner),
     ("IsOwned", is_owned),
     ("FadeOut", fade_out),
+    ("GetAnchorType", get_anchor_type),
     ("SetAnchorType", set_anchor_type),
     // Misc
     ("CopyTooltip", copy_tooltip),

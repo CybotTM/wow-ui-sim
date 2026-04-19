@@ -87,7 +87,7 @@ fn create_template_child_frame(
     state: &mut LuaState,
     state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
     parent_id: u64,
-    _parent_name: &str,
+    parent_name: &str,
     subst_parent: &str,
     child_frame: &crate::xml::FrameXml,
     child_tag: &'static str,
@@ -117,7 +117,7 @@ fn create_template_child_frame(
     };
     create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
 
-    apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
+    apply_runtime_child_direct_properties(state_rc, child_id, frame, parent_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     apply_runtime_template_loader_effects(
         state,

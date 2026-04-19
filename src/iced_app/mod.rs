@@ -94,6 +94,8 @@ use crate::saved_variables::SavedVariablesManager;
 #[cfg(feature = "gui")]
 pub use app::App;
 #[cfg(feature = "gui")]
+pub(crate) use app::resize_party_state;
+#[cfg(feature = "gui")]
 pub use benchmark::{BenchmarkPhase, SpellbookBenchmarkReport, benchmark_spellbook_open_in_gui};
 #[cfg(feature = "gui")]
 pub use render::rebuild_dirty_strata_batches_for_registry;

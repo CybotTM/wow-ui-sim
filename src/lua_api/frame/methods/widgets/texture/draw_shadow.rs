@@ -29,11 +29,16 @@ pub(super) fn set_draw_layer(state: &mut LuaState) -> LuaResult<u32> {
         _ => None,
     };
     let mut sim = borrow_state_mut(state)?;
+    let mut changed = false;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.draw_layer = draw_layer;
         if let Some(sub_level) = sub_level {
             frame.draw_sub_layer = sub_level;
         }
+        changed = true;
+    }
+    if changed {
+        sim.invalidate_strata_buckets();
     }
     Ok(0)
 }

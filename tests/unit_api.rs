@@ -186,6 +186,14 @@ fn test_unit_name_player() {
 }
 
 #[test]
+fn test_unit_pvp_name_player_matches_unit_name() {
+    let env = env();
+    let pvp_name: String = env.eval("return UnitPVPName('player')").unwrap();
+    let name: String = env.eval("return UnitName('player')").unwrap();
+    assert_eq!(pvp_name, name);
+}
+
+#[test]
 fn test_unit_name_no_target() {
     let env = env();
     let name: String = env

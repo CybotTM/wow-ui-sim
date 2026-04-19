@@ -2,7 +2,7 @@
 
 use crate::lua_api::SimState;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref, sync_child_to_rilua};
-use crate::widget::{Frame, WidgetType};
+use crate::widget::{Frame, FrameStrata, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -16,6 +16,10 @@ pub fn create_frame_instance(
     id: Option<i32>,
 ) -> LuaResult<u64> {
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
+    if widget_type == WidgetType::GameTooltip {
+        frame.frame_strata = FrameStrata::Tooltip;
+        frame.has_fixed_frame_strata = true;
+    }
     if should_preserve_object_type_name(widget_type, frame_type) {
         frame.object_type_name = Some(frame_type.to_string());
     }
@@ -136,7 +140,9 @@ fn register_and_attach_parent(
     let parent_alpha = parent.effective_alpha;
     let parent_scale = parent.effective_scale;
     if let Some(child) = sim.widgets.get_mut_visual(frame_id) {
-        child.frame_strata = parent_strata;
+        if !child.has_fixed_frame_strata {
+            child.frame_strata = parent_strata;
+        }
         if parent_explicit {
             child.frame_level = parent_level + 1;
         }

@@ -528,14 +528,19 @@ impl Frame {
             widget_type,
             WidgetType::Button | WidgetType::CheckButton | WidgetType::EditBox
         );
-        Self {
+        let mut frame = Self {
             widget_type,
             name,
             parent_id,
             mouse_enabled,
             clips_children: false,
             ..Default::default()
+        };
+        if widget_type == WidgetType::GameTooltip {
+            frame.frame_strata = FrameStrata::Tooltip;
+            frame.has_fixed_frame_strata = true;
         }
+        frame
     }
 
     pub fn set_size(&mut self, width: f32, height: f32) {

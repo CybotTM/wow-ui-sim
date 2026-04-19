@@ -22,6 +22,7 @@ pub struct TooltipLine {
 }
 
 /// State for a GameTooltip frame.
+#[derive(Clone)]
 pub struct TooltipData {
     pub lines: Vec<TooltipLine>,
     pub owner_id: Option<u64>,
