@@ -211,12 +211,17 @@ pub(super) fn create_texture(state: &mut LuaState) -> LuaResult<u32> {
     let parent_id = frame_id_from_stack(state, 1)?;
     let name_raw: Option<String> = Option::<String>::from_stack(state, 2)?;
     let layer = opt_string(state, 3);
-    let _inherits = opt_string(state, 4);
+    let inherits = opt_string(state, 4);
     let sub_level = super::shared::opt_f32(state, 5).map(|n| n as i32);
 
     let name = resolve_child_name(state, name_raw, parent_id);
     let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(parent_id));
     apply_draw_layer(&mut texture, layer);
+    if let Some(inherits) = inherits
+        && let Some((width, height)) = crate::xml::get_texture_template_size(&inherits)
+    {
+        texture.set_size(width, height);
+    }
     if let Some(sub_level) = sub_level {
         texture.draw_sub_layer = sub_level;
     }

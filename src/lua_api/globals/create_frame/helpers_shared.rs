@@ -34,7 +34,7 @@ pub fn create_frame_instance(
 }
 
 fn should_preserve_object_type_name(widget_type: WidgetType, frame_type: &str) -> bool {
-    if widget_type.as_str() == frame_type {
+    if widget_type.as_str().eq_ignore_ascii_case(frame_type) {
         return false;
     }
 

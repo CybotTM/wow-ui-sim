@@ -8,7 +8,11 @@
 //! - `CanLootUnit(unit)`           — `unit is dead AND is_enemy`.
 //! - `CanMerchant()`               — `SimState.merchant_frame_open`.
 //! - `CanInspect(unit, showError?)` — unit resolves to a player-like entity.
+//! - `GetInventoryItemID/Link/Texture/Quality/Count` — player equipment
+//!   queries plus bag-slot texture fallbacks.
 
+use super::missing_surface::item_link_for_id;
+use crate::items;
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val};
@@ -117,6 +121,128 @@ fn can_inspect(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn player_equipped_item_id(state: &mut LuaState, unit: &str, slot: i32) -> Option<u32> {
+    if unit != "player" || !(1..=19).contains(&slot) {
+        return None;
+    }
+    borrow_state(state)
+        .ok()?
+        .player
+        .equipped_items
+        .get(&slot)
+        .map(|item| item.item_id)
+}
+
+fn get_inventory_item_id(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let Some(slot) = stack_i32(state, 2) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    match player_equipped_item_id(state, &unit, slot) {
+        Some(item_id) => state.push(Val::Num(item_id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_inventory_item_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let Some(slot) = stack_i32(state, 2) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    if unit != "player" {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+    if (20..=23).contains(&slot) {
+        let texture =
+            crate::lua_api::methods::create_string(state, "Interface\\Icons\\INV_Misc_Bag_08");
+        state.push(texture);
+        return Ok(1);
+    }
+    let Some(item_id) = player_equipped_item_id(state, &unit, slot) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let texture = items::get_item(item_id)
+        .map(|item| {
+            if item.icon_file_data_id == 0 {
+                134400.0
+            } else {
+                item.icon_file_data_id as f64
+            }
+        })
+        .unwrap_or(134400.0);
+    state.push(Val::Num(texture));
+    Ok(1)
+}
+
+fn get_inventory_item_link(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let Some(slot) = stack_i32(state, 2) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let Some(item_id) = player_equipped_item_id(state, &unit, slot) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    match item_link_for_id(item_id) {
+        Some(link) => {
+            let link = crate::lua_api::methods::create_string(state, &link);
+            state.push(link);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_inventory_item_broken(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = Option::<String>::from_stack(state, 1)?;
+    let _slot = stack_i32(state, 2);
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn get_inventory_item_equipped_unusable(state: &mut LuaState) -> LuaResult<u32> {
+    let _unit = Option::<String>::from_stack(state, 1)?;
+    let _slot = stack_i32(state, 2);
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn get_inventory_item_quality(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let Some(slot) = stack_i32(state, 2) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let Some(item_id) = player_equipped_item_id(state, &unit, slot) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let quality = items::get_item(item_id)
+        .map(|item| item.quality as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Num(quality));
+    Ok(1)
+}
+
+fn get_inventory_item_count(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let Some(slot) = stack_i32(state, 2) else {
+        state.push(Val::Num(0.0));
+        return Ok(1);
+    };
+    let count = player_equipped_item_id(state, &unit, slot)
+        .map(|_| 1.0)
+        .unwrap_or(0.0);
+    state.push(Val::Num(count));
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsInventoryItemLocked", is_inventory_item_locked)?;
     LuaApiMut::register_function(lua, "IsEquippableItem", is_equippable_item)?;
@@ -124,5 +250,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanLootUnit", can_loot_unit)?;
     LuaApiMut::register_function(lua, "CanMerchant", can_merchant)?;
     LuaApiMut::register_function(lua, "CanInspect", can_inspect)?;
+    LuaApiMut::register_function(lua, "GetInventoryItemID", get_inventory_item_id)?;
+    LuaApiMut::register_function(lua, "GetInventoryItemTexture", get_inventory_item_texture)?;
+    LuaApiMut::register_function(lua, "GetInventoryItemLink", get_inventory_item_link)?;
+    LuaApiMut::register_function(lua, "GetInventoryItemBroken", get_inventory_item_broken)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetInventoryItemEquippedUnusable",
+        get_inventory_item_equipped_unusable,
+    )?;
+    LuaApiMut::register_function(lua, "GetInventoryItemQuality", get_inventory_item_quality)?;
+    LuaApiMut::register_function(lua, "GetInventoryItemCount", get_inventory_item_count)?;
     Ok(())
 }

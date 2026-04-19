@@ -16,7 +16,7 @@ pub(super) fn quality_color_hex(quality: u8) -> &'static str {
     }
 }
 
-pub(super) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
+pub(crate) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",
         1..=12 | 14 | 16 | 23 => "Armor",
@@ -24,7 +24,7 @@ pub(super) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     }
 }
 
-pub(super) fn inv_type_to_class_id(inv_type: u8) -> i32 {
+pub(crate) fn inv_type_to_class_id(inv_type: u8) -> i32 {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => 2,
         1..=12 | 14 | 16 | 23 => 4,
@@ -32,8 +32,55 @@ pub(super) fn inv_type_to_class_id(inv_type: u8) -> i32 {
     }
 }
 
+pub(crate) fn item_class_name(class_id: i32) -> &'static str {
+    match class_id {
+        0 => "Consumable",
+        1 => "Container",
+        2 => "Weapon",
+        3 => "Gem",
+        4 => "Armor",
+        5 => "Reagent",
+        6 => "Projectile",
+        7 => "Trade Goods",
+        8 => "Item Enhancement",
+        9 => "Recipe",
+        10 => "Money",
+        11 => "Quiver",
+        12 => "Quest",
+        13 => "Key",
+        14 => "Permanent",
+        15 => "Miscellaneous",
+        16 => "Glyph",
+        17 => "Battle Pet",
+        18 => "WoW Token",
+        19 => "Profession",
+        20 => "Housing",
+        _ => "Unknown",
+    }
+}
+
 pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static str {
     match (class_id, subclass_id) {
+        (2, 0) => "Axe",
+        (2, 1) => "Axe",
+        (2, 2) => "Bow",
+        (2, 3) => "Gun",
+        (2, 4) => "Mace",
+        (2, 5) => "Mace",
+        (2, 6) => "Polearm",
+        (2, 7) => "One-Handed Swords",
+        (2, 8) => "Two-Handed Swords",
+        (2, 9) => "Warglaives",
+        (2, 10) => "Staves",
+        (2, 11) => "Bear Claws",
+        (2, 12) => "Cat Claws",
+        (2, 13) => "Unarmed",
+        (2, 14) => "Generic",
+        (2, 15) => "Daggers",
+        (2, 16) => "Thrown",
+        (2, 18) => "Crossbows",
+        (2, 19) => "Wands",
+        (2, 20) => "Fishing Poles",
         (4, 1) => "Cloth",
         (4, 2) => "Leather",
         (4, 3) => "Mail",
@@ -44,7 +91,7 @@ pub(super) fn item_subclass_name(class_id: i32, subclass_id: i32) -> &'static st
     }
 }
 
-pub(super) fn inv_type_to_subclass(inv_type: u8) -> &'static str {
+pub(crate) fn inv_type_to_subclass(inv_type: u8) -> &'static str {
     match inv_type {
         1 => "Head",
         2 => "Neck",
@@ -64,7 +111,7 @@ pub(super) fn inv_type_to_subclass(inv_type: u8) -> &'static str {
     }
 }
 
-pub(super) fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
+pub(crate) fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
     match inv_type {
         1 => "INVTYPE_HEAD",
         2 => "INVTYPE_NECK",

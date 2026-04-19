@@ -85,6 +85,8 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
         "GetQuestLogSpecialItemInfo",
         get_quest_log_special_item_info,
     ),
+    ("SortQuestSortTypes", noop),
+    ("SortQuests", noop),
 ];
 
 pub fn register_quest_info_handlers(state: &mut LuaState) -> LuaResult<()> {

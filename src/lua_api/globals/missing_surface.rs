@@ -14,6 +14,7 @@ mod club_info;
 mod creature_info;
 mod death_recap;
 mod delves_ui;
+mod encoding_util;
 mod encounter_journal;
 mod fog_of_war;
 mod friend_list;
@@ -46,6 +47,7 @@ mod zone_ability;
 
 use crate::lua_api::methods::{borrow_state_mut, create_string, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val};
+use crate::spells;
 
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -90,6 +92,9 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "PlaySoundFile", noop)?;
     LuaApiMut::register_function(lua, "StopSound", noop)?;
     LuaApiMut::register_function(lua, "GetSpellLink", get_spell_link_global)?;
+    LuaApiMut::register_function(lua, "GetSpellIcon", get_spell_icon_global)?;
+    LuaApiMut::register_function(lua, "GetItemInfo", get_item_info_global)?;
+    LuaApiMut::register_function(lua, "GetItemClassInfo", get_item_class_info_global)?;
     LuaApiMut::register_function(lua, "GetRepairAllCost", get_repair_all_cost)?;
     LuaApiMut::register_function(lua, "SetActionUIButton", set_action_ui_button)?;
     LuaApiMut::register_function(lua, "MapSceneCharacterHighlightStart", noop)?;
@@ -117,6 +122,7 @@ fn seed_placeholder_global_tables(state: &mut LuaState) {
 
 fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     item_spell::register_item_and_spell_surfaces(state)?;
+    encoding_util::register_encoding_util_surface(state)?;
     item_socket_info::register_item_socket_info_surface(state)?;
     professions::register_profession_surface(state)?;
     traits::register_trait_surfaces(state)?;
@@ -196,6 +202,35 @@ fn get_spell_link_global(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn get_spell_icon_global(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let icon = spells::get_spell(spell_id)
+        .map(|spell| {
+            if spell.icon_file_data_id == 0 {
+                136243
+            } else {
+                spell.icon_file_data_id
+            }
+        })
+        .unwrap_or(136243);
+    state.push(Val::Num(icon as f64));
+    Ok(1)
+}
+
+fn get_item_class_info_global(state: &mut LuaState) -> LuaResult<u32> {
+    let class_id = i32::from_stack(state, 1)?;
+    let name = create_string(state, item_spell::item_class_name(class_id));
+    state.push(name);
+    Ok(1)
+}
+
+fn get_item_info_global(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(item_id) = item_spell::parse_item_id_from_val(state, stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    item_spell::push_item_info(state, item_id)
 }
 
 fn get_repair_all_cost(state: &mut LuaState) -> LuaResult<u32> {

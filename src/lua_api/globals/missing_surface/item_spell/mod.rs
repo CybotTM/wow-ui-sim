@@ -4,8 +4,11 @@ mod c_item;
 mod c_spell;
 mod helpers;
 
-pub(super) use c_item::{parse_item_guid, parse_prefixed_id, spell_link_for_id};
+pub(crate) use c_item::{
+    parse_item_guid, parse_item_id_from_val, parse_prefixed_id, push_item_info, spell_link_for_id,
+};
 pub(super) use helpers::current_item_upgrade_location;
+pub(crate) use helpers::item_class_name;
 
 use rilua::LuaResult;
 use rilua::vm::state::LuaState;

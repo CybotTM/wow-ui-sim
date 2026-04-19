@@ -65,6 +65,24 @@ fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>
         "GetInviteConfirmationInfo",
         c_party_info_get_invite_confirmation_info,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetInstanceAbandonVoteTime",
+        c_party_info_get_instance_abandon_vote_time,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetInstanceAbandonVoteResponse",
+        c_party_info_get_instance_abandon_vote_response,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetInstanceAbandonVoteResponse",
+        c_party_info_set_instance_abandon_vote_response,
+    )?;
     Ok(())
 }
 
@@ -149,6 +167,22 @@ fn c_party_info_is_party_in_jailers_tower(state: &mut LuaState) -> LuaResult<u32
 /// clubId)` for a pending invite. Sim has no invite queue.
 fn c_party_info_get_invite_confirmation_info(state: &mut LuaState) -> LuaResult<u32> {
     let _ = state; // consume argument
+    Ok(0)
+}
+
+fn c_party_info_get_instance_abandon_vote_time(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(2)
+}
+
+fn c_party_info_get_instance_abandon_vote_response(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn c_party_info_set_instance_abandon_vote_response(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<bool>::from_stack(state, 1)?;
     Ok(0)
 }
 

@@ -55,6 +55,7 @@ pub(super) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
         &[
             ("GetContainerNumSlots", c_container_get_num_slots),
             ("GetContainerNumFreeSlots", c_container_get_num_free_slots),
+            ("HasContainerItem", c_container_has_item),
             ("GetBagSlotFlag", c_container_get_bag_slot_flag),
             ("GetContainerItemInfo", c_container_get_item_info),
             ("GetItemCooldown", c_container_get_item_cooldown),
@@ -115,6 +116,15 @@ fn c_container_get_num_free_slots(state: &mut LuaState) -> LuaResult<u32> {
         _ => 0.0,
     };
     state.push(Val::Num(free));
+    state.push(Val::Num(0.0));
+    Ok(2)
+}
+
+fn c_container_has_item(state: &mut LuaState) -> LuaResult<u32> {
+    let bag = i32::from_stack(state, 1)?;
+    let slot = i32::from_stack(state, 2)?;
+    let has_item = borrow_state(state)?.get_bag_item(bag, slot).is_some();
+    state.push(Val::Bool(has_item));
     Ok(1)
 }
 

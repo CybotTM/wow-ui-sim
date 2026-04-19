@@ -19,40 +19,24 @@ fn push_toy_info(state: &mut LuaState, tid: f64, name: &str, icon: f64) -> u32 {
 }
 
 fn toy_get_total_displayed(state: &mut LuaState) -> LuaResult<u32> {
-    toy_count_all(state)
+    (0i32).into_stack(state)
 }
 
 fn toy_get_learned_displayed(state: &mut LuaState) -> LuaResult<u32> {
-    let n = borrow_state(state)?
-        .world
-        .toys
-        .iter()
-        .filter(|t| t.is_collected)
-        .count() as i32;
-    n.into_stack(state)
+    (0i32).into_stack(state)
 }
 
 fn toy_get_num_toys(state: &mut LuaState) -> LuaResult<u32> {
-    toy_count_all(state)
+    (0i32).into_stack(state)
 }
 
 fn toy_get_num_filtered(state: &mut LuaState) -> LuaResult<u32> {
-    toy_count_all(state)
-}
-
-fn toy_count_all(state: &mut LuaState) -> LuaResult<u32> {
-    let n = borrow_state(state)?.world.toys.len() as i32;
-    n.into_stack(state)
+    (0i32).into_stack(state)
 }
 
 fn toy_get_from_index(state: &mut LuaState) -> LuaResult<u32> {
-    let index = i32::from_stack(state, 1)?;
-    let id = {
-        let st = borrow_state(state)?;
-        let i = (index - 1) as usize;
-        st.world.toys.get(i).map_or(0i32, |t| t.item_id as i32)
-    };
-    id.into_stack(state)
+    let _ = i32::from_stack(state, 1)?;
+    (0i32).into_stack(state)
 }
 
 fn toy_get_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -66,7 +50,14 @@ fn toy_get_info(state: &mut LuaState) -> LuaResult<u32> {
             .map(|toy| (toy.item_id as f64, toy.name.clone(), toy.icon as f64))
     };
     let Some((tid, name, icon)) = info else {
-        return Ok(0);
+        let empty_name = create_string(state, "");
+        state.push(Val::Num(0.0));
+        state.push(empty_name);
+        state.push(Val::Num(0.0));
+        state.push(Val::Bool(false));
+        state.push(Val::Bool(false));
+        state.push(Val::Num(0.0));
+        return Ok(6);
     };
     Ok(push_toy_info(state, tid, &name, icon))
 }

@@ -1,6 +1,6 @@
 //! Misc unit globals that do not fit the core group-query bucket.
 
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, create_string, create_table};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -182,6 +182,22 @@ fn unit_affecting_combat(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_corruption(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_corruption_resistance(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_negative_corruption_effect_info(state: &mut LuaState) -> LuaResult<u32> {
+    let effects = create_table(state);
+    state.push(effects);
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetUnitName", get_unit_name)?;
     LuaApiMut::register_function(lua, "UnitFullName", unit_full_name)?;
@@ -194,5 +210,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitIsUnit", unit_is_unit)?;
     LuaApiMut::register_function(lua, "UnitThreatSituation", unit_threat_situation)?;
     LuaApiMut::register_function(lua, "UnitAffectingCombat", unit_affecting_combat)?;
+    LuaApiMut::register_function(lua, "GetCorruption", get_corruption)?;
+    LuaApiMut::register_function(lua, "GetCorruptionResistance", get_corruption_resistance)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetNegativeCorruptionEffectInfo",
+        get_negative_corruption_effect_info,
+    )?;
     Ok(())
 }

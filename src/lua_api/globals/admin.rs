@@ -732,25 +732,6 @@ pub(crate) fn build_mail(
     }
 }
 
-/// Convert a rilua `Val` to an `EventArg`.
-pub(super) fn lua_val_to_event_arg(state: &LuaState, val: Val) -> crate::event::EventArg {
-    use crate::event::EventArg;
-    match val {
-        Val::Str(s) => {
-            let text = state
-                .gc
-                .string_arena
-                .get(s)
-                .map(|ls| String::from_utf8_lossy(ls.data()).into_owned())
-                .unwrap_or_default();
-            EventArg::String(text)
-        }
-        Val::Num(n) => EventArg::Number(n),
-        Val::Bool(b) => EventArg::Boolean(b),
-        _ => EventArg::Nil,
-    }
-}
-
 /// Extract a string from the stack, returning a default if nil or absent.
 pub(super) fn opt_string_stack(state: &LuaState, index: i32, default: &str) -> String {
     match crate::lua_bridge::stack_val(state, index) {

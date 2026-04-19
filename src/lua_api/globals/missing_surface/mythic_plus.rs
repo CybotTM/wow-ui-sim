@@ -55,6 +55,13 @@ pub(super) fn register_mythic_plus_surface(state: &mut LuaState) -> LuaResult<()
     table_set_rust_fn_static(state, ns, "RequestCurrentAffixes", noop)?;
     table_set_rust_fn_static(state, ns, "RequestMapInfo", noop)?;
     table_set_rust_fn_static(state, ns, "RequestRewards", noop)?;
+    let challenge_mode = ensure_namespace(state, "C_ChallengeMode")?;
+    table_set_rust_fn_static(
+        state,
+        challenge_mode,
+        "GetLeaverPenaltyWarningTimeLeft",
+        get_leaver_penalty_warning_time_left,
+    )?;
     Ok(())
 }
 
@@ -177,5 +184,10 @@ fn is_mythic_plus_active(state: &mut LuaState) -> LuaResult<u32> {
 fn is_weekly_reward_available(state: &mut LuaState) -> LuaResult<u32> {
     let available = borrow_state(state)?.mythic_plus.is_weekly_reward_available;
     state.push(Val::Bool(available));
+    Ok(1)
+}
+
+fn get_leaver_penalty_warning_time_left(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
     Ok(1)
 }

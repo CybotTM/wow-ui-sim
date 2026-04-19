@@ -79,6 +79,7 @@ pub mod pvp_probes;
 pub mod quest_surface;
 pub mod quest_verbs;
 pub mod register;
+pub mod reputation_data;
 pub mod security;
 pub mod set_cvar_verb;
 pub mod social_probes;

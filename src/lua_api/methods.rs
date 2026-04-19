@@ -10,6 +10,7 @@ use super::env::WowLuaAppData;
 use super::hot_literals::{hot_metatable_key, metatable_idx};
 use crate::lua_bridge::create_frame_table;
 use crate::lua_bridge::stack_val;
+use crate::widget::WidgetType;
 use rilua::vm::callinfo::LUA_MULTRET;
 use rilua::vm::execute::{CallResult, execute};
 use rilua::vm::gc::arena::GcRef;
@@ -75,6 +76,7 @@ pub fn borrow_lua(state: &LuaState) -> LuaResult<Rc<std::cell::RefCell<rilua::Lu
 // ── Frame ref creation and caching ───────────────────────────────────
 
 const FRAME_REFS_KEY: &str = "__rilua_frame_refs";
+const FRAME_MT_CACHE_KEY: &str = "__rilua_frame_mt_cache";
 
 /// Get or create a rilua frame-backed table for the given widget ID.
 ///
@@ -91,7 +93,7 @@ pub fn frame_ref(state: &mut LuaState, id: u64) -> LuaResult<Val> {
     }
     let (lo, hi) = unpack_id(id);
     let table_ref = create_frame_table(state, lo, hi);
-    attach_frame_metatable(state, table_ref);
+    attach_frame_metatable(state, table_ref, id);
     // Frame backing tables are never deleted — wow-sim never removes a
     // frame from the registry. Pin so GC skips marking the 47k+ entries
     // in __rilua_frame_refs each cycle. The companion skip-traverse
@@ -237,7 +239,7 @@ fn frame_mt_registry_key(state: &mut LuaState) -> GcRef<rilua::vm::string::LuaSt
 ///
 /// Methods are accessed via `__index` in the metatable, not copied directly.
 /// This avoids ~636 raw_set calls per frame and reduces memory/GC pressure.
-fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
+fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>, id: u64) {
     let mt_key = frame_mt_registry_key(state);
     let mt_val = state
         .gc
@@ -246,42 +248,133 @@ fn attach_frame_metatable(state: &mut LuaState, table_ref: GcRef<Table>) {
         .map(|reg| reg.get_str(mt_key, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
     if let Val::Table(mt_ref) = mt_val {
+        let widget_type = borrow_state(state)
+            .ok()
+            .and_then(|sim| sim.widgets.get(id).map(|frame| frame.widget_type))
+            .unwrap_or(WidgetType::Frame);
+        let type_mt = frame_metatable_for_widget_type(state, mt_ref, widget_type);
         if let Some(t) = state.gc.tables.get_mut(table_ref) {
-            t.set_metatable(Some(mt_ref));
+            if let Val::Table(type_mt_ref) = type_mt {
+                t.set_metatable(Some(type_mt_ref));
+            } else {
+                t.set_metatable(Some(mt_ref));
+            }
         }
         // Methods accessed via __index, no need to copy
     }
 }
 
-fn copy_frame_methods_from_metatable(
+fn frame_metatable_for_widget_type(
     state: &mut LuaState,
-    table_ref: GcRef<Table>,
-    mt_ref: GcRef<Table>,
-) {
-    let entries = state
+    base_mt_ref: GcRef<Table>,
+    widget_type: WidgetType,
+) -> Val {
+    if matches!(widget_type, WidgetType::Frame | WidgetType::WorldFrame) {
+        return Val::Table(base_mt_ref);
+    }
+
+    let cache = registry_table_or_create(state, FRAME_MT_CACHE_KEY);
+    let key = widget_type.as_str();
+    let cached = table_get_static(state, cache, key);
+    if let Val::Table(_) = cached {
+        return cached;
+    }
+
+    let source_index_key = state.gc.intern_string_static(b"__index");
+    let source_index = match state
         .gc
         .tables
-        .get(mt_ref)
+        .get(base_mt_ref)
+        .map(|table| table.get_str(source_index_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil)
+    {
+        Val::Table(index_ref) => index_ref,
+        _ => return Val::Table(base_mt_ref),
+    };
+
+    let remove: &[&str] = match widget_type {
+        WidgetType::ScrollFrame => &[],
+        WidgetType::StatusBar => &[
+            "GetStatusBarDesaturated",
+            "SetStatusBarAtlas",
+            "SetStatusBarDesaturated",
+            "SetStatusBarDesaturation",
+            "GetStatusBarDesaturation",
+            "IsStatusBarDesaturated",
+        ],
+        _ => &[
+            "GetVerticalScroll",
+            "SetVerticalScroll",
+            "GetVerticalScrollRange",
+            "GetScrollChild",
+            "SetScrollChild",
+            "UpdateScrollChildRect",
+        ],
+    };
+
+    let index_clone = match create_table(state) {
+        Val::Table(index_ref) => index_ref,
+        _ => return Val::Table(base_mt_ref),
+    };
+    let index_entries = state
+        .gc
+        .tables
+        .get(source_index)
         .map(|table| table.hash_entries())
         .unwrap_or_default();
-
-    for (key, value) in entries {
-        let Val::Str(str_ref) = key else {
-            continue;
+    for (entry_key, entry_value) in index_entries {
+        let keep = match entry_key {
+            Val::Str(str_ref) => state
+                .gc
+                .string_arena
+                .get(str_ref)
+                .and_then(|name| std::str::from_utf8(name.data()).ok())
+                .is_none_or(|name| !remove.contains(&name)),
+            _ => true,
         };
-
-        let Some(name) = state.gc.string_arena.get(str_ref) else {
-            continue;
-        };
-        if name.data().starts_with(b"__") {
-            continue;
+        if keep
+            && let Some(index_tbl) = state.gc.tables.get_mut(index_clone)
+        {
+            let _ = index_tbl.raw_set(entry_key, entry_value, &state.gc.string_arena);
         }
-
-        if let Some(table) = state.gc.tables.get_mut(table_ref) {
-            let _ = table.raw_set(key, value, &state.gc.string_arena);
-        }
-        state.gc.barrier_back(table_ref);
     }
+    state.gc.barrier_back(index_clone);
+
+    let mt_clone = match create_table(state) {
+        Val::Table(mt_ref) => mt_ref,
+        _ => return Val::Table(base_mt_ref),
+    };
+    let base_entries = state
+        .gc
+        .tables
+        .get(base_mt_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+    for (entry_key, entry_value) in base_entries {
+        let is_index = matches!(entry_key, Val::Str(str_ref)
+            if state
+                .gc
+                .string_arena
+                .get(str_ref)
+                .and_then(|name| std::str::from_utf8(name.data()).ok())
+                == Some("__index"));
+        if let Some(mt_tbl) = state.gc.tables.get_mut(mt_clone) {
+            let _ = mt_tbl.raw_set(
+                entry_key,
+                if is_index {
+                    Val::Table(index_clone)
+                } else {
+                    entry_value
+                },
+                &state.gc.string_arena,
+            );
+        }
+    }
+    state.gc.barrier_back(mt_clone);
+
+    let mt = Val::Table(mt_clone);
+    table_set_static(state, cache, key, mt);
+    mt
 }
 
 /// Get a numeric-keyed value from a table.

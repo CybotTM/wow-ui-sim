@@ -519,11 +519,12 @@ fn test_legacy_get_container_num_slots() {
 #[test]
 fn test_get_inventory_slot_info() {
     let env = env();
-    let (slot, texture): (i32, i32) = env
+    let (slot, texture, check_relic): (i32, i32, bool) = env
         .eval(r#"return GetInventorySlotInfo("HeadSlot")"#)
         .unwrap();
     assert_eq!(slot, 1);
     assert_eq!(texture, 136516);
+    assert!(!check_relic);
 }
 
 #[test]
@@ -558,12 +559,12 @@ fn test_get_inventory_slot_info_bag_slots() {
 }
 
 #[test]
-fn test_get_inventory_slot_info_returns_two_values() {
+fn test_get_inventory_slot_info_returns_three_values() {
     let env = env();
     let count: i32 = env
         .eval(r#"return select('#', GetInventorySlotInfo("HeadSlot"))"#)
         .unwrap();
-    assert_eq!(count, 2);
+    assert_eq!(count, 3);
 }
 
 #[test]

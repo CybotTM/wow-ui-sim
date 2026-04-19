@@ -17,12 +17,21 @@ use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, ge
 use crate::screen::ScreenKind;
 use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;
+use std::env;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
 static NEXT_TIMER_ID: AtomicU64 = AtomicU64::new(1);
 const EVAL_RESULTS_REGISTRY_KEY: &str = "__wow_eval_results";
+
+fn event_dispatch_trace_enabled(event: &str) -> bool {
+    let Some(filter) = env::var_os("WOW_SIM_TRACE_EVENT_DISPATCH") else {
+        return false;
+    };
+    let filter = filter.to_string_lossy();
+    filter == "*" || filter.split(',').any(|name| name.trim() == event)
+}
 
 /// Generate a unique timer ID.
 pub(crate) fn next_timer_id() -> u64 {
@@ -335,6 +344,19 @@ impl WowLuaEnv {
 
     fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
         let addon_idx = self.handler_owner_addon(widget_id);
+        let trace_dispatch = event_dispatch_trace_enabled(event);
+        let trace_label = if trace_dispatch {
+            let state = self.state.borrow();
+            let frame_name = state
+                .widgets
+                .get(widget_id)
+                .and_then(|frame| frame.name.clone())
+                .unwrap_or_else(|| format!("#{widget_id}"));
+            let start_time = state.start_time;
+            Some((frame_name, start_time))
+        } else {
+            None
+        };
         let mut lua = self.lua.borrow_mut();
         let handler = {
             let state = lua.state_mut();
@@ -343,8 +365,20 @@ impl WowLuaEnv {
         let Some(handler) = handler else {
             return Ok(());
         };
+        if let Some((frame_name, start_time)) = &trace_label {
+            eprintln!(
+                "{} [EventTrace] {event} -> {frame_name} begin",
+                crate::logging::elapsed_prefix(*start_time)
+            );
+        }
         let call_args = self.build_event_call_args(&mut lua, widget_id, event, args)?;
         self.call_widget_handler(&mut lua, addon_idx, handler, &call_args);
+        if let Some((frame_name, start_time)) = &trace_label {
+            eprintln!(
+                "{} [EventTrace] {event} -> {frame_name} end",
+                crate::logging::elapsed_prefix(*start_time)
+            );
+        }
         Ok(())
     }
 

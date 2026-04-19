@@ -1,42 +1,11 @@
 //! C_PetJournal namespace.
 
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::borrow_state;
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 use super::set_global_val;
-
-fn push_pet_info(
-    state: &mut LuaState,
-    name: &str,
-    species: f64,
-    level: f64,
-    icon: f64,
-    pet_type: f64,
-) -> u32 {
-    state.push(Val::Num(species));
-    state.push(Val::Nil);
-    state.push(Val::Num(level));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    let name_val = create_string(state, name);
-    let empty_1 = create_string(state, "");
-    let empty_2 = create_string(state, "");
-    state.push(Val::Bool(false));
-    state.push(name_val);
-    state.push(Val::Num(icon));
-    state.push(Val::Num(pet_type));
-    state.push(Val::Num(0.0));
-    state.push(empty_1);
-    state.push(empty_2);
-    state.push(Val::Bool(false));
-    state.push(Val::Bool(true));
-    state.push(Val::Bool(false));
-    state.push(Val::Bool(false));
-    17
-}
 
 fn pet_get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
     let st = borrow_state(state)?;
@@ -46,38 +15,30 @@ fn pet_get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
     (total, owned).into_stack(state)
 }
 
+fn pet_get_num_pet_types(state: &mut LuaState) -> LuaResult<u32> {
+    (10i32).into_stack(state)
+}
+
+fn pet_get_num_pet_sources(state: &mut LuaState) -> LuaResult<u32> {
+    (10i32).into_stack(state)
+}
+
 fn pet_get_num_collected_info(state: &mut LuaState) -> LuaResult<u32> {
-    let st = borrow_state(state)?;
-    let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
-    let total = st.world.pets.len() as i32;
-    drop(st);
-    (owned, total).into_stack(state)
+    (0i32, 0i32).into_stack(state)
 }
 
 fn pet_get_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
-    let index = i32::from_stack(state, 1)?;
-    let st = borrow_state(state)?;
-    let i = (index - 1) as usize;
-    let Some(p) = st.world.pets.get(i) else {
-        drop(st);
-        return Ok(0);
-    };
-    let species = p.species_id as f64;
-    let level = p.level as f64;
-    let icon = p.icon as f64;
-    let pet_type = p.pet_type as f64;
-    let name_str = p.name.clone();
-    drop(st);
-    // speciesId, nil, level, 0, 0, 0, false, name, icon, petType, 0, "", "", false, true, false, false
-    Ok(push_pet_info(
-        state, &name_str, species, level, icon, pet_type,
-    ))
+    let _ = i32::from_stack(state, 1)?;
+    state.push(Val::Nil);
+    Ok(1)
 }
 
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
     let t = TableBuilder::new(lua.state_mut())
         .set_function("ClearRecentFanfares", |_state| Ok(0))?
         .set_function("GetNumPets", pet_get_num_pets)?
+        .set_function("GetNumPetTypes", pet_get_num_pet_types)?
+        .set_function("GetNumPetSources", pet_get_num_pet_sources)?
         .set_function("GetNumCollectedInfo", pet_get_num_collected_info)?
         .set_function("GetNumPetsNeedingFanfare", |state| (0i32).into_stack(state))?
         .set_function("GetPetInfoByIndex", pet_get_info_by_index)?

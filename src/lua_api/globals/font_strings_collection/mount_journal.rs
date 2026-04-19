@@ -33,18 +33,8 @@ fn push_mount_info(
 }
 
 fn register_mount_counts(tb: TableBuilder) -> LuaResult<TableBuilder> {
-    tb.set_function("GetNumMounts", |state| {
-        let st = borrow_state(state)?;
-        let n = st.world.mounts.len() as i32;
-        drop(st);
-        n.into_stack(state)
-    })?
-    .set_function("GetNumDisplayedMounts", |state| {
-        let st = borrow_state(state)?;
-        let n = st.world.mounts.len() as i32;
-        drop(st);
-        n.into_stack(state)
-    })
+    tb.set_function("GetNumMounts", |state| (0i32).into_stack(state))?
+        .set_function("GetNumDisplayedMounts", |state| (0i32).into_stack(state))
 }
 
 struct MountInfoSnapshot {

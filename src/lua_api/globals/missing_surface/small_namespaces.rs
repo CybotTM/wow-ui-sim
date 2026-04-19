@@ -16,7 +16,7 @@
 //! - `C_VignetteInfo.*` — empty vignette set for world-map refreshes
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string, create_table};
+use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -32,6 +32,9 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
     register_flat_namespace(state, "C_Bank", C_BANK_METHODS)?;
     register_flat_namespace(state, "C_NewItems", C_NEW_ITEMS_METHODS)?;
     register_flat_namespace(state, "C_VignetteInfo", C_VIGNETTE_INFO_METHODS)?;
+    register_flat_namespace(state, "C_Console", C_CONSOLE_METHODS)?;
+    register_flat_namespace(state, "C_Covenants", C_COVENANTS_METHODS)?;
+    register_flat_namespace(state, "C_Soulbinds", C_SOULBINDS_METHODS)?;
     Ok(())
 }
 
@@ -107,6 +110,28 @@ const C_NEW_ITEMS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
 const C_VIGNETTE_INFO_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetVignettes", c_vignette_info_get_vignettes),
     ("GetVignetteInfo", c_vignette_info_get_vignette_info),
+];
+
+const C_CONSOLE_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
+    ("GetAllCommands", c_console_get_all_commands),
+    ("GetColorFromType", c_console_get_color_from_type),
+];
+
+const C_COVENANTS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
+    ("GetCovenantData", c_covenants_get_covenant_data),
+    ("GetActiveCovenantID", c_covenants_get_active_covenant_id),
+    ("GetCovenantIDs", c_covenants_get_covenant_ids),
+];
+
+const C_SOULBINDS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
+    ("GetActiveSoulbindID", c_soulbinds_get_active_soulbind_id),
+    ("GetSoulbindData", c_soulbinds_get_soulbind_data),
+    ("GetConduitCollection", c_soulbinds_get_conduit_collection),
+    (
+        "GetConduitCollectionData",
+        c_soulbinds_get_conduit_collection_data,
+    ),
+    ("IsConduitInstalled", c_soulbinds_is_conduit_installed),
 ];
 
 fn c_trophy_hall_get_trophy_info(_state: &mut LuaState) -> LuaResult<u32> {
@@ -217,4 +242,92 @@ fn c_vignette_info_get_vignettes(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_vignette_info_get_vignette_info(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn c_console_get_all_commands(state: &mut LuaState) -> LuaResult<u32> {
+    let commands = create_table(state);
+    state.push(commands);
+    Ok(1)
+}
+
+fn c_console_get_color_from_type(state: &mut LuaState) -> LuaResult<u32> {
+    let color = create_table(state);
+    table_set(state, color, "r", Val::Num(1.0));
+    table_set(state, color, "g", Val::Num(1.0));
+    table_set(state, color, "b", Val::Num(1.0));
+    table_set(state, color, "a", Val::Num(1.0));
+    state.push(color);
+    Ok(1)
+}
+
+fn c_covenants_get_covenant_data(state: &mut LuaState) -> LuaResult<u32> {
+    let covenant_id = match crate::lua_bridge::stack_val(state, 1) {
+        Val::Num(value) if value.is_finite() => value as i32,
+        _ => 0,
+    };
+    let (id, name) = match covenant_id {
+        1 => (1, "Kyrian"),
+        2 => (2, "Venthyr"),
+        3 => (3, "Night Fae"),
+        4 => (4, "Necrolord"),
+        _ => (0, "None"),
+    };
+    let covenant = create_table(state);
+    let name = create_string(state, name);
+    table_set(state, covenant, "ID", Val::Num(id as f64));
+    table_set(state, covenant, "name", name);
+    state.push(covenant);
+    Ok(1)
+}
+
+fn c_covenants_get_active_covenant_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_covenants_get_covenant_ids(state: &mut LuaState) -> LuaResult<u32> {
+    let ids = create_table(state);
+    if let Val::Table(table_ref) = &ids {
+        for (index, value) in [1_i32, 2, 3, 4].into_iter().enumerate() {
+            if let Some(table) = state.gc.tables.get_mut(*table_ref) {
+                let _ = table.raw_set(
+                    Val::Num((index + 1) as f64),
+                    Val::Num(value as f64),
+                    &state.gc.string_arena,
+                );
+            }
+        }
+    }
+    state.push(ids);
+    Ok(1)
+}
+
+fn c_soulbinds_get_active_soulbind_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn c_soulbinds_get_soulbind_data(state: &mut LuaState) -> LuaResult<u32> {
+    let soulbind = create_table(state);
+    let name = create_string(state, "");
+    table_set(state, soulbind, "ID", Val::Num(0.0));
+    table_set(state, soulbind, "name", name);
+    table_set(state, soulbind, "covenantID", Val::Num(0.0));
+    state.push(soulbind);
+    Ok(1)
+}
+
+fn c_soulbinds_get_conduit_collection(state: &mut LuaState) -> LuaResult<u32> {
+    let conduits = create_table(state);
+    state.push(conduits);
+    Ok(1)
+}
+
+fn c_soulbinds_get_conduit_collection_data(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_soulbinds_is_conduit_installed(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
 }

@@ -26,6 +26,8 @@ use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
 
+const BYTE_LOOKUP_SIZE: usize = 256;
+
 // ── Global table helpers ─────────────────────────────────────────────────────
 
 pub(super) fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
@@ -89,30 +91,88 @@ pub fn wipe(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 /// tinsert(t [, pos], value) — append or insert a value into an array table.
-pub fn tinsert(_state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: implement via table array ops
-    Ok(0)
+pub fn tinsert(state: &mut LuaState) -> LuaResult<u32> {
+    rilua::stdlib::table::tab_insert(state)
 }
 
 /// tremove(t [, pos]) — remove and return a value from an array table.
 pub fn tremove(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: implement via table array ops
-    state.push(Val::Nil);
-    Ok(1)
+    rilua::stdlib::table::tab_remove(state)
 }
 
 /// tContains(t, value) — return true if value is present in the array part of t.
 pub fn t_contains(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: iterate array part and compare
-    state.push(Val::Bool(false));
+    let table = stack_val(state, 1);
+    let needle = stack_val(state, 2);
+    let found = matches!(table, Val::Table(table_ref) if state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.array_slice().iter().any(|value| *value == needle))
+        .unwrap_or(false));
+    state.push(Val::Bool(found));
     Ok(1)
 }
 
 /// tIndexOf(t, value) — return the integer index of value in t, or nil.
 pub fn t_index_of(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: iterate array part and compare
-    state.push(Val::Nil);
+    let table = stack_val(state, 1);
+    let needle = stack_val(state, 2);
+    let index = match table {
+        Val::Table(table_ref) => state.gc.tables.get(table_ref).and_then(|table| {
+            table
+                .array_slice()
+                .iter()
+                .position(|value| *value == needle)
+                .map(|index| index + 1)
+        }),
+        _ => None,
+    };
+    match index {
+        Some(index) => state.push(Val::Num(index as f64)),
+        None => state.push(Val::Nil),
+    }
     Ok(1)
+}
+
+/// tFilter(t, predicate) — keep only values for which predicate returns true.
+pub fn t_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let table = stack_val(state, 1);
+    let predicate = stack_val(state, 2);
+    let Val::Table(table_ref) = table else {
+        return Ok(0);
+    };
+    let Some(table_values) = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.array_slice().to_vec())
+    else {
+        return Ok(0);
+    };
+
+    let mut kept = Vec::new();
+    for value in table_values {
+        let keep = match crate::lua_api::methods::call_function_state(state, predicate, &[value]) {
+            Ok(result) => matches!(result, Val::Bool(true)),
+            Err(_) => false,
+        };
+        if keep {
+            kept.push(value);
+        }
+    }
+
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let len = table.array_slice().len();
+        for index in 1..=len {
+            let _ = table.raw_set(Val::Num(index as f64), Val::Nil, &state.gc.string_arena);
+        }
+        for (index, value) in kept.into_iter().enumerate() {
+            let _ = table.raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(table_ref);
+    Ok(0)
 }
 
 pub use table_util::t_invert;
@@ -201,11 +261,15 @@ pub fn strsplit(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn split_on_delimiter_set(input: &[u8], delim: &[u8], limit: Option<usize>) -> Vec<Vec<u8>> {
+    let mut delim_lookup = [false; BYTE_LOOKUP_SIZE];
+    for &byte in delim {
+        delim_lookup[byte as usize] = true;
+    }
     let mut pieces = Vec::new();
     let mut current: Vec<u8> = Vec::new();
     let max_pieces = limit.unwrap_or(usize::MAX);
     for &byte in input {
-        let is_delim = delim.contains(&byte);
+        let is_delim = delim_lookup[byte as usize];
         let can_split = pieces.len() + 1 < max_pieces;
         if is_delim && can_split {
             pieces.push(std::mem::take(&mut current));
@@ -503,6 +567,7 @@ fn register_utility_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "tremove", tremove)?;
     LuaApiMut::register_function(lua, "tContains", t_contains)?;
     LuaApiMut::register_function(lua, "tIndexOf", t_index_of)?;
+    LuaApiMut::register_function(lua, "tFilter", t_filter)?;
     LuaApiMut::register_function(lua, "tInvert", t_invert)?;
     LuaApiMut::register_function(lua, "getglobal", getglobal)?;
     LuaApiMut::register_function(lua, "setglobal", setglobal)?;

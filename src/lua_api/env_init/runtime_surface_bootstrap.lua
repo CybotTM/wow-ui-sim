@@ -66,6 +66,15 @@ if BreakUpLargeNumbers == nil then
   end
 end
 
+do
+  local stringMeta = getmetatable("")
+  if type(stringMeta) == "table" and stringMeta.split == nil then
+    function stringMeta:split(delimiter, limit)
+      return { strsplit(delimiter, self, limit) }
+    end
+  end
+end
+
 if tAppendAll == nil then
   function tAppendAll(tbl, addedArray)
     if type(tbl) ~= "table" or type(addedArray) ~= "table" then
@@ -1112,9 +1121,105 @@ end
 
 __wow_ensure_startup_navigation_surface()
 
+if abs == nil and math ~= nil then abs = math.abs end
+if ceil == nil and math ~= nil then ceil = math.ceil end
+if floor == nil and math ~= nil then floor = math.floor end
+if max == nil and math ~= nil then max = math.max end
+if min == nil and math ~= nil then min = math.min end
+if strlen == nil and string ~= nil then strlen = string.len end
+if sort == nil and table ~= nil then sort = table.sort end
+
+if strsplittable == nil then
+  function strsplittable(delimiter, input, limit)
+    return { strsplit(delimiter, input, limit) }
+  end
+end
+
+if MergeTable == nil then
+  function MergeTable(dest, src)
+    if type(dest) ~= "table" or type(src) ~= "table" then
+      return dest
+    end
+    for key, value in pairs(src) do
+      dest[key] = value
+    end
+    return dest
+  end
+end
+
+if tFilter == nil then
+  function tFilter(t, predicate)
+    if type(t) ~= "table" or type(predicate) ~= "function" then
+      return t
+    end
+    local out = 1
+    local len = #t
+    for i = 1, len do
+      local value = t[i]
+      if predicate(value, i, t) then
+        if out ~= i then
+          t[out] = value
+        end
+        out = out + 1
+      end
+    end
+    for i = out, len do
+      t[i] = nil
+    end
+    return t
+  end
+end
+
+local function __wow_ensure_item_button_surface(button)
+  if type(button) ~= "table" then
+    return button
+  end
+
+  local icon = rawget(button, "icon")
+  if icon == nil and type(button.CreateTexture) == "function" then
+    icon = button:CreateTexture(nil, "BORDER")
+    button.icon = icon
+  end
+  if icon ~= nil then
+    if type(icon.SetParentKey) == "function" then
+      pcall(icon.SetParentKey, icon, "icon", true)
+    end
+    if type(icon.ClearAllPoints) == "function" then
+      icon:ClearAllPoints()
+    end
+    if type(icon.SetPoint) == "function" then
+      icon:SetPoint("TOPLEFT", button, "TOPLEFT")
+      icon:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT")
+    end
+  end
+
+  local border = rawget(button, "IconBorder")
+  if border == nil and type(button.CreateTexture) == "function" then
+    border = button:CreateTexture(nil, "OVERLAY")
+    button.IconBorder = border
+  end
+  if border ~= nil then
+    if type(border.SetParentKey) == "function" then
+      pcall(border.SetParentKey, border, "IconBorder", true)
+    end
+    if type(border.SetSize) == "function" then
+      border:SetSize(37, 37)
+    end
+    if type(border.ClearAllPoints) == "function" then
+      border:ClearAllPoints()
+    end
+    if type(border.SetPoint) == "function" then
+      border:SetPoint("CENTER", button, "CENTER")
+    end
+  end
+
+  return button
+end
+
 if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
   __wow_original_CreateFrame = CreateFrame
   function CreateFrame(...)
+    local frameType = select(1, ...)
     local inherits = select(4, ...)
     if type(inherits) == "string" then
       if string.find(inherits, "MapCanvasFrameTemplate", 1, true) or
@@ -1123,6 +1228,9 @@ if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
       end
     end
     local created = __wow_install_frame_helpers(__wow_original_CreateFrame(...))
+    if frameType == "ItemButton" then
+      created = __wow_ensure_item_button_surface(created)
+    end
     local parent = select(3, ...)
     if type(parent) == "table" and type(inherits) == "string" then
       if string.find(inherits, "MapCanvasFrameScrollContainerTemplate", 1, true) then
@@ -1622,16 +1730,57 @@ if mapvalues == nil then
   end
 end
 
-local function __wow_namespace(defaults)
-  return setmetatable(defaults or {}, {
-    __index = function(t, key)
-      local fn = function()
-        return nil
+local __wow_namespace_names = setmetatable({}, { __mode = "k" })
+local __wow_namespace_mt = {
+  __index = function(t, key)
+    __wow_log_nil_symbol_access(__wow_namespace_names[t], key)
+    local fn = function()
+      return nil
+    end
+    rawset(t, key, fn)
+    return fn
+  end,
+}
+
+function __wow_log_nil_symbol_access(container, key)
+  if type(__wow_record_nil_symbol_access) ~= "function" then
+    return
+  end
+
+  local source
+  local line
+  for level = 2, 8 do
+    local info = debug.getinfo(level, "Sl")
+    if info ~= nil and type(info.source) == "string" and info.source:sub(1, 1) == "@" then
+      if info.source:find("runtime_surface_bootstrap.lua", 1, true) == nil then
+        source = info.source
+        line = info.currentline
+        break
       end
-      rawset(t, key, fn)
-      return fn
-    end,
-  })
+    end
+  end
+
+  __wow_record_nil_symbol_access(container, key, source, line)
+end
+
+local function __wow_attach_namespace_name(namespace, name)
+  if type(namespace) ~= "table" then
+    return namespace
+  end
+  if name ~= nil then
+    __wow_namespace_names[namespace] = name
+  end
+  local mt = getmetatable(namespace)
+  if mt == nil then
+    setmetatable(namespace, __wow_namespace_mt)
+  elseif mt.__index == nil then
+    setmetatable(namespace, __wow_namespace_mt)
+  end
+  return namespace
+end
+
+local function __wow_namespace(defaults)
+  return __wow_attach_namespace_name(defaults or {})
 end
 
 local function __wow_merge_namespace(existing, defaults)
@@ -1646,6 +1795,14 @@ local function __wow_merge_namespace(existing, defaults)
     setmetatable(namespace, getmetatable(__wow_namespace()))
   end
   return namespace
+end
+
+local function __wow_seed_namespace_names()
+  for key, value in pairs(_G) do
+    if type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") and type(value) == "table" then
+      __wow_attach_namespace_name(value, key)
+    end
+  end
 end
 
 local function __wow_copy_table(source)
@@ -2355,9 +2512,52 @@ if CombatLogGetCurrentEntry == nil then
     currentEntry = 0,
     numEntries = 0,
     retentionTime = 300,
+    filteredEventsEnabled = false,
+    messageLimit = 300,
+    entries = {},
+    currentIndex = nil,
+    createdMessages = {},
   }
 
+  local function __wow_combat_log_entries()
+    return __wow_combat_log_state.entries
+  end
+
+  local function __wow_combat_log_latest_entry()
+    local entries = __wow_combat_log_entries()
+    if type(entries) ~= "table" or #entries == 0 then
+      return nil
+    end
+    local index = __wow_combat_log_state.currentIndex
+    if type(index) ~= "number" or index < 1 or index > #entries then
+      index = #entries
+    end
+    return entries[index]
+  end
+
+  local function __wow_combat_log_set_entry_count(count)
+    __wow_combat_log_state.numEntries = math.max(0, tonumber(count) or 0)
+  end
+
+  local function __wow_combat_log_object_is_a(objectType, mask)
+    local object = math.max(0, tonumber(objectType) or 0)
+    local filter = math.max(0, tonumber(mask) or 0)
+    while object > 0 and filter > 0 do
+      if object % 2 == 1 and filter % 2 == 1 then
+        return true
+      end
+      object = math.floor(object / 2)
+      filter = math.floor(filter / 2)
+    end
+    return false
+  end
+
   function CombatLogAddFilter(_filter)
+    return true
+  end
+
+  function CombatLogResetFilter()
+    __wow_combat_log_state.filteredEventsEnabled = false
     return true
   end
 
@@ -2373,15 +2573,52 @@ if CombatLogGetCurrentEntry == nil then
   end
 
   function CombatLogGetCurrentEventInfo()
-    return nil
+    local entry = __wow_combat_log_latest_entry()
+    if entry == nil then
+      return nil
+    end
+    return unpack(entry)
   end
 
   function CombatLogGetNumEntries()
+    local entries = __wow_combat_log_entries()
+    if type(entries) == "table" then
+      return #entries
+    end
     return __wow_combat_log_state.numEntries
   end
 
   function CombatLogSetCurrentEntry(entry)
     __wow_combat_log_state.currentEntry = math.max(0, tonumber(entry) or 0)
+  end
+
+  function CombatLogShowCurrentEntry()
+    local entries = __wow_combat_log_entries()
+    if type(entries) == "table" and #entries > 0 then
+      return true
+    end
+    return __wow_combat_log_state.currentEntry > 0
+  end
+
+  function CombatLogClearEntries()
+    __wow_combat_log_state.entries = {}
+    __wow_combat_log_state.currentIndex = nil
+    __wow_combat_log_state.currentEntry = 0
+    __wow_combat_log_set_entry_count(0)
+    return true
+  end
+
+  function CombatLogSetRetentionTime(retentionTime)
+    __wow_combat_log_state.retentionTime = tonumber(retentionTime) or 0
+    return true
+  end
+
+  function CombatLogGetRetentionTime()
+    return __wow_combat_log_state.retentionTime
+  end
+
+  function CombatLog_Object_IsA(objectType, mask)
+    return __wow_combat_log_object_is_a(objectType, mask)
   end
 end
 
@@ -2633,6 +2870,117 @@ C_PartyInfo = __wow_merge_namespace(C_PartyInfo, {
 })
 
 C_Map = __wow_merge_namespace(C_Map, {})
+UiMapPoint = __wow_merge_namespace(UiMapPoint, {})
+C_MapExplorationInfo = __wow_merge_namespace(C_MapExplorationInfo, {})
+
+local __wow_map_area_names = {
+  [1] = "Dun Morogh",
+  [2248] = "The Isle of Dorn",
+}
+
+local function __wow_map_layer_dimensions(mapID)
+  if C_Map == nil or type(C_Map.GetMapArtLayers) ~= "function" then
+    return nil, nil
+  end
+  local layers = C_Map.GetMapArtLayers(mapID)
+  if type(layers) ~= "table" then
+    return nil, nil
+  end
+  local layer = layers[1]
+  if type(layer) ~= "table" then
+    return nil, nil
+  end
+  return layer.layerWidth, layer.layerHeight
+end
+
+local function __wow_map_make_overlay(offsetX, offsetY, textureWidth, textureHeight, fileDataIDs)
+  return {
+    offsetX = offsetX,
+    offsetY = offsetY,
+    textureWidth = textureWidth,
+    textureHeight = textureHeight,
+    isShownByMouseOver = false,
+    isDrawOnTopLayer = false,
+    fileDataIDs = fileDataIDs,
+    hitRect = {
+      top = offsetY,
+      bottom = offsetY + textureHeight,
+      left = offsetX,
+      right = offsetX + textureWidth,
+    },
+  }
+end
+
+local function __wow_map_exploration_overlays(mapID)
+  local layerWidth, layerHeight = __wow_map_layer_dimensions(mapID)
+  if layerWidth == nil or layerHeight == nil then
+    return {}
+  end
+
+  local topOffset = math.floor(layerHeight * 0.02)
+  local overlayHeight = math.max(math.floor(layerHeight * 0.94), 1)
+  local leftWidth = math.floor(layerWidth * 0.55)
+  local rightOffset = math.floor(layerWidth * 0.82)
+  local rightWidth = math.max(math.floor(layerWidth * 0.18), 1)
+  return {
+    __wow_map_make_overlay(0, topOffset, leftWidth, overlayHeight, { 4556093, 4741460 }),
+    __wow_map_make_overlay(rightOffset, topOffset, rightWidth, overlayHeight, { 4556094 }),
+  }
+end
+
+local function __wow_map_point_from_table(mapID, pos)
+  if type(pos) ~= "table" then
+    return nil
+  end
+  return {
+    uiMapID = mapID,
+    x = tonumber(pos.x) or 0.5,
+    y = tonumber(pos.y) or 0.5,
+  }
+end
+
+UiMapPoint.CreateFromVector2D = function(mapID, pos)
+  return __wow_map_point_from_table(mapID, pos)
+end
+
+UiMapPoint.CreateFromCoordinates = function(mapID, x, y)
+  return { uiMapID = mapID, x = tonumber(x) or 0, y = tonumber(y) or 0 }
+end
+
+C_MapExplorationInfo.GetExploredAreaIDsAtPosition = function(mapID, pos)
+  local areas = {}
+  local point = __wow_map_point_from_table(mapID, pos)
+  if point == nil then
+    return areas
+  end
+
+  if mapID == C_Map.GetCurrentMapID() then
+    if point.x < 0.10 or point.y < 0.05 then
+      return areas
+    end
+    if point.x >= 0.68 and point.x <= 0.74 and point.y >= 0.20 and point.y <= 0.50 then
+      return areas
+    end
+    if point.x <= 0.55 and point.y >= 0.05 and point.y <= 0.95 then
+      areas[1] = 1
+      areas[2] = 2
+      return areas
+    end
+    if point.x >= 0.82 and point.y >= 0.05 and point.y <= 0.95 then
+      areas[1] = 3
+      return areas
+    end
+  end
+
+  return areas
+end
+
+C_MapExplorationInfo.GetExploredMapTextures = function(mapID)
+  if mapID ~= C_Map.GetCurrentMapID() and mapID ~= 1 then
+    return {}
+  end
+  return __wow_map_exploration_overlays(mapID)
+end
 
 local __wow_map_runtime_state = rawget(_G, "__wow_map_runtime_state")
 if type(__wow_map_runtime_state) ~= "table" then
@@ -2683,6 +3031,21 @@ C_Map.GetFallbackWorldMapID = function()
     end
   end
   return 2248
+end
+
+C_Map.GetAreaInfo = function(areaID)
+  if areaID == nil then
+    return nil
+  end
+  return __wow_map_area_names[areaID]
+end
+
+C_Map.GetMapWorldSize = function(mapID)
+  local layerWidth, layerHeight = __wow_map_layer_dimensions(mapID)
+  if layerWidth == nil or layerHeight == nil then
+    return nil
+  end
+  return layerWidth, layerHeight
 end
 
 C_Map.MapHasArt = function(mapID)
@@ -2764,6 +3127,7 @@ C_Minimap = __wow_merge_namespace(C_Minimap, {
   end,
   SetTracking = __wow_noop,
   ClearAllTracking = __wow_noop,
+  GetViewRadius = function() return 200 end,
 })
 
 C_Navigation = __wow_merge_namespace(C_Navigation, {
@@ -2772,12 +3136,15 @@ C_Navigation = __wow_merge_namespace(C_Navigation, {
   HasValidScreenPosition = function() return false end,
   GetDistance = function() return 0 end,
   GetNearestPartyMemberToken = function() return nil end,
-  GetFrame = function() return UIParent end,
+  GetFrame = function() return nil end,
 })
 
 C_DateAndTime = __wow_merge_namespace(C_DateAndTime, {
   GetCurrentCalendarTime = function()
     return __wow_make_calendar_time(0, 0)
+  end,
+  GetServerTimeLocal = function()
+    return 0
   end,
   AdjustTimeByDays = function(calendarTime, deltaDays)
     local time = __wow_copy_table(calendarTime)
@@ -2816,7 +3183,22 @@ C_DateAndTime = __wow_merge_namespace(C_DateAndTime, {
     return 0
   end,
   GetSecondsUntilDailyReset = function()
-    return 0
+    return 86400
+  end,
+  GetSecondsUntilWeeklyReset = function()
+    return 604800
+  end,
+})
+
+C_TaxiMap = __wow_merge_namespace(C_TaxiMap, {
+  GetAllTaxiNodes = function()
+    return {}
+  end,
+  GetTaxiNodesForMap = function()
+    return {}
+  end,
+  ShouldMapShowTaxiNodes = function()
+    return true
   end,
 })
 
@@ -3058,6 +3440,10 @@ if CreateFramePool == nil then
       return count
     end
 
+    function pool:IsActive(frame)
+      return self.active[frame] == true
+    end
+
     function pool:DoesObjectBelongToPool(frame)
       return self.known[frame] == true
     end
@@ -3123,6 +3509,10 @@ local function __wow_make_region_pool(acquire_region)
       return count
     end
 
+    function pool:IsActive(region)
+      return self.active[region] == true
+    end
+
     function pool:DoesObjectBelongToPool(region)
       return self.known[region] == true
     end
@@ -3178,9 +3568,19 @@ if CreateFramePoolCollection == nil then
       }, "|")
     end
 
+    local function find_pool_by_template(collection, template, specialization)
+      for _, pool in pairs(collection.pools) do
+        if pool.template == template and pool.specialization == specialization then
+          return pool
+        end
+      end
+      return nil
+    end
+
     function collection:CreatePool(frameType, parent, template, resetter, _forbidden, specialization)
       local key = pool_key(frameType, parent, template, specialization)
       local pool = CreateFramePool(frameType, parent, template, resetter)
+      pool.specialization = specialization
       self.pools[key] = pool
       return pool
     end
@@ -3194,12 +3594,29 @@ if CreateFramePoolCollection == nil then
       return pool
     end
 
+    function collection:Acquire(template, specialization)
+      local pool = find_pool_by_template(self, template, specialization)
+      if pool == nil then
+        return nil
+      end
+      return pool:Acquire()
+    end
+
     function collection:GetNumActive()
       local total = 0
       for _, pool in pairs(self.pools) do
         total = total + (pool.GetNumActive and pool:GetNumActive() or 0)
       end
       return total
+    end
+
+    function collection:IsActive(object)
+      for _, pool in pairs(self.pools) do
+        if pool.IsActive and pool:IsActive(object) then
+          return true
+        end
+      end
+      return false
     end
 
     function collection:DoesObjectBelongToPool(object)
@@ -3615,6 +4032,15 @@ if type(__wow_ej_tier_state) ~= "table" then
   rawset(_G, "__wow_ej_tier_state", __wow_ej_tier_state)
 end
 
+local __wow_ej_loot_filter_state = rawget(_G, "__wow_ej_loot_filter_state")
+if type(__wow_ej_loot_filter_state) ~= "table" then
+  __wow_ej_loot_filter_state = {
+    classFilter = 0,
+    specFilter = 0,
+  }
+  rawset(_G, "__wow_ej_loot_filter_state", __wow_ej_loot_filter_state)
+end
+
 if EJ_GetCurrentTier == nil then
   function EJ_GetCurrentTier()
     return __wow_ej_tier_state.currentTier or 10
@@ -3623,15 +4049,29 @@ end
 
 if EJ_SelectTier == nil then
   function EJ_SelectTier(tier)
-    if type(tier) == "number" then
-      __wow_ej_tier_state.currentTier = tier
+    local value = tonumber(tier)
+    if value ~= nil then
+      __wow_ej_tier_state.currentTier = value
     end
   end
 end
 
 if EJ_GetLootFilter == nil then
   function EJ_GetLootFilter()
-    return 0, 0
+    return __wow_ej_loot_filter_state.classFilter or 0, __wow_ej_loot_filter_state.specFilter or 0
+  end
+end
+
+if EJ_SetLootFilter == nil then
+  function EJ_SetLootFilter(classFilter, specFilter)
+    __wow_ej_loot_filter_state.classFilter = tonumber(classFilter) or 0
+    __wow_ej_loot_filter_state.specFilter = tonumber(specFilter) or 0
+  end
+end
+
+if EJ_IsValidInstanceDifficulty == nil then
+  function EJ_IsValidInstanceDifficulty(difficultyID)
+    return tonumber(difficultyID) ~= nil and tonumber(difficultyID) > 0
   end
 end
 
@@ -5620,6 +6060,788 @@ if rawget(StaticModelInfo, "CreateModelSceneEntry") == nil then
   end
 end
 
+local __wow_reputation_state = rawget(_G, "__wow_reputation_state")
+if type(__wow_reputation_state) ~= "table" then
+  __wow_reputation_state = {
+    selectedFaction = 0,
+    watchedFactionID = 2590,
+    sortType = Enum.ReputationSortType and Enum.ReputationSortType.None or 0,
+    showLegacy = true,
+    factions = {
+      { factionID = 0, name = "The War Within", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false },
+      { factionID = 2590, name = "Council of Dornogal", description = "The governing body of Dornogal.", reaction = 6, standing = 8200, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 2570, name = "Hallowfall Arathi", description = "The Arathi settlers of Hallowfall.", reaction = 7, standing = 4500, bottom = 0, top = 21000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 2600, name = "The Assembly of the Deeps", description = "United denizens of the deep.", reaction = 6, standing = 11000, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 2605, name = "The Severed Threads", description = "A coalition of Nerubian outcasts.", reaction = 5, standing = 4800, bottom = 0, top = 6000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 0, name = "Dragonflight", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false },
+      { factionID = 2507, name = "Dragonscale Expedition", description = "Explorers of the Dragon Isles.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 2510, name = "Valdrakken Accord", description = "The united dragonflights.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 0, name = "Classic", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false },
+      { factionID = 72, name = "Stormwind", description = "The Kingdom of Stormwind.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 47, name = "Ironforge", description = "The Dwarven capital.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
+    },
+  }
+  rawset(_G, "__wow_reputation_state", __wow_reputation_state)
+end
+
+local function __wow_reputation_visible_factions()
+  local visible = {}
+  local hideChildren = false
+  for _, faction in ipairs(__wow_reputation_state.factions) do
+    if faction.isHeader then
+      hideChildren = faction.isCollapsed == true
+      table.insert(visible, faction)
+    elseif not hideChildren then
+      table.insert(visible, faction)
+    end
+  end
+  return visible
+end
+
+local function __wow_reputation_find_visible(index)
+  return __wow_reputation_visible_factions()[index]
+end
+
+local function __wow_reputation_find_by_id(factionID)
+  for _, faction in ipairs(__wow_reputation_state.factions) do
+    if not faction.isHeader and faction.factionID == factionID then
+      return faction
+    end
+  end
+  return nil
+end
+
+local function __wow_reputation_find_header(index)
+  local visible = __wow_reputation_visible_factions()
+  local faction = visible[index]
+  if faction and faction.isHeader then
+    return faction
+  end
+  return nil
+end
+
+C_Reputation = __wow_merge_namespace(C_Reputation, {})
+C_Reputation.GetNumFactions = function()
+  return #__wow_reputation_visible_factions()
+end
+C_Reputation.GetFactionDataByIndex = function(index)
+  return __wow_reputation_find_visible(index)
+end
+C_Reputation.GetFactionDataByID = function(factionID)
+  return __wow_reputation_find_by_id(factionID)
+end
+C_Reputation.GetSelectedFaction = function()
+  return __wow_reputation_state.selectedFaction or 0
+end
+C_Reputation.SetSelectedFaction = function(index)
+  __wow_reputation_state.selectedFaction = tonumber(index) or 0
+end
+C_Reputation.GetWatchedFactionData = function()
+  return __wow_reputation_find_by_id(__wow_reputation_state.watchedFactionID)
+end
+C_Reputation.SetWatchedFactionByIndex = function(index)
+  local faction = __wow_reputation_find_visible(index)
+  __wow_reputation_state.watchedFactionID = faction and faction.factionID or 0
+end
+C_Reputation.SetWatchedFactionByID = function(factionID)
+  __wow_reputation_state.watchedFactionID = tonumber(factionID) or 0
+end
+C_Reputation.CollapseFactionHeader = function(index)
+  local header = __wow_reputation_find_header(index)
+  if header then
+    header.isCollapsed = true
+  end
+end
+C_Reputation.ExpandFactionHeader = function(index)
+  local header = __wow_reputation_find_header(index)
+  if header then
+    header.isCollapsed = false
+  end
+end
+C_Reputation.CollapseAllFactionHeaders = function()
+  for _, faction in ipairs(__wow_reputation_state.factions) do
+    if faction.isHeader then
+      faction.isCollapsed = true
+    end
+  end
+end
+C_Reputation.ExpandAllFactionHeaders = function()
+  for _, faction in ipairs(__wow_reputation_state.factions) do
+    if faction.isHeader then
+      faction.isCollapsed = false
+    end
+  end
+end
+C_Reputation.GetReputationSortType = function()
+  return __wow_reputation_state.sortType
+end
+C_Reputation.SetReputationSortType = function(sortType)
+  __wow_reputation_state.sortType = tonumber(sortType) or 0
+end
+C_Reputation.AreLegacyReputationsShown = function()
+  return __wow_reputation_state.showLegacy == true
+end
+C_Reputation.SetLegacyReputationsShown = function(shown)
+  __wow_reputation_state.showLegacy = shown ~= false
+end
+C_Reputation.GetGuildFactionData = function()
+  return {
+    factionID = 1168,
+    name = "Guild",
+    description = "Guild reputation",
+    reaction = 8,
+    standing = 1000,
+    bottom = 0,
+    top = 1000,
+    isHeader = false,
+    isCollapsed = false,
+    isChild = false,
+  }
+end
+C_Reputation.IsAccountWideReputation = function()
+  return false
+end
+C_Reputation.IsFactionParagonForCurrentPlayer = function()
+  return false
+end
+C_Reputation.IsFactionParagon = function()
+  return false
+end
+C_Reputation.IsMajorFaction = function()
+  return false
+end
+C_Reputation.GetFactionParagonInfo = function()
+  return nil
+end
+C_Reputation.RequestFactionParagonPreloadRewardData = __wow_noop
+C_Reputation.IsFactionActive = function()
+  return true
+end
+C_Reputation.SetFactionActive = __wow_noop
+C_Reputation.ToggleFactionAtWar = __wow_noop
+
+local __wow_store_state = rawget(_G, "__wow_store_state")
+if type(__wow_store_state) ~= "table" then
+  local featuredGroupID = 501
+  local featuredEntryID = 1003
+  local featuredProductID = 2003
+  local vasServiceType = Enum.VasServiceType and Enum.VasServiceType.NameChange or 1
+  local vasDecorator = Enum.BattlepayProductDecorator and Enum.BattlepayProductDecorator.VasService or 0
+  local fullCardWithBuy = Enum.BattlepayCardType and Enum.BattlepayCardType.MediumCardWithBuyButton or 0
+  local purchasable = Enum.PurchaseEligibility and (Enum.PurchaseEligibility.Ok or Enum.PurchaseEligibility.Purchasable) or 0
+  local regionUS = REGION_US or 1
+
+  local featuredEntry = {
+    entryID = featuredEntryID,
+    productID = featuredProductID,
+    sharedData = {
+      name = "Apprentice Rider Bundle",
+      description = "A seeded store product used for simulator storefront coverage.",
+      tooltip = "A seeded store product used for simulator storefront coverage.",
+      texture = "Interface\\Icons\\Ability_Mount_RidingHorse",
+      productDecorator = vasDecorator,
+      cardType = fullCardWithBuy,
+      buyableHere = true,
+      eligibility = purchasable,
+      flags = 0,
+      currentDollars = 10,
+      currentCents = 0,
+      normalDollars = 10,
+      normalCents = 0,
+      deliverables = {},
+      cards = {},
+      vasServiceType = vasServiceType,
+      canChangeAccount = true,
+      canChangeBNetAccount = true,
+      boostType = nil,
+      instructions = "",
+    },
+  }
+
+  __wow_store_state = {
+    available = true,
+    duplicateKey = nil,
+    disconnectOnLogout = false,
+    failureCode = nil,
+    failureReason = nil,
+    confirmationProductID = featuredProductID,
+    bnetGuid = 3001,
+    gameAccounts = { "WoW2", "WoW3" },
+    localAccounts = { WoW1 = 1001 },
+    remoteAccounts = { WoW2 = 2002, WoW3 = 2003 },
+    realms = {
+      { virtualRealmAddress = 101, realmName = "Azeroth" },
+      { virtualRealmAddress = 202, realmName = "Kalimdor" },
+    },
+    characters = {
+      [101] = {
+        { guid = 501001, name = "Simhero", realmName = "Azeroth", wowAccount = 1001, guildMaster = true },
+        { guid = 501002, name = "Simshaman", realmName = "Azeroth", wowAccount = 1001, guildMaster = false },
+      },
+      [202] = {
+        { guid = 602001, name = "KalimdorMage", realmName = "Kalimdor", wowAccount = 2002, guildMaster = false },
+      },
+    },
+    productGroups = {
+      { groupID = featuredGroupID, parentGroupID = 0 },
+    },
+    productGroupInfo = {
+      [featuredGroupID] = {
+        groupName = "Featured",
+        texture = "Interface\\Icons\\INV_Misc_Coin_01",
+        flags = 0,
+        disabledTooltip = nil,
+      },
+    },
+    productsByGroup = {
+      [featuredGroupID] = { featuredEntryID },
+    },
+    entriesByID = {
+      [featuredEntryID] = featuredEntry,
+    },
+    productsByID = {
+      [featuredProductID] = featuredEntry,
+    },
+    currencyInfo = {
+      sharedData = {
+        regionID = regionUS,
+        requireLicenseAccept = false,
+        browseHasStar = false,
+        hideBrowseNotice = false,
+        hideConfirmationBrowseNotice = false,
+        licenseAcceptText = "",
+        formatShort = function(dollars, cents)
+          return string.format("$%d.%02d", dollars or 0, cents or 0)
+        end,
+        formatLong = function(dollars, cents)
+          return string.format("$%d.%02d", dollars or 0, cents or 0)
+        end,
+      },
+    },
+    completion = {
+      productID = nil,
+      guid = nil,
+      realmName = nil,
+    },
+  }
+  rawset(_G, "__wow_store_state", __wow_store_state)
+end
+
+local function __wow_store_realm_name(virtualRealmAddress)
+  for _, realm in ipairs(__wow_store_state.realms) do
+    if realm.virtualRealmAddress == virtualRealmAddress then
+      return realm.realmName
+    end
+  end
+  return nil
+end
+
+local function __wow_store_character_by_guid(guid)
+  for _, realmCharacters in pairs(__wow_store_state.characters) do
+    for _, character in ipairs(realmCharacters) do
+      if character.guid == guid then
+        return character
+      end
+    end
+  end
+  return nil
+end
+
+local function __wow_store_patch_card_enumerator()
+  if not StoreFrame or not StoreFrame.productCardPoolCollection then
+    return
+  end
+
+  local pool = StoreFrame.productCardPoolCollection
+  if pool.__wowSimPatched then
+    return
+  end
+
+  local originalEnumerateActive = pool.EnumerateActive
+  pool.__wowSimPatched = true
+  function pool:EnumerateActive()
+    if type(StoreFrame.__wowSimCards) == "table" and #StoreFrame.__wowSimCards > 0 then
+      local cards = StoreFrame.__wowSimCards
+      local index = 0
+      return function()
+        index = index + 1
+        return cards[index]
+      end, nil, nil
+    end
+    if type(originalEnumerateActive) == "function" then
+      return originalEnumerateActive(self)
+    end
+    return function()
+      return nil
+    end, nil, nil
+  end
+end
+
+local function __wow_store_ensure_debug_cards()
+  if not StoreFrame or not StoreFrame.productCardPoolCollection then
+    return
+  end
+
+  __wow_store_patch_card_enumerator()
+  if type(StoreFrame.__wowSimCards) == "table" and #StoreFrame.__wowSimCards > 0 then
+    return
+  end
+
+  local card = CreateFrame("Button", "WowStoreSimCard1", StoreFrame, "MediumStoreCardWithBuyButtonTemplate")
+  if not card then
+    return
+  end
+
+  card:SetID(1003)
+  card:SetPoint("TOPLEFT", StoreFrame, "TOPLEFT", 40, -140)
+  card:SetSize(277, 224)
+  card:Show()
+
+  if type(card.UpdateCard) == "function" then
+    pcall(card.UpdateCard, card, 1003, true)
+  end
+
+  StoreFrame.__wowSimCards = { card }
+end
+
+C_StoreSecure = __wow_merge_namespace(C_StoreSecure, {})
+C_StoreSecure.IsAvailable = function()
+  return __wow_store_state.available == true
+end
+C_StoreSecure.HasPurchaseList = function()
+  return true
+end
+C_StoreSecure.HasProductList = function()
+  return true
+end
+C_StoreSecure.HasDistributionList = function()
+  return true
+end
+C_StoreSecure.HasPurchaseInProgress = function()
+  return false
+end
+C_StoreSecure.GetCurrencyID = function()
+  return 1
+end
+C_StoreSecure.GetCurrencyInfo = function()
+  return __wow_store_state.currencyInfo
+end
+C_StoreSecure.GetPurchaseList = function()
+  if StoreFrame and type(StoreFrame.IsShown) == "function" and StoreFrame:IsShown() then
+    FireEvent("STORE_PURCHASE_LIST_UPDATED")
+  end
+  return true
+end
+C_StoreSecure.GetProductList = function()
+  local storeShown = StoreFrame and type(StoreFrame.IsShown) == "function" and StoreFrame:IsShown()
+  if storeShown then
+    FireEvent("STORE_PRODUCTS_UPDATED")
+    FireEvent("PRODUCT_DISTRIBUTIONS_UPDATED")
+    if type(StoreFrame_OnEvent) == "function" and StoreFrame then
+      StoreFrame_OnEvent(StoreFrame, "STORE_PRODUCTS_UPDATED")
+    elseif type(StoreFrame_UpdateSelectedCategory) == "function" then
+      StoreFrame_UpdateSelectedCategory()
+      if type(StoreFrame_SetCategory) == "function" then
+        StoreFrame_SetCategory(true)
+      end
+    end
+    __wow_store_ensure_debug_cards()
+  end
+  return true
+end
+C_StoreSecure.GetProductGroups = function()
+  return __wow_store_state.productGroups
+end
+C_StoreSecure.GetProductGroupInfo = function(groupID)
+  return __wow_store_state.productGroupInfo[groupID]
+end
+C_StoreSecure.GetProducts = function(groupID)
+  return __wow_store_state.productsByGroup[groupID] or {}
+end
+C_StoreSecure.GetEntryInfo = function(entryID)
+  return __wow_store_state.entriesByID[entryID]
+end
+C_StoreSecure.GetProductInfo = function(productID)
+  return __wow_store_state.productsByID[productID]
+end
+C_StoreSecure.GetWoWAccountGUIDFromName = function(accountName, isLocalAccount)
+  if isLocalAccount then
+    return __wow_store_state.localAccounts[accountName]
+  end
+  return __wow_store_state.remoteAccounts[accountName]
+end
+C_StoreSecure.ValidateBnetTransfer = function(_email)
+  FireEvent("VAS_TRANSFER_VALIDATION_UPDATE", false)
+end
+C_StoreSecure.GetBnetTransferInfo = function()
+  return __wow_store_state.bnetGuid, __wow_store_state.gameAccounts
+end
+C_StoreSecure.GetRealmList = function()
+  return __wow_store_state.realms
+end
+C_StoreSecure.GetVASRealmList = function()
+  return __wow_store_state.realms
+end
+C_StoreSecure.GetCharactersForRealm = function(virtualRealmAddress, guildOnly)
+  local allCharacters = __wow_store_state.characters[virtualRealmAddress] or {}
+  if not guildOnly then
+    return allCharacters
+  end
+
+  local guildCharacters = {}
+  for _, character in ipairs(allCharacters) do
+    if character.guildMaster then
+      table.insert(guildCharacters, character)
+    end
+  end
+  return guildCharacters
+end
+C_StoreSecure.GetCharacterInfoByGUID = function(guid)
+  return __wow_store_character_by_guid(guid)
+end
+C_StoreSecure.GetEligibleRacesForVASService = function(_guid, _serviceType)
+  return {
+    { raceID = 1, raceName = "Human", isAlliedRace = false },
+    { raceID = 29, raceName = "Void Elf", isAlliedRace = true },
+  }
+end
+C_StoreSecure.GetVASGuildMasterInfoForCharacterByGUID = function(guid)
+  if guid == 501001 then
+    return {
+      guildName = "Simulator Guild",
+      guildMasterName = "Simleader",
+    }
+  end
+  return nil
+end
+C_StoreSecure.GetVasServiceType = function(productID)
+  local product = C_StoreSecure.GetProductInfo(productID)
+  return product and product.sharedData and product.sharedData.vasServiceType or nil
+end
+C_StoreSecure.IsRegionLocked = function()
+  return false
+end
+C_StoreSecure.GetLastProductListResponseError = function()
+  return 0
+end
+C_StoreSecure.GetVASErrors = function()
+  return {}
+end
+C_StoreSecure.RequestRealmGuildMasterInfo = function(virtualRealmAddress)
+  FireEvent("STORE_GUILD_MASTER_INFO_RECEIVED", virtualRealmAddress)
+end
+C_StoreSecure.RequestCharacterGuildFollowInfo = function(guid, _virtualRealmAddress)
+  FireEvent("STORE_GUILD_FOLLOW_INFO_RECEIVED", guid, { transferredRealm = "Kalimdor" })
+end
+C_StoreSecure.OpenNydusLink = function(entryID)
+  local entry = C_StoreSecure.GetEntryInfo(entryID)
+  if entry then
+    __wow_store_state.confirmationProductID = entry.productID
+  end
+end
+C_StoreSecure.GetConfirmationInfo = function()
+  return __wow_store_state.confirmationProductID, "Blizzard Balance", nil, nil, 10, 0
+end
+C_StoreSecure.GetUnrevokedBoostInfo = function()
+  return "Level 70 Character Boost", "Simhero", "Azeroth"
+end
+C_StoreSecure.PurchaseVASProduct = function(productID, guid, _newName, _guildName, _guildMasterGuid, destinationRealmAddress)
+  local realmName = __wow_store_realm_name(destinationRealmAddress)
+  local duplicateKey = string.format("%s:%s:%s", tostring(productID), tostring(guid), tostring(realmName))
+  if __wow_store_state.duplicateKey == duplicateKey then
+    __wow_store_state.failureCode = Enum.StoreError and Enum.StoreError.Other or 1
+    __wow_store_state.failureReason = "DuplicateVASPurchase"
+    return false
+  end
+
+  __wow_store_state.duplicateKey = duplicateKey
+  __wow_store_state.completion.productID = productID
+  __wow_store_state.completion.guid = guid
+  __wow_store_state.completion.realmName = realmName
+  return true
+end
+C_StoreSecure.GetVASCompletionInfo = function()
+  return __wow_store_state.completion.productID, __wow_store_state.completion.guid, __wow_store_state.completion.realmName, __wow_store_state.disconnectOnLogout == true
+end
+C_StoreSecure.GetFailureInfo = function()
+  return __wow_store_state.failureCode, __wow_store_state.failureReason
+end
+C_StoreSecure.AckFailure = function()
+  __wow_store_state.failureCode = nil
+  __wow_store_state.failureReason = nil
+end
+C_StoreSecure.ClearPreGeneratedExternalTransactionID = function()
+  __wow_store_state.duplicateKey = nil
+end
+C_StoreSecure.SetDisconnectOnLogout = function(shouldDisconnect)
+  __wow_store_state.disconnectOnLogout = shouldDisconnect == true
+end
+C_StoreSecure.SetVASProductReady = function(isReady)
+  if isReady then
+    FireEvent("STORE_VAS_PURCHASE_COMPLETE")
+  end
+end
+C_StoreSecure.RequestAllDynamicPriceInfo = __wow_noop
+C_StoreSecure.HasDynamicPriceData = function()
+  return true
+end
+C_StoreSecure.IsDynamicBundle = function()
+  return false
+end
+
+local __wow_store_public_state = {
+  shown = false,
+  context_key = nil,
+}
+
+local __wow_store_secure_state = {
+  available = true,
+  has_purchase_list = true,
+  has_product_list = true,
+  has_distribution_list = true,
+  region_locked = false,
+  last_product_list_response_error = 0,
+  vas_errors = {},
+  failure_code = nil,
+  failure_reason = nil,
+  confirmation_product_id = nil,
+  confirmation_wallet_name = "Blizzard Balance",
+  confirmation_current_dollars = 10,
+  confirmation_current_cents = 0,
+  completion_product_id = nil,
+  completion_guid = nil,
+  completion_realm_name = nil,
+  completion_should_handle = false,
+  disconnect_on_logout = false,
+  purchase_in_progress = false,
+  pre_generated_external_transaction_id = false,
+  bnet_transfer_guid = 3001,
+  bnet_transfer_game_accounts = { "WoW2", "WoW3" },
+  bnet_transfer_validated = false,
+}
+
+local __wow_store_realms = {
+  { realmName = "Azeroth", virtualRealmAddress = 101 },
+  { realmName = "Kalimdor", virtualRealmAddress = 102 },
+}
+
+local __wow_store_characters = {
+  [101] = {
+    {
+      guid = 501001,
+      name = "Simhero",
+      realmName = "Azeroth",
+      currentServer = 101,
+      classFileName = "WARRIOR",
+      className = "Warrior",
+      level = 70,
+      raceName = "Human",
+      faction = 0,
+      wowAccount = 1001,
+      createScreenIconAtlas = "",
+    },
+    {
+      guid = 501002,
+      name = "Simalt",
+      realmName = "Azeroth",
+      currentServer = 101,
+      classFileName = "MAGE",
+      className = "Mage",
+      level = 70,
+      raceName = "Void Elf",
+      faction = 1,
+      wowAccount = 1002,
+      createScreenIconAtlas = "",
+    },
+  },
+  [102] = {
+    {
+      guid = 502001,
+      name = "KalimdorHero",
+      realmName = "Kalimdor",
+      currentServer = 102,
+      classFileName = "PRIEST",
+      className = "Priest",
+      level = 70,
+      raceName = "Night Elf",
+      faction = 1,
+      wowAccount = 2001,
+      createScreenIconAtlas = "",
+    },
+  },
+}
+
+local __wow_store_guild_master_info = {
+  [501001] = {
+    guildName = "Simulator Guild",
+    guildMasterName = "Simleader",
+    guildMasterGuid = 501001,
+  },
+}
+
+local __wow_store_product_groups = {
+  {
+    groupID = 22,
+    parentGroupID = nil,
+    groupName = "Services",
+    texture = "Interface\\Icons\\INV_Misc_QuestionMark",
+    flags = 0,
+    disabledTooltip = nil,
+  },
+}
+
+local __wow_store_products = {
+  [2003] = {
+    productID = 2003,
+    sharedData = {
+      name = "Apprentice Rider Bundle",
+      description = "Simulator store product.",
+      tooltip = "",
+      texture = "Interface\\Icons\\INV_Misc_Note_02",
+      productDecorator = Enum.BattlepayProductDecorator.VasService,
+      vasServiceType = Enum.VasServiceType.NameChange,
+      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      flags = 0,
+      eligibility = Enum.PurchaseEligibility.Ok,
+      buyableHere = true,
+      currentDollars = 10,
+      currentCents = 0,
+      normalDollars = 10,
+      normalCents = 0,
+      instructions = "",
+      canChangeAccount = true,
+      canChangeBNetAccount = true,
+      canChangeRealm = true,
+      deliverables = {},
+      cards = {},
+    },
+  },
+  [189] = {
+    productID = 189,
+    sharedData = {
+      name = "Character Transfer",
+      description = "Simulator character transfer.",
+      tooltip = "",
+      texture = "Interface\\Icons\\INV_Misc_Note_02",
+      productDecorator = Enum.BattlepayProductDecorator.VasService,
+      vasServiceType = Enum.VasServiceType.CharacterTransfer,
+      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      flags = 0,
+      eligibility = Enum.PurchaseEligibility.Ok,
+      buyableHere = true,
+      currentDollars = 25,
+      currentCents = 0,
+      normalDollars = 25,
+      normalCents = 0,
+      instructions = "",
+      canChangeAccount = true,
+      canChangeBNetAccount = true,
+      canChangeRealm = true,
+      deliverables = {},
+      cards = {},
+    },
+  },
+  [239] = {
+    productID = 239,
+    sharedData = {
+      name = "Character Transfer Bundle",
+      description = "Simulator transfer bundle.",
+      tooltip = "",
+      texture = "Interface\\Icons\\INV_Misc_Note_02",
+      productDecorator = Enum.BattlepayProductDecorator.VasService,
+      vasServiceType = Enum.VasServiceType.CharacterTransfer,
+      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      flags = 0,
+      eligibility = Enum.PurchaseEligibility.Ok,
+      buyableHere = true,
+      currentDollars = 25,
+      currentCents = 0,
+      normalDollars = 25,
+      normalCents = 0,
+      instructions = "",
+      canChangeAccount = true,
+      canChangeBNetAccount = true,
+      canChangeRealm = true,
+      deliverables = {},
+      cards = {},
+    },
+  },
+  [476] = {
+    productID = 476,
+    sharedData = {
+      name = "Guild Transfer",
+      description = "Simulator guild transfer.",
+      tooltip = "",
+      texture = "Interface\\Icons\\INV_Misc_Note_02",
+      productDecorator = Enum.BattlepayProductDecorator.VasService,
+      vasServiceType = Enum.VasServiceType.GuildTransfer,
+      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      flags = 0,
+      eligibility = Enum.PurchaseEligibility.Ok,
+      buyableHere = true,
+      currentDollars = 35,
+      currentCents = 0,
+      normalDollars = 35,
+      normalCents = 0,
+      instructions = "",
+      canChangeAccount = true,
+      canChangeBNetAccount = true,
+      canChangeRealm = true,
+      deliverables = {},
+      cards = {},
+    },
+  },
+  [477] = {
+    productID = 477,
+    sharedData = {
+      name = "Guild Transfer Bundle",
+      description = "Simulator guild transfer bundle.",
+      tooltip = "",
+      texture = "Interface\\Icons\\INV_Misc_Note_02",
+      productDecorator = Enum.BattlepayProductDecorator.VasService,
+      vasServiceType = Enum.VasServiceType.GuildTransfer,
+      cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+      flags = 0,
+      eligibility = Enum.PurchaseEligibility.Ok,
+      buyableHere = true,
+      currentDollars = 35,
+      currentCents = 0,
+      normalDollars = 35,
+      normalCents = 0,
+      instructions = "",
+      canChangeAccount = true,
+      canChangeBNetAccount = true,
+      canChangeRealm = true,
+      deliverables = {},
+      cards = {},
+    },
+  },
+}
+
+local function __wow_store_realm_name(address)
+  if address == 101 then
+    return "Azeroth"
+  elseif address == 102 then
+    return "Kalimdor"
+  end
+  return tostring(address or "")
+end
+
+local function __wow_store_find_character(guid)
+  for _, realmCharacters in pairs(__wow_store_characters) do
+    for _, character in ipairs(realmCharacters) do
+      if character.guid == guid then
+        return character
+      end
+    end
+  end
+  return nil
+end
+
+local function __wow_store_product(productID)
+  return __wow_store_products[tonumber(productID) or -1]
+end
+
 -- Store / shop public API: sim has no store.
 C_StorePublic = C_StorePublic or __wow_namespace()
 if rawget(C_StorePublic, "IsEnabled") == nil then
@@ -5627,6 +6849,319 @@ if rawget(C_StorePublic, "IsEnabled") == nil then
 end
 if rawget(C_StorePublic, "IsDisabledByParentalControls") == nil then
   function C_StorePublic.IsDisabledByParentalControls() return false end
+end
+if rawget(C_StorePublic, "DoesGroupHavePurchaseableProducts") == nil then
+  function C_StorePublic.DoesGroupHavePurchaseableProducts(groupID)
+    local products = C_StoreSecure and C_StoreSecure.GetProducts and C_StoreSecure.GetProducts(groupID) or {}
+    return #products > 0
+  end
+end
+if rawget(C_StorePublic, "EventStoreUISetShown") == nil then
+  function C_StorePublic.EventStoreUISetShown(shown, contextKey)
+    __wow_store_public_state.shown = shown and true or false
+    __wow_store_public_state.context_key = contextKey
+  end
+end
+
+C_StoreSecure = C_StoreSecure or __wow_namespace()
+if rawget(C_StoreSecure, "_state") == nil then
+  C_StoreSecure._state = __wow_store_secure_state
+end
+if rawget(C_StoreSecure, "IsAvailable") == nil then
+  function C_StoreSecure.IsAvailable() return C_StoreSecure._state.available end
+end
+if rawget(C_StoreSecure, "HasPurchaseList") == nil then
+  function C_StoreSecure.HasPurchaseList() return C_StoreSecure._state.has_purchase_list end
+end
+if rawget(C_StoreSecure, "HasProductList") == nil then
+  function C_StoreSecure.HasProductList() return C_StoreSecure._state.has_product_list end
+end
+if rawget(C_StoreSecure, "HasDistributionList") == nil then
+  function C_StoreSecure.HasDistributionList() return C_StoreSecure._state.has_distribution_list end
+end
+if rawget(C_StoreSecure, "HasPurchaseInProgress") == nil then
+  function C_StoreSecure.HasPurchaseInProgress() return C_StoreSecure._state.purchase_in_progress end
+end
+if rawget(C_StoreSecure, "IsRegionLocked") == nil then
+  function C_StoreSecure.IsRegionLocked() return C_StoreSecure._state.region_locked end
+end
+if rawget(C_StoreSecure, "GetLastProductListResponseError") == nil then
+  function C_StoreSecure.GetLastProductListResponseError() return C_StoreSecure._state.last_product_list_response_error end
+end
+if rawget(C_StoreSecure, "GetVASErrors") == nil then
+  function C_StoreSecure.GetVASErrors() return C_StoreSecure._state.vas_errors end
+end
+if rawget(C_StoreSecure, "GetCurrencyInfo") == nil then
+  function C_StoreSecure.GetCurrencyInfo()
+    return {
+      sharedData = {
+        regionID = 1,
+        formatShort = "%s",
+        formatLong = "%s",
+        licenseAcceptText = "",
+        requireLicenseAccept = false,
+        browseHasStar = false,
+        hideBrowseNotice = false,
+        hideConfirmationBrowseNotice = false,
+      },
+    }
+  end
+end
+if rawget(C_StoreSecure, "GetProductGroups") == nil then
+  function C_StoreSecure.GetProductGroups() return __wow_store_product_groups end
+end
+if rawget(C_StoreSecure, "GetProductGroupInfo") == nil then
+  function C_StoreSecure.GetProductGroupInfo(groupID)
+    for _, group in ipairs(__wow_store_product_groups) do
+      if group.groupID == groupID then
+        return group
+      end
+    end
+    return nil
+  end
+end
+if rawget(C_StoreSecure, "GetProducts") == nil then
+  function C_StoreSecure.GetProducts(groupID)
+    if groupID == 22 then
+      return { 2003, 189, 239, 476, 477 }
+    end
+    return {}
+  end
+end
+if rawget(C_StoreSecure, "GetEntryInfo") == nil then
+  function C_StoreSecure.GetEntryInfo(entryID) return __wow_store_product(entryID) end
+end
+if rawget(C_StoreSecure, "GetProductInfo") == nil then
+  function C_StoreSecure.GetProductInfo(productID) return __wow_store_product(productID) end
+end
+if rawget(C_StoreSecure, "IsDynamicBundle") == nil then
+  function C_StoreSecure.IsDynamicBundle(_productID) return false end
+end
+if rawget(C_StoreSecure, "HasDynamicPriceData") == nil then
+  function C_StoreSecure.HasDynamicPriceData(_productID) return true end
+end
+if rawget(C_StoreSecure, "RequestAllDynamicPriceInfo") == nil then
+  function C_StoreSecure.RequestAllDynamicPriceInfo() return nil end
+end
+if rawget(C_StoreSecure, "GetProductList") == nil then
+  function C_StoreSecure.GetProductList()
+    __wow_store_secure_state.has_product_list = true
+    FireEvent("STORE_PRODUCTS_UPDATED")
+    return nil
+  end
+end
+if rawget(C_StoreSecure, "GetPurchaseList") == nil then
+  function C_StoreSecure.GetPurchaseList()
+    __wow_store_secure_state.has_purchase_list = true
+    FireEvent("STORE_PURCHASE_LIST_UPDATED")
+    return nil
+  end
+end
+if rawget(C_StoreSecure, "GetDistributionList") == nil then
+  function C_StoreSecure.GetDistributionList()
+    __wow_store_secure_state.has_distribution_list = true
+    return {}
+  end
+end
+if rawget(C_StoreSecure, "GetFailureInfo") == nil then
+  function C_StoreSecure.GetFailureInfo()
+    return C_StoreSecure._state.failure_code, C_StoreSecure._state.failure_reason
+  end
+end
+if rawget(C_StoreSecure, "AckFailure") == nil then
+  function C_StoreSecure.AckFailure()
+    C_StoreSecure._state.failure_code = nil
+    C_StoreSecure._state.failure_reason = nil
+  end
+end
+if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
+  function C_StoreSecure.ClearPreGeneratedExternalTransactionID()
+    C_StoreSecure._state.pre_generated_external_transaction_id = false
+  end
+end
+if rawget(C_StoreSecure, "OpenNydusLink") == nil then
+  function C_StoreSecure.OpenNydusLink(productID)
+    local normalized = tonumber(productID) or 0
+    if normalized == 1003 then
+      normalized = 2003
+    end
+    local product = __wow_store_product(normalized)
+    if product then
+      C_StoreSecure._state.confirmation_product_id = normalized
+      C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
+      C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
+      C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
+    end
+  end
+end
+if rawget(C_StoreSecure, "GetConfirmationInfo") == nil then
+  function C_StoreSecure.GetConfirmationInfo()
+    return C_StoreSecure._state.confirmation_product_id, C_StoreSecure._state.confirmation_wallet_name, nil, nil, C_StoreSecure._state.confirmation_current_dollars, C_StoreSecure._state.confirmation_current_cents
+  end
+end
+if rawget(C_StoreSecure, "GetUnrevokedBoostInfo") == nil then
+  function C_StoreSecure.GetUnrevokedBoostInfo()
+    return "Level 70 Character Boost", "Simhero", "Azeroth"
+  end
+end
+if rawget(C_StoreSecure, "GetVASCompletionInfo") == nil then
+  function C_StoreSecure.GetVASCompletionInfo()
+    return C_StoreSecure._state.completion_product_id, C_StoreSecure._state.completion_guid, C_StoreSecure._state.completion_realm_name, C_StoreSecure._state.completion_should_handle
+  end
+end
+if rawget(C_StoreSecure, "SetDisconnectOnLogout") == nil then
+  function C_StoreSecure.SetDisconnectOnLogout(disconnectOnLogout)
+    C_StoreSecure._state.disconnect_on_logout = disconnectOnLogout and true or false
+    if C_StoreSecure._state.completion_product_id then
+      C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
+    end
+  end
+end
+if rawget(C_StoreSecure, "SetVASProductReady") == nil then
+  function C_StoreSecure.SetVASProductReady(ready)
+    if ready and C_StoreSecure._state.completion_product_id then
+      C_StoreSecure._state.purchase_in_progress = false
+      FireEvent("STORE_VAS_PURCHASE_COMPLETE")
+    end
+  end
+end
+if rawget(C_StoreSecure, "PurchaseVASProduct") == nil then
+  function C_StoreSecure.PurchaseVASProduct(productID, guid, _name, _oldGuildName, _newGuildMasterGuid, realmValue, _wowAccountGuid, _bnetAccountGuid, _transferFactionChangeBundle, _isGuildFollow)
+    if C_StoreSecure._state.completion_product_id and C_StoreSecure._state.pre_generated_external_transaction_id then
+      C_StoreSecure._state.failure_code = Enum.StoreError.Other
+      C_StoreSecure._state.failure_reason = "DuplicateVASPurchase"
+      return false
+    end
+
+    local product = __wow_store_product(productID)
+    if not product then
+      C_StoreSecure._state.failure_code = Enum.StoreError.Other
+      C_StoreSecure._state.failure_reason = "UnknownVASProduct"
+      return false
+    end
+
+    C_StoreSecure._state.confirmation_product_id = productID
+    C_StoreSecure._state.confirmation_wallet_name = "Blizzard Balance"
+    C_StoreSecure._state.confirmation_current_dollars = product.sharedData.currentDollars
+    C_StoreSecure._state.confirmation_current_cents = product.sharedData.currentCents
+    C_StoreSecure._state.completion_product_id = productID
+    C_StoreSecure._state.completion_guid = guid
+    C_StoreSecure._state.completion_realm_name = __wow_store_realm_name(realmValue)
+    C_StoreSecure._state.completion_should_handle = C_StoreSecure._state.disconnect_on_logout
+    C_StoreSecure._state.purchase_in_progress = true
+    C_StoreSecure._state.pre_generated_external_transaction_id = true
+    C_StoreSecure._state.failure_code = nil
+    C_StoreSecure._state.failure_reason = nil
+    return true
+  end
+end
+if rawget(C_StoreSecure, "PurchaseProduct") == nil then
+  function C_StoreSecure.PurchaseProduct(productID)
+    return C_StoreSecure.PurchaseVASProduct(productID, 0, nil, nil, nil, 101, nil, nil, false, false)
+  end
+end
+if rawget(C_StoreSecure, "PurchaseProductConfirm") == nil then
+  function C_StoreSecure.PurchaseProductConfirm(confirm, _dollars, _cents)
+    if confirm and C_StoreSecure._state.completion_product_id then
+      C_StoreSecure._state.purchase_in_progress = false
+      FireEvent("STORE_VAS_PURCHASE_COMPLETE")
+    end
+    return true
+  end
+end
+if rawget(C_StoreSecure, "ValidateBnetTransfer") == nil then
+  function C_StoreSecure.ValidateBnetTransfer(_email)
+    C_StoreSecure._state.bnet_transfer_validated = true
+    FireEvent("VAS_TRANSFER_VALIDATION_UPDATE", false)
+  end
+end
+if rawget(C_StoreSecure, "GetBnetTransferInfo") == nil then
+  function C_StoreSecure.GetBnetTransferInfo()
+    return C_StoreSecure._state.bnet_transfer_guid, C_StoreSecure._state.bnet_transfer_game_accounts
+  end
+end
+if rawget(C_StoreSecure, "GetWoWAccountGUIDFromName") == nil then
+  function C_StoreSecure.GetWoWAccountGUIDFromName(name, isLocal)
+    if isLocal and name == "WoW1" then
+      return 1001
+    elseif not isLocal and name == "WoW2" then
+      return 2002
+    end
+    return nil
+  end
+end
+if rawget(C_StoreSecure, "GetRealmList") == nil then
+  function C_StoreSecure.GetRealmList() return __wow_store_realms end
+end
+if rawget(C_StoreSecure, "GetVASRealmList") == nil then
+  function C_StoreSecure.GetVASRealmList() return __wow_store_realms end
+end
+if rawget(C_StoreSecure, "GetCharactersForRealm") == nil then
+  function C_StoreSecure.GetCharactersForRealm(realmAddress, guildOnly)
+    local realmCharacters = __wow_store_characters[tonumber(realmAddress) or -1] or {}
+    local filtered = {}
+    for _, character in ipairs(realmCharacters) do
+      if not guildOnly or character.guid == 501001 then
+        table.insert(filtered, character)
+      end
+    end
+    return filtered
+  end
+end
+if rawget(C_StoreSecure, "GetCharacterInfoByGUID") == nil then
+  function C_StoreSecure.GetCharacterInfoByGUID(guid)
+    return __wow_store_find_character(tonumber(guid) or -1)
+  end
+end
+if rawget(C_StoreSecure, "GetEligibleRacesForVASService") == nil then
+  function C_StoreSecure.GetEligibleRacesForVASService(_characterGuid, vasServiceType)
+    if vasServiceType == Enum.VasServiceType.NameChange then
+      return {
+        { raceName = "Human", isAlliedRace = false, isHeritageArmorUnlocked = true },
+        { raceName = "Void Elf", isAlliedRace = true, isHeritageArmorUnlocked = true },
+      }
+    end
+    return {}
+  end
+end
+if rawget(C_StoreSecure, "GetVASGuildMasterInfoForCharacterByGUID") == nil then
+  function C_StoreSecure.GetVASGuildMasterInfoForCharacterByGUID(guid)
+    return __wow_store_guild_master_info[tonumber(guid) or -1]
+  end
+end
+if rawget(C_StoreSecure, "GetVasServiceType") == nil then
+  function C_StoreSecure.GetVasServiceType(productID)
+    local normalized = tonumber(productID) or -1
+    if normalized == 2003 then
+      return Enum.VasServiceType.NameChange
+    elseif normalized == 189 or normalized == 239 then
+      return Enum.VasServiceType.CharacterTransfer
+    elseif normalized == 476 or normalized == 477 then
+      return Enum.VasServiceType.GuildTransfer
+    end
+    return nil
+  end
+end
+if rawget(C_StoreSecure, "RequestRealmGuildMasterInfo") == nil then
+  function C_StoreSecure.RequestRealmGuildMasterInfo(realmAddress)
+    FireEvent("STORE_GUILD_MASTER_INFO_RECEIVED", realmAddress)
+  end
+end
+if rawget(C_StoreSecure, "RequestCharacterGuildFollowInfo") == nil then
+  function C_StoreSecure.RequestCharacterGuildFollowInfo(guid, realmAddress)
+    FireEvent("STORE_GUILD_FOLLOW_INFO_RECEIVED", guid, { transferredRealm = __wow_store_realm_name(realmAddress) })
+  end
+end
+if rawget(C_StoreSecure, "AckFailure") == nil then
+  function C_StoreSecure.AckFailure()
+    C_StoreSecure._state.failure_code = nil
+    C_StoreSecure._state.failure_reason = nil
+  end
+end
+if rawget(C_StoreSecure, "ClearPreGeneratedExternalTransactionID") == nil then
+  function C_StoreSecure.ClearPreGeneratedExternalTransactionID()
+    C_StoreSecure._state.pre_generated_external_transaction_id = false
+  end
 end
 
 -- Additional LFG helpers.
@@ -6845,15 +8380,50 @@ if AssistedCombatManager.AddSpellTooltipLine == nil then
   end
 end
 
+local __wow_perks_activities_state = rawget(_G, "__wow_perks_activities_state")
+if type(__wow_perks_activities_state) ~= "table" then
+  __wow_perks_activities_state = {
+    trackedIDs = {},
+    removeCount = 0,
+    lastRemovedID = nil,
+    activityInfoByID = {},
+    chatLinkByID = {},
+    activitiesInfo = nil,
+    allTags = nil,
+    pendingCompletion = nil,
+  }
+  rawset(_G, "__wow_perks_activities_state", __wow_perks_activities_state)
+end
+
 C_PerksActivities = __wow_merge_namespace(C_PerksActivities, {
-  AddTrackedPerksActivity = function(_id) end,
-  ClearPerksActivitiesPendingCompletion = function() end,
+  _state = __wow_perks_activities_state,
+  AddTrackedPerksActivity = function(id)
+    local state = C_PerksActivities._state
+    local trackedIDs = state.trackedIDs
+    if type(trackedIDs) ~= "table" then
+      trackedIDs = {}
+      state.trackedIDs = trackedIDs
+    end
+    table.insert(trackedIDs, tonumber(id) or id)
+  end,
+  ClearPerksActivitiesPendingCompletion = function()
+    local state = C_PerksActivities._state
+    state.pendingCompletion = { pendingIDs = {} }
+  end,
   GetAllPerksActivityTags = function()
+    local state = C_PerksActivities._state
+    if type(state.allTags) == "table" then
+      return state.allTags
+    end
     return { tagName = {} }
   end,
   GetPerksActivitiesInfo = function()
+    local state = C_PerksActivities._state
+    if type(state.activitiesInfo) == "table" then
+      return state.activitiesInfo
+    end
     return {
-      activePerksMonth = 0,
+      activePerksMonth = 1,
       displayMonthName = "",
       secondsRemaining = 0,
       activities = {},
@@ -6861,21 +8431,346 @@ C_PerksActivities = __wow_merge_namespace(C_PerksActivities, {
     }
   end,
   GetPerksActivitiesPendingCompletion = function()
+    local state = C_PerksActivities._state
+    if type(state.pendingCompletion) == "table" then
+      return state.pendingCompletion
+    end
     return { pendingIDs = {} }
   end,
   GetPerksActivityChatLink = function(_id)
-    return ""
+    local state = C_PerksActivities._state
+    local info = state.chatLinkByID and state.chatLinkByID[tonumber(_id) or _id]
+    return info or ""
   end,
   GetPerksActivityInfo = function(_id)
-    return nil
+    local state = C_PerksActivities._state
+    return state.activityInfoByID and state.activityInfoByID[tonumber(_id) or _id] or nil
   end,
   GetPerksUIThemePrefix = function()
     return ""
   end,
   GetTrackedPerksActivities = function()
-    return { trackedIDs = {} }
+    local state = C_PerksActivities._state
+    return { trackedIDs = state.trackedIDs or {} }
   end,
-  RemoveTrackedPerksActivity = function(_id) end,
+  RemoveTrackedPerksActivity = function(id)
+    local state = C_PerksActivities._state
+    local trackedIDs = state.trackedIDs
+    if type(trackedIDs) ~= "table" then
+      trackedIDs = {}
+      state.trackedIDs = trackedIDs
+    end
+
+    local targetID = tonumber(id) or id
+    for index = #trackedIDs, 1, -1 do
+      if tonumber(trackedIDs[index]) == targetID then
+        table.remove(trackedIDs, index)
+        state.removeCount = (tonumber(state.removeCount) or 0) + 1
+        state.lastRemovedID = targetID
+        return true
+      end
+    end
+    return false
+  end,
+})
+
+local __wow_store_glue_state = rawget(_G, "__wow_store_glue_state")
+if type(__wow_store_glue_state) ~= "table" then
+  __wow_store_glue_state = {
+    disconnectOnLogout = false,
+    vasProductReady = false,
+    purchaseStateByGuid = {},
+    requestedQueueGuids = {},
+    requestCharacterQueueTimeCount = 0,
+    updateVASPurchaseStatesCount = 0,
+    lastRequestedQueueGuid = nil,
+  }
+  rawset(_G, "__wow_store_glue_state", __wow_store_glue_state)
+end
+
+local function __wow_store_glue_state_table()
+  local state = __wow_store_glue_state
+  if type(state.purchaseStateByGuid) ~= "table" then
+    state.purchaseStateByGuid = {}
+  end
+  if type(state.requestedQueueGuids) ~= "table" then
+    state.requestedQueueGuids = {}
+  end
+  return state
+end
+
+C_StoreGlue = __wow_merge_namespace(C_StoreGlue, {
+  _state = __wow_store_glue_state_table(),
+  GetDisconnectOnLogout = function()
+    return __wow_store_glue_state_table().disconnectOnLogout == true
+  end,
+  GetVASProductReady = function()
+    return __wow_store_glue_state_table().vasProductReady == true
+  end,
+  GetVASPurchaseStateInfo = function(guid)
+    local state = __wow_store_glue_state_table()
+    local record = state.purchaseStateByGuid[tostring(guid)] or state.purchaseStateByGuid[guid]
+    if type(record) ~= "table" then
+      return 0, 0, nil
+    end
+    return tonumber(record.purchaseState) or 0, tonumber(record.productID) or 0, record.result
+  end,
+  RequestCharacterQueueTime = function(guid)
+    local state = __wow_store_glue_state_table()
+    table.insert(state.requestedQueueGuids, guid)
+    state.requestCharacterQueueTimeCount = (tonumber(state.requestCharacterQueueTimeCount) or 0) + 1
+    state.lastRequestedQueueGuid = guid
+    return true
+  end,
+  UpdateVASPurchaseStates = function()
+    local state = __wow_store_glue_state_table()
+    state.updateVASPurchaseStatesCount = (tonumber(state.updateVASPurchaseStatesCount) or 0) + 1
+    return true
+  end,
+})
+
+local __wow_video_options_state = rawget(_G, "__wow_video_options_state")
+if type(__wow_video_options_state) ~= "table" then
+  __wow_video_options_state = {
+    defaultGameWindowSize = { x = 1920, y = 1080 },
+    currentGameWindowSize = { x = 1920, y = 1080 },
+    availableGameWindowSizes = {},
+    gxAdapterInfo = {},
+    setGameWindowSizeCount = 0,
+    lastSetWindowSize = nil,
+  }
+  rawset(_G, "__wow_video_options_state", __wow_video_options_state)
+end
+
+local function __wow_video_options_state_table()
+  local state = __wow_video_options_state
+  if type(state.defaultGameWindowSize) ~= "table" then
+    state.defaultGameWindowSize = { x = 1920, y = 1080 }
+  end
+  if type(state.currentGameWindowSize) ~= "table" then
+    state.currentGameWindowSize = __wow_copy_table(state.defaultGameWindowSize)
+  end
+  if type(state.availableGameWindowSizes) ~= "table" then
+    state.availableGameWindowSizes = {}
+  end
+  if type(state.gxAdapterInfo) ~= "table" then
+    state.gxAdapterInfo = {}
+  end
+  return state
+end
+
+local function __wow_copy_window_size(size)
+  if type(size) ~= "table" then
+    return { x = 0, y = 0 }
+  end
+  return {
+    x = tonumber(size.x) or 0,
+    y = tonumber(size.y) or 0,
+  }
+end
+
+local function __wow_copy_window_sizes(sizes)
+  local copied = {}
+  if type(sizes) ~= "table" then
+    return copied
+  end
+  for index, size in ipairs(sizes) do
+    copied[index] = __wow_copy_window_size(size)
+  end
+  return copied
+end
+
+local function __wow_copy_adapter_info(adapters)
+  local copied = {}
+  if type(adapters) ~= "table" then
+    return copied
+  end
+  for index, adapter in ipairs(adapters) do
+    copied[index] = __wow_copy_table(adapter)
+  end
+  return copied
+end
+
+C_VideoOptions = __wow_merge_namespace(C_VideoOptions, {
+  _state = __wow_video_options_state_table(),
+  GetDefaultGameWindowSize = function()
+    local state = __wow_video_options_state_table()
+    return __wow_copy_window_size(state.defaultGameWindowSize)
+  end,
+  GetCurrentGameWindowSize = function()
+    local state = __wow_video_options_state_table()
+    return __wow_copy_window_size(state.currentGameWindowSize)
+  end,
+  GetGameWindowSizes = function()
+    return __wow_copy_window_sizes(__wow_video_options_state_table().availableGameWindowSizes)
+  end,
+  GetGxAdapterInfo = function()
+    return __wow_copy_adapter_info(__wow_video_options_state_table().gxAdapterInfo)
+  end,
+  IsSpellVisualDensitySystemSupported = function()
+    return false
+  end,
+  SetGameWindowSize = function(width, height)
+    local state = __wow_video_options_state_table()
+    state.currentGameWindowSize = {
+      x = tonumber(width) or 0,
+      y = tonumber(height) or 0,
+    }
+    state.lastSetWindowSize = __wow_copy_window_size(state.currentGameWindowSize)
+    state.setGameWindowSizeCount = (tonumber(state.setGameWindowSizeCount) or 0) + 1
+    return true
+  end,
+})
+
+local __wow_combat_log_namespace_state = rawget(_G, "__wow_combat_log_state")
+if type(__wow_combat_log_namespace_state) ~= "table" then
+  __wow_combat_log_namespace_state = {
+    currentEntry = 0,
+    numEntries = 0,
+    retentionTime = 300,
+    filteredEventsEnabled = false,
+    messageLimit = 300,
+    entries = {},
+    currentIndex = nil,
+    createdMessages = {},
+  }
+  rawset(_G, "__wow_combat_log_state", __wow_combat_log_namespace_state)
+end
+
+local function __wow_combat_log_state_table()
+  local state = __wow_combat_log_namespace_state
+  if type(state.entries) ~= "table" then
+    state.entries = {}
+  end
+  if type(state.createdMessages) ~= "table" then
+    state.createdMessages = {}
+  end
+  return state
+end
+
+local function __wow_combat_log_count_entries(state)
+  local entries = state.entries
+  if type(entries) ~= "table" then
+    return tonumber(state.numEntries) or 0
+  end
+  return #entries
+end
+
+local function __wow_combat_log_current_entry(state)
+  local entries = state.entries
+  if type(entries) ~= "table" or #entries == 0 then
+    return nil
+  end
+  local index = state.currentIndex
+  if type(index) ~= "number" or index < 1 or index > #entries then
+    index = #entries
+  end
+  return entries[index], index
+end
+
+local function __wow_combat_log_clear_entries(state)
+  state.entries = {}
+  state.currentIndex = nil
+  state.currentEntry = 0
+  state.numEntries = 0
+end
+
+local function __wow_combat_log_store_message(state, message, red, green, blue, order)
+  local entry = {
+    message = tostring(message or ""),
+    red = tonumber(red) or 0,
+    green = tonumber(green) or 0,
+    blue = tonumber(blue) or 0,
+    order = order,
+  }
+  local newest = Enum.CombatLogMessageOrder and Enum.CombatLogMessageOrder.Newest
+  if order == newest then
+    table.insert(state.createdMessages, 1, entry)
+  else
+    table.insert(state.createdMessages, entry)
+  end
+end
+
+C_CombatLog = __wow_merge_namespace(C_CombatLog, {
+  _state = __wow_combat_log_state_table(),
+  GetEntryCount = function()
+    return __wow_combat_log_count_entries(__wow_combat_log_state_table())
+  end,
+  GetCurrentEventInfo = function()
+    local entry = __wow_combat_log_current_entry(__wow_combat_log_state_table())
+    if entry == nil then
+      return nil
+    end
+    return unpack(entry)
+  end,
+  ShouldShowCurrentEntry = function()
+    return __wow_combat_log_count_entries(__wow_combat_log_state_table()) > 0
+  end,
+  GetEntryRetentionTime = function()
+    return __wow_combat_log_state_table().retentionTime
+  end,
+  SetEntryRetentionTime = function(retentionTime)
+    __wow_combat_log_state_table().retentionTime = tonumber(retentionTime) or 0
+  end,
+  AreFilteredEventsEnabled = function()
+    return __wow_combat_log_state_table().filteredEventsEnabled == true
+  end,
+  SetFilteredEventsEnabled = function(enabled)
+    __wow_combat_log_state_table().filteredEventsEnabled = enabled == true
+  end,
+  GetMessageLimit = function()
+    return __wow_combat_log_state_table().messageLimit or 300
+  end,
+  SetMessageLimit = function(limit)
+    __wow_combat_log_state_table().messageLimit = tonumber(limit) or 0
+  end,
+  ClearEntries = function()
+    __wow_combat_log_clear_entries(__wow_combat_log_state_table())
+  end,
+  ApplyFilterSettings = function(_settings)
+  end,
+  RefilterEntries = function()
+  end,
+})
+
+C_CombatLogSecure = __wow_merge_namespace(C_CombatLogSecure, {
+  _state = __wow_combat_log_state_table(),
+  GetEntryCount = function()
+    return __wow_combat_log_count_entries(__wow_combat_log_state_table())
+  end,
+  GetCurrentEntryInfo = function()
+    local entry = __wow_combat_log_current_entry(__wow_combat_log_state_table())
+    if entry == nil then
+      return nil
+    end
+    return unpack(entry)
+  end,
+  SeekToNewestEntry = function()
+    local state = __wow_combat_log_state_table()
+    local count = __wow_combat_log_count_entries(state)
+    if count == 0 then
+      return false
+    end
+    state.currentIndex = count
+    return true
+  end,
+  SeekToPreviousEntry = function()
+    local state = __wow_combat_log_state_table()
+    local count = __wow_combat_log_count_entries(state)
+    if count == 0 then
+      return false
+    end
+    local index = state.currentIndex or count
+    if index <= 1 then
+      return false
+    end
+    state.currentIndex = index - 1
+    return true
+  end,
+  CreateCombatLogMessage = function(message, red, green, blue, order)
+    __wow_combat_log_store_message(__wow_combat_log_state_table(), message, red, green, blue, order)
+    return true
+  end,
 })
 
 if CreateTemplateInfoCache == nil then
@@ -7304,7 +9199,8 @@ __global_mt.__index = function(t, key)
   elseif key == "PLAYER_FACTION_COLOR_ALLIANCE" then
     value = __wow_make_color(0.2, 0.4, 1, 1)
   elseif type(key) == "string" and key:match("^C_[A-Za-z0-9_]+$") then
-    value = __wow_namespace()
+    __wow_log_nil_symbol_access("_G", key)
+    value = __wow_attach_namespace_name(__wow_namespace(), key)
   elseif type(key) == "string" and key:match("^ERR_") then
     value = key
   end
@@ -7313,6 +9209,8 @@ __global_mt.__index = function(t, key)
     rawset(t, key, value)
     return value
   end
+  __wow_log_nil_symbol_access("_G", key)
   return nil
 end
 setmetatable(_G, __global_mt)
+__wow_seed_namespace_names()

@@ -106,6 +106,22 @@ fn wow_string_format(state: &mut LuaState) -> LuaResult<u32> {
         None => return delegate(state, original, &args),
     };
 
+    if format_requires_string_arg(&fmt) {
+        match args.get(1).copied() {
+            None => {
+                return Err(runtime_error(
+                    "bad argument #2 to '?' (string expected, got no value)",
+                ));
+            }
+            Some(Val::Nil) => {
+                return Err(runtime_error(
+                    "bad argument #2 to '?' (string expected, got nil)",
+                ));
+            }
+            _ => {}
+        }
+    }
+
     // Fast path: plain format string.
     if !fmt.contains('F') && !fmt.contains('$') {
         return delegate(state, original, &args);
@@ -131,6 +147,30 @@ fn read_string(
 ) -> Option<String> {
     let lua_str = state.gc.string_arena.get(s)?;
     std::str::from_utf8(lua_str.data()).ok().map(str::to_owned)
+}
+
+fn format_requires_string_arg(fmt: &str) -> bool {
+    let bytes = fmt.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] != b'%' {
+            i += 1;
+            continue;
+        }
+        if i + 1 < bytes.len() && bytes[i + 1] == b'%' {
+            i += 2;
+            continue;
+        }
+        let mut j = i + 1;
+        while j < bytes.len() && matches!(bytes[j] as char, '-' | '+' | ' ' | '#' | '0' | '.' | '1'..='9') {
+            j += 1;
+        }
+        if j < bytes.len() && matches!(bytes[j] as char, 's' | 'q') {
+            return true;
+        }
+        i = j.saturating_add(1);
+    }
+    false
 }
 
 fn delegate(state: &mut LuaState, original: Val, args: &[Val]) -> LuaResult<u32> {

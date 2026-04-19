@@ -26,7 +26,8 @@
 
 use crate::lua_api::SimState;
 use crate::lua_api::methods::{
-    extract_frame_id, frame_ref, registry_get, registry_set, state_handle, table_get_static,
+    borrow_state_mut, extract_frame_id, frame_ref, registry_get, registry_set, state_handle,
+    table_get_static, val_to_string,
 };
 use crate::lua_bridge::stack_val;
 use rilua::vm::callinfo::LUA_MULTRET;
@@ -48,12 +49,70 @@ function A_Print(...)
 end
 "#;
 
+const LEGACY_ALIAS_LUA: &str = r#"
+if abs == nil and math ~= nil then abs = math.abs end
+if ceil == nil and math ~= nil then ceil = math.ceil end
+if floor == nil and math ~= nil then floor = math.floor end
+if max == nil and math ~= nil then max = math.max end
+if min == nil and math ~= nil then min = math.min end
+if strlen == nil and string ~= nil then strlen = string.len end
+if sort == nil and table ~= nil then sort = table.sort end
+
+if strsplittable == nil then
+  function strsplittable(delimiter, input, limit)
+    return { strsplit(delimiter, input, limit) }
+  end
+end
+
+if MergeTable == nil then
+  function MergeTable(dest, src)
+    if type(dest) ~= "table" or type(src) ~= "table" then
+      return dest
+    end
+    for key, value in pairs(src) do
+      dest[key] = value
+    end
+    return dest
+  end
+end
+
+if tFilter == nil then
+  function tFilter(t, predicate)
+    if type(t) ~= "table" or type(predicate) ~= "function" then
+      return t
+    end
+    local out = 1
+    for index = 1, #t do
+      local value = t[index]
+      if predicate(value, index, t) then
+        if out ~= index then
+          t[out] = value
+        end
+        out = out + 1
+      end
+    end
+    for index = out, #t do
+      t[index] = nil
+    end
+    return t
+  end
+end
+
+if string ~= nil and string.split == nil then
+  function string.split(self, delimiter, limit)
+    return strsplittable(delimiter, self, limit)
+  end
+end
+"#;
+
 /// Install `print` / `A_Print` / `next` / `ipairs` overrides on the rilua
 /// VM. Idempotent — safe to call from `register_globals` even if the
 /// registrar runs more than once.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     install_print(lua)?;
     install_a_print(lua)?;
+    install_legacy_aliases(lua)?;
+    install_nil_symbol_logger(lua)?;
     install_next(lua)?;
     install_ipairs(lua)?;
     Ok(())
@@ -81,6 +140,48 @@ fn install_a_print(lua: &mut rilua::Lua) -> LuaResult<()> {
     lua.exec(A_PRINT_LUA)
         .map_err(|e| runtime_error(format!("A_Print install: {e}")))?;
     Ok(())
+}
+
+fn install_legacy_aliases(lua: &mut rilua::Lua) -> LuaResult<()> {
+    lua.exec(LEGACY_ALIAS_LUA)
+        .map_err(|e| runtime_error(format!("legacy alias install: {e}")))?;
+    Ok(())
+}
+
+fn install_nil_symbol_logger(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(
+        lua,
+        "__wow_record_nil_symbol_access",
+        record_nil_symbol_access,
+    )?;
+    Ok(())
+}
+
+fn record_nil_symbol_access(state: &mut LuaState) -> LuaResult<u32> {
+    let container = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    let key = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let source = val_to_string(state, stack_val(state, 3));
+    let line = match stack_val(state, 4) {
+        Val::Num(value) if value.is_finite() => Some(value as i32),
+        _ => None,
+    };
+    let addon_name = {
+        let sim = borrow_state_mut(state)?;
+        sim.loading_addon_index
+            .or(sim.executing_addon_index)
+            .and_then(|index| sim.addons.get(index as usize))
+            .map(|addon| addon.folder_name.clone())
+    };
+    borrow_state_mut(state)?
+        .nil_symbol_accesses
+        .push(crate::lua_api::state::NilSymbolAccess {
+            addon_name,
+            container,
+            key,
+            source,
+            line,
+        });
+    Ok(0)
 }
 
 fn sim_print(state: &mut LuaState) -> LuaResult<u32> {
