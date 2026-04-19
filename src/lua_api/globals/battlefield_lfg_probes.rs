@@ -10,6 +10,9 @@
 //!   retail `ms since entry` integer.
 //! - `GetNumBattlegroundEntries()`     → 1 when the queue is active
 //!   (`Queued` / `Confirm` / `Active`), else 0.
+//! - `GetWorldPVPQueueStatus(index)`   → 7 values with the same status token
+//!   family as battlefield queues. Default is the inert
+//!   `("none", "", 0, 0, 0, 0, false)` shape Blizzard startup expects.
 //! - `GetLFGDungeonInfo(dungeonID)`    → nil. The sim doesn't seed a
 //!   dungeon list.
 //! - `GetLFGMode(category)`            → `(nil, nil)`. No active LFG.
@@ -82,6 +85,22 @@ fn get_num_battleground_entries(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetWorldPVPQueueStatus(index)` — retail returns 7 values. The sim
+/// doesn't seed world PvP queues, so every index reports the inert queue
+/// shape Blizzard UI uses for "not queued".
+fn get_world_pvp_queue_status(state: &mut LuaState) -> LuaResult<u32> {
+    let status = create_string(state, "none");
+    let map_name = create_string(state, "");
+    state.push(status); // 1: status
+    state.push(map_name); // 2: mapName
+    state.push(Val::Num(0.0)); // 3: queueID / battleID
+    state.push(Val::Num(0.0)); // 4: expireTime
+    state.push(Val::Num(0.0)); // 5: averageWaitTime
+    state.push(Val::Num(0.0)); // 6: queuedTime
+    state.push(Val::Bool(false)); // 7: suspended
+    Ok(7)
+}
+
 /// `GetLFGDungeonInfo(dungeonID)` — retail returns ~18 values; we
 /// don't seed a dungeon list yet, so always nil.
 fn get_lfg_dungeon_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -116,6 +135,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetNumBattlegroundEntries",
         get_num_battleground_entries,
     )?;
+    LuaApiMut::register_function(lua, "GetWorldPVPQueueStatus", get_world_pvp_queue_status)?;
     LuaApiMut::register_function(lua, "GetLFGDungeonInfo", get_lfg_dungeon_info)?;
     LuaApiMut::register_function(lua, "GetLFGMode", get_lfg_mode)?;
     LuaApiMut::register_function(

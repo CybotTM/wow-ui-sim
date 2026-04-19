@@ -192,13 +192,14 @@ fn instance_abandon_vote_and_shutdown_helpers_return_numeric_pairs() {
 #[test]
 fn startup_party_chat_and_targeting_globals_are_callable() {
     let env = env();
-    let (clear_focus_ok, focus_cleared, request_ok, remove_channel_ok, can_mark_player): (
-        bool,
-        bool,
-        bool,
-        bool,
-        bool,
-    ) = env
+    let (
+        clear_focus_ok,
+        focus_cleared,
+        request_ok,
+        remove_channel_ok,
+        can_mark_player,
+        raid_target_index_is_nil,
+    ): (bool, bool, bool, bool, bool, bool) = env
         .eval(
             r#"
             A_Admin.SetFocus("Training Dummy", 72, 1)
@@ -217,7 +218,8 @@ fn startup_party_chat_and_targeting_globals_are_callable() {
                    not UnitExists("focus"),
                    requestOk,
                    removeChannelOk,
-                   CanBeRaidTarget("player")
+                   CanBeRaidTarget("player"),
+                   GetRaidTargetIndex("player") == nil
             "#,
         )
         .expect("party/chat/targeting startup globals should be callable");
@@ -236,6 +238,10 @@ fn startup_party_chat_and_targeting_globals_are_callable() {
         can_mark_player,
         "existing units should remain markable by CanBeRaidTarget"
     );
+    assert!(
+        raid_target_index_is_nil,
+        "GetRaidTargetIndex should be nil when the sim has not assigned a marker"
+    );
 }
 
 #[test]
@@ -250,6 +256,13 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
         elapsed_timer_id,
         elapsed_time,
         elapsed_type,
+        world_pvp_status,
+        world_pvp_map,
+        world_pvp_queue_id,
+        world_pvp_expire,
+        world_pvp_average,
+        world_pvp_queued,
+        world_pvp_suspended,
         bn_total,
         bn_online,
         bn_favorite,
@@ -263,6 +276,13 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
         f64,
         f64,
         f64,
+        String,
+        String,
+        f64,
+        f64,
+        f64,
+        f64,
+        bool,
         i32,
         i32,
         i32,
@@ -273,6 +293,8 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
             local queued = GetLFGQueuedList(1)
             local readyCheckInProgress, readyCheckIsBattleground = GetLFGReadyCheckUpdate()
             local timerID, elapsedTime, timerType = GetWorldElapsedTime(7)
+            local worldPvpStatus, worldPvpMap, worldPvpQueueID, worldPvpExpire, worldPvpAverage, worldPvpQueued, worldPvpSuspended =
+                GetWorldPVPQueueStatus(1)
 
             return type(queued),
                    next(queued) == nil,
@@ -282,6 +304,13 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
                    timerID,
                    elapsedTime,
                    timerType,
+                   worldPvpStatus,
+                   worldPvpMap,
+                   worldPvpQueueID,
+                   worldPvpExpire,
+                   worldPvpAverage,
+                   worldPvpQueued,
+                   worldPvpSuspended,
                    BNGetNumFriends()
             "##,
         )
@@ -298,6 +327,13 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
     assert_eq!(elapsed_timer_id, 7.0);
     assert_eq!(elapsed_time, 0.0);
     assert_eq!(elapsed_type, 0.0);
+    assert_eq!(world_pvp_status, "none");
+    assert_eq!(world_pvp_map, "");
+    assert_eq!(world_pvp_queue_id, 0.0);
+    assert_eq!(world_pvp_expire, 0.0);
+    assert_eq!(world_pvp_average, 0.0);
+    assert_eq!(world_pvp_queued, 0.0);
+    assert!(!world_pvp_suspended);
     assert_eq!(bn_total, 0);
     assert_eq!(bn_online, 0);
     assert_eq!(bn_favorite, 0);

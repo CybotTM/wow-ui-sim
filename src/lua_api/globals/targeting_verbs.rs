@@ -11,6 +11,7 @@
 //! | `ClearTarget`        | `PLAYER_TARGET_CHANGED`    |
 //! | `ClearFocus`         | `PLAYER_FOCUS_CHANGED`     |
 //! | `CanBeRaidTarget`    | none (query only)          |
+//! | `GetRaidTargetIndex` | none (query only)          |
 //! | `TargetLastTarget`   | `PLAYER_TARGET_CHANGED`    |
 //! | `TargetNearestEnemy` | `PLAYER_TARGET_CHANGED`    |
 //! | `TargetNearestFriend`| `PLAYER_TARGET_CHANGED`    |
@@ -266,6 +267,13 @@ pub fn can_be_raid_target(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetRaidTargetIndex(unit)` — nil until the sim models assigned markers.
+pub fn get_raid_target_index(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = state;
+    state.push(rilua::Val::Nil);
+    Ok(1)
+}
+
 /// `TargetLastTarget()` — swap `current_target` ↔ `previous_target`.
 pub fn target_last_target(state: &mut LuaState) -> LuaResult<u32> {
     let has_previous = borrow_state_mut(state)?.previous_target.is_some();
@@ -385,6 +393,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "ClearTarget", clear_target)?;
     table_set_rust_fn_static(state, g, "ClearFocus", clear_focus)?;
     table_set_rust_fn_static(state, g, "CanBeRaidTarget", can_be_raid_target)?;
+    table_set_rust_fn_static(state, g, "GetRaidTargetIndex", get_raid_target_index)?;
     table_set_rust_fn_static(state, g, "TargetLastTarget", target_last_target)?;
     table_set_rust_fn_static(state, g, "TargetNearestEnemy", target_nearest_enemy)?;
     table_set_rust_fn_static(state, g, "TargetNearestFriend", target_nearest_friend)?;
