@@ -190,6 +190,8 @@ fn apply_system_anchors(env: &WowLuaEnv) {
                 or EditModeUtil:IsRightAnchoredActionBar(systemFrame)
         end
 
+        local refresh_action_bar_system
+
         local function seed_action_bar_system(systemFrame)
             local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex)
             if not systemInfo then
@@ -200,6 +202,32 @@ fn apply_system_anchors(env: &WowLuaEnv) {
             systemFrame.systemInfo = systemInfo
             systemFrame:SetHasActiveChanges(false)
             systemFrame:UpdateSettingMap(true)
+            refresh_action_bar_system(systemFrame)
+        end
+
+        refresh_action_bar_system = function(systemFrame)
+            local systemInfo = systemFrame.systemInfo
+            -- Replay the action-bar setting handlers without the full
+            -- EditMode frame update path.
+            for _, settingInfo in ipairs(systemInfo and systemInfo.settings or {}) do
+                if systemFrame.UpdateSystemSetting then
+                    pcall(
+                        systemFrame.UpdateSystemSetting,
+                        systemFrame,
+                        settingInfo.setting,
+                        true
+                    )
+                end
+            end
+            if systemFrame.RefreshGridLayout then
+                systemFrame:RefreshGridLayout()
+            end
+            if systemFrame.RefreshDividers then
+                systemFrame:RefreshDividers()
+            end
+            if systemFrame.RefreshBarArt then
+                systemFrame:RefreshBarArt()
+            end
         end
 
         for _, systemFrame in ipairs(emm.registeredSystemFrames or {}) do
@@ -224,26 +252,37 @@ fn apply_system_anchors(env: &WowLuaEnv) {
 ///
 /// Layout() produces NaN because the bar has no size yet when children try
 /// to resolve anchors relative to it (chicken-and-egg). Compute the bar
-/// size directly from children's grid positions, then re-run
+/// size directly from the button grid, then re-run
 /// UpdateActionBarPositions to set the correct BOTTOMLEFT anchor.
 fn fix_action_bar_nan_size(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
         if not MainActionBar then return end
         local w, h = MainActionBar:GetSize()
-        if w == 566 and h == 52 then return end
-        -- Compute the outer frame bounds from the slot grid. The button
-        -- containers cover the 12x45 grid itself; the MainActionBar frame is
-        -- slightly wider/taller to include the action-bar frame art.
+        if w == 562 and h == 45 then return end
+        -- Compute the bar bounds from the actual button grid. Border art and
+        -- end caps are anchored outside the frame; baking them into the frame
+        -- size shifts the whole bar off-center.
         local lastOx = 0
+        local buttonWidth = 45
+        local buttonHeight = 45
         for i = 1, 12 do
             local c = _G["MainActionBarButtonContainer" .. i]
+            if c then
+                local cw, ch = c:GetSize()
+                if cw and cw == cw and cw > 0 then
+                    buttonWidth = cw
+                end
+                if ch and ch == ch and ch > 0 then
+                    buttonHeight = ch
+                end
+            end
             if c and c:GetNumPoints() > 0 then
                 local _, _, _, ox, _ = c:GetPoint(1)
                 if ox and ox == ox then lastOx = ox end
             end
         end
-        MainActionBar:SetSize(lastOx + 49, 52)
+        MainActionBar:SetSize(lastOx + buttonWidth, buttonHeight)
         pcall(EditModeManagerFrame.UpdateActionBarPositions,
               EditModeManagerFrame)
     "#,
