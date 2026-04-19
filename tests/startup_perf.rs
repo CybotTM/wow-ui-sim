@@ -16,6 +16,7 @@ fn full_game_startup_stays_under_budget() {
         common::with_perf_lock(|| {
             let loaded_ui = load_timed_game_ui();
             let env = &loaded_ui.env;
+            let phase_timings = loaded_ui.phase_timings();
             let startup_elapsed = loaded_ui.startup_elapsed;
 
             let startup_ready: bool = env
@@ -27,8 +28,11 @@ fn full_game_startup_stays_under_budget() {
             );
 
             eprintln!(
-                "full game startup baseline: {:.2?} (budget {:.2?})",
+                "full game startup baseline: {:.2?} (addons {:.2?}, post-load {:.2?}, startup events {:.2?}; budget {:.2?})",
                 startup_elapsed,
+                phase_timings.addon_load_elapsed(),
+                phase_timings.post_load_workarounds_elapsed(),
+                phase_timings.startup_events_elapsed(),
                 FULL_GAME_STARTUP_BUDGET
             );
 

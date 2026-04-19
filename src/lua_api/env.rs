@@ -224,11 +224,20 @@ impl WowLuaEnv {
     /// Apply post-load workarounds for Blizzard code that depends on
     /// unimplemented engine features (AnimationGroups, EditMode, etc.).
     pub fn apply_post_load_workarounds(&self) {
+        let start_time = self.state().borrow().start_time;
+        let log = |message: &str| {
+            eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
+        };
+
+        log("[Startup] apply_post_load_workarounds: begin");
         super::workarounds::apply(self);
+        log("[Startup] apply_post_load_workarounds: workarounds complete");
         self.restore_post_cleanup_globals();
+        log("[Startup] apply_post_load_workarounds: globals restored");
         let _ = self.exec(
             "rawset(_G, 'seterrorhandler', debug.newsecurefunction(rawget(_G, 'seterrorhandler')))",
         );
+        log("[Startup] apply_post_load_workarounds: seterrorhandler restored");
     }
 
     pub fn apply_runtime_addon_load_workarounds(&self, addon_name: &str) {

@@ -15,9 +15,11 @@ Planned use:
 The shared helpers currently live in:
 
 - `tests/perf/game_ui.rs`
-  - `load_timed_game_ui()` measures `WowLuaEnv::new` through the startup
-    event sequence up to `UPDATE_CHAT_WINDOWS` and returns both the loaded env
-    and the startup duration
+  - `load_timed_game_ui()` measures `WowLuaEnv::new` through Blizzard addon
+    load, `apply_post_load_workarounds()`, and the startup event sequence up to
+    `UPDATE_CHAT_WINDOWS`
+  - returns both the loaded env and per-phase timings so slow startup runs do
+    not disappear into an undifferentiated wall-clock total
 - `tests/perf/cases.rs`
   - `run_game_ui_cases(...)` loads and settles the full Blizzard game UI once,
     then runs multiple named perf cases against that single `WowLuaEnv`

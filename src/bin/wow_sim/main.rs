@@ -6,6 +6,7 @@ use clap::{Parser, Subcommand};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::time::Instant;
 use tracing_subscriber::EnvFilter;
 use wow_ui_sim::font::WowFontSystem;
 use wow_ui_sim::logging;
@@ -215,9 +216,21 @@ fn init_and_load(
         screen,
     );
     env.sync_addon_names_to_lua();
+    wow_ui_sim::logging::println_elapsed("[Startup] applying post-load workarounds");
+    let post_load_started = Instant::now();
     env.apply_post_load_workarounds();
+    wow_ui_sim::logging::println_elapsed(&format!(
+        "[Startup] post-load workarounds complete in {:.2?}",
+        post_load_started.elapsed()
+    ));
+    wow_ui_sim::logging::println_elapsed("[Startup] restarting GC after bootstrap");
+    let gc_restart_started = Instant::now();
     env.gc_restart_after_bootstrap()
         .expect("post-bootstrap full_gc failed");
+    wow_ui_sim::logging::println_elapsed(&format!(
+        "[Startup] GC restart complete in {:.2?}",
+        gc_restart_started.elapsed()
+    ));
     (env, font_system, saved_vars)
 }
 

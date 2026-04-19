@@ -6,6 +6,7 @@
 //! our custom InitSystemAnchors.
 
 use super::WowLuaEnv;
+use std::time::Instant;
 
 const SETUP_LAYOUT_INFO_LUA: &str = r#"
     local function setSystemSetting(systemInfo, setting, value)
@@ -114,10 +115,18 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
 /// preset layouts, then call our custom InitSystemAnchors. Also ensures
 /// accountSettings is initialized so CanEnterEditMode() returns true.
 pub fn init_edit_mode_layout(env: &WowLuaEnv) {
-    setup_layout_info(env);
-    apply_system_anchors(env);
-    fix_action_bar_nan_size(env);
-    fix_action_bar_scale(env);
+    log_step(env, "setup_layout_info", || {
+        setup_layout_info(env);
+    });
+    log_step(env, "apply_system_anchors", || {
+        apply_system_anchors(env);
+    });
+    log_step(env, "fix_action_bar_nan_size", || {
+        fix_action_bar_nan_size(env);
+    });
+    log_step(env, "fix_action_bar_scale", || {
+        fix_action_bar_scale(env);
+    });
 }
 
 /// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
@@ -135,9 +144,29 @@ fn apply_system_anchors(env: &WowLuaEnv) {
         emm.layoutApplyInProgress = true
         emm:InitSystemAnchors()
 
+        local function system_frame_name(systemFrame)
+            if not systemFrame then
+                return "nil"
+            end
+            if type(systemFrame.GetName) == "function" then
+                local name = systemFrame:GetName()
+                if name ~= nil then
+                    return name
+                end
+            end
+            return tostring(systemFrame.system) .. ":" .. tostring(systemFrame.systemIndex)
+        end
+
         local function is_bootstrap_action_bar(systemFrame)
+            local frameName = system_frame_name(systemFrame)
+            if string.sub(frameName, 1, 8) == "MultiBar" then
+                return true
+            end
             if not systemFrame or not EditModeUtil then
                 return false
+            end
+            if Enum and Enum.EditModeSystem and systemFrame.system == Enum.EditModeSystem.ActionBar then
+                return true
             end
             return EditModeUtil:IsBottomAnchoredActionBar(systemFrame)
                 or EditModeUtil:IsRightAnchoredActionBar(systemFrame)
@@ -209,6 +238,21 @@ fn fix_action_bar_scale(env: &WowLuaEnv) {
         r#"
         if MainActionBar then MainActionBar:SetScale(1) end
     "#,
+    );
+}
+
+fn log_with_timestamp(env: &WowLuaEnv, message: &str) {
+    let start_time = env.state().borrow().start_time;
+    eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
+}
+
+fn log_step(env: &WowLuaEnv, label: &str, apply_step: impl FnOnce()) {
+    log_with_timestamp(env, &format!("[EditMode] starting {label}"));
+    let started = Instant::now();
+    apply_step();
+    log_with_timestamp(
+        env,
+        &format!("[EditMode] finished {label} in {:.2?}", started.elapsed()),
     );
 }
 

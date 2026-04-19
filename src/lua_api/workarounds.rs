@@ -1,10 +1,20 @@
 //! Post-load workarounds that are still required on the live rilua path.
 
+use std::time::Instant;
+
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
-    crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
-    crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
-    patch_ui_parent_panel_toggles(env);
-    patch_vignette_pin_template(env);
+    log_step(env, "patch_edit_mode_manager", || {
+        crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
+    });
+    log_step(env, "init_edit_mode_layout", || {
+        crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
+    });
+    log_step(env, "patch_ui_parent_panel_toggles", || {
+        patch_ui_parent_panel_toggles(env);
+    });
+    log_step(env, "patch_vignette_pin_template", || {
+        patch_vignette_pin_template(env);
+    });
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
@@ -21,6 +31,27 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     if addon_name == "Blizzard_MapCanvas" {
         patch_map_canvas_scroll_container(env);
     }
+    if addon_name == "Blizzard_AccountStore" {
+        let _ = patch_account_store_set_storefront(env);
+    }
+}
+
+fn log_with_timestamp(env: &crate::lua_api::WowLuaEnv, message: &str) {
+    let start_time = env.state().borrow().start_time;
+    eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
+}
+
+fn log_step(env: &crate::lua_api::WowLuaEnv, label: &str, apply_step: impl FnOnce()) {
+    log_with_timestamp(env, &format!("[Workarounds] starting {label}"));
+    let started = Instant::now();
+    apply_step();
+    log_with_timestamp(
+        env,
+        &format!(
+            "[Workarounds] finished {label} in {:.2?}",
+            started.elapsed()
+        ),
+    );
 }
 
 fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
@@ -32,6 +63,25 @@ fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA);
+}
+
+pub(crate) fn patch_account_store_set_storefront(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) -> Result<(), crate::Error> {
+    env.exec(
+        r#"
+        local function __wow_account_store_set_storefront_id(self, storeFrontID)
+            self.storeFrontID = storeFrontID
+        end
+
+        if type(AccountStoreMixin) == "table" then
+            AccountStoreMixin.SetStoreFrontID = __wow_account_store_set_storefront_id
+        end
+        if type(AccountStoreFrame) == "table" then
+            AccountStoreFrame.SetStoreFrontID = __wow_account_store_set_storefront_id
+        end
+        "#,
+    )
 }
 
 fn patch_map_canvas_scroll_container(env: &crate::lua_api::LoaderEnv<'_>) {

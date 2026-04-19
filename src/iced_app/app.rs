@@ -54,7 +54,9 @@ thread_local! {
 pub fn fire_startup_events(env: &Rc<RefCell<WowLuaEnv>>) {
     let env = env.borrow();
     let screen = env.state().borrow().screen_kind;
+    crate::logging::println_elapsed("[Startup] beginning startup event dispatch");
     crate::startup::fire_startup_events_for_screen(&env, screen);
+    crate::logging::println_elapsed("[Startup] startup event dispatch complete");
 }
 
 /// Application state.
