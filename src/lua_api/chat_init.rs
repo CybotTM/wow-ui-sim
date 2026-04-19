@@ -13,47 +13,7 @@ use super::WowLuaEnv;
 
 /// Show ChatFrame1 and set DEFAULT_CHAT_FRAME after addon loading.
 pub fn show_chat_frame(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if ChatFrame1 then
-            ChatFrame1:Show()
-            DEFAULT_CHAT_FRAME = ChatFrame1
-            if type(__wow_send_chat_message) == "function" then
-                SendChatMessage = __wow_send_chat_message
-                if type(C_ChatInfo) == "table" then
-                    C_ChatInfo.SendChatMessage = __wow_send_chat_message
-                end
-            end
-            if ChatFrame1.Clear then
-                ChatFrame1:Clear()
-            end
-            ChatFrame1:ClearAllPoints()
-            ChatFrame1:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 32, 32)
-            ChatFrame1:SetSize(430, 120)
-            if FloatingChatFrameMixin and FloatingChatFrameMixin.OnLoad and not ChatFrame1.__codexOnLoadRan then
-                ChatFrame1.__codexOnLoadRan = true
-                FloatingChatFrameMixin.OnLoad(ChatFrame1)
-            end
-            ChatFrame1.oldAlpha = ChatFrame1.oldAlpha or DEFAULT_CHATFRAME_ALPHA or 0.3
-            if ChatFrame1.ResizeButton then
-                ChatFrame1.ResizeButton:ClearAllPoints()
-                ChatFrame1.ResizeButton:SetPoint("BOTTOMRIGHT", ChatFrame1, "BOTTOMRIGHT", 0, 0)
-            end
-            if ChatFrame1.ScrollToBottomButton and ChatFrame1.ResizeButton then
-                ChatFrame1.ScrollToBottomButton:ClearAllPoints()
-                ChatFrame1.ScrollToBottomButton:SetPoint("BOTTOMRIGHT", ChatFrame1.ResizeButton, "TOPRIGHT", -2, -2)
-            end
-            if ChatFrame1.ScrollBar and ChatFrame1.ScrollToBottomButton then
-                ChatFrame1.ScrollBar:ClearAllPoints()
-                ChatFrame1.ScrollBar:SetPoint("TOPLEFT", ChatFrame1, "TOPRIGHT", 0, 0)
-                ChatFrame1.ScrollBar:SetPoint("BOTTOMLEFT", ChatFrame1.ScrollToBottomButton, "TOPLEFT", 0, 2)
-            end
-            if FCF_UpdateResizeButton then
-                FCF_UpdateResizeButton(ChatFrame1)
-            end
-        end
-    "#,
-    );
+    let _ = env.exec(SHOW_CHAT_FRAME_LUA);
     start_fake_chat(env);
 }
 
@@ -93,44 +53,7 @@ fn register_fake_chat_data(env: &WowLuaEnv) {
 }
 
 fn register_fake_chat_messages(env: &WowLuaEnv) {
-    let _ = env.exec(fake_chat_messages_lua());
-}
-
-fn fake_chat_messages_lua() -> &'static str {
-    r#"
-        if not ChatFrame1 then return end
-        _FakeChat = { msgs = {}, names = {}, idx = {} }
-        _FakeChat.msgs.general = {
-            "Anyone know where the portal trainer is?",
-            "LFM Deadmines, need healer",
-            "WTS [Copper Bar] x20, 5g each",
-            "How do I get to Ironforge from here?",
-            "Is the Darkmoon Faire up this week?",
-            "Just hit level 60!",
-            "What's the fastest way to level cooking?",
-            "Any good guilds recruiting?",
-        }
-        _FakeChat.msgs.trade = {
-            "WTS [Enchant Weapon - Crusader] your mats + 10g tip",
-            "WTB [Large Brilliant Shard] x5, paying 3g each",
-            "LF Blacksmith to craft [Arcanite Reaper], have mats",
-            "WTS [Flask of the Titans] 45g, cheap!",
-            "WTB [Righteous Orb] x2, PST with price",
-            "Selling port to Dalaran, 1g",
-        }
-        _FakeChat.msgs.say = {
-            "Anyone else lagging?", "Thanks for the group!",
-            "Where did that quest NPC go?",
-            "I think I took a wrong turn somewhere",
-            "Wow, this place is huge", "Can someone help with this elite?",
-        }
-        _FakeChat.msgs.guild = {
-            "Hey everyone!", "Anyone up for a dungeon run?",
-            "Grats on the new gear!", "Guild bank has some free enchanting mats",
-            "Raid signup is up on the calendar",
-            "I just finished the attunement quest chain",
-        }
-    "#
+    let _ = env.exec(FAKE_CHAT_MESSAGES_LUA);
 }
 
 fn register_fake_chat_names(env: &WowLuaEnv) {
@@ -153,44 +76,7 @@ fn register_fake_chat_names(env: &WowLuaEnv) {
 }
 
 fn schedule_fake_chat_tickers(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not _FakeChat then return end
-        local fc = _FakeChat
-        local function timestamp()
-            local fmt = GetCVar and GetCVar("showTimestamps")
-            if fmt and fmt ~= "" and fmt ~= "none" then
-                return date(fmt, time())
-            end
-            return ""
-        end
-        local function post(channel, prefix, r, g, b)
-            local msg, name = fc:pick(channel)
-            ChatFrame1:_AddMessageSilent(timestamp() .. prefix ..
-                "|Hplayer:" .. name .. "|h[" .. name .. "]|h: " .. msg,
-                r, g, b)
-        end
-        -- General (0s offset, light orange)
-        C_Timer.After(0, function() C_Timer.NewTicker(40, function()
-            post("general", "|Hchannel:General|h[1. General]|h ", 1.0, 0.75, 0.5)
-        end) end)
-        -- Trade (5s offset, light orange)
-        C_Timer.After(5, function() C_Timer.NewTicker(40, function()
-            post("trade", "|Hchannel:Trade|h[2. Trade]|h ", 1.0, 0.75, 0.5)
-        end) end)
-        -- Say (10s offset, white — uses "says:" format)
-        C_Timer.After(10, function() C_Timer.NewTicker(40, function()
-            local msg, name = fc:pick("say")
-            ChatFrame1:_AddMessageSilent(
-                timestamp() .. "|Hplayer:" .. name .. "|h[" .. name .. "]|h says: " .. msg,
-                1.0, 1.0, 1.0)
-        end) end)
-        -- Guild (15s offset, green)
-        C_Timer.After(15, function() C_Timer.NewTicker(40, function()
-            post("guild", "|Hchannel:Guild|h[Guild]|h ", 0.25, 1.0, 0.25)
-        end) end)
-    "#,
-    );
+    let _ = env.exec(SCHEDULE_FAKE_CHAT_TICKERS_LUA);
 }
 
 fn fix_chat_scrollbar_anchors(env: &WowLuaEnv) {
@@ -204,3 +90,111 @@ fn fix_chat_scrollbar_anchors(env: &WowLuaEnv) {
     "#,
     );
 }
+
+const SHOW_CHAT_FRAME_LUA: &str = r#"
+    if ChatFrame1 then
+        ChatFrame1:Show()
+        DEFAULT_CHAT_FRAME = ChatFrame1
+        if type(__wow_send_chat_message) == "function" then
+            SendChatMessage = __wow_send_chat_message
+            if type(C_ChatInfo) == "table" then
+                C_ChatInfo.SendChatMessage = __wow_send_chat_message
+            end
+        end
+        if ChatFrame1.Clear then
+            ChatFrame1:Clear()
+        end
+        ChatFrame1:ClearAllPoints()
+        ChatFrame1:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 32, 32)
+        ChatFrame1:SetSize(430, 120)
+        if FloatingChatFrameMixin and FloatingChatFrameMixin.OnLoad and not ChatFrame1.__codexOnLoadRan then
+            ChatFrame1.__codexOnLoadRan = true
+            FloatingChatFrameMixin.OnLoad(ChatFrame1)
+        end
+        ChatFrame1.oldAlpha = ChatFrame1.oldAlpha or DEFAULT_CHATFRAME_ALPHA or 0.3
+        if ChatFrame1.ResizeButton then
+            ChatFrame1.ResizeButton:ClearAllPoints()
+            ChatFrame1.ResizeButton:SetPoint("BOTTOMRIGHT", ChatFrame1, "BOTTOMRIGHT", 0, 0)
+        end
+        if ChatFrame1.ScrollToBottomButton and ChatFrame1.ResizeButton then
+            ChatFrame1.ScrollToBottomButton:ClearAllPoints()
+            ChatFrame1.ScrollToBottomButton:SetPoint("BOTTOMRIGHT", ChatFrame1.ResizeButton, "TOPRIGHT", -2, -2)
+        end
+        if ChatFrame1.ScrollBar and ChatFrame1.ScrollToBottomButton then
+            ChatFrame1.ScrollBar:ClearAllPoints()
+            ChatFrame1.ScrollBar:SetPoint("TOPLEFT", ChatFrame1, "TOPRIGHT", 0, 0)
+            ChatFrame1.ScrollBar:SetPoint("BOTTOMLEFT", ChatFrame1.ScrollToBottomButton, "TOPLEFT", 0, 2)
+        end
+        if FCF_UpdateResizeButton then
+            FCF_UpdateResizeButton(ChatFrame1)
+        end
+    end
+"#;
+
+const FAKE_CHAT_MESSAGES_LUA: &str = r#"
+    if not ChatFrame1 then return end
+    _FakeChat = { msgs = {}, names = {}, idx = {} }
+    _FakeChat.msgs.general = {
+        "Anyone know where the portal trainer is?",
+        "LFM Deadmines, need healer",
+        "WTS [Copper Bar] x20, 5g each",
+        "How do I get to Ironforge from here?",
+        "Is the Darkmoon Faire up this week?",
+        "Just hit level 60!",
+        "What's the fastest way to level cooking?",
+        "Any good guilds recruiting?",
+    }
+    _FakeChat.msgs.trade = {
+        "WTS [Enchant Weapon - Crusader] your mats + 10g tip",
+        "WTB [Large Brilliant Shard] x5, paying 3g each",
+        "LF Blacksmith to craft [Arcanite Reaper], have mats",
+        "WTS [Flask of the Titans] 45g, cheap!",
+        "WTB [Righteous Orb] x2, PST with price",
+        "Selling port to Dalaran, 1g",
+    }
+    _FakeChat.msgs.say = {
+        "Anyone else lagging?", "Thanks for the group!",
+        "Where did that quest NPC go?",
+        "I think I took a wrong turn somewhere",
+        "Wow, this place is huge", "Can someone help with this elite?",
+    }
+    _FakeChat.msgs.guild = {
+        "Hey everyone!", "Anyone up for a dungeon run?",
+        "Grats on the new gear!", "Guild bank has some free enchanting mats",
+        "Raid signup is up on the calendar",
+        "I just finished the attunement quest chain",
+    }
+"#;
+
+const SCHEDULE_FAKE_CHAT_TICKERS_LUA: &str = r#"
+    if not _FakeChat then return end
+    local fc = _FakeChat
+    local function timestamp()
+        local fmt = GetCVar and GetCVar("showTimestamps")
+        if fmt and fmt ~= "" and fmt ~= "none" then
+            return date(fmt, time())
+        end
+        return ""
+    end
+    local function post(channel, prefix, r, g, b)
+        local msg, name = fc:pick(channel)
+        ChatFrame1:_AddMessageSilent(timestamp() .. prefix ..
+            "|Hplayer:" .. name .. "|h[" .. name .. "]|h: " .. msg,
+            r, g, b)
+    end
+    C_Timer.After(0, function() C_Timer.NewTicker(40, function()
+        post("general", "|Hchannel:General|h[1. General]|h ", 1.0, 0.75, 0.5)
+    end) end)
+    C_Timer.After(5, function() C_Timer.NewTicker(40, function()
+        post("trade", "|Hchannel:Trade|h[2. Trade]|h ", 1.0, 0.75, 0.5)
+    end) end)
+    C_Timer.After(10, function() C_Timer.NewTicker(40, function()
+        local msg, name = fc:pick("say")
+        ChatFrame1:_AddMessageSilent(
+            timestamp() .. "|Hplayer:" .. name .. "|h[" .. name .. "]|h says: " .. msg,
+            1.0, 1.0, 1.0)
+    end) end)
+    C_Timer.After(15, function() C_Timer.NewTicker(40, function()
+        post("guild", "|Hchannel:Guild|h[Guild]|h ", 0.25, 1.0, 0.25)
+    end) end)
+"#;
