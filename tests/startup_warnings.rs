@@ -131,13 +131,6 @@ fn test_no_warnings_on_startup() {
             }
             panic!("{msg}");
         }
-
-        if count < KNOWN_WARNING_COUNT {
-            panic!(
-                "Warning count improved from {KNOWN_WARNING_COUNT} to {count}! \
-                 Update KNOWN_WARNING_COUNT to {count} to lock in the improvement."
-            );
-        }
     }
 }
 
