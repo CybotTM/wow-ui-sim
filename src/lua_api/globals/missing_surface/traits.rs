@@ -240,11 +240,23 @@ fn check_has_currency(node_id: u32, state: &crate::lua_api::SimState) -> bool {
 }
 
 fn push_node_active_entry(state: &mut LuaState, info: Val, lookup_node_id: Option<u32>) {
+    let entry_id = borrow_state(state).ok().and_then(|sim| {
+        lookup_node_id
+            .and_then(|id| sim.talents.node_selections.get(&id).copied())
+            .or_else(|| {
+                lookup_node_id
+                    .and_then(|id| TRAIT_NODE_DB.get(&id))
+                    .and_then(|node| {
+                        matches!(node.node_type, 0 | 1).then_some(node.entry_ids[0])
+                    })
+            })
+    });
+    let Some(entry_id) = entry_id else {
+        table_set(state, info, "activeEntry", Val::Nil);
+        return;
+    };
+
     let active_entry = create_table(state);
-    let entry_id = borrow_state(state)
-        .ok()
-        .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_selections.get(&id).copied()))
-        .unwrap_or(0);
     let rank = borrow_state(state)
         .ok()
         .and_then(|sim| lookup_node_id.and_then(|id| sim.talents.node_ranks.get(&id).copied()))

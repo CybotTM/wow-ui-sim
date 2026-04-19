@@ -63,6 +63,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
     ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+    ("Blizzard_Menu", "Blizzard_Menu.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
@@ -788,6 +789,7 @@ fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
 fn talent_panel_has_at_least_one_visible_talent_node_frame() {
     test_timeout! {
         let env = setup_env();
+        install_test_error_handler(&env);
 
         let result: String = env
             .eval(
@@ -826,6 +828,13 @@ fn talent_panel_has_at_least_one_visible_talent_node_frame() {
             )
             .unwrap();
 
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Talent panel flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
         assert_eq!(
             result,
             "ok",

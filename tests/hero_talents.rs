@@ -104,7 +104,7 @@ fn test_activate_hero_spec_lightsmith() {
             -- Selection node 99838 should be visible (Protection spec)
             local nodeInfo = C_Traits.GetNodeInfo(1, 99838)
             assert(nodeInfo.isVisible, "selection node should be visible for Protection")
-            assert(nodeInfo.activeEntry.entryID == 0, "no entry selected yet")
+            assert(nodeInfo.activeEntry == nil, "no entry selected yet")
 
             -- Activate Lightsmith: select entry 123361 (subtree 49) on node 99838
             local ok = C_Traits.SetSelection(1, 99838, 123361)
