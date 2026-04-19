@@ -175,7 +175,11 @@ fn copy_info_to_button_fields(state: &mut LuaState, btn_id: u64, info: Val) {
     copy_info_named_entries(state, btn_id, info_ref);
 }
 
-fn copy_info_array_entries(state: &mut LuaState, btn_fields: Val, info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>) {
+fn copy_info_array_entries(
+    state: &mut LuaState,
+    btn_fields: Val,
+    info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) {
     let array_pairs = array_info_pairs(state, info_ref);
     let Val::Table(fields_ref) = btn_fields else {
         return;
@@ -188,7 +192,11 @@ fn copy_info_array_entries(state: &mut LuaState, btn_fields: Val, info_ref: rilu
     state.gc.barrier_back(fields_ref);
 }
 
-fn copy_info_named_entries(state: &mut LuaState, btn_id: u64, info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>) {
+fn copy_info_named_entries(
+    state: &mut LuaState,
+    btn_id: u64,
+    info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) {
     let Some(btn_frame) = frame_ref(state, btn_id).ok() else {
         return;
     };
