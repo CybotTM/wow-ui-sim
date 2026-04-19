@@ -3,7 +3,8 @@
 use iced::Task;
 use iced_layout_inspector::server::ScreenshotData;
 use rustc_hash::FxHashSet;
-use std::time::Instant;
+use std::sync::OnceLock;
+use std::time::{Duration, Instant};
 
 use crate::lua_api::WowLuaEnv;
 
@@ -337,44 +338,70 @@ impl App {
         }
         self.set_main_thread_phase("process_timers");
         let tick_started = std::time::Instant::now();
-        self.run_pending_exec_lua();
+        let mut stage_timings = TickStageTimings::default();
 
-        let (combined, layout_dur) = self.collect_tick_dirty();
+        let started = std::time::Instant::now();
+        self.run_pending_exec_lua();
+        stage_timings.exec_lua = started.elapsed();
+
+        let (combined, collect_timings) = self.collect_tick_dirty();
+        stage_timings.timers = collect_timings.timers;
+        stage_timings.layout = collect_timings.layout;
+        stage_timings.on_update = collect_timings.on_update;
+        stage_timings.party_health = collect_timings.party_health;
+        stage_timings.casting = collect_timings.casting;
+
+        let started = std::time::Instant::now();
         self.drain_console();
+        stage_timings.console = started.elapsed();
         if combined != 0 {
+            let started = std::time::Instant::now();
             self.mark_strata_dirty(combined);
+            stage_timings.mark_dirty = started.elapsed();
         }
         if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+            let started = std::time::Instant::now();
             self.preload_current_render_requests_preserving_dirty(Some(
                 std::time::Duration::from_millis(25),
             ));
+            stage_timings.preload = started.elapsed();
         }
         let tick_elapsed = tick_started.elapsed();
+        stage_timings.total = tick_elapsed;
         self.record_tick_time(tick_elapsed);
         self.update_fps_counter();
-        log_slow_tick(tick_elapsed, layout_dur, combined, self);
+        log_slow_tick(&stage_timings, combined, self);
         Task::none()
     }
 
     /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
-    fn collect_tick_dirty(&mut self) -> (u16, std::time::Duration) {
+    fn collect_tick_dirty(&mut self) -> (u16, TickStageTimings) {
+        let mut timings = TickStageTimings::default();
         let (m0, ids0) = self.take_render_dirty_with_ids();
+
+        let started = std::time::Instant::now();
         self.run_wow_timers();
+        timings.timers = started.elapsed();
         let (m1, ids1) = self.take_render_dirty_with_ids();
 
         let t_layout = std::time::Instant::now();
         self.env.borrow().state().borrow_mut().ensure_layout_rects();
-        let layout_dur = t_layout.elapsed();
+        timings.layout = t_layout.elapsed();
 
-        self.fire_on_update();
+        timings.on_update = self.fire_on_update();
         let (m2, ids2) = self.take_render_dirty_with_ids();
 
+        let started = std::time::Instant::now();
         self.tick_party_health();
+        timings.party_health = started.elapsed();
+
+        let started = std::time::Instant::now();
         self.tick_casting();
+        timings.casting = started.elapsed();
         let (m3, ids3) = self.take_render_dirty_with_ids();
 
         *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids([ids0, ids1, ids2, ids3]);
-        (m0 | m1 | m2 | m3, layout_dur)
+        (m0 | m1 | m2 | m3, timings)
     }
 
     fn take_render_dirty_with_ids(&self) -> (u16, Option<FxHashSet<u64>>) {
@@ -431,18 +458,25 @@ impl App {
         }
     }
 
-    fn fire_on_update(&mut self) {
+    fn fire_on_update(&mut self) -> crate::lua_api::on_update::OnUpdateStageTimings {
         let now = std::time::Instant::now();
         let elapsed = now.duration_since(self.last_on_update_time);
         if elapsed.as_millis() < 16 {
-            return;
+            return crate::lua_api::on_update::OnUpdateStageTimings::default();
         }
         self.last_on_update_time = now;
         let env = self.env.borrow();
-        if let Err(e) = env.fire_on_update(elapsed.as_secs_f64()) {
-            crate::logging::eprintln_elapsed(&format!("[OnUpdate] error: {e}"));
+        match env.fire_on_update_timed(elapsed.as_secs_f64()) {
+            Ok(timings) => {
+                self.last_on_update_time = std::time::Instant::now();
+                timings
+            }
+            Err(e) => {
+                crate::logging::eprintln_elapsed(&format!("[OnUpdate] error: {e}"));
+                self.last_on_update_time = std::time::Instant::now();
+                crate::lua_api::on_update::OnUpdateStageTimings::default()
+            }
         }
-        self.last_on_update_time = std::time::Instant::now();
     }
 
     fn tick_party_health(&mut self) {
@@ -673,19 +707,72 @@ impl App {
     }
 }
 
-fn log_slow_tick(
-    total: std::time::Duration,
-    layout_dur: std::time::Duration,
-    combined: u16,
-    app: &App,
-) {
-    if super::perf_logging_enabled() && total.as_millis() > 10 {
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+struct TickStageTimings {
+    total: Duration,
+    exec_lua: Duration,
+    timers: Duration,
+    layout: Duration,
+    on_update: crate::lua_api::on_update::OnUpdateStageTimings,
+    party_health: Duration,
+    casting: Duration,
+    console: Duration,
+    mark_dirty: Duration,
+    preload: Duration,
+}
+
+fn log_slow_tick(stage_timings: &TickStageTimings, combined: u16, app: &App) {
+    if super::perf_logging_enabled() && stage_timings.total.as_millis() > 10 {
         let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
         eprintln!(
-            "[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
+            "[tick] {:.1?} (layout={:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
+            stage_timings.total,
+            stage_timings.layout,
             app.textures_pending.get()
         );
     }
+    if tick_stage_logging_enabled() {
+        let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
+        eprintln!(
+            "{}",
+            format_tick_stage_log(stage_timings, combined, n, app.textures_pending.get())
+        );
+    }
+}
+
+fn tick_stage_logging_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var_os("WOW_SIM_LOG_TICK_STAGES").is_some())
+}
+
+fn format_tick_stage_log(
+    stage_timings: &TickStageTimings,
+    combined: u16,
+    dirty_ids: Option<usize>,
+    textures_pending: bool,
+) -> String {
+    format!(
+        "[tick-stage] total={:.3}ms exec_lua={:.3} timers={:.3} layout={:.3} on_update={:.3} handlers={:.3} anim={:.3} post={:.3} metrics={:.3} gc={:.3} party={:.3} casting={:.3} console={:.3} mark={:.3} preload={:.3} dirty=0x{combined:x} ids={dirty_ids:?} pending={textures_pending}",
+        duration_ms(stage_timings.total),
+        duration_ms(stage_timings.exec_lua),
+        duration_ms(stage_timings.timers),
+        duration_ms(stage_timings.layout),
+        duration_ms(stage_timings.on_update.total),
+        duration_ms(stage_timings.on_update.dispatch_handlers),
+        duration_ms(stage_timings.on_update.animation_groups),
+        duration_ms(stage_timings.on_update.on_post_update),
+        duration_ms(stage_timings.on_update.finalize_metrics),
+        duration_ms(stage_timings.on_update.gc_step),
+        duration_ms(stage_timings.party_health),
+        duration_ms(stage_timings.casting),
+        duration_ms(stage_timings.console),
+        duration_ms(stage_timings.mark_dirty),
+        duration_ms(stage_timings.preload),
+    )
+}
+
+fn duration_ms(duration: Duration) -> f64 {
+    duration.as_secs_f64() * 1000.0
 }
 
 fn should_drop_stale_timer_tick(age: std::time::Duration, interval: std::time::Duration) -> bool {
@@ -777,6 +864,47 @@ mod tests {
     }
 
     #[test]
+    fn format_tick_stage_log_includes_nested_on_update_breakdown() {
+        let log = format_tick_stage_log(
+            &TickStageTimings {
+                total: Duration::from_millis(100),
+                exec_lua: Duration::from_millis(1),
+                timers: Duration::from_millis(2),
+                layout: Duration::from_millis(30),
+                on_update: crate::lua_api::on_update::OnUpdateStageTimings {
+                    total: Duration::from_millis(40),
+                    dispatch_handlers: Duration::from_millis(10),
+                    animation_groups: Duration::from_millis(11),
+                    on_post_update: Duration::from_millis(12),
+                    finalize_metrics: Duration::from_millis(3),
+                    gc_step: Duration::from_millis(4),
+                },
+                party_health: Duration::from_millis(5),
+                casting: Duration::from_millis(6),
+                console: Duration::from_millis(7),
+                mark_dirty: Duration::from_millis(8),
+                preload: Duration::from_millis(9),
+            },
+            0x3,
+            Some(4),
+            true,
+        );
+
+        assert!(log.contains("total=100.000ms"));
+        assert!(log.contains("layout=30.000"));
+        assert!(log.contains("on_update=40.000"));
+        assert!(log.contains("handlers=10.000"));
+        assert!(log.contains("anim=11.000"));
+        assert!(log.contains("post=12.000"));
+        assert!(log.contains("metrics=3.000"));
+        assert!(log.contains("gc=4.000"));
+        assert!(log.contains("preload=9.000"));
+        assert!(log.contains("dirty=0x3"));
+        assert!(log.contains("ids=Some(4)"));
+        assert!(log.contains("pending=true"));
+    }
+
+    #[test]
     fn collect_tick_dirty_preserves_preexisting_dirty_ids() {
         let mut app = build_test_app(ScreenKind::Game);
         app.strata_dirty.set(0);
@@ -802,7 +930,7 @@ mod tests {
             state.widgets.mark_visual_dirty(frame_id);
         }
 
-        let (dirty_mask, _layout_dur) = app.collect_tick_dirty();
+        let (dirty_mask, _tick_timings) = app.collect_tick_dirty();
         let pending = app.pending_dirty_ids.borrow().clone().unwrap();
 
         assert_ne!(

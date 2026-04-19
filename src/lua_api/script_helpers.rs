@@ -10,6 +10,7 @@ use rilua::vm::table::Table;
 use rilua::{LuaApi, LuaApiMut, Val};
 use std::time::Instant;
 
+use crate::lua_api::handler_timing;
 use crate::lua_api::methods::{call_function_state, val_to_string};
 
 // ── Registry helpers ────────────────────────────────────────────────
@@ -551,13 +552,21 @@ pub fn dispatch_on_update(
         let Val::Function(func_ref) = handler_val else {
             continue;
         };
-        let owner_addon = frame_owner_addon(lua.state(), frame_id);
+        let (owner_addon, addon_name, frame_name) = handler_log_metadata(lua.state(), frame_id);
         let func = rilua::Function::from_gc_ref(func_ref);
         let start = Instant::now();
         if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
             call_error_handler(lua, &e.to_string());
         }
+        let elapsed = start.elapsed();
         record_frame_timing(lua.state(), owner_addon, &start);
+        log_dispatched_handler(
+            addon_name.as_deref(),
+            "OnUpdate",
+            frame_name.as_deref(),
+            frame_id,
+            elapsed,
+        );
     }
     Ok(())
 }
@@ -570,6 +579,46 @@ fn frame_owner_addon(state: &LuaState, frame_id: u64) -> Option<u16> {
     sim.widgets
         .get(frame_id)
         .and_then(|frame| frame.owner_addon)
+}
+
+fn handler_log_metadata(
+    state: &LuaState,
+    frame_id: u64,
+) -> (Option<u16>, Option<String>, Option<String>) {
+    use super::env::WowLuaAppData;
+
+    let Some(app) = state.app_data::<WowLuaAppData>() else {
+        return (None, None, None);
+    };
+    let Ok(sim) = app.sim_state.try_borrow() else {
+        return (None, None, None);
+    };
+    let owner_addon = sim
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.owner_addon);
+    let addon_name = owner_addon
+        .and_then(|idx| sim.addons.get(idx as usize))
+        .map(|addon| addon.folder_name.clone());
+    let frame_name = sim
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.name.clone());
+    (owner_addon, addon_name, frame_name)
+}
+
+fn log_dispatched_handler(
+    addon_name: Option<&str>,
+    handler_name: &str,
+    frame_name: Option<&str>,
+    frame_id: u64,
+    elapsed: std::time::Duration,
+) {
+    if !handler_timing::should_log(elapsed) {
+        return;
+    }
+
+    handler_timing::log(addon_name, handler_name, frame_name, frame_id, elapsed);
 }
 
 fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Instant) {

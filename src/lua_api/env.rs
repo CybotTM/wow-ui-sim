@@ -5,6 +5,7 @@ use super::env_init::{
     addon_taint_name, init_builtin_frames, init_lua_state, is_blizzard_addon, record_addon_time,
     update_threshold_counters,
 };
+use super::handler_timing;
 use super::state::{AddonInfo, PendingTimer, SimState};
 use super::timer_processing::{reschedule_timer, timer_should_wait};
 use crate::Result;
@@ -338,7 +339,9 @@ impl WowLuaEnv {
     fn call_widget_handler(
         &self,
         lua: &mut rilua::Lua,
+        widget_id: u64,
         addon_idx: Option<u16>,
+        handler_name: &str,
         handler: Val,
         call_args: &[Val],
     ) {
@@ -353,7 +356,9 @@ impl WowLuaEnv {
         if let Err(error) = call_result {
             call_error_handler(lua, &error.to_string());
         }
+        let elapsed = start.elapsed();
         record_addon_time(&self.state, addon_idx, &start);
+        log_widget_handler_timing(&self.state, widget_id, addon_idx, handler_name, elapsed);
     }
 
     fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
@@ -411,7 +416,9 @@ impl WowLuaEnv {
             );
         }
         let call_args = self.build_event_call_args(&mut lua, widget_id, event, args)?;
-        self.call_widget_handler(&mut lua, addon_idx, handler, &call_args);
+        self.call_widget_handler(
+            &mut lua, widget_id, addon_idx, "OnEvent", handler, &call_args,
+        );
         if let Some((frame_name, start_time)) = &trace_label {
             eprintln!(
                 "{} [EventTrace] {event} -> {frame_name} end",
@@ -439,7 +446,14 @@ impl WowLuaEnv {
         };
 
         let call_args = self.build_script_call_args(&mut lua, widget_id, extra_args)?;
-        self.call_widget_handler(&mut lua, addon_idx, handler, &call_args);
+        self.call_widget_handler(
+            &mut lua,
+            widget_id,
+            addon_idx,
+            handler_name,
+            handler,
+            &call_args,
+        );
         Ok(())
     }
 
@@ -719,6 +733,14 @@ impl WowLuaEnv {
 
     /// Fire OnUpdate handlers for all frames that have them registered.
     pub fn fire_on_update(&self, elapsed: f64) -> Result<()> {
+        self.fire_on_update_timed(elapsed).map(|_| ())
+    }
+
+    /// Fire OnUpdate handlers and return stage timings for profiling.
+    pub(crate) fn fire_on_update_timed(
+        &self,
+        elapsed: f64,
+    ) -> Result<super::on_update::OnUpdateStageTimings> {
         super::on_update::fire(self, elapsed)
     }
 
@@ -873,6 +895,38 @@ impl WowLuaEnv {
         let mut lua = self.lua.borrow_mut();
         crate::lua_api::timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
     }
+}
+
+fn log_widget_handler_timing(
+    state: &Rc<RefCell<SimState>>,
+    widget_id: u64,
+    addon_idx: Option<u16>,
+    handler_name: &str,
+    duration: Duration,
+) {
+    if !handler_timing::should_log(duration) {
+        return;
+    }
+
+    let (addon_name, frame_name) = {
+        let sim = state.borrow();
+        let addon_name = addon_idx
+            .and_then(|idx| sim.addons.get(idx as usize))
+            .map(|addon| addon.folder_name.clone());
+        let frame_name = sim
+            .widgets
+            .get(widget_id)
+            .and_then(|frame| frame.name.clone());
+        (addon_name, frame_name)
+    };
+
+    handler_timing::log(
+        addon_name.as_deref(),
+        handler_name,
+        frame_name.as_deref(),
+        widget_id,
+        duration,
+    );
 }
 
 fn global_hash_entries(

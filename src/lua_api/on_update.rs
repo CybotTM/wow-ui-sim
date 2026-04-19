@@ -3,6 +3,7 @@
 use super::state::SimState;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::{Duration, Instant};
 
 /// Per-tick GC work budget (rilua work units; `GCSTEPSIZE` is 1024).
 /// Starting value — tune once we have real measurements. Smaller values
@@ -11,11 +12,27 @@ use std::rc::Rc;
 /// pauses.
 const ON_UPDATE_GC_BUDGET: i64 = 1024;
 
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub(crate) struct OnUpdateStageTimings {
+    pub(crate) total: Duration,
+    pub(crate) dispatch_handlers: Duration,
+    pub(crate) animation_groups: Duration,
+    pub(crate) on_post_update: Duration,
+    pub(crate) finalize_metrics: Duration,
+    pub(crate) gc_step: Duration,
+}
+
 pub(crate) fn register<T>(_lua: &T, _state: &Rc<RefCell<SimState>>) -> crate::Result<()> {
     Ok(())
 }
 
-pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<()> {
+pub(crate) fn fire(
+    env: &super::env::WowLuaEnv,
+    elapsed: f64,
+) -> crate::Result<OnUpdateStageTimings> {
+    let total_started = Instant::now();
+    let mut timings = OnUpdateStageTimings::default();
+
     // Pause auto-GC while the tick runs its handlers — batches all
     // collection work into a single gc_step at the end of the tick
     // instead of interleaving mid-dispatch.
@@ -37,24 +54,35 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
     };
 
     {
+        let started = Instant::now();
         let mut lua = env.rilua_mut();
         super::script_helpers::dispatch_on_update(&mut lua, &frame_ids, elapsed)?;
+        timings.dispatch_handlers = started.elapsed();
     }
 
+    let started = Instant::now();
     crate::lua_api::frame::methods::button_anchor_hierarchy::advance_animation_groups(
         env, elapsed,
     )?;
+    timings.animation_groups = started.elapsed();
 
+    let started = Instant::now();
     for frame_id in &frame_ids {
         env.fire_script_handler(*frame_id, "OnPostUpdate", vec![rilua::Val::Num(elapsed)])?;
     }
+    timings.on_post_update = started.elapsed();
 
+    let started = Instant::now();
     env.finalize_frame_metrics(elapsed * 1000.0);
+    timings.finalize_metrics = started.elapsed();
 
     // Advance the collector with a bounded budget. gc_step updates the
     // threshold internally so the next tick starts with a reasonable
     // auto-GC ceiling before our gc_stop pauses it again.
+    let started = Instant::now();
     env.gc_step_with_budget(ON_UPDATE_GC_BUDGET)?;
+    timings.gc_step = started.elapsed();
 
-    Ok(())
+    timings.total = total_started.elapsed();
+    Ok(timings)
 }

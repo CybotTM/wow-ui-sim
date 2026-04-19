@@ -17,6 +17,7 @@ pub(crate) mod game_data;
 // Track 3 sub-item 2: populator + read path; compiler fast path lands in sub-items 3-5
 pub(crate) mod global_slots;
 pub mod globals;
+pub(crate) mod handler_timing;
 #[allow(dead_code)] // Track 1 sub-item 1: pure data, consumers land in sub-items 2-4
 pub(crate) mod hot_literals;
 mod key_dispatch;
