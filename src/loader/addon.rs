@@ -503,15 +503,40 @@ fn maybe_init_saved_variables(
     saved_vars_mgr: Option<&mut SavedVariablesManager>,
     result: &mut LoadResult,
 ) {
-    let Some(mgr) = saved_vars_mgr else {
-        return;
-    };
-
     let sv_start = Instant::now();
-    result
-        .warnings
-        .extend(init_saved_variables(env, toc, folder_name, mgr));
+    match saved_vars_mgr {
+        Some(mgr) => result
+            .warnings
+            .extend(init_saved_variables(env, toc, folder_name, mgr)),
+        None => seed_console_saved_variables_without_persistence(env, toc, folder_name, result),
+    }
     result.timing.saved_vars_time = sv_start.elapsed();
+}
+
+fn seed_console_saved_variables_without_persistence(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    result: &mut LoadResult,
+) {
+    if folder_name != "Blizzard_Console" {
+        return;
+    }
+
+    let saved_vars = toc.saved_variables();
+    if saved_vars.is_empty() {
+        return;
+    }
+
+    if let Err(error) = env.with_state(|state| {
+        SavedVariablesManager::seed_declared_globals(state, &saved_vars, &[]);
+        Ok::<(), crate::Error>(())
+    }) {
+        result.warnings.push(format!(
+            "Failed to seed console saved variables for {} without persistence: {}",
+            folder_name, error
+        ));
+    }
 }
 
 fn build_addon_context<'a>(

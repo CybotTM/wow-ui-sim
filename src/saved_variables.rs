@@ -174,6 +174,18 @@ impl SavedVariablesManager {
         Ok(())
     }
 
+    /// Seed declared SavedVariables globals with empty tables without touching
+    /// on-disk storage. This keeps addon startup behavior deterministic even
+    /// when persistence is disabled via `--no-saved-vars`.
+    pub fn seed_declared_globals(
+        state: &mut LuaState,
+        saved_vars: &[String],
+        saved_vars_per_char: &[String],
+    ) {
+        seed_missing_globals(state, saved_vars);
+        seed_missing_globals(state, saved_vars_per_char);
+    }
+
     /// Save all registered variables for an addon in WoW-compatible Lua format.
     pub fn save_addon(&self, state: &mut LuaState, addon_name: &str) -> crate::Result<()> {
         self.write_registered_file(state, addon_name, false)?;
@@ -357,4 +369,15 @@ fn set_global(state: &mut LuaState, name: &str, value: Val) {
 
 fn create_empty_table(state: &mut LuaState) -> Val {
     Val::Table(state.gc.alloc_table(Table::new()))
+}
+
+fn seed_missing_globals(state: &mut LuaState, variable_names: &[String]) {
+    for variable_name in variable_names {
+        let already_present = !matches!(get_global(state, variable_name), Val::Nil);
+        if already_present {
+            continue;
+        }
+        let empty_table = create_empty_table(state);
+        set_global(state, variable_name, empty_table);
+    }
 }
