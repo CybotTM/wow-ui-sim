@@ -15,6 +15,40 @@ fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
         onclick(btn, "LeftButton", false)
         assert(CharacterFrame and CharacterFrame:IsShown(), "CharacterFrame should be shown")
         assert(CharacterHeadSlot ~= nil, "CharacterHeadSlot should exist")
+        if CharacterFrame.TitleContainer and CharacterFrame.TitleContainer.TitleText then
+            CharacterFrame.TitleContainer.TitleText:SetText(UnitPVPName("player"))
+        end
+        local slotNames = {
+            "CharacterHeadSlot",
+            "CharacterNeckSlot",
+            "CharacterShoulderSlot",
+            "CharacterBackSlot",
+            "CharacterChestSlot",
+            "CharacterShirtSlot",
+            "CharacterTabardSlot",
+            "CharacterWristSlot",
+            "CharacterHandsSlot",
+            "CharacterWaistSlot",
+            "CharacterLegsSlot",
+            "CharacterFeetSlot",
+            "CharacterFinger0Slot",
+            "CharacterFinger1Slot",
+            "CharacterTrinket0Slot",
+            "CharacterTrinket1Slot",
+            "CharacterMainHandSlot",
+            "CharacterSecondaryHandSlot",
+        }
+        for _, frameName in ipairs(slotNames) do
+            local slot = _G[frameName]
+            if slot and slot.icon then
+                local texture = GetInventoryItemTexture("player", slot:GetID())
+                if texture ~= nil then
+                    slot.icon:SetTexture(texture)
+                elseif slot.backgroundTextureName ~= nil then
+                    slot.icon:SetTexture(slot.backgroundTextureName)
+                end
+            end
+        end
         "#,
     )
     .expect("Failed to open character panel");
