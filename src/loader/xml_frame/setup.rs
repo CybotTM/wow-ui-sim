@@ -76,8 +76,8 @@ fn ensure_parent_refs_registered(
     setup: &SetupFrame<'_>,
     frame_id: u64,
 ) -> Result<(), LoadError> {
-    let parent_key = resolve_inherited_parent_key(setup.frame, setup.inherits);
-    let parent_array = resolve_inherited_parent_array(setup.frame, setup.inherits);
+    let parent_key = setup.frame.parent_key.as_deref();
+    let parent_array = setup.frame.parent_array.as_deref();
     if parent_key.is_none() && parent_array.is_none() {
         return Ok(());
     }
@@ -87,13 +87,13 @@ fn ensure_parent_refs_registered(
             .widgets
             .get_id_by_name(setup.parent)
             .ok_or_else(|| crate::Error::Other(format!("missing parent '{}'", setup.parent)))?;
-        if let Some(parent_key) = parent_key.as_deref() {
+        if let Some(parent_key) = parent_key {
             crate::lua_api::globals::template::assign_parent_key(
                 state, parent_id, parent_key, frame_id,
             )
             .map_err(|error| crate::Error::Other(error.to_string()))?;
         }
-        if let Some(parent_array) = parent_array.as_deref()
+        if let Some(parent_array) = parent_array
             && !parent_array_contains_child(state, parent_id, parent_array, frame_id)?
         {
             crate::lua_api::globals::create_frame::append_parent_array_entry(
@@ -185,9 +185,20 @@ fn build_parent_link_repair_script(
         repair.push_str(&format!(
             "  parent[{parent_array:?}] = parent[{parent_array:?}] or {{}}\n"
         ));
+        repair.push_str(&format!("  local already_present = false\n"));
         repair.push_str(&format!(
-            "  table.insert(parent[{parent_array:?}], child)\n"
+            "  for _, existing in ipairs(parent[{parent_array:?}]) do\n"
         ));
+        repair.push_str("    if existing == child then\n");
+        repair.push_str("      already_present = true\n");
+        repair.push_str("      break\n");
+        repair.push_str("    end\n");
+        repair.push_str("  end\n");
+        repair.push_str("  if not already_present then\n");
+        repair.push_str(&format!(
+            "    table.insert(parent[{parent_array:?}], child)\n"
+        ));
+        repair.push_str("  end\n");
     }
     repair.push_str("end\n");
     repair
@@ -304,20 +315,17 @@ fn fast_create_frame(env: &LoaderEnv<'_>, setup: &SetupFrame<'_>) -> Result<(), 
             setup.frame,
         )
         .map_err(|error| crate::Error::Other(error.to_string()))?;
-        if let Some(parent_key) = resolve_inherited_parent_key(setup.frame, setup.inherits) {
+        if let Some(parent_key) = setup.frame.parent_key.as_deref() {
             crate::lua_api::globals::template::assign_parent_key(
-                state,
-                parent_id,
-                &parent_key,
-                frame_id,
+                state, parent_id, parent_key, frame_id,
             )
             .map_err(|error| crate::Error::Other(error.to_string()))?;
         }
-        if let Some(parent_array) = resolve_inherited_parent_array(setup.frame, setup.inherits) {
+        if let Some(parent_array) = setup.frame.parent_array.as_deref() {
             crate::lua_api::globals::create_frame::append_parent_array_entry(
                 state,
                 parent_id,
-                &parent_array,
+                parent_array,
                 frame_id,
             );
         }

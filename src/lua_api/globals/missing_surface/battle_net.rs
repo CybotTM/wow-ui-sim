@@ -20,7 +20,9 @@
 //!   of range.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
 use crate::lua_api::state_types::{BnetFriend, BnetGameAccount};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -28,6 +30,12 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_battle_net_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_BattleNet")?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "AreHighResTexturesInstalled",
+        c_bnet_are_high_res_textures_installed,
+    )?;
     table_set_rust_fn_static(state, table_ref, "GetNumFriends", c_bnet_get_num_friends)?;
     table_set_rust_fn_static(
         state,
@@ -53,7 +61,19 @@ pub(super) fn register_battle_net_surface(state: &mut LuaState) -> LuaResult<()>
         "GetFriendNumAccounts",
         c_bnet_get_friend_num_accounts,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "InstallHighResTextures",
+        c_bnet_install_high_res_textures,
+    )?;
     Ok(())
+}
+
+fn c_bnet_are_high_res_textures_installed(state: &mut LuaState) -> LuaResult<u32> {
+    let installed = borrow_state(state)?.cvars.get_bool("useHighResTextures");
+    state.push(Val::Bool(installed));
+    Ok(1)
 }
 
 fn c_bnet_get_num_friends(state: &mut LuaState) -> LuaResult<u32> {
@@ -150,6 +170,13 @@ fn c_bnet_get_friend_num_accounts(state: &mut LuaState) -> LuaResult<u32> {
     };
     state.push(Val::Num(count as f64));
     Ok(1)
+}
+
+fn c_bnet_install_high_res_textures(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = borrow_state_mut(state)?
+        .cvars
+        .set("useHighResTextures", "1");
+    Ok(0)
 }
 
 /// Build a `BNetAccountInfo` Lua table from `friend` + optional

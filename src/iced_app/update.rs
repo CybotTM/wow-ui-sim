@@ -667,10 +667,7 @@ fn log_slow_tick(
     }
 }
 
-fn should_drop_stale_timer_tick(
-    age: std::time::Duration,
-    interval: std::time::Duration,
-) -> bool {
+fn should_drop_stale_timer_tick(age: std::time::Duration, interval: std::time::Duration) -> bool {
     let stale_threshold = interval
         .saturating_mul(2)
         .max(std::time::Duration::from_millis(100));
@@ -818,9 +815,16 @@ mod tests {
         );
 
         app.options_modal_visible = true;
-        app.dispatch_simple_message(Message::KeyPress("ESCAPE".to_string(), None, Instant::now()));
+        app.dispatch_simple_message(Message::KeyPress(
+            "ESCAPE".to_string(),
+            None,
+            Instant::now(),
+        ));
 
-        assert!(!app.options_modal_visible, "escape should still be handled promptly");
+        assert!(
+            !app.options_modal_visible,
+            "escape should still be handled promptly"
+        );
         assert_eq!(
             app.dropped_stale_timer_ticks.get(),
             0,

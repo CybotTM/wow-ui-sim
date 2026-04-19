@@ -20,7 +20,7 @@
 //! Registered from `register_tail_globals` after `missing_surface`.
 
 use crate::event::Event;
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_api::state::TradeState;
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, stack_val};
@@ -149,11 +149,33 @@ fn set_cursor_item_slot(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn get_player_trade_money(state: &mut LuaState) -> LuaResult<u32> {
+    let money = borrow_state(state)?
+        .active_trade
+        .as_ref()
+        .map(|trade| trade.player_money)
+        .unwrap_or(0);
+    state.push(Val::Num(money as f64));
+    Ok(1)
+}
+
+fn get_target_trade_money(state: &mut LuaState) -> LuaResult<u32> {
+    let money = borrow_state(state)?
+        .active_trade
+        .as_ref()
+        .map(|trade| trade.target_money)
+        .unwrap_or(0);
+    state.push(Val::Num(money as f64));
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "InitiateTrade", initiate_trade)?;
     LuaApiMut::register_function(lua, "AcceptTrade", accept_trade)?;
     LuaApiMut::register_function(lua, "CancelTrade", cancel_trade)?;
     LuaApiMut::register_function(lua, "SetTradeCurrency", set_trade_currency)?;
     LuaApiMut::register_function(lua, "SetCursorItemSlot", set_cursor_item_slot)?;
+    LuaApiMut::register_function(lua, "GetPlayerTradeMoney", get_player_trade_money)?;
+    LuaApiMut::register_function(lua, "GetTargetTradeMoney", get_target_trade_money)?;
     Ok(())
 }

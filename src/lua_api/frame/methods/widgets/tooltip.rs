@@ -16,10 +16,9 @@ use rilua::{LuaResult, Val};
 pub(super) fn clear_lines(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.lines.clear();
-        td.spell_id = None;
-    }
+    let td = sim.tooltips.entry(id).or_default();
+    td.lines.clear();
+    td.spell_id = None;
     drop(sim);
     fire_tooltip_script(state, id, "OnTooltipCleared");
     Ok(0)
@@ -34,16 +33,15 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
     let b = val_to_f64(stack_val(state, 5)) as f32;
     let wrap = val_to_bool(stack_val(state, 6));
     let mut sim = borrow_state_mut(state)?;
-    if let Some(td) = sim.tooltips.get_mut(&id) {
-        td.lines.push(TooltipLine {
-            left_text: text,
-            left_color: (r, g, b),
-            right_text: None,
-            right_color: (1.0, 1.0, 1.0),
-            wrap,
-            texture: None,
-        });
-    }
+    let td = sim.tooltips.entry(id).or_default();
+    td.lines.push(TooltipLine {
+        left_text: text,
+        left_color: (r, g, b),
+        right_text: None,
+        right_color: (1.0, 1.0, 1.0),
+        wrap,
+        texture: None,
+    });
     Ok(0)
 }
 
@@ -649,20 +647,50 @@ pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     };
     tooltip.tooltip_owner_id = owner_id;
     apply_tooltip_anchor(tooltip, &anchor_kind, owner_id, x_offset, y_offset);
-    if let Some(td) = sim.tooltips.get_mut(&tooltip_id) {
-        td.owner_id = owner_id;
-        td.anchor_type = anchor_kind.clone();
-        td.anchor_x_offset = x_offset;
-        td.anchor_y_offset = y_offset;
-        td.lines.clear();
-        td.spell_id = None;
-    }
+    let td = sim.tooltips.entry(tooltip_id).or_default();
+    td.owner_id = owner_id;
+    td.anchor_type = anchor_kind.clone();
+    td.anchor_x_offset = x_offset;
+    td.anchor_y_offset = y_offset;
+    td.lines.clear();
+    td.spell_id = None;
     sim.set_frame_visible(tooltip_id, false);
     drop(sim);
     let fields = get_or_create_frame_fields(state, tooltip_id);
     let anchor_value = create_string(state, &anchor_kind);
     table_set(state, fields, "anchor", anchor_value);
     fire_tooltip_script(state, tooltip_id, "OnTooltipCleared");
+    Ok(0)
+}
+
+pub(super) fn set_object_tooltip_position(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::widget::{Anchor, AnchorPoint};
+
+    let tooltip_id = frame_id_from_stack(state, 1)?;
+    let owner_id = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(tooltip_id)
+            .and_then(|tooltip| tooltip.tooltip_owner_id)
+            .or_else(|| sim.tooltips.get(&tooltip_id).and_then(|td| td.owner_id))
+    };
+    let Some(owner_id) = owner_id else {
+        return Ok(0);
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    let Some(tooltip) = sim.widgets.get_mut_visual(tooltip_id) else {
+        return Ok(0);
+    };
+    tooltip.anchors.clear();
+    tooltip.anchors.push(Anchor {
+        point: AnchorPoint::Bottom,
+        relative_to: None,
+        relative_to_id: Some(owner_id as usize),
+        relative_point: AnchorPoint::Top,
+        x_offset: 0.0,
+        y_offset: 0.0,
+    });
     Ok(0)
 }
 
@@ -812,6 +840,7 @@ const TOOLTIP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ),
     // Ownership + anchoring
     ("SetOwner", set_owner),
+    ("SetObjectTooltipPosition", set_object_tooltip_position),
     ("GetOwner", get_owner),
     ("IsOwned", is_owned),
     ("SetAnchorType", set_anchor_type),

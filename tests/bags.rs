@@ -187,6 +187,74 @@ fn test_container_frames_registered() {
     }
 }
 
+#[test]
+fn test_container_frames_array_contains_only_real_container_frames() {
+    let env = setup_env();
+
+    let names: Vec<String> = env
+        .eval(
+            r#"
+            local t = assert(ContainerFrameContainer and ContainerFrameContainer.ContainerFrames)
+            local names = {}
+            for k, v in pairs(t) do
+                local key = tostring(k)
+                local name = type(v) == "table" and v.GetName and v:GetName() or tostring(v)
+                table.insert(names, key .. "=" .. tostring(name))
+            end
+            table.sort(names)
+            return names
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        names,
+        vec![
+            "1=ContainerFrame1".to_string(),
+            "2=ContainerFrame2".to_string(),
+            "3=ContainerFrame3".to_string(),
+            "4=ContainerFrame4".to_string(),
+            "5=ContainerFrame5".to_string(),
+            "6=ContainerFrame6".to_string(),
+        ],
+        "ContainerFrameContainer.ContainerFrames should only contain the six real bag frames",
+    );
+}
+
+#[test]
+fn test_bag_ui_c_container_helpers_have_safe_default_shapes() {
+    let env = setup_env();
+
+    let (not_filtered, quest_info_ok, cannot_upgrade, trade_money_zero): (bool, bool, bool, bool) =
+        env.eval(
+            r#"
+            local questInfo = C_Container.GetContainerItemQuestInfo(0, 1)
+            local itemLocation = ItemLocation:CreateFromBagAndSlot(0, 1)
+            return C_Container.IsContainerFiltered(0) == false,
+                   type(questInfo) == "table"
+                       and questInfo.isQuestItem == false
+                       and questInfo.isActive == false,
+                   C_ItemUpgrade.CanUpgradeItem(itemLocation) == false,
+                   GetPlayerTradeMoney() == 0
+            "#,
+        )
+        .unwrap();
+
+    assert!(not_filtered, "bag search defaults should start unfiltered");
+    assert!(
+        quest_info_ok,
+        "bag quest-info helper should return a safe default table shape",
+    );
+    assert!(
+        cannot_upgrade,
+        "default bag items should not report upgrade availability"
+    );
+    assert!(
+        trade_money_zero,
+        "default trade money helper should report zero"
+    );
+}
+
 /// Open all bags via pcall-protected ToggleAllBags, logging any Lua errors.
 fn open_all_bags(env: &WowLuaEnv) {
     env.exec(

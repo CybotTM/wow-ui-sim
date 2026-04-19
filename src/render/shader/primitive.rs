@@ -653,7 +653,10 @@ impl shader::Primitive for WowUiPrimitive {
         if prepare_elapsed >= Duration::from_millis(50) {
             crate::logging::eprintln_elapsed(&format!(
                 "[prepare] total={prepare_elapsed:.1?} textures={textures_elapsed:.1?} strata={strata_elapsed:.1?} overlay={overlay_elapsed:.1?} dirty_strata={} new_rgba={} new_bc={}",
-                self.strata_batches.iter().filter(|batch| batch.is_some()).count(),
+                self.strata_batches
+                    .iter()
+                    .filter(|batch| batch.is_some())
+                    .count(),
                 self.textures.len(),
                 self.bc_textures.len()
             ));

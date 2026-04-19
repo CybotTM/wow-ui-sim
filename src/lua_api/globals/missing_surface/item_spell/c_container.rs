@@ -1,5 +1,6 @@
 use super::c_item::item_link_for_id;
 use super::helpers::global_table;
+use crate::items;
 use crate::lua_api::globals::missing_surface::ensure_namespace;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
@@ -10,6 +11,12 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_c_item_upgrade(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_ItemUpgrade")?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanUpgradeItem",
+        c_item_upgrade_can_upgrade_item,
+    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -25,6 +32,13 @@ fn c_item_upgrade_set_location(state: &mut LuaState) -> LuaResult<u32> {
     let storage = global_table(state, "__item_upgrade_state");
     table_set(state, storage, "location", location);
     Ok(0)
+}
+
+fn c_item_upgrade_can_upgrade_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _location = stack_val(state, 1);
+    let can_upgrade = false;
+    state.push(Val::Bool(can_upgrade));
+    Ok(1)
 }
 
 fn c_item_upgrade_clear(state: &mut LuaState) -> LuaResult<u32> {
@@ -54,6 +68,7 @@ pub(super) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
                 c_container_get_item_purchase_info,
             ),
             ("GetContainerItemQuestInfo", c_container_get_item_quest_info),
+            ("IsContainerFiltered", c_container_is_container_filtered),
             ("IsBattlePayItem", c_container_is_battle_pay_item),
         ],
     )?;
@@ -110,9 +125,40 @@ fn c_container_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
+
+    let item = items::get_item(item_id);
     let info = create_table(state);
     table_set(state, info, "itemID", Val::Num(item_id as f64));
     table_set(state, info, "stackCount", Val::Num(stack_count as f64));
+    table_set(
+        state,
+        info,
+        "iconFileID",
+        Val::Num(
+            item.map(|item| item.icon_file_data_id)
+                .filter(|icon| *icon != 0)
+                .unwrap_or(134400) as f64,
+        ),
+    );
+    table_set(
+        state,
+        info,
+        "quality",
+        Val::Num(item.map(|item| item.quality).unwrap_or(0) as f64),
+    );
+    table_set(state, info, "isFiltered", Val::Bool(false));
+    table_set(state, info, "isLocked", Val::Bool(false));
+    table_set(state, info, "isBound", Val::Bool(false));
+    table_set(state, info, "hasNoValue", Val::Bool(false));
+    table_set(state, info, "isReadable", Val::Bool(false));
+    table_set(state, info, "IsReadable", Val::Bool(false));
+    match item_link_for_id(item_id) {
+        Some(link) => {
+            let hyperlink = create_string(state, &link);
+            table_set(state, info, "hyperlink", hyperlink);
+        }
+        None => table_set(state, info, "hyperlink", Val::Nil),
+    }
     state.push(info);
     Ok(1)
 }
@@ -209,7 +255,17 @@ fn c_container_get_item_purchase_info(state: &mut LuaState) -> LuaResult<u32> {
 fn c_container_get_item_quest_info(state: &mut LuaState) -> LuaResult<u32> {
     let _bag = i32::from_stack(state, 1)?;
     let _slot = i32::from_stack(state, 2)?;
-    state.push(Val::Nil);
+    let info = create_table(state);
+    table_set(state, info, "isQuestItem", Val::Bool(false));
+    table_set(state, info, "questID", Val::Nil);
+    table_set(state, info, "isActive", Val::Bool(false));
+    state.push(info);
+    Ok(1)
+}
+
+fn c_container_is_container_filtered(state: &mut LuaState) -> LuaResult<u32> {
+    let _bag = i32::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

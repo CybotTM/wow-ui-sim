@@ -2,8 +2,8 @@
 
 use crate::lua_api::hot_literals::{hot_metatable_key, metatable_idx};
 use crate::lua_api::methods::{
-    create_string, create_table, extract_frame_id, frame_ref, get_or_create_frame_fields,
-    registry_get, table_get, table_set,
+    borrow_state, create_string, create_table, extract_frame_id, frame_ref,
+    get_or_create_frame_fields, registry_get, table_get, table_set,
 };
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -309,36 +309,169 @@ pub(crate) fn append_parent_array_entry(
     let Val::Table(array_ref) = array else {
         return;
     };
-    if parent_array_contains_child(state, array_ref, child) {
+    normalize_parent_array_entries(state, array_ref);
+    if parent_array_contains_child(state, array_ref, child, child_id) {
         return;
     }
-    let next_index = next_table_array_index(state, array_ref);
-    if let Some(table) = state.gc.tables.get_mut(array_ref) {
-        let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
+    if replace_stale_named_parent_array_entries(state, array_ref, child_id, child) {
+        return;
     }
-    state.gc.barrier_back(array_ref);
+    append_parent_array_value(state, array_ref, child);
 }
 
 fn parent_array_contains_child(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
     child: Val,
+    child_id: u64,
 ) -> bool {
-    let Some(child_id) = extract_frame_id(state, child) else {
-        return false;
-    };
-    state
+    let entries = state
         .gc
         .tables
         .get(table_ref)
-        .map(|table| {
-            table
-                .array_slice()
-                .iter()
-                .copied()
-                .any(|entry| extract_frame_id(state, entry) == Some(child_id))
-        })
-        .unwrap_or(false)
+        .map(|table| table.array_slice().to_vec())
+        .unwrap_or_default();
+    entries
+        .into_iter()
+        .any(|entry| entries_conflict(state, entry, child, Some(child_id)))
+}
+
+fn normalize_parent_array_entries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) {
+    let existing_entries = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.array_slice().to_vec())
+        .unwrap_or_default();
+    let existing_len = existing_entries.len();
+    let mut normalized = Vec::with_capacity(existing_entries.len());
+
+    for entry in existing_entries {
+        if normalized
+            .iter()
+            .copied()
+            .any(|existing| entries_conflict(state, existing, entry, None))
+        {
+            continue;
+        }
+        normalized.push(entry);
+    }
+
+    if normalized.len() != existing_len {
+        write_parent_array_entries(state, table_ref, &normalized);
+    }
+}
+
+fn replace_stale_named_parent_array_entries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    child_id: u64,
+    child: Val,
+) -> bool {
+    let Some(child_name) = frame_name_for_id(state, child_id) else {
+        return false;
+    };
+    let existing_entries = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.array_slice().to_vec())
+        .unwrap_or_default();
+    let mut rewritten_entries = Vec::with_capacity(existing_entries.len());
+    let mut replaced = false;
+
+    for entry in existing_entries {
+        if parent_array_entry_name(state, entry).as_deref() == Some(child_name.as_str()) {
+            if !replaced {
+                rewritten_entries.push(child);
+                replaced = true;
+            }
+            continue;
+        }
+        rewritten_entries.push(entry);
+    }
+
+    if !replaced {
+        return false;
+    }
+
+    write_parent_array_entries(state, table_ref, &rewritten_entries);
+    true
+}
+
+fn frame_name_for_id(state: &LuaState, frame_id: u64) -> Option<String> {
+    borrow_state(state).ok().and_then(|sim| {
+        sim.widgets
+            .get(frame_id)
+            .and_then(|frame| frame.name.clone())
+    })
+}
+
+fn parent_array_entry_name(state: &mut LuaState, entry: Val) -> Option<String> {
+    let frame_id = extract_frame_id(state, entry)?;
+    frame_name_for_id(state, frame_id)
+}
+
+fn entries_conflict(
+    state: &mut LuaState,
+    existing: Val,
+    candidate: Val,
+    candidate_id: Option<u64>,
+) -> bool {
+    if existing == candidate {
+        return true;
+    }
+    let existing_id = extract_frame_id(state, existing);
+    let candidate_id = candidate_id.or_else(|| extract_frame_id(state, candidate));
+    if existing_id.is_some() && existing_id == candidate_id {
+        return true;
+    }
+    let existing_name = parent_array_entry_name(state, existing);
+    let candidate_name = parent_array_entry_name(state, candidate);
+    existing_name.is_some() && existing_name == candidate_name
+}
+
+fn write_parent_array_entries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    entries: &[Val],
+) {
+    let existing_len = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|table| table.array_slice().len())
+        .unwrap_or(0);
+    let cleared_len = existing_len.max(entries.len());
+
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        for (index, entry) in entries.iter().copied().enumerate() {
+            let _ = table.raw_set(Val::Num((index + 1) as f64), entry, &state.gc.string_arena);
+        }
+        for index in entries.len()..cleared_len {
+            let _ = table.raw_set(
+                Val::Num((index + 1) as f64),
+                Val::Nil,
+                &state.gc.string_arena,
+            );
+        }
+    }
+    state.gc.barrier_back(table_ref);
+}
+
+fn append_parent_array_value(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    child: Val,
+) {
+    let next_index = next_table_array_index(state, table_ref);
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(table_ref);
 }
 
 fn next_table_array_index(
