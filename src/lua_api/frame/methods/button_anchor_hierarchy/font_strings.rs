@@ -23,16 +23,21 @@ pub(super) fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
 
 fn find_existing_text_child(state: &mut LuaState, id: u64) -> Option<u64> {
     let sim = borrow_state(state).ok()?;
-    sim.widgets.get(id).and_then(|frame| {
-        frame.children_keys.get("Text").copied().or_else(|| {
-            let fallback_name = frame.name.as_ref().map(|name| format!("{name}Text"))?;
-            let child_id = sim.widgets.get_id_by_name(&fallback_name)?;
-            let child = sim.widgets.get(child_id)?;
-            (child.parent_id == Some(id)
-                && child.widget_type == crate::widget::WidgetType::FontString)
-                .then_some(child_id)
-        })
-    })
+    if let Some(child_id) = sim
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.children_keys.get("Text").copied())
+    {
+        return Some(child_id);
+    }
+    let fallback_name = sim.widgets.get(id)?.name.as_ref()?.to_string() + "Text";
+    let child_id = sim.widgets.get_id_by_name(&fallback_name)?;
+    let child = sim.widgets.get(child_id)?;
+    if child.parent_id == Some(id) && child.widget_type == crate::widget::WidgetType::FontString {
+        Some(child_id)
+    } else {
+        None
+    }
 }
 
 fn create_synthetic_text_child(state: &mut LuaState, id: u64) -> LuaResult<u32> {
