@@ -16,6 +16,15 @@ use rilua::{LuaResult, Val, runtime_error};
 
 use crate::lua_api::frame::methods::button_anchor_hierarchy::ensure_button_text_child;
 
+#[derive(Copy, Clone)]
+struct TooltipLineValues {
+    r: Val,
+    g: Val,
+    b: Val,
+    a: Val,
+    wrap: Val,
+}
+
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = read_text_arg(state, 2);
@@ -24,6 +33,13 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let arg5 = stack_val(state, 5);
     let arg6 = stack_val(state, 6);
     let arg7 = stack_val(state, 7);
+    let tooltip = TooltipLineValues {
+        r: arg3,
+        g: arg4,
+        b: arg5,
+        a: arg6,
+        wrap: arg7,
+    };
     // TODO: button Text child creation, HTML stripping, font measurement, tooltip lines
     let stripped_text = {
         let sim = borrow_state(state)?;
@@ -42,21 +58,22 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     };
     let (is_tooltip, should_update_button_child) =
         update_text_frame(state, id, &text, &stripped_text)?;
-    if should_update_button_child && let Some(text_child_id) = ensure_button_text_child(state, id)?
-    {
-        {
-            let mut sim = borrow_state_mut(state)?;
-            if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
-                text_child.text = text.clone();
-                text_child.text_stripped = stripped_text.clone();
+    if should_update_button_child {
+        if let Some(text_child_id) = ensure_button_text_child(state, id)? {
+            {
+                let mut sim = borrow_state_mut(state)?;
+                if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
+                    text_child.text = text.clone();
+                    text_child.text_stripped = stripped_text.clone();
+                }
             }
+            update_auto_text_width(state, text_child_id);
         }
-        update_auto_text_width(state, text_child_id);
     }
     update_auto_text_width(state, id);
     if is_tooltip {
-        mirror_tooltip_text_fields(state, id, text.clone(), arg3, arg4, arg5, arg6, arg7);
-        replace_tooltip_lines(state, id, text, arg3, arg4, arg5, arg6, arg7)?;
+        mirror_tooltip_text_fields(state, id, text.clone(), tooltip);
+        replace_tooltip_lines(state, id, text, tooltip)?;
     }
     Ok(0)
 }
@@ -96,9 +113,11 @@ fn update_text_frame(
         .map(|frame| frame.widget_type == WidgetType::GameTooltip)
         .unwrap_or(false);
     let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
-    if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.text = text.clone();
-        frame.text_stripped = stripped_text.clone();
+    if changed {
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.text = text.clone();
+            frame.text_stripped = stripped_text.clone();
+        }
     }
     let should_update_button_child = matches!(
         sim.widgets.get(id).map(|frame| frame.widget_type),
@@ -124,43 +143,42 @@ fn update_auto_text_width(state: &mut LuaState, id: u64) {
     let Ok(mut sim) = borrow_state_mut(state) else {
         return;
     };
-    if let Some(frame) = sim.widgets.get_mut_visual(id)
-        && (frame.width <= 0.0 || frame.width_is_text_auto)
-    {
-        frame.width = width;
-        frame.width_is_text_auto = true;
-        sim.widgets.mark_rect_dirty(id);
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return;
+    };
+    if frame.width > 0.0 && !frame.width_is_text_auto {
+        return;
     }
+
+    frame.width = width;
+    frame.width_is_text_auto = true;
+    sim.widgets.mark_rect_dirty(id);
 }
 
 fn mirror_tooltip_text_fields(
     state: &mut LuaState,
     id: u64,
     text: Option<String>,
-    arg3: Val,
-    arg4: Val,
-    arg5: Val,
-    arg6: Val,
-    arg7: Val,
+    tooltip: TooltipLineValues,
 ) {
     let fields = get_or_create_frame_fields(state, id);
     let text_val = text.map_or(Val::Nil, |value| create_string(state, &value));
     table_set(state, fields, "text", text_val.clone());
-    table_set(state, fields, "r", arg3.clone());
-    table_set(state, fields, "g", arg4.clone());
-    table_set(state, fields, "b", arg5.clone());
-    table_set(state, fields, "a", arg6.clone());
-    table_set(state, fields, "wrap", arg7.clone());
+    table_set(state, fields, "r", tooltip.r);
+    table_set(state, fields, "g", tooltip.g);
+    table_set(state, fields, "b", tooltip.b);
+    table_set(state, fields, "a", tooltip.a);
+    table_set(state, fields, "wrap", tooltip.wrap);
 
     let args = create_table(state);
     if let Val::Table(args_ref) = args {
         if let Some(table) = state.gc.tables.get_mut(args_ref) {
             let _ = table.raw_set(Val::Num(1.0), text_val, &state.gc.string_arena);
-            let _ = table.raw_set(Val::Num(2.0), arg3, &state.gc.string_arena);
-            let _ = table.raw_set(Val::Num(3.0), arg4, &state.gc.string_arena);
-            let _ = table.raw_set(Val::Num(4.0), arg5, &state.gc.string_arena);
-            let _ = table.raw_set(Val::Num(5.0), arg6, &state.gc.string_arena);
-            let _ = table.raw_set(Val::Num(6.0), arg7, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(2.0), tooltip.r, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(3.0), tooltip.g, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(4.0), tooltip.b, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(5.0), tooltip.a, &state.gc.string_arena);
+            let _ = table.raw_set(Val::Num(6.0), tooltip.wrap, &state.gc.string_arena);
         }
         state.gc.barrier_back(args_ref);
     }
@@ -171,11 +189,7 @@ fn replace_tooltip_lines(
     state: &mut LuaState,
     id: u64,
     text: Option<String>,
-    arg3: Val,
-    arg4: Val,
-    arg5: Val,
-    _arg6: Val,
-    arg7: Val,
+    tooltip: TooltipLineValues,
 ) -> LuaResult<()> {
     let mut sim = borrow_state_mut(state)?;
     let td = sim.tooltips.entry(id).or_default();
@@ -184,13 +198,13 @@ fn replace_tooltip_lines(
         td.lines.push(crate::lua_api::tooltip::TooltipLine {
             left_text: text,
             left_color: (
-                val_to_f32(arg3.clone(), 1.0),
-                val_to_f32(arg4.clone(), 1.0),
-                val_to_f32(arg5.clone(), 1.0),
+                val_to_f32(tooltip.r, 1.0),
+                val_to_f32(tooltip.g, 1.0),
+                val_to_f32(tooltip.b, 1.0),
             ),
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
-            wrap: matches!(arg7, Val::Bool(true)),
+            wrap: matches!(tooltip.wrap, Val::Bool(true)),
             texture: None,
         });
     }
