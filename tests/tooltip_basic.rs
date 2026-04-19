@@ -373,6 +373,45 @@ fn test_setowner_makes_tooltip_visible() {
 }
 
 #[test]
+fn test_repeated_identical_tooltip_refresh_keeps_cached_strata_buckets() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "TooltipRefreshOwner", UIParent)
+        owner:SetSize(100, 50)
+        owner:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+        GameTooltip:SetSpellByID(19750)
+    "#,
+    )
+    .unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        assert!(
+            state.strata_buckets.is_some(),
+            "initial tooltip show should populate cached strata buckets"
+        );
+    }
+
+    env.exec(
+        r#"
+        GameTooltip:SetOwner(TooltipRefreshOwner, "ANCHOR_RIGHT")
+        GameTooltip:SetSpellByID(19750)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    assert!(
+        state.strata_buckets.is_some(),
+        "repeating the same tooltip refresh should not invalidate cached strata buckets"
+    );
+}
+
+#[test]
 fn test_createframe_gametooltip_type() {
     let env = WowLuaEnv::new().unwrap();
 

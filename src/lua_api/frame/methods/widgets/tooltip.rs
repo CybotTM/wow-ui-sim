@@ -654,7 +654,9 @@ pub(super) fn set_owner(state: &mut LuaState) -> LuaResult<u32> {
     td.anchor_y_offset = y_offset;
     td.lines.clear();
     td.spell_id = None;
-    sim.set_frame_visible(tooltip_id, false);
+    // Tooltip owners commonly reapply SetOwner during periodic refreshes.
+    // Keep the tooltip shown so identical refreshes don't churn show/hide state.
+    sim.set_frame_visible(tooltip_id, true);
     drop(sim);
     let fields = get_or_create_frame_fields(state, tooltip_id);
     let anchor_value = create_string(state, &anchor_kind);
