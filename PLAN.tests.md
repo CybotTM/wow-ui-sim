@@ -74,4 +74,11 @@
 - [x] Fix layout/render/visual regression bucket (`24` failed targets): `blizzard_ui_unit`, `frame_positions`, `game_time_frame_perf`, `layout_perf`, `nine_slice`, `objective_tracker_titles`, `render_order`, `render_order_world_map`, `rendering_pipeline`, `scroll_widgets`, `scroll_widgets_minimal`, `simple_html`, `store_anchor_regression`, `tooltip`, `tooltip_allow_empty`, `tooltip_anchoring`, `tooltip_basic`, `tooltip_hover`, `tooltip_item_spell`, `tooltip_shrink_to_fit_wrapped`, `tooltip_text`, `tooltip_text_layout`, `tooltip_word_wrap_min_width`, `widget_registry_perf`.
 - [x] Fix systems/security/misc gameplay bucket (`15` failed targets): `encounter_events`, `equipment_api`, `protected_frame_enforcement`, `pvp_info`, `quest_async`, `quest_counts`, `reincarnation`, `rot_damage`, `scenario_info`, `secure_transfer`, `security_api`, `talent_change_events`, `test_addon`, `test_sim_commands`, `ui_frame_manager`.
 
-- [ ] Re-run `cargo test --tests --no-fail-fast`, update bucket counts, and split any remaining high-volume failure groups into new unchecked subsystem tasks instead of collapsing them into one item.
+- [x] Re-run `cargo test --tests --no-fail-fast`, update bucket counts, and split any remaining high-volume failure groups into new unchecked subsystem tasks instead of collapsing them into one item.
+  - [x] Fresh rerun captured 12 lib failures before the harness stopped, plus a separate `action_bar` cluster with 7 failures.
+  - [x] The remaining clusters below are split into subsystem-sized follow-up tasks instead of one umbrella item.
+
+- [ ] Fix loader/bootstrap/global-access bucket (`12` failed targets): `global_frame_access`, `wow_api_globals` bootstrap namespace checks, `xml_basics`, and the related startup namespace visibility regressions surfaced by the fresh sweep.
+- [ ] Fix state-render/global-slot bucket (`5` failed targets): `state_render_repairs`, `state_render`, `global_slots`, and the bucket-order repair regressions surfaced by the fresh sweep.
+- [ ] Fix editmode workarounds bucket (`1` failed target): `workarounds_editmode` preset cloning behavior.
+- [ ] Fix action-bar startup bucket (`7+` failed targets): `action_bar` and `action_bar_tree` startup/load behavior that still depends on `WowLuaEnv` initialization.
