@@ -85,3 +85,6 @@
 - [ ] Fix global-slots bucket (`2` failed targets): `global_slots` root-global refresh behavior.
 - [ ] Fix editmode workarounds bucket (`1` failed target): `workarounds_editmode` preset cloning behavior.
 - [ ] Fix action-bar startup bucket (`7` failed targets): `action_bar` startup/load behavior that still depends on `WowLuaEnv` initialization.
+- [ ] Fix probe bucket (`6` failed targets): `c_club_probes`, `c_map_api`, `c_pet_battles_probes`, `c_small_probes`.
+- [ ] Investigate addon-loading perf harness failure (`1` failed target): `addon_loading_perf`.
+- [ ] Re-run `cargo test --tests --no-fail-fast`, update bucket counts, and split any remaining high-volume failure groups into new unchecked subsystem tasks instead of collapsing them into one item.
