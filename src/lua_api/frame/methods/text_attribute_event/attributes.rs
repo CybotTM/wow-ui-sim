@@ -69,8 +69,8 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
     let name_arg = create_string(state, &name);
-    store_simple_attribute(state, id, &name, value)?;
-    if let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
+    let changed = store_simple_attribute(state, id, &name, value)?;
+    if changed && let Some(handler) = get_rilua_script(state, id, "OnAttributeChanged") {
         let frame = frame_ref(state, id)?;
         dispatch_attribute_changed(state, handler, frame, name_arg, value);
     }
@@ -129,7 +129,7 @@ pub(super) fn set_attribute_no_handler(state: &mut LuaState) -> LuaResult<u32> {
     if protected_write_blocked(state, id) {
         return Ok(0);
     }
-    store_simple_attribute(state, id, &name, value)?;
+    let _ = store_simple_attribute(state, id, &name, value)?;
     Ok(0)
 }
 

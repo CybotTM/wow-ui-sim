@@ -135,3 +135,29 @@ fn insecure_caller_cannot_set_attribute_no_handler_on_protected_frame() {
         "insecure SetAttributeNoHandler on a protected frame must be dropped silently"
     );
 }
+
+#[test]
+fn unchanged_scalar_attribute_does_not_refire_on_attribute_changed() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "UnchangedAttributeNoRefire", UIParent)
+            local count = 0
+            frame:SetScript("OnAttributeChanged", function()
+                count = count + 1
+            end)
+
+            frame:SetAttribute("showgrid", 1)
+            frame:SetAttribute("showgrid", 1)
+
+            return count
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        count, 1,
+        "unchanged scalar attributes should not re-fire OnAttributeChanged"
+    );
+}

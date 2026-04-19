@@ -78,16 +78,22 @@ pub(super) fn store_simple_attribute(
     id: u64,
     name: &str,
     value: Val,
-) -> LuaResult<()> {
+) -> LuaResult<bool> {
     let ref_key = attr_ref_key(id, name);
     let attr = val_to_attribute(value, state, Some(&ref_key));
     let replace_with_nil = matches!(attr, crate::widget::AttributeValue::Nil);
     let mut sim = borrow_state_mut(state)?;
+    let old_attr = sim
+        .widgets
+        .get(id)
+        .and_then(|f| f.attributes.get(name))
+        .cloned();
     let old_was_ref = sim
         .widgets
         .get(id)
         .and_then(|f| f.attributes.get(name))
         .is_some_and(|v| matches!(v, crate::widget::AttributeValue::LuaRef(_)));
+    let changed = !attributes_equivalent(old_attr.as_ref(), Some(&attr));
     if let Some(frame) = sim.widgets.get_mut(id) {
         if replace_with_nil {
             frame.attributes.remove(name);
@@ -99,11 +105,28 @@ pub(super) fn store_simple_attribute(
     if replace_with_nil && old_was_ref {
         drop_attr_ref(state, &ref_key);
     }
-    Ok(())
+    Ok(changed)
 }
 
 fn drop_attr_ref(state: &mut LuaState, ref_key: &str) {
     if let Some(refs) = script_helpers::registry_table(state, ATTR_REFS_KEY) {
         script_helpers::table_set_str(state, refs, ref_key, Val::Nil);
+    }
+}
+
+fn attributes_equivalent(
+    lhs: Option<&crate::widget::AttributeValue>,
+    rhs: Option<&crate::widget::AttributeValue>,
+) -> bool {
+    use crate::widget::AttributeValue;
+
+    match (lhs, rhs) {
+        (None, None) => true,
+        (None, Some(AttributeValue::Nil)) | (Some(AttributeValue::Nil), None) => true,
+        (Some(AttributeValue::Nil), Some(AttributeValue::Nil)) => true,
+        (Some(AttributeValue::Boolean(lhs)), Some(AttributeValue::Boolean(rhs))) => lhs == rhs,
+        (Some(AttributeValue::Number(lhs)), Some(AttributeValue::Number(rhs))) => lhs == rhs,
+        (Some(AttributeValue::String(lhs)), Some(AttributeValue::String(rhs))) => lhs == rhs,
+        _ => false,
     }
 }
