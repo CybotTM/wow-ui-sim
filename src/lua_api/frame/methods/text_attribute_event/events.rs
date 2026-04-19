@@ -166,19 +166,25 @@ pub(super) fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: full unit-event callback (unit filter + Lua callback storage)
     let id = frame_id_from_stack(state, 1)?;
     let Some(event) = val_to_string(state, stack_val(state, 2)) else {
         state.push(Val::Bool(false));
         return Ok(1);
     };
+    let callback = stack_val(state, 3);
+    if !matches!(callback, Val::Function(_)) {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
+    let unit_filter = val_to_string(state, stack_val(state, 4));
     let mut sim = borrow_state_mut(state)?;
     if let Some(f) = sim.widgets.get_mut(id) {
         f.registered_events.insert(event.clone());
     }
-    let restricted = crate::event::is_restricted_event(&event);
     drop(sim);
     rilua_hlist_register_individual(state, id, &event)?;
+    super::callbacks::register_unit_callback(state, id, &event, callback, unit_filter.as_deref())?;
+    let restricted = crate::event::is_restricted_event(&event);
     state.push(Val::Bool(!restricted));
     Ok(1)
 }

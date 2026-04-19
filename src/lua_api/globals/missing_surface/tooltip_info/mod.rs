@@ -5,7 +5,9 @@ mod unit;
 
 use super::ensure_namespace;
 use crate::lua_bridge::table_set_rust_fn_static;
-use builders::ensure_pet_info_state;
+use builders::{
+    ensure_pet_info_state, get_pet_tamers_for_map, get_spell_for_pet_action, is_pet_action_passive,
+};
 use probes::*;
 use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
@@ -13,8 +15,33 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
 pub(super) fn register_tooltip_surface(state: &mut LuaState) -> LuaResult<()> {
+    register_pet_info_surface(state)?;
     ensure_pet_info_state(state);
     register_c_tooltip_info(state)
+}
+
+pub(super) fn register_pet_info_surface(state: &mut LuaState) -> LuaResult<()> {
+    let table_ref = ensure_namespace(state, "C_PetInfo")?;
+    ensure_pet_info_state(state);
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetPetTamersForMap",
+        get_pet_tamers_for_map,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetSpellForPetAction",
+        get_spell_for_pet_action,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsPetActionPassive",
+        is_pet_action_passive,
+    )?;
+    Ok(())
 }
 
 fn register_c_tooltip_info(state: &mut LuaState) -> LuaResult<()> {

@@ -1,5 +1,6 @@
 //! Restored rilua API surface for item, spell, tooltip, and small legacy globals.
 
+mod account_services;
 mod achievement_info;
 mod area_poi;
 mod auction_house;
@@ -15,6 +16,7 @@ mod death_recap;
 mod delves_ui;
 mod encounter_journal;
 mod fog_of_war;
+mod friend_list;
 mod gossip_info;
 mod heirloom;
 mod item_socket_info;
@@ -29,6 +31,7 @@ mod profession_crafting;
 mod professions;
 mod quest_log;
 mod recruit_a_friend;
+mod report_system;
 mod scenario_info;
 mod small_namespaces;
 mod small_probes;
@@ -39,6 +42,7 @@ mod traits;
 mod transmog;
 mod tutorial;
 mod voice_chat;
+mod zone_ability;
 
 use crate::lua_api::methods::{borrow_state_mut, create_string, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val};
@@ -145,6 +149,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     character_services::register_character_services_surface(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_info::register_club_info_surface(state)?;
+    friend_list::register_friend_list_surface(state)?;
     recruit_a_friend::register_recruit_a_friend_surface(state)?;
     voice_chat::register_voice_chat_surface(state)?;
     social::register_social_surface(state)?;
@@ -159,6 +164,9 @@ fn register_group_activity_surfaces(state: &mut LuaState) -> LuaResult<()> {
     player_info::register_player_info_surface(state)?;
     lfg_info::register_lfg_info_surface(state)?;
     pet_battles::register_pet_battles_surface(state)?;
+    account_services::register_account_services_surface(state)?;
+    report_system::register_report_system_surface(state)?;
+    zone_ability::register_zone_ability_surface(state)?;
     small_namespaces::register_small_namespaces(state)?;
     small_probes::register_small_probes_surface(state)?;
     Ok(())

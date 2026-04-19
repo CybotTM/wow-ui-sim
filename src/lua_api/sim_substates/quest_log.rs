@@ -42,6 +42,7 @@ impl QuestLogState {
             entries: vec![
                 lost_expedition_entry(),
                 defending_the_gates_entry(),
+                glittering_geodes_entry(),
                 earthen_relic_recovery_entry(),
             ],
             completed_quest_ids: seeded_completed_quest_ids(),
@@ -96,6 +97,19 @@ fn earthen_relic_recovery_entry() -> QuestLogEntry {
         is_world_quest: true,
         is_replayable: true,
         waypoint: Some((0.62, 0.58)),
+        tag_id: Some(2),
+        ..seed_quest_defaults()
+    }
+}
+
+fn glittering_geodes_entry() -> QuestLogEntry {
+    QuestLogEntry {
+        quest_id: 90001,
+        title: "Glittering Geodes".into(),
+        is_world_quest: true,
+        is_replayable: true,
+        map_id: Some(2025),
+        waypoint: Some((0.52, 0.63)),
         tag_id: Some(2),
         ..seed_quest_defaults()
     }

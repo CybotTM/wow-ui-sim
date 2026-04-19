@@ -111,7 +111,7 @@ impl shader::Program<Message> for &App {
 
         log_slow_draw(quad_dur, tex_dur, textures.len(), bc_textures.len());
 
-        self.update_frame_time_avg(start.elapsed());
+        self.record_draw_time(start.elapsed());
 
         let mut primitive = WowUiPrimitive {
             strata_batches: dirty_strata,
@@ -287,11 +287,10 @@ impl App {
             .any(|path| !uploaded.contains(path) && !failed.contains(path))
     }
 
-    fn update_frame_time_avg(&self, elapsed: std::time::Duration) {
+    fn record_draw_time(&self, elapsed: std::time::Duration) {
         let elapsed_ms = elapsed.as_secs_f32() * 1000.0;
-        self.frame_time_ms.set(elapsed_ms);
-        let avg = self.frame_time_avg.get();
-        self.frame_time_avg.set(0.33 * elapsed_ms + 0.67 * avg);
+        self.draw_time_accum_ms
+            .set(self.draw_time_accum_ms.get() + elapsed_ms);
     }
 
     /// Return per-strata dirty batches, rebuilding only strata whose bit is

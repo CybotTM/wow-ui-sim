@@ -86,6 +86,7 @@ pub mod spell_api;
 pub mod spell_macro_verbs;
 pub mod spell_state_probes;
 pub mod spellbook_data;
+pub mod state_backed_queries;
 pub mod store_frame;
 pub mod strings;
 pub mod stubs;

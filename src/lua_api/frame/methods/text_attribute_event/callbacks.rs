@@ -161,7 +161,7 @@ pub(super) fn register_callback(state: &mut LuaState) -> LuaResult<u32> {
     };
     if let Some(event_table) = callback_event_table(state, frame_id, &event, true)? {
         let entries = dedup_entries_by_owner(state, event_table, owner);
-        let entry_ref = build_callback_entry(state, owner, func);
+        let entry_ref = build_callback_entry(state, owner, func, None);
         let mut new_entries = entries;
         new_entries.push(Val::Table(entry_ref));
         rewrite_callback_entries(state, event_table, &new_entries);
@@ -181,16 +181,45 @@ fn dedup_entries_by_owner(state: &mut LuaState, event_table: GcRef<Table>, owner
         .collect()
 }
 
-fn build_callback_entry(state: &mut LuaState, owner: Val, func: Val) -> GcRef<Table> {
+fn build_callback_entry(
+    state: &mut LuaState,
+    owner: Val,
+    func: Val,
+    unit_filter: Option<&str>,
+) -> GcRef<Table> {
     let entry_ref = state.gc.alloc_table(Table::new());
     let owner_key = state.gc.intern_string_static(b"owner");
     let func_key = state.gc.intern_string_static(b"func");
+    let unit_key = state.gc.intern_string_static(b"unit");
+    let unit_val =
+        unit_filter.map(|unit_filter| Val::Str(state.gc.intern_string(unit_filter.as_bytes())));
     if let Some(entry_table) = state.gc.tables.get_mut(entry_ref) {
         let _ = entry_table.raw_set(Val::Str(owner_key), owner, &state.gc.string_arena);
         let _ = entry_table.raw_set(Val::Str(func_key), func, &state.gc.string_arena);
+        if let Some(unit_val) = unit_val {
+            let _ = entry_table.raw_set(Val::Str(unit_key), unit_val, &state.gc.string_arena);
+        }
     }
     state.gc.barrier_back(entry_ref);
     entry_ref
+}
+
+pub(super) fn register_unit_callback(
+    state: &mut LuaState,
+    frame_id: u64,
+    event: &str,
+    func: Val,
+    unit_filter: Option<&str>,
+) -> LuaResult<()> {
+    let owner = frame_ref(state, frame_id)?;
+    if let Some(event_table) = callback_event_table(state, frame_id, event, true)? {
+        let entries = dedup_entries_by_owner(state, event_table, owner);
+        let entry_ref = build_callback_entry(state, owner, func, unit_filter);
+        let mut new_entries = entries;
+        new_entries.push(Val::Table(entry_ref));
+        rewrite_callback_entries(state, event_table, &new_entries);
+    }
+    Ok(())
 }
 
 pub(super) fn unregister_callback(state: &mut LuaState) -> LuaResult<u32> {
@@ -267,5 +296,62 @@ fn dispatch_callbacks(state: &mut LuaState, callbacks: &[Val], args: &[Val]) {
         if let Err(error) = call_function_state(state, func, &call_args) {
             call_error_handler_state(state, &error.to_string());
         }
+    }
+}
+
+pub(crate) fn dispatch_unit_event_callbacks(
+    state: &mut LuaState,
+    frame_id: u64,
+    event: &str,
+    args: &[Val],
+) {
+    let callbacks = callback_event_table(state, frame_id, event, false)
+        .ok()
+        .flatten()
+        .map(|event_table| callback_entries(state, event_table))
+        .unwrap_or_default();
+    for entry in callbacks {
+        let Some((owner, func)) = callback_entry_fields(state, entry) else {
+            continue;
+        };
+        let unit_filter = callback_entry_unit_filter(state, entry);
+        if unit_filter.is_some()
+            && !unit_filter_matches(state, unit_filter.as_deref(), args.first().copied())
+        {
+            continue;
+        }
+        let mut call_args = Vec::with_capacity(args.len() + 1);
+        call_args.push(owner);
+        call_args.extend_from_slice(args);
+        if let Err(error) = call_function_state(state, func, &call_args) {
+            call_error_handler_state(state, &error.to_string());
+        }
+    }
+}
+
+fn callback_entry_unit_filter(state: &mut LuaState, entry: Val) -> Option<String> {
+    let Val::Table(entry_ref) = entry else {
+        return None;
+    };
+    let unit_key = state.gc.intern_string_static(b"unit");
+    let table = state.gc.tables.get(entry_ref)?;
+    match table.get_str(unit_key, &state.gc.string_arena) {
+        Val::Str(unit_ref) => state
+            .gc
+            .string_arena
+            .get(unit_ref)
+            .and_then(|unit| std::str::from_utf8(unit.data()).ok())
+            .map(str::to_owned),
+        _ => None,
+    }
+}
+
+fn unit_filter_matches(state: &mut LuaState, unit_filter: Option<&str>, arg: Option<Val>) -> bool {
+    let Some(unit_filter) = unit_filter else {
+        return true;
+    };
+    match arg {
+        Some(unit_arg) => val_to_string(state, unit_arg).as_deref() == Some(unit_filter),
+        None => false,
     }
 }

@@ -402,6 +402,12 @@ pub(super) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
+        "FindSpellOverrideByID",
+        c_spell_book_get_override_spell,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
         "IsSpellKnown",
         c_spell_book_is_spell_known,
     )?;

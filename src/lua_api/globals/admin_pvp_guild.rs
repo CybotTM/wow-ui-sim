@@ -5,6 +5,7 @@
 //! point in admin.rs imports these as pub(super) and weaves
 //! them into the A_Admin TableBuilder chain.
 
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_bridge::FromStack;
 use rilua::LuaResult;
@@ -36,7 +37,6 @@ pub(super) fn set_guild_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn join_guild(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
     let name = String::from_stack(state, 1)?;
     let rank = String::from_stack(state, 2)?;
     let num_members = i32::from_stack(state, 3)?;
@@ -44,10 +44,8 @@ pub(super) fn join_guild(state: &mut LuaState) -> LuaResult<u32> {
     st.world.guild_name = Some(name);
     st.world.guild_rank = Some(rank);
     st.world.guild_num_members = num_members;
-    st.events.push(Event {
-        name: "PLAYER_GUILD_UPDATE".to_string(),
-        args: vec![],
-    });
+    drop(st);
+    dispatch_event_now(state, "PLAYER_GUILD_UPDATE", &[])?;
     Ok(0)
 }
 
@@ -60,14 +58,11 @@ pub(super) fn clear_guild(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn leave_guild(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::Event;
     let mut st = borrow_state_mut(state)?;
     st.world.guild_name = None;
     st.world.guild_rank = None;
     st.world.guild_num_members = 0;
-    st.events.push(Event {
-        name: "PLAYER_GUILD_UPDATE".to_string(),
-        args: vec![],
-    });
+    drop(st);
+    dispatch_event_now(state, "PLAYER_GUILD_UPDATE", &[])?;
     Ok(0)
 }

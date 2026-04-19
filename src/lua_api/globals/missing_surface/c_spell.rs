@@ -5,6 +5,8 @@
 //! - `GetSpellInfo(spellID)` → `SpellInfo` table from `spells::get_spell`, or nil.
 //! - `GetSpellCooldown(spellID)` → `SpellCooldownInfo` table from
 //!   `SimState.spell_cooldowns` (start/duration/isEnabled/isActive/modRate).
+//! - `GetSpellCastCount(spellID)` → permissive zero. The zone-ability UI
+//!   only uses this as a fallback display count when charges are absent.
 //! - `GetMountFromSpell(spellID)` → scans `world.mounts` for matching spell
 //!   id, returns mount_id or nil.
 //! - `GetVisibilityInfo(spellID, filter)` → `(false, true, false)` — most
@@ -29,6 +31,7 @@ pub(super) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_Spell")?;
     table_set_rust_fn_static(state, ns, "GetSpellInfo", get_spell_info)?;
     table_set_rust_fn_static(state, ns, "GetSpellCooldown", get_spell_cooldown)?;
+    table_set_rust_fn_static(state, ns, "GetSpellCastCount", get_spell_cast_count)?;
     table_set_rust_fn_static(state, ns, "GetMountFromSpell", get_mount_from_spell)?;
     table_set_rust_fn_static(state, ns, "GetVisibilityInfo", get_visibility_info)?;
     table_set_rust_fn_static(state, ns, "DoesSpellExist", does_spell_exist)?;
@@ -107,6 +110,17 @@ fn get_spell_cooldown(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "isActive", Val::Bool(is_active));
     table_set(state, info, "modRate", Val::Num(1.0));
     state.push(info);
+    Ok(1)
+}
+
+/// `C_Spell.GetSpellCastCount(spellID)` → `0`.
+///
+/// ZoneAbility treats this as a fallback count when a spell has no
+/// charge table. The sim does not track spell cast counts yet, so the
+/// permissive baseline is zero.
+fn get_spell_cast_count(state: &mut LuaState) -> LuaResult<u32> {
+    let _spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Num(0.0));
     Ok(1)
 }
 

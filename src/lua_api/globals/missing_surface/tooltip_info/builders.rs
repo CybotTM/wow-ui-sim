@@ -10,7 +10,7 @@ use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, table_get, table_set,
     val_to_string,
 };
-use crate::lua_bridge::table_set_rust_fn_static;
+use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -397,24 +397,24 @@ pub(super) fn ensure_pet_info_state(state: &mut LuaState) -> Val {
         table @ Val::Table(_) => table,
         _ => {
             let t = create_table(state);
-            // sub-tables used by tests / C_PetInfo._state()
+            // sub-tables used by tests / C_PetInfo._state
             let spell_map = create_table(state);
             table_set(state, t, "spellByPetActionID", spell_map);
             let action_map = create_table(state);
             table_set(state, t, "petActionsByID", action_map);
+            let tamers_map = create_table(state);
+            table_set(state, t, "petTamersByMapID", tamers_map);
+            let passive_actions = create_table(state);
+            table_set(state, t, "passivePetActionIDs", passive_actions);
             table_set(state, ns, "_pet_state_data", t);
-            // register _state() as a Rust function the first time
-            let _ = table_set_rust_fn_static(state, ns_ref, "_state", c_pet_info_get_state);
+            table_set(state, ns, "_state", t);
             t
         }
     };
+    if !matches!(table_get(state, ns, "_state"), Val::Table(_)) {
+        table_set(state, ns, "_state", pet_state);
+    }
     pet_state
-}
-
-fn c_pet_info_get_state(state: &mut LuaState) -> LuaResult<u32> {
-    let pet_state = ensure_pet_info_state(state);
-    state.push(pet_state);
-    Ok(1)
 }
 
 pub(super) fn table_get_int(state: &LuaState, table: Val, index: i32) -> Val {
@@ -433,14 +433,113 @@ pub(super) fn pet_action_spell_id(state: &mut LuaState, slot: i32) -> Option<u32
     let pet_state = ensure_pet_info_state(state);
     // spellByPetActionID[slot] → spell id (direct integer key mapping)
     let spell_map = table_get(state, pet_state, "spellByPetActionID");
-    if let Val::Num(n) = table_get_int(state, spell_map, slot) {
-        return Some(n as u32);
+    if let Some(spell_id) = table_get_u32(state, table_get_int(state, spell_map, slot)) {
+        return Some(spell_id);
     }
     // petActionsByID[slot].spellID fallback
     let action_map = table_get(state, pet_state, "petActionsByID");
     let entry = table_get_int(state, action_map, slot);
-    if let Val::Num(n) = table_get(state, entry, "spellID") {
-        return Some(n as u32);
+    let spell_value = table_get(state, entry, "spellID");
+    if let Some(spell_id) = table_get_u32(state, spell_value) {
+        return Some(spell_id);
     }
     None
+}
+
+fn pet_info_slot_from_stack(state: &LuaState, slot_index: i32) -> Option<i32> {
+    match stack_val(state, slot_index) {
+        Val::Num(n) => Some(n as i32),
+        Val::Str(_) => val_to_string(state, stack_val(state, slot_index))
+            .and_then(|text| text.parse::<i32>().ok()),
+        _ => None,
+    }
+}
+
+fn table_get_u32(state: &LuaState, value: Val) -> Option<u32> {
+    match value {
+        Val::Num(n) if n >= 0.0 => Some(n as u32),
+        Val::Str(_) => val_to_string(state, value).and_then(|text| text.parse::<u32>().ok()),
+        _ => None,
+    }
+}
+
+fn clone_pet_tamer_entry(state: &mut LuaState, entry: Val) -> Val {
+    let copy = create_table(state);
+    for key in ["areaPoiID", "name", "atlasName", "textureIndex"] {
+        let value = table_get(state, entry, key);
+        if !matches!(value, Val::Nil) {
+            table_set(state, copy, key, value);
+        }
+    }
+    let position = table_get(state, entry, "position");
+    if matches!(position, Val::Table(_)) {
+        let position_copy = create_table(state);
+        for key in ["x", "y"] {
+            let value = table_get(state, position, key);
+            if !matches!(value, Val::Nil) {
+                table_set(state, position_copy, key, value);
+            }
+        }
+        table_set(state, copy, "position", position_copy);
+    }
+    copy
+}
+
+fn clone_pet_tamers_for_map(state: &mut LuaState, tamers: Val) -> Val {
+    let clone = create_table(state);
+    let mut index = 1_i64;
+    loop {
+        let entry = table_get_int(state, tamers, index as i32);
+        if matches!(entry, Val::Nil) {
+            break;
+        }
+        let entry_copy = clone_pet_tamer_entry(state, entry);
+        set_table_array(state, clone, index, entry_copy);
+        index += 1;
+    }
+    clone
+}
+
+pub(super) fn get_pet_tamers_for_map(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(map_id) = pet_info_slot_from_stack(state, 1) else {
+        let empty = create_table(state);
+        state.push(empty);
+        return Ok(1);
+    };
+    let pet_state = ensure_pet_info_state(state);
+    let tamers_by_map = table_get(state, pet_state, "petTamersByMapID");
+    let tamers = table_get_int(state, tamers_by_map, map_id);
+    let result = match tamers {
+        Val::Table(_) => clone_pet_tamers_for_map(state, tamers),
+        _ => create_table(state),
+    };
+    state.push(result);
+    Ok(1)
+}
+
+pub(super) fn get_spell_for_pet_action(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = pet_info_slot_from_stack(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    match pet_action_spell_id(state, slot) {
+        Some(spell_id) => state.push(Val::Num(spell_id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+pub(super) fn is_pet_action_passive(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = pet_info_slot_from_stack(state, 1) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let pet_state = ensure_pet_info_state(state);
+    let passive_actions = table_get(state, pet_state, "passivePetActionIDs");
+    let action_map = table_get(state, pet_state, "petActionsByID");
+    let action_entry = table_get_int(state, action_map, slot);
+    let is_passive = matches!(table_get_int(state, passive_actions, slot), Val::Bool(true))
+        || matches!(table_get(state, action_entry, "isPassive"), Val::Bool(true));
+    state.push(Val::Bool(is_passive));
+    Ok(1)
 }

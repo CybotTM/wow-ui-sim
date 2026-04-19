@@ -66,6 +66,20 @@ if BreakUpLargeNumbers == nil then
   end
 end
 
+if tAppendAll == nil then
+  function tAppendAll(tbl, addedArray)
+    if type(tbl) ~= "table" or type(addedArray) ~= "table" then
+      return tbl
+    end
+
+    for _, value in ipairs(addedArray) do
+      table.insert(tbl, value)
+    end
+
+    return tbl
+  end
+end
+
 if StaticPopup_Hide == nil then
   function StaticPopup_Hide(_which, _data)
   end
@@ -1858,6 +1872,12 @@ C_Ping = __wow_merge_namespace(C_Ping, {
 C_ZoneAbility = __wow_merge_namespace(C_ZoneAbility, {
   GetActiveAbilities = function() return {} end,
 })
+
+if rawget(C_ZoneAbility, "GetActiveAbilities") == nil then
+  function C_ZoneAbility.GetActiveAbilities()
+    return {}
+  end
+end
 
 C_AuthChallenge = __wow_merge_namespace(C_AuthChallenge, {
   SetFrame = __wow_noop,
@@ -4877,6 +4897,297 @@ end
 -- The earlier __wow_merge_namespace at the top of this file already
 -- installed the C_PetBattles namespace with stub methods; our Rust
 -- registration overrides the two that the PLAN called out.
+local __wow_pet_battle_state = rawget(_G, "__wow_pet_battle_state")
+if type(__wow_pet_battle_state) ~= "table" then
+  __wow_pet_battle_state = {
+    battleState = 0,
+    numPetsPlayer = 0,
+    numPetsEnemy = 0,
+    isWildBattle = false,
+    queueStatus = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.None or 0,
+    queueEstimatedTime = 12,
+    queueTime = 4,
+    canAcceptQueuedPVPMatch = false,
+    selectedActionType = nil,
+    selectedActionIndex = nil,
+    pendingReportBattlePetTarget = nil,
+    pendingReportTargetUnit = nil,
+    pvpDuel = {
+      pending = false,
+      challengedUnit = nil,
+      exactMatch = false,
+      accepted = false,
+    },
+    sampleSeeded = false,
+  }
+  rawset(_G, "__wow_pet_battle_state", __wow_pet_battle_state)
+end
+
+local __wow_pet_battle_waiting_state = Enum.PetbattleState and Enum.PetbattleState.WaitingPreBattle or 1
+local __wow_pet_battle_finished_state = Enum.PetbattleState and Enum.PetbattleState.Finished or 7
+
+local function __wow_pet_battle_seed_sample()
+  if __wow_pet_battle_state.sampleSeeded then
+    return
+  end
+
+  __wow_pet_battle_state.sampleSeeded = true
+  __wow_pet_battle_state.battleState = __wow_pet_battle_waiting_state
+  __wow_pet_battle_state.numPetsPlayer = 3
+  __wow_pet_battle_state.numPetsEnemy = 2
+  __wow_pet_battle_state.isWildBattle = true
+  __wow_pet_battle_state.playerPets = {
+    {
+      name = "Arcane Familiar",
+      level = 25,
+      health = 1120,
+      maxHealth = 1420,
+      power = 18,
+      speed = 21,
+      petType = 7,
+      xp = 45,
+      maxXP = 100,
+      abilities = {
+        [1] = { id = 1001, name = "Arcane Bite", icon = 0, maxCooldown = 2, description = "Arcane bite.", numTurns = 1, petType = 7, usable = true, cooldown = 0, lockdown = 0 },
+        [2] = { id = 1002, name = "Blink Ward", icon = 0, maxCooldown = 1, description = "Blink ward.", numTurns = 1, petType = 7, usable = true, cooldown = 1, lockdown = 0 },
+      },
+      auras = {
+        { auraID = 1002, instanceID = 9001, turnsRemaining = 2, isBuff = true },
+      },
+    },
+    {
+      name = "Clockwork Hopper",
+      level = 24,
+      health = 910,
+      maxHealth = 1180,
+      power = 15,
+      speed = 17,
+      petType = 9,
+      xp = 15,
+      maxXP = 100,
+      abilities = {
+        [1] = { id = 1003, name = "Spring-Loaded", icon = 0, maxCooldown = 2, description = "Jump forward.", numTurns = 1, petType = 9, usable = true, cooldown = 0, lockdown = 0 },
+      },
+      auras = {},
+    },
+    {
+      name = "Frost Pup",
+      level = 23,
+      health = 870,
+      maxHealth = 1110,
+      power = 14,
+      speed = 19,
+      petType = 8,
+      xp = 10,
+      maxXP = 100,
+      abilities = {
+        [1] = { id = 1004, name = "Snowball", icon = 0, maxCooldown = 1, description = "Throw snowball.", numTurns = 1, petType = 8, usable = true, cooldown = 0, lockdown = 0 },
+      },
+      auras = {},
+    },
+  }
+  __wow_pet_battle_state.enemyPets = {
+    {
+      name = "Stone Lurker",
+      level = 24,
+      health = 980,
+      maxHealth = 1320,
+      power = 16,
+      speed = 14,
+      petType = 9,
+      xp = 0,
+      maxXP = 100,
+      abilities = {
+        [1] = { id = 1101, name = "Pebble Toss", icon = 0, maxCooldown = 1, description = "Pebble toss.", numTurns = 1, petType = 9, usable = true, cooldown = 0, lockdown = 0 },
+      },
+      auras = {},
+    },
+    {
+      name = "Bog Hopper",
+      level = 24,
+      health = 930,
+      maxHealth = 1210,
+      power = 13,
+      speed = 20,
+      petType = 9,
+      xp = 0,
+      maxXP = 100,
+      abilities = {
+        [1] = { id = 1102, name = "Bog Kick", icon = 0, maxCooldown = 1, description = "Bog kick.", numTurns = 1, petType = 9, usable = true, cooldown = 0, lockdown = 0 },
+      },
+      auras = {},
+    },
+  }
+  __wow_pet_battle_state.abilitiesByID = {
+    [1001] = __wow_pet_battle_state.playerPets[1].abilities[1],
+    [1002] = __wow_pet_battle_state.playerPets[1].abilities[2],
+    [1003] = __wow_pet_battle_state.playerPets[2].abilities[1],
+    [1004] = __wow_pet_battle_state.playerPets[3].abilities[1],
+    [1101] = __wow_pet_battle_state.enemyPets[1].abilities[1],
+    [1102] = __wow_pet_battle_state.enemyPets[2].abilities[1],
+  }
+end
+
+local function __wow_pet_battle_ensure_active()
+  if not __wow_pet_battle_state.sampleSeeded then
+    __wow_pet_battle_seed_sample()
+  end
+end
+
+local function __wow_pet_battle_get_pet(owner, petIndex)
+  __wow_pet_battle_ensure_active()
+  local pets
+  if owner == (Enum.BattlePetOwner and Enum.BattlePetOwner.Ally or 1) then
+    pets = __wow_pet_battle_state.playerPets
+  elseif owner == (Enum.BattlePetOwner and Enum.BattlePetOwner.Enemy or 2) then
+    pets = __wow_pet_battle_state.enemyPets
+  else
+    return nil
+  end
+
+  return pets and pets[petIndex] or nil
+end
+
+local function __wow_pet_battle_get_ability(owner, petIndex, abilityIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.abilities and pet.abilities[abilityIndex] or nil
+end
+
+C_PetBattles._state = __wow_pet_battle_state
+C_PetBattles.IsInBattle = function()
+  __wow_pet_battle_ensure_active()
+  return (__wow_pet_battle_state.battleState or 0) ~= __wow_pet_battle_finished_state
+end
+C_PetBattles.IsWildBattle = function()
+  __wow_pet_battle_ensure_active()
+  return __wow_pet_battle_state.isWildBattle == true
+end
+C_PetBattles.GetAbilityInfo = function(owner, petIndex, abilityIndex)
+  local ability = __wow_pet_battle_get_ability(owner, petIndex, abilityIndex)
+  if not ability then
+    return nil
+  end
+  return ability.id, ability.name, ability.icon, ability.maxCooldown, ability.description, ability.numTurns, ability.petType
+end
+C_PetBattles.GetAbilityInfoByID = function(abilityID)
+  __wow_pet_battle_ensure_active()
+  local ability = __wow_pet_battle_state.abilitiesByID and __wow_pet_battle_state.abilitiesByID[abilityID]
+  if not ability then
+    return nil
+  end
+  return ability.id, ability.name, ability.icon, ability.maxCooldown, ability.description, ability.numTurns, ability.petType
+end
+C_PetBattles.GetAbilityState = function(owner, petIndex, abilityIndex)
+  local ability = __wow_pet_battle_get_ability(owner, petIndex, abilityIndex)
+  if not ability then
+    return false, 0, 0
+  end
+  return ability.usable ~= false, ability.cooldown or 0, ability.lockdown or 0
+end
+C_PetBattles.GetAuraInfo = function(owner, petIndex, auraIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  local aura = pet and pet.auras and pet.auras[auraIndex]
+  if not aura then
+    return nil
+  end
+  return aura.auraID, aura.instanceID, aura.turnsRemaining, aura.isBuff
+end
+C_PetBattles.GetNumAuras = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.auras and #pet.auras or 0
+end
+C_PetBattles.GetHealth = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.health or 0
+end
+C_PetBattles.GetMaxHealth = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.maxHealth or 0
+end
+C_PetBattles.GetPower = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.power or 0
+end
+C_PetBattles.GetSpeed = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.speed or 0
+end
+C_PetBattles.GetLevel = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  return pet and pet.level or 0
+end
+C_PetBattles.GetXP = function(owner, petIndex)
+  local pet = __wow_pet_battle_get_pet(owner, petIndex)
+  if not pet then
+    return 0, 0
+  end
+  return pet.xp or 0, pet.maxXP or 0
+end
+C_PetBattles.GetAttackModifier = function(attackerType, defenderType)
+  if attackerType == 7 and defenderType == 9 then
+    return 1.5
+  end
+  return 1.0
+end
+C_PetBattles.GetAllStates = function(parserEnv)
+  if type(parserEnv) ~= "table" then
+    return
+  end
+  parserEnv.STATE_Stat_Power = 18
+end
+C_PetBattles.GetPVPMatchmakingInfo = function()
+  return __wow_pet_battle_state.queueStatus, __wow_pet_battle_state.queueEstimatedTime, __wow_pet_battle_state.queueTime
+end
+C_PetBattles.CanAcceptQueuedPVPMatch = function()
+  return __wow_pet_battle_state.canAcceptQueuedPVPMatch == true
+end
+C_PetBattles.StartPVPMatchmaking = function()
+  __wow_pet_battle_ensure_active()
+  __wow_pet_battle_state.queueStatus = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.Matchmaking or 1
+  __wow_pet_battle_state.canAcceptQueuedPVPMatch = true
+end
+C_PetBattles.AcceptQueuedPVPMatch = function()
+  __wow_pet_battle_state.queueStatus = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.MatchAccepted or 2
+  __wow_pet_battle_state.canAcceptQueuedPVPMatch = false
+end
+C_PetBattles.GetSelectedAction = function()
+  return __wow_pet_battle_state.selectedActionType, __wow_pet_battle_state.selectedActionIndex
+end
+C_PetBattles.UseAbility = function(abilityIndex)
+  __wow_pet_battle_state.selectedActionType = Enum.BattlePetAction and Enum.BattlePetAction.Ability or 1
+  __wow_pet_battle_state.selectedActionIndex = abilityIndex
+end
+C_PetBattles.ChangePet = function(petIndex)
+  __wow_pet_battle_state.selectedActionType = Enum.BattlePetAction and Enum.BattlePetAction.SwitchPet or 2
+  __wow_pet_battle_state.selectedActionIndex = petIndex
+end
+C_PetBattles.UseTrap = function()
+  __wow_pet_battle_state.selectedActionType = Enum.BattlePetAction and Enum.BattlePetAction.Trap or 3
+  __wow_pet_battle_state.selectedActionIndex = nil
+end
+C_PetBattles.SkipTurn = function()
+  __wow_pet_battle_state.selectedActionType = Enum.BattlePetAction and Enum.BattlePetAction.Skip or 4
+  __wow_pet_battle_state.selectedActionIndex = nil
+end
+C_PetBattles.StartPVPDuel = function(unitToken, exactMatch)
+  __wow_pet_battle_state.pvpDuel.pending = true
+  __wow_pet_battle_state.pvpDuel.challengedUnit = unitToken
+  __wow_pet_battle_state.pvpDuel.exactMatch = exactMatch == true
+  __wow_pet_battle_state.pvpDuel.accepted = false
+end
+C_PetBattles.AcceptPVPDuel = function()
+  __wow_pet_battle_state.pvpDuel.pending = false
+  __wow_pet_battle_state.pvpDuel.accepted = true
+end
+C_PetBattles.SetPendingReportBattlePetTarget = function(petIndex)
+  __wow_pet_battle_state.pendingReportBattlePetTarget = petIndex
+end
+C_PetBattles.SetPendingReportTargetFromUnit = function(unitToken)
+  __wow_pet_battle_state.pendingReportTargetUnit = unitToken
+end
+C_PetBattles.ForfeitGame = function()
+  __wow_pet_battle_state.battleState = __wow_pet_battle_finished_state
+end
 
 -- LFG group-finder probes. Neither applies in the sim: no group-finder
 -- usage and no active proposal. `GetLFGProposal` returns 15 values
@@ -5312,7 +5623,7 @@ end
 -- Store / shop public API: sim has no store.
 C_StorePublic = C_StorePublic or __wow_namespace()
 if rawget(C_StorePublic, "IsEnabled") == nil then
-  function C_StorePublic.IsEnabled() return false end
+  function C_StorePublic.IsEnabled() return true end
 end
 if rawget(C_StorePublic, "IsDisabledByParentalControls") == nil then
   function C_StorePublic.IsDisabledByParentalControls() return false end
@@ -5368,6 +5679,78 @@ C_Commentator = C_Commentator or __wow_namespace()
 if rawget(C_Commentator, "IsSpectating") == nil then
   function C_Commentator.IsSpectating() return false end
 end
+if rawget(C_Commentator, "SendAddonMessage") == nil then
+  function C_Commentator.SendAddonMessage(_prefix, _message, _channel)
+    return Enum and Enum.SendAddonMessageResult and Enum.SendAddonMessageResult.Success or 0
+  end
+end
+
+C_CampaignInfo = __wow_merge_namespace(C_CampaignInfo, {
+  GetCampaignID = function(campaignID)
+    return tonumber(campaignID) or 0
+  end,
+  GetState = function(_campaignID)
+    return Enum and Enum.CampaignState and Enum.CampaignState.Invalid or 0
+  end,
+})
+
+C_CovenantSanctumUI = __wow_merge_namespace(C_CovenantSanctumUI, {
+  GetRenownRewardsForLevel = function(factionID, level)
+    if tonumber(factionID) == 1 and tonumber(level) == 5 then
+      return {
+        {
+          name = "Path of Ascension",
+          description = "Unlocks a new covenant activity.",
+          toastDescription = "Path of Ascension unlocked",
+          icon = 4089529,
+        },
+      }
+    end
+    return {}
+  end,
+})
+
+local __wow_level_link_state = type(C_LevelLink) == "table" and rawget(C_LevelLink, "_state") or nil
+C_LevelLink = __wow_merge_namespace(C_LevelLink, {
+  _state = __wow_level_link_state or {
+    lockedActions = {},
+    lockedSpells = {},
+    lastActionQuery = nil,
+    lastSpellQuery = nil,
+  },
+})
+
+if rawget(C_LevelLink, "IsActionLocked") == nil then
+  function C_LevelLink.IsActionLocked(actionID)
+    local normalized = tonumber(actionID)
+    if normalized == nil then
+      C_LevelLink._state.lastActionQuery = nil
+      return false
+    end
+    local entry = C_LevelLink._state.lockedActions[normalized]
+    C_LevelLink._state.lastActionQuery = normalized
+    if type(entry) == "table" then
+      return entry.locked == true
+    end
+    return entry == true
+  end
+end
+
+if rawget(C_LevelLink, "IsSpellLocked") == nil then
+  function C_LevelLink.IsSpellLocked(spellID)
+    local normalized = tonumber(spellID)
+    if normalized == nil then
+      C_LevelLink._state.lastSpellQuery = nil
+      return false
+    end
+    local entry = C_LevelLink._state.lockedSpells[normalized]
+    C_LevelLink._state.lastSpellQuery = normalized
+    if type(entry) == "table" then
+      return entry.locked == true
+    end
+    return entry == true
+  end
+end
 
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
@@ -5378,6 +5761,27 @@ C_GuildBank = C_GuildBank or __wow_namespace()
 -- Merge the stub-namespace __index fallback so other unimplemented
 -- C_GuildInfo members resolve to the no-op metamethod.
 C_GuildInfo = __wow_merge_namespace(C_GuildInfo, {})
+if rawget(C_GuildInfo, "_textState") == nil then
+  C_GuildInfo._textState = {
+    motd = "Raid invites tonight at 20:00 server. Repairs are on for progression.",
+    infoText = "Mythic-focused guild recruiting healers and a warlock for weekend raids.",
+  }
+end
+if rawget(C_GuildInfo, "GetMOTD") == nil then
+  function C_GuildInfo.GetMOTD()
+    return C_GuildInfo._textState.motd
+  end
+end
+if rawget(C_GuildInfo, "GetInfoText") == nil then
+  function C_GuildInfo.GetInfoText()
+    return C_GuildInfo._textState.infoText
+  end
+end
+if rawget(C_GuildInfo, "SetInfoText") == nil then
+  function C_GuildInfo.SetInfoText(text)
+    C_GuildInfo._textState.infoText = tostring(text or "")
+  end
+end
 -- GetAvailableLocaleInfo is registered from Rust
 -- (src/lua_api/globals/locale_info.rs). Returns the 12-locale retail list
 -- as { localeId, localeName, englishName, displayName } entries.
@@ -5497,6 +5901,8 @@ C_ContentTracking = __wow_merge_namespace(C_ContentTracking, {
 -- InitiativeTasksObjectiveTracker indexes `.trackedIDs` on the returned
 -- value, so return a real table even when there are no initiatives.
 C_NeighborhoodInitiative = __wow_merge_namespace(C_NeighborhoodInitiative, {
+  IsInitiativeEnabled = function() return false end,
+  GetAvailableHouseXP = function() return 0 end,
   GetTrackedInitiativeTasks = function()
     return { trackedIDs = {} }
   end,
@@ -5513,8 +5919,73 @@ C_AutoComplete = __wow_merge_namespace(C_AutoComplete, {
   GetAutoCompleteRealms = function() return {} end,
 })
 C_TransmogOutfitInfo = C_TransmogOutfitInfo or __wow_namespace({
+  __activeOutfitID = 0,
+  __currentlyViewedOutfitID = 0,
+  __pendingSheatheCategories = {},
   GetOutfitInfo = function() return nil end,
 })
+if rawget(C_TransmogOutfitInfo, "GetActiveOutfitID") == nil then
+  function C_TransmogOutfitInfo.GetActiveOutfitID()
+    return rawget(C_TransmogOutfitInfo, "__activeOutfitID") or 0
+  end
+end
+if rawget(C_TransmogOutfitInfo, "GetCurrentlyViewedOutfitID") == nil then
+  function C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID()
+    return rawget(C_TransmogOutfitInfo, "__currentlyViewedOutfitID") or 0
+  end
+end
+if rawget(C_TransmogOutfitInfo, "GetAllTransmogOutfitOptionSheatheCategoryInfo") == nil then
+  function C_TransmogOutfitInfo.GetAllTransmogOutfitOptionSheatheCategoryInfo(slotTransmogID)
+    if tonumber(slotTransmogID) ~= 190001 then
+      return nil
+    end
+    return {
+      {
+        sheatheCategory = Enum.TransmogOutfitSlotOptionSheatheCategory.Default,
+        categoryName = "Default",
+      },
+      {
+        sheatheCategory = Enum.TransmogOutfitSlotOptionSheatheCategory.Back,
+        categoryName = "Back",
+      },
+      {
+        sheatheCategory = Enum.TransmogOutfitSlotOptionSheatheCategory.Side,
+        categoryName = "Side",
+      },
+      {
+        sheatheCategory = Enum.TransmogOutfitSlotOptionSheatheCategory.Hide,
+        categoryName = "Hide",
+      },
+    }
+  end
+end
+if rawget(C_TransmogOutfitInfo, "SetPendingTransmogSheatheCategory") == nil then
+  function C_TransmogOutfitInfo.SetPendingTransmogSheatheCategory(slotID, optionID, category)
+    local pending = rawget(C_TransmogOutfitInfo, "__pendingSheatheCategories") or {}
+    pending[string.format("%s:%s", tostring(slotID), tostring(optionID))] = category
+    rawset(C_TransmogOutfitInfo, "__pendingSheatheCategories", pending)
+  end
+end
+if rawget(C_TransmogOutfitInfo, "ChangeToOutfit") == nil then
+  function C_TransmogOutfitInfo.ChangeToOutfit(outfitID, clear)
+    if clear then
+      rawset(C_TransmogOutfitInfo, "__activeOutfitID", 0)
+      rawset(C_TransmogOutfitInfo, "__currentlyViewedOutfitID", 0)
+      rawset(C_TransmogOutfitInfo, "__pendingSheatheCategories", {})
+      return
+    end
+    local id = tonumber(outfitID) or 0
+    rawset(C_TransmogOutfitInfo, "__activeOutfitID", id)
+    rawset(C_TransmogOutfitInfo, "__currentlyViewedOutfitID", id)
+  end
+end
+if rawget(C_TransmogOutfitInfo, "ClearOutfit") == nil then
+  function C_TransmogOutfitInfo.ClearOutfit()
+    rawset(C_TransmogOutfitInfo, "__activeOutfitID", 0)
+    rawset(C_TransmogOutfitInfo, "__currentlyViewedOutfitID", 0)
+    rawset(C_TransmogOutfitInfo, "__pendingSheatheCategories", {})
+  end
+end
 C_Macro = C_Macro or __wow_namespace({
   GetNumMacros = function() return 0, 0 end,
 })
@@ -5556,6 +6027,75 @@ C_ActionBar = C_ActionBar or __wow_namespace({
   FindFlyoutActionButtons = function() return {} end,
   GetPetActionPetBarIndices = function() return {} end,
 })
+if rawget(C_ActionBar, "GetBonusBarOffset") == nil then
+  function C_ActionBar.GetBonusBarOffset()
+    local index = tonumber(C_ActionBar.GetBonusBarIndex and C_ActionBar.GetBonusBarIndex() or 1) or 1
+    return math.max(0, index - 6)
+  end
+end
+if GetBonusBarOffset == nil then
+  function GetBonusBarOffset()
+    return C_ActionBar.GetBonusBarOffset()
+  end
+end
+if type(C_SpellBook) ~= "table" then
+  C_SpellBook = __wow_namespace()
+end
+if rawget(C_SpellBook, "FindSpellOverrideByID") == nil then
+  function C_SpellBook.FindSpellOverrideByID(_spellID)
+    return nil
+  end
+end
+if GameTime_GetTime == nil then
+  function GameTime_GetTime(_useLocalTime)
+    return "12:00"
+  end
+end
+if C_TradeInfo == nil then
+  C_TradeInfo = __wow_namespace()
+end
+if rawget(C_TradeInfo, "ShouldShowTradeOfferWarning") == nil then
+  function C_TradeInfo.ShouldShowTradeOfferWarning()
+    return false
+  end
+end
+if C_ProfSpecs == nil then
+  C_ProfSpecs = __wow_namespace()
+end
+if rawget(C_ProfSpecs, "ShouldShowSpecTab") == nil then
+  function C_ProfSpecs.ShouldShowSpecTab() return true end
+end
+if rawget(C_ProfSpecs, "GetDefaultSpecSkillLine") == nil then
+  function C_ProfSpecs.GetDefaultSpecSkillLine() return 164 end
+end
+if rawget(C_ProfSpecs, "GetConfigIDForSkillLine") == nil then
+  function C_ProfSpecs.GetConfigIDForSkillLine(skillLineID)
+    if tonumber(skillLineID) == 164 then
+      return 1
+    end
+    return nil
+  end
+end
+if rawget(C_ProfSpecs, "GetSpecTabIDsForSkillLine") == nil then
+  function C_ProfSpecs.GetSpecTabIDsForSkillLine(skillLineID)
+    if tonumber(skillLineID) == 164 then
+      return { 101 }
+    end
+    return {}
+  end
+end
+if rawget(C_ProfSpecs, "GetTabInfo") == nil then
+  function C_ProfSpecs.GetTabInfo(tabID)
+    if tonumber(tabID) == 101 then
+      return {
+        tabID = 101,
+        rootNodeID = 1001,
+        name = "Armorsmithing",
+      }
+    end
+    return nil
+  end
+end
 
 if type(_G.IsPressHoldReleaseSpell) ~= "function" then
   function IsPressHoldReleaseSpell(...)

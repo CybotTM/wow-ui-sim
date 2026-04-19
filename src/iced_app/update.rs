@@ -336,8 +336,7 @@ impl App {
             return Task::none();
         }
         self.set_main_thread_phase("process_timers");
-        let t0 = std::time::Instant::now();
-        self.update_fps_counter();
+        let tick_started = std::time::Instant::now();
         self.run_pending_exec_lua();
 
         let (combined, layout_dur) = self.collect_tick_dirty();
@@ -350,7 +349,10 @@ impl App {
                 std::time::Duration::from_millis(25),
             ));
         }
-        log_slow_tick(t0.elapsed(), layout_dur, combined, self);
+        let tick_elapsed = tick_started.elapsed();
+        self.record_tick_time(tick_elapsed);
+        self.update_fps_counter();
+        log_slow_tick(tick_elapsed, layout_dur, combined, self);
         Task::none()
     }
 
@@ -394,13 +396,32 @@ impl App {
         let elapsed = now.duration_since(self.fps_last_time);
         if elapsed >= std::time::Duration::from_secs(1) {
             let frames = self.frame_count.get();
-            self.fps = frames as f32 / elapsed.as_secs_f32();
-            self.frame_time_display = self.frame_time_avg.get();
+            let metrics = sample_display_metrics(
+                elapsed,
+                frames,
+                self.tick_count.get(),
+                self.draw_time_accum_ms.get(),
+                self.tick_time_accum_ms.get(),
+            );
+            self.fps = metrics.fps;
+            self.tick_time_display = metrics.tick_ms;
+            self.draw_time_display = metrics.draw_ms;
+            self.other_time_display = metrics.other_ms;
             self.frame_count.set(0);
+            self.draw_time_accum_ms.set(0.0);
+            self.tick_time_accum_ms.set(0.0);
+            self.tick_count.set(0);
             self.fps_last_time = now;
             let env = self.env.borrow();
             env.state().borrow_mut().fps = self.fps;
         }
+    }
+
+    fn record_tick_time(&self, elapsed: std::time::Duration) {
+        let elapsed_ms = elapsed.as_secs_f32() * 1000.0;
+        self.tick_time_accum_ms
+            .set(self.tick_time_accum_ms.get() + elapsed_ms);
+        self.tick_count.set(self.tick_count.get().saturating_add(1));
     }
 
     fn run_wow_timers(&self) {
@@ -674,6 +695,45 @@ fn should_drop_stale_timer_tick(age: std::time::Duration, interval: std::time::D
     age > stale_threshold
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct DisplayMetrics {
+    fps: f32,
+    tick_ms: f32,
+    draw_ms: f32,
+    other_ms: f32,
+}
+
+fn sample_display_metrics(
+    elapsed: std::time::Duration,
+    frames: u32,
+    ticks: u32,
+    draw_total_ms: f32,
+    tick_total_ms: f32,
+) -> DisplayMetrics {
+    let elapsed_secs = elapsed.as_secs_f32();
+    let fps = if elapsed_secs > 0.0 {
+        frames as f32 / elapsed_secs
+    } else {
+        0.0
+    };
+    let draw_denominator = frames.max(1) as f32;
+    let tick_denominator = if frames > 0 {
+        draw_denominator
+    } else {
+        ticks.max(1) as f32
+    };
+    let frame_budget_ms = elapsed.as_secs_f32() * 1000.0 / draw_denominator;
+    let draw_ms = draw_total_ms / draw_denominator;
+    let tick_ms = tick_total_ms / tick_denominator;
+    let other_ms = (frame_budget_ms - draw_ms - tick_ms).max(0.0);
+    DisplayMetrics {
+        fps,
+        tick_ms,
+        draw_ms,
+        other_ms,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -835,6 +895,17 @@ mod tests {
             std::time::Duration::ZERO,
             "keypress log accounting should clear the recorded backlog age"
         );
+    }
+
+    #[test]
+    fn sample_display_metrics_split_frame_budget() {
+        let metrics =
+            sample_display_metrics(std::time::Duration::from_secs_f32(1.0), 10, 10, 25.0, 15.0);
+
+        assert!((metrics.fps - 10.0).abs() < 0.001);
+        assert!((metrics.draw_ms - 2.5).abs() < 0.001);
+        assert!((metrics.tick_ms - 1.5).abs() < 0.001);
+        assert!((metrics.other_ms - 96.0).abs() < 0.001);
     }
 }
 use rilua::Val;

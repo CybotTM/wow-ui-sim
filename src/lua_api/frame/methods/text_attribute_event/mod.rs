@@ -4,7 +4,7 @@
 //! the corresponding mlua method. Complex operations are stubbed with TODO.
 
 mod attributes;
-mod callbacks;
+pub(crate) mod callbacks;
 mod events;
 mod helpers;
 mod text;

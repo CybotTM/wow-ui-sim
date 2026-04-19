@@ -15,15 +15,19 @@
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::borrow_state;
 use crate::lua_api::methods::create_table;
+use crate::lua_bridge::FromStack;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
+const AVAILABLE_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
+
 pub(super) fn register_party_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_PartyInfo")?;
     register_group_membership_probes(state, table_ref)?;
+    register_loot_method_probes(state, table_ref)?;
     register_invite_and_tower_stubs(state, table_ref)?;
     Ok(())
 }
@@ -60,6 +64,28 @@ fn register_invite_and_tower_stubs(state: &mut LuaState, table_ref: GcRef<Table>
         table_ref,
         "GetInviteConfirmationInfo",
         c_party_info_get_invite_confirmation_info,
+    )?;
+    Ok(())
+}
+
+fn register_loot_method_probes(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetAvailableLootMethods",
+        c_party_info_get_available_loot_methods,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsLootMethodAvailable",
+        c_party_info_is_loot_method_available,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetLootMethod",
+        c_party_info_get_loot_method,
     )?;
     Ok(())
 }
@@ -124,6 +150,29 @@ fn c_party_info_is_party_in_jailers_tower(state: &mut LuaState) -> LuaResult<u32
 fn c_party_info_get_invite_confirmation_info(state: &mut LuaState) -> LuaResult<u32> {
     let _ = state; // consume argument
     Ok(0)
+}
+
+fn c_party_info_get_available_loot_methods(state: &mut LuaState) -> LuaResult<u32> {
+    let array = create_table(state);
+    for (index, method) in AVAILABLE_LOOT_METHODS.iter().enumerate() {
+        set_table_array(state, array, index as i64 + 1, Val::Num(*method as f64));
+    }
+    state.push(array);
+    Ok(1)
+}
+
+fn c_party_info_is_loot_method_available(state: &mut LuaState) -> LuaResult<u32> {
+    let method = i32::from_stack(state, 1)?;
+    let available = matches!(method, 0 | 1 | 2 | 3 | 4);
+    state.push(Val::Bool(available));
+    Ok(1)
+}
+
+fn c_party_info_get_loot_method(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(3.0));
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(3)
 }
 
 fn active_party_count(state: &mut LuaState) -> LuaResult<usize> {

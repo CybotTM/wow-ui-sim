@@ -116,16 +116,22 @@ pub struct App {
     pub(crate) oldest_dropped_timer_tick_age: std::cell::Cell<std::time::Duration>,
     /// FPS counter: frame count since last update (interior mutability for draw()).
     pub(crate) frame_count: std::cell::Cell<u32>,
+    /// Total draw time accumulated since the last metrics refresh.
+    pub(crate) draw_time_accum_ms: std::cell::Cell<f32>,
+    /// Total timer tick time accumulated since the last metrics refresh.
+    pub(crate) tick_time_accum_ms: std::cell::Cell<f32>,
+    /// Count of timer ticks accumulated since the last metrics refresh.
+    pub(crate) tick_count: std::cell::Cell<u32>,
     /// FPS counter: last FPS calculation time.
     pub(crate) fps_last_time: std::time::Instant,
     /// Current FPS value.
     pub(crate) fps: f32,
-    /// Frame render time in ms (interior mutability for draw()).
-    pub(crate) frame_time_ms: std::cell::Cell<f32>,
-    /// Smoothed frame time (5-second EMA).
-    pub(crate) frame_time_avg: std::cell::Cell<f32>,
-    /// Frame time for display (updated every 1 second with FPS).
-    pub(crate) frame_time_display: f32,
+    /// Timer tick time for display, amortized per draw over the sample window.
+    pub(crate) tick_time_display: f32,
+    /// Draw time for display, averaged per draw over the sample window.
+    pub(crate) draw_time_display: f32,
+    /// Remaining wall time for display after subtracting tick + draw.
+    pub(crate) other_time_display: f32,
     /// Current mouse position in canvas coordinates.
     pub(crate) mouse_position: Option<Point>,
     /// Currently inspected frame ID.
@@ -256,11 +262,14 @@ impl App {
             dropped_stale_timer_ticks: std::cell::Cell::new(0),
             oldest_dropped_timer_tick_age: std::cell::Cell::new(std::time::Duration::ZERO),
             frame_count: std::cell::Cell::new(0),
+            draw_time_accum_ms: std::cell::Cell::new(0.0),
+            tick_time_accum_ms: std::cell::Cell::new(0.0),
+            tick_count: std::cell::Cell::new(0),
             fps_last_time: now,
             fps: 0.0,
-            frame_time_ms: std::cell::Cell::new(0.0),
-            frame_time_avg: std::cell::Cell::new(0.0),
-            frame_time_display: 0.0,
+            tick_time_display: 0.0,
+            draw_time_display: 0.0,
+            other_time_display: 0.0,
             mouse_position: None,
             inspected_frame: None,
             inspector_visible: false,
