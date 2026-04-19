@@ -51,6 +51,7 @@ fn rebuild_strata_batches(
             bucket,
             params.dirty_ids,
             params.widgets,
+            (params.size.width / UI_SCALE, params.size.height / UI_SCALE),
             params.pressed_frame,
             text_ctx,
             params.message_frames,
@@ -196,6 +197,7 @@ fn emit_strata_cached(
     bucket: &[u64],
     dirty_ids: Option<&FxHashSet<u64>>,
     registry: &crate::widget::WidgetRegistry,
+    screen_size: (f32, f32),
     pressed_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
@@ -203,7 +205,7 @@ fn emit_strata_cached(
     quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
     elapsed_secs: f64,
 ) -> EmitStats {
-    let render_list = build_render_list(bucket, registry);
+    let render_list = build_render_list(bucket, registry, screen_size);
     let statusbar_fills = collect_statusbar_fills(&render_list, registry);
     let mut stats = EmitStats {
         cached: 0,

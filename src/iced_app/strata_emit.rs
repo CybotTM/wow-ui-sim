@@ -53,7 +53,7 @@ pub(super) fn emit_single_strata(
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     params: SingleStrataEmit<'_>,
 ) {
-    let render_list = build_render_list(params.bucket, params.registry);
+    let render_list = build_render_list(params.bucket, params.registry, params.screen_size);
     let statusbar_fills = collect_statusbar_fills(&render_list, params.registry);
 
     for entry in &render_list {
@@ -131,6 +131,7 @@ pub(super) struct SingleStrataEmit<'a> {
     bucket: &'a [u64],
     registry: &'a crate::widget::WidgetRegistry,
     visible_ids: &'a Option<FxHashSet<u64>>,
+    screen_size: (f32, f32),
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
     message_frames:
@@ -144,11 +145,14 @@ pub(super) struct SingleStrataEmit<'a> {
 pub(super) fn build_render_list(
     bucket: &[u64],
     registry: &crate::widget::WidgetRegistry,
+    screen_size: (f32, f32),
 ) -> Vec<(u64, crate::LayoutRect, Option<crate::LayoutRect>, f32)> {
     let mut list = Vec::new();
     for &id in bucket {
         let Some(f) = registry.get(id) else { continue };
-        let Some(rect) = f.layout_rect else { continue };
+        let rect = f.layout_rect.unwrap_or_else(|| {
+            crate::layout::compute_frame_rect(registry, id, screen_size.0, screen_size.1)
+        });
         let clip_rect = resolve_clip_rect(id, registry);
         let eff_alpha = resolve_eff_alpha(f, registry);
         if eff_alpha <= 0.0 {
@@ -344,6 +348,7 @@ pub fn build_quad_batch_with_cache(
                 bucket,
                 registry,
                 visible_ids: &visible_ids,
+                screen_size,
                 pressed_frame,
                 hovered_frame,
                 message_frames,
