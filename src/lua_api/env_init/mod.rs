@@ -14,6 +14,17 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::state::SimState;
+use crate::lua_api::methods::{registry_get, registry_set};
+use crate::lua_api::script_helpers::protected_lua_pcall_state;
+use crate::lua_api::taint::stamp_addon_taint_state;
+use rilua::LuaApiMut;
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val, runtime_error};
+
+const ORIGINAL_LOADSTRING_KEY: &str = "__original_loadstring";
+const LOADSTRING_TAINT_MARKER: &str = "*** ForceTaint_Strong ***";
+const LOADSTRING_SOURCE_TAINT_PREAMBLE: &[u8] =
+    b"debug.setstacktaint(\"*** ForceTaint_Strong ***\")\n";
 
 // Re-export public-within-crate symbols that env.rs and globals/ import.
 pub(crate) use frames::init_builtin_frames;
@@ -96,7 +107,67 @@ fn finalize_bootstrap_gc(lua: &mut rilua::Lua) -> crate::Result<()> {
 /// Enable Elune taint tracking and wrap loadstring as secure.
 fn enable_taint_and_wrap_loadstring(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::taint::enable_taint_mode(lua);
+    let original_loadstring = LuaApiMut::get_global_val(lua, "loadstring");
+    if matches!(original_loadstring, Val::Function(_)) {
+        let state = lua.state_mut();
+        registry_set(state, ORIGINAL_LOADSTRING_KEY, original_loadstring);
+    }
+    LuaApiMut::register_function(lua, "loadstring", tainting_loadstring)?;
+    LuaApiMut::register_function(lua, "forceinsecure", forceinsecure)?;
     Ok(())
+}
+
+fn tainting_loadstring(state: &mut LuaState) -> LuaResult<u32> {
+    let original = match registry_get(state, ORIGINAL_LOADSTRING_KEY) {
+        Val::Function(_) => registry_get(state, ORIGINAL_LOADSTRING_KEY),
+        _ => {
+            return Err(runtime_error(
+                "loadstring wrapper missing original implementation",
+            ));
+        }
+    };
+    let nargs = state.top.saturating_sub(state.base);
+    let mut args = (0..nargs)
+        .map(|index| state.stack_get(state.base + index))
+        .collect::<Vec<_>>();
+    if let Some(source) = args.first_mut() {
+        if let Some(wrapped_source) = wrap_loadstring_source(state, *source) {
+            *source = wrapped_source;
+        }
+    }
+    let results = protected_lua_pcall_state(state, original, &args)
+        .map_err(|error| runtime_error(format!("loadstring wrapper failed: {error}")))?;
+    if let Some(Val::Function(func_ref)) = results.first().copied() {
+        let func = rilua::Function::from_gc_ref(func_ref);
+        stamp_addon_taint_state(state, &func, LOADSTRING_TAINT_MARKER);
+    }
+    let count = results.len() as u32;
+    for value in results {
+        state.push(value);
+    }
+    Ok(count)
+}
+
+fn wrap_loadstring_source(state: &mut LuaState, source: Val) -> Option<Val> {
+    let Val::Str(source_ref) = source else {
+        return None;
+    };
+    let source = state.gc.string_arena.get(source_ref)?;
+    let mut wrapped_source = LOADSTRING_SOURCE_TAINT_PREAMBLE.to_vec();
+    wrapped_source.extend_from_slice(source.data());
+    Some(Val::Str(state.gc.intern_string(&wrapped_source)))
+}
+
+fn forceinsecure(state: &mut LuaState) -> LuaResult<u32> {
+    taint_calling_frame(state, "");
+    Ok(0)
+}
+
+fn taint_calling_frame(state: &mut LuaState, taint: &str) {
+    let target = state.ci.checked_sub(1).unwrap_or(state.ci);
+    if let Some(ci) = state.call_stack.get_mut(target) {
+        ci.taint = Some(taint.to_string());
+    }
 }
 
 /// Nil WoW-forbidden globals from `_G`: the filesystem / module

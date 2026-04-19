@@ -434,6 +434,47 @@ fn test_map_scene_character_highlight_shims_track_guid() {
     );
 }
 
+#[test]
+fn test_can_hearth_and_resurrect_from_area_tracks_player_state() {
+    let env = env();
+    let unavailable: bool = env.eval("return CanHearthAndResurrectFromArea()").unwrap();
+    assert!(
+        !unavailable,
+        "area resurrection should stay unavailable without a pending resurrect"
+    );
+
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.pending_resurrect = Some("Tyrande".into());
+    }
+    let available: bool = env.eval("return CanHearthAndResurrectFromArea()").unwrap();
+    assert!(
+        available,
+        "a pending resurrect plus the default teleport/hearth state should enable the probe"
+    );
+
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.has_hearthstone = false;
+    }
+    let without_hearthstone: bool = env.eval("return CanHearthAndResurrectFromArea()").unwrap();
+    assert!(
+        !without_hearthstone,
+        "the probe should turn off when the player cannot hearth from the area"
+    );
+
+    {
+        let mut sim = env.state().borrow_mut();
+        sim.has_hearthstone = true;
+        sim.can_teleport = false;
+    }
+    let without_teleport: bool = env.eval("return CanHearthAndResurrectFromArea()").unwrap();
+    assert!(
+        !without_teleport,
+        "the probe should turn off when teleport/hearth travel is disabled"
+    );
+}
+
 // ============================================================================
 // String library aliases
 // ============================================================================

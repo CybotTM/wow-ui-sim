@@ -74,6 +74,7 @@ macro_rules! build_empty_sim_state {
             last_stopped_sound_handle: $runtime.last_stopped_sound_handle,
             highlighted_map_scene_character_guid: $runtime.highlighted_map_scene_character_guid,
             multi_action_bar_grids_shown: $runtime.multi_action_bar_grids_shown,
+            secure_attribute_drivers: $collections.secure_attribute_drivers,
             rot_damage_level: $runtime.rot_damage_level,
             fps: $runtime.fps,
             start_time: $runtime.start_time,
@@ -357,6 +358,10 @@ pub struct SimState {
     pub highlighted_map_scene_character_guid: Option<String>,
     /// Whether the legacy `MultiActionBar_ShowAllGrids` shim has grids enabled.
     pub multi_action_bar_grids_shown: bool,
+    /// Registered secure state/attribute drivers keyed by frame id and
+    /// attribute name. The sim applies them eagerly when registered and keeps
+    /// the raw option text so future updates can reuse the same mapping.
+    pub secure_attribute_drivers: HashMap<u64, HashMap<String, String>>,
     /// Rot damage intensity (index into ROT_DAMAGE_LEVELS).
     pub rot_damage_level: usize,
     /// Current framerate (FPS), updated by the app's FPS counter.
@@ -784,6 +789,7 @@ struct EmptyStateCollections {
     addon_base_paths: Vec<PathBuf>,
     spell_cooldowns: HashMap<u32, SpellCooldownState>,
     action_ui_buttons: Vec<(u64, u32)>,
+    secure_attribute_drivers: HashMap<u64, HashMap<String, String>>,
     party_members: Vec<PartyMember>,
     bag_items: HashMap<(i32, i32), BagItem>,
     tracked_recipes: TrackedRecipes,

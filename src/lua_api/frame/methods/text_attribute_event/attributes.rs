@@ -2,10 +2,14 @@
 
 use super::helpers::{attribute_to_val, store_simple_attribute, val_to_f32};
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, frame_ref, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
+    frame_ref, val_to_string,
 };
-use crate::lua_api::script_helpers::{call_error_handler_state, get_script as get_rilua_script};
+use crate::lua_api::script_helpers::{
+    call_error_handler_state, get_script as get_rilua_script, protected_lua_pcall_state,
+};
 use crate::lua_bridge::stack_val;
+use crate::widget::WidgetRegistry;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -149,30 +153,120 @@ pub(super) fn clear_attributes(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn execute_attribute(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: full ExecuteAttribute semantics (function callback and snippet execution)
-    let _id = frame_id_from_stack(state, 1)?;
-    let reason = create_string(state, "attribute-missing");
+    let id = frame_id_from_stack(state, 1)?;
+    let name_val = stack_val(state, 2);
+    let Some(name) = val_to_string(state, name_val) else {
+        return push_execute_attribute_failure(state, "attribute-missing");
+    };
+    let attr = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame.attributes.get(name.as_str()).cloned())
+    };
+    let attr = attribute_to_val(state, attr.as_ref());
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let extra_args = (3..=nargs)
+        .map(|index| stack_val(state, index as i32))
+        .collect::<Vec<_>>();
+    match attr {
+        Val::Function(_) => {
+            let results = protected_lua_pcall_state(state, attr, &extra_args)
+                .map_err(|error| error.to_string());
+            push_execute_attribute_result(state, results)
+        }
+        Val::Str(body_ref) => {
+            let is_protected = borrow_state(state)?
+                .widgets
+                .get(id)
+                .is_some_and(|frame| frame.is_protected);
+            if !is_protected {
+                return push_execute_attribute_failure(state, "unsupported-unprotected-snippet");
+            }
+            let Some(body) = val_to_string(state, Val::Str(body_ref)) else {
+                return push_execute_attribute_failure(state, "attribute-missing");
+            };
+            let Ok(snippet) = compile_execute_attribute_snippet(state, &body) else {
+                return push_execute_attribute_failure(state, "snippet-compile-failed");
+            };
+            let mut args = Vec::with_capacity(extra_args.len() + 1);
+            args.push(frame_ref(state, id)?);
+            args.extend(extra_args);
+            let results = protected_lua_pcall_state(state, Val::Function(snippet.gc_ref()), &args)
+                .map_err(|error| error.to_string());
+            push_execute_attribute_result(state, results)
+        }
+        _ => push_execute_attribute_failure(state, "attribute-missing"),
+    }
+}
+
+fn compile_execute_attribute_snippet(
+    state: &mut LuaState,
+    body: &str,
+) -> LuaResult<rilua::Function> {
+    let loader = state.load(&format!("return function(self, ...) {body} end"))?;
+    let closure = call_function_state(state, Val::Function(loader.gc_ref()), &[])?;
+    let Val::Function(func_ref) = closure else {
+        return Err(rilua::runtime_error(
+            "ExecuteAttribute: snippet loader did not return a function",
+        ));
+    };
+    Ok(rilua::Function::from_gc_ref(func_ref))
+}
+
+fn push_execute_attribute_result(
+    state: &mut LuaState,
+    results: Result<Vec<Val>, String>,
+) -> LuaResult<u32> {
+    match results {
+        Ok(values) => {
+            state.push(Val::Bool(true));
+            let return_count = values.len() as u32 + 1;
+            for value in values {
+                state.push(value);
+            }
+            Ok(return_count)
+        }
+        Err(error) => push_execute_attribute_failure(state, &error),
+    }
+}
+
+fn push_execute_attribute_failure(state: &mut LuaState, reason: &str) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    let reason = create_string(state, reason);
     state.push(reason);
     Ok(2)
 }
 
 pub(super) fn set_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
-    let _id = frame_id_from_stack(state, 1)?;
+    let id = frame_id_from_stack(state, 1)?;
     let label_val = stack_val(state, 2);
-    let _frame_val = stack_val(state, 3);
-    let Some(_label) = val_to_string(state, label_val) else {
+    let frame_val = stack_val(state, 3);
+    let Some(label) = val_to_string(state, label_val) else {
         return Ok(0);
     };
-    // TODO: store frame refs in Lua-side attribute table to preserve Val identity
+    let _ = store_simple_attribute(state, id, &format!("_frame-{label}"), frame_val)?;
     Ok(0)
 }
 
 pub(super) fn get_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
-    let _id = frame_id_from_stack(state, 1)?;
-    let _label_val = stack_val(state, 2);
-    // TODO: retrieve from Lua-side attribute table
-    state.push(Val::Nil);
+    let id = frame_id_from_stack(state, 1)?;
+    let label_val = stack_val(state, 2);
+    let Some(label) = val_to_string(state, label_val) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let attr = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).and_then(|frame| {
+            frame
+                .attributes
+                .get(format!("_frame-{label}").as_str())
+                .cloned()
+        })
+    };
+    let attr = attribute_to_val(state, attr.as_ref());
+    state.push(attr);
     Ok(1)
 }
 
@@ -200,9 +294,56 @@ pub(super) fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub(super) fn can_change_protected_state(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: combat lockdown check
-    state.push(Val::Bool(true));
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let in_combat = sim.player.in_combat;
+    let blocked = in_combat
+        && !rilua::api::state_is_secure(state)
+        && frame_blocks_protected_state(&sim.widgets, id);
+    drop(sim);
+    state.push(Val::Bool(!blocked));
     Ok(1)
+}
+
+fn frame_blocks_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {
+    frame_or_ancestor_is_protected(widgets, id)
+        || frame_has_protected_descendant(widgets, id)
+        || frame_anchor_references_protected_state(widgets, id)
+}
+
+fn frame_or_ancestor_is_protected(widgets: &WidgetRegistry, id: u64) -> bool {
+    let mut current = Some(id);
+    while let Some(frame_id) = current {
+        let Some(frame) = widgets.get(frame_id) else {
+            return false;
+        };
+        if frame.is_protected {
+            return true;
+        }
+        current = frame.parent_id;
+    }
+    false
+}
+
+fn frame_has_protected_descendant(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets.get(id).is_some_and(|frame| {
+        frame.children.iter().copied().any(|child_id| {
+            frame_or_ancestor_is_protected(widgets, child_id)
+                || frame_has_protected_descendant(widgets, child_id)
+        })
+    })
+}
+
+fn frame_anchor_references_protected_state(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets.get(id).is_some_and(|frame| {
+        frame.anchors.iter().any(|anchor| {
+            anchor.relative_to_id.is_some_and(|relative_to_id| {
+                let relative_to_id = relative_to_id as u64;
+                frame_or_ancestor_is_protected(widgets, relative_to_id)
+                    || frame_has_protected_descendant(widgets, relative_to_id)
+            })
+        })
+    })
 }
 
 pub(super) fn set_pass_through_buttons(state: &mut LuaState) -> LuaResult<u32> {

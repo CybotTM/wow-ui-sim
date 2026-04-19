@@ -158,9 +158,9 @@ fn test_secure_handler_stubs_exist() {
 }
 
 #[test]
-fn test_secure_handler_stubs_are_inert() {
+fn test_secure_handlers_store_frame_refs_and_execute_snippets() {
     let env = env();
-    let (ran_original, kept_attribute, did_not_store_ref): (bool, bool, bool) = env
+    let (ran_original, updated_attribute, stored_ref): (bool, bool, bool) = env
         .eval(
             r#"
             local frame = CreateFrame("Frame")
@@ -177,18 +177,20 @@ fn test_secure_handler_stubs_are_inert() {
 
             frame:Show()
 
-            return originalRan, frame:GetAttribute("testAttr") == "before", frame:GetAttribute("_frame-target") == nil
+            return originalRan,
+                frame:GetAttribute("testAttr") == "after",
+                SecureHandlerGetFrameRef(frame, "target") == ref
             "#,
         )
         .unwrap();
     assert!(ran_original, "original script should still run");
     assert!(
-        kept_attribute,
-        "secure handler stubs should not mutate attributes"
+        updated_attribute,
+        "SecureHandlerExecute should run the snippet against the frame"
     );
     assert!(
-        did_not_store_ref,
-        "SecureHandlerSetFrameRef should stay inert until restricted handlers exist"
+        stored_ref,
+        "SecureHandlerSetFrameRef should make the ref retrievable"
     );
 }
 
@@ -500,9 +502,59 @@ fn test_scrub_helpers_are_passthrough() {
 }
 
 #[test]
-fn test_state_driver_stubs_are_inert() {
+fn test_state_drivers_apply_visibility_and_attributes() {
     let env = env();
-    let (still_shown, no_state_attr): (bool, bool) = env
+    let (shown, state_hidden, custom_state, numeric_state, nil_state): (
+        bool,
+        bool,
+        String,
+        i32,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:Show()
+
+            RegisterStateDriver(frame, "visibility", "hide")
+            RegisterAttributeDriver(frame, "state-custom", "active")
+            RegisterAttributeDriver(frame, "state-count", "17")
+            RegisterAttributeDriver(frame, "state-empty", "nil")
+
+            return frame:IsShown(),
+                frame:GetAttribute("statehidden"),
+                frame:GetAttribute("state-custom"),
+                frame:GetAttribute("state-count"),
+                frame:GetAttribute("state-empty") == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        !shown,
+        "visibility drivers should immediately hide frames for the hide state"
+    );
+    assert!(
+        state_hidden,
+        "visibility drivers should mark hidden frames with statehidden"
+    );
+    assert!(
+        custom_state == "active",
+        "attribute drivers should resolve string values onto frame attributes"
+    );
+    assert_eq!(
+        numeric_state, 17,
+        "attribute drivers should coerce numeric strings to numbers"
+    );
+    assert!(
+        nil_state,
+        "attribute drivers should treat the literal nil token as an unset attribute"
+    );
+}
+
+#[test]
+fn test_unregister_state_drivers_leaves_last_resolved_values_in_place() {
+    let env = env();
+    let (shown, custom_state): (bool, String) = env
         .eval(
             r#"
             local frame = CreateFrame("Frame")
@@ -513,17 +565,17 @@ fn test_state_driver_stubs_are_inert() {
             UnregisterStateDriver(frame, "visibility")
             UnregisterAttributeDriver(frame, "state-custom")
 
-            return frame:IsShown(), frame:GetAttribute("state-custom") == nil
+            return frame:IsShown(), frame:GetAttribute("state-custom")
             "#,
         )
         .unwrap();
     assert!(
-        still_shown,
-        "state driver stubs should not change visibility until protected drivers exist"
+        !shown,
+        "unregister should stop future updates, not force a visibility reset"
     );
-    assert!(
-        no_state_attr,
-        "attribute driver stubs should not write attributes until protected drivers exist"
+    assert_eq!(
+        custom_state, "active",
+        "unregister should preserve the last resolved attribute value"
     );
 }
 

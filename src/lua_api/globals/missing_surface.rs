@@ -46,7 +46,9 @@ mod tutorial;
 mod voice_chat;
 mod zone_ability;
 
-use crate::lua_api::methods::{borrow_state_mut, create_string, table_get, val_to_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
+};
 use crate::lua_bridge::{FromStack, stack_val};
 use crate::spells;
 
@@ -121,7 +123,11 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     )?;
     LuaApiMut::register_function(lua, "CreateAtlasMarkup", create_atlas_markup)?;
     LuaApiMut::register_function(lua, "InGlue", in_glue)?;
-    LuaApiMut::register_function(lua, "CanHearthAndResurrectFromArea", return_false)?;
+    LuaApiMut::register_function(
+        lua,
+        "CanHearthAndResurrectFromArea",
+        can_hearth_and_resurrect_from_area,
+    )?;
     LuaApiMut::register_function(
         lua,
         "GetMaxLevelForLatestExpansion",
@@ -222,8 +228,11 @@ pub fn register_quest_log_overrides(lua: &mut rilua::Lua) -> LuaResult<()> {
     quest_log::register_quest_log_surface(state)
 }
 
-fn return_false(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+fn can_hearth_and_resurrect_from_area(state: &mut LuaState) -> LuaResult<u32> {
+    let sim = borrow_state(state)?;
+    let allowed = sim.pending_resurrect.is_some() && sim.can_teleport && sim.has_hearthstone;
+    drop(sim);
+    state.push(Val::Bool(allowed));
     Ok(1)
 }
 

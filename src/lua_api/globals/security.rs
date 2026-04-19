@@ -24,12 +24,17 @@
 use crate::loader::LoadError;
 use crate::loader::lua_file::compile_with_rilua;
 use crate::lua_api::hot_literals::{hot_metatable_key, metatable_idx};
-use crate::lua_api::methods::registry_get;
-use crate::lua_api::methods::registry_set;
+use crate::lua_api::methods::{
+    borrow_state_mut, frame_id_from_stack, registry_get, registry_set, val_to_string,
+};
 use crate::lua_api::script_helpers::{call_error_handler_state, protected_lua_pcall_state};
+use crate::lua_bridge::stack_val;
+use crate::widget::AttributeValue;
 use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val, runtime_error};
+use std::collections::HashSet;
 
 // ── Top-level entry point ────────────────────────────────────────────────────
 
@@ -40,6 +45,7 @@ use rilua::{LuaResult, Val, runtime_error};
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     LuaApiMut::register_function(lua, "securecallmethod", securecallmethod)?;
+    LuaApiMut::register_function(lua, "issecurevariable", issecurevariable_override)?;
     register_value_access_fallbacks(lua)?;
     register_scrub_fallbacks(lua)?;
     register_secure_handler_stubs(lua)?;
@@ -180,28 +186,92 @@ fn register_value_access_fallbacks(lua: &mut rilua::Lua) -> LuaResult<()> {
     Ok(())
 }
 
-/// `issecretvalue(v)` — returns false (permissive stub; no taint registry yet).
+fn issecurevariable_override(state: &mut LuaState) -> LuaResult<u32> {
+    let first = state.stack_get(state.base);
+    let second = state.stack_get(state.base + 1);
+    let (table_ref, key_val) = match first {
+        Val::Table(table_ref) if !matches!(second, Val::Nil) => (table_ref, second),
+        Val::Str(_) | Val::Num(_) => (state.global, first),
+        _ => {
+            state.push(Val::Bool(true));
+            return Ok(1);
+        }
+    };
+
+    let taint = match key_val {
+        Val::Str(s) => {
+            let bytes = state.gc.string_arena.get(s).map(|ls| ls.data().to_vec());
+            bytes.and_then(|bytes| {
+                state
+                    .gc
+                    .tables
+                    .get(table_ref)
+                    .and_then(|table| table.get_slot_taint_str(&bytes).map(str::to_string))
+            })
+        }
+        Val::Num(n) if n.is_finite() && (n as i64) as f64 == n => state
+            .gc
+            .tables
+            .get(table_ref)
+            .and_then(|table| table.get_slot_taint_int(n as i64).map(str::to_string)),
+        _ => None,
+    };
+
+    match taint {
+        None => {
+            state.push(Val::Bool(true));
+            Ok(1)
+        }
+        Some(taint) => {
+            let taint = Val::Str(state.gc.intern_string(taint.as_bytes()));
+            state.push(Val::Bool(false));
+            state.push(taint);
+            Ok(2)
+        }
+    }
+}
+
+/// `issecretvalue(v)` — returns true for tainted values and tables containing
+/// tainted slots or nested tainted values.
 fn issecretvalue_fallback(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: check __tainted_loadstring_functions registry when rilua taint lands.
-    state.push(Val::Bool(false));
+    let value = state.stack_get(state.base);
+    let secret = value_is_secret(state, value, &mut HashSet::new());
+    state.push(Val::Bool(secret));
     Ok(1)
 }
 
-/// `canaccessvalue(v)` — returns true (permissive stub).
+/// `canaccessvalue(v)` — returns true for non-secret values.
 fn canaccessvalue_fallback(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
+    let value = state.stack_get(state.base);
+    let secret = value_is_secret(state, value, &mut HashSet::new());
+    state.push(Val::Bool(!secret));
     Ok(1)
 }
 
-/// `canaccessallvalues(...)` — returns true (permissive stub).
+/// `canaccessallvalues(...)` — returns true only if every argument is
+/// non-secret.
 fn canaccessallvalues_fallback(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
+    let nargs = state.top.saturating_sub(state.base);
+    let mut visited = HashSet::new();
+    let mut accessible = true;
+    for index in 0..nargs {
+        if value_is_secret(state, state.stack_get(state.base + index), &mut visited) {
+            accessible = false;
+            break;
+        }
+    }
+    state.push(Val::Bool(accessible));
     Ok(1)
 }
 
-/// `canaccesstable(t)` — returns true (permissive stub).
+/// `canaccesstable(t)` — returns true only for non-secret tables.
 fn canaccesstable_fallback(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
+    let value = state.stack_get(state.base);
+    let accessible = match value {
+        Val::Table(table_ref) => !table_is_secret(state, table_ref, &mut HashSet::new()),
+        _ => !value_is_secret(state, value, &mut HashSet::new()),
+    };
+    state.push(Val::Bool(accessible));
     Ok(1)
 }
 
@@ -218,6 +288,74 @@ fn scrub_passthrough(state: &mut LuaState) -> LuaResult<u32> {
     // All args are already on the stack; return them as-is.
     let nargs = (state.top as i32 - state.base as i32).max(0) as u32;
     Ok(nargs)
+}
+
+fn value_is_secret(
+    state: &mut LuaState,
+    value: Val,
+    visited: &mut HashSet<rilua::vm::gc::arena::GcRef<Table>>,
+) -> bool {
+    match value {
+        Val::Function(func_ref) => function_is_secret(state, func_ref),
+        Val::Table(table_ref) => table_is_secret(state, table_ref, visited),
+        _ => false,
+    }
+}
+
+fn function_is_secret(
+    state: &mut LuaState,
+    func_ref: rilua::vm::gc::arena::GcRef<rilua::vm::closure::Closure>,
+) -> bool {
+    let Val::Table(taint_table_ref) = registry_get(state, "__closure_taint") else {
+        return false;
+    };
+    state.gc.tables.get(taint_table_ref).is_some_and(|table| {
+        !matches!(
+            table.get(Val::Num(func_ref.index() as f64), &state.gc.string_arena),
+            Val::Nil
+        )
+    })
+}
+
+fn table_is_secret(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+    visited: &mut HashSet<rilua::vm::gc::arena::GcRef<Table>>,
+) -> bool {
+    if !visited.insert(table_ref) {
+        return false;
+    }
+
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return false;
+    };
+
+    let mut entries = Vec::new();
+    for (index, value) in table.array_slice().iter().copied().enumerate() {
+        if !value.is_nil() {
+            entries.push((Val::Num((index + 1) as f64), value));
+        }
+    }
+    entries.extend(table.hash_entries());
+    let tainted_slot = entries.iter().any(|(key, _)| match key {
+        Val::Str(key_ref) => state
+            .gc
+            .string_arena
+            .get(*key_ref)
+            .and_then(|s| table.get_slot_taint_str(s.data()))
+            .is_some(),
+        Val::Num(n) if n.is_finite() && (*n as i64) as f64 == *n => {
+            table.get_slot_taint_int(*n as i64).is_some()
+        }
+        _ => false,
+    });
+    if tainted_slot {
+        return true;
+    }
+
+    entries.into_iter().any(|(key, value)| {
+        value_is_secret(state, key, visited) || value_is_secret(state, value, visited)
+    })
 }
 
 // ── SecureHandler fallback ───────────────────────────────────────────────────
@@ -323,20 +461,156 @@ function SecureHandlerWrapScript(frame, script, header, preBody, postBody)
 end
 "#;
 
-// ── State/attribute driver stubs ─────────────────────────────────────────────
+// ── State/attribute drivers ──────────────────────────────────────────────────
 
 fn register_state_driver_stubs(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
-    LuaApiMut::register_function(lua, "RegisterStateDriver", stub_noop)?;
-    LuaApiMut::register_function(lua, "UnregisterStateDriver", stub_noop)?;
-    LuaApiMut::register_function(lua, "RegisterAttributeDriver", stub_noop)?;
-    LuaApiMut::register_function(lua, "UnregisterAttributeDriver", stub_noop)?;
+    LuaApiMut::register_function(lua, "RegisterStateDriver", register_state_driver)?;
+    LuaApiMut::register_function(lua, "UnregisterStateDriver", unregister_state_driver)?;
+    LuaApiMut::register_function(lua, "RegisterAttributeDriver", register_attribute_driver)?;
+    LuaApiMut::register_function(
+        lua,
+        "UnregisterAttributeDriver",
+        unregister_attribute_driver,
+    )?;
     Ok(())
 }
 
-/// No-op stub: accepts any args, returns nothing.
-fn stub_noop(_state: &mut LuaState) -> LuaResult<u32> {
+fn register_state_driver(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(name) = val_to_string(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+    let Some(values) = val_to_string(state, stack_val(state, 3)) else {
+        return Ok(0);
+    };
+    register_driver(state, id, &format!("state-{name}"), values)?;
     Ok(0)
+}
+
+fn unregister_state_driver(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(name) = val_to_string(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+    unregister_driver(state, id, &format!("state-{name}"))
+}
+
+fn register_attribute_driver(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(attribute) = val_to_string(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+    let Some(values) = val_to_string(state, stack_val(state, 3)) else {
+        return Ok(0);
+    };
+    register_driver(state, id, &attribute, values)
+}
+
+fn unregister_attribute_driver(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let Some(attribute) = val_to_string(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+    unregister_driver(state, id, &attribute)
+}
+
+fn register_driver(
+    state: &mut LuaState,
+    id: u64,
+    attribute: &str,
+    values: String,
+) -> LuaResult<u32> {
+    if attribute.starts_with('_') {
+        return Ok(0);
+    }
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.secure_attribute_drivers
+            .entry(id)
+            .or_default()
+            .insert(attribute.to_string(), values.clone());
+    }
+    apply_driver(state, id, attribute, &values)?;
+    Ok(0)
+}
+
+fn unregister_driver(state: &mut LuaState, id: u64, attribute: &str) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let Some(drivers) = sim.secure_attribute_drivers.get_mut(&id) else {
+        return Ok(0);
+    };
+    drivers.remove(attribute);
+    if drivers.is_empty() {
+        sim.secure_attribute_drivers.remove(&id);
+    }
+    Ok(0)
+}
+
+fn apply_driver(state: &mut LuaState, id: u64, attribute: &str, values: &str) -> LuaResult<()> {
+    let Some(resolved) = resolve_driver_value(values) else {
+        return Ok(());
+    };
+
+    if attribute == "state-visibility" {
+        apply_visibility_driver(state, id, resolved);
+        return Ok(());
+    }
+
+    let attr = coerce_driver_attribute(resolved);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        match attr {
+            AttributeValue::Nil => {
+                frame.attributes.remove(attribute);
+            }
+            value => {
+                frame.attributes.insert(attribute.to_string(), value);
+            }
+        }
+    }
+    Ok(())
+}
+
+fn resolve_driver_value(values: &str) -> Option<&str> {
+    values
+        .split(';')
+        .next_back()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+}
+
+fn apply_visibility_driver(state: &mut LuaState, id: u64, resolved: &str) {
+    let mut sim = match borrow_state_mut(state) {
+        Ok(sim) => sim,
+        Err(_) => return,
+    };
+    let Some(frame) = sim.widgets.get_mut(id) else {
+        return;
+    };
+    match resolved {
+        "show" => {
+            frame.attributes.remove("statehidden");
+            sim.set_frame_visible(id, true);
+        }
+        "hide" => {
+            frame
+                .attributes
+                .insert("statehidden".into(), AttributeValue::Boolean(true));
+            sim.set_frame_visible(id, false);
+        }
+        _ => {}
+    }
+}
+
+fn coerce_driver_attribute(resolved: &str) -> AttributeValue {
+    if resolved == "nil" {
+        AttributeValue::Nil
+    } else if let Ok(number) = resolved.parse::<f64>() {
+        AttributeValue::Number(number)
+    } else {
+        AttributeValue::String(resolved.to_string())
+    }
 }
 
 // ── SecureCmdOptionParse ─────────────────────────────────────────────────────
@@ -358,7 +632,7 @@ fn secure_cmd_option_parse(state: &mut LuaState) -> LuaResult<u32> {
             .map_err(|_| runtime_error("SecureCmdOptionParse: non-UTF8 string"))?
             .to_owned()
     };
-    let last = text.split(';').next_back().map(str::trim).unwrap_or("");
+    let last = resolve_driver_value(&text).unwrap_or("");
     let result = Val::Str(state.gc.intern_string(last.as_bytes()));
     state.push(result);
     Ok(1)
