@@ -1165,6 +1165,12 @@ if C_UI.ShouldUIParentAvoidNotch == nil then
   end
 end
 
+if C_UI.DoesAnyDisplayHaveNotch == nil then
+  function C_UI.DoesAnyDisplayHaveNotch()
+    return false
+  end
+end
+
 if C_UI.GetTopLeftNotchSafeRegion == nil then
   function C_UI.GetTopLeftNotchSafeRegion()
     return 0, 0, 0, 0
@@ -1367,6 +1373,54 @@ end
 if GetMaxRenderScale == nil then
   function GetMaxRenderScale()
     return 1.0
+  end
+end
+
+if GetUpgradeExpansionLevel == nil then
+  function GetUpgradeExpansionLevel()
+    return 80
+  end
+end
+
+if GetCharacterUndeleteStatus == nil then
+  function GetCharacterUndeleteStatus()
+    return false, false, 0, 0
+  end
+end
+
+if GetCharacterListUpdate == nil then
+  local function __wow_character_select_event(frame, event, ...)
+    if type(frame) == "table" and type(frame.OnEvent) == "function" then
+      frame:OnEvent(event, ...)
+    end
+  end
+
+  function GetCharacterListUpdate()
+    local includeEmptySlots = true
+    local listSize = type(GetNumCharacters) == "function" and GetNumCharacters(includeEmptySlots) or 0
+    if type(CharacterSelect) == "table" then
+      CharacterSelect.waitingforCharacterList = false
+    end
+    __wow_character_select_event(CharacterSelect, "CHARACTER_LIST_UPDATE", listSize)
+    __wow_character_select_event(CharacterSelectCharacterFrame, "CHARACTER_LIST_UPDATE", listSize)
+
+    local selectedCharacter = 0
+    if type(GetCharacterSelection) == "function" then
+      selectedCharacter = GetCharacterSelection() or 0
+    elseif listSize > 0 then
+      selectedCharacter = 1
+    end
+    __wow_character_select_event(CharacterSelect, "UPDATE_SELECTED_CHARACTER", selectedCharacter)
+    if type(CharacterSelectCharacterFrame) == "table"
+      and type(CharacterSelectCharacterFrame.UpdateCharacterSelection) == "function"
+    then
+      CharacterSelectCharacterFrame:UpdateCharacterSelection()
+    end
+  end
+end
+
+if PlayGlueAmbience == nil then
+  function PlayGlueAmbience()
   end
 end
 

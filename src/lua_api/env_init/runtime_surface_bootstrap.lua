@@ -54,6 +54,12 @@ if GetText == nil then
   end
 end
 
+BACK = BACK or "Back"
+NEXT = NEXT or "Next"
+PREVIEW = PREVIEW or "Preview"
+CUSTOMIZE = CUSTOMIZE or "Customize"
+FINISH = FINISH or "Finish"
+
 if BreakUpLargeNumbers == nil then
   function BreakUpLargeNumbers(value)
     return tostring(value)
@@ -213,6 +219,21 @@ if IsExpansionTrial == nil then
   end
 end
 
+local function __wow_ensure_glue_character_select_surface()
+  IsExpansionTrial = function()
+    return false
+  end
+
+  C_RecruitAFriend = C_RecruitAFriend or {}
+  if type(C_RecruitAFriend.GetRecruitInfo) ~= "function" then
+    function C_RecruitAFriend.GetRecruitInfo()
+      return false, nil
+    end
+  end
+end
+
+__wow_ensure_glue_character_select_surface()
+
 if GetSpecializationInfoForSpecID == nil then
   function GetSpecializationInfoForSpecID(_specID)
     return nil, ""
@@ -246,6 +267,12 @@ end
 if GetCameraFOVDefaults == nil then
   function GetCameraFOVDefaults()
     return 0, 30, 110
+  end
+end
+
+if GetGraphicsAPIs == nil then
+  function GetGraphicsAPIs()
+    return "D3D12", "D3D11"
   end
 end
 
@@ -1198,6 +1225,8 @@ C_ClassTrial = __wow_merge_namespace(C_ClassTrial, {
 
 C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
   HasRequiredBoostForClassTrial = function() return false end,
+  GetCharacterServiceDisplayInfo = function() return {} end,
+  GetVASDistributions = function() return {} end,
   GetCharacterServiceDisplayData = function(_boostType)
     return {
       boostLevel = GetMaxPlayerLevel and GetMaxPlayerLevel() or 80,
@@ -1207,6 +1236,10 @@ C_CharacterServices = __wow_merge_namespace(C_CharacterServices, {
       },
     }
   end,
+})
+
+C_SharedCharacterServices = __wow_merge_namespace(C_SharedCharacterServices, {
+  GetUpgradeDistributions = function() return {} end,
 })
 
 C_SocialQueue = __wow_merge_namespace(C_SocialQueue, {
@@ -3546,95 +3579,333 @@ end
 if C_CharacterCreation == nil then
   C_CharacterCreation = __wow_namespace()
 end
-if C_CharacterCreation.GetNumCharacterTemplates == nil then
-  function C_CharacterCreation.GetNumCharacterTemplates()
-    return 0
-  end
+local __wow_character_create_races = rawget(_G, "__wow_character_create_races")
+if __wow_character_create_races == nil then
+  __wow_character_create_races = {
+    { raceID = 1, name = "Human", fileName = "Human", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Versatile and determined.", createScreenIconAtlas = "charactercreate-humans" },
+    { raceID = 2, name = "Orc", fileName = "Orc", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Fierce warriors from Draenor.", createScreenIconAtlas = "charactercreate-orcs" },
+    { raceID = 3, name = "Dwarf", fileName = "Dwarf", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Stout defenders of Khaz Modan.", createScreenIconAtlas = "charactercreate-dwarves" },
+    { raceID = 4, name = "Night Elf", fileName = "NightElf", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Ancient guardians of nature.", createScreenIconAtlas = "charactercreate-nightelves" },
+    { raceID = 5, name = "Undead", fileName = "Scourge", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Forsaken who fight for their future.", createScreenIconAtlas = "charactercreate-undead" },
+    { raceID = 6, name = "Tauren", fileName = "Tauren", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Noble protectors of the plains.", createScreenIconAtlas = "charactercreate-tauren" },
+    { raceID = 7, name = "Gnome", fileName = "Gnome", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Inventive and resilient.", createScreenIconAtlas = "charactercreate-gnomes" },
+    { raceID = 8, name = "Troll", fileName = "Troll", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Regenerating jungle fighters.", createScreenIconAtlas = "charactercreate-trolls" },
+    { raceID = 9, name = "Goblin", fileName = "Goblin", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Clever deal-makers and engineers.", createScreenIconAtlas = "charactercreate-goblins" },
+    { raceID = 10, name = "Blood Elf", fileName = "BloodElf", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Arcane masters with fierce pride.", createScreenIconAtlas = "charactercreate-bloodelves" },
+    { raceID = 11, name = "Draenei", fileName = "Draenei", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Exiles guided by the Light.", createScreenIconAtlas = "charactercreate-draenei" },
+    { raceID = 22, name = "Worgen", fileName = "Worgen", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Ferocious survivors of Gilneas.", createScreenIconAtlas = "charactercreate-worgen" },
+    { raceID = 24, name = "Pandaren", fileName = "Pandaren", factionInternalName = "Neutral", enabled = true, isNeutralRace = true, isAlliedRace = false, loreDescription = "Wanderers seeking balance.", createScreenIconAtlas = "charactercreate-pandaren" },
+    { raceID = 25, name = "Nightborne", fileName = "Nightborne", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Arcwine-fueled children of Suramar.", createScreenIconAtlas = "charactercreate-nightborne" },
+    { raceID = 26, name = "Highmountain Tauren", fileName = "HighmountainTauren", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Descendants of Huln Highmountain.", createScreenIconAtlas = "charactercreate-highmountaintauren" },
+    { raceID = 27, name = "Void Elf", fileName = "VoidElf", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Ren'dorei shaped by the Void.", createScreenIconAtlas = "charactercreate-voidelves" },
+    { raceID = 28, name = "Lightforged Draenei", fileName = "LightforgedDraenei", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Veterans of the Army of the Light.", createScreenIconAtlas = "charactercreate-lightforgeddraenei" },
+    { raceID = 29, name = "Zandalari Troll", fileName = "ZandalariTroll", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Ancient kings of troll empires.", createScreenIconAtlas = "charactercreate-zandalaritroll" },
+    { raceID = 30, name = "Kul Tiran", fileName = "KulTiran", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Seafaring mariners and tide sages.", createScreenIconAtlas = "charactercreate-kultiran" },
+    { raceID = 31, name = "Dark Iron Dwarf", fileName = "DarkIronDwarf", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Fire-forged dwarves of Blackrock.", createScreenIconAtlas = "charactercreate-darkirondwarf" },
+    { raceID = 32, name = "Mag'har Orc", fileName = "MagharOrc", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Uncorrupted clans from alternate Draenor.", createScreenIconAtlas = "charactercreate-magharorc" },
+    { raceID = 34, name = "Mechagnome", fileName = "Mechagnome", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Tinkerers enhanced with machinery.", createScreenIconAtlas = "charactercreate-mechagnomes" },
+    { raceID = 35, name = "Vulpera", fileName = "Vulpera", factionInternalName = "Horde", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Resourceful nomads of Vol'dun.", createScreenIconAtlas = "charactercreate-vulpera" },
+    { raceID = 36, name = "Dracthyr", fileName = "Dracthyr", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = false, loreDescription = "Awakened draconic soldiers.", createScreenIconAtlas = "charactercreate-dracthyr" },
+    { raceID = 37, name = "Earthen", fileName = "Earthen", factionInternalName = "Alliance", enabled = true, isNeutralRace = false, isAlliedRace = true, loreDescription = "Titan-forged explorers of the deep places.", createScreenIconAtlas = "charactercreate-earthen" },
+  }
+  rawset(_G, "__wow_character_create_races", __wow_character_create_races)
 end
-if C_CharacterCreation.GetBlockedRaces == nil then
+
+local __wow_character_create_classes = rawget(_G, "__wow_character_create_classes")
+if __wow_character_create_classes == nil then
+  __wow_character_create_classes = {
+    { classID = 1, fileName = "WARRIOR", name = "Warrior", description = "Front-line melee fighter.", roleInfo = "Tank, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 2, fileName = "PALADIN", name = "Paladin", description = "Holy crusader of the Light.", roleInfo = "Tank, Healer, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 3, fileName = "HUNTER", name = "Hunter", description = "Ranged weapon master.", roleInfo = "Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 4, fileName = "ROGUE", name = "Rogue", description = "Stealth and precision specialist.", roleInfo = "Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 5, fileName = "PRIEST", name = "Priest", description = "Devout wielder of Light and Shadow.", roleInfo = "Healer, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 6, fileName = "DEATHKNIGHT", name = "Death Knight", description = "Runeblade champion of undeath.", roleInfo = "Tank, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5, earlyFactionChoice = true },
+    { classID = 7, fileName = "SHAMAN", name = "Shaman", description = "Channeler of the elements.", roleInfo = "Healer, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 8, fileName = "MAGE", name = "Mage", description = "Master of arcane power.", roleInfo = "Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 9, fileName = "WARLOCK", name = "Warlock", description = "Fel caster with demonic allies.", roleInfo = "Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 10, fileName = "MONK", name = "Monk", description = "Martial artist with mystic focus.", roleInfo = "Tank, Healer, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 11, fileName = "DRUID", name = "Druid", description = "Shapeshifter of the wilds.", roleInfo = "Tank, Healer, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 12, fileName = "DEMONHUNTER", name = "Demon Hunter", description = "Agile hunter of the Legion.", roleInfo = "Tank, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+    { classID = 13, fileName = "EVOKER", name = "Evoker", description = "Dracthyr spellcaster wielding dragonflights.", roleInfo = "Healer, Damage", enabled = true, animLoopWaitTimeSeconds = 0.5 },
+  }
+  rawset(_G, "__wow_character_create_classes", __wow_character_create_classes)
+end
+
+local function __wow_chr_customization_option_type(kind)
+  if Enum ~= nil and Enum.ChrCustomizationOptionType ~= nil and Enum.ChrCustomizationOptionType[kind] ~= nil then
+    return Enum.ChrCustomizationOptionType[kind]
+  end
+  if kind == "Checkbox" then
+    return 1
+  elseif kind == "Slider" then
+    return 2
+  end
+  return 0
+end
+
+local function __wow_clone_table(value)
+  local copy = {}
+  for k, v in pairs(value) do
+    copy[k] = v
+  end
+  return copy
+end
+
+local function __wow_find_character_create_race(raceID)
+  for _, raceData in ipairs(__wow_character_create_races) do
+    if raceData.raceID == raceID then
+      return __wow_clone_table(raceData)
+    end
+  end
+  return nil
+end
+
+local function __wow_find_character_create_class(classID)
+  for _, classData in ipairs(__wow_character_create_classes) do
+    if classData.classID == classID then
+      return __wow_clone_table(classData)
+    end
+  end
+  return nil
+end
+
+local function __wow_character_create_categories()
+  local function choices(baseID, names)
+    local out = {}
+    for index, name in ipairs(names) do
+      out[index] = {
+        id = baseID + index - 1,
+        choiceIndex = index,
+        name = name,
+      }
+    end
+    return out
+  end
+
+  return {
+    {
+      id = 1,
+      name = "Face",
+      options = {
+        { id = 101, orderIndex = 1, name = "Face Shape", optionType = __wow_chr_customization_option_type("Dropdown"), currentChoiceIndex = 1, choices = choices(1001, { "Face 1", "Face 2", "Face 3" }) },
+        { id = 102, orderIndex = 2, name = "Skin Tone", optionType = __wow_chr_customization_option_type("Slider"), currentChoiceIndex = 2, choices = choices(1011, { "Tone 1", "Tone 2", "Tone 3" }) },
+      },
+    },
+    {
+      id = 2,
+      name = "Hair",
+      options = {
+        { id = 201, orderIndex = 1, name = "Hair Style", optionType = __wow_chr_customization_option_type("Dropdown"), currentChoiceIndex = 1, choices = choices(2001, { "Style 1", "Style 2", "Style 3" }) },
+        { id = 202, orderIndex = 2, name = "Hair Color", optionType = __wow_chr_customization_option_type("Dropdown"), currentChoiceIndex = 2, choices = choices(2011, { "Color 1", "Color 2", "Color 3" }) },
+      },
+    },
+    {
+      id = 3,
+      name = "Details",
+      options = {
+        { id = 301, orderIndex = 1, name = "Accessories", optionType = __wow_chr_customization_option_type("Checkbox"), currentChoiceIndex = 1, choices = choices(3001, { "Off", "On" }) },
+        { id = 302, orderIndex = 2, name = "Markings", optionType = __wow_chr_customization_option_type("Dropdown"), currentChoiceIndex = 1, choices = choices(3011, { "Marking 1", "Marking 2" }) },
+      },
+    },
+  }
+end
+
+rawset(_G, "__wow_selected_race_id", rawget(_G, "__wow_selected_race_id") or __wow_character_create_races[1].raceID)
+rawset(_G, "__wow_selected_class_id", rawget(_G, "__wow_selected_class_id") or __wow_character_create_classes[1].classID)
+rawset(_G, "__wow_selected_sex_id", rawget(_G, "__wow_selected_sex_id") or 0)
+rawset(
+  _G,
+  "__wow_character_create_type",
+  rawget(_G, "__wow_character_create_type")
+    or (Enum ~= nil and Enum.CharacterCreateType ~= nil and Enum.CharacterCreateType.Normal or 0)
+)
+function C_CharacterCreation.GetNumCharacterTemplates()
+  return 0
+end
+if rawget(C_CharacterCreation, "GetBlockedRaces") == nil then
   function C_CharacterCreation.GetBlockedRaces()
     return {}
   end
 end
-if C_CharacterCreation.GetSelectedRace == nil then
+if rawget(C_CharacterCreation, "GetSelectedRace") == nil then
   function C_CharacterCreation.GetSelectedRace()
-    return rawget(_G, "__wow_selected_race_id") or 1
+    return rawget(_G, "__wow_selected_race_id") or __wow_character_create_races[1].raceID
   end
 end
-if C_CharacterCreation.SetSelectedRace == nil then
+if rawget(C_CharacterCreation, "SetSelectedRace") == nil then
   function C_CharacterCreation.SetSelectedRace(raceID)
-    rawset(_G, "__wow_selected_race_id", raceID)
+    local selectedRace = __wow_find_character_create_race(raceID)
+    rawset(_G, "__wow_selected_race_id", selectedRace and selectedRace.raceID or __wow_character_create_races[1].raceID)
   end
 end
-if C_CharacterCreation.GetRaceDataByID == nil then
-  function C_CharacterCreation.GetRaceDataByID(raceID)
-    if raceID == nil then
-      return nil
+if rawget(C_CharacterCreation, "GetAvailableRaces") == nil then
+  function C_CharacterCreation.GetAvailableRaces()
+    local races = {}
+    for index, raceData in ipairs(__wow_character_create_races) do
+      races[index] = __wow_clone_table(raceData)
     end
-    return {
-      raceID = raceID,
-      fileName = "human",
-      factionInternalName = "Alliance",
-      isNeutralRace = false,
-      enabled = true,
-      createScreenIconAtlas = "charactercreate-humans",
-    }
+    return races
   end
 end
-if C_CharacterCreation.GetSelectedClass == nil then
+if rawget(C_CharacterCreation, "GetRaceDataByID") == nil then
+  function C_CharacterCreation.GetRaceDataByID(raceID)
+    return raceID ~= nil and __wow_find_character_create_race(raceID) or nil
+  end
+end
+if rawget(C_CharacterCreation, "SetSelectedClass") == nil then
+  function C_CharacterCreation.SetSelectedClass(classID)
+    local selectedClass = __wow_find_character_create_class(classID)
+    rawset(_G, "__wow_selected_class_id", selectedClass and selectedClass.classID or __wow_character_create_classes[1].classID)
+  end
+end
+if rawget(C_CharacterCreation, "GetAvailableClasses") == nil then
+  function C_CharacterCreation.GetAvailableClasses()
+    local classes = {}
+    for index, classData in ipairs(__wow_character_create_classes) do
+      classes[index] = __wow_clone_table(classData)
+    end
+    return classes
+  end
+end
+if rawget(C_CharacterCreation, "GetSelectedClass") == nil then
   function C_CharacterCreation.GetSelectedClass()
-    return {
-      classID = 2,
-      classFilename = "PALADIN",
-      className = "Paladin",
-    }
+    return __wow_find_character_create_class(rawget(_G, "__wow_selected_class_id"))
+      or __wow_find_character_create_class(__wow_character_create_classes[1].classID)
   end
 end
-if C_CharacterCreation.GetSelectedSex == nil then
+if rawget(C_CharacterCreation, "SetSelectedSex") == nil then
+  function C_CharacterCreation.SetSelectedSex(sexID)
+    rawset(_G, "__wow_selected_sex_id", sexID or 0)
+  end
+end
+if rawget(C_CharacterCreation, "GetSelectedSex") == nil then
   function C_CharacterCreation.GetSelectedSex()
-    return 2
+    return rawget(_G, "__wow_selected_sex_id") or 0
   end
 end
-if C_CharacterCreation.GetFactionForRace == nil then
-  function C_CharacterCreation.GetFactionForRace(_raceID)
-    return "Alliance"
+if rawget(C_CharacterCreation, "GetFactionForRace") == nil then
+  function C_CharacterCreation.GetFactionForRace(raceID)
+    local raceData = __wow_find_character_create_race(raceID)
+    return raceData and raceData.factionInternalName or "Alliance"
   end
 end
-if C_CharacterCreation.GetNameForRace == nil then
-  function C_CharacterCreation.GetNameForRace(_raceID)
-    return "Human"
+if rawget(C_CharacterCreation, "GetNameForRace") == nil then
+  function C_CharacterCreation.GetNameForRace(raceID)
+    local raceData = __wow_find_character_create_race(raceID)
+    return raceData and raceData.name or "Human"
   end
 end
-if C_CharacterCreation.GetClassAchievementRequirements == nil then
+if rawget(C_CharacterCreation, "GetClassAchievementRequirements") == nil then
   function C_CharacterCreation.GetClassAchievementRequirements(_raceID, _classID)
     return {}
   end
 end
-if C_CharacterCreation.UseBeginnerMode == nil then
+if rawget(C_CharacterCreation, "GetValidRacesForClass") == nil then
+  function C_CharacterCreation.GetValidRacesForClass(_classID)
+    return C_CharacterCreation.GetAvailableRaces()
+  end
+end
+if rawget(C_CharacterCreation, "GetAlliedRaceAchievementRequirements") == nil then
+  function C_CharacterCreation.GetAlliedRaceAchievementRequirements(_raceID)
+    return {}
+  end
+end
+if rawget(C_CharacterCreation, "UseBeginnerMode") == nil then
   function C_CharacterCreation.UseBeginnerMode()
     return false
   end
 end
-if C_CharacterCreation.SetCharacterCreateType == nil then
-  C_CharacterCreation.SetCharacterCreateType = __wow_noop
+if rawget(C_CharacterCreation, "IsViewingAlteredForm") == nil then
+  function C_CharacterCreation.IsViewingAlteredForm()
+    return false
+  end
 end
-if C_CharacterCreation.SetTimerunningSeasonID == nil then
-  C_CharacterCreation.SetTimerunningSeasonID = __wow_noop
+if rawget(C_CharacterCreation, "IsUsingCharacterTemplate") == nil then
+  function C_CharacterCreation.IsUsingCharacterTemplate()
+    return false
+  end
 end
-if C_CharacterCreation.ClearCharacterTemplate == nil then
+if rawget(C_CharacterCreation, "IsForcingCharacterTemplate") == nil then
+  function C_CharacterCreation.IsForcingCharacterTemplate()
+    return false
+  end
+end
+if rawget(C_CharacterCreation, "IsTimerunningEnabled") == nil then
+  function C_CharacterCreation.IsTimerunningEnabled()
+    return rawget(_G, "__wow_timerunning_season_id") ~= nil
+  end
+end
+if rawget(C_CharacterCreation, "IsNewPlayerRestricted") == nil then
+  function C_CharacterCreation.IsNewPlayerRestricted()
+    return false
+  end
+end
+if rawget(C_CharacterCreation, "IsTrialAccountRestricted") == nil then
+  function C_CharacterCreation.IsTrialAccountRestricted()
+    return false
+  end
+end
+if rawget(C_CharacterCreation, "GetCharacterCreateType") == nil then
+  function C_CharacterCreation.GetCharacterCreateType()
+    return rawget(_G, "__wow_character_create_type")
+      or (Enum ~= nil and Enum.CharacterCreateType ~= nil and Enum.CharacterCreateType.Normal or 0)
+  end
+end
+if rawget(C_CharacterCreation, "SetCharacterCreateType") == nil then
+  function C_CharacterCreation.SetCharacterCreateType(characterCreateType)
+    rawset(_G, "__wow_character_create_type", characterCreateType)
+  end
+end
+if rawget(C_CharacterCreation, "SetTimerunningSeasonID") == nil then
+  function C_CharacterCreation.SetTimerunningSeasonID(seasonID)
+    rawset(_G, "__wow_timerunning_season_id", seasonID)
+  end
+end
+if rawget(C_CharacterCreation, "ClearCharacterTemplate") == nil then
   C_CharacterCreation.ClearCharacterTemplate = __wow_noop
 end
-if C_CharacterCreation.IsCharacterNameValid == nil then
+if rawget(C_CharacterCreation, "ResetCharCustomize") == nil then
+  C_CharacterCreation.ResetCharCustomize = __wow_noop
+end
+if rawget(C_CharacterCreation, "SetCharCustomizeFrame") == nil then
+  C_CharacterCreation.SetCharCustomizeFrame = __wow_noop
+end
+if rawget(C_CharacterCreation, "SetCharCustomizeBackground") == nil then
+  C_CharacterCreation.SetCharCustomizeBackground = __wow_noop
+end
+if rawget(C_CharacterCreation, "GetCreateBackgroundModel") == nil then
+  function C_CharacterCreation.GetCreateBackgroundModel()
+    return 0
+  end
+end
+if rawget(C_CharacterCreation, "SetModelAlpha") == nil then
+  C_CharacterCreation.SetModelAlpha = __wow_noop
+end
+if rawget(C_CharacterCreation, "PlayClassIdleAnimationOnCharacter") == nil then
+  C_CharacterCreation.PlayClassIdleAnimationOnCharacter = __wow_noop
+end
+if rawget(C_CharacterCreation, "PlayCustomizationIdleAnimationOnCharacter") == nil then
+  C_CharacterCreation.PlayCustomizationIdleAnimationOnCharacter = __wow_noop
+end
+if rawget(C_CharacterCreation, "DestroyAuxModel") == nil then
+  C_CharacterCreation.DestroyAuxModel = __wow_noop
+end
+if rawget(C_CharacterCreation, "GetAvailableCustomizations") == nil then
+  function C_CharacterCreation.GetAvailableCustomizations()
+    return __wow_character_create_categories()
+  end
+end
+if rawget(C_CharacterCreation, "IsCharacterNameValid") == nil then
   function C_CharacterCreation.IsCharacterNameValid(_name)
     return true, ""
   end
 end
-if C_CharacterCreation.IsGuildNameValid == nil then
+if rawget(C_CharacterCreation, "IsGuildNameValid") == nil then
   function C_CharacterCreation.IsGuildNameValid(_name)
     return true, ""
   end
 end
-if C_CharacterCreation.CreateCharacter == nil then
+if rawget(C_CharacterCreation, "CreateCharacter") == nil then
   function C_CharacterCreation.CreateCharacter(name)
     if A_Admin and A_Admin.SetPlayerName then
       A_Admin.SetPlayerName(name)
@@ -3715,6 +3986,380 @@ end
 
 -- Adventure journal: the sim has no adventure content.
 C_AdventureJournal = C_AdventureJournal or __wow_namespace()
+if rawget(C_AdventureJournal, "CanBeShown") == nil then
+  function C_AdventureJournal.CanBeShown()
+    return true
+  end
+end
+if rawget(C_AdventureJournal, "UpdateSuggestions") == nil then
+  function C_AdventureJournal.UpdateSuggestions(_forceUpdate)
+  end
+end
+if rawget(C_AdventureJournal, "GetPrimaryOffset") == nil then
+  function C_AdventureJournal.GetPrimaryOffset()
+    return 0
+  end
+end
+if rawget(C_AdventureJournal, "SetPrimaryOffset") == nil then
+  function C_AdventureJournal.SetPrimaryOffset(_offset)
+  end
+end
+if rawget(C_AdventureJournal, "GetNumAvailableSuggestions") == nil then
+  function C_AdventureJournal.GetNumAvailableSuggestions()
+    return 0
+  end
+end
+if rawget(C_AdventureJournal, "GetSuggestions") == nil then
+  function C_AdventureJournal.GetSuggestions(suggestions)
+    if type(suggestions) == "table" then
+      for index = #suggestions, 1, -1 do
+        suggestions[index] = nil
+      end
+    end
+  end
+end
+if rawget(C_AdventureJournal, "GetReward") == nil then
+  function C_AdventureJournal.GetReward(_suggestionIndex)
+    return nil
+  end
+end
+if rawget(C_AdventureJournal, "ActivateEntry") == nil then
+  function C_AdventureJournal.ActivateEntry(_suggestionIndex)
+  end
+end
+
+if type(AdventureGuideUtil) ~= "table" then
+  AdventureGuideUtil = {}
+end
+if rawget(AdventureGuideUtil, "IsAvailable") == nil then
+  function AdventureGuideUtil.IsAvailable()
+    local kioskEnabled = Kiosk and Kiosk.IsEnabled and Kiosk.IsEnabled()
+    return not kioskEnabled and C_AdventureJournal.CanBeShown()
+  end
+end
+if rawget(AdventureGuideUtil, "OpenJournalLink") == nil then
+  function AdventureGuideUtil.OpenJournalLink(_journalType, _id, _difficultyID)
+    if not EncounterJournal and type(EncounterJournal_LoadUI) == "function" then
+      EncounterJournal_LoadUI()
+    end
+    if EncounterJournal then
+      ShowUIPanel(EncounterJournal)
+      return true
+    end
+    return false
+  end
+end
+if rawget(AdventureGuideUtil, "OpenHyperLink") == nil then
+  function AdventureGuideUtil.OpenHyperLink(_tag, journalType, id, difficultyID)
+    if not AdventureGuideUtil.IsAvailable() then
+      return false
+    end
+    return AdventureGuideUtil.OpenJournalLink(
+      tonumber(journalType),
+      tonumber(id),
+      tonumber(difficultyID)
+    )
+  end
+end
+if rawget(AdventureGuideUtil, "GetCurrentJournalInstance") == nil then
+  function AdventureGuideUtil.GetCurrentJournalInstance()
+    return nil
+  end
+end
+if rawget(AdventureGuideUtil, "IsInInstance") == nil then
+  function AdventureGuideUtil.IsInInstance(_journalInstanceID)
+    return false
+  end
+end
+
+if type(DifficultyUtil) ~= "table" then
+  DifficultyUtil = {}
+end
+if rawget(DifficultyUtil, "ID") == nil then
+  DifficultyUtil.ID = {
+    DungeonNormal = 1,
+    DungeonHeroic = 2,
+    Raid10Normal = 3,
+    Raid25Normal = 4,
+    Raid10Heroic = 5,
+    Raid25Heroic = 6,
+    RaidLFR = 7,
+    DungeonChallenge = 8,
+    Raid40 = 9,
+    PrimaryRaidNormal = 14,
+    PrimaryRaidHeroic = 15,
+    PrimaryRaidMythic = 16,
+    PrimaryRaidLFR = 17,
+    DungeonMythic = 23,
+    DungeonTimewalker = 24,
+    RaidTimewalker = 33,
+    RaidStory = 220,
+  }
+end
+if rawget(DifficultyUtil, "GetDifficultyName") == nil then
+  local __wow_difficulty_names = {
+    [DifficultyUtil.ID.DungeonNormal] = PLAYER_DIFFICULTY1 or "Normal",
+    [DifficultyUtil.ID.DungeonHeroic] = PLAYER_DIFFICULTY2 or "Heroic",
+    [DifficultyUtil.ID.Raid10Normal] = PLAYER_DIFFICULTY1 or "Normal",
+    [DifficultyUtil.ID.Raid25Normal] = PLAYER_DIFFICULTY1 or "Normal",
+    [DifficultyUtil.ID.Raid10Heroic] = PLAYER_DIFFICULTY2 or "Heroic",
+    [DifficultyUtil.ID.Raid25Heroic] = PLAYER_DIFFICULTY2 or "Heroic",
+    [DifficultyUtil.ID.RaidLFR] = PLAYER_DIFFICULTY3 or "Raid Finder",
+    [DifficultyUtil.ID.DungeonChallenge] = PLAYER_DIFFICULTY_MYTHIC_PLUS or "Mythic+",
+    [DifficultyUtil.ID.Raid40] = LEGACY_RAID_DIFFICULTY or "Legacy Raid",
+    [DifficultyUtil.ID.PrimaryRaidNormal] = PLAYER_DIFFICULTY1 or "Normal",
+    [DifficultyUtil.ID.PrimaryRaidHeroic] = PLAYER_DIFFICULTY2 or "Heroic",
+    [DifficultyUtil.ID.PrimaryRaidMythic] = PLAYER_DIFFICULTY6 or "Mythic",
+    [DifficultyUtil.ID.PrimaryRaidLFR] = PLAYER_DIFFICULTY3 or "Raid Finder",
+    [DifficultyUtil.ID.DungeonMythic] = PLAYER_DIFFICULTY6 or "Mythic",
+    [DifficultyUtil.ID.DungeonTimewalker] = PLAYER_DIFFICULTY_TIMEWALKER or "Timewalking",
+    [DifficultyUtil.ID.RaidTimewalker] = PLAYER_DIFFICULTY_TIMEWALKER or "Timewalking",
+    [DifficultyUtil.ID.RaidStory] = PLAYER_DIFFICULTY_STORY_RAID or "Story",
+  }
+
+  function DifficultyUtil.GetDifficultyName(difficultyID)
+    return __wow_difficulty_names[difficultyID]
+  end
+end
+if rawget(DifficultyUtil, "IsPrimaryRaid") == nil then
+  local __wow_primary_raids = {
+    [DifficultyUtil.ID.PrimaryRaidLFR] = true,
+    [DifficultyUtil.ID.PrimaryRaidNormal] = true,
+    [DifficultyUtil.ID.PrimaryRaidHeroic] = true,
+    [DifficultyUtil.ID.PrimaryRaidMythic] = true,
+  }
+
+  function DifficultyUtil.IsPrimaryRaid(difficultyID)
+    return __wow_primary_raids[difficultyID] or false
+  end
+end
+if rawget(DifficultyUtil, "GetMaxPlayers") == nil then
+  local __wow_max_players = {
+    [DifficultyUtil.ID.DungeonNormal] = 5,
+    [DifficultyUtil.ID.DungeonHeroic] = 5,
+    [DifficultyUtil.ID.DungeonMythic] = 5,
+    [DifficultyUtil.ID.DungeonChallenge] = 5,
+    [DifficultyUtil.ID.DungeonTimewalker] = 5,
+    [DifficultyUtil.ID.Raid10Normal] = 10,
+    [DifficultyUtil.ID.Raid10Heroic] = 10,
+    [DifficultyUtil.ID.Raid25Normal] = 25,
+    [DifficultyUtil.ID.Raid25Heroic] = 25,
+    [DifficultyUtil.ID.Raid40] = 40,
+  }
+
+  function DifficultyUtil.GetMaxPlayers(difficultyID)
+    return __wow_max_players[difficultyID]
+  end
+end
+
+if type(PVPUtil) ~= "table" then
+  PVPUtil = {}
+end
+if rawget(PVPUtil, "GetTierName") == nil then
+  function PVPUtil.GetTierName(_tierEnum)
+    return ""
+  end
+end
+if rawget(PVPUtil, "GetTierDescription") == nil then
+  function PVPUtil.GetTierDescription(_tierEnum)
+    return ""
+  end
+end
+if rawget(PVPUtil, "GetBracketName") == nil then
+  function PVPUtil.GetBracketName(_bracketIndex)
+    return ""
+  end
+end
+if rawget(PVPUtil, "IsInActiveBattlefield") == nil then
+  function PVPUtil.IsInActiveBattlefield()
+    return false
+  end
+end
+if rawget(PVPUtil, "GetCurrentSeasonNumber") == nil then
+  function PVPUtil.GetCurrentSeasonNumber()
+    return 0
+  end
+end
+
+if type(PlayerSpellsUtil) ~= "table" then
+  PlayerSpellsUtil = {}
+end
+if rawget(PlayerSpellsUtil, "FrameTabs") == nil then
+  PlayerSpellsUtil.FrameTabs = {
+    ClassSpecializations = 1,
+    ClassTalents = 2,
+    SpellBook = 3,
+  }
+end
+if rawget(PlayerSpellsUtil, "SpellBookCategories") == nil then
+  PlayerSpellsUtil.SpellBookCategories = {
+    Class = 1,
+    General = 2,
+    Pet = 3,
+  }
+end
+
+local function __wow_load_player_spells_frame()
+  if not PlayerSpellsFrame and type(PlayerSpellsFrame_LoadUI) == "function" then
+    PlayerSpellsFrame_LoadUI()
+  end
+  return PlayerSpellsFrame
+end
+
+local function __wow_set_playerspells_inspect_unit(inspectUnit)
+  local frame = PlayerSpellsFrame
+  if not frame then
+    return
+  end
+  if inspectUnit and type(frame.SetInspectUnit) == "function" then
+    frame:SetInspectUnit(inspectUnit)
+  elseif type(frame.IsInspecting) == "function"
+    and frame:IsInspecting()
+    and type(frame.ClearInspectUnit) == "function"
+  then
+    frame:ClearInspectUnit()
+  end
+end
+
+if rawget(PlayerSpellsUtil, "GetCurrentTabID") == nil then
+  function PlayerSpellsUtil.GetCurrentTabID()
+    local frame = __wow_load_player_spells_frame()
+    if not frame or type(frame.GetCurrentTabID) ~= "function" then
+      return nil
+    end
+    return frame:GetCurrentTabID()
+  end
+end
+if rawget(PlayerSpellsUtil, "TogglePlayerSpellsFrame") == nil then
+  function PlayerSpellsUtil.TogglePlayerSpellsFrame(suggestedTab, inspectUnit)
+    if DISALLOW_FRAME_TOGGLING then
+      return false
+    end
+
+    local frame = __wow_load_player_spells_frame()
+    if not frame then
+      return false
+    end
+
+    if not suggestedTab
+      and type(frame.ShouldOpenToSpecTab) == "function"
+      and frame:ShouldOpenToSpecTab()
+    then
+      suggestedTab = PlayerSpellsUtil.FrameTabs.ClassSpecializations
+    end
+
+    local alreadyShowing = frame:IsShown()
+      and (
+        not suggestedTab
+        or (type(frame.IsFrameTabActive) == "function" and frame:IsFrameTabActive(suggestedTab))
+      )
+
+    if alreadyShowing then
+      HideUIPanel(frame)
+      return true
+    end
+
+    __wow_set_playerspells_inspect_unit(inspectUnit)
+    if suggestedTab and type(frame.TrySetTab) == "function" and not frame:TrySetTab(suggestedTab) then
+      return false
+    end
+    ShowUIPanel(frame)
+    return true
+  end
+end
+if rawget(PlayerSpellsUtil, "OpenToSpellBookTabAtSpell") == nil then
+  function PlayerSpellsUtil.OpenToSpellBookTabAtSpell(spellID, knownSpellsOnly, toggleFlyout, flyoutReason)
+    local frame = __wow_load_player_spells_frame()
+    if not frame then
+      return nil
+    end
+    __wow_set_playerspells_inspect_unit(nil)
+    if type(frame.TrySetTab) == "function" and not frame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook) then
+      return nil
+    end
+    ShowUIPanel(frame)
+    local spellBook = frame.SpellBookFrame
+    if type(spellBook) == "table" and type(spellBook.GoToSpell) == "function" then
+      return spellBook:GoToSpell(spellID, knownSpellsOnly, toggleFlyout, flyoutReason)
+    end
+    return nil
+  end
+end
+if rawget(PlayerSpellsUtil, "ToggleSpellBookFrame") == nil then
+  function PlayerSpellsUtil.ToggleSpellBookFrame(spellBookCategory)
+    if DISALLOW_FRAME_TOGGLING then
+      return false
+    end
+    local frame = __wow_load_player_spells_frame()
+    if not frame then
+      return false
+    end
+
+    local spellBook = frame.SpellBookFrame
+    local categoryMatches = (
+      not spellBookCategory
+      or not spellBook
+      or type(spellBook.IsCategoryActive) ~= "function"
+      or spellBook:IsCategoryActive(spellBookCategory)
+    )
+    local alreadyShowing = frame:IsShown()
+      and type(frame.IsFrameTabActive) == "function"
+      and frame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.SpellBook)
+      and categoryMatches
+
+    if alreadyShowing then
+      HideUIPanel(frame)
+      return true
+    end
+
+    __wow_set_playerspells_inspect_unit(nil)
+    if type(frame.TrySetTab) == "function" and not frame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook) then
+      return false
+    end
+    if spellBookCategory and spellBook and type(spellBook.TrySetCategory) == "function" then
+      spellBook:TrySetCategory(spellBookCategory)
+    end
+    ShowUIPanel(frame)
+    return true
+  end
+end
+if rawget(PlayerSpellsUtil, "ToggleClassTalentFrame") == nil then
+  function PlayerSpellsUtil.ToggleClassTalentFrame(inspectUnit)
+    return PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassTalents, inspectUnit)
+  end
+end
+if rawget(PlayerSpellsUtil, "OpenToClassTalentsTab") == nil then
+  function PlayerSpellsUtil.OpenToClassTalentsTab(inspectUnit)
+    return PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassTalents, inspectUnit)
+  end
+end
+if rawget(PlayerSpellsUtil, "OpenToClassSpecializationsTab") == nil then
+  function PlayerSpellsUtil.OpenToClassSpecializationsTab()
+    return PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassSpecializations)
+  end
+end
+if rawget(PlayerSpellsUtil, "OpenToSpellBookTab") == nil then
+  function PlayerSpellsUtil.OpenToSpellBookTab()
+    return PlayerSpellsUtil.ToggleSpellBookFrame()
+  end
+end
+if TogglePlayerSpellsFrame == nil then
+  function TogglePlayerSpellsFrame(suggestedTab, inspectUnit)
+    return PlayerSpellsUtil.TogglePlayerSpellsFrame(suggestedTab, inspectUnit)
+  end
+end
+
+if type(StaticModelInfo) ~= "table" then
+  StaticModelInfo = {}
+end
+if rawget(StaticModelInfo, "CreateModelSceneEntry") == nil then
+  function StaticModelInfo.CreateModelSceneEntry(sceneID, displayID)
+    return {
+      sceneID = sceneID,
+      displayID = displayID,
+    }
+  end
+end
 
 -- Store / shop public API: sim has no store.
 C_StorePublic = C_StorePublic or __wow_namespace()
@@ -4342,12 +4987,44 @@ end
 
 __wow_patch_fog_of_war_pin_methods()
 
+local function __wow_patch_character_select_nav_bar()
+  if rawget(_G, "__wow_character_select_nav_bar_patched") then
+    return
+  end
+  if type(CharacterSelectNavBarMixin) ~= "table" then
+    return
+  end
+
+  if type(CharacterSelectNavBarMixin.SetRealmsButtonEnabled) == "function" then
+    local original_set_realms_button_enabled = CharacterSelectNavBarMixin.SetRealmsButtonEnabled
+    CharacterSelectNavBarMixin.SetRealmsButtonEnabled = function(self, enabled)
+      if type(self) ~= "table" or self.RealmsButton == nil then
+        return
+      end
+      return original_set_realms_button_enabled(self, enabled)
+    end
+  end
+
+  rawset(_G, "__wow_character_select_nav_bar_patched", true)
+end
+
+__wow_patch_character_select_nav_bar()
+
 if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
   hooksecurefunc(C_AddOns, "LoadAddOn", function(addonName)
     if addonName == "Blizzard_AchievementUI" then
       __wow_ensure_achievement_search_previews()
       __wow_patch_achievement_search_preview_selection()
-    elseif addonName == "Blizzard_MapCanvas" then
+    elseif addonName == "Blizzard_GlueXML_Mainline"
+      or addonName == "Blizzard_GlueXML"
+      or addonName == "Blizzard_CharacterCreate" then
+      __wow_ensure_glue_character_select_surface()
+    elseif addonName == "Blizzard_CharacterSelectNavBar" then
+      __wow_patch_character_select_nav_bar()
+    elseif addonName == "Blizzard_MapCanvas"
+      or addonName == "Blizzard_SharedMapDataProviders"
+      or addonName == "Blizzard_WorldMap"
+      or addonName == "Blizzard_BattlefieldMap" then
       __wow_patch_map_canvas_scroll_container_methods()
       __wow_patch_fog_of_war_pin_methods()
     end

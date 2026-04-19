@@ -30,7 +30,10 @@ pub(crate) fn trace_load_addon_enabled() -> bool {
 }
 
 fn trace_load_addon_enabled_from(value: Option<&str>) -> bool {
-    !matches!(value, None | Some("") | Some("0") | Some("false") | Some("FALSE"))
+    !matches!(
+        value,
+        None | Some("") | Some("0") | Some("false") | Some("FALSE")
+    )
 }
 
 pub(crate) fn trace_load_addon(origin: LoadAddonTraceOrigin, message: impl AsRef<str>) {

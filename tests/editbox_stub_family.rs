@@ -79,6 +79,13 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             if eb:IsSecureText() ~= true then
                 return "secure_text_state_not_persisted"
             end
+            eb:SetDesiredWidth(222)
+            if eb:GetDesiredWidth() ~= 222 then
+                return "desired_width_should_round_trip"
+            end
+            if eb:GetWidth() ~= 222 then
+                return "desired_width_should_update_width"
+            end
             if eb:GetVisibleTextByteLimit() ~= 32 then
                 return "visible_text_byte_limit_not_persisted"
             end

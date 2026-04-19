@@ -14,7 +14,7 @@
 //! - `C_CharacterServices.AssignPCTDistribution()` — no-op.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::borrow_state;
+use crate::lua_api::methods::{borrow_state, create_table};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -38,6 +38,12 @@ pub(super) fn register_character_services_surface(state: &mut LuaState) -> LuaRe
         table_ref,
         "HasRequiredServiceForCharacterUpgrade",
         has_required_service_for_character_upgrade,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetCharacterServiceDisplayInfo",
+        get_character_service_display_info,
     )?;
     table_set_rust_fn_static(state, table_ref, "AssignUpgradeDistribution", assign_noop)?;
     table_set_rust_fn_static(state, table_ref, "AssignPCTDistribution", assign_noop)?;
@@ -68,6 +74,12 @@ fn get_active_class_trial_boost_type(state: &mut LuaState) -> LuaResult<u32> {
 
 fn has_required_service_for_character_upgrade(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn get_character_service_display_info(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    state.push(table);
     Ok(1)
 }
 

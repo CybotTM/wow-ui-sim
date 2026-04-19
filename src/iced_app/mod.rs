@@ -80,6 +80,8 @@ pub use layout::{
 use std::path::PathBuf;
 #[cfg(feature = "gui")]
 use std::sync::OnceLock;
+#[cfg(feature = "gui")]
+use std::time::Instant;
 
 #[cfg(feature = "gui")]
 use iced::window::screenshot::Screenshot;
@@ -156,8 +158,9 @@ pub enum Message {
     /// Party size changed via dropdown.
     PartySizeChanged(String),
     /// Keyboard input dispatched to Lua (WoW key name, e.g. "ESCAPE", "ENTER", "A")
-    /// plus optional raw text for character input into focused EditBox.
-    KeyPress(String, Option<String>),
+    /// plus optional raw text for character input into focused EditBox and
+    /// the event capture timestamp.
+    KeyPress(String, Option<String>, Instant),
     /// Player class changed via dropdown.
     PlayerClassChanged(String),
     /// Player race changed via dropdown.

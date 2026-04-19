@@ -31,6 +31,8 @@ pub(super) fn register_c_spell_surface(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, ns, "GetSpellCooldown", get_spell_cooldown)?;
     table_set_rust_fn_static(state, ns, "GetMountFromSpell", get_mount_from_spell)?;
     table_set_rust_fn_static(state, ns, "GetVisibilityInfo", get_visibility_info)?;
+    table_set_rust_fn_static(state, ns, "DoesSpellExist", does_spell_exist)?;
+    table_set_rust_fn_static(state, ns, "IsSpellDataCached", is_spell_data_cached)?;
     table_set_rust_fn_static(state, ns, "IsPriorityAura", is_priority_aura)?;
     table_set_rust_fn_static(state, ns, "IsSelfBuff", is_self_buff)?;
     table_set_rust_fn_static(state, ns, "IsSpellUsable", is_spell_usable)?;
@@ -139,6 +141,22 @@ fn get_visibility_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     state.push(Val::Bool(false));
     Ok(3)
+}
+
+/// `C_Spell.DoesSpellExist(spellID)` -> `bool`.
+///
+/// Permissive for addon/UI probes: any non-zero spell ID is treated as existing.
+fn does_spell_exist(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(spell_id != 0));
+    Ok(1)
+}
+
+/// `C_Spell.IsSpellDataCached(spellID)` -> `true` for non-zero spell IDs.
+fn is_spell_data_cached(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(spell_id != 0));
+    Ok(1)
 }
 
 /// `C_Spell.IsPriorityAura(spellID)` → `false`.

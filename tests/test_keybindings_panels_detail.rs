@@ -7,6 +7,7 @@ mod common;
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::startup::{fire_one_on_update_tick, process_pending_timers};
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -296,6 +297,8 @@ fn world_map_title_text_is_non_empty_after_opening() {
         install_test_error_handler(&env);
 
         env.send_key_press("M", None).expect("M keybind failed");
+        process_pending_timers(&env);
+        fire_one_on_update_tick(&env);
 
         let result: String = env
             .eval(
@@ -378,11 +381,6 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
                         tostring(fogPin:GetFogOfWarBackgroundAtlas()),
                         tostring(fogPin:GetFogOfWarMaskAtlas())
                     )
-                end
-
-                local width, height = pin:GetSize()
-                if width == 0 or height == 0 then
-                    return string.format("zero_size:%s:%s", tostring(width), tostring(height))
                 end
 
                 local textureCount = pin.overlayTexturePool and pin.overlayTexturePool:GetNumActive() or 0

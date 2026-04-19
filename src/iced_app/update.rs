@@ -3,6 +3,7 @@
 use iced::Task;
 use iced_layout_inspector::server::ScreenshotData;
 use rustc_hash::FxHashSet;
+use std::time::Instant;
 
 use crate::lua_api::WowLuaEnv;
 
@@ -51,8 +52,8 @@ impl App {
             }
             Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
             Message::PartySizeChanged(ref label) => self.handle_party_size_changed(label),
-            Message::KeyPress(ref key, ref text) => {
-                self.handle_simple_key_press(key, text.as_deref())
+            Message::KeyPress(ref key, ref text, captured_at) => {
+                self.handle_simple_key_press(key, text.as_deref(), captured_at)
             }
             Message::PlayerClassChanged(ref name) => self.handle_player_class_changed(name),
             Message::PlayerRaceChanged(ref name) => self.handle_player_race_changed(name),
@@ -81,13 +82,17 @@ impl App {
         }
     }
 
-    fn handle_simple_key_press(&mut self, key: &str, text: Option<&str>) {
+    fn handle_simple_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {
+        crate::logging::eprintln_elapsed(&format!(
+            "[key] {key} reached app in {:.1?}",
+            captured_at.elapsed()
+        ));
         if key == "ESCAPE" && self.options_modal_visible {
             self.options_modal_visible = false;
             return;
         }
 
-        self.handle_key_press(key, text);
+        self.handle_key_press(key, text, captured_at);
     }
 
     // ── Event handlers ──────────────────────────────────────────────────
@@ -116,13 +121,19 @@ impl App {
         Task::none()
     }
 
-    pub(super) fn handle_key_press(&mut self, key: &str, text: Option<&str>) {
+    pub(super) fn handle_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {
+        let dispatch_started = Instant::now();
         let env = self.env.borrow();
         if let Err(e) = env.send_key_press(key, text) {
             self.log_messages
                 .push(format!("KeyPress({}) error: {}", key, e));
         }
         drop(env);
+        crate::logging::eprintln_elapsed(&format!(
+            "[key] {key} app->lua dispatch took {:.1?} ({:.1?} since capture)",
+            dispatch_started.elapsed(),
+            captured_at.elapsed()
+        ));
         self.invalidate();
     }
 

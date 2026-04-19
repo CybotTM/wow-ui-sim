@@ -19,6 +19,7 @@ use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::{FromStack, IntoStack};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::time::Instant;
 
 // ── Binding action registry ───────────────────────────────────────────────────
 
@@ -386,10 +387,15 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
     let Some(ba) = BINDING_ACTIONS.iter().find(|b| b.action == action) else {
         return Ok(false);
     };
-    eprintln!("[keybind] {} → {} → {}", key, action, ba.lua_code);
+    crate::logging::eprintln_elapsed(&format!("[keybind] {key} → {action} → {}", ba.lua_code));
+    let exec_started = Instant::now();
     if let Err(error) = lua.exec(ba.lua_code) {
         call_error_handler_state(lua.state_mut(), &error.to_string());
     }
+    crate::logging::eprintln_elapsed(&format!(
+        "[keybind] {key} executed in {:.1?}",
+        exec_started.elapsed()
+    ));
     Ok(true)
 }
 

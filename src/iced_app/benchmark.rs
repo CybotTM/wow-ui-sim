@@ -168,7 +168,11 @@ fn dispatch_keypress(app: &mut App, keypress: Option<&'static str>) -> Duration 
         return Duration::ZERO;
     };
     let started = Instant::now();
-    let _ = app.update(Message::KeyPress(keypress.to_string(), None));
+    let _ = app.update(Message::KeyPress(
+        keypress.to_string(),
+        None,
+        Instant::now(),
+    ));
     started.elapsed()
 }
 

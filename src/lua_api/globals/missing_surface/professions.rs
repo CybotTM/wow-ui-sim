@@ -2,7 +2,7 @@ use super::profession_crafting::{craft_recipe, recipe_is_craftable};
 use super::{ensure_namespace, set_table_array};
 use crate::event::{Event, EventArg};
 use crate::items;
-use crate::lua_api::globals::profession_data;
+use crate::lua_api::globals::{profession_data, spellbook_data};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
 };
@@ -93,7 +93,13 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
         state,
         state.global,
         "GetProfessions",
-        c_trade_skill_ui_get_professions,
+        get_professions_global,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetProfessionInfo",
+        get_profession_info_global,
     )?;
     Ok(())
 }
@@ -163,6 +169,47 @@ fn c_trade_skill_ui_get_professions(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_professions_global(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1.0));
+    state.push(Val::Num(2.0));
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(5)
+}
+
+fn get_profession_info_global(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let Some(profession) = global_profession(index) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let name = create_string(state, profession.name);
+    let icon = create_string(state, profession_icon_path(profession.profession_id));
+    let skill_line_name = create_string(state, profession.parent_profession_name);
+    let spellbook_skill_line = profession_spellbook_skill_line(profession.name).unwrap_or(0);
+    let spell_offset = if spellbook_skill_line > 0 {
+        spellbook_data::skill_line_offset(spellbook_skill_line) as f64
+    } else {
+        0.0
+    };
+    let num_spells = profession_spell_count(profession.name);
+
+    state.push(name);
+    state.push(icon);
+    state.push(Val::Num(profession.skill_level as f64));
+    state.push(Val::Num(profession.max_skill_level as f64));
+    state.push(Val::Num(num_spells as f64));
+    state.push(Val::Num(spell_offset));
+    state.push(Val::Num(profession.skill_line_id as f64));
+    state.push(Val::Num(profession.skill_modifier as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(skill_line_name);
+    Ok(11)
+}
+
 fn c_trade_skill_ui_get_num_recipes(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(profession_data::BLACKSMITHING_RECIPES.len() as f64));
     Ok(1)
@@ -171,6 +218,35 @@ fn c_trade_skill_ui_get_num_recipes(state: &mut LuaState) -> LuaResult<u32> {
 fn c_trade_skill_ui_get_num_trade_skills(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(profession_data::BLACKSMITHING_RECIPES.len() as f64));
     Ok(1)
+}
+
+fn global_profession(index: i32) -> Option<&'static profession_data::ProfessionInfo> {
+    usize::try_from(index.saturating_sub(1))
+        .ok()
+        .and_then(profession_data::get_profession_by_index)
+}
+
+fn profession_spellbook_skill_line(name: &str) -> Option<i32> {
+    (1..=spellbook_data::num_skill_lines()).find(|index| {
+        spellbook_data::get_skill_line(*index)
+            .map(|skill_line| skill_line.name == name)
+            .unwrap_or(false)
+    })
+}
+
+fn profession_spell_count(name: &str) -> i32 {
+    profession_spellbook_skill_line(name)
+        .and_then(spellbook_data::get_skill_line)
+        .map(|skill_line| skill_line.spells.len() as i32)
+        .unwrap_or(0)
+}
+
+fn profession_icon_path(profession_id: i32) -> &'static str {
+    match profession_id {
+        164 => "Interface\\Icons\\Trade_BlackSmithing",
+        186 => "Interface\\Icons\\Trade_Mining",
+        _ => "Interface\\Icons\\INV_Scroll_04",
+    }
 }
 
 fn c_trade_skill_ui_get_recipe_info(state: &mut LuaState) -> LuaResult<u32> {

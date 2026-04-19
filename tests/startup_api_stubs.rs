@@ -100,6 +100,7 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
     let (
         c_ui_type,
         avoids_notch,
+        has_display_notch,
         c_glue_type,
         first_load,
         saved_account_name,
@@ -110,8 +111,15 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
         server_name_type,
         player_location_kind,
         player_location_valid,
+        adventure_guide_available,
+        dungeon_normal_name,
+        dungeon_normal_max_players,
+        player_spells_util_type,
+        has_spellbook_toggle,
+        has_talent_toggle,
     ): (
         String,
+        bool,
         bool,
         String,
         bool,
@@ -120,6 +128,12 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
         bool,
         f64,
         String,
+        String,
+        bool,
+        bool,
+        bool,
+        String,
+        f64,
         String,
         bool,
         bool,
@@ -135,6 +149,7 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
 
             return type(C_UI),
                    C_UI.ShouldUIParentAvoidNotch(),
+                   C_UI.DoesAnyDisplayHaveNotch(),
                    type(C_Glue),
                    C_Glue.IsFirstLoadThisSession(),
                    GetSavedAccountName(),
@@ -144,13 +159,20 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
                    type(GetMinimumExpansionLevel()),
                    type(GetServerName()),
                    location:IsUnit(),
-                   location:IsValid()
+                   location:IsValid(),
+                   AdventureGuideUtil.IsAvailable(),
+                   DifficultyUtil.GetDifficultyName(DifficultyUtil.ID.DungeonNormal),
+                   DifficultyUtil.GetMaxPlayers(DifficultyUtil.ID.DungeonNormal),
+                   type(PlayerSpellsUtil),
+                   type(PlayerSpellsUtil.ToggleSpellBookFrame) == "function",
+                   type(PlayerSpellsUtil.ToggleClassTalentFrame) == "function"
             "#,
         )
         .expect("glue runtime helpers should be callable");
 
     assert_eq!(c_ui_type, "table");
     assert!(!avoids_notch);
+    assert!(!has_display_notch);
     assert_eq!(c_glue_type, "table");
     assert!(!first_load);
     assert_eq!(saved_account_name, "");
@@ -161,6 +183,12 @@ fn glue_runtime_helpers_exist_with_safe_defaults() {
     assert_eq!(server_name_type, "nil");
     assert!(player_location_kind);
     assert!(player_location_valid);
+    assert!(adventure_guide_available);
+    assert!(!dungeon_normal_name.is_empty());
+    assert_eq!(dungeon_normal_max_players, 5.0);
+    assert_eq!(player_spells_util_type, "table");
+    assert!(has_spellbook_toggle);
+    assert!(has_talent_toggle);
 }
 
 #[test]
@@ -174,7 +202,27 @@ fn glue_character_select_helpers_exist_with_safe_defaults() {
         timerunning_season_kind,
         min_render_scale,
         max_render_scale,
-    ): (bool, bool, bool, f64, String, f64, f64) = env
+        expansion_trial,
+        recruit_active_type,
+        recruit_faction_type,
+        upgrade_expansion_level,
+        undelete_enabled,
+        undelete_cooldown,
+    ): (
+        bool,
+        bool,
+        bool,
+        f64,
+        String,
+        f64,
+        f64,
+        bool,
+        String,
+        String,
+        f64,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
             local frame = CreateFrame("Frame", "CodexGlueWorldFrame", UIParent)
@@ -194,7 +242,12 @@ fn glue_character_select_helpers_exist_with_safe_defaults() {
                    GetMaxWarbandGroupCount(),
                    type(GetActiveTimerunningSeasonID()),
                    GetMinRenderScale(),
-                   GetMaxRenderScale()
+                   GetMaxRenderScale(),
+                   IsExpansionTrial(),
+                   type(select(1, C_RecruitAFriend.GetRecruitInfo())),
+                   type(select(2, C_RecruitAFriend.GetRecruitInfo())),
+                   GetUpgradeExpansionLevel(),
+                   GetCharacterUndeleteStatus()
             "#,
         )
         .expect("glue character-select helpers should be callable");
@@ -206,6 +259,12 @@ fn glue_character_select_helpers_exist_with_safe_defaults() {
     assert_eq!(timerunning_season_kind, "nil");
     assert_eq!(min_render_scale, 0.5);
     assert_eq!(max_render_scale, 1.0);
+    assert!(!expansion_trial);
+    assert_eq!(recruit_active_type, "boolean");
+    assert_eq!(recruit_faction_type, "nil");
+    assert_eq!(upgrade_expansion_level, 80.0);
+    assert!(!undelete_enabled);
+    assert!(!undelete_cooldown);
 }
 
 #[test]
@@ -224,21 +283,26 @@ fn c_lfg_info_can_player_use_premade_group_returns_false() {
 #[test]
 fn recruit_a_friend_surface_returns_disabled_empty_defaults() {
     let env = env();
-    let (enabled, recruiting_enabled, versions_len, recruits_len, claim_in_progress): (
-        bool,
-        bool,
-        f64,
-        f64,
-        bool,
-    ) = env
+    let (
+        enabled,
+        recruiting_enabled,
+        versions_len,
+        recruits_len,
+        claim_in_progress,
+        recruit_active,
+        recruit_faction_type,
+    ): (bool, bool, f64, f64, bool, bool, String) = env
         .eval(
             r#"
             local info = C_RecruitAFriend.GetRAFInfo()
+            local active, faction = C_RecruitAFriend.GetRecruitInfo()
             return C_RecruitAFriend.IsEnabled(),
                    C_RecruitAFriend.IsRecruitingEnabled(),
                    #info.versions,
                    #info.recruits,
-                   info.claimInProgress
+                   info.claimInProgress,
+                   active,
+                   type(faction)
             "#,
         )
         .expect("Recruit-A-Friend fallback surface should be callable");
@@ -247,6 +311,8 @@ fn recruit_a_friend_surface_returns_disabled_empty_defaults() {
     assert_eq!(versions_len, 1.0);
     assert_eq!(recruits_len, 0.0);
     assert!(!claim_in_progress);
+    assert!(!recruit_active);
+    assert_eq!(recruit_faction_type, "nil");
 }
 
 #[test]

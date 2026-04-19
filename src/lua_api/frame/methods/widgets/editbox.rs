@@ -1,7 +1,10 @@
 //! EditBox and text-spacing widget methods.
 
 use super::shared::{opt_string, val_to_bool, val_to_f64};
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, get_or_create_frame_fields,
+    table_get, table_set,
+};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -203,6 +206,99 @@ pub(super) fn is_password(state: &mut LuaState) -> LuaResult<u32> {
         .unwrap_or(false);
     drop(sim);
     v.into_stack(state)
+}
+
+pub(super) fn set_secure_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let value = val_to_bool(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_secure_text = value;
+    }
+    Ok(0)
+}
+
+pub(super) fn is_secure_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_secure_text)
+        .unwrap_or(false);
+    drop(sim);
+    v.into_stack(state)
+}
+
+fn desired_width_field(state: &mut LuaState, id: u64) -> Option<f32> {
+    let fields = get_or_create_frame_fields(state, id);
+    match table_get(state, fields, "desiredWidth") {
+        rilua::Val::Num(width) => Some(width as f32),
+        _ => None,
+    }
+}
+
+fn set_width_from_desired(state: &mut LuaState, id: u64, width: f32) {
+    if let Ok(mut sim) = borrow_state_mut(state) {
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.width = width;
+            frame.width_is_text_auto = false;
+        }
+        sim.widgets.mark_rect_dirty(id);
+    }
+}
+
+pub(super) fn set_desired_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let width = val_to_f64(stack_val(state, 2)) as f32;
+    let fields = get_or_create_frame_fields(state, id);
+    table_set(state, fields, "desiredWidth", rilua::Val::Num(width as f64));
+    set_width_from_desired(state, id, width);
+    Ok(0)
+}
+
+pub(super) fn get_desired_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let width = desired_width_field(state, id).or_else(|| {
+        let sim = borrow_state(state).ok()?;
+        sim.widgets.get(id).map(|f| f.width)
+    });
+    state.push(rilua::Val::Num(width.unwrap_or(0.0) as f64));
+    Ok(1)
+}
+
+pub(super) fn get_scaled_desired_width(state: &mut LuaState) -> LuaResult<u32> {
+    get_desired_width(state)
+}
+
+pub(super) fn get_desired_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let height = {
+        let sim = borrow_state(state)?;
+        sim.widgets.get(id).map(|f| f.height)
+    };
+    state.push(rilua::Val::Num(height.unwrap_or(0.0) as f64));
+    Ok(1)
+}
+
+pub(super) fn get_scaled_desired_height(state: &mut LuaState) -> LuaResult<u32> {
+    get_desired_height(state)
+}
+
+pub(super) fn update_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    if let Some(width) = desired_width_field(state, id) {
+        set_width_from_desired(state, id, width);
+    }
+    Ok(0)
+}
+
+pub(super) fn on_text_scale_updated(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    if let Some(width) = desired_width_field(state, id) {
+        set_width_from_desired(state, id, width);
+    }
+    Ok(0)
 }
 
 pub(super) fn set_number(state: &mut LuaState) -> LuaResult<u32> {
@@ -487,6 +583,8 @@ const EDITBOX_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("IsNumeric", is_numeric),
     ("SetPassword", set_password),
     ("IsPassword", is_password),
+    ("SetSecureText", set_secure_text),
+    ("IsSecureText", is_secure_text),
     // Numeric helpers
     ("SetNumber", set_number),
     ("GetNumber", get_number),
@@ -505,6 +603,13 @@ const EDITBOX_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetSpacing", get_spacing),
     ("GetTextInsets", get_text_insets),
     ("GetDisplayText", get_display_text),
+    ("SetDesiredWidth", set_desired_width),
+    ("GetDesiredWidth", get_desired_width),
+    ("GetScaledDesiredWidth", get_scaled_desired_width),
+    ("GetDesiredHeight", get_desired_height),
+    ("GetScaledDesiredHeight", get_scaled_desired_height),
+    ("UpdateWidth", update_width),
+    ("OnTextScaleUpdated", on_text_scale_updated),
     ("Insert", insert),
     // Cursor blink + nav
     ("SetBlinkSpeed", set_blink_speed),

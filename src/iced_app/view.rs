@@ -364,6 +364,7 @@ impl App {
     pub fn subscription(&self) -> Subscription<Message> {
         let keyboard = iced::event::listen_with(|event, status, _window| {
             use iced::keyboard;
+            use std::time::Instant;
             if let iced::Event::Keyboard(keyboard::Event::KeyPressed {
                 key,
                 modifiers,
@@ -387,7 +388,7 @@ impl App {
                     } else {
                         text.as_ref().map(|t| t.to_string())
                     };
-                    return Some(Message::KeyPress(wow_key, raw_text));
+                    return Some(Message::KeyPress(wow_key, raw_text, Instant::now()));
                 }
             }
             None

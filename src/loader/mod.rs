@@ -31,8 +31,7 @@ use std::time::Duration;
 
 pub use error::LoadError;
 pub(crate) use load_addon_trace::{
-    LoadAddonTraceOrigin, enter_xml_load_addon_context, runtime_load_addon_origin,
-    trace_load_addon,
+    LoadAddonTraceOrigin, enter_xml_load_addon_context, runtime_load_addon_origin, trace_load_addon,
 };
 pub use xml_frame::create_frame_from_xml;
 pub use xml_frame::{fast_create_frame_profile_body_report, fast_create_frame_profile_report};
