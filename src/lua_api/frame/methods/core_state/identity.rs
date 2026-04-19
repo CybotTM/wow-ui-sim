@@ -209,12 +209,14 @@ fn widget_type_inherits(widget_type: crate::widget::WidgetType, requested: &str)
         | crate::widget::WidgetType::Minimap
         | crate::widget::WidgetType::Model
         | crate::widget::WidgetType::ModelScene
-        | crate::widget::WidgetType::PlayerModel
         | crate::widget::WidgetType::ScrollFrame
         | crate::widget::WidgetType::SimpleHTML
         | crate::widget::WidgetType::Slider
         | crate::widget::WidgetType::StatusBar
         | crate::widget::WidgetType::ColorSelect => requested.eq_ignore_ascii_case("Frame"),
+        crate::widget::WidgetType::PlayerModel => {
+            requested.eq_ignore_ascii_case("Model") || requested.eq_ignore_ascii_case("Frame")
+        }
         crate::widget::WidgetType::FontString
         | crate::widget::WidgetType::Line
         | crate::widget::WidgetType::Texture => requested.eq_ignore_ascii_case("Region"),

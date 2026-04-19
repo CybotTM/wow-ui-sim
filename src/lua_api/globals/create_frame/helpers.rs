@@ -81,6 +81,8 @@ pub(super) fn set_frame_field(state: &mut LuaState, field_name: &str) -> LuaResu
             }
             state.gc.barrier_back(fields_ref);
         }
+        let frame_val = frame_ref(state, id)?;
+        table_set(state, frame_val, field_name, value);
     }
     Ok(0)
 }

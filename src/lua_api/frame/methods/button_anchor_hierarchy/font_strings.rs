@@ -68,7 +68,7 @@ fn create_synthetic_text_child(state: &mut LuaState, id: u64) -> LuaResult<u32> 
     Ok(1)
 }
 
-pub(super) fn ensure_button_text_child(state: &mut LuaState, id: u64) -> LuaResult<Option<u64>> {
+pub(crate) fn ensure_button_text_child(state: &mut LuaState, id: u64) -> LuaResult<Option<u64>> {
     if let Some(tid) = find_existing_text_child(state, id) {
         return Ok(Some(tid));
     }

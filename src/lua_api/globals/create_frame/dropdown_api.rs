@@ -5,8 +5,8 @@ use super::helpers::{
     set_global_raw, table_get_str,
 };
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id,
-    get_or_create_frame_fields, table_set,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    extract_frame_id, frame_ref, get_or_create_frame_fields, table_set,
 };
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -46,30 +46,82 @@ pub fn ui_dropdown_menu_create_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn set_dropdown_frame_value(state: &mut LuaState, frame_id: u64, field_name: &str, value: Val) {
+    let fields = get_or_create_frame_fields(state, frame_id);
+    table_set(state, fields, field_name, value);
+    if let Ok(frame) = frame_ref(state, frame_id) {
+        table_set(state, frame, field_name, value);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // UIDropDownMenu_Initialize
 // ---------------------------------------------------------------------------
 
 /// `UIDropDownMenu_Initialize(frame, initFn, displayMode, level, menuList)`
-///
-/// Stores the init function on the frame's fields.
-/// TODO: call initFn(frame, level, menuList) once function calling from RustFn is supported.
 pub fn ui_dropdown_menu_initialize(state: &mut LuaState) -> LuaResult<u32> {
     let frame: Val = FromStack::from_stack(state, 1)?;
     let init_fn: Val = FromStack::from_stack(state, 2)?;
+    let display_mode: Option<String> = FromStack::from_stack(state, 3)?;
+    let level_val: Option<f64> = FromStack::from_stack(state, 4)?;
+    let menu_list: Val = FromStack::from_stack(state, 5)?;
+    let level = level_val.unwrap_or(1.0) as i32;
 
     if let Some(id) = extract_frame_id(state, frame) {
-        let fields = get_or_create_frame_fields(state, id);
         if !matches!(init_fn, Val::Nil) {
-            table_set(state, fields, "initialize", init_fn);
+            set_dropdown_frame_value(state, id, "initialize", init_fn);
         }
+        if let Some(display_mode) = display_mode {
+            let display_mode_val = create_string(state, &display_mode);
+            set_dropdown_frame_value(state, id, "displayMode", display_mode_val);
+        }
+        set_dropdown_frame_value(state, id, "menuList", menu_list);
+        set_dropdown_frame_value(state, id, "dropdownLevel", Val::Num(level as f64));
+        reset_dropdown_lists(state)?;
     }
 
-    let frame2: Val = FromStack::from_stack(state, 1)?;
-    set_global_raw(state, "UIDROPDOWNMENU_INIT_MENU", frame2);
-
-    // TODO: call init_fn(frame, level, menu_list)
+    set_global_raw(state, "UIDROPDOWNMENU_INIT_MENU", frame);
+    set_global_num(state, "UIDROPDOWNMENU_MENU_LEVEL", level as f64);
+    if matches!(init_fn, Val::Function(_)) {
+        let _ = call_function_state(state, init_fn, &[frame, Val::Num(level as f64), menu_list])?;
+    }
     Ok(0)
+}
+
+fn reset_dropdown_lists(state: &mut LuaState) -> LuaResult<()> {
+    for level in 1..=3 {
+        let list_name = format!("DropDownList{}", level);
+        let list_val = get_global(state, &list_name);
+        let Some(list_id) = extract_frame_id(state, list_val) else {
+            continue;
+        };
+
+        {
+            let fields = get_or_create_frame_fields(state, list_id);
+            table_set(state, fields, "numButtons", Val::Num(0.0));
+            table_set(state, fields, "maxWidth", Val::Num(0.0));
+            table_set(state, fields, "shouldRefresh", Val::Bool(false));
+        }
+
+        {
+            let button_ids: Vec<u64> = (1..=8)
+                .filter_map(|button| {
+                    let button_name = format!("DropDownList{}Button{}", level, button);
+                    let button_val = get_global(state, &button_name);
+                    extract_frame_id(state, button_val)
+                })
+                .collect();
+
+            let mut sim = borrow_state_mut(state)?;
+            sim.set_frame_visible(list_id, false);
+            for button in 1..=8 {
+                if let Some(button_id) = button_ids.get((button - 1) as usize).copied() {
+                    sim.set_frame_visible(button_id, false);
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -110,13 +162,47 @@ fn increment_list_button_count(state: &mut LuaState, list_id: u64) -> i32 {
     };
     let new_index = num_buttons + 1;
     table_set(state, list_fields, "numButtons", Val::Num(new_index as f64));
+    if let Ok(list_frame) = frame_ref(state, list_id) {
+        table_set(state, list_frame, "numButtons", Val::Num(new_index as f64));
+    }
     new_index
 }
 
 fn copy_info_to_button_fields(state: &mut LuaState, btn_id: u64, info: Val) {
-    let btn_fields = get_or_create_frame_fields(state, btn_id);
     let Val::Table(info_ref) = info else { return };
-    let array_pairs: Vec<(Val, Val)> = state
+    let btn_fields = get_or_create_frame_fields(state, btn_id);
+    copy_info_array_entries(state, btn_fields, info_ref);
+    copy_info_named_entries(state, btn_id, info_ref);
+}
+
+fn copy_info_array_entries(state: &mut LuaState, btn_fields: Val, info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>) {
+    let array_pairs = array_info_pairs(state, info_ref);
+    let Val::Table(fields_ref) = btn_fields else {
+        return;
+    };
+    if let Some(t) = state.gc.tables.get_mut(fields_ref) {
+        for (key, value) in array_pairs {
+            let _ = t.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+    state.gc.barrier_back(fields_ref);
+}
+
+fn copy_info_named_entries(state: &mut LuaState, btn_id: u64, info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>) {
+    let Some(btn_frame) = frame_ref(state, btn_id).ok() else {
+        return;
+    };
+    let named_pairs = named_info_pairs(state, info_ref);
+    for (key_name, value) in named_pairs {
+        table_set(state, btn_frame, &key_name, value);
+    }
+}
+
+fn array_info_pairs(
+    state: &LuaState,
+    info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> Vec<(Val, Val)> {
+    state
         .gc
         .tables
         .get(info_ref)
@@ -124,25 +210,36 @@ fn copy_info_to_button_fields(state: &mut LuaState, btn_id: u64, info: Val) {
             t.array_slice()
                 .iter()
                 .enumerate()
-                .filter(|(_, v)| !matches!(v, Val::Nil))
-                .map(|(i, v)| (Val::Num((i + 1) as f64), *v))
+                .filter(|(_, value)| !matches!(value, Val::Nil))
+                .map(|(index, value)| (Val::Num((index + 1) as f64), *value))
                 .collect()
         })
-        .unwrap_or_default();
-    let hash_pairs: Vec<(Val, Val)> = state
+        .unwrap_or_default()
+}
+
+fn named_info_pairs(
+    state: &LuaState,
+    info_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> Vec<(String, Val)> {
+    state
         .gc
         .tables
         .get(info_ref)
-        .map(|t| t.hash_entries())
-        .unwrap_or_default();
-    if let Val::Table(fields_ref) = btn_fields {
-        for (k, v) in array_pairs.into_iter().chain(hash_pairs) {
-            if let Some(t) = state.gc.tables.get_mut(fields_ref) {
-                let _ = t.raw_set(k, v, &state.gc.string_arena);
-            }
-            state.gc.barrier_back(fields_ref);
-        }
-    }
+        .map(|t| {
+            t.hash_entries()
+                .into_iter()
+                .filter_map(|(key, value)| match key {
+                    Val::Str(str_ref) => state
+                        .gc
+                        .string_arena
+                        .get(str_ref)
+                        .map(|s| String::from_utf8_lossy(s.data()).into_owned())
+                        .map(|name| (name, value)),
+                    _ => None,
+                })
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn get_info_text_string(state: &mut LuaState, info: Val) -> Option<String> {
@@ -285,31 +382,28 @@ pub fn ui_dropdown_menu_set_selected_name(state: &mut LuaState) -> LuaResult<u32
 /// `UIDropDownMenu_EnableDropDown(frame)`
 pub fn ui_dropdown_menu_enable(state: &mut LuaState) -> LuaResult<u32> {
     let frame: Val = FromStack::from_stack(state, 1)?;
-    if let Some(id) = extract_frame_id(state, frame) {
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(f) = sim.widgets.get_mut_visual(id) {
-            f.attributes.insert(
-                "__dropdown_enabled".to_string(),
-                crate::widget::AttributeValue::Boolean(true),
-            );
-        }
-    }
+    set_dropdown_enabled(state, frame, true)?;
     Ok(0)
 }
 
 /// `UIDropDownMenu_DisableDropDown(frame)`
 pub fn ui_dropdown_menu_disable(state: &mut LuaState) -> LuaResult<u32> {
     let frame: Val = FromStack::from_stack(state, 1)?;
+    set_dropdown_enabled(state, frame, false)?;
+    Ok(0)
+}
+
+fn set_dropdown_enabled(state: &mut LuaState, frame: Val, enabled: bool) -> LuaResult<()> {
     if let Some(id) = extract_frame_id(state, frame) {
         let mut sim = borrow_state_mut(state)?;
         if let Some(f) = sim.widgets.get_mut_visual(id) {
             f.attributes.insert(
                 "__dropdown_enabled".to_string(),
-                crate::widget::AttributeValue::Boolean(false),
+                crate::widget::AttributeValue::Boolean(enabled),
             );
         }
     }
-    Ok(0)
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -326,9 +420,8 @@ pub fn toggle_dropdown_menu(state: &mut LuaState) -> LuaResult<u32> {
     let list_val = get_global(state, &list_name);
     if let Some(id) = extract_frame_id(state, list_val) {
         let mut sim = borrow_state_mut(state)?;
-        if let Some(f) = sim.widgets.get_mut_visual(id) {
-            f.visible = !f.visible;
-        }
+        let next_visible = sim.widgets.get(id).is_some_and(|f| !f.visible);
+        sim.set_frame_visible(id, next_visible);
     }
     set_global_raw(state, "UIDROPDOWNMENU_OPEN_MENU", dropdown_frame);
     Ok(0)
@@ -364,15 +457,14 @@ pub fn ui_dropdown_menu_set_anchor(state: &mut LuaState) -> LuaResult<u32> {
     let relative_point: Option<String> = FromStack::from_stack(state, 6)?;
 
     if let Some(id) = extract_frame_id(state, dropdown) {
-        let fields = get_or_create_frame_fields(state, id);
-        table_set(state, fields, "xOffset", Val::Num(x_offset));
-        table_set(state, fields, "yOffset", Val::Num(y_offset));
+        set_dropdown_frame_value(state, id, "xOffset", Val::Num(x_offset));
+        set_dropdown_frame_value(state, id, "yOffset", Val::Num(y_offset));
         let point_val = create_string(state, &point);
-        table_set(state, fields, "point", point_val);
-        table_set(state, fields, "relativeTo", relative_to);
+        set_dropdown_frame_value(state, id, "point", point_val);
+        set_dropdown_frame_value(state, id, "relativeTo", relative_to);
         if let Some(rp) = relative_point {
             let rp_val = create_string(state, &rp);
-            table_set(state, fields, "relativePoint", rp_val);
+            set_dropdown_frame_value(state, id, "relativePoint", rp_val);
         }
     }
     Ok(0)
@@ -400,13 +492,25 @@ pub fn ui_dropdown_menu_set_frame_strata(state: &mut LuaState) -> LuaResult<u32>
 /// TODO: build an info table and call `ui_dropdown_menu_add_button` once
 /// cross-function calling from within a RustFn is supported.
 pub fn ui_dropdown_menu_add_separator(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+    add_placeholder_button(_state)
 }
 
 /// `UIDropDownMenu_AddSpace(level?)` — no-op stub
 ///
 /// TODO: same as AddSeparator
 pub fn ui_dropdown_menu_add_space(_state: &mut LuaState) -> LuaResult<u32> {
+    add_placeholder_button(_state)
+}
+
+fn add_placeholder_button(state: &mut LuaState) -> LuaResult<u32> {
+    let level_val: Option<f64> = FromStack::from_stack(state, 1)?;
+    let level = level_val.unwrap_or(1.0) as i32;
+    let list_name = format!("DropDownList{}", level);
+    let list_val = get_global(state, &list_name);
+    let Some(list_id) = extract_frame_id(state, list_val) else {
+        return Ok(0);
+    };
+    let _ = increment_list_button_count(state, list_id);
     Ok(0)
 }
 
@@ -462,8 +566,7 @@ pub fn ui_dropdown_menu_set_initialize_function(state: &mut LuaState) -> LuaResu
     let frame: Val = FromStack::from_stack(state, 1)?;
     let init_fn: Val = FromStack::from_stack(state, 2)?;
     if let Some(id) = extract_frame_id(state, frame) {
-        let fields = get_or_create_frame_fields(state, id);
-        table_set(state, fields, "initialize", init_fn);
+        set_dropdown_frame_value(state, id, "initialize", init_fn);
     }
     Ok(0)
 }

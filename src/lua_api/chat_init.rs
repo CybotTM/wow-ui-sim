@@ -18,10 +18,39 @@ pub fn show_chat_frame(env: &WowLuaEnv) {
         if ChatFrame1 then
             ChatFrame1:Show()
             DEFAULT_CHAT_FRAME = ChatFrame1
+            if type(__wow_send_chat_message) == "function" then
+                SendChatMessage = __wow_send_chat_message
+                if type(C_ChatInfo) == "table" then
+                    C_ChatInfo.SendChatMessage = __wow_send_chat_message
+                end
+            end
+            if ChatFrame1.Clear then
+                ChatFrame1:Clear()
+            end
             ChatFrame1:ClearAllPoints()
             ChatFrame1:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 32, 32)
             ChatFrame1:SetSize(430, 120)
+            if FloatingChatFrameMixin and FloatingChatFrameMixin.OnLoad and not ChatFrame1.__codexOnLoadRan then
+                ChatFrame1.__codexOnLoadRan = true
+                FloatingChatFrameMixin.OnLoad(ChatFrame1)
+            end
             ChatFrame1.oldAlpha = ChatFrame1.oldAlpha or DEFAULT_CHATFRAME_ALPHA or 0.3
+            if ChatFrame1.ResizeButton then
+                ChatFrame1.ResizeButton:ClearAllPoints()
+                ChatFrame1.ResizeButton:SetPoint("BOTTOMRIGHT", ChatFrame1, "BOTTOMRIGHT", 0, 0)
+            end
+            if ChatFrame1.ScrollToBottomButton and ChatFrame1.ResizeButton then
+                ChatFrame1.ScrollToBottomButton:ClearAllPoints()
+                ChatFrame1.ScrollToBottomButton:SetPoint("BOTTOMRIGHT", ChatFrame1.ResizeButton, "TOPRIGHT", -2, -2)
+            end
+            if ChatFrame1.ScrollBar and ChatFrame1.ScrollToBottomButton then
+                ChatFrame1.ScrollBar:ClearAllPoints()
+                ChatFrame1.ScrollBar:SetPoint("TOPLEFT", ChatFrame1, "TOPRIGHT", 0, 0)
+                ChatFrame1.ScrollBar:SetPoint("BOTTOMLEFT", ChatFrame1.ScrollToBottomButton, "TOPLEFT", 0, 2)
+            end
+            if FCF_UpdateResizeButton then
+                FCF_UpdateResizeButton(ChatFrame1)
+            end
         end
     "#,
     );
@@ -55,7 +84,7 @@ pub fn init_chat_type_colors(env: &WowLuaEnv) {
 
 fn start_fake_chat(env: &WowLuaEnv) {
     register_fake_chat_data(env);
-    schedule_fake_chat_tickers(env);
+    fix_chat_scrollbar_anchors(env);
 }
 
 fn register_fake_chat_data(env: &WowLuaEnv) {
@@ -160,6 +189,18 @@ fn schedule_fake_chat_tickers(env: &WowLuaEnv) {
         C_Timer.After(15, function() C_Timer.NewTicker(40, function()
             post("guild", "|Hchannel:Guild|h[Guild]|h ", 0.25, 1.0, 0.25)
         end) end)
+    "#,
+    );
+}
+
+fn fix_chat_scrollbar_anchors(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if ChatFrame1 and ChatFrame1.ScrollBar and ChatFrame1.ScrollToBottomButton then
+            ChatFrame1.ScrollBar:ClearAllPoints()
+            ChatFrame1.ScrollBar:SetPoint("TOPLEFT", ChatFrame1, "TOPRIGHT", 0, 0)
+            ChatFrame1.ScrollBar:SetPoint("BOTTOMLEFT", ChatFrame1.ScrollToBottomButton, "TOPLEFT", 0, 2)
+        end
     "#,
     );
 }

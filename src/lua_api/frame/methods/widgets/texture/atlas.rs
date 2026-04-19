@@ -62,6 +62,8 @@ fn apply_atlas(
             info.file.to_string(),
             tex_coords,
         );
+        let should_show = button_texture_should_show(widgets, parent_id, &parent_key);
+        widgets.set_visible(id, should_show);
     }
 }
 
@@ -108,7 +110,7 @@ fn apply_atlas_to_frame(
 }
 
 /// Copy atlas texture/UV data from a child texture onto the parent Button's
-/// corresponding slot field when `parent_key` is one of the four standard names.
+/// corresponding slot field when `parent_key` names a standard button slot.
 fn propagate_atlas_to_button_slot(
     widgets: &mut crate::widget::WidgetRegistry,
     parent_id: u64,
@@ -142,7 +144,53 @@ fn propagate_atlas_to_button_slot(
             parent.disabled_texture = Some(texture_path);
             parent.disabled_tex_coords = Some(tex_coords);
         }
+        "CheckedTexture" => {
+            parent.checked_texture = Some(texture_path);
+            parent.checked_tex_coords = Some(tex_coords);
+        }
+        "DisabledCheckedTexture" => {
+            parent.disabled_checked_texture = Some(texture_path);
+            parent.disabled_checked_tex_coords = Some(tex_coords);
+        }
         _ => {}
+    }
+}
+
+fn button_texture_should_show(
+    widgets: &crate::widget::WidgetRegistry,
+    button_id: u64,
+    parent_key: &str,
+) -> bool {
+    let (enabled, checked, button_state) = widgets
+        .get(button_id)
+        .map(|frame| {
+            let enabled = frame
+                .attributes
+                .get("__enabled")
+                .and_then(|value| match value {
+                    crate::widget::AttributeValue::Boolean(flag) => Some(*flag),
+                    _ => None,
+                })
+                .unwrap_or(true);
+            let checked = frame
+                .attributes
+                .get("__checked")
+                .and_then(|value| match value {
+                    crate::widget::AttributeValue::Boolean(flag) => Some(*flag),
+                    _ => None,
+                })
+                .unwrap_or(false);
+            (enabled, checked, frame.button_state)
+        })
+        .unwrap_or((true, false, 0));
+
+    match parent_key {
+        "NormalTexture" => enabled && button_state == 0,
+        "PushedTexture" => enabled && button_state == 1,
+        "DisabledTexture" => !enabled,
+        "CheckedTexture" => enabled && checked,
+        "DisabledCheckedTexture" => !enabled && checked,
+        _ => true,
     }
 }
 

@@ -48,6 +48,7 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(REFRESH_ACTION_BUTTONS_LUA);
     crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
     crate::lua_api::workarounds_editmode::reapply_player_frame_anchor(env);
+    crate::lua_api::chat_init::show_chat_frame(env);
     patch_chat_voice_button_surface(env);
 }
 

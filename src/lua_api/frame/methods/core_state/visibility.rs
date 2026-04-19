@@ -4,6 +4,7 @@ use super::helpers::{arg_bool, frame_id};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_api::script_helpers::get_script as get_rilua_script;
+use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
@@ -184,7 +185,17 @@ fn fire_visibility_handler_recursive(
 pub fn is_visible(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
-    let result = sim.widgets.is_ancestor_visible(id);
+    let result = sim.widgets.is_ancestor_visible(id)
+        && sim
+            .widgets
+            .get(id)
+            .map(|frame| {
+                matches!(
+                    frame.widget_type,
+                    WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+                ) || frame.effective_alpha > 0.0
+            })
+            .unwrap_or(false);
     drop(sim);
     state.push(Val::Bool(result));
     Ok(1)

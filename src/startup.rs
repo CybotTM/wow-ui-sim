@@ -171,6 +171,7 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
     fire_login_sequence(env, false);
     fire_world_enter_sequence(env);
     fire_post_login_events(env);
+    env.apply_post_event_workarounds();
 }
 
 /// Fire startup events for a selected top-level screen.

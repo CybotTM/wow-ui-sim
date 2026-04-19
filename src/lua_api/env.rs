@@ -287,6 +287,9 @@ impl WowLuaEnv {
         for widget_id in listeners {
             self.dispatch_event_to_frame(widget_id, event, args)?;
         }
+        if event == "PLAYER_ENTERING_WORLD" {
+            super::workarounds::apply_post_event(self);
+        }
         Ok(())
     }
 

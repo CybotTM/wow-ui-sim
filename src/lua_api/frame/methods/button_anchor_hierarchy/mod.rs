@@ -18,6 +18,7 @@ mod shared;
 mod textures;
 
 pub(crate) use animations::advance_animation_groups;
+pub(crate) use font_strings::ensure_button_text_child;
 
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;

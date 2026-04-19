@@ -1,7 +1,7 @@
 //! Minimal CreateFrame helpers kept alive while the implementation moves to rilua.
 
 use crate::lua_api::SimState;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref, sync_child_to_rilua};
 use crate::widget::{Frame, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -28,9 +28,51 @@ pub fn create_frame_instance(
 
     let frame_id = frame.id;
     register_and_attach_parent(state, frame, parent_id, parent_explicit, frame_id)?;
+    install_default_children(state, widget_type, frame_id)?;
     register_global_name(state, name, frame_id)?;
 
     Ok(frame_id)
+}
+
+fn install_default_children(
+    state: &mut LuaState,
+    widget_type: WidgetType,
+    frame_id: u64,
+) -> LuaResult<()> {
+    if widget_type != WidgetType::Slider {
+        return Ok(());
+    }
+
+    for (key, child_type) in [
+        ("Low", WidgetType::FontString),
+        ("High", WidgetType::FontString),
+        ("Text", WidgetType::FontString),
+        ("ThumbTexture", WidgetType::Texture),
+    ] {
+        register_named_child(state, frame_id, key, child_type)?;
+    }
+    Ok(())
+}
+
+fn register_named_child(
+    state: &mut LuaState,
+    parent_id: u64,
+    key: &str,
+    child_type: WidgetType,
+) -> LuaResult<u64> {
+    let mut child = Frame::new(child_type, None, Some(parent_id));
+    child.parent_key = Some(key.to_string());
+    let child_id = child.id;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.widgets.register(child);
+        sim.widgets.add_child(parent_id, child_id);
+        if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+            parent.children_keys.insert(key.to_string(), child_id);
+        }
+    }
+    sync_child_to_rilua(state, parent_id, key, child_id)?;
+    Ok(child_id)
 }
 
 fn should_preserve_object_type_name(widget_type: WidgetType, frame_type: &str) -> bool {

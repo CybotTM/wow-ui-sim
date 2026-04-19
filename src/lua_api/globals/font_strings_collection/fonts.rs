@@ -397,10 +397,24 @@ fn font_get_font_object_for_alphabet(state: &mut LuaState) -> LuaResult<u32> {
     stack_val(state, 1).into_stack(state)
 }
 
-// TODO: full cycle-safe property copy (mlua: copy_font_properties)
 fn font_copy_font_object(state: &mut LuaState) -> LuaResult<u32> {
-    let _font = stack_val(state, 1);
-    let _src = stack_val(state, 2);
+    let dest = stack_val(state, 1);
+    let Some(src) = resolve_font_object(state, stack_val(state, 2)) else {
+        return Ok(0);
+    };
+
+    copy_font_string(state, dest, src, "__fontPath");
+    copy_font_number(state, dest, src, "__fontHeight");
+    copy_font_string(state, dest, src, "__fontFlags");
+    copy_color_components(state, dest, src, "__textColor");
+    copy_color_components(state, dest, src, "__shadowColor");
+    copy_font_number(state, dest, src, "__shadowOffsetX");
+    copy_font_number(state, dest, src, "__shadowOffsetY");
+    copy_font_string(state, dest, src, "__justifyH");
+    copy_font_string(state, dest, src, "__justifyV");
+    copy_font_number(state, dest, src, "__spacing");
+    copy_font_bool(state, dest, src, "__indentedWordWrap");
+    copy_font_number(state, dest, src, "__maxLines");
     Ok(0)
 }
 
@@ -415,16 +429,27 @@ fn font_is_object_type(state: &mut LuaState) -> LuaResult<u32> {
 
 fn font_get_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
-    table_get_static(state, font, "__fontObject").into_stack(state)
+    let existing = table_get_static(state, font, "__fontObject");
+    if !matches!(existing, Val::Nil) {
+        return existing.into_stack(state);
+    }
+    let auto_font = create_font_object(state, None);
+    table_set_static(state, font, "__fontObject", auto_font);
+    auto_font.into_stack(state)
 }
 
 // TODO: cycle detection (mlua: detect_font_object_cycle)
 fn font_set_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let font = stack_val(state, 1);
     let target = stack_val(state, 2);
-    if matches!(target, Val::Table(_)) {
-        table_set_static(state, font, "__fontObject", target);
+    let resolved = match target {
+        Val::Table(_) => Some(target),
+        Val::Str(_) => resolve_font_object(state, target),
+        Val::Nil => None,
+        _ => None,
     }
+    .ok_or_else(|| runtime_error("SetFontObject requires a font object"))?;
+    table_set_static(state, font, "__fontObject", resolved);
     Ok(0)
 }
 
@@ -458,6 +483,16 @@ pub(super) fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()>
     Ok(())
 }
 
+pub(crate) fn create_font_object(state: &mut LuaState, name: Option<&str>) -> Val {
+    let font = create_table(state);
+    font_set_defaults(state, font, name);
+    let _ = add_font_methods(state, font);
+    if let Some(name) = name {
+        set_global_val(state, name, font);
+    }
+    font
+}
+
 // ── Top-level Font API functions ──────────────────────────────────────────────
 
 pub fn create_font(state: &mut LuaState) -> LuaResult<u32> {
@@ -470,10 +505,7 @@ pub fn create_font(state: &mut LuaState) -> LuaResult<u32> {
         _ => return Err(runtime_error("Usage: CreateFont(\"name\")")),
     };
     // TODO: check __font_registry for existing object
-    let font = create_table(state);
-    font_set_defaults(state, font, Some(&name));
-    add_font_methods(state, font)?;
-    set_global_val(state, &name, font);
+    let font = create_font_object(state, Some(&name));
     font.into_stack(state)
 }
 
@@ -482,24 +514,130 @@ pub fn get_fonts(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn get_font_info(state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: resolve font object from arg, populate fields
+    let Some(font) = resolve_font_object(state, stack_val(state, 1)) else {
+        let info = create_table(state);
+        let empty = create_string(state, "");
+        table_set(state, info, "name", empty);
+        table_set(state, info, "height", Val::Num(0.0));
+        let empty = create_string(state, "");
+        table_set(state, info, "outline", empty);
+        let empty = create_string(state, "");
+        table_set(state, info, "flags", empty);
+        return info.into_stack(state);
+    };
     let info = create_table(state);
-    let empty = create_string(state, "");
-    table_set(state, info, "name", empty);
-    table_set(state, info, "height", Val::Num(12.0));
-    let outline = create_string(state, "");
-    table_set(state, info, "outline", outline);
+    let name = match table_get_static(state, font, "__name") {
+        Val::Str(_) => table_get_static(state, font, "__name"),
+        _ => create_string(state, ""),
+    };
+    table_set(state, info, "name", name);
+    let height = font_f64_static(state, font, "__fontHeight");
+    table_set(state, info, "height", Val::Num(height));
+    let flags = font_str_static(state, font, "__fontFlags");
+    let flags_val = create_string(state, &flags);
+    table_set(state, info, "outline", flags_val);
+    let flags_val = create_string(state, &flags);
+    table_set(state, info, "flags", flags_val);
+    let font_path = match table_get_static(state, font, "__fontPath") {
+        Val::Str(_) => table_get_static(state, font, "__fontPath"),
+        _ => Val::Nil,
+    };
+    table_set(state, info, "font", font_path);
+    table_set(state, info, "fontHeight", Val::Num(height));
+    let font_flags = create_string(state, &flags);
+    table_set(state, info, "fontFlags", font_flags);
     info.into_stack(state)
+}
+
+fn resolve_font_object(state: &mut LuaState, value: Val) -> Option<Val> {
+    match value {
+        Val::Table(_) => Some(value),
+        Val::Str(_) => {
+            let name = val_to_string(state, value)?;
+            let font = table_get(state, Val::Table(state.global), &name);
+            matches!(font, Val::Table(_)).then_some(font)
+        }
+        _ => None,
+    }
+}
+
+fn first_family_member_snapshot(
+    state: &mut LuaState,
+    members: Val,
+) -> (Option<String>, f64, String) {
+    let Val::Table(members_ref) = members else {
+        return (None, 0.0, String::new());
+    };
+    let first = state
+        .gc
+        .tables
+        .get(members_ref)
+        .map(|table| table.get_int(1))
+        .unwrap_or(Val::Nil);
+    let Val::Table(member_ref) = first else {
+        return (None, 0.0, String::new());
+    };
+
+    let file = table_get(state, Val::Table(member_ref), "file");
+    let path = match file {
+        Val::Str(_) => val_to_string(state, file),
+        _ => None,
+    };
+    let height = match table_get(state, Val::Table(member_ref), "height") {
+        Val::Num(n) => n,
+        _ => 0.0,
+    };
+    let flags_val = table_get(state, Val::Table(member_ref), "flags");
+    let flags = match flags_val {
+        Val::Str(_) => val_to_string(state, flags_val).unwrap_or_default(),
+        _ => String::new(),
+    };
+    (path, height, flags)
+}
+
+fn copy_font_string(state: &mut LuaState, dest: Val, src: Val, key: &'static str) {
+    let value = table_get_static(state, src, key);
+    if matches!(value, Val::Str(_)) {
+        table_set_static(state, dest, key, value);
+    }
+}
+
+fn copy_font_number(state: &mut LuaState, dest: Val, src: Val, key: &'static str) {
+    let value = table_get_static(state, src, key);
+    if matches!(value, Val::Num(_)) {
+        table_set_static(state, dest, key, value);
+    }
+}
+
+fn copy_font_bool(state: &mut LuaState, dest: Val, src: Val, key: &'static str) {
+    let value = table_get_static(state, src, key);
+    if matches!(value, Val::Bool(_)) {
+        table_set_static(state, dest, key, value);
+    }
+}
+
+fn copy_color_components(state: &mut LuaState, dest: Val, src: Val, prefix: &'static str) {
+    for suffix in ["R", "G", "B", "A"] {
+        let key = format!("{prefix}{suffix}");
+        let value = table_get(state, src, &key);
+        if matches!(value, Val::Num(_)) {
+            table_set(state, dest, &key, value);
+        }
+    }
 }
 
 pub fn create_font_family(state: &mut LuaState) -> LuaResult<u32> {
     let name = String::from_stack(state, 1)?;
-    let _members = stack_val(state, 2);
-    // TODO: extract first member's file/height/flags from members table
-    let font = create_table(state);
-    font_set_defaults(state, font, Some(&name));
-    add_font_methods(state, font)?;
-    set_global_val(state, &name, font);
+    let members = stack_val(state, 2);
+    let (path, height, flags) = first_family_member_snapshot(state, members);
+    let font = create_font_object(state, Some(&name));
+    if let Some(path) = path {
+        let path_val = create_string(state, &path);
+        table_set_static(state, font, "__fontPath", path_val);
+    }
+    table_set_static(state, font, "__fontHeight", Val::Num(height));
+    let flags_val = create_string(state, &flags);
+    table_set_static(state, font, "__fontFlags", flags_val);
     font.into_stack(state)
 }
 
@@ -524,11 +662,8 @@ fn apply_standard_font_colors(
 pub fn register_standard_font_objects(lua: &mut rilua::Lua) -> LuaResult<()> {
     for &(name, height, flags, r, g, b) in STANDARD_FONTS {
         let state = lua.state_mut();
-        let font = create_table(state);
-        font_set_defaults(state, font, Some(name));
+        let font = create_font_object(state, Some(name));
         apply_standard_font_colors(state, font, height, flags, r, g, b);
-        add_font_methods(state, font)?;
-        set_global_val(state, name, font);
     }
     Ok(())
 }

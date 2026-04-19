@@ -1502,7 +1502,7 @@ do
   end
 
   ContainerFrameContainer = ContainerFrameContainer or { ContainerFrames = {} }
-  ChatFrame1 = ChatFrame1 or __wow_install_frame_helpers(__wow_ensure_named_frame("MessageFrame", "ChatFrame1", uiParent))
+  ChatFrame1 = ChatFrame1 or __wow_install_frame_helpers(__wow_ensure_named_frame("ScrollingMessageFrame", "ChatFrame1", uiParent))
   EventToastManagerFrame = EventToastManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EventToastManagerFrame", uiParent))
   EditModeManagerFrame = EditModeManagerFrame or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "EditModeManagerFrame", uiParent))
   RolePollPopup = RolePollPopup or __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "RolePollPopup", uiParent))
@@ -2041,7 +2041,12 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
   CancelEmote = __wow_noop,
   IsValidChatLine = function() return false end,
   ReplaceIconAndGroupExpressions = function(message) return message end,
-  SendChatMessage = __wow_noop,
+  SendChatMessage = function(...)
+    local fn = rawget(_G, "__wow_send_chat_message")
+    if type(fn) == "function" then
+      return fn(...)
+    end
+  end,
   AreOutgoingAddonChatMessagesRestricted = function() return false end,
   GetNumReservedChatWindows = function() return 0 end,
   GetNumActiveChannels = function() return 0 end,
@@ -10686,6 +10691,62 @@ local function __wow_register_chat_frame_globals()
   end
 end
 
+local function __wow_register_dropdown_globals()
+  local function __wow_seed_dropdown_list(level)
+    local list_name = "DropDownList" .. tostring(level)
+    local list = __wow_install_frame_helpers(__wow_ensure_named_frame("Button", list_name, UIParent))
+    if list == nil then
+      return
+    end
+
+    if list.SetFrameStrata ~= nil then
+      list:SetFrameStrata("FULLSCREEN_DIALOG")
+    end
+    if list.SetClampedToScreen ~= nil then
+      list:SetClampedToScreen(true)
+    end
+    if list.Hide ~= nil then
+      list:Hide()
+    end
+    list.numButtons = 0
+    list.maxWidth = 0
+
+    for index = 1, 8 do
+      local button_name = list_name .. "Button" .. tostring(index)
+      local button = __wow_ensure_named_child(list, "Button" .. tostring(index), "Button", button_name)
+      if button ~= nil then
+        if button.Hide ~= nil then
+          button:Hide()
+        end
+        local text = __wow_ensure_named_child(button, "Text", "FontString", button_name .. "NormalText")
+        if text ~= nil then
+          if text.SetFontObject ~= nil then
+            text:SetFontObject("GameFontHighlightSmall")
+          end
+          if text.SetText ~= nil then
+            text:SetText("")
+          end
+        end
+      end
+    end
+
+    if level == 1 then
+      local button1 = rawget(list, "Button1")
+      local normal_text = button1 ~= nil and rawget(button1, "Text") or nil
+      if normal_text ~= nil and normal_text.GetFont ~= nil then
+        local _, font_height = normal_text:GetFont()
+        if font_height ~= nil then
+          UIDROPDOWNMENU_DEFAULT_TEXT_HEIGHT = font_height
+        end
+      end
+    end
+  end
+
+  for level = 1, 3 do
+    __wow_seed_dropdown_list(level)
+  end
+end
+
 local function __wow_register_misc_global_frames()
   __wow_make_named_frame("Frame", "EventToastManagerFrame", UIParent)
   __wow_make_named_frame("Frame", "EditModeManagerFrame", UIParent)
@@ -10733,6 +10794,7 @@ end
 
 __wow_register_core_frame_methods()
 __wow_register_chat_frame_globals()
+__wow_register_dropdown_globals()
 __wow_register_addon_compartment()
 __wow_register_alert_frame()
 __wow_register_misc_global_frames()

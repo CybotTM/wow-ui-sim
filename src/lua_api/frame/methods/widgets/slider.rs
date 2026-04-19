@@ -338,12 +338,33 @@ pub(super) fn checkbutton_set_checked(state: &mut LuaState) -> LuaResult<u32> {
         f.attributes
             .insert("__checked".to_string(), AttributeValue::Boolean(checked));
     }
-    let checked_tex_id = sim
-        .widgets
-        .get(id)
-        .and_then(|f| f.children_keys.get("CheckedTexture").copied());
-    if let Some(tex_id) = checked_tex_id {
-        sim.set_frame_visible(tex_id, checked);
+    for key in ["CheckedTexture", "DisabledCheckedTexture"] {
+        let visible = sim
+            .widgets
+            .get(id)
+            .map(|frame| {
+                let enabled = frame
+                    .attributes
+                    .get("__enabled")
+                    .and_then(|value| match value {
+                        AttributeValue::Boolean(flag) => Some(*flag),
+                        _ => None,
+                    })
+                    .unwrap_or(true);
+                match key {
+                    "CheckedTexture" => enabled && checked,
+                    "DisabledCheckedTexture" => !enabled && checked,
+                    _ => false,
+                }
+            })
+            .unwrap_or(false);
+        if let Some(tex_id) = sim
+            .widgets
+            .get(id)
+            .and_then(|frame| frame.children_keys.get(key).copied())
+        {
+            sim.set_frame_visible(tex_id, visible);
+        }
     }
     Ok(0)
 }

@@ -15,8 +15,9 @@ mod template_chain;
 pub(crate) use helpers::{append_parent_array_entry, apply_frame_mixins};
 pub(crate) use helpers_shared::{apply_parent_sub, create_frame_instance};
 
-use crate::lua_api::methods::{borrow_state, extract_frame_id, frame_ref};
+use crate::lua_api::methods::{borrow_state, extract_frame_id, frame_ref, val_to_string};
 use crate::lua_bridge::FromStack;
+use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
 use helpers::set_global_raw;
 use rilua::vm::state::LuaState;
@@ -28,7 +29,8 @@ use rilua::{LuaApiMut, LuaResult, Val};
 
 pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     let mut args = parse_create_frame_args(state)?;
-    let (parent_id, parent_explicit) = resolve_parent_id(state, args.parent_val)?;
+    let (parent_id, parent_explicit) =
+        resolve_parent_id(state, args.parent_val, args.default_parent_allowed)?;
     let runtime_inherits = build_runtime_inherits(&args.frame_type, args.inherits.as_deref());
     let parent_for_name_sub = if parent_explicit && parent_id != 0 {
         Some(parent_id)
@@ -55,6 +57,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
         parent_explicit,
         args.id,
     )?;
+    template_chain::ensure_runtime_slider_children(state, frame_id)?;
     let fire_on_load = borrow_state(state)?.suppress_runtime_on_load_depth == 0;
     template_chain::apply_runtime_template_chain(
         state,
@@ -77,16 +80,33 @@ struct CreateFrameArgs {
     widget_type: WidgetType,
     name: Option<String>,
     parent_val: Val,
+    default_parent_allowed: bool,
     inherits: Option<String>,
     id: Option<i32>,
 }
 
 fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
     let frame_type: String = FromStack::from_stack(state, 1)?;
-    let name: Option<String> = FromStack::from_stack(state, 2)?;
-    let parent_val: Val = FromStack::from_stack(state, 3)?;
-    let inherits: Option<String> = FromStack::from_stack(state, 4)?;
-    let id: Option<f64> = FromStack::from_stack(state, 5)?;
+    let arg2 = stack_val(state, 2);
+    let arg3 = stack_val(state, 3);
+    let arg4 = stack_val(state, 4);
+    let arg5 = stack_val(state, 5);
+    let name = if matches!(arg2, Val::Str(_)) || matches!(arg2, Val::Nil) {
+        Option::<String>::from_stack(state, 2)?
+    } else {
+        None
+    };
+    let parent_val = if matches!(arg2, Val::Str(_) | Val::Nil) {
+        arg3
+    } else {
+        Val::Nil
+    };
+    let default_parent_allowed = matches!(arg2, Val::Str(_) | Val::Nil);
+    let inherits = val_to_string(state, arg4);
+    let id = match arg5 {
+        Val::Num(n) => Some(n as i32),
+        _ => None,
+    };
     let widget_type = WidgetType::from_str(&frame_type)
         .ok_or_else(|| rilua::runtime_error(format!("unknown frame type '{frame_type}'")))?;
     Ok(CreateFrameArgs {
@@ -94,16 +114,23 @@ fn parse_create_frame_args(state: &mut LuaState) -> LuaResult<CreateFrameArgs> {
         widget_type,
         name,
         parent_val,
+        default_parent_allowed,
         inherits,
-        id: id.map(|n| n as i32),
+        id,
     })
 }
 
-fn resolve_parent_id(state: &mut LuaState, parent_val: Val) -> LuaResult<(u64, bool)> {
+fn resolve_parent_id(
+    state: &mut LuaState,
+    parent_val: Val,
+    default_parent_allowed: bool,
+) -> LuaResult<(u64, bool)> {
     let parent_explicit = !matches!(parent_val, Val::Nil);
     let parent_id = if parent_explicit {
         extract_frame_id(state, parent_val)
             .ok_or_else(|| rilua::runtime_error("CreateFrame parent must be a frame or nil"))?
+    } else if !default_parent_allowed {
+        0
     } else {
         let sim = borrow_state(state)?;
         sim.widgets.get_id_by_name("UIParent").unwrap_or_default()

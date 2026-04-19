@@ -40,7 +40,7 @@ struct AnchorEdges {
 fn resolve_multi_anchor_edges(
     registry: &WidgetRegistry,
     frame: &crate::widget::Frame,
-    _parent_rect: LayoutRect,
+    parent_rect: LayoutRect,
     eff_scale: f32,
     screen_width: f32,
     screen_height: f32,
@@ -53,6 +53,7 @@ fn resolve_multi_anchor_edges(
             &mut edges,
             registry,
             anchor,
+            parent_rect,
             eff_scale,
             screen_width,
             screen_height,
@@ -77,6 +78,7 @@ fn empty_anchor_edges() -> AnchorEdges {
 fn resolve_multi_anchor_relative_rect(
     registry: &WidgetRegistry,
     anchor: &crate::widget::Anchor,
+    parent_rect: LayoutRect,
     screen_width: f32,
     screen_height: f32,
     cache: &mut LayoutCache,
@@ -91,25 +93,27 @@ fn resolve_multi_anchor_relative_rect(
         )
         .rect;
     }
-    LayoutRect {
-        x: 0.0,
-        y: 0.0,
-        width: screen_width,
-        height: screen_height,
-    }
+    parent_rect
 }
 
 fn apply_multi_anchor_edge(
     edges: &mut AnchorEdges,
     registry: &WidgetRegistry,
     anchor: &crate::widget::Anchor,
+    parent_rect: LayoutRect,
     eff_scale: f32,
     screen_width: f32,
     screen_height: f32,
     cache: &mut LayoutCache,
 ) {
-    let relative_rect =
-        resolve_multi_anchor_relative_rect(registry, anchor, screen_width, screen_height, cache);
+    let relative_rect = resolve_multi_anchor_relative_rect(
+        registry,
+        anchor,
+        parent_rect,
+        screen_width,
+        screen_height,
+        cache,
+    );
     let target = resolve_anchor_target(anchor, relative_rect, eff_scale);
     apply_anchor_target(edges, anchor.point, target);
 }
@@ -259,7 +263,7 @@ fn resolve_axis_position(
 fn resolve_single_anchor(
     registry: &WidgetRegistry,
     frame: &crate::widget::Frame,
-    _parent_rect: LayoutRect,
+    parent_rect: LayoutRect,
     eff_scale: f32,
     screen_width: f32,
     screen_height: f32,
@@ -272,12 +276,7 @@ fn resolve_single_anchor(
     let relative_rect = if let Some(rel_id) = anchor.relative_to_id {
         compute_frame_rect_cached(registry, rel_id as u64, screen_width, screen_height, cache).rect
     } else {
-        LayoutRect {
-            x: 0.0,
-            y: 0.0,
-            width: screen_width,
-            height: screen_height,
-        }
+        parent_rect
     };
 
     let (anchor_x, anchor_y) = anchor_position(

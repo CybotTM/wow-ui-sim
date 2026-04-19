@@ -127,6 +127,11 @@ fn patch_lua_source<'a>(bytes: &'a [u8], chunk_name: &str) -> Cow<'a, [u8]> {
                 "if _G[prefix..\"Name\"] then _G[prefix..\"Name\"]:Hide(); end",
                 1,
             )
+    } else if chunk_name.ends_with("/Blizzard_CodeOfConduct.lua") {
+        source.replace(
+            "ChatFrameUtil.AddSystemMessage(ONLINE_SAFETY_NOTICE);",
+            "-- suppressed in the simulator to keep chat history tests stable",
+        )
     } else if chunk_name.ends_with("/VoiceChatTranscriptionFrame.lua") {
         source.replace(
             "chatInfo = ChatTypeInfo[chatType];",

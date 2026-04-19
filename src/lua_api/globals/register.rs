@@ -8,6 +8,7 @@ use super::super::SimState;
 use super::super::env::WowLuaAppData;
 use super::super::hot_literals::HotLiteralRegistry;
 use super::super::methods::mark_frame_ref_cache_no_traverse;
+use crate::lua_api::methods::borrow_state;
 use rilua::LuaApiMut;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -51,6 +52,7 @@ pub fn register_globals(lua: &mut rilua::Lua, _state: Rc<RefCell<SimState>>) -> 
 
 fn register_bootstrap_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     prewarm_hot_literal_registry(lua);
+    LuaApiMut::register_function(lua, "GetTime", get_time)?;
     super::strings::register_all_ui_strings(lua)?;
     super::security::register_all(lua)?;
     super::keybindings::register_all(lua)?;
@@ -163,12 +165,22 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
 
 fn register_compat_and_admin(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::compat_overrides::register_all(lua)?;
+    super::debug_api::register_all(lua)?;
     super::admin::register_all(lua)?;
     Ok(())
 }
 
 fn update_ui_parent_position(_state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
     Ok(0)
+}
+
+fn get_time(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+    let elapsed = {
+        let sim = borrow_state(state)?;
+        sim.start_time.elapsed().as_secs_f64()
+    };
+    state.push(rilua::Val::Num(elapsed));
+    Ok(1)
 }
 
 #[cfg(test)]

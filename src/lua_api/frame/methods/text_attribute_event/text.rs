@@ -2,6 +2,7 @@
 
 use super::helpers::{store_simple_attribute, val_to_f32};
 use crate::font::WowFontSystem;
+use crate::lua_api::globals::font_strings_collection::fonts::create_font_object;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static, create_table,
     frame_id_from_stack, get_or_create_frame_fields, registry_table_or_create, table_get,
@@ -11,7 +12,9 @@ use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
+use rilua::{LuaResult, Val, runtime_error};
+
+use crate::lua_api::frame::methods::button_anchor_hierarchy::ensure_button_text_child;
 
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -56,7 +59,19 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
         frame.text = text.clone();
         frame.text_stripped = stripped_text.clone();
     }
+    let should_update_button_child = matches!(
+        sim.widgets.get(id).map(|frame| frame.widget_type),
+        Some(WidgetType::Button | WidgetType::CheckButton)
+    );
     drop(sim);
+    if should_update_button_child && let Some(text_child_id) = ensure_button_text_child(state, id)?
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
+            text_child.text = text.clone();
+            text_child.text_stripped = stripped_text.clone();
+        }
+    }
     if is_tooltip {
         mirror_tooltip_text_fields(state, id, text, arg3, arg4, arg5, arg6, arg7);
     }
@@ -461,7 +476,21 @@ fn get_or_create_font_object_store(state: &mut LuaState) -> Val {
 
 pub(super) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let font_object = stack_val(state, 2);
+    let font_object = match stack_val(state, 2) {
+        Val::Nil => return Err(runtime_error("SetFontObject requires a font object")),
+        Val::Table(_) => stack_val(state, 2),
+        Val::Str(_) => {
+            let name = val_to_string(state, stack_val(state, 2))
+                .ok_or_else(|| runtime_error("SetFontObject requires a font object"))?;
+            let resolved = table_get(state, Val::Table(state.global), &name);
+            if matches!(resolved, Val::Table(_)) {
+                resolved
+            } else {
+                return Err(runtime_error("SetFontObject requires a font object"));
+            }
+        }
+        _ => return Err(runtime_error("SetFontObject requires a font object")),
+    };
     let store = get_or_create_font_object_store(state);
     table_set(state, store, &id.to_string(), font_object);
     Ok(0)
@@ -471,7 +500,13 @@ pub(super) fn get_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let store = get_or_create_font_object_store(state);
     let font_object = table_get(state, store, &id.to_string());
-    state.push(font_object);
+    if !matches!(font_object, Val::Nil) {
+        state.push(font_object);
+        return Ok(1);
+    }
+    let auto_font = create_font_object(state, None);
+    table_set(state, store, &id.to_string(), auto_font);
+    state.push(auto_font);
     Ok(1)
 }
 

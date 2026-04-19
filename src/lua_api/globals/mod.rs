@@ -32,6 +32,7 @@ pub mod compat_overrides;
 pub mod cooldown_probes;
 pub mod create_frame;
 pub mod currency_data;
+pub mod debug_api;
 pub mod enum_data;
 pub mod environment_restore;
 pub mod faction_probes;

@@ -1,9 +1,10 @@
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::frame::methods::methods_helpers::set_all_points_anchors_pub;
 use crate::lua_api::methods::{
     borrow_lua, borrow_state, borrow_state_mut, frame_ref, state_handle,
 };
 use crate::lua_api::script_helpers::get_script;
-use crate::widget::WidgetType;
+use crate::widget::{Frame, WidgetType};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 use std::cell::RefCell;
@@ -309,6 +310,8 @@ pub(super) fn ensure_runtime_button_texture_slots(
         ("PushedTexture", frame.pushed_texture()),
         ("HighlightTexture", frame.highlight_texture()),
         ("DisabledTexture", frame.disabled_texture()),
+        ("CheckedTexture", frame.checked_texture()),
+        ("DisabledCheckedTexture", frame.disabled_checked_texture()),
     ];
     let mut sim = borrow_state_mut(state)?;
     for (key, texture) in slots {
@@ -317,6 +320,73 @@ pub(super) fn ensure_runtime_button_texture_slots(
                 &mut sim, frame_id, key,
             );
         }
+    }
+    Ok(())
+}
+
+pub(crate) fn ensure_runtime_slider_children(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
+    let is_slider = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(frame_id)
+            .map(|widget| widget.widget_type == WidgetType::Slider)
+            .unwrap_or(false)
+    };
+    if !is_slider {
+        return Ok(());
+    }
+
+    for key in ["Low", "High", "Text"] {
+        ensure_named_font_string_child(state, frame_id, key)?;
+    }
+    ensure_named_texture_child(state, frame_id, "ThumbTexture")?;
+    Ok(())
+}
+
+fn ensure_named_font_string_child(
+    state: &mut LuaState,
+    parent_id: u64,
+    key: &str,
+) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    if sim
+        .widgets
+        .get(parent_id)
+        .is_some_and(|parent| parent.children_keys.contains_key(key))
+    {
+        return Ok(());
+    }
+
+    let mut child = Frame::new(WidgetType::FontString, None, Some(parent_id));
+    child.parent_key = Some(key.to_string());
+    set_all_points_anchors_pub(&mut child, parent_id);
+    let child_id = child.id;
+    sim.widgets.register(child);
+    sim.widgets.add_child(parent_id, child_id);
+    if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+        parent.children_keys.insert(key.to_string(), child_id);
+    }
+    Ok(())
+}
+
+fn ensure_named_texture_child(state: &mut LuaState, parent_id: u64, key: &str) -> LuaResult<()> {
+    let mut sim = borrow_state_mut(state)?;
+    if sim
+        .widgets
+        .get(parent_id)
+        .is_some_and(|parent| parent.children_keys.contains_key(key))
+    {
+        return Ok(());
+    }
+
+    let mut child = Frame::new(WidgetType::Texture, None, Some(parent_id));
+    child.parent_key = Some(key.to_string());
+    set_all_points_anchors_pub(&mut child, parent_id);
+    let child_id = child.id;
+    sim.widgets.register(child);
+    sim.widgets.add_child(parent_id, child_id);
+    if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+        parent.children_keys.insert(key.to_string(), child_id);
     }
     Ok(())
 }

@@ -230,6 +230,181 @@ pub(super) fn is_secure_text(state: &mut LuaState) -> LuaResult<u32> {
     v.into_stack(state)
 }
 
+pub(super) fn set_security_disable_set_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_security_disable_set_text = true;
+    }
+    Ok(0)
+}
+
+pub(super) fn set_alphabetic_only(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let value = val_to_bool(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_alphabetic_only = value;
+    }
+    Ok(0)
+}
+
+pub(super) fn is_alphabetic_only(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_alphabetic_only)
+        .unwrap_or(false);
+    drop(sim);
+    v.into_stack(state)
+}
+
+pub(super) fn set_numeric_full_range(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let value = val_to_bool(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_numeric_full_range = value;
+    }
+    Ok(0)
+}
+
+pub(super) fn is_numeric_full_range(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_numeric_full_range)
+        .unwrap_or(false);
+    drop(sim);
+    v.into_stack(state)
+}
+
+pub(super) fn set_count_invisible_letters(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let value = val_to_bool(stack_val(state, 2));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_count_invisible_letters = value;
+    }
+    Ok(0)
+}
+
+pub(super) fn is_count_invisible_letters(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_count_invisible_letters)
+        .unwrap_or(false);
+    drop(sim);
+    v.into_stack(state)
+}
+
+pub(super) fn set_visible_text_byte_limit(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let limit = val_to_f64(stack_val(state, 2)) as i32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_visible_text_byte_limit = limit;
+    }
+    Ok(0)
+}
+
+pub(super) fn get_visible_text_byte_limit(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let limit = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_visible_text_byte_limit)
+        .unwrap_or(0);
+    drop(sim);
+    (limit as f64).into_stack(state)
+}
+
+pub(super) fn set_security_disable_paste(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_security_disable_paste = true;
+    }
+    Ok(0)
+}
+
+pub(super) fn is_in_ime_composition_mode(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let v = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_in_ime_composition_mode)
+        .unwrap_or(false);
+    drop(sim);
+    v.into_stack(state)
+}
+
+pub(super) fn set_highlight_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let r = val_to_f64(stack_val(state, 2)) as f32;
+    let g = val_to_f64(stack_val(state, 3)) as f32;
+    let b = val_to_f64(stack_val(state, 4)) as f32;
+    let a = match stack_val(state, 5) {
+        Val::Num(n) => n as f32,
+        _ => 1.0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.editbox_highlight_color = crate::widget::Color::new(r, g, b, a);
+    }
+    Ok(0)
+}
+
+pub(super) fn get_highlight_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let color = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_highlight_color)
+        .unwrap_or(crate::widget::Color::new(1.0, 1.0, 1.0, 1.0));
+    drop(sim);
+    (
+        color.r as f64,
+        color.g as f64,
+        color.b as f64,
+        color.a as f64,
+    )
+        .into_stack(state)
+}
+
+pub(super) fn get_utf8_cursor_position(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let cursor = sim
+        .widgets
+        .get(id)
+        .map(|f| f.editbox_cursor_pos.max(0) as usize)
+        .unwrap_or(0);
+    let byte_pos = sim
+        .widgets
+        .get(id)
+        .and_then(|f| f.text.as_ref())
+        .map(|text| {
+            text.chars()
+                .take(cursor)
+                .map(|ch| ch.len_utf8())
+                .sum::<usize>()
+        })
+        .unwrap_or(0);
+    drop(sim);
+    (byte_pos as f64).into_stack(state)
+}
+
 fn desired_width_field(state: &mut LuaState, id: u64) -> Option<f32> {
     let fields = get_or_create_frame_fields(state, id);
     match table_get(state, fields, "desiredWidth") {
@@ -581,10 +756,17 @@ const EDITBOX_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("IsAutoFocus", is_auto_focus),
     ("SetNumeric", set_numeric),
     ("IsNumeric", is_numeric),
+    ("SetAlphabeticOnly", set_alphabetic_only),
+    ("IsAlphabeticOnly", is_alphabetic_only),
+    ("SetNumericFullRange", set_numeric_full_range),
+    ("IsNumericFullRange", is_numeric_full_range),
     ("SetPassword", set_password),
     ("IsPassword", is_password),
     ("SetSecureText", set_secure_text),
     ("IsSecureText", is_secure_text),
+    ("SetCountInvisibleLetters", set_count_invisible_letters),
+    ("IsCountInvisibleLetters", is_count_invisible_letters),
+    ("SetSecurityDisableSetText", set_security_disable_set_text),
     // Numeric helpers
     ("SetNumber", set_number),
     ("GetNumber", get_number),
@@ -603,6 +785,13 @@ const EDITBOX_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetSpacing", get_spacing),
     ("GetTextInsets", get_text_insets),
     ("GetDisplayText", get_display_text),
+    ("SetVisibleTextByteLimit", set_visible_text_byte_limit),
+    ("GetVisibleTextByteLimit", get_visible_text_byte_limit),
+    ("SetSecurityDisablePaste", set_security_disable_paste),
+    ("SetHighlightColor", set_highlight_color),
+    ("GetHighlightColor", get_highlight_color),
+    ("IsInIMECompositionMode", is_in_ime_composition_mode),
+    ("GetUTF8CursorPosition", get_utf8_cursor_position),
     ("SetDesiredWidth", set_desired_width),
     ("GetDesiredWidth", get_desired_width),
     ("GetScaledDesiredWidth", get_scaled_desired_width),

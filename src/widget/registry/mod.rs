@@ -399,6 +399,7 @@ impl WidgetRegistry {
     /// receives OnUpdate, events, etc.
     pub fn is_ancestor_visible(&self, id: u64) -> bool {
         let mut current_id = id;
+        let mut first = true;
         loop {
             let Some(f) = self.widgets.get(&current_id) else {
                 return false;
@@ -406,8 +407,14 @@ impl WidgetRegistry {
             if !f.visible {
                 return false;
             }
+            if !first && f.effective_alpha <= f32::EPSILON {
+                return false;
+            }
             match f.parent_id {
-                Some(parent_id) => current_id = parent_id,
+                Some(parent_id) => {
+                    current_id = parent_id;
+                    first = false;
+                }
                 None => return true,
             }
         }
