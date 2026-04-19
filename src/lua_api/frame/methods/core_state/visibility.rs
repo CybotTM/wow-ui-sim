@@ -6,94 +6,179 @@ use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_api::script_helpers::get_script as get_rilua_script;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
-use std::collections::HashSet;
+
+/// Maximum handler invocations per Show/Hide call (6 cycles × 2 handlers).
+const SHOW_HIDE_HANDLER_LIMIT: usize = 12;
+
+/// Maximum cross-frame Show/Hide dispatch depth.
+const GLOBAL_SHOW_HIDE_DEPTH_LIMIT: u32 = 40;
 
 pub fn show(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    for frame_id in update_frame_visibility(state, id, true)? {
-        fire_visibility_handler(state, frame_id, "OnShow");
-    }
+    show_or_hide(state, id, true)?;
     Ok(0)
 }
 
 pub fn hide(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
-    for frame_id in update_frame_visibility(state, id, false)? {
-        fire_visibility_handler(state, frame_id, "OnHide");
-    }
+    show_or_hide(state, id, false)?;
     Ok(0)
 }
 
 pub fn set_shown(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let shown = arg_bool(state, 2);
-    let handler_name = if shown { "OnShow" } else { "OnHide" };
-    for frame_id in update_frame_visibility(state, id, shown)? {
-        fire_visibility_handler(state, frame_id, handler_name);
-    }
+    show_or_hide(state, id, shown)?;
     Ok(0)
 }
 
-fn update_frame_visibility(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<Vec<u64>> {
-    let mut sim = borrow_state_mut(state)?;
-    let subtree_ids = collect_subtree_ids(&sim, id);
-    let previously_visible = visible_subtree_ids(&sim, &subtree_ids);
-    sim.set_frame_visible(id, shown);
-    let currently_visible = visible_subtree_ids(&sim, &subtree_ids);
-    drop(sim);
+fn show_or_hide(state: &mut LuaState, id: u64, shown: bool) -> LuaResult<()> {
+    let (needs_change, in_handler, parent_id) = read_show_hide_state(state, id, shown)?;
+    if !needs_change {
+        return Ok(());
+    }
 
-    let transitioned = if shown {
-        subtree_ids
-            .into_iter()
-            .filter(|frame_id| {
-                currently_visible.contains(frame_id) && !previously_visible.contains(frame_id)
-            })
-            .collect()
-    } else {
-        subtree_ids
-            .into_iter()
-            .rev()
-            .filter(|frame_id| {
-                previously_visible.contains(frame_id) && !currently_visible.contains(frame_id)
-            })
-            .collect()
-    };
-    Ok(transitioned)
+    let parent_visible = parent_id
+        .map(|parent_id| {
+            borrow_state(state)
+                .map(|sim| sim.widgets.is_ancestor_visible(parent_id))
+                .unwrap_or(false)
+        })
+        .unwrap_or(true);
+
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.set_frame_visible(id, shown);
+    }
+
+    if in_handler || !parent_visible {
+        return Ok(());
+    }
+
+    let depth = borrow_state(state)?.global_show_hide_depth;
+    if depth >= GLOBAL_SHOW_HIDE_DEPTH_LIMIT {
+        return Ok(());
+    }
+
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.global_show_hide_depth = depth + 1;
+    }
+
+    let result = drain_visibility_handlers(state, id, shown);
+
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.set_frame_visible(id, shown);
+        if let Some(frame) = sim.widgets.get_mut(id) {
+            frame.show_hide_depth = 0;
+        }
+        sim.global_show_hide_depth = depth;
+    }
+
+    result
 }
 
-fn collect_subtree_ids(state: &crate::lua_api::SimState, root_id: u64) -> Vec<u64> {
-    let mut ids = Vec::new();
-    let mut stack = vec![root_id];
-    while let Some(frame_id) = stack.pop() {
-        ids.push(frame_id);
-        if let Some(frame) = state.widgets.get(frame_id) {
-            for child_id in frame.children.iter().rev().copied() {
-                stack.push(child_id);
-            }
+fn read_show_hide_state(
+    state: &mut LuaState,
+    id: u64,
+    shown: bool,
+) -> LuaResult<(bool, bool, Option<u64>)> {
+    let sim = borrow_state(state)?;
+    let frame = sim.widgets.get(id);
+    let needs_change = frame.map(|frame| frame.visible != shown).unwrap_or(false);
+    let in_handler = frame
+        .map(|frame| frame.show_hide_depth > 0)
+        .unwrap_or(false);
+    let parent_id = if needs_change {
+        frame.and_then(|frame| frame.parent_id)
+    } else {
+        None
+    };
+    Ok((needs_change, in_handler, parent_id))
+}
+
+fn drain_visibility_handlers(state: &mut LuaState, id: u64, initial_target: bool) -> LuaResult<()> {
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut(id) {
+            frame.show_hide_depth = 1;
         }
     }
-    ids
+
+    let mut target = initial_target;
+    for _ in 0..SHOW_HIDE_HANDLER_LIMIT {
+        let handler_name = if target { "OnShow" } else { "OnHide" };
+        fire_visibility_handler_recursive(state, id, handler_name)?;
+
+        let visible_after = borrow_state(state)?
+            .widgets
+            .get(id)
+            .map(|frame| frame.visible)
+            .unwrap_or(false);
+
+        {
+            let mut sim = borrow_state_mut(state)?;
+            sim.set_frame_visible(id, target);
+        }
+
+        if visible_after == target {
+            break;
+        }
+
+        target = visible_after;
+
+        {
+            let mut sim = borrow_state_mut(state)?;
+            sim.set_frame_visible(id, target);
+        }
+    }
+
+    Ok(())
 }
 
-fn visible_subtree_ids(state: &crate::lua_api::SimState, ids: &[u64]) -> HashSet<u64> {
-    ids.iter()
-        .copied()
-        .filter(|frame_id| state.widgets.is_ancestor_visible(*frame_id))
-        .collect()
-}
+fn fire_visibility_handler_recursive(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &str,
+) -> LuaResult<()> {
+    let children = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(frame_id)
+            .map(|frame| {
+                frame
+                    .children
+                    .iter()
+                    .filter(|&&child_id| {
+                        sim.widgets
+                            .get(child_id)
+                            .map(|child| child.visible)
+                            .unwrap_or(false)
+                    })
+                    .copied()
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default()
+    };
 
-fn fire_visibility_handler(state: &mut LuaState, frame_id: u64, handler_name: &str) {
+    for child_id in children {
+        fire_visibility_handler_recursive(state, child_id, handler_name)?;
+    }
+
     let Some(handler) = get_rilua_script(state, frame_id, handler_name) else {
-        return;
+        return Ok(());
     };
     let Ok(frame) = frame_ref(state, frame_id) else {
-        return;
+        return Ok(());
     };
     if let Err(error_msg) =
         crate::lua_api::script_helpers::protected_lua_pcall_state(state, handler, &[frame])
     {
         call_error_handler_state(state, &error_msg);
     }
+
+    Ok(())
 }
 
 pub fn is_visible(state: &mut LuaState) -> LuaResult<u32> {
@@ -175,4 +260,49 @@ fn is_collapsed_impl(state: &crate::lua_api::SimState, id: u64) -> bool {
         }
     }
     !visible
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    use super::read_show_hide_state;
+
+    #[test]
+    fn read_show_hide_state_skips_parent_lookup_for_noop_visibility_calls() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            Parent = CreateFrame("Frame", "Parent", UIParent)
+            Child = CreateFrame("Frame", "Child", Parent)
+            Parent:Show()
+            Child:Show()
+            "#,
+        )
+        .expect("failed to create test frames");
+
+        let child_id = env
+            .state()
+            .borrow()
+            .widgets
+            .get_id_by_name("Child")
+            .expect("child should exist");
+
+        let (needs_change, in_handler, parent_id) =
+            read_show_hide_state(env.lua().state_mut(), child_id, true)
+                .expect("state query should succeed");
+
+        assert!(
+            !needs_change,
+            "shown child should not need another Show/SetShown(true)"
+        );
+        assert!(
+            !in_handler,
+            "fresh child should not be in a show/hide handler"
+        );
+        assert!(
+            parent_id.is_none(),
+            "no-op visibility checks should not request parent visibility traversal"
+        );
+    }
 }

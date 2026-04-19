@@ -769,6 +769,38 @@ fn test_cross_frame_show_recursion_does_not_overflow() {
 }
 
 #[test]
+fn test_onshow_onhide_mutual_recursion_terminates_with_reference_order() {
+    let env = WowLuaEnv::new().unwrap();
+    let log: String = env
+        .eval(
+            r#"
+            local log = {}
+            local f = CreateFrame("Frame", "MutualVisibilityFrame", UIParent)
+            f:SetScript("OnShow", function(self)
+                table.insert(log, self:IsVisible() and "A" or "a")
+                self:Hide()
+                table.insert(log, self:IsVisible() and "B" or "b")
+            end)
+            f:SetScript("OnHide", function(self)
+                table.insert(log, self:IsVisible() and "C" or "c")
+                self:Show()
+                table.insert(log, self:IsVisible() and "D" or "d")
+            end)
+
+            f:Hide()
+            return table.concat(log)
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        log,
+        "cDAb".repeat(6),
+        "OnShow/OnHide mutual recursion should unwind iteratively with wowless/master ordering"
+    );
+}
+
+#[test]
 fn test_child_onshow_fires_when_parent_becomes_visible() {
     let env = WowLuaEnv::new().unwrap();
     let fired: i32 = env
