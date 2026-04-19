@@ -149,6 +149,7 @@ local HELP = {
     { "/aa ftype <class> <creature> <reaction>", "Set focus type" },
     { "--- Party ---" },
     { "/aa party <size>",                   "Set party size (0-4)" },
+    { "/aa partyleader <player|idx>",       "Set party leader (player or party index)" },
     { "/aa partymember <idx> <name> <class> <level>", "Set party member info" },
     { "/aa kill <idx>",                     "Kill party member" },
     { "/aa res <idx>",                      "Resurrect party member" },
@@ -405,6 +406,20 @@ handlers["party"] = function(args)
     if not n then return Err("Usage: /aa party <size>") end
     A_Admin.SetPartySize(n)
     Confirm("Party size: " .. Val(n))
+end
+
+handlers["partyleader"] = function(args)
+    local raw = args[1]
+    if not raw then return Err("Usage: /aa partyleader <player|idx>") end
+    local leader = 0
+    if raw ~= "player" then
+        leader = tonumber(raw)
+        if not leader then
+            return Err("Usage: /aa partyleader <player|idx>")
+        end
+    end
+    A_Admin.SetPartyLeader(leader)
+    Confirm("Party leader: " .. Val(raw == "player" and "player" or leader))
 end
 
 handlers["partymember"] = function(args)

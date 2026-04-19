@@ -187,6 +187,49 @@ fn test_group_queries_switch_between_solo_and_grouped_states() {
     );
 }
 
+#[test]
+fn test_set_party_leader_to_party_member_updates_group_leader_queries() {
+    let env = env();
+    let (player_leads, party1_leads, party2_leads): (bool, bool, bool) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(2)
+            A_Admin.SetPartyLeader(1)
+            return IsGroupLeader(), UnitIsGroupLeader("party1"), UnitIsGroupLeader("party2")
+            "#,
+        )
+        .unwrap();
+    assert!(
+        !player_leads,
+        "player should stop leading after SetPartyLeader(1)"
+    );
+    assert!(party1_leads, "party1 should lead after SetPartyLeader(1)");
+    assert!(
+        !party2_leads,
+        "party2 should not lead after SetPartyLeader(1)"
+    );
+}
+
+#[test]
+fn test_set_party_leader_zero_restores_player_leadership() {
+    let env = env();
+    let (player_leads, party1_leads): (bool, bool) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(2)
+            A_Admin.SetPartyLeader(1)
+            A_Admin.SetPartyLeader(0)
+            return IsGroupLeader(), UnitIsGroupLeader("party1")
+            "#,
+        )
+        .unwrap();
+    assert!(player_leads, "player should lead after SetPartyLeader(0)");
+    assert!(
+        !party1_leads,
+        "party1 should stop leading after SetPartyLeader(0)"
+    );
+}
+
 // ============================================================================
 // SetPartyMember
 // ============================================================================

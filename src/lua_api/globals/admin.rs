@@ -126,6 +126,7 @@ fn register_targeting_party(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetFocusType", set_focus_type)?
         .set_function("SetFocusHealth", set_focus_health)?
         .set_function("SetPartySize", set_party_size)?
+        .set_function("SetPartyLeader", set_party_leader)?
         .set_function("SetPartyMember", set_party_member)?
         .set_function("SetPartyMemberHealth", set_party_member_health)?
         .set_function("KillPartyMember", kill_party_member)?
@@ -611,6 +612,31 @@ fn set_party_size(state: &mut LuaState) -> LuaResult<u32> {
             args: Vec::new(),
         });
     }
+    Ok(0)
+}
+
+fn set_party_leader(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::Event;
+
+    let n = i32::from_stack(state, 1)?;
+    let mut st = borrow_state_mut(state)?;
+    let next_leader = if n <= 0 {
+        Some(None)
+    } else {
+        let idx = (n - 1) as usize;
+        (idx < st.party_members.len()).then_some(Some(idx))
+    };
+    let Some(next_leader) = next_leader else {
+        return Ok(0);
+    };
+    if st.party_leader_index == next_leader {
+        return Ok(0);
+    }
+    st.party_leader_index = next_leader;
+    st.events.push(Event {
+        name: "GROUP_ROSTER_UPDATE".to_string(),
+        args: Vec::new(),
+    });
     Ok(0)
 }
 
