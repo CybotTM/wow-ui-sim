@@ -40,7 +40,7 @@ The bar atlases also exist in `data/atlas.rs` and point at `Interface\\hud\\uipa
 
 - `data/atlas.rs:8290-8308` maps the party bar atlases to `Interface\\hud\\uipartyframe` and the masks to separate `UIPartyFramePortraitOn*Mask.BLP` files.
 - `src/loader/xml_frame_extras.rs:51-80` creates the bar texture child and calls `parent:SetStatusBarTexture(bar)`.
-- `src/lua_api/frame/methods/widgets/statusbar.rs:182-193` accepts only string/number texture values.
+- `src/lua_api/frame/methods/widgets/statusbar.rs:202-219` is the setter path that now distinguishes userdata adoption from string / fileDataID rewrites.
 - `src/lua_api/methods.rs:445-450` shows `val_to_string()` only succeeds for Lua strings.
 - `Interface/BlizzardUI/Blizzard_UnitFrame/Mainline/PartyMemberFrame.lua:31,50,58` sets the bar and mask atlases directly in Blizzard UI code.
 
