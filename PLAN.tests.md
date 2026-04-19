@@ -77,9 +77,10 @@
 - [x] Re-run `cargo test --tests --no-fail-fast`, update bucket counts, and split any remaining high-volume failure groups into new unchecked subsystem tasks instead of collapsing them into one item.
   - [x] Fresh rerun captured 12 lib failures before the harness stopped, plus a separate `action_bar` cluster with 7 failures.
   - [x] The remaining clusters below are split into subsystem-sized follow-up tasks instead of one umbrella item.
+- [ ] Fix spellbook with `s` keybind not showing
 
 - [x] Fix loader/global-frame access bucket (`2` failed targets): `global_frame_access` child/template key wiring regressions.
-- [ ] Fix startup bootstrap namespace bucket (`3` failed targets): `wow_api_globals` startup namespace checks.
+- [x] Fix startup bootstrap namespace bucket (`3` failed targets): `wow_api_globals` startup namespace checks.
 - [ ] Fix XML inheritance bucket (`1` failed target): `xml_basics` inherited button text availability after load.
 - [ ] Fix state-render repair bucket (`3` failed targets): `state_render_repairs` and `state_render` bucket-order repair regressions.
 - [ ] Fix global-slots bucket (`2` failed targets): `global_slots` root-global refresh behavior.
