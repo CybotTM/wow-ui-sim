@@ -106,6 +106,23 @@ fn load_targeted_startup_env(messages: &mut Vec<String>) -> WowLuaEnv {
     env
 }
 
+fn load_with_early_error_collector(messages: &mut Vec<String>) -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    common::install_error_collector(&env, "__targeted_startup_errors");
+
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addons(&ui);
+    for (name, toc_path) in &addons {
+        let result = load_addon(&env.loader_env(), toc_path);
+        push_addon_load_messages(messages, name, result);
+        drain_startup_errors(&env, messages);
+    }
+
+    env.apply_post_load_workarounds();
+    env
+}
+
 fn collect_targeted_startup_messages(env: &WowLuaEnv, messages: &mut Vec<String>) {
     run_standard_startup(env, || {
         drain_startup_errors(env, messages);
@@ -177,6 +194,92 @@ fn startup_omits_arena_over_heal_absorb_glow_nil_error() {
             targeted.is_empty(),
             "Startup should not report the ArenaEnemyMatchFrame1 overHealAbsorbGlow nil regression:\n  {}",
             targeted.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn startup_omits_followup_blizzard_lua_errors() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let state = env.state();
+        let targeted: Vec<String> = state
+            .borrow()
+            .lua_error_records
+            .iter()
+            .filter(|record| {
+                record.message.contains("CheckButton")
+                    || record.message.contains("GetItemLevelColor")
+                    || record.message.contains("ClearCursorHoveredItem")
+                    || record.message.contains("UnitInSubgroup")
+                    || record.message.contains("GetNumGuildPerks")
+                    || record.message.contains("RequestGuildRewards")
+                    || record.message.contains("GetGuildRenameRequired")
+                    || record.message.contains("GetAvailableBandwidth")
+                    || record.message.contains("overHealAbsorbGlow")
+                    || record.message.contains("transmogLocation")
+                    || record.message.contains("CommunitiesUtil.lua:217")
+                    || record.message.contains("WarbandSceneCollection.lua:54")
+                    || record.message.contains("expected number, got nil at argument 1")
+                    || record.message.contains("expected number, got string at argument 1")
+            })
+            .map(|record| {
+                let addon = record.addon_name.as_deref().unwrap_or("<none>");
+                format!("[{addon}] {}", record.message)
+            })
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "Startup should not report the follow-up Blizzard Lua regressions:\n  {}",
+            targeted.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn startup_followup_surfaces_expose_safe_defaults() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: (
+            i32,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+            bool,
+        ) = env
+            .eval(
+                r##"
+                local r, g, b = GetItemLevelColor()
+                local appearanceSlotInfo, illusionSlotInfo = C_TransmogOutfitInfo.GetAllSlotLocationInfo()
+                return
+                    select("#", GetItemLevelColor()),
+                    type(r) == "number" and type(g) == "number" and type(b) == "number",
+                    type(C_Club.GetClubStreamNotificationSettings("guild-0")) == "table",
+                    type(C_WarbandScene.SearchWarbandSceneEntries({})) == "table",
+                    type(appearanceSlotInfo) == "table",
+                    type(illusionSlotInfo) == "table",
+                    UnitInSubgroup("player") == false,
+                    GetNumGuildPerks() == 0,
+                    GetGuildRenameRequired() == false,
+                    type(GetAvailableBandwidth()) == "number",
+                    pcall(ClearCursorHoveredItem),
+                    pcall(RequestGuildRewards)
+                "##,
+            )
+            .expect("follow-up startup surfaces should return safe defaults");
+
+        assert_eq!(
+            result,
+            (3, true, true, true, true, true, true, true, true, true, true, true),
+            "Follow-up startup surfaces should expose safe defaults for Blizzard callers"
         );
     }
 }
@@ -303,6 +406,449 @@ fn damage_meter_saved_variables_default_with_empty_saved_vars_storage() {
         assert!(
             saved_vars_type == "nil" || window_data_list_type == "table",
             "DamageMeter saved vars should stay nil or expose windowDataList, not a partially-seeded table"
+        );
+    }
+}
+
+#[test]
+fn startup_chat_config_checkbox_frames_keep_checkbutton_children() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: (bool, bool, bool, bool, bool, bool) = env
+            .eval(
+                r##"
+                return
+                    type(ChatConfigChatSettingsLeftCheckbox1) == "table",
+                    ChatConfigChatSettingsLeftCheckbox1
+                        and ChatConfigChatSettingsLeftCheckbox1.CheckButton ~= nil
+                        or false,
+                    ChatConfigChatSettingsLeftCheckbox1Check ~= nil,
+                    type(ChatConfigChannelSettingsLeftCheckbox1) == "table",
+                    ChatConfigChannelSettingsLeftCheckbox1
+                        and ChatConfigChannelSettingsLeftCheckbox1.CheckButton ~= nil
+                        or false,
+                    ChatConfigChannelSettingsLeftCheckbox1Check ~= nil
+                "##,
+            )
+            .expect("chat config checkbox probes should run");
+
+        assert_eq!(
+            result,
+            (true, true, true, true, true, true),
+            "Chat config checkbox frames should keep their inherited CheckButton children"
+        );
+    }
+}
+
+#[test]
+fn startup_frames_missing_checkbutton_parent_key() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let missing: String = env
+            .eval(
+                r##"
+                local missing = {}
+                for key, value in pairs(_G) do
+                    if type(key) == "string" and type(value) == "table" and _G[key .. "Check"] ~= nil then
+                        local ok, objectType = pcall(function()
+                            return type(value.GetObjectType) == "function" and value:GetObjectType() or nil
+                        end)
+                        if ok and type(objectType) == "string" and value.CheckButton == nil then
+                            missing[#missing + 1] = key .. " [" .. objectType .. "]"
+                        end
+                    end
+                end
+                table.sort(missing)
+                return table.concat(missing, "\n")
+                "##,
+            )
+            .expect("missing CheckButton frame probe should run");
+
+        assert!(
+            missing.is_empty(),
+            "Startup frames missing CheckButton parent keys:
+    {missing}"
+        );
+    }
+}
+
+#[test]
+fn startup_widget_tree_missing_checkbutton_parent_keys() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let state = env.state();
+        let sim = state.borrow();
+        let mut missing = Vec::new();
+        for frame_id in sim.widgets.iter_ids() {
+            let Some(frame) = sim.widgets.get(frame_id) else {
+                continue;
+            };
+            if frame.children_keys.contains_key("CheckButton") {
+                continue;
+            }
+            let Some(child_id) = frame.children.iter().copied().find(|child_id| {
+                sim.widgets
+                    .get(*child_id)
+                    .and_then(|child| child.name.as_deref())
+                    .is_some_and(|name| name.ends_with("Check"))
+            }) else {
+                continue;
+            };
+            let child_name = sim
+                .widgets
+                .get(child_id)
+                .and_then(|child| child.name.clone())
+                .unwrap_or_else(|| format!("#{child_id}"));
+            missing.push(format!(
+                "id={frame_id} name={:?} child={child_name}",
+                frame.name
+            ));
+        }
+        missing.sort();
+
+        assert!(
+            missing.is_empty(),
+            "Startup widget tree is missing CheckButton parent keys:
+    {}",
+            missing.join("
+    ")
+        );
+    }
+}
+
+#[test]
+fn startup_chat_config_dynamic_wide_checkboxes_keep_checkbutton_parent_key() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: (bool, bool, bool, bool, bool) = env
+            .eval(
+                r##"
+                local ok, err = pcall(function()
+                    CreateFrame("CheckButton", "StartupWideCheckboxProbe", UIParent, "MovableChatConfigWideCheckboxWithSwatchTemplate")
+                end)
+                local frame = StartupWideCheckboxProbe
+                local check = StartupWideCheckboxProbeCheck
+                return
+                    ok,
+                    type(err) == "nil",
+                    frame ~= nil,
+                    check ~= nil,
+                    frame ~= nil and frame.CheckButton == check
+                "##,
+            )
+            .expect("dynamic chat checkbox probe should run");
+
+        assert_eq!(
+            result,
+            (true, true, true, true, true),
+            "Dynamic chat checkboxes should keep their CheckButton child wired to the parent frame"
+        );
+    }
+}
+
+#[test]
+fn chat_config_create_checkboxes_does_not_emit_checkbutton_error() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let before = env.state().borrow().lua_errors.len();
+        env.exec(
+            r##"
+            ChatConfig_CreateCheckboxes(ChatConfigChatSettingsLeft, CHAT_CONFIG_CHAT_LEFT, "ChatConfigWideCheckboxWithSwatchTemplate", PLAYER_MESSAGES)
+            "##,
+        )
+        .expect("chat checkbox creation should succeed");
+        let after = env.state().borrow().lua_errors.clone();
+        let targeted: Vec<String> = after
+            .into_iter()
+            .skip(before)
+            .filter(|message| message.contains("CheckButton"))
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "ChatConfig_CreateCheckboxes should not emit CheckButton errors:
+    {}",
+            targeted.join("
+    ")
+        );
+    }
+}
+
+#[test]
+fn startup_chat_config_channel_checkbox_creation_keeps_checkbutton_children() {
+    test_timeout! {
+        let mut messages = Vec::new();
+        let env = load_targeted_startup_env(&mut messages);
+        env.exec(
+            r##"
+            local created = {}
+            local originalCreateFrame = CreateFrame
+            __chat_config_original_create_frame = originalCreateFrame
+            CreateFrame = function(frameType, name, parent, template, ...)
+                local frame = originalCreateFrame(frameType, name, parent, template, ...)
+                local nameStr = tostring(name)
+                local templateStr = tostring(template)
+                if nameStr:find("Checkbox") or nameStr:find("Check") or templateStr:find("Checkbox") or templateStr:find("Check") then
+                    created[#created + 1] = table.concat({
+                        tostring(frameType),
+                        nameStr,
+                        templateStr,
+                        tostring(frame ~= nil and frame.CheckButton ~= nil),
+                        tostring(_G[nameStr .. "Check"] ~= nil),
+                    }, "|")
+                end
+                return frame
+            end
+            __chat_config_created = created
+            "##,
+        )
+        .expect("chat config CreateFrame wrapper should install");
+        {
+            let mut state = env.state().borrow_mut();
+            state.lua_errors.clear();
+            state.lua_error_records.clear();
+            state.lua_error_counts.clear();
+        }
+        collect_targeted_startup_messages(&env, &mut messages);
+        env.exec(
+            r##"
+            if __chat_config_original_create_frame ~= nil then
+                CreateFrame = __chat_config_original_create_frame
+            end
+            "##,
+        )
+        .ok();
+        let created: String = env
+            .eval(
+                r##"
+                return table.concat(__chat_config_created or {}, "\n")
+                "##,
+            )
+            .expect("created checkbox log should stringify");
+        let targeted: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_errors
+            .clone()
+            .into_iter()
+            .filter(|message| message.contains("CheckButton"))
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "Startup channel checkbox creation should not emit CheckButton errors.\ncreated:\n{created}\nerrors:\n  {}",
+            targeted.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn startup_expected_number_error_has_traceback() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let targeted: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_error_records
+            .iter()
+            .filter(|record| record.message.contains("expected number, got nil at argument 1"))
+            .map(|record| {
+                let addon = record.addon_name.as_deref().unwrap_or("<none>");
+                format!("[{addon}] {}", record.message)
+            })
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "Startup should not report the numeric-argument regression:
+    {}",
+            targeted.join("
+    ")
+        );
+    }
+}
+
+#[test]
+fn startup_catalog_shop_numeric_error_after_load_clear() {
+    test_timeout! {
+        let mut messages = Vec::new();
+        let env = load_targeted_startup_env(&mut messages);
+        {
+            let mut state = env.state().borrow_mut();
+            state.lua_errors.clear();
+            state.lua_error_records.clear();
+            state.lua_error_counts.clear();
+        }
+        collect_targeted_startup_messages(&env, &mut messages);
+        let targeted: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_errors
+            .clone()
+            .into_iter()
+            .filter(|message| message.contains("expected number, got nil at argument 1"))
+            .collect();
+        let traced: Vec<String> = messages
+            .into_iter()
+            .filter(|message| message.contains("expected number, got nil at argument 1"))
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "CatalogShop numeric error should be absent after clearing load-time errors if it is load-only.\nstate errors:\n  {}\ntracebacks:\n  {}",
+            targeted.join("\n  "),
+            traced.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn loading_blizzard_addons_does_not_emit_catalog_shop_numeric_error() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+
+        for (name, toc_path) in &addons {
+            let before = env.state().borrow().lua_error_records.len();
+            load_addon(&env.loader_env(), toc_path)
+                .unwrap_or_else(|error| panic!("{name} should load: {error}"));
+            let records = env.state().borrow().lua_error_records.clone();
+            let targeted: Vec<String> = records
+                .into_iter()
+                .skip(before)
+                .filter(|record| {
+                    record.addon_name.as_deref() == Some("Blizzard_CatalogShop")
+                        && record
+                            .message
+                            .contains("expected number, got nil at argument 1")
+                })
+                .map(|record| {
+                    let addon = record.addon_name.unwrap_or_else(|| "<none>".to_string());
+                    format!("[{addon}] {}", record.message)
+                })
+                .collect();
+
+            assert!(
+                targeted.is_empty(),
+                "{name} load introduced the CatalogShop numeric error:\n  {}",
+                targeted.join("\n  ")
+            );
+        }
+    }
+}
+
+#[test]
+fn apply_post_load_workarounds_does_not_introduce_catalog_shop_numeric_error() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+        for (_name, toc_path) in &addons {
+            load_addon(&env.loader_env(), toc_path).expect("Failed to load Blizzard addon");
+        }
+
+        {
+            let mut state = env.state().borrow_mut();
+            state.lua_errors.clear();
+            state.lua_error_records.clear();
+            state.lua_error_counts.clear();
+        }
+
+        env.apply_post_load_workarounds();
+        let targeted: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_errors
+            .clone()
+            .into_iter()
+            .filter(|message| message.contains("expected number, got nil at argument 1"))
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "apply_post_load_workarounds should not introduce the CatalogShop numeric error:\n  {}",
+            targeted.join("\n  ")
+        );
+    }
+}
+
+#[test]
+fn startup_checkbutton_errors_report_addon_names() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let mut targeted: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_error_records
+            .iter()
+            .filter(|record| record.message.contains("CheckButton"))
+            .map(|record| {
+                let addon = record.addon_name.as_deref().unwrap_or("<none>");
+                format!("[{addon}] {}", record.message)
+            })
+            .collect();
+        targeted.sort();
+        targeted.dedup();
+
+        assert!(
+            targeted.is_empty(),
+            "Startup should not report CheckButton regressions:
+    {}",
+            targeted.join("
+    ")
+        );
+    }
+}
+
+#[test]
+fn startup_targeted_errors_have_tracebacks() {
+    test_timeout! {
+        let mut messages = Vec::new();
+        let env = load_with_early_error_collector(&mut messages);
+        collect_targeted_startup_messages(&env, &mut messages);
+        let targeted: Vec<String> = messages
+            .into_iter()
+            .filter(|message| {
+                message.contains("expected number, got nil at argument 1")
+                    || message.contains("CheckButton")
+            })
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "Startup targeted errors should be gone:
+    {}",
+            targeted.join("
+    ")
+        );
+    }
+}
+
+#[test]
+fn load_time_targeted_errors_have_tracebacks() {
+    test_timeout! {
+        let mut messages = Vec::new();
+        let _env = load_with_early_error_collector(&mut messages);
+        let targeted: Vec<String> = messages
+            .into_iter()
+            .filter(|message| {
+                message.contains("CheckButton")
+                    || message.contains("expected number, got nil at argument 1")
+                    || message.contains("expected number, got string at argument 1")
+            })
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "Load-time targeted errors should be gone:
+    {}",
+            targeted.join("
+    ")
         );
     }
 }
