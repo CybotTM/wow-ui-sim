@@ -334,9 +334,6 @@ fn startup_player_life_bar_matches_player_health() {
             current_health,
             max_health,
         ) = result;
-        eprintln!(
-            "player healthbar state: value={bar_value:?} max={bar_max:?} player_frame_state={player_frame_state:?} vehicle_ui={vehicle_ui:?} bar_unit={bar_unit:?} current_health={current_health} max_health={max_health}"
-        );
         assert!(
             current_health > 0,
             "player health should be initialized at startup"

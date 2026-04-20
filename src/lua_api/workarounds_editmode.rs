@@ -287,13 +287,14 @@ pub fn reapply_player_frame_anchor(env: &WowLuaEnv) {
 
 /// Re-run the player frame refresh after edit-mode anchoring settles.
 ///
-/// `ApplySystemAnchor` can leave the player frame in a stale art state.
-/// Replaying the explicit player-art path restores the live health binding.
+/// `ApplySystemAnchor` can leave the player frame's health bar bound to the
+/// wrong unit. Replaying the normal art update and then re-seeding the bar
+/// restores the live health binding without forcing a full art swap.
 fn refresh_player_frame_state(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
-        if PlayerFrame and type(PlayerFrame_ToPlayerArt) == "function" then
-            pcall(PlayerFrame_ToPlayerArt, PlayerFrame)
+        if PlayerFrame and type(PlayerFrame_UpdateArt) == "function" then
+            pcall(PlayerFrame_UpdateArt, PlayerFrame)
         end
         local healthBar = PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar()
         if healthBar and type(UnitFrameHealthBar_SetUnit) == "function" then
