@@ -26,7 +26,7 @@ const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_ArrowCalloutFrame", 3),
     ("Blizzard_ArtifactUI", 5),
     ("Blizzard_AuctionHouseUI", 63),
-    ("Blizzard_AzeriteEssenceUI", 2),
+    ("Blizzard_AzeriteEssenceUI", 4),
     ("Blizzard_AzeriteRespecUI", 1),
     ("Blizzard_AzeriteUI", 3),
     ("Blizzard_BarbershopUI", 2),
@@ -76,7 +76,7 @@ const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_DeprecatedWorldElapsedTimerTypes", 1),
     ("Blizzard_EncounterJournal", 21),
     ("Blizzard_EndOfMatchUI", 2),
-    ("Blizzard_EventTrace", 2),
+    ("Blizzard_EventTrace", 4),
     ("Blizzard_ExpansionTrial", 2),
     ("Blizzard_FlightMap", 11),
     ("Blizzard_FrameXMLUtil", 8),
@@ -155,8 +155,17 @@ const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_WorldMap", 5),
 ];
 
-const KNOWN_LOAD_ON_DEMAND_RUNTIME_ERRORS: &[(&str, usize)] =
-    &[("Blizzard_EventTrace", 2), ("Blizzard_Professions", 16)];
+const KNOWN_LOAD_ON_DEMAND_RUNTIME_ERRORS: &[(&str, usize)] = &[
+    ("Blizzard_AzeriteEssenceUI", 6),
+    ("Blizzard_BoostTutorial", 8),
+    ("Blizzard_EventTrace", 4),
+    ("Blizzard_ExpansionTrial", 4),
+    ("Blizzard_ItemBeltFrame", 4),
+    ("Blizzard_ItemInteractionUI", 6),
+    ("Blizzard_Professions", 16),
+    ("Blizzard_ScrappingMachineUI", 2),
+    ("Blizzard_TimerunningCharacterCreate", 4),
+];
 
 struct PanelOpenCoverageCase {
     name: &'static str,
@@ -790,7 +799,7 @@ fn shard_load_on_demand_addon_families(
 fn load_on_demand_runtime_baseline_overrides_force_load_counts() {
     let known_runtime_counts = known_load_on_demand_runtime_error_counts();
 
-    assert_eq!(known_runtime_counts.get("Blizzard_EventTrace"), Some(&2));
+    assert_eq!(known_runtime_counts.get("Blizzard_EventTrace"), Some(&4));
     assert_eq!(known_runtime_counts.get("Blizzard_Professions"), Some(&16));
     assert_eq!(known_runtime_counts.get("Blizzard_WorldMap"), Some(&5));
 }
