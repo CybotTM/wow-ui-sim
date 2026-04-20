@@ -312,16 +312,13 @@ fn test_statusbar_runtime_lookup_hides_extra_methods() {
         .eval(
             r#"
             local sb = CreateFrame("StatusBar", "StatusBarMethodFilter")
-            return sb.GetStatusBarDesaturated == nil,
+            return type(sb.GetStatusBarDesaturated) == "function",
                    sb.SetStatusBarAtlas == nil,
                    type(sb.SetStatusBarTexture) == "function"
             "#,
         )
         .unwrap();
-    assert!(
-        result.0,
-        "StatusBar should not expose GetStatusBarDesaturated"
-    );
+    assert!(result.0, "StatusBar should expose GetStatusBarDesaturated");
     assert!(result.1, "StatusBar should not expose SetStatusBarAtlas");
     assert!(
         result.2,
