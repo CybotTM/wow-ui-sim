@@ -176,7 +176,6 @@ fn fire_startup_events(env: &WowLuaEnv) {
 fn action_button_down_sets_pushed_state() {
     test_timeout! {
         let env = env_with_full_blizzard_ui();
-
         // ActionButtonDown calls SetButtonState("PUSHED") on the button widget
         let state_before: String = env
             .eval(r#"return _G["ActionButton1"]:GetButtonState()"#)
