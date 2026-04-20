@@ -342,6 +342,51 @@ fn keybind_s_renders_spellbook_item_icon_quads_on_first_open() {
     }
 }
 
+#[test]
+fn keybind_s_keeps_spellbook_backgrounds_below_icons_after_initial_bucket_build() {
+    test_timeout! {
+        let env = setup_env();
+        {
+            let mut state = env.state().borrow_mut();
+            let _ = state.get_strata_buckets();
+        }
+
+        env.send_key_press("S", None).expect("S keybind failed");
+
+        let batch = build_batch_for_root(&env, "PlayerSpellsFrame");
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let icon_id = find_first_visible_spellbook_icon_id(registry)
+            .expect("Spellbook first-open path should expose a visible spell icon frame");
+        let icon_rect = compute_frame_rect(registry, icon_id, 1024.0, 768.0);
+
+        let icon_request = batch
+            .texture_requests
+            .iter()
+            .find(|request| bounds_match_rect(quad_bounds(&batch, request), icon_rect))
+            .expect("Spellbook first-open path should emit a textured quad for the first visible spell icon");
+
+        let last_background_request = batch
+            .texture_requests
+            .iter()
+            .filter(|request| {
+                request
+                    .path
+                    .to_ascii_lowercase()
+                    .contains("spellbookbackgroundevergreen")
+            })
+            .max_by_key(|request| request.vertex_start)
+            .expect("Spellbook should emit evergreen parchment background quads");
+
+        assert!(
+            last_background_request.vertex_start < icon_request.vertex_start,
+            "Spellbook parchment backgrounds must render before spell icons after LoD open with prebuilt strata buckets; last background vertex_start={} icon vertex_start={}",
+            last_background_request.vertex_start,
+            icon_request.vertex_start
+        );
+    }
+}
+
 // ── N → PlayerSpellsUtil.ToggleClassTalentFrame() ───────────────────────
 
 #[test]

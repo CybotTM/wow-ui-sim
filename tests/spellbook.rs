@@ -360,6 +360,20 @@ fn find_first_passive_spell_item(
     })
 }
 
+fn find_first_visible_spell_item_button_children(
+    registry: &WidgetRegistry,
+    item_ids: &[u64],
+) -> Option<(u64, u64, u64)> {
+    item_ids.iter().find_map(|&item_id| {
+        let item = registry.get(item_id)?;
+        let &button_id = item.children_keys.get("Button")?;
+        let button = registry.get(button_id)?;
+        let &icon_id = button.children_keys.get("Icon")?;
+        let &mask_id = button.children_keys.get("IconMask")?;
+        Some((button_id, icon_id, mask_id))
+    })
+}
+
 /// Check that a frame is reachable from root via the children chain.
 /// Returns (reachable, detail_string).
 fn check_frame_reachability(registry: &WidgetRegistry, frame_id: u64) -> (bool, String) {
@@ -605,6 +619,71 @@ fn spellbook_icon_textures_in_ancestor_visible() {
         eprintln!("Icons: found={icons_found} missing={icons_missing}");
         assert_eq!(icons_missing, 0,
             "All spell icon textures should have effective_alpha > 0");
+    }
+}
+
+#[test]
+fn spellbook_first_visible_item_emits_icon_mask_quad_on_first_open() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
+
+        let buckets = build_strata_buckets(&env);
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let item_ids = find_spell_item_ids(registry);
+        assert!(!item_ids.is_empty(), "Should have spell items");
+
+        let (_button_id, icon_id, mask_id) = find_first_visible_spell_item_button_children(registry, &item_ids)
+            .expect("Should find the first visible spellbook item icon and mask");
+
+        let icon = registry.get(icon_id).expect("first visible icon frame");
+        let icon_masks = icon.mask_textures.len();
+        assert_eq!(
+            icon_masks,
+            1,
+            "First visible spellbook icon should already have exactly one mask wired on first open"
+        );
+
+        let icon_rect = compute_frame_rect(registry, icon_id, 1024.0, 768.0);
+        let mask_rect = compute_frame_rect(registry, mask_id, 1024.0, 768.0);
+
+        let batch = build_quad_batch_for_registry(
+            registry,
+            (1024.0, 768.0),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            &buckets,
+        );
+
+        let icon_request = batch
+            .texture_requests
+            .iter()
+            .find(|request| bounds_match_rect(quad_bounds(&batch, request), icon_rect))
+            .expect("First visible spellbook icon should emit a textured quad");
+        let mask_request = batch
+            .mask_texture_requests
+            .iter()
+            .find(|request| bounds_match_rect(quad_bounds(&batch, request), mask_rect))
+            .expect("First visible spellbook icon mask should emit a mask quad on first open");
+
+        assert!(
+            icon_request.path.to_ascii_lowercase().contains("icons"),
+            "First visible spellbook icon should render from an icon texture, got {}",
+            icon_request.path
+        );
+        assert!(
+            mask_request
+                .path
+                .to_ascii_lowercase()
+                .contains("spellbookelementsiconmask"),
+            "First visible spellbook icon mask should render from the spellbook icon mask texture, got {}",
+            mask_request.path
+        );
     }
 }
 
