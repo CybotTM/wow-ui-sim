@@ -82,7 +82,7 @@
 - [x] Fix loader/global-frame access bucket (`2` failed targets): `global_frame_access` child/template key wiring regressions.
 - [x] Fix startup bootstrap namespace bucket (`3` failed targets): `wow_api_globals` startup namespace checks.
 - [x] Fix XML inheritance bucket (`1` failed target): `xml_basics` inherited button text availability after load.
-- [ ] Fix state-render repair bucket (`3` failed targets): `state_render_repairs` and `state_render` bucket-order repair regressions.
+- [x] Fix state-render repair bucket (`3` failed targets): `state_render_repairs` and `state_render` bucket-order repair regressions.
 - [ ] Fix global-slots bucket (`2` failed targets): `global_slots` root-global refresh behavior.
 - [ ] Fix editmode workarounds bucket (`1` failed target): `workarounds_editmode` preset cloning behavior.
 - [ ] Fix action-bar startup bucket (`7` failed targets): `action_bar` startup/load behavior that still depends on `WowLuaEnv` initialization.

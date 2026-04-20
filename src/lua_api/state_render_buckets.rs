@@ -59,38 +59,7 @@ pub(super) fn dfs_emit(
     visible: &HashSet<u64>,
     out: &mut Vec<u64>,
 ) {
-    let Some(frame) = widgets.get(id) else {
-        return;
-    };
-    out.push(id);
-
-    let mut regions = Vec::new();
-    let mut child_frames = Vec::new();
-    collect_frame_regions(
-        frame,
-        strata_idx,
-        widgets,
-        visible,
-        0,
-        &mut regions,
-        &mut child_frames,
-    );
-    sort_regions(&mut regions, widgets);
-    out.extend(regions.into_iter().map(|entry| entry.id));
-
-    sort_child_frames(&mut child_frames, widgets);
-    for child_id in child_frames {
-        let child = widgets.get(child_id);
-        let suppress_regions = child.is_some_and(is_transparent_wrapper);
-        dfs_emit_with_region_mode(
-            child_id,
-            strata_idx,
-            widgets,
-            visible,
-            out,
-            suppress_regions,
-        );
-    }
+    dfs_emit_with_region_mode(id, strata_idx, widgets, visible, out, false);
 }
 
 fn dfs_emit_with_region_mode(
@@ -106,9 +75,36 @@ fn dfs_emit_with_region_mode(
     };
     out.push(id);
 
+    let (regions, mut child_frames) =
+        collect_regions_and_children(frame, strata_idx, widgets, visible, suppress_regions);
+    let mut deferred_font_regions = emit_immediate_regions(regions, widgets, out);
+    let hoisted_regions = emit_child_frames_and_collect_hoisted(
+        &mut child_frames,
+        strata_idx,
+        widgets,
+        visible,
+        out,
+        suppress_regions,
+    );
+
+    let deferred_hoisted = emit_immediate_regions(hoisted_regions, widgets, out);
+    deferred_font_regions.extend(deferred_hoisted);
+    sort_regions(&mut deferred_font_regions, widgets);
+    out.extend(deferred_font_regions.into_iter().map(|entry| entry.id));
+}
+
+fn collect_regions_and_children(
+    frame: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    suppress_regions: bool,
+) -> (Vec<RegionEntry>, Vec<u64>) {
     let mut regions = Vec::new();
     let mut child_frames = Vec::new();
-    if !suppress_regions {
+    if suppress_regions {
+        collect_frame_children_only(frame, strata_idx, widgets, visible, &mut child_frames);
+    } else {
         collect_frame_regions(
             frame,
             strata_idx,
@@ -118,18 +114,47 @@ fn dfs_emit_with_region_mode(
             &mut regions,
             &mut child_frames,
         );
-        sort_regions(&mut regions, widgets);
-        out.extend(regions.into_iter().map(|entry| entry.id));
-    } else {
-        collect_frame_children_only(frame, strata_idx, widgets, visible, &mut child_frames);
     }
+    (regions, child_frames)
+}
 
-    sort_child_frames(&mut child_frames, widgets);
-    for child_id in child_frames {
+fn emit_immediate_regions(
+    mut regions: Vec<RegionEntry>,
+    widgets: &WidgetRegistry,
+    out: &mut Vec<u64>,
+) -> Vec<RegionEntry> {
+    sort_regions(&mut regions, widgets);
+    let (immediate_regions, deferred_regions) = split_font_regions(regions, widgets);
+    out.extend(immediate_regions.into_iter().map(|entry| entry.id));
+    deferred_regions
+}
+
+fn emit_child_frames_and_collect_hoisted(
+    child_frames: &mut [u64],
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+    out: &mut Vec<u64>,
+    suppress_regions: bool,
+) -> Vec<RegionEntry> {
+    sort_child_frames(child_frames, widgets);
+    let mut hoisted_regions = Vec::new();
+    for &child_id in child_frames.iter() {
         let child = widgets.get(child_id);
         let child_suppress = child.is_some_and(is_transparent_wrapper);
+        if !suppress_regions && child_suppress {
+            collect_transparent_wrapper_regions(
+                child_id,
+                strata_idx,
+                widgets,
+                visible,
+                1,
+                &mut hoisted_regions,
+            );
+        }
         dfs_emit_with_region_mode(child_id, strata_idx, widgets, visible, out, child_suppress);
     }
+    hoisted_regions
 }
 
 fn collect_frame_regions(
@@ -198,16 +223,6 @@ fn collect_child_for_emit(
     }
     if child.frame_strata.as_index() == strata_idx {
         child_frames.push(child_id);
-        if is_transparent_wrapper(child) {
-            collect_transparent_wrapper_regions(
-                child_id,
-                strata_idx,
-                widgets,
-                visible,
-                depth + 1,
-                regions,
-            );
-        }
     }
 }
 
@@ -345,6 +360,17 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
     });
 }
 
+fn split_font_regions(
+    regions: Vec<RegionEntry>,
+    widgets: &WidgetRegistry,
+) -> (Vec<RegionEntry>, Vec<RegionEntry>) {
+    regions.into_iter().partition(|entry| {
+        widgets
+            .get(entry.id)
+            .is_none_or(|frame| frame.widget_type != crate::widget::WidgetType::FontString)
+    })
+}
+
 fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
     frames.sort_by(|&a, &b| match (widgets.get(a), widgets.get(b)) {
         (Some(frame_a), Some(frame_b)) => (
@@ -365,9 +391,20 @@ fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
 
 #[cfg(test)]
 mod tests {
-    use super::{collect_child_for_emit, same_strata_subtree_segment_end};
+    use super::{collect_child_for_emit, dfs_emit, same_strata_subtree_segment_end};
     use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
     use std::collections::HashSet;
+
+    fn test_frame(id: u64, widget_type: WidgetType, parent_id: Option<u64>) -> Frame {
+        Frame {
+            id,
+            widget_type,
+            parent_id,
+            frame_strata: FrameStrata::Medium,
+            visible: true,
+            ..Default::default()
+        }
+    }
 
     #[test]
     fn same_strata_subtree_segment_end_stops_at_first_non_subtree_id() {
@@ -424,5 +461,32 @@ mod tests {
             vec![2]
         );
         assert_eq!(child_frames, vec![3]);
+    }
+
+    #[test]
+    fn dfs_emit_keeps_transparent_wrapper_regions_after_wrapper_frame_and_parent_text_last() {
+        let mut widgets = WidgetRegistry::default();
+        widgets.register(test_frame(1, WidgetType::Frame, None));
+        widgets.register(test_frame(2, WidgetType::Texture, Some(1)));
+        widgets.register(test_frame(3, WidgetType::Frame, Some(1)));
+        widgets.register(test_frame(4, WidgetType::Texture, Some(3)));
+        widgets.register(test_frame(5, WidgetType::FontString, Some(1)));
+        widgets.add_child(1, 2);
+        widgets.add_child(1, 3);
+        widgets.add_child(1, 5);
+        widgets.add_child(3, 4);
+
+        let visible = HashSet::from([1, 2, 3, 4, 5]);
+        let mut bucket = Vec::new();
+
+        dfs_emit(
+            1,
+            FrameStrata::Medium.as_index(),
+            &widgets,
+            &visible,
+            &mut bucket,
+        );
+
+        assert_eq!(bucket, vec![1, 2, 3, 4, 5]);
     }
 }
