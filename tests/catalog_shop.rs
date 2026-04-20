@@ -284,6 +284,80 @@ fn catalog_shop_debug_seeded_refresh_step_probe() {
 }
 
 #[test]
+fn catalog_shop_debug_header_set_categories_numeric_trace() {
+    let env = load_full_game_ui();
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+    env.exec_rilua_secure(
+        r#"
+        __catalog_shop_numeric_trace_hits = {}
+
+        local function wrap_nil_first_arg(tbl, method_name)
+            if type(tbl) ~= "table" or type(tbl[method_name]) ~= "function" then
+                return
+            end
+
+            local original = tbl[method_name]
+            tbl[method_name] = function(self, ...)
+                if select("#", ...) >= 1 and select(1, ...) == nil then
+                    table.insert(__catalog_shop_numeric_trace_hits, method_name .. "\n" .. debug.traceback())
+                end
+                return original(self, ...)
+            end
+        end
+
+        wrap_nil_first_arg(DataProviderMixin, "Find")
+        wrap_nil_first_arg(ScrollBoxListMixin, "ScrollToNearest")
+        wrap_nil_first_arg(ScrollBoxBaseMixin, "ScrollTo")
+        wrap_nil_first_arg(ScrollBoxBaseMixin, "ScrollPercentage")
+        wrap_nil_first_arg(ScrollBoxListMixin, "GetElementExtent")
+        "#,
+    )
+    .expect("should install header trace wrappers");
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.lua_errors.clear();
+        state.lua_error_records.clear();
+        state.lua_error_counts.clear();
+    }
+
+    env.exec_rilua_secure(
+        r#"
+        local category_ids = C_CatalogShop.GetAvailableCategoryIDs()
+        CatalogShopFrame.HeaderFrame:SetCategories(category_ids)
+        "#,
+    )
+    .expect("CatalogShop header categories should run");
+
+    let hits: Vec<String> = env
+        .eval("return __catalog_shop_numeric_trace_hits")
+        .expect("numeric trace hits should be readable");
+    let targeted: Vec<String> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .clone()
+        .into_iter()
+        .filter(|message| message.contains("expected number, got nil at argument 1"))
+        .collect();
+
+    assert!(
+        targeted.is_empty(),
+        "CatalogShop header categories still emit numeric errors.\ntraces:\n{}\nerrors:\n{}",
+        hits.join("\n---\n"),
+        targeted.join("\n")
+    );
+}
+
+#[test]
 fn catalog_shop_seeded_refresh_reports_nil_numeric_c_api_calls() {
     let env = load_full_game_ui();
 
@@ -322,6 +396,26 @@ fn catalog_shop_seeded_refresh_reports_nil_numeric_c_api_calls() {
                         table.insert(bad_calls, name)
                     end
                     return fn(...)
+                end
+            end
+        end
+
+        if type(CatalogShopOutbound) == "table" then
+            for _, name in ipairs({
+                "SavedSet_IsLoaded",
+                "SavedSet_HasAny",
+                "SavedSet_Set",
+                "SavedSet_Check",
+            }) do
+                local fn = CatalogShopOutbound[name]
+                if type(fn) == "function" then
+                    original["outbound_" .. name] = fn
+                    CatalogShopOutbound[name] = function(...)
+                        if select("#", ...) >= 1 and select(1, ...) == nil then
+                            table.insert(bad_calls, "CatalogShopOutbound." .. name)
+                        end
+                        return fn(...)
+                    end
                 end
             end
         end
