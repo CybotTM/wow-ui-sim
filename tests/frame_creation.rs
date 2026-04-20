@@ -240,7 +240,7 @@ fn test_create_frame_with_parent() {
 }
 
 #[test]
-fn test_is_visible_false_when_parent_alpha_zero() {
+fn test_is_visible_ignores_parent_alpha_zero() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec(
@@ -261,8 +261,8 @@ fn test_is_visible_false_when_parent_alpha_zero() {
 
     assert!(child_shown, "child should still have its own shown flag");
     assert!(
-        !child_visible,
-        "child should not be visible when parent effective alpha is zero"
+        child_visible,
+        "child should remain visible even when parent effective alpha is zero"
     );
     assert_eq!(
         child_effective_alpha, 0.0,
@@ -271,7 +271,7 @@ fn test_is_visible_false_when_parent_alpha_zero() {
 }
 
 #[test]
-fn test_is_visible_updates_when_reparented_under_alpha_zero_parent() {
+fn test_is_visible_remains_true_when_reparented_under_alpha_zero_parent() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec(
@@ -305,8 +305,8 @@ fn test_is_visible_updates_when_reparented_under_alpha_zero_parent() {
         .unwrap();
 
     assert!(
-        !visible_after_reparent,
-        "child should become invisible after reparenting under alpha-zero parent"
+        visible_after_reparent,
+        "child should remain visible after reparenting under alpha-zero parent"
     );
     assert_eq!(
         effective_alpha_after_reparent, 0.0,
@@ -315,7 +315,7 @@ fn test_is_visible_updates_when_reparented_under_alpha_zero_parent() {
 }
 
 #[test]
-fn test_is_visible_recovers_after_parent_alpha_restored() {
+fn test_effective_alpha_recovers_after_parent_alpha_restored() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec(
@@ -336,7 +336,7 @@ fn test_is_visible_recovers_after_parent_alpha_restored() {
 
     assert!(
         child_visible,
-        "child should become visible again when parent alpha is restored"
+        "child should remain visible while parent alpha is restored"
     );
     assert_eq!(
         child_effective_alpha, 1.0,
