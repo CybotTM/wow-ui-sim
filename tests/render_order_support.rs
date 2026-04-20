@@ -327,7 +327,7 @@ pub(crate) fn env_with_root_addons_ui_with_overrides(
 pub(crate) fn env_with_isolated_world_map_ui() -> WowLuaEnv {
     env_with_root_addons_ui_with_overrides(
         ISOLATED_WORLD_MAP_ROOT_ADDONS,
-        crate::blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
+        self::blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
     )
 }
 
