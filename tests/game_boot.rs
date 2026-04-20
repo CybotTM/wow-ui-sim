@@ -194,12 +194,32 @@ fn install_panel_tab_anchor_trace(env: &WowLuaEnv) {
 #[test]
 fn game_boot_has_no_unexpected_lua_errors() {
     test_timeout! {
-        let env = load_game_screen();
+        let env = new_game_env();
+        let ui = blizzard_ui_dir();
+        let blizzard = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+        for (name, toc_path) in &blizzard {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
+        }
 
+        let addons = scan_game_addons();
+        for (name, toc_path) in &addons {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[addon {name}] FAILED: {err}");
+            }
+        }
+
+        env.apply_post_load_workarounds();
+        common::install_error_collector(&env, "__game_boot_errors");
+        take_lua_errors(&env);
+        fire_startup_events_for_screen(&env, ScreenKind::Game);
         let errors = env.state().borrow().lua_errors.clone();
+        let traces = common::drain_string_table(&env, "__game_boot_errors");
         assert!(
             errors.is_empty(),
-            "game boot still has lua errors: {errors:#?}"
+            "game boot still has lua errors: {errors:#?}\ntraces:\n{:#?}",
+            traces
         );
     }
 }
@@ -209,20 +229,34 @@ fn set_panel_tab_trace_addon(env: &WowLuaEnv, addon_name: &str) {
         .expect("set current panel tab trace addon");
 }
 
+fn take_lua_errors(env: &WowLuaEnv) -> Vec<String> {
+    let mut state = env.state().borrow_mut();
+    std::mem::take(&mut state.lua_errors)
+}
+
+fn assert_no_lua_errors_after_stage(env: &WowLuaEnv, stage: &str) {
+    let errors = take_lua_errors(env);
+    assert!(
+        errors.is_empty(),
+        "{stage} still has lua errors: {errors:#?}"
+    );
+}
+
 #[test]
 fn game_boot_lua_errors_pipeline_finishes() {
     test_timeout! {
         let env = load_game_screen();
+        take_lua_errors(&env);
         env.apply_post_event_workarounds();
+        assert_no_lua_errors_after_stage(&env, "game boot post-event workarounds");
         env.state().borrow_mut().widgets.rebuild_anchor_index();
+        assert_no_lua_errors_after_stage(&env, "game boot anchor-index rebuild");
         process_pending_timers(&env);
+        assert_no_lua_errors_after_stage(&env, "game boot process_pending_timers");
         fire_one_on_update_tick(&env);
+        assert_no_lua_errors_after_stage(&env, "game boot on_update tick");
         let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
-        let errors = env.state().borrow().lua_errors.clone();
-        assert!(
-            errors.is_empty(),
-            "game boot settle pipeline still has lua errors: {errors:#?}"
-        );
+        assert_no_lua_errors_after_stage(&env, "game boot hide runtime hidden frames");
     }
 }
 

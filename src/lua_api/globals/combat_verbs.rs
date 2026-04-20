@@ -192,20 +192,18 @@ fn start_instant_spell_cooldowns(state: &mut LuaState, spell_id: u32) {
 }
 
 pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaResult<()> {
-    {
-        let st = borrow_state(state)?;
-        if st.casting.is_some() {
-            return Ok(());
-        }
-    }
-
     if !spell_can_execute_now(state, spell_id)? {
         return Ok(());
     }
 
     let spell_name = spell_name(spell_id);
     let icon_path = spell_icon(spell_id);
-    let cast_time_ms = spell_cast_time(spell_id as i32);
+    let known_spell = crate::spells::get_spell(spell_id).is_some();
+    let cast_time_ms = if known_spell {
+        spell_cast_time(spell_id as i32)
+    } else {
+        (DEFAULT_CAST_DURATION * 1000.0) as i32
+    };
     if cast_time_ms > 0 {
         start_gcd(state, DEFAULT_GCD_SECONDS);
         start_cast(
@@ -237,22 +235,24 @@ fn apply_spell_to_target(state: &mut LuaState, spell_id: u32) {
 }
 
 fn set_action_button_state(state: &mut LuaState, slot: u32, button_state: u8) {
-    let Some(button_name) = slot
-        .checked_sub(0)
-        .map(|slot| format!("ActionButton{slot}"))
-    else {
+    let button_name = format!("ActionButton{slot}");
+    let button_val = LuaApiMut::get_global_val(state, &button_name);
+    if matches!(button_val, Val::Nil) {
         return;
+    }
+    let state_name = if button_state == 1 {
+        "PUSHED"
+    } else {
+        "NORMAL"
     };
-    let button_id = borrow_state(state)
-        .ok()
-        .and_then(|sim| sim.widgets.get_id_by_name(&button_name));
-    let Some(button_id) = button_id else {
-        return;
-    };
-    if let Ok(mut sim) = borrow_state_mut(state)
-        && let Some(button) = sim.widgets.get_mut_visual(button_id)
-    {
-        button.button_state = button_state;
+    let set_button_state = crate::lua_api::methods::table_get(state, button_val, "SetButtonState");
+    if matches!(set_button_state, Val::Function(_)) {
+        let state_val = create_string(state, state_name);
+        let _ = crate::lua_api::methods::call_function_state(
+            state,
+            set_button_state,
+            &[button_val, state_val],
+        );
     }
 }
 
