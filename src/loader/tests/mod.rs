@@ -921,6 +921,43 @@ fn test_runtime_create_frame_inherited_child_parent_array_registers_once_in_orde
 }
 
 #[test]
+fn test_runtime_named_child_inherited_layers_use_child_name_for_parent_substitution() {
+    let t = load_test_xml(
+        "runtime-child-layer-name-subst",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="NamedBackgroundTemplate" virtual="true">
+                <Layers>
+                    <Layer>
+                        <Texture name="$parentBackground" parentKey="Background"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+            <Frame name="ChildHostTemplate" virtual="true">
+                <Frames>
+                    <Frame name="$parentButtonFrame" inherits="NamedBackgroundTemplate" parentKey="buttonFrame"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local host = CreateFrame("Frame", "RuntimeLayerNameHost", UIParent, "ChildHostTemplate")
+            assert(host.buttonFrame ~= nil, "runtime template should create the named child frame")
+            assert(host.Background == nil, "child inherited layers must not leak onto the outer parent name")
+            assert(RuntimeLayerNameHostBackground == nil, "outer parent should not receive the child background global")
+            assert(RuntimeLayerNameHostButtonFrameBackground ~= nil, "child inherited layer should use the child frame name")
+            assert(host.buttonFrame.Background == RuntimeLayerNameHostButtonFrameBackground, "parentKey attachment should point at the child-named background")
+            assert(RuntimeLayerNameHostButtonFrameBackground:GetParent() == host.buttonFrame, "child-named background should stay parented to the child frame")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_xml_inherited_parent_array_registers_children_once_in_order() {
     let t = load_test_xml(
         "xml-inherited-parent-array-once",

@@ -6,9 +6,17 @@
 
 mod common;
 
+#[cfg(feature = "gui")]
+use std::cell::RefCell;
 use std::path::PathBuf;
+#[cfg(feature = "gui")]
+use std::rc::Rc;
+#[cfg(feature = "gui")]
+use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+#[cfg(feature = "gui")]
+use wow_ui_sim::render::{GlyphAtlas, QuadBatch, WowFontSystem};
 
 const CHAT_LAYOUT_DEBUG_LUA: &str = r#"
     local frames = {
@@ -99,6 +107,67 @@ fn fire_startup_events(env: &WowLuaEnv) {
 fn chat_layout_debug(env: &WowLuaEnv) -> String {
     env.eval(CHAT_LAYOUT_DEBUG_LUA)
         .expect("chat layout debug eval failed")
+}
+
+#[cfg(feature = "gui")]
+fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
+    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+}
+
+#[cfg(feature = "gui")]
+fn build_screenshot_like_batch(
+    env: &WowLuaEnv,
+    width: u32,
+    height: u32,
+    filter: Option<&str>,
+) -> QuadBatch {
+    let font_system = make_font_system();
+    env.set_font_system(Rc::clone(&font_system));
+    env.set_screen_size(width as f32, height as f32);
+    wow_ui_sim::startup::run_extra_update_ticks(env, 3);
+
+    let mut glyph_atlas = GlyphAtlas::new();
+    let mut font_system = font_system.borrow_mut();
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_system);
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
+    build_quad_batch_for_registry(
+        &state.widgets,
+        (width as f32, height as f32),
+        filter,
+        None,
+        None,
+        Some((&mut font_system, &mut glyph_atlas)),
+        Some(&state.message_frames),
+        Some(&tooltip_data),
+        &buckets,
+    )
+}
+
+#[cfg(feature = "gui")]
+fn quad_bounds(
+    batch: &QuadBatch,
+    vertex_start: usize,
+    vertex_count: usize,
+) -> (f32, f32, f32, f32) {
+    let verts = &batch.vertices[vertex_start..vertex_start + vertex_count];
+    let mut min_x = f32::INFINITY;
+    let mut min_y = f32::INFINITY;
+    let mut max_x = f32::NEG_INFINITY;
+    let mut max_y = f32::NEG_INFINITY;
+    for vert in verts {
+        min_x = min_x.min(vert.position[0]);
+        min_y = min_y.min(vert.position[1]);
+        max_x = max_x.max(vert.position[0]);
+        max_y = max_y.max(vert.position[1]);
+    }
+    (min_x, min_y, max_x, max_y)
 }
 
 /// Hook C_ChatInfo.SendChatMessage to capture submitted messages.
@@ -313,6 +382,92 @@ fn test_chat_background_uses_default_black_tint_and_alpha() {
         assert!(
             (alpha - 0.25).abs() < 0.01,
             "ChatFrame1Background alpha should be 0.25 after startup, got {alpha}"
+        );
+    }
+}
+
+#[cfg(feature = "gui")]
+#[test]
+fn test_chat_background_batch_uses_chat_frame_bounds_and_alpha_tint() {
+    test_timeout! {
+        let env = setup_env();
+        let _ = env.fire_event("UPDATE_CHAT_WINDOWS");
+
+        let (background_rect, chat_rect, background_parent_name) = {
+            let state = env.state().borrow();
+            let chat_id = state
+                .widgets
+                .get_id_by_name("ChatFrame1")
+                .expect("ChatFrame1 should exist");
+            let background_id = state
+                .widgets
+                .get_id_by_name("ChatFrame1Background")
+                .expect("ChatFrame1Background should exist");
+            let background_parent_name = state
+                .widgets
+                .get(background_id)
+                .and_then(|frame| frame.parent_id)
+                .and_then(|parent_id| state.widgets.get(parent_id))
+                .and_then(|frame| frame.name.clone())
+                .unwrap_or_else(|| "<none>".to_string());
+            let chat_rect = compute_frame_rect(&state.widgets, chat_id, 1024.0, 768.0);
+            let rect = compute_frame_rect(&state.widgets, background_id, 1024.0, 768.0);
+            (
+                (rect.x, rect.y, rect.width, rect.height),
+                (chat_rect.x, chat_rect.y, chat_rect.width, chat_rect.height),
+                background_parent_name,
+            )
+        };
+
+        let full_batch = build_screenshot_like_batch(&env, 1024, 768, None);
+        let background_request = full_batch
+            .texture_requests
+            .iter()
+            .find(|request| {
+                request.path.contains("ChatFrameBackground") && {
+                    let bounds = quad_bounds(
+                        &full_batch,
+                        request.vertex_start as usize,
+                        request.vertex_count as usize,
+                    );
+                    let rect_right = background_rect.0 + background_rect.2;
+                    let rect_bottom = background_rect.1 + background_rect.3;
+                    bounds.0 < rect_right
+                        && bounds.2 > background_rect.0
+                        && bounds.1 < rect_bottom
+                        && bounds.3 > background_rect.1
+                }
+            })
+            .expect("full batch should include the ChatFrame1Background texture request");
+        let background_bounds = quad_bounds(
+            &full_batch,
+            background_request.vertex_start as usize,
+            background_request.vertex_count as usize,
+        );
+        let background_vertex = full_batch.vertices[background_request.vertex_start as usize];
+        assert_eq!(
+            background_parent_name, "ChatFrame1",
+            "ChatFrame1Background should stay parented to ChatFrame1"
+        );
+        assert!(
+            background_rect.2 > chat_rect.2,
+            "Chat background should extend past the chat frame to cover the scrollbar gutter. chat_rect={chat_rect:?} background_rect={background_rect:?}"
+        );
+        assert!(
+            background_bounds.2 - background_bounds.0 > chat_rect.2,
+            "Chat background quad should be wider than the chat frame. bounds={background_bounds:?} chat_rect={chat_rect:?}"
+        );
+        assert!(
+            background_vertex.color[0].abs() < 0.01
+                && background_vertex.color[1].abs() < 0.01
+                && background_vertex.color[2].abs() < 0.01,
+            "Chat background quad should keep a black tint, got {:?}",
+            background_vertex.color
+        );
+        assert!(
+            (background_vertex.color[3] - 0.25).abs() < 0.01,
+            "Chat background quad should render at alpha 0.25, got {:?}",
+            background_vertex.color
         );
     }
 }

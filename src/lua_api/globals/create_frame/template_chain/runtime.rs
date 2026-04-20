@@ -27,7 +27,7 @@ fn create_direct_child_frames(
     state: &mut LuaState,
     state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
     parent_id: u64,
-    parent_name: &str,
+    _parent_name: &str,
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
@@ -36,7 +36,6 @@ fn create_direct_child_frames(
             state,
             state_rc,
             parent_id,
-            parent_name,
             subst_parent,
             child_frame,
             child_tag,
@@ -49,7 +48,7 @@ fn create_scroll_child_frames(
     state: &mut LuaState,
     state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
     parent_id: u64,
-    parent_name: &str,
+    _parent_name: &str,
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
 ) -> LuaResult<()> {
@@ -66,7 +65,6 @@ fn create_scroll_child_frames(
             state,
             state_rc,
             parent_id,
-            parent_name,
             subst_parent,
             child_frame,
             child_tag,
@@ -87,7 +85,6 @@ fn create_template_child_frame(
     state: &mut LuaState,
     state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
     parent_id: u64,
-    parent_name: &str,
     subst_parent: &str,
     child_frame: &crate::xml::FrameXml,
     child_tag: &'static str,
@@ -109,24 +106,45 @@ fn create_template_child_frame(
     )?;
     assign_child_parent_refs(state, parent_id, child_id, frame);
     apply_child_template_properties(state, child_id, frame, intrinsic)?;
-
-    let child_subst = if frame.name.is_some() {
-        child_name.as_str()
-    } else {
-        subst_parent
-    };
-    apply_runtime_child_direct_properties(state_rc, child_id, frame, parent_name);
-    ensure_runtime_button_texture_slots(state, child_id, frame)?;
-    apply_runtime_template_loader_effects(
+    finalize_runtime_template_child(
         state,
+        state_rc,
+        child_id,
         &child_name,
-        parent_name,
+        subst_parent,
         frame,
         inherited_chain.as_deref(),
     )?;
-    create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
-    fire_frame_on_load(state, child_id)?;
     Ok(Some(child_id))
+}
+
+fn finalize_runtime_template_child(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    child_id: u64,
+    child_name: &str,
+    subst_parent: &str,
+    frame: &crate::xml::FrameXml,
+    inherited_chain: Option<&str>,
+) -> LuaResult<()> {
+    let child_subst = child_runtime_subst(frame, child_name, subst_parent);
+    apply_runtime_child_direct_properties(state_rc, child_id, frame, child_subst);
+    ensure_runtime_button_texture_slots(state, child_id, frame)?;
+    apply_runtime_template_loader_effects(state, child_name, child_subst, frame, inherited_chain)?;
+    create_template_child_frames(state, state_rc, child_id, child_name, child_subst, frame)?;
+    fire_frame_on_load(state, child_id)
+}
+
+fn child_runtime_subst<'a>(
+    frame: &crate::xml::FrameXml,
+    child_name: &'a str,
+    subst_parent: &'a str,
+) -> &'a str {
+    if frame.name.is_some() {
+        child_name
+    } else {
+        subst_parent
+    }
 }
 
 fn instantiate_template_child(
