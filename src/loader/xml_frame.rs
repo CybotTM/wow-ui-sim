@@ -6,6 +6,7 @@ use crate::lua_api::LoaderEnv;
 
 use crate::loader::LoadTiming;
 use crate::loader::error::LoadError;
+use crate::loader::helpers::{lua_frame_ref_by_id, lua_global_ref};
 use crate::loader::xml_frame_codegen::build_frame_lua_code;
 
 use finalize::finalize_frame;
@@ -81,6 +82,13 @@ fn build_and_setup_frame(
     intrinsic_base: Option<&str>,
 ) -> Result<(), LoadError> {
     let build_start = Instant::now();
+    let parent_ref_expr = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name(&prepared.parent)
+        .map(lua_frame_ref_by_id)
+        .unwrap_or_else(|| lua_global_ref(&prepared.parent));
     let lua_code = build_frame_lua_code(
         widget_type,
         &prepared.name,
@@ -88,6 +96,7 @@ fn build_and_setup_frame(
         &prepared.inherits,
         frame,
         &prepared.parent,
+        &parent_ref_expr,
     );
     timing.frame_code_build_time += build_start.elapsed();
     setup_frame(

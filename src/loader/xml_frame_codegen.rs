@@ -4,9 +4,7 @@
 //! instantiate a frame: CreateFrame call, parentKey, mixins, KeyValues,
 //! attributes, and script handlers.
 
-use super::helpers::{
-    escape_lua_string, generate_scripts_code, lua_global_ref, lua_table_field_ref,
-};
+use super::helpers::{escape_lua_string, generate_scripts_code, lua_table_field_ref};
 
 /// Build the complete Lua code string for creating a frame from XML.
 pub(super) fn build_frame_lua_code(
@@ -16,9 +14,16 @@ pub(super) fn build_frame_lua_code(
     inherits: &str,
     frame: &crate::xml::FrameXml,
     parent: &str,
+    parent_ref_expr: &str,
 ) -> String {
-    let mut lua_code = build_create_frame_code(widget_type, name, explicit_parent, inherits);
-    append_parent_key_code(&mut lua_code, frame, inherits, parent);
+    let mut lua_code = build_create_frame_code(
+        widget_type,
+        name,
+        explicit_parent,
+        inherits,
+        parent_ref_expr,
+    );
+    append_parent_key_code(&mut lua_code, frame, inherits, parent, parent_ref_expr);
     append_mixins_code(&mut lua_code, frame, inherits);
     append_key_values_code(&mut lua_code, frame, inherits);
     append_xml_attributes_code(&mut lua_code, frame);
@@ -38,6 +43,7 @@ fn build_create_frame_code(
     name: &str,
     parent: Option<&str>,
     inherits: &str,
+    parent_ref_expr: &str,
 ) -> String {
     let inherits_arg = if inherits.is_empty() {
         "nil".to_string()
@@ -51,13 +57,13 @@ fn build_create_frame_code(
         if name == p {
             return format!(
                 r#"
-        local frame = _G["{name}"]
+        local frame = {parent_ref_expr}
         "#,
             );
         }
     }
     let parent_arg = match parent {
-        Some(p) => format!("{} or UIParent", lua_global_ref(p)),
+        Some(_) => format!("{parent_ref_expr} or UIParent"),
         // Lua CreateFrame defaults nil parent to UIParent, so pass UIParent
         // here and orphan the frame with SetParent(nil) afterwards.
         None => "UIParent".to_string(),
@@ -86,19 +92,19 @@ fn append_parent_key_code(
     frame: &crate::xml::FrameXml,
     inherits: &str,
     parent: &str,
+    parent_ref_expr: &str,
 ) {
     if let Some(parent_key) = resolve_inherited_string(frame, inherits, |f| f.parent_key.as_ref()) {
-        let parent_ref = lua_global_ref(parent);
         if let Some(key) = parent_key.strip_prefix("$parent.") {
             let parent_field = lua_table_field_ref("__pk", key);
             lua_code.push_str(&format!(
                 r#"
         do local __pk = {}:GetParent(); if __pk then {} = frame end end
         "#,
-                parent_ref, parent_field
+                parent_ref_expr, parent_field
             ));
         } else {
-            let parent_field = lua_table_field_ref(&parent_ref, &parent_key);
+            let parent_field = lua_table_field_ref(parent_ref_expr, &parent_key);
             lua_code.push_str(&format!(
                 r#"
         {} = frame
@@ -107,7 +113,7 @@ fn append_parent_key_code(
             ));
         }
     }
-    append_parent_array_code(lua_code, frame, inherits, parent);
+    append_parent_array_code(lua_code, frame, inherits, parent, parent_ref_expr);
 }
 
 /// Append parentArray insertion when the attribute is directly on this frame.
@@ -118,11 +124,11 @@ fn append_parent_array_code(
     lua_code: &mut String,
     frame: &crate::xml::FrameXml,
     _inherits: &str,
-    parent: &str,
+    _parent: &str,
+    parent_ref_expr: &str,
 ) {
     if let Some(parent_array) = frame.parent_array.as_ref() {
-        let parent_ref = lua_global_ref(parent);
-        let array_ref = lua_table_field_ref(&parent_ref, parent_array);
+        let array_ref = lua_table_field_ref(parent_ref_expr, parent_array);
         lua_code.push_str(&format!(
             "\n        {array_ref} = {array_ref} or {{}}\n        \
              table.insert({array_ref}, frame)\n        ",
