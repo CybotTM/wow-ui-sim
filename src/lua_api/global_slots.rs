@@ -337,6 +337,45 @@ mod tests {
     use crate::lua_api::env::WowLuaAppData;
     use rilua::{Lua, LuaApi, LuaApiMut};
 
+    const TRACKED_FRAME_GLOBAL_CANDIDATES: &[&[u8]] = &[
+        b"MainMenuBar",
+        b"MainActionBar",
+        b"SettingsPanel",
+        b"PlayerSpellsFrame",
+        b"QuestFrame",
+        b"GossipFrame",
+        b"MerchantFrame",
+        b"CharacterFrame",
+        b"FriendsFrame",
+        b"LFGListFrame",
+    ];
+
+    fn tracked_global_idx(name: &[u8]) -> usize {
+        HOT_GLOBALS
+            .iter()
+            .position(|&candidate| candidate == name)
+            .map(|i| GLOBALS_BASE + i)
+            .unwrap_or_else(|| panic!("{} is in HOT_GLOBALS", String::from_utf8_lossy(name)))
+    }
+
+    fn find_absent_tracked_frame_global(slots: &GlobalSlotTable) -> (&'static [u8], usize) {
+        TRACKED_FRAME_GLOBAL_CANDIDATES
+            .iter()
+            .copied()
+            .find_map(|name| {
+                let idx = tracked_global_idx(name);
+                (slots.raw(idx) == Val::Nil).then_some((name, idx))
+            })
+            .unwrap_or_else(|| {
+                let names = TRACKED_FRAME_GLOBAL_CANDIDATES
+                    .iter()
+                    .map(|name| String::from_utf8_lossy(name).into_owned())
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                panic!("expected at least one absent tracked frame global, checked: {names}");
+            })
+    }
+
     #[test]
     fn slot_count_matches_whitelist_size() {
         assert_eq!(SLOT_COUNT, 1 + HOT_GLOBALS.len() + HOT_NAMESPACES.len());
@@ -398,22 +437,19 @@ mod tests {
         let state = lua.state();
         let app = state.app_data::<WowLuaAppData>().expect("app data");
         let slots = app.global_slots.as_ref().expect("global_slots");
-        let main_action_bar_idx = HOT_GLOBALS
-            .iter()
-            .position(|&name| name == b"MainActionBar")
-            .map(|i| GLOBALS_BASE + i)
-            .expect("MainActionBar is in HOT_GLOBALS");
-        assert_eq!(slots.raw(main_action_bar_idx), Val::Nil);
+        let (tracked_name, tracked_idx) = find_absent_tracked_frame_global(slots);
+        assert_eq!(slots.raw(tracked_idx), Val::Nil);
+        let tracked_name = String::from_utf8_lossy(tracked_name).into_owned();
 
         drop(lua);
-        env.exec(r#"_G.MainActionBar = true"#)
+        env.exec(&format!(r#"_G.{tracked_name} = true"#))
             .expect("write live _G value");
 
         let lua = env.lua.borrow();
         let state = lua.state();
         let app = state.app_data::<WowLuaAppData>().expect("app data");
         let slots = app.global_slots.as_ref().expect("global_slots");
-        let value = read_slot(state, slots, main_action_bar_idx);
+        let value = read_slot(state, slots, tracked_idx);
         assert_eq!(value, Val::Bool(true));
     }
 
@@ -484,17 +520,18 @@ mod tests {
         use rilua::vm::table::Table;
 
         let env = WowLuaEnv::new().expect("fresh wow lua env");
+        let tracked_name = {
+            let lua = env.lua.borrow();
+            let state = lua.state();
+            let app = state.app_data::<WowLuaAppData>().expect("app data");
+            let slots = app.global_slots.as_ref().expect("global slots");
+            let (tracked_name, tracked_idx) = find_absent_tracked_frame_global(slots);
+            assert_eq!(slots.raw(tracked_idx), Val::Nil);
+            String::from_utf8_lossy(tracked_name).into_owned()
+        };
         {
             let mut lua = env.lua.borrow_mut();
             let state = lua.state_mut();
-            let app = state.app_data::<WowLuaAppData>().expect("app data");
-            let slots = app.global_slots.as_ref().expect("global slots");
-            let main_action_bar_idx = HOT_GLOBALS
-                .iter()
-                .position(|&name| name == b"MainActionBar")
-                .map(|i| GLOBALS_BASE + i)
-                .expect("MainActionBar is in HOT_GLOBALS");
-            assert_eq!(slots.raw(main_action_bar_idx), Val::Nil);
 
             let live_ref = state.gc.alloc_table(Table::new());
             let live_key = state.gc.intern_string_static(G_LIVE_REGISTRY_KEY);
@@ -508,21 +545,19 @@ mod tests {
             }
         }
 
-        env.exec(r#"CreateFrame("Frame", "MainActionBar", UIParent)"#)
-            .expect("create tracked named frame");
+        env.exec(&format!(
+            r#"CreateFrame("Frame", "{tracked_name}", UIParent)"#
+        ))
+        .expect("create tracked named frame");
 
         let lua = env.lua.borrow();
         let state = lua.state();
         let app = state.app_data::<WowLuaAppData>().expect("app data");
         let slots = app.global_slots.as_ref().expect("global slots");
-        let main_action_bar_idx = HOT_GLOBALS
-            .iter()
-            .position(|&name| name == b"MainActionBar")
-            .map(|i| GLOBALS_BASE + i)
-            .expect("MainActionBar is in HOT_GLOBALS");
-        match slots.raw(main_action_bar_idx) {
+        let tracked_idx = tracked_global_idx(tracked_name.as_bytes());
+        match slots.raw(tracked_idx) {
             Val::Table(_) => {}
-            other => panic!("expected refreshed MainActionBar slot, got {other:?}"),
+            other => panic!("expected refreshed {tracked_name} slot, got {other:?}"),
         }
     }
 }
