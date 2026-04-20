@@ -703,21 +703,27 @@ fn resolve_addon_name(addon_names: &[String], owner: Option<u16>) -> Option<&str
     owner.and_then(|idx| addon_names.get(idx as usize).map(|s| s.as_str()))
 }
 
-/// Global name > parentKey > anonymous fallback.
+/// Prefer semantic child keys when the runtime name is a lowercase or
+/// synthetic fallback.
 fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> String {
-    if let Some(ref name) = frame.name
-        && !name.starts_with("__")
+    if let Some(parent_key) = frame.parent_key.as_deref()
+        && should_prefer_parent_key(frame.name.as_deref(), parent_key)
     {
-        return name.clone();
+        return format!(".{parent_key}");
     }
     if let Some(parent_id) = frame.parent_id
         && let Some(parent) = widgets.get(parent_id)
     {
         for (key, &child_id) in &parent.children_keys {
-            if child_id == id {
+            if child_id == id && should_prefer_parent_key(frame.name.as_deref(), key) {
                 return format!(".{key}");
             }
         }
+    }
+    if let Some(ref name) = frame.name
+        && !name.starts_with("__")
+    {
+        return name.clone();
     }
     // For anonymous frames with text, show a text preview
     if let Some(ref text) = frame.text {
@@ -727,6 +733,20 @@ fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> Str
         return format!("\"{text}\"");
     }
     frame.name.as_deref().unwrap_or("(anonymous)").to_string()
+}
+
+fn should_prefer_parent_key(name: Option<&str>, parent_key: &str) -> bool {
+    let Some(name) = name else {
+        return true;
+    };
+    if name.starts_with("__") {
+        return true;
+    }
+    if name.eq_ignore_ascii_case(parent_key) && name != parent_key {
+        return true;
+    }
+    name.chars().next().is_some_and(|c| c.is_ascii_lowercase())
+        && parent_key.chars().any(|c| c.is_ascii_uppercase())
 }
 
 fn resolve_display_text(widgets: &WidgetRegistry, frame: &Frame) -> Option<String> {

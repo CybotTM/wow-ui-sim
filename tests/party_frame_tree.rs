@@ -424,3 +424,69 @@ fn party_frame_dump_tree_excludes_builtin_ghost_frame() {
         );
     }
 }
+
+#[test]
+fn party_frame_member_frame1_uses_semantic_child_names() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+        env.exec("A_Admin.SetPartySize(4)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            "#,
+        )
+        .unwrap();
+
+        let state = env.state();
+        let sim = state.borrow();
+        let addon_names: Vec<String> = sim.addons.iter().map(|a| a.folder_name.clone()).collect();
+        let lines = build_tree(
+            &sim.widgets,
+            &addon_names,
+            None,
+            Some("PartyFrame"),
+            false,
+            false,
+            1024.0,
+            768.0,
+        );
+        let dump = lines.join("\n");
+
+        assert!(
+            dump.contains(".MemberFrame1 [Button] (120x53) visible LOW:2"),
+            "MemberFrame1 must be present in the dump, got:\n{dump}",
+        );
+        assert!(
+            dump.contains(".Portrait [Texture] (37x37) visible LOW:3"),
+            "MemberFrame1 portrait must keep the Blizzard parentKey name, got:\n{dump}",
+        );
+        assert!(
+            dump.contains(".Flash [Texture] (114x47) hidden LOW:3"),
+            "MemberFrame1 flash texture must keep the Blizzard parentKey name, got:\n{dump}",
+        );
+        assert!(
+            dump.contains(".Name [FontString] (57x12) visible LOW:3"),
+            "MemberFrame1 name fontstring must keep the Blizzard parentKey name, got:\n{dump}",
+        );
+        assert!(
+            dump.contains(".PowerBarAlt [Frame] (0x0) hidden LOW:3"),
+            "MemberFrame1.PowerBarAlt must be present, got:\n{dump}",
+        );
+        for expected in [
+            ".background [Texture] (0x0) visible LOW:4",
+            ".fill [Texture] (0x0) visible LOW:4",
+            ".frame [Texture] (0x0) visible LOW:4",
+            ".spark [Texture] (0x0) visible LOW:4",
+            ".BG [Texture] (16x64) visible LOW:5",
+            ".BGL [Texture] (32x64) visible LOW:5",
+            ".BGR [Texture] (32x64) visible LOW:5",
+        ] {
+            assert!(
+                dump.contains(expected),
+                "MemberFrame1.PowerBarAlt must expose semantic child `{expected}`, got:\n{dump}",
+            );
+        }
+    }
+}

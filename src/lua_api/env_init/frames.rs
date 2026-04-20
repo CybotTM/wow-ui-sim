@@ -93,7 +93,9 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
                     parent.children_keys.insert(key.clone(), child_id);
                 }
                 if let Some(child) = sim.widgets.get_mut_visual(child_id) {
-                    child.parent_key = Some(key);
+                    if child.parent_key.is_none() {
+                        child.parent_key = Some(key);
+                    }
                 }
             }
             return Ok(0);
