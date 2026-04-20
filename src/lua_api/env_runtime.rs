@@ -2,7 +2,7 @@ use super::env::WowLuaAppData;
 use super::env::WowLuaEnv;
 use super::env::next_timer_id;
 use super::env_init::{record_addon_time, update_threshold_counters};
-use super::state::{AddonInfo, PendingTimer, SimState};
+use super::state::{AddonInfo, AppFrameMetrics, PendingTimer, SimState};
 use super::timer_processing::{reschedule_timer, timer_should_wait};
 use crate::Result;
 use crate::font::WowFontSystem;
@@ -11,6 +11,7 @@ use crate::lua_api::script_helpers::call_error_handler;
 use crate::screen::ScreenKind;
 use rilua::{LuaApiMut, Val};
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
@@ -48,29 +49,8 @@ impl WowLuaEnv {
         state.screen_height = height;
         state.invalidate_strata_buckets();
         state.widgets.clear_all_layout_rects();
-        for name in &["UIParent", "WorldFrame"] {
-            if let Some(id) = state.widgets.get_id_by_name(name)
-                && let Some(frame) = state.widgets.get_mut_visual(id)
-            {
-                frame.width = width;
-                frame.height = height;
-            }
-        }
-        let _ = self.exec(&format!(
-            r#"
-            function GetScreenWidth()
-                return {width}
-            end
-
-            function GetScreenHeight()
-                return {height}
-            end
-
-            function GetPhysicalScreenSize()
-                return GetScreenWidth(), GetScreenHeight()
-            end
-            "#
-        ));
+        update_screen_widgets_for_dimensions(&mut state, width, height);
+        install_screen_size_globals(self, width, height);
     }
 
     /// Select which UI surface should be loaded.
@@ -78,32 +58,14 @@ impl WowLuaEnv {
         self.state.borrow_mut().set_screen_kind(screen_kind);
         let (aurora_state, connected_to_wow, wow_connection_state, has_realm_list) =
             screen_kind.login_state();
-        let is_glue = if screen_kind.is_glue() {
-            "true"
-        } else {
-            "false"
-        };
-        let _ = self.exec(&format!(
-            r#"
-            __wow_screen_mode_is_glue = {is_glue}
-            __wow_login_aurora_state = {aurora_state}
-            __wow_login_connected_to_wow = {connected_to_wow}
-            __wow_login_wow_connection_state = {wow_connection_state}
-            __wow_login_has_realm_list = {has_realm_list}
-
-            function InGlue()
-                return {is_glue}
-            end
-
-            if C_Glue == nil then
-                C_Glue = {{}}
-            end
-
-            function C_Glue.IsOnGlueScreen()
-                return {is_glue}
-            end
-            "#
-        ));
+        install_screen_mode_globals(
+            self,
+            screen_kind,
+            aurora_state,
+            connected_to_wow,
+            wow_connection_state,
+            has_realm_list,
+        );
     }
 
     /// Toggle whether the simulated player is logged into the world.
@@ -168,36 +130,8 @@ impl WowLuaEnv {
     /// Run ready timers and return how many callbacks fired.
     pub fn process_timers(&self) -> Result<usize> {
         let now = Instant::now();
-        let mut fired = 0usize;
-        let mut timers = {
-            let mut state = self.state.borrow_mut();
-            let mut pending = std::collections::VecDeque::new();
-            std::mem::swap(&mut pending, &mut state.rilua_timers);
-            pending
-        };
-
-        let mut requeue = std::collections::VecDeque::new();
-        while let Some(mut timer) = timers.pop_front() {
-            if timer_should_wait(&timer, now) {
-                requeue.push_back(timer);
-                continue;
-            }
-
-            let Some(callback) = self.timer_callback(timer.id) else {
-                continue;
-            };
-
-            self.fire_timer_callback(timer.owner_addon, callback);
-            fired += 1;
-
-            if reschedule_timer(&mut timer, now) {
-                requeue.push_back(timer);
-                continue;
-            }
-
-            self.remove_timer_callback(timer.id);
-        }
-
+        let timers = take_pending_timers(self);
+        let (fired, requeue) = process_timer_queue(self, timers, now);
         self.state.borrow_mut().rilua_timers = requeue;
         Ok(fired)
     }
@@ -254,72 +188,15 @@ impl WowLuaEnv {
     pub(crate) fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
         self.drain_addon_timing();
         let mut state = self.state.borrow_mut();
-        let app = &mut state.app_frame_metrics;
-        app.recent_frame_ms.push_back(frame_elapsed_ms);
-        if app.recent_frame_ms.len() > 60 {
-            app.recent_frame_ms.pop_front();
-        }
-        if frame_elapsed_ms > app.peak_ms {
-            app.peak_ms = frame_elapsed_ms;
-        }
-        app.session_total_ms += frame_elapsed_ms;
-        app.session_frame_count += 1;
-
-        for addon in &mut state.addons {
-            let ms = addon.runtime.current_frame_ms;
-            if ms > 0.0 {
-                addon.runtime.recent_frames.push_back(ms);
-                if addon.runtime.recent_frames.len() > 60 {
-                    addon.runtime.recent_frames.pop_front();
-                }
-                if ms > addon.runtime.peak_ms {
-                    addon.runtime.peak_ms = ms;
-                }
-                addon.runtime.session_total_ms += ms;
-                addon.runtime.session_frame_count += 1;
-                update_threshold_counters(&mut addon.runtime, ms);
-            }
-            addon.runtime.current_frame_ms = 0.0;
-        }
+        update_app_frame_metrics(&mut state.app_frame_metrics, frame_elapsed_ms);
+        update_addon_frame_metrics(&mut state.addons);
     }
 
     /// Fire `EDIT_MODE_LAYOUTS_UPDATED` with layout info from `C_EditMode.GetLayouts()`.
     pub fn fire_edit_mode_layouts_updated(&self) -> Result<()> {
-        let Ok(true) =
-            self.eval::<bool>("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
-        else {
+        let Some(info) = build_edit_mode_layouts_info(self)? else {
             return Ok(());
         };
-
-        let info = self.eval::<Val>(
-            r#"
-            local source = (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()
-            if type(source) ~= "table" then
-                return source
-            end
-
-            local filtered = {
-                layouts = {},
-                activeLayout = source.activeLayout or 1,
-            }
-            local editModeLayoutType = type(Enum) == "table" and Enum.EditModeLayoutType or nil
-
-            if type(source.layouts) ~= "table" then
-                return filtered
-            end
-
-            for _, layoutInfo in ipairs(source.layouts) do
-                local layoutType = type(layoutInfo) == "table" and layoutInfo.layoutType or nil
-                if editModeLayoutType == nil
-                    or layoutType == editModeLayoutType.Account
-                    or layoutType == editModeLayoutType.Character then
-                    table.insert(filtered.layouts, layoutInfo)
-                end
-            end
-
-            return filtered
-            "#,
-        )?;
         self.fire_event_with_args("EDIT_MODE_LAYOUTS_UPDATED", &[info, Val::Bool(true)])
     }
 
@@ -366,4 +243,177 @@ impl WowLuaEnv {
         let mut lua = self.lua.borrow_mut();
         crate::lua_api::timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
     }
+}
+
+fn update_screen_widgets_for_dimensions(state: &mut SimState, width: f32, height: f32) {
+    for name in &["UIParent", "WorldFrame"] {
+        if let Some(id) = state.widgets.get_id_by_name(name)
+            && let Some(frame) = state.widgets.get_mut_visual(id)
+        {
+            frame.width = width;
+            frame.height = height;
+        }
+    }
+}
+
+fn install_screen_size_globals(env: &WowLuaEnv, width: f32, height: f32) {
+    let _ = env.exec(&format!(
+        r#"
+        function GetScreenWidth()
+            return {width}
+        end
+
+        function GetScreenHeight()
+            return {height}
+        end
+
+        function GetPhysicalScreenSize()
+            return GetScreenWidth(), GetScreenHeight()
+        end
+        "#
+    ));
+}
+
+fn install_screen_mode_globals(
+    env: &WowLuaEnv,
+    screen_kind: ScreenKind,
+    aurora_state: i32,
+    connected_to_wow: bool,
+    wow_connection_state: i32,
+    has_realm_list: bool,
+) {
+    let is_glue = if screen_kind.is_glue() {
+        "true"
+    } else {
+        "false"
+    };
+    let _ = env.exec(&format!(
+        r#"
+        __wow_screen_mode_is_glue = {is_glue}
+        __wow_login_aurora_state = {aurora_state}
+        __wow_login_connected_to_wow = {connected_to_wow}
+        __wow_login_wow_connection_state = {wow_connection_state}
+        __wow_login_has_realm_list = {has_realm_list}
+
+        function InGlue()
+            return {is_glue}
+        end
+
+        if C_Glue == nil then
+            C_Glue = {{}}
+        end
+
+        function C_Glue.IsOnGlueScreen()
+            return {is_glue}
+        end
+        "#
+    ));
+}
+
+fn take_pending_timers(env: &WowLuaEnv) -> VecDeque<PendingTimer> {
+    let mut state = env.state.borrow_mut();
+    let mut pending = VecDeque::new();
+    std::mem::swap(&mut pending, &mut state.rilua_timers);
+    pending
+}
+
+fn process_timer_queue(
+    env: &WowLuaEnv,
+    mut timers: VecDeque<PendingTimer>,
+    now: Instant,
+) -> (usize, VecDeque<PendingTimer>) {
+    let mut fired = 0usize;
+    let mut requeue = VecDeque::new();
+    while let Some(mut timer) = timers.pop_front() {
+        if timer_should_wait(&timer, now) {
+            requeue.push_back(timer);
+            continue;
+        }
+
+        let Some(callback) = env.timer_callback(timer.id) else {
+            continue;
+        };
+
+        env.fire_timer_callback(timer.owner_addon, callback);
+        fired += 1;
+
+        if reschedule_timer(&mut timer, now) {
+            requeue.push_back(timer);
+            continue;
+        }
+
+        env.remove_timer_callback(timer.id);
+    }
+
+    (fired, requeue)
+}
+
+fn update_app_frame_metrics(metrics: &mut AppFrameMetrics, frame_elapsed_ms: f64) {
+    metrics.recent_frame_ms.push_back(frame_elapsed_ms);
+    if metrics.recent_frame_ms.len() > 60 {
+        metrics.recent_frame_ms.pop_front();
+    }
+    if frame_elapsed_ms > metrics.peak_ms {
+        metrics.peak_ms = frame_elapsed_ms;
+    }
+    metrics.session_total_ms += frame_elapsed_ms;
+    metrics.session_frame_count += 1;
+}
+
+fn update_addon_frame_metrics(addons: &mut [AddonInfo]) {
+    for addon in addons {
+        let ms = addon.runtime.current_frame_ms;
+        if ms > 0.0 {
+            addon.runtime.recent_frames.push_back(ms);
+            if addon.runtime.recent_frames.len() > 60 {
+                addon.runtime.recent_frames.pop_front();
+            }
+            if ms > addon.runtime.peak_ms {
+                addon.runtime.peak_ms = ms;
+            }
+            addon.runtime.session_total_ms += ms;
+            addon.runtime.session_frame_count += 1;
+            update_threshold_counters(&mut addon.runtime, ms);
+        }
+        addon.runtime.current_frame_ms = 0.0;
+    }
+}
+
+fn build_edit_mode_layouts_info(env: &WowLuaEnv) -> Result<Option<Val>> {
+    let Ok(true) = env.eval::<bool>("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
+    else {
+        return Ok(None);
+    };
+
+    let info = env.eval::<Val>(
+        r#"
+        local source = (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()
+        if type(source) ~= "table" then
+            return source
+        end
+
+        local filtered = {
+            layouts = {},
+            activeLayout = source.activeLayout or 1,
+        }
+        local editModeLayoutType = type(Enum) == "table" and Enum.EditModeLayoutType or nil
+
+        if type(source.layouts) ~= "table" then
+            return filtered
+        end
+
+        for _, layoutInfo in ipairs(source.layouts) do
+            local layoutType = type(layoutInfo) == "table" and layoutInfo.layoutType or nil
+            if editModeLayoutType == nil
+                or layoutType == editModeLayoutType.Account
+                or layoutType == editModeLayoutType.Character then
+                table.insert(filtered.layouts, layoutInfo)
+            end
+        end
+
+        return filtered
+        "#,
+    )?;
+
+    Ok(Some(info))
 }
