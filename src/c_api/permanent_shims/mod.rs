@@ -1,1 +1,2 @@
 pub mod c_map_api;
+pub mod c_model_info;

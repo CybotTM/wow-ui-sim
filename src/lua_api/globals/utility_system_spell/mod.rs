@@ -16,7 +16,9 @@ mod c_xml_util;
 mod spell_api;
 mod table_util;
 
-use crate::c_api::c_model_info;
+use crate::c_api::c_wowtoken_secure;
+use crate::c_api::permanent_shims::c_model_info;
+use crate::c_api::temporary_shims::c_lfg_info;
 use crate::lua_api::script_helpers::{
     call_error_handler_state, protected_call_state, protected_lua_pcall_state,
 };
@@ -540,8 +542,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> rilua::LuaResult<()> {
     c_addon_profiler::register_c_addon_profiler(state)?;
     c_spec::register_c_specialization_info(state)?;
     c_model_info::register_c_model_info(state)?;
-    c_model_info::register_c_lfg_info(state)?;
-    c_model_info::register_c_wowtoken_secure(state)?;
+    c_lfg_info::register_c_lfg_info(state)?;
+    c_wowtoken_secure::register_c_wowtoken_secure(state)?;
     c_texture::register_c_texture(state)?;
     c_xml_util::register_c_xml_util(state)?;
     c_addons::register_legacy_addon_globals(state)?;

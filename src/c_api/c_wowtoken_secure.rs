@@ -1,94 +1,16 @@
-//! C_ModelInfo, C_LFGInfo, C_WowTokenSecure stubs and wowtoken simulation.
+//! C_WowTokenSecure — token buy/sell/redeem simulation with event firing.
 
 use crate::lua_api::methods::{
     call_function_state, create_string, create_table, frame_ref, val_to_string,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_bridge::{stack_val, table_set_rust_fn, table_set_rust_fn_static};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 use crate::c_api::{ensure_global_table, global_val, set_global_val};
-
-// ── C_ModelInfo ──────────────────────────────────────────────────────────────
-
-pub fn register_c_model_info(state: &mut LuaState) -> LuaResult<()> {
-    let t = create_table(state);
-    let Val::Table(t_ref) = t else {
-        unreachable!("create_table must return a table");
-    };
-    register_model_scene_stubs(state, t_ref)?;
-    table_set_rust_fn_static(
-        state,
-        t_ref,
-        "GetModelSceneInfoByID",
-        c_model_info_get_model_scene_info_by_id,
-    )?;
-    set_global_val(state, "C_ModelInfo", t);
-    Ok(())
-}
-
-fn register_model_scene_stubs(state: &mut LuaState, t_ref: GcRef<Table>) -> LuaResult<()> {
-    const NOOPS: &[&str] = &[
-        "AddActiveModelScene",
-        "AddActiveModelSceneActor",
-        "ClearActiveModelScene",
-        "ClearActiveModelSceneActor",
-    ];
-    const EMPTY_TABLE_GETTERS: &[&str] = &[
-        "GetModelSceneActorDisplayInfoByID",
-        "GetModelSceneActorInfoByID",
-        "GetModelSceneCameraInfoByID",
-    ];
-    for name in NOOPS {
-        table_set_rust_fn_static(state, t_ref, name, |_state| Ok(0))?;
-    }
-    for name in EMPTY_TABLE_GETTERS {
-        table_set_rust_fn(state, t_ref, name, empty_table_result)?;
-    }
-    Ok(())
-}
-
-fn c_model_info_get_model_scene_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
-    let camera_ids = create_table(state);
-    let actor_ids = create_table(state);
-    state.push(Val::Num(0.0));
-    state.push(camera_ids);
-    state.push(actor_ids);
-    state.push(Val::Num(0.0));
-    Ok(4)
-}
-
-fn empty_table_result(state: &mut LuaState) -> LuaResult<u32> {
-    let table = create_table(state);
-    state.push(table);
-    Ok(1)
-}
-
-// ── C_LFGInfo ────────────────────────────────────────────────────────────────
-
-pub fn register_c_lfg_info(state: &mut LuaState) -> LuaResult<()> {
-    let t = ensure_global_table(state, "C_LFGInfo");
-    let Val::Table(t_ref) = t else {
-        unreachable!("C_LFGInfo must be a table");
-    };
-    table_set_rust_fn_static(state, t_ref, "GetDungeonInfo", empty_table_result)?;
-    table_set_rust_fn_static(state, t_ref, "GetLFDLockStates", empty_table_result)?;
-    table_set_rust_fn_static(state, t_ref, "GetAllEntriesForCategory", empty_table_result)?;
-    table_set_rust_fn_static(state, t_ref, "CanPlayerUseLFD", c_lfg_info_can_player_use)?;
-    table_set_rust_fn_static(state, t_ref, "CanPlayerUseLFR", c_lfg_info_can_player_use)?;
-    Ok(())
-}
-
-fn c_lfg_info_can_player_use(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
-    state.push(Val::Nil);
-    Ok(2)
-}
-
-// ── C_WowTokenSecure ─────────────────────────────────────────────────────────
 
 const WOWTOKEN_SECURE_FUNCTIONS: &[(&str, rilua::vm::closure::RustFn)] = &[
     ("CanRedeemForBalance", c_wowtoken_can_redeem_for_balance),
@@ -134,8 +56,6 @@ pub fn register_c_wowtoken_secure(state: &mut LuaState) -> LuaResult<()> {
     }
     Ok(())
 }
-
-// ── WowToken state helpers ────────────────────────────────────────────────────
 
 fn wowtoken_state_table(state: &mut LuaState) -> Val {
     match global_val(state, "__wowtoken_state") {
@@ -225,8 +145,6 @@ fn wowtoken_set_pending_redeem_type(state: &mut LuaState, value: Option<i32>) {
     let v = value.map_or(Val::Nil, |n| Val::Num(n as f64));
     wowtoken_set(state, "pendingRedeemType", v);
 }
-
-// ── WowToken API functions ────────────────────────────────────────────────────
 
 fn fire_named_event(state: &mut LuaState, event_name: &str) {
     for widget_id in get_event_listeners(state, event_name) {
