@@ -368,7 +368,7 @@ fn get_achievement_criteria_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
     push_criterion_multiret(state, achievement_id, criterion)?;
-    Ok(5)
+    Ok(13)
 }
 
 fn get_previous_achievement(state: &mut LuaState) -> LuaResult<u32> {
@@ -576,11 +576,24 @@ fn push_criterion_multiret(
         0
     };
     let name = create_string(state, criterion.name);
+    let char_name = create_string(state, "");
+    let quantity_string = create_string(
+        state,
+        &format!("{quantity}/{}", criterion.required_quantity),
+    );
     state.push(name);
     state.push(Val::Num(0.0));
     state.push(Val::Bool(completed));
     state.push(Val::Num(quantity as f64));
     state.push(Val::Num(criterion.required_quantity as f64));
+    state.push(char_name);
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(quantity_string);
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(true));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
     Ok(())
 }
 

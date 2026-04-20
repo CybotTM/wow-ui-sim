@@ -331,7 +331,7 @@ fn test_previous_and_next_achievement_handle_category_edges_and_completion() {
 }
 
 #[test]
-fn test_latest_completed_achievements_returns_completed_ids() {
+fn test_latest_completed_achievements_returns_varargs_ids() {
     let env = env();
     env.exec(
         r#"
@@ -342,10 +342,10 @@ fn test_latest_completed_achievements_returns_completed_ids() {
     .unwrap();
     let (count, first, second): (i32, i32, i32) = env
         .eval(
-            r#"
-            local ids = GetLatestCompletedAchievements(false)
-            return #ids, ids[1], ids[2]
-            "#,
+            r##"
+            local first, second = GetLatestCompletedAchievements(false)
+            return select("#", GetLatestCompletedAchievements(false)), first, second
+            "##,
         )
         .unwrap();
     assert_eq!(count, 2);
@@ -385,6 +385,61 @@ fn test_achievement_criteria_info_returns_name() {
         .eval("return GetAchievementCriteriaInfo(948, 1)")
         .unwrap();
     assert_eq!(name, "Exalted with Stormwind");
+}
+
+#[test]
+fn test_achievement_criteria_info_matches_blizzard_multiret_shape() {
+    let env = env();
+    let (
+        name,
+        criteria_type,
+        completed,
+        quantity,
+        required_quantity,
+        char_name,
+        criteria_flags,
+        asset_id,
+        quantity_string,
+        criteria_id,
+        eligible,
+        duration,
+        elapsed,
+    ): (
+        String,
+        i32,
+        bool,
+        i32,
+        i32,
+        String,
+        i32,
+        i32,
+        String,
+        i32,
+        bool,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local name, criteriaType, completed, quantity, reqQuantity, charName, criteriaFlags, assetID, quantityString, criteriaID, eligible, duration, elapsed =
+                GetAchievementCriteriaInfo(948, 1)
+            return name, criteriaType, completed, quantity, reqQuantity, charName, criteriaFlags, assetID, quantityString, criteriaID, eligible, duration, elapsed
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Exalted with Stormwind");
+    assert_eq!(criteria_type, 0);
+    assert!(!completed);
+    assert_eq!(quantity, 0);
+    assert_eq!(required_quantity, 1);
+    assert_eq!(char_name, "");
+    assert_eq!(criteria_flags, 0);
+    assert_eq!(asset_id, 0);
+    assert_eq!(quantity_string, "0/1");
+    assert_eq!(criteria_id, 0);
+    assert!(eligible);
+    assert_eq!(duration, 0);
+    assert_eq!(elapsed, 0);
 }
 
 #[test]
