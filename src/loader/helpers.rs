@@ -448,7 +448,7 @@ fn handler_params(handler_name: &str) -> &'static str {
     match handler_name {
         "OnUpdate" => "self, elapsed",
         "OnEvent" => "self, event, ...",
-        "OnClick" => "self, button, down",
+        "OnClick" | "OnDoubleClick" => "self, button, down",
         "OnEnter" | "OnLeave" => "self, motion",
         "OnMouseDown" | "OnMouseUp" => "self, button",
         "OnValueChanged" => "self, value",
@@ -508,6 +508,7 @@ fn frame_lifecycle_handlers(scripts: &crate::xml::ScriptsXml) -> String {
             ("OnEvent", scripts.on_event.last()),
             ("OnUpdate", scripts.on_update.last()),
             ("OnClick", scripts.on_click.last()),
+            ("OnDoubleClick", scripts.on_double_click.last()),
             ("PreClick", scripts.pre_click.last()),
             ("PostClick", scripts.post_click.last()),
             ("OnShow", scripts.on_show.last()),

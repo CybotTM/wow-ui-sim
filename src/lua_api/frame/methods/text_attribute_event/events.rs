@@ -327,6 +327,7 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
         "OnClick" | "PreClick" | "PostClick" => {
             matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
         }
+        "OnDoubleClick" => true,
         "OnEnable" | "OnDisable" => matches!(
             widget_type,
             WidgetType::Button

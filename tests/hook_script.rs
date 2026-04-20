@@ -178,3 +178,25 @@ fn test_has_script_returns_true_for_base_handlers_on_frame() {
         "Frame should support base handlers OnShow, OnUpdate, OnEvent"
     );
 }
+
+#[test]
+fn test_set_script_allows_ondoubleclick_on_plain_frame() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame")
+        f:SetScript("OnDoubleClick", function() end)
+    "#,
+    )
+    .unwrap();
+    let has_script: bool = env
+        .eval(
+            r#"
+        local f = CreateFrame("Frame")
+        f:SetScript("OnDoubleClick", function() end)
+        return f:HasScript("OnDoubleClick")
+    "#,
+        )
+        .unwrap();
+    assert!(has_script, "Plain Frame should accept OnDoubleClick");
+}

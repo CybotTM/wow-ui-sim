@@ -165,6 +165,8 @@ pub struct ScriptsXml {
     pub on_update: Vec<ScriptBodyXml>,
     #[serde(rename = "OnClick", default)]
     pub on_click: Vec<ScriptBodyXml>,
+    #[serde(rename = "OnDoubleClick", default)]
+    pub on_double_click: Vec<ScriptBodyXml>,
     #[serde(rename = "OnShow", default)]
     pub on_show: Vec<ScriptBodyXml>,
     #[serde(rename = "OnHide", default)]

@@ -63,7 +63,10 @@ fn test_xml_frame_with_layers_and_scripts() {
                     <Button name="TestXMLFrame_CloseBtn" parentKey="closeBtn">
                         <Size x="80" y="22"/>
                         <Anchors><Anchor point="BOTTOM" y="10"/></Anchors>
-                        <Scripts><OnClick>XML_ONCLICK_FIRED = true</OnClick></Scripts>
+                        <Scripts>
+                            <OnClick>XML_ONCLICK_FIRED = true</OnClick>
+                            <OnDoubleClick>XML_ONDOUBLECLICK_FIRED = true</OnDoubleClick>
+                        </Scripts>
                     </Button>
                 </Frames>
             </Frame>
@@ -169,6 +172,7 @@ fn assert_layers_and_scripts_children(t: &TestCtx) {
         "closeBtn should exist via parentKey",
     );
     t.assert_script_set("TestXMLFrame_CloseBtn", "OnClick");
+    t.assert_script_set("TestXMLFrame_CloseBtn", "OnDoubleClick");
 }
 
 #[test]
