@@ -37,6 +37,13 @@ struct SimpleHtmlTextDataSnapshot {
     text_styles: HashMap<String, TextStyle>,
 }
 
+#[derive(Copy, Clone)]
+struct FormattedTextUpdateState {
+    text_matches: bool,
+    width_is_text_auto: bool,
+    current_width: f32,
+}
+
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = read_text_arg(state, 2);
@@ -759,65 +766,109 @@ fn check_vertical_overflow(state: &LuaState, id: u64, p: &TruncationProps) -> bo
 
 pub(super) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let format = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
-    let nargs = (state.top as i32 - state.base as i32) as usize;
-    let mut args = Vec::with_capacity(nargs.saturating_sub(1));
-    args.push(create_string(state, &format));
-    for index in 3..=nargs {
-        args.push(stack_val(state, index as i32));
-    }
-    let formatter = table_get(state, Val::Table(state.global), "format");
-    let formatted = call_function_state(state, formatter, &args)?;
-    let formatted_text = val_to_string(state, formatted).unwrap_or(format);
-
-    let (text_matches, width_is_auto, current_width) = {
-        let sim = borrow_state(state)?;
-        let Some(frame) = sim.widgets.get(id) else {
-            return Ok(0);
-        };
-        let current_text = frame_text_value(&sim, frame, false);
-        let current_stripped_text = frame_text_value(&sim, frame, true);
-        (
-            current_text.as_deref() == Some(formatted_text.as_str())
-                && current_stripped_text.as_deref() == Some(formatted_text.as_str()),
-            frame.width_is_text_auto,
-            frame.width,
-        )
-    };
-    let should_skip = if !text_matches {
-        false
-    } else if !width_is_auto && current_width > 0.0 {
-        true
-    } else {
-        let measured_width = measure_text_width(state, id) as f32;
-        (current_width - measured_width).abs() <= 0.5
-    };
-    if should_skip {
+    let formatted_text = format_text_arg(state)?;
+    if should_skip_formatted_text_update(state, id, &formatted_text)? {
         return Ok(0);
     }
 
-    let formatted_value = create_string(state, &formatted_text);
-    state.stack_set(2, formatted_value);
-
+    replace_text_stack_arg(state, &formatted_text);
     set_text(state)?;
+    ensure_intrinsic_formatted_text_width(state, id)?;
+    Ok(0)
+}
 
+fn format_text_arg(state: &mut LuaState) -> LuaResult<String> {
+    let format = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    let formatter = table_get(state, Val::Table(state.global), "format");
+    let args = collect_format_args(state, &format);
+    let formatted = call_function_state(state, formatter, &args)?;
+    Ok(val_to_string(state, formatted).unwrap_or(format))
+}
+
+fn collect_format_args(state: &mut LuaState, format: &str) -> Vec<Val> {
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let mut args = Vec::with_capacity(nargs.saturating_sub(1));
+    args.push(create_string(state, format));
+    for index in 3..=nargs {
+        args.push(stack_val(state, index as i32));
+    }
+    args
+}
+
+fn should_skip_formatted_text_update(
+    state: &mut LuaState,
+    id: u64,
+    formatted_text: &str,
+) -> LuaResult<bool> {
+    let Some(update_state) = read_formatted_text_update_state(state, id, formatted_text)? else {
+        return Ok(true);
+    };
+    if !update_state.text_matches {
+        return Ok(false);
+    }
+    if let Some(skip) = skip_matching_formatted_text(update_state, None) {
+        return Ok(skip);
+    }
+    let measured_width = measure_text_width(state, id) as f32;
+    Ok(skip_matching_formatted_text(update_state, Some(measured_width)).unwrap_or(false))
+}
+
+fn read_formatted_text_update_state(
+    state: &LuaState,
+    id: u64,
+    formatted_text: &str,
+) -> LuaResult<Option<FormattedTextUpdateState>> {
+    let sim = borrow_state(state)?;
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(None);
+    };
+    let current_text = frame_text_value(&sim, frame, false);
+    let current_stripped_text = frame_text_value(&sim, frame, true);
+    Ok(Some(FormattedTextUpdateState {
+        text_matches: current_text.as_deref() == Some(formatted_text)
+            && current_stripped_text.as_deref() == Some(formatted_text),
+        width_is_text_auto: frame.width_is_text_auto,
+        current_width: frame.width,
+    }))
+}
+
+fn skip_matching_formatted_text(
+    update_state: FormattedTextUpdateState,
+    measured_width: Option<f32>,
+) -> Option<bool> {
+    if !update_state.text_matches {
+        return Some(false);
+    }
+    if !update_state.width_is_text_auto && update_state.current_width > 0.0 {
+        return Some(true);
+    }
+    measured_width.map(|width| (update_state.current_width - width).abs() <= 0.5)
+}
+
+fn replace_text_stack_arg(state: &mut LuaState, text: &str) {
+    let formatted_value = create_string(state, text);
+    state.stack_set(2, formatted_value);
+}
+
+fn ensure_intrinsic_formatted_text_width(state: &mut LuaState, id: u64) -> LuaResult<()> {
     let needs_intrinsic_width = {
         let sim = borrow_state(state)?;
         sim.widgets.get(id).is_some_and(|frame| {
             frame.width <= 0.0 && !frame.text.as_deref().unwrap_or("").is_empty()
         })
     };
-    if needs_intrinsic_width {
-        let width = measure_text_width(state, id) as f32;
-        let mut sim = borrow_state_mut(state)?;
-        if let Some(frame) = sim.widgets.get_mut_visual(id)
-            && frame.width <= 0.0
-        {
-            frame.width = width;
-        }
+    if !needs_intrinsic_width {
+        return Ok(());
     }
 
-    Ok(0)
+    let width = measure_text_width(state, id) as f32;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id)
+        && frame.width <= 0.0
+    {
+        frame.width = width;
+    }
+    Ok(())
 }
 
 pub(super) fn set_font(state: &mut LuaState) -> LuaResult<u32> {
@@ -1365,7 +1416,7 @@ pub(super) fn set_text_scale(state: &mut LuaState) -> LuaResult<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::prepare_stripped_text;
+    use super::{FormattedTextUpdateState, prepare_stripped_text, skip_matching_formatted_text};
     use crate::widget::WidgetType;
 
     #[test]
@@ -1384,5 +1435,30 @@ mod tests {
             Some("|cff00ff00Hello|r".to_string()),
         );
         assert_eq!(stripped.as_deref(), Some("Hello"));
+    }
+
+    #[test]
+    fn skip_matching_formatted_text_skips_when_text_matches_and_width_is_stable() {
+        let update_state = FormattedTextUpdateState {
+            text_matches: true,
+            width_is_text_auto: true,
+            current_width: 24.0,
+        };
+
+        assert_eq!(
+            skip_matching_formatted_text(update_state, Some(24.2)),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn skip_matching_formatted_text_requires_measurement_for_auto_width() {
+        let update_state = FormattedTextUpdateState {
+            text_matches: true,
+            width_is_text_auto: true,
+            current_width: 24.0,
+        };
+
+        assert_eq!(skip_matching_formatted_text(update_state, None), None);
     }
 }
