@@ -104,6 +104,97 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
+#[derive(Debug)]
+struct ChatVoiceButtonSurface {
+    button_width: f64,
+    button_height: f64,
+    icon_width: f64,
+    icon_height: f64,
+    icon_points: f64,
+    point: String,
+    relative_name: String,
+    relative_point: String,
+    offset_x: f64,
+    offset_y: f64,
+    normal_atlas: String,
+    icon_atlas_count: f64,
+}
+
+fn read_chat_voice_button_surface(env: &WowLuaEnv) -> ChatVoiceButtonSurface {
+    let (
+        button_width,
+        button_height,
+        icon_width,
+        icon_height,
+        icon_points,
+        point,
+        relative_name,
+        relative_point,
+        offset_x,
+        offset_y,
+        normal_atlas,
+        icon_atlas_count,
+    ): (
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        String,
+        String,
+        String,
+        f64,
+        f64,
+        String,
+        f64,
+    ) = env
+        .eval(
+            r#"
+            local button = ChatFrameChannelButton
+            assert(button, "ChatFrameChannelButton should exist")
+            local icon = button.Icon
+            assert(icon, "ChatFrameChannelButton.Icon should exist")
+            local point, relativeTo, relativePoint, offsetX, offsetY = icon:GetPoint(1)
+            local iconAtlasCount = 0
+            for _, child in ipairs({ button:GetChildren() }) do
+                if child:GetObjectType() == "Texture" and child:GetAtlas() == "chatframe-button-icon-voicechat" then
+                    iconAtlasCount = iconAtlasCount + 1
+                end
+            end
+            local normalTexture = button:GetNormalTexture()
+            local normalAtlas = normalTexture and normalTexture:GetAtlas() or ""
+            return button:GetWidth(),
+                   button:GetHeight(),
+                   icon:GetWidth(),
+                   icon:GetHeight(),
+                   icon:GetNumPoints(),
+                   point or "",
+                   relativeTo and relativeTo:GetName() or "",
+                   relativePoint or "",
+                   offsetX or 0,
+                   offsetY or 0,
+                   normalAtlas,
+                   iconAtlasCount
+        "#,
+        )
+        .expect("chat voice button geometry eval failed");
+
+    ChatVoiceButtonSurface {
+        button_width,
+        button_height,
+        icon_width,
+        icon_height,
+        icon_points,
+        point,
+        relative_name,
+        relative_point,
+        offset_x,
+        offset_y,
+        normal_atlas,
+        icon_atlas_count,
+    }
+}
+
 fn chat_layout_debug(env: &WowLuaEnv) -> String {
     env.eval(CHAT_LAYOUT_DEBUG_LUA)
         .expect("chat layout debug eval failed")
@@ -533,63 +624,44 @@ fn test_chat_frame2_can_be_enabled_explicitly() {
 fn test_chat_voice_button_uses_template_sized_centered_icon() {
     test_timeout! {
         let env = setup_env();
-
-        let (button_width, button_height, icon_width, icon_height, icon_points, point, relative_name, relative_point, offset_x, offset_y, normal_atlas, icon_atlas_count): (f64, f64, f64, f64, f64, String, String, String, f64, f64, String, f64) = env
-            .eval(
-                r#"
-                local button = ChatFrameChannelButton
-                assert(button, "ChatFrameChannelButton should exist")
-                local icon = button.Icon
-                assert(icon, "ChatFrameChannelButton.Icon should exist")
-                local point, relativeTo, relativePoint, offsetX, offsetY = icon:GetPoint(1)
-                local iconAtlasCount = 0
-                for _, child in ipairs({ button:GetChildren() }) do
-                    if child:GetObjectType() == "Texture" and child:GetAtlas() == "chatframe-button-icon-voicechat" then
-                        iconAtlasCount = iconAtlasCount + 1
-                    end
-                end
-                return button:GetWidth(),
-                       button:GetHeight(),
-                       icon:GetWidth(),
-                       icon:GetHeight(),
-                       icon:GetNumPoints(),
-                       point or "",
-                       relativeTo and relativeTo:GetName() or "",
-                       relativePoint or "",
-                       offsetX or 0,
-                       offsetY or 0,
-                       button:GetNormalTexture() and button:GetNormalTexture():GetAtlas() or "",
-                       iconAtlasCount
-            "#,
-            )
-            .expect("chat voice button geometry eval failed");
+        let surface = read_chat_voice_button_surface(&env);
 
         assert!(
-            normal_atlas == "chatframe-button-up",
-            "ChatFrameChannelButton should keep its atlas-backed normal texture, got {normal_atlas:?}"
+            surface.normal_atlas == "chatframe-button-up",
+            "ChatFrameChannelButton should keep its atlas-backed normal texture, got {:?}",
+            surface.normal_atlas
         );
         assert!(
-            (icon_atlas_count - 1.0).abs() < 0.01,
-            "ChatFrameChannelButton should expose exactly one voice icon texture child, got {icon_atlas_count}"
+            (surface.icon_atlas_count - 1.0).abs() < 0.01,
+            "ChatFrameChannelButton should expose exactly one voice icon texture child, got {}",
+            surface.icon_atlas_count
         );
         assert!(
-            (button_width - 27.0).abs() < 0.01 && (button_height - 26.0).abs() < 0.01,
-            "voice button should keep the VoiceToggleButtonTemplate button size, got {button_width}x{button_height}"
+            (surface.button_width - 27.0).abs() < 0.01
+                && (surface.button_height - 26.0).abs() < 0.01,
+            "voice button should keep the VoiceToggleButtonTemplate button size, got {}x{}",
+            surface.button_width,
+            surface.button_height
         );
         assert!(
-            (icon_width - 15.0).abs() < 0.01 && (icon_height - 15.0).abs() < 0.01,
-            "voice button icon should keep the template's fixed 15x15 size instead of stretching to the full button, got {icon_width}x{icon_height}"
+            (surface.icon_width - 15.0).abs() < 0.01
+                && (surface.icon_height - 15.0).abs() < 0.01,
+            "voice button icon should keep the template's fixed 15x15 size instead of stretching to the full button, got {}x{}",
+            surface.icon_width,
+            surface.icon_height
         );
         assert_eq!(
-            icon_points, 1.0,
+            surface.icon_points, 1.0,
             "voice button icon should use a single centered point, not SetAllPoints semantics"
         );
-        assert_eq!(point, "CENTER");
-        assert_eq!(relative_name, "ChatFrameChannelButton");
-        assert_eq!(relative_point, "CENTER");
+        assert_eq!(surface.point, "CENTER");
+        assert_eq!(surface.relative_name, "ChatFrameChannelButton");
+        assert_eq!(surface.relative_point, "CENTER");
         assert!(
-            offset_x.abs() < 0.01 && offset_y.abs() < 0.01,
-            "voice button icon should stay centered with zero offset, got ({offset_x}, {offset_y})"
+            surface.offset_x.abs() < 0.01 && surface.offset_y.abs() < 0.01,
+            "voice button icon should stay centered with zero offset, got ({}, {})",
+            surface.offset_x,
+            surface.offset_y
         );
     }
 }
