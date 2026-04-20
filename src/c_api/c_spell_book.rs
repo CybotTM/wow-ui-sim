@@ -17,6 +17,17 @@ use rilua::{LuaResult, Val};
 
 pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_SpellBook")?;
+    register_spell_book_skill_line_queries(state, table_ref)?;
+    register_spell_book_item_queries(state, table_ref)?;
+    register_spell_book_item_actions(state, table_ref)?;
+    register_spell_book_state_queries(state, table_ref)?;
+    Ok(())
+}
+
+fn register_spell_book_skill_line_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -29,6 +40,22 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         "GetSpellBookSkillLineInfo",
         c_spell_book_get_spell_book_skill_line_info,
     )?;
+    Ok(())
+}
+
+fn register_spell_book_item_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_spell_book_item_identity_queries(state, table_ref)?;
+    register_spell_book_item_runtime_queries(state, table_ref)?;
+    Ok(())
+}
+
+fn register_spell_book_item_identity_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -47,6 +74,22 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         "GetSpellBookItemType",
         c_spell_book_get_spell_book_item_type,
     )?;
+    Ok(())
+}
+
+fn register_spell_book_item_runtime_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_spell_book_item_visual_queries(state, table_ref)?;
+    register_spell_book_item_status_queries(state, table_ref)?;
+    Ok(())
+}
+
+fn register_spell_book_item_visual_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -59,6 +102,13 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         "GetSpellBookItemTexture",
         c_spell_book_get_spell_book_item_texture,
     )?;
+    Ok(())
+}
+
+fn register_spell_book_item_status_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -71,6 +121,19 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         "GetSpellBookItemPowerCost",
         c_spell_book_get_spell_book_item_power_cost,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetSpellBookItemLossOfControlCooldownInfo",
+        c_spell_book_get_spell_book_item_loss_of_control_cooldown_info,
+    )?;
+    Ok(())
+}
+
+fn register_spell_book_item_actions(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -89,12 +152,22 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         "IsSpellInSpellBook",
         c_spell_book_is_spell_in_spell_book,
     )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetSpellBookItemLossOfControlCooldownInfo",
-        c_spell_book_get_spell_book_item_loss_of_control_cooldown_info,
-    )?;
+    Ok(())
+}
+
+fn register_spell_book_state_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
+    register_spell_book_override_queries(state, table_ref)?;
+    register_spell_book_owned_state_queries(state, table_ref)?;
+    Ok(())
+}
+
+fn register_spell_book_override_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -107,6 +180,13 @@ pub(crate) fn register_c_spell_book(state: &mut LuaState) -> LuaResult<()> {
         "FindSpellOverrideByID",
         c_spell_book_get_override_spell,
     )?;
+    Ok(())
+}
+
+fn register_spell_book_owned_state_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -138,6 +218,48 @@ fn spell_power_min_cost(player_power_max: f32, cost: &crate::spell_power::SpellP
     0
 }
 
+fn set_spell_power_cost_identity_fields(
+    state: &mut LuaState,
+    info: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    cost: &crate::spell_power::SpellPowerCost,
+    power_name: Val,
+) {
+    let info = Val::Table(info);
+    table_set(state, info, "type", Val::Num(cost.power_type as f64));
+    table_set(state, info, "name", power_name);
+    table_set(
+        state,
+        info,
+        "requiredAuraID",
+        Val::Num(cost.required_aura_id as f64),
+    );
+    table_set(
+        state,
+        info,
+        "hasRequiredAura",
+        Val::Bool(cost.required_aura_id == 0),
+    );
+}
+
+fn set_spell_power_cost_amount_fields(
+    state: &mut LuaState,
+    info: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    cost: &crate::spell_power::SpellPowerCost,
+    min_cost: i32,
+    total_cost: i32,
+) {
+    let info = Val::Table(info);
+    table_set(state, info, "cost", Val::Num(total_cost as f64));
+    table_set(state, info, "minCost", Val::Num(min_cost as f64));
+    table_set(state, info, "costPercent", Val::Num(cost.cost_pct as f64));
+    table_set(
+        state,
+        info,
+        "costPerSec",
+        Val::Num(cost.cost_per_sec as f64),
+    );
+}
+
 fn build_spell_power_cost_info(
     state: &mut LuaState,
     cost: &crate::spell_power::SpellPowerCost,
@@ -151,44 +273,8 @@ fn build_spell_power_cost_info(
     let total_cost = min_cost + cost.optional_cost.max(0);
     let power_name = create_string(state, crate::spell_power::power_type_name(cost.power_type));
 
-    table_set(
-        state,
-        Val::Table(info),
-        "type",
-        Val::Num(cost.power_type as f64),
-    );
-    table_set(state, Val::Table(info), "name", power_name);
-    table_set(state, Val::Table(info), "cost", Val::Num(total_cost as f64));
-    table_set(
-        state,
-        Val::Table(info),
-        "minCost",
-        Val::Num(min_cost as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "costPercent",
-        Val::Num(cost.cost_pct as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "costPerSec",
-        Val::Num(cost.cost_per_sec as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "requiredAuraID",
-        Val::Num(cost.required_aura_id as f64),
-    );
-    table_set(
-        state,
-        Val::Table(info),
-        "hasRequiredAura",
-        Val::Bool(cost.required_aura_id == 0),
-    );
+    set_spell_power_cost_identity_fields(state, info, cost, power_name);
+    set_spell_power_cost_amount_fields(state, info, cost, min_cost, total_cost);
 
     Some(Val::Table(info))
 }
@@ -412,6 +498,18 @@ fn c_spell_book_get_spell_book_skill_line_info(state: &mut LuaState) -> LuaResul
     };
 
     let info = create_table(state);
+    set_skill_line_identity_fields(state, info, index, skill_line);
+    set_skill_line_spec_fields(state, info, skill_line);
+    state.push(info);
+    Ok(1)
+}
+
+fn set_skill_line_identity_fields(
+    state: &mut LuaState,
+    info: Val,
+    index: i32,
+    skill_line: &spellbook_data::SkillLineData,
+) {
     let name = create_string(state, skill_line.name);
     table_set(state, info, "name", name);
     table_set(
@@ -426,6 +524,14 @@ fn c_spell_book_get_spell_book_skill_line_info(state: &mut LuaState) -> LuaResul
         "numSpellBookItems",
         Val::Num(skill_line.spells.len() as f64),
     );
+    table_set(state, info, "iconID", Val::Num(skill_line.icon_id as f64));
+}
+
+fn set_skill_line_spec_fields(
+    state: &mut LuaState,
+    info: Val,
+    skill_line: &spellbook_data::SkillLineData,
+) {
     table_set(
         state,
         info,
@@ -445,9 +551,6 @@ fn c_spell_book_get_spell_book_skill_line_info(state: &mut LuaState) -> LuaResul
             .unwrap_or(Val::Nil),
     );
     table_set(state, info, "shouldHide", Val::Bool(false));
-    table_set(state, info, "iconID", Val::Num(skill_line.icon_id as f64));
-    state.push(info);
-    Ok(1)
 }
 
 fn c_spell_book_has_pet_spells(state: &mut LuaState) -> LuaResult<u32> {
