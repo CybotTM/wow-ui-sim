@@ -7,53 +7,73 @@ fn env() -> WowLuaEnv {
 
 fn seed_sample_pet_battle(env: &WowLuaEnv) {
     let mut sim = env.state().borrow_mut();
+    seed_sample_pet_battle_state(&mut sim);
+    sim.pet_battles.player_pets = seeded_player_pets();
+    sim.pet_battles.enemy_pets = seeded_enemy_pets();
+}
+
+fn seed_sample_pet_battle_state(sim: &mut wow_ui_sim::lua_api::state::SimState) {
     sim.pet_battles.num_pets_player = 3;
     sim.pet_battles.num_pets_enemy = 2;
     sim.pet_battles.battle_state = 1;
     sim.pet_battles.active_pet_player = 1;
     sim.pet_battles.active_pet_enemy = 1;
-    sim.pet_battles.player_pets = vec![
-        PetBattlePet {
-            name: "Arcane Familiar".into(),
-            species_id: 1,
-            level: 25,
-            max_health: 1420,
-            current_health: 1120,
-            power: 18,
-            speed: 21,
-            pet_type: 7,
-            ability_ids: vec![1001, 1002],
-            xp: 45,
-            max_xp: 100,
-        },
-        PetBattlePet {
-            name: "Clockwork Hopper".into(),
-            species_id: 2,
-            level: 24,
-            max_health: 1180,
-            current_health: 910,
-            power: 15,
-            speed: 17,
-            pet_type: 9,
-            ability_ids: vec![1003],
-            xp: 15,
-            max_xp: 100,
-        },
-        PetBattlePet {
-            name: "Frost Pup".into(),
-            species_id: 3,
-            level: 23,
-            max_health: 1110,
-            current_health: 870,
-            power: 14,
-            speed: 19,
-            pet_type: 8,
-            ability_ids: vec![1004],
-            xp: 10,
-            max_xp: 100,
-        },
-    ];
-    sim.pet_battles.enemy_pets = vec![
+}
+
+fn seeded_player_pets() -> Vec<PetBattlePet> {
+    vec![arcane_familiar(), clockwork_hopper(), frost_pup()]
+}
+
+fn arcane_familiar() -> PetBattlePet {
+    PetBattlePet {
+        name: "Arcane Familiar".into(),
+        species_id: 1,
+        level: 25,
+        max_health: 1420,
+        current_health: 1120,
+        power: 18,
+        speed: 21,
+        pet_type: 7,
+        ability_ids: vec![1001, 1002],
+        xp: 45,
+        max_xp: 100,
+    }
+}
+
+fn clockwork_hopper() -> PetBattlePet {
+    PetBattlePet {
+        name: "Clockwork Hopper".into(),
+        species_id: 2,
+        level: 24,
+        max_health: 1180,
+        current_health: 910,
+        power: 15,
+        speed: 17,
+        pet_type: 9,
+        ability_ids: vec![1003],
+        xp: 15,
+        max_xp: 100,
+    }
+}
+
+fn frost_pup() -> PetBattlePet {
+    PetBattlePet {
+        name: "Frost Pup".into(),
+        species_id: 3,
+        level: 23,
+        max_health: 1110,
+        current_health: 870,
+        power: 14,
+        speed: 19,
+        pet_type: 8,
+        ability_ids: vec![1004],
+        xp: 10,
+        max_xp: 100,
+    }
+}
+
+fn seeded_enemy_pets() -> Vec<PetBattlePet> {
+    vec![
         PetBattlePet {
             name: "Stone Lurker".into(),
             species_id: 4,
@@ -80,7 +100,7 @@ fn seed_sample_pet_battle(env: &WowLuaEnv) {
             xp: 0,
             max_xp: 100,
         },
-    ];
+    ]
 }
 
 #[test]

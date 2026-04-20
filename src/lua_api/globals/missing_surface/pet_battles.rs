@@ -254,44 +254,36 @@ fn runtime_ability_info(
     state: &mut LuaState,
     ability_id: i32,
 ) -> Option<(String, f64, f64, String, f64, f64)> {
-    let runtime_state = table_get(state, Val::Table(state.global), "__wow_pet_battle_state");
-    let abilities = table_get(state, runtime_state, "abilitiesByID");
-    let ability = {
-        let Val::Table(abilities_ref) = abilities else {
-            return None;
-        };
-        state
-            .gc
-            .tables
-            .get(abilities_ref)
-            .map(|t| t.get(Val::Num(ability_id as f64), &state.gc.string_arena))
-            .unwrap_or(Val::Nil)
-    };
-    let Val::Table(ability_ref) = ability else {
-        return None;
-    };
-    let ability_table = Val::Table(ability_ref);
+    let ability_table = runtime_ability_table(state, ability_id)?;
     let name_value = table_get(state, ability_table, "name");
     let description_value = table_get(state, ability_table, "description");
     let name = val_to_string(&*state, name_value)?;
     let description = val_to_string(&*state, description_value).unwrap_or_default();
-    let icon = match table_get(state, ability_table, "icon") {
-        Val::Num(value) => value,
-        _ => 0.0,
-    };
-    let max_cooldown = match table_get(state, ability_table, "maxCooldown") {
-        Val::Num(value) => value,
-        _ => 0.0,
-    };
-    let num_turns = match table_get(state, ability_table, "numTurns") {
-        Val::Num(value) => value,
-        _ => 0.0,
-    };
-    let pet_type = match table_get(state, ability_table, "petType") {
-        Val::Num(value) => value,
-        _ => 0.0,
-    };
+    let icon = runtime_ability_number(state, ability_table, "icon");
+    let max_cooldown = runtime_ability_number(state, ability_table, "maxCooldown");
+    let num_turns = runtime_ability_number(state, ability_table, "numTurns");
+    let pet_type = runtime_ability_number(state, ability_table, "petType");
     Some((name, icon, max_cooldown, description, num_turns, pet_type))
+}
+
+fn runtime_ability_table(state: &mut LuaState, ability_id: i32) -> Option<Val> {
+    let runtime_state = table_get(state, Val::Table(state.global), "__wow_pet_battle_state");
+    let abilities = table_get(state, runtime_state, "abilitiesByID");
+    let Val::Table(abilities_ref) = abilities else {
+        return None;
+    };
+    state
+        .gc
+        .tables
+        .get(abilities_ref)
+        .map(|t| t.get(Val::Num(ability_id as f64), &state.gc.string_arena))
+}
+
+fn runtime_ability_number(state: &mut LuaState, ability_table: Val, key: &str) -> f64 {
+    match table_get(state, ability_table, key) {
+        Val::Num(value) => value,
+        _ => 0.0,
+    }
 }
 
 fn start_pvp_matchmaking(state: &mut LuaState) -> LuaResult<u32> {
