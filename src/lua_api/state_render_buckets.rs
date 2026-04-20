@@ -141,7 +141,9 @@ fn emit_child_frames_and_collect_hoisted(
     let mut hoisted_regions = Vec::new();
     for &child_id in child_frames.iter() {
         let child = widgets.get(child_id);
-        let child_suppress = child.is_some_and(is_transparent_wrapper);
+        let child_suppress = child.is_some_and(|frame| {
+            is_regionless_transparent_wrapper(frame, strata_idx, widgets, visible)
+        });
         if !suppress_regions && child_suppress {
             collect_transparent_wrapper_regions(
                 child_id,
@@ -294,6 +296,30 @@ fn is_transparent_wrapper(frame: &crate::widget::Frame) -> bool {
     ) && !is_strata_root_boundary(frame)
 }
 
+fn is_regionless_transparent_wrapper(
+    frame: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+) -> bool {
+    is_transparent_wrapper(frame)
+        && !has_visible_same_strata_region_child(frame, strata_idx, widgets, visible)
+}
+
+fn has_visible_same_strata_region_child(
+    frame: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+) -> bool {
+    frame.children.iter().copied().any(|child_id| {
+        visible.contains(&child_id)
+            && widgets.get(child_id).is_some_and(|child| {
+                is_region(child.widget_type) && child.frame_strata.as_index() == strata_idx
+            })
+    })
+}
+
 pub(super) fn collect_same_strata_subtree_ids(
     id: u64,
     strata_idx: usize,
@@ -407,14 +433,6 @@ mod tests {
     }
 
     #[test]
-    fn same_strata_subtree_segment_end_stops_at_first_non_subtree_id() {
-        let bucket = vec![10, 11, 12, 99, 13];
-        let subtree_ids = HashSet::from([10, 11, 12, 13]);
-
-        assert_eq!(same_strata_subtree_segment_end(&bucket, 0, &subtree_ids), 3);
-    }
-
-    #[test]
     fn collect_child_for_emit_routes_regions_and_same_strata_frames() {
         let mut widgets = WidgetRegistry::default();
         widgets.register(Frame {
@@ -464,6 +482,14 @@ mod tests {
     }
 
     #[test]
+    fn same_strata_subtree_segment_end_stops_at_first_non_subtree_id() {
+        let bucket = vec![10, 11, 12, 99, 13];
+        let subtree_ids = HashSet::from([10, 11, 12, 13]);
+
+        assert_eq!(same_strata_subtree_segment_end(&bucket, 0, &subtree_ids), 3);
+    }
+
+    #[test]
     fn dfs_emit_keeps_transparent_wrapper_regions_after_wrapper_frame_and_parent_text_last() {
         let mut widgets = WidgetRegistry::default();
         widgets.register(test_frame(1, WidgetType::Frame, None));
@@ -488,5 +514,36 @@ mod tests {
         );
 
         assert_eq!(bucket, vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn dfs_emit_keeps_wrapper_owned_regions_before_child_frames() {
+        let mut widgets = WidgetRegistry::default();
+        widgets.register(test_frame(1, WidgetType::Frame, None));
+        widgets.register(test_frame(2, WidgetType::Frame, Some(1)));
+        widgets.register(test_frame(3, WidgetType::Texture, Some(2)));
+        widgets.register(test_frame(4, WidgetType::Frame, Some(2)));
+        widgets.register(test_frame(5, WidgetType::Texture, Some(4)));
+        widgets.add_child(1, 2);
+        widgets.add_child(2, 3);
+        widgets.add_child(2, 4);
+        widgets.add_child(4, 5);
+
+        let visible = HashSet::from([1, 2, 3, 4, 5]);
+        let mut bucket = Vec::new();
+
+        dfs_emit(
+            1,
+            FrameStrata::Medium.as_index(),
+            &widgets,
+            &visible,
+            &mut bucket,
+        );
+
+        assert_eq!(
+            bucket,
+            vec![1, 2, 3, 4, 5],
+            "wrapper-owned regions should render before descendant child frames"
+        );
     }
 }
