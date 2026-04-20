@@ -56,24 +56,49 @@ fn action_spell_id(state: &mut LuaState, slot: u32) -> Option<u32> {
 }
 
 fn place_cursor_item_in_backpack(state: &mut LuaState) -> LuaResult<u32> {
-    {
-        let Ok(mut st) = borrow_state_mut(state) else {
-            return Ok(0);
-        };
-        let Some(cursor) = st.cursor_item.clone() else {
-            return Ok(0);
-        };
-        let CursorInfo::Item {
-            item_id,
-            stack_count,
-            ..
-        } = cursor
-        else {
-            return Ok(0);
-        };
-        let Some(slot) = (1..=16).find(|slot| !st.bag_items.contains_key(&(0, *slot))) else {
-            return Ok(0);
-        };
+    let Some((item_id, stack_count)) = take_cursor_item(state) else {
+        return Ok(0);
+    };
+    let Some(slot) = find_first_free_backpack_slot(state) else {
+        return Ok(0);
+    };
+
+    store_cursor_item_in_backpack(state, slot, item_id, stack_count);
+    fire_named_event(state, "CURSOR_CHANGED");
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn take_cursor_item(state: &mut LuaState) -> Option<(u32, i32)> {
+    let Ok(st) = borrow_state(state) else {
+        return None;
+    };
+    let cursor = st.cursor_item.clone()?;
+    let CursorInfo::Item {
+        item_id,
+        stack_count,
+        ..
+    } = cursor
+    else {
+        return None;
+    };
+    Some((item_id, stack_count))
+}
+
+fn find_first_free_backpack_slot(state: &mut LuaState) -> Option<i32> {
+    let Ok(st) = borrow_state(state) else {
+        return None;
+    };
+    (1..=16).find(|slot| !st.bag_items.contains_key(&(0, *slot)))
+}
+
+fn store_cursor_item_in_backpack(
+    state: &mut LuaState,
+    slot: i32,
+    item_id: u32,
+    stack_count: i32,
+) {
+    if let Ok(mut st) = borrow_state_mut(state) {
         st.bag_items.insert(
             (0, slot),
             crate::lua_api::state::BagItem {
@@ -83,9 +108,6 @@ fn place_cursor_item_in_backpack(state: &mut LuaState) -> LuaResult<u32> {
         );
         st.cursor_item = None;
     }
-    fire_named_event(state, "CURSOR_CHANGED");
-    state.push(Val::Bool(true));
-    Ok(1)
 }
 
 /// `PickupContainerItem(bag, slot)` — take an item out of a bag slot and
