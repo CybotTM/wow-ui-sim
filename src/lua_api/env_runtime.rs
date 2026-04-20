@@ -15,6 +15,35 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
+const RECENT_FRAME_WINDOW_SIZE: usize = 60;
+const EDIT_MODE_LAYOUTS_INFO_LUA: &str = r#"
+    local source = (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()
+    if type(source) ~= "table" then
+        return source
+    end
+
+    local filtered = {
+        layouts = {},
+        activeLayout = source.activeLayout or 1,
+    }
+    local editModeLayoutType = type(Enum) == "table" and Enum.EditModeLayoutType or nil
+
+    if type(source.layouts) ~= "table" then
+        return filtered
+    end
+
+    for _, layoutInfo in ipairs(source.layouts) do
+        local layoutType = type(layoutInfo) == "table" and layoutInfo.layoutType or nil
+        if editModeLayoutType == nil
+            or layoutType == editModeLayoutType.Account
+            or layoutType == editModeLayoutType.Character then
+            table.insert(filtered.layouts, layoutInfo)
+        end
+    end
+
+    return filtered
+"#;
+
 impl WowLuaEnv {
     /// Call a named global Lua function.
     pub fn call_global(&self, name: &str, args: &[Val]) -> Result<Vec<Val>> {
@@ -350,7 +379,7 @@ fn process_timer_queue(
 
 fn update_app_frame_metrics(metrics: &mut AppFrameMetrics, frame_elapsed_ms: f64) {
     metrics.recent_frame_ms.push_back(frame_elapsed_ms);
-    if metrics.recent_frame_ms.len() > 60 {
+    if metrics.recent_frame_ms.len() > RECENT_FRAME_WINDOW_SIZE {
         metrics.recent_frame_ms.pop_front();
     }
     if frame_elapsed_ms > metrics.peak_ms {
@@ -365,7 +394,7 @@ fn update_addon_frame_metrics(addons: &mut [AddonInfo]) {
         let ms = addon.runtime.current_frame_ms;
         if ms > 0.0 {
             addon.runtime.recent_frames.push_back(ms);
-            if addon.runtime.recent_frames.len() > 60 {
+            if addon.runtime.recent_frames.len() > RECENT_FRAME_WINDOW_SIZE {
                 addon.runtime.recent_frames.pop_front();
             }
             if ms > addon.runtime.peak_ms {
@@ -385,35 +414,7 @@ fn build_edit_mode_layouts_info(env: &WowLuaEnv) -> Result<Option<Val>> {
         return Ok(None);
     };
 
-    let info = env.eval::<Val>(
-        r#"
-        local source = (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()
-        if type(source) ~= "table" then
-            return source
-        end
-
-        local filtered = {
-            layouts = {},
-            activeLayout = source.activeLayout or 1,
-        }
-        local editModeLayoutType = type(Enum) == "table" and Enum.EditModeLayoutType or nil
-
-        if type(source.layouts) ~= "table" then
-            return filtered
-        end
-
-        for _, layoutInfo in ipairs(source.layouts) do
-            local layoutType = type(layoutInfo) == "table" and layoutInfo.layoutType or nil
-            if editModeLayoutType == nil
-                or layoutType == editModeLayoutType.Account
-                or layoutType == editModeLayoutType.Character then
-                table.insert(filtered.layouts, layoutInfo)
-            end
-        end
-
-        return filtered
-        "#,
-    )?;
+    let info = env.eval::<Val>(EDIT_MODE_LAYOUTS_INFO_LUA)?;
 
     Ok(Some(info))
 }
