@@ -62,6 +62,10 @@ pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn set_fixed_size(state: &mut LuaState) -> LuaResult<u32> {
+    set_size(state)
+}
+
 pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let width = opt_f32(state, 2);

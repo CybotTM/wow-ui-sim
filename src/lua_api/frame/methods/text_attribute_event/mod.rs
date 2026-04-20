@@ -338,6 +338,68 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         callbacks::trigger_callback_event,
     )?;
     table_set_rust_fn_static(state, table, "SetupMenu", callbacks::setup_menu)?;
+    table_set_rust_fn_static(state, table, "SetDefaultText", callbacks::set_default_text)?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetSelectionTranslator",
+        callbacks::set_selection_translator,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetSelectionText",
+        callbacks::set_selection_text,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "EnableRegenerateOnResponse",
+        callbacks::enable_regenerate_on_response,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "GetSelectionText",
+        callbacks::get_selection_text,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "UpdateToMenuSelections",
+        callbacks::update_to_menu_selections,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetDefaultCallback",
+        callbacks::set_default_callback,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetIsDefaultCallback",
+        callbacks::set_is_default_callback,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetUpdateCallback",
+        callbacks::set_update_callback,
+    )?;
+    table_set_rust_fn_static(state, table, "NotifyUpdate", callbacks::notify_update)?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetOnClickHandler",
+        callbacks::set_on_click_handler,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "SetOnEnterHandler",
+        callbacks::set_on_enter_handler,
+    )?;
     Ok(())
 }
 

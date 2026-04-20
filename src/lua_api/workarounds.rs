@@ -39,6 +39,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_map_exploration_pin_mixin", || {
         patch_map_exploration_pin_mixin(env);
     });
+    log_step(env, "patch_map_canvas_data_provider_attachment", || {
+        patch_map_canvas_data_provider_attachment(env);
+    });
     log_step(env, "patch_action_bar_button_event_fanout", || {
         patch_action_bar_button_event_fanout(env);
     });
@@ -177,6 +180,13 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     ) {
         patch_fog_of_war_pin_mixin_for_runtime_addon_load(env);
         patch_map_exploration_pin_mixin_for_runtime_addon_load(env);
+        patch_map_canvas_data_provider_attachment_for_runtime_addon_load(env);
+    }
+    if addon_name == "Blizzard_Collections" {
+        patch_toggle_collections_journal_for_runtime_addon_load(env);
+    }
+    if addon_name == "Blizzard_EncounterJournal" {
+        patch_toggle_encounter_journal_for_runtime_addon_load(env);
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
@@ -469,6 +479,10 @@ fn patch_map_exploration_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(MAP_EXPLORATION_PIN_WORKAROUND_LUA);
 }
 
+fn patch_map_canvas_data_provider_attachment(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(MAP_CANVAS_DATA_PROVIDER_WORKAROUND_LUA);
+}
+
 fn patch_character_create_defaults(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(CHARACTER_CREATE_DEFAULTS_WORKAROUND_LUA);
 }
@@ -577,6 +591,20 @@ fn patch_fog_of_war_pin_mixin_for_runtime_addon_load(env: &crate::lua_api::Loade
 
 fn patch_map_exploration_pin_mixin_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(MAP_EXPLORATION_PIN_WORKAROUND_LUA);
+}
+
+fn patch_toggle_collections_journal_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
+}
+
+fn patch_toggle_encounter_journal_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
+}
+
+fn patch_map_canvas_data_provider_attachment_for_runtime_addon_load(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) {
+    let _ = env.exec(MAP_CANVAS_DATA_PROVIDER_WORKAROUND_LUA);
 }
 
 pub(crate) fn patch_account_store_set_storefront(
@@ -1248,6 +1276,53 @@ for _, mapName in ipairs({ "WorldMapFrame", "BattlefieldMapFrame" }) do
 end
 "#;
 
+const MAP_CANVAS_DATA_PROVIDER_WORKAROUND_LUA: &str = r#"
+local function __wow_fix_provider_pin(provider)
+    if type(provider) ~= "table" then
+        return
+    end
+
+    local pin = provider.pin
+    if pin ~= nil then
+        pin.dataProvider = provider
+    end
+end
+
+if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_add_data_provider_patched") then
+    if type(MapCanvasMixin.AddDataProvider) == "function" then
+        local originalAddDataProvider = MapCanvasMixin.AddDataProvider
+        MapCanvasMixin.AddDataProvider = function(self, dataProvider, ...)
+            local result = originalAddDataProvider(self, dataProvider, ...)
+            __wow_fix_provider_pin(dataProvider)
+            return result
+        end
+    end
+
+    rawset(_G, "__wow_map_canvas_add_data_provider_patched", true)
+end
+
+for _, mapName in ipairs({ "WorldMapFrame", "BattlefieldMapFrame" }) do
+    local map = rawget(_G, mapName)
+    if type(map) == "table" then
+        if type(map.AddDataProvider) == "function" and rawget(map, "__wow_add_data_provider_patched") ~= true then
+            local originalAddDataProvider = map.AddDataProvider
+            map.AddDataProvider = function(self, dataProvider, ...)
+                local result = originalAddDataProvider(self, dataProvider, ...)
+                __wow_fix_provider_pin(dataProvider)
+                return result
+            end
+            rawset(map, "__wow_add_data_provider_patched", true)
+        end
+
+        if type(map.dataProviders) == "table" then
+            for provider in pairs(map.dataProviders) do
+                __wow_fix_provider_pin(provider)
+            end
+        end
+    end
+end
+"#;
+
 const TOGGLE_ACHIEVEMENT_FRAME_LUA: &str = r#"
 if __wow_panel_getglobal ~= nil then
     local __wow_getglobal = __wow_panel_getglobal
@@ -1278,39 +1353,48 @@ end
 "#;
 
 const TOGGLE_ENCOUNTER_JOURNAL_LUA: &str = r#"
-if __wow_panel_getglobal ~= nil then
-    local __wow_getglobal = __wow_panel_getglobal
-    function ToggleEncounterJournal()
-        local kiosk = __wow_getglobal("Kiosk")
-        if ( (kiosk and kiosk.IsEnabled and kiosk.IsEnabled()) or __wow_getglobal("DISALLOW_FRAME_TOGGLING") ) then
-            return;
-        end
-
-        if ( not __wow_getglobal("EncounterJournal") ) then
-            local cAddOns = __wow_getglobal("C_AddOns")
-            if cAddOns and cAddOns.LoadAddOn then
-                cAddOns.LoadAddOn("Blizzard_EncounterJournal");
-            end
-        end
-        local encounterJournal = __wow_getglobal("EncounterJournal")
-        if ( encounterJournal ) then
-            if encounterJournal:IsShown() then
-                encounterJournal:Hide();
-            else
-                encounterJournal:Show();
-            end
-            return true;
-        end
-        return false;
+function ToggleEncounterJournal()
+    if DISALLOW_FRAME_TOGGLING then
+        return
     end
+    if not EncounterJournal and type(EncounterJournal_LoadUI) == "function" then
+        EncounterJournal_LoadUI()
+    end
+    if not EncounterJournal and type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+        C_AddOns.LoadAddOn("Blizzard_EncounterJournal")
+    end
+    if EncounterJournal then
+        if EncounterJournal:IsShown() then
+            EncounterJournal:Hide();
+        else
+            EncounterJournal:Show();
+        end
+        return true;
+    end
+    return false;
 end
 "#;
 
 const MAIN_MENU_MICROBUTTON_CLICK_WORKAROUND_LUA: &str = r#"
-local function __wow_toggle_main_menu()
-    if type(Menu) == "table" and type(ToggleGameMenu) == "function" then
-        return ToggleGameMenu()
+local function __wow_show_game_menu(frame)
+    if type(ShowUIPanel) == "function" then
+        ShowUIPanel(frame)
     end
+    if type(frame.IsShown) == "function" and not frame:IsShown() and type(frame.Show) == "function" then
+        frame:Show()
+    end
+end
+
+local function __wow_hide_game_menu(frame)
+    if type(HideUIPanel) == "function" then
+        HideUIPanel(frame)
+    end
+    if type(frame.IsShown) == "function" and frame:IsShown() and type(frame.Hide) == "function" then
+        frame:Hide()
+    end
+end
+
+local function __wow_toggle_main_menu()
     local gameMenuFrame = rawget(_G, "GameMenuFrame")
     if not gameMenuFrame then
         return
@@ -1322,7 +1406,7 @@ local function __wow_toggle_main_menu()
         if type(PlaySound) == "function" and SOUNDKIT and SOUNDKIT.IG_MAINMENU_QUIT then
             PlaySound(SOUNDKIT.IG_MAINMENU_QUIT)
         end
-        HideUIPanel(gameMenuFrame)
+        __wow_hide_game_menu(gameMenuFrame)
     else
         if type(SettingsPanel) == "table" and type(SettingsPanel.IsShown) == "function" and SettingsPanel:IsShown() and type(SettingsPanel.Close) == "function" then
             SettingsPanel:Close()
@@ -1336,7 +1420,7 @@ local function __wow_toggle_main_menu()
         if type(PlaySound) == "function" and SOUNDKIT and SOUNDKIT.IG_MAINMENU_OPEN then
             PlaySound(SOUNDKIT.IG_MAINMENU_OPEN)
         end
-        ShowUIPanel(gameMenuFrame)
+        __wow_show_game_menu(gameMenuFrame)
     end
 end
 
@@ -1355,30 +1439,24 @@ end
 "#;
 
 const TOGGLE_COLLECTIONS_JOURNAL_LUA: &str = r#"
-if __wow_panel_getglobal ~= nil then
-    local __wow_getglobal = __wow_panel_getglobal
-    function ToggleCollectionsJournal(tabIndex)
-        if __wow_getglobal("DISALLOW_FRAME_TOGGLING") then
-            return;
-        end
+function ToggleCollectionsJournal(tabIndex)
+    if DISALLOW_FRAME_TOGGLING then
+        return
+    end
+    if not CollectionsJournal and type(CollectionsJournal_LoadUI) == "function" then
+        CollectionsJournal_LoadUI()
+    end
+    if not CollectionsJournal and type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+        C_AddOns.LoadAddOn("Blizzard_Collections")
+    end
+    if not CollectionsJournal then
+        return
+    end
 
-        local collectionsJournal = __wow_getglobal("CollectionsJournal")
-        if not collectionsJournal then
-            local cAddOns = __wow_getglobal("C_AddOns")
-            if cAddOns and cAddOns.LoadAddOn then
-                cAddOns.LoadAddOn("Blizzard_Collections");
-            end
-            collectionsJournal = __wow_getglobal("CollectionsJournal")
-        end
-        if not collectionsJournal then
-            return
-        end
-
-        if collectionsJournal:IsShown() then
-            collectionsJournal:Hide();
-        else
-            collectionsJournal:Show();
-        end
+    if CollectionsJournal:IsShown() then
+        CollectionsJournal:Hide();
+    else
+        CollectionsJournal:Show();
     end
 end
 "#;

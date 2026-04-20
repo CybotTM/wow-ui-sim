@@ -1,8 +1,9 @@
 //! Template registry for virtual frames.
 
 use super::types::{FrameChildElement, FrameXml};
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::Arc;
 
 /// Stores a template (virtual frame) with its widget type.
 #[derive(Debug, Clone)]
@@ -20,27 +21,58 @@ struct TemplateRegistry {
     lifecycle_cache: HashMap<String, (bool, bool)>,
 }
 
-/// Global registry of XML templates (virtual frames).
-fn template_registry() -> &'static RwLock<TemplateRegistry> {
-    static REGISTRY: OnceLock<RwLock<TemplateRegistry>> = OnceLock::new();
-    REGISTRY.get_or_init(|| RwLock::new(TemplateRegistry::default()))
+thread_local! {
+    static TEMPLATE_REGISTRY: RefCell<TemplateRegistry> = RefCell::new(TemplateRegistry::default());
+    static TEXTURE_TEMPLATE_REGISTRY: RefCell<HashMap<String, TextureXml>> = RefCell::new(HashMap::new());
+    static ANIM_GROUP_TEMPLATE_REGISTRY: RefCell<HashMap<String, AnimationGroupXml>> = RefCell::new(HashMap::new());
+}
+
+fn with_template_registry<R>(f: impl FnOnce(&TemplateRegistry) -> R) -> R {
+    TEMPLATE_REGISTRY.with(|registry| f(&registry.borrow()))
+}
+
+fn with_template_registry_mut<R>(f: impl FnOnce(&mut TemplateRegistry) -> R) -> R {
+    TEMPLATE_REGISTRY.with(|registry| f(&mut registry.borrow_mut()))
+}
+
+fn with_texture_template_registry<R>(f: impl FnOnce(&HashMap<String, TextureXml>) -> R) -> R {
+    TEXTURE_TEMPLATE_REGISTRY.with(|registry| f(&registry.borrow()))
+}
+
+fn with_texture_template_registry_mut<R>(
+    f: impl FnOnce(&mut HashMap<String, TextureXml>) -> R,
+) -> R {
+    TEXTURE_TEMPLATE_REGISTRY.with(|registry| f(&mut registry.borrow_mut()))
+}
+
+fn with_anim_group_template_registry<R>(
+    f: impl FnOnce(&HashMap<String, AnimationGroupXml>) -> R,
+) -> R {
+    ANIM_GROUP_TEMPLATE_REGISTRY.with(|registry| f(&registry.borrow()))
+}
+
+fn with_anim_group_template_registry_mut<R>(
+    f: impl FnOnce(&mut HashMap<String, AnimationGroupXml>) -> R,
+) -> R {
+    ANIM_GROUP_TEMPLATE_REGISTRY.with(|registry| f(&mut registry.borrow_mut()))
 }
 
 /// Register a template (virtual frame) in the global registry.
 pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
-    let mut registry = template_registry().write().unwrap();
-    let lower = name.to_ascii_lowercase();
-    registry.entries.insert(
-        name.to_string(),
-        Arc::new(TemplateEntry {
-            name: name.to_string(),
-            widget_type: widget_type.to_string(),
-            frame,
-        }),
-    );
-    registry.entries_ci.insert(lower, name.to_string());
-    registry.chain_cache.clear();
-    registry.lifecycle_cache.clear();
+    with_template_registry_mut(|registry| {
+        let lower = name.to_ascii_lowercase();
+        registry.entries.insert(
+            name.to_string(),
+            Arc::new(TemplateEntry {
+                name: name.to_string(),
+                widget_type: widget_type.to_string(),
+                frame,
+            }),
+        );
+        registry.entries_ci.insert(lower, name.to_string());
+        registry.chain_cache.clear();
+        registry.lifecycle_cache.clear();
+    });
 }
 
 /// Get a template by name from the registry (case-insensitive).
@@ -53,16 +85,17 @@ pub fn get_template(name: &str) -> Option<TemplateEntry> {
 }
 
 fn get_template_arc(name: &str) -> Option<Arc<TemplateEntry>> {
-    let registry = template_registry().read().unwrap();
-    if let Some(entry) = registry.entries.get(name) {
-        return Some(Arc::clone(entry));
-    }
-    let lower = name.to_ascii_lowercase();
-    registry
-        .entries_ci
-        .get(&lower)
-        .and_then(|canonical| registry.entries.get(canonical))
-        .cloned()
+    with_template_registry(|registry| {
+        if let Some(entry) = registry.entries.get(name) {
+            return Some(Arc::clone(entry));
+        }
+        let lower = name.to_ascii_lowercase();
+        registry
+            .entries_ci
+            .get(&lower)
+            .and_then(|canonical| registry.entries.get(canonical))
+            .cloned()
+    })
 }
 
 /// Template info for C_XMLUtil.GetTemplateInfo.
@@ -175,12 +208,7 @@ pub fn get_template_chain(names: &str) -> Arc<Vec<Arc<TemplateEntry>>> {
         return Arc::new(Vec::new());
     }
 
-    if let Some(cached) = template_registry()
-        .read()
-        .unwrap()
-        .chain_cache
-        .get(&key)
-        .cloned()
+    if let Some(cached) = with_template_registry(|registry| registry.chain_cache.get(&key).cloned())
     {
         return cached;
     }
@@ -197,11 +225,9 @@ pub fn get_template_chain(names: &str) -> Arc<Vec<Arc<TemplateEntry>>> {
     }
 
     let arc_chain = Arc::new(chain);
-    template_registry()
-        .write()
-        .unwrap()
-        .chain_cache
-        .insert(key, Arc::clone(&arc_chain));
+    with_template_registry_mut(|registry| {
+        registry.chain_cache.insert(key, Arc::clone(&arc_chain));
+    });
     arc_chain
 }
 
@@ -212,12 +238,8 @@ pub fn get_template_lifecycle_flags(names: &str) -> (bool, bool) {
         return (false, false);
     }
 
-    if let Some(cached) = template_registry()
-        .read()
-        .unwrap()
-        .lifecycle_cache
-        .get(&key)
-        .copied()
+    if let Some(cached) =
+        with_template_registry(|registry| registry.lifecycle_cache.get(&key).copied())
     {
         return cached;
     }
@@ -237,11 +259,9 @@ pub fn get_template_lifecycle_flags(names: &str) -> (bool, bool) {
     }
 
     let flags = (on_load, on_show);
-    template_registry()
-        .write()
-        .unwrap()
-        .lifecycle_cache
-        .insert(key, flags);
+    with_template_registry_mut(|registry| {
+        registry.lifecycle_cache.insert(key, flags);
+    });
     flags
 }
 
@@ -331,14 +351,15 @@ pub fn register_intrinsic_templates() {
 
 /// Clear the template registry (useful for testing).
 pub fn clear_templates() {
-    let mut registry = template_registry().write().unwrap();
-    registry.entries.clear();
-    registry.entries_ci.clear();
-    registry.chain_cache.clear();
-    registry.lifecycle_cache.clear();
+    with_template_registry_mut(|registry| {
+        registry.entries.clear();
+        registry.entries_ci.clear();
+        registry.chain_cache.clear();
+        registry.lifecycle_cache.clear();
+    });
 
-    texture_template_registry().write().unwrap().clear();
-    anim_group_template_registry().write().unwrap().clear();
+    with_texture_template_registry_mut(|registry| registry.clear());
+    with_anim_group_template_registry_mut(|registry| registry.clear());
 }
 
 // ---------------------------------------------------------------------------
@@ -347,30 +368,26 @@ pub fn clear_templates() {
 
 use super::types_elements::{AnimationGroupXml, TextureXml};
 
-/// Global registry of virtual texture templates.
-fn texture_template_registry() -> &'static RwLock<HashMap<String, TextureXml>> {
-    static REGISTRY: OnceLock<RwLock<HashMap<String, TextureXml>>> = OnceLock::new();
-    REGISTRY.get_or_init(|| RwLock::new(HashMap::new()))
-}
-
 /// Register a virtual texture template.
 pub fn register_texture_template(name: &str, texture: TextureXml) {
-    let mut registry = texture_template_registry().write().unwrap();
-    registry.insert(name.to_string(), texture);
+    with_texture_template_registry_mut(|registry| {
+        registry.insert(name.to_string(), texture);
+    });
 }
 
 /// Get size from a texture template by name. Returns (width, height) if found.
 pub fn get_texture_template_size(name: &str) -> Option<(f32, f32)> {
-    let registry = texture_template_registry().read().unwrap();
-    let tex = registry.get(name)?;
-    let size = tex.size.as_ref()?;
-    let w = size.x.unwrap_or(0.0);
-    let h = size.y.unwrap_or(0.0);
-    if w > 0.0 && h > 0.0 {
-        Some((w, h))
-    } else {
-        None
-    }
+    with_texture_template_registry(|registry| {
+        let tex = registry.get(name)?;
+        let size = tex.size.as_ref()?;
+        let w = size.x.unwrap_or(0.0);
+        let h = size.y.unwrap_or(0.0);
+        if w > 0.0 && h > 0.0 {
+            Some((w, h))
+        } else {
+            None
+        }
+    })
 }
 
 /// Resolve texture inheritance: merge properties from the template chain.
@@ -382,15 +399,15 @@ pub fn resolve_texture_inheritance(texture: &TextureXml) -> TextureXml {
         return texture.clone();
     };
 
-    let registry = texture_template_registry().read().unwrap();
-    // Collect templates in order (base first)
-    let mut templates = Vec::new();
-    for parent_name in inherits.split(',').map(|s| s.trim()) {
-        if let Some(parent) = registry.get(parent_name) {
-            templates.push(parent.clone());
+    let templates = with_texture_template_registry(|registry| {
+        let mut templates = Vec::new();
+        for parent_name in inherits.split(',').map(|s| s.trim()) {
+            if let Some(parent) = registry.get(parent_name) {
+                templates.push(parent.clone());
+            }
         }
-    }
-    drop(registry);
+        templates
+    });
 
     if templates.is_empty() {
         return texture.clone();
@@ -453,44 +470,39 @@ fn merge_texture_blend_mode(dst: &mut TextureXml, src: &TextureXml) {
 
 /// Collect all mixins for a texture by resolving its `inherits` chain.
 pub fn collect_texture_mixins(texture: &TextureXml) -> Vec<String> {
-    let registry = texture_template_registry().read().unwrap();
-    collect_inherited_mixins(
-        texture.inherits.as_deref(),
-        texture.mixin.as_deref(),
-        |name| registry.get(name).and_then(|p| p.mixin.clone()),
-    )
+    with_texture_template_registry(|registry| {
+        collect_inherited_mixins(
+            texture.inherits.as_deref(),
+            texture.mixin.as_deref(),
+            |name| registry.get(name).and_then(|p| p.mixin.clone()),
+        )
+    })
 }
 
 // ---------------------------------------------------------------------------
 // AnimationGroup template registry (virtual animation groups with mixin)
 // ---------------------------------------------------------------------------
 
-/// Global registry of virtual AnimationGroup templates.
-fn anim_group_template_registry() -> &'static RwLock<HashMap<String, AnimationGroupXml>> {
-    static REGISTRY: OnceLock<RwLock<HashMap<String, AnimationGroupXml>>> = OnceLock::new();
-    REGISTRY.get_or_init(|| RwLock::new(HashMap::new()))
-}
-
 /// Register a virtual AnimationGroup template.
 pub fn register_anim_group_template(name: &str, anim_group: AnimationGroupXml) {
-    let mut registry = anim_group_template_registry().write().unwrap();
-    registry.insert(name.to_string(), anim_group);
+    with_anim_group_template_registry_mut(|registry| {
+        registry.insert(name.to_string(), anim_group);
+    });
 }
 
-/// Read-lock the AnimationGroup template registry for lookups.
-pub fn anim_group_template_registry_read()
--> std::sync::RwLockReadGuard<'static, HashMap<String, AnimationGroupXml>> {
-    anim_group_template_registry().read().unwrap()
+pub fn get_anim_group_template(name: &str) -> Option<AnimationGroupXml> {
+    with_anim_group_template_registry(|registry| registry.get(name).cloned())
 }
 
 /// Collect all mixins for an AnimationGroup by resolving its `inherits` chain.
 pub fn collect_anim_group_mixins(anim_group: &AnimationGroupXml) -> Vec<String> {
-    let registry = anim_group_template_registry().read().unwrap();
-    collect_inherited_mixins(
-        anim_group.inherits.as_deref(),
-        anim_group.mixin.as_deref(),
-        |name| registry.get(name).and_then(|p| p.mixin.clone()),
-    )
+    with_anim_group_template_registry(|registry| {
+        collect_inherited_mixins(
+            anim_group.inherits.as_deref(),
+            anim_group.mixin.as_deref(),
+            |name| registry.get(name).and_then(|p| p.mixin.clone()),
+        )
+    })
 }
 
 /// Append unique mixin names from a comma-separated string.

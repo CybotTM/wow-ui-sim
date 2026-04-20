@@ -22,13 +22,15 @@
 //!
 //! Registered from `register_tail_globals` after `missing_surface`.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, call_function_state, table_get};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_string, table_get,
+};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult};
 
 /// (panel_token, companion_frame_name)
-const PANELS: &[(&'static str, &str)] = &[
+const PANELS: &[(&str, &str)] = &[
     ("Character", "CharacterFrame"),
     ("SpellBook", "SpellBookFrame"),
     ("Talent", "PlayerTalentFrame"),
@@ -77,8 +79,45 @@ fn try_toggle_player_spells_helper(
         return Ok(false);
     };
 
-    let _ = call_function_state(state, helper, args)?;
-    Ok(true)
+    match call_function_state(state, helper, args) {
+        Ok(_) => Ok(true),
+        Err(_) => Ok(false),
+    }
+}
+
+fn try_load_addon(state: &mut LuaState, addon_name: &str) -> LuaResult<bool> {
+    let global = Val::Table(state.global);
+    let c_addons = table_get(state, global, "C_AddOns");
+    let Val::Table(_) = c_addons else {
+        return Ok(false);
+    };
+
+    let load_addon = table_get(state, c_addons, "LoadAddOn");
+    let Val::Function(_) = load_addon else {
+        return Ok(false);
+    };
+
+    let addon_name = create_string(state, addon_name);
+    match call_function_state(state, load_addon, &[addon_name]) {
+        Ok(result) => Ok(matches!(result, Val::Bool(true))),
+        Err(_) => Ok(false),
+    }
+}
+
+fn player_spells_surface_ready(state: &mut LuaState) -> bool {
+    let global = Val::Table(state.global);
+    for name in [
+        "SelectableButtonMixin",
+        "CreateAnchor",
+        "TextureUtil",
+        "SetClampedTextureRotation",
+    ] {
+        let value = table_get(state, global, name);
+        if !matches!(value, Val::Table(_) | Val::Function(_)) {
+            return false;
+        }
+    }
+    true
 }
 
 fn try_toggle_panel_via_frame_method(state: &mut LuaState, frame_name: &str) -> LuaResult<bool> {
@@ -138,17 +177,53 @@ macro_rules! define_toggle {
 
 define_toggle!(toggle_character, "Character", "CharacterFrame");
 fn toggle_spell_book(state: &mut LuaState) -> LuaResult<u32> {
-    if !try_toggle_player_spells_helper(state, "ToggleSpellBookFrame", &[])? {
+    if !player_spells_surface_ready(state)
+        || !try_toggle_player_spells_helper(state, "ToggleSpellBookFrame", &[])?
+    {
         toggle_panel(state, "SpellBook", "SpellBookFrame")?;
     }
     Ok(0)
 }
 
 fn toggle_talent_frame(state: &mut LuaState) -> LuaResult<u32> {
-    if !try_toggle_player_spells_helper(state, "ToggleClassTalentFrame", &[])? {
+    if !player_spells_surface_ready(state)
+        || !try_toggle_player_spells_helper(state, "ToggleClassTalentFrame", &[])?
+    {
         toggle_panel(state, "Talent", "PlayerTalentFrame")?;
     }
     Ok(0)
+}
+
+fn toggle_loadable_panel(
+    state: &mut LuaState,
+    addon_name: &str,
+    panel: &'static str,
+    frame: &'static str,
+) -> LuaResult<u32> {
+    let global = Val::Table(state.global);
+    if matches!(table_get(state, global, frame), Val::Nil) {
+        let _ = try_load_addon(state, addon_name)?;
+    }
+    toggle_panel(state, panel, frame)?;
+    Ok(0)
+}
+
+fn toggle_collections_journal(state: &mut LuaState) -> LuaResult<u32> {
+    toggle_loadable_panel(
+        state,
+        "Blizzard_Collections",
+        "CollectionsJournal",
+        "CollectionsJournal",
+    )
+}
+
+fn toggle_encounter_journal(state: &mut LuaState) -> LuaResult<u32> {
+    toggle_loadable_panel(
+        state,
+        "Blizzard_EncounterJournal",
+        "EncounterJournal",
+        "EncounterJournal",
+    )
 }
 define_toggle!(toggle_quest_log, "QuestLog", "QuestLogFrame");
 define_toggle!(toggle_world_map, "WorldMap", "WorldMapFrame");
@@ -174,5 +249,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ToggleHelpFrame", toggle_help_frame)?;
     LuaApiMut::register_function(lua, "ToggleSocialPanel", toggle_social_panel)?;
     LuaApiMut::register_function(lua, "ToggleMinimap", toggle_minimap)?;
+    LuaApiMut::register_function(lua, "ToggleCollectionsJournal", toggle_collections_journal)?;
+    LuaApiMut::register_function(lua, "ToggleEncounterJournal", toggle_encounter_journal)?;
     Ok(())
 }

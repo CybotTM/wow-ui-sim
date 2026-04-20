@@ -1,7 +1,7 @@
 //! CallbackRegistryMixin equivalents: RegisterCallback, UnregisterCallback, TriggerEvent.
 
 use crate::lua_api::methods::{
-    call_function_state, extract_frame_id, frame_id_from_stack, frame_ref,
+    call_function_state, create_table, extract_frame_id, frame_id_from_stack, frame_ref,
     get_or_create_frame_fields, table_get, table_set, val_to_string,
 };
 use crate::lua_api::script_helpers::call_error_handler_state;
@@ -271,6 +271,120 @@ pub(super) fn setup_menu(_state: &mut LuaState) -> LuaResult<u32> {
     }
     table_set(state, fields, "menuGenerator", stack_val(state, 2));
     Ok(0)
+}
+
+fn frame_fields(state: &mut LuaState) -> LuaResult<(u64, Val)> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    Ok((frame_id, get_or_create_frame_fields(state, frame_id)))
+}
+
+fn current_selections_or_empty_table(state: &mut LuaState, index: i32) -> Val {
+    match stack_val(state, index) {
+        Val::Nil => create_table(state),
+        value => value,
+    }
+}
+
+fn set_callback_field(state: &mut LuaState, key: &str, value_index: i32) -> LuaResult<u32> {
+    let (_, fields) = frame_fields(state)?;
+    table_set(state, fields, key, stack_val(state, value_index));
+    Ok(0)
+}
+
+pub(super) fn set_default_text(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "defaultText", 2)
+}
+
+pub(super) fn set_selection_translator(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "selectionTranslator", 2)
+}
+
+pub(super) fn set_selection_text(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "selectionFunc", 2)
+}
+
+pub(super) fn enable_regenerate_on_response(state: &mut LuaState) -> LuaResult<u32> {
+    let (_, fields) = frame_fields(state)?;
+    table_set(state, fields, "shouldRegenerateOnResponse", Val::Bool(true));
+    Ok(0)
+}
+
+pub(super) fn get_selection_text(state: &mut LuaState) -> LuaResult<u32> {
+    let (_, fields) = frame_fields(state)?;
+    let selection_func = table_get(state, fields, "selectionFunc");
+    let default_text = table_get(state, fields, "defaultText");
+    let result = if matches!(selection_func, Val::Function(_)) {
+        let selections = create_table(state);
+        let text = call_function_state(state, selection_func, &[selections])?;
+        if matches!(text, Val::Nil) {
+            default_text
+        } else {
+            text
+        }
+    } else {
+        default_text
+    };
+    state.push(result);
+    Ok(1)
+}
+
+pub(super) fn update_to_menu_selections(state: &mut LuaState) -> LuaResult<u32> {
+    let (frame_id, fields) = frame_fields(state)?;
+    let current_selections = current_selections_or_empty_table(state, 3);
+    let selection_func = table_get(state, fields, "selectionFunc");
+    let default_text = table_get(state, fields, "defaultText");
+    let text = if matches!(selection_func, Val::Function(_)) {
+        let text = call_function_state(state, selection_func, &[current_selections])?;
+        if matches!(text, Val::Nil) {
+            default_text
+        } else {
+            text
+        }
+    } else {
+        default_text
+    };
+    if !matches!(text, Val::Nil) {
+        let self_ref = frame_ref(state, frame_id)?;
+        let set_text = table_get(state, self_ref, "SetText");
+        if matches!(set_text, Val::Function(_)) {
+            let _ = call_function_state(state, set_text, &[self_ref, text])?;
+        }
+    }
+    Ok(0)
+}
+
+pub(super) fn set_default_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "defaultCallback", 2)
+}
+
+pub(super) fn set_is_default_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "isDefaultCallback", 2)
+}
+
+pub(super) fn set_update_callback(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "notifyUpdateCallback", 2)
+}
+
+pub(super) fn notify_update(state: &mut LuaState) -> LuaResult<u32> {
+    let (_, fields) = frame_fields(state)?;
+    let callback = table_get(state, fields, "notifyUpdateCallback");
+    if matches!(callback, Val::Function(_)) {
+        let self_ref = stack_val(state, 1);
+        let description = stack_val(state, 2);
+        let _ = call_function_state(state, callback, &[self_ref, description])?;
+    }
+    Ok(0)
+}
+
+pub(super) fn set_on_click_handler(state: &mut LuaState) -> LuaResult<u32> {
+    let (_, fields) = frame_fields(state)?;
+    table_set(state, fields, "onClickHandler", stack_val(state, 2));
+    table_set(state, fields, "onClickSoundKit", stack_val(state, 3));
+    Ok(0)
+}
+
+pub(super) fn set_on_enter_handler(state: &mut LuaState) -> LuaResult<u32> {
+    set_callback_field(state, "onEnterHandler", 2)
 }
 
 fn collect_trigger_args(state: &LuaState) -> Vec<Val> {

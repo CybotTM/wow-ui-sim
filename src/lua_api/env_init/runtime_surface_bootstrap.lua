@@ -977,6 +977,15 @@ local function __wow_install_frame_helpers(frame)
         end
       end
       providers[#providers + 1] = provider
+      if type(provider) == "table" and type(provider.OnAdded) == "function" then
+        pcall(provider.OnAdded, provider, self)
+      end
+      if type(provider) == "table" and provider.pin ~= nil then
+        provider.pin.dataProvider = provider
+      end
+      if type(provider) == "table" and provider.pin == nil then
+        provider.pin = { dataProvider = provider }
+      end
     end
   end
 
@@ -1438,6 +1447,21 @@ do
   __wow_seed_settings_preview(settingsPanel, "QuestTextPreview")
 
   local objectiveTracker = __wow_install_frame_helpers(__wow_ensure_named_frame("Frame", "ObjectiveTrackerFrame", uiParent))
+  if objectiveTracker ~= nil and rawget(objectiveTracker, "OnAdded") == nil then
+    function objectiveTracker:OnAdded(backgroundAlpha)
+      if not self.init then
+        self.init = true
+        if type(ObjectiveTrackerContainerMixin) == "table" and type(ObjectiveTrackerContainerMixin.Init) == "function" then
+          ObjectiveTrackerContainerMixin.Init(self)
+        elseif self.Header and self.Header.Text and type(self.Header.Text.SetText) == "function" then
+          self.Header.Text:SetText(self.headerText or "")
+        end
+      end
+      if type(self.SetBackgroundAlpha) == "function" then
+        self:SetBackgroundAlpha(backgroundAlpha)
+      end
+    end
+  end
   local objectiveHeader = __wow_ensure_named_child(objectiveTracker, "Header", "Frame")
   __wow_ensure_named_child(objectiveHeader, "MinimizeButton", "Button")
 
@@ -10338,18 +10362,135 @@ end
 
 C_MountJournal = __wow_merge_namespace(C_MountJournal, {
   IsUsingDefaultFilters = function() return true end,
+  SetDefaultFilters = function() end,
   ClearRecentFanfares = function() end,
   GetDynamicFlightModeSpellID = function() return 0 end,
   GetMountEquipmentUnlockLevel = function() return 0 end,
   IsDragonridingUnlocked = function() return false end,
+  GetNumDisplayedMounts = function() return 0 end,
+  GetDisplayedMountID = function(_index) return nil end,
+  GetNumMounts = function() return 0 end,
+  GetMountIDs = function() return {} end,
+  GetMountInfoByID = function(_mountID) return nil, nil, nil, false end,
+  GetMountInfoExtraByID = function(_mountID) return nil, nil, nil, nil, nil, nil, nil, nil, nil end,
+  GetMountLink = function(_mountID) return nil end,
+  GetMountUsabilityByID = function(_mountID) return false, false, false end,
+  IsItemMountEquipment = function(_itemLocation) return false end,
+  IsMountEquipmentApplied = function() return false end,
+  GetIsFavorite = function(_mountID) return false end,
+  SetIsFavorite = function(_mountID, _favorite) end,
+  NeedsFanfare = function(_mountID) return false end,
+  ClearFanfare = function(_mountID) end,
+  Dismiss = function() end,
+  ApplyMountEquipment = function(_mountID) end,
+  AreMountEquipmentEffectsSuppressed = function() return false end,
+  GetAppliedMountEquipmentID = function() return 0 end,
+  Pickup = function(_mountID) end,
+  PickupDynamicFlightMode = function() end,
+  SwapDynamicFlightMode = function() end,
+  SetSearch = function(_text) end,
+  SetCollectedFilterSetting = function(_filter, _value) return true end,
+  GetCollectedFilterSetting = function(_filter) return true end,
+  IsTypeChecked = function(_filterIndex) return true end,
+  SetTypeFilter = function(_filterIndex, _value) end,
+  IsValidTypeFilter = function(_filterIndex) return true end,
+  IsSourceChecked = function(_filterIndex) return true end,
+  SetSourceFilter = function(_filterIndex, _value) end,
+  SetAllSourceFilters = function(_value) end,
+  IsValidSourceFilter = function(_filterIndex) return true end,
 })
 
 C_PetJournal = __wow_merge_namespace(C_PetJournal, {
   IsUsingDefaultFilters = function() return true end,
+  SetDefaultFilters = function() end,
   ClearRecentFanfares = function() end,
   GetSummonBattlePetCooldown = function() return 0, 0, false end,
   PetNeedsFanfare = function() return false end,
+  GetNumPets = function() return 0, 0 end,
+  GetPetInfoByIndex = function(_index) return nil, nil, false end,
+  GetPetInfoByPetID = function(_petID) return nil end,
+  GetPetInfoBySpeciesID = function(_speciesID) return nil, nil, nil end,
+  GetPetStats = function(_petID) return 0, 0, 0, 0, 0 end,
+  GetPetSummonInfo = function(_petID) return false, nil, nil end,
+  GetPetSortParameter = function() return LE_SORT_BY_NAME end,
+  SetPetSortParameter = function(_parameter) end,
+  IsFilterChecked = function(_filterIndex) return true end,
+  SetFilterChecked = function(_filterIndex, _value) end,
+  IsPetTypeChecked = function(_filterIndex) return true end,
+  SetPetTypeFilter = function(_filterIndex, _value) end,
+  IsPetSourceChecked = function(_filterIndex) return true end,
+  SetPetSourceChecked = function(_filterIndex, _value) end,
+  SetAllPetTypesChecked = function(_value) end,
+  SetAllPetSourcesChecked = function(_value) end,
+  SetSearchFilter = function(_text) end,
+  IsFindBattleEnabled = function() return false end,
+  IsJournalUnlocked = function() return true end,
+  SetCustomName = function(_petID, _name) end,
+  CagePetByID = function(_petID) end,
+  ReleasePetByID = function(_petID) end,
+  ClearFanfare = function(_petID) end,
+  ClearHoveredBattlePet = function() end,
+  GetNumPetSources = function() return 0 end,
+  GetBattlePetLink = function(_speciesID, _level, _breed, _quality, _maxHealth, _power, _speed) return nil end,
+  HasFavoritePets = function() return false end,
+  PetIsFavorite = function(_petID) return false end,
+  PetCanBeReleased = function(_petID) return false end,
+  PetIsHurt = function(_petID) return false end,
+  PetIsLockedForConvert = function(_petID) return false end,
+  PetIsRevoked = function(_petID) return false end,
+  PetIsSlotted = function(_petID) return false end,
+  PetIsSummonable = function(_petID) return false end,
+  PetIsTradable = function(_petID) return false end,
+  PickupPet = function(_petID) end,
+  PickupSummonRandomPet = function() end,
+  SetAbility = function(_slot, _abilityID) end,
+  SetFavorite = function(_petID, _favorite) end,
+  SummonPetByGUID = function(_petID) end,
+  SummonRandomPet = function() end,
 })
+
+if rawget(_G, "ToggleCollectionsJournal") == nil then
+  function ToggleCollectionsJournal(tabIndex)
+    if DISALLOW_FRAME_TOGGLING then
+      return
+    end
+    if not CollectionsJournal and type(CollectionsJournal_LoadUI) == "function" then
+      CollectionsJournal_LoadUI()
+    end
+    if CollectionsJournal and type(SetCollectionsJournalShown) == "function" then
+      local tabMatches = not tabIndex or tabIndex == PanelTemplates_GetSelectedTab(CollectionsJournal)
+      local isShown = CollectionsJournal:IsShown() and tabMatches
+      SetCollectionsJournalShown(not isShown, tabIndex)
+    elseif CollectionsJournal then
+      if CollectionsJournal:IsShown() then
+        CollectionsJournal:Hide()
+      else
+        CollectionsJournal:Show()
+      end
+    end
+  end
+end
+
+if rawget(_G, "ToggleEncounterJournal") == nil then
+  function ToggleEncounterJournal()
+    if DISALLOW_FRAME_TOGGLING then
+      return
+    end
+    if not EncounterJournal and type(EncounterJournal_LoadUI) == "function" then
+      EncounterJournal_LoadUI()
+    end
+    if not EncounterJournal and type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+      C_AddOns.LoadAddOn("Blizzard_EncounterJournal")
+    end
+    if EncounterJournal then
+      if EncounterJournal:IsShown() then
+        EncounterJournal:Hide()
+      else
+        EncounterJournal:Show()
+      end
+    end
+  end
+end
 
 C_Calendar = __wow_merge_namespace(C_Calendar, {
   GetDefaultGuildFilter = function()
@@ -10950,9 +11091,168 @@ local function __wow_register_core_frame_methods()
         end
       end
       table.insert(providers, provider)
+      if type(provider) == "table" and provider.pin ~= nil then
+        provider.pin.dataProvider = provider
+      end
       if type(provider) == "table" and provider.pin == nil then
         provider.pin = { dataProvider = provider }
       end
+    end
+  end
+
+  if methods.SetTitle == nil then
+    function methods:SetTitle(title)
+      self.title = title
+      if self.TitleText and type(self.TitleText.SetText) == "function" then
+        self.TitleText:SetText(title or "")
+      elseif self.TitleContainer and self.TitleContainer.TitleText and type(self.TitleContainer.TitleText.SetText) == "function" then
+        self.TitleContainer.TitleText:SetText(title or "")
+      elseif self.Header and self.Header.Text and type(self.Header.Text.SetText) == "function" then
+        self.Header.Text:SetText(title or "")
+      end
+    end
+  end
+
+  if methods.SetPortraitToAsset == nil then
+    function methods:SetPortraitToAsset(texture)
+      if self.GetPortrait and type(self.GetPortrait) == "function" then
+        local portrait = self:GetPortrait()
+        if portrait and type(portrait.SetTexture) == "function" then
+          portrait:SetTexture(texture)
+          return
+        end
+      end
+      if self.PortraitContainer and self.PortraitContainer.portrait and type(self.PortraitContainer.portrait.SetTexture) == "function" then
+        self.PortraitContainer.portrait:SetTexture(texture)
+      end
+    end
+  end
+
+  if methods.SetUpdateCallback == nil then
+    function methods:SetUpdateCallback(callback)
+      self.updateCallback = callback
+    end
+  end
+
+  if methods.SetDefaultCallback == nil then
+    function methods:SetDefaultCallback(callback)
+      self.defaultCallback = callback
+    end
+  end
+
+  if methods.SetIsDefaultCallback == nil then
+    function methods:SetIsDefaultCallback(callback)
+      self.isDefaultCallback = callback
+    end
+  end
+
+  if methods.SetInterpolateScroll == nil then
+    function methods:SetInterpolateScroll(enabled)
+      self.interpolateScroll = enabled and true or false
+    end
+  end
+
+  if methods.CanInterpolateScroll == nil then
+    function methods:CanInterpolateScroll()
+      return false
+    end
+  end
+
+  if methods.Update == nil then
+    function methods:Update()
+      if type(self.updateCallback) == "function" then
+        return self.updateCallback(self)
+      end
+    end
+  end
+
+  if methods.SetDirtyMethod == nil then
+    function methods:SetDirtyMethod(method)
+      self.dirtyCallback = function()
+        method(self)
+        self.dirty = nil
+      end
+    end
+  end
+
+  if methods.MarkDirty == nil then
+    function methods:MarkDirty()
+      if not self.dirty then
+        if type(self.dirtyCallback) == "function" then
+          RunNextFrame(self.dirtyCallback)
+        end
+      end
+      self.dirty = true
+    end
+  end
+
+  if methods.IsDirty == nil then
+    function methods:IsDirty()
+      return self.dirty
+    end
+  end
+
+  if methods.AddModule == nil then
+    function methods:AddModule(module)
+      local fields = __wow_frame_fields(self)
+      if fields == nil or module == nil then
+        return
+      end
+      local modules = fields.modules
+      if type(modules) ~= "table" then
+        modules = {}
+        fields.modules = modules
+      end
+      for _, existing in ipairs(modules) do
+        if existing == module then
+          return
+        end
+      end
+      table.insert(modules, module)
+      if type(module.SetContainer) == "function" then
+        module:SetContainer(self)
+      end
+    end
+  end
+
+  if methods.RemoveModule == nil then
+    function methods:RemoveModule(module)
+      local fields = __wow_frame_fields(self)
+      local modules = fields and fields.modules
+      if type(modules) ~= "table" then
+        return
+      end
+      for i, existing in ipairs(modules) do
+        if existing == module then
+          table.remove(modules, i)
+          break
+        end
+      end
+    end
+  end
+
+  if methods.RemoveAllModules == nil then
+    function methods:RemoveAllModules()
+      local fields = __wow_frame_fields(self)
+      if fields ~= nil then
+        fields.modules = {}
+      end
+    end
+  end
+
+  if methods.HasModule == nil then
+    function methods:HasModule(module)
+      local fields = __wow_frame_fields(self)
+      local modules = fields and fields.modules
+      if type(modules) ~= "table" then
+        return false
+      end
+      for _, existing in ipairs(modules) do
+        if existing == module then
+          return true
+        end
+      end
+      return false
     end
   end
 
@@ -11167,6 +11467,61 @@ local function __wow_register_chat_frame_globals()
   end
 end
 
+local function __wow_register_catalog_shop_inbound_globals()
+  local function ensure_inbound_interface(name)
+    if rawget(_G, name) ~= nil then
+      return
+    end
+
+    local inbound = {}
+
+    function inbound.IsShown()
+      return false
+    end
+
+    function inbound.SetShown(_shown, _contextKey)
+    end
+
+    function inbound.EscapePressed()
+      return false
+    end
+
+    function inbound.SelectSubscriptionProduct()
+    end
+
+    function inbound.SetTokenCategory()
+    end
+
+    function inbound.CheckForFree(_event)
+    end
+
+    function inbound.OpenGamesCategory()
+    end
+
+    function inbound.SetGamesCategory()
+    end
+
+    function inbound.SetServicesCategory()
+    end
+
+    function inbound.SelectBoost(_boostType, _reason, _guid)
+    end
+
+    function inbound.SelectGameTimeProduct()
+    end
+
+    function inbound.SelectSpecificProduct(_productID)
+    end
+
+    rawset(_G, name, inbound)
+  end
+
+  ensure_inbound_interface("CatalogShopInboundInterface")
+  ensure_inbound_interface("CatalogShopTopUpFlowInboundInterface")
+  ensure_inbound_interface("CatalogShopRefundFlowInboundInterface")
+  ensure_inbound_interface("SimpleCheckoutInboundInterface")
+end
+
 local function __wow_register_dropdown_globals()
   local function __wow_seed_dropdown_list(level)
     local list_name = "DropDownList" .. tostring(level)
@@ -11235,6 +11590,28 @@ local function __wow_register_misc_global_frames()
   __wow_make_named_frame("Frame", "RaidWarningFrame", UIParent)
   __wow_make_named_frame("Frame", "GossipFrame", UIParent)
   __wow_make_named_frame("Frame", "FriendsFrame", UIParent)
+  __wow_make_named_frame("Frame", "HelpFrame", UIParent)
+
+  local gameMenu = __wow_make_named_frame("Frame", "GameMenuFrame", UIParent)
+  if type(gameMenu.Hide) == "function" then
+    gameMenu:Hide()
+  end
+  if gameMenu.buttonPool == nil and type(CreateFramePool) == "function" then
+    local buttonPool = CreateFramePool("Button", gameMenu)
+    local function ensure_button_text(text)
+      local button = buttonPool:Acquire()
+      if type(button.SetText) == "function" then
+        button:SetText(text)
+      end
+      if type(button.Show) == "function" then
+        button:Show()
+      end
+      return button
+    end
+    ensure_button_text(GAMEMENU_OPTIONS or "Options")
+    ensure_button_text(LOGOUT or "Logout")
+    gameMenu.buttonPool = buttonPool
+  end
 
   local settings = __wow_make_named_frame("Frame", "SettingsPanel", UIParent)
   __wow_seed_global_frame_path(settings, { "Container", "SettingsList", "ScrollBox", "ScrollTarget" })
@@ -11270,6 +11647,7 @@ end
 
 __wow_register_core_frame_methods()
 __wow_register_chat_frame_globals()
+__wow_register_catalog_shop_inbound_globals()
 __wow_register_dropdown_globals()
 __wow_register_addon_compartment()
 __wow_register_alert_frame()

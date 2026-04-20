@@ -227,20 +227,20 @@ fn encounter_journal_addon_load_creates_frame() {
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
 
-    let (loaded, reason, frame_exists): (bool, Option<String>, bool) = env
+    load_blizzard_addon(
+        &env,
+        "Blizzard_EncounterJournal",
+        "Blizzard_EncounterJournal.toc",
+    );
+
+    let frame_exists: bool = env
         .eval(
             r#"
-            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_EncounterJournal")
-            return loaded, reason, EncounterJournal ~= nil
+            return EncounterJournal ~= nil
             "#,
         )
-        .expect("encounter journal load should return");
+        .expect("encounter journal load probe should return");
 
-    assert!(
-        loaded,
-        "Blizzard_EncounterJournal should load in the panel harness, reason: {}",
-        reason.unwrap_or_else(|| "<nil>".to_string())
-    );
     assert!(
         frame_exists,
         "Blizzard_EncounterJournal should create EncounterJournal when loaded"
@@ -293,28 +293,41 @@ fn group_members_pin_acquire_keeps_data_provider_on_pin() {
         "Blizzard_SharedMapDataProviders",
         "Blizzard_SharedMapDataProviders_Mainline.toc",
     );
+    load_blizzard_addon(
+        &env,
+        "Blizzard_BattlefieldMap",
+        "Blizzard_BattlefieldMap.toc",
+    );
 
-    let has_provider: bool = env
+    let probe: String = env
         .eval(
             r#"
             local map = BattlefieldMapFrame
             if not (map and map.ScrollContainer and map.ScrollContainer.Child) then
-                return false
+                return "missing_map"
             end
             map:SetMapID(C_Map.GetCurrentMapID())
 
             local provider = CreateFromMixins(GroupMembersDataProviderMixin)
             map:AddDataProvider(provider)
 
-            return provider.pin ~= nil
-                and provider.pin.dataProvider == provider
+            local pin = provider.pin
+            local has_pin = pin ~= nil
+            local has_backref = false
+            local backref_type = "nil"
+            if has_pin then
+                has_backref = pin.dataProvider == provider
+                backref_type = type(pin.dataProvider)
+            end
+            return string.format("pin=%s pin_type=%s backref=%s backref_type=%s",
+                tostring(has_pin), type(pin), tostring(has_backref), backref_type)
             "#,
         )
         .expect("group members pin probe should return");
 
     assert!(
-        has_provider,
-        "GroupMembersDataProvider should keep the acquired pin wired to its data provider"
+        probe.contains("pin=true") && probe.contains("backref=true"),
+        "GroupMembersDataProvider should keep the acquired pin wired to its data provider ({probe})"
     );
 }
 
@@ -452,6 +465,14 @@ fn collections_toggle_loads_and_shows_frame() {
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
     load_panel_harness(&env);
+
+    let toggle_type: String = env
+        .eval(r#"return type(ToggleCollectionsJournal)"#)
+        .expect("collections toggle type probe should return");
+    assert_eq!(
+        toggle_type, "function",
+        "ToggleCollectionsJournal should be registered before the toggle test runs"
+    );
 
     env.exec("ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS)")
         .expect("ToggleCollectionsJournal should execute");

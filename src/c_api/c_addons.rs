@@ -15,6 +15,21 @@ use std::{collections::HashSet, io};
 use super::helpers::set_global_val;
 
 const ADDON_VERSION_CHECK_KEY: &str = "__addon_version_check_enabled";
+const GAME_RUNTIME_FOUNDATIONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Menu",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+    "Blizzard_FrameXMLBase",
+    "Blizzard_UIPanelTemplates",
+    "Blizzard_FrameXMLUtil",
+];
+const GLUE_RUNTIME_FOUNDATIONS: &[&str] = &[
+    "Blizzard_GlueXMLBase",
+    "Blizzard_GlueParent",
+    "Blizzard_GlueMenuFrame",
+    "Blizzard_GlueXML",
+];
 
 // ── C_AddOns registration ─────────────────────────────────────────────────────
 
@@ -548,6 +563,11 @@ fn load_runtime_addon_with_dependencies(
     crate::loader::trace_load_addon(origin, format!("toc {}", toc_path.display()));
     let toc = crate::toc::TocFile::from_file(&toc_path).map_err(LoadError::Toc)?;
 
+    for dependency in runtime_foundation_dependencies(state, addon_name) {
+        crate::loader::trace_load_addon(origin, format!("{addon_name} -> foundation {dependency}"));
+        load_runtime_addon_recursive(state, loader_env, dependency, loading)?;
+    }
+
     for dependency in runtime_addon_dependencies(state, &toc) {
         crate::loader::trace_load_addon(origin, format!("{addon_name} -> dep {dependency}"));
         if addon_is_disabled(state, &dependency) {
@@ -577,6 +597,32 @@ fn runtime_addon_dependencies(state: &LuaState, toc: &crate::toc::TocFile) -> Ve
         }
     }
     deps
+}
+
+fn runtime_foundation_dependencies(state: &LuaState, addon_name: &str) -> Vec<&'static str> {
+    if !addon_name.starts_with("Blizzard_") {
+        return Vec::new();
+    }
+
+    let screen_kind = borrow_state(state)
+        .ok()
+        .map(|sim| sim.screen_kind)
+        .unwrap_or(crate::screen::ScreenKind::Game);
+    let foundations = match screen_kind {
+        crate::screen::ScreenKind::Game => GAME_RUNTIME_FOUNDATIONS,
+        crate::screen::ScreenKind::Login
+        | crate::screen::ScreenKind::CharacterSelect
+        | crate::screen::ScreenKind::CharacterCreate => GLUE_RUNTIME_FOUNDATIONS,
+    };
+    let end = foundations
+        .iter()
+        .position(|candidate| *candidate == addon_name)
+        .unwrap_or(foundations.len());
+    foundations[..end]
+        .iter()
+        .copied()
+        .filter(|dependency| find_runtime_addon_toc(state, dependency).is_some())
+        .collect()
 }
 
 fn is_addon_loaded_by_name(state: &LuaState, addon_name: &str) -> bool {

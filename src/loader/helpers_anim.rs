@@ -51,14 +51,13 @@ fn emit_inherited_anim_group_children(
     let Some(ref inherits) = anim_group.inherits else {
         return;
     };
-    let registry = crate::xml::anim_group_template_registry_read();
     for parent_name in inherits.split(',').map(|s| s.trim()) {
-        if let Some(parent) = registry.get(parent_name) {
+        if let Some(parent) = crate::xml::get_anim_group_template(parent_name) {
             // Apply looping from template if not overridden
             if anim_group.looping.is_none() {
                 emit_str_call(code, "__ag", "SetLooping", parent.looping.as_deref());
             }
-            emit_anim_group_children(code, parent, frame_ref);
+            emit_anim_group_children(code, &parent, frame_ref);
         }
     }
 }
