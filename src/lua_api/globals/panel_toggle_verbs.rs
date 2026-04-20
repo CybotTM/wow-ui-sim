@@ -104,14 +104,6 @@ fn try_load_addon(state: &mut LuaState, addon_name: &str) -> LuaResult<bool> {
     }
 }
 
-fn invalidate_strata_buckets_if_built(state: &mut LuaState) {
-    if let Ok(mut sim) = borrow_state_mut(state)
-        && sim.strata_buckets.is_some()
-    {
-        sim.invalidate_strata_buckets();
-    }
-}
-
 fn player_spells_surface_ready(state: &mut LuaState) -> bool {
     let global = Val::Table(state.global);
     for name in [
@@ -192,7 +184,6 @@ fn toggle_spell_book(state: &mut LuaState) -> LuaResult<u32> {
     if !try_toggle_player_spells_helper(state, "ToggleSpellBookFrame", &[])? {
         toggle_panel(state, "SpellBook", "PlayerSpellsFrame")?;
     }
-    invalidate_strata_buckets_if_built(state);
     Ok(0)
 }
 
