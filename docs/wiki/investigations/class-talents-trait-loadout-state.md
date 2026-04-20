@@ -44,6 +44,18 @@ Focused tests now pin the restored behavior:
 - staged purchases expose visible cost deltas
 - staged refunds and selection swaps each surface through `GetStagedChanges`
 
+Follow-up restore coverage:
+
+- `C_ClassTalents.GetTraitTreeForSpec(specID)` now returns `nil` for unknown specs instead of a forced Paladin tree id
+- `C_ClassTalents.GetNextStarterBuildPurchase()` now feeds the real `PlayerSpellsFrame.TalentsFrame:UpdateStarterBuildHighlights()` path
+- `C_ClassTalents.HasUnspentHeroTalentPoints()` now reports the active hero subtree's remaining points and gates the export callback in `Blizzard_ClassTalentsFrame`
+
+Tests:
+
+- `tests/class_talents_config.rs`
+- `tests/class_talents_flags.rs`
+- `tests/test_showuipanel_lod_player_spells.rs`
+
 Relevant tests:
 
 - `tests/admin_spec_talent_api.rs`

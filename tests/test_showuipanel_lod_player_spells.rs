@@ -206,6 +206,82 @@ fn keybind_n_loads_blizzard_player_spells_and_shows_talents() {
     }
 }
 
+#[test]
+fn starter_build_highlight_uses_player_spells_talent_ui_call_path() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__starter_build_highlight_errors");
+        clear_recorded_lua_errors(&env);
+
+        {
+            let mut state = env.state().borrow_mut();
+            state.talents.has_starter_build = true;
+            state.talents.is_starter_build_active = true;
+        }
+
+        env.send_key_press("N", None).expect("N keybind failed");
+        run_extra_update_ticks(&env, 3);
+
+        let result: String = env.eval(r#"
+            local talents = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+            assert(talents and talents:IsShown(), "talents frame should be visible")
+
+            talents:UpdateStarterBuildHighlights()
+            local highlight = talents.activeStarterBuildHighlight
+            local nodeID, entryID = C_ClassTalents.GetNextStarterBuildPurchase()
+            assert(nodeID and entryID, "starter build API should provide a purchase candidate")
+            if highlight then
+                assert(nodeID == highlight.nodeID, "highlight should use the starter build node")
+                assert(entryID == highlight.entryID, "highlight should use the starter build entry")
+                assert(not talents:WillDeviateFromStarterBuild(nodeID, entryID), "highlighted purchase should not count as deviation")
+            end
+
+            local function findExportClipboardSentinel(loadSystem)
+                for _, sentinelInfo in pairs(loadSystem.sentinelInfos) do
+                    if sentinelInfo.sentinelInfos then
+                        for _, child in ipairs(sentinelInfo.sentinelInfos) do
+                            if child.text == TALENT_FRAME_DROP_DOWN_EXPORT_CLIPBOARD then
+                                return child
+                            end
+                        end
+                    end
+                end
+            end
+
+            local clipboard = assert(findExportClipboardSentinel(talents.LoadSystem), "export clipboard sentinel should exist")
+            local disabled, _, _, _ = clipboard.disabledCallback()
+            assert(type(disabled) == "boolean", "disabled callback should return a boolean")
+
+            return table.concat({
+                tostring(nodeID),
+                tostring(entryID),
+                tostring(disabled),
+            }, ",")
+        "#).unwrap();
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__starter_build_highlight_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "Starter build highlight regression produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "Starter build highlight regression produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n")
+        );
+        assert!(
+            result.contains(','),
+            "starter build highlight regression should return node and entry ids: {result}"
+        );
+    }
+}
+
 fn spellbook_corner_flipbook_frame_index(env: &wow_ui_sim::lua_api::WowLuaEnv) -> i32 {
     env.eval(
         r#"

@@ -74,9 +74,19 @@ fn config_spec_id(config_id: i32) -> Option<u32> {
     }
 }
 
-fn trait_node_spec_set(cond_ids: &[u32]) -> u32 {
-    cond_ids
+fn spec_id_to_spec_set(spec_id: u32) -> u32 {
+    match spec_id {
+        65 => 27,
+        66 => 28,
+        70 => 29,
+        _ => 0,
+    }
+}
+
+fn trait_node_spec_set(node: &crate::traits::TraitNodeInfo) -> u32 {
+    node.cond_ids
         .iter()
+        .chain(node.group_cond_ids.iter())
         .filter_map(|cond_id| TRAIT_COND_DB.get(cond_id))
         .find(|cond| cond.cond_type == 1)
         .map(|cond| cond.spec_set_id)
@@ -87,7 +97,7 @@ fn trait_node_is_visible(state: &LuaState, node_id: u32) -> bool {
     let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
         return true;
     };
-    let required_spec_set = trait_node_spec_set(node.cond_ids);
+    let required_spec_set = trait_node_spec_set(node);
     required_spec_set == 0 || required_spec_set == current_spec_set_id(state)
 }
 
@@ -229,6 +239,64 @@ fn has_unspent_talent_points(state: &crate::lua_api::SimState) -> bool {
         let max_points = max_points_for_currency(currency_id);
         max_points > 0 && state.talents.spent_for_currency(currency_id) < max_points
     })
+}
+
+fn class_talent_tree_for_spec(spec_id: u32) -> Option<u32> {
+    let required_spec_set = spec_id_to_spec_set(spec_id);
+    if required_spec_set == 0 {
+        return None;
+    }
+
+    TRAIT_TREE_DB.values().find_map(|tree| {
+        tree.node_ids
+            .iter()
+            .any(|node_id| {
+                TRAIT_NODE_DB
+                    .get(node_id)
+                    .is_some_and(|node| trait_node_spec_set(node) == required_spec_set)
+            })
+            .then_some(tree.id)
+    })
+}
+
+fn starter_build_purchase_for_state(state: &crate::lua_api::SimState) -> Option<(u32, u32)> {
+    let active_hero_subtree = state.talents.active_hero_subtree();
+    let mut candidate_nodes = TRAIT_NODE_DB
+        .values()
+        .filter(|node| {
+            check_spec_conditions_met(node, state)
+                && check_node_available(node, state)
+                && check_edge_requirements(node, state)
+        })
+        .filter_map(|node| {
+            let ranks_purchased = state.talents.node_ranks.get(&node.id).copied().unwrap_or(0);
+            let total_max_ranks = total_node_max_ranks(node);
+            if ranks_purchased >= total_max_ranks || !check_has_currency(node.id, state) {
+                return None;
+            }
+
+            let subtree_priority = match (node.sub_tree_id, active_hero_subtree) {
+                (0, _) => 0,
+                (subtree_id, Some(active)) if subtree_id == active => 1,
+                _ => 2,
+            };
+            let entry_id = state
+                .talents
+                .node_selections
+                .get(&node.id)
+                .copied()
+                .or_else(|| node.entry_ids.first().copied())
+                .unwrap_or(0);
+
+            Some((subtree_priority, node.pos_y, node.pos_x, node.id, entry_id))
+        })
+        .collect::<Vec<_>>();
+
+    candidate_nodes.sort_unstable();
+    candidate_nodes
+        .into_iter()
+        .next()
+        .map(|(_, _, _, node_id, entry_id)| (node_id, entry_id))
 }
 
 fn check_has_currency(node_id: u32, state: &crate::lua_api::SimState) -> bool {
@@ -482,12 +550,13 @@ fn trait_tree_id_for_config(state: &LuaState, config_id: i32) -> Option<u32> {
     }
 
     config_spec_id(config_id)
-        .map(c_class_talents_trait_tree_for_spec)
+        .and_then(c_class_talents_trait_tree_for_spec)
         .or_else(|| {
             borrow_state(state).ok().and_then(|sim| {
-                sim.talents.is_active_config(config_id).then_some(
-                    c_class_talents_trait_tree_for_spec(sim.talents.active_spec_id),
-                )
+                sim.talents
+                    .is_active_config(config_id)
+                    .then(|| c_class_talents_trait_tree_for_spec(sim.talents.active_spec_id))
+                    .flatten()
             })
         })
 }
@@ -807,9 +876,8 @@ fn c_traits_get_config_info(state: &mut LuaState) -> LuaResult<u32> {
     let tree_ids = push_u32_array(
         state,
         config_spec_id(config_id)
-            .map(|spec_id| [c_class_talents_trait_tree_for_spec(spec_id)])
-            .into_iter()
-            .flatten(),
+            .and_then(c_class_talents_trait_tree_for_spec)
+            .into_iter(),
     );
     table_set(state, info, "treeIDs", tree_ids);
     state.push(info);
@@ -1547,7 +1615,10 @@ fn c_class_talents_switch_to_specialization_by_index(state: &mut LuaState) -> Lu
 
 fn c_class_talents_get_trait_tree_for_spec(state: &mut LuaState) -> LuaResult<u32> {
     let spec_id = u32::from_stack(state, 1)?;
-    state.push(Val::Num(c_class_talents_trait_tree_for_spec(spec_id) as f64));
+    match c_class_talents_trait_tree_for_spec(spec_id) {
+        Some(tree_id) => state.push(Val::Num(tree_id as f64)),
+        None => state.push(Val::Nil),
+    }
     Ok(1)
 }
 
@@ -1596,8 +1667,21 @@ fn c_class_talents_set_starter_build_active(state: &mut LuaState) -> LuaResult<u
 }
 
 fn c_class_talents_get_next_starter_build_purchase(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    state.push(Val::Nil);
+    let next_purchase = borrow_state(state)
+        .ok()
+        .filter(|sim| sim.talents.has_starter_build && sim.talents.is_starter_build_active)
+        .and_then(|sim| starter_build_purchase_for_state(&sim));
+
+    match next_purchase {
+        Some((node_id, entry_id)) => {
+            state.push(Val::Num(node_id as f64));
+            state.push(Val::Num(entry_id as f64));
+        }
+        None => {
+            state.push(Val::Nil);
+            state.push(Val::Nil);
+        }
+    }
     Ok(2)
 }
 
@@ -1611,10 +1695,24 @@ fn c_class_talents_has_unspent_talent_points(state: &mut LuaState) -> LuaResult<
 }
 
 fn c_class_talents_has_unspent_hero_talent_points(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
-    Ok(1)
+    let (has_unspent, num_points) = borrow_state(state)
+        .ok()
+        .and_then(|sim| {
+            let currency_id = sim
+                .talents
+                .active_hero_subtree()
+                .and_then(subtree_trait_currency_id)?;
+            let max_points = 11;
+            let spent = sim.talents.spent_for_currency(currency_id);
+            Some((spent < max_points, max_points.saturating_sub(spent)))
+        })
+        .unwrap_or((false, 0));
+
+    state.push(Val::Bool(has_unspent));
+    state.push(Val::Num(num_points as f64));
+    Ok(2)
 }
 
-fn c_class_talents_trait_tree_for_spec(_spec_id: u32) -> u32 {
-    790
+fn c_class_talents_trait_tree_for_spec(spec_id: u32) -> Option<u32> {
+    class_talent_tree_for_spec(spec_id)
 }

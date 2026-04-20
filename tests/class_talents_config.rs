@@ -92,3 +92,12 @@ fn get_trait_tree_for_spec_returns_tree_id() {
         .unwrap();
     assert_eq!(tree_id, 790, "Paladin class talent tree");
 }
+
+#[test]
+fn get_trait_tree_for_unknown_spec_returns_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_ClassTalents.GetTraitTreeForSpec(999) == nil")
+        .unwrap();
+    assert!(is_nil, "unknown specs should not map to a tree id");
+}

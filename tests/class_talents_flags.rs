@@ -95,3 +95,16 @@ fn is_starter_build_active_reflects_talent_state_field() {
         .unwrap();
     assert!(active);
 }
+
+#[test]
+fn has_unspent_hero_talent_points_defaults_to_remaining_points_for_active_subtree() {
+    let env = env();
+    let (has_unspent, num_points): (bool, i32) = env
+        .eval("return C_ClassTalents.HasUnspentHeroTalentPoints()")
+        .unwrap();
+    assert!(has_unspent);
+    assert_eq!(
+        num_points, 11,
+        "the seeded hero subtree starts with its full budget available"
+    );
+}
