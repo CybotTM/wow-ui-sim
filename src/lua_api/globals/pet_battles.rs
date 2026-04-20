@@ -123,7 +123,7 @@ fn runtime_state(state: &mut LuaState) -> Option<Val> {
     (!matches!(runtime_state, Val::Nil)).then_some(runtime_state)
 }
 
-fn get_or_create_runtime_state(state: &mut LuaState) -> Val {
+pub(crate) fn get_or_create_runtime_state(state: &mut LuaState) -> Val {
     runtime_state(state).unwrap_or_else(|| {
         let runtime_state = create_table(state);
         table_set(

@@ -2,7 +2,7 @@
 //!
 //! Migrates 15 entries off the namespace stub tables:
 //!
-//! - `GetAbilityInfoByID(abilityID)` — returns placeholder name/icon for any ID.
+//! - `GetAbilityInfoByID(abilityID)` — reads the seeded runtime ability table.
 //! - `GetActivePet(owner)` — returns the active pet slot index for that side.
 //! - `GetAllEffectiveAbilityIDs(owner, petIndex)` — returns ability-id array.
 //! - `GetMaxAbilityCharges(owner, petIndex, abilityIndex)` — returns 1.
@@ -19,7 +19,11 @@
 //! - `StartPVPMatchmaking()` — sets `is_matchmaking = true` on state.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
+use crate::lua_api::globals::pet_battles::get_or_create_runtime_state;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+    val_to_string,
+};
 use crate::lua_api::state::PetBattlePet;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -67,6 +71,21 @@ fn resolve_pet(state: &mut LuaState, owner_slot: usize, idx_slot: usize) -> Opti
 
 fn get_ability_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let ability_id = i32::from_stack(state, 1)?;
+    if let Some((name, icon, max_cooldown, description, num_turns, pet_type)) =
+        runtime_ability_info(state, ability_id)
+    {
+        let ability_name = create_string(state, &format!("Ability {ability_id}"));
+        let display_name = create_string(state, &name);
+        let description = create_string(state, &description);
+        state.push(ability_name);
+        state.push(display_name);
+        state.push(Val::Num(icon));
+        state.push(Val::Num(max_cooldown));
+        state.push(description);
+        state.push(Val::Num(num_turns));
+        state.push(Val::Num(pet_type));
+        return Ok(7);
+    }
     // Return a minimal placeholder: name, icon(0), maxCharges, splitDescriptionComponents
     let name = create_string(state, &format!("Ability {ability_id}"));
     state.push(name);
@@ -231,7 +250,69 @@ fn is_player_npc(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn runtime_ability_info(
+    state: &mut LuaState,
+    ability_id: i32,
+) -> Option<(String, f64, f64, String, f64, f64)> {
+    let runtime_state = table_get(state, Val::Table(state.global), "__wow_pet_battle_state");
+    let abilities = table_get(state, runtime_state, "abilitiesByID");
+    let ability = {
+        let Val::Table(abilities_ref) = abilities else {
+            return None;
+        };
+        state
+            .gc
+            .tables
+            .get(abilities_ref)
+            .map(|t| t.get(Val::Num(ability_id as f64), &state.gc.string_arena))
+            .unwrap_or(Val::Nil)
+    };
+    let Val::Table(ability_ref) = ability else {
+        return None;
+    };
+    let ability_table = Val::Table(ability_ref);
+    let name_value = table_get(state, ability_table, "name");
+    let description_value = table_get(state, ability_table, "description");
+    let name = val_to_string(&*state, name_value)?;
+    let description = val_to_string(&*state, description_value).unwrap_or_default();
+    let icon = match table_get(state, ability_table, "icon") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    let max_cooldown = match table_get(state, ability_table, "maxCooldown") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    let num_turns = match table_get(state, ability_table, "numTurns") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    let pet_type = match table_get(state, ability_table, "petType") {
+        Val::Num(value) => value,
+        _ => 0.0,
+    };
+    Some((name, icon, max_cooldown, description, num_turns, pet_type))
+}
+
 fn start_pvp_matchmaking(state: &mut LuaState) -> LuaResult<u32> {
-    borrow_state_mut(state)?.pet_battles.is_matchmaking = true;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.pet_battles.is_matchmaking = true;
+    }
+    let runtime_state = get_or_create_runtime_state(state);
+    table_set(state, runtime_state.clone(), "queueStatus", Val::Num(15.0));
+    table_set(
+        state,
+        runtime_state.clone(),
+        "queueEstimatedTime",
+        Val::Num(12.0),
+    );
+    table_set(state, runtime_state.clone(), "queueTime", Val::Num(4.0));
+    table_set(
+        state,
+        runtime_state,
+        "canAcceptQueuedPVPMatch",
+        Val::Bool(true),
+    );
     Ok(0)
 }

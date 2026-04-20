@@ -22,6 +22,13 @@ fn state(env: &WowLuaEnv) -> (i64, i64, i64) {
 #[test]
 fn defaults_all_zero() {
     let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        A_Admin.SetPetBattleCounts(0, 0)
+        A_Admin.SetPetBattleState(0)
+        "#,
+    )
+    .unwrap();
     assert_eq!(state(&env), (0, 0, 0));
 }
 

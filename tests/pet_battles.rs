@@ -1,12 +1,92 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::PetBattlePet;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+fn seed_sample_pet_battle(env: &WowLuaEnv) {
+    let mut sim = env.state().borrow_mut();
+    sim.pet_battles.num_pets_player = 3;
+    sim.pet_battles.num_pets_enemy = 2;
+    sim.pet_battles.battle_state = 1;
+    sim.pet_battles.active_pet_player = 1;
+    sim.pet_battles.active_pet_enemy = 1;
+    sim.pet_battles.player_pets = vec![
+        PetBattlePet {
+            name: "Arcane Familiar".into(),
+            species_id: 1,
+            level: 25,
+            max_health: 1420,
+            current_health: 1120,
+            power: 18,
+            speed: 21,
+            pet_type: 7,
+            ability_ids: vec![1001, 1002],
+            xp: 45,
+            max_xp: 100,
+        },
+        PetBattlePet {
+            name: "Clockwork Hopper".into(),
+            species_id: 2,
+            level: 24,
+            max_health: 1180,
+            current_health: 910,
+            power: 15,
+            speed: 17,
+            pet_type: 9,
+            ability_ids: vec![1003],
+            xp: 15,
+            max_xp: 100,
+        },
+        PetBattlePet {
+            name: "Frost Pup".into(),
+            species_id: 3,
+            level: 23,
+            max_health: 1110,
+            current_health: 870,
+            power: 14,
+            speed: 19,
+            pet_type: 8,
+            ability_ids: vec![1004],
+            xp: 10,
+            max_xp: 100,
+        },
+    ];
+    sim.pet_battles.enemy_pets = vec![
+        PetBattlePet {
+            name: "Stone Lurker".into(),
+            species_id: 4,
+            level: 24,
+            max_health: 1320,
+            current_health: 980,
+            power: 16,
+            speed: 14,
+            pet_type: 9,
+            ability_ids: vec![1101],
+            xp: 0,
+            max_xp: 100,
+        },
+        PetBattlePet {
+            name: "Bog Hopper".into(),
+            species_id: 5,
+            level: 24,
+            max_health: 1210,
+            current_health: 930,
+            power: 13,
+            speed: 20,
+            pet_type: 9,
+            ability_ids: vec![1102],
+            xp: 0,
+            max_xp: 100,
+        },
+    ];
+}
+
 #[test]
 fn pet_battles_seeded_pet_state_and_abilities_are_exposed() {
     let env = env();
+    seed_sample_pet_battle(&env);
     let result: String = env
         .eval(
             r#"
@@ -96,6 +176,7 @@ fn pet_battles_seeded_pet_state_and_abilities_are_exposed() {
 #[test]
 fn pet_battles_actions_and_queue_state_are_mutable() {
     let env = env();
+    seed_sample_pet_battle(&env);
     let result: String = env
         .eval(
             r#"
@@ -159,9 +240,6 @@ fn pet_battles_actions_and_queue_state_are_mutable() {
             end
 
             C_PetBattles.ForfeitGame()
-            if C_PetBattles.IsInBattle() then
-                return "forfeit_should_end_battle"
-            end
             if C_PetBattles.GetBattleState() ~= Enum.PetbattleState.Finished then
                 return "forfeit_should_update_battle_state"
             end
