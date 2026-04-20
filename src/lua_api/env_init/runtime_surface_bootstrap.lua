@@ -11719,6 +11719,7 @@ CLOCK_TICKER_Y_OVERRIDE = CLOCK_TICKER_Y_OVERRIDE or false
 
 local __global_mt = getmetatable(_G) or {}
 local __prev_index = __global_mt.__index
+local __prev_newindex = __global_mt.__newindex
 local function __wow_is_color_constant_key(key)
   if type(key) ~= "string" then
     return false
@@ -11740,6 +11741,37 @@ local function __wow_preserve_nil_global(key)
   return key:match("^SLASH_[A-Z0-9_]+%d+$") ~= nil
       or key:match("^EMOTE%d+_CMD%d+$") ~= nil
       or key:match("^EMOTE%d+_TOKEN$") ~= nil
+end
+local function __wow_make_settings_initializer_placeholder()
+  local initializer = {
+    data = {},
+  }
+
+  function initializer:SetSearchIgnoredInLayout(layout)
+    self.searchIgnoredInLayout = layout
+  end
+
+  function initializer:SetParentInitializer(parentInitializer, modifyPredicate)
+    self.parentInitializer = parentInitializer
+    self.modifyPredicate = modifyPredicate
+  end
+
+  function initializer:SetKioskProtected()
+    self.kioskProtected = true
+  end
+
+  function initializer:GetName()
+    return self.name or ""
+  end
+
+  return initializer
+end
+
+local function __wow_prepare_global_assignment(key, value)
+  if key == "Settings" and type(value) == "table" and value.PingSoundsInitializer == nil then
+    value.PingSoundsInitializer = __wow_make_settings_initializer_placeholder()
+  end
+  return value
 end
 __global_mt.__index = function(t, key)
   local value = nil
@@ -11778,6 +11810,18 @@ __global_mt.__index = function(t, key)
   end
   __wow_log_nil_symbol_access("_G", key)
   return nil
+end
+__global_mt.__newindex = function(t, key, value)
+  value = __wow_prepare_global_assignment(key, value)
+  if __prev_newindex ~= nil then
+    if type(__prev_newindex) == "function" then
+      __prev_newindex(t, key, value)
+      return
+    end
+    __prev_newindex[key] = value
+    return
+  end
+  rawset(t, key, value)
 end
 setmetatable(_G, __global_mt)
 __wow_seed_namespace_names()
@@ -12322,29 +12366,6 @@ if type(SecondsFormatterMixin.GetMinInterval) ~= "function" then
   end
 end
 
-Settings = Settings or {}
-
-if Settings.PingSoundsInitializer == nil then
-  local initializer = {
-    data = {},
-  }
-
-  function initializer:SetSearchIgnoredInLayout(layout)
-    self.searchIgnoredInLayout = layout
-  end
-
-  function initializer:SetParentInitializer(parentInitializer, modifyPredicate)
-    self.parentInitializer = parentInitializer
-    self.modifyPredicate = modifyPredicate
-  end
-
-  function initializer:SetKioskProtected()
-    self.kioskProtected = true
-  end
-
-  function initializer:GetName()
-    return self.name or ""
-  end
-
-  Settings.PingSoundsInitializer = initializer
+if type(rawget(_G, "Settings")) == "table" then
+  __wow_prepare_global_assignment("Settings", rawget(_G, "Settings"))
 end
