@@ -81,6 +81,10 @@ fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
         .unwrap_or_else(|| panic!("expected string value, got {}", value.type_name()))
 }
 
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
 /// Create a test environment, write XML content, load it, return context.
 pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
     let env = WowLuaEnv::new().unwrap();
@@ -604,6 +608,340 @@ fn test_runtime_create_frame_creates_inherited_layer_regions() {
             "#,
         )
         .unwrap();
+}
+
+#[test]
+fn test_runtime_create_frame_keeps_inherited_checkbutton_parent_key() {
+    let t = load_test_xml(
+        "runtime-create-frame-inherited-checkbutton-parent-key",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <CheckButton name="ChatConfigBaseCheckButtonTemplate" virtual="true">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="Text" justifyH="LEFT" maxLines="1"/>
+                    </Layer>
+                </Layers>
+            </CheckButton>
+            <CheckButton name="ChatConfigCheckButtonTemplate" parentKey="CheckButton" inherits="ChatConfigBaseCheckButtonTemplate" virtual="true"/>
+            <Frame name="ChatConfigCheckboxTemplate" virtual="true">
+                <Frames>
+                    <CheckButton name="$parentCheck" parentKey="CheckButton" inherits="ChatConfigCheckButtonTemplate"/>
+                </Frames>
+            </Frame>
+            <Frame name="ChatConfigWideCheckboxWithSwatchTemplate" inherits="ChatConfigCheckboxTemplate" virtual="true">
+                <Scripts>
+                    <OnLoad inherit="prepend">
+                        assert(self.CheckButton ~= nil, "template OnLoad should see inherited CheckButton child")
+                        assert(self.CheckButton.Text ~= nil, "template OnLoad should see inherited CheckButton Text")
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+            <Frame name="MovableChatConfigWideCheckboxWithSwatchTemplate" parentArray="WideCheckboxes" mixin="ChatConfigWideCheckboxMixin" inherits="ChatConfigWideCheckboxWithSwatchTemplate" virtual="true">
+                <Scripts>
+                    <OnLoad inherit="prepend" method="OnLoad"/>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            ChatConfigWideCheckboxMixin = {}
+            function ChatConfigWideCheckboxMixin:OnLoad()
+                assert(self.CheckButton ~= nil, "mixin OnLoad should see inherited CheckButton child")
+                assert(self.CheckButton.Text ~= nil, "mixin OnLoad should see inherited CheckButton Text")
+            end
+            "#,
+        )
+        .unwrap();
+
+    t.env
+        .exec(
+            r#"
+            CreateFrame("Frame", "RuntimeChatCheckboxFrame", UIParent, "MovableChatConfigWideCheckboxWithSwatchTemplate")
+            assert(RuntimeChatCheckboxFrame.CheckButton ~= nil, "runtime frame should keep inherited CheckButton child")
+            assert(RuntimeChatCheckboxFrame.CheckButton.Text ~= nil, "runtime frame should keep inherited CheckButton Text child")
+            assert(RuntimeChatCheckboxFrameCheck == RuntimeChatCheckboxFrame.CheckButton, "named CheckButton child should remain globally addressable")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_runtime_template_layers_can_anchor_to_template_child_parent_keys() {
+    let t = load_test_xml(
+        "runtime-template-layers-anchor-to-template-child-parent-keys",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <CheckButton name="ChatConfigBaseCheckButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="Text" justifyH="LEFT" maxLines="1"/>
+                    </Layer>
+                </Layers>
+            </CheckButton>
+            <CheckButton name="ChatConfigCheckButtonTemplate" parentKey="CheckButton" inherits="ChatConfigBaseCheckButtonTemplate" virtual="true"/>
+            <Frame name="ChatConfigCheckboxTemplate" virtual="true">
+                <Frames>
+                    <CheckButton name="$parentCheck" parentKey="CheckButton" inherits="ChatConfigCheckButtonTemplate"/>
+                </Frames>
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="BlankText">
+                            <Anchors>
+                                <Anchor point="LEFT" relativeKey="$parent.CheckButton.Text" relativePoint="LEFT" x="0" y="0"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    let before_errors = t.env.state().borrow().lua_errors.len();
+    t.env
+        .exec(
+            r#"
+            local frame = CreateFrame("Frame", "RuntimeAnchoredCheckboxFrame", UIParent, "ChatConfigCheckboxTemplate")
+            assert(frame.CheckButton ~= nil, "runtime frame should expose its template CheckButton child")
+            assert(frame.BlankText ~= nil, "runtime frame should create its anchored fontstring")
+            "#,
+        )
+        .unwrap();
+    let after_errors = t.env.state().borrow().lua_errors.clone();
+    let targeted: Vec<_> = after_errors
+        .into_iter()
+        .skip(before_errors)
+        .filter(|message| message.contains("CheckButton"))
+        .collect();
+    assert!(
+        targeted.is_empty(),
+        "runtime template creation should not emit CheckButton errors for sibling anchors: {targeted:?}"
+    );
+}
+
+#[test]
+fn test_xml_instance_keeps_inherited_checkbutton_parent_key() {
+    let t = load_test_xml(
+        "xml-instance-inherited-checkbutton-parent-key",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                ChatConfigWideCheckboxMixin = {}
+                function ChatConfigWideCheckboxMixin:OnLoad()
+                    assert(self.CheckButton ~= nil, "xml mixin OnLoad should see inherited CheckButton child")
+                    assert(self.CheckButton.Text ~= nil, "xml mixin OnLoad should see inherited CheckButton Text")
+                end
+            </Script>
+            <CheckButton name="ChatConfigBaseCheckButtonTemplate" virtual="true">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString parentKey="Text" justifyH="LEFT" maxLines="1"/>
+                    </Layer>
+                </Layers>
+            </CheckButton>
+            <CheckButton name="ChatConfigCheckButtonTemplate" parentKey="CheckButton" inherits="ChatConfigBaseCheckButtonTemplate" virtual="true"/>
+            <Frame name="ChatConfigCheckboxTemplate" virtual="true">
+                <Frames>
+                    <CheckButton name="$parentCheck" parentKey="CheckButton" inherits="ChatConfigCheckButtonTemplate"/>
+                </Frames>
+            </Frame>
+            <Frame name="ChatConfigWideCheckboxWithSwatchTemplate" inherits="ChatConfigCheckboxTemplate" virtual="true">
+                <Scripts>
+                    <OnLoad inherit="prepend">
+                        assert(self.CheckButton ~= nil, "xml template OnLoad should see inherited CheckButton child")
+                        assert(self.CheckButton.Text ~= nil, "xml template OnLoad should see inherited CheckButton Text")
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+            <Frame name="MovableChatConfigWideCheckboxWithSwatchTemplate" parentArray="WideCheckboxes" mixin="ChatConfigWideCheckboxMixin" inherits="ChatConfigWideCheckboxWithSwatchTemplate" virtual="true">
+                <Scripts>
+                    <OnLoad inherit="prepend" method="OnLoad"/>
+                </Scripts>
+            </Frame>
+            <Frame name="XmlChatCheckboxFrame" inherits="MovableChatConfigWideCheckboxWithSwatchTemplate"/>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(XmlChatCheckboxFrame.CheckButton ~= nil, "xml frame should keep inherited CheckButton child")
+            assert(XmlChatCheckboxFrame.CheckButton.Text ~= nil, "xml frame should keep inherited CheckButton Text child")
+            assert(XmlChatCheckboxFrameCheck == XmlChatCheckboxFrame.CheckButton, "xml named CheckButton child should remain globally addressable")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn test_catalog_shop_file_prefix_numeric_error_probe() {
+    let env = WowLuaEnv::new().expect("lua env");
+    env.set_screen_size(1024.0, 768.0);
+    env.exec_rilua_secure(
+        r#"
+        __catalog_shop_probe_traces = {}
+        local original_handler = geterrorhandler()
+        seterrorhandler(function(msg)
+            table.insert(__catalog_shop_probe_traces, tostring(msg) .. "\n" .. debug.traceback())
+            if original_handler then
+                return original_handler(msg)
+            end
+        end)
+        "#,
+    )
+    .expect("should install catalog shop probe handler");
+
+    let ui = blizzard_ui_dir();
+    let addons = crate::loader::discover_blizzard_addons(&ui);
+    for (name, toc_path) in &addons {
+        if matches!(
+            name.as_str(),
+            "Blizzard_CatalogShop"
+                | "Blizzard_CatalogShopTopUpFlow"
+                | "Blizzard_CatalogShopRefundFlow"
+        ) {
+            continue;
+        }
+        let _ = crate::loader::load_addon(&env.loader_env(), toc_path);
+    }
+
+    let toc_path = ui.join("Blizzard_CatalogShop/Blizzard_CatalogShop.toc");
+    let toc = crate::toc::TocFile::from_file(&toc_path).expect("catalog shop toc");
+    let addon_table = env.create_addon_table().expect("catalog shop addon table");
+    let ctx = crate::loader::addon::AddonContext {
+        name: "Blizzard_CatalogShop",
+        table: addon_table,
+        addon_root: toc.addon_dir.as_path(),
+        use_secure_env: toc.is_secure_env(),
+        taint: false,
+    };
+
+    for file in toc.file_paths() {
+        let before = env.state().borrow().lua_errors.len();
+        let ext = file
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .unwrap_or_default();
+        match ext {
+            "lua" => {
+                super::lua_file::load_lua_file(
+                    &env.loader_env(),
+                    &file,
+                    &ctx,
+                    &mut LoadTiming::default(),
+                )
+                .unwrap_or_else(|error| panic!("{} should load: {error}", file.display()));
+            }
+            "xml" => {
+                super::xml_file::load_xml_file(
+                    &env.loader_env(),
+                    &file,
+                    &ctx,
+                    &mut LoadTiming::default(),
+                )
+                .unwrap_or_else(|error| panic!("{} should load: {error}", file.display()));
+            }
+            _ => continue,
+        }
+        let errors = env.state().borrow().lua_errors.clone();
+        let targeted: Vec<_> = errors
+            .into_iter()
+            .skip(before)
+            .filter(|message| message.contains("expected number, got nil at argument 1"))
+            .collect();
+        let traces: Vec<String> = env
+            .eval("return __catalog_shop_probe_traces")
+            .expect("probe traces should stringify");
+        assert!(
+            targeted.is_empty(),
+            "{} introduced CatalogShop numeric load error: {targeted:?}\ntraces:\n{}",
+            file.display(),
+            traces.join("\n---\n")
+        );
+    }
+}
+
+#[test]
+fn test_catalog_shop_xml_numeric_error_without_main_onload() {
+    let env = WowLuaEnv::new().expect("lua env");
+    env.set_screen_size(1024.0, 768.0);
+
+    let ui = blizzard_ui_dir();
+    let addons = crate::loader::discover_blizzard_addons(&ui);
+    for (name, toc_path) in &addons {
+        if matches!(
+            name.as_str(),
+            "Blizzard_CatalogShop"
+                | "Blizzard_CatalogShopTopUpFlow"
+                | "Blizzard_CatalogShopRefundFlow"
+        ) {
+            continue;
+        }
+        let _ = crate::loader::load_addon(&env.loader_env(), toc_path);
+    }
+
+    let toc_path = ui.join("Blizzard_CatalogShop/Blizzard_CatalogShop.toc");
+    let toc = crate::toc::TocFile::from_file(&toc_path).expect("catalog shop toc");
+    let addon_table = env.create_addon_table().expect("catalog shop addon table");
+    let ctx = crate::loader::addon::AddonContext {
+        name: "Blizzard_CatalogShop",
+        table: addon_table,
+        addon_root: toc.addon_dir.as_path(),
+        use_secure_env: toc.is_secure_env(),
+        taint: false,
+    };
+
+    for file in toc.file_paths() {
+        let ext = file
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .unwrap_or_default();
+        match ext {
+            "lua" => {
+                super::lua_file::load_lua_file(
+                    &env.loader_env(),
+                    &file,
+                    &ctx,
+                    &mut LoadTiming::default(),
+                )
+                .unwrap_or_else(|error| panic!("{} should load: {error}", file.display()));
+            }
+            _ => continue,
+        }
+    }
+
+    env.exec_rilua_secure(
+        r#"
+        local original = CatalogShopDefaultProductCardMixin.Layout
+        CatalogShopDefaultProductCardMixin.Layout = function(self)
+            self.productInfo = self.productInfo
+            return nil
+        end
+        __catalog_shop_original_layout = original
+        "#,
+    )
+    .expect("should patch CatalogShop default product card layout");
+
+    let xml_path = ui.join("Blizzard_CatalogShop/Blizzard_CatalogShop.xml");
+    let before = env.state().borrow().lua_errors.len();
+    super::xml_file::load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default())
+        .unwrap_or_else(|error| panic!("{} should load: {error}", xml_path.display()));
+    let errors = env.state().borrow().lua_errors.clone();
+    let targeted: Vec<_> = errors
+        .into_iter()
+        .skip(before)
+        .filter(|message| message.contains("expected number, got nil at argument 1"))
+        .collect();
+    assert!(
+        targeted.is_empty(),
+        "CatalogShop xml still introduced numeric load error with product card layout disabled: {targeted:?}"
+    );
 }
 
 #[test]

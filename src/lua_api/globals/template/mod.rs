@@ -40,6 +40,52 @@ pub fn assign_parent_key(
     sync_child_to_rilua(state, target_parent_id, &resolved_key, child_id)
 }
 
+pub fn repair_direct_child_parent_keys(state: &mut LuaState, parent_id: u64) -> LuaResult<()> {
+    let repairs = {
+        let sim = crate::lua_api::methods::borrow_state(state)?;
+        let Some(parent) = sim.widgets.get(parent_id) else {
+            return Ok(());
+        };
+        let parent_name = parent.name.as_deref();
+
+        parent
+            .children
+            .iter()
+            .filter_map(|child_id| {
+                let child = sim.widgets.get(*child_id)?;
+                let key = child.parent_key.clone().or_else(|| {
+                    infer_parent_key_from_child_name(parent_name, child.name.as_deref())
+                });
+                let key = key?;
+                (parent.children_keys.get(&key) != Some(child_id)).then(|| (key, *child_id))
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (key, child_id) in repairs {
+        assign_parent_key(state, parent_id, &key, child_id)?;
+    }
+
+    Ok(())
+}
+
+fn infer_parent_key_from_child_name(
+    parent_name: Option<&str>,
+    child_name: Option<&str>,
+) -> Option<String> {
+    let parent_name = parent_name?;
+    let child_name = child_name?;
+    [
+        ("Check", "CheckButton"),
+        ("CheckButton", "CheckButton"),
+        ("Checkbox", "CheckButton"),
+    ]
+    .into_iter()
+    .find_map(|(suffix, key)| {
+        (child_name == format!("{parent_name}{suffix}")).then(|| key.to_string())
+    })
+}
+
 fn resolve_parent_key_target(
     state: &LuaState,
     parent_id: u64,

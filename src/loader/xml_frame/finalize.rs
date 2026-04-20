@@ -54,6 +54,10 @@ fn create_children_and_finalize(
     apply_bar_texture(env, frame, name, inherits)?;
     init_action_bar_tables(env, frame, name);
     timing.frame_button_time += btn_start.elapsed();
+    env.with_state(|state| {
+        crate::lua_api::globals::template::repair_direct_child_parent_keys(state, frame_id)
+            .map_err(|error| LoadError::Lua(error.to_string()))
+    })?;
     let lifecycle = lifecycle_scripts(frame, inherits);
     if name == "PlayerSpellsFrame" {
         eprintln!(
