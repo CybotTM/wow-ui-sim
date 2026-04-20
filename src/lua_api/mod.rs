@@ -8,6 +8,7 @@ pub mod chat_init;
 mod diagnostics;
 mod env;
 mod env_convert;
+mod env_events;
 mod env_init;
 mod env_rilua;
 mod env_runtime;
