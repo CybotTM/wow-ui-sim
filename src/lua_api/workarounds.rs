@@ -162,12 +162,6 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
-    if matches!(
-        addon_name,
-        "Blizzard_SharedTalentUI" | "Blizzard_PlayerSpells"
-    ) {
-        patch_shared_talent_util(env);
-    }
     if addon_name == "Blizzard_MapCanvas" {
         patch_map_canvas_scroll_container(env);
     }
@@ -1625,31 +1619,6 @@ if type(DamageMeter) == "table" and type(DamageMeter.ForEachSessionWindow) == "f
 end
 "#;
 
-const SHARED_TALENT_UTIL_COMBINE_COST_ARRAYS_LUA: &str = r###"
-if TalentUtil and type(TalentUtil.CombineCostArrays) == "function" and not TalentUtil.__wow_ui_sim_nil_safe_combine then
-    local original = TalentUtil.CombineCostArrays
-    function TalentUtil.CombineCostArrays(...)
-        local combinedCostMap = {}
-        for i = 1, select("#", ...) do
-            local costArray = select(i, ...)
-            if type(costArray) == "table" then
-                for _, cost in ipairs(costArray) do
-                    combinedCostMap[cost.ID] = (combinedCostMap[cost.ID] or 0) + cost.amount
-                end
-            end
-        end
-
-        local combinedCostArray = {}
-        for ID, amount in pairs(combinedCostMap) do
-            table.insert(combinedCostArray, { ID = ID, amount = amount })
-        end
-        return combinedCostArray
-    end
-    TalentUtil.__wow_ui_sim_nil_safe_combine = true
-    TalentUtil.__wow_ui_sim_original_combine = original
-end
-"###;
-
 const VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA: &str = r###"
 local function __wow_patch_vignette_provider(provider)
     if type(provider) ~= "table" then
@@ -1707,7 +1676,3 @@ for i = 1, 12 do
     __wow_refresh_action_button(_G["ActionButton" .. i])
 end
 "###;
-
-fn patch_shared_talent_util(env: &crate::lua_api::LoaderEnv<'_>) {
-    let _ = env.exec(SHARED_TALENT_UTIL_COMBINE_COST_ARRAYS_LUA);
-}

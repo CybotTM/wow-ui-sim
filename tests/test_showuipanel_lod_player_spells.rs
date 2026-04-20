@@ -314,6 +314,16 @@ fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
         common::install_error_collector(&env, "__hero_export_gate_errors");
         clear_recorded_lua_errors(&env);
 
+        let hero_currency_id = {
+            let state = env.state().borrow();
+            match state.talents.active_hero_subtree() {
+                Some(48) => 2986,
+                Some(49) => 2987,
+                Some(50) => 2988,
+                other => panic!("unexpected active hero subtree: {other:?}"),
+            }
+        };
+
         {
             let mut state = env.state().borrow_mut();
             let class_currency_ids = TRAIT_TREE_DB
@@ -325,12 +335,12 @@ fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
                 let max_points = max_points_for_currency(currency_id);
                 state.talents.currency_spent.insert(currency_id, max_points);
             }
-            state.talents.currency_spent.insert(2986, 10);
+            state.talents.currency_spent.insert(hero_currency_id, 10);
         }
 
         open_talents(&env);
 
-        let (disabled_with_points, disabled_without_points): (bool, bool) = env
+        let disabled_with_points: bool = env
             .eval(
                 r#"
                 local talents = assert(PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame, "talents frame should exist")
@@ -353,24 +363,40 @@ fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
 
                 local hadPoints, numPoints = C_ClassTalents.HasUnspentHeroTalentPoints()
                 assert(hadPoints and numPoints == 1, "expected one remaining hero point before final spend")
+                return disabledWithPoints
+                "#,
+            )
+            .unwrap();
 
-                local activeSubTree = assert(C_ClassTalents.GetActiveHeroTalentSpec(), "active hero subtree should exist")
-                local finalSpent = 11
-                if activeSubTree == 48 then
-                    A_Admin.SetTraitCurrencySpent(2986, finalSpent)
-                elseif activeSubTree == 49 then
-                    A_Admin.SetTraitCurrencySpent(2987, finalSpent)
-                elseif activeSubTree == 50 then
-                    A_Admin.SetTraitCurrencySpent(2988, finalSpent)
-                else
-                    error("unexpected active hero subtree: " .. tostring(activeSubTree))
+        env.state()
+            .borrow_mut()
+            .talents
+            .currency_spent
+            .insert(hero_currency_id, 11);
+
+        let disabled_without_points: bool = env
+            .eval(
+                r#"
+                local talents = assert(PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame, "talents frame should exist")
+
+                local function find_export_clipboard(loadSystem)
+                    for _, sentinelInfo in pairs(loadSystem.sentinelInfos) do
+                        if sentinelInfo.sentinelInfos then
+                            for _, child in ipairs(sentinelInfo.sentinelInfos) do
+                                if child.text == TALENT_FRAME_DROP_DOWN_EXPORT_CLIPBOARD then
+                                    return child
+                                end
+                            end
+                        end
+                    end
                 end
 
+                local clipboard = assert(find_export_clipboard(talents.LoadSystem), "export clipboard sentinel should exist")
                 local disabledWithoutPoints = select(1, clipboard.disabledCallback())
                 local hasPointsAfter, numPointsAfter = C_ClassTalents.HasUnspentHeroTalentPoints()
                 assert(not hasPointsAfter and numPointsAfter == 0, "hero points should be exhausted after final spend")
 
-                return disabledWithPoints, disabledWithoutPoints
+                return disabledWithoutPoints
                 "#,
             )
             .unwrap();
@@ -395,6 +421,90 @@ fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
         assert!(
             !disabled_without_points,
             "export should re-enable once hero points are exhausted and class points are capped"
+        );
+    }
+}
+
+#[test]
+fn player_spells_tiered_button_costs_aggregate_real_trait_data() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__tiered_button_cost_errors");
+        clear_recorded_lua_errors(&env);
+
+        open_talents(&env);
+        run_extra_update_ticks(&env, 3);
+
+        let result: String = env
+            .eval(
+                r#"
+                local talents = assert(PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame, "talents frame should exist")
+                local configID = assert(talents:GetConfigID(), "talents frame should have a config id")
+
+                local tieredButton
+                for talentButton in talents:EnumerateAllTalentButtons() do
+                    local nodeInfo = talentButton:GetNodeInfo()
+                    if nodeInfo and nodeInfo.type == Enum.TraitNodeType.Tiered then
+                        tieredButton = talentButton
+                        break
+                    end
+                end
+
+                assert(tieredButton, "expected a tiered talent button")
+
+                local function cost_map(costs)
+                    local map = {}
+                    if type(costs) ~= "table" then
+                        return map
+                    end
+                    for _, cost in ipairs(costs) do
+                        map[cost.ID] = (map[cost.ID] or 0) + cost.amount
+                    end
+                    return map
+                end
+
+                local nodeID = tieredButton:GetNodeID()
+                local nodeCost = assert(C_Traits.GetNodeCost(configID, nodeID), "tiered button should have node cost data")
+                local entryInfo = assert(tieredButton:GetEntryInfo(), "tiered button should have entry info")
+                local combinedCost = assert(tieredButton:GetTraitCurrenciesCost(), "tiered button should have combined cost data")
+
+                local expected = cost_map(nodeCost)
+                for _, cost in ipairs(entryInfo.entryCost or {}) do
+                    expected[cost.ID] = (expected[cost.ID] or 0) + cost.amount
+                end
+
+                local actual = cost_map(combinedCost)
+                for id, amount in pairs(expected) do
+                    assert(actual[id] == amount, string.format("combined cost mismatch for %s: expected %s got %s", id, amount, tostring(actual[id])))
+                end
+                for id, amount in pairs(actual) do
+                    assert(expected[id] == amount, string.format("combined cost has unexpected entry %s=%s", id, amount))
+                end
+
+                return string.format("%d:%d:%d", nodeID, #nodeCost, #combinedCost)
+                "#,
+            )
+            .unwrap();
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__tiered_button_cost_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "Tiered talent cost regression produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "Tiered talent cost regression produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n")
+        );
+        assert!(
+            result.split(':').count() == 3,
+            "tiered cost regression should return node and cost counts: {result}"
         );
     }
 }
