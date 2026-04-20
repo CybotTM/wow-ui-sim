@@ -17,7 +17,7 @@ fn is_enabled_returns_true() {
 #[test]
 fn get_subscribed_clubs_returns_guild_entry() {
     let env = env();
-    let (count, name, club_type): (i32, String, String) = env
+    let (count, name, club_type): (i32, String, i32) = env
         .eval(
             r#"
             local clubs = C_Club.GetSubscribedClubs()
@@ -27,7 +27,7 @@ fn get_subscribed_clubs_returns_guild_entry() {
         .unwrap();
     assert_eq!(count, 1);
     assert_eq!(name, "Heroes of Azeroth");
-    assert_eq!(club_type, "Guild");
+    assert_eq!(club_type, 2);
 }
 
 #[test]

@@ -6718,12 +6718,14 @@ C_PetBattles.GetLevel = function(owner, petIndex)
   local pet = __wow_pet_battle_get_pet(owner, petIndex)
   return pet and pet.level or 0
 end
-C_PetBattles.GetXP = function(owner, petIndex)
-  local pet = __wow_pet_battle_get_pet(owner, petIndex)
-  if not pet then
-    return 0, 0
+if C_PetBattles.GetXP == nil then
+  C_PetBattles.GetXP = function(owner, petIndex)
+    local pet = __wow_pet_battle_get_pet(owner, petIndex)
+    if not pet then
+      return 0, 0
+    end
+    return pet.xp or 0, pet.maxXP or 0
   end
-  return pet.xp or 0, pet.maxXP or 0
 end
 C_PetBattles.GetAttackModifier = function(attackerType, defenderType)
   if attackerType == 7 and defenderType == 9 then
@@ -6743,10 +6745,12 @@ end
 C_PetBattles.CanAcceptQueuedPVPMatch = function()
   return __wow_pet_battle_state.canAcceptQueuedPVPMatch == true
 end
-C_PetBattles.StartPVPMatchmaking = function()
-  __wow_pet_battle_ensure_active()
-  __wow_pet_battle_state.queueStatus = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.Matchmaking or 1
-  __wow_pet_battle_state.canAcceptQueuedPVPMatch = true
+if C_PetBattles.StartPVPMatchmaking == nil then
+  C_PetBattles.StartPVPMatchmaking = function()
+    __wow_pet_battle_ensure_active()
+    __wow_pet_battle_state.queueStatus = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.Matchmaking or 1
+    __wow_pet_battle_state.canAcceptQueuedPVPMatch = true
+  end
 end
 C_PetBattles.AcceptQueuedPVPMatch = function()
   __wow_pet_battle_state.queueStatus = Enum.PetBattleQueueStatus and Enum.PetBattleQueueStatus.MatchAccepted or 2

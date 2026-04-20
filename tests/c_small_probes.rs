@@ -53,12 +53,9 @@ fn get_frame_stack_returns_table() {
 #[test]
 fn get_frame_stack_returns_one_frame_when_hovered() {
     let env = env();
-    // Create a frame, stash its name, then set hovered_frame via SimState.
     let _: () = env
-        .eval(r#"_G.__test_frame = CreateFrame("Frame", "TestHoverFrame", UIParent)"#)
+        .eval(r#"CreateFrame("Frame", "TestHoverFrame", UIParent)"#)
         .unwrap();
-    let frame_id: f64 = env.eval("return __test_frame:GetID() or 0").unwrap();
-    // Use the frame's widget id via name lookup in WidgetRegistry.
     {
         let state = env.state().borrow();
         let id = state.widgets.get_id_by_name("TestHoverFrame");
@@ -67,7 +64,6 @@ fn get_frame_stack_returns_one_frame_when_hovered() {
             env.state().borrow_mut().hovered_frame = Some(id);
         }
     }
-    let _ = frame_id; // suppress unused warning
     let count: i32 = env.eval("return #C_System.GetFrameStack()").unwrap();
     assert_eq!(count, 1, "one hovered frame → stack has one element");
 }

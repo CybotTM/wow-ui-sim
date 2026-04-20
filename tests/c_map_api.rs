@@ -623,7 +623,9 @@ fn test_is_visible_ignores_alpha() {
 fn test_create_texture_inherits_template_size() {
     use wow_ui_sim::xml::{SizeXml, TextureXml, register_texture_template};
 
-    // Register a texture template with known size (simulates XML loading)
+    let env = env();
+    // Register the template after env creation because WowLuaEnv resets the
+    // global XML registries to isolate tests from prior env state.
     register_texture_template(
         "TestTileTemplate",
         TextureXml {
@@ -636,7 +638,6 @@ fn test_create_texture_inherits_template_size() {
         },
     );
 
-    let env = env();
     // CreateTexture(name, layer, inherits, subLevel) should apply template size
     let (w, h): (f64, f64) = env
         .eval(

@@ -186,16 +186,12 @@ pub fn is_visible(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let sim = borrow_state(state)?;
     let result = sim.widgets.is_ancestor_visible(id)
-        && sim
-            .widgets
-            .get(id)
-            .map(|frame| {
-                matches!(
-                    frame.widget_type,
-                    WidgetType::Texture | WidgetType::FontString | WidgetType::Line
-                ) || frame.effective_alpha > 0.0
-            })
-            .unwrap_or(false);
+        && sim.widgets.get(id).is_some_and(|frame| {
+            matches!(
+                frame.widget_type,
+                WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+            ) || frame.visible
+        });
     drop(sim);
     state.push(Val::Bool(result));
     Ok(1)

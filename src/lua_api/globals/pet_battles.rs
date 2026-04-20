@@ -8,7 +8,7 @@
 //! Admin: `A_Admin.SetPetBattleCounts(player?, enemy?)` plus
 //! `A_Admin.SetPetBattleState(state?)` — missing args default to 0.
 
-use crate::lua_api::methods::{borrow_state_mut, create_table, table_get, table_set};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table, table_get, table_set};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -23,8 +23,8 @@ const BATTLE_STATE_KEY: &str = "battleState";
 pub fn get_num_pets(state: &mut LuaState) -> LuaResult<u32> {
     let owner = Option::<f64>::from_stack(state, 1)?.map(|n| n as i32);
     let count = match owner {
-        Some(1) => runtime_state_i32(state, NUM_PETS_PLAYER_KEY).unwrap_or(0),
-        Some(2) => runtime_state_i32(state, NUM_PETS_ENEMY_KEY).unwrap_or(0),
+        Some(1) => borrow_state(state)?.pet_battles.num_pets_player,
+        Some(2) => borrow_state(state)?.pet_battles.num_pets_enemy,
         _ => 0,
     };
     state.push(Val::Num(count as f64));
