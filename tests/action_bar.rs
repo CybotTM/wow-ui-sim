@@ -92,32 +92,34 @@ const ACTION_BAR_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
 ];
 
+fn build_action_bar_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+
+    // Set addon_base_paths so runtime LoadAddOn() can find on-demand addons.
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+
+    for (name, toc) in ACTION_BAR_ADDONS {
+        let toc_path = blizzard_toc(name, toc);
+        if !toc_path.exists() {
+            continue;
+        }
+        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+            eprintln!("{name} failed: {e}");
+        }
+    }
+
+    env.apply_post_load_workarounds();
+    fire_startup_events(&env);
+    env
+}
+
 /// Load addons, fire startup events, and apply post-startup fixups.
 fn env_with_action_bar() -> common::LockedEnv {
-    common::lock_env(|| {
-        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        env.set_screen_size(1024.0, 768.0);
-
-        // Set addon_base_paths so runtime LoadAddOn() can find on-demand addons.
-        {
-            let mut state = env.state().borrow_mut();
-            state.addon_base_paths = vec![blizzard_ui_dir()];
-        }
-
-        for (name, toc) in ACTION_BAR_ADDONS {
-            let toc_path = blizzard_toc(name, toc);
-            if !toc_path.exists() {
-                continue;
-            }
-            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-                eprintln!("{name} failed: {e}");
-            }
-        }
-
-        env.apply_post_load_workarounds();
-        fire_startup_events(&env);
-        env
-    })
+    common::lock_env(build_action_bar_env)
 }
 
 /// Replicate the startup event sequence from main.rs / app.rs.
@@ -251,6 +253,24 @@ fn test_action_button_size() {
         )
         .unwrap();
     assert_eq!(size, (45.0, 45.0), "ActionButton should be 45x45");
+}
+
+#[test]
+fn test_action_bar_env_can_bootstrap_twice_in_same_process() {
+    common::with_perf_lock(|| {
+        let first = build_action_bar_env();
+        let first_visible: bool = first
+            .eval("return MainActionBar ~= nil and MainActionBar:IsVisible()")
+            .unwrap();
+        assert!(first_visible, "first action bar env should initialize");
+        drop(first);
+
+        let second = build_action_bar_env();
+        let second_visible: bool = second
+            .eval("return MainActionBar ~= nil and MainActionBar:IsVisible()")
+            .unwrap();
+        assert!(second_visible, "second action bar env should initialize");
+    });
 }
 
 #[test]

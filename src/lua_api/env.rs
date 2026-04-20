@@ -16,7 +16,7 @@ use crate::lua_api::methods::{
 };
 use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, get_script};
 use crate::screen::ScreenKind;
-use crate::xml::register_intrinsic_templates;
+use crate::xml::{clear_templates, register_intrinsic_templates};
 use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;
 use std::env;
@@ -99,14 +99,23 @@ impl WowLuaEnv {
     /// Create a new WoW Lua environment with the API initialized.
     pub fn new() -> Result<Self> {
         let state = Rc::new(RefCell::new(SimState::default()));
-        let mut lua = Self::new_rilua(Rc::clone(&state));
+        let lua = Rc::new(RefCell::new(Self::new_rilua(Rc::clone(&state))));
         init_builtin_frames(&state);
+        clear_templates();
         register_intrinsic_templates();
-        init_lua_state(&mut lua, Rc::clone(&state))?;
-        let env = Self {
-            lua: Rc::new(RefCell::new(lua)),
-            state,
-        };
+        {
+            let mut lua_ref = lua.borrow_mut();
+            let app_data = lua_ref
+                .state_mut()
+                .app_data_mut::<WowLuaAppData>()
+                .expect("WowLuaEnv rilua app_data should always exist");
+            app_data.lua = Some(Rc::clone(&lua));
+        }
+        {
+            let mut lua_ref = lua.borrow_mut();
+            init_lua_state(&mut lua_ref, Rc::clone(&state))?;
+        }
+        let env = Self { lua, state };
         {
             let mut lua = env.lua.borrow_mut();
             let app_data = lua
