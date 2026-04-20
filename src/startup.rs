@@ -412,7 +412,6 @@ fn fire_post_login_events(env: &WowLuaEnv) {
 
     call_unit_frame_set_unit(env);
     fire_unit_aura(env);
-    seed_buff_durations(env);
 
     fire("BAG_UPDATE_DELAYED");
     fire("QUEST_LOG_UPDATE");
@@ -422,6 +421,7 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     fire("DISPLAY_SIZE_CHANGED");
     fire("UI_SCALE_CHANGED");
     fire("UPDATE_CHAT_WINDOWS");
+    seed_buff_durations(env);
 }
 
 fn normalize_headless_frame_positions(env: &WowLuaEnv) {
@@ -506,8 +506,17 @@ pub fn seed_buff_durations(env: &WowLuaEnv) {
         r#"
         if not BuffFrame or not BuffFrame.auraFrames then return end
         for _, b in ipairs(BuffFrame.auraFrames) do
-            if b:IsVisible() and b.timeLeft and b.UpdateDuration then
-                pcall(b.UpdateDuration, b, b.timeLeft)
+            if b:IsVisible() and b.UpdateDuration then
+                local timeLeft = b.timeLeft
+                if not timeLeft and b.buttonInfo and b.buttonInfo.expirationTime then
+                    timeLeft = b.buttonInfo.expirationTime - GetTime()
+                    if b.buttonInfo.timeMod and b.buttonInfo.timeMod > 0 then
+                        timeLeft = timeLeft / b.buttonInfo.timeMod
+                    end
+                end
+                if timeLeft then
+                    pcall(b.UpdateDuration, b, timeLeft)
+                end
             end
         end
     "#,

@@ -370,6 +370,60 @@ fn startup_player_life_bar_matches_player_health() {
 }
 
 #[test]
+fn startup_player_buffs_show_duration_text() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: (i32, i32, Option<String>) = env
+            .eval(
+                r#"
+                if not BuffFrame or not BuffFrame.auraFrames then
+                    return 0, 0, nil
+                end
+
+                local visible_buffs = 0
+                local visible_durations = 0
+                local first_duration = nil
+
+                for _, button in ipairs(BuffFrame.auraFrames) do
+                    if button:IsShown()
+                        and button.buttonInfo
+                        and button.buttonInfo.auraType == "Buff"
+                        and button.buttonInfo.expirationTime
+                        and button.buttonInfo.expirationTime > 0
+                    then
+                        visible_buffs = visible_buffs + 1
+                        if button.Duration and button.Duration:IsShown() then
+                            visible_durations = visible_durations + 1
+                            if not first_duration and button.Duration:GetText() then
+                                first_duration = button.Duration:GetText()
+                            end
+                        end
+                    end
+                end
+
+                return visible_buffs, visible_durations, first_duration
+                "#,
+            )
+            .expect("buff duration probe should run");
+
+        let (visible_buffs, visible_durations, first_duration) = result;
+        assert!(
+            visible_buffs > 0,
+            "startup should expose at least one visible player buff with a duration"
+        );
+        assert_eq!(
+            visible_buffs,
+            visible_durations,
+            "visible player buffs with durations should render their duration labels"
+        );
+        assert!(
+            first_duration.is_some(),
+            "at least one visible buff duration should have text"
+        );
+    }
+}
+
+#[test]
 fn startup_keeps_action_bar_deprecation_fallbacks_non_recursive() {
     test_timeout! {
         let env = load_and_startup_env();
