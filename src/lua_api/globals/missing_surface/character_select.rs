@@ -140,12 +140,7 @@ fn set_in_character_select(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn set_global_flag(state: &mut LuaState, key: &str) -> LuaResult<u32> {
-    table_set(
-        state,
-        Val::Table(state.global),
-        key,
-        Val::Bool(true),
-    );
+    table_set(state, Val::Table(state.global), key, Val::Bool(true));
     Ok(0)
 }
 
