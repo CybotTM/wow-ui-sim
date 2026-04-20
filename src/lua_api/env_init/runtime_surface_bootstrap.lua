@@ -11904,6 +11904,11 @@ if type(GetMicroIconForRole) ~= "function" then
   end
 end
 
+if type(PingSystemInitializer) ~= "function" then
+  function PingSystemInitializer(_category)
+  end
+end
+
 if type(SecondsFormatter) ~= "table" then
   SecondsFormatter = {
     Abbreviation = { None = 0 },
