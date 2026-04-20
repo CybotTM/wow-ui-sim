@@ -252,6 +252,43 @@ fn test_get_text_data_returns_table() {
 }
 
 #[test]
+fn test_get_text_data_returns_expected_fields() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("SimpleHTML", "TestHTMLDataFields", UIParent)
+        f:SetHyperlinkFormat("|cffffd200|H%s|h[%s]|h")
+        f:SetHyperlinksEnabled(false)
+        f:SetText("Hello <b>world</b>")
+    "#,
+    )
+    .unwrap();
+
+    let (hyperlink_format, hyperlinks_enabled, text, text_styles_type): (
+        String,
+        bool,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local data = TestHTMLDataFields:GetTextData()
+            return data.hyperlinkFormat,
+                   data.hyperlinksEnabled,
+                   data.text,
+                   type(data.textStyles)
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(hyperlink_format, "|cffffd200|H%s|h[%s]|h");
+    assert!(!hyperlinks_enabled);
+    assert_eq!(text, "Hello <b>world</b>");
+    assert_eq!(text_styles_type, "table");
+}
+
+#[test]
 fn test_fontstring_settext_no_html_stripping() {
     // Verify that regular FontStrings do NOT strip HTML tags
     let env = WowLuaEnv::new().unwrap();

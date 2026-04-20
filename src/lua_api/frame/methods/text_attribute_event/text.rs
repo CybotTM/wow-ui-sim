@@ -17,6 +17,7 @@ use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val, runtime_error};
+use std::collections::HashMap;
 
 use crate::lua_api::frame::methods::button_anchor_hierarchy::ensure_button_text_child;
 
@@ -29,58 +30,36 @@ struct TooltipLineValues {
     wrap: Val,
 }
 
+#[derive(Clone)]
+struct SimpleHtmlTextDataSnapshot {
+    hyperlink_format: String,
+    hyperlinks_enabled: bool,
+    text_styles: HashMap<String, TextStyle>,
+}
+
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = read_text_arg(state, 2);
-    let arg3 = stack_val(state, 3);
-    let arg4 = stack_val(state, 4);
-    let arg5 = stack_val(state, 5);
-    let arg6 = stack_val(state, 6);
-    let arg7 = stack_val(state, 7);
-    let tooltip = TooltipLineValues {
-        r: arg3,
-        g: arg4,
-        b: arg5,
-        a: arg6,
-        wrap: arg7,
-    };
-    // TODO: button Text child creation, HTML stripping, font measurement, tooltip lines
-    let stripped_text = {
-        let sim = borrow_state(state)?;
-        let is_simple_html = sim
-            .widgets
-            .get(id)
-            .map(|frame| frame.widget_type == WidgetType::SimpleHTML)
-            .unwrap_or(false);
-        text.as_ref().map(|value| {
-            if is_simple_html {
-                strip_html_tags(value)
-            } else {
-                crate::render::strip_wow_markup(value)
-            }
-        })
-    };
+    let tooltip = read_tooltip_line_values(state);
+    let stripped_text = stripped_text_for_frame(state, id, text.clone())?;
     let (is_tooltip, should_update_button_child) =
         update_text_frame(state, id, &text, &stripped_text)?;
-    if should_update_button_child && let Some(text_child_id) = ensure_button_text_child(state, id)?
-    {
-        {
-            let mut sim = borrow_state_mut(state)?;
-            if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
-                text_child.text = text.clone();
-                text_child.text_stripped = stripped_text.clone();
-            }
-        }
-        update_auto_text_width(state, text_child_id);
-        update_auto_text_height(state, text_child_id);
-    }
-    update_auto_text_width(state, id);
-    update_auto_text_height(state, id);
+    sync_button_text_child(state, id, &text, &stripped_text, should_update_button_child)?;
+    refresh_text_measurements(state, id);
     if is_tooltip {
-        mirror_tooltip_text_fields(state, id, text.clone(), tooltip);
-        replace_tooltip_lines(state, id, text, tooltip)?;
+        sync_tooltip_text(state, id, text, tooltip)?;
     }
     Ok(0)
+}
+
+fn read_tooltip_line_values(state: &LuaState) -> TooltipLineValues {
+    TooltipLineValues {
+        r: stack_val(state, 3),
+        g: stack_val(state, 4),
+        b: stack_val(state, 5),
+        a: stack_val(state, 6),
+        wrap: stack_val(state, 7),
+    }
 }
 
 fn is_simple_html_frame(state: &LuaState, id: u64) -> bool {
@@ -187,44 +166,75 @@ fn resolved_frame_width(state: &LuaState, id: u64) -> f32 {
 }
 
 fn build_simple_html_text_data(state: &mut LuaState, id: u64, text: Option<String>) -> Val {
-    let Some(snapshot) = with_simple_html_data_mut(state, id, |data| {
-        (
-            data.hyperlink_format.clone(),
-            data.hyperlinks_enabled,
-            data.text_styles.clone(),
-        )
-    }) else {
+    let Some(snapshot) = capture_simple_html_text_data(state, id) else {
         return Val::Nil;
     };
 
     let table = create_table(state);
-    let hyperlink_format = create_string(state, &snapshot.0);
+    write_simple_html_text_data_fields(state, table, &snapshot, text);
+    let styles = build_simple_html_text_styles_table(state, &snapshot.text_styles);
+    table_set(state, table, "textStyles", styles);
+    table
+}
+
+fn capture_simple_html_text_data(
+    state: &mut LuaState,
+    id: u64,
+) -> Option<SimpleHtmlTextDataSnapshot> {
+    with_simple_html_data_mut(state, id, |data| SimpleHtmlTextDataSnapshot {
+        hyperlink_format: data.hyperlink_format.clone(),
+        hyperlinks_enabled: data.hyperlinks_enabled,
+        text_styles: data.text_styles.clone(),
+    })
+}
+
+fn write_simple_html_text_data_fields(
+    state: &mut LuaState,
+    table: Val,
+    snapshot: &SimpleHtmlTextDataSnapshot,
+    text: Option<String>,
+) {
+    let hyperlink_format = create_string(state, &snapshot.hyperlink_format);
     table_set(state, table, "hyperlinkFormat", hyperlink_format);
-    table_set(state, table, "hyperlinksEnabled", Val::Bool(snapshot.1));
+    table_set(
+        state,
+        table,
+        "hyperlinksEnabled",
+        Val::Bool(snapshot.hyperlinks_enabled),
+    );
     if let Some(text) = text {
         let text_value = create_string(state, &text);
         table_set(state, table, "text", text_value);
     }
+}
 
+fn build_simple_html_text_styles_table(
+    state: &mut LuaState,
+    text_styles: &HashMap<String, TextStyle>,
+) -> Val {
     let styles = create_table(state);
-    for (text_type, style) in snapshot.2 {
-        let style_table = create_table(state);
-        let font_value = style
-            .font
-            .as_ref()
-            .map(|font| create_string(state, font))
-            .unwrap_or(Val::Nil);
-        table_set(state, style_table, "font", font_value);
-        table_set(
-            state,
-            style_table,
-            "fontSize",
-            Val::Num(style.font_size as f64),
-        );
-        table_set(state, styles, &text_type, style_table);
+    for (text_type, style) in text_styles {
+        let style_table = build_simple_html_style_table(state, style);
+        table_set(state, styles, text_type.as_str(), style_table);
     }
-    table_set(state, table, "textStyles", styles);
-    table
+    styles
+}
+
+fn build_simple_html_style_table(state: &mut LuaState, style: &TextStyle) -> Val {
+    let style_table = create_table(state);
+    let font_value = style
+        .font
+        .as_ref()
+        .map(|font| create_string(state, font))
+        .unwrap_or(Val::Nil);
+    table_set(state, style_table, "font", font_value);
+    table_set(
+        state,
+        style_table,
+        "fontSize",
+        Val::Num(style.font_size as f64),
+    );
+    style_table
 }
 
 fn strip_html_tags(text: &str) -> String {
@@ -239,6 +249,29 @@ fn strip_html_tags(text: &str) -> String {
         }
     }
     out
+}
+
+fn prepare_stripped_text(widget_type: WidgetType, text: Option<String>) -> Option<String> {
+    text.map(|value| {
+        if widget_type == WidgetType::SimpleHTML {
+            strip_html_tags(&value)
+        } else {
+            crate::render::strip_wow_markup(&value)
+        }
+    })
+}
+
+fn stripped_text_for_frame(
+    state: &LuaState,
+    id: u64,
+    text: Option<String>,
+) -> LuaResult<Option<String>> {
+    let widget_type = borrow_state(state)?
+        .widgets
+        .get(id)
+        .map(|frame| frame.widget_type)
+        .unwrap_or(WidgetType::FontString);
+    Ok(prepare_stripped_text(widget_type, text))
 }
 
 fn update_text_frame(
@@ -269,6 +302,30 @@ fn update_text_frame(
     let should_update_button_child =
         is_button && (changed || (!has_button_text_child && text.is_some()));
     Ok((is_tooltip, should_update_button_child))
+}
+
+fn sync_button_text_child(
+    state: &mut LuaState,
+    id: u64,
+    text: &Option<String>,
+    stripped_text: &Option<String>,
+    should_update_button_child: bool,
+) -> LuaResult<()> {
+    if !should_update_button_child {
+        return Ok(());
+    }
+    let Some(text_child_id) = ensure_button_text_child(state, id)? else {
+        return Ok(());
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
+            text_child.text = text.clone();
+            text_child.text_stripped = stripped_text.clone();
+        }
+    }
+    refresh_text_measurements(state, text_child_id);
+    Ok(())
 }
 
 fn update_auto_text_height(state: &mut LuaState, id: u64) {
@@ -346,6 +403,11 @@ fn update_auto_text_width(state: &mut LuaState, id: u64) {
     sim.widgets.mark_rect_dirty(id);
 }
 
+fn refresh_text_measurements(state: &mut LuaState, id: u64) {
+    update_auto_text_width(state, id);
+    update_auto_text_height(state, id);
+}
+
 fn mirror_tooltip_text_fields(
     state: &mut LuaState,
     id: u64,
@@ -401,6 +463,16 @@ fn replace_tooltip_lines(
     }
     td.spell_id = None;
     Ok(())
+}
+
+fn sync_tooltip_text(
+    state: &mut LuaState,
+    id: u64,
+    text: Option<String>,
+    tooltip: TooltipLineValues,
+) -> LuaResult<()> {
+    mirror_tooltip_text_fields(state, id, text.clone(), tooltip);
+    replace_tooltip_lines(state, id, text, tooltip)
 }
 
 fn read_text_arg(state: &LuaState, index: i32) -> Option<String> {
@@ -1289,4 +1361,28 @@ pub(super) fn set_text_scale(state: &mut LuaState) -> LuaResult<u32> {
         frame.text_scale = text_scale;
     }
     Ok(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::prepare_stripped_text;
+    use crate::widget::WidgetType;
+
+    #[test]
+    fn prepare_stripped_text_uses_html_stripping_for_simple_html() {
+        let stripped = prepare_stripped_text(
+            WidgetType::SimpleHTML,
+            Some("<p>Hello <b>World</b></p>".to_string()),
+        );
+        assert_eq!(stripped.as_deref(), Some("Hello World"));
+    }
+
+    #[test]
+    fn prepare_stripped_text_uses_wow_markup_stripping_for_font_strings() {
+        let stripped = prepare_stripped_text(
+            WidgetType::FontString,
+            Some("|cff00ff00Hello|r".to_string()),
+        );
+        assert_eq!(stripped.as_deref(), Some("Hello"));
+    }
 }
