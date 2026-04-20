@@ -1,10 +1,16 @@
 //! Talent tree interactive state (ranks purchased, selections, currency mappings).
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 #[derive(Clone, Copy)]
 pub struct SeededTalentConfig {
     pub id: i32,
+}
+
+#[derive(Clone, Default)]
+pub struct TalentLoadoutState {
+    pub node_ranks: HashMap<u32, u32>,
+    pub node_selections: HashMap<u32, u32>,
 }
 
 const HOLY_CONFIGS: [SeededTalentConfig; 2] = [
@@ -103,8 +109,26 @@ fn default_last_selected_config_ids() -> HashMap<u32, i32> {
         .collect()
 }
 
+fn default_loadout_state_for_spec(active_spec_id: u32) -> TalentLoadoutState {
+    let (node_ranks, node_selections) = seed_hero_spec_nodes(active_spec_id);
+    TalentLoadoutState {
+        node_ranks,
+        node_selections,
+    }
+}
+
+fn default_loadout_states_for_spec(active_spec_id: u32) -> HashMap<i32, TalentLoadoutState> {
+    let state = default_loadout_state_for_spec(active_spec_id);
+    seeded_class_talent_configs(active_spec_id)
+        .iter()
+        .map(|config| (config.id, state.clone()))
+        .collect()
+}
+
 /// Talent tree interactive state.
 pub struct TalentState {
+    /// Active spec ID for the current loadout state.
+    pub active_spec_id: u32,
     /// Per-node purchased ranks: node_id → ranks_purchased (default 0).
     pub node_ranks: HashMap<u32, u32>,
     /// Per-node selected entry (for choice nodes): node_id → entry_id.
@@ -132,6 +156,10 @@ pub struct TalentState {
     /// Whether the active talent config is the starter build. Drives
     /// `C_ClassTalents.IsStarterBuildActive`. Seeded false.
     pub is_starter_build_active: bool,
+    /// Working loadout state per config ID.
+    pub config_states: HashMap<i32, TalentLoadoutState>,
+    /// Committed loadout state per config ID.
+    pub committed_config_states: HashMap<i32, TalentLoadoutState>,
 }
 
 impl TalentState {
@@ -152,8 +180,10 @@ impl TalentState {
             .get(&active_spec_id)
             .copied()
             .unwrap_or(1);
+        let config_states = default_loadout_states_for_spec(active_spec_id);
 
         Self {
+            active_spec_id,
             node_ranks,
             node_selections,
             group_currency_map,
@@ -165,7 +195,38 @@ impl TalentState {
             can_change_talents: true,
             has_starter_build: false,
             is_starter_build_active: false,
+            config_states: config_states.clone(),
+            committed_config_states: config_states,
         }
+    }
+
+    fn active_loadout_state(&self) -> TalentLoadoutState {
+        TalentLoadoutState {
+            node_ranks: self.node_ranks.clone(),
+            node_selections: self.node_selections.clone(),
+        }
+    }
+
+    fn apply_loadout_state(&mut self, state: &TalentLoadoutState) {
+        self.node_ranks = state.node_ranks.clone();
+        self.node_selections = state.node_selections.clone();
+        self.currency_spent = tally_currency_spent(&self.node_ranks, &self.node_currency_map);
+        self.active_hero_subtree_id = detect_active_hero_subtree(&self.node_selections);
+    }
+
+    fn persist_active_loadout_state(&mut self) {
+        self.config_states
+            .insert(self.active_config_id, self.active_loadout_state());
+    }
+
+    fn ensure_config_state(&mut self, config_id: i32) {
+        if self.config_states.contains_key(&config_id) {
+            return;
+        }
+        let default_state = default_loadout_state_for_spec(self.active_spec_id);
+        self.config_states.insert(config_id, default_state.clone());
+        self.committed_config_states
+            .insert(config_id, default_state);
     }
 
     /// Total points spent for a given currency across all nodes.
@@ -197,12 +258,14 @@ impl TalentState {
                 self.currency_spent.remove(&currency_id);
             }
         }
+        self.persist_active_loadout_state();
     }
 
     /// Clear all purchased ranks and cached spent totals.
     pub fn clear_ranks(&mut self) {
         self.node_ranks.clear();
         self.currency_spent.clear();
+        self.persist_active_loadout_state();
     }
 
     /// Update a node's selected entry and refresh the cached hero subtree when relevant.
@@ -217,6 +280,7 @@ impl TalentState {
                 self.active_hero_subtree_id = Some(entry.sub_tree_id);
             }
         }
+        self.persist_active_loadout_state();
     }
 
     fn deselect_node(&mut self, node_id: u32) {
@@ -237,26 +301,167 @@ impl TalentState {
         self.active_hero_subtree_id
     }
 
+    pub fn is_active_config(&self, config_id: i32) -> bool {
+        config_id == self.active_config_id
+    }
+
+    pub fn has_staged_changes(&self, config_id: i32) -> bool {
+        !self.staged_purchases(config_id).is_empty()
+            || !self.staged_refunds(config_id).is_empty()
+            || !self.staged_selection_swaps(config_id).is_empty()
+    }
+
+    pub fn staged_purchases(&self, config_id: i32) -> Vec<u32> {
+        self.staged_rank_changes(config_id, |working, committed| working > committed)
+    }
+
+    pub fn staged_refunds(&self, config_id: i32) -> Vec<u32> {
+        self.staged_rank_changes(config_id, |working, committed| working < committed)
+    }
+
+    pub fn staged_selection_swaps(&self, config_id: i32) -> Vec<u32> {
+        let Some(working) = self.working_loadout_state(config_id) else {
+            return Vec::new();
+        };
+        let Some(committed) = self.committed_loadout_state(config_id) else {
+            return Vec::new();
+        };
+
+        selection_change_ids(working, committed)
+            .into_iter()
+            .filter(|node_id| {
+                matches!(
+                    (
+                        working.node_selections.get(node_id),
+                        committed.node_selections.get(node_id),
+                    ),
+                    (Some(working_entry), Some(committed_entry))
+                        if working_entry != committed_entry
+                )
+            })
+            .collect()
+    }
+
+    pub fn staged_cost_deltas(&self, config_id: i32) -> Vec<(u32, i32)> {
+        let Some(working) = self.working_loadout_state(config_id) else {
+            return Vec::new();
+        };
+        let Some(committed) = self.committed_loadout_state(config_id) else {
+            return Vec::new();
+        };
+
+        let working_spent = tally_currency_spent(&working.node_ranks, &self.node_currency_map);
+        let committed_spent = tally_currency_spent(&committed.node_ranks, &self.node_currency_map);
+
+        currency_change_ids(&working_spent, &committed_spent)
+            .into_iter()
+            .filter_map(|currency_id| {
+                let working_amount = working_spent.get(&currency_id).copied().unwrap_or(0) as i32;
+                let committed_amount =
+                    committed_spent.get(&currency_id).copied().unwrap_or(0) as i32;
+                let delta = working_amount - committed_amount;
+                (delta != 0).then_some((currency_id, delta))
+            })
+            .collect()
+    }
+
     pub fn switch_to_spec(&mut self, spec_id: u32) {
+        self.persist_active_loadout_state();
         let last_selected = self.last_selected_config_id_by_spec_id.clone();
         let can_change = self.can_change_talents;
         let has_starter = self.has_starter_build;
+        let config_states = self.config_states.clone();
+        let committed_config_states = self.committed_config_states.clone();
         *self = Self::for_spec_id(spec_id);
+        self.config_states.extend(config_states);
+        self.committed_config_states.extend(committed_config_states);
         self.last_selected_config_id_by_spec_id
             .extend(last_selected);
+        self.active_spec_id = spec_id;
         self.active_config_id = self
             .last_selected_config_id_by_spec_id
             .get(&spec_id)
             .copied()
             .or_else(|| default_class_talent_config_id(spec_id))
             .unwrap_or(self.active_config_id);
+        if let Some(state) = self.config_states.get(&self.active_config_id).cloned() {
+            self.apply_loadout_state(&state);
+        }
+        self.ensure_config_state(self.active_config_id);
         self.can_change_talents = can_change;
         self.has_starter_build = has_starter;
     }
 
     pub fn switch_to_loadout(&mut self, spec_id: u32, config_id: i32) {
+        self.persist_active_loadout_state();
         self.active_config_id = config_id;
         self.last_selected_config_id_by_spec_id
             .insert(spec_id, config_id);
+        self.ensure_config_state(config_id);
+        if let Some(state) = self.config_states.get(&config_id).cloned() {
+            self.apply_loadout_state(&state);
+        }
     }
+
+    pub fn update_active_loadout_state(&mut self) {
+        self.persist_active_loadout_state();
+    }
+
+    pub fn committed_loadout_state(&self, config_id: i32) -> Option<&TalentLoadoutState> {
+        self.committed_config_states.get(&config_id)
+    }
+
+    pub fn working_loadout_state(&self, config_id: i32) -> Option<&TalentLoadoutState> {
+        self.config_states.get(&config_id)
+    }
+
+    fn staged_rank_changes(
+        &self,
+        config_id: i32,
+        include_node: impl Fn(u32, u32) -> bool,
+    ) -> Vec<u32> {
+        let Some(working) = self.working_loadout_state(config_id) else {
+            return Vec::new();
+        };
+        let Some(committed) = self.committed_loadout_state(config_id) else {
+            return Vec::new();
+        };
+
+        rank_change_ids(working, committed)
+            .into_iter()
+            .filter(|node_id| {
+                let working_rank = working.node_ranks.get(node_id).copied().unwrap_or(0);
+                let committed_rank = committed.node_ranks.get(node_id).copied().unwrap_or(0);
+                include_node(working_rank, committed_rank)
+            })
+            .collect()
+    }
+}
+
+fn rank_change_ids(working: &TalentLoadoutState, committed: &TalentLoadoutState) -> BTreeSet<u32> {
+    working
+        .node_ranks
+        .keys()
+        .chain(committed.node_ranks.keys())
+        .copied()
+        .collect()
+}
+
+fn selection_change_ids(
+    working: &TalentLoadoutState,
+    committed: &TalentLoadoutState,
+) -> BTreeSet<u32> {
+    working
+        .node_selections
+        .keys()
+        .chain(committed.node_selections.keys())
+        .copied()
+        .collect()
+}
+
+fn currency_change_ids(
+    working: &HashMap<u32, u32>,
+    committed: &HashMap<u32, u32>,
+) -> BTreeSet<u32> {
+    working.keys().chain(committed.keys()).copied().collect()
 }

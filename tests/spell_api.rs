@@ -389,14 +389,16 @@ fn test_traits_get_config_id_by_system_id() {
     let id: i32 = env
         .eval("return C_Traits.GetConfigIDBySystemID(1)")
         .unwrap();
-    assert_eq!(id, 1);
+    assert_eq!(id, 201);
 }
 
 #[test]
 fn test_traits_get_config_id_by_tree_id() {
     let env = env();
-    let id: i32 = env.eval("return C_Traits.GetConfigIDByTreeID(1)").unwrap();
-    assert_eq!(id, 1);
+    let id: i32 = env
+        .eval("return C_Traits.GetConfigIDByTreeID(790)")
+        .unwrap();
+    assert_eq!(id, 201);
 }
 
 #[test]
@@ -553,6 +555,15 @@ fn test_traits_get_all_tree_ids_empty() {
 fn test_traits_get_trait_system_flags() {
     let env = env();
     let flags: i32 = env.eval("return C_Traits.GetTraitSystemFlags(1)").unwrap();
+    assert_eq!(flags, 2);
+}
+
+#[test]
+fn test_traits_get_trait_system_flags_for_class_config() {
+    let env = env();
+    let flags: i32 = env
+        .eval("return C_Traits.GetTraitSystemFlags(201)")
+        .unwrap();
     assert_eq!(flags, 0);
 }
 
@@ -560,9 +571,95 @@ fn test_traits_get_trait_system_flags() {
 fn test_traits_can_purchase_rank() {
     let env = env();
     let can: bool = env
-        .eval("return C_Traits.CanPurchaseRank(1, 1, 1)")
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.canPurchaseRank and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                    return C_Traits.CanPurchaseRank(configID, nodeID, nodeInfo.entryIDs[1])
+                end
+            end
+            return false
+            "#,
+        )
         .unwrap();
-    assert!(!can);
+    assert!(can);
+}
+
+#[test]
+fn test_traits_can_purchase_rank_matches_node_info() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.canPurchaseRank and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                    local entryID = nodeInfo.entryIDs[1]
+                    assert(C_Traits.CanPurchaseRank(configID, nodeID, entryID) == true, "CanPurchaseRank should match nodeInfo.canPurchaseRank")
+                    return "ok"
+                end
+            end
+            error("expected a purchasable node in the active config")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_traits_staged_changes_are_visible_after_purchase() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+            local nodeID = nil
+            local entryID = nil
+            for _, candidateNodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local candidateInfo = C_Traits.GetNodeInfo(configID, candidateNodeID)
+                if candidateInfo and candidateInfo.canPurchaseRank and candidateInfo.entryIDs and candidateInfo.entryIDs[1] then
+                    nodeID = candidateNodeID
+                    entryID = candidateInfo.entryIDs[1]
+                    break
+                end
+            end
+            assert(nodeID and entryID, "expected a purchasable node in the active config")
+
+            assert(C_Traits.ConfigHasStagedChanges(configID) == false, "fresh config should not have staged changes")
+            local purchases, refunds, swaps = C_Traits.GetStagedChanges(configID)
+            assert(purchases == nil and refunds == nil and swaps == nil, "fresh config should not report staged changes")
+
+            assert(C_Traits.CanPurchaseRank(configID, nodeID, entryID) == true, "node should be purchasable before the change")
+            assert(C_Traits.PurchaseRank(configID, nodeID) == true, "purchase should succeed")
+            assert(C_Traits.ConfigHasStagedChanges(configID) == true, "purchase should mark staged changes")
+
+            purchases, refunds, swaps = C_Traits.GetStagedChanges(configID)
+            assert(purchases and #purchases > 0 and purchases[1] == nodeID, "purchase should be reported for the changed node")
+            assert(refunds and #refunds == 0, "purchase should not report refunds")
+            assert(swaps and #swaps == 0, "purchase should not report selection swaps")
+
+            local costs = C_Traits.GetStagedChangesCost(configID)
+            assert(costs and #costs > 0, "purchase should report staged currency cost")
+            local sawAmount = false
+            for _, cost in ipairs(costs) do
+                if cost.amount ~= 0 then
+                    sawAmount = true
+                    break
+                end
+            end
+            assert(sawAmount, "staged costs should contain a non-zero amount")
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
 }
 
 #[test]

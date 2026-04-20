@@ -476,6 +476,50 @@ fn current_config_ids(state: &LuaState) -> Vec<i32> {
         .unwrap_or_default()
 }
 
+fn trait_tree_id_for_config(state: &LuaState, config_id: i32) -> Option<u32> {
+    if config_id == 1 {
+        return Some(672);
+    }
+
+    config_spec_id(config_id)
+        .map(c_class_talents_trait_tree_for_spec)
+        .or_else(|| {
+            borrow_state(state).ok().and_then(|sim| {
+                sim.talents.is_active_config(config_id).then_some(
+                    c_class_talents_trait_tree_for_spec(sim.talents.active_spec_id),
+                )
+            })
+        })
+}
+
+fn config_id_for_tree_id(state: &LuaState, tree_id: u32) -> Option<i32> {
+    if tree_id == 672 {
+        return Some(1);
+    }
+
+    borrow_state(state).ok().and_then(|sim| {
+        let active_config_id = sim.talents.active_config_id;
+        (trait_tree_id_for_config(state, active_config_id) == Some(tree_id))
+            .then_some(active_config_id)
+    })
+}
+
+fn config_id_for_system_id(state: &LuaState, system_id: i32) -> Option<i32> {
+    match system_id {
+        1 => borrow_state(state)
+            .ok()
+            .map(|sim| sim.talents.active_config_id),
+        _ => None,
+    }
+}
+
+fn trait_system_flags_for_config(state: &LuaState, config_id: i32) -> u32 {
+    trait_tree_id_for_config(state, config_id)
+        .and_then(|tree_id| TRAIT_TREE_DB.get(&tree_id))
+        .map(|tree| tree.flags)
+        .unwrap_or(0)
+}
+
 fn register_c_traits_query_fns(
     state: &mut LuaState,
     table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
@@ -622,7 +666,7 @@ fn register_c_class_talents_hero_fns(
     Ok(())
 }
 
-const CLASS_TALENTS_CONFIG_METHODS: &[(&'static str, rilua::RustFn)] = &[
+const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
     (
         "GetConfigIDsBySpecID",
         c_class_talents_get_config_ids_by_spec_id,
@@ -734,16 +778,22 @@ fn c_traits_generate_import_string(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_get_config_id_by_system_id(state: &mut LuaState) -> LuaResult<u32> {
-    let _system_id = i32::from_stack(state, 1)?;
-    state.push(Val::Num(1.0));
+    let system_id = i32::from_stack(state, 1)?;
+    let Some(config_id) = config_id_for_system_id(state, system_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    state.push(Val::Num(config_id as f64));
     Ok(1)
 }
 
 fn c_traits_get_config_id_by_tree_id(state: &mut LuaState) -> LuaResult<u32> {
-    let Val::Num(_) = stack_val(state, 1) else {
-        return Ok(0);
+    let tree_id = u32::from_stack(state, 1)?;
+    let Some(config_id) = config_id_for_tree_id(state, tree_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
     };
-    state.push(Val::Num(1.0));
+    state.push(Val::Num(config_id as f64));
     Ok(1)
 }
 
@@ -1143,16 +1193,39 @@ fn c_traits_get_all_tree_ids(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_traits_get_trait_system_flags(state: &mut LuaState) -> LuaResult<u32> {
-    let _system_id = i32::from_stack(state, 1)?;
-    state.push(Val::Num(0.0));
+    let config_id = i32::from_stack(state, 1)?;
+    state.push(Val::Num(
+        trait_system_flags_for_config(state, config_id) as f64
+    ));
     Ok(1)
 }
 
 fn c_traits_can_purchase_rank(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
-    let _node_id = u32::from_stack(state, 2)?;
-    let _entry_id = u32::from_stack(state, 3)?;
-    state.push(Val::Bool(false));
+    let config_id = i32::from_stack(state, 1)?;
+    let node_id = u32::from_stack(state, 2)?;
+    let entry_id = u32::from_stack(state, 3)?;
+    let can_purchase = borrow_state(state)
+        .ok()
+        .and_then(|sim| {
+            if !sim.talents.is_active_config(config_id) {
+                return None;
+            }
+            TRAIT_NODE_DB.get(&node_id).map(|node| {
+                let ranks_purchased = sim.talents.node_ranks.get(&node_id).copied().unwrap_or(0);
+                let total_max_ranks = total_node_max_ranks(node);
+                let entry_ok = node.entry_ids.is_empty() || node.entry_ids.contains(&entry_id);
+                let is_available = check_node_available(node, &sim);
+                let meets_edge_requirements = check_edge_requirements(node, &sim);
+                let has_currency = check_has_currency(node_id, &sim);
+                entry_ok
+                    && ranks_purchased < total_max_ranks
+                    && is_available
+                    && meets_edge_requirements
+                    && has_currency
+            })
+        })
+        .unwrap_or(false);
+    state.push(Val::Bool(can_purchase));
     Ok(1)
 }
 
@@ -1162,25 +1235,57 @@ fn c_traits_get_loadout_serialization_version(state: &mut LuaState) -> LuaResult
 }
 
 fn c_traits_config_has_staged_changes(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
-    state.push(Val::Bool(false));
+    let config_id = i32::from_stack(state, 1)?;
+    let has_changes = borrow_state(state)
+        .ok()
+        .map(|sim| sim.talents.has_staged_changes(config_id))
+        .unwrap_or(false);
+    state.push(Val::Bool(has_changes));
     Ok(1)
 }
 
 fn c_traits_get_staged_changes(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
-    let purchases = create_table(state);
-    let refunds = create_table(state);
-    let swaps = create_table(state);
-    state.push(purchases);
-    state.push(refunds);
-    state.push(swaps);
+    let config_id = i32::from_stack(state, 1)?;
+    let Some((purchases, refunds, selection_swaps)) = borrow_state(state).ok().map(|sim| {
+        (
+            sim.talents.staged_purchases(config_id),
+            sim.talents.staged_refunds(config_id),
+            sim.talents.staged_selection_swaps(config_id),
+        )
+    }) else {
+        return Ok(0);
+    };
+    if purchases.is_empty() && refunds.is_empty() && selection_swaps.is_empty() {
+        return Ok(0);
+    }
+
+    let purchases_table = push_u32_array(state, purchases);
+    let refunds_table = push_u32_array(state, refunds);
+    let swaps_table = push_u32_array(state, selection_swaps);
+    state.push(purchases_table);
+    state.push(refunds_table);
+    state.push(swaps_table);
     Ok(3)
 }
 
 fn c_traits_get_staged_changes_cost(state: &mut LuaState) -> LuaResult<u32> {
-    let _config_id = i32::from_stack(state, 1)?;
+    let config_id = i32::from_stack(state, 1)?;
+    let Some(costs_data) = borrow_state(state)
+        .ok()
+        .map(|sim| sim.talents.staged_cost_deltas(config_id))
+    else {
+        let empty = create_table(state);
+        state.push(empty);
+        return Ok(1);
+    };
+
     let costs = create_table(state);
+    for (index, (currency_id, amount)) in costs_data.into_iter().enumerate() {
+        let cost = create_table(state);
+        table_set(state, cost, "ID", Val::Num(currency_id as f64));
+        table_set(state, cost, "amount", Val::Num(amount as f64));
+        set_table_array(state, costs, index as i64 + 1, cost);
+    }
     state.push(costs);
     Ok(1)
 }
