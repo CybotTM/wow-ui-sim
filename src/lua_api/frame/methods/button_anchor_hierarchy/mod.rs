@@ -92,6 +92,9 @@ fn register_button_clicks(state: &mut LuaState, table: GcRef<Table>) -> LuaResul
 }
 
 fn register_button_misc(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(state, table, "IsDownOver", buttons::is_down_over)?;
+    table_set_rust_fn_static(state, table, "IsDown", buttons::is_down)?;
+    table_set_rust_fn_static(state, table, "IsOver", buttons::is_over)?;
     table_set_rust_fn_static(
         state,
         table,

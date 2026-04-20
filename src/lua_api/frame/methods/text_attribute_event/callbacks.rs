@@ -240,6 +240,24 @@ pub(super) fn unregister_callback(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn add_static_event_method(state: &mut LuaState) -> LuaResult<u32> {
+    let owner = stack_val(state, 1);
+    let registry = stack_val(state, 2);
+    let event = stack_val(state, 3);
+    let handler = stack_val(state, 4);
+
+    let Val::Table(registry_table) = registry else {
+        return Ok(0);
+    };
+    let register_callback = table_get(state, Val::Table(registry_table), "RegisterCallback");
+    if !matches!(register_callback, Val::Function(_)) {
+        return Ok(0);
+    }
+
+    let _ = call_function_state(state, register_callback, &[registry, event, handler, owner])?;
+    Ok(0)
+}
+
 pub(super) fn trigger_callback_event(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let event = val_to_string(state, stack_val(state, 2)).ok_or_else(|| {

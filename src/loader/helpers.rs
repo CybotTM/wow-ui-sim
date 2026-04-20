@@ -202,12 +202,16 @@ pub fn lua_table_field_ref(table_expr: &str, key: &str) -> String {
 ///
 /// Uses `_G["name"]` to safely handle frame names containing characters
 /// that aren't valid in Lua identifiers (e.g., `$TankMarkerCheckButton`).
+pub fn lua_frame_ref_by_id(id: u64) -> String {
+    format!("debug.getregistry().__rilua_frame_refs[{id}]")
+}
+
 pub fn lua_global_ref(name: &str) -> String {
     if let Some(id) = name
         .strip_prefix("__frame_")
         .and_then(|suffix| suffix.parse::<u64>().ok())
     {
-        return format!("debug.getregistry().__rilua_frame_refs[{id}]");
+        return lua_frame_ref_by_id(id);
     }
     format!("_G[\"{}\"]", escape_lua_string(name))
 }

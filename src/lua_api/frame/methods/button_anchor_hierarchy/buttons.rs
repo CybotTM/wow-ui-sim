@@ -130,6 +130,46 @@ pub(super) fn get_button_state(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn is_down(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let is_down = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.button_state == 1)
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(is_down));
+    Ok(1)
+}
+
+pub(super) fn is_over(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let is_over = {
+        let fields = get_or_create_frame_fields(state, id);
+        matches!(table_get(state, fields, "over"), Val::Bool(true))
+    };
+    state.push(Val::Bool(is_over));
+    Ok(1)
+}
+
+pub(super) fn is_down_over(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let is_down = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.button_state == 1)
+            .unwrap_or(false)
+    };
+    let is_over = {
+        let fields = get_or_create_frame_fields(state, id);
+        matches!(table_get(state, fields, "over"), Val::Bool(true))
+    };
+    state.push(Val::Bool(is_down && is_over));
+    Ok(1)
+}
+
 pub(super) fn click(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let Some(handler) = get_rilua_script(state, id, "OnClick") else {
