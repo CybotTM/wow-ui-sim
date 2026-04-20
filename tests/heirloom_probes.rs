@@ -2,7 +2,7 @@
 //!
 //! - `C_Heirloom.GetHeirloomInfo(itemID)` — 10 retail return values.
 //! - `C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(index)` — 1-based
-//!   lookup, nil out of range. Replaces the dead
+//!   lookup, `0` out of range. Replaces the dead
 //!   `GetHeirloomItemIDFromDisplayedSlot` stub entry.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -77,18 +77,18 @@ fn get_heirloom_item_id_from_displayed_index_returns_seeded_item() {
 }
 
 #[test]
-fn get_heirloom_item_id_returns_nil_out_of_range() {
+fn get_heirloom_item_id_returns_zero_out_of_range() {
     let env = env();
-    let (zero_nil, negative_nil, big_nil): (bool, bool, bool) = env
+    let (zero, negative, big): (i32, i32, i32) = env
         .eval(
             r#"
-            return C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(0) == nil,
-                   C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(-1) == nil,
-                   C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(9999) == nil
+            return C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(0),
+                   C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(-1),
+                   C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(9999)
             "#,
         )
         .unwrap();
-    assert!(zero_nil, "zero index is nil (1-based)");
-    assert!(negative_nil);
-    assert!(big_nil);
+    assert_eq!(zero, 0, "zero index is out of range (1-based)");
+    assert_eq!(negative, 0);
+    assert_eq!(big, 0);
 }
