@@ -24,6 +24,10 @@ pub use from_stack::FromMethodSelf;
 pub use from_stack::FromStack;
 pub(crate) use from_stack::stack_val;
 pub use into_stack::IntoStack;
+#[doc(hidden)]
+pub use macros::push_lua_result;
+#[doc(hidden)]
+pub use macros::run_method_body;
 pub use multivalue::MultiValue;
 pub use table_builder::TableBuilder;
 pub use table_builder::create_frame_table;

@@ -552,6 +552,48 @@ fn test_define_methods_registers_backed_table_methods() {
 }
 
 #[test]
+fn test_define_methods_extracts_non_self_args_from_slot_two() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+        state.set_app_data(TestFrameArena {
+            slots: vec![TestFrameSlot {
+                generation: 7,
+                frame: Some(TestFrame {
+                    label: "seed".to_string(),
+                    visits: 2,
+                }),
+            }],
+        });
+
+        let mt_ref = state.gc.alloc_table(Table::new());
+        define_methods!(state, mt_ref, {
+            "Rewrite" => |frame: &mut TestFrame, label: String, delta: u32| -> (String, u32) {
+                frame.label = format!("{}-{label}", frame.label);
+                frame.visits += delta;
+                Ok((frame.label.clone(), frame.visits))
+            },
+        })
+        .unwrap();
+        make_index_self(state, mt_ref);
+
+        let frame_ref = create_frame_table(state, 0, 7);
+        state
+            .gc
+            .tables
+            .get_mut(frame_ref)
+            .unwrap()
+            .set_metatable(Some(mt_ref));
+        set_global_table(state, "slot_two_frame", frame_ref);
+    }
+
+    lua.exec(
+        "local label, visits = slot_two_frame:Rewrite('tail', 5); assert(label == 'seed-tail' and visits == 7)",
+    )
+    .unwrap();
+}
+
+#[test]
 fn test_frame_table_roundtrips_five_registered_methods() {
     let mut lua = Lua::new().unwrap();
     {
@@ -618,6 +660,55 @@ fn test_frame_table_roundtrips_five_registered_methods() {
 }
 
 #[test]
+fn test_define_methods_extracts_multiple_args_through_helper() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+        state.set_app_data(TestFrameArena {
+            slots: vec![TestFrameSlot {
+                generation: 11,
+                frame: Some(TestFrame {
+                    label: "seed".to_string(),
+                    visits: 2,
+                }),
+            }],
+        });
+
+        let mt_ref = state.gc.alloc_table(Table::new());
+        define_methods!(state, mt_ref, {
+            "Compose" => |frame: &mut TestFrame, prefix: String, delta: u32, suffix: String| -> (String, u32) {
+                frame.label = format!("{prefix}-{}-{suffix}", frame.label);
+                frame.visits += delta;
+                Ok((frame.label.clone(), frame.visits))
+            }
+        })
+        .unwrap();
+        make_index_self(state, mt_ref);
+
+        let frame_ref = create_frame_table(state, 0, 11);
+        state
+            .gc
+            .tables
+            .get_mut(frame_ref)
+            .unwrap()
+            .set_metatable(Some(mt_ref));
+        set_global_table(state, "helper_frame", frame_ref);
+    }
+
+    lua.exec(
+        "local label, visits = helper_frame:Compose('pre', 5, 'post'); \
+         assert(label == 'pre-seed-post' and visits == 7)",
+    )
+    .unwrap();
+
+    let state = lua.state_mut();
+    let arena = state.app_data::<TestFrameArena>().unwrap();
+    let frame = arena.frame(0, 11).unwrap();
+    assert_eq!(frame.label, "pre-seed-post");
+    assert_eq!(frame.visits, 7);
+}
+
+#[test]
 fn test_benchmark_table_field_access_returns_timings() {
     let result = benchmark_table_field_access(1_000, 5).unwrap();
 
@@ -628,4 +719,3 @@ fn test_benchmark_table_field_access_returns_timings() {
     assert!(result.backed_ns_per_access().is_finite());
     assert!(result.backed_over_plain_ratio().is_finite());
 }
-
