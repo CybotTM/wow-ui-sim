@@ -19,6 +19,23 @@ The split is deliberate:
 - addon-bootstrap tests should verify load-order-sensitive behavior
 - the heavier bootstrap path should not become the default for every regression
 
+## First Smoke Targets
+
+The first addon-bootstrap smoke targets are pinned to four representative
+closure shapes:
+
+- `combat_log` — mostly-functional single-addon surface via `Blizzard_CombatLog`
+- `panel_templates` — template-heavy shared UI surface via `Blizzard_UIPanelTemplates`
+- `world_map` — layout-heavy map canvas via `Blizzard_WorldMap`
+- `settings_panel` — multi-addon flow via `Blizzard_SettingsDefinitions_Frame`
+
+These targets are defined in
+[`tests/common/blizzard_addon_manifest.rs`](../../../tests/common/blizzard_addon_manifest.rs)
+and loaded through
+[`tests/common/blizzard_addon_harness.rs`](../../../tests/common/blizzard_addon_harness.rs)
+before being exercised by
+[`tests/blizzard_addon_smoke_targets.rs`](../../../tests/blizzard_addon_smoke_targets.rs).
+
 ## Sources
 
 - [tests/blizzard_ui_unit.rs](../../../tests/blizzard_ui_unit.rs) — unit-lane example

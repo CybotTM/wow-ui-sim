@@ -16,6 +16,15 @@ render-order test helpers to use it. The resolver walks TOC `Dependencies` and
 resolve explicit closures for load-on-demand roots instead of relying on a fake
 monolithic Blizzard bundle.
 
+## [2026-04-20] update | blizzard ui smoke targets
+
+Updated `reference/blizzard-ui-test-lanes.md` with the first four explicit
+addon-bootstrap smoke targets: combat log, panel templates, world map, and
+settings panel. Added the shared smoke-target manifest and harness coverage in
+`tests/common/blizzard_addon_manifest.rs`,
+`tests/common/blizzard_addon_harness.rs`, and
+`tests/blizzard_addon_smoke_targets.rs`.
+
 ## [2026-04-20] update | keybinding spellbook direct dispatch
 
 Updated `investigations/keybinding-system.md` with the spellbook follow-up.
