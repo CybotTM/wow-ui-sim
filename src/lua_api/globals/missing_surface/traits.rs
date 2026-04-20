@@ -231,6 +231,8 @@ fn max_points_for_currency(currency_id: u32) -> u32 {
     }
 }
 
+const HERO_TALENT_POINT_BUDGET: u32 = 11;
+
 fn has_unspent_talent_points(state: &crate::lua_api::SimState) -> bool {
     let Some(tree) = TRAIT_TREE_DB.get(&790) else {
         return false;
@@ -1123,7 +1125,7 @@ fn tree_currency_budget(state: &LuaState, index: usize, currency_id: u32) -> Opt
     match index {
         0 => Some(31),
         1 => Some(30),
-        _ if active_hero_currency_id(state) == Some(currency_id) => Some(11),
+        _ if active_hero_currency_id(state) == Some(currency_id) => Some(HERO_TALENT_POINT_BUDGET),
         _ => None,
     }
 }
@@ -1702,7 +1704,7 @@ fn c_class_talents_has_unspent_hero_talent_points(state: &mut LuaState) -> LuaRe
                 .talents
                 .active_hero_subtree()
                 .and_then(subtree_trait_currency_id)?;
-            let max_points = 11;
+            let max_points = HERO_TALENT_POINT_BUDGET;
             let spent = sim.talents.spent_for_currency(currency_id);
             Some((spent < max_points, max_points.saturating_sub(spent)))
         })
