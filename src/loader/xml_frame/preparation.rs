@@ -6,6 +6,7 @@ use crate::loader::helpers::rand_id;
 
 pub(super) struct PreparedFrameCreation {
     pub(super) name: String,
+    pub(super) subst_parent: String,
     pub(super) explicit_parent: Option<String>,
     pub(super) parent: String,
     pub(super) inherits: String,
@@ -16,10 +17,17 @@ pub(super) fn prepare_frame_creation(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     parent_override: Option<&str>,
+    subst_parent_override: Option<&str>,
     intrinsic_base: Option<&str>,
 ) -> Option<PreparedFrameCreation> {
     let creator_name = current_loading_addon_name(env);
-    let name = resolve_frame_name(frame, parent_override, creator_name.as_deref())?;
+    let name = resolve_frame_name(
+        frame,
+        parent_override,
+        subst_parent_override,
+        creator_name.as_deref(),
+    )?;
+    let subst_parent = resolve_subst_parent(frame, &name, subst_parent_override, parent_override);
     let inherited_parent_buf = resolve_parent(frame, parent_override);
     let explicit_parent = parent_override
         .or(frame.parent.as_deref())
@@ -37,6 +45,7 @@ pub(super) fn prepare_frame_creation(
 
     Some(PreparedFrameCreation {
         name,
+        subst_parent,
         explicit_parent,
         parent,
         inherits,
@@ -103,11 +112,12 @@ pub(super) fn build_inherits_chain(
 fn resolve_frame_name(
     frame: &crate::xml::FrameXml,
     parent_override: Option<&str>,
+    subst_parent_override: Option<&str>,
     creator: Option<&str>,
 ) -> Option<String> {
     match &frame.name {
         Some(n) => {
-            if let Some(parent_name) = parent_override {
+            if let Some(parent_name) = subst_parent_override.or(parent_override) {
                 Some(n.replace("$parent", parent_name))
             } else {
                 Some(n.clone())
@@ -120,6 +130,22 @@ fn resolve_frame_name(
                 None // Anonymous top-level frames are templates
             }
         }
+    }
+}
+
+fn resolve_subst_parent(
+    frame: &crate::xml::FrameXml,
+    resolved_name: &str,
+    subst_parent_override: Option<&str>,
+    parent_override: Option<&str>,
+) -> String {
+    if frame.name.is_some() {
+        resolved_name.to_string()
+    } else {
+        subst_parent_override
+            .or(parent_override)
+            .unwrap_or(resolved_name)
+            .to_string()
     }
 }
 

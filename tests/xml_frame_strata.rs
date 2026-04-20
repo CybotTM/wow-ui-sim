@@ -25,6 +25,7 @@ fn test_create_frame_from_xml_frame_strata() {
             "Frame",
             None,
             None,
+            None,
             &mut LoadTiming::default(),
         )
         .unwrap();
@@ -67,6 +68,7 @@ fn test_frame_strata_inherited_from_template() {
             "Frame",
             None,
             None,
+            None,
             &mut LoadTiming::default(),
         )
         .unwrap();
@@ -85,6 +87,7 @@ fn test_frame_strata_inherited_from_template() {
             &env.loader_env(),
             frame,
             "Frame",
+            None,
             None,
             None,
             &mut LoadTiming::default(),

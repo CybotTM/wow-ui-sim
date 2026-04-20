@@ -18,6 +18,7 @@ fn create_first_frame(env: &WowLuaEnv, xml: &str, widget_type: &str) {
                 widget_type,
                 None,
                 None,
+                None,
                 &mut LoadTiming::default(),
             )
             .unwrap();

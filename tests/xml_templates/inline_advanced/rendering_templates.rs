@@ -24,6 +24,7 @@ fn test_create_scrollframe_from_xml_registers_scroll_child() {
                 "ScrollFrame",
                 None,
                 None,
+                None,
                 &mut LoadTiming::default(),
             )
             .unwrap();
@@ -56,6 +57,7 @@ fn test_button_text_without_parent_key_registers_as_text_fontstring() {
                 &env.loader_env(),
                 f,
                 "Button",
+                None,
                 None,
                 None,
                 &mut LoadTiming::default(),

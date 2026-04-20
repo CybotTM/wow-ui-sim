@@ -256,7 +256,7 @@ fn process_frame_element(
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     if let Some((frame_xml, widget_type, intrinsic)) = resolve_frame_element(element) {
-        create_frame_from_xml(env, frame_xml, widget_type, None, intrinsic, timing)?;
+        create_frame_from_xml(env, frame_xml, widget_type, None, None, intrinsic, timing)?;
     }
     Ok(())
 }

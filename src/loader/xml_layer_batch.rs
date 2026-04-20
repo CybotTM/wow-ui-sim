@@ -353,13 +353,3 @@ pub fn create_layer_children_batched_with_name_parent(
     apply_fontstring_syncs(env, &text_syncs);
     Ok(())
 }
-
-/// Create all textures and fontstrings for a frame in a single batched Lua exec.
-pub fn create_layer_children_batched(
-    env: &LoaderEnv<'_>,
-    frame: &xml::FrameXml,
-    parent_name: &str,
-    timing: &mut LoadTiming,
-) -> Result<(), LoadError> {
-    create_layer_children_batched_with_name_parent(env, frame, parent_name, parent_name, timing)
-}

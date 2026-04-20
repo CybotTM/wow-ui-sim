@@ -20,11 +20,12 @@ pub(super) fn finalize_frame(
     frame: &crate::xml::FrameXml,
     frame_id: u64,
     name: &str,
+    subst_parent: &str,
     inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let finalize_start = Instant::now();
-    create_children_and_finalize(env, frame, frame_id, name, inherits, timing)?;
+    create_children_and_finalize(env, frame, frame_id, name, subst_parent, inherits, timing)?;
     timing.xml_frame_finalize_time += finalize_start.elapsed();
     Ok(())
 }
@@ -35,13 +36,14 @@ fn create_children_and_finalize(
     frame: &crate::xml::FrameXml,
     frame_id: u64,
     name: &str,
+    subst_parent: &str,
     inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     seed_child_parent_arrays(env, frame, frame_id)?;
-    create_child_frames(env, frame, name, inherits, timing)?;
+    create_child_frames(env, frame, name, subst_parent, inherits, timing)?;
     let layer_start = Instant::now();
-    create_layer_children(env, frame, name, inherits, timing)?;
+    create_layer_children(env, frame, name, subst_parent, inherits, timing)?;
     timing.frame_layer_children_time += layer_start.elapsed();
     let anim_start = Instant::now();
     apply_animation_groups(env, frame, name, inherits)?;
@@ -145,10 +147,17 @@ fn create_layer_children(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    subst_parent: &str,
     _inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    crate::loader::xml_layer_batch::create_layer_children_batched(env, frame, name, timing)
+    crate::loader::xml_layer_batch::create_layer_children_batched_with_name_parent(
+        env,
+        frame,
+        name,
+        subst_parent,
+        timing,
+    )
 }
 
 /// Map a FrameElement to its (FrameXml, widget_type, intrinsic_name) triple.
@@ -172,16 +181,17 @@ fn create_child_frames(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    subst_parent: &str,
     _inherits: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     frame.try_for_each_frame_element(|child_frame, child_tag| {
-        create_single_child_frame(env, child_frame, child_tag, name, timing)
+        create_single_child_frame(env, child_frame, child_tag, name, subst_parent, timing)
     })?;
     // ScrollChild children are parented to the ScrollFrame just like regular children,
     // but the first ScrollChild element also becomes the ScrollFrame's scroll child.
     if let Some(scroll_child) = frame.scroll_child() {
-        create_scroll_child_elements(env, &scroll_child.children, name, timing)?;
+        create_scroll_child_elements(env, &scroll_child.children, name, subst_parent, timing)?;
     }
     Ok(())
 }
@@ -190,6 +200,7 @@ fn create_scroll_child_elements(
     env: &LoaderEnv<'_>,
     elements: &[crate::xml::FrameElement],
     parent_name: &str,
+    subst_parent: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let mut registered_scroll_child = false;
@@ -207,6 +218,7 @@ fn create_scroll_child_elements(
             child_frame,
             child_type,
             Some(parent_name),
+            Some(subst_parent),
             intrinsic,
             timing,
         )?;
@@ -233,6 +245,7 @@ fn create_single_child_frame(
     child_frame: &crate::xml::FrameXml,
     child_tag: &'static str,
     parent_name: &str,
+    subst_parent: &str,
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let (child_frame, child_type, intrinsic) = match frame_element_to_type(child_frame, child_tag) {
@@ -244,6 +257,7 @@ fn create_single_child_frame(
         child_frame,
         child_type,
         Some(parent_name),
+        Some(subst_parent),
         intrinsic,
         timing,
     )?;

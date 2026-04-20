@@ -40,6 +40,7 @@ pub fn create_frame_from_xml(
     frame: &crate::xml::FrameXml,
     widget_type: &str,
     parent_override: Option<&str>,
+    subst_parent_override: Option<&str>,
     intrinsic_base: Option<&str>,
     timing: &mut LoadTiming,
 ) -> Result<Option<String>, LoadError> {
@@ -48,7 +49,13 @@ pub fn create_frame_from_xml(
     {
         return Ok(early);
     }
-    let Some(prepared) = prepare_frame_creation(env, frame, parent_override, intrinsic_base) else {
+    let Some(prepared) = prepare_frame_creation(
+        env,
+        frame,
+        parent_override,
+        subst_parent_override,
+        intrinsic_base,
+    ) else {
         return Ok(None);
     };
     build_and_setup_frame(env, timing, frame, widget_type, &prepared, intrinsic_base)?;
@@ -58,6 +65,7 @@ pub fn create_frame_from_xml(
         frame,
         frame_id,
         &prepared.name,
+        &prepared.subst_parent,
         &prepared.inherits,
         timing,
     )?;

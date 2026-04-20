@@ -277,6 +277,43 @@ fn compact_unit_frame_runtime_template_keeps_over_heal_absorb_glow_child() {
 }
 
 #[test]
+fn deprecated_arena_match_frame_keeps_over_heal_absorb_glow_named_from_ancestor() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+    load_blizzard_addon(&env, "Blizzard_BuffFrame", "Blizzard_BuffFrame.toc");
+    load_blizzard_addon(
+        &env,
+        "Blizzard_UnitFrame",
+        "Blizzard_UnitFrame_Mainline.toc",
+    );
+    load_blizzard_addon(
+        &env,
+        "Blizzard_Deprecated_ArenaUI",
+        "Blizzard_Deprecated_ArenaUI.toc",
+    );
+
+    let has_glow: bool = env
+        .eval(
+            r#"
+            local frame = ArenaEnemyMatchFrame1
+            local glow = ArenaEnemyMatchFrame1OverHealAbsorbGlow
+            return frame ~= nil
+                and glow ~= nil
+                and frame.overHealAbsorbGlow == glow
+                and glow:GetParent() ~= nil
+            "#,
+        )
+        .expect("deprecated arena frame probe should return");
+
+    assert!(
+        has_glow,
+        "ArenaEnemyMatchFrame1 should keep its named overHealAbsorbGlow through anonymous XML wrapper frames"
+    );
+}
+
+#[test]
 fn group_members_pin_acquire_keeps_data_provider_on_pin() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);

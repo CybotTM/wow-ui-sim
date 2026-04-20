@@ -141,6 +141,7 @@ fn template_child_shared_mixin_no_onload_xml() {
             "Frame",
             None,
             None,
+            None,
             &mut LoadTiming::default(),
         )
         .unwrap();
@@ -165,6 +166,7 @@ fn inherited_template_onload_survives_base_onshow_during_xml_load() {
             &env.loader_env(),
             frame,
             "Frame",
+            None,
             None,
             None,
             &mut LoadTiming::default(),

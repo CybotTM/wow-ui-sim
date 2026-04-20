@@ -162,6 +162,26 @@ fn startup_omits_targeted_missing_global_errors() {
 }
 
 #[test]
+fn startup_omits_arena_over_heal_absorb_glow_nil_error() {
+    test_timeout! {
+        let messages = load_and_startup_collect_messages();
+        let targeted: Vec<String> = messages
+            .into_iter()
+            .filter(|message| {
+                message.contains("ArenaEnemyMatchFrame1")
+                    && message.contains("overHealAbsorbGlow")
+            })
+            .collect();
+
+        assert!(
+            targeted.is_empty(),
+            "Startup should not report the ArenaEnemyMatchFrame1 overHealAbsorbGlow nil regression:\n  {}",
+            targeted.join("\n  ")
+        );
+    }
+}
+
+#[test]
 fn startup_keeps_action_bar_deprecation_fallbacks_non_recursive() {
     test_timeout! {
         let env = load_and_startup_env();
