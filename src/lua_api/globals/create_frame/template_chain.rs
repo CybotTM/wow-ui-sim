@@ -82,6 +82,15 @@ fn apply_runtime_template_chain_impl(
         apply_template_key_values(state, frame_id, frame.all_key_values());
     }
 
+    let runtime_frame = crate::xml::FrameXml::default();
+    runtime::apply_runtime_template_loader_effects(
+        state,
+        &frame_name,
+        &frame_name,
+        &runtime_frame,
+        Some(inherits),
+    )?;
+
     // The chain is base-to-derived. Install all parent-facing state first so
     // template child OnLoad/OnShow handlers can see derived key values and
     // mixin methods (for example ThreeSliceButtonTemplate children expect the
@@ -165,13 +174,6 @@ fn finalize_template_frame(
     frame_name: &str,
     fire_on_load: bool,
 ) -> LuaResult<()> {
-    runtime::apply_runtime_template_loader_effects(
-        state,
-        frame_name,
-        frame_name,
-        &crate::xml::FrameXml::default(),
-        Some(inherits),
-    )?;
     runtime::apply_runtime_template_direct_properties(state_rc, frame_id, inherits, frame_name);
     if fire_on_load {
         runtime::fire_frame_on_load(state, frame_id)?;

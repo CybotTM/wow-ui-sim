@@ -115,8 +115,6 @@ fn create_template_child_frame(
     } else {
         subst_parent
     };
-    create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
-
     apply_runtime_child_direct_properties(state_rc, child_id, frame, parent_name);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     apply_runtime_template_loader_effects(
@@ -126,6 +124,7 @@ fn create_template_child_frame(
         frame,
         inherited_chain.as_deref(),
     )?;
+    create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
     fire_frame_on_load(state, child_id)?;
     Ok(Some(child_id))
 }

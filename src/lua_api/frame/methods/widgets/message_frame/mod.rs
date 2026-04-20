@@ -12,7 +12,9 @@ mod getters;
 mod scroll;
 mod transform;
 
+use crate::lua_api::methods::{frame_ref, get_or_create_frame_fields};
 use crate::lua_bridge::table_set_rust_fn;
+use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -29,7 +31,6 @@ const METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("ClearText", getters::clear_text),
     // Count / max lines
     ("GetNumMessages", getters::get_num_messages),
-    ("SetMaxLines", getters::set_max_lines),
     ("GetMaxLines", getters::get_max_lines),
     // Fading
     ("SetFading", getters::set_fading),
@@ -97,6 +98,15 @@ const METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
 pub fn register_message_frame(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
     for (name, func) in METHODS {
         table_set_rust_fn(state, metatable, name, *func)?;
+    }
+    Ok(())
+}
+
+pub(crate) fn install_message_frame_fields(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
+    let _ = frame_ref(state, frame_id)?;
+    let fields = get_or_create_frame_fields(state, frame_id);
+    if let rilua::Val::Table(fields_ref) = fields {
+        table_set_rust_fn_static(state, fields_ref, "SetMaxLines", getters::set_max_lines)?;
     }
     Ok(())
 }

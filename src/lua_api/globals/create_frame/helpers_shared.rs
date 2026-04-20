@@ -33,6 +33,11 @@ pub fn create_frame_instance(
     let frame_id = frame.id;
     register_and_attach_parent(state, frame, parent_id, parent_explicit, frame_id)?;
     install_default_children(state, widget_type, frame_id)?;
+    if widget_type == WidgetType::MessageFrame {
+        crate::lua_api::frame::methods::widgets::message_frame::install_message_frame_fields(
+            state, frame_id,
+        )?;
+    }
     register_global_name(state, name, frame_id)?;
 
     Ok(frame_id)
