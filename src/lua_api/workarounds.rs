@@ -21,8 +21,8 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_item_socketing_tooltips", || {
         patch_item_socketing_tooltips(env);
     });
-    log_step(env, "patch_character_select_list", || {
-        patch_character_select_list(env);
+    log_step(env, "patch_character_select_selected_name", || {
+        patch_character_select_selected_name(env);
     });
     log_step(env, "patch_character_create_defaults", || {
         patch_character_create_defaults(env);
@@ -303,8 +303,22 @@ fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(VIGNETTE_PIN_TEMPLATE_WORKAROUND_LUA);
 }
 
-fn patch_character_select_list(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CHARACTER_SELECT_LIST_WORKAROUND_LUA);
+fn patch_character_select_selected_name(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(CharacterSelect_SetSelectedCharacterName) == "function"
+            and not rawget(_G, "__wow_character_select_selected_name_patched") then
+            local original = CharacterSelect_SetSelectedCharacterName
+            CharacterSelect_SetSelectedCharacterName = function(name, timerunningSeasonID)
+                if type(CharSelectCharacterName) ~= "table" then
+                    return
+                end
+                return original(name, timerunningSeasonID)
+            end
+            rawset(_G, "__wow_character_select_selected_name_patched", true)
+        end
+        "#,
+    );
 }
 
 fn patch_chat_voice_button_surface(env: &crate::lua_api::WowLuaEnv) {
@@ -1036,27 +1050,6 @@ local function __wow_getglobal(name)
     return getglobal(name)
 end
 _G.__wow_panel_getglobal = __wow_getglobal
-"#;
-
-const CHARACTER_SELECT_LIST_WORKAROUND_LUA: &str = r#"
-if type(CharacterSelect) == "table" and CharacterSelect:IsShown()
-    and type(CharacterSelectUI) == "table"
-    and CharacterSelectUI.config == nil
-    and type(CharacterSelectUI.RefreshConfig) == "function" then
-    pcall(function()
-        CharacterSelectUI:RefreshConfig()
-    end)
-end
-
-if type(CharacterSelect) == "table" and CharacterSelect:IsShown()
-    and type(CharacterSelectCharacterFrame) == "table"
-    and type(CharacterSelectCharacterFrame.UpdateCharacterSelection) == "function"
-    and not rawget(_G, "__wow_character_select_list_refreshed") then
-    pcall(function()
-        CharacterSelectCharacterFrame:UpdateCharacterSelection()
-    end)
-    rawset(_G, "__wow_character_select_list_refreshed", true)
-end
 "#;
 
 const CHARACTER_CREATE_DEFAULTS_WORKAROUND_LUA: &str = r#"

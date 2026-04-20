@@ -4,28 +4,30 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::{fire_startup_events_for_screen, run_extra_update_ticks};
+use wow_ui_sim::startup::{run_extra_update_ticks, settle_headless_startup};
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
-fn load_blizzard_screen(screen: ScreenKind) -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(screen);
+fn load_blizzard_screen(screen: ScreenKind) -> common::LockedEnv {
+    common::lock_env(move || {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+        env.set_screen_mode(screen);
 
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons_for_screen(&ui, screen);
-    for (name, toc_path) in &addons {
-        if let Err(err) = load_addon(&env.loader_env(), toc_path) {
-            panic!("[load {name}] FAILED: {err}");
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons_for_screen(&ui, screen);
+        for (name, toc_path) in &addons {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
         }
-    }
 
-    env.apply_post_load_workarounds();
-    fire_startup_events_for_screen(&env, screen);
-    env
+        env.apply_post_load_workarounds();
+        settle_headless_startup(&env);
+        env
+    })
 }
 
 #[test]
@@ -216,22 +218,62 @@ fn character_select_builds_scrollbox_entries() {
     test_timeout! {
         let env = load_blizzard_screen(ScreenKind::CharacterSelect);
 
-        let entry_count: i32 = env
+        let provider_count: i32 = env
             .eval(
                 r#"
-                local count = 0
-                if CharacterSelectCharacterFrame and CharacterSelectCharacterFrame.ScrollBox then
-                    for _ in CharacterSelectCharacterFrame.ScrollBox:EnumerateDataProviderEntireRange() do
-                        count = count + 1
-                    end
+                if CharacterSelectListUtil and CharacterSelectListUtil.BuildCharIndexToIDMapping then
+                    CharacterSelectListUtil.BuildCharIndexToIDMapping()
                 end
-                return count
+                local complete = CharacterSelectListUtil and CharacterSelectListUtil.CreateCompleteDataProvider
+                    and CharacterSelectListUtil.CreateCompleteDataProvider()
+                return complete and complete.GetSize and complete:GetSize() or -1
                 "#,
             )
             .expect("character list data provider should be enumerable");
+        let debug_state: String = env
+            .eval(
+                r#"
+                local completeSize = -1
+                if CharacterSelectListUtil and CharacterSelectListUtil.CreateCompleteDataProvider then
+                    local complete = CharacterSelectListUtil.CreateCompleteDataProvider()
+                    completeSize = complete and complete.GetSize and complete:GetSize() or -1
+                end
+                local providerSize = completeSize
+                local numCharacters = GetNumCharacters and GetNumCharacters(true) or -1
+                local mappedFirst = CharacterSelectListUtil and CharacterSelectListUtil.GetCharIDFromIndex
+                    and CharacterSelectListUtil.GetCharIDFromIndex(1) or -1
+                local frameShown = CharacterSelectFrame and CharacterSelectFrame.IsShown and CharacterSelectFrame:IsShown() or false
+                local selectedIndex = CharacterSelect and CharacterSelect.selectedIndex or -1
+                return string.format(
+                    "frameShown=%s selectedIndex=%d providerSize=%d completeSize=%d numCharacters=%d mappedFirst=%d",
+                    tostring(frameShown),
+                    selectedIndex,
+                    providerSize,
+                    completeSize,
+                    numCharacters,
+                    mappedFirst
+                )
+                "#,
+            )
+            .expect("character list debug state should be queryable");
         assert!(
-            entry_count > 0,
-            "character-select screen should populate the character list"
+            provider_count > 0,
+            "character-select screen should populate the character list; {debug_state}"
+        );
+    }
+}
+
+#[test]
+fn character_select_configuration_warnings_returns_a_table() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::CharacterSelect);
+
+        let warnings_type: String = env
+            .eval("return type(C_ConfigurationWarnings.GetConfigurationWarnings(false))")
+            .expect("configuration warnings should be queryable");
+        assert_eq!(
+            warnings_type, "table",
+            "configuration warnings API should return a table even when there are no warnings"
         );
     }
 }

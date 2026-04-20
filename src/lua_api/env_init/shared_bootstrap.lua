@@ -1561,8 +1561,82 @@ if GetCharacterListUpdate == nil then
   end
 end
 
+if PlayGlueMusic == nil then
+  function PlayGlueMusic()
+  end
+end
+
+if StopGlueMusic == nil then
+  function StopGlueMusic()
+  end
+end
+
 if PlayGlueAmbience == nil then
   function PlayGlueAmbience()
+  end
+end
+
+if StopGlueAmbience == nil then
+  function StopGlueAmbience()
+  end
+end
+
+if HasCheckedSystemRequirements == nil
+  or SetCheckedSystemRequirements == nil
+  or CheckSystemRequirements == nil
+then
+  local __wow_checked_system_requirements = false
+
+  if HasCheckedSystemRequirements == nil then
+    function HasCheckedSystemRequirements()
+      return __wow_checked_system_requirements
+    end
+  end
+
+  if SetCheckedSystemRequirements == nil then
+    function SetCheckedSystemRequirements(checked)
+      __wow_checked_system_requirements = not not checked
+    end
+  end
+
+  if CheckSystemRequirements == nil then
+    function CheckSystemRequirements(includeSeenWarnings)
+      if type(C_ConfigurationWarnings) ~= "table"
+        or type(C_ConfigurationWarnings.GetConfigurationWarnings) ~= "function"
+      then
+        return
+      end
+
+      local warnings = C_ConfigurationWarnings.GetConfigurationWarnings(includeSeenWarnings)
+      if type(warnings) ~= "table" then
+        return
+      end
+
+      if type(StaticPopup_Queue) ~= "function" then
+        return
+      end
+
+      for _, warning in ipairs(warnings) do
+        local text = nil
+        if type(C_ConfigurationWarnings.GetConfigurationWarningString) == "function" then
+          text = C_ConfigurationWarnings.GetConfigurationWarningString(warning)
+        end
+        if text then
+          StaticPopup_Queue("CONFIGURATION_WARNING", text, nil, { configurationWarning = warning })
+        end
+      end
+    end
+  end
+end
+
+if StoreFrame_WaitingForCharacterListUpdate == nil then
+  function StoreFrame_WaitingForCharacterListUpdate()
+    return false
+  end
+end
+
+if UpdateSelectionCustomizationScene == nil then
+  function UpdateSelectionCustomizationScene()
   end
 end
 
