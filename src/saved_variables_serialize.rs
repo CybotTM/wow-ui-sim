@@ -211,8 +211,13 @@ mod tests {
         f(lua.state_mut())
     }
 
+    fn ensure_saved_var_table(env: &WowLuaEnv, var_name: &str) {
+        env.exec(&format!("{var_name} = {var_name} or {{}}"))
+            .unwrap();
+    }
+
     #[test]
-    fn test_init_empty_variables() {
+    fn test_init_missing_variables_stay_nil_until_initialized_by_addon() {
         let env = new_env();
         let dir = tempdir().unwrap();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
@@ -222,10 +227,8 @@ mod tests {
         })
         .unwrap();
 
-        let is_empty: bool = env
-            .eval("return type(TestDB) == 'table' and next(TestDB) == nil")
-            .unwrap();
-        assert!(is_empty);
+        let value_type: String = env.eval("return type(TestDB)").unwrap();
+        assert_eq!(value_type, "nil");
     }
 
     #[test]
@@ -241,6 +244,7 @@ mod tests {
             })
             .unwrap();
 
+            ensure_saved_var_table(&env, "TestDB");
             env.exec(r#"TestDB.setting1 = "hello"; TestDB.setting2 = 42"#)
                 .unwrap();
 
@@ -275,6 +279,7 @@ mod tests {
         })
         .unwrap();
 
+        ensure_saved_var_table(&env, "TestDB");
         env.exec(r#"TestDB.name = "Haky"; TestDB.level = 70; TestDB.active = true"#)
             .unwrap();
 
@@ -307,6 +312,7 @@ mod tests {
         })
         .unwrap();
 
+        ensure_saved_var_table(&env, "TestDB");
         env.exec(
             r#"
             TestDB.nested = { a = 1, b = { c = "deep" } }
@@ -345,6 +351,7 @@ mod tests {
         })
         .unwrap();
 
+        ensure_saved_var_table(&env, "TestDB");
         env.exec(r#"TestDB.msg = "line1\nline2"; TestDB.path = "C:\\Users\\test""#)
             .unwrap();
 
@@ -378,6 +385,7 @@ mod tests {
             })
             .unwrap();
 
+            ensure_saved_var_table(&env, "CharDB");
             env.exec("CharDB.level = 70").unwrap();
             with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
         }
@@ -406,8 +414,8 @@ mod tests {
             })
             .unwrap();
 
-            let level: Val = env.eval("return CharDB.level").unwrap();
-            assert!(matches!(level, Val::Nil));
+            let value_type: String = env.eval("return type(CharDB)").unwrap();
+            assert_eq!(value_type, "nil");
         }
     }
 
@@ -432,6 +440,9 @@ mod tests {
             })
             .unwrap();
 
+            ensure_saved_var_table(&env, "AngleurConfig");
+            ensure_saved_var_table(&env, "AngleurMinimapButton");
+            ensure_saved_var_table(&env, "AngleurCharacter");
             env.exec(
                 r#"
                 AngleurConfig.method = "oneKey"
