@@ -90,24 +90,32 @@ fn drain_startup_errors(env: &WowLuaEnv, messages: &mut Vec<String>) {
     messages.extend(common::drain_string_table(env, "__targeted_startup_errors"));
 }
 
-fn load_and_startup_collect_messages() -> Vec<String> {
+fn load_targeted_startup_env(messages: &mut Vec<String>) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
-    let mut messages = Vec::new();
     for (name, toc_path) in &addons {
         let result = load_addon(&env.loader_env(), toc_path);
-        push_addon_load_messages(&mut messages, name, result);
+        push_addon_load_messages(messages, name, result);
     }
 
     env.apply_post_load_workarounds();
     common::install_error_collector(&env, "__targeted_startup_errors");
+    env
+}
 
-    run_standard_startup(&env, || {
-        drain_startup_errors(&env, &mut messages);
+fn collect_targeted_startup_messages(env: &WowLuaEnv, messages: &mut Vec<String>) {
+    run_standard_startup(env, || {
+        drain_startup_errors(env, messages);
     });
+}
+
+fn load_and_startup_collect_messages() -> Vec<String> {
+    let mut messages = Vec::new();
+    let env = load_targeted_startup_env(&mut messages);
+    collect_targeted_startup_messages(&env, &mut messages);
     messages
 }
 
