@@ -11,19 +11,19 @@ fn env() -> WowLuaEnv {
 // ============================================================================
 
 #[test]
-fn test_get_thumb_texture_nil_by_default() {
+fn test_get_thumb_texture_defaults_to_thumb_child() {
     let env = env();
-    let is_nil: bool = env
+    let matches: bool = env
         .eval(
             r#"
         local s = CreateFrame("Slider")
-        return s:GetThumbTexture() == nil
+        return s:GetThumbTexture() == s.ThumbTexture
     "#,
         )
         .unwrap();
     assert!(
-        is_nil,
-        "GetThumbTexture should return nil on a fresh slider"
+        matches,
+        "GetThumbTexture should return the default thumb child"
     );
 }
 

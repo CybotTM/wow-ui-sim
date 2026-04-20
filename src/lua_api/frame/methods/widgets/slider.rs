@@ -405,6 +405,42 @@ fn scroll_range(frame: &crate::widget::Frame, axis: char) -> f64 {
     (child_extent - own_extent).max(0.0)
 }
 
+fn scroll_child_subtree_bounds(
+    registry: &crate::widget::WidgetRegistry,
+    root_id: u64,
+    screen_width: f32,
+    screen_height: f32,
+) -> Option<(f32, f32)> {
+    let mut cache = crate::layout::LayoutCache::default();
+    let mut stack = vec![root_id];
+    let mut bounds: Option<(f32, f32, f32, f32)> = None;
+
+    while let Some(id) = stack.pop() {
+        let rect = crate::layout::compute_frame_rect_cached(
+            registry,
+            id,
+            screen_width,
+            screen_height,
+            &mut cache,
+        )
+        .rect;
+        bounds = Some(match bounds {
+            Some((min_x, min_y, max_x, max_y)) => (
+                min_x.min(rect.x),
+                min_y.min(rect.y),
+                max_x.max(rect.x + rect.width),
+                max_y.max(rect.y + rect.height),
+            ),
+            None => (rect.x, rect.y, rect.x + rect.width, rect.y + rect.height),
+        });
+        if let Some(frame) = registry.get(id) {
+            stack.extend(frame.children.iter().copied());
+        }
+    }
+
+    bounds.map(|(min_x, min_y, max_x, max_y)| (max_x - min_x, max_y - min_y))
+}
+
 pub(super) fn get_horizontal_scroll(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let offset = borrow_state(state)?
@@ -425,8 +461,16 @@ pub(super) fn set_horizontal_scroll(state: &mut LuaState) -> LuaResult<u32> {
         .get(id)
         .map(|frame| scroll_range(frame, 'h'))
         .unwrap_or(0.0);
+    let new_offset = offset.clamp(0.0, range);
+    if sim
+        .widgets
+        .get(id)
+        .is_some_and(|frame| frame.scroll_horizontal == new_offset)
+    {
+        return Ok(0);
+    }
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.scroll_horizontal = offset.clamp(0.0, range);
+        frame.scroll_horizontal = new_offset;
     }
     Ok(0)
 }
@@ -462,8 +506,16 @@ pub(super) fn set_vertical_scroll(state: &mut LuaState) -> LuaResult<u32> {
         .get(id)
         .map(|frame| scroll_range(frame, 'v'))
         .unwrap_or(0.0);
+    let new_offset = offset.clamp(0.0, range);
+    if sim
+        .widgets
+        .get(id)
+        .is_some_and(|frame| frame.scroll_vertical == new_offset)
+    {
+        return Ok(0);
+    }
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.scroll_vertical = offset.clamp(0.0, range);
+        frame.scroll_vertical = new_offset;
     }
     Ok(0)
 }
@@ -518,16 +570,21 @@ pub(super) fn set_scroll_child(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn update_scroll_child_rect(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let scroll_child_rect_size = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame.scroll_child_id)
+            .and_then(|child_id| {
+                scroll_child_subtree_bounds(
+                    &sim.widgets,
+                    child_id,
+                    sim.screen_width,
+                    sim.screen_height,
+                )
+            })
+    };
     let mut sim = borrow_state_mut(state)?;
-    let scroll_child_rect_size = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame.scroll_child_id)
-        .and_then(|child_id| {
-            sim.widgets
-                .get(child_id)
-                .map(|child| (child.width, child.height))
-        });
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.scroll_child_rect_size = scroll_child_rect_size;
     }
