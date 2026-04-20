@@ -276,10 +276,22 @@ fn startup_followup_surfaces_expose_safe_defaults() {
             )
             .expect("follow-up startup surfaces should return safe defaults");
 
+        let catalog_shop_nav_soundkit_is_number: bool = env
+            .eval(
+                r#"
+                return type(SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU) == "number"
+                "#,
+            )
+            .expect("catalog shop nav soundkit probe should run");
+
         assert_eq!(
             result,
             (3, true, true, true, true, true, true, true, true, true, true, true),
             "Follow-up startup surfaces should expose safe defaults for Blizzard callers"
+        );
+        assert!(
+            catalog_shop_nav_soundkit_is_number,
+            "CatalogShop nav soundkit should be seeded during startup"
         );
     }
 }

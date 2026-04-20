@@ -33,6 +33,14 @@ if CreateAndInitFromMixin == nil then
   end
 end
 
+SOUNDKIT = SOUNDKIT or {}
+if SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU == nil then
+  SOUNDKIT.CATALOG_SHOP_SELECT_NAV_MENU = 303824
+end
+if SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON == nil then
+  SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON = 303826
+end
+
 if CatalogShopConstants == nil then
   CatalogShopConstants = {
     ScrollViewType = {
