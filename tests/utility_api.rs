@@ -225,6 +225,21 @@ fn test_tcontains_not_found() {
     assert!(!found);
 }
 
+#[test]
+fn test_tcontains_checks_hash_entries_too() {
+    let env = env();
+    let found: bool = env
+        .eval(
+            r#"
+            local t = {}
+            t.onlyHash = 42
+            return tContains(t, 42)
+            "#,
+        )
+        .unwrap();
+    assert!(found, "tContains should match Blizzard pairs() semantics");
+}
+
 // ============================================================================
 // tIndexOf
 // ============================================================================

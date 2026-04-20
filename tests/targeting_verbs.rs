@@ -58,6 +58,20 @@ fn target_unit_unknown_token_is_silent_noop() {
 }
 
 #[test]
+fn target_unit_enemy1_falls_back_to_default_enemy() {
+    let env = env();
+    let name: String = env
+        .eval(
+            r#"
+            TargetUnit("enemy1")
+            return UnitName("target")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Hogger");
+}
+
+#[test]
 fn target_unit_does_not_crash_and_target_exists() {
     // Smoke test: TargetUnit against an existing target token doesn't crash
     // and the target is still set afterwards.

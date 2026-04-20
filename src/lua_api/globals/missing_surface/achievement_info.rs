@@ -265,7 +265,43 @@ fn register_traversal_globals(state: &mut LuaState, globals: GcRef<Table>) -> Lu
 }
 
 fn get_achievement_info_global(state: &mut LuaState) -> LuaResult<u32> {
-    push_achievement_info_for_id(state, i32::from_stack(state, 1)?)
+    let nargs = (state.top as i32 - state.base as i32).max(0);
+    let first_arg = i32::from_stack(state, 1)?;
+
+    if nargs >= 2 {
+        let index = i32::from_stack(state, 2)?;
+        let Some(category) = find_category(first_arg) else {
+            return Ok(0);
+        };
+        let achievement_ids = collect_category_achievement_ids(category.category_id);
+        let Some(achievement_id) = achievement_ids.get((index - 1).max(0) as usize).copied() else {
+            return Ok(0);
+        };
+        return push_achievement_info_for_id(state, achievement_id);
+    }
+
+    if let Some(category) = find_category(first_arg) {
+        let name = create_string(state, category.name);
+        let empty = create_string(state, "");
+        state.push(Val::Num(category.category_id as f64));
+        state.push(name);
+        state.push(Val::Num(0.0));
+        state.push(Val::Bool(false));
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+        state.push(empty.clone());
+        state.push(Val::Num(category.flags as f64));
+        state.push(Val::Num(0.0));
+        state.push(empty.clone());
+        state.push(Val::Bool(false));
+        state.push(Val::Bool(false));
+        state.push(empty);
+        state.push(Val::Bool(false));
+        return Ok(15);
+    }
+
+    push_achievement_info_for_id(state, first_arg)
 }
 
 fn get_category_list(state: &mut LuaState) -> LuaResult<u32> {
@@ -374,19 +410,12 @@ fn get_latest_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
             .collect::<Vec<_>>()
     };
     earned_ids.sort_unstable();
+    let count = earned_ids.len() as u32;
 
-    let table_ref = state.gc.alloc_table(Table::new());
-    let table = Val::Table(table_ref);
-    for (index, achievement_id) in earned_ids.into_iter().enumerate() {
-        set_table_array(
-            state,
-            table,
-            (index + 1) as i64,
-            Val::Num(achievement_id as f64),
-        );
+    for achievement_id in &earned_ids {
+        state.push(Val::Num((*achievement_id) as f64));
     }
-    state.push(table);
-    Ok(1)
+    Ok(count)
 }
 
 fn get_achievement_guild_rep(state: &mut LuaState) -> LuaResult<u32> {
@@ -398,9 +427,22 @@ fn get_achievement_guild_rep(state: &mut LuaState) -> LuaResult<u32> {
 fn push_achievement_info_for_id(state: &mut LuaState, achievement_id: i32) -> LuaResult<u32> {
     let row = {
         let sim = borrow_state(state)?;
-        let Some(info) = sim.achievements.get(&achievement_id).cloned() else {
-            return Ok(0);
-        };
+        let info = sim
+            .achievements
+            .get(&achievement_id)
+            .cloned()
+            .unwrap_or(AchievementInfo {
+                achievement_id,
+                name: String::new(),
+                points: 0,
+                description: String::new(),
+                flags: 0,
+                icon: 0,
+                reward_text: String::new(),
+                is_guild: false,
+                is_statistic: false,
+                reward_item_id: None,
+            });
         let completed = sim.world.earned_achievements.contains(&achievement_id);
         (info, completed)
     };

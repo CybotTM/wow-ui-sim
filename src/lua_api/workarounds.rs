@@ -184,6 +184,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_Collections" {
         patch_toggle_collections_journal_for_runtime_addon_load(env);
+        patch_collections_journal_namespace(env);
     }
     if addon_name == "Blizzard_EncounterJournal" {
         patch_toggle_encounter_journal_for_runtime_addon_load(env);
@@ -193,6 +194,12 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_DamageMeter" {
         let _ = patch_damage_meter_initial_scrollbox_extent(env);
+    }
+}
+
+pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
+    if addon_name == "Blizzard_Collections" {
+        patch_collections_journal_namespace(env);
     }
 }
 
@@ -609,6 +616,7 @@ fn patch_map_exploration_pin_mixin_for_runtime_addon_load(env: &crate::lua_api::
 
 fn patch_toggle_collections_journal_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
+    let _ = env.exec(MOUNT_JOURNAL_DYNAMIC_FLIGHT_POPUP_WORKAROUND_LUA);
 }
 
 fn patch_toggle_encounter_journal_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>) {
@@ -959,7 +967,45 @@ if type(ToggleWorldMap) == "function" and not rawget(_G, "__wow_toggle_world_map
 
   rawset(_G, "__wow_toggle_world_map_refresh_patched", true)
 end
-"#,
+    "#,
+    );
+}
+
+fn patch_collections_journal_namespace(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(
+        r#"
+        if type(C_MountJournal) == "table" then
+            if rawget(C_MountJournal, "IsUsingDefaultFilters") == nil then
+                function C_MountJournal.IsUsingDefaultFilters()
+                    return true
+                end
+            end
+            if rawget(C_MountJournal, "GetDisplayedMountID") == nil then
+                function C_MountJournal.GetDisplayedMountID(_index)
+                    return nil
+                end
+            end
+        end
+
+        if type(C_PetJournal) == "table" and rawget(C_PetJournal, "IsUsingDefaultFilters") == nil then
+            function C_PetJournal.IsUsingDefaultFilters()
+                return true
+            end
+        end
+
+        if type(MountJournalToggleDynamicFlightFlyoutButtonMixin) == "table"
+            and type(MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation) == "function"
+            and not MountJournalToggleDynamicFlightFlyoutButtonMixin.__wow_popup_guard then
+            local original = MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation
+            MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation = function(self, ...)
+                if not self.popup then
+                    return
+                end
+                return original(self, ...)
+            end
+            MountJournalToggleDynamicFlightFlyoutButtonMixin.__wow_popup_guard = true
+        end
+        "#,
     );
 }
 
@@ -1473,6 +1519,38 @@ function ToggleCollectionsJournal(tabIndex)
         CollectionsJournal:Show();
     end
 end
+"#;
+
+const MOUNT_JOURNAL_DYNAMIC_FLIGHT_POPUP_WORKAROUND_LUA: &str = r#"
+local function __wow_patch_mount_journal_dynamic_flight_animation()
+    if type(MountJournalToggleDynamicFlightFlyoutButtonMixin) ~= "table" then
+        return
+    end
+    if rawget(_G, "__wow_mount_journal_dynamic_flight_popup_patched") then
+        return
+    end
+    if type(MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation) ~= "function" then
+        return
+    end
+
+    MountJournalToggleDynamicFlightFlyoutButtonMixin.UpdateUnspentGlyphsAnimation = function(self)
+        local isPopupOpen = type(self.IsPopupOpen) == "function" and self:IsPopupOpen() or false
+        if self.UnspentGlyphsAnim and type(self.UnspentGlyphsAnim.SetPlaying) == "function" then
+            self.UnspentGlyphsAnim:SetPlaying(self.canSpendDragonridingGlyphs and not isPopupOpen)
+        end
+
+        local popup = rawget(self, "popup")
+        local popupButton = type(popup) == "table" and rawget(popup, "OpenDynamicFlightSkillTreeButton") or nil
+        local popupAnim = popupButton and popupButton.UnspentGlyphsAnim or nil
+        if popupAnim and type(popupAnim.SetPlaying) == "function" then
+            popupAnim:SetPlaying(self.canSpendDragonridingGlyphs and isPopupOpen)
+        end
+    end
+
+    rawset(_G, "__wow_mount_journal_dynamic_flight_popup_patched", true)
+end
+
+__wow_patch_mount_journal_dynamic_flight_animation()
 "#;
 
 const DAMAGE_METER_INITIAL_SCROLLBOX_EXTENT_LUA: &str = r#"

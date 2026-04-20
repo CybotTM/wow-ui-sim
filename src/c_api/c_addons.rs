@@ -511,6 +511,7 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
         return push_load_result(state, false, Some("DISABLED"));
     }
     let loader_env = LoaderEnv::from_parts_active(borrow_lua(state)?, state_handle(state)?, state);
+    crate::lua_api::workarounds::apply_for_runtime_addon_preload(&loader_env, &addon_name);
     let mut loading = HashSet::new();
     match load_runtime_addon_recursive(state, &loader_env, &addon_name, &mut loading) {
         Ok(()) => push_load_result(state, true, None),

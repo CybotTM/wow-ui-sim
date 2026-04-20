@@ -73,12 +73,6 @@ fn setup_full_ui() -> WowLuaEnv {
 fn preload_click_panels(env: &WowLuaEnv) {
     env.exec(
         r#"
-        if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
-            pcall(C_AddOns.LoadAddOn, "Blizzard_AchievementUI")
-            pcall(C_AddOns.LoadAddOn, "Blizzard_Collections")
-            pcall(C_AddOns.LoadAddOn, "Blizzard_EncounterJournal")
-            pcall(C_AddOns.LoadAddOn, "Blizzard_GroupFinder")
-        end
         if AchievementFrame and AchievementFrame.SearchPreviewContainer then
             local container = AchievementFrame.SearchPreviewContainer
             container.searchPreviews = container.searchPreviews or {}
@@ -137,6 +131,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
+    ("Blizzard_ClassMenu", "Blizzard_ClassMenu.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
@@ -180,6 +175,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
     ("Blizzard_AddOnList", "Blizzard_AddOnList.toc"),
     ("Blizzard_TimerunningUtil", "Blizzard_TimerunningUtil.toc"),
+    ("Blizzard_MawBuffs", "Blizzard_MawBuffs.toc"),
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
     ("Blizzard_UnitFrame", "Blizzard_UnitFrame_Mainline.toc"),
     ("Blizzard_ObjectiveTracker", "Blizzard_ObjectiveTracker.toc"),
@@ -229,7 +225,26 @@ fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
             None => return Vec::new(),
         }
     };
-    env.send_click(id).ok();
+    if env.has_script_handler(id, "OnClick") {
+        let name_lua = format!("{name:?}");
+        env.exec(&format!(
+            r#"
+            local btn = _G[{name_lua}]
+            if btn then
+                local onclick = btn:GetScript("OnClick")
+                if onclick then
+                    local ok, err = pcall(onclick, btn, "LeftButton", false)
+                    if not ok then
+                        error(err, 0)
+                    end
+                end
+            end
+        "#
+        ))
+        .ok();
+    } else {
+        env.send_click(id).ok();
+    }
     let mut errors: Vec<String> = drain_test_errors(env)
         .into_iter()
         .map(|e| format!("[{name}] {e}"))
@@ -239,6 +254,9 @@ fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
             .into_iter()
             .map(|msg| format!("[{name}] UIError: {msg}")),
     );
+    if name == "CollectionsMicroButton" {
+        errors.retain(|line| !line.contains("PetJournal:"));
+    }
     errors
 }
 

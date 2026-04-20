@@ -62,6 +62,7 @@ fn insecure_caller_cannot_set_attribute_on_protected_frame() {
     env.exec(
         r#"
         Protected = CreateFrame("Frame", "ProtectedInsecureWrite", UIParent)
+        A_Admin.SetInCombat(true)
     "#,
     )
     .unwrap();
@@ -72,6 +73,7 @@ fn insecure_caller_cannot_set_attribute_on_protected_frame() {
         debug.setstacktaint("evil-addon")
         Protected:SetAttribute("foo", "attempted")
         debug.setstacktaint(nil)
+        A_Admin.SetInCombat(false)
     "#,
     )
     .unwrap();
@@ -82,6 +84,36 @@ fn insecure_caller_cannot_set_attribute_on_protected_frame() {
     assert_eq!(
         got, "nil",
         "insecure write on a protected frame must be dropped silently"
+    );
+}
+
+#[test]
+fn insecure_caller_can_set_attribute_on_protected_frame_out_of_combat() {
+    let env = env();
+    env.exec(
+        r#"
+        Protected = CreateFrame("Frame", "ProtectedOutOfCombatWrite", UIParent)
+        A_Admin.SetInCombat(false)
+    "#,
+    )
+    .unwrap();
+    mark_frame_protected(&env, "ProtectedOutOfCombatWrite");
+
+    env.exec(
+        r#"
+        debug.setstacktaint("evil-addon")
+        Protected:SetAttribute("foo", "allowed")
+        debug.setstacktaint(nil)
+    "#,
+    )
+    .unwrap();
+
+    let got: String = env
+        .eval(r#"return tostring(Protected:GetAttribute("foo"))"#)
+        .unwrap();
+    assert_eq!(
+        got, "allowed",
+        "insecure write on a protected frame should be allowed out of combat"
     );
 }
 
@@ -113,6 +145,7 @@ fn insecure_caller_cannot_set_attribute_no_handler_on_protected_frame() {
     env.exec(
         r#"
         Protected = CreateFrame("Frame", "ProtectedNoHandlerBlock", UIParent)
+        A_Admin.SetInCombat(true)
     "#,
     )
     .unwrap();
@@ -123,6 +156,7 @@ fn insecure_caller_cannot_set_attribute_no_handler_on_protected_frame() {
         debug.setstacktaint("evil-addon")
         Protected:SetAttributeNoHandler("foo", "attempted")
         debug.setstacktaint(nil)
+        A_Admin.SetInCombat(false)
     "#,
     )
     .unwrap();

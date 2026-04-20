@@ -68,6 +68,7 @@ fn register_unit_relationships(state: &mut LuaState) {
     set_global(state, "UnitCanAttack", unit_can_attack);
     set_global(state, "UnitCanAssist", unit_can_assist);
     set_global(state, "UnitCanCooperate", unit_can_cooperate);
+    set_global(state, "UnitLeadsAnyGroup", unit_leads_any_group);
     set_global(state, "UnitInParty", unit_in_party);
     set_global(state, "UnitInRaid", unit_in_raid);
     set_global(state, "UnitInOtherParty", unit_in_other_party);
@@ -684,6 +685,24 @@ fn unit_is_group_assistant(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     state.push(Val::Bool(assistant));
+    Ok(1)
+}
+
+fn unit_leads_any_group(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let leads = {
+        let st = borrow_state(state)?;
+        if !st.party_group_active || st.party_members.is_empty() {
+            false
+        } else if matches!(unit.as_str(), "player" | "pet" | "vehicle") {
+            st.party_leader_index.is_none() || st.everyone_assistant
+        } else if let Some(idx) = resolve_unit_party_index(&st, &unit) {
+            st.party_leader_index == Some(idx) || st.everyone_assistant
+        } else {
+            false
+        }
+    };
+    state.push(Val::Bool(leads));
     Ok(1)
 }
 

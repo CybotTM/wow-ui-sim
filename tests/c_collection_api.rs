@@ -43,6 +43,21 @@ fn test_pet_journal_get_pet_info_by_index_nil() {
 }
 
 #[test]
+fn test_pet_journal_get_pet_info_by_pet_id_accepts_species_fallback() {
+    let env = env();
+    let name: String = env
+        .eval(
+            r#"
+            local speciesID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(39)
+            if speciesID ~= 39 then return "species=" .. tostring(speciesID) end
+            return name
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Mechanical Squirrel");
+}
+
+#[test]
 fn test_pet_journal_get_pet_info_by_pet_id_nil() {
     let env = env();
     let is_nil: bool = env

@@ -288,6 +288,7 @@ fn damage_meter_loads_and_populates_primary_session_window() {
             end
 
             sessionWindow:Refresh(ScrollBoxConstants.DiscardScrollPosition)
+            sessionWindow:GetScrollBox():FullUpdate(ScrollBoxConstants.UpdateImmediately)
 
             if not DamageMeter:IsShown() then
                 return "damage_meter_hidden"

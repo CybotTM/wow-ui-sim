@@ -111,6 +111,7 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "PetUsesPetFrame",
     "PlayerIsPVPInactive",
     "SupportsClipCursor",
+    "ShouldShowMawBuffs",
     // PlayerIsTimerunning is SimState-backed in rilua_timerunning.rs, not a stub.
     "ShouldShowLevelSquishDialog",
     "UnitCanAssist",
@@ -122,9 +123,15 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitHasVehicleUI",
     "UnitIsGameObject",
     "UnitIsOtherPlayersPet",
+    "UnitIsBattlePet",
+    "UnitIsBattlePetCompanion",
+    "UnitIsOtherPlayersBattlePet",
+    "UnitIsWildBattlePet",
+    "UnitIsBossMob",
     "UnitIsPVPSanctioned",
     "UnitIsQuestBoss",
     "UnitIsTapDenied",
+    "UnitLeadsAnyGroup",
     "UnitOnTaxi",
     "UnitPVPName",
     "UnitPlayerControlled",
@@ -214,6 +221,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "UnitAttackBothHands",
     "UnitAttackSpeed",
     "UnitBattlePetLevel",
+    "UnitBattlePetType",
     "UnitHasVehiclePlayerFrameUI",
     "UnitIsAFK",
     "UnitIsDND",
@@ -224,10 +232,26 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
 static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
+    (
+        "GetNumCompletedAchievements",
+        stub_num_completed_achievements,
+    ),
+    ("GetClassicExpansionLevel", stub_classic_expansion_level),
     ("GetRepairAllCost", stub_repair_all_cost),
     ("UnitGroupRolesAssigned", stub_role_none),
     ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
 ];
+
+fn stub_num_completed_achievements(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(0.0));
+    state.push(rilua::Val::Num(0.0));
+    Ok(2)
+}
+
+fn stub_classic_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(10.0));
+    Ok(1)
+}
 
 pub(super) fn register_global_stubs(state: &mut LuaState) {
     for &name in GLOBAL_NIL_STUBS {

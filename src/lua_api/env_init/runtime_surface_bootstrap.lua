@@ -3381,14 +3381,17 @@ local __wow_seeded_damage_meter_source = {
   isLocalPlayer = true,
   sourceGUID = "Player-1-00000001",
   sourceCreatureID = 1,
-  totalAmount = 90000,
+  totalAmount = 52000,
+  amountPerSecond = 1300,
   combatSpells = {
-    { spellID = 19750, totalAmount = 90000 },
+    { spellID = 19750, totalAmount = 52000, amountPerSecond = 1300 },
   },
 }
 local __wow_seeded_damage_meter_session = {
   sessionID = 1,
-  totalAmount = 123456,
+  totalAmount = 52000,
+  maxAmount = 52000,
+  durationSeconds = 40,
   combatSources = {
     __wow_seeded_damage_meter_source,
     {
@@ -3397,8 +3400,9 @@ local __wow_seeded_damage_meter_session = {
       sourceGUID = "Creature-1-00000002",
       sourceCreatureID = 2,
       totalAmount = 3333,
+      amountPerSecond = 83.325,
       combatSpells = {
-        { spellID = 1337, totalAmount = 3333 },
+        { spellID = 1337, totalAmount = 3333, amountPerSecond = 83.325 },
       },
     },
   },
@@ -3429,8 +3433,35 @@ C_DamageMeter = __wow_merge_namespace(C_DamageMeter, {
     end
     return __wow_seeded_damage_meter_source
   end,
-  GetSessionDurationSeconds = function()
-    return 123.0
+  GetCombatSessionFromID = function(sessionID, damageType)
+    if sessionID ~= __wow_seeded_damage_meter_session.sessionID then
+      return nil
+    end
+    if damageType ~= Enum.DamageMeterType.DamageDone then
+      return nil
+    end
+    return __wow_seeded_damage_meter_session
+  end,
+  GetCombatSessionSourceFromID = function(sessionID, damageType, sourceGUID, sourceCreatureID)
+    if sessionID ~= __wow_seeded_damage_meter_session.sessionID then
+      return nil
+    end
+    if damageType ~= Enum.DamageMeterType.DamageDone then
+      return nil
+    end
+    if sourceGUID ~= __wow_seeded_damage_meter_source.sourceGUID then
+      return nil
+    end
+    if sourceCreatureID ~= __wow_seeded_damage_meter_source.sourceCreatureID then
+      return nil
+    end
+    return __wow_seeded_damage_meter_source
+  end,
+  GetSessionDurationSeconds = function(sessionType, sessionID)
+    if sessionType == Enum.DamageMeterSessionType.Overall or sessionID == __wow_seeded_damage_meter_session.sessionID then
+      return __wow_seeded_damage_meter_session.durationSeconds
+    end
+    return 0
   end,
 })
 
@@ -4796,35 +4827,61 @@ end
 
 if CreateFrameFactory == nil then
   function CreateFrameFactory()
-    local cache = {}
-
-    function cache:GetTemplateInfo(template)
-      if C_XMLUtil and C_XMLUtil.GetTemplateInfo then
-        local info = C_XMLUtil.GetTemplateInfo(template)
-        if info then
-          return info
-        end
-      end
-      return { width = 0, height = 0 }
-    end
-
-    local factory = {}
+    local factory = {
+      templateInfoCache = CreateTemplateInfoCache and CreateTemplateInfoCache() or nil,
+      poolCollection = CreateFramePoolCollection and CreateFramePoolCollection() or nil,
+    }
 
     function factory:GetTemplateInfoCache()
-      return cache
+      return self.templateInfoCache
     end
 
     function factory:Create(parent, frameTypeOrTemplate, resetFunc)
-      local frame = nil
-      if type(frameTypeOrTemplate) == "string" and C_XMLUtil and C_XMLUtil.GetTemplateInfo and C_XMLUtil.GetTemplateInfo(frameTypeOrTemplate) then
-        frame = CreateFrame("Frame", nil, parent, frameTypeOrTemplate)
+      local info = self.templateInfoCache and self.templateInfoCache:GetTemplateInfo(frameTypeOrTemplate) or nil
+      local frameTemplate = nil
+      local frameType = nil
+      local specialization = nil
+
+      if info then
+        frameTemplate = frameTypeOrTemplate
+        frameType = info.type
       else
-        frame = CreateFrame(type(frameTypeOrTemplate) == "string" and frameTypeOrTemplate or "Frame", nil, parent)
+        frameTemplate = ""
+        frameType = type(frameTypeOrTemplate) == "string" and frameTypeOrTemplate or "Frame"
+        specialization = frameType
       end
+
+      if self.poolCollection and self.poolCollection.GetOrCreatePool then
+        local pool = self.poolCollection:GetOrCreatePool(frameType, parent, frameTemplate, resetFunc, nil, specialization)
+        local frame, isNew = pool:Acquire()
+        return frame, isNew, info
+      end
+
+      local frame = CreateFrame(frameType, nil, parent, frameTemplate)
       if resetFunc then
-        resetFunc(nil, frame, true, frameTypeOrTemplate)
+        resetFunc(nil, frame, true, frameTemplate)
       end
-      return frame, true
+      return frame, true, info
+    end
+
+    function factory:GetNumActive()
+      if self.poolCollection and self.poolCollection.GetNumActive then
+        return self.poolCollection:GetNumActive()
+      end
+      return 0
+    end
+
+    function factory:ReleaseAll()
+      if self.poolCollection and self.poolCollection.ReleaseAll then
+        self.poolCollection:ReleaseAll()
+      end
+    end
+
+    function factory:Release(frame)
+      if self.poolCollection and self.poolCollection.Release then
+        return self.poolCollection:Release(frame)
+      end
+      return false
     end
 
     return factory

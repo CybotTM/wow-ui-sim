@@ -67,18 +67,40 @@ pub fn tremove(state: &mut LuaState) -> LuaResult<u32> {
     rilua::stdlib::table::tab_remove(state)
 }
 
-/// tContains(t, value) — return true if value is present in the array part of t.
+/// tContains(t, value) — return true if value is present in the table.
+///
+/// Blizzard's `TableUtil.lua` implementation scans with `pairs(tbl)`, not
+/// `ipairs(tbl)`, so hash-only / mixed tables must participate too.
 pub fn t_contains(state: &mut LuaState) -> LuaResult<u32> {
     let table = stack_val(state, 1);
     let needle = stack_val(state, 2);
-    let found = matches!(table, Val::Table(table_ref) if state
-        .gc
-        .tables
-        .get(table_ref)
-        .map(|table| table.array_slice().iter().any(|value| *value == needle))
-        .unwrap_or(false));
+    let found = match table {
+        Val::Table(table_ref) => state
+            .gc
+            .tables
+            .get(table_ref)
+            .map(|table| table_contains_value(table, needle, state))
+            .transpose()?
+            .unwrap_or(false),
+        _ => false,
+    };
     state.push(Val::Bool(found));
     Ok(1)
+}
+
+fn table_contains_value(
+    table: &rilua::vm::table::Table,
+    needle: Val,
+    state: &LuaState,
+) -> LuaResult<bool> {
+    let mut key = Val::Nil;
+    while let Some((next_key, value)) = table.next(key, &state.gc.string_arena)? {
+        if value == needle {
+            return Ok(true);
+        }
+        key = next_key;
+    }
+    Ok(false)
 }
 
 /// tIndexOf(t, value) — return the integer index of value in t, or nil.

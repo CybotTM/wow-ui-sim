@@ -87,9 +87,9 @@ pub(super) fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// True when the target frame is protected and the current call is running
-/// under addon taint. Matches Blizzard's "protected frames reject insecure
-/// attribute writes" rule — the write is silently dropped.
+/// True when the caller cannot mutate protected state for the current frame.
+/// Attribute writes use the same lockdown gate as other protected frame
+/// mutations.
 pub(super) fn protected_write_blocked(state: &mut LuaState, id: u64) -> bool {
     !can_change_protected_state_for(state, id)
 }
@@ -289,8 +289,7 @@ pub(super) fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn can_change_protected_state(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let allowed =
-        crate::lua_api::frame::methods::methods_helpers::can_change_protected_state_for(state, id);
+    let allowed = can_change_protected_state_for(state, id);
     state.push(Val::Bool(allowed));
     Ok(1)
 }
