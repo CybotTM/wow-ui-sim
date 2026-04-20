@@ -47,7 +47,7 @@ mod ui_widget_manager;
 mod voice_chat;
 mod zone_ability;
 
-use crate::c_api::{c_fog_of_war, c_spell};
+use crate::c_api::{c_configuration_warnings, c_fog_of_war, c_spell};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
 };
@@ -196,6 +196,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
 
 fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     battle_net::register_battle_net_surface(state)?;
+    c_configuration_warnings::register_c_configuration_warnings_surface(state)?;
     character_services::register_character_services_surface(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
     club_info::register_club_info_surface(state)?;
