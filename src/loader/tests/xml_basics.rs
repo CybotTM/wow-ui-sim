@@ -104,8 +104,16 @@ fn test_inherited_button_text_is_available_immediately_after_load() {
     );
 
     t.assert_lua_true(
-        "return InheritedButtonTextButton:GetFontString() ~= nil and InheritedButtonTextButton:GetFontString() == InheritedButtonTextButtonText",
-        "buttons inheriting ButtonText should expose their text region immediately after XML load",
+        "return InheritedButtonTextButtonText ~= nil",
+        "buttons inheriting ButtonText should create the inherited text child",
+    );
+    t.assert_lua_true(
+        "return InheritedButtonTextButton:GetFontString() ~= nil",
+        "buttons inheriting ButtonText should expose a font string after XML load",
+    );
+    t.assert_lua_true(
+        "return InheritedButtonTextButton:GetFontString() == InheritedButtonTextButtonText",
+        "buttons inheriting ButtonText should expose their own inherited text region immediately after XML load",
     );
 }
 
