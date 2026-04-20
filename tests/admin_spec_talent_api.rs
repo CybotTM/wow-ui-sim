@@ -212,3 +212,173 @@ fn test_reset_talents_allows_re_setting_ranks() {
         .unwrap();
     assert_eq!(ranks, 1);
 }
+
+#[test]
+fn test_trait_config_mapping_tracks_active_loadout() {
+    let env = env();
+    let (active_before, by_tree_before, by_system_before, active_after, by_tree_after, by_system_after):
+        (i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local activeBefore = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(activeBefore).treeIDs[1]
+            local byTreeBefore = C_Traits.GetConfigIDByTreeID(treeID)
+            local bySystemBefore = C_Traits.GetConfigIDBySystemID(1)
+
+            C_ClassTalents.SwitchToLoadoutByIndex(2)
+
+            local activeAfter = C_ClassTalents.GetActiveConfigID()
+            local switchedTreeID = C_Traits.GetConfigInfo(activeAfter).treeIDs[1]
+            local byTreeAfter = C_Traits.GetConfigIDByTreeID(switchedTreeID)
+            local bySystemAfter = C_Traits.GetConfigIDBySystemID(1)
+
+            return activeBefore, byTreeBefore, bySystemBefore, activeAfter, byTreeAfter, bySystemAfter
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(by_tree_before, active_before);
+    assert_eq!(by_system_before, active_before);
+    assert_ne!(active_after, active_before);
+    assert_eq!(by_tree_after, active_after);
+    assert_eq!(by_system_after, active_after);
+}
+
+#[test]
+fn test_can_purchase_rank_tracks_live_node_gating() {
+    let env = env();
+    let (node_id, entry_id, can_before, can_after): (i32, i32, bool, bool) = env
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.canPurchaseRank and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                    local entryID = nodeInfo.entryIDs[1]
+                    local canBefore = C_Traits.CanPurchaseRank(configID, nodeID, entryID)
+                    for _ = 1, nodeInfo.totalMaxRanks do
+                        assert(C_Traits.PurchaseRank(configID, nodeID))
+                    end
+                    local canAfter = C_Traits.CanPurchaseRank(configID, nodeID, entryID)
+                    return nodeID, entryID, canBefore, canAfter
+                end
+            end
+
+            error("expected at least one purchasable node in the active config")
+            "#,
+        )
+        .unwrap();
+
+    assert!(node_id > 0, "expected a live purchasable node");
+    assert!(entry_id > 0, "expected a live purchasable entry");
+    assert!(
+        can_before,
+        "purchasable node should report true before spending"
+    );
+    assert!(!can_after, "maxed node should stop reporting purchasable");
+}
+
+#[test]
+fn test_staged_changes_expose_purchases_and_costs() {
+    let env = env();
+    let (purchase_node, cost_id, cost_amount): (i32, i32, i32) = env
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+
+            local purchaseNodeID = nil
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.canPurchaseRank and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                    purchaseNodeID = nodeID
+                    break
+                end
+            end
+
+            assert(purchaseNodeID, "expected a staged purchase candidate")
+            assert(C_Traits.PurchaseRank(configID, purchaseNodeID))
+            assert(C_Traits.ConfigHasStagedChanges(configID), "staged purchases should become visible")
+
+            local purchases = C_Traits.GetStagedChanges(configID)
+            assert(purchases and tContains(purchases, purchaseNodeID), "purchase node should be listed")
+
+            local costs = C_Traits.GetStagedChangesCost(configID)
+            assert(costs and costs[1] and costs[1].ID and costs[1].amount, "staged purchase costs should include trait currency rows")
+
+            return purchaseNodeID, costs[1].ID, costs[1].amount
+            "#,
+        )
+        .unwrap();
+
+    assert!(purchase_node > 0);
+    assert!(cost_id > 0, "expected a staged trait currency cost id");
+    assert!(
+        cost_amount > 0,
+        "expected staged purchase costs to consume talent currency"
+    );
+}
+
+#[test]
+fn test_staged_changes_expose_refunds() {
+    let env = env();
+    let refund_node: i32 = env
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.canRefundRank then
+                    assert(C_Traits.RefundRank(configID, nodeID))
+                    assert(C_Traits.ConfigHasStagedChanges(configID), "staged refunds should become visible")
+
+                    local _, refunds = C_Traits.GetStagedChanges(configID)
+                    assert(refunds and tContains(refunds, nodeID), "refund node should be listed")
+                    return nodeID
+                end
+            end
+
+            error("expected a staged refund candidate")
+            "#,
+        )
+        .unwrap();
+
+    assert!(refund_node > 0);
+}
+
+#[test]
+fn test_staged_changes_expose_selection_swaps() {
+    let env = env();
+    let swap_node: i32 = env
+        .eval(
+            r#"
+            local configID = C_ClassTalents.GetActiveConfigID()
+            local treeID = C_Traits.GetConfigInfo(configID).treeIDs[1]
+
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.ranksPurchased and nodeInfo.ranksPurchased > 0 and nodeInfo.entryIDs and #nodeInfo.entryIDs > 1 and nodeInfo.activeEntry and nodeInfo.activeEntry.entryID then
+                    for _, entryID in ipairs(nodeInfo.entryIDs) do
+                        if entryID ~= nodeInfo.activeEntry.entryID then
+                            assert(C_Traits.SetSelection(configID, nodeID, entryID))
+                            assert(C_Traits.ConfigHasStagedChanges(configID), "staged selection swaps should become visible")
+
+                            local _, _, swaps = C_Traits.GetStagedChanges(configID)
+                            assert(swaps and tContains(swaps, nodeID), "selection swap node should be listed")
+                            return nodeID
+                        end
+                    end
+                end
+            end
+
+            error("expected a staged selection swap candidate")
+            "#,
+        )
+        .unwrap();
+
+    assert!(swap_node > 0);
+}
