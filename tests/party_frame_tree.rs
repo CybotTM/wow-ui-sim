@@ -1,6 +1,6 @@
 //! Party-frame tree regression test.
 //!
-//! Captures the rendered PartyFrame shape for a 4-member group against the
+//! Captures the rendered PartyFrame tree for a 4-member group against the
 //! reference dump taken on `master` at commit `322eba4a` (see
 //! `docs/wiki/investigations/partyframe-tree.md`):
 //!
@@ -12,12 +12,9 @@
 //!   .MemberFrame4     (120x53)  visible LOW:2 x=22  y=336
 //! ```
 //!
-//! The `rilua-migration` branch currently renders `PartyFrame` at `(4x2)`
-//! with zero member frames. That's a visible regression vs. `master`, so
-//! this test is expected to fail on the branch until the Blizzard UnitFrame
-//! load path is restored (see `intern_string_static` registry-key mismatch
-//! in `methods.rs`). Once it passes here, it becomes a guard against
-//! future regressions in party-frame layout or member enumeration.
+//! The test suite now pins the remaining structural details that differed
+//! from `master`: semantic child names and the EditMode selection subtree's
+//! strata/level chain.
 
 mod common;
 
@@ -454,6 +451,18 @@ fn party_frame_member_frame1_uses_semantic_child_names() {
         );
         let dump = lines.join("\n");
 
+        assert!(
+            dump.contains(".Selection [Frame] (120x244) [stored=1x1] hidden LOW:3"),
+            "PartyFrame.Selection must stay in the LOW:3 band like master, got:\n{dump}",
+        );
+        assert!(
+            dump.contains(".MouseOverHighlight [Frame] (120x244) hidden LOW:4"),
+            "PartyFrame.Selection.MouseOverHighlight must stay in the LOW:4 band like master, got:\n{dump}",
+        );
+        assert!(
+            dump.contains(".TopLeftCorner [Texture] (16x16) visible LOW:5"),
+            "PartyFrame.Selection.MouseOverHighlight corners must stay in LOW:5 like master, got:\n{dump}",
+        );
         assert!(
             dump.contains(".MemberFrame1 [Button] (120x53) visible LOW:2"),
             "MemberFrame1 must be present in the dump, got:\n{dump}",

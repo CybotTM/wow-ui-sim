@@ -442,8 +442,45 @@ fn apply_runtime_child_direct_properties_with_inherits(
     crate::lua_api::globals::template::direct::apply_xml_frame_strata(
         state, frame_id, frame, inherits,
     );
+    normalize_edit_mode_selection_layers(state, frame_id, inherits);
     crate::lua_api::globals::template::direct::apply_xml_protected(
         state, frame_id, frame, inherits,
+    );
+}
+
+fn normalize_edit_mode_selection_layers(
+    state: &Rc<RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    inherits: &str,
+) {
+    if !inherits
+        .split(',')
+        .map(str::trim)
+        .any(|name| name.starts_with("EditModeSystemSelection"))
+    {
+        return;
+    }
+
+    let mut sim = state.borrow_mut();
+    let Some((parent_strata, parent_level)) = sim
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.parent_id)
+        .and_then(|parent_id| sim.widgets.get(parent_id))
+        .map(|parent| (parent.frame_strata, parent.frame_level))
+    else {
+        return;
+    };
+
+    if let Some(frame) = sim.widgets.get_mut_visual(frame_id) {
+        frame.has_fixed_frame_strata = false;
+        frame.frame_strata = parent_strata;
+        frame.has_fixed_frame_level = false;
+        frame.frame_level = parent_level + frame.frame_level_offset.unwrap_or(1);
+    }
+    crate::lua_api::frame::methods::methods_hierarchy::propagate_strata_level_pub(
+        &mut sim.widgets,
+        frame_id,
     );
 }
 

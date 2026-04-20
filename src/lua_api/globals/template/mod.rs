@@ -30,6 +30,11 @@ pub fn assign_parent_key(
         if let Some(parent) = sim.widgets.get_mut_visual(target_parent_id) {
             parent.children_keys.insert(resolved_key.clone(), child_id);
         }
+        if sim.widgets.get(child_id).and_then(|child| child.parent_id) == Some(target_parent_id)
+            && let Some(child) = sim.widgets.get_mut_visual(child_id)
+        {
+            child.parent_key = Some(resolved_key.clone());
+        }
     }
 
     sync_child_to_rilua(state, target_parent_id, &resolved_key, child_id)

@@ -707,6 +707,7 @@ fn resolve_addon_name(addon_names: &[String], owner: Option<u16>) -> Option<&str
 /// synthetic fallback.
 fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> String {
     if let Some(parent_key) = frame.parent_key.as_deref()
+        && parent_key_matches_current_parent(widgets, frame, id, parent_key)
         && should_prefer_parent_key(frame.name.as_deref(), parent_key)
     {
         return format!(".{parent_key}");
@@ -733,6 +734,19 @@ fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> Str
         return format!("\"{text}\"");
     }
     frame.name.as_deref().unwrap_or("(anonymous)").to_string()
+}
+
+fn parent_key_matches_current_parent(
+    widgets: &WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+    parent_key: &str,
+) -> bool {
+    frame
+        .parent_id
+        .and_then(|parent_id| widgets.get(parent_id))
+        .and_then(|parent| parent.children_keys.get(parent_key).copied())
+        == Some(id)
 }
 
 fn should_prefer_parent_key(name: Option<&str>, parent_key: &str) -> bool {
@@ -825,6 +839,11 @@ fn print_no_key_breakdown(no_key: &[String]) {
 }
 
 fn find_parent_key(widgets: &WidgetRegistry, w: &Frame, id: u64) -> Option<String> {
+    if let Some(parent_key) = w.parent_key.as_deref()
+        && parent_key_matches_current_parent(widgets, w, id, parent_key)
+    {
+        return Some(parent_key.to_string());
+    }
     let pid = w.parent_id?;
     let p = widgets.get(pid)?;
     p.children_keys
