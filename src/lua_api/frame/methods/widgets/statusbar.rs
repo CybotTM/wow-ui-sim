@@ -1,6 +1,6 @@
 //! StatusBar widget methods.
 
-use super::shared::{opt_string, rgba_from_stack, val_to_bool, val_to_f64};
+use super::shared::{opt_f32, opt_string, rgba_from_stack, val_to_bool, val_to_f64};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, extract_frame_id, frame_id_from_stack,
     frame_ref, get_or_create_frame_fields, sync_child_to_rilua, table_get_static, table_set_static,
@@ -146,7 +146,7 @@ pub(super) fn set_status_bar_color(state: &mut LuaState) -> LuaResult<u32> {
     let r = val_to_f64(stack_val(state, 2)) as f32;
     let g = val_to_f64(stack_val(state, 3)) as f32;
     let b = val_to_f64(stack_val(state, 4)) as f32;
-    let a = val_to_f64(stack_val(state, 5)) as f32;
+    let a = opt_f32(state, 5).unwrap_or(1.0);
     let color = crate::widget::Color::new(r, g, b, a);
     let mut sim = borrow_state_mut(state)?;
     let bar_id = statusbar_child_id(&sim, id);
