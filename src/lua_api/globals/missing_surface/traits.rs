@@ -117,6 +117,34 @@ fn push_i32_array(state: &mut LuaState, values: impl IntoIterator<Item = i32>) -
     table
 }
 
+fn mix_tree_hash_lane(lane: &mut u32, value: u32) {
+    *lane ^= value.wrapping_mul(0x9E37_79B9);
+    *lane = lane.rotate_left(7).wrapping_mul(0x85EB_CA6B);
+}
+
+fn trait_tree_hash_bytes(tree: &crate::traits::TraitTreeInfo) -> [u8; 16] {
+    let mut lanes = [0xC2B2_AE35, 0x27D4_EB2F, 0x1656_67B1, 0x85EB_CA77];
+    mix_tree_hash_lane(&mut lanes[0], tree.id);
+    mix_tree_hash_lane(&mut lanes[1], tree.first_node_id);
+    mix_tree_hash_lane(&mut lanes[2], tree.flags);
+    mix_tree_hash_lane(&mut lanes[3], tree.node_ids.len() as u32);
+    mix_tree_hash_lane(&mut lanes[0], tree.currency_ids.len() as u32);
+
+    let lane_count = lanes.len();
+    for (index, &node_id) in tree.node_ids.iter().enumerate() {
+        mix_tree_hash_lane(&mut lanes[index % lane_count], node_id);
+    }
+    for (index, &currency_id) in tree.currency_ids.iter().enumerate() {
+        mix_tree_hash_lane(&mut lanes[(index + 1) % lane_count], currency_id);
+    }
+
+    let mut bytes = [0u8; 16];
+    for (index, lane) in lanes.into_iter().enumerate() {
+        bytes[index * 4..index * 4 + 4].copy_from_slice(&lane.to_le_bytes());
+    }
+    bytes
+}
+
 fn node_max_ranks(node: &crate::traits::TraitNodeInfo) -> u32 {
     node.entry_ids
         .first()
@@ -652,6 +680,7 @@ fn register_c_traits_query_fns(
         "GetTraitCurrencyInfo",
         c_traits_get_trait_currency_info,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetTreeHash", c_traits_get_tree_hash)?;
     table_set_rust_fn_static(state, table_ref, "GetTreeInfo", c_traits_get_tree_info)?;
     table_set_rust_fn_static(state, table_ref, "GetTreeNodes", c_traits_get_tree_nodes)?;
     Ok(())
@@ -1199,6 +1228,17 @@ fn c_traits_get_trait_currency_info(state: &mut LuaState) -> LuaResult<u32> {
     }
     state.push(Val::Nil);
     Ok(4)
+}
+
+fn c_traits_get_tree_hash(state: &mut LuaState) -> LuaResult<u32> {
+    let tree_id = u32::from_stack(state, 1)?;
+    let hash = TRAIT_TREE_DB
+        .get(&tree_id)
+        .map(trait_tree_hash_bytes)
+        .unwrap_or([0; 16]);
+    let hash_table = push_u32_array(state, hash.into_iter().map(u32::from));
+    state.push(hash_table);
+    Ok(1)
 }
 
 fn c_traits_get_tree_info(state: &mut LuaState) -> LuaResult<u32> {

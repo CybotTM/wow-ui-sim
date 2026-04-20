@@ -482,6 +482,37 @@ fn test_traits_get_tree_info_valid() {
 }
 
 #[test]
+fn test_traits_get_tree_hash_is_stable_and_tree_specific() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local function hashString(treeID)
+                local hash = C_Traits.GetTreeHash(treeID)
+                assert(type(hash) == "table" and #hash == 16, "expected a 16-lane tree hash")
+                return table.concat(hash, ",")
+            end
+
+            return hashString(790) .. "|" .. hashString(999999)
+            "#,
+        )
+        .unwrap();
+
+    let (paladin_hash, missing_hash) = result
+        .split_once('|')
+        .expect("hash result should contain a separator");
+    assert!(
+        paladin_hash.split(',').any(|lane| lane != "0"),
+        "known trees should produce a non-zero tree hash"
+    );
+    assert!(
+        missing_hash.split(',').all(|lane| lane == "0"),
+        "unknown trees should produce an all-zero tree hash"
+    );
+    assert_ne!(paladin_hash, missing_hash);
+}
+
+#[test]
 fn test_traits_get_tree_currency_info_exposes_currency_fields() {
     let env = env();
     let result: String = env
