@@ -8,7 +8,10 @@ mod common;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::panic::{self, AssertUnwindSafe};
 use std::path::PathBuf;
-use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
+use wow_ui_sim::loader::{
+    discover_all_blizzard_addons, discover_blizzard_addon_closure_for_screen,
+    discover_blizzard_addons, load_addon,
+};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_errors::grouped_errors_by_addon;
 use wow_ui_sim::screen::ScreenKind;
@@ -214,6 +217,13 @@ const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn panel_coverage_roots() -> Vec<&'static str> {
+    PANEL_COVERAGE_ADDONS
+        .iter()
+        .map(|(addon_name, _)| *addon_name)
+        .collect()
 }
 
 fn format_per_addon_report(grouped_errors: &BTreeMap<String, Vec<String>>) -> String {
@@ -570,11 +580,10 @@ fn fire_panel_harness_startup_events(env: &WowLuaEnv) {
 fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
     let ui = blizzard_ui_dir();
-    for (addon_name, toc_name) in PANEL_COVERAGE_ADDONS {
-        let toc_path = ui.join(addon_name).join(toc_name);
-        if !toc_path.exists() {
-            continue;
-        }
+    let roots = panel_coverage_roots();
+    for (addon_name, toc_path) in
+        discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &roots)
+    {
         if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
             panic!("{addon_name} should load for the panel harness: {error}");
         }

@@ -310,24 +310,62 @@ pub fn discover_blizzard_addons_for_screen(
     blizzard_ui_dir: &Path,
     screen: ScreenKind,
 ) -> Vec<(String, PathBuf)> {
-    let entries = match std::fs::read_dir(blizzard_ui_dir) {
-        Ok(e) => e,
-        Err(_) => return Vec::new(),
+    let Some((mut addons, mut lod_pool)) =
+        discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
+    else {
+        return Vec::new();
     };
 
-    // Parse all addon TOCs into two pools: normal and load-on-demand
+    // Pull LOD addons that are required by non-LOD addons
+    pull_required_lod_addons(&mut addons, &mut lod_pool);
+
+    topological_sort_addons(addons)
+}
+
+/// Discover the explicit dependency closure for one or more Blizzard addons.
+///
+/// The returned list is ordered the same way as `discover_blizzard_addons_for_screen`,
+/// but filtered to the requested roots and everything they require via
+/// `## Dependencies:` and `## OptionalDeps:`.
+/// Roots or dependencies not present in the discovered screen set are ignored.
+pub fn discover_blizzard_addon_closure_for_screen(
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+    roots: &[&str],
+) -> Vec<(String, PathBuf)> {
+    let Some((addons, lod_pool)) = discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
+    else {
+        return Vec::new();
+    };
+    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons.into_iter().chain(lod_pool).collect();
+    let wanted = collect_declared_dependency_closure(&toc_map, roots);
+    let filtered: HashMap<String, (PathBuf, TocFile)> = toc_map
+        .into_iter()
+        .filter(|(name, _)| wanted.contains(name))
+        .collect();
+    topological_sort_addons(filtered)
+}
+
+fn discover_blizzard_addon_toc_pools_for_screen(
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+) -> Option<(
+    HashMap<String, (PathBuf, TocFile)>,
+    HashMap<String, (PathBuf, TocFile)>,
+)> {
+    let entries = std::fs::read_dir(blizzard_ui_dir).ok()?;
     let mut addons: HashMap<String, (PathBuf, TocFile)> = HashMap::new();
     let mut lod_pool: HashMap<String, (PathBuf, TocFile)> = HashMap::new();
+
     for entry in entries.flatten() {
         let path = entry.path();
         if !path.is_dir() {
             continue;
         }
         let dir_name = path.file_name().unwrap().to_str().unwrap().to_string();
-        if !dir_name.starts_with("Blizzard_") {
-            continue;
-        }
-        if excluded_addons_for_screen(screen).contains(&dir_name.as_str()) {
+        if !dir_name.starts_with("Blizzard_")
+            || excluded_addons_for_screen(screen).contains(&dir_name.as_str())
+        {
             continue;
         }
         let Some(toc_path) = find_toc_file(&path) else {
@@ -339,17 +377,15 @@ pub fn discover_blizzard_addons_for_screen(
         if !toc.allows_screen(screen) || toc.is_ptr_only() || toc.is_game_type_restricted() {
             continue;
         }
-        if toc.is_load_on_demand() {
-            lod_pool.insert(dir_name, (toc_path, toc));
+        let pool = if toc.is_load_on_demand() {
+            &mut lod_pool
         } else {
-            addons.insert(dir_name, (toc_path, toc));
-        }
+            &mut addons
+        };
+        pool.insert(dir_name, (toc_path, toc));
     }
 
-    // Pull LOD addons that are required by non-LOD addons
-    pull_required_lod_addons(&mut addons, &mut lod_pool);
-
-    topological_sort_addons(addons)
+    Some((addons, lod_pool))
 }
 
 fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
@@ -465,9 +501,15 @@ fn emit_addon_recursive(
     let deps = addons
         .get(name)
         .map(|(_, toc)| {
-            let mut deps = toc.dependencies();
+            let mut seen = HashSet::new();
+            let mut deps = Vec::new();
+            for dep in toc.dependencies() {
+                if seen.insert(dep.clone()) {
+                    deps.push(dep);
+                }
+            }
             for dep in toc.optional_deps() {
-                if addons.contains_key(&dep) && !deps.contains(&dep) {
+                if addons.contains_key(&dep) && seen.insert(dep.clone()) {
                     deps.push(dep);
                 }
             }
@@ -530,6 +572,33 @@ fn emit_load_with(
     }
 }
 
+fn collect_declared_dependency_closure(
+    toc_map: &HashMap<String, (PathBuf, TocFile)>,
+    roots: &[&str],
+) -> HashSet<String> {
+    let mut wanted = HashSet::new();
+    let mut pending: Vec<String> = roots.iter().map(|name| (*name).to_string()).collect();
+    let mut queued: HashSet<String> = pending.iter().cloned().collect();
+
+    while let Some(name) = pending.pop() {
+        if !wanted.insert(name.clone()) {
+            continue;
+        }
+
+        let Some((_, toc)) = toc_map.get(&name) else {
+            continue;
+        };
+
+        for dep in toc.dependencies().into_iter().chain(toc.optional_deps()) {
+            if toc_map.get(&dep).is_some() && queued.insert(dep.clone()) {
+                pending.push(dep);
+            }
+        }
+    }
+
+    wanted
+}
+
 /// Build a map of addon name -> list of available addon names it depends on.
 /// Includes both required and optional dependencies (WoW loads optional deps
 /// before the addon if they are present).
@@ -540,14 +609,20 @@ fn build_dependency_graph<'a>(
     addons
         .iter()
         .map(|(name, (_, toc))| {
-            let mut deps: Vec<&str> = toc
+            let mut seen = HashSet::new();
+            let mut deps: Vec<&str> = Vec::new();
+            for dep in toc
                 .dependencies()
                 .iter()
                 .filter_map(|d| available.get(d.as_str()).copied())
-                .collect();
+            {
+                if seen.insert(dep) {
+                    deps.push(dep);
+                }
+            }
             for d in toc.optional_deps() {
                 if let Some(&dep) = available.get(d.as_str())
-                    && !deps.contains(&dep)
+                    && seen.insert(dep)
                 {
                     deps.push(dep);
                 }

@@ -1,7 +1,9 @@
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::loader::discover_blizzard_addons_for_screen;
+use crate::loader::{
+    discover_blizzard_addon_closure_for_screen, discover_blizzard_addons_for_screen,
+};
 use crate::screen::ScreenKind;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -148,6 +150,108 @@ Core.lua
         addons,
         vec!["Blizzard_A_Normal", "Blizzard_Z_LoadFirst"],
         "LoadFirst triggers first-pass loading, but declared dependencies still emit first",
+    );
+}
+
+#[test]
+fn addon_closure_resolves_transitive_optional_dependencies_for_roots() {
+    let ui = TempBlizzardUiDir::new("closure");
+    ui.add_addon(
+        "Blizzard_B",
+        r#"
+## Title: Blizzard_B
+## AllowLoad: Both
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_C",
+        r#"
+## Title: Blizzard_C
+## AllowLoad: Both
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_D",
+        r#"
+## Title: Blizzard_D
+## AllowLoad: Glue
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_A",
+        r#"
+## Title: Blizzard_A
+## AllowLoad: Both
+## Dependencies: Blizzard_B
+## OptionalDeps: Blizzard_C, Blizzard_D
+Core.lua
+"#,
+    );
+
+    let addons =
+        discover_blizzard_addon_closure_for_screen(&ui.path, ScreenKind::Game, &["Blizzard_A"]);
+    let names: Vec<String> = addons.into_iter().map(|(name, _)| name).collect();
+
+    assert_eq!(
+        names,
+        vec!["Blizzard_B", "Blizzard_C", "Blizzard_A"],
+        "dependency closure should include required and screen-allowed optional TOC deps only",
+    );
+    assert!(
+        !names.iter().any(|name| name == "Blizzard_D"),
+        "screen-filtered optional dependencies should not be included in the closure"
+    );
+}
+
+#[test]
+fn addon_closure_includes_load_on_demand_roots_and_their_dependencies() {
+    let ui = TempBlizzardUiDir::new("lod-closure");
+    ui.add_addon(
+        "Blizzard_Dependency",
+        r#"
+## Title: Blizzard_Dependency
+## AllowLoad: Both
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_Optional",
+        r#"
+## Title: Blizzard_Optional
+## AllowLoad: Both
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_LoadOnDemandRoot",
+        r#"
+## Title: Blizzard_LoadOnDemandRoot
+## AllowLoad: Both
+## LoadOnDemand: 1
+## Dependencies: Blizzard_Dependency
+## OptionalDeps: Blizzard_Optional
+Core.lua
+"#,
+    );
+
+    let addons = discover_blizzard_addon_closure_for_screen(
+        &ui.path,
+        ScreenKind::Game,
+        &["Blizzard_LoadOnDemandRoot"],
+    );
+    let names: Vec<String> = addons.into_iter().map(|(name, _)| name).collect();
+
+    assert_eq!(
+        names,
+        vec![
+            "Blizzard_Dependency",
+            "Blizzard_Optional",
+            "Blizzard_LoadOnDemandRoot",
+        ],
+        "load-on-demand roots should resolve against the full screen-allowed TOC set",
     );
 }
 

@@ -8,6 +8,13 @@ Added `reference/blizzard-ui-test-lanes.md` and updated
 `reference/addon-compatibility.md` to document the explicit split between
 Blizzard UI unit tests and addon-bootstrap coverage.
 
+## [2026-04-20] update | blizzard ui addon closure resolver
+
+Added `loader::discover_blizzard_addon_closure_for_screen()` and switched the
+render-order test helpers to use it. The resolver walks TOC `Dependencies` and
+`OptionalDeps` from the discovered Blizzard addon set, then returns the
+requested explicit closure in loader order.
+
 ## [2026-04-20] update | keybinding spellbook direct dispatch
 
 Updated `investigations/keybinding-system.md` with the spellbook follow-up.

@@ -1,12 +1,10 @@
 mod common;
 
-use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use wow_ui_sim::iced_app::compute_frame_rect;
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{discover_blizzard_addon_closure_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::toc::TocFile;
 
 const WORLD_MAP_ROOT_ADDONS: &[&str] = &[
     "Blizzard_FrameEffects",
@@ -46,54 +44,6 @@ fn is_descendant_of(
         };
         frame_id = parent_id;
     }
-}
-
-fn collect_declared_dependency_closure(
-    toc_map: &HashMap<String, (PathBuf, TocFile)>,
-    roots: &[&str],
-) -> HashSet<String> {
-    let mut wanted = HashSet::new();
-    let mut pending: Vec<String> = roots.iter().map(|name| (*name).to_string()).collect();
-
-    while let Some(name) = pending.pop() {
-        if !wanted.insert(name.clone()) {
-            continue;
-        }
-
-        let Some((_, toc)) = toc_map.get(&name) else {
-            panic!("missing Blizzard addon root/dependency in discovered set: {name}");
-        };
-
-        for dep in toc.dependencies() {
-            if toc_map.contains_key(&dep) && !wanted.contains(&dep) {
-                pending.push(dep);
-            }
-        }
-    }
-
-    wanted
-}
-
-fn discover_blizzard_addon_closure_for_screen(
-    blizzard_ui_dir: &Path,
-    screen: ScreenKind,
-    roots: &[&str],
-) -> Vec<(String, PathBuf)> {
-    let addons = discover_blizzard_addons_for_screen(blizzard_ui_dir, screen);
-    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons
-        .iter()
-        .map(|(name, toc_path)| {
-            let toc = TocFile::from_file(toc_path)
-                .unwrap_or_else(|err| panic!("failed to parse TOC for {name}: {err}"));
-            (name.clone(), (toc_path.clone(), toc))
-        })
-        .collect();
-
-    let wanted = collect_declared_dependency_closure(&toc_map, roots);
-    addons
-        .into_iter()
-        .filter(|(name, _)| wanted.contains(name))
-        .collect()
 }
 
 fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {

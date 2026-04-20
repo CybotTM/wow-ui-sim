@@ -3,16 +3,17 @@
 #![allow(dead_code)]
 
 use image::RgbaImage;
-use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::{cell::RefCell, rc::Rc};
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::loader::{
+    discover_blizzard_addon_closure_for_screen as load_blizzard_addon_closure_for_screen,
+    load_addon,
+};
 use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
 use wow_ui_sim::render::{GlyphAtlas, QuadBatch, QuadVertex, TextureRequest, WowFontSystem};
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::texture::TextureManager;
-use wow_ui_sim::toc::TocFile;
 use wow_ui_sim::widget::WidgetRegistry;
 
 pub(crate) fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
@@ -272,47 +273,7 @@ pub(crate) fn discover_blizzard_addon_closure_for_screen(
     screen: ScreenKind,
     roots: &[&str],
 ) -> Vec<(String, PathBuf)> {
-    let addons = discover_blizzard_addons_for_screen(blizzard_ui_dir, screen);
-    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons
-        .iter()
-        .map(|(name, toc_path)| {
-            let toc = TocFile::from_file(toc_path)
-                .unwrap_or_else(|err| panic!("failed to parse TOC for {name}: {err}"));
-            (name.clone(), (toc_path.clone(), toc))
-        })
-        .collect();
-
-    let wanted = collect_declared_dependency_closure(&toc_map, roots);
-    addons
-        .into_iter()
-        .filter(|(name, _)| wanted.contains(name))
-        .collect()
-}
-
-fn collect_declared_dependency_closure(
-    toc_map: &HashMap<String, (PathBuf, TocFile)>,
-    roots: &[&str],
-) -> HashSet<String> {
-    let mut wanted = HashSet::new();
-    let mut pending: Vec<String> = roots.iter().map(|name| (*name).to_string()).collect();
-
-    while let Some(name) = pending.pop() {
-        if !wanted.insert(name.clone()) {
-            continue;
-        }
-
-        let Some((_, toc)) = toc_map.get(&name) else {
-            panic!("missing Blizzard addon root/dependency in discovered set: {name}");
-        };
-
-        for dep in toc.dependencies() {
-            if toc_map.contains_key(&dep) && !wanted.contains(&dep) {
-                pending.push(dep);
-            }
-        }
-    }
-
-    wanted
+    load_blizzard_addon_closure_for_screen(blizzard_ui_dir, screen, roots)
 }
 
 pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
