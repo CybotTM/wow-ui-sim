@@ -139,8 +139,9 @@ pub fn call_error_handler(lua: &mut rilua::Lua, error_msg: &str) {
 
 /// State-only variant for RustFn call sites that only hold `&mut LuaState`.
 pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
-    if collect_lua_error(state, error_msg) {
-        eprintln!("Lua error: {error_msg}");
+    let collected_error = augment_error_with_traceback(state, error_msg);
+    if collect_lua_error(state, &collected_error) {
+        eprintln!("Lua error: {collected_error}");
     }
     let Ok(handler) = ensure_error_handler(state) else {
         return;
@@ -148,8 +149,34 @@ pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
     let Val::Function(_) = handler else {
         return;
     };
-    let msg_ref = state.gc.intern_string(error_msg.as_bytes());
+    let msg_ref = state.gc.intern_string(collected_error.as_bytes());
     let _ = protected_call_state(state, handler, &[Val::Str(msg_ref)]);
+}
+
+fn augment_error_with_traceback(state: &mut LuaState, error_msg: &str) -> String {
+    if error_msg.contains("stack traceback:") {
+        return error_msg.to_string();
+    }
+
+    let Ok(func) = state.load("return debug and debug.traceback and debug.traceback() or ''") else {
+        return error_msg.to_string();
+    };
+    let Ok(results) = protected_call_state(state, Val::Function(func.gc_ref()), &[]) else {
+        return error_msg.to_string();
+    };
+    let Some(traceback) = results
+        .into_iter()
+        .next()
+        .and_then(|value| val_to_string(state, value))
+    else {
+        return error_msg.to_string();
+    };
+    let traceback = traceback.trim();
+    if traceback.is_empty() {
+        return error_msg.to_string();
+    }
+
+    format!("{error_msg}\n{traceback}")
 }
 
 pub fn protected_call_state(
