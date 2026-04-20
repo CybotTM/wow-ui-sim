@@ -1808,6 +1808,10 @@ if UnitInVehicle == nil then
   end
 end
 
+function UnitHasVehiclePlayerFrameUI()
+  return false
+end
+
 if UnitGetAvailableRoles == nil then
   function UnitGetAvailableRoles()
     return true, true, true

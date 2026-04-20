@@ -281,7 +281,32 @@ pub fn reapply_player_frame_anchor(env: &WowLuaEnv) {
             end
         "#,
         );
+        refresh_player_frame_state(env);
     });
+}
+
+/// Re-run the player frame refresh after edit-mode anchoring settles.
+///
+/// `ApplySystemAnchor` can leave the player frame in a stale art state.
+/// Replaying the explicit player-art path restores the live health binding.
+fn refresh_player_frame_state(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if PlayerFrame and type(PlayerFrame_ToPlayerArt) == "function" then
+            pcall(PlayerFrame_ToPlayerArt, PlayerFrame)
+        end
+        local healthBar = PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar()
+        if healthBar and type(UnitFrameHealthBar_SetUnit) == "function" then
+            pcall(UnitFrameHealthBar_SetUnit, healthBar, "player")
+        end
+        if PlayerFrame and type(UnitFrame_Update) == "function" then
+            pcall(UnitFrame_Update, PlayerFrame)
+        end
+        if healthBar and type(UnitFrameHealthBar_Update) == "function" then
+            pcall(UnitFrameHealthBar_Update, healthBar, "player")
+        end
+    "#,
+    );
 }
 
 /// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.

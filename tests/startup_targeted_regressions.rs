@@ -297,6 +297,82 @@ fn startup_followup_surfaces_expose_safe_defaults() {
 }
 
 #[test]
+fn startup_player_life_bar_matches_player_health() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: (
+            Option<f64>,
+            Option<f64>,
+            String,
+            bool,
+            String,
+            i32,
+            i32,
+        ) = env
+            .eval(
+                r#"
+                local healthBar = PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar()
+                local playerFrameState = PlayerFrame and PlayerFrame.state or "nil"
+                local vehicleUi = type(UnitHasVehiclePlayerFrameUI) == "function"
+                    and UnitHasVehiclePlayerFrameUI("player")
+                    or false
+                if not healthBar then
+                    return nil, nil, playerFrameState, vehicleUi, "nil", UnitHealth("player"), UnitHealthMax("player")
+                end
+                local _, maxValue = healthBar:GetMinMaxValues()
+                return healthBar:GetValue(), maxValue, playerFrameState, vehicleUi, tostring(healthBar.unit), UnitHealth("player"), UnitHealthMax("player")
+                "#,
+            )
+            .expect("player health bar probe should run");
+
+        let (
+            bar_value,
+            bar_max,
+            player_frame_state,
+            vehicle_ui,
+            bar_unit,
+            current_health,
+            max_health,
+        ) = result;
+        eprintln!(
+            "player healthbar state: value={bar_value:?} max={bar_max:?} player_frame_state={player_frame_state:?} vehicle_ui={vehicle_ui:?} bar_unit={bar_unit:?} current_health={current_health} max_health={max_health}"
+        );
+        assert!(
+            current_health > 0,
+            "player health should be initialized at startup"
+        );
+        assert!(
+            max_health > 0,
+            "player health max should be initialized at startup"
+        );
+        assert_eq!(
+            bar_max,
+            Some(max_health as f64),
+            "player health bar max should match player max health"
+        );
+        assert_eq!(
+            player_frame_state,
+            "player",
+            "player frame should stay on player art at startup"
+        );
+        assert!(
+            !vehicle_ui,
+            "vehicle player-frame UI should be disabled in the simulator startup surface"
+        );
+        assert_eq!(
+            bar_unit,
+            "player",
+            "player health bar should stay bound to the player unit"
+        );
+        assert_eq!(
+            bar_value,
+            Some(current_health as f64),
+            "player health bar should reflect current player health"
+        );
+    }
+}
+
+#[test]
 fn startup_keeps_action_bar_deprecation_fallbacks_non_recursive() {
     test_timeout! {
         let env = load_and_startup_env();
