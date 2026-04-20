@@ -2,6 +2,25 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-20] add | class talents trait loadout state
+
+Added `investigations/class-talents-trait-loadout-state.md` to capture the
+remaining `C_Traits` restore that unblocked `PlayerSpells`. Documented the root
+cause (live talent state existed, but Blizzard-facing trait queries still
+returned placeholder config IDs / staged-change surfaces), the new
+working-vs-committed diff model exposed through `TalentState`, and the focused
+regression coverage for config mapping, purchase gating, and staged edits.
+Updated `index.md` with the new page.
+
+## [2026-04-20] ingest | partyframe portrait composition
+
+Added `investigations/partyframe-portrait-composition.md` to capture the
+party portrait sizing/composition result from live queries and Blizzard XML.
+Documented that the class icon is the `37x37` `Portrait` texture, while the
+visible ring/surround is not a separate widget and instead comes from the
+larger `UI-HUD-UnitFrame-Party-PortraitOn` frame-art texture (`120x49` in the
+live master GUI tree). Updated `index.md` with the new page.
+
 ## [2026-04-19] ingest | partyframe status-bar texture drop
 
 Added `investigations/partyframe-statusbar-textures.md` to capture the root cause for the party health/mana bar `MISSING` render. The XML loader creates the bar child correctly, but `SetStatusBarTexture(bar)` passes a userdata frame into a setter that only accepts strings/numbers, so the status-bar source is cleared. Updated `index.md` with the new page.

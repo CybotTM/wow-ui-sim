@@ -44,6 +44,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
 | [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
+| [[class-talents-trait-loadout-state]] | `PlayerSpells` trait queries now read working-vs-committed class-talent state instead of placeholder config IDs and empty staged-change surfaces |
 | [[editmode-layout]] | 3 frame regressions from EditMode overrides after `__index` ordering fix; fenv workaround |
 | [[generated-stubs-audit]] | 6 priority findings in generated_stubs.rs affecting startup/panel-load paths |
 | [[chatframe-scrollbar-anchor-reapply]] | Inherited child anchor reapply used the child name for `$parent...` substitution, pushing `ChatFrame1` scrollbar descendants off-screen |
@@ -58,6 +59,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[table-rehashing]] | 97K rehashes on startup; 98% from non-frame Lua tables, 81% land at hash size ≤16; root cause is `OP_NEWTABLE(0,0)` for addon `local t = {}` patterns |
 | [[layout-profile]] | Layout was 7.5% of release startup; `LayoutCache` siphash dominated. `FxHashMap` switch drops to 5.0%, −170M layout samples, −219M total siphash samples |
 | [[intern-string-ranking]] | 1.25M intern_string calls per startup; rilua bug found (mid-cycle inserts swept) + fixed. Migration landed for registry/metatable helpers: 1.25M → 1.10M (−12%), 1.18s → 1.15s, and follow-up perf shows `lua_hash` itself is down to 0.08% of startup. `frame_ref_cache` still deferred |
+| [[partyframe-portrait-composition]] | Party member class icon is a `37x37` `Portrait`; the visible ring is not a separate widget but part of the larger `UI-HUD-UnitFrame-Party-PortraitOn` frame-art texture (`120x49` live on master) |
 | [[partyframe-tree]] | `rilua-migration` regresses `PartyFrame` from master's `(120x244)` 4-member layout down to `(4x2)` with zero member frames; regression test pinned against the master dump |
 | [[partyframe-statusbar-textures]] | XML loader passes `StatusBar` bar textures as userdata into `SetStatusBarTexture()`, so the party health/mana bar source gets cleared while masks still render via `SetAtlas()` |
 | [[rilua-mlua-gap-audit]] | Audit of mlua-era Lua API handling still missing on rilua: sandbox cleanup parity, dropped MessageFrame methods, secure/event TODOs, and an unwired namespace patch hook |
