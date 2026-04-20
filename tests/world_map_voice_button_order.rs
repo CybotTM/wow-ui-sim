@@ -93,10 +93,15 @@ fn chat_frame_voice_button_renders_below_overlapping_world_map_widgets() {
 
         let voice_button_rect = compute_frame_rect(&state.widgets, voice_button_id, 1024.0, 768.0);
         let voice_icon = state.widgets.get(voice_icon_id).unwrap();
+        let voice_button = state.widgets.get(voice_button_id).unwrap();
 
         assert_eq!(
             voice_icon.atlas.as_deref(),
             Some("chatframe-button-icon-voicechat")
+        );
+        assert!(
+            !voice_button.children_keys.contains_key("Background"),
+            "chat voice button should not synthesize an extra white background child"
         );
 
         let voice_button_pos = flattened

@@ -1045,23 +1045,21 @@ local function __wow_ensure_chat_voice_button_surface()
   end
 
   local icon = rawget(channelButton, "Icon")
-  if icon == nil and type(channelButton.CreateTexture) == "function" then
-    icon = channelButton:CreateTexture(nil, "ARTWORK")
-    channelButton.Icon = icon
-    if type(icon.SetParentKey) == "function" then
-      pcall(icon.SetParentKey, icon, "Icon", true)
-    end
-    if type(icon.SetAllPoints) == "function" then
-      icon:SetAllPoints(channelButton)
-    end
-  end
-
   if icon ~= nil then
     if type(icon.SetParentKey) == "function" then
       pcall(icon.SetParentKey, icon, "Icon", true)
     end
+    if type(icon.GetWidth) == "function" and type(icon.GetHeight) == "function"
+        and (icon:GetWidth() == 0 or icon:GetHeight() == 0)
+        and type(icon.SetSize) == "function" then
+      icon:SetSize(channelButton.fixedIconWidth or 15, channelButton.fixedIconHeight or 15)
+    end
+    if type(icon.GetNumPoints) == "function" and icon:GetNumPoints() == 0
+        and type(icon.SetPoint) == "function" then
+      icon:SetPoint("CENTER", channelButton, "CENTER", 0, 0)
+    end
     if type(icon.SetAtlas) == "function" then
-      icon:SetAtlas("chatframe-button-icon-voicechat", true)
+      icon:SetAtlas("chatframe-button-icon-voicechat")
     else
       rawset(icon, "atlas", "chatframe-button-icon-voicechat")
     end
