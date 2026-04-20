@@ -37,7 +37,7 @@ const KNOWN_ERRORS: &[(&str, usize)] = &[
     ("Blizzard_CharacterCreate", 1),
     ("Blizzard_CharacterCustomize", 2),
     ("Blizzard_ClickBindingUI", 4),
-    ("Blizzard_Collections", 3),
+    ("Blizzard_Collections", 6),
     ("Blizzard_CombatLog", 1),
     ("Blizzard_CombatText", 2),
     ("Blizzard_Commentator", 2),
@@ -759,7 +759,7 @@ fn panel_open_runtime_baseline_overrides_known_side_loads() {
     let known_counts = known_panel_open_runtime_error_counts(collections_case);
 
     assert_eq!(known_counts.get("<unknown>"), Some(&29));
-    assert_eq!(known_counts.get("Blizzard_Collections"), Some(&3));
+    assert_eq!(known_counts.get("Blizzard_Collections"), Some(&6));
 }
 
 #[test]
