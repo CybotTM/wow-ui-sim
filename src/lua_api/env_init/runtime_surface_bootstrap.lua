@@ -7361,7 +7361,9 @@ if __wow_toggle_spellbook_keybind == nil then
       return
     end
 
-    pcall(PlayerSpellsUtil.ToggleSpellBookFrame)
+    if PlayerSpellsUtil and type(PlayerSpellsUtil.OpenToSpellBookTab) == "function" then
+      pcall(PlayerSpellsUtil.OpenToSpellBookTab)
+    end
     if PlayerSpellsFrame and not PlayerSpellsFrame:IsShown() and type(PlayerSpellsFrame.Show) == "function" then
       PlayerSpellsFrame:Show()
     end
