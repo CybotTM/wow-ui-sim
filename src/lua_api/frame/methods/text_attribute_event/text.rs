@@ -3,7 +3,7 @@
 use super::helpers::{store_simple_attribute, val_to_f32};
 use crate::font::WowFontSystem;
 use crate::lua_api::frame::methods::button_anchor_hierarchy::{
-    apply_font_object_snapshot, read_font_object_fields,
+    apply_font_object_snapshot, font_object_snapshot_changes_frame, read_font_object_fields,
 };
 use crate::lua_api::globals::font_strings_collection::fonts::create_font_object;
 use crate::lua_api::methods::{
@@ -246,28 +246,26 @@ fn update_text_frame(
     stripped_text: &Option<String>,
 ) -> LuaResult<(bool, bool)> {
     let mut sim = borrow_state_mut(state)?;
-    let current_text = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame_text_value(&sim, frame, false));
-    let current_stripped_text = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame_text_value(&sim, frame, true));
-    let is_tooltip = sim
-        .widgets
-        .get(id)
+    let frame = sim.widgets.get(id);
+    let current_text = frame.and_then(|frame| frame_text_value(&sim, frame, false));
+    let current_stripped_text = frame.and_then(|frame| frame_text_value(&sim, frame, true));
+    let is_tooltip = frame
         .map(|frame| frame.widget_type == WidgetType::GameTooltip)
         .unwrap_or(false);
+    let is_button = matches!(
+        frame.map(|frame| frame.widget_type),
+        Some(WidgetType::Button | WidgetType::CheckButton)
+    );
+    let has_button_text_child = frame
+        .and_then(|frame| frame.children_keys.get("Text"))
+        .is_some();
     let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
     if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
         frame.text_stripped = stripped_text.clone();
     }
-    let should_update_button_child = matches!(
-        sim.widgets.get(id).map(|frame| frame.widget_type),
-        Some(WidgetType::Button | WidgetType::CheckButton)
-    );
+    let should_update_button_child =
+        is_button && (changed || (!has_button_text_child && text.is_some()));
     Ok((is_tooltip, should_update_button_child))
 }
 
@@ -288,13 +286,20 @@ fn update_auto_text_width(state: &mut LuaState, id: u64) {
     let Ok(mut sim) = borrow_state_mut(state) else {
         return;
     };
-    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+    let Some(frame) = sim.widgets.get_mut(id) else {
         return;
     };
     if frame.width > 0.0 && !frame.width_is_text_auto {
         return;
     }
-
+    let width_changed = (frame.width - width).abs() > 0.5;
+    let auto_flag_changed = !frame.width_is_text_auto;
+    if !width_changed && !auto_flag_changed {
+        return;
+    }
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return;
+    };
     frame.width = width;
     frame.width_is_text_auto = true;
     sim.widgets.mark_rect_dirty(id);
@@ -651,6 +656,33 @@ pub(super) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
     let formatter = table_get(state, Val::Table(state.global), "format");
     let formatted = call_function_state(state, formatter, &args)?;
     let formatted_text = val_to_string(state, formatted).unwrap_or(format);
+
+    let (text_matches, width_is_auto, current_width) = {
+        let sim = borrow_state(state)?;
+        let Some(frame) = sim.widgets.get(id) else {
+            return Ok(0);
+        };
+        let current_text = frame_text_value(&sim, frame, false);
+        let current_stripped_text = frame_text_value(&sim, frame, true);
+        (
+            current_text.as_deref() == Some(formatted_text.as_str())
+                && current_stripped_text.as_deref() == Some(formatted_text.as_str()),
+            frame.width_is_text_auto,
+            frame.width,
+        )
+    };
+    let should_skip = if !text_matches {
+        false
+    } else if !width_is_auto && current_width > 0.0 {
+        true
+    } else {
+        let measured_width = measure_text_width(state, id) as f32;
+        (current_width - measured_width).abs() <= 0.5
+    };
+    if should_skip {
+        return Ok(0);
+    }
+
     let formatted_value = create_string(state, &formatted_text);
     state.stack_set(2, formatted_value);
 
@@ -807,9 +839,18 @@ pub(super) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
         }
         _ => return Err(runtime_error("SetFontObject requires a font object")),
     };
+    let fields = read_font_object_fields(state, font_object);
     let store = get_or_create_font_object_store(state);
     table_set(state, store, &id.to_string(), font_object);
-    let fields = read_font_object_fields(state, font_object);
+    let should_apply = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .is_some_and(|frame| font_object_snapshot_changes_frame(frame, &fields))
+    };
+    if !should_apply {
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         apply_font_object_snapshot(frame, &fields);

@@ -241,14 +241,14 @@ pub(crate) fn apply_font_object_fields(
 }
 
 pub(crate) struct FontObjectFields {
-    font: Option<String>,
-    font_size: Option<f32>,
-    font_outline: Option<crate::widget::TextOutline>,
-    justify_h: Option<crate::widget::TextJustify>,
-    justify_v: Option<crate::widget::TextJustify>,
-    text_color: Option<crate::widget::Color>,
-    shadow_color: Option<crate::widget::Color>,
-    shadow_offset: Option<(f32, f32)>,
+    pub(crate) font: Option<String>,
+    pub(crate) font_size: Option<f32>,
+    pub(crate) font_outline: Option<crate::widget::TextOutline>,
+    pub(crate) justify_h: Option<crate::widget::TextJustify>,
+    pub(crate) justify_v: Option<crate::widget::TextJustify>,
+    pub(crate) text_color: Option<crate::widget::Color>,
+    pub(crate) shadow_color: Option<crate::widget::Color>,
+    pub(crate) shadow_offset: Option<(f32, f32)>,
 }
 
 pub(crate) fn read_font_object_fields(state: &mut LuaState, font_object: Val) -> FontObjectFields {
@@ -296,6 +296,37 @@ pub(crate) fn apply_font_object_snapshot(
     if let Some(shadow_offset) = fields.shadow_offset {
         fontstring.shadow_offset = shadow_offset;
     }
+}
+
+pub(crate) fn font_object_snapshot_changes_frame(
+    frame: &crate::widget::Frame,
+    fields: &FontObjectFields,
+) -> bool {
+    fields
+        .font
+        .as_ref()
+        .is_some_and(|font| frame.font.as_deref() != Some(font.as_str()))
+        || fields
+            .font_size
+            .is_some_and(|font_size| (frame.font_size - font_size).abs() > f32::EPSILON)
+        || fields
+            .font_outline
+            .is_some_and(|outline| frame.font_outline != outline)
+        || fields
+            .justify_h
+            .is_some_and(|justify_h| frame.justify_h != justify_h)
+        || fields
+            .justify_v
+            .is_some_and(|justify_v| frame.justify_v != justify_v)
+        || fields
+            .text_color
+            .is_some_and(|color| frame.text_color != color)
+        || fields
+            .shadow_color
+            .is_some_and(|color| frame.shadow_color != color)
+        || fields
+            .shadow_offset
+            .is_some_and(|shadow_offset| frame.shadow_offset != shadow_offset)
 }
 
 fn font_field_string(
