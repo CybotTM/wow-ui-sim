@@ -257,7 +257,7 @@ impl SavedVariablesManager {
     ) -> crate::Result<Val> {
         let path = self.storage_path(addon_name, per_character);
         if !path.exists() {
-            return Ok(create_empty_table(state));
+            return Ok(Val::Nil);
         }
 
         self.load_lua_file(state, &path, "@SavedVariables")?;
@@ -266,7 +266,7 @@ impl SavedVariablesManager {
             return Ok(value);
         }
 
-        Ok(create_empty_table(state))
+        Ok(Val::Nil)
     }
 
     fn load_lua_file(

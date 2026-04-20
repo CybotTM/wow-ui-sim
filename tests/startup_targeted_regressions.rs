@@ -2,11 +2,57 @@ mod common;
 
 use std::path::PathBuf;
 
-use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
+use tempfile::tempdir;
+use wow_ui_sim::loader::{discover_blizzard_addons, load_addon, load_addon_with_saved_vars};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::saved_variables::SavedVariablesManager;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn damage_meter_saved_vars_shape(env: &WowLuaEnv) -> (String, String) {
+    env.eval(
+        r#"
+        local saved_type = type(DamageMeterPerCharacterSettings)
+        local list_type = "missing"
+        if saved_type == "table" then
+            list_type = type(DamageMeterPerCharacterSettings.windowDataList)
+        end
+        return saved_type, list_type
+        "#,
+    )
+    .expect("damage meter saved vars probe should run")
+}
+
+fn run_standard_startup(env: &WowLuaEnv, mut after_step: impl FnMut()) {
+    common::fire_addon_loaded(env, "WoWUISim");
+    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
+        env.fire_event(event).ok();
+        after_step();
+    }
+    env.fire_edit_mode_layouts_updated().ok();
+    after_step();
+    common::call_global_if_present(env, "RequestTimePlayed");
+    common::fire_player_entering_world(env, true, false);
+    after_step();
+
+    for event in [
+        "UNIT_AURA",
+        "BAG_UPDATE_DELAYED",
+        "QUEST_LOG_UPDATE",
+        "GROUP_ROSTER_UPDATE",
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+        "UPDATE_CHAT_WINDOWS",
+    ] {
+        env.fire_event(event).ok();
+        after_step();
+    }
+
+    env.fire_on_update(0.016).ok();
+    after_step();
 }
 
 fn load_and_startup_env() -> WowLuaEnv {
@@ -21,29 +67,27 @@ fn load_and_startup_env() -> WowLuaEnv {
     }
 
     env.apply_post_load_workarounds();
-    common::fire_addon_loaded(&env, "WoWUISim");
-    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
-        env.fire_event(event).ok();
-    }
-    env.fire_edit_mode_layouts_updated().ok();
-    common::call_global_if_present(&env, "RequestTimePlayed");
-    common::fire_player_entering_world(&env, true, false);
-
-    for event in [
-        "UNIT_AURA",
-        "BAG_UPDATE_DELAYED",
-        "QUEST_LOG_UPDATE",
-        "GROUP_ROSTER_UPDATE",
-        "UPDATE_BINDINGS",
-        "DISPLAY_SIZE_CHANGED",
-        "UI_SCALE_CHANGED",
-        "UPDATE_CHAT_WINDOWS",
-    ] {
-        env.fire_event(event).ok();
-    }
-
-    env.fire_on_update(0.016).ok();
+    run_standard_startup(&env, || {});
     env
+}
+
+fn push_addon_load_messages(
+    messages: &mut Vec<String>,
+    name: &str,
+    result: Result<wow_ui_sim::loader::LoadResult, wow_ui_sim::loader::LoadError>,
+) {
+    match result {
+        Ok(result) => {
+            for warning in result.warnings {
+                messages.push(format!("[load {name}] {warning}"));
+            }
+        }
+        Err(error) => messages.push(format!("[load {name}] FAILED: {error}")),
+    }
+}
+
+fn drain_startup_errors(env: &WowLuaEnv, messages: &mut Vec<String>) {
+    messages.extend(common::drain_string_table(env, "__targeted_startup_errors"));
 }
 
 fn load_and_startup_collect_messages() -> Vec<String> {
@@ -53,65 +97,17 @@ fn load_and_startup_collect_messages() -> Vec<String> {
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
     let mut messages = Vec::new();
-
     for (name, toc_path) in &addons {
-        match load_addon(&env.loader_env(), toc_path) {
-            Ok(result) => {
-                for warning in result.warnings {
-                    messages.push(format!("[load {name}] {warning}"));
-                }
-            }
-            Err(error) => messages.push(format!("[load {name}] FAILED: {error}")),
-        }
+        let result = load_addon(&env.loader_env(), toc_path);
+        push_addon_load_messages(&mut messages, name, result);
     }
 
     env.apply_post_load_workarounds();
     common::install_error_collector(&env, "__targeted_startup_errors");
 
-    common::fire_addon_loaded(&env, "WoWUISim");
-    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
-        env.fire_event(event).ok();
-        messages.extend(common::drain_string_table(
-            &env,
-            "__targeted_startup_errors",
-        ));
-    }
-
-    env.fire_edit_mode_layouts_updated().ok();
-    messages.extend(common::drain_string_table(
-        &env,
-        "__targeted_startup_errors",
-    ));
-
-    common::call_global_if_present(&env, "RequestTimePlayed");
-    common::fire_player_entering_world(&env, true, false);
-    messages.extend(common::drain_string_table(
-        &env,
-        "__targeted_startup_errors",
-    ));
-
-    for event in [
-        "UNIT_AURA",
-        "BAG_UPDATE_DELAYED",
-        "QUEST_LOG_UPDATE",
-        "GROUP_ROSTER_UPDATE",
-        "UPDATE_BINDINGS",
-        "DISPLAY_SIZE_CHANGED",
-        "UI_SCALE_CHANGED",
-        "UPDATE_CHAT_WINDOWS",
-    ] {
-        env.fire_event(event).ok();
-        messages.extend(common::drain_string_table(
-            &env,
-            "__targeted_startup_errors",
-        ));
-    }
-
-    env.fire_on_update(0.016).ok();
-    messages.extend(common::drain_string_table(
-        &env,
-        "__targeted_startup_errors",
-    ));
+    run_standard_startup(&env, || {
+        drain_startup_errors(&env, &mut messages);
+    });
     messages
 }
 
@@ -249,18 +245,32 @@ fn damage_meter_saved_variables_default_without_partial_empty_seed() {
         load_addon(&env.loader_env(), &toc_path)
             .expect("Blizzard_DamageMeter should load without a saved vars manager");
 
-        let (saved_vars_type, window_data_list_type): (String, String) = env
-            .eval(
-                r#"
-                local saved_type = type(DamageMeterPerCharacterSettings)
-                local list_type = "missing"
-                if saved_type == "table" then
-                    list_type = type(DamageMeterPerCharacterSettings.windowDataList)
-                end
-                return saved_type, list_type
-                "#,
-            )
-            .expect("damage meter saved vars probe should run");
+        let (saved_vars_type, window_data_list_type) = damage_meter_saved_vars_shape(&env);
+
+        assert!(
+            saved_vars_type == "nil" || window_data_list_type == "table",
+            "DamageMeter saved vars should stay nil or expose windowDataList, not a partially-seeded table"
+        );
+    }
+}
+
+#[test]
+fn damage_meter_saved_variables_default_with_empty_saved_vars_storage() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+        let temp = tempdir().expect("tempdir");
+        let mut saved_vars = SavedVariablesManager::with_storage_dir(temp.path().to_path_buf());
+
+        let edit_mode_toc = blizzard_ui_dir().join("Blizzard_EditMode/Blizzard_EditMode.toc");
+        load_addon_with_saved_vars(&env.loader_env(), &edit_mode_toc, &mut saved_vars)
+            .expect("Blizzard_EditMode should load with an empty saved vars manager");
+
+        let toc_path = blizzard_ui_dir().join("Blizzard_DamageMeter/Blizzard_DamageMeter.toc");
+        load_addon_with_saved_vars(&env.loader_env(), &toc_path, &mut saved_vars)
+            .expect("Blizzard_DamageMeter should load with an empty saved vars manager");
+
+        let (saved_vars_type, window_data_list_type) = damage_meter_saved_vars_shape(&env);
 
         assert!(
             saved_vars_type == "nil" || window_data_list_type == "table",
