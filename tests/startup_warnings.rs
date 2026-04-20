@@ -5,6 +5,7 @@ mod common;
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -30,6 +31,7 @@ fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
 fn load_and_startup() -> Vec<String> {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Login);
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
@@ -164,6 +166,7 @@ fn test_edit_mode_layout_update_ignores_preset_layouts_during_startup() {
 fn load_all_addons() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Login);
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
@@ -179,6 +182,7 @@ fn load_all_addons() -> WowLuaEnv {
 fn load_single_blizzard_addon(addon_name: &str) -> (WowLuaEnv, Vec<String>) {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Login);
 
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
@@ -194,16 +198,30 @@ fn load_single_blizzard_addon(addon_name: &str) -> (WowLuaEnv, Vec<String>) {
 fn load_blizzard_addon_by_folder(folder_name: &str) -> (WowLuaEnv, Vec<String>) {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Login);
 
     let ui = blizzard_ui_dir();
     let addons = discover_all_blizzard_addons(&ui);
-    let (_, toc_path) = addons
-        .into_iter()
-        .find(|(name, _)| name == folder_name)
-        .unwrap_or_else(|| panic!("addon folder {folder_name} should exist"));
-    let result = load_addon(&env.loader_env(), &toc_path)
-        .unwrap_or_else(|error| panic!("{folder_name} should load: {error}"));
-    (env, result.warnings)
+    let mut warnings = Vec::new();
+    let mut found_target = false;
+
+    for (name, toc_path) in addons {
+        let result = load_addon(&env.loader_env(), &toc_path)
+            .unwrap_or_else(|error| panic!("{name} should load before {folder_name}: {error}"));
+        warnings.extend(
+            result
+                .warnings
+                .into_iter()
+                .map(|warning| format!("[load {name}] {warning}")),
+        );
+        if name == folder_name {
+            found_target = true;
+            break;
+        }
+    }
+
+    assert!(found_target, "addon folder {folder_name} should exist");
+    (env, warnings)
 }
 
 /// Assert that a Lua expression evaluates to true.
