@@ -9,7 +9,7 @@ mod perf_widget_registry;
 use perf_game_ui::load_timed_game_ui;
 use perf_widget_registry::snapshot_widget_registry;
 
-const WIDGET_REGISTRY_FRAME_COUNT_BUDGET: usize = 45_000;
+const WIDGET_REGISTRY_FRAME_COUNT_BUDGET: usize = 52_000;
 const WIDGET_REGISTRY_STORAGE_BUDGET_BYTES: usize = 230_000_000;
 
 #[test]

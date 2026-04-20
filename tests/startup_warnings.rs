@@ -2,10 +2,31 @@
 
 mod common;
 
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
+use wow_ui_sim::toc::TocFile;
+
+const STARTUP_WARNING_GAME_FOUNDATIONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Menu",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+    "Blizzard_FrameXMLBase",
+    "Blizzard_UIPanelTemplates",
+    "Blizzard_FrameXMLUtil",
+    "Blizzard_UIParent",
+    "Blizzard_UIParentPanelManager",
+];
+
+const STARTUP_WARNING_GLUE_FOUNDATIONS: &[&str] = &[
+    "Blizzard_GlueXMLBase",
+    "Blizzard_GlueParent",
+    "Blizzard_GlueMenuFrame",
+    "Blizzard_GlueXML",
+];
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -184,15 +205,9 @@ fn load_single_blizzard_addon(addon_name: &str) -> (WowLuaEnv, Vec<String>) {
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Login);
 
-    let ui = blizzard_ui_dir();
-    let addons = discover_blizzard_addons(&ui);
-    let (_, toc_path) = addons
-        .into_iter()
-        .find(|(name, _)| name == addon_name)
-        .unwrap_or_else(|| panic!("addon {addon_name} should exist"));
-    let result = load_addon(&env.loader_env(), &toc_path)
-        .unwrap_or_else(|error| panic!("{addon_name} should load: {error}"));
-    (env, result.warnings)
+    let addons = addon_map_all();
+    let warnings = load_blizzard_addon_with_foundations(&env, &addons, addon_name);
+    (env, warnings)
 }
 
 fn load_blizzard_addon_by_folder(folder_name: &str) -> (WowLuaEnv, Vec<String>) {
@@ -200,28 +215,116 @@ fn load_blizzard_addon_by_folder(folder_name: &str) -> (WowLuaEnv, Vec<String>) 
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Login);
 
-    let ui = blizzard_ui_dir();
-    let addons = discover_all_blizzard_addons(&ui);
-    let mut warnings = Vec::new();
-    let mut found_target = false;
+    let addons = addon_map_all();
+    let warnings = load_blizzard_addon_with_foundations(&env, &addons, folder_name);
+    (env, warnings)
+}
 
-    for (name, toc_path) in addons {
-        let result = load_addon(&env.loader_env(), &toc_path)
-            .unwrap_or_else(|error| panic!("{name} should load before {folder_name}: {error}"));
-        warnings.extend(
-            result
-                .warnings
-                .into_iter()
-                .map(|warning| format!("[load {name}] {warning}")),
-        );
-        if name == folder_name {
-            found_target = true;
-            break;
+fn addon_map_all() -> HashMap<String, PathBuf> {
+    let ui = blizzard_ui_dir();
+    discover_all_blizzard_addons(&ui).into_iter().collect()
+}
+
+fn load_blizzard_addon_with_foundations(
+    env: &WowLuaEnv,
+    addons: &HashMap<String, PathBuf>,
+    addon_name: &str,
+) -> Vec<String> {
+    let mut loading = HashSet::new();
+    let mut loaded = HashSet::new();
+    let mut warnings = Vec::new();
+    load_blizzard_addon_recursive(
+        env,
+        addons,
+        addon_name,
+        true,
+        &mut loading,
+        &mut loaded,
+        &mut warnings,
+    );
+    warnings
+}
+
+fn load_blizzard_addon_recursive(
+    env: &WowLuaEnv,
+    addons: &HashMap<String, PathBuf>,
+    addon_name: &str,
+    required: bool,
+    loading: &mut HashSet<String>,
+    loaded: &mut HashSet<String>,
+    warnings: &mut Vec<String>,
+) {
+    if loaded.contains(addon_name) || loading.contains(addon_name) {
+        return;
+    }
+    loading.insert(addon_name.to_string());
+
+    let Some(toc_path) = addons.get(addon_name) else {
+        if required {
+            panic!("addon {addon_name} should exist");
+        }
+        loading.remove(addon_name);
+        return;
+    };
+    let toc = TocFile::from_file(toc_path)
+        .unwrap_or_else(|error| panic!("{addon_name} TOC should parse: {error}"));
+
+    for foundation in startup_warning_foundations(addon_name) {
+        if foundation != addon_name && addons.contains_key(foundation) {
+            load_blizzard_addon_recursive(
+                env, addons, foundation, false, loading, loaded, warnings,
+            );
         }
     }
 
-    assert!(found_target, "addon folder {folder_name} should exist");
-    (env, warnings)
+    for dependency in toc_dependency_names(&toc, addons) {
+        if dependency != addon_name {
+            load_blizzard_addon_recursive(
+                env,
+                addons,
+                &dependency,
+                false,
+                loading,
+                loaded,
+                warnings,
+            );
+        }
+    }
+
+    let result = load_addon(&env.loader_env(), toc_path)
+        .unwrap_or_else(|error| panic!("{addon_name} should load: {error}"));
+    warnings.extend(
+        result
+            .warnings
+            .into_iter()
+            .map(|warning| format!("[load {addon_name}] {warning}")),
+    );
+    loading.remove(addon_name);
+    loaded.insert(addon_name.to_string());
+}
+
+fn startup_warning_foundations(addon_name: &str) -> Vec<&'static str> {
+    let foundations = if addon_name.starts_with("Blizzard_Glue") {
+        STARTUP_WARNING_GLUE_FOUNDATIONS
+    } else {
+        STARTUP_WARNING_GAME_FOUNDATIONS
+    };
+    let end = foundations
+        .iter()
+        .position(|candidate| *candidate == addon_name)
+        .unwrap_or(foundations.len());
+    foundations[..end].to_vec()
+}
+
+fn toc_dependency_names(toc: &TocFile, addons: &HashMap<String, PathBuf>) -> Vec<String> {
+    let mut dependencies = toc.dependencies();
+    let mut seen: HashSet<String> = dependencies.iter().cloned().collect();
+    for dependency in toc.optional_deps() {
+        if addons.contains_key(&dependency) && seen.insert(dependency.clone()) {
+            dependencies.push(dependency);
+        }
+    }
+    dependencies
 }
 
 /// Assert that a Lua expression evaluates to true.
