@@ -74,9 +74,6 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_character_frame_title_refresh", || {
         patch_character_frame_title_refresh(env);
     });
-    log_step(env, "patch_spellbook_frame_page_text_refresh", || {
-        patch_spellbook_frame_page_text_refresh(env);
-    });
     log_step(env, "patch_vignette_pin_template", || {
         patch_vignette_pin_template(env);
     });
@@ -211,7 +208,6 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     "#,
     );
     refresh_character_frame_surface(env);
-    refresh_spellbook_paging_surface(env);
     patch_chat_voice_button_surface(env);
 }
 
@@ -245,18 +241,6 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_CatalogShop" {
         let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
-    }
-    if addon_name == "Blizzard_PlayerSpells" {
-        let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
-        let _ = env.exec(
-            r#"
-            local spellBookFrame = PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame
-            local pagingControls = spellBookFrame and spellBookFrame.PagedSpellsFrame and spellBookFrame.PagedSpellsFrame.PagingControls
-            if type(pagingControls) == "table" and type(pagingControls.UpdateControls) == "function" then
-                pagingControls:UpdateControls()
-            end
-            "#,
-        );
     }
     if addon_name == "Blizzard_DamageMeter" {
         let _ = patch_damage_meter_initial_scrollbox_extent(env);
@@ -604,19 +588,6 @@ fn patch_paging_controls_page_text(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
 }
 
-fn refresh_spellbook_paging_surface(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        __wow_refresh_spellbook_paging_surface(
-            PlayerSpellsFrame
-                and PlayerSpellsFrame.SpellBookFrame
-                and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame
-                and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame.PagingControls
-        )
-        "#,
-    );
-}
-
 const PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA: &str = r#"
     if type(PagingControlsMixin) ~= "table"
         or type(PagingControlsMixin.UpdateControls) ~= "function" then
@@ -677,68 +648,6 @@ fn patch_character_create_defaults(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_character_frame_title_refresh(env: &crate::lua_api::WowLuaEnv) {
     refresh_character_frame_surface(env);
-}
-
-fn patch_spellbook_frame_page_text_refresh(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if rawget(_G, "__wow_refresh_spellbook_paging_surface") == nil then
-            function __wow_refresh_spellbook_paging_surface(pagingControls)
-                local pageText = pagingControls and pagingControls.PageText
-                if type(pagingControls) ~= "table"
-                    or type(pageText) ~= "table"
-                    or type(pageText.SetText) ~= "function" then
-                    return
-                end
-
-                local currentPage = tonumber(pagingControls.currentPage) or 1
-                local maxPages = tonumber(pagingControls.maxPages) or 1
-                if pagingControls.displayMaxPages then
-                    pageText:SetText(
-                        string.format(
-                            pagingControls.currentPageWithMaxText or PAGE_NUMBER_WITH_MAX,
-                            currentPage,
-                            maxPages
-                        )
-                    )
-                else
-                    pageText:SetText(
-                        string.format(
-                            pagingControls.currentPageOnlyText or PAGE_NUMBER,
-                            currentPage
-                        )
-                    )
-                end
-            end
-        end
-
-        if type(PlayerSpellsFrame) ~= "table"
-            or type(PlayerSpellsFrame.SpellBookFrame) ~= "table" then
-            return
-        end
-
-        local spellBookFrame = PlayerSpellsFrame.SpellBookFrame
-        local existing_wrapper = rawget(_G, "__wow_spellbook_frame_onshow_wrapper")
-        if spellBookFrame:GetScript("OnShow") ~= existing_wrapper then
-            local original_on_show = spellBookFrame:GetScript("OnShow")
-            if type(original_on_show) ~= "function" then
-                return
-            end
-            local wrapper = function(self, ...)
-                original_on_show(self, ...)
-                __wow_refresh_spellbook_paging_surface(
-                    self and self.PagedSpellsFrame and self.PagedSpellsFrame.PagingControls
-                )
-            end
-            spellBookFrame:SetScript("OnShow", wrapper)
-            rawset(_G, "__wow_spellbook_frame_onshow_wrapper", wrapper)
-        end
-
-        __wow_refresh_spellbook_paging_surface(
-            spellBookFrame.PagedSpellsFrame and spellBookFrame.PagedSpellsFrame.PagingControls
-        )
-        "#,
-    );
 }
 
 fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
