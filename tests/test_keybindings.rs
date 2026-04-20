@@ -399,6 +399,81 @@ fn keybind_c_opens_character() {
 }
 
 #[test]
+fn keybind_c_populates_character_panel_surface() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("C", None).expect("C keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (CharacterFrame and CharacterFrame:IsShown()) then
+                    return "character_not_open"
+                end
+
+                if not CharacterFrame.TitleContainer then
+                    return "missing_title_container"
+                end
+
+                if not CharacterFrame.TitleContainer.TitleText then
+                    return "missing_title_text"
+                end
+
+                local expectedTitle = UnitPVPName("player")
+                local actualTitle = CharacterFrame.TitleContainer.TitleText:GetText()
+                if actualTitle ~= expectedTitle then
+                    return string.format(
+                        "title_mismatch_expected_%s_actual_%s",
+                        tostring(expectedTitle),
+                        tostring(actualTitle)
+                    )
+                end
+
+                local slotNames = {
+                    "CharacterHeadSlot",
+                    "CharacterChestSlot",
+                    "CharacterMainHandSlot",
+                }
+
+                for _, frameName in ipairs(slotNames) do
+                    local slot = _G[frameName]
+                    if not slot then
+                        return "missing_slot_" .. frameName
+                    end
+                    if not slot.icon then
+                        return "missing_icon_" .. frameName
+                    end
+
+                    local expectedTexture = GetInventoryItemTexture("player", slot:GetID())
+                    if expectedTexture == nil then
+                        expectedTexture = slot.backgroundTextureName
+                    end
+                    local actualTexture = slot.icon:GetTexture()
+
+                    if actualTexture ~= expectedTexture then
+                        return string.format(
+                            "slot_texture_mismatch_%s_expected_%s_actual_%s",
+                            frameName,
+                            tostring(expectedTexture),
+                            tostring(actualTexture)
+                        )
+                    end
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "Character panel should populate title text and representative slot icons on first open: {result}"
+        );
+    }
+}
+
+#[test]
 fn game_screen_runtime_loadaddon_rejects_glueparent() {
     test_timeout! {
         let env = setup_env();

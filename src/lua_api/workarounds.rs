@@ -599,6 +599,37 @@ fn patch_character_frame_title_refresh(env: &crate::lua_api::WowLuaEnv) {
 fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(
         r#"
+        local function get_character_panel_slot_buttons()
+            local slotFrameNames = {
+                "CharacterHeadSlot",
+                "CharacterNeckSlot",
+                "CharacterShoulderSlot",
+                "CharacterBackSlot",
+                "CharacterChestSlot",
+                "CharacterShirtSlot",
+                "CharacterTabardSlot",
+                "CharacterWristSlot",
+                "CharacterHandsSlot",
+                "CharacterWaistSlot",
+                "CharacterLegsSlot",
+                "CharacterFeetSlot",
+                "CharacterFinger0Slot",
+                "CharacterFinger1Slot",
+                "CharacterTrinket0Slot",
+                "CharacterTrinket1Slot",
+                "CharacterMainHandSlot",
+                "CharacterSecondaryHandSlot",
+            }
+            local buttons = {}
+            for _, frameName in ipairs(slotFrameNames) do
+                local button = _G[frameName]
+                if type(button) == "table" then
+                    table.insert(buttons, button)
+                end
+            end
+            return buttons
+        end
+
         if type(CharacterFrame) == "table"
             and type(CharacterFrame.GetScript) == "function"
             and type(CharacterFrame.SetScript) == "function" then
@@ -613,12 +644,9 @@ fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
                     if type(self.UpdateTitle) == "function" then
                         self:UpdateTitle()
                     end
-                    if type(PaperDollItemSlotButton_Update) == "function"
-                        and type(itemSlotButtons) == "table" then
-                        for _, button in pairs(itemSlotButtons) do
-                            if type(button) == "table" then
-                                PaperDollItemSlotButton_Update(button)
-                            end
+                    if type(PaperDollItemSlotButton_Update) == "function" then
+                        for _, button in ipairs(get_character_panel_slot_buttons()) do
+                            PaperDollItemSlotButton_Update(button)
                         end
                     end
                 end
@@ -636,12 +664,9 @@ fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
                     if type(self.UpdateTitle) == "function" then
                         self:UpdateTitle()
                     end
-                    if type(PaperDollItemSlotButton_Update) == "function"
-                        and type(itemSlotButtons) == "table" then
-                        for _, button in pairs(itemSlotButtons) do
-                            if type(button) == "table" then
-                                PaperDollItemSlotButton_Update(button)
-                            end
+                    if type(PaperDollItemSlotButton_Update) == "function" then
+                        for _, button in ipairs(get_character_panel_slot_buttons()) do
+                            PaperDollItemSlotButton_Update(button)
                         end
                     end
                 end
@@ -658,12 +683,9 @@ fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
             end
         end
 
-        if type(PaperDollItemSlotButton_Update) == "function"
-            and type(itemSlotButtons) == "table" then
-            for _, button in pairs(itemSlotButtons) do
-                if type(button) == "table" then
-                    PaperDollItemSlotButton_Update(button)
-                end
+        if type(PaperDollItemSlotButton_Update) == "function" then
+            for _, button in ipairs(get_character_panel_slot_buttons()) do
+                PaperDollItemSlotButton_Update(button)
             end
         end
 
@@ -674,15 +696,13 @@ fn refresh_character_frame_surface(env: &crate::lua_api::WowLuaEnv) {
             CharacterFrame.TitleContainer.TitleText:SetText(UnitPVPName("player"))
         end
 
-        if type(itemSlotButtons) == "table" then
-            for _, button in pairs(itemSlotButtons) do
-                if type(button) == "table" and type(button.icon) == "table" then
-                    local textureName = GetInventoryItemTexture("player", button:GetID())
-                    if textureName ~= nil then
-                        button.icon:SetTexture(textureName)
-                    elseif button.backgroundTextureName ~= nil then
-                        button.icon:SetTexture(button.backgroundTextureName)
-                    end
+        for _, button in ipairs(get_character_panel_slot_buttons()) do
+            if type(button.icon) == "table" then
+                local textureName = GetInventoryItemTexture("player", button:GetID())
+                if textureName ~= nil then
+                    button.icon:SetTexture(textureName)
+                elseif button.backgroundTextureName ~= nil then
+                    button.icon:SetTexture(button.backgroundTextureName)
                 end
             end
         end
