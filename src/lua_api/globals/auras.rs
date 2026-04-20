@@ -137,10 +137,17 @@ fn ensure_runtime_aura_state(state: &mut LuaState, ns: Val) {
 enum AuraFilter {
     Helpful,
     Harmful,
+    /// Torghast anima powers. The sim has no MAW auras, so this variant
+    /// matches nothing — preventing Blizzard_MawBuffs from showing outside
+    /// Torghast when the player has any ordinary buff.
+    Maw,
 }
 
 fn filter_from_str(filter: &str) -> AuraFilter {
-    if filter.to_uppercase().contains("HARMFUL") {
+    let upper = filter.to_uppercase();
+    if upper.contains("MAW") {
+        AuraFilter::Maw
+    } else if upper.contains("HARMFUL") {
         AuraFilter::Harmful
     } else {
         AuraFilter::Helpful
@@ -151,6 +158,7 @@ fn aura_matches_filter(aura: &AuraInfo, filter: AuraFilter) -> bool {
     match filter {
         AuraFilter::Helpful => aura.is_helpful,
         AuraFilter::Harmful => !aura.is_helpful,
+        AuraFilter::Maw => false,
     }
 }
 
@@ -197,6 +205,7 @@ fn collect_unit_auras(state: &mut LuaState, unit: &str, filter: AuraFilter) -> V
             match filter {
                 AuraFilter::Helpful => member.buffs.iter().collect(),
                 AuraFilter::Harmful => member.debuffs.iter().collect(),
+                AuraFilter::Maw => return Vec::new(),
             }
         } else {
             return Vec::new();

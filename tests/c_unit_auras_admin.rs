@@ -152,6 +152,20 @@ fn get_aura_data_by_spell_name_returns_nil_for_unknown_name() {
 }
 
 #[test]
+fn get_aura_data_by_index_maw_returns_nil_for_ordinary_buffs() {
+    // Blizzard_MawBuffs calls GetAuraDataByIndex("player", 1, "MAW"). Without
+    // this guard, the filter fell through to HELPFUL and returned the first
+    // ordinary player buff, causing ShouldShowMawBuffs() to display the
+    // Torghast anima-power button outside Torghast.
+    let env = env();
+    clear_buffs_and_insert(&env, vec![admin_buff("Power Word: Fortitude", 21562, 1, true)]);
+    let is_nil: bool = env
+        .eval(r#"return C_UnitAuras.GetAuraDataByIndex("player", 1, "MAW") == nil"#)
+        .unwrap();
+    assert!(is_nil, "MAW filter must not return ordinary helpful buffs");
+}
+
+#[test]
 fn aura_data_table_carries_retail_fields() {
     let env = env();
     clear_buffs_and_insert(&env, vec![admin_buff("Shield", 21562, 999, true)]);
