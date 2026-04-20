@@ -25,6 +25,7 @@ const ORIGINAL_LOADSTRING_KEY: &str = "__original_loadstring";
 const LOADSTRING_TAINT_MARKER: &str = "*** ForceTaint_Strong ***";
 const LOADSTRING_SOURCE_TAINT_PREAMBLE: &[u8] =
     b"debug.setstacktaint(\"*** ForceTaint_Strong ***\")\n";
+const DISABLE_GLOBAL_SLOTS_ENV: &str = "WOW_SIM_DISABLE_GLOBAL_SLOTS";
 
 // Re-export public-within-crate symbols that env.rs and globals/ import.
 pub(crate) use frames::init_builtin_frames;
@@ -82,6 +83,13 @@ pub(super) fn init_lua_state(
 /// post-freeze shadow bootstrapping, but before addon load so the
 /// captured snapshot is the canonical pre-addon state.
 fn install_global_slots(lua: &mut rilua::Lua) {
+    install_global_slots_from_env(lua, std::env::var(DISABLE_GLOBAL_SLOTS_ENV).ok().as_deref());
+}
+
+fn install_global_slots_from_env(lua: &mut rilua::Lua, env_value: Option<&str>) {
+    if global_slots_disabled_from_env(env_value) {
+        return;
+    }
     use super::env::WowLuaAppData;
     use super::global_slots;
     use rilua::LuaApiMut;
@@ -91,6 +99,10 @@ fn install_global_slots(lua: &mut rilua::Lua) {
         .app_data_mut::<WowLuaAppData>()
         .expect("WowLuaEnv rilua app_data should always exist");
     app.global_slots = Some(slots);
+}
+
+fn global_slots_disabled_from_env(value: Option<&str>) -> bool {
+    value == Some("1")
 }
 
 /// Run a full collection to drop bootstrap transients, then re-enable
@@ -207,4 +219,42 @@ fn remove_sandbox_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
         "#,
     )?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{global_slots_disabled_from_env, install_global_slots_from_env};
+    use crate::lua_api::env::WowLuaAppData;
+    use crate::lua_api::state::SimState;
+    use rilua::{Lua, LuaApi, LuaApiMut};
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    #[test]
+    fn global_slots_disable_flag_parses_exact_one() {
+        assert!(global_slots_disabled_from_env(Some("1")));
+        assert!(!global_slots_disabled_from_env(Some("0")));
+        assert!(!global_slots_disabled_from_env(Some("")));
+        assert!(!global_slots_disabled_from_env(None));
+    }
+
+    #[test]
+    fn install_global_slots_from_env_skips_when_disabled() {
+        let mut lua = Lua::new().expect("fresh rilua VM");
+        lua.state_mut().set_app_data(WowLuaAppData {
+            sim_state: Rc::new(RefCell::new(SimState::default())),
+            lua: None,
+            font_system: None,
+            hot_literals: None,
+            global_slots: None,
+        });
+
+        install_global_slots_from_env(&mut lua, Some("1"));
+
+        let app = lua
+            .state()
+            .app_data::<WowLuaAppData>()
+            .expect("app data should exist");
+        assert!(app.global_slots.is_none());
+    }
 }

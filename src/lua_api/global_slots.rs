@@ -42,8 +42,6 @@ use rilua::vm::string::LuaString;
 /// `freeze_globals_with_live_shadow`. Mirrors the constant declared
 /// in `env_init::freeze_globals` (kept private there).
 const G_LIVE_REGISTRY_KEY: &[u8] = b"__rilua_g_live";
-const DISABLE_GLOBAL_SLOTS_ENV: &str = "WOW_SIM_DISABLE_GLOBAL_SLOTS";
-
 /// Total slot count in the current ABI. Ties directly to
 /// [`WHITELIST_VERSION`] so bumping the version + the whitelist
 /// entries is a single coordinated change.
@@ -175,13 +173,11 @@ pub fn install(state: &mut LuaState) -> GlobalSlotTable {
 
     debug_assert_eq!(values.len(), SLOT_COUNT);
     debug_assert_eq!(name_keys.len(), SLOT_COUNT);
-    if std::env::var(DISABLE_GLOBAL_SLOTS_ENV).as_deref() != Ok("1") {
-        state.install_global_slots(
-            values.clone().into_boxed_slice(),
-            name_keys.clone().into_boxed_slice(),
-            Some(g_live_key),
-        );
-    }
+    state.install_global_slots(
+        values.clone().into_boxed_slice(),
+        name_keys.clone().into_boxed_slice(),
+        Some(g_live_key),
+    );
     GlobalSlotTable {
         values: values.into_boxed_slice(),
         name_keys: name_keys.into_boxed_slice(),
