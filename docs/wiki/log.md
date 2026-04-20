@@ -2,6 +2,12 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-20] update | blizzard ui test lanes
+
+Added `reference/blizzard-ui-test-lanes.md` and updated
+`reference/addon-compatibility.md` to document the explicit split between
+Blizzard UI unit tests and addon-bootstrap coverage.
+
 ## [2026-04-20] update | keybinding spellbook direct dispatch
 
 Updated `investigations/keybinding-system.md` with the spellbook follow-up.

@@ -1,3 +1,8 @@
+//! Blizzard UI addon-bootstrap lane.
+//!
+//! Keep this file for behaviors that only exist after the relevant Blizzard
+//! addons and their startup sequence have loaded.
+
 mod common;
 
 use std::collections::{BTreeMap, HashMap, HashSet};

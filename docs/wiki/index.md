@@ -17,6 +17,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[api-coverage]] | ~97% C_* coverage, missing APIs by category, three-layer stub methodology |
 | [[cli-commands]] | wow-sim and wow-cli subcommands: lua-errors, run-tests, screenshot, dump-tree, audit-api, convert-texture |
 | [[addon-compatibility]] | 127+ tested addons, Wowless integration, SavedVariables loading, Docker CI |
+| [[blizzard-ui-test-lanes]] | Explicit split between Blizzard UI unit tests and addon-bootstrap coverage |
 | [[development-phases]] | Active phases 31–33: widget stubs, audit tool, performance regression tests |
 
 ## systems/

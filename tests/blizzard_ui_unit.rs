@@ -1,4 +1,7 @@
-//! Blizzard UI component unit tests.
+//! Blizzard UI unit lane.
+//!
+//! Keep this file for isolated helper logic and pure component behavior that
+//! does not require a full addon bootstrap.
 
 mod common;
 mod tooltip_full_env_helpers;

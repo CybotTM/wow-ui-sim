@@ -49,6 +49,15 @@ The simulator follows WoW's addon load order:
 3. Blizzard_FrameXML (UI templates) — deferred; requires more APIs (Phase 5)
 4. User addons (via TOC files)
 
+## Test Lanes
+
+Blizzard UI coverage is intentionally split into two lanes:
+
+- `tests/blizzard_ui_unit.rs` covers isolated helpers and component behavior that can run without a full Blizzard startup sequence.
+- `tests/addon_coverage.rs` covers addon-bootstrap behavior that only exists after the relevant Blizzard addons load.
+
+The split keeps unit-style regressions fast and focused while reserving the heavier bootstrap suite for startup-order, dependency, and load-on-demand behavior.
+
 ## Known Issues
 
 - `BetterWardrobe/ColorFilter.lua` uses large constant tables that work in WoW's patched LuaJIT but are slow in standard Lua 5.1
@@ -64,3 +73,4 @@ The simulator follows WoW's addon load order:
 - [[api-coverage]] — which APIs are missing (causes addon errors)
 - [[cli-commands]] — `run-tests`, `lua-errors`, Docker usage
 - [[development-phases]] — Phase 5 progress and missing API work
+- [[blizzard-ui-test-lanes]] — explicit unit vs addon-bootstrap test split
