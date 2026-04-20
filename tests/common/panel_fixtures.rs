@@ -66,18 +66,18 @@ pub const PANEL_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
+    ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
     ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_Menu", "Blizzard_Menu.toc"),
-    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
     ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
     ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
-    ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
     (
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
+    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
 ];
 
 #[allow(dead_code)]

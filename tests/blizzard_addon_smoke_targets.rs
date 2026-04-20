@@ -8,29 +8,78 @@ use common::blizzard_addon_manifest::{
 
 const EXPECTED_SMOKE_TARGET_COUNT: usize = 4;
 
-fn assert_loaded_target_shape(target: &BlizzardAddonSmokeTarget<'static>) {
-    common::blizzard_addon_harness::with_blizzard_addon_closure(
+fn assert_loaded_target_shape(target: &BlizzardAddonSmokeTarget<'static>, loaded: &[String]) {
+    let loaded_set: HashSet<_> = loaded.iter().cloned().collect();
+
+    for root in target.roots {
+        assert!(
+            loaded_set.contains(*root),
+            "{} smoke target should load its root addon {root}; loaded={loaded:?}",
+            target.name,
+        );
+    }
+
+    for required_addon in target.required_addons {
+        assert!(
+            loaded_set.contains(*required_addon),
+            "{} smoke target should include dependency {} in its explicit closure; loaded={loaded:?}",
+            target.name,
+            required_addon,
+        );
+    }
+}
+
+fn assert_no_lua_errors(env: &wow_ui_sim::lua_api::WowLuaEnv, target_name: &str) {
+    let errors = common::panel_fixtures::recorded_lua_errors(env);
+    assert!(
+        errors.is_empty(),
+        "{} smoke target should settle without Lua errors:\n  {}",
+        target_name,
+        errors.join("\n  ")
+    );
+}
+
+fn assert_startup_shape_for_target(
+    target: &BlizzardAddonSmokeTarget<'static>,
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+) {
+    let presence_probe = format!(
+        "return type({}), {} ~= nil",
+        target.expected_global, target.expected_frame,
+    );
+    let (global_type, frame_exists): (String, bool) = env
+        .eval(&presence_probe)
+        .unwrap_or_else(|error| panic!("{} presence probe should return: {error}", target.name));
+
+    assert_eq!(
+        global_type, "function",
+        "{} should expose {} as a function",
+        target.name, target.expected_global,
+    );
+    assert!(
+        frame_exists,
+        "{} should create {}",
+        target.name, target.expected_frame,
+    );
+
+    let behavior_result: String = env
+        .eval(target.behavior_probe_lua)
+        .unwrap_or_else(|error| panic!("{} behavior probe should run: {error}", target.name));
+    assert_eq!(
+        behavior_result, "ok",
+        "{} startup behavior probe should return ok, got {}",
+        target.name, behavior_result,
+    );
+    assert_no_lua_errors(env, target.name);
+}
+
+fn assert_smoke_target_startup_shape(target: &BlizzardAddonSmokeTarget<'static>) {
+    common::blizzard_addon_harness::with_blizzard_addon_smoke_shape(
         target.roots,
         target.overrides,
-        |_, loaded| {
-            let loaded_set: HashSet<_> = loaded.iter().cloned().collect();
-
-            for root in target.roots {
-                assert!(
-                    loaded_set.contains(*root),
-                    "{} smoke target should load its root addon {root}; loaded={loaded:?}",
-                    target.name,
-                );
-            }
-
-            for required_addon in target.required_addons {
-                assert!(
-                    loaded_set.contains(*required_addon),
-                    "{} smoke target should include dependency {} in its explicit closure; loaded={loaded:?}",
-                    target.name,
-                    required_addon,
-                );
-            }
+        |env, loaded| {
+            assert_loaded_target_shape(target, loaded);
+            assert_startup_shape_for_target(target, env);
         },
     );
 }
@@ -69,11 +118,11 @@ fn blizzard_addon_smoke_targets_cover_each_requested_addon_shape_once() {
 }
 
 #[test]
-fn blizzard_addon_smoke_targets_resolve_and_load_their_expected_closures() {
+fn blizzard_addon_smoke_targets_assert_startup_shape_after_loading_the_closure() {
     common::with_perf_lock(|| {
         common::with_timeout(600, move || {
             for target in BLIZZARD_ADDON_SMOKE_TARGETS {
-                assert_loaded_target_shape(target);
+                assert_smoke_target_startup_shape(target);
             }
         })
     });

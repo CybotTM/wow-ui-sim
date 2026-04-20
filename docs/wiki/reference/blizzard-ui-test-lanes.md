@@ -25,7 +25,7 @@ The first addon-bootstrap smoke targets are pinned to four representative
 closure shapes:
 
 - `combat_log` — mostly-functional single-addon surface via `Blizzard_CombatLog`
-- `panel_templates` — template-heavy shared UI surface via `Blizzard_UIPanelTemplates`
+- `macro_ui` — template-heavy panel/tab surface via `Blizzard_MacroUI`
 - `world_map` — layout-heavy map canvas via `Blizzard_WorldMap`
 - `settings_panel` — multi-addon flow via `Blizzard_SettingsDefinitions_Frame`
 
@@ -35,6 +35,13 @@ and loaded through
 [`tests/common/blizzard_addon_harness.rs`](../../../tests/common/blizzard_addon_harness.rs)
 before being exercised by
 [`tests/blizzard_addon_smoke_targets.rs`](../../../tests/blizzard_addon_smoke_targets.rs).
+
+The smoke lane now asserts startup shape instead of just "closure loads":
+
+- no recorded Lua errors after loading the target closure
+- the target's expected global function exists
+- the target's expected top-level frame exists
+- one or two representative target behaviors succeed
 
 ## Sources
 
