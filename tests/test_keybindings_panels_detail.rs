@@ -974,6 +974,56 @@ fn spellbook_first_visible_item_icon_matches_spellbook_texture() {
 }
 
 #[test]
+fn spellbook_paging_label_is_formatted_on_first_open() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("S", None).expect("S keybind dispatch failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                local pagingControls = PlayerSpellsFrame
+                    and PlayerSpellsFrame.SpellBookFrame
+                    and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame
+                    and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame.PagingControls
+                if not pagingControls then
+                    return "missing_paging_controls"
+                end
+
+                local text = pagingControls.PageText and pagingControls.PageText:GetText()
+                if not text then
+                    return "missing_page_text"
+                end
+                if text:find("%%d") then
+                    return "unformatted_page_text_" .. text
+                end
+                if not text:match("^Page %d+/%d+$") then
+                    return "unexpected_page_text_" .. text
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Spellbook paging label regression produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Spellbook paging controls should render a formatted page label, not a literal format string: {result}"
+        );
+    }
+}
+
+#[test]
 fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
     test_timeout! {
         let env = setup_env();

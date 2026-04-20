@@ -72,6 +72,15 @@ fn literal_percent_preserved() {
 }
 
 #[test]
+fn repeated_numeric_specifiers_are_all_substituted() {
+    let env = env();
+    let out: String = env
+        .eval(r#"return string.format("Page %d/%d", 1, 2)"#)
+        .unwrap();
+    assert_eq!(out, "Page 1/2");
+}
+
+#[test]
 fn non_string_fmt_delegates_to_original() {
     // When the first arg isn't a string, the patched implementation
     // forwards straight through to the native string.format. Lua 5.1's
