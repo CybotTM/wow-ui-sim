@@ -10,6 +10,14 @@ use rilua::{LuaResult, Val};
 const DEFAULT_WARBAND_GROUP_COUNT: f64 = 4.0;
 
 pub(super) fn register_character_select_surface(state: &mut LuaState) -> LuaResult<()> {
+    register_character_select_bootstrap(state)?;
+    register_character_select_frame_state(state)?;
+    register_character_select_character_queries(state)?;
+    register_character_select_character_details(state)?;
+    Ok(())
+}
+
+fn register_character_select_bootstrap(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         state.global,
@@ -22,6 +30,10 @@ pub(super) fn register_character_select_surface(state: &mut LuaState) -> LuaResu
         "SetWorldFrameStrata",
         set_world_frame_strata,
     )?;
+    Ok(())
+}
+
+fn register_character_select_frame_state(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         state.global,
@@ -40,6 +52,10 @@ pub(super) fn register_character_select_surface(state: &mut LuaState) -> LuaResu
         "SetInCharacterSelect",
         set_in_character_select,
     )?;
+    Ok(())
+}
+
+fn register_character_select_character_queries(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         state.global,
@@ -59,6 +75,10 @@ pub(super) fn register_character_select_surface(state: &mut LuaState) -> LuaResu
         "GetCharacterSelection",
         get_character_selection,
     )?;
+    Ok(())
+}
+
+fn register_character_select_character_details(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(state, state.global, "GetCharacterGUID", get_character_guid)?;
     table_set_rust_fn_static(state, state.global, "GetCharacterRace", get_character_race)?;
     table_set_rust_fn_static(
@@ -99,24 +119,14 @@ fn set_world_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn set_char_select_model_frame(state: &mut LuaState) -> LuaResult<u32> {
-    let frame_name = match crate::lua_bridge::stack_val(state, 1) {
-        Val::Str(_) => {
-            crate::lua_api::methods::val_to_string(state, crate::lua_bridge::stack_val(state, 1))
-                .unwrap_or_default()
-        }
-        _ => String::new(),
-    };
-    let frame_name = create_string(state, &frame_name);
-    table_set(
-        state,
-        Val::Table(state.global),
-        "__wow_char_select_model_frame_name",
-        frame_name,
-    );
-    Ok(0)
+    set_char_select_frame_name(state, "__wow_char_select_model_frame_name")
 }
 
 fn set_char_select_map_scene_frame(state: &mut LuaState) -> LuaResult<u32> {
+    set_char_select_frame_name(state, "__wow_char_select_map_scene_frame_name")
+}
+
+fn set_char_select_frame_name(state: &mut LuaState, slot: &str) -> LuaResult<u32> {
     let frame_name = match crate::lua_bridge::stack_val(state, 1) {
         Val::Str(_) => {
             crate::lua_api::methods::val_to_string(state, crate::lua_bridge::stack_val(state, 1))
@@ -125,12 +135,7 @@ fn set_char_select_map_scene_frame(state: &mut LuaState) -> LuaResult<u32> {
         _ => String::new(),
     };
     let frame_name = create_string(state, &frame_name);
-    table_set(
-        state,
-        Val::Table(state.global),
-        "__wow_char_select_map_scene_frame_name",
-        frame_name,
-    );
+    table_set(state, Val::Table(state.global), slot, frame_name);
     Ok(0)
 }
 
