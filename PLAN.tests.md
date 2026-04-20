@@ -84,7 +84,7 @@
 - [x] Fix XML inheritance bucket (`1` failed target): `xml_basics` inherited button text availability after load.
 - [x] Fix state-render repair bucket (`3` failed targets): `state_render_repairs` and `state_render` bucket-order repair regressions.
 - [x] Fix global-slots bucket (`2` failed targets): `global_slots` root-global refresh behavior.
-- [ ] Fix editmode workarounds bucket (`1` failed target): `workarounds_editmode` preset cloning behavior.
+- [x] Fix editmode workarounds bucket (`1` failed target): `workarounds_editmode` preset cloning behavior.
 - [ ] Fix action-bar startup bucket (`7` failed targets): `action_bar` startup/load behavior that still depends on `WowLuaEnv` initialization.
 - [ ] Fix probe bucket (`6` failed targets): `c_club_probes`, `c_map_api`, `c_pet_battles_probes`, `c_small_probes`.
 - [ ] Investigate addon-loading perf harness failure (`1` failed target): `addon_loading_perf`.

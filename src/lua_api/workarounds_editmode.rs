@@ -79,9 +79,6 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     end
 
     local function forceCastBarUnderPlayerFrame(layoutInfo)
-        if type(PlayerFrame) ~= "table" or type(PlayerCastingBarFrame) ~= "table" then
-            return
-        end
         if not layoutInfo or not layoutInfo.layouts then return end
         local activeLayout = layoutInfo.layouts[layoutInfo.activeLayout]
         if not activeLayout or not activeLayout.systems then return end
@@ -125,55 +122,7 @@ const SETUP_LAYOUT_INFO_LUA: &str = r#"
     end
 "#;
 
-/// Initialize EditMode layout info and apply system anchors.
-///
-/// EDIT_MODE_LAYOUTS_UPDATED fires during startup but UpdateLayoutInfo
-/// crashes partway through (cascading dependencies). This leaves
-/// layoutInfo nil. Manually set it up from C_EditMode.GetLayouts() +
-/// preset layouts, then call our custom InitSystemAnchors. Also ensures
-/// accountSettings is initialized so CanEnterEditMode() returns true.
-pub fn init_edit_mode_layout(env: &WowLuaEnv) {
-    log_step(env, "setup_layout_info", || {
-        setup_layout_info(env);
-    });
-    log_step(env, "apply_system_anchors", || {
-        apply_system_anchors(env);
-    });
-    log_step(env, "fix_action_bar_nan_size", || {
-        fix_action_bar_nan_size(env);
-    });
-    log_step(env, "fix_action_bar_scale", || {
-        fix_action_bar_scale(env);
-    });
-}
-
-/// Re-run the normal player-frame anchor path after startup events settle.
-///
-/// The player frame's edit-mode anchor path re-applies the cast bar anchor as
-/// a side effect. Post-event startup leaves that path unapplied in some
-/// headless/test flows, so explicitly replay it here instead of directly
-/// attaching the cast bar.
-pub fn reapply_player_frame_anchor(env: &WowLuaEnv) {
-    log_step(env, "reapply_player_frame_anchor", || {
-        let _ = env.exec(
-            r#"
-            if PlayerFrame and type(PlayerFrame.ApplySystemAnchor) == "function" then
-                pcall(PlayerFrame.ApplySystemAnchor, PlayerFrame)
-            end
-        "#,
-        );
-    });
-}
-
-/// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
-fn setup_layout_info(env: &WowLuaEnv) {
-    let _ = env.exec(SETUP_LAYOUT_INFO_LUA);
-}
-
-/// Apply preset layout anchors and settings to all EditMode system frames.
-fn apply_system_anchors(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
+const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
         if not EditModeManagerFrame then return end
         local emm = EditModeManagerFrame
         if not emm.layoutInfo then return end
@@ -262,19 +211,9 @@ fn apply_system_anchors(env: &WowLuaEnv) {
 
         emm.layoutApplyInProgress = false
         pcall(emm.UpdateActionBarPositions, emm)
-    "#,
-    );
-}
+    "#;
 
-/// Fix MainActionBar NaN size after UpdateSystems.
-///
-/// Layout() produces NaN because the bar has no size yet when children try
-/// to resolve anchors relative to it (chicken-and-egg). Compute the bar
-/// size directly from the button grid, then re-run
-/// UpdateActionBarPositions to set the correct BOTTOMLEFT anchor.
-fn fix_action_bar_nan_size(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
+const FIX_ACTION_BAR_NAN_SIZE_LUA: &str = r#"
         if not MainActionBar then return end
         local w, h = MainActionBar:GetSize()
         if w == 562 and h == 45 then return end
@@ -303,8 +242,66 @@ fn fix_action_bar_nan_size(env: &WowLuaEnv) {
         MainActionBar:SetSize(lastOx + buttonWidth, buttonHeight)
         pcall(EditModeManagerFrame.UpdateActionBarPositions,
               EditModeManagerFrame)
-    "#,
-    );
+    "#;
+
+/// Initialize EditMode layout info and apply system anchors.
+///
+/// EDIT_MODE_LAYOUTS_UPDATED fires during startup but UpdateLayoutInfo
+/// crashes partway through (cascading dependencies). This leaves
+/// layoutInfo nil. Manually set it up from C_EditMode.GetLayouts() +
+/// preset layouts, then call our custom InitSystemAnchors. Also ensures
+/// accountSettings is initialized so CanEnterEditMode() returns true.
+pub fn init_edit_mode_layout(env: &WowLuaEnv) {
+    log_step(env, "setup_layout_info", || {
+        setup_layout_info(env);
+    });
+    log_step(env, "apply_system_anchors", || {
+        apply_system_anchors(env);
+    });
+    log_step(env, "fix_action_bar_nan_size", || {
+        fix_action_bar_nan_size(env);
+    });
+    log_step(env, "fix_action_bar_scale", || {
+        fix_action_bar_scale(env);
+    });
+}
+
+/// Re-run the normal player-frame anchor path after startup events settle.
+///
+/// The player frame's edit-mode anchor path re-applies the cast bar anchor as
+/// a side effect. Post-event startup leaves that path unapplied in some
+/// headless/test flows, so explicitly replay it here instead of directly
+/// attaching the cast bar.
+pub fn reapply_player_frame_anchor(env: &WowLuaEnv) {
+    log_step(env, "reapply_player_frame_anchor", || {
+        let _ = env.exec(
+            r#"
+            if PlayerFrame and type(PlayerFrame.ApplySystemAnchor) == "function" then
+                pcall(PlayerFrame.ApplySystemAnchor, PlayerFrame)
+            end
+        "#,
+        );
+    });
+}
+
+/// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
+fn setup_layout_info(env: &WowLuaEnv) {
+    let _ = env.exec(SETUP_LAYOUT_INFO_LUA);
+}
+
+/// Apply preset layout anchors and settings to all EditMode system frames.
+fn apply_system_anchors(env: &WowLuaEnv) {
+    let _ = env.exec(APPLY_SYSTEM_ANCHORS_LUA);
+}
+
+/// Fix MainActionBar NaN size after UpdateSystems.
+///
+/// Layout() produces NaN because the bar has no size yet when children try
+/// to resolve anchors relative to it (chicken-and-egg). Compute the bar
+/// size directly from the button grid, then re-run
+/// UpdateActionBarPositions to set the correct BOTTOMLEFT anchor.
+fn fix_action_bar_nan_size(env: &WowLuaEnv) {
+    let _ = env.exec(FIX_ACTION_BAR_NAN_SIZE_LUA);
 }
 
 /// Force MainActionBar scale=1 after EditMode initialization.
