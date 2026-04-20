@@ -46,11 +46,34 @@ fn catalog_shop_loads_and_populates_navigation_and_products() {
         "Blizzard_CatalogShop should load successfully: reason={reason:?}"
     );
 
+    {
+        let mut state = env.state().borrow_mut();
+        state.lua_errors.clear();
+        state.lua_error_records.clear();
+        state.lua_error_counts.clear();
+    }
+
+    env.exec("CatalogShopFrame:Show()")
+        .expect("CatalogShopFrame:Show() should run");
+
+    let targeted: Vec<String> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .clone()
+        .into_iter()
+        .filter(|message| message.contains("expected number, got nil at argument 1"))
+        .collect();
+
+    assert!(
+        targeted.is_empty(),
+        "CatalogShop should not emit the numeric startup regression when shown:\n  {}",
+        targeted.join("\n  ")
+    );
+
     let result: String = env
         .eval(
             r#"
-            CatalogShopFrame:Show()
-
             local categoryIDs = C_CatalogShop.GetAvailableCategoryIDs()
             if not categoryIDs or #categoryIDs == 0 then
                 return "no_categories"
@@ -97,4 +120,354 @@ fn catalog_shop_loads_and_populates_navigation_and_products() {
         .expect("catalog shop UI should be queryable");
 
     assert_eq!(result, "Apprentice Rider Bundle");
+}
+
+#[test]
+fn catalog_shop_debug_numeric_error_without_seeded_shop_refresh() {
+    let env = load_full_game_ui();
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+    env.exec_rilua_secure(
+        r#"
+        __catalog_shop_original_open = C_CatalogShop.OpenCatalogShopInteractionFromShop
+        C_CatalogShop.OpenCatalogShopInteractionFromShop = function()
+            return "debug-no-refresh"
+        end
+        "#,
+    )
+    .expect("should patch C_CatalogShop.OpenCatalogShopInteractionFromShop");
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.lua_errors.clear();
+        state.lua_error_records.clear();
+        state.lua_error_counts.clear();
+    }
+
+    env.exec("CatalogShopFrame:Show()")
+        .expect("CatalogShopFrame:Show() should run");
+
+    let targeted: Vec<String> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .clone()
+        .into_iter()
+        .filter(|message| message.contains("expected number, got nil at argument 1"))
+        .collect();
+
+    assert!(
+        targeted.is_empty(),
+        "CatalogShop numeric error still occurs with seeded shop refresh disabled:\n  {}",
+        targeted.join("\n  ")
+    );
+}
+
+#[test]
+fn catalog_shop_debug_seeded_refresh_step_probe() {
+    let env = load_full_game_ui();
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+    let variants = [
+        (
+            "data_refresh_only",
+            r#"
+            local session_id = "debug-step-data"
+            CatalogShopFrame.shoppingSessionUUIDStr = session_id
+            CatalogShopFrame:OnEvent_CatalogShop("CATALOG_SHOP_DATA_REFRESH", session_id)
+            "#,
+        ),
+        (
+            "fetch_success_only",
+            r#"
+            local session_id = "debug-step-fetch"
+            CatalogShopFrame.shoppingSessionUUIDStr = session_id
+            CatalogShopFrame:OnEvent_CatalogShop("CATALOG_SHOP_FETCH_SUCCESS", session_id)
+            "#,
+        ),
+        (
+            "category_selected_only",
+            r#"
+            local category_ids = C_CatalogShop.GetAvailableCategoryIDs()
+            CatalogShopFrame:OnCategorySelected(category_ids and category_ids[1])
+            "#,
+        ),
+        (
+            "seeded_refresh_without_category_selected",
+            r#"
+            local session_id = "debug-step-seeded"
+            CatalogShopFrame.shoppingSessionUUIDStr = session_id
+            CatalogShopFrame:OnEvent_CatalogShop("CATALOG_SHOP_DATA_REFRESH", session_id)
+            CatalogShopFrame:OnEvent_CatalogShop("CATALOG_SHOP_FETCH_SUCCESS", session_id)
+            "#,
+        ),
+        (
+            "header_set_categories_only",
+            r#"
+            local category_ids = C_CatalogShop.GetAvailableCategoryIDs()
+            CatalogShopFrame.HeaderFrame:SetCategories(category_ids)
+            "#,
+        ),
+        (
+            "data_refreshed_event_only",
+            r#"
+            EventRegistry:TriggerEvent("CatalogShop.DataRefreshed")
+            "#,
+        ),
+        (
+            "header_set_categories_without_nav_update_notifications",
+            r#"
+            local original = NavigationBarMixin.UpdateNotifications
+            NavigationBarMixin.UpdateNotifications = function() end
+            local category_ids = C_CatalogShop.GetAvailableCategoryIDs()
+            CatalogShopFrame.HeaderFrame:SetCategories(category_ids)
+            NavigationBarMixin.UpdateNotifications = original
+            "#,
+        ),
+        (
+            "header_set_categories_without_nav_init",
+            r#"
+            local original = NavigationBarMixin.Init
+            NavigationBarMixin.Init = function() end
+            local category_ids = C_CatalogShop.GetAvailableCategoryIDs()
+            CatalogShopFrame.HeaderFrame:SetCategories(category_ids)
+            NavigationBarMixin.Init = original
+            "#,
+        ),
+    ];
+
+    let mut failing_variants = Vec::new();
+    for (label, code) in variants {
+        {
+            let mut state = env.state().borrow_mut();
+            state.lua_errors.clear();
+            state.lua_error_records.clear();
+            state.lua_error_counts.clear();
+        }
+
+        env.exec(code)
+            .unwrap_or_else(|error| panic!("{label} probe should run: {error}"));
+
+        let targeted: Vec<String> = env
+            .state()
+            .borrow()
+            .lua_errors
+            .clone()
+            .into_iter()
+            .filter(|message| message.contains("expected number, got nil at argument 1"))
+            .collect();
+
+        if !targeted.is_empty() {
+            failing_variants.push(format!("{label}: {}", targeted.join(" | ")));
+        }
+    }
+
+    assert!(
+        failing_variants.is_empty(),
+        "CatalogShop seeded refresh steps still emit numeric errors:\n  {}",
+        failing_variants.join("\n  ")
+    );
+}
+
+#[test]
+fn catalog_shop_seeded_refresh_reports_nil_numeric_c_api_calls() {
+    let env = load_full_game_ui();
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+    env.exec_rilua_secure(
+        r##"
+        local bad_calls = {}
+        local original = {}
+        local names = {
+            "GetCategoryInfo",
+            "GetProductInfo",
+            "GetCatalogShopProductDisplayInfo",
+            "GetProductIDsForCategory",
+            "GetProductIDsForCategorySection",
+            "GetProductSortOrder",
+            "GetProductAvailabilityTimeRemainingSecs",
+            "GetProductIDsForBundle",
+            "GetFirstCategoryByProductID",
+            "ProductDisplayedTelemetry",
+            "GetCategorySectionInfo",
+        }
+
+        for _, name in ipairs(names) do
+            local fn = C_CatalogShop[name]
+            if type(fn) == "function" then
+                original[name] = fn
+                C_CatalogShop[name] = function(...)
+                    if select("#", ...) >= 1 and select(1, ...) == nil then
+                        table.insert(bad_calls, name)
+                    end
+                    return fn(...)
+                end
+            end
+        end
+
+        __catalog_shop_bad_numeric_calls = bad_calls
+        "##,
+    )
+    .expect("should install CatalogShop numeric argument probe");
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.lua_errors.clear();
+        state.lua_error_records.clear();
+        state.lua_error_counts.clear();
+    }
+
+    let session_id = "debug-step-data";
+    env.exec(&format!(
+        r#"
+        CatalogShopFrame.shoppingSessionUUIDStr = "{session_id}"
+        CatalogShopFrame:OnEvent_CatalogShop("CATALOG_SHOP_DATA_REFRESH", "{session_id}")
+        "#
+    ))
+    .expect("seeded data refresh probe should run");
+
+    let bad_calls: Vec<String> = env
+        .eval(
+            r#"
+            return __catalog_shop_bad_numeric_calls or {}
+            "#,
+        )
+        .expect("should read CatalogShop numeric argument probe");
+
+    assert!(
+        bad_calls.is_empty(),
+        "CatalogShop seeded refresh should not call numeric C APIs with nil first arguments: {bad_calls:?}"
+    );
+}
+
+#[test]
+fn catalog_shop_bundle_card_uses_selected_model_scene_id_when_default_is_missing() {
+    let env = load_full_game_ui();
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+    env.exec(
+        r#"
+        local seen_model_scene_id = nil
+        CatalogShopUtil.SetupModelSceneForBundle = function(modelScene, modelSceneID, displayData, ...)
+            seen_model_scene_id = modelSceneID
+        end
+
+        local card = CreateFrame("Button", "CatalogShopCardProbe", UIParent, "DefaultCatalogShopCardTemplate")
+        card.useWideCardSettings = false
+        card.productInfo = {
+            catalogShopProductID = 1,
+            cardDisplayData = {
+                selectedModelSceneID = 4242,
+                defaultModelSceneID = nil,
+                overrideModelSceneID = 4242,
+            },
+            isBundleChild = false,
+            categoryID = 1,
+        }
+
+        local displayInfo = {
+            defaultCardModelSceneID = nil,
+            overrideCardModelSceneID = 4242,
+            selectedModelSceneID = 4242,
+            hasUnknownLicense = false,
+            productType = CatalogShopConstants.ProductType.Bundle,
+        }
+
+        card:SetModelScene(card.productInfo, true, displayInfo, CatalogShopConstants.ProductType.Bundle)
+        assert(seen_model_scene_id == 4242, "bundle cards should use the selected scene id when the default is missing")
+        "#,
+    )
+    .expect("bundle card model scene fallback should run");
+}
+
+#[test]
+fn catalog_shop_product_display_translation_uses_override_scene_when_default_is_missing() {
+    let env = load_full_game_ui();
+
+    env.exec(
+        r#"
+        local original_get_model_scene_info_by_id = C_ModelInfo.GetModelSceneInfoByID
+        local seen_model_scene_id = nil
+        C_ModelInfo.GetModelSceneInfoByID = function(modelSceneID)
+            seen_model_scene_id = modelSceneID
+            return "mock", {}, {}, 0
+        end
+
+        local displayInfo = CatalogShopUtil.TranslateProductInfoToProductDisplayData(
+            { productType = CatalogShopConstants.ProductType.Bundle },
+            nil,
+            4242
+        )
+
+        C_ModelInfo.GetModelSceneInfoByID = original_get_model_scene_info_by_id
+
+        assert(seen_model_scene_id == 4242, "translation should fall back to the override scene id")
+        assert(displayInfo.selectedModelSceneID == 4242, "translation should preserve the selected scene id")
+        "#,
+    )
+    .expect("catalog shop product display translation should run");
+}
+
+#[test]
+fn catalog_shop_load_does_not_request_nil_model_scene_ids() {
+    let env = load_full_game_ui();
+
+    env.exec(
+        r#"
+        local original = C_ModelInfo.GetModelSceneInfoByID
+        __catalog_shop_nil_model_scene_calls = {}
+        C_ModelInfo.GetModelSceneInfoByID = function(modelSceneID)
+            if modelSceneID == nil then
+                __catalog_shop_nil_model_scene_calls[#__catalog_shop_nil_model_scene_calls + 1] = debug.traceback("nil model scene id")
+                return nil
+            end
+            return original(modelSceneID)
+        end
+        "#,
+    )
+    .expect("should install model scene probe");
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+    let calls: String = env
+        .eval("return table.concat(__catalog_shop_nil_model_scene_calls or {}, '\\n---\\n')")
+        .expect("nil model scene call log should stringify");
+    assert!(
+        calls.is_empty(),
+        "CatalogShop should not request nil model scene ids:\n{calls}"
+    );
 }

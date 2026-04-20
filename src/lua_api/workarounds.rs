@@ -2,6 +2,50 @@
 
 use std::time::Instant;
 
+const CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA: &str = r#"
+    if rawget(_G, "__wow_catalog_shop_product_card_defaults_wrapped") then
+        return
+    end
+
+    if type(CatalogShopDefaultProductCardMixin) ~= "table"
+        or type(CatalogShopDefaultProductCardMixin.Layout) ~= "function" then
+        return
+    end
+
+    local original_layout = CatalogShopDefaultProductCardMixin.Layout
+
+    local function resolve_product_id(card)
+        if type(card.productInfo) == "table"
+            and type(card.productInfo.catalogShopProductID) == "number" then
+            return card.productInfo.catalogShopProductID
+        end
+
+        if type(card.GetElementData) == "function" then
+            local elementData = card:GetElementData()
+            if type(elementData) == "table" then
+                local productID = elementData.catalogShopProductID or elementData.productID
+                if type(productID) == "number" then
+                    if type(card.productInfo) == "table" then
+                        card.productInfo.catalogShopProductID = productID
+                    end
+                    return productID
+                end
+            end
+        end
+
+        return nil
+    end
+
+    CatalogShopDefaultProductCardMixin.Layout = function(self, ...)
+        if resolve_product_id(self) == nil then
+            return
+        end
+        return original_layout(self, ...)
+    end
+
+    rawset(_G, "__wow_catalog_shop_product_card_defaults_wrapped", true)
+"#;
+
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_edit_mode_manager", || {
         crate::lua_api::workarounds_editmode::patch_edit_mode_manager(env);
@@ -44,6 +88,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     });
     log_step(env, "patch_action_bar_button_event_fanout", || {
         patch_action_bar_button_event_fanout(env);
+    });
+    log_step(env, "patch_catalog_shop_product_card_defaults", || {
+        patch_catalog_shop_product_card_defaults(env);
     });
     log_step(env, "patch_game_time_defaults", || {
         patch_game_time_defaults(env);
@@ -185,6 +232,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     }
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
+    }
+    if addon_name == "Blizzard_CatalogShop" {
+        let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
     }
     if addon_name == "Blizzard_DamageMeter" {
         let _ = patch_damage_meter_initial_scrollbox_extent(env);
@@ -520,6 +570,10 @@ fn patch_game_time_defaults(env: &crate::lua_api::WowLuaEnv) {
         end
         "#,
     );
+}
+
+fn patch_catalog_shop_product_card_defaults(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
 }
 
 fn patch_fog_of_war_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
