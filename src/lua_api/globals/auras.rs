@@ -35,64 +35,9 @@ use rilua::{LuaResult, RustFn, Val};
 pub fn register_all(state: &mut LuaState) {
     let ns = ensure_c_unit_auras(state);
     ensure_runtime_aura_state(state, ns);
-    install(state, ns, "GetAuraSlots", get_aura_slots);
-    install(state, ns, "GetAuraDataBySlot", get_aura_data_by_slot);
-    install(state, ns, "GetAuraDataByIndex", get_aura_data_by_index);
-    install(
-        state,
-        ns,
-        "GetAuraDataByAuraInstanceID",
-        get_aura_data_by_aura_instance_id,
-    );
-    install(
-        state,
-        ns,
-        "GetAuraDataBySpellName",
-        get_aura_data_by_spell_name,
-    );
-    install(state, ns, "GetBuffDataByIndex", get_buff_data_by_index);
-    install(state, ns, "GetDebuffDataByIndex", get_debuff_data_by_index);
-    install(
-        state,
-        ns,
-        "GetPlayerAuraBySpellID",
-        get_player_aura_by_spell_id,
-    );
-    install(state, ns, "AddBlockedAura", add_blocked_aura);
-    install(
-        state,
-        ns,
-        "SwitchAuraDataProvider",
-        switch_aura_data_provider,
-    );
-    install(state, ns, "ResetAuraDataProvider", reset_aura_data_provider);
-
-    install_global(state, "GetPlayerAuraBySpellID", get_player_aura_by_spell_id);
-    install_global(state, "UnitBuff", unit_buff);
-    install_global(state, "UnitDebuff", unit_debuff);
-    install_global(state, "UnitAura", unit_aura);
-
-    let aura_util = ensure_global_table(state, "AuraUtil");
-    install(
-        state,
-        aura_util,
-        "UnpackAuraData",
-        aura_util_unpack_aura_data,
-    );
-    install(state, aura_util, "ForEachAura", aura_util_for_each_aura);
-    install(state, aura_util, "FindAura", aura_util_find_aura);
-    install(
-        state,
-        aura_util,
-        "FindAuraByName",
-        aura_util_find_aura_by_name,
-    );
-    install(
-        state,
-        aura_util,
-        "GetAuraDataByAuraInstanceID",
-        aura_util_get_aura_data_by_aura_instance_id,
-    );
+    install_c_unit_auras_methods(state, ns);
+    install_legacy_aura_globals(state);
+    install_aura_util_methods(state);
 }
 
 fn ensure_c_unit_auras(state: &mut LuaState) -> Val {
@@ -117,8 +62,61 @@ fn install(state: &mut LuaState, ns: Val, name: &'static str, func: RustFn) {
     table_set(state, ns, name, Val::Function(closure_ref));
 }
 
-fn install_global(state: &mut LuaState, name: &'static str, func: RustFn) {
-    install(state, Val::Table(state.global), name, func);
+fn install_methods(state: &mut LuaState, ns: Val, methods: &[(&'static str, RustFn)]) {
+    for (name, func) in methods {
+        install(state, ns, name, *func);
+    }
+}
+
+fn install_c_unit_auras_methods(state: &mut LuaState, ns: Val) {
+    install_methods(
+        state,
+        ns,
+        &[
+            ("GetAuraSlots", get_aura_slots),
+            ("GetAuraDataBySlot", get_aura_data_by_slot),
+            ("GetAuraDataByIndex", get_aura_data_by_index),
+            (
+                "GetAuraDataByAuraInstanceID",
+                get_aura_data_by_aura_instance_id,
+            ),
+            ("GetAuraDataBySpellName", get_aura_data_by_spell_name),
+            ("GetBuffDataByIndex", get_buff_data_by_index),
+            ("GetDebuffDataByIndex", get_debuff_data_by_index),
+            ("GetPlayerAuraBySpellID", get_player_aura_by_spell_id),
+            ("AddBlockedAura", add_blocked_aura),
+            ("SwitchAuraDataProvider", switch_aura_data_provider),
+            ("ResetAuraDataProvider", reset_aura_data_provider),
+        ],
+    );
+}
+
+fn install_legacy_aura_globals(state: &mut LuaState) {
+    let legacy_globals: &[(&'static str, RustFn)] = &[
+        ("GetPlayerAuraBySpellID", get_player_aura_by_spell_id),
+        ("UnitBuff", unit_buff),
+        ("UnitDebuff", unit_debuff),
+        ("UnitAura", unit_aura),
+    ];
+    install_methods(state, Val::Table(state.global), legacy_globals);
+}
+
+fn install_aura_util_methods(state: &mut LuaState) {
+    let aura_util = ensure_global_table(state, "AuraUtil");
+    install_methods(
+        state,
+        aura_util,
+        &[
+            ("UnpackAuraData", aura_util_unpack_aura_data),
+            ("ForEachAura", aura_util_for_each_aura),
+            ("FindAura", aura_util_find_aura),
+            ("FindAuraByName", aura_util_find_aura_by_name),
+            (
+                "GetAuraDataByAuraInstanceID",
+                aura_util_get_aura_data_by_aura_instance_id,
+            ),
+        ],
+    );
 }
 
 fn ensure_runtime_aura_state(state: &mut LuaState, ns: Val) {

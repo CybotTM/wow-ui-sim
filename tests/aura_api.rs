@@ -160,6 +160,33 @@ fn test_aura_util_exists() {
 }
 
 #[test]
+fn test_aura_registration_surfaces_exist() {
+    let env = env();
+    let (
+        get_aura_slots,
+        get_player_aura_by_spell_id,
+        unit_aura,
+        aura_util_for_each,
+        aura_util_find_by_name,
+    ): (String, String, String, String, String) = env
+        .eval(
+            r#"
+            return type(C_UnitAuras.GetAuraSlots),
+                   type(GetPlayerAuraBySpellID),
+                   type(UnitAura),
+                   type(AuraUtil.ForEachAura),
+                   type(AuraUtil.FindAuraByName)
+        "#,
+        )
+        .unwrap();
+    assert_eq!(get_aura_slots, "function");
+    assert_eq!(get_player_aura_by_spell_id, "function");
+    assert_eq!(unit_aura, "function");
+    assert_eq!(aura_util_for_each, "function");
+    assert_eq!(aura_util_find_by_name, "function");
+}
+
+#[test]
 fn test_aura_util_for_each_aura() {
     let env = env();
     env.eval::<()>("AuraUtil.ForEachAura('player', 'HELPFUL', nil, function() end)")
