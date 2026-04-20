@@ -19,6 +19,20 @@ The split is deliberate:
 - addon-bootstrap tests should verify load-order-sensitive behavior
 - the heavier bootstrap path should not become the default for every regression
 
+## Execution Home
+
+The addon-bootstrap lane lives under `cargo test`, not a dedicated
+`wow-sim run-tests` mode.
+
+- the assertions need direct Rust access to loader state, captured Lua errors,
+  and frame-tree state
+- `cargo test` keeps the regression close to the Rust systems it exercises and
+  in the normal CI path
+- `run-tests` stays reserved for addon-authored Lua suites and black-box addon
+  compatibility checks
+- if we ever need a Lua-facing mirror, it should wrap this Rust lane instead of
+  becoming the source of truth
+
 ## First Smoke Targets
 
 The first addon-bootstrap smoke targets are pinned to four representative

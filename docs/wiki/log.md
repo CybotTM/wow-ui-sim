@@ -33,6 +33,14 @@ that preload noise, then loads only the target closure; each target asserts no
 recorded Lua errors, the expected global/frame pair, and one or two
 representative behaviors.
 
+## [2026-04-20] update | blizzard ui addon-bootstrap test home
+
+Documented that addon-bootstrap regressions stay in `cargo test`, while
+`wow-sim run-tests` remains the lane for addon-authored Lua suites. The key
+tradeoff is that the smoke harness needs direct Rust access to loader state,
+recorded Lua errors, and frame-tree assertions, which is easier to maintain in
+the normal Rust test binaries than in a Lua-only wrapper.
+
 ## [2026-04-20] update | keybinding spellbook direct dispatch
 
 Updated `investigations/keybinding-system.md` with the spellbook follow-up.
