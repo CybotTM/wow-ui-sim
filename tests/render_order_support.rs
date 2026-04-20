@@ -2,19 +2,19 @@
 // a subset of the helpers, so per-binary dead_code warnings are expected.
 #![allow(dead_code)]
 
+#[path = "common/blizzard_addon_harness.rs"]
+mod blizzard_addon_harness;
 #[path = "common/blizzard_addon_manifest.rs"]
 mod blizzard_addon_manifest;
+#[path = "common/panel_fixtures.rs"]
+mod panel_fixtures;
 
 use image::RgbaImage;
+use rilua::Val;
 use std::path::{Path, PathBuf};
 use std::{cell::RefCell, rc::Rc};
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
-use wow_ui_sim::loader::{
-    BlizzardAddonOverride,
-    discover_blizzard_addon_closure_for_screen as load_blizzard_addon_closure_for_screen,
-    discover_blizzard_addon_closure_for_screen_with_overrides as load_blizzard_addon_closure_for_screen_with_overrides,
-    load_addon,
-};
+use wow_ui_sim::loader::discover_blizzard_addon_closure_for_screen as load_blizzard_addon_closure_for_screen;
 use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
 use wow_ui_sim::render::{GlyphAtlas, QuadBatch, QuadVertex, TextureRequest, WowFontSystem};
 use wow_ui_sim::screen::ScreenKind;
@@ -285,9 +285,14 @@ pub(crate) fn discover_blizzard_addon_closure_for_screen_with_overrides(
     blizzard_ui_dir: &Path,
     screen: ScreenKind,
     roots: &[&str],
-    overrides: &[BlizzardAddonOverride<'_>],
+    overrides: &[wow_ui_sim::loader::BlizzardAddonOverride<'_>],
 ) -> Vec<(String, PathBuf)> {
-    load_blizzard_addon_closure_for_screen_with_overrides(blizzard_ui_dir, screen, roots, overrides)
+    wow_ui_sim::loader::discover_blizzard_addon_closure_for_screen_with_overrides(
+        blizzard_ui_dir,
+        screen,
+        roots,
+        overrides,
+    )
 }
 
 pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
@@ -296,29 +301,10 @@ pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
 
 pub(crate) fn env_with_root_addons_ui_with_overrides(
     roots: &[&str],
-    overrides: &[BlizzardAddonOverride<'_>],
+    overrides: &[wow_ui_sim::loader::BlizzardAddonOverride<'_>],
 ) -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
-
     let ui = blizzard_ui_dir();
-    {
-        let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![ui.clone()];
-    }
-
-    for (name, toc_path) in discover_blizzard_addon_closure_for_screen_with_overrides(
-        &ui,
-        ScreenKind::Game,
-        roots,
-        overrides,
-    ) {
-        if let Err(err) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[isolated load {name}] FAILED: {err}");
-        }
-    }
-
+    let (env, _) = blizzard_addon_harness::build_blizzard_addon_closure_env(&ui, roots, overrides);
     env.apply_post_load_workarounds();
     wow_ui_sim::startup::settle_headless_startup(&env);
     env
@@ -327,8 +313,19 @@ pub(crate) fn env_with_root_addons_ui_with_overrides(
 pub(crate) fn env_with_isolated_world_map_ui() -> WowLuaEnv {
     env_with_root_addons_ui_with_overrides(
         ISOLATED_WORLD_MAP_ROOT_ADDONS,
-        self::blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
+        blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
     )
+}
+
+pub(crate) fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
+    let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
+}
+
+pub(crate) fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reload: bool) {
+    let _ = env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[Val::Bool(initial_login), Val::Bool(is_reload)],
+    );
 }
 
 pub(crate) fn env_with_isolated_world_map() -> WowLuaEnv {

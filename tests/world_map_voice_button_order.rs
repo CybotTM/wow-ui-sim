@@ -1,12 +1,8 @@
-#[path = "common/blizzard_addon_manifest.rs"]
-mod blizzard_addon_manifest;
 mod common;
 
 use std::path::PathBuf;
 use wow_ui_sim::iced_app::compute_frame_rect;
-use wow_ui_sim::loader::{discover_blizzard_addon_closure_for_screen_with_overrides, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::screen::ScreenKind;
 
 const WORLD_MAP_ROOT_ADDONS: &[&str] = &[
     "Blizzard_FrameEffects",
@@ -52,20 +48,9 @@ fn env_with_root_addons_ui_with_overrides(
     roots: &[&str],
     overrides: &[wow_ui_sim::loader::BlizzardAddonOverride<'_>],
 ) -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("failed to create env");
     let ui = blizzard_ui_dir();
-
-    for (name, toc_path) in discover_blizzard_addon_closure_for_screen_with_overrides(
-        &ui,
-        ScreenKind::Game,
-        roots,
-        overrides,
-    ) {
-        if let Err(err) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[world-map voice button order load {name}] FAILED: {err}");
-        }
-    }
-
+    let (env, _) =
+        common::blizzard_addon_harness::build_blizzard_addon_closure_env(&ui, roots, overrides);
     env.apply_post_load_workarounds();
     wow_ui_sim::startup::settle_headless_startup(&env);
     env
@@ -83,7 +68,7 @@ fn chat_frame_voice_button_renders_below_overlapping_world_map_widgets() {
     common::with_timeout(120, move || {
         let env = env_with_root_addons_ui_with_overrides(
             WORLD_MAP_ROOT_ADDONS,
-            blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
+            common::blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
         );
         open_world_map(&env);
 

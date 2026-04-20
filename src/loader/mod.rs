@@ -406,10 +406,7 @@ fn collect_declared_dependency_closure_with_overrides(
 
         if let Some(extra_roots) = extra_roots_by_addon.get(name.as_str()) {
             for extra_root in extra_roots {
-                let extra_root = (*extra_root).to_string();
-                if queued.insert(extra_root.clone()) {
-                    pending.push(extra_root);
-                }
+                queue_pending_addon((*extra_root).to_string(), &mut pending, &mut queued);
             }
         }
 
@@ -418,13 +415,19 @@ fn collect_declared_dependency_closure_with_overrides(
         };
 
         for dep in toc.dependencies().into_iter().chain(toc.optional_deps()) {
-            if toc_map.contains_key(&dep) && queued.insert(dep.clone()) {
-                pending.push(dep);
+            if toc_map.contains_key(&dep) {
+                queue_pending_addon(dep, &mut pending, &mut queued);
             }
         }
     }
 
     wanted
+}
+
+fn queue_pending_addon(name: String, pending: &mut Vec<String>, queued: &mut HashSet<String>) {
+    if queued.insert(name.clone()) {
+        pending.push(name);
+    }
 }
 
 fn build_extra_roots_map<'a>(
@@ -639,31 +642,7 @@ fn emit_addon_recursive(
         return;
     }
 
-    let deps = addons
-        .get(name)
-        .map(|(_, toc)| {
-            let mut seen = HashSet::new();
-            let mut deps = Vec::new();
-            for dep in toc.dependencies() {
-                if seen.insert(dep.clone()) {
-                    deps.push(dep);
-                }
-            }
-            for dep in toc.optional_deps() {
-                if addons.contains_key(&dep) && seen.insert(dep.clone()) {
-                    deps.push(dep);
-                }
-            }
-            if let Some(extra_roots) = extra_dependencies.get(name) {
-                for dep in extra_roots {
-                    if addons.contains_key(dep) && seen.insert(dep.clone()) {
-                        deps.push(dep.clone());
-                    }
-                }
-            }
-            deps
-        })
-        .unwrap_or_default();
+    let deps = collect_emit_dependencies(name, addons, extra_dependencies);
 
     for dep in deps {
         emit_addon_recursive(
@@ -683,6 +662,41 @@ fn emit_addon_recursive(
         result.push((name.to_string(), toc_path));
         loaded.insert(name.to_string());
         emit_load_with(name, load_with_map, addons, result, loaded);
+    }
+}
+
+fn collect_emit_dependencies(
+    name: &str,
+    addons: &HashMap<String, (PathBuf, TocFile)>,
+    extra_dependencies: &HashMap<String, Vec<String>>,
+) -> Vec<String> {
+    let Some((_, toc)) = addons.get(name) else {
+        return Vec::new();
+    };
+
+    let mut seen = HashSet::new();
+    let mut deps = Vec::new();
+    append_emit_dependencies(&mut deps, &mut seen, toc.dependencies(), addons);
+    append_emit_dependencies(&mut deps, &mut seen, toc.optional_deps(), addons);
+    append_emit_dependencies(
+        &mut deps,
+        &mut seen,
+        extra_dependencies.get(name).cloned().unwrap_or_default(),
+        addons,
+    );
+    deps
+}
+
+fn append_emit_dependencies(
+    deps: &mut Vec<String>,
+    seen: &mut HashSet<String>,
+    candidates: Vec<String>,
+    addons: &HashMap<String, (PathBuf, TocFile)>,
+) {
+    for dep in candidates {
+        if addons.contains_key(&dep) && seen.insert(dep.clone()) {
+            deps.push(dep);
+        }
     }
 }
 

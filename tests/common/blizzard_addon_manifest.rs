@@ -5,6 +5,7 @@ use wow_ui_sim::loader::BlizzardAddonOverride;
 /// `Blizzard_Channels` is not pulled in by the isolated world-map roots
 /// themselves, but the combined voice-button render-order checks need it
 /// so Blizzard's implicit channel UI path is present.
+#[allow(dead_code)]
 pub const WORLD_MAP_VOICE_CHAT_OVERRIDES: &[BlizzardAddonOverride<'static>] =
     &[BlizzardAddonOverride {
         addon: "Blizzard_WorldMap",

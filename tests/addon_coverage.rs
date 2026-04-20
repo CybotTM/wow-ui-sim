@@ -972,6 +972,41 @@ fn load_addon_root_for_closure(
     }
 }
 
+fn closure_runtime_failure_message(
+    env: &WowLuaEnv,
+    closure: &LoadOnDemandAddonClosure,
+    representative: &str,
+    startup_addons: &HashSet<String>,
+    known_runtime_counts: &BTreeMap<String, usize>,
+) -> Option<String> {
+    let state = env.state().borrow();
+    let grouped_errors = grouped_errors_by_addon(&state);
+    let actual_counts = actual_error_counts(&grouped_errors);
+    let increases =
+        classify_error_count_increases_from_baseline(known_runtime_counts, &actual_counts);
+    let invalid_addons: Vec<_> = grouped_errors
+        .keys()
+        .filter(|addon_name| {
+            addon_name.as_str() != "<unknown>"
+                && !startup_addons.contains(*addon_name)
+                && !closure.addons.contains(*addon_name)
+        })
+        .cloned()
+        .collect();
+    let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
+
+    (unknown_count > 0 || !invalid_addons.is_empty() || !increases.is_empty()).then(|| {
+        format!(
+            "{representative}: increased [{}], invalid_addons={:?}, unknown_count={}, actual counts=[{}]\n{}",
+            format_error_count_changes(&increases),
+            invalid_addons,
+            unknown_count,
+            format_error_count_map(&actual_counts),
+            format_per_addon_report(&grouped_errors),
+        )
+    })
+}
+
 fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usize) {
     with_isolated_addon_coverage_state(|| {
         common::with_perf_lock(|| {
@@ -998,32 +1033,14 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
                     let Some(representative) = representative else {
                         continue;
                     };
-                    let state = env.state().borrow();
-                    let grouped_errors = grouped_errors_by_addon(&state);
-                    let actual_counts = actual_error_counts(&grouped_errors);
-                    let increases = classify_error_count_increases_from_baseline(
+                    if let Some(failure) = closure_runtime_failure_message(
+                        &env,
+                        closure,
+                        &representative,
+                        &startup_addons,
                         &known_runtime_counts,
-                        &actual_counts,
-                    );
-                    let invalid_addons: Vec<_> = grouped_errors
-                        .keys()
-                        .filter(|addon_name| {
-                            addon_name.as_str() != "<unknown>"
-                                && !startup_addons.contains(*addon_name)
-                                && !closure.addons.contains(*addon_name)
-                        })
-                        .cloned()
-                        .collect();
-                    let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
-                    if unknown_count > 0 || !invalid_addons.is_empty() || !increases.is_empty() {
-                        closure_failures.push(format!(
-                            "{representative}: increased [{}], invalid_addons={:?}, unknown_count={}, actual counts=[{}]\n{}",
-                            format_error_count_changes(&increases),
-                            invalid_addons,
-                            unknown_count,
-                            format_error_count_map(&actual_counts),
-                            format_per_addon_report(&grouped_errors),
-                        ));
+                    ) {
+                        closure_failures.push(failure);
                     }
                 }
 

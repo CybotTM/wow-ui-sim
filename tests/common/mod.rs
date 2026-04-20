@@ -1,5 +1,7 @@
 //! Shared test helpers.
 
+pub mod blizzard_addon_harness;
+pub mod blizzard_addon_manifest;
 pub mod panel_fixtures;
 
 use rilua::Val;
