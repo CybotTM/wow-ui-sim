@@ -427,7 +427,7 @@ fn resolve_frame_layout_rect(
     cache: &mut LayoutCache,
 ) -> LayoutRect {
     if frame.anchors.is_empty() {
-        return anchorless_rect(frame, parent_rect, scale);
+        return anchorless_rect(registry, frame, parent_rect, scale);
     }
     if frame.anchors.len() >= 2 {
         let edges = resolve_multi_anchor_edges(
@@ -453,16 +453,32 @@ fn resolve_frame_layout_rect(
 }
 
 fn anchorless_rect(
+    registry: &WidgetRegistry,
     frame: &crate::widget::Frame,
     parent_rect: LayoutRect,
     scale: f32,
 ) -> LayoutRect {
+    let width = frame.width * scale;
+    let height = frame.height * scale;
+    if width == 0.0 && height == 0.0 && is_statusbar_bar_child(registry, frame) {
+        return parent_rect;
+    }
     LayoutRect {
         x: parent_rect.x,
         y: parent_rect.y,
-        width: frame.width * scale,
-        height: frame.height * scale,
+        width,
+        height,
     }
+}
+
+fn is_statusbar_bar_child(registry: &WidgetRegistry, frame: &crate::widget::Frame) -> bool {
+    let Some(parent_id) = frame.parent_id else {
+        return false;
+    };
+    let Some(parent) = registry.get(parent_id) else {
+        return false;
+    };
+    parent.statusbar_bar_id == Some(frame.id)
 }
 
 fn apply_frame_layout_adjustments(
