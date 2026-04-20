@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 
 /// Per-textType style (h1, h2, h3, p, etc.)
+#[derive(Clone)]
 pub struct TextStyle {
     pub font: Option<String>,
     pub font_size: f32,

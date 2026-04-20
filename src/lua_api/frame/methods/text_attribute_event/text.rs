@@ -11,6 +11,7 @@ use crate::lua_api::methods::{
     create_table, frame_id_from_stack, get_or_create_frame_fields, registry_table_or_create,
     table_get, table_set, val_to_string,
 };
+use crate::lua_api::simple_html::{SimpleHtmlData, TextStyle};
 use crate::lua_api::state::SimState;
 use crate::lua_bridge::stack_val;
 use crate::widget::WidgetType;
@@ -78,6 +79,150 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
         replace_tooltip_lines(state, id, text, tooltip)?;
     }
     Ok(0)
+}
+
+fn is_simple_html_frame(state: &LuaState, id: u64) -> bool {
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| {
+            sim.widgets
+                .get(id)
+                .map(|frame| frame.widget_type == WidgetType::SimpleHTML)
+        })
+        .unwrap_or(false)
+}
+
+fn with_simple_html_data_mut<R>(
+    state: &mut LuaState,
+    id: u64,
+    f: impl FnOnce(&mut SimpleHtmlData) -> R,
+) -> Option<R> {
+    if !is_simple_html_frame(state, id) {
+        return None;
+    }
+    let mut sim = borrow_state_mut(state).ok()?;
+    Some(f(sim.simple_htmls.entry(id).or_default()))
+}
+
+fn simple_html_style<'a>(data: &'a mut SimpleHtmlData, text_type: &str) -> &'a mut TextStyle {
+    data.text_styles.entry(text_type.to_string()).or_default()
+}
+
+fn get_simple_html_font(
+    state: &mut LuaState,
+    id: u64,
+    text_type: String,
+) -> Option<(String, f32, String)> {
+    with_simple_html_data_mut(state, id, |data| {
+        let style = simple_html_style(data, &text_type);
+        let font = style
+            .font
+            .clone()
+            .unwrap_or_else(|| "Fonts\\FRIZQT__.TTF".to_string());
+        let flags = style.font_object.clone().unwrap_or_default();
+        (font, style.font_size, flags)
+    })
+}
+
+fn set_simple_html_font(
+    state: &mut LuaState,
+    id: u64,
+    text_type: String,
+    font: Option<String>,
+    size: Option<f32>,
+    flags: Option<String>,
+) {
+    let _ = with_simple_html_data_mut(state, id, |data| {
+        let style = simple_html_style(data, &text_type);
+        if let Some(font) = font {
+            style.font = Some(font);
+        }
+        if let Some(size) = size {
+            style.font_size = size;
+        }
+        if let Some(flags) = flags {
+            style.font_object = Some(flags);
+        }
+    });
+}
+
+fn get_simple_html_text_color(
+    state: &mut LuaState,
+    id: u64,
+    text_type: String,
+) -> Option<(f32, f32, f32, f32)> {
+    with_simple_html_data_mut(state, id, |data| {
+        simple_html_style(data, &text_type).text_color
+    })
+}
+
+fn set_simple_html_text_color(
+    state: &mut LuaState,
+    id: u64,
+    text_type: String,
+    color: (f32, f32, f32, f32),
+) {
+    let _ = with_simple_html_data_mut(state, id, |data| {
+        simple_html_style(data, &text_type).text_color = color;
+    });
+}
+
+fn resolved_frame_width(state: &LuaState, id: u64) -> f32 {
+    let Ok(sim) = borrow_state(state) else {
+        return 0.0;
+    };
+    let mut cache = crate::layout::LayoutCache::default();
+    crate::layout::compute_frame_rect_cached(
+        &sim.widgets,
+        id,
+        sim.screen_width,
+        sim.screen_height,
+        &mut cache,
+    )
+    .rect
+    .width
+    .max(0.0)
+}
+
+fn build_simple_html_text_data(state: &mut LuaState, id: u64, text: Option<String>) -> Val {
+    let Some(snapshot) = with_simple_html_data_mut(state, id, |data| {
+        (
+            data.hyperlink_format.clone(),
+            data.hyperlinks_enabled,
+            data.text_styles.clone(),
+        )
+    }) else {
+        return Val::Nil;
+    };
+
+    let table = create_table(state);
+    let hyperlink_format = create_string(state, &snapshot.0);
+    table_set(state, table, "hyperlinkFormat", hyperlink_format);
+    table_set(state, table, "hyperlinksEnabled", Val::Bool(snapshot.1));
+    if let Some(text) = text {
+        let text_value = create_string(state, &text);
+        table_set(state, table, "text", text_value);
+    }
+
+    let styles = create_table(state);
+    for (text_type, style) in snapshot.2 {
+        let style_table = create_table(state);
+        let font_value = style
+            .font
+            .as_ref()
+            .map(|font| create_string(state, font))
+            .unwrap_or(Val::Nil);
+        table_set(state, style_table, "font", font_value);
+        table_set(
+            state,
+            style_table,
+            "fontSize",
+            Val::Num(style.font_size as f64),
+        );
+        table_set(state, styles, &text_type, style_table);
+    }
+    table_set(state, table, "textStyles", styles);
+    table
 }
 
 fn strip_html_tags(text: &str) -> String {
@@ -394,6 +539,42 @@ pub(super) fn get_text_width(state: &mut LuaState) -> LuaResult<u32> {
     get_string_width(state)
 }
 
+pub(super) fn get_content_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let has_text = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame_text_value(&sim, frame, true))
+            .is_some_and(|text| !text.is_empty())
+    };
+    let height = if has_text {
+        let wrap_width = resolved_frame_width(state, id);
+        measure_text_height(state, id, (wrap_width > 0.0).then_some(wrap_width))
+    } else {
+        0.0
+    };
+    state.push(Val::Num(height));
+    Ok(1)
+}
+
+pub(super) fn get_text_data(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let text = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame.text.clone().or_else(|| frame.text_stripped.clone()))
+    };
+    let data = if is_simple_html_frame(state, id) {
+        build_simple_html_text_data(state, id, text)
+    } else {
+        create_table(state)
+    };
+    state.push(data);
+    Ok(1)
+}
+
 pub(super) fn get_line_height(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let sim = borrow_state(state)?;
@@ -496,7 +677,17 @@ pub(super) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_font(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    // TODO: SimpleHTML per-textType dispatch
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    if is_simple_html_frame(state, id) {
+        let font = val_to_string(state, stack_val(state, 3));
+        let size = match stack_val(state, 4) {
+            Val::Num(n) => Some(n as f32),
+            _ => None,
+        };
+        let flags = val_to_string(state, stack_val(state, 5));
+        set_simple_html_font(state, id, text_type, font, size, flags);
+        return Ok(0);
+    }
     let font = val_to_string(state, stack_val(state, 2));
     let size = match stack_val(state, 3) {
         Val::Num(n) => Some(n as f32),
@@ -531,7 +722,17 @@ fn apply_font_args(
 
 pub(super) fn get_font(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    // TODO: SimpleHTML per-textType dispatch
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    if is_simple_html_frame(state, id)
+        && let Some((font_path, font_size, flags)) = get_simple_html_font(state, id, text_type)
+    {
+        let font_path_val = create_string(state, &font_path);
+        let flags_val = create_string(state, &flags);
+        state.push(font_path_val);
+        state.push(Val::Num(font_size as f64));
+        state.push(flags_val);
+        return Ok(3);
+    }
     let sim = borrow_state(state)?;
     let frame = sim.widgets.get(id);
     let font_path = frame
@@ -719,12 +920,23 @@ pub(super) fn try_apply_default_text(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn set_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let enabled = matches!(stack_val(state, 2), Val::Bool(true));
+    if with_simple_html_data_mut(state, id, |data| {
+        data.hyperlinks_enabled = enabled;
+    })
+    .is_some()
+    {
+        return Ok(0);
+    }
     store_simple_attribute(state, id, "__hyperlinks_enabled", Val::Bool(enabled))?;
     Ok(0)
 }
 
 pub(super) fn get_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if let Some(enabled) = with_simple_html_data_mut(state, id, |data| data.hyperlinks_enabled) {
+        state.push(Val::Bool(enabled));
+        return Ok(1);
+    }
     let enabled = borrow_state(state)?
         .widgets
         .get(id)
@@ -736,13 +948,27 @@ pub(super) fn get_hyperlinks_enabled(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_hyperlink_format(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let value = stack_val(state, 2);
-    store_simple_attribute(state, id, "__hyperlink_format", value)?;
+    let value = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    if with_simple_html_data_mut(state, id, |data| {
+        data.hyperlink_format = value.clone();
+    })
+    .is_some()
+    {
+        return Ok(0);
+    }
+    let stored_value = create_string(state, &value);
+    store_simple_attribute(state, id, "__hyperlink_format", stored_value)?;
     Ok(0)
 }
 
 pub(super) fn get_hyperlink_format(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if let Some(value) = with_simple_html_data_mut(state, id, |data| data.hyperlink_format.clone())
+    {
+        let format_value = create_string(state, &value);
+        state.push(format_value);
+        return Ok(1);
+    }
     let value = borrow_state(state)?
         .widgets
         .get(id)
@@ -783,7 +1009,21 @@ pub(super) fn get_indented_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    // TODO: SimpleHTML per-textType dispatch
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    if is_simple_html_frame(state, id) {
+        set_simple_html_text_color(
+            state,
+            id,
+            text_type,
+            (
+                val_to_f32(stack_val(state, 3), 1.0),
+                val_to_f32(stack_val(state, 4), 1.0),
+                val_to_f32(stack_val(state, 5), 1.0),
+                val_to_f32(stack_val(state, 6), 1.0),
+            ),
+        );
+        return Ok(0);
+    }
     let r = val_to_f32(stack_val(state, 2), 1.0);
     let g = val_to_f32(stack_val(state, 3), 1.0);
     let b = val_to_f32(stack_val(state, 4), 1.0);
@@ -800,7 +1040,16 @@ pub(super) fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn get_text_color(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    // TODO: SimpleHTML per-textType dispatch
+    let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
+    if is_simple_html_frame(state, id)
+        && let Some((r, g, b, a)) = get_simple_html_text_color(state, id, text_type)
+    {
+        state.push(Val::Num(r as f64));
+        state.push(Val::Num(g as f64));
+        state.push(Val::Num(b as f64));
+        state.push(Val::Num(a as f64));
+        return Ok(4);
+    }
     let sim = borrow_state(state)?;
     let (r, g, b, a) = sim
         .widgets
@@ -880,19 +1129,6 @@ pub(super) fn set_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.word_wrap = word_wrap;
-    }
-    Ok(0)
-}
-
-pub(super) fn set_max_lines(state: &mut LuaState) -> LuaResult<u32> {
-    let id = frame_id_from_stack(state, 1)?;
-    let max_lines = match stack_val(state, 2) {
-        Val::Num(value) if value >= 0.0 => value as u32,
-        _ => 0,
-    };
-    let mut sim = borrow_state_mut(state)?;
-    if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.max_lines = max_lines;
     }
     Ok(0)
 }

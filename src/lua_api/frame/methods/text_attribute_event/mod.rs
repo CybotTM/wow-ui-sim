@@ -62,9 +62,18 @@ fn register_font_methods(state: &mut LuaState, table: GcRef<Table>) -> LuaResult
 }
 
 fn register_text_layout(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    register_text_measurement(state, table)?;
+    register_text_alignment(state, table)?;
+    register_text_wrapping(state, table)?;
+    register_text_scaling(state, table)
+}
+
+fn register_text_measurement(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "GetStringWidth", text::get_string_width)?;
     table_set_rust_fn_static(state, table, "GetStringHeight", text::get_string_height)?;
     table_set_rust_fn_static(state, table, "GetTextWidth", text::get_text_width)?;
+    table_set_rust_fn_static(state, table, "GetContentHeight", text::get_content_height)?;
+    table_set_rust_fn_static(state, table, "GetTextData", text::get_text_data)?;
     table_set_rust_fn_static(state, table, "GetLineHeight", text::get_line_height)?;
     table_set_rust_fn_static(state, table, "IsTruncated", text::is_truncated)?;
     table_set_rust_fn_static(
@@ -73,17 +82,28 @@ fn register_text_layout(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<
         "GetUnboundedStringWidth",
         text::get_unbounded_string_width,
     )?;
+    Ok(())
+}
+
+fn register_text_alignment(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetJustifyH", text::set_justify_h)?;
     table_set_rust_fn_static(state, table, "GetJustifyH", text::get_justify_h)?;
     table_set_rust_fn_static(state, table, "SetJustifyV", text::set_justify_v)?;
     table_set_rust_fn_static(state, table, "GetJustifyV", text::get_justify_v)?;
+    Ok(())
+}
+
+fn register_text_wrapping(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetWordWrap", text::set_word_wrap)?;
     table_set_rust_fn_static(state, table, "GetWordWrap", text::get_word_wrap)?;
     table_set_rust_fn_static(state, table, "CanWordWrap", text::can_word_wrap)?;
-    table_set_rust_fn_static(state, table, "SetMaxLines", text::set_max_lines)?;
     table_set_rust_fn_static(state, table, "GetMaxLines", text::get_max_lines)?;
     table_set_rust_fn_static(state, table, "SetNonSpaceWrap", text::set_non_space_wrap)?;
     table_set_rust_fn_static(state, table, "CanNonSpaceWrap", text::can_non_space_wrap)?;
+    Ok(())
+}
+
+fn register_text_scaling(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "GetTextScale", text::get_text_scale)?;
     table_set_rust_fn_static(state, table, "SetTextScale", text::set_text_scale)?;
     table_set_rust_fn_static(state, table, "SetTextToFit", text::set_text_to_fit)?;
