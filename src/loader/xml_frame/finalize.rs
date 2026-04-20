@@ -48,16 +48,40 @@ fn create_children_and_finalize(
     let anim_start = Instant::now();
     apply_animation_groups(env, frame, name, inherits)?;
     timing.frame_anim_time += anim_start.elapsed();
-    let btn_start = Instant::now();
-    apply_button_textures(env, frame, name, inherits)?;
-    apply_button_text(env, frame, name, inherits)?;
-    apply_bar_texture(env, frame, name, inherits)?;
-    init_action_bar_tables(env, frame, name);
-    timing.frame_button_time += btn_start.elapsed();
+    timing.frame_button_time += apply_frame_button_extras(env, frame, name, inherits)?;
     env.with_state(|state| {
         crate::lua_api::globals::template::repair_direct_child_parent_keys(state, frame_id)
             .map_err(|error| LoadError::Lua(error.to_string()))
     })?;
+    fire_frame_lifecycle(env, frame, frame_id, name, inherits, timing);
+    Ok(())
+}
+
+fn apply_frame_button_extras(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
+    inherits: &str,
+) -> Result<std::time::Duration, LoadError> {
+    let button_start = Instant::now();
+    // `CreateFrame(..., inherits)` already installs template-owned button
+    // texture/text extras. The XML finalize pass should only apply the
+    // frame's direct extras or inherited ButtonText regions get created twice.
+    apply_button_textures(env, frame, name, "")?;
+    apply_button_text(env, frame, name, "")?;
+    apply_bar_texture(env, frame, name, inherits)?;
+    init_action_bar_tables(env, frame, name);
+    Ok(button_start.elapsed())
+}
+
+fn fire_frame_lifecycle(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    frame_id: u64,
+    name: &str,
+    inherits: &str,
+    timing: &mut LoadTiming,
+) {
     let lifecycle = lifecycle_scripts(frame, inherits);
     if name == "PlayerSpellsFrame" {
         eprintln!(
@@ -65,16 +89,17 @@ fn create_children_and_finalize(
             name, lifecycle.on_load, lifecycle.on_show
         );
     }
-    if lifecycle.any() {
-        let lc_start = Instant::now();
-        fire_lifecycle_scripts(env, frame_id, name, lifecycle);
-        if name == "PlayerSpellsFrame" {
-            eprintln!("[lifecycle] {} fired", name);
-        }
-        timing.frame_lifecycle_time += lc_start.elapsed();
-        timing.lifecycle_fire_count += 1;
+    if !lifecycle.any() {
+        return;
     }
-    Ok(())
+
+    let lifecycle_start = Instant::now();
+    fire_lifecycle_scripts(env, frame_id, name, lifecycle);
+    if name == "PlayerSpellsFrame" {
+        eprintln!("[lifecycle] {} fired", name);
+    }
+    timing.frame_lifecycle_time += lifecycle_start.elapsed();
+    timing.lifecycle_fire_count += 1;
 }
 
 fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleScripts {
