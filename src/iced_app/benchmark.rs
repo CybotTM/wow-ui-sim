@@ -57,44 +57,28 @@ struct FrameTelemetry {
 
 pub fn benchmark_spellbook_open_in_gui(env: WowLuaEnv) -> crate::Result<SpellbookBenchmarkReport> {
     let mut app = boot_benchmark_app(env);
-    let startup_idle = benchmark_phase(
-        &mut app,
-        PhaseOptions {
-            name: "startup_idle",
-            keypress: None,
-            expect_visible: false,
-        },
-    )?;
-    let first_open = benchmark_phase(
-        &mut app,
-        PhaseOptions {
-            name: "first_open",
-            keypress: Some("S"),
-            expect_visible: true,
-        },
-    )?;
-    let first_close = benchmark_phase(
-        &mut app,
-        PhaseOptions {
-            name: "first_close",
-            keypress: Some("S"),
-            expect_visible: false,
-        },
-    )?;
-    let second_open = benchmark_phase(
-        &mut app,
-        PhaseOptions {
-            name: "second_open",
-            keypress: Some("S"),
-            expect_visible: true,
-        },
-    )?;
+    let startup_idle = benchmark_phase(&mut app, spellbook_phase("startup_idle", None, false))?;
+    let first_open = benchmark_phase(&mut app, spellbook_phase("first_open", Some("S"), true))?;
+    let first_close = benchmark_phase(&mut app, spellbook_phase("first_close", Some("S"), false))?;
+    let second_open = benchmark_phase(&mut app, spellbook_phase("second_open", Some("S"), true))?;
     Ok(SpellbookBenchmarkReport {
         startup_idle,
         first_open,
         first_close,
         second_open,
     })
+}
+
+fn spellbook_phase(
+    name: &'static str,
+    keypress: Option<&'static str>,
+    expect_visible: bool,
+) -> PhaseOptions {
+    PhaseOptions {
+        name,
+        keypress,
+        expect_visible,
+    }
 }
 
 fn boot_benchmark_app(env: WowLuaEnv) -> App {
@@ -224,4 +208,18 @@ fn is_spellbook_shown(app: &App) -> crate::Result<bool> {
     env.eval::<bool>(
         "return PlayerSpellsFrame ~= nil and PlayerSpellsFrame:IsShown() and PlayerSpellsUtil.GetCurrentTabID() == PlayerSpellsUtil.FrameTabs.SpellBook",
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn spellbook_phase_sets_expected_metadata() {
+        let phase = spellbook_phase("first_open", Some("S"), true);
+
+        assert_eq!(phase.name, "first_open");
+        assert_eq!(phase.keypress, Some("S"));
+        assert!(phase.expect_visible);
+    }
 }
