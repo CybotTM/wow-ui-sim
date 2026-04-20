@@ -914,6 +914,66 @@ fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_e
 }
 
 #[test]
+fn spellbook_first_visible_item_icon_matches_spellbook_texture() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("S", None).expect("S keybind dispatch failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                local paged = PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame
+                if not paged then
+                    return "missing_paged_spells_frame"
+                end
+
+                for _, frame in paged:EnumerateFrames() do
+                    if frame
+                        and frame:IsShown()
+                        and frame.HasValidData
+                        and frame:HasValidData()
+                        and frame.slotIndex
+                        and frame.spellBank
+                        and frame.Button
+                        and frame.Button.Icon
+                    then
+                        local expected = C_SpellBook.GetSpellBookItemTexture(frame.slotIndex, frame.spellBank)
+                        local actual = frame.Button.Icon:GetTexture()
+                        if actual ~= expected then
+                            return string.format(
+                                "icon_mismatch_slot_%s_expected_%s_actual_%s",
+                                tostring(frame.slotIndex),
+                                tostring(expected),
+                                tostring(actual)
+                            )
+                        end
+                        return "ok"
+                    end
+                end
+
+                return "no_visible_spellbook_item"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Spellbook icon regression produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "The first visible spellbook item icon should match C_SpellBook.GetSpellBookItemTexture for its slot: {result}"
+        );
+    }
+}
+
+#[test]
 fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
     test_timeout! {
         let env = setup_env();
