@@ -3,11 +3,15 @@
 //! Covers TargetFrame visibility, F1–F6 party/enemy targeting keybinds.
 
 mod common;
+#[path = "render_order_support.rs"]
+mod render_order_support;
 
+use image::RgbaImage;
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::global_frames;
+use wow_ui_sim::render::headless::render_to_image;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -46,6 +50,43 @@ fn install_test_error_handler(env: &WowLuaEnv) {
 
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     common::drain_string_table(env, "__test_errors")
+}
+
+fn sample_rect_pixel(image: &RgbaImage, rect: (f32, f32, f32, f32), u: f32, v: f32) -> [u8; 4] {
+    let x = (rect.0 + rect.2 * u).round() as u32;
+    let y = (rect.1 + rect.3 * v).round() as u32;
+    image.get_pixel(x, y).0
+}
+
+fn max_channel_diff(lhs: [u8; 4], rhs: [u8; 4]) -> u8 {
+    (0..4)
+        .map(|channel| lhs[channel].abs_diff(rhs[channel]))
+        .max()
+        .unwrap_or(0)
+}
+
+fn target_portrait_rect(env: &WowLuaEnv, width: f32, height: f32) -> (f32, f32, f32, f32) {
+    let state = env.state().borrow();
+    let target_frame_id = state
+        .widgets
+        .get_id_by_name("TargetFrame")
+        .expect("TargetFrame should exist");
+    let portrait_id = state
+        .widgets
+        .iter_ids()
+        .find(|&id| {
+            let Some(frame) = state.widgets.get(id) else {
+                return false;
+            };
+            render_order_support::is_descendant_of(&state.widgets, id, target_frame_id)
+                && frame.texture.as_deref().is_some_and(|texture| {
+                    texture.eq_ignore_ascii_case("Interface\\TargetingFrame\\UI-Classes-Circles")
+                })
+                && !frame.mask_textures.is_empty()
+        })
+        .expect("TargetFrame portrait texture should exist");
+    let rect = wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, portrait_id, width, height);
+    (rect.x, rect.y, rect.width, rect.height)
 }
 
 const BLIZZARD_ADDONS: &[(&str, &str)] = &[
@@ -199,6 +240,62 @@ fn target_frame_shown_for_enemy() {
             frame_is_shown(&env, "TargetFrame"),
             "TargetFrame should be shown after targeting enemy with TAB"
         );
+    }
+}
+
+#[test]
+fn target_frame_portrait_corners_match_background_when_replaced_with_class_icon() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("F2", None).expect("F2 keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting party1 with F2"
+        );
+
+        let width = 1600u32;
+        let height = 1200u32;
+        let portrait_rect = target_portrait_rect(&env, width as f32, height as f32);
+
+        let mut visible_mgr =
+            render_order_support::make_texture_manager().expect("texture directories should exist");
+        let visible_batch =
+            render_order_support::build_screenshot_like_batch(&env, width, height, Some("TargetFrame"));
+        let visible_render = render_to_image(&visible_batch, &mut visible_mgr, width, height, None);
+
+        env.exec("TargetFrame.TargetFrameContainer.Portrait:Hide()")
+            .expect("target portrait should hide");
+        wow_ui_sim::startup::run_extra_update_ticks(&env, 1);
+
+        let mut hidden_mgr =
+            render_order_support::make_texture_manager().expect("texture directories should exist");
+        let hidden_batch =
+            render_order_support::build_screenshot_like_batch(&env, width, height, Some("TargetFrame"));
+        let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, width, height, None);
+
+        let center_visible = sample_rect_pixel(&visible_render, portrait_rect, 0.5, 0.5);
+        let center_hidden = sample_rect_pixel(&hidden_render, portrait_rect, 0.5, 0.5);
+        assert!(
+            max_channel_diff(center_visible, center_hidden) >= 40,
+            "hiding the portrait should materially change the portrait center: visible={center_visible:?} hidden={center_hidden:?}"
+        );
+
+        for (u, v, label) in [
+            (0.08, 0.08, "top-left"),
+            (0.92, 0.08, "top-right"),
+            (0.08, 0.92, "bottom-left"),
+            (0.92, 0.92, "bottom-right"),
+        ] {
+            let visible_corner = sample_rect_pixel(&visible_render, portrait_rect, u, v);
+            let hidden_corner = sample_rect_pixel(&hidden_render, portrait_rect, u, v);
+            assert!(
+                max_channel_diff(visible_corner, hidden_corner) <= 18,
+                "target portrait {label} corner should already match the background when masked: visible={visible_corner:?} hidden={hidden_corner:?}"
+            );
+        }
     }
 }
 

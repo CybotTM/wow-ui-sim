@@ -1704,16 +1704,16 @@ if SetPortraitTexture == nil then
     if UnitIsPlayer ~= nil and UnitIsPlayer(unit) then
       local _, classFile = UnitClass(unit)
       if classFile then
-        local atlas = GetClassAtlas and GetClassAtlas(classFile)
-        if atlas and texture.SetAtlas then
-          texture:SetAtlas(atlas)
-          return
-        end
-
         local coords = CLASS_ICON_TCOORDS and CLASS_ICON_TCOORDS[classFile]
         if coords and texture.SetTexture and texture.SetTexCoord then
           texture:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles")
           texture:SetTexCoord(unpack(coords))
+          return
+        end
+
+        local atlas = GetClassAtlas and GetClassAtlas(classFile)
+        if atlas and texture.SetAtlas then
+          texture:SetAtlas(atlas)
           return
         end
       end

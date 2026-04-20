@@ -30,6 +30,8 @@ fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
+const PARTY_FRAME_SELECTION_SIZE: &str = "120x244";
+
 fn load_settled_game_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
@@ -160,7 +162,7 @@ fn party_frame_member_frames_render_at_master_offsets() {
 }
 
 #[test]
-fn player_and_party_portraits_use_class_icon_atlases() {
+fn player_and_party_portraits_use_circular_class_texture_fallback() {
     test_timeout! {
         let env = load_settled_game_ui();
         env.exec("A_Admin.SetPartySize(4)").unwrap();
@@ -192,15 +194,23 @@ fn player_and_party_portraits_use_class_icon_atlases() {
                        tostring(partyPortrait and partyPortrait:GetTexture())
                 "#,
             )
-            .expect("eval portrait atlases");
+            .expect("eval portrait fallback");
 
         assert_eq!(
-            player_atlas, "classicon-paladin",
-            "player portrait should use the Paladin class icon atlas, got texture {player_texture}"
+            player_atlas, "",
+            "player portrait fallback should clear the class atlas once it switches to the circular class texture, got atlas {player_atlas} texture {player_texture}"
         );
         assert_eq!(
-            party_atlas, "classicon-paladin",
-            "party1 portrait should use the Paladin class icon atlas, got texture {party_texture}"
+            player_texture, "Interface\\TargetingFrame\\UI-Classes-Circles",
+            "player portrait fallback should use the circular class texture, got atlas {player_atlas} texture {player_texture}"
+        );
+        assert_eq!(
+            party_atlas, "",
+            "party1 portrait fallback should clear the class atlas once it switches to the circular class texture, got atlas {party_atlas} texture {party_texture}"
+        );
+        assert_eq!(
+            party_texture, "Interface\\TargetingFrame\\UI-Classes-Circles",
+            "party1 portrait fallback should use the circular class texture, got atlas {party_atlas} texture {party_texture}"
         );
     }
 }
@@ -452,11 +462,15 @@ fn party_frame_member_frame1_uses_semantic_child_names() {
         let dump = lines.join("\n");
 
         assert!(
-            dump.contains(".Selection [Frame] (120x244) [stored=1x1] hidden LOW:3"),
+            dump.contains(&format!(
+                ".Selection [Frame] ({PARTY_FRAME_SELECTION_SIZE}) [stored=1x1] hidden LOW:3"
+            )),
             "PartyFrame.Selection must stay in the LOW:3 band like master, got:\n{dump}",
         );
         assert!(
-            dump.contains(".MouseOverHighlight [Frame] (120x244) hidden LOW:4"),
+            dump.contains(&format!(
+                ".MouseOverHighlight [Frame] ({PARTY_FRAME_SELECTION_SIZE}) hidden LOW:4"
+            )),
             "PartyFrame.Selection.MouseOverHighlight must stay in the LOW:4 band like master, got:\n{dump}",
         );
         assert!(
