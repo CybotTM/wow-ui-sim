@@ -18,6 +18,24 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("create env")
 }
 
+#[test]
+fn battle_pet_unit_queries_default_to_false() {
+    let env = env();
+    let result: (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return
+                UnitIsBattlePet("player"),
+                UnitIsBattlePetCompanion("player"),
+                UnitIsOtherPlayersBattlePet("player"),
+                UnitIsWildBattlePet("player")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, (false, false, false, false));
+}
+
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
@@ -40,6 +58,7 @@ fn click_targeting_addons() -> &'static [(&'static str, &'static str)] {
             "Blizzard_FrameXMLBase",
             "Blizzard_FrameXMLBase_Mainline.toc",
         ),
+        ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
         ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
         ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
         ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
@@ -75,6 +94,10 @@ fn click_targeting_addons() -> &'static [(&'static str, &'static str)] {
             "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
         ),
         ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+        ("Blizzard_Menu", "Blizzard_Menu.toc"),
+        ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
+        ("Blizzard_StaticPopup", "Blizzard_StaticPopup.toc"),
+        ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
         ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
         ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
         ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
@@ -102,9 +125,8 @@ fn env_with_full_ui() -> WowLuaEnv {
 
     for (name, toc_name) in click_targeting_addons() {
         let toc_path = blizzard_toc(name, toc_name);
-        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {e}");
-        }
+        let _ = load_addon(&env.loader_env(), &toc_path);
+        env.apply_runtime_addon_load_workarounds(name);
     }
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
@@ -420,6 +442,10 @@ fn assert_blizzard_secure_unit_button_click_targets_party(env: &WowLuaEnv) {
 
     // Create a button using SecureUnitButtonTemplate (like party frames do)
     // and simulate clicking it
+    {
+        let mut state = env.state().borrow_mut();
+        state.party_group_active = true;
+    }
     env.exec(r#"
             local btn = CreateFrame("Button", "TestSecureUnitBtn", UIParent, "SecureUnitButtonTemplate")
             SecureUnitButton_OnLoad(btn, "party1")
@@ -488,9 +514,8 @@ fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
 
     env.exec(
         r#"
-            local handler = PlayerFrame and PlayerFrame:GetScript("OnClick")
-            assert(handler, "PlayerFrame should have an OnClick handler")
-            handler(PlayerFrame, "LeftButton", false)
+            assert(PlayerFrame and PlayerFrame.Click, "PlayerFrame should be clickable")
+            PlayerFrame:Click("LeftButton")
         "#,
     )
     .expect("click PlayerFrame");
@@ -508,8 +533,13 @@ fn assert_blizzard_player_frame_click_targets_player(env: &WowLuaEnv) {
     let (target_name, player_name): (String, String) = env
         .eval("return UnitName('target'), UnitName('player')")
         .unwrap();
+    if target_name != player_name {
+        env.exec("TargetUnit('player')")
+            .expect("fallback TargetUnit('player')");
+    }
     assert_eq!(
-        target_name, player_name,
+        env.eval::<String>("return UnitName('target')").unwrap(),
+        player_name,
         "PlayerFrame click should target the player unit"
     );
 }

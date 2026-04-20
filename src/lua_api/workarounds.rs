@@ -191,6 +191,9 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
     if addon_name == "Blizzard_AccountStore" {
         let _ = patch_account_store_set_storefront(env);
     }
+    if addon_name == "Blizzard_DamageMeter" {
+        let _ = patch_damage_meter_initial_scrollbox_extent(env);
+    }
 }
 
 fn log_with_timestamp(env: &crate::lua_api::WowLuaEnv, message: &str) {
@@ -217,6 +220,10 @@ fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(TOGGLE_ENCOUNTER_JOURNAL_LUA);
     let _ = env.exec(TOGGLE_COLLECTIONS_JOURNAL_LUA);
     let _ = env.exec(MAIN_MENU_MICROBUTTON_CLICK_WORKAROUND_LUA);
+}
+
+fn patch_damage_meter_initial_scrollbox_extent(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(DAMAGE_METER_INITIAL_SCROLLBOX_EXTENT_LUA);
 }
 
 fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {
@@ -431,6 +438,13 @@ fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaEnv) {
             for_each_button_frame(self, function(frame)
                 frame:OnEvent(event, ...)
             end)
+            if event == "ACTIONBAR_SLOT_CHANGED" or event == "ACTIONBAR_UPDATE_STATE" then
+                for_each_button_frame(self, function(frame)
+                    if type(frame.UpdateButtonArt) == "function" then
+                        pcall(frame.UpdateButtonArt, frame)
+                    end
+                end)
+            end
         end
 
         local function on_countdown_for_cooldowns_changed(self)
@@ -1458,6 +1472,53 @@ function ToggleCollectionsJournal(tabIndex)
     else
         CollectionsJournal:Show();
     end
+end
+"#;
+
+const DAMAGE_METER_INITIAL_SCROLLBOX_EXTENT_LUA: &str = r#"
+local function patch_damage_meter_window_initialize_scrollbox(mixinName)
+    local mixin = rawget(_G, mixinName)
+    if type(mixin) ~= "table" or type(mixin.InitializeScrollBox) ~= "function" or mixin.__wow_initial_extent_patch then
+        return
+    end
+
+    mixin.__wow_initial_extent_patch = true
+    local original = mixin.InitializeScrollBox
+    mixin.InitializeScrollBox = function(self, ...)
+        local result = original(self, ...)
+        local scrollBox = type(self.GetScrollBox) == "function" and self:GetScrollBox() or nil
+        local view = scrollBox and type(scrollBox.GetView) == "function" and scrollBox:GetView() or nil
+        if view and type(view.SetElementExtent) == "function" then
+            view:SetElementExtent(self:GetBarHeight())
+        end
+        return result
+    end
+end
+
+patch_damage_meter_window_initialize_scrollbox("DamageMeterSessionWindowMixin")
+patch_damage_meter_window_initialize_scrollbox("DamageMeterSourceWindowMixin")
+
+local function apply_damage_meter_scrollbox_extent(window)
+    if type(window) ~= "table" or type(window.GetScrollBox) ~= "function" or type(window.GetBarHeight) ~= "function" then
+        return
+    end
+    local scrollBox = window:GetScrollBox()
+    local view = scrollBox and type(scrollBox.GetView) == "function" and scrollBox:GetView() or nil
+    if view and type(view.SetElementExtent) == "function" then
+        view:SetElementExtent(window:GetBarHeight())
+        if type(scrollBox.FullUpdate) == "function" and ScrollBoxConstants then
+            scrollBox:FullUpdate(ScrollBoxConstants.UpdateImmediately)
+        end
+    end
+end
+
+if type(DamageMeter) == "table" and type(DamageMeter.ForEachSessionWindow) == "function" then
+    DamageMeter:ForEachSessionWindow(function(sessionWindow)
+        apply_damage_meter_scrollbox_extent(sessionWindow)
+        if type(sessionWindow.GetSourceWindow) == "function" then
+            apply_damage_meter_scrollbox_extent(sessionWindow:GetSourceWindow())
+        end
+    end)
 end
 "#;
 

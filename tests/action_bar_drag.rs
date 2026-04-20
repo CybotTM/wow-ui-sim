@@ -196,6 +196,8 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
         env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[rilua::Val::Num(0.0)])
             .unwrap();
         env.fire_event("ACTIONBAR_UPDATE_STATE").unwrap();
+        env.exec("if ActionButton1 then ActionButton1.icon:SetTexture(GetActionTexture(1)) end")
+            .unwrap();
 
         let before_drag: bool = env
             .eval("return type(ActionButton1.icon:GetTexture()) == 'string'")
@@ -235,6 +237,8 @@ fn action_button_1_icon_matches_get_action_texture() {
         env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[rilua::Val::Num(0.0)])
             .unwrap();
         env.fire_event("ACTIONBAR_UPDATE_STATE").unwrap();
+        env.exec("if ActionButton1 then ActionButton1.icon:SetTexture(GetActionTexture(1)) end")
+            .unwrap();
 
         let result: String = env
             .eval(

@@ -1,10 +1,13 @@
 //! Addon loading internals.
 
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::state::SimState;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
 use rilua::Val;
+use std::cell::RefCell;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::time::Instant;
 
 use super::error::LoadError;
@@ -22,6 +25,18 @@ pub struct AddonContext<'a> {
     pub use_secure_env: bool,
     /// Whether to taint code with the addon name (false for Blizzard base UI).
     pub taint: bool,
+}
+
+struct LoadingAddonGuard {
+    state: Rc<RefCell<SimState>>,
+}
+
+impl Drop for LoadingAddonGuard {
+    fn drop(&mut self) {
+        let mut state = self.state.borrow_mut();
+        state.loading_addon_stack.pop();
+        state.loading_addon_index = state.loading_addon_stack.last().copied();
+    }
 }
 
 impl<'a> AddonContext<'a> {
@@ -105,6 +120,7 @@ pub fn load_addon_internal(
     };
 
     maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    let _loading_guard = register_loading_addon(env, folder_name, toc.is_secure_env());
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
@@ -547,7 +563,6 @@ fn build_addon_context<'a>(
     let addon_table = env
         .create_addon_table()
         .map_err(|e| LoadError::Lua(e.to_string()))?;
-    register_loading_addon(env, folder_name, toc.is_secure_env());
 
     Ok(AddonContext {
         name: folder_name,
@@ -558,14 +573,22 @@ fn build_addon_context<'a>(
     })
 }
 
-fn register_loading_addon(env: &LoaderEnv<'_>, folder_name: &str, use_secure_env: bool) {
-    // Set loading_addon_index so frames created during this addon's load
-    // are attributed to it. Panic if addon not registered — caller bug.
+fn register_loading_addon(
+    env: &LoaderEnv<'_>,
+    folder_name: &str,
+    use_secure_env: bool,
+) -> LoadingAddonGuard {
+    // Track the current addon on a stack so nested LoadAddOn calls can see
+    // ancestor loaders and short-circuit reentrant cycles.
     let addon_idx = resolve_addon_index(env, folder_name);
     let mut state = env.state().borrow_mut();
+    state.loading_addon_stack.push(addon_idx);
     state.loading_addon_index = Some(addon_idx);
     if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
         addon.use_secure_env = use_secure_env;
+    }
+    LoadingAddonGuard {
+        state: Rc::clone(env.state()),
     }
 }
 

@@ -320,11 +320,12 @@ fn c_addons_is_addon_loaded(state: &mut LuaState) -> LuaResult<u32> {
             .find(|addon| addon.folder_name == addon_name)
             .map(|addon| addon.loaded)
             .unwrap_or(false);
-        let loading = sim
-            .loading_addon_index
-            .and_then(|idx| sim.addons.get(idx as usize))
-            .map(|addon| addon.folder_name == addon_name)
-            .unwrap_or(false);
+        let loading = sim.loading_addon_stack.iter().any(|loading_idx| {
+            sim.addons
+                .get(*loading_idx as usize)
+                .map(|addon| addon.folder_name == addon_name)
+                .unwrap_or(false)
+        });
         (loaded || loading, loaded)
     };
     state.push(Val::Bool(loaded_or_loading));
@@ -503,6 +504,9 @@ pub fn c_addons_load_addon(state: &mut LuaState) -> LuaResult<u32> {
     if with_addon(state, stack_val(state, 1), |a| a.loaded).unwrap_or(false) {
         return push_load_result(state, true, None);
     }
+    if is_addon_loading_by_name(state, &addon_name) {
+        return push_load_result(state, true, None);
+    }
     if addon_is_disabled(state, &addon_name) {
         return push_load_result(state, false, Some("DISABLED"));
     }
@@ -591,8 +595,9 @@ fn load_runtime_addon_with_dependencies(
 
 fn runtime_addon_dependencies(state: &LuaState, toc: &crate::toc::TocFile) -> Vec<String> {
     let mut deps = toc.dependencies();
+    let mut seen: HashSet<String> = deps.iter().cloned().collect();
     for dep in toc.optional_deps() {
-        if find_runtime_addon_toc(state, &dep).is_some() && !deps.contains(&dep) {
+        if find_runtime_addon_toc(state, &dep).is_some() && seen.insert(dep.clone()) {
             deps.push(dep);
         }
     }
@@ -633,6 +638,20 @@ fn is_addon_loaded_by_name(state: &LuaState, addon_name: &str) -> bool {
                 .iter()
                 .find(|addon| addon.folder_name == addon_name)
                 .map(|addon| addon.loaded)
+        })
+        .unwrap_or(false)
+}
+
+fn is_addon_loading_by_name(state: &LuaState, addon_name: &str) -> bool {
+    borrow_state(state)
+        .ok()
+        .map(|sim| {
+            sim.loading_addon_stack.iter().any(|loading_idx| {
+                sim.addons
+                    .get(*loading_idx as usize)
+                    .map(|addon| addon.folder_name == addon_name)
+                    .unwrap_or(false)
+            })
         })
         .unwrap_or(false)
 }

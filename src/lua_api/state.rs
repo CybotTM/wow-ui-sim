@@ -86,6 +86,7 @@ macro_rules! build_empty_sim_state {
             action_ui_buttons: $collections.action_ui_buttons,
             cursor_item: $runtime.cursor_item,
             loading_addon_index: $runtime.loading_addon_index,
+            loading_addon_stack: $runtime.loading_addon_stack,
             executing_addon_index: $runtime.executing_addon_index,
             xml_load_addon_depth: $runtime.xml_load_addon_depth,
             loading_forbidden: $runtime.loading_forbidden,
@@ -386,6 +387,8 @@ pub struct SimState {
     pub cursor_item: Option<CursorInfo>,
     /// Index of the addon currently being loaded (into `addons` vec).
     pub loading_addon_index: Option<u16>,
+    /// Stack of addon indexes currently being loaded, oldest to newest.
+    pub loading_addon_stack: Vec<u16>,
     /// Index of the addon whose code is currently executing (event/timer/script handlers).
     pub executing_addon_index: Option<u16>,
     /// Whether loading inside a ScopedModifier with forbidden="true".
@@ -1316,6 +1319,7 @@ struct EmptyRuntimeState {
     gcd: Option<(f64, f64)>,
     cursor_item: Option<CursorInfo>,
     loading_addon_index: Option<u16>,
+    loading_addon_stack: Vec<u16>,
     executing_addon_index: Option<u16>,
     xml_load_addon_depth: u32,
     loading_forbidden: bool,
@@ -1370,6 +1374,7 @@ macro_rules! build_empty_runtime_state {
             gcd: None,
             cursor_item: None,
             loading_addon_index: None,
+            loading_addon_stack: Vec::new(),
             executing_addon_index: None,
             xml_load_addon_depth: 0,
             loading_forbidden: false,

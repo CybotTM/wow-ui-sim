@@ -95,7 +95,7 @@
 - [x] Fix saved-variables serialization lib regression bucket (`1` failed target, `7` failed lib tests): `wow_ui_sim` `saved_variables::saved_variables_serialize::*` failures after the missing-saved-vars default change.
 - [x] Fix loader inherited-layer lib regression bucket (`1` failed target, `1` failed lib test): `wow_ui_sim` `loader::tests::test_runtime_template_creates_inherited_layer_regions`.
 - [x] Fix panel/glue/navigation startup bucket (`13` failed targets, `1` timeout): `game_boot`, `glue_character_select`, `glue_login`, `micro_menu`, `panel_harness_runtime`, `panel_toggle_verbs`, `startup_warnings`, `store_tree`, `test_keybindings_panels_detail`, `test_showuipanel_auction_house`, `test_showuipanel_lod`, `test_showuipanel_lod_fixtures`, `test_showuipanel_toggles`.
-- [ ] Fix click/targeting/protected interaction bucket (`5` failed targets): `action_bar_drag`, `click_all_frames`, `click_targeting`, `protected_attribute_enforcement`, `targeting_verbs`.
+- [x] Fix click/targeting/protected interaction bucket (`5` failed targets): `action_bar_drag`, `click_all_frames`, `click_targeting`, `protected_attribute_enforcement`, `targeting_verbs`.
 - [ ] Fix spell/cast-state bucket (`3` failed targets): `combat_verbs`, `spell_casting`, `spell_state_probes`.
 - [ ] Fix pet-battle seeded/default-count bucket (`2` failed targets): `pet_battles`, `pet_battles_counts`.
 - [ ] Fix scroll/html/widget layout bucket (`4` failed targets): `scroll_widgets`, `scroll_widgets_minimal`, `simple_html`, `widget_registry_perf`.

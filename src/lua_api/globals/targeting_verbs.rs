@@ -22,7 +22,9 @@
 //! does nothing).
 //!
 //! `TargetNearestEnemy` / `TargetNearestFriend` pick the first entry of
-//! `enemy_pool` / party members respectively. Empty pool → silent no-op.
+//! `enemy_pool` / party members respectively. `enemy1` falls back to a seeded
+//! default enemy when the pool is empty. Empty nearest-pool lookups are silent
+//! no-ops.
 
 use crate::event::Event;
 use crate::lua_api::game_data::{PartyMember, TargetInfo};
@@ -293,21 +295,17 @@ pub fn target_last_target(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `TargetNearestEnemy()` — pick first member of `enemy_pool`. No-op when empty.
 pub fn target_nearest_enemy(state: &mut LuaState) -> LuaResult<u32> {
-    let new_target = {
+    let Some(new_target) = ({
         let st = borrow_state(state)?;
-        st.enemy_pool
-            .first()
-            .cloned()
-            .or_else(|| Some(default_enemy_target_info()))
-    };
-    if new_target.is_none() {
+        st.enemy_pool.first().cloned()
+    }) else {
         return Ok(0);
-    }
+    };
     {
         let mut st = borrow_state_mut(state)?;
         let old = st.current_target.take();
         st.previous_target = old;
-        st.current_target = new_target;
+        st.current_target = Some(new_target);
     }
     push_target_changed(state)?;
     Ok(0)
@@ -317,7 +315,11 @@ pub fn target_nearest_enemy(state: &mut LuaState) -> LuaResult<u32> {
 pub fn target_nearest_friend(state: &mut LuaState) -> LuaResult<u32> {
     let new_target = {
         let st = borrow_state(state)?;
-        st.party_members.first().map(party_member_to_target_info)
+        if st.party_group_active {
+            st.party_members.first().map(party_member_to_target_info)
+        } else {
+            None
+        }
     };
     if new_target.is_none() {
         return Ok(0);
