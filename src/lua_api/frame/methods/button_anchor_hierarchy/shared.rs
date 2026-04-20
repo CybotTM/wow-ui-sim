@@ -116,7 +116,7 @@ pub(super) fn frame_global_or_ref(state: &mut LuaState, id: u64) -> LuaResult<Va
             .get(state.global)
             .map(|table| table.get_str(key_ref, &state.gc.string_arena))
             .unwrap_or(Val::Nil);
-        if global != Val::Nil {
+        if extract_frame_id(state, global) == Some(id) {
             return Ok(global);
         }
     }
