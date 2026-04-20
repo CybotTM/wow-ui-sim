@@ -856,18 +856,6 @@ if GetTutorialsEnabled == nil then
   end
 end
 
-if GetChatWindowInfo == nil then
-  function GetChatWindowInfo(id)
-    -- Default chat frame color: black with 25% alpha (DEFAULT_CHATFRAME_COLOR / DEFAULT_CHATFRAME_ALPHA)
-    -- Only ChatFrame1 (General) and ChatFrame2 (CombatLog) shown by default;
-    -- ChatFrame3-10 exist in XML but stay hidden until user creates them.
-    local realId = id or 1
-    local shown = (realId == 1) or (realId == 2)
-    local docked = (realId == 1)
-    return "Chat " .. tostring(realId), 12, 0, 0, 0, 0.25, shown, false, docked, false
-  end
-end
-
 ChatTypeInfo = ChatTypeInfo or {}
 ChatTypeInfo.SYSTEM = ChatTypeInfo.SYSTEM or {
   r = 1,
@@ -877,6 +865,33 @@ ChatTypeInfo.SYSTEM = ChatTypeInfo.SYSTEM or {
 }
 
 local __wow_chat_window_state = __wow_chat_window_state or {}
+
+local function __wow_is_chat_window_shown_by_default(id)
+  return id == 1
+end
+
+local function __wow_is_chat_window_docked_by_default(id)
+  return id == 1
+end
+
+if GetChatWindowInfo == nil then
+  function GetChatWindowInfo(id)
+    -- Default chat frame color: black with 25% alpha (DEFAULT_CHATFRAME_COLOR / DEFAULT_CHATFRAME_ALPHA)
+    -- Only ChatFrame1 (General) is enabled by default.
+    -- ChatFrame2-10 exist in XML but stay hidden until user enables them.
+    local realId = id or 1
+    local chat = __wow_chat_window_state[realId]
+    local shown = __wow_is_chat_window_shown_by_default(realId)
+    local docked = __wow_is_chat_window_docked_by_default(realId)
+    if chat and chat.shown ~= nil then
+      shown = chat.shown == true
+    end
+    if chat and chat.docked ~= nil then
+      docked = chat.docked == true
+    end
+    return "Chat " .. tostring(realId), 12, 0, 0, 0, 0.25, shown, false, docked, false
+  end
+end
 
 if SetChatWindowShown == nil then
   function SetChatWindowShown(id, shown)

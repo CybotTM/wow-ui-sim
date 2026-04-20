@@ -318,6 +318,63 @@ fn test_chat_background_uses_default_black_tint_and_alpha() {
 }
 
 #[test]
+fn test_chat_frame2_starts_disabled() {
+    test_timeout! {
+        let env = setup_env();
+
+        let (shown, frame_shown, tab_shown): (bool, bool, bool) = env
+            .eval(
+                r#"
+                local shown = select(7, GetChatWindowInfo(2))
+                local frameShown = ChatFrame2 and ChatFrame2:IsShown() or false
+                local tabShown = ChatFrame2Tab and ChatFrame2Tab:IsShown() or false
+                return shown, frameShown, tabShown
+            "#,
+            )
+            .expect("ChatFrame2 startup state eval failed");
+
+        assert!(!shown, "GetChatWindowInfo(2) should report chat window 2 hidden");
+        assert!(!frame_shown, "ChatFrame2 should start hidden");
+        assert!(!tab_shown, "ChatFrame2Tab should start hidden");
+    }
+}
+
+#[test]
+fn test_chat_frame2_can_be_enabled_explicitly() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.exec(
+            r#"
+            SetChatWindowShown(2, true)
+            if FloatingChatFrame_Update then
+                FloatingChatFrame_Update(2)
+            end
+            if FCF_DockUpdate then
+                FCF_DockUpdate()
+            end
+        "#,
+        )
+        .expect("ChatFrame2 enable setup failed");
+
+        let (shown, frame_shown, tab_shown): (bool, bool, bool) = env
+            .eval(
+                r#"
+                local shown = select(7, GetChatWindowInfo(2))
+                local frameShown = ChatFrame2 and ChatFrame2:IsShown() or false
+                local tabShown = ChatFrame2Tab and ChatFrame2Tab:IsShown() or false
+                return shown, frameShown, tabShown
+            "#,
+            )
+            .expect("ChatFrame2 enabled state eval failed");
+
+        assert!(shown, "GetChatWindowInfo(2) should report chat window 2 visible after enabling it");
+        assert!(frame_shown, "ChatFrame2 should become visible after enabling it");
+        assert!(tab_shown, "ChatFrame2Tab should become visible after enabling it");
+    }
+}
+
+#[test]
 fn test_chat_scrollbar_stays_attached_to_chat_frame_right_edge() {
     test_timeout! {
         let env = setup_env();
