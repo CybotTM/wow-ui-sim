@@ -234,7 +234,10 @@ fn character_select_builds_scrollbox_entries() {
             .eval(
                 r#"
                 local completeSize = -1
-                if CharacterSelectListUtil and CharacterSelectListUtil.CreateCompleteDataProvider then
+                if CharacterSelectListUtil
+                    and CharacterSelectListUtil.CreateCompleteDataProvider
+                    and CharacterSelectCharacterFrame
+                then
                     local complete = CharacterSelectListUtil.CreateCompleteDataProvider()
                     completeSize = complete and complete.GetSize and complete:GetSize() or -1
                 end
@@ -244,14 +247,25 @@ fn character_select_builds_scrollbox_entries() {
                     and CharacterSelectListUtil.GetCharIDFromIndex(1) or -1
                 local frameShown = CharacterSelectFrame and CharacterSelectFrame.IsShown and CharacterSelectFrame:IsShown() or false
                 local selectedIndex = CharacterSelect and CharacterSelect.selectedIndex or -1
+                local charSelectUIType = type(CharacterSelectUI)
+                local visibilityType = type(VisibilityFramesContainer)
+                local parentVisibilityType = CharacterSelectUI and type(CharacterSelectUI.VisibilityFramesContainer) or "nil"
+                local characterListType = type(CharacterSelectCharacterFrame)
+                local parentCharacterListType = CharacterSelectUI and CharacterSelectUI.VisibilityFramesContainer
+                    and type(CharacterSelectUI.VisibilityFramesContainer.CharacterList) or "nil"
                 return string.format(
-                    "frameShown=%s selectedIndex=%d providerSize=%d completeSize=%d numCharacters=%d mappedFirst=%d",
+                    "frameShown=%s selectedIndex=%d providerSize=%d completeSize=%d numCharacters=%d mappedFirst=%d CharacterSelectUI=%s VisibilityFramesContainer=%s ParentVisibility=%s CharacterSelectCharacterFrame=%s ParentCharacterList=%s",
                     tostring(frameShown),
                     selectedIndex,
                     providerSize,
                     completeSize,
                     numCharacters,
-                    mappedFirst
+                    mappedFirst,
+                    charSelectUIType,
+                    visibilityType,
+                    parentVisibilityType,
+                    characterListType,
+                    parentCharacterListType
                 )
                 "#,
             )
