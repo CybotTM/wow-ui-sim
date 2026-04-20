@@ -2,7 +2,8 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::loader::{
-    discover_blizzard_addon_closure_for_screen, discover_blizzard_addons_for_screen,
+    BlizzardAddonOverride, discover_blizzard_addon_closure_for_screen,
+    discover_blizzard_addon_closure_for_screen_with_overrides, discover_blizzard_addons_for_screen,
 };
 use crate::screen::ScreenKind;
 
@@ -252,6 +253,55 @@ Core.lua
             "Blizzard_LoadOnDemandRoot",
         ],
         "load-on-demand roots should resolve against the full screen-allowed TOC set",
+    );
+}
+
+#[test]
+fn addon_closure_applies_override_manifest_extras_transitively() {
+    let ui = TempBlizzardUiDir::new("closure-overrides");
+    ui.add_addon(
+        "Blizzard_B",
+        r#"
+## Title: Blizzard_B
+## AllowLoad: Both
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_C",
+        r#"
+## Title: Blizzard_C
+## AllowLoad: Both
+Core.lua
+"#,
+    );
+    ui.add_addon(
+        "Blizzard_A",
+        r#"
+## Title: Blizzard_A
+## AllowLoad: Both
+## Dependencies: Blizzard_B
+Core.lua
+"#,
+    );
+
+    let overrides = &[BlizzardAddonOverride {
+        addon: "Blizzard_A",
+        extra_roots: &["Blizzard_C"],
+    }];
+
+    let addons = discover_blizzard_addon_closure_for_screen_with_overrides(
+        &ui.path,
+        ScreenKind::Game,
+        &["Blizzard_A"],
+        overrides,
+    );
+    let names: Vec<String> = addons.into_iter().map(|(name, _)| name).collect();
+
+    assert_eq!(
+        names,
+        vec!["Blizzard_B", "Blizzard_C", "Blizzard_A"],
+        "override manifest extras should participate in the explicit closure",
     );
 }
 

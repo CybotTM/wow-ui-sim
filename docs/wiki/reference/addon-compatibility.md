@@ -57,7 +57,7 @@ Blizzard UI coverage is intentionally split into two lanes:
 - `tests/addon_coverage.rs` covers addon-bootstrap behavior that only exists after the relevant Blizzard addons load.
 
 The split keeps unit-style regressions fast and focused while reserving the heavier bootstrap suite for startup-order, dependency, and load-on-demand behavior.
-The loader now exposes `discover_blizzard_addon_closure_for_screen()` so the bootstrap lane can load an explicit TOC-derived closure for a target addon set instead of a fake monolithic Blizzard bundle.
+The loader now exposes `discover_blizzard_addon_closure_for_screen()` so the bootstrap lane can load an explicit TOC-derived closure for a target addon set, including load-on-demand roots, instead of a fake monolithic Blizzard bundle.
 
 ## Known Issues
 

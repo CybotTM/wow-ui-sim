@@ -2,12 +2,17 @@
 // a subset of the helpers, so per-binary dead_code warnings are expected.
 #![allow(dead_code)]
 
+#[path = "common/blizzard_addon_manifest.rs"]
+mod blizzard_addon_manifest;
+
 use image::RgbaImage;
 use std::path::{Path, PathBuf};
 use std::{cell::RefCell, rc::Rc};
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
 use wow_ui_sim::loader::{
+    BlizzardAddonOverride,
     discover_blizzard_addon_closure_for_screen as load_blizzard_addon_closure_for_screen,
+    discover_blizzard_addon_closure_for_screen_with_overrides as load_blizzard_addon_closure_for_screen_with_overrides,
     load_addon,
 };
 use wow_ui_sim::lua_api::{SimState, WowLuaEnv};
@@ -276,7 +281,23 @@ pub(crate) fn discover_blizzard_addon_closure_for_screen(
     load_blizzard_addon_closure_for_screen(blizzard_ui_dir, screen, roots)
 }
 
+pub(crate) fn discover_blizzard_addon_closure_for_screen_with_overrides(
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+    roots: &[&str],
+    overrides: &[BlizzardAddonOverride<'_>],
+) -> Vec<(String, PathBuf)> {
+    load_blizzard_addon_closure_for_screen_with_overrides(blizzard_ui_dir, screen, roots, overrides)
+}
+
 pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
+    env_with_root_addons_ui_with_overrides(roots, &[])
+}
+
+pub(crate) fn env_with_root_addons_ui_with_overrides(
+    roots: &[&str],
+    overrides: &[BlizzardAddonOverride<'_>],
+) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
@@ -287,8 +308,12 @@ pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
-    for (name, toc_path) in discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, roots)
-    {
+    for (name, toc_path) in discover_blizzard_addon_closure_for_screen_with_overrides(
+        &ui,
+        ScreenKind::Game,
+        roots,
+        overrides,
+    ) {
         if let Err(err) = load_addon(&env.loader_env(), &toc_path) {
             eprintln!("[isolated load {name}] FAILED: {err}");
         }
@@ -300,7 +325,10 @@ pub(crate) fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
 }
 
 pub(crate) fn env_with_isolated_world_map_ui() -> WowLuaEnv {
-    env_with_root_addons_ui(ISOLATED_WORLD_MAP_ROOT_ADDONS)
+    env_with_root_addons_ui_with_overrides(
+        ISOLATED_WORLD_MAP_ROOT_ADDONS,
+        crate::blizzard_addon_manifest::WORLD_MAP_VOICE_CHAT_OVERRIDES,
+    )
 }
 
 pub(crate) fn env_with_isolated_world_map() -> WowLuaEnv {

@@ -5,7 +5,7 @@
 
 mod common;
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
 use std::panic::{self, AssertUnwindSafe};
 use std::path::PathBuf;
 use wow_ui_sim::loader::{
@@ -208,6 +208,7 @@ const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_TimeManager", "Blizzard_TimeManager_Mainline.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
+    ("Blizzard_Collections", "Blizzard_Collections_Mainline.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
     (
         "Blizzard_UIPanels_Game",
@@ -401,113 +402,26 @@ fn discover_blizzard_lod_addon_tocs() -> Vec<(String, TocFile)> {
         .collect()
 }
 
-fn discover_blizzard_lod_addon_families() -> Vec<Vec<String>> {
-    let lod_tocs = discover_blizzard_lod_addon_tocs();
-    let ordered_addons: Vec<_> = lod_tocs.iter().map(|(name, _)| name.clone()).collect();
-    let addon_indices: HashMap<_, _> = ordered_addons
-        .iter()
-        .enumerate()
-        .map(|(index, addon_name)| (addon_name.clone(), index))
-        .collect();
-    let addon_names: HashSet<_> = ordered_addons.iter().cloned().collect();
-    let toc_by_addon: HashMap<_, _> = lod_tocs.into_iter().collect();
-    let mut adjacency: HashMap<_, Vec<String>> = ordered_addons
-        .iter()
-        .cloned()
-        .map(|addon_name| (addon_name, Vec::new()))
-        .collect();
-
-    for (addon_name, toc) in &toc_by_addon {
-        let related_addons: HashSet<_> = toc
-            .dependencies()
-            .into_iter()
-            .chain(toc.optional_deps())
-            .chain(toc.load_with())
-            .filter(|dependency| addon_names.contains(dependency))
-            .collect();
-
-        for related_addon in related_addons {
-            adjacency
-                .get_mut(addon_name)
-                .expect("each load-on-demand addon should have an adjacency list")
-                .push(related_addon.clone());
-            adjacency
-                .get_mut(&related_addon)
-                .expect("each related load-on-demand addon should have an adjacency list")
-                .push(addon_name.clone());
-        }
-    }
-
-    let mut synthetic_family_members: HashMap<&'static str, Vec<String>> = HashMap::new();
-    for addon_name in &ordered_addons {
-        if let Some(family_key) = synthetic_load_on_demand_family_key(addon_name) {
-            synthetic_family_members
-                .entry(family_key)
-                .or_default()
-                .push(addon_name.clone());
-        }
-    }
-
-    for family_members in synthetic_family_members.into_values() {
-        if let Some(family_root) = family_members.first() {
-            for related_addon in family_members.iter().skip(1) {
-                adjacency
-                    .get_mut(family_root)
-                    .expect("synthetic family roots should have adjacency lists")
-                    .push(related_addon.clone());
-                adjacency
-                    .get_mut(related_addon)
-                    .expect("synthetic family members should have adjacency lists")
-                    .push(family_root.clone());
-            }
-        }
-    }
-
-    let mut visited = HashSet::new();
-    let mut families = Vec::new();
-    for addon_name in ordered_addons {
-        if !visited.insert(addon_name.clone()) {
-            continue;
-        }
-
-        let mut family = vec![addon_name.clone()];
-        let mut stack = vec![addon_name];
-        while let Some(current) = stack.pop() {
-            for related_addon in adjacency
-                .get(&current)
-                .into_iter()
-                .flatten()
-                .filter(|related_addon| visited.insert((*related_addon).clone()))
-            {
-                family.push(related_addon.clone());
-                stack.push(related_addon.clone());
-            }
-        }
-
-        family.sort_by_key(|related_addon| {
-            *addon_indices
-                .get(related_addon)
-                .expect("family addons should preserve discovery order")
-        });
-        families.push(family);
-    }
-
-    families
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct LoadOnDemandAddonClosure {
+    root: String,
+    addons: Vec<String>,
 }
 
-fn synthetic_load_on_demand_family_key(addon_name: &str) -> Option<&'static str> {
-    if addon_name.starts_with("Blizzard_Settings") {
-        Some("settings")
-    } else if addon_name.starts_with("Blizzard_Professions") {
-        Some("professions")
-    } else if addon_name == "Blizzard_Kiosk"
-        || addon_name.starts_with("Blizzard_House")
-        || addon_name.starts_with("Blizzard_Housing")
-    {
-        Some("housing")
-    } else {
-        None
-    }
+fn discover_blizzard_lod_addon_closures() -> Vec<LoadOnDemandAddonClosure> {
+    let ui = blizzard_ui_dir();
+    discover_blizzard_lod_addon_tocs()
+        .into_iter()
+        .map(|(root, _)| {
+            let addons =
+                discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &[root.as_str()])
+                    .into_iter()
+                    .map(|(name, _)| name)
+                    .collect();
+
+            LoadOnDemandAddonClosure { root, addons }
+        })
+        .collect()
 }
 
 fn clear_lua_error_tracking(env: &WowLuaEnv) {
@@ -538,10 +452,6 @@ fn with_isolated_addon_coverage_state(f: impl FnOnce()) {
 
 fn load_startup_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
-    let known_blizzard_addons: HashSet<_> = discover_all_blizzard_addons(&blizzard_ui_dir())
-        .into_iter()
-        .map(|(name, _)| name)
-        .collect();
     let startup_addons = discover_blizzard_addons(&blizzard_ui_dir());
     let mut load_failures = Vec::new();
     for (name, toc_path) in &startup_addons {
@@ -559,7 +469,7 @@ fn load_startup_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     env.apply_post_load_workarounds();
     settle_headless_startup(env);
     silence_lua_error_handler(env);
-    known_blizzard_addons
+    startup_addons.into_iter().map(|(name, _)| name).collect()
 }
 
 fn fire_panel_harness_startup_events(env: &WowLuaEnv) {
@@ -581,9 +491,8 @@ fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     reset_template_state();
     let ui = blizzard_ui_dir();
     let roots = panel_coverage_roots();
-    for (addon_name, toc_path) in
-        discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &roots)
-    {
+    let closure = discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &roots);
+    for (addon_name, toc_path) in &closure {
         if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
             panic!("{addon_name} should load for the panel harness: {error}");
         }
@@ -593,10 +502,7 @@ fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
     fire_panel_harness_startup_events(env);
     silence_lua_error_handler(env);
 
-    discover_all_blizzard_addons(&ui)
-        .into_iter()
-        .map(|(name, _)| name)
-        .collect()
+    closure.into_iter().map(|(name, _)| name).collect()
 }
 
 fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
@@ -709,26 +615,36 @@ fn load_on_demand_shard_weight(
         .max(1)
 }
 
-fn shard_load_on_demand_addon_families(
-    lod_families: &[Vec<String>],
+fn closure_runtime_weight(
+    closure: &LoadOnDemandAddonClosure,
+    known_runtime_counts: &BTreeMap<String, usize>,
+) -> usize {
+    closure
+        .addons
+        .iter()
+        .map(|addon_name| load_on_demand_shard_weight(addon_name, known_runtime_counts))
+        .sum::<usize>()
+        .max(1)
+}
+
+fn shard_load_on_demand_addon_closures(
+    lod_closures: &[LoadOnDemandAddonClosure],
     shard_count: usize,
     known_runtime_counts: &BTreeMap<String, usize>,
-) -> Vec<Vec<Vec<String>>> {
-    let mut weighted_families: Vec<_> = lod_families
+) -> Vec<Vec<LoadOnDemandAddonClosure>> {
+    let mut weighted_closures: Vec<_> = lod_closures
         .iter()
         .enumerate()
-        .map(|(original_index, family)| {
-            let family_weight = family
-                .iter()
-                .map(|addon_name| load_on_demand_shard_weight(addon_name, known_runtime_counts))
-                .sum::<usize>()
-                .max(1);
-
-            (original_index, family.clone(), family_weight)
+        .map(|(original_index, closure)| {
+            (
+                original_index,
+                closure.clone(),
+                closure_runtime_weight(closure, known_runtime_counts),
+            )
         })
         .collect();
 
-    weighted_families.sort_by(
+    weighted_closures.sort_by(
         |(left_index, _, left_weight), (right_index, _, right_weight)| {
             right_weight
                 .cmp(left_weight)
@@ -737,20 +653,20 @@ fn shard_load_on_demand_addon_families(
     );
 
     let mut shard_weights = vec![0usize; shard_count];
-    let mut shards: Vec<Vec<(usize, Vec<String>)>> = vec![Vec::new(); shard_count];
-    for (original_index, family, weight) in weighted_families {
+    let mut shards: Vec<Vec<(usize, LoadOnDemandAddonClosure)>> = vec![Vec::new(); shard_count];
+    for (original_index, closure, weight) in weighted_closures {
         let shard_index = (0..shard_count)
             .min_by_key(|&index| (shard_weights[index], shards[index].len(), index))
             .expect("shard_count should be non-zero");
         shard_weights[shard_index] += weight;
-        shards[shard_index].push((original_index, family));
+        shards[shard_index].push((original_index, closure));
     }
 
     shards
         .into_iter()
         .map(|mut shard| {
             shard.sort_by_key(|(original_index, _)| *original_index);
-            shard.into_iter().map(|(_, family)| family).collect()
+            shard.into_iter().map(|(_, closure)| closure).collect()
         })
         .collect()
 }
@@ -778,14 +694,26 @@ fn panel_open_runtime_baseline_overrides_known_side_loads() {
 
 #[test]
 fn shard_load_on_demand_addons_spreads_heavy_addons_across_shards() {
-    let lod_families = vec![
-        vec!["Blizzard_Light".to_string()],
-        vec!["Blizzard_HeavyA".to_string()],
-        vec![
-            "Blizzard_HeavyB".to_string(),
-            "Blizzard_HeavyB_Dependency".to_string(),
-        ],
-        vec!["Blizzard_Medium".to_string()],
+    let lod_closures = vec![
+        LoadOnDemandAddonClosure {
+            root: "Blizzard_Light".to_string(),
+            addons: vec!["Blizzard_Light".to_string()],
+        },
+        LoadOnDemandAddonClosure {
+            root: "Blizzard_HeavyA".to_string(),
+            addons: vec!["Blizzard_HeavyA".to_string()],
+        },
+        LoadOnDemandAddonClosure {
+            root: "Blizzard_HeavyB".to_string(),
+            addons: vec![
+                "Blizzard_HeavyB_Dependency".to_string(),
+                "Blizzard_HeavyB".to_string(),
+            ],
+        },
+        LoadOnDemandAddonClosure {
+            root: "Blizzard_Medium".to_string(),
+            addons: vec!["Blizzard_Medium".to_string()],
+        },
     ];
     let known_runtime_counts = BTreeMap::from([
         ("Blizzard_HeavyA".to_string(), 100),
@@ -793,51 +721,52 @@ fn shard_load_on_demand_addons_spreads_heavy_addons_across_shards() {
         ("Blizzard_Medium".to_string(), 10),
     ]);
 
-    let shards = shard_load_on_demand_addon_families(&lod_families, 2, &known_runtime_counts);
+    let shards = shard_load_on_demand_addon_closures(&lod_closures, 2, &known_runtime_counts);
 
     assert_eq!(shards.len(), 2);
     assert!(
         shards[0]
             .iter()
-            .flatten()
-            .any(|addon_name| addon_name == "Blizzard_HeavyA")
+            .any(|closure| closure.root == "Blizzard_HeavyA")
     );
     assert!(
         shards[1]
             .iter()
-            .flatten()
-            .any(|addon_name| addon_name == "Blizzard_HeavyB")
+            .any(|closure| closure.root == "Blizzard_HeavyB")
     );
     assert!(
-        shards.iter().any(|shard| shard.iter().any(|family| {
-            family.contains(&"Blizzard_HeavyB".to_string())
-                && family.contains(&"Blizzard_HeavyB_Dependency".to_string())
+        shards.iter().any(|shard| shard.iter().any(|closure| {
+            closure.root == "Blizzard_HeavyB"
+                && closure
+                    .addons
+                    .contains(&"Blizzard_HeavyB_Dependency".to_string())
         })),
-        "dependency families should stay together inside a single shard",
+        "dependency closures should stay together inside a single shard",
     );
 }
 
-fn first_unloaded_addon_in_family(env: &WowLuaEnv, family: &[String]) -> Option<String> {
-    family
+fn closure_has_unloaded_addons(env: &WowLuaEnv, closure: &LoadOnDemandAddonClosure) -> bool {
+    closure
+        .addons
         .iter()
-        .find(|addon_name| !is_addon_loaded(env, addon_name))
-        .cloned()
+        .any(|addon_name| !is_addon_loaded(env, addon_name))
 }
 
 #[test]
-fn first_unloaded_addon_in_family_respects_family_order() {
+fn closure_has_unloaded_addons_checks_full_dependency_closure() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
-    let family = vec![
-        "Blizzard_First".to_string(),
-        "Blizzard_Second".to_string(),
-        "Blizzard_Third".to_string(),
-    ];
+    let closure = LoadOnDemandAddonClosure {
+        root: "Blizzard_First".to_string(),
+        addons: vec![
+            "Blizzard_First".to_string(),
+            "Blizzard_Second".to_string(),
+            "Blizzard_Third".to_string(),
+        ],
+    };
 
-    let first = first_unloaded_addon_in_family(&env, &family);
-
-    assert_eq!(first.as_deref(), Some("Blizzard_First"));
+    assert!(closure_has_unloaded_addons(&env, &closure));
 }
 
 #[test]
@@ -1014,26 +943,30 @@ fn panel_open_runtime_paths_stay_within_known_error_baseline() {
     })
 }
 
-fn load_first_unloaded_addon_in_family(
+fn load_addon_root_for_closure(
     env: &WowLuaEnv,
-    family: &[String],
+    closure: &LoadOnDemandAddonClosure,
     load_failures: &mut Vec<String>,
 ) -> Option<String> {
-    if let Some(addon_name) = first_unloaded_addon_in_family(env, family) {
+    if closure_has_unloaded_addons(env, closure) {
         let (loaded, reason): (bool, Option<String>) = env
-            .eval(&format!("return C_AddOns.LoadAddOn({addon_name:?})"))
+            .eval(&format!("return C_AddOns.LoadAddOn({:?})", closure.root))
             .unwrap_or_else(|error| {
-                panic!("{addon_name}: C_AddOns.LoadAddOn should return: {error:?}")
+                panic!(
+                    "{}: C_AddOns.LoadAddOn should return: {error:?}",
+                    closure.root
+                )
             });
 
         if !loaded {
             load_failures.push(format!(
-                "{addon_name}: LoadAddOn returned false ({})",
+                "{}: LoadAddOn returned false ({})",
+                closure.root,
                 reason.as_deref().unwrap_or("nil"),
             ));
         }
 
-        Some(addon_name)
+        Some(closure.root.clone())
     } else {
         None
     }
@@ -1047,21 +980,21 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
                 env.set_screen_size(1024.0, 768.0);
                 env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
-                let known_blizzard_addons = load_startup_blizzard_ui(&env);
-                let lod_families = discover_blizzard_lod_addon_families();
+                let startup_addons = load_startup_blizzard_ui(&env);
+                let lod_closures = discover_blizzard_lod_addon_closures();
                 let known_runtime_counts = known_load_on_demand_runtime_error_counts();
-                let shard_families = shard_load_on_demand_addon_families(
-                    &lod_families,
+                let shard_closures = shard_load_on_demand_addon_closures(
+                    &lod_closures,
                     shard_count,
                     &known_runtime_counts,
                 );
-                let mut family_failures = Vec::new();
+                let mut closure_failures = Vec::new();
                 let mut load_failures = Vec::new();
 
-                for family in &shard_families[shard_index] {
+                for closure in &shard_closures[shard_index] {
                     clear_lua_error_tracking(&env);
                     let representative =
-                        load_first_unloaded_addon_in_family(&env, family, &mut load_failures);
+                        load_addon_root_for_closure(&env, closure, &mut load_failures);
                     let Some(representative) = representative else {
                         continue;
                     };
@@ -1076,13 +1009,14 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
                         .keys()
                         .filter(|addon_name| {
                             addon_name.as_str() != "<unknown>"
-                                && !known_blizzard_addons.contains(*addon_name)
+                                && !startup_addons.contains(*addon_name)
+                                && !closure.addons.contains(*addon_name)
                         })
                         .cloned()
                         .collect();
                     let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
                     if unknown_count > 0 || !invalid_addons.is_empty() || !increases.is_empty() {
-                        family_failures.push(format!(
+                        closure_failures.push(format!(
                             "{representative}: increased [{}], invalid_addons={:?}, unknown_count={}, actual counts=[{}]\n{}",
                             format_error_count_changes(&increases),
                             invalid_addons,
@@ -1099,9 +1033,9 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
                     load_failures.join("\n"),
                 );
                 assert!(
-                    family_failures.is_empty(),
-                    "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one family in shard {shard_index}/{shard_count}:\n{}",
-                    family_failures.join("\n\n"),
+                    closure_failures.is_empty(),
+                    "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one explicit addon closure in shard {shard_index}/{shard_count}:\n{}",
+                    closure_failures.join("\n\n"),
                 );
             })
         })

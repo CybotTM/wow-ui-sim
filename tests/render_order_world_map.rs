@@ -1,3 +1,6 @@
+#[path = "common/blizzard_addon_manifest.rs"]
+mod blizzard_addon_manifest;
+mod common;
 mod render_order_support;
 
 use render_order_support::*;
@@ -207,9 +210,7 @@ fn isolated_world_map_dependency_closure_loads_declared_dependencies() {
 
 #[test]
 fn voice_chat_prompt_renders_below_world_map_panel_in_combined_stack() {
-    let mut roots = ISOLATED_WORLD_MAP_ROOT_ADDONS.to_vec();
-    roots.extend(["Blizzard_ChatFrame", "Blizzard_Channels"]);
-    let env = env_with_root_addons_ui(&roots);
+    let env = env_with_isolated_world_map_ui();
     open_world_map(&env);
     env.exec(
         r#"
@@ -265,9 +266,7 @@ fn voice_chat_prompt_renders_below_world_map_panel_in_combined_stack() {
 
 #[test]
 fn chat_frame_voice_button_overlaps_world_map_but_renders_below_panel_border() {
-    let mut roots = ISOLATED_WORLD_MAP_ROOT_ADDONS.to_vec();
-    roots.extend(["Blizzard_ChatFrame", "Blizzard_Channels"]);
-    let env = env_with_root_addons_ui(&roots);
+    let env = env_with_isolated_world_map_ui();
     open_world_map(&env);
 
     let buckets = build_strata_buckets(&env);

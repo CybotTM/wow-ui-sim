@@ -12,8 +12,9 @@ Blizzard UI unit tests and addon-bootstrap coverage.
 
 Added `loader::discover_blizzard_addon_closure_for_screen()` and switched the
 render-order test helpers to use it. The resolver walks TOC `Dependencies` and
-`OptionalDeps` from the discovered Blizzard addon set, then returns the
-requested explicit closure in loader order.
+`OptionalDeps` across the full screen-allowed Blizzard TOC set, so tests can
+resolve explicit closures for load-on-demand roots instead of relying on a fake
+monolithic Blizzard bundle.
 
 ## [2026-04-20] update | keybinding spellbook direct dispatch
 

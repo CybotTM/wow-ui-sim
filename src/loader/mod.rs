@@ -327,13 +327,14 @@ pub fn discover_blizzard_addons_for_screen(
 /// The returned list is ordered the same way as `discover_blizzard_addons_for_screen`,
 /// but filtered to the requested roots and everything they require via
 /// `## Dependencies:` and `## OptionalDeps:`.
-/// Roots or dependencies not present in the discovered screen set are ignored.
+/// Roots or dependencies not present in the screen-allowed Blizzard TOC set are ignored.
 pub fn discover_blizzard_addon_closure_for_screen(
     blizzard_ui_dir: &Path,
     screen: ScreenKind,
     roots: &[&str],
 ) -> Vec<(String, PathBuf)> {
-    let Some((addons, lod_pool)) = discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
+    let Some((addons, lod_pool)) =
+        discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
     else {
         return Vec::new();
     };
@@ -344,6 +345,115 @@ pub fn discover_blizzard_addon_closure_for_screen(
         .filter(|(name, _)| wanted.contains(name))
         .collect();
     topological_sort_addons(filtered)
+}
+
+/// Per-addon override entry for Blizzard addon closure discovery.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct BlizzardAddonOverride<'a> {
+    pub addon: &'a str,
+    pub extra_roots: &'a [&'a str],
+}
+
+/// Discover the explicit dependency closure for one or more Blizzard addons.
+///
+/// `overrides` adds extra non-TOC roots before the dependency walk runs.
+/// Use it for shared templates, startup-order assumptions, and implicit
+/// addons that Blizzard code reaches outside TOC metadata.
+pub fn discover_blizzard_addon_closure_for_screen_with_overrides(
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+    roots: &[&str],
+    overrides: &[BlizzardAddonOverride<'_>],
+) -> Vec<(String, PathBuf)> {
+    let Some((addons, lod_pool)) =
+        discover_blizzard_addon_toc_pools_for_screen(blizzard_ui_dir, screen)
+    else {
+        return Vec::new();
+    };
+    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons.into_iter().chain(lod_pool).collect();
+    let extra_roots_by_addon = build_extra_roots_map(overrides);
+    let wanted =
+        collect_declared_dependency_closure_with_overrides(&toc_map, roots, &extra_roots_by_addon);
+    let extra_dependencies = build_extra_dependency_map(overrides);
+    let filtered: HashMap<String, (PathBuf, TocFile)> = toc_map
+        .into_iter()
+        .filter(|(name, _)| wanted.contains(name))
+        .collect();
+    topological_sort_addons_with_extra_dependencies(filtered, &extra_dependencies)
+}
+
+pub(crate) fn collect_declared_dependency_closure(
+    toc_map: &HashMap<String, (PathBuf, TocFile)>,
+    roots: &[&str],
+) -> HashSet<String> {
+    let extra_roots_by_addon: HashMap<&str, Vec<&str>> = HashMap::new();
+    collect_declared_dependency_closure_with_overrides(toc_map, roots, &extra_roots_by_addon)
+}
+
+fn collect_declared_dependency_closure_with_overrides(
+    toc_map: &HashMap<String, (PathBuf, TocFile)>,
+    roots: &[&str],
+    extra_roots_by_addon: &HashMap<&str, Vec<&str>>,
+) -> HashSet<String> {
+    let mut wanted = HashSet::new();
+    let mut pending: Vec<String> = roots.iter().map(|name| (*name).to_string()).collect();
+    let mut queued: HashSet<String> = pending.iter().cloned().collect();
+
+    while let Some(name) = pending.pop() {
+        if !wanted.insert(name.clone()) {
+            continue;
+        }
+
+        if let Some(extra_roots) = extra_roots_by_addon.get(name.as_str()) {
+            for extra_root in extra_roots {
+                let extra_root = (*extra_root).to_string();
+                if queued.insert(extra_root.clone()) {
+                    pending.push(extra_root);
+                }
+            }
+        }
+
+        let Some((_, toc)) = toc_map.get(&name) else {
+            continue;
+        };
+
+        for dep in toc.dependencies().into_iter().chain(toc.optional_deps()) {
+            if toc_map.contains_key(&dep) && queued.insert(dep.clone()) {
+                pending.push(dep);
+            }
+        }
+    }
+
+    wanted
+}
+
+fn build_extra_roots_map<'a>(
+    overrides: &'a [BlizzardAddonOverride<'a>],
+) -> HashMap<&'a str, Vec<&'a str>> {
+    let mut map: HashMap<&'a str, Vec<&'a str>> = HashMap::new();
+    for override_entry in overrides {
+        map.entry(override_entry.addon)
+            .or_default()
+            .extend(override_entry.extra_roots.iter().copied());
+    }
+    map
+}
+
+fn build_extra_dependency_map(
+    overrides: &[BlizzardAddonOverride<'_>],
+) -> HashMap<String, Vec<String>> {
+    let mut map: HashMap<String, Vec<String>> = HashMap::new();
+    for override_entry in overrides {
+        map.entry(override_entry.addon.to_string())
+            .or_default()
+            .extend(
+                override_entry
+                    .extra_roots
+                    .iter()
+                    .map(|extra_root| (*extra_root).to_string()),
+            );
+    }
+    map
 }
 
 fn discover_blizzard_addon_toc_pools_for_screen(
@@ -436,23 +546,36 @@ fn pull_required_lod_addons(
 ///
 /// After emitting each addon, any addon with `LoadWith` pointing to it is emitted
 /// immediately (matching WoW's inline load-on-trigger behavior).
-fn topological_sort_addons(
+fn topological_sort_addons(addons: HashMap<String, (PathBuf, TocFile)>) -> Vec<(String, PathBuf)> {
+    let extra_dependencies = HashMap::new();
+    topological_sort_addons_with_extra_dependencies(addons, &extra_dependencies)
+}
+
+fn topological_sort_addons_with_extra_dependencies(
     mut addons: HashMap<String, (PathBuf, TocFile)>,
+    extra_dependencies: &HashMap<String, Vec<String>>,
 ) -> Vec<(String, PathBuf)> {
     let load_with_map = build_load_with_map(&addons);
     let mut result = Vec::with_capacity(addons.len());
     let mut loaded: HashSet<String> = HashSet::new();
     let mut visiting: HashSet<String> = HashSet::new();
-    let ctx = (&load_with_map, &mut result, &mut loaded, &mut visiting);
+    let ctx = (
+        &load_with_map,
+        extra_dependencies,
+        &mut result,
+        &mut loaded,
+        &mut visiting,
+    );
 
-    emit_early_addons(&mut addons, ctx.0, ctx.1, ctx.2, ctx.3);
-    emit_remaining_addons(&mut addons, ctx.0, ctx.1, ctx.2, ctx.3);
+    emit_early_addons(&mut addons, ctx.0, ctx.1, ctx.2, ctx.3, ctx.4);
+    emit_remaining_addons(&mut addons, ctx.0, ctx.1, ctx.2, ctx.3, ctx.4);
     result
 }
 
 fn emit_early_addons(
     addons: &mut HashMap<String, (PathBuf, TocFile)>,
     load_with_map: &HashMap<String, Vec<String>>,
+    extra_dependencies: &HashMap<String, Vec<String>>,
     result: &mut Vec<(String, PathBuf)>,
     loaded: &mut HashSet<String>,
     visiting: &mut HashSet<String>,
@@ -465,13 +588,22 @@ fn emit_early_addons(
         .collect();
     early.sort();
     for name in early {
-        emit_addon_recursive(&name, addons, load_with_map, result, loaded, visiting);
+        emit_addon_recursive(
+            &name,
+            addons,
+            load_with_map,
+            extra_dependencies,
+            result,
+            loaded,
+            visiting,
+        );
     }
 }
 
 fn emit_remaining_addons(
     addons: &mut HashMap<String, (PathBuf, TocFile)>,
     load_with_map: &HashMap<String, Vec<String>>,
+    extra_dependencies: &HashMap<String, Vec<String>>,
     result: &mut Vec<(String, PathBuf)>,
     loaded: &mut HashSet<String>,
     visiting: &mut HashSet<String>,
@@ -479,7 +611,15 @@ fn emit_remaining_addons(
     let mut remaining: Vec<String> = addons.keys().cloned().collect();
     remaining.sort();
     for name in remaining {
-        emit_addon_recursive(&name, addons, load_with_map, result, loaded, visiting);
+        emit_addon_recursive(
+            &name,
+            addons,
+            load_with_map,
+            extra_dependencies,
+            result,
+            loaded,
+            visiting,
+        );
     }
 }
 
@@ -487,6 +627,7 @@ fn emit_addon_recursive(
     name: &str,
     addons: &mut HashMap<String, (PathBuf, TocFile)>,
     load_with_map: &HashMap<String, Vec<String>>,
+    extra_dependencies: &HashMap<String, Vec<String>>,
     result: &mut Vec<(String, PathBuf)>,
     loaded: &mut HashSet<String>,
     visiting: &mut HashSet<String>,
@@ -513,12 +654,27 @@ fn emit_addon_recursive(
                     deps.push(dep);
                 }
             }
+            if let Some(extra_roots) = extra_dependencies.get(name) {
+                for dep in extra_roots {
+                    if addons.contains_key(dep) && seen.insert(dep.clone()) {
+                        deps.push(dep.clone());
+                    }
+                }
+            }
             deps
         })
         .unwrap_or_default();
 
     for dep in deps {
-        emit_addon_recursive(&dep, addons, load_with_map, result, loaded, visiting);
+        emit_addon_recursive(
+            &dep,
+            addons,
+            load_with_map,
+            extra_dependencies,
+            result,
+            loaded,
+            visiting,
+        );
     }
 
     visiting.remove(name);
@@ -570,33 +726,6 @@ fn emit_load_with(
             emit_load_with(&name, load_with_map, addons, result, loaded);
         }
     }
-}
-
-fn collect_declared_dependency_closure(
-    toc_map: &HashMap<String, (PathBuf, TocFile)>,
-    roots: &[&str],
-) -> HashSet<String> {
-    let mut wanted = HashSet::new();
-    let mut pending: Vec<String> = roots.iter().map(|name| (*name).to_string()).collect();
-    let mut queued: HashSet<String> = pending.iter().cloned().collect();
-
-    while let Some(name) = pending.pop() {
-        if !wanted.insert(name.clone()) {
-            continue;
-        }
-
-        let Some((_, toc)) = toc_map.get(&name) else {
-            continue;
-        };
-
-        for dep in toc.dependencies().into_iter().chain(toc.optional_deps()) {
-            if toc_map.get(&dep).is_some() && queued.insert(dep.clone()) {
-                pending.push(dep);
-            }
-        }
-    }
-
-    wanted
 }
 
 /// Build a map of addon name -> list of available addon names it depends on.
