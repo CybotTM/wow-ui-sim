@@ -11770,6 +11770,31 @@ end
 local function __wow_prepare_global_assignment(key, value)
   if key == "Settings" and type(value) == "table" and value.PingSoundsInitializer == nil then
     value.PingSoundsInitializer = __wow_make_settings_initializer_placeholder()
+  elseif key == "SettingsRegistrar" and type(value) == "table" then
+    local registrar_mt = getmetatable(value) or {}
+    local registrar_prev_newindex = registrar_mt.__newindex
+
+    registrar_mt.__newindex = function(tbl, subkey, subvalue)
+      if subkey == "AddRegistrant" and type(subvalue) == "function" then
+        local original = subvalue
+        subvalue = function(self, registrant)
+          if type(rawget(_G, "Settings")) == "table" and rawget(Settings, "PingSoundsInitializer") == nil then
+            rawset(Settings, "PingSoundsInitializer", __wow_make_settings_initializer_placeholder())
+          end
+          return original(self, registrant)
+        end
+      end
+      if registrar_prev_newindex ~= nil then
+        if type(registrar_prev_newindex) == "function" then
+          registrar_prev_newindex(tbl, subkey, subvalue)
+          return
+        end
+        registrar_prev_newindex[subkey] = subvalue
+        return
+      end
+      rawset(tbl, subkey, subvalue)
+    end
+    setmetatable(value, registrar_mt)
   end
   return value
 end
