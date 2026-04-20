@@ -177,10 +177,12 @@ macro_rules! define_toggle {
 
 define_toggle!(toggle_character, "Character", "CharacterFrame");
 fn toggle_spell_book(state: &mut LuaState) -> LuaResult<u32> {
-    if !player_spells_surface_ready(state)
-        || !try_toggle_player_spells_helper(state, "ToggleSpellBookFrame", &[])?
-    {
-        toggle_panel(state, "SpellBook", "SpellBookFrame")?;
+    let global = Val::Table(state.global);
+    if matches!(table_get(state, global, "PlayerSpellsFrame"), Val::Nil) {
+        let _ = try_load_addon(state, "Blizzard_PlayerSpells")?;
+    }
+    if !try_toggle_player_spells_helper(state, "ToggleSpellBookFrame", &[])? {
+        toggle_panel(state, "SpellBook", "PlayerSpellsFrame")?;
     }
     Ok(0)
 }
