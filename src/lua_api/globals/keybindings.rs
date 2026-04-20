@@ -90,7 +90,7 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
     },
     BindingAction {
         action: "TOGGLESPELLBOOK",
-        lua_code: "PlayerSpellsUtil.ToggleSpellBookFrame()",
+        lua_code: "__wow_toggle_spellbook_keybind()",
     },
     BindingAction {
         action: "TOGGLETALENTS",

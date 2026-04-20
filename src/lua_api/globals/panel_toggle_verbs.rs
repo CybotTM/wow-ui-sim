@@ -61,6 +61,26 @@ fn toggle_panel(state: &mut LuaState, panel: &'static str, frame: &'static str) 
     Ok(())
 }
 
+fn try_toggle_player_spells_helper(
+    state: &mut LuaState,
+    helper_name: &str,
+    args: &[Val],
+) -> LuaResult<bool> {
+    let global = Val::Table(state.global);
+    let util = table_get(state, global, "PlayerSpellsUtil");
+    let Val::Table(_) = util else {
+        return Ok(false);
+    };
+
+    let helper = table_get(state, util, helper_name);
+    let Val::Function(_) = helper else {
+        return Ok(false);
+    };
+
+    let _ = call_function_state(state, helper, args)?;
+    Ok(true)
+}
+
 fn try_toggle_panel_via_frame_method(state: &mut LuaState, frame_name: &str) -> LuaResult<bool> {
     let global = Val::Table(state.global);
     let frame = table_get(state, global, frame_name);
@@ -117,8 +137,19 @@ macro_rules! define_toggle {
 }
 
 define_toggle!(toggle_character, "Character", "CharacterFrame");
-define_toggle!(toggle_spell_book, "SpellBook", "SpellBookFrame");
-define_toggle!(toggle_talent_frame, "Talent", "PlayerTalentFrame");
+fn toggle_spell_book(state: &mut LuaState) -> LuaResult<u32> {
+    if !try_toggle_player_spells_helper(state, "ToggleSpellBookFrame", &[])? {
+        toggle_panel(state, "SpellBook", "SpellBookFrame")?;
+    }
+    Ok(0)
+}
+
+fn toggle_talent_frame(state: &mut LuaState) -> LuaResult<u32> {
+    if !try_toggle_player_spells_helper(state, "ToggleClassTalentFrame", &[])? {
+        toggle_panel(state, "Talent", "PlayerTalentFrame")?;
+    }
+    Ok(0)
+}
 define_toggle!(toggle_quest_log, "QuestLog", "QuestLogFrame");
 define_toggle!(toggle_world_map, "WorldMap", "WorldMapFrame");
 define_toggle!(toggle_friends_frame, "Friends", "FriendsFrame");
