@@ -1144,6 +1144,19 @@ pub(super) fn get_max_lines(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub(super) fn set_max_lines(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let max_lines = match stack_val(state, 2) {
+        Val::Num(value) if value >= 0.0 => value as u32,
+        _ => 0,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.max_lines = max_lines;
+    }
+    Ok(0)
+}
+
 pub(super) fn get_word_wrap(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let word_wrap = borrow_state(state)?

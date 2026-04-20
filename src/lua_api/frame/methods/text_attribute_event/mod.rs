@@ -97,6 +97,7 @@ fn register_text_wrapping(state: &mut LuaState, table: GcRef<Table>) -> LuaResul
     table_set_rust_fn_static(state, table, "SetWordWrap", text::set_word_wrap)?;
     table_set_rust_fn_static(state, table, "GetWordWrap", text::get_word_wrap)?;
     table_set_rust_fn_static(state, table, "CanWordWrap", text::can_word_wrap)?;
+    table_set_rust_fn_static(state, table, "SetMaxLines", text::set_max_lines)?;
     table_set_rust_fn_static(state, table, "GetMaxLines", text::get_max_lines)?;
     table_set_rust_fn_static(state, table, "SetNonSpaceWrap", text::set_non_space_wrap)?;
     table_set_rust_fn_static(state, table, "CanNonSpaceWrap", text::can_non_space_wrap)?;
@@ -350,6 +351,12 @@ fn register_named_callback_table(state: &mut LuaState, table: GcRef<Table>) -> L
         table,
         "UnregisterCallback",
         callbacks::unregister_callback,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table,
+        "AddStaticEventMethod",
+        callbacks::add_static_event_method,
     )?;
     table_set_rust_fn_static(
         state,

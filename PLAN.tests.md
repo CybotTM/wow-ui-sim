@@ -99,7 +99,7 @@
 - [x] Fix spell/cast-state bucket (`3` failed targets): `combat_verbs`, `spell_casting`, `spell_state_probes`.
 - [x] Fix pet-battle seeded/default-count bucket (`2` failed targets): `pet_battles`, `pet_battles_counts`.
 - [x] Fix scroll/html/widget layout bucket (`4` failed targets): `scroll_widgets`, `scroll_widgets_minimal`, `simple_html`, `widget_registry_perf`.
-- [ ] Fix world-map/hero visual bucket (`2` failed targets): `hero_talents_render_visual`, `world_map_onupdate_inventory`.
+- [x] Fix world-map/hero visual bucket (`2` failed targets): `hero_talents_render_visual`, `world_map_onupdate_inventory`.
 - [ ] Fix alpha-visibility expectation drift bucket (`1` failed target): `frame_creation` `IsVisible()` behavior under zero-alpha parents.
 - [ ] Refresh coverage/audit drift bucket (`3` failed targets): `addon_coverage`, `globals_legacy`, `method_diff_coverage`.
 - [ ] Fix widget/pool/heirloom surface bucket (`3` failed targets): `heirloom_probes`, `pool_api`, `widget_slider`.

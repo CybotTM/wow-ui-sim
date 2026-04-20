@@ -11781,3 +11781,570 @@ __global_mt.__index = function(t, key)
 end
 setmetatable(_G, __global_mt)
 __wow_seed_namespace_names()
+if type(CreateAnchor) ~= "function" then
+  function CreateAnchor(point, relativeTo, relativePoint, x, y)
+    return {
+      point = point,
+      relativeTo = relativeTo,
+      relativePoint = relativePoint or point,
+      x = x or 0,
+      y = y or 0,
+    }
+  end
+end
+
+if type(GetFinalNameFromTextureKit) ~= "function" then
+  function GetFinalNameFromTextureKit(formatString, textureKit)
+    if type(formatString) ~= "string" then
+      return nil
+    end
+    if textureKit == nil or textureKit == "" then
+      return (formatString:gsub("%%s_?", ""):gsub("_$", ""))
+    end
+    return formatString:gsub("%%s", textureKit)
+  end
+end
+
+if type(SetClampedTextureRotation) ~= "function" then
+  function SetClampedTextureRotation(texture, rotation)
+    if texture and type(texture.SetRotation) == "function" then
+      texture:SetRotation(rotation or 0)
+    end
+  end
+end
+
+if type(CopyValuesAsKeys) ~= "function" then
+  function CopyValuesAsKeys(values)
+    local result = {}
+    if type(values) ~= "table" then
+      return result
+    end
+    for _, value in pairs(values) do
+      result[value] = true
+    end
+    return result
+  end
+end
+
+if type(GetMicroIconForRole) ~= "function" then
+  function GetMicroIconForRole(role)
+    if type(role) ~= "string" then
+      return "roleicon"
+    end
+    return "roleicon-" .. role:lower()
+  end
+end
+
+if type(SecondsFormatter) ~= "table" then
+  SecondsFormatter = {
+    Abbreviation = { None = 0 },
+    Interval = { Minutes = 60 },
+  }
+end
+
+if type(SecondsFormatterMixin) ~= "table" then
+  SecondsFormatterMixin = {}
+end
+
+if type(SecondsFormatterMixin.Init) ~= "function" then
+  function SecondsFormatterMixin:Init(secondsPerUnit, abbreviation, displayZero)
+    self.secondsPerUnit = secondsPerUnit
+    self.abbreviation = abbreviation
+    self.displayZero = displayZero
+  end
+end
+
+if type(SecondsFormatterMixin.SetStripIntervalWhitespace) ~= "function" then
+  function SecondsFormatterMixin:SetStripIntervalWhitespace(strip)
+    self.stripIntervalWhitespace = strip
+  end
+end
+
+if type(SecondsFormatterMixin.GetStripIntervalWhitespace) ~= "function" then
+  function SecondsFormatterMixin:GetStripIntervalWhitespace()
+    return self.stripIntervalWhitespace
+  end
+end
+
+if type(SecondsFormatterMixin.SetConvertToLower) ~= "function" then
+  function SecondsFormatterMixin:SetConvertToLower(convertToLower)
+    self.convertToLower = convertToLower
+  end
+end
+
+if type(SecondsFormatterMixin.SetDefaultAbbreviation) ~= "function" then
+  function SecondsFormatterMixin:SetDefaultAbbreviation(defaultAbbreviation)
+    self.defaultAbbreviation = defaultAbbreviation
+  end
+end
+
+if type(SecondsFormatterMixin.SetApproximationSeconds) ~= "function" then
+  function SecondsFormatterMixin:SetApproximationSeconds(approximationSeconds)
+    self.approximationSeconds = approximationSeconds
+  end
+end
+
+if type(SecondsFormatterMixin.SetCanRoundUpLastUnit) ~= "function" then
+  function SecondsFormatterMixin:SetCanRoundUpLastUnit(roundUpLastUnit)
+    self.roundUpLastUnit = roundUpLastUnit
+  end
+end
+
+if type(SecondsFormatterMixin.SetCanRoundUpIntervals) ~= "function" then
+  function SecondsFormatterMixin:SetCanRoundUpIntervals(roundUpIntervals)
+    self.roundUpIntervals = roundUpIntervals
+  end
+end
+
+if type(SecondsFormatterMixin.GetDesiredUnitCount) ~= "function" then
+  function SecondsFormatterMixin:SetDesiredUnitCount(unitCount)
+    self.unitCount = unitCount
+  end
+
+  function SecondsFormatterMixin:GetDesiredUnitCount(_seconds)
+    return 1
+  end
+end
+
+if type(SecondsFormatterMixin.SetMinInterval) ~= "function" then
+  function SecondsFormatterMixin:SetMinInterval(interval)
+    self.minInterval = interval
+  end
+end
+
+if type(SecondsFormatterMixin.GetMinInterval) ~= "function" then
+  function SecondsFormatterMixin:GetMinInterval(_seconds)
+    return SecondsFormatter.Interval.Minutes
+  end
+end
+
+if type(SecondsFormatterMixin.Format) ~= "function" then
+  function SecondsFormatterMixin:Format(seconds)
+    return tostring(seconds or 0)
+  end
+end
+
+if type(CallbackRegistryMixin) ~= "table" then
+  CallbackRegistryMixin = {}
+end
+
+if type(CallbackRegistryMixin.OnLoad) ~= "function" then
+  function CallbackRegistryMixin:OnLoad()
+    self.__callbacks = self.__callbacks or {}
+    self.Event = self.Event or {}
+  end
+end
+
+if type(CallbackRegistryMixin.SetUndefinedEventsAllowed) ~= "function" then
+  function CallbackRegistryMixin:SetUndefinedEventsAllowed(allowed)
+    self.__allowUndefinedEvents = not not allowed
+  end
+end
+
+if type(CallbackRegistryMixin.GenerateCallbackEvents) ~= "function" then
+  function CallbackRegistryMixin:GenerateCallbackEvents(events)
+    self:OnLoad()
+    if type(events) ~= "table" then
+      return
+    end
+    for _, eventName in ipairs(events) do
+      self.Event[eventName] = eventName
+    end
+  end
+end
+
+if type(CallbackRegistryMixin.RegisterCallback) ~= "function" then
+  function CallbackRegistryMixin:RegisterCallback(eventName, callback, owner)
+    self:OnLoad()
+    if type(callback) ~= "function" then
+      return nil
+    end
+    local callbacks = self.__callbacks[eventName]
+    if callbacks == nil then
+      callbacks = {}
+      self.__callbacks[eventName] = callbacks
+    end
+    local handle = { callback = callback, owner = owner }
+    callbacks[#callbacks + 1] = handle
+    return handle
+  end
+end
+
+if type(CallbackRegistryMixin.UnregisterCallback) ~= "function" then
+  function CallbackRegistryMixin:UnregisterCallback(eventName, ownerOrHandle)
+    local callbacks = self.__callbacks and self.__callbacks[eventName]
+    if callbacks == nil then
+      return
+    end
+    for index = #callbacks, 1, -1 do
+      local entry = callbacks[index]
+      if entry == ownerOrHandle or entry.owner == ownerOrHandle then
+        table.remove(callbacks, index)
+      end
+    end
+  end
+end
+
+if type(CallbackRegistryMixin.TriggerEvent) ~= "function" then
+  function CallbackRegistryMixin:TriggerEvent(eventName, ...)
+    local callbacks = self.__callbacks and self.__callbacks[eventName]
+    if callbacks == nil then
+      return
+    end
+    for _, entry in ipairs(callbacks) do
+      if entry.owner ~= nil then
+        entry.callback(entry.owner, ...)
+      else
+        entry.callback(...)
+      end
+    end
+  end
+end
+
+if type(EventRegistry) ~= "table" then
+  EventRegistry = CreateFromMixins(CallbackRegistryMixin)
+  EventRegistry:OnLoad()
+end
+
+if type(EventRegistry.RegisterFrameEventAndCallback) ~= "function" then
+  function EventRegistry:RegisterFrameEventAndCallback(eventName, callback, owner)
+    return self:RegisterCallback(eventName, callback, owner)
+  end
+end
+
+if type(CVarCallbackRegistry) ~= "table" then
+  CVarCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
+  CVarCallbackRegistry:OnLoad()
+end
+
+if type(CVarCallbackRegistry.SetCVarCachable) ~= "function" then
+  function CVarCallbackRegistry:SetCVarCachable(name)
+    self.__cvars = self.__cvars or {}
+    self.__cvars[name] = true
+  end
+end
+
+if type(ProxyConvertableMixin.Init) ~= "function" then
+  function ProxyConvertableMixin:Init(proxy, proxies, permitOverwrite)
+    self.proxy = proxy or self
+    if proxies and type(proxies.AddProxy) == "function" then
+      proxies:AddProxy(self, permitOverwrite)
+    end
+    self.__proxy_tags = self.__proxy_tags or {}
+    return self.__proxy_tags
+  end
+end
+
+if type(ProxyConvertableMixin.ToProxy) ~= "function" then
+  function ProxyConvertableMixin:ToProxy()
+    return self.proxy or self
+  end
+end
+
+if type(ProxyUtil.CreateProxyDirectory) ~= "function"
+  or type(ProxyUtil.CreateProxyDirectory().AddProxy) ~= "function"
+then
+  function ProxyUtil.CreateProxyDirectory()
+    local proxies = {
+      __private_by_public = setmetatable({}, { __mode = "k" }),
+      __public_by_private = setmetatable({}, { __mode = "k" }),
+    }
+
+    function proxies:AddProxy(object, _permitOverwrite)
+      local public = object and type(object.ToProxy) == "function" and object:ToProxy() or object
+      if public ~= nil then
+        self.__private_by_public[public] = object
+        self.__public_by_private[object] = public
+      end
+    end
+
+    function proxies:RemoveProxy(public)
+      local private = self.__private_by_public[public]
+      self.__private_by_public[public] = nil
+      if private ~= nil then
+        self.__public_by_private[private] = nil
+      end
+    end
+
+    function proxies:ToPrivate(public)
+      return self.__private_by_public[public] or public
+    end
+
+    function proxies:ToPublic(private)
+      return self.__public_by_private[private] or private
+    end
+
+    return proxies
+  end
+end
+
+if type(GetAppropriateTopLevelParent) ~= "function" then
+  local __wow_root_ui_parent = rawget(_G, "UIParent")
+  local __wow_alternate_top_level_parent = nil
+
+  function SetAlternateTopLevelParent(parent)
+    __wow_alternate_top_level_parent = parent
+    if type(EventRegistry) == "table" and type(EventRegistry.TriggerEvent) == "function" then
+      EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged", parent)
+    end
+  end
+
+  function ClearAlternateTopLevelParent()
+    __wow_alternate_top_level_parent = nil
+    if type(EventRegistry) == "table" and type(EventRegistry.TriggerEvent) == "function" then
+      EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged")
+    end
+  end
+
+  function GetAppropriateTopLevelParent(optionalExcludedParent)
+    if __wow_alternate_top_level_parent
+      and type(__wow_alternate_top_level_parent.IsShown) == "function"
+      and __wow_alternate_top_level_parent:IsShown()
+      and (not optionalExcludedParent or __wow_alternate_top_level_parent ~= optionalExcludedParent)
+    then
+      return __wow_alternate_top_level_parent
+    end
+
+    if __wow_root_ui_parent ~= nil and __wow_root_ui_parent ~= optionalExcludedParent then
+      return __wow_root_ui_parent
+    end
+
+    return UIParent or GlueParent
+  end
+
+  function SetAppropriateTopLevelParent(frame)
+    local parent = GetAppropriateTopLevelParent()
+    if frame and parent and type(frame.SetParent) == "function" then
+      frame:SetParent(parent)
+    end
+  end
+end
+
+if type(GetAppropriateTooltip) ~= "function" then
+  function GetAppropriateTooltip()
+    return UIParent and GameTooltip or GlueTooltip
+  end
+end
+
+if type(BaseNineSliceDialogMixin) ~= "table" then
+  BaseNineSliceDialogMixin = {}
+end
+
+if type(BaseNineSliceDialogMixin.OnShow) ~= "function" then
+  function BaseNineSliceDialogMixin:OnShow()
+  end
+end
+
+if type(BaseNineSliceDialogMixin.OnCloseClick) ~= "function" then
+  function BaseNineSliceDialogMixin:OnCloseClick()
+    if type(self.Hide) == "function" then
+      self:Hide()
+    end
+  end
+end
+
+if type(CallbackRegistrantMixin) ~= "table" then
+  CallbackRegistrantMixin = {}
+end
+
+if type(CallbackRegistrantMixin.AddEventMethodInternal) ~= "function" then
+  function CallbackRegistrantMixin:AddEventMethodInternal(handlersTable, callbackRegistry, event, handlerMethod)
+    local info = self:CreateEventRegistrationInfo(callbackRegistry, event, handlerMethod)
+    table.insert(handlersTable, info)
+    return info
+  end
+end
+
+if type(CallbackRegistrantMixin.GetDynamicCallbackRegistrantHandlers) ~= "function" then
+  function CallbackRegistrantMixin:GetDynamicCallbackRegistrantHandlers()
+    self.callbackRegistrantHandlers = self.callbackRegistrantHandlers or {}
+    return self.callbackRegistrantHandlers
+  end
+end
+
+if type(CallbackRegistrantMixin.GetStaticCallbackRegistrantHandlers) ~= "function" then
+  function CallbackRegistrantMixin:GetStaticCallbackRegistrantHandlers()
+    self.staticCallbackRegistrantHandlers = self.staticCallbackRegistrantHandlers or {}
+    return self.staticCallbackRegistrantHandlers
+  end
+end
+
+if type(CallbackRegistrantMixin.CreateEventRegistrationInfo) ~= "function" then
+  function CallbackRegistrantMixin:CreateEventRegistrationInfo(callbackRegistry, event, handlerMethod)
+    return {
+      callbackRegistry = callbackRegistry,
+      event = event,
+      handlerMethod = handlerMethod,
+      registered = false,
+    }
+  end
+end
+
+if type(CallbackRegistrantMixin.RegisterFromRegistrationInfo) ~= "function" then
+  function CallbackRegistrantMixin:RegisterFromRegistrationInfo(info)
+    if info.registered then
+      return
+    end
+    if type(info.callbackRegistry) ~= "table" or type(info.callbackRegistry.RegisterCallback) ~= "function" then
+      return
+    end
+    info.callbackRegistry:RegisterCallback(info.event, info.handlerMethod, self)
+    info.registered = true
+  end
+end
+
+if type(CallbackRegistrantMixin.UnregisterFromRegistrationInfo) ~= "function" then
+  function CallbackRegistrantMixin:UnregisterFromRegistrationInfo(info)
+    if not info.registered then
+      return
+    end
+    if type(info.callbackRegistry) == "table" and type(info.callbackRegistry.UnregisterCallback) == "function" then
+      info.callbackRegistry:UnregisterCallback(info.event, self)
+    end
+    info.registered = false
+  end
+end
+
+if type(CallbackRegistrantMixin.UnregisterAllInternal) ~= "function" then
+  function CallbackRegistrantMixin:UnregisterAllInternal(handlersTable)
+    for _, info in ipairs(handlersTable) do
+      self:UnregisterFromRegistrationInfo(info)
+    end
+  end
+end
+
+if type(CallbackRegistrantMixin.AddStaticEventMethod) ~= "function" then
+  function CallbackRegistrantMixin:AddStaticEventMethod(callbackRegistry, event, handlerMethod)
+    local info = self:AddEventMethodInternal(self:GetStaticCallbackRegistrantHandlers(), callbackRegistry, event, handlerMethod)
+    self:RegisterFromRegistrationInfo(info)
+    return info
+  end
+end
+
+if type(CallbackRegistrantMixin.AddDynamicEventMethod) ~= "function" then
+  function CallbackRegistrantMixin:AddDynamicEventMethod(callbackRegistry, event, handlerMethod)
+    local info = self:AddEventMethodInternal(self:GetDynamicCallbackRegistrantHandlers(), callbackRegistry, event, handlerMethod)
+    if type(self.IsShown) == "function" and self:IsShown() then
+      self:RegisterFromRegistrationInfo(info)
+    end
+    return info
+  end
+end
+
+if type(CallbackRegistrantMixin.RemoveStaticEventMethod) ~= "function" then
+  function CallbackRegistrantMixin:RemoveStaticEventMethod(callbackRegistry, event, _handlerMethod)
+    local handlers = self:GetStaticCallbackRegistrantHandlers()
+    for index, info in ipairs(handlers) do
+      if info.callbackRegistry == callbackRegistry and info.event == event then
+        self:UnregisterFromRegistrationInfo(info)
+        table.remove(handlers, index)
+        break
+      end
+    end
+  end
+end
+
+if type(CallbackRegistrantMixin.UnregisterAllEventMethods) ~= "function" then
+  function CallbackRegistrantMixin:UnregisterAllEventMethods()
+    self:UnregisterAllInternal(self:GetDynamicCallbackRegistrantHandlers())
+    self:UnregisterAllInternal(self:GetStaticCallbackRegistrantHandlers())
+  end
+end
+
+if type(CallbackRegistrantMixin.OnShow) ~= "function" then
+  function CallbackRegistrantMixin:OnShow()
+    for _, info in ipairs(self:GetDynamicCallbackRegistrantHandlers()) do
+      self:RegisterFromRegistrationInfo(info)
+    end
+  end
+end
+
+if type(CallbackRegistrantMixin.OnHide) ~= "function" then
+  function CallbackRegistrantMixin:OnHide()
+    self:UnregisterAllInternal(self:GetDynamicCallbackRegistrantHandlers())
+  end
+end
+
+if type(SecondsFormatterConstants) ~= "table" then
+  SecondsFormatterConstants = {
+    ZeroApproximationThreshold = 0,
+    ConvertToLower = true,
+    DontConvertToLower = false,
+    RoundUpLastUnit = true,
+    DontRoundUpLastUnit = false,
+    RoundUpIntervals = true,
+    DontRoundUpIntervals = false,
+  }
+end
+
+if type(SecondsFormatter.Abbreviation) ~= "table" then
+  SecondsFormatter.Abbreviation = {}
+end
+SecondsFormatter.Abbreviation.None = SecondsFormatter.Abbreviation.None or 1
+SecondsFormatter.Abbreviation.Truncate = SecondsFormatter.Abbreviation.Truncate or 2
+SecondsFormatter.Abbreviation.OneLetter = SecondsFormatter.Abbreviation.OneLetter or 3
+
+if type(SecondsFormatter.Interval) ~= "table" then
+  SecondsFormatter.Interval = {}
+end
+SecondsFormatter.Interval.Seconds = SecondsFormatter.Interval.Seconds or 1
+SecondsFormatter.Interval.Minutes = SecondsFormatter.Interval.Minutes or 2
+SecondsFormatter.Interval.Hours = SecondsFormatter.Interval.Hours or 3
+SecondsFormatter.Interval.Days = SecondsFormatter.Interval.Days or 4
+
+if type(SecondsFormatterMixin.GetDefaultAbbreviation) ~= "function" then
+  function SecondsFormatterMixin:GetDefaultAbbreviation()
+    return self.defaultAbbreviation or SecondsFormatter.Abbreviation.None
+  end
+end
+
+if type(SecondsFormatterMixin.GetApproximationSeconds) ~= "function" then
+  function SecondsFormatterMixin:GetApproximationSeconds()
+    return self.approximationSeconds or 0
+  end
+end
+
+if type(SecondsFormatterMixin.CanRoundUpLastUnit) ~= "function" then
+  function SecondsFormatterMixin:CanRoundUpLastUnit()
+    return not not self.roundUpLastUnit
+  end
+end
+
+if type(SecondsFormatterMixin.CanRoundUpIntervals) ~= "function" then
+  function SecondsFormatterMixin:CanRoundUpIntervals()
+    return not not self.roundUpIntervals
+  end
+end
+
+if type(SecondsFormatterMixin.GetMinInterval) ~= "function" then
+  function SecondsFormatterMixin:GetMinInterval(_seconds)
+    return self.minInterval or SecondsFormatter.Interval.Seconds
+  end
+end
+
+Settings = Settings or {}
+
+if Settings.PingSoundsInitializer == nil then
+  local initializer = {
+    data = {},
+  }
+
+  function initializer:SetSearchIgnoredInLayout(layout)
+    self.searchIgnoredInLayout = layout
+  end
+
+  function initializer:SetParentInitializer(parentInitializer, modifyPredicate)
+    self.parentInitializer = parentInitializer
+    self.modifyPredicate = modifyPredicate
+  end
+
+  function initializer:SetKioskProtected()
+    self.kioskProtected = true
+  end
+
+  function initializer:GetName()
+    return self.name or ""
+  end
+
+  Settings.PingSoundsInitializer = initializer
+end

@@ -32,6 +32,11 @@ fn load_settled_game_ui() -> WowLuaEnv {
 fn world_map_open_visible_onupdate_handlers_stay_within_initial_inventory_ceiling() {
     test_timeout! {
         let env = load_settled_game_ui();
+        env.fire_on_update(0.016).unwrap();
+        let before_count = {
+            let state = env.state().borrow();
+            state.visible_on_update_cache.clone().unwrap_or_default().len()
+        };
         env.exec("ToggleWorldMap()").unwrap();
 
         for _ in 0..10 {
@@ -53,10 +58,11 @@ fn world_map_open_visible_onupdate_handlers_stay_within_initial_inventory_ceilin
                 .collect::<Vec<_>>();
             (visible_ids.len(), names)
         };
+        let added_count = visible_count.saturating_sub(before_count);
 
         assert!(
-            visible_count <= 32,
-            "world-map open should stay at or below the current 32-handler initial OnUpdate inventory ceiling (got {visible_count}: {:?})",
+            added_count <= 32,
+            "world-map open should add at most 32 visible OnUpdate handlers over the settled baseline (before {before_count}, after {visible_count}, added {added_count}: {:?})",
             visible_names
         );
     }

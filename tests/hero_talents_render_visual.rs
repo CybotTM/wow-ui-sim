@@ -333,7 +333,7 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
     );
 
     let icon_crop_prefix = format!("{icon_path}@crop:");
-    let request = batch
+    let icon_request = batch
         .texture_requests
         .iter()
         .find(|request| {
@@ -346,26 +346,74 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
         })
         .expect("HeroSpecButton.Icon1 should emit a cropped atlas request");
 
+    let overlapping_requests: Vec<_> = batch
+        .texture_requests
+        .iter()
+        .filter(|request| {
+            request_overlaps_rect(
+                &batch,
+                request,
+                (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height),
+            )
+        })
+        .collect();
+
+    let mask_request = batch
+        .mask_texture_requests
+        .iter()
+        .find(|request| {
+            request_matches_rect(
+                &batch,
+                request,
+                (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height),
+            )
+        })
+        .map(|request| request.path.clone());
+
     let mut crop_mgr = make_texture_manager().expect("texture directories should exist");
-    let crop = load_texture_or_crop(&mut crop_mgr, &request.path)
+    let crop = load_texture_or_crop(&mut crop_mgr, &icon_request.path)
         .expect("cropped hero spec icon texture should load");
     let crop_image = RgbaImage::from_raw(crop.width, crop.height, crop.rgba.to_vec())
         .expect("cropped hero spec icon should decode into an image");
 
     let mut isolated_batch = QuadBatch::default();
-    isolated_batch.push_textured_path(
-        Rectangle::new(
-            Point::new(icon_rect.x, icon_rect.y),
-            Size::new(icon_rect.width, icon_rect.height),
-        ),
-        &request.path,
-        [1.0, 1.0, 1.0, 1.0],
-        BlendMode::Alpha,
-    );
+    let mut icon_isolated_start = None;
+    for request in &overlapping_requests {
+        let request_bounds = quad_bounds(&batch, request);
+        isolated_batch.push_textured_path(
+            Rectangle::new(
+                Point::new(request_bounds.0, request_bounds.1),
+                Size::new(
+                    request_bounds.2 - request_bounds.0,
+                    request_bounds.3 - request_bounds.1,
+                ),
+            ),
+            &request.path,
+            [1.0, 1.0, 1.0, 1.0],
+            BlendMode::Alpha,
+        );
+        let isolated_start = isolated_batch.vertices.len() - 4;
+        let source_start = request.vertex_start as usize;
+        for offset in 0..4 {
+            isolated_batch.vertices[isolated_start + offset] =
+                batch.vertices[source_start + offset];
+        }
+        if request.vertex_start == icon_request.vertex_start && request.path == icon_request.path {
+            icon_isolated_start = Some(isolated_start as u32);
+        }
+    }
+    if let (Some(mask_path), Some(icon_isolated_start)) = (mask_request, icon_isolated_start) {
+        isolated_batch
+            .mask_texture_requests
+            .push(wow_ui_sim::render::TextureRequest {
+                path: mask_path,
+                vertex_start: icon_isolated_start,
+                vertex_count: 4,
+            });
+    }
 
     let mut isolated_mgr = make_texture_manager().expect("texture directories should exist");
     let isolated_render = render_to_image(&isolated_batch, &mut isolated_mgr, 1024, 768, None);
-
     let mut full_render_mgr = make_texture_manager().expect("texture directories should exist");
     let full_render = render_to_image(&batch, &mut full_render_mgr, 1024, 768, None);
     let rendered_rect = (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height);
