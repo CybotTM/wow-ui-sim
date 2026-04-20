@@ -12,6 +12,7 @@ use common::panel_fixtures::{
     clear_recorded_lua_errors, player_spells_panel_debug_snapshot, recorded_lua_errors, setup_env,
 };
 use wow_ui_sim::startup::{prewarm_player_spells_spellbook, run_extra_update_ticks};
+use wow_ui_sim::traits::{TRAIT_CURRENCY_DB, TRAIT_TREE_DB};
 
 fn open_spellbook(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     env.exec(
@@ -23,6 +24,30 @@ fn open_spellbook(env: &wow_ui_sim::lua_api::WowLuaEnv) {
         "#,
     )
     .expect("Failed to open spellbook");
+}
+
+fn open_talents(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    env.exec(
+        r#"
+        assert(PlayerSpellsUtil and PlayerSpellsUtil.ToggleClassTalentFrame, "ToggleClassTalentFrame should exist")
+        PlayerSpellsUtil.ToggleClassTalentFrame()
+        assert(PlayerSpellsFrame and PlayerSpellsFrame:IsShown(), "PlayerSpellsFrame should be shown")
+        assert(PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame:IsShown(), "TalentsFrame should be shown")
+        "#,
+    )
+    .expect("Failed to open talents");
+}
+
+fn max_points_for_currency(currency_id: u32) -> u32 {
+    let flags = TRAIT_CURRENCY_DB
+        .get(&currency_id)
+        .map(|currency| currency.flags)
+        .unwrap_or_default();
+    match flags {
+        4 => 31,
+        8 => 30,
+        _ => 0,
+    }
 }
 
 #[test]
@@ -278,6 +303,159 @@ fn starter_build_highlight_uses_player_spells_talent_ui_call_path() {
         assert!(
             result.contains(','),
             "starter build highlight regression should return node and entry ids: {result}"
+        );
+    }
+}
+
+#[test]
+fn player_spells_export_disabled_callback_tracks_unspent_hero_points() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__hero_export_gate_errors");
+        clear_recorded_lua_errors(&env);
+
+        {
+            let mut state = env.state().borrow_mut();
+            let class_currency_ids = TRAIT_TREE_DB
+                .get(&790)
+                .expect("Paladin class tree should exist")
+                .currency_ids;
+            for currency_id in class_currency_ids {
+                let currency_id = *currency_id;
+                let max_points = max_points_for_currency(currency_id);
+                state.talents.currency_spent.insert(currency_id, max_points);
+            }
+            state.talents.currency_spent.insert(2986, 10);
+        }
+
+        open_talents(&env);
+
+        let (disabled_with_points, disabled_without_points): (bool, bool) = env
+            .eval(
+                r#"
+                local talents = assert(PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame, "talents frame should exist")
+
+                local function find_export_clipboard(loadSystem)
+                    for _, sentinelInfo in pairs(loadSystem.sentinelInfos) do
+                        if sentinelInfo.sentinelInfos then
+                            for _, child in ipairs(sentinelInfo.sentinelInfos) do
+                                if child.text == TALENT_FRAME_DROP_DOWN_EXPORT_CLIPBOARD then
+                                    return child
+                                end
+                            end
+                        end
+                    end
+                end
+
+                local clipboard = assert(find_export_clipboard(talents.LoadSystem), "export clipboard sentinel should exist")
+                local disabledWithPoints = select(1, clipboard.disabledCallback())
+                assert(disabledWithPoints == true, "hero points should disable export")
+
+                local hadPoints, numPoints = C_ClassTalents.HasUnspentHeroTalentPoints()
+                assert(hadPoints and numPoints == 1, "expected one remaining hero point before final spend")
+
+                local activeSubTree = assert(C_ClassTalents.GetActiveHeroTalentSpec(), "active hero subtree should exist")
+                local finalSpent = 11
+                if activeSubTree == 48 then
+                    A_Admin.SetTraitCurrencySpent(2986, finalSpent)
+                elseif activeSubTree == 49 then
+                    A_Admin.SetTraitCurrencySpent(2987, finalSpent)
+                elseif activeSubTree == 50 then
+                    A_Admin.SetTraitCurrencySpent(2988, finalSpent)
+                else
+                    error("unexpected active hero subtree: " .. tostring(activeSubTree))
+                end
+
+                local disabledWithoutPoints = select(1, clipboard.disabledCallback())
+                local hasPointsAfter, numPointsAfter = C_ClassTalents.HasUnspentHeroTalentPoints()
+                assert(not hasPointsAfter and numPointsAfter == 0, "hero points should be exhausted after final spend")
+
+                return disabledWithPoints, disabledWithoutPoints
+                "#,
+            )
+            .unwrap();
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__hero_export_gate_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "Hero export gate regression produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "Hero export gate regression produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n")
+        );
+        assert!(disabled_with_points, "hero points should disable export");
+        assert!(
+            !disabled_without_points,
+            "export should re-enable once hero points are exhausted and class points are capped"
+        );
+    }
+}
+
+#[test]
+fn player_spells_view_loadout_uses_trait_tree_for_imported_spec() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__view_loadout_trait_tree_errors");
+        clear_recorded_lua_errors(&env);
+
+        open_talents(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                local talents = assert(PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame, "talents frame should exist")
+                local exportString = talents:GetLoadoutExportString()
+                assert(type(exportString) == "string" and exportString ~= "", "loadout export should be a non-empty string")
+
+                local captured = {}
+                local original = C_ClassTalents.ViewLoadout
+                C_ClassTalents.ViewLoadout = function(loadoutEntryInfo, importText)
+                    captured.entryCount = #loadoutEntryInfo
+                    captured.importMatches = importText == exportString
+                    return true
+                end
+
+                local ok, specID = talents:ViewLoadout(exportString, UnitLevel("player"))
+                C_ClassTalents.ViewLoadout = original
+
+                assert(ok == true, "ViewLoadout should succeed for the exported loadout")
+                assert(specID == PlayerUtil.GetCurrentSpecID(), "ViewLoadout should return the imported spec id")
+                assert(captured.importMatches, "ViewLoadout should pass the same import string through to C_ClassTalents.ViewLoadout")
+                assert(captured.entryCount and captured.entryCount >= 0, "ViewLoadout should decode loadout entries using GetTraitTreeForSpec")
+
+                return string.format("%d:%d", specID, captured.entryCount)
+                "#,
+            )
+            .unwrap();
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors =
+            common::drain_string_table(&env, "__view_loadout_trait_tree_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "ViewLoadout trait-tree regression produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "ViewLoadout trait-tree regression produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n")
+        );
+        assert!(
+            result.starts_with("66:"),
+            "Protection export should round-trip through ViewLoadout using spec 66: {result}"
         );
     }
 }
