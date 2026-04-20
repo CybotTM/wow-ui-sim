@@ -10,6 +10,7 @@ mod env;
 mod env_convert;
 mod env_init;
 mod env_rilua;
+mod env_runtime;
 pub(crate) mod frame;
 pub(crate) mod frame_substates;
 pub(crate) mod game_data;

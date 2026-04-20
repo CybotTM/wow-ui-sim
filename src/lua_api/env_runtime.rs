@@ -1,0 +1,792 @@
+use super::env::WowLuaAppData;
+use super::env::WowLuaEnv;
+use super::env::next_timer_id;
+use super::env_init::{
+    addon_taint_name, is_blizzard_addon, record_addon_time, update_threshold_counters,
+};
+use super::handler_timing;
+use super::state::{AddonInfo, PendingTimer, SimState};
+use super::timer_processing::{reschedule_timer, timer_should_wait};
+use crate::Result;
+use crate::font::WowFontSystem;
+use crate::lua_api::methods::{
+    call_function as call_rilua_function, create_string, frame_ref, registry_get, val_to_string,
+};
+use crate::lua_api::script_helpers::{call_error_handler, get_event_listeners, get_script};
+use crate::screen::ScreenKind;
+use rilua::{LuaApiMut, Val};
+use std::cell::RefCell;
+use std::env;
+use std::rc::Rc;
+use std::time::{Duration, Instant};
+
+fn event_dispatch_trace_enabled(event: &str) -> bool {
+    let Some(filter) = env::var_os("WOW_SIM_TRACE_EVENT_DISPATCH") else {
+        return false;
+    };
+    let filter = filter.to_string_lossy();
+    filter == "*" || filter.split(',').any(|name| name.trim() == event)
+}
+
+fn should_skip_startup_actionbar_dispatch(state: &SimState, widget_id: u64, event: &str) -> bool {
+    if event != "PLAYER_ENTERING_WORLD" {
+        return false;
+    }
+
+    matches!(
+        state
+            .widgets
+            .get(widget_id)
+            .and_then(|frame| frame.name.as_deref()),
+        Some("ActionBarButtonEventsFrame" | "ActionBarController")
+    )
+}
+
+fn log_widget_handler_timing(
+    state: &Rc<RefCell<SimState>>,
+    widget_id: u64,
+    addon_idx: Option<u16>,
+    handler_name: &str,
+    duration: Duration,
+) {
+    if !handler_timing::should_log(duration) {
+        return;
+    }
+
+    let (addon_name, frame_name) = {
+        let sim = state.borrow();
+        let addon_name = addon_idx
+            .and_then(|idx| sim.addons.get(idx as usize))
+            .map(|addon| addon.folder_name.clone());
+        let frame_name = sim
+            .widgets
+            .get(widget_id)
+            .and_then(|frame| frame.name.clone());
+        (addon_name, frame_name)
+    };
+
+    handler_timing::log(
+        addon_name.as_deref(),
+        handler_name,
+        frame_name.as_deref(),
+        widget_id,
+        duration,
+    );
+}
+
+fn global_hash_entries(
+    state: &rilua::vm::state::LuaState,
+    globals: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> Vec<(Val, Val)> {
+    state
+        .gc
+        .tables
+        .get(globals)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default()
+}
+
+fn slash_command_name(key: &str) -> Option<&str> {
+    if !key.starts_with("SLASH_") {
+        return None;
+    }
+    let suffix = &key[6..];
+    let name = suffix.trim_end_matches(|c: char| c.is_ascii_digit());
+    (!name.is_empty()).then_some(name)
+}
+
+fn matching_slash_handlers(
+    state: &mut rilua::vm::state::LuaState,
+    globals: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    slash_table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    command: &str,
+) -> Vec<(String, Val)> {
+    let entries = global_hash_entries(state, globals);
+    let mut matches = Vec::new();
+
+    for (key, value) in entries {
+        let Some(key_string) = val_to_string(state, key) else {
+            continue;
+        };
+        let Some(name) = slash_command_name(&key_string) else {
+            continue;
+        };
+        let Some(slash_command) = val_to_string(state, value) else {
+            continue;
+        };
+        if slash_command.to_lowercase() != command {
+            continue;
+        }
+
+        let handler_key = state.gc.intern_string(name.as_bytes());
+        let handler = state
+            .gc
+            .tables
+            .get(slash_table_ref)
+            .map(|table| table.get_str(handler_key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+        matches.push((name.to_string(), handler));
+    }
+
+    matches
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WowLuaEnv;
+
+    #[test]
+    fn dispatch_slash_command_uses_registered_handler() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            SlashCmdList = {}
+            local calls = {}
+            function SlashCmdList.TEST(msg)
+                calls[#calls + 1] = msg
+            end
+            SLASH_TEST1 = "/test"
+            __dispatch_calls = calls
+            "#,
+        )
+        .expect("Failed to register slash command");
+
+        assert!(
+            env.dispatch_slash_command("/test payload")
+                .expect("slash dispatch should succeed")
+        );
+        assert_eq!(
+            env.eval::<String>("return __dispatch_calls[1]")
+                .expect("dispatch should record payload"),
+            "payload"
+        );
+    }
+}
+
+impl WowLuaEnv {
+    /// Fire an event to all registered frames.
+    pub fn fire_event(&self, event: &str) -> Result<()> {
+        self.fire_event_with_args(event, &[])
+    }
+
+    /// Fire an event with arguments to all registered frames.
+    pub fn fire_event_with_args(&self, event: &str, args: &[Val]) -> Result<()> {
+        let listeners = {
+            let mut lua = self.lua.borrow_mut();
+            get_event_listeners(lua.state_mut(), event)
+        };
+        for widget_id in listeners {
+            self.dispatch_event_to_frame(widget_id, event, args)?;
+        }
+        if event == "PLAYER_ENTERING_WORLD" {
+            super::workarounds::apply_post_event(self);
+        }
+        Ok(())
+    }
+
+    fn handler_owner_addon(&self, widget_id: u64) -> Option<u16> {
+        self.state
+            .borrow()
+            .widgets
+            .get(widget_id)
+            .and_then(|frame| frame.owner_addon)
+    }
+
+    fn build_event_call_args(
+        &self,
+        lua: &mut rilua::Lua,
+        widget_id: u64,
+        event: &str,
+        args: &[Val],
+    ) -> Result<Vec<Val>> {
+        let frame = {
+            let state = lua.state_mut();
+            frame_ref(state, widget_id)?
+        };
+        let event_name = {
+            let state = lua.state_mut();
+            create_string(state, event)
+        };
+        let mut call_args = Vec::with_capacity(args.len() + 2);
+        call_args.push(frame);
+        call_args.push(event_name);
+        call_args.extend_from_slice(args);
+        Ok(call_args)
+    }
+
+    fn build_script_call_args(
+        &self,
+        lua: &mut rilua::Lua,
+        widget_id: u64,
+        extra_args: Vec<Val>,
+    ) -> Result<Vec<Val>> {
+        let frame = {
+            let state = lua.state_mut();
+            frame_ref(state, widget_id)?
+        };
+        let mut call_args = Vec::with_capacity(extra_args.len() + 1);
+        call_args.push(frame);
+        call_args.extend(extra_args);
+        Ok(call_args)
+    }
+
+    fn call_widget_handler(
+        &self,
+        lua: &mut rilua::Lua,
+        widget_id: u64,
+        addon_idx: Option<u16>,
+        handler_name: &str,
+        handler: Val,
+        call_args: &[Val],
+    ) {
+        let taint = addon_taint_name(&self.state, addon_idx);
+        let blizzard = is_blizzard_addon(&self.state, addon_idx);
+        let _ = (taint, blizzard);
+
+        let start = Instant::now();
+        self.state.borrow_mut().executing_addon_index = addon_idx;
+        let call_result = call_rilua_function(lua, handler, call_args);
+        self.state.borrow_mut().executing_addon_index = None;
+        if let Err(error) = call_result {
+            call_error_handler(lua, &error.to_string());
+        }
+        let elapsed = start.elapsed();
+        record_addon_time(&self.state, addon_idx, &start);
+        log_widget_handler_timing(&self.state, widget_id, addon_idx, handler_name, elapsed);
+    }
+
+    fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
+        {
+            let state = self.state.borrow();
+            // These two frames still wedge the startup path on
+            // PLAYER_ENTERING_WORLD. Keep them out of the event fanout until
+            // the underlying action-bar button update path is fixed.
+            if should_skip_startup_actionbar_dispatch(&state, widget_id, event) {
+                return Ok(());
+            }
+        }
+        let addon_idx = self.handler_owner_addon(widget_id);
+        let trace_dispatch = event_dispatch_trace_enabled(event);
+        let trace_label = if trace_dispatch {
+            let state = self.state.borrow();
+            let frame_name = state
+                .widgets
+                .get(widget_id)
+                .map(|frame| {
+                    let name = frame
+                        .name
+                        .clone()
+                        .or_else(|| frame.parent_key.clone())
+                        .unwrap_or_else(|| format!("#{widget_id}"));
+                    let object_type = frame
+                        .object_type_name
+                        .clone()
+                        .unwrap_or_else(|| format!("{:?}", frame.widget_type));
+                    let owner = frame
+                        .owner_addon
+                        .and_then(|index| state.addons.get(index as usize))
+                        .map(|addon| addon.folder_name.clone())
+                        .unwrap_or_else(|| "?".to_string());
+                    format!("{name} [{object_type}] owner={owner}")
+                })
+                .unwrap_or_else(|| format!("#{widget_id}"));
+            let start_time = state.start_time;
+            Some((frame_name, start_time))
+        } else {
+            None
+        };
+        let mut lua = self.lua.borrow_mut();
+        let handler = {
+            let state = lua.state_mut();
+            get_script(state, widget_id, "OnEvent")
+        };
+        let Some(handler) = handler else {
+            return Ok(());
+        };
+        if let Some((frame_name, start_time)) = &trace_label {
+            eprintln!(
+                "{} [EventTrace] {event} -> {frame_name} begin",
+                crate::logging::elapsed_prefix(*start_time)
+            );
+        }
+        let call_args = self.build_event_call_args(&mut lua, widget_id, event, args)?;
+        self.call_widget_handler(
+            &mut lua, widget_id, addon_idx, "OnEvent", handler, &call_args,
+        );
+        if let Some((frame_name, start_time)) = &trace_label {
+            eprintln!(
+                "{} [EventTrace] {event} -> {frame_name} end",
+                crate::logging::elapsed_prefix(*start_time)
+            );
+        }
+        Ok(())
+    }
+
+    /// Fire a script handler for a specific widget with per-addon taint restoration.
+    pub fn fire_script_handler(
+        &self,
+        widget_id: u64,
+        handler_name: &str,
+        extra_args: Vec<Val>,
+    ) -> Result<()> {
+        let addon_idx = self.handler_owner_addon(widget_id);
+        let mut lua = self.lua.borrow_mut();
+        let handler = {
+            let state = lua.state_mut();
+            get_script(state, widget_id, handler_name)
+        };
+        let Some(handler) = handler else {
+            return Ok(());
+        };
+
+        let call_args = self.build_script_call_args(&mut lua, widget_id, extra_args)?;
+        self.call_widget_handler(
+            &mut lua,
+            widget_id,
+            addon_idx,
+            handler_name,
+            handler,
+            &call_args,
+        );
+        Ok(())
+    }
+
+    /// Check if a script handler is registered for a widget.
+    pub fn has_script_handler(&self, widget_id: u64, handler_name: &str) -> bool {
+        let mut lua = self.lua.borrow_mut();
+        get_script(lua.state_mut(), widget_id, handler_name).is_some()
+    }
+
+    /// Resolve a clicked frame to the nearest EditBox in its parent chain.
+    pub(crate) fn resolve_editbox_focus_target(&self, clicked_frame: Option<u64>) -> Option<u64> {
+        use crate::widget::WidgetType;
+
+        let state = self.state.borrow();
+        let mut current = clicked_frame;
+
+        while let Some(frame_id) = current {
+            let Some(frame) = state.widgets.get(frame_id) else {
+                break;
+            };
+            if frame.widget_type == WidgetType::EditBox {
+                return Some(frame_id);
+            }
+            current = frame.parent_id;
+        }
+
+        None
+    }
+
+    /// Simulate a left-click on a frame by ID.
+    pub fn send_click(&self, frame_id: u64) -> Result<()> {
+        let editbox_target = self.resolve_editbox_focus_target(Some(frame_id));
+        let old_focus = self.state.borrow().focused_frame_id;
+
+        if let Some(editbox_id) = editbox_target {
+            if old_focus != Some(editbox_id) {
+                self.state.borrow_mut().focused_frame_id = Some(editbox_id);
+                if let Some(old_id) = old_focus {
+                    self.fire_script_handler(old_id, "OnEditFocusLost", vec![])?;
+                }
+                self.fire_script_handler(editbox_id, "OnEditFocusGained", vec![])?;
+            }
+        } else if let Some(old_id) = old_focus {
+            self.state.borrow_mut().focused_frame_id = None;
+            self.fire_script_handler(old_id, "OnEditFocusLost", vec![])?;
+        }
+
+        let button_val = self.lua_string("LeftButton");
+        self.fire_script_handler(frame_id, "OnMouseDown", vec![button_val])?;
+        self.fire_script_handler(frame_id, "OnClick", vec![button_val, Val::Bool(false)])?;
+        self.fire_script_handler(frame_id, "OnMouseUp", vec![button_val, Val::Bool(true)])?;
+        Ok(())
+    }
+
+    /// Dispatch a slash command (e.g., "/wa options").
+    /// Returns Ok(true) if a handler was found and called, Ok(false) if no handler matched.
+    pub fn dispatch_slash_command(&self, input: &str) -> Result<bool> {
+        let input = input.trim();
+        if !input.starts_with('/') {
+            return Ok(false);
+        }
+
+        let (cmd, msg) = match input.find(' ') {
+            Some(pos) => (&input[..pos], input[pos + 1..].trim()),
+            None => (input, ""),
+        };
+        let cmd_lower = cmd.to_lowercase();
+
+        let mut lua = self.lua.borrow_mut();
+        let slash_cmd_list = LuaApiMut::get_global_val(&mut *lua, "SlashCmdList");
+        let Val::Table(slash_table_ref) = slash_cmd_list else {
+            return Ok(false);
+        };
+        let state = lua.state_mut();
+        let globals = state.global;
+
+        for (name, handler) in matching_slash_handlers(state, globals, slash_table_ref, &cmd_lower)
+        {
+            if !matches!(handler, Val::Function(_)) {
+                continue;
+            }
+            let msg_val = create_string(state, msg);
+            let _ = call_rilua_function(&mut lua, handler, &[msg_val])?;
+            let _ = name;
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    /// Call a named global Lua function.
+    pub fn call_global(&self, name: &str, args: &[Val]) -> Result<Vec<Val>> {
+        let mut lua = self.lua.borrow_mut();
+        let func = LuaApiMut::get_global_val(&mut *lua, name);
+        let Val::Function(func_ref) = func else {
+            return Ok(Vec::new());
+        };
+        let func_handle = rilua::Function::from_gc_ref(func_ref);
+        lua.call_function(&func_handle, args).map_err(Into::into)
+    }
+
+    /// Get access to the simulator state.
+    pub fn state(&self) -> &Rc<RefCell<SimState>> {
+        &self.state
+    }
+
+    /// Set the font system for text measurement from Lua API methods.
+    pub fn set_font_system(&self, font_system: Rc<RefCell<WowFontSystem>>) {
+        let mut rilua = self.rilua_mut();
+        let app_data = rilua
+            .state_mut()
+            .app_data_mut::<WowLuaAppData>()
+            .expect("WowLuaEnv rilua app_data should always exist");
+        app_data.font_system = Some(font_system);
+    }
+
+    /// Update screen dimensions in SimState and resize UIParent/WorldFrame to match.
+    pub fn set_screen_size(&self, width: f32, height: f32) {
+        let mut state = self.state.borrow_mut();
+        state.screen_width = width;
+        state.screen_height = height;
+        state.invalidate_strata_buckets();
+        state.widgets.clear_all_layout_rects();
+        for name in &["UIParent", "WorldFrame"] {
+            if let Some(id) = state.widgets.get_id_by_name(name)
+                && let Some(frame) = state.widgets.get_mut_visual(id)
+            {
+                frame.width = width;
+                frame.height = height;
+            }
+        }
+        let _ = self.exec(&format!(
+            r#"
+            function GetScreenWidth()
+                return {width}
+            end
+
+            function GetScreenHeight()
+                return {height}
+            end
+
+            function GetPhysicalScreenSize()
+                return GetScreenWidth(), GetScreenHeight()
+            end
+            "#
+        ));
+    }
+
+    /// Select which UI surface should be loaded.
+    pub fn set_screen_mode(&self, screen_kind: ScreenKind) {
+        self.state.borrow_mut().set_screen_kind(screen_kind);
+        let (aurora_state, connected_to_wow, wow_connection_state, has_realm_list) =
+            screen_kind.login_state();
+        let is_glue = if screen_kind.is_glue() {
+            "true"
+        } else {
+            "false"
+        };
+        let _ = self.exec(&format!(
+            r#"
+            __wow_screen_mode_is_glue = {is_glue}
+            __wow_login_aurora_state = {aurora_state}
+            __wow_login_connected_to_wow = {connected_to_wow}
+            __wow_login_wow_connection_state = {wow_connection_state}
+            __wow_login_has_realm_list = {has_realm_list}
+
+            function InGlue()
+                return {is_glue}
+            end
+
+            if C_Glue == nil then
+                C_Glue = {{}}
+            end
+
+            function C_Glue.IsOnGlueScreen()
+                return {is_glue}
+            end
+            "#
+        ));
+    }
+
+    /// Toggle whether the simulated player is logged into the world.
+    pub fn set_logged_in(&self, is_logged_in: bool) {
+        self.state.borrow_mut().is_logged_in = is_logged_in;
+    }
+
+    /// Register an addon in the addon list.
+    pub fn register_addon(&self, info: AddonInfo) {
+        self.state.borrow_mut().addons.push(info);
+    }
+
+    /// Scan an addons directory and register all found addons (metadata only, no loading).
+    pub fn scan_and_register_addons(&self, addons_path: &std::path::Path) {
+        let mut addons = super::addon_scan::scan_addon_entries(addons_path);
+        addons.sort_by(|a, b| {
+            a.folder_name
+                .to_lowercase()
+                .cmp(&b.folder_name.to_lowercase())
+        });
+        let mut state = self.state.borrow_mut();
+        for addon in addons {
+            if !state
+                .addons
+                .iter()
+                .any(|a| a.folder_name == addon.folder_name)
+            {
+                state.addons.push(addon);
+            }
+        }
+    }
+
+    /// Schedule a timer callback.
+    pub fn schedule_timer(
+        &self,
+        seconds: f64,
+        callback: Val,
+        interval: Option<Duration>,
+        iterations: Option<i32>,
+    ) -> Result<u64> {
+        let id = next_timer_id();
+        {
+            let mut lua = self.lua.borrow_mut();
+            crate::lua_api::timer_layout::store_timer_callback(lua.state_mut(), id, callback);
+        }
+        let owner_addon = {
+            let state = self.state.borrow();
+            state.loading_addon_index.or(state.executing_addon_index)
+        };
+        let timer = PendingTimer {
+            id,
+            fire_at: Instant::now() + Duration::from_secs_f64(seconds),
+            interval,
+            remaining: iterations,
+            cancelled: false,
+            owner_addon,
+        };
+        self.state.borrow_mut().rilua_timers.push_back(timer);
+        Ok(id)
+    }
+
+    /// Run ready timers and return how many callbacks fired.
+    pub fn process_timers(&self) -> Result<usize> {
+        let now = Instant::now();
+        let mut fired = 0usize;
+        let mut timers = {
+            let mut state = self.state.borrow_mut();
+            let mut pending = std::collections::VecDeque::new();
+            std::mem::swap(&mut pending, &mut state.rilua_timers);
+            pending
+        };
+
+        let mut requeue = std::collections::VecDeque::new();
+        while let Some(mut timer) = timers.pop_front() {
+            if timer_should_wait(&timer, now) {
+                requeue.push_back(timer);
+                continue;
+            }
+
+            let Some(callback) = self.timer_callback(timer.id) else {
+                continue;
+            };
+
+            self.fire_timer_callback(timer.owner_addon, callback);
+            fired += 1;
+
+            if reschedule_timer(&mut timer, now) {
+                requeue.push_back(timer);
+                continue;
+            }
+
+            self.remove_timer_callback(timer.id);
+        }
+
+        self.state.borrow_mut().rilua_timers = requeue;
+        Ok(fired)
+    }
+
+    /// Fire OnUpdate handlers for all frames that have them registered.
+    pub fn fire_on_update(&self, elapsed: f64) -> Result<()> {
+        self.fire_on_update_timed(elapsed).map(|_| ())
+    }
+
+    /// Fire OnUpdate handlers and return stage timings for profiling.
+    pub(crate) fn fire_on_update_timed(
+        &self,
+        elapsed: f64,
+    ) -> Result<super::on_update::OnUpdateStageTimings> {
+        super::on_update::fire(self, elapsed)
+    }
+
+    fn drain_addon_timing(&self) {
+        let mut lua = self.lua.borrow_mut();
+        let state = lua.state_mut();
+        let timing = registry_get(state, "__addon_timing");
+        let Val::Table(timing_ref) = timing else {
+            return;
+        };
+        let entries = state
+            .gc
+            .tables
+            .get(timing_ref)
+            .map(|table| table.hash_entries())
+            .unwrap_or_default();
+        let mut consumed_keys = Vec::new();
+        {
+            let mut sim = self.state.borrow_mut();
+            for (key, value) in entries {
+                let Val::Num(idx) = key else {
+                    continue;
+                };
+                let Val::Num(ms) = value else {
+                    continue;
+                };
+                consumed_keys.push(idx);
+                if let Some(addon) = sim.addons.get_mut(idx as usize) {
+                    addon.runtime.current_frame_ms += ms;
+                }
+            }
+        }
+        for idx in consumed_keys {
+            if let Some(table) = state.gc.tables.get_mut(timing_ref) {
+                let _ = table.raw_set(Val::Num(idx), Val::Nil, &state.gc.string_arena);
+            }
+        }
+    }
+
+    pub(crate) fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
+        self.drain_addon_timing();
+        let mut state = self.state.borrow_mut();
+        let app = &mut state.app_frame_metrics;
+        app.recent_frame_ms.push_back(frame_elapsed_ms);
+        if app.recent_frame_ms.len() > 60 {
+            app.recent_frame_ms.pop_front();
+        }
+        if frame_elapsed_ms > app.peak_ms {
+            app.peak_ms = frame_elapsed_ms;
+        }
+        app.session_total_ms += frame_elapsed_ms;
+        app.session_frame_count += 1;
+
+        for addon in &mut state.addons {
+            let ms = addon.runtime.current_frame_ms;
+            if ms > 0.0 {
+                addon.runtime.recent_frames.push_back(ms);
+                if addon.runtime.recent_frames.len() > 60 {
+                    addon.runtime.recent_frames.pop_front();
+                }
+                if ms > addon.runtime.peak_ms {
+                    addon.runtime.peak_ms = ms;
+                }
+                addon.runtime.session_total_ms += ms;
+                addon.runtime.session_frame_count += 1;
+                update_threshold_counters(&mut addon.runtime, ms);
+            }
+            addon.runtime.current_frame_ms = 0.0;
+        }
+    }
+
+    /// Fire `EDIT_MODE_LAYOUTS_UPDATED` with layout info from `C_EditMode.GetLayouts()`.
+    pub fn fire_edit_mode_layouts_updated(&self) -> Result<()> {
+        let Ok(true) =
+            self.eval::<bool>("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
+        else {
+            return Ok(());
+        };
+
+        let info = self.eval::<Val>(
+            r#"
+            local source = (EditModeManagerFrame and EditModeManagerFrame.layoutInfo) or C_EditMode.GetLayouts()
+            if type(source) ~= "table" then
+                return source
+            end
+
+            local filtered = {
+                layouts = {},
+                activeLayout = source.activeLayout or 1,
+            }
+            local editModeLayoutType = type(Enum) == "table" and Enum.EditModeLayoutType or nil
+
+            if type(source.layouts) ~= "table" then
+                return filtered
+            end
+
+            for _, layoutInfo in ipairs(source.layouts) do
+                local layoutType = type(layoutInfo) == "table" and layoutInfo.layoutType or nil
+                if editModeLayoutType == nil
+                    or layoutType == editModeLayoutType.Account
+                    or layoutType == editModeLayoutType.Character then
+                    table.insert(filtered.layouts, layoutInfo)
+                end
+            end
+
+            return filtered
+            "#,
+        )?;
+        self.fire_event_with_args("EDIT_MODE_LAYOUTS_UPDATED", &[info, Val::Bool(true)])
+    }
+
+    /// Get the time until the next timer fires, if any.
+    pub fn next_timer_delay(&self) -> Option<Duration> {
+        let state = self.state.borrow();
+        let now = Instant::now();
+        state
+            .rilua_timers
+            .iter()
+            .filter(|timer| !timer.cancelled)
+            .map(|timer| timer.fire_at.saturating_duration_since(now))
+            .min()
+    }
+
+    /// Dump all frame positions for debugging.
+    pub fn dump_frames(&self) -> String {
+        let state = self.state.borrow();
+        super::diagnostics::dump_frames(&state)
+    }
+
+    fn timer_callback(&self, timer_id: u64) -> Option<Val> {
+        let mut lua = self.lua.borrow_mut();
+        let callback = crate::lua_api::timer_layout::get_timer_callback(lua.state_mut(), timer_id);
+        (!matches!(callback, Val::Nil)).then_some(callback)
+    }
+
+    fn fire_timer_callback(&self, owner_addon: Option<u16>, callback: Val) {
+        let start = Instant::now();
+        self.state.borrow_mut().executing_addon_index = owner_addon;
+        let call_result = {
+            let mut lua = self.lua.borrow_mut();
+            call_rilua_function(&mut lua, callback, &[])
+        };
+        self.state.borrow_mut().executing_addon_index = None;
+        if let Err(error) = call_result {
+            let mut lua = self.lua.borrow_mut();
+            call_error_handler(&mut lua, &error.to_string());
+        }
+        record_addon_time(&self.state, owner_addon, &start);
+    }
+
+    fn remove_timer_callback(&self, timer_id: u64) {
+        let mut lua = self.lua.borrow_mut();
+        crate::lua_api::timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
+    }
+}
