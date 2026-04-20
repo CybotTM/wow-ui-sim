@@ -21,6 +21,8 @@
 //! - `IsAutoAttackSpell(spellID)` → true for spell 6603.
 //! - `IsRangedAutoAttackSpell(spellID)` → false.
 //! - `IsPressHoldReleaseSpell(spellID)` → false.
+//! - `IsSpellHelpful(spellID)` → true for self-targeted spells.
+//! - `IsSpellHarmful(spellID)` → true for known non-self-targeted spells.
 //! - `GetMountFromSpell(spellID)` → scans `world.mounts` for matching spell
 //!   id, returns mount_id or nil.
 //! - `GetVisibilityInfo(spellID, filter)` → `(false, true, false)` — most
@@ -90,6 +92,8 @@ const SPELL_BOOLEAN_METHODS: &[(&'static str, SpellScriptFn)] = &[
     ("IsAutoAttackSpell", is_auto_attack_spell),
     ("IsRangedAutoAttackSpell", is_ranged_auto_attack_spell),
     ("IsPressHoldReleaseSpell", is_press_hold_release_spell),
+    ("IsSpellHelpful", is_spell_helpful),
+    ("IsSpellHarmful", is_spell_harmful),
     ("IsSpellUsable", is_spell_usable),
 ];
 
@@ -462,6 +466,27 @@ fn is_ranged_auto_attack_spell(state: &mut LuaState) -> LuaResult<u32> {
 fn is_press_hold_release_spell(state: &mut LuaState) -> LuaResult<u32> {
     let _spell_id = u32::from_stack(state, 1)?;
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn spell_is_helpful(spell_id: u32) -> bool {
+    spells::get_spell(spell_id)
+        .map(|spell| spell.implicit_target == 1)
+        .unwrap_or(false)
+}
+
+fn is_spell_helpful(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    state.push(Val::Bool(spell_is_helpful(spell_id)));
+    Ok(1)
+}
+
+fn is_spell_harmful(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    let harmful = spells::get_spell(spell_id)
+        .map(|_| !spell_is_helpful(spell_id))
+        .unwrap_or(false);
+    state.push(Val::Bool(harmful));
     Ok(1)
 }
 

@@ -111,6 +111,7 @@ fn enable_taint_and_wrap_loadstring(lua: &mut rilua::Lua) -> crate::Result<()> {
     if matches!(original_loadstring, Val::Function(_)) {
         let state = lua.state_mut();
         registry_set(state, ORIGINAL_LOADSTRING_KEY, original_loadstring);
+        LuaApiMut::set_global_val(lua, "loadstring_untainted", original_loadstring)?;
     }
     LuaApiMut::register_function(lua, "loadstring", tainting_loadstring)?;
     LuaApiMut::register_function(lua, "forceinsecure", forceinsecure)?;

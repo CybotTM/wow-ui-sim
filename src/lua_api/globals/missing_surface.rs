@@ -47,7 +47,7 @@ mod ui_widget_manager;
 mod voice_chat;
 mod zone_ability;
 
-use crate::c_api::{c_configuration_warnings, c_fog_of_war, c_spell};
+use crate::c_api::{c_configuration_warnings, c_fog_of_war, c_spell, c_widget};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
 };
@@ -136,7 +136,16 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
         get_max_level_for_latest_expansion,
     )?;
     LuaApiMut::register_function(lua, "strsub", strsub)?;
+    LuaApiMut::register_function(lua, "strconcat", strconcat)?;
+    LuaApiMut::register_function(lua, "strlenutf8", strlenutf8)?;
     LuaApiMut::register_function(lua, "strcmputf8i", strcmputf8i)?;
+    LuaApiMut::register_function(
+        lua,
+        "FindSpellBookSlotBySpellID",
+        find_spell_book_slot_by_spell_id,
+    )?;
+    LuaApiMut::register_function(lua, "GetMultiCastTotemSpells", get_multi_cast_totem_spells)?;
+    LuaApiMut::register_function(lua, "GetMouseButtonClicked", get_mouse_button_clicked)?;
     Ok(())
 }
 
@@ -173,6 +182,7 @@ fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     tutorial::register_tutorial_surface(state)?;
     heirloom::register_heirloom_surface(state)?;
     c_spell::register_c_spell_surface(state)?;
+    c_widget::register_c_widget_surface(state)?;
     Ok(())
 }
 
@@ -409,6 +419,25 @@ fn strsub(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn strconcat(state: &mut LuaState) -> LuaResult<u32> {
+    let nargs = state.top.saturating_sub(state.base);
+    let mut result = String::new();
+    for index in 0..nargs {
+        if let Some(text) = val_to_string(state, state.stack_get(state.base + index)) {
+            result.push_str(&text);
+        }
+    }
+    let value = create_string(state, &result);
+    state.push(value);
+    Ok(1)
+}
+
+fn strlenutf8(state: &mut LuaState) -> LuaResult<u32> {
+    let text = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    state.push(Val::Num(text.chars().count() as f64));
+    Ok(1)
+}
+
 fn strcmputf8i(state: &mut LuaState) -> LuaResult<u32> {
     let left = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
     let right = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
@@ -419,6 +448,26 @@ fn strcmputf8i(state: &mut LuaState) -> LuaResult<u32> {
         std::cmp::Ordering::Greater => 1.0,
     };
     state.push(Val::Num(result));
+    Ok(1)
+}
+
+fn find_spell_book_slot_by_spell_id(state: &mut LuaState) -> LuaResult<u32> {
+    let spell_id = u32::from_stack(state, 1)?;
+    match crate::lua_api::globals::spellbook_data::find_spell_slot(spell_id) {
+        Some((slot, _)) => state.push(Val::Num(slot as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_multi_cast_totem_spells(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn get_mouse_button_clicked(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
     Ok(1)
 }
 

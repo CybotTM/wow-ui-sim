@@ -558,6 +558,52 @@ pub fn set_override_binding(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn set_override_action(state: &mut LuaState, action: String) -> LuaResult<u32> {
+    let key = Option::<String>::from_stack(state, 3)?.unwrap_or_default();
+    if key.is_empty() {
+        return Ok(0);
+    }
+    borrow_state_mut(state)?
+        .keybindings
+        .set_override(&key, &action);
+    Ok(0)
+}
+
+pub fn set_override_binding_click(state: &mut LuaState) -> LuaResult<u32> {
+    let button_name = Option::<String>::from_stack(state, 4)?.unwrap_or_default();
+    if button_name.is_empty() {
+        return Ok(0);
+    }
+    let mouse_button = Option::<String>::from_stack(state, 5)?
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "LeftButton".to_string());
+    set_override_action(state, format!("CLICK {button_name}:{mouse_button}"))
+}
+
+pub fn set_override_binding_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let spell = Option::<String>::from_stack(state, 4)?.unwrap_or_default();
+    if spell.is_empty() {
+        return Ok(0);
+    }
+    set_override_action(state, format!("SPELL {spell}"))
+}
+
+pub fn set_override_binding_item(state: &mut LuaState) -> LuaResult<u32> {
+    let item = Option::<String>::from_stack(state, 4)?.unwrap_or_default();
+    if item.is_empty() {
+        return Ok(0);
+    }
+    set_override_action(state, format!("ITEM {item}"))
+}
+
+pub fn set_override_binding_macro(state: &mut LuaState) -> LuaResult<u32> {
+    let macro_name = Option::<String>::from_stack(state, 4)?.unwrap_or_default();
+    if macro_name.is_empty() {
+        return Ok(0);
+    }
+    set_override_action(state, format!("MACRO {macro_name}"))
+}
+
 pub fn clear_override_bindings(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?.keybindings.clear_overrides();
     Ok(0)
@@ -589,6 +635,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "SetBindingItem", set_binding_item)?;
     LuaApiMut::register_function(lua, "SetBindingMacro", set_binding_macro)?;
     LuaApiMut::register_function(lua, "SetOverrideBinding", set_override_binding)?;
+    LuaApiMut::register_function(lua, "SetOverrideBindingClick", set_override_binding_click)?;
+    LuaApiMut::register_function(lua, "SetOverrideBindingSpell", set_override_binding_spell)?;
+    LuaApiMut::register_function(lua, "SetOverrideBindingItem", set_override_binding_item)?;
+    LuaApiMut::register_function(lua, "SetOverrideBindingMacro", set_override_binding_macro)?;
     LuaApiMut::register_function(lua, "ClearOverrideBindings", clear_override_bindings)?;
     LuaApiMut::register_function(lua, "SaveBindings", save_bindings)?;
     LuaApiMut::register_function(lua, "LoadBindings", load_bindings)?;

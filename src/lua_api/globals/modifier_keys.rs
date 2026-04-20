@@ -33,6 +33,42 @@ pub fn is_alt_key_down(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn push_modifier_side(
+    state: &mut LuaState,
+    accessor: impl FnOnce(&crate::lua_api::SimState) -> bool,
+) -> LuaResult<u32> {
+    let down = {
+        let sim = borrow_state(state)?;
+        accessor(&sim)
+    };
+    state.push(Val::Bool(down));
+    Ok(1)
+}
+
+pub fn is_left_shift_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    push_modifier_side(state, |sim| sim.modifier_keys.shift)
+}
+
+pub fn is_right_shift_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    push_modifier_side(state, |sim| sim.modifier_keys.shift)
+}
+
+pub fn is_left_control_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    push_modifier_side(state, |sim| sim.modifier_keys.control)
+}
+
+pub fn is_right_control_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    push_modifier_side(state, |sim| sim.modifier_keys.control)
+}
+
+pub fn is_left_alt_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    push_modifier_side(state, |sim| sim.modifier_keys.alt)
+}
+
+pub fn is_right_alt_key_down(state: &mut LuaState) -> LuaResult<u32> {
+    push_modifier_side(state, |sim| sim.modifier_keys.alt)
+}
+
 pub fn is_meta_key_down(state: &mut LuaState) -> LuaResult<u32> {
     let down = borrow_state(state)?.modifier_keys.meta;
     state.push(Val::Bool(down));
@@ -59,6 +95,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "IsShiftKeyDown", is_shift_key_down)?;
     table_set_rust_fn_static(state, g, "IsControlKeyDown", is_control_key_down)?;
     table_set_rust_fn_static(state, g, "IsAltKeyDown", is_alt_key_down)?;
+    table_set_rust_fn_static(state, g, "IsLeftShiftKeyDown", is_left_shift_key_down)?;
+    table_set_rust_fn_static(state, g, "IsRightShiftKeyDown", is_right_shift_key_down)?;
+    table_set_rust_fn_static(state, g, "IsLeftControlKeyDown", is_left_control_key_down)?;
+    table_set_rust_fn_static(state, g, "IsRightControlKeyDown", is_right_control_key_down)?;
+    table_set_rust_fn_static(state, g, "IsLeftAltKeyDown", is_left_alt_key_down)?;
+    table_set_rust_fn_static(state, g, "IsRightAltKeyDown", is_right_alt_key_down)?;
     table_set_rust_fn_static(state, g, "IsMetaKeyDown", is_meta_key_down)?;
     table_set_rust_fn_static(state, g, "IsModifierKeyDown", is_modifier_key_down)?;
     table_set_rust_fn_static(state, g, "IsModifiedClick", is_modified_click)?;

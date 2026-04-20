@@ -17,6 +17,7 @@ const STARTUP_WARNING_GAME_FOUNDATIONS: &[&str] = &[
     "Blizzard_FrameXMLBase",
     "Blizzard_UIPanelTemplates",
     "Blizzard_FrameXMLUtil",
+    "Blizzard_FrameXML",
     "Blizzard_UIParent",
     "Blizzard_UIParentPanelManager",
 ];

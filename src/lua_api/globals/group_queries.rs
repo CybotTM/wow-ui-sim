@@ -71,6 +71,13 @@ fn register_unit_relationships(state: &mut LuaState) {
     set_global(state, "UnitLeadsAnyGroup", unit_leads_any_group);
     set_global(state, "UnitInParty", unit_in_party);
     set_global(state, "UnitInRaid", unit_in_raid);
+    set_global(state, "UnitPlayerOrPetInParty", unit_player_or_pet_in_party);
+    set_global(state, "UnitPlayerOrPetInRaid", unit_player_or_pet_in_raid);
+    set_global(
+        state,
+        "UnitTargetsVehicleInRaidUI",
+        unit_targets_vehicle_in_raid_ui,
+    );
     set_global(state, "UnitInOtherParty", unit_in_other_party);
     set_global(state, "UnitIsGroupLeader", unit_is_group_leader);
     set_global(state, "UnitIsGroupAssistant", unit_is_group_assistant);
@@ -535,6 +542,20 @@ fn unit_in_raid(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     state.push(Val::Bool(in_raid));
+    Ok(1)
+}
+
+fn unit_player_or_pet_in_party(state: &mut LuaState) -> LuaResult<u32> {
+    unit_in_party(state)
+}
+
+fn unit_player_or_pet_in_raid(state: &mut LuaState) -> LuaResult<u32> {
+    unit_in_raid(state)
+}
+
+fn unit_targets_vehicle_in_raid_ui(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = Option::<String>::from_stack(state, 1)?;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

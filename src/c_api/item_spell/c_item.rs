@@ -87,6 +87,8 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         ("GetItemLink", c_item_get_item_link),
         ("GetItemCooldown", c_item_get_item_cooldown),
         ("GetItemGUID", c_item_get_item_guid),
+        ("IsHelpfulItem", c_item_is_helpful_item),
+        ("IsHarmfulItem", c_item_is_harmful_item),
         (
             "GetItemInventorySlotInfo",
             c_item_get_item_inventory_slot_info,
@@ -390,6 +392,18 @@ fn c_item_get_item_guid(state: &mut LuaState) -> LuaResult<u32> {
         }
         None => state.push(Val::Nil),
     }
+    Ok(1)
+}
+
+fn c_item_is_helpful_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_item_is_harmful_item(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = stack_val(state, 1);
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
