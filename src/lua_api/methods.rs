@@ -294,7 +294,7 @@ fn frame_metatable_for_widget_type(
     };
 
     let remove: &[&str] = match widget_type {
-        WidgetType::ScrollFrame => &[],
+        WidgetType::ScrollFrame => &["SetMaxLines"],
         WidgetType::StatusBar => &["SetStatusBarAtlas"],
         _ => &[
             "GetVerticalScroll",

@@ -12,7 +12,7 @@ mod getters;
 mod scroll;
 mod transform;
 
-use crate::lua_api::methods::{frame_ref, get_or_create_frame_fields};
+use crate::lua_api::methods::get_or_create_frame_fields;
 use crate::lua_bridge::table_set_rust_fn;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
@@ -103,7 +103,6 @@ pub fn register_message_frame(state: &mut LuaState, metatable: GcRef<Table>) -> 
 }
 
 pub(crate) fn install_message_frame_fields(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
-    let _ = frame_ref(state, frame_id)?;
     let fields = get_or_create_frame_fields(state, frame_id);
     if let rilua::Val::Table(fields_ref) = fields {
         table_set_rust_fn_static(state, fields_ref, "SetMaxLines", getters::set_max_lines)?;
