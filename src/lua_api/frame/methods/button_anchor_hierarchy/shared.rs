@@ -21,7 +21,11 @@ pub(super) fn opt_string(state: &LuaState, index: i32) -> Option<String> {
     }
 }
 
-pub(super) fn resolve_anchor_target_id(state: &mut LuaState, value: Val) -> Option<usize> {
+pub(super) fn resolve_anchor_target_id(
+    state: &mut LuaState,
+    frame_id: u64,
+    value: Val,
+) -> Option<usize> {
     if let Some(id) = extract_frame_id(state, value) {
         return Some(id as usize);
     }
@@ -34,7 +38,50 @@ pub(super) fn resolve_anchor_target_id(state: &mut LuaState, value: Val) -> Opti
         .get(state.global)
         .map(|table| table.get_str(key_ref, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
-    extract_frame_id(state, global).map(|id| id as usize)
+    if let Some(id) = extract_frame_id(state, global) {
+        return Some(id as usize);
+    }
+
+    resolve_parent_key_target(state, frame_id, &name)
+}
+
+fn resolve_parent_key_target(state: &LuaState, frame_id: u64, name: &str) -> Option<usize> {
+    let sim = borrow_state(state).ok()?;
+    let parent_id = sim.widgets.get(frame_id)?.parent_id?;
+    let parent = sim.widgets.get(parent_id)?;
+    if let Some(parent_name) = parent.name.as_deref()
+        && let Some(suffix) = name.strip_prefix(parent_name)
+    {
+        let suffix = suffix.strip_prefix('.').unwrap_or(suffix);
+        if suffix.is_empty() {
+            return Some(parent_id as usize);
+        }
+        if let Some(child_id) = parent.children_keys.get(suffix) {
+            return Some(*child_id as usize);
+        }
+    }
+
+    let mut current_id = parent_id;
+    let trimmed = name
+        .strip_prefix("$parent")
+        .or_else(|| name.strip_prefix("$Parent"))
+        .or_else(|| name.strip_prefix("$parentKey"))?;
+    let path = trimmed.strip_prefix('.').unwrap_or(trimmed);
+    if path.is_empty() {
+        return Some(current_id as usize);
+    }
+
+    for segment in path.split('.') {
+        if segment.is_empty() {
+            continue;
+        }
+        let next_id = sim
+            .widgets
+            .get(current_id)
+            .and_then(|frame| frame.children_keys.get(segment).copied())?;
+        current_id = next_id;
+    }
+    Some(current_id as usize)
 }
 
 pub(super) fn resolve_relative_point_from_val(

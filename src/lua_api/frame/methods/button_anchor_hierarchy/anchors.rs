@@ -16,6 +16,7 @@ use super::shared::{
 
 fn parse_line_anchor_args(
     state: &mut LuaState,
+    frame_id: u64,
 ) -> LuaResult<(crate::widget::AnchorPoint, Option<u64>, f32, f32)> {
     let point_name = String::from_stack(state, 2)?;
     let point = crate::widget::AnchorPoint::from_str(&point_name).ok_or_else(|| {
@@ -40,7 +41,7 @@ fn parse_line_anchor_args(
         return Ok((point, None, x_offset, y_offset));
     }
 
-    let target_id = resolve_anchor_target_id(state, arg3).map(|id| id as u64);
+    let target_id = resolve_anchor_target_id(state, frame_id, arg3).map(|id| id as u64);
     let x_offset = match arg4 {
         Val::Num(n) => n as f32,
         _ => 0.0,
@@ -54,7 +55,7 @@ fn parse_line_anchor_args(
 
 fn set_line_endpoint(state: &mut LuaState, is_start: bool) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let (point, target_id, x_offset, y_offset) = parse_line_anchor_args(state)?;
+    let (point, target_id, x_offset, y_offset) = parse_line_anchor_args(state, id)?;
 
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id)
@@ -130,6 +131,7 @@ pub(super) fn get_end_point(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn parse_set_point_args(
     state: &mut LuaState,
+    frame_id: u64,
     point: crate::widget::AnchorPoint,
 ) -> LuaResult<(Option<usize>, crate::widget::AnchorPoint, f32, f32)> {
     let arg3 = stack_val(state, 3);
@@ -154,7 +156,7 @@ pub(super) fn parse_set_point_args(
         return Ok((None, point, x_offset, y_offset));
     }
 
-    let relative_to = resolve_anchor_target_id(state, arg3);
+    let relative_to = resolve_anchor_target_id(state, frame_id, arg3);
     if matches!(arg4, Val::Num(_)) {
         let x_offset = num_opt(arg4).unwrap_or(0.0);
         let y_offset = num_opt(arg5).unwrap_or(0.0);
@@ -373,7 +375,8 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
         )));
     };
 
-    let (mut relative_to, relative_point, x_offset, y_offset) = parse_set_point_args(state, point)?;
+    let (mut relative_to, relative_point, x_offset, y_offset) =
+        parse_set_point_args(state, id, point)?;
     if relative_to.is_none() {
         relative_to = {
             let sim = borrow_state(state)?;

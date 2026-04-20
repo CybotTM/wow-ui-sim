@@ -122,7 +122,7 @@ fn create_template_child_frame(
     apply_runtime_template_loader_effects(
         state,
         &child_name,
-        child_subst,
+        parent_name,
         frame,
         inherited_chain.as_deref(),
     )?;
