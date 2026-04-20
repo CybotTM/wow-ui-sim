@@ -82,6 +82,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
+    (
+        "Blizzard_MainMenuBarBagButtons",
+        "Blizzard_MainMenuBarBagButtons_Mainline.toc",
+    ),
 ];
 
 /// Create a fully loaded environment with Blizzard addons and startup events.
@@ -315,6 +319,27 @@ fn keybind_backspace_opens_backpack() {
         assert!(
             bag_id_is_shown(&env, 0),
             "Backpack should be visible after pressing BACKSPACE; {}",
+            visible_bag_frames_debug(&env)
+        );
+    }
+}
+
+#[test]
+fn backpack_button_click_opens_backpack() {
+    test_timeout! {
+        let env = setup_settled_env();
+        prepare_bag_env(&env);
+        let backpack_id = env
+            .state()
+            .borrow()
+            .widgets
+            .get_id_by_name("MainMenuBarBackpackButton")
+            .expect("MainMenuBarBackpackButton should exist");
+        env.send_click(backpack_id)
+            .expect("MainMenuBarBackpackButton click failed");
+        assert!(
+            bag_id_is_shown(&env, 0),
+            "Backpack should be visible after clicking MainMenuBarBackpackButton; {}",
             visible_bag_frames_debug(&env)
         );
     }
