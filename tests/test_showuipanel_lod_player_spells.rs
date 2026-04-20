@@ -101,6 +101,73 @@ fn startup_prewarm_loads_blizzard_player_spells_and_keeps_it_hidden() {
 }
 
 #[test]
+fn raw_toggle_spellbook_frame_loads_blizzard_player_spells_and_shows_spellbook() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__spellbook_raw_toggle_errors");
+        clear_recorded_lua_errors(&env);
+
+        let result: String = env.eval(r#"
+            if C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+                return "addon_preloaded"
+            end
+
+            if not PlayerSpellsUtil or type(PlayerSpellsUtil.ToggleSpellBookFrame) ~= "function" then
+                return "missing_toggle_spellbook_frame"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Test harness should start with Blizzard_PlayerSpells unloaded and the raw toggle helper available: {result}"
+        );
+
+        env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()")
+            .expect("raw ToggleSpellBookFrame call failed");
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__spellbook_raw_toggle_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "Opening spellbook through raw ToggleSpellBookFrame produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "Opening spellbook through raw ToggleSpellBookFrame produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n")
+        );
+
+        let result: String = env.eval(r#"
+            if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+                return "addon_not_loaded"
+            end
+            if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+                return "player_spells_not_shown"
+            end
+            if not PlayerSpellsFrame.SpellBookFrame or not PlayerSpellsFrame.SpellBookFrame:IsShown() then
+                return "spellbook_tab_not_shown"
+            end
+            if not (PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.SpellBook)) then
+                return "spellbook_tab_not_active"
+            end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "Raw PlayerSpellsUtil.ToggleSpellBookFrame() should demand-load Blizzard_PlayerSpells and show the SpellBook tab: {result}"
+        );
+    }
+}
+
+#[test]
 fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
     test_timeout! {
         let env = setup_env();
@@ -160,6 +227,80 @@ fn keybind_s_loads_blizzard_player_spells_and_shows_spellbook() {
             result,
             "ok",
             "Pressing S should demand-load Blizzard_PlayerSpells and show the SpellBook tab: {result}"
+        );
+    }
+}
+
+#[test]
+fn raw_spellbook_toggle_hands_off_to_blizzard_playerspells_util_on_first_load() {
+    test_timeout! {
+        let env = setup_env();
+        common::install_error_collector(&env, "__spellbook_raw_toggle_errors");
+        clear_recorded_lua_errors(&env);
+
+        let (before_source, after_source, result): (String, String, String) = env
+            .eval(
+                r#"
+                local function fn_source(fn)
+                    local info = debug.getinfo(fn, "S")
+                    return info and info.source or "missing"
+                end
+
+                if C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+                    return "addon_preloaded", "addon_preloaded", "addon_preloaded"
+                end
+
+                if not PlayerSpellsUtil or type(PlayerSpellsUtil.ToggleSpellBookFrame) ~= "function" then
+                    return "missing_toggle_spellbook_frame", "missing_toggle_spellbook_frame", "missing_toggle_spellbook_frame"
+                end
+
+                local beforeSource = fn_source(PlayerSpellsUtil.ToggleSpellBookFrame)
+                PlayerSpellsUtil.ToggleSpellBookFrame()
+                local afterSource = fn_source(PlayerSpellsUtil.ToggleSpellBookFrame)
+
+                if not C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then
+                    return beforeSource, afterSource, "addon_not_loaded"
+                end
+                if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+                    return beforeSource, afterSource, "player_spells_not_shown"
+                end
+                if not PlayerSpellsFrame.SpellBookFrame or not PlayerSpellsFrame.SpellBookFrame:IsShown() then
+                    return beforeSource, afterSource, "spellbook_tab_not_shown"
+                end
+
+                return beforeSource, afterSource, "ok"
+                "#,
+            )
+            .expect("raw spellbook toggle handoff probe should return");
+
+        let recorded_errors = recorded_lua_errors(&env);
+        let handler_errors = common::drain_string_table(&env, "__spellbook_raw_toggle_errors");
+        assert!(
+            recorded_errors.is_empty(),
+            "Raw spellbook toggle produced {} recorded Lua error(s):\n{:#?}\nhandler_errors:\n{}\n{}",
+            recorded_errors.len(),
+            recorded_errors,
+            handler_errors.join("\n"),
+            player_spells_panel_debug_snapshot(&env),
+        );
+        assert!(
+            handler_errors.is_empty(),
+            "Raw spellbook toggle produced {} Lua error(s):\n{}",
+            handler_errors.len(),
+            handler_errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Raw PlayerSpellsUtil.ToggleSpellBookFrame() should demand-load Blizzard_PlayerSpells and show the spellbook: {result}"
+        );
+        assert!(
+            before_source.contains("Blizzard_FrameXMLUtil/Mainline/PlayerSpellsUtil.lua"),
+            "Before the first spellbook open, ToggleSpellBookFrame should already come from Blizzard_FrameXMLUtil: {before_source}"
+        );
+        assert!(
+            after_source.contains("Blizzard_FrameXMLUtil/Mainline/PlayerSpellsUtil.lua"),
+            "After load, ToggleSpellBookFrame should still be Blizzard-owned: {after_source}"
         );
     }
 }

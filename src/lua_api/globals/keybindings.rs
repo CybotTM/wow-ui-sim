@@ -14,7 +14,9 @@
 //! `init_keybindings` / `dispatch_key_binding` are called by the key
 //! dispatch module to seed default bindings and execute bound actions.
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, pcall_function, table_get,
+};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_bridge::{FromStack, IntoStack};
 use rilua::vm::state::LuaState;
@@ -48,6 +50,44 @@ fn default_keys_for_action(action: &str) -> (Option<String>, Option<String>) {
         .filter(|entry| entry.action == action)
         .map(|entry| entry.key.to_string());
     (matches.next(), matches.next())
+}
+
+fn parse_noarg_function_path(lua_code: &str) -> Option<Vec<&str>> {
+    let path = lua_code.strip_suffix("()")?;
+    let segments = path.split('.').collect::<Vec<_>>();
+    if segments.is_empty() {
+        return None;
+    }
+    segments
+        .iter()
+        .all(|segment| {
+            !segment.is_empty()
+                && segment
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+        })
+        .then_some(segments)
+}
+
+fn dispatch_noarg_function_path(lua: &mut rilua::Lua, path: &[&str]) -> crate::Result<bool> {
+    let state = lua.state_mut();
+    let mut current = Val::Table(state.global);
+    for segment in &path[..path.len().saturating_sub(1)] {
+        current = table_get(state, current, segment);
+        if !matches!(current, Val::Table(_)) {
+            return Ok(false);
+        }
+    }
+
+    let Some(function_name) = path.last() else {
+        return Ok(false);
+    };
+    let function = table_get(state, current, function_name);
+    if !matches!(function, Val::Function(_)) {
+        return Ok(false);
+    }
+    let _ = pcall_function(lua, function, &[]);
+    Ok(true)
 }
 
 /// Full set of binding actions (mirrors master `keybindings.rs`).
@@ -90,7 +130,7 @@ pub const BINDING_ACTIONS: &[BindingAction] = &[
     },
     BindingAction {
         action: "TOGGLESPELLBOOK",
-        lua_code: "__wow_toggle_spellbook_keybind()",
+        lua_code: "PlayerSpellsUtil.ToggleSpellBookFrame()",
     },
     BindingAction {
         action: "TOGGLETALENTS",
@@ -391,7 +431,12 @@ pub fn dispatch_key_binding(lua: &mut rilua::Lua, key: &str) -> crate::Result<bo
     };
     crate::logging::eprintln_elapsed(&format!("[keybind] {key} → {action} → {}", ba.lua_code));
     let exec_started = Instant::now();
-    if let Err(error) = lua.exec(ba.lua_code) {
+    let handled = if let Some(path) = parse_noarg_function_path(ba.lua_code) {
+        dispatch_noarg_function_path(lua, &path)?
+    } else {
+        false
+    };
+    if !handled && let Err(error) = lua.exec(ba.lua_code) {
         call_error_handler_state(lua.state_mut(), &error.to_string());
     }
     crate::logging::eprintln_elapsed(&format!(

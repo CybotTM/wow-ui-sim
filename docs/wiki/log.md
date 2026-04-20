@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-20] update | keybinding spellbook direct dispatch
+
+Updated `investigations/keybinding-system.md` with the spellbook follow-up.
+Documented that the simulator now routes `S` back to Blizzard-owned
+`PlayerSpellsUtil.ToggleSpellBookFrame()`, removes the bootstrap spellbook
+fallback wrapper, and dispatches simple zero-arg binding targets directly
+instead of always compiling a Lua chunk first. Recorded the key finding that
+raw Blizzard spellbook toggles were already correct and the remaining
+first-open regression only happened through binding dispatch.
+
 ## [2026-04-20] add | class talents trait loadout state
 
 Added `investigations/class-talents-trait-loadout-state.md` to capture the

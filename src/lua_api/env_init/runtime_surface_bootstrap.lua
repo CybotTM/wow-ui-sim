@@ -7189,60 +7189,16 @@ local function __wow_load_player_spells_frame()
   return PlayerSpellsFrame
 end
 
-local function __wow_set_playerspells_inspect_unit(inspectUnit)
-  local frame = PlayerSpellsFrame
-  if not frame then
-    return
+local function __wow_call_playerspells_util(methodName, bootstrapMethod, ...)
+  __wow_load_player_spells_frame()
+  if type(PlayerSpellsUtil) ~= "table" then
+    return nil
   end
-  if inspectUnit and type(frame.SetInspectUnit) == "function" then
-    frame:SetInspectUnit(inspectUnit)
-  elseif type(frame.IsInspecting) == "function"
-    and frame:IsInspecting()
-    and type(frame.ClearInspectUnit) == "function"
-  then
-    frame:ClearInspectUnit()
+  local method = rawget(PlayerSpellsUtil, methodName)
+  if type(method) ~= "function" or method == bootstrapMethod then
+    return nil
   end
-end
-
-local function __wow_show_uipanel_with_fallback(frame, force, contextKey)
-  ShowUIPanel(frame, force, contextKey)
-  if not frame or type(frame.IsShown) ~= "function" or frame:IsShown() then
-    return
-  end
-
-  if type(UIPanelUpdateScaleForFit) == "function" then
-    local extraWidth = CHECK_FIT_DEFAULT_EXTRA_WIDTH or 0
-    local extraHeight = CHECK_FIT_DEFAULT_EXTRA_HEIGHT or 0
-    if type(GetUIPanelAttribute) == "function" then
-      extraWidth = GetUIPanelAttribute(frame, "checkFitExtraWidth") or extraWidth
-      extraHeight = GetUIPanelAttribute(frame, "checkFitExtraHeight") or extraHeight
-    end
-    UIPanelUpdateScaleForFit(frame, extraWidth, extraHeight)
-  end
-
-  if type(frame.Show) == "function" then
-    frame:Show()
-  end
-end
-
-local function __wow_hide_uipanel_with_fallback(frame)
-  HideUIPanel(frame)
-  if frame and type(frame.IsShown) == "function" and frame:IsShown() and type(frame.Hide) == "function" then
-    frame:Hide()
-  end
-end
-
-local function __wow_show_playerspells_and_try_tab(frame, tabID)
-  if type(frame.TrySetTab) == "function" and frame:TrySetTab(tabID) then
-    __wow_show_uipanel_with_fallback(frame)
-    return true
-  end
-
-  __wow_show_uipanel_with_fallback(frame)
-  if type(frame.TrySetTab) ~= "function" then
-    return true
-  end
-  return frame:TrySetTab(tabID)
+  return method(...)
 end
 
 if rawget(PlayerSpellsUtil, "GetCurrentTabID") == nil then
@@ -7254,96 +7210,36 @@ if rawget(PlayerSpellsUtil, "GetCurrentTabID") == nil then
     return frame:GetCurrentTabID()
   end
 end
+local __wow_bootstrap_toggle_player_spells_frame
 if rawget(PlayerSpellsUtil, "TogglePlayerSpellsFrame") == nil then
-  function PlayerSpellsUtil.TogglePlayerSpellsFrame(suggestedTab, inspectUnit)
-    if DISALLOW_FRAME_TOGGLING then
-      return false
-    end
-
-    local frame = __wow_load_player_spells_frame()
-    if not frame then
-      return false
-    end
-
-    if not suggestedTab
-      and type(frame.ShouldOpenToSpecTab) == "function"
-      and frame:ShouldOpenToSpecTab()
-    then
-      suggestedTab = PlayerSpellsUtil.FrameTabs.ClassSpecializations
-    end
-
-    local alreadyShowing = frame:IsShown()
-      and (
-        not suggestedTab
-        or (type(frame.IsFrameTabActive) == "function" and frame:IsFrameTabActive(suggestedTab))
-      )
-
-    if alreadyShowing then
-      __wow_hide_uipanel_with_fallback(frame)
-      return true
-    end
-
-    __wow_set_playerspells_inspect_unit(inspectUnit)
-    if suggestedTab then
-      return __wow_show_playerspells_and_try_tab(frame, suggestedTab)
-    end
-    __wow_show_uipanel_with_fallback(frame)
-    return true
-  end
-end
-if rawget(PlayerSpellsUtil, "OpenToSpellBookTabAtSpell") == nil then
-  function PlayerSpellsUtil.OpenToSpellBookTabAtSpell(spellID, knownSpellsOnly, toggleFlyout, flyoutReason)
-    local frame = __wow_load_player_spells_frame()
-    if not frame then
-      return nil
-    end
-    __wow_set_playerspells_inspect_unit(nil)
-    if not __wow_show_playerspells_and_try_tab(frame, PlayerSpellsUtil.FrameTabs.SpellBook) then
-      return nil
-    end
-    local spellBook = frame.SpellBookFrame
-    if type(spellBook) == "table" and type(spellBook.GoToSpell) == "function" then
-      return spellBook:GoToSpell(spellID, knownSpellsOnly, toggleFlyout, flyoutReason)
-    end
-    return nil
-  end
-end
-if rawget(PlayerSpellsUtil, "ToggleSpellBookFrame") == nil then
-  function PlayerSpellsUtil.ToggleSpellBookFrame(spellBookCategory)
-    if DISALLOW_FRAME_TOGGLING then
-      return false
-    end
-    local frame = __wow_load_player_spells_frame()
-    if not frame then
-      return false
-    end
-
-    local spellBook = frame.SpellBookFrame
-    local categoryMatches = (
-      not spellBookCategory
-      or not spellBook
-      or type(spellBook.IsCategoryActive) ~= "function"
-      or spellBook:IsCategoryActive(spellBookCategory)
+  __wow_bootstrap_toggle_player_spells_frame = function(suggestedTab, inspectUnit)
+    return __wow_call_playerspells_util(
+      "TogglePlayerSpellsFrame",
+      __wow_bootstrap_toggle_player_spells_frame,
+      suggestedTab,
+      inspectUnit
     )
-    local alreadyShowing = frame:IsShown()
-      and type(frame.IsFrameTabActive) == "function"
-      and frame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.SpellBook)
-      and categoryMatches
-
-    if alreadyShowing then
-      __wow_hide_uipanel_with_fallback(frame)
-      return true
-    end
-
-    __wow_set_playerspells_inspect_unit(nil)
-    if not __wow_show_playerspells_and_try_tab(frame, PlayerSpellsUtil.FrameTabs.SpellBook) then
-      return false
-    end
-    if spellBookCategory and spellBook and type(spellBook.TrySetCategory) == "function" then
-      spellBook:TrySetCategory(spellBookCategory)
-    end
-    return true
   end
+  PlayerSpellsUtil.TogglePlayerSpellsFrame = __wow_bootstrap_toggle_player_spells_frame
+end
+local __wow_bootstrap_open_to_spellbook_tab_at_spell
+if rawget(PlayerSpellsUtil, "OpenToSpellBookTabAtSpell") == nil then
+  __wow_bootstrap_open_to_spellbook_tab_at_spell = function(
+    spellID,
+    knownSpellsOnly,
+    toggleFlyout,
+    flyoutReason
+  )
+    return __wow_call_playerspells_util(
+      "OpenToSpellBookTabAtSpell",
+      __wow_bootstrap_open_to_spellbook_tab_at_spell,
+      spellID,
+      knownSpellsOnly,
+      toggleFlyout,
+      flyoutReason
+    )
+  end
+  PlayerSpellsUtil.OpenToSpellBookTabAtSpell = __wow_bootstrap_open_to_spellbook_tab_at_spell
 end
 if rawget(PlayerSpellsUtil, "ToggleClassTalentFrame") == nil then
   function PlayerSpellsUtil.ToggleClassTalentFrame(inspectUnit)
@@ -7360,35 +7256,15 @@ if rawget(PlayerSpellsUtil, "OpenToClassSpecializationsTab") == nil then
     return PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassSpecializations)
   end
 end
+local __wow_bootstrap_open_to_spellbook_tab
 if rawget(PlayerSpellsUtil, "OpenToSpellBookTab") == nil then
-  function PlayerSpellsUtil.OpenToSpellBookTab()
-    return PlayerSpellsUtil.ToggleSpellBookFrame()
+  __wow_bootstrap_open_to_spellbook_tab = function()
+    return __wow_call_playerspells_util(
+      "OpenToSpellBookTab",
+      __wow_bootstrap_open_to_spellbook_tab
+    )
   end
-end
-if __wow_toggle_spellbook_keybind == nil then
-  function __wow_toggle_spellbook_keybind()
-    if not PlayerSpellsUtil or type(PlayerSpellsUtil.ToggleSpellBookFrame) ~= "function" then
-      return
-    end
-
-    local ok, opened = pcall(PlayerSpellsUtil.ToggleSpellBookFrame)
-    if ok and opened and PlayerSpellsFrame and PlayerSpellsFrame:IsShown() then
-      return
-    end
-
-    if PlayerSpellsUtil and type(PlayerSpellsUtil.OpenToSpellBookTab) == "function" then
-      pcall(PlayerSpellsUtil.OpenToSpellBookTab)
-    end
-    if PlayerSpellsFrame and not PlayerSpellsFrame:IsShown() and type(PlayerSpellsFrame.Show) == "function" then
-      PlayerSpellsFrame:Show()
-    end
-    if PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame
-      and not PlayerSpellsFrame.SpellBookFrame:IsShown()
-      and type(PlayerSpellsFrame.SpellBookFrame.Show) == "function"
-    then
-      PlayerSpellsFrame.SpellBookFrame:Show()
-    end
-  end
+  PlayerSpellsUtil.OpenToSpellBookTab = __wow_bootstrap_open_to_spellbook_tab
 end
 if TogglePlayerSpellsFrame == nil then
   function TogglePlayerSpellsFrame(suggestedTab, inspectUnit)
@@ -12415,4 +12291,71 @@ end
 
 if type(rawget(_G, "Settings")) == "table" then
   __wow_prepare_global_assignment("Settings", rawget(_G, "Settings"))
+end
+
+if GetItemLevelColor == nil then
+  function GetItemLevelColor()
+    return 1, 1, 1
+  end
+end
+
+if ClearCursorHoveredItem == nil then
+  function ClearCursorHoveredItem()
+    return nil
+  end
+end
+
+if UnitInSubgroup == nil then
+  function UnitInSubgroup(unit)
+    if unit == nil or unit == "player" then
+      return false
+    end
+    return type(UnitInParty) == "function" and UnitInParty(unit) or false
+  end
+end
+
+if GetNumGuildPerks == nil then
+  function GetNumGuildPerks()
+    return 0
+  end
+end
+
+if RequestGuildRewards == nil then
+  function RequestGuildRewards()
+    return nil
+  end
+end
+
+if GetGuildRenameRequired == nil then
+  function GetGuildRenameRequired()
+    return false
+  end
+end
+
+if GetAvailableBandwidth == nil then
+  function GetAvailableBandwidth()
+    local bandwidthIn, bandwidthOut = GetNetStats()
+    return math.max(tonumber(bandwidthIn) or 0, tonumber(bandwidthOut) or 0)
+  end
+end
+
+C_Club = C_Club or __wow_namespace()
+if rawget(C_Club, "GetClubStreamNotificationSettings") == nil then
+  function C_Club.GetClubStreamNotificationSettings(_clubId)
+    return {}
+  end
+end
+
+C_WarbandScene = C_WarbandScene or __wow_namespace()
+if rawget(C_WarbandScene, "SearchWarbandSceneEntries") == nil then
+  function C_WarbandScene.SearchWarbandSceneEntries(_searchParams)
+    return {}
+  end
+end
+
+C_TransmogOutfitInfo = C_TransmogOutfitInfo or __wow_namespace()
+if rawget(C_TransmogOutfitInfo, "GetAllSlotLocationInfo") == nil then
+  function C_TransmogOutfitInfo.GetAllSlotLocationInfo()
+    return {}, {}
+  end
 end

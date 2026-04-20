@@ -21,6 +21,24 @@ iced KeyPressed → iced_key_to_wow() → Message::KeyPress(key_name)
         3. OnKeyDown dispatch with parent propagation
 ```
 
+## Mainline Spellbook Follow-up
+
+- `S` now routes to mainline `PlayerSpellsUtil.ToggleSpellBookFrame()`.
+- `runtime_surface_bootstrap.lua` no longer owns a spellbook fallback wrapper.
+- `dispatch_key_binding()` now resolves simple zero-arg global/table function
+  paths directly instead of always compiling a Lua chunk first.
+
+Why this matters:
+
+- Raw `PlayerSpellsUtil.ToggleSpellBookFrame()` calls already matched Blizzard
+  load-on-demand behavior.
+- The remaining regression only happened through binding dispatch: chunk-eval
+  keybind execution could leave `PlayerSpellsFrame` in a partial open state on
+  first press even though the same Blizzard function worked when invoked
+  directly.
+- Direct function dispatch keeps Blizzard ownership of the spellbook logic
+  while avoiding the binding-only partial-open path.
+
 ## Default Key Assignments (simulator-specific)
 
 | Key | Panel |

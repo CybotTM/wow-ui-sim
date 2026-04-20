@@ -674,44 +674,49 @@ fn keybind_s_opens_spellbook_tab_on_first_press() {
 }
 
 #[test]
-fn keybind_s_does_not_toggle_spellbook_twice_on_partial_open() {
+fn keybind_s_is_a_single_thin_dispatch_to_toggle_spellbook_frame() {
     test_timeout! {
         let env = setup_env();
         install_test_error_handler(&env);
 
-        let result: String = env
+        env.exec(
+            r#"
+            if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleSpellBookFrame) == "function") then
+                error("missing_toggle_spellbook")
+            end
+
+            original_toggle_spellbook_frame = PlayerSpellsUtil.ToggleSpellBookFrame
+            spellbook_toggle_calls = 0
+
+            PlayerSpellsUtil.ToggleSpellBookFrame = function(...)
+                spellbook_toggle_calls = spellbook_toggle_calls + 1
+                return false
+            end
+            "#,
+        )
+        .unwrap();
+
+        env.send_key_press("S", None)
+            .expect("S keybind dispatch failed");
+
+        let result: (i32, bool, bool) = env
             .eval(
                 r#"
-                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleSpellBookFrame) == "function") then
-                    return "missing_toggle_spellbook"
-                end
-
-                local original = PlayerSpellsUtil.ToggleSpellBookFrame
-                local calls = 0
-
-                PlayerSpellsUtil.ToggleSpellBookFrame = function(...)
-                    calls = calls + 1
-                    if PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame then
-                        PlayerSpellsFrame:Show()
-                        PlayerSpellsFrame.SpellBookFrame:Show()
-                    end
-                    return false
-                end
-
-                local ok, err = pcall(function()
-                    __wow_toggle_spellbook_keybind()
-                end)
-                PlayerSpellsUtil.ToggleSpellBookFrame = original
-
-                assert(ok, tostring(err))
-                assert(calls == 1, "keybind wrapper should not retry the toggle after the first attempt")
-                assert(PlayerSpellsFrame and PlayerSpellsFrame:IsShown(), "PlayerSpellsFrame should stay shown")
-                assert(PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:IsShown(), "SpellBookFrame should stay shown")
-
-                return tostring(calls)
+                return
+                    spellbook_toggle_calls or 0,
+                    PlayerSpellsFrame and PlayerSpellsFrame:IsShown() == true or false,
+                    PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:IsShown() == true or false
                 "#,
             )
             .unwrap();
+        env.exec(
+            r#"
+            if original_toggle_spellbook_frame ~= nil then
+                PlayerSpellsUtil.ToggleSpellBookFrame = original_toggle_spellbook_frame
+            end
+            "#,
+        )
+        .unwrap();
 
         let errors = drain_test_errors(&env);
         assert!(
@@ -722,8 +727,108 @@ fn keybind_s_does_not_toggle_spellbook_twice_on_partial_open() {
         );
         assert_eq!(
             result,
-            "1",
-            "Spellbook keybind wrapper should only call ToggleSpellBookFrame once when the first attempt partially opens the panel"
+            (1, false, false),
+            "Spellbook keybind should be a single dispatch into ToggleSpellBookFrame without force-show fallback"
+        );
+    }
+}
+
+#[test]
+fn keybind_s_dispatches_directly_to_playerspellsutil_toggle_spellbook_frame() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.exec(
+            r#"
+            if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleSpellBookFrame) == "function") then
+                error("missing_toggle_spellbook")
+            end
+            if type(ToggleSpellBook) ~= "function" then
+                error("missing_legacy_toggle_spellbook")
+            end
+
+            original_toggle_spellbook_frame = PlayerSpellsUtil.ToggleSpellBookFrame
+            original_toggle_spellbook = ToggleSpellBook
+            spellbook_toggle_frame_calls = 0
+            legacy_toggle_spellbook_calls = 0
+
+            PlayerSpellsUtil.ToggleSpellBookFrame = function(...)
+                spellbook_toggle_frame_calls = spellbook_toggle_frame_calls + 1
+                return false
+            end
+
+            ToggleSpellBook = function(...)
+                legacy_toggle_spellbook_calls = legacy_toggle_spellbook_calls + 1
+                return false
+            end
+            "#,
+        )
+        .unwrap();
+
+        env.send_key_press("S", None)
+            .expect("S keybind dispatch failed");
+
+        let result: (i32, i32) = env
+            .eval(
+                r#"
+                return
+                    spellbook_toggle_frame_calls or 0,
+                    legacy_toggle_spellbook_calls or 0
+                "#,
+            )
+            .unwrap();
+        env.exec(
+            r#"
+            if original_toggle_spellbook_frame ~= nil then
+                PlayerSpellsUtil.ToggleSpellBookFrame = original_toggle_spellbook_frame
+            end
+            if original_toggle_spellbook ~= nil then
+                ToggleSpellBook = original_toggle_spellbook
+            end
+            "#,
+        )
+        .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Direct spellbook keybind dispatch produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            (1, 0),
+            "Spellbook keybind should dispatch directly into PlayerSpellsUtil.ToggleSpellBookFrame, not legacy ToggleSpellBook"
+        );
+    }
+}
+
+#[test]
+fn keybind_s_toggles_spellbook_closed_on_second_press() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("S", None).expect("first S keybind dispatch failed");
+        assert!(
+            frame_is_shown(&env, "PlayerSpellsFrame"),
+            "PlayerSpellsFrame should be shown after the first S press"
+        );
+
+        env.send_key_press("S", None).expect("second S keybind dispatch failed");
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Toggling spellbook through S produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert!(
+            !frame_is_shown(&env, "PlayerSpellsFrame"),
+            "PlayerSpellsFrame should be hidden after pressing S twice"
         );
     }
 }
