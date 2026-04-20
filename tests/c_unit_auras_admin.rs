@@ -158,7 +158,10 @@ fn get_aura_data_by_index_maw_returns_nil_for_ordinary_buffs() {
     // ordinary player buff, causing ShouldShowMawBuffs() to display the
     // Torghast anima-power button outside Torghast.
     let env = env();
-    clear_buffs_and_insert(&env, vec![admin_buff("Power Word: Fortitude", 21562, 1, true)]);
+    clear_buffs_and_insert(
+        &env,
+        vec![admin_buff("Power Word: Fortitude", 21562, 1, true)],
+    );
     let is_nil: bool = env
         .eval(r#"return C_UnitAuras.GetAuraDataByIndex("player", 1, "MAW") == nil"#)
         .unwrap();

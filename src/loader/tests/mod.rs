@@ -930,8 +930,13 @@ fn test_catalog_shop_xml_numeric_error_without_main_onload() {
 
     let xml_path = ui.join("Blizzard_CatalogShop/Blizzard_CatalogShop.xml");
     let before = env.state().borrow().lua_errors.len();
-    super::xml_file::load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default())
-        .unwrap_or_else(|error| panic!("{} should load: {error}", xml_path.display()));
+    super::xml_file::load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap_or_else(|error| panic!("{} should load: {error}", xml_path.display()));
     let errors = env.state().borrow().lua_errors.clone();
     let targeted: Vec<_> = errors
         .into_iter()

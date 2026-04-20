@@ -158,7 +158,8 @@ fn augment_error_with_traceback(state: &mut LuaState, error_msg: &str) -> String
         return error_msg.to_string();
     }
 
-    let Ok(func) = state.load("return debug and debug.traceback and debug.traceback() or ''") else {
+    let Ok(func) = state.load("return debug and debug.traceback and debug.traceback() or ''")
+    else {
         return error_msg.to_string();
     };
     let Ok(results) = protected_call_state(state, Val::Function(func.gc_ref()), &[]) else {
