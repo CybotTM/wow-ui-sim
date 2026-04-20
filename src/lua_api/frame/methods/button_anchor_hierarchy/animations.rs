@@ -147,14 +147,15 @@ pub(super) fn animation_group_play(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let reverse = matches!(stack_val(state, 2), Val::Bool(true));
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id)
-        && let Some(group) = sim.animation_groups.get_mut(&group_id)
-    {
-        group.playing = true;
-        group.paused = false;
-        group.done = false;
-        group.pending_finish = false;
-        group.reverse = reverse;
+    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id) {
+        if let Some(group) = sim.animation_groups.get_mut(&group_id) {
+            group.playing = true;
+            group.paused = false;
+            group.done = false;
+            group.pending_finish = false;
+            group.reverse = reverse;
+        }
+        apply_group_flipbook_state(&mut sim, group_id);
     }
     Ok(0)
 }
@@ -175,17 +176,18 @@ pub(super) fn animation_group_pause(state: &mut LuaState) -> LuaResult<u32> {
 pub(super) fn animation_group_stop(state: &mut LuaState) -> LuaResult<u32> {
     let group_frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id)
-        && let Some(group) = sim.animation_groups.get_mut(&group_id)
-    {
-        group.playing = false;
-        group.paused = false;
-        group.done = true;
-        group.pending_finish = false;
-        group.elapsed = 0.0;
-        for animation in &mut group.animations {
-            animation.elapsed = 0.0;
+    if let Some(group_id) = resolve_animation_group_id(&sim, group_frame_id) {
+        if let Some(group) = sim.animation_groups.get_mut(&group_id) {
+            group.playing = false;
+            group.paused = false;
+            group.done = true;
+            group.pending_finish = false;
+            group.elapsed = 0.0;
+            for animation in &mut group.animations {
+                animation.elapsed = 0.0;
+            }
         }
+        apply_group_flipbook_state(&mut sim, group_id);
     }
     Ok(0)
 }
@@ -238,17 +240,18 @@ pub(super) fn animation_group_set_playing(state: &mut LuaState) -> LuaResult<u32
 pub(super) fn animation_group_restart(state: &mut LuaState) -> LuaResult<u32> {
     let frame_id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
-    if let Some(group_id) = resolve_animation_group_id(&sim, frame_id)
-        && let Some(group) = sim.animation_groups.get_mut(&group_id)
-    {
-        group.playing = true;
-        group.paused = false;
-        group.done = false;
-        group.pending_finish = false;
-        group.elapsed = 0.0;
-        for animation in &mut group.animations {
-            animation.elapsed = 0.0;
+    if let Some(group_id) = resolve_animation_group_id(&sim, frame_id) {
+        if let Some(group) = sim.animation_groups.get_mut(&group_id) {
+            group.playing = true;
+            group.paused = false;
+            group.done = false;
+            group.pending_finish = false;
+            group.elapsed = 0.0;
+            for animation in &mut group.animations {
+                animation.elapsed = 0.0;
+            }
         }
+        apply_group_flipbook_state(&mut sim, group_id);
     }
     Ok(0)
 }
@@ -880,8 +883,17 @@ struct AnimationGroupAdvance {
     parent_effective_alpha: f32,
     pending_alpha: Option<f64>,
     restore_saved_alpha: Option<f32>,
+    flipbook_updates: Vec<FlipbookUpdate>,
     loop_count: u32,
     frame_id: u64,
+}
+
+struct FlipbookUpdate {
+    child_key: Option<String>,
+    frame_index: u32,
+    rows: u32,
+    columns: u32,
+    frames: u32,
 }
 
 fn advance_animation_group(
@@ -904,7 +916,7 @@ fn advance_animation_group(
         .map(|frame| frame.alpha)
         .unwrap_or(1.0_f32);
     let mut loop_count = 0u32;
-    let (pending_alpha, restore_saved_alpha, frame_id) = {
+    let (pending_alpha, restore_saved_alpha, flipbook_updates, frame_id) = {
         let group = sim.animation_groups.get_mut(&group_id)?;
         if !group.playing || group.paused {
             return None;
@@ -927,13 +939,19 @@ fn advance_animation_group(
 
         sync_animation_elapsed(group);
         let pending_alpha = group_current_alpha(group, group.elapsed);
+        let flipbook_updates = collect_group_flipbook_updates(group);
         let frame_id = animation_group_frame_id(group);
         let restore_saved_alpha = if !group.playing && group.done && !group.set_to_final_alpha {
             group.saved_alphas.get(&owner_id).copied()
         } else {
             None
         };
-        (pending_alpha, restore_saved_alpha, frame_id)
+        (
+            pending_alpha,
+            restore_saved_alpha,
+            flipbook_updates,
+            frame_id,
+        )
     };
 
     Some(AnimationGroupAdvance {
@@ -941,6 +959,7 @@ fn advance_animation_group(
         parent_effective_alpha,
         pending_alpha,
         restore_saved_alpha,
+        flipbook_updates,
         loop_count,
         frame_id,
     })
@@ -954,7 +973,11 @@ fn advance_group_elapsed(
     finished_scripts: &mut Vec<u64>,
 ) {
     let advance = elapsed * group.speed_multiplier.max(0.0);
-    group.elapsed += advance;
+    if group.reverse {
+        group.elapsed -= advance;
+    } else {
+        group.elapsed += advance;
+    }
 
     if total_duration <= 0.0 {
         finished_scripts.push(finish_group_now(group, total_duration));
@@ -963,19 +986,34 @@ fn advance_group_elapsed(
 
     match group.looping {
         crate::lua_api::animation::LoopType::None => {
-            if group.elapsed >= total_duration {
+            if group.reverse {
+                if group.elapsed <= 0.0 {
+                    finished_scripts.push(finish_group_now(group, 0.0));
+                }
+            } else if group.elapsed >= total_duration {
                 finished_scripts.push(finish_group_now(group, total_duration));
             }
         }
         crate::lua_api::animation::LoopType::Repeat => {
-            while group.elapsed >= total_duration {
-                group.elapsed -= total_duration;
-                *loop_count += 1;
+            if group.reverse {
+                while group.elapsed < 0.0 {
+                    group.elapsed += total_duration;
+                    *loop_count += 1;
+                }
+            } else {
+                while group.elapsed >= total_duration {
+                    group.elapsed -= total_duration;
+                    *loop_count += 1;
+                }
             }
         }
         crate::lua_api::animation::LoopType::Bounce => {
-            while group.elapsed >= total_duration {
-                group.elapsed -= total_duration;
+            while group.elapsed >= total_duration || group.elapsed < 0.0 {
+                if group.elapsed >= total_duration {
+                    group.elapsed = (group.elapsed - total_duration).max(0.0);
+                } else {
+                    group.elapsed = (-group.elapsed).min(total_duration);
+                }
                 group.reverse = !group.reverse;
                 *loop_count += 1;
             }
@@ -1003,6 +1041,8 @@ fn apply_animation_group_outcome(
         frame.alpha = saved_alpha;
         alpha_changed = true;
     }
+
+    apply_group_flipbook_updates(sim, result.owner_id, &result.flipbook_updates);
 
     if alpha_changed {
         sim.widgets
@@ -1074,6 +1114,111 @@ fn current_animation_alpha(
         animation.from_alpha + (animation.to_alpha - animation.from_alpha) * progress
     };
     Some(alpha)
+}
+
+fn apply_group_flipbook_state(sim: &mut crate::lua_api::state::SimState, group_id: u64) {
+    let Some(group) = sim.animation_groups.get(&group_id) else {
+        return;
+    };
+    let owner_id = group.owner_frame_id;
+    let updates = collect_group_flipbook_updates(group);
+    apply_group_flipbook_updates(sim, owner_id, &updates);
+}
+
+fn collect_group_flipbook_updates(
+    group: &crate::lua_api::animation::AnimGroupState,
+) -> Vec<FlipbookUpdate> {
+    group
+        .animations
+        .iter()
+        .filter_map(|animation| {
+            flipbook_frame_index(animation).map(|frame_index| FlipbookUpdate {
+                child_key: animation.child_key.clone(),
+                frame_index,
+                rows: animation.flipbook_rows,
+                columns: animation.flipbook_columns,
+                frames: animation.flipbook_frames,
+            })
+        })
+        .collect()
+}
+
+fn apply_group_flipbook_updates(
+    sim: &mut crate::lua_api::state::SimState,
+    owner_id: u64,
+    updates: &[FlipbookUpdate],
+) {
+    for update in updates {
+        let Some(target_id) = resolve_anim_target_id(sim, owner_id, update.child_key.as_deref())
+        else {
+            continue;
+        };
+        let Some(frame) = sim.widgets.get_mut_visual(target_id) else {
+            continue;
+        };
+        if let Some(tex_coords) = flipbook_tex_coords(
+            frame.atlas_tex_coords.or(frame.tex_coords),
+            update.rows,
+            update.columns,
+            update.frames,
+            update.frame_index,
+        ) {
+            frame.tex_coords = Some(tex_coords);
+            frame.tex_coords_quad = None;
+        }
+    }
+}
+
+fn flipbook_frame_index(animation: &crate::lua_api::animation::AnimState) -> Option<u32> {
+    if !matches!(
+        animation.anim_type,
+        crate::lua_api::animation::AnimationType::FlipBook
+    ) {
+        return None;
+    }
+    let frames = animation.flipbook_frames;
+    let columns = animation.flipbook_columns;
+    let rows = animation.flipbook_rows;
+    if frames == 0 || columns == 0 || rows == 0 {
+        return None;
+    }
+    let duration = animation.duration.max(0.0);
+    let frame_index = if duration <= 0.0 {
+        0
+    } else {
+        let progress = (animation.elapsed / duration).clamp(0.0, 1.0);
+        let candidate = (progress * frames as f64).floor() as u32;
+        candidate.min(frames.saturating_sub(1))
+    };
+    Some(frame_index)
+}
+
+fn flipbook_tex_coords(
+    atlas_tex_coords: Option<(f32, f32, f32, f32)>,
+    rows: u32,
+    columns: u32,
+    frames: u32,
+    frame_index: u32,
+) -> Option<(f32, f32, f32, f32)> {
+    let Some((al, ar, at, ab)) = atlas_tex_coords else {
+        return None;
+    };
+    if rows == 0 || columns == 0 || frames == 0 {
+        return None;
+    }
+    let frame_index = frame_index.min(frames.saturating_sub(1));
+    let row = frame_index / columns;
+    if row >= rows {
+        return None;
+    }
+    let col = frame_index % columns;
+    let width = (ar - al) / columns as f32;
+    let height = (ab - at) / rows as f32;
+    let left = al + col as f32 * width;
+    let right = left + width;
+    let top = at + row as f32 * height;
+    let bottom = top + height;
+    Some((left, right, top, bottom))
 }
 
 fn sync_animation_elapsed(group: &mut crate::lua_api::animation::AnimGroupState) {
