@@ -637,6 +637,98 @@ fn keybind_s_opens_spellbook_no_errors() {
 }
 
 #[test]
+fn keybind_s_opens_spellbook_tab_on_first_press() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("S", None).expect("S keybind dispatch failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsFrame and PlayerSpellsFrame:IsShown()) then
+                    return "player_spells_not_shown"
+                end
+                if not (PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:IsShown()) then
+                    return "spellbook_tab_not_shown"
+                end
+                return "ok"
+                "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Opening spellbook through S produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Pressing S should show the spellbook tab on the first open: {result}"
+        );
+    }
+}
+
+#[test]
+fn keybind_s_does_not_toggle_spellbook_twice_on_partial_open() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleSpellBookFrame) == "function") then
+                    return "missing_toggle_spellbook"
+                end
+
+                local original = PlayerSpellsUtil.ToggleSpellBookFrame
+                local calls = 0
+
+                PlayerSpellsUtil.ToggleSpellBookFrame = function(...)
+                    calls = calls + 1
+                    if PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame then
+                        PlayerSpellsFrame:Show()
+                        PlayerSpellsFrame.SpellBookFrame:Show()
+                    end
+                    return false
+                end
+
+                local ok, err = pcall(function()
+                    __wow_toggle_spellbook_keybind()
+                end)
+                PlayerSpellsUtil.ToggleSpellBookFrame = original
+
+                assert(ok, tostring(err))
+                assert(calls == 1, "keybind wrapper should not retry the toggle after the first attempt")
+                assert(PlayerSpellsFrame and PlayerSpellsFrame:IsShown(), "PlayerSpellsFrame should stay shown")
+                assert(PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:IsShown(), "SpellBookFrame should stay shown")
+
+                return tostring(calls)
+                "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Spellbook keybind fallback regression produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "1",
+            "Spellbook keybind wrapper should only call ToggleSpellBookFrame once when the first attempt partially opens the panel"
+        );
+    }
+}
+
+#[test]
 fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_errors() {
     test_timeout! {
         let env = setup_env();
