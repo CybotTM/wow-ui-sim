@@ -104,4 +104,4 @@
 - [x] Refresh coverage/audit drift bucket (`3` failed targets): `addon_coverage`, `globals_legacy`, `method_diff_coverage`.
 - [x] Fix widget/pool/heirloom surface bucket (`3` failed targets): `heirloom_probes`, `pool_api`, `widget_slider`.
 - [x] Fix onupdate audit bucket (`1` failed target): `onupdate_handler_audit`.
-- [ ] Fix admin split harness bucket (`1` failed target): `rilua_admin_split_smoke`.
+- [x] Fix admin split harness bucket (`1` failed target): `rilua_admin_split_smoke`.

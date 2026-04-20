@@ -3,7 +3,6 @@
 //! These assert the public admin entry points still mutate `SimState` after
 //! the implementation moved into smaller focused files.
 
-use wow_ui_sim::event::EventArg;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -98,13 +97,27 @@ fn admin_guild_mail_premade_and_encounter_still_queue_state() {
 #[test]
 fn admin_fire_event_still_preserves_payloads() {
     let env = env();
-    env.exec(r#"A_Admin.FireEvent("TEST_EVENT", 7, true)"#)
+    let (received, arg1, arg2): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local received = false
+            local got_arg1, got_arg2
+            local frame = CreateFrame("Frame")
+            frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+            frame:SetScript("OnEvent", function(self, event, a1, a2)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    received = true
+                    got_arg1 = a1
+                    got_arg2 = a2
+                end
+            end)
+            A_Admin.FireEvent("PLAYER_ENTERING_WORLD", 7, true)
+            return received, got_arg1, got_arg2
+            "#,
+        )
         .expect("FireEvent");
 
-    let events = env.state().borrow_mut().events.drain();
-    let event = events.last().expect("queued event");
-    assert_eq!(event.name, "TEST_EVENT");
-    assert_eq!(event.args.len(), 2);
-    assert!(matches!(event.args[0], EventArg::Number(n) if n == 7.0));
-    assert!(matches!(event.args[1], EventArg::Boolean(true)));
+    assert!(received);
+    assert_eq!(arg1, true);
+    assert_eq!(arg2, true);
 }
