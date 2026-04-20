@@ -72,8 +72,10 @@ pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
             }
         }
         update_auto_text_width(state, text_child_id);
+        update_auto_text_height(state, text_child_id);
     }
     update_auto_text_width(state, id);
+    update_auto_text_height(state, id);
     if is_tooltip {
         mirror_tooltip_text_fields(state, id, text.clone(), tooltip);
         replace_tooltip_lines(state, id, text, tooltip)?;
@@ -267,6 +269,45 @@ fn update_text_frame(
     let should_update_button_child =
         is_button && (changed || (!has_button_text_child && text.is_some()));
     Ok((is_tooltip, should_update_button_child))
+}
+
+fn update_auto_text_height(state: &mut LuaState, id: u64) {
+    let Some((is_fontstring, has_text, width, width_is_text_auto, word_wrap)) =
+        (match borrow_state(state) {
+            Ok(sim) => sim.widgets.get(id).map(|frame| {
+                (
+                    frame.widget_type == WidgetType::FontString,
+                    frame.text.as_ref().is_some_and(|text| !text.is_empty()),
+                    frame.width,
+                    frame.width_is_text_auto,
+                    frame.word_wrap,
+                )
+            }),
+            Err(_) => return,
+        })
+    else {
+        return;
+    };
+    if !is_fontstring || !has_text {
+        return;
+    }
+    let width_is_explicit = word_wrap && width > 0.0 && !width_is_text_auto;
+    let wrap_width = width_is_explicit.then_some(width);
+    let height = measure_text_height(state, id, wrap_width) as f32;
+    let Ok(mut sim) = borrow_state_mut(state) else {
+        return;
+    };
+    let Some(frame) = sim.widgets.get(id) else {
+        return;
+    };
+    if (frame.height - height).abs() <= 0.5 {
+        return;
+    }
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return;
+    };
+    frame.height = height;
+    sim.widgets.mark_rect_dirty(id);
 }
 
 fn update_auto_text_width(state: &mut LuaState, id: u64) {
