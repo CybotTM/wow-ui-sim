@@ -8,6 +8,8 @@ use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
 const DEFAULT_WARBAND_GROUP_COUNT: f64 = 4.0;
+const CHARACTER_SELECT_READY_FLAG: &str = "__wow_character_screen_initialized";
+const IN_CHARACTER_SELECT_FLAG: &str = "__wow_in_character_select";
 
 pub(super) fn register_character_select_surface(state: &mut LuaState) -> LuaResult<()> {
     register_character_select_bootstrap(state)?;
@@ -97,13 +99,7 @@ fn register_character_select_character_details(state: &mut LuaState) -> LuaResul
 }
 
 fn initialize_character_screen_data(state: &mut LuaState) -> LuaResult<u32> {
-    table_set(
-        state,
-        Val::Table(state.global),
-        "__wow_character_screen_initialized",
-        Val::Bool(true),
-    );
-    Ok(0)
+    set_global_flag(state, CHARACTER_SELECT_READY_FLAG)
 }
 
 fn set_world_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
@@ -140,10 +136,14 @@ fn set_char_select_frame_name(state: &mut LuaState, slot: &str) -> LuaResult<u32
 }
 
 fn set_in_character_select(state: &mut LuaState) -> LuaResult<u32> {
+    set_global_flag(state, IN_CHARACTER_SELECT_FLAG)
+}
+
+fn set_global_flag(state: &mut LuaState, key: &str) -> LuaResult<u32> {
     table_set(
         state,
         Val::Table(state.global),
-        "__wow_in_character_select",
+        key,
         Val::Bool(true),
     );
     Ok(0)
@@ -255,47 +255,102 @@ fn seeded_character_accounts(state: &mut LuaState) -> Vec<BnetGameAccount> {
 
 fn build_character_info_table(state: &mut LuaState, account: &BnetGameAccount) -> Val {
     let table = create_table(state);
-    let character_name = create_string(state, &account.character_name);
-    table_set(state, table, "name", character_name);
-    let realm_name = create_string(state, &account.realm_name);
-    table_set(state, table, "realmName", realm_name);
-    let realm_address = create_string(state, &account.realm_display_name);
-    table_set(state, table, "realmAddress", realm_address);
-    let guid = create_string(state, &account.wow_account_guid);
-    table_set(state, table, "guid", guid);
-    let class_name = create_string(state, &account.class_name);
-    table_set(state, table, "className", class_name);
-    let class_filename = create_string(state, &account.class_name);
-    table_set(state, table, "classFilename", class_filename);
+    set_character_info_strings(state, table, account);
+    set_character_info_numbers(state, table, account);
+    set_character_info_flags(state, table);
+    set_character_info_empty_tables(state, table);
+    table
+}
+
+fn set_character_info_strings(state: &mut LuaState, table: Val, account: &BnetGameAccount) {
+    set_string_field(state, table, "name", &account.character_name);
+    set_string_field(state, table, "realmName", &account.realm_name);
+    set_string_field(state, table, "realmAddress", &account.realm_display_name);
+    set_string_field(state, table, "guid", &account.wow_account_guid);
+    set_string_field(state, table, "className", &account.class_name);
+    set_string_field(state, table, "classFilename", &account.class_name);
+    set_string_field(state, table, "areaName", &account.area_name);
+    set_string_field(state, table, "faction", &account.faction_name);
+}
+
+fn set_character_info_numbers(state: &mut LuaState, table: Val, account: &BnetGameAccount) {
     table_set(
         state,
         table,
         "experienceLevel",
         Val::Num(account.character_level as f64),
     );
-    let area_name = create_string(state, &account.area_name);
-    table_set(state, table, "areaName", area_name);
-    let faction_name = create_string(state, &account.faction_name);
-    table_set(state, table, "faction", faction_name);
-    table_set(state, table, "raceID", Val::Num(1.0));
-    table_set(state, table, "specID", Val::Num(0.0));
-    table_set(state, table, "profession0", Val::Num(0.0));
-    table_set(state, table, "profession1", Val::Num(0.0));
-    table_set(state, table, "money", Val::Num(0.0));
-    table_set(state, table, "boostInProgress", Val::Bool(false));
-    table_set(state, table, "isTrialBoostCompleted", Val::Bool(false));
-    table_set(state, table, "revokedCharacterUpgrade", Val::Bool(false));
-    table_set(state, table, "isExpansionTrialCharacter", Val::Bool(false));
-    table_set(state, table, "isLocked", Val::Bool(false));
-    table_set(state, table, "isLockedByExpansion", Val::Bool(false));
-    table_set(state, table, "isRevokedCharacterUpgrade", Val::Bool(false));
-    table_set(state, table, "isTrialBoost", Val::Bool(false));
-    table_set(state, table, "hasCustomize", Val::Bool(false));
-    table_set(state, table, "customizeDisabled", Val::Bool(false));
-    table_set(state, table, "hasFactionChange", Val::Bool(false));
-    table_set(state, table, "hasRaceChange", Val::Bool(false));
-    table_set(state, table, "lastLoginBuild", Val::Num(0.0));
+    for key in [
+        "raceID",
+        "specID",
+        "profession0",
+        "profession1",
+        "money",
+        "lastLoginBuild",
+    ] {
+        table_set(state, table, key, Val::Num(0.0));
+    }
+}
+
+fn set_character_info_flags(state: &mut LuaState, table: Val) {
+    for key in [
+        "boostInProgress",
+        "isTrialBoostCompleted",
+        "revokedCharacterUpgrade",
+        "isExpansionTrialCharacter",
+        "isLocked",
+        "isLockedByExpansion",
+        "isRevokedCharacterUpgrade",
+        "isTrialBoost",
+        "hasCustomize",
+        "customizeDisabled",
+        "hasFactionChange",
+        "hasRaceChange",
+    ] {
+        table_set(state, table, key, Val::Bool(false));
+    }
+}
+
+fn set_character_info_empty_tables(state: &mut LuaState, table: Val) {
     let mail_senders = create_table(state);
     table_set(state, table, "mailSenders", mail_senders);
-    table
+}
+
+fn set_string_field(state: &mut LuaState, table: Val, key: &str, value: &str) {
+    let value = create_string(state, value);
+    table_set(state, table, key, value);
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn character_select_globals_setters_store_expected_flags_and_names() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let (initialized, in_character_select, model_name, map_scene_name): (
+            bool,
+            bool,
+            String,
+            String,
+        ) = env
+            .eval(
+                r#"
+                InitializeCharacterScreenData()
+                SetInCharacterSelect()
+                SetCharSelectModelFrame("ModelFFX")
+                SetCharSelectMapSceneFrame("MapScene")
+                return __wow_character_screen_initialized,
+                       __wow_in_character_select,
+                       __wow_char_select_model_frame_name,
+                       __wow_char_select_map_scene_frame_name
+                "#,
+            )
+            .expect("character select globals should be stored");
+
+        assert!(initialized);
+        assert!(in_character_select);
+        assert_eq!(model_name, "ModelFFX");
+        assert_eq!(map_scene_name, "MapScene");
+    }
 }
