@@ -55,6 +55,16 @@ struct FrameTelemetry {
     bc_textures_loaded: usize,
 }
 
+#[derive(Debug, Default)]
+struct SettleMetrics {
+    tick_elapsed: Duration,
+    draw_elapsed: Duration,
+    frames: usize,
+    textures_loaded: usize,
+    bc_textures_loaded: usize,
+    max_pending_dirty_ids: usize,
+}
+
 pub fn benchmark_spellbook_open_in_gui(env: WowLuaEnv) -> crate::Result<SpellbookBenchmarkReport> {
     let mut app = boot_benchmark_app(env);
     let startup_idle = benchmark_phase(&mut app, spellbook_phase("startup_idle", None, false))?;
@@ -102,29 +112,7 @@ fn default_textures_path() -> PathBuf {
 fn benchmark_phase(app: &mut App, options: PhaseOptions) -> crate::Result<BenchmarkPhase> {
     let keypress_elapsed = dispatch_keypress(app, options.keypress);
     let settle_started = Instant::now();
-    let mut tick_elapsed = Duration::ZERO;
-    let mut draw_elapsed = Duration::ZERO;
-    let mut frames = 0_usize;
-    let mut textures_loaded = 0_usize;
-    let mut bc_textures_loaded = 0_usize;
-    let mut max_pending_dirty_ids = pending_dirty_count(app);
-
-    while !is_quiescent(app) {
-        if frames >= MAX_SETTLE_FRAMES {
-            return Err(crate::Error::Other(format!(
-                "{} did not settle after {} frames",
-                options.name, MAX_SETTLE_FRAMES
-            )));
-        }
-        let (tick_dur, draw_dur, frame_telemetry) = run_benchmark_frame(app);
-        tick_elapsed += tick_dur;
-        draw_elapsed += draw_dur;
-        textures_loaded += frame_telemetry.textures_loaded;
-        bc_textures_loaded += frame_telemetry.bc_textures_loaded;
-        max_pending_dirty_ids = max_pending_dirty_ids.max(pending_dirty_count(app));
-        frames += 1;
-    }
-
+    let settle_metrics = collect_settle_metrics(app, options)?;
     let spellbook_shown = is_spellbook_shown(app)?;
     if spellbook_shown != options.expect_visible {
         return Err(crate::Error::Other(format!(
@@ -137,14 +125,36 @@ fn benchmark_phase(app: &mut App, options: PhaseOptions) -> crate::Result<Benchm
         name: options.name,
         keypress_elapsed,
         settle_elapsed: settle_started.elapsed(),
-        tick_elapsed,
-        draw_elapsed,
-        frames,
-        textures_loaded,
-        bc_textures_loaded,
-        max_pending_dirty_ids,
+        tick_elapsed: settle_metrics.tick_elapsed,
+        draw_elapsed: settle_metrics.draw_elapsed,
+        frames: settle_metrics.frames,
+        textures_loaded: settle_metrics.textures_loaded,
+        bc_textures_loaded: settle_metrics.bc_textures_loaded,
+        max_pending_dirty_ids: settle_metrics.max_pending_dirty_ids,
         spellbook_shown,
     })
+}
+
+fn collect_settle_metrics(app: &mut App, options: PhaseOptions) -> crate::Result<SettleMetrics> {
+    let mut metrics = SettleMetrics::default();
+
+    while !is_quiescent(app) {
+        if metrics.frames >= MAX_SETTLE_FRAMES {
+            return Err(crate::Error::Other(format!(
+                "{} did not settle after {} frames",
+                options.name, MAX_SETTLE_FRAMES
+            )));
+        }
+        let (tick_dur, draw_dur, frame_telemetry) = run_benchmark_frame(app);
+        metrics.tick_elapsed += tick_dur;
+        metrics.draw_elapsed += draw_dur;
+        metrics.textures_loaded += frame_telemetry.textures_loaded;
+        metrics.bc_textures_loaded += frame_telemetry.bc_textures_loaded;
+        metrics.max_pending_dirty_ids = metrics.max_pending_dirty_ids.max(pending_dirty_count(app));
+        metrics.frames += 1;
+    }
+
+    Ok(metrics)
 }
 
 fn dispatch_keypress(app: &mut App, keypress: Option<&'static str>) -> Duration {
@@ -221,5 +231,17 @@ mod tests {
         assert_eq!(phase.name, "first_open");
         assert_eq!(phase.keypress, Some("S"));
         assert!(phase.expect_visible);
+    }
+
+    #[test]
+    fn settle_metrics_defaults_to_zero() {
+        let metrics = SettleMetrics::default();
+
+        assert_eq!(metrics.tick_elapsed, Duration::ZERO);
+        assert_eq!(metrics.draw_elapsed, Duration::ZERO);
+        assert_eq!(metrics.frames, 0);
+        assert_eq!(metrics.textures_loaded, 0);
+        assert_eq!(metrics.bc_textures_loaded, 0);
+        assert_eq!(metrics.max_pending_dirty_ids, 0);
     }
 }
