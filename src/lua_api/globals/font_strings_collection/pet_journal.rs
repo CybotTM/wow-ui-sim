@@ -68,17 +68,36 @@ fn push_pet_info(state: &mut LuaState, pet: PetInfoSnapshot) -> u32 {
     state.push(name);
     state.push(Val::Num(pet.icon as f64));
     state.push(Val::Num(pet.pet_type as f64));
-    state.push(Val::Num(pet.species_id as f64));
     10
+}
+
+fn find_pet_by_index(state: &LuaState, index: i32) -> Option<PetInfoSnapshot> {
+    let st = borrow_state(state).ok()?;
+    let pet_index = (index - 1) as usize;
+    st.world.pets.get(pet_index).map(PetInfoSnapshot::from_pet)
+}
+
+fn find_pet_by_pet_id(state: &LuaState, pet_id: &str) -> Option<PetInfoSnapshot> {
+    let st = borrow_state(state).ok()?;
+    st.world
+        .pets
+        .iter()
+        .find(|pet| pet.pet_id == pet_id)
+        .map(PetInfoSnapshot::from_pet)
+}
+
+fn find_pet_by_species_id(state: &LuaState, species_id: u32) -> Option<PetInfoSnapshot> {
+    let st = borrow_state(state).ok()?;
+    st.world
+        .pets
+        .iter()
+        .find(|pet| pet.species_id == species_id)
+        .map(PetInfoSnapshot::from_pet)
 }
 
 fn pet_get_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
     let index = i32::from_stack(state, 1)?;
-    let pet = {
-        let st = borrow_state(state)?;
-        let pet_index = (index - 1) as usize;
-        st.world.pets.get(pet_index).map(PetInfoSnapshot::from_pet)
-    };
+    let pet = find_pet_by_index(state, index);
     let Some(pet) = pet else {
         return Ok(0);
     };
@@ -92,35 +111,13 @@ fn pet_get_info_by_pet_id(state: &mut LuaState) -> LuaResult<u32> {
             let Some(pet_id) = val_to_string(state, value) else {
                 return Ok(0);
             };
-            let pet = {
-                let st = borrow_state(state)?;
-                st.world
-                    .pets
-                    .iter()
-                    .find(|pet| pet.pet_id == pet_id)
-                    .map(PetInfoSnapshot::from_pet)
-            };
-            if pet.is_some() {
-                pet
-            } else {
-                pet_id.parse::<u32>().ok().and_then(|species_id| {
-                    let st = borrow_state(state).ok()?;
-                    st.world
-                        .pets
-                        .iter()
-                        .find(|pet| pet.species_id == species_id)
-                        .map(PetInfoSnapshot::from_pet)
-                })
-            }
+            let species_id = pet_id.parse::<u32>().ok();
+            let pet = find_pet_by_pet_id(state, &pet_id);
+            pet.or_else(|| {
+                species_id.and_then(|species_id| find_pet_by_species_id(state, species_id))
+            })
         }
-        Val::Num(species_id) => {
-            let st = borrow_state(state)?;
-            st.world
-                .pets
-                .iter()
-                .find(|pet| pet.species_id == species_id as u32)
-                .map(PetInfoSnapshot::from_pet)
-        }
+        Val::Num(species_id) => find_pet_by_species_id(state, species_id as u32),
         _ => return Ok(0),
     };
     let Some(pet) = pet else {
@@ -131,14 +128,7 @@ fn pet_get_info_by_pet_id(state: &mut LuaState) -> LuaResult<u32> {
 
 fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     let species_id = u32::from_stack(state, 1)?;
-    let pet = {
-        let st = borrow_state(state)?;
-        st.world
-            .pets
-            .iter()
-            .find(|pet| pet.species_id == species_id)
-            .map(PetInfoSnapshot::from_pet)
-    };
+    let pet = find_pet_by_species_id(state, species_id);
     let Some(pet) = pet else {
         return Ok(0);
     };
