@@ -270,23 +270,27 @@ fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
     }
     apply_glue_screen_visibility(env, screen);
     if screen == ScreenKind::CharacterSelect {
-        let _ = env.exec(
-            r#"
-            if type(CharacterSelect) == "table"
-                and type(CharacterSelect.OnLoad) == "function"
-                and CharacterSelectCharacterFrame == nil
-            then
-                CharacterSelect:OnLoad()
-            end
-            "#,
-        );
+        prime_character_select_frame(env);
     }
     env.state().borrow_mut().screen_first_displayed = true;
     fire_simple_event(env, "SCREEN_FIRST_DISPLAYED");
     fire_simple_event(env, "LOGIN_STATE_CHANGED");
 }
 
-fn refresh_character_select_screen(env: &WowLuaEnv) {
+fn prime_character_select_frame(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(CharacterSelect) == "table"
+            and type(CharacterSelect.OnLoad) == "function"
+            and CharacterSelectCharacterFrame == nil
+        then
+            CharacterSelect:OnLoad()
+        end
+        "#,
+    );
+}
+
+fn alias_character_select_globals(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
         if type(CharacterSelectUI) == "table"
@@ -300,22 +304,13 @@ fn refresh_character_select_screen(env: &WowLuaEnv) {
                 CharSelectCharacterName = CharacterSelectUI.VisibilityFramesContainer.CharSelectCharacterName
             end
         end
-        if type(CharacterSelect) == "table"
-            and type(CharacterSelect.OnLoad) == "function"
-            and not rawget(_G, "__wow_character_select_frame_onload_ran") then
-            pcall(function()
-                CharacterSelect:OnLoad()
-            end)
-            rawset(_G, "__wow_character_select_frame_onload_ran", true)
-        end
-        if type(CharacterSelect) == "table"
-            and type(CharacterSelect.OnShow) == "function"
-            and not rawget(_G, "__wow_character_select_frame_onshow_ran") then
-            pcall(function()
-                CharacterSelect:OnShow()
-            end)
-            rawset(_G, "__wow_character_select_frame_onshow_ran", true)
-        end
+        "#,
+    );
+}
+
+fn refresh_character_select_roster(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
         if type(CharacterSelectListUtil) == "table"
             and type(CharacterSelectListUtil.BuildCharIndexToIDMapping) == "function" then
             pcall(function()
@@ -340,6 +335,28 @@ fn refresh_character_select_screen(env: &WowLuaEnv) {
         end
         "#,
     );
+}
+
+fn show_character_select_frame(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(CharacterSelect) == "table"
+            and type(CharacterSelect.OnShow) == "function"
+            and not rawget(_G, "__wow_character_select_frame_onshow_ran") then
+            pcall(function()
+                CharacterSelect:OnShow()
+            end)
+            rawset(_G, "__wow_character_select_frame_onshow_ran", true)
+        end
+        "#,
+    );
+}
+
+fn refresh_character_select_screen(env: &WowLuaEnv) {
+    alias_character_select_globals(env);
+    prime_character_select_frame(env);
+    show_character_select_frame(env);
+    refresh_character_select_roster(env);
 }
 
 fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
