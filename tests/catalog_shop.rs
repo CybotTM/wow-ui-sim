@@ -296,7 +296,7 @@ fn catalog_shop_debug_header_set_categories_numeric_trace() {
     );
 
     env.exec_rilua_secure(
-        r#"
+        r##"
         __catalog_shop_numeric_trace_hits = {}
 
         local function wrap_nil_first_arg(tbl, method_name)
@@ -318,7 +318,7 @@ fn catalog_shop_debug_header_set_categories_numeric_trace() {
         wrap_nil_first_arg(ScrollBoxBaseMixin, "ScrollTo")
         wrap_nil_first_arg(ScrollBoxBaseMixin, "ScrollPercentage")
         wrap_nil_first_arg(ScrollBoxListMixin, "GetElementExtent")
-        "#,
+        "##,
     )
     .expect("should install header trace wrappers");
 
@@ -358,7 +358,7 @@ fn catalog_shop_debug_header_set_categories_numeric_trace() {
 }
 
 #[test]
-fn catalog_shop_seeded_refresh_reports_nil_numeric_c_api_calls() {
+fn catalog_shop_debug_header_set_categories_securecall_trace() {
     let env = load_full_game_ui();
 
     let (loaded, reason): (bool, Option<String>) = env
@@ -370,52 +370,103 @@ fn catalog_shop_seeded_refresh_reports_nil_numeric_c_api_calls() {
     );
 
     env.exec_rilua_secure(
-        r##"
+        r#"
+        __catalog_shop_securecall_traces = {}
+        local original_securecallfunction = securecallfunction
+        securecallfunction = function(func, ...)
+            local packed = table.pack(...)
+            local ok, result = xpcall(function()
+                return original_securecallfunction(func, unpack(packed, 1, packed.n))
+            end, debug.traceback)
+            if not ok then
+                table.insert(__catalog_shop_securecall_traces, result)
+                return nil
+            end
+            return result
+        end
+        "#,
+    )
+    .expect("should wrap securecallfunction");
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.lua_errors.clear();
+        state.lua_error_records.clear();
+        state.lua_error_counts.clear();
+    }
+
+    env.exec_rilua_secure(
+        r#"
+        local category_ids = C_CatalogShop.GetAvailableCategoryIDs()
+        CatalogShopFrame.HeaderFrame:SetCategories(category_ids)
+        "#,
+    )
+    .expect("CatalogShop header categories should run");
+
+    let traces: Vec<String> = env
+        .eval("return __catalog_shop_securecall_traces")
+        .expect("securecall traces should be readable");
+    let targeted: Vec<String> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .clone()
+        .into_iter()
+        .filter(|message| message.contains("expected number, got nil at argument 1"))
+        .collect();
+
+    assert!(
+        targeted.is_empty(),
+        "CatalogShop header categories still emit numeric errors.\nsecurecall traces:\n{}\nerrors:\n{}",
+        traces.join("\n---\n"),
+        targeted.join("\n")
+    );
+}
+
+#[test]
+fn catalog_shop_seeded_refresh_reports_nil_numeric_c_api_calls() {
+    let env = load_full_game_ui();
+
+    let (loaded, reason): (bool, Option<String>) = env
+        .eval("return LoadAddOn('Blizzard_CatalogShop')")
+        .expect("LoadAddOn('Blizzard_CatalogShop') should return");
+    assert!(
+        loaded,
+        "Blizzard_CatalogShop should load successfully: reason={reason:?}"
+    );
+
+        env.exec_rilua_secure(
+            r##"
         local bad_calls = {}
         local original = {}
-        local names = {
-            "GetCategoryInfo",
-            "GetProductInfo",
-            "GetCatalogShopProductDisplayInfo",
-            "GetProductIDsForCategory",
-            "GetProductIDsForCategorySection",
-            "GetProductSortOrder",
-            "GetProductAvailabilityTimeRemainingSecs",
-            "GetProductIDsForBundle",
-            "GetFirstCategoryByProductID",
-            "ProductDisplayedTelemetry",
-            "GetCategorySectionInfo",
-        }
-
-        for _, name in ipairs(names) do
-            local fn = C_CatalogShop[name]
-            if type(fn) == "function" then
-                original[name] = fn
-                C_CatalogShop[name] = function(...)
-                    if select("#", ...) >= 1 and select(1, ...) == nil then
-                        table.insert(bad_calls, name)
+        local function wrap_table_functions(table_name, table_value)
+            if type(table_value) ~= "table" then
+                return
+            end
+            for name, fn in pairs(table_value) do
+                if type(fn) == "function" then
+                    original[table_name .. "." .. name] = fn
+                    table_value[name] = function(...)
+                        if select("#", ...) >= 1 and select(1, ...) == nil then
+                            table.insert(bad_calls, table_name .. "." .. name)
+                        end
+                        return fn(...)
                     end
-                    return fn(...)
                 end
             end
         end
 
-        if type(CatalogShopOutbound) == "table" then
-            for _, name in ipairs({
-                "SavedSet_IsLoaded",
-                "SavedSet_HasAny",
-                "SavedSet_Set",
-                "SavedSet_Check",
-            }) do
-                local fn = CatalogShopOutbound[name]
-                if type(fn) == "function" then
-                    original["outbound_" .. name] = fn
-                    CatalogShopOutbound[name] = function(...)
-                        if select("#", ...) >= 1 and select(1, ...) == nil then
-                            table.insert(bad_calls, "CatalogShopOutbound." .. name)
-                        end
-                        return fn(...)
+        wrap_table_functions("C_CatalogShop", C_CatalogShop)
+        wrap_table_functions("CatalogShopOutbound", CatalogShopOutbound)
+
+        for name, fn in pairs(_G) do
+            if type(fn) == "function" and name:match("^SavedSet_") then
+                original["global_" .. name] = fn
+                _G[name] = function(...)
+                    if select("#", ...) >= 1 and select(1, ...) == nil then
+                        table.insert(bad_calls, "global." .. name)
                     end
+                    return fn(...)
                 end
             end
         end
