@@ -9,6 +9,8 @@
 //!   (bag container slots are the same equipment slot range covered by
 //!    `PickupInventoryItem`; this is a named alias for the bag slots 20-23)
 //! - `PickupMerchantItem(index)`      — merchant row → cursor (synthesized)
+//! - `PutItemInBackpack()`            — cursor item → backpack slot 1-16
+//! - `PutItemInBag(slot)`             — cursor item → equipped bag slot
 //! - `EquipCursorItem(slot)`          — cursor → equip slot
 //! - `DeleteCursorItem()`             — clears cursor
 //! - `PlaceAction(slot)`              — cursor spell/action → action bar slot
@@ -51,6 +53,39 @@ fn fire_named_event(state: &mut LuaState, event_name: &str) {
 
 fn action_spell_id(state: &mut LuaState, slot: u32) -> Option<u32> {
     borrow_state(state).ok()?.action_bars.get(&slot).copied()
+}
+
+fn place_cursor_item_in_backpack(state: &mut LuaState) -> LuaResult<u32> {
+    {
+        let Ok(mut st) = borrow_state_mut(state) else {
+            return Ok(0);
+        };
+        let Some(cursor) = st.cursor_item.clone() else {
+            return Ok(0);
+        };
+        let CursorInfo::Item {
+            item_id,
+            stack_count,
+            ..
+        } = cursor
+        else {
+            return Ok(0);
+        };
+        let Some(slot) = (1..=16).find(|slot| !st.bag_items.contains_key(&(0, *slot))) else {
+            return Ok(0);
+        };
+        st.bag_items.insert(
+            (0, slot),
+            crate::lua_api::state::BagItem {
+                item_id,
+                stack_count,
+            },
+        );
+        st.cursor_item = None;
+    }
+    fire_named_event(state, "CURSOR_CHANGED");
+    state.push(Val::Bool(true));
+    Ok(1)
 }
 
 /// `PickupContainerItem(bag, slot)` — take an item out of a bag slot and
@@ -182,6 +217,24 @@ fn pickup_merchant_item(state: &mut LuaState) -> LuaResult<u32> {
         origin: CursorItemOrigin::Merchant { index },
     });
     Ok(0)
+}
+
+/// `PutItemInBackpack()` — move a cursor item into the first free backpack
+/// slot. Silent no-op for non-item cursors or when the backpack is full.
+fn put_item_in_backpack(state: &mut LuaState) -> LuaResult<u32> {
+    place_cursor_item_in_backpack(state)
+}
+
+/// `PutItemInBag(slot)` — move a cursor item into an equipped bag slot.
+/// The sim only models the backpack, so non-backpack bags are a no-op.
+fn put_item_in_bag(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(bag_slot) = stack_i32(state, 1) else {
+        return Ok(0);
+    };
+    if bag_slot != 0 {
+        return Ok(0);
+    }
+    place_cursor_item_in_backpack(state)
 }
 
 /// `EquipCursorItem(slot)` — write the cursor's item into `equipped_items[slot]`.
@@ -326,6 +379,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetActionTexture", get_action_texture)?;
     LuaApiMut::register_function(lua, "GetActionInfo", get_action_info)?;
     LuaApiMut::register_function(lua, "PickupMerchantItem", pickup_merchant_item)?;
+    LuaApiMut::register_function(lua, "PutItemInBackpack", put_item_in_backpack)?;
+    LuaApiMut::register_function(lua, "PutItemInBag", put_item_in_bag)?;
     LuaApiMut::register_function(lua, "EquipCursorItem", equip_cursor_item)?;
     LuaApiMut::register_function(lua, "DeleteCursorItem", delete_cursor_item)?;
     LuaApiMut::register_function(lua, "ClearCursor", clear_cursor)?;

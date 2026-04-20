@@ -93,6 +93,48 @@ fn pickup_merchant_item_synthesizes_item_on_cursor() {
 }
 
 #[test]
+fn put_item_in_backpack_returns_false_without_item_cursor() {
+    let env = env();
+
+    let returned: bool = env
+        .eval("return PutItemInBackpack() and true or false")
+        .unwrap();
+    assert!(
+        !returned,
+        "PutItemInBackpack should be falsey when there is nothing on the cursor"
+    );
+}
+
+#[test]
+fn put_item_in_backpack_moves_item_cursor_into_backpack() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.cursor_item = Some(CursorInfo::Item {
+            item_id: 6948,
+            stack_count: 1,
+            origin: CursorItemOrigin::Unknown,
+        });
+    }
+
+    let returned: bool = env
+        .eval("return PutItemInBackpack() and true or false")
+        .unwrap();
+    assert!(
+        returned,
+        "PutItemInBackpack should report success for item cursors"
+    );
+
+    let st = env.state().borrow();
+    assert!(st.cursor_item.is_none(), "cursor item should be consumed");
+    assert_eq!(
+        st.bag_items.get(&(0, 1)).map(|item| item.item_id),
+        Some(6948),
+        "first backpack slot should receive the moved item"
+    );
+}
+
+#[test]
 fn cursor_has_item_tracks_item_cursor_only() {
     let env = env();
 
