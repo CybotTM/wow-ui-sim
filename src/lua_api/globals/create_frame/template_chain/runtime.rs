@@ -125,13 +125,17 @@ fn finalize_runtime_template_child(
     child_name: &str,
     subst_parent: &str,
     frame: &crate::xml::FrameXml,
-    inherited_chain: Option<&str>,
+    _inherited_chain: Option<&str>,
 ) -> LuaResult<()> {
     let child_subst = child_runtime_subst(frame, child_name, subst_parent);
     apply_runtime_child_direct_properties(state_rc, child_id, frame, child_subst);
     ensure_runtime_button_texture_slots(state, child_id, frame)?;
     create_template_child_frames(state, state_rc, child_id, child_name, child_subst, frame)?;
-    apply_runtime_template_loader_effects(state, child_name, child_subst, frame, inherited_chain)?;
+    // `apply_runtime_template_chain()` already loaded inherited layers/extras
+    // onto the runtime child. The finalize pass should only apply the
+    // child frame's own direct loader-backed content or it duplicates named
+    // inherited regions (for example `$parentBackground`).
+    apply_runtime_template_loader_effects(state, child_name, child_subst, frame, None)?;
     crate::lua_api::globals::template::repair_direct_child_parent_keys(state, child_id)?;
     fire_frame_on_load(state, child_id)
 }

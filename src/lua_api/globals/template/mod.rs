@@ -75,7 +75,7 @@ fn infer_parent_key_from_child_name(
 ) -> Option<String> {
     let parent_name = parent_name?;
     let child_name = child_name?;
-    [
+    let special_case = [
         ("Check", "CheckButton"),
         ("CheckButton", "CheckButton"),
         ("Checkbox", "CheckButton"),
@@ -83,6 +83,13 @@ fn infer_parent_key_from_child_name(
     .into_iter()
     .find_map(|(suffix, key)| {
         (child_name == format!("{parent_name}{suffix}")).then(|| key.to_string())
+    });
+
+    special_case.or_else(|| {
+        child_name
+            .strip_prefix(parent_name)
+            .filter(|suffix| !suffix.is_empty())
+            .map(str::to_string)
     })
 }
 
