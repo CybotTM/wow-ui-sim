@@ -14,6 +14,17 @@ const MAX_OUTFITS: i32 = 20;
 
 pub(super) fn register_transmog_collection_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_TransmogCollection")?;
+    register_transmog_collection_appearance_queries(state, table_ref)?;
+    register_transmog_collection_category_queries(state, table_ref)?;
+    register_transmog_collection_flags(state, table_ref)?;
+    register_transmog_collection_outfits(state, table_ref)?;
+    Ok(())
+}
+
+fn register_transmog_collection_appearance_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -46,6 +57,13 @@ pub(super) fn register_transmog_collection_surface(state: &mut LuaState) -> LuaR
         "GetAllAppearanceSources",
         get_all_appearance_sources,
     )?;
+    Ok(())
+}
+
+fn register_transmog_collection_category_queries(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -54,6 +72,13 @@ pub(super) fn register_transmog_collection_surface(state: &mut LuaState) -> LuaR
     )?;
     table_set_rust_fn_static(state, table_ref, "GetCategoryInfo", get_category_info)?;
     table_set_rust_fn_static(state, table_ref, "PlayerKnowsSource", player_knows_source)?;
+    Ok(())
+}
+
+fn register_transmog_collection_flags(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -72,6 +97,13 @@ pub(super) fn register_transmog_collection_surface(state: &mut LuaState) -> LuaR
         "GetShowMissingSourceInItemTooltips",
         get_show_missing_source_in_item_tooltips,
     )?;
+    Ok(())
+}
+
+fn register_transmog_collection_outfits(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetIllusions", get_illusions)?;
     table_set_rust_fn_static(state, table_ref, "GetOutfits", get_outfits)?;
     table_set_rust_fn_static(state, table_ref, "GetNumMaxOutfits", get_num_max_outfits)?;
