@@ -164,15 +164,28 @@ fn emit_horiz_tiled_line_quads(
     let bottom = base_uvs[1][1];
 
     let mut offset = 0.0_f32;
+    // Adjacent rotated quads can show tiny raster cracks at tile joins due to
+    // floating-point edge coverage. A small overlap hides those seams.
+    let join_overlap = 0.5_f32;
     while offset < len - 0.001 {
         let seg_len = (len - offset).min(tile_len);
         let u_ratio = (seg_len / tile_len).clamp(0.0, 1.0);
         let seg_right = left + (right - left) * u_ratio;
-        let seg_start = (start.0 + ux * offset, start.1 + uy * offset);
-        let seg_end = (
-            start.0 + ux * (offset + seg_len),
-            start.1 + uy * (offset + seg_len),
+        let seg_start_offset = if offset > 0.0 {
+            (offset - join_overlap).max(0.0)
+        } else {
+            0.0
+        };
+        let seg_end_offset = if offset + seg_len < len {
+            (offset + seg_len + join_overlap).min(len)
+        } else {
+            len
+        };
+        let seg_start = (
+            start.0 + ux * seg_start_offset,
+            start.1 + uy * seg_start_offset,
         );
+        let seg_end = (start.0 + ux * seg_end_offset, start.1 + uy * seg_end_offset);
         let positions = [
             [seg_start.0 + px, seg_start.1 + py],
             [seg_start.0 - px, seg_start.1 - py],
