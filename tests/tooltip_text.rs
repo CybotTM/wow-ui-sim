@@ -1,3 +1,8 @@
+#[path = "tooltip_full_env_helpers.rs"]
+mod tooltip_full_env_helpers;
+
+use tooltip_full_env_helpers::setup_full_env;
+use wow_ui_sim::iced_app::compute_frame_rect;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 // --- GetLeftLine / GetRightLine tests ---
@@ -514,16 +519,18 @@ fn test_tooltip_height_grows_with_lines() {
 
 #[test]
 fn test_tooltip_nineslice_child_accessible() {
-    let env = WowLuaEnv::new().unwrap();
+    let env = setup_full_env();
 
-    // Verify NineSlice exists in Rust children_keys
-    let ns_exists_rust = {
+    let (gt_id, ns_id) = {
         let state = env.state().borrow();
         let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
         let frame = state.widgets.get(gt_id).unwrap();
-        frame.children_keys.contains_key("NineSlice")
+        let ns_id = *frame
+            .children_keys
+            .get("NineSlice")
+            .expect("NineSlice should be in Rust children_keys");
+        (gt_id, ns_id)
     };
-    assert!(ns_exists_rust, "NineSlice should be in Rust children_keys");
 
     let has_ns: bool = env.eval("return GameTooltip.NineSlice ~= nil").unwrap();
     assert!(
@@ -535,6 +542,42 @@ fn test_tooltip_nineslice_child_accessible() {
         .eval("return GameTooltip.NineSlice:GetObjectType()")
         .unwrap();
     assert_eq!(obj_type, "Frame", "NineSlice child should be a Frame");
+
+    let ns_num_points: i32 = env
+        .eval("return GameTooltip.NineSlice:GetNumPoints()")
+        .unwrap();
+    assert!(
+        ns_num_points >= 2,
+        "GameTooltip.NineSlice should use fill-parent anchors, got {ns_num_points} points"
+    );
+
+    let state = env.state().borrow();
+    let tooltip_rect = compute_frame_rect(&state.widgets, gt_id, 1024.0, 768.0);
+    let nine_slice_rect = compute_frame_rect(&state.widgets, ns_id, 1024.0, 768.0);
+    assert!(
+        (nine_slice_rect.x - tooltip_rect.x).abs() < 1.0,
+        "GameTooltip.NineSlice x {} should match tooltip x {}",
+        nine_slice_rect.x,
+        tooltip_rect.x
+    );
+    assert!(
+        (nine_slice_rect.y - tooltip_rect.y).abs() < 1.0,
+        "GameTooltip.NineSlice y {} should match tooltip y {}",
+        nine_slice_rect.y,
+        tooltip_rect.y
+    );
+    assert!(
+        (nine_slice_rect.width - tooltip_rect.width).abs() < 1.0,
+        "GameTooltip.NineSlice width {} should match tooltip width {}",
+        nine_slice_rect.width,
+        tooltip_rect.width
+    );
+    assert!(
+        (nine_slice_rect.height - tooltip_rect.height).abs() < 1.0,
+        "GameTooltip.NineSlice height {} should match tooltip height {}",
+        nine_slice_rect.height,
+        tooltip_rect.height
+    );
 }
 
 #[test]

@@ -253,7 +253,9 @@ pub fn build_tooltip_quads(
     let data = tooltip.tooltip_data.and_then(|map| map.get(&tooltip.id));
     let Some(data) = data else { return };
 
-    emit_tooltip_background(tooltip.batch, tooltip.bounds, tooltip.eff_alpha);
+    if tooltip.draw_background {
+        emit_tooltip_background(tooltip.batch, tooltip.bounds, tooltip.eff_alpha);
+    }
 
     let Some((font_sys, glyph_atlas)) = text_ctx else {
         return;
@@ -342,6 +344,7 @@ pub struct TooltipRender<'a> {
     pub tooltip_data: Option<&'a HashMap<u64, TooltipRenderData>>,
     pub id: u64,
     pub eff_alpha: f32,
+    pub draw_background: bool,
 }
 
 struct TooltipTextRenderer<'a> {
@@ -559,6 +562,7 @@ mod tests {
                 tooltip_data: Some(&tooltip_data),
                 id: 42,
                 eff_alpha: 1.0,
+                draw_background: true,
             },
             &mut text_ctx,
         );
@@ -694,6 +698,49 @@ mod tests {
         assert!(
             top_inset >= 15.0,
             "glyphs should start at or inside the 15px top inset: glyphs={glyph_bounds:?} border={border_bounds:?}"
+        );
+    }
+
+    #[test]
+    fn tooltip_renderer_skips_fallback_background_when_lua_nineslice_exists() {
+        let data = TooltipRenderData {
+            lines: vec![TooltipLineRender {
+                left_text: "Header".to_string(),
+                left_color: [1.0, 1.0, 1.0, 1.0],
+                right_text: None,
+                right_color: [1.0, 1.0, 1.0, 1.0],
+                font_size: TOOLTIP_HEADER_FONT_SIZE,
+                wrap: false,
+                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            }],
+            line_spacing: TOOLTIP_LINE_SPACING,
+        };
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut glyph_atlas = GlyphAtlas::new();
+        let tooltip_data = HashMap::from([(42_u64, data)]);
+        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds: Rectangle::new(Point::new(100.0, 200.0), Size::new(80.0, 47.0)),
+                tooltip_data: Some(&tooltip_data),
+                id: 42,
+                eff_alpha: 1.0,
+                draw_background: false,
+            },
+            &mut text_ctx,
+        );
+
+        assert!(
+            batch.texture_requests.is_empty(),
+            "Lua-owned tooltip NineSlice should suppress Rust fallback background requests"
+        );
+        assert!(
+            glyph_bounds(&batch).is_some(),
+            "Skipping the fallback background must still render tooltip text"
         );
     }
 }

@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-20] ingest | tooltip double shell
+
+Added `investigations/tooltip-double-shell.md` to capture the duplicate
+tooltip chrome bug. Documented the two-layer root cause: a bootstrap-created
+fake `NineSlice` surface on the Lua side plus an unconditional Rust fallback
+tooltip background. Recorded the fix: remove the bootstrap injection, repair
+tooltip `NineSlice` post-load with the real template-backed surface, and gate
+the Rust fallback shell on whether the frame already owns `NineSlice`.
+
 ## [2026-04-20] update | blizzard ui test lanes
 
 Added `reference/blizzard-ui-test-lanes.md` and updated

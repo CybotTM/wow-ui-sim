@@ -98,6 +98,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_game_time_defaults", || {
         patch_game_time_defaults(env);
     });
+    log_step(env, "patch_tooltip_nineslice_surface", || {
+        patch_tooltip_nineslice_surface(env);
+    });
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
@@ -580,6 +583,41 @@ fn patch_game_time_defaults(env: &crate::lua_api::WowLuaEnv) {
         if type(GameTimeFrame) == "table" and GameTimeFrame.pendingCalendarInvites == nil then
             GameTimeFrame.pendingCalendarInvites = 0
         end
+        "#,
+    );
+}
+
+fn patch_tooltip_nineslice_surface(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        local function ensure_tooltip_nineslice(tooltip)
+            if type(tooltip) ~= "table" or tooltip.NineSlice ~= nil then
+                return
+            end
+
+            if type(CreateFrame) ~= "function" or type(NineSliceUtil) ~= "table" then
+                return
+            end
+
+            local nineSlice = CreateFrame("Frame", nil, tooltip, "NineSlicePanelTemplate")
+            if nineSlice == nil then
+                return
+            end
+
+            tooltip.NineSlice = nineSlice
+            if type(nineSlice.SetParentKey) == "function" then
+                pcall(nineSlice.SetParentKey, nineSlice, "NineSlice", true)
+            end
+            if type(NineSliceUtil.DisableSharpening) == "function" then
+                NineSliceUtil.DisableSharpening(nineSlice)
+            end
+            if type(SharedTooltip_SetBackdropStyle) == "function" then
+                pcall(SharedTooltip_SetBackdropStyle, tooltip, nil, false)
+            end
+        end
+
+        ensure_tooltip_nineslice(GameTooltip)
+        ensure_tooltip_nineslice(GlueTooltip)
         "#,
     );
 }

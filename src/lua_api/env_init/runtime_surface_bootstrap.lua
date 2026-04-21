@@ -1303,16 +1303,6 @@ end
 
 if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
   __wow_original_CreateFrame = CreateFrame
-  local function __wow_ensure_tooltip_nineslice(tooltip)
-    if type(tooltip) ~= "table" or tooltip.NineSlice ~= nil or CreateFrame == nil then
-      return tooltip
-    end
-    local nineSlice = CreateFrame("Frame", nil, tooltip)
-    if nineSlice ~= nil and type(nineSlice.SetParentKey) == "function" then
-      pcall(nineSlice.SetParentKey, nineSlice, "NineSlice", true)
-    end
-    return tooltip
-  end
 
   function CreateFrame(...)
     local frameType = select(1, ...)
@@ -1326,7 +1316,6 @@ if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
     local created = __wow_install_frame_helpers(__wow_original_CreateFrame(...))
     if frameType == "GameTooltip" and created and created.SetFrameStrata ~= nil then
       created:SetFrameStrata("TOOLTIP")
-      __wow_ensure_tooltip_nineslice(created)
     end
     if frameType == "ItemButton" then
       created = __wow_ensure_item_button_surface(created)
@@ -1339,8 +1328,6 @@ if CreateFrame ~= nil and __wow_original_CreateFrame == nil then
     end
     return created
   end
-
-  __wow_ensure_tooltip_nineslice(GameTooltip)
 end
 
 do

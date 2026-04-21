@@ -228,6 +228,7 @@ pub fn measure_tooltip_collect_and_quad_emission(env: &WowLuaEnv) -> Duration {
                 tooltip_data: Some(&tooltip_data),
                 id: tooltip_id,
                 eff_alpha: tooltip_frame.alpha,
+                draw_background: true,
             },
             &mut text_ctx,
         );
