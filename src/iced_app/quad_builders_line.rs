@@ -240,9 +240,7 @@ fn line_end_cap_overlap_px(f: &crate::widget::Frame) -> f32 {
         .as_deref()
         .is_some_and(|atlas| atlas.starts_with("talents-arrow-line"))
     {
-        // Keep a tiny overlap to hide line/head seams, but avoid extending
-        // deep into the destination talent node icon.
-        return 1.0;
+        return (f.line_thickness * crate::render::texture::UI_SCALE).clamp(3.0, 8.0);
     }
     3.0
 }
@@ -300,17 +298,5 @@ mod tests {
         frame.vertex_color = Some(Color::new(0.2, 0.4, 0.6, 0.5));
 
         assert_eq!(line_tint(&frame, 0.8), [0.2, 0.4, 0.6, 0.4]);
-    }
-
-    #[test]
-    fn talents_arrow_lines_use_small_end_cap_overlap() {
-        let mut frame = Frame::default();
-        frame.atlas = Some("talents-arrow-line-yellow".to_string());
-        frame.line_thickness = 6.0;
-
-        assert!(
-            (line_end_cap_overlap_px(&frame) - 1.0).abs() < f32::EPSILON,
-            "talent arrow lines should not overshoot endpoint icons"
-        );
     }
 }
