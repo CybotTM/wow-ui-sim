@@ -101,6 +101,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_tooltip_nineslice_surface", || {
         patch_tooltip_nineslice_surface(env);
     });
+    log_step(env, "patch_container_frame_token_tracker", || {
+        patch_container_frame_token_tracker(env);
+    });
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
@@ -212,6 +215,7 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     );
     refresh_character_frame_surface(env);
     patch_chat_voice_button_surface(env);
+    patch_objective_tracker_quest_header(env);
 }
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
@@ -622,6 +626,38 @@ fn patch_tooltip_nineslice_surface(env: &crate::lua_api::WowLuaEnv) {
     );
 }
 
+fn patch_container_frame_token_tracker(env: &crate::lua_api::WowLuaEnv) {
+    // Startup emits a consolidated ADDON_LOADED("WoWUISim") event after
+    // bootstrap. Bag setup expects Blizzard_TokenUI's per-addon callback to
+    // have initialized ContainerFrameSettingsManager.TokenTracker.
+    let _ = env.exec(
+        r#"
+        if type(ContainerFrameSettingsManager) ~= "table" then
+            return
+        end
+        if ContainerFrameSettingsManager.TokenTracker ~= nil then
+            return
+        end
+        if type(ContainerFrameSettingsManager.OnAddonLoaded) ~= "function" then
+            return
+        end
+
+        local tokenUiLoaded = false
+        if type(C_AddOns) == "table" and type(C_AddOns.IsAddOnLoaded) == "function" then
+            tokenUiLoaded = C_AddOns.IsAddOnLoaded("Blizzard_TokenUI")
+        end
+
+        if tokenUiLoaded then
+            pcall(
+                ContainerFrameSettingsManager.OnAddonLoaded,
+                ContainerFrameSettingsManager,
+                "Blizzard_TokenUI"
+            )
+        end
+        "#,
+    );
+}
+
 fn patch_paging_controls_page_text(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
 }
@@ -666,6 +702,80 @@ const PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA: &str = r#"
 
 fn patch_catalog_shop_product_card_defaults(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
+}
+
+fn patch_objective_tracker_quest_header(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        local function module_has_visible_contents(module)
+            if not module then
+                return false
+            end
+            if module.GetContentsHeight and module:GetContentsHeight() > 0 then
+                return true
+            end
+            local used = module.usedBlocks
+            if type(used) ~= "table" then
+                return false
+            end
+            for _, blocks in pairs(used) do
+                if type(blocks) == "table" and next(blocks) ~= nil then
+                    return true
+                end
+            end
+            return false
+        end
+
+        local function resolve_quest_header()
+            if QuestObjectiveTracker and QuestObjectiveTracker.Header then
+                return QuestObjectiveTracker.Header
+            end
+            local legacy = ObjectiveTrackerBlocksFrame and ObjectiveTrackerBlocksFrame.QuestHeader
+            if not legacy then
+                return nil
+            end
+            return legacy.Header or legacy
+        end
+
+        local module = QuestObjectiveTracker
+        local header = resolve_quest_header()
+        local textRegion = header and header.Text
+        if not textRegion then
+            return
+        end
+
+        if header.Show and module_has_visible_contents(module) and not header:IsShown() then
+            header:Show()
+        end
+
+        local text = textRegion.GetText and textRegion:GetText() or nil
+        if type(text) ~= "string" or text == "" then
+            local fallback = TRACKER_HEADER_QUESTS or QUESTS or "Quests"
+            textRegion:SetText(fallback)
+        end
+
+        if textRegion.Show and not textRegion:IsShown() then
+            textRegion:Show()
+        end
+
+        if textRegion.GetAlpha and textRegion.SetAlpha and textRegion:GetAlpha() <= 0 then
+            textRegion:SetAlpha(1)
+        end
+
+        if textRegion.GetTextColor and textRegion.SetTextColor then
+            local r, g, b = textRegion:GetTextColor()
+            local effectively_black = (r or 0) < 0.02 and (g or 0) < 0.02 and (b or 0) < 0.02
+            if effectively_black then
+                local color =
+                    (type(OBJECTIVE_TRACKER_COLOR) == "table" and OBJECTIVE_TRACKER_COLOR["Header"])
+                    or NORMAL_FONT_COLOR
+                if type(color) == "table" and color.r and color.g and color.b then
+                    textRegion:SetTextColor(color.r, color.g, color.b)
+                end
+            end
+        end
+    "#,
+    );
 }
 
 fn patch_fog_of_war_pin_mixin(env: &crate::lua_api::WowLuaEnv) {

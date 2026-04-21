@@ -87,6 +87,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_TimerunningUtil", "Blizzard_TimerunningUtil.toc"),
     ("Blizzard_Communities", "Blizzard_Communities_Mainline.toc"),
 ];
+const BLIZZARD_TOKEN_UI_ADDON: (&str, &str) = ("Blizzard_TokenUI", "Blizzard_TokenUI.toc");
 
 fn setup_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -111,6 +112,34 @@ fn setup_env() -> WowLuaEnv {
     load_token_ui(&env);
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
+    env
+}
+
+fn setup_env_with_bootstrap_loaded_token_ui() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+
+    let ui = blizzard_ui_dir();
+    for (name, toc) in BLIZZARD_ADDONS
+        .iter()
+        .copied()
+        .chain(std::iter::once(BLIZZARD_TOKEN_UI_ADDON))
+    {
+        let toc_path = ui.join(name).join(toc);
+        if !toc_path.exists() {
+            continue;
+        }
+        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+            eprintln!("[load {name}] FAILED: {e}");
+        }
+    }
+
+    env.apply_post_load_workarounds();
     env
 }
 
@@ -473,5 +502,48 @@ fn test_container_frame_1_item_1_icon_matches_first_bag_slot_item() {
             || result.starts_with("stale_name_button_slot_")
             || result.starts_with("stale_name_items_1_button_slot_"),
         "ContainerFrame1Item1 should either match bag slot 1 directly or prove the plan wording is stale through the real item-button list: {result}"
+    );
+}
+
+#[test]
+fn test_toggle_backpack_bootstrap_token_ui_does_not_nil_error() {
+    let env = setup_env_with_bootstrap_loaded_token_ui();
+    install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
+
+    env.exec(
+        r#"
+        local ok, err = pcall(ToggleBackpack)
+        if not ok then
+            table.insert(__test_errors, "ToggleBackpack: " .. tostring(err))
+        end
+        "#,
+    )
+    .unwrap();
+
+    let handler_errors = drain_test_errors(&env);
+    let recorded_errors = common::panel_fixtures::recorded_lua_errors(&env);
+    assert!(
+        handler_errors.is_empty(),
+        "ToggleBackpack should not error with bootstrap-loaded TokenUI; got:\n{}",
+        handler_errors.join("\n"),
+    );
+    assert!(
+        recorded_errors.is_empty(),
+        "ToggleBackpack should not emit recorded Lua errors; got:\n{}",
+        recorded_errors.join("\n"),
+    );
+
+    let has_token_tracker: bool = env
+        .eval(
+            r#"
+            return type(ContainerFrameSettingsManager) == "table"
+                and ContainerFrameSettingsManager.TokenTracker ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_token_tracker,
+        "ContainerFrameSettingsManager.TokenTracker should be initialized",
     );
 }
