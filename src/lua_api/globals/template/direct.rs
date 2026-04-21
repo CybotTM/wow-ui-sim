@@ -112,7 +112,9 @@ fn resolve_relative_to(
                 .and_then(|pid| state.widgets.get(pid))
                 .and_then(|p| p.name.as_deref())
                 .unwrap_or(frame_name);
-            let resolved = rel.replace("$parent", parent_name).replace("$Parent", parent_name);
+            let resolved = rel
+                .replace("$parent", parent_name)
+                .replace("$Parent", parent_name);
             state.widgets.get_id_by_name(&resolved)
         }
         Some(rel) => state.widgets.get_id_by_name(rel),

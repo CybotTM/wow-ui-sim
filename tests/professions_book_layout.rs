@@ -19,14 +19,26 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
-    ("Blizzard_UIPanelTemplates", "Blizzard_UIPanelTemplates_Mainline.toc"),
-    ("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
     ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    ("Blizzard_AccessibilityTemplates", "Blizzard_AccessibilityTemplates.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
     ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
     ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
     ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
@@ -42,7 +54,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIParentPanelManager",
         "Blizzard_UIParentPanelManager_Mainline.toc",
     ),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared_Mainline.toc"),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
     (
         "Blizzard_SettingsDefinitions_Shared",
         "Blizzard_SettingsDefinitions_Shared.toc",
@@ -51,12 +66,21 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
-    ("Blizzard_MapCanvasSecureUtil", "Blizzard_MapCanvasSecureUtil.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+    (
+        "Blizzard_MapCanvasSecureUtil",
+        "Blizzard_MapCanvasSecureUtil.toc",
+    ),
     ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
     (
         "Blizzard_SharedMapDataProviders",
@@ -148,9 +172,18 @@ fn professions_book_primary_spell_buttons_layout() {
     let b2 = rect(&env, "PrimaryProfession1.SpellButton2");
     let primary = rect(&env, "PrimaryProfession1");
 
-    eprintln!("PrimaryProfession1 L={} B={} W={} H={}", primary.0, primary.1, primary.2, primary.3);
-    eprintln!("SpellButton1         L={} B={} W={} H={}", b1.0, b1.1, b1.2, b1.3);
-    eprintln!("SpellButton2         L={} B={} W={} H={}", b2.0, b2.1, b2.2, b2.3);
+    eprintln!(
+        "PrimaryProfession1 L={} B={} W={} H={}",
+        primary.0, primary.1, primary.2, primary.3
+    );
+    eprintln!(
+        "SpellButton1         L={} B={} W={} H={}",
+        b1.0, b1.1, b1.2, b1.3
+    );
+    eprintln!(
+        "SpellButton2         L={} B={} W={} H={}",
+        b2.0, b2.1, b2.2, b2.3
+    );
 
     assert!(b1.2 > 0.0 && b1.3 > 0.0, "SpellButton1 must have size");
     assert!(b2.2 > 0.0 && b2.3 > 0.0, "SpellButton2 must have size");
@@ -165,7 +198,8 @@ fn professions_book_primary_spell_buttons_layout() {
     assert!(
         (b1.0 - b2.0).abs() < 1.0,
         "SpellButton1 left ({}) should match SpellButton2 left ({})",
-        b1.0, b2.0
+        b1.0,
+        b2.0
     );
 
     let primary_right = primary.0 + primary.2;
@@ -185,9 +219,21 @@ fn professions_book_primary_spell_buttons_layout() {
     // PrimaryProfession1 L=96 B=537 W=437 H=81
     // SpellButton1       L=384 B=535 W=40 H=40
     // SpellButton2       L=384 B=575 W=40 H=40
-    assert_eq!(primary, (96.0, 537.0, 437.0, 81.0), "PrimaryProfession1 rect mismatch vs master");
-    assert_eq!(b1, (384.0, 535.0, 40.0, 40.0), "SpellButton1 rect mismatch vs master");
-    assert_eq!(b2, (384.0, 575.0, 40.0, 40.0), "SpellButton2 rect mismatch vs master");
+    assert_eq!(
+        primary,
+        (96.0, 537.0, 437.0, 81.0),
+        "PrimaryProfession1 rect mismatch vs master"
+    );
+    assert_eq!(
+        b1,
+        (384.0, 535.0, 40.0, 40.0),
+        "SpellButton1 rect mismatch vs master"
+    );
+    assert_eq!(
+        b2,
+        (384.0, 575.0, 40.0, 40.0),
+        "SpellButton2 rect mismatch vs master"
+    );
 
     // Rank status bar must show formatted "<rank>/<max>", never the raw
     // "%d/%d" format string. Regression for SetFormattedText writing the
