@@ -167,20 +167,30 @@ fn emit_horiz_tiled_line_quads(
     // Adjacent rotated quads can show tiny raster cracks at tile joins due to
     // floating-point edge coverage. A small overlap hides those seams.
     let join_overlap = 0.5_f32;
+    // Arrow connectors can also show a tiny gap where the line meets the
+    // arrow head. Extend the first/last segment slightly to hide that seam.
+    let start_cap_overlap = 1.0_f32;
+    let end_cap_overlap = line_end_cap_overlap_px(f);
     while offset < len - 0.001 {
         let seg_len = (len - offset).min(tile_len);
         let u_ratio = (seg_len / tile_len).clamp(0.0, 1.0);
         let seg_right = left + (right - left) * u_ratio;
-        let seg_start_offset = if offset > 0.0 {
+        let mut seg_start_offset = if offset > 0.0 {
             (offset - join_overlap).max(0.0)
         } else {
             0.0
         };
-        let seg_end_offset = if offset + seg_len < len {
+        let mut seg_end_offset = if offset + seg_len < len {
             (offset + seg_len + join_overlap).min(len)
         } else {
             len
         };
+        if offset <= f32::EPSILON {
+            seg_start_offset -= start_cap_overlap;
+        }
+        if offset + seg_len >= len - 0.001 {
+            seg_end_offset += end_cap_overlap;
+        }
         let seg_start = (
             start.0 + ux * seg_start_offset,
             start.1 + uy * seg_start_offset,
@@ -223,6 +233,16 @@ fn line_tile_length_px(f: &crate::widget::Frame) -> f32 {
         return f.width * crate::render::texture::UI_SCALE;
     }
     (f.line_thickness * crate::render::texture::UI_SCALE).max(1.0)
+}
+
+fn line_end_cap_overlap_px(f: &crate::widget::Frame) -> f32 {
+    if f.atlas
+        .as_deref()
+        .is_some_and(|atlas| atlas.starts_with("talents-arrow-line"))
+    {
+        return (f.line_thickness * crate::render::texture::UI_SCALE).clamp(3.0, 8.0);
+    }
+    3.0
 }
 
 /// Push 4 vertices and 6 indices for a line quad with arbitrary positions.
