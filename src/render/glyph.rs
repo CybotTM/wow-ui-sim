@@ -281,7 +281,10 @@ fn write_glyph_pixels(
             for y in 0..height {
                 for x in 0..width {
                     let src_idx = ((y * width + x) * 3) as usize;
-                    let alpha = data.get(src_idx).copied().unwrap_or(0);
+                    let r = data.get(src_idx).copied().unwrap_or(0);
+                    let g = data.get(src_idx + 1).copied().unwrap_or(0);
+                    let b = data.get(src_idx + 2).copied().unwrap_or(0);
+                    let alpha = subpixel_mask_alpha(r, g, b);
                     let dst_idx = (((cursor_y + y) * GLYPH_ATLAS_SIZE + cursor_x + x) * 4) as usize;
                     pixels[dst_idx] = 255;
                     pixels[dst_idx + 1] = 255;
@@ -291,6 +294,10 @@ fn write_glyph_pixels(
             }
         }
     }
+}
+
+fn subpixel_mask_alpha(r: u8, g: u8, b: u8) -> u8 {
+    ((r as u16 + g as u16 + b as u16) / 3) as u8
 }
 
 /// Shape text into a cosmic-text buffer and return total text height.
@@ -638,4 +645,17 @@ pub fn emit_text_quads(
 
     // Render main text
     emit(batch, glyph_atlas, font_system, color, 0.0, 0.0);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::subpixel_mask_alpha;
+
+    #[test]
+    fn subpixel_mask_alpha_averages_rgb_channels() {
+        assert_eq!(subpixel_mask_alpha(0, 0, 0), 0);
+        assert_eq!(subpixel_mask_alpha(255, 255, 255), 255);
+        assert_eq!(subpixel_mask_alpha(255, 0, 0), 85);
+        assert_eq!(subpixel_mask_alpha(0, 255, 128), 127);
+    }
 }
