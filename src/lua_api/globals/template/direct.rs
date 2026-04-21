@@ -100,10 +100,22 @@ fn resolve_relative_to(
 ) -> Option<u64> {
     match relative_to {
         Some(rel) if rel == "$parent" => state.widgets.get(frame_id).and_then(|f| f.parent_id),
-        Some(rel) => {
-            let resolved = rel.replace("$parent", frame_name);
+        Some(rel) if rel.contains("$parent") || rel.contains("$Parent") => {
+            // $parent in relativeTo refers to the anchoring frame's parent.
+            // Derive from frame_id so we don't depend on callers threading the
+            // correct parent name through every codepath (some runtime template
+            // paths pass the frame's own name instead of its parent's).
+            let parent_name = state
+                .widgets
+                .get(frame_id)
+                .and_then(|f| f.parent_id)
+                .and_then(|pid| state.widgets.get(pid))
+                .and_then(|p| p.name.as_deref())
+                .unwrap_or(frame_name);
+            let resolved = rel.replace("$parent", parent_name).replace("$Parent", parent_name);
             state.widgets.get_id_by_name(&resolved)
         }
+        Some(rel) => state.widgets.get_id_by_name(rel),
         None => state.widgets.get(frame_id).and_then(|f| f.parent_id),
     }
 }
