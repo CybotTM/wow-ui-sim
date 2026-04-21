@@ -2,12 +2,39 @@
 
 use std::path::PathBuf;
 
+use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::shader::load_texture_or_crop;
 use wow_ui_sim::texture::TextureManager;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+fn env_with_full_ui() -> WowLuaEnv {
+    let env = env();
+    env.set_screen_size(1024.0, 768.0);
+
+    let ui = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![ui.clone()];
+    }
+
+    let addons = discover_blizzard_addons(&ui);
+    for (name, toc_path) in &addons {
+        if let Err(e) = load_addon(&env.loader_env(), toc_path) {
+            eprintln!("[load {name}] FAILED: {e}");
+        }
+    }
+
+    env.apply_post_load_workarounds();
+    wow_ui_sim::startup::fire_startup_events(&env);
+    env.apply_post_event_workarounds();
+    wow_ui_sim::startup::process_pending_timers(&env);
+    wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+    env
 }
 
 #[test]
@@ -302,5 +329,70 @@ fn test_active_hero_subtree_exposes_multiple_visible_nodes_and_edges() {
     assert!(
         parts[2] >= 2,
         "unexpected edge-ready hero node count: {result}"
+    );
+}
+
+#[test]
+fn test_non_selectable_hero_nodes_do_not_show_selectable_glow() {
+    let env = env_with_full_ui();
+    let result: String = env
+        .eval(
+            r#"
+            C_ClassTalents.SwitchToSpecializationByName("Protection")
+            local ok = C_Traits.SetSelection(1, 99838, 123361) -- Lightsmith
+            assert(ok, "expected deterministic hero subtree selection")
+            assert(C_ClassTalents.GetActiveHeroTalentSpec() == 49, "expected active subtree 49")
+
+            assert(PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab, "expected class talents UI helper")
+            PlayerSpellsUtil.OpenToClassTalentsTab()
+
+            local frame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+            assert(frame and frame.EnumerateAllTalentButtons, "expected class talents frame")
+
+            local selectable = 0
+            local nonSelectable = 0
+            local nonSelectableGlowShown = 0
+
+            for button in frame:EnumerateAllTalentButtons() do
+                local node = button:GetNodeInfo()
+                if node and node.subTreeID == 49 and button:IsShown() then
+                    if button:IsSelectable() then
+                        selectable = selectable + 1
+                    else
+                        nonSelectable = nonSelectable + 1
+                        local glow = button.SelectableGlow
+                        if glow and glow:IsShown() then
+                            nonSelectableGlowShown = nonSelectableGlowShown + 1
+                        end
+                    end
+                end
+            end
+
+            assert(selectable >= 1, "expected at least one selectable hero node")
+            assert(nonSelectable >= 1, "expected at least one non-selectable hero node")
+            assert(nonSelectableGlowShown == 0, "non-selectable hero nodes should not show selectable glow")
+
+            return table.concat({
+                tostring(selectable),
+                tostring(nonSelectable),
+                tostring(nonSelectableGlowShown),
+            }, ",")
+            "#,
+        )
+        .unwrap();
+
+    let parts: Vec<u32> = result
+        .split(',')
+        .map(|s| s.parse::<u32>().expect("count should parse"))
+        .collect();
+    assert_eq!(parts.len(), 3, "expected selectable,nonSelectable,glowShown");
+    assert!(parts[0] >= 1, "unexpected selectable hero node count: {result}");
+    assert!(
+        parts[1] >= 1,
+        "unexpected non-selectable hero node count: {result}"
+    );
+    assert_eq!(
+        parts[2], 0,
+        "non-selectable hero nodes unexpectedly showed selectable glow: {result}"
     );
 }
