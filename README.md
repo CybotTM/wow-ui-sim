@@ -1,6 +1,28 @@
 # WoW UI Simulator
 
-A headless World of Warcraft UI simulator for testing addons. Loads Blizzard's base UI (XML/Lua), runs addon code, and executes Lua test suites — no WoW client required.
+A World of Warcraft UI simulator for addon testing and UI rendering. Supports headless test workflows plus frame-tree and screenshot output — no WoW client required.
+
+## UI Gallery
+
+| Main Screen | Spellbook |
+|---|---|
+| ![Main screen](docs/gallery/main-screen.png) | ![Spellbook](docs/gallery/spellbook.png) |
+
+| Character Panel | Reputations Panel |
+|---|---|
+| ![Character panel](docs/gallery/character-panel.png) | ![Reputations panel](docs/gallery/reputations-panel.png) |
+
+| Blacksmithing | Guild Panel |
+|---|---|
+| ![Blacksmithing](docs/gallery/blacksmithing.png) | ![Guild panel](docs/gallery/guild-panel.png) |
+
+| Store | Achievements Panel |
+|---|---|
+| ![Store](docs/gallery/store.png) | ![Achievements panel](docs/gallery/achievements-panel.png) |
+
+| Damage Meter |
+|---|
+| ![Damage meter](docs/gallery/damage-meter.webp) |
 
 ## GitHub Action
 
