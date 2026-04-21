@@ -268,3 +268,149 @@ fn action_button1_hotkey_shows_slot_one() {
         );
     }
 }
+
+#[test]
+fn main_action_bar_layout_is_locked() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+
+        env.exec(
+            r#"
+            local EPS = 0.75
+
+            local function approx(actual, expected, eps)
+                if type(actual) ~= "number" or type(expected) ~= "number" then
+                    return false
+                end
+                return math.abs(actual - expected) <= (eps or EPS)
+            end
+
+            local function require_frame(path, frame)
+                assert(type(frame) == "table", path .. " missing")
+                return frame
+            end
+
+            local function rect(path, frame)
+                local l = frame:GetLeft()
+                local r = frame:GetRight()
+                local t = frame:GetTop()
+                local b = frame:GetBottom()
+                local w = frame:GetWidth()
+                local h = frame:GetHeight()
+                assert(type(l) == "number", path .. ":GetLeft() missing")
+                assert(type(r) == "number", path .. ":GetRight() missing")
+                assert(type(t) == "number", path .. ":GetTop() missing")
+                assert(type(b) == "number", path .. ":GetBottom() missing")
+                assert(type(w) == "number", path .. ":GetWidth() missing")
+                assert(type(h) == "number", path .. ":GetHeight() missing")
+                return l, r, t, b, w, h
+            end
+
+            local function center(path, frame)
+                local x, y = frame:GetCenter()
+                assert(type(x) == "number", path .. ":GetCenter() x missing")
+                assert(type(y) == "number", path .. ":GetCenter() y missing")
+                return x, y
+            end
+
+            local bar = require_frame("MainActionBar", MainActionBar)
+            local endCaps = require_frame("MainActionBar.EndCaps", bar.EndCaps)
+            local leftEndCap = require_frame("MainActionBar.EndCaps.LeftEndCap", endCaps.LeftEndCap)
+            local rightEndCap = require_frame("MainActionBar.EndCaps.RightEndCap", endCaps.RightEndCap)
+            local page = require_frame("MainActionBar.ActionBarPageNumber", bar.ActionBarPageNumber)
+            local pageUp = require_frame("MainActionBar.ActionBarPageNumber.UpButton", page.UpButton)
+            local pageDown = require_frame("MainActionBar.ActionBarPageNumber.DownButton", page.DownButton)
+            local pageText = require_frame("MainActionBar.ActionBarPageNumber.Text", page.Text)
+
+            local bL, bR, bT, bB, bW, bH = rect("MainActionBar", bar)
+            assert(bar:IsVisible(), "MainActionBar must be visible")
+            assert(approx(bW, 562, 0.1), "MainActionBar width changed: " .. tostring(bW))
+            assert(approx(bH, 45, 0.1), "MainActionBar height changed: " .. tostring(bH))
+            assert(approx(bar:GetAlpha() or -1, 1, 0.01), "MainActionBar alpha changed")
+
+            local eL, eR, eT, eB, eW, eH = rect("MainActionBar.EndCaps", endCaps)
+            assert(endCaps:IsShown(), "MainActionBar.EndCaps must be shown")
+            assert(approx(eL, bL), "EndCaps left drifted")
+            assert(approx(eR, bR), "EndCaps right drifted")
+            assert(approx(eT, bT), "EndCaps top drifted")
+            assert(approx(eB, bB), "EndCaps bottom drifted")
+            assert(approx(eW, bW, 0.1), "EndCaps width changed: " .. tostring(eW))
+            assert(approx(eH, bH, 0.1), "EndCaps height changed: " .. tostring(eH))
+
+            local leL, leR, _, leB, leW, leH = rect("LeftEndCap", leftEndCap)
+            local reL, reR, _, reB, reW, reH = rect("RightEndCap", rightEndCap)
+            assert((leftEndCap:GetAtlas() or ""):lower() == "ui-hud-actionbar-gryphon-left", "LeftEndCap atlas changed")
+            assert((rightEndCap:GetAtlas() or ""):lower() == "ui-hud-actionbar-gryphon-right", "RightEndCap atlas changed")
+            assert(leW > 0 and leH > 0, "LeftEndCap size must be non-zero")
+            assert(reW > 0 and reH > 0, "RightEndCap size must be non-zero")
+            assert(approx(leW, reW, 0.1), "EndCap widths diverged")
+            assert(approx(leH, reH, 0.1), "EndCap heights diverged")
+            assert(approx(leR, bL + 9), "LeftEndCap right anchor offset changed")
+            assert(approx(reL, bR - 8), "RightEndCap left anchor offset changed")
+            assert(approx(leB, bB - 22), "LeftEndCap bottom anchor offset changed")
+            assert(approx(reB, bB - 22), "RightEndCap bottom anchor offset changed")
+
+            local pL, pR, _, pB, pW, pH = rect("ActionBarPageNumber", page)
+            assert(page:IsVisible(), "ActionBarPageNumber must be visible")
+            assert(approx(pW, 18, 0.1) and approx(pH, 34, 0.1), "ActionBarPageNumber size changed")
+            assert(approx(pR, bL - 4), "ActionBarPageNumber right anchor offset changed")
+            assert(approx(pB, bB + 9), "ActionBarPageNumber bottom anchor offset changed")
+
+            local _, upCY = center("UpButton", pageUp)
+            local _, downCY = center("DownButton", pageDown)
+            local _, pageCY = center("ActionBarPageNumber", page)
+            assert(pageUp:IsVisible(), "ActionBar page up button must be visible")
+            assert(pageDown:IsVisible(), "ActionBar page down button must be visible")
+            assert(approx(math.abs(upCY - pageCY), 10), "ActionBar page up button offset changed")
+            assert(approx(math.abs(downCY - pageCY), 10), "ActionBar page down button offset changed")
+            local pageNumberText = pageText:GetText() or ""
+            assert(pageNumberText ~= "", "ActionBar page text must be non-empty")
+
+            -- Lock all 12 main bar button container slots to 47px stride
+            -- (45px button + 2px gap) from MainActionBar's left edge.
+            for i = 1, 12 do
+                local container = require_frame("MainActionBarButtonContainer" .. i, _G["MainActionBarButtonContainer" .. i])
+                local button = require_frame("ActionButton" .. i, _G["ActionButton" .. i])
+                local icon = require_frame("ActionButton" .. i .. "Icon", _G["ActionButton" .. i .. "Icon"])
+                local normal = require_frame("ActionButton" .. i .. "NormalTexture", _G["ActionButton" .. i .. "NormalTexture"])
+
+                local cL, _, _, cB, cW, cH = rect("MainActionBarButtonContainer" .. i, container)
+                local expectedLeft = bL + (i - 1) * 47
+                assert(approx(cL, expectedLeft), "button container " .. i .. " left drifted")
+                assert(approx(cB, bB), "button container " .. i .. " bottom drifted")
+                assert(approx(cW, 45, 0.1) and approx(cH, 45, 0.1), "button container " .. i .. " size changed")
+
+                local b2L, b2R, b2T, b2B, b2W, b2H = rect("ActionButton" .. i, button)
+                assert(button:IsVisible(), "ActionButton" .. i .. " must be visible")
+                assert(approx(b2L, cL) and approx(b2B, cB), "ActionButton" .. i .. " drifted from container")
+                assert(approx(b2W, 45, 0.1) and approx(b2H, 45, 0.1), "ActionButton" .. i .. " size changed")
+                assert((button:GetAlpha() or -1) > 0.95, "ActionButton" .. i .. " alpha changed")
+
+                local iL, iR, iT, iB = icon:GetLeft(), icon:GetRight(), icon:GetTop(), icon:GetBottom()
+                assert(iL and iR and iT and iB, "ActionButton" .. i .. "Icon bounds missing")
+                assert(approx(iL, b2L) and approx(iR, b2R), "ActionButton" .. i .. "Icon x drifted")
+                assert(approx(iT, b2T) and approx(iB, b2B), "ActionButton" .. i .. "Icon y drifted")
+
+                local nAtlas = normal.GetAtlas and normal:GetAtlas() or ""
+                assert(nAtlas:lower() == "ui-hud-actionbar-iconframe", "ActionButton" .. i .. "NormalTexture atlas changed")
+            end
+
+            local hk = require_frame("ActionButton1HotKey", ActionButton1HotKey)
+            assert(hk:IsVisible(), "ActionButton1HotKey must be visible")
+            local hkText = hk:GetText() or ""
+            assert(hkText == "1" or hkText == "ACTIONBUTTON1", "ActionButton1HotKey text changed: " .. tostring(hkText))
+
+            local a1 = require_frame("ActionButton1", ActionButton1)
+            local a2 = require_frame("ActionButton2", ActionButton2)
+            local a12 = require_frame("ActionButton12", ActionButton12)
+            local a1L, a1R = a1:GetLeft(), a1:GetRight()
+            local a2L, _ = a2:GetLeft(), a2:GetRight()
+            local _, a12R = a12:GetLeft(), a12:GetRight()
+            assert(a1L and a1R and a2L and a12R, "action button bounds missing for spacing checks")
+            assert(approx(a2L - a1L, 47), "ActionButton1->2 spacing changed")
+            assert(approx(a12R, bR), "ActionButton12 right edge no longer matches MainActionBar")
+            "#,
+        )
+        .expect("main action bar layout lock assertions");
+    }
+}
