@@ -732,12 +732,49 @@ const OBJECTIVE_TRACKER_QUEST_HEADER_WORKAROUND_LUA: &str = r#"
             return legacy.Header or legacy
         end
 
+        local function set_region_alpha(region, target_alpha)
+            if type(region) ~= "table"
+                or type(region.GetAlpha) ~= "function"
+                or type(region.SetAlpha) ~= "function" then
+                return
+            end
+            local current = region:GetAlpha()
+            if type(current) ~= "number" or math.abs(current - target_alpha) > 0.001 then
+                region:SetAlpha(target_alpha)
+            end
+        end
+
+        local function normalize_quest_header_surface(module, header)
+            if type(header) ~= "table" then
+                return
+            end
+            -- During startup the AddAnim can leave the quest header in a half-faded
+            -- state (dim background + fully lit shine/glow). Force the expanded visuals
+            -- once the module has quest content so the texture stack matches Blizzard.
+            if module and module.collapsed then
+                return
+            end
+            if not module_has_visible_contents(module) then
+                return
+            end
+            if type(header.AddAnim) == "table" and type(header.AddAnim.Stop) == "function" then
+                header.AddAnim:Stop()
+            end
+            set_region_alpha(header, 1)
+            set_region_alpha(header.Background, 1)
+            set_region_alpha(header.Shine, 0)
+            set_region_alpha(header.Glow, 0)
+            set_region_alpha(header.MinimizeButton, 1)
+        end
+
         local module = QuestObjectiveTracker
         local header = resolve_quest_header()
         local textRegion = header and header.Text
         if not textRegion then
             return
         end
+
+        normalize_quest_header_surface(module, header)
 
         if header.Show and module_has_visible_contents(module) and not header:IsShown() then
             header:Show()
@@ -772,6 +809,7 @@ const OBJECTIVE_TRACKER_QUEST_HEADER_WORKAROUND_LUA: &str = r#"
                 end
             end
         end
+        normalize_quest_header_surface(module, header)
         end
 
         if not rawget(_G, "__wow_objective_tracker_quest_header_update_wrapper")
@@ -784,6 +822,35 @@ const OBJECTIVE_TRACKER_QUEST_HEADER_WORKAROUND_LUA: &str = r#"
                 return result
             end
             rawset(_G, "__wow_objective_tracker_quest_header_update_wrapper", true)
+        end
+
+        if not rawget(_G, "__wow_objective_tracker_header_play_add_anim_wrapper")
+            and ObjectiveTrackerModuleHeaderMixin
+            and type(ObjectiveTrackerModuleHeaderMixin.PlayAddAnimation) == "function" then
+            local originalPlayAddAnimation = ObjectiveTrackerModuleHeaderMixin.PlayAddAnimation
+            ObjectiveTrackerModuleHeaderMixin.PlayAddAnimation = function(self, ...)
+                local result = originalPlayAddAnimation(self, ...)
+                local module = self.GetParent and self:GetParent() or nil
+                if module == QuestObjectiveTracker then
+                    pcall(normalize_quest_header_surface, module, self)
+                end
+                return result
+            end
+            rawset(_G, "__wow_objective_tracker_header_play_add_anim_wrapper", true)
+        end
+
+        if not rawget(_G, "__wow_objective_tracker_module_end_layout_wrapper")
+            and ObjectiveTrackerModuleMixin
+            and type(ObjectiveTrackerModuleMixin.EndLayout) == "function" then
+            local originalEndLayout = ObjectiveTrackerModuleMixin.EndLayout
+            ObjectiveTrackerModuleMixin.EndLayout = function(self, ...)
+                local result = originalEndLayout(self, ...)
+                if self == QuestObjectiveTracker then
+                    pcall(normalize_quest_header_surface, self, self.Header)
+                end
+                return result
+            end
+            rawset(_G, "__wow_objective_tracker_module_end_layout_wrapper", true)
         end
 
         pcall(ensure_quest_header_text)

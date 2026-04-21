@@ -345,3 +345,169 @@ fn objective_tracker_quest_module_header_emits_glyph_quads() {
         );
     }
 }
+
+#[test]
+fn objective_tracker_frame_layout_is_locked() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+
+        env.exec(
+            r#"
+            local EPS = 0.75
+
+            local function approx(actual, expected, eps)
+                if type(actual) ~= "number" or type(expected) ~= "number" then
+                    return false
+                end
+                return math.abs(actual - expected) <= (eps or EPS)
+            end
+
+            local function require_frame(path, frame)
+                assert(type(frame) == "table", path .. " missing")
+                return frame
+            end
+
+            local function get_rect(path, frame)
+                local left = frame:GetLeft()
+                local right = frame:GetRight()
+                local top = frame:GetTop()
+                local bottom = frame:GetBottom()
+                local width = frame:GetWidth()
+                local height = frame:GetHeight()
+                assert(type(left) == "number", path .. ":GetLeft() missing")
+                assert(type(right) == "number", path .. ":GetRight() missing")
+                assert(type(top) == "number", path .. ":GetTop() missing")
+                assert(type(bottom) == "number", path .. ":GetBottom() missing")
+                assert(type(width) == "number", path .. ":GetWidth() missing")
+                assert(type(height) == "number", path .. ":GetHeight() missing")
+                return left, right, top, bottom, width, height
+            end
+
+            local function get_center(path, frame)
+                local x, y = frame:GetCenter()
+                assert(type(x) == "number", path .. ":GetCenter() x missing")
+                assert(type(y) == "number", path .. ":GetCenter() y missing")
+                return x, y
+            end
+
+            local tracker = require_frame("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
+            local trackerHeader = require_frame("ObjectiveTrackerFrame.Header", tracker.Header)
+            local trackerHeaderText = require_frame("ObjectiveTrackerFrame.Header.Text", trackerHeader.Text)
+            local module = require_frame("QuestObjectiveTracker", QuestObjectiveTracker)
+            local header = require_frame("QuestObjectiveTracker.Header", module.Header)
+            local background = require_frame("QuestObjectiveTracker.Header.Background", header.Background)
+            local shine = require_frame("QuestObjectiveTracker.Header.Shine", header.Shine)
+            local glow = require_frame("QuestObjectiveTracker.Header.Glow", header.Glow)
+            local text = require_frame("QuestObjectiveTracker.Header.Text", header.Text)
+            local minimize = require_frame("QuestObjectiveTracker.Header.MinimizeButton", header.MinimizeButton)
+            local contents = require_frame("QuestObjectiveTracker.ContentsFrame", module.ContentsFrame)
+
+            local tL, tR, tT, tB, tW, _ = get_rect("ObjectiveTrackerFrame", tracker)
+            assert(approx(tW, 260, 0.1), "ObjectiveTrackerFrame width changed: " .. tostring(tW))
+
+            local thL, thR, thT, thB, thW, thH = get_rect("ObjectiveTrackerFrame.Header", trackerHeader)
+            assert(approx(thL, tL), "ObjectiveTrackerFrame.Header left drifted")
+            assert(approx(thR, tR), "ObjectiveTrackerFrame.Header right drifted")
+            assert(approx(thT, tT), "ObjectiveTrackerFrame.Header top drifted")
+            assert(approx(thW, 260, 0.1), "ObjectiveTrackerFrame.Header width changed: " .. tostring(thW))
+            assert(approx(thH, 32, 0.1), "ObjectiveTrackerFrame.Header height changed: " .. tostring(thH))
+
+            local aotText = trackerHeaderText:GetText()
+            assert(aotText == "All Objectives", "ObjectiveTrackerFrame.Header.Text changed: " .. tostring(aotText))
+
+            local mL, mR, mT, mB, mW, _ = get_rect("QuestObjectiveTracker", module)
+            assert(approx(mL, tL), "QuestObjectiveTracker left drifted from ObjectiveTrackerFrame")
+            assert(approx(mR, tR), "QuestObjectiveTracker right drifted from ObjectiveTrackerFrame")
+            assert(approx(mW, 260, 0.1), "QuestObjectiveTracker width changed: " .. tostring(mW))
+            assert(approx(mT, tT - 38, 0.1), "QuestObjectiveTracker top offset changed")
+
+            local hL, hR, hT, hB, hW, hH = get_rect("QuestObjectiveTracker.Header", header)
+            assert(approx(hL, mL), "QuestObjectiveTracker.Header left drifted")
+            assert(approx(hR, mR), "QuestObjectiveTracker.Header right drifted")
+            assert(approx(hT, mT), "QuestObjectiveTracker.Header top drifted")
+            assert(approx(hW, 260, 0.1), "QuestObjectiveTracker.Header width changed: " .. tostring(hW))
+            assert(approx(hH, 26, 0.1), "QuestObjectiveTracker.Header height changed: " .. tostring(hH))
+
+            local hCX, hCY = get_center("QuestObjectiveTracker.Header", header)
+            local bgCX, bgCY = get_center("QuestObjectiveTracker.Header.Background", background)
+            local shCX, shCY = get_center("QuestObjectiveTracker.Header.Shine", shine)
+            local glCX, glCY = get_center("QuestObjectiveTracker.Header.Glow", glow)
+            local minCX, minCY = get_center("QuestObjectiveTracker.Header.MinimizeButton", minimize)
+
+            local _, _, _, _, bgW, bgH = get_rect("QuestObjectiveTracker.Header.Background", background)
+            local _, _, _, _, shW, shH = get_rect("QuestObjectiveTracker.Header.Shine", shine)
+            local _, _, _, _, glW, glH = get_rect("QuestObjectiveTracker.Header.Glow", glow)
+            local minL, minR, _, _, minW, minH = get_rect("QuestObjectiveTracker.Header.MinimizeButton", minimize)
+            local txL, _, _, _, txW, _ = get_rect("QuestObjectiveTracker.Header.Text", text)
+
+            assert(approx(bgCX, hCX), "Header.Background center-x drifted")
+            assert(approx(bgCY, hCY), "Header.Background center-y drifted")
+            assert(approx(bgW, 300, 0.1), "Header.Background width changed: " .. tostring(bgW))
+            assert(approx(bgH, 30, 0.1), "Header.Background height changed: " .. tostring(bgH))
+
+            assert(approx(shCX, hCX - 150), "Header.Shine center-x offset changed")
+            assert(approx(shCY, hCY + 1), "Header.Shine center-y offset changed")
+            assert(approx(shW, 154, 0.1), "Header.Shine width changed: " .. tostring(shW))
+            assert(approx(shH, 23, 0.1), "Header.Shine height changed: " .. tostring(shH))
+
+            assert(approx(glCX, hCX - 120), "Header.Glow center-x offset changed")
+            assert(approx(glCY, hCY + 1), "Header.Glow center-y offset changed")
+            assert(approx(glW, 187, 0.1), "Header.Glow width changed: " .. tostring(glW))
+            assert(approx(glH, 28, 0.1), "Header.Glow height changed: " .. tostring(glH))
+
+            assert(approx(minR, hR + 1), "Header.MinimizeButton right anchor offset changed")
+            assert(approx(minCY, hCY), "Header.MinimizeButton center-y drifted")
+            assert(approx(minW, 16, 0.1), "Header.MinimizeButton width changed: " .. tostring(minW))
+            assert(approx(minH, 16, 0.1), "Header.MinimizeButton height changed: " .. tostring(minH))
+            assert(approx(minL, minR - 16, 0.1), "Header.MinimizeButton width/left mismatch")
+
+            assert(approx(txL, hL + 7), "Header.Text left anchor offset changed")
+            assert(approx(txW, 200, 0.1), "Header.Text width changed: " .. tostring(txW))
+            local moduleText = text:GetText()
+            assert(moduleText == "Quests", "QuestObjectiveTracker.Header.Text changed: " .. tostring(moduleText))
+
+            local _, _, cT, cB, cW, _ = get_rect("QuestObjectiveTracker.ContentsFrame", contents)
+            assert(approx(cT, hB), "QuestObjectiveTracker.ContentsFrame top no longer tracks header bottom")
+            assert(approx(cW, 260, 0.1), "QuestObjectiveTracker.ContentsFrame width changed: " .. tostring(cW))
+            local cL, cR = contents:GetLeft(), contents:GetRight()
+            assert(approx(cL, mL), "QuestObjectiveTracker.ContentsFrame left drifted")
+            assert(approx(cR, mR), "QuestObjectiveTracker.ContentsFrame right drifted")
+            assert(approx(cB, mB), "QuestObjectiveTracker.ContentsFrame bottom drifted")
+
+            -- Lock down quest block placement in the objective frame.
+            local blockCount = 0
+            local blockTops = {}
+            if type(module.usedBlocks) == "table" then
+                for _, blocksById in pairs(module.usedBlocks) do
+                    if type(blocksById) == "table" then
+                        for _, block in pairs(blocksById) do
+                            if type(block) == "table" and block.GetTop and block:IsShown() then
+                                local bL, bR, bT, bB = block:GetLeft(), block:GetRight(), block:GetTop(), block:GetBottom()
+                                assert(bL and bR and bT and bB, "quest block bounds missing")
+                                local bMinX, bMaxX = math.min(bL, bR), math.max(bL, bR)
+                                local bMaxY = math.max(bT, bB)
+                                local cMinX, cMaxX = math.min(cL, cR), math.max(cL, cR)
+                                assert(bMinX >= cMinX - EPS and bMaxX <= cMaxX + EPS, "quest block escaped contents frame horizontally")
+                                table.insert(blockTops, bMaxY)
+                                blockCount = blockCount + 1
+                            end
+                        end
+                    end
+                end
+            end
+            assert(blockCount >= 3, "expected >=3 visible quest blocks, got " .. tostring(blockCount))
+            table.sort(blockTops, function(a, b) return a > b end)
+            for i = 2, #blockTops do
+                assert(blockTops[i] < blockTops[i - 1] - 0.1, "quest block ordering changed or collapsed")
+            end
+
+            -- Lock down quest header surface state to catch shifted/overbright background regressions.
+            assert((background:GetAlpha() or -1) > 0.95, "header background alpha must settle to 1")
+            assert((shine:GetAlpha() or 1) < 0.05, "header shine alpha must settle to 0")
+            assert((glow:GetAlpha() or 1) < 0.05, "header glow alpha must settle to 0")
+            assert((minimize:GetAlpha() or -1) > 0.95, "header minimize alpha must settle to 1")
+            "#,
+        )
+        .expect("objective tracker layout lock assertions");
+    }
+}
