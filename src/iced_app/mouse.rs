@@ -139,6 +139,13 @@ impl App {
     }
 
     pub(super) fn handle_mouse_down(&mut self, pos: Point) {
+        {
+            let env = self.env.borrow();
+            let _ = env
+                .state()
+                .borrow_mut()
+                .set_mouse_button_down("LeftButton", true);
+        }
         let hit_frame = self.hit_test_mouse_button(pos, "LeftButton");
 
         // Focus/unfocus EditBox on click
@@ -173,6 +180,13 @@ impl App {
     }
 
     pub(super) fn handle_mouse_up(&mut self, pos: Point) {
+        {
+            let env = self.env.borrow();
+            let _ = env
+                .state()
+                .borrow_mut()
+                .set_mouse_button_down("LeftButton", false);
+        }
         let (was_dragging, drag_source) = self.take_left_drag_state();
         let released_on = self.hit_test_mouse_button(pos, "LeftButton");
 
@@ -245,6 +259,13 @@ impl App {
     }
 
     pub(super) fn handle_right_mouse_down(&mut self, pos: Point) {
+        {
+            let env = self.env.borrow();
+            let _ = env
+                .state()
+                .borrow_mut()
+                .set_mouse_button_down("RightButton", true);
+        }
         let Some(frame_id) = self.hit_test_mouse_button(pos, "RightButton") else {
             return;
         };
@@ -261,6 +282,13 @@ impl App {
     }
 
     pub(super) fn handle_right_mouse_up(&mut self, pos: Point) {
+        {
+            let env = self.env.borrow();
+            let _ = env
+                .state()
+                .borrow_mut()
+                .set_mouse_button_down("RightButton", false);
+        }
         // Right-click clears the cursor (drops held spell/action) in WoW.
         // Use the Lua ClearCursor() function so events fire properly.
         let had_cursor_item = self.env.borrow().state().borrow().cursor_item.is_some();

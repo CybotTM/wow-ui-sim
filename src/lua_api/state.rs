@@ -61,6 +61,7 @@ macro_rules! build_empty_sim_state {
             hovered_frame: $runtime.hovered_frame,
             active_drag_frame: $runtime.active_drag_frame,
             active_slider_thumb_drag_frame: $runtime.active_slider_thumb_drag_frame,
+            mouse_buttons: $runtime.mouse_buttons,
             next_report_token: $runtime.next_report_token,
             party_members: $collections.party_members,
             party_group_active: $runtime.party_group_active,
@@ -447,6 +448,9 @@ pub struct SimState {
     /// false (no input to the sim). Admin: `A_Admin.SetShiftKeyDown(b)` and
     /// friends toggle individual keys.
     pub modifier_keys: ModifierKeys,
+    /// Mouse-button down state backing `IsMouseButtonDown([button])`.
+    /// Defaults all false (no input to the sim).
+    pub mouse_buttons: MouseButtons,
     /// `C_GameRules` backing state — active game mode + glue-screen name +
     /// a rules map. Default: Standard mode, `CharacterSelect` glue screen,
     /// empty rules.
@@ -757,8 +761,8 @@ pub struct SimState {
 pub use super::sim_substates::{
     BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow,
     FactionEntry, GameRuleValue, GameRulesState, GossipOption, GossipQuestRow, GossipState,
-    Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, NetStats,
-    PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState, TorghastState,
+    Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, MouseButtons,
+    NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState, TorghastState,
     TradeState, VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
     WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
     WowLabsPoint, WowLabsState,
@@ -1305,6 +1309,7 @@ struct EmptyRuntimeState {
     hovered_frame: Option<u64>,
     active_drag_frame: Option<u64>,
     active_slider_thumb_drag_frame: Option<u64>,
+    mouse_buttons: MouseButtons,
     next_report_token: i64,
     party_group_active: bool,
     current_target: Option<TargetInfo>,
@@ -1360,6 +1365,7 @@ macro_rules! build_empty_runtime_state {
             hovered_frame: None,
             active_drag_frame: None,
             active_slider_thumb_drag_frame: None,
+            mouse_buttons: MouseButtons::default(),
             next_report_token: $next_report_token,
             party_group_active: false,
             current_target: None,
@@ -1486,6 +1492,10 @@ impl SimState {
 
     pub fn set_active_slider_thumb_drag_frame(&mut self, frame_id: Option<u64>) {
         self.active_slider_thumb_drag_frame = frame_id;
+    }
+
+    pub fn set_mouse_button_down(&mut self, button: &str, down: bool) -> bool {
+        self.mouse_buttons.set_down(button, down)
     }
 
     pub fn enqueue_texture_preloads<I>(&mut self, paths: I)

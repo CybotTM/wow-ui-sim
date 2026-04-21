@@ -10,6 +10,7 @@
 
 use crate::lua_api::methods::{borrow_state, frame_ref};
 use crate::lua_api::methods::{create_table, table_set_num};
+use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
@@ -48,9 +49,19 @@ fn get_mouse_foci(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn is_mouse_button_down(state: &mut LuaState) -> LuaResult<u32> {
+    let button = Option::<String>::from_stack(state, 1)?;
+    let down = borrow_state(state)?
+        .mouse_buttons
+        .is_down(button.as_deref());
+    state.push(Val::Bool(down));
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetCursorPosition", get_cursor_position)?;
     LuaApiMut::register_function(lua, "GetMouseFocus", get_mouse_focus)?;
     LuaApiMut::register_function(lua, "GetMouseFoci", get_mouse_foci)?;
+    LuaApiMut::register_function(lua, "IsMouseButtonDown", is_mouse_button_down)?;
     Ok(())
 }

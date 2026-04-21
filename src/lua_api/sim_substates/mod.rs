@@ -50,6 +50,48 @@ impl ModifierKeys {
     }
 }
 
+/// Mouse-button down state backing `IsMouseButtonDown([button])`.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct MouseButtons {
+    pub left: bool,
+    pub right: bool,
+    pub middle: bool,
+    pub button4: bool,
+    pub button5: bool,
+}
+
+impl MouseButtons {
+    pub fn any_down(&self) -> bool {
+        self.left || self.right || self.middle || self.button4 || self.button5
+    }
+
+    pub fn is_down(&self, button: Option<&str>) -> bool {
+        let Some(button) = button else {
+            return self.any_down();
+        };
+        match button.to_ascii_lowercase().as_str() {
+            "leftbutton" | "left" => self.left,
+            "rightbutton" | "right" => self.right,
+            "middlebutton" | "middle" => self.middle,
+            "button4" => self.button4,
+            "button5" => self.button5,
+            _ => false,
+        }
+    }
+
+    pub fn set_down(&mut self, button: &str, down: bool) -> bool {
+        match button.to_ascii_lowercase().as_str() {
+            "leftbutton" | "left" => self.left = down,
+            "rightbutton" | "right" => self.right = down,
+            "middlebutton" | "middle" => self.middle = down,
+            "button4" => self.button4 = down,
+            "button5" => self.button5 = down,
+            _ => return false,
+        }
+        true
+    }
+}
+
 /// Backing state for the `C_GameRules` namespace. WoW's retail client
 /// exposes a handful of named game rules (`"DISABLE_DUELS"`,
 /// `"ALLOW_PING_PARTY_MEMBERS"`, etc.) that the UI queries to decide which

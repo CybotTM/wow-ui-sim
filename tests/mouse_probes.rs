@@ -56,3 +56,50 @@ fn get_mouse_focus_returns_hovered_frame_userdata() {
     let name: String = env.eval("return GetMouseFocus():GetName()").unwrap();
     assert_eq!(name, "MouseFocusTestFrame");
 }
+
+// ── IsMouseButtonDown ────────────────────────────────────────────────────────
+
+#[test]
+fn is_mouse_button_down_defaults_false() {
+    let env = env();
+    let (any, left, right, middle, button4): (bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return IsMouseButtonDown(),
+                   IsMouseButtonDown("LeftButton"),
+                   IsMouseButtonDown("RightButton"),
+                   IsMouseButtonDown("MiddleButton"),
+                   IsMouseButtonDown("Button4")
+            "#,
+        )
+        .unwrap();
+    assert!(!any);
+    assert!(!left);
+    assert!(!right);
+    assert!(!middle);
+    assert!(!button4);
+}
+
+#[test]
+fn is_mouse_button_down_reads_named_button_state() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        let _ = state.set_mouse_button_down("LeftButton", true);
+    }
+
+    let (any, left, right, unknown): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return IsMouseButtonDown(),
+                   IsMouseButtonDown("LeftButton"),
+                   IsMouseButtonDown("RightButton"),
+                   IsMouseButtonDown("NoSuchButton")
+            "#,
+        )
+        .unwrap();
+    assert!(any);
+    assert!(left);
+    assert!(!right);
+    assert!(!unknown);
+}
