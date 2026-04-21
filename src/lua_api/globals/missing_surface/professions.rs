@@ -187,7 +187,11 @@ fn get_profession_info_global(state: &mut LuaState) -> LuaResult<u32> {
 
     let name = create_string(state, profession.name);
     let icon = create_string(state, profession_icon_path(profession.profession_id));
-    let skill_line_name = create_string(state, profession.parent_profession_name);
+    let skill_line_name = if profession.parent_profession_name.is_empty() {
+        Val::Nil
+    } else {
+        create_string(state, profession.parent_profession_name)
+    };
     let spellbook_skill_line = profession_spellbook_skill_line(profession.name).unwrap_or(0);
     let spell_offset = if spellbook_skill_line > 0 {
         spellbook_data::skill_line_offset(spellbook_skill_line) as f64
