@@ -906,12 +906,18 @@ fn advance_animation_group(
     elapsed: f64,
     finished_scripts: &mut Vec<u64>,
 ) -> Option<AnimationGroupAdvance> {
-    let owner_id = sim.animation_groups.get(&group_id)?.owner_frame_id;
-    let alpha_target_ids_by_animation = sim
-        .animation_groups
-        .get(&group_id)
-        .map(|group| resolve_group_alpha_targets(sim, group))
-        .unwrap_or_default();
+    let (owner_id, alpha_target_ids_by_animation) = {
+        let group = sim.animation_groups.get(&group_id)?;
+        // Most registered animation groups are idle; avoid any expensive
+        // target-resolution work unless the group is actively ticking.
+        if !group.playing || group.paused {
+            return None;
+        }
+        (
+            group.owner_frame_id,
+            resolve_group_alpha_targets(sim, group),
+        )
+    };
     let unique_alpha_target_ids = unique_alpha_targets(&alpha_target_ids_by_animation);
     let saved_alphas: std::collections::HashMap<u64, f32> = unique_alpha_target_ids
         .iter()
@@ -928,9 +934,6 @@ fn advance_animation_group(
     let mut loop_count = 0u32;
     let (alpha_updates, flipbook_updates, frame_id) = {
         let group = sim.animation_groups.get_mut(&group_id)?;
-        if !group.playing || group.paused {
-            return None;
-        }
 
         for (&target_id, &saved_alpha) in &saved_alphas {
             group.saved_alphas.entry(target_id).or_insert(saved_alpha);
