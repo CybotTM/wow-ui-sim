@@ -55,6 +55,7 @@ impl App {
             let buckets = {
                 let mut state = env.state().borrow_mut();
                 super::tooltip::update_tooltip_sizes(&mut state, &mut fs);
+                state.ensure_layout_rects();
                 let _ = state.get_strata_buckets();
                 state.strata_buckets.as_ref().unwrap().clone()
             };

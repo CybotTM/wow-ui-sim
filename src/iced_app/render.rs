@@ -459,9 +459,9 @@ impl App {
     ) -> Vec<Vec<u64>> {
         let mut state = env.state().borrow_mut();
         let t0 = std::time::Instant::now();
+        super::tooltip::update_tooltip_sizes(&mut state, font_sys);
         state.ensure_layout_rects();
         let layout_dur = t0.elapsed();
-        super::tooltip::update_tooltip_sizes(&mut state, font_sys);
         let t1 = std::time::Instant::now();
         let _ = state.get_strata_buckets();
         let bucket_dur = t1.elapsed();
@@ -809,6 +809,57 @@ mod tests {
         assert!(
             tex_mgr.get(&overlay_path).is_some(),
             "RequestPreloadMap should warm exploration overlay texture {overlay_path}"
+        );
+    }
+
+    #[test]
+    fn resolve_layout_and_buckets_recomputes_tooltip_layout_after_sizing() {
+        let temp_dir = tempdir().unwrap();
+        let app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                local owner = CreateFrame("Frame", "TooltipLayoutOwner", UIParent)
+                owner:SetSize(100, 50)
+                owner:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+                GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+                GameTooltip:AddLine("Tooltip layout must resize before render buckets lock in")
+            "#,
+            )
+            .expect("tooltip setup should succeed");
+
+        {
+            let env = app.env.borrow();
+            let mut font_sys = app.font_system.borrow_mut();
+            let _ = app.resolve_layout_and_buckets(&env, &mut font_sys);
+        }
+
+        let state_ref = app.env.borrow();
+        let state = state_ref.state().borrow();
+        let tooltip_id = state
+            .widgets
+            .get_id_by_name("GameTooltip")
+            .expect("GameTooltip should exist");
+        let tooltip = state
+            .widgets
+            .get(tooltip_id)
+            .expect("GameTooltip frame should exist");
+        let tooltip_rect = tooltip
+            .layout_rect
+            .expect("render prep should resolve the tooltip layout rect");
+
+        assert!(
+            (tooltip_rect.width - tooltip.width).abs() < f32::EPSILON,
+            "tooltip layout width {} should match sized width {} after render prep",
+            tooltip_rect.width,
+            tooltip.width
+        );
+        assert!(
+            (tooltip_rect.height - tooltip.height).abs() < f32::EPSILON,
+            "tooltip layout height {} should match sized height {} after render prep",
+            tooltip_rect.height,
+            tooltip.height
         );
     }
 }

@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-20] investigate | tooltip layout timing
+
+Added `investigations/tooltip-layout-timing.md` to capture the tooltip
+one-frame mismatch caused by sizing after layout resolution. Documented that
+`update_tooltip_sizes()` runs too late in the live render path, so the current
+frame can render from stale `layout_rect` data even though tooltip line data is
+fresh.
+
 ## [2026-04-20] ingest | tooltip double shell
 
 Added `investigations/tooltip-double-shell.md` to capture the duplicate

@@ -213,7 +213,7 @@ fn emit_strata_cached(
     };
 
     for &(id, rect, clip_rect, eff_alpha) in &render_list {
-        if try_use_cached(batch, snapshots, dirty_ids, id) {
+        if try_use_cached(batch, snapshots, dirty_ids, registry, id) {
             stats.cached += 1;
             continue;
         }
@@ -251,12 +251,13 @@ fn try_use_cached(
     batch: &mut QuadBatch,
     snapshots: &HashMap<u64, FrameQuadSnapshot>,
     dirty_ids: Option<&FxHashSet<u64>>,
+    registry: &crate::widget::WidgetRegistry,
     id: u64,
 ) -> bool {
     let Some(dirty_ids) = dirty_ids else {
         return false;
     };
-    if dirty_ids.contains(&id) {
+    if frame_or_ancestor_is_dirty(id, dirty_ids, registry) {
         return false;
     }
 
@@ -265,6 +266,21 @@ fn try_use_cached(
     };
     batch.append_snapshot(snapshot);
     true
+}
+
+fn frame_or_ancestor_is_dirty(
+    id: u64,
+    dirty_ids: &FxHashSet<u64>,
+    registry: &crate::widget::WidgetRegistry,
+) -> bool {
+    let mut current_id = Some(id);
+    while let Some(frame_id) = current_id {
+        if dirty_ids.contains(&frame_id) {
+            return true;
+        }
+        current_id = registry.get(frame_id).and_then(|frame| frame.parent_id);
+    }
+    false
 }
 
 fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
@@ -373,4 +389,45 @@ pub fn rebuild_dirty_strata_batches_for_registry(
             elapsed_secs,
         },
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::frame_or_ancestor_is_dirty;
+    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+    use rustc_hash::FxHashSet;
+
+    #[test]
+    fn cached_descendants_of_dirty_parents_are_not_clean() {
+        let mut registry = WidgetRegistry::new();
+
+        let root = Frame::new(WidgetType::Frame, Some("Root".to_string()), None);
+        let root_id = root.id;
+        registry.register(root);
+
+        let parent = Frame::new(
+            WidgetType::Frame,
+            Some("Tooltip".to_string()),
+            Some(root_id),
+        );
+        let parent_id = parent.id;
+        registry.register(parent);
+        registry.add_child(root_id, parent_id);
+
+        let child = Frame::new(
+            WidgetType::Frame,
+            Some("TooltipNineSlice".to_string()),
+            Some(parent_id),
+        );
+        let child_id = child.id;
+        registry.register(child);
+        registry.add_child(parent_id, child_id);
+
+        let dirty_ids = FxHashSet::from_iter([parent_id]);
+
+        assert!(
+            frame_or_ancestor_is_dirty(child_id, &dirty_ids, &registry),
+            "cached child snapshots must be discarded when the parent frame is dirty"
+        );
+    }
 }

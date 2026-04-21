@@ -111,8 +111,8 @@ fn build_screenshot_batch(
         let mut fs = font_system.borrow_mut();
         let buckets = {
             let mut state = env.state().borrow_mut();
-            state.ensure_layout_rects();
             wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut fs);
+            state.ensure_layout_rects();
             let _ = state.get_strata_buckets();
             state.strata_buckets.as_ref().unwrap().clone()
         };

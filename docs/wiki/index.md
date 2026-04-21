@@ -70,6 +70,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[transparent-wrapper-render-order]] | Renderless `Frame`/`ScrollFrame` wrappers were creating fake z-order boundaries; descendant regions now hoist through them |
 | [[talent-sheen]] | 22s synchronized sweep; white rectangle bug when masking broken |
 | [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
+| [[tooltip-layout-timing]] | Tooltip sizing ran after layout resolution, so one frame could use stale bounds |
 | [[tooltip-double-shell]] | Fake bootstrap `NineSlice` plus Rust fallback shell caused duplicate tooltip chrome |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
