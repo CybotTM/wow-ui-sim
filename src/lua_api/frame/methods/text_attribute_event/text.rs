@@ -341,7 +341,7 @@ fn sync_button_text_child(
 }
 
 fn update_auto_text_height(state: &mut LuaState, id: u64) {
-    let Some((is_fontstring, has_text, width, width_is_text_auto, word_wrap)) =
+    let Some((is_fontstring, has_text, width, width_is_text_auto, word_wrap, height)) =
         (match borrow_state(state) {
             Ok(sim) => sim.widgets.get(id).map(|frame| {
                 (
@@ -350,6 +350,7 @@ fn update_auto_text_height(state: &mut LuaState, id: u64) {
                     frame.width,
                     frame.width_is_text_auto,
                     frame.word_wrap,
+                    frame.height,
                 )
             }),
             Err(_) => return,
@@ -357,7 +358,7 @@ fn update_auto_text_height(state: &mut LuaState, id: u64) {
     else {
         return;
     };
-    if !is_fontstring || !has_text {
+    if !is_fontstring || !has_text || height.abs() > f32::EPSILON {
         return;
     }
     let width_is_explicit = word_wrap && width > 0.0 && !width_is_text_auto;
