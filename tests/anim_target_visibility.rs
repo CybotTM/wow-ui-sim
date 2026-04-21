@@ -165,3 +165,41 @@ fn get_target_resolves_child_key() {
     )
     .unwrap();
 }
+
+#[test]
+fn child_key_alpha_only_updates_target_texture() {
+    let env = setup();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestChildAlphaOwner", UIParent)
+        f:SetAlpha(1)
+        local tex = f:CreateTexture("MyTex", "ARTWORK")
+        tex:SetAlpha(1)
+        f.MyTex = tex
+        local ag = f:CreateAnimationGroup()
+        local anim = ag:CreateAnimation("Alpha")
+        anim:SetDuration(1.0)
+        anim:SetFromAlpha(0)
+        anim:SetToAlpha(1)
+        anim:SetChildKey("MyTex")
+        ag:Play()
+    "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.5).unwrap();
+
+    let owner_alpha: f64 = env.eval("return TestChildAlphaOwner:GetAlpha()").unwrap();
+    let tex_alpha: f64 = env
+        .eval("return TestChildAlphaOwner.MyTex:GetAlpha()")
+        .unwrap();
+
+    assert!(
+        (owner_alpha - 1.0).abs() < 0.01,
+        "owner alpha should remain unchanged, got {owner_alpha}"
+    );
+    assert!(
+        (tex_alpha - 0.5).abs() < 0.1,
+        "child alpha should animate to ~0.5 at halfway point, got {tex_alpha}"
+    );
+}

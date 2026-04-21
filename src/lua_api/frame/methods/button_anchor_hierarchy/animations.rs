@@ -880,12 +880,16 @@ pub(crate) fn advance_animation_groups(
 
 struct AnimationGroupAdvance {
     owner_id: u64,
-    parent_effective_alpha: f32,
-    pending_alpha: Option<f64>,
-    restore_saved_alpha: Option<f32>,
+    alpha_updates: Vec<AlphaUpdate>,
     flipbook_updates: Vec<FlipbookUpdate>,
     loop_count: u32,
     frame_id: u64,
+}
+
+struct AlphaUpdate {
+    target_id: u64,
+    pending_alpha: Option<f64>,
+    restore_saved_alpha: Option<f32>,
 }
 
 struct FlipbookUpdate {
@@ -903,26 +907,34 @@ fn advance_animation_group(
     finished_scripts: &mut Vec<u64>,
 ) -> Option<AnimationGroupAdvance> {
     let owner_id = sim.animation_groups.get(&group_id)?.owner_frame_id;
-    let parent_effective_alpha = sim
-        .widgets
-        .get(owner_id)
-        .and_then(|frame| frame.parent_id)
-        .and_then(|parent_id| sim.widgets.get(parent_id))
-        .map(|parent| parent.effective_alpha)
-        .unwrap_or(1.0_f32);
-    let saved_alpha = sim
-        .widgets
-        .get(owner_id)
-        .map(|frame| frame.alpha)
-        .unwrap_or(1.0_f32);
+    let alpha_target_ids_by_animation = sim
+        .animation_groups
+        .get(&group_id)
+        .map(|group| resolve_group_alpha_targets(sim, group))
+        .unwrap_or_default();
+    let unique_alpha_target_ids = unique_alpha_targets(&alpha_target_ids_by_animation);
+    let saved_alphas: std::collections::HashMap<u64, f32> = unique_alpha_target_ids
+        .iter()
+        .copied()
+        .map(|target_id| {
+            let alpha = sim
+                .widgets
+                .get(target_id)
+                .map(|frame| frame.alpha)
+                .unwrap_or(1.0);
+            (target_id, alpha)
+        })
+        .collect();
     let mut loop_count = 0u32;
-    let (pending_alpha, restore_saved_alpha, flipbook_updates, frame_id) = {
+    let (alpha_updates, flipbook_updates, frame_id) = {
         let group = sim.animation_groups.get_mut(&group_id)?;
         if !group.playing || group.paused {
             return None;
         }
 
-        group.saved_alphas.entry(owner_id).or_insert(saved_alpha);
+        for (&target_id, &saved_alpha) in &saved_alphas {
+            group.saved_alphas.entry(target_id).or_insert(saved_alpha);
+        }
         let total_duration = current_group_total_duration(group);
 
         if group.pending_finish {
@@ -938,27 +950,33 @@ fn advance_animation_group(
         }
 
         sync_animation_elapsed(group);
-        let pending_alpha = group_current_alpha(group, group.elapsed);
+        let mut alpha_updates = Vec::new();
+        for target_id in unique_alpha_target_ids.iter().copied() {
+            let pending_alpha = group_current_alpha_for_target(
+                group,
+                group.elapsed,
+                target_id,
+                &alpha_target_ids_by_animation,
+            );
+            let restore_saved_alpha = if !group.playing && group.done && !group.set_to_final_alpha {
+                group.saved_alphas.get(&target_id).copied()
+            } else {
+                None
+            };
+            alpha_updates.push(AlphaUpdate {
+                target_id,
+                pending_alpha,
+                restore_saved_alpha,
+            });
+        }
         let flipbook_updates = collect_group_flipbook_updates(group);
         let frame_id = animation_group_frame_id(group);
-        let restore_saved_alpha = if !group.playing && group.done && !group.set_to_final_alpha {
-            group.saved_alphas.get(&owner_id).copied()
-        } else {
-            None
-        };
-        (
-            pending_alpha,
-            restore_saved_alpha,
-            flipbook_updates,
-            frame_id,
-        )
+        (alpha_updates, flipbook_updates, frame_id)
     };
 
     Some(AnimationGroupAdvance {
         owner_id,
-        parent_effective_alpha,
-        pending_alpha,
-        restore_saved_alpha,
+        alpha_updates,
         flipbook_updates,
         loop_count,
         frame_id,
@@ -1025,28 +1043,42 @@ fn apply_animation_group_outcome(
     sim: &mut crate::lua_api::state::SimState,
     result: &AnimationGroupAdvance,
 ) {
-    let mut alpha_changed = false;
-    if let Some(alpha) = result.pending_alpha
-        && let Some(frame) = sim.widgets.get_mut_visual(result.owner_id)
-        && (frame.alpha as f64 - alpha).abs() > f32::EPSILON as f64
-    {
-        frame.alpha = alpha as f32;
-        alpha_changed = true;
-    }
+    let mut changed_alpha_targets = Vec::new();
+    for alpha_update in &result.alpha_updates {
+        let mut changed = false;
+        if let Some(alpha) = alpha_update.pending_alpha
+            && let Some(frame) = sim.widgets.get_mut_visual(alpha_update.target_id)
+            && (frame.alpha as f64 - alpha).abs() > f32::EPSILON as f64
+        {
+            frame.alpha = alpha as f32;
+            changed = true;
+        }
 
-    if let Some(saved_alpha) = result.restore_saved_alpha
-        && let Some(frame) = sim.widgets.get_mut_visual(result.owner_id)
-        && (frame.alpha - saved_alpha).abs() > f32::EPSILON
-    {
-        frame.alpha = saved_alpha;
-        alpha_changed = true;
+        if let Some(saved_alpha) = alpha_update.restore_saved_alpha
+            && let Some(frame) = sim.widgets.get_mut_visual(alpha_update.target_id)
+            && (frame.alpha - saved_alpha).abs() > f32::EPSILON
+        {
+            frame.alpha = saved_alpha;
+            changed = true;
+        }
+
+        if changed {
+            changed_alpha_targets.push(alpha_update.target_id);
+        }
     }
 
     apply_group_flipbook_updates(sim, result.owner_id, &result.flipbook_updates);
 
-    if alpha_changed {
+    for target_id in changed_alpha_targets {
+        let parent_effective_alpha = sim
+            .widgets
+            .get(target_id)
+            .and_then(|frame| frame.parent_id)
+            .and_then(|parent_id| sim.widgets.get(parent_id))
+            .map(|parent| parent.effective_alpha)
+            .unwrap_or(1.0_f32);
         sim.widgets
-            .propagate_effective_alpha(result.owner_id, result.parent_effective_alpha);
+            .propagate_effective_alpha(target_id, parent_effective_alpha);
     }
 }
 
@@ -1061,26 +1093,61 @@ fn fire_animation_group_scripts(
     Ok(())
 }
 
-fn group_current_alpha(
+fn resolve_group_alpha_targets(
+    sim: &crate::lua_api::state::SimState,
+    group: &crate::lua_api::animation::AnimGroupState,
+) -> Vec<Option<u64>> {
+    group
+        .animations
+        .iter()
+        .map(|animation| {
+            if !matches!(
+                animation.anim_type,
+                crate::lua_api::animation::AnimationType::Alpha
+            ) {
+                return None;
+            }
+            resolve_anim_target_id(sim, group.owner_frame_id, animation.child_key.as_deref())
+        })
+        .collect()
+}
+
+fn unique_alpha_targets(alpha_targets_by_animation: &[Option<u64>]) -> Vec<u64> {
+    let mut seen = std::collections::HashSet::new();
+    let mut unique = Vec::new();
+    for target_id in alpha_targets_by_animation.iter().flatten().copied() {
+        if seen.insert(target_id) {
+            unique.push(target_id);
+        }
+    }
+    unique
+}
+
+fn group_current_alpha_for_target(
     group: &crate::lua_api::animation::AnimGroupState,
     elapsed: f64,
+    target_id: u64,
+    alpha_targets_by_animation: &[Option<u64>],
 ) -> Option<f64> {
     use std::collections::BTreeMap;
 
-    let mut groups: BTreeMap<u32, Vec<&crate::lua_api::animation::AnimState>> = BTreeMap::new();
-    for animation in &group.animations {
-        groups.entry(animation.order).or_default().push(animation);
+    let mut groups: BTreeMap<u32, Vec<usize>> = BTreeMap::new();
+    for (index, animation) in group.animations.iter().enumerate() {
+        groups.entry(animation.order).or_default().push(index);
     }
     let mut remaining = elapsed;
-    for (_order, anims) in groups {
-        let order_duration = anims
+    for (_order, animation_indices) in groups {
+        let order_duration = animation_indices
             .iter()
-            .map(|anim| anim.total_time())
+            .map(|&index| group.animations[index].total_time())
             .fold(0.0, f64::max);
         let within_order = remaining.min(order_duration);
         let mut current = None;
-        for anim in anims {
-            if let Some(alpha) = current_animation_alpha(anim, within_order) {
+        for &index in &animation_indices {
+            if alpha_targets_by_animation.get(index).copied().flatten() != Some(target_id) {
+                continue;
+            }
+            if let Some(alpha) = current_animation_alpha(&group.animations[index], within_order) {
                 current = Some(alpha);
             }
         }
