@@ -725,6 +725,51 @@ fn test_runtime_template_layers_can_anchor_to_template_child_parent_keys() {
 }
 
 #[test]
+fn test_rebuild_anchor_index_resolves_relative_key_to_late_layer_parent_key() {
+    let t = load_test_xml(
+        "anchor-index-rebuild-resolves-late-layer-parent-key",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="AnchorOrderFrame">
+                <Frames>
+                    <Frame parentKey="LoadSystem">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeKey="$parent.BottomBar" relativePoint="LEFT" x="48" y="0"/>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture parentKey="BottomBar">
+                            <Size x="400" y="30"/>
+                            <Anchors>
+                                <Anchor point="BOTTOM"/>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env.state().borrow_mut().widgets.rebuild_anchor_index();
+
+    t.env
+        .exec(
+            r#"
+            assert(AnchorOrderFrame.BottomBar ~= nil, "expected BottomBar layer parentKey to be attached on parent frame")
+            local point, relativeTo, relativePoint, x, y = AnchorOrderFrame.LoadSystem:GetPoint(1)
+            assert(point == "LEFT", "expected LEFT anchor point")
+            assert(relativeTo == AnchorOrderFrame.BottomBar, "expected LoadSystem to anchor to BottomBar after anchor index rebuild")
+            assert(relativePoint == "LEFT", "expected LEFT relative point")
+            assert(x == 48 and y == 0, "expected anchor offsets to be preserved")
+            "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_xml_instance_keeps_inherited_checkbutton_parent_key() {
     let t = load_test_xml(
         "xml-instance-inherited-checkbutton-parent-key",

@@ -23,6 +23,15 @@ pub(super) fn set_single_anchor(
 
     let (offset_x, offset_y) = anchor_offset(anchor);
     let relative_to_id = resolve_anchor_target(state, frame_id, anchor, frame_name);
+    let unresolved_relative = if relative_to_id.is_none() {
+        anchor
+            .relative_key
+            .as_ref()
+            .cloned()
+            .or_else(|| anchor.relative_to.as_ref().cloned())
+    } else {
+        None
+    };
 
     if let Some(rel_id) = relative_to_id {
         if state.widgets.would_create_anchor_cycle(frame_id, rel_id) {
@@ -33,13 +42,23 @@ pub(super) fn set_single_anchor(
     update_anchor_dependents(state, frame_id, point, relative_to_id);
 
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
-        frame.set_point(
-            point,
-            relative_to_id.map(|id| id as usize),
-            relative_point,
-            offset_x,
-            offset_y,
-        );
+        if let Some(relative_expr) = unresolved_relative {
+            frame.set_point_with_name(
+                point,
+                Some(relative_expr),
+                relative_point,
+                offset_x,
+                offset_y,
+            );
+        } else {
+            frame.set_point(
+                point,
+                relative_to_id.map(|id| id as usize),
+                relative_point,
+                offset_x,
+                offset_y,
+            );
+        }
     }
     state.widgets.mark_rect_dirty(frame_id);
 }

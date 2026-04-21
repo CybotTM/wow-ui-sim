@@ -53,6 +53,20 @@ fn create_children_and_finalize(
         crate::lua_api::globals::template::repair_direct_child_parent_keys(state, frame_id)
             .map_err(|error| LoadError::Lua(error.to_string()))
     })?;
+    env.with_state(|state| {
+        let mut sim = crate::lua_api::methods::borrow_state_mut(state)
+            .map_err(|error| LoadError::Lua(error.to_string()))?;
+        let child_ids = sim
+            .widgets
+            .get(frame_id)
+            .map(|frame| frame.children.clone())
+            .unwrap_or_default();
+        sim.widgets.resolve_named_anchor_targets_for_frame(frame_id);
+        for child_id in child_ids {
+            sim.widgets.resolve_named_anchor_targets_for_frame(child_id);
+        }
+        Ok::<(), LoadError>(())
+    })?;
     fire_frame_lifecycle(env, frame, frame_id, name, inherits, timing);
     Ok(())
 }

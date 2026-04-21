@@ -14,6 +14,94 @@ pub struct AnchorCyclePath {
 }
 
 impl WidgetRegistry {
+    fn is_parent_token(segment: &str) -> bool {
+        matches!(segment, "$parent" | "$Parent" | "$parentKey")
+    }
+
+    fn resolve_anchor_relative_expr(&self, frame_id: u64, expr: &str) -> Option<u64> {
+        let mut segments = expr.split('.');
+        let first = segments.next()?;
+        if Self::is_parent_token(first) {
+            let mut current_id = self.widgets.get(&frame_id)?.parent_id?;
+            for segment in segments {
+                if Self::is_parent_token(segment) {
+                    current_id = self.widgets.get(&current_id)?.parent_id?;
+                } else {
+                    let frame = self.widgets.get(&current_id)?;
+                    current_id = *frame.children_keys.get(segment)?;
+                }
+            }
+            return Some(current_id);
+        }
+        self.names.get(expr).copied()
+    }
+
+    fn collect_resolved_named_targets(&self, frame_id: u64) -> Vec<(usize, u64)> {
+        self.widgets
+            .get(&frame_id)
+            .map(|frame| {
+                frame
+                    .anchors
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(index, anchor)| {
+                        if anchor.relative_to_id.is_some() {
+                            return None;
+                        }
+                        let expr = anchor.relative_to.as_deref()?;
+                        self.resolve_anchor_relative_expr(frame_id, expr)
+                            .map(|target| (index, target))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    fn apply_resolved_named_targets(&mut self, frame_id: u64, resolved_targets: &[(usize, u64)]) {
+        if resolved_targets.is_empty() {
+            return;
+        }
+        if let Some(frame) = self.widgets.get_mut(&frame_id) {
+            for (index, target_id) in resolved_targets.iter().copied() {
+                if let Some(anchor) = frame.anchors.get_mut(index) {
+                    anchor.relative_to_id = Some(target_id as usize);
+                }
+            }
+        }
+    }
+
+    fn collect_direct_anchor_targets(&self, frame_id: u64) -> Vec<u64> {
+        self.widgets
+            .get(&frame_id)
+            .map(|frame| {
+                frame
+                    .anchors
+                    .iter()
+                    .filter_map(|anchor| anchor.relative_to_id.map(|target| target as u64))
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    fn reindex_anchor_dependents_for_frame(&mut self, frame_id: u64) {
+        let direct_targets = self.collect_direct_anchor_targets(frame_id);
+        for target in direct_targets {
+            self.anchor_dependents
+                .entry(target)
+                .or_default()
+                .insert(frame_id);
+        }
+    }
+
+    /// Resolve any named/relative-key anchors on a frame into concrete target IDs.
+    /// Safe to call repeatedly as children/layer regions become available.
+    pub fn resolve_named_anchor_targets_for_frame(&mut self, frame_id: u64) {
+        self.remove_all_anchor_dependents_for(frame_id);
+        let resolved_targets = self.collect_resolved_named_targets(frame_id);
+        self.apply_resolved_named_targets(frame_id, &resolved_targets);
+        self.reindex_anchor_dependents_for_frame(frame_id);
+    }
+
     /// Check if setting a point from `frame_id` to `relative_to_id` would create a cycle.
     /// A cycle exists if relative_to (or any of its anchor dependencies) already
     /// depends on frame_id.
@@ -155,20 +243,9 @@ impl WidgetRegistry {
     /// and frame creation.
     pub fn rebuild_anchor_index(&mut self) {
         self.anchor_dependents.clear();
-        let entries: Vec<(u64, u64)> = self
-            .widgets
-            .values()
-            .flat_map(|f| {
-                f.anchors
-                    .iter()
-                    .filter_map(move |a| a.relative_to_id.map(|target| (target as u64, f.id)))
-            })
-            .collect();
-        for (target, frame_id) in entries {
-            self.anchor_dependents
-                .entry(target)
-                .or_default()
-                .insert(frame_id);
+        let frame_ids: Vec<u64> = self.widgets.keys().copied().collect();
+        for frame_id in frame_ids {
+            self.resolve_named_anchor_targets_for_frame(frame_id);
         }
     }
 }
