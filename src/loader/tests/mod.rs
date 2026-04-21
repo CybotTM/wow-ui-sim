@@ -1,6 +1,7 @@
 //! Tests for the addon loader.
 
 mod account_store;
+mod button_text;
 mod screen_selection;
 mod xml_basics;
 
