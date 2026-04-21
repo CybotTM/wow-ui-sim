@@ -2,6 +2,10 @@
 
 A World of Warcraft UI simulator for addon testing and UI rendering. Supports headless test workflows plus frame-tree and screenshot output — no WoW client required.
 
+## Community
+
+Related project Discord (wowless): <https://discord.gg/rTwWcfJXuz>
+
 ## UI Gallery
 
 | Main Screen | Spellbook |
