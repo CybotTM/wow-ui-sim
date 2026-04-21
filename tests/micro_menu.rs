@@ -306,6 +306,144 @@ fn micro_menu_buttons_have_sized_atlas_textures() {
 }
 
 #[test]
+fn micro_menu_layout_stays_locked() {
+    let env = setup_env();
+    let result: String = env
+        .eval(
+            r#"
+            local EPS = 0.75
+
+            local function approx(actual, expected, eps)
+                if type(actual) ~= "number" or type(expected) ~= "number" then
+                    return false
+                end
+                return math.abs(actual - expected) <= (eps or EPS)
+            end
+
+            local function rect(path, frame)
+                if type(frame) ~= "table" then
+                    return nil, path .. "_missing"
+                end
+                local l, b, w, h = frame:GetRect()
+                if not (l and b and w and h) then
+                    return nil, path .. "_missing_rect"
+                end
+                return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+            end
+
+            if UpdateMicroButtons then
+                UpdateMicroButtons()
+            end
+            if MicroMenu and MicroMenu.Layout then
+                MicroMenu:Layout()
+            end
+            if MicroMenuContainer and MicroMenuContainer.Layout then
+                MicroMenuContainer:Layout()
+            end
+
+            local bar = MicroButtonAndBagsBar
+            local container = MicroMenuContainer
+            local menu = MicroMenu
+            if not bar then return "bar_missing" end
+            if not container then return "container_missing" end
+            if not menu then return "menu_missing" end
+
+            local barRect, barErr = rect("bar", bar)
+            if not barRect then return barErr end
+            if not approx(barRect.w, 232, 0.1) then return "bar_width=" .. tostring(barRect.w) end
+            if not approx(barRect.h, 80, 0.1) then return "bar_height=" .. tostring(barRect.h) end
+            if barRect.l < 0 or barRect.b < 0 then
+                return "bar_out_of_bounds=" .. tostring(barRect.l) .. "," .. tostring(barRect.b)
+            end
+
+            local containerRect, containerErr = rect("container", container)
+            if not containerRect then return containerErr end
+
+            local menuRect, menuErr = rect("menu", menu)
+            if not menuRect then return menuErr end
+
+            if not approx(containerRect.r, barRect.r) then
+                return "container_right=" .. tostring(containerRect.r)
+            end
+            if not approx(containerRect.b, barRect.b) then
+                return "container_bottom=" .. tostring(containerRect.b)
+            end
+            if not approx(menuRect.r, containerRect.r) then
+                return "menu_right=" .. tostring(menuRect.r)
+            end
+            if not approx(menuRect.b, containerRect.b) then
+                return "menu_bottom=" .. tostring(menuRect.b)
+            end
+            if containerRect.w + EPS < menuRect.w then
+                return "container_width_lt_menu_width"
+            end
+            if containerRect.h + EPS < menuRect.h then
+                return "container_height_lt_menu_height"
+            end
+
+            local buttonNames = {
+                "CharacterMicroButton",
+                "ProfessionMicroButton",
+                "PlayerSpellsMicroButton",
+                "AchievementMicroButton",
+                "QuestLogMicroButton",
+            }
+
+            local buttonRects = {}
+            for index, name in ipairs(buttonNames) do
+                local button = _G[name]
+                local r, e = rect(name, button)
+                if not r then return e end
+                if not button:IsShown() then
+                    return name .. "_hidden"
+                end
+                if not approx(r.w, 32, 0.1) or not approx(r.h, 40, 0.1) then
+                    return name .. "_size=" .. tostring(r.w) .. "x" .. tostring(r.h)
+                end
+                if not approx(r.b, menuRect.b) then
+                    return name .. "_bottom=" .. tostring(r.b)
+                end
+                buttonRects[index] = r
+            end
+
+            for i = 2, #buttonRects do
+                local delta = buttonRects[i].l - buttonRects[i - 1].l
+                if not approx(delta, 27) then
+                    return "button_spacing_" .. tostring(i) .. "=" .. tostring(delta)
+                end
+            end
+
+            local characterRect = buttonRects[1]
+            if not approx(characterRect.l, menuRect.l) then
+                return "character_left=" .. tostring(characterRect.l)
+            end
+
+            local mainMenuRect, mainMenuErr = rect("MainMenuMicroButton", MainMenuMicroButton)
+            if not mainMenuRect then return mainMenuErr end
+            if not MainMenuMicroButton:IsShown() then
+                return "MainMenuMicroButton_hidden"
+            end
+            if not approx(mainMenuRect.w, 32, 0.1) or not approx(mainMenuRect.h, 40, 0.1) then
+                return "MainMenuMicroButton_size=" .. tostring(mainMenuRect.w) .. "x" .. tostring(mainMenuRect.h)
+            end
+            if not approx(mainMenuRect.r, menuRect.r) then
+                return "MainMenuMicroButton_right=" .. tostring(mainMenuRect.r)
+            end
+            if not approx(mainMenuRect.b, menuRect.b) then
+                return "MainMenuMicroButton_bottom=" .. tostring(mainMenuRect.b)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Micro menu layout should remain locked: {result}"
+    );
+}
+
+#[test]
 fn micro_menu_professions_button_loads_and_opens_panel() {
     let env = setup_env();
     assert!(
