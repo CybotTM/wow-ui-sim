@@ -50,3 +50,12 @@ fn admin_set_net_stats_overwrites_previous_values() {
         env.eval("return GetNetStats()").expect("GetNetStats");
     assert_eq!((bw_in, bw_out, lat_home, lat_world), (1.0, 2.0, 3.0, 4.0));
 }
+
+#[test]
+fn get_downloaded_percentage_defaults_to_fully_downloaded() {
+    let env = WowLuaEnv::new().expect("env");
+    let percent: f64 = env
+        .eval("return GetDownloadedPercentage()")
+        .expect("GetDownloadedPercentage should be callable");
+    assert_eq!(percent, 1.0);
+}

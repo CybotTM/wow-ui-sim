@@ -254,6 +254,7 @@ fn startup_followup_surfaces_expose_safe_defaults() {
             bool,
             bool,
             bool,
+            bool,
         ) = env
             .eval(
                 r##"
@@ -270,6 +271,7 @@ fn startup_followup_surfaces_expose_safe_defaults() {
                     GetNumGuildPerks() == 0,
                     GetGuildRenameRequired() == false,
                     type(GetAvailableBandwidth()) == "number",
+                    type(GetDownloadedPercentage()) == "number",
                     pcall(ClearCursorHoveredItem),
                     pcall(RequestGuildRewards)
                 "##,
@@ -284,9 +286,35 @@ fn startup_followup_surfaces_expose_safe_defaults() {
             )
             .expect("catalog shop nav soundkit probe should run");
 
-        assert_eq!(
-            result,
-            (3, true, true, true, true, true, true, true, true, true, true, true),
+        let (
+            color_count,
+            item_level_color_ok,
+            club_stream_ok,
+            warband_scene_ok,
+            appearance_slot_info_ok,
+            illusion_slot_info_ok,
+            unit_in_subgroup_player_ok,
+            guild_perks_ok,
+            guild_rename_required_ok,
+            available_bandwidth_ok,
+            downloaded_percentage_ok,
+            clear_cursor_hovered_item_ok,
+            request_guild_rewards_ok,
+        ) = result;
+        assert_eq!(color_count, 3, "GetItemLevelColor should return three values");
+        assert!(
+            item_level_color_ok
+                && club_stream_ok
+                && warband_scene_ok
+                && appearance_slot_info_ok
+                && illusion_slot_info_ok
+                && unit_in_subgroup_player_ok
+                && guild_perks_ok
+                && guild_rename_required_ok
+                && available_bandwidth_ok
+                && downloaded_percentage_ok
+                && clear_cursor_hovered_item_ok
+                && request_guild_rewards_ok,
             "Follow-up startup surfaces should expose safe defaults for Blizzard callers"
         );
         assert!(
