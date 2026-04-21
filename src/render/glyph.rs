@@ -29,6 +29,8 @@ struct GlyphEntry {
     /// Glyph bitmap dimensions in pixels.
     width: u32,
     height: u32,
+    /// Swash placement offset from pen position to image left edge.
+    left: i32,
     /// Swash placement offset from pen position to image top edge.
     top: i32,
 }
@@ -196,7 +198,14 @@ impl GlyphAtlas {
             image.content,
         );
 
-        let entry = build_glyph_entry(atlas_x, atlas_y, width, height, image.placement.top);
+        let entry = build_glyph_entry(
+            atlas_x,
+            atlas_y,
+            width,
+            height,
+            image.placement.left,
+            image.placement.top,
+        );
 
         self.entries.insert(cache_key, entry);
         self.dirty = true;
@@ -227,7 +236,14 @@ impl GlyphAtlas {
     }
 }
 
-fn build_glyph_entry(atlas_x: u32, atlas_y: u32, width: u32, height: u32, top: i32) -> GlyphEntry {
+fn build_glyph_entry(
+    atlas_x: u32,
+    atlas_y: u32,
+    width: u32,
+    height: u32,
+    left: i32,
+    top: i32,
+) -> GlyphEntry {
     GlyphEntry {
         uv_x: atlas_x as f32 / GLYPH_ATLAS_SIZE as f32,
         uv_y: atlas_y as f32 / GLYPH_ATLAS_SIZE as f32,
@@ -235,6 +251,7 @@ fn build_glyph_entry(atlas_x: u32, atlas_y: u32, width: u32, height: u32, top: i
         uv_h: height as f32 / GLYPH_ATLAS_SIZE as f32,
         width,
         height,
+        left,
         top,
     }
 }
@@ -420,7 +437,7 @@ fn emit_glyphs_from_cache(
 
         for glyph in &run.glyphs {
             if let Some(entry) = glyph_atlas.ensure_glyph(font_system, glyph.cache_key) {
-                let glyph_x = bounds.x + x_offset + glyph.x as f32 + offset_x;
+                let glyph_x = bounds.x + x_offset + glyph.x as f32 + entry.left as f32 + offset_x;
                 let glyph_y =
                     bounds.y + y_offset + run.line_y + glyph.y as f32 - entry.top as f32 + offset_y;
                 let glyph_bounds = Rectangle::new(
@@ -649,7 +666,7 @@ pub fn emit_text_quads(
 
 #[cfg(test)]
 mod tests {
-    use super::subpixel_mask_alpha;
+    use super::{build_glyph_entry, subpixel_mask_alpha};
 
     #[test]
     fn subpixel_mask_alpha_averages_rgb_channels() {
@@ -657,5 +674,12 @@ mod tests {
         assert_eq!(subpixel_mask_alpha(255, 255, 255), 255);
         assert_eq!(subpixel_mask_alpha(255, 0, 0), 85);
         assert_eq!(subpixel_mask_alpha(0, 255, 128), 127);
+    }
+
+    #[test]
+    fn glyph_entry_keeps_left_and_top_placement_offsets() {
+        let entry = build_glyph_entry(8, 16, 20, 30, 4, 7);
+        assert_eq!(entry.left, 4);
+        assert_eq!(entry.top, 7);
     }
 }
