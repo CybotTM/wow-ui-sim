@@ -1,6 +1,10 @@
 //! Tests for hero talent spec resolution.
 
+use std::path::PathBuf;
+
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::shader::load_texture_or_crop;
+use wow_ui_sim::texture::TextureManager;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -201,4 +205,102 @@ fn test_class_talents_switch_methods_update_seeded_spec_and_loadout_state() {
         .unwrap();
 
     assert_eq!(result, "202,102,301");
+}
+
+#[test]
+fn test_active_hero_node_icon_texture_path_resolves_to_real_asset() {
+    let env = env();
+    let texture_path: String = env
+        .eval(
+            r#"
+            local config = C_ClassTalents.GetActiveConfigID()
+            local configInfo = C_Traits.GetConfigInfo(config)
+            local treeID = configInfo and configInfo.treeIDs and configInfo.treeIDs[1]
+            assert(treeID, "expected active trait tree")
+
+            local nodes = C_Traits.GetTreeNodes(treeID) or {}
+            for _, nodeID in ipairs(nodes) do
+                local node = C_Traits.GetNodeInfo(config, nodeID)
+                local entryID = node and node.activeEntry and node.activeEntry.entryID
+                if entryID and node.subTreeID then
+                    local entry = C_Traits.GetEntryInfo(config, entryID)
+                    local definitionID = entry and entry.definitionID
+                    if definitionID and definitionID > 0 then
+                        local definition = C_Traits.GetDefinitionInfo(definitionID)
+                        local spellID = definition and definition.spellID
+                        if spellID and spellID > 0 then
+                            local texturePath = C_Spell.GetSpellTexture(spellID)
+                            if type(texturePath) == "string" and texturePath ~= "" then
+                                return texturePath
+                            end
+                        end
+                    end
+                end
+            end
+
+            error("expected at least one visible hero node with spell-backed icon path")
+            "#,
+        )
+        .unwrap();
+
+    let mut mgr = TextureManager::new(PathBuf::from("./textures"));
+    let texture = load_texture_or_crop(&mut mgr, &texture_path).unwrap_or_else(|| {
+        panic!("hero node spell texture did not resolve: {texture_path}");
+    });
+
+    assert!(
+        texture.rgba.chunks_exact(4).any(|px| px[3] > 0),
+        "hero node texture is fully transparent: {}",
+        texture_path
+    );
+}
+
+#[test]
+fn test_active_hero_subtree_exposes_multiple_visible_nodes_and_edges() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Force a deterministic active hero subtree for Protection.
+            local ok = C_Traits.SetSelection(1, 99838, 123361) -- Lightsmith
+            assert(ok, "expected SetSelection for hero subtree to succeed")
+            assert(C_ClassTalents.GetActiveHeroTalentSpec() == 49, "expected active subtree 49")
+
+            local treeID = C_ClassTalents.GetTraitTreeForSpec(66)
+            local nodes = C_Traits.GetTreeNodes(treeID) or {}
+            local total, visible, edgeReady = 0, 0, 0
+            for _, nodeID in ipairs(nodes) do
+                local node = C_Traits.GetNodeInfo(1, nodeID)
+                if node and node.subTreeID == 49 then
+                    total = total + 1
+                    if node.isVisible then visible = visible + 1 end
+                    if node.meetsEdgeRequirements then edgeReady = edgeReady + 1 end
+                end
+            end
+
+            local root = C_Traits.GetNodeInfo(1, 95228)
+            assert(root and root.isVisible, "expected representative hero node to be visible")
+            assert(total >= 10, "expected many hero nodes in subtree; got " .. tostring(total))
+            assert(visible >= 10, "expected most hero nodes visible; got " .. tostring(visible))
+            assert(edgeReady >= 2, "expected at least two edge-ready hero nodes; got " .. tostring(edgeReady))
+
+            return table.concat({tostring(total), tostring(visible), tostring(edgeReady)}, ",")
+            "#,
+        )
+        .unwrap();
+
+    let parts: Vec<u32> = result
+        .split(',')
+        .map(|s| s.parse::<u32>().expect("count should parse"))
+        .collect();
+    assert_eq!(parts.len(), 3, "expected total,visible,edgeReady");
+    assert!(parts[0] >= 10, "unexpected total hero node count: {result}");
+    assert!(
+        parts[1] >= 10,
+        "unexpected visible hero node count: {result}"
+    );
+    assert!(
+        parts[2] >= 2,
+        "unexpected edge-ready hero node count: {result}"
+    );
 }

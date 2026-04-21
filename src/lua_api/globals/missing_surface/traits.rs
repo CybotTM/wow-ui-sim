@@ -187,15 +187,21 @@ fn check_spec_conditions_met(
     node: &crate::traits::TraitNodeInfo,
     state: &crate::lua_api::SimState,
 ) -> bool {
+    let mut saw_spec_condition = false;
+    let mut has_matching_spec = false;
     for &cond_id in node.cond_ids.iter().chain(node.group_cond_ids.iter()) {
         let Some(cond) = TRAIT_COND_DB.get(&cond_id) else {
             continue;
         };
-        if cond.cond_type == 1 && !spec_set_contains_active_spec(cond.spec_set_id, state) {
-            return false;
+        if cond.cond_type != 1 {
+            continue;
+        }
+        saw_spec_condition = true;
+        if spec_set_contains_active_spec(cond.spec_set_id, state) {
+            has_matching_spec = true;
         }
     }
-    true
+    !saw_spec_condition || has_matching_spec
 }
 
 fn check_node_available(

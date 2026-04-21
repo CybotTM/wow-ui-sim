@@ -50,6 +50,39 @@ Follow-up restore coverage:
 - `C_ClassTalents.GetNextStarterBuildPurchase()` now feeds the real `PlayerSpellsFrame.TalentsFrame:UpdateStarterBuildHighlights()` path
 - `C_ClassTalents.HasUnspentHeroTalentPoints()` now reports the active hero subtree's remaining points and gates the export callback in `Blizzard_ClassTalentsFrame`
 
+## Hero subtree visibility regression (2026-04-21)
+
+After restoring hero node icon assets, the hero panel still rendered with only a single node and missing connector edges. The issue was not texture loading.
+
+### Symptom
+
+- `HeroTalentsContainer.ExpandedContainer.NodesContainer` rendered one visible node button instead of the full subtree
+- edge atlases (for example `talents-arrow-line-gray`) were mostly absent because upstream node visibility gated them out
+
+### Root Cause
+
+`check_spec_conditions_met()` in `src/lua_api/globals/missing_surface/traits.rs` treated multiple `cond_type == 1` spec-set conditions as strict `AND`.
+
+Hero nodes in tree `790` frequently carry both Paladin spec-set conditions in `group_cond_ids`:
+
+- Protection set (`49234` / spec set `28`)
+- Holy set (`49235` / spec set `27`)
+
+With `AND` semantics, these nodes were impossible to satisfy for a single active spec, so `GetNodeInfo(...).isVisible` was false for most hero nodes. The frame builder then had no nodes/edges to render.
+
+### Fix
+
+- Changed `check_spec_conditions_met()` to use `OR` semantics across spec-set conditions:
+  - no spec conditions => visible
+  - at least one spec condition => visible when any condition matches active spec
+- Added regression coverage in `tests/hero_talents.rs`:
+  - `test_active_hero_subtree_exposes_multiple_visible_nodes_and_edges`
+  - verifies active hero subtree exposes many visible nodes (not just one) and has edge-ready nodes
+
+### Result
+
+`HeroTalentsContainer` now emits the full hero subtree again (multiple node buttons and connector-edge atlases), so border/edge visuals come back with the same render path.
+
 Tests:
 
 - `tests/class_talents_config.rs`
@@ -60,6 +93,11 @@ Relevant tests:
 
 - `tests/admin_spec_talent_api.rs`
 - `tests/spell_api.rs`
+
+## Sources
+
+- [traits.rs](/syncthing/Sync/Projects/wow/wow-ui-sim-rilua/src/lua_api/globals/missing_surface/traits.rs) — spec-condition visibility logic
+- [hero_talents.rs](/syncthing/Sync/Projects/wow/wow-ui-sim-rilua/tests/hero_talents.rs) — regression coverage for hero subtree node visibility
 
 ## See Also
 

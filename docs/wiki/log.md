@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-21] update | hero talents visibility and edges
+
+Updated `investigations/class-talents-trait-loadout-state.md` with the hero
+subtree rendering regression where only one node appeared and connector edges
+were missing. Documented root cause in
+`check_spec_conditions_met()` (`src/lua_api/globals/missing_surface/traits.rs`):
+spec-set conditions were treated as `AND` instead of `OR` across shared hero
+node groups. Recorded the fix and new regression test
+`test_active_hero_subtree_exposes_multiple_visible_nodes_and_edges` in
+`tests/hero_talents.rs`. Updated `index.md` summary for the investigation page.
+
 ## [2026-04-20] investigate | tooltip layout timing
 
 Added `investigations/tooltip-layout-timing.md` to capture the tooltip

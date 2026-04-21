@@ -203,8 +203,24 @@ impl WidgetRegistry {
             .get(&parent_id)
             .map(|p| (p.effective_alpha, p.effective_scale))
             .unwrap_or((1.0, 1.0));
+        let old_parent_id = self.widgets.get(&child_id).and_then(|child| child.parent_id);
+        if old_parent_id != Some(parent_id) {
+            if let Some(old_parent_id) = old_parent_id
+                && let Some(old_parent) = self.widgets.get_mut(&old_parent_id)
+            {
+                old_parent.children.retain(|&id| id != child_id);
+                old_parent
+                    .children_keys
+                    .retain(|_, mapped_id| *mapped_id != child_id);
+            }
+            if let Some(child) = self.widgets.get_mut(&child_id) {
+                child.parent_id = Some(parent_id);
+            }
+        }
         if let Some(parent) = self.widgets.get_mut(&parent_id) {
-            parent.children.push(child_id);
+            if !parent.children.contains(&child_id) {
+                parent.children.push(child_id);
+            }
         }
         self.propagate_effective_alpha(child_id, parent_eff_alpha);
         self.propagate_effective_scale(child_id, parent_eff_scale);
@@ -673,5 +689,65 @@ mod tests {
         assert_eq!(batch.strata_mask, all_mask);
         assert_eq!(batch.frame_ids, None);
         assert!(!registry.has_dirty_frames());
+    }
+
+    #[test]
+    fn add_child_reparents_child_and_updates_effective_alpha() {
+        let mut registry = WidgetRegistry::default();
+
+        let mut parent_a = frame(1, WidgetType::Frame, None, FrameStrata::High);
+        parent_a.alpha = 1.0;
+        let mut parent_b = frame(2, WidgetType::Frame, None, FrameStrata::High);
+        parent_b.alpha = 0.0;
+        let mut child = frame(3, WidgetType::Texture, Some(1), FrameStrata::High);
+        child.alpha = 1.0;
+
+        registry.register(parent_a);
+        registry.register(parent_b);
+        registry.register(child);
+
+        registry.add_child(1, 3);
+        registry.propagate_all_effective_alpha();
+        assert_eq!(
+            registry
+                .get(3)
+                .expect("child frame should exist after first parenting")
+                .effective_alpha,
+            1.0
+        );
+
+        registry.add_child(2, 3);
+        assert_eq!(
+            registry
+                .get(3)
+                .expect("child frame should remain registered after reparent")
+                .parent_id,
+            Some(2)
+        );
+        assert_eq!(
+            registry
+                .get(3)
+                .expect("child frame should keep updated effective alpha")
+                .effective_alpha,
+            0.0
+        );
+        assert!(
+            !registry
+                .get(1)
+                .expect("old parent should remain registered")
+                .children
+                .contains(&3),
+            "child should be detached from old parent"
+        );
+
+        registry.add_child(2, 3);
+        let duplicates = registry
+            .get(2)
+            .expect("new parent should remain registered")
+            .children
+            .iter()
+            .filter(|&&id| id == 3)
+            .count();
+        assert_eq!(duplicates, 1, "add_child should not duplicate child IDs");
     }
 }
