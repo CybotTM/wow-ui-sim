@@ -73,10 +73,24 @@ fn dfs_emit_with_region_mode(
     let Some(frame) = widgets.get(id) else {
         return;
     };
+    let tooltip_nineslice_id = tooltip_nineslice_child(frame, strata_idx, widgets, visible);
+    if let Some(nineslice_id) = tooltip_nineslice_id {
+        dfs_emit_with_region_mode(
+            nineslice_id,
+            strata_idx,
+            widgets,
+            visible,
+            out,
+            suppress_regions,
+        );
+    }
     out.push(id);
 
     let (regions, mut child_frames) =
         collect_regions_and_children(frame, strata_idx, widgets, visible, suppress_regions);
+    if let Some(nineslice_id) = tooltip_nineslice_id {
+        child_frames.retain(|&child_id| child_id != nineslice_id);
+    }
     let mut deferred_font_regions = emit_immediate_regions(regions, widgets, out);
     let hoisted_regions = emit_child_frames_and_collect_hoisted(
         &mut child_frames,
@@ -91,6 +105,23 @@ fn dfs_emit_with_region_mode(
     deferred_font_regions.extend(deferred_hoisted);
     sort_regions(&mut deferred_font_regions, widgets);
     out.extend(deferred_font_regions.into_iter().map(|entry| entry.id));
+}
+
+fn tooltip_nineslice_child(
+    frame: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+) -> Option<u64> {
+    if frame.widget_type != crate::widget::WidgetType::GameTooltip {
+        return None;
+    }
+    let nineslice_id = *frame.children_keys.get("NineSlice")?;
+    if !visible.contains(&nineslice_id) {
+        return None;
+    }
+    let child = widgets.get(nineslice_id)?;
+    (child.frame_strata.as_index() == strata_idx).then_some(nineslice_id)
 }
 
 fn collect_regions_and_children(
@@ -479,6 +510,52 @@ mod tests {
             vec![2]
         );
         assert_eq!(child_frames, vec![3]);
+    }
+
+    #[test]
+    fn dfs_emit_renders_tooltip_nineslice_before_tooltip_frame() {
+        let mut widgets = WidgetRegistry::default();
+
+        let tooltip_id = 100;
+        let nineslice_id = 101;
+        let border_tex_id = 102;
+
+        let mut tooltip = test_frame(tooltip_id, WidgetType::GameTooltip, None);
+        tooltip.children = vec![nineslice_id];
+        tooltip
+            .children_keys
+            .insert("NineSlice".to_string(), nineslice_id);
+        widgets.register(tooltip);
+
+        let mut nineslice = test_frame(nineslice_id, WidgetType::Frame, Some(tooltip_id));
+        nineslice.children = vec![border_tex_id];
+        widgets.register(nineslice);
+
+        let border = test_frame(border_tex_id, WidgetType::Texture, Some(nineslice_id));
+        widgets.register(border);
+
+        let visible = HashSet::from([tooltip_id, nineslice_id, border_tex_id]);
+        let mut out = Vec::new();
+        dfs_emit(
+            tooltip_id,
+            crate::widget::FrameStrata::Medium.as_index(),
+            &widgets,
+            &visible,
+            &mut out,
+        );
+
+        let tooltip_pos = out
+            .iter()
+            .position(|&id| id == tooltip_id)
+            .expect("tooltip should be emitted");
+        let nineslice_pos = out
+            .iter()
+            .position(|&id| id == nineslice_id)
+            .expect("nineslice should be emitted");
+        assert!(
+            nineslice_pos < tooltip_pos,
+            "NineSlice should render before tooltip frame so tooltip text stays on top"
+        );
     }
 
     #[test]
