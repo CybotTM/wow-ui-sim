@@ -57,6 +57,17 @@ fn get_net_stats_returns_four_zeros() {
 }
 
 #[test]
+fn get_restricted_account_data_returns_safe_caps() {
+    let env = env();
+    let (level_cap, money_cap, profession_cap): (f64, f64, f64) = env
+        .eval("return GetRestrictedAccountData()")
+        .expect("GetRestrictedAccountData should be callable");
+    assert_eq!(level_cap, 20.0);
+    assert_eq!(money_cap, 0.0);
+    assert_eq!(profession_cap, 0.0);
+}
+
+#[test]
 fn store_frame_is_shown_returns_false() {
     let env = env();
     let shown: bool = env.eval("return StoreFrame_IsShown()").unwrap();

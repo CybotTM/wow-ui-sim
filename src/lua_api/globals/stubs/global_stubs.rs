@@ -232,6 +232,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
 static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
+    ("GetRestrictedAccountData", stub_restricted_account_data),
     (
         "GetNumCompletedAchievements",
         stub_num_completed_achievements,
@@ -246,6 +247,15 @@ fn stub_num_completed_achievements(state: &mut LuaState) -> rilua::LuaResult<u32
     state.push(rilua::Val::Num(0.0));
     state.push(rilua::Val::Num(0.0));
     Ok(2)
+}
+
+fn stub_restricted_account_data(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    // Blizzard callers read up to three return values:
+    // level cap, money cap, and profession cap.
+    state.push(rilua::Val::Num(20.0));
+    state.push(rilua::Val::Num(0.0));
+    state.push(rilua::Val::Num(0.0));
+    Ok(3)
 }
 
 fn stub_classic_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {

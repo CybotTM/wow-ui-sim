@@ -57,6 +57,7 @@ pub(crate) fn register_c_container(state: &mut LuaState) -> LuaResult<()> {
             ("HasContainerItem", c_container_has_item),
             ("GetBagSlotFlag", c_container_get_bag_slot_flag),
             ("GetContainerItemInfo", c_container_get_item_info),
+            ("GetContainerItemCooldown", c_container_get_item_cooldown),
             ("GetItemCooldown", c_container_get_item_cooldown),
             ("GetContainerItemID", c_container_get_item_id),
             ("GetContainerItemLink", c_container_get_item_link),

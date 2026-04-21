@@ -157,6 +157,28 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     common::drain_string_table(env, "__test_errors")
 }
 
+fn clear_recorded_lua_errors(env: &WowLuaEnv) {
+    common::panel_fixtures::clear_recorded_lua_errors(env);
+}
+
+fn assert_no_bag_open_errors(env: &WowLuaEnv, context: &str) {
+    let recorded_errors = common::panel_fixtures::recorded_lua_errors(env);
+    let handler_errors = drain_test_errors(env);
+    assert!(
+        recorded_errors.is_empty(),
+        "{context} produced {} recorded Lua error(s):\n{}\nhandler errors:\n{}",
+        recorded_errors.len(),
+        recorded_errors.join("\n"),
+        handler_errors.join("\n"),
+    );
+    assert!(
+        handler_errors.is_empty(),
+        "{context} produced {} Lua error(s):\n{}",
+        handler_errors.len(),
+        handler_errors.join("\n"),
+    );
+}
+
 #[test]
 fn test_container_frames_registered() {
     let env = setup_env();
@@ -336,12 +358,14 @@ fn test_bag_env_loads_real_backpack_token_tracker() {
 fn test_bags_open_with_items() {
     let env = setup_env();
     install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
 
     // Backpack starts with 4 default items (Hearthstone, Water, Bread, Skinning Knife)
     // Add one more via admin API
     env.exec("A_Admin.AddBagItem(0, 5, 6948, 1)").unwrap();
 
     open_all_bags(&env);
+    assert_no_bag_open_errors(&env, "ToggleAllBags backpack open");
     assert_bag_frame_visible(&env);
     assert_backpack_item_count(&env, 5);
 
@@ -365,6 +389,7 @@ fn test_bags_open_with_items() {
 fn test_container_frame_1_item_1_icon_matches_first_bag_slot_item() {
     let env = setup_env();
     install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
 
     env.exec(
         r#"
@@ -375,6 +400,7 @@ fn test_container_frame_1_item_1_icon_matches_first_bag_slot_item() {
     .unwrap();
 
     open_all_bags(&env);
+    assert_no_bag_open_errors(&env, "ToggleAllBags individual-bag open");
 
     let result: String = env
         .eval(

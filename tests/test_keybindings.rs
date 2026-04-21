@@ -277,6 +277,28 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     common::drain_string_table(env, "__test_errors")
 }
 
+fn clear_recorded_lua_errors(env: &WowLuaEnv) {
+    common::panel_fixtures::clear_recorded_lua_errors(env);
+}
+
+fn assert_no_backpack_open_errors(env: &WowLuaEnv, context: &str) {
+    let recorded_errors = common::panel_fixtures::recorded_lua_errors(env);
+    let handler_errors = drain_test_errors(env);
+    assert!(
+        recorded_errors.is_empty(),
+        "{context} produced {} recorded Lua error(s):\n{}\nhandler errors:\n{}",
+        recorded_errors.len(),
+        recorded_errors.join("\n"),
+        handler_errors.join("\n"),
+    );
+    assert!(
+        handler_errors.is_empty(),
+        "{context} produced {} Lua error(s):\n{}",
+        handler_errors.len(),
+        handler_errors.join("\n"),
+    );
+}
+
 // ── B → ToggleAllBags() ─────────────────────────────────────────────────
 
 #[test]
@@ -315,7 +337,10 @@ fn keybind_backspace_opens_backpack() {
     test_timeout! {
         let env = setup_settled_env();
         prepare_bag_env(&env);
+        install_test_error_handler(&env);
+        clear_recorded_lua_errors(&env);
         env.send_key_press("BACKSPACE", None).expect("BACKSPACE keybind failed");
+        assert_no_backpack_open_errors(&env, "BACKSPACE backpack open");
         assert!(
             bag_id_is_shown(&env, 0),
             "Backpack should be visible after pressing BACKSPACE; {}",

@@ -353,6 +353,17 @@ fn test_c_container_get_item_cooldown_zero_when_ready() {
 }
 
 #[test]
+fn test_c_container_get_container_item_cooldown_aliases_item_cooldown() {
+    let env = env();
+    let (start, duration, enable): (f64, f64, i32) = env
+        .eval("return C_Container.GetContainerItemCooldown(6948)")
+        .unwrap();
+    assert_eq!(start, 0.0);
+    assert_eq!(duration, 0.0);
+    assert_eq!(enable, 1);
+}
+
+#[test]
 fn test_c_container_default_stack_count_is_one() {
     let env = env();
     // AddBagItem without explicit stack count defaults to 1
