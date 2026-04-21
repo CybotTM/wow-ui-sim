@@ -2,6 +2,12 @@
 
 use crate::render::{BlendMode, QuadBatch};
 
+fn is_talent_arrow_line(f: &crate::widget::Frame) -> bool {
+    f.atlas
+        .as_deref()
+        .is_some_and(|atlas| atlas.starts_with("talents-arrow-line"))
+}
+
 /// Resolve a line anchor to screen-space pixel coordinates.
 fn resolve_line_endpoint(
     anchor: &crate::widget::LineAnchor,
@@ -17,6 +23,62 @@ fn resolve_line_endpoint(
         (ax + anchor.x_offset) * ui_scale,
         (ay - anchor.y_offset) * ui_scale,
     ))
+}
+
+/// Talent arrow lines are anchored from start-button center to end-button edge in Lua.
+/// Nudge the rendered start point toward the endpoint so the visible line begins
+/// near the start node border instead of crossing the icon center.
+fn adjust_talent_line_start_endpoint(
+    f: &crate::widget::Frame,
+    start_anchor: &crate::widget::LineAnchor,
+    end_anchor: Option<&crate::widget::LineAnchor>,
+    registry: &crate::widget::WidgetRegistry,
+    start: (f32, f32),
+    end: (f32, f32),
+) -> (f32, f32) {
+    if !is_talent_arrow_line(f) {
+        return start;
+    }
+    let Some(start_target_id) = start_anchor.target_id else {
+        return start;
+    };
+    let Some(start_target) = registry.get(start_target_id) else {
+        return start;
+    };
+    let Some(start_rect) = start_target.layout_rect else {
+        return start;
+    };
+
+    let dx = end.0 - start.0;
+    let dy = end.1 - start.1;
+    let len = (dx * dx + dy * dy).sqrt();
+    if len < 0.001 {
+        return start;
+    }
+
+    let mut diameter_scale = 1.2_f32;
+    if let Some(end_anchor) = end_anchor
+        && let Some(end_target_id) = end_anchor.target_id
+        && let Some(end_target) = registry.get(end_target_id)
+        && let Some(end_rect) = end_target.layout_rect
+    {
+        let ui_scale = crate::render::texture::UI_SCALE;
+        let rx = (end_rect.width * ui_scale * 0.5).abs();
+        let ry = (end_rect.height * ui_scale * 0.5).abs();
+        if rx > 0.0 && ry > 0.0 {
+            let nx = (end_anchor.x_offset * ui_scale / rx).abs();
+            let ny = (end_anchor.y_offset * ui_scale / ry).abs();
+            let measured = (nx * nx + ny * ny).sqrt();
+            if measured.is_finite() && measured > 0.1 {
+                diameter_scale = measured.clamp(1.0, 1.6);
+            }
+        }
+    }
+
+    let trim = ((start_rect.width.min(start_rect.height) * crate::render::texture::UI_SCALE * 0.5)
+        * diameter_scale)
+        .min((len - 1.0).max(0.0));
+    (start.0 + (dx / len) * trim, start.1 + (dy / len) * trim)
 }
 
 /// Compute the 4 corner positions of a rotated line quad from endpoints and thickness.
@@ -74,6 +136,7 @@ fn resolve_line_quad_inputs(
     };
     let sp = resolve_line_endpoint(start_anchor, registry)?;
     let ep = resolve_line_endpoint(end_anchor, registry)?;
+    let sp = adjust_talent_line_start_endpoint(f, start_anchor, Some(end_anchor), registry, sp, ep);
     let thickness = f.line_thickness * crate::render::texture::UI_SCALE;
     let positions = line_quad_positions(sp, ep, thickness)?;
     Some((sp, ep, positions, line_uvs(f), line_tint(f, alpha)))
@@ -169,7 +232,7 @@ fn emit_horiz_tiled_line_quads(
     let join_overlap = 0.5_f32;
     // Arrow connectors can also show a tiny gap where the line meets the
     // arrow head. Extend the first/last segment slightly to hide that seam.
-    let start_cap_overlap = 1.0_f32;
+    let start_cap_overlap = if is_talent_arrow_line(f) { 0.0 } else { 1.0 };
     let end_cap_overlap = line_end_cap_overlap_px(f);
     while offset < len - 0.001 {
         let seg_len = (len - offset).min(tile_len);
@@ -236,10 +299,7 @@ fn line_tile_length_px(f: &crate::widget::Frame) -> f32 {
 }
 
 fn line_end_cap_overlap_px(f: &crate::widget::Frame) -> f32 {
-    if f.atlas
-        .as_deref()
-        .is_some_and(|atlas| atlas.starts_with("talents-arrow-line"))
-    {
+    if is_talent_arrow_line(f) {
         return (f.line_thickness * crate::render::texture::UI_SCALE).clamp(3.0, 8.0);
     }
     3.0
@@ -279,7 +339,7 @@ fn emit_line_vertices(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::widget::{Color, Frame};
+    use crate::widget::{Color, Frame, LineAnchor, WidgetRegistry, WidgetType};
 
     #[test]
     fn line_uvs_uses_tex_coords_when_present() {
@@ -298,5 +358,65 @@ mod tests {
         frame.vertex_color = Some(Color::new(0.2, 0.4, 0.6, 0.5));
 
         assert_eq!(line_tint(&frame, 0.8), [0.2, 0.4, 0.6, 0.4]);
+    }
+
+    #[test]
+    fn talent_arrow_line_start_is_trimmed_toward_endpoint() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut start_target = Frame::new(WidgetType::Button, Some("Start".to_string()), None);
+        start_target.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 40.0,
+            height: 40.0,
+        });
+        let start_id = start_target.id;
+        registry.register(start_target);
+
+        let mut end_target = Frame::new(WidgetType::Button, Some("End".to_string()), None);
+        end_target.layout_rect = Some(crate::LayoutRect {
+            x: 100.0,
+            y: 0.0,
+            width: 40.0,
+            height: 40.0,
+        });
+        let end_id = end_target.id;
+        registry.register(end_target);
+
+        let mut line = Frame::new(WidgetType::Line, Some("EdgeLine".to_string()), None);
+        line.atlas = Some("talents-arrow-line-yellow".to_string());
+        line.line_start = Some(LineAnchor {
+            point: crate::widget::AnchorPoint::Center,
+            target_id: Some(start_id),
+            x_offset: 0.0,
+            y_offset: 0.0,
+        });
+        line.line_end = Some(LineAnchor {
+            point: crate::widget::AnchorPoint::Center,
+            target_id: Some(end_id),
+            x_offset: 24.0,
+            y_offset: 0.0,
+        });
+
+        let start = (20.0, 20.0);
+        let end = (120.0, 20.0);
+        let adjusted = adjust_talent_line_start_endpoint(
+            &line,
+            line.line_start.as_ref().unwrap(),
+            line.line_end.as_ref(),
+            &registry,
+            start,
+            end,
+        );
+        assert!(
+            adjusted.0 > start.0,
+            "talent line start should move toward end"
+        );
+        assert!(adjusted.0 < end.0, "trimmed start must remain before end");
+        assert_eq!(
+            adjusted.1, start.1,
+            "horizontal test should keep y unchanged"
+        );
     }
 }
