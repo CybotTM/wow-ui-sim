@@ -241,12 +241,25 @@ pub fn set_frame_strata(state: &Rc<RefCell<SimState>>, frame_id: u64, strata_str
     s.invalidate_strata_buckets();
 }
 
-/// Set frame level directly.
-pub fn set_frame_level(state: &Rc<RefCell<SimState>>, frame_id: u64, level: i32) {
+fn set_xml_frame_level(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    level_offset: i32,
+    fixed: bool,
+) {
     let mut s = state.borrow_mut();
+    let parent_level = s
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.parent_id)
+        .and_then(|parent_id| s.widgets.get(parent_id))
+        .map(|parent| parent.frame_level);
     if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
-        frame.frame_level = level;
-        frame.has_fixed_frame_level = true;
+        frame.frame_level_offset = Some(level_offset);
+        frame.has_fixed_frame_level = fixed;
+        frame.frame_level = parent_level
+            .map(|parent_level| parent_level.saturating_add(level_offset))
+            .unwrap_or(level_offset);
     }
     crate::lua_api::frame::propagate_strata_level_pub(&mut s.widgets, frame_id);
 }
@@ -394,16 +407,26 @@ pub fn apply_xml_frame_level(
     frame: &FrameXml,
     inherits: &str,
 ) {
-    let level = frame.frame_level.or_else(|| {
-        if inherits.is_empty() {
-            return None;
+    let mut level = None;
+    let mut fixed_frame_level = None;
+    if !inherits.is_empty() {
+        for entry in &*crate::xml::get_template_chain(inherits) {
+            if let Some(entry_level) = entry.frame.frame_level {
+                level = Some(entry_level);
+            }
+            if let Some(entry_fixed) = entry.frame.fixed_frame_level {
+                fixed_frame_level = Some(entry_fixed);
+            }
         }
-        crate::xml::get_template_chain(inherits)
-            .iter()
-            .find_map(|e| e.frame.frame_level)
-    });
+    }
+    if let Some(frame_level) = frame.frame_level {
+        level = Some(frame_level);
+    }
+    if let Some(frame_fixed) = frame.fixed_frame_level {
+        fixed_frame_level = Some(frame_fixed);
+    }
     if let Some(l) = level {
-        set_frame_level(state, frame_id, l);
+        set_xml_frame_level(state, frame_id, l, fixed_frame_level.unwrap_or(false));
     }
 }
 

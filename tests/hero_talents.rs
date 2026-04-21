@@ -385,8 +385,15 @@ fn test_non_selectable_hero_nodes_do_not_show_selectable_glow() {
         .split(',')
         .map(|s| s.parse::<u32>().expect("count should parse"))
         .collect();
-    assert_eq!(parts.len(), 3, "expected selectable,nonSelectable,glowShown");
-    assert!(parts[0] >= 1, "unexpected selectable hero node count: {result}");
+    assert_eq!(
+        parts.len(),
+        3,
+        "expected selectable,nonSelectable,glowShown"
+    );
+    assert!(
+        parts[0] >= 1,
+        "unexpected selectable hero node count: {result}"
+    );
     assert!(
         parts[1] >= 1,
         "unexpected non-selectable hero node count: {result}"
@@ -394,5 +401,130 @@ fn test_non_selectable_hero_nodes_do_not_show_selectable_glow() {
     assert_eq!(
         parts[2], 0,
         "non-selectable hero nodes unexpectedly showed selectable glow: {result}"
+    );
+}
+
+#[test]
+fn test_class_talent_edges_render_below_visible_talent_buttons() {
+    let env = env_with_full_ui();
+    let result: String = env
+        .eval(
+            r#"
+            C_ClassTalents.SwitchToSpecializationByName("Protection")
+            local ok = C_Traits.SetSelection(1, 99838, 123361) -- Lightsmith
+            assert(ok, "expected deterministic hero subtree selection")
+            assert(C_ClassTalents.GetActiveHeroTalentSpec() == 49, "expected active subtree 49")
+
+            assert(PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab, "expected class talents UI helper")
+            PlayerSpellsUtil.OpenToClassTalentsTab()
+
+            local frame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+            assert(frame and frame.edgePool, "expected class talents frame and edge pool")
+
+            -- Force one explicit update pass so edge state/frame-level updates have run.
+            if frame.OnUpdate then
+                frame:OnUpdate()
+            end
+
+            local minHeroVisibleButtonLevel = nil
+            local heroVisibleButtons = 0
+            local minButtonParentLevel = nil
+            local maxButtonParentLevel = nil
+            for button in frame:EnumerateAllTalentButtons() do
+                local nodeInfo = button.GetNodeInfo and button:GetNodeInfo()
+                if button:IsShown() then
+                    local parent = button:GetParent()
+                    if parent and parent.GetFrameLevel then
+                        local parentLevel = parent:GetFrameLevel()
+                        if minButtonParentLevel == nil or parentLevel < minButtonParentLevel then
+                            minButtonParentLevel = parentLevel
+                        end
+                        if maxButtonParentLevel == nil or parentLevel > maxButtonParentLevel then
+                            maxButtonParentLevel = parentLevel
+                        end
+                    end
+                end
+
+                if button:IsShown() and nodeInfo and nodeInfo.subTreeID then
+                    heroVisibleButtons = heroVisibleButtons + 1
+                    local level = button:GetFrameLevel()
+                    if minHeroVisibleButtonLevel == nil or level < minHeroVisibleButtonLevel then
+                        minHeroVisibleButtonLevel = level
+                    end
+                end
+            end
+            assert(heroVisibleButtons > 0, "expected at least one visible hero talent button")
+            assert(minHeroVisibleButtonLevel ~= nil, "expected hero talent frame levels")
+
+            local checked = 0
+            local violations = {}
+            for edge in frame.edgePool:EnumerateActive() do
+                local edgeLevel = edge:GetFrameLevel()
+                local startLevel = edge:GetStartButton():GetFrameLevel()
+                local endLevel = edge:GetEndButton():GetFrameLevel()
+                checked = checked + 1
+                if edgeLevel >= math.min(startLevel, endLevel) then
+                    table.insert(
+                        violations,
+                        string.format(
+                            "edge=%d expected<min(%d,%d)",
+                            edgeLevel,
+                            startLevel,
+                            endLevel
+                        )
+                    )
+                end
+            end
+
+            assert(checked > 0, "expected active talent edges after opening class talents")
+            return table.concat({
+                tostring(checked),
+                tostring(heroVisibleButtons),
+                tostring(minButtonParentLevel or -1),
+                tostring(maxButtonParentLevel or -1),
+                tostring(#violations),
+                table.concat(violations, " | "),
+            }, "::")
+            "#,
+        )
+        .unwrap();
+
+    let mut parts = result.splitn(6, "::");
+    let checked = parts
+        .next()
+        .expect("checked count missing")
+        .parse::<u32>()
+        .expect("checked count should parse");
+    let hero_visible = parts
+        .next()
+        .expect("hero visible count missing")
+        .parse::<u32>()
+        .expect("hero visible count should parse");
+    let min_parent = parts
+        .next()
+        .expect("min parent level missing")
+        .parse::<i32>()
+        .expect("min parent level should parse");
+    let max_parent = parts
+        .next()
+        .expect("max parent level missing")
+        .parse::<i32>()
+        .expect("max parent level should parse");
+    let violations = parts
+        .next()
+        .expect("violation count missing")
+        .parse::<u32>()
+        .expect("violation count should parse");
+    let details = parts.next().unwrap_or_default();
+
+    assert!(checked > 0, "expected at least one checked edge");
+    assert!(hero_visible > 0, "expected visible hero talent buttons");
+    assert!(
+        max_parent - min_parent <= 200,
+        "talent button parent frame-level bands diverged unexpectedly: min={min_parent} max={max_parent}"
+    );
+    assert_eq!(
+        violations, 0,
+        "class talent edges should render below their endpoint buttons; violations={details}"
     );
 }
