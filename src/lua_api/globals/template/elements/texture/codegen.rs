@@ -252,10 +252,10 @@ pub(crate) fn append_texture_properties(
     if let Some(ref grad) = texture.gradient {
         append_gradient_code(code, grad, var);
     }
-    if texture.horiz_tile == Some(true) {
+    if texture.wants_horiz_tile() {
         code.push_str(&format!("            {}:SetHorizTile(true)\n", var));
     }
-    if texture.vert_tile == Some(true) {
+    if texture.wants_vert_tile() {
         code.push_str(&format!("            {}:SetVertTile(true)\n", var));
     }
     if let Some(a) = texture.alpha {

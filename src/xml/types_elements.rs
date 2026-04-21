@@ -82,6 +82,10 @@ pub struct TextureXml {
     pub horiz_tile: Option<bool>,
     #[serde(rename = "@vertTile")]
     pub vert_tile: Option<bool>,
+    #[serde(rename = "@hWrapMode")]
+    pub h_wrap_mode: Option<String>,
+    #[serde(rename = "@vWrapMode")]
+    pub v_wrap_mode: Option<String>,
     #[serde(rename = "@thickness")]
     pub thickness: Option<f32>,
     #[serde(rename = "@hidden")]
@@ -122,6 +126,22 @@ impl TextureXml {
     /// Effective blend mode from either WoW XML spelling.
     pub fn effective_blend_mode(&self) -> Option<&str> {
         self.blend_mode.as_deref().or(self.alpha_mode.as_deref())
+    }
+
+    pub fn wants_horiz_tile(&self) -> bool {
+        self.horiz_tile == Some(true)
+            || self
+                .h_wrap_mode
+                .as_deref()
+                .is_some_and(|mode| mode.eq_ignore_ascii_case("REPEAT"))
+    }
+
+    pub fn wants_vert_tile(&self) -> bool {
+        self.vert_tile == Some(true)
+            || self
+                .v_wrap_mode
+                .as_deref()
+                .is_some_and(|mode| mode.eq_ignore_ascii_case("REPEAT"))
     }
 }
 

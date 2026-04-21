@@ -130,10 +130,10 @@ fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
 
 fn emit_tiling_flags_code(texture: &crate::xml::TextureXml) -> String {
     let mut code = String::new();
-    if texture.horiz_tile == Some(true) {
+    if texture.wants_horiz_tile() {
         code.push_str("\n        tex:SetHorizTile(true)\n        ");
     }
-    if texture.vert_tile == Some(true) {
+    if texture.wants_vert_tile() {
         code.push_str("\n        tex:SetVertTile(true)\n        ");
     }
     if texture.set_all_points == Some(true) {

@@ -451,6 +451,8 @@ fn merge_texture_fields(dst: &mut TextureXml, src: &TextureXml) {
     merge_opt!(color);
     merge_opt!(horiz_tile);
     merge_opt!(vert_tile);
+    merge_opt!(h_wrap_mode);
+    merge_opt!(v_wrap_mode);
     merge_opt!(thickness);
     merge_opt!(hidden);
     merge_opt!(alpha);

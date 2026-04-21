@@ -49,9 +49,12 @@ pub(super) fn build_line_quads(
     registry: &crate::widget::WidgetRegistry,
     alpha: f32,
 ) {
-    let Some((positions, uvs, tint)) = resolve_line_quad_inputs(f, registry, alpha) else {
+    let Some((sp, ep, positions, uvs, tint)) = resolve_line_quad_inputs(f, registry, alpha) else {
         return;
     };
+    if emit_horiz_tiled_line_quads(batch, f, sp, ep, tint, uvs) {
+        return;
+    }
     emit_resolved_line_quad(batch, f, alpha, &positions, &uvs, tint);
 }
 
@@ -59,7 +62,13 @@ fn resolve_line_quad_inputs(
     f: &crate::widget::Frame,
     registry: &crate::widget::WidgetRegistry,
     alpha: f32,
-) -> Option<([[f32; 2]; 4], [[f32; 2]; 4], [f32; 4])> {
+) -> Option<(
+    (f32, f32),
+    (f32, f32),
+    [[f32; 2]; 4],
+    [[f32; 2]; 4],
+    [f32; 4],
+)> {
     let (Some(start_anchor), Some(end_anchor)) = (&f.line_start, &f.line_end) else {
         return None;
     };
@@ -67,7 +76,7 @@ fn resolve_line_quad_inputs(
     let ep = resolve_line_endpoint(end_anchor, registry)?;
     let thickness = f.line_thickness * crate::render::texture::UI_SCALE;
     let positions = line_quad_positions(sp, ep, thickness)?;
-    Some((positions, line_uvs(f), line_tint(f, alpha)))
+    Some((sp, ep, positions, line_uvs(f), line_tint(f, alpha)))
 }
 
 fn line_uvs(f: &crate::widget::Frame) -> [[f32; 2]; 4] {
@@ -119,6 +128,88 @@ fn emit_resolved_line_quad(
         return;
     }
     emit_line_vertices(batch, positions, uvs, tint, -1, f.blend_mode);
+}
+
+fn emit_horiz_tiled_line_quads(
+    batch: &mut QuadBatch,
+    f: &crate::widget::Frame,
+    start: (f32, f32),
+    end: (f32, f32),
+    tint: [f32; 4],
+    base_uvs: [[f32; 2]; 4],
+) -> bool {
+    if !f.horiz_tile {
+        return false;
+    }
+    let Some(tex_path) = f.texture.as_ref() else {
+        return false;
+    };
+
+    let dx = end.0 - start.0;
+    let dy = end.1 - start.1;
+    let len = (dx * dx + dy * dy).sqrt();
+    if len < 0.001 {
+        return false;
+    }
+    let tile_len = line_tile_length_px(f).max(1.0);
+    let ux = dx / len;
+    let uy = dy / len;
+    let half_t = f.line_thickness * crate::render::texture::UI_SCALE * 0.5;
+    let px = -uy * half_t;
+    let py = ux * half_t;
+
+    let left = base_uvs[0][0];
+    let right = base_uvs[2][0];
+    let top = base_uvs[0][1];
+    let bottom = base_uvs[1][1];
+
+    let mut offset = 0.0_f32;
+    while offset < len - 0.001 {
+        let seg_len = (len - offset).min(tile_len);
+        let u_ratio = (seg_len / tile_len).clamp(0.0, 1.0);
+        let seg_right = left + (right - left) * u_ratio;
+        let seg_start = (start.0 + ux * offset, start.1 + uy * offset);
+        let seg_end = (
+            start.0 + ux * (offset + seg_len),
+            start.1 + uy * (offset + seg_len),
+        );
+        let positions = [
+            [seg_start.0 + px, seg_start.1 + py],
+            [seg_start.0 - px, seg_start.1 - py],
+            [seg_end.0 - px, seg_end.1 - py],
+            [seg_end.0 + px, seg_end.1 + py],
+        ];
+        let uvs = [
+            [left, top],
+            [left, bottom],
+            [seg_right, bottom],
+            [seg_right, top],
+        ];
+        let vertex_start = batch.vertices.len() as u32;
+        emit_line_vertices(batch, &positions, &uvs, tint, -2, f.blend_mode);
+        batch
+            .texture_requests
+            .push(crate::render::shader::TextureRequest {
+                path: tex_path.clone(),
+                vertex_start,
+                vertex_count: 4,
+            });
+        offset += tile_len;
+    }
+
+    true
+}
+
+fn line_tile_length_px(f: &crate::widget::Frame) -> f32 {
+    if let Some(atlas_name) = f.atlas.as_deref()
+        && let Some(lookup) = crate::atlas::get_render_atlas_info(atlas_name)
+    {
+        return lookup.width() as f32 * crate::render::texture::UI_SCALE;
+    }
+    if f.width > 1.0 {
+        return f.width * crate::render::texture::UI_SCALE;
+    }
+    (f.line_thickness * crate::render::texture::UI_SCALE).max(1.0)
 }
 
 /// Push 4 vertices and 6 indices for a line quad with arbitrary positions.

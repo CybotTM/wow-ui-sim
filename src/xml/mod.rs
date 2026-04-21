@@ -96,4 +96,33 @@ mod tests {
             "layoutIndex"
         );
     }
+
+    #[test]
+    fn test_parse_line_hwrapmode_repeat_as_horiz_tile_intent() {
+        let xml = r#"
+            <Ui>
+                <Frame name="TestFrame">
+                    <Layers>
+                        <Layer level="ARTWORK">
+                            <Line parentKey="MyLine" hWrapMode="REPEAT" vWrapMode="CLAMP"/>
+                        </Layer>
+                    </Layers>
+                </Frame>
+            </Ui>
+        "#;
+
+        let ui = parse_xml(xml).unwrap();
+        let frame = match &ui.elements[0] {
+            XmlElement::Frame(frame) => frame,
+            other => panic!("expected frame, got {:?}", other),
+        };
+        let layer = &frame.layers().next().unwrap().layers[0];
+        let line = match &layer.elements[0] {
+            LayerElement::Line(line) => line,
+            other => panic!("expected line, got {:?}", other),
+        };
+        assert_eq!(line.h_wrap_mode.as_deref(), Some("REPEAT"));
+        assert!(line.wants_horiz_tile());
+        assert!(!line.wants_vert_tile());
+    }
 }
