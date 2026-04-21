@@ -457,10 +457,23 @@ fn line_color_component(state: &mut LuaState, color: Val, key: &str, default: f3
     }
 }
 
+fn normal_font_color(state: &mut LuaState) -> (f32, f32, f32) {
+    let globals = Val::Table(state.global);
+    let normal = table_get(state, globals, "NORMAL_FONT_COLOR");
+    if !matches!(normal, Val::Table(_)) {
+        return (1.0, 0.82, 0.0);
+    }
+    (
+        line_color_component(state, normal, "r", 1.0),
+        line_color_component(state, normal, "g", 0.82),
+        line_color_component(state, normal, "b", 0.0),
+    )
+}
+
 fn line_color(state: &mut LuaState, line: Val, key: &str) -> (f32, f32, f32) {
     let color = table_get(state, line, key);
     if !matches!(color, Val::Table(_)) {
-        return (1.0, 1.0, 1.0);
+        return normal_font_color(state);
     }
     (
         line_color_component(state, color, "r", 1.0),

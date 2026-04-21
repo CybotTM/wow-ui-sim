@@ -390,6 +390,38 @@ fn test_set_spell_by_id_populates_lines() {
 }
 
 #[test]
+fn test_set_spell_by_id_defaults_uncolored_lines_to_normal_font_color() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
+
+    let expected: (f32, f32, f32) = env
+        .eval("local r,g,b = NORMAL_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let title = td
+        .lines
+        .first()
+        .expect("spell tooltip should contain at least one line");
+
+    assert!(
+        (title.left_color.0 - expected.0).abs() < 0.01
+            && (title.left_color.1 - expected.1).abs() < 0.01
+            && (title.left_color.2 - expected.2).abs() < 0.01,
+        "uncolored spell-tooltip lines should inherit NORMAL_FONT_COLOR; expected rgb=({:.3},{:.3},{:.3}), got rgb=({:.3},{:.3},{:.3})",
+        expected.0,
+        expected.1,
+        expected.2,
+        title.left_color.0,
+        title.left_color.1,
+        title.left_color.2
+    );
+}
+
+#[test]
 fn test_set_spell_by_id_shows_cast_time() {
     let env = WowLuaEnv::new().unwrap();
 
