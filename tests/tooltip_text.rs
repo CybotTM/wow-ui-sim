@@ -347,6 +347,33 @@ fn test_wrapped_line_does_not_expand_width() {
 }
 
 #[test]
+fn test_wrapped_only_line_still_sets_tooltip_width() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "WrapOnlyOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine("Professions", 1, 1, 1, true)
+    "#,
+    )
+    .unwrap();
+
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert!(
+        frame.width > 100.0,
+        "Wrapped-only title text should still size tooltip width, got {}",
+        frame.width
+    );
+}
+
+#[test]
 fn test_wrapped_line_increases_height() {
     let env = WowLuaEnv::new().unwrap();
 

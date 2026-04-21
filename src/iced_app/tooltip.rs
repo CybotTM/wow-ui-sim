@@ -130,14 +130,13 @@ fn measure_tooltip_content_width(
     font_system: &mut WowFontSystem,
 ) -> f32 {
     let mut max_width: f32 = td.min_width;
+    let mut wrapped_only_max_width: f32 = 0.0;
+    let mut measured_non_wrapped_line = false;
     if tooltip_has_wrapped_lines(td) {
         let wrapped_min_width = td.custom_word_wrap_min_width.unwrap_or(0.0);
         max_width = max_width.max(wrapped_min_width);
     }
     for (i, line) in td.lines.iter().enumerate() {
-        if line.wrap && td.shrink_to_fit_wrapped {
-            continue;
-        }
         let font_size = tooltip_line_font_size(i);
         let left_w = font_system.measure_text_width(&line.left_text, None, font_size);
         let right_w = line
@@ -150,7 +149,15 @@ fn measure_tooltip_content_width(
         } else {
             left_w
         };
+        if line.wrap && td.shrink_to_fit_wrapped {
+            wrapped_only_max_width = wrapped_only_max_width.max(line_width);
+            continue;
+        }
+        measured_non_wrapped_line = true;
         max_width = max_width.max(line_width);
+    }
+    if !measured_non_wrapped_line {
+        max_width = max_width.max(wrapped_only_max_width);
     }
     max_width
 }
