@@ -188,4 +188,19 @@ fn professions_book_primary_spell_buttons_layout() {
     assert_eq!(primary, (96.0, 537.0, 437.0, 81.0), "PrimaryProfession1 rect mismatch vs master");
     assert_eq!(b1, (384.0, 535.0, 40.0, 40.0), "SpellButton1 rect mismatch vs master");
     assert_eq!(b2, (384.0, 575.0, 40.0, 40.0), "SpellButton2 rect mismatch vs master");
+
+    // Rank status bar must show formatted "<rank>/<max>", never the raw
+    // "%d/%d" format string. Regression for SetFormattedText writing the
+    // formatted result to the wrong stack slot when base != 0.
+    let rank_text: String = env
+        .eval("return tostring(PrimaryProfession1.statusBar.rankText:GetText())")
+        .unwrap();
+    assert!(
+        !rank_text.contains("%d"),
+        "statusBar.rankText should be formatted, got {rank_text:?}"
+    );
+    assert!(
+        rank_text.contains('/'),
+        "statusBar.rankText should be '<rank>/<max>', got {rank_text:?}"
+    );
 }

@@ -156,7 +156,9 @@ fn skip_matching_formatted_text(
 
 fn replace_text_stack_arg(state: &mut LuaState, text: &str) {
     let formatted_value = create_string(state, text);
-    state.stack_set(2, formatted_value);
+    // stack_val uses base-relative indexing (index 2 = stack[base + 1]);
+    // stack_set is absolute. Match the reader so set_text sees the replacement.
+    state.stack_set(state.base + 1, formatted_value);
 }
 
 fn ensure_intrinsic_formatted_text_width(state: &mut LuaState, id: u64) -> LuaResult<()> {
