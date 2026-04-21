@@ -700,13 +700,8 @@ const PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA: &str = r#"
     rawset(_G, "__wow_paging_controls_update_controls_wrapper", true)
 "#;
 
-fn patch_catalog_shop_product_card_defaults(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
-}
-
-fn patch_objective_tracker_quest_header(env: &crate::lua_api::WowLuaEnv) {
-    let _ = env.exec(
-        r#"
+const OBJECTIVE_TRACKER_QUEST_HEADER_WORKAROUND_LUA: &str = r#"
+        local function ensure_quest_header_text()
         local function module_has_visible_contents(module)
             if not module then
                 return false
@@ -763,19 +758,43 @@ fn patch_objective_tracker_quest_header(env: &crate::lua_api::WowLuaEnv) {
         end
 
         if textRegion.GetTextColor and textRegion.SetTextColor then
-            local r, g, b = textRegion:GetTextColor()
+            local r, g, b, a = textRegion:GetTextColor()
             local effectively_black = (r or 0) < 0.02 and (g or 0) < 0.02 and (b or 0) < 0.02
-            if effectively_black then
+            local fully_transparent = a ~= nil and a <= 0
+            if effectively_black or fully_transparent then
                 local color =
                     (type(OBJECTIVE_TRACKER_COLOR) == "table" and OBJECTIVE_TRACKER_COLOR["Header"])
                     or NORMAL_FONT_COLOR
                 if type(color) == "table" and color.r and color.g and color.b then
-                    textRegion:SetTextColor(color.r, color.g, color.b)
+                    textRegion:SetTextColor(color.r, color.g, color.b, color.a or 1)
+                elseif fully_transparent then
+                    textRegion:SetTextColor(r or 1, g or 0.82, b or 0.0, 1)
                 end
             end
         end
-    "#,
-    );
+        end
+
+        if not rawget(_G, "__wow_objective_tracker_quest_header_update_wrapper")
+            and ObjectiveTrackerContainerMixin
+            and type(ObjectiveTrackerContainerMixin.Update) == "function" then
+            local originalUpdate = ObjectiveTrackerContainerMixin.Update
+            ObjectiveTrackerContainerMixin.Update = function(self, dirtyUpdate)
+                local result = originalUpdate(self, dirtyUpdate)
+                pcall(ensure_quest_header_text)
+                return result
+            end
+            rawset(_G, "__wow_objective_tracker_quest_header_update_wrapper", true)
+        end
+
+        pcall(ensure_quest_header_text)
+    "#;
+
+fn patch_catalog_shop_product_card_defaults(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
+}
+
+fn patch_objective_tracker_quest_header(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(OBJECTIVE_TRACKER_QUEST_HEADER_WORKAROUND_LUA);
 }
 
 fn patch_fog_of_war_pin_mixin(env: &crate::lua_api::WowLuaEnv) {
