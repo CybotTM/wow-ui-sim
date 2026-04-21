@@ -309,6 +309,184 @@ fn show_ui_panel_positions_character_frame_at_expected_rect() {
 }
 
 #[test]
+fn show_ui_panel_locks_character_frame_layout() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                local EPS = 0.75
+
+                local function approx(actual, expected, eps)
+                    if type(actual) ~= "number" or type(expected) ~= "number" then
+                        return false
+                    end
+                    return math.abs(actual - expected) <= (eps or EPS)
+                end
+
+                local function rect(path, frame)
+                    if type(frame) ~= "table" then
+                        return nil, path .. "_missing"
+                    end
+                    local l, b, w, h = frame:GetRect()
+                    if not (l and b and w and h) then
+                        return nil, path .. "_missing_rect"
+                    end
+                    return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+                end
+
+                local frame = CharacterFrame
+                if not frame then
+                    return "missing_character_frame"
+                end
+
+                ShowUIPanel(frame)
+                if not frame:IsShown() then
+                    return "character_not_shown"
+                end
+
+                local f, err = rect("CharacterFrame", frame)
+                if not f then
+                    return err
+                end
+
+                if not approx(f.l, 16) then return "frame_left=" .. tostring(f.l) end
+                if not approx(f.b, 228) then return "frame_bottom=" .. tostring(f.b) end
+                if not approx(f.w, 338, 0.1) then return "frame_width=" .. tostring(f.w) end
+                if not approx(f.h, 424, 0.1) then return "frame_height=" .. tostring(f.h) end
+
+                local closeRect, closeErr = rect("CharacterFrameCloseButton", CharacterFrameCloseButton)
+                if not closeRect then return closeErr end
+                if not CharacterFrameCloseButton:IsShown() then
+                    return "close_button_hidden"
+                end
+                if not approx(closeRect.w, 24, 0.1) or not approx(closeRect.h, 24, 0.1) then
+                    return "close_button_size=" .. tostring(closeRect.w) .. "x" .. tostring(closeRect.h)
+                end
+                if not approx(closeRect.r, f.r + 1) then return "close_button_right=" .. tostring(closeRect.r) end
+                if not approx(closeRect.t, f.t) then return "close_button_top=" .. tostring(closeRect.t) end
+
+                local tab1Rect, tab1Err = rect("CharacterFrameTab1", CharacterFrameTab1)
+                if not tab1Rect then return tab1Err end
+                local tab2Rect, tab2Err = rect("CharacterFrameTab2", CharacterFrameTab2)
+                if not tab2Rect then return tab2Err end
+                if not CharacterFrameTab1:IsShown() then return "tab1_hidden" end
+                if not CharacterFrameTab2:IsShown() then return "tab2_hidden" end
+                if not approx(tab1Rect.l, f.l + 11) then return "tab1_left=" .. tostring(tab1Rect.l) end
+                if not approx(tab1Rect.t, f.b + 2) then return "tab1_top=" .. tostring(tab1Rect.t) end
+                if not approx(tab2Rect.l, tab1Rect.r + 3) then return "tab2_left=" .. tostring(tab2Rect.l) end
+                if not approx(tab2Rect.b, tab1Rect.b) then return "tab2_bottom=" .. tostring(tab2Rect.b) end
+
+                local titleRect, titleErr = rect("CharacterFrameTitleText", CharacterFrameTitleText)
+                if not titleRect then return titleErr end
+                local titleText = CharacterFrameTitleText:GetText() or ""
+                if titleText == "" then
+                    return "title_text_empty"
+                end
+                if not approx(titleRect.l, f.l + 58) then return "title_left=" .. tostring(titleRect.l) end
+                if not approx(titleRect.t, f.t - 6) then return "title_top=" .. tostring(titleRect.t) end
+
+                local modelRect, modelErr = rect("CharacterModelScene", CharacterModelScene)
+                if not modelRect then return modelErr end
+                if not CharacterModelScene:IsShown() then
+                    return "model_scene_hidden"
+                end
+                if not approx(modelRect.l, f.l + 52) then return "model_left=" .. tostring(modelRect.l) end
+                if not approx(modelRect.b, f.b + 38) then return "model_bottom=" .. tostring(modelRect.b) end
+                if not approx(modelRect.w, 231, 0.1) then return "model_width=" .. tostring(modelRect.w) end
+                if not approx(modelRect.h, 320, 0.1) then return "model_height=" .. tostring(modelRect.h) end
+
+                local paperRect, paperErr = rect("PaperDollFrame", PaperDollFrame)
+                if not paperRect then return paperErr end
+                if not approx(paperRect.l, f.l) or not approx(paperRect.b, f.b)
+                    or not approx(paperRect.w, f.w) or not approx(paperRect.h, f.h) then
+                    return "paperdoll_rect_drift"
+                end
+
+                -- Character frame starts collapsed in default panel mode; lock that state too.
+                if not CharacterFrameInsetRight then
+                    return "inset_right_missing"
+                end
+                if CharacterFrameInsetRight:IsShown() then
+                    return "inset_right_unexpectedly_shown"
+                end
+                if not CharacterStatsPane then
+                    return "stats_pane_missing"
+                end
+                if CharacterStatsPane:IsShown() then
+                    return "stats_pane_unexpectedly_shown"
+                end
+
+                local function expect_slot(name, expected_left, expected_bottom)
+                    local slot = _G[name]
+                    local r, e = rect(name, slot)
+                    if not r then return false, e end
+                    if not slot:IsShown() then
+                        return false, name .. "_hidden"
+                    end
+                    if not approx(r.w, 37, 0.1) or not approx(r.h, 37, 0.1) then
+                        return false, name .. "_size=" .. tostring(r.w) .. "x" .. tostring(r.h)
+                    end
+                    if not approx(r.l, expected_left) then
+                        return false, name .. "_left=" .. tostring(r.l)
+                    end
+                    if not approx(r.b, expected_bottom) then
+                        return false, name .. "_bottom=" .. tostring(r.b)
+                    end
+                    return true, nil
+                end
+
+                -- Left column slots.
+                local left_x = f.l + 8
+                local left_rows = {
+                    {"CharacterHeadSlot", 553},
+                    {"CharacterNeckSlot", 512},
+                    {"CharacterShoulderSlot", 471},
+                    {"CharacterChestSlot", 389},
+                    {"CharacterShirtSlot", 348},
+                    {"CharacterTabardSlot", 307},
+                    {"CharacterWristSlot", 266},
+                }
+                for _, row in ipairs(left_rows) do
+                    local ok, e = expect_slot(row[1], left_x, row[2])
+                    if not ok then return e end
+                end
+
+                -- Right column slots.
+                local right_x = f.r - 47
+                local right_rows = {
+                    {"CharacterHandsSlot", 553},
+                    {"CharacterWaistSlot", 512},
+                    {"CharacterLegsSlot", 471},
+                    {"CharacterFeetSlot", 430},
+                    {"CharacterFinger0Slot", 389},
+                    {"CharacterFinger1Slot", 348},
+                    {"CharacterTrinket0Slot", 307},
+                    {"CharacterTrinket1Slot", 266},
+                }
+                for _, row in ipairs(right_rows) do
+                    local ok, e = expect_slot(row[1], right_x, row[2])
+                    if not ok then return e end
+                end
+
+                -- Weapon slots centered at the bottom of the panel.
+                local ok, e = expect_slot("CharacterMainHandSlot", f.l + 130, f.b + 16)
+                if not ok then return e end
+                ok, e = expect_slot("CharacterSecondaryHandSlot", f.l + 172, f.b + 16)
+                if not ok then return e end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "CharacterFrame layout should stay fully locked after ShowUIPanel: {result}"
+        );
+    }
+}
+
+#[test]
 fn show_ui_panel_reanchors_character_frame_after_reopen() {
     test_timeout! {
         let env = setup_env();
