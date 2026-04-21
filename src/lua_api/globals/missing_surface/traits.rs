@@ -35,6 +35,26 @@ fn fire_named_event_with_arg(state: &mut LuaState, event_name: &str, arg: Val) {
     }
 }
 
+/// Fire `TRAIT_NODE_CHANGED` for `changed_node_id` and nodes that directly
+/// depend on it through incoming edge sources.
+fn fire_trait_node_changed_with_dependents(state: &mut LuaState, changed_node_id: u32) {
+    let mut affected = Vec::with_capacity(8);
+    affected.push(changed_node_id);
+    for node in TRAIT_NODE_DB.values() {
+        if node
+            .edges
+            .iter()
+            .any(|edge| edge.source_node_id == changed_node_id)
+            && !affected.contains(&node.id)
+        {
+            affected.push(node.id);
+        }
+    }
+    for node_id in affected {
+        fire_named_event_with_arg(state, "TRAIT_NODE_CHANGED", Val::Num(node_id as f64));
+    }
+}
+
 fn current_spec_id(state: &LuaState) -> Option<u32> {
     let sim = borrow_state(state).ok()?;
     let class_id = sim.player.class_index as u32;
@@ -1491,6 +1511,7 @@ fn c_traits_set_selection(state: &mut LuaState) -> LuaResult<u32> {
         sim.talents
             .set_node_rank(node_id, u32::from(entry_id.is_some()));
     }
+    fire_trait_node_changed_with_dependents(state, node_id);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -1503,7 +1524,7 @@ fn c_traits_purchase_rank(state: &mut LuaState) -> LuaResult<u32> {
         let next_rank = sim.talents.node_ranks.get(&node_id).copied().unwrap_or(0) + 1;
         sim.talents.set_node_rank(node_id, next_rank);
     }
-    fire_named_event_with_arg(state, "TRAIT_NODE_CHANGED", Val::Num(node_id as f64));
+    fire_trait_node_changed_with_dependents(state, node_id);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -1515,7 +1536,7 @@ fn c_traits_refund_rank(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         sim.talents.set_node_rank(node_id, 0);
     }
-    fire_named_event_with_arg(state, "TRAIT_NODE_CHANGED", Val::Num(node_id as f64));
+    fire_trait_node_changed_with_dependents(state, node_id);
     state.push(Val::Bool(true));
     Ok(1)
 }
