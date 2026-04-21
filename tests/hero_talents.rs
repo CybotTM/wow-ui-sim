@@ -458,10 +458,32 @@ fn test_class_talent_edges_render_below_visible_talent_buttons() {
 
             local checked = 0
             local violations = {}
+            local iconViolations = {}
+            local function iconLevel(button)
+                if not button then
+                    return nil
+                end
+                local icon = nil
+                if button.GetActiveIcon then
+                    local okCall, activeIcon = pcall(button.GetActiveIcon, button)
+                    if okCall and type(activeIcon) == "table" and activeIcon.GetFrameLevel then
+                        icon = activeIcon
+                    end
+                end
+                if not icon and type(button.Icon) == "table" and button.Icon.GetFrameLevel then
+                    icon = button.Icon
+                end
+                if icon then
+                    return icon:GetFrameLevel()
+                end
+                return nil
+            end
             for edge in frame.edgePool:EnumerateActive() do
                 local edgeLevel = edge:GetFrameLevel()
                 local startLevel = edge:GetStartButton():GetFrameLevel()
                 local endLevel = edge:GetEndButton():GetFrameLevel()
+                local startIconLevel = iconLevel(edge:GetStartButton())
+                local endIconLevel = iconLevel(edge:GetEndButton())
                 checked = checked + 1
                 if edgeLevel >= math.min(startLevel, endLevel) then
                     table.insert(
@@ -470,6 +492,28 @@ fn test_class_talent_edges_render_below_visible_talent_buttons() {
                             "edge=%d expected<min(%d,%d)",
                             edgeLevel,
                             startLevel,
+                            endLevel
+                        )
+                    )
+                end
+                if startIconLevel and edgeLevel >= startIconLevel then
+                    table.insert(
+                        iconViolations,
+                        string.format(
+                            "edge=%d expected<startIcon(%d) start=%d",
+                            edgeLevel,
+                            startIconLevel,
+                            startLevel
+                        )
+                    )
+                end
+                if endIconLevel and edgeLevel >= endIconLevel then
+                    table.insert(
+                        iconViolations,
+                        string.format(
+                            "edge=%d expected<endIcon(%d) end=%d",
+                            edgeLevel,
+                            endIconLevel,
                             endLevel
                         )
                     )
@@ -483,13 +527,15 @@ fn test_class_talent_edges_render_below_visible_talent_buttons() {
                 tostring(minButtonParentLevel or -1),
                 tostring(maxButtonParentLevel or -1),
                 tostring(#violations),
+                tostring(#iconViolations),
                 table.concat(violations, " | "),
+                table.concat(iconViolations, " | "),
             }, "::")
             "#,
         )
         .unwrap();
 
-    let mut parts = result.splitn(6, "::");
+    let mut parts = result.splitn(8, "::");
     let checked = parts
         .next()
         .expect("checked count missing")
@@ -515,7 +561,13 @@ fn test_class_talent_edges_render_below_visible_talent_buttons() {
         .expect("violation count missing")
         .parse::<u32>()
         .expect("violation count should parse");
+    let icon_violations = parts
+        .next()
+        .expect("icon violation count missing")
+        .parse::<u32>()
+        .expect("icon violation count should parse");
     let details = parts.next().unwrap_or_default();
+    let icon_details = parts.next().unwrap_or_default();
 
     assert!(checked > 0, "expected at least one checked edge");
     assert!(hero_visible > 0, "expected visible hero talent buttons");
@@ -526,5 +578,83 @@ fn test_class_talent_edges_render_below_visible_talent_buttons() {
     assert_eq!(
         violations, 0,
         "class talent edges should render below their endpoint buttons; violations={details}"
+    );
+    assert_eq!(
+        icon_violations, 0,
+        "class talent edges should render below endpoint icons; violations={icon_details}"
+    );
+}
+
+#[test]
+fn test_button_frame_level_change_relevels_connected_edges_on_update() {
+    let env = env_with_full_ui();
+    let result: String = env
+        .eval(
+            r#"
+            C_ClassTalents.SwitchToSpecializationByName("Protection")
+            local ok = C_Traits.SetSelection(1, 99838, 123361) -- Lightsmith
+            assert(ok, "expected deterministic hero subtree selection")
+            PlayerSpellsUtil.OpenToClassTalentsTab()
+
+            local frame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+            assert(frame and frame.edgePool, "expected class talents frame and edge pool")
+            if frame.OnUpdate then
+                frame:OnUpdate()
+            end
+
+            local edge = nil
+            for candidate in frame.edgePool:EnumerateActive() do
+                edge = candidate
+                break
+            end
+            assert(edge ~= nil, "expected at least one active edge")
+
+            local startButton = edge:GetStartButton()
+            local endButton = edge:GetEndButton()
+            assert(startButton and endButton, "expected edge endpoints")
+            local startParent = startButton:GetParent()
+            assert(startParent and startParent.GetFrameLevel, "expected start button parent")
+
+            local oldEdgeLevel = edge:GetFrameLevel()
+            frame:SetElementFrameLevel(startParent, startParent:GetFrameLevel() + 50)
+            frame:UpdateButtonFrameLevel(startButton)
+            local expectedEdgeLevel = frame:GetFrameLevelForEdge(startButton, endButton)
+            if frame.OnUpdate then
+                frame:OnUpdate()
+            end
+            local newEdgeLevel = edge:GetFrameLevel()
+            return table.concat({
+                tostring(oldEdgeLevel),
+                tostring(newEdgeLevel),
+                tostring(expectedEdgeLevel),
+            }, "::")
+            "#,
+        )
+        .unwrap();
+
+    let mut parts = result.splitn(3, "::");
+    let old_edge_level = parts
+        .next()
+        .expect("old edge level missing")
+        .parse::<i32>()
+        .expect("old edge level should parse");
+    let new_edge_level = parts
+        .next()
+        .expect("new edge level missing")
+        .parse::<i32>()
+        .expect("new edge level should parse");
+    let expected_edge_level = parts
+        .next()
+        .expect("expected edge level missing")
+        .parse::<i32>()
+        .expect("expected edge level should parse");
+
+    assert_ne!(
+        old_edge_level, expected_edge_level,
+        "test setup did not change expected edge frame level"
+    );
+    assert_eq!(
+        new_edge_level, expected_edge_level,
+        "connected edge should be re-leveled after button frame-level updates"
     );
 }
