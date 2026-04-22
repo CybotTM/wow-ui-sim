@@ -337,6 +337,11 @@ pub fn get_required_money(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_suggested_group_size(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 pub fn get_next_waypoint_text(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }

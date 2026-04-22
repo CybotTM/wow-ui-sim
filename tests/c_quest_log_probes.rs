@@ -424,6 +424,25 @@ fn get_bounty_set_info_for_map_id_returns_nil() {
 }
 
 #[test]
+fn suggested_group_size_apis_return_number_not_nil() {
+    let env = env();
+    let (capi_group, global_group, can_compare_capi, can_compare_global): (i32, i32, bool, bool) = env
+        .eval(
+            r#"
+            C_QuestLog.SetSelectedQuest(80000)
+            local capi = C_QuestLog.GetSuggestedGroupSize(C_QuestLog.GetSelectedQuest())
+            local global = GetSuggestedGroupSize()
+            return capi, global, (capi > 0), (global > 0)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(capi_group, 0);
+    assert_eq!(global_group, 0);
+    assert!(!can_compare_capi);
+    assert!(!can_compare_global);
+}
+
+#[test]
 fn criteria_spell_globals_return_selected_quest_spell_data() {
     let env = env();
     {
