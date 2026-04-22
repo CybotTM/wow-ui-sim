@@ -56,6 +56,61 @@ fn test_get_right_line_has_correct_text() {
 }
 
 #[test]
+fn test_add_line_without_color_uses_normal_font_color() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"GameTooltip:AddLine("Click here to view calendar")"#)
+        .unwrap();
+
+    let (expected_r, expected_g, expected_b): (f32, f32, f32) = env
+        .eval(
+            r#"
+            local r, g, b = NORMAL_FONT_COLOR:GetRGB()
+            return r, g, b
+            "#,
+        )
+        .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let (r, g, b) = td.lines[0].left_color;
+
+    const EPSILON: f32 = 0.0001;
+    assert!((r - expected_r).abs() < EPSILON);
+    assert!((g - expected_g).abs() < EPSILON);
+    assert!((b - expected_b).abs() < EPSILON);
+}
+
+#[test]
+fn test_add_double_line_without_color_uses_normal_font_color_for_both_sides() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"GameTooltip:AddDoubleLine("Left", "Right")"#)
+        .unwrap();
+
+    let (expected_r, expected_g, expected_b): (f32, f32, f32) = env
+        .eval(
+            r#"
+            local r, g, b = NORMAL_FONT_COLOR:GetRGB()
+            return r, g, b
+            "#,
+        )
+        .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let line = &td.lines[0];
+
+    const EPSILON: f32 = 0.0001;
+    assert!((line.left_color.0 - expected_r).abs() < EPSILON);
+    assert!((line.left_color.1 - expected_g).abs() < EPSILON);
+    assert!((line.left_color.2 - expected_b).abs() < EPSILON);
+    assert!((line.right_color.0 - expected_r).abs() < EPSILON);
+    assert!((line.right_color.1 - expected_g).abs() < EPSILON);
+    assert!((line.right_color.2 - expected_b).abs() < EPSILON);
+}
+
+#[test]
 fn test_get_left_line_out_of_range_returns_nil() {
     let env = WowLuaEnv::new().unwrap();
 
