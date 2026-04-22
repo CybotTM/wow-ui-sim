@@ -878,6 +878,11 @@ fn default_maps() -> HashMap<i32, MapData> {
 fn default_achievements() -> HashMap<i32, AchievementInfo> {
     [
         achievement_level_ten(),
+        achievement_level_twenty(),
+        achievement_level_thirty(),
+        achievement_level_forty(),
+        achievement_level_fifty(),
+        achievement_level_sixty(),
         achievement_explore_elwynn_forest(),
         achievement_explore_eastern_kingdoms(),
         achievement_veteran_of_the_alliance(),
@@ -894,7 +899,82 @@ fn achievement_level_ten() -> AchievementInfo {
         points: 10,
         description: "Reach Level 10.".into(),
         flags: 0,
-        icon: 236377,
+        icon: 236562,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_level_twenty() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 7,
+        name: "Level 20".into(),
+        points: 10,
+        description: "Reach Level 20.".into(),
+        flags: 0,
+        icon: 236563,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_level_thirty() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 8,
+        name: "Level 30".into(),
+        points: 10,
+        description: "Reach Level 30.".into(),
+        flags: 0,
+        icon: 236563,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_level_forty() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 9,
+        name: "Level 40".into(),
+        points: 10,
+        description: "Reach Level 40.".into(),
+        flags: 0,
+        icon: 236565,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_level_fifty() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 10,
+        name: "Level 50".into(),
+        points: 10,
+        description: "Reach Level 50.".into(),
+        flags: 0,
+        icon: 236565,
+        reward_text: String::new(),
+        is_guild: false,
+        is_statistic: false,
+        reward_item_id: None,
+    }
+}
+
+fn achievement_level_sixty() -> AchievementInfo {
+    AchievementInfo {
+        achievement_id: 11,
+        name: "Level 60".into(),
+        points: 10,
+        description: "Reach Level 60.".into(),
+        flags: 0,
+        icon: 236567,
         reward_text: String::new(),
         is_guild: false,
         is_statistic: false,

@@ -184,6 +184,43 @@ fn test_achievement_info_returns_real_name() {
 }
 
 #[test]
+fn test_incomplete_achievement_returns_nil_completion_date_fields() {
+    let env = env();
+    let (month_is_empty, day_is_empty, year_is_empty): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local _, _, _, _, month, day, year = GetAchievementInfo(6)
+            return month == nil or month == 0, day == nil or day == 0, year == nil or year == 0
+            "#,
+        )
+        .unwrap();
+    assert!(month_is_empty);
+    assert!(day_is_empty);
+    assert!(year_is_empty);
+}
+
+#[test]
+fn test_general_summary_seed_has_display_data_for_default_ids() {
+    let env = env();
+    let seeded_names_present: bool = env
+        .eval(
+            r#"
+            local ids = {6, 7, 8, 9, 10, 11}
+            local seededCount = 0
+            for _, id in ipairs(ids) do
+                local _, name = GetAchievementInfo(id)
+                if type(name) == "string" and name ~= "" then
+                    seededCount = seededCount + 1
+                end
+            end
+            return seededCount > 0
+            "#,
+        )
+        .unwrap();
+    assert!(seeded_names_present);
+}
+
+#[test]
 fn test_achievement_info_explore_elwynn() {
     let env = env();
     let (name, points): (String, i32) = env

@@ -1,6 +1,6 @@
 mod common;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use wow_ui_sim::loader::{find_toc_file, load_addon};
@@ -76,36 +76,7 @@ const AURA_ONUPDATE_ADDONS: &[(&str, &str)] = &[
 const PER_SAMPLE_TICKS: u32 = 256;
 const SAMPLE_WINDOWS: usize = 8;
 const AURA_ONUPDATE_MAX_BUDGET: Duration = Duration::from_micros(500);
-
-fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
-}
-
-fn load_aura_perf_env() -> WowLuaEnv {
-    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
-
-    let ui = blizzard_ui_dir();
-    env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
-
-    for (name, toc) in AURA_ONUPDATE_ADDONS {
-        let addon_dir = ui.join(name);
-        let requested_toc = addon_dir.join(toc);
-        let toc_path = if requested_toc.exists() {
-            requested_toc
-        } else if let Some(discovered_toc) = find_toc_file(&addon_dir) {
-            discovered_toc
-        } else {
-            continue;
-        };
-        if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {error}");
-        }
-    }
-
-    env.apply_post_load_workarounds();
-    env.exec(
-        r#"
+const AURA_ONUPDATE_HARNESS_LUA: &str = r#"
         if not PlayerFrame then
             PlayerFrame = CreateFrame("Frame", "PlayerFrame", UIParent)
         end
@@ -156,10 +127,59 @@ fn load_aura_perf_env() -> WowLuaEnv {
                 local _ = target.timeLeft
             end
         end
-        "#,
-    )
-    .expect("Failed to initialize aura onupdate perf harness");
+        "#;
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn load_aura_perf_env() -> WowLuaEnv {
+    let env = new_aura_perf_env();
+    let ui = blizzard_ui_dir();
+    configure_addon_base_path(&env, &ui);
+    load_aura_perf_addons(&env, &ui);
+    apply_workarounds_and_bootstrap_harness(&env);
     env
+}
+
+fn new_aura_perf_env() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env
+}
+
+fn configure_addon_base_path(env: &WowLuaEnv, ui: &Path) {
+    env.state().borrow_mut().addon_base_paths = vec![ui.to_path_buf()];
+}
+
+fn load_aura_perf_addons(env: &WowLuaEnv, ui: &Path) {
+    for (name, toc) in AURA_ONUPDATE_ADDONS {
+        load_aura_perf_addon(env, ui, name, toc);
+    }
+}
+
+fn load_aura_perf_addon(env: &WowLuaEnv, ui: &Path, addon_name: &str, toc_name: &str) {
+    let Some(toc_path) = resolve_addon_toc_path(ui, addon_name, toc_name) else {
+        return;
+    };
+    if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
+        eprintln!("[load {addon_name}] FAILED: {error}");
+    }
+}
+
+fn resolve_addon_toc_path(ui: &Path, addon_name: &str, toc_name: &str) -> Option<PathBuf> {
+    let addon_dir = ui.join(addon_name);
+    let requested_toc = addon_dir.join(toc_name);
+    if requested_toc.exists() {
+        return Some(requested_toc);
+    }
+    find_toc_file(&addon_dir)
+}
+
+fn apply_workarounds_and_bootstrap_harness(env: &WowLuaEnv) {
+    env.apply_post_load_workarounds();
+    env.exec(AURA_ONUPDATE_HARNESS_LUA)
+        .expect("Failed to initialize aura onupdate perf harness");
 }
 
 fn run_tick_batch(env: &WowLuaEnv, fn_name: &str, ticks: u32) -> Duration {

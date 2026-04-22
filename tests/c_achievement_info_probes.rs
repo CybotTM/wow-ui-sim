@@ -71,7 +71,7 @@ fn get_achievement_info_returns_full_fifteen_tuple() {
     assert_eq!(points, 10);
     assert!(!completed, "not earned by default");
     assert_eq!(description, "Reach Level 10.");
-    assert_eq!(icon, 236377);
+    assert_eq!(icon, 236562);
     assert!(!is_guild);
     assert!(!is_statistic);
 }

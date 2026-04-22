@@ -156,7 +156,15 @@ pub(super) fn register_achievement_info_surface(state: &mut LuaState) -> LuaResu
 }
 
 fn c_achievement_info_get_achievement_info(state: &mut LuaState) -> LuaResult<u32> {
-    push_achievement_info_for_id(state, i32::from_stack(state, 1)?)
+    let achievement_id = i32::from_stack(state, 1)?;
+    let exists = {
+        let sim = borrow_state(state)?;
+        sim.achievements.contains_key(&achievement_id)
+    };
+    if !exists {
+        return Ok(0);
+    }
+    push_achievement_info_for_id(state, achievement_id)
 }
 
 fn c_achievement_info_get_reward_item_id(state: &mut LuaState) -> LuaResult<u32> {
