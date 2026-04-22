@@ -390,8 +390,6 @@ pub(super) fn same_strata_subtree_segment_end(
 }
 
 fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
-    use std::cmp::Reverse;
-
     regions.sort_by(|a, b| {
         let (frame_a, frame_b) = match (widgets.get(a.id), widgets.get(b.id)) {
             (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
@@ -401,18 +399,22 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
             u8::from(frame.widget_type == crate::widget::WidgetType::FontString)
         };
         (
+            effective_frame_level(frame_a),
+            frame_a.frame_level,
             a.depth,
             frame_a.draw_layer as i32,
             frame_a.draw_sub_layer,
             type_flag(frame_a),
-            Reverse(a.id),
+            a.id,
         )
             .cmp(&(
+                effective_frame_level(frame_b),
+                frame_b.frame_level,
                 b.depth,
                 frame_b.draw_layer as i32,
                 frame_b.draw_sub_layer,
                 type_flag(frame_b),
-                Reverse(b.id),
+                b.id,
             ))
     });
 }
@@ -448,7 +450,7 @@ fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
 
 #[cfg(test)]
 mod tests {
-    use super::{collect_child_for_emit, dfs_emit, same_strata_subtree_segment_end};
+    use super::{RegionEntry, collect_child_for_emit, dfs_emit, same_strata_subtree_segment_end};
     use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
     use std::collections::HashSet;
 
@@ -621,6 +623,32 @@ mod tests {
             bucket,
             vec![1, 2, 3, 4, 5],
             "wrapper-owned regions should render before descendant child frames"
+        );
+    }
+
+    #[test]
+    fn sort_regions_prioritizes_frame_level_before_depth() {
+        let mut widgets = WidgetRegistry::default();
+
+        let mut lower_level = test_frame(20, WidgetType::Texture, None);
+        lower_level.frame_level = 100;
+        widgets.register(lower_level);
+
+        let mut higher_level = test_frame(30, WidgetType::Texture, None);
+        higher_level.frame_level = 200;
+        widgets.register(higher_level);
+
+        let mut regions = vec![
+            RegionEntry { depth: 0, id: 30 },
+            RegionEntry { depth: 5, id: 20 },
+        ];
+
+        super::sort_regions(&mut regions, &widgets);
+
+        assert_eq!(
+            regions.iter().map(|entry| entry.id).collect::<Vec<_>>(),
+            vec![20, 30],
+            "lower frame-level region should render first even when deeper in the wrapper tree"
         );
     }
 }
