@@ -156,21 +156,25 @@ impl App {
         let mut telemetry = TextureLoadBatchTelemetry::default();
         let mut exhausted = false;
         let mut texture_requests = TextureRequestTracker::default();
-        for batch_opt in dirty_strata {
-            if exhausted {
-                break;
-            }
-            if let Some(batch) = batch_opt {
-                let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
-                    self.load_new_textures_budgeted(batch, deadline, &mut texture_requests);
-                textures.extend(loaded);
-                bc_textures.extend(loaded_bc);
-                scan_elapsed += batch_scan;
-                load_elapsed += batch_load;
-                telemetry.record_batch(batch_telemetry);
-                exhausted |= hit;
-            }
+        for batch in dirty_strata.iter().flatten() {
+            texture_requests.register_batch(batch);
         }
+
+        let (
+            queued_textures,
+            queued_bc_textures,
+            queued_scan_elapsed,
+            queued_load_elapsed,
+            queued_telemetry,
+            queued_exhausted,
+        ) = self.load_pending_texture_queue_budgeted(deadline, &mut texture_requests);
+        textures.extend(queued_textures);
+        bc_textures.extend(queued_bc_textures);
+        scan_elapsed += queued_scan_elapsed;
+        load_elapsed += queued_load_elapsed;
+        telemetry.record_batch(queued_telemetry);
+        exhausted |= queued_exhausted;
+
         if !exhausted {
             let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
                 self.load_new_textures_budgeted(overlay, deadline, &mut texture_requests);
@@ -181,6 +185,7 @@ impl App {
             telemetry.record_batch(batch_telemetry);
             exhausted |= hit;
         }
+
         self.textures_pending
             .set(exhausted || self.cached_render_requests_still_pending());
         let elapsed = t.elapsed();
@@ -254,6 +259,82 @@ impl App {
             load_start.elapsed(),
             telemetry,
             false,
+        )
+    }
+
+    fn load_pending_texture_queue_budgeted(
+        &self,
+        deadline: std::time::Instant,
+        texture_requests: &mut TextureRequestTracker,
+    ) -> (
+        Vec<GpuTextureData>,
+        Vec<GpuBcTextureData>,
+        std::time::Duration,
+        std::time::Duration,
+        TextureLoadBatchTelemetry,
+        bool,
+    ) {
+        let mut textures = Vec::new();
+        let mut bc_textures = Vec::new();
+        let mut telemetry = TextureLoadBatchTelemetry::default();
+        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let mut scan_elapsed = std::time::Duration::ZERO;
+        let mut load_elapsed = std::time::Duration::ZERO;
+        let mut budget_hit = false;
+        let mut iterations_remaining = self.pending_texture_path_queue.borrow().len();
+
+        while iterations_remaining != 0 {
+            iterations_remaining -= 1;
+            let scan_started = std::time::Instant::now();
+            let Some(path) = self.pop_next_pending_texture_path() else {
+                scan_elapsed += scan_started.elapsed();
+                break;
+            };
+
+            let (is_pending, should_load) = self.pending_path_state(&path);
+            scan_elapsed += scan_started.elapsed();
+            if !is_pending {
+                self.remove_pending_texture_path(&path);
+                continue;
+            }
+            if !should_load {
+                self.requeue_pending_texture_path(path);
+                continue;
+            }
+
+            self.register_pending_texture_requests_for_path(&path, texture_requests);
+            let load_started = std::time::Instant::now();
+            if process_budgeted_texture_request(
+                deadline,
+                &path,
+                &mut tex_mgr,
+                &mut textures,
+                &mut bc_textures,
+                &mut telemetry,
+                texture_requests,
+            ) {
+                load_elapsed += load_started.elapsed();
+                self.requeue_pending_texture_path(path);
+                budget_hit = true;
+                break;
+            }
+            load_elapsed += load_started.elapsed();
+
+            let (still_pending, _) = self.pending_path_state(&path);
+            if still_pending {
+                self.requeue_pending_texture_path(path);
+            } else {
+                self.remove_pending_texture_path(&path);
+            }
+        }
+
+        (
+            textures,
+            bc_textures,
+            scan_elapsed,
+            load_elapsed,
+            telemetry,
+            budget_hit,
         )
     }
 

@@ -4,13 +4,11 @@ use iced::mouse;
 use iced::widget::shader;
 use iced::{Event, Point, Rectangle, Size};
 
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
-use crate::render::{
-    GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop,
-};
+use crate::render::{QuadBatch, WowUiPrimitive, load_texture_or_crop};
 
 use super::Message;
 use super::app::App;
@@ -103,16 +101,11 @@ impl shader::Program<Message> for &App {
         let quad_dur = t0.elapsed();
 
         let overlay = self.build_overlay();
-        let (mut textures, mut bc_textures, tex_dur, texture_requests) =
+        let (textures, bc_textures, tex_dur, texture_requests) =
             self.load_all_textures(&dirty_strata, &overlay);
 
         if had_textures_pending {
-            self.recover_pending_textures(
-                &mut dirty_strata,
-                &mut textures,
-                &mut bc_textures,
-                &texture_requests,
-            );
+            self.recover_pending_textures(&mut dirty_strata, &texture_requests);
         }
 
         log_slow_draw(quad_dur, tex_dur, textures.len(), bc_textures.len());
@@ -213,29 +206,28 @@ impl App {
     fn recover_pending_textures(
         &self,
         dirty_strata: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
-        textures: &mut Vec<GpuTextureData>,
-        bc_textures: &mut Vec<GpuBcTextureData>,
         texture_requests: &Arc<
             std::sync::Mutex<crate::render::shader::primitive::TextureRequestTracker>,
         >,
     ) {
+        self.prune_completed_pending_texture_paths();
         let cached = self.cached_strata_quads.borrow();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);
-        let mut exhausted = false;
+        let strata_pending = self.strata_pending_texture_requests.borrow();
         let mut texture_requests = texture_requests.lock().unwrap();
+        let mut reinjected = false;
         for i in 0..dirty_strata.len() {
             if dirty_strata[i].is_none()
                 && let Some(batch) = &cached[i]
+                && strata_pending[i]
+                    .values()
+                    .any(|requests| requests.iter().any(|request| request.handle.is_pending()))
             {
-                let (extra, extra_bc, _scan_elapsed, _load_elapsed, _telemetry, hit) =
-                    self.load_new_textures_budgeted(batch, deadline, &mut texture_requests);
-                textures.extend(extra);
-                bc_textures.extend(extra_bc);
-                exhausted |= hit;
+                texture_requests.register_batch(batch);
                 dirty_strata[i] = Some(batch.clone());
+                reinjected = true;
             }
         }
-        if exhausted {
+        if reinjected {
             self.textures_pending.set(true);
         }
     }
@@ -353,17 +345,12 @@ impl App {
     }
 
     pub(crate) fn cached_render_requests_still_pending(&self) -> bool {
-        self.cached_strata_quads
-            .borrow()
-            .iter()
-            .flatten()
-            .any(|batch| {
-                batch
-                    .texture_requests
-                    .iter()
-                    .chain(&batch.mask_texture_requests)
-                    .any(|request| request.handle.is_pending())
-            })
+        self.prune_completed_pending_texture_paths();
+        if self.pending_texture_path_set.borrow().is_empty() && self.textures_pending.get() {
+            self.seed_pending_texture_paths_from_cached_strata();
+            self.prune_completed_pending_texture_paths();
+        }
+        !self.pending_texture_path_set.borrow().is_empty()
     }
 
     /// Return per-strata dirty batches, rebuilding only strata whose bit is
@@ -435,7 +422,142 @@ impl App {
         self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
         drop(state);
         self.store_rebuilt_strata_buckets(&env, strata_buckets);
+        self.refresh_pending_texture_requests_for_rebuilt_strata(effective_dirty);
         effective_dirty
+    }
+
+    fn refresh_pending_texture_requests_for_rebuilt_strata(&self, rebuilt: u16) {
+        if rebuilt == 0 {
+            return;
+        }
+        let strata_cache = self.cached_strata_quads.borrow();
+        let mut strata_pending = self.strata_pending_texture_requests.borrow_mut();
+        for strata_idx in 0..FrameStrata::COUNT {
+            if rebuilt & (1 << strata_idx) == 0 {
+                continue;
+            }
+            strata_pending[strata_idx] = strata_cache[strata_idx]
+                .as_deref()
+                .map_or_else(FxHashMap::default, collect_pending_texture_requests);
+        }
+        drop(strata_pending);
+        drop(strata_cache);
+        self.rebuild_pending_texture_queue_from_strata_maps();
+    }
+
+    pub(crate) fn seed_pending_texture_paths_from_cached_strata(&self) {
+        let strata_cache = self.cached_strata_quads.borrow();
+        let mut strata_pending = self.strata_pending_texture_requests.borrow_mut();
+        for strata_idx in 0..FrameStrata::COUNT {
+            strata_pending[strata_idx] = strata_cache[strata_idx]
+                .as_deref()
+                .map_or_else(FxHashMap::default, collect_pending_texture_requests);
+        }
+        drop(strata_pending);
+        drop(strata_cache);
+        self.rebuild_pending_texture_queue_from_strata_maps();
+    }
+
+    fn rebuild_pending_texture_queue_from_strata_maps(&self) {
+        let strata_pending = self.strata_pending_texture_requests.borrow();
+        let mut pending_by_path: FxHashMap<String, Vec<crate::render::TextureRequest>> =
+            FxHashMap::default();
+        for strata_map in strata_pending.iter() {
+            for (path, requests) in strata_map {
+                pending_by_path.entry(path.clone()).or_default().extend(
+                    requests
+                        .iter()
+                        .filter(|request| request.handle.is_pending())
+                        .cloned(),
+                );
+            }
+        }
+        pending_by_path.retain(|_, requests| !requests.is_empty());
+        let mut ordered_paths: Vec<String> = pending_by_path.keys().cloned().collect();
+        sort_pending_texture_paths(&mut ordered_paths);
+
+        *self.pending_texture_requests_by_path.borrow_mut() = pending_by_path;
+        *self.pending_texture_path_set.borrow_mut() = ordered_paths.iter().cloned().collect();
+        *self.pending_texture_path_queue.borrow_mut() =
+            std::collections::VecDeque::from(ordered_paths);
+    }
+
+    fn prune_completed_pending_texture_paths(&self) {
+        let mut changed = false;
+        {
+            let mut strata_pending = self.strata_pending_texture_requests.borrow_mut();
+            for strata_map in strata_pending.iter_mut() {
+                strata_map.retain(|_, requests| {
+                    requests.retain(|request| request.handle.is_pending());
+                    let keep = !requests.is_empty();
+                    if !keep {
+                        changed = true;
+                    }
+                    keep
+                });
+            }
+        }
+        if changed {
+            self.rebuild_pending_texture_queue_from_strata_maps();
+        }
+    }
+
+    fn pop_next_pending_texture_path(&self) -> Option<String> {
+        self.pending_texture_path_queue.borrow_mut().pop_front()
+    }
+
+    fn requeue_pending_texture_path(&self, path: String) {
+        if self.pending_texture_path_set.borrow().contains(&path) {
+            self.pending_texture_path_queue.borrow_mut().push_back(path);
+        }
+    }
+
+    fn pending_path_state(&self, path: &str) -> (bool, bool) {
+        let pending_by_path = self.pending_texture_requests_by_path.borrow();
+        let Some(requests) = pending_by_path.get(path) else {
+            return (false, false);
+        };
+        let mut has_pending = false;
+        let mut should_load = false;
+        for request in requests {
+            if request.handle.is_pending() {
+                has_pending = true;
+                if request.handle.should_load() {
+                    should_load = true;
+                    break;
+                }
+            }
+        }
+        (has_pending, should_load)
+    }
+
+    fn register_pending_texture_requests_for_path(
+        &self,
+        path: &str,
+        texture_requests: &mut crate::render::shader::primitive::TextureRequestTracker,
+    ) {
+        let pending_by_path = self.pending_texture_requests_by_path.borrow();
+        let Some(requests) = pending_by_path.get(path) else {
+            return;
+        };
+        for request in requests {
+            texture_requests.register_request(request);
+        }
+    }
+
+    fn remove_pending_texture_path(&self, path: &str) {
+        if !self.pending_texture_path_set.borrow_mut().remove(path) {
+            return;
+        }
+        self.pending_texture_requests_by_path
+            .borrow_mut()
+            .remove(path);
+        for strata_map in self.strata_pending_texture_requests.borrow_mut().iter_mut() {
+            strata_map.remove(path);
+        }
+        self.pending_texture_path_queue
+            .borrow_mut()
+            .retain(|queued_path| queued_path != path);
     }
 
     fn prune_dirty_strata(&self, dirty: u16, dirty_ids: Option<&FxHashSet<u64>>) -> u16 {
@@ -615,8 +737,46 @@ fn sample_texture_paths(paths: &[String], limit: usize) -> Vec<String> {
     paths.iter().take(limit).cloned().collect()
 }
 
+fn sort_pending_texture_paths(paths: &mut [String]) {
+    paths.sort_by(|a, b| {
+        pending_texture_path_priority(a)
+            .cmp(&pending_texture_path_priority(b))
+            .then_with(|| a.cmp(b))
+    });
+}
+
+fn pending_texture_path_priority(path: &str) -> (u8, u8) {
+    let is_world_map = path
+        .get(..19)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface\\WorldMap\\"))
+        || path
+            .get(..19)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface/WorldMap/"));
+    let is_crop = path.contains("@crop:");
+    (u8::from(!is_world_map), u8::from(is_crop))
+}
+
 fn duration_ms(duration: std::time::Duration) -> f64 {
     duration.as_secs_f64() * 1000.0
+}
+
+fn collect_pending_texture_requests(
+    batch: &crate::render::QuadBatch,
+) -> FxHashMap<String, Vec<crate::render::TextureRequest>> {
+    let mut pending: FxHashMap<String, Vec<crate::render::TextureRequest>> = FxHashMap::default();
+    for request in batch
+        .texture_requests
+        .iter()
+        .chain(&batch.mask_texture_requests)
+    {
+        if request.handle.is_pending() {
+            pending
+                .entry(request.path.clone())
+                .or_default()
+                .push(request.clone());
+        }
+    }
+    pending
 }
 
 #[cfg(test)]

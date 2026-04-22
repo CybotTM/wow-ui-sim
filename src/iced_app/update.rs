@@ -813,6 +813,7 @@ impl App {
     }
 
     fn clear_failed_texture_requests(&self) {
+        let mut retried = false;
         for batch in self.cached_strata_quads.borrow().iter().flatten() {
             for request in batch
                 .texture_requests
@@ -821,8 +822,12 @@ impl App {
             {
                 if request.handle.is_failed() {
                     request.handle.mark_retry();
+                    retried = true;
                 }
             }
+        }
+        if retried {
+            self.seed_pending_texture_paths_from_cached_strata();
         }
     }
 }

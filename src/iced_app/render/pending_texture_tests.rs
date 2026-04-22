@@ -159,6 +159,7 @@ fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_reque
         .push(TextureRequest::new(&request_path, 0, 4));
     batch.texture_requests[0].handle.mark_staged();
     app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
+    app.seed_pending_texture_paths_from_cached_strata();
 
     app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
 
@@ -189,23 +190,13 @@ fn pending_transition_reinjects_clean_cached_strata_for_staged_requests() {
     app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::clone(&cached));
     // Request-local state is now carried on the request itself.
     app.textures_pending.set(true);
+    app.seed_pending_texture_paths_from_cached_strata();
 
     let mut dirty_strata = std::array::from_fn(|_| None);
-    let mut textures = Vec::new();
-    let mut bc_textures = Vec::new();
     let texture_requests = Arc::new(Mutex::new(TextureRequestTracker::default()));
 
-    app.recover_pending_textures(
-        &mut dirty_strata,
-        &mut textures,
-        &mut bc_textures,
-        &texture_requests,
-    );
+    app.recover_pending_textures(&mut dirty_strata, &texture_requests);
 
-    assert!(
-        textures.is_empty() && bc_textures.is_empty(),
-        "already staged requests should not redundantly reload CPU texture payloads"
-    );
     assert!(
         dirty_strata[0]
             .as_ref()
@@ -215,5 +206,77 @@ fn pending_transition_reinjects_clean_cached_strata_for_staged_requests() {
     assert!(
         dirty_strata[1..].iter().all(Option::is_none),
         "only the cached strata with pending requests should be reinjected here"
+    );
+}
+
+#[test]
+fn pending_path_state_tracks_rebuilt_strata_deltas() {
+    let temp_dir = tempdir().unwrap();
+    let app = build_test_app_with_textures(temp_dir.path());
+
+    let mut strata0 = QuadBatch::new();
+    strata0
+        .texture_requests
+        .push(TextureRequest::new("delta-strata-0-a", 0, 4));
+    app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(strata0));
+
+    let mut strata1 = QuadBatch::new();
+    strata1
+        .texture_requests
+        .push(TextureRequest::new("delta-strata-1", 0, 4));
+    app.cached_strata_quads.borrow_mut()[1] = Some(Arc::new(strata1));
+
+    app.refresh_pending_texture_requests_for_rebuilt_strata((1 << 0) | (1 << 1));
+    {
+        let pending = app.pending_texture_path_set.borrow();
+        assert!(pending.contains("delta-strata-0-a"));
+        assert!(pending.contains("delta-strata-1"));
+    }
+
+    let mut strata0_rebuilt = QuadBatch::new();
+    strata0_rebuilt
+        .texture_requests
+        .push(TextureRequest::new("delta-strata-0-b", 0, 4));
+    app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(strata0_rebuilt));
+    app.refresh_pending_texture_requests_for_rebuilt_strata(1 << 0);
+
+    let pending = app.pending_texture_path_set.borrow();
+    assert!(
+        !pending.contains("delta-strata-0-a"),
+        "rebuilding one strata should evict stale paths from that strata only"
+    );
+    assert!(pending.contains("delta-strata-0-b"));
+    assert!(
+        pending.contains("delta-strata-1"),
+        "unrebuilt strata paths should remain pending"
+    );
+}
+
+#[test]
+fn pending_path_queue_drains_when_request_is_marked_ready() {
+    let temp_dir = tempdir().unwrap();
+    let app = build_test_app_with_textures(temp_dir.path());
+
+    let mut batch = QuadBatch::new();
+    batch
+        .texture_requests
+        .push(TextureRequest::new("drain-on-ready", 0, 4));
+    let handle = batch.texture_requests[0].handle.clone();
+    app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(batch));
+
+    app.refresh_pending_texture_requests_for_rebuilt_strata(1 << 0);
+    assert!(
+        app.cached_render_requests_still_pending(),
+        "fresh pending request should be tracked"
+    );
+
+    handle.mark_ready();
+    assert!(
+        !app.cached_render_requests_still_pending(),
+        "ready requests should be pruned from the persistent pending-path queue"
+    );
+    assert!(
+        app.pending_texture_path_set.borrow().is_empty(),
+        "drained queue should not keep stale pending paths"
     );
 }
