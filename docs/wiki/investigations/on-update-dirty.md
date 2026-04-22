@@ -142,6 +142,55 @@ Equality-bail ordering confirmation:
 - static path confirms the same ordering: `set_formatted_text()` calls
   `format_text_arg()` before `should_skip_formatted_text_update()`
 
+## 2026-04-22 SetPoint no-op microbenchmark baseline
+
+Before touching `SetPoint`, we measured the current no-op and change-path cost
+with a differential headless `--exec-lua` benchmark (`N=80000`, `R=8`) and
+saved the output in `/tmp/claude/setpoint_bench_results.txt`.
+
+Command shape used:
+
+```bash
+LD_LIBRARY_PATH=target/debug:target/debug/deps \
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 \
+target/debug/wow-sim --no-addons --no-saved-vars \
+  --exec-lua @/tmp/claude/setpoint_bench.lua \
+  screenshot -o /tmp/claude/setpoint_bench.webp
+```
+
+Measured batch timings (`GetTime` timer path in this headless run):
+
+- `empty_ms=12.880099`
+- `implicit_noop_ms=277.082179` (`SetPoint("CENTER", 10, 20)`)
+- `explicit_noop_ms=303.036494` (`SetPoint("CENTER", UIParent, "CENTER", 10, 20)`)
+- `explicit_name_noop_ms=320.425885` (`SetPoint("CENTER", "UIParent", "CENTER", 10, 20)`)
+- `eq_proxy_ms=253.182395` (`GetPointByName("CENTER")` + value compare loop)
+- `change_ms=417.348080` (alternating x-offset `10/11` on explicit `SetPoint`)
+
+Required split (per-call, microseconds):
+
+- **anchor argument parsing baseline (no explicit target lookup):**
+  `3.303us` (`implicit_noop - empty`)
+- **anchor normalization/lookup (userdata target + relative-point parsing):**
+  `+0.324us` (`explicit_noop - implicit_noop`)
+- **name-based lookup overhead (string target vs userdata target):**
+  `+0.217us` (`explicit_name_noop - explicit_noop`)
+- **no-op equivalence check proxy (read current anchor + compare values):**
+  `3.004us` (`eq_proxy - empty`)
+- **full relayout/dirty extra over explicit no-op path:**
+  `+1.429us` (`change - explicit_noop`)
+
+Cycle-check / bailout ordering (static):
+
+- `set_point()` parses/normalizes args first (`parse_set_point_args`)
+- if `relative_to` is still `None`, it resolves default parent before cycle
+  detection
+- `ensure_no_anchor_cycle(...)` runs next
+- only after that does `apply_set_point(...)` run, where the no-op
+  equivalence bail-out (`if unchanged { return Ok(0); }`) lives
+
+So both anchor resolution work and cycle-check run before the no-op bail-out.
+
 ## 2026-04-14 GameTimeFrame calendar atlas follow-up
 
 The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than

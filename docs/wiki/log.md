@@ -19,6 +19,16 @@ Recorded the three required splits (argument formatting/parsing cost,
 text-equality fast-path cost, and real text-change cost) and added a runtime
 probe proving global `format()` is still called on same-text no-op updates.
 
+## [2026-04-22] update | setpoint no-op microbenchmark baseline
+
+Updated `investigations/on-update-dirty.md` with a pre-optimization
+`SetPoint` differential microbenchmark baseline. Recorded split timings for
+implicit-noop parse baseline, explicit target normalization/lookup overhead,
+string target lookup overhead, a no-op equivalence-check proxy, and full
+relayout/dirty extra cost. Also documented the static control-flow ordering in
+`anchors.rs` proving anchor resolution and `ensure_no_anchor_cycle` run before
+the no-op `unchanged` bail-out in `apply_set_point`.
+
 ## [2026-04-22] update | world-map Lua retry simplification
 
 Updated `investigations/world-map-texture-loading-budget.md` with the
