@@ -104,6 +104,44 @@ Interpretation: the same-value `SetAlpha(1)` path is already near bare
 Lua->Rust call cost in this benchmark, while real state change adds another
 ~`1.4us`/call on top.
 
+## 2026-04-22 SetFormattedText no-op microbenchmark baseline
+
+Before changing any `SetFormattedText` implementation, we measured the current
+simulator cost in the same shape as `SetAlpha` using a batched headless
+`--exec-lua` microbenchmark (`N=120000`, `R=8`) and wrote the output to
+`/tmp/claude/setformatted_bench_results.txt`.
+
+Command shape used:
+
+```bash
+LD_LIBRARY_PATH=target/debug:target/debug/deps \
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 \
+target/debug/wow-sim --no-addons --no-saved-vars \
+  --exec-lua @/tmp/claude/setformatted_bench.lua \
+  screenshot -o /tmp/claude/setformatted_bench.webp
+```
+
+Measured batch timings (`GetTime` timer path in this headless run):
+
+- `empty_ms=16.863603`
+- `format_only_ms=397.144604` (`format("%dm", 60)` loop)
+- `same_ms=483.865347` (`SetFormattedText("%dm", 60)` no-op path)
+- `change_ms=725.311604` (alternating `%dm` with `60/61`)
+
+Required split (per-call, microseconds):
+
+- **argument formatting/parsing cost:** `3.169us` (`format_only - empty`)
+- **text-equality fast-path cost:** `0.723us` (`same - format_only`)
+- **real text-change cost:** `+2.012us` (`change - same`)
+
+Equality-bail ordering confirmation:
+
+- runtime probe patched global `format` to increment a counter, then called
+  `SetFormattedText("%dm", 60)` `100` times on already-matching text
+- observed `format_call_probe_same_text_calls=100`
+- static path confirms the same ordering: `set_formatted_text()` calls
+  `format_text_arg()` before `should_skip_formatted_text_update()`
+
 ## 2026-04-14 GameTimeFrame calendar atlas follow-up
 
 The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than

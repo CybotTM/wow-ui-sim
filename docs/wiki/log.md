@@ -11,6 +11,14 @@ state-change `SetAlpha`) and the required split:
 Lua->Rust call overhead, same-value fast-path overhead, and real
 state-change overhead.
 
+## [2026-04-22] update | setformattedtext no-op microbenchmark baseline
+
+Updated `investigations/on-update-dirty.md` with a pre-optimization
+`SetFormattedText` microbenchmark baseline from a headless `--exec-lua` run.
+Recorded the three required splits (argument formatting/parsing cost,
+text-equality fast-path cost, and real text-change cost) and added a runtime
+probe proving global `format()` is still called on same-text no-op updates.
+
 ## [2026-04-22] update | world-map Lua retry simplification
 
 Updated `investigations/world-map-texture-loading-budget.md` with the
