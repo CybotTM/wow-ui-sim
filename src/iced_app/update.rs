@@ -341,6 +341,10 @@ impl App {
         let mut stage_timings = TickStageTimings::default();
 
         let started = std::time::Instant::now();
+        self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
+        stage_timings.preload += started.elapsed();
+
+        let started = std::time::Instant::now();
         self.run_pending_exec_lua();
         stage_timings.exec_lua = started.elapsed();
 
@@ -358,11 +362,6 @@ impl App {
             let started = std::time::Instant::now();
             self.mark_strata_dirty(combined);
             stage_timings.mark_dirty = started.elapsed();
-        }
-        if self.textures_pending.get() {
-            let started = std::time::Instant::now();
-            self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
-            stage_timings.preload += started.elapsed();
         }
         if self.strata_dirty.get() != 0 || self.textures_pending.get() {
             let started = std::time::Instant::now();
@@ -382,6 +381,7 @@ impl App {
     /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
     fn collect_tick_dirty(&mut self) -> (u16, TickStageTimings) {
         let mut timings = TickStageTimings::default();
+        let pending_before = self.pending_dirty_ids.borrow_mut().take();
         let (m0, ids0) = self.take_render_dirty_with_ids();
 
         let started = std::time::Instant::now();
@@ -405,7 +405,8 @@ impl App {
         timings.casting = started.elapsed();
         let (m3, ids3) = self.take_render_dirty_with_ids();
 
-        *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids([ids0, ids1, ids2, ids3]);
+        *self.pending_dirty_ids.borrow_mut() =
+            merge_dirty_ids([pending_before, ids0, ids1, ids2, ids3]);
         (m0 | m1 | m2 | m3, timings)
     }
 
@@ -591,31 +592,69 @@ impl App {
     }
 
     fn preload_visible_textures_with_budget(&self, budget: std::time::Duration) {
-        let env = self.env.borrow();
-        let paths = env.state().borrow().widgets.visible_texture_paths();
-        drop(env);
-        let mut tex_mgr = self.texture_manager.borrow_mut();
-        let before = tex_mgr.cache_len();
+        let paths = self.warmup_texture_paths();
         let deadline = std::time::Instant::now() + budget;
-        let mut remaining_uncached = false;
-        for path in &paths {
-            if tex_mgr.get(path).is_some() {
-                continue;
-            }
-            tex_mgr.load(path);
-            if std::time::Instant::now() >= deadline {
-                remaining_uncached = paths.iter().any(|p| tex_mgr.get(p).is_none());
-                break;
+        let mut loaded = 0usize;
+        {
+            let mut tex_mgr = self.texture_manager.borrow_mut();
+            for path in &paths {
+                if texture_request_is_cached(&tex_mgr, path) {
+                    continue;
+                }
+                super::render::preload_texture_request_source(&mut tex_mgr, path);
+                if texture_request_is_cached(&tex_mgr, path) {
+                    loaded += 1;
+                }
+                if std::time::Instant::now() >= deadline {
+                    break;
+                }
             }
         }
-        self.textures_pending.set(remaining_uncached);
-        let loaded = tex_mgr.cache_len() - before;
+        let remaining_pending = {
+            let tex_mgr = self.texture_manager.borrow();
+            let ready = self.gpu_ready_textures.lock().unwrap();
+            paths
+                .iter()
+                .any(|path| !texture_request_ready_for_draw(&tex_mgr, &ready, path))
+        };
+        self.textures_pending.set(remaining_pending);
         if loaded > 0 {
+            // Cached quad batches still reference pending texture markers until
+            // we re-emit them, so a decode completion must trigger a redraw.
+            self.mark_all_strata_dirty();
             crate::logging::eprintln_elapsed(&format!(
                 "[texture-cache-warmup] {loaded} new textures ({} requested)",
                 paths.len()
             ));
         }
+    }
+
+    fn warmup_texture_paths(&self) -> Vec<String> {
+        let mut cached_paths = self.cached_render_request_paths();
+        if !cached_paths.is_empty() {
+            sort_texture_request_paths(&mut cached_paths);
+            return cached_paths;
+        }
+
+        let env = self.env.borrow();
+        let mut visible_paths = env.state().borrow().widgets.visible_texture_paths();
+        sort_texture_request_paths(&mut visible_paths);
+        visible_paths
+    }
+
+    fn cached_render_request_paths(&self) -> Vec<String> {
+        let mut paths = FxHashSet::default();
+        let strata = self.cached_strata_quads.borrow();
+        for batch in strata.iter().flatten() {
+            for request in batch
+                .texture_requests
+                .iter()
+                .chain(&batch.mask_texture_requests)
+            {
+                paths.insert(request.path.clone());
+            }
+        }
+        paths.into_iter().collect()
     }
 
     pub(super) fn apply_hit_grid_changes(&self) {
@@ -784,6 +823,40 @@ fn duration_ms(duration: Duration) -> f64 {
     duration.as_secs_f64() * 1000.0
 }
 
+fn texture_request_is_cached(tex_mgr: &crate::texture::TextureManager, path: &str) -> bool {
+    if path.contains("@crop:") {
+        return tex_mgr.get_cached_crop_request(path).is_some();
+    }
+    tex_mgr.is_cached(path)
+}
+
+fn texture_request_ready_for_draw(
+    tex_mgr: &crate::texture::TextureManager,
+    ready: &std::collections::HashSet<String>,
+    path: &str,
+) -> bool {
+    texture_request_is_cached(tex_mgr, path) && ready.contains(path)
+}
+
+fn sort_texture_request_paths(paths: &mut [String]) {
+    paths.sort_by(|a, b| {
+        texture_request_priority(a)
+            .cmp(&texture_request_priority(b))
+            .then_with(|| a.cmp(b))
+    });
+}
+
+fn texture_request_priority(path: &str) -> (u8, u8) {
+    let is_world_map = path
+        .get(..19)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface\\WorldMap\\"))
+        || path
+            .get(..19)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface/WorldMap/"));
+    let is_crop = path.contains("@crop:");
+    (u8::from(!is_world_map), u8::from(is_crop))
+}
+
 fn should_drop_stale_timer_tick(age: std::time::Duration, interval: std::time::Duration) -> bool {
     let stale_threshold = interval
         .saturating_mul(2)
@@ -833,22 +906,30 @@ fn sample_display_metrics(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::iced_app::render;
+    use crate::render::{QuadBatch, TextureRequest};
     use crate::screen::ScreenKind;
     use crate::texture::TextureManager;
     use iced::Size;
     use std::cell::RefCell;
+    use std::path::Path;
     use std::path::PathBuf;
     use std::rc::Rc;
+    use tempfile::tempdir;
     use tokio::sync::mpsc;
 
     fn build_test_app(screen_kind: ScreenKind) -> App {
+        build_test_app_with_textures(screen_kind, Path::new("./textures"))
+    }
+
+    fn build_test_app_with_textures(screen_kind: ScreenKind, textures_path: &Path) -> App {
         let env = Rc::new(RefCell::new(
             WowLuaEnv::new().expect("Failed to create Lua environment"),
         ));
         env.borrow().set_screen_mode(screen_kind);
 
         let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
-            "./textures",
+            textures_path,
         ))));
         let font_system = Rc::new(RefCell::new(crate::render::WowFontSystem::new(
             &PathBuf::from(super::super::app::DEFAULT_FONTS_PATH),
@@ -1036,6 +1117,140 @@ mod tests {
             app.oldest_dropped_timer_tick_age.get(),
             std::time::Duration::ZERO,
             "keypress log accounting should clear the recorded backlog age"
+        );
+    }
+
+    #[test]
+    fn tick_warmup_marks_strata_dirty_when_it_decodes_visible_textures() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("tick-warmup.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.selected_rot_level = "Off".to_string();
+        app.strata_dirty.set(0);
+        app.textures_pending.set(false);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                local frame = CreateFrame("Frame", "TickWarmupFrame", UIParent)
+                local texture = frame:CreateTexture(nil, "ARTWORK")
+                texture:SetTexture("tick-warmup")
+            "#,
+            )
+            .unwrap();
+            let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+        }
+
+        let _ = app.update(Message::ProcessTimers(Instant::now()));
+
+        let all_strata_mask = (1u16 << crate::widget::FrameStrata::COUNT) - 1;
+        assert_eq!(
+            app.strata_dirty.get(),
+            all_strata_mask,
+            "tick-start warmup should force a redraw when it decodes visible textures"
+        );
+        assert!(
+            app.texture_manager.borrow().get("tick-warmup").is_some(),
+            "tick-start warmup should decode the visible texture source"
+        );
+    }
+
+    #[test]
+    fn tick_warmup_prefers_cached_render_crop_requests() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("tick-warmup-crop.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.strata_dirty.set(0);
+        app.textures_pending.set(false);
+
+        let crop_path = "tick-warmup-crop@crop:0.000000,0.500000,0.000000,0.500000";
+        let mut batch = QuadBatch::new();
+        batch.texture_requests.push(TextureRequest {
+            path: crop_path.to_string(),
+            vertex_start: 0,
+            vertex_count: 4,
+        });
+        app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
+
+        app.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
+
+        let tex_mgr = app.texture_manager.borrow();
+        assert!(
+            tex_mgr.get_cached_crop_request(crop_path).is_some(),
+            "tick warmup should cache the current render crop request itself"
+        );
+        assert!(
+            app.textures_pending.get(),
+            "CPU-cached render requests must stay pending until the live draw uploads them"
+        );
+    }
+
+    #[test]
+    fn tick_warmup_keeps_staged_but_unprepared_requests_pending() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("staged-not-prepared.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.strata_dirty.set(0);
+        app.textures_pending.set(false);
+
+        let request_path = "staged-not-prepared";
+        let mut batch = QuadBatch::new();
+        batch.texture_requests.push(TextureRequest {
+            path: request_path.to_string(),
+            vertex_start: 0,
+            vertex_count: 4,
+        });
+        app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
+
+        {
+            let mut tex_mgr = app.texture_manager.borrow_mut();
+            render::preload_texture_request_source(&mut tex_mgr, request_path);
+        }
+        app.gpu_uploaded_textures
+            .borrow_mut()
+            .insert(request_path.to_string());
+
+        app.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
+
+        assert!(
+            app.textures_pending.get(),
+            "draw-staged requests must stay pending until prepare uploads them into the atlas"
+        );
+    }
+
+    #[test]
+    fn collect_tick_dirty_preserves_full_rebuild_sentinel() {
+        let mut app = build_test_app(ScreenKind::Game);
+        app.pending_dirty_ids.borrow_mut().take();
+        app.mark_all_strata_dirty();
+
+        {
+            let env = app.env.borrow();
+            let frame = env
+                .state()
+                .borrow()
+                .widgets
+                .get_id_by_name("UIParent")
+                .expect("UIParent should exist");
+            env.state().borrow().widgets.mark_visual_dirty(frame);
+        }
+
+        let _ = app.collect_tick_dirty();
+
+        assert!(
+            app.pending_dirty_ids.borrow().is_none(),
+            "full rebuild sentinel must survive later per-frame dirty collection"
         );
     }
 

@@ -121,6 +121,7 @@ impl shader::Program<Message> for &App {
             bc_textures,
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
+            gpu_ready_textures: Some(std::sync::Arc::clone(&self.gpu_ready_textures)),
         };
         self.attach_dirty_glyph_atlas(&mut primitive);
         primitive
@@ -260,7 +261,9 @@ impl App {
         telemetry.remaining = queued_progress.remaining;
         telemetry.remaining_sample = queued_progress.remaining_sample;
         if queued_progress.total != 0 {
-            telemetry.pending = queued_progress.remaining != 0;
+            telemetry.pending = queued_progress.remaining != 0
+                || self.textures_pending.get()
+                || self.cached_render_requests_still_pending();
             self.textures_pending.set(telemetry.pending);
         }
         telemetry.elapsed = started.elapsed();
@@ -313,6 +316,24 @@ impl App {
         let elapsed_ms = elapsed.as_secs_f32() * 1000.0;
         self.draw_time_accum_ms
             .set(self.draw_time_accum_ms.get() + elapsed_ms);
+    }
+
+    fn cached_render_requests_still_pending(&self) -> bool {
+        let ready = self.gpu_ready_textures.lock().unwrap();
+        let failed = self.gpu_failed_textures.borrow();
+        self.cached_strata_quads
+            .borrow()
+            .iter()
+            .flatten()
+            .any(|batch| {
+                batch
+                    .texture_requests
+                    .iter()
+                    .chain(&batch.mask_texture_requests)
+                    .any(|request| {
+                        !ready.contains(&request.path) && !failed.contains(&request.path)
+                    })
+            })
     }
 
     /// Return per-strata dirty batches, rebuilding only strata whose bit is
@@ -508,7 +529,10 @@ impl App {
     }
 }
 
-fn preload_texture_request_source(tex_mgr: &mut crate::texture::TextureManager, path: &str) {
+pub(crate) fn preload_texture_request_source(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+) {
     if path.contains("@crop:") {
         let _ = load_texture_or_crop(tex_mgr, path);
         return;

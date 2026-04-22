@@ -546,7 +546,7 @@ fn texture_request_priority(path: &str) -> (u8, u8) {
             .get(..19)
             .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface/WorldMap/"));
     let is_crop = path.contains("@crop:");
-    (u8::from(is_world_map), u8::from(!is_crop))
+    (u8::from(!is_world_map), u8::from(is_crop))
 }
 
 #[cfg(test)]
@@ -596,8 +596,8 @@ mod tests {
         assert_eq!(
             paths,
             vec![
-                r"Interface\Minimap\UI-Minimap-Background",
                 r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
+                r"Interface\Minimap\UI-Minimap-Background",
             ]
         );
     }
@@ -619,8 +619,8 @@ mod tests {
         assert_eq!(
             paths,
             vec![
-                r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
                 r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
+                r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
             ]
         );
     }

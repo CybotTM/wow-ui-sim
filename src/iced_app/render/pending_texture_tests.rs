@@ -1,6 +1,7 @@
 use super::*;
 use crate::lua_api::WowLuaEnv;
 use crate::render::{GlyphAtlas, WowFontSystem};
+use crate::render::{QuadBatch, TextureRequest};
 use crate::screen::ScreenKind;
 use crate::texture::TextureManager;
 use std::cell::RefCell;
@@ -108,5 +109,40 @@ fn empty_queue_preload_preserves_existing_pending_state() {
     assert!(
         app.textures_pending.get(),
         "an empty preload queue should not clear draw-owned pending state"
+    );
+}
+
+#[test]
+fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_requests() {
+    let temp_dir = tempdir().unwrap();
+    let texture_path = temp_dir.path().join("render-owned-pending.png");
+    let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+    image.save(&texture_path).unwrap();
+
+    let app = build_test_app_with_textures(temp_dir.path());
+    let request_path = "render-owned-pending".to_string();
+    app.env
+        .borrow()
+        .state()
+        .borrow_mut()
+        .enqueue_texture_preloads([request_path.clone()]);
+
+    let mut batch = QuadBatch::new();
+    batch.texture_requests.push(TextureRequest {
+        path: request_path.clone(),
+        vertex_start: 0,
+        vertex_count: 4,
+    });
+    app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
+
+    app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
+
+    assert!(
+        app.texture_manager.borrow().get(&request_path).is_some(),
+        "queue-driven preload should decode the cached render request source"
+    );
+    assert!(
+        app.textures_pending.get(),
+        "queue drain must not clear pending state until the render request is GPU-uploaded"
     );
 }

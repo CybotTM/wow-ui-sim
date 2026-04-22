@@ -3,7 +3,8 @@
 use super::{QuadBatch, WowUiPipeline};
 use iced::Rectangle;
 use iced::widget::shader::{self, Viewport};
-use std::sync::Arc;
+use std::collections::HashSet;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 /// Loaded texture data ready for GPU upload.
@@ -269,6 +270,8 @@ pub struct WowUiPrimitive {
     pub glyph_atlas_data: Option<Vec<u8>>,
     /// Size of the glyph atlas (width = height).
     pub glyph_atlas_size: u32,
+    /// Shared app-side tracker for texture paths confirmed ready in the atlas.
+    pub gpu_ready_textures: Option<Arc<Mutex<HashSet<String>>>>,
 }
 
 impl WowUiPrimitive {
@@ -288,6 +291,7 @@ impl WowUiPrimitive {
             bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
+            gpu_ready_textures: None,
         }
     }
 
@@ -313,6 +317,7 @@ impl WowUiPrimitive {
             bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
+            gpu_ready_textures: None,
         }
     }
 }
@@ -331,6 +336,25 @@ fn upload_pending_textures(
     upload_bc_textures(atlas, queue, bc_textures);
     upload_glyph_atlas_if_present(atlas, queue, glyph_atlas_data, glyph_atlas_size);
     log_gpu_memory_once(atlas);
+}
+
+fn mark_ready_texture_paths(
+    ready: Option<&Arc<Mutex<HashSet<String>>>>,
+    textures: &[GpuTextureData],
+    bc_textures: &[GpuBcTextureData],
+) {
+    let Some(ready) = ready else {
+        return;
+    };
+    let Ok(mut ready) = ready.lock() else {
+        return;
+    };
+    for texture in textures {
+        ready.insert(texture.path.clone());
+    }
+    for texture in bc_textures {
+        ready.insert(texture.path.clone());
+    }
 }
 
 fn upload_rgba_textures(
@@ -622,6 +646,11 @@ impl shader::Primitive for WowUiPrimitive {
             &self.bc_textures,
             &self.glyph_atlas_data,
             self.glyph_atlas_size,
+        );
+        mark_ready_texture_paths(
+            self.gpu_ready_textures.as_ref(),
+            &self.textures,
+            &self.bc_textures,
         );
         let textures_elapsed = textures_started.elapsed();
         crate::logging::set_blocking_phase("prepare_projection");
