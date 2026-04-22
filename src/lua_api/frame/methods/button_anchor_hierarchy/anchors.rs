@@ -387,6 +387,23 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
         };
     }
 
+    let unchanged = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame.anchors.iter().find(|anchor| anchor.point == point))
+            .map(|anchor| {
+                anchor.relative_to_id == relative_to
+                    && anchor.relative_point == relative_point
+                    && anchor.x_offset == x_offset
+                    && anchor.y_offset == y_offset
+            })
+            .unwrap_or(false)
+    };
+    if unchanged {
+        return Ok(0);
+    }
+
     ensure_no_anchor_cycle(state, id, relative_to, "SetPoint")?;
 
     let mut sim = borrow_state_mut(state)?;
@@ -430,21 +447,6 @@ fn apply_set_point(
     x_offset: f32,
     y_offset: f32,
 ) -> LuaResult<u32> {
-    let unchanged = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame.anchors.iter().find(|anchor| anchor.point == point))
-        .map(|anchor| {
-            anchor.relative_to_id == relative_to
-                && anchor.relative_point == relative_point
-                && anchor.x_offset == x_offset
-                && anchor.y_offset == y_offset
-        })
-        .unwrap_or(false);
-    if unchanged {
-        return Ok(0);
-    }
-
     if let Some(old_target) = sim.widgets.get(id).and_then(|f| {
         f.anchors
             .iter()

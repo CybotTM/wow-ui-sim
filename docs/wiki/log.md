@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | setpoint no-op fast-path optimization
+
+Updated `investigations/on-update-dirty.md` with the post-optimization
+`SetPoint` rerun after moving the same-anchor no-op bail-out to
+`set_point()` before `ensure_no_anchor_cycle(...)`. Recorded the measured
+before/after no-op totals (`3.626955us -> 1.392966us`, about `61.6%` lower)
+and updated the control-flow notes to reflect that cycle detection now runs
+only on real anchor changes.
+
 ## [2026-04-22] update | formattedtext and fontobject no-op fast paths
 
 Updated `investigations/on-update-dirty.md` with the post-optimization

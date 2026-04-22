@@ -255,6 +255,44 @@ Cycle-check / bailout ordering (static):
 
 So both anchor resolution work and cycle-check run before the no-op bail-out.
 
+## 2026-04-22 SetPoint no-op fast-path optimization
+
+`src/lua_api/frame/methods/button_anchor_hierarchy/anchors.rs::set_point` now
+does the same-anchor equivalence check immediately after argument parsing and
+default-parent resolution, before `ensure_no_anchor_cycle(...)`. The unchanged
+check was removed from `apply_set_point(...)`.
+
+Post-change benchmark rerun (`/tmp/claude/setpoint_bench.lua`, `N=80000`,
+`R=8`, output in `/tmp/claude/setpoint_bench_results.txt`):
+
+- `empty_ms=9.564679`
+- `implicit_noop_ms=100.608869`
+- `explicit_noop_ms=121.001922`
+- `explicit_name_noop_ms=130.711111`
+- `eq_proxy_ms=162.620613`
+- `change_ms=316.323588`
+
+Measured split (per-call, microseconds):
+
+- `parse_base_us=1.138052`
+- `normalize_lookup_us=0.254913`
+- `name_lookup_extra_us=0.121365`
+- `eq_proxy_us=1.913199`
+- `full_relayout_extra_us=2.441521`
+
+Before/after explicit same-anchor no-op total (`explicit_noop - empty`):
+
+- baseline: `3.626955us`
+- post-change: `1.392966us`
+- delta: `-2.233989us` (`~61.6%` lower)
+
+Control-flow ordering after optimization:
+
+- `set_point()` parses/normalizes args and resolves default parent
+- it performs same-anchor equivalence check and returns early on no-op
+- `ensure_no_anchor_cycle(...)` only runs for real anchor changes
+- `apply_set_point(...)` applies mutation/dirty propagation
+
 ## 2026-04-22 SetFontObject / SetShown / SetVertexColor no-op baseline
 
 To complete the no-op audit set, we measured `SetFontObject`, `SetShown`, and
