@@ -1705,6 +1705,40 @@ local function __wow_size_map_exploration_pin(pin)
     end
 end
 
+local function __wow_finalize_map_exploration_pin_waiting(pin)
+    if type(pin) ~= "table" then
+        return
+    end
+
+    if not rawget(pin, "isWaitingForLoad") then
+        return
+    end
+
+    local map = type(pin.GetMap) == "function" and pin:GetMap() or nil
+    local detailLayersLoaded = type(map) == "table"
+        and type(map.AreDetailLayersLoaded) == "function"
+        and map:AreDetailLayersLoaded()
+    local textureLoadGroup = rawget(pin, "textureLoadGroup")
+    local texturesLoaded = type(textureLoadGroup) == "table"
+        and type(textureLoadGroup.IsFullyLoaded) == "function"
+        and textureLoadGroup:IsFullyLoaded()
+
+    if detailLayersLoaded and texturesLoaded then
+        if type(pin.RefreshAlpha) == "function" then
+            pin:RefreshAlpha()
+        end
+        pin.isWaitingForLoad = nil
+        if type(textureLoadGroup) == "table" and type(textureLoadGroup.Reset) == "function" then
+            textureLoadGroup:Reset()
+        end
+        return
+    end
+
+    if type(pin.Show) == "function" and type(pin.IsShown) == "function" and not pin:IsShown() then
+        pin:Show()
+    end
+end
+
 local function __wow_patch_live_map_exploration_pins(map)
     if type(map) ~= "table" then
         return
@@ -1740,6 +1774,7 @@ if type(MapExplorationPinMixin) == "table" and not rawget(_G, "__wow_map_explora
         MapExplorationPinMixin.OnAcquired = function(self, dataProvider)
             originalOnAcquired(self, dataProvider)
             __wow_size_map_exploration_pin(self)
+            __wow_finalize_map_exploration_pin_waiting(self)
         end
     end
 
@@ -1747,7 +1782,25 @@ if type(MapExplorationPinMixin) == "table" and not rawget(_G, "__wow_map_explora
         local originalRefreshOverlays = MapExplorationPinMixin.RefreshOverlays
         MapExplorationPinMixin.RefreshOverlays = function(self, fullUpdate)
             __wow_size_map_exploration_pin(self)
-            return originalRefreshOverlays(self, fullUpdate)
+            local result = originalRefreshOverlays(self, fullUpdate)
+            __wow_finalize_map_exploration_pin_waiting(self)
+            return result
+        end
+    end
+
+    if type(MapExplorationPinMixin.OnUpdate) == "function" then
+        local originalOnUpdate = MapExplorationPinMixin.OnUpdate
+        MapExplorationPinMixin.OnUpdate = function(self, elapsed)
+            if rawget(self, "isWaitingForLoad")
+                and type(self.Show) == "function"
+                and type(self.IsShown) == "function"
+                and not self:IsShown()
+            then
+                self:Show()
+            end
+            local result = originalOnUpdate(self, elapsed)
+            __wow_finalize_map_exploration_pin_waiting(self)
+            return result
         end
     end
 

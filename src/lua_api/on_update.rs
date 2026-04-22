@@ -38,6 +38,11 @@ pub(crate) fn fire(
     // instead of interleaving mid-dispatch.
     env.gc_stop();
 
+    {
+        let mut lua = env.rilua_mut();
+        super::script_helpers::reconcile_on_update_runtime_cache_if_dirty(&mut lua);
+    }
+
     let frame_ids = {
         let mut sim = env.state().borrow_mut();
         if sim.visible_on_update_cache.is_none() {

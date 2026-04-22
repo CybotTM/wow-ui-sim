@@ -433,6 +433,110 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
 }
 
 #[test]
+fn world_map_exploration_pin_converges_visible_after_onupdate_ticks() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("M keybind failed");
+        for _ in 0..12 {
+            process_pending_timers(&env);
+            env.state().borrow_mut().ensure_layout_rects();
+            fire_one_on_update_tick(&env);
+        }
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                local pin = WorldMapFrame:EnumeratePinsByTemplate("MapExplorationPinTemplate")()
+                if not pin then
+                    return "missing_exploration_pin"
+                end
+
+                local waiting = rawget(pin, "isWaitingForLoad")
+                local detailLoaded = WorldMapFrame:AreDetailLayersLoaded()
+                local alpha = pin:GetAlpha()
+                local shown = pin:IsShown()
+                local visible = pin:IsVisible()
+                local textureVisibleCount = 0
+                local textureActiveCount = 0
+                if pin.overlayTexturePool and pin.overlayTexturePool.EnumerateActive then
+                    for texture in pin.overlayTexturePool:EnumerateActive() do
+                        textureActiveCount = textureActiveCount + 1
+                        if texture:IsVisible() then
+                            textureVisibleCount = textureVisibleCount + 1
+                        end
+                    end
+                end
+
+                if waiting ~= nil then
+                    return string.format(
+                        "pin_waiting:detailLoaded=%s:shown=%s:visible=%s:alpha=%.2f:activeTextures=%d:visibleTextures=%d",
+                        tostring(detailLoaded),
+                        tostring(shown),
+                        tostring(visible),
+                        alpha,
+                        textureActiveCount,
+                        textureVisibleCount
+                    )
+                end
+
+                if not detailLoaded then
+                    return string.format(
+                        "detail_layers_not_loaded:shown=%s:visible=%s:alpha=%.2f",
+                        tostring(shown),
+                        tostring(visible),
+                        alpha
+                    )
+                end
+
+                if not shown or not visible or alpha <= 0 then
+                    return string.format(
+                        "pin_not_visible:shown=%s:visible=%s:alpha=%.2f:activeTextures=%d:visibleTextures=%d",
+                        tostring(shown),
+                        tostring(visible),
+                        alpha,
+                        textureActiveCount,
+                        textureVisibleCount
+                    )
+                end
+
+                if textureVisibleCount == 0 then
+                    return string.format(
+                        "no_visible_overlay_textures:active=%d:shown=%s:visible=%s:alpha=%.2f",
+                        textureActiveCount,
+                        tostring(shown),
+                        tostring(visible),
+                        alpha
+                    )
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+
+        assert_eq!(
+            result,
+            "ok",
+            "World map exploration pin should become visible after update ticks: {result}"
+        );
+        assert!(
+            errors.is_empty(),
+            "World map exploration visibility test produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+    }
+}
+
+#[test]
 fn world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame() {
     test_timeout! {
         let env = setup_env();

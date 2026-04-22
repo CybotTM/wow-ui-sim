@@ -25,6 +25,9 @@ pub(crate) struct WowLuaAppData {
     pub(crate) sim_state: Rc<RefCell<SimState>>,
     pub(crate) lua: Option<Rc<RefCell<rilua::Lua>>>,
     pub(crate) font_system: Option<Rc<RefCell<WowFontSystem>>>,
+    /// Sticky dirty bit for rebuilding `SimState::on_update_frames` from
+    /// registry handler caches when incremental sync could not borrow state.
+    pub(crate) on_update_cache_dirty: bool,
     /// Pre-interned handles for the hot-literal whitelist. Populated by
     /// `HotLiteralRegistry::install` during bootstrap (Track 1 sub-item 2).
     /// `None` on a fresh VM before the register-globals pass runs.
@@ -41,6 +44,7 @@ impl WowLuaAppData {
             sim_state,
             lua: None,
             font_system: None,
+            on_update_cache_dirty: true,
             hot_literals: None,
             global_slots: None,
         }
