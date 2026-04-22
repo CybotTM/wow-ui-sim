@@ -191,6 +191,61 @@ Cycle-check / bailout ordering (static):
 
 So both anchor resolution work and cycle-check run before the no-op bail-out.
 
+## 2026-04-22 SetFontObject / SetShown / SetVertexColor no-op baseline
+
+To complete the no-op audit set, we measured `SetFontObject`, `SetShown`, and
+`SetVertexColor` in one headless `--exec-lua` benchmark (`N=20000`, `R=4`)
+and wrote output to `/tmp/claude/set_misc_bench_results.txt`.
+
+Command shape used:
+
+```bash
+LD_LIBRARY_PATH=target/debug:target/debug/deps \
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 \
+target/debug/wow-sim --no-addons --no-saved-vars \
+  --exec-lua @/tmp/claude/set_misc_bench.lua \
+  screenshot -o /tmp/claude/set_misc_bench.webp
+```
+
+Measured split (per-call, microseconds):
+
+- `SetFontObject`
+  - dispatch cost (`GetFontObject - empty`): `2.004us`
+  - pre-bail work (`SetFontObject(same) - GetFontObject`): `4.100us`
+  - true state-change extra (`change - same`): `+0.194us`
+  - steady-state no-op total (`same - empty`): `6.104us`
+- `SetShown`
+  - dispatch cost (`IsShown - empty`): `1.390us`
+  - pre-bail work (`SetShown(true same) - IsShown`): about `0us` (measured
+    `-0.231us`, treated as timer noise around parity)
+  - true state-change extra (`change - same`): `+7.765us`
+  - steady-state no-op total (`same - empty`): `1.160us`
+- `SetVertexColor`
+  - dispatch cost (`GetVertexColor - empty`): `1.067us`
+  - pre-bail work (`SetVertexColor(same) - GetVertexColor`): `0.159us`
+  - true state-change extra (`change - same`): `+0.385us`
+  - steady-state no-op total (`same - empty`): `1.226us`
+
+Steady-state priority after `SetAlpha`:
+
+- `SetAlpha` no-op baseline from earlier: `1.009us`
+- current highest no-op steady-state among this group: `SetFontObject` at
+  `6.104us`/call
+
+So the next primitive optimization priority remains `SetFontObject`.
+
+Static ordering notes:
+
+- `SetFontObject`: argument resolution, `read_font_object_fields`, and
+  `table_set(__font_objects, ...)` all run before the change check
+  (`font_object_snapshot_changes_frame`), so there is significant pre-bail work
+  by design.
+- `SetShown`: `show_or_hide` does an early `needs_change` check via
+  `read_show_hide_state`; when unchanged it returns before parent-visibility
+  checks or handler dispatch.
+- `SetVertexColor`: parses RGBA first, then checks `frame.vertex_color != color`
+  before taking the `get_mut_visual` write path.
+
 ## 2026-04-14 GameTimeFrame calendar atlas follow-up
 
 The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than

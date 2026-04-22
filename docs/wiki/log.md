@@ -29,6 +29,14 @@ relayout/dirty extra cost. Also documented the static control-flow ordering in
 `anchors.rs` proving anchor resolution and `ensure_no_anchor_cycle` run before
 the no-op `unchanged` bail-out in `apply_set_point`.
 
+## [2026-04-22] update | fontobject shown vertexcolor no-op baselines
+
+Updated `investigations/on-update-dirty.md` with measured no-op and change-path
+splits for `SetFontObject`, `SetShown`, and `SetVertexColor`
+(`dispatch`, `pre-bail`, `true state-change`). Recorded the steady-state
+comparison against the earlier `SetAlpha` baseline and pinned
+`SetFontObject` as the highest remaining no-op cost in this primitive set.
+
 ## [2026-04-22] update | world-map Lua retry simplification
 
 Updated `investigations/world-map-texture-loading-budget.md` with the
