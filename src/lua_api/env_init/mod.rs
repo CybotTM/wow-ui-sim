@@ -245,6 +245,7 @@ mod tests {
             sim_state: Rc::new(RefCell::new(SimState::default())),
             lua: None,
             font_system: None,
+            on_update_cache_dirty: true,
             hot_literals: None,
             global_slots: None,
         });

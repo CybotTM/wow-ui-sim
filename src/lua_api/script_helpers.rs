@@ -143,6 +143,7 @@ pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
     let collected_error = augment_error_with_traceback(state, error_msg);
     if collect_lua_error(state, &collected_error) {
         eprintln!("Lua error: {collected_error}");
+        mirror_lua_error_to_console(state, &collected_error);
     }
     let Ok(handler) = ensure_error_handler(state) else {
         return;
@@ -152,6 +153,18 @@ pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
     };
     let msg_ref = state.gc.intern_string(collected_error.as_bytes());
     let _ = protected_call_state(state, handler, &[Val::Str(msg_ref)]);
+}
+
+fn mirror_lua_error_to_console(state: &LuaState, error_msg: &str) {
+    use super::env::WowLuaAppData;
+
+    let Some(app) = state.app_data::<WowLuaAppData>() else {
+        return;
+    };
+    let Ok(mut sim) = app.sim_state.try_borrow_mut() else {
+        return;
+    };
+    sim.console_output.push(format!("Lua error: {error_msg}"));
 }
 
 fn augment_error_with_traceback(state: &mut LuaState, error_msg: &str) -> String {
@@ -750,6 +763,7 @@ fn record_frame_timing(state: &LuaState, owner_addon: Option<u16>, start: &Insta
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lua_api::WowLuaEnv;
 
     #[test]
     fn protected_lua_pcall_state_caches_wrapper_factory() {
@@ -783,6 +797,28 @@ mod tests {
         assert_eq!(
             first_factory, second_factory,
             "cached wrapper factory should be reused"
+        );
+    }
+
+    #[test]
+    fn call_error_handler_state_mirrors_first_seen_errors_to_console_output() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        {
+            let mut lua = env.rilua_mut();
+            call_error_handler_state(lua.state_mut(), "boom");
+            call_error_handler_state(lua.state_mut(), "boom");
+        }
+
+        let state = env.state().borrow();
+        let mirrored: Vec<_> = state
+            .console_output
+            .iter()
+            .filter(|line| line.starts_with("Lua error: boom"))
+            .collect();
+        assert_eq!(
+            mirrored.len(),
+            1,
+            "duplicate Lua errors should be deduped in GUI console output"
         );
     }
 }
