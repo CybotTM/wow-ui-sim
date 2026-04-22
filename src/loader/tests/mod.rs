@@ -1403,6 +1403,28 @@ fn test_anonymous_runtime_scroll_template_parent_key_attaches_to_parent() {
 }
 
 #[test]
+fn test_anonymous_top_level_xml_frame_with_parent_key_attaches_to_parent() {
+    let t = load_test_xml(
+        "top-level-anon-parent-key",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="TopLevelAnonParentHost" parent="UIParent"/>
+            <Frame parent="TopLevelAnonParentHost" parentKey="AttachedChild"/>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            assert(TopLevelAnonParentHost.AttachedChild ~= nil, "anonymous top-level frame with explicit parent should attach via parentKey")
+            assert(TopLevelAnonParentHost.AttachedChild:GetParent() == TopLevelAnonParentHost, "anonymous top-level frame should stay parented to explicit parent")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_child_onload_sees_seeded_parent_array() {
     let t = load_test_xml(
         "xml-parent-array-onload",

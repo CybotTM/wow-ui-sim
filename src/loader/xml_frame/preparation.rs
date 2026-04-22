@@ -21,14 +21,13 @@ pub(super) fn prepare_frame_creation(
     intrinsic_base: Option<&str>,
 ) -> Option<PreparedFrameCreation> {
     let creator_name = current_loading_addon_name(env);
-    let name = resolve_frame_name(
-        frame,
-        parent_override,
-        subst_parent_override,
-        creator_name.as_deref(),
-    )?;
-    let subst_parent = resolve_subst_parent(frame, &name, subst_parent_override, parent_override);
     let inherited_parent_buf = resolve_parent(frame, parent_override);
+    let parent_for_name = subst_parent_override
+        .or(parent_override)
+        .or(frame.parent.as_deref())
+        .or(inherited_parent_buf.as_deref());
+    let name = resolve_frame_name(frame, parent_for_name, creator_name.as_deref())?;
+    let subst_parent = resolve_subst_parent(frame, &name, subst_parent_override, parent_override);
     let explicit_parent = parent_override
         .or(frame.parent.as_deref())
         .or(inherited_parent_buf.as_deref())
@@ -111,20 +110,19 @@ pub(super) fn build_inherits_chain(
 /// Returns `None` if the frame should be skipped (anonymous top-level frame).
 fn resolve_frame_name(
     frame: &crate::xml::FrameXml,
-    parent_override: Option<&str>,
-    subst_parent_override: Option<&str>,
+    parent_for_name: Option<&str>,
     creator: Option<&str>,
 ) -> Option<String> {
     match &frame.name {
         Some(n) => {
-            if let Some(parent_name) = subst_parent_override.or(parent_override) {
+            if let Some(parent_name) = parent_for_name {
                 Some(n.replace("$parent", parent_name))
             } else {
                 Some(n.clone())
             }
         }
         None => {
-            if parent_override.is_some() {
+            if parent_for_name.is_some() {
                 Some(format!("__{}_{}", creator.unwrap_or("anon"), rand_id()))
             } else {
                 None // Anonymous top-level frames are templates

@@ -5250,6 +5250,22 @@ if EJ_SelectTier == nil then
   end
 end
 
+if EJ_GetNumTiers == nil then
+  function EJ_GetNumTiers()
+    return 12
+  end
+end
+
+if EJ_GetTierInfo == nil then
+  function EJ_GetTierInfo(tier)
+    local tierIndex = tonumber(tier)
+    if tierIndex == nil then
+      return ""
+    end
+    return string.format("Tier %d", tierIndex)
+  end
+end
+
 if EJ_GetLootFilter == nil then
   function EJ_GetLootFilter()
     return __wow_ej_loot_filter_state.classFilter or 0, __wow_ej_loot_filter_state.specFilter or 0
@@ -10496,6 +10512,15 @@ C_EncounterJournal = __wow_merge_namespace(C_EncounterJournal, {
   OnOpen = function() end,
   InitalizeSelectedTier = function()
     __wow_ej_tier_state.currentTier = GetClientDisplayExpansionLevel ~= nil and GetClientDisplayExpansionLevel() or 10
+  end,
+})
+
+C_LootJournal = __wow_merge_namespace(C_LootJournal, {
+  GetItemSets = function(_classID, _specID)
+    return {}
+  end,
+  GetItemSetItems = function(_setID)
+    return {}
   end,
 })
 

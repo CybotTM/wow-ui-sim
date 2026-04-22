@@ -947,6 +947,220 @@ fn spellbook_frame_positions() {
 }
 
 #[test]
+fn spellbook_layout_stays_locked() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                local EPS = 1.5
+
+                local function approx(actual, expected, eps)
+                    if type(actual) ~= "number" or type(expected) ~= "number" then
+                        return false
+                    end
+                    return math.abs(actual - expected) <= (eps or EPS)
+                end
+
+                local function rect(frame, tag)
+                    if type(frame) ~= "table" then
+                        return nil, tag .. "_missing"
+                    end
+                    local l, b, w, h = frame:GetRect()
+                    if not (l and b and w and h) then
+                        return nil, tag .. "_missing_rect"
+                    end
+                    return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+                end
+
+                local playerSpells = PlayerSpellsFrame
+                local spellbook = playerSpells and playerSpells.SpellBookFrame
+                local paged = spellbook and spellbook.PagedSpellsFrame
+                if not playerSpells then return "player_spells_missing" end
+                if not spellbook then return "spellbook_frame_missing" end
+                if not paged then return "paged_spells_missing" end
+                if not playerSpells:IsShown() then return "player_spells_hidden" end
+                if not spellbook:IsShown() then return "spellbook_hidden" end
+                if not paged:IsShown() then return "paged_spells_hidden" end
+
+                local psRect, psErr = rect(playerSpells, "player_spells")
+                if not psRect then return psErr end
+                local sbRect, sbErr = rect(spellbook, "spellbook")
+                if not sbRect then return sbErr end
+                local pagedRect, pagedErr = rect(paged, "paged")
+                if not pagedRect then return pagedErr end
+
+                if sbRect.w < 900 then return "spellbook_width=" .. tostring(sbRect.w) end
+                if sbRect.h < 500 then return "spellbook_height=" .. tostring(sbRect.h) end
+
+                if pagedRect.l < sbRect.l - 2 then return "paged_left_outside=" .. tostring(pagedRect.l) end
+                if pagedRect.b < sbRect.b - 2 then return "paged_bottom_outside=" .. tostring(pagedRect.b) end
+                if pagedRect.r > sbRect.r + 2 then return "paged_right_outside=" .. tostring(pagedRect.r) end
+                if pagedRect.t > sbRect.t + 2 then return "paged_top_outside=" .. tostring(pagedRect.t) end
+                if pagedRect.w < sbRect.w * 0.65 then return "paged_width_too_small=" .. tostring(pagedRect.w) end
+                if pagedRect.h < sbRect.h * 0.65 then return "paged_height_too_small=" .. tostring(pagedRect.h) end
+
+                local bgLeft = spellbook.BookBGLeft
+                local bgRight = spellbook.BookBGRight
+                local bgTop = spellbook.TopBar
+                local corner = spellbook.BookCornerFlipbook
+                if not bgLeft then return "book_bg_left_missing" end
+                if not bgRight then return "book_bg_right_missing" end
+                if not bgTop then return "book_topbar_missing" end
+                if not corner then return "book_corner_missing" end
+
+                local bgLeftRect, bgLeftErr = rect(bgLeft, "book_bg_left")
+                if not bgLeftRect then return bgLeftErr end
+                local bgRightRect, bgRightErr = rect(bgRight, "book_bg_right")
+                if not bgRightRect then return bgRightErr end
+                local bgTopRect, bgTopErr = rect(bgTop, "book_topbar")
+                if not bgTopRect then return bgTopErr end
+                local cornerRect, cornerErr = rect(corner, "book_corner")
+                if not cornerRect then return cornerErr end
+
+                if not bgLeft:IsShown() then return "book_bg_left_hidden" end
+                if not bgRight:IsShown() then return "book_bg_right_hidden" end
+                if not bgTop:IsShown() then return "book_topbar_hidden" end
+                if not corner:IsShown() then return "book_corner_hidden" end
+
+                if not approx(bgLeftRect.w, bgRightRect.w, 1.5) then
+                    return "book_bg_halves_width_mismatch=" .. tostring(bgLeftRect.w) .. "," .. tostring(bgRightRect.w)
+                end
+                if not approx(bgLeftRect.h, bgRightRect.h, 1.5) then
+                    return "book_bg_halves_height_mismatch=" .. tostring(bgLeftRect.h) .. "," .. tostring(bgRightRect.h)
+                end
+                if not approx(bgLeftRect.r, bgRightRect.l, 2.0) then
+                    return "book_bg_gap=" .. tostring(bgLeftRect.r - bgRightRect.l)
+                end
+                if not approx(bgLeftRect.l, sbRect.l, 2.0) then
+                    return "book_bg_left_edge=" .. tostring(bgLeftRect.l)
+                end
+                if not approx(bgRightRect.r, sbRect.r, 2.0) then
+                    return "book_bg_right_edge=" .. tostring(bgRightRect.r)
+                end
+
+                if cornerRect.w < 120 or cornerRect.h < 120 then
+                    return "book_corner_size=" .. tostring(cornerRect.w) .. "x" .. tostring(cornerRect.h)
+                end
+                if cornerRect.r > sbRect.r then return "book_corner_right_outside=" .. tostring(cornerRect.r) end
+                if cornerRect.b < sbRect.b then return "book_corner_bottom_outside=" .. tostring(cornerRect.b) end
+
+                local paging = paged.PagingControls
+                local prev = paging and paging.PrevPageButton
+                local next = paging and paging.NextPageButton
+                local pageText = paging and paging.PageText
+                if not paging then return "paging_controls_missing" end
+                if not prev then return "paging_prev_missing" end
+                if not next then return "paging_next_missing" end
+                if not pageText then return "paging_text_missing" end
+                if not paging:IsShown() then return "paging_hidden" end
+                if not prev:IsShown() then return "paging_prev_hidden" end
+                if not next:IsShown() then return "paging_next_hidden" end
+                if not pageText:IsShown() then return "paging_text_hidden" end
+
+                local pagingRect, pagingErr = rect(paging, "paging")
+                if not pagingRect then return pagingErr end
+                local prevRect, prevErr = rect(prev, "paging_prev")
+                if not prevRect then return prevErr end
+                local nextRect, nextErr = rect(next, "paging_next")
+                if not nextRect then return nextErr end
+                local pageTextRect, pageTextErr = rect(pageText, "paging_text")
+                if not pageTextRect then return pageTextErr end
+
+                if pagingRect.w < 160 or pagingRect.h < 24 then
+                    return "paging_size=" .. tostring(pagingRect.w) .. "x" .. tostring(pagingRect.h)
+                end
+                if pagingRect.r > pagedRect.r + 2 then return "paging_right_outside=" .. tostring(pagingRect.r) end
+                if pagingRect.b < pagedRect.b then return "paging_bottom_outside=" .. tostring(pagingRect.b) end
+                if not approx(prevRect.w, 32, 1.0) or not approx(prevRect.h, 32, 1.0) then
+                    return "paging_prev_size=" .. tostring(prevRect.w) .. "x" .. tostring(prevRect.h)
+                end
+                if not approx(nextRect.w, 32, 1.0) or not approx(nextRect.h, 32, 1.0) then
+                    return "paging_next_size=" .. tostring(nextRect.w) .. "x" .. tostring(nextRect.h)
+                end
+                if nextRect.l <= prevRect.l then
+                    return "paging_button_order_invalid"
+                end
+                if pageTextRect.r >= prevRect.l then
+                    return "paging_text_overlap_prev"
+                end
+                local pageLabel = pageText:GetText() or ""
+                if pageLabel == "" then return "paging_text_empty" end
+                if string.find(pageLabel, "%%") then return "paging_text_unformatted=" .. pageLabel end
+                if not string.find(pageLabel, "%d") then return "paging_text_no_digits=" .. pageLabel end
+
+                local firstSpell
+                for _, frame in paged:EnumerateFrames() do
+                    if frame
+                        and frame:IsShown()
+                        and frame.HasValidData
+                        and frame:HasValidData()
+                        and frame.Button
+                        and frame.Button:IsShown()
+                    then
+                        firstSpell = frame
+                        break
+                    end
+                end
+                if not firstSpell then return "no_visible_spell_item" end
+
+                local button = firstSpell.Button
+                local icon = button.Icon
+                local border = button.Border
+                local mask = button.IconMask
+                if not icon then return "spell_icon_missing" end
+                if not border then return "spell_border_missing" end
+                if not mask then return "spell_mask_missing" end
+
+                local buttonRect, buttonErr = rect(button, "spell_button")
+                if not buttonRect then return buttonErr end
+                local iconRect, iconErr = rect(icon, "spell_icon")
+                if not iconRect then return iconErr end
+                local borderRect, borderErr = rect(border, "spell_border")
+                if not borderRect then return borderErr end
+                local maskRect, maskErr = rect(mask, "spell_mask")
+                if not maskRect then return maskErr end
+
+                if not approx(buttonRect.w, 40, 1.0) or not approx(buttonRect.h, 40, 1.0) then
+                    return "spell_button_size=" .. tostring(buttonRect.w) .. "x" .. tostring(buttonRect.h)
+                end
+                if not approx(iconRect.w, 36, 1.0) or not approx(iconRect.h, 36, 1.0) then
+                    return "spell_icon_size=" .. tostring(iconRect.w) .. "x" .. tostring(iconRect.h)
+                end
+                if borderRect.w < buttonRect.w or borderRect.h < buttonRect.h then
+                    return "spell_border_smaller_than_button=" .. tostring(borderRect.w) .. "x" .. tostring(borderRect.h)
+                end
+                if maskRect.w <= 0 or maskRect.h <= 0 then
+                    return "spell_mask_size=" .. tostring(maskRect.w) .. "x" .. tostring(maskRect.h)
+                end
+                if iconRect.l < buttonRect.l or iconRect.r > buttonRect.r then
+                    return "spell_icon_outside_button_x"
+                end
+                if iconRect.b < buttonRect.b or iconRect.t > buttonRect.t then
+                    return "spell_icon_outside_button_y"
+                end
+                if maskRect.w > borderRect.w + 1 or maskRect.h > borderRect.h + 1 then
+                    return "spell_mask_larger_than_border=" .. tostring(maskRect.w) .. "x" .. tostring(maskRect.h)
+                end
+                if buttonRect.l < pagedRect.l or buttonRect.r > pagedRect.r then
+                    return "spell_button_outside_paged_x"
+                end
+                if buttonRect.b < pagedRect.b or buttonRect.t > pagedRect.t then
+                    return "spell_button_outside_paged_y"
+                end
+
+                return "ok"
+                "#,
+            )
+            .unwrap();
+
+        assert_eq!(result, "ok", "Spellbook layout should remain locked: {result}");
+    }
+}
+
+#[test]
 fn spellbook_spell_items_have_nonzero_rect() {
     test_timeout! {
         let env = setup_full_ui();
