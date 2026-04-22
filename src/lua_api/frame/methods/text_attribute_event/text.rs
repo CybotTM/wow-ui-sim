@@ -182,6 +182,14 @@ fn build_simple_html_text_data(state: &mut LuaState, id: u64, text: Option<Strin
         return Val::Nil;
     };
 
+    build_simple_html_text_data_table(state, &snapshot, text)
+}
+
+fn build_simple_html_text_data_table(
+    state: &mut LuaState,
+    snapshot: &SimpleHtmlTextDataSnapshot,
+    text: Option<String>,
+) -> Val {
     let table = create_table(state);
     write_simple_html_text_data_fields(state, table, &snapshot, text);
     let styles = build_simple_html_text_styles_table(state, &snapshot.text_styles);
