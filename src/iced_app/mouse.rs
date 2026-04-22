@@ -341,7 +341,7 @@ impl App {
 
     pub(super) fn handle_scroll(&mut self, _dx: f32, dy: f32) {
         if self.fire_mouse_wheel(dy) {
-            self.invalidate();
+            self.invalidate_after_lua_mutation();
         } else {
             let scroll_speed = 30.0;
             self.scroll_offset -= dy * scroll_speed;

@@ -70,8 +70,7 @@ impl App {
             LuaCommand::Exec { code, respond } => {
                 let response = self.exec_lua_command(&code);
                 let _ = respond.send(response);
-                self.drain_console();
-                self.mark_all_strata_dirty();
+                self.invalidate_after_lua_mutation();
             }
             LuaCommand::DumpTree {
                 filter,

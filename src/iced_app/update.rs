@@ -124,7 +124,7 @@ impl App {
                 self.log_messages.push(format!("Fired: {}", event));
             }
         }
-        self.invalidate();
+        self.invalidate_after_lua_mutation();
     }
 
     fn handle_canvas_event(&mut self, canvas_msg: CanvasMessage) -> Task<Message> {
@@ -152,7 +152,7 @@ impl App {
             dispatch_started.elapsed(),
             captured_at.elapsed()
         ));
-        self.invalidate();
+        self.invalidate_after_lua_mutation();
     }
 
     fn handle_xp_level_changed(&mut self, label: &str) {
@@ -306,9 +306,8 @@ impl App {
         }
         self.log_messages.push(format!("> {}", cmd));
         self.execute_command_inner(&cmd);
-        self.drain_console();
         self.command_input.clear();
-        self.mark_all_strata_dirty();
+        self.invalidate_after_lua_mutation();
     }
 
     fn execute_command_inner(&mut self, cmd: &str) {
@@ -600,7 +599,28 @@ impl App {
     pub(super) fn flush_post_script_updates(&mut self) {
         self.env.borrow().state().borrow_mut().ensure_layout_rects();
         self.fire_on_update();
-        self.invalidate();
+        self.invalidate_after_lua_mutation();
+    }
+
+    pub(super) fn invalidate_after_lua_mutation(&mut self) {
+        self.drain_console();
+        if !self.has_queued_texture_preloads() && !self.textures_pending.get() {
+            self.preload_visible_textures();
+        }
+        self.clear_failed_texture_requests();
+        self.merge_widget_dirty_into_render_state();
+        self.preload_current_render_requests_preserving_dirty(Some(
+            std::time::Duration::from_millis(25),
+        ));
+    }
+
+    fn merge_widget_dirty_into_render_state(&self) {
+        let (dirty_mask, dirty_ids) = self.take_render_dirty_with_ids();
+        if dirty_mask == 0 {
+            return;
+        }
+        self.mark_strata_dirty(dirty_mask);
+        self.merge_pending_dirty_ids(dirty_ids);
     }
 
     pub(super) fn invalidate(&mut self) {
@@ -976,7 +996,7 @@ fn sample_display_metrics(
 mod tests {
     use super::*;
     use crate::iced_app::render;
-    use crate::render::{QuadBatch, TextureRequest};
+    use crate::render::{FrameQuadSnapshot, QuadBatch, TextureRequest};
     use crate::screen::ScreenKind;
     use crate::texture::TextureManager;
     use iced::Size;
@@ -984,6 +1004,7 @@ mod tests {
     use iced_runtime::futures::futures::StreamExt;
     use iced_runtime::window::Action as WindowAction;
     use std::cell::RefCell;
+    use std::collections::HashMap;
     use std::path::Path;
     use std::path::PathBuf;
     use std::rc::Rc;
@@ -1105,6 +1126,57 @@ mod tests {
         assert!(
             pending.contains(&frame_id),
             "pre-tick dirty frame should survive collect_tick_dirty"
+        );
+    }
+
+    #[test]
+    fn invalidate_after_lua_mutation_keeps_incremental_dirty_ids() {
+        let mut app = build_test_app(ScreenKind::Game);
+        app.strata_dirty.set(0);
+        *app.pending_dirty_ids.borrow_mut() = Some(FxHashSet::default());
+        app.cached_frame_snapshots.borrow_mut()[0] =
+            Some(HashMap::from([(1_u64, FrameQuadSnapshot::default())]));
+
+        let frame_id = {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            state
+                .widgets
+                .get_id_by_name("UIParent")
+                .expect("UIParent should exist")
+        };
+
+        {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            let _ = state.widgets.take_render_dirty_with_ids();
+            state.widgets.mark_visual_dirty(frame_id);
+        }
+
+        app.invalidate_after_lua_mutation();
+
+        let all_mask = (1u16 << crate::widget::FrameStrata::COUNT) - 1;
+        assert_ne!(
+            app.strata_dirty.get(),
+            0,
+            "dirty strata should be preserved"
+        );
+        assert_ne!(
+            app.strata_dirty.get(),
+            all_mask,
+            "incremental invalidate should not force all strata dirty"
+        );
+        let pending = app.pending_dirty_ids.borrow();
+        let ids = pending
+            .as_ref()
+            .expect("incremental invalidate should keep concrete dirty IDs");
+        assert!(
+            ids.contains(&frame_id),
+            "pending dirty IDs should include the Lua-mutated frame"
+        );
+        assert!(
+            app.cached_frame_snapshots.borrow()[0].is_some(),
+            "incremental invalidate should not clear snapshot caches"
         );
     }
 
