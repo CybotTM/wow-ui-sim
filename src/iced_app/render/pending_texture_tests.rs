@@ -103,7 +103,7 @@ fn budgeted_preload_requeues_tail_when_budget_hits() {
 }
 
 #[test]
-fn empty_queue_preload_preserves_existing_pending_state() {
+fn empty_queue_preload_clears_stale_pending_state_without_draw_owned_requests() {
     let temp_dir = tempdir().unwrap();
     let app = build_test_app_with_textures(temp_dir.path());
     app.textures_pending.set(true);
@@ -111,8 +111,30 @@ fn empty_queue_preload_preserves_existing_pending_state() {
     app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
 
     assert!(
+        !app.textures_pending.get(),
+        "an empty preload queue should clear stale pending state when draw requests are already resolved"
+    );
+}
+
+#[test]
+fn empty_queue_preload_keeps_draw_owned_pending_state() {
+    let temp_dir = tempdir().unwrap();
+    let app = build_test_app_with_textures(temp_dir.path());
+    app.textures_pending.set(true);
+
+    let request_path = "render-owned-pending";
+    let mut batch = QuadBatch::new();
+    batch
+        .texture_requests
+        .push(TextureRequest::new(request_path, 0, 4));
+    batch.texture_requests[0].handle.mark_staged();
+    app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
+
+    app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
+
+    assert!(
         app.textures_pending.get(),
-        "an empty preload queue should not clear draw-owned pending state"
+        "an empty preload queue must preserve pending state while draw-owned requests are unresolved"
     );
 }
 

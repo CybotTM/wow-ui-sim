@@ -348,7 +348,7 @@ impl App {
         let mut redraw_needed = false;
         let queued_preloads_pending = self.has_queued_texture_preloads();
 
-        if !queued_preloads_pending {
+        if !queued_preloads_pending && !self.textures_pending.get() {
             let started = std::time::Instant::now();
             redraw_needed |=
                 self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
@@ -605,7 +605,7 @@ impl App {
 
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
-        if !self.has_queued_texture_preloads() {
+        if !self.has_queued_texture_preloads() && !self.textures_pending.get() {
             self.preload_visible_textures();
         }
         self.clear_failed_texture_requests();
@@ -1390,6 +1390,46 @@ mod tests {
         assert!(
             iced_runtime::task::into_stream(task).is_none(),
             "pending state alone should not force redraws every tick"
+        );
+    }
+
+    #[test]
+    fn process_timers_skips_visible_warmup_while_draw_work_is_pending() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("pending-skip-warmup.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.selected_rot_level = "Off".to_string();
+        app.strata_dirty.set(0);
+        app.textures_pending.set(true);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                local frame = CreateFrame("Frame", "PendingSkipWarmupFrame", UIParent)
+                local texture = frame:CreateTexture(nil, "ARTWORK")
+                texture:SetTexture("pending-skip-warmup")
+            "#,
+            )
+            .unwrap();
+            let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+        }
+
+        let task = app.handle_process_timers(Instant::now());
+        assert!(
+            iced_runtime::task::into_stream(task).is_none(),
+            "draw-owned pending state should not trigger another warmup decode pass"
+        );
+        assert!(
+            app.texture_manager
+                .borrow()
+                .get("pending-skip-warmup")
+                .is_none(),
+            "visible warmup should be skipped while draw work is already pending"
         );
     }
 

@@ -238,6 +238,42 @@ keep only one deferred retry at a time:
 This keeps the workaround focused on the remaining Blizzard-side refresh race
 without carrying over the old renderer-state compensation loops.
 
+## 2026-04-22 Follow-up: No-World-Map Retained Trace After BC-Negative Cache
+
+I captured a fresh retained GUI startup trace on the current tree (no world
+map open) after the BC-negative cache change in `TextureManager`:
+
+```bash
+WOW_SIM_DEBUG_TEXTURE_LOADS=1 \
+WOW_SIM_GUI_TRACE=1 \
+WOW_SIM_NO_ADDONS=1 \
+WOW_SIM_NO_SAVED_VARS=1 \
+LD_LIBRARY_PATH=target/debug:target/debug/deps \
+timeout 90 target/debug/wow-sim > /tmp/claude/no_world_map_after_2026-04-22b.log 2>&1
+```
+
+For before/after comparison, I reused the earlier no-world-map retained startup
+baseline at `/tmp/claude/gui-trace-startup.log`.
+
+| Trace | Peak `draw textures` | Peak `bc_parse` |
+|---|---:|---:|
+| Before (`gui-trace-startup.log`) | 482.2ms | 240.6ms |
+| After (`no_world_map_after_2026-04-22b.log`) | 283.2ms | 139.2ms |
+| Delta | -199.0ms (-41.3%) | -101.4ms (-42.1%) |
+
+Peak evidence lines:
+
+```text
+[ 16.766s] [draw] quads=53.8ms textures=482.2ms (new=18 rgba=2 bc=16)
+[ 16.766s] [textures] ... bc_parse=240.6ms ...
+[ 19.168s] [draw] quads=6.6ms textures=283.2ms (new=23 rgba=2 bc=21)
+[ 19.167s] [textures] ... bc_parse=139.2ms ...
+```
+
+This confirms the no-world-map retained startup path now spends materially less
+time in the combined draw texture stage and BC parse stage before any
+world-map-specific Lua flow is involved.
+
 ## Result
 
 After the cache + budget changes, the world map no longer took repeated ~50ms draw stalls while tiles streamed in. The same repro shifted to progressive smaller chunks:

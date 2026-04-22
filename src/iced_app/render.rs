@@ -270,7 +270,7 @@ impl App {
             pending: pending_before,
             ..Default::default()
         };
-        let mut redraw_needed = false;
+        let redraw_needed;
 
         let env = self.env.borrow();
         let is_glue_screen = env.state().borrow().screen_kind.is_glue();
@@ -289,12 +289,15 @@ impl App {
         telemetry.loaded = queued_progress.loaded;
         telemetry.remaining = queued_progress.remaining;
         telemetry.remaining_sample = queued_progress.remaining_sample;
+        let draw_pending = self.cached_render_requests_still_pending();
         if queued_progress.total != 0 {
-            telemetry.pending = queued_progress.remaining != 0
-                || self.textures_pending.get()
-                || self.cached_render_requests_still_pending();
+            telemetry.pending = queued_progress.remaining != 0 || draw_pending;
             self.textures_pending.set(telemetry.pending);
             redraw_needed = queued_progress.loaded != 0 || (!pending_before && telemetry.pending);
+        } else {
+            telemetry.pending = draw_pending;
+            self.textures_pending.set(draw_pending);
+            redraw_needed = !pending_before && draw_pending;
         }
         telemetry.elapsed = started.elapsed();
         if log_preload {

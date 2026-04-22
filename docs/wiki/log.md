@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | no-world-map retained trace after bc-negative cache
+
+Updated `investigations/world-map-texture-loading-budget.md` with a fresh
+no-world-map retained GUI trace captured after the BC-negative cache change.
+Recorded the exact command and before/after peak timings from the trace logs:
+`draw textures` dropped `482.2ms -> 283.2ms` and `bc_parse` dropped
+`240.6ms -> 139.2ms`. Refreshed the `index.md` summary row for
+`world-map-texture-loading-budget` with the new no-world-map baseline deltas.
+
 ## [2026-04-22] update | setalpha no-op microbenchmark baseline
 
 Updated `investigations/on-update-dirty.md` with a pre-optimization

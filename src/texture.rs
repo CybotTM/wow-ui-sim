@@ -29,6 +29,8 @@ pub struct TextureManager {
     size_cache: HashMap<String, (u32, u32)>,
     /// Cache of raw BC-compressed texture data keyed by normalized WoW path.
     bc_cache: HashMap<String, BcTextureResult>,
+    /// Cache of normalized paths known to be unavailable on the BC path.
+    bc_unavailable: HashSet<String>,
     /// Cache of sub-region textures (path#region -> RGBA pixels).
     sub_cache: HashMap<String, TextureData>,
     /// Paths that failed to load (logged once, then silenced).
@@ -54,6 +56,7 @@ impl TextureManager {
             cache: HashMap::new(),
             size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
+            bc_unavailable: HashSet::new(),
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
         }
@@ -258,9 +261,19 @@ impl TextureManager {
                 },
             );
         }
+        if self.bc_unavailable.contains(&normalized) {
+            return (
+                None,
+                BcLoadTelemetry {
+                    total_elapsed: start.elapsed(),
+                    ..Default::default()
+                },
+            );
+        }
         let mut telemetry = BcLoadTelemetry::default();
         let resolve_start = Instant::now();
         let Some(file_path) = self.resolve_path(&normalized) else {
+            self.bc_unavailable.insert(normalized);
             telemetry.resolve_elapsed = resolve_start.elapsed();
             telemetry.total_elapsed = start.elapsed();
             return (None, telemetry);
@@ -269,6 +282,7 @@ impl TextureManager {
 
         let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
         if !ext.eq_ignore_ascii_case("blp") {
+            self.bc_unavailable.insert(normalized);
             telemetry.total_elapsed = start.elapsed();
             return (None, telemetry);
         }
@@ -276,6 +290,7 @@ impl TextureManager {
 
         let parse_start = Instant::now();
         let Some(blp) = load_blp(&file_path).ok() else {
+            self.bc_unavailable.insert(normalized);
             telemetry.parse_elapsed = parse_start.elapsed();
             telemetry.total_elapsed = start.elapsed();
             return (None, telemetry);
@@ -284,12 +299,14 @@ impl TextureManager {
         let extract_start = Instant::now();
         let Some(bc_texture) = bc_texture_result(blp.header.width, blp.header.height, blp.content)
         else {
+            self.bc_unavailable.insert(normalized);
             telemetry.extract_elapsed = extract_start.elapsed();
             telemetry.total_elapsed = start.elapsed();
             return (None, telemetry);
         };
         telemetry.extract_elapsed = extract_start.elapsed();
 
+        self.bc_unavailable.remove(&normalized);
         self.bc_cache.insert(normalized.clone(), bc_texture);
         telemetry.total_elapsed = start.elapsed();
         (self.bc_cache.get(&normalized), telemetry)
@@ -757,6 +774,42 @@ mod tests {
             telemetry.extract_elapsed,
             Duration::ZERO,
             "cached loads should not re-extract BC blocks"
+        );
+    }
+
+    #[test]
+    fn test_load_bc_with_telemetry_caches_non_blp_paths() {
+        let temp_dir = TempDir::new().unwrap();
+        let base = temp_dir.path();
+        let png_path = base.join("not-bc.png");
+        let img = image::RgbaImage::from_pixel(2, 2, image::Rgba([1, 2, 3, 255]));
+        img.save(&png_path).unwrap();
+
+        let mut mgr = TextureManager::new(base);
+        let (first, first_telemetry) = mgr.load_bc_with_telemetry("not-bc");
+        assert!(
+            first.is_none(),
+            "png texture should stay on the non-BC path"
+        );
+        assert!(
+            first_telemetry.resolve_elapsed > Duration::ZERO,
+            "first attempt should resolve the texture path"
+        );
+
+        let (second, second_telemetry) = mgr.load_bc_with_telemetry("not-bc");
+        assert!(
+            second.is_none(),
+            "non-BC texture should still return None for BC requests"
+        );
+        assert_eq!(
+            second_telemetry.resolve_elapsed,
+            Duration::ZERO,
+            "negative BC cache should skip path resolution on repeat"
+        );
+        assert_eq!(
+            second_telemetry.parse_elapsed,
+            Duration::ZERO,
+            "negative BC cache should skip BLP parsing on repeat"
         );
     }
 
