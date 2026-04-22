@@ -544,3 +544,208 @@ fn test_status_tracking_xp_and_reputation_bars_layout_locked() {
         "XP/Reputation status tracking bars should remain layout-locked: {result}"
     );
 }
+
+#[test]
+fn test_bag_bar_layout_locked() {
+    let env = env_with_action_bar();
+    let result: String = env
+        .eval(
+            r#"
+            local EPS = 0.75
+
+            local function approx(actual, expected, eps)
+                if type(actual) ~= "number" or type(expected) ~= "number" then
+                    return false
+                end
+                return math.abs(actual - expected) <= (eps or EPS)
+            end
+
+            local function rect(frame, tag)
+                if type(frame) ~= "table" then
+                    return nil, tag .. "_missing"
+                end
+                local l, b, w, h = frame:GetRect()
+                if not (l and b and w and h) then
+                    return nil, tag .. "_missing_rect"
+                end
+                return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+            end
+
+            local function has_point(frame, point, rel, relPoint, x, y, eps)
+                for i = 1, frame:GetNumPoints() do
+                    local p, r, rp, ox, oy = frame:GetPoint(i)
+                    local relMatches = (r == rel) or (r == nil and rel ~= nil and frame.GetParent and frame:GetParent() == rel)
+                    if p == point and relMatches and rp == relPoint and approx(ox or 0, x, eps) and approx(oy or 0, y, eps) then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            local function points_debug(frame)
+                local out = {}
+                for i = 1, frame:GetNumPoints() do
+                    local p, r, rp, ox, oy = frame:GetPoint(i)
+                    local rn = r and r:GetName() or "nil"
+                    out[#out + 1] = string.format("%s->%s:%s(%.2f,%.2f)", tostring(p), rn, tostring(rp), tonumber(ox) or 0, tonumber(oy) or 0)
+                end
+                table.sort(out)
+                return table.concat(out, " | ")
+            end
+
+            if not BagsBar then
+                if UIParentLoadAddOn then
+                    pcall(UIParentLoadAddOn, "Blizzard_MainMenuBarBagButtons")
+                end
+                if not BagsBar and LoadAddOn then
+                    pcall(LoadAddOn, "Blizzard_MainMenuBarBagButtons")
+                end
+            end
+
+            local bar = BagsBar
+            local microBar = MicroButtonAndBagsBar
+            local backpack = MainMenuBarBackpackButton
+            local toggle = BagBarExpandToggle
+            local bag0 = CharacterBag0Slot
+            local bag1 = CharacterBag1Slot
+            local bag2 = CharacterBag2Slot
+            local bag3 = CharacterBag3Slot
+            local reagent = CharacterReagentBag0Slot
+
+            if not bar then return "bags_bar_missing" end
+            if not microBar then return "micro_button_and_bags_bar_missing" end
+            if not backpack then return "backpack_button_missing" end
+            if not toggle then return "bag_toggle_missing" end
+            if not bag0 or not bag1 or not bag2 or not bag3 then return "bag_slots_missing" end
+            if not reagent then return "reagent_slot_missing" end
+
+            if MainMenuBarBagManager and MainMenuBarBagManager.SetExpandBar then
+                MainMenuBarBagManager:SetExpandBar(true)
+            end
+            if bar.Layout then
+                bar:Layout()
+            end
+
+            local barRect, barErr = rect(bar, "bags_bar")
+            if not barRect then return barErr end
+            local microRect, microErr = rect(microBar, "micro_bar")
+            if not microRect then return microErr end
+            local backpackRect, backpackErr = rect(backpack, "backpack")
+            if not backpackRect then return backpackErr end
+            local toggleRect, toggleErr = rect(toggle, "toggle")
+            if not toggleRect then return toggleErr end
+            local bag0Rect, bag0Err = rect(bag0, "bag0")
+            if not bag0Rect then return bag0Err end
+            local bag1Rect, bag1Err = rect(bag1, "bag1")
+            if not bag1Rect then return bag1Err end
+            local bag2Rect, bag2Err = rect(bag2, "bag2")
+            if not bag2Rect then return bag2Err end
+            local bag3Rect, bag3Err = rect(bag3, "bag3")
+            if not bag3Rect then return bag3Err end
+            local reagentRect, reagentErr = rect(reagent, "reagent")
+            if not reagentRect then return reagentErr end
+
+            if not has_point(bar, "TOPRIGHT", microBar, "TOPRIGHT", 0, 0, 0.1) then
+                return "bags_bar_anchor_mismatch:" .. points_debug(bar)
+            end
+            if not approx(barRect.w, 208, 0.1) or not approx(barRect.h, 47, 0.1) then
+                return "bags_bar_size=" .. tostring(barRect.w) .. "x" .. tostring(barRect.h)
+            end
+            if not approx(barRect.r, microRect.r, 0.1) then
+                return "bags_bar_right=" .. tostring(barRect.r) .. ",micro_right=" .. tostring(microRect.r)
+            end
+            if not approx(barRect.t, microRect.t, 0.1) then
+                return "bags_bar_top=" .. tostring(barRect.t) .. ",micro_top=" .. tostring(microRect.t)
+            end
+
+            if not backpack:IsShown() then return "backpack_hidden" end
+            if not toggle:IsShown() then return "toggle_hidden" end
+            if not bag0:IsShown() or not bag1:IsShown() or not bag2:IsShown() or not bag3:IsShown() then
+                return "one_or_more_bag_slots_hidden"
+            end
+            if not reagent:IsShown() then return "reagent_slot_hidden" end
+
+            if not has_point(backpack, "RIGHT", bar, "RIGHT", 0, 0, 0.1) then
+                return "backpack_anchor_mismatch:" .. points_debug(backpack)
+            end
+            if not has_point(toggle, "RIGHT", backpack, "LEFT", 0, 0, 0.1) then
+                return "toggle_anchor_mismatch:" .. points_debug(toggle)
+            end
+            if not has_point(bag0, "RIGHT", toggle, "LEFT", 0, 0, 0.1) then
+                return "bag0_anchor_mismatch:" .. points_debug(bag0)
+            end
+            if not has_point(bag1, "RIGHT", bag0, "LEFT", 0, 0, 0.1) then
+                return "bag1_anchor_mismatch:" .. points_debug(bag1)
+            end
+            if not has_point(bag2, "RIGHT", bag1, "LEFT", 0, 0, 0.1) then
+                return "bag2_anchor_mismatch:" .. points_debug(bag2)
+            end
+            if not has_point(bag3, "RIGHT", bag2, "LEFT", 0, 0, 0.1) then
+                return "bag3_anchor_mismatch:" .. points_debug(bag3)
+            end
+            if not has_point(reagent, "RIGHT", bag3, "LEFT", 0, 0, 0.1) then
+                return "reagent_anchor_mismatch:" .. points_debug(reagent)
+            end
+
+            if not approx(backpackRect.w, 48, 0.1) or not approx(backpackRect.h, 48, 0.1) then
+                return "backpack_size=" .. tostring(backpackRect.w) .. "x" .. tostring(backpackRect.h)
+            end
+            if not approx(toggleRect.w, 10, 0.1) or not approx(toggleRect.h, 16, 0.1) then
+                return "toggle_size=" .. tostring(toggleRect.w) .. "x" .. tostring(toggleRect.h)
+            end
+            if not approx(bag0Rect.w, 30, 0.1) or not approx(bag0Rect.h, 30, 0.1) then
+                return "bag0_size=" .. tostring(bag0Rect.w) .. "x" .. tostring(bag0Rect.h)
+            end
+            if not approx(bag1Rect.w, 30, 0.1) or not approx(bag1Rect.h, 30, 0.1) then
+                return "bag1_size=" .. tostring(bag1Rect.w) .. "x" .. tostring(bag1Rect.h)
+            end
+            if not approx(bag2Rect.w, 30, 0.1) or not approx(bag2Rect.h, 30, 0.1) then
+                return "bag2_size=" .. tostring(bag2Rect.w) .. "x" .. tostring(bag2Rect.h)
+            end
+            if not approx(bag3Rect.w, 30, 0.1) or not approx(bag3Rect.h, 30, 0.1) then
+                return "bag3_size=" .. tostring(bag3Rect.w) .. "x" .. tostring(bag3Rect.h)
+            end
+            if not approx(reagentRect.w, 30, 0.1) or not approx(reagentRect.h, 30, 0.1) then
+                return "reagent_size=" .. tostring(reagentRect.w) .. "x" .. tostring(reagentRect.h)
+            end
+
+            if not approx(backpackRect.l, barRect.r - backpackRect.w, 0.1) then
+                return "backpack_not_at_bar_right_edge"
+            end
+            if not approx(toggleRect.r, backpackRect.l, 0.1) then
+                return "toggle_gap_to_backpack=" .. tostring(toggleRect.r - backpackRect.l)
+            end
+            if not approx(bag0Rect.r, toggleRect.l, 0.1) then
+                return "bag0_gap_to_toggle=" .. tostring(bag0Rect.r - toggleRect.l)
+            end
+            if not approx(bag1Rect.r, bag0Rect.l, 0.1) then
+                return "bag1_gap_to_bag0=" .. tostring(bag1Rect.r - bag0Rect.l)
+            end
+            if not approx(bag2Rect.r, bag1Rect.l, 0.1) then
+                return "bag2_gap_to_bag1=" .. tostring(bag2Rect.r - bag1Rect.l)
+            end
+            if not approx(bag3Rect.r, bag2Rect.l, 0.1) then
+                return "bag3_gap_to_bag2=" .. tostring(bag3Rect.r - bag2Rect.l)
+            end
+            if not approx(reagentRect.r, bag3Rect.l, 0.1) then
+                return "reagent_gap_to_bag3=" .. tostring(reagentRect.r - bag3Rect.l)
+            end
+            if not approx(reagentRect.l, barRect.l, 0.1) then
+                return "leftmost_bag_not_flush_with_bar_left=" .. tostring(reagentRect.l - barRect.l)
+            end
+
+            local expectedBarWidth = backpackRect.w + toggleRect.w + bag0Rect.w + bag1Rect.w + bag2Rect.w + bag3Rect.w + reagentRect.w
+            if not approx(barRect.w, expectedBarWidth, 0.1) then
+                return "bags_bar_width_mismatch=" .. tostring(barRect.w) .. ",expected=" .. tostring(expectedBarWidth)
+            end
+
+            return "ok"
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "Bags bar and bag-slot chain should remain layout-locked: {result}"
+    );
+}
