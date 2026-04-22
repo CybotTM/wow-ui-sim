@@ -1,12 +1,10 @@
 //! App struct definition and core initialization.
 
+use iced::{Point, Size, Task};
+use rilua::LuaApiMut;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
-
-use iced::{Point, Size, Task};
-use rilua::LuaApiMut;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 
@@ -86,14 +84,6 @@ pub struct App {
     pub(crate) debug_borders: bool,
     /// Draw green anchor points on all frames when true.
     pub(crate) debug_anchors: bool,
-    /// Track texture paths staged by draw-side loading before `prepare()` uploads them.
-    pub(crate) gpu_uploaded_textures: Arc<Mutex<std::collections::HashSet<String>>>,
-    /// Track texture paths confirmed present in the GPU atlas after `prepare()`.
-    pub(crate) gpu_ready_textures: Arc<Mutex<std::collections::HashSet<String>>>,
-    /// Track texture paths that should bypass BC upload and retry on the RGBA atlas.
-    pub(crate) gpu_force_rgba_textures: Arc<Mutex<std::collections::HashSet<String>>>,
-    /// Track texture paths that failed to load (avoid infinite retry loops).
-    pub(crate) gpu_failed_textures: RefCell<std::collections::HashSet<String>>,
     /// Cached merged quad batch (all strata combined), used by draw().
     pub(crate) cached_quads: RefCell<Option<(Size, std::sync::Arc<crate::render::QuadBatch>)>>,
     /// Per-strata cached quad batches. Index = FrameStrata::as_index().
@@ -254,10 +244,6 @@ impl App {
             lua_rx: Some(lua_rx),
             debug_borders,
             debug_anchors,
-            gpu_uploaded_textures: Arc::new(Mutex::new(std::collections::HashSet::new())),
-            gpu_ready_textures: Arc::new(Mutex::new(std::collections::HashSet::new())),
-            gpu_force_rgba_textures: Arc::new(Mutex::new(std::collections::HashSet::new())),
-            gpu_failed_textures: RefCell::new(std::collections::HashSet::new()),
             cached_quads: RefCell::new(None),
             cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
             cached_frame_snapshots: RefCell::new(std::array::from_fn(|_| None)),

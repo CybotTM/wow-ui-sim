@@ -158,11 +158,13 @@ mod tests {
             -2,
             BlendMode::Alpha,
         );
-        batch.texture_requests.push(crate::render::TextureRequest {
-            path: "Interface\\hud\\uigroupmanager@crop:test".to_string(),
-            vertex_start: 0,
-            vertex_count: 4,
-        });
+        batch
+            .texture_requests
+            .push(crate::render::TextureRequest::new(
+                "Interface\\hud\\uigroupmanager@crop:test",
+                0,
+                4,
+            ));
         let strata = [
             Some(Arc::new(batch)),
             None,

@@ -2,10 +2,11 @@ use iced::{Point, Rectangle, Size};
 
 use crate::iced_app::layout::anchor_position;
 use std::collections::HashSet;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use crate::render::shader::primitive::{
-    TextureLoadTelemetry, load_texture_or_crop, load_texture_prefer_bc_with_telemetry,
+    TextureLoadTelemetry, TextureRequestTracker, load_texture_or_crop,
+    load_texture_prefer_bc_with_telemetry,
 };
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
@@ -144,6 +145,7 @@ impl App {
         Vec<GpuTextureData>,
         Vec<GpuBcTextureData>,
         std::time::Duration,
+        Arc<Mutex<TextureRequestTracker>>,
     ) {
         let t = std::time::Instant::now();
         let deadline = t + std::time::Duration::from_millis(10);
@@ -153,13 +155,14 @@ impl App {
         let mut load_elapsed = std::time::Duration::ZERO;
         let mut telemetry = TextureLoadBatchTelemetry::default();
         let mut exhausted = false;
+        let mut texture_requests = TextureRequestTracker::default();
         for batch_opt in dirty_strata {
             if exhausted {
                 break;
             }
             if let Some(batch) = batch_opt {
                 let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
-                    self.load_new_textures_budgeted(batch, deadline);
+                    self.load_new_textures_budgeted(batch, deadline, &mut texture_requests);
                 textures.extend(loaded);
                 bc_textures.extend(loaded_bc);
                 scan_elapsed += batch_scan;
@@ -170,7 +173,7 @@ impl App {
         }
         if !exhausted {
             let (loaded, loaded_bc, batch_scan, batch_load, batch_telemetry, hit) =
-                self.load_new_textures_budgeted(overlay, deadline);
+                self.load_new_textures_budgeted(overlay, deadline, &mut texture_requests);
             textures.extend(loaded);
             bc_textures.extend(loaded_bc);
             scan_elapsed += batch_scan;
@@ -178,7 +181,8 @@ impl App {
             telemetry.record_batch(batch_telemetry);
             exhausted |= hit;
         }
-        self.textures_pending.set(exhausted);
+        self.textures_pending
+            .set(exhausted || self.cached_render_requests_still_pending());
         let elapsed = t.elapsed();
         if elapsed.as_millis() > 10 && (!textures.is_empty() || !bc_textures.is_empty()) {
             log_slow_texture_load(
@@ -190,7 +194,12 @@ impl App {
                 telemetry,
             );
         }
-        (textures, bc_textures, elapsed)
+        (
+            textures,
+            bc_textures,
+            elapsed,
+            Arc::new(Mutex::new(texture_requests)),
+        )
     }
 
     /// Load new textures from the batch's requests within a time budget.
@@ -199,6 +208,7 @@ impl App {
         &self,
         quads: &QuadBatch,
         deadline: std::time::Instant,
+        texture_requests: &mut TextureRequestTracker,
     ) -> (
         Vec<GpuTextureData>,
         Vec<GpuBcTextureData>,
@@ -210,12 +220,10 @@ impl App {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
-        let mut uploaded = self.gpu_uploaded_textures.lock().unwrap();
-        let mut failed = self.gpu_failed_textures.borrow_mut();
-        let force_rgba = self.gpu_force_rgba_textures.lock().unwrap();
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let scan_start = std::time::Instant::now();
-        let pending_paths = unresolved_texture_request_paths(quads, &uploaded, &failed);
+        texture_requests.register_batch(quads);
+        let pending_paths = unresolved_texture_request_paths(quads);
         let scan_elapsed = scan_start.elapsed();
         let load_start = std::time::Instant::now();
 
@@ -224,12 +232,10 @@ impl App {
                 deadline,
                 path,
                 &mut tex_mgr,
-                &force_rgba,
-                &mut uploaded,
-                &mut failed,
                 &mut textures,
                 &mut bc_textures,
                 &mut telemetry,
+                texture_requests,
             ) {
                 return (
                     textures,
@@ -460,12 +466,10 @@ fn process_budgeted_texture_request(
     deadline: std::time::Instant,
     path: &str,
     tex_mgr: &mut crate::texture::TextureManager,
-    force_rgba: &std::collections::HashSet<String>,
-    uploaded: &mut std::collections::HashSet<String>,
-    failed: &mut std::collections::HashSet<String>,
     textures: &mut Vec<GpuTextureData>,
     bc_textures: &mut Vec<GpuBcTextureData>,
     telemetry: &mut TextureLoadBatchTelemetry,
+    texture_requests: &mut TextureRequestTracker,
 ) -> bool {
     if should_pause_texture_loading(textures, bc_textures, deadline, path, tex_mgr) {
         return true;
@@ -473,12 +477,10 @@ fn process_budgeted_texture_request(
     load_pending_texture(
         tex_mgr,
         path,
-        force_rgba,
-        uploaded,
-        failed,
         textures,
         bc_textures,
         telemetry,
+        texture_requests,
     );
     false
 }
@@ -486,18 +488,16 @@ fn process_budgeted_texture_request(
 fn load_pending_texture(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
-    force_rgba: &std::collections::HashSet<String>,
-    uploaded: &mut std::collections::HashSet<String>,
-    failed: &mut std::collections::HashSet<String>,
     textures: &mut Vec<GpuTextureData>,
     bc_textures: &mut Vec<GpuBcTextureData>,
     telemetry: &mut TextureLoadBatchTelemetry,
+    texture_requests: &mut TextureRequestTracker,
 ) {
     use crate::render::shader::primitive::LoadedTexture;
 
-    if force_rgba.contains(path) {
+    if texture_requests.needs_force_rgba_retry(path) {
         if let Some(data) = load_texture_or_crop(tex_mgr, path) {
-            uploaded.insert(path.to_string());
+            texture_requests.mark_staged(path);
             textures.push(data);
             return;
         }
@@ -505,7 +505,7 @@ fn load_pending_texture(
         let (loaded, load_telemetry) = load_texture_prefer_bc_with_telemetry(tex_mgr, path);
         telemetry.record(load_telemetry);
         if let Some(loaded) = loaded {
-            uploaded.insert(path.to_string());
+            texture_requests.mark_staged(path);
             match loaded {
                 LoadedTexture::Rgba(data) => textures.push(data),
                 LoadedTexture::Bc(data) => bc_textures.push(data),
@@ -514,14 +514,10 @@ fn load_pending_texture(
         }
     }
 
-    failed.insert(path.to_string());
+    texture_requests.mark_failed(path);
 }
 
-fn unresolved_texture_request_paths<'a>(
-    quads: &'a QuadBatch,
-    uploaded: &std::collections::HashSet<String>,
-    failed: &std::collections::HashSet<String>,
-) -> Vec<&'a str> {
+fn unresolved_texture_request_paths<'a>(quads: &'a QuadBatch) -> Vec<&'a str> {
     let mut paths = Vec::new();
     let mut seen = HashSet::new();
 
@@ -532,8 +528,7 @@ fn unresolved_texture_request_paths<'a>(
     {
         let path = request.path.as_str();
         let is_duplicate = !seen.insert(path);
-        let already_resolved = uploaded.contains(path) || failed.contains(path);
-        if is_duplicate || already_resolved {
+        if is_duplicate || !request.handle.should_load() {
             continue;
         }
         paths.push(path);
@@ -570,28 +565,24 @@ mod tests {
         unresolved_texture_request_paths,
     };
     use crate::iced_app::App;
+    use crate::render::shader::primitive::TextureRequestTracker;
     use crate::render::{GlyphAtlas, GpuTextureData, QuadBatch, TextureRequest, WowFontSystem};
     use crate::screen::ScreenKind;
     use crate::texture::TextureManager;
     use crate::widget::{AnchorPoint, Frame, WidgetType};
     use crate::{LayoutRect, lua_api::WowLuaEnv};
     use std::cell::RefCell;
-    use std::collections::HashSet;
     use std::path::PathBuf;
     use std::rc::Rc;
     use std::sync::Arc;
     use tokio::sync::mpsc;
 
     fn request(path: &str) -> TextureRequest {
-        TextureRequest {
-            path: path.to_string(),
-            vertex_start: 0,
-            vertex_count: 4,
-        }
+        TextureRequest::new(path, 0, 4)
     }
 
     #[test]
-    fn unresolved_texture_request_paths_filters_uploaded_and_failed_requests() {
+    fn unresolved_texture_request_paths_filters_non_loadable_requests() {
         let mut batch = QuadBatch::new();
         batch
             .texture_requests
@@ -602,10 +593,10 @@ mod tests {
         batch.mask_texture_requests.push(request("uploaded-mask"));
         batch.texture_requests.push(request("failed-path"));
 
-        let uploaded = HashSet::from(["uploaded-mask".to_string()]);
-        let failed = HashSet::from(["failed-path".to_string()]);
+        batch.mask_texture_requests[0].handle.mark_staged();
+        batch.texture_requests[2].handle.mark_failed();
 
-        let paths = unresolved_texture_request_paths(&batch, &uploaded, &failed);
+        let paths = unresolved_texture_request_paths(&batch);
         assert_eq!(
             paths,
             vec![
@@ -628,7 +619,7 @@ mod tests {
             r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
         ));
 
-        let paths = unresolved_texture_request_paths(&batch, &HashSet::new(), &HashSet::new());
+        let paths = unresolved_texture_request_paths(&batch);
         assert_eq!(
             paths,
             vec![
@@ -661,8 +652,6 @@ mod tests {
     #[test]
     fn process_budgeted_texture_request_returns_true_before_loading_uncached_work() {
         let mut tex_mgr = TextureManager::new(PathBuf::from("./textures"));
-        let mut uploaded = HashSet::new();
-        let mut failed = HashSet::new();
         let mut textures = vec![GpuTextureData {
             path: "already-loaded".to_string(),
             width: 1,
@@ -671,23 +660,21 @@ mod tests {
         }];
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
-        let force_rgba = HashSet::new();
+        let mut texture_requests = TextureRequestTracker::default();
 
         let paused = process_budgeted_texture_request(
             std::time::Instant::now(),
             r"Interface\Foo\Bar",
             &mut tex_mgr,
-            &force_rgba,
-            &mut uploaded,
-            &mut failed,
             &mut textures,
             &mut bc_textures,
             &mut telemetry,
+            &mut texture_requests,
         );
 
         assert!(paused);
-        assert!(uploaded.is_empty());
-        assert!(failed.is_empty());
+        assert_eq!(texture_requests.ready_count(), 0);
+        assert_eq!(texture_requests.staged_count(), 0);
         assert_eq!(textures.len(), 1);
         assert!(bc_textures.is_empty());
     }
@@ -809,10 +796,12 @@ mod tests {
             .push(request(r"Interface\spellbook\spellbookelementsiconmask"));
 
         let prev_bc_supported = crate::render::shader::atlas::set_bc_supported_for_tests(true);
+        let mut texture_requests = TextureRequestTracker::default();
         let (rgba, bc, _scan_elapsed, _load_elapsed, _telemetry, hit_deadline) = app
             .load_new_textures_budgeted(
                 &batch,
                 std::time::Instant::now() + std::time::Duration::from_secs(1),
+                &mut texture_requests,
             );
         crate::render::shader::atlas::set_bc_supported_for_tests(prev_bc_supported);
 

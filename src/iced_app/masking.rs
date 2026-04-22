@@ -29,11 +29,11 @@ pub fn apply_mask_texture(
     };
     let mask_path = mask_info.path.clone();
     apply_mask_to_quads(batch, vert_before, mask_info);
-    batch.mask_texture_requests.push(TextureRequest {
-        path: mask_path,
-        vertex_start: vert_before as u32,
-        vertex_count: count as u32,
-    });
+    batch.mask_texture_requests.push(TextureRequest::new(
+        mask_path,
+        vert_before as u32,
+        count as u32,
+    ));
 }
 
 struct MaskInfo {

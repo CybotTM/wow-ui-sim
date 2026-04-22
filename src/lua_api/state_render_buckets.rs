@@ -448,7 +448,7 @@ fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
 
 #[cfg(test)]
 mod tests {
-    use super::{RegionEntry, collect_child_for_emit, dfs_emit, same_strata_subtree_segment_end};
+    use super::{collect_child_for_emit, dfs_emit, same_strata_subtree_segment_end};
     use crate::widget::{Frame, FrameStrata, WidgetRegistry, WidgetType};
     use std::collections::HashSet;
 

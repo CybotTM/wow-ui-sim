@@ -1,6 +1,7 @@
 //! Quad vertex format and batching for GPU rendering.
 
 use iced::Rectangle;
+use std::sync::{Arc, Mutex};
 
 /// Flag bit: clip to a circle using UV coordinates (for minimap).
 pub const FLAG_CIRCLE_CLIP: u32 = 0x100;
@@ -105,6 +106,124 @@ pub struct TextureRequest {
     pub vertex_start: u32,
     /// Number of vertices using this texture.
     pub vertex_count: u32,
+    /// Request-local load state shared across cloned batches.
+    pub handle: TextureRequestHandle,
+}
+
+impl TextureRequest {
+    /// Create a new deferred texture request with fresh request-local state.
+    pub fn new(path: impl Into<String>, vertex_start: u32, vertex_count: u32) -> Self {
+        Self {
+            path: path.into(),
+            vertex_start,
+            vertex_count,
+            handle: TextureRequestHandle::default(),
+        }
+    }
+
+    /// Copy the request while preserving the request-local state handle.
+    pub fn with_vertex_start(&self, vertex_start: u32) -> Self {
+        Self {
+            path: self.path.clone(),
+            vertex_start,
+            vertex_count: self.vertex_count,
+            handle: self.handle.clone(),
+        }
+    }
+}
+
+/// Shared request-local load state for a deferred texture request.
+#[derive(Debug, Clone, Default)]
+pub struct TextureRequestHandle(Arc<Mutex<TextureRequestHandleState>>);
+
+#[derive(Debug, Default)]
+struct TextureRequestHandleState {
+    staged: bool,
+    ready: bool,
+    force_rgba: bool,
+    failed: bool,
+}
+
+impl TextureRequestHandle {
+    fn state(&self) -> std::sync::MutexGuard<'_, TextureRequestHandleState> {
+        self.0
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    /// Whether the request finished loading and GPU upload can resolve it.
+    pub fn is_ready(&self) -> bool {
+        self.state().ready
+    }
+
+    /// Whether the request failed and should stay quiet until reset.
+    pub fn is_failed(&self) -> bool {
+        self.state().failed
+    }
+
+    /// Whether the request is staged for upload but not yet ready.
+    pub fn is_staged(&self) -> bool {
+        self.state().staged
+    }
+
+    /// Whether the request still needs to be driven by preload or draw.
+    pub fn is_pending(&self) -> bool {
+        let state = self.state();
+        !state.ready && !state.failed
+    }
+
+    /// Whether the request still needs to be driven by preload or draw.
+    pub fn should_load(&self) -> bool {
+        let state = self.state();
+        !state.ready && !state.failed && (!state.staged || state.force_rgba)
+    }
+
+    /// Mark the request as staged for GPU upload.
+    pub fn mark_staged(&self) {
+        let mut state = self.state();
+        state.staged = true;
+        state.ready = false;
+        state.force_rgba = false;
+        state.failed = false;
+    }
+
+    /// Mark the request as ready in the atlas after GPU upload.
+    pub fn mark_ready(&self) {
+        let mut state = self.state();
+        state.staged = true;
+        state.ready = true;
+        state.force_rgba = false;
+        state.failed = false;
+    }
+
+    /// Mark the request so the next load pass retries through the RGBA atlas.
+    pub fn mark_force_rgba(&self) {
+        self.mark_retry();
+        self.state().force_rgba = true;
+    }
+
+    /// Whether the next retry should bypass BC upload and force RGBA upload.
+    pub fn needs_force_rgba(&self) -> bool {
+        self.state().force_rgba
+    }
+
+    /// Clear staged state so the request can be retried on the next frame.
+    pub fn mark_retry(&self) {
+        let mut state = self.state();
+        state.staged = false;
+        state.ready = false;
+        state.force_rgba = false;
+        state.failed = false;
+    }
+
+    /// Mark the request as failed and stop retrying it.
+    pub fn mark_failed(&self) {
+        let mut state = self.state();
+        state.staged = false;
+        state.ready = false;
+        state.force_rgba = false;
+        state.failed = true;
+    }
 }
 
 /// Cached quad data for a single frame, used for incremental strata rebuilds.
@@ -314,11 +433,8 @@ impl QuadBatch {
     ) {
         let vertex_start = self.vertices.len() as u32;
         self.push_cooldown_swipe_impl(bounds, progress, color, -2, sample_uv_range);
-        self.texture_requests.push(TextureRequest {
-            path: path.to_string(),
-            vertex_start,
-            vertex_count: 4,
-        });
+        self.texture_requests
+            .push(TextureRequest::new(path, vertex_start, 4));
     }
 
     /// Push a solid color quad (no texture).
@@ -425,11 +541,8 @@ impl QuadBatch {
             -2, // Marker for pending texture
             blend_mode,
         );
-        self.texture_requests.push(TextureRequest {
-            path: path.to_string(),
-            vertex_start,
-            vertex_count: 4,
-        });
+        self.texture_requests
+            .push(TextureRequest::new(path, vertex_start, 4));
     }
 
     /// Push a textured quad by path with custom UV coordinates.
@@ -443,11 +556,8 @@ impl QuadBatch {
     ) {
         let vertex_start = self.vertices.len() as u32;
         self.push_quad(bounds, uvs, color, -2, blend_mode);
-        self.texture_requests.push(TextureRequest {
-            path: path.to_string(),
-            vertex_start,
-            vertex_count: 4,
-        });
+        self.texture_requests
+            .push(TextureRequest::new(path, vertex_start, 4));
     }
 
     /// Push a textured triangle by path (for deferred texture loading).
@@ -461,10 +571,7 @@ impl QuadBatch {
     ) {
         let vertex_start = self.vertices.len() as u32;
         self.push_triangle(positions, uvs, color, -2, blend_mode);
-        self.texture_requests.push(TextureRequest {
-            path: path.to_string(),
-            vertex_start,
-            vertex_count: 3,
-        });
+        self.texture_requests
+            .push(TextureRequest::new(path, vertex_start, 3));
     }
 }

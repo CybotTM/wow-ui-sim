@@ -11,8 +11,7 @@ use crate::render::shader::quad::QuadVertex;
 use bytemuck::Zeroable;
 use iced::widget::shader::{Pipeline, Primitive as ShaderPrimitive, Viewport};
 use iced::{Point, Rectangle, Size};
-use std::collections::HashSet;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[test]
 fn decode_crop_request_rejects_malformed_coords() {
@@ -238,9 +237,7 @@ fn prepare_bc_upload_failure_keeps_path_unready_and_requests_rgba_retry() {
     }
 
     let path = r"Interface\WorldMap\Test\Tile01".to_string();
-    let staged = Arc::new(std::sync::Mutex::new(HashSet::from([path.clone()])));
-    let ready = Arc::new(std::sync::Mutex::new(HashSet::new()));
-    let force_rgba = Arc::new(std::sync::Mutex::new(HashSet::new()));
+    let request = crate::render::TextureRequest::new(path.clone(), 0, 4);
 
     let mut primitive = WowUiPrimitive::empty();
     primitive.bc_textures.push(crate::render::GpuBcTextureData {
@@ -255,9 +252,9 @@ fn prepare_bc_upload_failure_keeps_path_unready_and_requests_rgba_retry() {
         ]),
         bc_format: BcFormat::Bc1,
     });
-    primitive.gpu_uploaded_textures = Some(Arc::clone(&staged));
-    primitive.gpu_ready_textures = Some(Arc::clone(&ready));
-    primitive.gpu_force_rgba_textures = Some(Arc::clone(&force_rgba));
+    let tracker = Arc::new(Mutex::new(super::TextureRequestTracker::default()));
+    tracker.lock().unwrap().register_request(&request);
+    primitive.texture_requests = Some(Arc::clone(&tracker));
 
     <WowUiPrimitive as ShaderPrimitive>::prepare(
         &primitive,
@@ -268,17 +265,18 @@ fn prepare_bc_upload_failure_keeps_path_unready_and_requests_rgba_retry() {
         &Viewport::with_physical_size(Size::new(64, 64), 1.0),
     );
 
+    assert!(request.handle.is_pending(), "failed uploads stay pending");
     assert!(
-        !ready.lock().unwrap().contains(&path),
-        "failed BC atlas uploads must not be marked ready"
+        request.handle.needs_force_rgba(),
+        "failed BC atlas uploads should retry through the RGBA atlas"
     );
     assert!(
-        !staged.lock().unwrap().contains(&path),
+        !request.handle.is_staged(),
         "failed BC atlas uploads must clear staged state so draw can retry"
     );
     assert!(
-        force_rgba.lock().unwrap().contains(&path),
-        "failed BC atlas uploads should retry through the RGBA atlas"
+        !request.handle.is_ready(),
+        "failed BC atlas uploads must not be marked ready"
     );
     assert!(
         pipeline.texture_atlas_mut().get(&path).is_none()
@@ -399,6 +397,7 @@ fn pending_transition_reuploads_strata_vertices_with_resolved_tex_indices_after_
         [1.0, 1.0, 1.0, 1.0],
         BlendMode::Alpha,
     );
+    let request = batch.texture_requests[0].clone();
     let batch = Arc::new(batch);
 
     let mut first = WowUiPrimitive::empty();
@@ -423,9 +422,6 @@ fn pending_transition_reuploads_strata_vertices_with_resolved_tex_indices_after_
         "pending first-open vertices should be transparent until the atlas entry exists"
     );
 
-    let staged = Arc::new(std::sync::Mutex::new(HashSet::from([path.clone()])));
-    let ready = Arc::new(std::sync::Mutex::new(HashSet::new()));
-    let force_rgba = Arc::new(std::sync::Mutex::new(HashSet::new()));
     let mut second = WowUiPrimitive::empty();
     second.strata_batches[0] = Some(Arc::clone(&batch));
     second.textures.push(crate::render::GpuTextureData {
@@ -434,9 +430,9 @@ fn pending_transition_reuploads_strata_vertices_with_resolved_tex_indices_after_
         height: 16,
         rgba: Arc::<[u8]>::from(vec![0xff; 16 * 16 * 4]),
     });
-    second.gpu_uploaded_textures = Some(Arc::clone(&staged));
-    second.gpu_ready_textures = Some(Arc::clone(&ready));
-    second.gpu_force_rgba_textures = Some(Arc::clone(&force_rgba));
+    let tracker = Arc::new(Mutex::new(super::TextureRequestTracker::default()));
+    tracker.lock().unwrap().register_request(&request);
+    second.texture_requests = Some(Arc::clone(&tracker));
     <WowUiPrimitive as ShaderPrimitive>::prepare(
         &second,
         &mut pipeline,
@@ -454,11 +450,11 @@ fn pending_transition_reuploads_strata_vertices_with_resolved_tex_indices_after_
     let uploaded_vertices = pipeline.uploaded_vertices(0);
     assert_eq!(uploaded_vertices.len(), batch.vertices.len());
     assert!(
-        ready.lock().unwrap().contains(&path),
+        request.handle.is_ready(),
         "successful prepare should mark the path atlas-ready"
     );
     assert!(
-        force_rgba.lock().unwrap().is_empty(),
+        !request.handle.needs_force_rgba(),
         "plain RGBA uploads should not request BC fallback handling"
     );
 

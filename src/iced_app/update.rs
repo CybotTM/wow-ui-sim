@@ -386,11 +386,7 @@ impl App {
         self.update_fps_counter();
         log_slow_tick(&stage_timings, combined, self);
         if crate::logging::gui_trace_enabled() {
-            let ready_count = self
-                .gpu_ready_textures
-                .lock()
-                .map(|ready| ready.len())
-                .unwrap_or_default();
+            let ready_count = self.cached_render_request_ready_count();
             crate::logging::eprintln_gui_trace(&format!(
                 "tick redraw_request={} dirty=0x{:x} pending={} ready={ready_count}",
                 redraw_needed,
@@ -607,7 +603,7 @@ impl App {
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
         self.preload_visible_textures();
-        self.gpu_failed_textures.borrow_mut().clear();
+        self.clear_failed_texture_requests();
         self.mark_all_strata_dirty();
         self.preload_current_render_requests_preserving_dirty(Some(
             std::time::Duration::from_millis(25),
@@ -638,12 +634,14 @@ impl App {
                 }
             }
         }
-        let remaining_pending = {
+        let remaining_pending = if !self.cached_render_request_paths().is_empty() {
+            self.cached_render_requests_still_pending()
+        } else {
             let tex_mgr = self.texture_manager.borrow();
-            let ready = self.gpu_ready_textures.lock().unwrap();
-            paths
+            let cpu_pending = paths
                 .iter()
-                .any(|path| !texture_request_ready_for_draw(&tex_mgr, &ready, path))
+                .any(|path| !texture_request_is_cached(&tex_mgr, path));
+            cpu_pending || loaded != 0 || (pending_before && !paths.is_empty())
         };
         self.textures_pending.set(remaining_pending);
         if loaded > 0 {
@@ -658,13 +656,13 @@ impl App {
     fn warmup_texture_paths(&self) -> Vec<String> {
         let mut cached_paths = self.cached_render_request_paths();
         if !cached_paths.is_empty() {
-            sort_texture_request_paths(&mut cached_paths);
+            Self::sort_texture_request_paths(&mut cached_paths);
             return cached_paths;
         }
 
         let env = self.env.borrow();
         let mut visible_paths = env.state().borrow().widgets.visible_texture_paths();
-        sort_texture_request_paths(&mut visible_paths);
+        Self::sort_texture_request_paths(&mut visible_paths);
         visible_paths
     }
 
@@ -779,6 +777,44 @@ impl App {
         let mut state = env.state().borrow_mut();
         self.log_messages.append(&mut state.console_output);
     }
+
+    fn sort_texture_request_paths(paths: &mut [String]) {
+        paths.sort_by(|a, b| {
+            texture_request_priority(a)
+                .cmp(&texture_request_priority(b))
+                .then_with(|| a.cmp(b))
+        });
+    }
+
+    fn cached_render_request_ready_count(&self) -> usize {
+        self.cached_strata_quads
+            .borrow()
+            .iter()
+            .flatten()
+            .map(|batch| {
+                batch
+                    .texture_requests
+                    .iter()
+                    .chain(&batch.mask_texture_requests)
+                    .filter(|request| request.handle.is_ready())
+                    .count()
+            })
+            .sum()
+    }
+
+    fn clear_failed_texture_requests(&self) {
+        for batch in self.cached_strata_quads.borrow().iter().flatten() {
+            for request in batch
+                .texture_requests
+                .iter()
+                .chain(&batch.mask_texture_requests)
+            {
+                if request.handle.is_failed() {
+                    request.handle.mark_retry();
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
@@ -796,7 +832,7 @@ struct TickStageTimings {
 }
 
 fn log_slow_tick(stage_timings: &TickStageTimings, combined: u16, app: &App) {
-    let atlas_ready = app.gpu_ready_textures.lock().unwrap().len();
+    let atlas_ready = app.cached_render_request_ready_count();
     if super::perf_logging_enabled() && stage_timings.total.as_millis() > 10 {
         let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
         eprintln!(
@@ -862,22 +898,6 @@ fn texture_request_is_cached(tex_mgr: &crate::texture::TextureManager, path: &st
         return tex_mgr.get_cached_crop_request(path).is_some();
     }
     tex_mgr.is_cached(path)
-}
-
-fn texture_request_ready_for_draw(
-    tex_mgr: &crate::texture::TextureManager,
-    ready: &std::collections::HashSet<String>,
-    path: &str,
-) -> bool {
-    texture_request_is_cached(tex_mgr, path) && ready.contains(path)
-}
-
-fn sort_texture_request_paths(paths: &mut [String]) {
-    paths.sort_by(|a, b| {
-        texture_request_priority(a)
-            .cmp(&texture_request_priority(b))
-            .then_with(|| a.cmp(b))
-    });
 }
 
 fn texture_request_priority(path: &str) -> (u8, u8) {
@@ -1249,11 +1269,9 @@ mod tests {
 
         let crop_path = "tick-warmup-crop@crop:0.000000,0.500000,0.000000,0.500000";
         let mut batch = QuadBatch::new();
-        batch.texture_requests.push(TextureRequest {
-            path: crop_path.to_string(),
-            vertex_start: 0,
-            vertex_count: 4,
-        });
+        batch
+            .texture_requests
+            .push(TextureRequest::new(crop_path, 0, 4));
         app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
 
         app.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
@@ -1282,22 +1300,16 @@ mod tests {
 
         let request_path = "staged-not-prepared";
         let mut batch = QuadBatch::new();
-        batch.texture_requests.push(TextureRequest {
-            path: request_path.to_string(),
-            vertex_start: 0,
-            vertex_count: 4,
-        });
+        batch
+            .texture_requests
+            .push(TextureRequest::new(request_path, 0, 4));
+        batch.texture_requests[0].handle.mark_staged();
         app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
 
         {
             let mut tex_mgr = app.texture_manager.borrow_mut();
             render::preload_texture_request_source(&mut tex_mgr, request_path);
         }
-        app.gpu_uploaded_textures
-            .lock()
-            .unwrap()
-            .insert(request_path.to_string());
-
         app.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
 
         assert!(
@@ -1321,22 +1333,16 @@ mod tests {
 
         let request_path = "staged-discovered";
         let mut batch = QuadBatch::new();
-        batch.texture_requests.push(TextureRequest {
-            path: request_path.to_string(),
-            vertex_start: 0,
-            vertex_count: 4,
-        });
+        batch
+            .texture_requests
+            .push(TextureRequest::new(request_path, 0, 4));
+        batch.texture_requests[0].handle.mark_staged();
         app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
 
         {
             let mut tex_mgr = app.texture_manager.borrow_mut();
             render::preload_texture_request_source(&mut tex_mgr, request_path);
         }
-        app.gpu_uploaded_textures
-            .lock()
-            .unwrap()
-            .insert(request_path.to_string());
-
         let task = app.update(Message::ProcessTimers(Instant::now()));
         let action = pollster::block_on(async {
             iced_runtime::task::into_stream(task)

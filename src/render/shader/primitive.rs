@@ -1,9 +1,10 @@
 //! WoW UI shader primitive implementation.
 
+use super::quad::TextureRequestHandle;
 use super::{QuadBatch, WowUiPipeline};
 use iced::Rectangle;
 use iced::widget::shader::{self, Viewport};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -35,6 +36,92 @@ pub struct GpuBcTextureData {
     pub bc_data: Arc<[u8]>,
     /// BC compression format (BC1 = DXT1, BC3 = DXT3/DXT5).
     pub bc_format: BcFormat,
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct TextureRequestTracker {
+    handles: HashMap<String, Vec<TextureRequestHandle>>,
+}
+
+impl TextureRequestTracker {
+    fn handles_for_path_mut(&mut self, path: &str) -> &mut Vec<TextureRequestHandle> {
+        self.handles.entry(path.to_string()).or_default()
+    }
+
+    pub(crate) fn register_request(&mut self, request: &crate::render::TextureRequest) {
+        self.handles_for_path_mut(&request.path)
+            .push(request.handle.clone());
+    }
+
+    pub(crate) fn register_batch(&mut self, batch: &QuadBatch) {
+        for request in batch
+            .texture_requests
+            .iter()
+            .chain(&batch.mask_texture_requests)
+        {
+            self.register_request(request);
+        }
+    }
+
+    pub(crate) fn mark_failed(&mut self, path: &str) {
+        if let Some(handles) = self.handles.get(path) {
+            for handle in handles {
+                if handle.is_pending() && !handle.is_staged() {
+                    handle.mark_failed();
+                }
+            }
+        }
+    }
+
+    pub(crate) fn mark_staged(&mut self, path: &str) {
+        if let Some(handles) = self.handles.get(path) {
+            for handle in handles {
+                if handle.is_pending() {
+                    handle.mark_staged();
+                }
+            }
+        }
+    }
+
+    pub(crate) fn mark_ready(&mut self, path: &str) {
+        if let Some(handles) = self.handles.get(path) {
+            for handle in handles {
+                if handle.is_pending() || handle.is_staged() {
+                    handle.mark_ready();
+                }
+            }
+        }
+    }
+
+    pub(crate) fn mark_upload_retry(&mut self, path: &str) {
+        if let Some(handles) = self.handles.get(path) {
+            for handle in handles {
+                if handle.is_pending() || handle.is_staged() {
+                    handle.mark_force_rgba();
+                }
+            }
+        }
+    }
+
+    pub(crate) fn needs_force_rgba_retry(&self, path: &str) -> bool {
+        self.handles
+            .get(path)
+            .is_some_and(|handles| handles.iter().any(TextureRequestHandle::needs_force_rgba))
+    }
+
+    pub(crate) fn ready_count(&self) -> usize {
+        self.handles
+            .values()
+            .map(|handles| handles.iter().filter(|handle| handle.is_ready()).count())
+            .sum()
+    }
+
+    pub(crate) fn staged_count(&self) -> usize {
+        self.handles
+            .values()
+            .map(|handles| handles.iter().filter(|handle| handle.is_staged()).count())
+            .sum()
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -270,12 +357,8 @@ pub struct WowUiPrimitive {
     pub glyph_atlas_data: Option<Vec<u8>>,
     /// Size of the glyph atlas (width = height).
     pub glyph_atlas_size: u32,
-    /// Shared app-side tracker for staged texture paths awaiting successful atlas upload.
-    pub gpu_uploaded_textures: Option<Arc<Mutex<HashSet<String>>>>,
-    /// Shared app-side tracker for texture paths confirmed ready in the atlas.
-    pub gpu_ready_textures: Option<Arc<Mutex<HashSet<String>>>>,
-    /// Shared app-side tracker for texture paths that must retry on the RGBA atlas.
-    pub gpu_force_rgba_textures: Option<Arc<Mutex<HashSet<String>>>>,
+    /// Shared app-side tracker for per-request texture upload handles.
+    pub(crate) texture_requests: Option<Arc<Mutex<TextureRequestTracker>>>,
 }
 
 impl WowUiPrimitive {
@@ -295,9 +378,7 @@ impl WowUiPrimitive {
             bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
-            gpu_uploaded_textures: None,
-            gpu_ready_textures: None,
-            gpu_force_rgba_textures: None,
+            texture_requests: None,
         }
     }
 
@@ -323,9 +404,7 @@ impl WowUiPrimitive {
             bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
-            gpu_uploaded_textures: None,
-            gpu_ready_textures: None,
-            gpu_force_rgba_textures: None,
+            texture_requests: None,
         }
     }
 }
@@ -357,38 +436,22 @@ fn upload_pending_textures(
 
 fn record_texture_upload_outcome(
     outcome: TextureUploadOutcome,
-    uploaded: Option<&Arc<Mutex<HashSet<String>>>>,
-    ready: Option<&Arc<Mutex<HashSet<String>>>>,
-    force_rgba: Option<&Arc<Mutex<HashSet<String>>>>,
+    texture_requests: Option<&Arc<Mutex<TextureRequestTracker>>>,
 ) {
-    if let Some(uploaded) = uploaded
-        && let Ok(mut uploaded) = uploaded.lock()
-    {
-        for path in &outcome.retry_paths {
-            uploaded.remove(path);
-        }
+    let Some(texture_requests) = texture_requests else {
+        return;
+    };
+    let Ok(mut texture_requests) = texture_requests.lock() else {
+        return;
+    };
+    for path in outcome.ready_paths {
+        texture_requests.mark_ready(&path);
     }
-    let Some(ready) = ready else {
-        if let Some(force_rgba) = force_rgba
-            && let Ok(mut force_rgba) = force_rgba.lock()
-        {
-            force_rgba.extend(outcome.force_rgba_retry_paths);
-        }
-        return;
-    };
-    let Ok(mut ready) = ready.lock() else {
-        if let Some(force_rgba) = force_rgba
-            && let Ok(mut force_rgba) = force_rgba.lock()
-        {
-            force_rgba.extend(outcome.force_rgba_retry_paths);
-        }
-        return;
-    };
-    ready.extend(outcome.ready_paths);
-    if let Some(force_rgba) = force_rgba
-        && let Ok(mut force_rgba) = force_rgba.lock()
-    {
-        force_rgba.extend(outcome.force_rgba_retry_paths);
+    for path in outcome.retry_paths {
+        texture_requests.mark_upload_retry(&path);
+    }
+    for path in outcome.force_rgba_retry_paths {
+        texture_requests.mark_upload_retry(&path);
     }
 }
 
@@ -694,14 +757,14 @@ impl shader::Primitive for WowUiPrimitive {
         crate::logging::set_blocking_phase("prepare_textures");
         let textures_started = Instant::now();
         let ready_before = self
-            .gpu_ready_textures
+            .texture_requests
             .as_ref()
-            .and_then(|ready| ready.lock().ok().map(|ready| ready.len()))
+            .and_then(|tracker| tracker.lock().ok().map(|tracker| tracker.ready_count()))
             .unwrap_or_default();
         let staged_before = self
-            .gpu_uploaded_textures
+            .texture_requests
             .as_ref()
-            .and_then(|uploaded| uploaded.lock().ok().map(|uploaded| uploaded.len()))
+            .and_then(|tracker| tracker.lock().ok().map(|tracker| tracker.staged_count()))
             .unwrap_or_default();
         let upload_outcome = upload_pending_textures(
             pipeline,
@@ -713,22 +776,17 @@ impl shader::Primitive for WowUiPrimitive {
         );
         let retry_count = upload_outcome.retry_paths.len();
         let force_rgba_retry_count = upload_outcome.force_rgba_retry_paths.len();
-        record_texture_upload_outcome(
-            upload_outcome,
-            self.gpu_uploaded_textures.as_ref(),
-            self.gpu_ready_textures.as_ref(),
-            self.gpu_force_rgba_textures.as_ref(),
-        );
+        record_texture_upload_outcome(upload_outcome, self.texture_requests.as_ref());
         if crate::logging::gui_trace_enabled() {
             let ready_after = self
-                .gpu_ready_textures
+                .texture_requests
                 .as_ref()
-                .and_then(|ready| ready.lock().ok().map(|ready| ready.len()))
+                .and_then(|tracker| tracker.lock().ok().map(|tracker| tracker.ready_count()))
                 .unwrap_or_default();
             let staged_after = self
-                .gpu_uploaded_textures
+                .texture_requests
                 .as_ref()
-                .and_then(|uploaded| uploaded.lock().ok().map(|uploaded| uploaded.len()))
+                .and_then(|tracker| tracker.lock().ok().map(|tracker| tracker.staged_count()))
                 .unwrap_or_default();
             crate::logging::eprintln_gui_trace(&format!(
                 "prepare ready_before={ready_before} ready_after={ready_after} staged_before={staged_before} staged_after={staged_after} retry={retry_count} force_rgba_retry={force_rgba_retry_count} dirty_strata={} new_rgba={} new_bc={}",

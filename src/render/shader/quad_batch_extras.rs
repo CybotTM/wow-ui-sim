@@ -309,11 +309,8 @@ impl QuadBatch {
     }
 
     fn push_texture_request(&mut self, path: &str, vertex_start: u32, vertex_count: u32) {
-        self.texture_requests.push(TextureRequest {
-            path: path.to_string(),
-            vertex_start,
-            vertex_count,
-        });
+        self.texture_requests
+            .push(TextureRequest::new(path, vertex_start, vertex_count));
     }
 
     fn extend_texture_requests(&mut self, requests: &[TextureRequest], base: u32, is_mask: bool) {
@@ -323,21 +320,17 @@ impl QuadBatch {
             &mut self.texture_requests
         };
 
-        target.extend(requests.iter().map(|req| TextureRequest {
-            path: req.path.clone(),
-            vertex_start: req.vertex_start + base,
-            vertex_count: req.vertex_count,
-        }));
+        target.extend(
+            requests
+                .iter()
+                .map(|req| req.with_vertex_start(req.vertex_start + base)),
+        );
     }
 
     fn snapshot_requests(&self, requests: &[TextureRequest], base: u32) -> Vec<TextureRequest> {
         requests
             .iter()
-            .map(|r| TextureRequest {
-                path: r.path.clone(),
-                vertex_start: r.vertex_start - base,
-                vertex_count: r.vertex_count,
-            })
+            .map(|r| r.with_vertex_start(r.vertex_start - base))
             .collect()
     }
 }

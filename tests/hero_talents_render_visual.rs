@@ -405,11 +405,11 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
     if let (Some(mask_path), Some(icon_isolated_start)) = (mask_request, icon_isolated_start) {
         isolated_batch
             .mask_texture_requests
-            .push(wow_ui_sim::render::TextureRequest {
-                path: mask_path,
-                vertex_start: icon_isolated_start,
-                vertex_count: 4,
-            });
+            .push(wow_ui_sim::render::TextureRequest::new(
+                mask_path,
+                icon_isolated_start,
+                4,
+            ));
     }
 
     let mut isolated_mgr = make_texture_manager().expect("texture directories should exist");

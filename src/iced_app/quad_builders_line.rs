@@ -143,11 +143,11 @@ fn emit_resolved_line_quad(
         emit_line_vertices(batch, positions, uvs, tint, -2, f.blend_mode);
         batch
             .texture_requests
-            .push(crate::render::shader::TextureRequest {
-                path: tex_path.clone(),
+            .push(crate::render::shader::TextureRequest::new(
+                tex_path.clone(),
                 vertex_start,
-                vertex_count: 4,
-            });
+                4,
+            ));
         return;
     }
     emit_line_vertices(batch, positions, uvs, tint, -1, f.blend_mode);

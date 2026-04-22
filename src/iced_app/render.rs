@@ -103,19 +103,23 @@ impl shader::Program<Message> for &App {
         let quad_dur = t0.elapsed();
 
         let overlay = self.build_overlay();
-        let (mut textures, mut bc_textures, tex_dur) =
+        let (mut textures, mut bc_textures, tex_dur, texture_requests) =
             self.load_all_textures(&dirty_strata, &overlay);
 
         if had_textures_pending {
-            self.recover_pending_textures(&mut dirty_strata, &mut textures, &mut bc_textures);
+            self.recover_pending_textures(
+                &mut dirty_strata,
+                &mut textures,
+                &mut bc_textures,
+                &texture_requests,
+            );
         }
 
         log_slow_draw(quad_dur, tex_dur, textures.len(), bc_textures.len());
         if crate::logging::gui_trace_enabled() {
-            let ready_count = self
-                .gpu_ready_textures
+            let ready_count = texture_requests
                 .lock()
-                .map(|ready| ready.len())
+                .map(|tracker| tracker.ready_count())
                 .unwrap_or_default();
             crate::logging::eprintln_gui_trace(&format!(
                 "draw dirty_before=0x{dirty_before:x} had_pending={} ready={ready_count} dirty_batches={} new_rgba={} new_bc={}",
@@ -136,9 +140,7 @@ impl shader::Program<Message> for &App {
             bc_textures,
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
-            gpu_uploaded_textures: Some(std::sync::Arc::clone(&self.gpu_uploaded_textures)),
-            gpu_ready_textures: Some(std::sync::Arc::clone(&self.gpu_ready_textures)),
-            gpu_force_rgba_textures: Some(std::sync::Arc::clone(&self.gpu_force_rgba_textures)),
+            texture_requests: Some(texture_requests),
         };
         self.attach_dirty_glyph_atlas(&mut primitive);
         primitive
@@ -213,16 +215,20 @@ impl App {
         dirty_strata: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
         textures: &mut Vec<GpuTextureData>,
         bc_textures: &mut Vec<GpuBcTextureData>,
+        texture_requests: &Arc<
+            std::sync::Mutex<crate::render::shader::primitive::TextureRequestTracker>,
+        >,
     ) {
         let cached = self.cached_strata_quads.borrow();
         let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);
         let mut exhausted = false;
+        let mut texture_requests = texture_requests.lock().unwrap();
         for i in 0..dirty_strata.len() {
             if dirty_strata[i].is_none()
                 && let Some(batch) = &cached[i]
             {
                 let (extra, extra_bc, _scan_elapsed, _load_elapsed, _telemetry, hit) =
-                    self.load_new_textures_budgeted(batch, deadline);
+                    self.load_new_textures_budgeted(batch, deadline, &mut texture_requests);
                 textures.extend(extra);
                 bc_textures.extend(extra_bc);
                 exhausted |= hit;
@@ -343,9 +349,7 @@ impl App {
             .set(self.draw_time_accum_ms.get() + elapsed_ms);
     }
 
-    fn cached_render_requests_still_pending(&self) -> bool {
-        let ready = self.gpu_ready_textures.lock().unwrap();
-        let failed = self.gpu_failed_textures.borrow();
+    pub(crate) fn cached_render_requests_still_pending(&self) -> bool {
         self.cached_strata_quads
             .borrow()
             .iter()
@@ -355,9 +359,7 @@ impl App {
                     .texture_requests
                     .iter()
                     .chain(&batch.mask_texture_requests)
-                    .any(|request| {
-                        !ready.contains(&request.path) && !failed.contains(&request.path)
-                    })
+                    .any(|request| request.handle.is_pending())
             })
     }
 

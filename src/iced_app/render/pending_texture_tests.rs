@@ -1,6 +1,7 @@
 use super::*;
 use crate::lua_api::WowLuaEnv;
 use crate::render::BlendMode;
+use crate::render::shader::primitive::TextureRequestTracker;
 use crate::render::{GlyphAtlas, WowFontSystem};
 use crate::render::{QuadBatch, TextureRequest};
 use crate::screen::ScreenKind;
@@ -9,6 +10,7 @@ use iced::{Point, Rectangle, Size};
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use tempfile::tempdir;
 use tokio::sync::mpsc;
 
@@ -130,11 +132,10 @@ fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_reque
         .enqueue_texture_preloads([request_path.clone()]);
 
     let mut batch = QuadBatch::new();
-    batch.texture_requests.push(TextureRequest {
-        path: request_path.clone(),
-        vertex_start: 0,
-        vertex_count: 4,
-    });
+    batch
+        .texture_requests
+        .push(TextureRequest::new(&request_path, 0, 4));
+    batch.texture_requests[0].handle.mark_staged();
     app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
 
     app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
@@ -164,17 +165,20 @@ fn pending_transition_reinjects_clean_cached_strata_for_staged_requests() {
     );
     let cached = std::sync::Arc::new(batch);
     app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::clone(&cached));
-    app.gpu_uploaded_textures
-        .lock()
-        .unwrap()
-        .insert(request_path.to_string());
+    // Request-local state is now carried on the request itself.
     app.textures_pending.set(true);
 
     let mut dirty_strata = std::array::from_fn(|_| None);
     let mut textures = Vec::new();
     let mut bc_textures = Vec::new();
+    let texture_requests = Arc::new(Mutex::new(TextureRequestTracker::default()));
 
-    app.recover_pending_textures(&mut dirty_strata, &mut textures, &mut bc_textures);
+    app.recover_pending_textures(
+        &mut dirty_strata,
+        &mut textures,
+        &mut bc_textures,
+        &texture_requests,
+    );
 
     assert!(
         textures.is_empty() && bc_textures.is_empty(),
