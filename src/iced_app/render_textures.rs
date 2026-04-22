@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use crate::render::shader::primitive::{
-    TextureLoadTelemetry, load_texture_prefer_bc_with_telemetry,
+    TextureLoadTelemetry, load_texture_or_crop, load_texture_prefer_bc_with_telemetry,
 };
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
@@ -210,8 +210,9 @@ impl App {
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
-        let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
+        let mut uploaded = self.gpu_uploaded_textures.lock().unwrap();
         let mut failed = self.gpu_failed_textures.borrow_mut();
+        let force_rgba = self.gpu_force_rgba_textures.lock().unwrap();
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let scan_start = std::time::Instant::now();
         let pending_paths = unresolved_texture_request_paths(quads, &uploaded, &failed);
@@ -223,6 +224,7 @@ impl App {
                 deadline,
                 path,
                 &mut tex_mgr,
+                &force_rgba,
                 &mut uploaded,
                 &mut failed,
                 &mut textures,
@@ -458,6 +460,7 @@ fn process_budgeted_texture_request(
     deadline: std::time::Instant,
     path: &str,
     tex_mgr: &mut crate::texture::TextureManager,
+    force_rgba: &std::collections::HashSet<String>,
     uploaded: &mut std::collections::HashSet<String>,
     failed: &mut std::collections::HashSet<String>,
     textures: &mut Vec<GpuTextureData>,
@@ -470,6 +473,7 @@ fn process_budgeted_texture_request(
     load_pending_texture(
         tex_mgr,
         path,
+        force_rgba,
         uploaded,
         failed,
         textures,
@@ -482,6 +486,7 @@ fn process_budgeted_texture_request(
 fn load_pending_texture(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
+    force_rgba: &std::collections::HashSet<String>,
     uploaded: &mut std::collections::HashSet<String>,
     failed: &mut std::collections::HashSet<String>,
     textures: &mut Vec<GpuTextureData>,
@@ -490,15 +495,23 @@ fn load_pending_texture(
 ) {
     use crate::render::shader::primitive::LoadedTexture;
 
-    let (loaded, load_telemetry) = load_texture_prefer_bc_with_telemetry(tex_mgr, path);
-    telemetry.record(load_telemetry);
-    if let Some(loaded) = loaded {
-        uploaded.insert(path.to_string());
-        match loaded {
-            LoadedTexture::Rgba(data) => textures.push(data),
-            LoadedTexture::Bc(data) => bc_textures.push(data),
+    if force_rgba.contains(path) {
+        if let Some(data) = load_texture_or_crop(tex_mgr, path) {
+            uploaded.insert(path.to_string());
+            textures.push(data);
+            return;
         }
-        return;
+    } else {
+        let (loaded, load_telemetry) = load_texture_prefer_bc_with_telemetry(tex_mgr, path);
+        telemetry.record(load_telemetry);
+        if let Some(loaded) = loaded {
+            uploaded.insert(path.to_string());
+            match loaded {
+                LoadedTexture::Rgba(data) => textures.push(data),
+                LoadedTexture::Bc(data) => bc_textures.push(data),
+            }
+            return;
+        }
     }
 
     failed.insert(path.to_string());
@@ -658,11 +671,13 @@ mod tests {
         }];
         let mut bc_textures = Vec::new();
         let mut telemetry = TextureLoadBatchTelemetry::default();
+        let force_rgba = HashSet::new();
 
         let paused = process_budgeted_texture_request(
             std::time::Instant::now(),
             r"Interface\Foo\Bar",
             &mut tex_mgr,
+            &force_rgba,
             &mut uploaded,
             &mut failed,
             &mut textures,

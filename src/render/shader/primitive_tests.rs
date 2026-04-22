@@ -1,16 +1,17 @@
 use super::{
-    LoadedTexture, ResolvedTextureEntry, WowUiPipeline, apply_resolved_texture_entry,
-    bc_texture_dimensions_fit_gpu_atlas, decode_crop_request, load_texture_prefer_bc,
-    load_texture_prefer_bc_with_telemetry, remap_bc_entry_uv, remap_entry_uv,
-    resolve_and_scale_quads,
+    LoadedTexture, ResolvedTextureEntry, WowUiPipeline, WowUiPrimitive,
+    apply_resolved_texture_entry, bc_texture_dimensions_fit_gpu_atlas, decode_crop_request,
+    load_texture_prefer_bc, load_texture_prefer_bc_with_telemetry, remap_bc_entry_uv,
+    remap_entry_uv, resolve_and_scale_quads,
 };
 use crate::render::BlendMode;
 use crate::render::shader::QuadBatch;
 use crate::render::shader::atlas::{BcFormat, BcTextureEntry};
 use crate::render::shader::quad::QuadVertex;
 use bytemuck::Zeroable;
-use iced::widget::shader::Pipeline;
+use iced::widget::shader::{Pipeline, Primitive as ShaderPrimitive, Viewport};
 use iced::{Point, Rectangle, Size};
+use std::collections::HashSet;
 use std::sync::Arc;
 
 #[test]
@@ -194,6 +195,95 @@ fn unresolved_pending_textures_become_transparent() {
             .vertices
             .iter()
             .all(|vertex| vertex.color[3] == 0.0)
+    );
+}
+
+#[test]
+fn prepare_bc_upload_failure_keeps_path_unready_and_requests_rgba_retry() {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+    let (device, queue) = pollster::block_on(async {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions::default())
+            .await
+            .expect("adapter");
+        adapter
+            .request_device(&wgpu::DeviceDescriptor::default())
+            .await
+            .expect("device")
+    });
+
+    let mut pipeline = WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
+    if crate::render::shader::atlas::is_bc_supported() {
+        let bc_blocks = vec![
+            0u8;
+            ((crate::render::shader::atlas::BC_CELL_SIZE / 4)
+                * (crate::render::shader::atlas::BC_CELL_SIZE / 4)
+                * 8) as usize
+        ];
+        let mut slot = 0usize;
+        while pipeline
+            .texture_atlas_mut()
+            .upload_bc(
+                &queue,
+                &format!("filled-bc-slot-{slot}"),
+                crate::render::shader::atlas::BC_CELL_SIZE,
+                crate::render::shader::atlas::BC_CELL_SIZE,
+                &bc_blocks,
+                BcFormat::Bc1,
+            )
+            .is_some()
+        {
+            slot += 1;
+        }
+    }
+
+    let path = r"Interface\WorldMap\Test\Tile01".to_string();
+    let staged = Arc::new(std::sync::Mutex::new(HashSet::from([path.clone()])));
+    let ready = Arc::new(std::sync::Mutex::new(HashSet::new()));
+    let force_rgba = Arc::new(std::sync::Mutex::new(HashSet::new()));
+
+    let mut primitive = WowUiPrimitive::empty();
+    primitive.bc_textures.push(crate::render::GpuBcTextureData {
+        path: path.clone(),
+        width: crate::render::shader::atlas::BC_CELL_SIZE,
+        height: crate::render::shader::atlas::BC_CELL_SIZE,
+        bc_data: Arc::<[u8]>::from(vec![
+            0u8;
+            ((crate::render::shader::atlas::BC_CELL_SIZE / 4)
+                * (crate::render::shader::atlas::BC_CELL_SIZE / 4)
+                * 8) as usize
+        ]),
+        bc_format: BcFormat::Bc1,
+    });
+    primitive.gpu_uploaded_textures = Some(Arc::clone(&staged));
+    primitive.gpu_ready_textures = Some(Arc::clone(&ready));
+    primitive.gpu_force_rgba_textures = Some(Arc::clone(&force_rgba));
+
+    <WowUiPrimitive as ShaderPrimitive>::prepare(
+        &primitive,
+        &mut pipeline,
+        &device,
+        &queue,
+        &Rectangle::new(Point::ORIGIN, Size::new(64.0, 64.0)),
+        &Viewport::with_physical_size(Size::new(64, 64), 1.0),
+    );
+
+    assert!(
+        !ready.lock().unwrap().contains(&path),
+        "failed BC atlas uploads must not be marked ready"
+    );
+    assert!(
+        !staged.lock().unwrap().contains(&path),
+        "failed BC atlas uploads must clear staged state so draw can retry"
+    );
+    assert!(
+        force_rgba.lock().unwrap().contains(&path),
+        "failed BC atlas uploads should retry through the RGBA atlas"
+    );
+    assert!(
+        pipeline.texture_atlas_mut().get(&path).is_none()
+            && pipeline.texture_atlas_mut().get_bc(&path).is_none(),
+        "rejected BC uploads must not appear in the atlas"
     );
 }
 

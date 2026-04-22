@@ -270,8 +270,12 @@ pub struct WowUiPrimitive {
     pub glyph_atlas_data: Option<Vec<u8>>,
     /// Size of the glyph atlas (width = height).
     pub glyph_atlas_size: u32,
+    /// Shared app-side tracker for staged texture paths awaiting successful atlas upload.
+    pub gpu_uploaded_textures: Option<Arc<Mutex<HashSet<String>>>>,
     /// Shared app-side tracker for texture paths confirmed ready in the atlas.
     pub gpu_ready_textures: Option<Arc<Mutex<HashSet<String>>>>,
+    /// Shared app-side tracker for texture paths that must retry on the RGBA atlas.
+    pub gpu_force_rgba_textures: Option<Arc<Mutex<HashSet<String>>>>,
 }
 
 impl WowUiPrimitive {
@@ -291,7 +295,9 @@ impl WowUiPrimitive {
             bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
+            gpu_uploaded_textures: None,
             gpu_ready_textures: None,
+            gpu_force_rgba_textures: None,
         }
     }
 
@@ -317,9 +323,18 @@ impl WowUiPrimitive {
             bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
+            gpu_uploaded_textures: None,
             gpu_ready_textures: None,
+            gpu_force_rgba_textures: None,
         }
     }
+}
+
+#[derive(Debug, Default)]
+struct TextureUploadOutcome {
+    ready_paths: HashSet<String>,
+    retry_paths: HashSet<String>,
+    force_rgba_retry_paths: HashSet<String>,
 }
 
 /// Upload pending textures and glyph atlas data to the GPU atlas.
@@ -330,30 +345,50 @@ fn upload_pending_textures(
     bc_textures: &[GpuBcTextureData],
     glyph_atlas_data: &Option<Vec<u8>>,
     glyph_atlas_size: u32,
-) {
+) -> TextureUploadOutcome {
     let atlas = pipeline.texture_atlas_mut();
-    upload_rgba_textures(atlas, queue, textures);
-    upload_bc_textures(atlas, queue, bc_textures);
+    let mut outcome = TextureUploadOutcome::default();
+    upload_rgba_textures(atlas, queue, textures, &mut outcome);
+    upload_bc_textures(atlas, queue, bc_textures, &mut outcome);
     upload_glyph_atlas_if_present(atlas, queue, glyph_atlas_data, glyph_atlas_size);
     log_gpu_memory_once(atlas);
+    outcome
 }
 
-fn mark_ready_texture_paths(
+fn record_texture_upload_outcome(
+    outcome: TextureUploadOutcome,
+    uploaded: Option<&Arc<Mutex<HashSet<String>>>>,
     ready: Option<&Arc<Mutex<HashSet<String>>>>,
-    textures: &[GpuTextureData],
-    bc_textures: &[GpuBcTextureData],
+    force_rgba: Option<&Arc<Mutex<HashSet<String>>>>,
 ) {
+    if let Some(uploaded) = uploaded
+        && let Ok(mut uploaded) = uploaded.lock()
+    {
+        for path in &outcome.retry_paths {
+            uploaded.remove(path);
+        }
+    }
     let Some(ready) = ready else {
+        if let Some(force_rgba) = force_rgba
+            && let Ok(mut force_rgba) = force_rgba.lock()
+        {
+            force_rgba.extend(outcome.force_rgba_retry_paths);
+        }
         return;
     };
     let Ok(mut ready) = ready.lock() else {
+        if let Some(force_rgba) = force_rgba
+            && let Ok(mut force_rgba) = force_rgba.lock()
+        {
+            force_rgba.extend(outcome.force_rgba_retry_paths);
+        }
         return;
     };
-    for texture in textures {
-        ready.insert(texture.path.clone());
-    }
-    for texture in bc_textures {
-        ready.insert(texture.path.clone());
+    ready.extend(outcome.ready_paths);
+    if let Some(force_rgba) = force_rgba
+        && let Ok(mut force_rgba) = force_rgba.lock()
+    {
+        force_rgba.extend(outcome.force_rgba_retry_paths);
     }
 }
 
@@ -361,18 +396,27 @@ fn upload_rgba_textures(
     atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
     queue: &wgpu::Queue,
     textures: &[GpuTextureData],
+    outcome: &mut TextureUploadOutcome,
 ) {
     for tex_data in textures {
         if atlas.get(&tex_data.path).is_some() {
+            outcome.ready_paths.insert(tex_data.path.clone());
             continue;
         }
-        atlas.upload(
-            queue,
-            &tex_data.path,
-            tex_data.width,
-            tex_data.height,
-            tex_data.rgba.as_ref(),
-        );
+        if atlas
+            .upload(
+                queue,
+                &tex_data.path,
+                tex_data.width,
+                tex_data.height,
+                tex_data.rgba.as_ref(),
+            )
+            .is_some()
+        {
+            outcome.ready_paths.insert(tex_data.path.clone());
+        } else {
+            outcome.retry_paths.insert(tex_data.path.clone());
+        }
     }
 }
 
@@ -380,21 +424,31 @@ fn upload_bc_textures(
     atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
     queue: &wgpu::Queue,
     bc_textures: &[GpuBcTextureData],
+    outcome: &mut TextureUploadOutcome,
 ) {
     for bc_data in bc_textures {
         let already_uploaded =
             atlas.get_bc(&bc_data.path).is_some() || atlas.get(&bc_data.path).is_some();
         if already_uploaded {
+            outcome.ready_paths.insert(bc_data.path.clone());
             continue;
         }
-        atlas.upload_bc(
-            queue,
-            &bc_data.path,
-            bc_data.width,
-            bc_data.height,
-            bc_data.bc_data.as_ref(),
-            bc_data.bc_format,
-        );
+        if atlas
+            .upload_bc(
+                queue,
+                &bc_data.path,
+                bc_data.width,
+                bc_data.height,
+                bc_data.bc_data.as_ref(),
+                bc_data.bc_format,
+            )
+            .is_some()
+        {
+            outcome.ready_paths.insert(bc_data.path.clone());
+        } else {
+            outcome.retry_paths.insert(bc_data.path.clone());
+            outcome.force_rgba_retry_paths.insert(bc_data.path.clone());
+        }
     }
 }
 
@@ -639,7 +693,7 @@ impl shader::Primitive for WowUiPrimitive {
         let prepare_started = Instant::now();
         crate::logging::set_blocking_phase("prepare_textures");
         let textures_started = Instant::now();
-        upload_pending_textures(
+        let upload_outcome = upload_pending_textures(
             pipeline,
             queue,
             &self.textures,
@@ -647,10 +701,11 @@ impl shader::Primitive for WowUiPrimitive {
             &self.glyph_atlas_data,
             self.glyph_atlas_size,
         );
-        mark_ready_texture_paths(
+        record_texture_upload_outcome(
+            upload_outcome,
+            self.gpu_uploaded_textures.as_ref(),
             self.gpu_ready_textures.as_ref(),
-            &self.textures,
-            &self.bc_textures,
+            self.gpu_force_rgba_textures.as_ref(),
         );
         let textures_elapsed = textures_started.elapsed();
         crate::logging::set_blocking_phase("prepare_projection");

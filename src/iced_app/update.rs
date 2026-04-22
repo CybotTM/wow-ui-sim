@@ -1218,7 +1218,8 @@ mod tests {
             render::preload_texture_request_source(&mut tex_mgr, request_path);
         }
         app.gpu_uploaded_textures
-            .borrow_mut()
+            .lock()
+            .unwrap()
             .insert(request_path.to_string());
 
         app.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));

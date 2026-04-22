@@ -121,7 +121,9 @@ impl shader::Program<Message> for &App {
             bc_textures,
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
+            gpu_uploaded_textures: Some(std::sync::Arc::clone(&self.gpu_uploaded_textures)),
             gpu_ready_textures: Some(std::sync::Arc::clone(&self.gpu_ready_textures)),
+            gpu_force_rgba_textures: Some(std::sync::Arc::clone(&self.gpu_force_rgba_textures)),
         };
         self.attach_dirty_glyph_atlas(&mut primitive);
         primitive
