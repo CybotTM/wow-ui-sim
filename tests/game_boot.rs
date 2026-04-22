@@ -261,6 +261,28 @@ fn game_boot_lua_errors_pipeline_finishes() {
 }
 
 #[test]
+fn hide_runtime_hidden_frames_hides_quest_info_free_floating_frames() {
+    test_timeout! {
+        let env = load_game_screen();
+        let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
+        let required_money_shown: bool = env
+            .eval("return QuestInfoRequiredMoneyFrame ~= nil and QuestInfoRequiredMoneyFrame:IsShown()")
+            .expect("probe QuestInfoRequiredMoneyFrame shown state");
+        let group_size_shown: bool = env
+            .eval("return QuestInfoGroupSize ~= nil and QuestInfoGroupSize:IsShown()")
+            .expect("probe QuestInfoGroupSize shown state");
+        assert!(
+            !required_money_shown,
+            "QuestInfoRequiredMoneyFrame should be hidden after runtime hidden frame pass"
+        );
+        assert!(
+            !group_size_shown,
+            "QuestInfoGroupSize should be hidden after runtime hidden frame pass"
+        );
+    }
+}
+
+#[test]
 fn panel_tabs_do_not_diverge_during_blizzard_load() {
     test_timeout! {
         let env = new_game_env();
