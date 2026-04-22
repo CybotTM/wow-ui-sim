@@ -39,18 +39,23 @@ fn assert_no_lua_errors(env: &wow_ui_sim::lua_api::WowLuaEnv, target_name: &str)
     );
 }
 
-fn assert_startup_shape_for_target(
+fn probe_target_presence(
     target: &BlizzardAddonSmokeTarget<'static>,
     env: &wow_ui_sim::lua_api::WowLuaEnv,
-) {
+) -> (String, bool) {
     let presence_probe = format!(
         "return type({}), {} ~= nil",
         target.expected_global, target.expected_frame,
     );
-    let (global_type, frame_exists): (String, bool) = env
-        .eval(&presence_probe)
-        .unwrap_or_else(|error| panic!("{} presence probe should return: {error}", target.name));
+    env.eval(&presence_probe)
+        .unwrap_or_else(|error| panic!("{} presence probe should return: {error}", target.name))
+}
 
+fn assert_target_presence(
+    target: &BlizzardAddonSmokeTarget<'static>,
+    global_type: &str,
+    frame_exists: bool,
+) {
     assert_eq!(
         global_type, "function",
         "{} should expose {} as a function",
@@ -61,7 +66,12 @@ fn assert_startup_shape_for_target(
         "{} should create {}",
         target.name, target.expected_frame,
     );
+}
 
+fn assert_target_behavior_probe(
+    target: &BlizzardAddonSmokeTarget<'static>,
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+) {
     let behavior_result: String = env
         .eval(target.behavior_probe_lua)
         .unwrap_or_else(|error| panic!("{} behavior probe should run: {error}", target.name));
@@ -70,6 +80,15 @@ fn assert_startup_shape_for_target(
         "{} startup behavior probe should return ok, got {}",
         target.name, behavior_result,
     );
+}
+
+fn assert_startup_shape_for_target(
+    target: &BlizzardAddonSmokeTarget<'static>,
+    env: &wow_ui_sim::lua_api::WowLuaEnv,
+) {
+    let (global_type, frame_exists) = probe_target_presence(target, env);
+    assert_target_presence(target, &global_type, frame_exists);
+    assert_target_behavior_probe(target, env);
     assert_no_lua_errors(env, target.name);
 }
 
