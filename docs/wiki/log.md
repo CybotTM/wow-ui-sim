@@ -2,6 +2,27 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | world-map live retained trace recapture
+
+Updated `investigations/world-map-texture-loading-budget.md` again with the
+current HEAD live-GUI recapture. Recorded the retained sequence from
+`ToggleWorldMap()` through `draw` and `prepare`, added the new `ready=` trace
+field for the atlas-ready set, and captured the key numbers from the run:
+`dirty=0x1ff pending=true ready=21` on the first retained tick, then
+`ready=21 -> 31 -> 38` while the map was still invisible, and finally
+`pending=false ready=335` after `prepare()` drained the backlog. Refreshed the
+`index.md` summary row for `world-map-texture-loading-budget`.
+
+## [2026-04-22] update | world-map RedrawAll verification
+
+Updated `investigations/world-map-texture-loading-budget.md` with the
+timer-path `RedrawAll` verification from the same live retained-GUI repro.
+Recorded that the first post-warmup frame reached `draw -> prepare -> present`
+without any extra presentation gate after texture warmup, with
+`ready=38 -> 335` as `prepare()` drained the atlas backlog. Refreshed the
+`index.md` summary row for `world-map-texture-loading-budget` to mention the
+verified post-warmup frame path.
+
 ## [2026-04-22] update | world-map retained texture display follow-up
 
 Updated `investigations/world-map-texture-loading-budget.md` with the latest

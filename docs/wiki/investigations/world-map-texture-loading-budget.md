@@ -96,6 +96,65 @@ The fix on 2026-04-22 was to split those meanings:
 - add a separate atlas-ready tracker populated from `WowUiPrimitive::prepare()`,
 - switch warmup and cached-request pending checks to the atlas-ready set instead of the staging set.
 
+## 2026-04-22 Live Retained-GUI Trace Recapture
+
+I reran the first-open world-map repro on current HEAD with the GUI path and
+captured the retained sequence using:
+
+```bash
+env LD_LIBRARY_PATH=target/debug:target/debug/deps \
+  WOW_SIM_VERBOSE=1 \
+  WOW_SIM_LOG_TICK_STAGES=1 \
+  WOW_SIM_DEBUG_TEXTURE_LOADS=1 \
+  WOW_SIM_LOG_TEXTURE_PRELOAD=1 \
+  timeout 30 ./target/debug/wow-sim --no-addons --no-saved-vars --exec-lua "ToggleWorldMap()"
+```
+
+The first post-toggle retained tick reported:
+
+```text
+[tick-stage] ... dirty=0x1ff ids=None pending=true ready=21
+```
+
+That mattered because the map was still invisible, yet the atlas-ready count was
+already moving while `textures_pending` stayed true. The next retained frames
+kept the same shape:
+
+- `dirty` fell from `0x1ff` to `0x1c`
+- `textures_pending` stayed `true`
+- `ready` climbed `21 -> 31 -> 38`
+
+The later visible handoff looked like this:
+
+```text
+[draw] quads=9.4ms textures=98.7ms (new=297 rgba=123 bc=174)
+[prepare] total=55.1ms textures=53.8ms strata=1.3ms overlay=361.0ns dirty_strata=9 new_rgba=123 new_bc=174
+[tick-stage] ... pending=false ready=335
+```
+
+`present` is not separately instrumented, so that last line is the final
+post-prepare retained tick in the same frame. The important part is that the
+atlas-ready count only settled after `prepare()` drained the backlog, which
+matches the "click fixes it" behavior we were chasing.
+
+## 2026-04-22 RedrawAll Verification
+
+I then reran the same retained-GUI repro with the new timer-path
+`RedrawAll` path instrumented in the live GUI trace. The first post-warmup
+frame was not blocked by any extra presentation gate:
+
+```text
+[gui-trace] draw dirty_before=0x1c had_pending=true ready=38 dirty_batches=9 new_rgba=123 new_bc=174
+[gui-trace] prepare ready_before=38 ready_after=335 staged_before=335 staged_after=335 retry=0 force_rgba_retry=0 dirty_strata=9 new_rgba=123 new_bc=174
+[gui-trace] present
+```
+
+That is the missing post-warmup frame landing in the real GUI path. Once the
+atlas backlog finished, `prepare()` advanced the ready count to `335` and the
+frame was presented immediately after. I did not find a further presentation
+gate after texture warmup; the remaining delay is the atlas warmup/backlog
+itself.
+
 ## Result
 
 After the cache + budget changes, the world map no longer took repeated ~50ms draw stalls while tiles streamed in. The same repro shifted to progressive smaller chunks:
