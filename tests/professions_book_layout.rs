@@ -250,3 +250,190 @@ fn professions_book_primary_spell_buttons_layout() {
         "statusBar.rankText should be '<rank>/<max>', got {rank_text:?}"
     );
 }
+
+#[test]
+fn professions_book_frame_layout_stays_locked() {
+    let env = setup_env();
+    click(&env, "ProfessionMicroButton");
+
+    let result: String = env
+        .eval(
+            r#"
+            local EPS = 0.75
+
+            local function approx(actual, expected, eps)
+                if type(actual) ~= "number" or type(expected) ~= "number" then
+                    return false
+                end
+                return math.abs(actual - expected) <= (eps or EPS)
+            end
+
+            local function rect(frame, name)
+                if type(frame) ~= "table" then
+                    return nil, name .. "_missing"
+                end
+                local l, b, w, h = frame:GetRect()
+                if not (l and b and w and h) then
+                    return nil, name .. "_missing_rect"
+                end
+                return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+            end
+
+            local function has_point(frame, point, rel, rel_point, x, y, eps)
+                for i = 1, frame:GetNumPoints() do
+                    local p, r, rp, ox, oy = frame:GetPoint(i)
+                    local rel_matches = (r == rel) or (r == nil and rel ~= nil and frame.GetParent and frame:GetParent() == rel)
+                    if p == point and rel_matches and rp == rel_point and approx(ox or 0, x, eps) and approx(oy or 0, y, eps) then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            if not ProfessionsBookFrame then
+                return "professions_book_missing"
+            end
+            if not ProfessionsBookFrame:IsShown() then
+                return "professions_book_hidden"
+            end
+            if not ProfessionsBookFrameInset then
+                return "inset_missing"
+            end
+            if not ProfessionsContentFrame then
+                return "content_missing"
+            end
+            if not PrimaryProfession1 then
+                return "primary_missing"
+            end
+            if not SecondaryProfession1 or not SecondaryProfession2 or not SecondaryProfession3 then
+                return "secondary_rows_missing"
+            end
+
+            local panel_rect, panel_err = rect(ProfessionsBookFrame, "panel")
+            if not panel_rect then return panel_err end
+            local inset_rect, inset_err = rect(ProfessionsBookFrameInset, "inset")
+            if not inset_rect then return inset_err end
+            local content_rect, content_err = rect(ProfessionsContentFrame, "content")
+            if not content_rect then return content_err end
+            local close_rect, close_err = rect(ProfessionsBookFrameCloseButton, "close")
+            if not close_rect then return close_err end
+
+            if not approx(panel_rect.l, 16) or not approx(panel_rect.b, 160) then
+                return "panel_origin=" .. tostring(panel_rect.l) .. "," .. tostring(panel_rect.b)
+            end
+            if not approx(panel_rect.w, 550, 0.1) or not approx(panel_rect.h, 525, 0.1) then
+                return "panel_size=" .. tostring(panel_rect.w) .. "x" .. tostring(panel_rect.h)
+            end
+            if not approx(inset_rect.l, 20, 2.0) or not approx(inset_rect.b, 164, 2.0) then
+                return "inset_origin=" .. tostring(inset_rect.l) .. "," .. tostring(inset_rect.b)
+            end
+            if not approx(inset_rect.w, 540, 0.1) or not approx(inset_rect.h, 497, 0.1) then
+                return "inset_size=" .. tostring(inset_rect.w) .. "x" .. tostring(inset_rect.h)
+            end
+
+            if not approx(content_rect.l, panel_rect.l) or not approx(content_rect.b, panel_rect.b) then
+                return "content_origin=" .. tostring(content_rect.l) .. "," .. tostring(content_rect.b)
+            end
+            if not approx(content_rect.w, panel_rect.w, 0.1) or not approx(content_rect.h, panel_rect.h, 0.1) then
+                return "content_size=" .. tostring(content_rect.w) .. "x" .. tostring(content_rect.h)
+            end
+
+            if not approx(close_rect.w, 24, 0.1) or not approx(close_rect.h, 24, 0.1) then
+                return "close_size=" .. tostring(close_rect.w) .. "x" .. tostring(close_rect.h)
+            end
+            local title = ProfessionsBookFrame.TitleContainer and ProfessionsBookFrame.TitleContainer.TitleText
+            if not title then
+                title = ProfessionsBookFrame.TitleText
+            end
+            if not title then
+                return "title_missing"
+            end
+            if (title:GetText() or "") ~= "Professions" then
+                return "title_text=" .. tostring(title:GetText())
+            end
+
+            local primary_rect, primary_err = rect(PrimaryProfession1, "primary")
+            if not primary_rect then return primary_err end
+            local b1 = PrimaryProfession1.SpellButton1
+            local b2 = PrimaryProfession1.SpellButton2
+            if not b1 or not b2 then
+                return "primary_spell_buttons_missing"
+            end
+            local b1_rect, b1_err = rect(b1, "b1")
+            if not b1_rect then return b1_err end
+            local b2_rect, b2_err = rect(b2, "b2")
+            if not b2_rect then return b2_err end
+
+            if not approx(primary_rect.l, 96) or not approx(primary_rect.b, 537) then
+                return "primary_origin=" .. tostring(primary_rect.l) .. "," .. tostring(primary_rect.b)
+            end
+            if not approx(primary_rect.w, 437, 0.1) or not approx(primary_rect.h, 81, 0.1) then
+                return "primary_size=" .. tostring(primary_rect.w) .. "x" .. tostring(primary_rect.h)
+            end
+            if not approx(b1_rect.l, 384) or not approx(b1_rect.b, 535) then
+                return "b1_origin=" .. tostring(b1_rect.l) .. "," .. tostring(b1_rect.b)
+            end
+            if not approx(b2_rect.l, 384) or not approx(b2_rect.b, 575) then
+                return "b2_origin=" .. tostring(b2_rect.l) .. "," .. tostring(b2_rect.b)
+            end
+            if not approx(b1_rect.w, 40, 0.1) or not approx(b1_rect.h, 40, 0.1) then
+                return "b1_size=" .. tostring(b1_rect.w) .. "x" .. tostring(b1_rect.h)
+            end
+            if not approx(b2_rect.w, 40, 0.1) or not approx(b2_rect.h, 40, 0.1) then
+                return "b2_size=" .. tostring(b2_rect.w) .. "x" .. tostring(b2_rect.h)
+            end
+            if not approx(b2_rect.b - b1_rect.b, 40) then
+                return "primary_spell_vertical_spacing=" .. tostring(b2_rect.b - b1_rect.b)
+            end
+            if not approx(b1_rect.l, b2_rect.l) then
+                return "primary_spell_horizontal_mismatch"
+            end
+
+            local s1_rect, s1_err = rect(SecondaryProfession1, "secondary1")
+            if not s1_rect then return s1_err end
+            local s2_rect, s2_err = rect(SecondaryProfession2, "secondary2")
+            if not s2_rect then return s2_err end
+            local s3_rect, s3_err = rect(SecondaryProfession3, "secondary3")
+            if not s3_rect then return s3_err end
+
+            if not approx(s1_rect.l, 96) then
+                return "secondary1_origin=" .. tostring(s1_rect.l) .. "," .. tostring(s1_rect.b)
+            end
+            if not approx(s2_rect.l, 96) then
+                return "secondary2_origin=" .. tostring(s2_rect.l) .. "," .. tostring(s2_rect.b)
+            end
+            if not approx(s3_rect.l, 96) then
+                return "secondary3_origin=" .. tostring(s3_rect.l) .. "," .. tostring(s3_rect.b)
+            end
+            if not approx(s1_rect.w, 437, 0.1) or not approx(s1_rect.h, 46, 0.1) then
+                return "secondary1_size=" .. tostring(s1_rect.w) .. "x" .. tostring(s1_rect.h)
+            end
+            if not approx(s2_rect.w, 437, 0.1) or not approx(s2_rect.h, 46, 0.1) then
+                return "secondary2_size=" .. tostring(s2_rect.w) .. "x" .. tostring(s2_rect.h)
+            end
+            if not approx(s3_rect.w, 437, 0.1) or not approx(s3_rect.h, 46, 0.1) then
+                return "secondary3_size=" .. tostring(s3_rect.w) .. "x" .. tostring(s3_rect.h)
+            end
+            if not approx(s1_rect.b - s2_rect.b, 76) then
+                return "secondary1_to_2_vertical_delta=" .. tostring(s1_rect.b - s2_rect.b)
+            end
+            if not approx(s2_rect.b - s3_rect.b, 76) then
+                return "secondary2_to_3_vertical_delta=" .. tostring(s2_rect.b - s3_rect.b)
+            end
+            if not has_point(SecondaryProfession2, "TOPLEFT", SecondaryProfession1, "BOTTOMLEFT", 0, -30, 0.1) then
+                return "secondary2_anchor_mismatch"
+            end
+            if not has_point(SecondaryProfession3, "TOPLEFT", SecondaryProfession2, "BOTTOMLEFT", 0, -30, 0.1) then
+                return "secondary3_anchor_mismatch"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "ProfessionsBookFrame layout should remain locked: {result}"
+    );
+}
