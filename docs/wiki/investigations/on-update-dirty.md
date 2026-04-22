@@ -33,10 +33,42 @@ Two focused audit tests narrowed the remaining work after the earlier `SetText` 
 
 - `AuraButtonMixin:OnUpdate` (BuffFrame buttons)
   - A settled second tick still runs `SecondsToTimeAbbrev()`, `Duration:SetFormattedText()`, `Duration:SetFontObject()`, `Duration:SetPoint()`, `Duration:SetShown()`, `Duration:SetVertexColor()`, and `SetAlpha()` once each.
-  - The dirty batch also stays empty on that settled tick.
-  - Conclusion: the remaining cost is Lua-side duration formatting and font-threshold branching before the guarded mutators decide nothing changed.
+  - Current regression coverage still sees the root button plus the duration `FontString` in the dirty set on that settled tick.
+  - Conclusion: the remaining cost is still centered in the Lua-side duration formatting / font-threshold path, not in missing coverage around whether the handler runs.
 
 That shifts the next optimization target away from more setter no-op guards and toward short-circuiting the redundant work in the handlers themselves, especially `AuraButtonMixin:OnUpdate`.
+
+## 2026-04-22 BuffFrame slow-handler interpretation
+
+Slow handler logs shaped like `addon=Blizzard_BuffFrame handler=OnUpdate frame=#21946`
+do **not** point at the named `BuffFrame` root. They point at an anonymous
+`AuraButtonTemplate` child:
+
+- `AuraFrameMixin:AuraFrame_OnLoad()` creates buff buttons with
+  `CreateFrame("BUTTON", nil, self.AuraContainer, "AuraButtonTemplate")`, so
+  the buttons have no global name.
+- The timing logger prints `#<widget_id>` when a frame has no name.
+- `AuraButtonMixin:UpdateExpirationTime()` enables `OnUpdate` only for timed
+  auras (`expirationTime > 0`), which matches the visible buff buttons whose
+  `Duration` labels are active.
+
+That matters because the top-level `BuffFrameMixin:OnUpdate()` has a different
+shape:
+
+- it would log as `frame=BuffFrame`, not `frame=#...`
+- it is a hidden-buff maintenance path with a `0.2s` throttle
+  (`hiddenBuffUpdatePeriod`), not a per-frame countdown update
+
+A headless `dump-tree --filter-key BuffFrame --visible-only` run on
+2026-04-22 showed five visible anonymous BuffFrame buttons, each with a
+visible `Duration` font string. That lines up with the repeated anonymous
+`OnUpdate` timings and rules out the named root frame as the hot path.
+
+The remaining work is still at the handler level. The current Rust mutators for
+`SetAlpha`, `SetFormattedText`, `SetFontObject`, and `SetPoint` already have
+same-value guards, so the main waste is that `AuraButtonMixin:OnUpdate()` keeps
+recomputing countdown formatting and threshold branches every tick before those
+guards can bail out.
 
 ## 2026-04-14 GameTimeFrame calendar atlas follow-up
 
@@ -76,6 +108,11 @@ Regression coverage now includes:
 ## Sources
 
 - [on-update-dirty-handlers.md](../../on-update-dirty-handlers.md) — full handler classification and fix options
+- [BuffFrame.lua](../../../../Interface/BlizzardUI/Blizzard_BuffFrame/BuffFrame.lua) — `BuffFrameMixin` and `AuraButtonMixin` `OnUpdate` paths
+- [BuffFrameTemplates.xml](../../../../Interface/BlizzardUI/Blizzard_BuffFrame/BuffFrameTemplates.xml) — `AuraButtonTemplate` script registration
+- [handler_timing.rs](../../../../src/lua_api/handler_timing.rs) — `frame=#id` fallback formatting
+- [script_helpers.rs](../../../../src/lua_api/script_helpers.rs) — `OnUpdate` dispatch timing scope
+- [onupdate_handler_audit.rs](../../../../tests/onupdate_handler_audit.rs) — focused regression test for BuffFrame button `OnUpdate`
 
 ## See Also
 

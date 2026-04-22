@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | buffframe slow onupdate interpretation
+
+Updated `investigations/on-update-dirty.md` with the current BuffFrame
+slow-handler interpretation. Documented that logs like
+`addon=Blizzard_BuffFrame handler=OnUpdate frame=#21946` map to anonymous
+`AuraButtonTemplate` children, not the named `BuffFrame` root, using the
+current `BuffFrame.lua` creation path, `handler_timing.rs` fallback formatting,
+and a live `dump-tree --filter-key BuffFrame --visible-only` run that showed
+five visible anonymous timed buff buttons. Also corrected the stale audit note
+to match the current `onupdate_handler_audit.rs` regression coverage.
+
 ## [2026-04-21] update | world-map exploration non-current map surface
 
 Updated `investigations/world-map-fog-of-war-overlay-model.md` with a
