@@ -359,12 +359,17 @@ impl App {
             self.mark_strata_dirty(combined);
             stage_timings.mark_dirty = started.elapsed();
         }
+        if self.textures_pending.get() {
+            let started = std::time::Instant::now();
+            self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
+            stage_timings.preload += started.elapsed();
+        }
         if self.strata_dirty.get() != 0 || self.textures_pending.get() {
             let started = std::time::Instant::now();
             self.preload_current_render_requests_preserving_dirty(Some(
                 std::time::Duration::from_millis(25),
             ));
-            stage_timings.preload = started.elapsed();
+            stage_timings.preload += started.elapsed();
         }
         let tick_elapsed = tick_started.elapsed();
         stage_timings.total = tick_elapsed;
@@ -582,12 +587,16 @@ impl App {
     }
 
     fn preload_visible_textures(&self) {
+        self.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
+    }
+
+    fn preload_visible_textures_with_budget(&self, budget: std::time::Duration) {
         let env = self.env.borrow();
         let paths = env.state().borrow().widgets.visible_texture_paths();
         drop(env);
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let before = tex_mgr.cache_len();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
+        let deadline = std::time::Instant::now() + budget;
         let mut remaining_uncached = false;
         for path in &paths {
             if tex_mgr.get(path).is_some() {

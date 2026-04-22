@@ -1294,12 +1294,14 @@ local function __wow_ensure_map_canvas_zoom_levels(scroll)
   scroll.targetScale = scroll.targetScale or zoomLevels[1].scale or 1.0
 end
 
+rawset(_G, "__wow_ensure_map_canvas_zoom_levels", __wow_ensure_map_canvas_zoom_levels)
+
 local function __wow_refresh_world_map_canvas()
   __wow_patch_live_map_canvas(WorldMapFrame)
   __wow_patch_world_map_display_state(WorldMapFrame)
 end
 
-if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_scroll_container_patched") then
+if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_scroll_container_advanced_patched") then
   if rawget(_G, "__wow_map_canvas_original_onload") == nil and type(MapCanvasMixin.OnLoad) == "function" then
     _G.__wow_map_canvas_original_onload = MapCanvasMixin.OnLoad
     MapCanvasMixin.OnLoad = function(self, ...)
@@ -1374,7 +1376,26 @@ if type(MapCanvasMixin) == "table" and not rawget(_G, "__wow_map_canvas_scroll_c
     end
   end
 
-  __wow_map_canvas_scroll_container_patched = true
+  if type(MapCanvasScrollControllerMixin) == "table"
+    and type(MapCanvasScrollControllerMixin.GetCurrentLayerIndex) == "function"
+  then
+    local originalGetCurrentLayerIndex = MapCanvasScrollControllerMixin.GetCurrentLayerIndex
+    MapCanvasScrollControllerMixin.GetCurrentLayerIndex = function(self, ...)
+      __wow_ensure_map_canvas_zoom_levels(self)
+      local zoomLevels = rawget(self, "zoomLevels")
+      if type(zoomLevels) ~= "table" or type(zoomLevels[1]) ~= "table" then
+        return 1
+      end
+      local ok, layerIndex = pcall(originalGetCurrentLayerIndex, self, ...)
+      if ok and type(layerIndex) == "number" and layerIndex >= 1 then
+        return layerIndex
+      end
+      return zoomLevels[1].layerIndex or 1
+    end
+  end
+
+  rawset(_G, "__wow_map_canvas_scroll_container_advanced_patched", true)
+  rawset(_G, "__wow_map_canvas_scroll_container_patched", true)
 end
 
 for _, mapName in ipairs({ "WorldMapFrame", "BattlefieldMapFrame" }) do
@@ -1906,6 +1927,24 @@ if type(MapExplorationPinMixin) == "table" and not rawget(_G, "__wow_map_explora
         local originalRefreshOverlays = MapExplorationPinMixin.RefreshOverlays
         MapExplorationPinMixin.RefreshOverlays = function(self, fullUpdate)
             __wow_size_map_exploration_pin(self)
+            local map = type(self.GetMap) == "function" and self:GetMap() or nil
+            local container = type(map) == "table" and type(map.GetCanvasContainer) == "function" and map:GetCanvasContainer() or nil
+            if type(container) == "table" then
+                local ensureZoomLevels = rawget(_G, "__wow_ensure_map_canvas_zoom_levels")
+                if type(ensureZoomLevels) == "function" then
+                    ensureZoomLevels(container)
+                end
+                local zoomLevels = rawget(container, "zoomLevels")
+                if (type(zoomLevels) ~= "table" or type(zoomLevels[1]) ~= "table")
+                    and type(container.CreateZoomLevels) == "function"
+                then
+                    pcall(container.CreateZoomLevels, container)
+                    zoomLevels = rawget(container, "zoomLevels")
+                end
+                if type(zoomLevels) ~= "table" or type(zoomLevels[1]) ~= "table" then
+                    rawset(container, "zoomLevels", { { scale = 1.0, layerIndex = 1 } })
+                end
+            end
             local result = originalRefreshOverlays(self, fullUpdate)
             __wow_finalize_map_exploration_pin_waiting(self)
             __wow_schedule_map_exploration_pin_finalize_retry(self, 12)
