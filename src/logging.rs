@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 
 static PROCESS_START_TIME: OnceLock<Instant> = OnceLock::new();
 static TEXTURE_LOAD_DEBUG_ENABLED: OnceLock<bool> = OnceLock::new();
+static GUI_TRACE_ENABLED: OnceLock<bool> = OnceLock::new();
 static BLOCKING_PHASE: OnceLock<Mutex<(&'static str, Instant)>> = OnceLock::new();
 
 /// Initialize the shared process start time for elapsed log prefixes.
@@ -52,6 +53,11 @@ pub fn texture_load_debug_enabled() -> bool {
         .get_or_init(|| std::env::var_os("WOW_SIM_DEBUG_TEXTURE_LOADS").is_some())
 }
 
+/// Whether retained-GUI frame-sequence tracing is enabled.
+pub fn gui_trace_enabled() -> bool {
+    *GUI_TRACE_ENABLED.get_or_init(|| std::env::var_os("WOW_SIM_GUI_TRACE").is_some())
+}
+
 /// Print a log line to stdout with the shared elapsed-time prefix.
 pub fn println_elapsed(message: &str) {
     println!("{} {}", global_elapsed_prefix(), message);
@@ -60,4 +66,11 @@ pub fn println_elapsed(message: &str) {
 /// Print a log line to stderr with the shared elapsed-time prefix.
 pub fn eprintln_elapsed(message: &str) {
     eprintln!("{} {}", global_elapsed_prefix(), message);
+}
+
+/// Print a retained-GUI trace log line to stderr when tracing is enabled.
+pub fn eprintln_gui_trace(message: &str) {
+    if gui_trace_enabled() {
+        eprintln_elapsed(&format!("[gui-trace] {message}"));
+    }
 }

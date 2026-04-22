@@ -385,6 +385,19 @@ impl App {
         self.record_tick_time(tick_elapsed);
         self.update_fps_counter();
         log_slow_tick(&stage_timings, combined, self);
+        if crate::logging::gui_trace_enabled() {
+            let ready_count = self
+                .gpu_ready_textures
+                .lock()
+                .map(|ready| ready.len())
+                .unwrap_or_default();
+            crate::logging::eprintln_gui_trace(&format!(
+                "tick redraw_request={} dirty=0x{:x} pending={} ready={ready_count}",
+                redraw_needed,
+                self.strata_dirty.get(),
+                self.textures_pending.get()
+            ));
+        }
         if redraw_needed {
             request_redraw_task()
         } else {
@@ -783,6 +796,7 @@ struct TickStageTimings {
 }
 
 fn log_slow_tick(stage_timings: &TickStageTimings, combined: u16, app: &App) {
+    let atlas_ready = app.gpu_ready_textures.lock().unwrap().len();
     if super::perf_logging_enabled() && stage_timings.total.as_millis() > 10 {
         let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
         eprintln!(
@@ -796,7 +810,13 @@ fn log_slow_tick(stage_timings: &TickStageTimings, combined: u16, app: &App) {
         let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
         eprintln!(
             "{}",
-            format_tick_stage_log(stage_timings, combined, n, app.textures_pending.get())
+            format_tick_stage_log(
+                stage_timings,
+                combined,
+                n,
+                app.textures_pending.get(),
+                atlas_ready,
+            )
         );
     }
 }
@@ -811,9 +831,10 @@ fn format_tick_stage_log(
     combined: u16,
     dirty_ids: Option<usize>,
     textures_pending: bool,
+    atlas_ready: usize,
 ) -> String {
     format!(
-        "[tick-stage] total={:.3}ms exec_lua={:.3} timers={:.3} layout={:.3} on_update={:.3} handlers={:.3} anim={:.3} post={:.3} metrics={:.3} gc={:.3} party={:.3} casting={:.3} console={:.3} mark={:.3} preload={:.3} dirty=0x{combined:x} ids={dirty_ids:?} pending={textures_pending}",
+        "[tick-stage] total={:.3}ms exec_lua={:.3} timers={:.3} layout={:.3} on_update={:.3} handlers={:.3} anim={:.3} post={:.3} metrics={:.3} gc={:.3} party={:.3} casting={:.3} console={:.3} mark={:.3} preload={:.3} dirty=0x{combined:x} ids={dirty_ids:?} pending={textures_pending} ready={atlas_ready}",
         duration_ms(stage_timings.total),
         duration_ms(stage_timings.exec_lua),
         duration_ms(stage_timings.timers),
@@ -994,6 +1015,7 @@ mod tests {
             0x3,
             Some(4),
             true,
+            42,
         );
 
         assert!(log.contains("total=100.000ms"));
@@ -1008,6 +1030,7 @@ mod tests {
         assert!(log.contains("dirty=0x3"));
         assert!(log.contains("ids=Some(4)"));
         assert!(log.contains("pending=true"));
+        assert!(log.contains("ready=42"));
     }
 
     #[test]
@@ -1314,7 +1337,7 @@ mod tests {
             .unwrap()
             .insert(request_path.to_string());
 
-        let task = app.handle_process_timers(Instant::now());
+        let task = app.update(Message::ProcessTimers(Instant::now()));
         let action = pollster::block_on(async {
             iced_runtime::task::into_stream(task)
                 .expect("newly discovered pending draw work should request a redraw")

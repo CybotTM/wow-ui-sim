@@ -97,6 +97,7 @@ impl shader::Program<Message> for &App {
         self.screen_size.set(size);
         self.sync_screen_size_to_state(size);
         let had_textures_pending = self.textures_pending.get();
+        let dirty_before = self.strata_dirty.get();
         let t0 = std::time::Instant::now();
         let (mut dirty_strata, _) = self.get_or_rebuild_quads(size);
         let quad_dur = t0.elapsed();
@@ -110,6 +111,20 @@ impl shader::Program<Message> for &App {
         }
 
         log_slow_draw(quad_dur, tex_dur, textures.len(), bc_textures.len());
+        if crate::logging::gui_trace_enabled() {
+            let ready_count = self
+                .gpu_ready_textures
+                .lock()
+                .map(|ready| ready.len())
+                .unwrap_or_default();
+            crate::logging::eprintln_gui_trace(&format!(
+                "draw dirty_before=0x{dirty_before:x} had_pending={} ready={ready_count} dirty_batches={} new_rgba={} new_bc={}",
+                had_textures_pending,
+                dirty_strata.iter().filter(|batch| batch.is_some()).count(),
+                textures.len(),
+                bc_textures.len()
+            ));
+        }
 
         self.record_draw_time(start.elapsed());
 

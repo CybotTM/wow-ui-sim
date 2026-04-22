@@ -6,6 +6,7 @@ use crate::graphics::error;
 use crate::graphics::{self, Shell, Viewport};
 use crate::settings::{self, Settings};
 use crate::{Engine, Renderer};
+use std::sync::OnceLock;
 
 /// A window graphics backend for iced powered by `wgpu`.
 pub struct Compositor {
@@ -279,6 +280,7 @@ pub fn present(
             // Present the frame
             on_pre_present();
             frame.present();
+            eprintln_gui_trace("present");
 
             Ok(())
         }
@@ -289,6 +291,17 @@ pub fn present(
             wgpu::SurfaceError::OutOfMemory => Err(compositor::SurfaceError::OutOfMemory),
             wgpu::SurfaceError::Other => Err(compositor::SurfaceError::Other),
         },
+    }
+}
+
+fn gui_trace_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var_os("WOW_SIM_GUI_TRACE").is_some())
+}
+
+fn eprintln_gui_trace(message: &str) {
+    if gui_trace_enabled() {
+        eprintln!("[gui-trace] {message}");
     }
 }
 

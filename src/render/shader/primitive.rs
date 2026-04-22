@@ -693,6 +693,16 @@ impl shader::Primitive for WowUiPrimitive {
         let prepare_started = Instant::now();
         crate::logging::set_blocking_phase("prepare_textures");
         let textures_started = Instant::now();
+        let ready_before = self
+            .gpu_ready_textures
+            .as_ref()
+            .and_then(|ready| ready.lock().ok().map(|ready| ready.len()))
+            .unwrap_or_default();
+        let staged_before = self
+            .gpu_uploaded_textures
+            .as_ref()
+            .and_then(|uploaded| uploaded.lock().ok().map(|uploaded| uploaded.len()))
+            .unwrap_or_default();
         let upload_outcome = upload_pending_textures(
             pipeline,
             queue,
@@ -701,12 +711,35 @@ impl shader::Primitive for WowUiPrimitive {
             &self.glyph_atlas_data,
             self.glyph_atlas_size,
         );
+        let retry_count = upload_outcome.retry_paths.len();
+        let force_rgba_retry_count = upload_outcome.force_rgba_retry_paths.len();
         record_texture_upload_outcome(
             upload_outcome,
             self.gpu_uploaded_textures.as_ref(),
             self.gpu_ready_textures.as_ref(),
             self.gpu_force_rgba_textures.as_ref(),
         );
+        if crate::logging::gui_trace_enabled() {
+            let ready_after = self
+                .gpu_ready_textures
+                .as_ref()
+                .and_then(|ready| ready.lock().ok().map(|ready| ready.len()))
+                .unwrap_or_default();
+            let staged_after = self
+                .gpu_uploaded_textures
+                .as_ref()
+                .and_then(|uploaded| uploaded.lock().ok().map(|uploaded| uploaded.len()))
+                .unwrap_or_default();
+            crate::logging::eprintln_gui_trace(&format!(
+                "prepare ready_before={ready_before} ready_after={ready_after} staged_before={staged_before} staged_after={staged_after} retry={retry_count} force_rgba_retry={force_rgba_retry_count} dirty_strata={} new_rgba={} new_bc={}",
+                self.strata_batches
+                    .iter()
+                    .filter(|batch| batch.is_some())
+                    .count(),
+                self.textures.len(),
+                self.bc_textures.len()
+            ));
+        }
         let textures_elapsed = textures_started.elapsed();
         crate::logging::set_blocking_phase("prepare_projection");
         pipeline.update_projection(queue, &physical_bounds);
