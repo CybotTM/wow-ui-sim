@@ -426,8 +426,8 @@ fn get_bounty_set_info_for_map_id_returns_nil() {
 #[test]
 fn suggested_group_size_apis_return_number_not_nil() {
     let env = env();
-    let (capi_group, global_group, can_compare_capi, can_compare_global): (i32, i32, bool, bool) = env
-        .eval(
+    let (capi_group, global_group, can_compare_capi, can_compare_global): (i32, i32, bool, bool) =
+        env.eval(
             r#"
             C_QuestLog.SetSelectedQuest(80000)
             local capi = C_QuestLog.GetSuggestedGroupSize(C_QuestLog.GetSelectedQuest())
@@ -440,6 +440,42 @@ fn suggested_group_size_apis_return_number_not_nil() {
     assert_eq!(global_group, 0);
     assert!(!can_compare_capi);
     assert!(!can_compare_global);
+}
+
+#[test]
+fn quest_reward_globals_are_present_and_numeric_safe() {
+    let env = env();
+    let (quest_log_ok, offer_ok): (bool, bool) = env
+        .eval(
+            r#"
+            local function quest_log_probe()
+                local numQuestRewards = GetNumQuestLogRewards()
+                local numQuestChoices = GetNumQuestLogChoices(80000, true)
+                local money = GetQuestLogRewardMoney()
+                local xp = GetQuestLogRewardXP()
+                local artifactXP = GetQuestLogRewardArtifactXP()
+                local honor = GetQuestLogRewardHonor()
+                local _ = (artifactXP > 0) or (numQuestChoices > 0) or (money > 0) or (xp > 0) or (honor > 0) or (numQuestRewards > 0)
+                return true
+            end
+
+            local function offer_probe()
+                local numQuestRewards = GetNumQuestRewards()
+                local numQuestChoices = GetNumQuestChoices()
+                local money = GetRewardMoney()
+                local xp = GetRewardXP()
+                local artifactXP = GetRewardArtifactXP()
+                local honor = GetRewardHonor()
+                local _ = (artifactXP > 0) or (numQuestChoices > 0) or (money > 0) or (xp > 0) or (honor > 0) or (numQuestRewards > 0)
+                return true
+            end
+
+            return pcall(quest_log_probe), pcall(offer_probe)
+            "#,
+        )
+        .unwrap();
+    assert!(quest_log_ok);
+    assert!(offer_ok);
 }
 
 #[test]

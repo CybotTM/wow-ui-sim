@@ -337,6 +337,11 @@ pub fn get_required_money(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn return_zero(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
 pub fn get_suggested_group_size(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
@@ -543,6 +548,13 @@ pub fn get_quest_log_time_left(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn get_quest_log_special_item_info(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+pub fn get_reward_skill_points_nil_triplet(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(3)
 }
 
 // ---------------------------------------------------------------------------
