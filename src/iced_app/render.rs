@@ -1052,6 +1052,31 @@ mod tests {
     }
 
     #[test]
+    fn consumed_full_rebuild_sentinel_preserves_next_incremental_fast_path() {
+        let temp_dir = tempdir().unwrap();
+        let app = build_test_app_with_textures(temp_dir.path());
+        app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(QuadBatch::new()));
+        app.cached_frame_snapshots.borrow_mut()[0] =
+            Some(HashMap::from([(1_u64, FrameQuadSnapshot::default())]));
+        app.env.borrow().state().borrow_mut().strata_buckets = Some(vec![vec![1_u64, 2_u64]]);
+
+        app.pending_dirty_ids.borrow_mut().take();
+        let first = app.rebuild_dirty_strata(Size::new(64.0, 64.0), dirty_mask(0));
+        assert_eq!(
+            first,
+            dirty_mask(0),
+            "consuming a full-rebuild sentinel should allow one full rebuild pass"
+        );
+
+        app.merge_pending_dirty_ids(Some(FxHashSet::from_iter([99_u64])));
+        let second = app.rebuild_dirty_strata(Size::new(64.0, 64.0), dirty_mask(0));
+        assert_eq!(
+            second, 0,
+            "after the sentinel is consumed, unrelated dirty IDs must still prune cached strata rebuilds"
+        );
+    }
+
+    #[test]
     fn request_preload_map_warms_map_art_and_overlay_textures() {
         let Some((map_id, art_path, overlay_path)) = first_map_with_art_and_overlay_paths() else {
             eprintln!("Skipping test: no map with both art and exploration overlay textures found");
