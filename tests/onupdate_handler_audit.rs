@@ -266,7 +266,7 @@ fn leave_instance_group_button_queries_group_state_even_when_mutators_noop() {
 }
 
 #[test]
-fn buff_button_onupdate_skips_settled_duration_reformatting_and_alpha_churn() {
+fn buff_button_onupdate_still_formats_duration_and_reapplies_font_decisions_after_noop_text() {
     test_timeout! {
         let env = load_buff_audit_env();
         env.exec(
@@ -307,69 +307,6 @@ fn buff_button_onupdate_skips_settled_duration_reformatting_and_alpha_churn() {
 
         let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
 
-        env.exec(
-            r#"
-            local button = assert(AuditBuffButton, "missing audited buff button")
-            local duration = assert(button.Duration, "missing duration label")
-            local buttonFields = assert(debug.getfenv(button)[1], "missing button field table")
-            local durationFields = assert(debug.getfenv(duration)[1], "missing duration field table")
-            AuditBuffCounts = {
-                seconds = 0,
-                formattedText = 0,
-                fontObject = 0,
-                point = 0,
-                shown = 0,
-                vertexColor = 0,
-                alpha = 0,
-            }
-
-            local originalSecondsToTimeAbbrev = SecondsToTimeAbbrev
-            SecondsToTimeAbbrev = function(...)
-                AuditBuffCounts.seconds = AuditBuffCounts.seconds + 1
-                return originalSecondsToTimeAbbrev(...)
-            end
-
-            local originalSetFormattedText = duration.SetFormattedText
-            durationFields.SetFormattedText = function(self, ...)
-                AuditBuffCounts.formattedText = AuditBuffCounts.formattedText + 1
-                return originalSetFormattedText(self, ...)
-            end
-
-            local originalSetFontObject = duration.SetFontObject
-            durationFields.SetFontObject = function(self, ...)
-                AuditBuffCounts.fontObject = AuditBuffCounts.fontObject + 1
-                return originalSetFontObject(self, ...)
-            end
-
-            local originalSetPoint = duration.SetPoint
-            durationFields.SetPoint = function(self, ...)
-                AuditBuffCounts.point = AuditBuffCounts.point + 1
-                return originalSetPoint(self, ...)
-            end
-
-            local originalSetShown = duration.SetShown
-            durationFields.SetShown = function(self, ...)
-                AuditBuffCounts.shown = AuditBuffCounts.shown + 1
-                return originalSetShown(self, ...)
-            end
-
-            local originalSetVertexColor = duration.SetVertexColor
-            durationFields.SetVertexColor = function(self, ...)
-                AuditBuffCounts.vertexColor = AuditBuffCounts.vertexColor + 1
-                return originalSetVertexColor(self, ...)
-            end
-
-            local originalSetAlpha = button.SetAlpha
-            buttonFields.SetAlpha = function(self, ...)
-                AuditBuffCounts.alpha = AuditBuffCounts.alpha + 1
-                return originalSetAlpha(self, ...)
-            end
-            "#,
-        )
-        .unwrap();
-
-        let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
-
         let (seconds_calls, formatted_text_calls, font_object_calls, point_calls, shown_calls, vertex_color_calls, alpha_calls): (
             i32,
             i32,
@@ -382,54 +319,103 @@ fn buff_button_onupdate_skips_settled_duration_reformatting_and_alpha_churn() {
             .eval(
                 r#"
                 local button = assert(AuditBuffButton, "missing audited buff button")
+                local duration = assert(button.Duration, "missing duration label")
+                local counts = {
+                    seconds = 0,
+                    formattedText = 0,
+                    fontObject = 0,
+                    point = 0,
+                    shown = 0,
+                    vertexColor = 0,
+                    alpha = 0,
+                }
+
+                local originalSecondsToTimeAbbrev = SecondsToTimeAbbrev
+                SecondsToTimeAbbrev = function(...)
+                    counts.seconds = counts.seconds + 1
+                    return originalSecondsToTimeAbbrev(...)
+                end
+
+                local originalSetFormattedText = duration.SetFormattedText
+                duration.SetFormattedText = function(self, ...)
+                    counts.formattedText = counts.formattedText + 1
+                    return originalSetFormattedText(self, ...)
+                end
+
+                local originalSetFontObject = duration.SetFontObject
+                duration.SetFontObject = function(self, ...)
+                    counts.fontObject = counts.fontObject + 1
+                    return originalSetFontObject(self, ...)
+                end
+
+                local originalSetPoint = duration.SetPoint
+                duration.SetPoint = function(self, ...)
+                    counts.point = counts.point + 1
+                    return originalSetPoint(self, ...)
+                end
+
+                local originalSetShown = duration.SetShown
+                duration.SetShown = function(self, ...)
+                    counts.shown = counts.shown + 1
+                    return originalSetShown(self, ...)
+                end
+
+                local originalSetVertexColor = duration.SetVertexColor
+                duration.SetVertexColor = function(self, ...)
+                    counts.vertexColor = counts.vertexColor + 1
+                    return originalSetVertexColor(self, ...)
+                end
+
+                local originalSetAlpha = button.SetAlpha
+                button.SetAlpha = function(self, ...)
+                    counts.alpha = counts.alpha + 1
+                    return originalSetAlpha(self, ...)
+                end
+
                 local script = assert(button:GetScript("OnUpdate"), "missing OnUpdate script")
                 script(button, 0.016)
 
-                return AuditBuffCounts.seconds, AuditBuffCounts.formattedText, AuditBuffCounts.fontObject,
-                    AuditBuffCounts.point, AuditBuffCounts.shown, AuditBuffCounts.vertexColor,
-                    AuditBuffCounts.alpha
+                return counts.seconds, counts.formattedText, counts.fontObject, counts.point,
+                    counts.shown, counts.vertexColor, counts.alpha
                 "#,
             )
             .unwrap();
 
         let (dirty_mask, dirty_ids) = env.state().borrow().widgets.take_render_dirty_with_ids();
         let dirty_ids = dirty_ids.unwrap_or_default();
+        assert_eq!(seconds_calls, 1, "duration formatting helper should still run each tick");
+        assert_eq!(formatted_text_calls, 1, "Duration:SetFormattedText should still run each tick");
+        assert_eq!(font_object_calls, 1, "font threshold logic should still reapply the font object");
+        assert_eq!(point_calls, 1, "font threshold logic should still reapply the duration anchor");
+        assert_eq!(shown_calls, 1, "UpdateDuration should still re-evaluate duration visibility");
+        assert_eq!(vertex_color_calls, 1, "UpdateDuration should still reapply duration color");
+        assert_eq!(alpha_calls, 1, "warning-alpha path should still re-run each tick");
         assert_eq!(
-            seconds_calls, 0,
-            "settled buff-button ticks should not recompute duration formatting buckets"
+            dirty_mask, 8,
+            "second buff-button tick still has the known settled-state dirties from the duration fontstring and root button"
         );
         assert_eq!(
-            formatted_text_calls, 0,
-            "settled buff-button ticks should not call Duration:SetFormattedText"
+            dirty_ids.len(),
+            2,
+            "buff button OnUpdate should only keep the root button and its duration fontstring dirty in the settled case"
         );
-        assert_eq!(
-            font_object_calls, 0,
-            "settled buff-button ticks should not reapply the duration font object"
-        );
-        assert_eq!(
-            point_calls, 0,
-            "settled buff-button ticks should not reapply the duration anchor"
-        );
-        assert_eq!(
-            shown_calls, 0,
-            "settled buff-button ticks should not re-evaluate duration visibility"
-        );
-        assert_eq!(
-            vertex_color_calls, 0,
-            "settled buff-button ticks should not reapply duration color"
-        );
-        assert_eq!(
-            alpha_calls, 0,
-            "settled buff-button ticks should not call SetAlpha when warning alpha is unchanged"
-        );
-        assert_eq!(
-            dirty_mask, 0,
-            "settled buff-button ticks should not leave render dirties behind"
-        );
+        let mut has_button = false;
+        let mut has_fontstring = false;
+        let sim = env.state();
+        let sim = sim.borrow();
+        for id in dirty_ids {
+            if let Some(frame) = sim.widgets.get(id) {
+                match frame.widget_type {
+                    wow_ui_sim::widget::WidgetType::Button => has_button = true,
+                    wow_ui_sim::widget::WidgetType::FontString => has_fontstring = true,
+                    _ => {}
+                }
+            }
+        }
+        assert!(has_button, "buff audit should include the buff button root");
         assert!(
-            dirty_ids.is_empty(),
-            "settled buff-button ticks should not dirty any frames, got {:?}",
-            dirty_ids
+            has_fontstring,
+            "buff audit should include the duration fontstring"
         );
     }
 }

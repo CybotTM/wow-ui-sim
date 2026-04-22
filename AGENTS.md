@@ -5,6 +5,7 @@
 - **NEVER modify files in `Interface/AddOns/Wowless/`** — this is an external test suite, not our code.
 - **NEVER modify files in `Interface/AddOns/WowlessData/`** — regenerate with `python3 tools/gen_wowless_data.py` (reads from `~/Repos/wowless/data/`). Update the source repo first: `cd ~/Repos/wowless && git pull`.
 - **NEVER modify files in `Interface/BlizzardUI/`** — this is a symlink to `vendor/wow-ui-source/Interface/AddOns` (sparse checkout of [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source)). To update, run `./scripts/setup-blizzard-ui.sh <TAG>`.
+- **NEVER override, monkey-patch, or otherwise change Blizzard/vendor Lua behavior as a performance optimization.** Blizzard Lua is the compatibility target. For perf work, optimize simulator-side primitive/method/dirty/dispatch costs (`SetAlpha`, `SetFormattedText`, `SetPoint`, `SetFontObject`, etc.) instead. Only patch Blizzard/vendor behavior when matching real WoW semantics/correctness, never as a performance shortcut.
 
 ## Wiki
 

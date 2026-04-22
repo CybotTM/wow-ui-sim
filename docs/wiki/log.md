@@ -2,16 +2,6 @@
 
 Chronological record of wiki operations.
 
-## [2026-04-22] update | buffframe settled onupdate optimization
-
-Updated `investigations/on-update-dirty.md` with the landed BuffFrame
-settled-tick workaround. Documented the new `AuraButtonMixin:OnUpdate()`
-short-circuit in `src/lua_api/workarounds.rs`, the exact long-buff cache keys
-it uses (warning alpha, duration visibility bucket, and font-threshold mode),
-and the new regression contract in `tests/onupdate_handler_audit.rs` that a
-second settled long-buff tick performs no duration/font/alpha setter work and
-leaves the render-dirty batch empty.
-
 ## [2026-04-22] update | world-map Lua retry simplification
 
 Updated `investigations/world-map-texture-loading-budget.md` with the
