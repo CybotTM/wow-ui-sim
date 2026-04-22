@@ -329,3 +329,218 @@ fn test_enter_exit_edit_mode_core_steps() {
         failures
     );
 }
+
+#[test]
+fn test_status_tracking_xp_and_reputation_bars_layout_locked() {
+    let env = env_with_action_bar();
+    let result: String = env
+        .eval(
+            r#"
+            local EPS = 0.75
+
+            local function approx(actual, expected, eps)
+                if type(actual) ~= "number" or type(expected) ~= "number" then
+                    return false
+                end
+                return math.abs(actual - expected) <= (eps or EPS)
+            end
+
+            local function rect(frame, tag)
+                if type(frame) ~= "table" then
+                    return nil, tag .. "_missing"
+                end
+                local l, b, w, h = frame:GetRect()
+                if not (l and b and w and h) then
+                    return nil, tag .. "_missing_rect"
+                end
+                return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+            end
+
+            local function has_point(frame, point, rel, relPoint, x, y, eps)
+                for i = 1, frame:GetNumPoints() do
+                    local p, r, rp, ox, oy = frame:GetPoint(i)
+                    local relMatches = (r == rel) or (r == nil and rel ~= nil and frame.GetParent and frame:GetParent() == rel)
+                    if p == point and relMatches and rp == relPoint and approx(ox or 0, x, eps) and approx(oy or 0, y, eps) then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            local function points_debug(frame)
+                local out = {}
+                for i = 1, frame:GetNumPoints() do
+                    local p, r, rp, ox, oy = frame:GetPoint(i)
+                    local rn = r and r:GetName() or "nil"
+                    out[#out + 1] = string.format("%s->%s:%s(%.2f,%.2f)", tostring(p), rn, tostring(rp), tonumber(ox) or 0, tonumber(oy) or 0)
+                end
+                table.sort(out)
+                return table.concat(out, " | ")
+            end
+
+            if C_Reputation and C_Reputation.SetWatchedFactionByID then
+                C_Reputation.SetWatchedFactionByID(72)
+            end
+
+            local manager = StatusTrackingBarManager
+            if not manager then
+                return "manager_missing"
+            end
+            manager:UpdateBarsShown()
+
+            local main = manager.MainStatusTrackingBarContainer
+            local secondary = manager.SecondaryStatusTrackingBarContainer
+            if not main then
+                return "main_container_missing"
+            end
+            if not secondary then
+                return "secondary_container_missing"
+            end
+
+            local managerRect, managerErr = rect(manager, "manager")
+            if not managerRect then return managerErr end
+            local mainRect, mainErr = rect(main, "main")
+            if not mainRect then return mainErr end
+            local secondaryRect, secondaryErr = rect(secondary, "secondary")
+            if not secondaryRect then return secondaryErr end
+
+            if not manager:IsShown() then
+                return "manager_hidden"
+            end
+            if not main:IsShown() then
+                return "main_container_hidden"
+            end
+            if not secondary:IsShown() then
+                return "secondary_container_hidden"
+            end
+
+            if manager:GetNumPoints() ~= 1 then
+                return "manager_points=" .. tostring(manager:GetNumPoints())
+            end
+            if not has_point(manager, "BOTTOM", UIParent, "BOTTOM", 0, 0, 0.1) then
+                return "manager_anchor_mismatch"
+            end
+            if not approx(managerRect.w, 571, 0.1) or not approx(managerRect.h, 34, 0.1) then
+                return "manager_size=" .. tostring(managerRect.w) .. "x" .. tostring(managerRect.h)
+            end
+
+            if main:GetNumPoints() ~= 1 or secondary:GetNumPoints() ~= 1 then
+                return "container_points=" .. tostring(main:GetNumPoints()) .. "," .. tostring(secondary:GetNumPoints())
+            end
+            if not has_point(main, "BOTTOM", manager, "BOTTOM", 0, 0, 0.1) then
+                return "main_anchor_mismatch:" .. points_debug(main)
+            end
+            if not has_point(secondary, "BOTTOM", manager, "BOTTOM", 0, 17, 0.1) then
+                return "secondary_anchor_mismatch:" .. points_debug(secondary)
+            end
+            if not approx(mainRect.w, 571, 0.1) or not approx(mainRect.h, 17, 0.1) then
+                return "main_size=" .. tostring(mainRect.w) .. "x" .. tostring(mainRect.h)
+            end
+            if not approx(secondaryRect.w, 571, 0.1) or not approx(secondaryRect.h, 17, 0.1) then
+                return "secondary_size=" .. tostring(secondaryRect.w) .. "x" .. tostring(secondaryRect.h)
+            end
+            if not approx(mainRect.r, managerRect.r, 0.1) or not approx(mainRect.l, managerRect.l, 0.1) then
+                return "main_x_mismatch"
+            end
+            if not approx(secondaryRect.r, managerRect.r, 0.1) or not approx(secondaryRect.l, managerRect.l, 0.1) then
+                return "secondary_x_mismatch"
+            end
+            local stacked = approx(mainRect.b, secondaryRect.t, 0.1) or approx(secondaryRect.b, mainRect.t, 0.1)
+            if not stacked then
+                return "container_stack_gap=" .. tostring(mainRect.b - secondaryRect.t) .. "," .. tostring(secondaryRect.b - mainRect.t)
+            end
+            local minBottom = math.min(mainRect.b, secondaryRect.b)
+            local maxTop = math.max(mainRect.t, secondaryRect.t)
+            if not approx(minBottom, managerRect.b, 0.1) or not approx(maxTop, managerRect.t, 0.1) then
+                return "container_vertical_span_mismatch"
+            end
+
+            local barsEnum = StatusTrackingBarInfo and StatusTrackingBarInfo.BarsEnum
+            if not barsEnum then
+                return "bars_enum_missing"
+            end
+            local expIndex = barsEnum.Experience
+            local repIndex = barsEnum.Reputation
+            if not expIndex or not repIndex then
+                return "xp_or_rep_index_missing"
+            end
+
+            if main.shownBarIndex ~= expIndex then
+                return "main_shown_bar=" .. tostring(main.shownBarIndex)
+            end
+            if secondary.shownBarIndex ~= repIndex then
+                return "secondary_shown_bar=" .. tostring(secondary.shownBarIndex)
+            end
+
+            local mainExpBar = main.bars and main.bars[expIndex]
+            local secondaryRepBar = secondary.bars and secondary.bars[repIndex]
+            if not mainExpBar then
+                return "main_exp_bar_missing"
+            end
+            if not secondaryRepBar then
+                return "secondary_rep_bar_missing"
+            end
+            if not mainExpBar:IsShown() then
+                return "main_exp_bar_hidden"
+            end
+            if not secondaryRepBar:IsShown() then
+                return "secondary_rep_bar_hidden"
+            end
+
+            local mainExpRect, mainExpErr = rect(mainExpBar, "main_exp_bar")
+            if not mainExpRect then return mainExpErr end
+            local secondaryRepRect, secondaryRepErr = rect(secondaryRepBar, "secondary_rep_bar")
+            if not secondaryRepRect then return secondaryRepErr end
+
+            if mainExpBar:GetNumPoints() ~= 1 then
+                return "main_exp_points=" .. tostring(mainExpBar:GetNumPoints())
+            end
+            if secondaryRepBar:GetNumPoints() ~= 1 then
+                return "secondary_rep_points=" .. tostring(secondaryRepBar:GetNumPoints())
+            end
+            if not has_point(mainExpBar, "BOTTOMLEFT", main, "BOTTOMLEFT", 1, 5, 0.1) then
+                return "main_exp_anchor_mismatch"
+            end
+            if not has_point(secondaryRepBar, "BOTTOMLEFT", secondary, "BOTTOMLEFT", 1, 5, 0.1) then
+                return "secondary_rep_anchor_mismatch"
+            end
+            if not approx(mainExpRect.w, 565, 0.1) or not approx(mainExpRect.h, 11, 0.1) then
+                return "main_exp_size=" .. tostring(mainExpRect.w) .. "x" .. tostring(mainExpRect.h)
+            end
+            if not approx(secondaryRepRect.w, 565, 0.1) or not approx(secondaryRepRect.h, 11, 0.1) then
+                return "secondary_rep_size=" .. tostring(secondaryRepRect.w) .. "x" .. tostring(secondaryRepRect.h)
+            end
+
+            if not mainExpBar.StatusBar or not secondaryRepBar.StatusBar then
+                return "xp_or_rep_statusbar_missing"
+            end
+            local mainStatusRect, mainStatusErr = rect(mainExpBar.StatusBar, "main_exp_status")
+            if not mainStatusRect then return mainStatusErr end
+            local repStatusRect, repStatusErr = rect(secondaryRepBar.StatusBar, "secondary_rep_status")
+            if not repStatusRect then return repStatusErr end
+            if mainExpBar.StatusBar:GetNumPoints() ~= 1 or secondaryRepBar.StatusBar:GetNumPoints() ~= 1 then
+                return "status_points=" .. tostring(mainExpBar.StatusBar:GetNumPoints()) .. "," .. tostring(secondaryRepBar.StatusBar:GetNumPoints())
+            end
+            if not has_point(mainExpBar.StatusBar, "RIGHT", mainExpBar, "RIGHT", 0, 0, 0.1) then
+                return "main_exp_status_anchor_mismatch"
+            end
+            if not has_point(secondaryRepBar.StatusBar, "RIGHT", secondaryRepBar, "RIGHT", 0, 0, 0.1) then
+                return "secondary_rep_status_anchor_mismatch"
+            end
+            if not approx(mainStatusRect.w, mainExpRect.w, 0.1) or not approx(mainStatusRect.h, mainExpRect.h, 0.1) then
+                return "main_status_size_mismatch"
+            end
+            if not approx(repStatusRect.w, secondaryRepRect.w, 0.1) or not approx(repStatusRect.h, secondaryRepRect.h, 0.1) then
+                return "rep_status_size_mismatch"
+            end
+
+            return "ok"
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "XP/Reputation status tracking bars should remain layout-locked: {result}"
+    );
+}
