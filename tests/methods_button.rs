@@ -318,6 +318,72 @@ fn test_set_text_updates_button_text_child_without_synthesizing_text_key() {
     );
 }
 
+#[test]
+fn test_set_text_finds_button_text_child_by_parent_key_when_children_keys_missing() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestButtonTextParentKeyFallback", UIParent)
+        local fs = btn:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        fs:SetPoint("CENTER")
+        btn.ButtonText = fs
+    "#,
+    )
+    .unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        let button_id = state
+            .widgets
+            .get_id_by_name("TestButtonTextParentKeyFallback")
+            .expect("button should exist");
+        let text_child_id = state
+            .widgets
+            .get(button_id)
+            .and_then(|button| button.children_keys.get("ButtonText").copied())
+            .expect("button should have a ButtonText child");
+
+        let button = state
+            .widgets
+            .get_mut_visual(button_id)
+            .expect("button should be mutable");
+        button.children_keys.remove("ButtonText");
+        button.children_keys.remove("Text");
+
+        let text_child = state
+            .widgets
+            .get_mut_visual(text_child_id)
+            .expect("button text child should be mutable");
+        text_child.parent_key = Some("ButtonText".to_string());
+    }
+
+    env.exec(r#"TestButtonTextParentKeyFallback:SetText("Category Header")"#)
+        .unwrap();
+
+    let button_text: String = env
+        .eval(
+            r#"
+            return TestButtonTextParentKeyFallback.ButtonText
+                and TestButtonTextParentKeyFallback.ButtonText:GetText()
+                or ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        button_text, "Category Header",
+        "SetText should still update ButtonText when children_keys is stale"
+    );
+
+    let synthesized_text_exists: bool = env
+        .eval("return TestButtonTextParentKeyFallback.Text ~= nil")
+        .unwrap();
+    assert!(
+        !synthesized_text_exists,
+        "SetText should not synthesize a Text child when an existing ButtonText child is discoverable"
+    );
+}
+
 // ============================================================================
 // Enable/Disable State Methods
 // ============================================================================

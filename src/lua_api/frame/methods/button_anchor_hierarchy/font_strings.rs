@@ -29,6 +29,11 @@ fn find_existing_text_child(state: &mut LuaState, id: u64) -> Option<u64> {
                 return Some(child_id);
             }
         }
+        for key in ["Text", "ButtonText"] {
+            if let Some(child_id) = find_child_by_parent_key(&sim, frame.children.as_slice(), key) {
+                return Some(child_id);
+            }
+        }
     }
     let fallback_name = sim.widgets.get(id)?.name.as_ref()?.to_string() + "Text";
     let child_id = sim.widgets.get_id_by_name(&fallback_name)?;
@@ -38,6 +43,19 @@ fn find_existing_text_child(state: &mut LuaState, id: u64) -> Option<u64> {
     } else {
         None
     }
+}
+
+fn find_child_by_parent_key(
+    sim: &crate::lua_api::state::SimState,
+    children: &[u64],
+    key: &str,
+) -> Option<u64> {
+    children.iter().copied().find(|child_id| {
+        sim.widgets.get(*child_id).is_some_and(|child| {
+            child.widget_type == crate::widget::WidgetType::FontString
+                && child.parent_key.as_deref() == Some(key)
+        })
+    })
 }
 
 fn create_synthetic_text_child(state: &mut LuaState, id: u64) -> LuaResult<u32> {
