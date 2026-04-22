@@ -46,10 +46,34 @@ The simulator still does not render Blizzard's real fog background+mask model.
 That is intentional here: removing the fake overlay is safer than preserving a
 known-wrong hardcoded shape.
 
+## 2026-04-21 Follow-up: Runtime Bootstrap Override
+
+The map exploration APIs regressed again on non-current maps: the post-enum Lua
+bootstrap (`runtime_surface_bootstrap.lua`) still installed synthetic
+`C_MapExplorationInfo` handlers with hardcoded geometry. Those Lua handlers only
+returned overlays for `currentMapID` and map `1`, so all other maps looked
+fully unexplored.
+
+### Fix
+
+- Added a real Rust `C_MapExplorationInfo` surface in
+  `src/c_api/c_map_exploration_info.rs` backed by `src/map_exploration.rs`:
+  - `GetExploredMapTextures(mapID)` now returns DB2-backed overlay geometry +
+    tile `fileDataIDs` for any map with default-visible overlays
+  - `GetExploredAreaIDsAtPosition(mapID, pos)` now resolves area IDs from real
+    overlay hit rects
+- Registered the new surface in
+  `src/lua_api/globals/missing_surface.rs` so it loads with the other world-map
+  namespaces.
+- Converted the Lua bootstrap `C_MapExplorationInfo` functions into fallback
+  stubs (`if type(...) ~= "function" then ... end`) so the Rust surface wins
+  when present.
+
 ## Verification
 
 - `cargo test --test c_map_api test_c_fog_of_war_returns_nil_for_current_map_without_fog_data -- --nocapture`
 - `cargo test --test c_map_api test_get_explored_area_ids_leave_one_current_map_sub_zone_unexplored -- --nocapture`
+- `cargo test --test c_map_exploration_info -- --nocapture`
 - `cargo test --test test_keybindings_panels_detail world_map_current_map_keeps_fog_of_war_pin_hidden_without_fog_data -- --nocapture`
 - `cargo test --test render_order isolated_world_map_current_map_does_not_render_fog_of_war_without_db_entry -- --nocapture`
 - `cargo test --test test_keybindings_panels_detail world_map_exploration_pin_has_visible_overlay_textures_after_opening -- --nocapture`
@@ -58,13 +82,20 @@ known-wrong hardcoded shape.
 
 - [data/db2/UiMapFogOfWar.csv](../../../data/db2/UiMapFogOfWar.csv) — local fog
   presence data used by `C_FogOfWar`
-- [src/lua_api/globals/c_map_api.rs](../../../src/lua_api/globals/c_map_api.rs)
+- [src/c_api/c_fog_of_war.rs](../../../src/c_api/c_fog_of_war.rs) +
+  [src/c_api/permanent_shims/c_map_api.rs](../../../src/c_api/permanent_shims/c_map_api.rs)
   — DB-backed fog lookup and info table assembly
 - [src/iced_app/quad_builders.rs](../../../src/iced_app/quad_builders.rs) —
   removal of synthetic fog geometry
 - [src/map_exploration.rs](../../../src/map_exploration.rs) — exploration
   overlays still come from real irregular chunk data
+- [src/c_api/c_map_exploration_info.rs](../../../src/c_api/c_map_exploration_info.rs) —
+  DB2-backed `C_MapExplorationInfo` surface for texture + area lookup
+- [src/lua_api/env_init/runtime_surface_bootstrap.lua](../../../src/lua_api/env_init/runtime_surface_bootstrap.lua) —
+  fallback-only map exploration stubs
 - [tests/c_map_api.rs](../../../tests/c_map_api.rs) — fog API regression
+- [tests/c_map_exploration_info.rs](../../../tests/c_map_exploration_info.rs) —
+  non-current map exploration regressions
 - [tests/render_order.rs](../../../tests/render_order.rs) — render regression
 - [tests/test_keybindings_panels_detail.rs](../../../tests/test_keybindings_panels_detail.rs)
   — live world-map pin visibility regression

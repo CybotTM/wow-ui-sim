@@ -203,7 +203,10 @@ impl WidgetRegistry {
             .get(&parent_id)
             .map(|p| (p.effective_alpha, p.effective_scale))
             .unwrap_or((1.0, 1.0));
-        let old_parent_id = self.widgets.get(&child_id).and_then(|child| child.parent_id);
+        let old_parent_id = self
+            .widgets
+            .get(&child_id)
+            .and_then(|child| child.parent_id);
         if old_parent_id != Some(parent_id) {
             if let Some(old_parent_id) = old_parent_id
                 && let Some(old_parent) = self.widgets.get_mut(&old_parent_id)

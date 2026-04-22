@@ -2,6 +2,27 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-21] update | world-map exploration non-current map surface
+
+Updated `investigations/world-map-fog-of-war-overlay-model.md` with a
+follow-up regression where `runtime_surface_bootstrap.lua` was still installing
+synthetic `C_MapExplorationInfo` handlers and limiting explored overlays to
+`currentMapID` / map `1`. Documented the new Rust-backed
+`src/c_api/c_map_exploration_info.rs` implementation, fallback-only bootstrap
+stubs, and focused non-current-map regressions in
+`tests/c_map_exploration_info.rs`. Refreshed the `index.md` summary row for
+`world-map-fog-of-war-overlay-model`.
+
+## [2026-04-21] add | class talents edge frame levels
+
+Added `investigations/class-talents-edge-frame-levels.md` documenting the
+class-talents edge-over-icon regression and the fix in
+`src/lua_api/workarounds.rs` that patches both the mixin and the live
+`PlayerSpellsFrame.TalentsFrame` method, then re-levels active edges.
+Recorded regression coverage in
+`test_class_talent_edges_render_below_visible_talent_buttons`
+(`tests/hero_talents.rs`) and updated `index.md`.
+
 ## [2026-04-21] update | hero talents visibility and edges
 
 Updated `investigations/class-talents-trait-loadout-state.md` with the hero

@@ -3059,39 +3059,43 @@ UiMapPoint.CreateFromCoordinates = function(mapID, x, y)
   return { uiMapID = mapID, x = tonumber(x) or 0, y = tonumber(y) or 0 }
 end
 
-C_MapExplorationInfo.GetExploredAreaIDsAtPosition = function(mapID, pos)
-  local areas = {}
-  local point = __wow_map_point_from_table(mapID, pos)
-  if point == nil then
+if type(C_MapExplorationInfo.GetExploredAreaIDsAtPosition) ~= "function" then
+  C_MapExplorationInfo.GetExploredAreaIDsAtPosition = function(mapID, pos)
+    local areas = {}
+    local point = __wow_map_point_from_table(mapID, pos)
+    if point == nil then
+      return areas
+    end
+
+    if mapID == C_Map.GetCurrentMapID() then
+      if point.x < 0.10 or point.y < 0.05 then
+        return areas
+      end
+      if point.x >= 0.68 and point.x <= 0.74 and point.y >= 0.20 and point.y <= 0.50 then
+        return areas
+      end
+      if point.x <= 0.55 and point.y >= 0.05 and point.y <= 0.95 then
+        areas[1] = 1
+        areas[2] = 2
+        return areas
+      end
+      if point.x >= 0.82 and point.y >= 0.05 and point.y <= 0.95 then
+        areas[1] = 3
+        return areas
+      end
+    end
+
     return areas
   end
-
-  if mapID == C_Map.GetCurrentMapID() then
-    if point.x < 0.10 or point.y < 0.05 then
-      return areas
-    end
-    if point.x >= 0.68 and point.x <= 0.74 and point.y >= 0.20 and point.y <= 0.50 then
-      return areas
-    end
-    if point.x <= 0.55 and point.y >= 0.05 and point.y <= 0.95 then
-      areas[1] = 1
-      areas[2] = 2
-      return areas
-    end
-    if point.x >= 0.82 and point.y >= 0.05 and point.y <= 0.95 then
-      areas[1] = 3
-      return areas
-    end
-  end
-
-  return areas
 end
 
-C_MapExplorationInfo.GetExploredMapTextures = function(mapID)
-  if mapID ~= C_Map.GetCurrentMapID() and mapID ~= 1 then
-    return {}
+if type(C_MapExplorationInfo.GetExploredMapTextures) ~= "function" then
+  C_MapExplorationInfo.GetExploredMapTextures = function(mapID)
+    if mapID ~= C_Map.GetCurrentMapID() and mapID ~= 1 then
+      return {}
+    end
+    return __wow_map_exploration_overlays(mapID)
   end
-  return __wow_map_exploration_overlays(mapID)
 end
 
 local __wow_map_runtime_state = rawget(_G, "__wow_map_runtime_state")

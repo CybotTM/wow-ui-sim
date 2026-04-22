@@ -47,7 +47,9 @@ mod ui_widget_manager;
 mod voice_chat;
 mod zone_ability;
 
-use crate::c_api::{c_configuration_warnings, c_fog_of_war, c_spell, c_widget};
+use crate::c_api::{
+    c_configuration_warnings, c_fog_of_war, c_map_exploration_info, c_spell, c_widget,
+};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
 };
@@ -196,6 +198,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     delves_ui::register_delves_ui_surface(state)?;
     encounter_journal::register_encounter_journal_surface(state)?;
     c_fog_of_war::register_fog_of_war_surface(state)?;
+    c_map_exploration_info::register_c_map_exploration_info_surface(state)?;
     gossip_info::register_gossip_info_surface(state)?;
     mythic_plus::register_mythic_plus_surface(state)?;
     scenario_info::register_scenario_info_surface(state)?;

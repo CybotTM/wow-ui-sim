@@ -9,6 +9,7 @@ pub mod c_addons;
 pub mod c_configuration_warnings;
 pub mod c_fog_of_war;
 pub mod c_map;
+pub mod c_map_exploration_info;
 pub mod c_spec;
 pub mod c_spell;
 pub mod c_spell_book;
