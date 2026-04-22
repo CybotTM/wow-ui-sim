@@ -54,6 +54,28 @@ fn set_alpha_same_value_is_a_true_noop() {
 }
 
 #[test]
+fn set_alpha_clamped_same_value_is_a_true_noop() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "NoopAlphaClampedFrame", UIParent)
+            frame:SetAlpha(1)
+            "#,
+        )
+        .expect("initial clamped alpha setup should succeed");
+
+        clear_dirty(&env);
+
+        env.exec(r#"NoopAlphaClampedFrame:SetAlpha(2)"#)
+            .expect("clamped SetAlpha should succeed");
+
+        assert_no_visual_dirty(&env, "SetAlpha(2) on alpha=1");
+        assert_no_rect_dirty(&env, "SetAlpha(2) on alpha=1");
+    }
+}
+
+#[test]
 fn set_text_same_value_is_a_true_noop() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

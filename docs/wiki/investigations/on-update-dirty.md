@@ -104,6 +104,29 @@ Interpretation: the same-value `SetAlpha(1)` path is already near bare
 Lua->Rust call cost in this benchmark, while real state change adds another
 ~`1.4us`/call on top.
 
+## 2026-04-22 SetAlpha no-op post-fast-path measurement
+
+After optimizing `SetAlpha` to return on same-value calls before mutable-state
+borrow and alpha-propagation bookkeeping in
+`src/lua_api/frame/methods/core_state/alpha.rs`, I reran the same benchmark
+script and command shape as above.
+
+Representative measured run (`N=120000`, `R=8`):
+
+- `empty_ms=36.540528`
+- `get_ms=262.643878`
+- `same_ms=210.177339`
+- `change_ms=485.401209`
+
+Derived no-op delta against dispatch (`same - get`), per call:
+
+- baseline from earlier section: `-0.093us`
+- post-fast-path: `-0.437us`
+
+So the no-op `SetAlpha(1)` path now measures lower relative cost than the
+pre-optimization baseline on the same script metric (`same - get`), while
+behavioral no-op contracts remain intact (`tests/noop_hot_setters.rs`).
+
 ## 2026-04-22 SetFormattedText no-op microbenchmark baseline
 
 Before changing any `SetFormattedText` implementation, we measured the current

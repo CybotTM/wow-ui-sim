@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | setalpha no-op fast-path optimization
+
+Updated `investigations/on-update-dirty.md` with the `SetAlpha` fast-path
+optimization follow-up in `core_state/alpha.rs`. Recorded a post-change
+rerun of the existing `setalpha_bench.lua` microbenchmark and the key no-op
+delta metric (`same - get`) showing lower measured no-op overhead than the
+earlier baseline, plus the reminder that `noop_hot_setters` behavioral
+contracts still pass.
+
 ## [2026-04-22] update | no-world-map retained trace after bc-negative cache
 
 Updated `investigations/world-map-texture-loading-budget.md` with a fresh

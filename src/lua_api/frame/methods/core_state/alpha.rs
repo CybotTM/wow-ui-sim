@@ -9,20 +9,34 @@ use rilua::{LuaResult, Val};
 pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let alpha = opt_f32(state, 2);
-    let clamped = alpha.clamp(0.0, 1.0);
-    let mut sim = borrow_state_mut(state)?;
-    let changed = sim
-        .widgets
-        .get(id)
-        .map(|f| f.alpha != clamped)
-        .unwrap_or(false);
-    if changed {
-        let parent_eff = parent_effective_alpha(&sim, id);
-        if let Some(frame) = sim.widgets.get_mut_visual(id) {
-            frame.alpha = clamped;
+    let clamped = if (0.0..=1.0).contains(&alpha) {
+        alpha
+    } else {
+        alpha.clamp(0.0, 1.0)
+    };
+    {
+        let sim = borrow_state(state)?;
+        let Some(frame) = sim.widgets.get(id) else {
+            return Ok(0);
+        };
+        if frame.alpha == clamped {
+            return Ok(0);
         }
-        sim.widgets.propagate_effective_alpha(id, parent_eff);
     }
+
+    let mut sim = borrow_state_mut(state)?;
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    if frame.alpha == clamped {
+        return Ok(0);
+    }
+
+    let parent_eff = parent_effective_alpha(&sim, id);
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.alpha = clamped;
+    }
+    sim.widgets.propagate_effective_alpha(id, parent_eff);
     Ok(0)
 }
 
