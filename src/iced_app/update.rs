@@ -346,11 +346,14 @@ impl App {
         let tick_started = std::time::Instant::now();
         let mut stage_timings = TickStageTimings::default();
         let mut redraw_needed = false;
+        let queued_preloads_pending = self.has_queued_texture_preloads();
 
-        let started = std::time::Instant::now();
-        redraw_needed |=
-            self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
-        stage_timings.preload += started.elapsed();
+        if !queued_preloads_pending {
+            let started = std::time::Instant::now();
+            redraw_needed |=
+                self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
+            stage_timings.preload += started.elapsed();
+        }
 
         let started = std::time::Instant::now();
         self.run_pending_exec_lua();
@@ -373,7 +376,7 @@ impl App {
             stage_timings.mark_dirty = started.elapsed();
             redraw_needed = true;
         }
-        if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+        if self.strata_dirty.get() != 0 || self.textures_pending.get() || queued_preloads_pending {
             let started = std::time::Instant::now();
             redraw_needed |= self.preload_current_render_requests_preserving_dirty(Some(
                 std::time::Duration::from_millis(25),
@@ -602,7 +605,9 @@ impl App {
 
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
-        self.preload_visible_textures();
+        if !self.has_queued_texture_preloads() {
+            self.preload_visible_textures();
+        }
         self.clear_failed_texture_requests();
         self.mark_all_strata_dirty();
         self.preload_current_render_requests_preserving_dirty(Some(
@@ -664,6 +669,11 @@ impl App {
         let mut visible_paths = env.state().borrow().widgets.visible_texture_paths();
         Self::sort_texture_request_paths(&mut visible_paths);
         visible_paths
+    }
+
+    fn has_queued_texture_preloads(&self) -> bool {
+        let env = self.env.borrow();
+        !env.state().borrow().pending_texture_preloads.is_empty()
     }
 
     fn cached_render_request_paths(&self) -> Vec<String> {
@@ -1380,6 +1390,61 @@ mod tests {
         assert!(
             iced_runtime::task::into_stream(task).is_none(),
             "pending state alone should not force redraws every tick"
+        );
+    }
+
+    #[test]
+    fn process_timers_prioritizes_queued_preloads_over_visible_warmup() {
+        let temp_dir = tempdir().unwrap();
+        let visible_texture = temp_dir.path().join("queued-visible.png");
+        let queued_texture = temp_dir.path().join("queued-target.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&visible_texture).unwrap();
+        image.save(&queued_texture).unwrap();
+
+        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.selected_rot_level = "Off".to_string();
+        app.strata_dirty.set(0);
+        app.textures_pending.set(false);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                local frame = CreateFrame("Frame", "QueuedPreloadVisibleFrame", UIParent)
+                local texture = frame:CreateTexture(nil, "ARTWORK")
+                texture:SetTexture("queued-visible")
+            "#,
+            )
+            .unwrap();
+            env.state()
+                .borrow_mut()
+                .enqueue_texture_preloads(["queued-target".to_string()]);
+            let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+        }
+
+        let task = app.handle_process_timers(Instant::now());
+        let action = pollster::block_on(async {
+            iced_runtime::task::into_stream(task)
+                .expect("queued preload progress should request a redraw")
+                .next()
+                .await
+                .expect("task should emit a redraw action")
+        });
+
+        let tex_mgr = app.texture_manager.borrow();
+        assert!(
+            tex_mgr.get("queued-target").is_some(),
+            "queued preloads should still decode during the tick"
+        );
+        assert!(
+            tex_mgr.get("queued-visible").is_none(),
+            "queued preloads should bypass tick visible warmup to avoid duplicate decode work"
+        );
+        assert!(
+            matches!(action, Action::Window(WindowAction::RedrawAll)),
+            "queued preload progress should still request a redraw"
         );
     }
 
