@@ -19,6 +19,7 @@ mod table_util;
 use crate::c_api::c_wowtoken_secure;
 use crate::c_api::permanent_shims::c_model_info;
 use crate::c_api::temporary_shims::c_lfg_info;
+use crate::lua_api::methods::call_function_state_multi;
 use crate::lua_api::script_helpers::{
     call_error_handler_state, protected_call_state, protected_lua_pcall_state,
 };
@@ -446,7 +447,16 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
         .map(|index| state.stack_get(state.base + 1 + index))
         .collect::<Vec<_>>();
 
-    match protected_lua_pcall_state(state, func, &args) {
+    const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
+    let results = match call_function_state_multi(state, func, &args) {
+        Ok(results) => Ok(results),
+        Err(error) if error.to_string().contains(DIRECT_CALL_FALLBACK_ERROR) => {
+            protected_lua_pcall_state(state, func, &args).map_err(runtime_error)
+        }
+        Err(error) => Err(error),
+    };
+
+    match results {
         Ok(results) if results.is_empty() => {
             state.push(Val::Nil);
             Ok(1)
@@ -459,7 +469,7 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
             Ok(count)
         }
         Err(error) => {
-            call_error_handler_state(state, &error);
+            call_error_handler_state(state, &error.to_string());
             state.push(Val::Nil);
             Ok(1)
         }

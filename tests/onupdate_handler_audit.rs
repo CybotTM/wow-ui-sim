@@ -239,28 +239,13 @@ fn leave_instance_group_button_queries_group_state_even_when_mutators_noop() {
         assert_eq!(set_text_calls, 1, "button text setter is still invoked from the handler");
         assert_eq!(set_enabled_calls, 1, "button enabled setter is still invoked from the handler");
         assert_eq!(
-            dirty_mask, 8,
-            "leave-instance OnUpdate still keeps the button root dirty in the settled case"
+            dirty_mask, 0,
+            "leave-instance OnUpdate should stay visually clean in the settled case"
         );
         assert_eq!(
             dirty_ids.len(),
-            1,
-            "leave-instance OnUpdate should only keep the button root dirty in the settled case"
-        );
-        let sim = env.state();
-        let sim = sim.borrow();
-        let dirty_id = *dirty_ids
-            .iter()
-            .next()
-            .expect("leave-instance dirty frame should still exist");
-        let frame = sim
-            .widgets
-            .get(dirty_id)
-            .expect("leave-instance dirty frame should still exist");
-        assert_eq!(
-            frame.widget_type,
-            wow_ui_sim::widget::WidgetType::Button,
-            "leave-instance audit should only keep the button root dirty"
+            0,
+            "leave-instance OnUpdate should not enqueue dirty frame ids in settled case"
         );
     }
 }
@@ -391,31 +376,13 @@ fn buff_button_onupdate_still_formats_duration_and_reapplies_font_decisions_afte
         assert_eq!(vertex_color_calls, 1, "UpdateDuration should still reapply duration color");
         assert_eq!(alpha_calls, 1, "warning-alpha path should still re-run each tick");
         assert_eq!(
-            dirty_mask, 8,
-            "second buff-button tick still has the known settled-state dirties from the duration fontstring and root button"
+            dirty_mask, 0,
+            "second buff-button tick should be visually clean once no-op setters fast-path"
         );
         assert_eq!(
             dirty_ids.len(),
-            2,
-            "buff button OnUpdate should only keep the root button and its duration fontstring dirty in the settled case"
-        );
-        let mut has_button = false;
-        let mut has_fontstring = false;
-        let sim = env.state();
-        let sim = sim.borrow();
-        for id in dirty_ids {
-            if let Some(frame) = sim.widgets.get(id) {
-                match frame.widget_type {
-                    wow_ui_sim::widget::WidgetType::Button => has_button = true,
-                    wow_ui_sim::widget::WidgetType::FontString => has_fontstring = true,
-                    _ => {}
-                }
-            }
-        }
-        assert!(has_button, "buff audit should include the buff button root");
-        assert!(
-            has_fontstring,
-            "buff audit should include the duration fontstring"
+            0,
+            "buff button OnUpdate should not enqueue dirty frame ids in settled state"
         );
     }
 }

@@ -2,6 +2,27 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] add | layout lock inventory reference page
+
+Added `reference/layout-lock-inventory.md` as the consolidated source of truth
+for UI layout lock coverage. The page inventories baseline frame rect locks
+(`tests/frame_positions.rs`) plus subsystem-specific lock tests for objective
+tracker, main action bar, status tracking bars, bag bar, micro menu, chat
+frame, compact raid manager, character/reputation panels, and buff
+icons/durations. Updated `index.md` with a new `[[layout-lock-inventory]]`
+entry under `reference/` for discoverability.
+
+## [2026-04-22] update | buff aura onupdate perf lock-down to 0.5ms
+
+Updated `investigations/on-update-dirty.md` with the AuraButton
+`OnUpdate <=0.5ms` lock-down pass. Recorded the focused perf harness
+(`tests/buff_aura_onupdate_perf.rs`), the pre-fix max (`~0.86ms`),
+the dominant hotspot (`SetFormattedText` inside `UpdateDuration`), and the
+post-fix max (`31.44us`). Documented the engine-side fixes:
+`SetFormattedText` width-hint no-op fast path,
+`securecall` direct multi-return fast path with protected fallback, and
+non-visual `FrameRef.__newindex` bookkeeping updates.
+
 ## [2026-04-22] update | setpoint no-op fast-path optimization
 
 Updated `investigations/on-update-dirty.md` with the post-optimization

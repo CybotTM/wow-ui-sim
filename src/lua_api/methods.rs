@@ -501,6 +501,47 @@ pub fn call_function_state(state: &mut LuaState, func: Val, args: &[Val]) -> Lua
     Ok(first)
 }
 
+pub fn call_function_state_multi(
+    state: &mut LuaState,
+    func: Val,
+    args: &[Val],
+) -> LuaResult<Vec<Val>> {
+    let Val::Function(_) = func else {
+        return Err(runtime_error("expected function"));
+    };
+    let func_idx = state.top;
+    state.ensure_stack(func_idx + 1 + args.len());
+    state.stack_set(func_idx, func);
+    state.top = func_idx + 1;
+
+    for arg in args {
+        let top = state.top;
+        state.stack_set(top, *arg);
+        state.top = top + 1;
+    }
+
+    let save_base = state.base;
+    state.base = func_idx + 1;
+
+    let result = match state.precall(func_idx, LUA_MULTRET) {
+        Ok(CallResult::Lua) => execute(state),
+        Ok(CallResult::Rust) => Ok(()),
+        Err(err) => Err(err),
+    };
+
+    let mut results = Vec::new();
+    if result.is_ok() {
+        for idx in func_idx..state.top {
+            results.push(state.stack_get(idx));
+        }
+    }
+
+    state.top = func_idx;
+    state.base = save_base;
+    result?;
+    Ok(results)
+}
+
 /// Call a Lua function with error handling (pcall semantics).
 ///
 /// Returns the results on success, or logs the error and returns an empty vec on failure.

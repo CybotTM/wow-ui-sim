@@ -375,6 +375,50 @@ Regression coverage now includes:
 - a full-UI `GameTimeFrame_SetDate()` test that proves the second same-day call
   leaves the render-dirty batch empty
 
+## 2026-04-22 AuraButton OnUpdate perf lock-down (`<= 0.5ms`)
+
+To lock the BuffFrame aura-button hot path under `0.5ms`, we added a focused
+perf regression in
+`tests/buff_aura_onupdate_perf.rs` that measures steady-state
+`AuraButtonMixin:OnUpdate` cost with a baseline-subtracted batch loop over a
+real `AuraButtonTemplate` instance.
+
+Baseline from the same harness before this pass:
+
+- net per-tick max: `~0.86ms` (samples around `0.82ms`-`0.86ms`)
+
+Root cause from harness breakdown:
+
+- `UpdateDuration(...)` dominated almost all per-tick cost
+- within `UpdateDuration`, `SetFormattedText(...)` was the hotspot
+- `SecondsToTimeAbbrev(...)`, `SetShown(...)`, and `SetVertexColor(...)`
+  were comparatively small
+
+Fixes landed:
+
+- `set_formatted_text` cache now stores a width hint and uses it to short-circuit
+  same-text auto-width no-op calls before re-running `measure_text_width`
+  (`src/lua_api/frame/methods/text_attribute_event/text/formatting.rs`)
+- added `call_function_state_multi` and switched `securecall` to a direct
+  multi-return fast path with fallback to the existing protected Lua pcall
+  wrapper only on the known direct-call incompatibility marker
+  (`src/lua_api/methods.rs`, `src/lua_api/globals/utility_system_spell/mod.rs`)
+- `FrameRef.__newindex` now updates `children_keys` / `parent_key` via non-visual
+  mutable access (`get_mut`) so non-visual frame-field writes do not trigger
+  visual dirty bookkeeping (`src/lua_api/env_init/frames.rs`)
+
+Post-change from the same perf harness:
+
+- net per-tick samples: `21.21us`-`31.44us`
+- net per-tick max: `31.44us`
+- enforced budget: `500us` (`0.5ms`) via test assertion
+
+Related audit behavior updates:
+
+- settled BuffFrame aura-button audit now observes zero render-dirty mask/ids
+- settled leave-instance button audit now observes zero render-dirty mask/ids
+  (`tests/onupdate_handler_audit.rs`)
+
 ## Fix Strategies
 
 **Option A: Same-value guards in Rust methods** — Make `SetValue`, `SetText`, `SetAlpha`, `Show`, `Hide` etc. skip `get_mut()` when the new value equals the current value. Fixes the root cause; blanket discard can be removed entirely. Requires touching many API methods.

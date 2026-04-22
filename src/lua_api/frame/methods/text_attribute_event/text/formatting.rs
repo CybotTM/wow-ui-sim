@@ -31,6 +31,11 @@ struct FormattedTextUpdateState {
     current_width: f32,
 }
 
+struct CachedFormattedText {
+    result: String,
+    width_hint: Option<f32>,
+}
+
 pub(crate) fn is_truncated(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let props = read_truncation_props(state, id);
@@ -80,18 +85,18 @@ pub(crate) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
     let signature = default_formatter_unchanged(state, formatter)
         .then(|| formatted_text_signature(state))
         .flatten();
-    let formatted_text = if let Some(cached) =
-        read_cached_formatted_text(state, id, formatter, signature.as_deref())
-    {
-        cached
+    let cached = read_cached_formatted_text(state, id, formatter, signature.as_deref());
+    let formatted_text = if let Some(cached) = &cached {
+        cached.result.clone()
     } else {
         format_text_arg(state, formatter)?
     };
 
+    let cached_width_hint = cached.as_ref().and_then(|cached| cached.width_hint);
+    apply_formatted_text_update(state, id, formatted_text.clone(), cached_width_hint)?;
     if let Some(signature) = signature.as_deref() {
         write_cached_formatted_text(state, id, formatter, signature, &formatted_text);
     }
-    apply_formatted_text_update(state, id, formatted_text)?;
     Ok(0)
 }
 
@@ -99,8 +104,9 @@ fn apply_formatted_text_update(
     state: &mut LuaState,
     id: u64,
     formatted_text: String,
+    cached_width_hint: Option<f32>,
 ) -> LuaResult<()> {
-    if should_skip_formatted_text_update(state, id, &formatted_text)? {
+    if should_skip_formatted_text_update(state, id, &formatted_text, cached_width_hint)? {
         return Ok(());
     }
 
@@ -180,10 +186,11 @@ fn read_cached_formatted_text(
     id: u64,
     formatter: Val,
     signature: Option<&str>,
-) -> Option<String> {
+) -> Option<CachedFormattedText> {
     let signature = signature?;
     let store = get_or_create_formatted_text_cache_store(state);
-    let entry = table_get(state, store, &id.to_string());
+    let id_key = id.to_string();
+    let entry = table_get(state, store, &id_key);
     if !matches!(entry, Val::Table(_)) {
         return None;
     }
@@ -197,7 +204,12 @@ fn read_cached_formatted_text(
         return None;
     }
     let cached_result_val = table_get(state, entry, "__result");
-    val_to_string(state, cached_result_val)
+    let result = val_to_string(state, cached_result_val)?;
+    let width_hint = match table_get(state, entry, "__width_hint") {
+        Val::Num(width) => Some(width as f32),
+        _ => None,
+    };
+    Some(CachedFormattedText { result, width_hint })
 }
 
 fn write_cached_formatted_text(
@@ -208,28 +220,44 @@ fn write_cached_formatted_text(
     result: &str,
 ) {
     let store = get_or_create_formatted_text_cache_store(state);
-    let mut entry = table_get(state, store, &id.to_string());
+    let id_key = id.to_string();
+    let mut entry = table_get(state, store, &id_key);
     if !matches!(entry, Val::Table(_)) {
         entry = create_table(state);
     }
+    let width_hint = borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.widgets.get(id).map(|frame| frame.width));
     let signature_val = create_string(state, signature);
     let result_val = create_string(state, result);
     table_set(state, entry, "__formatter", formatter);
     table_set(state, entry, "__signature", signature_val);
     table_set(state, entry, "__result", result_val);
-    table_set(state, store, &id.to_string(), entry);
+    if let Some(width_hint) = width_hint {
+        table_set(state, entry, "__width_hint", Val::Num(width_hint as f64));
+    } else {
+        table_set(state, entry, "__width_hint", Val::Nil);
+    }
+    table_set(state, store, &id_key, entry);
 }
 
 fn should_skip_formatted_text_update(
     state: &mut LuaState,
     id: u64,
     formatted_text: &str,
+    cached_width_hint: Option<f32>,
 ) -> LuaResult<bool> {
     let Some(update_state) = read_formatted_text_update_state(state, id, formatted_text)? else {
         return Ok(true);
     };
     if !update_state.text_matches {
         return Ok(false);
+    }
+    if update_state.width_is_text_auto
+        && cached_width_hint
+            .is_some_and(|cached_width| (update_state.current_width - cached_width).abs() <= 0.5)
+    {
+        return Ok(true);
     }
     if let Some(skip) = skip_matching_formatted_text(update_state, None) {
         return Ok(skip);

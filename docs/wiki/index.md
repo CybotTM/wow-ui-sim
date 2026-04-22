@@ -18,6 +18,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[cli-commands]] | wow-sim and wow-cli subcommands: lua-errors, run-tests, screenshot, dump-tree, audit-api, convert-texture |
 | [[addon-compatibility]] | 127+ tested addons, Wowless integration, SavedVariables loading, Docker CI |
 | [[blizzard-ui-test-lanes]] | Explicit split between Blizzard UI unit tests and addon-bootstrap coverage |
+| [[layout-lock-inventory]] | Canonical list of UI elements with explicit layout lock coverage, mapped by subsystem/test |
 | [[development-phases]] | Active phases 31–33: widget stubs, audit tool, performance regression tests |
 
 ## systems/
@@ -56,7 +57,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
-| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks the compact-raid cleanup, remaining leave-button/BuffFrame churn, and the same-day `GameTimeFrame_SetDate()` calendar-atlas no-op fix |
+| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks compact-raid cleanup, the `GameTimeFrame_SetDate()` calendar-atlas no-op fix, and the AuraButton OnUpdate lock-down (`~0.86ms` → `31.44us`, budgeted at `<=0.5ms`) |
 | [[startup-createframe-profile]] | Runtime `CreateFrame` profiling started with action-bar button template expansion, then widened into the XML loader fast path; current safe loader state lands around 4.8s-5.8s on debug no-addons/no-saved-vars runs, with remaining misses dominated by XML script bodies |
 | [[table-rehashing]] | 97K rehashes on startup; 98% from non-frame Lua tables, 81% land at hash size ≤16; root cause is `OP_NEWTABLE(0,0)` for addon `local t = {}` patterns |
 | [[layout-profile]] | Layout was 7.5% of release startup; `LayoutCache` siphash dominated. `FxHashMap` switch drops to 5.0%, −170M layout samples, −219M total siphash samples |

@@ -104,17 +104,17 @@ fn frame_newindex(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u3
                 return Ok(0);
             }
 
-            if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+            if let Some(parent) = sim.widgets.get_mut(parent_id) {
                 parent.children_keys.insert(key.clone(), child_id);
             }
-            if let Some(child) = sim.widgets.get_mut_visual(child_id) {
+            if let Some(child) = sim.widgets.get_mut(child_id) {
                 child.parent_key = Some(key);
             }
             return Ok(0);
         }
 
         let mut sim = borrow_state_mut(state)?;
-        if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+        if let Some(parent) = sim.widgets.get_mut(parent_id) {
             parent.children_keys.remove(&key);
         }
     }

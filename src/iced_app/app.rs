@@ -35,6 +35,8 @@ pub const DEFAULT_INTERFACE_PATH: &str = "/home/osso/Projects/wow/Interface";
 /// Default path to addons directory.
 pub const DEFAULT_ADDONS_PATH: &str = "./Interface/AddOns";
 
+const DEFAULT_FAST_TICK_MS: u64 = 16;
+
 /// Debug visualization options.
 #[derive(Default, Clone)]
 pub struct DebugOptions {
@@ -527,7 +529,7 @@ impl App {
             || self.strata_dirty.get() != 0
             || self.textures_pending.get()
         {
-            return Some(std::time::Duration::from_millis(16));
+            return Some(fast_tick_interval());
         }
         drop(state);
 
@@ -552,6 +554,20 @@ impl App {
         // nothing else is active (e.g., buff duration countdown text).
         Some(std::time::Duration::from_secs(1))
     }
+}
+
+fn fast_tick_interval() -> std::time::Duration {
+    let fast_tick_ms = std::env::var("WOW_SIM_TICK_MS")
+        .ok()
+        .as_deref()
+        .and_then(parse_fast_tick_ms)
+        .unwrap_or(DEFAULT_FAST_TICK_MS);
+    std::time::Duration::from_millis(fast_tick_ms)
+}
+
+fn parse_fast_tick_ms(value: &str) -> Option<u64> {
+    let tick_ms = value.trim().parse::<u64>().ok()?;
+    (tick_ms > 0).then_some(tick_ms)
 }
 
 /// Check if any GCD or spell cooldowns are still active.
@@ -643,5 +659,18 @@ mod tests {
             app.compute_tick_interval(),
             Some(std::time::Duration::from_secs(1)),
         );
+    }
+
+    #[test]
+    fn parse_fast_tick_ms_accepts_positive_integers() {
+        assert_eq!(parse_fast_tick_ms("1"), Some(1));
+        assert_eq!(parse_fast_tick_ms(" 8 "), Some(8));
+    }
+
+    #[test]
+    fn parse_fast_tick_ms_rejects_zero_and_invalid_values() {
+        assert_eq!(parse_fast_tick_ms("0"), None);
+        assert_eq!(parse_fast_tick_ms("abc"), None);
+        assert_eq!(parse_fast_tick_ms(""), None);
     }
 }
