@@ -1,6 +1,6 @@
+use super::simple_html::{get_simple_html_font, is_simple_html_frame, set_simple_html_font};
 use super::{
-    frame_text_value, get_simple_html_font, get_string_width, is_simple_html_frame,
-    measure_text_height, measure_text_width, set_simple_html_font, set_text,
+    frame_text_value, get_string_width, measure_text_height, measure_text_width, set_text,
 };
 use crate::lua_api::frame::methods::button_anchor_hierarchy::{
     apply_font_object_snapshot, font_object_snapshot_changes_frame, read_font_object_fields,

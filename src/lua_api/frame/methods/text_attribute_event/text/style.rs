@@ -1,7 +1,8 @@
 use super::super::helpers::{store_simple_attribute, val_to_f32};
-use super::{
-    frame_text_scale_value, get_simple_html_text_color, is_simple_html_frame,
-    set_simple_html_text_color, with_simple_html_data_mut,
+use super::frame_text_scale_value;
+use super::simple_html::{
+    get_simple_html_text_color, is_simple_html_frame, set_simple_html_text_color,
+    with_simple_html_data_mut,
 };
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_string_static, frame_id_from_stack,
