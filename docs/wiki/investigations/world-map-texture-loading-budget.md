@@ -155,6 +155,22 @@ frame was presented immediately after. I did not find a further presentation
 gate after texture warmup; the remaining delay is the atlas warmup/backlog
 itself.
 
+## 2026-04-22 Atlas Tier Pressure Audit
+
+I also audited the atlas tier pressure in the same live GUI repro. The
+world-map preload path was busy, but it never reported an actual upload
+rejection:
+
+```text
+retry=0
+force_rgba_retry=0
+```
+
+Those counters stayed at zero for every `prepare()` pass in the trace, which
+means there was no RGBA fallback failure and no BC upload rejection to chase
+down. The world-map tile paths still spent time draining queued work, but each
+tile path that reached `prepare()` obtained an atlas slot successfully.
+
 ## Result
 
 After the cache + budget changes, the world map no longer took repeated ~50ms draw stalls while tiles streamed in. The same repro shifted to progressive smaller chunks:

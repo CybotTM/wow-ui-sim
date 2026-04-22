@@ -23,6 +23,16 @@ without any extra presentation gate after texture warmup, with
 `index.md` summary row for `world-map-texture-loading-budget` to mention the
 verified post-warmup frame path.
 
+## [2026-04-22] update | world-map atlas tier pressure audit
+
+Updated `investigations/world-map-texture-loading-budget.md` with the atlas
+tier pressure audit from the same live GUI repro. Recorded that every observed
+`prepare()` pass kept `retry=0` and `force_rgba_retry=0`, so there were zero
+RGBA fallback failures and zero BC upload rejections while the world-map tile
+paths drained queued work and reached atlas-ready completion. Refreshed the
+`index.md` summary row for `world-map-texture-loading-budget` with the
+no-rejection conclusion.
+
 ## [2026-04-22] update | world-map retained texture display follow-up
 
 Updated `investigations/world-map-texture-loading-budget.md` with the latest
