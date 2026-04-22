@@ -30,6 +30,14 @@ fn assert_no_rect_dirty(env: &WowLuaEnv, context: &str) {
     );
 }
 
+fn frame_id_by_name(env: &WowLuaEnv, name: &str) -> u64 {
+    env.state()
+        .borrow()
+        .widgets
+        .get_id_by_name(name)
+        .unwrap_or_else(|| panic!("frame {name} should exist"))
+}
+
 #[test]
 fn set_alpha_same_value_is_a_true_noop() {
     test_timeout! {
@@ -72,6 +80,41 @@ fn set_alpha_clamped_same_value_is_a_true_noop() {
 
         assert_no_visual_dirty(&env, "SetAlpha(2) on alpha=1");
         assert_no_rect_dirty(&env, "SetAlpha(2) on alpha=1");
+    }
+}
+
+#[test]
+fn set_alpha_real_change_marks_parent_and_child_visual_dirty() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "NoopAlphaDirtyFrame", UIParent)
+            local child = CreateFrame("Frame", "NoopAlphaDirtyChild", frame)
+            frame:SetAlpha(1)
+            "#,
+        )
+        .expect("initial alpha dirty setup should succeed");
+
+        let frame_id = frame_id_by_name(&env, "NoopAlphaDirtyFrame");
+        let child_id = frame_id_by_name(&env, "NoopAlphaDirtyChild");
+
+        clear_dirty(&env);
+
+        env.exec(r#"NoopAlphaDirtyFrame:SetAlpha(0.5)"#)
+            .expect("changed SetAlpha should succeed");
+
+        let (dirty_mask, dirty_ids) = env.state().borrow().widgets.take_render_dirty_with_ids();
+        let dirty_ids = dirty_ids.unwrap_or_default();
+        assert_ne!(dirty_mask, 0, "SetAlpha value change should dirty at least one strata");
+        assert!(
+            dirty_ids.contains(&frame_id),
+            "SetAlpha value change should dirty the parent frame"
+        );
+        assert!(
+            dirty_ids.contains(&child_id),
+            "SetAlpha value change should dirty child effective alpha too"
+        );
     }
 }
 
@@ -126,6 +169,51 @@ fn set_formatted_text_same_value_is_a_true_noop() {
 }
 
 #[test]
+fn set_formatted_text_same_value_with_overridden_format_still_calls_format_and_stays_clean() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "NoopFormattedOverrideFrame", UIParent)
+            local text = frame:CreateFontString("NoopFormattedOverrideFontString", "ARTWORK")
+            text:SetWidth(120)
+            text:SetHeight(20)
+            text:SetFormattedText("%dm", 60)
+
+            local original_format = format
+            _G.__noop_format_calls = 0
+            format = function(...)
+                _G.__noop_format_calls = _G.__noop_format_calls + 1
+                return original_format(...)
+            end
+            "#,
+        )
+        .expect("formatted override setup should succeed");
+
+        clear_dirty(&env);
+
+        env.exec(r#"NoopFormattedOverrideFontString:SetFormattedText("%dm", 60)"#)
+            .expect("same-value SetFormattedText with override should succeed");
+
+        let format_calls = env
+            .eval::<f64>(r#"return _G.__noop_format_calls"#)
+            .expect("format call counter should be readable");
+        assert_eq!(
+            format_calls as u32, 1,
+            "SetFormattedText should still dispatch through overridden format()"
+        );
+        assert_no_visual_dirty(
+            &env,
+            "SetFormattedText(%dm, 60) with overridden format on identical output",
+        );
+        assert_no_rect_dirty(
+            &env,
+            "SetFormattedText(%dm, 60) with overridden format on identical output",
+        );
+    }
+}
+
+#[test]
 fn set_point_same_value_is_a_true_noop() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
@@ -144,6 +232,28 @@ fn set_point_same_value_is_a_true_noop() {
 
         assert_no_visual_dirty(&env, "SetPoint on identical anchor");
         assert_no_rect_dirty(&env, "SetPoint on identical anchor");
+    }
+}
+
+#[test]
+fn set_point_same_value_implicit_parent_form_is_a_true_noop() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "NoopPointImplicitFrame", UIParent)
+            frame:SetPoint("CENTER", 10, 20)
+            "#,
+        )
+        .expect("initial implicit point setup should succeed");
+
+        clear_dirty(&env);
+
+        env.exec(r#"NoopPointImplicitFrame:SetPoint("CENTER", 10, 20)"#)
+            .expect("same-value implicit SetPoint should succeed");
+
+        assert_no_visual_dirty(&env, "SetPoint implicit-parent form on identical anchor");
+        assert_no_rect_dirty(&env, "SetPoint implicit-parent form on identical anchor");
     }
 }
 
@@ -192,6 +302,44 @@ fn set_font_object_same_table_reference_is_a_true_noop() {
 
         assert_no_visual_dirty(&env, "SetFontObject on identical font table ref");
         assert_no_rect_dirty(&env, "SetFontObject on identical font table ref");
+    }
+}
+
+#[test]
+fn set_font_object_equivalent_snapshot_different_table_is_a_true_noop() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "NoopFontObjectSnapshotFrame", UIParent)
+            local text = frame:CreateFontString("NoopFontObjectSnapshotString", "ARTWORK")
+            text:SetFontObject(GameFontNormalMed1)
+
+            local copy = {}
+            for k, v in pairs(GameFontNormalMed1) do
+                copy[k] = v
+            end
+            _G.__noop_font_object_snapshot_copy = copy
+            "#,
+        )
+        .expect("font object snapshot setup should succeed");
+
+        clear_dirty(&env);
+
+        env.exec(r#"NoopFontObjectSnapshotString:SetFontObject(__noop_font_object_snapshot_copy)"#)
+            .expect("equivalent snapshot SetFontObject should succeed");
+
+        let stored_copy = env
+            .eval::<bool>(
+                r#"return NoopFontObjectSnapshotString:GetFontObject() == __noop_font_object_snapshot_copy"#,
+            )
+            .expect("font object identity check should succeed");
+        assert!(
+            stored_copy,
+            "font object store should accept replacement table reference"
+        );
+        assert_no_visual_dirty(&env, "SetFontObject on equivalent snapshot table");
+        assert_no_rect_dirty(&env, "SetFontObject on equivalent snapshot table");
     }
 }
 
