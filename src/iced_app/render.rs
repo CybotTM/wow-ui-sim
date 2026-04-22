@@ -220,30 +220,36 @@ impl App {
     }
 
     pub(crate) fn preload_initial_texture_requests(&self) {
-        self.preload_current_render_requests(None);
+        let _ = self.preload_current_render_requests(None);
     }
 
     pub(crate) fn preload_current_render_requests_preserving_dirty(
         &self,
         budget: Option<std::time::Duration>,
-    ) {
+    ) -> bool {
         let dirty_before = self.strata_dirty.get();
         let pending_ids_before = self.pending_dirty_ids.borrow().clone();
-        self.preload_current_render_requests(budget);
+        let redraw_needed = self.preload_current_render_requests(budget);
         if dirty_before != 0 {
             self.mark_strata_dirty(dirty_before);
             *self.pending_dirty_ids.borrow_mut() = pending_ids_before;
         }
+        redraw_needed
     }
 
-    pub(crate) fn preload_current_render_requests(&self, budget: Option<std::time::Duration>) {
+    pub(crate) fn preload_current_render_requests(
+        &self,
+        budget: Option<std::time::Duration>,
+    ) -> bool {
         let started = std::time::Instant::now();
         let log_preload = texture_preload_logging_enabled();
+        let pending_before = self.textures_pending.get();
         let mut telemetry = TexturePreloadPassTelemetry {
             budget,
-            pending: self.textures_pending.get(),
+            pending: pending_before,
             ..Default::default()
         };
+        let mut redraw_needed = false;
 
         let env = self.env.borrow();
         let is_glue_screen = env.state().borrow().screen_kind.is_glue();
@@ -267,11 +273,13 @@ impl App {
                 || self.textures_pending.get()
                 || self.cached_render_requests_still_pending();
             self.textures_pending.set(telemetry.pending);
+            redraw_needed = queued_progress.loaded != 0 || (!pending_before && telemetry.pending);
         }
         telemetry.elapsed = started.elapsed();
         if log_preload {
             eprintln!("{}", format_texture_preload_log(&telemetry));
         }
+        redraw_needed
     }
 
     fn preload_queued_texture_requests(

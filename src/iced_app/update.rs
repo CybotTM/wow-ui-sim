@@ -345,14 +345,17 @@ impl App {
         self.set_main_thread_phase("process_timers");
         let tick_started = std::time::Instant::now();
         let mut stage_timings = TickStageTimings::default();
+        let mut redraw_needed = false;
 
         let started = std::time::Instant::now();
-        self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
+        redraw_needed |=
+            self.preload_visible_textures_with_budget(std::time::Duration::from_millis(10));
         stage_timings.preload += started.elapsed();
 
         let started = std::time::Instant::now();
         self.run_pending_exec_lua();
         stage_timings.exec_lua = started.elapsed();
+        redraw_needed |= self.strata_dirty.get() != 0;
 
         let (combined, collect_timings) = self.collect_tick_dirty();
         stage_timings.timers = collect_timings.timers;
@@ -368,10 +371,11 @@ impl App {
             let started = std::time::Instant::now();
             self.mark_strata_dirty(combined);
             stage_timings.mark_dirty = started.elapsed();
+            redraw_needed = true;
         }
         if self.strata_dirty.get() != 0 || self.textures_pending.get() {
             let started = std::time::Instant::now();
-            self.preload_current_render_requests_preserving_dirty(Some(
+            redraw_needed |= self.preload_current_render_requests_preserving_dirty(Some(
                 std::time::Duration::from_millis(25),
             ));
             stage_timings.preload += started.elapsed();
@@ -381,7 +385,7 @@ impl App {
         self.record_tick_time(tick_elapsed);
         self.update_fps_counter();
         log_slow_tick(&stage_timings, combined, self);
-        if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+        if redraw_needed {
             request_redraw_task()
         } else {
             Task::none()
@@ -598,12 +602,13 @@ impl App {
     }
 
     fn preload_visible_textures(&self) {
-        self.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
+        let _ = self.preload_visible_textures_with_budget(std::time::Duration::from_millis(50));
     }
 
-    fn preload_visible_textures_with_budget(&self, budget: std::time::Duration) {
+    fn preload_visible_textures_with_budget(&self, budget: std::time::Duration) -> bool {
         let paths = self.warmup_texture_paths();
         let deadline = std::time::Instant::now() + budget;
+        let pending_before = self.textures_pending.get();
         let mut loaded = 0usize;
         {
             let mut tex_mgr = self.texture_manager.borrow_mut();
@@ -634,6 +639,7 @@ impl App {
                 paths.len()
             ));
         }
+        loaded != 0 || (!pending_before && remaining_pending)
     }
 
     fn warmup_texture_paths(&self) -> Vec<String> {
@@ -1157,7 +1163,14 @@ mod tests {
             let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
         }
 
-        let _ = app.update(Message::ProcessTimers(Instant::now()));
+        let task = app.handle_process_timers(Instant::now());
+        let action = pollster::block_on(async {
+            iced_runtime::task::into_stream(task)
+                .expect("decode progress should request a redraw")
+                .next()
+                .await
+                .expect("task should emit a redraw action")
+        });
 
         assert_eq!(
             app.strata_dirty.get(),
@@ -1172,10 +1185,14 @@ mod tests {
             app.texture_manager.borrow().get("tick-warmup").is_some(),
             "tick-start warmup should decode the visible texture source"
         );
+        assert!(
+            matches!(action, Action::Window(WindowAction::RedrawAll)),
+            "decode progress should request a redraw for the next draw pass"
+        );
     }
 
     #[test]
-    fn process_timers_requests_redraw_when_render_work_remains() {
+    fn process_timers_requests_redraw_when_strata_are_dirty() {
         let mut app = build_test_app(ScreenKind::Game);
         app.screen_size.set(Size::new(1024.0, 768.0));
         app.selected_rot_level = "Off".to_string();
@@ -1192,7 +1209,7 @@ mod tests {
 
         assert!(
             matches!(action, Action::Window(WindowAction::RedrawAll)),
-            "timer ticks with pending render work should request a redraw"
+            "dirty strata should still request a redraw"
         );
     }
 
@@ -1263,6 +1280,77 @@ mod tests {
         assert!(
             app.textures_pending.get(),
             "draw-staged requests must stay pending until prepare uploads them into the atlas"
+        );
+    }
+
+    #[test]
+    fn process_timers_requests_redraw_when_pending_is_newly_discovered() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("staged-discovered.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.selected_rot_level = "Off".to_string();
+        app.strata_dirty.set(0);
+        app.textures_pending.set(false);
+
+        let request_path = "staged-discovered";
+        let mut batch = QuadBatch::new();
+        batch.texture_requests.push(TextureRequest {
+            path: request_path.to_string(),
+            vertex_start: 0,
+            vertex_count: 4,
+        });
+        app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::new(batch));
+
+        {
+            let mut tex_mgr = app.texture_manager.borrow_mut();
+            render::preload_texture_request_source(&mut tex_mgr, request_path);
+        }
+        app.gpu_uploaded_textures
+            .lock()
+            .unwrap()
+            .insert(request_path.to_string());
+
+        let task = app.handle_process_timers(Instant::now());
+        let action = pollster::block_on(async {
+            iced_runtime::task::into_stream(task)
+                .expect("newly discovered pending draw work should request a redraw")
+                .next()
+                .await
+                .expect("task should emit a redraw action")
+        });
+
+        assert!(
+            app.textures_pending.get(),
+            "staged-but-unprepared requests should become pending"
+        );
+        assert!(
+            matches!(action, Action::Window(WindowAction::RedrawAll)),
+            "first discovery of unresolved draw work should request a redraw"
+        );
+    }
+
+    #[test]
+    fn process_timers_skips_redraw_when_pending_state_does_not_progress() {
+        let temp_dir = tempdir().unwrap();
+        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.selected_rot_level = "Off".to_string();
+        app.strata_dirty.set(0);
+        app.textures_pending.set(true);
+        {
+            let env = app.env.borrow();
+            let _ = env.state().borrow().widgets.take_render_dirty_with_ids();
+        }
+
+        let task = app.handle_process_timers(Instant::now());
+
+        assert!(
+            iced_runtime::task::into_stream(task).is_none(),
+            "pending state alone should not force redraws every tick"
         );
     }
 
