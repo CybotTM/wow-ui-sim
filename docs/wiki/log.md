@@ -2,6 +2,23 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | world-map retained texture display follow-up
+
+Updated `investigations/world-map-texture-loading-budget.md` with the latest
+live-GUI follow-up. Documented that the screenshot path could render the world
+map on first pass while the retained GUI still missed random tiles/overlays,
+then recorded the four later bugs behind that gap: wrong warmup request source,
+full-rebuild sentinel clobbering, inverted world-map request priority, and the
+remaining `textures_pending` ownership conflict between queued preload and
+draw-time retained recovery. Refreshed the `index.md` summary row for
+`world-map-texture-loading-budget`.
+
+Later that day, updated the same page again after the deeper state-model fix:
+`gpu_uploaded_textures` was only a draw-staging set populated before
+`prepare()`, not proof that a path was ready in the atlas. Recorded the new
+atlas-ready tracker populated from `WowUiPrimitive::prepare()` and the switch
+away from using the staging set for display-readiness checks.
+
 ## [2026-04-22] update | buffframe slow onupdate interpretation
 
 Updated `investigations/on-update-dirty.md` with the current BuffFrame

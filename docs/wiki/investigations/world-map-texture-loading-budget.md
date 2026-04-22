@@ -60,6 +60,42 @@ That mismatch made the first interactive frame vulnerable to partial tile upload
 
 The fix was small but critical: `TextureManager::is_cached()` now returns true when the normalized path exists in either `cache` or `bc_cache`. That keeps the upload loop streaming BC-preloaded map tiles across the deadline boundary instead of stalling after the first quadrant.
 
+## 2026-04-22 Follow-up: Retained Live-GUI Display Path
+
+The earlier preload and GPU-pending fixes were still not the full story for the live GUI. A one-shot screenshot render of `ToggleWorldMap()` could show the textured map on first render, while the retained interactive path still showed seemingly random missing map tiles or explored regions until later interaction. That ruled out the failed-texture cache and pointed back at retained render state.
+
+The later investigation found four stacked issues in the live path:
+
+1. Tick warmup was loading the wrong request set first:
+   - it started from raw widget texture fields,
+   - but the retained renderer actually draws cached `QuadBatch` request paths, including derived `@crop:` requests,
+   - so warmup could finish “successfully” while still skipping the exact request the current frame needed.
+2. Full redraw invalidation could be downgraded later in the same tick:
+   - warmup called `mark_all_strata_dirty()`, which uses `pending_dirty_ids = None` as the full-rebuild sentinel,
+   - `collect_tick_dirty()` later overwrote that sentinel with unrelated per-frame dirty IDs,
+   - the next rebuild could then miss clean world-map strata that only needed texture re-resolution.
+3. Request priority was inverted:
+   - the sort key treated `is_world_map=true` as a larger value,
+   - so ascending sort pushed world-map requests behind unrelated UI textures,
+   - budgeted warmup then spent time on the wrong assets first.
+4. `textures_pending` still had split ownership:
+   - tick warmup and draw use it to mean “the current render request is not display-ready yet,”
+   - queued preload in `render.rs` still treated it as “the explicit preload queue has work left,”
+   - when the queue drained, that path could clear `textures_pending` before draw had uploaded and re-resolved cached world-map batches.
+5. The retained path also used the wrong readiness set:
+   - `render_textures.rs` inserted paths into `gpu_uploaded_textures` inside `load_pending_texture()`,
+   - that happens before `prepare()` uploads the bytes into `GpuTextureAtlas`,
+   - so `gpu_uploaded_textures` was really a draw-staging set, not a “visible in the atlas” set,
+   - warmup and queued-preload checks that treated it as display-ready could clear `textures_pending` a frame too early.
+
+That fourth issue matches the “click fixes it” symptom directly. `render()` only calls `recover_pending_textures()` when `had_textures_pending` is true before draw starts. If queued preload clears the flag too early, clean cached strata are never re-injected into `prepare()`, so already-decoded map textures remain invisible until some unrelated interaction dirties the UI again.
+
+The fix on 2026-04-22 was to split those meanings:
+
+- keep `gpu_uploaded_textures` as the draw-staging dedupe set,
+- add a separate atlas-ready tracker populated from `WowUiPrimitive::prepare()`,
+- switch warmup and cached-request pending checks to the atlas-ready set instead of the staging set.
+
 ## Result
 
 After the cache + budget changes, the world map no longer took repeated ~50ms draw stalls while tiles streamed in. The same repro shifted to progressive smaller chunks:
@@ -87,11 +123,12 @@ After wiring `RequestPreloadMap()`, the base map and explored overlays no longer
 ## Sources
 
 - [src/iced_app/render.rs](../../../src/iced_app/render.rs) — preload budget loop, `textures_pending` bookkeeping, and focused regression tests
+- [src/iced_app/update.rs](../../../src/iced_app/update.rs) — tick-start warmup, cached render request selection, and dirty sentinel handling
+- [src/iced_app/render_textures.rs](../../../src/iced_app/render_textures.rs) — unresolved-request ordering and GPU-upload bookkeeping
 - [src/texture.rs](../../../src/texture.rs) — `bc_cache`, `TextureManager::is_cached()`, and BC-cache regression coverage
 - [src/lua_api/globals/c_map_api.rs](../../../src/lua_api/globals/c_map_api.rs) — `C_Map.RequestPreloadMap()` queueing
 - [src/lua_api/state.rs](../../../src/lua_api/state.rs) — API-side queued texture preload storage
 - [src/texture/preload.rs](../../../src/texture/preload.rs) — map-art / exploration-overlay path collection
-- [src/iced_app/render_textures.rs](../../../src/iced_app/render_textures.rs) — draw-path GPU upload budget and `gpu_uploaded_textures` semantics
 - [Interface/BlizzardUI/Blizzard_WorldMap/MapTexturePreloader.lua](../../../Interface/BlizzardUI/Blizzard_WorldMap/MapTexturePreloader.lua) — Blizzard-side preload request entrypoint
 - [Interface/BlizzardUI/Blizzard_SharedMapDataProviders/MapExplorationDataProvider.lua](../../../Interface/BlizzardUI/Blizzard_SharedMapDataProviders/MapExplorationDataProvider.lua) — explored-overlay visibility waits on detail/background load
 - [tests/render_order.rs](../../../tests/render_order.rs) — isolated world-map integration coverage used as regression proof
@@ -100,6 +137,7 @@ After wiring `RequestPreloadMap()`, the base map and explored overlays no longer
 
 - [[world-map-frame-level-rebuilds]] — earlier fix for the periodic bucket rebuild loop
 - [[world-map-create-texture-sublevel]] — follow-up fix for world-map textures that were immediately repaired with `SetDrawLayer()`
+- [[rendering-pipeline]] — retained strata batches, prepare-time texture upload, and why clean strata need re-injection for re-resolution
 - [[world-map-fog-of-war-overlay-model]] — later fix for the separate
   exploration-data versus fog-geometry mismatch
 - [[character-select-performance]] — earlier preload/draw-path texture stall investigation
