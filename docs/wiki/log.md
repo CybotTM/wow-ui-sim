@@ -5,12 +5,13 @@ Chronological record of wiki operations.
 ## [2026-04-22] update | world-map live retained trace recapture
 
 Updated `investigations/world-map-texture-loading-budget.md` again with the
-current HEAD live-GUI recapture. Recorded the retained sequence from
-`ToggleWorldMap()` through `draw` and `prepare`, added the new `ready=` trace
-field for the atlas-ready set, and captured the key numbers from the run:
-`dirty=0x1ff pending=true ready=21` on the first retained tick, then
-`ready=21 -> 31 -> 38` while the map was still invisible, and finally
-`pending=false ready=335` after `prepare()` drained the backlog. Refreshed the
+current HEAD live-GUI recapture. Recorded the retained startup sequence from
+`ToggleWorldMap()` through `tick -> draw -> prepare -> present`, using the
+exact `iced-debug` socket emitted by the process for the screenshot burst. The
+first world-map tick was `dirty=0x1ff pending=true ready=6`; later draws
+advanced atlas-ready `6 -> 24 -> 33 -> 282 -> 335`; the first post-present
+world-map screenshot was already textured; and redraws continued after
+`pending=false` because `strata_dirty` remained `0x1c`. Refreshed the
 `index.md` summary row for `world-map-texture-loading-budget`.
 
 ## [2026-04-22] update | world-map RedrawAll verification
@@ -32,6 +33,16 @@ RGBA fallback failures and zero BC upload rejections while the world-map tile
 paths drained queued work and reached atlas-ready completion. Refreshed the
 `index.md` summary row for `world-map-texture-loading-budget` with the
 no-rejection conclusion.
+
+## [2026-04-22] update | world-map retained GPU buffer reupload audit
+
+Updated `investigations/world-map-texture-loading-budget.md` with the retained
+GPU buffer reupload audit from the same live GUI repro. Recorded that
+`upload_strata` showed the dirty world-map strata being re-written with
+`pending_tex_vertices=0` and resolved sample `tex_index` / UVs, proving the
+first-open retained path was re-uploading the affected vertex buffers after the
+atlas transition. Refreshed the `index.md` summary row for
+`world-map-texture-loading-budget` with the buffer-reupload conclusion.
 
 ## [2026-04-22] update | world-map retained texture display follow-up
 

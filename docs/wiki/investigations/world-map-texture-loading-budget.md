@@ -98,44 +98,73 @@ The fix on 2026-04-22 was to split those meanings:
 
 ## 2026-04-22 Live Retained-GUI Trace Recapture
 
-I reran the first-open world-map repro on current HEAD with the GUI path and
-captured the retained sequence using:
+I reran the first-open world-map trace on current HEAD with the live GUI path,
+enabled explicit `tick -> draw -> prepare -> present` tracing, and bound the
+`iced-debug` screenshot burst to the exact socket path written by the new
+process:
 
 ```bash
 env LD_LIBRARY_PATH=target/debug:target/debug/deps \
-  WOW_SIM_VERBOSE=1 \
+  WOW_SIM_GUI_TRACE=1 \
   WOW_SIM_LOG_TICK_STAGES=1 \
   WOW_SIM_DEBUG_TEXTURE_LOADS=1 \
-  WOW_SIM_LOG_TEXTURE_PRELOAD=1 \
-  timeout 30 ./target/debug/wow-sim --no-addons --no-saved-vars --exec-lua "ToggleWorldMap()"
+  timeout 30 ./target/debug/wow-sim \
+    --no-addons \
+    --no-saved-vars \
+    --exec-lua "ToggleWorldMap()"
 ```
 
-The first post-toggle retained tick reported:
+The retained startup sequence on the first world-map open was:
 
 ```text
-[tick-stage] ... dirty=0x1ff ids=None pending=true ready=21
+[exec-lua] Running: ToggleWorldMap()
+[gui-trace] tick redraw_request=true dirty=0x1ff pending=true ready=6
+[gui-trace] draw dirty_before=0x1ff had_pending=true ready=6 dirty_batches=9 new_rgba=2 new_bc=16
+[gui-trace] prepare ready_before=6 ready_after=24 staged_before=24 staged_after=24 retry=0 force_rgba_retry=0 dirty_strata=9 new_rgba=2 new_bc=16
+[gui-trace] present
 ```
 
-That mattered because the map was still invisible, yet the atlas-ready count was
-already moving while `textures_pending` stayed true. The next retained frames
-kept the same shape:
-
-- `dirty` fell from `0x1ff` to `0x1c`
-- `textures_pending` stayed `true`
-- `ready` climbed `21 -> 31 -> 38`
-
-The later visible handoff looked like this:
+Two later retained passes continued the same pattern:
 
 ```text
-[draw] quads=9.4ms textures=98.7ms (new=297 rgba=123 bc=174)
-[prepare] total=55.1ms textures=53.8ms strata=1.3ms overlay=361.0ns dirty_strata=9 new_rgba=123 new_bc=174
-[tick-stage] ... pending=false ready=335
+[gui-trace] tick redraw_request=true dirty=0x1c pending=true ready=24
+[gui-trace] draw dirty_before=0x1c had_pending=true ready=24 dirty_batches=9 new_rgba=6 new_bc=3
+[gui-trace] prepare ready_before=24 ready_after=33 ...
+[gui-trace] present
+
+[gui-trace] tick redraw_request=true dirty=0x1c pending=true ready=33
+[gui-trace] draw dirty_before=0x1c had_pending=true ready=33 dirty_batches=9 new_rgba=79 new_bc=170
+[gui-trace] prepare ready_before=33 ready_after=282 ...
+[gui-trace] present
 ```
 
-`present` is not separately instrumented, so that last line is the final
-post-prepare retained tick in the same frame. The important part is that the
-atlas-ready count only settled after `prepare()` drained the backlog, which
-matches the "click fixes it" behavior we were chasing.
+The final backlog-draining pass looked like this:
+
+```text
+[gui-trace] tick redraw_request=true dirty=0x1c pending=true ready=282
+[gui-trace] draw dirty_before=0x1c had_pending=true ready=282 dirty_batches=9 new_rgba=47 new_bc=4
+[gui-trace] prepare ready_before=282 ready_after=335 staged_before=335 staged_after=335 retry=0 force_rgba_retry=0 dirty_strata=9 new_rgba=47 new_bc=4
+[gui-trace] present
+[gui-trace] tick redraw_request=true dirty=0x1c pending=false ready=335
+```
+
+The screenshot burst against that same retained run mattered more than the raw
+counts:
+
+- burst frame `1` was still pre-map black
+- burst frame `2`, the first post-present world-map capture, was already fully
+  textured
+- burst frames `2` through `9` stayed pixel-identical even while `ready` kept
+  rising `24 -> 33 -> 282`
+
+So this current-HEAD recapture answered the original question directly:
+
+- `textures_pending` and atlas-ready counts did continue changing after first
+  open, but not while tiles were still invisible in this run
+- `strata_dirty` collapsed from `0x1ff` to `0x1c` and then stayed there,
+  which kept redraw requests flowing even after `textures_pending=false`
+- the retained path is now instrumented through `present`, so the frame
+  boundary is no longer inferred from the next tick log
 
 ## 2026-04-22 RedrawAll Verification
 
@@ -170,6 +199,26 @@ Those counters stayed at zero for every `prepare()` pass in the trace, which
 means there was no RGBA fallback failure and no BC upload rejection to chase
 down. The world-map tile paths still spent time draining queued work, but each
 tile path that reached `prepare()` obtained an atlas slot successfully.
+
+## 2026-04-22 Retained GPU Buffer Reupload Audit
+
+With `upload_strata` trace enabled, I then checked the retained GPU buffer
+updates themselves. The first-open world-map frames showed the dirty strata
+slots being rewritten every pass, and the uploaded vertex batches were already
+resolved before the GPU write:
+
+```text
+[gui-trace] upload_strata slot=3 vertices=3344 indices=5016 pending_tex_vertices=0 pending_mask_vertices=0 sample_tex_index=2 sample_tex_coords=(0.125,0.031)
+[gui-trace] upload_strata slot=4 vertices=1264 indices=1896 pending_tex_vertices=0 pending_mask_vertices=0 sample_tex_index=5 sample_tex_coords=(0.334,0.000)
+...
+[gui-trace] upload_strata slot=4 vertices=1264 indices=1896 pending_tex_vertices=0 pending_mask_vertices=0 sample_tex_index=0 sample_tex_coords=(0.516,0.016)
+```
+
+That is the important distinction: the retained path did re-upload the strata
+vertex buffers after pending textures became ready, and the resolved sample
+`tex_index` / UVs changed as the atlas filled in. The uploaded buffers never
+contained `tex_index=-2` at that point, so the first-open world-map path is not
+stuck on unresolved vertex data after the atlas transition.
 
 ## Result
 

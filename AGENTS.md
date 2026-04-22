@@ -106,7 +106,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ### Method/Property Lookup on UserData
 
-All frame methods (`Hide`, `Show`, `IsVisible`, etc.) are registered once on `FrameRef` via `add_method` — mlua resolves them for ALL widget types regardless of `WidgetType`. The per-type method registry (`is_method_allowed`) only gates `getmetatable()` results, not actual method calls. Verified by `test_message_frame_has_global_methods` in `src/loader/tests/mod.rs`. If runtime errors report global methods as nil, the problem is the Lua value not being a `FrameRef` (e.g., overwritten by a table), not a missing method registration.
+All frame methods (`Hide`, `Show`, `IsVisible`, etc.) are registered once on `FrameRef` via the shared rilua method/metatable path, so runtime dispatch resolves them for ALL widget types regardless of `WidgetType`. The per-type method registry (`is_method_allowed`) only gates `getmetatable()` results, not actual method calls. Verified by `test_message_frame_has_global_methods` in `src/loader/tests/mod.rs`. If runtime errors report global methods as nil, the problem is the Lua value not being a `FrameRef` (e.g., overwritten by a table), not a missing method registration.
 
 ### UserData vs Table: rawset/rawget
 
@@ -203,7 +203,13 @@ The simulator uses **Elune** — Blizzard's custom Lua 5.1 fork with taint track
 
 ## Performance
 
-Uses **Lua 5.1** via mlua (WoW's Lua version).
+Uses **Lua 5.1 semantics** on the `rilua` runtime.
+
+### Rilua Hot Paths
+
+- Do **not** default to blaming generic "Lua bridge cost" or old mlua userdata overhead when a handler is slow.
+- The current simulator uses rilua stack-level dispatch and direct hot Rust calls for frame methods / globals.
+- `WOW_SIM_LOG_HANDLER_TIMINGS` measures the handler body itself. Treat slow `OnUpdate`/event timings as real work in the handler, downstream Rust API calls, string formatting, table churn, or GC until proven otherwise.
 
 ### Running the Simulator
 
