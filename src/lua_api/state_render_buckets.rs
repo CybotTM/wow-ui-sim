@@ -92,17 +92,15 @@ fn dfs_emit_with_region_mode(
         child_frames.retain(|&child_id| child_id != nineslice_id);
     }
     let mut deferred_font_regions = emit_immediate_regions(regions, widgets, out);
-    let hoisted_regions = emit_child_frames_and_collect_hoisted(
+    emit_child_frames_and_hoisted(
         &mut child_frames,
         strata_idx,
         widgets,
         visible,
         out,
         suppress_regions,
+        &mut deferred_font_regions,
     );
-
-    let deferred_hoisted = emit_immediate_regions(hoisted_regions, widgets, out);
-    deferred_font_regions.extend(deferred_hoisted);
     sort_regions(&mut deferred_font_regions, widgets);
     out.extend(deferred_font_regions.into_iter().map(|entry| entry.id));
 }
@@ -160,22 +158,23 @@ fn emit_immediate_regions(
     deferred_regions
 }
 
-fn emit_child_frames_and_collect_hoisted(
+fn emit_child_frames_and_hoisted(
     child_frames: &mut [u64],
     strata_idx: usize,
     widgets: &WidgetRegistry,
     visible: &HashSet<u64>,
     out: &mut Vec<u64>,
     suppress_regions: bool,
-) -> Vec<RegionEntry> {
+    deferred_regions: &mut Vec<RegionEntry>,
+) {
     sort_child_frames(child_frames, widgets);
-    let mut hoisted_regions = Vec::new();
     for &child_id in child_frames.iter() {
         let child = widgets.get(child_id);
         let child_suppress = child.is_some_and(|frame| {
             is_regionless_transparent_wrapper(frame, strata_idx, widgets, visible)
         });
         if !suppress_regions && child_suppress {
+            let mut hoisted_regions = Vec::new();
             collect_transparent_wrapper_regions(
                 child_id,
                 strata_idx,
@@ -184,10 +183,11 @@ fn emit_child_frames_and_collect_hoisted(
                 1,
                 &mut hoisted_regions,
             );
+            let deferred_hoisted = emit_immediate_regions(hoisted_regions, widgets, out);
+            deferred_regions.extend(deferred_hoisted);
         }
         dfs_emit_with_region_mode(child_id, strata_idx, widgets, visible, out, child_suppress);
     }
-    hoisted_regions
 }
 
 fn collect_frame_regions(
@@ -390,6 +390,8 @@ pub(super) fn same_strata_subtree_segment_end(
 }
 
 fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
+    use std::cmp::Reverse;
+
     regions.sort_by(|a, b| {
         let (frame_a, frame_b) = match (widgets.get(a.id), widgets.get(b.id)) {
             (Some(frame_a), Some(frame_b)) => (frame_a, frame_b),
@@ -399,22 +401,18 @@ fn sort_regions(regions: &mut [RegionEntry], widgets: &WidgetRegistry) {
             u8::from(frame.widget_type == crate::widget::WidgetType::FontString)
         };
         (
-            effective_frame_level(frame_a),
-            frame_a.frame_level,
             a.depth,
             frame_a.draw_layer as i32,
             frame_a.draw_sub_layer,
             type_flag(frame_a),
-            a.id,
+            Reverse(a.id),
         )
             .cmp(&(
-                effective_frame_level(frame_b),
-                frame_b.frame_level,
                 b.depth,
                 frame_b.draw_layer as i32,
                 frame_b.draw_sub_layer,
                 type_flag(frame_b),
-                b.id,
+                Reverse(b.id),
             ))
     });
 }
@@ -623,32 +621,6 @@ mod tests {
             bucket,
             vec![1, 2, 3, 4, 5],
             "wrapper-owned regions should render before descendant child frames"
-        );
-    }
-
-    #[test]
-    fn sort_regions_prioritizes_frame_level_before_depth() {
-        let mut widgets = WidgetRegistry::default();
-
-        let mut lower_level = test_frame(20, WidgetType::Texture, None);
-        lower_level.frame_level = 100;
-        widgets.register(lower_level);
-
-        let mut higher_level = test_frame(30, WidgetType::Texture, None);
-        higher_level.frame_level = 200;
-        widgets.register(higher_level);
-
-        let mut regions = vec![
-            RegionEntry { depth: 0, id: 30 },
-            RegionEntry { depth: 5, id: 20 },
-        ];
-
-        super::sort_regions(&mut regions, &widgets);
-
-        assert_eq!(
-            regions.iter().map(|entry| entry.id).collect::<Vec<_>>(),
-            vec![20, 30],
-            "lower frame-level region should render first even when deeper in the wrapper tree"
         );
     }
 }
