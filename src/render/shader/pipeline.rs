@@ -38,6 +38,8 @@ struct StrataGpuBuffer {
     vertex_capacity: usize,
     index_capacity: usize,
     index_count: usize,
+    #[cfg(test)]
+    last_uploaded_vertices: Vec<QuadVertex>,
 }
 
 /// Total number of GPU buffer slots: 9 strata + 1 overlay.
@@ -90,6 +92,8 @@ fn create_strata_buffer(device: &wgpu::Device, label_idx: usize) -> StrataGpuBuf
         vertex_capacity: 4096,
         index_capacity: 4096,
         index_count: 0,
+        #[cfg(test)]
+        last_uploaded_vertices: Vec::new(),
     }
 }
 
@@ -158,6 +162,39 @@ impl WowUiPipeline {
         }
     }
 
+    fn trace_strata_upload(slot: usize, quads: &QuadBatch) {
+        let pending_tex_vertices = quads.vertices.iter().filter(|v| v.tex_index == -2).count();
+        let pending_mask_vertices = quads
+            .vertices
+            .iter()
+            .filter(|v| v.mask_tex_index == -2)
+            .count();
+        let sample = quads
+            .vertices
+            .iter()
+            .find(|v| v.tex_index >= 0 || v.mask_tex_index >= 0)
+            .or_else(|| quads.vertices.first());
+        let sample_text = sample.map_or_else(
+            || "sample=none".to_string(),
+            |vertex| {
+                format!(
+                    "sample_tex_index={} sample_tex_coords=({:.3},{:.3}) sample_mask_tex_index={} sample_mask_tex_coords=({:.3},{:.3})",
+                    vertex.tex_index,
+                    vertex.tex_coords[0],
+                    vertex.tex_coords[1],
+                    vertex.mask_tex_index,
+                    vertex.mask_tex_coords[0],
+                    vertex.mask_tex_coords[1],
+                )
+            },
+        );
+        crate::logging::eprintln_gui_trace(&format!(
+            "upload_strata slot={slot} vertices={} indices={} pending_tex_vertices={pending_tex_vertices} pending_mask_vertices={pending_mask_vertices} {sample_text}",
+            quads.vertices.len(),
+            quads.indices.len(),
+        ));
+    }
+
     /// Upload quad data for a single strata/overlay slot.
     ///
     /// Resizes the slot's vertex/index buffers if needed, then writes data.
@@ -168,6 +205,10 @@ impl WowUiPipeline {
         slot: usize,
         quads: &QuadBatch,
     ) {
+        if crate::logging::gui_trace_enabled() {
+            Self::trace_strata_upload(slot, quads);
+        }
+
         let buf = &mut self.strata_buffers[slot];
 
         let vertex_size = quads.vertices.len() * mem::size_of::<QuadVertex>();
@@ -199,11 +240,17 @@ impl WowUiPipeline {
             queue.write_buffer(&buf.index_buffer, 0, bytemuck::cast_slice(&quads.indices));
         }
         buf.index_count = quads.indices.len();
+        #[cfg(test)]
+        {
+            buf.last_uploaded_vertices = quads.vertices.clone();
+        }
     }
 
     /// Clear the index count for a strata slot (keeps buffer allocated).
     pub fn clear_strata(&mut self, slot: usize) {
         self.strata_buffers[slot].index_count = 0;
+        #[cfg(test)]
+        self.strata_buffers[slot].last_uploaded_vertices.clear();
     }
 
     /// Render all strata + overlay using per-strata GPU buffers.
@@ -316,6 +363,11 @@ impl WowUiPipeline {
     /// Get mutable access to the texture atlas.
     pub fn texture_atlas_mut(&mut self) -> &mut GpuTextureAtlas {
         &mut self.texture_atlas
+    }
+
+    #[cfg(test)]
+    pub(crate) fn uploaded_vertices(&self, slot: usize) -> &[QuadVertex] {
+        &self.strata_buffers[slot].last_uploaded_vertices
     }
 }
 

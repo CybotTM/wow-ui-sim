@@ -375,3 +375,118 @@ fn resolved_bc_entries_remap_quad_uvs_into_bc_slot() {
     assert!((vertices[1].tex_coords[0] - remap_bc_entry_uv(1.0, 0.25, 0.125, 128)).abs() < 1e-6);
     assert!((vertices[1].tex_coords[1] - remap_bc_entry_uv(1.0, 0.5, 0.25, 64)).abs() < 1e-6);
 }
+
+#[test]
+fn pending_transition_reuploads_strata_vertices_with_resolved_tex_indices_after_ready() {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+    let (device, queue) = pollster::block_on(async {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions::default())
+            .await
+            .expect("adapter");
+        adapter
+            .request_device(&wgpu::DeviceDescriptor::default())
+            .await
+            .expect("device")
+    });
+
+    let mut pipeline = WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
+    let path = r"Interface\WorldMap\Test\TileReady".to_string();
+    let mut batch = QuadBatch::default();
+    batch.push_textured_path(
+        Rectangle::new(Point::ORIGIN, Size::new(16.0, 16.0)),
+        &path,
+        [1.0, 1.0, 1.0, 1.0],
+        BlendMode::Alpha,
+    );
+    let batch = Arc::new(batch);
+
+    let mut first = WowUiPrimitive::empty();
+    first.strata_batches[0] = Some(Arc::clone(&batch));
+    <WowUiPrimitive as ShaderPrimitive>::prepare(
+        &first,
+        &mut pipeline,
+        &device,
+        &queue,
+        &Rectangle::new(Point::ORIGIN, Size::new(64.0, 64.0)),
+        &Viewport::with_physical_size(Size::new(64, 64), 1.0),
+    );
+
+    let pending_vertices = pipeline.uploaded_vertices(0).to_vec();
+    assert_eq!(pending_vertices.len(), batch.vertices.len());
+    assert!(
+        pending_vertices.iter().all(|vertex| vertex.tex_index == -1),
+        "unresolved first-open vertices should upload as hidden placeholders first"
+    );
+    assert!(
+        pending_vertices.iter().all(|vertex| vertex.color[3] == 0.0),
+        "pending first-open vertices should be transparent until the atlas entry exists"
+    );
+
+    let staged = Arc::new(std::sync::Mutex::new(HashSet::from([path.clone()])));
+    let ready = Arc::new(std::sync::Mutex::new(HashSet::new()));
+    let force_rgba = Arc::new(std::sync::Mutex::new(HashSet::new()));
+    let mut second = WowUiPrimitive::empty();
+    second.strata_batches[0] = Some(Arc::clone(&batch));
+    second.textures.push(crate::render::GpuTextureData {
+        path: path.clone(),
+        width: 16,
+        height: 16,
+        rgba: Arc::<[u8]>::from(vec![0xff; 16 * 16 * 4]),
+    });
+    second.gpu_uploaded_textures = Some(Arc::clone(&staged));
+    second.gpu_ready_textures = Some(Arc::clone(&ready));
+    second.gpu_force_rgba_textures = Some(Arc::clone(&force_rgba));
+    <WowUiPrimitive as ShaderPrimitive>::prepare(
+        &second,
+        &mut pipeline,
+        &device,
+        &queue,
+        &Rectangle::new(Point::ORIGIN, Size::new(64.0, 64.0)),
+        &Viewport::with_physical_size(Size::new(64, 64), 1.0),
+    );
+
+    let entry = pipeline
+        .texture_atlas_mut()
+        .get(&path)
+        .copied()
+        .expect("second prepare should upload the pending texture into the atlas");
+    let uploaded_vertices = pipeline.uploaded_vertices(0);
+    assert_eq!(uploaded_vertices.len(), batch.vertices.len());
+    assert!(
+        ready.lock().unwrap().contains(&path),
+        "successful prepare should mark the path atlas-ready"
+    );
+    assert!(
+        force_rgba.lock().unwrap().is_empty(),
+        "plain RGBA uploads should not request BC fallback handling"
+    );
+
+    for (resolved, pending) in uploaded_vertices.iter().zip(&pending_vertices) {
+        let expected_u = remap_entry_uv(
+            resolved.local_uv[0],
+            entry.uv_x,
+            entry.uv_width,
+            entry.original_width,
+            entry.tier,
+        );
+        let expected_v = remap_entry_uv(
+            resolved.local_uv[1],
+            entry.uv_y,
+            entry.uv_height,
+            entry.original_height,
+            entry.tier,
+        );
+        assert_eq!(resolved.tex_index, entry.tex_index());
+        assert!((resolved.tex_coords[0] - expected_u).abs() < 1e-6);
+        assert!((resolved.tex_coords[1] - expected_v).abs() < 1e-6);
+        assert!(
+            resolved.color[3] > 0.0,
+            "resolved upload should restore visible vertex alpha"
+        );
+        assert_ne!(
+            resolved.tex_index, pending.tex_index,
+            "the retained strata slot must be rewritten, not left on the hidden placeholder state"
+        );
+    }
+}

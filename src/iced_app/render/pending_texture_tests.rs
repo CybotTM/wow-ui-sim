@@ -1,9 +1,11 @@
 use super::*;
 use crate::lua_api::WowLuaEnv;
+use crate::render::BlendMode;
 use crate::render::{GlyphAtlas, WowFontSystem};
 use crate::render::{QuadBatch, TextureRequest};
 use crate::screen::ScreenKind;
 use crate::texture::TextureManager;
+use iced::{Point, Rectangle, Size};
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
@@ -144,5 +146,48 @@ fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_reque
     assert!(
         app.textures_pending.get(),
         "queue drain must not clear pending state until the render request is GPU-uploaded"
+    );
+}
+
+#[test]
+fn pending_transition_reinjects_clean_cached_strata_for_staged_requests() {
+    let temp_dir = tempdir().unwrap();
+    let app = build_test_app_with_textures(temp_dir.path());
+    let request_path = "retained-reinject";
+
+    let mut batch = QuadBatch::new();
+    batch.push_textured_path(
+        Rectangle::new(Point::ORIGIN, Size::new(8.0, 8.0)),
+        request_path,
+        [1.0, 1.0, 1.0, 1.0],
+        BlendMode::Alpha,
+    );
+    let cached = std::sync::Arc::new(batch);
+    app.cached_strata_quads.borrow_mut()[0] = Some(std::sync::Arc::clone(&cached));
+    app.gpu_uploaded_textures
+        .lock()
+        .unwrap()
+        .insert(request_path.to_string());
+    app.textures_pending.set(true);
+
+    let mut dirty_strata = std::array::from_fn(|_| None);
+    let mut textures = Vec::new();
+    let mut bc_textures = Vec::new();
+
+    app.recover_pending_textures(&mut dirty_strata, &mut textures, &mut bc_textures);
+
+    assert!(
+        textures.is_empty() && bc_textures.is_empty(),
+        "already staged requests should not redundantly reload CPU texture payloads"
+    );
+    assert!(
+        dirty_strata[0]
+            .as_ref()
+            .is_some_and(|batch| std::sync::Arc::ptr_eq(batch, &cached)),
+        "retained draw should resubmit the cached clean strata batch while textures are pending"
+    );
+    assert!(
+        dirty_strata[1..].iter().all(Option::is_none),
+        "only the cached strata with pending requests should be reinjected here"
     );
 }
