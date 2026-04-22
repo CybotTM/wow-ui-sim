@@ -612,7 +612,7 @@ impl App {
         let loaded = tex_mgr.cache_len() - before;
         if loaded > 0 {
             crate::logging::eprintln_elapsed(&format!(
-                "[preload] {loaded} new textures ({} total)",
+                "[texture-cache-warmup] {loaded} new textures ({} requested)",
                 paths.len()
             ));
         }
