@@ -56,7 +56,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
-| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks the compact-raid cleanup, remaining leave-button/BuffFrame churn, and the same-day `GameTimeFrame_SetDate()` calendar-atlas no-op fix |
+| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks the compact-raid cleanup, the landed BuffFrame AuraButton settled-tick short-circuit for long buffs, and the same-day `GameTimeFrame_SetDate()` calendar-atlas no-op fix |
 | [[startup-createframe-profile]] | Runtime `CreateFrame` profiling started with action-bar button template expansion, then widened into the XML loader fast path; current safe loader state lands around 4.8s-5.8s on debug no-addons/no-saved-vars runs, with remaining misses dominated by XML script bodies |
 | [[table-rehashing]] | 97K rehashes on startup; 98% from non-frame Lua tables, 81% land at hash size ≤16; root cause is `OP_NEWTABLE(0,0)` for addon `local t = {}` patterns |
 | [[layout-profile]] | Layout was 7.5% of release startup; `LayoutCache` siphash dominated. `FxHashMap` switch drops to 5.0%, −170M layout samples, −219M total siphash samples |

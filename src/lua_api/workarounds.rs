@@ -59,6 +59,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_uiparent_onupdate_worklists", || {
         patch_uiparent_onupdate_worklists(env);
     });
+    log_step(env, "patch_buff_frame_aura_button_onupdate", || {
+        patch_buff_frame_aura_button_onupdate(env);
+    });
     log_step(env, "patch_chat_voice_button_surface", || {
         patch_chat_voice_button_surface(env);
     });
@@ -222,6 +225,9 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
 }
 
 pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
+    if addon_name == "Blizzard_BuffFrame" {
+        patch_buff_frame_aura_button_onupdate_for_runtime_addon_load(env);
+    }
     if addon_name == "Blizzard_PagedContent" {
         let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
     }
@@ -363,6 +369,135 @@ fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {
         end
         "#,
     );
+}
+
+const BUFF_FRAME_AURA_BUTTON_ONUPDATE_WORKAROUND_LUA: &str = r#"
+    if type(AuraButtonMixin) ~= "table"
+        or type(AuraButtonMixin.OnUpdate) ~= "function"
+        or rawget(_G, "__wow_buff_frame_aura_button_onupdate_patched")
+    then
+        return
+    end
+
+    local originalOnUpdate = AuraButtonMixin.OnUpdate
+    local originalUpdateExpirationTime = AuraButtonMixin.UpdateExpirationTime
+
+    local function resetAuraButtonNoopCache(self)
+        rawset(self, "__wow_cached_warning_alpha", nil)
+        rawset(self, "__wow_cached_duration_show", nil)
+        rawset(self, "__wow_cached_duration_bucket_unit", nil)
+        rawset(self, "__wow_cached_duration_bucket_value", nil)
+        rawset(self, "__wow_cached_duration_small_font", nil)
+    end
+
+    local function getDurationBucket(timeLeft)
+        local threshold = 1.5
+        if timeLeft >= SECONDS_PER_DAY * threshold then
+            return 4, ceil(timeLeft / SECONDS_PER_DAY)
+        end
+        if timeLeft >= SECONDS_PER_HOUR * threshold then
+            return 3, ceil(timeLeft / SECONDS_PER_HOUR)
+        end
+        return 2, ceil(timeLeft / SECONDS_PER_MIN)
+    end
+
+    local function useSmallerDurationFont(timeLeft)
+        if not SMALLER_AURA_DURATION_FONT_MIN_THRESHOLD then
+            return nil
+        end
+
+        local aboveMinThreshold = timeLeft > SMALLER_AURA_DURATION_FONT_MIN_THRESHOLD
+        local belowMaxThreshold = not SMALLER_AURA_DURATION_FONT_MAX_THRESHOLD
+            or timeLeft < SMALLER_AURA_DURATION_FONT_MAX_THRESHOLD
+        return aboveMinThreshold and belowMaxThreshold
+    end
+
+    if type(originalUpdateExpirationTime) == "function" then
+        AuraButtonMixin.UpdateExpirationTime = function(self, buttonInfo)
+            resetAuraButtonNoopCache(self)
+            return originalUpdateExpirationTime(self, buttonInfo)
+        end
+    end
+
+    AuraButtonMixin.OnUpdate = function(self, elapsed)
+        if self.isExample or not self.buttonInfo then
+            return
+        end
+
+        if self.auraType == "TempEnchant" then
+            return originalOnUpdate(self, elapsed)
+        end
+
+        local tooltipOwned = type(GameTooltip) == "table"
+            and type(GameTooltip.IsOwned) == "function"
+            and GameTooltip:IsOwned(self)
+        if tooltipOwned then
+            return originalOnUpdate(self, elapsed)
+        end
+
+        self:CalculateTimeLeft()
+        local timeLeft = self.timeLeft or 0
+        if timeLeft < BUFF_DURATION_WARNING_TIME then
+            return originalOnUpdate(self, elapsed)
+        end
+
+        local containerFrame = self:GetParent()
+        local auraWarningAlpha
+        if containerFrame and containerFrame.GetAuraWarningAlphaForDuration then
+            auraWarningAlpha = containerFrame:GetAuraWarningAlphaForDuration(timeLeft)
+        end
+
+        local showDuration = CVarCallbackRegistry:GetCVarValueBool("buffDurations")
+        local bucketUnit, bucketValue = getDurationBucket(timeLeft)
+        local smallFont = useSmallerDurationFont(timeLeft)
+
+        local alphaChanged = auraWarningAlpha ~= nil
+            and rawget(self, "__wow_cached_warning_alpha") ~= auraWarningAlpha
+        local durationChanged = rawget(self, "__wow_cached_duration_show") ~= showDuration
+            or rawget(self, "__wow_cached_duration_bucket_unit") ~= bucketUnit
+            or rawget(self, "__wow_cached_duration_bucket_value") ~= bucketValue
+        local fontChanged = smallFont ~= nil
+            and rawget(self, "__wow_cached_duration_small_font") ~= smallFont
+
+        if not alphaChanged and not durationChanged and not fontChanged then
+            return
+        end
+
+        if alphaChanged then
+            self:SetAlpha(auraWarningAlpha)
+            rawset(self, "__wow_cached_warning_alpha", auraWarningAlpha)
+        end
+
+        if durationChanged then
+            securecall(self.UpdateDuration, self, timeLeft)
+            rawset(self, "__wow_cached_duration_show", showDuration)
+            rawset(self, "__wow_cached_duration_bucket_unit", bucketUnit)
+            rawset(self, "__wow_cached_duration_bucket_value", bucketValue)
+        end
+
+        if fontChanged then
+            if smallFont then
+                self.Duration:SetFontObject(SMALLER_AURA_DURATION_FONT)
+                self.Duration:SetPoint("TOP", self, "BOTTOM", 0, SMALLER_AURA_DURATION_OFFSET_Y)
+            else
+                self.Duration:SetFontObject(DEFAULT_AURA_DURATION_FONT)
+                self.Duration:SetPoint("TOP", self, "BOTTOM")
+            end
+            rawset(self, "__wow_cached_duration_small_font", smallFont)
+        end
+    end
+
+    rawset(_G, "__wow_buff_frame_aura_button_onupdate_patched", true)
+"#;
+
+fn patch_buff_frame_aura_button_onupdate(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(BUFF_FRAME_AURA_BUTTON_ONUPDATE_WORKAROUND_LUA);
+}
+
+fn patch_buff_frame_aura_button_onupdate_for_runtime_addon_load(
+    env: &crate::lua_api::LoaderEnv<'_>,
+) {
+    let _ = env.exec(BUFF_FRAME_AURA_BUTTON_ONUPDATE_WORKAROUND_LUA);
 }
 
 fn patch_vignette_pin_template(env: &crate::lua_api::WowLuaEnv) {

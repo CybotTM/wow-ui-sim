@@ -70,6 +70,52 @@ same-value guards, so the main waste is that `AuraButtonMixin:OnUpdate()` keeps
 recomputing countdown formatting and threshold branches every tick before those
 guards can bail out.
 
+## 2026-04-22 BuffFrame settled-tick optimization
+
+The BuffFrame hot path now has a simulator-side workaround in
+`src/lua_api/workarounds.rs` that patches `AuraButtonMixin:OnUpdate()` without
+editing Blizzard vendor files.
+
+The optimization deliberately stays narrow:
+
+- keep Blizzard behavior for temp enchants
+- keep Blizzard behavior while the tooltip owns the aura button
+- keep Blizzard behavior once `timeLeft < BUFF_DURATION_WARNING_TIME` (`90s`),
+  where the countdown and warning color legitimately change often
+- short-circuit the common long-buff settled path where the visible state is
+  unchanged
+
+For long buffs (`timeLeft >= 90s`), the patch now caches the pieces that matter
+to rendering:
+
+- warning alpha target
+- duration visibility
+- duration display bucket (minute / hour / day bucket + rounded value)
+- duration font-threshold mode
+
+When those cached values are unchanged, the settled tick skips:
+
+- `SecondsToTimeAbbrev()`
+- `Duration:SetFormattedText()`
+- `Duration:SetShown()`
+- `Duration:SetVertexColor()`
+- `Duration:SetFontObject()`
+- `Duration:SetPoint()`
+- `SetAlpha()`
+
+That turns the old “call a stack of no-op mutators every frame” behavior into a
+state-driven path for long buffs, while still falling back to the Blizzard
+logic in the short-duration and tooltip-owned cases where the UI legitimately
+changes every tick.
+
+Regression coverage now lives in `tests/onupdate_handler_audit.rs`:
+
+- `buff_button_onupdate_skips_settled_duration_reformatting_and_alpha_churn`
+  proves a second settled tick on a long buff performs none of the duration /
+  font / alpha updates and leaves the render-dirty batch empty
+- `leave_instance_group_button_queries_group_state_even_when_mutators_noop`
+  still covers the compact-raid button path separately
+
 ## 2026-04-14 GameTimeFrame calendar atlas follow-up
 
 The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than
