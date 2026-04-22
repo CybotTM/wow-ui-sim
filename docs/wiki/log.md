@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | setalpha no-op microbenchmark baseline
+
+Updated `investigations/on-update-dirty.md` with a pre-optimization
+`SetAlpha` microbenchmark baseline from a headless `--exec-lua` run. Recorded
+batch timings (`empty`, `GetAlpha`, same-value `SetAlpha(1)`, and alternating
+state-change `SetAlpha`) and the required split:
+Lua->Rust call overhead, same-value fast-path overhead, and real
+state-change overhead.
+
 ## [2026-04-22] update | world-map Lua retry simplification
 
 Updated `investigations/world-map-texture-loading-budget.md` with the

@@ -70,6 +70,40 @@ same-value guards, so the main waste is that `AuraButtonMixin:OnUpdate()` keeps
 recomputing countdown formatting and threshold branches every tick before those
 guards can bail out.
 
+## 2026-04-22 SetAlpha no-op microbenchmark baseline
+
+Before changing any `SetAlpha` implementation, we measured the current
+simulator cost directly in Lua with a batched microbenchmark
+(`N=120000`, `R=8`) and wrote the results from `--exec-lua` to
+`/tmp/claude/setalpha_bench_results.txt`.
+
+Command shape used:
+
+```bash
+LD_LIBRARY_PATH=target/debug:target/debug/deps \
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 \
+target/debug/wow-sim --no-addons --no-saved-vars \
+  --exec-lua @/tmp/claude/setalpha_bench.lua \
+  screenshot -o /tmp/claude/setalpha_bench.webp
+```
+
+Measured batch timings (`GetTime` timer path in this headless run):
+
+- `empty_ms=18.959338`
+- `get_ms=151.218306` (`GetAlpha`)
+- `same_ms=140.049725` (`SetAlpha(1)` when alpha already `1`)
+- `change_ms=309.110654` (alternating `SetAlpha(1)` / `SetAlpha(0.5)`)
+
+Required split (per-call, microseconds):
+
+- **Lua->Rust call overhead:** `1.102us` (`GetAlpha - empty`)
+- **same-value fast-path overhead:** `1.009us` (`SetAlpha(1) - empty`)
+- **real state-change overhead:** `+1.409us` (`change - same`)
+
+Interpretation: the same-value `SetAlpha(1)` path is already near bare
+Lua->Rust call cost in this benchmark, while real state change adds another
+~`1.4us`/call on top.
+
 ## 2026-04-14 GameTimeFrame calendar atlas follow-up
 
 The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than
