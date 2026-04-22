@@ -38,6 +38,18 @@ pub fn get_downloaded_percentage(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetMovieDownloadProgress(movieID) -> (inProgress, downloaded, total)`.
+///
+/// The simulator has no cinematic download pipeline. Return a stable "not
+/// downloading" tuple so Blizzard_PerformanceBar tooltip code can execute
+/// without nil-global errors.
+pub fn get_movie_download_progress(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(3)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     let state = lua.state_mut();
@@ -47,6 +59,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         state.global,
         "GetDownloadedPercentage",
         get_downloaded_percentage,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        state.global,
+        "GetMovieDownloadProgress",
+        get_movie_download_progress,
     )?;
     Ok(())
 }

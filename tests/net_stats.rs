@@ -59,3 +59,14 @@ fn get_downloaded_percentage_defaults_to_fully_downloaded() {
         .expect("GetDownloadedPercentage should be callable");
     assert_eq!(percent, 1.0);
 }
+
+#[test]
+fn get_movie_download_progress_defaults_to_no_active_download() {
+    let env = WowLuaEnv::new().expect("env");
+    let (in_progress, downloaded, total): (bool, f64, f64) = env
+        .eval("return GetMovieDownloadProgress(1)")
+        .expect("GetMovieDownloadProgress should be callable");
+    assert!(!in_progress);
+    assert_eq!(downloaded, 0.0);
+    assert_eq!(total, 0.0);
+}
