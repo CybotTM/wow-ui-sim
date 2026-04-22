@@ -76,14 +76,22 @@ fn check_vertical_overflow(state: &LuaState, id: u64, p: &TruncationProps) -> bo
 pub(crate) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let formatted_text = format_text_arg(state)?;
+    apply_formatted_text_update(state, id, formatted_text)?;
+    Ok(0)
+}
+
+fn apply_formatted_text_update(
+    state: &mut LuaState,
+    id: u64,
+    formatted_text: String,
+) -> LuaResult<()> {
     if should_skip_formatted_text_update(state, id, &formatted_text)? {
-        return Ok(0);
+        return Ok(());
     }
 
     replace_text_stack_arg(state, &formatted_text);
     set_text(state)?;
-    ensure_intrinsic_formatted_text_width(state, id)?;
-    Ok(0)
+    ensure_intrinsic_formatted_text_width(state, id)
 }
 
 fn format_text_arg(state: &mut LuaState) -> LuaResult<String> {
