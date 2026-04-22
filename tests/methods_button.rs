@@ -280,6 +280,44 @@ fn test_get_font_string_exists_for_button_with_normal_font_but_no_text() {
     );
 }
 
+#[test]
+fn test_set_text_updates_button_text_child_without_synthesizing_text_key() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestButtonButtonTextChild", UIParent)
+        local fs = btn:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        fs:SetPoint("CENTER")
+        btn.ButtonText = fs
+        btn:SetText("Category Header")
+    "#,
+    )
+    .unwrap();
+
+    let button_text: String = env
+        .eval(
+            r#"
+            return TestButtonButtonTextChild.ButtonText
+                and TestButtonButtonTextChild.ButtonText:GetText()
+                or ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        button_text, "Category Header",
+        "SetText should update an existing ButtonText region"
+    );
+
+    let synthesized_text_exists: bool = env
+        .eval("return TestButtonButtonTextChild.Text ~= nil")
+        .unwrap();
+    assert!(
+        !synthesized_text_exists,
+        "SetText should reuse ButtonText instead of creating a synthetic Text child"
+    );
+}
+
 // ============================================================================
 // Enable/Disable State Methods
 // ============================================================================

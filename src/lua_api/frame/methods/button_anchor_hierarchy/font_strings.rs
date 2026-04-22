@@ -23,12 +23,12 @@ pub(super) fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
 
 fn find_existing_text_child(state: &mut LuaState, id: u64) -> Option<u64> {
     let sim = borrow_state(state).ok()?;
-    if let Some(child_id) = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame.children_keys.get("Text").copied())
-    {
-        return Some(child_id);
+    if let Some(frame) = sim.widgets.get(id) {
+        for key in ["Text", "ButtonText"] {
+            if let Some(child_id) = frame.children_keys.get(key).copied() {
+                return Some(child_id);
+            }
+        }
     }
     let fallback_name = sim.widgets.get(id)?.name.as_ref()?.to_string() + "Text";
     let child_id = sim.widgets.get_id_by_name(&fallback_name)?;

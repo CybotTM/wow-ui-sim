@@ -139,7 +139,12 @@ fn update_text_frame(
         Some(WidgetType::Button | WidgetType::CheckButton)
     );
     let has_button_text_child = frame
-        .and_then(|frame| frame.children_keys.get("Text"))
+        .and_then(|frame| {
+            frame
+                .children_keys
+                .get("Text")
+                .or_else(|| frame.children_keys.get("ButtonText"))
+        })
         .is_some();
     let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
     if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
