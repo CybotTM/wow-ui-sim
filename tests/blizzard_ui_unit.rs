@@ -474,3 +474,159 @@ fn buff_frame_visible_count_matches_active_helpful_aura_count() {
         );
     }
 }
+
+#[test]
+fn buff_frame_icons_and_durations_stay_locked() {
+    test_timeout! {
+        let env = setup_full_env();
+
+        env.exec(
+            r#"
+            A_Admin.ClearBuffs()
+            if SetCVar then
+                pcall(SetCVar, "buffDurations", "1")
+                pcall(SetCVar, "consolidateBuffs", "0")
+                pcall(SetCVar, "collapseExpandBuffs", "0")
+            end
+            A_Admin.AddBuff(99101, "Locked Buff One", "134973", 30, 1)
+            A_Admin.AddBuff(99102, "Locked Buff Two", "134973", 45, 2)
+            A_Admin.AddBuff(99103, "Locked Buff Three", "134973", 50, 1)
+            if BuffFrame and BuffFrame.SetBuffsExpandedState then
+                BuffFrame:SetBuffsExpandedState(true)
+            end
+            "#,
+        )
+        .unwrap();
+        refresh_buff_frame(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                local EPS = 0.75
+
+                local function approx(actual, expected, eps)
+                    if type(actual) ~= "number" or type(expected) ~= "number" then
+                        return false
+                    end
+                    return math.abs(actual - expected) <= (eps or EPS)
+                end
+
+                local function has_point(frame, point, rel, relPoint, x, y, eps)
+                    for i = 1, frame:GetNumPoints() do
+                        local p, r, rp, ox, oy = frame:GetPoint(i)
+                        local relMatches = (r == rel) or (r == nil and rel ~= nil and frame.GetParent and frame:GetParent() == rel)
+                        if p == point and relMatches and rp == relPoint and approx(ox or 0, x, eps) and approx(oy or 0, y, eps) then
+                            return true
+                        end
+                    end
+                    return false
+                end
+
+                local function rect(frame, tag)
+                    if type(frame) ~= "table" then
+                        return nil, tag .. "_missing"
+                    end
+                    local l, b, w, h = frame:GetRect()
+                    if not (l and b and w and h) then
+                        return nil, tag .. "_missing_rect"
+                    end
+                    return { l = l, b = b, w = w, h = h, r = l + w, t = b + h }, nil
+                end
+
+                if not BuffFrame then
+                    return "missing_buff_frame"
+                end
+                if not BuffFrame.auraFrames then
+                    return "missing_aura_frames"
+                end
+
+                local visible = {}
+                for _, button in ipairs(BuffFrame.auraFrames) do
+                    if button:IsShown()
+                        and button.buttonInfo
+                        and button.buttonInfo.auraType == "Buff"
+                        and button.buttonInfo.index
+                    then
+                        visible[#visible + 1] = button
+                    end
+                end
+
+                if #visible ~= 3 then
+                    return "visible_buff_buttons=" .. tostring(#visible)
+                end
+
+                table.sort(visible, function(a, b)
+                    local ar = select(1, a:GetRect()) or 0
+                    local br = select(1, b:GetRect()) or 0
+                    return ar > br
+                end)
+
+                for i, button in ipairs(visible) do
+                    local buttonRect, buttonErr = rect(button, "buff_button_" .. tostring(i))
+                    if not buttonRect then return buttonErr end
+                    if not approx(buttonRect.w, 30, 0.1) or not approx(buttonRect.h, 40, 0.1) then
+                        return "buff_button_size_" .. tostring(i) .. "=" .. tostring(buttonRect.w) .. "x" .. tostring(buttonRect.h)
+                    end
+
+                    if not button.Icon then
+                        return "missing_icon_" .. tostring(i)
+                    end
+                    local iconRect, iconErr = rect(button.Icon, "buff_icon_" .. tostring(i))
+                    if not iconRect then return iconErr end
+                    if not approx(iconRect.w, 30, 0.1) or not approx(iconRect.h, 30, 0.1) then
+                        return "buff_icon_size_" .. tostring(i) .. "=" .. tostring(iconRect.w) .. "x" .. tostring(iconRect.h)
+                    end
+                    if not has_point(button.Icon, "TOP", button, "TOP", 0, 0, 0.1) then
+                        return "buff_icon_anchor_" .. tostring(i)
+                    end
+                    if not button.Icon:GetTexture() then
+                        return "buff_icon_texture_missing_" .. tostring(i)
+                    end
+
+                    if not button.Duration then
+                        return "missing_duration_" .. tostring(i)
+                    end
+                    if not button.Duration:IsShown() then
+                        return "duration_hidden_" .. tostring(i)
+                    end
+                    local durationText = button.Duration:GetText() or ""
+                    if durationText == "" then
+                        return "duration_text_empty_" .. tostring(i)
+                    end
+                    local expectedText = string.format(SecondsToTimeAbbrev(button.timeLeft or 0))
+                    if durationText ~= expectedText then
+                        return "duration_text_mismatch_" .. tostring(i) .. "_actual_" .. tostring(durationText) .. "_expected_" .. tostring(expectedText)
+                    end
+                    local durationAnchored =
+                        has_point(button.Duration, "TOP", button, "BOTTOM", 0, 0, 0.1)
+                        or has_point(button.Duration, "TOP", button, "BOTTOM", 0, -2, 0.1)
+                        or has_point(button.Duration, "TOP", button.Icon, "BOTTOM", 0, 0, 0.1)
+                    if not durationAnchored then
+                        return "duration_anchor_" .. tostring(i)
+                    end
+
+                    if i > 1 then
+                        local prevRect, prevErr = rect(visible[i - 1], "buff_button_prev_" .. tostring(i))
+                        if not prevRect then return prevErr end
+                        if not approx(prevRect.t, buttonRect.t, 0.1) then
+                            return "buff_row_misaligned_" .. tostring(i)
+                        end
+                        local delta = prevRect.l - buttonRect.l
+                        if not approx(delta, 35, 0.25) then
+                            return "buff_spacing_" .. tostring(i) .. "=" .. tostring(delta)
+                        end
+                    end
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "Buff icon and duration layout should remain locked for active HELPFUL auras: {result}"
+        );
+    }
+}
