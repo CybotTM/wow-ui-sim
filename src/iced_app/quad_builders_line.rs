@@ -2,6 +2,12 @@
 
 use crate::render::{BlendMode, QuadBatch};
 
+fn is_talent_arrow_line(f: &crate::widget::Frame) -> bool {
+    f.atlas
+        .as_deref()
+        .is_some_and(|atlas| atlas.starts_with("talents-arrow-line"))
+}
+
 /// Resolve a line anchor to screen-space pixel coordinates.
 fn resolve_line_endpoint(
     anchor: &crate::widget::LineAnchor,
@@ -17,6 +23,31 @@ fn resolve_line_endpoint(
         (ax + anchor.x_offset) * ui_scale,
         (ay - anchor.y_offset) * ui_scale,
     ))
+}
+
+fn adjust_talent_arrow_line_caps(
+    f: &crate::widget::Frame,
+    start: (f32, f32),
+    end: (f32, f32),
+    thickness: f32,
+) -> ((f32, f32), (f32, f32)) {
+    if !is_talent_arrow_line(f) {
+        return (start, end);
+    }
+    let dx = end.0 - start.0;
+    let dy = end.1 - start.1;
+    let len = (dx * dx + dy * dy).sqrt();
+    if len < 0.001 {
+        return (start, end);
+    }
+    let ux = dx / len;
+    let uy = dy / len;
+    let start_overlap = (thickness * 0.5).clamp(1.0, 2.0);
+    let end_overlap = (thickness * 1.25).clamp(2.0, 5.0);
+    (
+        (start.0 - ux * start_overlap, start.1 - uy * start_overlap),
+        (end.0 + ux * end_overlap, end.1 + uy * end_overlap),
+    )
 }
 
 /// Compute the 4 corner positions of a rotated line quad from endpoints and thickness.
@@ -66,6 +97,7 @@ fn resolve_line_quad_inputs(
     let sp = resolve_line_endpoint(start_anchor, registry)?;
     let ep = resolve_line_endpoint(end_anchor, registry)?;
     let thickness = f.line_thickness * crate::render::texture::UI_SCALE;
+    let (sp, ep) = adjust_talent_arrow_line_caps(f, sp, ep, thickness);
     let positions = line_quad_positions(sp, ep, thickness)?;
     Some((positions, line_uvs(f), line_tint(f, alpha)))
 }
@@ -174,5 +206,23 @@ mod tests {
         frame.vertex_color = Some(Color::new(0.2, 0.4, 0.6, 0.5));
 
         assert_eq!(line_tint(&frame, 0.8), [0.2, 0.4, 0.6, 0.4]);
+    }
+
+    #[test]
+    fn talent_arrow_line_caps_extend_beyond_anchors() {
+        let mut frame = Frame::default();
+        frame.atlas = Some("talents-arrow-line-gray".to_string());
+        let start = (10.0, 20.0);
+        let end = (110.0, 20.0);
+
+        let (extended_start, extended_end) = adjust_talent_arrow_line_caps(&frame, start, end, 4.0);
+
+        assert!(
+            extended_start.0 < start.0,
+            "start cap should extend backward"
+        );
+        assert!(extended_end.0 > end.0, "end cap should extend forward");
+        assert_eq!(extended_start.1, start.1);
+        assert_eq!(extended_end.1, end.1);
     }
 }
