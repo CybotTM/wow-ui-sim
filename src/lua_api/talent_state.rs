@@ -54,10 +54,23 @@ fn build_group_currency_map() -> HashMap<u32, u32> {
     map
 }
 
+fn subtree_currency_id(subtree_id: u32) -> Option<u32> {
+    match subtree_id {
+        48 => Some(2986),
+        49 => Some(2987),
+        50 => Some(2988),
+        _ => None,
+    }
+}
+
 fn build_node_currency_map(group_currency_map: &HashMap<u32, u32>) -> HashMap<u32, u32> {
     use crate::traits::TRAIT_NODE_DB;
     let mut map = HashMap::new();
     for (&node_id, node) in TRAIT_NODE_DB.entries() {
+        if let Some(currency_id) = subtree_currency_id(node.sub_tree_id) {
+            map.insert(node_id, currency_id);
+            continue;
+        }
         for &gid in node.group_ids {
             if let Some(&cid) = group_currency_map.get(&gid) {
                 map.insert(node_id, cid);

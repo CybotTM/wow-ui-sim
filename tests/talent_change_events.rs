@@ -1,7 +1,8 @@
 //! Tests for talent change event counts and animation side-effects.
 //!
 //! Verifies that PurchaseRank/RefundRank fire a bounded number of
-//! TRAIT_NODE_CHANGED events and do not trigger unrelated animations.
+//! TRAIT_NODE_CHANGED events, notify currency refresh, and do not
+//! trigger unrelated config/tree mutation events.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -56,7 +57,7 @@ fn read_event_counts(env: &WowLuaEnv) -> (i32, i32, i32, i32) {
     (p[0], p[1], p[2], p[3])
 }
 
-/// Assert that only TRAIT_NODE_CHANGED fired, bounded, and nothing else.
+/// Assert bounded node-change fanout plus one currency refresh notification.
 fn assert_bounded_node_changed(counts: (i32, i32, i32, i32), context: &str) {
     let (nc, tc, cu, co) = counts;
     assert!(
@@ -69,8 +70,8 @@ fn assert_bounded_node_changed(counts: (i32, i32, i32, i32), context: &str) {
     );
     assert_eq!(tc, 0, "{context}: TRAIT_TREE_CHANGED should not fire");
     assert_eq!(
-        cu, 0,
-        "{context}: TRAIT_TREE_CURRENCY_INFO_UPDATED should not fire"
+        cu, 1,
+        "{context}: TRAIT_TREE_CURRENCY_INFO_UPDATED should fire exactly once"
     );
     assert_eq!(co, 0, "{context}: TRAIT_CONFIG_UPDATED should not fire");
 }
@@ -104,6 +105,85 @@ fn refund_rank_fires_bounded_trait_node_changed() {
 
     let counts = read_event_counts(&env);
     assert_bounded_node_changed(counts, "RefundRank");
+}
+
+#[test]
+fn set_selection_fires_currency_update_event() {
+    let env = env();
+    env.exec(INSTALL_HOOKS).unwrap();
+
+    // Known hero talent selection node + entry from seeded paladin data.
+    let ok: bool = env
+        .eval("return C_Traits.SetSelection(1, 99838, 123361)")
+        .unwrap();
+    assert!(ok, "SetSelection should succeed for node 99838");
+
+    let counts = read_event_counts(&env);
+    assert_bounded_node_changed(counts, "SetSelection");
+}
+
+#[test]
+fn hero_purchase_increments_hero_currency_spent() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local configID = 1
+            local treeID = 790
+            local ok = C_Traits.SetSelection(configID, 99838, 123361) -- Lightsmith
+            assert(ok, "expected deterministic hero subtree selection")
+
+            local activeSubTreeID = C_ClassTalents.GetActiveHeroTalentSpec()
+            assert(activeSubTreeID ~= nil, "expected active hero subtree")
+
+            local subTreeInfo = C_Traits.GetSubTreeInfo(configID, activeSubTreeID)
+            local heroCurrencyID = subTreeInfo and subTreeInfo.traitCurrencyID
+            assert(heroCurrencyID ~= nil, "expected hero trait currency id")
+
+            local function spent_for(currencyID)
+                for _, currency in ipairs(C_Traits.GetTreeCurrencyInfo(configID, treeID, false)) do
+                    if currency.traitCurrencyID == currencyID then
+                        return currency.spent or 0
+                    end
+                end
+                return -1
+            end
+
+            local beforeSpent = spent_for(heroCurrencyID)
+            assert(beforeSpent >= 0, "hero currency must exist in tree currency info")
+
+            local purchasableHeroNodeID = nil
+            for _, nodeID in ipairs(C_Traits.GetTreeNodes(configID, treeID)) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+                if nodeInfo and nodeInfo.subTreeID == activeSubTreeID and nodeInfo.canPurchaseRank and (nodeInfo.ranksPurchased or 0) == 0 then
+                    local costs = C_Traits.GetNodeCost(configID, nodeID)
+                    local costCurrencyID = costs and costs[1] and costs[1].ID or nil
+                    if costCurrencyID == heroCurrencyID then
+                        purchasableHeroNodeID = nodeID
+                        break
+                    end
+                end
+            end
+            assert(purchasableHeroNodeID ~= nil, "expected a purchasable hero node with hero currency cost")
+            assert(C_Traits.PurchaseRank(configID, purchasableHeroNodeID), "hero node purchase should succeed")
+
+            local afterSpent = spent_for(heroCurrencyID)
+            return string.format("%d,%d,%d,%d", heroCurrencyID, beforeSpent, afterSpent, purchasableHeroNodeID)
+            "#,
+        )
+        .unwrap();
+
+    let parts: Vec<i32> = result
+        .split(',')
+        .map(|piece| piece.parse::<i32>().expect("expected numeric result"))
+        .collect();
+    assert_eq!(parts.len(), 4, "unexpected result format: {result}");
+    let before_spent = parts[1];
+    let after_spent = parts[2];
+    assert!(
+        after_spent > before_spent,
+        "expected hero currency spent to increase after purchase, got {before_spent} -> {after_spent} ({result})"
+    );
 }
 
 // ============================================================================

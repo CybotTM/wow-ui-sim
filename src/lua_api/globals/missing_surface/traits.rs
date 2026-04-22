@@ -55,6 +55,18 @@ fn fire_trait_node_changed_with_dependents(state: &mut LuaState, changed_node_id
     }
 }
 
+/// Fire `TRAIT_TREE_CURRENCY_INFO_UPDATED` for the node's owning tree.
+fn fire_trait_tree_currency_info_updated_for_node(state: &mut LuaState, node_id: u32) {
+    let Some(tree_id) = TRAIT_NODE_DB.get(&node_id).map(|node| node.tree_id) else {
+        return;
+    };
+    fire_named_event_with_arg(
+        state,
+        "TRAIT_TREE_CURRENCY_INFO_UPDATED",
+        Val::Num(tree_id as f64),
+    );
+}
+
 fn current_spec_id(state: &LuaState) -> Option<u32> {
     let sim = borrow_state(state).ok()?;
     let class_id = sim.player.class_index as u32;
@@ -1512,6 +1524,7 @@ fn c_traits_set_selection(state: &mut LuaState) -> LuaResult<u32> {
             .set_node_rank(node_id, u32::from(entry_id.is_some()));
     }
     fire_trait_node_changed_with_dependents(state, node_id);
+    fire_trait_tree_currency_info_updated_for_node(state, node_id);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -1525,6 +1538,7 @@ fn c_traits_purchase_rank(state: &mut LuaState) -> LuaResult<u32> {
         sim.talents.set_node_rank(node_id, next_rank);
     }
     fire_trait_node_changed_with_dependents(state, node_id);
+    fire_trait_tree_currency_info_updated_for_node(state, node_id);
     state.push(Val::Bool(true));
     Ok(1)
 }
@@ -1537,6 +1551,7 @@ fn c_traits_refund_rank(state: &mut LuaState) -> LuaResult<u32> {
         sim.talents.set_node_rank(node_id, 0);
     }
     fire_trait_node_changed_with_dependents(state, node_id);
+    fire_trait_tree_currency_info_updated_for_node(state, node_id);
     state.push(Val::Bool(true));
     Ok(1)
 }
