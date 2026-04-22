@@ -116,6 +116,8 @@ pub struct App {
     /// Aggregated pending requests keyed by normalized texture path.
     pub(crate) pending_texture_requests_by_path:
         RefCell<FxHashMap<String, Vec<crate::render::TextureRequest>>>,
+    /// Paths known-ready in GPU atlas from prior successful request handles.
+    pub(crate) ready_texture_path_cache: RefCell<FxHashSet<String>>,
     /// Most recent main-thread phase that can block event handling.
     pub(crate) main_thread_phase: RefCell<(&'static str, std::time::Instant)>,
     /// Count of stale timer ticks dropped since the last key log.
@@ -270,6 +272,7 @@ impl App {
                 FxHashMap::default()
             })),
             pending_texture_requests_by_path: RefCell::new(FxHashMap::default()),
+            ready_texture_path_cache: RefCell::new(FxHashSet::default()),
             main_thread_phase: RefCell::new(("boot", now)),
             dropped_stale_timer_ticks: std::cell::Cell::new(0),
             oldest_dropped_timer_tick_age: std::cell::Cell::new(std::time::Duration::ZERO),

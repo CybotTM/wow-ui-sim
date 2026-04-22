@@ -280,3 +280,41 @@ fn pending_path_queue_drains_when_request_is_marked_ready() {
         "drained queue should not keep stale pending paths"
     );
 }
+
+#[test]
+fn rebuilt_requests_reuse_ready_path_cache_without_redecode() {
+    let temp_dir = tempdir().unwrap();
+    let app = build_test_app_with_textures(temp_dir.path());
+
+    let mut initial_batch = QuadBatch::new();
+    initial_batch
+        .texture_requests
+        .push(TextureRequest::new("already-ready-path", 0, 4));
+    let initial_handle = initial_batch.texture_requests[0].handle.clone();
+    app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(initial_batch));
+    app.refresh_pending_texture_requests_for_rebuilt_strata(1 << 0);
+
+    assert!(app.cached_render_requests_still_pending());
+    initial_handle.mark_ready();
+    assert!(
+        !app.cached_render_requests_still_pending(),
+        "ready path should drain from pending queue and be cached as ready"
+    );
+
+    let mut rebuilt_batch = QuadBatch::new();
+    rebuilt_batch
+        .texture_requests
+        .push(TextureRequest::new("already-ready-path", 0, 4));
+    let rebuilt_handle = rebuilt_batch.texture_requests[0].handle.clone();
+    app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(rebuilt_batch));
+    app.refresh_pending_texture_requests_for_rebuilt_strata(1 << 0);
+
+    assert!(
+        rebuilt_handle.is_ready(),
+        "newly rebuilt request should inherit ready state from persistent ready-path cache"
+    );
+    assert!(
+        !app.cached_render_requests_still_pending(),
+        "ready-cache hydrated request should not re-enter the pending queue"
+    );
+}

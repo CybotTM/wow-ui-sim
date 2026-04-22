@@ -438,7 +438,9 @@ impl App {
             }
             strata_pending[strata_idx] = strata_cache[strata_idx]
                 .as_deref()
-                .map_or_else(FxHashMap::default, collect_pending_texture_requests);
+                .map_or_else(FxHashMap::default, |batch| {
+                    self.collect_pending_texture_requests_for_batch(batch)
+                });
         }
         drop(strata_pending);
         drop(strata_cache);
@@ -451,7 +453,9 @@ impl App {
         for strata_idx in 0..FrameStrata::COUNT {
             strata_pending[strata_idx] = strata_cache[strata_idx]
                 .as_deref()
-                .map_or_else(FxHashMap::default, collect_pending_texture_requests);
+                .map_or_else(FxHashMap::default, |batch| {
+                    self.collect_pending_texture_requests_for_batch(batch)
+                });
         }
         drop(strata_pending);
         drop(strata_cache);
@@ -484,17 +488,34 @@ impl App {
 
     fn prune_completed_pending_texture_paths(&self) {
         let mut changed = false;
+        let mut resolved_paths = Vec::new();
+        let mut unresolved_paths = Vec::new();
         {
             let mut strata_pending = self.strata_pending_texture_requests.borrow_mut();
             for strata_map in strata_pending.iter_mut() {
-                strata_map.retain(|_, requests| {
+                strata_map.retain(|path, requests| {
+                    let had_ready = requests.iter().any(|request| request.handle.is_ready());
                     requests.retain(|request| request.handle.is_pending());
                     let keep = !requests.is_empty();
                     if !keep {
+                        if had_ready {
+                            resolved_paths.push(path.clone());
+                        } else {
+                            unresolved_paths.push(path.clone());
+                        }
                         changed = true;
                     }
                     keep
                 });
+            }
+        }
+        if !resolved_paths.is_empty() || !unresolved_paths.is_empty() {
+            let mut ready_paths = self.ready_texture_path_cache.borrow_mut();
+            for path in resolved_paths {
+                ready_paths.insert(path);
+            }
+            for path in unresolved_paths {
+                ready_paths.remove(&path);
             }
         }
         if changed {
@@ -549,6 +570,18 @@ impl App {
         if !self.pending_texture_path_set.borrow_mut().remove(path) {
             return;
         }
+        let had_ready = self
+            .pending_texture_requests_by_path
+            .borrow()
+            .get(path)
+            .is_some_and(|requests| requests.iter().any(|request| request.handle.is_ready()));
+        if had_ready {
+            self.ready_texture_path_cache
+                .borrow_mut()
+                .insert(path.to_string());
+        } else {
+            self.ready_texture_path_cache.borrow_mut().remove(path);
+        }
         self.pending_texture_requests_by_path
             .borrow_mut()
             .remove(path);
@@ -558,6 +591,33 @@ impl App {
         self.pending_texture_path_queue
             .borrow_mut()
             .retain(|queued_path| queued_path != path);
+    }
+
+    fn collect_pending_texture_requests_for_batch(
+        &self,
+        batch: &crate::render::QuadBatch,
+    ) -> FxHashMap<String, Vec<crate::render::TextureRequest>> {
+        let ready_paths = self.ready_texture_path_cache.borrow();
+        let mut pending: FxHashMap<String, Vec<crate::render::TextureRequest>> =
+            FxHashMap::default();
+        for request in batch
+            .texture_requests
+            .iter()
+            .chain(&batch.mask_texture_requests)
+        {
+            if !request.handle.is_pending() {
+                continue;
+            }
+            if ready_paths.contains(&request.path) {
+                request.handle.mark_ready();
+                continue;
+            }
+            pending
+                .entry(request.path.clone())
+                .or_default()
+                .push(request.clone());
+        }
+        pending
     }
 
     fn prune_dirty_strata(&self, dirty: u16, dirty_ids: Option<&FxHashSet<u64>>) -> u16 {
@@ -758,25 +818,6 @@ fn pending_texture_path_priority(path: &str) -> (u8, u8) {
 
 fn duration_ms(duration: std::time::Duration) -> f64 {
     duration.as_secs_f64() * 1000.0
-}
-
-fn collect_pending_texture_requests(
-    batch: &crate::render::QuadBatch,
-) -> FxHashMap<String, Vec<crate::render::TextureRequest>> {
-    let mut pending: FxHashMap<String, Vec<crate::render::TextureRequest>> = FxHashMap::default();
-    for request in batch
-        .texture_requests
-        .iter()
-        .chain(&batch.mask_texture_requests)
-    {
-        if request.handle.is_pending() {
-            pending
-                .entry(request.path.clone())
-                .or_default()
-                .push(request.clone());
-        }
-    }
-    pending
 }
 
 #[cfg(test)]
