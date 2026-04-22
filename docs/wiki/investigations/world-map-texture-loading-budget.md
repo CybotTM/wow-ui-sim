@@ -220,6 +220,24 @@ vertex buffers after pending textures became ready, and the resolved sample
 contained `tex_index=-2` at that point, so the first-open world-map path is not
 stuck on unresolved vertex data after the atlas transition.
 
+## 2026-04-22 Follow-up: Lua Retry Layer Simplified
+
+After the request-handle refactor landed, the Lua-side world-map retry layer
+no longer needed the recursive timer churn that had been compensating for stale
+draw-side pending state. I simplified `MapExplorationPinMixin`'s workaround to
+keep only one deferred retry at a time:
+
+- `OnAcquired`, `RefreshOverlays`, and `OnUpdate` still re-run the pin wait and
+  overlay refresh checks.
+- The retry helpers now schedule a single `C_Timer.After(0, ...)` callback
+  instead of re-arming themselves with fixed attempt counters.
+- The existing world-map detail tests still pass, including the empty-first-
+  fetch recovery case, so the simplification did not regress the explored
+  overlay path.
+
+This keeps the workaround focused on the remaining Blizzard-side refresh race
+without carrying over the old renderer-state compensation loops.
+
 ## Result
 
 After the cache + budget changes, the world map no longer took repeated ~50ms draw stalls while tiles streamed in. The same repro shifted to progressive smaller chunks:

@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | world-map Lua retry simplification
+
+Updated `investigations/world-map-texture-loading-budget.md` with the
+follow-up Lua pin retry cleanup after the request-handle refactor. The
+`MapExplorationPinMixin` workaround now keeps only one deferred refresh at a
+time instead of recursively re-arming the old timer loop, and the world-map
+detail tests still pass. Refreshed the `index.md` summary row for
+`world-map-texture-loading-budget` to mention the simplified Lua retry layer.
+
 ## [2026-04-22] update | world-map live retained trace recapture
 
 Updated `investigations/world-map-texture-loading-budget.md` again with the
