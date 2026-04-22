@@ -16,6 +16,12 @@ use super::update_helpers::{
     merge_dirty_ids,
 };
 
+fn request_redraw_task<T>() -> Task<T> {
+    iced_runtime::task::effect(iced_runtime::Action::Window(
+        iced_runtime::window::Action::RedrawAll,
+    ))
+}
+
 impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         let ipc_task = self.process_ipc();
@@ -375,7 +381,11 @@ impl App {
         self.record_tick_time(tick_elapsed);
         self.update_fps_counter();
         log_slow_tick(&stage_timings, combined, self);
-        Task::none()
+        if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+            request_redraw_task()
+        } else {
+            Task::none()
+        }
     }
 
     /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
@@ -911,6 +921,9 @@ mod tests {
     use crate::screen::ScreenKind;
     use crate::texture::TextureManager;
     use iced::Size;
+    use iced_runtime::Action;
+    use iced_runtime::futures::futures::StreamExt;
+    use iced_runtime::window::Action as WindowAction;
     use std::cell::RefCell;
     use std::path::Path;
     use std::path::PathBuf;
@@ -1157,6 +1170,28 @@ mod tests {
         assert!(
             app.texture_manager.borrow().get("tick-warmup").is_some(),
             "tick-start warmup should decode the visible texture source"
+        );
+    }
+
+    #[test]
+    fn process_timers_requests_redraw_when_render_work_remains() {
+        let mut app = build_test_app(ScreenKind::Game);
+        app.screen_size.set(Size::new(1024.0, 768.0));
+        app.selected_rot_level = "Off".to_string();
+        app.strata_dirty.set(1);
+
+        let task = app.handle_process_timers(Instant::now());
+        let action = pollster::block_on(async {
+            iced_runtime::task::into_stream(task)
+                .expect("redraw task should produce a runtime action")
+                .next()
+                .await
+                .expect("task should emit a redraw action")
+        });
+
+        assert!(
+            matches!(action, Action::Window(WindowAction::RedrawAll)),
+            "timer ticks with pending render work should request a redraw"
         );
     }
 

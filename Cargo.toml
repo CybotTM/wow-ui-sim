@@ -32,6 +32,7 @@ lz4_flex = "0.11"
 # Iced GUI (optional, gated behind "gui" feature)
 iced = { version = "0.1.0", optional = true, path = "iced-dynamic", package = "iced-dynamic" }
 iced_wgpu = { version = "0.14", optional = true, path = "iced-wgpu-patched" }
+iced_runtime = { version = "0.14", optional = true }
 iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.git", tag = "v0.2.0", features = ["server"], optional = true }
 
 # Text rendering
@@ -61,7 +62,7 @@ sha2 = "0.10"
 [features]
 default = ["sound", "gui"]
 sound = ["rodio"]
-gui = ["dep:iced", "dep:iced_wgpu", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
+gui = ["dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
 rehash-stats = ["rilua/rehash-stats"]
 intern-stats = ["rilua/intern-stats"]
 

@@ -5694,6 +5694,7 @@ dependencies = [
  "glob",
  "iced-dynamic",
  "iced-layout-inspector",
+ "iced_runtime",
  "iced_wgpu",
  "image 0.25.9",
  "image-blp",
