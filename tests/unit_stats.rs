@@ -254,8 +254,9 @@ fn attack_power_for_stat_is_defined_for_strength_and_agility() {
             "#,
         )
         .unwrap();
+    // Seeded player is Paladin spec index 2 (Protection): Strength primary.
     assert_eq!(str_ap, 150.0);
-    assert_eq!(agi_ap, 120.0);
+    assert_eq!(agi_ap, 0.0);
     assert_eq!(int_ap, 0.0);
 }
 
@@ -272,18 +273,78 @@ fn paperdoll_attribute_helpers_return_numbers() {
 #[test]
 fn paperdoll_health_and_ap_sp_helpers_are_available() {
     let env = env();
-    let (hp_per_stam, health_mod, ap_to_sp, sp_to_ap): (f64, f64, bool, bool) = env
+    let (stamina, hp_max, hp_per_stam, health_mod, ap_to_sp, sp_to_ap): (
+        f64,
+        f64,
+        f64,
+        f64,
+        bool,
+        bool,
+    ) = env
         .eval(
             r#"
-            return UnitHPPerStamina("player"),
+            return select(1, UnitStat("player", 3)),
+                   UnitHealthMax("player"),
+                   UnitHPPerStamina("player"),
                    GetUnitMaxHealthModifier("player"),
                    HasAPEffectsSpellPower(),
                    HasSPEffectsAttackPower()
             "#,
         )
         .unwrap();
-    assert_eq!(hp_per_stam, 1.0);
-    assert_eq!(health_mod, 1.0);
+    let projected_hp = stamina * hp_per_stam * health_mod;
+    assert!(
+        (projected_hp - hp_max).abs() <= 0.5,
+        "paperdoll stamina projection should match UnitHealthMax"
+    );
+    assert!(hp_per_stam > 0.0);
+    assert!(health_mod > 0.0);
+    assert!(ap_to_sp, "seeded protection paladin is a physical spec");
+    assert!(!sp_to_ap);
+}
+
+#[test]
+fn paperdoll_helpers_track_primary_stat_by_spec() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.class_index = 11; // Druid
+        st.player.active_spec_index = 2; // Feral (Agility)
+    }
+    let (str_ap, agi_ap, ap_to_sp): (f64, f64, bool) = env
+        .eval(
+            r#"
+            return GetAttackPowerForStat(1, 200),
+                   GetAttackPowerForStat(2, 200),
+                   HasAPEffectsSpellPower()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(str_ap, 0.0);
+    assert_eq!(agi_ap, 200.0);
+    assert!(ap_to_sp);
+}
+
+#[test]
+fn paperdoll_helpers_disable_ap_to_sp_on_intellect_spec() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.class_index = 2; // Paladin
+        st.player.active_spec_index = 1; // Holy (Intellect)
+    }
+    let (str_ap, int_ap, ap_to_sp, sp_to_ap): (f64, f64, bool, bool) = env
+        .eval(
+            r#"
+            return GetAttackPowerForStat(1, 200),
+                   GetAttackPowerForStat(4, 200),
+                   HasAPEffectsSpellPower(),
+                   HasSPEffectsAttackPower()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(str_ap, 0.0);
+    assert_eq!(int_ap, 0.0);
     assert!(!ap_to_sp);
     assert!(!sp_to_ap);
 }

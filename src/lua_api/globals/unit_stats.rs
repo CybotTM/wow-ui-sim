@@ -178,14 +178,22 @@ fn lookup_unit_stats(sim: &SimState, unit: &str) -> UnitStats {
     }
 }
 
+fn unit_token_at(state: &LuaState, index: i32) -> String {
+    val_to_string(state, stack_val(state, index)).unwrap_or_else(|| "player".to_string())
+}
+
 fn unit_token(state: &LuaState) -> String {
-    val_to_string(state, stack_val(state, 1)).unwrap_or_else(|| "player".to_string())
+    unit_token_at(state, 1)
+}
+
+fn stats_for_unit(state: &LuaState, unit: &str) -> UnitStats {
+    let sim = borrow_state(state).expect("sim state should exist");
+    lookup_unit_stats(&sim, unit)
 }
 
 fn stats_for(state: &LuaState) -> UnitStats {
     let unit = unit_token(state);
-    let sim = borrow_state(state).expect("sim state should exist");
-    lookup_unit_stats(&sim, &unit)
+    stats_for_unit(state, &unit)
 }
 
 fn requested_power_type(state: &LuaState) -> Option<i32> {
@@ -207,6 +215,63 @@ fn stack_f64(state: &LuaState, index: i32) -> f64 {
         Val::Num(n) => n,
         _ => 0.0,
     }
+}
+
+fn active_spec_primary_stat(state: &LuaState) -> Option<i32> {
+    let (class_id, active_spec_index) = {
+        let sim = borrow_state(state).ok()?;
+        (
+            sim.player.class_index.max(1) as u32,
+            sim.player.active_spec_index.max(1),
+        )
+    };
+    crate::specializations::specs_for_class(class_id)
+        .nth((active_spec_index - 1) as usize)
+        .map(|spec| spec.primary_stat as i32)
+}
+
+fn attack_power_for_stat_value(state: &LuaState, stat_index: i32, stat_value: f64) -> f64 {
+    let value = stat_value.max(0.0);
+    match active_spec_primary_stat(state) {
+        Some(1) if stat_index == 1 => value, // strength specs
+        Some(2) if stat_index == 2 => value, // agility specs
+        // No current sim spec maps spell power back into attack power.
+        Some(4) if stat_index == 4 => 0.0,
+        // Fallback when spec metadata is unavailable.
+        None if matches!(stat_index, 1 | 2) => value,
+        _ => 0.0,
+    }
+}
+
+fn has_ap_effects_spell_power_model(state: &LuaState) -> bool {
+    matches!(active_spec_primary_stat(state), Some(1 | 2))
+}
+
+fn has_sp_effects_attack_power_model(_state: &LuaState) -> bool {
+    false
+}
+
+fn baseline_hp_per_stamina(level: i32) -> f64 {
+    let level = level.max(1) as f64;
+    2.5 + level * 0.05
+}
+
+fn unit_hp_per_stamina_value(stats: UnitStats) -> f64 {
+    if stats.stamina <= 0.0 {
+        return 0.0;
+    }
+    baseline_hp_per_stamina(stats.level)
+}
+
+fn unit_max_health_modifier_value(stats: UnitStats) -> f64 {
+    if stats.stamina <= 0.0 {
+        return 1.0;
+    }
+    let base_health = stats.stamina * unit_hp_per_stamina_value(stats);
+    if base_health <= 0.0 {
+        return 1.0;
+    }
+    (stats.health_max as f64 / base_health).max(0.0)
 }
 
 fn secondary_power_max(power_type: i32) -> i32 {
@@ -418,12 +483,8 @@ fn unit_resistance(state: &mut LuaState) -> LuaResult<u32> {
 /// PaperDoll tooltip generation.
 fn get_attack_power_for_stat(state: &mut LuaState) -> LuaResult<u32> {
     let stat_index = stack_i32(state, 1);
-    let stat_value = stack_f64(state, 2).max(0.0);
-    let attack_power = match stat_index {
-        // Sim model computes AP linearly from strength + agility.
-        1 | 2 => stat_value,
-        _ => 0.0,
-    };
+    let stat_value = stack_f64(state, 2);
+    let attack_power = attack_power_for_stat_value(state, stat_index, stat_value);
     state.push(Val::Num(attack_power));
     Ok(1)
 }
@@ -444,25 +505,30 @@ fn get_parry_chance_from_attribute(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `UnitHPPerStamina(unit)` — fixed multiplier used by PaperDoll stamina text.
 fn unit_hp_per_stamina(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
+    let unit = unit_token_at(state, 1);
+    let stats = stats_for_unit(state, &unit);
+    state.push(Val::Num(unit_hp_per_stamina_value(stats)));
     Ok(1)
 }
 
-/// `GetUnitMaxHealthModifier(unit)` — no percentage health scaling modelled.
+/// `GetUnitMaxHealthModifier(unit)` — percentage multiplier over the level-
+/// scaled stamina baseline used by `UnitHPPerStamina`.
 fn get_unit_max_health_modifier(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
+    let unit = unit_token_at(state, 1);
+    let stats = stats_for_unit(state, &unit);
+    state.push(Val::Num(unit_max_health_modifier_value(stats)));
     Ok(1)
 }
 
 /// `HasAPEffectsSpellPower()` and `HasSPEffectsAttackPower()` return class/spec
 /// crossover flags in retail. The simulator currently models no crossover.
 fn has_ap_effects_spell_power(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    state.push(Val::Bool(has_ap_effects_spell_power_model(state)));
     Ok(1)
 }
 
 fn has_sp_effects_attack_power(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    state.push(Val::Bool(has_sp_effects_attack_power_model(state)));
     Ok(1)
 }
 
