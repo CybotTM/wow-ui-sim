@@ -400,7 +400,15 @@ impl App {
     /// Stores results in `cached_strata_quads`. Also updates the hittable
     /// grid on first build and syncs layout caches.
     fn rebuild_dirty_strata(&self, size: Size, dirty: u16) -> u16 {
-        let dirty_ids = self.pending_dirty_ids.borrow_mut().take();
+        let dirty_ids = {
+            let mut pending_dirty_ids = self.pending_dirty_ids.borrow_mut();
+            let drained = pending_dirty_ids.take();
+            // A full-rebuild sentinel (`None`) only applies to this rebuild pass.
+            // Reset to an empty concrete set so subsequent ticks can recover
+            // incremental dirty IDs instead of remaining in permanent full mode.
+            *pending_dirty_ids = Some(FxHashSet::default());
+            drained
+        };
         let effective_dirty = self.prune_dirty_strata(dirty, dirty_ids.as_ref());
         if effective_dirty == 0 {
             return self.finish_without_strata_rebuild();
@@ -1025,6 +1033,21 @@ mod tests {
         assert_eq!(
             rebuilt, 0,
             "irrelevant dirty ids should short-circuit cached strata rebuilds"
+        );
+    }
+
+    #[test]
+    fn rebuild_dirty_strata_resets_consumed_full_rebuild_sentinel() {
+        let temp_dir = tempdir().unwrap();
+        let app = build_test_app_with_textures(temp_dir.path());
+        app.pending_dirty_ids.borrow_mut().take();
+
+        let _ = app.rebuild_dirty_strata(Size::new(64.0, 64.0), dirty_mask(0));
+
+        let pending = app.pending_dirty_ids.borrow();
+        assert!(
+            pending.as_ref().is_some_and(FxHashSet::is_empty),
+            "after consuming a full-rebuild sentinel, pending dirty IDs must reset to an empty concrete set"
         );
     }
 
