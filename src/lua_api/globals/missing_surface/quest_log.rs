@@ -32,6 +32,8 @@ use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+const QUEST_LOG_HEADER_TITLE: &str = "Khaz Algar";
+
 pub(super) fn register_quest_log_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_QuestLog")?;
     for (name, func) in C_QUEST_LOG_METHODS {
@@ -52,6 +54,7 @@ const C_QUEST_LOG_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetQuestsOnMap", get_quests_on_map),
     ("GetWorldQuestInfo", get_world_quest_info),
     ("GetAllCompletedQuestIDs", get_all_completed_quest_ids),
+    ("GetQuestIDForLogIndex", get_quest_id_for_log_index),
     ("GetLogIndexForQuestID", get_log_index_for_quest_id),
     ("GetNumQuestLogEntries", get_num_quest_log_entries),
     ("IsComplete", is_complete),
@@ -78,19 +81,61 @@ fn get_info(state: &mut LuaState) -> LuaResult<u32> {
     if log_index < 1 {
         return Ok(0);
     }
-    let entry = borrow_state(state)?
-        .quest_log_entries
-        .entries
-        .get((log_index - 1) as usize)
-        .cloned();
-    let Some(entry) = entry else { return Ok(0) };
+    let kind = {
+        let sim = borrow_state(state)?;
+        classify_quest_log_index(sim.quest_log_entries.entries.len(), log_index)
+    };
+    let Some(kind) = kind else { return Ok(0) };
 
     let t = create_table(state);
-    write_quest_identity_fields(state, t, &entry, log_index);
-    write_quest_classification_flags(state, t, &entry);
-    write_quest_constant_stub_fields(state, t, &entry);
+    match kind {
+        QuestLogIndexKind::Header => {
+            write_header_identity_fields(state, t, log_index);
+            write_header_constant_fields(state, t);
+        }
+        QuestLogIndexKind::Quest(quest_entry_index) => {
+            let entry = borrow_state(state)?
+                .quest_log_entries
+                .entries
+                .get(quest_entry_index)
+                .cloned();
+            let Some(entry) = entry else { return Ok(0) };
+            write_quest_identity_fields(state, t, &entry, log_index);
+            write_quest_classification_flags(state, t, &entry);
+            write_quest_constant_stub_fields(state, t, false);
+        }
+    }
+
     state.push(t);
     Ok(1)
+}
+
+#[derive(Clone, Copy)]
+enum QuestLogIndexKind {
+    Header,
+    Quest(usize),
+}
+
+fn classify_quest_log_index(entry_count: usize, log_index: i32) -> Option<QuestLogIndexKind> {
+    if entry_count == 0 || log_index < 1 {
+        return None;
+    }
+    if log_index == 1 {
+        return Some(QuestLogIndexKind::Header);
+    }
+    let quest_index = (log_index - 2) as usize;
+    (quest_index < entry_count).then_some(QuestLogIndexKind::Quest(quest_index))
+}
+
+fn write_header_identity_fields(state: &mut LuaState, t: Val, log_index: i32) {
+    table_set(state, t, "questID", Val::Num(0.0));
+    let title = create_string(state, QUEST_LOG_HEADER_TITLE);
+    table_set(state, t, "title", title);
+    table_set(state, t, "level", Val::Num(0.0));
+    table_set(state, t, "questLogIndex", Val::Num(log_index as f64));
+    table_set(state, t, "difficultyLevel", Val::Num(0.0));
+    table_set(state, t, "isComplete", Val::Bool(false));
+    table_set(state, t, "isFailed", Val::Bool(false));
 }
 
 fn write_quest_identity_fields(
@@ -119,8 +164,8 @@ fn write_quest_classification_flags(state: &mut LuaState, t: Val, entry: &QuestL
 /// Fields that the sim always reports with a constant value — headers,
 /// bounty/story categories, POI flags, sort/scaling toggles, and the
 /// campaign/suggestedGroup identifiers we don't model.
-fn write_quest_constant_stub_fields(state: &mut LuaState, t: Val, _entry: &QuestLogEntry) {
-    table_set(state, t, "isHeader", Val::Bool(false));
+fn write_quest_constant_stub_fields(state: &mut LuaState, t: Val, is_header: bool) {
+    table_set(state, t, "isHeader", Val::Bool(is_header));
     table_set(state, t, "isCollapsed", Val::Bool(false));
     table_set(state, t, "isBounty", Val::Bool(false));
     table_set(state, t, "isStory", Val::Bool(false));
@@ -131,8 +176,18 @@ fn write_quest_constant_stub_fields(state: &mut LuaState, t: Val, _entry: &Quest
     table_set(state, t, "startEvent", Val::Bool(false));
     table_set(state, t, "isScaling", Val::Bool(false));
     table_set(state, t, "readyForTranslation", Val::Bool(false));
-    table_set(state, t, "campaignID", Val::Num(0.0));
+    if !is_header {
+        table_set(state, t, "campaignID", Val::Num(0.0));
+    }
     table_set(state, t, "suggestedGroup", Val::Num(0.0));
+}
+
+fn write_header_constant_fields(state: &mut LuaState, t: Val) {
+    table_set(state, t, "isMeta", Val::Bool(false));
+    table_set(state, t, "isWorldQuest", Val::Bool(false));
+    table_set(state, t, "isTask", Val::Bool(false));
+    table_set(state, t, "isOnMap", Val::Bool(false));
+    write_quest_constant_stub_fields(state, t, true);
 }
 
 fn get_next_waypoint(state: &mut LuaState) -> LuaResult<u32> {
@@ -297,6 +352,31 @@ fn get_all_completed_quest_ids(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_quest_id_for_log_index(state: &mut LuaState) -> LuaResult<u32> {
+    let log_index = i32::from_stack(state, 1)?;
+    let kind = {
+        let sim = borrow_state(state)?;
+        classify_quest_log_index(sim.quest_log_entries.entries.len(), log_index)
+    };
+    match kind {
+        Some(QuestLogIndexKind::Header) => {
+            state.push(Val::Num(0.0));
+            Ok(1)
+        }
+        Some(QuestLogIndexKind::Quest(quest_entry_index)) => {
+            let quest_id = borrow_state(state)?
+                .quest_log_entries
+                .entries
+                .get(quest_entry_index)
+                .map(|entry| entry.quest_id)
+                .unwrap_or(0);
+            state.push(Val::Num(quest_id as f64));
+            Ok(1)
+        }
+        None => Ok(0),
+    }
+}
+
 fn get_log_index_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
     let quest_id = i32::from_stack(state, 1)?;
     let idx = borrow_state(state)?
@@ -306,7 +386,7 @@ fn get_log_index_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
         .enumerate()
         .find_map(|(i, e)| {
             if e.quest_id == quest_id {
-                Some(i as i32 + 1)
+                Some(i as i32 + 2)
             } else {
                 None
             }
@@ -321,10 +401,14 @@ fn get_log_index_for_quest_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_num_quest_log_entries(state: &mut LuaState) -> LuaResult<u32> {
-    let count = borrow_state(state)?.quest_log_entries.entries.len() as f64;
-    // shownCount = totalCount (no collapsed headers in sim entries)
-    state.push(Val::Num(count));
-    state.push(Val::Num(count));
+    let quest_count = borrow_state(state)?.quest_log_entries.entries.len() as f64;
+    let total_entries = if quest_count > 0.0 {
+        quest_count + 1.0
+    } else {
+        0.0
+    };
+    state.push(Val::Num(total_entries));
+    state.push(Val::Num(quest_count));
     Ok(2)
 }
 

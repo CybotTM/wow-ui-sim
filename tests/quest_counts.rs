@@ -24,7 +24,7 @@ fn get_num_quest_log_entries_matches_c_quest_log_method() {
             "#,
         )
         .unwrap();
-    assert_eq!(top_entries, c_entries);
+    assert_eq!(top_entries + 1, c_entries);
     assert_eq!(top_quests, c_quests);
     assert!(
         top_entries > 0,
@@ -35,7 +35,7 @@ fn get_num_quest_log_entries_matches_c_quest_log_method() {
         "seeded quest log should expose at least one non-header quest"
     );
     assert!(
-        top_entries >= top_quests,
+        c_entries >= c_quests,
         "total entries (including headers) cannot be below quest count"
     );
 }
@@ -71,11 +71,10 @@ fn get_quest_log_time_left_nil_when_no_selection() {
 #[test]
 fn get_quest_log_time_left_nil_when_selected_quest_is_not_world_quest() {
     let env = env();
-    // Pick any quest that's in the seeded QUEST_LOG but not in WORLD_QUESTS —
-    // C_QuestLog.GetQuestIDForLogIndex(1) is always a real quest in the sim.
+    // Pick a known non-world quest log index (2 = first quest after header).
     env.exec(
         r#"
-        local qid = C_QuestLog.GetQuestIDForLogIndex(1)
+        local qid = C_QuestLog.GetQuestIDForLogIndex(2)
         if qid then C_QuestLog.SetSelectedQuest(qid) end
         "#,
     )

@@ -17,7 +17,7 @@ fn get_num_quest_log_entries_returns_seeded_count() {
     let (shown, total): (i32, i32) = env
         .eval("return C_QuestLog.GetNumQuestLogEntries()")
         .unwrap();
-    assert_eq!(shown, 4);
+    assert_eq!(shown, 5);
     assert_eq!(total, 4);
 }
 
@@ -41,9 +41,25 @@ fn get_num_quest_log_entries_reflects_state_mutation() {
 fn get_info_returns_table_for_valid_index() {
     let env = env();
     let quest_id: i32 = env
-        .eval("local info = C_QuestLog.GetInfo(1); return info and info.questID or -1")
+        .eval("local info = C_QuestLog.GetInfo(2); return info and info.questID or -1")
         .unwrap();
     assert_eq!(quest_id, 80000);
+}
+
+#[test]
+fn get_info_exposes_header_at_first_index() {
+    let env = env();
+    let (title, quest_id, is_header): (String, i32, bool) = env
+        .eval(
+            r#"
+            local info = C_QuestLog.GetInfo(1)
+            return info.title, info.questID, info.isHeader
+            "#,
+        )
+        .unwrap();
+    assert_eq!(title, "Khaz Algar");
+    assert_eq!(quest_id, 0);
+    assert!(is_header);
 }
 
 #[test]
@@ -61,7 +77,7 @@ fn get_info_fields_match_entry() {
     let (title, level, is_complete): (String, i32, bool) = env
         .eval(
             r#"
-            local info = C_QuestLog.GetInfo(2)
+            local info = C_QuestLog.GetInfo(3)
             return info.title, info.level, info.isComplete
             "#,
         )
@@ -79,7 +95,7 @@ fn get_log_index_for_quest_id_returns_correct_index() {
     let idx: i32 = env
         .eval("return C_QuestLog.GetLogIndexForQuestID(80001) or -1")
         .unwrap();
-    assert_eq!(idx, 2);
+    assert_eq!(idx, 3);
 }
 
 #[test]
