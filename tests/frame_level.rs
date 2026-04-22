@@ -66,6 +66,31 @@ fn test_frame_level_same_parent_no_recalc() {
 }
 
 #[test]
+fn test_same_parent_set_parent_preserves_child_custom_frame_level() {
+    let env = env();
+    let child_level: i32 = env
+        .eval(
+            r#"
+        local host = CreateFrame("Frame")
+        local parent = CreateFrame("Frame")
+        local child = CreateFrame("Frame", nil, parent)
+
+        parent:SetParent(host)
+        parent:SetFrameLevel(100)
+        child:SetFrameLevel(7)
+
+        parent:SetParent(host)
+        return child:GetFrameLevel()
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        child_level, 7,
+        "same-parent SetParent should not clobber explicitly assigned child frame levels",
+    );
+}
+
+#[test]
 fn test_frame_level_recalc_after_nil_reparent() {
     let env = env();
     // After going through nil parent, reparenting should recalculate

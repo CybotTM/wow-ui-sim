@@ -2,6 +2,19 @@
 
 Opening the Blizzard world map used to fall into a steady `[rebuild] buckets=~16-20ms` loop even when the UI had settled. The root cause was not the pulse animation itself and not the final renderer cache: map canvas pins were reapplying their frame level, and the simulator invalidated `strata_buckets` on every `SetFrameLevel()` call even when the numeric level was unchanged. The fix was to treat no-op `SetFrameLevel()` calls as no-ops for render ordering too.
 
+## 2026-04-22 Follow-up Regression
+
+A second steady-state rebuild loop reappeared later with world map open (`[rebuild]` every ~500ms, buckets ~16-31ms). `WOW_SIM_TRACE_STRATA_INVALIDATIONS=1` showed the new invalidation source was still `SetFrameLevel`, but now from a child `widgetContainer` under a map pin:
+
+- `MapCanvasMixin:ApplyPinPosition()` called `pin:SetParent(canvas)` on every position refresh.
+- The simulator treated same-parent `SetParent` as a partial no-op, but still ran descendant `propagate_strata_level`.
+- That propagation reset child frame levels (including `widgetContainer`) back to inherited parent+offset every refresh.
+- `MapCanvasPinMixin:ApplyFrameLevel()` then reapplied the intended explicit level (`frameLevel - 10`), creating a repeating level tug-of-war and forcing bucket invalidation.
+
+Fix: make same-parent reparenting a true no-op for strata/level propagation in `reparent_widget()`.
+
+Regression test: `test_same_parent_set_parent_preserves_child_custom_frame_level` in `tests/frame_level.rs`.
+
 ## Symptoms
 
 - Repro: open the world map with `WOW_SIM_VERBOSE=1`.

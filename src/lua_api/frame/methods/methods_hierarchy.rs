@@ -12,7 +12,9 @@ pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_i
 
     let parent_props = read_parent_props(widgets, new_parent_id);
     update_child_parent_link(widgets, child_id, new_parent_id, same_parent, parent_props);
-    propagate_strata_level(widgets, child_id);
+    if !same_parent {
+        propagate_strata_level(widgets, child_id);
+    }
 
     let parent_eff_alpha = parent_props.map(|(_, _, alpha, _)| alpha).unwrap_or(1.0);
     let parent_eff_scale = parent_props.map(|(_, _, _, scale)| scale).unwrap_or(1.0);
