@@ -629,9 +629,6 @@ impl App {
         };
         self.textures_pending.set(remaining_pending);
         if loaded > 0 {
-            // Cached quad batches still reference pending texture markers until
-            // we re-emit them, so a decode completion must trigger a redraw.
-            self.mark_all_strata_dirty();
             crate::logging::eprintln_elapsed(&format!(
                 "[texture-cache-warmup] {loaded} new textures ({} requested)",
                 paths.len()
@@ -1013,6 +1010,7 @@ mod tests {
         app.strata_dirty.set(0);
         app.selected_rot_level = "Off".to_string();
         app.screen_size.set(Size::new(1024.0, 768.0));
+        *app.pending_dirty_ids.borrow_mut() = Some(FxHashSet::default());
 
         {
             let env = app.env.borrow();
@@ -1134,7 +1132,7 @@ mod tests {
     }
 
     #[test]
-    fn tick_warmup_marks_strata_dirty_when_it_decodes_visible_textures() {
+    fn tick_warmup_keeps_draw_pending_when_it_decodes_visible_textures() {
         let temp_dir = tempdir().unwrap();
         let texture_path = temp_dir.path().join("tick-warmup.png");
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
@@ -1161,11 +1159,14 @@ mod tests {
 
         let _ = app.update(Message::ProcessTimers(Instant::now()));
 
-        let all_strata_mask = (1u16 << crate::widget::FrameStrata::COUNT) - 1;
         assert_eq!(
             app.strata_dirty.get(),
-            all_strata_mask,
-            "tick-start warmup should force a redraw when it decodes visible textures"
+            0,
+            "warmup decode should not force a full strata rebuild by itself"
+        );
+        assert!(
+            app.textures_pending.get(),
+            "decoded textures should stay pending until draw uploads and resolves them"
         );
         assert!(
             app.texture_manager.borrow().get("tick-warmup").is_some(),
