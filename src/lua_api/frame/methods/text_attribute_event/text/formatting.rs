@@ -7,8 +7,9 @@ use crate::lua_api::frame::methods::button_anchor_hierarchy::{
 };
 use crate::lua_api::globals::font_strings_collection::fonts::create_font_object;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
-    registry_table_or_create, table_get, table_set, val_to_string,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    frame_id_from_stack, registry_get, registry_set, registry_table_or_create, table_get,
+    table_set, val_to_string,
 };
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -75,7 +76,21 @@ fn check_vertical_overflow(state: &LuaState, id: u64, p: &TruncationProps) -> bo
 
 pub(crate) fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let formatted_text = format_text_arg(state)?;
+    let formatter = table_get(state, Val::Table(state.global), "format");
+    let signature = default_formatter_unchanged(state, formatter)
+        .then(|| formatted_text_signature(state))
+        .flatten();
+    let formatted_text = if let Some(cached) =
+        read_cached_formatted_text(state, id, formatter, signature.as_deref())
+    {
+        cached
+    } else {
+        format_text_arg(state, formatter)?
+    };
+
+    if let Some(signature) = signature.as_deref() {
+        write_cached_formatted_text(state, id, formatter, signature, &formatted_text);
+    }
     apply_formatted_text_update(state, id, formatted_text)?;
     Ok(0)
 }
@@ -94,9 +109,8 @@ fn apply_formatted_text_update(
     ensure_intrinsic_formatted_text_width(state, id)
 }
 
-fn format_text_arg(state: &mut LuaState) -> LuaResult<String> {
+fn format_text_arg(state: &mut LuaState, formatter: Val) -> LuaResult<String> {
     let format = val_to_string(state, stack_val(state, 2)).unwrap_or_default();
-    let formatter = table_get(state, Val::Table(state.global), "format");
     let args = collect_format_args(state, &format);
     let formatted = call_function_state(state, formatter, &args)?;
     Ok(val_to_string(state, formatted).unwrap_or(format))
@@ -110,6 +124,100 @@ fn collect_format_args(state: &mut LuaState, format: &str) -> Vec<Val> {
         args.push(stack_val(state, index as i32));
     }
     args
+}
+
+fn formatted_text_signature(state: &LuaState) -> Option<String> {
+    let nargs = (state.top as i32 - state.base as i32) as usize;
+    let mut sig = String::new();
+    for index in 2..=nargs {
+        match stack_val(state, index as i32) {
+            Val::Nil => sig.push_str("n;"),
+            Val::Bool(value) => {
+                sig.push_str("b:");
+                sig.push(if value { '1' } else { '0' });
+                sig.push(';');
+            }
+            Val::Num(value) => {
+                sig.push_str("d:");
+                sig.push_str(&value.to_bits().to_string());
+                sig.push(';');
+            }
+            Val::Str(value) => {
+                let text = val_to_string(state, Val::Str(value))?;
+                sig.push_str("s:");
+                sig.push_str(&text.len().to_string());
+                sig.push(':');
+                sig.push_str(&text);
+                sig.push(';');
+            }
+            _ => return None,
+        }
+    }
+    Some(sig)
+}
+
+fn get_or_create_formatted_text_cache_store(state: &mut LuaState) -> Val {
+    registry_table_or_create(state, "__formatted_text_cache")
+}
+
+fn capture_default_formatter(state: &mut LuaState) -> Val {
+    const DEFAULT_FORMATTER_KEY: &str = "__formatted_text_default_formatter";
+    let cached = registry_get(state, DEFAULT_FORMATTER_KEY);
+    if !matches!(cached, Val::Nil) {
+        return cached;
+    }
+    let formatter = table_get(state, Val::Table(state.global), "format");
+    registry_set(state, DEFAULT_FORMATTER_KEY, formatter);
+    formatter
+}
+
+fn default_formatter_unchanged(state: &mut LuaState, formatter: Val) -> bool {
+    capture_default_formatter(state) == formatter
+}
+
+fn read_cached_formatted_text(
+    state: &mut LuaState,
+    id: u64,
+    formatter: Val,
+    signature: Option<&str>,
+) -> Option<String> {
+    let signature = signature?;
+    let store = get_or_create_formatted_text_cache_store(state);
+    let entry = table_get(state, store, &id.to_string());
+    if !matches!(entry, Val::Table(_)) {
+        return None;
+    }
+    let cached_formatter = table_get(state, entry, "__formatter");
+    if cached_formatter != formatter {
+        return None;
+    }
+    let cached_signature_val = table_get(state, entry, "__signature");
+    let cached_signature = val_to_string(state, cached_signature_val)?;
+    if cached_signature != signature {
+        return None;
+    }
+    let cached_result_val = table_get(state, entry, "__result");
+    val_to_string(state, cached_result_val)
+}
+
+fn write_cached_formatted_text(
+    state: &mut LuaState,
+    id: u64,
+    formatter: Val,
+    signature: &str,
+    result: &str,
+) {
+    let store = get_or_create_formatted_text_cache_store(state);
+    let mut entry = table_get(state, store, &id.to_string());
+    if !matches!(entry, Val::Table(_)) {
+        entry = create_table(state);
+    }
+    let signature_val = create_string(state, signature);
+    let result_val = create_string(state, result);
+    table_set(state, entry, "__formatter", formatter);
+    table_set(state, entry, "__signature", signature_val);
+    table_set(state, entry, "__result", result_val);
+    table_set(state, store, &id.to_string(), entry);
 }
 
 fn should_skip_formatted_text_update(
@@ -322,8 +430,11 @@ pub(crate) fn set_font_object(state: &mut LuaState) -> LuaResult<u32> {
         }
         _ => return Err(runtime_error("SetFontObject requires a font object")),
     };
-    let fields = read_font_object_fields(state, font_object);
     let store = get_or_create_font_object_store(state);
+    if table_get(state, store, &id.to_string()) == font_object {
+        return Ok(0);
+    }
+    let fields = read_font_object_fields(state, font_object);
     table_set(state, store, &id.to_string(), font_object);
     let should_apply = {
         let sim = borrow_state(state)?;

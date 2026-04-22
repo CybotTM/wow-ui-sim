@@ -2,6 +2,17 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-22] update | formattedtext and fontobject no-op fast paths
+
+Updated `investigations/on-update-dirty.md` with the post-optimization
+measurements for `SetFormattedText` and `SetFontObject` after
+`text/formatting.rs` changes. Documented the new same-signature
+`SetFormattedText` cache guard (enabled only while global `format` matches the
+captured default), confirmed behavior parity for overridden `format`
+(`format_call_probe_same_text_calls=100`), and recorded the large
+`SetFontObject` no-op drop (`steady_same_total_us` from `6.104us` baseline to
+`1.201us` in the rerun).
+
 ## [2026-04-22] update | setalpha no-op fast-path optimization
 
 Updated `investigations/on-update-dirty.md` with the `SetAlpha` fast-path

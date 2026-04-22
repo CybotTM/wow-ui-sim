@@ -171,6 +171,31 @@ fn set_font_object_same_value_is_a_true_noop() {
 }
 
 #[test]
+fn set_font_object_same_table_reference_is_a_true_noop() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame", "NoopFontObjectTableFrame", UIParent)
+            local text = frame:CreateFontString("NoopFontObjectTableString", "ARTWORK")
+            local font_obj = GameFontNormalMed1
+            text:SetFontObject(font_obj)
+            _G.__noop_font_object_table_ref = font_obj
+            "#,
+        )
+        .expect("initial font object table setup should succeed");
+
+        clear_dirty(&env);
+
+        env.exec(r#"NoopFontObjectTableString:SetFontObject(__noop_font_object_table_ref)"#)
+            .expect("same-table SetFontObject should succeed");
+
+        assert_no_visual_dirty(&env, "SetFontObject on identical font table ref");
+        assert_no_rect_dirty(&env, "SetFontObject on identical font table ref");
+    }
+}
+
+#[test]
 fn set_shown_same_value_is_a_true_noop() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");

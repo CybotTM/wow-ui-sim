@@ -165,6 +165,47 @@ Equality-bail ordering confirmation:
 - static path confirms the same ordering: `set_formatted_text()` calls
   `format_text_arg()` before `should_skip_formatted_text_update()`
 
+## 2026-04-22 SetFormattedText / SetFontObject post-fast-path measurement
+
+After the `formatting.rs` optimization pass:
+
+- `SetFormattedText` now has a same-signature result cache keyed by
+  `(frame, formatter identity, argument signature)`, but only when global
+  `format` still matches the captured default formatter.
+- If addons override global `format`, the cache disables and the call path
+  falls back to always invoking `format()` (behavior parity with baseline).
+- `SetFontObject` now has an early no-op guard when the resolved incoming font
+  object is the same table already stored for that frame, so it returns before
+  `read_font_object_fields()` and snapshot application checks.
+
+Post-change benchmark rerun (same scripts/shape as baseline):
+
+`setformatted_bench.lua` (`N=120000`, `R=8`, measured):
+
+- `empty_ms=14.762528`
+- `format_only_ms=267.826908`
+- `same_ms=462.302798`
+- `change_ms=847.277951`
+- `formatting_parse_us=2.108870`
+- `text_equality_fastpath_us=1.620632`
+- `real_text_change_extra_us=3.208126`
+- `format_call_probe_same_text_calls=100` (global `format` override path still
+  executes each call, as expected)
+
+The total same-value `SetFormattedText` cost (`same - empty`) dropped from the
+baseline `3.891us` to `3.729us` in this rerun.
+
+`set_misc_bench.lua` (`N=20000`, `R=4`, measured `set_font_object`):
+
+- `dispatch_us=1.111644`
+- `prebail_us=0.089713`
+- `change_extra_us=3.342836`
+- `steady_same_total_us=1.201357`
+
+Compared to the earlier baseline (`steady_same_total_us=6.104us`,
+`prebail_us=4.100us`), same-value `SetFontObject` no-op cost is now
+substantially lower.
+
 ## 2026-04-22 SetPoint no-op microbenchmark baseline
 
 Before touching `SetPoint`, we measured the current no-op and change-path cost
