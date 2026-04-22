@@ -1722,8 +1722,12 @@ local function __wow_finalize_map_exploration_pin_waiting(pin)
     local texturesLoaded = type(textureLoadGroup) == "table"
         and type(textureLoadGroup.IsFullyLoaded) == "function"
         and textureLoadGroup:IsFullyLoaded()
+    local overlayPool = rawget(pin, "overlayTexturePool")
+    local hasOverlayTextures = type(overlayPool) == "table"
+        and type(overlayPool.GetNumActive) == "function"
+        and overlayPool:GetNumActive() > 0
 
-    if detailLayersLoaded and texturesLoaded then
+    if detailLayersLoaded and (texturesLoaded or hasOverlayTextures) then
         if type(pin.RefreshAlpha) == "function" then
             pin:RefreshAlpha()
         end
@@ -1739,6 +1743,122 @@ local function __wow_finalize_map_exploration_pin_waiting(pin)
     end
 end
 
+local function __wow_map_exploration_pin_overlay_count(pin)
+    if type(pin) ~= "table" then
+        return 0
+    end
+    local overlayPool = rawget(pin, "overlayTexturePool")
+    if type(overlayPool) ~= "table" or type(overlayPool.GetNumActive) ~= "function" then
+        return 0
+    end
+    return overlayPool:GetNumActive()
+end
+
+local function __wow_should_retry_map_exploration_pin_overlay_refresh(pin)
+    if type(pin) ~= "table" then
+        return false
+    end
+
+    local map = type(pin.GetMap) == "function" and pin:GetMap() or nil
+    local mapID = type(map) == "table" and type(map.GetMapID) == "function" and map:GetMapID() or nil
+    if type(mapID) ~= "number" or mapID == 0 then
+        return false
+    end
+
+    if type(C_MapExplorationInfo) ~= "table" or type(C_MapExplorationInfo.GetExploredMapTextures) ~= "function" then
+        return false
+    end
+
+    local exploredMapTextures = C_MapExplorationInfo.GetExploredMapTextures(mapID)
+    if type(exploredMapTextures) ~= "table" or #exploredMapTextures == 0 then
+        return false
+    end
+
+    return __wow_map_exploration_pin_overlay_count(pin) == 0
+end
+
+local function __wow_schedule_map_exploration_pin_finalize_retry(pin, attemptsLeft)
+    if type(pin) ~= "table" or not rawget(pin, "isWaitingForLoad") then
+        return
+    end
+
+    local remaining = attemptsLeft or 12
+    if remaining <= 0 then
+        -- Fail-open fallback: prefer showing explored overlays on first open
+        -- over requiring close/reopen when waiting never resolves.
+        if type(pin.RefreshAlpha) == "function" then
+            pin:RefreshAlpha()
+        end
+        pin.isWaitingForLoad = nil
+        local textureLoadGroup = rawget(pin, "textureLoadGroup")
+        if type(textureLoadGroup) == "table" and type(textureLoadGroup.Reset) == "function" then
+            textureLoadGroup:Reset()
+        end
+        return
+    end
+
+    if rawget(pin, "__wow_finalize_retry_pending") then
+        return
+    end
+    if type(C_Timer) ~= "table" or type(C_Timer.After) ~= "function" then
+        return
+    end
+
+    rawset(pin, "__wow_finalize_retry_pending", true)
+    C_Timer.After(0, function()
+        if type(pin) ~= "table" then
+            return
+        end
+        rawset(pin, "__wow_finalize_retry_pending", nil)
+        __wow_finalize_map_exploration_pin_waiting(pin)
+        if rawget(pin, "isWaitingForLoad") then
+            __wow_schedule_map_exploration_pin_finalize_retry(pin, remaining - 1)
+        end
+    end)
+end
+
+local function __wow_schedule_map_exploration_pin_overlay_retry(pin, attemptsLeft)
+    if type(pin) ~= "table" then
+        return
+    end
+
+    local remaining = attemptsLeft or 8
+    if remaining <= 0 or not __wow_should_retry_map_exploration_pin_overlay_refresh(pin) then
+        return
+    end
+
+    if rawget(pin, "__wow_overlay_retry_pending") then
+        return
+    end
+    if type(C_Timer) ~= "table" or type(C_Timer.After) ~= "function" then
+        return
+    end
+
+    rawset(pin, "__wow_overlay_retry_pending", true)
+    C_Timer.After(0, function()
+        if type(pin) ~= "table" then
+            return
+        end
+
+        rawset(pin, "__wow_overlay_retry_pending", nil)
+        if rawget(pin, "__wow_overlay_retry_running") or not __wow_should_retry_map_exploration_pin_overlay_refresh(pin) then
+            return
+        end
+
+        rawset(pin, "__wow_overlay_retry_running", true)
+        if type(pin.RefreshOverlays) == "function" then
+            pin:RefreshOverlays(true)
+        end
+        rawset(pin, "__wow_overlay_retry_running", nil)
+
+        __wow_finalize_map_exploration_pin_waiting(pin)
+        if rawget(pin, "isWaitingForLoad") then
+            __wow_schedule_map_exploration_pin_finalize_retry(pin, 12)
+        end
+        __wow_schedule_map_exploration_pin_overlay_retry(pin, remaining - 1)
+    end)
+end
+
 local function __wow_patch_live_map_exploration_pins(map)
     if type(map) ~= "table" then
         return
@@ -1747,6 +1867,7 @@ local function __wow_patch_live_map_exploration_pins(map)
     if type(map.EnumeratePinsByTemplate) == "function" then
         for pin in map:EnumeratePinsByTemplate("MapExplorationPinTemplate") do
             __wow_size_map_exploration_pin(pin)
+            __wow_schedule_map_exploration_pin_overlay_retry(pin, 8)
         end
     end
 
@@ -1764,6 +1885,7 @@ local function __wow_patch_live_map_exploration_pins(map)
                 pin.RefreshOverlays = MapExplorationPinMixin.RefreshOverlays
             end
             __wow_size_map_exploration_pin(pin)
+            __wow_schedule_map_exploration_pin_overlay_retry(pin, 8)
         end
     end
 end
@@ -1775,6 +1897,8 @@ if type(MapExplorationPinMixin) == "table" and not rawget(_G, "__wow_map_explora
             originalOnAcquired(self, dataProvider)
             __wow_size_map_exploration_pin(self)
             __wow_finalize_map_exploration_pin_waiting(self)
+            __wow_schedule_map_exploration_pin_finalize_retry(self, 12)
+            __wow_schedule_map_exploration_pin_overlay_retry(self, 8)
         end
     end
 
@@ -1784,6 +1908,10 @@ if type(MapExplorationPinMixin) == "table" and not rawget(_G, "__wow_map_explora
             __wow_size_map_exploration_pin(self)
             local result = originalRefreshOverlays(self, fullUpdate)
             __wow_finalize_map_exploration_pin_waiting(self)
+            __wow_schedule_map_exploration_pin_finalize_retry(self, 12)
+            if not rawget(self, "__wow_overlay_retry_running") then
+                __wow_schedule_map_exploration_pin_overlay_retry(self, 8)
+            end
             return result
         end
     end
@@ -1800,6 +1928,9 @@ if type(MapExplorationPinMixin) == "table" and not rawget(_G, "__wow_map_explora
             end
             local result = originalOnUpdate(self, elapsed)
             __wow_finalize_map_exploration_pin_waiting(self)
+            if not rawget(self, "__wow_overlay_retry_running") then
+                __wow_schedule_map_exploration_pin_overlay_retry(self, 8)
+            end
             return result
         end
     end
