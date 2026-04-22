@@ -113,15 +113,20 @@ fn push_item_name_line(state: &mut LuaState, lines: Val, item: &items::ItemInfo)
     );
 }
 
+fn tooltip_detail_color(state: &mut LuaState) -> (f64, f64, f64) {
+    global_color_or_fallback(state, b"HIGHLIGHT_FONT_COLOR", (1.0, 0.82, 0.0))
+}
+
 fn push_item_level_line(state: &mut LuaState, lines: Val, item: &items::ItemInfo) {
     let item_level = format!("Item Level {}", item.item_level);
+    let detail_color = tooltip_detail_color(state);
     push_tooltip_line(
         state,
         lines,
         2,
         LINE_TYPE_ITEM_LEVEL,
         &item_level,
-        None,
+        Some(detail_color),
         false,
     );
 }
@@ -150,13 +155,14 @@ fn push_item_equip_slot_line(
     if equip_slot.is_empty() {
         return;
     }
+    let detail_color = tooltip_detail_color(state);
     push_tooltip_line(
         state,
         lines,
         *next_index,
         LINE_TYPE_EQUIP_SLOT,
         equip_slot,
-        None,
+        Some(detail_color),
         false,
     );
     *next_index += 1;
@@ -165,21 +171,187 @@ fn push_item_equip_slot_line(
 fn push_item_binding_line(
     state: &mut LuaState,
     lines: Val,
-    next_index: i64,
+    next_index: &mut i64,
     item: &items::ItemInfo,
 ) {
     let Some(binding) = item_binding_text(state, item.bonding) else {
         return;
     };
+    let detail_color = tooltip_detail_color(state);
     push_tooltip_line(
         state,
         lines,
-        next_index,
+        *next_index,
         LINE_TYPE_ITEM_BINDING,
         &binding,
-        None,
+        Some(detail_color),
         false,
     );
+    *next_index += 1;
+}
+
+fn global_string_or_fallback(state: &mut LuaState, key: &[u8], fallback: &str) -> String {
+    let interned_key = state.gc.intern_string(key);
+    state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(interned_key, &state.gc.string_arena))
+        .and_then(|value| val_to_string(state, value))
+        .unwrap_or_else(|| fallback.to_string())
+}
+
+fn table_color_component(state: &mut LuaState, table: Val, key: &[u8]) -> Option<f64> {
+    let Val::Table(table_ref) = table else {
+        return None;
+    };
+    let component_key = state.gc.intern_string(key);
+    let value = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|tbl| tbl.get_str(component_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    match value {
+        Val::Num(component) => Some(component),
+        _ => None,
+    }
+}
+
+fn global_color_or_fallback(
+    state: &mut LuaState,
+    key: &[u8],
+    fallback: (f64, f64, f64),
+) -> (f64, f64, f64) {
+    let global_key = state.gc.intern_string(key);
+    let color = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(global_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    let Some(r) = table_color_component(state, color, b"r") else {
+        return fallback;
+    };
+    let Some(g) = table_color_component(state, color, b"g") else {
+        return fallback;
+    };
+    let Some(b) = table_color_component(state, color, b"b") else {
+        return fallback;
+    };
+    (r, g, b)
+}
+
+fn slot_budget_multiplier(inventory_type: u8) -> f64 {
+    match inventory_type {
+        1 | 3 | 5 | 6 | 7 | 8 | 9 | 10 => 2.0, // armor pieces
+        2 | 11 | 12 | 16 => 1.25,              // neck, rings, trinkets, cloak
+        13 | 17 | 21 => 2.7,                   // one-hand, two-hand, main hand
+        14 | 22 => 1.6,                        // shield/off hand
+        15 => 2.2,                             // ranged
+        _ => 1.0,
+    }
+}
+
+fn primary_stat_for_class(class_index: i32) -> i16 {
+    match class_index {
+        1 | 2 | 6 => 4,       // Strength classes
+        3 | 4 | 10 | 12 => 3, // Agility classes
+        _ => 5,               // Intellect classes
+    }
+}
+
+fn resolve_hybrid_stat_id(raw_stat_id: i16, class_index: i32) -> i16 {
+    let primary = primary_stat_for_class(class_index);
+    match raw_stat_id {
+        71 => primary, // Agi/Str/Int
+        72 => {
+            if primary == 4 {
+                4
+            } else {
+                3
+            }
+        } // Agi/Str
+        73 => {
+            if primary == 3 {
+                3
+            } else {
+                5
+            }
+        } // Agi/Int
+        74 => {
+            if primary == 4 {
+                4
+            } else {
+                5
+            }
+        } // Str/Int
+        _ => raw_stat_id,
+    }
+}
+
+fn stat_display_spec(stat_id: i16) -> Option<(&'static [u8], &'static str, f64)> {
+    match stat_id {
+        3 => Some((b"ITEM_MOD_AGILITY_SHORT", "Agility", 1.2)),
+        4 => Some((b"ITEM_MOD_STRENGTH_SHORT", "Strength", 1.2)),
+        5 => Some((b"ITEM_MOD_INTELLECT_SHORT", "Intellect", 1.2)),
+        7 => Some((b"ITEM_MOD_STAMINA_SHORT", "Stamina", 1.8)),
+        32 => Some((b"ITEM_MOD_CRIT_RATING_SHORT", "Critical Strike", 0.75)),
+        36 => Some((b"ITEM_MOD_HASTE_RATING_SHORT", "Haste", 0.75)),
+        40 => Some((b"ITEM_MOD_VERSATILITY", "Versatility", 0.75)),
+        49 => Some((b"ITEM_MOD_MASTERY_RATING_SHORT", "Mastery", 0.75)),
+        50 => Some((b"ITEM_MOD_EXTRA_ARMOR_SHORT", "Bonus Armor", 0.9)),
+        61 => Some((b"ITEM_MOD_CR_SPEED_SHORT", "Speed", 0.35)),
+        62 => Some((b"ITEM_MOD_CR_LIFESTEAL_SHORT", "Leech", 0.35)),
+        63 => Some((b"ITEM_MOD_CR_AVOIDANCE_SHORT", "Avoidance", 0.35)),
+        _ => None,
+    }
+}
+
+fn estimate_stat_value(item: &items::ItemInfo, stat_percent: u16, scale: f64) -> i32 {
+    let budget = f64::from(item.item_level) * slot_budget_multiplier(item.inventory_type);
+    let raw = budget * (f64::from(stat_percent) / 10_000.0) * scale;
+    raw.round().max(1.0) as i32
+}
+
+fn push_item_stat_lines(
+    state: &mut LuaState,
+    lines: Val,
+    item: &items::ItemInfo,
+    next_index: &mut i64,
+) {
+    let stat_color = global_color_or_fallback(state, b"GREEN_FONT_COLOR", (0.12, 1.0, 0.0));
+    let class_index = borrow_state(state)
+        .ok()
+        .map(|sim| sim.player.class_index)
+        .unwrap_or(2);
+
+    for (&raw_stat_id, &stat_percent) in item
+        .stat_modifier_bonus_stat
+        .iter()
+        .zip(item.stat_percent_editor.iter())
+    {
+        if raw_stat_id < 0 || stat_percent == 0 {
+            continue;
+        }
+        let stat_id = resolve_hybrid_stat_id(raw_stat_id, class_index);
+        let Some((label_key, label_fallback, scale)) = stat_display_spec(stat_id) else {
+            continue;
+        };
+        let label = global_string_or_fallback(state, label_key, label_fallback);
+        let value = estimate_stat_value(item, stat_percent, scale);
+        let line_text = format!("+{value} {label}");
+        push_tooltip_line(
+            state,
+            lines,
+            *next_index,
+            LINE_TYPE_SPELL_NAME,
+            &line_text,
+            Some(stat_color),
+            false,
+        );
+        *next_index += 1;
+    }
 }
 
 pub(super) fn tooltip_for_item_id(state: &mut LuaState, item_id: u32) -> Val {
@@ -202,7 +374,8 @@ pub(super) fn populate_item_tooltip_lines(
 
     let mut next_index = 3;
     push_item_equip_slot_line(state, lines, item.inventory_type, &mut next_index);
-    push_item_binding_line(state, lines, next_index, item);
+    push_item_binding_line(state, lines, &mut next_index, item);
+    push_item_stat_lines(state, lines, item, &mut next_index);
 }
 
 pub(super) fn push_plain_line(state: &mut LuaState, lines: Val, index: i64, text: &str) {

@@ -195,6 +195,20 @@ fn requested_power_type(state: &LuaState) -> Option<i32> {
     }
 }
 
+fn stack_i32(state: &LuaState, index: i32) -> i32 {
+    match stack_val(state, index) {
+        Val::Num(n) => n as i32,
+        _ => 0,
+    }
+}
+
+fn stack_f64(state: &LuaState, index: i32) -> f64 {
+    match stack_val(state, index) {
+        Val::Num(n) => n,
+        _ => 0.0,
+    }
+}
+
 fn secondary_power_max(power_type: i32) -> i32 {
     match power_type {
         4 => 7,
@@ -398,6 +412,60 @@ fn unit_resistance(state: &mut LuaState) -> LuaResult<u32> {
     Ok(4)
 }
 
+// ── PaperDoll stat helpers ───────────────────────────────────────────────────
+
+/// `GetAttackPowerForStat(statIndex, value)` — helper used by Blizzard's
+/// PaperDoll tooltip generation.
+fn get_attack_power_for_stat(state: &mut LuaState) -> LuaResult<u32> {
+    let stat_index = stack_i32(state, 1);
+    let stat_value = stack_f64(state, 2).max(0.0);
+    let attack_power = match stat_index {
+        // Sim model computes AP linearly from strength + agility.
+        1 | 2 => stat_value,
+        _ => 0.0,
+    };
+    state.push(Val::Num(attack_power));
+    Ok(1)
+}
+
+/// `GetDodgeChanceFromAttribute()` — attribute-only dodge contribution.
+fn get_dodge_chance_from_attribute(state: &mut LuaState) -> LuaResult<u32> {
+    let stats = stats_for(state);
+    state.push(Val::Num((stats.agility / 100.0).max(0.0)));
+    Ok(1)
+}
+
+/// `GetParryChanceFromAttribute()` — attribute-only parry contribution.
+fn get_parry_chance_from_attribute(state: &mut LuaState) -> LuaResult<u32> {
+    let stats = stats_for(state);
+    state.push(Val::Num((stats.strength / 100.0).max(0.0)));
+    Ok(1)
+}
+
+/// `UnitHPPerStamina(unit)` — fixed multiplier used by PaperDoll stamina text.
+fn unit_hp_per_stamina(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+/// `GetUnitMaxHealthModifier(unit)` — no percentage health scaling modelled.
+fn get_unit_max_health_modifier(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+/// `HasAPEffectsSpellPower()` and `HasSPEffectsAttackPower()` return class/spec
+/// crossover flags in retail. The simulator currently models no crossover.
+fn has_ap_effects_spell_power(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn has_sp_effects_attack_power(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /// Approximate rating-to-percent conversion used by the sim's stat
@@ -410,6 +478,29 @@ fn rating_to_percent(rating: i32) -> f64 {
 
 fn base_avoidance_percent(primary_stat: f64) -> f64 {
     5.0 + primary_stat / 100.0
+}
+
+fn register_paperdoll_helpers(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetAttackPowerForStat", get_attack_power_for_stat)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetDodgeChanceFromAttribute",
+        get_dodge_chance_from_attribute,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "GetParryChanceFromAttribute",
+        get_parry_chance_from_attribute,
+    )?;
+    LuaApiMut::register_function(lua, "UnitHPPerStamina", unit_hp_per_stamina)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetUnitMaxHealthModifier",
+        get_unit_max_health_modifier,
+    )?;
+    LuaApiMut::register_function(lua, "HasAPEffectsSpellPower", has_ap_effects_spell_power)?;
+    LuaApiMut::register_function(lua, "HasSPEffectsAttackPower", has_sp_effects_attack_power)?;
+    Ok(())
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -431,5 +522,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitXPMax", unit_xp_max)?;
     LuaApiMut::register_function(lua, "UnitStat", unit_stat)?;
     LuaApiMut::register_function(lua, "UnitResistance", unit_resistance)?;
+    register_paperdoll_helpers(lua)?;
     Ok(())
 }

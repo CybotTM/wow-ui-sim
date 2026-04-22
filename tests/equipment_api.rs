@@ -60,6 +60,16 @@ fn test_inventory_item_texture_nil_for_empty_slot() {
 }
 
 #[test]
+fn test_inventory_item_texture_uses_ring_fallback_icon_for_missing_item_icon() {
+    let env = env();
+    env.exec("A_Admin.EquipItem(11, 999999)").unwrap();
+    let tex: i64 = env
+        .eval("return GetInventoryItemTexture('player', 11)")
+        .unwrap();
+    assert_eq!(tex, 133358);
+}
+
+#[test]
 fn test_bag_slot_texture() {
     let env = env();
     let tex: String = env

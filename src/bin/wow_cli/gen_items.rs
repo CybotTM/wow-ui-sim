@@ -46,7 +46,12 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 fn collect_required_item_ids() -> BTreeSet<u32> {
     let mut ids = BTreeSet::new();
 
-    // Equipped items from state_types.rs: e(221096), e(225577), etc.
+    // Equipped items seeded in state defaults: e(211993), e(211995), etc.
+    if let Ok(src) = std::fs::read_to_string("src/lua_api/state_defaults.rs") {
+        collect_number_literals_after(&src, "e(", &mut ids);
+    }
+
+    // Legacy fallback for older layouts.
     if let Ok(src) = std::fs::read_to_string("src/lua_api/state_types.rs") {
         collect_number_literals_after(&src, "e(", &mut ids);
     }
@@ -57,7 +62,7 @@ fn collect_required_item_ids() -> BTreeSet<u32> {
         collect_number_literals_after(&src, "output_item_id: ", &mut ids);
     }
 
-    // Bag items from c_container_api.rs or admin API
+    // Legacy fallback for older container stubs.
     if let Ok(src) = std::fs::read_to_string("src/lua_api/globals/c_container_api.rs") {
         collect_number_literals_after(&src, "item_id: ", &mut ids);
     }
@@ -222,12 +227,47 @@ fn format_item_info(fields: &[String], name: &str, icon_file_data_id: u32) -> St
     let required_level: u16 = fields[99].parse().unwrap_or(0);
     let inventory_type: u8 = fields[100].parse().unwrap_or(0);
     let quality: u8 = fields[101].parse().unwrap_or(0);
+    let stat_percent_editor = parse_stat_percent_editor(fields);
+    let stat_modifier_bonus_stat = parse_stat_modifier_bonus_stat(fields);
+
+    let stat_percent_editor = format_u16_array(&stat_percent_editor);
+    let stat_modifier_bonus_stat = format_i16_array(&stat_modifier_bonus_stat);
     format!(
         "ItemInfo {{ name: \"{escaped_name}\", quality: {quality}, item_level: {item_level}, \
          required_level: {required_level}, inventory_type: {inventory_type}, \
          sell_price: {sell_price}, stackable: {stackable}, bonding: {bonding}, \
-         expansion_id: {expansion_id}, icon_file_data_id: {icon_file_data_id} }}"
+         expansion_id: {expansion_id}, icon_file_data_id: {icon_file_data_id}, \
+         stat_percent_editor: {stat_percent_editor}, \
+         stat_modifier_bonus_stat: {stat_modifier_bonus_stat} }}"
     )
+}
+
+fn parse_stat_percent_editor(fields: &[String]) -> [u16; 10] {
+    std::array::from_fn(|index| fields[26 + index].parse::<u16>().unwrap_or(0))
+}
+
+fn parse_stat_modifier_bonus_stat(fields: &[String]) -> [i16; 10] {
+    std::array::from_fn(|index| fields[36 + index].parse::<i16>().unwrap_or(-1))
+}
+
+fn format_array<T: std::fmt::Display>(values: &[T]) -> String {
+    let mut out = String::from("[");
+    for (index, value) in values.iter().enumerate() {
+        if index > 0 {
+            out.push_str(", ");
+        }
+        out.push_str(&value.to_string());
+    }
+    out.push(']');
+    out
+}
+
+fn format_u16_array(values: &[u16; 10]) -> String {
+    format_array(values)
+}
+
+fn format_i16_array(values: &[i16; 10]) -> String {
+    format_array(values)
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
@@ -249,6 +289,8 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    pub bonding: u8,")?;
     writeln!(out, "    pub expansion_id: u8,")?;
     writeln!(out, "    pub icon_file_data_id: u32,")?;
+    writeln!(out, "    pub stat_percent_editor: [u16; 10],")?;
+    writeln!(out, "    pub stat_modifier_bonus_stat: [i16; 10],")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
     Ok(())

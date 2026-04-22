@@ -69,7 +69,7 @@ fn test_c_tooltip_info_get_trait_entry_returns_real_tooltip_lines() {
 #[test]
 fn test_c_tooltip_info_get_item_by_id_exposes_colored_name_and_binding_line() {
     let env = WowLuaEnv::new().unwrap();
-    let has_full_item_tooltip: bool = env
+    let has_full_item_tooltip_colors: bool = env
         .eval(
             r#"
             local tooltip = C_TooltipInfo.GetItemByID(229181)
@@ -91,16 +91,41 @@ fn test_c_tooltip_info_get_item_by_id_exposes_colored_name_and_binding_line() {
                 return false
             end
 
+            local itemLevelLine = tooltip.lines[2]
+            if not itemLevelLine
+                or itemLevelLine.type ~= Enum.TooltipDataLineType.ItemLevel
+                or type(itemLevelLine.leftText) ~= "string"
+                or not string.find(itemLevelLine.leftText, "Item Level", 1, true)
+                or type(itemLevelLine.leftColor) ~= "table"
+            then
+                return false
+            end
+
+            local hR, hG, hB = HIGHLIGHT_FONT_COLOR:GetRGB()
+            local levelR, levelG, levelB = itemLevelLine.leftColor:GetRGB()
+            if math.abs(levelR - hR) > 0.01 or math.abs(levelG - hG) > 0.01 or math.abs(levelB - hB) > 0.01 then
+                return false
+            end
+
             local bindingLine = tooltip.lines[4]
-            return bindingLine
-                and bindingLine.type == Enum.TooltipDataLineType.ItemBinding
-                and bindingLine.leftText == ITEM_BIND_ON_PICKUP
+            if not bindingLine
+                or bindingLine.type ~= Enum.TooltipDataLineType.ItemBinding
+                or bindingLine.leftText ~= ITEM_BIND_ON_PICKUP
+                or type(bindingLine.leftColor) ~= "table"
+            then
+                return false
+            end
+
+            local bindingR, bindingG, bindingB = bindingLine.leftColor:GetRGB()
+            return math.abs(bindingR - hR) <= 0.01
+                and math.abs(bindingG - hG) <= 0.01
+                and math.abs(bindingB - hB) <= 0.01
             "#,
         )
         .unwrap();
     assert!(
-        has_full_item_tooltip,
-        "C_TooltipInfo.GetItemByID should expose item name color and binding text",
+        has_full_item_tooltip_colors,
+        "C_TooltipInfo.GetItemByID should expose colored item-level and binding lines",
     );
 }
 
@@ -113,6 +138,46 @@ fn test_c_tooltip_info_get_item_by_id_returns_item_tooltip_lines() {
         "Entombed Seraph's Greaves",
         "Legs",
         "C_TooltipInfo.GetItemByID should expose item, item-level, and equip-slot lines",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_item_by_id_includes_stat_lines_for_gear() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_colored_stat_lines: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetItemByID(211995)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local foundStrength = false
+            local foundStamina = false
+            local foundGreenStatColor = false
+            for _, line in ipairs(tooltip.lines) do
+                local text = line.leftText
+                if type(text) == "string" and string.sub(text, 1, 1) == "+" then
+                    if string.find(text, ITEM_MOD_STRENGTH_SHORT, 1, true) then
+                        foundStrength = true
+                    end
+                    if string.find(text, ITEM_MOD_STAMINA_SHORT, 1, true) then
+                        foundStamina = true
+                    end
+                    if line.leftColor and type(line.leftColor.g) == "number" and type(line.leftColor.r) == "number" and line.leftColor.g > line.leftColor.r then
+                        foundGreenStatColor = true
+                    end
+                end
+            end
+
+            return foundStrength and foundStamina and foundGreenStatColor
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_colored_stat_lines,
+        "C_TooltipInfo.GetItemByID should include green-colored stat lines for equippable armor",
     );
 }
 

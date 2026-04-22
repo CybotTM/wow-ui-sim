@@ -133,6 +133,15 @@ fn player_equipped_item_id(state: &mut LuaState, unit: &str, slot: i32) -> Optio
         .map(|item| item.item_id)
 }
 
+fn fallback_icon_for_slot(slot: i32) -> f64 {
+    match slot {
+        2 => 133311.0,       // Necklace
+        11 | 12 => 133358.0, // Ring
+        13 | 14 => 338783.0, // Trinket
+        _ => 134400.0,       // Question mark fallback
+    }
+}
+
 fn get_inventory_item_id(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let Some(slot) = stack_i32(state, 2) else {
@@ -169,12 +178,12 @@ fn get_inventory_item_texture(state: &mut LuaState) -> LuaResult<u32> {
     let texture = items::get_item(item_id)
         .map(|item| {
             if item.icon_file_data_id == 0 {
-                134400.0
+                fallback_icon_for_slot(slot)
             } else {
                 item.icon_file_data_id as f64
             }
         })
-        .unwrap_or(134400.0);
+        .unwrap_or_else(|| fallback_icon_for_slot(slot));
     state.push(Val::Num(texture));
     Ok(1)
 }

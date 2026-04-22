@@ -240,6 +240,54 @@ fn unit_resistance_returns_four_zero_values() {
     assert_eq!((base, res, pos, neg), (0, 0, 0, 0));
 }
 
+// ── PaperDoll helpers ────────────────────────────────────────────────────────
+
+#[test]
+fn attack_power_for_stat_is_defined_for_strength_and_agility() {
+    let env = env();
+    let (str_ap, agi_ap, int_ap): (f64, f64, f64) = env
+        .eval(
+            r#"
+            return GetAttackPowerForStat(1, 150),
+                   GetAttackPowerForStat(2, 120),
+                   GetAttackPowerForStat(4, 999)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(str_ap, 150.0);
+    assert_eq!(agi_ap, 120.0);
+    assert_eq!(int_ap, 0.0);
+}
+
+#[test]
+fn paperdoll_attribute_helpers_return_numbers() {
+    let env = env();
+    let (dodge_from_attr, parry_from_attr): (f64, f64) = env
+        .eval(r#"return GetDodgeChanceFromAttribute(), GetParryChanceFromAttribute()"#)
+        .unwrap();
+    assert!(dodge_from_attr >= 0.0);
+    assert!(parry_from_attr >= 0.0);
+}
+
+#[test]
+fn paperdoll_health_and_ap_sp_helpers_are_available() {
+    let env = env();
+    let (hp_per_stam, health_mod, ap_to_sp, sp_to_ap): (f64, f64, bool, bool) = env
+        .eval(
+            r#"
+            return UnitHPPerStamina("player"),
+                   GetUnitMaxHealthModifier("player"),
+                   HasAPEffectsSpellPower(),
+                   HasSPEffectsAttackPower()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(hp_per_stam, 1.0);
+    assert_eq!(health_mod, 1.0);
+    assert!(!ap_to_sp);
+    assert!(!sp_to_ap);
+}
+
 // ── Unknown unit tokens ───────────────────────────────────────────────────────
 
 #[test]
