@@ -38,6 +38,15 @@ fn test_get_money() {
 }
 
 #[test]
+fn test_get_inventory_item_texture_reagent_bag_slot_fallback() {
+    let env = WowLuaEnv::new().unwrap();
+    let texture: String = env
+        .eval("return GetInventoryItemTexture('player', 25)")
+        .unwrap();
+    assert_eq!(texture, "Interface\\Icons\\INV_Misc_Bag_08");
+}
+
+#[test]
 fn test_in_combat_lockdown_false() {
     let env = WowLuaEnv::new().unwrap();
     let in_combat: bool = env.eval("return InCombatLockdown()").unwrap();

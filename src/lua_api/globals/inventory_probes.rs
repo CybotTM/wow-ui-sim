@@ -165,7 +165,8 @@ fn get_inventory_item_texture(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     }
-    if (20..=23).contains(&slot) {
+    // Bag slots: Bag0Slot..Bag4Slot (20-24) + ReagentBag0Slot (25).
+    if (20..=25).contains(&slot) {
         let texture =
             crate::lua_api::methods::create_string(state, "Interface\\Icons\\INV_Misc_Bag_08");
         state.push(texture);
