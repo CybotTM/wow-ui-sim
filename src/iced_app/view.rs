@@ -30,6 +30,10 @@ fn anon_display_name(
     "(anon)".to_string()
 }
 
+fn console_text_from_log_messages(log_messages: &[String]) -> String {
+    log_messages.join("\n")
+}
+
 impl App {
     /// Build the title bar with FPS counter, frame time, canvas size, and mouse coords.
     fn build_title_bar(&self) -> Element<'_, Message> {
@@ -160,17 +164,9 @@ impl App {
         .into()
     }
 
-    /// Build the console output area showing recent log messages.
+    /// Build the console output area showing full log history with scrollback.
     fn build_console(&self) -> Container<'_, Message> {
-        let console_text: String = self
-            .log_messages
-            .iter()
-            .rev()
-            .take(5)
-            .rev()
-            .cloned()
-            .collect::<Vec<_>>()
-            .join("\n");
+        let console_text = console_text_from_log_messages(&self.log_messages);
 
         container(
             scrollable(
@@ -882,4 +878,31 @@ fn labeled_checkbox<'a, F: Fn(bool) -> Message + 'a>(
     .spacing(6)
     .align_y(iced::Alignment::Center)
     .into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::console_text_from_log_messages;
+
+    #[test]
+    fn console_text_includes_full_scrollback_without_truncation() {
+        let lines = (0..8)
+            .map(|index| format!("line-{index}"))
+            .collect::<Vec<_>>();
+        let rendered = console_text_from_log_messages(&lines);
+        assert_eq!(rendered.lines().count(), 8);
+        assert!(rendered.contains("line-0"));
+        assert!(rendered.contains("line-7"));
+    }
+
+    #[test]
+    fn console_text_preserves_message_order() {
+        let lines = vec![
+            "first".to_string(),
+            "second".to_string(),
+            "third".to_string(),
+        ];
+        let rendered = console_text_from_log_messages(&lines);
+        assert_eq!(rendered, "first\nsecond\nthird");
+    }
 }
