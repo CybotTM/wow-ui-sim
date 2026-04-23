@@ -8,6 +8,7 @@ use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 use std::path::PathBuf;
 
 const MAX_ASYNC_TICKS: u32 = 500;
+const ADDON_BASE_PATHS: &[&str] = &["./Interface/AddOns", "./Interface/TestAddOns"];
 
 /// Reset test registry between files (TestFramework globals stay alive).
 const TEST_RESET: &str = r#"
@@ -56,11 +57,13 @@ end
 
 /// Load the TestFramework addon (provides test/async_test/assertions).
 fn load_test_framework(env: &WowLuaEnv) {
-    let toc_path = PathBuf::from("./Interface/AddOns/TestFramework/TestFramework.toc");
-    if !toc_path.exists() {
-        eprintln!("TestFramework addon not found at {}", toc_path.display());
+    let Some(toc_path) = resolve_addon_toc_path("TestFramework") else {
+        eprintln!(
+            "TestFramework addon not found (checked: {})",
+            ADDON_BASE_PATHS.join(", ")
+        );
         std::process::exit(1);
-    }
+    };
     match crate::loader::load_addon(&env.loader_env(), &toc_path) {
         Ok(r) => {
             for w in &r.warnings {
@@ -74,7 +77,20 @@ fn load_test_framework(env: &WowLuaEnv) {
     }
 }
 
-/// Run all .lua test files from `Interface/AddOns/<addon_name>/tests/`.
+fn resolve_addon_root(addon_name: &str) -> Option<PathBuf> {
+    ADDON_BASE_PATHS
+        .iter()
+        .map(PathBuf::from)
+        .map(|base| base.join(addon_name))
+        .find(|path| path.exists())
+}
+
+fn resolve_addon_toc_path(addon_name: &str) -> Option<PathBuf> {
+    let root = resolve_addon_root(addon_name)?;
+    crate::loader::find_toc_file(&root)
+}
+
+/// Run all .lua test files from `<base>/<addon_name>/tests/`.
 pub fn run_addon_tests(
     env: &WowLuaEnv,
     addon_name: &str,
@@ -110,7 +126,14 @@ fn run_exec_lua(env: &WowLuaEnv, exec_lua: Option<&str>, exec_lua_secure: bool) 
 }
 
 fn load_test_files(addon_name: &str) -> (PathBuf, Vec<PathBuf>) {
-    let tests_dir = PathBuf::from(format!("./Interface/AddOns/{addon_name}/tests"));
+    let Some(addon_root) = resolve_addon_root(addon_name) else {
+        eprintln!(
+            "Addon '{addon_name}' not found (checked: {})",
+            ADDON_BASE_PATHS.join(", ")
+        );
+        std::process::exit(1);
+    };
+    let tests_dir = addon_root.join("tests");
     if !tests_dir.exists() {
         eprintln!("No tests directory found: {}", tests_dir.display());
         std::process::exit(1);

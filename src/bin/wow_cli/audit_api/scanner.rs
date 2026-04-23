@@ -279,7 +279,10 @@ fn scan_xml_inherits(content: &str, file_label: &str, results: &mut AuditResults
 /// Whether to skip a directory (test suites we don't want to scan).
 fn should_skip(path: &Path) -> bool {
     let s = path.to_string_lossy();
-    s.contains("Interface/AddOns/Wowless") || s.contains("Interface/AddOns/WowlessData")
+    s.contains("Interface/AddOns/Wowless")
+        || s.contains("Interface/AddOns/WowlessData")
+        || s.contains("Interface/TestAddOns/Wowless")
+        || s.contains("Interface/TestAddOns/WowlessData")
 }
 
 /// Whether to skip a file because it's LoadOnDemand (when filter_startup is on).

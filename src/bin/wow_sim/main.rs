@@ -110,7 +110,7 @@ enum Commands {
         categories: Option<String>,
     },
 
-    /// Run test Lua files from Interface/AddOns/<name>/tests/
+    /// Run test Lua files from Interface/AddOns/<name>/tests/ or Interface/TestAddOns/<name>/tests/
     RunTests { addon_name: String },
 
     /// Dump textures used by frames to disk (for debugging atlas crops)
@@ -317,7 +317,7 @@ fn apply_resource_limits() {
     ));
 }
 
-fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
+fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
     logging::init_process_start_time(env.state().borrow().start_time);
     apply_resource_limits();
     tracing_subscriber::fmt()
@@ -327,10 +327,14 @@ fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowF
     init_sound(env);
     {
         let mut state = env.state().borrow_mut();
-        state.addon_base_paths = vec![
+        let mut addon_base_paths = vec![
             PathBuf::from("./Interface/BlizzardUI"),
             PathBuf::from("./Interface/AddOns"),
         ];
+        if args.is_test_command() {
+            addon_base_paths.push(PathBuf::from("./Interface/TestAddOns"));
+        }
+        state.addon_base_paths = addon_base_paths;
     }
     wow_ui_sim::xml::register_intrinsic_templates();
 }

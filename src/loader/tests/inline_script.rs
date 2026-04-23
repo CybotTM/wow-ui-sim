@@ -8,7 +8,7 @@ use rilua::LuaApi;
 
 #[test]
 fn test_parse_wowless_test_xml() {
-    let path = std::path::Path::new("Interface/AddOns/Wowless/test.xml");
+    let path = std::path::Path::new("Interface/TestAddOns/Wowless/test.xml");
     if !path.exists() {
         return; // Skip if Wowless addon not present
     }

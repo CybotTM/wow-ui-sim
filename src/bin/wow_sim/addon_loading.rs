@@ -11,8 +11,17 @@ use wow_ui_sim::saved_variables::SavedVariablesManager;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
+pub const USER_ADDONS_PATH: &str = "./Interface/AddOns";
+pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
+
 /// Addon names that are test-only and should not be loaded in GUI mode.
-pub const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData"];
+pub const TEST_ADDONS: &[&str] = &[
+    "Wowless",
+    "WowlessData",
+    "WowBehaviorTest",
+    "WowDiscovery",
+    "TestFramework",
+];
 
 /// Load Blizzard SharedXML and base UI addons (auto-discovered, dependency-sorted).
 pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
@@ -144,14 +153,19 @@ pub fn load_third_party_addons(
     saved_vars: &mut Option<SavedVariablesManager>,
     screen: ScreenKind,
 ) {
-    let addons_path = PathBuf::from("./Interface/AddOns");
     if skip_addons && !is_test {
         logging::println_elapsed("Addon loading disabled");
         return;
     }
 
+    let user_addons_path = PathBuf::from(USER_ADDONS_PATH);
     let exclude = if is_test { &[][..] } else { TEST_ADDONS };
-    let mut addons = scan_addons(&addons_path, exclude, screen);
+    let mut addons = scan_addons(&user_addons_path, exclude, screen);
+    if is_test {
+        let test_addons_path = PathBuf::from(TEST_ADDONS_PATH);
+        addons.extend(scan_addons(&test_addons_path, &[], screen));
+    }
+    wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
     if skip_addons {
         addons.retain(|(name, _)| TEST_ADDONS.iter().any(|t| t == name));
     }
@@ -168,7 +182,7 @@ pub fn load_third_party_addons(
 }
 
 pub fn scan_addons(
-    base_path: &PathBuf,
+    base_path: &Path,
     exclude: &[&str],
     screen: ScreenKind,
 ) -> Vec<(String, PathBuf)> {
@@ -196,7 +210,6 @@ pub fn scan_addons(
             }
         }
     }
-    wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
     addons
 }
 

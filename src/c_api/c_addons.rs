@@ -236,6 +236,7 @@ fn default_runtime_addon_bases() -> Vec<PathBuf> {
     vec![
         root.join("Interface/BlizzardUI"),
         root.join("Interface/AddOns"),
+        root.join("Interface/TestAddOns"),
     ]
 }
 
