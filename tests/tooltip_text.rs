@@ -663,6 +663,35 @@ fn test_tooltip_nineslice_child_accessible() {
 }
 
 #[test]
+fn test_blank_unwrapped_line_does_not_collapse_wrapped_tooltip_width() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "SpacerWrapOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        -- Matches Blizzard tooltip composition pattern: wrapped title + blank spacer + wrapped instruction.
+        GameTooltip:AddLine("Council of Dornogal", 1, 1, 1, true)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine("<Click to view options>", 0, 1, 0, true)
+        GameTooltip:Show()
+    "#,
+    )
+    .unwrap();
+
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+    assert!(
+        frame.width > 100.0,
+        "blank spacer lines should not collapse wrapped-tooltip width; got {}",
+        frame.width
+    );
+}
+
+#[test]
 fn test_tooltip_sizing_skipped_when_hidden() {
     let env = WowLuaEnv::new().unwrap();
 

@@ -149,8 +149,14 @@ fn measure_tooltip_content_width(
         } else {
             left_w
         };
+        let has_width_text = tooltip_line_has_width_text(line);
         if line.wrap && td.shrink_to_fit_wrapped {
-            wrapped_only_max_width = wrapped_only_max_width.max(line_width);
+            if has_width_text {
+                wrapped_only_max_width = wrapped_only_max_width.max(line_width);
+            }
+            continue;
+        }
+        if !has_width_text {
             continue;
         }
         measured_non_wrapped_line = true;
@@ -164,6 +170,14 @@ fn measure_tooltip_content_width(
 
 fn tooltip_has_wrapped_lines(td: &crate::lua_api::tooltip::TooltipData) -> bool {
     td.lines.iter().any(|line| line.wrap)
+}
+
+fn tooltip_line_has_width_text(line: &crate::lua_api::tooltip::TooltipLine) -> bool {
+    !line.left_text.trim().is_empty()
+        || line
+            .right_text
+            .as_ref()
+            .is_some_and(|text| !text.trim().is_empty())
 }
 
 /// Collect render data for all visible tooltips with lines.
