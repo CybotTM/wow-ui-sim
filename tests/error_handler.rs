@@ -381,3 +381,69 @@ fn test_seterrorhandler_xpcall_error_is_mirrored_and_recorded() {
         "xpcall-handled error should be captured in addon-attributed records"
     );
 }
+
+#[test]
+fn test_repeated_runtime_errors_increment_counts_but_mirror_first_occurrence_only() {
+    let env = env();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("PLAYER_LOGIN")
+        f:SetScript("OnEvent", function()
+            error("repeat first-seen-only")
+        end)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_event("PLAYER_LOGIN").unwrap();
+    env.fire_event("PLAYER_LOGIN").unwrap();
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.lua_error_counts.get("repeat first-seen-only"),
+        Some(&2),
+        "repeated runtime errors should increment normalized counts: {:?}",
+        state.lua_error_counts
+    );
+    assert_eq!(
+        state
+            .console_output
+            .iter()
+            .filter(|line| line.contains("Lua error:") && line.contains("repeat first-seen-only"))
+            .count(),
+        1,
+        "first-seen-only policy should mirror only the first normalized occurrence: {:?}",
+        state.console_output
+    );
+}
+
+#[test]
+fn test_repeated_addframetext_errors_increment_counts_and_mirror_every_occurrence() {
+    let env = env();
+    env.exec(
+        r#"
+        addframetext("repeat always-emit")
+        addframetext("repeat always-emit")
+        "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.lua_error_counts.get("repeat always-emit"),
+        Some(&2),
+        "repeated addframetext errors should increment normalized counts: {:?}",
+        state.lua_error_counts
+    );
+    assert_eq!(
+        state
+            .console_output
+            .iter()
+            .filter(|line| line.contains("Lua error: repeat always-emit"))
+            .count(),
+        2,
+        "always-emit policy should mirror every occurrence: {:?}",
+        state.console_output
+    );
+}
