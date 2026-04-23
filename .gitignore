@@ -7,14 +7,11 @@
 /elune-src/Cargo.lock
 /.cache
 /Interface/AddOns/*
+!/Interface/AddOns/TestFramework
 !/Interface/AddOns/Admin
 !/Interface/AddOns/SimCommands
 /Interface/TestAddOns/*
-!/Interface/TestAddOns/TestFramework
 !/Interface/TestAddOns/Wowless
-/Interface/TestAddOns/TestFramework/*
-!/Interface/TestAddOns/TestFramework/TestFramework.lua
-!/Interface/TestAddOns/TestFramework/TestFramework.toc
 /Interface/TestAddOns/Wowless/*
 !/Interface/TestAddOns/Wowless/tests
 /Interface/TestAddOns/Wowless/tests/*

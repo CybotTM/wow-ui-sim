@@ -15,13 +15,7 @@ pub const USER_ADDONS_PATH: &str = "./Interface/AddOns";
 pub const TEST_ADDONS_PATH: &str = "./Interface/TestAddOns";
 
 /// Addon names that are test-only and should not be loaded in GUI mode.
-pub const TEST_ADDONS: &[&str] = &[
-    "Wowless",
-    "WowlessData",
-    "WowBehaviorTest",
-    "WowDiscovery",
-    "TestFramework",
-];
+pub const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData", "WowBehaviorTest", "WowDiscovery"];
 
 /// Load Blizzard SharedXML and base UI addons (auto-discovered, dependency-sorted).
 pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
