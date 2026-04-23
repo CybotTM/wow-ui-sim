@@ -323,3 +323,61 @@ fn test_registry_report_script_error_routes_through_active_error_handler_and_tra
         state.lua_error_counts
     );
 }
+
+#[test]
+fn test_seterrorhandler_xpcall_error_is_mirrored_and_recorded() {
+    let env = env();
+    let (ok, handled): (bool, String) = env
+        .eval(
+            r#"
+            seterrorhandler(function(msg)
+                addframetext("xpcall mirrored: " .. tostring(msg))
+                return "handled by seterrorhandler: " .. tostring(msg)
+            end)
+
+            local ok, handled = xpcall(
+                function() error("xpcall runtime boom") end,
+                geterrorhandler()
+            )
+            return ok, handled
+            "#,
+        )
+        .unwrap();
+
+    assert!(!ok, "xpcall should report handled failure as false");
+    assert!(
+        handled.contains("handled by seterrorhandler:") && handled.contains("xpcall runtime boom"),
+        "xpcall should return the active seterrorhandler result, got: {handled}"
+    );
+
+    let state = env.state().borrow();
+
+    // `console_output` is the same simulator mirror path used for stderr logging.
+    assert!(
+        state.console_output.iter().any(|line| {
+            line.contains("Lua error: xpcall mirrored:") && line.contains("xpcall runtime boom")
+        }),
+        "xpcall-handled error should be visible in stderr-mirrored console output: {:?}",
+        state.console_output
+    );
+    assert!(
+        state
+            .lua_errors
+            .iter()
+            .any(|msg| msg.contains("xpcall runtime boom")),
+        "xpcall-handled error should be captured in raw lua_errors"
+    );
+    assert_eq!(
+        state.lua_error_counts.get("xpcall runtime boom"),
+        Some(&1),
+        "xpcall runtime failure should be counted in normalized errors: {:?}",
+        state.lua_error_counts
+    );
+    assert!(
+        state
+            .lua_error_records
+            .iter()
+            .any(|record| record.message.contains("xpcall runtime boom")),
+        "xpcall-handled error should be captured in addon-attributed records"
+    );
+}
