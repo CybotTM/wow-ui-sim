@@ -69,6 +69,8 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
         ("DoesItemExist", c_item_does_item_exist),
         ("DoesItemExistByID", c_item_does_item_exist_by_id),
         ("GetItemID", c_item_get_item_id),
+        ("GetItemIcon", c_item_get_item_icon),
+        ("GetItemName", c_item_get_item_name),
         ("IsItemDataCached", c_item_is_item_data_cached),
         ("IsItemDataCachedByID", c_item_is_item_data_cached_by_id),
         ("GetItemIconByID", c_item_get_item_icon_by_id),
@@ -130,9 +132,8 @@ fn c_item_does_item_exist_by_id(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn c_item_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
-    let value = stack_val(state, 1);
-    let item_id = match value {
+fn item_id_from_location_or_item_info(state: &mut LuaState, value: Val) -> Option<u32> {
+    match value {
         Val::Table(_) => {
             let bag = match table_get(state, value, "bagID") {
                 Val::Num(number) => number as i32,
@@ -142,14 +143,54 @@ fn c_item_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
                 Val::Num(number) => number as i32,
                 _ => 0,
             };
-            borrow_state(state)?
+            borrow_state(state)
+                .ok()?
                 .get_bag_item(bag, slot)
                 .map(|(item_id, _)| item_id)
         }
         _ => parse_item_id_from_val(state, value),
-    };
-    match item_id {
+    }
+}
+
+fn c_item_get_item_id(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    match item_id_from_location_or_item_info(state, value) {
         Some(item_id) => state.push(Val::Num(item_id as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_item_get_item_icon(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    match item_id_from_location_or_item_info(state, value) {
+        Some(item_id) => {
+            let icon = items::get_item(item_id)
+                .map(|item| {
+                    if item.icon_file_data_id == 0 {
+                        134400.0
+                    } else {
+                        item.icon_file_data_id as f64
+                    }
+                })
+                .unwrap_or(134400.0);
+            state.push(Val::Num(icon));
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_item_get_item_name(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    match item_id_from_location_or_item_info(state, value) {
+        Some(item_id) => {
+            let name = items::get_item(item_id)
+                .map(|item| item.name)
+                .unwrap_or("Unknown");
+            let name = create_string(state, name);
+            state.push(name);
+        }
         None => state.push(Val::Nil),
     }
     Ok(1)
@@ -353,9 +394,12 @@ fn c_item_get_item_count(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_item_get_item_link(state: &mut LuaState) -> LuaResult<u32> {
-    let item_id = parse_item_id_from_val(state, stack_val(state, 1)).unwrap_or(0);
-    match item_link_for_id(item_id) {
-        Some(link) => {
+    let value = stack_val(state, 1);
+    match item_id_from_location_or_item_info(state, value) {
+        Some(item_id) => {
+            let link = item_link_for_id(item_id).unwrap_or_else(|| {
+                format!("|cffffffff|Hitem:{item_id}::::::::80:::::|h[Unknown]|h|r")
+            });
             let link = create_string(state, &link);
             state.push(link);
         }

@@ -115,6 +115,56 @@ fn test_c_item_get_item_link() {
     assert!(link.contains("[Hearthstone]"));
 }
 
+#[test]
+fn test_c_item_item_location_queries_return_seeded_backpack_metadata() {
+    let env = env();
+    let (item_id, icon, name, link_ok, link_or_err): (
+        Option<i64>,
+        Option<i64>,
+        String,
+        bool,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local itemLocation = { bagID = 0, slotIndex = 1 }
+            local ok, linkOrErr = pcall(function()
+                return C_Item.GetItemLink(itemLocation)
+            end)
+
+            return C_Item.GetItemID(itemLocation),
+                C_Item.GetItemIcon(itemLocation),
+                C_Item.GetItemName(itemLocation),
+                ok,
+                tostring(linkOrErr)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        item_id,
+        Some(6948),
+        "The seeded backpack hearthstone should resolve through C_Item.GetItemID(ItemLocation)"
+    );
+    assert_eq!(
+        icon,
+        Some(134400),
+        "The seeded backpack hearthstone should resolve through C_Item.GetItemIcon(ItemLocation)"
+    );
+    assert_eq!(
+        name, "Hearthstone",
+        "The seeded backpack hearthstone should resolve through C_Item.GetItemName(ItemLocation)"
+    );
+    assert!(
+        link_ok,
+        "C_Item.GetItemLink(ItemLocation) should not error: {link_or_err}"
+    );
+    assert!(
+        link_or_err.contains("Hitem:6948") && link_or_err.contains("[Hearthstone]"),
+        "C_Item.GetItemLink(ItemLocation) should return the seeded backpack hearthstone link: {link_or_err}"
+    );
+}
+
 // ============================================================================
 // C_Item.GetItemNameByID
 // ============================================================================
