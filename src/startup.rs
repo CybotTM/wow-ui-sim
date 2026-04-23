@@ -15,8 +15,8 @@ const UNIT_FRAME_SET_UNIT_LUA: &str = r#"
         {
             frame = PlayerFrame,
             unit = "player",
-            healthbar = PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar(),
-            manabar = PlayerFrame_GetManaBar and PlayerFrame_GetManaBar(),
+            healthbar = PlayerFrame and PlayerFrame_GetHealthBar and PlayerFrame_GetHealthBar(),
+            manabar = PlayerFrame and PlayerFrame_GetManaBar and PlayerFrame_GetManaBar(),
         },
         {
             frame = PetFrame,

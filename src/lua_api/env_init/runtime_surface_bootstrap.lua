@@ -12375,6 +12375,18 @@ if ClearCursorHoveredItem == nil then
   end
 end
 
+if SetCursorHoveredItem == nil then
+  function SetCursorHoveredItem(_itemLocation)
+    return nil
+  end
+end
+
+if SetCursorHoveredItemTradeItem == nil then
+  function SetCursorHoveredItemTradeItem(_enabled)
+    return nil
+  end
+end
+
 if UnitInSubgroup == nil then
   function UnitInSubgroup(unit)
     if unit == nil or unit == "player" then

@@ -211,6 +211,7 @@ fn startup_omits_followup_blizzard_lua_errors() {
                 record.message.contains("CheckButton")
                     || record.message.contains("GetItemLevelColor")
                     || record.message.contains("ClearCursorHoveredItem")
+                    || record.message.contains("SetCursorHoveredItem")
                     || record.message.contains("UnitInSubgroup")
                     || record.message.contains("GetNumGuildPerks")
                     || record.message.contains("RequestGuildRewards")
@@ -255,6 +256,8 @@ fn startup_followup_surfaces_expose_safe_defaults() {
             bool,
             bool,
             bool,
+            bool,
+            bool,
         ) = env
             .eval(
                 r##"
@@ -273,6 +276,8 @@ fn startup_followup_surfaces_expose_safe_defaults() {
                     type(GetAvailableBandwidth()) == "number",
                     type(GetDownloadedPercentage()) == "number",
                     pcall(ClearCursorHoveredItem),
+                    pcall(SetCursorHoveredItem, nil),
+                    pcall(SetCursorHoveredItemTradeItem, true),
                     pcall(RequestGuildRewards)
                 "##,
             )
@@ -299,6 +304,8 @@ fn startup_followup_surfaces_expose_safe_defaults() {
             available_bandwidth_ok,
             downloaded_percentage_ok,
             clear_cursor_hovered_item_ok,
+            set_cursor_hovered_item_ok,
+            set_cursor_hovered_trade_item_ok,
             request_guild_rewards_ok,
         ) = result;
         assert_eq!(color_count, 3, "GetItemLevelColor should return three values");
@@ -314,12 +321,50 @@ fn startup_followup_surfaces_expose_safe_defaults() {
                 && available_bandwidth_ok
                 && downloaded_percentage_ok
                 && clear_cursor_hovered_item_ok
+                && set_cursor_hovered_item_ok
+                && set_cursor_hovered_trade_item_ok
                 && request_guild_rewards_ok,
             "Follow-up startup surfaces should expose safe defaults for Blizzard callers"
         );
         assert!(
             catalog_shop_nav_soundkit_is_number,
             "CatalogShop nav soundkit should be seeded during startup"
+        );
+    }
+}
+
+#[test]
+fn cursor_hovered_item_globals_are_callable() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let result: (bool, bool, bool, bool, bool) = env
+            .eval(
+                r#"
+                return
+                    type(ClearCursorHoveredItem) == "function",
+                    type(SetCursorHoveredItem) == "function",
+                    type(SetCursorHoveredItemTradeItem) == "function",
+                    pcall(SetCursorHoveredItem, nil),
+                    pcall(SetCursorHoveredItemTradeItem, true)
+                "#,
+            )
+            .expect("cursor hovered globals probe should run");
+
+        let (
+            clear_cursor_hovered_item_is_fn,
+            set_cursor_hovered_item_is_fn,
+            set_cursor_hovered_trade_item_is_fn,
+            set_cursor_hovered_item_ok,
+            set_cursor_hovered_trade_item_ok,
+        ) = result;
+
+        assert!(
+            clear_cursor_hovered_item_is_fn
+                && set_cursor_hovered_item_is_fn
+                && set_cursor_hovered_trade_item_is_fn
+                && set_cursor_hovered_item_ok
+                && set_cursor_hovered_trade_item_ok,
+            "cursor hovered globals should exist and be callable"
         );
     }
 }
