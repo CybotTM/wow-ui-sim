@@ -233,3 +233,28 @@ fn setmetatable_mixin_still_works() {
         .unwrap();
     assert_eq!(greeting, "hi!");
 }
+
+#[test]
+fn setmetatable_function_index_intercepts_method_lookup() {
+    // Blizzard's menu compositor wraps frames with a *function* __index so
+    // it can intercept AttachFontString / AttachTexture. The mlua build
+    // needed an extra PATCH_INDEX_LUA branch to honour this; rilua's native
+    // metatable dispatch handles it directly. Pin that behaviour here.
+    let env = env();
+    let greeting: String = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", nil, UIParent)
+            setmetatable(frame, {
+                __index = function(self, key)
+                    if key == "SayHi" then
+                        return function() return "function-index-hi" end
+                    end
+                end,
+            })
+            return frame:SayHi()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(greeting, "function-index-hi");
+}
