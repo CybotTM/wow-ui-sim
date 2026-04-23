@@ -34,41 +34,86 @@ fn pet_get_num_collected_info(state: &mut LuaState) -> LuaResult<u32> {
 
 #[derive(Clone)]
 struct PetInfoSnapshot {
+    pet_id: String,
     species_id: u32,
     name: String,
     icon: u32,
     pet_type: i32,
     level: i32,
+    quality: i32,
     is_collected: bool,
 }
 
 impl PetInfoSnapshot {
     fn from_pet(pet: &crate::lua_api::state_types::PetData) -> Self {
         Self {
+            pet_id: pet.pet_id.clone(),
             species_id: pet.species_id,
             name: pet.name.clone(),
             icon: pet.icon,
             pet_type: pet.pet_type,
             level: pet.level,
+            quality: pet.quality,
             is_collected: pet.is_collected,
         }
     }
 }
 
-fn push_pet_info(state: &mut LuaState, pet: PetInfoSnapshot) -> u32 {
+fn push_pet_info_by_index(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
+    let pet_id = create_string(state, &pet.pet_id);
     let name = create_string(state, &pet.name);
-    let empty = create_string(state, "");
+    state.push(pet_id);
     state.push(Val::Num(pet.species_id as f64));
-    state.push(empty.clone());
-    state.push(Val::Num(pet.level as f64));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
-    state.push(Val::Num(0.0));
     state.push(Val::Bool(pet.is_collected));
+    state.push(Val::Nil);
+    state.push(Val::Num(pet.level as f64));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
     state.push(name);
     state.push(Val::Num(pet.icon as f64));
     state.push(Val::Num(pet.pet_type as f64));
     10
+}
+
+fn push_pet_info_by_pet_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
+    let name = create_string(state, &pet.name);
+    let empty = create_string(state, "");
+    state.push(Val::Num(pet.species_id as f64));
+    state.push(Val::Nil);
+    state.push(Val::Num(pet.level as f64));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(100.0));
+    state.push(Val::Num(pet.species_id as f64));
+    state.push(Val::Bool(false));
+    state.push(name);
+    state.push(Val::Num(pet.icon as f64));
+    state.push(Val::Num(pet.pet_type as f64));
+    state.push(Val::Num(pet.species_id as f64));
+    state.push(empty.clone());
+    state.push(empty);
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(pet.quality > 0));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    17
+}
+
+fn push_pet_info_by_species_id(state: &mut LuaState, pet: &PetInfoSnapshot) -> u32 {
+    let name = create_string(state, &pet.name);
+    let empty = create_string(state, "");
+    state.push(name);
+    state.push(Val::Num(pet.icon as f64));
+    state.push(Val::Num(pet.pet_type as f64));
+    state.push(Val::Num(pet.species_id as f64));
+    state.push(empty.clone());
+    state.push(empty);
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(pet.quality > 0));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(true));
+    state.push(Val::Num(pet.species_id as f64));
+    12
 }
 
 fn find_pet_by_index(state: &LuaState, index: i32) -> Option<PetInfoSnapshot> {
@@ -101,7 +146,7 @@ fn pet_get_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
     let Some(pet) = pet else {
         return Ok(0);
     };
-    Ok(push_pet_info(state, pet))
+    Ok(push_pet_info_by_index(state, &pet))
 }
 
 fn pet_get_info_by_pet_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -123,7 +168,7 @@ fn pet_get_info_by_pet_id(state: &mut LuaState) -> LuaResult<u32> {
     let Some(pet) = pet else {
         return Ok(0);
     };
-    Ok(push_pet_info(state, pet))
+    Ok(push_pet_info_by_pet_id(state, &pet))
 }
 
 fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -132,7 +177,7 @@ fn pet_get_info_by_species_id(state: &mut LuaState) -> LuaResult<u32> {
     let Some(pet) = pet else {
         return Ok(0);
     };
-    Ok(push_pet_info(state, pet))
+    Ok(push_pet_info_by_species_id(state, &pet))
 }
 
 pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {

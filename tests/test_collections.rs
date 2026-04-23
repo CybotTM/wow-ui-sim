@@ -131,12 +131,15 @@ fn pet_journal_get_pet_info_by_index() {
     let result: String = env
         .eval(
             r#"
-            local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType
+            local petID, speciesID, isOwned, customName, level, isFavorite, isRevoked, name, icon, petType
                 = C_PetJournal.GetPetInfoByIndex(1)
+            if type(petID) ~= "string" then return "petID_type=" .. type(petID) end
             if name ~= "Mechanical Squirrel" then return "name=" .. tostring(name) end
             if speciesID ~= 39 then return "species=" .. tostring(speciesID) end
+            if isOwned ~= true then return "owned=" .. tostring(isOwned) end
             if level ~= 25 then return "level=" .. tostring(level) end
             if type(level) ~= "number" then return "level_type=" .. type(level) end
+            if customName ~= nil then return "customName=" .. tostring(customName) end
             return "ok"
             "#,
         )
@@ -150,15 +153,40 @@ fn pet_journal_get_pet_info_by_species_id() {
     let result: String = env
         .eval(
             r#"
-            local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name
+            local name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable, displayID
                 = C_PetJournal.GetPetInfoBySpeciesID(254)
             if name ~= "Lil' Ragnaros" then return "name=" .. tostring(name) end
-            if speciesID ~= 254 then return "species=" .. tostring(speciesID) end
+            if type(sourceText) ~= "string" then return "source_type=" .. type(sourceText) end
+            if type(description) ~= "string" then return "desc_type=" .. type(description) end
+            if type(displayID) ~= "number" then return "displayID_type=" .. type(displayID) end
             return "ok"
             "#,
         )
         .unwrap();
     assert_eq!(result, "ok", "GetPetInfoBySpeciesID: {result}");
+}
+
+#[test]
+fn pet_journal_get_pet_info_by_pet_id_has_strings_for_card_fields() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local petID = C_PetJournal.GetPetInfoByIndex(1)
+            local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique
+                = C_PetJournal.GetPetInfoByPetID(petID)
+            if type(name) ~= "string" then return "name_type=" .. type(name) end
+            if type(sourceText) ~= "string" then return "source_type=" .. type(sourceText) end
+            if type(description) ~= "string" then return "desc_type=" .. type(description) end
+            if maxXp == nil or maxXp <= 0 then return "maxXp=" .. tostring(maxXp) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "GetPetInfoByPetID card fields should be non-nil strings: {result}"
+    );
 }
 
 #[test]
