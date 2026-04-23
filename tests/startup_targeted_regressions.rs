@@ -341,7 +341,7 @@ fn startup_wardrobe_tab_has_transmog_locations() {
             .eval(
                 r#"
                 local appearanceSlotInfo, illusionSlotInfo = C_TransmogOutfitInfo.GetAllSlotLocationInfo()
-                if type(appearanceSlotInfo) ~= "table" then
+                if type(appearanceSlotInfo) ~= "table" or #appearanceSlotInfo == 0 then
                     return "missing_appearance_slot_info"
                 end
                 if type(illusionSlotInfo) ~= "table" then
