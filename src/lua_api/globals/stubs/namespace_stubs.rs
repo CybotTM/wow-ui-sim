@@ -112,6 +112,9 @@ static NAMESPACE_NIL_STUBS: &[NsStub] = &[
     ("C_TradeSkillUI", "GetRecipeReagentItemLink", stub_nil),
     ("C_TradeSkillUI", "GetRecipeSchematic", stub_nil),
     ("C_TradeSkillUI", "GetTradeSkillListLink", stub_nil),
+    ("C_TradeSkillUI", "GetFilterableInventorySlotName", stub_nil),
+    ("C_TradeSkillUI", "SetInventorySlotFilter", stub_nil),
+    ("C_TradeSkillUI", "ClearInventorySlotFilter", stub_nil),
     // C_TrophyHall.GetTrophyInfo is registered in
     // missing_surface/small_namespaces.rs, not a stub.
     // C_Tutorial
@@ -169,6 +172,9 @@ static NAMESPACE_FALSE_STUBS: &[NsStub] = &[
     ),
     // C_Item
     ("C_Item", "IsItemTransmogrifiable", stub_false),
+    // C_TradeSkillUI
+    ("C_TradeSkillUI", "AreAnyInventorySlotsFiltered", stub_false),
+    ("C_TradeSkillUI", "IsInventorySlotFiltered", stub_false),
     // C_LFGInfo — CanPlayerUseLFD / GetLFGCategoryInfo / GetSystemPanelData /
     // IsLFGModeActiveForCategory are SimState-backed in missing_surface/lfg_info.rs.
     // CanPlayerUsePremadeGroup is SimState-backed in lfg_info.rs.
@@ -211,6 +217,7 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // C_TradeSkillUI
     ("C_TradeSkillUI", "GetNumRecipes", stub_zero),
     ("C_TradeSkillUI", "GetNumTradeSkills", stub_zero),
+    ("C_TradeSkillUI", "GetAllFilterableInventorySlotsCount", stub_zero),
     // C_VoiceChat GetNumActiveChannels / GetNumMembers are SimState-backed in
     // missing_surface/voice_chat.rs, not stubs.
 ];
@@ -264,6 +271,16 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
         stub_empty_table,
     ),
     ("C_TradeSkillUI", "GetFilteredRecipeIDs", stub_empty_table),
+    (
+        "C_TradeSkillUI",
+        "GetAllFilterableInventorySlots",
+        stub_empty_table,
+    ),
+    (
+        "C_TradeSkillUI",
+        "GetFilterableInventorySlots",
+        stub_empty_table,
+    ),
     // C_UnitAuras
     // GetAuraSlots returns (continuationToken, slot1, slot2, ...). Callers
     // drive AuraUtil.ForEachAura via a `repeat ... until token == nil` loop
