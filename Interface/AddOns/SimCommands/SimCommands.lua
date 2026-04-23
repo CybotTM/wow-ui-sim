@@ -249,6 +249,14 @@ end
 -- Create the minimap button at load time (does not depend on palette UI)
 CreateMinimapButton()
 
+-- Show the command palette by default on login.
+local startupFrame = CreateFrame("Frame")
+startupFrame:RegisterEvent("PLAYER_LOGIN")
+startupFrame:SetScript("OnEvent", function(self)
+    self:UnregisterEvent("PLAYER_LOGIN")
+    SimCommands:Show()
+end)
+
 ---------------------------------------------------------------------------
 -- Input prompt dialog
 ---------------------------------------------------------------------------

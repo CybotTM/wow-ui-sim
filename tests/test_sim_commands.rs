@@ -162,6 +162,21 @@ fn sim_commands_search_box_exists() {
 }
 
 #[test]
+fn sim_commands_shows_on_player_login_event() {
+    let env = env();
+    let initially_hidden: bool = env.eval("return not SimCommands:IsShown()").unwrap();
+    assert!(
+        initially_hidden,
+        "Palette should stay hidden until PLAYER_LOGIN fires"
+    );
+
+    env.fire_event("PLAYER_LOGIN")
+        .expect("PLAYER_LOGIN dispatch failed");
+    let shown: bool = env.eval("return SimCommands:IsShown()").unwrap();
+    assert!(shown, "PLAYER_LOGIN should auto-open the command palette");
+}
+
+#[test]
 fn sim_commands_ctrl_p_toggles() {
     let env = env();
     env.send_key_press("CTRL-P", None)
