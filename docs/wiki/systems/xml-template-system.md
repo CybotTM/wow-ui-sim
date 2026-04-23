@@ -25,7 +25,7 @@ A separate registry holds virtual texture templates for mixin chain resolution.
 `get_template_chain(names: &str) -> Vec<TemplateEntry>` splits comma-separated names and recursively follows each template's own `inherits`, depth-first with cycle detection. Returns base-to-derived order — for `inherits="A, B"` where A inherits C: chain is `[C, A, B]`.
 
 Property resolution per template walk:
-- **Size**: most-derived wins; frame's own overrides all
+- **Size**: most-derived wins per dimension; frame's own overrides all. Partial XML sizes (`<Size x="..."/>` or `<Size y="..."/>`) apply only the declared dimension.
 - **Anchors**: frame's own if present; otherwise most-derived template with anchors
 - **Mixins**: accumulated base-to-derived, then frame's own (duplicates skipped)
 - **KeyValues**: later values overwrite; frame's own applied last

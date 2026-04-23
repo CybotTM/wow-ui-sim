@@ -517,6 +517,42 @@ fn test_xml_size_with_absdimension() {
 }
 
 #[test]
+fn test_xml_partial_size_preserves_single_dimension() {
+    let t = load_test_xml(
+        "test-partial-size",
+        r#"<Ui>
+            <Frame name="PartialSizeFrame" parent="UIParent">
+                <Size x="8"/>
+                <Anchors>
+                    <Anchor point="TOP"/>
+                    <Anchor point="BOTTOM"/>
+                </Anchors>
+            </Frame>
+            <Frame name="PartialHeightFrame" parent="UIParent">
+                <Size y="13"/>
+                <Anchors>
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT"/>
+                </Anchors>
+            </Frame>
+        </Ui>"#,
+    );
+
+    assert_eq!(
+        t.env
+            .eval::<f64>("return PartialSizeFrame:GetWidth()")
+            .unwrap(),
+        8.0
+    );
+    assert_eq!(
+        t.env
+            .eval::<f64>("return PartialHeightFrame:GetHeight()")
+            .unwrap(),
+        13.0
+    );
+}
+
+#[test]
 fn test_xml_nested_child_frames() {
     let t = load_test_xml(
         "test-nested",

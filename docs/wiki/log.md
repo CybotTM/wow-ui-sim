@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-23] add | quest scrollbar partial XML size investigation
+
+Added `investigations/quest-scrollbar-partial-size.md` to document the
+QuestScrollFrame scrollbar alignment bug. Root cause was the direct XML
+property path ignoring partial `<Size x="..."/>` / `<Size y="..."/>` values
+unless both dimensions were present. Updated `systems/xml-template-system.md`
+to record per-dimension size resolution and added the new investigation to
+`index.md`.
+
 ## [2026-04-22] add | layout lock inventory reference page
 
 Added `reference/layout-lock-inventory.md` as the consolidated source of truth

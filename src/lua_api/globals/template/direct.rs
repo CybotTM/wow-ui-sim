@@ -343,10 +343,16 @@ pub fn apply_xml_size(
     }
     merge_size(&mut final_width, &mut final_height, frame.size());
 
-    if let (Some(w), Some(h)) = (final_width, final_height) {
+    if final_width.is_some() || final_height.is_some() {
         let mut s = state.borrow_mut();
         if let Some(f) = s.widgets.get_mut_visual(frame_id) {
-            f.set_size(w, h);
+            if let Some(width) = final_width {
+                f.width = width;
+                f.width_is_text_auto = false;
+            }
+            if let Some(height) = final_height {
+                f.height = height;
+            }
         }
         s.widgets.mark_rect_dirty(frame_id);
     }
