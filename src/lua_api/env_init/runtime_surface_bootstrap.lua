@@ -5943,6 +5943,9 @@ C_UIColor = C_UIColor or __wow_namespace({
       { baseTag = "PLAYER_FACTION_COLOR_HORDE", color = { r = 1, g = 0.1, b = 0.1, a = 1 } },
       { baseTag = "PLAYER_FACTION_COLOR_ALLIANCE", color = { r = 0.2, g = 0.4, b = 1, a = 1 } },
       { baseTag = "NORMAL_FONT_COLOR", color = { r = 1, g = 0.82, b = 0, a = 1 } },
+      -- Blizzard_Professions panels look up the tradeskill experience bar
+      -- fill color by baseTag in the C_UIColor.GetColors() return value.
+      { baseTag = "TRADESKILL_EXPERIENCE_COLOR", color = { r = 0.25, g = 0.25, b = 0.75, a = 1 } },
     }
   end,
 })
