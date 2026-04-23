@@ -164,9 +164,10 @@ fn test_c_item_get_item_link() {
 #[test]
 fn test_c_item_item_location_queries_return_seeded_backpack_metadata() {
     let env = env();
-    let (item_id, icon, name, link_ok, link_or_err): (
+    let (item_id, icon, icon_by_id, name, link_ok, link_or_err): (
         Option<i64>,
         Option<i64>,
+        i64,
         String,
         bool,
         String,
@@ -180,6 +181,7 @@ fn test_c_item_item_location_queries_return_seeded_backpack_metadata() {
 
             return C_Item.GetItemID(itemLocation),
                 C_Item.GetItemIcon(itemLocation),
+                C_Item.GetItemIconByID(6948),
                 C_Item.GetItemName(itemLocation),
                 ok,
                 tostring(linkOrErr)
@@ -194,7 +196,7 @@ fn test_c_item_item_location_queries_return_seeded_backpack_metadata() {
     );
     assert_eq!(
         icon,
-        Some(134400),
+        Some(icon_by_id),
         "The seeded backpack hearthstone should resolve through C_Item.GetItemIcon(ItemLocation)"
     );
     assert_eq!(
