@@ -6,6 +6,52 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
+#[test]
+fn test_c_item_surface_registers_expected_methods() {
+    let env = env();
+    let all_present: bool = env
+        .eval(
+            r#"
+            local methods = {
+                "DoesItemExist",
+                "DoesItemExistByID",
+                "GetItemID",
+                "IsItemDataCached",
+                "IsItemDataCachedByID",
+                "GetItemIDForItemInfo",
+                "GetItemIcon",
+                "GetItemName",
+                "GetItemIconByID",
+                "GetItemNameByID",
+                "GetItemQualityByID",
+                "GetItemInfoInstant",
+                "GetItemInfo",
+                "GetDetailedItemLevelInfo",
+                "GetItemSubClassInfo",
+                "GetItemClassInfo",
+                "GetItemCount",
+                "GetItemLink",
+                "GetItemCooldown",
+                "GetItemGUID",
+                "IsHelpfulItem",
+                "IsHarmfulItem",
+                "GetItemInventorySlotInfo",
+            }
+            for _, method_name in ipairs(methods) do
+                if type(C_Item[method_name]) ~= "function" then
+                    return false
+                end
+            end
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        all_present,
+        "C_Item should expose the full method surface after registration refactors"
+    );
+}
+
 // ============================================================================
 // C_Item.GetItemInfo
 // ============================================================================

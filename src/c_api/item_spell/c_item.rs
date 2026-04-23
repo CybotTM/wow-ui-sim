@@ -6,8 +6,12 @@ use crate::c_api::ensure_namespace;
 use crate::items;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
+
+type CItemMethod = (&'static str, fn(&mut LuaState) -> LuaResult<u32>);
 
 pub(crate) fn parse_prefixed_id(value: &str, prefix: &str) -> Option<u32> {
     let needle = format!("|H{prefix}:");
@@ -65,37 +69,82 @@ pub(crate) fn parse_item_guid(guid: &str) -> Option<(i32, i32, u32)> {
 
 pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Item")?;
-    let methods: &[(&'static str, fn(&mut LuaState) -> LuaResult<u32>)] = &[
-        ("DoesItemExist", c_item_does_item_exist),
-        ("DoesItemExistByID", c_item_does_item_exist_by_id),
-        ("GetItemID", c_item_get_item_id),
-        ("GetItemIcon", c_item_get_item_icon),
-        ("GetItemName", c_item_get_item_name),
-        ("IsItemDataCached", c_item_is_item_data_cached),
-        ("IsItemDataCachedByID", c_item_is_item_data_cached_by_id),
-        ("GetItemIconByID", c_item_get_item_icon_by_id),
-        ("GetItemNameByID", c_item_get_item_name_by_id),
-        ("GetItemQualityByID", c_item_get_item_quality_by_id),
-        ("GetItemInfoInstant", c_item_get_item_info_instant),
-        ("GetItemInfo", c_item_get_item_info),
-        (
-            "GetDetailedItemLevelInfo",
-            c_item_get_detailed_item_level_info,
-        ),
-        ("GetItemSubClassInfo", c_item_get_item_sub_class_info),
-        ("GetItemClassInfo", c_item_get_item_class_info),
-        ("GetItemIDForItemInfo", c_item_get_item_id_for_item_info),
-        ("GetItemCount", c_item_get_item_count),
-        ("GetItemLink", c_item_get_item_link),
-        ("GetItemCooldown", c_item_get_item_cooldown),
-        ("GetItemGUID", c_item_get_item_guid),
-        ("IsHelpfulItem", c_item_is_helpful_item),
-        ("IsHarmfulItem", c_item_is_harmful_item),
-        (
-            "GetItemInventorySlotInfo",
-            c_item_get_item_inventory_slot_info,
-        ),
-    ];
+    register_c_item_existence_queries(state, table_ref)?;
+    register_c_item_metadata_queries(state, table_ref)?;
+    register_c_item_inventory_queries(state, table_ref)?;
+    Ok(())
+}
+
+fn register_c_item_existence_queries(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_c_item_methods(
+        state,
+        table_ref,
+        &[
+            ("DoesItemExist", c_item_does_item_exist),
+            ("DoesItemExistByID", c_item_does_item_exist_by_id),
+            ("GetItemID", c_item_get_item_id),
+            ("IsItemDataCached", c_item_is_item_data_cached),
+            ("IsItemDataCachedByID", c_item_is_item_data_cached_by_id),
+            ("GetItemIDForItemInfo", c_item_get_item_id_for_item_info),
+        ],
+    )
+}
+
+fn register_c_item_metadata_queries(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_c_item_methods(
+        state,
+        table_ref,
+        &[
+            ("GetItemIcon", c_item_get_item_icon),
+            ("GetItemName", c_item_get_item_name),
+            ("GetItemIconByID", c_item_get_item_icon_by_id),
+            ("GetItemNameByID", c_item_get_item_name_by_id),
+            ("GetItemQualityByID", c_item_get_item_quality_by_id),
+            ("GetItemInfoInstant", c_item_get_item_info_instant),
+            ("GetItemInfo", c_item_get_item_info),
+            (
+                "GetDetailedItemLevelInfo",
+                c_item_get_detailed_item_level_info,
+            ),
+            ("GetItemSubClassInfo", c_item_get_item_sub_class_info),
+            ("GetItemClassInfo", c_item_get_item_class_info),
+        ],
+    )
+}
+
+fn register_c_item_inventory_queries(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+) -> LuaResult<()> {
+    register_c_item_methods(
+        state,
+        table_ref,
+        &[
+            ("GetItemCount", c_item_get_item_count),
+            ("GetItemLink", c_item_get_item_link),
+            ("GetItemCooldown", c_item_get_item_cooldown),
+            ("GetItemGUID", c_item_get_item_guid),
+            ("IsHelpfulItem", c_item_is_helpful_item),
+            ("IsHarmfulItem", c_item_is_harmful_item),
+            (
+                "GetItemInventorySlotInfo",
+                c_item_get_item_inventory_slot_info,
+            ),
+        ],
+    )
+}
+
+fn register_c_item_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<Table>,
+    methods: &[CItemMethod],
+) -> LuaResult<()> {
     for &(name, func) in methods {
         table_set_rust_fn_static(state, table_ref, name, func)?;
     }
@@ -103,23 +152,7 @@ pub(super) fn register_c_item(state: &mut LuaState) -> LuaResult<()> {
 }
 
 fn c_item_does_item_exist(state: &mut LuaState) -> LuaResult<u32> {
-    let value = stack_val(state, 1);
-    let exists = match value {
-        Val::Table(_) => {
-            let bag = match table_get(state, value, "bagID") {
-                Val::Num(number) => number as i32,
-                _ => 0,
-            };
-            let slot = match table_get(state, value, "slotIndex") {
-                Val::Num(number) => number as i32,
-                _ => 0,
-            };
-            borrow_state(state)?.get_bag_item(bag, slot).is_some()
-        }
-        _ => parse_item_id_from_val(state, value)
-            .and_then(items::get_item)
-            .is_some(),
-    };
+    let exists = item_data_exists(state, stack_val(state, 1))?;
     state.push(Val::Bool(exists));
     Ok(1)
 }
@@ -197,8 +230,13 @@ fn c_item_get_item_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_item_is_item_data_cached(state: &mut LuaState) -> LuaResult<u32> {
-    let value = stack_val(state, 1);
-    let cached = match value {
+    let cached = item_data_exists(state, stack_val(state, 1))?;
+    state.push(Val::Bool(cached));
+    Ok(1)
+}
+
+fn item_data_exists(state: &mut LuaState, value: Val) -> LuaResult<bool> {
+    Ok(match value {
         Val::Table(_) => {
             let bag = match table_get(state, value, "bagID") {
                 Val::Num(number) => number as i32,
@@ -213,9 +251,7 @@ fn c_item_is_item_data_cached(state: &mut LuaState) -> LuaResult<u32> {
         _ => parse_item_id_from_val(state, value)
             .and_then(items::get_item)
             .is_some(),
-    };
-    state.push(Val::Bool(cached));
-    Ok(1)
+    })
 }
 
 fn c_item_is_item_data_cached_by_id(state: &mut LuaState) -> LuaResult<u32> {
