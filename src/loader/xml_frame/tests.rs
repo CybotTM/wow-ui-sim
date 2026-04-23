@@ -86,7 +86,7 @@ fn specialized_widget_types() {
     );
     assert_eq!(
         resolve(&FrameElement::EventEditBox(f.clone())),
-        Some(("EditBox", None))
+        Some(("EditBox", Some("EventEditBox")))
     );
     assert_eq!(
         resolve(&FrameElement::ScrollFrame(f.clone())),
@@ -94,7 +94,7 @@ fn specialized_widget_types() {
     );
     assert_eq!(
         resolve(&FrameElement::EventScrollFrame(f.clone())),
-        Some(("ScrollFrame", None))
+        Some(("ScrollFrame", Some("EventScrollFrame")))
     );
     assert_eq!(
         resolve(&FrameElement::Slider(f.clone())),
