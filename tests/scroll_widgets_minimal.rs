@@ -132,6 +132,28 @@ fn test_minimal_scrollbar_track_textures() {
         end_atlas, "minimal-scrollbar-track-bottom",
         "Track.End atlas"
     );
+
+    let (middle_atlas, middle_horiz_tile, middle_vert_tile): (String, bool, bool) = env
+        .eval(
+            r#"
+            return TestMinSBTrackTex.Track.Middle:GetAtlas() or '',
+                TestMinSBTrackTex.Track.Middle:GetHorizTile(),
+                TestMinSBTrackTex.Track.Middle:GetVertTile()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        middle_atlas, "!minimal-scrollbar-track-middle",
+        "Track.Middle atlas"
+    );
+    assert!(
+        !middle_horiz_tile,
+        "Track.Middle should not be horizontally tiled"
+    );
+    assert!(
+        middle_vert_tile,
+        "Track.Middle atlas metadata should enable vertical tiling"
+    );
 }
 
 #[test]

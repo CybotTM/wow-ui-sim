@@ -100,6 +100,8 @@ pub(crate) fn apply_atlas_to_frame(
     frame.texture = Some(info.file.to_string());
     frame.tex_coords = Some(tex_coords);
     frame.atlas_tex_coords = Some(tex_coords);
+    frame.horiz_tile = info.tiles_horizontally;
+    frame.vert_tile = info.tiles_vertically;
     if use_atlas_size {
         frame.set_size(lookup.width() as f32, lookup.height() as f32);
     }

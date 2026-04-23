@@ -421,6 +421,47 @@ fn test_set_atlas_tile_slice_uses_direct_atlas_entry() {
 }
 
 #[test]
+fn test_set_atlas_applies_atlas_tiling_flags() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "AtlasTileFlags");
+    env.exec(&format!(
+        r#"{tex}:SetAtlas("!minimal-scrollbar-track-middle")"#
+    ))
+    .unwrap();
+
+    let (horiz_tile, vert_tile): (bool, bool) = env
+        .eval(&format!("return {tex}:GetHorizTile(), {tex}:GetVertTile()"))
+        .unwrap();
+    assert!(
+        !horiz_tile,
+        "Vertical atlas should not enable horizontal tiling"
+    );
+    assert!(vert_tile, "Vertical atlas should enable vertical tiling");
+}
+
+#[test]
+fn test_set_atlas_clears_previous_atlas_tiling_flags() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "AtlasTileClear");
+    env.exec(&format!(
+        r#"
+        {tex}:SetAtlas("!minimal-scrollbar-track-middle")
+        {tex}:SetAtlas("checkbox-minimal")
+        "#
+    ))
+    .unwrap();
+
+    let (horiz_tile, vert_tile): (bool, bool) = env
+        .eval(&format!("return {tex}:GetHorizTile(), {tex}:GetVertTile()"))
+        .unwrap();
+    assert!(
+        !horiz_tile,
+        "Non-tiled atlas should clear horizontal tiling"
+    );
+    assert!(!vert_tile, "Non-tiled atlas should clear vertical tiling");
+}
+
+#[test]
 fn test_set_atlas_uses_render_preferred_2x_texture_path() {
     let env = env();
     let (_, tex) = setup_texture(&env, "QuestLogTickSquareAtlas");
