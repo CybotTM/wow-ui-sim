@@ -371,49 +371,128 @@ fn preserved_frame_alias_type(tag: &str) -> Option<&'static str> {
     }
 }
 
+type WidgetMapping = (&'static str, Option<&'static str>);
+type WidgetTagMapping = (&'static str, WidgetMapping);
+
+const DIRECT_WIDGET_MAPPINGS: &[WidgetTagMapping] = &[
+    ("Frame", ("Frame", None)),
+    ("Button", ("Button", None)),
+    ("ItemButton", ("Button", Some("ItemButton"))),
+    ("CheckButton", ("CheckButton", None)),
+    ("EditBox", ("EditBox", None)),
+    ("EventEditBox", ("EditBox", Some("EventEditBox"))),
+    ("ScrollFrame", ("ScrollFrame", None)),
+    (
+        "EventScrollFrame",
+        ("ScrollFrame", Some("EventScrollFrame")),
+    ),
+    ("Slider", ("Slider", None)),
+    ("StatusBar", ("StatusBar", None)),
+    ("Cooldown", ("Cooldown", None)),
+    ("GameTooltip", ("GameTooltip", None)),
+    ("ColorSelect", ("ColorSelect", None)),
+    ("Model", ("Model", None)),
+    ("ModelScene", ("ModelScene", None)),
+    ("MessageFrame", ("MessageFrame", None)),
+    (
+        "ScrollingMessageFrame",
+        ("MessageFrame", Some("ScrollingMessageFrame")),
+    ),
+    ("SimpleHTML", ("SimpleHTML", None)),
+    ("Minimap", ("Minimap", None)),
+    ("DropdownButton", ("Button", Some("DropdownButton"))),
+    (
+        "ContainedAlertFrame",
+        ("Button", Some("ContainedAlertFrame")),
+    ),
+];
+
+fn direct_widget_mapping(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
+    DIRECT_WIDGET_MAPPINGS
+        .iter()
+        .find_map(|(mapped_tag, mapping)| (*mapped_tag == tag).then_some(*mapping))
+}
+
+fn is_player_model_family_tag(tag: &str) -> bool {
+    matches!(
+        tag,
+        "PlayerModel" | "CinematicModel" | "TabardModel" | "DressUpModel"
+    )
+}
+
+fn is_frame_fallback_tag(tag: &str) -> bool {
+    matches!(
+        tag,
+        "TaxiRouteFrame"
+            | "ModelFFX"
+            | "UiCamera"
+            | "UIThemeContainerFrame"
+            | "MapScene"
+            | "Line"
+            | "WorldFrame"
+    )
+}
+
 /// Shared mapping from XML element tag name to `(widget_type, intrinsic_name)`.
 ///
 /// Covers the common mappings used by both `FrameElement` (inside `<Frames>`)
 /// and `XmlElement` (top-level). Callers handle divergences before calling this.
 pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
-    if let Some(widget_type) = preserved_frame_alias_type(tag) {
+    if let Some(widget_type) = preserved_frame_alias_type(tag).or_else(|| {
+        if is_player_model_family_tag(tag) {
+            Some("PlayerModel")
+        } else if is_frame_fallback_tag(tag) {
+            Some("Frame")
+        } else {
+            None
+        }
+    }) {
         return Some((widget_type, None));
     }
 
-    match tag {
-        "Frame" => Some(("Frame", None)),
-        "Button" => Some(("Button", None)),
-        "ItemButton" => Some(("Button", Some("ItemButton"))),
-        "CheckButton" => Some(("CheckButton", None)),
-        "EditBox" => Some(("EditBox", None)),
-        "EventEditBox" => Some(("EditBox", Some("EventEditBox"))),
-        "ScrollFrame" => Some(("ScrollFrame", None)),
-        "EventScrollFrame" => Some(("ScrollFrame", Some("EventScrollFrame"))),
-        "Slider" => Some(("Slider", None)),
-        "StatusBar" => Some(("StatusBar", None)),
-        "Cooldown" => Some(("Cooldown", None)),
-        "GameTooltip" => Some(("GameTooltip", None)),
-        "ColorSelect" => Some(("ColorSelect", None)),
-        "Model" => Some(("Model", None)),
-        "ModelScene" => Some(("ModelScene", None)),
-        "PlayerModel" | "CinematicModel" | "TabardModel" | "DressUpModel" => {
+    direct_widget_mapping(tag)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::widget_type_for_tag;
+
+    #[test]
+    fn widget_type_for_tag_preserves_alias_widgets() {
+        assert_eq!(
+            widget_type_for_tag("EventFrame"),
+            Some(("EventFrame", None))
+        );
+        assert_eq!(
+            widget_type_for_tag("FogOfWarFrame"),
+            Some(("FogOfWarFrame", None))
+        );
+    }
+
+    #[test]
+    fn widget_type_for_tag_maps_intrinsic_widget_aliases() {
+        assert_eq!(
+            widget_type_for_tag("ItemButton"),
+            Some(("Button", Some("ItemButton")))
+        );
+        assert_eq!(
+            widget_type_for_tag("EventScrollFrame"),
+            Some(("ScrollFrame", Some("EventScrollFrame")))
+        );
+        assert_eq!(
+            widget_type_for_tag("ContainedAlertFrame"),
+            Some(("Button", Some("ContainedAlertFrame")))
+        );
+    }
+
+    #[test]
+    fn widget_type_for_tag_maps_widget_families_and_fallbacks() {
+        assert_eq!(
+            widget_type_for_tag("DressUpModel"),
             Some(("PlayerModel", None))
-        }
-        "MessageFrame" => Some(("MessageFrame", None)),
-        "ScrollingMessageFrame" => Some(("MessageFrame", Some("ScrollingMessageFrame"))),
-        "SimpleHTML" => Some(("SimpleHTML", None)),
-        "Minimap" => Some(("Minimap", None)),
-        "DropdownButton" => Some(("Button", Some("DropdownButton"))),
-        "ContainedAlertFrame" => Some(("Button", Some("ContainedAlertFrame"))),
-        // Frame-like elements without a creatable alias still fall back to Frame.
-        "TaxiRouteFrame"
-        | "ModelFFX"
-        | "UiCamera"
-        | "UIThemeContainerFrame"
-        | "MapScene"
-        | "Line"
-        | "WorldFrame" => Some(("Frame", None)),
-        _ => None,
+        );
+        assert_eq!(widget_type_for_tag("MapScene"), Some(("Frame", None)));
+        assert_eq!(widget_type_for_tag("UnknownTag"), None);
     }
 }
 
