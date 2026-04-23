@@ -334,6 +334,38 @@ fn startup_followup_surfaces_expose_safe_defaults() {
 }
 
 #[test]
+fn startup_wardrobe_tab_has_transmog_locations() {
+    test_timeout! {
+        let env = load_and_startup_env();
+        let result: String = env
+            .eval(
+                r#"
+                local appearanceSlotInfo, illusionSlotInfo = C_TransmogOutfitInfo.GetAllSlotLocationInfo()
+                if type(appearanceSlotInfo) ~= "table" then
+                    return "missing_appearance_slot_info"
+                end
+                if type(illusionSlotInfo) ~= "table" then
+                    return "missing_illusion_slot_info"
+                end
+
+                local transmogLocation = TransmogUtil.GetTransmogLocation("HEADSLOT", Enum.TransmogType.Appearance, false)
+                if not transmogLocation then
+                    return "missing_head_transmog_location"
+                end
+                if transmogLocation:GetSlotName() ~= "HEADSLOT" then
+                    return "wrong_slot_name:" .. tostring(transmogLocation:GetSlotName())
+                end
+
+                return "ok"
+                "#,
+            )
+            .expect("wardrobe transmog location probe should run");
+
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn cursor_hovered_item_globals_are_callable() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
