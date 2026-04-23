@@ -94,6 +94,15 @@ fn glyph_vertex_bounds(batch: &wow_ui_sim::render::QuadBatch) -> (f32, f32, f32,
     (min_x, min_y, max_x, max_y)
 }
 
+fn glyph_vertex_count(batch: &wow_ui_sim::render::QuadBatch) -> usize {
+    let glyph_tex_index = wow_ui_sim::render::shader::GLYPH_ATLAS_TEX_INDEX;
+    batch
+        .vertices
+        .iter()
+        .filter(|vertex| vertex.tex_index == glyph_tex_index)
+        .count()
+}
+
 /// In normal state, NormalTexture renders but PushedTexture does not.
 /// In pressed state, PushedTexture renders but NormalTexture does not.
 #[test]
@@ -326,6 +335,50 @@ fn pressed_button_text_child_uses_pushed_text_offset() {
         "Pressed text max_y should shift by +3; normal={:?} pushed={:?}",
         normal_bounds,
         pushed_bounds
+    );
+}
+
+#[test]
+fn lowercase_button_text_child_suppresses_direct_button_text_rendering() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local childOnly = CreateFrame("Button", "TestLowercaseChildOnlyText", UIParent)
+        childOnly:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
+        childOnly:SetSize(100, 30)
+        local childOnlyText = childOnly:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        childOnlyText:SetPoint("LEFT", 20, 0)
+        childOnlyText:SetText("World")
+        childOnly.text = childOnlyText
+        childOnly:Show()
+
+        local withButtonText = CreateFrame("Button", "TestLowercaseChildAndButtonText", UIParent)
+        withButtonText:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -60)
+        withButtonText:SetSize(100, 30)
+        local explicitText = withButtonText:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        explicitText:SetPoint("LEFT", 20, 0)
+        explicitText:SetText("World")
+        withButtonText.text = explicitText
+        withButtonText:SetText("World")
+        withButtonText:Show()
+    "#,
+    )
+    .unwrap();
+
+    let child_only_batch = build_text_batch_for_button(&env, "TestLowercaseChildOnlyText");
+    let with_button_text_batch =
+        build_text_batch_for_button(&env, "TestLowercaseChildAndButtonText");
+    let child_only_glyphs = glyph_vertex_count(&child_only_batch);
+    let with_button_text_glyphs = glyph_vertex_count(&with_button_text_batch);
+
+    assert!(
+        child_only_glyphs > 0,
+        "Lowercase text child should render its label"
+    );
+    assert_eq!(
+        with_button_text_glyphs, child_only_glyphs,
+        "Button:SetText should not add a second rendered label when a lowercase text child exists"
     );
 }
 

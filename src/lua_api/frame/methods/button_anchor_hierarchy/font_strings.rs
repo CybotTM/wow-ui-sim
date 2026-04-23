@@ -10,6 +10,8 @@ use rilua::{LuaResult, Val};
 
 use super::shared::{bind_named_child_global, opt_string};
 
+const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+
 /// GetFontString() -> fontstring
 pub(super) fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
@@ -24,12 +26,12 @@ pub(super) fn get_font_string(state: &mut LuaState) -> LuaResult<u32> {
 fn find_existing_text_child(state: &mut LuaState, id: u64) -> Option<u64> {
     let sim = borrow_state(state).ok()?;
     if let Some(frame) = sim.widgets.get(id) {
-        for key in ["Text", "ButtonText"] {
+        for key in BUTTON_TEXT_CHILD_KEYS {
             if let Some(child_id) = frame.children_keys.get(key).copied() {
                 return Some(child_id);
             }
         }
-        for key in ["Text", "ButtonText"] {
+        for key in BUTTON_TEXT_CHILD_KEYS {
             if let Some(child_id) = find_child_by_parent_key(&sim, frame.children.as_slice(), key) {
                 return Some(child_id);
             }

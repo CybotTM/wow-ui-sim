@@ -8,6 +8,8 @@ use crate::widget::{TextJustify, WidgetType};
 use super::textures::remap_atlas_crop;
 use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_text_quads};
 
+const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+
 /// Build quads for a Button widget.
 pub(super) fn build_button_quads(
     batch: &mut QuadBatch,
@@ -164,7 +166,7 @@ pub(super) fn pressed_button_text_offset(frame: &FrameQuadEmit<'_>) -> Option<(f
         WidgetType::FontString => {
             let parent_id = frame.widget.parent_id?;
             let parent = frame.registry.get(parent_id)?;
-            let is_button_text_child = parent.children_keys.get("Text").copied() == Some(frame.id);
+            let is_button_text_child = has_button_text_child_id(parent, frame.id);
             (is_button_text_child
                 && matches!(
                     parent.widget_type,
@@ -176,6 +178,18 @@ pub(super) fn pressed_button_text_offset(frame: &FrameQuadEmit<'_>) -> Option<(f
         }
         _ => None,
     }
+}
+
+fn has_button_text_child_id(parent: &crate::widget::Frame, child_id: u64) -> bool {
+    BUTTON_TEXT_CHILD_KEYS
+        .iter()
+        .any(|key| parent.children_keys.get(*key).copied() == Some(child_id))
+}
+
+fn has_button_text_child(parent: &crate::widget::Frame) -> bool {
+    BUTTON_TEXT_CHILD_KEYS
+        .iter()
+        .any(|key| parent.children_keys.contains_key(*key))
 }
 
 pub(super) fn button_text_bounds(frame: &FrameQuadEmit<'_>) -> Rectangle {
@@ -200,7 +214,7 @@ pub(super) fn emit_button_quads_with_text(
         frame.hovered_frame == Some(frame.id),
         frame.eff_alpha,
     );
-    if !frame.widget.children_keys.contains_key("Text")
+    if !has_button_text_child(frame.widget)
         && let Some((fs, ga)) = text_ctx
         && let Some(ref txt) = frame.widget.text
     {

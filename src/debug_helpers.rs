@@ -3,6 +3,8 @@
 use crate::lua_api::WowLuaEnv;
 use crate::widget::WidgetType;
 
+const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+
 /// Debug: open game menu via micro button click for screenshot testing.
 pub fn debug_show_game_menu(env: &WowLuaEnv) {
     if std::env::var("WOW_SIM_SHOW_GAME_MENU").is_err() {
@@ -78,7 +80,9 @@ fn log_game_menu_button(state: &crate::widget::WidgetRegistry, button: &crate::w
         "      font={:?} fsz={} color={:?}",
         button.font, button.font_size, button.text_color
     );
-    if let Some(&tid) = button.children_keys.get("Text")
+    if let Some(tid) = BUTTON_TEXT_CHILD_KEYS
+        .iter()
+        .find_map(|key| button.children_keys.get(*key).copied())
         && let Some(tf) = state.get(tid)
     {
         eprintln!(

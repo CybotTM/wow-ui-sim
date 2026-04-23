@@ -33,6 +33,8 @@ use simple_html::{build_simple_html_text_data, is_simple_html_frame};
 
 use crate::lua_api::frame::methods::button_anchor_hierarchy::ensure_button_text_child;
 
+const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+
 #[derive(Copy, Clone)]
 struct TooltipLineValues {
     r: Val,
@@ -138,14 +140,7 @@ fn update_text_frame(
         frame.map(|frame| frame.widget_type),
         Some(WidgetType::Button | WidgetType::CheckButton)
     );
-    let has_button_text_child = frame
-        .and_then(|frame| {
-            frame
-                .children_keys
-                .get("Text")
-                .or_else(|| frame.children_keys.get("ButtonText"))
-        })
-        .is_some();
+    let has_button_text_child = frame.and_then(button_text_child_id).is_some();
     let changed = is_tooltip || current_text != *text || current_stripped_text != *stripped_text;
     if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
@@ -378,14 +373,17 @@ pub(super) fn clear_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let mut sim = borrow_state_mut(state)?;
     clear_frame_text(&mut sim, id);
-    let text_child_id = sim
-        .widgets
-        .get(id)
-        .and_then(|frame| frame.children_keys.get("Text").copied());
+    let text_child_id = sim.widgets.get(id).and_then(button_text_child_id);
     if let Some(child_id) = text_child_id {
         clear_frame_text(&mut sim, child_id);
     }
     Ok(0)
+}
+
+fn button_text_child_id(frame: &crate::widget::Frame) -> Option<u64> {
+    BUTTON_TEXT_CHILD_KEYS
+        .iter()
+        .find_map(|key| frame.children_keys.get(*key).copied())
 }
 
 fn clear_frame_text(sim: &mut SimState, id: u64) {

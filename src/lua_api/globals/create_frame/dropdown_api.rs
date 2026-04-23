@@ -12,6 +12,8 @@ use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
+const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
+
 // ---------------------------------------------------------------------------
 // UIDropDownMenu constants
 // ---------------------------------------------------------------------------
@@ -280,10 +282,11 @@ fn set_button_text_on_widget(sim: &mut crate::lua_api::SimState, btn_id: u64, te
         f.text_stripped = Some(stripped.clone());
         f.text = Some(text_string.to_owned());
     }
-    let text_child = sim
-        .widgets
-        .get(btn_id)
-        .and_then(|f| f.children_keys.get("Text").copied());
+    let text_child = sim.widgets.get(btn_id).and_then(|f| {
+        BUTTON_TEXT_CHILD_KEYS
+            .iter()
+            .find_map(|key| f.children_keys.get(*key).copied())
+    });
     if let Some(tc_id) = text_child {
         if let Some(tc) = sim.widgets.get_mut_visual(tc_id) {
             tc.text_stripped = Some(stripped);

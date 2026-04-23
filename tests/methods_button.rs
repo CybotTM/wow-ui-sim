@@ -319,6 +319,44 @@ fn test_set_text_updates_button_text_child_without_synthesizing_text_key() {
 }
 
 #[test]
+fn test_set_text_updates_lowercase_text_child_without_synthesizing_text_key() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestButtonLowercaseTextChild", UIParent)
+        local fs = btn:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        fs:SetPoint("CENTER")
+        btn.text = fs
+        btn:SetText("World")
+    "#,
+    )
+    .unwrap();
+
+    let button_text: String = env
+        .eval(
+            r#"
+            return TestButtonLowercaseTextChild.text
+                and TestButtonLowercaseTextChild.text:GetText()
+                or ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        button_text, "World",
+        "SetText should update an existing lowercase text region"
+    );
+
+    let synthesized_text_exists: bool = env
+        .eval("return TestButtonLowercaseTextChild.Text ~= nil")
+        .unwrap();
+    assert!(
+        !synthesized_text_exists,
+        "SetText should reuse lowercase text instead of creating a synthetic Text child"
+    );
+}
+
+#[test]
 fn test_set_text_finds_button_text_child_by_parent_key_when_children_keys_missing() {
     let env = WowLuaEnv::new().unwrap();
 
