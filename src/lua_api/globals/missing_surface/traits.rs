@@ -16,6 +16,10 @@ use crate::traits::{
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+const DELVES_COMPANION_CONFIG_ID: i32 = 9201;
+const DELVES_COMPANION_TRAIT_TREE_ID: u32 = 9201;
+const DELVES_COMPANION_NODE_IDS: [u32; 3] = [9301, 9302, 9303];
+
 pub(super) fn register_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     register_c_traits(state)?;
     register_c_class_talents(state)?;
@@ -87,6 +91,7 @@ fn current_spec_set_id(state: &LuaState) -> u32 {
 
 fn config_name(config_id: i32) -> &'static str {
     match config_id {
+        DELVES_COMPANION_CONFIG_ID => "Delves Companion",
         101 => "Holy Mythic+",
         102 => "Holy Raid",
         201 => "Protection Raid",
@@ -613,6 +618,10 @@ fn current_config_ids(state: &LuaState) -> Vec<i32> {
 }
 
 fn trait_tree_id_for_config(state: &LuaState, config_id: i32) -> Option<u32> {
+    if config_id == DELVES_COMPANION_CONFIG_ID {
+        return Some(DELVES_COMPANION_TRAIT_TREE_ID);
+    }
+
     if config_id == 1 {
         return Some(672);
     }
@@ -630,6 +639,10 @@ fn trait_tree_id_for_config(state: &LuaState, config_id: i32) -> Option<u32> {
 }
 
 fn config_id_for_tree_id(state: &LuaState, tree_id: u32) -> Option<i32> {
+    if tree_id == DELVES_COMPANION_TRAIT_TREE_ID {
+        return Some(DELVES_COMPANION_CONFIG_ID);
+    }
+
     if tree_id == 672 {
         return Some(1);
     }
@@ -942,12 +955,16 @@ fn c_traits_get_config_info(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "id", Val::Num(config_id as f64));
     let name = create_string(state, config_name(config_id));
     table_set(state, info, "name", name);
-    let tree_ids = push_u32_array(
-        state,
-        config_spec_id(config_id)
-            .and_then(c_class_talents_trait_tree_for_spec)
-            .into_iter(),
-    );
+    let tree_ids = if config_id == DELVES_COMPANION_CONFIG_ID {
+        push_u32_array(state, [DELVES_COMPANION_TRAIT_TREE_ID])
+    } else {
+        push_u32_array(
+            state,
+            config_spec_id(config_id)
+                .and_then(c_class_talents_trait_tree_for_spec)
+                .into_iter(),
+        )
+    };
     table_set(state, info, "treeIDs", tree_ids);
     state.push(info);
     Ok(1)
@@ -1326,10 +1343,14 @@ fn c_traits_get_tree_nodes(state: &mut LuaState) -> LuaResult<u32> {
             _ => 0,
         },
     };
-    let nodes = TRAIT_TREE_DB
-        .get(&tree_id)
-        .map(|tree| push_u32_array(state, tree.node_ids.iter().copied()))
-        .unwrap_or_else(|| create_table(state));
+    let nodes = if tree_id == DELVES_COMPANION_TRAIT_TREE_ID {
+        push_u32_array(state, DELVES_COMPANION_NODE_IDS)
+    } else {
+        TRAIT_TREE_DB
+            .get(&tree_id)
+            .map(|tree| push_u32_array(state, tree.node_ids.iter().copied()))
+            .unwrap_or_else(|| create_table(state))
+    };
     state.push(nodes);
     Ok(1)
 }

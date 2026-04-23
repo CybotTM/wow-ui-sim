@@ -87,6 +87,15 @@ fn test_get_map_world_size() {
 // ============================================================================
 
 #[test]
+fn test_get_map_art_layers_uses_current_map_for_nil_map_id() {
+    let env = env();
+    let has_layer: bool = env
+        .eval("return type((C_Map.GetMapArtLayers(nil) or {})[1]) == 'table'")
+        .unwrap();
+    assert!(has_layer);
+}
+
+#[test]
 fn test_get_map_art_layer_textures_returns_filedata_ids() {
     let env = env();
     // GetMapArtLayerTextures must return a table of fileDataIDs for map tiles.

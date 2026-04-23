@@ -119,7 +119,7 @@ fn c_map_get_map_art_id(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_map_get_map_art_layers(state: &mut LuaState) -> LuaResult<u32> {
-    let ui_map_id = i32::from_stack(state, 1)?;
+    let ui_map_id = Option::<i32>::from_stack(state, 1)?.unwrap_or(DEFAULT_PLAYER_MAP_ID);
     let Some(map_art) = crate::map_art::get_map_art(ui_map_id as u32) else {
         return Ok(0);
     };

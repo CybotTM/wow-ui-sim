@@ -10,6 +10,7 @@ const ACTIVE_TIER_FIELD: &str = "__wow_ui_sim_active_tier";
 const DEFAULT_ACTIVE_TIER: i32 = 4;
 const DELVE_HEADER: &str = "Fungal Folly";
 const DELVE_DESCRIPTION: &str = "The Fungal Folly winds deeper with every tier.";
+const DELVE_ENTRANCE_MAP_ID: i32 = 2339;
 const LOCKED_TIER_REASON: &str = "Complete Tier 4 to unlock this delve tier.";
 const UNKNOWN_TIER_REASON: &str = "Unknown tier";
 
@@ -152,7 +153,7 @@ fn get_delve_entrance_header_string(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_delve_entrance_map_id(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(2339.0));
+    state.push(Val::Num(DELVE_ENTRANCE_MAP_ID as f64));
     Ok(1)
 }
 
@@ -224,7 +225,8 @@ fn get_unseen_curios_by_slot_type(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn has_active_delve(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(true));
+    let map_id = Option::<i32>::from_stack(state, 1)?.unwrap_or_default();
+    state.push(Val::Bool(map_id == DELVE_ENTRANCE_MAP_ID));
     Ok(1)
 }
 

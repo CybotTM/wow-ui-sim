@@ -17,8 +17,31 @@ const DELVES_UI_SCRIPT: &str = r#"
         return "wrong_map_id"
     end
 
+    if C_DelvesUI.HasActiveDelve() ~= false or C_DelvesUI.HasActiveDelve(0) ~= false then
+        return "wrong_default_active_delve"
+    end
+
+    if C_DelvesUI.HasActiveDelve(2339) ~= true then
+        return "wrong_seeded_active_delve"
+    end
+
     if C_DelvesUI.GetTieredEntranceOptionalAffixTraitTreeID() ~= 77001 then
         return "wrong_optional_affix_tree"
+    end
+
+    local companionTreeID = C_DelvesUI.GetTraitTreeForCompanion(C_DelvesUI.GetCompanionInfoForActivePlayer())
+    if companionTreeID ~= 9201 then
+        return "wrong_companion_tree"
+    end
+
+    local companionConfigID = C_Traits.GetConfigIDByTreeID(companionTreeID)
+    if companionConfigID ~= 9201 then
+        return "wrong_companion_config"
+    end
+
+    local companionNodes = C_Traits.GetTreeNodes(companionTreeID)
+    if #companionNodes ~= 3 then
+        return "wrong_companion_node_count:" .. tostring(#companionNodes)
     end
 
     local activeTier = C_DelvesUI.GetActiveDelveTier()
