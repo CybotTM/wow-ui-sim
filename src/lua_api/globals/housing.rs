@@ -22,6 +22,15 @@ pub fn is_housing_service_enabled(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `C_Housing.HasHousingExpansionAccess` — gates the Midnight housing
+/// dashboard. Blizzard_HousingDashboard/Blizzard_HousingDashboardHouseInfoContent
+/// blocks dashboard access when this returns false; the sim grants access so
+/// the dashboard renders populated.
+pub fn has_housing_expansion_access(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
 fn ensure_c_housing_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_Housing");
     let global = state.global;
@@ -53,6 +62,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         table_ref,
         "IsHousingServiceEnabled",
         is_housing_service_enabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "HasHousingExpansionAccess",
+        has_housing_expansion_access,
     )?;
     Ok(())
 }
