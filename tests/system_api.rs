@@ -177,6 +177,45 @@ fn test_protected_calls_record_errors_in_shared_tracker() {
     );
 }
 
+#[test]
+fn test_xpcall_handler_failures_are_recorded_in_shared_tracker() {
+    let env = env();
+    let (_ok, msg): (bool, String) = env
+        .eval(
+            r#"
+        return xpcall(
+            function() error("root failure") end,
+            function(err) error("handler failure: " .. err) end
+        )
+    "#,
+        )
+        .unwrap();
+
+    assert!(
+        msg.contains("root failure"),
+        "xpcall should return original error when handler also fails: {msg}"
+    );
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.lua_error_counts.get("root failure"),
+        Some(&1),
+        "root protected-call failure should be tracked"
+    );
+    let handler_count = state
+        .lua_error_counts
+        .iter()
+        .find_map(|(key, count)| {
+            key.contains("handler failure: root failure")
+                .then_some(*count)
+        })
+        .unwrap_or(0);
+    assert_eq!(
+        handler_count, 1,
+        "xpcall handler failure should be tracked via canonical sink"
+    );
+}
+
 // ============================================================================
 // SlashCmdList
 // ============================================================================

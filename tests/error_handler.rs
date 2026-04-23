@@ -290,3 +290,36 @@ fn test_error_handler_can_be_replaced() {
     );
     assert_eq!(second, 1, "second handler should receive the error");
 }
+
+#[test]
+fn test_registry_report_script_error_routes_through_active_error_handler_and_tracker() {
+    let env = env();
+    let (count, msg): (i32, String) = env
+        .eval(
+            r#"
+            RegistryErrors = {}
+            seterrorhandler(function(err) table.insert(RegistryErrors, err) end)
+            local report = debug.getregistry()["__report_script_error"]
+            report("registry boom")
+            return #RegistryErrors, RegistryErrors[1] or ""
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        count, 1,
+        "active error handler should receive registry-reported errors"
+    );
+    assert!(
+        msg.contains("registry boom"),
+        "registry-reported error message should propagate to active handler, got: {msg}"
+    );
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.lua_error_counts.get("registry boom"),
+        Some(&1),
+        "registry-reported errors should be counted in normalized tracker: {:?}",
+        state.lua_error_counts
+    );
+}

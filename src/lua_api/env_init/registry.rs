@@ -44,7 +44,6 @@ fn register_script_error_reporter(state: &mut rilua::vm::state::LuaState) {
                 .unwrap_or_default(),
             other => format!("{other:?}"),
         };
-        eprintln!("Lua error: {msg}");
         crate::lua_api::script_helpers::call_error_handler_state(state, &msg);
         Ok(0)
     }

@@ -153,7 +153,12 @@ pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
         return;
     };
     let msg_ref = state.gc.intern_string(collected_error.as_bytes());
-    let _ = protected_call_state(state, handler, &[Val::Str(msg_ref)]);
+    let _ = protected_call_state_with_policy(
+        state,
+        handler,
+        &[Val::Str(msg_ref)],
+        LuaErrorEmitPolicy::FirstOccurrenceOnly,
+    );
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -249,6 +254,15 @@ pub fn protected_call_state(
     func: Val,
     args: &[Val],
 ) -> Result<Vec<Val>, Val> {
+    protected_call_state_with_policy(state, func, args, LuaErrorEmitPolicy::Never)
+}
+
+fn protected_call_state_with_policy(
+    state: &mut LuaState,
+    func: Val,
+    args: &[Val],
+    emit_policy: LuaErrorEmitPolicy,
+) -> Result<Vec<Val>, Val> {
     let saved_top = state.top;
     let call_base = saved_top;
     let saved_ci = state.ci;
@@ -282,11 +296,15 @@ pub fn protected_call_state(
                 err,
             );
             state.top = saved_top;
-            if let Some(error_msg) = val_to_string(state, error_val) {
-                let _ = collect_lua_error(state, &error_msg);
-            }
+            record_protected_call_error(state, error_val, emit_policy);
             Err(error_val)
         }
+    }
+}
+
+fn record_protected_call_error(state: &LuaState, error_val: Val, emit_policy: LuaErrorEmitPolicy) {
+    if let Some(error_msg) = val_to_string(state, error_val) {
+        let _ = sink_lua_error(state, &error_msg, emit_policy);
     }
 }
 
@@ -877,6 +895,34 @@ mod tests {
                 .iter()
                 .all(|line| !line.starts_with("Lua error: boom")),
             "collector-only path should not mirror to GUI console"
+        );
+    }
+
+    #[test]
+    fn active_error_handler_callback_failures_use_canonical_sink() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        {
+            let mut lua = env.rilua_mut();
+            lua.exec("seterrorhandler(function(msg) error('handler boom: ' .. msg) end)")
+                .expect("seterrorhandler should install callback");
+            call_error_handler_state(lua.state_mut(), "root boom");
+            call_error_handler_state(lua.state_mut(), "root boom");
+        }
+
+        let state = env.state().borrow();
+        assert_eq!(
+            state.lua_error_counts.get("root boom"),
+            Some(&2),
+            "original errors should be counted through canonical sink"
+        );
+        let handler_count = state
+            .lua_error_counts
+            .iter()
+            .find_map(|(key, count)| key.contains("handler boom: root boom").then_some(*count))
+            .unwrap_or(0);
+        assert_eq!(
+            handler_count, 2,
+            "error handler callback failures should also be counted via canonical sink"
         );
     }
 }
