@@ -141,10 +141,11 @@ pub fn call_error_handler(lua: &mut rilua::Lua, error_msg: &str) {
 /// State-only variant for RustFn call sites that only hold `&mut LuaState`.
 pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
     let collected_error = augment_error_with_traceback(state, error_msg);
-    if collect_lua_error(state, &collected_error) {
-        eprintln!("Lua error: {collected_error}");
-        mirror_lua_error_to_console(state, &collected_error);
-    }
+    let _ = sink_lua_error(
+        state,
+        &collected_error,
+        LuaErrorEmitPolicy::FirstOccurrenceOnly,
+    );
     let Ok(handler) = ensure_error_handler(state) else {
         return;
     };
@@ -155,16 +156,65 @@ pub fn call_error_handler_state(state: &mut LuaState, error_msg: &str) {
     let _ = protected_call_state(state, handler, &[Val::Str(msg_ref)]);
 }
 
-fn mirror_lua_error_to_console(state: &LuaState, error_msg: &str) {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum LuaErrorEmitPolicy {
+    /// Record/normalize/count only.
+    Never,
+    /// Mirror to stderr + GUI console only for the first normalized occurrence.
+    FirstOccurrenceOnly,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct LuaErrorSinkResult {
+    is_first: bool,
+}
+
+/// Canonical Lua error sink.
+///
+/// This is the single entry point that records a Lua error into simulator state
+/// (raw message + addon attribution + normalized counts) and optionally mirrors
+/// it to stderr/GUI console using a single normalized-occurrence policy.
+fn sink_lua_error(
+    state: &LuaState,
+    error_msg: &str,
+    emit_policy: LuaErrorEmitPolicy,
+) -> LuaErrorSinkResult {
     use super::env::WowLuaAppData;
 
     let Some(app) = state.app_data::<WowLuaAppData>() else {
-        return;
+        return LuaErrorSinkResult { is_first: false };
     };
     let Ok(mut sim) = app.sim_state.try_borrow_mut() else {
-        return;
+        return LuaErrorSinkResult { is_first: false };
     };
-    sim.console_output.push(format!("Lua error: {error_msg}"));
+
+    sim.lua_errors.push(error_msg.to_string());
+    let addon_name = sim
+        .executing_addon_index
+        .or(sim.loading_addon_index)
+        .and_then(|idx| sim.addons.get(idx as usize))
+        .map(|addon| addon.folder_name.clone());
+    sim.lua_error_records
+        .push(crate::lua_api::state::LuaErrorRecord {
+            message: error_msg.to_string(),
+            addon_name,
+        });
+
+    let normalized = crate::lua_errors::extract_error_message(error_msg);
+    let entry = sim.lua_error_counts.entry(normalized).or_insert(0);
+    let is_first = *entry == 0;
+    *entry += 1;
+
+    let should_emit = matches!(
+        emit_policy,
+        LuaErrorEmitPolicy::FirstOccurrenceOnly if is_first
+    );
+    if should_emit {
+        eprintln!("Lua error: {error_msg}");
+        sim.console_output.push(format!("Lua error: {error_msg}"));
+    }
+
+    LuaErrorSinkResult { is_first }
 }
 
 fn augment_error_with_traceback(state: &mut LuaState, error_msg: &str) -> String {
@@ -488,29 +538,7 @@ fn set_registry_value(state: &mut LuaState, key: &str, value: Val) {
 
 /// Collect a Lua error into SimState for later retrieval.
 pub fn collect_lua_error(state: &LuaState, msg: &str) -> bool {
-    use super::env::WowLuaAppData;
-    let Some(app) = state.app_data::<WowLuaAppData>() else {
-        return false;
-    };
-    let Ok(mut sim) = app.sim_state.try_borrow_mut() else {
-        return false;
-    };
-    sim.lua_errors.push(msg.to_string());
-    let addon_name = sim
-        .executing_addon_index
-        .or(sim.loading_addon_index)
-        .and_then(|idx| sim.addons.get(idx as usize))
-        .map(|addon| addon.folder_name.clone());
-    sim.lua_error_records
-        .push(crate::lua_api::state::LuaErrorRecord {
-            message: msg.to_string(),
-            addon_name,
-        });
-    let normalized = crate::lua_errors::extract_error_message(msg);
-    let entry = sim.lua_error_counts.entry(normalized).or_insert(0);
-    let is_first = *entry == 0;
-    *entry += 1;
-    is_first
+    sink_lua_error(state, msg, LuaErrorEmitPolicy::Never).is_first
 }
 
 // ── Event dispatch ordering ─────────────────────────────────────────
@@ -819,6 +847,36 @@ mod tests {
             mirrored.len(),
             1,
             "duplicate Lua errors should be deduped in GUI console output"
+        );
+    }
+
+    #[test]
+    fn collect_lua_error_tracks_records_and_counts_without_console_mirroring() {
+        let env = WowLuaEnv::new().expect("env should initialize");
+        {
+            let lua = env.rilua();
+            let _ = collect_lua_error(lua.state(), "boom");
+            let _ = collect_lua_error(lua.state(), "boom");
+        }
+
+        let state = env.state().borrow();
+        assert_eq!(state.lua_errors.len(), 2, "raw errors should be recorded");
+        assert_eq!(
+            state.lua_error_records.len(),
+            2,
+            "addon-attributed records should be recorded"
+        );
+        assert_eq!(
+            state.lua_error_counts.get("boom"),
+            Some(&2),
+            "normalized counts should increment"
+        );
+        assert!(
+            state
+                .console_output
+                .iter()
+                .all(|line| !line.starts_with("Lua error: boom")),
+            "collector-only path should not mirror to GUI console"
         );
     }
 }
