@@ -167,6 +167,8 @@ enum LuaErrorEmitPolicy {
     Never,
     /// Mirror to stderr + GUI console only for the first normalized occurrence.
     FirstOccurrenceOnly,
+    /// Mirror every occurrence to stderr + GUI console.
+    Always,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -210,16 +212,25 @@ fn sink_lua_error(
     let is_first = *entry == 0;
     *entry += 1;
 
-    let should_emit = matches!(
-        emit_policy,
-        LuaErrorEmitPolicy::FirstOccurrenceOnly if is_first
-    );
+    let should_emit = match emit_policy {
+        LuaErrorEmitPolicy::Never => false,
+        LuaErrorEmitPolicy::FirstOccurrenceOnly => is_first,
+        LuaErrorEmitPolicy::Always => true,
+    };
     if should_emit {
         eprintln!("Lua error: {error_msg}");
         sim.console_output.push(format!("Lua error: {error_msg}"));
     }
 
     LuaErrorSinkResult { is_first }
+}
+
+/// Route `addframetext(...)` output through the canonical Lua error sink.
+///
+/// This mirrors every emitted message to stderr and GUI console while also
+/// recording raw messages, normalized counts, and addon-attributed records.
+pub fn report_addframetext_error(state: &LuaState, message: &str) {
+    let _ = sink_lua_error(state, message, LuaErrorEmitPolicy::Always);
 }
 
 fn augment_error_with_traceback(state: &mut LuaState, error_msg: &str) -> String {

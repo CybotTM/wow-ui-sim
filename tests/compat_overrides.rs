@@ -89,6 +89,51 @@ fn a_print_is_resilient_when_print_overridden() {
 }
 
 #[test]
+fn addframetext_routes_to_canonical_error_sink() {
+    let env = env();
+    env.exec(r#"addframetext("frame text boom")"#).unwrap();
+    let state = env.state().borrow();
+    assert_eq!(
+        state.console_output.last().map(String::as_str),
+        Some("Lua error: frame text boom")
+    );
+    assert_eq!(
+        state.lua_error_counts.get("frame text boom"),
+        Some(&1),
+        "addframetext should update normalized error counts"
+    );
+    assert!(
+        state
+            .lua_errors
+            .iter()
+            .any(|message| message.contains("frame text boom")),
+        "addframetext should record raw errors"
+    );
+}
+
+#[test]
+fn addframetext_formats_non_string_and_ignores_nil() {
+    let env = env();
+    env.exec(
+        r#"
+        addframetext(42)
+        addframetext(nil)
+        "#,
+    )
+    .unwrap();
+    let state = env.state().borrow();
+    assert_eq!(
+        state.console_output.last().map(String::as_str),
+        Some("Lua error: 42")
+    );
+    assert_eq!(
+        state.lua_error_counts.get("42"),
+        Some(&1),
+        "non-string addframetext values should be normalized and counted"
+    );
+}
+
+#[test]
 fn next_on_frame_yields_nothing() {
     let env = env();
     let count: i64 = env

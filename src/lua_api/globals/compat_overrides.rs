@@ -110,6 +110,7 @@ end
 /// registrar runs more than once.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     install_print(lua)?;
+    install_addframetext(lua)?;
     install_a_print(lua)?;
     install_legacy_aliases(lua)?;
     install_nil_symbol_logger(lua)?;
@@ -133,6 +134,11 @@ fn install_print(lua: &mut rilua::Lua) -> LuaResult<()> {
             .unwrap_or(Val::Nil)
     };
     registry_set(state, SIM_PRINT_KEY, print_val);
+    Ok(())
+}
+
+fn install_addframetext(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "addframetext", sim_addframetext)?;
     Ok(())
 }
 
@@ -197,6 +203,17 @@ fn sim_print(state: &mut LuaState) -> LuaResult<u32> {
     if let Ok(sim) = state_handle(state) {
         write_console_line(&sim, output);
     }
+    Ok(0)
+}
+
+fn sim_addframetext(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    if matches!(value, Val::Nil) {
+        return Ok(0);
+    }
+    let mut rendered = String::new();
+    append_val(state, value, &mut rendered);
+    crate::lua_api::script_helpers::report_addframetext_error(state, &rendered);
     Ok(0)
 }
 
