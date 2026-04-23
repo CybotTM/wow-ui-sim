@@ -512,7 +512,40 @@ pub(crate) fn get_unbounded_string_width(state: &mut LuaState) -> LuaResult<u32>
 }
 
 pub(crate) fn set_text_to_fit(state: &mut LuaState) -> LuaResult<u32> {
-    set_text(state)
+    let id = frame_id_from_stack(state, 1)?;
+    set_text(state)?;
+    let measured_width = measure_text_width(state, id) as f32;
+    apply_text_to_fit_size(state, id, measured_width);
+    Ok(0)
+}
+
+/// Real WoW's `FontString:SetTextToFit` unconditionally resizes the font
+/// string to the unclipped extents of the new text so menu compositors can
+/// measure element widths. Menu dropdowns rely on this — without it, element
+/// font strings report width 0 and menus render as 1-row stubs.
+fn apply_text_to_fit_size(state: &mut LuaState, id: u64, measured_width: f32) {
+    const LINE_HEIGHT_MULTIPLIER: f32 = 1.2;
+    let font_size = {
+        let Ok(sim) = borrow_state(state) else {
+            return;
+        };
+        sim.widgets
+            .get(id)
+            .map(|frame| frame.font_size)
+            .unwrap_or(0.0)
+    };
+    let Ok(mut sim) = borrow_state_mut(state) else {
+        return;
+    };
+    let Some(frame) = sim.widgets.get_mut_visual(id) else {
+        return;
+    };
+    frame.width = measured_width;
+    frame.width_is_text_auto = true;
+    if frame.height <= 0.0 && font_size > 0.0 {
+        frame.height = (font_size * LINE_HEIGHT_MULTIPLIER).ceil();
+    }
+    sim.widgets.mark_rect_dirty(id);
 }
 
 pub(crate) fn scale_text_to_fit(_state: &mut LuaState) -> LuaResult<u32> {
