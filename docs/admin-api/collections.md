@@ -58,6 +58,40 @@ Toggles whether a toy is in the toy box.
 A_Admin.SetToyCollected(37710, true)    -- Paper Flying Machine Kit
 ```
 
+### A_Admin.SetCampsiteCollected(campsiteId, collected)
+
+Toggles whether a campsite (warband scene) is collected.
+
+- **campsiteId** `number` -- Warband scene ID from `C_WarbandScene`
+- **collected** `boolean`
+- **Affects:** `C_WarbandScene.HasWarbandScene(campsiteId)`
+- **Example:**
+```lua
+A_Admin.SetCampsiteCollected(3, true)
+```
+
+### A_Admin.CollectCampsite(campsiteId)
+
+Marks a campsite as collected.
+
+- **campsiteId** `number` -- Warband scene ID from `C_WarbandScene`
+- **Affects:** `C_WarbandScene.HasWarbandScene(campsiteId)`
+- **Example:**
+```lua
+A_Admin.CollectCampsite(3)
+```
+
+### A_Admin.UncollectCampsite(campsiteId)
+
+Marks a campsite as uncollected.
+
+- **campsiteId** `number` -- Warband scene ID from `C_WarbandScene`
+- **Affects:** `C_WarbandScene.HasWarbandScene(campsiteId)`
+- **Example:**
+```lua
+A_Admin.UncollectCampsite(3)
+```
+
 ### A_Admin.SetAchievementEarned(achieveId, earned)
 
 Toggles whether an achievement has been earned.

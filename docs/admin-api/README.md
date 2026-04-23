@@ -16,7 +16,7 @@ The `A_Admin` namespace provides administrative functions for controlling simula
 - [Buffs](buffs.md) — AddBuff, RemoveBuff, ClearBuffs
 - [Zone](zone.md) — SetZone, SetSubZone, SetInstanceInfo, SetInInstance
 - [Economy](economy.md) — SetMoney, SetItemLevel, AddBagItem, RemoveBagItem
-- [Collections](collections.md) — AddTransmog, RemoveTransmog, CollectMount, UncollectMount, CollectPet, UncollectPet, CollectToy, UncollectToy, SetAchievementEarned, EarnAchievement
+- [Collections](collections.md) — AddTransmog, RemoveTransmog, CollectMount, UncollectMount, CollectPet, UncollectPet, CollectToy, UncollectToy, CollectCampsite, UncollectCampsite, SetAchievementEarned, EarnAchievement
 - [PvP](pvp.md) — SetPvPEnabled, SetHonorLevel
 - [Guild](guild.md) — SetGuildInfo, ClearGuild, JoinGuild, LeaveGuild
 - [Mail](mail.md) — AddMail, ClearInbox, SetInboxCount

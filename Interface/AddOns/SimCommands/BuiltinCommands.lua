@@ -16,6 +16,42 @@ SimCommands:Register("Open Guild Bank", "Fire GUILDBANKFRAME_OPENED event", func
     FireEvent("GUILDBANKFRAME_OPENED")
 end, "UI Panels")
 
+local function ResolveProfessionSkillLineID(professionEnumID, fallbackSkillLineID)
+    if C_TradeSkillUI and C_TradeSkillUI.GetProfessionSkillLineID and professionEnumID then
+        local skillLineID = C_TradeSkillUI.GetProfessionSkillLineID(professionEnumID)
+        if type(skillLineID) == "number" and skillLineID > 0 then
+            return skillLineID
+        end
+    end
+    return fallbackSkillLineID
+end
+
+local function OpenProfessionPanel(professionName, professionEnumID, fallbackSkillLineID)
+    local skillLineID = ResolveProfessionSkillLineID(professionEnumID, fallbackSkillLineID)
+    if not skillLineID then
+        print("[SimCommands] Could not resolve " .. professionName .. " skill line ID.")
+        return
+    end
+
+    if type(OpenProfessionUIToSkillLine) == "function" then
+        OpenProfessionUIToSkillLine(skillLineID)
+        return
+    end
+
+    if C_TradeSkillUI and C_TradeSkillUI.OpenTradeSkill then
+        C_TradeSkillUI.OpenTradeSkill(skillLineID)
+        return
+    end
+
+    print("[SimCommands] Profession UI API unavailable.")
+end
+
+local BLACKSMITHING_PROFESSION_ENUM_ID = (Enum and Enum.Profession and Enum.Profession.Blacksmithing) or 1
+
+SimCommands:Register("Open Blacksmithing", "Open the Blacksmithing profession panel", function()
+    OpenProfessionPanel("Blacksmithing", BLACKSMITHING_PROFESSION_ENUM_ID, 164)
+end, "UI Panels")
+
 SimCommands:Register("Add Gold", "Add gold to player (enter amount in gold)", function()
     SimCommands:Prompt("Enter gold amount:", function(text)
         local gold = tonumber(text)
@@ -93,6 +129,15 @@ SimCommands:Register("Add Toy", "Collect a toy by item ID", function()
         local id = tonumber(text)
         if id and id > 0 then
             A_Admin.SetToyCollected(id, true)
+        end
+    end)
+end, "Collections")
+
+SimCommands:Register("Add Campsite", "Collect a campsite by warband scene ID", function()
+    SimCommands:Prompt("Enter campsite ID:", function(text)
+        local id = tonumber(text)
+        if id and id > 0 then
+            A_Admin.SetCampsiteCollected(id, true)
         end
     end)
 end, "Collections")

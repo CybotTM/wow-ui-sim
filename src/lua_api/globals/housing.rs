@@ -22,6 +22,21 @@ pub fn is_housing_service_enabled(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `C_Housing.GetMaxHouseLevel` — dashboard bootstrap currently needs a
+/// numeric value during frame construction. Return `0` so Blizzard's
+/// "+1 coming soon" path still has a stable, non-error baseline.
+pub fn get_max_house_level(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+/// `C_Housing.GetVisitCooldownInfo` — dashboard teleport button probes this.
+/// No visit cooldown is simulated yet.
+pub fn get_visit_cooldown_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
 /// `C_Housing.HasHousingExpansionAccess` — gates the Midnight housing
 /// dashboard. Blizzard_HousingDashboard/Blizzard_HousingDashboardHouseInfoContent
 /// blocks dashboard access when this returns false; the sim grants access so
@@ -62,6 +77,13 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         table_ref,
         "IsHousingServiceEnabled",
         is_housing_service_enabled,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "GetMaxHouseLevel", get_max_house_level)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetVisitCooldownInfo",
+        get_visit_cooldown_info,
     )?;
     table_set_rust_fn_static(
         state,

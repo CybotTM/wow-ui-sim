@@ -124,6 +124,73 @@ pub(super) fn set_toy_collected(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(super) fn set_campsite_collected(state: &mut LuaState) -> LuaResult<u32> {
+    let id = i32::from_stack(state, 1)? as u32;
+    let collected = bool::from_stack(state, 2)?;
+    let mut st = borrow_state_mut(state)?;
+    let mut newly_collected = false;
+    if let Some(scene) = st
+        .world
+        .warband_scenes
+        .iter_mut()
+        .find(|scene| scene.warband_scene_id == id)
+    {
+        newly_collected = collected && !scene.is_collected;
+        scene.is_collected = collected;
+        if !collected {
+            scene.is_favorite = false;
+        }
+    }
+
+    if newly_collected {
+        st.events.push(Event {
+            name: "NEW_WARBAND_SCENE_ADDED".to_string(),
+            args: vec![EventArg::Number(id as f64)],
+        });
+    }
+
+    Ok(0)
+}
+
+pub(super) fn collect_campsite(state: &mut LuaState) -> LuaResult<u32> {
+    let id = i32::from_stack(state, 1)? as u32;
+    let mut st = borrow_state_mut(state)?;
+    let mut newly_collected = false;
+    if let Some(scene) = st
+        .world
+        .warband_scenes
+        .iter_mut()
+        .find(|scene| scene.warband_scene_id == id)
+    {
+        newly_collected = !scene.is_collected;
+        scene.is_collected = true;
+    }
+
+    if newly_collected {
+        st.events.push(Event {
+            name: "NEW_WARBAND_SCENE_ADDED".to_string(),
+            args: vec![EventArg::Number(id as f64)],
+        });
+    }
+
+    Ok(0)
+}
+
+pub(super) fn uncollect_campsite(state: &mut LuaState) -> LuaResult<u32> {
+    let id = i32::from_stack(state, 1)? as u32;
+    let mut st = borrow_state_mut(state)?;
+    if let Some(scene) = st
+        .world
+        .warband_scenes
+        .iter_mut()
+        .find(|scene| scene.warband_scene_id == id)
+    {
+        scene.is_collected = false;
+        scene.is_favorite = false;
+    }
+    Ok(0)
+}
+
 pub(super) fn set_achievement_earned(state: &mut LuaState) -> LuaResult<u32> {
     let id = i32::from_stack(state, 1)?;
     let collected = bool::from_stack(state, 2)?;

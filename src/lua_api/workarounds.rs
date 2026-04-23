@@ -267,6 +267,9 @@ pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addo
     if addon_name == "Blizzard_Collections" {
         patch_collections_journal_namespace(env);
     }
+    if addon_name == "Blizzard_HousingDashboard" {
+        patch_housing_dashboard_preload(env);
+    }
 }
 
 fn log_with_timestamp(env: &crate::lua_api::WowLuaEnv, message: &str) {
@@ -297,6 +300,27 @@ fn patch_ui_parent_panel_toggles(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_damage_meter_initial_scrollbox_extent(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(DAMAGE_METER_INITIAL_SCROLLBOX_EXTENT_LUA);
+}
+
+fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
+    let _ = env.exec(
+        r#"
+        HousingTutorialUtil = HousingTutorialUtil or {}
+        if type(HousingTutorialUtil.BoughtHouseQuestComplete) ~= "function" then
+            function HousingTutorialUtil.BoughtHouseQuestComplete()
+                return true
+            end
+        end
+
+        if type(C_Housing) == "table" then
+            function C_Housing.GetPlayerOwnedHouses()
+                if type(FireEvent) == "function" then
+                    FireEvent("PLAYER_HOUSE_LIST_UPDATED", {})
+                end
+            end
+        end
+    "#,
+    );
 }
 
 fn patch_uiparent_onupdate_worklists(env: &crate::lua_api::WowLuaEnv) {

@@ -217,7 +217,11 @@ static NAMESPACE_ZERO_STUBS: &[NsStub] = &[
     // C_TradeSkillUI
     ("C_TradeSkillUI", "GetNumRecipes", stub_zero),
     ("C_TradeSkillUI", "GetNumTradeSkills", stub_zero),
-    ("C_TradeSkillUI", "GetAllFilterableInventorySlotsCount", stub_zero),
+    (
+        "C_TradeSkillUI",
+        "GetAllFilterableInventorySlotsCount",
+        stub_zero,
+    ),
     // C_VoiceChat GetNumActiveChannels / GetNumMembers are SimState-backed in
     // missing_surface/voice_chat.rs, not stubs.
 ];

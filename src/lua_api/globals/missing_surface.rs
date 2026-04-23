@@ -45,6 +45,7 @@ mod tutorial;
 #[path = "missing_surface/ui_widget_manager.rs"]
 mod ui_widget_manager;
 mod voice_chat;
+mod warband_scene;
 mod zone_ability;
 
 use crate::c_api::{
@@ -202,6 +203,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     gossip_info::register_gossip_info_surface(state)?;
     mythic_plus::register_mythic_plus_surface(state)?;
     scenario_info::register_scenario_info_surface(state)?;
+    warband_scene::register_warband_scene_surface(state)?;
     nameplate::register_nameplate_surface(state)?;
     ui_widget_manager::register_ui_widget_manager_surface(state)?;
     Ok(())

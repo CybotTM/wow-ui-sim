@@ -54,6 +54,21 @@ pub struct ToyData {
     pub is_usable: bool,
 }
 
+/// A campsite/warband-scene entry in the collections journal.
+#[derive(Debug, Clone)]
+pub struct WarbandSceneData {
+    pub warband_scene_id: u32,
+    pub name: String,
+    pub description: String,
+    pub source: String,
+    pub quality: i32,
+    pub texture_kit: String,
+    pub is_collected: bool,
+    pub is_favorite: bool,
+    pub has_fanfare: bool,
+    pub source_type: i32,
+}
+
 /// An heirloom item in the collection.
 #[derive(Debug, Clone)]
 pub struct HeirloomData {

@@ -47,3 +47,20 @@ fn other_c_housing_members_still_resolve_via_metamethod_fallback() {
         .unwrap();
     assert_eq!(result, "ok");
 }
+
+#[test]
+fn dashboard_bootstrap_members_have_safe_defaults() {
+    let env = WowLuaEnv::new().unwrap();
+    let (max_level, cooldown_is_nil): (i32, bool) = env
+        .eval(
+            r#"
+            return C_Housing.GetMaxHouseLevel(), C_Housing.GetVisitCooldownInfo() == nil
+            "#,
+        )
+        .unwrap();
+    assert_eq!(max_level, 0);
+    assert!(
+        cooldown_is_nil,
+        "GetVisitCooldownInfo should default to nil when no cooldown is active"
+    );
+}

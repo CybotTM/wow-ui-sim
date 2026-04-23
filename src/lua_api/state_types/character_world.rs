@@ -6,7 +6,7 @@ use crate::lua_api::game_data::AuraInfo;
 
 use super::collections::{
     EquippedItem, GreatVaultActivity, HeirloomData, MailAttachment, MailMessage, MountData,
-    PetData, PremadeListing, ToyData, TransmogAppearance,
+    PetData, PremadeListing, ToyData, TransmogAppearance, WarbandSceneData,
 };
 
 use super::super::state_defaults::*;
@@ -306,6 +306,7 @@ pub struct WorldState {
     pub pets: Vec<PetData>,
     pub collected_toys: HashSet<i32>,
     pub toys: Vec<ToyData>,
+    pub warband_scenes: Vec<WarbandSceneData>,
     pub favorite_toys: HashSet<u32>,
     pub heirlooms: Vec<HeirloomData>,
     pub collected_heirlooms: HashSet<u32>,
@@ -510,6 +511,7 @@ fn apply_collection_defaults(ws: &mut WorldState) {
     ws.mounts = default_mounts();
     ws.pets = default_pets();
     ws.toys = default_toys();
+    ws.warband_scenes = default_warband_scenes();
     ws.premade_listings = default_premade_listings();
 }
 
@@ -541,6 +543,7 @@ mod tests {
         assert!(!world.mounts.is_empty());
         assert!(!world.pets.is_empty());
         assert!(!world.toys.is_empty());
+        assert!(!world.warband_scenes.is_empty());
         assert!(!world.heirlooms.is_empty());
         assert!(!world.premade_listings.is_empty());
         assert_eq!(world.collected_heirlooms.len(), world.heirlooms.len());

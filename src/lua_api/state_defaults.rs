@@ -121,6 +121,81 @@ pub(super) fn default_toys() -> Vec<ToyData> {
     ]
 }
 
+pub(super) fn default_warband_scenes() -> Vec<WarbandSceneData> {
+    let s = |warband_scene_id,
+             name: &str,
+             description: &str,
+             source: &str,
+             quality,
+             texture_kit: &str,
+             is_collected,
+             is_favorite,
+             has_fanfare,
+             source_type| WarbandSceneData {
+        warband_scene_id,
+        name: name.to_string(),
+        description: description.to_string(),
+        source: source.to_string(),
+        quality,
+        texture_kit: texture_kit.to_string(),
+        is_collected,
+        is_favorite,
+        has_fanfare,
+        source_type,
+    };
+
+    vec![
+        s(
+            1,
+            "Harbor Camp",
+            "A windswept camp overlooking the harbor.",
+            "Rewarded from the opening Warband questline.",
+            2,
+            "campcollection-icon-camp",
+            true,
+            true,
+            false,
+            1,
+        ),
+        s(
+            2,
+            "Evergreen Grove",
+            "A quiet glade with druidic furnishings.",
+            "Purchased from the Trading Post.",
+            3,
+            "campcollection-icon-camp",
+            true,
+            false,
+            false,
+            2,
+        ),
+        s(
+            3,
+            "Storm Camp",
+            "A fortified site built for foul weather.",
+            "Complete a seasonal event to unlock.",
+            3,
+            "campcollection-icon-camp",
+            false,
+            false,
+            false,
+            3,
+        ),
+        s(
+            4,
+            "Dragonflight Perch",
+            "A high cliffside camp with dragonriding access.",
+            "Earned from a meta achievement.",
+            4,
+            "campcollection-icon-camp",
+            false,
+            false,
+            false,
+            4,
+        ),
+    ]
+}
+
 /// Default transmog appearances: ~5 per armor slot + weapon slots.
 ///
 /// Category IDs from Enum.TransmogCollectionType:

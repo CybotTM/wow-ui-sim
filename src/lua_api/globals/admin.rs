@@ -32,10 +32,11 @@ use super::admin_auction_house::{
 };
 use super::admin_buffs::{add_buff, clear_buffs, remove_buff};
 use super::admin_collections::{
-    add_transmog, add_transmog_appearance, collect_heirloom, collect_mount, collect_pet,
-    collect_toy, earn_achievement, has_achievement, remove_transmog, set_achievement_earned,
-    set_mount_collected, set_pet_collected, set_toy_collected, set_transmog_for_slot,
-    uncollect_heirloom, uncollect_mount, uncollect_pet, uncollect_toy,
+    add_transmog, add_transmog_appearance, collect_campsite, collect_heirloom, collect_mount,
+    collect_pet, collect_toy, earn_achievement, has_achievement, remove_transmog,
+    set_achievement_earned, set_campsite_collected, set_mount_collected, set_pet_collected,
+    set_toy_collected, set_transmog_for_slot, uncollect_campsite, uncollect_heirloom,
+    uncollect_mount, uncollect_pet, uncollect_toy,
 };
 use super::admin_crafting::{
     clear_known_recipes, learn_recipe, seed_reagents_for_recipe, set_reagent_count,
@@ -269,6 +270,7 @@ fn register_collections_pvp(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("SetMountCollected", set_mount_collected)?
         .set_function("SetPetCollected", set_pet_collected)?
         .set_function("SetToyCollected", set_toy_collected)?
+        .set_function("SetCampsiteCollected", set_campsite_collected)?
         .set_function("SetAchievementEarned", set_achievement_earned)?
         .set_function("HasAchievement", has_achievement)?
         .set_function("CollectMount", collect_mount)?
@@ -277,6 +279,8 @@ fn register_collections_pvp(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("UncollectPet", uncollect_pet)?
         .set_function("CollectToy", collect_toy)?
         .set_function("UncollectToy", uncollect_toy)?
+        .set_function("CollectCampsite", collect_campsite)?
+        .set_function("UncollectCampsite", uncollect_campsite)?
         .set_function("EarnAchievement", earn_achievement)?
         .set_function("SetPvPEnabled", set_pvp_enabled)?
         .set_function("SetHonorLevel", set_honor_level)?
