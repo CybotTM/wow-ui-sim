@@ -1,0 +1,233 @@
+use crate::support::env;
+
+#[test]
+fn test_c_container_get_num_slots_backpack() {
+    let env = env();
+    let slots: i32 = env
+        .eval("return C_Container.GetContainerNumSlots(0)")
+        .unwrap();
+    assert_eq!(slots, 16);
+}
+
+#[test]
+fn test_c_container_get_num_slots_other_bag() {
+    let env = env();
+    let slots: i32 = env
+        .eval("return C_Container.GetContainerNumSlots(1)")
+        .unwrap();
+    assert_eq!(slots, 16);
+    let slots: i32 = env
+        .eval("return C_Container.GetContainerNumSlots(5)")
+        .unwrap();
+    assert_eq!(slots, 0);
+}
+
+#[test]
+fn test_c_container_get_item_id_empty_slot() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemID(0, 10) == nil")
+        .unwrap();
+    assert!(is_nil, "Unpopulated slot should be nil");
+}
+
+#[test]
+fn test_c_container_add_bag_item_via_admin() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 5)").unwrap();
+    let id: i64 = env
+        .eval("return C_Container.GetContainerItemID(0, 1)")
+        .unwrap();
+    assert_eq!(id, 6948);
+}
+
+#[test]
+fn test_c_container_get_item_info_after_add() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 3, 6948, 10)").unwrap();
+    let stack: i32 = env
+        .eval("local info = C_Container.GetContainerItemInfo(0, 3); return info.stackCount")
+        .unwrap();
+    assert_eq!(stack, 10);
+}
+
+#[test]
+fn test_c_container_get_item_info_empty_slot_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemInfo(0, 10) == nil")
+        .unwrap();
+    assert!(is_nil, "Empty slot should return nil");
+}
+
+#[test]
+fn test_c_container_remove_bag_item() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    env.exec("A_Admin.RemoveBagItem(0, 1)").unwrap();
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemID(0, 1) == nil")
+        .unwrap();
+    assert!(is_nil, "Removed item should be nil");
+}
+
+#[test]
+fn test_c_container_clear_bags() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 2, 6948, 1)").unwrap();
+    env.exec("A_Admin.ClearBags()").unwrap();
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemID(0, 1) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn test_c_container_free_slots_tracks_items() {
+    let env = env();
+    let (free, _): (i32, i32) = env
+        .eval("return C_Container.GetContainerNumFreeSlots(0)")
+        .unwrap();
+    assert_eq!(
+        free, 12,
+        "Backpack with 4 default items should have 12 free slots"
+    );
+    env.exec("A_Admin.AddBagItem(0, 10, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 11, 6948, 1)").unwrap();
+    let (free2, _): (i32, i32) = env
+        .eval("return C_Container.GetContainerNumFreeSlots(0)")
+        .unwrap();
+    assert_eq!(free2, 10, "Should have 10 free after adding 2 more items");
+}
+
+#[test]
+fn test_c_container_has_item() {
+    let env = env();
+    let has: bool = env
+        .eval("return C_Container.HasContainerItem(0, 10)")
+        .unwrap();
+    assert!(!has, "Empty slot should return false");
+    env.exec("A_Admin.AddBagItem(0, 10, 6948, 1)").unwrap();
+    let has: bool = env
+        .eval("return C_Container.HasContainerItem(0, 10)")
+        .unwrap();
+    assert!(has, "Occupied slot should return true");
+}
+
+#[test]
+fn test_c_container_get_item_link_after_add() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    let link: String = env
+        .eval("return C_Container.GetContainerItemLink(0, 1)")
+        .unwrap();
+    assert!(
+        link.contains("Hearthstone"),
+        "Link should contain item name"
+    );
+}
+
+#[test]
+fn test_c_container_get_item_cooldown_zero_when_ready() {
+    let env = env();
+    let (start, duration, enable): (f64, f64, i32) = env
+        .eval("return C_Container.GetItemCooldown(6948)")
+        .unwrap();
+    assert_eq!(start, 0.0);
+    assert_eq!(duration, 0.0);
+    assert_eq!(enable, 1);
+}
+
+#[test]
+fn test_c_container_get_container_item_cooldown_aliases_item_cooldown() {
+    let env = env();
+    let (start, duration, enable): (f64, f64, i32) = env
+        .eval("return C_Container.GetContainerItemCooldown(6948)")
+        .unwrap();
+    assert_eq!(start, 0.0);
+    assert_eq!(duration, 0.0);
+    assert_eq!(enable, 1);
+}
+
+#[test]
+fn test_c_container_default_stack_count_is_one() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948)").unwrap();
+    let stack: i32 = env
+        .eval("local info = C_Container.GetContainerItemInfo(0, 1); return info.stackCount")
+        .unwrap();
+    assert_eq!(stack, 1);
+}
+
+#[test]
+fn test_c_item_get_item_cooldown_zero_when_ready() {
+    let env = env();
+    let (start, duration, enable): (f64, f64, bool) =
+        env.eval("return C_Item.GetItemCooldown(6948)").unwrap();
+    assert_eq!(start, 0.0);
+    assert_eq!(duration, 0.0);
+    assert!(enable);
+}
+
+#[test]
+fn test_default_backpack_hearthstone_slot1() {
+    let env = env();
+    let (id, stack, name): (i64, i32, String) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 1)
+            return info.itemID, info.stackCount, info.hyperlink
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 6948);
+    assert_eq!(stack, 1);
+    assert!(name.contains("Hearthstone"));
+}
+
+#[test]
+fn test_default_backpack_water_slot2() {
+    let env = env();
+    let (id, stack): (i64, i32) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 2)
+            return info.itemID, info.stackCount
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 159);
+    assert_eq!(stack, 5);
+}
+
+#[test]
+fn test_default_backpack_bread_slot3() {
+    let env = env();
+    let (id, stack): (i64, i32) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 3)
+            return info.itemID, info.stackCount
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 4540);
+    assert_eq!(stack, 5);
+}
+
+#[test]
+fn test_default_backpack_skinning_knife_slot4() {
+    let env = env();
+    let (id, stack, icon): (i64, i32, i64) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 4)
+            return info.itemID, info.stackCount, info.iconFileID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 7005);
+    assert_eq!(stack, 1);
+    assert_eq!(icon, 135637);
+}
