@@ -67,7 +67,7 @@ pub static ITEM_DB: phf::Map<u32, ItemInfo> = ::phf::Map {
                 stackable: 20,
                 bonding: 0,
                 expansion_id: 0,
-                icon_file_data_id: 0,
+                icon_file_data_id: 133964,
                 stat_percent_editor: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 stat_modifier_bonus_stat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
@@ -186,7 +186,7 @@ pub static ITEM_DB: phf::Map<u32, ItemInfo> = ::phf::Map {
                 stackable: 20,
                 bonding: 0,
                 expansion_id: 0,
-                icon_file_data_id: 0,
+                icon_file_data_id: 132788,
                 stat_percent_editor: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 stat_modifier_bonus_stat: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
             },
@@ -305,7 +305,7 @@ pub static ITEM_DB: phf::Map<u32, ItemInfo> = ::phf::Map {
                 stackable: 1,
                 bonding: 1,
                 expansion_id: 0,
-                icon_file_data_id: 0,
+                icon_file_data_id: 134414,
                 stat_percent_editor: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 stat_modifier_bonus_stat: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
             },
@@ -467,6 +467,15 @@ mod tests {
         let item = get_item(6948).expect("Hearthstone (6948) should exist");
         assert_eq!(item.name, "Hearthstone");
         assert_eq!(item.quality, 1);
+        assert_eq!(item.icon_file_data_id, 134414);
+    }
+
+    #[test]
+    fn test_default_backpack_consumable_icons() {
+        let water = get_item(159).expect("Refreshing Spring Water (159) should exist");
+        let bread = get_item(4540).expect("Tough Hunk of Bread (4540) should exist");
+        assert_eq!(water.icon_file_data_id, 132788);
+        assert_eq!(bread.icon_file_data_id, 133964);
     }
 
     #[test]

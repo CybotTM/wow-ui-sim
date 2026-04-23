@@ -547,3 +547,91 @@ fn test_toggle_backpack_bootstrap_token_ui_does_not_nil_error() {
         "ContainerFrameSettingsManager.TokenTracker should be initialized",
     );
 }
+
+#[test]
+fn test_default_backpack_seed_items_do_not_use_question_mark_icons() {
+    let env = setup_env();
+    install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
+
+    let (slot1, slot2, slot3, slot4): (i64, i64, i64, i64) = env
+        .eval(
+            r#"
+            local i1 = C_Container.GetContainerItemInfo(0, 1)
+            local i2 = C_Container.GetContainerItemInfo(0, 2)
+            local i3 = C_Container.GetContainerItemInfo(0, 3)
+            local i4 = C_Container.GetContainerItemInfo(0, 4)
+            return i1 and i1.iconFileID or 0,
+                   i2 and i2.iconFileID or 0,
+                   i3 and i3.iconFileID or 0,
+                   i4 and i4.iconFileID or 0
+        "#,
+        )
+        .unwrap();
+
+    assert_ne!(
+        slot1, 134400,
+        "slot 1 (Hearthstone) should not render as question-mark placeholder"
+    );
+    assert_ne!(
+        slot2, 134400,
+        "slot 2 (Refreshing Spring Water) should not render as question-mark placeholder"
+    );
+    assert_ne!(
+        slot3, 134400,
+        "slot 3 (Tough Hunk of Bread) should not render as question-mark placeholder"
+    );
+    assert_ne!(
+        slot4, 134400,
+        "slot 4 (Skinning Knife) should not render as question-mark placeholder"
+    );
+}
+
+#[test]
+fn test_backpack_bg_regions_have_color_fill() {
+    let env = setup_env();
+    install_test_error_handler(&env);
+    clear_recorded_lua_errors(&env);
+    env.exec("ToggleBackpack()").unwrap();
+    assert_no_bag_open_errors(&env, "ToggleBackpack background inspection");
+
+    let state = env.state().borrow();
+    let frame_id = state
+        .widgets
+        .get_id_by_name("ContainerFrame1")
+        .expect("ContainerFrame1 must exist");
+    let bg_id = state
+        .widgets
+        .get(frame_id)
+        .and_then(|f| f.children_keys.get("Bg").copied())
+        .expect("ContainerFrame1.Bg must exist");
+
+    let top_section_id = state
+        .widgets
+        .get(bg_id)
+        .and_then(|f| f.children_keys.get("TopSection").copied())
+        .expect("ContainerFrame1.Bg.TopSection must exist");
+    let bottom_edge_id = state
+        .widgets
+        .get(bg_id)
+        .and_then(|f| f.children_keys.get("BottomEdge").copied())
+        .expect("ContainerFrame1.Bg.BottomEdge must exist");
+
+    let top_section = state
+        .widgets
+        .get(top_section_id)
+        .expect("TopSection widget must exist");
+    let bottom_edge = state
+        .widgets
+        .get(bottom_edge_id)
+        .expect("BottomEdge widget must exist");
+
+    assert!(
+        top_section.color_texture.is_some(),
+        "TopSection should be initialized via SetColorTexture"
+    );
+    assert!(
+        bottom_edge.color_texture.is_some(),
+        "BottomEdge should be initialized via SetColorTexture"
+    );
+}

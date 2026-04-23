@@ -109,7 +109,29 @@ fn build_icon_map(
     required_ids: &BTreeSet<u32>,
 ) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
     let appearance_map = parse_appearance_icons(wow_data)?;
-    resolve_item_icons(wow_data, required_ids, &appearance_map)
+    let mut icon_map = resolve_item_icons(wow_data, required_ids, &appearance_map)?;
+
+    // Non-equippable items (consumables, utility items) can be missing from
+    // ItemModifiedAppearance. Seed explicit icon fileDataIDs for baseline items
+    // the simulator always places in the backpack.
+    for (item_id, icon_file_data_id) in required_item_icon_overrides() {
+        if required_ids.contains(item_id) {
+            icon_map.entry(*item_id).or_insert(*icon_file_data_id);
+        }
+    }
+
+    Ok(icon_map)
+}
+
+fn required_item_icon_overrides() -> &'static [(u32, u32)] {
+    &[
+        // Hearthstone
+        (6948, 134414), // ICONS/INV_MISC_RUNE_01
+        // Refreshing Spring Water
+        (159, 132788), // ICONS/INV_Drink_01
+        // Tough Hunk of Bread
+        (4540, 133964), // ICONS/INV_MISC_FOOD_11
+    ]
 }
 
 /// Parse ItemAppearance.csv: appearance_id → icon fileDataID.
@@ -312,11 +334,24 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "mod tests {{")?;
     writeln!(out, "    use super::*;")?;
     writeln!(out)?;
+    write_test_item_count(out)?;
+    write_test_hearthstone(out)?;
+    write_test_default_backpack_consumable_icons(out)?;
+    write_test_nonexistent_item(out)?;
+    writeln!(out, "}}")?;
+    Ok(())
+}
+
+fn write_test_item_count(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_item_count() {{")?;
     writeln!(out, "        assert!(ITEM_DB.len() > 10);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_hearthstone(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_hearthstone() {{")?;
     writeln!(
@@ -325,13 +360,34 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "        assert_eq!(item.name, \"Hearthstone\");")?;
     writeln!(out, "        assert_eq!(item.quality, 1);")?;
-    // Hearthstone has no ItemModifiedAppearance entry (non-equippable), icon_file_data_id = 0
+    writeln!(out, "        assert_eq!(item.icon_file_data_id, 134414);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_default_backpack_consumable_icons(out: &mut File) -> std::io::Result<()> {
+    writeln!(out, "    #[test]")?;
+    writeln!(out, "    fn test_default_backpack_consumable_icons() {{")?;
+    writeln!(
+        out,
+        "        let water = get_item(159).expect(\"Refreshing Spring Water (159) should exist\");"
+    )?;
+    writeln!(
+        out,
+        "        let bread = get_item(4540).expect(\"Tough Hunk of Bread (4540) should exist\");"
+    )?;
+    writeln!(out, "        assert_eq!(water.icon_file_data_id, 132788);")?;
+    writeln!(out, "        assert_eq!(bread.icon_file_data_id, 133964);")?;
+    writeln!(out, "    }}")?;
+    writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_nonexistent_item(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_nonexistent_item() {{")?;
     writeln!(out, "        assert!(get_item(999_999_999).is_none());")?;
     writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
     Ok(())
 }
