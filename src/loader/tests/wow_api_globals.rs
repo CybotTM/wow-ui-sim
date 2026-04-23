@@ -1059,6 +1059,90 @@ fn test_text_runtime_helpers_exist() {
 }
 
 #[test]
+fn test_scrollframe_scroll_scripts_fire_from_native_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (range_count, h_range, v_range, scroll_count, scroll_offset, current_scroll, current_range): (
+        i32,
+        f64,
+        f64,
+        i32,
+        f64,
+        f64,
+        f64,
+    ) = env
+        .eval(
+            r#"
+            local scrollFrame = CreateFrame("ScrollFrame")
+            scrollFrame:SetSize(100, 100)
+
+            local scrollChild = CreateFrame("Frame")
+            scrollChild:SetSize(100, 250)
+            scrollFrame:SetScrollChild(scrollChild)
+
+            local rangeCount, hRange, vRange = 0, nil, nil
+            scrollFrame:SetScript("OnScrollRangeChanged", function(self, h, v)
+                rangeCount = rangeCount + 1
+                hRange = h
+                vRange = v
+            end)
+
+            local scrollCount, scrollOffset = 0, nil
+            scrollFrame:SetScript("OnVerticalScroll", function(self, offset)
+                scrollCount = scrollCount + 1
+                scrollOffset = offset
+            end)
+
+            scrollFrame:UpdateScrollChildRect()
+            scrollFrame:SetVerticalScroll(40)
+
+            return rangeCount, hRange, vRange, scrollCount, scrollOffset,
+                scrollFrame:GetVerticalScroll(), scrollFrame:GetVerticalScrollRange()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(range_count, 1);
+    assert_eq!(h_range, 0.0);
+    assert_eq!(v_range, 150.0);
+    assert_eq!(scroll_count, 1);
+    assert_eq!(scroll_offset, 40.0);
+    assert_eq!(current_scroll, 40.0);
+    assert_eq!(current_range, 150.0);
+}
+
+#[test]
+fn test_scroll_child_resize_refreshes_parent_scroll_range() {
+    let env = WowLuaEnv::new().unwrap();
+    let (range_count, v_range, current_range): (i32, f64, f64) = env
+        .eval(
+            r#"
+            local scrollFrame = CreateFrame("ScrollFrame")
+            scrollFrame:SetSize(100, 100)
+
+            local scrollChild = CreateFrame("Frame")
+            scrollChild:SetSize(100, 80)
+            scrollFrame:SetScrollChild(scrollChild)
+            scrollFrame:UpdateScrollChildRect()
+
+            local rangeCount, vRange = 0, nil
+            scrollFrame:SetScript("OnScrollRangeChanged", function(self, h, v)
+                rangeCount = rangeCount + 1
+                vRange = v
+            end)
+
+            scrollChild:SetHeight(250)
+
+            return rangeCount, vRange, scrollFrame:GetVerticalScrollRange()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(range_count, 1);
+    assert_eq!(v_range, 150.0);
+    assert_eq!(current_range, 150.0);
+}
+
+#[test]
 fn test_startup_time_and_service_globals_exist() {
     let env = WowLuaEnv::new().unwrap();
     let (

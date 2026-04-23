@@ -5,6 +5,9 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, extract_frame_id, frame_id_from_stack, frame_ref,
     get_or_create_frame_fields, sync_child_to_rilua, table_get, table_set,
 };
+use crate::lua_api::script_helpers::{
+    call_error_handler_state, get_script, protected_lua_pcall_state,
+};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn, table_set_rust_fn_static};
 use crate::widget::{Frame, WidgetType};
 use rilua::vm::gc::arena::GcRef;
@@ -405,6 +408,114 @@ fn scroll_range(frame: &crate::widget::Frame, axis: char) -> f64 {
     (child_extent - own_extent).max(0.0)
 }
 
+fn scroll_ranges(frame: &crate::widget::Frame) -> (f64, f64) {
+    (scroll_range(frame, 'h'), scroll_range(frame, 'v'))
+}
+
+fn scroll_ranges_from_size(
+    scroll_child_rect_size: Option<(f32, f32)>,
+    own_width: f32,
+    own_height: f32,
+) -> (f64, f64) {
+    let Some((child_width, child_height)) = scroll_child_rect_size else {
+        return (0.0, 0.0);
+    };
+    (
+        (child_width as f64 - own_width as f64).max(0.0),
+        (child_height as f64 - own_height as f64).max(0.0),
+    )
+}
+
+fn scroll_frames_affected_by_resize(state: &mut LuaState, resized_id: u64) -> LuaResult<Vec<u64>> {
+    let sim = borrow_state(state)?;
+    let mut affected = Vec::new();
+    if sim
+        .widgets
+        .get(resized_id)
+        .is_some_and(|frame| frame.scroll_child_id.is_some())
+    {
+        affected.push(resized_id);
+    }
+
+    let mut current_id = sim
+        .widgets
+        .get(resized_id)
+        .and_then(|frame| frame.parent_id);
+    while let Some(id) = current_id {
+        let Some(frame) = sim.widgets.get(id) else {
+            break;
+        };
+        if frame.scroll_child_id == Some(resized_id) {
+            affected.push(id);
+        }
+        current_id = frame.parent_id;
+    }
+    Ok(affected)
+}
+
+fn fire_scroll_frame_event(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &str,
+    args: &[Val],
+) -> LuaResult<()> {
+    call_scroll_frame_handler(state, frame_id, handler_name, args)?;
+    let intrinsic_name = format!("{handler_name}_Intrinsic");
+    call_scroll_frame_intrinsic(state, frame_id, &intrinsic_name, args)
+}
+
+fn call_scroll_frame_handler(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &str,
+    args: &[Val],
+) -> LuaResult<()> {
+    let Some(handler) = get_script(state, frame_id, handler_name) else {
+        return Ok(());
+    };
+    call_scroll_frame_function(state, frame_id, handler, args)
+}
+
+fn call_scroll_frame_intrinsic(
+    state: &mut LuaState,
+    frame_id: u64,
+    intrinsic_name: &str,
+    args: &[Val],
+) -> LuaResult<()> {
+    let frame = frame_ref(state, frame_id)?;
+    let intrinsic = table_get(state, frame, intrinsic_name);
+    if matches!(intrinsic, Val::Function(_)) {
+        call_scroll_frame_function(state, frame_id, intrinsic, args)?;
+    }
+    Ok(())
+}
+
+fn call_scroll_frame_function(
+    state: &mut LuaState,
+    frame_id: u64,
+    function: Val,
+    args: &[Val],
+) -> LuaResult<()> {
+    let frame = frame_ref(state, frame_id)?;
+    let mut call_args = Vec::with_capacity(args.len() + 1);
+    call_args.push(frame);
+    call_args.extend_from_slice(args);
+    if let Err(error_msg) = protected_lua_pcall_state(state, function, &call_args) {
+        call_error_handler_state(state, &error_msg);
+    }
+    Ok(())
+}
+
+pub(super) fn refresh_scroll_frames_for_resized_frame(
+    state: &mut LuaState,
+    resized_id: u64,
+) -> LuaResult<()> {
+    for scroll_frame_id in scroll_frames_affected_by_resize(state, resized_id)? {
+        refresh_scroll_child_rect(state, scroll_frame_id)?;
+    }
+    Ok(())
+}
+
 fn scroll_child_subtree_bounds(
     registry: &crate::widget::WidgetRegistry,
     root_id: u64,
@@ -472,6 +583,8 @@ pub(super) fn set_horizontal_scroll(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.scroll_horizontal = new_offset;
     }
+    drop(sim);
+    fire_scroll_frame_event(state, id, "OnHorizontalScroll", &[Val::Num(new_offset)])?;
     Ok(0)
 }
 
@@ -517,6 +630,8 @@ pub(super) fn set_vertical_scroll(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.scroll_vertical = new_offset;
     }
+    drop(sim);
+    fire_scroll_frame_event(state, id, "OnVerticalScroll", &[Val::Num(new_offset)])?;
     Ok(0)
 }
 
@@ -570,25 +685,36 @@ pub(super) fn set_scroll_child(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn update_scroll_child_rect(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let scroll_child_rect_size = {
+    refresh_scroll_child_rect(state, id)?;
+    Ok(0)
+}
+
+fn refresh_scroll_child_rect(state: &mut LuaState, id: u64) -> LuaResult<()> {
+    let (old_ranges, new_size, own_width, own_height) = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .and_then(|frame| frame.scroll_child_id)
-            .and_then(|child_id| {
-                scroll_child_subtree_bounds(
-                    &sim.widgets,
-                    child_id,
-                    sim.screen_width,
-                    sim.screen_height,
-                )
-            })
+        let Some(frame) = sim.widgets.get(id) else {
+            return Ok(());
+        };
+        let new_size = frame.scroll_child_id.and_then(|child_id| {
+            scroll_child_subtree_bounds(&sim.widgets, child_id, sim.screen_width, sim.screen_height)
+        });
+        (scroll_ranges(frame), new_size, frame.width, frame.height)
     };
+    let new_ranges = scroll_ranges_from_size(new_size, own_width, own_height);
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
-        frame.scroll_child_rect_size = scroll_child_rect_size;
+        frame.scroll_child_rect_size = new_size;
     }
-    Ok(0)
+    drop(sim);
+    if old_ranges != new_ranges {
+        fire_scroll_frame_event(
+            state,
+            id,
+            "OnScrollRangeChanged",
+            &[Val::Num(new_ranges.0), Val::Num(new_ranges.1)],
+        )?;
+    }
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------

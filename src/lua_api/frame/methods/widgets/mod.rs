@@ -23,6 +23,13 @@ use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 
+pub(crate) fn refresh_scroll_frames_for_resized_frame(
+    state: &mut LuaState,
+    resized_id: u64,
+) -> LuaResult<()> {
+    slider::refresh_scroll_frames_for_resized_frame(state, resized_id)
+}
+
 /// Register all widget-specific methods on the frame metatable.
 ///
 /// Call this after the standard frame metatable has been created,
