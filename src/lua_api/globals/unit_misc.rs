@@ -128,6 +128,62 @@ fn unit_guid(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn target_or_focus_token_from_guid(
+    sim: &crate::lua_api::state::SimState,
+    guid: &str,
+) -> Option<&'static str> {
+    if sim
+        .current_target
+        .as_ref()
+        .is_some_and(|target| target.guid == guid)
+    {
+        return Some("target");
+    }
+    if sim
+        .current_focus
+        .as_ref()
+        .is_some_and(|target| target.guid == guid)
+    {
+        return Some("focus");
+    }
+    None
+}
+
+fn party_token_from_guid(sim: &crate::lua_api::state::SimState, guid: &str) -> Option<String> {
+    if !sim.party_group_active {
+        return None;
+    }
+    sim.party_members.iter().enumerate().find_map(|(idx, _)| {
+        let party_guid = format!("Player-0000-000000{:02}", idx + 2);
+        (party_guid == guid).then(|| format!("party{}", idx + 1))
+    })
+}
+
+fn unit_token_from_guid(state: &mut LuaState) -> LuaResult<u32> {
+    let guid = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let token = {
+        let Ok(sim) = borrow_state(state) else {
+            state.push(Val::Nil);
+            return Ok(1);
+        };
+        if guid == "Player-0000-00000001" {
+            Some("player".to_string())
+        } else {
+            target_or_focus_token_from_guid(&sim, &guid)
+                .map(str::to_string)
+                .or_else(|| party_token_from_guid(&sim, &guid))
+        }
+    };
+    match token {
+        Some(token) => {
+            let token = create_string(state, &token);
+            state.push(token);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 fn unit_creature_family(state: &mut LuaState) -> LuaResult<u32> {
     let _ = Option::<String>::from_stack(state, 1)?;
     state.push(Val::Nil);
@@ -208,6 +264,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitFullName", unit_full_name)?;
     LuaApiMut::register_function(lua, "UnitClassBase", unit_class_base)?;
     LuaApiMut::register_function(lua, "UnitGUID", unit_guid)?;
+    LuaApiMut::register_function(lua, "UnitTokenFromGUID", unit_token_from_guid)?;
     LuaApiMut::register_function(lua, "UnitCreatureFamily", unit_creature_family)?;
     LuaApiMut::register_function(lua, "UnitPlayerControlled", unit_player_controlled)?;
     LuaApiMut::register_function(lua, "UnitIsAFK", unit_is_afk)?;

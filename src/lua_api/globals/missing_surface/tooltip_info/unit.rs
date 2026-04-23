@@ -6,7 +6,7 @@ use super::builders::{empty_tooltip, push_plain_line, push_tooltip_line};
 use super::spell::tooltip_for_spell_id;
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::methods::{borrow_state, create_string, table_get, table_set};
-use crate::lua_api::state::RACE_DATA;
+use crate::lua_api::state::{PartyMember, PlayerState, RACE_DATA, SimState, TargetInfo};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
@@ -45,31 +45,73 @@ fn class_label(class_index: i32) -> String {
         .to_string()
 }
 
+fn target_tooltip_info(target: &TargetInfo) -> UnitTooltipInfo {
+    UnitTooltipInfo {
+        name: target.name.clone(),
+        level: target.level,
+        race: target.creature_type.clone(),
+        class_name: class_label(target.class_index),
+        color: class_color(target.class_index),
+    }
+}
+
+fn player_tooltip_info(player: &PlayerState) -> UnitTooltipInfo {
+    let race = RACE_DATA
+        .get(player.race_index)
+        .map(|(name, _, _)| (*name).to_string())
+        .unwrap_or_else(|| "Unknown".to_string());
+    UnitTooltipInfo {
+        name: player.name.clone(),
+        level: player.level,
+        race,
+        class_name: class_label(player.class_index),
+        color: class_color(player.class_index),
+    }
+}
+
+fn party_tooltip_info(member: &PartyMember) -> UnitTooltipInfo {
+    UnitTooltipInfo {
+        name: member.name.clone(),
+        level: member.level,
+        race: "Player".to_string(),
+        class_name: class_label(member.class_index),
+        color: class_color(member.class_index),
+    }
+}
+
+fn active_party_member_index(sim: &SimState, unit: &str) -> Option<usize> {
+    if !sim.party_group_active {
+        return None;
+    }
+    let idx = crate::lua_api::globals::unit_api::parse_party_index(unit)?;
+    (idx < sim.party_members.len()).then_some(idx)
+}
+
+fn active_party_member<'a>(sim: &'a SimState, unit: &str) -> Option<&'a PartyMember> {
+    let idx = active_party_member_index(sim, unit)?;
+    sim.party_members.get(idx)
+}
+
 pub(super) fn unit_tooltip_info(state: &LuaState, unit: &str) -> Option<UnitTooltipInfo> {
     let sim = borrow_state(state).ok()?;
     match unit {
-        "target" => sim.current_target.as_ref().map(|target| UnitTooltipInfo {
-            name: target.name.clone(),
-            level: target.level,
-            race: target.creature_type.clone(),
-            class_name: class_label(target.class_index),
-            color: class_color(target.class_index),
-        }),
-        "player" => {
-            let player = &sim.player;
-            let race = RACE_DATA
-                .get(player.race_index)
-                .map(|(name, _, _)| (*name).to_string())
-                .unwrap_or_else(|| "Unknown".to_string());
-            Some(UnitTooltipInfo {
-                name: player.name.clone(),
-                level: player.level,
-                race,
-                class_name: class_label(player.class_index),
-                color: class_color(player.class_index),
-            })
-        }
-        _ => None,
+        "target" => sim.current_target.as_ref().map(target_tooltip_info),
+        "player" => Some(player_tooltip_info(&sim.player)),
+        other => active_party_member(&sim, other).map(party_tooltip_info),
+    }
+}
+
+fn unit_guid(state: &LuaState, unit: &str) -> Option<String> {
+    let sim = borrow_state(state).ok()?;
+    match unit {
+        "player" => Some("Player-0000-00000001".to_string()),
+        "target" => sim
+            .current_target
+            .as_ref()
+            .map(|target| target.guid.clone()),
+        "focus" => sim.current_focus.as_ref().map(|target| target.guid.clone()),
+        other => active_party_member_index(&sim, other)
+            .map(|idx| format!("Player-0000-000000{:02}", idx + 2)),
     }
 }
 
@@ -94,6 +136,10 @@ pub(super) fn tooltip_for_unit(state: &mut LuaState, unit: &str) -> Val {
     let lines = table_get(state, tooltip, "lines");
     if let Some(info) = unit_tooltip_info(state, unit) {
         push_unit_tooltip_lines(state, lines, &info);
+        if let Some(guid) = unit_guid(state, unit) {
+            let guid = create_string(state, &guid);
+            table_set(state, tooltip, "guid", guid);
+        }
     }
     tooltip
 }

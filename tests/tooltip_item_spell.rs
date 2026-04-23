@@ -277,6 +277,45 @@ fn test_set_unit_player_populates_tooltip() {
 }
 
 #[test]
+fn test_set_unit_party_member_populates_tooltip_and_fires_event() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("A_Admin.SetPartySize(1)").unwrap();
+
+    let result: String = env
+        .eval(
+            r#"
+            local eventCount = 0
+            local eventName, eventUnit, eventGuid
+            GameTooltip:SetScript("OnTooltipSetUnit", function(self)
+                eventCount = eventCount + 1
+                eventName, eventUnit, eventGuid = self:GetUnit()
+            end)
+
+            local hasUnit = GameTooltip:SetUnit("party1")
+            local name, unit, guid = GameTooltip:GetUnit()
+
+            return table.concat({
+                tostring(hasUnit),
+                tostring(GameTooltip:NumLines()),
+                tostring(name),
+                tostring(unit),
+                tostring(guid),
+                tostring(eventCount),
+                tostring(eventName),
+                tostring(eventUnit),
+                tostring(eventGuid),
+            }, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "true|4|Thrynn|party1|Player-0000-00000002|1|Thrynn|party1|Player-0000-00000002",
+        "SetUnit('party1') should populate unit lines, preserve displayed unit data, and fire OnTooltipSetUnit once"
+    );
+}
+
+#[test]
 fn test_set_unit_invalid_returns_false() {
     let env = WowLuaEnv::new().unwrap();
     let result: bool = env

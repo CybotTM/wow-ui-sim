@@ -90,6 +90,58 @@ fn party_frame_has_master_reference_shape() {
     }
 }
 
+#[test]
+fn party_member_frame_hover_shows_unit_tooltip() {
+    test_timeout! {
+        let env = load_settled_game_ui();
+        env.exec("A_Admin.SetPartySize(1)").unwrap();
+        env.exec(
+            r#"
+            if PartyFrame and PartyFrame.UpdatePartyFrames then
+                pcall(PartyFrame.UpdatePartyFrames, PartyFrame)
+            end
+            "#,
+        )
+        .unwrap();
+
+        let result: String = env
+            .eval(
+                r#"
+                local mf = PartyFrame and PartyFrame.MemberFrame1
+                if not mf then
+                    return "missing-member"
+                end
+
+                local handler = mf:GetScript("OnEnter")
+                if type(handler) ~= "function" then
+                    return "missing-enter"
+                end
+
+                local ok, err = pcall(handler, mf)
+                if not ok then
+                    return "error:" .. tostring(err)
+                end
+
+                local name, unit, guid = GameTooltip:GetUnit()
+                return table.concat({
+                    tostring(GameTooltip:IsVisible()),
+                    tostring(GameTooltip:NumLines()),
+                    tostring(name),
+                    tostring(unit),
+                    tostring(guid),
+                }, "|")
+                "#,
+            )
+            .expect("hover PartyFrame.MemberFrame1");
+
+        assert_eq!(
+            result,
+            "true|6|Thrynn|party1|Player-0000-00000002",
+            "PartyFrame.MemberFrame1 hover should show a unit tooltip for party1"
+        );
+    }
+}
+
 /// All four member frames populate with the 63px vertical stride master uses.
 #[test]
 fn party_frame_member_frames_render_at_master_offsets() {

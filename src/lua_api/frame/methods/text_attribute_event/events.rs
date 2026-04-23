@@ -353,6 +353,7 @@ fn script_supported_for_widget(widget_type: WidgetType, handler_name: &str) -> b
         "OnTooltipCleared"
         | "OnTooltipSetSpell"
         | "OnTooltipSetItem"
+        | "OnTooltipSetUnit"
         | "OnTooltipSetFramestack" => {
             matches!(widget_type, WidgetType::GameTooltip)
         }
