@@ -2004,6 +2004,48 @@ end
 const TOGGLE_ACHIEVEMENT_FRAME_LUA: &str = r#"
 if __wow_panel_getglobal ~= nil then
     local __wow_getglobal = __wow_panel_getglobal
+
+    local function __wow_patch_summary_empty_text_overlap()
+        if rawget(_G, "__wow_achievement_summary_empty_text_patched") then
+            return
+        end
+        if type(AchievementFrameSummary_UpdateAchievements) ~= "function" then
+            return
+        end
+
+        local original = AchievementFrameSummary_UpdateAchievements
+        AchievementFrameSummary_UpdateAchievements = function(...)
+            local numAchievements = select('#', ...)
+            local results = { original(...) }
+            local emptyText = __wow_getglobal("AchievementFrameSummaryAchievementsEmptyText")
+            local summary = __wow_getglobal("AchievementFrameSummaryAchievements")
+            local buttons = summary and summary.buttons
+            local hasVisibleSummaryButton = false
+
+            if type(buttons) == "table" then
+                for _, button in ipairs(buttons) do
+                    if (type(button) == "table" or type(button) == "userdata")
+                        and type(button.IsShown) == "function"
+                        and button:IsShown()
+                    then
+                        hasVisibleSummaryButton = true
+                        break
+                    end
+                end
+            end
+
+            if (type(emptyText) == "table" or type(emptyText) == "userdata")
+                and type(emptyText.SetShown) == "function"
+            then
+                emptyText:SetShown(numAchievements == 0 and not hasVisibleSummaryButton)
+            end
+
+            return unpack(results)
+        end
+
+        rawset(_G, "__wow_achievement_summary_empty_text_patched", true)
+    end
+
     function ToggleAchievementFrame(stats)
         local kiosk = __wow_getglobal("Kiosk")
         if ( (kiosk and kiosk.IsEnabled and kiosk.IsEnabled()) or __wow_getglobal("DISALLOW_FRAME_TOGGLING") ) then
@@ -2014,6 +2056,8 @@ if __wow_panel_getglobal ~= nil then
         if cAddOns and cAddOns.LoadAddOn and cAddOns.IsAddOnLoaded and not cAddOns.IsAddOnLoaded("Blizzard_AchievementUI") then
             cAddOns.LoadAddOn("Blizzard_AchievementUI");
         end
+        __wow_patch_summary_empty_text_overlap()
+
         local achievementFrame = __wow_getglobal("AchievementFrame")
         if not achievementFrame then
             return;

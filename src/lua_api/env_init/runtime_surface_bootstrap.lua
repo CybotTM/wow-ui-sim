@@ -9810,6 +9810,46 @@ local function __wow_patch_achievement_search_preview_selection()
   __wow_achievement_search_preview_patched = true
 end
 
+local function __wow_patch_achievement_summary_empty_text_overlap()
+  if rawget(_G, "__wow_achievement_summary_empty_text_patched") then
+    return
+  end
+  if type(AchievementFrameSummary_UpdateAchievements) ~= "function" then
+    return
+  end
+
+  local original = AchievementFrameSummary_UpdateAchievements
+  AchievementFrameSummary_UpdateAchievements = function(...)
+    local numAchievements = select("#", ...)
+    local results = { original(...) }
+
+    local emptyText = rawget(_G, "AchievementFrameSummaryAchievementsEmptyText")
+    local summary = rawget(_G, "AchievementFrameSummaryAchievements")
+    local buttons = summary and summary.buttons
+    local hasVisibleSummaryButton = false
+
+    if type(buttons) == "table" then
+      for _, button in ipairs(buttons) do
+        if (type(button) == "table" or type(button) == "userdata")
+          and type(button.IsShown) == "function"
+          and button:IsShown() then
+          hasVisibleSummaryButton = true
+          break
+        end
+      end
+    end
+
+    if (type(emptyText) == "table" or type(emptyText) == "userdata")
+      and type(emptyText.SetShown) == "function" then
+      emptyText:SetShown(numAchievements == 0 and not hasVisibleSummaryButton)
+    end
+
+    return unpack(results)
+  end
+
+  __wow_achievement_summary_empty_text_patched = true
+end
+
 local function __wow_find_first_scroll_frame_child(parent)
   if parent == nil or type(parent.GetChildren) ~= "function" then
     return nil
@@ -10046,6 +10086,7 @@ if C_AddOns and type(C_AddOns.LoadAddOn) == "function" then
     if addonName == "Blizzard_AchievementUI" then
       __wow_ensure_achievement_search_previews()
       __wow_patch_achievement_search_preview_selection()
+      __wow_patch_achievement_summary_empty_text_overlap()
     elseif addonName == "Blizzard_GlueXML_Mainline"
       or addonName == "Blizzard_GlueXML"
       or addonName == "Blizzard_CharacterCreate" then

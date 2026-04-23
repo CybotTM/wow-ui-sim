@@ -185,3 +185,42 @@ fn achievement_frame_layout_stays_locked() {
         );
     }
 }
+
+#[test]
+fn achievement_summary_empty_text_does_not_overlap_summary_entries() {
+    test_timeout! {
+        let env = common::panel_fixtures::setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                if not ToggleAchievementFrame then
+                    return "missing_toggle_achievement_frame"
+                end
+
+                ToggleAchievementFrame()
+                if not AchievementFrameSummary or not AchievementFrameSummary:IsShown() then
+                    return "achievement_summary_hidden"
+                end
+
+                local emptyText = AchievementFrameSummaryAchievementsEmptyText
+                if not emptyText then
+                    return "summary_empty_text_missing"
+                end
+
+                local first = AchievementFrameSummaryAchievement1
+                local emptyShown = emptyText:IsShown()
+                local firstShown = first and first:IsShown() or false
+                if emptyShown and firstShown then
+                    return "summary_empty_text_overlap"
+                end
+
+                return "ok"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "achievement summary empty text should not overlap summary rows: {result}"
+        );
+    }
+}
