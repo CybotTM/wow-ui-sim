@@ -15,11 +15,11 @@ local function __wow_make_color(r, g, b, a)
   end
 
   function color:GenerateHexColor()
-    return string.format("%02X%02X%02X", math.floor(self.r * 255), math.floor(self.g * 255), math.floor(self.b * 255))
+    return string.format("FF%02X%02X%02X", math.floor(self.r * 255), math.floor(self.g * 255), math.floor(self.b * 255))
   end
 
   function color:GenerateHexColorMarkup()
-    return "|cFF" .. self:GenerateHexColor()
+    return "|c" .. self:GenerateHexColor()
   end
 
   function color:WrapTextInColorCode(text)

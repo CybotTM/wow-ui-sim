@@ -84,7 +84,7 @@ fn color_rgb(state: &mut LuaState, this: Val) -> (f64, f64, f64) {
 
 fn hex_from_rgb(r: f64, g: f64, b: f64) -> String {
     format!(
-        "{:02x}{:02x}{:02x}",
+        "ff{:02x}{:02x}{:02x}",
         (r * 255.0) as u8,
         (g * 255.0) as u8,
         (b * 255.0) as u8
@@ -118,7 +118,7 @@ fn register_color_methods(
         let this = stack_val(state, 1);
         let text = String::from_stack(state, 2)?;
         let (r, g, b) = color_rgb(state, this);
-        let wrapped = format!("|cff{}{}|r", hex_from_rgb(r, g, b), text);
+        let wrapped = format!("|c{}{}|r", hex_from_rgb(r, g, b), text);
         create_string(state, &wrapped).into_stack(state)
     })?;
     Ok(())
