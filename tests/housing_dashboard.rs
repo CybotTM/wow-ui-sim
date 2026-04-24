@@ -62,6 +62,106 @@ fn start_tutorial_button_opens_house_finder() {
 }
 
 #[test]
+fn dashboard_house_list_request_hides_main_spinner() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                    local loaded, reason = C_AddOns.LoadAddOn("Blizzard_HousingDashboard")
+                    if not loaded then
+                        return "dashboard_load_failed:" .. tostring(reason)
+                    end
+
+                    ShowUIPanel(HousingDashboardFrame)
+
+                    if HousingDashboardFrame.HouseInfoContent.LoadingSpinner:IsShown() then
+                        return "spinner_still_shown"
+                    end
+                    if not HousingDashboardFrame.HouseInfoContent.DashboardNoHousesFrame:IsShown() then
+                        return "empty_dashboard_not_shown"
+                    end
+
+                    return "ok"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "Housing dashboard should resolve the owned-house request: {result}"
+        );
+    }
+}
+
+#[test]
+fn house_finder_initial_neighborhood_loads_initial_map() {
+    test_timeout! {
+        let env = setup_env();
+        let open_result: String = env
+            .eval(
+                r#"
+                    local tutorialsLoaded, tutorialsReason = C_AddOns.LoadAddOn("Blizzard_HousingTutorials")
+                    if not tutorialsLoaded then
+                        return "tutorials_load_failed:" .. tostring(tutorialsReason)
+                    end
+
+                    local loaded, reason = C_AddOns.LoadAddOn("Blizzard_HousingDashboard")
+                    if not loaded then
+                        return "dashboard_load_failed:" .. tostring(reason)
+                    end
+
+                    ShowUIPanel(HousingDashboardFrame)
+                    local startButton = HousingDashboardFrame.HouseInfoContent.DashboardNoHousesFrame.NoHouseButton
+                    local onclick = startButton and startButton:GetScript("OnClick")
+                    if not onclick then
+                        return "missing_start_tutorial_onclick"
+                    end
+                    local ok, err = pcall(function()
+                        onclick(startButton, "LeftButton", false)
+                    end)
+                    if not ok then
+                        return "start_tutorial_click_failed:" .. tostring(err)
+                    end
+
+                    if not HouseFinderFrame.selectedNeighborhoodButton then
+                        return "missing_selected_neighborhood"
+                    end
+                    if not HouseFinderFrame.LoadingSpinnerMap:IsShown() then
+                        return "spinner_not_shown_before_data"
+                    end
+
+                    return "opened"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            open_result, "opened",
+            "House finder should request initial map data after opening: {open_result}"
+        );
+
+        process_pending_timers(&env);
+
+        let map_result: String = env
+            .eval(
+                r#"
+                    if not HouseFinderFrame.HouseFinderMapCanvasFrame:IsShown() then
+                        return "map_not_shown"
+                    end
+                    if HouseFinderFrame.LoadingSpinnerMap:IsShown() then
+                        return "map_spinner_still_shown"
+                    end
+                    return "ok"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            map_result, "ok",
+            "House finder should load the initially selected neighborhood map: {map_result}"
+        );
+    }
+}
+
+#[test]
 fn neighborhood_selector_populates_and_click_loads_selected_map() {
     test_timeout! {
         let env = setup_env();
