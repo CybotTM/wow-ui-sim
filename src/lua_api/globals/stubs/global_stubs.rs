@@ -41,6 +41,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ReportCheating",
     "RequestInspectData",
     "RequestGuildPartyState",
+    "RequestLFDPartyLockInfo",
     "RequestLFDPlayerLockInfo",
     "RemoveChatWindowChannel",
     // RequestPartyLootMethod is SimState-backed in loot_method.rs, not a stub.

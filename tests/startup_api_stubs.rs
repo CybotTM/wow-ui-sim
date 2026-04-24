@@ -352,6 +352,28 @@ fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
 }
 
 #[test]
+fn lfd_lock_refresh_requests_are_callable_noops() {
+    let env = env();
+    let (player_lock_request_ok, party_lock_request_ok): (bool, bool) = env
+        .eval(
+            r#"
+            return pcall(RequestLFDPlayerLockInfo),
+                   pcall(RequestLFDPartyLockInfo)
+            "#,
+        )
+        .expect("LFD lock refresh request probes should run");
+
+    assert!(
+        player_lock_request_ok,
+        "player LFD lock refresh request should be a callable no-op"
+    );
+    assert!(
+        party_lock_request_ok,
+        "party LFD lock refresh request should be a callable no-op"
+    );
+}
+
+#[test]
 fn startup_resurrection_probe_defaults_false_and_is_callable() {
     let env = env();
     let (call_ok, can_resurrect): (bool, bool) = env
