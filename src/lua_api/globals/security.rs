@@ -477,15 +477,52 @@ function SecureHandlerGetFrameRef(frame, label)
     return refs[label]
 end
 
+local function readonly_copy(source)
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = value
+    end
+    return setmetatable(copy, {
+        __newindex = function()
+            error("restricted table is read-only")
+        end,
+        __metatable = false,
+    })
+end
+
+local restricted_env = setmetatable({
+    assert = assert,
+    error = error,
+    ipairs = ipairs,
+    math = readonly_copy(math),
+    next = next,
+    pairs = pairs,
+    print = print,
+    select = select,
+    string = readonly_copy(string),
+    tonumber = tonumber,
+    tostring = tostring,
+    type = type,
+    unpack = unpack,
+}, {
+    __newindex = function()
+        error("restricted environment is read-only")
+    end,
+    __metatable = false,
+})
+
 -- Compile `body` as a closure `function(self, ...) <body> end`. Returning the
 -- closure through an outer loadstring wrapper keeps `self` and the varargs
 -- cleanly separated (plain `local self = ...` would consume from the same
--- vararg list and mis-index subsequent destructures).
+-- vararg list and mis-index subsequent destructures). The closure runs in a
+-- restricted environment: frame refs arrive through `self` and globals are
+-- limited to safe utility tables/functions.
 local function compile_snippet(body, chunk_name)
     local loader, err = loadstring("return function(self, ...) " .. body .. " end", chunk_name)
     if not loader then return nil end
     local ok, closure = pcall(loader)
     if not ok or type(closure) ~= "function" then return nil end
+    setfenv(closure, restricted_env)
     return closure
 end
 

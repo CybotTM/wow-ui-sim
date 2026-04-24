@@ -93,9 +93,8 @@ fn execute_runs_body_with_self_bound_to_frame() {
         .eval(
             r#"
             local owner = CreateFrame("Frame", "SecureExecuteOwner", UIParent)
-            _G.__captured_name = nil
-            SecureHandlerExecute(owner, "_G.__captured_name = self:GetName()")
-            return _G.__captured_name or ""
+            SecureHandlerExecute(owner, "self:SetAttribute('capturedName', self:GetName())")
+            return owner:GetAttribute('capturedName') or ""
             "#,
         )
         .unwrap();
@@ -109,13 +108,43 @@ fn execute_passes_varargs_to_body() {
         .eval(
             r#"
             local owner = CreateFrame("Frame", nil, UIParent)
-            _G.__sum_result = 0
-            SecureHandlerExecute(owner, "local a, b = ...; _G.__sum_result = (a or 0) + (b or 0)", 3, 4)
-            return _G.__sum_result
+            SecureHandlerExecute(owner, "local a, b = ...; self:SetAttribute('sum', (a or 0) + (b or 0))", 3, 4)
+            return owner:GetAttribute('sum')
             "#,
         )
         .unwrap();
     assert_eq!(sum, 7.0);
+}
+
+#[test]
+fn execute_uses_restricted_environment_without_global_table_access() {
+    let env = env();
+    let leaked: String = env
+        .eval(
+            r#"
+            local owner = CreateFrame("Frame", nil, UIParent)
+            _G.__secure_leak = "clean"
+            SecureHandlerExecute(owner, "_G.__secure_leak = 'leaked'; self:SetAttribute('afterLeak', true)")
+            return _G.__secure_leak .. ":" .. tostring(owner:GetAttribute('afterLeak'))
+            "#,
+        )
+        .unwrap();
+    assert_eq!(leaked, "clean:nil");
+}
+
+#[test]
+fn execute_restricted_environment_allows_math_string_and_print() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local owner = CreateFrame("Frame", nil, UIParent)
+            SecureHandlerExecute(owner, "local text = string.upper('ok') .. ':' .. math.max(2, 5); print(text); self:SetAttribute('allowed', text)")
+            return owner:GetAttribute('allowed') or ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "OK:5");
 }
 
 #[test]
@@ -144,23 +173,22 @@ fn wrap_script_installs_pre_and_post_around_existing_handler() {
             r#"
             local frame = CreateFrame("Button", "WrapScriptBtn", UIParent)
             local header = CreateFrame("Frame", "WrapScriptHeader", UIParent)
-            _G.__wrap_log = {}
             local function record(tag)
-                table.insert(_G.__wrap_log, tag)
+                header:SetAttribute('log', (header:GetAttribute('log') or '') .. tag .. '|')
             end
             -- Original: records "mid"
             frame:SetScript("OnClick", function() record("mid") end)
             SecureHandlerWrapScript(frame, "OnClick", header,
-                "_G.__wrap_log[#_G.__wrap_log + 1] = 'pre:'..self:GetName()",
-                "_G.__wrap_log[#_G.__wrap_log + 1] = 'post:'..self:GetName()"
+                "self:SetAttribute('log', (self:GetAttribute('log') or '') .. 'pre:' .. self:GetName() .. '|')",
+                "self:SetAttribute('log', (self:GetAttribute('log') or '') .. 'post:' .. self:GetName() .. '|')"
             )
             frame:GetScript("OnClick")(frame)
-            return table.concat(_G.__wrap_log, "|")
+            return header:GetAttribute('log') or ''
             "#,
         )
         .unwrap();
     assert_eq!(
-        order, "pre:WrapScriptHeader|mid|post:WrapScriptHeader",
+        order, "pre:WrapScriptHeader|mid|post:WrapScriptHeader|",
         "wrapped handler should run pre(header)/original(frame)/post(header)"
     );
 }
@@ -173,13 +201,12 @@ fn wrap_script_runs_even_without_existing_handler() {
             r#"
             local frame = CreateFrame("Button", nil, UIParent)
             local header = CreateFrame("Frame", nil, UIParent)
-            _G.__wrap_fired = false
             SecureHandlerWrapScript(frame, "OnClick", header,
-                "_G.__wrap_fired = true",
+                "self:SetAttribute('fired', true)",
                 nil
             )
             frame:GetScript("OnClick")(frame)
-            return _G.__wrap_fired
+            return header:GetAttribute('fired') == true
             "#,
         )
         .unwrap();
@@ -194,13 +221,12 @@ fn wrap_script_post_body_is_optional() {
             r#"
             local frame = CreateFrame("Button", nil, UIParent)
             local header = CreateFrame("Frame", nil, UIParent)
-            _G.__wrap_pre_called = false
             SecureHandlerWrapScript(frame, "OnClick", header,
-                "_G.__wrap_pre_called = true"
+                "self:SetAttribute('preCalled', true)"
                 -- no postBody
             )
             frame:GetScript("OnClick")(frame)
-            return _G.__wrap_pre_called
+            return header:GetAttribute('preCalled') == true
             "#,
         )
         .unwrap();
