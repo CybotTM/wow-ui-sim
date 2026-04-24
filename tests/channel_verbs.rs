@@ -41,6 +41,76 @@ fn join_temporary_channel_aliases_join() {
     );
 }
 
+#[test]
+fn get_channel_list_returns_no_values_when_empty() {
+    let env = env();
+    let returned_values: i32 = env
+        .eval(r##"return select("#", GetChannelList())"##)
+        .unwrap();
+    assert_eq!(returned_values, 0);
+}
+
+#[test]
+fn get_channel_list_returns_channel_triples() {
+    let env = env();
+    let (count, first_id, first_name, first_disabled, second_id, second_name, second_disabled): (
+        i32,
+        i32,
+        String,
+        bool,
+        i32,
+        String,
+        bool,
+    ) = env
+        .eval(
+            r##"
+            JoinChannelByName("General")
+            JoinChannelByName("Trade")
+            return select("#", GetChannelList()), GetChannelList()
+            "##,
+        )
+        .unwrap();
+    assert_eq!(count, 6);
+    assert_eq!(
+        (first_id, first_name, first_disabled),
+        (1, "General".to_string(), false)
+    );
+    assert_eq!(
+        (second_id, second_name, second_disabled),
+        (2, "Trade".to_string(), false)
+    );
+}
+
+#[test]
+fn chat_info_channel_identifier_matches_joined_channel() {
+    let env = env();
+    let (name, shortcut, local_id, instance_id, zone_channel_id, channel_type, enabled): (
+        String,
+        String,
+        i32,
+        i32,
+        i32,
+        i32,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            JoinChannelByName("General")
+            local info = C_ChatInfo.GetChannelInfoFromIdentifier("General")
+            return info.name, info.shortcut, info.localID, info.instanceID,
+                info.zoneChannelID, info.channelType, C_TTSSettings.GetChannelEnabled(info)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "General");
+    assert_eq!(shortcut, "1");
+    assert_eq!(local_id, 1);
+    assert_eq!(instance_id, 0);
+    assert_eq!(zone_channel_id, 1);
+    assert_eq!(channel_type, 1);
+    assert!(enabled);
+}
+
 // ── ChannelLeave ──────────────────────────────────────────────────────────────
 
 #[test]

@@ -1,7 +1,10 @@
-//! Chat-channel moderation verbs that round-trip `SimState.chat_channels`.
+//! SimState-backed chat channel globals and channel metadata probes.
 //!
-//! Migrates 9 entries off `GLOBAL_NIL_STUBS`:
+//! Round-trips the player's joined chat channels through the global channel
+//! verb family, `C_ChatInfo`, and TTS channel settings:
 //!
+//! - `GetChannelList()` — returns `(id, name, disabled)` triples.
+//! - `GetChannelName(channel)` — resolves local channel IDs / names.
 //! - `JoinChannelByName(name)`   — append new channel if missing.
 //! - `JoinTemporaryChannel(name)` — alias of `JoinChannelByName`; retail
 //!                                   auto-removes these on logout. Not
@@ -15,16 +18,24 @@
 //!                                   channel first; silent no-op otherwise).
 //! - `ChannelUnmoderator(n, p)`  — remove from moderators.
 //! - `SwapChatChannelLinks(a, b)` — swap channels at positions a and b.
+//! - `C_ChatInfo.GetChannelInfoFromIdentifier(idOrName)` — returns metadata.
 //!
 //! Channel-number semantics mirror retail: slot 1 = channel #1.
 //!
 //! Registered from `register_tail_globals` after `missing_surface`.
 
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
 use crate::lua_api::state::ChatChannel;
-use crate::lua_bridge::{FromStack, stack_val};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
+
+const CHANNEL_TYPE_ZONE: f64 = 1.0;
+const CHANNEL_TYPE_CUSTOM: f64 = 3.0;
 
 fn required_string(state: &mut LuaState, index: i32) -> Option<String> {
     Option::<String>::from_stack(state, index)
@@ -40,6 +51,13 @@ fn stack_i32(state: &mut LuaState, index: i32) -> Option<i32> {
     }
 }
 
+fn channel_identifier(state: &mut LuaState, index: i32) -> Option<String> {
+    match stack_val(state, index) {
+        Val::Num(n) => Some((n as i32).to_string()),
+        _ => required_string(state, index),
+    }
+}
+
 fn ensure_channel<'a>(
     channels: &'a mut Vec<ChatChannel>,
     name: &str,
@@ -49,6 +67,68 @@ fn ensure_channel<'a>(
 
 fn channel_index(channels: &[ChatChannel], name: &str) -> Option<usize> {
     channels.iter().position(|c| c.name == name)
+}
+
+fn channel_type(channel_name: &str) -> f64 {
+    match channel_name {
+        "General" | "Trade" | "LocalDefense" | "LookingForGroup" => CHANNEL_TYPE_ZONE,
+        _ => CHANNEL_TYPE_CUSTOM,
+    }
+}
+
+fn ensure_namespace(state: &mut LuaState, name: &'static str) -> GcRef<Table> {
+    let key_ref = state.gc.intern_string_static(name.as_bytes());
+    let current = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(key_ref, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    if let Val::Table(table_ref) = current {
+        return table_ref;
+    }
+
+    let table_ref = state.gc.alloc_table(Table::new());
+    if let Some(globals) = state.gc.tables.get_mut(state.global) {
+        let _ = globals.raw_set(
+            Val::Str(key_ref),
+            Val::Table(table_ref),
+            &state.gc.string_arena,
+        );
+    }
+    state.gc.barrier_back(state.global);
+    table_ref
+}
+
+fn find_channel(channels: &[ChatChannel], identifier: &str) -> Option<(usize, ChatChannel)> {
+    if let Ok(local_id) = identifier.parse::<usize>()
+        && local_id > 0
+    {
+        return channels.get(local_id - 1).cloned().map(|ch| (local_id, ch));
+    }
+
+    channels
+        .iter()
+        .position(|ch| ch.name == identifier)
+        .map(|index| (index + 1, channels[index].clone()))
+}
+
+fn build_channel_info(state: &mut LuaState, local_id: usize, channel: &ChatChannel) -> Val {
+    let info = create_table(state);
+    let name = create_string(state, &channel.name);
+    let shortcut = create_string(state, &local_id.to_string());
+    table_set(state, info, "name", name);
+    table_set(state, info, "shortcut", shortcut);
+    table_set(state, info, "localID", Val::Num(local_id as f64));
+    table_set(state, info, "instanceID", Val::Num(0.0));
+    table_set(state, info, "zoneChannelID", Val::Num(local_id as f64));
+    table_set(
+        state,
+        info,
+        "channelType",
+        Val::Num(channel_type(&channel.name)),
+    );
+    info
 }
 
 /// `JoinChannelByName(name)` — append a new channel when missing.
@@ -63,6 +143,99 @@ fn join_channel_by_name(state: &mut LuaState) -> LuaResult<u32> {
             ..ChatChannel::default()
         });
     }
+    Ok(0)
+}
+
+fn get_channel_list(state: &mut LuaState) -> LuaResult<u32> {
+    let channels = borrow_state(state)?.chat_channels.clone();
+    let value_count = channels.len() * 3;
+    state.ensure_stack(state.top + value_count);
+    for (index, channel) in channels.iter().enumerate() {
+        let channel_id = index + 1;
+        let name = create_string(state, &channel.name);
+        state.push(Val::Num(channel_id as f64));
+        state.push(name);
+        state.push(Val::Bool(false));
+    }
+    Ok(value_count as u32)
+}
+
+fn get_channel_name(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(identifier) = channel_identifier(state, 1) else {
+        state.push(Val::Num(0.0));
+        state.push(Val::Nil);
+        state.push(Val::Num(0.0));
+        state.push(Val::Bool(false));
+        return Ok(4);
+    };
+    let channels = borrow_state(state)?.chat_channels.clone();
+    match find_channel(&channels, &identifier) {
+        Some((local_id, channel)) => {
+            let name = create_string(state, &channel.name);
+            state.push(Val::Num(local_id as f64));
+            state.push(name);
+        }
+        None => {
+            state.push(Val::Num(0.0));
+            state.push(Val::Nil);
+        }
+    }
+    state.push(Val::Num(0.0));
+    state.push(Val::Bool(false));
+    Ok(4)
+}
+
+fn get_channel_info_from_identifier(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(identifier) = channel_identifier(state, 1) else {
+        return Ok(0);
+    };
+    let channels = borrow_state(state)?.chat_channels.clone();
+    if let Some((local_id, channel)) = find_channel(&channels, &identifier) {
+        let info = build_channel_info(state, local_id, &channel);
+        state.push(info);
+        return Ok(1);
+    }
+    Ok(0)
+}
+
+fn get_num_active_channels(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.chat_channels.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_channel_shortcut(state: &mut LuaState) -> LuaResult<u32> {
+    let channel_id = stack_i32(state, 1).unwrap_or(0);
+    let shortcut = create_string(state, &channel_id.to_string());
+    state.push(shortcut);
+    Ok(1)
+}
+
+fn get_general_channel_local_id(state: &mut LuaState) -> LuaResult<u32> {
+    let channels = borrow_state(state)?.chat_channels.clone();
+    let local_id = channel_index(&channels, "General")
+        .map(|index| Val::Num(index as f64 + 1.0))
+        .unwrap_or(Val::Nil);
+    state.push(local_id);
+    Ok(1)
+}
+
+fn is_channel_regional(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn is_regional_service_available(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn get_tts_channel_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn set_tts_channel_enabled(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
@@ -177,7 +350,9 @@ fn swap_chat_channel_links(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+fn register_channel_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "GetChannelList", get_channel_list)?;
+    LuaApiMut::register_function(lua, "GetChannelName", get_channel_name)?;
     LuaApiMut::register_function(lua, "JoinChannelByName", join_channel_by_name)?;
     LuaApiMut::register_function(lua, "JoinTemporaryChannel", join_temporary_channel)?;
     LuaApiMut::register_function(lua, "ChannelLeave", channel_leave)?;
@@ -187,5 +362,71 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ChannelModerator", channel_moderator)?;
     LuaApiMut::register_function(lua, "ChannelUnmoderator", channel_unmoderator)?;
     LuaApiMut::register_function(lua, "SwapChatChannelLinks", swap_chat_channel_links)?;
+    Ok(())
+}
+
+fn register_chat_info_namespace(state: &mut LuaState) -> LuaResult<()> {
+    let chat_info = ensure_namespace(state, "C_ChatInfo");
+    table_set_rust_fn_static(
+        state,
+        chat_info,
+        "GetChannelInfoFromIdentifier",
+        get_channel_info_from_identifier,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        chat_info,
+        "GetNumActiveChannels",
+        get_num_active_channels,
+    )?;
+    table_set_rust_fn_static(state, chat_info, "GetChannelShortcut", get_channel_shortcut)?;
+    table_set_rust_fn_static(
+        state,
+        chat_info,
+        "GetGeneralChannelLocalID",
+        get_general_channel_local_id,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        chat_info,
+        "GetGeneralChannelID",
+        get_general_channel_local_id,
+    )?;
+    table_set_rust_fn_static(state, chat_info, "IsChannelRegional", is_channel_regional)?;
+    table_set_rust_fn_static(
+        state,
+        chat_info,
+        "IsChannelRegionalForChannelID",
+        is_channel_regional,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        chat_info,
+        "IsRegionalServiceAvailable",
+        is_regional_service_available,
+    )
+}
+
+fn register_tts_settings_namespace(state: &mut LuaState) -> LuaResult<()> {
+    let tts_settings = ensure_namespace(state, "C_TTSSettings");
+    table_set_rust_fn_static(
+        state,
+        tts_settings,
+        "GetChannelEnabled",
+        get_tts_channel_enabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        tts_settings,
+        "SetChannelEnabled",
+        set_tts_channel_enabled,
+    )
+}
+
+pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    register_channel_globals(lua)?;
+    let state = lua.state_mut();
+    register_chat_info_namespace(state)?;
+    register_tts_settings_namespace(state)?;
     Ok(())
 }
