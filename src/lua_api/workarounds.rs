@@ -318,6 +318,24 @@ fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
                     FireEvent("PLAYER_HOUSE_LIST_UPDATED", {})
                 end
             end
+
+            function C_Housing.StartTutorial()
+                if type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+                    if not AUTOCOMPLETE_LIST or not AUTOCOMPLETE_LIST.HOUSE_FINDER then
+                        C_AddOns.LoadAddOn("Blizzard_AutoComplete")
+                    end
+                end
+                if not HouseFinderFrame and type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
+                    C_AddOns.LoadAddOn("Blizzard_HousingHouseFinder")
+                end
+                if HouseFinderFrame and type(ShowUIPanel) == "function" then
+                    ShowUIPanel(HouseFinderFrame)
+                end
+                if HousingDashboardFrame and type(HideUIPanel) == "function" then
+                    HideUIPanel(HousingDashboardFrame)
+                end
+                return true
+            end
         end
     "#,
     );
