@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-24] update | taint-system doc refresh
+
+Refreshed `systems/taint-system.md` to match the current rilua implementation.
+Recorded the live file split between `src/lua_api/frame/methods/methods_helpers.rs`
+for protected-state gating and `src/lua_api/globals/security.rs` for
+SecureHandler fallback, secure environment setup, `securecallmethod`, and
+state/attribute drivers. Updated the systems index summary to mention the
+fallbacks instead of the old no-op stubs.
+
 ## [2026-04-24] update | spell description token resolver
 
 Updated `systems/lua-api.md` to record the shared spell-description token
@@ -604,7 +613,7 @@ Created all 10 systems/ pages from source docs in docs/:
 - systems/addon-loading.md — from addon-loading-pipeline.md
 - systems/texture-atlas.md — from texture-atlas-system.md
 - systems/frame-data-flow.md — from frame-data-flow.md
-- systems/taint-system.md — from protected-frame-enforcement.md + src/lua_api/globals/security_api.rs + src/lua_api/secure_env.rs + src/lua_api/frame/methods/combat_lockdown.rs
+- systems/taint-system.md — from protected-frame-enforcement.md + src/lua_api/frame/methods/methods_helpers.rs + src/lua_api/globals/security.rs + tests/protected_frame_enforcement.rs + tests/secure_handler_fallback.rs + tests/security_api.rs
 
 Updated index.md systems/ table.
 
