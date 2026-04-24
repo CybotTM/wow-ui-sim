@@ -586,6 +586,53 @@ fn test_canaccesstable_clean() {
 }
 
 #[test]
+fn test_party_roster_name_is_secret_value() {
+    let env = env();
+    env.exec("A_Admin.SetPartySize(1)").unwrap();
+    let (secret, accessible): (bool, bool) = env
+        .eval("local name = UnitName('party1'); return issecretvalue(name), canaccessvalue(name)")
+        .unwrap();
+    assert!(secret, "party roster identity should be secret");
+    assert!(
+        !accessible,
+        "party roster identity should not be directly accessible"
+    );
+}
+
+#[test]
+fn test_party_full_name_marks_name_and_realm_secret() {
+    let env = env();
+    env.exec("A_Admin.SetPartySize(1)").unwrap();
+    let (name_secret, realm_secret, all_accessible): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local name, realm = UnitFullName('party1')
+            return issecretvalue(name), issecretvalue(realm), canaccessallvalues(name, realm)
+            "#,
+        )
+        .unwrap();
+    assert!(name_secret, "party full-name identity should be secret");
+    assert!(realm_secret, "party realm identity should be secret");
+    assert!(
+        !all_accessible,
+        "secret full-name fields should block bulk access"
+    );
+}
+
+#[test]
+fn test_table_containing_party_identity_is_not_accessible() {
+    let env = env();
+    env.exec("A_Admin.SetPartySize(1)").unwrap();
+    let accessible: bool = env
+        .eval("local t = { name = UnitName('party1') }; return canaccesstable(t)")
+        .unwrap();
+    assert!(
+        !accessible,
+        "tables containing secret identities should be secret"
+    );
+}
+
+#[test]
 fn test_scrub_helpers_are_passthrough() {
     let env = env();
     let (first, third, first_secret, third_secret): (i32, String, i32, String) = env

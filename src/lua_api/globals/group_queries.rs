@@ -16,6 +16,7 @@
 //! share no code with it.
 
 use crate::lua_api::game_data::{CLASS_LABELS, PartyMember, RACE_DATA};
+use crate::lua_api::globals::security::mark_secret_value;
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
 use crate::lua_bridge::FromStack;
 use rilua::vm::closure::{Closure, RustClosure};
@@ -202,6 +203,7 @@ fn push_empty_raid_roster_info(state: &mut LuaState) {
 
 fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &PartyMember) {
     let name = create_string(state, &member.name);
+    mark_secret_value(state, name);
     let subgroup = ((index - 1) / 5 + 1) as f64;
     let (_, class_file, _) = class_info(member.class_index);
     let class_file = create_string(state, class_file);
@@ -289,12 +291,21 @@ fn unit_name(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let name = unit_name_for(state, &unit)?;
     let value = create_string(state, &name);
+    if unit_identity_is_secret(&unit, &name) {
+        mark_secret_value(state, value);
+    }
     state.push(value);
     Ok(1)
 }
 
 fn unit_name_unmodified(state: &mut LuaState) -> LuaResult<u32> {
     unit_name(state)
+}
+
+fn unit_identity_is_secret(unit: &str, name: &str) -> bool {
+    name != "Unknown"
+        && (crate::lua_api::globals::unit_api::parse_party_index(unit).is_some()
+            || unit.strip_prefix("raid").is_some())
 }
 
 fn unit_name_for(state: &mut LuaState, unit: &str) -> LuaResult<String> {

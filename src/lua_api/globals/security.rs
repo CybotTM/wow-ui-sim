@@ -290,16 +290,73 @@ fn scrub_passthrough(state: &mut LuaState) -> LuaResult<u32> {
     Ok(nargs)
 }
 
+const SECRET_VALUE_REGISTRY_KEY: &str = "__sim_secret_values";
+pub(crate) const SECRET_TAINT_MARKER: &str = "*** SimSecretValue ***";
+
+pub(crate) fn mark_secret_value(state: &mut LuaState, value: Val) {
+    let Some(key) = secret_registry_key(state, value) else {
+        return;
+    };
+    let marker = Val::Str(state.gc.intern_string(SECRET_TAINT_MARKER.as_bytes()));
+    let table_ref = get_or_create_secret_value_table(state);
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(key, marker, &state.gc.string_arena);
+    }
+}
+
 fn value_is_secret(
     state: &mut LuaState,
     value: Val,
     visited: &mut HashSet<rilua::vm::gc::arena::GcRef<Table>>,
 ) -> bool {
+    if value_has_secret_marker(state, value) {
+        return true;
+    }
+
     match value {
         Val::Function(func_ref) => function_is_secret(state, func_ref),
         Val::Table(table_ref) => table_is_secret(state, table_ref, visited),
         _ => false,
     }
+}
+
+fn value_has_secret_marker(state: &mut LuaState, value: Val) -> bool {
+    let Some(key) = secret_registry_key(state, value) else {
+        return false;
+    };
+    let Val::Table(table_ref) = registry_get(state, SECRET_VALUE_REGISTRY_KEY) else {
+        return false;
+    };
+    state.gc.tables.get(table_ref).is_some_and(|table| {
+        matches!(
+            table.get(key, &state.gc.string_arena),
+            Val::Str(marker_ref)
+                if state.gc.string_arena.get(marker_ref).is_some_and(|marker| {
+                    marker.data() == SECRET_TAINT_MARKER.as_bytes()
+                })
+        )
+    })
+}
+
+fn secret_registry_key(state: &mut LuaState, value: Val) -> Option<Val> {
+    let key = match value {
+        Val::Str(value_ref) => format!("str:{}", value_ref.index()),
+        Val::Table(value_ref) => format!("table:{}", value_ref.index()),
+        Val::Function(value_ref) => format!("func:{}", value_ref.index()),
+        Val::Userdata(value_ref) => format!("userdata:{}", value_ref.index()),
+        Val::Thread(value_ref) => format!("thread:{}", value_ref.index()),
+        _ => return None,
+    };
+    Some(Val::Str(state.gc.intern_string(key.as_bytes())))
+}
+
+fn get_or_create_secret_value_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Table> {
+    if let Val::Table(table_ref) = registry_get(state, SECRET_VALUE_REGISTRY_KEY) {
+        return table_ref;
+    }
+    let table_ref = state.gc.alloc_table(Table::new());
+    registry_set(state, SECRET_VALUE_REGISTRY_KEY, Val::Table(table_ref));
+    table_ref
 }
 
 fn function_is_secret(

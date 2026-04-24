@@ -1,5 +1,6 @@
 //! Misc unit globals that do not fit the core group-query bucket.
 
+use crate::lua_api::globals::security::mark_secret_value;
 use crate::lua_api::methods::{borrow_state, create_string, create_table};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -36,10 +37,17 @@ fn unit_name_for(state: &mut LuaState, unit: &str) -> String {
     }
 }
 
+fn unit_identity_is_secret(unit: &str) -> bool {
+    crate::lua_api::globals::unit_api::parse_party_index(unit).is_some()
+}
+
 fn unit_name_string(state: &mut LuaState) -> LuaResult<u32> {
     let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
     let name = unit_name_for(state, &unit);
     let name = create_string(state, &name);
+    if unit_identity_is_secret(&unit) {
+        mark_secret_value(state, name);
+    }
     state.push(name);
     Ok(1)
 }
@@ -57,6 +65,10 @@ fn unit_full_name(state: &mut LuaState) -> LuaResult<u32> {
     let name = unit_name_for(state, &unit);
     let name = create_string(state, &name);
     let realm = create_string(state, SIM_REALM);
+    if unit_identity_is_secret(&unit) {
+        mark_secret_value(state, name);
+        mark_secret_value(state, realm);
+    }
     state.push(name);
     state.push(realm);
     Ok(2)
