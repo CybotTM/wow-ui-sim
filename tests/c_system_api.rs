@@ -82,6 +82,23 @@ fn test_c_console_get_color_from_type() {
     assert_eq!(b, 1.0);
 }
 
+#[test]
+fn test_console_font_height_globals_round_trip() {
+    let env = env();
+    let (before, after): (f64, f64) = env
+        .eval(
+            r#"
+            local before = ConsoleGetFontHeight()
+            ConsoleSetFontHeight(18)
+            return before, ConsoleGetFontHeight()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(before, 14.0);
+    assert_eq!(after, 18.0);
+}
+
 // ============================================================================
 // C_VoiceChat
 // ============================================================================
