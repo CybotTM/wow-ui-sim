@@ -34,7 +34,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[addon-loading]] | TOC parsing, Blizzard load order (27 addons), per-file Lua/XML loading, SavedVariables, startup sequence |
 | [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, nine-slice kit detection, UV remapping |
 | [[frame-data-flow]] | Parallel Lua/Rust systems, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
-| [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, SecureHandler fallback, state/attribute drivers |
+| [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
 
 ## investigations/
 

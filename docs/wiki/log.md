@@ -4,7 +4,7 @@ Chronological record of wiki operations.
 
 ## [2026-04-24] update | taint-system doc refresh
 
-Updated `systems/taint-system.md` to match the current rilua implementation.
+Updated `systems/taint-system.md` to match the current rilua implementation and added a Blizzard `issecure()` call-site matrix with test coverage references.
 SecureHandler APIs now document fallback frame-ref/snippet/wrap/unwrap behavior,
 state and attribute drivers now document shallow driver application,
 secret-value accessors now document marked/tainted value tracking, and source

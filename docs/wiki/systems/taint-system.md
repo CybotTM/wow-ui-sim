@@ -85,6 +85,44 @@ Driver limitations:
 - Driver values are not automatically reevaluated on every relevant state transition.
 - This is a compatibility fallback for addon bootstrap, not a full `SecureStateDriverManager`.
 
+## Blizzard `issecure()` Call-Sites
+
+These are the real Blizzard Lua paths the simulator executes today that branch on `issecure()` or pass its value into secure APIs. They are the practical end-to-end checks for Elune taint integration.
+
+### Registration and command routing
+
+- `Blizzard_ChatFrameBase/Shared/SlashCommands.lua` uses `issecure()` to choose between secure slash-command registration and the insecure fallback registry.
+- `Blizzard_ChatFrameBase/Shared/SlashCommandsRegistry.lua` uses `issecure()` to decide whether secure slash-command aliases can be added, and rejects insecure `AddSecureCmd()` calls.
+- `Blizzard_SharedXMLBase/Mixin.lua` uses `issecure()` to allow secure mixin copying only during the secure bootstrap path.
+
+### UI actions gated by secure state
+
+- `Blizzard_UnitPopupShared/UnitPopupSharedButtonMixins.lua` uses `issecure()` to hide insecurely-invoked unit popup actions that would otherwise target or promote players.
+- `Blizzard_SharedXMLBase/CvarUtil.lua` uses `issecure()` to decide whether a CVar read can be cached without tainting later reads.
+- `Blizzard_DebugTools/DebugObjectUtil.lua` uses `issecure()` to allow object access when secure, even if the target is forbidden.
+- `Blizzard_StaticPopup/StaticPopup.lua` uses `issecure()` to block secure edit-box dialogs from tainted callers.
+- `Blizzard_GroupFinder/Mainline/LFGList.lua` uses `issecure()` to either begin a secure search or show an insecure-search warning popup.
+- `Blizzard_ActionBar/WoWLabs/ActionButtonOverrides.lua` and `Blizzard_ActionBar/Shared/ActionButton.lua` use `issecure()` to gate action-bar grid state updates.
+- `Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua` uses `issecure()` with combat lockdown to gate panel show/hide operations.
+- `Blizzard_SharedXMLGame/Tooltip/TooltipDataHandler.lua` uses `issecure()` to register secure callbacks directly or wrap insecure callbacks with `forceinsecure()`.
+- `Blizzard_EditMode/Shared/EditModeManager.lua` uses `issecure()` with combat lockdown to choose the secure delegate path for clearing selected systems.
+
+### Secure-environment plumbing
+
+- `Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua` and `Blizzard_ScriptErrorsFrame/Blizzard_ScriptErrorsFrame.lua` assert secure execution during their startup wiring.
+- `Blizzard_NamePlates/Blizzard_NamePlates.lua` passes `issecure()` into `C_NamePlate` lookup APIs so secure and insecure views resolve differently.
+- `Blizzard_NewPlayerExperience/Blizzard_TutorialTutorials.lua` passes `issecure()` into `C_NamePlate.GetNamePlateForUnit()` for the same reason.
+- `Blizzard_RestrictedAddOnEnvironment/SecureHoverDriver.lua` uses `issecure()` to pick secure auto-hide helpers when possible, otherwise it falls back to attribute-driven emulation.
+- `Blizzard_RestrictedAddOnEnvironment/SecureHandlers.lua`, `RestrictedInfrastructure.lua`, and `RestrictedExecution.lua` use `issecure()` as the guard for secure-handler APIs, restricted table mutation, frame-handle namespace initialization, forbidden-frame propagation, and restricted closure execution.
+
+### End-to-end coverage in the simulator
+
+- `tests/security_api.rs` covers the base Elune contract: `issecure()`, `forceinsecure()`, `loadstring()` tainting, and `securecall()` restoring secure execution.
+- `tests/protected_frame_enforcement.rs` covers the combat/insecure gates that many `issecure()` branches are protecting.
+- `tests/secure_handler_fallback.rs` covers the SecureHandler fallback path that runs before `Blizzard_RestrictedAddOnEnvironment` loads.
+- `tests/secure_group_headers.rs` covers the secure group-header path after `Blizzard_RestrictedAddOnEnvironment` loads.
+- `tests/startup_warnings.rs` and `tests/load_order.rs` cover the Blizzard addon startup/load path where these call sites are exercised together.
+
 ## Sources
 
 - [protected-frame-enforcement.md](../../protected-frame-enforcement.md) — protected-frame behavior and remaining gaps
