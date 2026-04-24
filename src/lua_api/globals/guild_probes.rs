@@ -94,11 +94,20 @@ fn can_view_guild_recipes(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 /// `GetNumGuildMembers()` — retail returns (total, online, onlineAndMobile).
-/// The sim treats every roster member as online and no mobile sessions.
 fn get_num_guild_members(state: &mut LuaState) -> LuaResult<u32> {
-    let n = borrow_state(state)?.world.guild_members.len() as f64;
-    state.push(Val::Num(n));
-    state.push(Val::Num(n));
+    let (total, online) = {
+        let sim = borrow_state(state)?;
+        let total = sim.world.guild_members.len() as f64;
+        let online = sim
+            .world
+            .guild_members
+            .iter()
+            .filter(|member| member.online)
+            .count() as f64;
+        (total, online)
+    };
+    state.push(Val::Num(total));
+    state.push(Val::Num(online));
     state.push(Val::Num(0.0));
     Ok(3)
 }
@@ -151,10 +160,10 @@ fn push_roster_row_values(state: &mut LuaState, row: &RosterRow) {
     state.push(Val::Num(row.rank_index)); // 3: rankIndex
     state.push(Val::Num(row.level)); // 4: level
     state.push(class_label); // 5: class
-    state.push(empty.clone()); // 6: zone
-    state.push(empty.clone()); // 7: note
+    state.push(empty); // 6: zone
+    state.push(empty); // 7: note
     state.push(empty); // 8: officernote
-    state.push(Val::Bool(true)); // 9: online
+    state.push(Val::Bool(row.online)); // 9: online
     state.push(Val::Num(0.0)); // 10: status
     state.push(class_file); // 11: classFileName
     state.push(Val::Num(0.0)); // 12: achievementPoints
@@ -171,6 +180,7 @@ struct RosterRow {
     level: f64,
     class_label: &'static str,
     class_file: &'static str,
+    online: bool,
 }
 
 fn build_roster_row(st: &crate::lua_api::state::SimState, zero_based: usize) -> Option<RosterRow> {
@@ -189,6 +199,7 @@ fn build_roster_row(st: &crate::lua_api::state::SimState, zero_based: usize) -> 
         level: st.player.level as f64,
         class_label,
         class_file,
+        online: member.online,
     })
 }
 

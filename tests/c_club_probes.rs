@@ -74,6 +74,7 @@ fn get_club_members_returns_guild_roster() {
         state.world.guild_members = vec![GuildMember {
             name: "Uther".into(),
             rank_index: 1,
+            online: true,
         }];
     }
     let count: i32 = env
@@ -90,20 +91,44 @@ fn get_club_members_entry_has_required_fields() {
         state.world.guild_members = vec![GuildMember {
             name: "Uther".into(),
             rank_index: 1,
+            online: true,
         }];
     }
-    let (name, is_self, presence): (String, bool, i32) = env
+    let (member_id, name, is_self, presence): (i32, String, bool, i32) = env
         .eval(
             r#"
             local members = C_Club.GetClubMembers('guild-0')
-            local m = members[1]
-            return m.name, m.isSelf, m.presence
+            local memberId = members[1]
+            local m = C_Club.GetMemberInfo('guild-0', memberId)
+            return memberId, m.name, m.isSelf, m.presence
             "#,
         )
         .unwrap();
+    assert_eq!(member_id, 1);
     assert_eq!(name, "Uther");
     assert!(is_self, "first member should be isSelf=true");
     assert_eq!(presence, 1, "online presence = 1");
+}
+
+#[test]
+fn get_club_members_returns_member_ids_for_member_info_lookup() {
+    let env = env();
+    let (count, first_id, first_name, second_id, second_name): (i32, i32, String, i32, String) =
+        env.eval(
+            r#"
+            local members = C_Club.GetClubMembers('guild-0')
+            local first = C_Club.GetMemberInfo('guild-0', members[1])
+            local second = C_Club.GetMemberInfo('guild-0', members[2])
+            return #members, members[1], first.name, members[2], second.name
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(count, 2);
+    assert_eq!(first_id, 1);
+    assert_eq!(first_name, "Uther");
+    assert_eq!(second_id, 2);
+    assert_eq!(second_name, "Jaina");
 }
 
 #[test]
@@ -146,24 +171,53 @@ fn get_club_members_reflects_state_mutation() {
             GuildMember {
                 name: "Arthas".into(),
                 rank_index: 1,
+                online: true,
             },
             GuildMember {
                 name: "Jaina".into(),
                 rank_index: 2,
+                online: false,
             },
         ];
     }
-    let (count, first_name, second_name): (i32, String, String) = env
+    let (count, first_name, first_presence, second_name, second_presence): (
+        i32,
+        String,
+        i32,
+        String,
+        i32,
+    ) = env
         .eval(
             r#"
             local members = C_Club.GetClubMembers('guild-0')
-            return #members, members[1].name, members[2].name
+            local first = C_Club.GetMemberInfo('guild-0', members[1])
+            local second = C_Club.GetMemberInfo('guild-0', members[2])
+            return #members, first.name, first.presence, second.name, second.presence
             "#,
         )
         .unwrap();
     assert_eq!(count, 2);
     assert_eq!(first_name, "Arthas");
+    assert_eq!(first_presence, 1);
     assert_eq!(second_name, "Jaina");
+    assert_eq!(second_presence, 3);
+}
+
+#[test]
+fn members_are_ready_for_seeded_guild_club() {
+    let env = env();
+    let (club_id, ready): (String, bool) = env
+        .eval(
+            r#"
+            local clubId = C_Club.GetGuildClubId()
+            C_Club.FocusMembers(clubId)
+            return clubId, C_Club.AreMembersReady(clubId)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(club_id, "guild-0");
+    assert!(ready);
 }
 
 #[test]

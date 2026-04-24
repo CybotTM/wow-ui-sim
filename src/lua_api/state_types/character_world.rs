@@ -352,18 +352,19 @@ pub struct WorldState {
     pub guild_can_speak_in_chat: bool,
     /// Guild Message of the Day. Empty string when not set.
     pub guild_motd: String,
-    /// Guild members (names + 1-based rank indices). Populated by
+    /// Guild members (names + 1-based rank indices + online state). Populated by
     /// `GuildInvite` / `GuildUninvite` / `GuildKick` / `GuildPromote`.
     /// Empty when the player has no guild.
     pub guild_members: Vec<GuildMember>,
 }
 
-/// A guild member: display name + 1-based rank index. Rank 1 is highest
-/// (Guild Master). Higher values = lower rank.
+/// A guild member: display name, 1-based rank index, and online state.
+/// Rank 1 is highest (Guild Master). Higher values = lower rank.
 #[derive(Debug, Clone)]
 pub struct GuildMember {
     pub name: String,
     pub rank_index: i32,
+    pub online: bool,
 }
 
 /// Seeded `C_PvP.GetWorldPVPAreaInfo()` row.
@@ -463,44 +464,68 @@ pub fn seeded_world_state() -> WorldState {
         instance_difficulty_name: String::new(),
         guild_name: Some("Heroes of Azeroth".into()),
         guild_rank: Some("Member".into()),
-        guild_num_members: 150,
+        guild_num_members: 2,
+        guild_members: default_guild_members(),
         pvp_type: "contested".into(),
         guild_can_speak_in_chat: true,
-        world_pvp_areas: vec![
-            WorldPvpBattlegroundInfo {
-                bg_id: 571,
-                can_enter: true,
-                can_queue: true,
-                is_active: true,
-                max_level: 80,
-                min_level: 80,
-                name: "Wintergrasp".into(),
-                start_time: 900,
-            },
-            WorldPvpBattlegroundInfo {
-                bg_id: 607,
-                can_enter: false,
-                can_queue: false,
-                is_active: false,
-                max_level: 85,
-                min_level: 80,
-                name: "Tol Barad".into(),
-                start_time: 0,
-            },
-        ],
-        holiday_bg_info: Some(RandomBGInfo {
-            bg_id: 108,
-            bg_index: 2,
-            can_queue: true,
-            has_random_win_today: false,
-            max_level: 80,
-            min_level: 10,
-            name: "Warsong Scramble".into(),
-        }),
+        world_pvp_areas: default_world_pvp_areas(),
+        holiday_bg_info: Some(default_holiday_bg_info()),
         ..WorldState::default()
     };
     apply_collection_defaults(&mut ws);
     ws
+}
+
+fn default_guild_members() -> Vec<GuildMember> {
+    vec![
+        GuildMember {
+            name: "Uther".into(),
+            rank_index: 1,
+            online: true,
+        },
+        GuildMember {
+            name: "Jaina".into(),
+            rank_index: 2,
+            online: false,
+        },
+    ]
+}
+
+fn default_world_pvp_areas() -> Vec<WorldPvpBattlegroundInfo> {
+    vec![
+        WorldPvpBattlegroundInfo {
+            bg_id: 571,
+            can_enter: true,
+            can_queue: true,
+            is_active: true,
+            max_level: 80,
+            min_level: 80,
+            name: "Wintergrasp".into(),
+            start_time: 900,
+        },
+        WorldPvpBattlegroundInfo {
+            bg_id: 607,
+            can_enter: false,
+            can_queue: false,
+            is_active: false,
+            max_level: 85,
+            min_level: 80,
+            name: "Tol Barad".into(),
+            start_time: 0,
+        },
+    ]
+}
+
+fn default_holiday_bg_info() -> RandomBGInfo {
+    RandomBGInfo {
+        bg_id: 108,
+        bg_index: 2,
+        can_queue: true,
+        has_random_win_today: false,
+        max_level: 80,
+        min_level: 10,
+        name: "Warsong Scramble".into(),
+    }
 }
 
 fn apply_collection_defaults(ws: &mut WorldState) {

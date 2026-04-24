@@ -12,6 +12,7 @@
 //! - `A_Admin.SetGuildIsOfficer(b?)` / `A_Admin.SetGuildCanSpeakInChat(b?)` —
 //!   no-arg defaults to true.
 
+use crate::event::Event;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
@@ -43,6 +44,14 @@ pub fn can_speak_in_guild_chat(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn guild_roster(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.events.push(Event {
+        name: "GUILD_ROSTER_UPDATE".to_string(),
+        args: Vec::new(),
+    });
+    Ok(0)
+}
+
 fn ensure_c_guild_info_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_GuildInfo");
     let global = state.global;
@@ -70,6 +79,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let state = lua.state_mut();
     let table_ref = ensure_c_guild_info_table(state);
     table_set_rust_fn_static(state, table_ref, "GetClubId", get_club_id)?;
+    table_set_rust_fn_static(state, table_ref, "GuildRoster", guild_roster)?;
     table_set_rust_fn_static(state, table_ref, "IsGuildOfficer", is_guild_officer)?;
     table_set_rust_fn_static(
         state,

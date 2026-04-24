@@ -112,9 +112,10 @@ fn get_guild_roster_show_offline_toggles_off() {
 #[test]
 fn get_num_guild_members_returns_zero_when_roster_empty() {
     let env = env();
+    env.state().borrow_mut().world.guild_members.clear();
     let (total, online, online_mobile): (i32, i32, i32) =
         env.eval("return GetNumGuildMembers()").unwrap();
-    assert_eq!(total, 0, "seeded world has no roster entries");
+    assert_eq!(total, 0, "cleared roster has no entries");
     assert_eq!(online, 0);
     assert_eq!(online_mobile, 0);
 }
@@ -129,32 +130,51 @@ fn get_num_guild_members_counts_roster() {
             GuildMember {
                 name: "Alpha".into(),
                 rank_index: 1,
+                online: true,
             },
             GuildMember {
                 name: "Beta".into(),
                 rank_index: 2,
+                online: false,
             },
         ];
     }
     let (total, online, online_mobile): (i32, i32, i32) =
         env.eval("return GetNumGuildMembers()").unwrap();
     assert_eq!(total, 2);
-    assert_eq!(online, 2, "every roster entry reports as online in the sim");
+    assert_eq!(online, 1, "only online roster entries count as online");
     assert_eq!(online_mobile, 0);
+}
+
+#[test]
+fn seeded_guild_roster_has_one_online_and_one_offline_member() {
+    let env = env();
+    let (total, online, first_online, second_online): (i32, i32, bool, bool) = env
+        .eval(
+            r#"
+            local total, online = GetNumGuildMembers()
+            local _, _, _, _, _, _, _, _, firstOnline = GetGuildRosterInfo(1)
+            local _, _, _, _, _, _, _, _, secondOnline = GetGuildRosterInfo(2)
+            return total, online, firstOnline, secondOnline
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(total, 2);
+    assert_eq!(online, 1);
+    assert!(first_online);
+    assert!(!second_online);
 }
 
 #[test]
 fn get_guild_roster_size_returns_total_count() {
     use wow_ui_sim::lua_api::state::GuildMember;
     let env = env();
-    env.state()
-        .borrow_mut()
-        .world
-        .guild_members
-        .push(GuildMember {
-            name: "Solo".into(),
-            rank_index: 1,
-        });
+    env.state().borrow_mut().world.guild_members = vec![GuildMember {
+        name: "Solo".into(),
+        rank_index: 1,
+        online: true,
+    }];
     let n: i32 = env.eval("return GetGuildRosterSize()").unwrap();
     assert_eq!(n, 1);
 }
@@ -208,6 +228,7 @@ fn get_guild_roster_info_synthesises_row_from_member_and_rank() {
         st.world.guild_members = vec![GuildMember {
             name: "Alpha".into(),
             rank_index: 2,
+            online: true,
         }];
         st.player.level = 80;
         st.player.class_index = 2; // Paladin
@@ -239,4 +260,26 @@ fn get_guild_roster_info_synthesises_row_from_member_and_rank() {
     assert_eq!(class, "Paladin");
     assert!(online);
     assert_eq!(class_file, "PALADIN");
+}
+
+#[test]
+fn get_guild_roster_info_reports_offline_member() {
+    use wow_ui_sim::lua_api::state::GuildMember;
+    let env = env();
+    env.state().borrow_mut().world.guild_members = vec![GuildMember {
+        name: "Offline".into(),
+        rank_index: 1,
+        online: false,
+    }];
+
+    let online: bool = env
+        .eval(
+            r#"
+            local _, _, _, _, _, _, _, _, online = GetGuildRosterInfo(1)
+            return online
+            "#,
+        )
+        .unwrap();
+
+    assert!(!online);
 }

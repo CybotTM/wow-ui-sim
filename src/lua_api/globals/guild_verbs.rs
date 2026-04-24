@@ -3,14 +3,14 @@
 //!
 //! Migrates 8 entries off `GLOBAL_NIL_STUBS`:
 //!
-//! - `GuildInvite(name)`           — appends a GuildMember at the lowest
-//!                                     rank. Fires `GUILD_ROSTER_UPDATE`.
+//! - `GuildInvite(name)` — appends a GuildMember at the lowest rank.
+//!   Fires `GUILD_ROSTER_UPDATE`.
 //! - `GuildUninvite(name)`         — remove by name. Fires `GUILD_ROSTER_UPDATE`.
 //! - `GuildKick(name)`             — alias of `GuildUninvite`.
-//! - `GuildLeave()`                — clears guild identity + roster. Fires
-//!                                     `GUILD_ROSTER_UPDATE`.
-//! - `GuildPromote(name)`          — decrement member's rank_index (minimum 1).
-//!                                     Fires `GUILD_ROSTER_UPDATE`.
+//! - `GuildLeave()` — clears guild identity + roster.
+//!   Fires `GUILD_ROSTER_UPDATE`.
+//! - `GuildPromote(name)` — decrement member's rank_index (minimum 1).
+//!   Fires `GUILD_ROSTER_UPDATE`.
 //! - `GuildSetMOTD(text)`          — write `world.guild_motd`. Fires `GUILD_MOTD`.
 //! - `RequestGuildRoster()`        — refresh signal. Fires `GUILD_ROSTER_UPDATE`.
 //! - `RequestGuildChallengeInfo()` — fires `GUILD_CHALLENGE_UPDATED`.
@@ -58,6 +58,7 @@ fn guild_invite(state: &mut LuaState) -> LuaResult<u32> {
         st.world.guild_members.push(GuildMember {
             name,
             rank_index: rank,
+            online: true,
         });
         st.world.guild_num_members = st.world.guild_num_members.saturating_add(1);
     }

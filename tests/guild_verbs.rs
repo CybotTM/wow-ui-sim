@@ -172,6 +172,13 @@ fn request_guild_roster_fires_event() {
 }
 
 #[test]
+fn c_guild_info_guild_roster_fires_event() {
+    let env = env();
+    env.exec("C_GuildInfo.GuildRoster()").unwrap();
+    assert!(fired(&env, "GUILD_ROSTER_UPDATE"));
+}
+
+#[test]
 fn request_guild_challenge_info_fires_challenge_updated() {
     let env = env();
     env.exec("RequestGuildChallengeInfo()").unwrap();
