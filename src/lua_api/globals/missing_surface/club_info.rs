@@ -12,6 +12,8 @@
 //!   `world.guild_name` is set, else an empty array.
 //! - `C_Club.GetClubMembers(clubId)` — returns an array of
 //!   `ClubMemberInfo`-like tables derived from `world.guild_members`.
+//! - `C_Club.GetStreams(clubId)` — returns an empty array; the simulator does
+//!   not model club chat streams yet.
 //! - `C_Club.GetClubCapacity(clubId)` — returns 1000 (hard-coded guild
 //!   capacity; retail is unbounded in practice).
 //! - `C_Club.IsEnabled()` — returns true unconditionally.
@@ -36,6 +38,7 @@ pub(super) fn register_club_info_surface(state: &mut LuaState) -> LuaResult<()> 
         c_club_get_subscribed_clubs,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetClubMembers", c_club_get_club_members)?;
+    table_set_rust_fn_static(state, table_ref, "GetStreams", c_club_get_streams)?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -66,6 +69,12 @@ fn c_club_get_club_members(state: &mut LuaState) -> LuaResult<u32> {
         let entry = build_member_info_table(state, member.rank_index, &member.name, index == 0);
         set_table_array(state, array, index as i64 + 1, entry);
     }
+    state.push(array);
+    Ok(1)
+}
+
+fn c_club_get_streams(state: &mut LuaState) -> LuaResult<u32> {
+    let array = create_table(state);
     state.push(array);
     Ok(1)
 }

@@ -236,8 +236,8 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
     ("C_CinematicList", "GetUICinematicList", stub_empty_table),
     // C_ClassTalents GetConfigIDsBySpecID is TalentState-backed in
     // missing_surface/traits.rs, not a stub.
-    // C_Club GetClubMembers / GetSubscribedClubs are WorldState-backed in
-    // missing_surface/club_info.rs, not stubs.
+    // C_Club GetClubMembers / GetStreams / GetSubscribedClubs are
+    // registered in missing_surface/club_info.rs, not stubs.
     (
         "C_ContentTracking",
         "GetCollectableSourceTypes",

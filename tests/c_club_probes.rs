@@ -127,3 +127,40 @@ fn get_club_capacity_returns_number() {
         .unwrap();
     assert!(capacity > 0, "guild capacity should be positive");
 }
+
+#[test]
+fn get_streams_returns_sortable_table() {
+    let env = env();
+    let (stream_type, count): (String, i32) = env
+        .eval(
+            r#"
+            local streams = C_Club.GetStreams('guild-0')
+            table.sort(streams, function(lhs, rhs)
+                return lhs.creationTime < rhs.creationTime
+            end)
+            return type(streams), #streams
+            "#,
+        )
+        .unwrap();
+    assert_eq!(stream_type, "table");
+    assert_eq!(count, 0);
+}
+
+#[test]
+fn club_unread_message_queries_have_safe_defaults() {
+    let env = env();
+    let (any_unread, stream_marker_type, settings_count): (bool, String, i32) = env
+        .eval(
+            r#"
+            local settings = C_Club.GetClubStreamNotificationSettings('guild-0')
+            return
+                C_Club.DoesAnyCommunityHaveUnreadMessages(),
+                type(C_Club.GetStreamViewMarker('guild-0', 1)),
+                #settings
+            "#,
+        )
+        .unwrap();
+    assert!(!any_unread);
+    assert_eq!(stream_marker_type, "nil");
+    assert_eq!(settings_count, 0);
+}
