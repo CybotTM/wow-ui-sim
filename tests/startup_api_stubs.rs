@@ -910,6 +910,17 @@ fn contribution_collector_namespace_exists_with_load_safe_defaults() {
 }
 
 #[test]
+fn region_helpers_return_us_region_defaults() {
+    let env = env();
+    let (region, region_name): (i32, String) = env
+        .eval("return GetCurrentRegion(), GetCurrentRegionName()")
+        .expect("region helpers should be callable");
+
+    assert_eq!(region, 1);
+    assert_eq!(region_name, "US");
+}
+
+#[test]
 fn setup_localization_runs_locale_setup_now_and_frame_setup_later() {
     let env = env();
     let (before_localize, before_frames): (i32, i32) = env
@@ -1290,11 +1301,12 @@ fn player_is_timerunning_returns_false() {
 #[test]
 fn startup_expansion_and_threat_stubs_return_safe_values() {
     let env = env();
-    let result: (f64, f64, f64, f64, f64, bool, bool, f64, f64, f64) = env
+    let result: (f64, f64, f64, f64, f64, f64, bool, bool, f64, f64, f64) = env
         .eval(
             r#"
             local detailedStatus = select(2, UnitDetailedThreatSituation("player", "target"))
             return UnitTrialBankedLevels("player"),
+                   GetServerExpansionLevel(),
                    GetClientDisplayExpansionLevel(),
                    GetAccountExpansionLevel(),
                    GetMaxLevelForExpansionLevel(0),
@@ -1310,19 +1322,20 @@ fn startup_expansion_and_threat_stubs_return_safe_values() {
     assert_eq!(result.0, 0.0);
     assert_eq!(result.1, 10.0);
     assert_eq!(result.2, 10.0);
-    assert_eq!(result.3, 80.0);
+    assert_eq!(result.3, 10.0);
     assert_eq!(result.4, 80.0);
+    assert_eq!(result.5, 80.0);
     assert!(
-        result.5,
+        result.6,
         "player should resolve as a human player in the sim"
     );
     assert!(
-        !result.6,
+        !result.7,
         "threat warning UI should default disabled in the sim"
     );
-    assert_eq!(result.7, 0.0);
     assert_eq!(result.8, 0.0);
     assert_eq!(result.9, 0.0);
+    assert_eq!(result.10, 0.0);
 }
 
 #[test]

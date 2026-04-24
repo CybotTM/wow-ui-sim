@@ -8,6 +8,9 @@ use super::{
     stub_role_none_enum, stub_zero,
 };
 
+const CURRENT_EXPANSION_LEVEL: f64 = 10.0;
+const CURRENT_REGION_ID: f64 = 1.0;
+
 static GLOBAL_NIL_STUBS: &[&str] = &[
     "AddFriend",
     "AgreeToSurvey",
@@ -237,7 +240,9 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
         "GetNumCompletedAchievements",
         stub_num_completed_achievements,
     ),
-    ("GetClassicExpansionLevel", stub_classic_expansion_level),
+    ("GetClassicExpansionLevel", stub_current_expansion_level),
+    ("GetCurrentRegion", stub_current_region),
+    ("GetServerExpansionLevel", stub_current_expansion_level),
     ("GetRepairAllCost", stub_repair_all_cost),
     ("UnitGroupRolesAssigned", stub_role_none),
     ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
@@ -258,8 +263,13 @@ fn stub_restricted_account_data(state: &mut LuaState) -> rilua::LuaResult<u32> {
     Ok(3)
 }
 
-fn stub_classic_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {
-    state.push(rilua::Val::Num(10.0));
+fn stub_current_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(CURRENT_EXPANSION_LEVEL));
+    Ok(1)
+}
+
+fn stub_current_region(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(CURRENT_REGION_ID));
     Ok(1)
 }
 

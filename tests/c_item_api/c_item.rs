@@ -252,6 +252,36 @@ fn test_c_item_get_detailed_item_level_info_real() {
 }
 
 #[test]
+fn test_c_item_get_current_item_level_from_item_location() {
+    let env = env();
+    let level: i32 = env
+        .eval("return C_Item.GetCurrentItemLevel({ bagID = 0, slotIndex = 1 })")
+        .unwrap();
+    assert_eq!(level, 1);
+}
+
+#[test]
+fn test_c_item_get_quality_and_stack_count_from_item_location() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 5, 159, 5)").unwrap();
+    let (quality, count): (i32, i32) = env
+        .eval("return C_Item.GetItemQuality({ bagID = 0, slotIndex = 5 }), C_Item.GetStackCount({ bagID = 0, slotIndex = 5 })")
+        .unwrap();
+    assert_eq!(quality, 1);
+    assert_eq!(count, 5);
+}
+
+#[test]
+fn test_c_item_binding_probes_return_booleans_for_item_location() {
+    let env = env();
+    let (is_bound, is_bound_until_equip): (bool, bool) = env
+        .eval("return C_Item.IsBound({ bagID = 0, slotIndex = 1 }), C_Item.IsBoundToAccountUntilEquip({ bagID = 0, slotIndex = 1 })")
+        .unwrap();
+    assert!(!is_bound);
+    assert!(!is_bound_until_equip);
+}
+
+#[test]
 fn test_c_item_get_item_count() {
     let env = env();
     let count: i32 = env.eval("return C_Item.GetItemCount(12345)").unwrap();

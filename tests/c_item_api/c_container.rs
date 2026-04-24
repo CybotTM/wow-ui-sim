@@ -129,6 +129,34 @@ fn test_c_container_get_item_link_after_add() {
 }
 
 #[test]
+fn test_c_container_item_link_matches_retail_parse_shape() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    let (item_id, item_context, bonus_count_is_safe): (String, String, bool) = env
+        .eval(
+            r#"
+            local link = C_Container.GetContainerItemLink(0, 1)
+            local _, _, itemID, _enchantID, _gemID1, _gemID2, _gemID3, _gemID4,
+                _suffixID, _uniqueID, _linkLevel, _specializationID, _modifiersMask,
+                itemContext, rest = strsplit(":", link, 15)
+            local numBonusIDs = nil
+            if rest ~= nil then
+                numBonusIDs = strsplit(":", rest, 2)
+            end
+            return itemID, itemContext, numBonusIDs == "" or tonumber(numBonusIDs) ~= nil
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(item_id, "6948");
+    assert_eq!(item_context, "");
+    assert!(
+        bonus_count_is_safe,
+        "the first variable item-link field must be empty or numeric"
+    );
+}
+
+#[test]
 fn test_c_container_get_item_cooldown_zero_when_ready() {
     let env = env();
     let (start, duration, enable): (f64, f64, i32) = env

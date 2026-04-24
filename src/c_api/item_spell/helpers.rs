@@ -2,20 +2,6 @@ use crate::lua_api::methods::{create_table, table_get};
 use rilua::Val;
 use rilua::vm::state::LuaState;
 
-pub(super) fn quality_color_hex(quality: u8) -> &'static str {
-    match quality {
-        0 => "9d9d9d",
-        1 => "ffffff",
-        2 => "1eff00",
-        3 => "0070dd",
-        4 => "a335ee",
-        5 => "ff8000",
-        6 => "e6cc80",
-        7 => "00ccff",
-        _ => "ffffff",
-    }
-}
-
 pub(crate) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",

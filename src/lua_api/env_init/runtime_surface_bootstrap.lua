@@ -7268,6 +7268,14 @@ if rawget(PlayerSpellsUtil, "OpenToClassSpecializationsTab") == nil then
     return PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassSpecializations)
   end
 end
+if rawget(PlayerSpellsUtil, "ToggleSpellBookFrame") == nil then
+  function PlayerSpellsUtil.ToggleSpellBookFrame(spellBookCategory)
+    return PlayerSpellsUtil.TogglePlayerSpellsFrame(
+      PlayerSpellsUtil.FrameTabs.SpellBook,
+      spellBookCategory
+    )
+  end
+end
 local __wow_bootstrap_open_to_spellbook_tab
 if rawget(PlayerSpellsUtil, "OpenToSpellBookTab") == nil then
   __wow_bootstrap_open_to_spellbook_tab = function()

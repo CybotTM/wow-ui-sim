@@ -1,6 +1,6 @@
 use super::helpers::{
     inv_type_to_class_id, inv_type_to_equip_loc, inv_type_to_subclass, item_class_from_inv_type,
-    item_class_name, item_subclass_name, quality_color_hex,
+    item_class_name, item_subclass_name,
 };
 use crate::c_api::ensure_namespace;
 use crate::items;
@@ -35,10 +35,8 @@ pub(crate) fn parse_item_id_from_val(state: &LuaState, value: Val) -> Option<u32
 pub(crate) fn item_link_for_id(item_id: u32) -> Option<String> {
     let item = items::get_item(item_id)?;
     Some(format!(
-        "|cff{}|Hitem:{}::::::::80:::::|h[{}]|h|r",
-        quality_color_hex(item.quality),
-        item_id,
-        item.name
+        "|cnIQ{}:|Hitem:{}::::::::80:70:::::::::|h[{}]|h|r",
+        item.quality, item_id, item.name
     ))
 }
 
@@ -106,12 +104,14 @@ fn register_c_item_metadata_queries(
             ("GetItemIconByID", c_item_get_item_icon_by_id),
             ("GetItemNameByID", c_item_get_item_name_by_id),
             ("GetItemQualityByID", c_item_get_item_quality_by_id),
+            ("GetItemQuality", c_item_get_item_quality),
             ("GetItemInfoInstant", c_item_get_item_info_instant),
             ("GetItemInfo", c_item_get_item_info),
             (
                 "GetDetailedItemLevelInfo",
                 c_item_get_detailed_item_level_info,
             ),
+            ("GetCurrentItemLevel", c_item_get_current_item_level),
             ("GetItemSubClassInfo", c_item_get_item_sub_class_info),
             ("GetItemClassInfo", c_item_get_item_class_info),
         ],
@@ -127,9 +127,12 @@ fn register_c_item_inventory_queries(
         table_ref,
         &[
             ("GetItemCount", c_item_get_item_count),
+            ("GetStackCount", c_item_get_stack_count),
             ("GetItemLink", c_item_get_item_link),
             ("GetItemCooldown", c_item_get_item_cooldown),
             ("GetItemGUID", c_item_get_item_guid),
+            ("IsBound", c_item_is_bound),
+            ("IsBoundToAccountUntilEquip", c_item_is_bound),
             ("IsHelpfulItem", c_item_is_helpful_item),
             ("IsHarmfulItem", c_item_is_harmful_item),
             (
@@ -289,11 +292,20 @@ fn c_item_get_item_name_by_id(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_item_get_item_quality_by_id(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = parse_item_id_from_val(state, stack_val(state, 1)).unwrap_or(0);
-    let quality = items::get_item(item_id)
-        .map(|item| item.quality as f64)
-        .unwrap_or_else(|| if item_id == 1 { 1.0 } else { 0.0 });
-    state.push(Val::Num(quality));
+    state.push(Val::Num(item_quality_for_id(item_id)));
     Ok(1)
+}
+
+fn c_item_get_item_quality(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = item_id_from_location_or_item_info(state, stack_val(state, 1)).unwrap_or(0);
+    state.push(Val::Num(item_quality_for_id(item_id)));
+    Ok(1)
+}
+
+fn item_quality_for_id(item_id: u32) -> f64 {
+    items::get_item(item_id)
+        .map(|item| item.quality as f64)
+        .unwrap_or_else(|| if item_id == 1 { 1.0 } else { 0.0 })
 }
 
 fn c_item_get_item_info_instant(state: &mut LuaState) -> LuaResult<u32> {
@@ -372,13 +384,23 @@ fn c_item_get_item_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_item_get_detailed_item_level_info(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = parse_item_id_from_val(state, stack_val(state, 1)).unwrap_or(0);
-    let level = items::get_item(item_id)
-        .map(|item| item.item_level as f64)
-        .unwrap_or(0.0);
+    let level = item_level_for_id(item_id);
     state.push(Val::Num(level));
     state.push(Val::Num(0.0));
     state.push(Val::Num(level));
     Ok(3)
+}
+
+fn c_item_get_current_item_level(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = item_id_from_location_or_item_info(state, stack_val(state, 1)).unwrap_or(0);
+    state.push(Val::Num(item_level_for_id(item_id)));
+    Ok(1)
+}
+
+fn item_level_for_id(item_id: u32) -> f64 {
+    items::get_item(item_id)
+        .map(|item| item.item_level as f64)
+        .unwrap_or(0.0)
 }
 
 fn c_item_get_item_sub_class_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -429,12 +451,44 @@ fn c_item_get_item_count(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_item_get_stack_count(state: &mut LuaState) -> LuaResult<u32> {
+    let value = stack_val(state, 1);
+    let count = match value {
+        Val::Table(_) => bag_stack_count(state, value),
+        _ => item_id_from_location_or_item_info(state, value)
+            .and_then(|item_id| items::get_item(item_id).map(|_| 1))
+            .unwrap_or(0),
+    };
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn bag_stack_count(state: &mut LuaState, location: Val) -> i32 {
+    let bag = match table_get(state, location, "bagID") {
+        Val::Num(number) => number as i32,
+        _ => 0,
+    };
+    let slot = match table_get(state, location, "slotIndex") {
+        Val::Num(number) => number as i32,
+        _ => 0,
+    };
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.get_bag_item(bag, slot).map(|(_, count)| count))
+        .unwrap_or(0)
+}
+
+fn c_item_is_bound(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
 fn c_item_get_item_link(state: &mut LuaState) -> LuaResult<u32> {
     let value = stack_val(state, 1);
     match item_id_from_location_or_item_info(state, value) {
         Some(item_id) => {
             let link = item_link_for_id(item_id).unwrap_or_else(|| {
-                format!("|cffffffff|Hitem:{item_id}::::::::80:::::|h[Unknown]|h|r")
+                format!("|cnIQ1:|Hitem:{item_id}::::::::80:70:::::::::|h[Unknown]|h|r")
             });
             let link = create_string(state, &link);
             state.push(link);
