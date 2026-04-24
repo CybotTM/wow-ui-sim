@@ -47,6 +47,57 @@ fn init_chat_type_colors_fills_missing_entries() {
     assert_eq!((r, g, b), (1.0, 1.0, 1.0));
 }
 
+#[test]
+fn init_chat_type_colors_ignores_inherited_rgb_defaults() {
+    let env = env();
+    env.exec(
+        r#"
+        local inheritedWhite = { r = 1, g = 1, b = 1 }
+        ChatTypeInfo.GUILD = setmetatable({ id = 3 }, { __index = inheritedWhite })
+        "#,
+    )
+    .unwrap();
+    wow_ui_sim::lua_api::chat_init::init_chat_type_colors(&env);
+    let (r, g, b): (f64, f64, f64) = env
+        .eval("return ChatTypeInfo.GUILD.r, ChatTypeInfo.GUILD.g, ChatTypeInfo.GUILD.b")
+        .unwrap();
+    assert_eq!((r, g, b), (0.25, 1.0, 0.25));
+}
+
+#[test]
+fn init_chat_type_colors_updates_proxy_entries() {
+    let env = env();
+    env.exec(
+        r#"
+        local proxy = { GUILD = { id = 3 } }
+        ChatTypeInfo = setmetatable({}, { __index = proxy })
+        "#,
+    )
+    .unwrap();
+    wow_ui_sim::lua_api::chat_init::init_chat_type_colors(&env);
+    let (r, g, b): (f64, f64, f64) = env
+        .eval("return ChatTypeInfo.GUILD.r, ChatTypeInfo.GUILD.g, ChatTypeInfo.GUILD.b")
+        .unwrap();
+    assert_eq!((r, g, b), (0.25, 1.0, 0.25));
+}
+
+#[test]
+fn init_chat_type_colors_replaces_placeholder_guild_white() {
+    let env = env();
+    env.exec(
+        r#"
+        local proxy = { GUILD = { id = 3, r = 1, g = 1, b = 1 } }
+        ChatTypeInfo = setmetatable({}, { __index = proxy })
+        "#,
+    )
+    .unwrap();
+    wow_ui_sim::lua_api::chat_init::init_chat_type_colors(&env);
+    let (r, g, b): (f64, f64, f64) = env
+        .eval("return ChatTypeInfo.GUILD.r, ChatTypeInfo.GUILD.g, ChatTypeInfo.GUILD.b")
+        .unwrap();
+    assert_eq!((r, g, b), (0.25, 1.0, 0.25));
+}
+
 /// Unknown keys fall back to the white {1,1,1} default.
 #[test]
 fn init_chat_type_colors_unknown_key_falls_back_to_white() {

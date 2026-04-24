@@ -32,11 +32,21 @@ pub fn init_chat_type_colors(env: &WowLuaEnv) {
             BN_WHISPER_INFORM={0,.8,1}, INSTANCE_CHAT={1,.5,0},
             INSTANCE_CHAT_LEADER={1,.5,0},
         }
-        for key, info in pairs(ChatTypeInfo) do
-            if not info.r then
-                local d = defaults[key] or {1, 1, 1}
-                info.r, info.g, info.b = d[1], d[2], d[3]
+        local function applyDefaults(chatTypeInfo)
+            for key, info in pairs(chatTypeInfo) do
+                local d = defaults[key]
+                if d or rawget(info, "r") == nil then
+                    d = d or {1, 1, 1}
+                    info.r, info.g, info.b = d[1], d[2], d[3]
+                end
             end
+        end
+
+        applyDefaults(ChatTypeInfo)
+
+        local mt = getmetatable(ChatTypeInfo)
+        if type(mt) == "table" and type(mt.__index) == "table" then
+            applyDefaults(mt.__index)
         end
     "#,
     );

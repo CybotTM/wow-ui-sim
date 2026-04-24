@@ -59,6 +59,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_uiparent_onupdate_worklists", || {
         patch_uiparent_onupdate_worklists(env);
     });
+    log_step(env, "init_chat_type_colors", || {
+        crate::lua_api::chat_init::init_chat_type_colors(env);
+    });
     log_step(env, "patch_chat_voice_button_surface", || {
         patch_chat_voice_button_surface(env);
     });
@@ -116,6 +119,7 @@ pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(REFRESH_ACTION_BUTTONS_LUA);
     crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
     crate::lua_api::workarounds_editmode::reapply_player_frame_anchor(env);
+    crate::lua_api::chat_init::init_chat_type_colors(env);
     crate::lua_api::chat_init::show_chat_frame(env);
     let _ = env.exec(
         r#"
