@@ -565,5 +565,5 @@ fn format_number(value: f64) -> String {
 }
 
 fn format_tooltip_value(value: f64) -> String {
-    format!("|cFFFFFFFF{}|r", format_number(value))
+    format_number(value)
 }

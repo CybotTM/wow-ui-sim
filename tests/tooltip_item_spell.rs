@@ -621,22 +621,10 @@ fn test_set_spell_by_id_replaces_armor_placeholder_for_shield_of_the_righteous()
         .iter()
         .find(|line| line.left_text.contains("Armor by"))
         .expect("Shield of the Righteous tooltip should include armor description");
-    for value in [expected_armor.to_string(), "4.5".to_string()] {
-        let segment = description_line
-            .left_segments
-            .iter()
-            .find(|segment| segment.text == value)
-            .unwrap_or_else(|| panic!("expected white value segment {value:?}"));
-        assert!(
-            (segment.color.0 - 1.0).abs() < 0.01
-                && (segment.color.1 - 1.0).abs() < 0.01
-                && (segment.color.2 - 1.0).abs() < 0.01,
-            "resolved value {value} should be highlighted white, got rgb=({:.3},{:.3},{:.3})",
-            segment.color.0,
-            segment.color.1,
-            segment.color.2
-        );
-    }
+    assert!(
+        description_line.left_segments.is_empty(),
+        "resolved numeric values should not invent inline color segments"
+    );
 }
 
 #[test]
@@ -681,11 +669,8 @@ fn test_set_spell_by_id_get_left_line_uses_tooltip_line_color() {
 }
 
 #[test]
-fn test_set_spell_by_id_get_left_line_preserves_inline_color_segments() {
+fn test_set_spell_by_id_get_left_line_does_not_invent_value_color_segments() {
     let env = WowLuaEnv::new().unwrap();
-    let expected_armor: i32 = env
-        .eval("local str = UnitStat('player', 1); return math.floor(str * 1.60 + 0.5)")
-        .unwrap();
 
     env.exec("GameTooltip:SetSpellByID(53600)").unwrap();
 
@@ -707,36 +692,15 @@ fn test_set_spell_by_id_get_left_line_preserves_inline_color_segments() {
     let td = state.tooltips.get(&gt_id).unwrap();
     let left_line_id = td.left_line_ids[line_index - 1];
     let line_frame = state.widgets.get(left_line_id).unwrap();
-    for value in [expected_armor.to_string(), "4.5".to_string()] {
-        let segment = line_frame
-            .text_segments
-            .iter()
-            .find(|segment| segment.text == value)
-            .unwrap_or_else(|| {
-                panic!(
-                    "expected rendered tooltip line {} to preserve value segment {value:?}; got {:?}",
-                    line_index + 1,
-                    line_frame.text_segments
-                )
-            });
-        assert!(
-            (segment.color.r - 1.0).abs() < 0.01
-                && (segment.color.g - 1.0).abs() < 0.01
-                && (segment.color.b - 1.0).abs() < 0.01,
-            "rendered value {value} should stay white, got rgb=({:.3},{:.3},{:.3})",
-            segment.color.r,
-            segment.color.g,
-            segment.color.b
-        );
-    }
+    assert!(
+        line_frame.text_segments.is_empty(),
+        "rendered numeric values should not invent inline color segments"
+    );
 }
 
 #[test]
-fn test_add_line_preserves_processing_info_inline_color_segments() {
+fn test_add_line_does_not_invent_processing_info_value_color_segments() {
     let env = WowLuaEnv::new().unwrap();
-    let expected_armor: i32 = env
-        .eval("local str = UnitStat('player', 1); return math.floor(str * 1.60 + 0.5)")
-        .unwrap();
 
     env.exec(
         r#"
@@ -761,27 +725,61 @@ fn test_add_line_preserves_processing_info_inline_color_segments() {
         .iter()
         .find(|line| line.left_text.contains("Armor by"))
         .expect("action tooltip should include Shield of the Righteous description");
-    for value in [expected_armor.to_string(), "4.5".to_string()] {
-        let segment = description_line
-            .left_segments
-            .iter()
-            .find(|segment| segment.text == value)
-            .unwrap_or_else(|| {
-                panic!(
-                    "expected data-handler tooltip to preserve value segment {value:?}; got {} segments",
-                    description_line.left_segments.len()
-                )
-            });
-        assert!(
-            (segment.color.0 - 1.0).abs() < 0.01
-                && (segment.color.1 - 1.0).abs() < 0.01
-                && (segment.color.2 - 1.0).abs() < 0.01,
-            "data-handler value {value} should stay white, got rgb=({:.3},{:.3},{:.3})",
-            segment.color.0,
-            segment.color.1,
-            segment.color.2
-        );
-    }
+    assert!(
+        description_line.left_segments.is_empty(),
+        "data-handler tooltip should not invent color segments for resolved numeric values"
+    );
+}
+
+#[test]
+fn test_add_line_preserves_explicit_processing_info_inline_color_segments() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local info = {
+            tooltipData = {
+                lines = {
+                    {
+                        leftText = "Requires Clearcasting",
+                        leftColor = NORMAL_FONT_COLOR,
+                        leftColorSegments = {
+                            { text = "Requires ", color = NORMAL_FONT_COLOR },
+                            { text = "Clearcasting", color = HIGHLIGHT_FONT_COLOR },
+                        },
+                    },
+                },
+            },
+        }
+        GameTooltip.processingInfo = info
+        GameTooltip:ClearLines()
+        local lineData = info.tooltipData.lines[1]
+        local r, g, b = lineData.leftColor:GetRGB()
+        GameTooltip:AddLine(lineData.leftText, r, g, b, lineData.wrapText)
+        GameTooltip.processingInfo = nil
+        "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let line = td.lines.first().unwrap();
+    let highlighted = line
+        .left_segments
+        .iter()
+        .find(|segment| segment.text == "Clearcasting")
+        .expect("AddLine should preserve explicit processingInfo color segments");
+
+    assert!(
+        (highlighted.color.0 - 1.0).abs() < 0.01
+            && (highlighted.color.1 - 1.0).abs() < 0.01
+            && (highlighted.color.2 - 1.0).abs() < 0.01,
+        "explicit highlighted segment should stay white, got rgb=({:.3},{:.3},{:.3})",
+        highlighted.color.0,
+        highlighted.color.1,
+        highlighted.color.2
+    );
 }
 
 #[test]
