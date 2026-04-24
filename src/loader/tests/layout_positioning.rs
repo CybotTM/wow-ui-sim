@@ -96,6 +96,30 @@ fn test_get_rect_recovers_pending_layout_for_anchored_frame() {
 }
 
 #[test]
+fn test_scroll_child_without_explicit_anchor_has_queryable_rect() {
+    let (t, _) = load_test_lua(
+        "layout-scroll-child-implicit-anchor",
+        r#"
+        local scrollFrame = CreateFrame("ScrollFrame", "ImplicitAnchorScrollFrame", UIParent)
+        scrollFrame:SetSize(200, 100)
+        scrollFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 40, -60)
+
+        local scrollChild = CreateFrame("Frame", "ImplicitAnchorScrollChild")
+        scrollChild:SetSize(180, 300)
+        scrollFrame:SetScrollChild(scrollChild)
+
+        CHILD_TOP_COUNT = select('#', scrollChild:GetTop())
+        CHILD_BOTTOM_COUNT = select('#', scrollChild:GetBottom())
+        TOP_DIFF = math.abs(scrollChild:GetTop() - scrollFrame:GetTop())
+    "#,
+    );
+
+    assert_eq!(t.env.eval::<i32>("return CHILD_TOP_COUNT").unwrap(), 1);
+    assert_eq!(t.env.eval::<i32>("return CHILD_BOTTOM_COUNT").unwrap(), 1);
+    assert!(t.env.eval::<f64>("return TOP_DIFF").unwrap() < 0.01);
+}
+
+#[test]
 fn test_topleft_at_origin() {
     let (t, _) = load_test_lua(
         "layout-pos-tl-origin",
