@@ -19,14 +19,39 @@
 //!
 //! Registered from `register_tail_globals` after `missing_surface`.
 
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state_mut, call_function_state, create_string, create_table};
 use crate::lua_api::state::MacroInfo;
 use crate::lua_api::state_types::CursorInfo;
-use crate::lua_bridge::{FromStack, stack_val};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 const PET_ACTION_SPELL_OFFSET: u32 = 1_000_000;
+
+fn ensure_namespace_table(state: &mut LuaState, namespace: &'static str) -> GcRef<Table> {
+    let key = state.gc.intern_string_static(namespace.as_bytes());
+    let global = state.global;
+    let existing = state
+        .gc
+        .tables
+        .get(global)
+        .map(|table| table.get_str(key, &state.gc.string_arena));
+    if let Some(Val::Table(table_ref)) = existing {
+        return table_ref;
+    }
+
+    let table = create_table(state);
+    let Val::Table(table_ref) = table else {
+        unreachable!("create_table must return a table");
+    };
+    if let Some(global_table) = state.gc.tables.get_mut(global) {
+        let _ = global_table.raw_set(Val::Str(key), table, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(global);
+    table_ref
+}
 
 fn stack_u32(state: &mut LuaState, index: i32) -> Option<u32> {
     match stack_val(state, index) {
@@ -125,6 +150,56 @@ fn stop_macro(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `C_Macro.RunMacroText(text [, button])` — execute the supported secure macro
+/// slash commands through the same globals SecureTemplates would have called.
+fn run_macro_text(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(text) = stack_string(state, 1) else {
+        return Ok(0);
+    };
+
+    for line in text.lines() {
+        run_macro_text_line(state, line)?;
+    }
+    Ok(0)
+}
+
+fn run_macro_text_line(state: &mut LuaState, line: &str) -> LuaResult<()> {
+    let trimmed = line.trim();
+    if trimmed.is_empty() || !trimmed.starts_with('/') {
+        return Ok(());
+    }
+
+    let Some((command, argument)) = split_macro_command(trimmed) else {
+        return Ok(());
+    };
+    match command.as_str() {
+        "/target" | "/tar" => call_named_global(state, "TargetUnit", argument),
+        "/focus" => call_named_global(state, "FocusUnit", argument),
+        "/cast" | "/spell" => call_named_global(state, "CastSpellByName", argument),
+        _ => Ok(()),
+    }
+}
+
+fn split_macro_command(line: &str) -> Option<(String, &str)> {
+    let mut parts = line.splitn(2, char::is_whitespace);
+    let command = parts.next()?.to_ascii_lowercase();
+    let argument = parts.next().unwrap_or_default().trim();
+    if argument.is_empty() {
+        return None;
+    }
+    Some((command, argument))
+}
+
+fn call_named_global(state: &mut LuaState, name: &str, argument: &str) -> LuaResult<()> {
+    let function = LuaApiMut::get_global_val(state, name);
+    if !matches!(function, Val::Function(_)) {
+        return Ok(());
+    }
+    let argument = create_string(state, argument);
+    call_function_state(state, function, &[argument])?;
+    Ok(())
+}
+
 /// `EditMacro(index_or_name, name?, icon?, body?)` — update a macro slot
 /// in-place. Passing an index beyond current length grows the macro table
 /// with empty entries until the slot exists.
@@ -174,5 +249,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "RunMacro", run_macro)?;
     LuaApiMut::register_function(lua, "StopMacro", stop_macro)?;
     LuaApiMut::register_function(lua, "EditMacro", edit_macro)?;
+    let c_macro = ensure_namespace_table(lua.state_mut(), "C_Macro");
+    table_set_rust_fn_static(lua.state_mut(), c_macro, "RunMacroText", run_macro_text)?;
     Ok(())
 }

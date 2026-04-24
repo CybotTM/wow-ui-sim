@@ -695,6 +695,38 @@ fn assert_blizzard_action_button_click_casts_via_use_action(env: &WowLuaEnv) {
 }
 
 #[test]
+fn blizzard_secure_action_button_macrotext_targets_unit() {
+    test_timeout! {
+        let env = env_with_full_ui();
+        install_test_error_handler(&env);
+        env.exec("ClearTarget()").expect("clear target");
+
+        env.exec(r#"
+            local btn = CreateFrame("Button", "TestMacroTextBtn", UIParent, "SecureActionButtonTemplate")
+            btn:SetAttribute("type", "macro")
+            btn:SetAttribute("macrotext", "/target party2")
+            btn:SetSize(40, 40)
+            local handler = btn:GetScript("OnClick")
+            if handler then
+                handler(btn, "LeftButton", false)
+                if UnitName("target") ~= "Kazzara" then
+                    handler(btn, "LeftButton", true)
+                end
+            end
+        "#).expect("click macrotext button");
+
+        let fatal: Vec<String> = drain_test_errors(&env)
+            .into_iter()
+            .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
+            .collect();
+        assert!(fatal.is_empty(), "macrotext click errors:\n{}", fatal.join("\n"));
+
+        let target_name: String = env.eval("return UnitName('target') or ''").unwrap();
+        assert_eq!(target_name, "Kazzara", "macrotext should target party2");
+    }
+}
+
+#[test]
 fn blizzard_full_ui_click_chain_targets_and_casts() {
     test_timeout! {
         common::with_perf_lock(|| {
