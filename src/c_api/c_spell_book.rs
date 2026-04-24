@@ -471,6 +471,9 @@ fn c_spell_book_find_spell_book_slot_for_spell(state: &mut LuaState) -> LuaResul
 fn c_spell_book_cast_spell_book_item(state: &mut LuaState) -> LuaResult<u32> {
     let slot = i32::from_stack(state, 1)?;
     let _spell_bank = Option::<i32>::from_stack(state, 2)?;
+    if borrow_state(state)?.casting.is_some() {
+        return Ok(0);
+    }
     let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
         return Ok(0);
     };

@@ -8,6 +8,7 @@
 //! |----------------------|----------------------------|
 //! | `TargetUnit`         | `PLAYER_TARGET_CHANGED`    |
 //! | `FocusUnit`          | `PLAYER_FOCUS_CHANGED`     |
+//! | `AssistUnit`         | `PLAYER_TARGET_CHANGED`    |
 //! | `ClearTarget`        | `PLAYER_TARGET_CHANGED`    |
 //! | `ClearFocus`         | `PLAYER_FOCUS_CHANGED`     |
 //! | `CanBeRaidTarget`    | none (query only)          |
@@ -237,6 +238,36 @@ pub fn focus_unit(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn assisted_target_for_unit(state: &mut LuaState, token: &str) -> LuaResult<Option<TargetInfo>> {
+    let Some(unit) = resolve_token_to_target_info(state, token)? else {
+        return Ok(None);
+    };
+    if unit.is_enemy {
+        let st = borrow_state(state)?;
+        return Ok(Some(player_target_info(&st)));
+    }
+    Ok(Some(default_enemy_target_info()))
+}
+
+/// `AssistUnit(unit)` — target the selected unit's simulated target.
+pub fn assist_unit(state: &mut LuaState) -> LuaResult<u32> {
+    let token = match Option::<String>::from_stack(state, 1)? {
+        Some(t) => t,
+        None => return Ok(0),
+    };
+    let Some(new_target) = assisted_target_for_unit(state, &token)? else {
+        return Ok(0);
+    };
+    {
+        let mut st = borrow_state_mut(state)?;
+        let old = st.current_target.take();
+        st.previous_target = old;
+        st.current_target = Some(new_target);
+    }
+    push_target_changed(state)?;
+    Ok(0)
+}
+
 /// `ClearTarget()` — clear `current_target`, snapshot to `previous_target`.
 pub fn clear_target(state: &mut LuaState) -> LuaResult<u32> {
     {
@@ -392,6 +423,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let g = state.global;
     table_set_rust_fn_static(state, g, "TargetUnit", target_unit)?;
     table_set_rust_fn_static(state, g, "FocusUnit", focus_unit)?;
+    table_set_rust_fn_static(state, g, "AssistUnit", assist_unit)?;
     table_set_rust_fn_static(state, g, "ClearTarget", clear_target)?;
     table_set_rust_fn_static(state, g, "ClearFocus", clear_focus)?;
     table_set_rust_fn_static(state, g, "CanBeRaidTarget", can_be_raid_target)?;

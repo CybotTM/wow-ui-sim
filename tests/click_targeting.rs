@@ -727,6 +727,72 @@ fn blizzard_secure_action_button_macrotext_targets_unit() {
 }
 
 #[test]
+fn blizzard_secure_unit_button_focus_action_sets_focus_unit() {
+    test_timeout! {
+        let env = env_with_full_ui();
+        install_test_error_handler(&env);
+        env.exec("ClearFocus()").expect("clear focus");
+        env.state().borrow_mut().party_group_active = true;
+
+        env.exec(r#"
+            local btn = CreateFrame("Button", "TestFocusUnitBtn", UIParent, "SecureUnitButtonTemplate")
+            SecureUnitButton_OnLoad(btn, "party2")
+            btn:SetAttribute("*type1", "focus")
+            btn:SetSize(40, 40)
+            local handler = btn:GetScript("OnClick")
+            if handler then
+                handler(btn, "LeftButton", false)
+                if UnitName("focus") ~= "Kazzara" then
+                    handler(btn, "LeftButton", true)
+                end
+            end
+        "#).expect("click focus unit button");
+
+        let fatal: Vec<String> = drain_test_errors(&env)
+            .into_iter()
+            .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
+            .collect();
+        assert!(fatal.is_empty(), "focus click errors:\n{}", fatal.join("\n"));
+
+        let focus_name: String = env.eval("return UnitName('focus') or ''").unwrap();
+        assert_eq!(focus_name, "Kazzara", "focus action should focus party2");
+    }
+}
+
+#[test]
+fn blizzard_secure_unit_button_assist_action_targets_assisted_unit_target() {
+    test_timeout! {
+        let env = env_with_full_ui();
+        install_test_error_handler(&env);
+        env.exec("ClearTarget()").expect("clear target");
+        env.state().borrow_mut().party_group_active = true;
+
+        env.exec(r#"
+            local btn = CreateFrame("Button", "TestAssistUnitBtn", UIParent, "SecureUnitButtonTemplate")
+            SecureUnitButton_OnLoad(btn, "party1")
+            btn:SetAttribute("*type1", "assist")
+            btn:SetSize(40, 40)
+            local handler = btn:GetScript("OnClick")
+            if handler then
+                handler(btn, "LeftButton", false)
+                if UnitName("target") ~= "Hogger" then
+                    handler(btn, "LeftButton", true)
+                end
+            end
+        "#).expect("click assist unit button");
+
+        let fatal: Vec<String> = drain_test_errors(&env)
+            .into_iter()
+            .filter(|e| !e.contains("C_PingSecure") && !e.contains("ClassResourceBar"))
+            .collect();
+        assert!(fatal.is_empty(), "assist click errors:\n{}", fatal.join("\n"));
+
+        let target_name: String = env.eval("return UnitName('target') or ''").unwrap();
+        assert_eq!(target_name, "Hogger", "assist action should target party1's simulated target");
+    }
+}
+
+#[test]
 fn blizzard_full_ui_click_chain_targets_and_casts() {
     test_timeout! {
         common::with_perf_lock(|| {
