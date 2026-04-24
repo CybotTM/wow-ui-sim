@@ -35,6 +35,26 @@ if CreateColor == nil then
   end
 end
 
+local __wow_console_font_height = 14
+
+if ConsoleGetColorFromType == nil then
+  function ConsoleGetColorFromType(_colorType)
+    return CreateColor(1, 1, 1)
+  end
+end
+
+if ConsoleGetFontHeight == nil then
+  function ConsoleGetFontHeight()
+    return __wow_console_font_height
+  end
+end
+
+if ConsoleSetFontHeight == nil then
+  function ConsoleSetFontHeight(fontHeightInPixels)
+    __wow_console_font_height = tonumber(fontHeightInPixels) or __wow_console_font_height
+  end
+end
+
 local function __wow_noop()
 end
 
