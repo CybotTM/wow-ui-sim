@@ -11,12 +11,63 @@ fn env() -> WowLuaEnv {
 // ============================================================================
 
 #[test]
-fn test_securecmdoptionparse_returns_last() {
+fn test_securecmdoptionparse_uses_fallback_when_condition_is_false() {
     let env = env();
     let result: String = env
         .eval("return SecureCmdOptionParse('[mod:shift] action1; action2')")
         .unwrap();
     assert_eq!(result, "action2");
+}
+
+#[test]
+fn test_securecmdoptionparse_matches_modifier_and_comma_conditions() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetShiftKeyDown(true)
+        A_Admin.SetTarget("Friendly", 70, 2, false)
+    "#,
+    )
+    .unwrap();
+    let result: String = env
+        .eval("return SecureCmdOptionParse('[mod:shift,noharm] Flash Heal; [combat] Crusader Strike; fallback')")
+        .unwrap();
+    assert_eq!(result, "Flash Heal");
+}
+
+#[test]
+fn test_securecmdoptionparse_uses_first_matching_combat_clause() {
+    let env = env();
+    env.exec("A_Admin.SetInCombat(true)").unwrap();
+    let result: String = env
+        .eval("return SecureCmdOptionParse('[mod:shift] shifted; [combat] combat_spell; fallback')")
+        .unwrap();
+    assert_eq!(result, "combat_spell");
+}
+
+#[test]
+fn test_securecmdoptionparse_supports_harm_and_unit_override() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetTarget("Friendly", 70, 2, false)
+        A_Admin.SetFocus("Enemy", 70, 1, true)
+    "#,
+    )
+    .unwrap();
+    let result: String = env
+        .eval("return SecureCmdOptionParse('[@target,harm] target_harm; [@focus,harm] focus_harm; fallback')")
+        .unwrap();
+    assert_eq!(result, "focus_harm");
+}
+
+#[test]
+fn test_securecmdoptionparse_returns_nil_when_no_clause_matches() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return SecureCmdOptionParse('[combat] combat_only; [mod:alt] alt_only') == nil")
+        .unwrap();
+    assert!(is_nil);
 }
 
 #[test]
