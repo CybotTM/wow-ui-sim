@@ -107,6 +107,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_container_frame_token_tracker", || {
         patch_container_frame_token_tracker(env);
     });
+    log_step(env, "patch_housing_dashboard_preload", || {
+        patch_housing_dashboard_preload(&env.loader_env());
+    });
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
@@ -267,7 +270,10 @@ pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addo
     if addon_name == "Blizzard_Collections" {
         patch_collections_journal_namespace(env);
     }
-    if addon_name == "Blizzard_HousingDashboard" {
+    if matches!(
+        addon_name,
+        "Blizzard_HousingDashboard" | "Blizzard_HousingHouseFinder"
+    ) {
         patch_housing_dashboard_preload(env);
     }
 }
@@ -319,6 +325,88 @@ fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
                 end
             end
 
+            if type(ClearCachedActivitiesForPlayer) ~= "function" then
+                function ClearCachedActivitiesForPlayer() end
+            end
+
+            local HOUSING_SIM_NEIGHBORHOODS = {
+                {
+                    neighborhoodGUID = "wow-ui-sim-neighborhood-dawnmeadow",
+                    neighborhoodName = "Dawnmeadow",
+                    neighborhoodType = Enum.NeighborhoodType.Public,
+                    neighborhoodOwnerType = Enum.NeighborhoodOwnerType.None,
+                    suggestionReason = Enum.HouseFinderSuggestionReason.None,
+                },
+                {
+                    neighborhoodGUID = "wow-ui-sim-neighborhood-umber-grove",
+                    neighborhoodName = "Umber Grove",
+                    neighborhoodType = Enum.NeighborhoodType.Public,
+                    neighborhoodOwnerType = Enum.NeighborhoodOwnerType.None,
+                    suggestionReason = Enum.HouseFinderSuggestionReason.None,
+                },
+            }
+
+            local HOUSING_SIM_MAP_IDS = {
+                ["wow-ui-sim-neighborhood-dawnmeadow"] = 1,
+                ["wow-ui-sim-neighborhood-umber-grove"] = 2248,
+            }
+
+            local HOUSING_SIM_TEXTURE_SUFFIXES = {
+                ["wow-ui-sim-neighborhood-dawnmeadow"] = "elwynn",
+                ["wow-ui-sim-neighborhood-umber-grove"] = "durotar",
+            }
+
+            function C_Housing.HouseFinderRequestNeighborhoods()
+                if HouseFinderFrame and type(HouseFinderFrame.OnEvent) == "function" then
+                    HouseFinderFrame:OnEvent("NEIGHBORHOOD_LIST_UPDATED", Enum.HousingResult.Success, HOUSING_SIM_NEIGHBORHOODS)
+                end
+                if type(FireEvent) == "function" then
+                    FireEvent("NEIGHBORHOOD_LIST_UPDATED", Enum.HousingResult.Success, HOUSING_SIM_NEIGHBORHOODS)
+                end
+            end
+
+            function C_Housing.GetUIMapIDForNeighborhood(neighborhoodGUID)
+                return HOUSING_SIM_MAP_IDS[neighborhoodGUID]
+            end
+
+            function C_Housing.GetNeighborhoodTextureSuffix(neighborhoodGUID)
+                return HOUSING_SIM_TEXTURE_SUFFIXES[neighborhoodGUID]
+            end
+
+            function C_Housing.DoesFactionMatchNeighborhood(neighborhoodGUID)
+                return true
+            end
+
+            function C_Housing.RequestHouseFinderNeighborhoodData(neighborhoodGUID, neighborhoodName)
+                local mapPlotData = {
+                    {
+                        mapPosition = { x = 0.35, y = 0.46 },
+                        ownerType = Enum.HousingPlotOwnerType.None,
+                        plotID = 1,
+                        plotCost = 100000,
+                    },
+                    {
+                        mapPosition = { x = 0.62, y = 0.52 },
+                        ownerName = "Simfriend",
+                        ownerType = Enum.HousingPlotOwnerType.Friend,
+                        plotID = 2,
+                    },
+                }
+                local function dispatchNeighborhoodData()
+                    if HouseFinderFrame and type(HouseFinderFrame.OnEvent) == "function" then
+                        HouseFinderFrame:OnEvent("HOUSE_FINDER_NEIGHBORHOOD_DATA_RECIEVED", mapPlotData)
+                    end
+                    if type(FireEvent) == "function" then
+                        FireEvent("HOUSE_FINDER_NEIGHBORHOOD_DATA_RECIEVED", mapPlotData)
+                    end
+                end
+                if type(C_Timer) == "table" and type(C_Timer.After) == "function" then
+                    C_Timer.After(0, dispatchNeighborhoodData)
+                else
+                    dispatchNeighborhoodData()
+                end
+            end
+
             function C_Housing.StartTutorial()
                 if type(C_AddOns) == "table" and type(C_AddOns.LoadAddOn) == "function" then
                     if not AUTOCOMPLETE_LIST or not AUTOCOMPLETE_LIST.HOUSE_FINDER then
@@ -330,6 +418,9 @@ fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
                 end
                 if HouseFinderFrame and type(ShowUIPanel) == "function" then
                     ShowUIPanel(HouseFinderFrame)
+                end
+                if HouseFinderFrame and not HouseFinderFrame.hasNeighborhoodList then
+                    C_Housing.HouseFinderRequestNeighborhoods()
                 end
                 if HousingDashboardFrame and type(HideUIPanel) == "function" then
                     HideUIPanel(HousingDashboardFrame)
@@ -1127,6 +1218,10 @@ pub(crate) fn patch_account_store_set_storefront(
 fn patch_map_canvas_scroll_container(env: &crate::lua_api::LoaderEnv<'_>) {
     let _ = env.exec(
         r#"
+if type(ClearCachedActivitiesForPlayer) ~= "function" then
+  function ClearCachedActivitiesForPlayer() end
+end
+
 local function __wow_find_first_scroll_frame_child(parent)
   if type(parent) ~= "table" or type(parent.GetNumChildren) ~= "function" or type(parent.GetChildren) ~= "function" then
     return nil
