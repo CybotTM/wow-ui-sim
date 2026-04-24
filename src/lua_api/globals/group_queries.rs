@@ -15,7 +15,7 @@
 //! A_Admin RustFn table; group/unit queries have different semantics and
 //! share no code with it.
 
-use crate::lua_api::game_data::{CLASS_LABELS, RACE_DATA};
+use crate::lua_api::game_data::{CLASS_LABELS, PartyMember, RACE_DATA};
 use crate::lua_api::methods::{borrow_state, create_string, create_table, table_get, table_set};
 use crate::lua_bridge::FromStack;
 use rilua::vm::closure::{Closure, RustClosure};
@@ -35,12 +35,14 @@ fn register_group_status(state: &mut LuaState) {
     set_global(state, "GetNumSubgroupMembers", get_num_subgroup_members);
     set_global(state, "GetNumPartyMembers", get_num_subgroup_members);
     set_global(state, "GetNumRaidMembers", get_num_raid_members);
+    set_global(state, "GetRaidRosterInfo", get_raid_roster_info);
     set_global(state, "IsInGroup", is_in_group);
     set_global(state, "IsInRaid", is_in_raid);
     set_global(state, "IsPartyLFG", is_party_lfg);
     set_global(state, "IsGroupLeader", is_group_leader);
     set_global(state, "IsEveryoneAssistant", is_everyone_assistant);
     set_global(state, "IsPartyWorldPVP", always_false);
+    set_global(state, "GetPartyAssignment", get_party_assignment);
 }
 
 fn register_unit_queries(state: &mut LuaState) {
@@ -168,6 +170,61 @@ fn get_num_raid_members(state: &mut LuaState) -> LuaResult<u32> {
     let party_count = active_party_count(state)?;
     let n = if party_count >= 6 { party_count + 1 } else { 0 };
     state.push(Val::Num(n as f64));
+    Ok(1)
+}
+
+fn get_raid_roster_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?.max(0) as usize;
+    let Some(member) = raid_roster_member(state, index)? else {
+        push_empty_raid_roster_info(state);
+        return Ok(12);
+    };
+
+    push_raid_roster_info(state, index, &member);
+    Ok(12)
+}
+
+fn raid_roster_member(state: &LuaState, index: usize) -> LuaResult<Option<PartyMember>> {
+    let st = borrow_state(state)?;
+    let raid_active = st.party_group_active && st.party_members.len() >= 6 && index > 0;
+    let member = raid_active
+        .then(|| st.party_members.get(index - 1))
+        .flatten()
+        .cloned();
+    Ok(member)
+}
+
+fn push_empty_raid_roster_info(state: &mut LuaState) {
+    for _ in 0..12 {
+        state.push(Val::Nil);
+    }
+}
+
+fn push_raid_roster_info(state: &mut LuaState, index: usize, member: &PartyMember) {
+    let name = create_string(state, &member.name);
+    let subgroup = ((index - 1) / 5 + 1) as f64;
+    let (_, class_file, _) = class_info(member.class_index);
+    let class_file = create_string(state, class_file);
+    let assigned_role = create_string(state, "NONE");
+
+    state.push(name);
+    state.push(Val::Nil);
+    state.push(Val::Num(subgroup));
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(class_file);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    state.push(assigned_role);
+}
+
+fn get_party_assignment(state: &mut LuaState) -> LuaResult<u32> {
+    let _assignment = Option::<String>::from_stack(state, 1)?;
+    let _unit = Option::<String>::from_stack(state, 2)?;
+    state.push(Val::Bool(false));
     Ok(1)
 }
 

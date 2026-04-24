@@ -26,16 +26,33 @@ use std::rc::Rc;
 /// `(id as u32, (id >> 32) as u32)`.
 pub fn frame_id_from_stack(state: &LuaState, index: i32) -> LuaResult<u64> {
     let val = stack_val(state, index);
+    frame_id_from_val(state, val)
+}
+
+fn frame_id_from_val(state: &LuaState, val: Val) -> LuaResult<u64> {
     let Val::Table(table_ref) = val else {
         return Err(runtime_error("expected frame table as self argument"));
     };
-    let backing = state
-        .gc
-        .tables
-        .get(table_ref)
-        .and_then(|t| t.backing())
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return Err(runtime_error("expected frame-backed table"));
+    };
+    if let Some(backing) = table.backing() {
+        return Ok((backing.0 as u64) | ((backing.1 as u64) << 32));
+    }
+    let backing = frame_surrogate_backing(state, table)
         .ok_or_else(|| runtime_error("expected frame-backed table"))?;
     Ok((backing.0 as u64) | ((backing.1 as u64) << 32))
+}
+
+fn frame_surrogate_backing(state: &LuaState, table: &Table) -> Option<(u32, u32)> {
+    let Val::Table(real_frame_ref) = table.get_int(1) else {
+        return None;
+    };
+    state
+        .gc
+        .tables
+        .get(real_frame_ref)
+        .and_then(|real_frame| real_frame.backing())
 }
 
 /// Borrow `SimState` immutably from rilua's app_data.

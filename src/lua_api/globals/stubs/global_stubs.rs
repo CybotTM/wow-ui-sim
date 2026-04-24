@@ -198,7 +198,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // not a stub.
     // GetQuestLogTimeLeft / QuestMapUpdateAllQuests are SimState-backed in
     // quest_surface.rs, not stubs.
-    "GetRaidRosterInfo",
+    // GetRaidRosterInfo is SimState-backed in group_queries.rs, not a stub.
     "GetRelicSlotType",
     "GetRestState",
     // GetSelectedSkill / GetSkillLineInfo are SimState-backed in
