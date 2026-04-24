@@ -163,12 +163,17 @@ pub(super) struct WidgetTextLayout<'a> {
     pub(super) alpha: f32,
 }
 
+fn effective_word_wrap(f: &crate::widget::Frame, requested_word_wrap: bool) -> bool {
+    requested_word_wrap && !f.width_is_text_auto
+}
+
 /// Emit text quads for a widget, extracting color/shadow from the frame.
 pub(super) fn emit_widget_text_quads(
     text_renderer: &mut WidgetTextRenderer<'_>,
     f: &crate::widget::Frame,
-    layout: WidgetTextLayout<'_>,
+    mut layout: WidgetTextLayout<'_>,
 ) {
+    layout.word_wrap = effective_word_wrap(f, layout.word_wrap);
     let color = color_with_alpha(&f.text_color, layout.alpha);
     let shadow = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, layout.alpha));
     if !f.text_segments.is_empty() {
@@ -594,6 +599,25 @@ mod tests {
             .vertices
             .iter()
             .any(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color)
+    }
+
+    #[test]
+    fn text_auto_width_disables_render_wrapping() {
+        let mut frame = Frame::new(crate::widget::WidgetType::FontString, None, None);
+        frame.word_wrap = true;
+        frame.width_is_text_auto = true;
+
+        assert!(!effective_word_wrap(&frame, true));
+    }
+
+    #[test]
+    fn explicit_text_width_keeps_render_wrapping() {
+        let mut frame = Frame::new(crate::widget::WidgetType::FontString, None, None);
+        frame.word_wrap = true;
+        frame.width = 40.0;
+        frame.width_is_text_auto = false;
+
+        assert!(effective_word_wrap(&frame, true));
     }
 
     /// A frame that only has a nine-slice layout registered (no active
