@@ -2,6 +2,14 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-24] add | achievement panel hide investigation
+
+Added `investigations/achievement-panel-hide.md` to document the achievement
+panel hide fix. The simulator workaround now delegates to Blizzard's real
+`AchievementFrame_ToggleAchievementFrame()` / managed `HideUIPanel` path, and
+animation advancement now fires child animation `OnFinished` handlers so XML
+outro hide scripts can run. Updated `index.md` with the new page.
+
 ## [2026-04-24] update | taint-system doc refresh
 
 Updated `systems/taint-system.md` to match the current rilua implementation and added a Blizzard `issecure()` call-site matrix with test coverage references.

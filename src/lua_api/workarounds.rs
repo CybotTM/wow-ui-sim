@@ -2191,7 +2191,7 @@ if __wow_panel_getglobal ~= nil then
         rawset(_G, "__wow_achievement_summary_empty_text_patched", true)
     end
 
-    function ToggleAchievementFrame(stats)
+    function ToggleAchievementFrame(stats, toggleGuildView)
         local kiosk = __wow_getglobal("Kiosk")
         if ( (kiosk and kiosk.IsEnabled and kiosk.IsEnabled()) or __wow_getglobal("DISALLOW_FRAME_TOGGLING") ) then
             return;
@@ -2208,12 +2208,27 @@ if __wow_panel_getglobal ~= nil then
             return;
         end
 
+        local achievementToggle = __wow_getglobal("AchievementFrame_ToggleAchievementFrame")
+        if type(achievementToggle) == "function" then
+            return achievementToggle(stats, toggleGuildView)
+        end
+
         local requestedTab = stats and 3 or 1
         if achievementFrame:IsShown() and achievementFrame.selectedTab == requestedTab then
-            achievementFrame:Hide();
+            local hideUIPanel = __wow_getglobal("HideUIPanel")
+            if type(hideUIPanel) == "function" then
+                hideUIPanel(achievementFrame)
+            else
+                achievementFrame:Hide();
+            end
         else
             achievementFrame.selectedTab = requestedTab
-            achievementFrame:Show();
+            local showUIPanel = __wow_getglobal("ShowUIPanel")
+            if type(showUIPanel) == "function" then
+                showUIPanel(achievementFrame)
+            else
+                achievementFrame:Show();
+            end
         end
     end
 end

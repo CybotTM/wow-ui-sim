@@ -224,3 +224,67 @@ fn achievement_summary_empty_text_does_not_overlap_summary_entries() {
         );
     }
 }
+
+#[test]
+fn achievement_frame_toggle_hides_visible_panel_tree() {
+    test_timeout! {
+        let env = common::panel_fixtures::setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                if not ToggleAchievementFrame then
+                    return "missing_toggle_achievement_frame"
+                end
+
+                ToggleAchievementFrame()
+                if not AchievementFrame or not AchievementFrame:IsShown() then
+                    return "achievement_not_shown"
+                end
+
+                local hideCalls = 0
+                local originalHideUIPanel = HideUIPanel
+                HideUIPanel = function(frame, ...)
+                    if frame == AchievementFrame then
+                        hideCalls = hideCalls + 1
+                    end
+                    return originalHideUIPanel(frame, ...)
+                end
+
+                ToggleAchievementFrame()
+                HideUIPanel = originalHideUIPanel
+                if AchievementFrame:IsShown() then
+                    return "achievement_still_shown"
+                end
+                if hideCalls ~= 1 then
+                    return "hide_uipanel_calls=" .. tostring(hideCalls)
+                end
+
+                local leaked = {}
+                local function visit(frame, path)
+                    if (type(frame) ~= "table" and type(frame) ~= "userdata") or type(frame.GetChildren) ~= "function" then
+                        return
+                    end
+                    for index, child in ipairs({ frame:GetChildren() }) do
+                        local childPath = path .. "." .. tostring(child:GetName() or index)
+                        if type(child.IsVisible) == "function" and child:IsVisible() then
+                            table.insert(leaked, childPath)
+                        end
+                        visit(child, childPath)
+                    end
+                end
+
+                visit(AchievementFrame, "AchievementFrame")
+                if #leaked > 0 then
+                    return "visible_child_after_hide=" .. table.concat(leaked, ",")
+                end
+
+                return "ok"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "AchievementFrame toggle should hide the full visible panel tree: {result}"
+        );
+    }
+}

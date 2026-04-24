@@ -857,13 +857,18 @@ pub(crate) fn advance_animation_groups(
     elapsed: f64,
 ) -> crate::Result<()> {
     let mut finished_scripts = Vec::new();
+    let mut finished_animation_scripts = Vec::new();
     let mut loop_scripts = Vec::new();
     let mut sim = env.state().borrow_mut();
     let group_ids: Vec<u64> = sim.animation_groups.keys().copied().collect();
     for group_id in group_ids {
-        let Some(result) =
-            advance_animation_group(&mut sim, group_id, elapsed, &mut finished_scripts)
-        else {
+        let Some(result) = advance_animation_group(
+            &mut sim,
+            group_id,
+            elapsed,
+            &mut finished_scripts,
+            &mut finished_animation_scripts,
+        ) else {
             continue;
         };
         apply_animation_group_outcome(&mut sim, &result);
@@ -874,6 +879,7 @@ pub(crate) fn advance_animation_groups(
     drop(sim);
 
     fire_animation_group_scripts(env, "OnLoop", loop_scripts)?;
+    fire_animation_group_scripts(env, "OnFinished", finished_animation_scripts)?;
     fire_animation_group_scripts(env, "OnFinished", finished_scripts)?;
     Ok(())
 }
@@ -905,6 +911,7 @@ fn advance_animation_group(
     group_id: u64,
     elapsed: f64,
     finished_scripts: &mut Vec<u64>,
+    finished_animation_scripts: &mut Vec<u64>,
 ) -> Option<AnimationGroupAdvance> {
     let (owner_id, alpha_target_ids_by_animation) = {
         let group = sim.animation_groups.get(&group_id)?;
@@ -918,6 +925,7 @@ fn advance_animation_group(
             resolve_group_alpha_targets(sim, group),
         )
     };
+    let animation_frame_ids = animation_frame_ids_for_group(sim, group_id);
     let unique_alpha_target_ids = unique_alpha_targets(&alpha_target_ids_by_animation);
     let saved_alphas: std::collections::HashMap<u64, f32> = unique_alpha_target_ids
         .iter()
@@ -940,16 +948,15 @@ fn advance_animation_group(
         }
         let total_duration = current_group_total_duration(group);
 
-        if group.pending_finish {
-            finished_scripts.push(finish_group_now(group, total_duration));
-        } else {
-            advance_group_elapsed(
-                group,
-                elapsed,
-                total_duration,
-                &mut loop_count,
-                finished_scripts,
-            );
+        let group_finished = advance_group_playback(
+            group,
+            elapsed,
+            total_duration,
+            &mut loop_count,
+            finished_scripts,
+        );
+        if group_finished {
+            finished_animation_scripts.extend(animation_frame_ids.iter().copied());
         }
 
         sync_animation_elapsed(group);
@@ -984,6 +991,38 @@ fn advance_animation_group(
         loop_count,
         frame_id,
     })
+}
+
+fn advance_group_playback(
+    group: &mut crate::lua_api::animation::AnimGroupState,
+    elapsed: f64,
+    total_duration: f64,
+    loop_count: &mut u32,
+    finished_scripts: &mut Vec<u64>,
+) -> bool {
+    if group.pending_finish {
+        finished_scripts.push(finish_group_now(group, total_duration));
+        return true;
+    }
+
+    let was_done = group.done;
+    advance_group_elapsed(group, elapsed, total_duration, loop_count, finished_scripts);
+    !was_done && group.done && !group.playing
+}
+
+fn animation_frame_ids_for_group(sim: &crate::lua_api::state::SimState, group_id: u64) -> Vec<u64> {
+    let mut frame_ids: Vec<(usize, u64)> = sim
+        .anim_frame_to_anim
+        .iter()
+        .filter_map(|(&frame_id, &(mapped_group_id, animation_index))| {
+            (mapped_group_id == group_id).then_some((animation_index, frame_id))
+        })
+        .collect();
+    frame_ids.sort_unstable_by_key(|(animation_index, _)| *animation_index);
+    frame_ids
+        .into_iter()
+        .map(|(_, frame_id)| frame_id)
+        .collect()
 }
 
 fn advance_group_elapsed(

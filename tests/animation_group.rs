@@ -368,6 +368,35 @@ fn tick_fires_on_finished() {
 }
 
 #[test]
+fn tick_fires_child_animation_on_finished() {
+    let env = setup();
+    env.exec(
+        r#"
+        _G.child_on_finished_called = false
+        local f = CreateFrame("Frame", "TestAnimChildFinished", UIParent)
+        local ag = f:CreateAnimationGroup()
+        local anim = ag:CreateAnimation("Alpha")
+        anim:SetDuration(0.1)
+        anim:SetFromAlpha(1)
+        anim:SetToAlpha(0)
+        anim:SetScript("OnFinished", function(self)
+            _G.child_on_finished_called = self:GetRegionParent() == f
+        end)
+        ag:Play()
+    "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.2).unwrap();
+
+    let called: bool = env.eval("_G.child_on_finished_called").unwrap();
+    assert!(
+        called,
+        "child animation OnFinished should fire with the animation as self"
+    );
+}
+
+#[test]
 fn tick_alpha_animation_changes_frame_alpha() {
     let env = setup();
     env.exec(
