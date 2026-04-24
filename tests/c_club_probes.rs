@@ -232,19 +232,74 @@ fn get_club_capacity_returns_number() {
 #[test]
 fn get_streams_returns_sortable_table() {
     let env = env();
-    let (stream_type, count): (String, i32) = env
+    let (stream_type, count, stream_id, name): (String, i32, i32, String) = env
         .eval(
             r#"
             local streams = C_Club.GetStreams('guild-0')
             table.sort(streams, function(lhs, rhs)
                 return lhs.creationTime < rhs.creationTime
             end)
-            return type(streams), #streams
+            return type(streams), #streams, streams[1].streamId, streams[1].name
             "#,
         )
         .unwrap();
     assert_eq!(stream_type, "table");
-    assert_eq!(count, 0);
+    assert_eq!(count, 1);
+    assert_eq!(stream_id, 1);
+    assert_eq!(name, "Guild");
+}
+
+#[test]
+fn guild_stream_returns_generated_message_history() {
+    let env = env();
+    let (range_count, message_count, first_author, first_content, last_author, last_content): (
+        i32,
+        i32,
+        String,
+        String,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local ranges = C_Club.GetMessageRanges('guild-0', 1)
+            local newest = ranges[1].newestMessageId
+            local messages = C_Club.GetMessagesBefore('guild-0', 1, newest, 20)
+            return #ranges, #messages,
+                messages[1].author.name, messages[1].content,
+                messages[#messages].author.name, messages[#messages].content
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(range_count, 1);
+    assert_eq!(message_count, 4);
+    assert_eq!(first_author, "Uther");
+    assert!(first_content.contains("Welcome"));
+    assert_eq!(last_author, "Uther");
+    assert!(last_content.contains("Transmog"));
+}
+
+#[test]
+fn guild_message_info_round_trips_by_message_id() {
+    let env = env();
+    let (stream_name, subscribed, content, beginning): (String, bool, String, bool) = env
+        .eval(
+            r#"
+            local stream = C_Club.GetStreamInfo('guild-0', 1)
+            local ranges = C_Club.GetMessageRanges('guild-0', 1)
+            local oldest = ranges[1].oldestMessageId
+            local message = C_Club.GetMessageInfo('guild-0', 1, oldest)
+            return stream.name, C_Club.IsSubscribedToStream('guild-0', 1),
+                message.content, C_Club.IsBeginningOfStream('guild-0', 1, oldest)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(stream_name, "Guild");
+    assert!(subscribed);
+    assert!(content.contains("Welcome"));
+    assert!(beginning);
 }
 
 #[test]

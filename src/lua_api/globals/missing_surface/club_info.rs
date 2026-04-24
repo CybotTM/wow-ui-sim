@@ -13,8 +13,8 @@
 //! - `C_Club.GetClubMembers(clubId)` — returns an array of member IDs.
 //! - `C_Club.GetMemberInfo(clubId, memberId)` — returns a
 //!   `ClubMemberInfo`-like table derived from `world.guild_members`.
-//! - `C_Club.GetStreams(clubId)` — returns an empty array; the simulator does
-//!   not model club chat streams yet.
+//! - `C_Club.GetStreams(clubId)` / message history probes — returns one
+//!   synthetic guild stream with deterministic generated messages.
 //! - `C_Club.GetClubCapacity(clubId)` — returns 1000 (hard-coded guild
 //!   capacity; retail is unbounded in practice).
 //! - `C_Club.IsEnabled()` — returns true unconditionally.
@@ -22,7 +22,7 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_set, val_to_string,
+    borrow_state, create_string, create_table, table_get, table_set, val_to_string,
 };
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
@@ -33,6 +33,10 @@ use rilua::{LuaResult, Val};
 const GUILD_CLUB_ID: &str = "guild-0";
 const GUILD_CLUB_TYPE: f64 = 2.0;
 const GUILD_CLUB_CAPACITY: f64 = 1000.0;
+const GUILD_STREAM_ID: f64 = 1.0;
+const GUILD_STREAM_TYPE: f64 = 1.0;
+const FIRST_MESSAGE_EPOCH: i64 = 1_700_000_000_000_000;
+const MESSAGE_EPOCH_STEP: i64 = 120_000_000;
 
 pub(super) fn register_club_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Club")?;
@@ -68,6 +72,39 @@ fn register_club_status_methods(state: &mut LuaState, table_ref: GcRef<Table>) -
         c_club_get_club_privileges,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetStreams", c_club_get_streams)?;
+    table_set_rust_fn_static(state, table_ref, "GetStreamInfo", c_club_get_stream_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsSubscribedToStream",
+        c_club_is_subscribed_to_stream,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "GetMessageInfo", c_club_get_message_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMessageRanges",
+        c_club_get_message_ranges,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMessagesBefore",
+        c_club_get_messages_before,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "RequestMoreMessagesBefore",
+        c_club_request_more_messages_before,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsBeginningOfStream",
+        c_club_is_beginning_of_stream,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "SendMessage", c_club_send_message)?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -201,8 +238,104 @@ fn c_club_get_club_privileges(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_club_get_streams(state: &mut LuaState) -> LuaResult<u32> {
     let array = create_table(state);
+    if is_guild_club_arg(state) {
+        let stream = build_guild_stream_table(state);
+        set_table_array(state, array, 1, stream);
+    }
     state.push(array);
     Ok(1)
+}
+
+fn c_club_get_stream_info(state: &mut LuaState) -> LuaResult<u32> {
+    if is_guild_stream_arg(state) {
+        let stream = build_guild_stream_table(state);
+        state.push(stream);
+    } else {
+        state.push(Val::Nil);
+    }
+    Ok(1)
+}
+
+fn c_club_is_subscribed_to_stream(state: &mut LuaState) -> LuaResult<u32> {
+    let subscribed = is_guild_stream_arg(state);
+    state.push(Val::Bool(subscribed));
+    Ok(1)
+}
+
+fn c_club_get_message_info(state: &mut LuaState) -> LuaResult<u32> {
+    if !is_guild_stream_arg(state) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+
+    let Some(message_id) = message_id_from_stack(state, 3) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    match generated_guild_messages()
+        .iter()
+        .find(|message| message.id == message_id)
+    {
+        Some(message) => {
+            let message_info = build_message_info_table(state, message);
+            state.push(message_info);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_club_get_message_ranges(state: &mut LuaState) -> LuaResult<u32> {
+    let ranges = create_table(state);
+    if is_guild_stream_arg(state) {
+        let messages = generated_guild_messages();
+        let range = build_message_range_table(
+            state,
+            messages.first().expect("generated guild messages"),
+            messages.last().expect("generated guild messages"),
+        );
+        set_table_array(state, ranges, 1, range);
+    }
+    state.push(ranges);
+    Ok(1)
+}
+
+fn c_club_get_messages_before(state: &mut LuaState) -> LuaResult<u32> {
+    if !is_guild_stream_arg(state) {
+        let empty_messages = create_table(state);
+        state.push(empty_messages);
+        return Ok(1);
+    }
+
+    let newest = message_id_from_stack(state, 3).unwrap_or_else(last_generated_message_id);
+    let count = i64::from_stack(state, 4)?.max(0) as usize;
+    let messages = messages_before(newest, count);
+    let array = create_table(state);
+    for (index, message) in messages.iter().enumerate() {
+        let message_info = build_message_info_table(state, message);
+        set_table_array(state, array, index as i64 + 1, message_info);
+    }
+    state.push(array);
+    Ok(1)
+}
+
+fn c_club_request_more_messages_before(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn c_club_is_beginning_of_stream(state: &mut LuaState) -> LuaResult<u32> {
+    let message_id = message_id_from_stack(state, 3);
+    let first_message_id = generated_guild_messages()
+        .first()
+        .map(|message| message.id)
+        .unwrap_or_default();
+    state.push(Val::Bool(message_id == Some(first_message_id)));
+    Ok(1)
+}
+
+fn c_club_send_message(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }
 
 fn c_club_get_club_capacity(_state: &mut LuaState) -> LuaResult<u32> {
@@ -246,6 +379,10 @@ fn is_guild_club_arg(state: &mut LuaState) -> bool {
         && val_to_string(state, value).is_some_and(|club_id| club_id == GUILD_CLUB_ID)
 }
 
+fn is_guild_stream_arg(state: &mut LuaState) -> bool {
+    is_guild_club_arg(state) && matches!(f64::from_stack(state, 2), Ok(id) if id == GUILD_STREAM_ID)
+}
+
 fn member_id_from_index(zero_based_index: usize) -> i64 {
     zero_based_index as i64 + 1
 }
@@ -254,6 +391,87 @@ fn index_from_member_id(member_id: i64) -> Option<usize> {
     member_id
         .checked_sub(1)
         .and_then(|zero_based| usize::try_from(zero_based).ok())
+}
+
+#[derive(Clone, Copy)]
+struct GeneratedMessage {
+    id: MessageId,
+    author_member_id: i64,
+    content: &'static str,
+}
+
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+struct MessageId {
+    epoch: i64,
+    position: i64,
+}
+
+fn generated_guild_messages() -> [GeneratedMessage; 4] {
+    [
+        generated_message(
+            0,
+            1,
+            "Welcome to Heroes of Azeroth. Repairs are open for raid night.",
+        ),
+        generated_message(
+            1,
+            1,
+            "Mythic plus keys start after reset. Bring flasks if you have them.",
+        ),
+        generated_message(
+            2,
+            2,
+            "I put extra feasts and vantus runes in the guild bank.",
+        ),
+        generated_message(
+            3,
+            1,
+            "Transmog run on Sunday. Invites go out ten minutes early.",
+        ),
+    ]
+}
+
+fn generated_message(index: i64, author_member_id: i64, content: &'static str) -> GeneratedMessage {
+    GeneratedMessage {
+        id: MessageId {
+            epoch: FIRST_MESSAGE_EPOCH + index * MESSAGE_EPOCH_STEP,
+            position: index + 1,
+        },
+        author_member_id,
+        content,
+    }
+}
+
+fn last_generated_message_id() -> MessageId {
+    generated_guild_messages()
+        .last()
+        .map(|message| message.id)
+        .unwrap_or_default()
+}
+
+fn messages_before(newest: MessageId, count: usize) -> Vec<GeneratedMessage> {
+    let mut messages: Vec<_> = generated_guild_messages()
+        .into_iter()
+        .filter(|message| message.id.epoch <= newest.epoch)
+        .collect();
+    let keep_from = messages.len().saturating_sub(count);
+    messages.drain(..keep_from);
+    messages
+}
+
+fn message_id_from_stack(state: &mut LuaState, index: i32) -> Option<MessageId> {
+    let table = stack_val(state, index);
+    Some(MessageId {
+        epoch: table_get_i64(state, table, "epoch")?,
+        position: table_get_i64(state, table, "position")?,
+    })
+}
+
+fn table_get_i64(state: &mut LuaState, table: Val, key: &str) -> Option<i64> {
+    match table_get(state, table, key) {
+        Val::Num(value) => Some(value as i64),
+        _ => None,
+    }
 }
 
 fn build_club_info_table(state: &mut LuaState, name: &str) -> Val {
@@ -270,6 +488,24 @@ fn build_club_info_table(state: &mut LuaState, name: &str) -> Val {
     table_set(state, t, "avatarId", Val::Num(0.0));
     table_set(state, t, "memberCount", Val::Num(GUILD_CLUB_CAPACITY));
     t
+}
+
+fn build_guild_stream_table(state: &mut LuaState) -> Val {
+    let stream = create_table(state);
+    let name = create_string(state, "Guild");
+    let subject = create_string(state, "General guild chat");
+    table_set(state, stream, "streamId", Val::Num(GUILD_STREAM_ID));
+    table_set(state, stream, "name", name);
+    table_set(state, stream, "subject", subject);
+    table_set(state, stream, "leadersAndModeratorsOnly", Val::Bool(false));
+    table_set(state, stream, "streamType", Val::Num(GUILD_STREAM_TYPE));
+    table_set(
+        state,
+        stream,
+        "creationTime",
+        Val::Num(FIRST_MESSAGE_EPOCH as f64),
+    );
+    stream
 }
 
 fn build_member_info_table(
@@ -295,6 +531,64 @@ fn build_member_info_table(
         Val::Num(if online { 1.0 } else { 3.0 }),
     );
     t
+}
+
+fn build_message_range_table(
+    state: &mut LuaState,
+    oldest: &GeneratedMessage,
+    newest: &GeneratedMessage,
+) -> Val {
+    let range = create_table(state);
+    let oldest_id = build_message_id_table(state, oldest.id);
+    let newest_id = build_message_id_table(state, newest.id);
+    table_set(state, range, "oldestMessageId", oldest_id);
+    table_set(state, range, "newestMessageId", newest_id);
+    range
+}
+
+fn build_message_info_table(state: &mut LuaState, message: &GeneratedMessage) -> Val {
+    let info = create_table(state);
+    let message_id = build_message_id_table(state, message.id);
+    let content = create_string(state, message.content);
+    let author = build_message_author_table(state, message.author_member_id);
+    table_set(state, info, "messageId", message_id);
+    table_set(state, info, "content", content);
+    table_set(state, info, "author", author);
+    table_set(state, info, "destroyer", Val::Nil);
+    table_set(state, info, "destroyed", Val::Bool(false));
+    table_set(state, info, "edited", Val::Bool(false));
+    info
+}
+
+fn build_message_id_table(state: &mut LuaState, message_id: MessageId) -> Val {
+    let table = create_table(state);
+    table_set(state, table, "epoch", Val::Num(message_id.epoch as f64));
+    table_set(
+        state,
+        table,
+        "position",
+        Val::Num(message_id.position as f64),
+    );
+    table
+}
+
+fn build_message_author_table(state: &mut LuaState, member_id: i64) -> Val {
+    let zero_based_index = index_from_member_id(member_id).unwrap_or(0);
+    let member = borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.world.guild_members.get(zero_based_index).cloned());
+
+    match member {
+        Some(member) => build_member_info_table(
+            state,
+            member_id,
+            member.rank_index,
+            &member.name,
+            zero_based_index == 0,
+            member.online,
+        ),
+        None => build_member_info_table(state, member_id, 1, "Unknown", false, false),
+    }
 }
 
 const CLUB_PRIVILEGE_FIELDS: &[&str] = &[
