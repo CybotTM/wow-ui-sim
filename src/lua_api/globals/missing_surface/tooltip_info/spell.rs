@@ -6,7 +6,6 @@ use super::builders::{empty_tooltip, item_quality_color, push_tooltip_line, tool
 use crate::lua_api::game_data;
 use crate::lua_api::globals::spell_api;
 use crate::lua_api::methods::{borrow_state, table_get, table_set};
-use crate::spell_descriptions;
 use crate::spells;
 use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB};
 use rilua::Val;
@@ -64,7 +63,7 @@ fn push_spell_cast_line(state: &mut LuaState, lines: Val, index: i64, spell_id: 
 }
 
 fn push_spell_description_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) {
-    let description = resolved_spell_description(spell_id);
+    let description = resolved_spell_description(state, spell_id);
     push_tooltip_line(
         state,
         lines,
@@ -76,15 +75,10 @@ fn push_spell_description_line(state: &mut LuaState, lines: Val, index: i64, spe
     );
 }
 
-fn resolved_spell_description(spell_id: u32) -> String {
-    match spell_id {
-        31935 => format!(
-            "Hurls your shield at an enemy target, dealing {} Holy damage, interrupting and silencing the non-Player target for 3 sec, and then jumping to 2 additional nearby enemies.",
-            crate::lua_api::game_data::spell_effect_amount(spell_id)
-        ),
-        _ => spell_descriptions::get_spell_description(spell_id)
-            .unwrap_or("No description available.")
-            .to_string(),
+fn resolved_spell_description(state: &LuaState, spell_id: u32) -> String {
+    match borrow_state(state) {
+        Ok(sim) => crate::spell_description_resolver::resolve_spell_description(&sim, spell_id),
+        Err(_) => "No description available.".to_string(),
     }
 }
 
@@ -130,14 +124,13 @@ pub(super) fn tooltip_for_unit_aura(
         false,
     );
     push_tooltip_line(state, lines, 2, LINE_TYPE_SPELL_NAME, "1 hr", None, false);
-    let description = spell_descriptions::get_spell_description(aura.spell_id as u32)
-        .unwrap_or("No description available.");
+    let description = resolved_spell_description(state, aura.spell_id as u32);
     push_tooltip_line(
         state,
         lines,
         3,
         LINE_TYPE_SPELL_DESCRIPTION,
-        description,
+        &description,
         None,
         true,
     );

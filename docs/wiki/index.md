@@ -28,7 +28,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[layout-system]] | AnchorPoint enum (9 positions), single vs multi-anchor resolution, coordinate system (top-left screen / bottom-left Lua), SetPoint API, cycle detection |
 | [[rendering-pipeline]] | QuadBatch (36-byte QuadVertex), four-tier GPU texture atlas, WGSL shaders, strata/level sorting, alpha propagation, hit testing |
 | [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern |
-| [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, 200+ globals, C_* namespaces, timer system, animation system |
+| [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, 200+ globals, C_* namespaces, spell-description token resolution, timer system, animation system |
 | [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
 | [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, inline scripts |
 | [[addon-loading]] | TOC parsing, Blizzard load order (27 addons), per-file Lua/XML loading, SavedVariables, startup sequence |
@@ -66,7 +66,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[partyframe-tree]] | `rilua-migration` regresses `PartyFrame` from master's `(120x244)` 4-member layout down to `(4x2)` with zero member frames; regression test pinned against the master dump |
 | [[partyframe-statusbar-textures]] | XML loader passes `StatusBar` bar textures as userdata into `SetStatusBarTexture()`, so the party health/mana bar source gets cleared while masks still render via `SetAtlas()` |
 | [[quest-scrollbar-partial-size]] | Quest scrollbar track/thumb drifted right because partial XML sizes like `<Size x="8"/>` were ignored unless both dimensions were present |
-| [[rilua-mlua-gap-audit]] | Audit of mlua-era Lua API handling still missing on rilua: sandbox cleanup parity, dropped MessageFrame methods, secure/event TODOs, and an unwired namespace patch hook |
+| [[rilua-mlua-gap-audit]] | Audit of mlua-era Lua API handling still missing on rilua: sandbox cleanup parity, dropped MessageFrame methods, secure/event follow-ups, and an unwired namespace patch hook |
 | [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, empty `UIParent` worklists short-circuit, but the fresh 90s world-map profile still sits at 31 steady-state handlers |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |

@@ -59,6 +59,23 @@ fn test_get_spell_info_original_icon_matches_icon() {
     assert!(matches);
 }
 
+#[test]
+fn test_get_spell_description_resolves_spell_placeholders() {
+    let env = env();
+    let desc: String = env
+        .eval("return C_Spell.GetSpellDescription(31935)")
+        .unwrap();
+
+    assert!(
+        desc.contains("25000 Holy damage"),
+        "spell description should resolve damage placeholders, got: {desc}"
+    );
+    assert!(
+        !desc.contains('$'),
+        "spell description should not expose raw Blizzard placeholders, got: {desc}"
+    );
+}
+
 // ── GetSpellCooldown ─────────────────────────────────────────────────────────
 
 #[test]

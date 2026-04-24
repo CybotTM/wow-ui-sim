@@ -52,6 +52,7 @@ pub mod sound;
 pub mod spec_display_spells;
 #[path = "../data/specializations.rs"]
 pub mod specializations;
+pub mod spell_description_resolver;
 #[path = "../data/spell_descriptions.rs"]
 pub mod spell_descriptions;
 #[path = "../data/spell_power.rs"]

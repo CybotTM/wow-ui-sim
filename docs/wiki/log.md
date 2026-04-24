@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-24] update | spell description token resolver
+
+Updated `systems/lua-api.md` to record the shared spell-description token
+resolver used by both `C_Spell.GetSpellDescription()` and
+`C_TooltipInfo.GetSpellByID()`. The note covers the supported DB2 token
+families (`$s1`, `$<damage>`, `$<shield>`, `${...}`, `$STR`, `$INT`, `$AP`)
+and the reason for the shared path: keep spellbook/tooltips from exposing raw
+placeholders or drifting from the C API result. Refreshed the `index.md`
+`[[lua-api]]` summary.
+
 ## [2026-04-23] add | quest scrollbar partial XML size investigation
 
 Added `investigations/quest-scrollbar-partial-size.md` to document the

@@ -520,6 +520,37 @@ fn test_set_spell_by_id_replaces_damage_placeholders_in_description() {
 }
 
 #[test]
+fn test_set_spell_by_id_replaces_shield_placeholders_from_player_health() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.state().borrow_mut().player.health_max = 120_000;
+    env.exec("GameTooltip:SetSpellByID(184662)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+
+    assert!(
+        td.lines
+            .iter()
+            .any(|line| line.left_text.contains("absorbs 36000 damage")),
+        "SetSpellByID should calculate shield values from player health, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        td.lines.iter().all(|line| !line.left_text.contains('$')),
+        "SetSpellByID should not leave raw parameter placeholders in shield text, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn test_set_spell_by_id_makes_tooltip_visible() {
     let env = WowLuaEnv::new().unwrap();
 

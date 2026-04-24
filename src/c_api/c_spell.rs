@@ -47,7 +47,6 @@ use crate::lua_api::script_helpers::{
 };
 use crate::lua_api::state_types::CursorInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
-use crate::spell_descriptions;
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -122,10 +121,11 @@ fn register_spell_methods(
 
 fn get_spell_description(state: &mut LuaState) -> LuaResult<u32> {
     let spell_id = u32::from_stack(state, 1)?;
-    let description = create_string(
-        state,
-        spell_descriptions::get_spell_description(spell_id).unwrap_or(""),
-    );
+    let description_text = {
+        let sim = borrow_state(state)?;
+        crate::spell_description_resolver::resolve_spell_description_or_empty(&sim, spell_id)
+    };
+    let description = create_string(state, &description_text);
     state.push(description);
     Ok(1)
 }
