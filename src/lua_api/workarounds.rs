@@ -363,6 +363,10 @@ fn patch_housing_dashboard_preload(env: &crate::lua_api::LoaderEnv<'_>) {
                 if type(FireEvent) == "function" then
                     FireEvent("NEIGHBORHOOD_LIST_UPDATED", Enum.HousingResult.Success, HOUSING_SIM_NEIGHBORHOODS)
                 end
+                local firstNeighborhood = HOUSING_SIM_NEIGHBORHOODS[1]
+                if firstNeighborhood then
+                    C_Housing.RequestHouseFinderNeighborhoodData(firstNeighborhood.neighborhoodGUID, firstNeighborhood.neighborhoodName)
+                end
             end
 
             function C_Housing.GetUIMapIDForNeighborhood(neighborhoodGUID)
