@@ -29,29 +29,40 @@ fn resolve_text(sim: &SimState, spell_id: u32, text: &str, depth: usize) -> Stri
     cleanup_control_tokens(&expanded)
 }
 
+fn spell_variables(spell_id: u32) -> &'static [(&'static str, &'static str)] {
+    match spell_id {
+        // SimulationCraft SpellDataDump/allspells.txt:
+        // Avenger's Shield: $dmg=${$378286s1*(1+($378285s2/100))}
+        31935 => &[("dmg", "$378286s1*(1+($378285s2/100))")],
+        // Eye Beam: inactive talent conditionals collapse to the base
+        // SimulationCraft branch, $dmg=${$198030s1*10}.
+        198013 => &[("dmg", "$198030s1*10")],
+        // Crusader Strike: $damage=${$s1*$<retribution>}; inactive
+        // talent/PvP conditionals collapse to a 1.0 multiplier here.
+        35395 => &[("damage", "$s1")],
+        // Shield of Vengeance: $shield=${$s2/100*$MHP*(1+$@versadmg)}
+        184662 => &[("shield", "$s2/100*$MHP*(1+$@versadmg)")],
+        _ => &[],
+    }
+}
+
+fn named_variable_value(sim: &SimState, spell_id: u32, name: &str) -> Option<f64> {
+    spell_variables(spell_id)
+        .iter()
+        .find_map(|(candidate, expression)| (*candidate == name).then_some(*expression))
+        .and_then(|expression| {
+            let numeric = replace_expression_variables(sim, spell_id, expression);
+            evaluate_number_expression(&numeric)
+        })
+}
+
 fn expand_named_references(sim: &SimState, text: &str, depth: usize) -> String {
     let mut out = String::with_capacity(text.len());
     let mut rest = text;
     while let Some(index) = rest.find("$@") {
         out.push_str(&rest[..index]);
-        let token_start = index + 2;
-        let token = &rest[token_start..];
-        if let Some(id_text) = token.strip_prefix("spellname") {
-            let (id, consumed) = parse_number_prefix(id_text);
-            if let Some(name) = id.and_then(|id| crate::spells::get_spell(id).map(|s| s.name)) {
-                out.push_str(name);
-            }
-            rest = &token["spellname".len() + consumed..];
-        } else if let Some(id_text) = token.strip_prefix("spelldesc") {
-            let (id, consumed) = parse_number_prefix(id_text);
-            if let Some(id) = id {
-                out.push_str(&resolve_spell_description(sim, id));
-            }
-            rest = &token["spelldesc".len() + consumed..];
-        } else {
-            out.push_str("$@");
-            rest = token;
-        }
+        let token = &rest[index + 2..];
+        rest = append_named_reference(sim, &mut out, token);
     }
     out.push_str(rest);
     if depth == 0 {
@@ -59,6 +70,38 @@ fn expand_named_references(sim: &SimState, text: &str, depth: usize) -> String {
     } else {
         resolve_text(sim, 0, &out, depth + 1)
     }
+}
+
+fn append_named_reference<'a>(sim: &SimState, out: &mut String, token: &'a str) -> &'a str {
+    if let Some(id_text) = token.strip_prefix("spellname") {
+        append_spell_name_reference(out, id_text);
+        return remaining_named_reference(token, "spellname", id_text);
+    }
+    if let Some(id_text) = token.strip_prefix("spelldesc") {
+        append_spell_desc_reference(sim, out, id_text);
+        return remaining_named_reference(token, "spelldesc", id_text);
+    }
+    out.push_str("$@");
+    token
+}
+
+fn append_spell_name_reference(out: &mut String, id_text: &str) {
+    let (id, _) = parse_number_prefix(id_text);
+    if let Some(name) = id.and_then(|id| crate::spells::get_spell(id).map(|spell| spell.name)) {
+        out.push_str(name);
+    }
+}
+
+fn append_spell_desc_reference(sim: &SimState, out: &mut String, id_text: &str) {
+    let (id, _) = parse_number_prefix(id_text);
+    if let Some(id) = id {
+        out.push_str(&resolve_spell_description(sim, id));
+    }
+}
+
+fn remaining_named_reference<'a>(token: &'a str, prefix: &str, id_text: &str) -> &'a str {
+    let (_, consumed) = parse_number_prefix(id_text);
+    &token[prefix.len() + consumed..]
 }
 
 fn replace_expressions(sim: &SimState, spell_id: u32, text: &str) -> String {
@@ -93,8 +136,13 @@ fn replace_expression_variables(sim: &SimState, spell_id: u32, expression: &str)
         }
 
         let tail = &expression[index + 1..];
-        if let Some((token, consumed)) = parse_value_token(sim, spell_id, tail) {
-            out.push_str(&token.to_string());
+        if let Some((value, consumed)) = parse_angle_value_token(sim, spell_id, tail) {
+            out.push_str(&value.to_string());
+            while chars.peek().is_some_and(|(i, _)| *i < index + 1 + consumed) {
+                chars.next();
+            }
+        } else if let Some((value, consumed)) = parse_value_token(sim, spell_id, tail) {
+            out.push_str(&value.to_string());
             while chars.peek().is_some_and(|(i, _)| *i < index + 1 + consumed) {
                 chars.next();
             }
@@ -106,12 +154,25 @@ fn replace_expression_variables(sim: &SimState, spell_id: u32, expression: &str)
 }
 
 fn replace_angle_tokens(sim: &SimState, spell_id: u32, text: &str) -> String {
-    let mut out = text.replace("$<damage>", &spell_amount(sim, spell_id, 1).to_string());
+    let damage = named_variable_value(sim, spell_id, "damage")
+        .unwrap_or_else(|| spell_amount(sim, spell_id, 1));
+    let shield = named_variable_value(sim, spell_id, "shield")
+        .unwrap_or_else(|| shield_amount(sim, spell_id) as f64);
+    let mut out = text.replace("$<damage>", &format_number(damage));
     out = out.replace(
         "$<damageValue>",
-        &spell_amount(sim, spell_id, 1).to_string(),
+        &format_number(spell_amount(sim, spell_id, 1)),
     );
-    out.replace("$<shield>", &shield_amount(sim, spell_id).to_string())
+    out = out.replace("$<shield>", &format_number(shield));
+
+    for (name, _expression) in spell_variables(spell_id) {
+        let token = format!("$<{name}>");
+        if let Some(value) = named_variable_value(sim, spell_id, name) {
+            out = out.replace(&token, &format_number(value));
+        }
+    }
+
+    out
 }
 
 fn replace_dollar_tokens(sim: &SimState, spell_id: u32, text: &str) -> String {
@@ -143,22 +204,14 @@ fn replace_dollar_tokens(sim: &SimState, spell_id: u32, text: &str) -> String {
 }
 
 fn parse_value_token(sim: &SimState, current_spell_id: u32, token: &str) -> Option<(f64, usize)> {
-    if token.starts_with("STR") {
-        return Some((sim.player.stats.strength, 3));
-    }
-    if token.starts_with("INT") {
-        return Some((sim.player.stats.intellect, 3));
-    }
-    if token.starts_with("AP") {
-        return Some((player_attack_power(sim), 2));
+    if let Some(value) = parse_special_value_token(sim, token) {
+        return Some(value);
     }
 
     let (referenced_id, digits) = parse_number_prefix(token);
     let spell_id = referenced_id.unwrap_or(current_spell_id);
     let suffix = &token[digits..];
-    let Some(kind) = suffix.chars().next() else {
-        return None;
-    };
+    let kind = suffix.chars().next()?;
     if !matches!(kind, 's' | 'm' | 'x' | 'd' | 't' | 'A' | 'u' | 'h') {
         return None;
     }
@@ -178,6 +231,27 @@ fn parse_value_token(sim: &SimState, current_spell_id: u32, token: &str) -> Opti
     Some((value, consumed))
 }
 
+fn parse_special_value_token(sim: &SimState, token: &str) -> Option<(f64, usize)> {
+    match token {
+        value if value.starts_with("@versadmg") => {
+            Some((sim.player.stats.versatility_pct() / 100.0, 9))
+        }
+        value if value.starts_with("MHP") => Some((sim.player.health_max as f64, 3)),
+        value if value.starts_with("STR") => Some((sim.player.stats.strength, 3)),
+        value if value.starts_with("INT") => Some((sim.player.stats.intellect, 3)),
+        value if value.starts_with("AP") => Some((player_attack_power(sim), 2)),
+        value if value.starts_with("pl") => Some((sim.player.level as f64, 2)),
+        _ => None,
+    }
+}
+
+fn parse_angle_value_token(sim: &SimState, spell_id: u32, token: &str) -> Option<(f64, usize)> {
+    let variable = token.strip_prefix('<')?;
+    let end = variable.find('>')?;
+    let name = &variable[..end];
+    named_variable_value(sim, spell_id, name).map(|value| (value, end + 2))
+}
+
 fn parse_number_prefix(text: &str) -> (Option<u32>, usize) {
     let count = text
         .chars()
@@ -192,11 +266,17 @@ fn parse_number_prefix(text: &str) -> (Option<u32>, usize) {
 
 fn spell_amount(sim: &SimState, spell_id: u32, effect_index: u32) -> f64 {
     match (spell_id, effect_index) {
-        (184662, _) => shield_amount(sim, spell_id) as f64,
+        (184662, 2) => 30.0,
         (633, 2) => 100.0,
-        (31935, 1) => 25_000.0,
-        (35395, _) => 15_000.0,
-        (53600, 1) => 20_000.0,
+        (31935, 1) => player_attack_power(sim) * 1.55,
+        (35395, 1) => player_attack_power(sim) * 1.4,
+        (53600, 1) => player_attack_power(sim) * 0.95,
+        (378286, 1) => player_attack_power(sim) * 0.12,
+        (198030, 1) => player_attack_power(sim) * 0.4026,
+        (378285, 2) => 0.0,
+        (209389, 1) => 60.0,
+        (209389, 2) => 50.0,
+        (198013, 5) => 5.0,
         (19750, _) | (85673, _) | (130551, _) => 20_000.0,
         (82326, _) => 35_000.0,
         (25912, _) | (25914, _) | (20473, _) => 10_000.0,
@@ -207,25 +287,33 @@ fn spell_amount(sim: &SimState, spell_id: u32, effect_index: u32) -> f64 {
 
 fn shield_amount(sim: &SimState, spell_id: u32) -> i32 {
     match spell_id {
-        184662 => (sim.player.health_max as f64 * 0.30).round() as i32,
+        184662 => named_variable_value(sim, spell_id, "shield")
+            .unwrap_or(sim.player.health_max as f64 * 0.30)
+            .round() as i32,
         _ => game_data::spell_effect_amount(spell_id),
     }
 }
 
 fn player_attack_power(sim: &SimState) -> f64 {
-    sim.player.stats.strength + sim.player.stats.agility + sim.player.level as f64 * 10.0
+    (sim.player.stats.strength + sim.player.stats.agility + sim.player.level as f64 * 10.0).max(0.0)
+        as i32 as f64
 }
 
 fn spell_duration(spell_id: u32) -> f64 {
     match spell_id {
         31935 => 3.0,
+        198013 => 2.0,
+        209388 => 8.0,
         184662 => 15.0,
         _ => 0.0,
     }
 }
 
-fn spell_radius(_spell_id: u32, _effect_index: u32) -> f64 {
-    0.0
+fn spell_radius(spell_id: u32, effect_index: u32) -> f64 {
+    match (spell_id, effect_index) {
+        (378286, 1) => 5.0,
+        _ => 0.0,
+    }
 }
 
 fn spell_count(spell_id: u32, effect_index: u32) -> f64 {
@@ -265,6 +353,8 @@ enum NumberToken {
     Minus,
     Star,
     Slash,
+    LeftParen,
+    RightParen,
 }
 
 fn tokenize_expression(expression: &str) -> Option<Vec<NumberToken>> {
@@ -273,38 +363,46 @@ fn tokenize_expression(expression: &str) -> Option<Vec<NumberToken>> {
     let bytes = expression.as_bytes();
     while index < bytes.len() {
         let ch = bytes[index] as char;
-        match ch {
-            ' ' => index += 1,
-            '+' => {
-                tokens.push(NumberToken::Plus);
-                index += 1;
-            }
-            '-' => {
-                tokens.push(NumberToken::Minus);
-                index += 1;
-            }
-            '*' => {
-                tokens.push(NumberToken::Star);
-                index += 1;
-            }
-            '/' => {
-                tokens.push(NumberToken::Slash);
-                index += 1;
-            }
-            '0'..='9' | '.' => {
-                let start = index;
-                index += 1;
-                while index < bytes.len()
-                    && ((bytes[index] as char).is_ascii_digit() || bytes[index] == b'.')
-                {
-                    index += 1;
-                }
-                tokens.push(NumberToken::Number(expression[start..index].parse().ok()?));
-            }
-            _ => return None,
+        if let Some(token) = operator_token(ch) {
+            tokens.push(token);
+            index += 1;
+        } else if ch == ' ' {
+            index += 1;
+        } else {
+            let number = parse_number_token(expression, &mut index)?;
+            tokens.push(NumberToken::Number(number));
         }
     }
     Some(tokens)
+}
+
+fn operator_token(ch: char) -> Option<NumberToken> {
+    match ch {
+        '+' => Some(NumberToken::Plus),
+        '-' => Some(NumberToken::Minus),
+        '*' => Some(NumberToken::Star),
+        '/' => Some(NumberToken::Slash),
+        '(' => Some(NumberToken::LeftParen),
+        ')' => Some(NumberToken::RightParen),
+        _ => None,
+    }
+}
+
+fn parse_number_token(expression: &str, index: &mut usize) -> Option<f64> {
+    let bytes = expression.as_bytes();
+    let start = *index;
+    match bytes.get(*index).copied().map(char::from)? {
+        '0'..='9' | '.' => {
+            *index += 1;
+            while *index < bytes.len()
+                && ((bytes[*index] as char).is_ascii_digit() || bytes[*index] == b'.')
+            {
+                *index += 1;
+            }
+            expression[start..*index].parse().ok()
+        }
+        _ => None,
+    }
 }
 
 struct NumberExpressionParser {
@@ -363,6 +461,16 @@ impl NumberExpressionParser {
                 self.index += 1;
                 self.parse_factor().map(|value| -value)
             }
+            NumberToken::LeftParen => {
+                self.index += 1;
+                let value = self.parse_sum()?;
+                if matches!(self.current(), Some(NumberToken::RightParen)) {
+                    self.index += 1;
+                    Some(value)
+                } else {
+                    None
+                }
+            }
             _ => None,
         }
     }
@@ -397,7 +505,7 @@ fn cleanup_control_tokens(text: &str) -> String {
 }
 
 fn format_number(value: f64) -> String {
-    if (value.fract()).abs() < 0.001 {
+    if value.abs() >= 100.0 || (value.fract()).abs() < 0.001 {
         (value.round() as i64).to_string()
     } else {
         format!("{value:.1}")

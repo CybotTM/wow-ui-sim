@@ -62,17 +62,40 @@ fn test_get_spell_info_original_icon_matches_icon() {
 #[test]
 fn test_get_spell_description_resolves_spell_placeholders() {
     let env = env();
+    let avengers_shield_damage: String = env
+        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 1.55)")
+        .unwrap();
     let desc: String = env
         .eval("return C_Spell.GetSpellDescription(31935)")
         .unwrap();
 
     assert!(
-        desc.contains("25000 Holy damage"),
-        "spell description should resolve damage placeholders, got: {desc}"
+        desc.contains(&format!("{avengers_shield_damage} Holy damage")),
+        "spell description should resolve AP-scaled damage placeholders: expected {avengers_shield_damage}, got: {desc}"
     );
     assert!(
         !desc.contains('$'),
         "spell description should not expose raw Blizzard placeholders, got: {desc}"
+    );
+}
+
+#[test]
+fn test_get_spell_description_resolves_named_dmg_variable() {
+    let env = env();
+    let eye_beam_damage: String = env
+        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 0.4026 * 10)")
+        .unwrap();
+    let desc: String = env
+        .eval("return C_Spell.GetSpellDescription(198013)")
+        .unwrap();
+
+    assert!(
+        desc.contains(&format!("{eye_beam_damage} Chaos damage")),
+        "spell description should resolve $<dmg> variables from SimC formulas, got: {desc}"
+    );
+    assert!(
+        !desc.contains("$<dmg>"),
+        "spell description should not expose raw $<dmg> placeholders, got: {desc}"
     );
 }
 

@@ -494,16 +494,19 @@ fn test_set_spell_by_id_replaces_damage_placeholders_in_description() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec("GameTooltip:SetSpellByID(31935)").unwrap();
+    let avengers_shield_damage: String = env
+        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 1.55)")
+        .unwrap();
 
     let state = env.state().borrow();
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let td = state.tooltips.get(&gt_id).unwrap();
 
     assert!(
-        td.lines
-            .iter()
-            .any(|line| line.left_text.contains("25000 Holy damage")),
-        "SetSpellByID should replace spell damage placeholders in tooltip descriptions, got: {:?}",
+        td.lines.iter().any(|line| line
+            .left_text
+            .contains(&format!("{avengers_shield_damage} Holy damage"))),
+        "SetSpellByID should replace spell damage placeholders with AP-scaled values, got: {:?}",
         td.lines
             .iter()
             .map(|line| line.left_text.clone())
@@ -525,15 +528,18 @@ fn test_set_spell_by_id_replaces_shield_placeholders_from_player_health() {
 
     env.state().borrow_mut().player.health_max = 120_000;
     env.exec("GameTooltip:SetSpellByID(184662)").unwrap();
+    let shield_amount: i32 = env
+        .eval("return math.floor(120000 * 0.30 * (1 + GetVersatilityBonus() / 100) + 0.5)")
+        .unwrap();
 
     let state = env.state().borrow();
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let td = state.tooltips.get(&gt_id).unwrap();
 
     assert!(
-        td.lines
-            .iter()
-            .any(|line| line.left_text.contains("absorbs 36000 damage")),
+        td.lines.iter().any(|line| line
+            .left_text
+            .contains(&format!("absorbs {shield_amount} damage"))),
         "SetSpellByID should calculate shield values from player health, got: {:?}",
         td.lines
             .iter()

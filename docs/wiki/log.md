@@ -12,6 +12,15 @@ and the reason for the shared path: keep spellbook/tooltips from exposing raw
 placeholders or drifting from the C API result. Refreshed the `index.md`
 `[[lua-api]]` summary.
 
+## [2026-04-24] update | SimulationCraft spell coefficients
+
+Updated `systems/lua-api.md` with the local SimulationCraft source used for
+spell-description coefficients and variables. Recorded the concrete formulas
+now mirrored by `src/spell_description_resolver.rs`: Avenger's Shield
+`1.55 * AP`, Crusader Strike `1.4 * AP`, Shield of the Righteous `0.95 * AP`,
+Eye Beam `$<dmg>` as `10 * 0.4026 * AP`, and Shield of Vengeance `$<shield>`
+as `30% max health * (1 + versatility damage)`.
+
 ## [2026-04-23] add | quest scrollbar partial XML size investigation
 
 Added `investigations/quest-scrollbar-partial-size.md` to document the
