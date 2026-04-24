@@ -73,6 +73,14 @@ fn quest_poi_update_icons_is_registered() {
 }
 
 #[test]
+fn switch_achievement_search_tab_is_registered() {
+    let env = make_env();
+    let global_type: String = env.eval("return type(SwitchAchievementSearchTab)").unwrap();
+    assert_eq!(global_type, "function");
+    env.exec("SwitchAchievementSearchTab(1)").unwrap();
+}
+
+#[test]
 fn register_all_skips_existing_global() {
     use rilua::LuaApiMut;
     let env = make_env();
