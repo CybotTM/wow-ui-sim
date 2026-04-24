@@ -61,6 +61,65 @@ fn test_create_font_default_values() {
 }
 
 #[test]
+fn test_copy_font_object_accepts_xml_style_font_fields() {
+    let env = env();
+    let (path, height, flags): (String, f64, String) = env
+        .eval(
+            r#"
+            local source = {
+                __font = "Fonts\\ARIALN.TTF",
+                __height = 14,
+                __outline = "OUTLINE",
+            }
+            local copy = CreateFont("XmlStyleFontCopyProbe")
+            copy:CopyFontObject(source)
+            return copy:GetFont()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(path, "Fonts\\ARIALN.TTF");
+    assert_eq!(height, 14.0);
+    assert_eq!(flags, "OUTLINE");
+}
+
+#[test]
+fn test_set_font_nil_path_does_not_clear_existing_font() {
+    let env = env();
+    let (result, path, height): (bool, String, f64) = env
+        .eval(
+            r#"
+            local f = UIParent:CreateFontString("SetFontNilPathProbe", "ARTWORK", "ChatFontNormal")
+            local result = f:SetFont(nil, 0)
+            local path, height = f:GetFont()
+            return result, path, height
+            "#,
+        )
+        .unwrap();
+
+    assert!(!result, "SetFont(nil, ...) should report failure");
+    assert_eq!(path, "Fonts\\FRIZQT__.TTF");
+    assert_eq!(height, 14.0);
+}
+
+#[test]
+fn test_message_frame_set_font_object_uses_chat_font_height() {
+    let env = env();
+    let height: f64 = env
+        .eval(
+            r#"
+            local f = CreateFrame("ScrollingMessageFrame", "MessageFrameFontObjectProbe", UIParent)
+            f:SetFontObject(ChatFontNormal)
+            local _, height = f:GetFont()
+            return height
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(height, 14.0);
+}
+
+#[test]
 fn test_create_font_text_color() {
     let env = env();
     let (r, g, b, a): (f64, f64, f64, f64) = env
@@ -328,10 +387,10 @@ fn test_standard_fonts_exist() {
 #[test]
 fn test_standard_font_has_methods() {
     let env = env();
-    let (is_nil, height): (bool, f64) = env
-        .eval("local p, h = GameFontNormal:GetFont(); return p == nil, h")
+    let (path, height): (String, f64) = env
+        .eval("local p, h = GameFontNormal:GetFont(); return p, h")
         .unwrap();
-    assert!(is_nil, "Standard font has no path set in headless mode");
+    assert_eq!(path, "Fonts\\FRIZQT__.TTF");
     assert_eq!(height, 12.0);
 }
 

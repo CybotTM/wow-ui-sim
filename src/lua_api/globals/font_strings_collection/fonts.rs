@@ -18,6 +18,8 @@ type FontTableRef = GcRef<RiluaTable>;
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
+const DEFAULT_FONT_PATH: &str = "Fonts\\FRIZQT__.TTF";
+
 /// (name, height, flags, r, g, b)
 const STANDARD_FONTS: &[(&'static str, f64, &str, f64, f64, f64)] = &[
     ("GameFontNormal", 12.0, "", 1.0, 0.82, 0.0),
@@ -411,10 +413,11 @@ fn font_copy_font_object(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
 
-    copy_font_string(state, dest, src, "__fontPath");
-    copy_font_number(state, dest, src, "__fontHeight");
-    copy_font_string(state, dest, src, "__fontFlags");
+    copy_font_string_alias(state, dest, src, "__fontPath", "__font");
+    copy_font_number_alias(state, dest, src, "__fontHeight", "__height");
+    copy_font_string_alias(state, dest, src, "__fontFlags", "__outline");
     copy_color_components(state, dest, src, "__textColor");
+    copy_xml_text_color_components(state, dest, src);
     copy_color_components(state, dest, src, "__shadowColor");
     copy_font_number(state, dest, src, "__shadowOffsetX");
     copy_font_number(state, dest, src, "__shadowOffsetY");
@@ -610,10 +613,44 @@ fn copy_font_string(state: &mut LuaState, dest: Val, src: Val, key: &'static str
     }
 }
 
+fn copy_font_string_alias(
+    state: &mut LuaState,
+    dest: Val,
+    src: Val,
+    dest_key: &'static str,
+    source_alias: &'static str,
+) {
+    let canonical_value = table_get_static(state, src, dest_key);
+    let value = match canonical_value {
+        Val::Str(_) => canonical_value,
+        _ => table_get_static(state, src, source_alias),
+    };
+    if matches!(value, Val::Str(_)) {
+        table_set_static(state, dest, dest_key, value);
+    }
+}
+
 fn copy_font_number(state: &mut LuaState, dest: Val, src: Val, key: &'static str) {
     let value = table_get_static(state, src, key);
     if matches!(value, Val::Num(_)) {
         table_set_static(state, dest, key, value);
+    }
+}
+
+fn copy_font_number_alias(
+    state: &mut LuaState,
+    dest: Val,
+    src: Val,
+    dest_key: &'static str,
+    source_alias: &'static str,
+) {
+    let canonical_value = table_get_static(state, src, dest_key);
+    let value = match canonical_value {
+        Val::Num(_) => canonical_value,
+        _ => table_get_static(state, src, source_alias),
+    };
+    if matches!(value, Val::Num(_)) {
+        table_set_static(state, dest, dest_key, value);
     }
 }
 
@@ -630,6 +667,23 @@ fn copy_color_components(state: &mut LuaState, dest: Val, src: Val, prefix: &'st
         let value = table_get(state, src, &key);
         if matches!(value, Val::Num(_)) {
             table_set(state, dest, &key, value);
+        }
+    }
+}
+
+fn copy_xml_text_color_components(state: &mut LuaState, dest: Val, src: Val) {
+    for (dest_key, source_key) in [
+        ("__textColorR", "__r"),
+        ("__textColorG", "__g"),
+        ("__textColorB", "__b"),
+    ] {
+        let already_copied = table_get(state, dest, dest_key);
+        if matches!(already_copied, Val::Num(_)) {
+            continue;
+        }
+        let value = table_get(state, src, source_key);
+        if matches!(value, Val::Num(_)) {
+            table_set(state, dest, dest_key, value);
         }
     }
 }
@@ -658,6 +712,8 @@ fn apply_standard_font_colors(
     g: f64,
     b: f64,
 ) {
+    let path = create_string_static(state, DEFAULT_FONT_PATH);
+    table_set_static(state, font, "__fontPath", path);
     table_set_static(state, font, "__fontHeight", Val::Num(height));
     let flags_val = create_string(state, flags);
     table_set_static(state, font, "__fontFlags", flags_val);

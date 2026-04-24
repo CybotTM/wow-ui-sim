@@ -749,3 +749,22 @@ fn test_xml_all_script_handlers() {
     }
     t.assert_script_set("AllScriptsButton", "OnClick");
 }
+
+#[test]
+fn test_xml_intrinsic_onupdate_runs_during_update_tick() {
+    let t = load_test_xml(
+        "test-intrinsic-onupdate",
+        r#"<Ui>
+            <Frame name="IntrinsicOnUpdateFrame" parent="UIParent">
+                <Scripts>
+                    <OnUpdate intrinsicOrder="postcall">
+                        INTRINSIC_ONUPDATE_COUNT = (INTRINSIC_ONUPDATE_COUNT or 0) + 1
+                    </OnUpdate>
+                </Scripts>
+            </Frame>
+        </Ui>"#,
+    );
+
+    t.env.fire_on_update(0.016).unwrap();
+    t.assert_lua_str("return tostring(INTRINSIC_ONUPDATE_COUNT)", "1");
+}

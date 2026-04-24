@@ -376,6 +376,11 @@ pub fn append_script_handler(
     // instead of SetScript. The fire_onload/fire_onshow dispatchers call these
     // before/after the regular handler respectively.
     if let Some(order) = script.intrinsic_order.as_deref() {
+        if (order == "precall" || order == "postcall") && handler_name == "OnUpdate" {
+            emit_chained_handler(code, target, handler_name, &new_handler, order == "precall");
+            return;
+        }
+
         if order == "precall" || order == "postcall" {
             code.push_str(&format!(
                 "\n        {target}.{handler_name}_Intrinsic = {new_handler}\n        "

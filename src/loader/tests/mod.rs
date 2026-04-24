@@ -2,6 +2,7 @@
 
 mod account_store;
 mod button_text;
+mod button_textures;
 mod screen_selection;
 mod xml_basics;
 

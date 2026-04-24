@@ -751,7 +751,10 @@ enum FastLiteralValue<'a> {
 #[derive(Clone)]
 enum FastScriptInstall<'a> {
     Set(FastHandlerRef<'a>),
-    Intrinsic(FastHandlerRef<'a>),
+    Intrinsic {
+        handler: FastHandlerRef<'a>,
+        new_first: bool,
+    },
     Chain {
         handler: FastHandlerRef<'a>,
         new_first: bool,
@@ -800,7 +803,14 @@ fn fast_script_install<'a>(
         FastHandlerRef::NoOp
     };
     match script.intrinsic_order.as_deref() {
-        Some("precall" | "postcall") => Some(FastScriptInstall::Intrinsic(handler)),
+        Some("precall") => Some(FastScriptInstall::Intrinsic {
+            handler,
+            new_first: true,
+        }),
+        Some("postcall") => Some(FastScriptInstall::Intrinsic {
+            handler,
+            new_first: false,
+        }),
         Some(_) => None,
         None => match script.inherit.as_deref() {
             Some("append") => Some(FastScriptInstall::Chain {

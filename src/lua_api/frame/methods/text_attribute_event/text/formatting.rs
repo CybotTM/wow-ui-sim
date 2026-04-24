@@ -340,6 +340,10 @@ pub(crate) fn set_font(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     }
     let font = val_to_string(state, stack_val(state, 2));
+    if font.is_none() {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    }
     let size = match stack_val(state, 3) {
         Val::Num(n) => Some(n as f32),
         _ => None,

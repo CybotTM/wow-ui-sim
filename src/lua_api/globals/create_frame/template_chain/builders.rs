@@ -620,8 +620,20 @@ pub(super) fn install_fast_handler(
                 set_script(state, frame_id, handler_name, handler);
             }
         }
-        FastScriptInstall::Intrinsic(handler_ref) => {
-            let Some(handler) = build_fast_handler(state, handler_ref)? else {
+        FastScriptInstall::Intrinsic { handler, new_first } if handler_name == "OnUpdate" => {
+            let Some(new_handler) = build_fast_handler(state, handler)? else {
+                return Ok(());
+            };
+            let Some(old_handler) = get_script(state, frame_id, handler_name) else {
+                set_script(state, frame_id, handler_name, new_handler);
+                return Ok(());
+            };
+            let chained =
+                build_chained_handler(state, old_handler, new_handler, handler_name, new_first)?;
+            set_script(state, frame_id, handler_name, chained);
+        }
+        FastScriptInstall::Intrinsic { handler, .. } => {
+            let Some(handler) = build_fast_handler(state, handler)? else {
                 return Ok(());
             };
             let frame = frame_ref(state, frame_id)?;

@@ -88,8 +88,22 @@ fn generate_texture_layout_snippet(
         code.push_str("        tex:SetAllPoints(true)\n");
     }
 
+    code.push_str(&generate_texture_tex_coords_snippet(texture));
+
     code.push_str("    end\nend\n");
     code
+}
+
+fn generate_texture_tex_coords_snippet(texture: &crate::xml::TextureXml) -> String {
+    let Some(tex_coords) = &texture.tex_coords else {
+        return String::new();
+    };
+
+    let left = tex_coords.left.unwrap_or(0.0);
+    let right = tex_coords.right.unwrap_or(1.0);
+    let top = tex_coords.top.unwrap_or(0.0);
+    let bottom = tex_coords.bottom.unwrap_or(1.0);
+    format!("        tex:SetTexCoord({left}, {right}, {top}, {bottom})\n")
 }
 
 /// Generate the per-button field assignment for a button texture parentKey.
