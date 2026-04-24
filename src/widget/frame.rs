@@ -116,6 +116,8 @@ pub struct Frame {
     pub text: Option<String>,
     /// Pre-stripped text (WoW markup removed). Updated when `text` is set.
     pub text_stripped: Option<String>,
+    /// Per-run colors for pre-stripped text, used for WoW inline color markup.
+    pub text_segments: Vec<TextSegment>,
     /// Title text (for DefaultPanelTemplate frames).
     pub title: Option<String>,
     /// Text color for FontStrings.

@@ -171,6 +171,10 @@ pub(super) fn emit_widget_text_quads(
 ) {
     let color = color_with_alpha(&f.text_color, layout.alpha);
     let shadow = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, layout.alpha));
+    if !f.text_segments.is_empty() {
+        emit_widget_text_segment_quads(text_renderer, f, layout, shadow);
+        return;
+    }
     emit_text_quads(
         text_renderer.batch,
         text_renderer.font_sys,
@@ -190,6 +194,80 @@ pub(super) fn emit_widget_text_quads(
         layout.max_lines,
         f.text_stripped.as_deref(),
     );
+}
+
+fn emit_widget_text_segment_quads(
+    text_renderer: &mut WidgetTextRenderer<'_>,
+    f: &crate::widget::Frame,
+    layout: WidgetTextLayout<'_>,
+    shadow: Option<[f32; 4]>,
+) {
+    let font_size = f.font_size * f.effective_scale;
+    let line_height = (font_size * 1.2).ceil();
+    let mut x = layout.bounds.x;
+    let mut y = layout.bounds.y;
+    let right = layout.bounds.x + layout.bounds.width;
+
+    for segment in &f.text_segments {
+        let color = color_with_alpha(&segment.color, layout.alpha);
+        for chunk in text_chunks(&segment.text) {
+            let width =
+                text_renderer
+                    .font_sys
+                    .measure_text_width(chunk, f.font.as_deref(), font_size);
+            if starts_new_segment_line(&layout, chunk, x, width, right) {
+                x = layout.bounds.x;
+                y += line_height;
+            }
+            let bounds = Rectangle::new(Point::new(x, y), Size::new(width.max(1.0), line_height));
+            emit_text_segment_chunk(text_renderer, f, chunk, bounds, font_size, color, shadow);
+            x += width;
+        }
+    }
+}
+
+fn starts_new_segment_line(
+    layout: &WidgetTextLayout<'_>,
+    chunk: &str,
+    x: f32,
+    width: f32,
+    right: f32,
+) -> bool {
+    layout.word_wrap && x > layout.bounds.x && x + width > right && !chunk.trim().is_empty()
+}
+
+fn emit_text_segment_chunk(
+    text_renderer: &mut WidgetTextRenderer<'_>,
+    f: &crate::widget::Frame,
+    chunk: &str,
+    bounds: Rectangle,
+    font_size: f32,
+    color: [f32; 4],
+    shadow: Option<[f32; 4]>,
+) {
+    emit_text_quads(
+        text_renderer.batch,
+        text_renderer.font_sys,
+        text_renderer.glyph_atlas,
+        chunk,
+        bounds,
+        f.font.as_deref(),
+        font_size,
+        color,
+        TextJustify::Left,
+        TextJustify::Center,
+        GLYPH_ATLAS_TEX_INDEX,
+        shadow,
+        f.shadow_offset,
+        f.font_outline,
+        false,
+        0,
+        None,
+    );
+}
+
+fn text_chunks(text: &str) -> impl Iterator<Item = &str> {
+    text.split_inclusive(char::is_whitespace)
 }
 
 pub struct FrameQuadEmit<'a> {
@@ -505,8 +583,18 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::*;
-    use crate::widget::Frame;
+    use crate::render::glyph::GlyphAtlas;
+    use crate::widget::{Frame, TextSegment};
+
+    fn has_glyph_color(batch: &QuadBatch, color: [f32; 4]) -> bool {
+        batch
+            .vertices
+            .iter()
+            .any(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color)
+    }
 
     /// A frame that only has a nine-slice layout registered (no active
     /// backdrop) must not emit any quads from `build_frame_quads`. The real
@@ -557,5 +645,47 @@ mod tests {
             batch.vertices.len() > before,
             "enabled backdrop should still emit quads"
         );
+    }
+
+    #[test]
+    fn emit_widget_text_quads_uses_text_segment_colors() {
+        let mut frame = Frame::new(crate::widget::WidgetType::FontString, None, None);
+        frame.text = Some("AB".to_string());
+        frame.text_segments = vec![
+            TextSegment {
+                text: "A".to_string(),
+                color: crate::widget::Color::new(1.0, 0.0, 0.0, 1.0),
+            },
+            TextSegment {
+                text: "B".to_string(),
+                color: crate::widget::Color::new(0.0, 1.0, 0.0, 1.0),
+            },
+        ];
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut glyph_atlas = GlyphAtlas::new();
+        let mut text_renderer = WidgetTextRenderer {
+            batch: &mut batch,
+            font_sys: &mut font_sys,
+            glyph_atlas: &mut glyph_atlas,
+        };
+
+        emit_widget_text_quads(
+            &mut text_renderer,
+            &frame,
+            WidgetTextLayout {
+                text: "AB",
+                bounds: Rectangle::new(iced::Point::new(0.0, 0.0), iced::Size::new(80.0, 24.0)),
+                justify_h: TextJustify::Left,
+                justify_v: TextJustify::Center,
+                word_wrap: false,
+                max_lines: 0,
+                alpha: 1.0,
+            },
+        );
+
+        assert!(has_glyph_color(&batch, [1.0, 0.0, 0.0, 1.0]));
+        assert!(has_glyph_color(&batch, [0.0, 1.0, 0.0, 1.0]));
     }
 }

@@ -59,6 +59,7 @@ macro_rules! frame_defaults {
             alpha_gradients: HashMap::new(),
             text: None,
             text_stripped: None,
+            text_segments: Vec::new(),
             title: None,
             text_color: Color::new(1.0, 0.8, 0.2, 1.0),
             shadow_color: Color::new(0.0, 0.0, 0.0, 0.0),

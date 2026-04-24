@@ -145,6 +145,7 @@ fn update_text_frame(
     if changed && let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = text.clone();
         frame.text_stripped = stripped_text.clone();
+        frame.text_segments.clear();
     }
     let should_update_button_child =
         is_button && (changed || (!has_button_text_child && text.is_some()));
@@ -392,6 +393,7 @@ fn clear_frame_text(sim: &mut SimState, id: u64) {
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.text = Some(String::new());
         frame.text_stripped = Some(String::new());
+        frame.text_segments.clear();
     }
 }
 

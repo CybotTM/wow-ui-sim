@@ -39,6 +39,12 @@ impl Color {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct TextSegment {
+    pub text: String,
+    pub color: Color,
+}
+
 /// Vertex color gradient (VERTICAL or HORIZONTAL).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Gradient {

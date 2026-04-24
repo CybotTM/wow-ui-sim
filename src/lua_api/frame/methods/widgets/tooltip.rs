@@ -382,16 +382,7 @@ fn sync_tooltip_line_frame(
     let Some(line) = line else {
         return Ok(None);
     };
-    let text = if right_side {
-        line.right_text
-    } else {
-        Some(line.left_text)
-    };
-    let (r, g, b) = if right_side {
-        line.right_color
-    } else {
-        line.left_color
-    };
+    let (text, color, text_segments) = tooltip_line_frame_content(line, right_side);
     let stripped = text
         .as_ref()
         .map(|value| crate::render::strip_wow_markup(value));
@@ -399,9 +390,55 @@ fn sync_tooltip_line_frame(
     if let Some(frame) = sim.widgets.get_mut_visual(line_id) {
         frame.text = text;
         frame.text_stripped = stripped;
-        frame.text_color = crate::widget::Color::new(r, g, b, 1.0);
+        frame.text_color = color;
+        frame.text_segments = text_segments;
     }
     Ok(Some(line_id))
+}
+
+fn tooltip_line_frame_content(
+    line: TooltipLine,
+    right_side: bool,
+) -> (
+    Option<String>,
+    crate::widget::Color,
+    Vec<crate::widget::TextSegment>,
+) {
+    if right_side {
+        (
+            line.right_text,
+            tooltip_line_frame_color(line.right_color),
+            tooltip_line_frame_segments(line.right_segments),
+        )
+    } else {
+        (
+            Some(line.left_text),
+            tooltip_line_frame_color(line.left_color),
+            tooltip_line_frame_segments(line.left_segments),
+        )
+    }
+}
+
+fn tooltip_line_frame_color(color: (f32, f32, f32)) -> crate::widget::Color {
+    let (r, g, b) = color;
+    crate::widget::Color::new(r, g, b, 1.0)
+}
+
+fn tooltip_line_frame_segments(
+    segments: Vec<TooltipTextSegment>,
+) -> Vec<crate::widget::TextSegment> {
+    segments
+        .into_iter()
+        .map(|segment| crate::widget::TextSegment {
+            text: segment.text,
+            color: crate::widget::Color::new(
+                segment.color.0,
+                segment.color.1,
+                segment.color.2,
+                1.0,
+            ),
+        })
+        .collect()
 }
 
 fn push_tooltip_line_ref(
