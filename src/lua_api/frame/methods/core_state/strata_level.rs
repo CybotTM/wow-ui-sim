@@ -1,6 +1,9 @@
 //! Frame strata, frame level, and toplevel methods.
 
 use super::helpers::{arg_bool, frame_id};
+use crate::lua_api::frame::methods::methods_helpers::{
+    can_change_protected_state_for, emit_addon_action_blocked,
+};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -9,6 +12,10 @@ use rilua::{LuaResult, Val};
 pub fn set_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let strata = String::from_stack(state, 2)?;
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetFrameStrata");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     let Some(s) = crate::widget::FrameStrata::from_str(&strata) else {
         return Ok(0);
@@ -53,6 +60,10 @@ pub fn get_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_fixed_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let fixed = arg_bool(state, 2);
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetFixedFrameStrata");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.has_fixed_frame_strata = fixed;
@@ -76,6 +87,10 @@ pub fn has_fixed_frame_strata(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let level = i32::from_stack(state, 2)?;
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetFrameLevel");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     let Some(current_level) = sim.widgets.get(id).map(|frame| frame.frame_level) else {
         return Ok(0);
@@ -103,6 +118,10 @@ pub fn get_frame_level(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_fixed_frame_level(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let fixed = arg_bool(state, 2);
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetFixedFrameLevel");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.has_fixed_frame_level = fixed;
@@ -126,6 +145,10 @@ pub fn has_fixed_frame_level(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_toplevel(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let toplevel = arg_bool(state, 2);
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetToplevel");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     if let Some(f) = sim.widgets.get_mut(id) {
         f.toplevel = toplevel;

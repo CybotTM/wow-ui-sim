@@ -2,6 +2,9 @@
 //! SetIgnoreParentScale, GetIgnoreParentScale, IsIgnoringParentScale.
 
 use super::helpers::{arg_bool, frame_id};
+use crate::lua_api::frame::methods::methods_helpers::{
+    can_change_protected_state_for, emit_addon_action_blocked,
+};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -37,6 +40,10 @@ pub fn set_scale(state: &mut LuaState) -> LuaResult<u32> {
     };
     if scale <= 0.0 {
         return Err(runtime_error("Frame:SetScale(): Scale must be > 0"));
+    }
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetScale");
+        return Ok(0);
     }
     let mut sim = borrow_state_mut(state)?;
     let changed = sim

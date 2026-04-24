@@ -143,3 +143,150 @@ fn test_insecure_out_of_combat_can_mutate_protected_frame() {
     assert!(parent_changed);
     assert_eq!(blocked_count, 0);
 }
+
+#[test]
+fn test_insecure_combat_blocks_protected_anchor_mutations() {
+    let env = env();
+    let (num_points, top_x, center_x, blocked): (i32, f32, f32, String) = env
+        .eval(
+            r#"
+            local blocked = {}
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("ADDON_ACTION_BLOCKED")
+            listener:SetScript("OnEvent", function(_, _, _, func)
+                blocked[#blocked + 1] = func
+            end)
+
+            local frame = CreateFrame("Frame", "ProtectedAnchorFrame", UIParent)
+            frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -10)
+            frame:SetPoint("CENTER", UIParent, "CENTER", 20, 0)
+
+            A_Admin.SetFrameProtected("ProtectedAnchorFrame", true)
+            A_Admin.SetInCombat(true)
+            forceinsecure()
+
+            frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 99, -99)
+            frame:ClearPoint("CENTER")
+            frame:ClearAllPoints()
+
+            local _, _, _, topX = frame:GetPointByName("TOPLEFT")
+            local _, _, _, centerX = frame:GetPointByName("CENTER")
+            return frame:GetNumPoints(), topX, centerX, table.concat(blocked, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(num_points, 2);
+    assert_eq!(top_x, 10.0);
+    assert_eq!(center_x, 20.0);
+    assert_eq!(
+        blocked,
+        "ProtectedAnchorFrame:SetPoint()|ProtectedAnchorFrame:ClearPoint()|ProtectedAnchorFrame:ClearAllPoints()"
+    );
+}
+
+#[test]
+fn test_insecure_combat_blocks_protected_visibility_and_scale_mutations() {
+    let env = env();
+    let (scale, shown, visible, show_frame_shown, blocked): (f32, bool, bool, bool, String) = env
+        .eval(
+            r#"
+            local blocked = {}
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("ADDON_ACTION_BLOCKED")
+            listener:SetScript("OnEvent", function(_, _, _, func)
+                blocked[#blocked + 1] = func
+            end)
+
+            local frame = CreateFrame("Frame", "ProtectedVisibilityScaleFrame", UIParent)
+            local showFrame = CreateFrame("Frame", "ProtectedShowFrame", UIParent)
+            frame:SetScale(1.25)
+            frame:Show()
+            showFrame:Hide()
+
+            A_Admin.SetFrameProtected("ProtectedVisibilityScaleFrame", true)
+            A_Admin.SetFrameProtected("ProtectedShowFrame", true)
+            A_Admin.SetInCombat(true)
+            forceinsecure()
+
+            frame:SetScale(2.0)
+            showFrame:Show()
+            frame:Hide()
+            frame:SetShown(false)
+
+            return frame:GetScale(),
+                   frame:IsShown(),
+                   frame:IsVisible(),
+                   showFrame:IsShown(),
+                   table.concat(blocked, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(scale, 1.25);
+    assert!(shown);
+    assert!(visible);
+    assert!(!show_frame_shown);
+    assert_eq!(
+        blocked,
+        "ProtectedVisibilityScaleFrame:SetScale()|ProtectedShowFrame:Show()|ProtectedVisibilityScaleFrame:Hide()|ProtectedVisibilityScaleFrame:SetShown()"
+    );
+}
+
+#[test]
+fn test_insecure_combat_blocks_protected_strata_level_and_toplevel_mutations() {
+    let env = env();
+    let (strata, level, fixed_level, fixed_strata, toplevel, blocked): (
+        String,
+        i32,
+        bool,
+        bool,
+        bool,
+        String,
+    ) = env
+        .eval(
+            r#"
+            local blocked = {}
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("ADDON_ACTION_BLOCKED")
+            listener:SetScript("OnEvent", function(_, _, _, func)
+                blocked[#blocked + 1] = func
+            end)
+
+            local frame = CreateFrame("Frame", "ProtectedStrataLevelFrame", UIParent)
+            frame:SetFrameStrata("LOW")
+            frame:SetFrameLevel(3)
+            frame:SetFixedFrameLevel(false)
+            frame:SetFixedFrameStrata(false)
+            frame:SetToplevel(false)
+
+            A_Admin.SetFrameProtected("ProtectedStrataLevelFrame", true)
+            A_Admin.SetInCombat(true)
+            forceinsecure()
+
+            frame:SetFrameStrata("DIALOG")
+            frame:SetFrameLevel(40)
+            frame:SetFixedFrameLevel(true)
+            frame:SetFixedFrameStrata(true)
+            frame:SetToplevel(true)
+
+            return frame:GetFrameStrata(),
+                   frame:GetFrameLevel(),
+                   frame:HasFixedFrameLevel(),
+                   frame:HasFixedFrameStrata(),
+                   frame:IsToplevel(),
+                   table.concat(blocked, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(strata, "LOW");
+    assert_eq!(level, 3);
+    assert!(!fixed_level);
+    assert!(!fixed_strata);
+    assert!(!toplevel);
+    assert_eq!(
+        blocked,
+        "ProtectedStrataLevelFrame:SetFrameStrata()|ProtectedStrataLevelFrame:SetFrameLevel()|ProtectedStrataLevelFrame:SetFixedFrameLevel()|ProtectedStrataLevelFrame:SetFixedFrameStrata()|ProtectedStrataLevelFrame:SetToplevel()"
+    );
+}

@@ -1,6 +1,9 @@
 //! Visibility, collapse-layout, and menu-open methods.
 
 use super::helpers::{arg_bool, frame_id};
+use crate::lua_api::frame::methods::methods_helpers::{
+    can_change_protected_state_for, emit_addon_action_blocked,
+};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, frame_ref};
 use crate::lua_api::script_helpers::call_error_handler_state;
 use crate::lua_api::script_helpers::get_script as get_rilua_script;
@@ -16,12 +19,20 @@ const GLOBAL_SHOW_HIDE_DEPTH_LIMIT: u32 = 40;
 
 pub fn show(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "Show");
+        return Ok(0);
+    }
     show_or_hide(state, id, true)?;
     Ok(0)
 }
 
 pub fn hide(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "Hide");
+        return Ok(0);
+    }
     show_or_hide(state, id, false)?;
     Ok(0)
 }
@@ -29,6 +40,10 @@ pub fn hide(state: &mut LuaState) -> LuaResult<u32> {
 pub fn set_shown(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let shown = arg_bool(state, 2);
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetShown");
+        return Ok(0);
+    }
     show_or_hide(state, id, shown)?;
     Ok(0)
 }

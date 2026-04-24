@@ -1,5 +1,8 @@
 //! Anchor methods: SetPoint, GetPoint, ClearAllPoints, line endpoints, etc.
 
+use crate::lua_api::frame::methods::methods_helpers::{
+    can_change_protected_state_for, emit_addon_action_blocked,
+};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, frame_id_from_stack,
     val_to_string,
@@ -181,6 +184,10 @@ fn num_opt(v: Val) -> Option<f32> {
 /// ClearAllPoints()
 pub(super) fn clear_all_points(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "ClearAllPoints");
+        return Ok(0);
+    }
     let already_empty = {
         let sim = borrow_state(state)?;
         sim.widgets
@@ -206,6 +213,10 @@ pub(super) fn clear_point(state: &mut LuaState) -> LuaResult<u32> {
     let Some(point) = crate::widget::AnchorPoint::from_str(&point_name) else {
         return Ok(0);
     };
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "ClearPoint");
+        return Ok(0);
+    }
     let mut sim = borrow_state_mut(state)?;
     let target_id = sim
         .widgets
@@ -374,6 +385,10 @@ pub(super) fn set_point(state: &mut LuaState) -> LuaResult<u32> {
             "Frame:SetPoint(): Invalid region point {point_name}"
         )));
     };
+    if !can_change_protected_state_for(state, id) {
+        emit_addon_action_blocked(state, id, "SetPoint");
+        return Ok(0);
+    }
 
     let (mut relative_to, relative_point, x_offset, y_offset) =
         parse_set_point_args(state, id, point)?;
