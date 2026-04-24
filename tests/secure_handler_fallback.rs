@@ -148,6 +148,35 @@ fn execute_restricted_environment_allows_math_string_and_print() {
 }
 
 #[test]
+fn execute_callmethod_propagates_tainted_args_to_insecure_method() {
+    let env = env();
+    let (called, returned_is_secret): (bool, bool) = env
+        .eval(
+            r#"
+            local owner = CreateFrame("Frame", nil, UIParent)
+            function owner:Echo(value)
+                return value
+            end
+
+            local payload = {}
+            debug.settaintmode("rw")
+            debug.setstacktaint("evil-addon")
+            SecureHandlerExecute(owner, [[
+                local returned = self:CallMethod('Echo', ...)
+                self:SetAttribute('callmethodReturned', returned)
+            ]], payload)
+            debug.setstacktaint(nil)
+
+            local returned = owner:GetAttribute('callmethodReturned')
+            return returned == payload, issecretvalue(returned)
+            "#,
+        )
+        .unwrap();
+    assert!(called);
+    assert!(returned_is_secret);
+}
+
+#[test]
 fn execute_swallows_compile_and_runtime_errors() {
     let env = env();
     let still_true: bool = env

@@ -9,11 +9,13 @@ mod events;
 mod helpers;
 mod text;
 
+use crate::lua_api::methods::call_function_state;
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaResult;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
+use rilua::{LuaApiMut, Val};
 
 /// Register all text, attribute, and event RustFn methods on the given table.
 pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
@@ -184,8 +186,51 @@ fn register_attribute_core(state: &mut LuaState, table: GcRef<Table>) -> LuaResu
         "ExecuteAttribute",
         attributes::execute_attribute,
     )?;
+    register_call_method(state, table)?;
     Ok(())
 }
+
+fn register_call_method(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    let loader = state.load(CALL_METHOD_LUA)?;
+    let closure = call_function_state(state, Val::Function(loader.gc_ref()), &[])?;
+    let key = Val::Str(state.gc.intern_string_static(b"CallMethod"));
+    if let Some(methods) = state.gc.tables.get_mut(table) {
+        methods.raw_set(key, closure, &state.gc.string_arena)?;
+    }
+    state.gc.barrier_back(table);
+    Ok(())
+}
+
+const CALL_METHOD_LUA: &str = r##"
+return function(frame, methodName, ...)
+    local callerTaint = debug.getstacktaint()
+    forceinsecure()
+    if callerTaint ~= nil then
+        debug.setstacktaint(callerTaint)
+    end
+    if type(methodName) ~= "string" then
+        error("Method name must be a string")
+    end
+    local method = frame[methodName]
+    if type(method) ~= "function" then
+        error("Invalid method '" .. methodName .. "'")
+    end
+    if callerTaint ~= nil then
+        __sim_mark_secret_value(...)
+    end
+
+    local function pack(...)
+        return { n = select("#", ...), ... }
+    end
+    local results = pack(method(frame, ...))
+    if callerTaint ~= nil then
+        for index = 1, results.n do
+            __sim_mark_secret_value(results[index])
+        end
+    end
+    return unpack(results, 1, results.n)
+end
+"##;
 
 fn register_attribute_frame_refs(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table, "SetFrameRef", attributes::set_frame_ref)?;

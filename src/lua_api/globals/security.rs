@@ -46,6 +46,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     use rilua::LuaApiMut;
     LuaApiMut::register_function(lua, "securecallmethod", securecallmethod)?;
     LuaApiMut::register_function(lua, "issecurevariable", issecurevariable_override)?;
+    LuaApiMut::register_function(lua, "__sim_mark_secret_value", mark_secret_values)?;
     register_value_access_fallbacks(lua)?;
     register_scrub_fallbacks(lua)?;
     register_secure_handler_stubs(lua)?;
@@ -177,6 +178,14 @@ fn dispatch_securecall(state: &mut LuaState, method: Val, args: &[Val]) -> LuaRe
 }
 
 // ── Value-access fallbacks ───────────────────────────────────────────────────
+
+fn mark_secret_values(state: &mut LuaState) -> LuaResult<u32> {
+    let nargs = state.top.saturating_sub(state.base);
+    for index in 0..nargs {
+        mark_secret_value(state, state.stack_get(state.base + index));
+    }
+    Ok(0)
+}
 
 fn register_value_access_fallbacks(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_if_missing(lua, "issecretvalue", issecretvalue_fallback)?;
