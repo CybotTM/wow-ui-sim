@@ -5255,6 +5255,15 @@ if type(__wow_ej_loot_filter_state) ~= "table" then
   rawset(_G, "__wow_ej_loot_filter_state", __wow_ej_loot_filter_state)
 end
 
+local __wow_ej_search_state = rawget(_G, "__wow_ej_search_state")
+if type(__wow_ej_search_state) ~= "table" then
+  __wow_ej_search_state = {
+    text = "",
+    finished = true,
+  }
+  rawset(_G, "__wow_ej_search_state", __wow_ej_search_state)
+end
+
 if EJ_GetCurrentTier == nil then
   function EJ_GetCurrentTier()
     return __wow_ej_tier_state.currentTier or 10
@@ -5302,6 +5311,56 @@ end
 if EJ_IsValidInstanceDifficulty == nil then
   function EJ_IsValidInstanceDifficulty(difficultyID)
     return tonumber(difficultyID) ~= nil and tonumber(difficultyID) > 0
+  end
+end
+
+if EJ_SetSearch == nil then
+  function EJ_SetSearch(text)
+    __wow_ej_search_state.text = text or ""
+    __wow_ej_search_state.finished = true
+  end
+end
+
+if EJ_ClearSearch == nil then
+  function EJ_ClearSearch()
+    __wow_ej_search_state.text = ""
+    __wow_ej_search_state.finished = true
+  end
+end
+
+if EJ_EndSearch == nil then
+  function EJ_EndSearch()
+    __wow_ej_search_state.finished = true
+  end
+end
+
+if EJ_GetSearchSize == nil then
+  function EJ_GetSearchSize()
+    return 0
+  end
+end
+
+if EJ_GetSearchProgress == nil then
+  function EJ_GetSearchProgress()
+    return 0
+  end
+end
+
+if EJ_GetNumSearchResults == nil then
+  function EJ_GetNumSearchResults()
+    return 0
+  end
+end
+
+if EJ_GetSearchResult == nil then
+  function EJ_GetSearchResult(index)
+    return nil
+  end
+end
+
+if EJ_IsSearchFinished == nil then
+  function EJ_IsSearchFinished()
+    return __wow_ej_search_state.finished ~= false
   end
 end
 

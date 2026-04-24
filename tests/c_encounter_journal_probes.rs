@@ -155,3 +155,31 @@ fn test_encounter_journal_tier_selection_round_trips() {
     assert_eq!(initial_tier, 10_i64);
     assert_eq!(selected_tier, 11_i64);
 }
+
+#[test]
+fn encounter_journal_search_surface_is_available_and_empty() {
+    let env = env();
+    env.exec(
+        r#"
+        assert(type(EJ_EndSearch) == "function")
+        assert(type(EJ_ClearSearch) == "function")
+        assert(type(EJ_SetSearch) == "function")
+        assert(type(EJ_GetSearchSize) == "function")
+        assert(type(EJ_GetSearchProgress) == "function")
+        assert(type(EJ_GetNumSearchResults) == "function")
+        assert(type(EJ_GetSearchResult) == "function")
+        assert(type(EJ_IsSearchFinished) == "function")
+
+        EJ_SetSearch("fyrakk")
+        EJ_EndSearch()
+        EJ_ClearSearch()
+
+        assert(EJ_GetSearchSize() == 0)
+        assert(EJ_GetSearchProgress() == 0)
+        assert(EJ_GetNumSearchResults() == 0)
+        assert(EJ_GetSearchResult(1) == nil)
+        assert(EJ_IsSearchFinished() == true)
+        "#,
+    )
+    .unwrap();
+}
