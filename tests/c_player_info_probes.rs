@@ -156,3 +156,13 @@ fn is_player_in_rpe_reflects_mutation() {
     let in_rpe: bool = env.eval("return C_PlayerInfo.IsPlayerInRPE()").unwrap();
     assert!(in_rpe);
 }
+
+#[test]
+fn display_ids_default_to_zero_for_character_model_scene() {
+    let env = env();
+    let (display_id, native_display_id): (i32, i32) = env
+        .eval("return C_PlayerInfo.GetDisplayID(), C_PlayerInfo.GetNativeDisplayID()")
+        .unwrap();
+    assert_eq!(display_id, 0);
+    assert_eq!(native_display_id, 0);
+}

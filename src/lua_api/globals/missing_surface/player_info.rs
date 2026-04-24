@@ -30,6 +30,8 @@ pub(super) fn register_player_info_surface(state: &mut LuaState) -> LuaResult<()
         "CanPlayerUseMountEquipment",
         can_player_use_mount_equipment,
     )?;
+    table_set_rust_fn_static(state, ns, "GetDisplayID", get_display_id)?;
+    table_set_rust_fn_static(state, ns, "GetNativeDisplayID", get_native_display_id)?;
     table_set_rust_fn_static(
         state,
         ns,
@@ -79,6 +81,16 @@ fn get_alternate_form_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(has));
     state.push(Val::Bool(in_form));
     Ok(2)
+}
+
+fn get_display_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_native_display_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
 }
 
 fn get_content_difficulty_creature(state: &mut LuaState) -> LuaResult<u32> {

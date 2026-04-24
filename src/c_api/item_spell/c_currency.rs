@@ -267,10 +267,21 @@ pub(super) fn register_c_equipment_set(state: &mut LuaState) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
+        "GetNumEquipmentSets",
+        c_equipment_set_count,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
         "GetEquipmentSetInfo",
         c_equipment_set_info,
     )?;
     Ok(())
+}
+
+fn c_equipment_set_count(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
 }
 
 fn c_equipment_set_ids(state: &mut LuaState) -> LuaResult<u32> {

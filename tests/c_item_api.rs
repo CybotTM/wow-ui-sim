@@ -8,3 +8,12 @@ mod c_item;
 mod globals_and_inventory;
 #[path = "c_item_api/support.rs"]
 mod support;
+
+#[test]
+fn c_equipment_set_count_defaults_to_zero() {
+    let env = support::env();
+    let count: i32 = env
+        .eval("return C_EquipmentSet.GetNumEquipmentSets()")
+        .unwrap();
+    assert_eq!(count, 0);
+}

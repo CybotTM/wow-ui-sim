@@ -368,3 +368,16 @@ fn stats_for_unknown_unit_fall_back_to_zero() {
     assert_eq!(ap, 0);
     assert_eq!(damage_min, 0.0);
 }
+
+#[test]
+fn paper_doll_defensive_chance_globals_return_numbers() {
+    let env = env();
+    let (dodge, parry, block, shield_block): (f64, f64, f64, f64) = env
+        .eval(r#"return GetDodgeChance(), GetParryChance(), GetBlockChance(), GetShieldBlock()"#)
+        .unwrap();
+
+    assert!(dodge >= 0.0, "dodge={dodge}");
+    assert!(parry >= 0.0, "parry={parry}");
+    assert!(block >= 0.0, "block={block}");
+    assert!(shield_block >= 0.0, "shield block={shield_block}");
+}

@@ -143,6 +143,48 @@ fn test_get_versatility_bonus_positive() {
     assert!(vers > 0.0, "vers bonus={vers}");
 }
 
+#[test]
+fn test_paper_doll_combat_stat_helpers_return_safe_numbers() {
+    let env = env();
+    let (
+        spell_crit,
+        ranged_crit,
+        parry_from_crit,
+        crit_from_value,
+        speed,
+        lifesteal,
+        avoidance,
+        mana_base,
+        mana_combat,
+    ): (f64, f64, bool, f64, f64, f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local base, combat = GetManaRegen()
+            return
+                GetSpellCritChance(2),
+                GetRangedCritChance(),
+                GetCritChanceProvidesParryEffect(),
+                GetCombatRatingBonusForCombatRatingValue(CR_CRIT_MELEE or 9, 180),
+                GetSpeed(),
+                GetLifesteal(),
+                GetAvoidance(),
+                base,
+                combat
+            "#,
+        )
+        .unwrap();
+
+    assert!(spell_crit > 0.0, "spell crit={spell_crit}");
+    assert!(ranged_crit > 0.0, "ranged crit={ranged_crit}");
+    assert!(!parry_from_crit);
+    assert!(crit_from_value > 0.0, "crit from value={crit_from_value}");
+    assert!(speed >= 0.0, "speed={speed}");
+    assert!(lifesteal >= 0.0, "lifesteal={lifesteal}");
+    assert!(avoidance >= 0.0, "avoidance={avoidance}");
+    assert!(mana_base >= 0.0, "mana base={mana_base}");
+    assert!(mana_combat >= 0.0, "mana combat={mana_combat}");
+}
+
 // ============================================================================
 // Stats change with equipment
 // ============================================================================

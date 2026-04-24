@@ -503,6 +503,29 @@ fn get_parry_chance_from_attribute(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_dodge_chance(state: &mut LuaState) -> LuaResult<u32> {
+    let stats = stats_for(state);
+    state.push(Val::Num(base_avoidance_percent(stats.agility)));
+    Ok(1)
+}
+
+fn get_parry_chance(state: &mut LuaState) -> LuaResult<u32> {
+    let stats = stats_for(state);
+    state.push(Val::Num(base_avoidance_percent(stats.strength)));
+    Ok(1)
+}
+
+fn get_block_chance(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn get_shield_block(state: &mut LuaState) -> LuaResult<u32> {
+    let stats = stats_for(state);
+    state.push(Val::Num(stats.armor as f64));
+    Ok(1)
+}
+
 /// `UnitHPPerStamina(unit)` — fixed multiplier used by PaperDoll stamina text.
 fn unit_hp_per_stamina(state: &mut LuaState) -> LuaResult<u32> {
     let unit = unit_token_at(state, 1);
@@ -558,6 +581,10 @@ fn register_paperdoll_helpers(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetParryChanceFromAttribute",
         get_parry_chance_from_attribute,
     )?;
+    LuaApiMut::register_function(lua, "GetDodgeChance", get_dodge_chance)?;
+    LuaApiMut::register_function(lua, "GetParryChance", get_parry_chance)?;
+    LuaApiMut::register_function(lua, "GetBlockChance", get_block_chance)?;
+    LuaApiMut::register_function(lua, "GetShieldBlock", get_shield_block)?;
     LuaApiMut::register_function(lua, "UnitHPPerStamina", unit_hp_per_stamina)?;
     LuaApiMut::register_function(
         lua,

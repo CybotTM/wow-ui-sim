@@ -77,3 +77,10 @@ fn get_num_shapeshift_forms_reports_sim_state_len() {
     let after: i32 = env.eval("return GetNumShapeshiftForms()").unwrap();
     assert_eq!(after, 2);
 }
+
+#[test]
+fn shapeshift_form_id_defaults_to_nil() {
+    let env = env();
+    let is_nil: bool = env.eval("return GetShapeshiftFormID() == nil").unwrap();
+    assert!(is_nil);
+}

@@ -72,11 +72,17 @@ fn get_num_shapeshift_forms(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_shapeshift_form_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetNumTitles", get_num_titles)?;
     LuaApiMut::register_function(lua, "GetTitleName", get_title_name)?;
     LuaApiMut::register_function(lua, "GetNumClasses", get_num_classes)?;
     LuaApiMut::register_function(lua, "GetClassInfo", get_class_info)?;
     LuaApiMut::register_function(lua, "GetNumShapeshiftForms", get_num_shapeshift_forms)?;
+    LuaApiMut::register_function(lua, "GetShapeshiftFormID", get_shapeshift_form_id)?;
     Ok(())
 }
