@@ -99,6 +99,13 @@ fn setup_env() -> WowLuaEnv {
     env
 }
 
+fn load_guild_control_ui(env: &WowLuaEnv) {
+    let toc_path = blizzard_ui_dir()
+        .join("Blizzard_GuildControlUI")
+        .join("Blizzard_GuildControlUI.toc");
+    load_addon(&env.loader_env(), &toc_path).expect("Blizzard_GuildControlUI should load");
+}
+
 fn fire_startup_events(env: &WowLuaEnv) {
     common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
@@ -176,4 +183,86 @@ fn c_club_returns_guild() {
         )
         .unwrap();
     assert_eq!(result, "ok", "C_Club should return guild: {result}");
+}
+
+#[test]
+fn guild_member_rank_dropdown_generates_rank_options() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            A_Admin.SetGuildRanks({
+                { name = "Guild Leader", flags = {} },
+                { name = "Officer", flags = {} },
+                { name = "Member", flags = {} },
+            })
+
+            function CanGuildPromote() return true end
+            function CanGuildDemote() return true end
+            C_GuildInfo.IsGuildRankAssignmentAllowed = function() return true end
+            C_GuildInfo.SetGuildRankOrder = function() end
+
+            local dropdown = CreateFrame("DropdownButton", "GuildRankDropdownProbe", UIParent)
+            Mixin(dropdown, DropdownButtonMixin)
+
+            local detail = {
+                RankDropdown = dropdown,
+                GetClubId = function() return "guild-0" end,
+                GetMemberInfo = function()
+                    return { guid = "member-2", guildRankOrder = 2 }
+                end,
+            }
+            setmetatable(detail, { __index = CommunitiesGuildMemberDetailMixin })
+
+            detail:SetupRankDropdown()
+            local desc = dropdown:GenerateMenu()
+            if type(desc) ~= "table" or type(desc.__wow_elements) ~= "table" then
+                return "missing_elements"
+            end
+
+            local labels = {}
+            for _, element in ipairs(desc.__wow_elements) do
+                table.insert(labels, element.text or "")
+            end
+            local descriptorLabels = table.concat(labels, ",")
+
+            dropdown:OpenMenu()
+            local first = GuildRankDropdownProbeMenuButton1
+            local second = GuildRankDropdownProbeMenuButton2
+            if first == nil or second == nil then
+                return descriptorLabels .. "|missing_buttons"
+            end
+            return descriptorLabels .. "|" .. first:GetText() .. "," .. second:GetText()
+        "#).unwrap();
+        assert_eq!(result, "Officer,Member|Officer,Member", "rank dropdown should list visible assignable guild ranks: {result}");
+    }
+}
+
+#[test]
+fn guild_control_rank_settings_dropdown_shows_rank_rows() {
+    test_timeout! {
+        let env = setup_env();
+        load_guild_control_ui(&env);
+        let result: String = env.eval(r#"
+            A_Admin.SetGuildRanks({
+                { name = "Guild Leader", flags = {} },
+                { name = "Officer", flags = {} },
+                { name = "Member", flags = {} },
+            })
+
+            local dropdown = GuildControlUIRankSettingsFrame
+                and GuildControlUIRankSettingsFrame.dropdown
+            if dropdown == nil then
+                return "missing_dropdown"
+            end
+
+            dropdown:OpenMenu()
+            local first = GuildControlUIRankSettingsFrameRankDropdownMenuButton1
+            local second = GuildControlUIRankSettingsFrameRankDropdownMenuButton2
+            if first == nil or second == nil then
+                return "missing_buttons"
+            end
+            return first:GetText() .. "," .. second:GetText()
+        "#).unwrap();
+        assert_eq!(result, "Officer,Member", "guild control rank dropdown should materialize visible rank rows: {result}");
+    }
 }

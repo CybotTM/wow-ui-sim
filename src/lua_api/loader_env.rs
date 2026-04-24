@@ -105,7 +105,31 @@ local __wow_menu_iterator_methods = {
     EnumerateFrames = true,
 }
 local function __wow_menu_descriptor_stub()
-    local desc = {}
+    local desc = { __wow_elements = {} }
+    local function add_child(kind, text, ...)
+        local child = __wow_menu_descriptor_stub()
+        child.kind = kind
+        child.text = text
+        child.args = { ... }
+        table.insert(desc.__wow_elements, child)
+        return child
+    end
+    function desc:SetTag(tag)
+        self.tag = tag
+        return self
+    end
+    function desc:CreateRadio(text, ...)
+        return add_child("radio", text, ...)
+    end
+    function desc:CreateButton(text, ...)
+        return add_child("button", text, ...)
+    end
+    function desc:CreateTitle(text, ...)
+        return add_child("title", text, ...)
+    end
+    function desc:CreateDivider(...)
+        return add_child("divider", nil, ...)
+    end
     setmetatable(desc, {
         __index = function(_, key)
             if __wow_menu_iterator_methods[key] then
@@ -125,8 +149,45 @@ local function __wow_wrap_menu_descriptor(desc)
     if type(desc) ~= "table" then
         return __wow_menu_descriptor_stub()
     end
+    if type(desc.__wow_elements) ~= "table" then
+        desc.__wow_elements = {}
+    end
     local previous_mt = getmetatable(desc)
     local previous_index = previous_mt and previous_mt.__index or nil
+    local function add_child(kind, text, ...)
+        local child = __wow_wrap_menu_descriptor({})
+        child.kind = kind
+        child.text = text
+        child.args = { ... }
+        table.insert(desc.__wow_elements, child)
+        return child
+    end
+    if rawget(desc, "SetTag") == nil then
+        desc.SetTag = function(self, tag)
+            self.tag = tag
+            return self
+        end
+    end
+    if rawget(desc, "CreateRadio") == nil then
+        desc.CreateRadio = function(_, text, ...)
+            return add_child("radio", text, ...)
+        end
+    end
+    if rawget(desc, "CreateButton") == nil then
+        desc.CreateButton = function(_, text, ...)
+            return add_child("button", text, ...)
+        end
+    end
+    if rawget(desc, "CreateTitle") == nil then
+        desc.CreateTitle = function(_, text, ...)
+            return add_child("title", text, ...)
+        end
+    end
+    if rawget(desc, "CreateDivider") == nil then
+        desc.CreateDivider = function(_, ...)
+            return add_child("divider", nil, ...)
+        end
+    end
     setmetatable(desc, {
         __index = function(self, key)
             local existing = rawget(self, key)

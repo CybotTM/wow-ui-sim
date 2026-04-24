@@ -102,6 +102,69 @@ fn populate_description_invokes_generator_under_pcall() {
 }
 
 #[test]
+fn descriptor_records_radio_entries_for_dropdown_inspection() {
+    let env = env_with_fallback();
+    let labels: (i64, String, String) = env
+        .eval(
+            r#"
+            local desc = Menu.CreateRootMenuDescription()
+            desc:CreateRadio("Guild Leader", function() return false end, function() end, 1)
+            desc:CreateRadio("Officer", function() return true end, function() end, 2)
+            return #desc.__wow_elements, desc.__wow_elements[1].text, desc.__wow_elements[2].text
+            "#,
+        )
+        .unwrap();
+    assert_eq!(labels, (2, "Guild Leader".into(), "Officer".into()));
+}
+
+#[test]
+fn dropdown_generate_menu_populates_setup_menu_generator() {
+    let env = env_with_fallback();
+    let labels: (i64, String, String) = env
+        .eval(
+            r#"
+            local dropdown = CreateFrame("DropdownButton", "MenuFallbackDropdown", UIParent)
+            Mixin(dropdown, DropdownButtonMixin)
+            dropdown:SetupMenu(function(_, rootDescription)
+                rootDescription:SetTag("MENU_GUILD_RANKS")
+                rootDescription:CreateRadio("Guild Leader", function() return false end, function() end, 1)
+                rootDescription:CreateRadio("Officer", function() return true end, function() end, 2)
+            end)
+            local desc = dropdown:GenerateMenu()
+            return #desc.__wow_elements, desc.__wow_elements[1].text, desc.__wow_elements[2].text
+            "#,
+        )
+        .unwrap();
+    assert_eq!(labels, (2, "Guild Leader".into(), "Officer".into()));
+}
+
+#[test]
+fn dropdown_open_menu_materializes_visible_rank_rows() {
+    let env = env_with_fallback();
+    let labels: (String, String, bool, bool) = env
+        .eval(
+            r#"
+            local dropdown = CreateFrame("DropdownButton", "MenuFallbackVisibleDropdown", UIParent)
+            Mixin(dropdown, DropdownButtonMixin)
+            dropdown:SetSize(160, 20)
+            dropdown:SetupMenu(function(_, rootDescription)
+                rootDescription:CreateRadio("Guild Leader", function() return false end, function() end, 1)
+                rootDescription:CreateRadio("Officer", function() return true end, function() end, 2)
+            end)
+            dropdown:OpenMenu()
+            local first = MenuFallbackVisibleDropdownMenuButton1
+            local second = MenuFallbackVisibleDropdownMenuButton2
+            return first:GetText(), second:GetText(), first:IsVisible(), second:IsVisible()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        labels,
+        ("Guild Leader".into(), "Officer".into(), true, true)
+    );
+}
+
+#[test]
 fn populate_description_swallows_generator_errors() {
     let env = env_with_fallback();
     let ok: bool = env

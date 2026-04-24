@@ -9720,6 +9720,7 @@ if type(DropdownButtonMixin) ~= "table" then
   end
 
   function DropdownButtonMixin:OpenMenu()
+    self:GenerateMenu()
     self:SetMenuOpen(true)
   end
 
@@ -9758,6 +9759,129 @@ if type(DropdownButtonMixin) ~= "table" then
   function DropdownButtonMixin:CollectSelectionData() return nil, nil, {} end
   function DropdownButtonMixin:GetSelectionData() return nil, nil, {} end
   function DropdownButtonMixin:HasStickyFocus() return false end
+end
+
+local function __wow_dropdown_root_description()
+  if MenuUtil and type(MenuUtil.CreateRootMenuDescription) == "function" then
+    return MenuUtil.CreateRootMenuDescription({})
+  end
+  if Menu and type(Menu.CreateRootMenuDescription) == "function" then
+    return Menu.CreateRootMenuDescription({})
+  end
+  return { __wow_elements = {} }
+end
+
+local function __wow_dropdown_generate_menu(self)
+  local description = __wow_dropdown_root_description()
+  if type(self.__wow_menu_generator) == "function" then
+    pcall(self.__wow_menu_generator, self, description)
+  elseif self.__wow_menu_description ~= nil then
+    description = self.__wow_menu_description
+  end
+  self.__wow_menu_description = description
+  return description
+end
+
+local function __wow_dropdown_button_name(owner, index)
+  if type(owner.GetName) ~= "function" then
+    return nil
+  end
+  local ok, name = pcall(owner.GetName, owner)
+  if ok and type(name) == "string" and name ~= "" then
+    return name .. "MenuButton" .. tostring(index)
+  end
+  return nil
+end
+
+local function __wow_dropdown_width(owner)
+  if type(owner.GetWidth) == "function" then
+    local ok, width = pcall(owner.GetWidth, owner)
+    if ok and type(width) == "number" and width > 0 then
+      return width
+    end
+  end
+  return 160
+end
+
+local function __wow_dropdown_materialize_menu(owner, description)
+  local previous = owner.__wow_menu_buttons
+  if type(previous) == "table" then
+    for _, button in ipairs(previous) do
+      if button and type(button.Hide) == "function" then
+        button:Hide()
+      end
+    end
+  end
+
+  local elements = type(description) == "table" and description.__wow_elements or nil
+  if type(elements) ~= "table" then
+    owner.__wow_menu_buttons = {}
+    return
+  end
+
+  local buttons = {}
+  local visible_index = 0
+  local width = __wow_dropdown_width(owner)
+  for _, element in ipairs(elements) do
+    local text = type(element) == "table" and element.text or nil
+    if type(text) == "string" and text ~= "" then
+      visible_index = visible_index + 1
+      local name = __wow_dropdown_button_name(owner, visible_index)
+      local button = name and rawget(_G, name) or nil
+      if button == nil then
+        button = CreateFrame("Button", name, UIParent)
+      end
+      button:SetSize(width, 20)
+      button:ClearAllPoints()
+      button:SetPoint("TOPLEFT", owner, "BOTTOMLEFT", 0, -((visible_index - 1) * 20))
+      button:SetText(text)
+      button:Show()
+      buttons[visible_index] = button
+    end
+  end
+  owner.__wow_menu_buttons = buttons
+end
+
+if type(DropdownButtonMixin) == "table" then
+  local __wow_existing_dropdown_generate_menu = DropdownButtonMixin.GenerateMenu
+  local __wow_existing_dropdown_setup_menu = DropdownButtonMixin.SetupMenu
+  local __wow_existing_dropdown_open_menu = DropdownButtonMixin.OpenMenu
+  function DropdownButtonMixin:SetupMenu(generator)
+    self.__wow_menu_generator = generator
+    if type(__wow_existing_dropdown_setup_menu) == "function" then
+      pcall(__wow_existing_dropdown_setup_menu, self, generator)
+    end
+  end
+  if type(DropdownButtonMixin.RegisterMenu) ~= "function" then
+    function DropdownButtonMixin:RegisterMenu(menuDescription)
+      self.__wow_menu_description = menuDescription
+    end
+  end
+  function DropdownButtonMixin:GenerateMenu()
+    if type(__wow_existing_dropdown_generate_menu) == "function" then
+      local ok, description = pcall(__wow_existing_dropdown_generate_menu, self)
+      if ok and type(description) == "table" then
+        self.__wow_menu_description = description
+        return description
+      end
+    end
+    return __wow_dropdown_generate_menu(self)
+  end
+  if type(DropdownButtonMixin.OpenMenu) ~= "function" then
+    function DropdownButtonMixin:OpenMenu()
+      self.__wow_menu_open = true
+    end
+  end
+  function DropdownButtonMixin:OpenMenu()
+    if type(__wow_existing_dropdown_open_menu) == "function" then
+      pcall(__wow_existing_dropdown_open_menu, self)
+    else
+      self.__wow_menu_open = true
+    end
+    local description = self:GenerateMenu()
+    __wow_dropdown_materialize_menu(self, description)
+    self.__wow_menu_open = true
+  end
 end
 
 local function __wow_copy_mixin_methods(target, source)
@@ -11396,6 +11520,74 @@ local function __wow_register_core_frame_methods()
   if methods.EnableRegenerateOnResponse == nil then
     function methods:EnableRegenerateOnResponse()
       self.shouldRegenerateOnResponse = true
+    end
+  end
+
+  if methods.SetupMenu == nil then
+    function methods:SetupMenu(generator)
+      self.__wow_menu_generator = generator
+    end
+  end
+
+  if methods.RegisterMenu == nil then
+    function methods:RegisterMenu(menuDescription)
+      self.__wow_menu_description = menuDescription
+    end
+  end
+
+  if methods.GenerateMenu == nil then
+    function methods:GenerateMenu()
+      local description = nil
+      if MenuUtil and type(MenuUtil.CreateRootMenuDescription) == "function" then
+        description = MenuUtil.CreateRootMenuDescription({})
+      elseif Menu and type(Menu.CreateRootMenuDescription) == "function" then
+        description = Menu.CreateRootMenuDescription({})
+      else
+        description = { __wow_elements = {} }
+      end
+      if type(self.__wow_menu_generator) == "function" then
+        pcall(self.__wow_menu_generator, self, description)
+      elseif self.__wow_menu_description ~= nil then
+        description = self.__wow_menu_description
+      end
+      self.__wow_menu_description = description
+      return description
+    end
+  end
+
+  if methods.GetMenuDescription == nil then
+    function methods:GetMenuDescription()
+      return self.__wow_menu_description
+    end
+  end
+
+  if methods.HasElements == nil then
+    function methods:HasElements()
+      local description = self.__wow_menu_description
+      return type(description) == "table"
+        and type(description.__wow_elements) == "table"
+        and #description.__wow_elements > 0
+    end
+  end
+
+  if methods.OpenMenu == nil then
+    function methods:OpenMenu()
+      if type(self.GenerateMenu) == "function" then
+        self:GenerateMenu()
+      end
+      self.__wow_menu_open = true
+    end
+  end
+
+  if methods.CloseMenu == nil then
+    function methods:CloseMenu()
+      self.__wow_menu_open = false
+    end
+  end
+
+  if methods.IsMenuOpen == nil then
+    function methods:IsMenuOpen()
+      return self.__wow_menu_open == true
     end
   end
 
