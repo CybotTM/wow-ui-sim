@@ -10221,7 +10221,9 @@ end
 if C_Container ~= nil and type(C_Container.SetBagPortraitTexture) ~= "function" then
   function C_Container.SetBagPortraitTexture(texture, bagID)
     if texture ~= nil and type(texture.SetTexture) == "function" then
-      texture:SetTexture(nil)
+      local inventoryID = C_Container.ContainerIDToInventoryID and C_Container.ContainerIDToInventoryID(bagID)
+      local portraitTexture = inventoryID and GetInventoryItemTexture("player", inventoryID)
+      texture:SetTexture(portraitTexture)
     end
   end
 end

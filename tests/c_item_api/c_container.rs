@@ -259,3 +259,19 @@ fn test_default_backpack_skinning_knife_slot4() {
     assert_eq!(stack, 1);
     assert_eq!(icon, 135637);
 }
+
+#[test]
+fn test_c_container_set_bag_portrait_texture_uses_equipped_bag_icon() {
+    let env = env();
+    let texture: String = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local portrait = frame:CreateTexture(nil, "ARTWORK")
+            C_Container.SetBagPortraitTexture(portrait, Enum.BagIndex.Bag_1)
+            return portrait:GetTexture()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(texture, "Interface\\Icons\\INV_Misc_Bag_08");
+}
