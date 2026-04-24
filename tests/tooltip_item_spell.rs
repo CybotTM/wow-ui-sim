@@ -557,6 +557,31 @@ fn test_set_spell_by_id_replaces_shield_placeholders_from_player_health() {
 }
 
 #[test]
+fn test_set_spell_by_id_replaces_armor_placeholder_for_shield_of_the_righteous() {
+    let env = WowLuaEnv::new().unwrap();
+    let expected_armor: i32 = env
+        .eval("local str = UnitStat('player', 1); return math.floor(str * 1.60 + 0.5)")
+        .unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(53600)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+
+    assert!(
+        td.lines.iter().any(|line| line
+            .left_text
+            .contains(&format!("Armor by {expected_armor}"))),
+        "SetSpellByID should calculate Shield of the Righteous armor from 160% primary stat, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn test_set_spell_by_id_makes_tooltip_visible() {
     let env = WowLuaEnv::new().unwrap();
 

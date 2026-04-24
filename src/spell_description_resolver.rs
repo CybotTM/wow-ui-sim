@@ -26,6 +26,7 @@ fn resolve_text(sim: &SimState, spell_id: u32, text: &str, depth: usize) -> Stri
     let expanded = replace_expressions(sim, spell_id, &expanded);
     let expanded = replace_angle_tokens(sim, spell_id, &expanded);
     let expanded = replace_dollar_tokens(sim, spell_id, &expanded);
+    let expanded = replace_class_conditionals(sim, &expanded);
     cleanup_control_tokens(&expanded)
 }
 
@@ -280,7 +281,7 @@ fn spell_amount(sim: &SimState, spell_id: u32, effect_index: u32) -> f64 {
         (19750, _) | (85673, _) | (130551, _) => 20_000.0,
         (82326, _) => 35_000.0,
         (25912, _) | (25914, _) | (20473, _) => 10_000.0,
-        (132403, 1) => 100.0,
+        (132403, 1 | 2) => 160.0,
         _ => game_data::spell_effect_amount(spell_id) as f64,
     }
 }
@@ -403,6 +404,56 @@ fn parse_number_token(expression: &str, index: &mut usize) -> Option<f64> {
         }
         _ => None,
     }
+}
+
+fn replace_class_conditionals(sim: &SimState, text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(start) = rest.find("$?c") {
+        out.push_str(&rest[..start]);
+        let token = &rest[start + 3..];
+        let (class_id, digits) = parse_number_prefix(token);
+        let Some(class_id) = class_id else {
+            out.push_str("$?c");
+            rest = token;
+            continue;
+        };
+        let Some((true_branch, false_branch, consumed)) =
+            parse_two_branch_conditional(&token[digits..])
+        else {
+            out.push_str("$?c");
+            out.push_str(&token[..digits]);
+            rest = &token[digits..];
+            continue;
+        };
+        if sim.player.class_index as u32 == class_id {
+            out.push_str(true_branch);
+        } else {
+            out.push_str(false_branch.unwrap_or(""));
+        }
+        rest = &token[digits + consumed..];
+    }
+    out.push_str(rest);
+    out
+}
+
+fn parse_two_branch_conditional(text: &str) -> Option<(&str, Option<&str>, usize)> {
+    let (true_branch, true_consumed) = parse_bracketed(text)?;
+    let remaining = &text[true_consumed..];
+    let Some((false_branch, false_consumed)) = parse_bracketed(remaining) else {
+        return Some((true_branch, None, true_consumed));
+    };
+    Some((
+        true_branch,
+        Some(false_branch),
+        true_consumed + false_consumed,
+    ))
+}
+
+fn parse_bracketed(text: &str) -> Option<(&str, usize)> {
+    let body = text.strip_prefix('[')?;
+    let end = body.find(']')?;
+    Some((&body[..end], end + 2))
 }
 
 struct NumberExpressionParser {
