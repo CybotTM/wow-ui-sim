@@ -545,12 +545,12 @@ fn test_get_action_adds_colored_binding_line() {
             "#,
         )
         .unwrap();
-    let highlight: (f32, f32, f32) = env
-        .eval("local r,g,b = HIGHLIGHT_FONT_COLOR:GetRGB(); return r,g,b")
+    let instruction: (f32, f32, f32) = env
+        .eval("local r,g,b = GREEN_FONT_COLOR:GetRGB(); return r,g,b")
         .unwrap();
 
     assert_eq!(binding_text, "Key bound: 5");
-    assert_color_close((r, g, b), highlight, "action binding line");
+    assert_color_close((r, g, b), instruction, "action binding line");
 }
 
 #[test]

@@ -64,7 +64,7 @@ fn push_spell_cast_line(state: &mut LuaState, lines: Val, index: i64, spell_id: 
 }
 
 fn push_highlight_spell_line(state: &mut LuaState, lines: Val, index: i64, text: &str) {
-    let detail_color = spell_detail_color(state);
+    let detail_color = spell_color_from_global(state, b"HIGHLIGHT_FONT_COLOR", (1.0, 1.0, 1.0));
     push_tooltip_line(
         state,
         lines,
@@ -93,28 +93,32 @@ pub(super) fn append_action_binding_line(state: &mut LuaState, tooltip: Val, slo
     let lines = table_get(state, tooltip, "lines");
     let index = tooltip_line_count(state, lines) + 1;
     let text = action_binding_line(slot);
-    let detail_color = spell_detail_color(state);
+    let instruction_color = spell_color_from_global(state, b"GREEN_FONT_COLOR", (0.1, 1.0, 0.1));
     push_tooltip_line(
         state,
         lines,
         index,
         LINE_TYPE_SPELL_NAME,
         &text,
-        Some(detail_color),
+        Some(instruction_color),
         false,
     );
 }
 
-fn spell_detail_color(state: &mut LuaState) -> (f64, f64, f64) {
-    let highlight_key = state.gc.intern_string(b"HIGHLIGHT_FONT_COLOR");
-    let highlight_color = state
+fn spell_color_from_global(
+    state: &mut LuaState,
+    color_name: &[u8],
+    fallback: (f64, f64, f64),
+) -> (f64, f64, f64) {
+    let color_key = state.gc.intern_string(color_name);
+    let color = state
         .gc
         .tables
         .get(state.global)
-        .map(|globals| globals.get_str(highlight_key, &state.gc.string_arena))
+        .map(|globals| globals.get_str(color_key, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
 
-    table_color_components(state, highlight_color).unwrap_or((1.0, 1.0, 1.0))
+    table_color_components(state, color).unwrap_or(fallback)
 }
 
 fn table_color_components(state: &mut LuaState, color: Val) -> Option<(f64, f64, f64)> {
