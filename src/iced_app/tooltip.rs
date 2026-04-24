@@ -486,23 +486,81 @@ fn emit_tooltip_text_segments(
         return;
     }
 
-    let mut x = bounds.x;
+    let line_height = (font_size * 1.2).ceil();
+    let total_width = measure_tooltip_segments_width(tr, segments, font_size);
+    let mut x = tooltip_segment_start_x(bounds, justify, total_width, wrap);
+    let mut y = bounds.y;
+    let right = bounds.x + bounds.width;
+
     for segment in segments {
-        let segment_width = tr
-            .font_sys
-            .measure_text_width(&segment.text, None, font_size);
-        let segment_bounds =
-            tooltip_line_bounds(x, bounds.y, segment_width.max(1.0), bounds.height);
-        tr.emit(
-            &segment.text,
-            segment_bounds,
-            TextJustify::Left,
-            font_size,
-            segment.color,
-            false,
-        );
-        x += segment_width;
+        for chunk in tooltip_segment_chunks(&segment.text, wrap) {
+            let chunk_width = tr.font_sys.measure_text_width(chunk, None, font_size);
+            if starts_wrapped_tooltip_segment_line(wrap, chunk, x, chunk_width, bounds.x, right) {
+                x = bounds.x;
+                y += line_height;
+            }
+            let chunk_bounds =
+                tooltip_line_bounds(x, y, chunk_width.max(1.0), line_height.min(bounds.height));
+            tr.emit(
+                chunk,
+                chunk_bounds,
+                TextJustify::Left,
+                font_size,
+                segment.color,
+                false,
+            );
+            x += chunk_width;
+        }
     }
+}
+
+fn measure_tooltip_segments_width(
+    tr: &mut TooltipTextRenderer<'_>,
+    segments: &[TooltipTextSegmentRender],
+    font_size: f32,
+) -> f32 {
+    segments
+        .iter()
+        .map(|segment| {
+            tr.font_sys
+                .measure_text_width(&segment.text, None, font_size)
+        })
+        .sum()
+}
+
+fn tooltip_segment_start_x(
+    bounds: Rectangle,
+    justify: TextJustify,
+    total_width: f32,
+    wrap: bool,
+) -> f32 {
+    if wrap {
+        return bounds.x;
+    }
+    match justify {
+        TextJustify::Center => bounds.x + ((bounds.width - total_width) / 2.0).max(0.0),
+        TextJustify::Right => bounds.x + (bounds.width - total_width).max(0.0),
+        _ => bounds.x,
+    }
+}
+
+fn tooltip_segment_chunks(text: &str, wrap: bool) -> Box<dyn Iterator<Item = &str> + '_> {
+    if wrap {
+        Box::new(text.split_inclusive(char::is_whitespace))
+    } else {
+        Box::new(std::iter::once(text))
+    }
+}
+
+fn starts_wrapped_tooltip_segment_line(
+    wrap: bool,
+    chunk: &str,
+    x: f32,
+    chunk_width: f32,
+    left: f32,
+    right: f32,
+) -> bool {
+    wrap && x > left && x + chunk_width > right && !chunk.trim().is_empty()
 }
 
 struct TooltipLinePlacement {
@@ -615,6 +673,17 @@ mod tests {
             .vertices
             .iter()
             .any(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color)
+    }
+
+    fn glyph_bounds_for_color(batch: &QuadBatch, color: [f32; 4]) -> Option<(f32, f32, f32, f32)> {
+        union_bounds(batch.vertices.iter().filter_map(|vertex| {
+            (vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color).then_some((
+                vertex.position[0],
+                vertex.position[1],
+                vertex.position[0],
+                vertex.position[1],
+            ))
+        }))
     }
 
     fn request_bounds_by_base_path(
@@ -846,6 +915,64 @@ mod tests {
 
         assert!(has_glyph_color(&batch, [1.0, 0.0, 0.0, 1.0]));
         assert!(has_glyph_color(&batch, [0.0, 1.0, 0.0, 1.0]));
+    }
+
+    #[test]
+    fn tooltip_renderer_wraps_inline_color_segments() {
+        let data = TooltipRenderData {
+            lines: vec![TooltipLineRender {
+                left_text: "Alpha Bravo Charlie Delta".to_string(),
+                left_color: [1.0, 0.82, 0.0, 1.0],
+                left_segments: vec![
+                    TooltipTextSegmentRender {
+                        text: "Alpha Bravo ".to_string(),
+                        color: [1.0, 0.0, 0.0, 1.0],
+                    },
+                    TooltipTextSegmentRender {
+                        text: "Charlie Delta".to_string(),
+                        color: [0.0, 1.0, 0.0, 1.0],
+                    },
+                ],
+                right_text: None,
+                right_color: [1.0, 1.0, 1.0, 1.0],
+                right_segments: Vec::new(),
+                font_size: TOOLTIP_BODY_FONT_SIZE,
+                wrap: true,
+                measured_height: (TOOLTIP_BODY_FONT_SIZE * 3.0).ceil(),
+            }],
+            line_spacing: TOOLTIP_LINE_SPACING,
+        };
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut glyph_atlas = GlyphAtlas::new();
+        let tooltip_data = HashMap::from([(42_u64, data)]);
+        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+        let bounds = Rectangle::new(Point::new(100.0, 200.0), Size::new(95.0, 90.0));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds,
+                tooltip_data: Some(&tooltip_data),
+                id: 42,
+                eff_alpha: 1.0,
+                draw_background: false,
+            },
+            &mut text_ctx,
+        );
+
+        let insets = tooltip_text_insets();
+        let right_edge = bounds.x + bounds.width - insets.right;
+        let red_bounds = glyph_bounds_for_color(&batch, [1.0, 0.0, 0.0, 1.0]).unwrap();
+        let green_bounds = glyph_bounds_for_color(&batch, [0.0, 1.0, 0.0, 1.0]).unwrap();
+
+        assert!(red_bounds.2 <= right_edge + 1.0);
+        assert!(green_bounds.2 <= right_edge + 1.0);
+        assert!(
+            green_bounds.1 > red_bounds.1,
+            "later colored segment should wrap below earlier text, red={red_bounds:?} green={green_bounds:?}"
+        );
     }
 
     #[test]
