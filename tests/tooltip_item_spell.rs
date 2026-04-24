@@ -732,6 +732,59 @@ fn test_set_spell_by_id_get_left_line_preserves_inline_color_segments() {
 }
 
 #[test]
+fn test_add_line_preserves_processing_info_inline_color_segments() {
+    let env = WowLuaEnv::new().unwrap();
+    let expected_armor: i32 = env
+        .eval("local str = UnitStat('player', 1); return math.floor(str * 1.60 + 0.5)")
+        .unwrap();
+
+    env.exec(
+        r#"
+        local info = { tooltipData = C_TooltipInfo.GetAction(5) }
+        GameTooltip.processingInfo = info
+        GameTooltip:ClearLines()
+        for _, lineData in ipairs(info.tooltipData.lines) do
+            local color = lineData.leftColor or NORMAL_FONT_COLOR
+            local r, g, b = color:GetRGB()
+            GameTooltip:AddLine(lineData.leftText, r, g, b, lineData.wrapText)
+        end
+        GameTooltip.processingInfo = nil
+        "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let description_line = td
+        .lines
+        .iter()
+        .find(|line| line.left_text.contains("Armor by"))
+        .expect("action tooltip should include Shield of the Righteous description");
+    for value in [expected_armor.to_string(), "4.5".to_string()] {
+        let segment = description_line
+            .left_segments
+            .iter()
+            .find(|segment| segment.text == value)
+            .unwrap_or_else(|| {
+                panic!(
+                    "expected data-handler tooltip to preserve value segment {value:?}; got {} segments",
+                    description_line.left_segments.len()
+                )
+            });
+        assert!(
+            (segment.color.0 - 1.0).abs() < 0.01
+                && (segment.color.1 - 1.0).abs() < 0.01
+                && (segment.color.2 - 1.0).abs() < 0.01,
+            "data-handler value {value} should stay white, got rgb=({:.3},{:.3},{:.3})",
+            segment.color.0,
+            segment.color.1,
+            segment.color.2
+        );
+    }
+}
+
+#[test]
 fn test_set_spell_by_id_applies_full_line_inline_color_markup() {
     let env = WowLuaEnv::new().unwrap();
 

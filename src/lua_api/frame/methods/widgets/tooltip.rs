@@ -42,12 +42,21 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
     let g = opt_f32(state, 4).unwrap_or(default_g);
     let b = opt_f32(state, 5).unwrap_or(default_b);
     let wrap = val_to_bool(stack_val(state, 6));
+    let line_index = next_tooltip_line_index(state, id);
+    let left_segments = processing_line_color_segments(
+        state,
+        id,
+        line_index,
+        "leftText",
+        &text,
+        "leftColorSegments",
+    );
     let mut sim = borrow_state_mut(state)?;
     let td = sim.tooltips.entry(id).or_default();
     td.lines.push(TooltipLine {
         left_text: text,
         left_color: (r, g, b),
-        left_segments: Vec::new(),
+        left_segments,
         right_text: None,
         right_color: (1.0, 1.0, 1.0),
         right_segments: Vec::new(),
@@ -69,15 +78,37 @@ pub(super) fn add_double_line(state: &mut LuaState) -> LuaResult<u32> {
     let right_g = opt_f32(state, 8).unwrap_or(left_g);
     let right_b = opt_f32(state, 9).unwrap_or(left_b);
     let wrap = val_to_bool(stack_val(state, 10));
+    let line_index = next_tooltip_line_index(state, id);
+    let left_segments = processing_line_color_segments(
+        state,
+        id,
+        line_index,
+        "leftText",
+        &left_text,
+        "leftColorSegments",
+    );
+    let right_segments = right_text
+        .as_deref()
+        .map(|text| {
+            processing_line_color_segments(
+                state,
+                id,
+                line_index,
+                "rightText",
+                text,
+                "rightColorSegments",
+            )
+        })
+        .unwrap_or_default();
     let mut sim = borrow_state_mut(state)?;
     let td = sim.tooltips.entry(id).or_default();
     td.lines.push(TooltipLine {
         left_text,
         left_color: (left_r, left_g, left_b),
-        left_segments: Vec::new(),
+        left_segments,
         right_text,
         right_color: (right_r, right_g, right_b),
-        right_segments: Vec::new(),
+        right_segments,
         wrap,
         texture: None,
     });
@@ -90,6 +121,82 @@ pub(super) fn num_lines(state: &mut LuaState) -> LuaResult<u32> {
     let v = sim.tooltips.get(&id).map(|td| td.lines.len()).unwrap_or(0);
     drop(sim);
     (v as f64).into_stack(state)
+}
+
+fn next_tooltip_line_index(state: &mut LuaState, tooltip_id: u64) -> usize {
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| sim.tooltips.get(&tooltip_id).map(|td| td.lines.len() + 1))
+        .unwrap_or(1)
+}
+
+fn processing_line_color_segments(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    line_index: usize,
+    text_key: &str,
+    text: &str,
+    segment_key: &str,
+) -> Vec<TooltipTextSegment> {
+    let Some(line) = processing_tooltip_line(state, tooltip_id, line_index, text_key, text) else {
+        return Vec::new();
+    };
+    line_color_segments(state, line, segment_key)
+}
+
+fn processing_tooltip_line(
+    state: &mut LuaState,
+    tooltip_id: u64,
+    line_index: usize,
+    text_key: &str,
+    text: &str,
+) -> Option<Val> {
+    let tooltip = frame_ref(state, tooltip_id).ok()?;
+    let processing_info = table_get(state, tooltip, "processingInfo");
+    let tooltip_data = table_get(state, processing_info, "tooltipData");
+    let lines = table_get(state, tooltip_data, "lines");
+    processing_tooltip_line_at(state, lines, line_index, text_key, text)
+        .or_else(|| find_processing_tooltip_line(state, lines, text_key, text))
+}
+
+fn processing_tooltip_line_at(
+    state: &mut LuaState,
+    lines: Val,
+    line_index: usize,
+    text_key: &str,
+    text: &str,
+) -> Option<Val> {
+    let line = table_array_get(state, lines, line_index as i64);
+    processing_line_text_matches(state, line, text_key, text).then_some(line)
+}
+
+fn find_processing_tooltip_line(
+    state: &mut LuaState,
+    lines: Val,
+    text_key: &str,
+    text: &str,
+) -> Option<Val> {
+    let mut index = 1;
+    loop {
+        let line = table_array_get(state, lines, index);
+        if !matches!(line, Val::Table(_)) {
+            return None;
+        }
+        if processing_line_text_matches(state, line, text_key, text) {
+            return Some(line);
+        }
+        index += 1;
+    }
+}
+
+fn processing_line_text_matches(
+    state: &mut LuaState,
+    line: Val,
+    text_key: &str,
+    text: &str,
+) -> bool {
+    let line_text = table_get(state, line, text_key);
+    val_to_string(state, line_text).as_deref() == Some(text)
 }
 
 pub(super) fn set_custom_line_spacing(state: &mut LuaState) -> LuaResult<u32> {
