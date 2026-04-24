@@ -5,6 +5,8 @@
 //!
 //! - `C_LFGInfo.CanPlayerUseLFD()` — returns `(true, nil)` matching the
 //!   existing `c_lfg_info_can_player_use` behaviour in `c_model_info.rs`.
+//! - `C_LFGInfo.CanPlayerUseGroupFinder()` — returns `(true, nil)` so the
+//!   LFG micro menu button is available in the default simulator state.
 //! - `C_LFGInfo.GetLFGCategoryInfo(categoryID)` — returns a table with
 //!   `name` and `order` fields from `lfg_category_info`, or nil for
 //!   unknown categories.
@@ -21,6 +23,12 @@ use rilua::{LuaResult, Val};
 
 pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_LFGInfo")?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanPlayerUseGroupFinder",
+        can_player_use_group_finder,
+    )?;
     table_set_rust_fn_static(state, table_ref, "CanPlayerUseLFD", can_player_use_lfd)?;
     table_set_rust_fn_static(
         state,
@@ -41,6 +49,12 @@ pub(super) fn register_lfg_info_surface(state: &mut LuaState) -> LuaResult<()> {
         is_lfg_mode_active_for_category,
     )?;
     Ok(())
+}
+
+fn can_player_use_group_finder(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    state.push(Val::Nil);
+    Ok(2)
 }
 
 fn can_player_use_lfd(state: &mut LuaState) -> LuaResult<u32> {

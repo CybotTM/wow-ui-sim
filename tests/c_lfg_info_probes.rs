@@ -21,6 +21,22 @@ fn can_player_use_lfd_returns_true_by_default() {
 }
 
 #[test]
+fn can_player_use_group_finder_returns_true_by_default() {
+    let env = env();
+    let (can_use, failure_reason): (bool, Option<String>) = env
+        .eval("return C_LFGInfo.CanPlayerUseGroupFinder()")
+        .unwrap();
+    assert!(
+        can_use,
+        "CanPlayerUseGroupFinder gates the LFG micro menu button"
+    );
+    assert!(
+        failure_reason.is_none(),
+        "failure reason should be nil when group finder is allowed"
+    );
+}
+
+#[test]
 fn get_lfg_category_info_returns_dungeons_for_category_2() {
     let env = env();
     let (name, order): (String, i32) = env
