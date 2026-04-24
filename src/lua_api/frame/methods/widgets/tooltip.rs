@@ -381,6 +381,11 @@ fn sync_tooltip_line_frame(
     } else {
         Some(line.left_text)
     };
+    let (r, g, b) = if right_side {
+        line.right_color
+    } else {
+        line.left_color
+    };
     let stripped = text
         .as_ref()
         .map(|value| crate::render::strip_wow_markup(value));
@@ -388,6 +393,7 @@ fn sync_tooltip_line_frame(
     if let Some(frame) = sim.widgets.get_mut_visual(line_id) {
         frame.text = text;
         frame.text_stripped = stripped;
+        frame.text_color = crate::widget::Color::new(r, g, b, 1.0);
     }
     Ok(Some(line_id))
 }

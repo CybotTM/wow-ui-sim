@@ -592,6 +592,47 @@ fn test_set_spell_by_id_replaces_armor_placeholder_for_shield_of_the_righteous()
 }
 
 #[test]
+fn test_set_spell_by_id_get_left_line_uses_tooltip_line_color() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(53600)").unwrap();
+
+    let (line_index, expected_color) = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let td = state.tooltips.get(&gt_id).unwrap();
+        let description_index = td
+            .lines
+            .iter()
+            .position(|line| line.left_text.contains("Armor by"))
+            .expect("Shield of the Righteous tooltip should include armor description")
+            + 1;
+        (
+            description_index,
+            td.lines[description_index - 1].left_color,
+        )
+    };
+    let actual_color: (f32, f32, f32) = env
+        .eval(&format!(
+            "local line = GameTooltip:GetLeftLine({line_index}); return line:GetTextColor()"
+        ))
+        .unwrap();
+
+    assert!(
+        (actual_color.0 - expected_color.0).abs() < 0.01
+            && (actual_color.1 - expected_color.1).abs() < 0.01
+            && (actual_color.2 - expected_color.2).abs() < 0.01,
+        "GetLeftLine should apply tooltip line color; expected rgb=({:.3},{:.3},{:.3}), got rgb=({:.3},{:.3},{:.3})",
+        expected_color.0,
+        expected_color.1,
+        expected_color.2,
+        actual_color.0,
+        actual_color.1,
+        actual_color.2
+    );
+}
+
+#[test]
 fn test_set_spell_by_id_makes_tooltip_visible() {
     let env = WowLuaEnv::new().unwrap();
 
