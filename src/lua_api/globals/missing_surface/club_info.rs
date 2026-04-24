@@ -65,12 +65,32 @@ fn register_club_lookup_methods(state: &mut LuaState, table_ref: GcRef<Table>) -
 }
 
 fn register_club_status_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    register_club_privilege_methods(state, table_ref)?;
+    register_club_stream_methods(state, table_ref)?;
+    register_club_message_methods(state, table_ref)?;
+    register_club_readiness_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_club_privilege_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
         "GetClubPrivileges",
         c_club_get_club_privileges,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetClubCapacity",
+        c_club_get_club_capacity,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "IsEnabled", c_club_is_enabled)?;
+    table_set_rust_fn_static(state, table_ref, "IsRestricted", c_club_is_restricted)?;
+    Ok(())
+}
+
+fn register_club_stream_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetStreams", c_club_get_streams)?;
     table_set_rust_fn_static(state, table_ref, "GetStreamInfo", c_club_get_stream_info)?;
     table_set_rust_fn_static(
@@ -79,6 +99,10 @@ fn register_club_status_methods(state: &mut LuaState, table_ref: GcRef<Table>) -
         "IsSubscribedToStream",
         c_club_is_subscribed_to_stream,
     )?;
+    Ok(())
+}
+
+fn register_club_message_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetMessageInfo", c_club_get_message_info)?;
     table_set_rust_fn_static(
         state,
@@ -105,12 +129,10 @@ fn register_club_status_methods(state: &mut LuaState, table_ref: GcRef<Table>) -
         c_club_is_beginning_of_stream,
     )?;
     table_set_rust_fn_static(state, table_ref, "SendMessage", c_club_send_message)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetClubCapacity",
-        c_club_get_club_capacity,
-    )?;
+    Ok(())
+}
+
+fn register_club_readiness_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(state, table_ref, "GetGuildClubId", c_club_get_guild_club_id)?;
     table_set_rust_fn_static(
         state,
@@ -119,8 +141,6 @@ fn register_club_status_methods(state: &mut LuaState, table_ref: GcRef<Table>) -
         c_club_are_members_ready,
     )?;
     table_set_rust_fn_static(state, table_ref, "FocusMembers", c_club_focus_members)?;
-    table_set_rust_fn_static(state, table_ref, "IsEnabled", c_club_is_enabled)?;
-    table_set_rust_fn_static(state, table_ref, "IsRestricted", c_club_is_restricted)?;
     Ok(())
 }
 
