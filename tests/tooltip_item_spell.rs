@@ -1,5 +1,14 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+fn update_tooltip_sizes(env: &WowLuaEnv) {
+    use std::path::PathBuf;
+    use wow_ui_sim::render::font::WowFontSystem;
+
+    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut state = env.state().borrow_mut();
+    wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+}
+
 #[test]
 fn test_set_item_by_id_populates_lines() {
     let env = WowLuaEnv::new().unwrap();
@@ -426,6 +435,24 @@ fn test_set_spell_by_id_populates_lines() {
     let td = state.tooltips.get(&gt_id).unwrap();
     let expected_name: String = env.eval("return C_Spell.GetSpellName(19750)").unwrap();
     assert_eq!(td.lines[0].left_text, expected_name);
+}
+
+#[test]
+fn test_set_spell_by_id_uses_wrapped_description_for_tooltip_width() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(375576)").unwrap();
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert!(
+        frame.width >= 240.0,
+        "Divine Toll tooltip should not shrink to the short title width, got {}",
+        frame.width
+    );
 }
 
 #[test]
