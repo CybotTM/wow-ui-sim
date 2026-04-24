@@ -118,7 +118,7 @@ fn replace_expressions(sim: &SimState, spell_id: u32, text: &str) -> String {
         let expression = &rest[expression_start..expression_start + end];
         let numeric = replace_expression_variables(sim, spell_id, expression);
         match evaluate_number_expression(&numeric) {
-            Some(value) => out.push_str(&format_number(value)),
+            Some(value) => out.push_str(&format_tooltip_value(value)),
             None => out.push_str(&cleanup_control_tokens(expression)),
         }
         rest = &rest[expression_start + end + 1..];
@@ -159,17 +159,17 @@ fn replace_angle_tokens(sim: &SimState, spell_id: u32, text: &str) -> String {
         .unwrap_or_else(|| spell_amount(sim, spell_id, 1));
     let shield = named_variable_value(sim, spell_id, "shield")
         .unwrap_or_else(|| shield_amount(sim, spell_id) as f64);
-    let mut out = text.replace("$<damage>", &format_number(damage));
+    let mut out = text.replace("$<damage>", &format_tooltip_value(damage));
     out = out.replace(
         "$<damageValue>",
-        &format_number(spell_amount(sim, spell_id, 1)),
+        &format_tooltip_value(spell_amount(sim, spell_id, 1)),
     );
-    out = out.replace("$<shield>", &format_number(shield));
+    out = out.replace("$<shield>", &format_tooltip_value(shield));
 
     for (name, _expression) in spell_variables(spell_id) {
         let token = format!("$<{name}>");
         if let Some(value) = named_variable_value(sim, spell_id, name) {
-            out = out.replace(&token, &format_number(value));
+            out = out.replace(&token, &format_tooltip_value(value));
         }
     }
 
@@ -192,7 +192,7 @@ fn replace_dollar_tokens(sim: &SimState, spell_id: u32, text: &str) -> String {
             continue;
         }
         if let Some((value, consumed)) = parse_value_token(sim, spell_id, tail) {
-            out.push_str(&format_number(value));
+            out.push_str(&format_tooltip_value(value));
             while chars.peek().is_some_and(|(i, _)| *i < index + 1 + consumed) {
                 chars.next();
             }
@@ -562,4 +562,8 @@ fn format_number(value: f64) -> String {
     } else {
         format!("{value:.1}")
     }
+}
+
+fn format_tooltip_value(value: f64) -> String {
+    format!("|cFFFFFFFF{}|r", format_number(value))
 }

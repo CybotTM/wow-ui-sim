@@ -39,12 +39,19 @@ pub struct TooltipRenderData {
 pub struct TooltipLineRender {
     pub left_text: String,
     pub left_color: [f32; 4],
+    pub left_segments: Vec<TooltipTextSegmentRender>,
     pub right_text: Option<String>,
     pub right_color: [f32; 4],
+    pub right_segments: Vec<TooltipTextSegmentRender>,
     pub font_size: f32,
     pub wrap: bool,
     /// Measured height for this line (accounts for word-wrap).
     pub measured_height: f32,
+}
+
+pub struct TooltipTextSegmentRender {
+    pub text: String,
+    pub color: [f32; 4],
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -237,25 +244,42 @@ fn tooltip_line_render(
     line: &crate::lua_api::tooltip::TooltipLine,
     alpha: f32,
 ) -> TooltipLineRender {
+    let left_color = [
+        line.left_color.0,
+        line.left_color.1,
+        line.left_color.2,
+        alpha,
+    ];
+    let right_color = [
+        line.right_color.0,
+        line.right_color.1,
+        line.right_color.2,
+        alpha,
+    ];
     TooltipLineRender {
         left_text: line.left_text.clone(),
-        left_color: [
-            line.left_color.0,
-            line.left_color.1,
-            line.left_color.2,
-            alpha,
-        ],
+        left_color,
+        left_segments: tooltip_text_segment_renders(&line.left_segments, alpha),
         right_text: line.right_text.clone(),
-        right_color: [
-            line.right_color.0,
-            line.right_color.1,
-            line.right_color.2,
-            alpha,
-        ],
+        right_color,
+        right_segments: tooltip_text_segment_renders(&line.right_segments, alpha),
         font_size: tooltip_line_font_size(index),
         wrap: line.wrap,
         measured_height: (tooltip_line_font_size(index) * 1.2).ceil(),
     }
+}
+
+fn tooltip_text_segment_renders(
+    segments: &[crate::lua_api::tooltip::TooltipTextSegment],
+    alpha: f32,
+) -> Vec<TooltipTextSegmentRender> {
+    segments
+        .iter()
+        .map(|segment| TooltipTextSegmentRender {
+            text: segment.text.clone(),
+            color: [segment.color.0, segment.color.1, segment.color.2, alpha],
+        })
+        .collect()
 }
 
 fn tooltip_line_font_size(index: usize) -> f32 {
@@ -414,8 +438,10 @@ fn emit_tooltip_line(
         _ => placement.width,
     };
     let left_bounds = tooltip_line_bounds(placement.x, placement.y, left_width, placement.height);
-    tr.emit(
+    emit_tooltip_text_segments(
+        tr,
         &line.left_text,
+        &line.left_segments,
         left_bounds,
         TextJustify::Left,
         line.font_size,
@@ -427,14 +453,50 @@ fn emit_tooltip_line(
         let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
         let right_w = (placement.width - left_width - DOUBLE_LINE_GAP).max(0.0);
         let right_bounds = tooltip_line_bounds(right_x, placement.y, right_w, placement.height);
-        tr.emit(
+        emit_tooltip_text_segments(
+            tr,
             right_text,
+            &line.right_segments,
             right_bounds,
             TextJustify::Right,
             line.font_size,
             line.right_color,
             false,
         );
+    }
+}
+
+fn emit_tooltip_text_segments(
+    tr: &mut TooltipTextRenderer<'_>,
+    text: &str,
+    segments: &[TooltipTextSegmentRender],
+    bounds: Rectangle,
+    justify: TextJustify,
+    font_size: f32,
+    color: [f32; 4],
+    wrap: bool,
+) {
+    if segments.is_empty() {
+        tr.emit(text, bounds, justify, font_size, color, wrap);
+        return;
+    }
+
+    let mut x = bounds.x;
+    for segment in segments {
+        let segment_width = tr
+            .font_sys
+            .measure_text_width(&segment.text, None, font_size);
+        let segment_bounds =
+            tooltip_line_bounds(x, bounds.y, segment_width.max(1.0), bounds.height);
+        tr.emit(
+            &segment.text,
+            segment_bounds,
+            TextJustify::Left,
+            font_size,
+            segment.color,
+            false,
+        );
+        x += segment_width;
     }
 }
 
@@ -489,7 +551,7 @@ mod tests {
     use iced::{Point, Rectangle, Size};
 
     use super::*;
-    use crate::lua_api::tooltip::{TooltipData, TooltipLine};
+    use crate::lua_api::tooltip::{TooltipData, TooltipLine, TooltipTextSegment};
     use crate::render::{GlyphAtlas, QuadBatch, TextureRequest, WowFontSystem};
     use crate::widget::{Frame, WidgetType};
 
@@ -543,6 +605,13 @@ mod tests {
         }))
     }
 
+    fn has_glyph_color(batch: &QuadBatch, color: [f32; 4]) -> bool {
+        batch
+            .vertices
+            .iter()
+            .any(|vertex| vertex.tex_index == GLYPH_ATLAS_TEX_INDEX && vertex.color == color)
+    }
+
     fn request_bounds_by_base_path(
         batch: &QuadBatch,
         base_path: &str,
@@ -561,8 +630,10 @@ mod tests {
             lines: vec![TooltipLineRender {
                 left_text: "Header".to_string(),
                 left_color: [1.0, 1.0, 1.0, 1.0],
+                left_segments: Vec::new(),
                 right_text: None,
                 right_color: [1.0, 1.0, 1.0, 1.0],
+                right_segments: Vec::new(),
                 font_size: TOOLTIP_HEADER_FONT_SIZE,
                 wrap: false,
                 measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
@@ -648,16 +719,20 @@ mod tests {
                     TooltipLine {
                         left_text: "Header".to_string(),
                         left_color: (1.0, 0.5, 0.25),
+                        left_segments: Vec::new(),
                         right_text: Some("Right".to_string()),
                         right_color: (0.2, 0.3, 0.4),
+                        right_segments: Vec::new(),
                         wrap: false,
                         texture: None,
                     },
                     TooltipLine {
                         left_text: "Body".to_string(),
                         left_color: (0.1, 0.2, 0.3),
+                        left_segments: Vec::new(),
                         right_text: None,
                         right_color: (0.0, 0.0, 0.0),
+                        right_segments: Vec::new(),
                         wrap: true,
                         texture: None,
                     },
@@ -676,6 +751,96 @@ mod tests {
         assert_eq!(lines[0].right_color, [0.2, 0.3, 0.4, 0.35]);
         assert_eq!(lines[1].left_color, [0.1, 0.2, 0.3, 0.35]);
         assert!(lines[1].wrap);
+    }
+
+    #[test]
+    fn collect_tooltip_data_preserves_inline_color_segments() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::Frame, Some("GameTooltip".to_string()), None);
+        frame.id = 42;
+        frame.visible = true;
+        frame.alpha = 0.5;
+        state.widgets.register(frame);
+        state.tooltips.insert(
+            42,
+            TooltipData {
+                lines: vec![TooltipLine {
+                    left_text: "Plain Hot Plain".to_string(),
+                    left_color: (1.0, 0.82, 0.0),
+                    left_segments: vec![
+                        TooltipTextSegment {
+                            text: "Plain ".to_string(),
+                            color: (1.0, 0.82, 0.0),
+                        },
+                        TooltipTextSegment {
+                            text: "Hot".to_string(),
+                            color: (1.0, 1.0, 1.0),
+                        },
+                    ],
+                    right_text: None,
+                    right_color: (1.0, 1.0, 1.0),
+                    right_segments: Vec::new(),
+                    wrap: false,
+                    texture: None,
+                }],
+                ..TooltipData::default()
+            },
+        );
+
+        let data = collect_tooltip_data(&state);
+        let segments = &data.get(&42).unwrap().lines[0].left_segments;
+
+        assert_eq!(segments.len(), 2);
+        assert_eq!(segments[0].color, [1.0, 0.82, 0.0, 0.5]);
+        assert_eq!(segments[1].color, [1.0, 1.0, 1.0, 0.5]);
+    }
+
+    #[test]
+    fn tooltip_renderer_emits_inline_color_segments() {
+        let data = TooltipRenderData {
+            lines: vec![TooltipLineRender {
+                left_text: "AB".to_string(),
+                left_color: [1.0, 0.82, 0.0, 1.0],
+                left_segments: vec![
+                    TooltipTextSegmentRender {
+                        text: "A".to_string(),
+                        color: [1.0, 0.0, 0.0, 1.0],
+                    },
+                    TooltipTextSegmentRender {
+                        text: "B".to_string(),
+                        color: [0.0, 1.0, 0.0, 1.0],
+                    },
+                ],
+                right_text: None,
+                right_color: [1.0, 1.0, 1.0, 1.0],
+                right_segments: Vec::new(),
+                font_size: TOOLTIP_HEADER_FONT_SIZE,
+                wrap: false,
+                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            }],
+            line_spacing: TOOLTIP_LINE_SPACING,
+        };
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut glyph_atlas = GlyphAtlas::new();
+        let tooltip_data = HashMap::from([(42_u64, data)]);
+        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds: Rectangle::new(Point::new(100.0, 200.0), Size::new(80.0, 47.0)),
+                tooltip_data: Some(&tooltip_data),
+                id: 42,
+                eff_alpha: 1.0,
+                draw_background: false,
+            },
+            &mut text_ctx,
+        );
+
+        assert!(has_glyph_color(&batch, [1.0, 0.0, 0.0, 1.0]));
+        assert!(has_glyph_color(&batch, [0.0, 1.0, 0.0, 1.0]));
     }
 
     #[test]
@@ -728,8 +893,10 @@ mod tests {
             lines: vec![TooltipLineRender {
                 left_text: "Header".to_string(),
                 left_color: [1.0, 1.0, 1.0, 1.0],
+                left_segments: Vec::new(),
                 right_text: None,
                 right_color: [1.0, 1.0, 1.0, 1.0],
+                right_segments: Vec::new(),
                 font_size: TOOLTIP_HEADER_FONT_SIZE,
                 wrap: false,
                 measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),

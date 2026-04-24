@@ -9,7 +9,9 @@ use crate::lua_api::methods::{
 use crate::lua_api::script_helpers::{
     call_void_function_with_fallback_state, collect_lua_error, get_script,
 };
-use crate::lua_api::tooltip::{TooltipLine, TooltipTexture, build_cursor_anchor};
+use crate::lua_api::tooltip::{
+    TooltipLine, TooltipTextSegment, TooltipTexture, build_cursor_anchor,
+};
 use crate::lua_bridge::{IntoStack, stack_val, table_set_rust_fn};
 use crate::widget::{TextJustify, WidgetType};
 use rilua::vm::gc::arena::GcRef;
@@ -45,8 +47,10 @@ pub(super) fn add_line(state: &mut LuaState) -> LuaResult<u32> {
     td.lines.push(TooltipLine {
         left_text: text,
         left_color: (r, g, b),
+        left_segments: Vec::new(),
         right_text: None,
         right_color: (1.0, 1.0, 1.0),
+        right_segments: Vec::new(),
         wrap,
         texture: None,
     });
@@ -70,8 +74,10 @@ pub(super) fn add_double_line(state: &mut LuaState) -> LuaResult<u32> {
     td.lines.push(TooltipLine {
         left_text,
         left_color: (left_r, left_g, left_b),
+        left_segments: Vec::new(),
         right_text,
         right_color: (right_r, right_g, right_b),
+        right_segments: Vec::new(),
         wrap,
         texture: None,
     });
@@ -431,8 +437,10 @@ fn add_texture_line(
         .push(TooltipLine {
             left_text: String::new(),
             left_color: (1.0, 1.0, 1.0),
+            left_segments: Vec::new(),
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
+            right_segments: Vec::new(),
             wrap: false,
             texture: Some(texture),
         });
@@ -517,6 +525,26 @@ fn line_color(state: &mut LuaState, line: Val, key: &str) -> (f32, f32, f32) {
     )
 }
 
+fn line_color_segments(state: &mut LuaState, line: Val, key: &str) -> Vec<TooltipTextSegment> {
+    let segments_table = table_get(state, line, key);
+    let mut segments = Vec::new();
+    let mut index = 1;
+
+    loop {
+        let segment = table_array_get(state, segments_table, index);
+        if !matches!(segment, Val::Table(_)) {
+            break;
+        }
+        let text_val = table_get(state, segment, "text");
+        let text = val_to_string(state, text_val).unwrap_or_default();
+        let color = line_color(state, segment, "color");
+        segments.push(TooltipTextSegment { text, color });
+        index += 1;
+    }
+
+    segments
+}
+
 fn tooltip_line_from_table(state: &mut LuaState, line: Val) -> Option<TooltipLine> {
     if !matches!(line, Val::Table(_)) {
         return None;
@@ -530,8 +558,10 @@ fn tooltip_line_from_table(state: &mut LuaState, line: Val) -> Option<TooltipLin
     Some(TooltipLine {
         left_text,
         left_color: line_color(state, line, "leftColor"),
+        left_segments: line_color_segments(state, line, "leftColorSegments"),
         right_text,
         right_color: line_color(state, line, "rightColor"),
+        right_segments: line_color_segments(state, line, "rightColorSegments"),
         wrap,
         texture: None,
     })
@@ -1307,16 +1337,20 @@ pub(super) fn set_frame_stack(state: &mut LuaState) -> LuaResult<u32> {
         td.lines.push(TooltipLine {
             left_text: primary,
             left_color: (1.0, 1.0, 1.0),
+            left_segments: Vec::new(),
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
+            right_segments: Vec::new(),
             wrap: false,
             texture: None,
         });
         td.lines.push(TooltipLine {
             left_text: format!("Parent: {parent_label}"),
             left_color: (0.8, 0.8, 0.8),
+            left_segments: Vec::new(),
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
+            right_segments: Vec::new(),
             wrap: false,
             texture: None,
         });

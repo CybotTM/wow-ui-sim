@@ -43,12 +43,16 @@ pub(super) fn push_tooltip_line(
 ) {
     let line = create_table(state);
     table_set(state, line, "type", Val::Num(line_type));
-    let (left_text, left_color) = tooltip_line_text_and_color(state, left_text, left_color);
-    let left_text_val = create_string(state, &left_text);
+    let parsed = tooltip_line_text_and_color(state, left_text, left_color);
+    let left_text_val = create_string(state, &parsed.text);
     table_set(state, line, "leftText", left_text_val);
-    if let Some((r, g, b)) = left_color {
+    if let Some((r, g, b)) = parsed.color {
         let color = color_table(state, r, g, b, 1.0);
         table_set(state, line, "leftColor", color);
+    }
+    if !parsed.segments.is_empty() {
+        let segments = color_segment_table(state, parsed.segments);
+        table_set(state, line, "leftColorSegments", segments);
     }
     if wrap {
         table_set(state, line, "wrapText", Val::Bool(true));
@@ -56,13 +60,32 @@ pub(super) fn push_tooltip_line(
     set_table_array(state, lines, index, line);
 }
 
+struct ParsedTooltipText {
+    text: String,
+    color: Option<(f64, f64, f64)>,
+    segments: Vec<TooltipColorSegment>,
+}
+
+struct TooltipColorSegment {
+    text: String,
+    color: (f64, f64, f64),
+}
+
 fn tooltip_line_text_and_color(
     state: &mut LuaState,
     text: &str,
     explicit_color: Option<(f64, f64, f64)>,
-) -> (String, Option<(f64, f64, f64)>) {
+) -> ParsedTooltipText {
     let color = explicit_color.or_else(|| full_line_color_markup(state, text));
-    (strip_tooltip_color_markup(text), color)
+    let base_color = color
+        .or_else(|| global_color(state, b"NORMAL_FONT_COLOR"))
+        .unwrap_or((1.0, 0.82, 0.0));
+    let (text, segments) = parse_tooltip_color_segments(state, text, base_color);
+    ParsedTooltipText {
+        text,
+        color,
+        segments,
+    }
 }
 
 fn full_line_color_markup(state: &mut LuaState, text: &str) -> Option<(f64, f64, f64)> {
@@ -91,38 +114,118 @@ fn has_closing_color_reset(text: &str) -> bool {
     text.ends_with("|r") || text.ends_with("|R")
 }
 
-fn strip_tooltip_color_markup(text: &str) -> String {
+fn parse_tooltip_color_segments(
+    state: &mut LuaState,
+    text: &str,
+    base_color: (f64, f64, f64),
+) -> (String, Vec<TooltipColorSegment>) {
     let mut stripped = String::with_capacity(text.len());
+    let mut segments = Vec::new();
+    let mut segment_text = String::new();
+    let mut current_color = base_color;
+    let mut color_stack = Vec::new();
+    let mut saw_markup = false;
     let mut index = 0;
 
     while index < text.len() {
         let rest = &text[index..];
-        if let Some(skip) = color_markup_len(rest) {
-            index += skip;
+        if let Some(markup) = parse_color_markup(state, rest, base_color) {
+            push_color_segment(&mut segments, &mut segment_text, current_color);
+            match markup.action {
+                ColorMarkupAction::Push(color) => {
+                    color_stack.push(current_color);
+                    current_color = color;
+                }
+                ColorMarkupAction::Pop => {
+                    current_color = color_stack.pop().unwrap_or(base_color);
+                }
+            }
+            saw_markup = true;
+            index += markup.len;
             continue;
         }
 
         let ch = rest.chars().next().expect("index should be in bounds");
         stripped.push(ch);
+        segment_text.push(ch);
         index += ch.len_utf8();
     }
 
-    stripped
+    push_color_segment(&mut segments, &mut segment_text, current_color);
+    if !saw_markup {
+        segments.clear();
+    }
+
+    (stripped, segments)
 }
 
-fn color_markup_len(text: &str) -> Option<usize> {
+struct ParsedColorMarkup {
+    len: usize,
+    action: ColorMarkupAction,
+}
+
+enum ColorMarkupAction {
+    Push((f64, f64, f64)),
+    Pop,
+}
+
+fn parse_color_markup(
+    state: &mut LuaState,
+    text: &str,
+    _base_color: (f64, f64, f64),
+) -> Option<ParsedColorMarkup> {
     if let Some(rest) = text.strip_prefix("|cn")
         && let Some(colon_index) = rest.find(':')
     {
-        return Some("|cn".len() + colon_index + ":".len());
+        let name = &rest[..colon_index];
+        let color = global_color(state, name.as_bytes())?;
+        return Some(ParsedColorMarkup {
+            len: "|cn".len() + colon_index + ":".len(),
+            action: ColorMarkupAction::Push(color),
+        });
     }
     if let Some(rest) = text.strip_prefix("|c") {
         let (hex, _) = rest.split_at_checked(8)?;
         if is_hex_color(hex) {
-            return Some("|c".len() + hex.len());
+            let color = rgb_from_argb_hex(hex)?;
+            return Some(ParsedColorMarkup {
+                len: "|c".len() + hex.len(),
+                action: ColorMarkupAction::Push(color),
+            });
         }
     }
-    (text.starts_with("|r") || text.starts_with("|R")).then_some(2)
+    (text.starts_with("|r") || text.starts_with("|R")).then_some(ParsedColorMarkup {
+        len: 2,
+        action: ColorMarkupAction::Pop,
+    })
+}
+
+fn push_color_segment(
+    segments: &mut Vec<TooltipColorSegment>,
+    segment_text: &mut String,
+    color: (f64, f64, f64),
+) {
+    if segment_text.is_empty() {
+        return;
+    }
+    segments.push(TooltipColorSegment {
+        text: std::mem::take(segment_text),
+        color,
+    });
+}
+
+fn color_segment_table(state: &mut LuaState, segments: Vec<TooltipColorSegment>) -> Val {
+    let table = create_table(state);
+    for (index, segment) in segments.into_iter().enumerate() {
+        let entry = create_table(state);
+        let text = create_string(state, &segment.text);
+        table_set(state, entry, "text", text);
+        let (r, g, b) = segment.color;
+        let color = color_table(state, r, g, b, 1.0);
+        table_set(state, entry, "color", color);
+        set_table_array(state, table, index as i64 + 1, entry);
+    }
+    table
 }
 
 fn is_hex_color(text: &str) -> bool {

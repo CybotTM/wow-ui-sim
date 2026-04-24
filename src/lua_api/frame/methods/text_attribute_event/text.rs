@@ -303,8 +303,10 @@ fn replace_tooltip_lines(
                 val_to_f32(tooltip.g, 1.0),
                 val_to_f32(tooltip.b, 1.0),
             ),
+            left_segments: Vec::new(),
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
+            right_segments: Vec::new(),
             wrap: matches!(tooltip.wrap, Val::Bool(true)),
             texture: None,
         });

@@ -589,6 +589,27 @@ fn test_set_spell_by_id_replaces_armor_placeholder_for_shield_of_the_righteous()
             .map(|line| line.left_text.clone())
             .collect::<Vec<_>>()
     );
+    let description_line = td
+        .lines
+        .iter()
+        .find(|line| line.left_text.contains("Armor by"))
+        .expect("Shield of the Righteous tooltip should include armor description");
+    for value in [expected_armor.to_string(), "4.5".to_string()] {
+        let segment = description_line
+            .left_segments
+            .iter()
+            .find(|segment| segment.text == value)
+            .unwrap_or_else(|| panic!("expected white value segment {value:?}"));
+        assert!(
+            (segment.color.0 - 1.0).abs() < 0.01
+                && (segment.color.1 - 1.0).abs() < 0.01
+                && (segment.color.2 - 1.0).abs() < 0.01,
+            "resolved value {value} should be highlighted white, got rgb=({:.3},{:.3},{:.3})",
+            segment.color.0,
+            segment.color.1,
+            segment.color.2
+        );
+    }
 }
 
 #[test]
@@ -711,6 +732,42 @@ fn test_set_spell_by_id_applies_named_inline_color_markup() {
         description_color.0,
         description_color.1,
         description_color.2
+    );
+}
+
+#[test]
+fn test_set_spell_by_id_preserves_partial_inline_color_segments() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(1223268)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let line = td
+        .lines
+        .iter()
+        .find(|line| line.left_text.contains("Scale of the Earth-Warder"))
+        .expect("tooltip should include the partially colored description line");
+    let highlighted = line
+        .left_segments
+        .iter()
+        .find(|segment| segment.text == "Scale of the Earth-Warder")
+        .expect("partial inline color markup should create a segment for the highlighted text");
+
+    assert!(
+        line.left_segments.len() > 1,
+        "partial inline color markup should split the line into colored runs, got {}",
+        line.left_segments.len()
+    );
+    assert!(
+        (highlighted.color.0 - 1.0).abs() < 0.01
+            && (highlighted.color.1 - 0.8).abs() < 0.01
+            && (highlighted.color.2 - 0.6).abs() < 0.01,
+        "highlighted segment should use |cFFFFCC99 color, got rgb=({:.3},{:.3},{:.3})",
+        highlighted.color.0,
+        highlighted.color.1,
+        highlighted.color.2
     );
 }
 

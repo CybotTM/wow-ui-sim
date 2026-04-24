@@ -9,13 +9,22 @@ pub enum TooltipTexture {
     Atlas(String),
 }
 
+/// A text segment with its own color inside a tooltip line.
+#[derive(Clone)]
+pub struct TooltipTextSegment {
+    pub text: String,
+    pub color: (f32, f32, f32),
+}
+
 /// A single line in a tooltip.
 #[derive(Clone)]
 pub struct TooltipLine {
     pub left_text: String,
     pub left_color: (f32, f32, f32),
+    pub left_segments: Vec<TooltipTextSegment>,
     pub right_text: Option<String>,
     pub right_color: (f32, f32, f32),
+    pub right_segments: Vec<TooltipTextSegment>,
     pub wrap: bool,
     /// Inline texture icon (from `AddTexture` / `AddAtlas`).
     pub texture: Option<TooltipTexture>,
