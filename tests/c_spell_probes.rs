@@ -114,8 +114,16 @@ fn test_get_spell_description_resolves_consecration_dmg_expression() {
         "Consecration should resolve nested $<dmg> expression; expected {consecration_damage}, got: {desc}"
     );
     assert!(
+        !desc.contains("Radiant"),
+        "Consecration should choose the inactive Burning Crusade false branch, got: {desc}"
+    );
+    assert!(
         !desc.contains("$<dmg>") && !desc.contains("${"),
         "Consecration should not expose raw expression placeholders, got: {desc}"
+    );
+    assert!(
+        desc.contains("Limit 1."),
+        "Consecration should use its area-trigger limit value, got: {desc}"
     );
 }
 

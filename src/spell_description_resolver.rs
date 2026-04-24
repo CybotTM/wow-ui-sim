@@ -1,6 +1,7 @@
 //! Resolve Blizzard spell-description tokens into simulator tooltip text.
 
 use crate::lua_api::game_data;
+use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::state::SimState;
 
 pub fn resolve_spell_description(sim: &SimState, spell_id: u32) -> String {
@@ -26,6 +27,7 @@ fn resolve_text(sim: &SimState, spell_id: u32, text: &str, depth: usize) -> Stri
     let expanded = replace_expressions(sim, spell_id, &expanded);
     let expanded = replace_angle_tokens(sim, spell_id, &expanded);
     let expanded = replace_dollar_tokens(sim, spell_id, &expanded);
+    let expanded = replace_spell_conditionals(&expanded);
     let expanded = replace_class_conditionals(sim, &expanded);
     cleanup_control_tokens(&expanded)
 }
@@ -283,6 +285,7 @@ fn spell_amount(sim: &SimState, spell_id: u32, effect_index: u32) -> f64 {
         (209389, 1) => 60.0,
         (209389, 2) => 50.0,
         (198013, 5) => 5.0,
+        (26573, 2) => 1.0,
         (19750, _) | (85673, _) | (130551, _) => 20_000.0,
         (82326, _) => 35_000.0,
         (25912, _) | (25914, _) | (20473, _) => 10_000.0,
@@ -434,6 +437,38 @@ fn replace_class_conditionals(sim: &SimState, text: &str) -> String {
             continue;
         };
         if sim.player.class_index as u32 == class_id {
+            out.push_str(true_branch);
+        } else {
+            out.push_str(false_branch.unwrap_or(""));
+        }
+        rest = &token[digits + consumed..];
+    }
+    out.push_str(rest);
+    out
+}
+
+fn replace_spell_conditionals(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(start) = rest.find("$?s") {
+        out.push_str(&rest[..start]);
+        let token = &rest[start + 3..];
+        let (spell_id, digits) = parse_number_prefix(token);
+        let Some(spell_id) = spell_id else {
+            out.push_str("$?s");
+            rest = token;
+            continue;
+        };
+        let Some((true_branch, false_branch, consumed)) =
+            parse_two_branch_conditional(&token[digits..])
+        else {
+            out.push_str("$?s");
+            out.push_str(&token[..digits]);
+            rest = &token[digits..];
+            continue;
+        };
+
+        if spellbook_data::is_spell_known(spell_id) {
             out.push_str(true_branch);
         } else {
             out.push_str(false_branch.unwrap_or(""));
