@@ -6,10 +6,11 @@ use crate::lua_api::globals::{profession_data, spellbook_data};
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
 };
+use crate::lua_api::script_helpers::{fire_named_event_state, protected_lua_pcall_state};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::{gc::arena::GcRef, table::Table};
-use rilua::{LuaResult, Val};
+use rilua::{LuaApiMut, LuaResult, Val};
 
 const TRADE_SKILL_NAMESPACE: &str = "C_TradeSkillUI";
 const SELECTED_PROFESSION_KEY: &str = "_selectedProfessionID";
@@ -46,11 +47,19 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         "GetProfessionInfoByRecipeID",
         c_trade_skill_ui_get_profession_info_by_recipe_id,
     ),
+    (
+        "GetProfessionSkillLineID",
+        c_trade_skill_ui_get_profession_skill_line_id,
+    ),
     ("GetProfessions", c_trade_skill_ui_get_professions),
     ("GetNumRecipes", c_trade_skill_ui_get_num_recipes),
     ("GetNumTradeSkills", c_trade_skill_ui_get_num_trade_skills),
     ("GetRecipeInfo", c_trade_skill_ui_get_recipe_info),
     ("GetRecipeItemLink", c_trade_skill_ui_get_recipe_item_link),
+    (
+        "GetRecipeItemNameFilter",
+        c_trade_skill_ui_get_recipe_item_name_filter,
+    ),
     (
         "GetRecipeNumReagents",
         c_trade_skill_ui_get_recipe_num_reagents,
@@ -74,10 +83,24 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         "GetTradeSkillTexture",
         c_trade_skill_ui_get_trade_skill_texture,
     ),
+    (
+        "IsDataSourceChanging",
+        c_trade_skill_ui_is_data_source_changing,
+    ),
+    ("IsNPCCrafting", c_trade_skill_ui_is_npc_crafting),
     ("IsRecipeCraftable", c_trade_skill_ui_is_recipe_craftable),
     ("IsRecipeLearned", c_trade_skill_ui_is_recipe_learned),
     ("IsRecipeTracked", c_trade_skill_ui_is_recipe_tracked),
+    ("IsRuneforging", c_trade_skill_ui_is_runeforging),
+    ("IsTradeSkillGuild", c_trade_skill_ui_is_trade_skill_guild),
+    (
+        "IsTradeSkillGuildMember",
+        c_trade_skill_ui_is_trade_skill_guild_member,
+    ),
+    ("IsTradeSkillLinked", c_trade_skill_ui_is_trade_skill_linked),
     ("IsTradeSkillReady", c_trade_skill_ui_is_trade_skill_ready),
+    ("OpenTradeSkill", c_trade_skill_ui_open_trade_skill),
+    ("CloseTradeSkill", c_trade_skill_ui_close_trade_skill),
     (
         "SetProfessionChildSkillLineID",
         c_trade_skill_ui_set_profession_child_skill_line_id,
@@ -102,6 +125,58 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
         get_profession_info_global,
     )?;
     Ok(())
+}
+
+pub(crate) fn open_trade_skill_for_skill_line(
+    state: &mut LuaState,
+    skill_line_id: i32,
+) -> LuaResult<bool> {
+    if profession_data::get_profession(skill_line_id).is_none() {
+        return Ok(false);
+    }
+
+    select_profession(state, skill_line_id)?;
+    ensure_professions_frame_loaded(state);
+    show_professions_frame(state);
+    fire_named_event_state(state, "TRADE_SKILL_NAME_UPDATE", &[]);
+    fire_named_event_state(state, "TRADE_SKILL_LIST_UPDATE", &[]);
+    Ok(true)
+}
+
+fn ensure_professions_frame_loaded(state: &mut LuaState) {
+    if !matches!(
+        LuaApiMut::get_global_val(state, "ProfessionsFrame"),
+        Val::Nil
+    ) {
+        return;
+    }
+    call_global_function(state, "ProfessionsFrame_LoadUI", &[]);
+}
+
+fn show_professions_frame(state: &mut LuaState) {
+    let frame = LuaApiMut::get_global_val(state, "ProfessionsFrame");
+    if matches!(frame, Val::Nil) {
+        return;
+    }
+
+    let show_ui_panel = LuaApiMut::get_global_val(state, "ShowUIPanel");
+    if matches!(show_ui_panel, Val::Function(_)) {
+        let _ = protected_lua_pcall_state(state, show_ui_panel, &[frame]);
+        return;
+    }
+
+    let show_method = table_get(state, frame, "Show");
+    if matches!(show_method, Val::Function(_)) {
+        let _ = protected_lua_pcall_state(state, show_method, &[frame]);
+    }
+}
+
+fn call_global_function(state: &mut LuaState, name: &str, args: &[Val]) {
+    let function = LuaApiMut::get_global_val(state, name);
+    if !matches!(function, Val::Function(_)) {
+        return;
+    }
+    let _ = protected_lua_pcall_state(state, function, args);
 }
 
 fn c_trade_skill_ui_get_all_profession_trade_skill_lines(state: &mut LuaState) -> LuaResult<u32> {
@@ -160,6 +235,17 @@ fn c_trade_skill_ui_get_profession_info_by_recipe_id(state: &mut LuaState) -> Lu
     let profession = profession_for_recipe(recipe_id);
     let table = profession_table(state, profession);
     state.push(table);
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_profession_skill_line_id(state: &mut LuaState) -> LuaResult<u32> {
+    let profession_id = i32::from_stack(state, 1)?;
+    let skill_line_id = profession_data::PROFESSIONS
+        .iter()
+        .find(|profession| profession.profession == profession_id)
+        .map(|profession| profession.skill_line_id)
+        .unwrap_or(profession_id);
+    state.push(Val::Num(skill_line_id as f64));
     Ok(1)
 }
 
@@ -266,6 +352,12 @@ fn c_trade_skill_ui_get_recipe_item_link(state: &mut LuaState) -> LuaResult<u32>
     let link = profession_data::get_recipe(recipe_id)
         .and_then(|recipe| item_link_value(state, recipe.output_item_id));
     state.push(link.unwrap_or(Val::Nil));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_item_name_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let filter = create_string(state, "");
+    state.push(filter);
     Ok(1)
 }
 
@@ -439,9 +531,52 @@ fn c_trade_skill_ui_get_trade_skill_texture(state: &mut LuaState) -> LuaResult<u
     Ok(1)
 }
 
+fn c_trade_skill_ui_is_data_source_changing(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_npc_crafting(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_runeforging(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_trade_skill_guild(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_trade_skill_guild_member(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_trade_skill_linked(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    state.push(Val::Nil);
+    Ok(2)
+}
+
 fn c_trade_skill_ui_is_trade_skill_ready(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(true));
     Ok(1)
+}
+
+fn c_trade_skill_ui_open_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
+    let skill_line_id = i32::from_stack(state, 1)?;
+    let opened = open_trade_skill_for_skill_line(state, skill_line_id)?;
+    state.push(Val::Bool(opened));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_close_trade_skill(state: &mut LuaState) -> LuaResult<u32> {
+    fire_named_event_state(state, "TRADE_SKILL_CLOSE", &[]);
+    Ok(0)
 }
 
 fn c_trade_skill_ui_set_profession_child_skill_line_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -450,17 +585,20 @@ fn c_trade_skill_ui_set_profession_child_skill_line_id(state: &mut LuaState) -> 
         return Ok(0);
     }
 
-    // Write to SimState (primary source of truth).
-    borrow_state_mut(state)?.crafting.selected_profession_id = Some(skill_line_id);
-    // Mirror to Lua-side table so legacy call sites that read the key directly continue to work.
+    select_profession(state, skill_line_id)?;
+    Ok(0)
+}
+
+fn select_profession(state: &mut LuaState, skill_line_id: i32) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
+    borrow_state_mut(state)?.crafting.selected_profession_id = Some(skill_line_id);
     table_set(
         state,
         Val::Table(table_ref),
         SELECTED_PROFESSION_KEY,
         Val::Num(skill_line_id as f64),
     );
-    Ok(0)
+    Ok(())
 }
 
 fn skill_line_id_table(state: &mut LuaState) -> Val {

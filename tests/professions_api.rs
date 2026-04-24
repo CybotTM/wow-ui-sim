@@ -93,6 +93,21 @@ fn test_profession_info_mining() {
 }
 
 #[test]
+fn test_get_profession_skill_line_id_maps_known_profession_enums() {
+    let env = env();
+    let (blacksmithing, mining): (i32, i32) = env
+        .eval(
+            r#"
+            return C_TradeSkillUI.GetProfessionSkillLineID(Enum.Profession.Blacksmithing),
+                C_TradeSkillUI.GetProfessionSkillLineID(Enum.Profession.Mining)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(blacksmithing, 164);
+    assert_eq!(mining, 186);
+}
+
+#[test]
 fn test_profession_info_exposes_spell_slots_for_professions_book_buttons() {
     let env = env();
     let (num_spells_1, num_spells_2, bs_spell_id, mining_spell_id): (i32, i32, i32, i32) = env

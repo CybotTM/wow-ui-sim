@@ -276,3 +276,11 @@ pub fn find_spell_slot(spell_id: u32) -> Option<(i32, i32)> {
     }
     None
 }
+
+pub fn profession_skill_line_for_spell(spell_id: u32) -> Option<i32> {
+    match spell_id {
+        2018 => Some(164),
+        2575 => Some(186),
+        _ => None,
+    }
+}

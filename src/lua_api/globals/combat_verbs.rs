@@ -26,10 +26,9 @@
 use crate::lua_api::env::WowLuaAppData;
 use crate::lua_api::game_data::{self, CastingState, SpellCooldownState, SpellTargetType};
 use crate::lua_api::globals::spell_api::spell_cast_time;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_ref};
-use crate::lua_api::script_helpers::{
-    call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
-};
+use crate::lua_api::globals::spellbook_data;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -39,28 +38,6 @@ const AUTO_ATTACK_NAME: &str = "Auto Attack";
 const EXTRA_ATTACK_NAME: &str = "Extra Attack";
 const DEFAULT_ICON: &str = "Interface/Icons/INV_Misc_QuestionMark";
 const DEFAULT_GCD_SECONDS: f64 = 1.5;
-
-fn fire_named_event(state: &mut LuaState, event_name: &str, args: &[Val]) {
-    for widget_id in get_event_listeners(state, event_name) {
-        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
-            continue;
-        };
-        if !matches!(handler, Val::Function(_)) {
-            continue;
-        }
-        let Ok(frame) = frame_ref(state, widget_id) else {
-            continue;
-        };
-        let event_name_val = create_string(state, event_name);
-        let mut call_args = Vec::with_capacity(args.len() + 2);
-        call_args.push(frame);
-        call_args.push(event_name_val);
-        call_args.extend_from_slice(args);
-        if let Err(error) = protected_lua_pcall_state(state, handler, &call_args) {
-            call_error_handler_state(state, &error);
-        }
-    }
-}
 
 fn spell_name(spell_id: u32) -> String {
     crate::spells::get_spell(spell_id)
@@ -192,6 +169,14 @@ fn start_instant_spell_cooldowns(state: &mut LuaState, spell_id: u32) {
 }
 
 pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaResult<()> {
+    if let Some(skill_line_id) = spellbook_data::profession_skill_line_for_spell(spell_id) {
+        crate::lua_api::globals::missing_surface::professions::open_trade_skill_for_skill_line(
+            state,
+            skill_line_id,
+        )?;
+        return Ok(());
+    }
+
     if !spell_can_execute_now(state, spell_id)? {
         return Ok(());
     }
@@ -215,7 +200,7 @@ pub(crate) fn execute_spell_by_id(state: &mut LuaState, spell_id: u32) -> LuaRes
         );
         let player = create_string(state, "player");
         let spell_id_val = Val::Num(spell_id as f64);
-        fire_named_event(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
+        fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
         return Ok(());
     }
 
@@ -230,7 +215,7 @@ fn apply_spell_to_target(state: &mut LuaState, spell_id: u32) {
     };
     if let Some(unit_id) = game_data::apply_spell_to_state(&app_data.sim_state, spell_id) {
         let unit = create_string(state, &unit_id);
-        fire_named_event(state, "UNIT_HEALTH", &[unit]);
+        fire_named_event_state(state, "UNIT_HEALTH", &[unit]);
     }
 }
 

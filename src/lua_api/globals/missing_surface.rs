@@ -29,7 +29,7 @@ mod party_info;
 mod pet_battles;
 mod player_info;
 mod profession_crafting;
-mod professions;
+pub(crate) mod professions;
 mod quest_log;
 mod recruit_a_friend;
 mod report_system;

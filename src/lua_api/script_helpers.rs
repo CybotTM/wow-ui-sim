@@ -12,7 +12,7 @@ use std::collections::HashSet;
 use std::time::Instant;
 
 use crate::lua_api::handler_timing;
-use crate::lua_api::methods::{call_function_state, val_to_string};
+use crate::lua_api::methods::{call_function_state, create_string, frame_ref, val_to_string};
 
 // ── Registry helpers ────────────────────────────────────────────────
 
@@ -580,6 +580,28 @@ pub fn get_event_listeners(state: &mut LuaState, event: &str) -> Vec<u64> {
     collect_all_event_listeners(state, &mut result, &mut seen);
     collect_widget_registry_listeners(state, event, &mut result, &mut seen);
     result
+}
+
+pub fn fire_named_event_state(state: &mut LuaState, event_name: &str, args: &[Val]) {
+    for widget_id in get_event_listeners(state, event_name) {
+        let Some(handler) = get_script(state, widget_id, "OnEvent") else {
+            continue;
+        };
+        if !matches!(handler, Val::Function(_)) {
+            continue;
+        }
+        let Ok(frame) = frame_ref(state, widget_id) else {
+            continue;
+        };
+        let event_name_val = create_string(state, event_name);
+        let mut call_args = Vec::with_capacity(args.len() + 2);
+        call_args.push(frame);
+        call_args.push(event_name_val);
+        call_args.extend_from_slice(args);
+        if let Err(error) = protected_lua_pcall_state(state, handler, &call_args) {
+            call_error_handler_state(state, &error);
+        }
+    }
 }
 
 fn collect_individual_listeners(
