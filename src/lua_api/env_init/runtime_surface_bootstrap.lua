@@ -3557,7 +3557,14 @@ C_DateAndTime = __wow_merge_namespace(C_DateAndTime, {
     return base
   end,
   GetCalendarTimeFromEpoch = function(epoch)
-    return __wow_make_calendar_time(0, math.floor((tonumber(epoch) or 0) / 60))
+    local seconds = tonumber(epoch) or 0
+    if seconds > 1000000000000 then
+      seconds = seconds / 1000000
+    end
+    local totalMinutes = math.floor(seconds / 60)
+    local dayOffset = math.floor(totalMinutes / 1440) % 30
+    local minuteOffset = totalMinutes % 1440
+    return __wow_make_calendar_time(dayOffset, minuteOffset)
   end,
   GetWeeklyResetStartTime = function()
     return 0
@@ -4413,6 +4420,9 @@ C_CraftingOrders = __wow_merge_namespace(C_CraftingOrders, {
 
 C_Calendar = __wow_merge_namespace(C_Calendar, {
   GetNumPendingInvites = function() return 0 end,
+  GetClubCalendarEvents = function()
+    return {}
+  end,
 })
 
 C_WowTokenPublic = __wow_merge_namespace(C_WowTokenPublic, {

@@ -268,6 +268,44 @@ fn test_get_current_calendar_time() {
 }
 
 #[test]
+fn test_get_calendar_time_from_microsecond_epoch_is_bounded() {
+    let env = env();
+    let (year, month, day, hour, minute): (i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local time = C_DateAndTime.GetCalendarTimeFromEpoch(1700000360000000)
+            return time.year, time.month, time.monthDay, time.hour, time.minute
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(year, 2026);
+    assert_eq!(month, 4);
+    assert!((14..=43).contains(&day));
+    assert!((0..24).contains(&hour));
+    assert!((0..60).contains(&minute));
+}
+
+#[test]
+fn test_get_club_calendar_events_defaults_empty() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            local events = C_Calendar.GetClubCalendarEvents(
+                "guild-0",
+                C_DateAndTime.GetCurrentCalendarTime(),
+                C_DateAndTime.GetCurrentCalendarTime()
+            )
+            return #events
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(count, 0);
+}
+
+#[test]
 fn test_get_server_time_local() {
     let env = env();
     let time: i32 = env
