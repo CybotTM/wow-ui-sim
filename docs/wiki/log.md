@@ -4,12 +4,13 @@ Chronological record of wiki operations.
 
 ## [2026-04-24] update | taint-system doc refresh
 
-Refreshed `systems/taint-system.md` to match the current rilua implementation.
-Recorded the live file split between `src/lua_api/frame/methods/methods_helpers.rs`
-for protected-state gating and `src/lua_api/globals/security.rs` for
-SecureHandler fallback, secure environment setup, `securecallmethod`, and
-state/attribute drivers. Updated the systems index summary to mention the
-fallbacks instead of the old no-op stubs.
+Updated `systems/taint-system.md` to match the current rilua implementation.
+SecureHandler APIs now document fallback frame-ref/snippet/wrap/unwrap behavior,
+state and attribute drivers now document shallow driver application,
+secret-value accessors now document marked/tainted value tracking, and source
+links now point at `security.rs` plus current frame-method helpers instead of
+removed `security_api.rs`, `secure_env.rs`, and `combat_lockdown.rs` paths.
+Refreshed the `index.md` summary.
 
 ## [2026-04-24] update | spell description token resolver
 
