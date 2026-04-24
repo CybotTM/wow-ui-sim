@@ -225,6 +225,34 @@ fn test_secure_handler_unwrap_script_restores_original_handler() {
 }
 
 #[test]
+fn test_protect_only_sets_protected_for_secure_callers() {
+    let env = env();
+    env.exec(r#"ProtectMethodFrame = CreateFrame("Frame", "ProtectMethodFrame", UIParent)"#)
+        .unwrap();
+
+    let insecure_protected: bool = env
+        .eval(
+            r#"
+            forceinsecure()
+            ProtectMethodFrame:Protect()
+            return ProtectMethodFrame:IsProtected()
+            "#,
+        )
+        .unwrap();
+    assert!(!insecure_protected);
+
+    let secure_protected: bool = env
+        .eval(
+            r#"
+            ProtectMethodFrame:Protect()
+            return ProtectMethodFrame:IsProtected()
+            "#,
+        )
+        .unwrap();
+    assert!(secure_protected);
+}
+
+#[test]
 fn test_execute_attribute_calls_function_attribute_and_returns_success_tuple() {
     let env = env();
     let (success, first, second, called): (bool, String, i64, bool) = env

@@ -104,8 +104,16 @@ pub fn is_protected(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-pub fn protect(_state: &mut LuaState) -> LuaResult<u32> {
-    // TODO: needs issecure() call via Lua globals — requires mlua/function support
+pub fn protect(state: &mut LuaState) -> LuaResult<u32> {
+    if !rilua::api::state_is_secure(state) {
+        return Ok(0);
+    }
+
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.is_protected = true;
+    }
     Ok(0)
 }
 

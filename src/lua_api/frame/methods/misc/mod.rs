@@ -4,7 +4,7 @@
 //! where the return value is the number of results pushed onto the stack.
 //!
 //! Methods that require mlua table/function support (frame_fields, resolve_and_extract,
-//! issecure() call, SetToDefaults) are stubbed with a `// TODO` comment.
+//! SetToDefaults) are stubbed with a `// TODO` comment.
 
 pub mod alpha_gradient;
 pub mod attribute_stubs;
