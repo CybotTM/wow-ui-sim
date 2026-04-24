@@ -8,18 +8,18 @@ fn probe(env: &WowLuaEnv) -> bool {
 }
 
 #[test]
-fn defaults_to_false() {
+fn defaults_to_true() {
     let env = WowLuaEnv::new().unwrap();
-    assert!(!probe(&env));
+    assert!(probe(&env));
 }
 
 #[test]
 fn admin_set_enables_and_disables() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec("A_Admin.SetHousingServiceEnabled(true)").unwrap();
-    assert!(probe(&env));
     env.exec("A_Admin.SetHousingServiceEnabled(false)").unwrap();
     assert!(!probe(&env));
+    env.exec("A_Admin.SetHousingServiceEnabled(true)").unwrap();
+    assert!(probe(&env));
 }
 
 #[test]

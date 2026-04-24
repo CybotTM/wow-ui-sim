@@ -109,7 +109,7 @@ macro_rules! build_empty_sim_state {
             timerunning_season_id: None,
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
-            housing_service_enabled: false,
+            housing_service_enabled: true,
             pet_battles: PetBattleState::default(),
             pet: PetState::default(),
             lfg_list_counts: LfgListCounts::default(),
@@ -457,7 +457,7 @@ pub struct SimState {
     pub game_rules: GameRulesState,
     /// Whether `C_Housing.IsHousingServiceEnabled()` reports true. Drives
     /// MainMenuBarMicroButtons' decision to render the Housing micro-button.
-    /// Default false (sim has no housing service).
+    /// Default true so the housing dashboard can be opened from the live UI.
     pub housing_service_enabled: bool,
     /// Backing state for `C_PetBattles.GetNumPets(owner)` and
     /// `C_PetBattles.GetBattleState()`. Default zeros (no active battle).

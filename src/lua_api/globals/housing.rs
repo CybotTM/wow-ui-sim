@@ -1,9 +1,9 @@
 //! `C_Housing` namespace — currently just `IsHousingServiceEnabled`.
 //!
 //! MainMenuBarMicroButtons gates the Housing micro-button on this probe.
-//! Sim has no housing service, default is `false`. Admin
-//! `A_Admin.SetHousingServiceEnabled(b?)` flips the flag for tests that want
-//! to render the Housing button.
+//! The sim defaults this to `true` so the live UI can open the Housing
+//! dashboard. Admin `A_Admin.SetHousingServiceEnabled(b?)` flips the flag for
+//! tests that need disabled-service behavior.
 //!
 //! `C_Housing` namespace table is provided by the Lua bootstrap
 //! `__wow_merge_namespace` so other unimplemented members still fall through

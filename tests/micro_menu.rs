@@ -48,6 +48,10 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
+    (
+        "Blizzard_HousingEventHandler",
+        "Blizzard_HousingEventHandler.toc",
+    ),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
     (
         "Blizzard_UIParentPanelManager",
@@ -518,6 +522,20 @@ fn micro_menu_collections_button_loads_and_opens_panel() {
     assert!(
         frame_is_shown(&env, "CollectionsJournal"),
         "CollectionsJournal should be shown after clicking CollectionsMicroButton"
+    );
+}
+
+#[test]
+fn micro_menu_housing_button_loads_and_opens_panel() {
+    let env = setup_env();
+    assert!(
+        !frame_exists(&env, "HousingDashboardFrame"),
+        "HousingDashboardFrame should not exist before click"
+    );
+    click_button(&env, "HousingMicroButton").expect("HousingMicroButton click failed");
+    assert!(
+        frame_is_shown(&env, "HousingDashboardFrame"),
+        "HousingDashboardFrame should be shown after clicking HousingMicroButton"
     );
 }
 
