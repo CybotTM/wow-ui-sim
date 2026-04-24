@@ -87,41 +87,35 @@ Driver limitations:
 
 ## Blizzard `issecure()` Call-Sites
 
-These are the real Blizzard Lua paths the simulator executes today that branch on `issecure()` or pass its value into secure APIs. They are the practical end-to-end checks for Elune taint integration.
+These are the real Blizzard Lua paths the simulator executes today that branch on `issecure()` or pass its value into secure APIs. They are the practical end-to-end checks for Elune taint integration. The important runtime question is whether existing tests exercise the secure branch, the insecure branch, or only load-time registration.
 
-### Registration and command routing
+| Area | Blizzard paths | Branch behavior | Simulator coverage |
+|------|----------------|-----------------|--------------------|
+| Secure mixin creation | `Blizzard_SharedXMLBase/Mixin.lua` | `SecureMixin` and `CreateFromSecureMixins` return only for secure callers. | Loaded by nearly every Blizzard integration lane; TOC coverage in `tests/toc_parsing.rs`, global/mixin coverage in `tests/utility_api.rs`, startup/panel/keybinding lanes. |
+| Secure slash commands | `Blizzard_ChatFrameBase/Shared/SlashCommands.lua`, `SlashCommandsRegistry.lua` | Secure callers register secure command aliases; insecure callers fall back to normal slash command tables or error for `AddSecureCmd`. | `Blizzard_ChatFrameBase` loads in startup/load-order lanes; secure-file load coverage in `tests/startup_warnings.rs::test_secure_env_annotated_files_load_cleanly`. |
+| Action button secure attributes | `Blizzard_ActionBar/Shared/ActionButton.lua`, `Blizzard_ActionBar/WoWLabs/ActionButtonOverrides.lua` | Secure callers update protected `showgrid` attributes; insecure callers skip the protected attribute mutation. | Action bar loading and interaction are covered by `tests/action_bar_drag.rs`, `tests/spell_casting.rs`, `tests/frame_positions.rs`, and ShowUIPanel/keybinding lanes that include `Blizzard_ActionBar`. |
+| UI panel lockdown | `Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua` | `CheckProtectedFunctionsAllowed` blocks insecure panel show/hide while in combat. | Panel load and interaction coverage in `tests/test_showuipanel.rs`, `tests/test_showuipanel_lod*.rs`, `tests/panel_harness_runtime.rs`, and keybinding panel tests. |
+| Static popup secure text | `Blizzard_StaticPopup/StaticPopup.lua` | `editBoxSecureText` dialogs error when shown from tainted context. | StaticPopup loads in panel/click/profession lanes; no focused tainted secure-editbox dialog test yet. |
+| CVar cache hygiene | `Blizzard_SharedXMLBase/CvarUtil.lua` | CVar values are cached only when execution is secure to avoid tainting later reads. | CVar API coverage in `tests/test_cvar_display_settings.rs`, `tests/set_cvar_global.rs`, startup warning coverage for registered CVars. |
+| Tooltip callback tables | `Blizzard_SharedXMLGame/Tooltip/TooltipDataHandler.lua` | Secure callbacks are stored in secure tables; insecure callbacks are wrapped with `forceinsecure()`. | Full tooltip lanes in `tests/tooltip_hover.rs` and `src/loader/tests/wow_api_tooltip.rs`. |
+| Edit Mode secure delegate | `Blizzard_EditMode/Shared/EditModeManager.lua` | `ClearSelectedSystem` uses a secure delegate when secure or out of combat, otherwise runs direct cleanup. | `Blizzard_EditMode` is in startup, panel, keybinding, action-bar, and frame-position lanes. |
+| Group Finder protected searches | `Blizzard_GroupFinder/Mainline/LFGList.lua` | Secure pending quest/scenario searches start directly; insecure paths show confirmation popups. | `Blizzard_GroupFinder` loads in full load-order and keybinding panel lanes; no focused insecure pending-search branch test yet. |
+| Unit popup protected actions | `Blizzard_UnitPopupShared/UnitPopupSharedButtonMixins.lua` | Target, Battle.net target, and raid-role buttons are hidden/disabled for insecure callers. | `Blizzard_UnitPopupShared` / `Blizzard_UnitPopup` load in full load-order and interaction lanes; no focused tainted unit-popup branch test yet. |
+| Restricted add-on environment | `Blizzard_RestrictedAddOnEnvironment/RestrictedExecution.lua`, `RestrictedInfrastructure.lua`, `SecureHandlers.lua`, `SecureHoverDriver.lua` | Secure callers can create restricted closures/tables/frame handles and direct auto-hide operations; insecure callers error or route through attribute-mediated updates. | Load and exported-surface coverage in `tests/startup_warnings.rs::test_secure_env_annotated_files_load_cleanly` and `test_restricted_addon_environment_exposes_execution_surface`; fallback API coverage in `tests/secure_handler_fallback.rs`; state/driver/security coverage in `tests/security_api.rs`. |
+| Nameplate secure flag forwarding | `Blizzard_NamePlates/Blizzard_NamePlates.lua`, `Blizzard_NewPlayerExperience/Blizzard_TutorialTutorials.lua` | Current secure state is passed to `C_NamePlate.GetNamePlateForUnit` / `GetNamePlates`. | NamePlate addon is in full load-order; startup API stubs cover nameplate API presence. NewPlayerExperience file is present in the source tree but not part of the current normal load-order snapshot. |
+| Script error registration | `Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua`, `Blizzard_ScriptErrorsFrame/Blizzard_ScriptErrorsFrame.lua` | Internal handler registration asserts secure execution. | ScriptErrorsFrame is in full load-order; startup/load warning lanes catch load-time assertion failures. |
+| Debug/menu probes | `Blizzard_DebugTools/DebugObjectUtil.lua`, `Blizzard_Menu/MenuTemplates.lua` | Debug object access permits secure callers or non-forbidden objects; menu debug path prints current secure state. | DebugTools and Menu load in full/panel/click lanes. These are diagnostic/passive branches, not core compatibility gates. |
 
-- `Blizzard_ChatFrameBase/Shared/SlashCommands.lua` uses `issecure()` to choose between secure slash-command registration and the insecure fallback registry.
-- `Blizzard_ChatFrameBase/Shared/SlashCommandsRegistry.lua` uses `issecure()` to decide whether secure slash-command aliases can be added, and rejects insecure `AddSecureCmd()` calls.
-- `Blizzard_SharedXMLBase/Mixin.lua` uses `issecure()` to allow secure mixin copying only during the secure bootstrap path.
-
-### UI actions gated by secure state
-
-- `Blizzard_UnitPopupShared/UnitPopupSharedButtonMixins.lua` uses `issecure()` to hide insecurely-invoked unit popup actions that would otherwise target or promote players.
-- `Blizzard_SharedXMLBase/CvarUtil.lua` uses `issecure()` to decide whether a CVar read can be cached without tainting later reads.
-- `Blizzard_DebugTools/DebugObjectUtil.lua` uses `issecure()` to allow object access when secure, even if the target is forbidden.
-- `Blizzard_StaticPopup/StaticPopup.lua` uses `issecure()` to block secure edit-box dialogs from tainted callers.
-- `Blizzard_GroupFinder/Mainline/LFGList.lua` uses `issecure()` to either begin a secure search or show an insecure-search warning popup.
-- `Blizzard_ActionBar/WoWLabs/ActionButtonOverrides.lua` and `Blizzard_ActionBar/Shared/ActionButton.lua` use `issecure()` to gate action-bar grid state updates.
-- `Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua` uses `issecure()` with combat lockdown to gate panel show/hide operations.
-- `Blizzard_SharedXMLGame/Tooltip/TooltipDataHandler.lua` uses `issecure()` to register secure callbacks directly or wrap insecure callbacks with `forceinsecure()`.
-- `Blizzard_EditMode/Shared/EditModeManager.lua` uses `issecure()` with combat lockdown to choose the secure delegate path for clearing selected systems.
-
-### Secure-environment plumbing
-
-- `Blizzard_ScriptErrors/Blizzard_ScriptErrors.lua` and `Blizzard_ScriptErrorsFrame/Blizzard_ScriptErrorsFrame.lua` assert secure execution during their startup wiring.
-- `Blizzard_NamePlates/Blizzard_NamePlates.lua` passes `issecure()` into `C_NamePlate` lookup APIs so secure and insecure views resolve differently.
-- `Blizzard_NewPlayerExperience/Blizzard_TutorialTutorials.lua` passes `issecure()` into `C_NamePlate.GetNamePlateForUnit()` for the same reason.
-- `Blizzard_RestrictedAddOnEnvironment/SecureHoverDriver.lua` uses `issecure()` to pick secure auto-hide helpers when possible, otherwise it falls back to attribute-driven emulation.
-- `Blizzard_RestrictedAddOnEnvironment/SecureHandlers.lua`, `RestrictedInfrastructure.lua`, and `RestrictedExecution.lua` use `issecure()` as the guard for secure-handler APIs, restricted table mutation, frame-handle namespace initialization, forbidden-frame propagation, and restricted closure execution.
-
-### End-to-end coverage in the simulator
+End-to-end coverage summary:
 
 - `tests/security_api.rs` covers the base Elune contract: `issecure()`, `forceinsecure()`, `loadstring()` tainting, and `securecall()` restoring secure execution.
 - `tests/protected_frame_enforcement.rs` covers the combat/insecure gates that many `issecure()` branches are protecting.
 - `tests/secure_handler_fallback.rs` covers the SecureHandler fallback path that runs before `Blizzard_RestrictedAddOnEnvironment` loads.
 - `tests/secure_group_headers.rs` covers the secure group-header path after `Blizzard_RestrictedAddOnEnvironment` loads.
 - `tests/startup_warnings.rs` and `tests/load_order.rs` cover the Blizzard addon startup/load path where these call sites are exercised together.
+- Startup, panel, tooltip, action-bar, keybinding, and click-targeting tests exercise several interaction branches through real Blizzard Lua.
+
+Remaining audit gaps are branch-specific coverage gaps, not known missing implementation by themselves: tainted calls into StaticPopup secure edit boxes, GroupFinder pending-search confirmation, UnitPopup protected actions, and NamePlate secure flag behavior.
 
 ## Sources
 
