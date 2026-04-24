@@ -9,6 +9,21 @@ fn update_tooltip_sizes(env: &WowLuaEnv) {
     wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
 }
 
+fn assert_color_close(actual: (f32, f32, f32), expected: (f32, f32, f32), label: &str) {
+    assert!(
+        (actual.0 - expected.0).abs() < 0.01
+            && (actual.1 - expected.1).abs() < 0.01
+            && (actual.2 - expected.2).abs() < 0.01,
+        "{label} color mismatch; expected rgb=({:.3},{:.3},{:.3}), got rgb=({:.3},{:.3},{:.3})",
+        expected.0,
+        expected.1,
+        expected.2,
+        actual.0,
+        actual.1,
+        actual.2
+    );
+}
+
 #[test]
 fn test_set_item_by_id_populates_lines() {
     let env = WowLuaEnv::new().unwrap();
@@ -456,35 +471,86 @@ fn test_set_spell_by_id_uses_wrapped_description_for_tooltip_width() {
 }
 
 #[test]
-fn test_set_spell_by_id_defaults_uncolored_lines_to_normal_font_color() {
+fn test_set_spell_by_id_colors_title_and_metadata_lines() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
 
-    let expected: (f32, f32, f32) = env
+    let highlight: (f32, f32, f32) = env
+        .eval("local r,g,b = HIGHLIGHT_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+    let normal: (f32, f32, f32) = env
         .eval("local r,g,b = NORMAL_FONT_COLOR:GetRGB(); return r,g,b")
         .unwrap();
 
     let state = env.state().borrow();
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let td = state.tooltips.get(&gt_id).unwrap();
-    let title = td
+    let title = &td.lines[0];
+    let cost = td
         .lines
-        .first()
-        .expect("spell tooltip should contain at least one line");
+        .iter()
+        .find(|line| line.left_text.contains("MANA"))
+        .expect("Flash of Light tooltip should include resource cost");
+    let cast = td
+        .lines
+        .iter()
+        .find(|line| line.left_text.contains("sec cast"))
+        .expect("Flash of Light tooltip should include cast time");
+    let description = td
+        .lines
+        .last()
+        .expect("Flash of Light tooltip should include a description");
 
-    assert!(
-        (title.left_color.0 - expected.0).abs() < 0.01
-            && (title.left_color.1 - expected.1).abs() < 0.01
-            && (title.left_color.2 - expected.2).abs() < 0.01,
-        "uncolored spell-tooltip lines should inherit NORMAL_FONT_COLOR; expected rgb=({:.3},{:.3},{:.3}), got rgb=({:.3},{:.3},{:.3})",
-        expected.0,
-        expected.1,
-        expected.2,
-        title.left_color.0,
-        title.left_color.1,
-        title.left_color.2
-    );
+    for line in [title, cost, cast] {
+        assert_color_close(line.left_color, highlight, "spell metadata line");
+    }
+    assert_color_close(description.left_color, normal, "spell description line");
+}
+
+#[test]
+fn test_set_spell_by_id_colors_cooldown_line() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(642)").unwrap();
+    let highlight: (f32, f32, f32) = env
+        .eval("local r,g,b = HIGHLIGHT_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let cooldown = td
+        .lines
+        .iter()
+        .find(|line| line.left_text.contains("cooldown"))
+        .expect("Divine Shield tooltip should include cooldown line");
+
+    assert_color_close(cooldown.left_color, highlight, "cooldown line");
+}
+
+#[test]
+fn test_get_action_adds_colored_binding_line() {
+    let env = WowLuaEnv::new().unwrap();
+    let (binding_text, r, g, b): (String, f32, f32, f32) = env
+        .eval(
+            r#"
+            local info = C_TooltipInfo.GetAction(5)
+            for _, line in ipairs(info.lines) do
+                if line.leftText and string.find(line.leftText, "Key bound") then
+                    return line.leftText, line.leftColor:GetRGB()
+                end
+            end
+            return "", 0, 0, 0
+            "#,
+        )
+        .unwrap();
+    let highlight: (f32, f32, f32) = env
+        .eval("local r,g,b = HIGHLIGHT_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+
+    assert_eq!(binding_text, "Key bound: 5");
+    assert_color_close((r, g, b), highlight, "action binding line");
 }
 
 #[test]

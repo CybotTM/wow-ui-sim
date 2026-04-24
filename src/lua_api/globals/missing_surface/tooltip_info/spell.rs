@@ -18,6 +18,15 @@ fn spell_cost_line(spell_id: u32) -> Option<&'static str> {
     }
 }
 
+fn spell_cooldown_line(spell_id: u32) -> Option<&'static str> {
+    match spell_id {
+        642 | 86659 => Some("5 min cooldown"),
+        31850 => Some("2 min cooldown"),
+        375576 => Some("1 min cooldown"),
+        _ => None,
+    }
+}
+
 fn spell_cast_line(spell_id: u32) -> String {
     let cast_ms = spell_api::spell_cast_time(spell_id as i32);
     if cast_ms <= 0 {
@@ -28,15 +37,7 @@ fn spell_cast_line(spell_id: u32) -> String {
 }
 
 fn push_spell_name_line(state: &mut LuaState, lines: Val, index: i64, spell_name: &str) {
-    push_tooltip_line(
-        state,
-        lines,
-        index,
-        LINE_TYPE_SPELL_NAME,
-        spell_name,
-        None,
-        false,
-    );
+    push_highlight_spell_line(state, lines, index, spell_name);
 }
 
 /// Returns true when a cost line was written, so the caller can advance
@@ -45,19 +46,32 @@ fn push_spell_cost_line(state: &mut LuaState, lines: Val, index: i64, spell_id: 
     let Some(cost) = spell_cost_line(spell_id) else {
         return false;
     };
-    push_tooltip_line(state, lines, index, LINE_TYPE_SPELL_NAME, cost, None, false);
+    push_highlight_spell_line(state, lines, index, cost);
+    true
+}
+
+fn push_spell_cooldown_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) -> bool {
+    let Some(cooldown) = spell_cooldown_line(spell_id) else {
+        return false;
+    };
+    push_highlight_spell_line(state, lines, index, cooldown);
     true
 }
 
 fn push_spell_cast_line(state: &mut LuaState, lines: Val, index: i64, spell_id: u32) {
     let cast_line = spell_cast_line(spell_id);
+    push_highlight_spell_line(state, lines, index, &cast_line);
+}
+
+fn push_highlight_spell_line(state: &mut LuaState, lines: Val, index: i64, text: &str) {
+    let detail_color = spell_detail_color(state);
     push_tooltip_line(
         state,
         lines,
         index,
         LINE_TYPE_SPELL_NAME,
-        &cast_line,
-        None,
+        text,
+        Some(detail_color),
         false,
     );
 }
@@ -73,6 +87,84 @@ fn push_spell_description_line(state: &mut LuaState, lines: Val, index: i64, spe
         None,
         true,
     );
+}
+
+pub(super) fn append_action_binding_line(state: &mut LuaState, tooltip: Val, slot: u32) {
+    let lines = table_get(state, tooltip, "lines");
+    let index = tooltip_line_count(state, lines) + 1;
+    let text = action_binding_line(slot);
+    let detail_color = spell_detail_color(state);
+    push_tooltip_line(
+        state,
+        lines,
+        index,
+        LINE_TYPE_SPELL_NAME,
+        &text,
+        Some(detail_color),
+        false,
+    );
+}
+
+fn spell_detail_color(state: &mut LuaState) -> (f64, f64, f64) {
+    let highlight_key = state.gc.intern_string(b"HIGHLIGHT_FONT_COLOR");
+    let highlight_color = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(highlight_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+
+    table_color_components(state, highlight_color).unwrap_or((1.0, 1.0, 1.0))
+}
+
+fn table_color_components(state: &mut LuaState, color: Val) -> Option<(f64, f64, f64)> {
+    let red = table_color_component(state, color, b"r")?;
+    let green = table_color_component(state, color, b"g")?;
+    let blue = table_color_component(state, color, b"b")?;
+    Some((red, green, blue))
+}
+
+fn table_color_component(state: &mut LuaState, color: Val, component: &[u8]) -> Option<f64> {
+    let Val::Table(color_ref) = color else {
+        return None;
+    };
+    let component_key = state.gc.intern_string(component);
+    let component_value = state
+        .gc
+        .tables
+        .get(color_ref)
+        .map(|color| color.get_str(component_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    match component_value {
+        Val::Num(value) => Some(value),
+        _ => None,
+    }
+}
+
+fn action_binding_line(slot: u32) -> String {
+    match slot {
+        1..=9 => format!("Key bound: {slot}"),
+        10 => "Key bound: 0".to_string(),
+        11 => "Key bound: -".to_string(),
+        12 => "Key bound: =".to_string(),
+        _ => "Not bound".to_string(),
+    }
+}
+
+fn tooltip_line_count(state: &LuaState, lines: Val) -> i64 {
+    let Val::Table(lines_ref) = lines else {
+        return 0;
+    };
+    let mut index = 1;
+    while state
+        .gc
+        .tables
+        .get(lines_ref)
+        .is_some_and(|table| table.get_int(index) != Val::Nil)
+    {
+        index += 1;
+    }
+    index - 1
 }
 
 fn resolved_spell_description(state: &LuaState, spell_id: u32) -> String {
@@ -91,6 +183,9 @@ fn push_spell_tooltip_lines(state: &mut LuaState, lines: Val, spell_id: u32, spe
     }
     push_spell_cast_line(state, lines, index, spell_id);
     index += 1;
+    if push_spell_cooldown_line(state, lines, index, spell_id) {
+        index += 1;
+    }
     push_spell_description_line(state, lines, index, spell_id);
 }
 

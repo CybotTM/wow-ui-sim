@@ -9,9 +9,9 @@ use super::builders::{
     trade_slot_item_id,
 };
 use super::spell::{
-    lookup_player_aura, lookup_player_aura_by_instance_id, spell_id_for_talent_id,
-    tooltip_for_mount_spell_id, tooltip_for_spell_id, tooltip_for_toy_item_id,
-    tooltip_for_unit_aura,
+    append_action_binding_line, lookup_player_aura, lookup_player_aura_by_instance_id,
+    spell_id_for_talent_id, tooltip_for_mount_spell_id, tooltip_for_spell_id,
+    tooltip_for_toy_item_id, tooltip_for_unit_aura,
 };
 use super::unit::{tooltip_for_unit, tooltip_for_world_loot};
 use crate::lua_api::globals::currency_data;
@@ -36,6 +36,7 @@ pub(super) fn c_tooltip_get_action(state: &mut LuaState) -> LuaResult<u32> {
     match spell_id {
         Some(spell_id) => {
             let tooltip = tooltip_for_spell_id(state, spell_id);
+            append_action_binding_line(state, tooltip, slot);
             state.push(tooltip);
         }
         None => state.push(Val::Nil),
