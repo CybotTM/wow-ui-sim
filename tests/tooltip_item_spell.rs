@@ -579,6 +579,16 @@ fn test_set_spell_by_id_replaces_armor_placeholder_for_shield_of_the_righteous()
             .map(|line| line.left_text.clone())
             .collect::<Vec<_>>()
     );
+    assert!(
+        td.lines
+            .iter()
+            .any(|line| line.left_text.contains("for 4.5")),
+        "SetSpellByID should resolve Shield of the Righteous armor duration from spell 132403, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
 }
 
 #[test]
