@@ -262,7 +262,7 @@ pub fn apply_for_runtime_addon_load(env: &crate::lua_api::LoaderEnv<'_>, addon_n
         let _ = env.exec(CATALOG_SHOP_PRODUCT_CARD_DEFAULTS_WORKAROUND_LUA);
     }
     if addon_name == "Blizzard_DamageMeter" {
-        let _ = patch_damage_meter_initial_scrollbox_extent(env);
+        patch_damage_meter_initial_scrollbox_extent(env);
     }
 }
 
