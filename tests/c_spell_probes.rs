@@ -99,6 +99,26 @@ fn test_get_spell_description_resolves_named_dmg_variable() {
     );
 }
 
+#[test]
+fn test_get_spell_description_resolves_consecration_dmg_expression() {
+    let env = env();
+    let consecration_damage: String = env
+        .eval("local function fmt(v) if math.abs(v) >= 100 or math.abs(v - math.floor(v + 0.5)) < 0.001 then return tostring(math.floor(v + 0.5)) else return string.format('%.1f', v) end end local ap = UnitAttackPower('player'); return fmt(ap * 0.05 * 12 * 1.05)")
+        .unwrap();
+    let desc: String = env
+        .eval("return C_Spell.GetSpellDescription(26573)")
+        .unwrap();
+
+    assert!(
+        desc.contains(&format!("{consecration_damage} Holy damage")),
+        "Consecration should resolve nested $<dmg> expression; expected {consecration_damage}, got: {desc}"
+    );
+    assert!(
+        !desc.contains("$<dmg>") && !desc.contains("${"),
+        "Consecration should not expose raw expression placeholders, got: {desc}"
+    );
+}
+
 // ── GetSpellCooldown ─────────────────────────────────────────────────────────
 
 #[test]

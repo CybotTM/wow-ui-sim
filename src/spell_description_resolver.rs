@@ -38,6 +38,10 @@ fn spell_variables(spell_id: u32) -> &'static [(&'static str, &'static str)] {
         // Eye Beam: inactive talent conditionals collapse to the base
         // SimulationCraft branch, $dmg=${$198030s1*10}.
         198013 => &[("dmg", "$198030s1*10")],
+        // Consecration: SimulationCraft has
+        // $dmg=${$81297s1*$ceil($d/$t1)}. Consecration lasts 12 sec and
+        // ticks every 1 sec in our data model.
+        26573 => &[("dmg", "$81297s1*12")],
         // Crusader Strike: $damage=${$s1*$<retribution>}; inactive
         // talent/PvP conditionals collapse to a 1.0 multiplier here.
         35395 => &[("damage", "$s1")],
@@ -274,6 +278,7 @@ fn spell_amount(sim: &SimState, spell_id: u32, effect_index: u32) -> f64 {
         (53600, 1) => player_attack_power(sim) * 0.95,
         (378286, 1) => player_attack_power(sim) * 0.12,
         (198030, 1) => player_attack_power(sim) * 0.4026,
+        (81297, 1) => player_attack_power(sim) * 0.05,
         (378285, 2) => 0.0,
         (209389, 1) => 60.0,
         (209389, 2) => 50.0,
@@ -304,6 +309,7 @@ fn spell_duration(spell_id: u32) -> f64 {
     match spell_id {
         31935 => 3.0,
         198013 => 2.0,
+        26573 => 12.0,
         132403 => 4.5,
         209388 => 8.0,
         184662 => 15.0,
