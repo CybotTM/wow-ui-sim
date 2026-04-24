@@ -9,6 +9,7 @@ mod c_map;
 mod character_select;
 mod character_services;
 mod chat_bubbles;
+mod club_finder;
 mod club_info;
 mod creature_info;
 mod death_recap;
@@ -216,6 +217,7 @@ fn register_social_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_configuration_warnings::register_c_configuration_warnings_surface(state)?;
     character_services::register_character_services_surface(state)?;
     chat_bubbles::register_chat_bubbles_surface(state)?;
+    club_finder::register_club_finder_surface(state)?;
     club_info::register_club_info_surface(state)?;
     friend_list::register_friend_list_surface(state)?;
     recruit_a_friend::register_recruit_a_friend_surface(state)?;

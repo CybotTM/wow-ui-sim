@@ -57,34 +57,59 @@ fn load_one_blizzard_addon(
     timing: &mut LoadTiming,
 ) {
     match load_addon(&env.loader_env(), toc_path) {
-        Ok(r) => {
-            if verbose {
-                let t = &r.timing;
-                println!(
-                    "{} loaded: {} Lua, {} XML, {} warnings ({:.1?}: xmlproc={:.1?} exec_lua={:.1?} lifecycle={:.1?} layers={:.1?} lua={:.1?} [compile={:.1?} call={:.1?}] frames={})",
-                    name,
-                    r.lua_files,
-                    r.xml_files,
-                    r.warnings.len(),
-                    t.total(),
-                    t.xml_process_time,
-                    t.frame_exec_lua_time,
-                    t.frame_lifecycle_time,
-                    t.frame_layer_children_time,
-                    t.lua_exec_time,
-                    t.lua_compile_time,
-                    t.lua_call_time,
-                    t.frame_count
-                );
-            }
-            if std::env::var("WOW_SIM_DEBUG_NIL_GLOBALS").is_ok() {
-                for w in &r.warnings {
-                    println!("  [!] {}", w);
-                }
-            }
-            timing.accumulate(&r.timing);
-        }
+        Ok(r) => record_blizzard_addon_success(env, name, verbose, timing, r),
         Err(e) => println!("{} failed: {}", name, e),
+    }
+}
+
+fn record_blizzard_addon_success(
+    env: &WowLuaEnv,
+    name: &str,
+    verbose: bool,
+    timing: &mut LoadTiming,
+    result: LoadResult,
+) {
+    print_verbose_blizzard_status(name, verbose, &result);
+    print_nil_global_warnings(&result);
+    fire_addon_loaded(env, name);
+    timing.accumulate(&result.timing);
+}
+
+fn print_verbose_blizzard_status(name: &str, verbose: bool, result: &LoadResult) {
+    if !verbose {
+        return;
+    }
+    let t = &result.timing;
+    println!(
+        "{} loaded: {} Lua, {} XML, {} warnings ({:.1?}: xmlproc={:.1?} exec_lua={:.1?} lifecycle={:.1?} layers={:.1?} lua={:.1?} [compile={:.1?} call={:.1?}] frames={})",
+        name,
+        result.lua_files,
+        result.xml_files,
+        result.warnings.len(),
+        t.total(),
+        t.xml_process_time,
+        t.frame_exec_lua_time,
+        t.frame_lifecycle_time,
+        t.frame_layer_children_time,
+        t.lua_exec_time,
+        t.lua_compile_time,
+        t.lua_call_time,
+        t.frame_count
+    );
+}
+
+fn print_nil_global_warnings(result: &LoadResult) {
+    if std::env::var("WOW_SIM_DEBUG_NIL_GLOBALS").is_err() {
+        return;
+    }
+    for warning in &result.warnings {
+        println!("  [!] {warning}");
+    }
+}
+
+fn fire_addon_loaded(env: &WowLuaEnv, name: &str) {
+    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(name)]) {
+        logging::println_elapsed(&format!("Error firing ADDON_LOADED for {name}: {e}"));
     }
 }
 
@@ -181,30 +206,39 @@ pub fn scan_addons(
     screen: ScreenKind,
 ) -> Vec<(String, PathBuf)> {
     let mut addons = Vec::new();
-    if let Ok(entries) = std::fs::read_dir(base_path) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if !path.is_dir() {
-                continue;
-            }
-            let name = path.file_name().unwrap().to_str().unwrap().to_string();
-            if name.starts_with('.') || name == "BlizzardUI" {
-                continue;
-            }
-            if exclude.iter().any(|e| *e == name) {
-                continue;
-            }
-            if let Some(toc_path) = wow_ui_sim::loader::find_toc_file(&path)
-                && let Ok(toc) = TocFile::from_file(&toc_path)
-                && toc.allows_screen(screen)
-                && !toc.is_ptr_only()
-                && !toc.is_game_type_restricted()
-            {
-                addons.push((name, toc_path));
-            }
+    let Ok(entries) = std::fs::read_dir(base_path) else {
+        return addons;
+    };
+    for entry in entries.flatten() {
+        if let Some(addon) = scanned_addon(entry.path(), exclude, screen) {
+            addons.push(addon);
         }
     }
     addons
+}
+
+fn scanned_addon(path: PathBuf, exclude: &[&str], screen: ScreenKind) -> Option<(String, PathBuf)> {
+    if !path.is_dir() {
+        return None;
+    }
+    let name = path.file_name()?.to_str()?.to_string();
+    if should_skip_addon_dir(&name, exclude) {
+        return None;
+    }
+    let toc_path = loadable_toc_path(&path, screen)?;
+    Some((name, toc_path))
+}
+
+fn should_skip_addon_dir(name: &str, exclude: &[&str]) -> bool {
+    name.starts_with('.') || name == "BlizzardUI" || exclude.contains(&name)
+}
+
+fn loadable_toc_path(path: &Path, screen: ScreenKind) -> Option<PathBuf> {
+    let toc_path = wow_ui_sim::loader::find_toc_file(path)?;
+    let toc = TocFile::from_file(&toc_path).ok()?;
+    let supports_screen = toc.allows_screen(screen);
+    let supported_game_type = !toc.is_ptr_only() && !toc.is_game_type_restricted();
+    (supports_screen && supported_game_type).then_some(toc_path)
 }
 
 /// Accumulated statistics from loading addons.
@@ -266,6 +300,7 @@ fn load_single_addon(
     match result {
         Ok(r) => {
             mark_addon_loaded(env, name, &r);
+            fire_addon_loaded(env, name);
             record_addon_success(name, &r, stats);
         }
         Err(e) => {

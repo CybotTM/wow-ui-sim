@@ -25,6 +25,37 @@ fn is_in_guild_false_after_clearing_guild_name() {
     assert!(!b);
 }
 
+#[test]
+fn can_guild_invite_tracks_guild_membership() {
+    let env = env();
+    let seeded: bool = env.eval("return CanGuildInvite()").unwrap();
+    assert!(seeded);
+    env.state().borrow_mut().world.guild_name = None;
+    let cleared: bool = env.eval("return CanGuildInvite()").unwrap();
+    assert!(!cleared);
+}
+
+#[test]
+fn is_guild_leader_defaults_false() {
+    let env = env();
+    let leader: bool = env.eval("return IsGuildLeader()").unwrap();
+    assert!(!leader);
+}
+
+#[test]
+fn guild_recipe_queries_have_safe_defaults() {
+    let env = env();
+    let can_view: bool = env
+        .eval(
+            r#"
+            QueryGuildRecipes()
+            return CanViewGuildRecipes(0)
+            "#,
+        )
+        .unwrap();
+    assert!(!can_view);
+}
+
 // ── CanReplaceGuildMaster ─────────────────────────────────────────────────────
 
 #[test]

@@ -40,6 +40,22 @@ fn get_subscribed_clubs_club_id_is_string() {
 }
 
 #[test]
+fn get_club_info_returns_guild_shape() {
+    let env = env();
+    let (name, club_type, member_count): (String, i32, i32) = env
+        .eval(
+            r#"
+            local club = C_Club.GetClubInfo("guild-0")
+            return club.name, club.clubType, club.memberCount
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Heroes of Azeroth");
+    assert_eq!(club_type, 2);
+    assert!(member_count > 0);
+}
+
+#[test]
 fn get_subscribed_clubs_empty_when_no_guild() {
     let env = env();
     {
@@ -88,6 +104,37 @@ fn get_club_members_entry_has_required_fields() {
     assert_eq!(name, "Uther");
     assert!(is_self, "first member should be isSelf=true");
     assert_eq!(presence, 1, "online presence = 1");
+}
+
+#[test]
+fn get_member_info_for_self_has_role() {
+    let env = env();
+    let (name, is_self, role): (String, bool, i32) = env
+        .eval(
+            r#"
+            local member = C_Club.GetMemberInfoForSelf("guild-0")
+            return member.name, member.isSelf, member.role
+            "#,
+        )
+        .unwrap();
+    assert!(!name.is_empty());
+    assert!(is_self);
+    assert_eq!(role, 4);
+}
+
+#[test]
+fn get_club_privileges_returns_flags_table() {
+    let env = env();
+    let (kind, can_invite): (String, bool) = env
+        .eval(
+            r#"
+            local privileges = C_Club.GetClubPrivileges("guild-0")
+            return type(privileges), privileges.canSendInvitation
+            "#,
+        )
+        .unwrap();
+    assert_eq!(kind, "table");
+    assert!(!can_invite);
 }
 
 #[test]
@@ -163,4 +210,35 @@ fn club_unread_message_queries_have_safe_defaults() {
     assert!(!any_unread);
     assert_eq!(stream_marker_type, "nil");
     assert_eq!(settings_count, 0);
+}
+
+#[test]
+fn club_finder_queries_have_safe_empty_defaults() {
+    let env = env();
+    let (enabled, invites, applicants, pending, status_flags, guild_total): (
+        bool,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            return
+                C_ClubFinder.IsEnabled(),
+                #C_ClubFinder.PlayerGetClubInvitationList(),
+                #C_ClubFinder.ReturnClubApplicantList("guild-0"),
+                #C_ClubFinder.ReturnPendingClubApplicantList("guild-0"),
+                #C_ClubFinder.GetStatusOfPostingFromClubId("guild-0"),
+                C_ClubFinder.GetTotalMatchingGuildListSize()
+            "#,
+        )
+        .unwrap();
+    assert!(enabled);
+    assert_eq!(invites, 0);
+    assert_eq!(applicants, 0);
+    assert_eq!(pending, 0);
+    assert_eq!(status_flags, 0);
+    assert_eq!(guild_total, 0);
 }

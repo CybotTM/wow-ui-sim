@@ -6,6 +6,10 @@
 //! - `CanReplaceGuildMaster()`     -> `SimState.can_replace_guild_master`
 //! - `GetAutoDeclineGuildInvites()` -> `SimState.auto_decline_guild_invites`
 //! - `GetGuildRosterShowOffline()` -> `SimState.guild_roster_show_offline`
+//! - `CanGuildInvite()`             -> true when the player is in a guild
+//! - `IsGuildLeader()`              -> false until rank privileges are modeled
+//! - `QueryGuildRecipes()`          -> no-op, guild recipe state is unmodeled
+//! - `CanViewGuildRecipes()`        -> false, guild recipe state is unmodeled
 //!
 //! Migrates 4 roster-count entries off `GLOBAL_ZERO_STUBS`:
 //!
@@ -66,6 +70,26 @@ fn get_auto_decline_guild_invites(state: &mut LuaState) -> LuaResult<u32> {
 fn get_guild_roster_show_offline(state: &mut LuaState) -> LuaResult<u32> {
     let b = borrow_state(state)?.guild_roster_show_offline;
     state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_guild_invite(state: &mut LuaState) -> LuaResult<u32> {
+    let b = borrow_state(state)?.world.guild_name.is_some();
+    state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn is_guild_leader(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn query_guild_recipes(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn can_view_guild_recipes(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
@@ -188,6 +212,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetGuildRosterShowOffline",
         get_guild_roster_show_offline,
     )?;
+    LuaApiMut::register_function(lua, "CanGuildInvite", can_guild_invite)?;
+    LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
+    LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
+    LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
     LuaApiMut::register_function(lua, "GetNumGuildMembers", get_num_guild_members)?;
     LuaApiMut::register_function(lua, "GetGuildRosterSize", get_guild_roster_size)?;
     LuaApiMut::register_function(lua, "GetGuildRosterMOTD", get_guild_roster_motd)?;

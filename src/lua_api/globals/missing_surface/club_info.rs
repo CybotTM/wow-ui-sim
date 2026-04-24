@@ -20,9 +20,13 @@
 //! - `C_Club.IsRestricted()` — returns `ClubRestrictionReason.None`.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_bridge::table_set_rust_fn_static;
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, table_set, val_to_string,
+};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
 
 const GUILD_CLUB_ID: &str = "guild-0";
@@ -31,13 +35,36 @@ const GUILD_CLUB_CAPACITY: f64 = 1000.0;
 
 pub(super) fn register_club_info_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Club")?;
+    register_club_lookup_methods(state, table_ref)?;
+    register_club_status_methods(state, table_ref)?;
+    Ok(())
+}
+
+fn register_club_lookup_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         table_ref,
         "GetSubscribedClubs",
         c_club_get_subscribed_clubs,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetClubInfo", c_club_get_club_info)?;
     table_set_rust_fn_static(state, table_ref, "GetClubMembers", c_club_get_club_members)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMemberInfoForSelf",
+        c_club_get_member_info_for_self,
+    )?;
+    Ok(())
+}
+
+fn register_club_status_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetClubPrivileges",
+        c_club_get_club_privileges,
+    )?;
     table_set_rust_fn_static(state, table_ref, "GetStreams", c_club_get_streams)?;
     table_set_rust_fn_static(
         state,
@@ -61,6 +88,22 @@ fn c_club_get_subscribed_clubs(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_club_get_club_info(state: &mut LuaState) -> LuaResult<u32> {
+    if !is_guild_club_arg(state) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+    let guild_name = borrow_state(state)?.world.guild_name.clone();
+    match guild_name {
+        Some(name) => {
+            let info = build_club_info_table(state, &name);
+            state.push(info);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
 fn c_club_get_club_members(state: &mut LuaState) -> LuaResult<u32> {
     // Accept any clubId — the sim only has one synthetic guild club.
     let members = borrow_state(state)?.world.guild_members.clone();
@@ -70,6 +113,40 @@ fn c_club_get_club_members(state: &mut LuaState) -> LuaResult<u32> {
         set_table_array(state, array, index as i64 + 1, entry);
     }
     state.push(array);
+    Ok(1)
+}
+
+fn c_club_get_member_info_for_self(state: &mut LuaState) -> LuaResult<u32> {
+    if !is_guild_club_arg(state) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
+    let member = {
+        let sim = borrow_state(state)?;
+        sim.world.guild_name.as_ref().map(|_| {
+            sim.world
+                .guild_members
+                .first()
+                .map(|member| (member.rank_index, member.name.clone()))
+                .unwrap_or_else(|| (1, sim.player.name.clone()))
+        })
+    };
+    let Some((rank_index, name)) = member else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+
+    let member_info = build_member_info_table(state, rank_index, &name, true);
+    state.push(member_info);
+    Ok(1)
+}
+
+fn c_club_get_club_privileges(state: &mut LuaState) -> LuaResult<u32> {
+    let privileges = create_table(state);
+    for field in CLUB_PRIVILEGE_FIELDS {
+        table_set(state, privileges, field, Val::Bool(false));
+    }
+    state.push(privileges);
     Ok(1)
 }
 
@@ -94,6 +171,12 @@ fn c_club_is_restricted(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn is_guild_club_arg(state: &mut LuaState) -> bool {
+    let value = stack_val(state, 1);
+    matches!(value, Val::Str(_))
+        && val_to_string(state, value).is_some_and(|club_id| club_id == GUILD_CLUB_ID)
+}
+
 fn build_club_info_table(state: &mut LuaState, name: &str) -> Val {
     let t = create_table(state);
     let club_id = create_string(state, GUILD_CLUB_ID);
@@ -106,6 +189,7 @@ fn build_club_info_table(state: &mut LuaState, name: &str) -> Val {
     table_set(state, t, "description", desc);
     table_set(state, t, "broadcast", broadcast);
     table_set(state, t, "avatarId", Val::Num(0.0));
+    table_set(state, t, "memberCount", Val::Num(GUILD_CLUB_CAPACITY));
     t
 }
 
@@ -122,7 +206,34 @@ fn build_member_info_table(
     table_set(state, t, "name", name_str);
     table_set(state, t, "isSelf", Val::Bool(is_self));
     table_set(state, t, "guildRankOrder", Val::Num(rank_order as f64));
+    table_set(state, t, "role", Val::Num(4.0));
     // presence: 1 = online (ClubMemberPresence.Online in retail enum).
     table_set(state, t, "presence", Val::Num(1.0));
     t
 }
+
+const CLUB_PRIVILEGE_FIELDS: &[&str] = &[
+    "canDestroy",
+    "canSetName",
+    "canSetDescription",
+    "canSetAvatar",
+    "canSetBroadcast",
+    "canSetPrivacyLevel",
+    "canSetOwnMemberAttribute",
+    "canSetOtherMemberAttribute",
+    "canSetOwnMemberNote",
+    "canSetOtherMemberNote",
+    "canSetOwnVoiceState",
+    "canSetOwnPresenceLevel",
+    "canUseVoice",
+    "canVoiceMuteMemberForAll",
+    "canGetInvitation",
+    "canSendInvitation",
+    "canCreateStream",
+    "canDestroyStream",
+    "canSetStreamName",
+    "canSetStreamSubject",
+    "canSetStreamAccess",
+    "canSetStreamVoiceLevel",
+    "canCreateTicket",
+];
