@@ -145,6 +145,7 @@ fn test_secure_handler_stubs_exist() {
         "SecureHandlerSetFrameRef",
         "SecureHandlerExecute",
         "SecureHandlerWrapScript",
+        "SecureHandlerUnwrapScript",
         "RegisterStateDriver",
         "UnregisterStateDriver",
         "RegisterAttributeDriver",
@@ -192,6 +193,35 @@ fn test_secure_handlers_store_frame_refs_and_execute_snippets() {
         stored_ref,
         "SecureHandlerSetFrameRef should make the ref retrievable"
     );
+}
+
+#[test]
+fn test_secure_handler_unwrap_script_restores_original_handler() {
+    let env = env();
+    let order: String = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Button", "SecurityUnwrapScriptButton", UIParent)
+            local header = CreateFrame("Frame", "SecurityUnwrapScriptHeader", UIParent)
+            local log = {}
+
+            frame:SetScript("OnClick", function()
+                log[#log + 1] = "original"
+            end)
+
+            SecureHandlerWrapScript(frame, "OnClick", header,
+                "log[#log + 1] = 'pre'",
+                "log[#log + 1] = 'post'"
+            )
+
+            SecureHandlerUnwrapScript(frame, "OnClick")
+            frame:GetScript("OnClick")(frame, "LeftButton", false)
+
+            return table.concat(log, "|")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(order, "original");
 }
 
 #[test]

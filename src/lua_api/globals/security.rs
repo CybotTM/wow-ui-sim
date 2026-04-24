@@ -380,6 +380,8 @@ fn table_is_secret(
 ///   `self = header`, the prior handler runs next, and `postBody` runs last.
 ///   Every step is `pcall`-isolated so a bad snippet can't prevent the others
 ///   from firing.
+/// - `SecureHandlerUnwrapScript(frame, script)` restores the handler that was
+///   active before the first fallback wrap for that frame/script pair.
 fn register_secure_handler_stubs(lua: &mut rilua::Lua) -> LuaResult<()> {
     lua.exec(SECURE_HANDLER_FALLBACK_LUA)
         .map_err(|e| runtime_error(format!("secure-handler fallback: {e}")))?;
@@ -387,9 +389,12 @@ fn register_secure_handler_stubs(lua: &mut rilua::Lua) -> LuaResult<()> {
 }
 
 const SECURE_HANDLER_FALLBACK_LUA: &str = r#"
--- Weak-keyed registry so the per-frame refs GC with their owner.
+-- Weak-keyed registries so per-frame state GCs with the owner.
 if _G.__secure_handler_frame_refs == nil then
     _G.__secure_handler_frame_refs = setmetatable({}, { __mode = "k" })
+end
+if _G.__secure_handler_original_scripts == nil then
+    _G.__secure_handler_original_scripts = setmetatable({}, { __mode = "k" })
 end
 
 function SecureHandlerSetFrameRef(frame, label, refFrame)
@@ -436,6 +441,15 @@ function SecureHandlerExecute(frame, body, ...)
     pcall(closure, frame, ...)
 end
 
+local function original_scripts_for_frame(frame)
+    local scripts = _G.__secure_handler_original_scripts[frame]
+    if scripts == nil then
+        scripts = {}
+        _G.__secure_handler_original_scripts[frame] = scripts
+    end
+    return scripts
+end
+
 function SecureHandlerWrapScript(frame, script, header, preBody, postBody)
     if frame == nil or type(script) ~= "string" or type(preBody) ~= "string" then
         return
@@ -447,6 +461,10 @@ function SecureHandlerWrapScript(frame, script, header, preBody, postBody)
         post_closure = compile_snippet(postBody, "SecureHandlerWrapScript-post")
     end
     local original = frame.GetScript and frame:GetScript(script) or nil
+    local scripts = original_scripts_for_frame(frame)
+    if scripts[script] == nil then
+        scripts[script] = original or false
+    end
     frame:SetScript(script, function(self, ...)
         if pre_closure then
             pcall(pre_closure, owner, ...)
@@ -458,6 +476,22 @@ function SecureHandlerWrapScript(frame, script, header, preBody, postBody)
             pcall(post_closure, owner, ...)
         end
     end)
+end
+
+function SecureHandlerUnwrapScript(frame, script)
+    if frame == nil or type(script) ~= "string" then
+        return
+    end
+    local scripts = _G.__secure_handler_original_scripts[frame]
+    if scripts == nil or scripts[script] == nil then
+        return
+    end
+    local original = scripts[script]
+    scripts[script] = nil
+    if original == false then
+        original = nil
+    end
+    frame:SetScript(script, original)
 end
 "#;
 
