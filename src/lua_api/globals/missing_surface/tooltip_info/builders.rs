@@ -43,7 +43,8 @@ pub(super) fn push_tooltip_line(
 ) {
     let line = create_table(state);
     table_set(state, line, "type", Val::Num(line_type));
-    let left_text_val = create_string(state, left_text);
+    let (left_text, left_color) = tooltip_line_text_and_color(state, left_text, left_color);
+    let left_text_val = create_string(state, &left_text);
     table_set(state, line, "leftText", left_text_val);
     if let Some((r, g, b)) = left_color {
         let color = color_table(state, r, g, b, 1.0);
@@ -53,6 +54,90 @@ pub(super) fn push_tooltip_line(
         table_set(state, line, "wrapText", Val::Bool(true));
     }
     set_table_array(state, lines, index, line);
+}
+
+fn tooltip_line_text_and_color(
+    state: &mut LuaState,
+    text: &str,
+    explicit_color: Option<(f64, f64, f64)>,
+) -> (String, Option<(f64, f64, f64)>) {
+    let color = explicit_color.or_else(|| full_line_color_markup(state, text));
+    (strip_tooltip_color_markup(text), color)
+}
+
+fn full_line_color_markup(state: &mut LuaState, text: &str) -> Option<(f64, f64, f64)> {
+    if let Some(color) = full_line_named_color_markup(state, text) {
+        return Some(color);
+    }
+    full_line_hex_color_markup(text)
+}
+
+fn full_line_named_color_markup(state: &mut LuaState, text: &str) -> Option<(f64, f64, f64)> {
+    let rest = text.strip_prefix("|cn")?;
+    let (color_name, colored_text) = rest.split_once(':')?;
+    has_closing_color_reset(colored_text).then(|| global_color(state, color_name.as_bytes()))?
+}
+
+fn full_line_hex_color_markup(text: &str) -> Option<(f64, f64, f64)> {
+    let rest = text.strip_prefix("|c")?;
+    let (hex, colored_text) = rest.split_at_checked(8)?;
+    if !is_hex_color(hex) || !has_closing_color_reset(colored_text) {
+        return None;
+    }
+    rgb_from_argb_hex(hex)
+}
+
+fn has_closing_color_reset(text: &str) -> bool {
+    text.ends_with("|r") || text.ends_with("|R")
+}
+
+fn strip_tooltip_color_markup(text: &str) -> String {
+    let mut stripped = String::with_capacity(text.len());
+    let mut index = 0;
+
+    while index < text.len() {
+        let rest = &text[index..];
+        if let Some(skip) = color_markup_len(rest) {
+            index += skip;
+            continue;
+        }
+
+        let ch = rest.chars().next().expect("index should be in bounds");
+        stripped.push(ch);
+        index += ch.len_utf8();
+    }
+
+    stripped
+}
+
+fn color_markup_len(text: &str) -> Option<usize> {
+    if let Some(rest) = text.strip_prefix("|cn")
+        && let Some(colon_index) = rest.find(':')
+    {
+        return Some("|cn".len() + colon_index + ":".len());
+    }
+    if let Some(rest) = text.strip_prefix("|c") {
+        let (hex, _) = rest.split_at_checked(8)?;
+        if is_hex_color(hex) {
+            return Some("|c".len() + hex.len());
+        }
+    }
+    (text.starts_with("|r") || text.starts_with("|R")).then_some(2)
+}
+
+fn is_hex_color(text: &str) -> bool {
+    text.len() == 8 && text.bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
+fn rgb_from_argb_hex(hex: &str) -> Option<(f64, f64, f64)> {
+    let red = u8::from_str_radix(&hex[2..4], 16).ok()?;
+    let green = u8::from_str_radix(&hex[4..6], 16).ok()?;
+    let blue = u8::from_str_radix(&hex[6..8], 16).ok()?;
+    Some((
+        f64::from(red) / 255.0,
+        f64::from(green) / 255.0,
+        f64::from(blue) / 255.0,
+    ))
 }
 
 pub(super) fn empty_tooltip(state: &mut LuaState, tooltip_type: f64) -> Val {
@@ -218,11 +303,7 @@ fn table_color_component(state: &mut LuaState, table: Val, key: &[u8]) -> Option
     }
 }
 
-fn global_color_or_fallback(
-    state: &mut LuaState,
-    key: &[u8],
-    fallback: (f64, f64, f64),
-) -> (f64, f64, f64) {
+fn global_color(state: &mut LuaState, key: &[u8]) -> Option<(f64, f64, f64)> {
     let global_key = state.gc.intern_string(key);
     let color = state
         .gc
@@ -230,16 +311,18 @@ fn global_color_or_fallback(
         .get(state.global)
         .map(|globals| globals.get_str(global_key, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
-    let Some(r) = table_color_component(state, color, b"r") else {
-        return fallback;
-    };
-    let Some(g) = table_color_component(state, color, b"g") else {
-        return fallback;
-    };
-    let Some(b) = table_color_component(state, color, b"b") else {
-        return fallback;
-    };
-    (r, g, b)
+    let r = table_color_component(state, color, b"r")?;
+    let g = table_color_component(state, color, b"g")?;
+    let b = table_color_component(state, color, b"b")?;
+    Some((r, g, b))
+}
+
+fn global_color_or_fallback(
+    state: &mut LuaState,
+    key: &[u8],
+    fallback: (f64, f64, f64),
+) -> (f64, f64, f64) {
+    global_color(state, key).unwrap_or(fallback)
 }
 
 fn slot_budget_multiplier(inventory_type: u8) -> f64 {

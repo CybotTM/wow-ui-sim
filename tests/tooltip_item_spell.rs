@@ -633,6 +633,88 @@ fn test_set_spell_by_id_get_left_line_uses_tooltip_line_color() {
 }
 
 #[test]
+fn test_set_spell_by_id_applies_full_line_inline_color_markup() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(5143)").unwrap();
+
+    let (description_index, description_color, description_text) = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let td = state.tooltips.get(&gt_id).unwrap();
+        let index = td
+            .lines
+            .iter()
+            .position(|line| line.left_text.contains("Requires Clearcasting"))
+            .expect("Arcane Missiles tooltip should include its colored requirement")
+            + 1;
+        let line = &td.lines[index - 1];
+        (index, line.left_color, line.left_text.clone())
+    };
+    let line_frame_color: (f32, f32, f32) = env
+        .eval(&format!(
+            "local line = GameTooltip:GetLeftLine({description_index}); return line:GetTextColor()"
+        ))
+        .unwrap();
+
+    assert_eq!(description_text, "Requires Clearcasting");
+    assert!(
+        (description_color.0 - 1.0).abs() < 0.01
+            && (description_color.1 - 1.0).abs() < 0.01
+            && (description_color.2 - 1.0).abs() < 0.01,
+        "full-line |cFFFFFFFF markup should make tooltip data white, got rgb=({:.3},{:.3},{:.3})",
+        description_color.0,
+        description_color.1,
+        description_color.2
+    );
+    assert!(
+        (line_frame_color.0 - 1.0).abs() < 0.01
+            && (line_frame_color.1 - 1.0).abs() < 0.01
+            && (line_frame_color.2 - 1.0).abs() < 0.01,
+        "full-line |cFFFFFFFF markup should make tooltip FontString white, got rgb=({:.3},{:.3},{:.3})",
+        line_frame_color.0,
+        line_frame_color.1,
+        line_frame_color.2
+    );
+}
+
+#[test]
+fn test_set_spell_by_id_applies_named_inline_color_markup() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(448287)").unwrap();
+
+    let (description_color, description_text) = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let td = state.tooltips.get(&gt_id).unwrap();
+        let line = td
+            .lines
+            .iter()
+            .find(|line| line.left_text.contains("Season 1"))
+            .expect("tooltip should include the named-color description line");
+        (line.left_color, line.left_text.clone())
+    };
+    let expected: (f32, f32, f32) = env
+        .eval("local r,g,b = GREEN_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+
+    assert_eq!(description_text, "Season 1");
+    assert!(
+        (description_color.0 - expected.0).abs() < 0.01
+            && (description_color.1 - expected.1).abs() < 0.01
+            && (description_color.2 - expected.2).abs() < 0.01,
+        "named |cnGREEN_FONT_COLOR markup should make tooltip data green; expected rgb=({:.3},{:.3},{:.3}), got rgb=({:.3},{:.3},{:.3})",
+        expected.0,
+        expected.1,
+        expected.2,
+        description_color.0,
+        description_color.1,
+        description_color.2
+    );
+}
+
+#[test]
 fn test_set_spell_by_id_makes_tooltip_visible() {
     let env = WowLuaEnv::new().unwrap();
 
