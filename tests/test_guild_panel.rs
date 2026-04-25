@@ -603,3 +603,56 @@ fn communities_stream_dropdown_shows_guild_officer_and_notification_settings() {
         );
     }
 }
+
+#[test]
+fn communities_stream_dropdown_click_opens_menu() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local frame = CommunitiesFrame
+            if frame == nil then
+                return "missing_communities_frame"
+            end
+            local dropdown = frame.StreamDropdown
+            if dropdown == nil then
+                return "missing_stream_dropdown"
+            end
+
+            frame.selectedClubId = "guild-0"
+            frame.selectedClubInfo = C_Club.GetClubInfo("guild-0")
+            frame.privilegesForClub["guild-0"] = {
+                canCreateStream = false,
+                canDestroyStream = false,
+            }
+            frame.selectedStreamForClub["guild-0"] = C_Club.GetStreamInfo("guild-0", 1)
+            dropdown:SetupMenu()
+
+            local onMouseDown = dropdown:GetScript("OnMouseDown")
+            if type(onMouseDown) ~= "function" then
+                return "missing_on_mouse_down"
+            end
+            onMouseDown(dropdown, "LeftButton")
+
+            local labels = {}
+            for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
+                if button ~= nil and button:IsVisible() then
+                    local text = button:GetText()
+                    if text ~= nil and text ~= "" then
+                        table.insert(labels, text)
+                    end
+                end
+            end
+
+            if #labels == 0 then
+                return "empty_stream_frames"
+            end
+            return "ok:" .. table.concat(labels, "|")
+        "#).unwrap();
+        assert!(
+            result.contains("Guild")
+                && result.contains("Officer")
+                && result.contains("Notification Settings"),
+            "clicking stream dropdown should open visible menu rows: {result}"
+        );
+    }
+}

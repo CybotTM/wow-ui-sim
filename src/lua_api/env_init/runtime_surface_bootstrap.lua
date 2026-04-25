@@ -9986,6 +9986,7 @@ local function __wow_install_dropdown_button_mixin_patch()
   local __wow_existing_dropdown_setup_menu = DropdownButtonMixin.SetupMenu
   local __wow_existing_dropdown_open_menu = DropdownButtonMixin.OpenMenu
   function DropdownButtonMixin:SetupMenu(generator)
+    __wow_patch_dropdown_instance_mouse_down(self)
     self.__wow_menu_generator = generator
     self.menuGenerator = generator
     if type(__wow_existing_dropdown_setup_menu) == "function" then
@@ -10034,8 +10035,60 @@ local function __wow_install_dropdown_button_mixin_patch()
   DropdownButtonMixin.__wow_sim_patched_open_menu = DropdownButtonMixin.OpenMenu
 end
 
+function __wow_patch_dropdown_style_mouse_down(mixin)
+  if type(mixin) ~= "table" then
+    return
+  end
+  if rawget(mixin, "__wow_sim_patched_mouse_down") == mixin.OnMouseDown then
+    return
+  end
+
+  local existingMouseDown = mixin.OnMouseDown
+  function mixin:OnMouseDown(...)
+    if type(existingMouseDown) == "function" then
+      pcall(existingMouseDown, self, ...)
+    end
+    if type(DropdownButtonMixin) == "table"
+        and type(DropdownButtonMixin.OnMouseDown_Intrinsic) == "function" then
+      DropdownButtonMixin.OnMouseDown_Intrinsic(self, ...)
+    elseif type(self.SetMenuOpen) == "function" and type(self.IsMenuOpen) == "function" then
+      self:SetMenuOpen(not self:IsMenuOpen())
+    end
+  end
+  mixin.__wow_sim_patched_mouse_down = mixin.OnMouseDown
+end
+
+function __wow_install_dropdown_style_mouse_down_patches()
+  __wow_patch_dropdown_style_mouse_down(WowStyle1DropdownMixin)
+  __wow_patch_dropdown_style_mouse_down(WowStyle1ArrowDropdownMixin)
+  __wow_patch_dropdown_style_mouse_down(WowStyle1FilterDropdownMixin)
+  __wow_patch_dropdown_style_mouse_down(WowStyle2DropdownMixin)
+end
+
+function __wow_patch_dropdown_instance_mouse_down(dropdown)
+  if dropdown == nil or type(dropdown.OnMouseDown) ~= "function" then
+    return
+  end
+  if dropdown.__wow_sim_patched_mouse_down == dropdown.OnMouseDown then
+    return
+  end
+
+  local existingMouseDown = dropdown.OnMouseDown
+  function dropdown:OnMouseDown(...)
+    pcall(existingMouseDown, self, ...)
+    if type(DropdownButtonMixin) == "table"
+        and type(DropdownButtonMixin.OnMouseDown_Intrinsic) == "function" then
+      DropdownButtonMixin.OnMouseDown_Intrinsic(self, ...)
+    elseif type(self.SetMenuOpen) == "function" and type(self.IsMenuOpen) == "function" then
+      self:SetMenuOpen(not self:IsMenuOpen())
+    end
+  end
+  dropdown.__wow_sim_patched_mouse_down = dropdown.OnMouseDown
+end
+
 _G.__wow_install_dropdown_button_mixin_patch = __wow_install_dropdown_button_mixin_patch
 __wow_install_dropdown_button_mixin_patch()
+__wow_install_dropdown_style_mouse_down_patches()
 
 local function __wow_copy_mixin_methods(target, source)
   if type(target) ~= "table" or type(source) ~= "table" then
