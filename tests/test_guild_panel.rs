@@ -218,7 +218,7 @@ fn guild_member_rank_dropdown_generates_rank_options() {
             if type(desc) ~= "table" or type(desc.__wow_elements) ~= "table" then
                 return "missing_elements"
             end
-            local closedText = dropdown:GetText() or ""
+            local closedText = (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "")
 
             local labels = {}
             for _, element in ipairs(desc.__wow_elements) do
@@ -234,7 +234,7 @@ fn guild_member_rank_dropdown_generates_rank_options() {
             end
             return closedText .. "|" .. descriptorLabels .. "|" .. first:GetText() .. "," .. second:GetText()
         "#).unwrap();
-        assert_eq!(result, "Officer|Officer,Member|Officer,Member", "rank dropdown should show selected rank and visible assignable guild ranks: {result}");
+        assert_eq!(result, "Officer/Officer|Officer,Member|Officer,Member", "rank dropdown should show selected rank and visible assignable guild ranks: {result}");
     }
 }
 
@@ -262,8 +262,11 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
             if first == nil or second == nil then
                 return "missing_buttons"
             end
-            return (dropdown:GetText() or "") .. "|" .. first:GetText() .. "," .. second:GetText()
+            local textWidth = dropdown.Text and dropdown.Text:GetWidth() or 0
+            return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "") .. "/" .. tostring(textWidth) .. "|" .. first:GetText() .. "," .. second:GetText()
         "#).unwrap();
-        assert_eq!(result, "Officer|Officer,Member", "guild control rank dropdown should show selected rank and visible rank rows: {result}");
+        assert_ne!(result, "Officer/Officer/0|Officer,Member", "guild control rank dropdown text child must have renderable width: {result}");
+        assert!(result.starts_with("Officer/Officer/"), "guild control rank dropdown should show selected rank and visible rank rows: {result}");
+        assert!(result.ends_with("|Officer,Member"), "guild control rank dropdown should materialize visible rank rows: {result}");
     }
 }

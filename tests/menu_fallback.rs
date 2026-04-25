@@ -178,11 +178,11 @@ fn dropdown_generate_menu_sets_selected_radio_text() {
                 rootDescription:CreateRadio("Officer", function(value) return value == selected end, function() end, 2)
             end)
             dropdown:GenerateMenu()
-            return dropdown:GetText() or ""
+            return (dropdown:GetText() or "") .. "|" .. (dropdown.Text and dropdown.Text:GetText() or "")
             "#,
         )
         .unwrap();
-    assert_eq!(text, "Officer");
+    assert_eq!(text, "Officer|Officer");
 }
 
 #[test]

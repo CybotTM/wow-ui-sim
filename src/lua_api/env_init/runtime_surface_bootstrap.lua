@@ -9878,6 +9878,9 @@ local function __wow_dropdown_update_selection_text(owner, description)
   if text ~= nil and type(owner.SetText) == "function" then
     owner:SetText(text)
   end
+  if text ~= nil and owner.Text ~= nil and type(owner.Text.SetText) == "function" then
+    owner.Text:SetText(text)
+  end
 end
 
 if type(DropdownButtonMixin) == "table" then
