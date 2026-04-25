@@ -21,6 +21,18 @@ impl App {
         self.update_hovered_frame(pos);
     }
 
+    pub(super) fn handle_mouse_leave(&mut self) {
+        self.mouse_position = None;
+        {
+            let env = self.env.borrow();
+            env.state().borrow_mut().set_mouse_position(None);
+        }
+        if self.hovered_frame.is_some() {
+            self.fire_hover_transition(None);
+            self.flush_mouse_move_visual_updates();
+        }
+    }
+
     fn sync_mouse_position(&mut self, pos: Point) {
         self.mouse_position = Some(pos);
         {

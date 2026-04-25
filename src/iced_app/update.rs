@@ -130,6 +130,7 @@ impl App {
     fn handle_canvas_event(&mut self, canvas_msg: CanvasMessage) -> Task<Message> {
         match canvas_msg {
             CanvasMessage::MouseMove(pos) => self.handle_mouse_move(pos),
+            CanvasMessage::MouseLeave => self.handle_mouse_leave(),
             CanvasMessage::MouseDown(pos) => self.handle_mouse_down(pos),
             CanvasMessage::MouseUp(pos) => self.handle_mouse_up(pos),
             CanvasMessage::RightMouseDown(pos) => self.handle_right_mouse_down(pos),

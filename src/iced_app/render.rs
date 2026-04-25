@@ -37,6 +37,9 @@ fn handle_mouse_event(
                 CanvasMessage::MouseMove(local),
             )))
         }
+        mouse::Event::CursorLeft => Some(shader::Action::publish(Message::CanvasEvent(
+            CanvasMessage::MouseLeave,
+        ))),
         mouse::Event::ButtonPressed(mouse::Button::Left) => cursor
             .position_in(bounds)
             .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseDown(p)))),

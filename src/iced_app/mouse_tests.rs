@@ -723,3 +723,57 @@ fn disabled_buttons_only_run_hover_motion_scripts_when_opted_in() {
         "GetMotionScriptsWhileDisabled should reflect the opt-in flag"
     );
 }
+
+#[test]
+fn cursor_leaving_canvas_fires_on_leave_for_hovered_frame() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            CanvasLeaveButton = CreateFrame("Button", "CanvasLeaveButton", UIParent)
+            CanvasLeaveButton:SetSize(100, 100)
+            CanvasLeaveButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            CanvasLeaveButton:EnableMouse(true)
+            CanvasLeaveButton:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+            CanvasLeaveButton:SetScript("OnEnter", function(self)
+                self:GetNormalTexture():SetAlpha(0)
+            end)
+            CanvasLeaveButton:SetScript("OnLeave", function(self)
+                self:GetNormalTexture():SetAlpha(1)
+                __canvas_leave_count = (__canvas_leave_count or 0) + 1
+            end)
+            __canvas_leave_count = 0
+            "#,
+        )
+        .expect("canvas leave test setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_move(Point::new(150.0, 150.0));
+
+    let alpha_after_enter: f64 = app
+        .env
+        .borrow()
+        .eval("return CanvasLeaveButton:GetNormalTexture():GetAlpha()")
+        .expect("normal texture alpha should be readable after enter");
+    assert_eq!(alpha_after_enter, 0.0);
+
+    app.handle_mouse_leave();
+
+    let (alpha_after_leave, leave_count): (f64, f64) = app
+        .env
+        .borrow()
+        .eval("return CanvasLeaveButton:GetNormalTexture():GetAlpha(), __canvas_leave_count")
+        .expect("normal texture alpha should be readable after canvas leave");
+    assert_eq!(
+        alpha_after_leave, 1.0,
+        "cursor leaving the canvas should restore hover-hidden normal textures"
+    );
+    assert_eq!(leave_count, 1.0, "OnLeave should fire exactly once");
+    assert!(
+        app.hovered_frame.is_none(),
+        "canvas leave should clear the app hover target"
+    );
+}

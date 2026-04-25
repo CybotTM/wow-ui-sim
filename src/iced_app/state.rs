@@ -17,6 +17,7 @@ pub struct InspectorState {
 #[derive(Debug, Clone)]
 pub enum CanvasMessage {
     MouseMove(Point),
+    MouseLeave,
     MouseDown(Point),
     MouseUp(Point),
     RightMouseDown(Point),
