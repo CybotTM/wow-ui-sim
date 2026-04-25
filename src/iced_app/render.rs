@@ -31,11 +31,17 @@ fn handle_mouse_event(
     cursor: mouse::Cursor,
 ) -> Option<shader::Action<Message>> {
     match mouse_event {
-        mouse::Event::CursorMoved { position } if bounds.contains(*position) => {
-            let local = Point::new(position.x - bounds.x, position.y - bounds.y);
-            Some(shader::Action::publish(Message::CanvasEvent(
-                CanvasMessage::MouseMove(local),
-            )))
+        mouse::Event::CursorMoved { position } => {
+            if bounds.contains(*position) {
+                let local = Point::new(position.x - bounds.x, position.y - bounds.y);
+                Some(shader::Action::publish(Message::CanvasEvent(
+                    CanvasMessage::MouseMove(local),
+                )))
+            } else {
+                Some(shader::Action::publish(Message::CanvasEvent(
+                    CanvasMessage::MouseLeave,
+                )))
+            }
         }
         mouse::Event::CursorLeft => Some(shader::Action::publish(Message::CanvasEvent(
             CanvasMessage::MouseLeave,
@@ -878,6 +884,26 @@ mod tests {
             None,
             crate::config::SimConfig::default(),
         )
+    }
+
+    #[test]
+    fn cursor_moved_outside_canvas_publishes_mouse_leave() {
+        let bounds = Rectangle::new(Point::new(10.0, 20.0), Size::new(100.0, 80.0));
+        let event = mouse::Event::CursorMoved {
+            position: Point::new(150.0, 40.0),
+        };
+
+        let action = handle_mouse_event(&event, bounds, mouse::Cursor::Unavailable)
+            .expect("outside canvas movement should publish a canvas leave event");
+        let (message, _, _) = action.into_inner();
+
+        assert!(
+            matches!(
+                message,
+                Some(Message::CanvasEvent(CanvasMessage::MouseLeave))
+            ),
+            "outside canvas movement should clear hover state"
+        );
     }
 
     #[test]
