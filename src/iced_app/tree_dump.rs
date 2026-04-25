@@ -47,11 +47,32 @@ fn push_request_lines(
     let end = start + request.vertex_count as usize;
     let bounds = quad_bounds(batch, request);
     lines.push(format!(
-        "strata={strata_idx} kind={kind} path={} vertex_start={} vertex_count={} bounds=({:.2}, {:.2}) -> ({:.2}, {:.2})",
-        request.path, request.vertex_start, request.vertex_count, bounds.0, bounds.1, bounds.2, bounds.3
+        "strata={strata_idx} kind={kind} path={} state={} vertex_start={} vertex_count={} bounds=({:.2}, {:.2}) -> ({:.2}, {:.2})",
+        request.path,
+        texture_request_state(request),
+        request.vertex_start,
+        request.vertex_count,
+        bounds.0,
+        bounds.1,
+        bounds.2,
+        bounds.3
     ));
     if verbose {
         push_vertex_lines(lines, "vertex", &batch.vertices[start..end]);
+    }
+}
+
+fn texture_request_state(request: &TextureRequest) -> &'static str {
+    if request.handle.is_ready() {
+        "ready"
+    } else if request.handle.is_failed() {
+        "failed"
+    } else if request.handle.needs_force_rgba() {
+        "force-rgba"
+    } else if request.handle.is_staged() {
+        "staged"
+    } else {
+        "pending"
     }
 }
 

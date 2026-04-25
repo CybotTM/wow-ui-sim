@@ -1230,6 +1230,74 @@ mod tests {
     }
 
     #[test]
+    fn mouse_leave_rebuild_restores_button_normal_texture() {
+        let temp_dir = tempdir().unwrap();
+        let mut app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                MouseLeaveMicroButton = CreateFrame("Button", "MouseLeaveMicroButton", UIParent)
+                MouseLeaveMicroButton:SetSize(32, 40)
+                MouseLeaveMicroButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
+                MouseLeaveMicroButton:SetNormalAtlas("UI-HUD-MicroMenu-Professions-Up")
+                MouseLeaveMicroButton:SetHighlightAtlas("UI-HUD-MicroMenu-Professions-Mouseover", "BLEND")
+                MouseLeaveMicroButton:SetScript("OnEnter", function(self)
+                    self:GetNormalTexture():SetAlpha(0)
+                end)
+                MouseLeaveMicroButton:SetScript("OnLeave", function(self)
+                    self:GetNormalTexture():SetAlpha(1)
+                end)
+            "#,
+            )
+            .expect("mouse-leave micro button setup should succeed");
+
+        let (normal_id, highlight_id) = {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            let button = state
+                .widgets
+                .get_by_name("MouseLeaveMicroButton")
+                .expect("mouse-leave micro button should exist");
+            let normal_id = *button
+                .children_keys
+                .get("NormalTexture")
+                .expect("normal texture child should exist");
+            let highlight_id = *button
+                .children_keys
+                .get("HighlightTexture")
+                .expect("highlight texture child should exist");
+            (normal_id, highlight_id)
+        };
+
+        let size = Size::new(320.0, 240.0);
+        app.mark_all_strata_dirty();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+
+        app.handle_mouse_move(Point::new(30.0, 40.0));
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        assert!(
+            snapshot_texture_alphas(&app, highlight_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "hover should emit the highlight texture through the real mouse path"
+        );
+
+        app.handle_mouse_leave();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        assert!(
+            snapshot_texture_alphas(&app, normal_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "mouse leave should re-emit the normal texture after OnLeave restores alpha"
+        );
+        assert!(
+            snapshot_texture_alphas(&app, highlight_id).is_empty(),
+            "mouse leave should remove the highlight texture snapshot"
+        );
+    }
+
+    #[test]
     fn prune_irrelevant_dirty_strata_skips_cached_strata_without_bucket_or_snapshot_hits() {
         let dirty_ids = FxHashSet::from_iter([99_u64]);
         let buckets = vec![vec![1_u64, 2_u64]];

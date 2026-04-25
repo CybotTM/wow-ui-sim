@@ -137,7 +137,11 @@ impl App {
             CanvasMessage::RightMouseUp(pos) => self.handle_right_mouse_up(pos),
             CanvasMessage::MiddleClick(pos) => self.handle_middle_click(pos),
         }
-        Task::none()
+        if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+            request_redraw_task()
+        } else {
+            Task::none()
+        }
     }
 
     pub(super) fn handle_key_press(&mut self, key: &str, text: Option<&str>, captured_at: Instant) {
@@ -1341,6 +1345,26 @@ mod tests {
         assert!(
             matches!(action, Action::Window(WindowAction::RedrawAll)),
             "dirty strata should still request a redraw"
+        );
+    }
+
+    #[test]
+    fn canvas_event_requests_redraw_when_it_leaves_dirty_strata() {
+        let mut app = build_test_app(ScreenKind::Game);
+        app.strata_dirty.set(1);
+
+        let task = app.handle_canvas_event(CanvasMessage::MouseLeave);
+        let action = pollster::block_on(async {
+            iced_runtime::task::into_stream(task)
+                .expect("canvas event with dirty strata should request a redraw")
+                .next()
+                .await
+                .expect("task should emit a redraw action")
+        });
+
+        assert!(
+            matches!(action, Action::Window(WindowAction::RedrawAll)),
+            "canvas event should request redraw when it leaves strata dirty"
         );
     }
 
