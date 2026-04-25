@@ -777,3 +777,51 @@ fn cursor_leaving_canvas_fires_on_leave_for_hovered_frame() {
         "canvas leave should clear the app hover target"
     );
 }
+
+#[test]
+fn moving_inside_canvas_off_hovered_frame_fires_on_leave() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            CanvasMoveAwayButton = CreateFrame("Button", "CanvasMoveAwayButton", UIParent)
+            CanvasMoveAwayButton:SetSize(100, 100)
+            CanvasMoveAwayButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            CanvasMoveAwayButton:EnableMouse(true)
+            CanvasMoveAwayButton:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+            CanvasMoveAwayButton:SetScript("OnEnter", function(self)
+                self:GetNormalTexture():SetAlpha(0)
+            end)
+            CanvasMoveAwayButton:SetScript("OnLeave", function(self)
+                self:GetNormalTexture():SetAlpha(1)
+                __canvas_move_leave_count = (__canvas_move_leave_count or 0) + 1
+            end)
+            __canvas_move_leave_count = 0
+            "#,
+        )
+        .expect("canvas move-away test setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+    app.handle_mouse_move(Point::new(150.0, 150.0));
+    app.handle_mouse_move(Point::new(20.0, 20.0));
+
+    let (alpha_after_leave, leave_count): (f64, f64) = app
+        .env
+        .borrow()
+        .eval(
+            "return CanvasMoveAwayButton:GetNormalTexture():GetAlpha(), __canvas_move_leave_count",
+        )
+        .expect("normal texture alpha should be readable after moving away");
+    assert_eq!(
+        alpha_after_leave, 1.0,
+        "moving off the button inside the canvas should restore normal texture alpha"
+    );
+    assert_eq!(leave_count, 1.0, "OnLeave should fire exactly once");
+    assert!(
+        app.hovered_frame.is_none(),
+        "moving to empty canvas should clear the app hover target"
+    );
+}

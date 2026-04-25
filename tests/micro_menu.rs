@@ -310,6 +310,56 @@ fn micro_menu_buttons_have_sized_atlas_textures() {
 }
 
 #[test]
+fn micro_menu_buttons_restore_normal_texture_after_hover() {
+    let env = setup_env();
+    let failures: String = env
+        .eval(
+            r#"
+            local names = {
+                "CharacterMicroButton",
+                "ProfessionMicroButton",
+                "PlayerSpellsMicroButton",
+                "AchievementMicroButton",
+                "QuestLogMicroButton",
+                "GuildMicroButton",
+                "LFDMicroButton",
+                "CollectionsMicroButton",
+                "EJMicroButton",
+                "StoreMicroButton",
+                "MainMenuMicroButton",
+            }
+            local failures = {}
+            for _, name in ipairs(names) do
+                local button = _G[name]
+                if button and button:GetNormalTexture() then
+                    local normal = button:GetNormalTexture()
+                    normal:SetAlpha(1)
+
+                    local onEnter = button:GetScript("OnEnter")
+                    local onLeave = button:GetScript("OnLeave")
+                    if onEnter and onLeave then
+                        onEnter(button)
+                        local enterAlpha = normal:GetAlpha()
+                        onLeave(button)
+                        local leaveAlpha = normal:GetAlpha()
+                        if enterAlpha == 0 and leaveAlpha ~= 1 then
+                            table.insert(failures, name .. "=" .. tostring(leaveAlpha))
+                        end
+                    end
+                end
+            end
+            return table.concat(failures, ",")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        failures, "",
+        "micro buttons that hide their normal texture on hover should restore it on leave"
+    );
+}
+
+#[test]
 fn micro_menu_layout_stays_locked() {
     let env = setup_env();
     let result: String = env

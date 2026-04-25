@@ -2,7 +2,7 @@
 
 use iced::mouse;
 use iced::widget::shader;
-use iced::{Event, Point, Rectangle, Size};
+use iced::{Event, Point, Rectangle, Size, window};
 
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -86,6 +86,9 @@ impl shader::Program<Message> for &App {
     ) -> Option<shader::Action<Message>> {
         match event {
             Event::Mouse(me) => handle_mouse_event(me, bounds, cursor),
+            Event::Window(window::Event::Unfocused | window::Event::Closed) => Some(
+                shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseLeave)),
+            ),
             _ => None,
         }
     }
@@ -907,6 +910,30 @@ mod tests {
     }
 
     #[test]
+    fn window_unfocused_publishes_mouse_leave() {
+        let temp_dir = tempdir().unwrap();
+        let app = build_test_app_with_textures(temp_dir.path());
+        let mut shader_state = ();
+        let action = <&App as shader::Program<Message>>::update(
+            &&app,
+            &mut shader_state,
+            &Event::Window(window::Event::Unfocused),
+            Rectangle::new(Point::ORIGIN, Size::new(100.0, 80.0)),
+            mouse::Cursor::Unavailable,
+        )
+        .expect("window unfocus should publish a canvas leave event");
+        let (message, _, _) = action.into_inner();
+
+        assert!(
+            matches!(
+                message,
+                Some(Message::CanvasEvent(CanvasMessage::MouseLeave))
+            ),
+            "window unfocus should clear hover state"
+        );
+    }
+
+    #[test]
     fn format_texture_preload_log_reports_budget_reason_and_samples() {
         let log = format_texture_preload_log(&TexturePreloadPassTelemetry {
             elapsed: std::time::Duration::from_millis(26),
@@ -974,6 +1001,92 @@ mod tests {
         }
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba(color));
         image.save(&file_path).unwrap();
+    }
+
+    fn rebuild_after_widget_dirty(app: &App, size: Size) -> u16 {
+        let (dirty_mask, dirty_ids) = app
+            .env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty_with_ids();
+        app.mark_strata_dirty(dirty_mask);
+        app.merge_pending_dirty_ids(dirty_ids);
+        app.rebuild_dirty_strata(size, dirty_mask)
+    }
+
+    fn texture_request_alphas(app: &App, needle: &str) -> Vec<f32> {
+        let mut alphas = Vec::new();
+        let strata = app.cached_strata_quads.borrow();
+        for batch in strata.iter().flatten() {
+            for request in &batch.texture_requests {
+                if !request.path.contains(needle) {
+                    continue;
+                }
+                let start = request.vertex_start as usize;
+                let end = start + request.vertex_count as usize;
+                alphas.extend(
+                    batch.vertices[start..end]
+                        .iter()
+                        .map(|vertex| vertex.color[3]),
+                );
+            }
+        }
+        alphas
+    }
+
+    #[test]
+    fn cached_button_normal_texture_alpha_restores_after_hover_hide() {
+        let temp_dir = tempdir().unwrap();
+        let normal_path = "Interface/Buttons/UI-Panel-Button-Up";
+        write_test_texture(temp_dir.path(), normal_path, [0xaa, 0x22, 0x22, 0xff]);
+
+        let app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                CachedHoverButton = CreateFrame("Button", "CachedHoverButton", UIParent)
+                CachedHoverButton:SetSize(100, 40)
+                CachedHoverButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
+                CachedHoverButton:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+            "#,
+            )
+            .expect("cached hover button setup should succeed");
+
+        let size = Size::new(320.0, 240.0);
+        *app.pending_dirty_ids.borrow_mut() = None;
+        app.mark_all_strata_dirty();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+
+        let initial_alphas = texture_request_alphas(&app, "UI-Panel-Button-Up");
+        assert!(
+            initial_alphas.iter().any(|alpha| *alpha == 1.0),
+            "initial normal texture should render opaque"
+        );
+
+        app.env
+            .borrow()
+            .exec("CachedHoverButton:GetNormalTexture():SetAlpha(0)")
+            .expect("normal texture should hide");
+        rebuild_after_widget_dirty(&app, size);
+        let hidden_alphas = texture_request_alphas(&app, "UI-Panel-Button-Up");
+        assert!(
+            hidden_alphas.iter().all(|alpha| *alpha == 0.0),
+            "normal texture should render transparent while hover code hides it"
+        );
+
+        app.env
+            .borrow()
+            .exec("CachedHoverButton:GetNormalTexture():SetAlpha(1)")
+            .expect("normal texture should restore");
+        rebuild_after_widget_dirty(&app, size);
+        let restored_alphas = texture_request_alphas(&app, "UI-Panel-Button-Up");
+        assert!(
+            restored_alphas.iter().any(|alpha| *alpha == 1.0),
+            "normal texture should render opaque again after OnLeave restores alpha"
+        );
     }
 
     #[test]
