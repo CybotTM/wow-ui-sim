@@ -439,6 +439,21 @@ fn test_c_tooltip_info_get_spell_by_id_returns_spell_tooltip_lines() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_spell_by_id_resolves_hammer_of_justice_duration() {
+    let env = WowLuaEnv::new().unwrap();
+    let description: String = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetSpellByID(853)
+            return tooltip.lines[3].leftText
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(description, "Stuns the target for 6.");
+}
+
+#[test]
 fn test_c_tooltip_info_get_spell_book_item_returns_spell_tooltip_lines() {
     let env = WowLuaEnv::new().unwrap();
     let has_real_tooltip: bool = env

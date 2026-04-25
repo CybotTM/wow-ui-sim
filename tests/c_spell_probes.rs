@@ -127,6 +127,34 @@ fn test_get_spell_description_resolves_consecration_dmg_expression() {
     );
 }
 
+#[test]
+fn test_get_spell_description_resolves_hammer_of_justice_duration() {
+    let env = env();
+    let desc: String = env.eval("return C_Spell.GetSpellDescription(853)").unwrap();
+
+    assert_eq!(desc, "Stuns the target for 6.");
+}
+
+#[test]
+fn test_get_spell_description_resolves_main_action_bar_durations() {
+    let env = env();
+    let duration_snippets: Vec<String> = env
+        .eval(
+            r#"
+            local ids = {62124, 31850, 86659, 642}
+            local snippets = {}
+            for _, spellID in ipairs(ids) do
+                local desc = C_Spell.GetSpellDescription(spellID)
+                table.insert(snippets, string.match(desc, "for %d+"))
+            end
+            return snippets
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(duration_snippets, vec!["for 6", "for 8", "for 8", "for 8"]);
+}
+
 // ── GetSpellCooldown ─────────────────────────────────────────────────────────
 
 #[test]
