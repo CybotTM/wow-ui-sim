@@ -272,3 +272,39 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
         assert!(result.ends_with("|Officer,Member"), "guild control rank dropdown should materialize visible rank rows: {result}");
     }
 }
+
+#[test]
+fn guild_control_tab_dropdown_shows_initial_selection() {
+    test_timeout! {
+        let env = setup_env();
+        load_guild_control_ui(&env);
+        let result: String = env.eval(r#"
+            local dropdown = GuildControlUI and GuildControlUI.dropdown
+            if dropdown == nil then
+                return "missing_dropdown"
+            end
+            return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "")
+        "#).unwrap();
+        assert_eq!(result, "Guild Ranks/Guild Ranks", "guild control tab dropdown should show its initial selected tab: {result}");
+    }
+}
+
+#[test]
+fn guild_control_rank_dropdown_falls_back_to_selected_rank_name() {
+    test_timeout! {
+        let env = setup_env();
+        load_guild_control_ui(&env);
+        let result: String = env.eval(r#"
+            local dropdown = GuildControlUIRankSettingsFrame
+                and GuildControlUIRankSettingsFrame.dropdown
+            if dropdown == nil then
+                return "missing_dropdown"
+            end
+            GuildControlSetRank(1)
+            GuildControlUI.currentRank = 1
+            dropdown:GenerateMenu()
+            return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "")
+        "#).unwrap();
+        assert_eq!(result, "Guild Leader/Guild Leader", "rank dropdown should show selected rank even when rank is not in assignable menu rows: {result}");
+    }
+}

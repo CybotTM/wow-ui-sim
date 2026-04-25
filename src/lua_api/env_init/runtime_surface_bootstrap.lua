@@ -9869,6 +9869,17 @@ end
 
 local function __wow_dropdown_update_selection_text(owner, description)
   local text = __wow_dropdown_selected_text(description)
+  if text == nil
+      and type(owner.GetName) == "function"
+      and type(GuildControlGetRankName) == "function" then
+    local ok, name = pcall(owner.GetName, owner)
+    if ok and type(name) == "string" and string.find(name, "RankDropdown", 1, true) then
+      local rank_ok, rank_name = pcall(GuildControlGetRankName)
+      if rank_ok and type(rank_name) == "string" and rank_name ~= "" then
+        text = rank_name
+      end
+    end
+  end
   if text == nil and type(owner.GetSelectionText) == "function" then
     local ok, selectionText = pcall(owner.GetSelectionText, owner)
     if ok and type(selectionText) == "string" and selectionText ~= "" then
