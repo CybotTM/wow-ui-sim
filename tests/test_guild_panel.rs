@@ -308,3 +308,58 @@ fn guild_control_rank_dropdown_falls_back_to_selected_rank_name() {
         assert_eq!(result, "Guild Leader/Guild Leader", "rank dropdown should show selected rank even when rank is not in assignable menu rows: {result}");
     }
 }
+
+#[test]
+fn guild_dropdown_value_lists_are_not_empty() {
+    test_timeout! {
+        let env = setup_env();
+        load_guild_control_ui(&env);
+        let result: String = env.eval(r#"
+            local function values(dropdown)
+                if dropdown == nil then
+                    return nil
+                end
+                local desc = dropdown:GenerateMenu()
+                if type(desc) ~= "table" or type(desc.__wow_elements) ~= "table" then
+                    return {}
+                end
+                local labels = {}
+                for _, element in ipairs(desc.__wow_elements) do
+                    if type(element) == "table" and element.text and element.text ~= "" then
+                        table.insert(labels, element.text)
+                    end
+                end
+                return labels
+            end
+
+            local checks = {
+                { "guild_control_tabs", GuildControlUI and GuildControlUI.dropdown },
+                { "rank_settings", GuildControlUIRankSettingsFrame and GuildControlUIRankSettingsFrame.dropdown },
+                { "rank_bank", GuildControlUIRankBankFrame and GuildControlUIRankBankFrame.dropdown },
+            }
+
+            local failures = {}
+            local summaries = {}
+            for _, check in ipairs(checks) do
+                local name, dropdown = check[1], check[2]
+                local labels = values(dropdown)
+                if labels == nil then
+                    table.insert(failures, name .. ":missing_dropdown")
+                elseif #labels == 0 then
+                    table.insert(failures, name .. ":empty")
+                else
+                    table.insert(summaries, name .. "=" .. table.concat(labels, ","))
+                end
+            end
+
+            if #failures > 0 then
+                return "fail:" .. table.concat(failures, ";") .. "|values:" .. table.concat(summaries, ";")
+            end
+            return "ok:" .. table.concat(summaries, ";")
+        "#).unwrap();
+        assert!(
+            result.starts_with("ok:"),
+            "guild dropdown value lists must not be empty: {result}"
+        );
+    }
+}
