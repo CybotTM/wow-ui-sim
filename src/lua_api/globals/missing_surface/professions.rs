@@ -502,8 +502,9 @@ fn c_trade_skill_ui_get_recipe_output_item_data(state: &mut LuaState) -> LuaResu
     let recipe = profession_data::get_recipe(recipe_id);
     let table = create_table(state);
     if let Some(recipe) = recipe {
-        table_set(state, table, "hyperlink", Val::Nil);
-        set_number_field(state, table, "icon", 0.0);
+        let link = item_link_value(state, recipe.output_item_id).unwrap_or(Val::Nil);
+        table_set(state, table, "hyperlink", link);
+        set_number_field(state, table, "icon", item_icon(recipe.output_item_id));
         if recipe.output_item_id == 0 {
             table_set(state, table, "itemID", Val::Nil);
         } else {
@@ -1093,4 +1094,11 @@ fn item_link_value(state: &mut LuaState, item_id: u32) -> Option<Val> {
             item.name
         ),
     ))
+}
+
+fn item_icon(item_id: u32) -> f64 {
+    items::get_item(item_id)
+        .map(|item| item.icon_file_data_id)
+        .filter(|icon| *icon != 0)
+        .unwrap_or(134400) as f64
 }

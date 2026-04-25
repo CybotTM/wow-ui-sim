@@ -355,18 +355,74 @@ fn trade_skill_recipes_are_visible_in_blacksmithing_skill_line() {
             if C_TradeSkillUI.GetCraftableCount(2660) ~= 0 then
                 return "craftable_count"
             end
-            if C_TradeSkillUI.GetRecipeSchematic(2660).outputItemID ~= nil then
-                return "empty_output_item"
+            if C_TradeSkillUI.GetRecipeSchematic(2660).outputItemID ~= 2862 then
+                return "output_item"
             end
             local outputItemData = C_TradeSkillUI.GetRecipeOutputItemData(2660)
             if type(outputItemData) ~= "table" then
                 return "missing_output_data"
             end
-            if outputItemData.itemID ~= nil then
-                return "empty_output_item_data"
+            if outputItemData.itemID ~= 2862 then
+                return "output_item_data"
             end
             if type(C_TradeSkillUI.GetRecipeDescription(2660)) ~= "string" then
                 return "missing_description"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn wago_blacksmithing_recipes_have_output_icons_and_reagents() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local expected = {
+                {2660, 2862, 2835, 1},
+                {29545, 23482, 23445, 4},
+                {52567, 39086, 36916, 5},
+                {365729, 190508, 189541, 17},
+                {438914, 217143, 222426, 6},
+                {1229598, 238018, 238528, 1},
+            }
+
+            for _, row in ipairs(expected) do
+                local recipeID, outputItemID, reagentItemID, reagentCount = unpack(row)
+                local output = C_TradeSkillUI.GetRecipeOutputItemData(recipeID)
+                if output.itemID ~= outputItemID then
+                    return "output=" .. recipeID .. ":" .. tostring(output.itemID)
+                end
+                if type(output.icon) ~= "number" or output.icon <= 0 then
+                    return "icon=" .. recipeID .. ":" .. tostring(output.icon)
+                end
+                if C_TradeSkillUI.GetRecipeSchematic(recipeID).outputItemID ~= outputItemID then
+                    return "schematic_output=" .. recipeID
+                end
+                if C_TradeSkillUI.GetRecipeNumReagents(recipeID) == 0 then
+                    return "reagents=0:" .. recipeID
+                end
+
+                local reagent = C_TradeSkillUI.GetRecipeReagentInfo(recipeID, 1)
+                if reagent.itemID ~= reagentItemID then
+                    return "reagent=" .. recipeID .. ":" .. tostring(reagent.itemID)
+                end
+                if reagent.numRequired ~= reagentCount then
+                    return "reagent_count=" .. recipeID .. ":" .. tostring(reagent.numRequired)
+                end
+                if reagent.name == nil or reagent.name == "Unknown" then
+                    return "reagent_name=" .. recipeID .. ":" .. tostring(reagent.name)
+                end
+
+                local link = C_TradeSkillUI.GetRecipeReagentItemLink(recipeID, 1)
+                if not link or not link:find("Hitem:" .. reagentItemID) then
+                    return "reagent_link=" .. recipeID .. ":" .. tostring(link)
+                end
             end
 
             return "ok"

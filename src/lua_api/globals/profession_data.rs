@@ -96,12 +96,13 @@ pub static RECIPE_CATEGORIES: &[RecipeCategory] = &[
     recipe_category(4, "Miscellaneous", 23),
 ];
 
-static NO_REAGENTS: &[ReagentSlot] = &[];
-
 const fn wago_blacksmithing_recipe(
     recipe_id: i32,
     name: &'static str,
     category_id: i32,
+    output_item_id: u32,
+    output_quantity: i32,
+    reagents: &'static [ReagentSlot],
 ) -> RecipeEntry {
     RecipeEntry {
         recipe_id,
@@ -111,130 +112,246 @@ const fn wago_blacksmithing_recipe(
         difficulty: 1,
         category_id,
         item_level: 1,
-        output_item_id: 0,
-        output_quantity: 1,
-        reagents: NO_REAGENTS,
+        output_item_id,
+        output_quantity,
+        reagents,
     }
 }
 
-static HELM_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 12,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 2,
-    },
+const fn reagent(item_id: u32, quantity: i32) -> ReagentSlot {
+    ReagentSlot { item_id, quantity }
+}
+
+static ROUGH_SHARPENING_STONE_REAGENTS: &[ReagentSlot] = &[reagent(2835, 1)];
+static COPPER_CHAIN_PANTS_REAGENTS: &[ReagentSlot] = &[reagent(2840, 4)];
+static FEL_IRON_PLATE_GLOVES_REAGENTS: &[ReagentSlot] = &[reagent(23445, 4)];
+static FEL_IRON_PLATE_BELT_REAGENTS: &[ReagentSlot] = &[reagent(23445, 4)];
+static COBALT_LEGPLATES_REAGENTS: &[ReagentSlot] = &[reagent(36916, 5)];
+static COBALT_BELT_REAGENTS: &[ReagentSlot] = &[reagent(36916, 4)];
+static FOLDED_OBSIDIUM_REAGENTS: &[ReagentSlot] = &[reagent(54849, 2)];
+static HARDENED_OBSIDIUM_BRACERS_REAGENTS: &[ReagentSlot] = &[reagent(65365, 3), reagent(18567, 1)];
+static SPIRITGUARD_HELM_REAGENTS: &[ReagentSlot] = &[reagent(72096, 12)];
+static SPIRITGUARD_SHOULDERS_REAGENTS: &[ReagentSlot] = &[reagent(72096, 7)];
+static TRUESTEEL_INGOT_REAGENTS: &[ReagentSlot] = &[reagent(109119, 20), reagent(109118, 10)];
+static SMOLDERING_HELM_REAGENTS: &[ReagentSlot] = &[reagent(109118, 60)];
+static LEYSTONE_ARMGUARDS_REAGENTS: &[ReagentSlot] = &[reagent(123918, 18)];
+static LEYSTONE_WAISTGUARD_REAGENTS: &[ReagentSlot] = &[reagent(123918, 24)];
+static MONEL_HARDENED_HOOFPLATES_REAGENTS: &[ReagentSlot] =
+    &[reagent(152512, 25), reagent(160298, 2)];
+static MONEL_HARDENED_STIRRUPS_REAGENTS: &[ReagentSlot] =
+    &[reagent(152512, 25), reagent(160298, 2)];
+static SHADOWGHAST_INGOT_REAGENTS: &[ReagentSlot] = &[
+    reagent(171829, 1),
+    reagent(171832, 1),
+    reagent(171831, 1),
+    reagent(171830, 1),
+    reagent(180733, 4),
 ];
-static CHEST_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 16,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 3,
-    },
-];
-static GAUNTLETS_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 8,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 2,
-    },
-];
-static GREAVES_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 14,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 2,
-    },
-];
-static GREATSWORD_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 20,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 4,
-    },
-    ReagentSlot {
-        item_id: 210935,
-        quantity: 2,
-    },
-];
-static MACE_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 10,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 2,
-    },
-];
-static INGOT_REAGENTS: &[ReagentSlot] = &[ReagentSlot {
-    item_id: 210930,
-    quantity: 3,
-}];
-static AQIRITE_INGOT_REAGENTS: &[ReagentSlot] = &[ReagentSlot {
-    item_id: 210931,
-    quantity: 3,
-}];
-static SPIKE_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 6,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 1,
-    },
-];
-static CHAIN_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot {
-        item_id: 210934,
-        quantity: 8,
-    },
-    ReagentSlot {
-        item_id: 210937,
-        quantity: 1,
-    },
-];
+static CEREMONIOUS_BREASTPLATE_REAGENTS: &[ReagentSlot] =
+    &[reagent(171828, 12), reagent(180733, 2)];
+static PRIMAL_MOLTEN_WEAPON_REAGENTS: &[ReagentSlot] = &[reagent(189541, 17)];
+static ALGARI_COMPETITOR_BREASTPLATE_REAGENTS: &[ReagentSlot] = &[reagent(222426, 6)];
+static ALGARI_COMPETITOR_SABATONS_REAGENTS: &[ReagentSlot] = &[reagent(222426, 4)];
+static SUN_BLESSED_TOOL_REAGENTS: &[ReagentSlot] = &[reagent(238528, 1), reagent(237366, 2)];
+
+static HELM_REAGENTS: &[ReagentSlot] = &[reagent(210934, 12), reagent(210937, 2)];
+static CHEST_REAGENTS: &[ReagentSlot] = &[reagent(210934, 16), reagent(210937, 3)];
+static GAUNTLETS_REAGENTS: &[ReagentSlot] = &[reagent(210934, 8), reagent(210937, 2)];
+static GREAVES_REAGENTS: &[ReagentSlot] = &[reagent(210934, 14), reagent(210937, 2)];
+static GREATSWORD_REAGENTS: &[ReagentSlot] =
+    &[reagent(210934, 20), reagent(210937, 4), reagent(210935, 2)];
+static MACE_REAGENTS: &[ReagentSlot] = &[reagent(210934, 10), reagent(210937, 2)];
+static INGOT_REAGENTS: &[ReagentSlot] = &[reagent(210930, 3)];
+static AQIRITE_INGOT_REAGENTS: &[ReagentSlot] = &[reagent(210931, 3)];
+static SPIKE_REAGENTS: &[ReagentSlot] = &[reagent(210934, 6), reagent(210937, 1)];
+static CHAIN_REAGENTS: &[ReagentSlot] = &[reagent(210934, 8), reagent(210937, 1)];
 
 pub static BLACKSMITHING_RECIPES: &[RecipeEntry] = &[
-    wago_blacksmithing_recipe(2660, "Rough Sharpening Stone", 101),
-    wago_blacksmithing_recipe(2662, "Copper Chain Pants", 101),
-    wago_blacksmithing_recipe(29545, "Fel Iron Plate Gloves", 102),
-    wago_blacksmithing_recipe(29547, "Fel Iron Plate Belt", 102),
-    wago_blacksmithing_recipe(52567, "Cobalt Legplates", 103),
-    wago_blacksmithing_recipe(52568, "Cobalt Belt", 103),
-    wago_blacksmithing_recipe(76178, "Folded Obsidium", 104),
-    wago_blacksmithing_recipe(76179, "Hardened Obsidium Bracers", 104),
-    wago_blacksmithing_recipe(122568, "Spiritguard Helm", 105),
-    wago_blacksmithing_recipe(122569, "Spiritguard Shoulders", 105),
-    wago_blacksmithing_recipe(171690, "Truesteel Ingot", 106),
-    wago_blacksmithing_recipe(171691, "Smoldering Helm", 106),
-    wago_blacksmithing_recipe(182928, "Leystone Armguards", 107),
-    wago_blacksmithing_recipe(182929, "Leystone Waistguard", 107),
-    wago_blacksmithing_recipe(253110, "Monel-Hardened Hoofplates", 108),
-    wago_blacksmithing_recipe(253112, "Monel-Hardened Stirrups", 108),
-    wago_blacksmithing_recipe(307611, "Shadowghast Ingot", 109),
-    wago_blacksmithing_recipe(307663, "Ceremonious Breastplate", 109),
-    wago_blacksmithing_recipe(365729, "Primal Molten Warglaive", 110),
-    wago_blacksmithing_recipe(365730, "Primal Molten Shortblade", 110),
-    wago_blacksmithing_recipe(438914, "Algari Competitor's Plate Breastplate", 111),
-    wago_blacksmithing_recipe(438915, "Algari Competitor's Plate Sabatons", 111),
-    wago_blacksmithing_recipe(1229598, "Sun-Blessed Blacksmith's Hammer", 112),
-    wago_blacksmithing_recipe(1229599, "Sun-Blessed Leatherworker's Knife", 112),
+    wago_blacksmithing_recipe(
+        2660,
+        "Rough Sharpening Stone",
+        101,
+        2862,
+        1,
+        ROUGH_SHARPENING_STONE_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        2662,
+        "Copper Chain Pants",
+        101,
+        2852,
+        1,
+        COPPER_CHAIN_PANTS_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        29545,
+        "Fel Iron Plate Gloves",
+        102,
+        23482,
+        1,
+        FEL_IRON_PLATE_GLOVES_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        29547,
+        "Fel Iron Plate Belt",
+        102,
+        23484,
+        1,
+        FEL_IRON_PLATE_BELT_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        52567,
+        "Cobalt Legplates",
+        103,
+        39086,
+        1,
+        COBALT_LEGPLATES_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(52568, "Cobalt Belt", 103, 39087, 1, COBALT_BELT_REAGENTS),
+    wago_blacksmithing_recipe(
+        76178,
+        "Folded Obsidium",
+        104,
+        65365,
+        1,
+        FOLDED_OBSIDIUM_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        76179,
+        "Hardened Obsidium Bracers",
+        104,
+        54850,
+        1,
+        HARDENED_OBSIDIUM_BRACERS_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        122568,
+        "Spiritguard Helm",
+        105,
+        80811,
+        1,
+        SPIRITGUARD_HELM_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        122569,
+        "Spiritguard Shoulders",
+        105,
+        82896,
+        1,
+        SPIRITGUARD_SHOULDERS_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        171690,
+        "Truesteel Ingot",
+        106,
+        108257,
+        1,
+        TRUESTEEL_INGOT_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        171691,
+        "Smoldering Helm",
+        106,
+        116426,
+        1,
+        SMOLDERING_HELM_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        182928,
+        "Leystone Armguards",
+        107,
+        123898,
+        1,
+        LEYSTONE_ARMGUARDS_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        182929,
+        "Leystone Waistguard",
+        107,
+        123897,
+        1,
+        LEYSTONE_WAISTGUARD_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        253110,
+        "Monel-Hardened Hoofplates",
+        108,
+        152812,
+        1,
+        MONEL_HARDENED_HOOFPLATES_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        253112,
+        "Monel-Hardened Stirrups",
+        108,
+        152813,
+        1,
+        MONEL_HARDENED_STIRRUPS_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        307611,
+        "Shadowghast Ingot",
+        109,
+        171428,
+        2,
+        SHADOWGHAST_INGOT_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        307663,
+        "Ceremonious Breastplate",
+        109,
+        171374,
+        1,
+        CEREMONIOUS_BREASTPLATE_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        365729,
+        "Primal Molten Warglaive",
+        110,
+        190508,
+        1,
+        PRIMAL_MOLTEN_WEAPON_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        365730,
+        "Primal Molten Shortblade",
+        110,
+        190505,
+        1,
+        PRIMAL_MOLTEN_WEAPON_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        438914,
+        "Algari Competitor's Plate Breastplate",
+        111,
+        217143,
+        1,
+        ALGARI_COMPETITOR_BREASTPLATE_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        438915,
+        "Algari Competitor's Plate Sabatons",
+        111,
+        217144,
+        1,
+        ALGARI_COMPETITOR_SABATONS_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        1229598,
+        "Sun-Blessed Blacksmith's Hammer",
+        112,
+        238018,
+        1,
+        SUN_BLESSED_TOOL_REAGENTS,
+    ),
+    wago_blacksmithing_recipe(
+        1229599,
+        "Sun-Blessed Leatherworker's Knife",
+        112,
+        238017,
+        1,
+        SUN_BLESSED_TOOL_REAGENTS,
+    ),
     RecipeEntry {
         recipe_id: 100001,
         name: "Khaz Algar Helm",
