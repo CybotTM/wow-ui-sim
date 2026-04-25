@@ -443,6 +443,45 @@ fn test_profiler_app_vs_overall_metric_differ() {
 }
 
 #[test]
+fn test_profiler_get_top_k_addons_for_metric_returns_sorted_table() {
+    let env = env_with_addons();
+
+    {
+        let mut state = env.state().borrow_mut();
+
+        let my_addon = state
+            .addons
+            .iter_mut()
+            .find(|addon| addon.folder_name == "MyAddon")
+            .expect("MyAddon should exist");
+        my_addon.runtime.recent_frames = std::collections::VecDeque::from([2.0, 4.0]);
+
+        let lod_addon = state
+            .addons
+            .iter_mut()
+            .find(|addon| addon.folder_name == "LODAddon")
+            .expect("LODAddon should exist");
+        lod_addon.runtime.recent_frames = std::collections::VecDeque::from([5.0, 7.0]);
+    }
+
+    let encoded: String = env
+        .eval(
+            r#"
+            local results = C_AddOnProfiler.GetTopKAddOnsForMetric(Enum.AddOnProfilerMetric.RecentAverageTime, 1)
+            return table.concat({
+                type(results),
+                tostring(#results),
+                results[1].addOnName,
+                tostring(results[1].metricValue),
+            }, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(encoded, "table|1|LODAddon|6");
+}
+
+#[test]
 fn test_profiler_check_for_performance_message_reports_specific_addon() {
     let env = env_with_addons();
 

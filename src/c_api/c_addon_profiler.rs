@@ -1,6 +1,6 @@
 //! C_AddOnProfiler: per-addon and application performance metrics.
 
-use crate::lua_api::methods::{borrow_state, create_table, val_to_string};
+use crate::lua_api::methods::{borrow_state, create_table, table_set_num, val_to_string};
 use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -37,6 +37,12 @@ pub fn register_c_addon_profiler(state: &mut LuaState) -> LuaResult<()> {
         profiler_ref,
         "GetAddOnMetric",
         c_addon_profiler_get_addon_metric,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        profiler_ref,
+        "GetTopKAddOnsForMetric",
+        c_addon_profiler_get_top_k_addons_for_metric,
     )?;
     table_set_rust_fn_static(
         state,
@@ -318,6 +324,54 @@ fn c_addon_profiler_get_addon_metric(state: &mut LuaState) -> LuaResult<u32> {
             .unwrap_or(0.0)
     };
     state.push(Val::Num(value));
+    Ok(1)
+}
+
+fn top_addons_for_metric(
+    sim: &crate::lua_api::SimState,
+    metric: i32,
+    limit: usize,
+) -> Vec<(String, f64)> {
+    let mut addons = sim
+        .addons
+        .iter()
+        .filter(|addon| addon.folder_name != "__BuiltIn")
+        .map(|addon| (addon.folder_name.clone(), addon_metric_value(addon, metric)))
+        .collect::<Vec<_>>();
+
+    addons.sort_by(|left, right| {
+        right
+            .1
+            .total_cmp(&left.1)
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    addons.truncate(limit);
+    addons
+}
+
+fn c_addon_profiler_get_top_k_addons_for_metric(state: &mut LuaState) -> LuaResult<u32> {
+    let metric = profiler_metric_kind(state, stack_val(state, 1)).unwrap_or(1);
+    let limit = match stack_val(state, 2) {
+        Val::Num(k) if k.is_finite() && k > 0.0 => k.floor() as usize,
+        _ => 0,
+    };
+    let addons = {
+        let sim = borrow_state(state)?;
+        top_addons_for_metric(&sim, metric, limit)
+    };
+
+    let results = create_table(state);
+    let Val::Table(results_ref) = results else {
+        unreachable!("create_table must return a table");
+    };
+    for (index, (add_on_name, metric_value)) in addons.into_iter().enumerate() {
+        let row = TableBuilder::new(state)
+            .set("addOnName", add_on_name)?
+            .set("metricValue", metric_value)?
+            .build();
+        table_set_num(state, results_ref, (index + 1) as f64, row);
+    }
+    state.push(results);
     Ok(1)
 }
 
