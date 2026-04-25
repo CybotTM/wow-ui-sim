@@ -69,6 +69,23 @@ fn social_panel_toggle_realizes_online_and_offline_friend_rows() {
                 result.contains("Brennor"),
                 "friends panel should show the offline friend row, got: {result:?}"
             );
+
+            let (wow_alpha, offline_alpha): (f64, f64) = env
+                .eval(
+                    r#"
+                    return FRIENDS_WOW_BACKGROUND_COLOR.a, FRIENDS_OFFLINE_BACKGROUND_COLOR.a
+                    "#,
+                )
+                .unwrap();
+
+            assert!(
+                (wow_alpha - 0.05).abs() < 0.001,
+                "online friend row background should be translucent, got alpha {wow_alpha}"
+            );
+            assert!(
+                (offline_alpha - 0.05).abs() < 0.001,
+                "offline friend row background should be translucent, got alpha {offline_alpha}"
+            );
         });
     });
 }

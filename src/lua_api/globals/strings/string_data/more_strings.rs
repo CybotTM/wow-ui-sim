@@ -499,6 +499,7 @@ pub const FONT_COLOR_CODE_STRINGS: &[StringDef] = &[
     ("ACHIEVEMENT_COLOR_CODE", "|cffffff00"),
     ("BATTLENET_FONT_COLOR_CODE", "|cff82c5ff"),
     ("DISABLED_FONT_COLOR_CODE", "|cff808080"),
+    ("FRIENDS_WOW_NAME_COLOR_CODE", "|cfffde05c"),
     ("FONT_COLOR_CODE_CLOSE", "|r"),
     ("LINK_FONT_COLOR_CODE", "|cff00ccff"),
 ];
