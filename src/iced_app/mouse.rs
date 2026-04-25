@@ -123,7 +123,12 @@ impl App {
         self.hovered_frame = new_hovered;
         {
             let env = self.env.borrow();
-            env.state().borrow_mut().hovered_frame = new_hovered;
+            {
+                let mut state = env.state().borrow_mut();
+                state.hovered_frame = new_hovered;
+                mark_hover_visuals_dirty(&mut state, old_hovered);
+                mark_hover_visuals_dirty(&mut state, new_hovered);
+            }
             if let Some(old_id) = old_hovered.filter(|id| self.motion_scripts_allowed(*id)) {
                 let _ = env.fire_script_handler(old_id, "OnLeave", vec![]);
             }
@@ -477,6 +482,26 @@ impl App {
             .get(frame_id)
             .map(frame_motion_scripts_allowed)
             .unwrap_or(false)
+    }
+}
+
+fn mark_hover_visuals_dirty(state: &mut crate::lua_api::SimState, frame_id: Option<u64>) {
+    let Some(frame_id) = frame_id else {
+        return;
+    };
+    state.widgets.mark_visual_dirty(frame_id);
+    let Some(frame) = state.widgets.get(frame_id) else {
+        return;
+    };
+    for parent_key in [
+        "NormalTexture",
+        "PushedTexture",
+        "HighlightTexture",
+        "DisabledTexture",
+    ] {
+        if let Some(child_id) = frame.children_keys.get(parent_key) {
+            state.widgets.mark_visual_dirty(*child_id);
+        }
     }
 }
 

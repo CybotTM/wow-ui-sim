@@ -688,6 +688,7 @@ impl App {
             strata_buckets,
             &state.widgets,
             self.pressed_frame,
+            self.hovered_frame,
             &state.message_frames,
             &tooltip_data,
             &state.quest_blobs,
@@ -1036,6 +1037,34 @@ mod tests {
         alphas
     }
 
+    fn snapshot_texture_alphas(app: &App, frame_id: u64) -> Vec<f32> {
+        let mut alphas = Vec::new();
+        let snapshots = app.cached_frame_snapshots.borrow();
+        for snapshot in snapshots.iter().flatten() {
+            let Some(snapshot) = snapshot.get(&frame_id) else {
+                continue;
+            };
+            for request in &snapshot.texture_requests {
+                let start = request.vertex_start as usize;
+                let end = start + request.vertex_count as usize;
+                alphas.extend(
+                    snapshot.vertices[start..end]
+                        .iter()
+                        .map(|vertex| vertex.color[3]),
+                );
+            }
+        }
+        alphas
+    }
+
+    fn mark_frames_dirty(app: &App, frame_ids: &[u64]) {
+        let env = app.env.borrow();
+        let state = env.state().borrow();
+        for frame_id in frame_ids {
+            state.widgets.mark_visual_dirty(*frame_id);
+        }
+    }
+
     #[test]
     fn cached_button_normal_texture_alpha_restores_after_hover_hide() {
         let temp_dir = tempdir().unwrap();
@@ -1086,6 +1115,86 @@ mod tests {
         assert!(
             restored_alphas.iter().any(|alpha| *alpha == 1.0),
             "normal texture should render opaque again after OnLeave restores alpha"
+        );
+    }
+
+    #[test]
+    fn cached_button_state_texture_restores_normal_after_hover() {
+        let temp_dir = tempdir().unwrap();
+        let mut app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                CachedMicroButton = CreateFrame("Button", "CachedMicroButton", UIParent)
+                CachedMicroButton:SetSize(32, 40)
+                CachedMicroButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
+                CachedMicroButton:SetNormalAtlas("UI-HUD-MicroMenu-Professions-Up")
+                CachedMicroButton:SetHighlightAtlas("UI-HUD-MicroMenu-Professions-Mouseover", "BLEND")
+            "#,
+            )
+            .expect("cached micro button setup should succeed");
+
+        let (button_id, normal_id, highlight_id) = {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            let button = state
+                .widgets
+                .get_by_name("CachedMicroButton")
+                .expect("cached micro button should exist");
+            let normal_id = *button
+                .children_keys
+                .get("NormalTexture")
+                .expect("normal texture child should exist");
+            let highlight_id = *button
+                .children_keys
+                .get("HighlightTexture")
+                .expect("highlight texture child should exist");
+            (button.id, normal_id, highlight_id)
+        };
+
+        let size = Size::new(320.0, 240.0);
+        *app.pending_dirty_ids.borrow_mut() = None;
+        app.mark_all_strata_dirty();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+
+        app.env
+            .borrow()
+            .exec("CachedMicroButton:GetNormalTexture():SetAlpha(0)")
+            .expect("normal texture should hide on hover");
+        {
+            app.env.borrow().state().borrow_mut().hovered_frame = Some(button_id);
+        }
+        app.hovered_frame = Some(button_id);
+        mark_frames_dirty(&app, &[button_id, normal_id, highlight_id]);
+        rebuild_after_widget_dirty(&app, size);
+        assert!(
+            snapshot_texture_alphas(&app, highlight_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "hover should emit the highlight texture"
+        );
+
+        app.env
+            .borrow()
+            .exec("CachedMicroButton:GetNormalTexture():SetAlpha(1)")
+            .expect("normal texture should restore after hover");
+        {
+            app.env.borrow().state().borrow_mut().hovered_frame = None;
+        }
+        app.hovered_frame = None;
+        mark_frames_dirty(&app, &[button_id, normal_id, highlight_id]);
+        rebuild_after_widget_dirty(&app, size);
+
+        assert!(
+            snapshot_texture_alphas(&app, normal_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "leaving hover should re-emit the normal texture at full alpha"
+        );
+        assert!(
+            snapshot_texture_alphas(&app, highlight_id).is_empty(),
+            "leaving hover should remove the highlight texture snapshot"
         );
     }
 
