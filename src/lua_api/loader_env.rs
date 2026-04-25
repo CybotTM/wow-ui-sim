@@ -254,6 +254,198 @@ if not rawget(_G, "__wow_menu_fallback_installed") then
         return Menu.CreateRootMenuDescription(menuMixin)
     end
 end
+
+local function __wow_dropdown_button_name(owner, index)
+    if type(owner.GetName) ~= "function" then
+        return nil
+    end
+    local ok, name = pcall(owner.GetName, owner)
+    if ok and type(name) == "string" and name ~= "" then
+        return name .. "MenuButton" .. tostring(index)
+    end
+    return nil
+end
+
+local function __wow_dropdown_width(owner)
+    if type(owner.GetWidth) == "function" then
+        local ok, width = pcall(owner.GetWidth, owner)
+        if ok and type(width) == "number" and width > 0 then
+            return width
+        end
+    end
+    return 160
+end
+
+local function __wow_dropdown_materialize_menu(owner, description)
+    local previous = owner.__wow_menu_buttons
+    if type(previous) == "table" then
+        for _, button in ipairs(previous) do
+            if button and type(button.Hide) == "function" then
+                button:Hide()
+            end
+        end
+    end
+
+    local elements = type(description) == "table" and description.__wow_elements or nil
+    if type(elements) ~= "table" then
+        owner.__wow_menu_buttons = {}
+        return
+    end
+
+    local buttons = {}
+    local visible_index = 0
+    local width = __wow_dropdown_width(owner)
+    for _, element in ipairs(elements) do
+        local text = type(element) == "table" and element.text or nil
+        if type(text) == "string" and text ~= "" then
+            visible_index = visible_index + 1
+            local name = __wow_dropdown_button_name(owner, visible_index)
+            local button = name and rawget(_G, name) or nil
+            if button == nil then
+                button = CreateFrame("Button", name, UIParent)
+            end
+            button:SetSize(width, 20)
+            button:ClearAllPoints()
+            button:SetPoint("TOPLEFT", owner, "BOTTOMLEFT", 0, -((visible_index - 1) * 20))
+            button:SetText(text)
+            button:Show()
+            buttons[visible_index] = button
+        end
+    end
+    owner.__wow_menu_buttons = buttons
+end
+
+local function __wow_dropdown_radio_is_selected(element)
+    local args = type(element) == "table" and element.args or nil
+    if type(args) ~= "table" or type(args[1]) ~= "function" then
+        return false
+    end
+    local ok, selected = pcall(args[1], args[3])
+    return ok and selected == true
+end
+
+local function __wow_dropdown_update_selection_text(owner, description)
+    local elements = type(description) == "table" and description.__wow_elements or nil
+    local text = nil
+    if type(elements) == "table" then
+        for _, element in ipairs(elements) do
+            if type(element) == "table"
+                and type(element.text) == "string"
+                and element.text ~= ""
+                and __wow_dropdown_radio_is_selected(element) then
+                text = element.text
+                break
+            end
+        end
+        if text == nil
+            and type(description) == "table"
+            and description.tag == "MENU_COMMUNITIES_LIST" then
+            for _, element in ipairs(elements) do
+                if type(element) == "table" and type(element.text) == "string" and element.text ~= "" then
+                    text = element.text
+                    break
+                end
+            end
+        end
+    end
+    if text == nil and type(owner.GetSelectionText) == "function" then
+        local ok, selection_text = pcall(owner.GetSelectionText, owner)
+        if ok and type(selection_text) == "string" and selection_text ~= "" then
+            text = selection_text
+        end
+    end
+    if text ~= nil and type(owner.SetText) == "function" then
+        owner:SetText(text)
+    end
+    if text ~= nil and owner.Text ~= nil and type(owner.Text.SetText) == "function" then
+        owner.Text:SetText(text)
+    end
+end
+
+local function __wow_generate_dropdown_menu(owner)
+    local description = nil
+    if type(owner.__wow_menu_generator) == "function" then
+        description = MenuUtil.CreateRootMenuDescription({})
+        pcall(owner.__wow_menu_generator, owner, description)
+    elseif type(owner.menuGenerator) == "function" then
+        description = MenuUtil.CreateRootMenuDescription({})
+        pcall(owner.menuGenerator, owner, description)
+    elseif type(owner.__wow_menu_description) == "table" then
+        description = owner.__wow_menu_description
+    elseif type(owner.menuDescription) == "table" then
+        description = owner.menuDescription
+    end
+    if type(description) == "table" then
+        owner.__wow_menu_description = description
+        owner.menuDescription = description
+    end
+    return description
+end
+
+local function __wow_patch_dropdown_button_mixin()
+    if type(DropdownButtonMixin) ~= "table" then
+        return
+    end
+    if rawget(DropdownButtonMixin, "__wow_menu_fallback_open_menu") == DropdownButtonMixin.OpenMenu
+        and rawget(DropdownButtonMixin, "__wow_menu_fallback_generate_menu") == DropdownButtonMixin.GenerateMenu
+        and rawget(DropdownButtonMixin, "__wow_menu_fallback_setup_menu") == DropdownButtonMixin.SetupMenu then
+        return
+    end
+
+    local existing_setup_menu = DropdownButtonMixin.SetupMenu
+    local existing_generate_menu = DropdownButtonMixin.GenerateMenu
+    local existing_open_menu = DropdownButtonMixin.OpenMenu
+
+    function DropdownButtonMixin:SetupMenu(generator)
+        self.__wow_menu_generator = generator
+        self.menuGenerator = generator
+        if type(existing_setup_menu) == "function" then
+            pcall(existing_setup_menu, self, generator)
+        end
+    end
+
+    function DropdownButtonMixin:GenerateMenu()
+        local description = nil
+        if type(existing_generate_menu) == "function" then
+            local ok, generated = pcall(existing_generate_menu, self)
+            if ok and type(generated) == "table" then
+                description = generated
+            elseif ok and type(self.menuDescription) == "table" then
+                description = self.menuDescription
+            end
+        end
+        if type(description) ~= "table" then
+            description = __wow_generate_dropdown_menu(self)
+        end
+        if type(description) == "table" then
+            self.__wow_menu_description = description
+            self.menuDescription = description
+            __wow_dropdown_update_selection_text(self, description)
+        end
+        return description
+    end
+
+    function DropdownButtonMixin:OpenMenu()
+        if type(existing_open_menu) == "function" then
+            pcall(existing_open_menu, self)
+        else
+            self.__wow_menu_open = true
+        end
+        local description = self:GenerateMenu()
+        __wow_dropdown_materialize_menu(self, description)
+        self.__wow_menu_open = true
+    end
+
+    DropdownButtonMixin.__wow_menu_fallback_setup_menu = DropdownButtonMixin.SetupMenu
+    DropdownButtonMixin.__wow_menu_fallback_generate_menu = DropdownButtonMixin.GenerateMenu
+    DropdownButtonMixin.__wow_menu_fallback_open_menu = DropdownButtonMixin.OpenMenu
+end
+
+__wow_patch_dropdown_button_mixin()
+
+if type(__wow_install_dropdown_button_mixin_patch) == "function" then
+    __wow_install_dropdown_button_mixin_patch()
+end
 "#;
 
 pub struct LoaderEnv<'a> {

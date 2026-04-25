@@ -9796,13 +9796,25 @@ local function __wow_dropdown_root_description()
 end
 
 local function __wow_dropdown_generate_menu(self)
+  if type(self.__wow_menu_generator) ~= "function"
+      and type(self.menuGenerator) ~= "function"
+      and type(self.SetupMenu) == "function"
+      and type(DropdownButtonMixin) == "table"
+      and self.SetupMenu ~= DropdownButtonMixin.SetupMenu then
+    pcall(self.SetupMenu, self)
+  end
   local description = __wow_dropdown_root_description()
   if type(self.__wow_menu_generator) == "function" then
     pcall(self.__wow_menu_generator, self, description)
+  elseif type(self.menuGenerator) == "function" then
+    pcall(self.menuGenerator, self, description)
   elseif self.__wow_menu_description ~= nil then
     description = self.__wow_menu_description
+  elseif self.menuDescription ~= nil then
+    description = self.menuDescription
   end
   self.__wow_menu_description = description
+  self.menuDescription = description
   return description
 end
 
@@ -9894,6 +9906,19 @@ end
 local function __wow_dropdown_update_selection_text(owner, description)
   local text = __wow_dropdown_selected_text(description)
   if text == nil
+      and type(description) == "table"
+      and description.tag == "MENU_COMMUNITIES_LIST" then
+    local elements = type(description.__wow_elements) == "table" and description.__wow_elements or nil
+    if elements ~= nil then
+      for _, element in ipairs(elements) do
+        if type(element) == "table" and type(element.text) == "string" and element.text ~= "" then
+          text = element.text
+          break
+        end
+      end
+    end
+  end
+  if text == nil
       and type(owner.GetName) == "function"
       and type(GuildControlGetRankName) == "function" then
     local ok, name = pcall(owner.GetName, owner)
@@ -9918,12 +9943,22 @@ local function __wow_dropdown_update_selection_text(owner, description)
   end
 end
 
-if type(DropdownButtonMixin) == "table" then
+local function __wow_install_dropdown_button_mixin_patch()
+  if type(DropdownButtonMixin) ~= "table" then
+    return
+  end
+  if rawget(DropdownButtonMixin, "__wow_sim_patched_setup_menu") == DropdownButtonMixin.SetupMenu
+      and rawget(DropdownButtonMixin, "__wow_sim_patched_generate_menu") == DropdownButtonMixin.GenerateMenu
+      and rawget(DropdownButtonMixin, "__wow_sim_patched_open_menu") == DropdownButtonMixin.OpenMenu then
+    return
+  end
+
   local __wow_existing_dropdown_generate_menu = DropdownButtonMixin.GenerateMenu
   local __wow_existing_dropdown_setup_menu = DropdownButtonMixin.SetupMenu
   local __wow_existing_dropdown_open_menu = DropdownButtonMixin.OpenMenu
   function DropdownButtonMixin:SetupMenu(generator)
     self.__wow_menu_generator = generator
+    self.menuGenerator = generator
     if type(__wow_existing_dropdown_setup_menu) == "function" then
       pcall(__wow_existing_dropdown_setup_menu, self, generator)
     end
@@ -9936,8 +9971,12 @@ if type(DropdownButtonMixin) == "table" then
   function DropdownButtonMixin:GenerateMenu()
     if type(__wow_existing_dropdown_generate_menu) == "function" then
       local ok, description = pcall(__wow_existing_dropdown_generate_menu, self)
+      if ok and type(description) ~= "table" and type(self.menuDescription) == "table" then
+        description = self.menuDescription
+      end
       if ok and type(description) == "table" then
         self.__wow_menu_description = description
+        self.menuDescription = description
         __wow_dropdown_update_selection_text(self, description)
         return description
       end
@@ -9961,7 +10000,13 @@ if type(DropdownButtonMixin) == "table" then
     __wow_dropdown_materialize_menu(self, description)
     self.__wow_menu_open = true
   end
+  DropdownButtonMixin.__wow_sim_patched_setup_menu = DropdownButtonMixin.SetupMenu
+  DropdownButtonMixin.__wow_sim_patched_generate_menu = DropdownButtonMixin.GenerateMenu
+  DropdownButtonMixin.__wow_sim_patched_open_menu = DropdownButtonMixin.OpenMenu
 end
+
+_G.__wow_install_dropdown_button_mixin_patch = __wow_install_dropdown_button_mixin_patch
+__wow_install_dropdown_button_mixin_patch()
 
 local function __wow_copy_mixin_methods(target, source)
   if type(target) ~= "table" or type(source) ~= "table" then
