@@ -25,6 +25,9 @@ use rilua::{LuaResult, Val};
 /// Resolve the 1-based rank index the caller asked about: explicit arg
 /// first, else the "selected" rank. `0`/out-of-range → `None`.
 fn resolve_rank_index(state: &mut LuaState, explicit_arg: i32) -> LuaResult<Option<usize>> {
+    if borrow_state(state)?.world.guild_name.is_none() {
+        return Ok(None);
+    }
     let from_arg = Option::<f64>::from_stack(state, explicit_arg)?
         .map(|n| n as i64)
         .filter(|n| *n > 0);
@@ -47,6 +50,10 @@ pub fn guild_control_set_rank(state: &mut LuaState) -> LuaResult<u32> {
         .map(|n| n as i64)
         .unwrap_or(0);
     let mut sim = borrow_state_mut(state)?;
+    if sim.world.guild_name.is_none() {
+        sim.world.guild_selected_rank = 0;
+        return Ok(0);
+    }
     let len = sim.world.guild_ranks.len() as i64;
     if rank >= 1 && rank <= len {
         sim.world.guild_selected_rank = rank as i32;
@@ -73,7 +80,14 @@ pub fn guild_control_get_rank_name(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 pub fn guild_control_get_num_ranks(state: &mut LuaState) -> LuaResult<u32> {
-    let count = borrow_state(state)?.world.guild_ranks.len() as f64;
+    let count = {
+        let sim = borrow_state(state)?;
+        if sim.world.guild_name.is_some() {
+            sim.world.guild_ranks.len() as f64
+        } else {
+            0.0
+        }
+    };
     state.push(Val::Num(count));
     Ok(1)
 }

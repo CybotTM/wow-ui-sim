@@ -465,6 +465,7 @@ pub fn seeded_world_state() -> WorldState {
         guild_name: Some("Heroes of Azeroth".into()),
         guild_rank: Some("Member".into()),
         guild_num_members: 2,
+        guild_ranks: default_guild_ranks(),
         guild_members: default_guild_members(),
         pvp_type: "contested".into(),
         guild_can_speak_in_chat: true,
@@ -474,6 +475,23 @@ pub fn seeded_world_state() -> WorldState {
     };
     apply_collection_defaults(&mut ws);
     ws
+}
+
+fn default_guild_ranks() -> Vec<GuildRank> {
+    vec![
+        GuildRank {
+            name: "Guild Leader".into(),
+            flags: vec![true; 21],
+        },
+        GuildRank {
+            name: "Officer".into(),
+            flags: vec![true; 21],
+        },
+        GuildRank {
+            name: "Member".into(),
+            flags: vec![false; 21],
+        },
+    ]
 }
 
 fn default_guild_members() -> Vec<GuildMember> {

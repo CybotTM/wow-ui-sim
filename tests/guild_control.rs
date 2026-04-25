@@ -16,8 +16,28 @@ fn install_three_ranks(env: &WowLuaEnv) {
 }
 
 #[test]
-fn defaults_no_guild() {
+fn default_seeded_guild_has_rank_names() {
     let env = WowLuaEnv::new().unwrap();
+    let (count, first, second, third): (i32, String, String, String) = env
+        .eval(
+            r#"
+            return GuildControlGetNumRanks(),
+                   GuildControlGetRankName(1),
+                   GuildControlGetRankName(2),
+                   GuildControlGetRankName(3)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 3);
+    assert_eq!(first, "Guild Leader");
+    assert_eq!(second, "Officer");
+    assert_eq!(third, "Member");
+}
+
+#[test]
+fn no_guild_returns_no_ranks() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec("A_Admin.ClearGuild()").unwrap();
     let (count, name): (i32, String) = env
         .eval(r#"return GuildControlGetNumRanks(), GuildControlGetRankName()"#)
         .unwrap();

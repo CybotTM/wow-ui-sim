@@ -263,9 +263,11 @@ fn guild_control_rank_settings_dropdown_shows_rank_rows() {
                 return "missing_buttons"
             end
             local textWidth = dropdown.Text and dropdown.Text:GetWidth() or 0
+            if textWidth <= 0 then
+                return "zero_text_width:" .. tostring(textWidth)
+            end
             return (dropdown:GetText() or "") .. "/" .. (dropdown.Text and dropdown.Text:GetText() or "") .. "/" .. tostring(textWidth) .. "|" .. first:GetText() .. "," .. second:GetText()
         "#).unwrap();
-        assert_ne!(result, "Officer/Officer/0|Officer,Member", "guild control rank dropdown text child must have renderable width: {result}");
         assert!(result.starts_with("Officer/Officer/"), "guild control rank dropdown should show selected rank and visible rank rows: {result}");
         assert!(result.ends_with("|Officer,Member"), "guild control rank dropdown should materialize visible rank rows: {result}");
     }

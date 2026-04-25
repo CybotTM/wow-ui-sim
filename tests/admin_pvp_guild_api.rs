@@ -298,6 +298,7 @@ fn test_leave_guild_clears_and_fires_event() {
 #[test]
 fn test_guild_control_get_num_ranks_returns_zero_when_not_in_guild() {
     let env = env();
+    env.exec("A_Admin.ClearGuild()").unwrap();
     let ranks: i32 = env.eval("return GuildControlGetNumRanks()").unwrap();
     assert_eq!(ranks, 0);
 }
