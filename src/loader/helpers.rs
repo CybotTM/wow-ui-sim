@@ -500,14 +500,19 @@ pub fn apply_script_handlers(
 
 /// Generate Lua code for setting script handlers.
 pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
-    let mut code = frame_lifecycle_handlers(scripts);
-    code.push_str(&frame_input_handlers(scripts));
+    generate_scripts_code_for_target("frame", scripts)
+}
+
+/// Generate Lua code for setting script handlers on a named Lua variable.
+pub fn generate_scripts_code_for_target(target: &str, scripts: &crate::xml::ScriptsXml) -> String {
+    let mut code = lifecycle_handlers(target, scripts);
+    code.push_str(&input_handlers(target, scripts));
     code
 }
 
-fn frame_lifecycle_handlers(scripts: &crate::xml::ScriptsXml) -> String {
+fn lifecycle_handlers(target: &str, scripts: &crate::xml::ScriptsXml) -> String {
     apply_script_handlers(
-        "frame",
+        target,
         &[
             ("OnLoad", scripts.on_load.last()),
             ("OnEvent", scripts.on_event.last()),
@@ -530,9 +535,9 @@ fn frame_lifecycle_handlers(scripts: &crate::xml::ScriptsXml) -> String {
     )
 }
 
-fn frame_input_handlers(scripts: &crate::xml::ScriptsXml) -> String {
+fn input_handlers(target: &str, scripts: &crate::xml::ScriptsXml) -> String {
     apply_script_handlers(
-        "frame",
+        target,
         &[
             ("OnEnterPressed", scripts.on_enter_pressed.last()),
             ("OnEscapePressed", scripts.on_escape_pressed.last()),

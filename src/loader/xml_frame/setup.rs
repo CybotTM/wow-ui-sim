@@ -40,14 +40,13 @@ pub(super) fn setup_frame(
     let exec_start = Instant::now();
     match exec_create_frame_code(env, &setup) {
         Ok(()) => {}
-        Err(error)
-            if recover_frame_after_loader_vm_error(
+        Err(_)
+            if recover_frame_after_partial_create_error(
                 env,
                 setup.name,
                 setup.frame,
                 setup.inherits,
                 setup.parent,
-                &error,
             )? => {}
         Err(error) => return Err(error),
     }
@@ -131,18 +130,13 @@ fn parent_array_contains_child(
         .unwrap_or(false))
 }
 
-fn recover_frame_after_loader_vm_error(
+fn recover_frame_after_partial_create_error(
     env: &LoaderEnv<'_>,
     name: &str,
     frame: &crate::xml::FrameXml,
     inherits: &str,
     parent: &str,
-    error: &LoadError,
 ) -> Result<bool, LoadError> {
-    let error_text = error.to_string();
-    if !error_text.contains("expected Lua closure in execute") {
-        return Ok(false);
-    }
     let frame_exists = env.state().borrow().widgets.get_id_by_name(name).is_some();
     if !frame_exists {
         return Ok(false);
@@ -160,14 +154,14 @@ fn recover_frame_after_loader_vm_error(
     );
     env.exec(&repair).map_err(|repair_error| {
         LoadError::Lua(format!(
-            "Recovered frame {name} exists but failed to repair parent links after loader VM error: {repair_error}"
+            "Recovered frame {name} exists but failed to repair parent links after partial CreateFrame error: {repair_error}"
         ))
     })?;
     Ok(true)
 }
 
 /// Build a Lua snippet that re-links `child` into `parent[parent_key]` and/or
-/// `parent[parent_array]` after a loader VM error left the frame disconnected.
+/// `parent[parent_array]` after a partial CreateFrame error left the frame disconnected.
 fn build_parent_link_repair_script(
     parent: &str,
     name: &str,

@@ -2,8 +2,8 @@
 
 use super::error::LoadError;
 use super::helpers::{
-    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
-    lua_table_field_ref, resolve_child_name, resolve_lua_escapes,
+    escape_lua_string, generate_scripts_code_for_target, generate_set_point_code, get_size_values,
+    lua_global_ref, lua_table_field_ref, resolve_child_name, resolve_lua_escapes,
 };
 use crate::lua_api::LoaderEnv;
 
@@ -174,6 +174,30 @@ fn build_fontstring_extra_code(
         fontstring.key_values.as_ref(),
         "fs",
     ));
+    if let Some(scripts) = &fontstring.scripts {
+        code.push_str(&generate_scripts_code_for_target("fs", scripts));
+        if fontstring_onload_should_fire_immediately(scripts) {
+            code.push_str(
+                r#"
+        do
+            local __onload = fs:GetScript("OnLoad")
+            if __onload then
+                local __ok, __err = pcall(__onload, fs)
+                if not __ok then
+                    local __report = debug.getregistry()["__report_script_error"]
+                    if __report then
+                        local __name = fs.GetName and fs:GetName() or "?"
+                        __report("[OnLoad] " .. tostring(__name) .. ": " .. tostring(__err))
+                    else
+                        error(__err)
+                    end
+                end
+            end
+        end
+        "#,
+            );
+        }
+    }
     if let Some(a) = fontstring.alpha {
         code.push_str(&format!("\n        fs:SetAlpha({})\n        ", a));
     }
@@ -181,6 +205,22 @@ fn build_fontstring_extra_code(
         code.push_str("\n        fs:Hide()\n        ");
     }
     code
+}
+
+fn fontstring_onload_should_fire_immediately(scripts: &crate::xml::ScriptsXml) -> bool {
+    let Some(script) = scripts.on_load.last() else {
+        return false;
+    };
+
+    let has_function = script
+        .function
+        .as_ref()
+        .is_some_and(|name| !name.is_empty());
+    let has_inline_body = script
+        .body
+        .as_ref()
+        .is_some_and(|body| !body.trim().is_empty());
+    has_function || has_inline_body
 }
 
 /// Build the Lua code string that creates and configures a fontstring.

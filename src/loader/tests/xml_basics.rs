@@ -240,6 +240,43 @@ fn test_xml_scripts_function_attribute() {
 }
 
 #[test]
+fn fontstring_onload_function_fires_after_parent_key_assignment() {
+    let t = load_test_xml(
+        "fontstring-onload-function",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Script>
+                function AliasFontString(fontString)
+                    local parent = fontString:GetParent()
+                    parent.text = fontString
+                end
+            </Script>
+            <Frame name="FontStringOnLoadParent" parent="UIParent">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <FontString name="$parentText" parentKey="Text">
+                            <Scripts>
+                                <OnLoad function="AliasFontString"/>
+                            </Scripts>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.assert_lua_true(
+        "return FontStringOnLoadParent.Text ~= nil",
+        "parentKey should wire FontString before OnLoad",
+    );
+    t.assert_lua_true(
+        "return FontStringOnLoadParent.text == FontStringOnLoadParent.Text",
+        "FontString OnLoad function should be called with the FontString",
+    );
+}
+
+#[test]
 fn test_xml_scripts_method_attribute() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-method");

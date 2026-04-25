@@ -488,6 +488,42 @@ fn professions_frame_loads_and_populates_specialization_tab() {
 }
 
 #[test]
+fn professions_frame_xml_pages_are_parent_keyed() {
+    test_timeout! {
+        let env = setup_env();
+        let ui = blizzard_ui_dir();
+        for (name, toc) in [
+            ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+            ("Blizzard_ProfessionsTemplates", "Blizzard_ProfessionsTemplates.toc"),
+            ("Blizzard_SharedTalentUI", "Blizzard_SharedTalentUI.toc"),
+            ("Blizzard_Professions", "Blizzard_Professions.toc"),
+        ] {
+            let toc_path = ui.join(name).join(toc);
+            if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
+                panic!("failed to load {name}: {error}");
+            }
+        }
+
+        let result: String = env.eval(r#"
+            if not ProfessionsFrame then return "professions_frame_missing" end
+            if not ProfessionsFrame.CraftingPage then return "crafting_page_missing" end
+            if not ProfessionsFrame.SpecPage then return "spec_page_missing" end
+            if not ProfessionsFrame.OrdersPage then return "orders_page_missing" end
+            if not ProfessionsFrame.Pages or #ProfessionsFrame.Pages ~= 3 then
+                return "pages=" .. tostring(ProfessionsFrame.Pages and #ProfessionsFrame.Pages or nil)
+            end
+            return "ok"
+        "#).unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "ProfessionsFrame XML page children should be available through parentKey: {result}"
+        );
+    }
+}
+
+#[test]
 fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
     test_timeout! {
         let env = setup_env();
