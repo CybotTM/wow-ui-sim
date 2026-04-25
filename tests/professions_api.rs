@@ -270,7 +270,51 @@ fn test_all_recipe_ids_count() {
     let count: i32 = env
         .eval("return #C_TradeSkillUI.GetAllRecipeIDs()")
         .unwrap();
-    assert_eq!(count, 10);
+    assert_eq!(count, 34);
+}
+
+#[test]
+fn blacksmithing_recipes_include_wago_db2_examples_for_each_expansion() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local expected = {
+                {2660, "Rough Sharpening Stone", "Classic Blacksmithing"},
+                {29545, "Fel Iron Plate Gloves", "Outland Blacksmithing"},
+                {52567, "Cobalt Legplates", "Northrend Blacksmithing"},
+                {76178, "Folded Obsidium", "Cataclysm Blacksmithing"},
+                {122568, "Spiritguard Helm", "Pandaria Blacksmithing"},
+                {171690, "Truesteel Ingot", "Draenor Blacksmithing"},
+                {182928, "Leystone Armguards", "Legion Blacksmithing"},
+                {253110, "Monel-Hardened Hoofplates", "Kul Tiran Blacksmithing"},
+                {307611, "Shadowghast Ingot", "Shadowlands Blacksmithing"},
+                {365729, "Primal Molten Warglaive", "Dragon Isles Blacksmithing"},
+                {438914, "Algari Competitor's Plate Breastplate", "Khaz Algar Blacksmithing"},
+                {1229598, "Sun-Blessed Blacksmith's Hammer", "Midnight Blacksmithing"},
+            }
+
+            for _, item in ipairs(expected) do
+                local recipe = C_TradeSkillUI.GetRecipeInfo(item[1])
+                if not recipe then
+                    return "missing_recipe=" .. item[1]
+                end
+                if recipe.name ~= item[2] then
+                    return "name=" .. item[1] .. ":" .. tostring(recipe.name)
+                end
+
+                local category = C_TradeSkillUI.GetCategoryInfo(recipe.categoryID)
+                if not category or category.name ~= item[3] then
+                    return "category=" .. item[1] .. ":" .. tostring(category and category.name)
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
 }
 
 #[test]
@@ -298,10 +342,10 @@ fn test_trade_skill_lists_and_counts_are_seeded() {
             if C_TradeSkillUI.GetCraftingOrderCount() ~= 0 then
                 return "orderCount=" .. tostring(C_TradeSkillUI.GetCraftingOrderCount())
             end
-            if C_TradeSkillUI.GetNumRecipes() ~= 10 then
+            if C_TradeSkillUI.GetNumRecipes() ~= 34 then
                 return "numRecipes=" .. tostring(C_TradeSkillUI.GetNumRecipes())
             end
-            if C_TradeSkillUI.GetNumTradeSkills() ~= 10 then
+            if C_TradeSkillUI.GetNumTradeSkills() ~= 34 then
                 return "numTradeSkills=" .. tostring(C_TradeSkillUI.GetNumTradeSkills())
             end
             return "ok"

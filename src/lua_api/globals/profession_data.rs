@@ -68,32 +68,54 @@ pub static PROFESSIONS: &[ProfessionInfo] = &[
     },
 ];
 
+const fn recipe_category(category_id: i32, name: &'static str, ui_order: i32) -> RecipeCategory {
+    RecipeCategory {
+        category_id,
+        name,
+        parent_category_id: 0,
+        ui_order,
+    }
+}
+
 pub static RECIPE_CATEGORIES: &[RecipeCategory] = &[
-    RecipeCategory {
-        category_id: 1,
-        name: "Armor",
-        parent_category_id: 0,
-        ui_order: 1,
-    },
-    RecipeCategory {
-        category_id: 2,
-        name: "Weapons",
-        parent_category_id: 0,
-        ui_order: 2,
-    },
-    RecipeCategory {
-        category_id: 3,
-        name: "Reagents",
-        parent_category_id: 0,
-        ui_order: 3,
-    },
-    RecipeCategory {
-        category_id: 4,
-        name: "Miscellaneous",
-        parent_category_id: 0,
-        ui_order: 4,
-    },
+    recipe_category(101, "Classic Blacksmithing", 1),
+    recipe_category(102, "Outland Blacksmithing", 2),
+    recipe_category(103, "Northrend Blacksmithing", 3),
+    recipe_category(104, "Cataclysm Blacksmithing", 4),
+    recipe_category(105, "Pandaria Blacksmithing", 5),
+    recipe_category(106, "Draenor Blacksmithing", 6),
+    recipe_category(107, "Legion Blacksmithing", 7),
+    recipe_category(108, "Kul Tiran Blacksmithing", 8),
+    recipe_category(109, "Shadowlands Blacksmithing", 9),
+    recipe_category(110, "Dragon Isles Blacksmithing", 10),
+    recipe_category(111, "Khaz Algar Blacksmithing", 11),
+    recipe_category(112, "Midnight Blacksmithing", 12),
+    recipe_category(1, "Armor", 20),
+    recipe_category(2, "Weapons", 21),
+    recipe_category(3, "Reagents", 22),
+    recipe_category(4, "Miscellaneous", 23),
 ];
+
+static NO_REAGENTS: &[ReagentSlot] = &[];
+
+const fn wago_blacksmithing_recipe(
+    recipe_id: i32,
+    name: &'static str,
+    category_id: i32,
+) -> RecipeEntry {
+    RecipeEntry {
+        recipe_id,
+        name,
+        learned: true,
+        craftable: true,
+        difficulty: 1,
+        category_id,
+        item_level: 1,
+        output_item_id: 0,
+        output_quantity: 1,
+        reagents: NO_REAGENTS,
+    }
+}
 
 static HELM_REAGENTS: &[ReagentSlot] = &[
     ReagentSlot {
@@ -189,6 +211,30 @@ static CHAIN_REAGENTS: &[ReagentSlot] = &[
 ];
 
 pub static BLACKSMITHING_RECIPES: &[RecipeEntry] = &[
+    wago_blacksmithing_recipe(2660, "Rough Sharpening Stone", 101),
+    wago_blacksmithing_recipe(2662, "Copper Chain Pants", 101),
+    wago_blacksmithing_recipe(29545, "Fel Iron Plate Gloves", 102),
+    wago_blacksmithing_recipe(29547, "Fel Iron Plate Belt", 102),
+    wago_blacksmithing_recipe(52567, "Cobalt Legplates", 103),
+    wago_blacksmithing_recipe(52568, "Cobalt Belt", 103),
+    wago_blacksmithing_recipe(76178, "Folded Obsidium", 104),
+    wago_blacksmithing_recipe(76179, "Hardened Obsidium Bracers", 104),
+    wago_blacksmithing_recipe(122568, "Spiritguard Helm", 105),
+    wago_blacksmithing_recipe(122569, "Spiritguard Shoulders", 105),
+    wago_blacksmithing_recipe(171690, "Truesteel Ingot", 106),
+    wago_blacksmithing_recipe(171691, "Smoldering Helm", 106),
+    wago_blacksmithing_recipe(182928, "Leystone Armguards", 107),
+    wago_blacksmithing_recipe(182929, "Leystone Waistguard", 107),
+    wago_blacksmithing_recipe(253110, "Monel-Hardened Hoofplates", 108),
+    wago_blacksmithing_recipe(253112, "Monel-Hardened Stirrups", 108),
+    wago_blacksmithing_recipe(307611, "Shadowghast Ingot", 109),
+    wago_blacksmithing_recipe(307663, "Ceremonious Breastplate", 109),
+    wago_blacksmithing_recipe(365729, "Primal Molten Warglaive", 110),
+    wago_blacksmithing_recipe(365730, "Primal Molten Shortblade", 110),
+    wago_blacksmithing_recipe(438914, "Algari Competitor's Plate Breastplate", 111),
+    wago_blacksmithing_recipe(438915, "Algari Competitor's Plate Sabatons", 111),
+    wago_blacksmithing_recipe(1229598, "Sun-Blessed Blacksmith's Hammer", 112),
+    wago_blacksmithing_recipe(1229599, "Sun-Blessed Leatherworker's Knife", 112),
     RecipeEntry {
         recipe_id: 100001,
         name: "Khaz Algar Helm",
