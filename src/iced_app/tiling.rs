@@ -45,12 +45,12 @@ struct UvRepeatInfo {
 
 /// Compute tile dimensions from frame size or UV region as fallback.
 fn tile_dimensions(f: &crate::widget::Frame, uv_w: f32, uv_h: f32) -> (f32, f32) {
-    let tile_w = if f.width > 1.0 {
+    let tile_w = if f.width > 0.0 {
         f.width
     } else {
         (uv_w * 128.0).max(8.0)
     };
-    let tile_h = if f.height > 1.0 {
+    let tile_h = if f.height > 0.0 {
         f.height
     } else {
         (uv_h * 128.0).max(8.0)
@@ -380,6 +380,11 @@ pub(super) fn emit_horiz_tiles(
     tint: [f32; 4],
     blend: BlendMode,
 ) {
+    if tile_w <= 1.0 {
+        batch.push_textured_path_uv(bounds, *uvs, tex_path, tint, blend);
+        return;
+    }
+
     let mut x = bounds.x;
     while x < bounds.x + bounds.width {
         let w = (bounds.x + bounds.width - x).min(tile_w);
@@ -508,5 +513,42 @@ mod tests {
         assert_eq!(config.tile_w, 128.0);
         assert_eq!(config.tile_h, 128.0);
         assert_eq!(config.tint, [0.25, 0.5, 0.75, 0.4]);
+    }
+
+    #[test]
+    fn standard_tile_config_preserves_one_pixel_atlas_strip_size() {
+        let frame = crate::widget::Frame {
+            width: 1.0,
+            height: 42.0,
+            ..Default::default()
+        };
+        let uvs = Rectangle::new(Point::new(0.0, 0.003906), Size::new(0.015625, 0.164063));
+
+        let config = standard_tile_config("Interface/FrameGeneral/UIFrameTabs", &uvs, &frame, 1.0);
+
+        assert_eq!(config.tile_w, 1.0);
+        assert_eq!(config.tile_h, 42.0);
+    }
+
+    #[test]
+    fn horizontal_one_pixel_repeat_collapses_to_single_quad() {
+        let mut batch = QuadBatch::new();
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(14.0, 42.0));
+        let uvs = Rectangle::new(Point::ORIGIN, Size::new(1.0, 1.0));
+
+        emit_horiz_tiles(
+            &mut batch,
+            bounds,
+            &uvs,
+            "Interface/FrameGeneral/UIFrameTabs@crop:0.000000,0.015625,0.003906,0.167969",
+            1.0,
+            [1.0, 1.0, 1.0, 1.0],
+            BlendMode::Alpha,
+        );
+
+        assert_eq!(batch.vertices.len(), 4);
+        assert_eq!(batch.texture_requests.len(), 1);
+        assert_eq!(batch.vertices[0].position, [0.0, 0.0]);
+        assert_eq!(batch.vertices[1].position, [14.0, 0.0]);
     }
 }

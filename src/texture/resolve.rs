@@ -220,9 +220,106 @@ fn extract_sub_region(
         pixels.extend_from_slice(&data.pixels[start..end]);
     }
 
+    bleed_low_alpha_black_padding(&mut pixels, width, height);
+
     Some(TextureData {
         width,
         height,
         pixels: Arc::<[u8]>::from(pixels),
     })
+}
+
+const EDGE_BLEED_ALPHA_MAX: u8 = 128;
+const EDGE_BLEED_RGB_MAX: u8 = 4;
+const EDGE_SOURCE_ALPHA_MIN: u8 = 128;
+const EDGE_SOURCE_RGB_MIN: u8 = 64;
+
+fn bleed_low_alpha_black_padding(pixels: &mut [u8], width: u32, height: u32) {
+    let source = pixels.to_vec();
+    for y in 0..height {
+        for x in 0..width {
+            let offset = pixel_offset(width, x, y);
+            if !is_low_alpha_black_padding(&source[offset..offset + 4]) {
+                continue;
+            }
+            let Some(rgb) = nearest_edge_rgb(&source, width, height, x, y) else {
+                continue;
+            };
+            pixels[offset..offset + 3].copy_from_slice(&rgb);
+        }
+    }
+}
+
+fn nearest_edge_rgb(source: &[u8], width: u32, height: u32, x: u32, y: u32) -> Option<[u8; 3]> {
+    let max_radius = width.max(height);
+    for radius in 1..=max_radius {
+        if let Some(source_x) = x.checked_sub(radius)
+            && let Some(rgb) = edge_rgb_at(source, width, source_x, y)
+        {
+            return Some(rgb);
+        }
+        if let Some(source_x) = x.checked_add(radius).filter(|&source_x| source_x < width)
+            && let Some(rgb) = edge_rgb_at(source, width, source_x, y)
+        {
+            return Some(rgb);
+        }
+        if let Some(rgb) = y
+            .checked_sub(radius)
+            .and_then(|source_y| edge_rgb_at(source, width, x, source_y))
+        {
+            return Some(rgb);
+        }
+        if y + radius < height
+            && let Some(rgb) = edge_rgb_at(source, width, x, y + radius)
+        {
+            return Some(rgb);
+        }
+    }
+    None
+}
+
+fn edge_rgb_at(source: &[u8], width: u32, x: u32, y: u32) -> Option<[u8; 3]> {
+    let offset = pixel_offset(width, x, y);
+    let pixel = source.get(offset..offset + 4)?;
+    is_edge_color_source(pixel).then_some([pixel[0], pixel[1], pixel[2]])
+}
+
+fn pixel_offset(width: u32, x: u32, y: u32) -> usize {
+    ((y * width + x) * 4) as usize
+}
+
+fn is_low_alpha_black_padding(pixel: &[u8]) -> bool {
+    pixel[3] <= EDGE_BLEED_ALPHA_MAX
+        && pixel[0] <= EDGE_BLEED_RGB_MAX
+        && pixel[1] <= EDGE_BLEED_RGB_MAX
+        && pixel[2] <= EDGE_BLEED_RGB_MAX
+}
+
+fn is_edge_color_source(pixel: &[u8]) -> bool {
+    pixel[3] > EDGE_SOURCE_ALPHA_MIN && pixel[0].max(pixel[1]).max(pixel[2]) > EDGE_SOURCE_RGB_MIN
+}
+
+#[cfg(test)]
+mod tests {
+    use super::extract_sub_region;
+    use crate::texture::TextureData;
+    use std::sync::Arc;
+
+    #[test]
+    fn cropped_sub_region_bleeds_edge_rgb_into_low_alpha_black_padding() {
+        let data = TextureData {
+            width: 3,
+            height: 1,
+            pixels: Arc::from([
+                220, 180, 40, 255, // opaque edge color
+                0, 0, 0, 96, // transparent padding from atlas edge
+                0, 0, 0, 0, // fully transparent padding
+            ]),
+        };
+
+        let cropped = extract_sub_region(&data, 0, 0, 3, 1).unwrap();
+
+        assert_eq!(&cropped.pixels[4..8], &[220, 180, 40, 96]);
+        assert_eq!(&cropped.pixels[8..12], &[220, 180, 40, 0]);
+    }
 }

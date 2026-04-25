@@ -36,7 +36,7 @@ pub fn should_skip_frame(
     // This is separate from the HighlightTexture button child (handled below).
     if f.draw_layer == DrawLayer::Highlight {
         let parent_hovered = f.parent_id.is_some() && hovered_frame == f.parent_id;
-        if !parent_hovered {
+        if !parent_hovered || !parent_allows_hover_highlight(f, registry) {
             return true;
         }
     }
@@ -63,6 +63,22 @@ fn parent_draw_layer_is_disabled(f: &crate::widget::Frame, registry: &WidgetRegi
         return false;
     };
     !parent.is_draw_layer_enabled(f.draw_layer)
+}
+
+fn parent_allows_hover_highlight(f: &crate::widget::Frame, registry: &WidgetRegistry) -> bool {
+    let Some(parent_id) = f.parent_id else {
+        return false;
+    };
+    let Some(parent) = registry.get(parent_id) else {
+        return false;
+    };
+    if matches!(
+        parent.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    ) {
+        return is_enabled(parent);
+    }
+    true
 }
 
 fn resolve_button_visibility(
@@ -138,7 +154,7 @@ fn is_enabled(frame: &crate::widget::Frame) -> bool {
 #[cfg(test)]
 mod tests {
     use super::should_skip_frame;
-    use crate::widget::{DrawLayer, Frame, WidgetRegistry, WidgetType};
+    use crate::widget::{AttributeValue, DrawLayer, Frame, WidgetRegistry, WidgetType};
 
     #[test]
     fn disabled_parent_draw_layer_hides_child_region() {
@@ -164,6 +180,43 @@ mod tests {
         assert!(
             skipped,
             "child region should be skipped when its parent draw layer is disabled",
+        );
+    }
+
+    #[test]
+    fn disabled_button_suppresses_hover_draw_layer_child() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut parent = Frame::new(WidgetType::Button, Some("Parent".to_string()), None);
+        parent
+            .attributes
+            .insert("__enabled".to_string(), AttributeValue::Boolean(false));
+        let parent_id = parent.id;
+        registry.register(parent);
+
+        let mut child = Frame::new(
+            WidgetType::Texture,
+            Some("HighlightChild".to_string()),
+            Some(parent_id),
+        );
+        child.draw_layer = DrawLayer::Highlight;
+        let child_id = child.id;
+        registry.register(child);
+        registry.add_child(parent_id, child_id);
+
+        let child = registry.get(child_id).unwrap();
+        let skipped = should_skip_frame(
+            child,
+            child_id,
+            1.0,
+            &None,
+            &registry,
+            None,
+            Some(parent_id),
+        );
+        assert!(
+            skipped,
+            "disabled button should not render HIGHLIGHT draw-layer children on hover",
         );
     }
 }

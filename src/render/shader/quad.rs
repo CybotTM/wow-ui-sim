@@ -106,6 +106,8 @@ pub struct TextureRequest {
     pub vertex_start: u32,
     /// Number of vertices using this texture.
     pub vertex_count: u32,
+    /// Whether atlas UV remapping should inset by half a texel for bleed protection.
+    pub use_uv_inset: bool,
     /// Request-local load state shared across cloned batches.
     pub handle: TextureRequestHandle,
 }
@@ -113,10 +115,23 @@ pub struct TextureRequest {
 impl TextureRequest {
     /// Create a new deferred texture request with fresh request-local state.
     pub fn new(path: impl Into<String>, vertex_start: u32, vertex_count: u32) -> Self {
+        let path = path.into();
+        let use_uv_inset = should_use_uv_inset(&path);
+        Self::new_with_uv_inset(path, vertex_start, vertex_count, use_uv_inset)
+    }
+
+    /// Create a new deferred texture request with explicit atlas UV inset behavior.
+    pub fn new_with_uv_inset(
+        path: impl Into<String>,
+        vertex_start: u32,
+        vertex_count: u32,
+        use_uv_inset: bool,
+    ) -> Self {
         Self {
             path: path.into(),
             vertex_start,
             vertex_count,
+            use_uv_inset,
             handle: TextureRequestHandle::default(),
         }
     }
@@ -127,9 +142,20 @@ impl TextureRequest {
             path: self.path.clone(),
             vertex_start,
             vertex_count: self.vertex_count,
+            use_uv_inset: self.use_uv_inset,
             handle: self.handle.clone(),
         }
     }
+}
+
+fn should_use_uv_inset(path: &str) -> bool {
+    !(path.contains("@crop:") && is_ui_frame_tabs_path(path))
+}
+
+fn is_ui_frame_tabs_path(path: &str) -> bool {
+    path.replace('\\', "/")
+        .to_ascii_lowercase()
+        .contains("interface/framegeneral/uiframetabs")
 }
 
 /// Shared request-local load state for a deferred texture request.

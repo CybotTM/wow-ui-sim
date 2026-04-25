@@ -573,7 +573,11 @@ fn resolve_texture_requests(
 ) {
     for request in requests {
         if let Some(entry) = resolved_texture_entry(atlas, &request.path) {
-            apply_resolved_texture_entry(request_vertices(request, vertices), entry);
+            apply_resolved_texture_entry(
+                request_vertices(request, vertices),
+                entry,
+                request.use_uv_inset,
+            );
         }
     }
 }
@@ -607,9 +611,10 @@ fn resolved_texture_entry(
 fn apply_resolved_texture_entry(
     vertices: &mut [crate::render::QuadVertex],
     entry: ResolvedTextureEntry,
+    use_uv_inset: bool,
 ) {
     match entry {
-        ResolvedTextureEntry::Rgba(entry) => apply_rgba_entry(vertices, &entry),
+        ResolvedTextureEntry::Rgba(entry) => apply_rgba_entry(vertices, &entry, use_uv_inset),
         ResolvedTextureEntry::Bc(entry) => apply_bc_entry(vertices, &entry),
     }
 }
@@ -617,6 +622,7 @@ fn apply_resolved_texture_entry(
 fn apply_rgba_entry(
     vertices: &mut [crate::render::QuadVertex],
     entry: &crate::render::shader::atlas::TextureEntry,
+    use_uv_inset: bool,
 ) {
     let tex_idx = entry.tex_index();
     for vertex in vertices.iter_mut() {
@@ -624,17 +630,18 @@ fn apply_rgba_entry(
             vertex.tex_index = tex_idx;
             vertex.tex_coords[0] = remap_entry_uv(
                 vertex.tex_coords[0],
-                entry.uv_x,
-                entry.uv_width,
-                entry.original_width,
-                entry.tier,
+                UvRemap::entry_axis(entry.uv_x, entry.uv_width, entry.original_width, entry.tier)
+                    .with_inset(use_uv_inset),
             );
             vertex.tex_coords[1] = remap_entry_uv(
                 vertex.tex_coords[1],
-                entry.uv_y,
-                entry.uv_height,
-                entry.original_height,
-                entry.tier,
+                UvRemap::entry_axis(
+                    entry.uv_y,
+                    entry.uv_height,
+                    entry.original_height,
+                    entry.tier,
+                )
+                .with_inset(use_uv_inset),
             );
         }
     }
@@ -680,17 +687,23 @@ fn resolve_mask_requests(
                     vertex.mask_tex_index = tex_idx;
                     vertex.mask_tex_coords[0] = remap_entry_uv(
                         vertex.mask_tex_coords[0],
-                        entry.uv_x,
-                        entry.uv_width,
-                        entry.original_width,
-                        entry.tier,
+                        UvRemap::entry_axis(
+                            entry.uv_x,
+                            entry.uv_width,
+                            entry.original_width,
+                            entry.tier,
+                        )
+                        .with_inset(request.use_uv_inset),
                     );
                     vertex.mask_tex_coords[1] = remap_entry_uv(
                         vertex.mask_tex_coords[1],
-                        entry.uv_y,
-                        entry.uv_height,
-                        entry.original_height,
-                        entry.tier,
+                        UvRemap::entry_axis(
+                            entry.uv_y,
+                            entry.uv_height,
+                            entry.original_height,
+                            entry.tier,
+                        )
+                        .with_inset(request.use_uv_inset),
                     );
                 }
             }
@@ -698,15 +711,42 @@ fn resolve_mask_requests(
     }
 }
 
-fn remap_entry_uv(local_uv: f32, base_uv: f32, span_uv: f32, original_size: u32, tier: u32) -> f32 {
-    let cell_size = crate::render::shader::atlas::TIER_SIZES[tier as usize];
-    let uploaded_size = original_size.min(cell_size).max(1) as f32;
-    let inset = if uploaded_size > 1.0 {
-        (span_uv * 0.5 / uploaded_size).min(span_uv * 0.5)
+#[derive(Clone, Copy)]
+struct UvRemap {
+    base_uv: f32,
+    span_uv: f32,
+    original_size: u32,
+    use_uv_inset: bool,
+    cell_size: u32,
+}
+
+impl UvRemap {
+    fn entry_axis(base_uv: f32, span_uv: f32, original_size: u32, tier: u32) -> Self {
+        Self {
+            base_uv,
+            span_uv,
+            original_size,
+            use_uv_inset: true,
+            cell_size: crate::render::shader::atlas::TIER_SIZES[tier as usize],
+        }
+    }
+
+    fn with_inset(self, use_uv_inset: bool) -> Self {
+        Self {
+            use_uv_inset,
+            ..self
+        }
+    }
+}
+
+fn remap_entry_uv(local_uv: f32, remap: UvRemap) -> f32 {
+    let uploaded_size = remap.original_size.min(remap.cell_size).max(1) as f32;
+    let inset = if remap.use_uv_inset && uploaded_size > 1.0 {
+        (remap.span_uv * 0.5 / uploaded_size).min(remap.span_uv * 0.5)
     } else {
         0.0
     };
-    base_uv + inset + local_uv * (span_uv - inset * 2.0).max(0.0)
+    remap.base_uv + inset + local_uv * (remap.span_uv - inset * 2.0).max(0.0)
 }
 
 /// Remap UV for BC atlas entries (fixed 256x256 cell size).

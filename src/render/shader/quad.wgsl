@@ -44,6 +44,9 @@ var bc1_atlas: texture_2d<f32>;   // BC1 (DXT1) compressed textures
 @group(1) @binding(8)
 var bc3_atlas: texture_2d<f32>;   // BC3 (DXT3/DXT5) compressed textures
 
+@group(1) @binding(9)
+var glyph_sampler: sampler;
+
 // Vertex input
 struct VertexInput {
     @location(0) position: vec2<f32>,
@@ -105,7 +108,7 @@ fn sample_tiered_texture(tex_index: i32, tex_coords: vec2<f32>) -> vec4<f32> {
     let s2 = textureSampleLevel(tier_256, texture_sampler, uv, 0.0);
     let s3 = textureSampleLevel(tier_512, texture_sampler, uv, 0.0);
     let s4 = textureSampleLevel(tier_2048, texture_sampler, uv, 0.0);
-    let sg = textureSampleLevel(glyph_atlas, texture_sampler, uv, 0.0);
+    let sg = textureSampleLevel(glyph_atlas, glyph_sampler, uv, 0.0);
     let sbc1 = textureSampleLevel(bc1_atlas, texture_sampler, uv, 0.0);
     let sbc3 = textureSampleLevel(bc3_atlas, texture_sampler, uv, 0.0);
 

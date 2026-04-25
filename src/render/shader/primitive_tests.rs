@@ -1,5 +1,5 @@
 use super::{
-    LoadedTexture, ResolvedTextureEntry, WowUiPipeline, WowUiPrimitive,
+    LoadedTexture, ResolvedTextureEntry, UvRemap, WowUiPipeline, WowUiPrimitive,
     apply_resolved_texture_entry, bc_texture_dimensions_fit_gpu_atlas, decode_crop_request,
     load_texture_prefer_bc, load_texture_prefer_bc_with_telemetry, remap_bc_entry_uv,
     remap_entry_uv, resolve_and_scale_quads,
@@ -138,11 +138,89 @@ fn load_texture_prefer_bc_cached_crop_request_skips_crop_decode_work() {
 
 #[test]
 fn remap_entry_uv_insets_slot_edges_by_half_texel() {
-    let left = remap_entry_uv(0.0, 0.25, 32.0 / 4096.0, 32, 0);
-    let right = remap_entry_uv(1.0, 0.25, 32.0 / 4096.0, 32, 0);
+    let remap = UvRemap::entry_axis(0.25, 32.0 / 4096.0, 32, 0);
+    let left = remap_entry_uv(0.0, remap);
+    let right = remap_entry_uv(1.0, remap);
 
     assert!((left - (0.25 + 0.5 / 4096.0)).abs() < 1e-6);
     assert!((right - (0.25 + 31.5 / 4096.0)).abs() < 1e-6);
+}
+
+#[test]
+fn tab_crop_texture_requests_disable_half_texel_inset() {
+    let request = crate::render::TextureRequest::new(
+        r"Interface\FrameGeneral\UIFrameTabs@crop:0.015625,0.593750,0.324219,0.488281",
+        0,
+        4,
+    );
+
+    assert!(
+        !request.use_uv_inset,
+        "tab atlas crops should preserve exact UV edges"
+    );
+}
+
+#[test]
+fn non_tab_texture_requests_keep_half_texel_inset() {
+    let request = crate::render::TextureRequest::new(
+        r"Interface\Buttons\UI-Panel-Button-Up@crop:0.000000,0.500000,0.000000,1.000000",
+        0,
+        4,
+    );
+
+    assert!(
+        request.use_uv_inset,
+        "non-tab texture crops should keep bleed protection"
+    );
+}
+
+#[test]
+fn texture_request_inset_policy_can_be_overridden() {
+    let request = crate::render::TextureRequest::new_with_uv_inset(
+        r"Interface\Buttons\UI-Panel-Button-Up@crop:0.000000,0.500000,0.000000,1.000000",
+        0,
+        4,
+        false,
+    );
+
+    assert!(!request.use_uv_inset);
+}
+
+#[test]
+fn resolved_tab_crop_uses_exact_atlas_slot_edges() {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+    let (device, queue) = pollster::block_on(async {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions::default())
+            .await
+            .expect("adapter");
+        adapter
+            .request_device(&wgpu::DeviceDescriptor::default())
+            .await
+            .expect("device")
+    });
+
+    let mut pipeline = WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
+    let path = r"Interface\FrameGeneral\UIFrameTabs@crop:0.015625,0.593750,0.324219,0.488281";
+    let entry = pipeline
+        .texture_atlas_mut()
+        .upload(&queue, path, 37, 42, &[0xff; 37 * 42 * 4])
+        .expect("tab crop should upload into the atlas");
+
+    let mut batch = QuadBatch::default();
+    batch.push_textured_path(
+        Rectangle::new(Point::ORIGIN, Size::new(37.0, 42.0)),
+        path,
+        [1.0, 1.0, 1.0, 1.0],
+        BlendMode::Alpha,
+    );
+
+    let resolved = resolve_and_scale_quads(&mut pipeline, &batch, 1.0);
+    let left = &resolved.vertices[0];
+    let right = &resolved.vertices[1];
+
+    assert_eq!(left.tex_coords[0], entry.uv_x);
+    assert_eq!(right.tex_coords[0], entry.uv_x + entry.uv_width);
 }
 
 #[test]
@@ -318,17 +396,16 @@ fn resolved_textures_remap_quad_uvs_into_atlas_slot() {
     for vertex in &resolved.vertices {
         let expected_u = remap_entry_uv(
             vertex.local_uv[0],
-            entry.uv_x,
-            entry.uv_width,
-            entry.original_width,
-            entry.tier,
+            UvRemap::entry_axis(entry.uv_x, entry.uv_width, entry.original_width, entry.tier),
         );
         let expected_v = remap_entry_uv(
             vertex.local_uv[1],
-            entry.uv_y,
-            entry.uv_height,
-            entry.original_height,
-            entry.tier,
+            UvRemap::entry_axis(
+                entry.uv_y,
+                entry.uv_height,
+                entry.original_height,
+                entry.tier,
+            ),
         );
         assert_eq!(vertex.tex_index, entry.tex_index());
         assert!((vertex.tex_coords[0] - expected_u).abs() < 1e-6);
@@ -364,7 +441,7 @@ fn resolved_bc_entries_remap_quad_uvs_into_bc_slot() {
         },
     ];
 
-    apply_resolved_texture_entry(&mut vertices, ResolvedTextureEntry::Bc(bc_entry));
+    apply_resolved_texture_entry(&mut vertices, ResolvedTextureEntry::Bc(bc_entry), true);
 
     assert_eq!(vertices[0].tex_index, bc_entry.tex_index());
     assert_eq!(vertices[1].tex_index, bc_entry.tex_index());
@@ -461,17 +538,16 @@ fn pending_transition_reuploads_strata_vertices_with_resolved_tex_indices_after_
     for (resolved, pending) in uploaded_vertices.iter().zip(&pending_vertices) {
         let expected_u = remap_entry_uv(
             resolved.local_uv[0],
-            entry.uv_x,
-            entry.uv_width,
-            entry.original_width,
-            entry.tier,
+            UvRemap::entry_axis(entry.uv_x, entry.uv_width, entry.original_width, entry.tier),
         );
         let expected_v = remap_entry_uv(
             resolved.local_uv[1],
-            entry.uv_y,
-            entry.uv_height,
-            entry.original_height,
-            entry.tier,
+            UvRemap::entry_axis(
+                entry.uv_y,
+                entry.uv_height,
+                entry.original_height,
+                entry.tier,
+            ),
         );
         assert_eq!(resolved.tex_index, entry.tex_index());
         assert!((resolved.tex_coords[0] - expected_u).abs() < 1e-6);
