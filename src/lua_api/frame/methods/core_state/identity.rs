@@ -7,6 +7,16 @@ use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+const INTERNAL_GENERATED_NAME_PREFIXES: &[&str] = &[
+    "__tpl_",
+    "__tex_",
+    "__font_",
+    "__line_",
+    "__anim_",
+    "__frame_",
+    "__Blizzard_",
+];
+
 pub fn set_id(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let user_id = i32::from_stack(state, 2)?;
@@ -116,7 +126,11 @@ pub fn get_name(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id(state, 1)?;
     let name = {
         let sim = borrow_state(state)?;
-        sim.widgets.get(id).and_then(|frame| frame.name.clone())
+        sim.widgets
+            .get(id)
+            .and_then(|frame| frame.name.as_deref())
+            .filter(|name| !is_internal_generated_name(name))
+            .map(str::to_owned)
     };
     let name_val = match name {
         Some(name) => create_string(state, &name),
@@ -143,6 +157,12 @@ pub fn get_debug_name(state: &mut LuaState) -> LuaResult<u32> {
     let debug_name_val = create_string(state, &debug_name);
     state.push(debug_name_val);
     Ok(1)
+}
+
+fn is_internal_generated_name(name: &str) -> bool {
+    INTERNAL_GENERATED_NAME_PREFIXES
+        .iter()
+        .any(|prefix| name.starts_with(prefix))
 }
 
 pub fn get_object_type(state: &mut LuaState) -> LuaResult<u32> {

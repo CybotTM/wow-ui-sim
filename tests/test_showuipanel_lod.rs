@@ -509,6 +509,7 @@ fn professions_frame_xml_pages_are_parent_keyed() {
             if not ProfessionsFrame.CraftingPage then return "crafting_page_missing" end
             if not ProfessionsFrame.SpecPage then return "spec_page_missing" end
             if not ProfessionsFrame.OrdersPage then return "orders_page_missing" end
+            if not ProfessionsFrame.CraftingPage.LinkButton then return "link_button_missing" end
             if not ProfessionsFrame.Pages or #ProfessionsFrame.Pages ~= 3 then
                 return "pages=" .. tostring(ProfessionsFrame.Pages and #ProfessionsFrame.Pages or nil)
             end

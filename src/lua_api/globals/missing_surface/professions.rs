@@ -13,7 +13,17 @@ use rilua::vm::{gc::arena::GcRef, table::Table};
 use rilua::{LuaApiMut, LuaResult, Val};
 
 const TRADE_SKILL_NAMESPACE: &str = "C_TradeSkillUI";
+const CRAFTING_ORDERS_NAMESPACE: &str = "C_CraftingOrders";
 const SELECTED_PROFESSION_KEY: &str = "_selectedProfessionID";
+const BLACKSMITHING_PROFESSION: i32 = 1;
+const MINING_PROFESSION: i32 = 6;
+const COOKING_PROFESSION: i32 = 9;
+const FISHING_PROFESSION: i32 = 10;
+const PROF0_INVENTORY_SLOTS: &[i32] = &[20, 21, 22];
+const PROF1_INVENTORY_SLOTS: &[i32] = &[23, 24, 25];
+const COOKING_INVENTORY_SLOTS: &[i32] = &[26, 27];
+const FISHING_INVENTORY_SLOTS: &[i32] = &[28];
+const PROFESSION_INVENTORY_SLOTS: &[i32] = &[20, 21, 22, 23, 24, 25, 26, 27, 28];
 type NamespaceMethod = (&'static str, fn(&mut LuaState) -> LuaResult<u32>);
 
 const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
@@ -48,9 +58,18 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         c_trade_skill_ui_get_profession_info_by_recipe_id,
     ),
     (
+        "GetProfessionByInventorySlot",
+        c_trade_skill_ui_get_profession_by_inventory_slot,
+    ),
+    (
+        "GetProfessionInventorySlots",
+        c_trade_skill_ui_get_profession_inventory_slots,
+    ),
+    (
         "GetProfessionSkillLineID",
         c_trade_skill_ui_get_profession_skill_line_id,
     ),
+    ("GetProfessionSlots", c_trade_skill_ui_get_profession_slots),
     ("GetProfessions", c_trade_skill_ui_get_professions),
     ("GetNumRecipes", c_trade_skill_ui_get_num_recipes),
     ("GetNumTradeSkills", c_trade_skill_ui_get_num_trade_skills),
@@ -109,9 +128,27 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
     ("CraftRecipe", c_trade_skill_ui_craft_recipe),
 ];
 
+const CRAFTING_ORDER_METHODS: &[NamespaceMethod] = &[
+    ("AreOrderNotesDisabled", stub_false),
+    ("CanOrderSkillAbility", stub_false),
+    ("CloseCrafterCraftingOrders", stub_noop),
+    ("GetClaimedOrder", stub_nil),
+    ("GetCrafterBuckets", stub_empty_table),
+    ("GetCrafterOrders", stub_empty_table),
+    ("GetCraftingOrderTime", stub_zero),
+    ("GetOrderClaimInfo", c_crafting_orders_get_order_claim_info),
+    ("OpenCrafterCraftingOrders", stub_noop),
+    ("OrderCanBeRecrafted", stub_false),
+    ("ShouldShowCraftingOrderTab", stub_false),
+    ("SkillLineHasOrders", stub_false),
+    ("UpdateIgnoreList", stub_noop),
+];
+
 pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE)?;
     register_namespace_methods(state, table_ref, TRADE_SKILL_METHODS)?;
+    let orders_ref = ensure_namespace(state, CRAFTING_ORDERS_NAMESPACE)?;
+    register_namespace_methods(state, orders_ref, CRAFTING_ORDER_METHODS)?;
     table_set_rust_fn_static(
         state,
         state.global,
@@ -127,6 +164,39 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
     Ok(())
 }
 
+fn c_crafting_orders_get_order_claim_info(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    set_number_field(state, table, "claimsRemaining", 0.0);
+    set_number_field(state, table, "secondsToRecharge", 0.0);
+    state.push(table);
+    Ok(1)
+}
+
+fn stub_noop(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn stub_nil(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+fn stub_false(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn stub_zero(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn stub_empty_table(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    state.push(table);
+    Ok(1)
+}
+
 pub(crate) fn open_trade_skill_for_skill_line(
     state: &mut LuaState,
     skill_line_id: i32,
@@ -137,9 +207,9 @@ pub(crate) fn open_trade_skill_for_skill_line(
 
     select_profession(state, skill_line_id)?;
     ensure_professions_frame_loaded(state);
+    fire_named_event_state(state, "TRADE_SKILL_LIST_UPDATE", &[]);
     show_professions_frame(state);
     fire_named_event_state(state, "TRADE_SKILL_NAME_UPDATE", &[]);
-    fire_named_event_state(state, "TRADE_SKILL_LIST_UPDATE", &[]);
     Ok(true)
 }
 
@@ -238,6 +308,24 @@ fn c_trade_skill_ui_get_profession_info_by_recipe_id(state: &mut LuaState) -> Lu
     Ok(1)
 }
 
+fn c_trade_skill_ui_get_profession_by_inventory_slot(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1)?;
+    match profession_for_inventory_slot(slot) {
+        Some(profession) => state.push(Val::Num(profession as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_profession_inventory_slots(state: &mut LuaState) -> LuaResult<u32> {
+    let table = create_table(state);
+    for (index, slot) in PROFESSION_INVENTORY_SLOTS.iter().enumerate() {
+        set_table_array(state, table, (index + 1) as i64, Val::Num(*slot as f64));
+    }
+    state.push(table);
+    Ok(1)
+}
+
 fn c_trade_skill_ui_get_profession_skill_line_id(state: &mut LuaState) -> LuaResult<u32> {
     let profession_id = i32::from_stack(state, 1)?;
     let skill_line_id = profession_data::PROFESSIONS
@@ -246,6 +334,17 @@ fn c_trade_skill_ui_get_profession_skill_line_id(state: &mut LuaState) -> LuaRes
         .map(|profession| profession.skill_line_id)
         .unwrap_or(profession_id);
     state.push(Val::Num(skill_line_id as f64));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_profession_slots(state: &mut LuaState) -> LuaResult<u32> {
+    let profession = i32::from_stack(state, 1)?;
+    let slots = profession_slots(profession);
+    let table = create_table(state);
+    for (index, slot) in slots.iter().enumerate() {
+        set_table_array(state, table, (index + 1) as i64, Val::Num(*slot as f64));
+    }
+    state.push(table);
     Ok(1)
 }
 
@@ -884,6 +983,26 @@ fn selected_profession(state: &mut LuaState) -> Option<&'static profession_data:
     };
     profession_data::get_profession(skill_line_id as i32)
         .or_else(|| profession_data::get_profession_by_index(0))
+}
+
+fn profession_slots(profession: i32) -> &'static [i32] {
+    match profession {
+        BLACKSMITHING_PROFESSION => PROF0_INVENTORY_SLOTS,
+        MINING_PROFESSION => PROF1_INVENTORY_SLOTS,
+        COOKING_PROFESSION => COOKING_INVENTORY_SLOTS,
+        FISHING_PROFESSION => FISHING_INVENTORY_SLOTS,
+        _ => &[],
+    }
+}
+
+fn profession_for_inventory_slot(slot: i32) -> Option<i32> {
+    match slot {
+        20..=22 => Some(BLACKSMITHING_PROFESSION),
+        23..=25 => Some(MINING_PROFESSION),
+        26 | 27 => Some(COOKING_PROFESSION),
+        28 => Some(FISHING_PROFESSION),
+        _ => None,
+    }
 }
 
 fn reagent_index_from_stack(state: &mut LuaState) -> LuaResult<usize> {

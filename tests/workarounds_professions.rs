@@ -59,18 +59,27 @@ fn settle_env(env: &WowLuaEnv) {
 fn casting_blacksmithing_opens_professions_frame() {
     let env = full_game_env();
 
-    let shown: bool = env
+    let result: String = env
         .eval(
             r#"
             CastSpellByID(2018)
-            return ProfessionsFrame ~= nil and ProfessionsFrame:IsShown() or false
+            if not ProfessionsFrame or not ProfessionsFrame:IsShown() then
+                return "frame_not_shown"
+            end
+            if not ProfessionsFrame.CraftingPage or not ProfessionsFrame.CraftingPage.LinkButton then
+                return "crafting_page_link_button_missing"
+            end
+            if ProfessionsFrame:GetWidth() < 900 then
+                return "width=" .. tostring(ProfessionsFrame:GetWidth())
+            end
+            return "ok"
             "#,
         )
         .unwrap();
 
-    assert!(
-        shown,
-        "ProfessionsFrame should be visible after casting Blacksmithing (spell 2018)"
+    assert_eq!(
+        result, "ok",
+        "ProfessionsFrame should be visible and expanded after casting Blacksmithing (spell 2018): {result}"
     );
 }
 

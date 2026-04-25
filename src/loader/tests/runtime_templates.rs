@@ -236,6 +236,57 @@ fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
 }
 
 #[test]
+fn runtime_child_key_values_exist_before_inherited_onload() {
+    let t = load_test_xml(
+        "runtime-child-key-values-before-inherited-onload",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Button name="NeedsInstanceValueTemplate" virtual="true">
+                <Scripts>
+                    <OnLoad>
+                        if self.slotName == nil then
+                            error("missing slotName")
+                        end
+                        self.loadedSlotName = self.slotName
+                    </OnLoad>
+                </Scripts>
+            </Button>
+
+            <Frame name="RuntimeChildKeyValueParentTemplate" virtual="true">
+                <Frames>
+                    <ItemButton parentKey="Child" inherits="NeedsInstanceValueTemplate">
+                        <KeyValues>
+                            <KeyValue key="slotName" value="Prof0ToolSlot" type="string"/>
+                        </KeyValues>
+                    </ItemButton>
+                    <ItemButton parentKey="SecondChild" inherits="NeedsInstanceValueTemplate">
+                        <KeyValues>
+                            <KeyValue key="slotName" value="Prof0Gear0Slot" type="string"/>
+                        </KeyValues>
+                    </ItemButton>
+                    <DropdownButton parentKey="LinkButton"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local parent = CreateFrame("Frame", "RuntimeChildKeyValueParent", UIParent, "RuntimeChildKeyValueParentTemplate")
+            assert(parent.Child ~= nil, "template child should exist")
+            assert(parent.SecondChild ~= nil, "second template child should exist")
+            assert(parent.LinkButton ~= nil, "dropdown template child should exist")
+            assert(parent.Child:GetName() == nil, "anonymous template child GetName should be nil")
+            assert(parent.Child.loadedSlotName == "Prof0ToolSlot", "inherited OnLoad should see child KeyValues")
+            assert(parent.SecondChild.loadedSlotName == "Prof0Gear0Slot", "second inherited OnLoad should see child KeyValues")
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_runtime_action_button_template_avoids_lua_layer_and_button_texture_methods() {
     let t = load_test_xml(
         "runtime-action-button-template-direct-layers",

@@ -9673,6 +9673,30 @@ if rawget(C_ProfSpecs, "GetTabInfo") == nil then
     return nil
   end
 end
+if rawget(C_ProfSpecs, "GetSpecTabInfo") == nil then
+  function C_ProfSpecs.GetSpecTabInfo()
+    return {
+      enabled = true,
+      errorReason = nil,
+    }
+  end
+end
+if rawget(C_ProfSpecs, "GetCurrencyInfoForSkillLine") == nil then
+  function C_ProfSpecs.GetCurrencyInfoForSkillLine(skillLineID)
+    if tonumber(skillLineID) == 164 then
+      return {
+        numAvailable = 0,
+        currencyName = "",
+      }
+    end
+    return nil
+  end
+end
+if rawget(C_ProfSpecs, "SkillLineHasSpecialization") == nil then
+  function C_ProfSpecs.SkillLineHasSpecialization(skillLineID)
+    return tonumber(skillLineID) == 164
+  end
+end
 
 if type(_G.IsPressHoldReleaseSpell) ~= "function" then
   function IsPressHoldReleaseSpell(...)

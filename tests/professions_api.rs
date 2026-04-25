@@ -83,6 +83,45 @@ fn test_profession_info_blacksmithing() {
 }
 
 #[test]
+fn trade_skill_profession_inventory_slots_are_available() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local blacksmithingSlots = C_TradeSkillUI.GetProfessionSlots(1)
+            if #blacksmithingSlots ~= 3 or blacksmithingSlots[1] ~= 20 or blacksmithingSlots[3] ~= 22 then
+                return "blacksmithing_slots"
+            end
+
+            local miningSlots = C_TradeSkillUI.GetProfessionSlots(6)
+            if #miningSlots ~= 3 or miningSlots[1] ~= 23 or miningSlots[3] ~= 25 then
+                return "mining_slots"
+            end
+
+            local allSlots = C_TradeSkillUI.GetProfessionInventorySlots()
+            if #allSlots ~= 9 or allSlots[1] ~= 20 or allSlots[9] ~= 28 then
+                return "all_slots"
+            end
+
+            if C_TradeSkillUI.GetProfessionByInventorySlot(20) ~= 1 then
+                return "slot_20_profession"
+            end
+            if C_TradeSkillUI.GetProfessionByInventorySlot(24) ~= 6 then
+                return "slot_24_profession"
+            end
+            if C_TradeSkillUI.GetProfessionByInventorySlot(99) ~= nil then
+                return "unknown_slot"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_profession_info_mining() {
     let env = env();
     let (name, skill): (String, i32) = env

@@ -18,6 +18,8 @@ use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
 
+const EMPTY_PROFESSION_SLOT_ICON: i32 = 130766;
+
 /// `(slot_id, icon_file_id)` for every named equipment/bag slot the sim
 /// recognises. Keys are lowercase for case-insensitive lookup.
 const INVENTORY_SLOTS: &[(&'static str, i32, i32)] = &[
@@ -40,6 +42,15 @@ const INVENTORY_SLOTS: &[(&'static str, i32, i32)] = &[
     ("secondaryhandslot", 17, 136524),
     ("rangedslot", 18, 136520),
     ("tabardslot", 19, 136527),
+    ("prof0toolslot", 20, EMPTY_PROFESSION_SLOT_ICON),
+    ("prof0gear0slot", 21, EMPTY_PROFESSION_SLOT_ICON),
+    ("prof0gear1slot", 22, EMPTY_PROFESSION_SLOT_ICON),
+    ("prof1toolslot", 23, EMPTY_PROFESSION_SLOT_ICON),
+    ("prof1gear0slot", 24, EMPTY_PROFESSION_SLOT_ICON),
+    ("prof1gear1slot", 25, EMPTY_PROFESSION_SLOT_ICON),
+    ("cookingtoolslot", 26, EMPTY_PROFESSION_SLOT_ICON),
+    ("cookinggear0slot", 27, EMPTY_PROFESSION_SLOT_ICON),
+    ("fishingtoolslot", 28, EMPTY_PROFESSION_SLOT_ICON),
     ("ammoslot", 0, 136510),
     ("bag0slot", 20, 136511),
     ("bag1slot", 21, 136511),
