@@ -4960,6 +4960,16 @@ if GetButtonMetatable == nil then
   end
 end
 
+if GetEditBoxMetatable == nil then
+  function GetEditBoxMetatable()
+    if CreateFrame == nil then
+      return nil
+    end
+    local frame = CreateFrame("EditBox")
+    return frame and getmetatable(frame) or nil
+  end
+end
+
 if secretwrap == nil then
   function secretwrap(fn)
     return fn
@@ -12564,8 +12574,8 @@ then
 end
 
 if type(GetAppropriateTopLevelParent) ~= "function" then
-  local __wow_root_ui_parent = rawget(_G, "UIParent")
-  local __wow_alternate_top_level_parent = nil
+  __wow_root_ui_parent = rawget(_G, "UIParent")
+  __wow_alternate_top_level_parent = nil
 
   function SetAlternateTopLevelParent(parent)
     __wow_alternate_top_level_parent = parent

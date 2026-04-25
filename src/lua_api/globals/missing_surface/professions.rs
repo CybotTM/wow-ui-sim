@@ -50,6 +50,8 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         "GetCraftingOrderCount",
         c_trade_skill_ui_get_crafting_order_count,
     ),
+    ("GetCraftableCount", stub_zero),
+    ("GetCategories", c_trade_skill_ui_get_categories),
     (
         "GetFilteredRecipeIDs",
         c_trade_skill_ui_get_filtered_recipe_ids,
@@ -74,6 +76,10 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
     ("GetProfessions", c_trade_skill_ui_get_professions),
     ("GetNumRecipes", c_trade_skill_ui_get_num_recipes),
     ("GetNumTradeSkills", c_trade_skill_ui_get_num_trade_skills),
+    (
+        "GetRecipeDescription",
+        c_trade_skill_ui_get_recipe_description,
+    ),
     ("GetRecipeInfo", c_trade_skill_ui_get_recipe_info),
     ("GetRecipeItemLink", c_trade_skill_ui_get_recipe_item_link),
     (
@@ -81,9 +87,15 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         c_trade_skill_ui_get_recipe_item_name_filter,
     ),
     (
+        "GetRecipeOutputItemData",
+        c_trade_skill_ui_get_recipe_output_item_data,
+    ),
+    ("GetRecipeQualityItemIDs", stub_empty_table),
+    (
         "GetRecipeNumReagents",
         c_trade_skill_ui_get_recipe_num_reagents,
     ),
+    ("GetRecipeRequirements", stub_empty_table),
     (
         "GetRecipeReagentInfo",
         c_trade_skill_ui_get_recipe_reagent_info,
@@ -99,6 +111,7 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         "GetTradeSkillListLink",
         c_trade_skill_ui_get_trade_skill_list_link,
     ),
+    ("GetFactionSpecificOutputItem", stub_nil),
     (
         "GetTradeSkillTexture",
         c_trade_skill_ui_get_trade_skill_texture,
@@ -109,6 +122,10 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
     ),
     ("IsNPCCrafting", c_trade_skill_ui_is_npc_crafting),
     ("IsRecipeCraftable", c_trade_skill_ui_is_recipe_craftable),
+    (
+        "IsRecipeInSkillLine",
+        c_trade_skill_ui_is_recipe_in_skill_line,
+    ),
     ("IsRecipeLearned", c_trade_skill_ui_is_recipe_learned),
     ("IsRecipeTracked", c_trade_skill_ui_is_recipe_tracked),
     ("IsRuneforging", c_trade_skill_ui_is_runeforging),
@@ -294,6 +311,14 @@ fn c_trade_skill_ui_get_crafting_order_count(state: &mut LuaState) -> LuaResult<
     Ok(1)
 }
 
+fn c_trade_skill_ui_get_categories(state: &mut LuaState) -> LuaResult<u32> {
+    let category_ids = profession_data::get_category_ids();
+    for category_id in &category_ids {
+        state.push(Val::Num(*category_id as f64));
+    }
+    Ok(category_ids.len() as u32)
+}
+
 fn c_trade_skill_ui_get_filtered_recipe_ids(state: &mut LuaState) -> LuaResult<u32> {
     let recipe_ids = profession_data::get_filtered_recipe_ids();
     let table = recipe_id_table(state, &recipe_ids);
@@ -447,6 +472,17 @@ fn c_trade_skill_ui_get_recipe_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_trade_skill_ui_get_recipe_description(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let description = u32::try_from(recipe_id)
+        .ok()
+        .and_then(crate::spell_descriptions::get_spell_description)
+        .unwrap_or("");
+    let description = create_string(state, description);
+    state.push(description);
+    Ok(1)
+}
+
 fn c_trade_skill_ui_get_recipe_item_link(state: &mut LuaState) -> LuaResult<u32> {
     let recipe_id = i32::from_stack(state, 1)?;
     let link = profession_data::get_recipe(recipe_id)
@@ -458,6 +494,23 @@ fn c_trade_skill_ui_get_recipe_item_link(state: &mut LuaState) -> LuaResult<u32>
 fn c_trade_skill_ui_get_recipe_item_name_filter(state: &mut LuaState) -> LuaResult<u32> {
     let filter = create_string(state, "");
     state.push(filter);
+    Ok(1)
+}
+
+fn c_trade_skill_ui_get_recipe_output_item_data(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let recipe = profession_data::get_recipe(recipe_id);
+    let table = create_table(state);
+    if let Some(recipe) = recipe {
+        table_set(state, table, "hyperlink", Val::Nil);
+        set_number_field(state, table, "icon", 0.0);
+        if recipe.output_item_id == 0 {
+            table_set(state, table, "itemID", Val::Nil);
+        } else {
+            set_number_field(state, table, "itemID", recipe.output_item_id as f64);
+        }
+    }
+    state.push(table);
     Ok(1)
 }
 
@@ -571,6 +624,17 @@ fn c_trade_skill_ui_is_recipe_craftable(state: &mut LuaState) -> LuaResult<u32> 
     let count = Option::<i32>::from_stack(state, 2)?.unwrap_or(1).max(1);
     let craftable = recipe_is_craftable(state, recipe_id, count);
     state.push(Val::Bool(craftable));
+    Ok(1)
+}
+
+fn c_trade_skill_ui_is_recipe_in_skill_line(state: &mut LuaState) -> LuaResult<u32> {
+    let recipe_id = i32::from_stack(state, 1)?;
+    let skill_line_id = i32::from_stack(state, 2)?;
+    let in_skill_line = profession_data::get_recipe(recipe_id)
+        .and_then(|_| profession_data::get_profession(skill_line_id))
+        .map(|profession| profession.profession == BLACKSMITHING_PROFESSION)
+        .unwrap_or(false);
+    state.push(Val::Bool(in_skill_line));
     Ok(1)
 }
 
@@ -934,6 +998,7 @@ fn populate_recipe_info_table(
     set_number_field(state, table, "difficulty", recipe.difficulty as f64);
     set_number_field(state, table, "categoryID", recipe.category_id as f64);
     set_number_field(state, table, "itemLevel", recipe.item_level as f64);
+    set_number_field(state, table, "maxTrivialLevel", recipe.difficulty as f64);
     set_bool_field(state, table, "favorite", false);
 }
 
@@ -945,7 +1010,11 @@ fn populate_recipe_schematic_table(
     let reagent_slot_schematics = reagent_slot_schematic_table(state, recipe);
     set_number_field(state, table, "recipeID", recipe.recipe_id as f64);
     set_string_field(state, table, "name", recipe.name);
-    set_number_field(state, table, "outputItemID", recipe.output_item_id as f64);
+    if recipe.output_item_id == 0 {
+        table_set(state, table, "outputItemID", Val::Nil);
+    } else {
+        set_number_field(state, table, "outputItemID", recipe.output_item_id as f64);
+    }
     set_number_field(state, table, "quantityMin", recipe.output_quantity as f64);
     set_number_field(state, table, "quantityMax", recipe.output_quantity as f64);
     table_set(

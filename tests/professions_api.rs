@@ -318,6 +318,66 @@ fn blacksmithing_recipes_include_wago_db2_examples_for_each_expansion() {
 }
 
 #[test]
+fn trade_skill_recipes_are_visible_in_blacksmithing_skill_line() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local categories = { C_TradeSkillUI.GetCategories() }
+            if #categories == 0 then
+                return "categories=0"
+            end
+
+            local sawClassic = false
+            for _, categoryID in ipairs(categories) do
+                local category = C_TradeSkillUI.GetCategoryInfo(categoryID)
+                if category and category.name == "Classic Blacksmithing" then
+                    sawClassic = true
+                    break
+                end
+            end
+            if not sawClassic then
+                return "missing_classic_category"
+            end
+
+            if not C_TradeSkillUI.IsRecipeInSkillLine(2660, 164) then
+                return "classic_recipe_hidden"
+            end
+            if C_TradeSkillUI.IsRecipeInSkillLine(2660, 186) then
+                return "classic_recipe_in_mining"
+            end
+            if C_TradeSkillUI.GetRecipeInfo(2660).maxTrivialLevel == nil then
+                return "missing_max_trivial"
+            end
+            if #C_TradeSkillUI.GetRecipeRequirements(2660) ~= 0 then
+                return "requirements"
+            end
+            if C_TradeSkillUI.GetCraftableCount(2660) ~= 0 then
+                return "craftable_count"
+            end
+            if C_TradeSkillUI.GetRecipeSchematic(2660).outputItemID ~= nil then
+                return "empty_output_item"
+            end
+            local outputItemData = C_TradeSkillUI.GetRecipeOutputItemData(2660)
+            if type(outputItemData) ~= "table" then
+                return "missing_output_data"
+            end
+            if outputItemData.itemID ~= nil then
+                return "empty_output_item_data"
+            end
+            if type(C_TradeSkillUI.GetRecipeDescription(2660)) ~= "string" then
+                return "missing_description"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_filtered_recipe_ids_nonempty() {
     let env = env();
     let count: i32 = env

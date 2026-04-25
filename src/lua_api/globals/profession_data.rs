@@ -385,6 +385,13 @@ pub fn get_filtered_recipe_ids() -> Vec<i32> {
         .collect()
 }
 
+pub fn get_category_ids() -> Vec<i32> {
+    RECIPE_CATEGORIES
+        .iter()
+        .map(|category| category.category_id)
+        .collect()
+}
+
 pub fn get_category(category_id: i32) -> Option<&'static RecipeCategory> {
     RECIPE_CATEGORIES
         .iter()
