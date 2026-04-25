@@ -122,6 +122,23 @@ fn trade_skill_profession_inventory_slots_are_available() {
 }
 
 #[test]
+fn trade_skill_concentration_currency_is_disabled_when_unsupported() {
+    let env = env();
+    let concentration_currency_id: i32 = env
+        .eval("return C_TradeSkillUI.GetConcentrationCurrencyID(164)")
+        .unwrap();
+
+    assert_eq!(concentration_currency_id, 0);
+}
+
+#[test]
+fn trade_skill_set_recipe_tracked_accepts_missing_recrafting_flag() {
+    let env = env();
+    env.eval::<()>("C_TradeSkillUI.SetRecipeTracked(1001, true)")
+        .unwrap();
+}
+
+#[test]
 fn test_profession_info_mining() {
     let env = env();
     let (name, skill): (String, i32) = env

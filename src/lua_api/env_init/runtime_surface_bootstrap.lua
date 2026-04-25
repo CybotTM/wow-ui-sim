@@ -9668,6 +9668,9 @@ if rawget(C_ProfSpecs, "GetTabInfo") == nil then
         tabID = 101,
         rootNodeID = 1001,
         name = "Armorsmithing",
+        description = "",
+        rootIconID = 0,
+        highlights = {},
       }
     end
     return nil
@@ -9676,8 +9679,8 @@ end
 if rawget(C_ProfSpecs, "GetSpecTabInfo") == nil then
   function C_ProfSpecs.GetSpecTabInfo()
     return {
-      enabled = true,
-      errorReason = nil,
+      enabled = false,
+      errorReason = "",
     }
   end
 end
@@ -9693,8 +9696,8 @@ if rawget(C_ProfSpecs, "GetCurrencyInfoForSkillLine") == nil then
   end
 end
 if rawget(C_ProfSpecs, "SkillLineHasSpecialization") == nil then
-  function C_ProfSpecs.SkillLineHasSpecialization(skillLineID)
-    return tonumber(skillLineID) == 164
+  function C_ProfSpecs.SkillLineHasSpecialization(_skillLineID)
+    return false
   end
 end
 

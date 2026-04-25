@@ -45,6 +45,7 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         "GetChildProfessionInfos",
         c_trade_skill_ui_get_child_profession_infos,
     ),
+    ("GetConcentrationCurrencyID", stub_zero),
     (
         "GetCraftingOrderCount",
         c_trade_skill_ui_get_crafting_order_count,
@@ -500,7 +501,7 @@ fn c_trade_skill_ui_get_recipe_schematic(state: &mut LuaState) -> LuaResult<u32>
 fn c_trade_skill_ui_set_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
     let recipe_id = u32::from_stack(state, 1)?;
     let tracked = bool::from_stack(state, 2)?;
-    let is_recrafting = bool::from_stack(state, 3)?;
+    let is_recrafting = Option::<bool>::from_stack(state, 3)?.unwrap_or(false);
 
     let mut sim = borrow_state_mut(state)?;
     let changed = sim.tracked_recipes.set(recipe_id, tracked, is_recrafting);

@@ -58,6 +58,7 @@ fn settle_env(env: &WowLuaEnv) {
 #[test]
 fn casting_blacksmithing_opens_professions_frame() {
     let env = full_game_env();
+    env.state().borrow_mut().lua_errors.clear();
 
     let result: String = env
         .eval(
@@ -81,11 +82,17 @@ fn casting_blacksmithing_opens_professions_frame() {
         result, "ok",
         "ProfessionsFrame should be visible and expanded after casting Blacksmithing (spell 2018): {result}"
     );
+    assert!(
+        env.state().borrow().lua_errors.is_empty(),
+        "Casting Blacksmithing should not report Lua errors: {:?}",
+        env.state().borrow().lua_errors
+    );
 }
 
 #[test]
 fn clicking_blacksmithing_button_in_professions_book_opens_panel() {
     let env = full_game_env();
+    env.state().borrow_mut().lua_errors.clear();
 
     let shown: bool = env
         .eval(
@@ -122,5 +129,10 @@ fn clicking_blacksmithing_button_in_professions_book_opens_panel() {
     assert!(
         shown,
         "Clicking the Blacksmithing spell button should open ProfessionsFrame"
+    );
+    assert!(
+        env.state().borrow().lua_errors.is_empty(),
+        "Clicking Blacksmithing should not report Lua errors: {:?}",
+        env.state().borrow().lua_errors
     );
 }
