@@ -9842,6 +9842,44 @@ local function __wow_dropdown_materialize_menu(owner, description)
   owner.__wow_menu_buttons = buttons
 end
 
+local function __wow_dropdown_radio_is_selected(element)
+  local args = type(element) == "table" and element.args or nil
+  if type(args) ~= "table" or type(args[1]) ~= "function" then
+    return false
+  end
+  local ok, selected = pcall(args[1], args[3])
+  return ok and selected == true
+end
+
+local function __wow_dropdown_selected_text(description)
+  local elements = type(description) == "table" and description.__wow_elements or nil
+  if type(elements) ~= "table" then
+    return nil
+  end
+  for _, element in ipairs(elements) do
+    if type(element) == "table"
+        and type(element.text) == "string"
+        and element.text ~= ""
+        and __wow_dropdown_radio_is_selected(element) then
+      return element.text
+    end
+  end
+  return nil
+end
+
+local function __wow_dropdown_update_selection_text(owner, description)
+  local text = __wow_dropdown_selected_text(description)
+  if text == nil and type(owner.GetSelectionText) == "function" then
+    local ok, selectionText = pcall(owner.GetSelectionText, owner)
+    if ok and type(selectionText) == "string" and selectionText ~= "" then
+      text = selectionText
+    end
+  end
+  if text ~= nil and type(owner.SetText) == "function" then
+    owner:SetText(text)
+  end
+end
+
 if type(DropdownButtonMixin) == "table" then
   local __wow_existing_dropdown_generate_menu = DropdownButtonMixin.GenerateMenu
   local __wow_existing_dropdown_setup_menu = DropdownButtonMixin.SetupMenu
@@ -9862,10 +9900,13 @@ if type(DropdownButtonMixin) == "table" then
       local ok, description = pcall(__wow_existing_dropdown_generate_menu, self)
       if ok and type(description) == "table" then
         self.__wow_menu_description = description
+        __wow_dropdown_update_selection_text(self, description)
         return description
       end
     end
-    return __wow_dropdown_generate_menu(self)
+    local description = __wow_dropdown_generate_menu(self)
+    __wow_dropdown_update_selection_text(self, description)
+    return description
   end
   if type(DropdownButtonMixin.OpenMenu) ~= "function" then
     function DropdownButtonMixin:OpenMenu()

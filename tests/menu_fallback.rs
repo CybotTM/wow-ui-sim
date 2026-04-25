@@ -165,6 +165,27 @@ fn dropdown_open_menu_materializes_visible_rank_rows() {
 }
 
 #[test]
+fn dropdown_generate_menu_sets_selected_radio_text() {
+    let env = env_with_fallback();
+    let text: String = env
+        .eval(
+            r#"
+            local dropdown = CreateFrame("DropdownButton", "MenuFallbackSelectedDropdown", UIParent)
+            Mixin(dropdown, DropdownButtonMixin)
+            local selected = 2
+            dropdown:SetupMenu(function(_, rootDescription)
+                rootDescription:CreateRadio("Guild Leader", function(value) return value == selected end, function() end, 1)
+                rootDescription:CreateRadio("Officer", function(value) return value == selected end, function() end, 2)
+            end)
+            dropdown:GenerateMenu()
+            return dropdown:GetText() or ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(text, "Officer");
+}
+
+#[test]
 fn populate_description_swallows_generator_errors() {
     let env = env_with_fallback();
     let ok: bool = env
