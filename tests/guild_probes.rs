@@ -36,6 +36,23 @@ fn can_guild_invite_tracks_guild_membership() {
 }
 
 #[test]
+fn guild_edit_permissions_track_officer_status() {
+    let env = env();
+    let (seeded_motd, seeded_info): (bool, bool) = env
+        .eval("return CanEditMOTD(), CanEditGuildInfo() ~= nil")
+        .unwrap();
+    assert!(!seeded_motd, "seeded member rank cannot edit the MOTD");
+    assert!(!seeded_info, "seeded member rank cannot edit guild info");
+
+    env.state().borrow_mut().world.guild_is_officer = true;
+    let (officer_motd, officer_info): (bool, bool) = env
+        .eval("return CanEditMOTD(), CanEditGuildInfo() ~= nil")
+        .unwrap();
+    assert!(officer_motd);
+    assert!(officer_info);
+}
+
+#[test]
 fn is_guild_leader_defaults_false() {
     let env = env();
     let leader: bool = env.eval("return IsGuildLeader()").unwrap();

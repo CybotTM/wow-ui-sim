@@ -9,6 +9,8 @@
 //! - `CanGuildInvite()`             -> true when the player is in a guild
 //! - `CanGuildRemove()`             -> true when the player is in a guild
 //! - `CanEditPublicNote()`          -> true when the player is in a guild
+//! - `CanEditMOTD()`                -> `world.guild_is_officer` when in a guild
+//! - `CanEditGuildInfo()`           -> one-or-nil from `world.guild_is_officer`
 //! - `IsGuildLeader()`              -> false until rank privileges are modeled
 //! - `QueryGuildRecipes()`          -> no-op, guild recipe state is unmodeled
 //! - `CanViewGuildRecipes()`        -> false, guild recipe state is unmodeled
@@ -94,6 +96,26 @@ fn can_guild_remove(state: &mut LuaState) -> LuaResult<u32> {
 fn can_edit_public_note(state: &mut LuaState) -> LuaResult<u32> {
     let b = borrow_state(state)?.world.guild_name.is_some();
     state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_edit_guild_details(state: &mut LuaState) -> LuaResult<bool> {
+    let world = &borrow_state(state)?.world;
+    Ok(world.guild_name.is_some() && world.guild_is_officer)
+}
+
+fn can_edit_motd(state: &mut LuaState) -> LuaResult<u32> {
+    let b = can_edit_guild_details(state)?;
+    state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_edit_guild_info(state: &mut LuaState) -> LuaResult<u32> {
+    if can_edit_guild_details(state)? {
+        state.push(Val::Bool(true));
+    } else {
+        state.push(Val::Nil);
+    }
     Ok(1)
 }
 
@@ -257,6 +279,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanGuildInvite", can_guild_invite)?;
     LuaApiMut::register_function(lua, "CanGuildRemove", can_guild_remove)?;
     LuaApiMut::register_function(lua, "CanEditPublicNote", can_edit_public_note)?;
+    LuaApiMut::register_function(lua, "CanEditMOTD", can_edit_motd)?;
+    LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
     LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
