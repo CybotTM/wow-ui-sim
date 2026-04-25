@@ -11,8 +11,16 @@ pub(super) fn register_recruit_a_friend_surface(state: &mut LuaState) -> LuaResu
     table_set_rust_fn_static(state, ns, "GetRAFInfo", get_raf_info)?;
     table_set_rust_fn_static(state, ns, "GetRAFSystemInfo", get_raf_system_info)?;
     table_set_rust_fn_static(state, ns, "GetRecruitInfo", get_recruit_info)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetSummonFriendCooldown",
+        get_summon_friend_cooldown,
+    )?;
     table_set_rust_fn_static(state, ns, "IsEnabled", is_enabled)?;
     table_set_rust_fn_static(state, ns, "IsRecruitingEnabled", is_recruiting_enabled)?;
+    table_set_rust_fn_static(state, ns, "CanSummonFriend", can_summon_friend)?;
+    table_set_rust_fn_static(state, ns, "SummonFriend", summon_friend)?;
     Ok(())
 }
 
@@ -74,4 +82,19 @@ fn get_recruit_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     state.push(Val::Nil);
     Ok(2)
+}
+
+fn get_summon_friend_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(2)
+}
+
+fn can_summon_friend(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn summon_friend(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
 }

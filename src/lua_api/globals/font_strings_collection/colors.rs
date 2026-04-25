@@ -34,6 +34,7 @@ pub(super) const NAMED_COLOR_GLOBALS: &[(&'static str, (f64, f64, f64, f64))] = 
     ("DISABLED_FONT_COLOR", (0.5, 0.5, 0.5, 1.0)),
     ("DIM_RED_FONT_COLOR", (0.8, 0.1, 0.1, 1.0)),
     ("LIGHTBLUE_FONT_COLOR", (0.51176, 0.77255, 1.0, 1.0)),
+    ("HIGHLIGHT_LIGHT_BLUE", (0.51176, 0.77255, 1.0, 1.0)),
     ("ACTIONBAR_HOTKEY_FONT_COLOR", (0.6, 0.6, 0.6, 1.0)),
     ("FACTION_RED_COLOR", (0.8, 0.13, 0.13, 1.0)),
     ("FACTION_ORANGE_COLOR", (0.93, 0.53, 0.13, 1.0)),
