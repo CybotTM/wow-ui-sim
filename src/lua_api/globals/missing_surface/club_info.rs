@@ -13,8 +13,8 @@
 //! - `C_Club.GetClubMembers(clubId)` — returns an array of member IDs.
 //! - `C_Club.GetMemberInfo(clubId, memberId)` — returns a
 //!   `ClubMemberInfo`-like table derived from `world.guild_members`.
-//! - `C_Club.GetStreams(clubId)` / message history probes — returns one
-//!   synthetic guild stream with deterministic generated messages.
+//! - `C_Club.GetStreams(clubId)` / message history probes — returns synthetic
+//!   guild and officer streams, with deterministic generated guild messages.
 //! - `C_Club.GetClubCapacity(clubId)` — returns 1000 (hard-coded guild
 //!   capacity; retail is unbounded in practice).
 //! - `C_Club.IsEnabled()` — returns true unconditionally.
@@ -35,6 +35,8 @@ const GUILD_CLUB_TYPE: f64 = 2.0;
 const GUILD_CLUB_CAPACITY: f64 = 1000.0;
 const GUILD_STREAM_ID: f64 = 1.0;
 const GUILD_STREAM_TYPE: f64 = 1.0;
+const OFFICER_STREAM_ID: f64 = 2.0;
+const OFFICER_STREAM_TYPE: f64 = 2.0;
 const FIRST_MESSAGE_EPOCH: i64 = 1_700_000_000_000_000;
 const MESSAGE_EPOCH_STEP: i64 = 120_000_000;
 
@@ -85,6 +87,7 @@ fn register_club_privilege_methods(state: &mut LuaState, table_ref: GcRef<Table>
         "GetClubCapacity",
         c_club_get_club_capacity,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetClubLimits", c_club_get_club_limits)?;
     table_set_rust_fn_static(state, table_ref, "IsEnabled", c_club_is_enabled)?;
     table_set_rust_fn_static(state, table_ref, "IsRestricted", c_club_is_restricted)?;
     Ok(())
@@ -259,25 +262,37 @@ fn c_club_get_club_privileges(state: &mut LuaState) -> LuaResult<u32> {
 fn c_club_get_streams(state: &mut LuaState) -> LuaResult<u32> {
     let array = create_table(state);
     if is_guild_club_arg(state) {
-        let stream = build_guild_stream_table(state);
-        set_table_array(state, array, 1, stream);
+        let guild_stream = build_stream_table(
+            state,
+            GUILD_STREAM_ID,
+            GUILD_STREAM_TYPE,
+            "Guild",
+            "General guild chat",
+            false,
+        );
+        let officer_stream = build_stream_table(
+            state,
+            OFFICER_STREAM_ID,
+            OFFICER_STREAM_TYPE,
+            "Officer",
+            "Officer chat",
+            true,
+        );
+        set_table_array(state, array, 1, guild_stream);
+        set_table_array(state, array, 2, officer_stream);
     }
     state.push(array);
     Ok(1)
 }
 
 fn c_club_get_stream_info(state: &mut LuaState) -> LuaResult<u32> {
-    if is_guild_stream_arg(state) {
-        let stream = build_guild_stream_table(state);
-        state.push(stream);
-    } else {
-        state.push(Val::Nil);
-    }
+    let stream = stream_table_from_stack(state).unwrap_or(Val::Nil);
+    state.push(stream);
     Ok(1)
 }
 
 fn c_club_is_subscribed_to_stream(state: &mut LuaState) -> LuaResult<u32> {
-    let subscribed = is_guild_stream_arg(state);
+    let subscribed = is_known_stream_arg(state);
     state.push(Val::Bool(subscribed));
     Ok(1)
 }
@@ -363,6 +378,13 @@ fn c_club_get_club_capacity(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn c_club_get_club_limits(state: &mut LuaState) -> LuaResult<u32> {
+    let limits = create_table(state);
+    table_set(state, limits, "maximumNumberOfStreams", Val::Num(2.0));
+    state.push(limits);
+    Ok(1)
+}
+
 fn c_club_get_guild_club_id(state: &mut LuaState) -> LuaResult<u32> {
     if borrow_state(state)?.world.guild_name.is_some() {
         let club_id = create_string(state, GUILD_CLUB_ID);
@@ -400,7 +422,43 @@ fn is_guild_club_arg(state: &mut LuaState) -> bool {
 }
 
 fn is_guild_stream_arg(state: &mut LuaState) -> bool {
-    is_guild_club_arg(state) && matches!(f64::from_stack(state, 2), Ok(id) if id == GUILD_STREAM_ID)
+    is_stream_arg(state, GUILD_STREAM_ID)
+}
+
+fn is_officer_stream_arg(state: &mut LuaState) -> bool {
+    is_stream_arg(state, OFFICER_STREAM_ID)
+}
+
+fn is_known_stream_arg(state: &mut LuaState) -> bool {
+    is_guild_stream_arg(state) || is_officer_stream_arg(state)
+}
+
+fn is_stream_arg(state: &mut LuaState, stream_id: f64) -> bool {
+    is_guild_club_arg(state) && matches!(f64::from_stack(state, 2), Ok(id) if id == stream_id)
+}
+
+fn stream_table_from_stack(state: &mut LuaState) -> Option<Val> {
+    if is_guild_stream_arg(state) {
+        Some(build_stream_table(
+            state,
+            GUILD_STREAM_ID,
+            GUILD_STREAM_TYPE,
+            "Guild",
+            "General guild chat",
+            false,
+        ))
+    } else if is_officer_stream_arg(state) {
+        Some(build_stream_table(
+            state,
+            OFFICER_STREAM_ID,
+            OFFICER_STREAM_TYPE,
+            "Officer",
+            "Officer chat",
+            true,
+        ))
+    } else {
+        None
+    }
 }
 
 fn member_id_from_index(zero_based_index: usize) -> i64 {
@@ -510,15 +568,27 @@ fn build_club_info_table(state: &mut LuaState, name: &str) -> Val {
     t
 }
 
-fn build_guild_stream_table(state: &mut LuaState) -> Val {
+fn build_stream_table(
+    state: &mut LuaState,
+    stream_id: f64,
+    stream_type: f64,
+    stream_name: &str,
+    stream_subject: &str,
+    leaders_and_moderators_only: bool,
+) -> Val {
     let stream = create_table(state);
-    let name = create_string(state, "Guild");
-    let subject = create_string(state, "General guild chat");
-    table_set(state, stream, "streamId", Val::Num(GUILD_STREAM_ID));
+    let name = create_string(state, stream_name);
+    let subject = create_string(state, stream_subject);
+    table_set(state, stream, "streamId", Val::Num(stream_id));
     table_set(state, stream, "name", name);
     table_set(state, stream, "subject", subject);
-    table_set(state, stream, "leadersAndModeratorsOnly", Val::Bool(false));
-    table_set(state, stream, "streamType", Val::Num(GUILD_STREAM_TYPE));
+    table_set(
+        state,
+        stream,
+        "leadersAndModeratorsOnly",
+        Val::Bool(leaders_and_moderators_only),
+    );
+    table_set(state, stream, "streamType", Val::Num(stream_type));
     table_set(
         state,
         stream,

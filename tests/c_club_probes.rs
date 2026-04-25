@@ -232,21 +232,32 @@ fn get_club_capacity_returns_number() {
 #[test]
 fn get_streams_returns_sortable_table() {
     let env = env();
-    let (stream_type, count, stream_id, name): (String, i32, i32, String) = env
+    let (stream_type, count, guild_id, guild_name, officer_id, officer_name): (
+        String,
+        i32,
+        i32,
+        String,
+        i32,
+        String,
+    ) = env
         .eval(
             r#"
             local streams = C_Club.GetStreams('guild-0')
             table.sort(streams, function(lhs, rhs)
                 return lhs.creationTime < rhs.creationTime
             end)
-            return type(streams), #streams, streams[1].streamId, streams[1].name
+            return type(streams), #streams,
+                streams[1].streamId, streams[1].name,
+                streams[2].streamId, streams[2].name
             "#,
         )
         .unwrap();
     assert_eq!(stream_type, "table");
-    assert_eq!(count, 1);
-    assert_eq!(stream_id, 1);
-    assert_eq!(name, "Guild");
+    assert_eq!(count, 2);
+    assert_eq!(guild_id, 1);
+    assert_eq!(guild_name, "Guild");
+    assert_eq!(officer_id, 2);
+    assert_eq!(officer_name, "Officer");
 }
 
 #[test]

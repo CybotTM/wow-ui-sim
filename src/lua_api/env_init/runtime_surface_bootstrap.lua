@@ -1416,6 +1416,19 @@ if ChatFrameUtil.GetChatWindowName == nil then
     return string.format("Chat Window %d", tonumber(index) or 1)
   end
 end
+if ChatFrameUtil.GetCommunitiesChannelColor == nil then
+  function ChatFrameUtil.GetCommunitiesChannelColor(_clubId, streamId)
+    if tonumber(streamId) == 2 then
+      return 0.25, 0.75, 0.25
+    end
+    return 0.25, 1, 0.25
+  end
+end
+if ChatFrameUtil.GetCommunitiesChannelLocalID == nil then
+  function ChatFrameUtil.GetCommunitiesChannelLocalID(_clubId, _streamId)
+    return nil
+  end
+end
 
 ChatTypeGroup = ChatTypeGroup or {
   SYSTEM = { "SYSTEM", "ERRORS", "IGNORED", "ACHIEVEMENT", "CHANNEL_NOTICE_USER" },
@@ -11905,6 +11918,19 @@ local function __wow_register_chat_frame_globals()
   if ChatFrameUtil.GetChatWindowName == nil then
     function ChatFrameUtil.GetChatWindowName(id)
       return "Chat Window " .. tostring(id or 1)
+    end
+  end
+  if ChatFrameUtil.GetCommunitiesChannelColor == nil then
+    function ChatFrameUtil.GetCommunitiesChannelColor(_clubId, streamId)
+      if tonumber(streamId) == 2 then
+        return 0.25, 0.75, 0.25
+      end
+      return 0.25, 1, 0.25
+    end
+  end
+  if ChatFrameUtil.GetCommunitiesChannelLocalID == nil then
+    function ChatFrameUtil.GetCommunitiesChannelLocalID(_clubId, _streamId)
+      return nil
     end
   end
 end
