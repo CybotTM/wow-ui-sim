@@ -242,6 +242,11 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
     let result: String = env
         .eval(
             r#"
+        if type(C_FriendList.ShowFriends) ~= "function" then
+            return "missing_show_friends"
+        end
+        C_FriendList.ShowFriends()
+
         if C_FriendList.GetNumFriends() ~= 2 then
             return "friend_count=" .. tostring(C_FriendList.GetNumFriends())
         end
@@ -282,6 +287,16 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
         if not C_FriendList.IsFriend("Alyth") then
             return "is_friend_failed"
         end
+        local offline = C_FriendList.GetFriendInfoByIndex(2)
+        if not offline then
+            return "missing_index_2"
+        end
+        if offline.name ~= "Brennor" then
+            return "offline_name=" .. tostring(offline.name)
+        end
+        if offline.connected then
+            return "offline_friend_should_be_offline"
+        end
         if C_FriendList.GetFriendInfoByIndex(99) ~= nil then
             return "unexpected_friend_at_99"
         end
@@ -292,6 +307,17 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
     assert_eq!(
         result, "ok",
         "C_FriendList should expose seeded WoW friends: {result}"
+    );
+
+    let state = env.state().borrow();
+    let has_friend_list_update = state
+        .events
+        .pending()
+        .iter()
+        .any(|event| event.name == "FRIENDLIST_UPDATE");
+    assert!(
+        has_friend_list_update,
+        "C_FriendList.ShowFriends should queue FRIENDLIST_UPDATE"
     );
 }
 

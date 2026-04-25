@@ -7,7 +7,7 @@
 //! `C_Social`.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{create_string, create_table, table_set};
+use crate::lua_api::methods::{borrow_state_mut, create_string, create_table, table_set};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -77,6 +77,7 @@ pub(super) fn register_friend_list_surface(state: &mut LuaState) -> LuaResult<()
     table_set_rust_fn_static(state, table_ref, "IsFriend", is_friend)?;
     table_set_rust_fn_static(state, table_ref, "GetWhoInfo", get_who_info)?;
     table_set_rust_fn_static(state, table_ref, "SetWhoToUi", set_who_to_ui)?;
+    table_set_rust_fn_static(state, table_ref, "ShowFriends", show_friends)?;
     Ok(())
 }
 
@@ -133,6 +134,13 @@ fn get_who_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn set_who_to_ui(state: &mut LuaState) -> LuaResult<u32> {
     let _ = bool::from_stack(state, 1)?;
+    Ok(0)
+}
+
+fn show_friends(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?
+        .events
+        .push_simple("FRIENDLIST_UPDATE");
     Ok(0)
 }
 
