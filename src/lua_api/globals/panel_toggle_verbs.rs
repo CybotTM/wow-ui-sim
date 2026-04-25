@@ -25,8 +25,8 @@
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, table_get,
 };
-use rilua::Val;
 use rilua::vm::state::LuaState;
+use rilua::Val;
 use rilua::{LuaApiMut, LuaResult};
 
 /// (panel_token, companion_frame_name)
@@ -39,7 +39,7 @@ const PANELS: &[(&str, &str)] = &[
     ("Friends", "FriendsFrame"),
     ("Guild", "GuildFrame"),
     ("Help", "HelpFrame"),
-    ("Social", "SocialFrame"),
+    ("Social", "FriendsFrame"),
     ("Minimap", "MinimapCluster"),
 ];
 
@@ -232,7 +232,24 @@ define_toggle!(toggle_world_map, "WorldMap", "WorldMapFrame");
 define_toggle!(toggle_friends_frame, "Friends", "FriendsFrame");
 define_toggle!(toggle_guild_frame, "Guild", "GuildFrame");
 define_toggle!(toggle_help_frame, "Help", "HelpFrame");
-define_toggle!(toggle_social_panel, "Social", "SocialFrame");
+fn toggle_social_panel(state: &mut LuaState) -> LuaResult<u32> {
+    let global = Val::Table(state.global);
+    let toggle_friends_frame = table_get(state, global, "ToggleFriendsFrame");
+    if matches!(toggle_friends_frame, Val::Function(_)) {
+        let friends_tab = table_get(state, global, "FRIEND_TAB_FRIENDS");
+        let args = if matches!(friends_tab, Val::Nil) {
+            Vec::new()
+        } else {
+            vec![friends_tab]
+        };
+        call_function_state(state, toggle_friends_frame, &args)?;
+        sync_open_panel_membership(state, "Social", "FriendsFrame");
+        return Ok(0);
+    }
+
+    toggle_panel(state, "Social", "FriendsFrame")?;
+    Ok(0)
+}
 define_toggle!(toggle_minimap, "Minimap", "MinimapCluster");
 
 /// Panel-token table for introspection (exposed to docs + tests).

@@ -75,8 +75,13 @@ fn toggle_help_frame_roundtrips() {
 #[test]
 fn toggle_social_panel_roundtrips() {
     let env = env();
+    env.exec(r#"CreateFrame("Frame", "FriendsFrame"); FriendsFrame:Hide()"#)
+        .unwrap();
     env.exec("ToggleSocialPanel()").unwrap();
     assert!(is_open(&env, "Social"));
+
+    let friends_frame_shown: bool = env.eval("return FriendsFrame:IsShown()").unwrap();
+    assert!(friends_frame_shown, "social panel should show FriendsFrame");
 }
 
 #[test]

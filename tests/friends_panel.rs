@@ -39,7 +39,7 @@ fn load_all_blizzard_addons(env: &WowLuaEnv, ui: &Path) {
 }
 
 #[test]
-fn friends_panel_realizes_online_and_offline_friend_rows() {
+fn social_panel_toggle_realizes_online_and_offline_friend_rows() {
     common::with_timeout(120, || {
         common::with_perf_lock(|| {
             let env = full_game_env_after_startup();
@@ -47,9 +47,7 @@ fn friends_panel_realizes_online_and_offline_friend_rows() {
             let result: String = env
                 .eval(
                     r#"
-                    ToggleFriendsFrame()
-                    FriendsFrame_Update()
-                    FriendsList_Update(true)
+                    ToggleSocialPanel()
 
                     local rows = {}
                     FriendsListFrame.ScrollBox:ForEachFrame(function(frame, elementData)
