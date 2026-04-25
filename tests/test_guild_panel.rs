@@ -363,3 +363,63 @@ fn guild_dropdown_value_lists_are_not_empty() {
         );
     }
 }
+
+#[test]
+fn guild_dropdown_materialized_frame_values_are_not_empty() {
+    test_timeout! {
+        let env = setup_env();
+        load_guild_control_ui(&env);
+        let result: String = env.eval(r#"
+            local function frameValues(dropdown)
+                if dropdown == nil or type(dropdown.GetName) ~= "function" then
+                    return nil
+                end
+                local name = dropdown:GetName()
+                if name == nil or name == "" then
+                    return nil
+                end
+                dropdown:OpenMenu()
+                local labels = {}
+                for index = 1, 10 do
+                    local button = _G[name .. "MenuButton" .. index]
+                    if button ~= nil and button:IsVisible() then
+                        local text = button:GetText()
+                        if text ~= nil and text ~= "" then
+                            table.insert(labels, text)
+                        end
+                    end
+                end
+                return labels
+            end
+
+            local checks = {
+                { "guild_control_tabs", GuildControlUI and GuildControlUI.dropdown },
+                { "rank_settings", GuildControlUIRankSettingsFrame and GuildControlUIRankSettingsFrame.dropdown },
+                { "rank_bank", GuildControlUIRankBankFrame and GuildControlUIRankBankFrame.dropdown },
+            }
+
+            local failures = {}
+            local summaries = {}
+            for _, check in ipairs(checks) do
+                local name, dropdown = check[1], check[2]
+                local labels = frameValues(dropdown)
+                if labels == nil then
+                    table.insert(failures, name .. ":missing_dropdown")
+                elseif #labels == 0 then
+                    table.insert(failures, name .. ":empty_frames")
+                else
+                    table.insert(summaries, name .. "=" .. table.concat(labels, ","))
+                end
+            end
+
+            if #failures > 0 then
+                return "fail:" .. table.concat(failures, ";") .. "|frames:" .. table.concat(summaries, ";")
+            end
+            return "ok:" .. table.concat(summaries, ";")
+        "#).unwrap();
+        assert!(
+            result.starts_with("ok:"),
+            "guild dropdown materialized frame values must not be empty: {result}"
+        );
+    }
+}
