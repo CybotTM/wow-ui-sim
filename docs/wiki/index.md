@@ -57,6 +57,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
+| [[micro-menu-atlas-revert]] | Micro menu normal icons could disappear after hover because button atlas setters skipped child `atlas_tex_coords`, preventing restored normal textures from using isolated atlas crop requests |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks compact-raid cleanup, the `GameTimeFrame_SetDate()` calendar-atlas no-op fix, and the AuraButton OnUpdate lock-down (`~0.86ms` → `31.44us`, budgeted at `<=0.5ms`) |
 | [[startup-createframe-profile]] | Runtime `CreateFrame` profiling started with action-bar button template expansion, then widened into the XML loader fast path; current safe loader state lands around 4.8s-5.8s on debug no-addons/no-saved-vars runs, with remaining misses dominated by XML script bodies |
