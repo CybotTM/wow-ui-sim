@@ -380,17 +380,11 @@ fn apply_atlas_setter(
     let tex_id = ensure_button_texture_child(state, button_id, parent_key)?;
     let mut sim = borrow_state_mut(state)?;
     if let Some(tid) = tex_id {
-        let already_set = sim
-            .widgets
-            .get(tid)
-            .map(|t| t.atlas.as_deref() == Some(atlas_name))
-            .unwrap_or(false);
-        if !already_set {
-            if let Some(tex) = sim.widgets.get_mut_visual(tid) {
-                tex.atlas = Some(atlas_name.to_string());
-                tex.texture = Some(file.clone());
-                tex.tex_coords = Some(tex_coords);
-            }
+        if let Some(tex) = sim.widgets.get_mut_visual(tid) {
+            tex.atlas = Some(atlas_name.to_string());
+            tex.texture = Some(file.clone());
+            tex.tex_coords = Some(tex_coords);
+            tex.atlas_tex_coords = Some(tex_coords);
         }
     }
     if let Some(frame) = sim.widgets.get_mut_visual(button_id) {

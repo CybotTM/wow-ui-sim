@@ -1057,6 +1057,23 @@ mod tests {
         alphas
     }
 
+    fn snapshot_texture_paths(app: &App, frame_id: u64) -> Vec<String> {
+        let mut paths = Vec::new();
+        let snapshots = app.cached_frame_snapshots.borrow();
+        for snapshot in snapshots.iter().flatten() {
+            let Some(snapshot) = snapshot.get(&frame_id) else {
+                continue;
+            };
+            paths.extend(
+                snapshot
+                    .texture_requests
+                    .iter()
+                    .map(|request| request.path.clone()),
+            );
+        }
+        paths
+    }
+
     fn mark_frames_dirty(app: &App, frame_ids: &[u64]) {
         let env = app.env.borrow();
         let state = env.state().borrow();
@@ -1150,6 +1167,14 @@ mod tests {
                 .children_keys
                 .get("HighlightTexture")
                 .expect("highlight texture child should exist");
+            let normal = state
+                .widgets
+                .get(normal_id)
+                .expect("normal texture child should resolve");
+            assert_eq!(
+                normal.atlas_tex_coords, normal.tex_coords,
+                "button SetNormalAtlas should preserve atlas sub-region metadata on the child texture",
+            );
             (button.id, normal_id, highlight_id)
         };
 
@@ -1191,6 +1216,12 @@ mod tests {
                 .iter()
                 .any(|alpha| *alpha == 1.0),
             "leaving hover should re-emit the normal texture at full alpha"
+        );
+        assert!(
+            snapshot_texture_paths(&app, normal_id)
+                .iter()
+                .any(|path| path.contains("@crop:")),
+            "restored normal texture should render through an isolated atlas crop"
         );
         assert!(
             snapshot_texture_alphas(&app, highlight_id).is_empty(),

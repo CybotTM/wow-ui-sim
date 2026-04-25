@@ -458,14 +458,6 @@ fn apply_atlas_to_button<F>(
 ) where
     F: FnOnce(&mut crate::widget::Frame, String, (f32, f32, f32, f32)),
 {
-    let already_set = state
-        .widgets
-        .get(tex_id)
-        .map(|texture| texture.atlas.as_deref() == Some(atlas_name))
-        .unwrap_or(false);
-    if already_set {
-        return;
-    }
     if let Some(lookup) = crate::atlas::get_render_atlas_info(atlas_name) {
         let tex_coords = (
             lookup.info.left_tex_coord,
@@ -477,6 +469,7 @@ fn apply_atlas_to_button<F>(
             tex.atlas = Some(atlas_name.to_string());
             tex.texture = Some(lookup.info.file.to_string());
             tex.tex_coords = Some(tex_coords);
+            tex.atlas_tex_coords = Some(tex_coords);
         }
         if let Some(frame) = state.widgets.get_mut_visual(button_id) {
             set_button_field(frame, lookup.info.file.to_string(), tex_coords);
