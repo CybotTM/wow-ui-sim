@@ -9879,6 +9879,9 @@ local function __wow_dropdown_materialize_menu(owner, description)
 end
 
 local function __wow_dropdown_radio_is_selected(element)
+  if type(element) ~= "table" or element.kind ~= "radio" then
+    return false
+  end
   local args = type(element) == "table" and element.args or nil
   if type(args) ~= "table" or type(args[1]) ~= "function" then
     return false

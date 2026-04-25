@@ -1193,6 +1193,45 @@ fn menu_util_create_root_menu_description_falls_back_after_menu_addon() {
 }
 
 #[test]
+fn dropdown_selection_text_does_not_invoke_button_callbacks() {
+    let env = env();
+    env.loader_env()
+        .ensure_menu_descriptor_fallback()
+        .expect("menu descriptor fallback should install");
+    let (button_calls, dropdown_text): (f64, String) = env
+        .eval(
+            r#"
+            local dropdown = {
+                SetText = function(self, text)
+                    self.text = text
+                end,
+            }
+            setmetatable(dropdown, { __index = DropdownButtonMixin })
+
+            local buttonCalls = 0
+            dropdown:SetupMenu(function(_, root)
+                root:CreateButton("Open", function()
+                    buttonCalls = buttonCalls + 1
+                end)
+                root:CreateRadio("Selected", function(value)
+                    return value == 42
+                end, function() end, 42)
+            end)
+
+            dropdown:GenerateMenu()
+            return buttonCalls, dropdown.text or ""
+            "#,
+        )
+        .expect("dropdown menu should generate");
+
+    assert_eq!(
+        button_calls, 0.0,
+        "button callbacks must not run while deriving dropdown selection text"
+    );
+    assert_eq!(dropdown_text, "Selected");
+}
+
+#[test]
 fn t_invert_inverts_array_and_hash_entries() {
     // Blizzard_SharedXMLBase's TableUtil.lua defines tInvert to build
     // `{[value] = key}`, and EnumUtil.MakeEnum uses it to produce every
