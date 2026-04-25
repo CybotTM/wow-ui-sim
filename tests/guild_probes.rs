@@ -56,6 +56,25 @@ fn guild_recipe_queries_have_safe_defaults() {
     assert!(!can_view);
 }
 
+#[test]
+fn guild_news_queries_have_empty_safe_defaults() {
+    let env = env();
+    let (ok, count, info_is_nil): (bool, i32, bool) = env
+        .eval(
+            r#"
+            local ok = pcall(function()
+                QueryGuildNews()
+                GuildNewsSort(0)
+            end)
+            return ok, GetNumGuildNews(), C_GuildInfo.GetGuildNewsInfo(1) == nil
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
+    assert_eq!(count, 0);
+    assert!(info_is_nil);
+}
+
 // ── CanReplaceGuildMaster ─────────────────────────────────────────────────────
 
 #[test]

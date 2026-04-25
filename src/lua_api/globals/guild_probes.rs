@@ -10,14 +10,18 @@
 //! - `IsGuildLeader()`              -> false until rank privileges are modeled
 //! - `QueryGuildRecipes()`          -> no-op, guild recipe state is unmodeled
 //! - `CanViewGuildRecipes()`        -> false, guild recipe state is unmodeled
+//! - `QueryGuildNews()`             -> no-op, guild news state is unmodeled
+//! - `GuildNewsSort()`              -> no-op, guild news state is unmodeled
 //!
-//! Migrates 4 roster-count entries off `GLOBAL_ZERO_STUBS`:
+//! Migrates 4 roster-count entries off `GLOBAL_ZERO_STUBS` and supplies the
+//! empty guild news count:
 //!
 //! - `GetNumGuildMembers()`   -> `world.guild_members.len()`
 //! - `GetGuildRosterSize()`   -> `world.guild_members.len()`
 //! - `GetGuildRosterInfo(i)`  -> synth row from `guild_members[i-1]` +
 //!   `guild_ranks[rank_index-1]`
 //! - `GetGuildRosterMOTD()`   -> `world.guild_motd`
+//! - `GetNumGuildNews()`      -> 0, guild news state is unmodeled
 
 use crate::lua_api::game_data::CLASS_LABELS;
 use crate::lua_api::methods::{borrow_state, create_string};
@@ -88,6 +92,14 @@ fn query_guild_recipes(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn query_guild_news(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn guild_news_sort(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn can_view_guild_recipes(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
@@ -117,6 +129,11 @@ fn get_num_guild_members(state: &mut LuaState) -> LuaResult<u32> {
 fn get_guild_roster_size(state: &mut LuaState) -> LuaResult<u32> {
     let n = borrow_state(state)?.world.guild_members.len() as f64;
     state.push(Val::Num(n));
+    Ok(1)
+}
+
+fn get_num_guild_news(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
     Ok(1)
 }
 
@@ -227,9 +244,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
     LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
+    LuaApiMut::register_function(lua, "QueryGuildNews", query_guild_news)?;
+    LuaApiMut::register_function(lua, "GuildNewsSort", guild_news_sort)?;
     LuaApiMut::register_function(lua, "GetNumGuildMembers", get_num_guild_members)?;
     LuaApiMut::register_function(lua, "GetGuildRosterSize", get_guild_roster_size)?;
     LuaApiMut::register_function(lua, "GetGuildRosterMOTD", get_guild_roster_motd)?;
     LuaApiMut::register_function(lua, "GetGuildRosterInfo", get_guild_roster_info)?;
+    LuaApiMut::register_function(lua, "GetNumGuildNews", get_num_guild_news)?;
     Ok(())
 }

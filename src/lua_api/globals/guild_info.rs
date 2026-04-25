@@ -6,6 +6,7 @@
 //! - `IsGuildOfficer()` — `world.guild_is_officer` (default false).
 //! - `CanSpeakInGuildChat()` — `world.guild_can_speak_in_chat` (default true;
 //!   retail's "no explicit mute" baseline keeps addons' chat input enabled).
+//! - `GetGuildNewsInfo(index)` — nil while guild news state is unmodeled.
 //!
 //! Admin:
 //! - `A_Admin.SetGuildClubId(id?)` — nil / empty clears.
@@ -52,6 +53,11 @@ pub fn guild_roster(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub fn get_guild_news_info(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
 fn ensure_c_guild_info_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_GuildInfo");
     let global = state.global;
@@ -80,6 +86,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     let table_ref = ensure_c_guild_info_table(state);
     table_set_rust_fn_static(state, table_ref, "GetClubId", get_club_id)?;
     table_set_rust_fn_static(state, table_ref, "GuildRoster", guild_roster)?;
+    table_set_rust_fn_static(state, table_ref, "GetGuildNewsInfo", get_guild_news_info)?;
     table_set_rust_fn_static(state, table_ref, "IsGuildOfficer", is_guild_officer)?;
     table_set_rust_fn_static(
         state,
