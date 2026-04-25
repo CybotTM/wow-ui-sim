@@ -538,7 +538,9 @@ fn build_member_info_table(
 ) -> Val {
     let t = create_table(state);
     let name_str = create_string(state, name);
+    let guid = create_string(state, &format!("member-{member_id}"));
     table_set(state, t, "memberId", Val::Num(member_id as f64));
+    table_set(state, t, "guid", guid);
     table_set(state, t, "name", name_str);
     table_set(state, t, "isSelf", Val::Bool(is_self));
     table_set(state, t, "guildRankOrder", Val::Num(rank_order as f64));

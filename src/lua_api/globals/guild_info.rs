@@ -6,6 +6,7 @@
 //! - `IsGuildOfficer()` — `world.guild_is_officer` (default false).
 //! - `CanSpeakInGuildChat()` — `world.guild_can_speak_in_chat` (default true;
 //!   retail's "no explicit mute" baseline keeps addons' chat input enabled).
+//! - `CanViewOfficerNote()` / `CanEditOfficerNote()` — `world.guild_is_officer`.
 //! - `GetGuildNewsInfo(index)` — nil while guild news state is unmodeled.
 //!
 //! Admin:
@@ -41,6 +42,18 @@ pub fn is_guild_officer(state: &mut LuaState) -> LuaResult<u32> {
 
 pub fn can_speak_in_guild_chat(state: &mut LuaState) -> LuaResult<u32> {
     let v = borrow_state(state)?.world.guild_can_speak_in_chat;
+    state.push(Val::Bool(v));
+    Ok(1)
+}
+
+pub fn can_view_officer_note(state: &mut LuaState) -> LuaResult<u32> {
+    let v = borrow_state(state)?.world.guild_is_officer;
+    state.push(Val::Bool(v));
+    Ok(1)
+}
+
+pub fn can_edit_officer_note(state: &mut LuaState) -> LuaResult<u32> {
+    let v = borrow_state(state)?.world.guild_is_officer;
     state.push(Val::Bool(v));
     Ok(1)
 }
@@ -93,6 +106,18 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         table_ref,
         "CanSpeakInGuildChat",
         can_speak_in_guild_chat,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanViewOfficerNote",
+        can_view_officer_note,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanEditOfficerNote",
+        can_edit_officer_note,
     )?;
     Ok(())
 }

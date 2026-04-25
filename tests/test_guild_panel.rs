@@ -3,6 +3,7 @@ mod common;
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::GuildMember;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -235,6 +236,90 @@ fn guild_member_rank_dropdown_generates_rank_options() {
             return closedText .. "|" .. descriptorLabels .. "|" .. first:GetText() .. "," .. second:GetText()
         "#).unwrap();
         assert_eq!(result, "Officer/Officer|Officer,Member|Officer,Member", "rank dropdown should show selected rank and visible assignable guild ranks: {result}");
+    }
+}
+
+#[test]
+fn communities_member_detail_rank_dropdown_shows_rank_rows() {
+    test_timeout! {
+        let env = setup_env();
+        env.state().borrow_mut().world.guild_members = vec![
+            GuildMember {
+                name: "Uther".to_string(),
+                rank_index: 1,
+                online: true,
+            },
+            GuildMember {
+                name: "Jaina".to_string(),
+                rank_index: 2,
+                online: true,
+            },
+        ];
+        let result: String = env.eval(r#"
+            A_Admin.SetGuildRanks({
+                { name = "Guild Leader", flags = {} },
+                { name = "Officer", flags = {} },
+                { name = "Member", flags = {} },
+            })
+
+            function CanGuildPromote() return true end
+            function CanGuildDemote() return true end
+            C_GuildInfo.IsGuildRankAssignmentAllowed = function() return true end
+            C_GuildInfo.SetGuildRankOrder = function() end
+
+            local frame = CommunitiesFrame and CommunitiesFrame.GuildMemberDetailFrame
+            if frame == nil then
+                return "missing_detail_frame"
+            end
+
+            local memberInfo = C_Club.GetMemberInfo("guild-0", 2)
+            frame:DisplayMember("guild-0", memberInfo)
+            frame:SetupRankDropdown()
+
+            local dropdown = frame.RankDropdown
+            if dropdown == nil then
+                return "missing_rank_dropdown"
+            end
+            if not dropdown:IsShown() then
+                return "rank_dropdown_hidden"
+            end
+
+            local desc = dropdown:GenerateMenu()
+            local descLabels = {}
+            if type(desc) == "table" and type(desc.__wow_elements) == "table" then
+                for _, element in ipairs(desc.__wow_elements) do
+                    if element.text ~= nil and element.text ~= "" then
+                        table.insert(descLabels, element.text)
+                    end
+                end
+            end
+
+            dropdown:OpenMenu()
+            local labels = {}
+            for _, button in ipairs(dropdown.__wow_menu_buttons or {}) do
+                if button ~= nil and button:IsVisible() then
+                    local text = button:GetText()
+                    if text ~= nil and text ~= "" then
+                        table.insert(labels, text)
+                    end
+                end
+            end
+
+            if #labels == 0 then
+                return "empty_rank_frames:desc=" .. table.concat(descLabels, ",")
+            end
+
+            local closedText = dropdown.Text and dropdown.Text:GetText() or dropdown:GetText()
+            if closedText == nil or closedText == "" then
+                return "empty_closed_text:frames=" .. table.concat(labels, ",")
+            end
+            return "ok:" .. closedText .. ":" .. table.concat(labels, ",")
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok:Officer:Officer,Member",
+            "member detail rank dropdown should show rank rows, not the guild selector: {result}"
+        );
     }
 }
 

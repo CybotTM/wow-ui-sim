@@ -7,6 +7,8 @@
 //! - `GetAutoDeclineGuildInvites()` -> `SimState.auto_decline_guild_invites`
 //! - `GetGuildRosterShowOffline()` -> `SimState.guild_roster_show_offline`
 //! - `CanGuildInvite()`             -> true when the player is in a guild
+//! - `CanGuildRemove()`             -> true when the player is in a guild
+//! - `CanEditPublicNote()`          -> true when the player is in a guild
 //! - `IsGuildLeader()`              -> false until rank privileges are modeled
 //! - `QueryGuildRecipes()`          -> no-op, guild recipe state is unmodeled
 //! - `CanViewGuildRecipes()`        -> false, guild recipe state is unmodeled
@@ -78,6 +80,18 @@ fn get_guild_roster_show_offline(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn can_guild_invite(state: &mut LuaState) -> LuaResult<u32> {
+    let b = borrow_state(state)?.world.guild_name.is_some();
+    state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_guild_remove(state: &mut LuaState) -> LuaResult<u32> {
+    let b = borrow_state(state)?.world.guild_name.is_some();
+    state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_edit_public_note(state: &mut LuaState) -> LuaResult<u32> {
     let b = borrow_state(state)?.world.guild_name.is_some();
     state.push(Val::Bool(b));
     Ok(1)
@@ -241,6 +255,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_guild_roster_show_offline,
     )?;
     LuaApiMut::register_function(lua, "CanGuildInvite", can_guild_invite)?;
+    LuaApiMut::register_function(lua, "CanGuildRemove", can_guild_remove)?;
+    LuaApiMut::register_function(lua, "CanEditPublicNote", can_edit_public_note)?;
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
     LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;

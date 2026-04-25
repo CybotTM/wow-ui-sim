@@ -11677,10 +11677,15 @@ local function __wow_register_core_frame_methods()
       end
       if type(self.__wow_menu_generator) == "function" then
         pcall(self.__wow_menu_generator, self, description)
+      elseif type(self.menuGenerator) == "function" then
+        pcall(self.menuGenerator, self, description)
       elseif self.__wow_menu_description ~= nil then
         description = self.__wow_menu_description
+      elseif self.menuDescription ~= nil then
+        description = self.menuDescription
       end
       self.__wow_menu_description = description
+      self.menuDescription = description
       return description
     end
   end
@@ -11702,8 +11707,12 @@ local function __wow_register_core_frame_methods()
 
   if methods.OpenMenu == nil then
     function methods:OpenMenu()
+      local description = nil
       if type(self.GenerateMenu) == "function" then
-        self:GenerateMenu()
+        description = self:GenerateMenu()
+      end
+      if type(__wow_dropdown_materialize_menu) == "function" then
+        __wow_dropdown_materialize_menu(self, description)
       end
       self.__wow_menu_open = true
     end
