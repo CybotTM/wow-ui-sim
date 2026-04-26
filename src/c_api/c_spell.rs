@@ -34,19 +34,27 @@
 //! - `TargetSpellIsEnchanting()` → false.
 //! - `TargetSpellJumpsUpgradeTrack()` → false.
 //! - `TargetSpellReplacesBonusTree()` → false.
+//! - `GetSpellTradeSkillLink(spellID)` → recipe link from
+//!   `state.spell_trade_skill_links`, or nil.
+//! - `GetSpellIDForSpellIdentifier(identifier)` → resolved spell id from
+//!   `state.spell_id_aliases`. Numeric input passes through unchanged when
+//!   no alias is registered; string input requires an entry.
+//! - `IsCurrentSpell(spellID)` → matches `state.casting.spell_id`.
+//! - `GetSpellLossOfControlCooldownInfo(spellID)` → LoC cooldown table from
+//!   `state.spell_loss_of_control`, or nil.
 
 use super::helpers::ensure_namespace;
 use crate::c_api::item_spell::spell_link_for_id;
 use crate::lua_api::globals::action_bar_api::spell_cooldown_times;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, frame_ref, table_set,
-    table_set_num,
+    table_set_num, val_to_string,
 };
 use crate::lua_api::script_helpers::{
     call_error_handler_state, get_event_listeners, get_script, protected_lua_pcall_state,
 };
 use crate::lua_api::state_types::CursorInfo;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use crate::spells;
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -80,6 +88,16 @@ const SPELL_QUERY_METHODS: &[(&'static str, SpellScriptFn)] = &[
     ("GetSpellCastCount", get_spell_cast_count),
     ("GetMountFromSpell", get_mount_from_spell),
     ("GetVisibilityInfo", get_visibility_info),
+    ("GetSpellTradeSkillLink", get_spell_trade_skill_link),
+    (
+        "GetSpellIDForSpellIdentifier",
+        get_spell_id_for_spell_identifier,
+    ),
+    ("IsCurrentSpell", is_current_spell),
+    (
+        "GetSpellLossOfControlCooldownInfo",
+        get_spell_loss_of_control_cooldown_info,
+    ),
 ];
 
 const SPELL_BOOLEAN_METHODS: &[(&'static str, SpellScriptFn)] = &[
@@ -518,5 +536,119 @@ fn target_spell_jumps_upgrade_track(state: &mut LuaState) -> LuaResult<u32> {
 /// `C_Spell.TargetSpellReplacesBonusTree()` → `false`.
 fn target_spell_replaces_bonus_tree(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn numeric_spell_id(state: &LuaState, index: i32) -> Option<u32> {
+    match stack_val(state, index) {
+        Val::Num(n) if n.is_finite() && n >= 0.0 => Some(n as u32),
+        _ => None,
+    }
+}
+
+/// `C_Spell.GetSpellTradeSkillLink(spellID)` → trade-skill recipe link, or
+/// nil. `SpellFlyoutPopupButtonMixin:OnClick` uses this in the chat-link
+/// modifier branch to insert a recipe link instead of the spell link when
+/// the flyout entry corresponds to a profession recipe.
+fn get_spell_trade_skill_link(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(spell_id) = numeric_spell_id(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let link_text = borrow_state(state)?
+        .spell_trade_skill_links
+        .get(&spell_id)
+        .cloned();
+    match link_text {
+        Some(link) => {
+            let link_string = create_string(state, &link);
+            state.push(link_string);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn alias_key_from_input(state: &LuaState, value: Val) -> Option<String> {
+    match value {
+        Val::Num(n) if n.is_finite() => Some((n as u32).to_string()),
+        Val::Str(_) => val_to_string(state, value).map(|s| s.to_lowercase()),
+        _ => None,
+    }
+}
+
+/// `C_Spell.GetSpellIDForSpellIdentifier(identifier)` → spell id or nil.
+///
+/// `SpellFlyoutPopupButtonMixin:OnClick` uses this to resolve overrides
+/// before calling `CastSpellByID`. Numeric input falls back to the same id
+/// when no alias is registered (matches retail's identity behavior for
+/// non-overridden spells); string input requires an alias entry.
+fn get_spell_id_for_spell_identifier(state: &mut LuaState) -> LuaResult<u32> {
+    let raw = stack_val(state, 1);
+    let is_number = matches!(raw, Val::Num(_));
+    let Some(key) = alias_key_from_input(state, raw) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let alias = borrow_state(state)?.spell_id_aliases.get(&key).copied();
+    match alias {
+        Some(id) => state.push(Val::Num(id as f64)),
+        None if is_number => {
+            let id: u32 = key.parse().unwrap_or(0);
+            state.push(Val::Num(id as f64));
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+/// `C_Spell.IsCurrentSpell(spellID)` → `true` when the active cast matches.
+///
+/// Mirrors the global `IsCurrentSpell` probe so flyout / stance / possess
+/// `UpdateState` paths stay aligned regardless of which surface they reach
+/// for. Nil cast slot returns false.
+fn is_current_spell(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(spell_id) = numeric_spell_id(state, 1) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let match_cast = borrow_state(state)?
+        .casting
+        .as_ref()
+        .is_some_and(|c| c.spell_id == spell_id);
+    state.push(Val::Bool(match_cast));
+    Ok(1)
+}
+
+/// `C_Spell.GetSpellLossOfControlCooldownInfo(spellID)` → LoC cooldown table
+/// or nil. `ActionButton_UpdateCooldown` only renders the LoC overlay when
+/// the table's `isActive` is true; absence (nil) falls back to the inert
+/// `defaultLossOfControlInfo` baseline. Returning nil here mirrors that path
+/// for spells with no registered loss-of-control entry.
+fn get_spell_loss_of_control_cooldown_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(spell_id) = numeric_spell_id(state, 1) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let info = borrow_state(state)?
+        .spell_loss_of_control
+        .get(&spell_id)
+        .cloned();
+    let Some(info) = info else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let table = create_table(state);
+    table_set(state, table, "startTime", Val::Num(info.start_time));
+    table_set(state, table, "duration", Val::Num(info.duration));
+    table_set(state, table, "modRate", Val::Num(info.mod_rate as f64));
+    table_set(state, table, "isActive", Val::Bool(info.is_active));
+    table_set(
+        state,
+        table,
+        "shouldReplaceNormalCooldown",
+        Val::Bool(info.should_replace_normal_cooldown),
+    );
+    state.push(table);
     Ok(1)
 }

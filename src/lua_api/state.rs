@@ -79,6 +79,9 @@ macro_rules! build_empty_sim_state {
             equipped_outfit_locked: false,
             locked_action_slots: HashSet::new(),
             is_active_battlefield: false,
+            spell_trade_skill_links: HashMap::new(),
+            spell_id_aliases: HashMap::new(),
+            spell_loss_of_control: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -450,6 +453,21 @@ pub struct HousingState {
     pub level_thresholds: Vec<i64>,
 }
 
+/// Loss-of-control cooldown payload returned by
+/// `C_Spell.GetSpellLossOfControlCooldownInfo(spellID)`. Mirrors the retail
+/// table shape consumed by `ActionButton_UpdateCooldown`'s lossOfControl
+/// overlay branch — `isActive` flips the overlay on, the rest position the
+/// swipe geometry. `should_replace_normal_cooldown` hides the underlying
+/// spell cooldown swipe so the LoC overlay is the only one visible.
+#[derive(Clone, Debug, Default)]
+pub struct LossOfControlInfo {
+    pub start_time: f64,
+    pub duration: f64,
+    pub mod_rate: f32,
+    pub is_active: bool,
+    pub should_replace_normal_cooldown: bool,
+}
+
 /// Paragon-rep payload returned by `C_Reputation.GetFactionParagonInfo`.
 /// Presence in `state.faction_paragon` doubles as the
 /// `IsFactionParagonForCurrentPlayer` truth, gating the gold reward badge in
@@ -720,6 +738,21 @@ pub struct SimState {
     /// (no active battleground). `StatusTrackingManager` checks this to
     /// hide XP / honor bars while the player is queued into a battlefield.
     pub is_active_battlefield: bool,
+    /// Trade-skill spell hyperlinks, keyed by spell id. Drives
+    /// `C_Spell.GetSpellTradeSkillLink`. Empty by default — only profession
+    /// recipe spells return a non-nil link in retail.
+    pub spell_trade_skill_links: HashMap<u32, String>,
+    /// Spell-identifier aliases for `C_Spell.GetSpellIDForSpellIdentifier`.
+    /// Keys are either the numeric form (`"133"`) or the lowercased spell
+    /// name (`"fireball"`); values are the resolved override spell id.
+    /// Empty by default — the surface treats numeric input as an identity
+    /// mapping when no alias is registered.
+    pub spell_id_aliases: HashMap<String, u32>,
+    /// Loss-of-control cooldown info, keyed by spell id. Drives
+    /// `C_Spell.GetSpellLossOfControlCooldownInfo`. Empty by default —
+    /// `ActionButton_UpdateCooldown` then falls back to the inert
+    /// `defaultLossOfControlInfo` baseline.
+    pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame

@@ -61,7 +61,8 @@ pub use message_frame::MessageFrameData;
 pub use simple_html::SimpleHtmlData;
 pub use state::{
     AddonInfo, ArtifactInfo, AzeriteItemState, FactionParagonInfo, HousingState, ItemLocationData,
-    MajorFactionData, PendingTimer, RenownLevelInfo, SimState, tick_party_health,
+    LossOfControlInfo, MajorFactionData, PendingTimer, RenownLevelInfo, SimState,
+    tick_party_health,
 };
 pub use tooltip::TooltipData;
 
