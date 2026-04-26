@@ -159,6 +159,7 @@ macro_rules! build_empty_sim_state {
             torghast: TorghastState::default(),
             titles: Vec::new(),
             shapeshift_forms: Vec::new(),
+            shapeshift_cooldowns: ::std::collections::HashMap::new(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             maps: default_maps(),
             achievements: default_achievements(),
@@ -308,6 +309,20 @@ pub struct AccountStoreCategoryInfo {
     pub name: String,
     pub category_type: i64,
     pub icon: i64,
+}
+
+/// One shapeshift / stance form record consumed by `GetShapeshiftFormInfo`
+/// and the `Blizzard_ActionBar/Shared/StanceBar.lua` mixin. Field shape
+/// matches the live API: `(texture, isActive, isCastable, spellID)`. The
+/// `name` field is read by `C_TooltipInfo.GetShapeshift` to render the
+/// stance tooltip header.
+#[derive(Clone, Debug)]
+pub struct ShapeshiftForm {
+    pub name: String,
+    pub texture: String,
+    pub spell_id: u32,
+    pub is_active: bool,
+    pub is_castable: bool,
 }
 
 /// Kind of an on-bar highlight mark — mirrors the action source that caused
@@ -716,9 +731,13 @@ pub struct SimState {
     /// `GetNumTitles` / `GetTitleName(index)`. Empty by default.
     pub titles: Vec<String>,
     /// Currently-available shapeshift forms (druid / shaman / priest
-    /// tokens). Drives `GetNumShapeshiftForms`. Empty by default; the
-    /// seeded Paladin player has no forms.
-    pub shapeshift_forms: Vec<String>,
+    /// tokens). Drives `GetNumShapeshiftForms`, `GetShapeshiftFormInfo`,
+    /// `CastShapeshiftForm`, and the StanceBar mixin. Empty by default;
+    /// the seeded Paladin player has no forms.
+    pub shapeshift_forms: Vec<ShapeshiftForm>,
+    /// Per-form cooldowns keyed by 1-based form index. Drives
+    /// `GetShapeshiftFormCooldown`. Empty by default.
+    pub shapeshift_cooldowns: HashMap<i32, SpellCooldownState>,
     /// Currency info keyed by currency id. Drives
     /// `C_CurrencyInfo.GetCurrencyInfo`, `GetCurrencyInfoFromLink`,
     /// and `GetCurrencyContainerInfo`. Seeded at startup from the

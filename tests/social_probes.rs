@@ -69,9 +69,22 @@ fn get_num_shapeshift_forms_reports_sim_state_len() {
     assert_eq!(before, 0, "seeded Paladin has no shapeshift forms");
 
     {
+        use wow_ui_sim::lua_api::state::ShapeshiftForm;
         let mut state = env.state().borrow_mut();
-        state.shapeshift_forms.push("Bear Form".to_string());
-        state.shapeshift_forms.push("Cat Form".to_string());
+        state.shapeshift_forms.push(ShapeshiftForm {
+            name: "Bear Form".to_string(),
+            texture: "Interface/Icons/Ability_Racial_BearForm".to_string(),
+            spell_id: 5487,
+            is_active: false,
+            is_castable: true,
+        });
+        state.shapeshift_forms.push(ShapeshiftForm {
+            name: "Cat Form".to_string(),
+            texture: "Interface/Icons/Ability_Druid_CatForm".to_string(),
+            spell_id: 768,
+            is_active: false,
+            is_castable: true,
+        });
     }
 
     let after: i32 = env.eval("return GetNumShapeshiftForms()").unwrap();

@@ -542,7 +542,9 @@ pub(super) fn c_tooltip_get_shapeshift(state: &mut LuaState) -> LuaResult<u32> {
     let name = {
         let sim = borrow_state(state)?;
         let zero_based = usize::try_from(slot.saturating_sub(1)).unwrap_or(usize::MAX);
-        sim.shapeshift_forms.get(zero_based).cloned()
+        sim.shapeshift_forms
+            .get(zero_based)
+            .map(|form| form.name.clone())
     };
     let Some(name) = name else {
         state.push(Val::Nil);

@@ -5660,12 +5660,6 @@ if GetShapeshiftForm == nil then
   end
 end
 
-if GetShapeshiftFormInfo == nil then
-  function GetShapeshiftFormInfo(_index)
-    return nil, false, false, nil
-  end
-end
-
 if GetTotemInfo == nil then
   function GetTotemInfo(_slot)
     return false, nil, 0, 0, nil

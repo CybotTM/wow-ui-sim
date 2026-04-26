@@ -85,6 +85,7 @@ pub mod register;
 pub mod reputation_data;
 pub mod security;
 pub mod set_cvar_verb;
+pub mod shapeshift;
 pub mod social_probes;
 pub mod spell_api;
 pub mod spell_macro_verbs;
