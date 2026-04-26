@@ -233,6 +233,51 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
     register_summary_globals(state, globals)?;
     register_comparison_globals(state, globals)?;
     register_guild_member_globals(state, globals)?;
+    register_search_globals(state, globals)?;
+    Ok(())
+}
+
+fn register_search_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    register_search_setter(state, globals)?;
+    register_search_getters(state, globals)?;
+    Ok(())
+}
+
+fn register_search_setter(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "SetAchievementSearchString",
+        set_achievement_search_string,
+    )?;
+    Ok(())
+}
+
+fn register_search_getters(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetAchievementSearchProgress",
+        get_achievement_search_progress,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetAchievementSearchSize",
+        get_achievement_search_size,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetNumFilteredAchievements",
+        get_num_filtered_achievements,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetFilteredAchievementID",
+        get_filtered_achievement_id,
+    )?;
     Ok(())
 }
 
@@ -783,6 +828,70 @@ fn get_guild_achievement_member_info(state: &mut LuaState) -> LuaResult<u32> {
             let val = create_string(state, &text);
             state.push(val);
         }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn set_achievement_search_string(state: &mut LuaState) -> LuaResult<u32> {
+    let query = String::from_stack(state, 1).unwrap_or_default();
+    let mut sim = borrow_state_mut(state)?;
+    let filtered_ids = match_achievements_by_query(&sim.achievements, &query);
+    let count = filtered_ids.len() as i32;
+    sim.achievement_search.query = query;
+    sim.achievement_search.progress = count;
+    sim.achievement_search.size = count;
+    sim.achievement_search.filtered_ids = filtered_ids;
+    drop(sim);
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn match_achievements_by_query(
+    achievements: &::std::collections::HashMap<i32, AchievementInfo>,
+    query: &str,
+) -> Vec<i32> {
+    if query.is_empty() {
+        return Vec::new();
+    }
+    let needle = query.to_lowercase();
+    let mut matches: Vec<i32> = achievements
+        .values()
+        .filter(|info| info.name.to_lowercase().contains(&needle))
+        .map(|info| info.achievement_id)
+        .collect();
+    matches.sort();
+    matches
+}
+
+fn get_achievement_search_progress(state: &mut LuaState) -> LuaResult<u32> {
+    let progress = borrow_state(state)?.achievement_search.progress;
+    state.push(Val::Num(progress as f64));
+    Ok(1)
+}
+
+fn get_achievement_search_size(state: &mut LuaState) -> LuaResult<u32> {
+    let size = borrow_state(state)?.achievement_search.size;
+    state.push(Val::Num(size as f64));
+    Ok(1)
+}
+
+fn get_num_filtered_achievements(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.achievement_search.filtered_ids.len() as i32;
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_filtered_achievement_id(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let id = {
+        let sim = borrow_state(state)?;
+        usize::try_from(index - 1)
+            .ok()
+            .and_then(|idx| sim.achievement_search.filtered_ids.get(idx).copied())
+    };
+    match id {
+        Some(value) => state.push(Val::Num(value as f64)),
         None => state.push(Val::Nil),
     }
     Ok(1)

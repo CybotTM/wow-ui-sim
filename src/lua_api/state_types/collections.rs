@@ -204,6 +204,29 @@ pub struct AchievementStatistic {
     pub is_counter: bool,
 }
 
+/// Achievement search state in `SimState.achievement_search`. Drives
+/// `SetAchievementSearchString` plus the four read-only getters
+/// (`GetAchievementSearchProgress`, `GetAchievementSearchSize`,
+/// `GetNumFilteredAchievements`, `GetFilteredAchievementID`) consumed
+/// by `AchievementFrameSearchProgressBar_OnUpdate` and
+/// `AchievementFrame_ShowSearchPreviewResults`. Default state is empty:
+/// progress/size both 0 so the addon's `size > 0` guard short-circuits
+/// the progress bar.
+#[derive(Debug, Clone, Default)]
+pub struct AchievementSearchState {
+    /// Last query passed to `SetAchievementSearchString`.
+    pub query: String,
+    /// Server-side scan progress. Synchronous impl sets this equal to
+    /// `size` so the progress bar fills immediately.
+    pub progress: i32,
+    /// Total work units the search needs to scan. Synchronous impl
+    /// sets this to the result count.
+    pub size: i32,
+    /// Achievement ids matching the active query. Indexed 1..=N by
+    /// `GetFilteredAchievementID(index)`.
+    pub filtered_ids: Vec<i32>,
+}
+
 /// Reputation gating metadata keyed by achievement id in
 /// `SimState.achievement_guild_rep`. Drives the legacy global
 /// `GetAchievementGuildRep`, which the achievement tooltip calls to

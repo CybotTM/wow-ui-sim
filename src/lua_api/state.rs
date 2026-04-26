@@ -166,6 +166,7 @@ macro_rules! build_empty_sim_state {
             achievement_comparison_unit: None,
             achievement_comparison_data: AchievementComparisonData::default(),
             guild_achievement_members: ::std::collections::HashMap::new(),
+            achievement_search: AchievementSearchState::default(),
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
             social_friends: default_social_friends(),
@@ -232,12 +233,12 @@ use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
-    AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementStatistic,
-    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo, AuctionBrowseResult,
-    AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount, ChatBubble,
-    CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem,
-    GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
+    AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
+    AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
+    AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
+    ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
+    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo,
+    LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
     MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
     MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, ScenarioState,
     ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
@@ -726,6 +727,11 @@ pub struct SimState {
     /// `numMembers == 0`, which the addon treats as "fetch from
     /// server" and silently drops the tooltip section.
     pub guild_achievement_members: HashMap<i32, Vec<String>>,
+    /// Achievement search state. Drives `SetAchievementSearchString`
+    /// plus the four read-only progress/result globals consumed by
+    /// `AchievementFrameSearchProgressBar_OnUpdate` and
+    /// `AchievementFrame_ShowSearchPreviewResults`.
+    pub achievement_search: AchievementSearchState,
     /// Area-POI metadata keyed by area poi id. Drives
     /// `C_AreaPoiInfo.GetAreaPOIInfo` / `GetAreaPOISecondsLeft`.
     /// Seeded with a tiny fixture (Mage Tower Stormwind +
