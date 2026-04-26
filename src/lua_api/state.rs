@@ -165,6 +165,7 @@ macro_rules! build_empty_sim_state {
             achievement_statistics: ::std::collections::HashMap::new(),
             achievement_comparison_unit: None,
             achievement_comparison_data: AchievementComparisonData::default(),
+            guild_achievement_members: ::std::collections::HashMap::new(),
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
             social_friends: default_social_friends(),
@@ -718,6 +719,13 @@ pub struct SimState {
     /// `GetComparison*` getters. Stays at default until a test or
     /// fixture seeds it; the addon then renders the friend's row.
     pub achievement_comparison_data: AchievementComparisonData,
+    /// Guild member rosters keyed by guild achievement id. Drives the
+    /// trio `GetGuildAchievementNumMembers`,
+    /// `GetGuildAchievementMembers` (async no-op), and
+    /// `GetGuildAchievementMemberInfo`. Empty rosters yield
+    /// `numMembers == 0`, which the addon treats as "fetch from
+    /// server" and silently drops the tooltip section.
+    pub guild_achievement_members: HashMap<i32, Vec<String>>,
     /// Area-POI metadata keyed by area poi id. Drives
     /// `C_AreaPoiInfo.GetAreaPOIInfo` / `GetAreaPOISecondsLeft`.
     /// Seeded with a tiny fixture (Mage Tower Stormwind +

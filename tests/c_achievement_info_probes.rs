@@ -746,3 +746,120 @@ fn comparison_data_struct_can_be_default_constructed() {
     assert!(data.completion_dates.is_empty());
     assert!(data.statistics.is_empty());
 }
+
+#[test]
+fn get_guild_achievement_num_members_returns_zero_for_unseeded_id() {
+    let env = env();
+    let count: i32 = env
+        .eval("return GetGuildAchievementNumMembers(4860)")
+        .unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
+fn get_guild_achievement_num_members_returns_seeded_count() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state
+            .guild_achievement_members
+            .insert(4860, vec!["Thrall".into(), "Jaina".into(), "Anduin".into()]);
+    }
+    let count: i32 = env
+        .eval("return GetGuildAchievementNumMembers(4860)")
+        .unwrap();
+    assert_eq!(count, 3);
+}
+
+#[test]
+fn get_guild_achievement_members_is_no_op() {
+    let env = env();
+    let nret: i32 = env
+        .eval("return select('#', GetGuildAchievementMembers(4860))")
+        .unwrap();
+    assert_eq!(nret, 0, "async stub must return zero values");
+}
+
+#[test]
+fn get_guild_achievement_member_info_returns_seeded_name_at_index() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state
+            .guild_achievement_members
+            .insert(4860, vec!["Thrall".into(), "Jaina".into(), "Anduin".into()]);
+    }
+    let (first, second, third): (String, String, String) = env
+        .eval(
+            r#"
+            return GetGuildAchievementMemberInfo(4860, 1),
+                   GetGuildAchievementMemberInfo(4860, 2),
+                   GetGuildAchievementMemberInfo(4860, 3)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(first, "Thrall");
+    assert_eq!(second, "Jaina");
+    assert_eq!(third, "Anduin");
+}
+
+#[test]
+fn get_guild_achievement_member_info_returns_nil_for_out_of_range_index() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state
+            .guild_achievement_members
+            .insert(4860, vec!["Thrall".into()]);
+    }
+    let (zero_is_nil, past_end_is_nil): (bool, bool) = env
+        .eval(
+            r#"
+            return GetGuildAchievementMemberInfo(4860, 0) == nil,
+                   GetGuildAchievementMemberInfo(4860, 9) == nil
+            "#,
+        )
+        .unwrap();
+    assert!(zero_is_nil, "1-indexed: index 0 must yield nil");
+    assert!(past_end_is_nil);
+}
+
+#[test]
+fn get_guild_achievement_member_info_returns_nil_for_unseeded_achievement() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return GetGuildAchievementMemberInfo(99999, 1) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn guild_member_tooltip_loop_renders_seeded_roster() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.guild_achievement_members.insert(
+            4860,
+            vec![
+                "Thrall".into(),
+                "Jaina".into(),
+                "Anduin".into(),
+                "Sylvanas".into(),
+            ],
+        );
+    }
+    let joined: String = env
+        .eval(
+            r#"
+            local id = 4860
+            local n = GetGuildAchievementNumMembers(id)
+            local names = {}
+            for i = 1, n do
+                names[i] = GetGuildAchievementMemberInfo(id, i)
+            end
+            return table.concat(names, ",")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(joined, "Thrall,Jaina,Anduin,Sylvanas");
+}

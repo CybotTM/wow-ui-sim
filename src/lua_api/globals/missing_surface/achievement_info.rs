@@ -232,6 +232,29 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
     register_traversal_globals(state, globals)?;
     register_summary_globals(state, globals)?;
     register_comparison_globals(state, globals)?;
+    register_guild_member_globals(state, globals)?;
+    Ok(())
+}
+
+fn register_guild_member_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetGuildAchievementNumMembers",
+        get_guild_achievement_num_members,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetGuildAchievementMembers",
+        get_guild_achievement_members,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetGuildAchievementMemberInfo",
+        get_guild_achievement_member_info,
+    )?;
     Ok(())
 }
 
@@ -717,6 +740,45 @@ fn get_comparison_statistic(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
     match quantity {
+        Some(text) => {
+            let val = create_string(state, &text);
+            state.push(val);
+        }
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
+}
+
+fn get_guild_achievement_num_members(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let count = borrow_state(state)?
+        .guild_achievement_members
+        .get(&achievement_id)
+        .map(|members| members.len() as i32)
+        .unwrap_or(0);
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn get_guild_achievement_members(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+fn get_guild_achievement_member_info(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let index = i32::from_stack(state, 2)?;
+    let name = {
+        let sim = borrow_state(state)?;
+        sim.guild_achievement_members
+            .get(&achievement_id)
+            .and_then(|members| {
+                usize::try_from(index - 1)
+                    .ok()
+                    .and_then(|idx| members.get(idx))
+            })
+            .cloned()
+    };
+    match name {
         Some(text) => {
             let val = create_string(state, &text);
             state.push(val);
