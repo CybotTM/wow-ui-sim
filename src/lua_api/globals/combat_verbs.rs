@@ -17,7 +17,12 @@
 //! - `SpellCanTargetItemID()` — false until item-targeting cursor exists
 //! - `SpellStopTargeting()`   — no-op companion to `SpellIsTargeting`
 //! - `UseAction(slot)`        — cast/execute the spell in an action bar slot
-//! - `ActionButtonDown(slot)` / `ActionButtonUp(slot)` — mirror button state
+//! - `ActionButtonDown(id)` / `ActionButtonUp(id)` — main bar key dispatch
+//! - `MultiActionButtonDown(barName, id)` / `MultiActionButtonUp(...)` —
+//!     multi-bar key dispatch into the bar's `actionButtons` table
+//! - `ExtraActionButtonKey(id, isDown)` — extra action bar key dispatch
+//! - `TryUseActionButton(button, checkingFromDown)` — fires the action bound
+//!     to a button during a key down, mirroring SecureActionButton_OnClick
 //!
 //! Registered from `register_tail_globals` in `register.rs` — runs after
 //! `missing_surface` so the real Rust bodies overwrite any pre-existing
@@ -27,11 +32,19 @@ use crate::lua_api::env::WowLuaAppData;
 use crate::lua_api::game_data::{self, CastingState, SpellCooldownState, SpellTargetType};
 use crate::lua_api::globals::spell_api::spell_cast_time;
 use crate::lua_api::globals::spellbook_data;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
+    table_get,
+};
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{FromStack, stack_val};
+use crate::widget::AttributeValue;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val};
+
+const BUTTON_STATE_PUSHED: &str = "PUSHED";
+const BUTTON_STATE_NORMAL: &str = "NORMAL";
 
 const DEFAULT_CAST_DURATION: f64 = 1.5;
 const AUTO_ATTACK_NAME: &str = "Auto Attack";
@@ -219,26 +232,76 @@ fn apply_spell_to_target(state: &mut LuaState, spell_id: u32) {
     }
 }
 
-fn set_action_button_state(state: &mut LuaState, slot: u32, button_state: u8) {
-    let button_name = format!("ActionButton{slot}");
-    let button_val = LuaApiMut::get_global_val(state, &button_name);
-    if matches!(button_val, Val::Nil) {
+fn read_action_slot(state: &mut LuaState, button: Val) -> Option<u32> {
+    if let Val::Num(n) = table_get(state, button, "action") {
+        return Some(n as u32);
+    }
+    let id = extract_frame_id(state, button)?;
+    let sim = borrow_state(state).ok()?;
+    match sim.widgets.get(id)?.attributes.get("action")? {
+        AttributeValue::Number(n) => Some(*n as u32),
+        _ => None,
+    }
+}
+
+fn lookup_method(state: &mut LuaState, button: Val, name: &str) -> Val {
+    let key = create_string(state, name);
+    state.gettable(button, key).unwrap_or(Val::Nil)
+}
+
+fn current_button_state(state: &mut LuaState, button: Val) -> Option<String> {
+    let getter = lookup_method(state, button, "GetButtonState");
+    if !matches!(getter, Val::Function(_)) {
+        return None;
+    }
+    let result = call_function_state(state, getter, &[button]).ok()?;
+    let Val::Str(str_ref) = result else {
+        return None;
+    };
+    let bytes = state.gc.string_arena.get(str_ref)?.data().to_vec();
+    String::from_utf8(bytes).ok()
+}
+
+fn set_button_state(state: &mut LuaState, button: Val, target: &str) {
+    let setter = lookup_method(state, button, "SetButtonState");
+    if !matches!(setter, Val::Function(_)) {
         return;
     }
-    let state_name = if button_state == 1 {
-        "PUSHED"
-    } else {
-        "NORMAL"
+    let target_val = create_string(state, target);
+    let _ = call_function_state(state, setter, &[button, target_val]);
+}
+
+fn dispatch_action_for_button(state: &mut LuaState, button: Val) -> LuaResult<bool> {
+    let Some(slot) = read_action_slot(state, button) else {
+        return Ok(false);
     };
-    let set_button_state = crate::lua_api::methods::table_get(state, button_val, "SetButtonState");
-    if matches!(set_button_state, Val::Function(_)) {
-        let state_val = create_string(state, state_name);
-        let _ = crate::lua_api::methods::call_function_state(
-            state,
-            set_button_state,
-            &[button_val, state_val],
-        );
-    }
+    let spell_id = {
+        let sim = borrow_state(state)?;
+        sim.action_bars.get(&slot).copied()
+    };
+    let Some(spell_id) = spell_id else {
+        return Ok(false);
+    };
+    execute_spell_by_id(state, spell_id)?;
+    Ok(true)
+}
+
+fn lookup_bar_button(state: &mut LuaState, bar_name: &str, id: u32) -> Val {
+    let bar = LuaApiMut::get_global_val(state, bar_name);
+    let buttons = table_get(state, bar, "actionButtons");
+    let Val::Table(buttons_ref) = buttons else {
+        return Val::Nil;
+    };
+    integer_table_entry(state, buttons_ref, id as i64)
+}
+
+fn integer_table_entry(state: &LuaState, table_ref: rilua::vm::gc::arena::GcRef<Table>, key: i64) -> Val {
+    state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|t| t.get_int(key))
+        .unwrap_or(Val::Nil)
 }
 
 /// `CastSpellByID(spellId [, unit])` — set `SimState.casting` to the spell.
@@ -349,16 +412,97 @@ fn use_action(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn action_button_down(state: &mut LuaState) -> LuaResult<u32> {
-    if let Some(slot) = stack_u32(state, 1) {
-        set_action_button_state(state, slot, 1);
+/// `TryUseActionButton(button, checkingFromDown)` — fire the bound action when
+/// `checkingFromDown` is truthy. Returns true if the slot resolved to a known
+/// spell and the cast pipeline was invoked.
+fn try_use_action_button(state: &mut LuaState) -> LuaResult<u32> {
+    let button = stack_val(state, 1);
+    let checking_from_down = matches!(stack_val(state, 2), Val::Bool(true));
+    let used = if checking_from_down {
+        dispatch_action_for_button(state, button)?
+    } else {
+        false
+    };
+    state.push(Val::Bool(used));
+    Ok(1)
+}
+
+fn press_button_and_fire(state: &mut LuaState, button: Val) -> LuaResult<()> {
+    if matches!(button, Val::Nil) {
+        return Ok(());
     }
+    let was_normal = current_button_state(state, button).as_deref() == Some(BUTTON_STATE_NORMAL);
+    if was_normal {
+        set_button_state(state, button, BUTTON_STATE_PUSHED);
+    }
+    let _ = dispatch_action_for_button(state, button)?;
+    Ok(())
+}
+
+fn release_button_if_pushed(state: &mut LuaState, button: Val) -> LuaResult<()> {
+    if matches!(button, Val::Nil) {
+        return Ok(());
+    }
+    let was_pushed = current_button_state(state, button).as_deref() == Some(BUTTON_STATE_PUSHED);
+    if !was_pushed {
+        return Ok(());
+    }
+    set_button_state(state, button, BUTTON_STATE_NORMAL);
+    Ok(())
+}
+
+fn action_button_down(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(id) = stack_u32(state, 1) else {
+        return Ok(0);
+    };
+    let button = LuaApiMut::get_global_val(state, &format!("ActionButton{id}"));
+    press_button_and_fire(state, button)?;
     Ok(0)
 }
 
 fn action_button_up(state: &mut LuaState) -> LuaResult<u32> {
-    if let Some(slot) = stack_u32(state, 1) {
-        set_action_button_state(state, slot, 0);
+    let Some(id) = stack_u32(state, 1) else {
+        return Ok(0);
+    };
+    let button = LuaApiMut::get_global_val(state, &format!("ActionButton{id}"));
+    release_button_if_pushed(state, button)?;
+    Ok(0)
+}
+
+fn multi_action_button_down(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(bar_name) = Option::<String>::from_stack(state, 1)? else {
+        return Ok(0);
+    };
+    let Some(id) = stack_u32(state, 2) else {
+        return Ok(0);
+    };
+    let button = lookup_bar_button(state, &bar_name, id);
+    press_button_and_fire(state, button)?;
+    Ok(0)
+}
+
+fn multi_action_button_up(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(bar_name) = Option::<String>::from_stack(state, 1)? else {
+        return Ok(0);
+    };
+    let Some(id) = stack_u32(state, 2) else {
+        return Ok(0);
+    };
+    let button = lookup_bar_button(state, &bar_name, id);
+    release_button_if_pushed(state, button)?;
+    Ok(0)
+}
+
+fn extra_action_button_key(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(id) = stack_u32(state, 1) else {
+        return Ok(0);
+    };
+    let is_down = matches!(stack_val(state, 2), Val::Bool(true));
+    let button = LuaApiMut::get_global_val(state, &format!("ExtraActionButton{id}"));
+    if is_down {
+        press_button_and_fire(state, button)?;
+    } else {
+        release_button_if_pushed(state, button)?;
     }
     Ok(0)
 }
@@ -372,6 +516,10 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UseAction", use_action)?;
     LuaApiMut::register_function(lua, "ActionButtonDown", action_button_down)?;
     LuaApiMut::register_function(lua, "ActionButtonUp", action_button_up)?;
+    LuaApiMut::register_function(lua, "MultiActionButtonDown", multi_action_button_down)?;
+    LuaApiMut::register_function(lua, "MultiActionButtonUp", multi_action_button_up)?;
+    LuaApiMut::register_function(lua, "ExtraActionButtonKey", extra_action_button_key)?;
+    LuaApiMut::register_function(lua, "TryUseActionButton", try_use_action_button)?;
     LuaApiMut::register_function(lua, "ClickSpecialAbility", click_special_ability)?;
     LuaApiMut::register_function(lua, "SpellTargetUnit", spell_target_unit)?;
     LuaApiMut::register_function(lua, "SpellIsTargeting", spell_is_targeting)?;

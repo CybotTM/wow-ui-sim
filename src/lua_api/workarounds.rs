@@ -691,28 +691,6 @@ fn patch_action_bar_button_event_fanout(env: &crate::lua_api::WowLuaEnv) {
             for_each_button_frame(self, func)
         end
 
-        local function action_button_for_id(id)
-            return GetActionButtonForID(id)
-        end
-
-        if rawget(_G, "__wow_action_button_state_patched") ~= true then
-            function ActionButtonDown(id)
-                local button = action_button_for_id(id)
-                if button and type(button.GetButtonState) == "function" and button:GetButtonState() == "NORMAL" then
-                    button:SetButtonState("PUSHED")
-                end
-            end
-
-            function ActionButtonUp(id)
-                local button = action_button_for_id(id)
-                if button and type(button.GetButtonState) == "function" and button:GetButtonState() == "PUSHED" then
-                    button:SetButtonState("NORMAL")
-                end
-            end
-
-            rawset(_G, "__wow_action_button_state_patched", true)
-        end
-
         ActionBarButtonEventsFrameMixin.OnEvent = on_event
         ActionBarButtonEventsFrameMixin.OnCountdownForCooldownsChanged = on_countdown_for_cooldowns_changed
         ActionBarButtonEventsFrameMixin.ForEachFrame = for_each_frame
