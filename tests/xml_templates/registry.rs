@@ -73,6 +73,62 @@ fn test_env_reinstalls_intrinsic_templates_after_clear() {
     );
 }
 
+#[test]
+fn intrinsic_dropdown_scripts_chain_with_style_template_scripts() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        XmlIntrinsicDropdownCalls = {}
+
+        XmlIntrinsicDropdownMixin = {}
+        function XmlIntrinsicDropdownMixin:OnMouseDown_Intrinsic()
+            table.insert(XmlIntrinsicDropdownCalls, "intrinsic")
+        end
+
+        XmlStyleDropdownMixin = {}
+        function XmlStyleDropdownMixin:OnMouseDown()
+            table.insert(XmlIntrinsicDropdownCalls, "style")
+        end
+    "#,
+    )
+    .unwrap();
+    let dir = create_test_addon(
+        r#"<Ui>
+            <DropdownButton name="DropdownButton" intrinsic="true" mixin="XmlIntrinsicDropdownMixin">
+                <Scripts>
+                    <OnMouseDown method="OnMouseDown_Intrinsic"/>
+                </Scripts>
+            </DropdownButton>
+            <DropdownButton name="XmlStyleDropdownTemplate" virtual="true" mixin="XmlStyleDropdownMixin">
+                <Scripts>
+                    <OnMouseDown method="OnMouseDown"/>
+                </Scripts>
+            </DropdownButton>
+            <DropdownButton name="XmlConcreteDropdown" parent="UIParent" inherits="XmlStyleDropdownTemplate"/>
+        </Ui>"#,
+        "TestIntrinsicDropdownScripts",
+    );
+    let toc_path = dir.path().join("TestIntrinsicDropdownScripts.toc");
+
+    load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
+    env.exec(
+        r#"
+        local handler = XmlConcreteDropdown:GetScript("OnMouseDown")
+        handler(XmlConcreteDropdown)
+    "#,
+    )
+    .unwrap();
+
+    let calls: String = env
+        .eval("return table.concat(XmlIntrinsicDropdownCalls, ',')")
+        .unwrap();
+    assert_eq!(
+        calls, "style,intrinsic",
+        "derived style handlers should not replace intrinsic dropdown handlers"
+    );
+}
+
 // ============================================================================
 // CreateFrame with XML Template Tests
 // ============================================================================

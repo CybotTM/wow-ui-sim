@@ -155,13 +155,15 @@ fn apply_chain_entries(
     frame_id: u64,
     chain: &[Arc<crate::xml::TemplateEntry>],
 ) -> LuaResult<()> {
+    let mut has_intrinsic_base = false;
     for entry in chain {
         runtime::ensure_runtime_button_texture_slots(state, frame_id, &entry.frame)?;
         apply_frame_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
         if let Some(scripts) = entry.frame.scripts() {
-            apply_template_scripts(state, frame_id, scripts)?;
+            apply_template_scripts_impl(state, frame_id, scripts, has_intrinsic_base)?;
         }
+        has_intrinsic_base |= entry.frame.intrinsic == Some(true);
     }
     Ok(())
 }
@@ -213,11 +215,24 @@ pub(crate) fn apply_template_scripts(
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
 ) -> LuaResult<()> {
-    if apply_fast_scripts(state, frame_id, scripts)? {
+    apply_template_scripts_impl(state, frame_id, scripts, false)
+}
+
+fn apply_template_scripts_impl(
+    state: &mut LuaState,
+    frame_id: u64,
+    scripts: &crate::xml::ScriptsXml,
+    chain_default_scripts: bool,
+) -> LuaResult<()> {
+    if apply_fast_scripts(state, frame_id, scripts, chain_default_scripts)? {
         return Ok(());
     }
 
-    let script_code = crate::loader::helpers::generate_scripts_code(scripts);
+    let script_code = if chain_default_scripts {
+        crate::loader::helpers::generate_scripts_code_chaining_default_handlers(scripts)
+    } else {
+        crate::loader::helpers::generate_scripts_code(scripts)
+    };
     if script_code.trim().is_empty() {
         return Ok(());
     }
@@ -242,7 +257,7 @@ pub(crate) fn apply_template_scripts(
 }
 
 pub(crate) fn scripts_support_fast_install(scripts: &crate::xml::ScriptsXml) -> bool {
-    collect_fast_handlers(scripts).is_some()
+    collect_fast_handlers(scripts, false).is_some()
 }
 
 pub(crate) fn first_fast_install_miss(scripts: &crate::xml::ScriptsXml) -> Option<String> {
@@ -256,8 +271,9 @@ fn apply_fast_scripts(
     state: &mut LuaState,
     frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
+    chain_default_scripts: bool,
 ) -> LuaResult<bool> {
-    let Some(installs) = collect_fast_handlers(scripts) else {
+    let Some(installs) = collect_fast_handlers(scripts, chain_default_scripts) else {
         return Ok(false);
     };
     if installs.is_empty() {
@@ -273,12 +289,29 @@ fn apply_fast_scripts(
 
 fn collect_fast_handlers(
     scripts: &crate::xml::ScriptsXml,
+    chain_default_scripts: bool,
 ) -> Option<Vec<(&'static str, FastScriptInstall<'_>)>> {
     let mut handlers = Vec::new();
-    collect_fast_handler_group(&mut handlers, base_method_only_handlers(scripts))?;
-    collect_fast_handler_group(&mut handlers, pointer_method_only_handlers(scripts))?;
-    collect_fast_handler_group(&mut handlers, text_method_only_handlers(scripts))?;
-    collect_fast_handler_group(&mut handlers, state_method_only_handlers(scripts))?;
+    collect_fast_handler_group(
+        &mut handlers,
+        base_method_only_handlers(scripts),
+        chain_default_scripts,
+    )?;
+    collect_fast_handler_group(
+        &mut handlers,
+        pointer_method_only_handlers(scripts),
+        chain_default_scripts,
+    )?;
+    collect_fast_handler_group(
+        &mut handlers,
+        text_method_only_handlers(scripts),
+        chain_default_scripts,
+    )?;
+    collect_fast_handler_group(
+        &mut handlers,
+        state_method_only_handlers(scripts),
+        chain_default_scripts,
+    )?;
     Some(handlers)
 }
 
@@ -764,12 +797,13 @@ enum FastScriptInstall<'a> {
 fn collect_fast_handler_group<'a>(
     handlers: &mut Vec<(&'static str, FastScriptInstall<'a>)>,
     group: impl IntoIterator<Item = FastHandler<'a>>,
+    chain_default_scripts: bool,
 ) -> Option<()> {
     for (handler_name, script) in group {
         let Some(script) = script else {
             continue;
         };
-        let install = fast_script_install(handler_name, script)?;
+        let install = fast_script_install(handler_name, script, chain_default_scripts)?;
         handlers.push((handler_name, install));
     }
     Some(())
@@ -782,7 +816,7 @@ fn first_fast_handler_miss_in_group<'a>(
         let Some(script) = script else {
             continue;
         };
-        if fast_script_install(handler_name, script).is_none() {
+        if fast_script_install(handler_name, script, false).is_none() {
             return Some(describe_fast_script_miss(handler_name, script));
         }
     }
@@ -792,16 +826,9 @@ fn first_fast_handler_miss_in_group<'a>(
 fn fast_script_install<'a>(
     handler_name: &'static str,
     script: &'a crate::xml::ScriptBodyXml,
+    chain_default_scripts: bool,
 ) -> Option<FastScriptInstall<'a>> {
-    let handler = if let Some(method_name) = script.method.as_deref() {
-        FastHandlerRef::Method(method_name)
-    } else if let Some(function_name) = script.function.as_deref() {
-        FastHandlerRef::Function(function_name)
-    } else if let Some(body) = script.body.as_deref() {
-        parser::parse_inline_fast_handler(handler_name, body)?
-    } else {
-        FastHandlerRef::NoOp
-    };
+    let handler = fast_handler_ref(handler_name, script)?;
     match script.intrinsic_order.as_deref() {
         Some("precall") => Some(FastScriptInstall::Intrinsic {
             handler,
@@ -822,9 +849,29 @@ fn fast_script_install<'a>(
                 new_first: false,
             }),
             Some(_) => None,
+            None if chain_default_scripts => Some(FastScriptInstall::Chain {
+                handler,
+                new_first: true,
+            }),
             None => Some(FastScriptInstall::Set(handler)),
         },
     }
+}
+
+fn fast_handler_ref<'a>(
+    handler_name: &'static str,
+    script: &'a crate::xml::ScriptBodyXml,
+) -> Option<FastHandlerRef<'a>> {
+    if let Some(method_name) = script.method.as_deref() {
+        return Some(FastHandlerRef::Method(method_name));
+    }
+    if let Some(function_name) = script.function.as_deref() {
+        return Some(FastHandlerRef::Function(function_name));
+    }
+    if let Some(body) = script.body.as_deref() {
+        return Some(parser::parse_inline_fast_handler(handler_name, body)?);
+    }
+    Some(FastHandlerRef::NoOp)
 }
 
 fn describe_fast_script_miss(handler_name: &str, script: &crate::xml::ScriptBodyXml) -> String {

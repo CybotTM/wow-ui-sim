@@ -143,7 +143,6 @@ fn apply_blizzard_post_load_patches(
 ) {
     match folder_name {
         "Blizzard_EnvironmentCleanup" => patch_environment_cleanup(env, result),
-        "Blizzard_Menu" => patch_menu_descriptor_fallback(env, result),
         "Blizzard_AccountStore" => patch_account_store_set_storefront(env, result),
         "Blizzard_SharedXML" => patch_shared_xml_anim_mixins(env, result),
         "Blizzard_UIParent" => patch_uiparent_managed_frame_mixin(env, result),
@@ -173,17 +172,6 @@ fn patch_environment_cleanup(env: &LoaderEnv<'_>, result: &mut LoadResult) {
             result,
             "Blizzard_EnvironmentCleanup",
             "restore post-cleanup globals",
-            &e,
-        );
-    }
-}
-
-fn patch_menu_descriptor_fallback(env: &LoaderEnv<'_>, result: &mut LoadResult) {
-    if let Err(e) = env.ensure_menu_descriptor_fallback() {
-        push_patch_warning(
-            result,
-            "Blizzard_Menu",
-            "install Menu descriptor fallback",
             &e,
         );
     }

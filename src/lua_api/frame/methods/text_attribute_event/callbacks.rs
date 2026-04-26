@@ -289,7 +289,6 @@ pub(super) fn setup_menu(_state: &mut LuaState) -> LuaResult<u32> {
     }
     let generator = stack_val(state, 2);
     table_set(state, fields, "menuGenerator", generator);
-    table_set(state, fields, "__wow_menu_generator", generator);
     Ok(0)
 }
 
