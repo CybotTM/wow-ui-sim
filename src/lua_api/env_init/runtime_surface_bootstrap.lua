@@ -1870,14 +1870,53 @@ if UnitGetAvailableRoles == nil then
 end
 
 if debugstack == nil then
-  function debugstack()
-    return ""
+  function debugstack(level, count1, count2)
+    if not debug or not debug.traceback then
+      return ""
+    end
+    local start = (tonumber(level) or 1) + 1
+    local tb = debug.traceback("", start) or ""
+    tb = tb:gsub("^\n?stack traceback:\n?", "")
+    tb = tb:gsub("^%s+", "")
+    if count1 or count2 then
+      local top = tonumber(count1) or 12
+      local bottom = tonumber(count2) or 10
+      local lines = {}
+      for line in tb:gmatch("([^\n]*)\n?") do
+        if line ~= "" then lines[#lines + 1] = line end
+      end
+      if #lines > top + bottom then
+        local kept = {}
+        for i = 1, top do kept[#kept + 1] = lines[i] end
+        kept[#kept + 1] = "..."
+        for i = #lines - bottom + 1, #lines do kept[#kept + 1] = lines[i] end
+        return table.concat(kept, "\n") .. "\n"
+      end
+    end
+    if tb ~= "" and not tb:match("\n$") then tb = tb .. "\n" end
+    return tb
   end
 end
 
 if debuglocals == nil then
-  function debuglocals()
-    return ""
+  function debuglocals(level)
+    if not debug or not debug.getinfo or not debug.getlocal then
+      return ""
+    end
+    local start = (tonumber(level) or 1) + 1
+    local info = debug.getinfo(start, "fS")
+    if not info then return "" end
+    local parts = {}
+    local i = 1
+    while true do
+      local name, value = debug.getlocal(start, i)
+      if not name then break end
+      if not name:match("^%(") then
+        parts[#parts + 1] = string.format("%s = %s", name, tostring(value))
+      end
+      i = i + 1
+    end
+    return table.concat(parts, "\n")
   end
 end
 

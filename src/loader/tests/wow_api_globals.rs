@@ -644,7 +644,10 @@ fn test_startup_service_globals_exist() {
     assert_eq!(background_ty, "function");
     assert_eq!(background_status, 0);
     assert_eq!(debugstack_ty, "function");
-    assert_eq!(debugstack_value, "");
+    assert!(
+        debugstack_value.contains("in main chunk") || debugstack_value.contains("in function"),
+        "expected debugstack output to contain stack frames, got: {debugstack_value:?}"
+    );
     assert_eq!(issecure_ty, "function");
     assert!(secure);
 }
