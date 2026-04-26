@@ -6,6 +6,7 @@
 
 pub mod c_addon_profiler;
 pub mod c_addons;
+pub mod c_artifact_ui;
 pub mod c_configuration_warnings;
 pub mod c_fog_of_war;
 pub mod c_map;

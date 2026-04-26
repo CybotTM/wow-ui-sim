@@ -68,6 +68,8 @@ macro_rules! build_empty_sim_state {
             action_bar_state: ActionBarStateInfo::default(),
             action_bars: $collections.action_bars,
             action_highlights: ActionHighlightState::default(),
+            equipped_artifact: None,
+            artifact_point_costs: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -420,6 +422,30 @@ impl Default for ActionBarStateInfo {
     }
 }
 
+/// Equipped artifact metadata read by `C_ArtifactUI.GetEquippedArtifactInfo`,
+/// `GetEquippedArtifactItemID`, `IsEquippedArtifactMaxed`, and
+/// `IsEquippedArtifactDisabled`. `None` on `state.equipped_artifact` means no
+/// artifact is wielded — `C_ArtifactUI.GetEquippedArtifactItemID` returns nil
+/// and the `Blizzard_ActionBar/Mainline/ArtifactBar.lua` mixin stays hidden.
+#[derive(Clone, Debug)]
+pub struct ArtifactInfo {
+    pub item_id: i32,
+    pub alt_item_id: i32,
+    pub name: String,
+    pub icon: String,
+    pub total_xp: i64,
+    pub points_spent: i32,
+    pub quality: i32,
+    pub artifact_appearance_id: i32,
+    pub appearance_mod_id: i32,
+    pub item_appearance_id: i32,
+    pub alt_item_appearance_id: i32,
+    pub alt_on_top: bool,
+    pub tier: i32,
+    pub maxed: bool,
+    pub disabled: bool,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -547,6 +573,16 @@ pub struct SimState {
     /// `On Bar` highlight verbs. Read by Blizzard_ActionBar buttons during
     /// hover/drag updates.
     pub action_highlights: ActionHighlightState,
+    /// Currently equipped artifact (legacy-spec content). `None` when no
+    /// artifact is wielded — drives `C_ArtifactUI.GetEquippedArtifactItemID`
+    /// returning nil and keeps the `ArtifactBarMixin` hidden.
+    pub equipped_artifact: Option<ArtifactInfo>,
+    /// XP cost of the next trait point keyed by `(points_spent, tier)`.
+    /// Consumed by `C_ArtifactUI.GetCostForPointAtRank` and the
+    /// `ArtifactBarGetNumArtifactTraitsPurchasableFromXP` helper. Empty by
+    /// default — callers receive 0 for missing entries, which the helper
+    /// treats as "no further point purchasable".
+    pub artifact_point_costs: HashMap<(i32, i32), i64>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame
