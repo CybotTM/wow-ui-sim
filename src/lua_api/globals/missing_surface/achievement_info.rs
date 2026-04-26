@@ -229,6 +229,11 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
     register_category_globals(state, globals)?;
     register_criteria_globals(state, globals)?;
     register_traversal_globals(state, globals)?;
+    register_summary_globals(state, globals)?;
+    Ok(())
+}
+
+fn register_summary_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
     table_set_rust_fn_static(
         state,
         globals,
@@ -248,6 +253,7 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         get_total_achievement_points,
     )?;
     table_set_rust_fn_static(state, globals, "GetAchievementLink", get_achievement_link)?;
+    table_set_rust_fn_static(state, globals, "GetStatistic", get_statistic)?;
     Ok(())
 }
 
@@ -482,6 +488,33 @@ fn get_achievement_guild_rep(state: &mut LuaState) -> LuaResult<u32> {
         None => Val::Nil,
     });
     Ok(3)
+}
+
+fn get_statistic(state: &mut LuaState) -> LuaResult<u32> {
+    let nargs = (state.top as i32 - state.base as i32).max(0);
+    if nargs >= 2 {
+        state.push(Val::Nil);
+        state.push(Val::Bool(true));
+        state.push(Val::Nil);
+        return Ok(3);
+    }
+    let achievement_id = i32::from_stack(state, 1)?;
+    let entry = borrow_state(state)?
+        .achievement_statistics
+        .get(&achievement_id)
+        .cloned();
+    match entry {
+        Some(stat) => {
+            let quantity = create_string(state, &stat.quantity);
+            state.push(quantity);
+            state.push(Val::Bool(stat.is_counter));
+        }
+        None => {
+            state.push(Val::Nil);
+            state.push(Val::Bool(false));
+        }
+    }
+    Ok(2)
 }
 
 fn get_num_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {

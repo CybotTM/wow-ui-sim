@@ -168,6 +168,22 @@ pub struct AchievementInfo {
     pub reward_item_id: Option<i32>,
 }
 
+/// Statistic display data keyed by achievement id in
+/// `SimState.achievement_statistics`. Drives the legacy global
+/// `GetStatistic(achievementID)`, which `AchievementFrameStats`
+/// renders in the Summary statistic rows. Empty by default —
+/// unseeded ids return `(nil, false)` and the tooltip's `"--"`
+/// fallback kicks in client-side.
+#[derive(Debug, Clone, Default)]
+pub struct AchievementStatistic {
+    /// Pre-formatted statistic display string (e.g. `"1234"` or
+    /// `"1h 23m"`).
+    pub quantity: String,
+    /// True when the value is a numeric counter (vs. a derived
+    /// time/string). Mirrors the second return of the legacy global.
+    pub is_counter: bool,
+}
+
 /// Reputation gating metadata keyed by achievement id in
 /// `SimState.achievement_guild_rep`. Drives the legacy global
 /// `GetAchievementGuildRep`, which the achievement tooltip calls to

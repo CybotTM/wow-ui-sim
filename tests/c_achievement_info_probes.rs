@@ -2,7 +2,7 @@
 //! `SimState.achievements` + `WorldState.earned_achievements`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state::{AchievementGuildRep, AchievementInfo};
+use wow_ui_sim::lua_api::state::{AchievementGuildRep, AchievementInfo, AchievementStatistic};
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -432,4 +432,89 @@ fn set_portrait_texture_overwrites_prior_atlas_and_color() {
     assert!(ok);
     assert_eq!(path, "Interface\\Icons\\Achievement_Character_Default");
     assert!(atlas_is_nil);
+}
+
+#[test]
+fn get_statistic_returns_nil_and_false_for_unseeded_id() {
+    let env = env();
+    let (quantity_is_nil, is_counter): (bool, bool) = env
+        .eval(
+            r#"
+            local q, c = GetStatistic(6)
+            return q == nil, c
+            "#,
+        )
+        .unwrap();
+    assert!(quantity_is_nil);
+    assert!(!is_counter);
+}
+
+#[test]
+fn get_statistic_returns_seeded_quantity_and_counter_flag() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievement_statistics.insert(
+            128,
+            AchievementStatistic {
+                quantity: "1234".into(),
+                is_counter: true,
+            },
+        );
+    }
+    let (quantity, is_counter): (String, bool) = env.eval("return GetStatistic(128)").unwrap();
+    assert_eq!(quantity, "1234");
+    assert!(is_counter);
+}
+
+#[test]
+fn get_statistic_returns_non_counter_for_string_stats() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievement_statistics.insert(
+            132,
+            AchievementStatistic {
+                quantity: "1h 23m".into(),
+                is_counter: false,
+            },
+        );
+    }
+    let (quantity, is_counter): (String, bool) = env.eval("return GetStatistic(132)").unwrap();
+    assert_eq!(quantity, "1h 23m");
+    assert!(!is_counter);
+}
+
+#[test]
+fn get_statistic_two_arg_form_signals_skip() {
+    let env = env();
+    let (quantity_is_nil, skip, id_is_nil): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local q, s, id = GetStatistic(92, 1)
+            return q == nil, s, id == nil
+            "#,
+        )
+        .unwrap();
+    assert!(quantity_is_nil);
+    assert!(
+        skip,
+        "two-arg form must signal skip until categories are seeded"
+    );
+    assert!(id_is_nil);
+}
+
+#[test]
+fn get_statistic_falls_back_to_dashes_when_unseeded() {
+    let env = env();
+    let displayed: String = env
+        .eval(
+            r#"
+            local q = GetStatistic(99999)
+            if not q then q = "--" end
+            return q
+            "#,
+        )
+        .unwrap();
+    assert_eq!(displayed, "--", "addon's nil-fallback must yield '--'");
 }
