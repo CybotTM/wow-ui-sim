@@ -201,13 +201,27 @@ fn unit_get_total_heal_absorbs(state: &mut LuaState) -> LuaResult<u32> {
 // CastSpellByID / CastSpellByName are registered from
 // `src/lua_api/globals/combat_verbs.rs` — they drive `SimState.casting`.
 
+enum CastSlot {
+    Casting,
+    Channeling,
+}
+
 fn unit_casting_info(state: &mut LuaState) -> LuaResult<u32> {
+    push_unit_cast_info(state, CastSlot::Casting)
+}
+
+fn unit_channel_info(state: &mut LuaState) -> LuaResult<u32> {
+    push_unit_cast_info(state, CastSlot::Channeling)
+}
+
+fn push_unit_cast_info(state: &mut LuaState, slot: CastSlot) -> LuaResult<u32> {
     let unit = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
     if unit != "player" {
         return Ok(0);
     }
-    let cast = extract_cast_info(state)?;
-    let Some((spell_name, icon_path, start_time, end_time, cast_id, spell_id)) = cast else {
+    let Some((spell_name, icon_path, start_time, end_time, cast_id, spell_id)) =
+        extract_cast_info(state, slot)?
+    else {
         return Ok(0);
     };
     push_cast_info(
@@ -218,9 +232,14 @@ fn unit_casting_info(state: &mut LuaState) -> LuaResult<u32> {
 
 fn extract_cast_info(
     state: &mut LuaState,
+    slot: CastSlot,
 ) -> LuaResult<Option<(String, String, f64, f64, u32, u32)>> {
     let sim = borrow_state(state)?;
-    Ok(sim.casting.as_ref().map(|cast| {
+    let source = match slot {
+        CastSlot::Casting => sim.casting.as_ref(),
+        CastSlot::Channeling => sim.channeling.as_ref(),
+    };
+    Ok(source.map(|cast| {
         (
             cast.spell_name.clone(),
             cast.icon_path.clone(),
@@ -253,10 +272,6 @@ fn push_cast_info(
     state.push(Val::Num(cast_id as f64));
     state.push(Val::Bool(false));
     state.push(Val::Num(spell_id as f64));
-}
-
-fn unit_channel_info(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
 }
 
 // ── Registration ─────────────────────────────────────────────────────────────

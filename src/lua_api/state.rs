@@ -94,6 +94,7 @@ macro_rules! build_empty_sim_state {
             fps: $runtime.fps,
             start_time: $runtime.start_time,
             casting: $runtime.casting,
+            channeling: $runtime.channeling,
             next_cast_id: $runtime.next_cast_id,
             gcd: $runtime.gcd,
             spell_cooldowns: $collections.spell_cooldowns,
@@ -564,6 +565,12 @@ pub struct SimState {
     pub start_time: Instant,
     /// Active spell cast (None = not casting).
     pub casting: Option<CastingState>,
+    /// Active spell *channel* (None = not channeling). Read by
+    /// `UnitChannelInfo("player")`. Independent from `casting` because
+    /// real WoW reports both via separate APIs and a player can be
+    /// casting one spell while channeling never happens, but a frame
+    /// switching from cast→channel must drop the old `casting` slot.
+    pub channeling: Option<CastingState>,
     /// Counter for generating unique cast IDs.
     pub next_cast_id: u32,
     /// Global Cooldown: (start_time, duration) in GetTime() seconds.
@@ -1646,6 +1653,7 @@ struct EmptyRuntimeState {
     highlighted_map_scene_character_guid: Option<String>,
     multi_action_bar_grids_shown: bool,
     casting: Option<CastingState>,
+    channeling: Option<CastingState>,
     gcd: Option<(f64, f64)>,
     cursor_item: Option<CursorInfo>,
     loading_addon_index: Option<u16>,
@@ -1708,6 +1716,7 @@ macro_rules! build_empty_runtime_state {
             highlighted_map_scene_character_guid: None,
             multi_action_bar_grids_shown: false,
             casting: None,
+            channeling: None,
             gcd: None,
             cursor_item: None,
             loading_addon_index: None,

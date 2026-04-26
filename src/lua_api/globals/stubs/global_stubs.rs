@@ -93,7 +93,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "AreNewRecruitTutorialsEnabled",
     "CanComplainChat",
     "CanComplainMail",
-    "CanExitVehicle",
     "CanPartyLFGBackfill",
     "CanSendAuctionQuery",
     "CanShowAchievementUI",
@@ -125,7 +124,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitIsCharmed",
     "UnitIsOwnerOrControllerOfUnit",
     "UnitIsPVP",
-    "UnitHasVehicleUI",
     "UnitIsGameObject",
     "UnitIsOtherPlayersPet",
     "UnitIsBattlePet",
@@ -137,7 +135,6 @@ static GLOBAL_FALSE_STUBS: &[&str] = &[
     "UnitIsQuestBoss",
     "UnitIsTapDenied",
     "UnitLeadsAnyGroup",
-    "UnitOnTaxi",
     "UnitPVPName",
     "UnitPlayerControlled",
 ];

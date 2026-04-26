@@ -1,0 +1,109 @@
+//! Vehicle / possess / taxi globals consumed by
+//! `Blizzard_ActionBar/Shared/VehicleLeaveButton.lua` and
+//! `Blizzard_ActionBar/Shared/PossessActionBar.lua`.
+//!
+//! All flags live on `state.player`:
+//!
+//! - `UnitHasVehicleUI(unit)`         → `player.has_vehicle_ui`
+//! - `UnitControllingVehicle(unit)`   → `player.controlling_vehicle`
+//! - `UnitOnTaxi(unit)`               → `player.on_taxi`
+//! - `CanExitVehicle()`               → `player.has_vehicle_ui || player.on_taxi`
+//! - `VehicleExit()`                  → clears the three vehicle flags and
+//!   fires `UNIT_EXITED_VEHICLE` with `"player"`.
+//! - `TaxiRequestEarlyLanding()`      → latches
+//!   `player.taxi_early_landing_requested = true`. Real WoW would send the
+//!   landing request to the server; the simulator just records it so tests
+//!   can assert the leave button click reached this branch.
+//!
+//! Unit tokens other than `"player"` always return `false` / nil — the
+//! simulator does not model vehicles or taxi seats for party / target.
+
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, val_to_string};
+use crate::lua_api::script_helpers::fire_named_event_state;
+use crate::lua_bridge::stack_val;
+use rilua::vm::state::LuaState;
+use rilua::{LuaApiMut, LuaResult, Val};
+
+fn unit_arg_is_player(state: &mut LuaState, index: i32) -> bool {
+    val_to_string(state, stack_val(state, index)).as_deref() == Some("player")
+}
+
+fn push_player_flag<F>(state: &mut LuaState, read: F) -> LuaResult<u32>
+where
+    F: FnOnce(&crate::lua_api::SimState) -> bool,
+{
+    let value = if unit_arg_is_player(state, 1) {
+        read(&*borrow_state(state)?)
+    } else {
+        false
+    };
+    state.push(Val::Bool(value));
+    Ok(1)
+}
+
+/// `UnitHasVehicleUI(unit)` — true when the override action bar is currently
+/// shown. Only `"player"` is modeled.
+fn unit_has_vehicle_ui(state: &mut LuaState) -> LuaResult<u32> {
+    push_player_flag(state, |sim| sim.player.has_vehicle_ui)
+}
+
+/// `UnitControllingVehicle(unit)` — true when the player is the controlling
+/// occupant of the vehicle. Only `"player"` is modeled.
+fn unit_controlling_vehicle(state: &mut LuaState) -> LuaResult<u32> {
+    push_player_flag(state, |sim| sim.player.controlling_vehicle)
+}
+
+/// `UnitOnTaxi(unit)` — true when the player is on a taxi route. Only
+/// `"player"` is modeled.
+fn unit_on_taxi(state: &mut LuaState) -> LuaResult<u32> {
+    push_player_flag(state, |sim| sim.player.on_taxi)
+}
+
+/// `CanExitVehicle()` — true when the leave button should be shown. The
+/// real client gates this on additional vehicle-controller flags; the
+/// simulator collapses it to "has vehicle UI or on taxi".
+fn can_exit_vehicle(state: &mut LuaState) -> LuaResult<u32> {
+    let can_exit = {
+        let sim = borrow_state(state)?;
+        sim.player.has_vehicle_ui || sim.player.on_taxi
+    };
+    state.push(Val::Bool(can_exit));
+    Ok(1)
+}
+
+/// `VehicleExit()` — clears the three vehicle flags and fires
+/// `UNIT_EXITED_VEHICLE` for `"player"`. No-op when the player is not in a
+/// vehicle (matches Blizzard: clicking the leave button without a vehicle
+/// is harmless).
+fn vehicle_exit(state: &mut LuaState) -> LuaResult<u32> {
+    let was_in_vehicle = {
+        let mut sim = borrow_state_mut(state)?;
+        let was = sim.player.in_vehicle || sim.player.has_vehicle_ui;
+        sim.player.in_vehicle = false;
+        sim.player.controlling_vehicle = false;
+        sim.player.has_vehicle_ui = false;
+        was
+    };
+    if was_in_vehicle {
+        let player = create_string(state, "player");
+        fire_named_event_state(state, "UNIT_EXITED_VEHICLE", &[player]);
+    }
+    Ok(0)
+}
+
+/// `TaxiRequestEarlyLanding()` — latches `taxi_early_landing_requested`.
+/// Tests assert the flag flipped after the leave button's click handler.
+fn taxi_request_early_landing(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.player.taxi_early_landing_requested = true;
+    Ok(0)
+}
+
+pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
+    LuaApiMut::register_function(lua, "UnitHasVehicleUI", unit_has_vehicle_ui)?;
+    LuaApiMut::register_function(lua, "UnitControllingVehicle", unit_controlling_vehicle)?;
+    LuaApiMut::register_function(lua, "UnitOnTaxi", unit_on_taxi)?;
+    LuaApiMut::register_function(lua, "CanExitVehicle", can_exit_vehicle)?;
+    LuaApiMut::register_function(lua, "VehicleExit", vehicle_exit)?;
+    LuaApiMut::register_function(lua, "TaxiRequestEarlyLanding", taxi_request_early_landing)?;
+    Ok(())
+}

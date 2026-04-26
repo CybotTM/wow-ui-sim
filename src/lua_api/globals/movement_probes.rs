@@ -78,12 +78,6 @@ fn is_outdoors(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn can_exit_vehicle(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = borrow_state(state)?;
-    state.push(Val::Bool(false));
-    Ok(1)
-}
-
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsPlayerMoving", is_player_moving)?;
     LuaApiMut::register_function(lua, "IsMounted", is_mounted)?;
@@ -96,6 +90,5 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "IsDrivableArea", is_drivable_area)?;
     LuaApiMut::register_function(lua, "IsIndoors", is_indoors)?;
     LuaApiMut::register_function(lua, "IsOutdoors", is_outdoors)?;
-    LuaApiMut::register_function(lua, "CanExitVehicle", can_exit_vehicle)?;
     Ok(())
 }

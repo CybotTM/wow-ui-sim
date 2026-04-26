@@ -193,6 +193,20 @@ pub struct PlayerState {
     pub is_in_rpe: bool,
     /// Mythic+ rating summary for the player. None = no rating data.
     pub mythic_plus_rating_summary: Option<MythicPlusRatingSummary>,
+    /// True when the player is occupying a vehicle/possess slot. Drives
+    /// `MainMenuBarVehicleLeaveButton` visibility together with `on_taxi`.
+    pub in_vehicle: bool,
+    /// True when the player is the *controlling* occupant of the vehicle —
+    /// the case `UnitControllingVehicle("player")` reports.
+    pub controlling_vehicle: bool,
+    /// True when the override action bar / vehicle UI is currently shown.
+    /// Drives `UnitHasVehicleUI` and `PossessActionBarMixin:Update`.
+    pub has_vehicle_ui: bool,
+    /// True when the player is on a flight master taxi route.
+    pub on_taxi: bool,
+    /// Latched true after the player clicks the leave button while on taxi.
+    /// Surfaced for tests to assert that `TaxiRequestEarlyLanding` fired.
+    pub taxi_early_landing_requested: bool,
 }
 
 impl PlayerState {
