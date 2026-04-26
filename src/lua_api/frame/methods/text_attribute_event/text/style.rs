@@ -139,6 +139,16 @@ pub(crate) fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+pub(crate) fn set_fixed_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let fixed = matches!(stack_val(state, 2), Val::Bool(true));
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.text_color_fixed = fixed;
+    }
+    Ok(0)
+}
+
 pub(crate) fn get_text_color(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text_type = val_to_string(state, stack_val(state, 2)).unwrap_or_default();

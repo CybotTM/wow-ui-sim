@@ -122,6 +122,10 @@ pub struct Frame {
     pub title: Option<String>,
     /// Text color for FontStrings.
     pub text_color: Color,
+    /// `SetFixedColor(true)` pins the FontString color against state-driven
+    /// updates (button highlight, disabled gray, theme switches). Explicit
+    /// `SetTextColor` calls still apply.
+    pub text_color_fixed: bool,
     /// Shadow color for FontStrings (defaults to transparent = no shadow).
     pub shadow_color: Color,
     /// Shadow offset (x, y) in pixels for FontStrings.

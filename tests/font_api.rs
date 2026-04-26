@@ -538,3 +538,94 @@ fn test_xml_font_is_object_type() {
     assert!(is_font);
     assert!(!is_frame);
 }
+
+// ============================================================================
+// FontString:SetFixedColor (Blizzard_AccessibilityTemplates dependency)
+// ============================================================================
+
+#[test]
+fn test_fontstring_set_fixed_color_is_callable() {
+    let env = env();
+    let ok: bool = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "SetFixedColorParent")
+            local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            return type(fs.SetFixedColor) == "function"
+            "#,
+        )
+        .unwrap();
+    assert!(ok, "FontString should expose SetFixedColor");
+}
+
+#[test]
+fn test_fontstring_set_fixed_color_does_not_error() {
+    let env = env();
+    env.eval::<()>(
+        r#"
+        local parent = CreateFrame("Frame", "SetFixedColorNoError")
+        local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        fs:SetFixedColor(true)
+        fs:SetFixedColor(false)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn test_fontstring_set_fixed_color_then_set_text_color_still_applies() {
+    // Real WoW: SetFixedColor(true) locks against state-driven recoloring,
+    // but explicit SetTextColor calls still apply. AccessibilityTemplates
+    // and QuestFrame both rely on this ordering.
+    let env = env();
+    let (r, g, b, a): (f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "SetFixedColorThenSetTextColor")
+            local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            fs:SetFixedColor(true)
+            fs:SetTextColor(0.25, 0.5, 0.75, 1.0)
+            return fs:GetTextColor()
+            "#,
+        )
+        .unwrap();
+    assert_eq!((r, g, b, a), (0.25, 0.5, 0.75, 1.0));
+}
+
+#[test]
+fn test_fontstring_set_fixed_color_accepts_non_bool_arg_as_false() {
+    // SetFixedColor takes a bool per API doc; non-true values clear the flag.
+    // This matches WoW's loose argument coercion for boolean params.
+    let env = env();
+    env.eval::<()>(
+        r#"
+        local parent = CreateFrame("Frame", "SetFixedColorNonBool")
+        local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        fs:SetFixedColor(nil)
+        "#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn test_accessibility_templates_set_fixed_color_pattern() {
+    // Mirror UIThemeContainerMixin:UpdateFontStrings call shape:
+    // for each registered fontString, SetFixedColor then SetTextColor.
+    let env = env();
+    let (r, g, b): (f64, f64, f64) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "AccessibilityFixedColorPattern")
+            local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            local fixedColor = true
+            fs:SetFixedColor(fixedColor)
+            fs:SetTextColor(0.9, 0.8, 0.7)
+            local cr, cg, cb = fs:GetTextColor()
+            return cr, cg, cb
+            "#,
+        )
+        .unwrap();
+    assert!((r - 0.9).abs() < 1e-6);
+    assert!((g - 0.8).abs() < 1e-6);
+    assert!((b - 0.7).abs() < 1e-6);
+}
