@@ -30,3 +30,4 @@ flamegraph.svg
 target-perf/
 perf.data*.flamegraph.svg
 tests/rilua_bridge/target/
+.claude/worktrees/
