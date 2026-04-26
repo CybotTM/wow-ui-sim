@@ -27,8 +27,11 @@ pub(super) fn register_account_store_surface(state: &mut LuaState) -> LuaResult<
         get_currency_id_for_store,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetCurrencyInfo", get_currency_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetStoreFrontState", get_storefront_state)?;
     Ok(())
 }
+
+const ACCOUNT_STORE_STATE_AVAILABLE: f64 = 0.0;
 
 fn begin_purchase(state: &mut LuaState) -> LuaResult<u32> {
     let item_id = i64::from_stack(state, 1)?;
@@ -103,6 +106,19 @@ fn get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
     let table = create_table(state);
     populate_currency_info_table(state, table, &info);
     state.push(table);
+    Ok(1)
+}
+
+fn get_storefront_state(state: &mut LuaState) -> LuaResult<u32> {
+    let store_front_id = i64::from_stack(state, 1)?;
+    let raw_state = borrow_state(state)?
+        .account_store_storefront_state
+        .get(&store_front_id)
+        .copied();
+    let state_value = raw_state
+        .map(|v| v as f64)
+        .unwrap_or(ACCOUNT_STORE_STATE_AVAILABLE);
+    state.push(Val::Num(state_value));
     Ok(1)
 }
 

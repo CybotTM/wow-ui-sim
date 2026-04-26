@@ -60,6 +60,7 @@ macro_rules! build_empty_sim_state {
             account_store_category_items: $collections.account_store_category_items,
             account_store_currency_for_store: $collections.account_store_currency_for_store,
             account_store_currency_info: $collections.account_store_currency_info,
+            account_store_storefront_state: $collections.account_store_storefront_state,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -355,6 +356,11 @@ pub struct SimState {
     /// Missing entries return nil; AccountStoreUtil branches on `currencyInfo`
     /// being non-nil and on `maxQuantity` being non-nil to gate warnings.
     pub account_store_currency_info: HashMap<i64, AccountStoreCurrencyInfo>,
+    /// Loading / availability state per storefront, as
+    /// `Enum.AccountStoreState`. Drives `C_AccountStore.GetStoreFrontState`;
+    /// missing entries default to `Available` (0) so unconfigured tests don't
+    /// accidentally gate buttons closed.
+    pub account_store_storefront_state: HashMap<i64, i64>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -833,6 +839,7 @@ struct EmptyStateCollections {
     account_store_category_items: HashMap<i64, Vec<i64>>,
     account_store_currency_for_store: HashMap<i64, i64>,
     account_store_currency_info: HashMap<i64, AccountStoreCurrencyInfo>,
+    account_store_storefront_state: HashMap<i64, i64>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,

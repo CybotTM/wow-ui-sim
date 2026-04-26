@@ -292,6 +292,63 @@ fn get_currency_info_omits_max_quantity_when_none() {
 }
 
 #[test]
+fn get_storefront_state_defaults_to_available() {
+    // CharacterSelectNavBar and Blizzard_EndOfMatchUI gate the storefront
+    // entry button on `state == Enum.AccountStoreState.Available` (0). An
+    // unseeded test must not accidentally gate the button closed.
+    let env = env();
+    let (default_state, available, equal): (i64, i64, bool) = env
+        .eval(
+            r#"
+            local s = C_AccountStore.GetStoreFrontState(123)
+            return s, Enum.AccountStoreState.Available, s == Enum.AccountStoreState.Available
+            "#,
+        )
+        .unwrap();
+    assert_eq!(default_state, 0, "default state must be Available (0)");
+    assert_eq!(available, 0);
+    assert!(
+        equal,
+        "default value must compare equal to the enum constant"
+    );
+}
+
+#[test]
+fn get_storefront_state_returns_seeded_state() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_storefront_state.insert(7, 2);
+    }
+    let value: i64 = env
+        .eval(r#"return C_AccountStore.GetStoreFrontState(7)"#)
+        .unwrap();
+    assert_eq!(value, 2, "seeded Unavailable state should be returned");
+}
+
+#[test]
+fn get_storefront_state_isolates_storefronts() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_storefront_state.insert(1, 1);
+        state.account_store_storefront_state.insert(2, 2);
+    }
+    let (a, b, c): (i64, i64, i64) = env
+        .eval(
+            r#"
+            return C_AccountStore.GetStoreFrontState(1),
+                   C_AccountStore.GetStoreFrontState(2),
+                   C_AccountStore.GetStoreFrontState(3)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(a, 1, "storefront 1 reports Unknown");
+    assert_eq!(b, 2, "storefront 2 reports Unavailable");
+    assert_eq!(c, 0, "unseeded storefront 3 falls back to Available");
+}
+
+#[test]
 fn refund_item_is_independent_of_begin_purchase_state() {
     // The two SimState flags are decoupled: a refund failure must not bleed
     // into purchase reporting and vice versa.
