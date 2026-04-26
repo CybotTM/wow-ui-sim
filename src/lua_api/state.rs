@@ -61,6 +61,8 @@ macro_rules! build_empty_sim_state {
             account_store_currency_for_store: $collections.account_store_currency_for_store,
             account_store_currency_info: $collections.account_store_currency_info,
             account_store_storefront_state: $collections.account_store_storefront_state,
+            last_account_store_storefront_info_request: $runtime
+                .last_account_store_storefront_info_request,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -361,6 +363,10 @@ pub struct SimState {
     /// missing entries default to `Available` (0) so unconfigured tests don't
     /// accidentally gate buttons closed.
     pub account_store_storefront_state: HashMap<i64, i64>,
+    /// Last storefront id passed to `C_AccountStore.RequestStoreFrontInfoUpdate`.
+    /// None until called. Tests assert on this to confirm the async refresh
+    /// request reached the C side before they fire `ACCOUNT_STORE_FRONT_UPDATED`.
+    pub last_account_store_storefront_info_request: Option<i64>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -1483,6 +1489,7 @@ struct EmptyRuntimeState {
     account_store_begin_purchase_succeeds: bool,
     last_account_store_refund_request: Option<i64>,
     account_store_refund_succeeds: bool,
+    last_account_store_storefront_info_request: Option<i64>,
     fps: f32,
     rot_damage_level: usize,
     start_time: Instant,
@@ -1544,6 +1551,7 @@ macro_rules! build_empty_runtime_state {
             account_store_begin_purchase_succeeds: true,
             last_account_store_refund_request: None,
             account_store_refund_succeeds: true,
+            last_account_store_storefront_info_request: None,
             fps: 0.0,
             rot_damage_level: 0,
             start_time: $start_time,

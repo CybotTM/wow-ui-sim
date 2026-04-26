@@ -349,6 +349,53 @@ fn get_storefront_state_isolates_storefronts() {
 }
 
 #[test]
+fn request_storefront_info_update_records_id_and_returns_no_values() {
+    // AccountStoreFrame:OnStoreFrontSet and Blizzard_EndOfMatchUI fire this
+    // call as the entry point of the storefront load flow; the simulator
+    // records it so a test can match a later ACCOUNT_STORE_FRONT_UPDATED
+    // event to the same id.
+    let env = env();
+    let return_count: i64 = env
+        .eval(
+            r##"
+            local before = select("#", C_AccountStore.RequestStoreFrontInfoUpdate(77))
+            return before
+            "##,
+        )
+        .unwrap();
+    assert_eq!(
+        return_count, 0,
+        "RequestStoreFrontInfoUpdate should return no values"
+    );
+    assert_eq!(
+        env.state()
+            .borrow()
+            .last_account_store_storefront_info_request,
+        Some(77),
+        "the requested storefront id should be recorded on SimState"
+    );
+}
+
+#[test]
+fn request_storefront_info_update_overwrites_previous_request() {
+    let env = env();
+    env.eval::<()>(
+        r#"
+        C_AccountStore.RequestStoreFrontInfoUpdate(11)
+        C_AccountStore.RequestStoreFrontInfoUpdate(22)
+        "#,
+    )
+    .unwrap();
+    assert_eq!(
+        env.state()
+            .borrow()
+            .last_account_store_storefront_info_request,
+        Some(22),
+        "the latest request id wins"
+    );
+}
+
+#[test]
 fn refund_item_is_independent_of_begin_purchase_state() {
     // The two SimState flags are decoupled: a refund failure must not bleed
     // into purchase reporting and vice versa.
