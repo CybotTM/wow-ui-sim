@@ -33,8 +33,7 @@ use crate::lua_api::game_data::{self, CastingState, SpellCooldownState, SpellTar
 use crate::lua_api::globals::spell_api::spell_cast_time;
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id,
-    table_get,
+    borrow_state, borrow_state_mut, call_function_state, create_string, extract_frame_id, table_get,
 };
 use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{FromStack, stack_val};
@@ -295,7 +294,11 @@ fn lookup_bar_button(state: &mut LuaState, bar_name: &str, id: u32) -> Val {
     integer_table_entry(state, buttons_ref, id as i64)
 }
 
-fn integer_table_entry(state: &LuaState, table_ref: rilua::vm::gc::arena::GcRef<Table>, key: i64) -> Val {
+fn integer_table_entry(
+    state: &LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+    key: i64,
+) -> Val {
     state
         .gc
         .tables
@@ -469,26 +472,28 @@ fn action_button_up(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn multi_action_button_down(state: &mut LuaState) -> LuaResult<u32> {
+fn multi_bar_button_from_stack(state: &mut LuaState) -> LuaResult<Option<Val>> {
     let Some(bar_name) = Option::<String>::from_stack(state, 1)? else {
-        return Ok(0);
+        return Ok(None);
     };
     let Some(id) = stack_u32(state, 2) else {
+        return Ok(None);
+    };
+    Ok(Some(lookup_bar_button(state, &bar_name, id)))
+}
+
+fn multi_action_button_down(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(button) = multi_bar_button_from_stack(state)? else {
         return Ok(0);
     };
-    let button = lookup_bar_button(state, &bar_name, id);
     press_button_and_fire(state, button)?;
     Ok(0)
 }
 
 fn multi_action_button_up(state: &mut LuaState) -> LuaResult<u32> {
-    let Some(bar_name) = Option::<String>::from_stack(state, 1)? else {
+    let Some(button) = multi_bar_button_from_stack(state)? else {
         return Ok(0);
     };
-    let Some(id) = stack_u32(state, 2) else {
-        return Ok(0);
-    };
-    let button = lookup_bar_button(state, &bar_name, id);
     release_button_if_pushed(state, button)?;
     Ok(0)
 }
