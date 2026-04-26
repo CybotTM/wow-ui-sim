@@ -1,60 +1,25 @@
 # UI Scaling and Coordinate Systems
 
-## WoW Coordinate System (from wowless)
+Canonical doc: [`docs/wiki/design/scaling-coordinates.md`](docs/wiki/design/scaling-coordinates.md). This file is a short status pointer.
 
-WoW uses **bottom-left origin with Y increasing upward**:
-```lua
-local screen = {
-  bottom = 0,
-  left = 0,
-  right = screenWidth,
-  top = screenHeight,
-}
-```
+## WoW Coordinate System
 
-- `(0, 0)` = bottom-left corner
-- `(screenWidth, screenHeight)` = top-right corner
-- Default anchor point: `TOPLEFT`
-- Wowless default screen size: `1280x720`
+- Bottom-left origin, Y increases upward
+- `(0, 0)` = bottom-left, `(screenWidth, screenHeight)` = top-right
+- Default anchor point when none specified: `TOPLEFT`
+- Wowless reference size: `1280×720`
 
-## Current Implementation
+The renderer runs in iced top-left Y-down screen space. Y is flipped in the orthographic projection (`Uniforms::new` in `src/render/shader/pipeline.rs`).
 
-### Screen Size
-- Layout uses **canvas size** (dynamic, matches widget bounds)
-- WoW coords map 1:1 to canvas pixels
-- No fixed screen size - adapts to window
+## Current Status
 
-### Lua API
-- `GetScreenWidth()` returns `1280.0`
-- `GetScreenHeight()` returns `720.0`
-- TODO: Should return actual canvas size dynamically
+- `UI_SCALE = 1.0` in `src/render/texture.rs:8`. Applied throughout `src/iced_app/` (masking, strata_emit, quad builders, rebuild, render textures).
+- `GetScreenWidth` / `GetScreenHeight` / `GetPhysicalScreenSize` are dynamic — installed by `install_screen_size_globals()` (`src/lua_api/env_runtime.rs:288`), re-run from `set_screen_size()` whenever the canvas changes.
+- Layout has no fixed screen size: canvas `size` flows through `RebuildStrataBatches` in `src/iced_app/render/rebuild.rs`.
+- `main.rs` no longer hardcodes `TOPLEFT (10, -10)`; XML anchors are honored.
+- Debug purple border has been removed.
 
-### UI_SCALE
-- Defined in `src/render/texture.rs` as `1.0`
-- Multiplies WoW coords to get display coords
-- With UI_SCALE=1.0, no scaling applied
+## Open
 
-## Projection Matrix
-
-The shader projection in `pipeline.rs` uses canvas bounds for the orthographic projection:
-- Maps (0,0)-(width,height) to clip space (-1,-1)-(1,1)
-- Viewport must match canvas bounds for correct coordinate mapping
-
-## Key Files
-
-- `src/iced_app.rs`: Layout calculation uses canvas `size` parameter
-- `src/render/shader/pipeline.rs`: Projection matrix setup
-- `src/render/texture.rs`: UI_SCALE constant
-- `src/lua_api/globals.rs`: GetScreenWidth/GetScreenHeight
-
-## Issues Fixed
-
-1. **Hardcoded anchor override** - `main.rs` was setting `TOPLEFT (10, -10)` instead of using XML's `CENTER` anchor
-2. **Screen size mismatch** - Internal screen_size was hardcoded, now uses canvas size
-
-## TODO
-
-- [ ] Make GetScreenWidth/GetScreenHeight return actual canvas size
-- [ ] Verify Y-axis direction (WoW uses Y-up, GUI frameworks use Y-down)
-- [ ] Test CENTER anchor with dynamic canvas size
-- [ ] Remove debug purple border when done
+- Document the WoW Y-up → renderer Y-down conversion end-to-end (anchor resolution).
+- Add a `CENTER`-anchor regression test against a live canvas resize.

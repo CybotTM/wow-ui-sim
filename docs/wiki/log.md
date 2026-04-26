@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-26] update | scaling-coordinates refresh
+
+Verified `docs/wiki/design/scaling-coordinates.md` against current source. Most TODOs from the original `SCALING.md` are done: `GetScreenWidth`/`GetScreenHeight`/`GetPhysicalScreenSize` are now installed dynamically by `install_screen_size_globals()` in `src/lua_api/env_runtime.rs` and re-run from `set_screen_size()`; the hardcoded `TOPLEFT (10, -10)` override in `main.rs` and the debug purple border are gone; layout `size` flows through `src/iced_app/render/rebuild.rs`. Updated file paths (`src/iced_app/` is a directory; `src/lua_api/globals.rs` no longer exists), clarified that the renderer runs in iced top-left Y-down with Y flipped in `Uniforms::new`, and trimmed the open-items list to anchor Y-axis documentation and a `CENTER`-anchor resize regression. Synced `SCALING.md` to a short status pointer.
+
 ## [2026-04-24] add | achievement panel hide investigation
 
 Added `investigations/achievement-panel-hide.md` to document the achievement
