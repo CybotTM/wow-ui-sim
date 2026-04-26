@@ -153,6 +153,7 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::vehicle_possession::register_all(lua)?;
     super::glyph_state::register_all(lua)?;
     super::xp_honor_rest::register_all(lua)?;
+    super::action_bar_state::register_all(lua)?;
     super::talent_spec_probes::register_all(lua)?;
     super::battlefield_lfg_probes::register_all(lua)?;
     super::loot_method::register_all(lua)?;

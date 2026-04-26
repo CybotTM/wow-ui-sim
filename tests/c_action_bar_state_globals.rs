@@ -1,0 +1,57 @@
+//! Integration tests for the action-bar transition globals registered in
+//! `src/lua_api/globals/action_bar_state.rs`.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+#[test]
+fn action_bar_busy_defaults_to_false() {
+    let env = WowLuaEnv::new().expect("env");
+    let busy: bool = env.eval("return ActionBarBusy()").unwrap();
+    assert!(!busy);
+}
+
+#[test]
+fn action_bar_busy_reflects_state_flag() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().action_bar_state.busy = true;
+    let busy: bool = env.eval("return ActionBarBusy()").unwrap();
+    assert!(busy);
+}
+
+#[test]
+fn current_action_bar_state_defaults_to_main() {
+    let env = WowLuaEnv::new().expect("env");
+    let current: f64 = env
+        .eval("return ActionBarController_GetCurrentActionBarState()")
+        .unwrap();
+    assert!((current - 1.0).abs() < 1e-6);
+    let matches_main: bool = env
+        .eval("return ActionBarController_GetCurrentActionBarState() == LE_ACTIONBAR_STATE_MAIN")
+        .unwrap();
+    assert!(matches_main);
+}
+
+#[test]
+fn current_action_bar_state_reports_override() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().action_bar_state.current_state = 2;
+    let current: f64 = env
+        .eval("return ActionBarController_GetCurrentActionBarState()")
+        .unwrap();
+    assert!((current - 2.0).abs() < 1e-6);
+    let matches_override: bool = env
+        .eval(
+            "return ActionBarController_GetCurrentActionBarState() == LE_ACTIONBAR_STATE_OVERRIDE",
+        )
+        .unwrap();
+    assert!(matches_override);
+}
+
+#[test]
+fn le_actionbar_state_constants_are_seeded() {
+    let env = WowLuaEnv::new().expect("env");
+    let main: f64 = env.eval("return LE_ACTIONBAR_STATE_MAIN").unwrap();
+    let over: f64 = env.eval("return LE_ACTIONBAR_STATE_OVERRIDE").unwrap();
+    assert!((main - 1.0).abs() < 1e-6);
+    assert!((over - 2.0).abs() < 1e-6);
+}

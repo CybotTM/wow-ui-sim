@@ -65,6 +65,7 @@ macro_rules! build_empty_sim_state {
                 .last_account_store_storefront_info_request,
             account_store_categories: $collections.account_store_categories,
             account_store_items: $collections.account_store_items,
+            action_bar_state: ActionBarStateInfo::default(),
             action_bars: $collections.action_bars,
             action_highlights: ActionHighlightState::default(),
             addon_base_paths: $collections.addon_base_paths,
@@ -398,6 +399,27 @@ pub struct ActionHighlightState {
     pub on_bar: HashMap<i32, ActionHighlightKind>,
 }
 
+/// Action-bar transition state read by `MultiActionBar_Update` and
+/// `ActionBarController_GetCurrentActionBarState`. `busy` is true while a
+/// status-tracking-bar fade or page change is mid-animation, gating
+/// `Blizzard_ActionBar/Shared/StanceBar.lua` updates. `current_state` matches
+/// `LE_ACTIONBAR_STATE_MAIN` (1) or `LE_ACTIONBAR_STATE_OVERRIDE` (2) — the
+/// override bar is only active while a vehicle/possess override is mounted.
+#[derive(Clone, Debug)]
+pub struct ActionBarStateInfo {
+    pub busy: bool,
+    pub current_state: i32,
+}
+
+impl Default for ActionBarStateInfo {
+    fn default() -> Self {
+        Self {
+            busy: false,
+            current_state: 1,
+        }
+    }
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -516,6 +538,11 @@ pub struct SimState {
     pub account_store_items: HashMap<i64, AccountStoreItemInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
+    /// Action-bar transition state. Drives `ActionBarBusy()` (set true while
+    /// a status-tracking-bar fade or page change is mid-animation) and
+    /// `ActionBarController_GetCurrentActionBarState()` (1 = main bar,
+    /// 2 = override bar mounted by a vehicle/possess override).
+    pub action_bar_state: ActionBarStateInfo,
     /// Action-highlight bookkeeping for `MarkNewActionHighlight` and the
     /// `On Bar` highlight verbs. Read by Blizzard_ActionBar buttons during
     /// hover/drag updates.
