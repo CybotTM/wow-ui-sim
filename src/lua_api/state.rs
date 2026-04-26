@@ -64,6 +64,7 @@ macro_rules! build_empty_sim_state {
             last_account_store_storefront_info_request: $runtime
                 .last_account_store_storefront_info_request,
             account_store_categories: $collections.account_store_categories,
+            account_store_items: $collections.account_store_items,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -260,6 +261,31 @@ pub struct AccountStoreCurrencyInfo {
     pub icon: i64,
 }
 
+/// Account-store item record — mirrors the official `AccountStoreItemInfo`
+/// structure in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AccountStoreDocumentation.lua`
+/// (lines 252-271). Every card mixin in `Blizzard_AccountStore` reads
+/// `status`, `mode`, `flags`, `price`, and `nonrefundable` from this struct
+/// and the optional fields gate model-scene previews, descriptive tooltips,
+/// transmog set previews, and the refund countdown overlay.
+#[derive(Clone, Debug)]
+pub struct AccountStoreItemInfo {
+    pub id: i64,
+    pub status: i64,
+    pub mode: i64,
+    pub currency_id: i64,
+    pub flags: i64,
+    pub custom_ui_model_scene_id: Option<i64>,
+    pub name: String,
+    pub description: Option<String>,
+    pub price: i64,
+    pub nonrefundable: bool,
+    pub creature_display_id: Option<i64>,
+    pub transmog_set_id: Option<i64>,
+    pub display_icon: Option<i64>,
+    pub refund_seconds_remaining: Option<i64>,
+}
+
 /// Account-store category record — mirrors the official
 /// `AccountStoreCategoryInfo` structure in
 /// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AccountStoreDocumentation.lua`
@@ -387,6 +413,10 @@ pub struct SimState {
     /// Missing entries return nil so the AccountStore mixin can guard against
     /// stale category ids during reload.
     pub account_store_categories: HashMap<i64, AccountStoreCategoryInfo>,
+    /// Item records exposed by `C_AccountStore.GetItemInfo(itemID)`. Missing
+    /// entries return nil so card mixins surface "no data yet" rather than
+    /// faking an unpriced item with default values.
+    pub account_store_items: HashMap<i64, AccountStoreItemInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -867,6 +897,7 @@ struct EmptyStateCollections {
     account_store_currency_info: HashMap<i64, AccountStoreCurrencyInfo>,
     account_store_storefront_state: HashMap<i64, i64>,
     account_store_categories: HashMap<i64, AccountStoreCategoryInfo>,
+    account_store_items: HashMap<i64, AccountStoreItemInfo>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,

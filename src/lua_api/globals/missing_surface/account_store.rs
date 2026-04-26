@@ -10,7 +10,9 @@ use super::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set, table_set_num,
 };
-use crate::lua_api::state::{AccountStoreCategoryInfo, AccountStoreCurrencyInfo};
+use crate::lua_api::state::{
+    AccountStoreCategoryInfo, AccountStoreCurrencyInfo, AccountStoreItemInfo,
+};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -28,6 +30,7 @@ pub(super) fn register_account_store_surface(state: &mut LuaState) -> LuaResult<
     )?;
     table_set_rust_fn_static(state, table_ref, "GetCategoryInfo", get_category_info)?;
     table_set_rust_fn_static(state, table_ref, "GetCurrencyInfo", get_currency_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetItemInfo", get_item_info)?;
     table_set_rust_fn_static(state, table_ref, "GetStoreFrontState", get_storefront_state)?;
     table_set_rust_fn_static(
         state,
@@ -132,6 +135,22 @@ fn get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn get_item_info(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i64::from_stack(state, 1)?;
+    let info = borrow_state(state)?
+        .account_store_items
+        .get(&item_id)
+        .cloned();
+    let Some(info) = info else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let table = create_table(state);
+    populate_item_info_table(state, table, &info);
+    state.push(table);
+    Ok(1)
+}
+
 fn get_storefront_state(state: &mut LuaState) -> LuaResult<u32> {
     let store_front_id = i64::from_stack(state, 1)?;
     let raw_state = borrow_state(state)?
@@ -157,6 +176,65 @@ fn populate_category_info_table(state: &mut LuaState, table: Val, info: &Account
     table_set(state, table, "name", name_val);
     table_set(state, table, "type", Val::Num(info.category_type as f64));
     table_set(state, table, "icon", Val::Num(info.icon as f64));
+}
+
+fn populate_item_info_table(state: &mut LuaState, table: Val, info: &AccountStoreItemInfo) {
+    table_set(state, table, "id", Val::Num(info.id as f64));
+    table_set(state, table, "status", Val::Num(info.status as f64));
+    table_set(state, table, "mode", Val::Num(info.mode as f64));
+    table_set(
+        state,
+        table,
+        "currencyID",
+        Val::Num(info.currency_id as f64),
+    );
+    table_set(state, table, "flags", Val::Num(info.flags as f64));
+    let name_val = create_string(state, &info.name);
+    table_set(state, table, "name", name_val);
+    table_set(state, table, "price", Val::Num(info.price as f64));
+    table_set(state, table, "nonrefundable", Val::Bool(info.nonrefundable));
+    populate_item_info_optional_fields(state, table, info);
+}
+
+fn populate_item_info_optional_fields(
+    state: &mut LuaState,
+    table: Val,
+    info: &AccountStoreItemInfo,
+) {
+    if let Some(scene_id) = info.custom_ui_model_scene_id {
+        table_set(
+            state,
+            table,
+            "customUIModelSceneID",
+            Val::Num(scene_id as f64),
+        );
+    }
+    if let Some(description) = &info.description {
+        let description_val = create_string(state, description);
+        table_set(state, table, "description", description_val);
+    }
+    if let Some(creature_id) = info.creature_display_id {
+        table_set(
+            state,
+            table,
+            "creatureDisplayID",
+            Val::Num(creature_id as f64),
+        );
+    }
+    if let Some(transmog_id) = info.transmog_set_id {
+        table_set(state, table, "transmogSetID", Val::Num(transmog_id as f64));
+    }
+    if let Some(icon) = info.display_icon {
+        table_set(state, table, "displayIcon", Val::Num(icon as f64));
+    }
+    if let Some(seconds) = info.refund_seconds_remaining {
+        table_set(
+            state,
+            table,
+            "refundSecondsRemaining",
+            Val::Num(seconds as f64),
+        );
+    }
 }
 
 fn populate_currency_info_table(state: &mut LuaState, table: Val, info: &AccountStoreCurrencyInfo) {

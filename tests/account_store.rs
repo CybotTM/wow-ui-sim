@@ -1,5 +1,45 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state::{AccountStoreCategoryInfo, AccountStoreCurrencyInfo};
+use wow_ui_sim::lua_api::state::{
+    AccountStoreCategoryInfo, AccountStoreCurrencyInfo, AccountStoreItemInfo,
+};
+
+fn fully_populated_item(item_id: i64) -> AccountStoreItemInfo {
+    AccountStoreItemInfo {
+        id: item_id,
+        status: 1,
+        mode: 2,
+        currency_id: 1828,
+        flags: 0x6,
+        custom_ui_model_scene_id: Some(742),
+        name: "Skyrider Mount".to_string(),
+        description: Some("A swift mount that soars above Azeroth.".to_string()),
+        price: 2500,
+        nonrefundable: false,
+        creature_display_id: Some(99001),
+        transmog_set_id: Some(404),
+        display_icon: Some(133456),
+        refund_seconds_remaining: Some(86400),
+    }
+}
+
+fn minimal_item(item_id: i64) -> AccountStoreItemInfo {
+    AccountStoreItemInfo {
+        id: item_id,
+        status: 0,
+        mode: 0,
+        currency_id: 1828,
+        flags: 0,
+        custom_ui_model_scene_id: None,
+        name: "Boost Token".to_string(),
+        description: None,
+        price: 1000,
+        nonrefundable: true,
+        creature_display_id: None,
+        transmog_set_id: None,
+        display_icon: None,
+        refund_seconds_remaining: None,
+    }
+}
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -474,6 +514,126 @@ fn get_category_info_isolates_categories() {
     assert_eq!(n1, "Boost");
     assert_eq!(n2, "Transmog");
     assert_eq!(missing, None, "unseeded category 3 stays nil");
+}
+
+#[test]
+fn get_item_info_returns_nil_when_unseeded() {
+    // AccountStoreBaseCardMixin:Setup expects a `nil` return to surface the
+    // "loading" placeholder; if the stub silently returned an empty table the
+    // mixin would render a $0 unbuyable card with no name.
+    let env = env();
+    let value: Option<i64> = env
+        .eval(r#"return C_AccountStore.GetItemInfo(99999) and 1 or nil"#)
+        .unwrap();
+    assert_eq!(value, None, "unknown item id should report nil");
+}
+
+#[test]
+fn get_item_info_returns_seeded_full_struct() {
+    // AccountStoreItemDisplayMixin:RefreshSelectedCard reads name, price,
+    // status, mode, flags, currencyID, and the optional refund/transmog/scene
+    // fields all in one pass. Seed every field and round-trip them through
+    // Lua so a future field rename can't silently slip through.
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state
+            .account_store_items
+            .insert(420555, fully_populated_item(420555));
+    }
+    let env_state = env.state();
+    let (id, status, mode, currency_id, flags): (i64, i64, i64, i64, i64) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetItemInfo(420555)
+            return info.id, info.status, info.mode, info.currencyID, info.flags
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 420555);
+    assert_eq!(status, 1);
+    assert_eq!(mode, 2);
+    assert_eq!(currency_id, 1828);
+    assert_eq!(flags, 0x6);
+    let _keep_alive = env_state;
+
+    let (name, description, price, nonrefundable): (String, String, i64, bool) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetItemInfo(420555)
+            return info.name, info.description, info.price, info.nonrefundable
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Skyrider Mount");
+    assert_eq!(description, "A swift mount that soars above Azeroth.");
+    assert_eq!(price, 2500);
+    assert!(!nonrefundable);
+
+    let (scene, creature, transmog, icon, refund_secs): (i64, i64, i64, i64, i64) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetItemInfo(420555)
+            return info.customUIModelSceneID, info.creatureDisplayID,
+                   info.transmogSetID, info.displayIcon,
+                   info.refundSecondsRemaining
+            "#,
+        )
+        .unwrap();
+    assert_eq!(scene, 742);
+    assert_eq!(creature, 99001);
+    assert_eq!(transmog, 404);
+    assert_eq!(icon, 133456);
+    assert_eq!(refund_secs, 86400);
+}
+
+#[test]
+fn get_item_info_omits_optional_fields_when_none() {
+    // AccountStoreFooter:UpdateForItem and the card mixins gate ModelScene /
+    // refund-countdown / transmog-preview UI on these fields being non-nil.
+    // Optional Rust fields set to None must surface as nil keys, not 0/empty.
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_items.insert(700, minimal_item(700));
+    }
+    let (scene_nil, desc_nil, creature_nil, transmog_nil, icon_nil, refund_nil): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetItemInfo(700)
+            return info.customUIModelSceneID == nil,
+                   info.description == nil,
+                   info.creatureDisplayID == nil,
+                   info.transmogSetID == nil,
+                   info.displayIcon == nil,
+                   info.refundSecondsRemaining == nil
+            "#,
+        )
+        .unwrap();
+    assert!(scene_nil, "customUIModelSceneID must be nil when unset");
+    assert!(desc_nil, "description must be nil when unset");
+    assert!(creature_nil, "creatureDisplayID must be nil when unset");
+    assert!(transmog_nil, "transmogSetID must be nil when unset");
+    assert!(icon_nil, "displayIcon must be nil when unset");
+    assert!(refund_nil, "refundSecondsRemaining must be nil when unset");
+
+    let (price, nonrefundable): (i64, bool) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetItemInfo(700)
+            return info.price, info.nonrefundable
+            "#,
+        )
+        .unwrap();
+    assert_eq!(price, 1000, "required price field is present");
+    assert!(nonrefundable, "required nonrefundable flag round-trips");
 }
 
 #[test]
