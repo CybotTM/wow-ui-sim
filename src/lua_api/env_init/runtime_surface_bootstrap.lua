@@ -7231,11 +7231,6 @@ end
 function CanShowAchievementUI()
   return true
 end
-if GetTotalAchievementPoints == nil then
-  function GetTotalAchievementPoints()
-    return 0
-  end
-end
 if GetPartyLFGID == nil then
   function GetPartyLFGID() return 0 end
 end

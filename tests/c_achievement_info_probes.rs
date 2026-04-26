@@ -233,6 +233,74 @@ fn get_num_completed_achievements_ignores_unseeded_earned_ids() {
 }
 
 #[test]
+fn get_total_achievement_points_starts_at_zero() {
+    let env = env();
+    let total: i32 = env.eval("return GetTotalAchievementPoints()").unwrap();
+    assert_eq!(total, 0, "no achievements earned yet");
+}
+
+#[test]
+fn get_total_achievement_points_sums_seeded_points() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.earned_achievements.insert(6);
+        state.world.earned_achievements.insert(42);
+    }
+    let total: i32 = env.eval("return GetTotalAchievementPoints()").unwrap();
+    let level_ten_points = env
+        .state()
+        .borrow()
+        .achievements
+        .get(&6)
+        .map(|info| info.points)
+        .unwrap_or(0);
+    let explore_ek_points = env
+        .state()
+        .borrow()
+        .achievements
+        .get(&42)
+        .map(|info| info.points)
+        .unwrap_or(0);
+    assert_eq!(total, level_ten_points + explore_ek_points);
+}
+
+#[test]
+fn get_total_achievement_points_guild_branch_uses_guild_categories() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.earned_achievements.insert(6);
+    }
+    let (account, guild): (i32, i32) = env
+        .eval(
+            r#"
+            return GetTotalAchievementPoints(false), GetTotalAchievementPoints(true)
+            "#,
+        )
+        .unwrap();
+    assert!(account > 0, "earning id 6 raises account-view points");
+    assert_eq!(
+        guild, 0,
+        "GUILD_CATEGORIES has no seeded ids, so guild-view points stay zero"
+    );
+}
+
+#[test]
+fn get_total_achievement_points_ignores_unseeded_earned_ids() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.earned_achievements.insert(99999);
+    }
+    let total: i32 = env.eval("return GetTotalAchievementPoints()").unwrap();
+    assert_eq!(
+        total, 0,
+        "earning an id outside ACHIEVEMENT_CATEGORIES contributes no points"
+    );
+}
+
+#[test]
 fn set_portrait_texture_overwrites_prior_atlas_and_color() {
     let env = env();
     let (ok, path, atlas_is_nil): (bool, String, bool) = env
