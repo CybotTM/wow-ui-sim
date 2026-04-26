@@ -247,6 +247,7 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         "GetTotalAchievementPoints",
         get_total_achievement_points,
     )?;
+    table_set_rust_fn_static(state, globals, "GetAchievementLink", get_achievement_link)?;
     Ok(())
 }
 
@@ -491,6 +492,24 @@ fn get_num_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(total as f64));
     state.push(Val::Num(completed as f64));
     Ok(2)
+}
+
+fn get_achievement_link(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let name = borrow_state(state)?
+        .achievements
+        .get(&achievement_id)
+        .map(|info| info.name.clone());
+    let Some(name) = name else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let link = format!(
+        "|cffffff00|Hachievement:{achievement_id}:Player-1-00000001:1:1:15:2025:0:0:0:0|h[{name}]|h|r"
+    );
+    let link_val = create_string(state, &link);
+    state.push(link_val);
+    Ok(1)
 }
 
 fn get_total_achievement_points(state: &mut LuaState) -> LuaResult<u32> {

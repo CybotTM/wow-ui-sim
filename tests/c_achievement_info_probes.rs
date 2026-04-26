@@ -301,6 +301,54 @@ fn get_total_achievement_points_ignores_unseeded_earned_ids() {
 }
 
 #[test]
+fn get_achievement_link_returns_full_chat_link_for_seeded_id() {
+    let env = env();
+    let link: String = env.eval("return GetAchievementLink(6)").unwrap();
+    assert_eq!(
+        link,
+        "|cffffff00|Hachievement:6:Player-1-00000001:1:1:15:2025:0:0:0:0|h[Level 10]|h|r"
+    );
+}
+
+#[test]
+fn get_achievement_link_returns_nil_for_unknown_id() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return GetAchievementLink(999999) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn get_achievement_link_uses_state_seeded_name() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievements.insert(
+            12345,
+            AchievementInfo {
+                achievement_id: 12345,
+                name: "Custom Title".into(),
+                points: 5,
+                description: String::new(),
+                flags: 0,
+                icon: 0,
+                reward_text: String::new(),
+                is_guild: false,
+                is_statistic: false,
+                reward_item_id: None,
+            },
+        );
+    }
+    let link: String = env.eval("return GetAchievementLink(12345)").unwrap();
+    assert!(
+        link.contains("[Custom Title]"),
+        "expected bracketed name in link, got {link}"
+    );
+    assert!(link.contains("Hachievement:12345:"));
+}
+
+#[test]
 fn set_portrait_texture_overwrites_prior_atlas_and_color() {
     let env = env();
     let (ok, path, atlas_is_nil): (bool, String, bool) = env
