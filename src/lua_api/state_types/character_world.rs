@@ -235,6 +235,74 @@ impl PlayerState {
     }
 }
 
+/// XP / honor / rest globals consumed by `Blizzard_ActionBar/Shared/ExpBar.lua`
+/// and `Mainline/HonorBar.lua`. Default values mirror "level 70 paladin in a
+/// rested inn, no Trial restrictions": no exhaustion XP, rest state 1
+/// ("Rested", 1.5x multiplier), no honor banked, no trial cap. The basic
+/// XP totals (`xp` / `xp_max`) live on [`PlayerState`] alongside health
+/// because many existing readers (UnitXP / UnitXPMax / IsXPUserDisabled /
+/// IsResting / UnitHonorLevel) already key off it.
+#[derive(Debug, Clone)]
+pub struct PlayerXpState {
+    /// Rest XP banked at an inn, in raw XP. `None` = no rest XP, which
+    /// matches `GetXPExhaustion()` returning nil rather than 0.
+    pub exhaustion: Option<i64>,
+    /// `GetRestState()` first return: 1 = Rested, 2 = Normal, etc.
+    pub rest_state: i32,
+    /// `GetRestState()` second return — localized state name.
+    pub rest_state_name: String,
+    /// `GetRestState()` third return — XP gain multiplier (1.5 while rested).
+    pub rest_multiplier: f64,
+    /// `IsPlayerAtEffectiveMaxLevel()`. Default false — the seeded paladin
+    /// is at 70, not at the cap.
+    pub is_max_level: bool,
+    /// `UnitHonor("player")` — current honor within the level.
+    pub honor: i32,
+    /// `UnitHonorMax("player")` — honor required for the next level.
+    pub honor_max: i32,
+    /// `UnitTrialXP("player")` — capped XP shown while a trial-account
+    /// level limit is active. Drives the `ExpBar:IsCapped` branch.
+    pub trial_xp: i32,
+    /// `UnitTrialBankedLevels("player")` — banked levels held for trial
+    /// accounts that have not subscribed yet.
+    pub trial_banked_levels: i32,
+    /// `GetRestrictedAccountData()` first return — the level cap a
+    /// limited account is locked at. 20 matches the historical Trial cap
+    /// and the previous custom-stub return.
+    pub restricted_level: i32,
+    /// `GetRestrictedAccountData()` second return — copper cap.
+    pub restricted_money: i64,
+    /// `GetRestrictedAccountData()` third return — profession-skill cap.
+    pub restricted_profession: i32,
+    /// `GameLimitedMode_IsBankedXPActive()` — true while the trial cap is
+    /// armed (the player has stopped earning XP toward the next level).
+    pub banked_xp_active: bool,
+    /// `GameLimitedMode_GetLevelLimit()` — the level the trial cap
+    /// enforces. Defaults to the same value as `restricted_level`.
+    pub level_limit: i32,
+}
+
+impl Default for PlayerXpState {
+    fn default() -> Self {
+        Self {
+            exhaustion: None,
+            rest_state: 1,
+            rest_state_name: "Rested".to_string(),
+            rest_multiplier: 1.5,
+            is_max_level: false,
+            honor: 0,
+            honor_max: 0,
+            trial_xp: 0,
+            trial_banked_levels: 0,
+            restricted_level: 20,
+            restricted_money: 0,
+            restricted_profession: 0,
+            banked_xp_active: false,
+            level_limit: 20,
+        }
+    }
+}
+
 /// A mirror timer (breath / exhaustion / feign death) currently active
 /// on the player. Drives `GetMirrorTimerInfo` /
 /// `GetMirrorTimerProgress`.

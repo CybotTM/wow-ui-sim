@@ -27,7 +27,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitRace", unit_race)?;
     LuaApiMut::register_function(lua, "UnitSex", unit_sex)?;
     LuaApiMut::register_function(lua, "UnitHonorLevel", unit_honor_level)?;
-    LuaApiMut::register_function(lua, "UnitHonor", unit_honor)?;
     LuaApiMut::register_function(lua, "UnitPowerBarTimerInfo", unit_power_bar_timer_info)?;
     LuaApiMut::register_function(lua, "ResetCursor", reset_cursor)?;
     LuaApiMut::register_function(lua, "GetSpecialization", get_specialization)?;
@@ -179,12 +178,6 @@ fn unit_honor_level(state: &mut LuaState) -> LuaResult<u32> {
     let _ = Option::<String>::from_stack(state, 1)?;
     let honor_level = borrow_state(state)?.player.honor_level;
     state.push(Val::Num(honor_level as f64));
-    Ok(1)
-}
-
-fn unit_honor(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = Option::<String>::from_stack(state, 1)?;
-    state.push(Val::Num(0.0));
     Ok(1)
 }
 

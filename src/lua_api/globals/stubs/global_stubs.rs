@@ -199,7 +199,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // quest_surface.rs, not stubs.
     // GetRaidRosterInfo is SimState-backed in group_queries.rs, not a stub.
     "GetRelicSlotType",
-    "GetRestState",
+    // GetRestState is SimState-backed in xp_honor_rest.rs, not a stub.
     // GetSelectedSkill / GetSkillLineInfo are SimState-backed in
     // talent_spec_probes.rs, not stubs.
     "GetSelectedSocial",
@@ -214,7 +214,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     "GetTradePlayerItemInfo",
     "GetTradeSkillInfo",
     "GetTradeTargetItemInfo",
-    "GetXPExhaustion",
+    // GetXPExhaustion is SimState-backed in xp_honor_rest.rs, not a stub.
     // UnitArmor / UnitAttackPower / UnitCriticalStrike / UnitDamage /
     // UnitDefense / UnitDodge / UnitParry / UnitSpellHaste / UnitStat /
     // UnitResistance / UnitRangedAttackPower / UnitRangedCriticalStrike /
@@ -234,7 +234,7 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
 static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
-    ("GetRestrictedAccountData", stub_restricted_account_data),
+    // GetRestrictedAccountData is SimState-backed in xp_honor_rest.rs.
     ("GetClassicExpansionLevel", stub_current_expansion_level),
     ("GetCurrentRegion", stub_current_region),
     ("GetServerExpansionLevel", stub_current_expansion_level),
@@ -242,15 +242,6 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("UnitGroupRolesAssigned", stub_role_none),
     ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
 ];
-
-fn stub_restricted_account_data(state: &mut LuaState) -> rilua::LuaResult<u32> {
-    // Blizzard callers read up to three return values:
-    // level cap, money cap, and profession cap.
-    state.push(rilua::Val::Num(20.0));
-    state.push(rilua::Val::Num(0.0));
-    state.push(rilua::Val::Num(0.0));
-    Ok(3)
-}
 
 fn stub_current_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {
     state.push(rilua::Val::Num(CURRENT_EXPANSION_LEVEL));

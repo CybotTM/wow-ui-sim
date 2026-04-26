@@ -70,12 +70,6 @@ if HasArtifactEquipped == nil then
   end
 end
 
-if UnitHonorMax == nil then
-  function UnitHonorMax(_unit)
-    return 0
-  end
-end
-
 if IsPVPTimerRunning == nil then
   function IsPVPTimerRunning()
     return false
@@ -1738,12 +1732,6 @@ end
 
 if UnitThreatPercentageOfLead == nil then
   function UnitThreatPercentageOfLead(_unit, _other_unit)
-    return 0
-  end
-end
-
-if UnitTrialBankedLevels == nil then
-  function UnitTrialBankedLevels(_unit)
     return 0
   end
 end

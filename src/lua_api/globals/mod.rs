@@ -114,6 +114,7 @@ pub mod vehicle_possession;
 pub mod voice_chat_probes;
 pub mod voice_chat_verbs;
 pub mod wowlabs;
+pub mod xp_honor_rest;
 pub mod zone_text;
 
 pub use crate::c_api::c_map_api;

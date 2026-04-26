@@ -115,6 +115,7 @@ macro_rules! build_empty_sim_state {
             global_show_hide_depth: 0,
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::seeded(),
+            player_xp: PlayerXpState::default(),
             world: super::state_types::seeded_world_state(),
             bag_items: $collections.bag_items,
             tracked_recipes: $collections.tracked_recipes,
@@ -246,8 +247,8 @@ pub use super::state_types::{
     EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo,
     LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
     MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
-    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, ScenarioState,
-    ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
+    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -629,6 +630,12 @@ pub struct SimState {
 
     /// Player character state (identity, combat, power, buffs, spec).
     pub player: PlayerState,
+    /// XP / honor / rest cluster consumed by `Blizzard_ActionBar/Shared/ExpBar.lua`
+    /// and `Mainline/HonorBar.lua`. Holds rest-XP exhaustion, the Rested/Normal
+    /// rest state, honor totals, trial-account caps, and limited-mode banked
+    /// XP flags. Basic xp / xp_max / honor_level / is_resting / xp_disabled
+    /// stay on `player` because their pre-existing readers key off it.
+    pub player_xp: PlayerXpState,
     /// World state (zone, instance, guild, collections, vault, loot).
     pub world: WorldState,
     /// Bags/Inventory: (bag_index, slot_index) → BagItem.
