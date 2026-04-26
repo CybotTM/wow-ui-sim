@@ -7,6 +7,7 @@ use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
     extract_frame_id, frame_ref, table_get, table_set,
 };
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
@@ -29,6 +30,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     register_cooldown_slot_methods(state, table_ref)?;
     register_pet_slot_methods(state, table_ref)?;
     register_stateful_methods(state, table_ref)?;
+    register_slot_mutation_methods(state, table_ref)?;
     Ok(())
 }
 
@@ -168,6 +170,18 @@ fn register_stateful_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> L
         ("IsCurrentAction", is_current_action),
         ("GetActionCooldown", get_action_cooldown),
         ("GetActionCharges", get_action_charges),
+    ];
+    for (name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
+    Ok(())
+}
+
+fn register_slot_mutation_methods(state: &mut LuaState, table_ref: GcRef<Table>) -> LuaResult<()> {
+    let methods: [(&'static str, RustFn); 3] = [
+        ("PutActionInSlot", put_action_in_slot),
+        ("ForceUpdateAction", force_update_action),
+        ("GetProfessionQualityInfo", get_profession_quality_info),
     ];
     for (name, func) in methods {
         table_set_rust_fn_static(state, table_ref, name, func)?;
@@ -606,6 +620,84 @@ fn get_action_charges(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "cooldownDuration", Val::Num(0.0));
     table_set(state, info, "chargeModRate", Val::Num(1.0));
     state.push(info);
+    Ok(1)
+}
+
+/// `C_ActionBar.PutActionInSlot(slot, targetSlot)` → `bool`.
+///
+/// Moves the spell stored at `state.action_bars[slot]` into `targetSlot`,
+/// firing `ACTIONBAR_SLOT_CHANGED` for both slots so the action button
+/// mixins refresh their textures. Returns `true` when there was an action
+/// to move; `false` for empty slots, missing target, or non-numeric input.
+fn put_action_in_slot(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(source) = stack_slot(state) else {
+        return push_bool(state, false);
+    };
+    let Some(target) = stack_slot_at(state, 2) else {
+        return push_bool(state, false);
+    };
+    let moved_spell = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.action_bars.remove(&source)
+    };
+    let Some(spell_id) = moved_spell else {
+        return push_bool(state, false);
+    };
+    borrow_state_mut(state)?
+        .action_bars
+        .insert(target, spell_id);
+    fire_named_event_state(
+        state,
+        "ACTIONBAR_SLOT_CHANGED",
+        &[Val::Num(source as f64)],
+    );
+    fire_named_event_state(
+        state,
+        "ACTIONBAR_SLOT_CHANGED",
+        &[Val::Num(target as f64)],
+    );
+    push_bool(state, true)
+}
+
+/// `C_ActionBar.ForceUpdateAction(slot)` — fires `ACTIONBAR_SLOT_CHANGED`
+/// for the given slot so the rotation manager / action button mixins
+/// re-pull texture and cooldown state. No-op for non-numeric input.
+fn force_update_action(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = stack_slot(state) else {
+        return push_no_results(state);
+    };
+    fire_named_event_state(state, "ACTIONBAR_SLOT_CHANGED", &[Val::Num(slot as f64)]);
+    push_no_results(state)
+}
+
+/// `C_ActionBar.GetProfessionQualityInfo(slot)` → ProfessionQualityInfo or nil.
+///
+/// Reads `state.action_profession_quality`. Missing entries return nil so
+/// `ActionBarActionButtonMixin:UpdateProfessionQuality` clears the overlay
+/// frame instead of populating it with a stale atlas.
+fn get_profession_quality_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot) = stack_slot(state) else {
+        return push_nil(state);
+    };
+    let info = borrow_state(state)?
+        .action_profession_quality
+        .get(&(slot as i32))
+        .cloned();
+    let Some(info) = info else {
+        return push_nil(state);
+    };
+    let table = create_table(state);
+    table_set(
+        state,
+        table,
+        "inventoryQuality",
+        Val::Num(info.inventory_quality as f64),
+    );
+    let icon_inventory = create_string(state, &info.icon_inventory);
+    table_set(state, table, "iconInventory", icon_inventory);
+    let icon_quality_container = create_string(state, &info.icon_quality_container);
+    table_set(state, table, "iconQualityContainer", icon_quality_container);
+    state.push(table);
     Ok(1)
 }
 

@@ -82,6 +82,7 @@ macro_rules! build_empty_sim_state {
             spell_trade_skill_links: HashMap::new(),
             spell_id_aliases: HashMap::new(),
             spell_loss_of_control: HashMap::new(),
+            action_profession_quality: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -453,6 +454,19 @@ pub struct HousingState {
     pub level_thresholds: Vec<i64>,
 }
 
+/// Profession-quality overlay payload returned by
+/// `C_ActionBar.GetProfessionQualityInfo(slot)`. `inventoryQuality` matches
+/// the retail 1..N tier band (T1 = lowest); `iconInventory` /
+/// `iconQualityContainer` are the atlas keys
+/// `ActionBarActionButtonMixin:UpdateProfessionQuality` passes to
+/// `Texture:SetAtlas` for the overlay frame.
+#[derive(Clone, Debug, Default)]
+pub struct ProfessionQualityInfo {
+    pub inventory_quality: i32,
+    pub icon_inventory: String,
+    pub icon_quality_container: String,
+}
+
 /// Loss-of-control cooldown payload returned by
 /// `C_Spell.GetSpellLossOfControlCooldownInfo(spellID)`. Mirrors the retail
 /// table shape consumed by `ActionButton_UpdateCooldown`'s lossOfControl
@@ -753,6 +767,11 @@ pub struct SimState {
     /// `ActionButton_UpdateCooldown` then falls back to the inert
     /// `defaultLossOfControlInfo` baseline.
     pub spell_loss_of_control: HashMap<u32, LossOfControlInfo>,
+    /// Profession-quality overlays for action slots. Drives
+    /// `C_ActionBar.GetProfessionQualityInfo`. Empty by default —
+    /// `ActionBarActionButtonMixin:UpdateProfessionQuality` then clears the
+    /// overlay frame for that slot.
+    pub action_profession_quality: HashMap<i32, ProfessionQualityInfo>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame
