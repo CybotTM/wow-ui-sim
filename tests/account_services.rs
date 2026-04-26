@@ -170,7 +170,10 @@ fn account_save_result_event_dispatches_payload_to_handler() {
         )
         .unwrap();
     assert!(received, "OnEvent should fire for ACCOUNT_SAVE_RESULT");
-    assert_eq!(result, 0, "first payload arg should be Enum.AccountExportResult.Success (0)");
+    assert_eq!(
+        result, 0,
+        "first payload arg should be Enum.AccountExportResult.Success (0)"
+    );
     assert_eq!(folder, "/tmp/saves");
     assert_eq!(file, "save.zip");
 }

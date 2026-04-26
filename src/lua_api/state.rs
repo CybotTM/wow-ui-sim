@@ -73,6 +73,7 @@ macro_rules! build_empty_sim_state {
             last_sound_kit_requested: $runtime.last_sound_kit_requested,
             last_sound_file_requested: $runtime.last_sound_file_requested,
             last_stopped_sound_handle: $runtime.last_stopped_sound_handle,
+            last_launched_url: $runtime.last_launched_url,
             highlighted_map_scene_character_guid: $runtime.highlighted_map_scene_character_guid,
             multi_action_bar_grids_shown: $runtime.multi_action_bar_grids_shown,
             secure_attribute_drivers: $collections.secure_attribute_drivers,
@@ -356,6 +357,9 @@ pub struct SimState {
     pub last_sound_file_requested: Option<String>,
     /// Most recent global `StopSound(handle)` request.
     pub last_stopped_sound_handle: Option<u32>,
+    /// Most recent global `LaunchURL(url)` request. The simulator never
+    /// opens an external browser; tests assert what URL was passed.
+    pub last_launched_url: Option<String>,
     /// Character GUID currently highlighted by glue `MapSceneCharacterHighlightStart`.
     pub highlighted_map_scene_character_guid: Option<String>,
     /// Whether the legacy `MultiActionBar_ShowAllGrids` shim has grids enabled.
@@ -1398,6 +1402,7 @@ struct EmptyRuntimeState {
     last_sound_kit_requested: Option<u32>,
     last_sound_file_requested: Option<String>,
     last_stopped_sound_handle: Option<u32>,
+    last_launched_url: Option<String>,
     highlighted_map_scene_character_guid: Option<String>,
     multi_action_bar_grids_shown: bool,
     casting: Option<CastingState>,
@@ -1454,6 +1459,7 @@ macro_rules! build_empty_runtime_state {
             last_sound_kit_requested: None,
             last_sound_file_requested: None,
             last_stopped_sound_handle: None,
+            last_launched_url: None,
             highlighted_map_scene_character_guid: None,
             multi_action_bar_grids_shown: false,
             casting: None,

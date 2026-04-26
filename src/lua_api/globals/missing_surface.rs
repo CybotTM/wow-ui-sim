@@ -101,6 +101,7 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "PlaySound", play_sound)?;
     LuaApiMut::register_function(lua, "PlaySoundFile", play_sound_file)?;
     LuaApiMut::register_function(lua, "StopSound", stop_sound)?;
+    LuaApiMut::register_function(lua, "LaunchURL", launch_url)?;
     install_date_alias(lua)?;
     LuaApiMut::register_function(lua, "GetSpellLink", get_spell_link_global)?;
     LuaApiMut::register_function(lua, "GetSpellIcon", get_spell_icon_global)?;
@@ -334,6 +335,12 @@ fn stop_sound(state: &mut LuaState) -> LuaResult<u32> {
     if let Some(manager) = sim.sound_manager.as_mut() {
         manager.stop_sound(handle);
     }
+    Ok(0)
+}
+
+fn launch_url(state: &mut LuaState) -> LuaResult<u32> {
+    let url = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    borrow_state_mut(state)?.last_launched_url = Some(url);
     Ok(0)
 }
 

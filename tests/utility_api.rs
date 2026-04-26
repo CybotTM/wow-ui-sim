@@ -409,6 +409,38 @@ fn test_sound_shims_record_latest_requests() {
 }
 
 #[test]
+fn launch_url_records_request_on_sim_state() {
+    // StaticPopupDialogs["ACCOUNT_SAVE_SUCCESS"].OnAccept calls LaunchURL(data)
+    // when the save success popup is accepted (Blizzard_AccountSaveUI.lua line 90).
+    // The simulator never opens an external browser; tests assert the URL.
+    let env = env();
+    env.eval::<()>(r#"LaunchURL("https://example.com/account-save")"#)
+        .unwrap();
+    assert_eq!(
+        env.state().borrow().last_launched_url.as_deref(),
+        Some("https://example.com/account-save"),
+        "LaunchURL should record the requested URL on SimState"
+    );
+}
+
+#[test]
+fn launch_url_overwrites_previous_request() {
+    let env = env();
+    env.eval::<()>(
+        r#"
+        LaunchURL("https://first.example/")
+        LaunchURL("https://second.example/")
+        "#,
+    )
+    .unwrap();
+    assert_eq!(
+        env.state().borrow().last_launched_url.as_deref(),
+        Some("https://second.example/"),
+        "LaunchURL should record only the latest URL"
+    );
+}
+
+#[test]
 fn test_multi_action_bar_grid_shims_toggle_sim_state() {
     let env = env();
     env.eval::<()>("MultiActionBar_ShowAllGrids()").unwrap();
