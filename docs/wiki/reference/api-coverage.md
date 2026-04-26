@@ -8,15 +8,16 @@ Current state of WoW API implementation across C_* namespaces, LE_* constants, a
 - **LE_* constants**: ~99% — only 8 missing, all legacy/Classic-era
 - **Enum namespaces**: ~99% — 11 missing after scanner false-positive fix, mostly low-usage
 
-## Implementation Layers
+## Implementation Layout
 
-Three layers in priority order (hand-written wins via `is_nil()` guard):
+C_* support lives in `src/c_api/`, a peer of `src/lua_api/` per the C-API boundary policy. Each namespace is its own module (`c_spell.rs`, `c_spell_book.rs`, `c_map.rs`, `c_addons.rs`, `c_widget.rs`, `c_texture.rs`, `c_paper_doll_info.rs`, `c_addon_profiler.rs`, `c_configuration_warnings.rs`, `c_fog_of_war.rs`, `c_map_exploration_info.rs`, `c_spec.rs`, `c_wowtoken_secure.rs`, `c_xml_util.rs`, `item_spell/`, …).
 
-1. **Hand-written Rust** (`c_*.rs`, `*_api.rs`) — real logic, state-backed
-2. **Hand-written stubs** (`c_stubs_api*.rs`, `c_misc_api*.rs`) — hardcoded correct defaults
-3. **Auto-generated** (`generated_stubs.rs`, ~19K lines) — catch-all nil/false/0 returns
+Two shim sub-trees are kept explicit, not hidden:
 
-Additionally, ~25 global (non-C_*) stubs have been upgraded from auto-generated nil to correct return values (player API, unit API, system API, etc.).
+- `src/c_api/permanent_shims/` — intentionally unsupported domains with documented rationale (currently `c_model_info` for the 3D-model gap and `c_map_api` for legacy map glue).
+- `src/c_api/temporary_shims/` — explicit stopgaps with a retirement path (currently `c_lfg_info`).
+
+Default behavior for missing methods (returning nil/false/0) is provided directly from the per-namespace modules and from a small set of upgraded global stubs (~25 player/unit/system globals returning correct typed defaults). The previous monolithic `generated_stubs.rs` (~19K lines) and `c_stubs_api*.rs` / `c_misc_api*.rs` files have been retired; ownership now lives in the per-namespace files alongside real logic.
 
 ## Well-Implemented Namespaces
 
@@ -56,17 +57,18 @@ Only 16 C_* namespaces from BlizzardUI are completely unregistered. All are eith
 
 ## Stub Methodology
 
-To implement a stub: find it in layer 1/2/3, replace the body with proper return values matching `Blizzard_APIDocumentationGenerated/*.lua`. The signature audit in `docs/c-api-signature-audit.md` documents the exact parameter/return types for high-priority namespaces (C_Spell, C_SpellBook, C_CVar, C_PlayerInfo, C_ClassColor, C_ChatInfo, C_CurrencyInfo, etc.).
+To implement a missing method, locate (or create) its namespace module under `src/c_api/`, add the method to the registry, and return values matching `Blizzard_APIDocumentationGenerated/*.lua`. State-backed implementations should read from / write to the simulator's state model rather than hardcoding constants.
 
-Dead stubs (duplicates of hand-written implementations) were cleaned up: 854 removed from `generated_stubs.rs`, reducing it from ~22K to ~19K lines.
+Per CLAUDE.md, missing or wrong `C_*` behavior should default to **implementing the backing system or state model** — not adding a shim. Shims belong in `permanent_shims/` (intentional gap, documented rationale) or `temporary_shims/` (stopgap with retirement path).
+
+The signature audit in `docs/c-api-signature-audit.md` documents the exact parameter/return types for high-priority namespaces. Live gaps come from `wow-cli audit-api --gaps`, which can also emit a PLAN.md-ready checkbox list (`--format plan`).
 
 ## Sources
 
-- [FUTURE.md](../../../FUTURE.md) — stub implementation tasks and methodology
 - [docs/c-api-signature-audit.md](../../c-api-signature-audit.md) — official API signatures (Patch 12.0.1)
 - [docs/c-api-stub-audit.md](../../c-api-stub-audit.md) — current implementation status per namespace
 
 ## See Also
 
 - [[cli-commands]] — `audit-api` command for live gap reports
-- [[architecture-overview]] — three-layer implementation architecture
+- [[architecture-overview]] — module layout and C-API boundary

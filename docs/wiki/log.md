@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-26] update | api-coverage refresh, FUTURE.md retired
+
+Folded `FUTURE.md` into `docs/wiki/reference/api-coverage.md` and deleted the root file. The old "three-layer" stub architecture (Hand-written / `c_stubs_api*.rs` / `generated_stubs.rs (~19K lines)`) has been replaced by per-namespace modules under `src/c_api/` with explicit `permanent_shims/` and `temporary_shims/` subtrees, matching the C-API boundary policy in CLAUDE.md. The wiki page now describes the actual module layout, calls out the shim sub-trees, and points to `wow-cli audit-api --gaps --format plan` as the live source of remaining work instead of a hand-curated task list. Removed the `FUTURE.md` source link.
+
 ## [2026-04-26] update | architecture-overview refresh, DESIGN.md retired
 
 Folded `DESIGN.md` into `docs/wiki/design/architecture-overview.md` and deleted the root file. Corrected several stale claims: rilua provides native taint tracking (the previous "stubbed as always-secure" line was wrong — `issecure`/`issecurevariable` work; what's missing is `SetAttribute`/`SetForbidden` enforcement, now spelled out as a non-goal). Removed the dropped `generated_stubs.rs (~19K lines)` reference. Expanded the module diagram beyond `lua_api`/`widget`/`render` to also cover `c_api`, `iced_app`, `loader`, `event`, `xml`, `lua_bridge`, `texture`, and `sound`, with `c_api` called out as a peer of `lua_api` per CLAUDE.md. Updated `addon-compatibility.md` and `development-phases.md` to drop the fixed "127+ addons" number and reflect that the Blizzard UI tree under `Interface/BlizzardUI/` (`SharedXMLBase`/`SharedXML`/`SharedXMLGame`/`FrameXMLBase`/`FrameXMLUtil`/`FrameXML` + per-feature addons) loads, not just `SharedXML`. Removed source links to the deleted `DESIGN.md`.
