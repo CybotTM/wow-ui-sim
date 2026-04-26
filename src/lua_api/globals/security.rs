@@ -47,6 +47,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "securecallmethod", securecallmethod)?;
     LuaApiMut::register_function(lua, "issecurevariable", issecurevariable_override)?;
     LuaApiMut::register_function(lua, "__sim_mark_secret_value", mark_secret_values)?;
+    LuaApiMut::register_function(lua, "__sim_mark_slot_taint", mark_slot_taint)?;
     register_value_access_fallbacks(lua)?;
     register_scrub_fallbacks(lua)?;
     register_secure_handler_stubs(lua)?;
@@ -187,6 +188,20 @@ fn mark_secret_values(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn mark_slot_taint(state: &mut LuaState) -> LuaResult<u32> {
+    let table_val = state.stack_get(state.base);
+    let key_val = state.stack_get(state.base + 1);
+    let taint_val = state.stack_get(state.base + 2);
+    let Some(taint) = val_to_string(state, taint_val) else {
+        return Ok(0);
+    };
+    let Val::Table(table_ref) = table_val else {
+        return Ok(0);
+    };
+    set_slot_taint(state, table_ref, key_val, &taint);
+    Ok(0)
+}
+
 fn register_value_access_fallbacks(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_if_missing(lua, "issecretvalue", issecretvalue_fallback)?;
     register_if_missing(lua, "canaccessvalue", canaccessvalue_fallback)?;
@@ -207,24 +222,8 @@ fn issecurevariable_override(state: &mut LuaState) -> LuaResult<u32> {
         }
     };
 
-    let taint = match key_val {
-        Val::Str(s) => {
-            let bytes = state.gc.string_arena.get(s).map(|ls| ls.data().to_vec());
-            bytes.and_then(|bytes| {
-                state
-                    .gc
-                    .tables
-                    .get(table_ref)
-                    .and_then(|table| table.get_slot_taint_str(&bytes).map(str::to_string))
-            })
-        }
-        Val::Num(n) if n.is_finite() && (n as i64) as f64 == n => state
-            .gc
-            .tables
-            .get(table_ref)
-            .and_then(|table| table.get_slot_taint_int(n as i64).map(str::to_string)),
-        _ => None,
-    };
+    let taint = slot_taint_for_key(state, table_ref, key_val)
+        .or_else(|| global_shadow_slot_taint_for_key(state, table_ref, key_val));
 
     match taint {
         None => {
@@ -237,6 +236,64 @@ fn issecurevariable_override(state: &mut LuaState) -> LuaResult<u32> {
             state.push(taint);
             Ok(2)
         }
+    }
+}
+
+fn slot_taint_for_key(
+    state: &LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+    key_val: Val,
+) -> Option<String> {
+    let table = state.gc.tables.get(table_ref)?;
+    match key_val {
+        Val::Str(s) => {
+            let bytes = state.gc.string_arena.get(s)?.data();
+            table.get_slot_taint_str(bytes).map(str::to_string)
+        }
+        Val::Num(n) if n.is_finite() && (n as i64) as f64 == n => {
+            table.get_slot_taint_int(n as i64).map(str::to_string)
+        }
+        _ => None,
+    }
+}
+
+fn global_shadow_slot_taint_for_key(
+    state: &LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+    key_val: Val,
+) -> Option<String> {
+    if table_ref != state.global {
+        return None;
+    }
+    let runtime = state.global_slots.as_ref()?;
+    let shadow_key = runtime.shadow_registry_key?;
+    let registry = state.gc.tables.get(state.registry)?;
+    let Val::Table(shadow_ref) = registry.get_str(shadow_key, &state.gc.string_arena) else {
+        return None;
+    };
+    slot_taint_for_key(state, shadow_ref, key_val)
+}
+
+fn set_slot_taint(
+    state: &mut LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+    key_val: Val,
+    taint: &str,
+) {
+    let Some(table) = state.gc.tables.get_mut(table_ref) else {
+        return;
+    };
+    match key_val {
+        Val::Str(s) => {
+            let Some(bytes) = state.gc.string_arena.get(s).map(|ls| ls.data().to_vec()) else {
+                return;
+            };
+            table.set_slot_taint_str(&bytes, taint);
+        }
+        Val::Num(n) if n.is_finite() && (n as i64) as f64 == n => {
+            table.set_slot_taint_int(n as i64, taint);
+        }
+        _ => {}
     }
 }
 
