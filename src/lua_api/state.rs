@@ -58,6 +58,7 @@ macro_rules! build_empty_sim_state {
             last_account_store_refund_request: $runtime.last_account_store_refund_request,
             account_store_refund_succeeds: $runtime.account_store_refund_succeeds,
             account_store_category_items: $collections.account_store_category_items,
+            account_store_currency_for_store: $collections.account_store_currency_for_store,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -330,6 +331,10 @@ pub struct SimState {
     /// Item ids exposed by `C_AccountStore.GetCategoryItems(categoryID)`.
     /// Keyed by category id; absent or empty entries return an empty array.
     pub account_store_category_items: HashMap<i64, Vec<i64>>,
+    /// Currency id used by each storefront. Drives
+    /// `C_AccountStore.GetCurrencyIDForStore(storeFrontID)`; missing entries
+    /// return nil so the footer's currency tooltip stays hidden.
+    pub account_store_currency_for_store: HashMap<i64, i64>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -806,6 +811,7 @@ struct EmptyStateCollections {
     unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     pending_player_reports: HashMap<i64, PendingPlayerReport>,
     account_store_category_items: HashMap<i64, Vec<i64>>,
+    account_store_currency_for_store: HashMap<i64, i64>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,

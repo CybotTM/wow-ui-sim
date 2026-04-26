@@ -17,6 +17,12 @@ pub(super) fn register_account_store_surface(state: &mut LuaState) -> LuaResult<
     table_set_rust_fn_static(state, table_ref, "BeginPurchase", begin_purchase)?;
     table_set_rust_fn_static(state, table_ref, "RefundItem", refund_item)?;
     table_set_rust_fn_static(state, table_ref, "GetCategoryItems", get_category_items)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetCurrencyIDForStore",
+        get_currency_id_for_store,
+    )?;
     Ok(())
 }
 
@@ -64,5 +70,18 @@ fn get_category_items(state: &mut LuaState) -> LuaResult<u32> {
         );
     }
     state.push(array);
+    Ok(1)
+}
+
+fn get_currency_id_for_store(state: &mut LuaState) -> LuaResult<u32> {
+    let store_front_id = i64::from_stack(state, 1)?;
+    let currency_id = borrow_state(state)?
+        .account_store_currency_for_store
+        .get(&store_front_id)
+        .copied();
+    match currency_id {
+        Some(id) => state.push(Val::Num(id as f64)),
+        None => state.push(Val::Nil),
+    }
     Ok(1)
 }

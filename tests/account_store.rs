@@ -162,6 +162,55 @@ fn get_category_items_isolates_categories() {
 }
 
 #[test]
+fn get_currency_id_for_store_returns_nil_when_unseeded() {
+    // Footer.CurrencyAvailable:OnEnter and AccountStoreFrame:OnStoreFrontSet
+    // both branch on `currency ~= nil` to decide whether to show the tooltip.
+    let env = env();
+    let value: Option<i64> = env
+        .eval(r#"return C_AccountStore.GetCurrencyIDForStore(42)"#)
+        .unwrap();
+    assert_eq!(
+        value, None,
+        "an unseeded storefront must report nil so the tooltip stays hidden"
+    );
+}
+
+#[test]
+fn get_currency_id_for_store_returns_seeded_currency() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_currency_for_store.insert(7, 1234);
+    }
+    let value: i64 = env
+        .eval(r#"return C_AccountStore.GetCurrencyIDForStore(7)"#)
+        .unwrap();
+    assert_eq!(value, 1234);
+}
+
+#[test]
+fn get_currency_id_for_store_isolates_storefronts() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_currency_for_store.insert(1, 100);
+        state.account_store_currency_for_store.insert(2, 200);
+    }
+    let (a, b, missing): (Option<i64>, Option<i64>, Option<i64>) = env
+        .eval(
+            r#"
+            return C_AccountStore.GetCurrencyIDForStore(1),
+                   C_AccountStore.GetCurrencyIDForStore(2),
+                   C_AccountStore.GetCurrencyIDForStore(3)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(a, Some(100));
+    assert_eq!(b, Some(200));
+    assert_eq!(missing, None, "unseeded id stays nil even with siblings");
+}
+
+#[test]
 fn refund_item_is_independent_of_begin_purchase_state() {
     // The two SimState flags are decoupled: a refund failure must not bleed
     // into purchase reporting and vice versa.
