@@ -134,6 +134,7 @@ macro_rules! build_empty_sim_state {
             modifier_keys: ModifierKeys::default(),
             game_rules: GameRulesState::default(),
             housing_service_enabled: true,
+            housing: HousingState::default(),
             pet_battles: PetBattleState::default(),
             pet: PetState::default(),
             lfg_list_counts: LfgListCounts::default(),
@@ -425,6 +426,24 @@ impl Default for ActionBarStateInfo {
             current_state: 1,
         }
     }
+}
+
+/// `C_Housing` favor-bar payload read by `HouseFavorBarMixin:Update`
+/// (`vendor/wow-ui-source/Interface/AddOns/Blizzard_ActionBar/Mainline/HouseFavorBar.lua`).
+/// `tracked_house_guid` is `Some` when a house is currently tracked for
+/// favor display — a `None` value disables the bar entirely. `level_thresholds`
+/// is indexed by level (1-based) and consumed by `GetHouseLevelFavorForLevel`;
+/// out-of-range lookups (including the `level + 1` next-threshold probe past
+/// the cap) return `0`, which is the sentinel the mixin checks to skip
+/// `SetBarValues`.
+#[derive(Clone, Debug, Default)]
+pub struct HousingState {
+    pub tracked_house_guid: Option<String>,
+    pub current_level: i32,
+    pub current_favor: i32,
+    pub next_threshold: i32,
+    pub max_level: i32,
+    pub level_thresholds: Vec<i64>,
 }
 
 /// Paragon-rep payload returned by `C_Reputation.GetFactionParagonInfo`.
@@ -840,6 +859,11 @@ pub struct SimState {
     /// MainMenuBarMicroButtons' decision to render the Housing micro-button.
     /// Default true so the housing dashboard can be opened from the live UI.
     pub housing_service_enabled: bool,
+    /// `C_Housing` favor-bar state — drives `GetTrackedHouseGuid`,
+    /// `GetCurrentHouseLevelFavor`, `GetHouseLevelFavorForLevel`, and
+    /// `GetMaxHouseLevel`. Default all-zero / `None`, which keeps
+    /// `HouseFavorBarMixin:Update` on the inert "no tracked house" path.
+    pub housing: HousingState,
     /// Backing state for `C_PetBattles.GetNumPets(owner)` and
     /// `C_PetBattles.GetBattleState()`. Default zeros (no active battle).
     pub pet_battles: PetBattleState,
