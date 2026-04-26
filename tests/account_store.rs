@@ -97,6 +97,71 @@ fn refund_item_returns_false_when_state_flag_disabled() {
 }
 
 #[test]
+fn get_category_items_returns_empty_array_for_unknown_category() {
+    // AccountStoreItemDisplayMixin:OnCategorySelected and ItemRack:Refresh both
+    // expect to iterate the result with ipairs, so the empty case must return
+    // a table — not nil — to avoid breaking the iteration.
+    let env = env();
+    let count: i64 = env
+        .eval(
+            r#"
+            local items = C_AccountStore.GetCategoryItems(9999)
+            return #items
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        count, 0,
+        "unknown category should yield an empty array, never nil"
+    );
+}
+
+#[test]
+fn get_category_items_returns_seeded_item_ids_in_order() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state
+            .account_store_category_items
+            .insert(7, vec![100, 200, 300]);
+    }
+    let (n, first, second, third): (i64, i64, i64, i64) = env
+        .eval(
+            r#"
+            local items = C_AccountStore.GetCategoryItems(7)
+            return #items, items[1], items[2], items[3]
+            "#,
+        )
+        .unwrap();
+    assert_eq!(n, 3);
+    assert_eq!(first, 100);
+    assert_eq!(second, 200);
+    assert_eq!(third, 300);
+}
+
+#[test]
+fn get_category_items_isolates_categories() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_category_items.insert(1, vec![11, 12]);
+        state.account_store_category_items.insert(2, vec![21]);
+    }
+    let (cat1_count, cat2_count, cat3_count): (i64, i64, i64) = env
+        .eval(
+            r#"
+            return #C_AccountStore.GetCategoryItems(1),
+                   #C_AccountStore.GetCategoryItems(2),
+                   #C_AccountStore.GetCategoryItems(3)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(cat1_count, 2);
+    assert_eq!(cat2_count, 1);
+    assert_eq!(cat3_count, 0, "unseeded category should still be empty");
+}
+
+#[test]
 fn refund_item_is_independent_of_begin_purchase_state() {
     // The two SimState flags are decoupled: a refund failure must not bleed
     // into purchase reporting and vice versa.

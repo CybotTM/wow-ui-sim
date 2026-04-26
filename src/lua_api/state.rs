@@ -57,6 +57,7 @@ macro_rules! build_empty_sim_state {
             account_store_begin_purchase_succeeds: $runtime.account_store_begin_purchase_succeeds,
             last_account_store_refund_request: $runtime.last_account_store_refund_request,
             account_store_refund_succeeds: $runtime.account_store_refund_succeeds,
+            account_store_category_items: $collections.account_store_category_items,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -326,6 +327,9 @@ pub struct SimState {
     /// Return value for `C_AccountStore.RefundItem` — true to simulate a
     /// queued refund request, false to simulate the C side rejecting it.
     pub account_store_refund_succeeds: bool,
+    /// Item ids exposed by `C_AccountStore.GetCategoryItems(categoryID)`.
+    /// Keyed by category id; absent or empty entries return an empty array.
+    pub account_store_category_items: HashMap<i64, Vec<i64>>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -801,6 +805,7 @@ struct EmptyStateCollections {
     fog_of_war_frames: HashMap<u64, FogOfWarFrameState>,
     unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     pending_player_reports: HashMap<i64, PendingPlayerReport>,
+    account_store_category_items: HashMap<i64, Vec<i64>>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,

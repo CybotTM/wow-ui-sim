@@ -7,7 +7,7 @@
 //! and refund fulfillment is out of scope.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table, table_set_num};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -16,6 +16,7 @@ pub(super) fn register_account_store_surface(state: &mut LuaState) -> LuaResult<
     let table_ref = ensure_namespace(state, "C_AccountStore")?;
     table_set_rust_fn_static(state, table_ref, "BeginPurchase", begin_purchase)?;
     table_set_rust_fn_static(state, table_ref, "RefundItem", refund_item)?;
+    table_set_rust_fn_static(state, table_ref, "GetCategoryItems", get_category_items)?;
     Ok(())
 }
 
@@ -38,5 +39,30 @@ fn refund_item(state: &mut LuaState) -> LuaResult<u32> {
         sim.account_store_refund_succeeds
     };
     state.push(Val::Bool(succeeds));
+    Ok(1)
+}
+
+fn get_category_items(state: &mut LuaState) -> LuaResult<u32> {
+    let category_id = i64::from_stack(state, 1)?;
+    let item_ids = borrow_state(state)?
+        .account_store_category_items
+        .get(&category_id)
+        .cloned()
+        .unwrap_or_default();
+
+    let array = create_table(state);
+    let Val::Table(array_ref) = array else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    for (index, item_id) in item_ids.iter().enumerate() {
+        table_set_num(
+            state,
+            array_ref,
+            (index + 1) as f64,
+            Val::Num(*item_id as f64),
+        );
+    }
+    state.push(array);
     Ok(1)
 }
