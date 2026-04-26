@@ -844,6 +844,7 @@ fn duration_ms(duration: std::time::Duration) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::iced_app::{build_hittable_rects, frame_collect::collect_hittable_frames};
     use crate::lua_api::WowLuaEnv;
     use crate::render::{FrameQuadSnapshot, GlyphAtlas, WowFontSystem};
     use crate::screen::ScreenKind;
@@ -1082,6 +1083,20 @@ mod tests {
         }
     }
 
+    fn rebuild_hittable_cache(app: &App, size: Size) {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let strata_buckets = state
+            .get_strata_buckets()
+            .expect("visible strata buckets should exist")
+            .clone();
+        let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
+        let hittable = build_hittable_rects(&collected, &state.widgets);
+        let grid = super::super::hit_grid::HitGrid::new(hittable, size.width, size.height);
+        *app.cached_hittable.borrow_mut() = Some(grid);
+    }
+
     #[test]
     fn cached_button_normal_texture_alpha_restores_after_hover_hide() {
         let temp_dir = tempdir().unwrap();
@@ -1294,6 +1309,130 @@ mod tests {
         assert!(
             snapshot_texture_alphas(&app, highlight_id).is_empty(),
             "mouse leave should remove the highlight texture snapshot"
+        );
+    }
+
+    #[test]
+    fn mouse_up_rebuild_restores_pressed_button_normal_texture() {
+        let temp_dir = tempdir().unwrap();
+        let mut app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                PressedMicroButton = CreateFrame("Button", "PressedMicroButton", UIParent)
+                PressedMicroButton:SetSize(32, 40)
+                PressedMicroButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
+                PressedMicroButton:EnableMouse(true)
+                PressedMicroButton:SetNormalAtlas("UI-HUD-MicroMenu-SpecTalents-Up")
+                PressedMicroButton:SetPushedAtlas("UI-HUD-MicroMenu-SpecTalents-Down")
+            "#,
+            )
+            .expect("pressed micro button setup should succeed");
+
+        let (normal_id, pushed_id) = {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            let button = state
+                .widgets
+                .get_by_name("PressedMicroButton")
+                .expect("pressed micro button should exist");
+            let normal_id = *button
+                .children_keys
+                .get("NormalTexture")
+                .expect("normal texture child should exist");
+            let pushed_id = *button
+                .children_keys
+                .get("PushedTexture")
+                .expect("pushed texture child should exist");
+            (normal_id, pushed_id)
+        };
+
+        let size = Size::new(320.0, 240.0);
+        app.screen_size.set(size);
+        app.mark_all_strata_dirty();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        rebuild_hittable_cache(&app, size);
+
+        let click_pos = Point::new(30.0, 40.0);
+        app.handle_mouse_down(click_pos);
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        assert!(
+            snapshot_texture_alphas(&app, normal_id).is_empty(),
+            "pressed button should remove the normal texture snapshot"
+        );
+        assert!(
+            snapshot_texture_alphas(&app, pushed_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "pressed button should emit the pushed texture snapshot"
+        );
+
+        app.handle_mouse_up(click_pos);
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        assert!(
+            snapshot_texture_alphas(&app, normal_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "mouse up should dirty and re-emit the normal texture snapshot"
+        );
+        assert!(
+            snapshot_texture_alphas(&app, pushed_id).is_empty(),
+            "mouse up should remove the pushed texture snapshot"
+        );
+    }
+
+    #[test]
+    fn mouse_leave_clears_pressed_button_texture_state() {
+        let temp_dir = tempdir().unwrap();
+        let mut app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(
+                r#"
+                PressedLeaveMicroButton = CreateFrame("Button", "PressedLeaveMicroButton", UIParent)
+                PressedLeaveMicroButton:SetSize(32, 40)
+                PressedLeaveMicroButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -20)
+                PressedLeaveMicroButton:EnableMouse(true)
+                PressedLeaveMicroButton:SetNormalAtlas("UI-HUD-MicroMenu-SpecTalents-Up")
+                PressedLeaveMicroButton:SetPushedAtlas("UI-HUD-MicroMenu-SpecTalents-Down")
+            "#,
+            )
+            .expect("pressed leave micro button setup should succeed");
+
+        let normal_id = {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            let button = state
+                .widgets
+                .get_by_name("PressedLeaveMicroButton")
+                .expect("pressed leave micro button should exist");
+            *button
+                .children_keys
+                .get("NormalTexture")
+                .expect("normal texture child should exist")
+        };
+
+        let size = Size::new(320.0, 240.0);
+        app.screen_size.set(size);
+        app.mark_all_strata_dirty();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        rebuild_hittable_cache(&app, size);
+
+        app.handle_mouse_down(Point::new(30.0, 40.0));
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        app.handle_mouse_leave();
+        app.rebuild_dirty_strata(size, app.strata_dirty.get());
+
+        assert!(
+            app.pressed_frame.is_none(),
+            "mouse leave should clear the app pressed target"
+        );
+        assert!(
+            snapshot_texture_alphas(&app, normal_id)
+                .iter()
+                .any(|alpha| *alpha == 1.0),
+            "mouse leave should dirty and restore the normal texture snapshot"
         );
     }
 

@@ -27,8 +27,14 @@ impl App {
             let env = self.env.borrow();
             env.state().borrow_mut().set_mouse_position(None);
         }
+        let cleared_pressed = self.pressed_frame.is_some();
+        if cleared_pressed {
+            self.clear_pressed_frame();
+        }
         if self.hovered_frame.is_some() {
             self.fire_hover_transition(None);
+            self.flush_mouse_move_visual_updates();
+        } else if cleared_pressed {
             self.flush_mouse_move_visual_updates();
         }
     }
@@ -126,8 +132,8 @@ impl App {
             {
                 let mut state = env.state().borrow_mut();
                 state.hovered_frame = new_hovered;
-                mark_hover_visuals_dirty(&mut state, old_hovered);
-                mark_hover_visuals_dirty(&mut state, new_hovered);
+                mark_button_state_visuals_dirty(&mut state, old_hovered);
+                mark_button_state_visuals_dirty(&mut state, new_hovered);
             }
             if let Some(old_id) = old_hovered.filter(|id| self.motion_scripts_allowed(*id)) {
                 let _ = env.fire_script_handler(old_id, "OnLeave", vec![]);
@@ -180,6 +186,7 @@ impl App {
         self.mouse_down_pos = Some(pos);
         self.dragging = false;
         self.pressed_frame = Some(frame_id);
+        self.mark_pressed_frame_visuals_dirty(Some(frame_id));
         {
             let env = self.env.borrow();
             let mut state = env.state().borrow_mut();
@@ -213,8 +220,18 @@ impl App {
             self.dispatch_left_mouse_release(released_on);
         }
         self.mouse_down_frame = None;
-        self.pressed_frame = None;
+        self.clear_pressed_frame();
         self.flush_post_script_updates();
+    }
+
+    fn clear_pressed_frame(&mut self) {
+        let old_pressed = self.pressed_frame.take();
+        self.mark_pressed_frame_visuals_dirty(old_pressed);
+    }
+
+    fn mark_pressed_frame_visuals_dirty(&self, frame_id: Option<u64>) {
+        let env = self.env.borrow();
+        mark_button_state_visuals_dirty(&mut env.state().borrow_mut(), frame_id);
     }
 
     fn take_left_drag_state(&mut self) -> (bool, Option<u64>) {
@@ -485,7 +502,7 @@ impl App {
     }
 }
 
-fn mark_hover_visuals_dirty(state: &mut crate::lua_api::SimState, frame_id: Option<u64>) {
+fn mark_button_state_visuals_dirty(state: &mut crate::lua_api::SimState, frame_id: Option<u64>) {
     let Some(frame_id) = frame_id else {
         return;
     };
