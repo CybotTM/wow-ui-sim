@@ -70,6 +70,7 @@ macro_rules! build_empty_sim_state {
             action_highlights: ActionHighlightState::default(),
             equipped_artifact: None,
             artifact_point_costs: HashMap::new(),
+            azerite_item: None,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -422,6 +423,33 @@ impl Default for ActionBarStateInfo {
     }
 }
 
+/// `ItemLocation` payload returned by C surfaces that hand opaque locations
+/// back to Lua (e.g. `C_AzeriteItem.FindActiveAzeriteItem`). Mirrors the
+/// fields populated by `ItemLocationMixin` so callers that walk
+/// `:GetBagAndSlot()`/`:GetEquipmentSlot()` see the expected shape.
+#[derive(Clone, Debug, Default)]
+pub struct ItemLocationData {
+    pub bag_id: Option<i32>,
+    pub slot_index: Option<i32>,
+    pub equipment_slot_index: Option<i32>,
+}
+
+/// Heart-of-Azeroth state read by `C_AzeriteItem.*`. `None` on
+/// `state.azerite_item` means no Azerite item is equipped —
+/// `FindActiveAzeriteItem` returns nil so `AzeriteBarMixin:Update`
+/// short-circuits.
+#[derive(Clone, Debug)]
+pub struct AzeriteItemState {
+    pub item_location: ItemLocationData,
+    pub current_xp: i64,
+    pub max_xp: i64,
+    pub power_level: i32,
+    pub unlimited_power_level: i32,
+    pub unlimited_unlocked: bool,
+    pub at_max_level: bool,
+    pub enabled: bool,
+}
+
 /// Equipped artifact metadata read by `C_ArtifactUI.GetEquippedArtifactInfo`,
 /// `GetEquippedArtifactItemID`, `IsEquippedArtifactMaxed`, and
 /// `IsEquippedArtifactDisabled`. `None` on `state.equipped_artifact` means no
@@ -583,6 +611,10 @@ pub struct SimState {
     /// default — callers receive 0 for missing entries, which the helper
     /// treats as "no further point purchasable".
     pub artifact_point_costs: HashMap<(i32, i32), i64>,
+    /// Heart of Azeroth state. `None` keeps
+    /// `C_AzeriteItem.FindActiveAzeriteItem` returning nil so the
+    /// `Blizzard_ActionBar/Mainline/AzeriteBar.lua` mixin stays hidden.
+    pub azerite_item: Option<AzeriteItemState>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame

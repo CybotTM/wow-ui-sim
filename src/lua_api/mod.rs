@@ -59,7 +59,10 @@ pub use layout::{
 pub use loader_env::LoaderEnv;
 pub use message_frame::MessageFrameData;
 pub use simple_html::SimpleHtmlData;
-pub use state::{AddonInfo, ArtifactInfo, PendingTimer, SimState, tick_party_health};
+pub use state::{
+    AddonInfo, ArtifactInfo, AzeriteItemState, ItemLocationData, PendingTimer, SimState,
+    tick_party_health,
+};
 pub use tooltip::TooltipData;
 
 // Crate-internal re-exports

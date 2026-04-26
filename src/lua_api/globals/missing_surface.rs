@@ -51,7 +51,7 @@ mod warband_scene;
 mod zone_ability;
 
 use crate::c_api::{
-    c_artifact_ui, c_configuration_warnings, c_fog_of_war, c_map_exploration_info,
+    c_artifact_ui, c_azerite_item, c_configuration_warnings, c_fog_of_war, c_map_exploration_info,
     c_paper_doll_info, c_spell, c_widget,
 };
 use crate::lua_api::methods::{
@@ -192,6 +192,7 @@ fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_widget::register_c_widget_surface(state)?;
     c_paper_doll_info::register_c_paper_doll_info_surface(state)?;
     c_artifact_ui::register_c_artifact_ui_surface(state)?;
+    c_azerite_item::register_c_azerite_item_surface(state)?;
     Ok(())
 }
 
