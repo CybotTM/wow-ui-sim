@@ -63,6 +63,7 @@ macro_rules! build_empty_sim_state {
             account_store_storefront_state: $collections.account_store_storefront_state,
             last_account_store_storefront_info_request: $runtime
                 .last_account_store_storefront_info_request,
+            account_store_categories: $collections.account_store_categories,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -259,6 +260,21 @@ pub struct AccountStoreCurrencyInfo {
     pub icon: i64,
 }
 
+/// Account-store category record — mirrors the official
+/// `AccountStoreCategoryInfo` structure in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AccountStoreDocumentation.lua`
+/// (lines 229-238). `category_type` corresponds to
+/// `Enum.AccountStoreCategoryType` and is read by
+/// `AccountStoreItemDisplayMixin:OnCategorySelected` to choose between the
+/// item-rack flavours (mounts vs. transmog vs. boost vs. service).
+#[derive(Clone, Debug)]
+pub struct AccountStoreCategoryInfo {
+    pub id: i64,
+    pub name: String,
+    pub category_type: i64,
+    pub icon: i64,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -367,6 +383,10 @@ pub struct SimState {
     /// None until called. Tests assert on this to confirm the async refresh
     /// request reached the C side before they fire `ACCOUNT_STORE_FRONT_UPDATED`.
     pub last_account_store_storefront_info_request: Option<i64>,
+    /// Category records exposed by `C_AccountStore.GetCategoryInfo(categoryID)`.
+    /// Missing entries return nil so the AccountStore mixin can guard against
+    /// stale category ids during reload.
+    pub account_store_categories: HashMap<i64, AccountStoreCategoryInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -846,6 +866,7 @@ struct EmptyStateCollections {
     account_store_currency_for_store: HashMap<i64, i64>,
     account_store_currency_info: HashMap<i64, AccountStoreCurrencyInfo>,
     account_store_storefront_state: HashMap<i64, i64>,
+    account_store_categories: HashMap<i64, AccountStoreCategoryInfo>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,

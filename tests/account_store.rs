@@ -1,5 +1,5 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state::AccountStoreCurrencyInfo;
+use wow_ui_sim::lua_api::state::{AccountStoreCategoryInfo, AccountStoreCurrencyInfo};
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -393,6 +393,87 @@ fn request_storefront_info_update_overwrites_previous_request() {
         Some(22),
         "the latest request id wins"
     );
+}
+
+#[test]
+fn get_category_info_returns_nil_when_unseeded() {
+    // AccountStoreCategoryMixin:SetCategory and OnCategorySelected dereference
+    // the result without a nil-guard once a real id is supplied. Tests that
+    // never seed a category should still see a clean nil — never a sentinel
+    // table — so we don't accidentally mask missing-data bugs.
+    let env = env();
+    let value: Option<i64> = env
+        .eval(r#"return C_AccountStore.GetCategoryInfo(404) and 1 or nil"#)
+        .unwrap();
+    assert_eq!(value, None, "unknown category id should report nil");
+}
+
+#[test]
+fn get_category_info_returns_seeded_struct_with_all_fields() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_categories.insert(
+            42,
+            AccountStoreCategoryInfo {
+                id: 42,
+                name: "Mounts".to_string(),
+                category_type: 3,
+                icon: 1357,
+            },
+        );
+    }
+    let (id, name, category_type, icon): (i64, String, i64, i64) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetCategoryInfo(42)
+            return info.id, info.name, info.type, info.icon
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 42);
+    assert_eq!(name, "Mounts");
+    assert_eq!(category_type, 3);
+    assert_eq!(icon, 1357);
+}
+
+#[test]
+fn get_category_info_isolates_categories() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_categories.insert(
+            1,
+            AccountStoreCategoryInfo {
+                id: 1,
+                name: "Boost".to_string(),
+                category_type: 1,
+                icon: 11,
+            },
+        );
+        state.account_store_categories.insert(
+            2,
+            AccountStoreCategoryInfo {
+                id: 2,
+                name: "Transmog".to_string(),
+                category_type: 2,
+                icon: 22,
+            },
+        );
+    }
+    let (n1, n2, missing): (String, String, Option<String>) = env
+        .eval(
+            r#"
+            local a = C_AccountStore.GetCategoryInfo(1)
+            local b = C_AccountStore.GetCategoryInfo(2)
+            local c = C_AccountStore.GetCategoryInfo(3)
+            return a.name, b.name, c and c.name or nil
+            "#,
+        )
+        .unwrap();
+    assert_eq!(n1, "Boost");
+    assert_eq!(n2, "Transmog");
+    assert_eq!(missing, None, "unseeded category 3 stays nil");
 }
 
 #[test]
