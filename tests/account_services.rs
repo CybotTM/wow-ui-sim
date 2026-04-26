@@ -124,3 +124,53 @@ fn save_account_data_starts_and_locks_on_success() {
     );
     assert!(locked, "successful save should lock the account");
 }
+
+#[test]
+fn account_save_result_event_is_registerable() {
+    // Blizzard_AccountSaveUI.lua line 42: AccountSaveFrame:RegisterEvent("ACCOUNT_SAVE_RESULT").
+    // Without this in the valid-events list, RegisterEvent rejects it with
+    // "Attempt to register unknown event" and the addon fails to wire its handler.
+    let env = env();
+    let (registered, error): (bool, Option<String>) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            local ok, err = pcall(function() f:RegisterEvent("ACCOUNT_SAVE_RESULT") end)
+            return ok, ok and nil or tostring(err)
+            "#,
+        )
+        .unwrap();
+    assert!(
+        registered,
+        "ACCOUNT_SAVE_RESULT should be registerable; error: {error:?}"
+    );
+}
+
+#[test]
+fn account_save_result_event_dispatches_payload_to_handler() {
+    // Per Blizzard_AccountSaveUI.lua line 128, the event payload is
+    // (result: Enum.AccountExportResult, outputFolderPath: string, outputFilePath: string).
+    let env = env();
+    let (received, result, folder, file): (bool, i32, String, String) = env
+        .eval(
+            r#"
+            local got_result, got_folder, got_file
+            local received = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("ACCOUNT_SAVE_RESULT")
+            f:SetScript("OnEvent", function(self, event, result, folder, file)
+                if event == "ACCOUNT_SAVE_RESULT" then
+                    received = true
+                    got_result, got_folder, got_file = result, folder, file
+                end
+            end)
+            FireEvent("ACCOUNT_SAVE_RESULT", Enum.AccountExportResult.Success, "/tmp/saves", "save.zip")
+            return received, got_result, got_folder, got_file
+            "#,
+        )
+        .unwrap();
+    assert!(received, "OnEvent should fire for ACCOUNT_SAVE_RESULT");
+    assert_eq!(result, 0, "first payload arg should be Enum.AccountExportResult.Success (0)");
+    assert_eq!(folder, "/tmp/saves");
+    assert_eq!(file, "save.zip");
+}
