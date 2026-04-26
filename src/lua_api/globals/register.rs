@@ -147,6 +147,7 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::combat_stats::register_all(lua)?;
     super::pet_stats::register_all(lua)?;
     super::cooldown_probes::register_all(lua)?;
+    super::action_highlights::register_all(lua)?;
     super::talent_spec_probes::register_all(lua)?;
     super::battlefield_lfg_probes::register_all(lua)?;
     super::loot_method::register_all(lua)?;

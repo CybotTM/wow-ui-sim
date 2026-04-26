@@ -66,6 +66,7 @@ macro_rules! build_empty_sim_state {
             account_store_categories: $collections.account_store_categories,
             account_store_items: $collections.account_store_items,
             action_bars: $collections.action_bars,
+            action_highlights: ActionHighlightState::default(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -309,6 +310,36 @@ pub struct AccountStoreCategoryInfo {
     pub icon: i64,
 }
 
+/// Kind of an on-bar highlight mark — mirrors the action source that caused
+/// the bar buttons to glow (spell hover, flyout drag, pet action drag).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ActionHighlightKind {
+    Spell,
+    Flyout,
+    PetAction,
+}
+
+impl ActionHighlightKind {
+    /// String tag returned alongside `GetOnBarHighlightMark(action)`.
+    pub fn type_tag(self) -> &'static str {
+        match self {
+            ActionHighlightKind::Spell => "spell",
+            ActionHighlightKind::Flyout => "flyout",
+            ActionHighlightKind::PetAction => "petaction",
+        }
+    }
+}
+
+/// Action-highlight bookkeeping read by `Blizzard_ActionBar/Shared/ActionButton.lua`.
+/// `new` mirrors `ACTION_HIGHLIGHT_MARKS` (set on `MarkNewActionHighlight`,
+/// cleared on `ClearNewActionHighlight`); `on_bar` mirrors
+/// `ON_BAR_HIGHLIGHT_MARKS` (rebuilt by the spell/flyout/pet update verbs).
+#[derive(Default, Clone, Debug)]
+pub struct ActionHighlightState {
+    pub new: HashSet<i32>,
+    pub on_bar: HashMap<i32, ActionHighlightKind>,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -427,6 +458,10 @@ pub struct SimState {
     pub account_store_items: HashMap<i64, AccountStoreItemInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
+    /// Action-highlight bookkeeping for `MarkNewActionHighlight` and the
+    /// `On Bar` highlight verbs. Read by Blizzard_ActionBar buttons during
+    /// hover/drag updates.
+    pub action_highlights: ActionHighlightState,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame
