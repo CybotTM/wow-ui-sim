@@ -500,13 +500,49 @@ fn test_issecurevariable_detects_taint() {
     let result: bool = env
         .eval(
             r#"
-            loadstring("TAINTED_VAR = 1")()
+            loadstring("_G.TAINTED_VAR = 1")()
             local secure = issecurevariable("TAINTED_VAR")
             return secure
             "#,
         )
         .unwrap();
     assert!(!result, "variable set by tainted code should be insecure");
+}
+
+#[test]
+fn test_secure_map_rejects_secret_keys_and_values() {
+    let env = env();
+    let (key_error, value_error, stored_value): (String, String, String) = env
+        .eval(
+            r#"
+            local map = SecureTypes.CreateSecureMap()
+            local secretKey = loadstring("return 1")
+            local secretValue = loadstring("return 2")
+
+            local keyOk, keyErr = pcall(function()
+                map:SetValue(secretKey, "safe")
+            end)
+            local valueOk, valueErr = pcall(function()
+                map:SetValue("safe", secretValue)
+            end)
+
+            map:SetValue("safe", "stored")
+            return keyOk and "" or keyErr,
+                valueOk and "" or valueErr,
+                map:GetValue("safe")
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        key_error.contains("attempted to store a secret key in a SecureMap"),
+        "secret key should be rejected, got: {key_error}"
+    );
+    assert!(
+        value_error.contains("attempted to store a secret value in a SecureMap"),
+        "secret value should be rejected, got: {value_error}"
+    );
+    assert_eq!(stored_value, "stored");
 }
 
 // ============================================================================

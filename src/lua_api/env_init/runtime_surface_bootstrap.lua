@@ -4597,30 +4597,115 @@ end
 if SecureTypes == nil then
   SecureTypes = {}
 end
-SecureTypes.CreateSecureMap = SecureTypes.CreateSecureMap or function()
-  local map = {}
-  function map:Insert(key, value)
-    self[key] = value
+
+local function __wow_securetypes_call(fn, ...)
+  if type(securecallfunction) == "function" then
+    return securecallfunction(fn, ...)
   end
-  function map:Remove(key)
-    local value = self[key]
-    self[key] = nil
-    return value
+  return fn(...)
+end
+
+SecureTypes.CreateSecureMap = SecureTypes.CreateSecureMap or function(mixin)
+  local SecureMap = {}
+
+  function SecureMap:GetValue(key)
+    return __wow_securetypes_call(rawget, self.tbl, key)
   end
-  function map:Find(key)
-    return self[key]
+
+  function SecureMap:SetValue(key, value)
+    assert(not issecretvalue(key), "attempted to store a secret key in a SecureMap")
+    assert(not issecretvalue(value), "attempted to store a secret value in a SecureMap")
+    self.tbl[key] = value
   end
-  function map:Contains(key)
-    return self[key] ~= nil
+
+  function SecureMap:ClearValue(key)
+    self.tbl[key] = nil
   end
-  function map:Enumerate()
-    return next, self, nil
+
+  function SecureMap:HasKey(key)
+    return self:GetValue(key) ~= nil
   end
-  function map:Clear()
-    for key in pairs(self) do
-      self[key] = nil
+
+  function SecureMap:GetNext(key)
+    return __wow_securetypes_call(next, self.tbl, key)
+  end
+
+  function SecureMap:GetSize()
+    local count = 0
+    for _ in pairs(self.tbl) do
+      count = count + 1
+    end
+    return count
+  end
+
+  function SecureMap:IsEmpty()
+    return self:GetNext() == nil
+  end
+
+  function SecureMap:Wipe()
+    for key in pairs(self.tbl) do
+      self.tbl[key] = nil
     end
   end
+
+  function SecureMap:Enumerate()
+    local iterator, tbl, index = next, self.tbl, nil
+    local function Iterator(_, key)
+      return __wow_securetypes_call(iterator, tbl, key)
+    end
+
+    return Iterator, nil, index
+  end
+
+  function SecureMap:ExecuteRange(func, ...)
+    return secureexecuterange(self.tbl, func, ...)
+  end
+
+  function SecureMap:ExecuteTable(func)
+    return __wow_securetypes_call(func, self.tbl)
+  end
+
+  function SecureMap:Insert(key, value)
+    self:SetValue(key, value)
+  end
+
+  function SecureMap:Remove(key)
+    local value = self:GetValue(key)
+    self:ClearValue(key)
+    return value
+  end
+
+  function SecureMap:Find(key)
+    return self:GetValue(key)
+  end
+
+  function SecureMap:Contains(key)
+    return self:HasKey(key)
+  end
+
+  function SecureMap:Clear()
+    self:Wipe()
+  end
+
+  SecureMap.__index = function(t, key)
+    local mapValue = SecureMap[key]
+    if mapValue then
+      return mapValue
+    end
+    return SecureMap.GetValue(t, key)
+  end
+
+  SecureMap.__newindex = function(t, key, value)
+    t:SetValue(key, value)
+  end
+
+  local map = { tbl = {} }
+  setmetatable(map, SecureMap)
+
+  if mixin and type(Mixin) == "function" then
+    Mixin(map, mixin)
+  end
+
   return map
 end
 SecureTypes.CreateSecureFunction = SecureTypes.CreateSecureFunction or function(fn) return fn end
@@ -11991,15 +12076,22 @@ __global_mt.__index = function(t, key)
 end
 __global_mt.__newindex = function(t, key, value)
   value = __wow_prepare_global_assignment(key, value)
+  local taint = debug and debug.getstacktaint and debug.getstacktaint()
   if __prev_newindex ~= nil then
     if type(__prev_newindex) == "function" then
       __prev_newindex(t, key, value)
       return
     end
     __prev_newindex[key] = value
+    if taint and type(__sim_mark_slot_taint) == "function" then
+      __sim_mark_slot_taint(__prev_newindex, key, taint)
+    end
     return
   end
   rawset(t, key, value)
+  if taint and type(__sim_mark_slot_taint) == "function" then
+    __sim_mark_slot_taint(t, key, taint)
+  end
 end
 setmetatable(_G, __global_mt)
 __wow_seed_namespace_names()
