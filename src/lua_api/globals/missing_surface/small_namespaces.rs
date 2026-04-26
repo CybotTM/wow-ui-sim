@@ -35,6 +35,7 @@ pub(super) fn register_small_namespaces(state: &mut LuaState) -> LuaResult<()> {
     register_flat_namespace(state, "C_Console", C_CONSOLE_METHODS)?;
     register_flat_namespace(state, "C_Covenants", C_COVENANTS_METHODS)?;
     register_flat_namespace(state, "C_Soulbinds", C_SOULBINDS_METHODS)?;
+    register_flat_namespace(state, "C_LevelLink", C_LEVEL_LINK_METHODS)?;
     Ok(())
 }
 
@@ -91,6 +92,7 @@ const C_PVP_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
         "GetLocklistMapName",
         super::super::pvp_probes::get_locklist_map_name,
     ),
+    ("IsActiveBattlefield", c_pvp_is_active_battlefield),
     ("IsMatchConsideredArena", c_pvp_is_match_considered_arena),
     (
         "IsInActiveWorldPVP",
@@ -171,6 +173,9 @@ const C_COVENANTS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetCovenantIDs", c_covenants_get_covenant_ids),
 ];
 
+const C_LEVEL_LINK_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] =
+    &[("IsActionLocked", c_level_link_is_action_locked)];
+
 const C_SOULBINDS_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetActiveSoulbindID", c_soulbinds_get_active_soulbind_id),
     ("GetSoulbindData", c_soulbinds_get_soulbind_data),
@@ -234,6 +239,23 @@ fn c_map_is_map_valid_for_navigation(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_pvp_is_match_considered_arena(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn c_pvp_is_active_battlefield(state: &mut LuaState) -> LuaResult<u32> {
+    let active = borrow_state(state)?.is_active_battlefield;
+    state.push(Val::Bool(active));
+    Ok(1)
+}
+
+fn c_level_link_is_action_locked(state: &mut LuaState) -> LuaResult<u32> {
+    let is_locked = match crate::lua_bridge::stack_val(state, 1) {
+        Val::Num(slot) => borrow_state(state)?
+            .locked_action_slots
+            .contains(&(slot as i32)),
+        _ => false,
+    };
+    state.push(Val::Bool(is_locked));
     Ok(1)
 }
 

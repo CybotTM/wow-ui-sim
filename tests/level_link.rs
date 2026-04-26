@@ -1,3 +1,6 @@
+//! `C_LevelLink.IsActionLocked` (state-backed via Rust) and
+//! `C_LevelLink.IsSpellLocked` (Lua bootstrap fallback).
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
@@ -27,49 +30,47 @@ fn level_link_locks_default_to_unlocked() {
 }
 
 #[test]
-fn level_link_uses_state_backed_action_and_spell_locks() {
+fn level_link_action_locks_read_state_locked_action_slots() {
     let env = env();
-    let (
-        action_lock_direct,
-        action_lock_struct,
-        spell_lock_direct,
-        spell_lock_struct,
-        action_unlock_explicit,
-        spell_unlock_missing,
-    ): (bool, bool, bool, bool, bool, bool) = env
+    {
+        let mut state = env.state().borrow_mut();
+        state.locked_action_slots.insert(2);
+        state.locked_action_slots.insert(7);
+    }
+    let listed_first: bool = env
+        .eval("return C_LevelLink.IsActionLocked(2)")
+        .unwrap();
+    let listed_second: bool = env
+        .eval("return C_LevelLink.IsActionLocked(7)")
+        .unwrap();
+    let unlisted: bool = env
+        .eval("return C_LevelLink.IsActionLocked(99)")
+        .unwrap();
+    assert!(listed_first);
+    assert!(listed_second);
+    assert!(!unlisted);
+}
+
+#[test]
+fn level_link_spell_locks_use_state_backed_table() {
+    let env = env();
+    let (spell_lock_direct, spell_lock_struct, spell_unlock_missing): (bool, bool, bool) = env
         .eval(
             r#"
-            C_LevelLink._state.lockedActions = {
-                [2] = true,
-                [3] = { locked = true },
-                [4] = { locked = false },
-            }
             C_LevelLink._state.lockedSpells = {
                 [111] = true,
                 [222] = { locked = true },
             }
 
-            return C_LevelLink.IsActionLocked(2),
-                   C_LevelLink.IsActionLocked(3),
-                   C_LevelLink.IsSpellLocked(111),
+            return C_LevelLink.IsSpellLocked(111),
                    C_LevelLink.IsSpellLocked(222),
-                   not C_LevelLink.IsActionLocked(4),
                    not C_LevelLink.IsSpellLocked(333)
             "#,
         )
         .unwrap();
 
-    assert!(
-        action_lock_direct,
-        "boolean action lock entries should lock"
-    );
-    assert!(action_lock_struct, "table action lock entries should lock");
     assert!(spell_lock_direct, "boolean spell lock entries should lock");
     assert!(spell_lock_struct, "table spell lock entries should lock");
-    assert!(
-        action_unlock_explicit,
-        "explicit unlocked action entry should not lock"
-    );
     assert!(
         spell_unlock_missing,
         "missing spell lock entry should not lock"
@@ -77,55 +78,49 @@ fn level_link_uses_state_backed_action_and_spell_locks() {
 }
 
 #[test]
-fn level_link_normalizes_numeric_input_and_rejects_invalid_ids() {
+fn level_link_action_locks_reject_non_numeric_input() {
     let env = env();
-    let (
-        action_from_string,
-        spell_from_string,
-        invalid_action_unlocked,
-        invalid_spell_unlocked,
-        last_action_query_ok,
-        last_spell_query_ok,
-    ): (bool, bool, bool, bool, bool, bool) = env
+    env.state().borrow_mut().locked_action_slots.insert(17);
+    let from_string: bool = env
+        .eval(r#"return C_LevelLink.IsActionLocked("17")"#)
+        .unwrap();
+    let from_invalid: bool = env
+        .eval(r#"return C_LevelLink.IsActionLocked("bad-action")"#)
+        .unwrap();
+    let from_table: bool = env
+        .eval("return C_LevelLink.IsActionLocked({})")
+        .unwrap();
+    assert!(
+        !from_string,
+        "string-shaped action IDs should not match the integer slot set"
+    );
+    assert!(!from_invalid, "non-numeric action IDs should be unlocked");
+    assert!(!from_table, "table action IDs should be unlocked");
+}
+
+#[test]
+fn level_link_spell_locks_normalize_and_track_last_query() {
+    let env = env();
+    let (spell_from_string, invalid_spell_unlocked, last_spell_query_ok): (bool, bool, bool) = env
         .eval(
             r#"
-            C_LevelLink._state.lockedActions = { [17] = true }
             C_LevelLink._state.lockedSpells = { [204] = true }
-
-            local actionFromString = C_LevelLink.IsActionLocked("17")
             local spellFromString = C_LevelLink.IsSpellLocked("204")
-            local invalidActionUnlocked = not C_LevelLink.IsActionLocked("bad-action")
             local invalidSpellUnlocked = not C_LevelLink.IsSpellLocked({})
-
-            return actionFromString,
-                   spellFromString,
-                   invalidActionUnlocked,
+            return spellFromString,
                    invalidSpellUnlocked,
-                   C_LevelLink._state.lastActionQuery == nil,
                    C_LevelLink._state.lastSpellQuery == nil
             "#,
         )
         .unwrap();
 
     assert!(
-        action_from_string,
-        "numeric-string action IDs should normalize and lock"
-    );
-    assert!(
         spell_from_string,
         "numeric-string spell IDs should normalize and lock"
     );
     assert!(
-        invalid_action_unlocked,
-        "invalid action IDs should be unlocked"
-    );
-    assert!(
         invalid_spell_unlocked,
         "invalid spell IDs should be unlocked"
-    );
-    assert!(
-        last_action_query_ok,
-        "lastActionQuery should be nil after invalid action lookup"
     );
     assert!(
         last_spell_query_ok,

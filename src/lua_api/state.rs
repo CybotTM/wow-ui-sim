@@ -77,6 +77,8 @@ macro_rules! build_empty_sim_state {
             faction_paragon: HashMap::new(),
             transmog_outfit_locks: HashSet::new(),
             equipped_outfit_locked: false,
+            locked_action_slots: HashSet::new(),
+            is_active_battlefield: false,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -710,6 +712,14 @@ pub struct SimState {
     /// usable). Drives the lock badge for the equipped-gear shortcut button
     /// in `ActionBarButtonMixin:UpdateUsable`.
     pub equipped_outfit_locked: bool,
+    /// Action slot ids reported as locked by `C_LevelLink.IsActionLocked`.
+    /// Empty by default — `ActionBarButtonMixin:UpdateAction` then leaves
+    /// trial-account-restricted buttons un-dimmed.
+    pub locked_action_slots: HashSet<i32>,
+    /// Whether `C_PvP.IsActiveBattlefield()` reports true. Default false
+    /// (no active battleground). `StatusTrackingManager` checks this to
+    /// hide XP / honor bars while the player is queued into a battlefield.
+    pub is_active_battlefield: bool,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame

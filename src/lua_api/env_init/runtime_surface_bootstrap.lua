@@ -8895,31 +8895,17 @@ C_CovenantSanctumUI = __wow_merge_namespace(C_CovenantSanctumUI, {
   end,
 })
 
+-- C_LevelLink.IsActionLocked is registered from Rust
+-- (src/lua_api/globals/missing_surface/small_namespaces.rs), backed by
+-- SimState::locked_action_slots. The _state table below still backs the
+-- bootstrap-only IsSpellLocked implementation.
 local __wow_level_link_state = type(C_LevelLink) == "table" and rawget(C_LevelLink, "_state") or nil
 C_LevelLink = __wow_merge_namespace(C_LevelLink, {
   _state = __wow_level_link_state or {
-    lockedActions = {},
     lockedSpells = {},
-    lastActionQuery = nil,
     lastSpellQuery = nil,
   },
 })
-
-if rawget(C_LevelLink, "IsActionLocked") == nil then
-  function C_LevelLink.IsActionLocked(actionID)
-    local normalized = tonumber(actionID)
-    if normalized == nil then
-      C_LevelLink._state.lastActionQuery = nil
-      return false
-    end
-    local entry = C_LevelLink._state.lockedActions[normalized]
-    C_LevelLink._state.lastActionQuery = normalized
-    if type(entry) == "table" then
-      return entry.locked == true
-    end
-    return entry == true
-  end
-end
 
 if rawget(C_LevelLink, "IsSpellLocked") == nil then
   function C_LevelLink.IsSpellLocked(spellID)
