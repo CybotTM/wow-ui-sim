@@ -4,7 +4,7 @@ A World of Warcraft UI simulator for addon testing and UI rendering. Supports he
 
 ## Community
 
-Related project Discord (wowless): <https://discord.gg/rTwWcfJXuz>
+Join the wowless Discord: <https://discord.gg/rTwWcfJXuz> — we have a `#wow-ui-sim` channel there.
 
 ## UI Gallery
 
