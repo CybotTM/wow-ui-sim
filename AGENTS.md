@@ -170,28 +170,27 @@ The `inherit` attribute on `<Scripts>` elements describes the **inherited** (tem
 
 This is counterintuitive — "append" means the inherited handler is appended (runs after), so the new code runs first. Confirmed via wowless (`wowless/modules/loader.lua:201-210`). Implementation: `src/loader/helpers.rs` `emit_chained_handler`.
 
-## Taint System (Elune)
+## Taint System
 
-The simulator uses **Elune** — Blizzard's custom Lua 5.1 fork with taint tracking built into the VM. Elune is loaded as a C library (`luaopen_security`, `luaopen_securecalls` in `env.rs`).
+The simulator uses **rilua** — a pure-Rust Lua 5.1 VM that bakes Elune-style taint tracking directly into the interpreter. There is no C runtime: taint state lives on each `CallInfo` frame and is read/written through rilua's native debug API.
 
-### What Elune provides (C runtime, NOT our code)
+### What rilua provides (native, in `/home/osso/Repos/rilua/src/stdlib/taint.rs`)
 
-`issecure`, `issecurevariable`, `securecall`, `securecallfunction`, `forceinsecure`, `hooksecurefunc`, `secureexecuterange`, `debug.setobjecttaint`, `debug.getstacktaint`, `debug.setstacktaint`, `debug.settaintmode`
+`debug.setobjecttaint`, `debug.getstacktaint`, `debug.setstacktaint`, `debug.settaintmode`. Stack taint propagates through call frames so tainted callers make every callee tainted on the way down.
 
-`issecure()` checks `debug.getstacktaint()` — returns true when stack taint is nil (Blizzard code), false when tainted (addon code). **Do NOT override issecure()** — Elune's implementation is correct and Wowless tests verify it.
+### What the simulator provides
 
-### What the simulator provides (`security_api.rs`)
+- **Rust** (`src/lua_api/globals/security.rs`): `securecallmethod`, `issecurevariable` overrides; permissive stubs for `issecretvalue`, `canaccessvalue`, `canaccessallvalues`, `canaccesstable`; SecureHandler / state-driver stubs.
+- **Rust** (`src/lua_api/env_init/mod.rs`): `forceinsecure` registration.
+- **Lua bootstrap** (`runtime_surface_bootstrap.lua`, `shared_bootstrap.lua`): Lua-level fallbacks for `issecure`, `hooksecurefunc`, and `secureexecuterange` (rilua's C-level `secureexecuterange` is a no-op stub, so the Lua impl is installed unconditionally).
 
-- `securecallmethod` — wrapper around Elune's `securecall`
-- `issecretvalue`, `canaccessvalue`, `canaccessallvalues`, `canaccesstable` — permissive stubs (always true/false)
-- SecureHandler stubs (do nothing)
-- State/attribute driver stubs (do nothing)
+`issecure()` checks `debug.getstacktaint()` — returns true when stack taint is nil (Blizzard code), false when tainted (addon code). The Lua fallback in `runtime_surface_bootstrap.lua` matches this contract; Wowless tests verify it.
 
 ### Per-addon taint stamping
 
 - **Loading** (`loader/lua_file.rs`): `debug.setobjecttaint(compiled_func, addon_name)` on each addon's compiled closure. Blizzard UI code is NOT tainted.
 - **Script dispatch** (`env.rs`): `debug.setobjecttaint(handler, addon_name)` before calling frame script handlers, using the frame's owner addon.
-- **Effect**: When tainted code runs, Elune sets stack taint to the addon name. Variables set by tainted code are marked. `issecurevariable(table, key)` returns `false, "AddonName"`.
+- **Effect**: When tainted code runs, rilua sets stack taint to the addon name. Variables set by tainted code are marked. `issecurevariable(table, key)` returns `false, "AddonName"`.
 
 ### What is NOT enforced
 

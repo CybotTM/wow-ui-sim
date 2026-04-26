@@ -1,6 +1,6 @@
 # Architecture Overview
 
-The wow-ui-sim project runs WoW addon Lua outside the game for testing and visual preview. It embeds Lua 5.1 (WoW's exact version) via mlua inside a Rust host, which also handles rendering through the iced GUI framework.
+The wow-ui-sim project runs WoW addon Lua outside the game for testing and visual preview. It embeds Lua 5.1 (WoW's exact version) via rilua — a pure-Rust Lua VM with WoW-style taint tracking built in — inside a Rust host, which also handles rendering through the iced GUI framework.
 
 ## Goals and Non-Goals
 
@@ -38,8 +38,8 @@ Rust Host
 
 ## Design Decisions
 
-- **Lua 5.1 via mlua**: matches WoW's exact Lua version (Elune fork with taint tracking).
-- **Elune taint system**: loaded as a C library; `issecure()` is Elune's implementation, not overridden.
+- **Lua 5.1 via rilua**: pure-Rust Lua 5.1 VM that matches WoW's Lua version and provides Elune-style taint tracking natively (no C runtime).
+- **Taint tracking**: rilua exposes `debug.setobjecttaint` / `debug.getstacktaint` and propagates stack taint through `CallInfo`. `issecure()` is provided by the simulator (Lua bootstrap fallback when not pre-registered); `issecurevariable` and `securecallmethod` are Rust implementations in `src/lua_api/globals/security.rs`.
 - **Auto-generated stubs**: `generated_stubs.rs` (~19K lines) catches all C_* functions not yet hand-written, returning nil/false/0. Hand-written Rust wins via `is_nil()` guard.
 - **XML templates**: loaded before user addons; Blizzard_FrameXML is deferred to Phase 5 due to API gaps.
 
