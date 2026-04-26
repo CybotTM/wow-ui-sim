@@ -87,6 +87,7 @@ fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::game_rules::register_all(lua)?;
     super::guild_info::register_all(lua)?;
     super::housing::register_all(lua)?;
+    super::transmog_outfit_info::register_all(lua)?;
     super::pet_battles::register_all(lua)?;
     super::photo_sharing::register_all(lua)?;
     super::wowlabs::register_all(lua)?;

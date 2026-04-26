@@ -105,6 +105,7 @@ pub mod template;
 pub mod temporary_shims;
 pub mod torghast;
 pub mod trade_verbs;
+pub mod transmog_outfit_info;
 pub mod ui_visibility;
 pub mod unit_api;
 pub mod unit_misc;

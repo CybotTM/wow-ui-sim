@@ -75,6 +75,8 @@ macro_rules! build_empty_sim_state {
             major_faction_renown_levels: HashMap::new(),
             account_wide_reputation_factions: HashSet::new(),
             faction_paragon: HashMap::new(),
+            transmog_outfit_locks: HashSet::new(),
+            equipped_outfit_locked: false,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -698,6 +700,16 @@ pub struct SimState {
     /// `C_Reputation.IsFactionParagonForCurrentPlayer` to true and feeds
     /// `C_Reputation.GetFactionParagonInfo`. Empty by default.
     pub faction_paragon: HashMap<i64, FactionParagonInfo>,
+    /// Locked transmog outfit ids — `C_TransmogOutfitInfo.IsLockedOutfit`
+    /// reports membership. Empty by default. `ActionBarButtonMixin:UpdateUsable`
+    /// uses this to gray out outfit-action buttons whose outfits are
+    /// momentarily restricted (e.g. stance/spec switches).
+    pub transmog_outfit_locks: HashSet<i64>,
+    /// Whether `C_TransmogOutfitInfo.IsEquippedGearOutfitLocked()` reports
+    /// true. Default false (the equipped-gear pseudo-outfit is freely
+    /// usable). Drives the lock badge for the equipped-gear shortcut button
+    /// in `ActionBarButtonMixin:UpdateUsable`.
+    pub equipped_outfit_locked: bool,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame
