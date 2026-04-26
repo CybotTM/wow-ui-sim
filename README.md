@@ -28,9 +28,9 @@ Related project Discord (wowless): <https://discord.gg/rTwWcfJXuz>
 |---|---|
 | ![World map](docs/gallery/worldmap.png) | ![Housing panel](docs/gallery/housing-panel.png) |
 
-| Damage Meter |
-|---|
-| ![Damage meter](docs/gallery/damage-meter.webp) |
+| Talents Panel | Damage Meter |
+|---|---|
+| ![Talents panel](docs/gallery/talents-panel.png) | ![Damage meter](docs/gallery/damage-meter.webp) |
 
 ## GitHub Action
 

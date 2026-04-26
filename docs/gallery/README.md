@@ -12,4 +12,5 @@ Stable screenshot assets used by the project README gallery.
 - `achievements-panel.png`
 - `worldmap.png`
 - `housing-panel.png`
+- `talents-panel.png`
 - `damage-meter.webp`
