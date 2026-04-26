@@ -158,7 +158,7 @@ fn execute_callmethod_propagates_tainted_args_to_insecure_method() {
                 return value
             end
 
-            local payload = {}
+            local payload = "secret-unit-identity"
             debug.settaintmode("rw")
             debug.setstacktaint("evil-addon")
             SecureHandlerExecute(owner, [[

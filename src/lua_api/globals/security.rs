@@ -348,14 +348,15 @@ fn value_has_secret_marker(state: &mut LuaState, value: Val) -> bool {
 }
 
 fn secret_registry_key(state: &mut LuaState, value: Val) -> Option<Val> {
-    let key = match value {
-        Val::Str(value_ref) => format!("str:{}", value_ref.index()),
-        Val::Table(value_ref) => format!("table:{}", value_ref.index()),
-        Val::Function(value_ref) => format!("func:{}", value_ref.index()),
-        Val::Userdata(value_ref) => format!("userdata:{}", value_ref.index()),
-        Val::Thread(value_ref) => format!("thread:{}", value_ref.index()),
-        _ => return None,
+    // Only strings carry persistent value-level taint in WoW's model
+    // (unit identity names are the canonical case). Tables/functions/userdata
+    // pass through pools and method dispatch and must not be permanently
+    // marked — frames in this simulator are Val::Table, so marking them
+    // poisons pool reuse via SecureMap's not-secret assertions.
+    let Val::Str(value_ref) = value else {
+        return None;
     };
+    let key = format!("str:{}", value_ref.index());
     Some(Val::Str(state.gc.intern_string(key.as_bytes())))
 }
 
