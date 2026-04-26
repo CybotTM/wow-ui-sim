@@ -442,6 +442,53 @@ fn test_macro_apis_return_seeded_macros() {
     );
 }
 
+#[test]
+fn test_macro_icon_apis_populate_icon_tables() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        local spellIcons = {}
+        if GetLooseMacroIcons(spellIcons) ~= nil then
+            return "loose_spell_returned_value"
+        end
+        if spellIcons[1] ~= "INV_Misc_QuestionMark" then
+            return "loose_spell_first=" .. tostring(spellIcons[1])
+        end
+
+        local returnedSpellIcons = GetMacroIcons(spellIcons)
+        if returnedSpellIcons ~= spellIcons then
+            return "spell_table_not_reused"
+        end
+        if spellIcons[2] ~= "Spell_Holy_CrusaderAura" then
+            return "macro_spell_second=" .. tostring(spellIcons[2])
+        end
+
+        local itemIcons = {}
+        if GetLooseMacroItemIcons(itemIcons) ~= nil then
+            return "loose_item_returned_value"
+        end
+        if itemIcons[1] ~= "INV_Misc_Bag_08" then
+            return "loose_item_first=" .. tostring(itemIcons[1])
+        end
+
+        local returnedItemIcons = GetMacroItemIcons(itemIcons)
+        if returnedItemIcons ~= itemIcons then
+            return "item_table_not_reused"
+        end
+        if itemIcons[2] ~= "INV_Sword_04" then
+            return "macro_item_second=" .. tostring(itemIcons[2])
+        end
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Macro icon APIs should populate caller-provided icon tables: {result}"
+    );
+}
+
 // ============================================================================
 // PlayerLocation
 // ============================================================================

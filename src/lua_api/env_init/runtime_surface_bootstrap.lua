@@ -8644,6 +8644,47 @@ if GetMacroInfo == nil then
     return nil
   end
 end
+__wow_loose_macro_icons = {
+  "INV_Misc_QuestionMark",
+}
+__wow_macro_icons = {
+  "Spell_Holy_CrusaderAura",
+}
+__wow_loose_macro_item_icons = {
+  "INV_Misc_Bag_08",
+}
+__wow_macro_item_icons = {
+  "INV_Sword_04",
+}
+function __wow_append_icons(iconTable, icons)
+  if type(iconTable) ~= "table" then
+    iconTable = {}
+  end
+  for _, icon in ipairs(icons) do
+    table.insert(iconTable, icon)
+  end
+  return iconTable
+end
+if GetLooseMacroIcons == nil then
+  function GetLooseMacroIcons(iconTable)
+    __wow_append_icons(iconTable, __wow_loose_macro_icons)
+  end
+end
+if GetLooseMacroItemIcons == nil then
+  function GetLooseMacroItemIcons(iconTable)
+    __wow_append_icons(iconTable, __wow_loose_macro_item_icons)
+  end
+end
+if GetMacroIcons == nil then
+  function GetMacroIcons(iconTable)
+    return __wow_append_icons(iconTable, __wow_macro_icons)
+  end
+end
+if GetMacroItemIcons == nil then
+  function GetMacroItemIcons(iconTable)
+    return __wow_append_icons(iconTable, __wow_macro_item_icons)
+  end
+end
 
 C_Macro = C_Macro or __wow_namespace()
 if rawget(C_Macro, "GetNumMacros") == nil then
