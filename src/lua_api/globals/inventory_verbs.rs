@@ -19,9 +19,9 @@
 //! Rust impls supersede any `stub_nil` entries that slipped through.
 
 use crate::lua_api::methods::{
-    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref,
+    borrow_state, borrow_state_mut, call_function_state, create_string, frame_ref, table_get,
 };
-use crate::lua_api::script_helpers::{get_event_listeners, get_script};
+use crate::lua_api::script_helpers::{fire_named_event_state, get_event_listeners, get_script};
 use crate::lua_api::state_types::{CursorInfo, CursorItemOrigin, EquippedItem};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -48,6 +48,32 @@ fn fire_named_event(state: &mut LuaState, event_name: &str) {
         };
         let event_name_val = create_string(state, event_name);
         let _ = call_function_state(state, handler, &[frame, event_name_val]);
+    }
+}
+
+fn fire_actionbar_slot_changed(state: &mut LuaState) {
+    fire_named_event_state(state, "ACTIONBAR_SLOT_CHANGED", &[Val::Num(0.0)]);
+}
+
+fn refresh_action_ui_buttons(state: &mut LuaState, slot: u32) {
+    let button_ids = {
+        let Ok(sim) = borrow_state(state) else {
+            return;
+        };
+        sim.action_ui_buttons
+            .iter()
+            .filter_map(|(button_id, action)| (*action == slot).then_some(*button_id))
+            .collect::<Vec<_>>()
+    };
+
+    for button_id in button_ids {
+        let Ok(button) = frame_ref(state, button_id) else {
+            continue;
+        };
+        let update_action = table_get(state, button, "UpdateAction");
+        if matches!(update_action, Val::Function(_)) {
+            let _ = call_function_state(state, update_action, &[button, Val::Bool(true)]);
+        }
     }
 }
 
@@ -170,6 +196,10 @@ fn pickup_action(state: &mut LuaState) -> LuaResult<u32> {
     }
     st.cursor_item = Some(CursorInfo::Action { slot, spell_id });
     drop(st);
+    if !ignore_removal {
+        fire_actionbar_slot_changed(state);
+        refresh_action_ui_buttons(state, slot);
+    }
     fire_named_event(state, "CURSOR_CHANGED");
     Ok(0)
 }
@@ -381,6 +411,8 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
     st.action_bars.insert(slot, spell_id);
     st.cursor_item = None;
     drop(st);
+    fire_actionbar_slot_changed(state);
+    refresh_action_ui_buttons(state, slot);
     fire_named_event(state, "CURSOR_CHANGED");
     Ok(0)
 }

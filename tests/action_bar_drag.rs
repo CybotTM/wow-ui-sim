@@ -182,6 +182,44 @@ fn pickup_action_accepts_ignore_removal_arg_and_place_restores_slot() {
 }
 
 #[test]
+fn pickup_action_updates_action_button_icon_immediately() {
+    common::with_timeout(120, move || {
+        let env = env_with_action_bar();
+        seed_action_slot(&env, 1, 853);
+        env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[rilua::Val::Num(1.0)])
+            .unwrap();
+
+        let before_drag: bool = env
+            .eval("return ActionButton1.icon:IsShown() and HasAction(1)")
+            .unwrap();
+        assert!(
+            before_drag,
+            "action button should show its icon before PickupAction"
+        );
+
+        env.exec("PickupAction(1, false)").unwrap();
+
+        let after_pickup: bool = env
+            .eval("return (not ActionButton1.icon:IsShown()) and not HasAction(1)")
+            .unwrap();
+        assert!(
+            after_pickup,
+            "PickupAction should fire ACTIONBAR_SLOT_CHANGED so the source icon hides immediately"
+        );
+
+        env.exec("PlaceAction(1)").unwrap();
+
+        let after_place: bool = env
+            .eval("return ActionButton1.icon:IsShown() and HasAction(1)")
+            .unwrap();
+        assert!(
+            after_place,
+            "PlaceAction should fire ACTIONBAR_SLOT_CHANGED so the icon restores immediately"
+        );
+    });
+}
+
+#[test]
 fn action_button_drag_round_trip_keeps_spell_visible() {
     common::with_timeout(120, move || {
         let env = env_with_action_bar();

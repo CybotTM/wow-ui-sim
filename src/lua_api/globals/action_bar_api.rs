@@ -4,7 +4,8 @@ use crate::Result;
 use crate::lua_api::SimState;
 use crate::lua_api::globals::lua_duration_object::new_duration_object_value;
 use crate::lua_api::methods::{
-    borrow_state, call_function_state, create_string, create_table, frame_ref, table_get, table_set,
+    borrow_state, borrow_state_mut, call_function_state, create_string, create_table,
+    extract_frame_id, frame_ref, table_get, table_set,
 };
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::LuaApiMut;
@@ -198,7 +199,11 @@ fn ensure_namespace_table(state: &mut LuaState, namespace: &'static str) -> GcRe
 }
 
 fn stack_slot(state: &LuaState) -> Option<u32> {
-    match stack_val(state, 1) {
+    stack_slot_at(state, 1)
+}
+
+fn stack_slot_at(state: &LuaState, index: i32) -> Option<u32> {
+    match stack_val(state, index) {
         Val::Num(n) if n >= 0.0 => Some(n as u32),
         _ => None,
     }
@@ -493,8 +498,17 @@ fn get_pet_action_pet_bar_indices(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn register_action_ui_button(state: &mut LuaState) -> LuaResult<u32> {
-    let _ = stack_val(state, 1);
-    let _ = stack_val(state, 2);
+    let button = stack_val(state, 1);
+    let Some(button_id) = extract_frame_id(state, button) else {
+        return push_no_results(state);
+    };
+    let Some(action) = stack_slot_at(state, 2) else {
+        return push_no_results(state);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    sim.action_ui_buttons.retain(|(id, _)| *id != button_id);
+    sim.action_ui_buttons.push((button_id, action));
+    drop(sim);
     push_no_results(state)
 }
 
