@@ -11,13 +11,15 @@
 //! `GetAchievementCriteriaInfo`) on top of the same seeded data.
 
 use super::{ensure_namespace, set_table_array};
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_api::state::AchievementInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
+
+const DEFAULT_PORTRAIT_PATH: &str = "Interface\\Icons\\Achievement_Character_Default";
 
 const COMPLETION_MONTH: f64 = 1.0;
 const COMPLETION_DAY: f64 = 15.0;
@@ -151,6 +153,12 @@ pub(super) fn register_achievement_info_surface(state: &mut LuaState) -> LuaResu
         "IsValidAchievement",
         c_achievement_info_is_valid_achievement,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "SetPortraitTexture",
+        c_achievement_info_set_portrait_texture,
+    )?;
     register_legacy_achievement_globals(state)?;
     Ok(())
 }
@@ -186,6 +194,27 @@ fn c_achievement_info_is_valid_achievement(state: &mut LuaState) -> LuaResult<u3
         .achievements
         .contains_key(&achievement_id);
     state.push(Val::Bool(valid));
+    Ok(1)
+}
+
+fn c_achievement_info_set_portrait_texture(state: &mut LuaState) -> LuaResult<u32> {
+    let Ok(texture_id) = frame_id_from_stack(state, 1) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    let Some(frame) = sim.widgets.get_mut_visual(texture_id) else {
+        drop(sim);
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    frame.texture = Some(DEFAULT_PORTRAIT_PATH.to_string());
+    frame.texture_file_data_id = None;
+    frame.color_texture = None;
+    frame.atlas = None;
+    frame.atlas_tex_coords = None;
+    drop(sim);
+    state.push(Val::Bool(true));
     Ok(1)
 }
 

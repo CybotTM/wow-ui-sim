@@ -142,3 +142,56 @@ fn is_valid_achievement_reflects_sim_state_mutation() {
     assert_eq!(reward, 12345);
     assert_eq!(name, "Custom Achievement");
 }
+
+#[test]
+fn set_portrait_texture_writes_default_path_and_returns_true() {
+    let env = env();
+    let (ok, path): (bool, String) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", nil, UIParent)
+            local tex = f:CreateTexture(nil, "ARTWORK")
+            local result = C_AchievementInfo.SetPortraitTexture(tex, "player")
+            return result, tex:GetTexture()
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
+    assert_eq!(path, "Interface\\Icons\\Achievement_Character_Default");
+}
+
+#[test]
+fn set_portrait_texture_works_without_unit_argument() {
+    let env = env();
+    let (ok, path): (bool, String) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", nil, UIParent)
+            local tex = f:CreateTexture(nil, "ARTWORK")
+            local result = C_AchievementInfo.SetPortraitTexture(tex)
+            return result, tex:GetTexture()
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
+    assert_eq!(path, "Interface\\Icons\\Achievement_Character_Default");
+}
+
+#[test]
+fn set_portrait_texture_overwrites_prior_atlas_and_color() {
+    let env = env();
+    let (ok, path, atlas_is_nil): (bool, String, bool) = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", nil, UIParent)
+            local tex = f:CreateTexture(nil, "ARTWORK")
+            tex:SetColorTexture(1, 0, 0, 1)
+            local result = C_AchievementInfo.SetPortraitTexture(tex, "target")
+            return result, tex:GetTexture(), tex:GetAtlas() == nil
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
+    assert_eq!(path, "Interface\\Icons\\Achievement_Character_Default");
+    assert!(atlas_is_nil);
+}
