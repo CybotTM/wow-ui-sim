@@ -45,7 +45,6 @@ The renderer itself runs in iced's top-left Y-down screen space. The orthographi
 
 ## Sources
 
-- `SCALING.md` — short status note kept in sync with this page
 - Verified against source 2026-04-26
 
 ## See Also
