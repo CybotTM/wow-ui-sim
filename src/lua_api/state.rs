@@ -53,6 +53,8 @@ macro_rules! build_empty_sim_state {
             account_save_enabled: $runtime.account_save_enabled,
             account_save_in_progress: $runtime.account_save_in_progress,
             account_locked_post_save: $runtime.account_locked_post_save,
+            last_account_store_purchase_request: $runtime.last_account_store_purchase_request,
+            account_store_begin_purchase_succeeds: $runtime.account_store_begin_purchase_succeeds,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -312,6 +314,11 @@ pub struct SimState {
     pub account_save_in_progress: bool,
     /// Whether the account is locked after a successful save/export.
     pub account_locked_post_save: bool,
+    /// Last item id passed to `C_AccountStore.BeginPurchase`. None until called.
+    pub last_account_store_purchase_request: Option<i64>,
+    /// Return value for `C_AccountStore.BeginPurchase` — true to simulate a
+    /// queued purchase request, false to simulate the C side rejecting it.
+    pub account_store_begin_purchase_succeeds: bool,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -1426,6 +1433,8 @@ struct EmptyRuntimeState {
     account_save_enabled: bool,
     account_save_in_progress: bool,
     account_locked_post_save: bool,
+    last_account_store_purchase_request: Option<i64>,
+    account_store_begin_purchase_succeeds: bool,
     fps: f32,
     rot_damage_level: usize,
     start_time: Instant,
@@ -1483,6 +1492,8 @@ macro_rules! build_empty_runtime_state {
             account_save_enabled: false,
             account_save_in_progress: false,
             account_locked_post_save: false,
+            last_account_store_purchase_request: None,
+            account_store_begin_purchase_succeeds: true,
             fps: 0.0,
             rot_damage_level: 0,
             start_time: $start_time,
