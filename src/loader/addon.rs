@@ -836,3 +836,38 @@ fn apply_cpp_mixin_stubs(env: &LoaderEnv<'_>) {
         "#,
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use crate::lua_api::WowLuaEnv;
+    use crate::toc::TocFile;
+
+    use super::build_addon_context;
+
+    #[test]
+    fn blizzard_talent_ui_context_is_not_tainted() {
+        let env = WowLuaEnv::new().unwrap();
+        let addon_dir = Path::new("/repo/Interface/BlizzardUI/Blizzard_TalentUI");
+        let toc = TocFile::parse(addon_dir, "## Title: Blizzard Talent UI\nMain.lua");
+
+        let ctx = build_addon_context(&env.loader_env(), &toc, "Blizzard_TalentUI").unwrap();
+
+        assert!(
+            !ctx.taint,
+            "Blizzard_TalentUI loader context must not stamp addon taint"
+        );
+    }
+
+    #[test]
+    fn third_party_addon_context_is_tainted() {
+        let env = WowLuaEnv::new().unwrap();
+        let addon_dir = Path::new("/repo/Interface/AddOns/TestAddon");
+        let toc = TocFile::parse(addon_dir, "## Title: Test Addon\nMain.lua");
+
+        let ctx = build_addon_context(&env.loader_env(), &toc, "TestAddon").unwrap();
+
+        assert!(ctx.taint, "third-party addon code must be taint stamped");
+    }
+}
