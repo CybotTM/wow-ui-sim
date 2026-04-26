@@ -55,6 +55,8 @@ macro_rules! build_empty_sim_state {
             account_locked_post_save: $runtime.account_locked_post_save,
             last_account_store_purchase_request: $runtime.last_account_store_purchase_request,
             account_store_begin_purchase_succeeds: $runtime.account_store_begin_purchase_succeeds,
+            last_account_store_refund_request: $runtime.last_account_store_refund_request,
+            account_store_refund_succeeds: $runtime.account_store_refund_succeeds,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -319,6 +321,11 @@ pub struct SimState {
     /// Return value for `C_AccountStore.BeginPurchase` — true to simulate a
     /// queued purchase request, false to simulate the C side rejecting it.
     pub account_store_begin_purchase_succeeds: bool,
+    /// Last item id passed to `C_AccountStore.RefundItem`. None until called.
+    pub last_account_store_refund_request: Option<i64>,
+    /// Return value for `C_AccountStore.RefundItem` — true to simulate a
+    /// queued refund request, false to simulate the C side rejecting it.
+    pub account_store_refund_succeeds: bool,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -1435,6 +1442,8 @@ struct EmptyRuntimeState {
     account_locked_post_save: bool,
     last_account_store_purchase_request: Option<i64>,
     account_store_begin_purchase_succeeds: bool,
+    last_account_store_refund_request: Option<i64>,
+    account_store_refund_succeeds: bool,
     fps: f32,
     rot_damage_level: usize,
     start_time: Instant,
@@ -1494,6 +1503,8 @@ macro_rules! build_empty_runtime_state {
             account_locked_post_save: false,
             last_account_store_purchase_request: None,
             account_store_begin_purchase_succeeds: true,
+            last_account_store_refund_request: None,
+            account_store_refund_succeeds: true,
             fps: 0.0,
             rot_damage_level: 0,
             start_time: $start_time,
