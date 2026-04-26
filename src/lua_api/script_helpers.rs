@@ -341,12 +341,12 @@ fn recover_call_state(
     })
 }
 
-/// Call a function through Lua's own `pcall` path.
+/// Call a function through Lua's protected `xpcall` path.
 ///
 /// Some handlers created from Blizzard XML work when called by Lua but trip
 /// rilua's direct Rust-side call path with "expected Lua closure in execute".
-/// A cached bridge keeps dispatch on the VM's normal path without rebuilding a
-/// per-handler wrapper every time.
+/// A cached bridge keeps dispatch on the VM's normal path and captures
+/// `debug.traceback` before the failing Lua stack unwinds.
 pub fn protected_lua_pcall_state(
     state: &mut LuaState,
     func: Val,
@@ -402,10 +402,15 @@ fn ensure_protected_lua_pcall_wrapper_factory(
     }
 
     let factory = state.load(
-        r#"
+        r##"
         local func = ...
-        return pcall(func, select(2, ...))
-    "#,
+        local argc = select("#", ...) - 1
+        local args = { select(2, ...) }
+        local handler = debug and debug.traceback or function(err) return tostring(err) end
+        return xpcall(function()
+            return func(unpack(args, 1, argc))
+        end, handler)
+    "##,
     )?;
     set_registry_value(
         state,
@@ -876,6 +881,44 @@ mod tests {
         assert_eq!(
             first_factory, second_factory,
             "cached wrapper factory should be reused"
+        );
+    }
+
+    #[test]
+    fn protected_lua_pcall_state_returns_traceback_on_error() {
+        let mut lua = rilua::Lua::new().expect("lua should initialize");
+        lua.exec(
+            r#"
+            function __traceback_probe()
+                local function inner()
+                    error("protected boom")
+                end
+                inner()
+            end
+            "#,
+        )
+        .expect("probe source should load");
+
+        let loader = lua
+            .state_mut()
+            .load("return __traceback_probe")
+            .expect("probe loader should compile");
+        let func = call_function_state(lua.state_mut(), Val::Function(loader.gc_ref()), &[])
+            .expect("probe function should exist");
+        let error = protected_lua_pcall_state(lua.state_mut(), func, &[])
+            .expect_err("protected call should fail");
+
+        assert!(
+            error.contains("protected boom"),
+            "error should include original failure, got: {error}"
+        );
+        assert!(
+            error.contains("stack traceback:"),
+            "error should include Lua traceback, got: {error}"
+        );
+        assert!(
+            error.contains("inner"),
+            "traceback should include failing call path, got: {error}"
         );
     }
 

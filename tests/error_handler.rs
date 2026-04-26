@@ -131,6 +131,42 @@ fn test_error_handler_receives_event_dispatch_errors() {
 }
 
 #[test]
+fn test_error_handler_receives_event_dispatch_traceback() {
+    let env = env();
+    env.exec(
+        r#"
+        TracebackErrors = {}
+        seterrorhandler(function(msg)
+            table.insert(TracebackErrors, msg)
+        end)
+
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("PLAYER_LOGIN")
+        f:SetScript("OnEvent", function()
+            local function inner()
+                error("traceback boom")
+            end
+            inner()
+        end)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_event("PLAYER_LOGIN").ok();
+
+    let msg: String = env.eval("return TracebackErrors[1] or ''").unwrap();
+    assert!(msg.contains("traceback boom"), "error message was: {msg}");
+    assert!(
+        msg.contains("stack traceback:"),
+        "error should include a Lua stack traceback, got: {msg}"
+    );
+    assert!(
+        msg.contains("inner"),
+        "traceback should point at the failing Lua call path, got: {msg}"
+    );
+}
+
+#[test]
 fn test_error_handler_receives_event_args() {
     // Verify that when OnEvent errors, the error handler is called
     // even when the event has arguments
