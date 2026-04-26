@@ -235,6 +235,12 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
         "GetAchievementGuildRep",
         get_achievement_guild_rep,
     )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetNumCompletedAchievements",
+        get_num_completed_achievements,
+    )?;
     Ok(())
 }
 
@@ -459,6 +465,30 @@ fn get_achievement_guild_rep(state: &mut LuaState) -> LuaResult<u32> {
     let _achievement_id = i32::from_stack(state, 1)?;
     state.push(Val::Nil);
     Ok(1)
+}
+
+fn get_num_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
+    let is_guild_view = bool::from_stack(state, 1).unwrap_or(false);
+    let categories = if is_guild_view {
+        GUILD_CATEGORIES
+    } else {
+        ACHIEVEMENT_CATEGORIES
+    };
+    let total: i32 = categories
+        .iter()
+        .map(|category| category.achievement_ids.len() as i32)
+        .sum();
+    let completed = {
+        let sim = borrow_state(state)?;
+        categories
+            .iter()
+            .flat_map(|category| category.achievement_ids.iter())
+            .filter(|achievement_id| sim.world.earned_achievements.contains(achievement_id))
+            .count() as i32
+    };
+    state.push(Val::Num(total as f64));
+    state.push(Val::Num(completed as f64));
+    Ok(2)
 }
 
 fn push_achievement_info_for_id(state: &mut LuaState, achievement_id: i32) -> LuaResult<u32> {

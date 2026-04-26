@@ -178,6 +178,61 @@ fn set_portrait_texture_works_without_unit_argument() {
 }
 
 #[test]
+fn get_num_completed_achievements_counts_seeded_categories() {
+    let env = env();
+    let (total, completed): (i32, i32) = env.eval("return GetNumCompletedAchievements()").unwrap();
+    assert!(total > 0, "ACHIEVEMENT_CATEGORIES should expose seeded ids");
+    assert_eq!(completed, 0, "no achievements earned by default");
+}
+
+#[test]
+fn get_num_completed_achievements_reflects_world_earned() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.earned_achievements.insert(6);
+        state.world.earned_achievements.insert(42);
+        state.world.earned_achievements.insert(1017);
+    }
+    let (total, completed): (i32, i32) = env.eval("return GetNumCompletedAchievements()").unwrap();
+    assert!(total >= 3);
+    assert_eq!(completed, 3, "earned ids in seeded categories should count");
+}
+
+#[test]
+fn get_num_completed_achievements_guild_branch_uses_guild_categories() {
+    let env = env();
+    let (account_total, guild_total): (i32, i32) = env
+        .eval(
+            r#"
+            local at = GetNumCompletedAchievements(false)
+            local gt = GetNumCompletedAchievements(true)
+            return at, gt
+            "#,
+        )
+        .unwrap();
+    assert!(account_total > 0);
+    assert_eq!(
+        guild_total, 0,
+        "GUILD_CATEGORIES has no seeded achievement ids"
+    );
+}
+
+#[test]
+fn get_num_completed_achievements_ignores_unseeded_earned_ids() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.world.earned_achievements.insert(99999);
+    }
+    let (_total, completed): (i32, i32) = env.eval("return GetNumCompletedAchievements()").unwrap();
+    assert_eq!(
+        completed, 0,
+        "earning an id outside ACHIEVEMENT_CATEGORIES does not bump the completed count"
+    );
+}
+
+#[test]
 fn set_portrait_texture_overwrites_prior_atlas_and_color() {
     let env = env();
     let (ok, path, atlas_is_nil): (bool, String, bool) = env

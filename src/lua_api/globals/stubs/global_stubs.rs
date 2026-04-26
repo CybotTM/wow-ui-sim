@@ -238,10 +238,6 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetReadyCheckStatus", stub_nil),
     ("GetReadyCheckTimeLeft", stub_zero),
     ("GetRestrictedAccountData", stub_restricted_account_data),
-    (
-        "GetNumCompletedAchievements",
-        stub_num_completed_achievements,
-    ),
     ("GetClassicExpansionLevel", stub_current_expansion_level),
     ("GetCurrentRegion", stub_current_region),
     ("GetServerExpansionLevel", stub_current_expansion_level),
@@ -249,12 +245,6 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("UnitGroupRolesAssigned", stub_role_none),
     ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
 ];
-
-fn stub_num_completed_achievements(state: &mut LuaState) -> rilua::LuaResult<u32> {
-    state.push(rilua::Val::Num(0.0));
-    state.push(rilua::Val::Num(0.0));
-    Ok(2)
-}
 
 fn stub_restricted_account_data(state: &mut LuaState) -> rilua::LuaResult<u32> {
     // Blizzard callers read up to three return values:
