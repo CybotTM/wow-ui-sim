@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-26] update | architecture-overview refresh, DESIGN.md retired
+
+Folded `DESIGN.md` into `docs/wiki/design/architecture-overview.md` and deleted the root file. Corrected several stale claims: rilua provides native taint tracking (the previous "stubbed as always-secure" line was wrong — `issecure`/`issecurevariable` work; what's missing is `SetAttribute`/`SetForbidden` enforcement, now spelled out as a non-goal). Removed the dropped `generated_stubs.rs (~19K lines)` reference. Expanded the module diagram beyond `lua_api`/`widget`/`render` to also cover `c_api`, `iced_app`, `loader`, `event`, `xml`, `lua_bridge`, `texture`, and `sound`, with `c_api` called out as a peer of `lua_api` per CLAUDE.md. Updated `addon-compatibility.md` and `development-phases.md` to drop the fixed "127+ addons" number and reflect that the Blizzard UI tree under `Interface/BlizzardUI/` (`SharedXMLBase`/`SharedXML`/`SharedXMLGame`/`FrameXMLBase`/`FrameXMLUtil`/`FrameXML` + per-feature addons) loads, not just `SharedXML`. Removed source links to the deleted `DESIGN.md`.
+
 ## [2026-04-26] update | scaling-coordinates refresh
 
 Verified `docs/wiki/design/scaling-coordinates.md` against current source and folded the standalone `SCALING.md` into the wiki page (root `SCALING.md` deleted). Most TODOs from the original note are done: `GetScreenWidth`/`GetScreenHeight`/`GetPhysicalScreenSize` are now installed dynamically by `install_screen_size_globals()` in `src/lua_api/env_runtime.rs` and re-run from `set_screen_size()`; the hardcoded `TOPLEFT (10, -10)` override in `main.rs` and the debug purple border are gone; layout `size` flows through `src/iced_app/render/rebuild.rs`. Updated file paths (`src/iced_app/` is a directory; `src/lua_api/globals.rs` no longer exists), clarified that the renderer runs in iced top-left Y-down with Y flipped in `Uniforms::new`, and trimmed open items to anchor Y-axis end-to-end docs and a `CENTER`-anchor resize regression.

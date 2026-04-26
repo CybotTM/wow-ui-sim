@@ -1,10 +1,10 @@
 # Addon Compatibility
 
-The simulator is tested against 127+ real WoW addons loaded simultaneously, including major frameworks and popular addons.
+The simulator loads the full Blizzard UI tree (`Interface/BlizzardUI/`, a sparse checkout of `Gethe/wow-ui-source` pinned to a tag) plus a small bundled set of third-party addons under `Interface/AddOns/`. CI and Wowless lanes can also mount external addons at test time.
 
 ## Tested Addons
 
-The Phase 5 test suite includes heavy-weight addons: **Ace3**, **WeakAuras**, **Details**, **BigWigs**, and many others. These exercise the full API surface — any stub returning nil instead of a typed value will surface as a Lua error or silent behavioral failure.
+Smoke targets include heavy-weight frameworks (**Ace3**, **WeakAuras**, **Details**, **BigWigs**) plus the bundled test/diagnostic addons (`TestFramework`, `DebugTests`, `BugSack`/`!BugGrabber`, `BetterBags`, `AutoRoll`, `SimCommands`, `Admin`, `FcTest`, `DebugCheck`). These exercise the full API surface — any stub returning nil instead of a typed value will surface as a Lua error or silent behavioral failure.
 
 ## Integration with Wowless
 
@@ -43,11 +43,7 @@ The Docker image is headless-only (~220MB): no audio, no textures, no GPU driver
 
 ## Load Order
 
-The simulator follows WoW's addon load order:
-1. Blizzard_SharedXMLBase (Mixin, utilities) — fully loaded
-2. Blizzard_SharedXML (more utilities) — fully loaded
-3. Blizzard_FrameXML (UI templates) — deferred; requires more APIs (Phase 5)
-4. User addons (via TOC files)
+The simulator follows WoW's addon load order. The Blizzard tree under `Interface/BlizzardUI/` provides the full chain — `Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`, `Blizzard_FrameXMLBase`, `Blizzard_FrameXMLUtil`, `Blizzard_FrameXML`, then per-feature `Blizzard_*` addons. User and third-party addons under `Interface/AddOns/` load on top via TOC files. Per-addon SavedVariables are applied after each addon's Lua executes.
 
 ## Test Lanes
 
@@ -66,7 +62,6 @@ The loader now exposes `discover_blizzard_addon_closure_for_screen()` so the boo
 
 ## Sources
 
-- [DESIGN.md](../../../DESIGN.md) — Phase 5 addon testing, load order
 - [AGENTS.md](../../../AGENTS.md) — Docker CI, Wowless integration, SavedVariables paths
 
 ## See Also

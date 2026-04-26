@@ -8,12 +8,12 @@ All foundational work is done:
 
 - **Phase 1**: Lua 5.1 environment, CreateFrame, events, global aliases, Mixin system
 - **Phase 2**: Widget API — alpha, strata, anchors, Texture/FontString creation
-- **Phase 3**: Addon loading — TOC parser, XML templates, Blizzard_SharedXML fully loaded
-- **Phase 4**: Rendering — iced canvas, strata z-ordering, text rendering, BLP/PNG textures, anchor cycle detection
+- **Phase 3**: Addon loading — TOC parser, XML templates, full Blizzard UI chain (`Blizzard_SharedXMLBase`/`SharedXML`/`SharedXMLGame`/`FrameXMLBase`/`FrameXMLUtil`/`FrameXML` + per-feature addons) plus user-addon TOC loading
+- **Phase 4**: Rendering — iced canvas, strata z-ordering, text rendering, BLP/PNG/WebP textures, anchor cycle detection
 
 ## Phase 5: Real Addon Testing (In Progress)
 
-127+ addons load. The remaining work is filling API stubs so addons load with fewer Lua errors. Tracked via `wow-cli audit-api --gaps`.
+The Blizzard UI tree and bundled third-party addons load. Remaining work is filling API stubs so addons load with fewer Lua errors. Tracked via `wow-cli audit-api --gaps`.
 
 ## Active: Phase 31 — Frame/Widget Method Stub Sweep
 
@@ -54,7 +54,6 @@ All items in Phase 33 are currently unchecked.
 ## Sources
 
 - [PLAN.md](../../../PLAN.md) — full task list with checkbox status
-- [DESIGN.md](../../../DESIGN.md) — phase descriptions and completion status
 
 ## See Also
 
