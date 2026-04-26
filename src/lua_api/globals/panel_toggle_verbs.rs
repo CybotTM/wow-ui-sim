@@ -25,8 +25,8 @@
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, table_get,
 };
-use rilua::vm::state::LuaState;
 use rilua::Val;
+use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult};
 
 /// (panel_token, companion_frame_name)
