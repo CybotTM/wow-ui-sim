@@ -25,6 +25,10 @@ pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
     }
 
     let mut sim = borrow_state_mut(state)?;
+    let old_render_alpha = sim
+        .widgets
+        .get(id)
+        .map(|frame| sim.frame_render_alpha(frame));
     let Some(frame) = sim.widgets.get(id) else {
         return Ok(0);
     };
@@ -37,6 +41,7 @@ pub fn set_alpha(state: &mut LuaState) -> LuaResult<u32> {
         frame.alpha = clamped;
     }
     sim.widgets.propagate_effective_alpha(id, parent_eff);
+    invalidate_strata_buckets_after_alpha_boundary_change(&mut sim, id, old_render_alpha);
     Ok(0)
 }
 
@@ -75,12 +80,39 @@ pub fn set_alpha_from_boolean(state: &mut LuaState) -> LuaResult<u32> {
     if !changed {
         return Ok(0);
     }
+    let old_render_alpha = sim
+        .widgets
+        .get(id)
+        .map(|frame| sim.frame_render_alpha(frame));
     let parent_eff = parent_effective_alpha(&sim, id);
     if let Some(frame) = sim.widgets.get_mut_visual(id) {
         frame.alpha = new_alpha;
     }
     sim.widgets.propagate_effective_alpha(id, parent_eff);
+    invalidate_strata_buckets_after_alpha_boundary_change(&mut sim, id, old_render_alpha);
     Ok(0)
+}
+
+fn invalidate_strata_buckets_after_alpha_boundary_change(
+    sim: &mut crate::lua_api::SimState,
+    id: u64,
+    old_render_alpha: Option<f32>,
+) {
+    let Some(old_render_alpha) = old_render_alpha else {
+        return;
+    };
+    let new_render_alpha = sim
+        .widgets
+        .get(id)
+        .map(|frame| sim.frame_render_alpha(frame))
+        .unwrap_or(0.0);
+    if render_alpha_crossed_zero(old_render_alpha, new_render_alpha) {
+        sim.invalidate_strata_buckets();
+    }
+}
+
+fn render_alpha_crossed_zero(old_render_alpha: f32, new_render_alpha: f32) -> bool {
+    (old_render_alpha <= 0.0) != (new_render_alpha <= 0.0)
 }
 
 pub fn set_ignore_parent_alpha(state: &mut LuaState) -> LuaResult<u32> {
@@ -119,4 +151,64 @@ fn parent_effective_alpha(sim: &crate::lua_api::state::SimState, id: u64) -> f32
         .and_then(|pid| sim.widgets.get(pid))
         .map(|p| p.effective_alpha)
         .unwrap_or(1.0)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn set_alpha_to_zero_invalidates_strata_buckets() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local texture = UIParent:CreateTexture("AlphaBucketTexture")
+            texture:SetSize(10, 10)
+            texture:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+            texture:SetTexture("Interface/Buttons/UI-Panel-Button-Up")
+            "#,
+        )
+        .unwrap();
+
+        build_strata_buckets(&env);
+        env.exec(r#"AlphaBucketTexture:SetAlpha(0)"#).unwrap();
+
+        assert!(
+            env.state().borrow().strata_buckets.is_none(),
+            "SetAlpha crossing to zero should invalidate strata buckets",
+        );
+    }
+
+    #[test]
+    fn set_alpha_from_zero_invalidates_strata_buckets() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            local texture = UIParent:CreateTexture("AlphaBucketRestoreTexture")
+            texture:SetSize(10, 10)
+            texture:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+            texture:SetTexture("Interface/Buttons/UI-Panel-Button-Up")
+            texture:SetAlpha(0)
+            "#,
+        )
+        .unwrap();
+
+        build_strata_buckets(&env);
+        env.exec(r#"AlphaBucketRestoreTexture:SetAlpha(1)"#)
+            .unwrap();
+
+        assert!(
+            env.state().borrow().strata_buckets.is_none(),
+            "SetAlpha crossing from zero should invalidate strata buckets",
+        );
+    }
+
+    fn build_strata_buckets(env: &WowLuaEnv) {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        assert!(
+            state.strata_buckets.is_some(),
+            "test setup should build cached strata buckets",
+        );
+    }
 }
