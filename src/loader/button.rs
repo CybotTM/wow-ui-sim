@@ -343,6 +343,104 @@ fn generate_set_text_code(button_name: &str, text_key: &str) -> String {
     )
 }
 
+/// Resolve a button font ref slot (NormalFont/HighlightFont/DisabledFont) from a frame
+/// or its inherited template chain.
+fn resolve_button_font_slot(
+    frame_xml: &crate::xml::FrameXml,
+    inherits: &str,
+    accessor: fn(&crate::xml::FrameXml) -> Option<&crate::xml::FontRefXml>,
+) -> Option<crate::xml::FontRefXml> {
+    if let Some(font_ref) = accessor(frame_xml) {
+        return Some(font_ref.clone());
+    }
+    crate::xml::get_template_chain(inherits)
+        .iter()
+        .rev()
+        .find_map(|entry| accessor(&entry.frame).cloned())
+}
+
+fn frame_normal_font(frame_xml: &crate::xml::FrameXml) -> Option<&crate::xml::FontRefXml> {
+    frame_xml.children.iter().find_map(|c| match c {
+        crate::xml::FrameChildElement::NormalFont(f) => Some(f),
+        _ => None,
+    })
+}
+
+fn frame_highlight_font(frame_xml: &crate::xml::FrameXml) -> Option<&crate::xml::FontRefXml> {
+    frame_xml.children.iter().find_map(|c| match c {
+        crate::xml::FrameChildElement::HighlightFont(f) => Some(f),
+        _ => None,
+    })
+}
+
+fn frame_disabled_font(frame_xml: &crate::xml::FrameXml) -> Option<&crate::xml::FontRefXml> {
+    frame_xml.children.iter().find_map(|c| match c {
+        crate::xml::FrameChildElement::DisabledFont(f) => Some(f),
+        _ => None,
+    })
+}
+
+fn font_ref_style(font_ref: &crate::xml::FontRefXml) -> Option<&str> {
+    font_ref
+        .style
+        .as_deref()
+        .or(font_ref.inherits.as_deref())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+}
+
+fn generate_button_font_setter(button_name: &str, method: &str, style: &str) -> String {
+    format!(
+        "do local fo = _G[\"{style}\"] if fo and {btn} and {btn}.{method} then {btn}:{method}(fo) end end\n",
+        style = escape_lua_string(style),
+        btn = lua_global_ref(button_name),
+        method = method,
+    )
+}
+
+/// Apply button font references (NormalFont/HighlightFont/DisabledFont) from XML.
+///
+/// `<NormalFont style="GameFontNormalSmall"/>` is parsed into FrameChildElement variants
+/// but is otherwise inert; this turns those declarations into runtime
+/// `Button:SetNormalFontObject(_G["GameFontNormalSmall"])` calls so the button text
+/// child picks up the font/size/outline/color from the font object.
+pub fn apply_button_fonts(
+    env: &LoaderEnv<'_>,
+    frame_xml: &crate::xml::FrameXml,
+    button_name: &str,
+    inherits: &str,
+) -> Result<(), LoadError> {
+    let slots: [(
+        &str,
+        fn(&crate::xml::FrameXml) -> Option<&crate::xml::FontRefXml>,
+    ); 3] = [
+        ("SetNormalFontObject", frame_normal_font),
+        ("SetHighlightFontObject", frame_highlight_font),
+        ("SetDisabledFontObject", frame_disabled_font),
+    ];
+
+    let lua_code: String = slots
+        .iter()
+        .filter_map(|(method, accessor)| {
+            let font_ref = resolve_button_font_slot(frame_xml, inherits, *accessor)?;
+            let style = font_ref_style(&font_ref)?.to_string();
+            Some(generate_button_font_setter(button_name, method, &style))
+        })
+        .collect();
+
+    if lua_code.is_empty() {
+        return Ok(());
+    }
+
+    env.exec(&lua_code).map_err(|e| {
+        LoadError::Lua(format!(
+            "Failed to apply button fonts to {}: {}",
+            button_name, e
+        ))
+    })?;
+    Ok(())
+}
+
 /// Apply button text from the text attribute and ButtonText child element.
 pub fn apply_button_text(
     env: &LoaderEnv<'_>,

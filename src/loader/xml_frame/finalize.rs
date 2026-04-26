@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::time::Instant;
 
 use crate::loader::LoadTiming;
-use crate::loader::button::{apply_button_text, apply_button_textures};
+use crate::loader::button::{apply_button_fonts, apply_button_text, apply_button_textures};
 use crate::loader::error::LoadError;
 use crate::loader::xml_frame_extras::{
     apply_animation_groups, apply_bar_texture, init_action_bar_tables,
@@ -83,6 +83,7 @@ fn apply_frame_button_extras(
     // frame's direct extras or inherited ButtonText regions get created twice.
     apply_button_textures(env, frame, name, "")?;
     apply_button_text(env, frame, name, "")?;
+    apply_button_fonts(env, frame, name, "")?;
     apply_bar_texture(env, frame, name, inherits)?;
     init_action_bar_tables(env, frame, name);
     Ok(button_start.elapsed())

@@ -296,6 +296,8 @@ fn apply_loader_frame_extras(
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::button::apply_button_text(loader_env, frame, frame_name, inherits)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    crate::loader::button::apply_button_fonts(loader_env, frame, frame_name, inherits)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
     crate::loader::xml_frame_extras::apply_animation_groups(
         loader_env, frame, frame_name, inherits,
     )

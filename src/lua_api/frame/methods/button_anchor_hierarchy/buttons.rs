@@ -250,11 +250,33 @@ pub(super) fn has_normal_font_object(state: &mut LuaState, id: u64) -> bool {
 
 pub(super) fn set_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let font_object = stack_val(state, 2);
+    let font_object = resolve_font_object_arg(state, 2);
     let store = get_or_create_button_font_store(state);
     table_set(state, store, &format!("{id}:normal"), font_object);
-    let _ = super::font_strings::ensure_button_text_child(state, id)?;
+    let Some(text_child_id) = super::font_strings::ensure_button_text_child(state, id)? else {
+        return Ok(0);
+    };
+    if matches!(font_object, Val::Table(_)) {
+        let fields = super::font_strings::read_font_object_fields(state, font_object);
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(text_child) = sim.widgets.get_mut_visual(text_child_id) {
+            super::font_strings::apply_font_object_snapshot(text_child, &fields);
+        }
+    }
     Ok(0)
+}
+
+fn resolve_font_object_arg(state: &mut LuaState, index: i32) -> Val {
+    let raw = stack_val(state, index);
+    if let Val::Str(_) = raw {
+        if let Some(name) = String::from_stack(state, index).ok() {
+            let resolved = table_get(state, Val::Table(state.global), &name);
+            if matches!(resolved, Val::Table(_)) {
+                return resolved;
+            }
+        }
+    }
+    raw
 }
 
 pub(super) fn get_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
@@ -267,7 +289,7 @@ pub(super) fn get_normal_font_object(state: &mut LuaState) -> LuaResult<u32> {
 
 pub(super) fn set_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let font_object = stack_val(state, 2);
+    let font_object = resolve_font_object_arg(state, 2);
     let store = get_or_create_button_font_store(state);
     table_set(state, store, &format!("{id}:highlight"), font_object);
     Ok(0)
@@ -283,7 +305,7 @@ pub(super) fn get_highlight_font_object(state: &mut LuaState) -> LuaResult<u32> 
 
 pub(super) fn set_disabled_font_object(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
-    let font_object = stack_val(state, 2);
+    let font_object = resolve_font_object_arg(state, 2);
     let store = get_or_create_button_font_store(state);
     table_set(state, store, &format!("{id}:disabled"), font_object);
     Ok(0)
