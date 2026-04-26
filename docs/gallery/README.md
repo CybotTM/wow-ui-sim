@@ -10,4 +10,6 @@ Stable screenshot assets used by the project README gallery.
 - `guild-panel.png`
 - `store.png`
 - `achievements-panel.png`
+- `worldmap.png`
+- `housing-panel.png`
 - `damage-meter.webp`

@@ -24,6 +24,10 @@ Related project Discord (wowless): <https://discord.gg/rTwWcfJXuz>
 |---|---|
 | ![Store](docs/gallery/store.png) | ![Achievements panel](docs/gallery/achievements-panel.png) |
 
+| World Map | Housing Panel |
+|---|---|
+| ![World map](docs/gallery/worldmap.png) | ![Housing panel](docs/gallery/housing-panel.png) |
+
 | Damage Meter |
 |---|
 | ![Damage meter](docs/gallery/damage-meter.webp) |
