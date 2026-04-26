@@ -5666,24 +5666,6 @@ if GetTotemInfo == nil then
   end
 end
 
-if GetPetActionInfo == nil then
-  function GetPetActionInfo(_index)
-    return nil, nil, false, false, false, false, nil, false, false
-  end
-end
-
-if GetPetActionCooldown == nil then
-  function GetPetActionCooldown(_index)
-    return 0, 0, 0
-  end
-end
-
-if PetHasActionBar == nil then
-  function PetHasActionBar()
-    return false
-  end
-end
-
 if GetNumSpecializations == nil then
   function GetNumSpecializations()
     return 3

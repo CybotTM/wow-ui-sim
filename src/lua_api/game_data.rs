@@ -86,7 +86,7 @@ pub struct CastingState {
 }
 
 /// Per-spell cooldown tracking.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SpellCooldownState {
     /// GetTime() at cooldown start.
     pub start: f64,

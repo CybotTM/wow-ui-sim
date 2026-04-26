@@ -160,6 +160,7 @@ macro_rules! build_empty_sim_state {
             titles: Vec::new(),
             shapeshift_forms: Vec::new(),
             shapeshift_cooldowns: ::std::collections::HashMap::new(),
+            pet_actions: vec![PetActionSlot::default(); 10],
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             maps: default_maps(),
             achievements: default_achievements(),
@@ -323,6 +324,30 @@ pub struct ShapeshiftForm {
     pub spell_id: u32,
     pub is_active: bool,
     pub is_castable: bool,
+}
+
+/// One pet action-bar slot (10 slots total; `NUM_PET_ACTION_SLOTS = 10`).
+/// Drives `GetPetActionInfo`, `GetPetActionCooldown`, `CastPetAction`,
+/// `TogglePetAutocast`, and `PetHasActionBar` consumed by
+/// `Blizzard_ActionBar/Shared/PetActionBar.lua`.
+///
+/// The 9-tuple returned by `GetPetActionInfo` maps as:
+/// `(name, texture, is_token, is_active, auto_cast_allowed, auto_cast_enabled,
+/// spell_id, _unused, passive)`. `has_action` is `false` for empty slots —
+/// the live API returns `(nil, nil, false, false, false, false, nil, false, false)`
+/// in that case.
+#[derive(Clone, Debug, Default)]
+pub struct PetActionSlot {
+    pub has_action: bool,
+    pub name: Option<String>,
+    pub texture: Option<String>,
+    pub is_token: bool,
+    pub is_active: bool,
+    pub auto_cast_allowed: bool,
+    pub auto_cast_enabled: bool,
+    pub spell_id: Option<u32>,
+    pub passive: bool,
+    pub cooldown: Option<SpellCooldownState>,
 }
 
 /// Kind of an on-bar highlight mark — mirrors the action source that caused
@@ -738,6 +763,12 @@ pub struct SimState {
     /// Per-form cooldowns keyed by 1-based form index. Drives
     /// `GetShapeshiftFormCooldown`. Empty by default.
     pub shapeshift_cooldowns: HashMap<i32, SpellCooldownState>,
+    /// Pet-bar slots (10 slots, fixed length). Drives
+    /// `GetNumPetActions`, `GetPetActionInfo`, `GetPetActionCooldown`,
+    /// `CastPetAction`, `TogglePetAutocast`, and `PetHasActionBar`.
+    /// Default 10 empty slots; `PetHasActionBar` reports false until at
+    /// least one slot has `has_action = true`.
+    pub pet_actions: Vec<PetActionSlot>,
     /// Currency info keyed by currency id. Drives
     /// `C_CurrencyInfo.GetCurrencyInfo`, `GetCurrencyInfoFromLink`,
     /// and `GetCurrencyContainerInfo`. Seeded at startup from the
