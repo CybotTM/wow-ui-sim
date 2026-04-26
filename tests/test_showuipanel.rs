@@ -705,6 +705,66 @@ fn show_ui_panel_locks_reputation_frame_layout() {
 }
 
 #[test]
+fn reputation_filter_dropdown_mouse_down_materializes_menu_rows() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                if not CharacterFrame or not ReputationFrame or not ReputationFrame.filterDropdown then
+                    return "missing_frame"
+                end
+                if PanelTemplates_SetTab then
+                    PanelTemplates_SetTab(CharacterFrame, ReputationFrame:GetID())
+                end
+                ReputationFrame:Show()
+                ShowUIPanel(CharacterFrame)
+                if ReputationFrame.OnShow then
+                    ReputationFrame:OnShow()
+                end
+
+                local dropdown = ReputationFrame.filterDropdown
+                local handler = dropdown:GetScript("OnMouseDown")
+                if type(handler) ~= "function" then
+                    return "missing_mouse_down_handler"
+                end
+
+                handler(dropdown, "LeftButton")
+
+                local buttons = dropdown.__wow_menu_buttons
+                if type(buttons) ~= "table" then
+                    return "missing_buttons"
+                end
+                if #buttons ~= 4 then
+                    return "button_count=" .. tostring(#buttons)
+                end
+                local playerName = UnitName("player")
+                local expected = {"All", "Warband", playerName, "Show Legacy Reputations"}
+                for index, expectedText in ipairs(expected) do
+                    local button = buttons[index]
+                    if not button then
+                        return "missing_button_" .. tostring(index)
+                    end
+                    if not button:IsShown() then
+                        return "hidden_button_" .. tostring(index)
+                    end
+                    if button:GetText() ~= expectedText then
+                        return "button_" .. tostring(index) .. "=" .. tostring(button:GetText())
+                    end
+                    if button:GetFrameStrata() ~= "TOOLTIP" then
+                        return "button_" .. tostring(index) .. "_strata=" .. tostring(button:GetFrameStrata())
+                    end
+                end
+
+                return "ok"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(result, "ok");
+    }
+}
+
+#[test]
 fn show_ui_panel_reanchors_character_frame_after_reopen() {
     test_timeout! {
         let env = setup_env();

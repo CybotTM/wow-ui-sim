@@ -10014,6 +10014,19 @@ local function __wow_dropdown_materialize_menu(owner, description)
       if button == nil then
         button = CreateFrame("Button", name, UIParent)
       end
+      if type(button.SetFrameStrata) == "function" then
+        button:SetFrameStrata("TOOLTIP")
+      end
+      if type(button.SetFrameLevel) == "function" then
+        local level = 1000 + visible_index
+        if type(owner.GetFrameLevel) == "function" then
+          local ok, ownerLevel = pcall(owner.GetFrameLevel, owner)
+          if ok and type(ownerLevel) == "number" then
+            level = ownerLevel + 100 + visible_index
+          end
+        end
+        button:SetFrameLevel(level)
+      end
       button:SetSize(width, 20)
       button:ClearAllPoints()
       button:SetPoint("TOPLEFT", owner, "BOTTOMLEFT", 0, -((visible_index - 1) * 20))
