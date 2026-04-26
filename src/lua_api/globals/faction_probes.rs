@@ -21,7 +21,10 @@ use crate::lua_api::methods::{
 };
 use crate::lua_bridge::stack_val;
 use crate::lua_bridge::table_set_rust_fn_static;
+use rilua::vm::closure::RustFn;
+use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
+use rilua::vm::table::Table as RiluaTable;
 use rilua::{LuaApiMut, LuaResult, Val};
 
 fn stack_i32(state: &LuaState, index: i32) -> Option<i32> {
@@ -196,59 +199,44 @@ fn reputation_entry_table(
     table
 }
 
+const REPUTATION_METHODS: &[(&str, RustFn)] = &[
+    ("GetFactionDataByID", reputation_get_faction_data_by_id),
+    ("IsFactionParagon", reputation_is_faction_paragon),
+    ("GetFactionParagonInfo", reputation_get_faction_paragon_info),
+    ("GetNumFactions", reputation_get_num_factions),
+    ("GetFactionInfo", reputation_get_faction_info),
+    ("GetWatchedFactionData", reputation_get_watched_faction_data),
+    ("SetWatchedFactionByID", reputation_set_watched_faction_by_id),
+    ("IsMajorFaction", reputation_is_major_faction),
+    ("IsAccountWideReputation", reputation_is_account_wide_reputation),
+];
+
 fn register_reputation_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
-    let existing_reputation = LuaApiMut::get_global_val(lua, "C_Reputation");
-    let state = lua.state_mut();
-    let reputation = match existing_reputation {
-        Val::Table(table) => Val::Table(table),
-        _ => create_table(state),
-    };
+    let reputation = reuse_or_create_namespace_table(lua, "C_Reputation");
     let Val::Table(reputation_ref) = reputation else {
-        unreachable!("create_table must return a table");
+        unreachable!("namespace table must be a table");
     };
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "GetFactionDataByID",
-        reputation_get_faction_data_by_id,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "IsFactionParagon",
-        reputation_is_faction_paragon,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "GetFactionParagonInfo",
-        reputation_get_faction_paragon_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "GetNumFactions",
-        reputation_get_num_factions,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "GetFactionInfo",
-        reputation_get_faction_info,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "GetWatchedFactionData",
-        reputation_get_watched_faction_data,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        reputation_ref,
-        "SetWatchedFactionByID",
-        reputation_set_watched_faction_by_id,
-    )?;
+    install_static_methods(lua.state_mut(), reputation_ref, REPUTATION_METHODS)?;
     LuaApiMut::set_global_val(lua, "C_Reputation", reputation)?;
+    Ok(())
+}
+
+fn reuse_or_create_namespace_table(lua: &mut rilua::Lua, global_name: &str) -> Val {
+    let existing = LuaApiMut::get_global_val(lua, global_name);
+    match existing {
+        Val::Table(table) => Val::Table(table),
+        _ => create_table(lua.state_mut()),
+    }
+}
+
+fn install_static_methods(
+    state: &mut LuaState,
+    table_ref: GcRef<RiluaTable>,
+    methods: &[(&'static str, RustFn)],
+) -> crate::Result<()> {
+    for &(name, func) in methods {
+        table_set_rust_fn_static(state, table_ref, name, func)?;
+    }
     Ok(())
 }
 
@@ -291,6 +279,26 @@ fn reputation_get_watched_faction_data(state: &mut LuaState) -> LuaResult<u32> {
 
 fn reputation_set_watched_faction_by_id(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn reputation_is_major_faction(state: &mut LuaState) -> LuaResult<u32> {
+    let is_major = match stack_i32(state, 1) {
+        Some(id) => borrow_state(state)?.major_factions.contains_key(&(id as i64)),
+        None => false,
+    };
+    state.push(Val::Bool(is_major));
+    Ok(1)
+}
+
+fn reputation_is_account_wide_reputation(state: &mut LuaState) -> LuaResult<u32> {
+    let is_account_wide = match stack_i32(state, 1) {
+        Some(id) => borrow_state(state)?
+            .account_wide_reputation_factions
+            .contains(&(id as i64)),
+        None => false,
+    };
+    state.push(Val::Bool(is_account_wide));
+    Ok(1)
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {

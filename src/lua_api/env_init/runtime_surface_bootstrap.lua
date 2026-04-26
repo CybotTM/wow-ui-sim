@@ -7698,8 +7698,10 @@ C_Reputation.GetGuildFactionData = function()
     isChild = false,
   })
 end
-C_Reputation.IsAccountWideReputation = function()
-  return false
+if C_Reputation.IsAccountWideReputation == nil then
+  C_Reputation.IsAccountWideReputation = function()
+    return false
+  end
 end
 C_Reputation.IsFactionParagonForCurrentPlayer = function()
   return false
@@ -7707,8 +7709,10 @@ end
 C_Reputation.IsFactionParagon = function()
   return false
 end
-C_Reputation.IsMajorFaction = function()
-  return false
+if C_Reputation.IsMajorFaction == nil then
+  C_Reputation.IsMajorFaction = function()
+    return false
+  end
 end
 C_Reputation.GetFactionParagonInfo = function()
   return nil

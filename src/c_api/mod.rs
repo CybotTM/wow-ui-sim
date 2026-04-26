@@ -10,6 +10,7 @@ pub mod c_artifact_ui;
 pub mod c_azerite_item;
 pub mod c_configuration_warnings;
 pub mod c_fog_of_war;
+pub mod c_major_factions;
 pub mod c_map;
 pub mod c_map_exploration_info;
 pub mod c_paper_doll_info;

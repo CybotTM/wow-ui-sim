@@ -71,6 +71,9 @@ macro_rules! build_empty_sim_state {
             equipped_artifact: None,
             artifact_point_costs: HashMap::new(),
             azerite_item: None,
+            major_factions: HashMap::new(),
+            major_faction_renown_levels: HashMap::new(),
+            account_wide_reputation_factions: HashSet::new(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -423,6 +426,36 @@ impl Default for ActionBarStateInfo {
     }
 }
 
+/// `MajorFactionData` row returned by `C_MajorFactions.GetMajorFactionData`
+/// for a single faction. Drives `ReputationStatusBarMixin:Update` when the
+/// watched faction is a major faction (Dragonflight Renown style bar).
+#[derive(Clone, Debug)]
+pub struct MajorFactionData {
+    pub faction_id: i64,
+    pub name: String,
+    pub expansion_filter: i32,
+    pub renown_level: i32,
+    pub renown_reputation_earned: i32,
+    pub renown_level_threshold: i32,
+    pub is_unlocked: bool,
+    pub unlock_description: Option<String>,
+    pub celebration_sound_kit: i32,
+    pub renown_fanfare_sound_kit_id: i32,
+    pub texture_kit: String,
+}
+
+/// One entry in the renown level table returned by
+/// `C_MajorFactions.GetRenownLevels`. `ReputationStatusBarMixin:GetMaxLevel`
+/// reads the last entry's `level` to clamp the bar.
+#[derive(Clone, Debug)]
+pub struct RenownLevelInfo {
+    pub faction_id: i64,
+    pub level: i32,
+    pub locked: bool,
+    pub is_milestone: bool,
+    pub is_capstone: bool,
+}
+
 /// `ItemLocation` payload returned by C surfaces that hand opaque locations
 /// back to Lua (e.g. `C_AzeriteItem.FindActiveAzeriteItem`). Mirrors the
 /// fields populated by `ItemLocationMixin` so callers that walk
@@ -615,6 +648,18 @@ pub struct SimState {
     /// `C_AzeriteItem.FindActiveAzeriteItem` returning nil so the
     /// `Blizzard_ActionBar/Mainline/AzeriteBar.lua` mixin stays hidden.
     pub azerite_item: Option<AzeriteItemState>,
+    /// Major-faction (Renown) data keyed by `factionID`. Empty by default —
+    /// `C_MajorFactions.GetMajorFactionData` returns nil for unknown ids and
+    /// `C_Reputation.IsMajorFaction` reports false, keeping the
+    /// `ReputationStatusBarMixin` on the standard rep code path.
+    pub major_factions: HashMap<i64, MajorFactionData>,
+    /// Renown level rungs keyed by `factionID`. Empty by default —
+    /// `C_MajorFactions.GetRenownLevels` returns an empty sequence.
+    pub major_faction_renown_levels: HashMap<i64, Vec<RenownLevelInfo>>,
+    /// Faction ids whose reputation is shared across the Battle.net account.
+    /// `C_Reputation.IsAccountWideReputation` looks up membership; empty
+    /// keeps every faction reported as character-bound.
+    pub account_wide_reputation_factions: HashSet<i64>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame
