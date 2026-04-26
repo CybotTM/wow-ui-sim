@@ -1093,3 +1093,33 @@ fn search_full_loop_renders_preview_results() {
     assert_eq!(count, 1);
     assert_eq!(name, "Preview Hit");
 }
+
+#[test]
+fn focused_achievement_defaults_to_none() {
+    let env = env();
+    assert!(env.state().borrow().focused_achievement.is_none());
+}
+
+#[test]
+fn set_focused_achievement_records_id() {
+    let env = env();
+    env.eval::<()>("SetFocusedAchievement(2186)").unwrap();
+    assert_eq!(env.state().borrow().focused_achievement, Some(2186));
+}
+
+#[test]
+fn set_focused_achievement_returns_no_values() {
+    let env = env();
+    let nret: i32 = env
+        .eval("return select('#', SetFocusedAchievement(6))")
+        .unwrap();
+    assert_eq!(nret, 0);
+}
+
+#[test]
+fn set_focused_achievement_overwrites_previous_id() {
+    let env = env();
+    env.eval::<()>("SetFocusedAchievement(6)").unwrap();
+    env.eval::<()>("SetFocusedAchievement(42)").unwrap();
+    assert_eq!(env.state().borrow().focused_achievement, Some(42));
+}

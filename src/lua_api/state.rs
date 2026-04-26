@@ -167,6 +167,7 @@ macro_rules! build_empty_sim_state {
             achievement_comparison_data: AchievementComparisonData::default(),
             guild_achievement_members: ::std::collections::HashMap::new(),
             achievement_search: AchievementSearchState::default(),
+            focused_achievement: None,
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
             social_friends: default_social_friends(),
@@ -732,6 +733,10 @@ pub struct SimState {
     /// `AchievementFrameSearchProgressBar_OnUpdate` and
     /// `AchievementFrame_ShowSearchPreviewResults`.
     pub achievement_search: AchievementSearchState,
+    /// Last achievement id passed to `SetFocusedAchievement`. The
+    /// addon writes this on selection but never reads it back, so the
+    /// field exists purely so tests can verify the call landed.
+    pub focused_achievement: Option<i32>,
     /// Area-POI metadata keyed by area poi id. Drives
     /// `C_AreaPoiInfo.GetAreaPOIInfo` / `GetAreaPOISecondsLeft`.
     /// Seeded with a tiny fixture (Mage Tower Stormwind +

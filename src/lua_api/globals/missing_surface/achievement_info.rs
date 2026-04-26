@@ -234,6 +234,17 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
     register_comparison_globals(state, globals)?;
     register_guild_member_globals(state, globals)?;
     register_search_globals(state, globals)?;
+    register_focus_globals(state, globals)?;
+    Ok(())
+}
+
+fn register_focus_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "SetFocusedAchievement",
+        set_focused_achievement,
+    )?;
     Ok(())
 }
 
@@ -895,6 +906,12 @@ fn get_filtered_achievement_id(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn set_focused_achievement(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1).ok();
+    borrow_state_mut(state)?.focused_achievement = achievement_id;
+    Ok(0)
 }
 
 fn get_total_achievement_points(state: &mut LuaState) -> LuaResult<u32> {
