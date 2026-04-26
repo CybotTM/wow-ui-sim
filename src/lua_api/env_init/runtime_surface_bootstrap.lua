@@ -7703,19 +7703,25 @@ if C_Reputation.IsAccountWideReputation == nil then
     return false
   end
 end
-C_Reputation.IsFactionParagonForCurrentPlayer = function()
-  return false
+if C_Reputation.IsFactionParagonForCurrentPlayer == nil then
+  C_Reputation.IsFactionParagonForCurrentPlayer = function()
+    return false
+  end
 end
-C_Reputation.IsFactionParagon = function()
-  return false
+if C_Reputation.IsFactionParagon == nil then
+  C_Reputation.IsFactionParagon = function()
+    return false
+  end
 end
 if C_Reputation.IsMajorFaction == nil then
   C_Reputation.IsMajorFaction = function()
     return false
   end
 end
-C_Reputation.GetFactionParagonInfo = function()
-  return nil
+if C_Reputation.GetFactionParagonInfo == nil then
+  C_Reputation.GetFactionParagonInfo = function()
+    return nil
+  end
 end
 C_Reputation.RequestFactionParagonPreloadRewardData = __wow_noop
 C_Reputation.IsFactionActive = function()

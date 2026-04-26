@@ -74,6 +74,7 @@ macro_rules! build_empty_sim_state {
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
             account_wide_reputation_factions: HashSet::new(),
+            faction_paragon: HashMap::new(),
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
             suppress_runtime_on_load_depth: $runtime.suppress_runtime_on_load_depth,
@@ -426,6 +427,20 @@ impl Default for ActionBarStateInfo {
     }
 }
 
+/// Paragon-rep payload returned by `C_Reputation.GetFactionParagonInfo`.
+/// Presence in `state.faction_paragon` doubles as the
+/// `IsFactionParagonForCurrentPlayer` truth, gating the gold reward badge in
+/// `ReputationStatusBarMixin:Update`. Empty by default — the bar stays on the
+/// standard rep code path.
+#[derive(Clone, Debug)]
+pub struct FactionParagonInfo {
+    pub current_value: i32,
+    pub threshold: i32,
+    pub reward_quest_id: i32,
+    pub has_reward_pending: bool,
+    pub too_low_level_for_paragon: bool,
+}
+
 /// `MajorFactionData` row returned by `C_MajorFactions.GetMajorFactionData`
 /// for a single faction. Drives `ReputationStatusBarMixin:Update` when the
 /// watched faction is a major faction (Dragonflight Renown style bar).
@@ -660,6 +675,10 @@ pub struct SimState {
     /// `C_Reputation.IsAccountWideReputation` looks up membership; empty
     /// keeps every faction reported as character-bound.
     pub account_wide_reputation_factions: HashSet<i64>,
+    /// Paragon-rep state keyed by `factionID`. Presence flips
+    /// `C_Reputation.IsFactionParagonForCurrentPlayer` to true and feeds
+    /// `C_Reputation.GetFactionParagonInfo`. Empty by default.
+    pub faction_paragon: HashMap<i64, FactionParagonInfo>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
     pub addon_base_paths: Vec<PathBuf>,
     /// One-shot override for XML frame creation: whether the next CreateFrame

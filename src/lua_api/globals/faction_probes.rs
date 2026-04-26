@@ -202,6 +202,10 @@ fn reputation_entry_table(
 const REPUTATION_METHODS: &[(&str, RustFn)] = &[
     ("GetFactionDataByID", reputation_get_faction_data_by_id),
     ("IsFactionParagon", reputation_is_faction_paragon),
+    (
+        "IsFactionParagonForCurrentPlayer",
+        reputation_is_faction_paragon_for_current_player,
+    ),
     ("GetFactionParagonInfo", reputation_get_faction_paragon_info),
     ("GetNumFactions", reputation_get_num_factions),
     ("GetFactionInfo", reputation_get_faction_info),
@@ -245,12 +249,43 @@ fn reputation_get_faction_data_by_id(_state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn reputation_is_faction_paragon(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    let is_paragon = match stack_i32(state, 1) {
+        Some(id) => borrow_state(state)?.faction_paragon.contains_key(&(id as i64)),
+        None => false,
+    };
+    state.push(Val::Bool(is_paragon));
     Ok(1)
 }
 
-fn reputation_get_faction_paragon_info(_state: &mut LuaState) -> LuaResult<u32> {
-    Ok(0)
+fn reputation_is_faction_paragon_for_current_player(state: &mut LuaState) -> LuaResult<u32> {
+    let is_active = match stack_i32(state, 1) {
+        Some(id) => borrow_state(state)?
+            .faction_paragon
+            .get(&(id as i64))
+            .is_some_and(|info| !info.too_low_level_for_paragon),
+        None => false,
+    };
+    state.push(Val::Bool(is_active));
+    Ok(1)
+}
+
+fn reputation_get_faction_paragon_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(faction_id) = stack_i32(state, 1) else {
+        return Ok(0);
+    };
+    let Some(info) = borrow_state(state)?
+        .faction_paragon
+        .get(&(faction_id as i64))
+        .cloned()
+    else {
+        return Ok(0);
+    };
+    state.push(Val::Num(info.current_value as f64));
+    state.push(Val::Num(info.threshold as f64));
+    state.push(Val::Num(info.reward_quest_id as f64));
+    state.push(Val::Bool(info.has_reward_pending));
+    state.push(Val::Bool(info.too_low_level_for_paragon));
+    Ok(5)
 }
 
 fn reputation_get_num_factions(state: &mut LuaState) -> LuaResult<u32> {
