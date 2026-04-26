@@ -162,6 +162,7 @@ macro_rules! build_empty_sim_state {
             shapeshift_forms: Vec::new(),
             shapeshift_cooldowns: ::std::collections::HashMap::new(),
             pet_actions: vec![PetActionSlot::default(); 10],
+            glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             maps: default_maps(),
             achievements: default_achievements(),
@@ -349,6 +350,21 @@ pub struct PetActionSlot {
     pub spell_id: Option<u32>,
     pub passive: bool,
     pub cooldown: Option<SpellCooldownState>,
+}
+
+/// Glyph cursor state read by `Blizzard_ActionBar/Shared/SpellFlyout.lua`'s
+/// `SpellFlyoutPopupButtonMixin:UpdateGlyphState` and the spellbook
+/// glyph-attach flow. While a glyph is on the cursor,
+/// `pending_glyph_name` carries its display name and
+/// `pending_glyph_removal` is true if the cursor is the "Remove Glyph"
+/// pseudo-glyph rather than a normal glyph item. `attached_glyphs` maps
+/// spell id → glyph display name for spells that already have a glyph
+/// inscribed; the flyout reads it to badge those spells with the icon.
+#[derive(Clone, Debug, Default)]
+pub struct GlyphState {
+    pub pending_glyph_name: Option<String>,
+    pub pending_glyph_removal: bool,
+    pub attached_glyphs: HashMap<i32, String>,
 }
 
 /// Kind of an on-bar highlight mark — mirrors the action source that caused
@@ -776,6 +792,12 @@ pub struct SimState {
     /// Default 10 empty slots; `PetHasActionBar` reports false until at
     /// least one slot has `has_action = true`.
     pub pet_actions: Vec<PetActionSlot>,
+    /// Glyph cursor state. Drives `HasPendingGlyphCast`, `HasAttachedGlyph`,
+    /// `IsPendingGlyphRemoval`, `GetCurrentGlyphNameForSpell`,
+    /// `GetPendingGlyphName`, `AttachGlyphToSpell`, and
+    /// `IsSpellValidForPendingGlyph` consumed by `SpellFlyout.lua` and the
+    /// spellbook. Default empty: no glyph on cursor, no spells inscribed.
+    pub glyph: GlyphState,
     /// Currency info keyed by currency id. Drives
     /// `C_CurrencyInfo.GetCurrencyInfo`, `GetCurrencyInfoFromLink`,
     /// and `GetCurrencyContainerInfo`. Seeded at startup from the

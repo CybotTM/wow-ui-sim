@@ -409,14 +409,6 @@ fn patch_map_canvas_scroll_container(env: &LoaderEnv<'_>, result: &mut LoadResul
 }
 
 const PLAYERSPELLS_ONLOAD_BACKFILL_PATCH: &str = r#"
-    HasAttachedGlyph = HasAttachedGlyph or function()
-        return false
-    end
-
-    IsSpellValidForPendingGlyph = IsSpellValidForPendingGlyph or function()
-        return false
-    end
-
     local function backfill_onload(frame, needs_init)
         if not frame or not needs_init then
             return
