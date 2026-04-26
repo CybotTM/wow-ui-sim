@@ -121,6 +121,9 @@ local function __wow_menu_descriptor_stub()
     function desc:CreateRadio(text, ...)
         return add_child("radio", text, ...)
     end
+    function desc:CreateCheckbox(text, ...)
+        return add_child("checkbox", text, ...)
+    end
     function desc:CreateButton(text, ...)
         return add_child("button", text, ...)
     end
@@ -171,6 +174,11 @@ local function __wow_wrap_menu_descriptor(desc)
     if rawget(desc, "CreateRadio") == nil then
         desc.CreateRadio = function(_, text, ...)
             return add_child("radio", text, ...)
+        end
+    end
+    if rawget(desc, "CreateCheckbox") == nil then
+        desc.CreateCheckbox = function(_, text, ...)
+            return add_child("checkbox", text, ...)
         end
     end
     if rawget(desc, "CreateButton") == nil then

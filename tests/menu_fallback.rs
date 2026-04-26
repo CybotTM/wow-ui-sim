@@ -165,6 +165,48 @@ fn dropdown_open_menu_materializes_visible_rank_rows() {
 }
 
 #[test]
+fn dropdown_open_menu_materializes_reputation_filter_rows() {
+    let env = env_with_fallback();
+    let rows: (String, String, String, String, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local dropdown = CreateFrame("DropdownButton", "MenuFallbackReputationDropdown", UIParent)
+            Mixin(dropdown, DropdownButtonMixin)
+            dropdown:SetSize(200, 20)
+            dropdown:SetupMenu(function(_, rootDescription)
+                rootDescription:SetTag("MENU_REPUTATION_FRAME_FILTER")
+                rootDescription:CreateRadio("All", function(value) return value == 0 end, function() end, 0)
+                rootDescription:CreateRadio("Warband", function(value) return value == 0 end, function() end, 1)
+                rootDescription:CreateRadio("Varian", function(value) return value == 0 end, function() end, 2)
+                rootDescription:CreateDivider()
+                rootDescription:CreateCheckbox("Show Legacy Reputations", function() return true end, function() end)
+            end)
+            dropdown:OpenMenu()
+            local first = MenuFallbackReputationDropdownMenuButton1
+            local second = MenuFallbackReputationDropdownMenuButton2
+            local third = MenuFallbackReputationDropdownMenuButton3
+            local fourth = MenuFallbackReputationDropdownMenuButton4
+            return first:GetText(), second:GetText(), third:GetText(), fourth:GetText(),
+                   first:IsVisible(), second:IsVisible(), third:IsVisible(), fourth:IsVisible()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        rows,
+        (
+            "All".into(),
+            "Warband".into(),
+            "Varian".into(),
+            "Show Legacy Reputations".into(),
+            true,
+            true,
+            true,
+            true,
+        )
+    );
+}
+
+#[test]
 fn dropdown_generate_menu_sets_selected_radio_text() {
     let env = env_with_fallback();
     let text: String = env
