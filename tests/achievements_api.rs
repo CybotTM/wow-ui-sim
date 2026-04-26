@@ -391,10 +391,19 @@ fn test_latest_completed_achievements_returns_varargs_ids() {
 }
 
 #[test]
-fn test_get_achievement_guild_rep_defaults_to_nil_for_non_guild_achievements() {
+fn test_get_achievement_guild_rep_defaults_to_false_for_non_guild_achievements() {
     let env = env();
-    let is_nil: bool = env.eval("return GetAchievementGuildRep(6) == nil").unwrap();
-    assert!(is_nil);
+    let (requires_rep, has_rep, rep_level_is_nil): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local r, h, lvl = GetAchievementGuildRep(6)
+            return r, h, lvl == nil
+            "#,
+        )
+        .unwrap();
+    assert!(!requires_rep);
+    assert!(!has_rep);
+    assert!(rep_level_is_nil);
 }
 
 // ============================================================================

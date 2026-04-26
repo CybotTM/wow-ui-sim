@@ -163,6 +163,8 @@ macro_rules! build_empty_sim_state {
             achievements: default_achievements(),
             achievement_guild_rep: ::std::collections::HashMap::new(),
             achievement_statistics: ::std::collections::HashMap::new(),
+            achievement_comparison_unit: None,
+            achievement_comparison_data: AchievementComparisonData::default(),
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
             social_friends: default_social_friends(),
@@ -229,15 +231,15 @@ use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
-    AchievementGuildRep, AchievementInfo, AchievementStatistic, AddonInfo, AddonRuntimeMetrics,
-    AppFrameMetrics, AreaPoiInfo, AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction,
-    BnetFriend, BnetGameAccount, ChatBubble, CraftingState, CurrencyInfo, CursorInfo,
-    CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
-    KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo, MapData,
-    MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
-    MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
-    OwnedAuction, PendingTimer, PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState,
-    SocialFriend, SummonRequestState, WorldState,
+    AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementStatistic,
+    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo, AuctionBrowseResult,
+    AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount, ChatBubble,
+    CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem,
+    GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
+    LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
+    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
+    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, ScenarioState,
+    ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -707,6 +709,15 @@ pub struct SimState {
     /// addon's `if not quantity then quantity = "--" end` fallback
     /// handles missing rows.
     pub achievement_statistics: HashMap<i32, AchievementStatistic>,
+    /// Active inspect/comparison target unit token (e.g. `"target"`,
+    /// `"party1"`). `Some(unit)` when the player has selected a
+    /// comparison via `SetAchievementComparisonUnit`; `None` after
+    /// `ClearAchievementComparisonUnit` or before any selection.
+    pub achievement_comparison_unit: Option<String>,
+    /// Friend-side achievement snapshot read by the
+    /// `GetComparison*` getters. Stays at default until a test or
+    /// fixture seeds it; the addon then renders the friend's row.
+    pub achievement_comparison_data: AchievementComparisonData,
     /// Area-POI metadata keyed by area poi id. Drives
     /// `C_AreaPoiInfo.GetAreaPOIInfo` / `GetAreaPOISecondsLeft`.
     /// Seeded with a tiny fixture (Mage Tower Stormwind +

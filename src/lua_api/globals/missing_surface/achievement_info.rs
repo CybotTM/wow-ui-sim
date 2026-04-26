@@ -11,6 +11,7 @@
 //! `GetAchievementCriteriaInfo`) on top of the same seeded data.
 
 use super::{ensure_namespace, set_table_array};
+use crate::event::Event;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, frame_id_from_stack};
 use crate::lua_api::state::AchievementInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -230,6 +231,57 @@ fn register_legacy_achievement_globals(state: &mut LuaState) -> LuaResult<()> {
     register_criteria_globals(state, globals)?;
     register_traversal_globals(state, globals)?;
     register_summary_globals(state, globals)?;
+    register_comparison_globals(state, globals)?;
+    Ok(())
+}
+
+fn register_comparison_globals(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    register_comparison_unit_mutators(state, globals)?;
+    register_comparison_getters(state, globals)?;
+    Ok(())
+}
+
+fn register_comparison_unit_mutators(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "SetAchievementComparisonUnit",
+        set_achievement_comparison_unit,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "ClearAchievementComparisonUnit",
+        clear_achievement_comparison_unit,
+    )?;
+    Ok(())
+}
+
+fn register_comparison_getters(state: &mut LuaState, globals: GcRef<Table>) -> LuaResult<()> {
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetAchievementComparisonInfo",
+        get_achievement_comparison_info,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetComparisonAchievementPoints",
+        get_comparison_achievement_points,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetComparisonCategoryNumAchievements",
+        get_comparison_category_num_achievements,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        globals,
+        "GetComparisonStatistic",
+        get_comparison_statistic,
+    )?;
     Ok(())
 }
 
@@ -552,6 +604,125 @@ fn get_achievement_link(state: &mut LuaState) -> LuaResult<u32> {
     );
     let link_val = create_string(state, &link);
     state.push(link_val);
+    Ok(1)
+}
+
+fn set_achievement_comparison_unit(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = String::from_stack(state, 1).ok().filter(|s| !s.is_empty());
+    let Some(unit) = unit else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.achievement_comparison_unit = Some(unit);
+        sim.events.push(Event {
+            name: "INSPECT_ACHIEVEMENT_READY".to_string(),
+            args: Vec::new(),
+        });
+    }
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn clear_achievement_comparison_unit(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.achievement_comparison_unit = None;
+    Ok(0)
+}
+
+fn get_achievement_comparison_info(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let date = {
+        let sim = borrow_state(state)?;
+        if sim.achievement_comparison_unit.is_none() {
+            None
+        } else if !sim
+            .achievement_comparison_data
+            .earned
+            .contains(&achievement_id)
+        {
+            None
+        } else {
+            Some(
+                sim.achievement_comparison_data
+                    .completion_dates
+                    .get(&achievement_id)
+                    .copied()
+                    .unwrap_or((0, 0, 0)),
+            )
+        }
+    };
+    let Some((month, day, year)) = date else {
+        state.push(Val::Bool(false));
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        return Ok(4);
+    };
+    state.push(Val::Bool(true));
+    state.push(Val::Num(month as f64));
+    state.push(Val::Num(day as f64));
+    state.push(Val::Num(year as f64));
+    Ok(4)
+}
+
+fn get_comparison_achievement_points(state: &mut LuaState) -> LuaResult<u32> {
+    let total: i32 = {
+        let sim = borrow_state(state)?;
+        if sim.achievement_comparison_unit.is_none() {
+            0
+        } else {
+            ACHIEVEMENT_CATEGORIES
+                .iter()
+                .flat_map(|category| category.achievement_ids.iter())
+                .filter(|id| sim.achievement_comparison_data.earned.contains(id))
+                .filter_map(|id| sim.achievements.get(id))
+                .map(|info| info.points)
+                .sum()
+        }
+    };
+    state.push(Val::Num(total as f64));
+    Ok(1)
+}
+
+fn get_comparison_category_num_achievements(state: &mut LuaState) -> LuaResult<u32> {
+    let category_id = i32::from_stack(state, 1)?;
+    let achievement_ids = collect_category_achievement_ids(category_id);
+    let completed = {
+        let sim = borrow_state(state)?;
+        if sim.achievement_comparison_unit.is_none() {
+            0
+        } else {
+            achievement_ids
+                .iter()
+                .filter(|id| sim.achievement_comparison_data.earned.contains(id))
+                .count() as i32
+        }
+    };
+    state.push(Val::Num(completed as f64));
+    Ok(1)
+}
+
+fn get_comparison_statistic(state: &mut LuaState) -> LuaResult<u32> {
+    let achievement_id = i32::from_stack(state, 1)?;
+    let quantity = {
+        let sim = borrow_state(state)?;
+        if sim.achievement_comparison_unit.is_none() {
+            None
+        } else {
+            sim.achievement_comparison_data
+                .statistics
+                .get(&achievement_id)
+                .cloned()
+        }
+    };
+    match quantity {
+        Some(text) => {
+            let val = create_string(state, &text);
+            state.push(val);
+        }
+        None => state.push(Val::Nil),
+    }
     Ok(1)
 }
 

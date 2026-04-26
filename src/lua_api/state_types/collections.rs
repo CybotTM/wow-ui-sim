@@ -168,6 +168,26 @@ pub struct AchievementInfo {
     pub reward_item_id: Option<i32>,
 }
 
+/// Snapshot of the comparison target's achievement progress, written
+/// when `SetAchievementComparisonUnit` selects a friend/inspect target
+/// and read by `GetAchievementComparisonInfo`,
+/// `GetComparisonAchievementPoints`,
+/// `GetComparisonCategoryNumAchievements`, and
+/// `GetComparisonStatistic`. Empty by default — getters then return
+/// "not earned" / 0 / nil so the comparison header desaturates and the
+/// per-card friend column displays `INCOMPLETE`.
+#[derive(Debug, Clone, Default)]
+pub struct AchievementComparisonData {
+    /// Achievement ids the comparison target has earned.
+    pub earned: ::std::collections::HashSet<i32>,
+    /// Per-achievement `(month, day, year)` completion timestamp the
+    /// comparison frame renders via `FormatShortDate`.
+    pub completion_dates: ::std::collections::HashMap<i32, (i32, i32, i32)>,
+    /// Pre-formatted statistic display string per achievement id —
+    /// powers `GetComparisonStatistic`.
+    pub statistics: ::std::collections::HashMap<i32, String>,
+}
+
 /// Statistic display data keyed by achievement id in
 /// `SimState.achievement_statistics`. Drives the legacy global
 /// `GetStatistic(achievementID)`, which `AchievementFrameStats`
