@@ -2,7 +2,7 @@
 //! `SimState.achievements` + `WorldState.earned_achievements`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state::AchievementInfo;
+use wow_ui_sim::lua_api::state::{AchievementGuildRep, AchievementInfo};
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -346,6 +346,73 @@ fn get_achievement_link_uses_state_seeded_name() {
         "expected bracketed name in link, got {link}"
     );
     assert!(link.contains("Hachievement:12345:"));
+}
+
+#[test]
+fn get_achievement_guild_rep_returns_defaults_for_unseeded_id() {
+    let env = env();
+    let (requires_rep, has_rep, rep_level_is_nil): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local r, h, lvl = GetAchievementGuildRep(6)
+            return r, h, lvl == nil
+            "#,
+        )
+        .unwrap();
+    assert!(!requires_rep);
+    assert!(!has_rep);
+    assert!(rep_level_is_nil);
+}
+
+#[test]
+fn get_achievement_guild_rep_returns_seeded_values_when_unlocked() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievement_guild_rep.insert(
+            2336,
+            AchievementGuildRep {
+                requires_rep: true,
+                has_rep: true,
+                rep_level: Some(8),
+            },
+        );
+    }
+    let (requires_rep, has_rep, rep_level): (bool, bool, i32) =
+        env.eval("return GetAchievementGuildRep(2336)").unwrap();
+    assert!(requires_rep);
+    assert!(has_rep);
+    assert_eq!(rep_level, 8);
+}
+
+#[test]
+fn get_achievement_guild_rep_signals_locked_when_player_lacks_rep() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.achievement_guild_rep.insert(
+            2336,
+            AchievementGuildRep {
+                requires_rep: true,
+                has_rep: false,
+                rep_level: Some(7),
+            },
+        );
+    }
+    let (requires_rep, has_rep, rep_level): (bool, bool, i32) =
+        env.eval("return GetAchievementGuildRep(2336)").unwrap();
+    assert!(requires_rep);
+    assert!(!has_rep);
+    assert_eq!(rep_level, 7);
+}
+
+#[test]
+fn get_achievement_guild_rep_returns_three_values() {
+    let env = env();
+    let nret: i32 = env
+        .eval("return select('#', GetAchievementGuildRep(6))")
+        .unwrap();
+    assert_eq!(nret, 3);
 }
 
 #[test]

@@ -168,6 +168,23 @@ pub struct AchievementInfo {
     pub reward_item_id: Option<i32>,
 }
 
+/// Reputation gating metadata keyed by achievement id in
+/// `SimState.achievement_guild_rep`. Drives the legacy global
+/// `GetAchievementGuildRep`, which the achievement tooltip calls to
+/// decorate reputation-locked rows (e.g. Justicar) with the gating
+/// faction's standing. The default `HashMap` is empty: ungated
+/// achievements simply produce `(false, false, nil)`.
+#[derive(Debug, Clone, Default)]
+pub struct AchievementGuildRep {
+    /// True when the achievement is gated behind a reputation level.
+    pub requires_rep: bool,
+    /// True when the player meets the gating threshold.
+    pub has_rep: bool,
+    /// Reputation level (`Standing` enum) required to unlock — `None`
+    /// when `requires_rep == false`.
+    pub rep_level: Option<i32>,
+}
+
 /// Per-map metadata keyed by ui-map id in `SimState.maps`. Drives
 /// `C_Map.GetMapArtID`, `GetMapChildrenInfo`, and
 /// `GetPlayerMapPosition`. Only the handful of ids commonly referenced

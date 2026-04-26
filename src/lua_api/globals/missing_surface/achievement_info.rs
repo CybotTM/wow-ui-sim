@@ -469,9 +469,19 @@ fn get_latest_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn get_achievement_guild_rep(state: &mut LuaState) -> LuaResult<u32> {
-    let _achievement_id = i32::from_stack(state, 1)?;
-    state.push(Val::Nil);
-    Ok(1)
+    let achievement_id = i32::from_stack(state, 1)?;
+    let entry = borrow_state(state)?
+        .achievement_guild_rep
+        .get(&achievement_id)
+        .cloned()
+        .unwrap_or_default();
+    state.push(Val::Bool(entry.requires_rep));
+    state.push(Val::Bool(entry.has_rep));
+    state.push(match entry.rep_level {
+        Some(level) => Val::Num(level as f64),
+        None => Val::Nil,
+    });
+    Ok(3)
 }
 
 fn get_num_completed_achievements(state: &mut LuaState) -> LuaResult<u32> {

@@ -161,6 +161,7 @@ macro_rules! build_empty_sim_state {
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
             maps: default_maps(),
             achievements: default_achievements(),
+            achievement_guild_rep: ::std::collections::HashMap::new(),
             area_pois: default_area_pois(),
             bnet_friends: default_bnet_friends(),
             social_friends: default_social_friends(),
@@ -227,14 +228,15 @@ use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
-    AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
-    AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
-    ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
-    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo,
-    LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState, MythicPlusAffix,
-    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
-    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, ScenarioState,
-    ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
+    AchievementGuildRep, AchievementInfo, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics,
+    AreaPoiInfo, AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend,
+    BnetGameAccount, ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin,
+    DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo,
+    LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo, MapData, MirrorTimer, MovementState,
+    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
+    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
+    PlayerState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
+    SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -693,6 +695,11 @@ pub struct SimState {
     /// Feats of Strength headers). Completion state is derived from
     /// `world.earned_achievements` at read time.
     pub achievements: HashMap<i32, AchievementInfo>,
+    /// Reputation-gating metadata keyed by achievement id. Drives
+    /// `GetAchievementGuildRep`, which the tooltip calls to mark
+    /// achievements like Justicar as "requires Honored with X". Empty
+    /// by default — unseeded ids report `(false, false, nil)`.
+    pub achievement_guild_rep: HashMap<i32, AchievementGuildRep>,
     /// Area-POI metadata keyed by area poi id. Drives
     /// `C_AreaPoiInfo.GetAreaPOIInfo` / `GetAreaPOISecondsLeft`.
     /// Seeded with a tiny fixture (Mage Tower Stormwind +
