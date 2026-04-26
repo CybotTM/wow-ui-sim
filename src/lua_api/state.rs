@@ -59,6 +59,7 @@ macro_rules! build_empty_sim_state {
             account_store_refund_succeeds: $runtime.account_store_refund_succeeds,
             account_store_category_items: $collections.account_store_category_items,
             account_store_currency_for_store: $collections.account_store_currency_for_store,
+            account_store_currency_info: $collections.account_store_currency_info,
             action_bars: $collections.action_bars,
             addon_base_paths: $collections.addon_base_paths,
             create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
@@ -240,6 +241,21 @@ pub use super::frame_substates::{
     UnitPositionPlayerPingTexture, UnitPositionUnit,
 };
 
+/// Account-store currency record — mirrors the official
+/// `AccountStoreCurrencyInfo` structure in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AccountStoreDocumentation.lua`
+/// (lines 240-249). The fields shipped here are the ones
+/// `Blizzard_AccountStoreUtil.lua` actually reads from
+/// `C_AccountStore.GetCurrencyInfo`.
+#[derive(Clone, Debug)]
+pub struct AccountStoreCurrencyInfo {
+    pub id: i64,
+    pub amount: i64,
+    pub max_quantity: Option<i64>,
+    pub name: String,
+    pub icon: i64,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -335,6 +351,10 @@ pub struct SimState {
     /// `C_AccountStore.GetCurrencyIDForStore(storeFrontID)`; missing entries
     /// return nil so the footer's currency tooltip stays hidden.
     pub account_store_currency_for_store: HashMap<i64, i64>,
+    /// Currency records exposed by `C_AccountStore.GetCurrencyInfo`.
+    /// Missing entries return nil; AccountStoreUtil branches on `currencyInfo`
+    /// being non-nil and on `maxQuantity` being non-nil to gate warnings.
+    pub account_store_currency_info: HashMap<i64, AccountStoreCurrencyInfo>,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -812,6 +832,7 @@ struct EmptyStateCollections {
     pending_player_reports: HashMap<i64, PendingPlayerReport>,
     account_store_category_items: HashMap<i64, Vec<i64>>,
     account_store_currency_for_store: HashMap<i64, i64>,
+    account_store_currency_info: HashMap<i64, AccountStoreCurrencyInfo>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,

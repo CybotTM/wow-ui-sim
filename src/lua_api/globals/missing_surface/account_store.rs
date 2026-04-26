@@ -7,7 +7,10 @@
 //! and refund fulfillment is out of scope.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table, table_set_num};
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set, table_set_num,
+};
+use crate::lua_api::state::AccountStoreCurrencyInfo;
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -23,6 +26,7 @@ pub(super) fn register_account_store_surface(state: &mut LuaState) -> LuaResult<
         "GetCurrencyIDForStore",
         get_currency_id_for_store,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetCurrencyInfo", get_currency_info)?;
     Ok(())
 }
 
@@ -84,4 +88,31 @@ fn get_currency_id_for_store(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn get_currency_info(state: &mut LuaState) -> LuaResult<u32> {
+    let currency_id = i64::from_stack(state, 1)?;
+    let info = borrow_state(state)?
+        .account_store_currency_info
+        .get(&currency_id)
+        .cloned();
+    let Some(info) = info else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let table = create_table(state);
+    populate_currency_info_table(state, table, &info);
+    state.push(table);
+    Ok(1)
+}
+
+fn populate_currency_info_table(state: &mut LuaState, table: Val, info: &AccountStoreCurrencyInfo) {
+    table_set(state, table, "id", Val::Num(info.id as f64));
+    table_set(state, table, "amount", Val::Num(info.amount as f64));
+    if let Some(max) = info.max_quantity {
+        table_set(state, table, "maxQuantity", Val::Num(max as f64));
+    }
+    let name_val = create_string(state, &info.name);
+    table_set(state, table, "name", name_val);
+    table_set(state, table, "icon", Val::Num(info.icon as f64));
 }

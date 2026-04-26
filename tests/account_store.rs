@@ -1,4 +1,5 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::AccountStoreCurrencyInfo;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -208,6 +209,86 @@ fn get_currency_id_for_store_isolates_storefronts() {
     assert_eq!(a, Some(100));
     assert_eq!(b, Some(200));
     assert_eq!(missing, None, "unseeded id stays nil even with siblings");
+}
+
+#[test]
+fn get_currency_info_returns_nil_when_unseeded() {
+    // AccountStoreUtil.IsCurrencyAtWarningThreshold and AddCurrencyTotalTooltip
+    // both branch on `currencyInfo` being non-nil before reading any field.
+    let env = env();
+    let value: Option<i64> = env
+        .eval(r#"return C_AccountStore.GetCurrencyInfo(99) and 1 or nil"#)
+        .unwrap();
+    assert_eq!(value, None, "unknown currency id should report nil");
+}
+
+#[test]
+fn get_currency_info_returns_seeded_struct_with_all_fields() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_currency_info.insert(
+            55,
+            AccountStoreCurrencyInfo {
+                id: 55,
+                amount: 1200,
+                max_quantity: Some(5000),
+                name: "Plunder".to_string(),
+                icon: 4242,
+            },
+        );
+    }
+    let (id, amount, max, name, icon): (i64, i64, i64, String, i64) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetCurrencyInfo(55)
+            return info.id, info.amount, info.maxQuantity, info.name, info.icon
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 55);
+    assert_eq!(amount, 1200);
+    assert_eq!(max, 5000);
+    assert_eq!(name, "Plunder");
+    assert_eq!(icon, 4242);
+}
+
+#[test]
+fn get_currency_info_omits_max_quantity_when_none() {
+    // AccountStoreUtil.IsCurrencyAtWarningThreshold uses
+    // `if currencyInfo and currencyInfo.maxQuantity then` to gate the warning
+    // branch — uncapped currencies must surface as nil, not 0.
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.account_store_currency_info.insert(
+            12,
+            AccountStoreCurrencyInfo {
+                id: 12,
+                amount: 50,
+                max_quantity: None,
+                name: "Soft Currency".to_string(),
+                icon: 1,
+            },
+        );
+    }
+    let (max_is_nil, threshold_branch_skipped): (bool, bool) = env
+        .eval(
+            r#"
+            local info = C_AccountStore.GetCurrencyInfo(12)
+            local skipped = true
+            if info and info.maxQuantity then
+                skipped = false
+            end
+            return info.maxQuantity == nil, skipped
+            "#,
+        )
+        .unwrap();
+    assert!(max_is_nil, "uncapped currency must report nil maxQuantity");
+    assert!(
+        threshold_branch_skipped,
+        "the maxQuantity-gated warning branch must be skipped when nil"
+    );
 }
 
 #[test]
