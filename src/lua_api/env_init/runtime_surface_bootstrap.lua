@@ -9879,24 +9879,32 @@ if type(DropdownButtonMixin) ~= "table" then
   end
 
   function DropdownButtonMixin:SetMenuOpen(open)
-    self.__wow_menu_open = open and true or false
+    if open then
+      self:OpenMenu()
+    else
+      self:CloseMenu()
+    end
+  end
+
+  function DropdownButtonMixin:OnMouseDown_Intrinsic()
+    self:SetMenuOpen(not self:IsMenuOpen())
   end
 
   function DropdownButtonMixin:OpenMenu()
     self:GenerateMenu()
-    self:SetMenuOpen(true)
+    self.__wow_menu_open = true
   end
 
   function DropdownButtonMixin:CloseMenu()
-    self:SetMenuOpen(false)
+    self.__wow_menu_open = false
   end
 
   function DropdownButtonMixin:OnMenuOpened(menu)
-    self:SetMenuOpen(true)
+    self.__wow_menu_open = true
   end
 
   function DropdownButtonMixin:OnMenuClosed(menu, closeReason)
-    self:SetMenuOpen(false)
+    self.__wow_menu_open = false
   end
 
   function DropdownButtonMixin:OnMenuResponse(menu, description) end
@@ -10088,6 +10096,21 @@ end
 local function __wow_install_dropdown_button_mixin_patch()
   if type(DropdownButtonMixin) ~= "table" then
     return
+  end
+  if type(DropdownButtonMixin.OnMouseDown_Intrinsic) ~= "function" then
+    function DropdownButtonMixin:OnMouseDown_Intrinsic()
+      self:SetMenuOpen(not self:IsMenuOpen())
+    end
+  end
+  if rawget(DropdownButtonMixin, "__wow_sim_patched_set_menu_open") ~= DropdownButtonMixin.SetMenuOpen then
+    function DropdownButtonMixin:SetMenuOpen(open)
+      if open then
+        self:OpenMenu()
+      else
+        self:CloseMenu()
+      end
+    end
+    DropdownButtonMixin.__wow_sim_patched_set_menu_open = DropdownButtonMixin.SetMenuOpen
   end
   if rawget(DropdownButtonMixin, "__wow_sim_patched_setup_menu") == DropdownButtonMixin.SetupMenu
       and rawget(DropdownButtonMixin, "__wow_sim_patched_generate_menu") == DropdownButtonMixin.GenerateMenu

@@ -397,6 +397,21 @@ local function __wow_patch_dropdown_button_mixin()
     if type(DropdownButtonMixin) ~= "table" then
         return
     end
+    if type(DropdownButtonMixin.OnMouseDown_Intrinsic) ~= "function" then
+        function DropdownButtonMixin:OnMouseDown_Intrinsic()
+            self:SetMenuOpen(not self:IsMenuOpen())
+        end
+    end
+    if rawget(DropdownButtonMixin, "__wow_menu_fallback_set_menu_open") ~= DropdownButtonMixin.SetMenuOpen then
+        function DropdownButtonMixin:SetMenuOpen(open)
+            if open then
+                self:OpenMenu()
+            else
+                self:CloseMenu()
+            end
+        end
+        DropdownButtonMixin.__wow_menu_fallback_set_menu_open = DropdownButtonMixin.SetMenuOpen
+    end
     if rawget(DropdownButtonMixin, "__wow_menu_fallback_open_menu") == DropdownButtonMixin.OpenMenu
         and rawget(DropdownButtonMixin, "__wow_menu_fallback_generate_menu") == DropdownButtonMixin.GenerateMenu
         and rawget(DropdownButtonMixin, "__wow_menu_fallback_setup_menu") == DropdownButtonMixin.SetupMenu then

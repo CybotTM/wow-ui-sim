@@ -207,6 +207,32 @@ fn dropdown_open_menu_materializes_reputation_filter_rows() {
 }
 
 #[test]
+fn dropdown_mouse_down_intrinsic_opens_menu() {
+    let env = env_with_fallback();
+    let rows: (String, String, bool, bool) = env
+        .eval(
+            r#"
+            local dropdown = CreateFrame("DropdownButton", "MenuFallbackMouseDropdown", UIParent)
+            Mixin(dropdown, DropdownButtonMixin)
+            dropdown:SetSize(200, 20)
+            dropdown:SetupMenu(function(_, rootDescription)
+                rootDescription:CreateRadio("All", function(value) return value == 0 end, function() end, 0)
+                rootDescription:CreateCheckbox("Show Legacy Reputations", function() return true end, function() end)
+            end)
+            dropdown:OnMouseDown_Intrinsic()
+            local first = MenuFallbackMouseDropdownMenuButton1
+            local second = MenuFallbackMouseDropdownMenuButton2
+            return first:GetText(), second:GetText(), first:IsVisible(), second:IsVisible()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        rows,
+        ("All".into(), "Show Legacy Reputations".into(), true, true,)
+    );
+}
+
+#[test]
 fn dropdown_generate_menu_sets_selected_radio_text() {
     let env = env_with_fallback();
     let text: String = env
