@@ -3,6 +3,80 @@ use std::sync::Arc;
 
 use super::{TextureData, TextureManager, normalize_wow_path};
 
+#[cfg(feature = "casc")]
+use std::sync::OnceLock;
+
+#[cfg(feature = "casc")]
+static CASC_INITIALIZED: OnceLock<bool> = OnceLock::new();
+
+#[cfg(feature = "casc")]
+fn casc_enabled() -> bool {
+    *CASC_INITIALIZED.get_or_init(|| {
+        if std::env::var("WOW_SIM_CASC").ok().as_deref() != Some("1") {
+            return false;
+        }
+        // asset-resolver looks for its data dir via GAME_ENGINE_SHARED_ROOT.
+        // Default to the sibling game-engine repo if the user hasn't pointed it elsewhere.
+        if std::env::var_os("GAME_ENGINE_SHARED_ROOT").is_none()
+            && let Some(home) = dirs::home_dir()
+        {
+            let default_root = home.join("Projects/world-of-osso/game-engine");
+            if default_root.exists() {
+                // SAFETY: set_var before any other thread reads it (OnceLock guarantees first call).
+                unsafe {
+                    std::env::set_var("GAME_ENGINE_SHARED_ROOT", &default_root);
+                }
+            }
+        }
+        true
+    })
+}
+
+#[cfg(feature = "casc")]
+fn casc_extract_dir() -> Option<PathBuf> {
+    let dir = dirs::cache_dir()?.join("wow-ui-sim/casc-extract");
+    std::fs::create_dir_all(&dir).ok()?;
+    Some(dir)
+}
+
+#[cfg(feature = "casc")]
+fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
+    if !casc_enabled() {
+        return None;
+    }
+
+    let resolver = asset_resolver::CascListfileResolver;
+
+    // Listfile entries always include the file extension; our normalized paths usually don't.
+    // Try common UI asset extensions.
+    let candidates: &[&str] = &["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"];
+    let (fdid, listfile_path) = std::iter::once(normalized_path.to_string())
+        .chain(
+            candidates
+                .iter()
+                .map(|ext| format!("{normalized_path}.{ext}")),
+        )
+        .find_map(|p| resolver.lookup_path(&p).map(|fdid| (fdid, p)))?;
+
+    let extract_dir = casc_extract_dir()?;
+    let safe_relative = listfile_path.replace('\\', "/");
+    let out_path = extract_dir.join(&safe_relative);
+    if let Some(parent) = out_path.parent() {
+        std::fs::create_dir_all(parent).ok()?;
+    }
+
+    if out_path.exists() {
+        return Some(out_path);
+    }
+
+    resolver.ensure_cached(fdid, &out_path)
+}
+
+#[cfg(not(feature = "casc"))]
+fn try_casc_resolve(_normalized_path: &str) -> Option<PathBuf> {
+    None
+}
+
 impl TextureManager {
     /// Number of entries in the texture cache.
     pub fn cache_len(&self) -> usize {
@@ -115,6 +189,10 @@ impl TextureManager {
         }
 
         if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {
+            return Some(result);
+        }
+
+        if let Some(result) = try_casc_resolve(normalized_path) {
             return Some(result);
         }
 
