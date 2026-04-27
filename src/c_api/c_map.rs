@@ -7,6 +7,12 @@
 //!   seeded map, or nothing (retail `mayreturnnothing`).
 //! - `C_Map.GetMapInfo(uiMapID)` — returns a `UiMapDetails`-shaped
 //!   table for seeded maps, or nothing for unknown ids.
+//! - `C_Map.GetMapInfoAtPosition(uiMapID, normalizedX, normalizedY)`
+//!   — resolves a normalized point on a parent map back to the leaf
+//!   zone whose `child_rects` entry contains the point. Returns
+//!   nothing when the parent is unknown, the point falls outside
+//!   every rect, or the matched child id is missing from
+//!   `SimState.maps`.
 //! - `C_Map.GetMapChildrenInfo(uiMapID, mapType?, allDescendants?)`
 //!   — returns the children as an array of `UiMapDetails` tables.
 //!   `mapType` filters by the UIMapType enum; `allDescendants`
@@ -55,6 +61,12 @@ pub(crate) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
         c_map_get_map_art_layers,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetMapInfo", c_map_get_map_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMapInfoAtPosition",
+        c_map_get_map_info_at_position,
+    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -212,6 +224,32 @@ fn c_map_get_map_info(state: &mut LuaState) -> LuaResult<u32> {
     let details = push_map_details_table(state, &map);
     state.push(details);
     Ok(1)
+}
+
+fn c_map_get_map_info_at_position(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let normalized_x = f64::from_stack(state, 2)?;
+    let normalized_y = f64::from_stack(state, 3)?;
+    let resolved = {
+        let sim = borrow_state(state)?;
+        let parent = sim.maps.get(&ui_map_id);
+        let child_id = parent
+            .and_then(|map| find_child_at_point(&map.child_rects, normalized_x, normalized_y));
+        child_id.and_then(|id| sim.maps.get(&id).cloned())
+    };
+    let Some(child) = resolved else {
+        return Ok(0);
+    };
+    let details = push_map_details_table(state, &child);
+    state.push(details);
+    Ok(1)
+}
+
+fn find_child_at_point(rects: &[crate::lua_api::state::MapChildRect], x: f64, y: f64) -> Option<i32> {
+    rects
+        .iter()
+        .find(|rect| x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+        .map(|rect| rect.map_id)
 }
 
 fn push_map_details_table(state: &mut LuaState, map: &MapData) -> Val {

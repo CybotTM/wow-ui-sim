@@ -2,6 +2,22 @@
 //! `SimState.player_map_position`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::MapChildRect;
+
+fn seed_eastern_kingdoms_child_rects(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    let parent = state
+        .maps
+        .get_mut(&13)
+        .expect("Eastern Kingdoms must be in default_maps");
+    parent.child_rects = vec![MapChildRect {
+        map_id: 84,
+        left: 0.40,
+        right: 0.55,
+        top: 0.60,
+        bottom: 0.75,
+    }];
+}
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -162,6 +178,131 @@ fn get_player_map_position_returns_nil_for_non_player_unit() {
         .eval(r#"return C_Map.GetPlayerMapPosition(84, "target") == nil"#)
         .unwrap();
     assert!(is_nil);
+}
+
+#[test]
+fn get_map_info_at_position_resolves_child_inside_rect() {
+    let env = env();
+    seed_eastern_kingdoms_child_rects(&env);
+
+    let (map_id, name): (i32, String) = env
+        .eval(
+            r#"
+            local info = C_Map.GetMapInfoAtPosition(13, 0.475, 0.675)
+            return info.mapID, info.name
+            "#,
+        )
+        .unwrap();
+    assert_eq!(map_id, 84);
+    assert_eq!(name, "Stormwind City");
+}
+
+#[test]
+fn get_map_info_at_position_returns_nothing_outside_any_rect() {
+    let env = env();
+    seed_eastern_kingdoms_child_rects(&env);
+
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapInfoAtPosition(13, 0.10, 0.10))")
+        .unwrap();
+    assert_eq!(nret, 0);
+}
+
+#[test]
+fn get_map_info_at_position_returns_nothing_for_unknown_map() {
+    let env = env();
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapInfoAtPosition(999999, 0.5, 0.5))")
+        .unwrap();
+    assert_eq!(nret, 0);
+}
+
+#[test]
+fn get_map_info_at_position_returns_nothing_when_parent_has_no_rects() {
+    let env = env();
+
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapInfoAtPosition(13, 0.5, 0.5))")
+        .unwrap();
+    assert_eq!(nret, 0);
+}
+
+#[test]
+fn get_map_info_at_position_is_inclusive_at_rect_edges() {
+    let env = env();
+    seed_eastern_kingdoms_child_rects(&env);
+
+    let (left_edge, right_edge, top_edge, bottom_edge): (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            return C_Map.GetMapInfoAtPosition(13, 0.40, 0.65).mapID,
+                   C_Map.GetMapInfoAtPosition(13, 0.55, 0.65).mapID,
+                   C_Map.GetMapInfoAtPosition(13, 0.45, 0.60).mapID,
+                   C_Map.GetMapInfoAtPosition(13, 0.45, 0.75).mapID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(left_edge, 84);
+    assert_eq!(right_edge, 84);
+    assert_eq!(top_edge, 84);
+    assert_eq!(bottom_edge, 84);
+}
+
+#[test]
+fn get_map_info_at_position_picks_first_rect_when_overlapping() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        let azeroth = state.maps.get_mut(&946).unwrap();
+        azeroth.child_rects = vec![
+            MapChildRect {
+                map_id: 13,
+                left: 0.0,
+                right: 1.0,
+                top: 0.0,
+                bottom: 1.0,
+            },
+            MapChildRect {
+                map_id: 84,
+                left: 0.4,
+                right: 0.6,
+                top: 0.4,
+                bottom: 0.6,
+            },
+        ];
+    }
+
+    let map_id: i32 = env
+        .eval("return C_Map.GetMapInfoAtPosition(946, 0.5, 0.5).mapID")
+        .unwrap();
+    assert_eq!(
+        map_id, 13,
+        "First-match wins when child rects overlap (data order is authoritative)"
+    );
+}
+
+#[test]
+fn get_map_info_at_position_skips_rect_pointing_to_unknown_child() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        let parent = state.maps.get_mut(&13).unwrap();
+        parent.child_rects = vec![MapChildRect {
+            map_id: 4242,
+            left: 0.0,
+            right: 1.0,
+            top: 0.0,
+            bottom: 1.0,
+        }];
+    }
+
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapInfoAtPosition(13, 0.5, 0.5))")
+        .unwrap();
+    assert_eq!(
+        nret, 0,
+        "A rect whose map_id is missing from state.maps must yield no return values"
+    );
 }
 
 #[test]

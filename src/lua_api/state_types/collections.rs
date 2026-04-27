@@ -266,6 +266,23 @@ pub struct MapData {
     /// `GetMapChildrenInfo` (filtered by mapType when the caller
     /// passes one).
     pub child_map_ids: Vec<i32>,
+    /// Normalized child rects in this map's coordinate space, used by
+    /// `C_Map.GetMapInfoAtPosition` to resolve a point on this parent
+    /// back to a leaf zone. Each rect's `(left, right, top, bottom)`
+    /// uses Blizzard's UI convention where `top < bottom` (y grows
+    /// downward, 0 = top edge). Empty for leaf maps.
+    pub child_rects: Vec<MapChildRect>,
+}
+
+/// One entry in `MapData.child_rects`. The child whose rect contains a
+/// queried point is returned by `C_Map.GetMapInfoAtPosition`.
+#[derive(Debug, Clone, Copy)]
+pub struct MapChildRect {
+    pub map_id: i32,
+    pub left: f64,
+    pub right: f64,
+    pub top: f64,
+    pub bottom: f64,
 }
 
 /// Per-currency info keyed by currency id in `SimState.currency_info`.
