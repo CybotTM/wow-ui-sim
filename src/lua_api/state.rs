@@ -26,6 +26,7 @@ macro_rules! build_empty_sim_state {
             focused_frame_id: $runtime.focused_frame_id,
             addons: $collections.addons,
             addon_saved_enable_state: None,
+            system_chat_log: Vec::new(),
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
@@ -601,6 +602,10 @@ pub struct SimState {
     /// with the current live state, and `Reset` restores live state from
     /// this snapshot.
     pub addon_saved_enable_state: Option<Vec<bool>>,
+    /// System chat log: append-only record of messages dispatched through
+    /// `ChatFrameUtil.AddSystemMessage`. Persists even when no chat frame is
+    /// available so tests and headless runs can inspect what was emitted.
+    pub system_chat_log: Vec<String>,
     /// Console variables (CVars).
     pub cvars: CVarStorage,
     /// Tooltip state for GameTooltip frames (keyed by frame ID).

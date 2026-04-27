@@ -132,6 +132,7 @@ fn register_action_verbs(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::panel_toggle_verbs::register_all(lua)?;
     super::voice_chat_verbs::register_all(lua)?;
     super::message_verbs::register_all(lua)?;
+    super::chat_frame_util::register_all(lua)?;
     super::set_cvar_verb::register_all(lua)?;
     super::ui_visibility::register_all(lua)?;
     Ok(())
