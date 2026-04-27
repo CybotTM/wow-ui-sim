@@ -54,6 +54,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "GetWorldMapActionButtonSpellInfo",
     "GetInventoryItemID",
     "GetInventoryItemQuality",
+    "GetInventoryItemsForSlot",
     "ResetCameraPosition",
     "SetActionBarToggles",
     "SetChannelPassword",
