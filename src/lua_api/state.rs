@@ -75,6 +75,7 @@ macro_rules! build_empty_sim_state {
             equipped_artifact: None,
             artifact_point_costs: HashMap::new(),
             allied_races: HashMap::new(),
+            active_player_interactions: HashSet::new(),
             azerite_item: None,
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
@@ -940,6 +941,14 @@ pub struct SimState {
     /// every race the dialog can be opened for. Unknown ids return nil and
     /// `AlliedRacesFrameMixin:LoadRaceData` short-circuits.
     pub allied_races: HashMap<i64, AlliedRaceInfo>,
+    /// Active NPC-interaction set keyed by `Enum.PlayerInteractionType`.
+    /// Populated when frames open via the player-interaction manager and
+    /// cleared by `C_PlayerInteractionManager.ClearInteraction(type)`.
+    /// Clearing the `AlliedRaceDetailsGiver` slot fires `ALLIED_RACE_CLOSE`
+    /// so `AlliedRacesFrameMixin:OnHide` can hand the close event back to
+    /// any other listener (the addon registers it via `RegisterEvent` in
+    /// `Blizzard_AlliedRacesFrameUI.lua`).
+    pub active_player_interactions: HashSet<i32>,
     /// Heart of Azeroth state. `None` keeps
     /// `C_AzeriteItem.FindActiveAzeriteItem` returning nil so the
     /// `Blizzard_ActionBar/Mainline/AzeriteBar.lua` mixin stays hidden.

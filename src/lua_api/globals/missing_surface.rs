@@ -52,7 +52,8 @@ mod zone_ability;
 
 use crate::c_api::{
     c_allied_races, c_artifact_ui, c_azerite_item, c_configuration_warnings, c_fog_of_war,
-    c_major_factions, c_map_exploration_info, c_paper_doll_info, c_spell, c_widget,
+    c_major_factions, c_map_exploration_info, c_paper_doll_info, c_player_interaction_manager,
+    c_spell, c_widget,
 };
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, table_get, val_to_string,
@@ -195,6 +196,7 @@ fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_azerite_item::register_c_azerite_item_surface(state)?;
     c_major_factions::register_c_major_factions_surface(state)?;
     c_allied_races::register_c_allied_races_surface(state)?;
+    c_player_interaction_manager::register_c_player_interaction_manager_surface(state)?;
     Ok(())
 }
 
