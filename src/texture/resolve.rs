@@ -188,12 +188,6 @@ impl TextureManager {
             normalized_path
         };
 
-        if let Some(interface_path) = &self.interface_path
-            && let Some(result) = self.try_resolve_in_dir(interface_path, path)
-        {
-            return Some(result);
-        }
-
         if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {
             return Some(result);
         }

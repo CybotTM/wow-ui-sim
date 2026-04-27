@@ -56,13 +56,7 @@ fn make_texture_manager() -> Option<TextureManager> {
         return None;
     }
 
-    let interface_path = dirs::home_dir()
-        .unwrap_or_default()
-        .join("Projects/wow/Interface");
-    let mut mgr = TextureManager::new(textures_path);
-    if interface_path.exists() {
-        mgr = mgr.with_interface_path(interface_path);
-    }
+    let mgr = TextureManager::new(textures_path);
     Some(mgr)
 }
 

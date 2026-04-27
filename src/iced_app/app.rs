@@ -372,7 +372,6 @@ impl App {
         Rc<RefCell<GlyphAtlas>>,
     ) {
         let mut tex_mgr = TextureManager::new(textures_path)
-            .with_interface_path(crate::paths::default_interface_path())
             .with_addons_path(crate::paths::default_addons_path())
             .with_disk_cache("./cache/textures");
         if Self::eager_startup_texture_preloads_enabled() {

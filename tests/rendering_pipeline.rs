@@ -22,7 +22,6 @@ use wow_ui_sim::texture::TextureManager;
 // Helpers
 // ============================================================================
 
-const INTERFACE_PATH: &str = "/home/osso/Projects/wow/Interface";
 const LOCAL_TEXTURES: &str = "./textures";
 
 fn make_texture_manager() -> Option<TextureManager> {
@@ -31,10 +30,7 @@ fn make_texture_manager() -> Option<TextureManager> {
         return None;
     }
 
-    let mut mgr = TextureManager::new(&textures_path);
-    if PathBuf::from(INTERFACE_PATH).exists() {
-        mgr = mgr.with_interface_path(INTERFACE_PATH);
-    }
+    let mgr = TextureManager::new(&textures_path);
     Some(mgr)
 }
 

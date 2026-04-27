@@ -797,10 +797,8 @@ mod tests {
         ));
         env.borrow().set_screen_mode(ScreenKind::Game);
 
-        let home = dirs::home_dir().expect("home dir");
         let texture_manager = Rc::new(RefCell::new(
             TextureManager::new(PathBuf::from("./textures"))
-                .with_interface_path(home.join("Projects/wow/Interface"))
                 .with_disk_cache("./cache/textures"),
         ));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(

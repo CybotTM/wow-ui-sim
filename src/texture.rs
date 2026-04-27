@@ -17,8 +17,6 @@ use image_blp::types::BlpContent;
 pub struct TextureManager {
     /// Base path to local WebP textures (`./textures`).
     textures_path: PathBuf,
-    /// Base path to WoW Interface directory (for extracted game files).
-    interface_path: Option<PathBuf>,
     /// Base path to addons directory (for addon textures).
     addons_path: Option<PathBuf>,
     /// Directory for decoded RGBA disk cache (lz4 compressed).
@@ -50,7 +48,6 @@ impl TextureManager {
     pub fn new(textures_path: impl Into<PathBuf>) -> Self {
         Self {
             textures_path: textures_path.into(),
-            interface_path: None,
             addons_path: None,
             disk_cache_dir: None,
             cache: HashMap::new(),
@@ -60,12 +57,6 @@ impl TextureManager {
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
         }
-    }
-
-    /// Set the WoW Interface directory path for extracted game files.
-    pub fn with_interface_path(mut self, path: impl Into<PathBuf>) -> Self {
-        self.interface_path = Some(path.into());
-        self
     }
 
     /// Set the disk cache directory for decoded RGBA textures.
@@ -529,27 +520,6 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_path_prefers_interface_blp_over_local_webp() {
-        let temp_dir = TempDir::new().unwrap();
-        let textures_path = temp_dir.path().join("textures");
-        let interface_path = temp_dir.path().join("Interface");
-        fs::create_dir_all(textures_path.join("icons")).unwrap();
-        fs::create_dir_all(interface_path.join("icons")).unwrap();
-
-        let webp_path = textures_path.join("icons").join("paladin_holy.webp");
-        let blp_path = interface_path.join("icons").join("PALADIN_HOLY.BLP");
-        fs::write(&webp_path, b"webp").unwrap();
-        fs::write(&blp_path, b"blp").unwrap();
-
-        let mgr = TextureManager::new(&textures_path).with_interface_path(&interface_path);
-        let resolved = mgr
-            .resolve_path(&normalize_wow_path(r"Interface\ICONS\PALADIN_HOLY"))
-            .expect("resolver should find interface BLP");
-
-        assert_eq!(resolved, blp_path);
-    }
-
-    #[test]
     fn test_fallback_to_png_when_no_webp() {
         let temp_dir = TempDir::new().unwrap();
         let base = temp_dir.path();
@@ -936,9 +906,7 @@ mod tests {
             eprintln!("Skipping test: textures directory not found");
             return;
         }
-        let home = dirs::home_dir().unwrap_or_default();
-        let mut mgr = TextureManager::new(&textures_path)
-            .with_interface_path(home.join("Projects/wow/Interface"));
+        let mut mgr = TextureManager::new(&textures_path);
 
         mgr.preload_talent_textures(790);
         mgr.preload_talent_panel_textures("Paladin");
@@ -1027,9 +995,7 @@ mod tests {
             eprintln!("Skipping test: textures directory not found");
             return;
         }
-        let home = dirs::home_dir().unwrap_or_default();
-        let mut mgr = TextureManager::new(&textures_path)
-            .with_interface_path(home.join("Projects/wow/Interface"));
+        let mut mgr = TextureManager::new(&textures_path);
         mgr.preload_talent_textures(790);
 
         let missing = find_uncached_talent_icons(&mgr, 790);
