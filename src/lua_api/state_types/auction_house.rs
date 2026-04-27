@@ -124,6 +124,40 @@ pub struct CommoditySearchResultInfo {
     pub contains_account_item: bool,
 }
 
+/// One sort spec from the `sorts` table accepted by `SendBrowseQuery`,
+/// `SendSearchQuery`, `SendSellSearchQuery`, and `SearchForFavorites`.
+/// Matches retail's `AuctionHouseSortType` shape.
+#[derive(Debug, Clone)]
+pub struct AuctionSortSpec {
+    /// Numeric `Enum.AuctionHouseSortOrder` (column index).
+    pub sort_order: i32,
+    pub reverse_sort: bool,
+}
+
+/// One row from `BrowseQuery.itemClassFilters`. Mirrors retail's
+/// `AuctionHouseItemClassFilter` struct.
+#[derive(Debug, Clone)]
+pub struct AuctionItemClassFilter {
+    pub class_id: i32,
+    pub sub_class_id: Option<i32>,
+    pub inventory_type: Option<i32>,
+}
+
+/// Captured `BrowseQuery` payload stored into
+/// `state.auction_last_browse_query` when `SendBrowseQuery` runs. Mirrors
+/// retail's `AuctionHouseBrowseQuery` struct so tests can introspect the
+/// most-recent query exactly the way the addon submitted it.
+#[derive(Debug, Clone, Default)]
+pub struct BrowseQuery {
+    pub search_string: String,
+    pub sorts: Vec<AuctionSortSpec>,
+    pub min_level: Option<i32>,
+    pub max_level: Option<i32>,
+    /// `Enum.AuctionHouseFilter` ids.
+    pub filters: Vec<i32>,
+    pub item_class_filters: Vec<AuctionItemClassFilter>,
+}
+
 /// One row of the player's active bid list (Bids tab). Drives
 /// `C_AuctionHouse.GetNumBids` / `GetBidInfo`. The bidder field uses
 /// the same shape Blizzard expects from `GetBidStatus`: nil = no bid,

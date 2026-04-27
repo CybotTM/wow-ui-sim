@@ -217,6 +217,9 @@ macro_rules! build_empty_sim_state {
             auction_bids: Vec::new(),
             auction_item_searches: ::std::collections::HashMap::new(),
             auction_commodity_searches: ::std::collections::HashMap::new(),
+            auction_sell_search_results: ::std::collections::HashMap::new(),
+            auction_last_browse_query: None,
+            auction_favorites: Vec::new(),
             auction_throttle_ready: true,
             auction_should_auto_populate_price: true,
             mythic_plus: MythicPlusState::default(),
@@ -281,15 +284,16 @@ use super::game_data::{
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
     AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
-    AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
-    ChatBubble, CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo,
-    CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember,
-    GuildRank, ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo,
-    LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect,
-    MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
-    MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
-    OwnedAuction, PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep,
-    SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
+    AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionSortSpec, BagItem,
+    BidAuction, BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommoditySearchResultInfo,
+    CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin,
+    DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey,
+    ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
+    LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
+    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
+    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
+    PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
+    SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1608,6 +1612,22 @@ pub struct SimState {
     /// Empty by default — tests seed directly via
     /// `state.auction_commodity_searches.insert(...)`.
     pub auction_commodity_searches: ::std::collections::HashMap<i32, CommoditySearchResults>,
+    /// Per-`ItemKey` sell-side search-result buckets. Drives
+    /// `C_AuctionHouse.SendSellSearchQuery` — kept separate from
+    /// `auction_item_searches` so opening the seller tab does not
+    /// reuse the buyer-tab cache. Empty by default — tests seed
+    /// directly via `state.auction_sell_search_results.insert(...)`.
+    pub auction_sell_search_results: ::std::collections::HashMap<ItemSearchKey, ItemSearchResults>,
+    /// Most-recent `BrowseQuery` payload supplied to `SendBrowseQuery`.
+    /// `None` until the first browse-query call. Tests can introspect
+    /// this to verify the addon submitted the expected filter shape.
+    pub auction_last_browse_query: Option<BrowseQuery>,
+    /// Item keys the player has favorited. Drives the favorites-aware
+    /// helpers (currently `SearchForFavorites` only re-emits the
+    /// browse-results event, but future favorites work — `IsFavoriteItem`,
+    /// `HasFavorites`, `SetFavoriteItem` — will read/write this list).
+    /// Empty by default.
+    pub auction_favorites: Vec<ItemSearchKey>,
     /// Drives `C_AuctionHouse.IsThrottledMessageSystemReady`. The live
     /// client clears this briefly while a query is in-flight; the sim
     /// has no real throttle, so it stays true unless a test toggles it.
