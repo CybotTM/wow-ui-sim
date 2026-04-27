@@ -197,6 +197,7 @@ macro_rules! build_empty_sim_state {
             gossip: GossipState::default(),
             torghast: TorghastState::default(),
             titles: Vec::new(),
+            current_title: -1,
             shapeshift_forms: Vec::new(),
             shapeshift_cooldowns: ::std::collections::HashMap::new(),
             pet_actions: vec![PetActionSlot::default(); 10],
@@ -1591,8 +1592,12 @@ pub struct SimState {
     /// `IsOnGroundFloorInJailersTower()`. Defaults to inactive / floor 0.
     pub torghast: TorghastState,
     /// Title names the player has unlocked, in display order. Drives
-    /// `GetNumTitles` / `GetTitleName(index)`. Empty by default.
+    /// `GetNumTitles` / `GetTitleName(index)` / `IsTitleKnown(index)`.
     pub titles: Vec<String>,
+    /// Currently-active title index (1-based into `titles`), or `-1` when
+    /// the player has no title selected. Drives `GetCurrentTitle` /
+    /// `SetCurrentTitle`. Defaults to `-1`.
+    pub current_title: i32,
     /// Currently-available shapeshift forms (druid / shaman / priest
     /// tokens). Drives `GetNumShapeshiftForms`, `GetShapeshiftFormInfo`,
     /// `CastShapeshiftForm`, and the StanceBar mixin. Empty by default;
@@ -2697,6 +2702,13 @@ impl SimState {
         self.player.power = 50_000;
         self.player.power_max = 100_000;
         self.player.buffs = default_player_buffs();
+        self.titles = vec![
+            "the Patient".to_string(),
+            "the Explorer".to_string(),
+            "Champion of the Naaru".to_string(),
+            "Hand of A'dal".to_string(),
+            "the Argent Champion".to_string(),
+        ];
     }
 
     fn new_empty() -> Self {
