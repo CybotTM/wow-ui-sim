@@ -275,6 +275,33 @@ fn startup_party_chat_and_targeting_globals_are_callable() {
 }
 
 #[test]
+fn set_raid_target_globals_are_callable_no_ops() {
+    let env = env();
+    let (set_target_ok, set_icon_ok, clear_ok, invalid_unit_ok): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local setTargetOk = pcall(function() SetRaidTarget("player", 5) end)
+            local setIconOk = pcall(function() SetRaidTargetIcon("player", 8) end)
+            local clearOk = pcall(function() SetRaidTarget("player", 0) end)
+            local invalidOk = pcall(function() SetRaidTarget("notaunit", 1) end)
+            return setTargetOk, setIconOk, clearOk, invalidOk
+            "#,
+        )
+        .expect("SetRaidTarget/SetRaidTargetIcon should be registered globals");
+
+    assert!(set_target_ok, "SetRaidTarget should accept (unit, marker)");
+    assert!(
+        set_icon_ok,
+        "SetRaidTargetIcon should be the legacy alias of SetRaidTarget"
+    );
+    assert!(clear_ok, "SetRaidTarget(unit, 0) should clear without error");
+    assert!(
+        invalid_unit_ok,
+        "SetRaidTarget should silently no-op on unknown unit tokens"
+    );
+}
+
+#[test]
 fn startup_lfg_world_timer_and_bn_surfaces_return_empty_safe_shapes() {
     let env = env();
     let (

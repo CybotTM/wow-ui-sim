@@ -13,6 +13,8 @@
 //! | `ClearFocus`         | `PLAYER_FOCUS_CHANGED`     |
 //! | `CanBeRaidTarget`    | none (query only)          |
 //! | `GetRaidTargetIndex` | none (query only)          |
+//! | `SetRaidTarget`      | `RAID_TARGET_UPDATE`       |
+//! | `SetRaidTargetIcon`  | `RAID_TARGET_UPDATE`       |
 //! | `TargetLastTarget`   | `PLAYER_TARGET_CHANGED`    |
 //! | `TargetNearestEnemy` | `PLAYER_TARGET_CHANGED`    |
 //! | `TargetNearestFriend`| `PLAYER_TARGET_CHANGED`    |
@@ -307,6 +309,27 @@ pub fn get_raid_target_index(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `SetRaidTarget(unit, marker)` — assign a raid marker (1-8, or 0 to clear).
+///
+/// The simulator does not model per-unit markers, so this is a no-op that
+/// fires `RAID_TARGET_UPDATE` for valid tokens. Matches Blizzard slash command
+/// `/tm` and the raid-marker key bindings in `Bindings_Mists.xml`.
+pub fn set_raid_target(state: &mut LuaState) -> LuaResult<u32> {
+    let token = match Option::<String>::from_stack(state, 1)? {
+        Some(t) => t,
+        None => return Ok(0),
+    };
+    if resolve_token_to_target_info(state, &token)?.is_none() {
+        return Ok(0);
+    }
+    borrow_state_mut(state)?.events.push(Event {
+        name: "RAID_TARGET_UPDATE".to_string(),
+        args: Vec::new(),
+    });
+    fire_event_now(state, "RAID_TARGET_UPDATE", &[]);
+    Ok(0)
+}
+
 /// `TargetLastTarget()` — swap `current_target` ↔ `previous_target`.
 pub fn target_last_target(state: &mut LuaState) -> LuaResult<u32> {
     let has_previous = borrow_state_mut(state)?.previous_target.is_some();
@@ -428,6 +451,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     table_set_rust_fn_static(state, g, "ClearFocus", clear_focus)?;
     table_set_rust_fn_static(state, g, "CanBeRaidTarget", can_be_raid_target)?;
     table_set_rust_fn_static(state, g, "GetRaidTargetIndex", get_raid_target_index)?;
+    table_set_rust_fn_static(state, g, "SetRaidTarget", set_raid_target)?;
+    table_set_rust_fn_static(state, g, "SetRaidTargetIcon", set_raid_target)?;
     table_set_rust_fn_static(state, g, "TargetLastTarget", target_last_target)?;
     table_set_rust_fn_static(state, g, "TargetNearestEnemy", target_nearest_enemy)?;
     table_set_rust_fn_static(state, g, "TargetNearestFriend", target_nearest_friend)?;
