@@ -225,6 +225,7 @@ macro_rules! build_empty_sim_state {
             commodity_purchase_quote: None,
             auction_throttle_ready: true,
             auction_should_auto_populate_price: true,
+            wow_token: WowTokenState::default(),
             mythic_plus: MythicPlusState::default(),
             character_services: CharacterServicesState::default(),
             scenario: ScenarioState::default(),
@@ -297,7 +298,7 @@ pub use super::state_types::{
     MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
     MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
     PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, WorldState,
+    SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1655,6 +1656,10 @@ pub struct SimState {
     /// Drives `C_AuctionHouse.ShouldAutoPopulatePrice`. Mirrors the
     /// per-account toggle in the live client.
     pub auction_should_auto_populate_price: bool,
+    /// `C_WowTokenPublic` backing state. Default values match retail
+    /// "commerce up, no listings, no tokens owned" so callers see the
+    /// same shape they'd get on a fresh login.
+    pub wow_token: WowTokenState,
     /// Mythic+ probe state. Drives `C_MythicPlus.*` methods. Seeded
     /// with season 14, affix id=9 (Tyrannical), no run history, no
     /// owned key (level 0), no weekly best.

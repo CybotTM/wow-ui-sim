@@ -4482,17 +4482,6 @@ C_Calendar = __wow_merge_namespace(C_Calendar, {
   end,
 })
 
-C_WowTokenPublic = __wow_merge_namespace(C_WowTokenPublic, {
-  GetCommerceSystemStatus = function() return false, 0, false end,
-  UpdateTokenCount = __wow_noop,
-  GetCurrentMarketPrice = function() return 0, 0 end,
-  GetGuaranteedPrice = function() return 0 end,
-  BuyToken = __wow_noop,
-  UpdateListedAuctionableTokens = __wow_noop,
-  UpdateMarketPrice = __wow_noop,
-  IsAuctionableWowToken = function() return false end,
-})
-
 C_WowTokenSecure = __wow_merge_namespace(C_WowTokenSecure, {
   CancelRedeem = __wow_noop,
   GetBalanceRedeemAmount = function() return 0 end,

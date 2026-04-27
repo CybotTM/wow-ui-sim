@@ -7,6 +7,7 @@ pub mod crafting;
 pub mod mythic_plus_scenario;
 pub mod runtime;
 pub mod social;
+pub mod wow_token;
 
 pub use crate::lua_api::timer_layout::RiluaPendingTimer as PendingTimer;
 pub use character_world::*;
@@ -18,3 +19,4 @@ pub use mythic_plus_scenario::{
 };
 pub use runtime::*;
 pub use social::*;
+pub use wow_token::{TokenAuctionInfo, WowTokenState};
