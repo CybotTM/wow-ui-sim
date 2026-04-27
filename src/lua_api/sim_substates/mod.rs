@@ -10,12 +10,17 @@ mod archaeology;
 mod arrow_callouts;
 mod gardenweald;
 mod quest_log;
+mod viewed_artifact;
 mod wow_labs;
 
 pub use archaeology::{ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, SelectedArtifact};
 pub use arrow_callouts::{ArrowCalloutInfo, ArrowCalloutState};
 pub use gardenweald::GardenwealdState;
 pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem};
+pub use viewed_artifact::{
+    ArtifactAppearanceInfo, ArtifactAppearanceSetInfo, ArtifactArtInfo, ArtifactPowerInfo,
+    ColorRgb, MetaPowerEntry, RelicSlotInfo, ViewedArtifactState,
+};
 pub use wow_labs::{
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,

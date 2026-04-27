@@ -1,6 +1,6 @@
 use super::ensure_namespace;
 use super::item_spell::parse_prefixed_id;
-use crate::lua_api::methods::{create_table, table_get, table_set, val_to_string};
+use crate::lua_api::methods::{borrow_state, create_table, table_get, table_set, val_to_string};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -362,12 +362,30 @@ fn c_item_socket_info_has_bound_gem_proposed(state: &mut LuaState) -> LuaResult<
     Ok(1)
 }
 
+/// `IsArtifactRelicItem(item)` returns true when `item` resolves to an
+/// id present in the simulator-side `state.artifact_relic_items` set.
+/// The legacy Lua-side `socketState.artifactRelicItemIDs` table is also
+/// consulted as a fallback so existing tests and addon code that seed
+/// the namespace's `_state` directly continue to work.
 fn c_item_socket_info_is_artifact_relic_item(state: &mut LuaState) -> LuaResult<u32> {
-    let socket_state = ensure_socket_state_table(state);
-    let relic_ids = table_get(state, socket_state, "artifactRelicItemIDs");
-    let is_relic = item_id_from_val(state, stack_val(state, 1))
-        .map(|item_id| table_array_has_true(state, relic_ids, item_id as i32))
-        .unwrap_or(false);
+    let argument = stack_val(state, 1);
+    let item_id = item_id_from_val(state, argument);
+    let is_relic = match item_id {
+        Some(id) => artifact_relic_lookup(state, id),
+        None => false,
+    };
     state.push(Val::Bool(is_relic));
     Ok(1)
+}
+
+fn artifact_relic_lookup(state: &mut LuaState, item_id: u32) -> bool {
+    let known_in_state = borrow_state(state)
+        .map(|st| st.artifact_relic_items.contains(&(item_id as i32)))
+        .unwrap_or(false);
+    if known_in_state {
+        return true;
+    }
+    let socket_state = ensure_socket_state_table(state);
+    let relic_ids = table_get(state, socket_state, "artifactRelicItemIDs");
+    table_array_has_true(state, relic_ids, item_id as i32)
 }

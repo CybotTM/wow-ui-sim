@@ -167,6 +167,9 @@ macro_rules! build_empty_sim_state {
             archaeology: ArchaeologyState::default(),
             arrow_callouts: ArrowCalloutState::default(),
             gardenweald: GardenwealdState::default(),
+            viewed_artifact: ViewedArtifactState::default(),
+            relic_forge_at_forge: false,
+            artifact_relic_items: HashSet::new(),
             quest_log: Vec::new(),
             quest_log_entries: QuestLogState::seeded(),
             pending_quest_offer: None,
@@ -1400,6 +1403,23 @@ pub struct SimState {
     /// landing-page section stays hidden until a test or admin verb
     /// flips it.
     pub gardenweald: GardenwealdState,
+    /// Backing record for the panel-side `C_ArtifactUI` surface read by
+    /// `Blizzard_ArtifactUI`. `info` left as `None` keeps every
+    /// `MayReturnNothing` panel getter (`GetArtifactInfo`,
+    /// `GetArtifactArtInfo`, etc.) returning zero values, matching the
+    /// "no artifact viewed" branch the addon's mixins guard against.
+    pub viewed_artifact: ViewedArtifactState,
+    /// Whether the player is at the artifact relic-forge NPC. Drives
+    /// `C_ArtifactRelicForgeUI.IsAtForge`. The artifact panel's
+    /// `OnEvent` branch at `Blizzard_ArtifactUI.lua:115-117` reads this
+    /// to decide whether `ARTIFACT_UPDATE` should auto-show the panel.
+    pub relic_forge_at_forge: bool,
+    /// Item ids the simulator should treat as artifact relic items.
+    /// Drives `C_ItemSocketInfo.IsArtifactRelicItem`. The artifact
+    /// panel's bag hover branch at
+    /// `Blizzard_ArtifactUI.lua:270-296` consults this set to decide
+    /// whether to highlight a relic slot.
+    pub artifact_relic_items: HashSet<i32>,
     /// Active quests in the player's log (quest IDs). Order reflects
     /// accept order. Drives `GetNumQuestLogEntries` and the quest-verbs
     /// module in `globals/quest_verbs.rs`.
@@ -1716,14 +1736,15 @@ pub struct SimState {
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
     ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, ArrowCalloutInfo, ArrowCalloutState,
-    BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow,
+    ArtifactAppearanceInfo, ArtifactAppearanceSetInfo, ArtifactArtInfo, ArtifactPowerInfo,
+    BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow, ColorRgb,
     FactionEntry, GameRuleValue, GameRulesState, GardenwealdState, GossipOption, GossipQuestRow,
-    GossipState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys,
-    MouseButtons, NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState,
-    QuestRewardCurrency, QuestRewardItem, SelectedArtifact, TorghastState, TradeState,
-    VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
-    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
-    WowLabsPoint, WowLabsState,
+    GossipState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, MetaPowerEntry,
+    ModifierKeys, MouseButtons, NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry,
+    QuestLogState, QuestRewardCurrency, QuestRewardItem, RelicSlotInfo, SelectedArtifact,
+    TorghastState, TradeState, ViewedArtifactState, VoiceChannel, VoiceChatState, VoiceMember,
+    WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
+    WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 #[derive(Default)]
