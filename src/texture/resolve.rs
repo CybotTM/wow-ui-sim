@@ -12,7 +12,8 @@ static CASC_INITIALIZED: OnceLock<bool> = OnceLock::new();
 #[cfg(feature = "casc")]
 fn casc_enabled() -> bool {
     *CASC_INITIALIZED.get_or_init(|| {
-        if std::env::var("WOW_SIM_CASC").ok().as_deref() != Some("1") {
+        // Opt-out: WOW_SIM_CASC=0 disables. Anything else (or unset) enables.
+        if std::env::var("WOW_SIM_CASC").ok().as_deref() == Some("0") {
             return false;
         }
         // asset-resolver looks for its data dir via GAME_ENGINE_SHARED_ROOT.
@@ -28,7 +29,8 @@ fn casc_enabled() -> bool {
                 }
             }
         }
-        true
+        // Require the WoW install to be present, otherwise no point trying.
+        std::path::Path::new("/syncthing/World of Warcraft/Data").exists()
     })
 }
 
@@ -174,6 +176,10 @@ impl TextureManager {
             return Some(result);
         }
 
+        if let Some(result) = try_casc_resolve(normalized_path) {
+            return Some(result);
+        }
+
         let path = if normalized_path.len() >= 10
             && normalized_path[..10].eq_ignore_ascii_case("Interface/")
         {
@@ -189,10 +195,6 @@ impl TextureManager {
         }
 
         if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {
-            return Some(result);
-        }
-
-        if let Some(result) = try_casc_resolve(normalized_path) {
             return Some(result);
         }
 
