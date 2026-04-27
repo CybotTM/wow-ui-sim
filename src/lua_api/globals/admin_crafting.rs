@@ -1,14 +1,18 @@
 //! Rilua A_Admin handlers — Crafting / profession seeding.
 //!
 //! Provides `LearnRecipe`, `UnlearnRecipe`, `ClearKnownRecipes`,
-//! `SetSelectedProfession`, plus the higher-level reagent seeders
-//! `SetReagentCount` and `SeedReagentsForRecipe` that bypass the
-//! per-`(bag, slot)` bookkeeping the generic `A_Admin.AddBagItem`
-//! requires — the Professions crafting page just needs "the player
-//! has N of item X", not a specific slot.
+//! `SetSelectedProfession`, `UnlearnProfession`, `RelearnProfession`,
+//! plus the higher-level reagent seeders `SetReagentCount` and
+//! `SeedReagentsForRecipe` that bypass the per-`(bag, slot)` bookkeeping
+//! the generic `A_Admin.AddBagItem` requires — the Professions crafting
+//! page just needs "the player has N of item X", not a specific slot.
 
+use crate::lua_api::globals::missing_surface::professions::{
+    abandon_profession_impl, relearn_profession_impl,
+};
 use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state::BagItem;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -45,6 +49,20 @@ pub(super) fn set_selected_profession(state: &mut LuaState) -> LuaResult<u32> {
         _ => None,
     };
     borrow_state_mut(state)?.crafting.selected_profession_id = id;
+    Ok(0)
+}
+
+pub(super) fn unlearn_profession(state: &mut LuaState) -> LuaResult<u32> {
+    let skill_line_id = i32::from_stack(state, 1)?;
+    abandon_profession_impl(state, skill_line_id);
+    fire_named_event_state(state, "SKILL_LINES_CHANGED", &[]);
+    Ok(0)
+}
+
+pub(super) fn relearn_profession(state: &mut LuaState) -> LuaResult<u32> {
+    let skill_line_id = i32::from_stack(state, 1)?;
+    relearn_profession_impl(state, skill_line_id);
+    fire_named_event_state(state, "SKILL_LINES_CHANGED", &[]);
     Ok(0)
 }
 

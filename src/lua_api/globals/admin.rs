@@ -39,8 +39,8 @@ use super::admin_collections::{
     uncollect_mount, uncollect_pet, uncollect_toy,
 };
 use super::admin_crafting::{
-    clear_known_recipes, learn_recipe, seed_reagents_for_recipe, set_reagent_count,
-    set_selected_profession, unlearn_recipe,
+    clear_known_recipes, learn_recipe, relearn_profession, seed_reagents_for_recipe,
+    set_reagent_count, set_selected_profession, unlearn_profession, unlearn_recipe,
 };
 use super::admin_encounter::{end_loot_roll, simulate_boss_kill, start_loot_roll};
 use super::admin_equipment::{equip_item, unequip_item};
@@ -306,6 +306,8 @@ fn register_crafting(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function("UnlearnRecipe", unlearn_recipe)?
         .set_function("ClearKnownRecipes", clear_known_recipes)?
         .set_function("SetSelectedProfession", set_selected_profession)?
+        .set_function("UnlearnProfession", unlearn_profession)?
+        .set_function("RelearnProfession", relearn_profession)?
         .set_function("SetReagentCount", set_reagent_count)?
         .set_function("SeedReagentsForRecipe", seed_reagents_for_recipe)?
         .set_function("RegisterTestAddon", register_test_addon)

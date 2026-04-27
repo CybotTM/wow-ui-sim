@@ -361,3 +361,91 @@ fn seed_reagents_for_unknown_recipe_returns_false() {
         "SeedReagentsForRecipe with unknown id should return false"
     );
 }
+
+#[test]
+fn abandon_skill_removes_profession_from_get_professions() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Before: both primaries present.
+            local p1, p2 = GetProfessions()
+            if p1 == nil or p2 == nil then return "before_missing p1=" .. tostring(p1) .. " p2=" .. tostring(p2) end
+
+            -- Abandon Blacksmithing (skill_line_id 164, PROFESSIONS index 1).
+            AbandonSkill(164)
+
+            local a1, a2 = GetProfessions()
+            -- Mining survives at slot 1 (index 2 in PROFESSIONS array).
+            if a1 ~= 2 then return "slot1=" .. tostring(a1) end
+            if a2 ~= nil then return "slot2_not_nil=" .. tostring(a2) end
+
+            -- GetProfessionInfo for the abandoned index returns nil.
+            local info = GetProfessionInfo(1)
+            if info ~= nil then return "info_not_nil=" .. tostring(info) end
+
+            -- C_TradeSkillUI.GetProfessions no longer contains 164.
+            local profs = C_TradeSkillUI.GetProfessions()
+            for _, v in ipairs(profs) do
+                if v == 164 then return "164_still_present" end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "AbandonSkill(164) should remove Blacksmithing from all profession queries: {result}"
+    );
+}
+
+#[test]
+fn relearn_profession_round_trip() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.UnlearnProfession(164)
+            local a1, a2 = GetProfessions()
+            if a1 ~= 2 then return "after_unlearn slot1=" .. tostring(a1) end
+            if a2 ~= nil then return "after_unlearn slot2=" .. tostring(a2) end
+
+            A_Admin.RelearnProfession(164)
+            local b1, b2 = GetProfessions()
+            if b1 == nil or b2 == nil then return "after_relearn missing b1=" .. tostring(b1) .. " b2=" .. tostring(b2) end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "UnlearnProfession/RelearnProfession round trip: {result}"
+    );
+}
+
+#[test]
+fn abandon_skill_clears_selection_when_selected_unlearned() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.SetSelectedProfession(164)
+            AbandonSkill(164)
+
+            -- GetChildProfessionInfo should not return Blacksmithing.
+            local info = C_TradeSkillUI.GetChildProfessionInfo()
+            if info ~= nil and info.skillLineID == 164 then
+                return "still_selected skill_line=" .. tostring(info.skillLineID)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "AbandonSkill should clear selection when the abandoned profession was selected: {result}"
+    );
+}

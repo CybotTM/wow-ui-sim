@@ -16,4 +16,7 @@ pub struct CraftingState {
     /// `A_Admin.LearnRecipe(id)` / `UnlearnRecipe(id)`. Drives
     /// `C_TradeSkillUI.IsRecipeLearned(id)`.
     pub known_recipe_ids: HashSet<i32>,
+    /// Professions the player has abandoned. Populated by `AbandonSkill(skillLine)`
+    /// and `A_Admin.UnlearnProfession(skillLineId)`. Filters all profession queries.
+    pub unlearned_profession_ids: HashSet<i32>,
 }
