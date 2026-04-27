@@ -109,6 +109,9 @@ pub struct AddonInfo {
     pub load_time_secs: f64,
     /// Runtime profiler metrics (updated per frame).
     pub runtime: AddonRuntimeMetrics,
+    /// Required dependencies declared in TOC (`Dependencies` / `RequiredDep` / `RequiredDeps`).
+    /// Surfaced to Lua via `C_AddOns.GetAddOnDependencies` as a variadic of strings.
+    pub dependencies: Vec<String>,
 }
 
 /// A collected Lua error with optional addon attribution.

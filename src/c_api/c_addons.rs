@@ -82,6 +82,12 @@ fn register_c_addons_queries(
     table_set_rust_fn_static(
         state,
         t,
+        "GetAddOnDependencies",
+        c_addons_get_addon_dependencies,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        t,
         "GetScriptsDisallowedForBeta",
         c_addons_get_scripts_disallowed_for_beta,
     )?;
@@ -481,6 +487,21 @@ fn c_addons_get_addon_security(state: &mut LuaState) -> LuaResult<u32> {
 fn c_addons_get_scripts_disallowed_for_beta(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
     Ok(1)
+}
+
+/// `C_AddOns.GetAddOnDependencies(indexOrName) → ...string`
+///
+/// Returns one return value per declared dependency from the addon's TOC
+/// (variadic, NOT a table). Used by the addon list to walk LOD readiness
+/// and to render the dependency line in the addon tooltip. Unknown addon
+/// or empty deps → no return values (nothing pushed).
+fn c_addons_get_addon_dependencies(state: &mut LuaState) -> LuaResult<u32> {
+    let deps = with_addon(state, stack_val(state, 1), |a| a.dependencies.clone()).unwrap_or_default();
+    for dep in &deps {
+        let val = create_string(state, dep);
+        state.push(val);
+    }
+    Ok(deps.len() as u32)
 }
 
 fn c_addons_is_addon_version_check_enabled(state: &mut LuaState) -> LuaResult<u32> {

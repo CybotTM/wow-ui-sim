@@ -4,7 +4,7 @@ use super::state::AddonInfo;
 use crate::toc::TocFile;
 
 fn addon_info_from_toc(name: &str, toc: Option<&TocFile>) -> AddonInfo {
-    let (title, notes, load_on_demand, use_secure_env) = toc
+    let (title, notes, load_on_demand, use_secure_env, dependencies) = toc
         .map(|t| {
             let title = t
                 .metadata
@@ -17,9 +17,9 @@ fn addon_info_from_toc(name: &str, toc: Option<&TocFile>) -> AddonInfo {
                 .get("LoadOnDemand")
                 .map(|v| v == "1")
                 .unwrap_or(false);
-            (title, notes, lod, t.is_secure_env())
+            (title, notes, lod, t.is_secure_env(), t.dependencies())
         })
-        .unwrap_or_else(|| (name.to_string(), String::new(), false, false));
+        .unwrap_or_else(|| (name.to_string(), String::new(), false, false, Vec::new()));
     AddonInfo {
         folder_name: name.to_string(),
         title,
@@ -27,6 +27,7 @@ fn addon_info_from_toc(name: &str, toc: Option<&TocFile>) -> AddonInfo {
         enabled: true,
         load_on_demand,
         use_secure_env,
+        dependencies,
         ..Default::default()
     }
 }

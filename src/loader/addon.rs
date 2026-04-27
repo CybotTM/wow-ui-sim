@@ -120,7 +120,7 @@ pub fn load_addon_internal(
     };
 
     maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
-    let _loading_guard = register_loading_addon(env, folder_name, toc.is_secure_env());
+    let _loading_guard = register_loading_addon(env, folder_name, toc);
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
     let addon_name = result.name.clone();
@@ -562,7 +562,7 @@ fn build_addon_context<'a>(
 fn register_loading_addon(
     env: &LoaderEnv<'_>,
     folder_name: &str,
-    use_secure_env: bool,
+    toc: &TocFile,
 ) -> LoadingAddonGuard {
     // Track the current addon on a stack so nested LoadAddOn calls can see
     // ancestor loaders and short-circuit reentrant cycles.
@@ -571,7 +571,8 @@ fn register_loading_addon(
     state.loading_addon_stack.push(addon_idx);
     state.loading_addon_index = Some(addon_idx);
     if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
-        addon.use_secure_env = use_secure_env;
+        addon.use_secure_env = toc.is_secure_env();
+        addon.dependencies = toc.dependencies();
     }
     LoadingAddonGuard {
         state: Rc::clone(env.state()),
