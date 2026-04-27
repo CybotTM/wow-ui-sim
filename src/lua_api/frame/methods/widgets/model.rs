@@ -141,6 +141,27 @@ pub(super) fn set_display_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// Records `displayID` on the actor handle, mirroring
+/// `Actor:SetModelByCreatureDisplayID` from
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneActorMixin.lua`.
+/// The optional `useCachedModelIfAvailable` flag is stored verbatim — the
+/// simulator's 3D path is intentionally stubbed, so the flag never drives
+/// a real renderer; tests still see the value the addon passed.
+pub(super) fn set_model_by_creature_display_id(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let display_id = val_to_f64(stack_val(state, 2)) as i32;
+    let use_cached = opt_bool(state, 3).unwrap_or(false);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut_visual(id) {
+        f.model_path = None;
+        f.model_file_id = None;
+        f.model_appearance.display_info = Some(display_id);
+        f.model_appearance.creature_id = None;
+        f.model_appearance.use_cached_model = use_cached;
+    }
+    Ok(0)
+}
+
 pub(super) fn set_creature(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let creature_id = val_to_f64(stack_val(state, 2)) as i32;
@@ -1281,6 +1302,10 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("ApplySpellVisualKit", apply_spell_visual_kit),
     ("SetDisplayInfo", set_display_info),
     ("GetDisplayInfo", get_display_info),
+    (
+        "SetModelByCreatureDisplayID",
+        set_model_by_creature_display_id,
+    ),
     ("SetCreature", set_creature),
     ("ClearModel", clear_model),
     ("GetModelFileID", get_model_file_id),

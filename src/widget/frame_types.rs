@@ -121,6 +121,11 @@ pub struct ModelAppearanceState {
     pub sequence_time_ms: Option<i32>,
     pub refresh_unit_count: u32,
     pub refresh_camera_count: u32,
+    /// Set by `Actor:SetModelByCreatureDisplayID(displayID, useCached)`.
+    /// Recorded so addons that round-trip the flag (e.g.
+    /// `Blizzard_AlliedRacesFrameUI:UpdateModel`) can observe it; the
+    /// simulator's 3D path never reads it because rendering is stubbed.
+    pub use_cached_model: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
