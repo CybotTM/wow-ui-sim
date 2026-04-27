@@ -29,6 +29,7 @@ macro_rules! build_empty_sim_state {
             system_chat_log: Vec::new(),
             adventure_map: AdventureMapState::default(),
             anima_diversion: AnimaDiversionState::default(),
+            garrison_talents: GarrisonTalentState::default(),
             quest_portrait_state: None,
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
@@ -841,6 +842,61 @@ pub struct AnimaDiversionState {
     pub last_selected_temporary: Option<bool>,
 }
 
+/// One currency-cost row on a Garrison talent — mirrors the official
+/// `GarrisonTalentCurrencyCostInfo` structure documented in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/GarrisonSharedDocumentation.lua`
+/// (lines 34-39). `Blizzard_AnimaDiversionUI/AnimaDiversionDataProvider.lua:289`
+/// iterates this list to compare against `GetCurrencyInfo(currencyType).quantity`.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct GarrisonTalentCurrencyCostInfo {
+    pub currency_type: i64,
+    pub currency_quantity: i64,
+}
+
+/// One Garrison talent descriptor — mirrors the official
+/// `GarrisonTalentInfo` documented in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/GarrisonSharedDocumentation.lua`
+/// (lines 43-73). The simulator surfaces only the fields that
+/// `Blizzard_AnimaDiversionUI` actually reads through
+/// `C_Garrison.GetTalentInfo` plus the formatter helper
+/// `GetGarrisonTalentCostString`. Field names use the canonical Blizzard
+/// names (`talent_max_rank` not `max_talent_rank`, `start_time` not
+/// `research_start_time`) so the Lua surface marshals into the official
+/// keys without translation.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct GarrisonTalentInfo {
+    pub id: i64,
+    pub name: String,
+    pub description: String,
+    pub icon: i64,
+    pub tier: i64,
+    pub ui_order: i64,
+    pub talent_rank: i64,
+    pub talent_max_rank: i64,
+    pub is_being_researched: bool,
+    pub researched: bool,
+    pub selected: bool,
+    pub perk_spell_id: i64,
+    pub talent_availability: i64,
+    pub research_duration: i64,
+    pub start_time: i64,
+    pub time_remaining: i64,
+    pub research_gold_cost: i64,
+    pub research_currency_costs: Vec<GarrisonTalentCurrencyCostInfo>,
+}
+
+/// Garrison-talent state backing `C_Garrison.GetTalentInfo` and
+/// `C_Garrison.GetTalentUnlockWorldQuest`. The lookups are keyed by
+/// talent id so seeding a single talent (`talents.insert(102, info)`)
+/// answers `GetTalentInfo(102)` directly. `unlock_world_quests` powers
+/// the unlock-quest probe used by `Blizzard_AnimaDiversionUI` to gate
+/// the "click to channel" branch and feed `HaveQuestRewardData`.
+#[derive(Clone, Debug, Default)]
+pub struct GarrisonTalentState {
+    pub talents: HashMap<i64, GarrisonTalentInfo>,
+    pub unlock_world_quests: HashMap<i64, i64>,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -872,6 +928,9 @@ pub struct SimState {
     pub adventure_map: AdventureMapState,
     /// Anima-diversion state backing the `C_AnimaDiversion` namespace.
     pub anima_diversion: AnimaDiversionState,
+    /// Garrison-talent state backing `C_Garrison.GetTalentInfo` /
+    /// `C_Garrison.GetTalentUnlockWorldQuest`.
+    pub garrison_talents: GarrisonTalentState,
     /// Most recent `QuestFrame_ShowQuestPortrait` args, or `None` after a
     /// `QuestFrame_HideQuestPortrait` call. Drives nothing at render
     /// time — it exists so admin probes / tests can assert the dialog

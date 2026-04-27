@@ -20,6 +20,7 @@ mod encoding_util;
 mod encounter_events;
 mod encounter_journal;
 mod friend_list;
+mod garrison;
 mod gossip_info;
 mod heirloom;
 mod item_socket_info;
@@ -219,6 +220,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     nameplate::register_nameplate_surface(state)?;
     ui_widget_manager::register_ui_widget_manager_surface(state)?;
     anima_diversion::register_anima_diversion_surface(state)?;
+    garrison::register_garrison_talent_surface(state)?;
     Ok(())
 }
 
