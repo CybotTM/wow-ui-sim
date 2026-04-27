@@ -84,6 +84,7 @@ pub const GLOBAL_QUEST_FUNCTIONS: &[(&'static str, SurfaceFn)] = &[
     ("GetQuestLogTimeLeft", get_quest_log_time_left),
     ("GetNumQuestLogRewards", return_zero),
     ("GetNumQuestLogChoices", return_zero),
+    ("GetQuestLogRewardInfo", get_quest_log_reward_info),
     ("GetQuestLogRewardMoney", return_zero),
     (
         "GetQuestLogRewardSkillPoints",

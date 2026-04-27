@@ -4,6 +4,7 @@
 //! `SimState.quest_log_entries` store.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::state::QuestRewardItem;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("WowLuaEnv init")
@@ -531,4 +532,145 @@ fn criteria_spell_globals_return_selected_quest_spell_data() {
     assert_eq!(criteria_result.1, "Flash of Light");
     assert_eq!(criteria_result.2, "Interface\\Icons\\Spell_Holy_FlashHeal");
     assert!(criteria_result.3);
+}
+
+// ── GetQuestLogRewardInfo ─────────────────────────────────────────────────────
+
+fn seed_reward_items_for(env: &WowLuaEnv, quest_id: i32, items: Vec<QuestRewardItem>) {
+    let mut st = env.state().borrow_mut();
+    let entry = st
+        .quest_log_entries
+        .entries
+        .iter_mut()
+        .find(|entry| entry.quest_id == quest_id)
+        .expect("seeded quest entry");
+    entry.reward_items = items;
+}
+
+fn seed_lost_expedition_one_reward(env: &WowLuaEnv) {
+    seed_reward_items_for(
+        env,
+        80000,
+        vec![QuestRewardItem {
+            name: "Earthen Lockbox".into(),
+            texture: "Interface\\Icons\\INV_Box_01".into(),
+            count: 1,
+            quality: 3,
+            is_usable: true,
+        }],
+    );
+}
+
+#[test]
+fn get_quest_log_reward_info_returns_seeded_item() {
+    let env = env();
+    seed_lost_expedition_one_reward(&env);
+
+    let (name, texture, count, quality, is_usable): (String, String, i32, i32, bool) = env
+        .eval("return GetQuestLogRewardInfo(1, 80000)")
+        .unwrap();
+
+    assert_eq!(name, "Earthen Lockbox");
+    assert_eq!(texture, "Interface\\Icons\\INV_Box_01");
+    assert_eq!(count, 1);
+    assert_eq!(quality, 3);
+    assert!(is_usable);
+}
+
+#[test]
+fn get_quest_log_reward_info_returns_nil_for_unknown_quest() {
+    let env = env();
+    let result: Option<bool> = env
+        .eval("local n = GetQuestLogRewardInfo(1, 999999); return n ~= nil or nil")
+        .unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn get_quest_log_reward_info_returns_nil_for_index_past_end() {
+    let env = env();
+    seed_lost_expedition_one_reward(&env);
+    let result: Option<bool> = env
+        .eval("local n = GetQuestLogRewardInfo(2, 80000); return n ~= nil or nil")
+        .unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn get_quest_log_reward_info_returns_nil_for_zero_index() {
+    let env = env();
+    seed_lost_expedition_one_reward(&env);
+    let result: Option<bool> = env
+        .eval("local n = GetQuestLogRewardInfo(0, 80000); return n ~= nil or nil")
+        .unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn get_quest_log_reward_info_returns_nil_when_no_rewards_seeded() {
+    let env = env();
+    let result: Option<bool> = env
+        .eval("local n = GetQuestLogRewardInfo(1, 80000); return n ~= nil or nil")
+        .unwrap();
+    assert!(result.is_none());
+}
+
+#[test]
+fn get_quest_log_reward_info_indexes_each_reward_independently() {
+    let env = env();
+    seed_reward_items_for(
+        &env,
+        80000,
+        vec![
+            QuestRewardItem {
+                name: "First Reward".into(),
+                texture: "Interface\\Icons\\INV_Misc_01".into(),
+                count: 1,
+                quality: 2,
+                is_usable: true,
+            },
+            QuestRewardItem {
+                name: "Second Reward".into(),
+                texture: "Interface\\Icons\\INV_Misc_02".into(),
+                count: 5,
+                quality: 4,
+                is_usable: false,
+            },
+        ],
+    );
+
+    let first: (String, String, i32, i32, bool) = env
+        .eval("return GetQuestLogRewardInfo(1, 80000)")
+        .unwrap();
+    assert_eq!(first.0, "First Reward");
+    assert_eq!(first.3, 2);
+    assert!(first.4);
+
+    let second: (String, String, i32, i32, bool) = env
+        .eval("return GetQuestLogRewardInfo(2, 80000)")
+        .unwrap();
+    assert_eq!(second.0, "Second Reward");
+    assert_eq!(second.2, 5);
+    assert_eq!(second.3, 4);
+    assert!(!second.4);
+}
+
+#[test]
+fn get_quest_log_reward_info_is_not_usable_field_round_trips_false() {
+    let env = env();
+    seed_reward_items_for(
+        &env,
+        80000,
+        vec![QuestRewardItem {
+            name: "Plate Helm".into(),
+            texture: "Interface\\Icons\\INV_Helm_01".into(),
+            count: 1,
+            quality: 4,
+            is_usable: false,
+        }],
+    );
+    let is_usable: bool = env
+        .eval("local _, _, _, _, u = GetQuestLogRewardInfo(1, 80000); return u")
+        .unwrap();
+    assert!(!is_usable);
 }

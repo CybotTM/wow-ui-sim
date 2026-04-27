@@ -30,6 +30,20 @@ pub struct QuestLogEntry {
     pub criteria_spell_name: Option<String>,
     pub criteria_spell_texture: Option<String>,
     pub criteria_spell_finished: bool,
+    /// Item rewards iterated by `GetNumQuestLogRewards` /
+    /// `GetQuestLogRewardInfo`. Empty for quests with no item rewards.
+    pub reward_items: Vec<QuestRewardItem>,
+}
+
+/// One item-shaped reward entry surfaced by `GetQuestLogRewardInfo`.
+/// `quality` is the `Enum.ItemQuality` ordinal (0=Poor … 7=Heirloom).
+#[derive(Debug, Clone)]
+pub struct QuestRewardItem {
+    pub name: String,
+    pub texture: String,
+    pub count: i32,
+    pub quality: i32,
+    pub is_usable: bool,
 }
 
 /// Backing state for `C_QuestLog.*` probes.
@@ -78,6 +92,7 @@ fn seed_quest_defaults() -> QuestLogEntry {
         criteria_spell_name: None,
         criteria_spell_texture: None,
         criteria_spell_finished: false,
+        reward_items: Vec::new(),
     }
 }
 

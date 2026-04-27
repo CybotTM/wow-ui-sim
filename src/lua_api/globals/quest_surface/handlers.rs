@@ -342,6 +342,33 @@ pub fn return_zero(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_quest_log_reward_info(state: &mut LuaState) -> LuaResult<u32> {
+    let item_index = i32::from_stack(state, 1)?;
+    let quest_id = i32::from_stack(state, 2)?;
+    if item_index < 1 {
+        return Ok(0);
+    }
+    let item = {
+        let sim = borrow_state(state)?;
+        sim.quest_log_entries
+            .entries
+            .iter()
+            .find(|entry| entry.quest_id == quest_id)
+            .and_then(|entry| entry.reward_items.get((item_index - 1) as usize).cloned())
+    };
+    let Some(item) = item else {
+        return Ok(0);
+    };
+    let name_val = create_string(state, &item.name);
+    let texture_val = create_string(state, &item.texture);
+    state.push(name_val);
+    state.push(texture_val);
+    state.push(Val::Num(item.count as f64));
+    state.push(Val::Num(item.quality as f64));
+    state.push(Val::Bool(item.is_usable));
+    Ok(5)
+}
+
 pub fn get_suggested_group_size(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
     Ok(1)
