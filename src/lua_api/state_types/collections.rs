@@ -272,6 +272,13 @@ pub struct MapData {
     /// uses Blizzard's UI convention where `top < bottom` (y grows
     /// downward, 0 = top edge). Empty for leaf maps.
     pub child_rects: Vec<MapChildRect>,
+    /// Normalized rect describing where this map sits inside its
+    /// `parent_map_id`'s coordinate space. `None` for root maps and
+    /// for any map whose placement on its parent is not seeded.
+    /// Drives `C_Map.GetMapRectOnMap`, which composes these rects up
+    /// the parent chain to project the map onto a non-direct
+    /// ancestor.
+    pub rect_on_parent: Option<MapRect>,
 }
 
 /// One entry in `MapData.child_rects`. The child whose rect contains a
@@ -279,6 +286,19 @@ pub struct MapData {
 #[derive(Debug, Clone, Copy)]
 pub struct MapChildRect {
     pub map_id: i32,
+    pub left: f64,
+    pub right: f64,
+    pub top: f64,
+    pub bottom: f64,
+}
+
+/// Normalized rect in some parent map's coordinate space. Used by
+/// `MapData.rect_on_parent` to position a child within its direct
+/// parent; `C_Map.GetMapRectOnMap` composes these up the chain.
+/// Follows Blizzard's UI convention where `top < bottom` (y grows
+/// downward, 0 = top edge).
+#[derive(Debug, Clone, Copy)]
+pub struct MapRect {
     pub left: f64,
     pub right: f64,
     pub top: f64,

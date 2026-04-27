@@ -2,7 +2,7 @@
 //! `SimState.player_map_position`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state::MapChildRect;
+use wow_ui_sim::lua_api::state::{MapChildRect, MapRect};
 
 fn seed_eastern_kingdoms_child_rects(env: &WowLuaEnv) {
     let mut state = env.state().borrow_mut();
@@ -303,6 +303,116 @@ fn get_map_info_at_position_skips_rect_pointing_to_unknown_child() {
         nret, 0,
         "A rect whose map_id is missing from state.maps must yield no return values"
     );
+}
+
+fn seed_stormwind_in_eastern_kingdoms_in_azeroth(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.maps.get_mut(&84).unwrap().rect_on_parent = Some(MapRect {
+        left: 0.40,
+        right: 0.55,
+        top: 0.60,
+        bottom: 0.75,
+    });
+    state.maps.get_mut(&13).unwrap().rect_on_parent = Some(MapRect {
+        left: 0.20,
+        right: 0.40,
+        top: 0.10,
+        bottom: 0.50,
+    });
+}
+
+#[test]
+fn get_map_rect_on_map_returns_identity_for_same_map() {
+    let env = env();
+    let (l, r, t, b): (f64, f64, f64, f64) =
+        env.eval("return C_Map.GetMapRectOnMap(84, 84)").unwrap();
+    assert!((l - 0.0).abs() < 1e-9);
+    assert!((r - 1.0).abs() < 1e-9);
+    assert!((t - 0.0).abs() < 1e-9);
+    assert!((b - 1.0).abs() < 1e-9);
+}
+
+#[test]
+fn get_map_rect_on_map_returns_rect_on_direct_parent() {
+    let env = env();
+    seed_stormwind_in_eastern_kingdoms_in_azeroth(&env);
+
+    let (l, r, t, b): (f64, f64, f64, f64) =
+        env.eval("return C_Map.GetMapRectOnMap(84, 13)").unwrap();
+    assert!((l - 0.40).abs() < 1e-9);
+    assert!((r - 0.55).abs() < 1e-9);
+    assert!((t - 0.60).abs() < 1e-9);
+    assert!((b - 0.75).abs() < 1e-9);
+}
+
+#[test]
+fn get_map_rect_on_map_composes_rect_up_through_grandparent() {
+    let env = env();
+    seed_stormwind_in_eastern_kingdoms_in_azeroth(&env);
+
+    let (l, r, t, b): (f64, f64, f64, f64) =
+        env.eval("return C_Map.GetMapRectOnMap(84, 946)").unwrap();
+    let span_x = 0.40 - 0.20;
+    let span_y = 0.50 - 0.10;
+    let expected_l = 0.20 + 0.40 * span_x;
+    let expected_r = 0.20 + 0.55 * span_x;
+    let expected_t = 0.10 + 0.60 * span_y;
+    let expected_b = 0.10 + 0.75 * span_y;
+    assert!((l - expected_l).abs() < 1e-9, "l: got {l}, want {expected_l}");
+    assert!((r - expected_r).abs() < 1e-9, "r: got {r}, want {expected_r}");
+    assert!((t - expected_t).abs() < 1e-9, "t: got {t}, want {expected_t}");
+    assert!((b - expected_b).abs() < 1e-9, "b: got {b}, want {expected_b}");
+}
+
+#[test]
+fn get_map_rect_on_map_returns_nothing_when_top_is_not_an_ancestor() {
+    let env = env();
+    seed_stormwind_in_eastern_kingdoms_in_azeroth(&env);
+
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapRectOnMap(84, 1))")
+        .unwrap();
+    assert_eq!(nret, 0, "Dun Morogh is not an ancestor of Stormwind");
+}
+
+#[test]
+fn get_map_rect_on_map_returns_nothing_when_chain_link_missing_rect() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.maps.get_mut(&84).unwrap().rect_on_parent = Some(MapRect {
+            left: 0.4,
+            right: 0.5,
+            top: 0.6,
+            bottom: 0.7,
+        });
+        state.maps.get_mut(&13).unwrap().rect_on_parent = None;
+    }
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapRectOnMap(84, 946))")
+        .unwrap();
+    assert_eq!(nret, 0, "Eastern Kingdoms missing rect must abort the walk");
+}
+
+#[test]
+fn get_map_rect_on_map_returns_nothing_for_unknown_ui_map_id() {
+    let env = env();
+    let nret: i32 = env
+        .eval("return select('#', C_Map.GetMapRectOnMap(999999, 946))")
+        .unwrap();
+    assert_eq!(nret, 0);
+}
+
+#[test]
+fn get_map_rect_on_map_drives_get_map_center_on_map_helper() {
+    let env = env();
+    seed_stormwind_in_eastern_kingdoms_in_azeroth(&env);
+
+    let (cx, cy): (f64, f64) = env
+        .eval("return MapUtil.GetMapCenterOnMap(84, 13)")
+        .unwrap();
+    assert!((cx - (0.40 + (0.55 - 0.40) * 0.5)).abs() < 1e-9);
+    assert!((cy - (0.60 + (0.75 - 0.60) * 0.5)).abs() < 1e-9);
 }
 
 #[test]

@@ -265,11 +265,11 @@ pub use super::state_types::{
     AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
     ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
     EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo,
-    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MirrorTimer, MovementState,
-    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
-    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState,
-    PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, WorldState,
+    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
+    MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
+    MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
+    PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState,
+    SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1514,6 +1514,7 @@ fn default_maps() -> HashMap<i32, MapData> {
             flags: 0,
             child_map_ids: vec![13],
             child_rects: Vec::new(),
+            rect_on_parent: None,
         },
         MapData {
             ui_map_id: 13,
@@ -1524,6 +1525,7 @@ fn default_maps() -> HashMap<i32, MapData> {
             flags: 0,
             child_map_ids: vec![84],
             child_rects: Vec::new(),
+            rect_on_parent: None,
         },
         MapData {
             ui_map_id: 1,
@@ -1534,6 +1536,7 @@ fn default_maps() -> HashMap<i32, MapData> {
             flags: 0,
             child_map_ids: Vec::new(),
             child_rects: Vec::new(),
+            rect_on_parent: None,
         },
         MapData {
             ui_map_id: 84,
@@ -1544,6 +1547,7 @@ fn default_maps() -> HashMap<i32, MapData> {
             flags: 0,
             child_map_ids: Vec::new(),
             child_rects: Vec::new(),
+            rect_on_parent: None,
         },
         MapData {
             ui_map_id: 2248,
@@ -1554,6 +1558,7 @@ fn default_maps() -> HashMap<i32, MapData> {
             flags: 0,
             child_map_ids: Vec::new(),
             child_rects: Vec::new(),
+            rect_on_parent: None,
         },
     ]
     .into_iter()

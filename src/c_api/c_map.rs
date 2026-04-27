@@ -13,6 +13,11 @@
 //!   nothing when the parent is unknown, the point falls outside
 //!   every rect, or the matched child id is missing from
 //!   `SimState.maps`.
+//! - `C_Map.GetMapRectOnMap(uiMapID, topMapID)` — projects the rect
+//!   of `uiMapID` onto `topMapID`'s coordinate space by composing
+//!   each `rect_on_parent` along the parent chain. Returns nothing
+//!   when `topMapID` is not an ancestor or any link in the chain
+//!   lacks a seeded `rect_on_parent`.
 //! - `C_Map.GetMapChildrenInfo(uiMapID, mapType?, allDescendants?)`
 //!   — returns the children as an array of `UiMapDetails` tables.
 //!   `mapType` filters by the UIMapType enum; `allDescendants`
@@ -66,6 +71,12 @@ pub(crate) fn register_c_map_surface(state: &mut LuaState) -> LuaResult<()> {
         table_ref,
         "GetMapInfoAtPosition",
         c_map_get_map_info_at_position,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetMapRectOnMap",
+        c_map_get_map_rect_on_map,
     )?;
     table_set_rust_fn_static(
         state,
@@ -250,6 +261,72 @@ fn find_child_at_point(rects: &[crate::lua_api::state::MapChildRect], x: f64, y:
         .iter()
         .find(|rect| x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
         .map(|rect| rect.map_id)
+}
+
+const MAP_RECT_MAX_DEPTH: usize = 16;
+
+fn c_map_get_map_rect_on_map(state: &mut LuaState) -> LuaResult<u32> {
+    let ui_map_id = i32::from_stack(state, 1)?;
+    let top_map_id = i32::from_stack(state, 2)?;
+    let rect = {
+        let sim = borrow_state(state)?;
+        compose_rect_up_chain(&sim.maps, ui_map_id, top_map_id)
+    };
+    let Some(rect) = rect else {
+        return Ok(0);
+    };
+    state.push(Val::Num(rect.left));
+    state.push(Val::Num(rect.right));
+    state.push(Val::Num(rect.top));
+    state.push(Val::Num(rect.bottom));
+    Ok(4)
+}
+
+/// Walk parent links from `ui_map_id` up to `top_map_id`, composing
+/// each `rect_on_parent` so the returned rect describes `ui_map_id`'s
+/// footprint inside `top_map_id`'s coordinate space. Identity rect is
+/// returned when `ui_map_id == top_map_id`. Returns `None` when the
+/// chain misses `top_map_id`, exceeds `MAP_RECT_MAX_DEPTH`, or hits a
+/// link without a seeded `rect_on_parent`.
+fn compose_rect_up_chain(
+    maps: &std::collections::HashMap<i32, crate::lua_api::state::MapData>,
+    ui_map_id: i32,
+    top_map_id: i32,
+) -> Option<crate::lua_api::state::MapRect> {
+    let mut rect = crate::lua_api::state::MapRect {
+        left: 0.0,
+        right: 1.0,
+        top: 0.0,
+        bottom: 1.0,
+    };
+    let mut current = ui_map_id;
+    for _ in 0..MAP_RECT_MAX_DEPTH {
+        if current == top_map_id {
+            return Some(rect);
+        }
+        let map = maps.get(&current)?;
+        let parent_rect = map.rect_on_parent?;
+        rect = compose_rect_in_parent(parent_rect, rect);
+        current = map.parent_map_id;
+    }
+    None
+}
+
+/// Project an inner rect (in `current`'s normalized space) into the
+/// parent's normalized space, given the placement of `current` inside
+/// the parent (`parent_rect`).
+fn compose_rect_in_parent(
+    parent_rect: crate::lua_api::state::MapRect,
+    inner: crate::lua_api::state::MapRect,
+) -> crate::lua_api::state::MapRect {
+    let span_x = parent_rect.right - parent_rect.left;
+    let span_y = parent_rect.bottom - parent_rect.top;
+    crate::lua_api::state::MapRect {
+        left: parent_rect.left + inner.left * span_x,
+        right: parent_rect.left + inner.right * span_x,
+        top: parent_rect.top + inner.top * span_y,
+        bottom: parent_rect.top + inner.bottom * span_y,
+    }
 }
 
 fn push_map_details_table(state: &mut LuaState, map: &MapData) -> Val {
