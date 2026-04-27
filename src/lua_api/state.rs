@@ -691,6 +691,12 @@ pub struct AdventureMapInset {
 /// same dialog's `QuestFrame_ShowQuestPortrait` branch; missing keys
 /// make `C_AdventureMap.GetQuestPortraitInfo` return zero values so
 /// the dialog's `if portraitInfo and ...` guard short-circuits.
+/// `texture_kit` is the per-map texture-kit identifier returned by
+/// `C_AdventureMap.GetAdventureMapTextureKit`; the
+/// `AdventureMap_QuestOfferDataProviderMixin` portrait-atlas branch
+/// reads this string and switches on `"midnight"`. Defaults to the
+/// empty string so the kit-specific branch is taken only when a
+/// scenario explicitly seeds a kit.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
@@ -700,6 +706,7 @@ pub struct AdventureMapState {
     pub quest_offers: Vec<AdventureMapQuestOffer>,
     pub quest_info: HashMap<i64, AdventureMapQuestInfo>,
     pub quest_portraits: HashMap<i64, AdventureMapQuestPortrait>,
+    pub texture_kit: String,
 }
 
 /// Shared simulator state accessible from Lua.

@@ -5,8 +5,9 @@
 //! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
 //! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, `GetNumQuestOffers()`,
 //! `GetQuestOfferInfo()`, `GetQuestInfo()`, `GetQuestPortraitInfo()`,
-//! and `StartQuest()`. Future commits will fill in the rest of the
-//! surface (decline/abstain flows, dialog hooks).
+//! `StartQuest()`, and `GetAdventureMapTextureKit()`. Future commits
+//! will fill in the rest of the surface (decline/abstain flows, dialog
+//! hooks).
 
 use crate::event::{Event, EventArg};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
@@ -44,6 +45,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_quest_portrait_info,
     )?;
     table_set_rust_fn_static(state, table_ref, "StartQuest", start_quest)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetAdventureMapTextureKit",
+        get_adventure_map_texture_kit,
+    )?;
     Ok(())
 }
 
@@ -72,6 +79,13 @@ fn ensure_namespace_table(state: &mut LuaState) -> GcRef<Table> {
 fn get_map_id(state: &mut LuaState) -> LuaResult<u32> {
     let map_id = borrow_state(state)?.adventure_map.map_id;
     state.push(Val::Num(map_id as f64));
+    Ok(1)
+}
+
+fn get_adventure_map_texture_kit(state: &mut LuaState) -> LuaResult<u32> {
+    let kit = borrow_state(state)?.adventure_map.texture_kit.clone();
+    let val = create_string(state, &kit);
+    state.push(val);
     Ok(1)
 }
 

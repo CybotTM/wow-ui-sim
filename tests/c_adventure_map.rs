@@ -1314,6 +1314,68 @@ fn start_quest_short_circuits_on_non_numeric_argument() {
 }
 
 #[test]
+fn get_adventure_map_texture_kit_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetAdventureMapTextureKit)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_adventure_map_texture_kit_defaults_to_empty_string() {
+    let env = WowLuaEnv::new().expect("env");
+    let kit: String = env
+        .eval("return C_AdventureMap.GetAdventureMapTextureKit()")
+        .unwrap();
+    assert_eq!(kit, "");
+}
+
+#[test]
+fn get_adventure_map_texture_kit_returns_string_type() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetAdventureMapTextureKit())")
+        .unwrap();
+    assert_eq!(kind, "string");
+}
+
+#[test]
+fn get_adventure_map_texture_kit_returns_seeded_value() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.texture_kit = "midnight".to_string();
+
+    let kit: String = env
+        .eval("return C_AdventureMap.GetAdventureMapTextureKit()")
+        .unwrap();
+    assert_eq!(kit, "midnight");
+}
+
+#[test]
+fn get_adventure_map_texture_kit_drives_dialog_portrait_branch() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.texture_kit = "midnight".to_string();
+
+    env.exec(
+        r#"
+        local kit = C_AdventureMap.GetAdventureMapTextureKit()
+        if kit == "midnight" then
+            _G.__portrait_atlas = "ui-prey-scoutingmap"
+        else
+            _G.__portrait_atlas = "FXAM-QuestBang"
+        end
+        "#,
+    )
+    .unwrap();
+
+    let atlas: String = env.eval("return _G.__portrait_atlas").unwrap();
+    assert_eq!(
+        atlas, "ui-prey-scoutingmap",
+        "midnight kit must drive the scouting-map portrait branch"
+    );
+}
+
+#[test]
 fn build_detail_tiles_pattern_iterates_over_num_detail_tiles() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
