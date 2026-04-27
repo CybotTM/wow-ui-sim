@@ -2,6 +2,7 @@
 
 pub mod auction_house;
 pub mod azerite_essence;
+pub mod barber_shop;
 pub mod character_world;
 pub mod collections;
 pub mod crafting;
@@ -12,6 +13,10 @@ pub mod wow_token;
 
 pub use crate::lua_api::timer_layout::RiluaPendingTimer as PendingTimer;
 pub use azerite_essence::{AzeriteEssenceInfo, AzeriteEssenceMilestoneInfo, AzeriteEssenceState};
+pub use barber_shop::{
+    BarberShopAlternateFormRace, BarberShopCategory, BarberShopCharacterData, BarberShopOption,
+    BarberShopState,
+};
 pub use character_world::*;
 pub use collections::*;
 pub use crafting::*;

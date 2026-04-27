@@ -54,7 +54,7 @@ mod zone_ability;
 
 use crate::c_api::{
     c_allied_races, c_ardenweald_gardening, c_arrow_callout_manager, c_artifact_relic_forge_ui,
-    c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item,
+    c_artifact_ui, c_azerite_empowered_item, c_azerite_essence, c_azerite_item, c_barber_shop,
     c_configuration_warnings, c_cursor, c_fog_of_war, c_major_factions, c_map_exploration_info,
     c_paper_doll_info, c_player_interaction_manager, c_spell, c_widget,
 };
@@ -201,6 +201,7 @@ fn register_item_trait_surfaces(state: &mut LuaState) -> LuaResult<()> {
     c_azerite_item::register_c_azerite_item_surface(state)?;
     c_azerite_essence::register_c_azerite_essence_surface(state)?;
     c_azerite_empowered_item::register_c_azerite_empowered_item_surface(state)?;
+    c_barber_shop::register_c_barber_shop_surface(state)?;
     c_cursor::register_c_cursor_surface(state)?;
     c_major_factions::register_c_major_factions_surface(state)?;
     c_allied_races::register_c_allied_races_surface(state)?;

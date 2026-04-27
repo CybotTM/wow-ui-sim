@@ -84,6 +84,7 @@ macro_rules! build_empty_sim_state {
             azerite_item: None,
             azerite_essence: AzeriteEssenceState::default(),
             azerite_empowered: AzeriteEmpoweredItemState::default(),
+            barber_shop: BarberShopState::default(),
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
             account_wide_reputation_factions: HashSet::new(),
@@ -292,8 +293,10 @@ pub use super::state_types::{
     AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
     AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionRowInfo,
     AuctionSellQuote, AuctionSellQuoteKind, AuctionSortSpec, AzeriteEssenceInfo,
-    AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem, BidAuction, BnetFriend,
-    BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote, CommoditySearchResultInfo,
+    AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem, BarberShopAlternateFormRace,
+    BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState, BidAuction,
+    BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote,
+    CommoditySearchResultInfo,
     CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin,
     DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey,
     ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
@@ -1229,6 +1232,11 @@ pub struct SimState {
     /// `respec_cost` at zero and `empowered_items` empty so the
     /// frame's "no item slotted" branch takes over.
     pub azerite_empowered: AzeriteEmpoweredItemState,
+    /// `C_BarberShop` backing state. Drives `Blizzard_BarbershopUI`'s
+    /// open/close/apply lifecycle. Default keeps `available_customizations`
+    /// at `None` so the addon's nil short-circuit at
+    /// `Blizzard_BarberShopUI.lua:130` takes over until tests seed data.
+    pub barber_shop: BarberShopState,
     /// Major-faction (Renown) data keyed by `factionID`. Empty by default —
     /// `C_MajorFactions.GetMajorFactionData` returns nil for unknown ids and
     /// `C_Reputation.IsMajorFaction` reports false, keeping the

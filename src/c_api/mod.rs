@@ -14,6 +14,7 @@ pub mod c_artifact_ui;
 pub mod c_azerite_empowered_item;
 pub mod c_azerite_essence;
 pub mod c_azerite_item;
+pub mod c_barber_shop;
 pub mod c_configuration_warnings;
 pub mod c_cursor;
 pub mod c_fog_of_war;

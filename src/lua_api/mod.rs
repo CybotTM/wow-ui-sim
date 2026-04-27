@@ -63,7 +63,9 @@ pub use state::{
     AddonInfo, AdventureMapInset, AdventureMapQuestInfo, AdventureMapQuestOffer,
     AdventureMapQuestPortrait, AdventureMapState, AdventureMapZoneChoice, AlliedRaceInfo,
     AlliedRaceRacialAbility, ArtifactInfo, AzeriteEmpoweredItemState, AzeriteEmpoweredPowerText,
-    AzeriteEmpoweredSelectionKey, AzeriteItemState, FactionParagonInfo, HousingState,
+    AzeriteEmpoweredSelectionKey, AzeriteItemState, BarberShopAlternateFormRace,
+    BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState,
+    FactionParagonInfo, HousingState,
     ItemLocationData, LossOfControlInfo, MajorFactionData, PendingTimer, ProfessionQualityInfo,
     RenownLevelInfo, SimState, tick_party_health,
 };
