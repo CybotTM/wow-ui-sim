@@ -179,7 +179,34 @@ pub(super) fn register_profession_surface(state: &mut LuaState) -> LuaResult<()>
         "GetProfessionInfo",
         get_profession_info_global,
     )?;
+    table_set_rust_fn_static(state, state.global, "AbandonSkill", abandon_skill)?;
     Ok(())
+}
+
+fn abandon_skill(state: &mut LuaState) -> LuaResult<u32> {
+    let skill_line_id = i32::from_stack(state, 1)?;
+    abandon_profession_impl(state, skill_line_id);
+    fire_named_event_state(state, "SKILL_LINES_CHANGED", &[]);
+    Ok(0)
+}
+
+pub(crate) fn abandon_profession_impl(state: &mut LuaState, skill_line_id: i32) {
+    let mut sim = match borrow_state_mut(state) {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+    sim.crafting.unlearned_profession_ids.insert(skill_line_id);
+    if sim.crafting.selected_profession_id == Some(skill_line_id) {
+        sim.crafting.selected_profession_id = None;
+    }
+}
+
+pub(crate) fn relearn_profession_impl(state: &mut LuaState, skill_line_id: i32) {
+    let mut sim = match borrow_state_mut(state) {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+    sim.crafting.unlearned_profession_ids.remove(&skill_line_id);
 }
 
 fn c_crafting_orders_get_order_claim_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -380,9 +407,32 @@ fn c_trade_skill_ui_get_professions(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn is_profession_unlearned(state: &LuaState, skill_line_id: i32) -> bool {
+    borrow_state(state)
+        .map(|s| s.crafting.unlearned_profession_ids.contains(&skill_line_id))
+        .unwrap_or(false)
+}
+
 fn get_professions_global(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(1.0));
-    state.push(Val::Num(2.0));
+    // Slots 1-2 are the two primaries. Surviving primaries collapse to fill from slot 1.
+    let mut slot1 = Val::Nil;
+    let mut slot2 = Val::Nil;
+    let mut primary_slot = 0usize;
+    for (index, profession) in profession_data::PROFESSIONS.iter().enumerate() {
+        if profession.parent_profession_name.is_empty()
+            && !is_profession_unlearned(state, profession.skill_line_id)
+        {
+            primary_slot += 1;
+            let index_val = Val::Num((index + 1) as f64);
+            match primary_slot {
+                1 => slot1 = index_val,
+                2 => slot2 = index_val,
+                _ => break,
+            }
+        }
+    }
+    state.push(slot1);
+    state.push(slot2);
     state.push(Val::Nil);
     state.push(Val::Nil);
     state.push(Val::Nil);
@@ -395,6 +445,10 @@ fn get_profession_info_global(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     };
+    if is_profession_unlearned(state, profession.skill_line_id) {
+        state.push(Val::Nil);
+        return Ok(1);
+    }
 
     let name = create_string(state, profession.name);
     let icon = create_string(state, profession_icon_path(profession.profession_id));
@@ -768,13 +822,17 @@ fn select_profession(state: &mut LuaState, skill_line_id: i32) -> LuaResult<()> 
 
 fn skill_line_id_table(state: &mut LuaState) -> Val {
     let table = create_table(state);
-    for (index, profession) in profession_data::PROFESSIONS.iter().enumerate() {
-        set_table_array(
-            state,
-            table,
-            (index + 1) as i64,
-            Val::Num(profession.profession_id as f64),
-        );
+    let mut slot = 0i64;
+    for profession in profession_data::PROFESSIONS.iter() {
+        if !is_profession_unlearned(state, profession.skill_line_id) {
+            slot += 1;
+            set_table_array(
+                state,
+                table,
+                slot,
+                Val::Num(profession.profession_id as f64),
+            );
+        }
     }
     table
 }
@@ -794,9 +852,13 @@ fn recipe_id_table(state: &mut LuaState, recipe_ids: &[i32]) -> Val {
 
 fn all_profession_tables(state: &mut LuaState) -> Val {
     let table = create_table(state);
-    for (index, profession) in profession_data::PROFESSIONS.iter().enumerate() {
-        let value = profession_table(state, Some(profession));
-        set_table_array(state, table, (index + 1) as i64, value);
+    let mut slot = 0i64;
+    for profession in profession_data::PROFESSIONS.iter() {
+        if !is_profession_unlearned(state, profession.skill_line_id) {
+            slot += 1;
+            let value = profession_table(state, Some(profession));
+            set_table_array(state, table, slot, value);
+        }
     }
     table
 }
@@ -1043,17 +1105,29 @@ fn selected_profession(state: &mut LuaState) -> Option<&'static profession_data:
     // SimState is the primary source; fall back to the Lua-side mirror, then to first profession.
     if let Ok(sim) = borrow_state(state) {
         if let Some(id) = sim.crafting.selected_profession_id {
-            return profession_data::get_profession(id)
-                .or_else(|| profession_data::get_profession_by_index(0));
+            let prof = profession_data::get_profession(id)?;
+            if is_profession_unlearned(state, prof.skill_line_id) {
+                return None;
+            }
+            return Some(prof);
         }
     }
     let table_ref = ensure_namespace(state, TRADE_SKILL_NAMESPACE).ok()?;
     let selected = table_get(state, Val::Table(table_ref), SELECTED_PROFESSION_KEY);
     let Val::Num(skill_line_id) = selected else {
-        return profession_data::get_profession_by_index(0);
+        return first_learned_profession(state);
     };
-    profession_data::get_profession(skill_line_id as i32)
-        .or_else(|| profession_data::get_profession_by_index(0))
+    let prof = profession_data::get_profession(skill_line_id as i32)?;
+    if is_profession_unlearned(state, prof.skill_line_id) {
+        return None;
+    }
+    Some(prof)
+}
+
+fn first_learned_profession(state: &LuaState) -> Option<&'static profession_data::ProfessionInfo> {
+    profession_data::PROFESSIONS
+        .iter()
+        .find(|p| !is_profession_unlearned(state, p.skill_line_id))
 }
 
 fn profession_slots(profession: i32) -> &'static [i32] {
