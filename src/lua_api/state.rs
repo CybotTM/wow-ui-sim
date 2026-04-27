@@ -165,6 +165,7 @@ macro_rules! build_empty_sim_state {
             tutorial_flags: $collections.tutorial_flags,
             wowlabs: WowLabsState::default(),
             archaeology: ArchaeologyState::default(),
+            arrow_callouts: ArrowCalloutState::default(),
             gardenweald: GardenwealdState::default(),
             quest_log: Vec::new(),
             quest_log_entries: QuestLogState::seeded(),
@@ -1389,6 +1390,11 @@ pub struct SimState {
     /// `GetNumArchaeologyRaces`, `GetArchaeologyRaceInfo`,
     /// `GetNumArtifactsByRace`).
     pub archaeology: ArchaeologyState,
+    /// Backing state for the `C_ArrowCalloutManager` namespace consumed
+    /// by `Blizzard_ArrowCalloutFrame`. `active` is the live show/hide
+    /// set keyed by `calloutID`; `acknowledged` tracks dismissed ids
+    /// and round-trips through the `acknowledgedArrowCallouts` cvar.
+    pub arrow_callouts: ArrowCalloutState,
     /// Backing state for `C_ArdenwealdGardening.GetGardenData` /
     /// `IsGardenAccessible`. `accessible` defaults to false so the
     /// landing-page section stays hidden until a test or admin verb
@@ -1709,14 +1715,15 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, BattlefieldQueue, BattlefieldStatus,
-    CharacterServicesState, ChatChannel, ChatWindow, FactionEntry, GameRuleValue, GameRulesState,
-    GardenwealdState, GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts,
-    LootMethodState, MessageLogEntry, ModifierKeys, MouseButtons, NetStats, PetBattlePet,
-    PetBattleState, PetState, QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem,
-    SelectedArtifact, TorghastState, TradeState, VoiceChannel, VoiceChatState, VoiceMember,
-    WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
-    WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, ArrowCalloutInfo, ArrowCalloutState,
+    BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow,
+    FactionEntry, GameRuleValue, GameRulesState, GardenwealdState, GossipOption, GossipQuestRow,
+    GossipState, Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys,
+    MouseButtons, NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState,
+    QuestRewardCurrency, QuestRewardItem, SelectedArtifact, TorghastState, TradeState,
+    VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
+    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
+    WowLabsPoint, WowLabsState,
 };
 
 #[derive(Default)]

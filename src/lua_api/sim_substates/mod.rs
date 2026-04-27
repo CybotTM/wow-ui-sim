@@ -7,11 +7,13 @@
 //! and the corresponding `C_*`/global probes in `lua_api::globals`.
 
 mod archaeology;
+mod arrow_callouts;
 mod gardenweald;
 mod quest_log;
 mod wow_labs;
 
 pub use archaeology::{ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, SelectedArtifact};
+pub use arrow_callouts::{ArrowCalloutInfo, ArrowCalloutState};
 pub use gardenweald::GardenwealdState;
 pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem};
 pub use wow_labs::{
