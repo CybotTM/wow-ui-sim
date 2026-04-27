@@ -123,6 +123,18 @@ enum Commands {
         #[arg(long)]
         frame_filter: Option<String>,
     },
+
+    /// Resolve a WoW texture path through the CASC pipeline and pre-cache it on disk.
+    ///
+    /// Skips addon loading. Useful to extract a single texture (or retry a previously
+    /// failed extraction) without launching the full simulator.
+    CacheTexture {
+        /// WoW texture path (backslash or forward slash; extension optional)
+        path: String,
+        /// Delete any existing `.missing` sentinel before retrying extraction
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 impl Args {
@@ -156,6 +168,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    if let Some(Commands::CacheTexture { ref path, force }) = args.command {
+        return run_cache_texture(path, force);
+    }
     let screen = args.effective_screen();
     let saved_stdout = redirect_if_quiet(&args);
     let (env, font_system, saved_vars) = init_and_load(&args, screen);
@@ -372,6 +387,9 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
         }
         #[cfg(feature = "gui")]
         Some(Commands::DumpTexture { .. }) => dispatch_dump_texture(dispatch),
+        Some(Commands::CacheTexture { .. }) => {
+            unreachable!("CacheTexture is handled before init_and_load");
+        }
         #[cfg(feature = "gui")]
         None => return gui_commands::run_gui(dispatch),
         #[cfg(not(feature = "gui"))]
@@ -522,6 +540,94 @@ fn run_dump_tree(
         width as f32,
         height as f32,
     );
+}
+
+fn run_cache_texture(path: &str, force: bool) -> Result<(), Box<dyn std::error::Error>> {
+    use wow_ui_sim::texture::TextureManager;
+
+    let normalized = wow_ui_sim::texture::normalize_wow_path(path);
+    println!("path:       {path}");
+    println!("normalized: {normalized}");
+
+    if force {
+        let removed = remove_missing_sentinels(&normalized);
+        if !removed.is_empty() {
+            for marker in &removed {
+                println!("removed:    {}", marker.display());
+            }
+        }
+    }
+
+    let mut mgr = TextureManager::new();
+    let load_start = Instant::now();
+    let result = mgr.load(path);
+    let elapsed = load_start.elapsed();
+
+    match result {
+        Some(td) => {
+            let (w, h) = (td.width, td.height);
+            println!("status:     OK");
+            println!("dimensions: {w}x{h}");
+            println!("elapsed:    {elapsed:.2?}");
+            Ok(())
+        }
+        None => {
+            println!("status:     MISS");
+            println!("elapsed:    {elapsed:.2?}");
+            let markers = list_missing_sentinels(&normalized);
+            for marker in &markers {
+                println!("sentinel:   {}", marker.display());
+            }
+            std::process::exit(1);
+        }
+    }
+}
+
+fn casc_extract_root() -> Option<PathBuf> {
+    dirs::cache_dir().map(|d| d.join("wow-ui-sim/casc-extract"))
+}
+
+fn candidate_extract_paths(normalized: &str) -> Vec<PathBuf> {
+    let Some(root) = casc_extract_root() else {
+        return Vec::new();
+    };
+    let extensions = [
+        "blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF",
+    ];
+    let mut paths = Vec::with_capacity(extensions.len() + 1);
+    paths.push(root.join(normalized));
+    for ext in extensions {
+        paths.push(root.join(format!("{normalized}.{ext}")));
+    }
+    paths
+}
+
+fn remove_missing_sentinels(normalized: &str) -> Vec<PathBuf> {
+    let mut removed = Vec::new();
+    for path in candidate_extract_paths(normalized) {
+        let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let marker = path.with_file_name(format!("{file_name}.missing"));
+        if marker.exists() && std::fs::remove_file(&marker).is_ok() {
+            removed.push(marker);
+        }
+    }
+    removed
+}
+
+fn list_missing_sentinels(normalized: &str) -> Vec<PathBuf> {
+    let mut markers = Vec::new();
+    for path in candidate_extract_paths(normalized) {
+        let Some(file_name) = path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let marker = path.with_file_name(format!("{file_name}.missing"));
+        if marker.exists() {
+            markers.push(marker);
+        }
+    }
+    markers
 }
 
 #[cfg(test)]
