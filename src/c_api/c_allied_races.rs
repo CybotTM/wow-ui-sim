@@ -7,6 +7,11 @@
 //!   unknown ids. `AlliedRacesFrameMixin:LoadRaceData` short-circuits on
 //!   nil; otherwise it pulls model ids, names, atlases, and the banner
 //!   color out of the returned table.
+//! - `state.allied_races[raceID].racial_abilities: Vec<AlliedRaceRacialAbility>`
+//!   — `GetAllRacialAbilitiesFromID(raceID)` returns a sequence of
+//!   `{name, description, icon}` tables, or nil for unknown ids.
+//!   `AlliedRacesFrameMixin:RacialAbilitiesData` short-circuits on nil and
+//!   otherwise iterates with `ipairs`.
 //!
 //! `bannerColor` is wrapped in `CreateColor` so the returned table carries
 //! the `ColorMixin:GetRGB` method the addon calls.
@@ -14,9 +19,9 @@
 use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
     borrow_state, call_function_state, create_string, create_table, create_table_with_fields,
-    table_set_num,
+    table_set, table_set_num,
 };
-use crate::lua_api::state::AlliedRaceInfo;
+use crate::lua_api::state::{AlliedRaceInfo, AlliedRaceRacialAbility};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -24,6 +29,12 @@ use rilua::{LuaResult, Val};
 pub(crate) fn register_c_allied_races_surface(state: &mut LuaState) -> LuaResult<()> {
     let ns = ensure_namespace(state, "C_AlliedRaces")?;
     table_set_rust_fn_static(state, ns, "GetRaceInfoByID", get_race_info_by_id)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetAllRacialAbilitiesFromID",
+        get_all_racial_abilities_from_id,
+    )?;
     Ok(())
 }
 
@@ -35,6 +46,22 @@ fn get_race_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     let table = build_allied_race_info_table(state, &info);
+    state.push(table);
+    Ok(1)
+}
+
+fn get_all_racial_abilities_from_id(state: &mut LuaState) -> LuaResult<u32> {
+    let Ok(race_id) = i64::from_stack(state, 1) else {
+        return Ok(0);
+    };
+    let Some(abilities) = borrow_state(state)?
+        .allied_races
+        .get(&race_id)
+        .map(|info| info.racial_abilities.clone())
+    else {
+        return Ok(0);
+    };
+    let table = build_racial_ability_sequence(state, &abilities);
     state.push(table);
     Ok(1)
 }
@@ -67,18 +94,38 @@ fn build_allied_race_info_table(state: &mut LuaState, info: &AlliedRaceInfo) -> 
     )
 }
 
+fn build_racial_ability_sequence(
+    state: &mut LuaState,
+    abilities: &[AlliedRaceRacialAbility],
+) -> Val {
+    build_sequence(state, abilities, build_racial_ability_entry)
+}
+
+fn build_racial_ability_entry(state: &mut LuaState, ability: &AlliedRaceRacialAbility) -> Val {
+    let entry = create_table(state);
+    let name = create_string(state, &ability.name);
+    let description = create_string(state, &ability.description);
+    table_set(state, entry, "name", name);
+    table_set(state, entry, "description", description);
+    table_set(state, entry, "icon", Val::Num(ability.icon as f64));
+    entry
+}
+
 fn build_achievement_id_sequence(state: &mut LuaState, ids: &[i64]) -> Val {
+    build_sequence(state, ids, |_, id| Val::Num(*id as f64))
+}
+
+fn build_sequence<T, F>(state: &mut LuaState, items: &[T], mut to_val: F) -> Val
+where
+    F: FnMut(&mut LuaState, &T) -> Val,
+{
     let sequence = create_table(state);
     let Val::Table(sequence_ref) = sequence else {
         unreachable!("create_table must return a table");
     };
-    for (index, id) in ids.iter().enumerate() {
-        table_set_num(
-            state,
-            sequence_ref,
-            (index + 1) as f64,
-            Val::Num(*id as f64),
-        );
+    for (index, item) in items.iter().enumerate() {
+        let val = to_val(state, item);
+        table_set_num(state, sequence_ref, (index + 1) as f64, val);
     }
     sequence
 }

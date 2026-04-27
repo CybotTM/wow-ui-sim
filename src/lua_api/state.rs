@@ -607,6 +607,22 @@ pub struct AlliedRaceInfo {
     pub crest_atlas: String,
     pub model_background_atlas: String,
     pub banner_color: (f64, f64, f64),
+    /// Racial-ability list returned by `C_AlliedRaces.GetAllRacialAbilitiesFromID`.
+    /// `AlliedRacesFrameMixin:RacialAbilitiesData` iterates this with `ipairs`
+    /// and feeds each entry into `AlliedRaceAbilityTemplate`.
+    pub racial_abilities: Vec<AlliedRaceRacialAbility>,
+}
+
+/// One racial ability shown in the allied-race intro panel. Mirrors the
+/// official `AlliedRaceRacialAbility` structure in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AlliedRacesFrameDocumentation.lua`.
+/// `icon` is the WoW fileID the ability button uses; the simulator stores
+/// it as `i64` to match the API contract.
+#[derive(Clone, Debug)]
+pub struct AlliedRaceRacialAbility {
+    pub name: String,
+    pub description: String,
+    pub icon: i64,
 }
 
 /// Zone-choice descriptor for the adventure map. A zone choice is one of

@@ -3,7 +3,7 @@
 //! Contains player/party/target/aura definitions and the default data
 //! generators used by `SimState::default()`.
 
-use crate::lua_api::state::AlliedRaceInfo;
+use crate::lua_api::state::{AlliedRaceInfo, AlliedRaceRacialAbility};
 use std::collections::HashMap;
 
 /// Information about the current target.
@@ -613,6 +613,28 @@ fn allied_race_lightforged_draenei() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-lightforgeddraenei".to_string(),
         model_background_atlas: "alliedraces-background-lightforgeddraenei".to_string(),
         banner_color: (0.94, 0.83, 0.36),
+        racial_abilities: vec![
+            ability(
+                "Demonbane",
+                "Increased experience from killing demons.",
+                1_103_069,
+            ),
+            ability(
+                "Light's Judgment",
+                "Call down a strike of Holy energy on a target location.",
+                1_500_852,
+            ),
+            ability(
+                "Forge of Light",
+                "Allows the use of a draenei forge to create or repair items.",
+                1_500_853,
+            ),
+            ability(
+                "Holy Resistance",
+                "Reduces all incoming Holy damage taken.",
+                1_500_854,
+            ),
+        ],
     }
 }
 
@@ -629,6 +651,28 @@ fn allied_race_dark_iron_dwarf() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-darkirondwarf".to_string(),
         model_background_atlas: "alliedraces-background-darkirondwarf".to_string(),
         banner_color: (0.65, 0.16, 0.12),
+        racial_abilities: vec![
+            ability(
+                "Dungeon Delver",
+                "Increases your movement speed while in dungeons.",
+                1_604_167,
+            ),
+            ability(
+                "Forged in Flames",
+                "Reduces damage taken from Physical attacks.",
+                1_604_168,
+            ),
+            ability(
+                "Fireblood",
+                "Removes all poison, disease, curse, magic, and bleed effects.",
+                1_604_166,
+            ),
+            ability(
+                "Mole Machine",
+                "Drill an underground tunnel to a Dark Iron meeting stone.",
+                1_604_165,
+            ),
+        ],
     }
 }
 
@@ -645,6 +689,28 @@ fn allied_race_void_elf() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-voidelf".to_string(),
         model_background_atlas: "alliedraces-background-voidelf".to_string(),
         banner_color: (0.41, 0.27, 0.62),
+        racial_abilities: vec![
+            ability(
+                "Spatial Rift",
+                "Open a rift in space to teleport to its location.",
+                1_500_866,
+            ),
+            ability(
+                "Chill of Night",
+                "Reduces damage taken from Shadow attacks.",
+                1_500_868,
+            ),
+            ability(
+                "Preternatural Calm",
+                "Casting time of all spells is reduced.",
+                1_500_869,
+            ),
+            ability(
+                "Entropic Embrace",
+                "Your damage and healing have a chance to be empowered by the Void.",
+                1_500_867,
+            ),
+        ],
     }
 }
 
@@ -661,6 +727,28 @@ fn allied_race_mechagnome() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-mechagnome".to_string(),
         model_background_atlas: "alliedraces-background-mechagnome".to_string(),
         banner_color: (0.84, 0.71, 0.27),
+        racial_abilities: vec![
+            ability(
+                "Combat Analysis",
+                "Periodically analyze your enemies, increasing your damage and healing done to them.",
+                3_528_286,
+            ),
+            ability(
+                "Skeleton Pinkie",
+                "Acts as a skeleton key, allowing you to open locks.",
+                3_528_287,
+            ),
+            ability(
+                "Hyper Organic Light Originator",
+                "Reduces all incoming Holy damage taken.",
+                3_528_288,
+            ),
+            ability(
+                "Emergency Failsafe",
+                "When you fall below 20% health, you are healed for a moderate amount.",
+                3_528_289,
+            ),
+        ],
     }
 }
 
@@ -677,6 +765,28 @@ fn allied_race_vulpera() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-vulpera".to_string(),
         model_background_atlas: "alliedraces-background-vulpera".to_string(),
         banner_color: (0.74, 0.40, 0.16),
+        racial_abilities: vec![
+            ability(
+                "Bag of Tricks",
+                "Pull out an interesting trinket and use it on yourself or an enemy.",
+                3_528_303,
+            ),
+            ability(
+                "Make Camp",
+                "Make camp at your current location.",
+                3_528_304,
+            ),
+            ability(
+                "Nose for Trouble",
+                "Damage taken is reduced when above 50% health.",
+                3_528_305,
+            ),
+            ability(
+                "Vulpera Cunning",
+                "Your starting reputation with all Horde factions is increased.",
+                3_528_306,
+            ),
+        ],
     }
 }
 
@@ -693,6 +803,28 @@ fn allied_race_zandalari_troll() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-zandalaritroll".to_string(),
         model_background_atlas: "alliedraces-background-zandalaritroll".to_string(),
         banner_color: (0.85, 0.18, 0.18),
+        racial_abilities: vec![
+            ability(
+                "Embrace of Pa'ku",
+                "Pa'ku grants you increased critical strike chance.",
+                2_192_734,
+            ),
+            ability(
+                "City of Gold",
+                "Increases gold gained from quest rewards.",
+                2_192_730,
+            ),
+            ability(
+                "Pterrordax Swoop",
+                "Use a Pterrordax to swoop down and attack a target.",
+                2_192_733,
+            ),
+            ability(
+                "Regeneratin'",
+                "Channel to recover health over time.",
+                2_192_735,
+            ),
+        ],
     }
 }
 
@@ -709,6 +841,28 @@ fn allied_race_highmountain_tauren() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-highmountaintauren".to_string(),
         model_background_atlas: "alliedraces-background-highmountaintauren".to_string(),
         banner_color: (0.43, 0.29, 0.20),
+        racial_abilities: vec![
+            ability(
+                "Mountaineer",
+                "Reduces all damage taken by a small amount.",
+                1_500_859,
+            ),
+            ability(
+                "Bull Rush",
+                "Charge forward, knocking enemies down.",
+                1_500_858,
+            ),
+            ability(
+                "Pride of Ironhorn",
+                "Mining skill is increased and you can mine faster.",
+                1_500_860,
+            ),
+            ability(
+                "Rugged Tenacity",
+                "Reduces damage taken when below 50% health.",
+                1_500_861,
+            ),
+        ],
     }
 }
 
@@ -725,6 +879,28 @@ fn allied_race_nightborne() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-nightborne".to_string(),
         model_background_atlas: "alliedraces-background-nightborne".to_string(),
         banner_color: (0.62, 0.39, 0.85),
+        racial_abilities: vec![
+            ability(
+                "Cantrips",
+                "Conjure a Mana Pudding for yourself or your party.",
+                1_500_862,
+            ),
+            ability(
+                "Magical Affinity",
+                "Increases all magical damage dealt by a small amount.",
+                1_500_863,
+            ),
+            ability(
+                "Arcane Pulse",
+                "Release a pulse of arcane energy, damaging nearby enemies.",
+                1_500_864,
+            ),
+            ability(
+                "Ancient History",
+                "Inscription skill is increased and you can mill herbs faster.",
+                1_500_865,
+            ),
+        ],
     }
 }
 
@@ -741,6 +917,24 @@ fn allied_race_maghar_orc() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-magharorc".to_string(),
         model_background_atlas: "alliedraces-background-magharorc".to_string(),
         banner_color: (0.65, 0.40, 0.27),
+        racial_abilities: vec![
+            ability("Open Skies", "Mounted speed is increased.", 1_604_169),
+            ability(
+                "Ancestral Call",
+                "Invoke the spirits of your ancestors, granting you a random bonus stat.",
+                1_604_170,
+            ),
+            ability(
+                "Sympathetic Vigor",
+                "Your pets gain extra health.",
+                1_604_171,
+            ),
+            ability(
+                "Savage Blood",
+                "Reduces the duration of incoming poisons, diseases, and curses.",
+                1_604_172,
+            ),
+        ],
     }
 }
 
@@ -757,6 +951,36 @@ fn allied_race_earthen_dwarf() -> AlliedRaceInfo {
         crest_atlas: "alliedraces-icon-earthen".to_string(),
         model_background_atlas: "alliedraces-background-earthen".to_string(),
         banner_color: (0.56, 0.46, 0.36),
+        racial_abilities: vec![
+            ability(
+                "Azerite Surge",
+                "Channel the residual energy of Azerite to deal damage to nearby enemies.",
+                5_899_363,
+            ),
+            ability(
+                "Ingest Mineral",
+                "Eat a mineral to recover health over time.",
+                5_899_364,
+            ),
+            ability(
+                "Stoneskin",
+                "Toughen your skin, reducing damage taken from physical attacks.",
+                5_899_365,
+            ),
+            ability(
+                "Hold Your Ground",
+                "Reduces the effect of knockback effects.",
+                5_899_366,
+            ),
+        ],
+    }
+}
+
+fn ability(name: &str, description: &str, icon: i64) -> AlliedRaceRacialAbility {
+    AlliedRaceRacialAbility {
+        name: name.to_string(),
+        description: description.to_string(),
+        icon,
     }
 }
 

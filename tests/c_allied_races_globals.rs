@@ -3,7 +3,7 @@
 //! `LoadRaceData` path which expects every canonical allied race to
 //! resolve and the returned `bannerColor` to expose `ColorMixin:GetRGB`.
 
-use wow_ui_sim::lua_api::{AlliedRaceInfo, WowLuaEnv};
+use wow_ui_sim::lua_api::{AlliedRaceInfo, AlliedRaceRacialAbility, WowLuaEnv};
 
 const CANONICAL_RACE_FILE_STRINGS: &[&str] = &[
     "lightforgeddraenei",
@@ -141,6 +141,7 @@ fn race_info_reflects_state_mutations() {
             crest_atlas: "test-crest".to_string(),
             model_background_atlas: "test-background".to_string(),
             banner_color: (0.5, 0.25, 0.75),
+            racial_abilities: vec![],
         },
     );
 
@@ -182,5 +183,128 @@ fn allied_races_load_data_path_runs_without_errors() {
     assert!(
         ok,
         "AlliedRacesFrameMixin:LoadRaceData-style probe should succeed"
+    );
+}
+
+#[test]
+fn racial_abilities_unknown_race_returns_nil() {
+    let env = WowLuaEnv::new().expect("env");
+    let nil: bool = env
+        .eval("return C_AlliedRaces.GetAllRacialAbilitiesFromID(99999) == nil")
+        .unwrap();
+    assert!(
+        nil,
+        "GetAllRacialAbilitiesFromID should return nil for unknown ids"
+    );
+}
+
+#[test]
+fn racial_abilities_missing_arg_returns_nothing() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AlliedRaces.GetAllRacialAbilitiesFromID())")
+        .unwrap();
+    assert_eq!(
+        count, 0.0,
+        "GetAllRacialAbilitiesFromID() with no args returns nothing"
+    );
+}
+
+#[test]
+fn racial_abilities_for_canonical_race_expose_documented_fields() {
+    let env = WowLuaEnv::new().expect("env");
+    let nightborne_id = race_id_for("nightborne");
+    env.exec(&format!(
+        "abilities = C_AlliedRaces.GetAllRacialAbilitiesFromID({nightborne_id})"
+    ))
+    .unwrap();
+
+    let kind: String = env.eval("return type(abilities)").unwrap();
+    assert_eq!(kind, "table");
+
+    let count: f64 = env.eval("return #abilities").unwrap();
+    assert!(
+        count >= 1.0,
+        "Nightborne should expose at least one racial ability"
+    );
+
+    let first_name: String = env.eval("return abilities[1].name").unwrap();
+    let first_description: String = env.eval("return abilities[1].description").unwrap();
+    let first_icon: f64 = env.eval("return abilities[1].icon").unwrap();
+    assert!(!first_name.is_empty());
+    assert!(!first_description.is_empty());
+    assert!(first_icon > 0.0, "icon should be a positive fileID");
+}
+
+#[test]
+fn racial_abilities_reflect_state_mutations() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().allied_races.insert(
+        9999,
+        AlliedRaceInfo {
+            race_id: 9999,
+            male_model_id: 1,
+            female_model_id: 2,
+            achievement_ids: vec![],
+            male_name: "TestRaceMale".to_string(),
+            female_name: "TestRaceFemale".to_string(),
+            description: "A test race".to_string(),
+            race_file_string: "testrace".to_string(),
+            crest_atlas: "test-crest".to_string(),
+            model_background_atlas: "test-background".to_string(),
+            banner_color: (0.5, 0.25, 0.75),
+            racial_abilities: vec![
+                AlliedRaceRacialAbility {
+                    name: "Test Ability".to_string(),
+                    description: "Does test things.".to_string(),
+                    icon: 4_242,
+                },
+                AlliedRaceRacialAbility {
+                    name: "Second".to_string(),
+                    description: "Does other test things.".to_string(),
+                    icon: 5_353,
+                },
+            ],
+        },
+    );
+
+    let count: f64 = env
+        .eval("return #C_AlliedRaces.GetAllRacialAbilitiesFromID(9999)")
+        .unwrap();
+    assert_eq!(count, 2.0);
+
+    let second_name: String = env
+        .eval("return C_AlliedRaces.GetAllRacialAbilitiesFromID(9999)[2].name")
+        .unwrap();
+    assert_eq!(second_name, "Second");
+
+    let second_icon: f64 = env
+        .eval("return C_AlliedRaces.GetAllRacialAbilitiesFromID(9999)[2].icon")
+        .unwrap();
+    assert_eq!(second_icon, 5_353.0);
+}
+
+#[test]
+fn racial_abilities_data_path_runs_without_errors() {
+    let env = WowLuaEnv::new().expect("env");
+    let voidelf_id = race_id_for("voidelf");
+    env.exec(&format!(
+        r#"
+        local racialAbilities = C_AlliedRaces.GetAllRacialAbilitiesFromID({voidelf_id})
+        assert(racialAbilities, "racialAbilities should not be nil")
+        for i, ability in ipairs(racialAbilities) do
+            assert(type(ability.name) == "string", "ability.name must be string")
+            assert(type(ability.description) == "string", "ability.description must be string")
+            assert(type(ability.icon) == "number", "ability.icon must be a fileID number")
+        end
+        RACIAL_ABILITIES_DATA_OK = #racialAbilities >= 1
+    "#
+    ))
+    .unwrap();
+
+    let ok: bool = env.eval("return RACIAL_ABILITIES_DATA_OK == true").unwrap();
+    assert!(
+        ok,
+        "AlliedRacesFrameMixin:RacialAbilitiesData-style probe should succeed"
     );
 }
