@@ -64,8 +64,7 @@ fn get_title_name_returns_player_title_flag() {
         state.titles.push("the Patient".to_string());
     }
 
-    let (name, is_player_title): (String, bool) =
-        env.eval("return GetTitleName(1)").unwrap();
+    let (name, is_player_title): (String, bool) = env.eval("return GetTitleName(1)").unwrap();
 
     assert_eq!(name, "the Patient");
     assert!(
@@ -133,6 +132,34 @@ fn set_current_title_persists_for_known_indices() {
         .eval("SetCurrentTitle(-1); return GetCurrentTitle()")
         .unwrap();
     assert_eq!(after_clear, -1);
+}
+
+#[test]
+fn set_current_title_dispatches_unit_name_update_for_player() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.titles.clear();
+        state.titles.push("the Patient".to_string());
+    }
+
+    let unit: String = env
+        .eval(
+            r#"
+            local listener = CreateFrame("Frame")
+            local seen
+            listener:RegisterEvent("UNIT_NAME_UPDATE")
+            listener:SetScript("OnEvent", function(self, event, unit)
+                seen = unit
+            end)
+
+            SetCurrentTitle(1)
+            return seen or "missing"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(unit, "player");
 }
 
 #[test]
