@@ -499,7 +499,7 @@ pub(crate) fn build_minimap_quads(
     use crate::render::shader::FLAG_CIRCLE_CLIP;
     batch.push_textured_path(
         bounds,
-        r"Interface\Minimap\placeholder-map",
+        r"Interface\HUD\UIMinimapBackground",
         [1.0, 1.0, 1.0, alpha],
         BlendMode::Alpha,
     );

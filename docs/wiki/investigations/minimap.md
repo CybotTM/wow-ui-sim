@@ -7,7 +7,7 @@ Current state of the minimap implementation: basic circular placeholder render, 
 - `WidgetType::Minimap` enum variant and XML parsing
 - `CreateFrame("Minimap", ...)` creates a proper frame
 - Child hierarchy renders (zoom buttons, backdrop, border texture)
-- `build_minimap_quads()` emits `Interface\\Minimap\\placeholder-map` with `FLAG_CIRCLE_CLIP` shader clipping
+- `build_minimap_quads()` emits `Interface\\HUD\\UIMinimapBackground` (CASC BLP) with `FLAG_CIRCLE_CLIP` shader clipping
 - `SetZoom()` / `GetZoom()` persist and clamp zoom
 - `Minimap` registered as Lua global
 

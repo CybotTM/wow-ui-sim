@@ -117,7 +117,7 @@ impl TextureManager {
             r"Interface\containerframe\bagslots2x",
             r"Interface\buttons\minimalscrollbarproportional",
             r"Interface\masks\circlemask",
-            r"Interface\Minimap\placeholder-map",
+            r"Interface\HUD\UIMinimapBackground",
         ];
 
         let mut loaded = 0usize;

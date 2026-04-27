@@ -13,7 +13,7 @@ are about real minimap state, real mask handling, and actual content overlays.
 - **XML parsing**: `<Minimap>` elements parse correctly via `FrameElement::Minimap`
 - **Frame creation**: `CreateFrame("Minimap", ...)` creates a proper frame
 - **Child hierarchy**: Zoom buttons, backdrop, border texture render as children
-- **Basic map quad**: `build_minimap_quads()` emits `Interface\\Minimap\\placeholder-map`
+- **Basic map quad**: `build_minimap_quads()` emits `Interface\\HUD\\UIMinimapBackground` (CASC BLP, 32x32 tileable backdrop)
 - **Circular clipping**: `FLAG_CIRCLE_CLIP` in `quad.wgsl` clips the minimap quad to a circle
 - **Zoom state**: `SetZoom()` / `GetZoom()` persist and clamp zoom instead of returning constants
 - **Lua surface coverage**: minimap methods exist, with many still as no-op compatibility stubs
@@ -70,26 +70,14 @@ The border does **not** do the masking. The corners of the border texture are tr
 
 ## Available Textures
 
-### In `textures/minimap/`
-
-| Texture | Purpose |
-|---------|---------|
-| `ui-minimap-background.webp` | Background fill behind map |
-| `ui-minimap-border.webp` | Old-style decorative ring border |
-| `minimaparrow.webp` | Player direction arrow |
-| `compassring.webp` | Compass ring overlay |
-| `partyraidblips.webp` / `partyraidblipsv2.webp` | Party/raid member markers |
-| `poiicons.webp` | Points of interest icons |
-| `ui-minimap-zoominbutton-*.webp` | Zoom button states |
-| `ui-minimap-zoomoutbutton-*.webp` | Zoom button states |
-
-### In game files (BLP, not yet converted)
+All minimap textures are loaded directly from CASC as BLPs. The old
+`textures/minimap/` webp mirror is gone — there is no conversion step.
 
 | BLP File | Atlas | Purpose |
 |----------|-------|---------|
-| `Interface/HUD/UIMinimap.BLP` | `ui-hud-minimap-frame` | New compass border frame (512x512) |
-| `Interface/HUD/UIMinimapMask.BLP` | `ui-hud-minimap-frame-mask` | Circular clip mask (256x256) |
-| `Interface/HUD/UIMinimapBackground.BLP` | — | Background fill |
+| `Interface/HUD/UIMinimap.BLP` | `ui-hud-minimap-frame` | Compass border frame (512x512), rendered as `MinimapCompassTexture` child via XML |
+| `Interface/HUD/UIMinimapMask.BLP` | `ui-hud-minimap-frame-mask` | Circular clip mask (256x256), not yet sampled — the shader uses `FLAG_CIRCLE_CLIP` instead |
+| `Interface/HUD/UIMinimapBackground.BLP` | — | 32x32 tileable backdrop, used as the placeholder map fill in `build_minimap_quads` |
 
 ## Rendering Architecture
 
@@ -97,7 +85,7 @@ The border does **not** do the masking. The corners of the border texture are tr
 
 ```
 build_minimap_quads(batch, bounds, frame)
-  → batch.push_textured_path(bounds, "Interface\\Minimap\\placeholder-map", ...)
+  → batch.push_textured_path(bounds, "Interface\\HUD\\UIMinimapBackground", ...)
   → batch.set_extra_flags(4, FLAG_CIRCLE_CLIP)
 ```
 
@@ -129,7 +117,7 @@ What is still needed to move from "basic placeholder minimap" to "useful minimap
      `SetCorpsePOIArrowTexture`, and `SetStaticPOIArrowTexture` on the frame instead of dropping
      them
 2. **Real minimap content selection**
-   - replace the fixed `Interface\\Minimap\\placeholder-map` path with a frame-driven texture input
+   - replace the fixed `Interface\\HUD\\UIMinimapBackground` fill with a frame-driven texture input
      or a simulator-owned dynamic minimap source
 3. **Player/POI rendering**
    - render the player arrow and basic POI/blip overlays on top of the map quad
