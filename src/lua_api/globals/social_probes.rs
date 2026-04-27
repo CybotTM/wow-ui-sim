@@ -11,8 +11,8 @@
 //!   canonical retail class count).
 //! - `GetNumShapeshiftForms()`  → `SimState.shapeshift_forms.len()`.
 
-use crate::event::{Event, EventArg};
 use crate::lua_api::game_data::{CLASS_LABELS, class_info_by_index};
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string};
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
@@ -90,11 +90,9 @@ fn set_current_title(state: &mut LuaState) -> LuaResult<u32> {
             -1
         };
         sim.current_title = resolved;
-        sim.events.push(Event {
-            name: "UNIT_NAME_UPDATE".to_string(),
-            args: vec![EventArg::String("player".to_string())],
-        });
     }
+    let unit = create_string(state, "player");
+    dispatch_event_now(state, "UNIT_NAME_UPDATE", &[unit])?;
     Ok(0)
 }
 
