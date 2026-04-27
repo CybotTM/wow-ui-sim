@@ -91,6 +91,7 @@ fn register_frame_globals(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::pet_battles::register_all(lua)?;
     super::photo_sharing::register_all(lua)?;
     super::wowlabs::register_all(lua)?;
+    super::adventure_map::register_all(lua)?;
     Ok(())
 }
 

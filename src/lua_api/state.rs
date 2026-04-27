@@ -27,6 +27,7 @@ macro_rules! build_empty_sim_state {
             addons: $collections.addons,
             addon_saved_enable_state: None,
             system_chat_log: Vec::new(),
+            adventure_map: AdventureMapState::default(),
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
@@ -579,6 +580,16 @@ pub struct ArtifactInfo {
     pub disabled: bool,
 }
 
+/// Adventure-map (Broken Isles / Garrison-style world map) state. Drives
+/// the `C_AdventureMap` namespace consumed by the Blizzard_AdventureMap
+/// addon. `map_id` is the currently-selected adventure-map UI map id
+/// (0 when no adventure map is active). Future fields will hold zone
+/// choices, quest offers, and inset metadata.
+#[derive(Clone, Debug, Default)]
+pub struct AdventureMapState {
+    pub map_id: i64,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -606,6 +617,8 @@ pub struct SimState {
     /// `ChatFrameUtil.AddSystemMessage`. Persists even when no chat frame is
     /// available so tests and headless runs can inspect what was emitted.
     pub system_chat_log: Vec<String>,
+    /// Adventure-map state backing the `C_AdventureMap` namespace.
+    pub adventure_map: AdventureMapState,
     /// Console variables (CVars).
     pub cvars: CVarStorage,
     /// Tooltip state for GameTooltip frames (keyed by frame ID).
