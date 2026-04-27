@@ -205,6 +205,9 @@ fn sample_inset() -> AdventureMapInset {
         num_detail_tiles: 8,
         normalized_x: 0.42,
         normalized_y: 0.18,
+        detail_tiles: vec![
+            1_001, 1_002, 1_003, 1_004, 1_005, 1_006, 1_007, 1_008,
+        ],
     }
 }
 
@@ -314,4 +317,109 @@ fn is_map_inset_expanded_pattern_uses_only_first_return() {
         (map_id - 627.0).abs() < 1e-6,
         "IsMapInsetExpanded pattern must read mapID as the first return value"
     );
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetMapInsetDetailTileInfo)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_returns_seeded_id() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let id: f64 = env
+        .eval("return C_AdventureMap.GetMapInsetDetailTileInfo(1, 3)")
+        .unwrap();
+    assert!((id - 1_003.0).abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_indexes_one_based() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let first: f64 = env
+        .eval("return C_AdventureMap.GetMapInsetDetailTileInfo(1, 1)")
+        .unwrap();
+    let last: f64 = env
+        .eval("return C_AdventureMap.GetMapInsetDetailTileInfo(1, 8)")
+        .unwrap();
+    assert!((first - 1_001.0).abs() < 1e-6);
+    assert!((last - 1_008.0).abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_returns_no_values_when_unloaded() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetDetailTileInfo(1, 1))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_returns_no_values_for_invalid_inset() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetDetailTileInfo(2, 1))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_returns_no_values_for_out_of_range_tile() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetDetailTileInfo(1, 9))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_detail_tile_info_returns_no_values_for_non_positive_tile() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let zero_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetDetailTileInfo(1, 0))")
+        .unwrap();
+    let negative_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetDetailTileInfo(1, -1))")
+        .unwrap();
+    assert!(zero_count.abs() < 1e-6);
+    assert!(negative_count.abs() < 1e-6);
+}
+
+#[test]
+fn build_detail_tiles_pattern_iterates_over_num_detail_tiles() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    env.exec(
+        r#"
+        local _, _, _, _, _, numDetailTiles = C_AdventureMap.GetMapInsetInfo(1)
+        _G.__tile_ids = {}
+        for i = 1, numDetailTiles do
+            _G.__tile_ids[i] = C_AdventureMap.GetMapInsetDetailTileInfo(1, i)
+        end
+        "#,
+    )
+    .unwrap();
+
+    let count: f64 = env.eval("return #_G.__tile_ids").unwrap();
+    let first: f64 = env.eval("return _G.__tile_ids[1]").unwrap();
+    let last: f64 = env.eval("return _G.__tile_ids[8]").unwrap();
+    assert!((count - 8.0).abs() < 1e-6);
+    assert!((first - 1_001.0).abs() < 1e-6);
+    assert!((last - 1_008.0).abs() < 1e-6);
 }

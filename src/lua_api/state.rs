@@ -584,8 +584,11 @@ pub struct ArtifactInfo {
 /// close-up panel published by `C_AdventureMap.GetMapInsetInfo`.
 /// `normalized_x` and `normalized_y` are 0..1 canvas coordinates that
 /// `AdventureMapInsetMixin:Initialize` converts to a `SetPoint` offset.
-/// `num_detail_tiles` is the count of `GetMapInsetDetailTileInfo` entries
-/// the inset can index into via `BuildDetailTiles`.
+/// `num_detail_tiles` is the count `BuildDetailTiles` iterates over;
+/// `detail_tiles` holds the BLP file-data ids `Texture:SetTexture`
+/// receives one per slot. The two are decoupled so the simulator can
+/// publish a different `num_detail_tiles` from `detail_tiles.len()` if
+/// the test wants to exercise the iteration shape independently.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapInset {
     pub map_id: i64,
@@ -596,6 +599,7 @@ pub struct AdventureMapInset {
     pub num_detail_tiles: i64,
     pub normalized_x: f64,
     pub normalized_y: f64,
+    pub detail_tiles: Vec<i64>,
 }
 
 /// Adventure-map (Broken Isles / Garrison-style world map) state. Drives
