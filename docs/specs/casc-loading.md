@@ -1,0 +1,69 @@
+# CASC asset loading
+
+The simulator reads textures and fonts directly from a live WoW install at `/syncthing/World of Warcraft/Data` via the [`asset-resolver`](/home/osso/Projects/world-of-osso/asset-resolver) crate (a thin wrapper over `cascette-rs` + the community listfile). This spec describes the contract the loader must satisfy. For implementation details see the wiki.
+
+## What it must do
+
+### Feature gating
+
+- [ ] `casc` Cargo feature is on by default and pulls in `asset-resolver`.
+- [ ] Building with `--no-default-features` (or `--features ""`) compiles cleanly with no CASC symbols and the loader skips the CASC tier entirely.
+- [ ] `WOW_SIM_CASC=0` at runtime disables the CASC tier without rebuilding (loader behaves as if the feature were off).
+- [ ] When neither `/syncthing/World of Warcraft/Data` exists nor `GAME_ENGINE_SHARED_ROOT` is set, the loader does not panic — it just reports a CASC miss and continues.
+
+### Texture resolution
+
+- [ ] WoW paths with backslashes (`Interface\Buttons\UI-Panel-Button-Up`) are normalised to forward slashes and extension-stripped before lookup.
+- [ ] Lookup probes the listfile under each of `<path>`, `<path>.blp`, `<path>.BLP`, `<path>.tga`, `<path>.TGA`, `<path>.ttf`, `<path>.TTF`, `<path>.otf`, `<path>.OTF` and stops at the first hit.
+- [ ] On hit, `asset_resolver::ensure_cached(fdid, out_path)` materialises the BLP under `~/.cache/wow-ui-sim/casc-extract/<listfile/path>` (forward-slash form).
+- [ ] A second resolution of the same path returns the cached file without re-extracting from CASC.
+- [ ] Addon-shipped textures under `Interface/AddOns/<Addon>/...` resolve before CASC is consulted.
+- [ ] Listfile lookup is case-insensitive (`UI-Panel-Button-Up.blp` and `ui-panel-button-up.blp` both resolve to the same fileDataID).
+
+### Font resolution
+
+- [ ] `WowFontSystem::new()` takes no arguments and returns a font system populated with at least the FRIZQT__ family.
+- [ ] When CASC is available, `Fonts\FRIZQT__.TTF`, `Fonts\ARIALN.TTF`, and `Fonts\frizqt___cyr.ttf` all resolve to a real CASC-loaded face.
+- [ ] When CASC is unavailable (feature off, `WOW_SIM_CASC=0`, or the WoW install missing), `Fonts\FRIZQT__.TTF` still resolves via the embedded fallback at `assets/fonts/FRIZQT__.TTF` (`include_bytes!`). Other fonts may legitimately miss in this mode.
+- [ ] An unknown font path (`Fonts\NONEXISTENT.TTF`) falls back to the FRIZQT__ family rather than returning `None`.
+
+### Smoke verification
+
+- [x] `cargo run --example casc_smoke` resolves at least the three baseline textures (`Interface\Buttons\UI-Panel-Button-Up`, `Interface\DialogFrame\UI-DialogBox-Background`, `Interface\Icons\INV_Misc_QuestionMark`) end-to-end through `TextureManager.load`.
+- [x] The same example reports `Some(fdid)` for at least `fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf` via direct `asset_resolver::lookup_path`.
+
+## How it works
+
+- → `docs/wiki/systems/texture-atlas.md` — TextureManager structure, path resolution, format support
+- → `docs/rendering-pipeline.md` — Font System section
+- → `docs/texture-atlas-system.md` — full texture/atlas walkthrough
+
+## Implementation inventory
+
+- `src/texture/resolve.rs` — CASC tier for textures (`casc_enabled`, `casc_extract_dir`, `try_casc_resolve`)
+- `src/render/font.rs` — CASC tier for fonts (`casc_enabled`, `try_casc_font_bytes`) and `FRIZQT_FALLBACK` embedded bytes
+- `assets/fonts/FRIZQT__.TTF` — embedded no-CASC fallback (only on-repo asset)
+- `examples/casc_smoke.rs` — verification harness for textures + fonts
+- `Cargo.toml` — `casc` feature gate (`dep:asset-resolver`), default-on
+
+## Tests asserting this spec
+
+- `examples/casc_smoke.rs` — canonical end-to-end verifier (binary, run manually or in CI)
+- `src/render/font.rs::tests::resolves_friz_quadrata` — asserts FRIZQT__ resolves with or without CASC
+- `src/render/font.rs::tests::unknown_font_falls_back_to_default` — asserts unknown path → FRIZQT family
+- `src/render/font.rs::tests::resolves_case_insensitive` — asserts WoW-path normalisation
+
+## Known gaps (current cycle)
+
+- [ ] No Rust integration test in `tests/` that asserts CASC actually produces correct bytes (only the example binary covers this).
+- [ ] No regression coverage for the `WOW_SIM_CASC=0` opt-out path — the OnceLock state is process-global and hard to flip mid-test.
+- [ ] No assertion that the warm-cache path (`out_path.exists()` short-circuit in `try_casc_resolve`) is actually faster than the cold path.
+- [ ] `asset_resolver::lookup_path` is not backslash-tolerant; the loader normalises but consumers calling the resolver directly hit `None` on `Fonts\\FRIZQT__.TTF`. Consider lifting normalisation into `asset-resolver` upstream.
+
+## Out of scope
+
+- Listfile maintenance — upstream concern of `asset-resolver`; the simulator never writes the listfile.
+- 3D model assets (M2/WMO/ADT) — see `docs/wiki/index.md` "Intentional Gaps"; the simulator is 2D only.
+- Audio assets — gated by the separate `sound` feature; CASC loading for sounds is not implemented.
+- Live filesystem watching of the WoW install — re-launching the simulator picks up new patches.
+- Bundled WebP/PNG mirror of textures — replaced by CASC; reintroducing it would defeat the whole migration.
