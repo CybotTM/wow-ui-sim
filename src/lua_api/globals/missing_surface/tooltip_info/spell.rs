@@ -213,26 +213,9 @@ pub(super) fn tooltip_for_unit_aura(
     };
     let tooltip = empty_tooltip(state, TOOLTIP_TYPE_UNIT_AURA);
     let lines = table_get(state, tooltip, "lines");
-    push_tooltip_line(
-        state,
-        lines,
-        1,
-        LINE_TYPE_SPELL_NAME,
-        &aura.name,
-        None,
-        false,
-    );
-    push_tooltip_line(state, lines, 2, LINE_TYPE_SPELL_NAME, "1 hr", None, false);
-    let description = resolved_spell_description(state, aura.spell_id as u32);
-    push_tooltip_line(
-        state,
-        lines,
-        3,
-        LINE_TYPE_SPELL_DESCRIPTION,
-        &description,
-        None,
-        true,
-    );
+    push_highlight_spell_line(state, lines, 1, &aura.name);
+    push_highlight_spell_line(state, lines, 2, "1 hr");
+    push_spell_description_line(state, lines, 3, aura.spell_id as u32);
     tooltip
 }
 
