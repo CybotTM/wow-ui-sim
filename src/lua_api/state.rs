@@ -165,6 +165,7 @@ macro_rules! build_empty_sim_state {
             tutorial_flags: $collections.tutorial_flags,
             wowlabs: WowLabsState::default(),
             archaeology: ArchaeologyState::default(),
+            gardenweald: GardenwealdState::default(),
             quest_log: Vec::new(),
             quest_log_entries: QuestLogState::seeded(),
             pending_quest_offer: None,
@@ -1388,6 +1389,11 @@ pub struct SimState {
     /// `GetNumArchaeologyRaces`, `GetArchaeologyRaceInfo`,
     /// `GetNumArtifactsByRace`).
     pub archaeology: ArchaeologyState,
+    /// Backing state for `C_ArdenwealdGardening.GetGardenData` /
+    /// `IsGardenAccessible`. `accessible` defaults to false so the
+    /// landing-page section stays hidden until a test or admin verb
+    /// flips it.
+    pub gardenweald: GardenwealdState,
     /// Active quests in the player's log (quest IDs). Order reflects
     /// accept order. Drives `GetNumQuestLogEntries` and the quest-verbs
     /// module in `globals/quest_verbs.rs`.
@@ -1705,12 +1711,12 @@ pub struct SimState {
 pub use super::sim_substates::{
     ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, BattlefieldQueue, BattlefieldStatus,
     CharacterServicesState, ChatChannel, ChatWindow, FactionEntry, GameRuleValue, GameRulesState,
-    GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts, LootMethodState,
-    MessageLogEntry, ModifierKeys, MouseButtons, NetStats, PetBattlePet, PetBattleState, PetState,
-    QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem, SelectedArtifact,
-    TorghastState, TradeState, VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo,
-    WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite,
-    WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    GardenwealdState, GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts,
+    LootMethodState, MessageLogEntry, ModifierKeys, MouseButtons, NetStats, PetBattlePet,
+    PetBattleState, PetState, QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem,
+    SelectedArtifact, TorghastState, TradeState, VoiceChannel, VoiceChatState, VoiceMember,
+    WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
+    WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 #[derive(Default)]

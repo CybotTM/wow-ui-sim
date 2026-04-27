@@ -7,10 +7,12 @@
 //! and the corresponding `C_*`/global probes in `lua_api::globals`.
 
 mod archaeology;
+mod gardenweald;
 mod quest_log;
 mod wow_labs;
 
 pub use archaeology::{ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, SelectedArtifact};
+pub use gardenweald::GardenwealdState;
 pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem};
 pub use wow_labs::{
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
