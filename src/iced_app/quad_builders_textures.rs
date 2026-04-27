@@ -139,6 +139,17 @@ fn emit_textured_quad(
     tint: [f32; 4],
     alpha: f32,
 ) {
+    if bar_fill.is_none()
+        && let Some(uv4) = rotated_quad_uvs(f)
+    {
+        let (effective_path, effective_uv4) =
+            remap_atlas_crop_uv4(tex_path, uv4, f.atlas_tex_coords);
+        let vert_before = batch.vertices.len();
+        batch.push_textured_path_uv4(bounds, effective_uv4, &effective_path, tint, f.blend_mode);
+        finalize_textured_quad(batch, vert_before, f);
+        return;
+    }
+
     let (fill_bounds, fill_uvs) = apply_bar_fill_with_uvs(bounds, f.tex_coords, bar_fill);
     let (effective_path, effective_uvs) = remap_atlas_crop(tex_path, fill_uvs, f.atlas_tex_coords);
     let vert_before = batch.vertices.len();
@@ -152,6 +163,56 @@ fn emit_textured_quad(
         alpha,
     );
     finalize_textured_quad(batch, vert_before, f);
+}
+
+/// Returns the 4 corner UVs (TL, TR, BR, BL) when the frame has an 8-arg
+/// SetTexCoord that can't be represented as an axis-aligned rect. Excludes
+/// UV-repeat tiling (any value > 1.0) which is handled separately.
+fn rotated_quad_uvs(f: &crate::widget::Frame) -> Option<[[f32; 2]; 4]> {
+    let raw = f.tex_coords_quad?;
+    if raw.iter().any(|&v| v > 1.0) {
+        return None;
+    }
+    let tl = [raw[0], raw[1]];
+    let bl = [raw[2], raw[3]];
+    let tr = [raw[4], raw[5]];
+    let br = [raw[6], raw[7]];
+    let axis_aligned = (tl[0] - bl[0]).abs() < f32::EPSILON
+        && (tr[0] - br[0]).abs() < f32::EPSILON
+        && (tl[1] - tr[1]).abs() < f32::EPSILON
+        && (bl[1] - br[1]).abs() < f32::EPSILON;
+    if axis_aligned {
+        return None;
+    }
+    Some([tl, tr, br, bl])
+}
+
+/// Apply atlas-slot cropping to 4-corner UVs. Returns the rewritten path
+/// (with `@crop:` key when the texture is a sub-region) and corner UVs in
+/// [0,1] of the slot's local space.
+fn remap_atlas_crop_uv4(
+    tex_path: &str,
+    uv4: [[f32; 2]; 4],
+    atlas_tex_coords: Option<TextureUvs>,
+) -> (String, [[f32; 2]; 4]) {
+    let Some((cl, cr, ct, cb)) = atlas_tex_coords else {
+        return (tex_path.to_string(), uv4);
+    };
+    let is_full = (cl - 0.0).abs() < 0.001
+        && (cr - 1.0).abs() < 0.001
+        && (ct - 0.0).abs() < 0.001
+        && (cb - 1.0).abs() < 0.001;
+    if is_full {
+        return (tex_path.to_string(), uv4);
+    }
+    let crop_key = format!("{tex_path}@crop:{cl:.6},{cr:.6},{ct:.6},{cb:.6}");
+    let cw = cr - cl;
+    let ch = cb - ct;
+    if cw <= 0.0 || ch <= 0.0 {
+        return (crop_key, [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]);
+    }
+    let remapped = uv4.map(|[u, v]| [(u - cl) / cw, (v - ct) / ch]);
+    (crop_key, remapped)
 }
 
 fn emit_texture_fill(
