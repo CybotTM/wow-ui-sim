@@ -580,18 +580,28 @@ pub struct ArtifactInfo {
     pub disabled: bool,
 }
 
+/// Inset frame descriptor for the adventure map. An inset is a sub-region
+/// close-up panel published by `C_AdventureMap.GetMapInsetInfo`. Future
+/// commits will add the descriptor fields (mapID, title, area table id,
+/// detail-tile list, etc.) as the rest of the inset surface lands.
+#[derive(Clone, Debug, Default)]
+pub struct AdventureMapInset {}
+
 /// Adventure-map (Broken Isles / Garrison-style world map) state. Drives
 /// the `C_AdventureMap` namespace consumed by the Blizzard_AdventureMap
 /// addon. `map_id` is the currently-selected adventure-map UI map id
 /// (0 when no adventure map is active). `last_closed` is the elapsed
 /// game time (seconds since `start_time`) when the player last closed
 /// the adventure map, or `None` if the map has not been closed this
-/// session. Future fields will hold zone choices, quest offers, and
-/// inset metadata.
+/// session. `insets` is `None` until inset metadata has been published
+/// for the active map, mirroring `C_AdventureMap.GetNumMapInsets`'s
+/// nil-or-number contract. Future fields will hold zone choices and
+/// quest offers.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
     pub last_closed: Option<f64>,
+    pub insets: Option<Vec<AdventureMapInset>>,
 }
 
 /// Shared simulator state accessible from Lua.

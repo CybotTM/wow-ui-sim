@@ -11,7 +11,7 @@
 //! `UIPanelWindows["AdventureMapFrame"].showFailedFunc`, so it must be
 //! present at addon load time (see `Blizzard_AdventureMap.lua:56`).
 
-use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::{AdventureMapInset, WowLuaEnv};
 
 #[test]
 fn c_adventure_map_namespace_is_a_table() {
@@ -123,5 +123,74 @@ fn close_can_be_stored_as_a_direct_reference() {
     assert!(
         env.state().borrow().adventure_map.last_closed.is_some(),
         "showFailedFunc reference should reach the simulator and stamp last_closed"
+    );
+}
+
+#[test]
+fn get_num_map_insets_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetNumMapInsets)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_num_map_insets_returns_nil_when_unloaded() {
+    let env = WowLuaEnv::new().expect("env");
+    let is_nil: bool = env
+        .eval("return C_AdventureMap.GetNumMapInsets() == nil")
+        .unwrap();
+    assert!(
+        is_nil,
+        "GetNumMapInsets must return nil before inset metadata is published \
+         so AdventureMapMixin:RefreshInsets can short-circuit"
+    );
+}
+
+#[test]
+fn get_num_map_insets_returns_zero_when_loaded_empty() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(Vec::new());
+
+    let count: f64 = env
+        .eval("return C_AdventureMap.GetNumMapInsets()")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_num_map_insets_returns_seeded_length() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![
+        AdventureMapInset::default(),
+        AdventureMapInset::default(),
+        AdventureMapInset::default(),
+    ]);
+
+    let count: f64 = env
+        .eval("return C_AdventureMap.GetNumMapInsets()")
+        .unwrap();
+    assert!((count - 3.0).abs() < 1e-6);
+}
+
+#[test]
+fn refresh_insets_guard_short_circuits_on_nil() {
+    let env = WowLuaEnv::new().expect("env");
+    env.exec(
+        r#"
+        _G.__refresh_ran = false
+        local numInsets = C_AdventureMap.GetNumMapInsets()
+        if numInsets and numInsets > 0 then
+            _G.__refresh_ran = true
+        end
+        "#,
+    )
+    .unwrap();
+
+    let ran: bool = env.eval("return _G.__refresh_ran").unwrap();
+    assert!(
+        !ran,
+        "RefreshInsets-style guard must skip the body when the count is nil"
     );
 }

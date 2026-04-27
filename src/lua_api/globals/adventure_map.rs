@@ -1,9 +1,9 @@
 //! `C_AdventureMap` namespace — Broken Isles / Garrison-style adventure-map
 //! surface consumed by the Blizzard_AdventureMap addon.
 //!
-//! Currently implements `GetMapID()` and `Close()`. Future commits will fill
-//! in the full surface (zone choices, quest offers, inset metadata, dialog
-//! hooks).
+//! Currently implements `GetMapID()`, `Close()`, and `GetNumMapInsets()`.
+//! Future commits will fill in the full surface (zone choices, quest
+//! offers, per-inset descriptors, dialog hooks).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
 use crate::lua_bridge::table_set_rust_fn_static;
@@ -20,6 +20,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let table_ref = ensure_namespace_table(state);
     table_set_rust_fn_static(state, table_ref, "GetMapID", get_map_id)?;
     table_set_rust_fn_static(state, table_ref, "Close", close)?;
+    table_set_rust_fn_static(state, table_ref, "GetNumMapInsets", get_num_map_insets)?;
     Ok(())
 }
 
@@ -56,4 +57,17 @@ fn close(state: &mut LuaState) -> LuaResult<u32> {
     let elapsed = sim.start_time.elapsed().as_secs_f64();
     sim.adventure_map.last_closed = Some(elapsed);
     Ok(0)
+}
+
+fn get_num_map_insets(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?
+        .adventure_map
+        .insets
+        .as_ref()
+        .map(|insets| insets.len());
+    match count {
+        Some(n) => state.push(Val::Num(n as f64)),
+        None => state.push(Val::Nil),
+    }
+    Ok(1)
 }
