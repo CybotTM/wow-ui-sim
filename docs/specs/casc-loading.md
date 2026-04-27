@@ -29,8 +29,8 @@ The simulator reads textures and fonts directly from a live WoW install at `/syn
 
 ### Smoke verification
 
-- [ ] `cargo run --example casc_smoke` resolves at least the three baseline textures (`Interface\Buttons\UI-Panel-Button-Up`, `Interface\DialogFrame\UI-DialogBox-Background`, `Interface\Icons\INV_Misc_QuestionMark`) end-to-end through `TextureManager.load`.
-- [ ] The same example reports `Some(fdid)` for at least `fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf` via direct `asset_resolver::lookup_path`.
+- [x] Three baseline textures (`Interface\Buttons\UI-Panel-Button-Up`, `Interface\DialogFrame\UI-DialogBox-Background`, `Interface\Icons\INV_Misc_QuestionMark`) resolve end-to-end through `TextureManager.load` with the expected dimensions (`tests/casc_loading.rs::casc_resolves_baseline_textures`).
+- [x] `fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf` resolve via `asset_resolver::lookup_path` and `asset_resolver::resolve_bytes` returns non-empty bytes (`tests/casc_loading.rs::casc_resolves_baseline_fonts`).
 
 ## How it works
 
@@ -48,14 +48,14 @@ The simulator reads textures and fonts directly from a live WoW install at `/syn
 
 ## Tests asserting this spec
 
-- `examples/casc_smoke.rs` — canonical end-to-end verifier (binary, run manually or in CI)
+- `tests/casc_loading.rs` — integration tests for the CASC tier (skip when `/syncthing/World of Warcraft/Data` is missing or `WOW_SIM_CASC=0`)
+- `examples/casc_smoke.rs` — manual verifier for ad-hoc probes (not run by `cargo test`)
 - `src/render/font.rs::tests::resolves_friz_quadrata` — asserts FRIZQT__ resolves with or without CASC
 - `src/render/font.rs::tests::unknown_font_falls_back_to_default` — asserts unknown path → FRIZQT family
 - `src/render/font.rs::tests::resolves_case_insensitive` — asserts WoW-path normalisation
 
 ## Known gaps (current cycle)
 
-- [ ] No Rust integration test in `tests/` that asserts CASC actually produces correct bytes. `examples/casc_smoke.rs` is a manual harness — `cargo test` does not run it, so every smoke-verification bullet above is `[ ]`. Promote them by writing a `#[test]` (gated on `/syncthing/World of Warcraft/Data` existing) that calls `TextureManager.load` and `asset_resolver::lookup_path` and asserts the same three textures + three fonts.
 - [ ] No regression coverage for the `WOW_SIM_CASC=0` opt-out path — the OnceLock state is process-global and hard to flip mid-test.
 - [ ] No assertion that the warm-cache path (`out_path.exists()` short-circuit in `try_casc_resolve`) is actually faster than the cold path.
 - [ ] `asset_resolver::lookup_path` is not backslash-tolerant; the loader normalises but consumers calling the resolver directly hit `None` on `Fonts\\FRIZQT__.TTF`. Consider lifting normalisation into `asset-resolver` upstream.
