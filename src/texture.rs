@@ -17,8 +17,6 @@ use image_blp::types::BlpContent;
 pub struct TextureManager {
     /// Base path to addons directory (for addon textures).
     addons_path: Option<PathBuf>,
-    /// Directory for decoded RGBA disk cache (lz4 compressed).
-    disk_cache_dir: Option<PathBuf>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
     /// Cache of texture dimensions keyed by normalized WoW path.
@@ -46,7 +44,6 @@ impl TextureManager {
     pub fn new() -> Self {
         Self {
             addons_path: None,
-            disk_cache_dir: None,
             cache: HashMap::new(),
             size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
@@ -54,14 +51,6 @@ impl TextureManager {
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
         }
-    }
-
-    /// Set the disk cache directory for decoded RGBA textures.
-    pub fn with_disk_cache(mut self, path: impl Into<PathBuf>) -> Self {
-        let dir = path.into();
-        std::fs::create_dir_all(&dir).ok();
-        self.disk_cache_dir = Some(dir);
-        self
     }
 
     /// Set the addons directory path for addon textures.
@@ -100,13 +89,8 @@ impl TextureManager {
         if let Some(file_path) = self.resolve_path(&normalized) {
             telemetry.resolve_elapsed = resolve_start.elapsed();
             let (loaded, load_telemetry) =
-                self.load_with_disk_cache_with_telemetry(&normalized, &file_path);
-            telemetry.disk_cache_hit = load_telemetry.disk_cache_hit;
-            telemetry.disk_probe_elapsed = load_telemetry.disk_probe_elapsed;
-            telemetry.disk_read_elapsed = load_telemetry.disk_read_elapsed;
-            telemetry.disk_decompress_elapsed = load_telemetry.disk_decompress_elapsed;
+                self.load_texture_with_telemetry(&file_path);
             telemetry.decode_elapsed = load_telemetry.decode_elapsed;
-            telemetry.disk_write_elapsed = load_telemetry.disk_write_elapsed;
             if let Some(data) = loaded {
                 self.size_cache
                     .insert(normalized.clone(), (data.width, data.height));
@@ -136,43 +120,21 @@ impl TextureManager {
         self.cache.contains_key(&normalized) || self.bc_cache.contains_key(&normalized)
     }
 
-    fn load_with_disk_cache_with_telemetry(
+    fn load_texture_with_telemetry(
         &self,
-        normalized: &str,
         file_path: &Path,
     ) -> (Option<TextureData>, RgbaLoadTelemetry) {
         let mut telemetry = RgbaLoadTelemetry::default();
-        // Try disk cache first
-        if let Some(cache_dir) = &self.disk_cache_dir {
-            let (data, disk_telemetry) = crate::texture_cache::load_from_disk_cache_with_telemetry(
-                cache_dir, normalized, file_path,
-            );
-            telemetry.disk_cache_hit = disk_telemetry.cache_hit;
-            telemetry.disk_probe_elapsed = disk_telemetry.probe_elapsed;
-            telemetry.disk_read_elapsed = disk_telemetry.read_elapsed;
-            telemetry.disk_decompress_elapsed = disk_telemetry.decompress_elapsed;
-            if data.is_some() {
-                return (data, telemetry);
-            }
-        }
-        // Decode from source
         let decode_start = Instant::now();
         match load_texture_file(file_path) {
             Ok(data) => {
                 telemetry.decode_elapsed = decode_start.elapsed();
-                if let Some(cache_dir) = &self.disk_cache_dir {
-                    telemetry.disk_write_elapsed =
-                        crate::texture_cache::write_to_disk_cache_with_telemetry(
-                            cache_dir, normalized, &data,
-                        );
-                }
                 (Some(data), telemetry)
             }
             Err(e) => {
                 telemetry.decode_elapsed = decode_start.elapsed();
                 crate::logging::eprintln_elapsed(&format!(
-                    "[TexMgr] Load error: {} -> {}: {}",
-                    normalized,
+                    "[TexMgr] Load error: {}: {}",
                     file_path.display(),
                     e
                 ));
@@ -213,13 +175,8 @@ pub struct BcLoadTelemetry {
 #[derive(Debug, Default, Clone, Copy)]
 pub struct RgbaLoadTelemetry {
     pub mem_cache_hit: bool,
-    pub disk_cache_hit: bool,
     pub resolve_elapsed: Duration,
-    pub disk_probe_elapsed: Duration,
-    pub disk_read_elapsed: Duration,
-    pub disk_decompress_elapsed: Duration,
     pub decode_elapsed: Duration,
-    pub disk_write_elapsed: Duration,
     pub total_elapsed: Duration,
 }
 
@@ -607,10 +564,6 @@ mod tests {
         assert!(
             telemetry.mem_cache_hit,
             "telemetry should report memory cache hits"
-        );
-        assert!(
-            !telemetry.disk_cache_hit,
-            "memory cache hit should skip disk cache"
         );
         assert_eq!(
             telemetry.resolve_elapsed,

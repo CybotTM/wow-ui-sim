@@ -936,9 +936,7 @@ fn resolve_texture_format(wow_path: &str) -> String {
 
     static TEX_MGR: OnceLock<TextureManager> = OnceLock::new();
     let mgr = TEX_MGR.get_or_init(|| {
-        TextureManager::new()
-            .with_addons_path(crate::paths::default_addons_path())
-            .with_disk_cache("./cache/textures")
+        TextureManager::new().with_addons_path(crate::paths::default_addons_path())
     });
 
     let normalized = normalize_wow_path(wow_path);

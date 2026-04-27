@@ -19,13 +19,8 @@ use super::super::quad_builders::{build_texture_quads, emit_button_highlight};
 pub(crate) struct TextureLoadBatchTelemetry {
     rgba_total_elapsed: std::time::Duration,
     rgba_mem_cache_hits: usize,
-    rgba_disk_cache_hits: usize,
     rgba_resolve_elapsed: std::time::Duration,
-    rgba_disk_probe_elapsed: std::time::Duration,
-    rgba_disk_read_elapsed: std::time::Duration,
-    rgba_disk_decompress_elapsed: std::time::Duration,
     rgba_decode_elapsed: std::time::Duration,
-    rgba_disk_write_elapsed: std::time::Duration,
     bc_total_elapsed: std::time::Duration,
     bc_resolve_elapsed: std::time::Duration,
     bc_parse_elapsed: std::time::Duration,
@@ -39,13 +34,8 @@ impl TextureLoadBatchTelemetry {
     fn record(&mut self, telemetry: TextureLoadTelemetry) {
         self.rgba_total_elapsed += telemetry.rgba.total_elapsed;
         self.rgba_mem_cache_hits += usize::from(telemetry.rgba.mem_cache_hit);
-        self.rgba_disk_cache_hits += usize::from(telemetry.rgba.disk_cache_hit);
         self.rgba_resolve_elapsed += telemetry.rgba.resolve_elapsed;
-        self.rgba_disk_probe_elapsed += telemetry.rgba.disk_probe_elapsed;
-        self.rgba_disk_read_elapsed += telemetry.rgba.disk_read_elapsed;
-        self.rgba_disk_decompress_elapsed += telemetry.rgba.disk_decompress_elapsed;
         self.rgba_decode_elapsed += telemetry.rgba.decode_elapsed;
-        self.rgba_disk_write_elapsed += telemetry.rgba.disk_write_elapsed;
         self.bc_total_elapsed += telemetry.bc.total_elapsed;
         self.bc_resolve_elapsed += telemetry.bc.resolve_elapsed;
         self.bc_parse_elapsed += telemetry.bc.parse_elapsed;
@@ -58,13 +48,8 @@ impl TextureLoadBatchTelemetry {
     fn record_batch(&mut self, telemetry: Self) {
         self.rgba_total_elapsed += telemetry.rgba_total_elapsed;
         self.rgba_mem_cache_hits += telemetry.rgba_mem_cache_hits;
-        self.rgba_disk_cache_hits += telemetry.rgba_disk_cache_hits;
         self.rgba_resolve_elapsed += telemetry.rgba_resolve_elapsed;
-        self.rgba_disk_probe_elapsed += telemetry.rgba_disk_probe_elapsed;
-        self.rgba_disk_read_elapsed += telemetry.rgba_disk_read_elapsed;
-        self.rgba_disk_decompress_elapsed += telemetry.rgba_disk_decompress_elapsed;
         self.rgba_decode_elapsed += telemetry.rgba_decode_elapsed;
-        self.rgba_disk_write_elapsed += telemetry.rgba_disk_write_elapsed;
         self.bc_total_elapsed += telemetry.bc_total_elapsed;
         self.bc_resolve_elapsed += telemetry.bc_resolve_elapsed;
         self.bc_parse_elapsed += telemetry.bc_parse_elapsed;
@@ -493,18 +478,13 @@ fn log_slow_texture_load(
     preview.extend(bc_textures.iter().map(|tex| tex.path.as_str()));
     preview.truncate(12);
     eprintln!(
-        "{} [textures] loaded {} in {elapsed:.1?} (scan={scan_elapsed:.1?} load={load_elapsed:.1?} rgba={:.1?} rgba_mem_hits={} rgba_disk_hits={} rgba_resolve={:.1?} rgba_disk_probe={:.1?} rgba_disk_read={:.1?} rgba_disk_decompress={:.1?} rgba_decode={:.1?} rgba_disk_write={:.1?} bc={:.1?} bc_resolve={:.1?} bc_parse={:.1?} bc_extract={:.1?} bc_cache_hits={} crop_decode={:.1?} crop_extract={:.1?}): {} (rgba={} bc={})",
+        "{} [textures] loaded {} in {elapsed:.1?} (scan={scan_elapsed:.1?} load={load_elapsed:.1?} rgba={:.1?} rgba_mem_hits={} rgba_resolve={:.1?} rgba_decode={:.1?} bc={:.1?} bc_resolve={:.1?} bc_parse={:.1?} bc_extract={:.1?} bc_cache_hits={} crop_decode={:.1?} crop_extract={:.1?}): {} (rgba={} bc={})",
         crate::logging::global_elapsed_prefix(),
         textures.len() + bc_textures.len(),
         telemetry.rgba_total_elapsed,
         telemetry.rgba_mem_cache_hits,
-        telemetry.rgba_disk_cache_hits,
         telemetry.rgba_resolve_elapsed,
-        telemetry.rgba_disk_probe_elapsed,
-        telemetry.rgba_disk_read_elapsed,
-        telemetry.rgba_disk_decompress_elapsed,
         telemetry.rgba_decode_elapsed,
-        telemetry.rgba_disk_write_elapsed,
         telemetry.bc_total_elapsed,
         telemetry.bc_resolve_elapsed,
         telemetry.bc_parse_elapsed,
@@ -796,7 +776,7 @@ mod tests {
         env.borrow().set_screen_mode(ScreenKind::Game);
 
         let texture_manager = Rc::new(RefCell::new(
-            TextureManager::new().with_disk_cache("./cache/textures"),
+            TextureManager::new(),
         ));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
             crate::iced_app::app::DEFAULT_FONTS_PATH,

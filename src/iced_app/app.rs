@@ -362,9 +362,7 @@ impl App {
         Rc<RefCell<WowFontSystem>>,
         Rc<RefCell<GlyphAtlas>>,
     ) {
-        let mut tex_mgr = TextureManager::new()
-            .with_addons_path(crate::paths::default_addons_path())
-            .with_disk_cache("./cache/textures");
+        let mut tex_mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
         if Self::eager_startup_texture_preloads_enabled() {
             let class_name = {
                 let env = env_rc.borrow();
