@@ -756,14 +756,34 @@ impl App {
 
         if let Some(fid) = editbox_target {
             if old_focus != Some(fid) {
-                env.state().borrow_mut().focused_frame_id = Some(fid);
+                {
+                    let mut state = env.state().borrow_mut();
+                    state.focused_frame_id = Some(fid);
+                    if let Some(old_id) = old_focus {
+                        if let Some(f) = state.widgets.get_mut_visual(old_id) {
+                            f.editbox_focused = false;
+                        }
+                        state.widgets.mark_visual_dirty(old_id);
+                    }
+                    if let Some(f) = state.widgets.get_mut_visual(fid) {
+                        f.editbox_focused = true;
+                    }
+                    state.widgets.mark_visual_dirty(fid);
+                }
                 if let Some(old_id) = old_focus {
                     let _ = env.fire_script_handler(old_id, "OnEditFocusLost", vec![]);
                 }
                 let _ = env.fire_script_handler(fid, "OnEditFocusGained", vec![]);
             }
         } else if let Some(old_id) = old_focus {
-            env.state().borrow_mut().focused_frame_id = None;
+            {
+                let mut state = env.state().borrow_mut();
+                state.focused_frame_id = None;
+                if let Some(f) = state.widgets.get_mut_visual(old_id) {
+                    f.editbox_focused = false;
+                }
+                state.widgets.mark_visual_dirty(old_id);
+            }
             let _ = env.fire_script_handler(old_id, "OnEditFocusLost", vec![]);
         }
     }

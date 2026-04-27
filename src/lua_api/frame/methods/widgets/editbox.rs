@@ -17,6 +17,18 @@ pub(super) fn set_focus(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         let old = sim.focused_frame_id;
         sim.focused_frame_id = Some(id);
+        if let Some(old_id) = old {
+            if old_id != id {
+                if let Some(f) = sim.widgets.get_mut_visual(old_id) {
+                    f.editbox_focused = false;
+                }
+                sim.widgets.mark_visual_dirty(old_id);
+            }
+        }
+        if let Some(f) = sim.widgets.get_mut_visual(id) {
+            f.editbox_focused = true;
+        }
+        sim.widgets.mark_visual_dirty(id);
         old
     };
     if old_focus != Some(id) {
@@ -31,6 +43,10 @@ pub(super) fn clear_focus(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         if sim.focused_frame_id == Some(id) {
             sim.focused_frame_id = None;
+            if let Some(f) = sim.widgets.get_mut_visual(id) {
+                f.editbox_focused = false;
+            }
+            sim.widgets.mark_visual_dirty(id);
             true
         } else {
             false

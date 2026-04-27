@@ -296,36 +296,57 @@ pub(super) fn emit_editbox_with_text(
     alpha: f32,
 ) {
     build_editbox_quads(batch, bounds, f, alpha);
-    if let Some((fs, ga)) = text_ctx
-        && let Some(ref txt) = f.text
-    {
-        let (left_inset, right_inset, top_inset, bottom_inset) = f.editbox_text_insets;
-        let left_pad = if left_inset > 0.0 { left_inset } else { 4.0 };
-        let right_pad = if right_inset > 0.0 { right_inset } else { 4.0 };
-        let text_bounds = Rectangle::new(
-            Point::new(bounds.x + left_pad, bounds.y + top_inset),
-            Size::new(
-                (bounds.width - left_pad - right_pad).max(0.0),
-                (bounds.height - top_inset - bottom_inset).max(0.0),
+    let (left_inset, right_inset, top_inset, bottom_inset) = f.editbox_text_insets;
+    let left_pad = if left_inset > 0.0 { left_inset } else { 4.0 };
+    let right_pad = if right_inset > 0.0 { right_inset } else { 4.0 };
+    let text_bounds = Rectangle::new(
+        Point::new(bounds.x + left_pad, bounds.y + top_inset),
+        Size::new(
+            (bounds.width - left_pad - right_pad).max(0.0),
+            (bounds.height - top_inset - bottom_inset).max(0.0),
+        ),
+    );
+    let mut text_width = 0.0_f32;
+    if let Some((fs, ga)) = text_ctx {
+        if let Some(ref txt) = f.text {
+            let mut text_renderer = WidgetTextRenderer {
+                batch,
+                font_sys: fs,
+                glyph_atlas: ga,
+            };
+            emit_widget_text_quads(
+                &mut text_renderer,
+                f,
+                WidgetTextLayout {
+                    text: txt,
+                    bounds: text_bounds,
+                    justify_h: TextJustify::Left,
+                    justify_v: TextJustify::Center,
+                    word_wrap: false,
+                    max_lines: 0,
+                    alpha,
+                },
+            );
+            if f.editbox_focused {
+                let cursor_chars = f.editbox_cursor_pos.max(0) as usize;
+                let measured: String = txt.chars().take(cursor_chars).collect();
+                let font_path = f.font.as_deref();
+                let font_size = if f.font_size > 0.0 { f.font_size } else { 12.0 };
+                text_width = fs.measure_text_width(&measured, font_path, font_size);
+            }
+        }
+    }
+    if f.editbox_focused {
+        let caret_x = (bounds.x + left_pad + text_width).min(bounds.x + bounds.width - 1.0);
+        let caret_top = bounds.y + top_inset + 1.0;
+        let caret_height = (bounds.height - top_inset - bottom_inset - 2.0).max(2.0);
+        batch.push_solid(
+            Rectangle::new(
+                Point::new(caret_x, caret_top),
+                Size::new(1.5, caret_height),
             ),
+            [1.0, 0.95, 0.55, 0.95 * alpha],
         );
-        let mut text_renderer = WidgetTextRenderer {
-            batch,
-            font_sys: fs,
-            glyph_atlas: ga,
-        };
-        emit_widget_text_quads(
-            &mut text_renderer,
-            f,
-            WidgetTextLayout {
-                text: txt,
-                bounds: text_bounds,
-                justify_h: TextJustify::Left,
-                justify_v: TextJustify::Center,
-                word_wrap: false,
-                max_lines: 0,
-                alpha,
-            },
-        );
+        batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
     }
 }

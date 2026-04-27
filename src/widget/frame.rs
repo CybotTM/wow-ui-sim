@@ -417,6 +417,8 @@ pub struct Frame {
     pub editbox_highlight_range: Option<(i32, i32)>,
     /// Highlight color for selected text.
     pub editbox_highlight_color: Color,
+    /// Whether this EditBox currently has keyboard focus.
+    pub editbox_focused: bool,
 
     // --- ScrollFrame fields ---
     /// Scroll child frame ID.
