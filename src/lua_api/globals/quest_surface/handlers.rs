@@ -342,6 +342,51 @@ pub fn return_zero(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn get_quest_reward_currencies(state: &mut LuaState) -> LuaResult<u32> {
+    let quest_id = i32::from_stack(state, 1)?;
+    let currencies = {
+        let sim = borrow_state(state)?;
+        sim.quest_log_entries
+            .entries
+            .iter()
+            .find(|entry| entry.quest_id == quest_id)
+            .map(|entry| entry.currency_rewards.clone())
+            .unwrap_or_default()
+    };
+    let list_val = create_table(state);
+    let Val::Table(list_ref) = list_val else {
+        return Ok(0);
+    };
+    for (zero_based_index, currency) in currencies.into_iter().enumerate() {
+        let entry_val = build_currency_reward_table(state, &currency);
+        set_array_value(state, list_ref, (zero_based_index + 1) as i32, entry_val);
+    }
+    state.push(list_val);
+    Ok(1)
+}
+
+fn build_currency_reward_table(
+    state: &mut LuaState,
+    currency: &crate::lua_api::state::QuestRewardCurrency,
+) -> Val {
+    let entry = create_table(state);
+    let name_val = create_string(state, &currency.name);
+    let texture_val = create_string(state, &currency.texture);
+    table_set(state, entry, "currencyID", Val::Num(currency.currency_id as f64));
+    table_set(state, entry, "name", name_val);
+    table_set(state, entry, "texture", texture_val);
+    table_set(
+        state,
+        entry,
+        "totalRewardAmount",
+        Val::Num(currency.total_reward_amount as f64),
+    );
+    if let Some(base) = currency.base_reward_amount {
+        table_set(state, entry, "baseRewardAmount", Val::Num(base as f64));
+    }
+    entry
+}
+
 pub fn get_quest_log_reward_info(state: &mut LuaState) -> LuaResult<u32> {
     let item_index = i32::from_stack(state, 1)?;
     let quest_id = i32::from_stack(state, 2)?;

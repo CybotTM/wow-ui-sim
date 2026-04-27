@@ -33,6 +33,10 @@ pub struct QuestLogEntry {
     /// Item rewards iterated by `GetNumQuestLogRewards` /
     /// `GetQuestLogRewardInfo`. Empty for quests with no item rewards.
     pub reward_items: Vec<QuestRewardItem>,
+    /// Currency rewards returned by
+    /// `C_QuestLog.GetQuestRewardCurrencies`. Empty for quests with no
+    /// currency rewards.
+    pub currency_rewards: Vec<QuestRewardCurrency>,
 }
 
 /// One item-shaped reward entry surfaced by `GetQuestLogRewardInfo`.
@@ -44,6 +48,21 @@ pub struct QuestRewardItem {
     pub count: i32,
     pub quality: i32,
     pub is_usable: bool,
+}
+
+/// One currency-reward entry surfaced by
+/// `C_QuestLog.GetQuestRewardCurrencies`. `texture` is a Blizzard-style
+/// `Interface\Icons\…` path; the dialog passes it through `SetTexture`.
+/// `base_reward_amount` is the pre-bonus value retail surfaces only
+/// when known — `None` means "no base/bonus distinction for this
+/// currency".
+#[derive(Debug, Clone)]
+pub struct QuestRewardCurrency {
+    pub currency_id: i32,
+    pub name: String,
+    pub texture: String,
+    pub total_reward_amount: i32,
+    pub base_reward_amount: Option<i32>,
 }
 
 /// Backing state for `C_QuestLog.*` probes.
@@ -93,6 +112,7 @@ fn seed_quest_defaults() -> QuestLogEntry {
         criteria_spell_texture: None,
         criteria_spell_finished: false,
         reward_items: Vec::new(),
+        currency_rewards: Vec::new(),
     }
 }
 

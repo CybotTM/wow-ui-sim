@@ -9,7 +9,7 @@
 mod quest_log;
 mod wow_labs;
 
-pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardItem};
+pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem};
 pub use wow_labs::{
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
     WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,

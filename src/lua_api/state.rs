@@ -1441,8 +1441,8 @@ pub use super::sim_substates::{
     FactionEntry, GameRuleValue, GameRulesState, GossipOption, GossipQuestRow, GossipState,
     Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, MouseButtons,
     NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState,
-    QuestRewardItem, TorghastState, TradeState, VoiceChannel, VoiceChatState, VoiceMember,
-    WowLabsAreaInfo, WowLabsCircleInfo,
+    QuestRewardCurrency, QuestRewardItem, TorghastState, TradeState, VoiceChannel, VoiceChatState,
+    VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
     WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
     WowLabsPoint, WowLabsState,
 };

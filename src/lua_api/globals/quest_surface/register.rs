@@ -40,6 +40,7 @@ pub const QUEST_LOG_METHODS: &[(&'static str, SurfaceFn)] = &[
     ("IsWorldQuest", is_world_quest_fn),
     ("IsQuestTask", is_quest_task),
     ("IsQuestBounty", return_false),
+    ("GetQuestRewardCurrencies", get_quest_reward_currencies),
     ("GetQuestTagInfo", get_quest_tag_info),
     ("GetRequiredMoney", get_required_money),
     ("GetSuggestedGroupSize", get_suggested_group_size),
