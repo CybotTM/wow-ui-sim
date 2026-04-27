@@ -38,6 +38,7 @@ fn seed_two_races(env: &WowLuaEnv) {
                 artifacts: vec![ArchaeologyArtifact::default()],
             },
         ],
+        selected: None,
     };
 }
 

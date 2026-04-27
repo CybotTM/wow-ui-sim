@@ -36,6 +36,38 @@ pub struct ArchaeologyArtifact {
     pub completion_count: i32,
 }
 
+/// Currently-selected artifact backing the active-artifact globals
+/// (`GetSelectedArtifactInfo`, `GetArtifactProgress`, `CanSolveArtifact`,
+/// `SolveArtifact`). Owned by `ArchaeologyState.selected` and replaced
+/// by `SetSelectedArtifact`.
+#[derive(Debug, Clone, Default)]
+pub struct SelectedArtifact {
+    /// 1-based race index this artifact belongs to.
+    pub race_id: i32,
+    /// 1-based artifact index inside the race when an already-completed
+    /// artifact is being viewed (`SetSelectedArtifact(raceID, artifactID)`).
+    /// `None` selects the race's currently-pending artifact.
+    pub artifact_id: Option<i32>,
+    pub name: String,
+    pub description: String,
+    pub rarity: i32,
+    pub icon: u32,
+    pub spell_description: String,
+    pub num_sockets: i32,
+    pub bg_texture: String,
+    pub spell_id: u32,
+    /// Fragment progress earned without keystone help.
+    pub base_progress: i32,
+    /// Fragment progress contributed by socketed keystones.
+    pub adjust_progress: i32,
+    /// Fragments required to solve this artifact.
+    pub total_cost: i32,
+    /// Whether the player can solve right now (base + adjust ≥ total_cost
+    /// and the artifact is still pending). Authoritative; the simulator
+    /// does not derive it so tests can drive any combination.
+    pub can_solve: bool,
+}
+
 /// Backing state for the legacy archaeology globals.
 ///
 /// `profession_name` is the localized "Archaeology" string returned by
@@ -45,6 +77,10 @@ pub struct ArchaeologyArtifact {
 pub struct ArchaeologyState {
     pub profession_name: String,
     pub races: Vec<ArchaeologyRace>,
+    /// Active artifact slot. `None` means no artifact is selected — the
+    /// active-artifact globals return nil / 0 / false until
+    /// `SetSelectedArtifact` runs.
+    pub selected: Option<SelectedArtifact>,
 }
 
 impl Default for ArchaeologyState {
@@ -52,6 +88,7 @@ impl Default for ArchaeologyState {
         Self {
             profession_name: "Archaeology".to_string(),
             races: Vec::new(),
+            selected: None,
         }
     }
 }

@@ -10,7 +10,7 @@ mod archaeology;
 mod quest_log;
 mod wow_labs;
 
-pub use archaeology::{ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState};
+pub use archaeology::{ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, SelectedArtifact};
 pub use quest_log::{QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem};
 pub use wow_labs::{
     WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState, WowLabsMatchmakingState,
