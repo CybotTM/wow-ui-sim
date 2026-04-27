@@ -3,8 +3,9 @@
 //!
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
 //! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
-//! `GetNumZoneChoices()`, and `GetZoneChoiceInfo()`. Future commits
-//! will fill in the rest of the surface (quest offers, dialog hooks).
+//! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, and
+//! `GetNumQuestOffers()`. Future commits will fill in the rest of the
+//! surface (quest offer details, dialog hooks).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -31,6 +32,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     )?;
     table_set_rust_fn_static(state, table_ref, "GetNumZoneChoices", get_num_zone_choices)?;
     table_set_rust_fn_static(state, table_ref, "GetZoneChoiceInfo", get_zone_choice_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetNumQuestOffers", get_num_quest_offers)?;
     Ok(())
 }
 
@@ -159,6 +161,12 @@ fn get_zone_choice_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(choice.normalized_x));
     state.push(Val::Num(choice.normalized_y));
     Ok(6)
+}
+
+fn get_num_quest_offers(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.adventure_map.quest_offers.len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
 }
 
 /// Convert a Lua-facing 1-based index to a 0-based slot index. Returns

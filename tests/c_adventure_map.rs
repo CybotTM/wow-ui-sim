@@ -11,7 +11,9 @@
 //! `UIPanelWindows["AdventureMapFrame"].showFailedFunc`, so it must be
 //! present at addon load time (see `Blizzard_AdventureMap.lua:56`).
 
-use wow_ui_sim::lua_api::{AdventureMapInset, AdventureMapZoneChoice, WowLuaEnv};
+use wow_ui_sim::lua_api::{
+    AdventureMapInset, AdventureMapQuestOffer, AdventureMapZoneChoice, WowLuaEnv,
+};
 
 #[test]
 fn c_adventure_map_namespace_is_a_table() {
@@ -603,6 +605,88 @@ fn quest_choice_data_provider_pattern_collects_each_choice() {
     assert!((count - 2.0).abs() < 1e-6);
     assert!((first - 40_519.0).abs() < 1e-6);
     assert!((second_id - 40_521.0).abs() < 1e-6);
+}
+
+fn sample_quest_offer() -> AdventureMapQuestOffer {
+    AdventureMapQuestOffer {
+        quest_id: 41_653,
+        is_trivial: false,
+        frequency: 1,
+        is_legendary: false,
+        title: "The Tidestone of Golganneth".to_string(),
+        description: "Recover the Pillar of Creation.".to_string(),
+        normalized_x: 0.55,
+        normalized_y: 0.62,
+        inset_index: None,
+    }
+}
+
+#[test]
+fn get_num_quest_offers_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetNumQuestOffers)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_num_quest_offers_defaults_to_zero() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return C_AdventureMap.GetNumQuestOffers()")
+        .unwrap();
+    assert!(
+        count.abs() < 1e-6,
+        "GetNumQuestOffers must return 0 (not nil) before any offer is published"
+    );
+}
+
+#[test]
+fn get_num_quest_offers_returns_a_number_type() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetNumQuestOffers())")
+        .unwrap();
+    assert_eq!(kind, "number");
+}
+
+#[test]
+fn get_num_quest_offers_returns_seeded_length() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.quest_offers = vec![
+        sample_quest_offer(),
+        sample_quest_offer(),
+        sample_quest_offer(),
+    ];
+
+    let count: f64 = env
+        .eval("return C_AdventureMap.GetNumQuestOffers()")
+        .unwrap();
+    assert!((count - 3.0).abs() < 1e-6);
+}
+
+#[test]
+fn quest_offer_data_provider_pattern_iterates_each_offer() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.quest_offers =
+        vec![sample_quest_offer(), sample_quest_offer()];
+
+    env.exec(
+        r#"
+        _G.__offer_count = 0
+        for offerIndex = 1, C_AdventureMap.GetNumQuestOffers() do
+            _G.__offer_count = _G.__offer_count + 1
+        end
+        "#,
+    )
+    .unwrap();
+
+    let visited: f64 = env.eval("return _G.__offer_count").unwrap();
+    assert!(
+        (visited - 2.0).abs() < 1e-6,
+        "AM_QuestOfferDataProvider:RefreshAllData loop must iterate the seeded count"
+    );
 }
 
 #[test]

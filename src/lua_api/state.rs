@@ -598,6 +598,26 @@ pub struct AdventureMapZoneChoice {
     pub normalized_y: f64,
 }
 
+/// Quest-offer descriptor for the adventure map. A quest offer is a
+/// standard non-legendary pin advertised on the canvas, surfaced via
+/// `C_AdventureMap.GetQuestOfferInfo`. `is_trivial`, `frequency`, and
+/// `is_legendary` drive the pin variant the
+/// `AdventureMap_QuestOfferDataProviderMixin:RefreshAllData` loop
+/// chooses; `inset_index` is `Some` when the offer renders inside an
+/// inset and `None` for offers anchored to the main canvas.
+#[derive(Clone, Debug, Default)]
+pub struct AdventureMapQuestOffer {
+    pub quest_id: i64,
+    pub is_trivial: bool,
+    pub frequency: i64,
+    pub is_legendary: bool,
+    pub title: String,
+    pub description: String,
+    pub normalized_x: f64,
+    pub normalized_y: f64,
+    pub inset_index: Option<i64>,
+}
+
 /// Inset frame descriptor for the adventure map. An inset is a sub-region
 /// close-up panel published by `C_AdventureMap.GetMapInsetInfo`.
 /// `normalized_x` and `normalized_y` are 0..1 canvas coordinates that
@@ -630,14 +650,18 @@ pub struct AdventureMapInset {
 /// for the active map, mirroring `C_AdventureMap.GetNumMapInsets`'s
 /// nil-or-number contract. `zone_choices` defaults to empty (not
 /// `None`) because `C_AdventureMap.GetNumZoneChoices` always returns
-/// a number — zero before any choices are published. Future fields
-/// will hold quest offers.
+/// a number — zero before any choices are published. `quest_offers`
+/// likewise defaults to empty: `C_AdventureMap.GetNumQuestOffers`
+/// always returns a number, and the
+/// `AdventureMap_QuestOfferDataProviderMixin:RefreshAllData` loop
+/// drives off it without a nil guard.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
     pub last_closed: Option<f64>,
     pub insets: Option<Vec<AdventureMapInset>>,
     pub zone_choices: Vec<AdventureMapZoneChoice>,
+    pub quest_offers: Vec<AdventureMapQuestOffer>,
 }
 
 /// Shared simulator state accessible from Lua.

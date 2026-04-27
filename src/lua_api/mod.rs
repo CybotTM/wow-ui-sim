@@ -60,10 +60,10 @@ pub use loader_env::LoaderEnv;
 pub use message_frame::MessageFrameData;
 pub use simple_html::SimpleHtmlData;
 pub use state::{
-    AddonInfo, AdventureMapInset, AdventureMapState, AdventureMapZoneChoice, ArtifactInfo,
-    AzeriteItemState, FactionParagonInfo, HousingState, ItemLocationData, LossOfControlInfo,
-    MajorFactionData, PendingTimer, ProfessionQualityInfo, RenownLevelInfo, SimState,
-    tick_party_health,
+    AddonInfo, AdventureMapInset, AdventureMapQuestOffer, AdventureMapState,
+    AdventureMapZoneChoice, ArtifactInfo, AzeriteItemState, FactionParagonInfo, HousingState,
+    ItemLocationData, LossOfControlInfo, MajorFactionData, PendingTimer, ProfessionQualityInfo,
+    RenownLevelInfo, SimState, tick_party_health,
 };
 pub use tooltip::TooltipData;
 
