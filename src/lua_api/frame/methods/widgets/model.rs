@@ -1054,6 +1054,32 @@ pub(super) fn scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResul
     Ok(1)
 }
 
+/// Stores a Lua callback at `self.resetCallback`, mirroring
+/// `ModelSceneMixin:SetResetCallback`
+/// (`vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneMixin.lua:56`).
+/// `ModelSceneMixin:Reset()` reads `self.resetCallback` and invokes it
+/// with the scene as the only argument, so writing through the frame
+/// metatable (same path `self.resetCallback = cb` would take) keeps both
+/// the widget method and the inherited Blizzard `Reset()` consistent.
+/// Non-function / non-nil arguments are ignored to match the mixin
+/// contract (any value other than a callable would crash `Reset()`).
+pub(super) fn scene_set_reset_callback(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_val = stack_val(state, 1);
+    let Val::Table(frame_ref) = frame_val else {
+        return Ok(0);
+    };
+    let callback = stack_val(state, 2);
+    if !matches!(callback, Val::Function(_) | Val::Nil) {
+        return Ok(0);
+    }
+    let key = state.gc.intern_string(b"resetCallback");
+    if let Some(t) = state.gc.tables.get_mut(frame_ref) {
+        let _ = t.raw_set(Val::Str(key), callback, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(frame_ref);
+    Ok(0)
+}
+
 // ---------------------------------------------------------------------------
 // register_model
 // ---------------------------------------------------------------------------
@@ -1192,6 +1218,7 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetNumActors", scene_get_num_actors),
     ("GetActorAtIndex", scene_get_actor_at_index),
     ("TakeActor", scene_take_actor),
+    ("SetResetCallback", scene_set_reset_callback),
 ];
 
 pub(super) fn register_model(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
