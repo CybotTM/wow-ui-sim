@@ -582,11 +582,21 @@ pub struct ArtifactInfo {
 
 /// Zone-choice descriptor for the adventure map. A zone choice is one of
 /// the competing quests on the Broken Isles starting-zone selection
-/// screen, exposed via `C_AdventureMap.GetZoneChoiceInfo`. Future commits
-/// will add the descriptor fields (questID, textureKit, name, etc.) as
-/// the rest of the zone-choice surface lands.
+/// screen, exposed via `C_AdventureMap.GetZoneChoiceInfo`.
+/// `texture_kit` is `"alliance"`, `"horde"`, or a faction-neutral kit
+/// name; the addon uses it to pick the portrait atlas. `normalized_x`
+/// and `normalized_y` are 0..1 canvas coordinates the pin uses to place
+/// itself; either being missing makes
+/// `AdventureMap_IsQuestValid`-style guards reject the choice.
 #[derive(Clone, Debug, Default)]
-pub struct AdventureMapZoneChoice {}
+pub struct AdventureMapZoneChoice {
+    pub quest_id: i64,
+    pub texture_kit: String,
+    pub name: String,
+    pub zone_description: String,
+    pub normalized_x: f64,
+    pub normalized_y: f64,
+}
 
 /// Inset frame descriptor for the adventure map. An inset is a sub-region
 /// close-up panel published by `C_AdventureMap.GetMapInsetInfo`.

@@ -2,9 +2,9 @@
 //! surface consumed by the Blizzard_AdventureMap addon.
 //!
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
-//! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`, and
-//! `GetNumZoneChoices()`. Future commits will fill in the rest of the
-//! surface (per-zone-choice descriptors, quest offers, dialog hooks).
+//! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
+//! `GetNumZoneChoices()`, and `GetZoneChoiceInfo()`. Future commits
+//! will fill in the rest of the surface (quest offers, dialog hooks).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -30,6 +30,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         get_map_inset_detail_tile_info,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetNumZoneChoices", get_num_zone_choices)?;
+    table_set_rust_fn_static(state, table_ref, "GetZoneChoiceInfo", get_zone_choice_info)?;
     Ok(())
 }
 
@@ -135,6 +136,29 @@ fn get_num_zone_choices(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.adventure_map.zone_choices.len();
     state.push(Val::Num(count as f64));
     Ok(1)
+}
+
+fn get_zone_choice_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot_index) = lua_one_based_index_to_slot(stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    let descriptor = {
+        let sim = borrow_state(state)?;
+        sim.adventure_map.zone_choices.get(slot_index).cloned()
+    };
+    let Some(choice) = descriptor else {
+        return Ok(0);
+    };
+    let texture_kit = create_string(state, &choice.texture_kit);
+    let name = create_string(state, &choice.name);
+    let zone_description = create_string(state, &choice.zone_description);
+    state.push(Val::Num(choice.quest_id as f64));
+    state.push(texture_kit);
+    state.push(name);
+    state.push(zone_description);
+    state.push(Val::Num(choice.normalized_x));
+    state.push(Val::Num(choice.normalized_y));
+    Ok(6)
 }
 
 /// Convert a Lua-facing 1-based index to a 0-based slot index. Returns

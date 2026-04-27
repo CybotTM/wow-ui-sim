@@ -471,6 +471,140 @@ fn get_num_zone_choices_supports_iteration_loop() {
     );
 }
 
+fn sample_zone_choice() -> AdventureMapZoneChoice {
+    AdventureMapZoneChoice {
+        quest_id: 40_519,
+        texture_kit: "alliance".to_string(),
+        name: "Azsuna".to_string(),
+        zone_description: "Reclaim the lost magic of the night elves.".to_string(),
+        normalized_x: 0.31,
+        normalized_y: 0.55,
+    }
+}
+
+#[test]
+fn get_zone_choice_info_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetZoneChoiceInfo)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_zone_choice_info_returns_no_values_when_unloaded() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetZoneChoiceInfo(1))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_zone_choice_info_returns_no_values_for_out_of_range_index() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.zone_choices = vec![sample_zone_choice()];
+
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetZoneChoiceInfo(2))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_zone_choice_info_returns_no_values_for_non_positive_index() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.zone_choices = vec![sample_zone_choice()];
+
+    let zero_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetZoneChoiceInfo(0))")
+        .unwrap();
+    let negative_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetZoneChoiceInfo(-1))")
+        .unwrap();
+    assert!(zero_count.abs() < 1e-6);
+    assert!(negative_count.abs() < 1e-6);
+}
+
+#[test]
+fn get_zone_choice_info_returns_six_descriptor_values() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.zone_choices = vec![sample_zone_choice()];
+
+    env.exec(
+        "questID, textureKit, name, zoneDescription, normalizedX, normalizedY = \
+         C_AdventureMap.GetZoneChoiceInfo(1)",
+    )
+    .unwrap();
+
+    let quest_id: f64 = env.eval("return questID").unwrap();
+    let texture_kit: String = env.eval("return textureKit").unwrap();
+    let name: String = env.eval("return name").unwrap();
+    let zone_description: String = env.eval("return zoneDescription").unwrap();
+    let normalized_x: f64 = env.eval("return normalizedX").unwrap();
+    let normalized_y: f64 = env.eval("return normalizedY").unwrap();
+
+    assert!((quest_id - 40_519.0).abs() < 1e-6);
+    assert_eq!(texture_kit, "alliance");
+    assert_eq!(name, "Azsuna");
+    assert_eq!(zone_description, "Reclaim the lost magic of the night elves.");
+    assert!((normalized_x - 0.31).abs() < 1e-6);
+    assert!((normalized_y - 0.55).abs() < 1e-6);
+}
+
+#[test]
+fn get_zone_choice_info_indexes_one_based() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut second = sample_zone_choice();
+    second.quest_id = 40_521;
+    second.texture_kit = "horde".to_string();
+    second.name = "Highmountain".to_string();
+    env.state().borrow_mut().adventure_map.zone_choices =
+        vec![sample_zone_choice(), second];
+
+    let first_id: f64 = env
+        .eval("local id = C_AdventureMap.GetZoneChoiceInfo(1) return id")
+        .unwrap();
+    let second_id: f64 = env
+        .eval("local id = C_AdventureMap.GetZoneChoiceInfo(2) return id")
+        .unwrap();
+    let second_kit: String = env
+        .eval("local _, kit = C_AdventureMap.GetZoneChoiceInfo(2) return kit")
+        .unwrap();
+
+    assert!((first_id - 40_519.0).abs() < 1e-6);
+    assert!((second_id - 40_521.0).abs() < 1e-6);
+    assert_eq!(second_kit, "horde");
+}
+
+#[test]
+fn quest_choice_data_provider_pattern_collects_each_choice() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut second = sample_zone_choice();
+    second.quest_id = 40_521;
+    second.name = "Highmountain".to_string();
+    env.state().borrow_mut().adventure_map.zone_choices =
+        vec![sample_zone_choice(), second];
+
+    env.exec(
+        r#"
+        _G.__choice_ids = {}
+        for i = 1, C_AdventureMap.GetNumZoneChoices() do
+            local questID = C_AdventureMap.GetZoneChoiceInfo(i)
+            _G.__choice_ids[i] = questID
+        end
+        "#,
+    )
+    .unwrap();
+
+    let count: f64 = env.eval("return #_G.__choice_ids").unwrap();
+    let first: f64 = env.eval("return _G.__choice_ids[1]").unwrap();
+    let second_id: f64 = env.eval("return _G.__choice_ids[2]").unwrap();
+    assert!((count - 2.0).abs() < 1e-6);
+    assert!((first - 40_519.0).abs() < 1e-6);
+    assert!((second_id - 40_521.0).abs() < 1e-6);
+}
+
 #[test]
 fn build_detail_tiles_pattern_iterates_over_num_detail_tiles() {
     let env = WowLuaEnv::new().expect("env");
