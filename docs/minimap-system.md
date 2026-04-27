@@ -13,7 +13,7 @@ are about real minimap state, real mask handling, and actual content overlays.
 - **XML parsing**: `<Minimap>` elements parse correctly via `FrameElement::Minimap`
 - **Frame creation**: `CreateFrame("Minimap", ...)` creates a proper frame
 - **Child hierarchy**: Zoom buttons, backdrop, border texture render as children
-- **Basic map quad**: `build_minimap_quads()` emits `Interface\\HUD\\UIMinimapBackground` (CASC BLP, 32x32 tileable backdrop)
+- **Basic map quad**: `build_minimap_quads()` emits a sim-bundled placeholder map (`Interface\\AddOns\\SimCommands\\textures\\minimap-placeholder.webp`, 256x256 stylized zone render)
 - **Circular clipping**: `FLAG_CIRCLE_CLIP` in `quad.wgsl` clips the minimap quad to a circle
 - **Zoom state**: `SetZoom()` / `GetZoom()` persist and clamp zoom instead of returning constants
 - **Lua surface coverage**: minimap methods exist, with many still as no-op compatibility stubs
@@ -77,7 +77,14 @@ All minimap textures are loaded directly from CASC as BLPs. The old
 |----------|-------|---------|
 | `Interface/HUD/UIMinimap.BLP` | `ui-hud-minimap-frame` | Compass border frame (512x512), rendered as `MinimapCompassTexture` child via XML |
 | `Interface/HUD/UIMinimapMask.BLP` | `ui-hud-minimap-frame-mask` | Circular clip mask (256x256), not yet sampled — the shader uses `FLAG_CIRCLE_CLIP` instead |
-| `Interface/HUD/UIMinimapBackground.BLP` | — | 32x32 tileable backdrop, used as the placeholder map fill in `build_minimap_quads` |
+| `Interface/HUD/UIMinimapBackground.BLP` | — | 32x32 tileable backdrop, currently unused (sim ships its own placeholder map) |
+
+### Sim-bundled placeholder
+
+The simulator ships a 256x256 stylized zone-map placeholder at
+`Interface/AddOns/SimCommands/textures/minimap-placeholder.webp` (resolved through the addon-dir
+tier of `TextureManager::resolve_path`). Replace this with frame-driven content once
+`SetMaskTexture` and the rest of the minimap texture setters land.
 
 ## Rendering Architecture
 
@@ -85,7 +92,7 @@ All minimap textures are loaded directly from CASC as BLPs. The old
 
 ```
 build_minimap_quads(batch, bounds, frame)
-  → batch.push_textured_path(bounds, "Interface\\HUD\\UIMinimapBackground", ...)
+  → batch.push_textured_path(bounds, "Interface\\AddOns\\SimCommands\\textures\\minimap-placeholder", ...)
   → batch.set_extra_flags(4, FLAG_CIRCLE_CLIP)
 ```
 
@@ -117,8 +124,8 @@ What is still needed to move from "basic placeholder minimap" to "useful minimap
      `SetCorpsePOIArrowTexture`, and `SetStaticPOIArrowTexture` on the frame instead of dropping
      them
 2. **Real minimap content selection**
-   - replace the fixed `Interface\\HUD\\UIMinimapBackground` fill with a frame-driven texture input
-     or a simulator-owned dynamic minimap source
+   - replace the fixed `Interface\\AddOns\\SimCommands\\textures\\minimap-placeholder` fill with a
+     frame-driven texture input or a simulator-owned dynamic minimap source
 3. **Player/POI rendering**
    - render the player arrow and basic POI/blip overlays on top of the map quad
 4. **Optional WoW-accurate mask**
