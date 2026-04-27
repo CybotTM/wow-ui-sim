@@ -583,11 +583,15 @@ pub struct ArtifactInfo {
 /// Adventure-map (Broken Isles / Garrison-style world map) state. Drives
 /// the `C_AdventureMap` namespace consumed by the Blizzard_AdventureMap
 /// addon. `map_id` is the currently-selected adventure-map UI map id
-/// (0 when no adventure map is active). Future fields will hold zone
-/// choices, quest offers, and inset metadata.
+/// (0 when no adventure map is active). `last_closed` is the elapsed
+/// game time (seconds since `start_time`) when the player last closed
+/// the adventure map, or `None` if the map has not been closed this
+/// session. Future fields will hold zone choices, quest offers, and
+/// inset metadata.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
+    pub last_closed: Option<f64>,
 }
 
 /// Shared simulator state accessible from Lua.

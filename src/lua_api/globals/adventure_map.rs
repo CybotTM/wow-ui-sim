@@ -1,10 +1,11 @@
 //! `C_AdventureMap` namespace — Broken Isles / Garrison-style adventure-map
 //! surface consumed by the Blizzard_AdventureMap addon.
 //!
-//! Currently implements `GetMapID()` only. Future commits will fill in the
-//! full surface (zone choices, quest offers, inset metadata, dialog hooks).
+//! Currently implements `GetMapID()` and `Close()`. Future commits will fill
+//! in the full surface (zone choices, quest offers, inset metadata, dialog
+//! hooks).
 
-use crate::lua_api::methods::{borrow_state, create_table};
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
@@ -18,6 +19,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     let state = lua.state_mut();
     let table_ref = ensure_namespace_table(state);
     table_set_rust_fn_static(state, table_ref, "GetMapID", get_map_id)?;
+    table_set_rust_fn_static(state, table_ref, "Close", close)?;
     Ok(())
 }
 
@@ -47,4 +49,11 @@ fn get_map_id(state: &mut LuaState) -> LuaResult<u32> {
     let map_id = borrow_state(state)?.adventure_map.map_id;
     state.push(Val::Num(map_id as f64));
     Ok(1)
+}
+
+fn close(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let elapsed = sim.start_time.elapsed().as_secs_f64();
+    sim.adventure_map.last_closed = Some(elapsed);
+    Ok(0)
 }
