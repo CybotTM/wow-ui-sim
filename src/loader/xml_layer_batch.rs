@@ -47,24 +47,24 @@ fn exec_batch(env: &LoaderEnv<'_>, batch: &str, parent_name: &str) -> Result<(),
         .map_err(|e| LoadError::Lua(format!("layer children on {}: {}", parent_name, e)))
 }
 
-fn collect_textures<'a>(frame: &'a xml::FrameXml) -> Vec<CollectedTexture<'a>> {
-    let mut result = Vec::new();
-    for layers in frame.layers() {
-        for layer in &layers.layers {
-            let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
-            let sub_level = layer.texture_sub_level.unwrap_or(0);
-            for (texture, is_mask, is_line) in layer.textures() {
-                result.push(CollectedTexture {
-                    texture,
-                    is_mask,
-                    is_line,
-                    draw_layer: draw_layer.to_string(),
-                    sub_level,
-                });
-            }
-        }
-    }
-    result
+fn collected_texture_for<'a>(
+    element: &'a xml::LayerElement,
+    draw_layer: &str,
+    sub_level: i32,
+) -> Option<CollectedTexture<'a>> {
+    let (texture, is_mask, is_line) = match element {
+        xml::LayerElement::Texture(t) => (t, false, false),
+        xml::LayerElement::Line(t) => (t, false, true),
+        xml::LayerElement::MaskTexture(t) => (t, true, false),
+        xml::LayerElement::FontString(_) => return None,
+    };
+    Some(CollectedTexture {
+        texture,
+        is_mask,
+        is_line,
+        draw_layer: draw_layer.to_string(),
+        sub_level,
+    })
 }
 
 fn push_parent_key_attachment(
@@ -120,40 +120,19 @@ fn append_single_texture<'a>(
     timing.texture_count += 1;
 }
 
-fn append_texture_code<'a>(
-    textures: &[CollectedTexture<'a>],
+/// Append code for all layer children (textures + fontstrings) in XML document order.
+///
+/// Order matters: an element's anchor `relativeKey="$parent.SiblingKey"` resolves at
+/// SetPoint time by reading the sibling from the parent table, so the sibling must
+/// be created before any element that anchors to it. Iterating `layer.elements`
+/// directly preserves the XML order Blizzard authors rely on.
+fn append_layer_children_code<'a>(
+    frame: &'a xml::FrameXml,
     parent_name: &str,
     name_parent: &str,
     batch: &mut String,
     attachments: &mut Vec<ParentKeyAttachment>,
     anim_entries: &mut Vec<AnimEntry<'a>>,
-    timing: &mut LoadTiming,
-) {
-    for ct in textures {
-        if ct.texture.is_virtual == Some(true) {
-            if let Some(ref name) = ct.texture.name {
-                xml::register_texture_template(name, ct.texture.clone());
-            }
-            continue;
-        }
-        append_single_texture(
-            ct,
-            parent_name,
-            name_parent,
-            batch,
-            attachments,
-            anim_entries,
-            timing,
-        );
-    }
-}
-
-fn append_fontstring_code(
-    frame: &xml::FrameXml,
-    parent_name: &str,
-    name_parent: &str,
-    batch: &mut String,
-    attachments: &mut Vec<ParentKeyAttachment>,
     text_syncs: &mut Vec<TextSync>,
     timing: &mut LoadTiming,
 ) {
@@ -161,21 +140,68 @@ fn append_fontstring_code(
         for layer in &layers.layers {
             let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
             let sub_level = layer.texture_sub_level.unwrap_or(0);
-            for fs in layer.font_strings() {
-                append_single_fontstring(
-                    fs,
+            for element in &layer.elements {
+                append_layer_element_code(
+                    element,
                     parent_name,
                     name_parent,
                     draw_layer,
                     sub_level,
                     batch,
                     attachments,
+                    anim_entries,
                     text_syncs,
                     timing,
                 );
             }
         }
     }
+}
+
+fn append_layer_element_code<'a>(
+    element: &'a xml::LayerElement,
+    parent_name: &str,
+    name_parent: &str,
+    draw_layer: &str,
+    sub_level: i32,
+    batch: &mut String,
+    attachments: &mut Vec<ParentKeyAttachment>,
+    anim_entries: &mut Vec<AnimEntry<'a>>,
+    text_syncs: &mut Vec<TextSync>,
+    timing: &mut LoadTiming,
+) {
+    if let xml::LayerElement::FontString(fs) = element {
+        append_single_fontstring(
+            fs,
+            parent_name,
+            name_parent,
+            draw_layer,
+            sub_level,
+            batch,
+            attachments,
+            text_syncs,
+            timing,
+        );
+        return;
+    }
+    let Some(ct) = collected_texture_for(element, draw_layer, sub_level) else {
+        return;
+    };
+    if ct.texture.is_virtual == Some(true) {
+        if let Some(ref name) = ct.texture.name {
+            xml::register_texture_template(name, ct.texture.clone());
+        }
+        return;
+    }
+    append_single_texture(
+        &ct,
+        parent_name,
+        name_parent,
+        batch,
+        attachments,
+        anim_entries,
+        timing,
+    );
 }
 
 fn append_single_fontstring(
@@ -327,23 +353,14 @@ pub fn create_layer_children_batched_with_name_parent(
     let mut attachments: Vec<ParentKeyAttachment> = Vec::new();
     let mut text_syncs: Vec<TextSync> = Vec::new();
     let mut anim_entries: Vec<AnimEntry<'_>> = Vec::new();
-    let all_textures = collect_textures(frame);
 
-    append_texture_code(
-        &all_textures,
-        parent_name,
-        name_parent,
-        &mut batch,
-        &mut attachments,
-        &mut anim_entries,
-        timing,
-    );
-    append_fontstring_code(
+    append_layer_children_code(
         frame,
         parent_name,
         name_parent,
         &mut batch,
         &mut attachments,
+        &mut anim_entries,
         &mut text_syncs,
         timing,
     );
