@@ -1018,6 +1018,29 @@ pub(super) fn scene_take_actor(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Drops every actor from the scene's actor pool, mirroring
+/// `ModelSceneMixin:ClearScene` /
+/// `ModelSceneMixin:ReleaseAllActors`
+/// (`vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneMixin.lua:16,217`).
+/// Drained actors are reparented away from the scene so the scene's
+/// `children` list and `model_scene_actor_ids` agree, matching what
+/// `scene_take_actor` does for a single actor.
+pub(super) fn scene_clear_scene(state: &mut LuaState) -> LuaResult<u32> {
+    let scene_id = frame_id_from_stack(state, 1)?;
+    let actor_ids: Vec<u64> = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.widgets
+            .get_mut_visual(scene_id)
+            .map(|scene| std::mem::take(&mut scene.model_scene_actor_ids))
+            .unwrap_or_default()
+    };
+    let mut sim = borrow_state_mut(state)?;
+    for actor_id in actor_ids {
+        reparent_widget(&mut sim.widgets, actor_id, None);
+    }
+    Ok(0)
+}
+
 pub(super) fn scene_set_view_insets(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let l = val_to_f64(stack_val(state, 2)) as f32;
@@ -1219,6 +1242,7 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("GetActorAtIndex", scene_get_actor_at_index),
     ("TakeActor", scene_take_actor),
     ("SetResetCallback", scene_set_reset_callback),
+    ("ClearScene", scene_clear_scene),
 ];
 
 pub(super) fn register_model(state: &mut LuaState, metatable: GcRef<Table>) -> LuaResult<()> {
