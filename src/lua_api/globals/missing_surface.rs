@@ -3,6 +3,7 @@
 mod account_services;
 mod account_store;
 mod achievement_info;
+mod anima_diversion;
 mod area_poi;
 mod auction_house;
 mod battle_net;
@@ -217,6 +218,7 @@ fn register_world_namespace_surfaces(state: &mut LuaState) -> LuaResult<()> {
     warband_scene::register_warband_scene_surface(state)?;
     nameplate::register_nameplate_surface(state)?;
     ui_widget_manager::register_ui_widget_manager_surface(state)?;
+    anima_diversion::register_anima_diversion_surface(state)?;
     Ok(())
 }
 

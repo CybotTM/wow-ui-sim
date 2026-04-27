@@ -28,6 +28,7 @@ macro_rules! build_empty_sim_state {
             addon_saved_enable_state: None,
             system_chat_log: Vec::new(),
             adventure_map: AdventureMapState::default(),
+            anima_diversion: AnimaDiversionState::default(),
             quest_portrait_state: None,
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
@@ -778,6 +779,68 @@ pub struct QuestPortraitState {
     pub hide_model: bool,
 }
 
+/// One currency cost row for an anima-diversion node — mirrors the
+/// official `AnimaDiversionCostInfo` documented in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AnimaDiversionUIDocumentation.lua`
+/// (lines 124-127). `currency_id` is the currency rewarded/spent and
+/// `quantity` is the magnitude. Each `AnimaDiversionNodeInfo` carries
+/// an array of these rows; the `ReinforceInfoFrameMixin` iterates them
+/// to render the bullet list of refund/spend currencies.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct AnimaDiversionCostInfo {
+    pub currency_id: i64,
+    pub quantity: i64,
+}
+
+/// One anima-diversion node descriptor — mirrors the official
+/// `AnimaDiversionNodeInfo` documented in
+/// `vendor/wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/AnimaDiversionUIDocumentation.lua`
+/// (lines 130-141). `state` is `Enum.AnimaDiversionNodeState` (0 =
+/// Unavailable, 1 = Available, 2 = SelectedTemporary, 3 =
+/// SelectedPermanent, 4 = Cooldown). `normalized_position` is the
+/// 0..1 canvas coordinate that `AnimaDiversionPinMixin:Init` consumes
+/// via `Vector2DMixin`. The `talent_id` is the unique per-node anchor
+/// the addon uses for `C_AnimaDiversion.SelectAnimaNode` round-trips.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct AnimaDiversionNodeInfo {
+    pub talent_id: i64,
+    pub name: String,
+    pub description: String,
+    pub costs: Vec<AnimaDiversionCostInfo>,
+    pub currency_id: i64,
+    pub icon: i64,
+    pub normalized_position_x: f64,
+    pub normalized_position_y: f64,
+    pub state: i64,
+}
+
+/// Anima-diversion frame state — backs the `C_AnimaDiversion`
+/// namespace consumed by `Blizzard_AnimaDiversionUI`. `texture_kit` is
+/// the asset prefix `AnimaDiversionFrameMixin:SetupTextureKits` reads
+/// (default empty string so the kit-specific code path is taken only
+/// when a scenario seeds one). `map_id` is the UI map id the bolster
+/// progress bar / reinforce frame anchor against. `title` is the
+/// dialog title `TryShow` displays. `origin_position` is the player's
+/// position on the canvas, returned as a `Vector2DMixin`-shaped
+/// `{x, y}` table — `None` means the API returns nil, matching the
+/// official Nilable annotation. `reinforce_progress` is the
+/// 0..1 fill fraction of the bolster bar; `nodes` is the talent grid
+/// returned by `GetAnimaDiversionNodes`. `last_selected_talent_id` and
+/// `last_selected_temporary` record the most recent
+/// `SelectAnimaNode(talentID, temporary)` request so tests can assert
+/// the round-trip.
+#[derive(Clone, Debug, Default)]
+pub struct AnimaDiversionState {
+    pub texture_kit: String,
+    pub title: String,
+    pub map_id: i64,
+    pub origin_position: Option<(f64, f64)>,
+    pub reinforce_progress: f64,
+    pub nodes: Vec<AnimaDiversionNodeInfo>,
+    pub last_selected_talent_id: Option<i64>,
+    pub last_selected_temporary: Option<bool>,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -807,6 +870,8 @@ pub struct SimState {
     pub system_chat_log: Vec<String>,
     /// Adventure-map state backing the `C_AdventureMap` namespace.
     pub adventure_map: AdventureMapState,
+    /// Anima-diversion state backing the `C_AnimaDiversion` namespace.
+    pub anima_diversion: AnimaDiversionState,
     /// Most recent `QuestFrame_ShowQuestPortrait` args, or `None` after a
     /// `QuestFrame_HideQuestPortrait` call. Drives nothing at render
     /// time — it exists so admin probes / tests can assert the dialog
