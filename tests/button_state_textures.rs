@@ -45,7 +45,6 @@ fn build_text_batch_for_button(
     env: &wow_ui_sim::lua_api::WowLuaEnv,
     root: &str,
 ) -> wow_ui_sim::render::QuadBatch {
-    use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
     use wow_ui_sim::render::glyph::GlyphAtlas;
 
@@ -59,7 +58,7 @@ fn build_text_batch_for_button(
         let _ = state.get_strata_buckets();
         state.strata_buckets.as_ref().unwrap().clone()
     };
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
     let state = env.state().borrow();
     build_quad_batch_for_registry(

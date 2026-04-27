@@ -465,7 +465,7 @@ pub(super) fn measure_text_width(state: &LuaState, id: u64) -> f64 {
             .measure_text_width(&text, font.as_deref(), font_size) as f64
             * text_scale;
     }
-    let mut fallback = WowFontSystem::new(std::path::Path::new("./fonts"));
+    let mut fallback = WowFontSystem::new();
     fallback.measure_text_width(&text, font.as_deref(), font_size) as f64 * text_scale
 }
 
@@ -486,7 +486,7 @@ fn measure_text_height(state: &LuaState, id: u64, wrap_width: Option<f32>) -> f6
         ) as f64
             * text_scale;
     }
-    let mut fallback = WowFontSystem::new(std::path::Path::new("./fonts"));
+    let mut fallback = WowFontSystem::new();
     fallback.measure_text_height(&text, font.as_deref(), font_size, wrap_width) as f64 * text_scale
 }
 

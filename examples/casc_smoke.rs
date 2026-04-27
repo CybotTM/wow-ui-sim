@@ -24,6 +24,11 @@ fn main() {
         "Interface\\Buttons\\UI-Panel-Button-Up.blp",
         "fonts/frizqt__.ttf",
         "Fonts\\FRIZQT__.TTF",
+        "fonts/arialn.ttf",
+        "fonts/frizqt___cyr.ttf",
+        "fonts/trajanpro3semibold.ttf",
+        "fonts/skurri.ttf",
+        "fonts/morpheus.ttf",
     ];
     for probe in direct_probes {
         let fdid = asset_resolver::lookup_path(probe);

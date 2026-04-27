@@ -1033,7 +1033,6 @@ mod tests {
     use iced_runtime::window::Action as WindowAction;
     use std::cell::RefCell;
     use std::collections::HashMap;
-    use std::path::PathBuf;
     use std::rc::Rc;
     use tempfile::tempdir;
     use tokio::sync::mpsc;
@@ -1045,9 +1044,7 @@ mod tests {
         env.borrow().set_screen_mode(screen_kind);
 
         let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
-        let font_system = Rc::new(RefCell::new(crate::render::WowFontSystem::new(
-            &PathBuf::from(super::super::app::DEFAULT_FONTS_PATH),
-        )));
+        let font_system = Rc::new(RefCell::new(crate::render::WowFontSystem::new()));
         let glyph_atlas = Rc::new(RefCell::new(crate::render::GlyphAtlas::new()));
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();

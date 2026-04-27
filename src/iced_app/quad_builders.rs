@@ -590,8 +590,6 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::*;
     use crate::render::glyph::GlyphAtlas;
     use crate::widget::{Frame, TextSegment};
@@ -689,7 +687,7 @@ mod tests {
         ];
 
         let mut batch = QuadBatch::new();
-        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut font_sys = WowFontSystem::new();
         let mut glyph_atlas = GlyphAtlas::new();
         let mut text_renderer = WidgetTextRenderer {
             batch: &mut batch,

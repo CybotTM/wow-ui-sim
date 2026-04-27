@@ -1271,7 +1271,7 @@ fn spellbook_hover_tooltip_is_sized_and_on_screen() {
         let (_spell_name, _button_left, _button_bottom, _button_right, _button_top) =
             hover_first_spell_button(&env);
 
-        let mut font_sys = wow_ui_sim::render::font::WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut font_sys = wow_ui_sim::render::font::WowFontSystem::new();
         {
             let mut state = env.state().borrow_mut();
             let _ = state.widgets.take_render_dirty();

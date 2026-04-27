@@ -487,7 +487,6 @@ fn test_tooltip_data_handler_set_upgrade_item_uses_upgrade_getter() {
 #[cfg(feature = "gui")]
 #[test]
 fn test_tooltip_produces_quads_after_hover() {
-    use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
     use wow_ui_sim::render::glyph::GlyphAtlas;
 
@@ -505,7 +504,7 @@ fn test_tooltip_produces_quads_after_hover() {
     env.fire_script_handler(btn_id, "OnEnter", vec![]).unwrap();
 
     // Run tooltip sizing (same as build_quad_batch does)
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     {
         let mut state = env.state().borrow_mut();
         let _ = state.widgets.take_render_dirty();
@@ -598,7 +597,6 @@ fn test_tooltip_produces_quads_after_hover() {
 #[cfg(feature = "gui")]
 #[test]
 fn test_character_slot_hover_tooltip_produces_quads() {
-    use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
     use wow_ui_sim::render::glyph::GlyphAtlas;
 
@@ -616,7 +614,7 @@ fn test_character_slot_hover_tooltip_produces_quads() {
     env.state().borrow_mut().hovered_frame = Some(slot_id);
     env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
 
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     {
         let mut state = env.state().borrow_mut();
         let _ = state.widgets.take_render_dirty();
@@ -688,7 +686,6 @@ fn test_character_slot_hover_tooltip_produces_quads() {
 #[cfg(feature = "gui")]
 #[test]
 fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
-    use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
 
     let env = setup_full_env();
@@ -705,7 +702,7 @@ fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
     env.state().borrow_mut().hovered_frame = Some(slot_id);
     env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
 
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     {
         let mut state = env.state().borrow_mut();
         let _ = state.widgets.take_render_dirty();
@@ -744,7 +741,6 @@ fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
 #[cfg(feature = "gui")]
 #[test]
 fn test_buff_icon_hover_tooltip_produces_quads() {
-    use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
     use wow_ui_sim::render::glyph::GlyphAtlas;
 
@@ -752,7 +748,7 @@ fn test_buff_icon_hover_tooltip_produces_quads() {
     refresh_buff_frame(&env);
     hover_first_visible_buff_icon(&env);
 
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     {
         let mut state = env.state().borrow_mut();
         let _ = state.widgets.take_render_dirty();

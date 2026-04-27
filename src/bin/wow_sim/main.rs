@@ -197,7 +197,7 @@ fn init_and_load(
     Option<SavedVariablesManager>,
 ) {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
-    let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
+    let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
     init_environment(args, &env, &font_system);
     env.set_screen_mode(screen);
 

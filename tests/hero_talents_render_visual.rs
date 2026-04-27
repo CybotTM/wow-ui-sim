@@ -55,7 +55,7 @@ fn make_texture_manager() -> TextureManager {
 }
 
 fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
-    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+    Rc::new(RefCell::new(WowFontSystem::new()))
 }
 
 fn build_screenshot_like_batch(

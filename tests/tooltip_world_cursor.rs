@@ -1,7 +1,5 @@
 mod tooltip_full_env_helpers;
 
-use std::path::PathBuf;
-
 use tooltip_full_env_helpers::setup_full_env;
 use wow_ui_sim::render::font::WowFontSystem;
 use wow_ui_sim::widget::AnchorPoint;
@@ -63,7 +61,7 @@ fn test_world_cursor_nameplate_anchor_positions_tooltip_relative_to_owner() {
     )
     .expect("Failed to show the world cursor tooltip with a nameplate anchor");
 
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     let mut state = env.state().borrow_mut();
     wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
     state.ensure_layout_rects();

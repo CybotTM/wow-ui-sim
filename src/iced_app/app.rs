@@ -5,7 +5,6 @@ use rilua::LuaApiMut;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
 use std::collections::VecDeque;
-use std::path::PathBuf;
 use std::rc::Rc;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
@@ -23,9 +22,6 @@ use iced_layout_inspector::server as debug_server;
 
 use super::Message;
 use super::state::InspectorState;
-
-/// Default path to WoW TTF fonts.
-pub const DEFAULT_FONTS_PATH: &str = "./fonts";
 
 const DEFAULT_FAST_TICK_MS: u64 = 16;
 
@@ -384,9 +380,7 @@ impl App {
             }
         }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-            DEFAULT_FONTS_PATH,
-        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         env_rc.borrow().set_font_system(Rc::clone(&font_system));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         (texture_manager, font_system, glyph_atlas)
@@ -593,9 +587,7 @@ mod tests {
         env.borrow().set_screen_mode(screen_kind);
 
         let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-            DEFAULT_FONTS_PATH,
-        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();

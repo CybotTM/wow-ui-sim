@@ -1,11 +1,9 @@
-use std::path::Path;
 use std::time::{Duration, Instant};
 
 use iced::{Point, Rectangle, Size};
 use wow_ui_sim::render::{GlyphAtlas, QuadBatch, WowFontSystem, emit_text_quads};
 use wow_ui_sim::widget::{TextJustify, TextOutline};
 
-const PERF_FONTS_PATH: &str = "./fonts";
 const REPRESENTATIVE_TEXT_CASES: &[TextPerfCase] = &[
     TextPerfCase {
         text: "Game Menu",
@@ -40,7 +38,7 @@ const REPRESENTATIVE_TEXT_CASES: &[TextPerfCase] = &[
 ];
 
 pub fn measure_glyph_text_shaping_for_representative_strings() -> Duration {
-    let mut font_system = WowFontSystem::new(Path::new(PERF_FONTS_PATH));
+    let mut font_system = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
     let mut batch = QuadBatch::new();
 

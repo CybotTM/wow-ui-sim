@@ -869,9 +869,7 @@ mod tests {
         env.borrow().set_screen_mode(ScreenKind::Game);
 
         let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&std::path::PathBuf::from(
-            crate::iced_app::app::DEFAULT_FONTS_PATH,
-        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();

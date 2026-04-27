@@ -202,7 +202,7 @@ fn chat_layout_debug(env: &WowLuaEnv) -> String {
 
 #[cfg(feature = "gui")]
 fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
-    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+    Rc::new(RefCell::new(WowFontSystem::new()))
 }
 
 #[cfg(feature = "gui")]
