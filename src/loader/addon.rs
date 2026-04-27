@@ -573,6 +573,7 @@ fn register_loading_addon(
     if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
         addon.use_secure_env = toc.is_secure_env();
         addon.dependencies = toc.dependencies();
+        addon.default_enabled = toc.default_enabled();
     }
     LoadingAddonGuard {
         state: Rc::clone(env.state()),

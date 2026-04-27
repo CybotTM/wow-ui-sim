@@ -757,3 +757,100 @@ fn test_get_addon_dependencies_walks_all_loaded_state() {
         "marking ChildAddon unloaded should make the walk return false"
     );
 }
+
+// ── C_AddOns.IsAddOnDefaultEnabled ────────────────────────────────────────────
+
+fn env_with_default_state_addons() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    {
+        let mut state = env.state().borrow_mut();
+        state.addons.push(AddonInfo {
+            folder_name: "EnabledAddon".into(),
+            title: "Enabled".into(),
+            enabled: true,
+            default_enabled: true,
+            ..Default::default()
+        });
+        state.addons.push(AddonInfo {
+            folder_name: "ShipsDisabledAddon".into(),
+            title: "Disabled".into(),
+            enabled: false,
+            default_enabled: false,
+            ..Default::default()
+        });
+    }
+    env
+}
+
+#[test]
+fn test_is_addon_default_enabled_true_for_factory_enabled() {
+    let env = env_with_default_state_addons();
+    let result: bool = env
+        .eval("return C_AddOns.IsAddOnDefaultEnabled('EnabledAddon')")
+        .unwrap();
+    assert!(result, "addon without DefaultState should default to enabled");
+}
+
+#[test]
+fn test_is_addon_default_enabled_false_for_ships_disabled() {
+    let env = env_with_default_state_addons();
+    let result: bool = env
+        .eval("return C_AddOns.IsAddOnDefaultEnabled('ShipsDisabledAddon')")
+        .unwrap();
+    assert!(
+        !result,
+        "addon with DefaultState=disabled should return false"
+    );
+}
+
+#[test]
+fn test_is_addon_default_enabled_independent_of_runtime_enabled() {
+    // Toggling AddonInfo.enabled at runtime must not affect the factory default —
+    // that is the whole point of the API for the reset-to-default path.
+    let env = env_with_default_state_addons();
+    {
+        let mut state = env.state().borrow_mut();
+        if let Some(a) = state
+            .addons
+            .iter_mut()
+            .find(|a| a.folder_name == "EnabledAddon")
+        {
+            a.enabled = false;
+        }
+    }
+    let result: bool = env
+        .eval("return C_AddOns.IsAddOnDefaultEnabled('EnabledAddon')")
+        .unwrap();
+    assert!(result, "factory default must be independent of current state");
+}
+
+#[test]
+fn test_is_addon_default_enabled_by_index() {
+    let env = env_with_default_state_addons();
+    let result: bool = env
+        .eval(
+            r#"
+            local idx
+            for i = 1, C_AddOns.GetNumAddOns() do
+                if C_AddOns.GetAddOnName(i) == "ShipsDisabledAddon" then idx = i end
+            end
+            return C_AddOns.IsAddOnDefaultEnabled(idx)
+            "#,
+        )
+        .unwrap();
+    assert!(!result);
+}
+
+#[test]
+fn test_is_addon_default_enabled_unknown_returns_false() {
+    let env = env_with_default_state_addons();
+    let by_name: bool = env
+        .eval("return C_AddOns.IsAddOnDefaultEnabled('NoSuchAddon')")
+        .unwrap();
+    assert!(!by_name);
+
+    let by_index: bool = env
+        .eval("return C_AddOns.IsAddOnDefaultEnabled(9999)")
+        .unwrap();
+    assert!(!by_index);
+}

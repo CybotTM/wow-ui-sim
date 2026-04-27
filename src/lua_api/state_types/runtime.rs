@@ -89,7 +89,7 @@ pub struct AppFrameMetrics {
 }
 
 /// Information about a loaded addon.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct AddonInfo {
     /// Folder name (used as addon identifier).
     pub folder_name: String,
@@ -112,6 +112,29 @@ pub struct AddonInfo {
     /// Required dependencies declared in TOC (`Dependencies` / `RequiredDep` / `RequiredDeps`).
     /// Surfaced to Lua via `C_AddOns.GetAddOnDependencies` as a variadic of strings.
     pub dependencies: Vec<String>,
+    /// Factory default enabled state, derived from `## DefaultState: disabled`
+    /// (`false` only when the TOC opts out; otherwise `true`). Surfaced via
+    /// `C_AddOns.IsAddOnDefaultEnabled` and used by the addon list's
+    /// reset-to-default action.
+    pub default_enabled: bool,
+}
+
+impl Default for AddonInfo {
+    fn default() -> Self {
+        Self {
+            folder_name: String::new(),
+            title: String::new(),
+            notes: String::new(),
+            enabled: false,
+            loaded: false,
+            load_on_demand: false,
+            use_secure_env: false,
+            load_time_secs: 0.0,
+            runtime: AddonRuntimeMetrics::default(),
+            dependencies: Vec::new(),
+            default_enabled: true,
+        }
+    }
 }
 
 /// A collected Lua error with optional addon attribution.

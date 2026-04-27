@@ -246,6 +246,15 @@ impl TocFile {
         self.file_env_overrides.get(index).copied().flatten()
     }
 
+    /// Default enabled state — `## DefaultState: disabled` ships the addon
+    /// disabled out of the box; any other value (or absence) ships it enabled.
+    pub fn default_enabled(&self) -> bool {
+        self.metadata
+            .get("DefaultState")
+            .map(|v| !v.eq_ignore_ascii_case("disabled"))
+            .unwrap_or(true)
+    }
+
     /// Check if addon is load-on-demand.
     pub fn is_load_on_demand(&self) -> bool {
         self.metadata

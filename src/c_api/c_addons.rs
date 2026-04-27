@@ -88,6 +88,12 @@ fn register_c_addons_queries(
     table_set_rust_fn_static(
         state,
         t,
+        "IsAddOnDefaultEnabled",
+        c_addons_is_addon_default_enabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        t,
         "GetScriptsDisallowedForBeta",
         c_addons_get_scripts_disallowed_for_beta,
     )?;
@@ -502,6 +508,19 @@ fn c_addons_get_addon_dependencies(state: &mut LuaState) -> LuaResult<u32> {
         state.push(val);
     }
     Ok(deps.len() as u32)
+}
+
+/// `C_AddOns.IsAddOnDefaultEnabled(indexOrName) → bool`
+///
+/// Returns the addon's factory-default enabled state — `true` unless its TOC
+/// declares `## DefaultState: disabled`. Used by the addon list's right-click
+/// "Reset to Default" path to decide whether to enable or disable on reset.
+/// Unknown addon → `false`.
+fn c_addons_is_addon_default_enabled(state: &mut LuaState) -> LuaResult<u32> {
+    let default_enabled =
+        with_addon(state, stack_val(state, 1), |a| a.default_enabled).unwrap_or(false);
+    state.push(Val::Bool(default_enabled));
+    Ok(1)
 }
 
 fn c_addons_is_addon_version_check_enabled(state: &mut LuaState) -> LuaResult<u32> {
