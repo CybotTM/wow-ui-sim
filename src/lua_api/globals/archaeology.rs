@@ -21,6 +21,14 @@
 //! - `SolveArtifact()` — clears progress, fires
 //!   `RESEARCH_ARTIFACT_COMPLETE` with the artifact name as payload.
 //!
+//! Keystone-socket surface (drives the keystone buttons):
+//! - `ItemAddedToArtifact(socketIndex: number) → bool` — true when the
+//!   1-based socket holds a keystone.
+//! - `SocketItemToArtifact()` — slots a keystone into the leftmost empty
+//!   socket and adds `keystone_value` to `adjust_progress`.
+//! - `RemoveItemFromArtifact()` — empties the rightmost-set socket and
+//!   subtracts `keystone_value` from `adjust_progress`.
+//!
 //! Without `GetArchaeologyInfo` the addon errors out at
 //! `Blizzard_ArchaeologyUI.lua:102` during `OnLoad` and `ArchaeologyFrame`
 //! becomes a half-initialized table.
@@ -225,6 +233,62 @@ fn solve_artifact(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// Resizes `selected.sockets` to match `selected.num_sockets` so the
+/// keystone globals can index by `1..=num_sockets` regardless of how the
+/// caller seeded the slot. Truncates excess entries (keystones beyond
+/// the current capacity are dropped) and zero-fills missing entries.
+fn normalize_sockets_to_capacity(selected: &mut SelectedArtifact) {
+    let capacity = selected.num_sockets.max(0) as usize;
+    selected.sockets.resize(capacity, false);
+}
+
+fn item_added_to_artifact(state: &mut LuaState) -> LuaResult<u32> {
+    let socket_index = i32::from_stack(state, 1)?;
+    let occupied = if socket_index < 1 {
+        false
+    } else {
+        let zero_based = (socket_index - 1) as usize;
+        borrow_state(state)?
+            .archaeology
+            .selected
+            .as_ref()
+            .and_then(|s| s.sockets.get(zero_based).copied())
+            .unwrap_or(false)
+    };
+    state.push(Val::Bool(occupied));
+    Ok(1)
+}
+
+fn socket_item_to_artifact(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let keystone_value = sim.archaeology.keystone_value;
+    let Some(selected) = sim.archaeology.selected.as_mut() else {
+        return Ok(0);
+    };
+    normalize_sockets_to_capacity(selected);
+    let Some(empty_index) = selected.sockets.iter().position(|filled| !filled) else {
+        return Ok(0);
+    };
+    selected.sockets[empty_index] = true;
+    selected.adjust_progress += keystone_value;
+    Ok(0)
+}
+
+fn remove_item_from_artifact(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let keystone_value = sim.archaeology.keystone_value;
+    let Some(selected) = sim.archaeology.selected.as_mut() else {
+        return Ok(0);
+    };
+    normalize_sockets_to_capacity(selected);
+    let Some(rightmost_set) = selected.sockets.iter().rposition(|filled| *filled) else {
+        return Ok(0);
+    };
+    selected.sockets[rightmost_set] = false;
+    selected.adjust_progress -= keystone_value;
+    Ok(0)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetArchaeologyInfo", get_archaeology_info)?;
     LuaApiMut::register_function(lua, "GetNumArchaeologyRaces", get_num_archaeology_races)?;
@@ -235,5 +299,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetArtifactProgress", get_artifact_progress)?;
     LuaApiMut::register_function(lua, "CanSolveArtifact", can_solve_artifact)?;
     LuaApiMut::register_function(lua, "SolveArtifact", solve_artifact)?;
+    LuaApiMut::register_function(lua, "ItemAddedToArtifact", item_added_to_artifact)?;
+    LuaApiMut::register_function(lua, "SocketItemToArtifact", socket_item_to_artifact)?;
+    LuaApiMut::register_function(lua, "RemoveItemFromArtifact", remove_item_from_artifact)?;
     Ok(())
 }

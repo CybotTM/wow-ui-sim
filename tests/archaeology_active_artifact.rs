@@ -30,6 +30,7 @@ fn solve_ready_selected() -> SelectedArtifact {
         num_sockets: 2,
         bg_texture: "DwarfArchRare".to_string(),
         spell_id: 88910,
+        sockets: vec![false, false],
         base_progress: 30,
         adjust_progress: 5,
         total_cost: 35,

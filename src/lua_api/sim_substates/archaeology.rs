@@ -56,6 +56,10 @@ pub struct SelectedArtifact {
     pub num_sockets: i32,
     pub bg_texture: String,
     pub spell_id: u32,
+    /// Per-socket keystone presence; `sockets[i]` is true when socket
+    /// `i + 1` currently holds a keystone. Length is normalized to
+    /// `num_sockets` by the keystone globals before each mutation.
+    pub sockets: Vec<bool>,
     /// Fragment progress earned without keystone help.
     pub base_progress: i32,
     /// Fragment progress contributed by socketed keystones.
@@ -81,6 +85,11 @@ pub struct ArchaeologyState {
     /// active-artifact globals return nil / 0 / false until
     /// `SetSelectedArtifact` runs.
     pub selected: Option<SelectedArtifact>,
+    /// Fragment value contributed per socketed keystone. `SocketItemToArtifact`
+    /// adds this to `selected.adjust_progress`; `RemoveItemFromArtifact`
+    /// subtracts it. Tests set this directly; the simulator does not derive
+    /// it from item data.
+    pub keystone_value: i32,
 }
 
 impl Default for ArchaeologyState {
@@ -89,6 +98,7 @@ impl Default for ArchaeologyState {
             profession_name: "Archaeology".to_string(),
             races: Vec::new(),
             selected: None,
+            keystone_value: 0,
         }
     }
 }
