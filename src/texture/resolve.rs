@@ -180,6 +180,16 @@ impl TextureManager {
             return Some(result);
         }
 
+        // Fallback: an extracted Interface dump. Covers entries the live CASC
+        // has GC'd but the older dump still has on disk.
+        let blizzard_art_root =
+            Path::new("/syncthing/World of Warcraft/_retail_/BlizzardInterfaceArt");
+        if blizzard_art_root.exists()
+            && let Some(result) = self.try_resolve_in_dir(blizzard_art_root, normalized_path)
+        {
+            return Some(result);
+        }
+
         None
     }
 
