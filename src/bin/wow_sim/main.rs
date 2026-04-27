@@ -289,18 +289,6 @@ fn init_sound(env: &WowLuaEnv) {
 
 #[cfg(target_os = "linux")]
 fn apply_resource_limits() {
-    let max_mem_gb: u64 = std::env::var("WOW_SIM_MAX_MEM_GB")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(10);
-    let max_mem_bytes = max_mem_gb * 1024 * 1024 * 1024;
-    let mem_limit = libc::rlimit {
-        rlim_cur: max_mem_bytes,
-        rlim_max: max_mem_bytes,
-    };
-    unsafe {
-        libc::setrlimit(libc::RLIMIT_AS, &mem_limit);
-    }
     let max_cores: usize = std::env::var("WOW_SIM_MAX_CORES")
         .ok()
         .and_then(|s| s.parse().ok())
@@ -312,9 +300,7 @@ fn apply_resource_limits() {
         }
         libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &cpuset);
     }
-    logging::println_elapsed(&format!(
-        "Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)"
-    ));
+    logging::println_elapsed(&format!("Resource limits: {max_cores} CPU core(s)"));
 }
 
 #[cfg(not(target_os = "linux"))]
