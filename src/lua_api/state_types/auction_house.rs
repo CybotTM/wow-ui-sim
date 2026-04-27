@@ -188,6 +188,44 @@ pub struct AuctionSellQuote {
     pub deposit: i64,
 }
 
+/// Side-index entry written when a row enters
+/// `auction_browse_results` / `auction_owned` / `auction_bids` so
+/// `C_AuctionHouse.GetAuctionInfoByID` can answer in O(1) without
+/// rescanning every list. Mirrors the 5-tuple Blizzard's
+/// `GetAuctionInfoByID` returns: `(owner, bid, buyout, deposit,
+/// consortiumCut)`.
+#[derive(Debug, Clone)]
+pub struct AuctionRowInfo {
+    pub owner: String,
+    pub bid_amount: i64,
+    pub buyout_amount: i64,
+    pub deposit: i64,
+    /// Server's consortium / commission fee in copper. The retail
+    /// formula varies by realm; the sim stores whatever the seeder
+    /// passed in so tests can assert exact pass-through.
+    pub consortium_cut: i64,
+}
+
+/// In-flight commodity-purchase quote written by
+/// `StartCommoditiesPurchase` and consumed by
+/// `ConfirmCommoditiesPurchase` / `CancelCommoditiesPurchase`. Mirrors
+/// the retail flow where Start computes a guaranteed total and Confirm
+/// commits to it within the quote window.
+#[derive(Debug, Clone)]
+pub struct CommodityPurchaseQuote {
+    pub item_id: i32,
+    pub quantity: i32,
+    /// Total copper the player will pay if they confirm before the
+    /// quote expires. Sum of cheapest-first unit prices times their
+    /// drained quantities.
+    pub total_price: i64,
+    /// Seconds remaining on the server-side quote hold. Retail uses
+    /// 15s; the sim seeds this on Start and decrements it on tick if
+    /// tests need that, but defaults to "unlimited" so tests don't
+    /// have to advance time.
+    pub quote_duration_remaining: i32,
+}
+
 /// One row of the player's active bid list (Bids tab). Drives
 /// `C_AuctionHouse.GetNumBids` / `GetBidInfo`. The bidder field uses
 /// the same shape Blizzard expects from `GetBidStatus`: nil = no bid,
