@@ -6,8 +6,6 @@ Texture handling spans three interconnected layers: file I/O and caching (Textur
 
 ```rust
 pub struct TextureManager {
-    textures_path: PathBuf,           // ./textures (local WebP cache)
-    interface_path: Option<PathBuf>,  // ~/Projects/wow/Interface (extracted BLP)
     addons_path: Option<PathBuf>,     // Addon directories
     cache: HashMap<String, TextureData>,
     sub_cache: HashMap<String, TextureData>,
@@ -16,13 +14,11 @@ pub struct TextureManager {
 
 All textures decoded to `TextureData { width, height, pixels: Vec<u8> }` in RGBA8.
 
-**Path resolution priority**: addon textures (`Interface/AddOns/...`) → local WebP cache (`./textures/...`) → extracted game files (`~/Projects/wow/Interface/...`) → case-insensitive crawl fallback.
+**Path resolution priority**: addon textures (`Interface/AddOns/...`) → CASC via `asset-resolver` against the live WoW install at `/syncthing/World of Warcraft/Data`. Extracted BLPs are cached under `~/.cache/wow-ui-sim/casc-extract/`.
 
-**Extension priority**: `webp > WEBP > PNG > png > tga > TGA > blp > BLP > jpg > JPG`.
+**Path normalization**: backslashes to forward slashes, extension stripped. `Interface\Buttons\UI-Panel-Button-Up.blp` → `Interface/Buttons/UI-Panel-Button-Up`. CASC lookup retries with several extensions (`blp`, `tga`, `ttf`, `otf`).
 
-**Path normalization**: backslashes to forward slashes, extension stripped. `Interface\Buttons\UI-Panel-Button-Up.blp` → `Interface/Buttons/UI-Panel-Button-Up`.
-
-**Formats**: BLP via `image_blp` crate (0.24 compat layer); PNG/WebP/TGA/JPG via standard `image` crate.
+**Formats**: BLP via `image_blp` crate; the `casc` feature gates the CASC tier (default-on). Set `WOW_SIM_CASC=0` to disable.
 
 ## Atlas Lookup (`src/atlas.rs`)
 

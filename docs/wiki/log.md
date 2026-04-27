@@ -53,6 +53,10 @@ Updated `investigations/talent-performance.md` with a new "Spec→Talents Tab Sw
 
 Created `investigations/hero-spec-dialog-anchors.md` documenting two anchor resolution bugs in `HeroTalentsSelectionDialog`. (1) `xml_layer_batch.rs` emitted all textures before all fontstrings into the same Lua chunk, breaking XML document order so SpecImage's `relativeKey="$parent.SpecName"` ran before SpecName existed and fell back to the spec frame. (2) Runtime template path lacked the loader's `resolve_named_anchor_targets_for_frame` re-pass, leaving NodesContainer's `$parent.Description` anchor as an unresolved string. Both fixed; talent node icons now render inside their LIGHTSMITH/TEMPLAR panels instead of at the screen bottom.
 
+## [2026-04-27] update | CASC migration: textures and fonts
+
+Migrated texture and font loading off bundled extracts onto direct CASC reads from the live WoW install at `/syncthing/World of Warcraft/Data` (via the `asset-resolver` crate). Removed `./textures/` (~1740 WebPs), the `~/Projects/wow/Interface` BLP fallback path, the `disk_cache_dir` field, and `src/texture_cache.rs`. `WowFontSystem::new()` is now no-arg and pulls FRIZQT__/ARIALN/frizqt___cyr from CASC, with an embedded `assets/fonts/FRIZQT__.TTF` as the no-CASC fallback (other bundled fonts deleted). Updated `docs/wiki/systems/texture-atlas.md`, `docs/texture-atlas-system.md`, `docs/rendering-pipeline.md`, `docs/wiki/reference/cli-commands.md`, and `docs/wiki/index.md` to drop references to the old curated paths and the now-obsolete `convert-texture` / `extract-textures` add-a-missing-texture flow. CASC is gated by the `casc` feature (default-on); set `WOW_SIM_CASC=0` to disable.
+
 ## [2026-04-26] ingest | dropdown intrinsic script chain investigation
 
 Created `investigations/dropdown-intrinsic-script-chain.md` to document the ReputationFrame dropdown root cause: style dropdown templates replaced intrinsic `DropdownButton` scripts, so Blizzard's `OnMouseDown_Intrinsic` was not in the click path. Recorded the simulator-side fix, the fake menu fallback removal, and the two regression tests.

@@ -83,7 +83,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 ## WoW Game Files
 
 - `./Interface/BlizzardUI/` - Symlink → `vendor/wow-ui-source/Interface/AddOns` (Gethe/wow-ui-source sparse checkout, pinned to tag). Run `./scripts/setup-blizzard-ui.sh` to set up.
-- `~/Projects/wow/Interface` - art extract from WoW game files (BLP textures, fallback for texture loading)
+- `/syncthing/World of Warcraft/Data` - Live WoW install. The simulator reads textures and fonts directly from CASC via the `asset-resolver` crate (gated behind the `casc` feature, on by default). Set `WOW_SIM_CASC=0` to disable.
 - `~/Projects/wow/WTF` - SavedVariables from real WoW installation
 
 ## Reference Implementations
@@ -444,25 +444,6 @@ AddonList [Button] (x=50, y=400, w=80, h=22) visible
     Text [FontString] (x=430, y=508, w=80, h=22) visible text="Cancel"
 ```
 
-### Convert Texture (BLP to WebP)
-
-Convert a single BLP texture to WebP format:
-
-```bash
-wow-cli convert-texture ~/Projects/wow/Interface/BUTTONS/redbuttons.BLP -o ./textures/buttons/redbuttons.webp
-```
-
-### Extract Textures (Batch)
-
-Extract all textures referenced by addons to WebP format:
-
-```bash
-wow-cli extract-textures                    # Use default paths
-wow-cli extract-textures --output ./tex     # Custom output directory
-```
-
-This scans addon XML/Lua files for texture references and converts them from BLP to WebP.
-
 ### Audit API Gaps → PLAN.md
 
 Generate PLAN.md-ready checkboxes for missing C_* methods, LE_* constants, and Enum namespaces:
@@ -475,57 +456,28 @@ wow-cli audit-api --gaps --format plan         # Paste-ready markdown checkboxes
 
 ### Texture Sources (in order of priority)
 
-1. `./textures` - Local WebP textures (fastest, smallest, ~45MB for ~1740 files)
-2. `~/Projects/wow/Interface` - Extracted WoW game files (BLP format, fallback)
-3. Addon directories - For addon-specific textures
+1. Addon directories — for addon-specific textures shipped under `Interface/AddOns/`.
+2. CASC — the live WoW install at `/syncthing/World of Warcraft/Data`, resolved via the `asset-resolver` crate using the community listfile. Extracted BLPs are cached under `~/.cache/wow-ui-sim/casc-extract/` keyed by listfile path.
 
-### Adding Missing Textures
-
-**Always convert from BLP game files**, never from `~/Repos/wow-ui-textures`. The `wow-ui-textures` PNG repo has textures at different resolutions than the BLP game files (e.g. `UIFrameMetal2x` is 1024x1024 in the PNG repo but 512x512 in the BLP). Using the wrong resolution causes nine-slice pieces to sample incorrect regions, rendering the wrong part of the texture.
-
-```bash
-# Find the BLP file (case-insensitive)
-find ~/Projects/wow/Interface -iname "UIFrameMetal2x.BLP"
-
-# Convert to webp (lowercase filename, matching existing convention)
-wow-cli convert-texture ~/Projects/wow/Interface/FrameGeneral/UIFrameMetal2x.BLP \
-  -o ./textures/framegeneral/uiframemetal2x.webp
-```
-
-Naming convention: lowercase directory and filename, no hyphens where the original BLP name has none (e.g. `UIFrameMetal2x.BLP` → `uiframemetal2x.webp`).
-
-### Stale BLP Files
-
-The `~/Projects/wow/Interface` extract can go stale between WoW patches. Staleness has two forms:
-
-**Dimension mismatch**: The BLP dimensions don't match what `UiTextureAtlas.csv` expects. Easy to detect.
-
-**Content mismatch (same dimensions)**: The BLP has the right dimensions but atlas sub-regions contain wrong/empty pixels. This happens when Blizzard rearranges atlas content between patches without changing the texture size. Symptoms: textures render as black squares, transparent where opaque expected, or show wrong content. The `talents.blp` atlas hit this — local BLP was 2048x1024 (correct) but the shadow/border regions were empty because the atlas layout had changed.
-
-To detect content mismatches, extract the atlas sub-region and check if it has meaningful pixel data:
-```bash
-# Extract atlas sub-region (coords from atlas.rs tex_coords * texture dimensions)
-magick textures/foo/bar.webp -crop WxH+X+Y +repage /tmp/claude/region.png
-identify -verbose /tmp/claude/region.png  # Check Alpha min/max — all zeros = empty
-```
-
-**Fix procedure** (works for both types):
-
-1. Find the fileDataID: `grep -i 'filename.blp' ~/Projects/wow/data/listfile.csv`
-2. Optionally verify atlas dimensions: look up fileDataID in `UiTextureAtlas.csv` (columns: `ID,FileDataID,AtlasWidth,AtlasHeight`)
-3. Download fresh BLP: `curl -sL "https://wago.tools/api/casc/{fileDataID}" -o /tmp/claude/fresh.blp`
-4. Verify dimensions: `python3 -c "import struct; f=open('/tmp/claude/fresh.blp','rb'); f.read(12); w,h=struct.unpack('<II',f.read(8)); print(f'{w}x{h}')"`
-5. Convert and replace: `wow-cli convert-texture /tmp/claude/fresh.blp -o ./textures/subdir/name.webp`
-
-**Known stale textures fixed**: `talents.blp` (FileDataID 4556093), `talentsanimations4.blp` (FileDataID 4741460)
+There is no longer a curated `./textures/` mirror or `~/Projects/wow/Interface` extract — adding a new texture means making sure CASC has it (the listfile is updated upstream by `asset-resolver`).
 
 ### Texture Path Resolution
 
 WoW paths like `Interface\\Buttons\\UI-Panel-Button-Up` are resolved by:
-1. Normalizing backslashes to forward slashes
-2. Stripping `Interface/` prefix
-3. Trying extensions: webp, WEBP, PNG, png, TGA, tga, BLP, blp, jpg, JPG
-4. Case-insensitive directory matching as fallback
+1. Normalizing backslashes to forward slashes and stripping any extension.
+2. Looking up the path under several extensions (`blp`, `tga`, `ttf`, `otf`, plus case variants) in the listfile to get a fileDataID.
+3. Asking `asset_resolver::ensure_cached(fdid, out_path)` to extract the BLP from CASC into the on-disk extract cache.
+4. Falling back to addon-relative paths if the CASC tier misses.
+
+### Verifying CASC lookups
+
+Use the smoke test to verify a path resolves end-to-end:
+
+```bash
+cargo run --example casc_smoke
+```
+
+It probes a handful of textures and prints the fileDataID for each. Add a new probe entry there when investigating a missing asset.
 
 ### Button Textures
 
