@@ -83,6 +83,7 @@ macro_rules! build_empty_sim_state {
             active_player_interactions: HashSet::new(),
             azerite_item: None,
             azerite_essence: AzeriteEssenceState::default(),
+            azerite_empowered: AzeriteEmpoweredItemState::default(),
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
             account_wide_reputation_factions: HashSet::new(),
@@ -586,6 +587,34 @@ pub struct AzeriteItemState {
     pub unlimited_unlocked: bool,
     pub at_max_level: bool,
     pub enabled: bool,
+}
+
+/// `C_AzeriteEmpoweredItem` backing state read by
+/// `Blizzard_AzeriteRespecUI`. The respec frame asks once for the cost,
+/// runs `IsAzeriteEmpoweredItem` whenever the cursor changes, and
+/// invokes `ConfirmAzeriteEmpoweredItemRespec` from the static popup.
+/// `last_close_request` / `last_confirmed_respec` are write-only audit
+/// fields the simulator's tests assert against — Blizzard's panel never
+/// reads them back.
+#[derive(Clone, Debug, Default)]
+pub struct AzeriteEmpoweredItemState {
+    /// Gold (in copper) returned by `GetAzeriteEmpoweredItemRespecCost`.
+    /// Drives `AzeriteRespecMixin:RefreshCostFrame`'s
+    /// `SmallMoneyFrameTemplate`.
+    pub respec_cost: i64,
+    /// Item ids that `IsAzeriteEmpoweredItem` reports true for. Tests
+    /// seed this with the ids that should drive the empowered branches.
+    pub empowered_items: HashSet<i32>,
+    /// Last `itemLocation` argument seen by
+    /// `CloseAzeriteEmpoweredItemRespec`. Recorded for tests that want
+    /// to assert close was called with a specific shape; the addon
+    /// itself passes none (it's the `UIPanelWindows.showFailedFunc`
+    /// signature).
+    pub last_close_request: Option<ItemLocationData>,
+    /// Last `itemLocation` argument handed to
+    /// `ConfirmAzeriteEmpoweredItemRespec`. Tests assert on this to
+    /// verify the static popup wired the right item through.
+    pub last_confirmed_respec: Option<ItemLocationData>,
 }
 
 /// Equipped artifact metadata read by `C_ArtifactUI.GetEquippedArtifactInfo`,
@@ -1153,6 +1182,12 @@ pub struct SimState {
     /// Defaults to "no neck equipped, nothing unlocked" so
     /// `CanOpenUI` returns false until a test seeds it.
     pub azerite_essence: AzeriteEssenceState,
+    /// `C_AzeriteEmpoweredItem` backing state. Drives
+    /// `Blizzard_AzeriteRespecUI`'s cost frame, item-empowered cursor
+    /// checks, and the static-popup confirm path. Default leaves
+    /// `respec_cost` at zero and `empowered_items` empty so the
+    /// frame's "no item slotted" branch takes over.
+    pub azerite_empowered: AzeriteEmpoweredItemState,
     /// Major-faction (Renown) data keyed by `factionID`. Empty by default —
     /// `C_MajorFactions.GetMajorFactionData` returns nil for unknown ids and
     /// `C_Reputation.IsMajorFaction` reports false, keeping the

@@ -62,9 +62,9 @@ pub use simple_html::SimpleHtmlData;
 pub use state::{
     AddonInfo, AdventureMapInset, AdventureMapQuestInfo, AdventureMapQuestOffer,
     AdventureMapQuestPortrait, AdventureMapState, AdventureMapZoneChoice, AlliedRaceInfo,
-    AlliedRaceRacialAbility, ArtifactInfo, AzeriteItemState, FactionParagonInfo, HousingState,
-    ItemLocationData, LossOfControlInfo, MajorFactionData, PendingTimer, ProfessionQualityInfo,
-    RenownLevelInfo, SimState, tick_party_health,
+    AlliedRaceRacialAbility, ArtifactInfo, AzeriteEmpoweredItemState, AzeriteItemState,
+    FactionParagonInfo, HousingState, ItemLocationData, LossOfControlInfo, MajorFactionData,
+    PendingTimer, ProfessionQualityInfo, RenownLevelInfo, SimState, tick_party_health,
 };
 pub use tooltip::TooltipData;
 
