@@ -598,6 +598,21 @@ pub struct AdventureMapZoneChoice {
     pub normalized_y: f64,
 }
 
+/// Portrait sub-shape consumed by `QuestFrame_ShowQuestPortrait` from
+/// the adventure-map quest-choice dialog. Mirrors the fields documented
+/// on `AdventureMapQuestPortraitInfo`. The dialog skips rendering when
+/// `portrait_display_id == 0`, so a default-constructed entry is the
+/// "no portrait" sentinel. `model_scene_id` is `None` when the offer
+/// uses the legacy display-id portrait path instead of a model scene.
+#[derive(Clone, Debug, Default)]
+pub struct AdventureMapQuestPortrait {
+    pub portrait_display_id: i64,
+    pub mount_portrait_display_id: i64,
+    pub model_scene_id: Option<i64>,
+    pub text: String,
+    pub name: String,
+}
+
 /// Dialog-shaped quest text used by the adventure-map quest-choice
 /// dialog (`AdventureMapQuestChoiceDialogMixin:RefreshDetails`). Indexed
 /// by quest id and surfaced via `C_AdventureMap.GetQuestInfo`. Missing
@@ -672,6 +687,10 @@ pub struct AdventureMapInset {
 /// `AdventureMapQuestChoiceDialogMixin:RefreshDetails`; missing keys
 /// make `C_AdventureMap.GetQuestInfo` return zero values so the
 /// dialog's `if descriptionText then ...` guard can short-circuit.
+/// `quest_portraits` carries the portrait sub-shape consumed by the
+/// same dialog's `QuestFrame_ShowQuestPortrait` branch; missing keys
+/// make `C_AdventureMap.GetQuestPortraitInfo` return zero values so
+/// the dialog's `if portraitInfo and ...` guard short-circuits.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
@@ -680,6 +699,7 @@ pub struct AdventureMapState {
     pub zone_choices: Vec<AdventureMapZoneChoice>,
     pub quest_offers: Vec<AdventureMapQuestOffer>,
     pub quest_info: HashMap<i64, AdventureMapQuestInfo>,
+    pub quest_portraits: HashMap<i64, AdventureMapQuestPortrait>,
 }
 
 /// Shared simulator state accessible from Lua.

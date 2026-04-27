@@ -4,9 +4,9 @@
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
 //! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
 //! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, `GetNumQuestOffers()`,
-//! `GetQuestOfferInfo()`, and `GetQuestInfo()`. Future commits will
-//! fill in the rest of the surface (quest portraits, accept/abandon
-//! flows).
+//! `GetQuestOfferInfo()`, `GetQuestInfo()`, and
+//! `GetQuestPortraitInfo()`. Future commits will fill in the rest of
+//! the surface (accept/abandon flows).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -36,6 +36,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     table_set_rust_fn_static(state, table_ref, "GetNumQuestOffers", get_num_quest_offers)?;
     table_set_rust_fn_static(state, table_ref, "GetQuestOfferInfo", get_quest_offer_info)?;
     table_set_rust_fn_static(state, table_ref, "GetQuestInfo", get_quest_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetQuestPortraitInfo",
+        get_quest_portrait_info,
+    )?;
     Ok(())
 }
 
@@ -220,6 +226,55 @@ fn get_quest_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(description);
     state.push(objective_text);
     Ok(3)
+}
+
+fn get_quest_portrait_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Val::Num(quest_id_f) = stack_val(state, 1) else {
+        return Ok(0);
+    };
+    let quest_id = quest_id_f as i64;
+    let portrait = {
+        let sim = borrow_state(state)?;
+        sim.adventure_map.quest_portraits.get(&quest_id).cloned()
+    };
+    let Some(portrait) = portrait else {
+        return Ok(0);
+    };
+    let model_scene = match portrait.model_scene_id {
+        Some(value) => Val::Num(value as f64),
+        None => Val::Nil,
+    };
+    let text = create_string(state, &portrait.text);
+    let name = create_string(state, &portrait.name);
+    let table_val = create_table(state);
+    set_table_field(
+        state,
+        table_val,
+        "portraitDisplayID",
+        Val::Num(portrait.portrait_display_id as f64),
+    );
+    set_table_field(
+        state,
+        table_val,
+        "mountPortraitDisplayID",
+        Val::Num(portrait.mount_portrait_display_id as f64),
+    );
+    set_table_field(state, table_val, "modelSceneID", model_scene);
+    set_table_field(state, table_val, "text", text);
+    set_table_field(state, table_val, "name", name);
+    state.push(table_val);
+    Ok(1)
+}
+
+fn set_table_field(state: &mut LuaState, table_val: Val, key: &'static str, value: Val) {
+    let Val::Table(table_ref) = table_val else {
+        return;
+    };
+    let key_ref = state.gc.intern_string_static(key.as_bytes());
+    if let Some(table) = state.gc.tables.get_mut(table_ref) {
+        let _ = table.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
+    }
+    state.gc.barrier_back(table_ref);
 }
 
 /// Convert a Lua-facing 1-based index to a 0-based slot index. Returns

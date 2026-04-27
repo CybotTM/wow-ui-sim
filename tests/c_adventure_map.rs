@@ -12,8 +12,8 @@
 //! present at addon load time (see `Blizzard_AdventureMap.lua:56`).
 
 use wow_ui_sim::lua_api::{
-    AdventureMapInset, AdventureMapQuestInfo, AdventureMapQuestOffer, AdventureMapZoneChoice,
-    WowLuaEnv,
+    AdventureMapInset, AdventureMapQuestInfo, AdventureMapQuestOffer, AdventureMapQuestPortrait,
+    AdventureMapZoneChoice, WowLuaEnv,
 };
 
 #[test]
@@ -983,6 +983,184 @@ fn refresh_details_pattern_renders_known_quest() {
 
     let title: String = env.eval("return _G.__title_seen").unwrap();
     assert_eq!(title, "Curse of the Drowned");
+}
+
+fn sample_quest_portrait() -> AdventureMapQuestPortrait {
+    AdventureMapQuestPortrait {
+        portrait_display_id: 50_523,
+        mount_portrait_display_id: 0,
+        model_scene_id: Some(33),
+        text: "The tides themselves cry out for justice.".to_string(),
+        name: "Lady Hyrja".to_string(),
+    }
+}
+
+#[test]
+fn get_quest_portrait_info_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetQuestPortraitInfo)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_quest_portrait_info_returns_no_values_for_unknown_quest() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestPortraitInfo(99999))")
+        .unwrap();
+    assert!(
+        count.abs() < 1e-6,
+        "GetQuestPortraitInfo must return zero values for unknown quests so the \
+         dialog's `if portraitInfo and ...` guard short-circuits"
+    );
+}
+
+#[test]
+fn get_quest_portrait_info_returns_no_values_for_non_numeric_argument() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestPortraitInfo('not-a-number'))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_quest_portrait_info_returns_a_table() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_portraits
+        .insert(40_519, sample_quest_portrait());
+
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetQuestPortraitInfo(40519))")
+        .unwrap();
+    assert_eq!(kind, "table");
+}
+
+#[test]
+fn get_quest_portrait_info_populates_documented_fields() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_portraits
+        .insert(40_519, sample_quest_portrait());
+
+    env.exec("portraitInfo = C_AdventureMap.GetQuestPortraitInfo(40519)")
+        .unwrap();
+
+    let portrait_id: f64 = env.eval("return portraitInfo.portraitDisplayID").unwrap();
+    let mount_id: f64 = env.eval("return portraitInfo.mountPortraitDisplayID").unwrap();
+    let scene_id: f64 = env.eval("return portraitInfo.modelSceneID").unwrap();
+    let text: String = env.eval("return portraitInfo.text").unwrap();
+    let name: String = env.eval("return portraitInfo.name").unwrap();
+
+    assert!((portrait_id - 50_523.0).abs() < 1e-6);
+    assert!((mount_id - 0.0).abs() < 1e-6);
+    assert!((scene_id - 33.0).abs() < 1e-6);
+    assert_eq!(text, "The tides themselves cry out for justice.");
+    assert_eq!(name, "Lady Hyrja");
+}
+
+#[test]
+fn get_quest_portrait_info_returns_nil_model_scene_when_unset() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut portrait = sample_quest_portrait();
+    portrait.model_scene_id = None;
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_portraits
+        .insert(40_519, portrait);
+
+    let scene_is_nil: bool = env
+        .eval(
+            "local p = C_AdventureMap.GetQuestPortraitInfo(40519) \
+             return p.modelSceneID == nil",
+        )
+        .unwrap();
+    assert!(
+        scene_is_nil,
+        "modelSceneID is documented Nilable; legacy display-id portraits should leave it unset"
+    );
+}
+
+#[test]
+fn refresh_portrait_pattern_skips_when_display_id_zero() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut portrait = sample_quest_portrait();
+    portrait.portrait_display_id = 0;
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_portraits
+        .insert(40_519, portrait);
+
+    env.exec(
+        r#"
+        _G.__shown = false
+        local portraitInfo = C_AdventureMap.GetQuestPortraitInfo(40519)
+        if portraitInfo and portraitInfo.portraitDisplayID ~= 0 then
+            _G.__shown = true
+        end
+        "#,
+    )
+    .unwrap();
+
+    let shown: bool = env.eval("return _G.__shown").unwrap();
+    assert!(
+        !shown,
+        "RefreshPortrait pattern must skip when portraitDisplayID is 0"
+    );
+}
+
+#[test]
+fn refresh_portrait_pattern_renders_when_display_id_nonzero() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_portraits
+        .insert(40_519, sample_quest_portrait());
+
+    env.exec(
+        r#"
+        _G.__name_seen = nil
+        local portraitInfo = C_AdventureMap.GetQuestPortraitInfo(40519)
+        if portraitInfo and portraitInfo.portraitDisplayID ~= 0 then
+            _G.__name_seen = portraitInfo.name
+        end
+        "#,
+    )
+    .unwrap();
+
+    let name: String = env.eval("return _G.__name_seen").unwrap();
+    assert_eq!(name, "Lady Hyrja");
+}
+
+#[test]
+fn refresh_portrait_pattern_short_circuits_on_unknown_quest() {
+    let env = WowLuaEnv::new().expect("env");
+    env.exec(
+        r#"
+        _G.__shown = false
+        local portraitInfo = C_AdventureMap.GetQuestPortraitInfo(123456)
+        if portraitInfo and portraitInfo.portraitDisplayID ~= 0 then
+            _G.__shown = true
+        end
+        "#,
+    )
+    .unwrap();
+
+    let shown: bool = env.eval("return _G.__shown").unwrap();
+    assert!(
+        !shown,
+        "Missing quest portraits must yield nil so the `if portraitInfo and ...` guard skips"
+    );
 }
 
 #[test]
