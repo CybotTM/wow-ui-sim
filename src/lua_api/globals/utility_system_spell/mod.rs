@@ -478,6 +478,59 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
 
 const ERROR_HANDLER_KEY: &str = "__error_handler";
 
+const ASSERTSAFE_DEFAULT_MESSAGE: &str = "non-fatal assertion failed";
+const ASSERTSAFE_PREFIX: &str = "assertsafe: ";
+
+/// `assertsafe(cond, message)` — non-throwing assertion.
+///
+/// When `cond` is falsy, format the message and report it through the same
+/// pipeline that records raised errors (`lua_error_records` + the active
+/// error handler). When `cond` is truthy, this is a no-op. Either way the
+/// function returns `cond` so callers can chain it like `assert`.
+///
+/// The reported message is prefixed with `"assertsafe: "` so it stays
+/// distinguishable from real raised errors in `lua-errors` JSON output.
+pub fn assertsafe(state: &mut LuaState) -> LuaResult<u32> {
+    let cond = stack_val(state, 1);
+    let is_truthy = !matches!(cond, Val::Nil | Val::Bool(false));
+    if is_truthy {
+        state.push(cond);
+        return Ok(1);
+    }
+    let raw_message = stack_val(state, 2);
+    let formatted = format_assertsafe_message(state, raw_message);
+    let prefixed = format!("{ASSERTSAFE_PREFIX}{formatted}");
+    call_error_handler_state(state, &prefixed);
+    state.push(cond);
+    Ok(1)
+}
+
+fn format_assertsafe_message(state: &mut LuaState, raw_message: Val) -> String {
+    if let Val::Function(_) = raw_message {
+        return invoke_message_callback(state, raw_message);
+    }
+    if matches!(raw_message, Val::Nil) {
+        return ASSERTSAFE_DEFAULT_MESSAGE.to_string();
+    }
+    val_to_string_or_default(state, raw_message)
+}
+
+fn invoke_message_callback(state: &mut LuaState, callback: Val) -> String {
+    let Ok(results) = call_function_state_multi(state, callback, &[]) else {
+        return ASSERTSAFE_DEFAULT_MESSAGE.to_string();
+    };
+    let Some(first) = results.into_iter().next() else {
+        return ASSERTSAFE_DEFAULT_MESSAGE.to_string();
+    };
+    val_to_string_or_default(state, first)
+}
+
+fn val_to_string_or_default(state: &LuaState, val: Val) -> String {
+    val_to_string_bytes(state, val)
+        .map(|bytes| String::from_utf8_lossy(&bytes).into_owned())
+        .unwrap_or_else(|| ASSERTSAFE_DEFAULT_MESSAGE.to_string())
+}
+
 pub fn seterrorhandler(state: &mut LuaState) -> LuaResult<u32> {
     let handler = stack_val(state, 1);
     if !matches!(handler, Val::Function(_)) {
@@ -597,5 +650,6 @@ fn register_system_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "securecall", securecall)?;
     LuaApiMut::register_function(lua, "seterrorhandler", seterrorhandler)?;
     LuaApiMut::register_function(lua, "geterrorhandler", geterrorhandler)?;
+    LuaApiMut::register_function(lua, "assertsafe", assertsafe)?;
     Ok(())
 }
