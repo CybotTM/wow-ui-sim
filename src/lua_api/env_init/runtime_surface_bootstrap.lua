@@ -193,6 +193,41 @@ if BreakUpLargeNumbers == nil then
   end
 end
 
+if CalculateStringEditDistance == nil then
+  function CalculateStringEditDistance(firstString, secondString)
+    if type(firstString) ~= "string" or type(secondString) ~= "string" then
+      return 0
+    end
+    local firstLen = #firstString
+    local secondLen = #secondString
+    if firstLen == 0 then return secondLen end
+    if secondLen == 0 then return firstLen end
+
+    local previousRow = {}
+    for column = 0, secondLen do
+      previousRow[column] = column
+    end
+
+    local currentRow = {}
+    for row = 1, firstLen do
+      currentRow[0] = row
+      local firstChar = firstString:byte(row)
+      for column = 1, secondLen do
+        local substitutionCost = (firstChar == secondString:byte(column)) and 0 or 1
+        local deletion = previousRow[column] + 1
+        local insertion = currentRow[column - 1] + 1
+        local substitution = previousRow[column - 1] + substitutionCost
+        currentRow[column] = math.min(deletion, insertion, substitution)
+      end
+      for column = 0, secondLen do
+        previousRow[column] = currentRow[column]
+      end
+    end
+
+    return previousRow[secondLen]
+  end
+end
+
 do
   local stringMeta = getmetatable("")
   if type(stringMeta) == "table" and stringMeta.split == nil then
