@@ -3,6 +3,7 @@
 //! Contains player/party/target/aura definitions and the default data
 //! generators used by `SimState::default()`.
 
+use crate::lua_api::state::AlliedRaceInfo;
 use std::collections::HashMap;
 
 /// Information about the current target.
@@ -567,6 +568,196 @@ fn build_auras_from_indices(indices: &[usize]) -> Vec<AuraInfo> {
             }
         })
         .collect()
+}
+
+/// Canonical allied-race directory consumed by `C_AlliedRaces.GetRaceInfoByID`.
+///
+/// `raceID` matches the `RACE_DATA` table seeded for `C_CreatureInfo.GetRaceInfo`
+/// in `runtime_surface_bootstrap.lua`. Model IDs are the live Mainline values
+/// the `Blizzard_AlliedRacesUI/Blizzard_AlliedRacesFrameUI.lua` actor map uses
+/// (`Actor_X_ModelID` table at the bottom of that file). `race_file_string`
+/// is the lowercased token the consumer joins onto `RACE_INFO_` to look up
+/// the race description.
+pub fn default_allied_races() -> HashMap<i64, AlliedRaceInfo> {
+    canonical_allied_race_seeds()
+        .into_iter()
+        .map(|info| (info.race_id, info))
+        .collect()
+}
+
+fn canonical_allied_race_seeds() -> Vec<AlliedRaceInfo> {
+    vec![
+        allied_race_lightforged_draenei(),
+        allied_race_dark_iron_dwarf(),
+        allied_race_void_elf(),
+        allied_race_mechagnome(),
+        allied_race_vulpera(),
+        allied_race_zandalari_troll(),
+        allied_race_highmountain_tauren(),
+        allied_race_nightborne(),
+        allied_race_maghar_orc(),
+        allied_race_earthen_dwarf(),
+    ]
+}
+
+fn allied_race_lightforged_draenei() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 28,
+        male_model_id: 82_729,
+        female_model_id: 82_730,
+        achievement_ids: vec![12_245, 11_846],
+        male_name: "Lightforged Draenei".to_string(),
+        female_name: "Lightforged Draenei".to_string(),
+        description: "Veterans of the Army of the Light.".to_string(),
+        race_file_string: "lightforgeddraenei".to_string(),
+        crest_atlas: "alliedraces-icon-lightforgeddraenei".to_string(),
+        model_background_atlas: "alliedraces-background-lightforgeddraenei".to_string(),
+        banner_color: (0.94, 0.83, 0.36),
+    }
+}
+
+fn allied_race_dark_iron_dwarf() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 31,
+        male_model_id: 87_992,
+        female_model_id: 87_993,
+        achievement_ids: vec![12_241, 12_843],
+        male_name: "Dark Iron Dwarf".to_string(),
+        female_name: "Dark Iron Dwarf".to_string(),
+        description: "Fire-forged dwarves of Blackrock.".to_string(),
+        race_file_string: "darkirondwarf".to_string(),
+        crest_atlas: "alliedraces-icon-darkirondwarf".to_string(),
+        model_background_atlas: "alliedraces-background-darkirondwarf".to_string(),
+        banner_color: (0.65, 0.16, 0.12),
+    }
+}
+
+fn allied_race_void_elf() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 27,
+        male_model_id: 82_736,
+        female_model_id: 82_735,
+        achievement_ids: vec![12_243, 11_843],
+        male_name: "Void Elf".to_string(),
+        female_name: "Void Elf".to_string(),
+        description: "Ren'dorei shaped by the Void.".to_string(),
+        race_file_string: "voidelf".to_string(),
+        crest_atlas: "alliedraces-icon-voidelf".to_string(),
+        model_background_atlas: "alliedraces-background-voidelf".to_string(),
+        banner_color: (0.41, 0.27, 0.62),
+    }
+}
+
+fn allied_race_mechagnome() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 34,
+        male_model_id: 94_370,
+        female_model_id: 94_371,
+        achievement_ids: vec![13_710, 14_013],
+        male_name: "Mechagnome".to_string(),
+        female_name: "Mechagnome".to_string(),
+        description: "Tinkerers enhanced with machinery.".to_string(),
+        race_file_string: "mechagnome".to_string(),
+        crest_atlas: "alliedraces-icon-mechagnome".to_string(),
+        model_background_atlas: "alliedraces-background-mechagnome".to_string(),
+        banner_color: (0.84, 0.71, 0.27),
+    }
+}
+
+fn allied_race_vulpera() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 35,
+        male_model_id: 94_257,
+        female_model_id: 94_256,
+        achievement_ids: vec![13_435, 14_012],
+        male_name: "Vulpera".to_string(),
+        female_name: "Vulpera".to_string(),
+        description: "Resourceful nomads of Vol'dun.".to_string(),
+        race_file_string: "vulpera".to_string(),
+        crest_atlas: "alliedraces-icon-vulpera".to_string(),
+        model_background_atlas: "alliedraces-background-vulpera".to_string(),
+        banner_color: (0.74, 0.40, 0.16),
+    }
+}
+
+fn allied_race_zandalari_troll() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 29,
+        male_model_id: 89_631,
+        female_model_id: 89_632,
+        achievement_ids: vec![12_244, 12_775],
+        male_name: "Zandalari Troll".to_string(),
+        female_name: "Zandalari Troll".to_string(),
+        description: "Ancient kings of troll empires.".to_string(),
+        race_file_string: "zandalaritroll".to_string(),
+        crest_atlas: "alliedraces-icon-zandalaritroll".to_string(),
+        model_background_atlas: "alliedraces-background-zandalaritroll".to_string(),
+        banner_color: (0.85, 0.18, 0.18),
+    }
+}
+
+fn allied_race_highmountain_tauren() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 26,
+        male_model_id: 82_733,
+        female_model_id: 82_731,
+        achievement_ids: vec![12_242, 11_851],
+        male_name: "Highmountain Tauren".to_string(),
+        female_name: "Highmountain Tauren".to_string(),
+        description: "Descendants of Huln Highmountain.".to_string(),
+        race_file_string: "highmountaintauren".to_string(),
+        crest_atlas: "alliedraces-icon-highmountaintauren".to_string(),
+        model_background_atlas: "alliedraces-background-highmountaintauren".to_string(),
+        banner_color: (0.43, 0.29, 0.20),
+    }
+}
+
+fn allied_race_nightborne() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 25,
+        male_model_id: 82_708,
+        female_model_id: 82_709,
+        achievement_ids: vec![12_240, 11_842],
+        male_name: "Nightborne".to_string(),
+        female_name: "Nightborne".to_string(),
+        description: "Arcwine-fueled children of Suramar.".to_string(),
+        race_file_string: "nightborne".to_string(),
+        crest_atlas: "alliedraces-icon-nightborne".to_string(),
+        model_background_atlas: "alliedraces-background-nightborne".to_string(),
+        banner_color: (0.62, 0.39, 0.85),
+    }
+}
+
+fn allied_race_maghar_orc() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 32,
+        male_model_id: 86_343,
+        female_model_id: 86_342,
+        achievement_ids: vec![12_246, 12_512],
+        male_name: "Mag'har Orc".to_string(),
+        female_name: "Mag'har Orc".to_string(),
+        description: "Uncorrupted clans from alternate Draenor.".to_string(),
+        race_file_string: "magharorc".to_string(),
+        crest_atlas: "alliedraces-icon-magharorc".to_string(),
+        model_background_atlas: "alliedraces-background-magharorc".to_string(),
+        banner_color: (0.65, 0.40, 0.27),
+    }
+}
+
+fn allied_race_earthen_dwarf() -> AlliedRaceInfo {
+    AlliedRaceInfo {
+        race_id: 37,
+        male_model_id: 121_634,
+        female_model_id: 121_635,
+        achievement_ids: vec![19_017],
+        male_name: "Earthen".to_string(),
+        female_name: "Earthen".to_string(),
+        description: "Titan-forged explorers of the deep places.".to_string(),
+        race_file_string: "earthendwarf".to_string(),
+        crest_atlas: "alliedraces-icon-earthen".to_string(),
+        model_background_atlas: "alliedraces-background-earthen".to_string(),
+        banner_color: (0.56, 0.46, 0.36),
+    }
 }
 
 /// Pre-populate main action bar (slots 1-12) with Protection Paladin spells.

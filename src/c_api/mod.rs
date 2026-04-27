@@ -6,6 +6,7 @@
 
 pub mod c_addon_profiler;
 pub mod c_addons;
+pub mod c_allied_races;
 pub mod c_artifact_ui;
 pub mod c_azerite_item;
 pub mod c_configuration_warnings;

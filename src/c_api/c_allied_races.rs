@@ -1,0 +1,114 @@
+//! `C_AlliedRaces` surface consumed by `Blizzard_AlliedRacesUI`.
+//!
+//! State source:
+//!
+//! - `state.allied_races: HashMap<raceID, AlliedRaceInfo>` —
+//!   `GetRaceInfoByID(raceID)` returns the matching row, or nil for
+//!   unknown ids. `AlliedRacesFrameMixin:LoadRaceData` short-circuits on
+//!   nil; otherwise it pulls model ids, names, atlases, and the banner
+//!   color out of the returned table.
+//!
+//! `bannerColor` is wrapped in `CreateColor` so the returned table carries
+//! the `ColorMixin:GetRGB` method the addon calls.
+
+use crate::c_api::helpers::ensure_namespace;
+use crate::lua_api::methods::{
+    borrow_state, call_function_state, create_string, create_table, create_table_with_fields,
+    table_set_num,
+};
+use crate::lua_api::state::AlliedRaceInfo;
+use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::state::LuaState;
+use rilua::{LuaResult, Val};
+
+pub(crate) fn register_c_allied_races_surface(state: &mut LuaState) -> LuaResult<()> {
+    let ns = ensure_namespace(state, "C_AlliedRaces")?;
+    table_set_rust_fn_static(state, ns, "GetRaceInfoByID", get_race_info_by_id)?;
+    Ok(())
+}
+
+fn get_race_info_by_id(state: &mut LuaState) -> LuaResult<u32> {
+    let Ok(race_id) = i64::from_stack(state, 1) else {
+        return Ok(0);
+    };
+    let Some(info) = borrow_state(state)?.allied_races.get(&race_id).cloned() else {
+        return Ok(0);
+    };
+    let table = build_allied_race_info_table(state, &info);
+    state.push(table);
+    Ok(1)
+}
+
+fn build_allied_race_info_table(state: &mut LuaState, info: &AlliedRaceInfo) -> Val {
+    let male_name = create_string(state, &info.male_name);
+    let female_name = create_string(state, &info.female_name);
+    let description = create_string(state, &info.description);
+    let race_file_string = create_string(state, &info.race_file_string);
+    let crest_atlas = create_string(state, &info.crest_atlas);
+    let model_background_atlas = create_string(state, &info.model_background_atlas);
+    let achievement_ids = build_achievement_id_sequence(state, &info.achievement_ids);
+    let (r, g, b) = info.banner_color;
+    let banner_color = create_color_mixin(state, r, g, b);
+    create_table_with_fields(
+        state,
+        &[
+            ("raceID", Val::Num(info.race_id as f64)),
+            ("maleModelID", Val::Num(info.male_model_id as f64)),
+            ("femaleModelID", Val::Num(info.female_model_id as f64)),
+            ("achievementIds", achievement_ids),
+            ("maleName", male_name),
+            ("femaleName", female_name),
+            ("description", description),
+            ("raceFileString", race_file_string),
+            ("crestAtlas", crest_atlas),
+            ("modelBackgroundAtlas", model_background_atlas),
+            ("bannerColor", banner_color),
+        ],
+    )
+}
+
+fn build_achievement_id_sequence(state: &mut LuaState, ids: &[i64]) -> Val {
+    let sequence = create_table(state);
+    let Val::Table(sequence_ref) = sequence else {
+        unreachable!("create_table must return a table");
+    };
+    for (index, id) in ids.iter().enumerate() {
+        table_set_num(
+            state,
+            sequence_ref,
+            (index + 1) as f64,
+            Val::Num(*id as f64),
+        );
+    }
+    sequence
+}
+
+fn create_color_mixin(state: &mut LuaState, r: f64, g: f64, b: f64) -> Val {
+    let create_color_key = state.gc.intern_string(b"CreateColor");
+    let create_color = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(create_color_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    match call_function_state(
+        state,
+        create_color,
+        &[Val::Num(r), Val::Num(g), Val::Num(b), Val::Num(1.0)],
+    ) {
+        Ok(color) => color,
+        Err(_) => fallback_color_table(state, r, g, b),
+    }
+}
+
+fn fallback_color_table(state: &mut LuaState, r: f64, g: f64, b: f64) -> Val {
+    create_table_with_fields(
+        state,
+        &[
+            ("r", Val::Num(r)),
+            ("g", Val::Num(g)),
+            ("b", Val::Num(b)),
+            ("a", Val::Num(1.0)),
+        ],
+    )
+}

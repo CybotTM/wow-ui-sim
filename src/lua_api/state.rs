@@ -74,6 +74,7 @@ macro_rules! build_empty_sim_state {
             action_highlights: ActionHighlightState::default(),
             equipped_artifact: None,
             artifact_point_costs: HashMap::new(),
+            allied_races: HashMap::new(),
             azerite_item: None,
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
@@ -258,7 +259,8 @@ pub use super::game_data::{
     tick_party_health,
 };
 use super::game_data::{
-    default_action_bars, default_party, default_player_buffs, random_player_name,
+    default_action_bars, default_allied_races, default_party, default_player_buffs,
+    random_player_name,
 };
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
@@ -586,6 +588,27 @@ pub struct ArtifactInfo {
     pub category: i32,
 }
 
+/// Allied-race directory entry consumed by `C_AlliedRaces.GetRaceInfoByID`.
+/// `race_file_string` is the `strupper`-folded suffix the consumer joins onto
+/// `RACE_INFO_` to look up the race description (`raceFileString` =
+/// `"lightforgeddraenei"` → `_G.RACE_INFO_LIGHTFORGEDDRAENEI`). `banner_color`
+/// is RGB in the 0..1 range; the simulator wraps it in `CreateColor` so the
+/// returned table carries the `ColorMixin:GetRGB` method the addon calls.
+#[derive(Clone, Debug)]
+pub struct AlliedRaceInfo {
+    pub race_id: i64,
+    pub male_model_id: i64,
+    pub female_model_id: i64,
+    pub achievement_ids: Vec<i64>,
+    pub male_name: String,
+    pub female_name: String,
+    pub description: String,
+    pub race_file_string: String,
+    pub crest_atlas: String,
+    pub model_background_atlas: String,
+    pub banner_color: (f64, f64, f64),
+}
+
 /// Zone-choice descriptor for the adventure map. A zone choice is one of
 /// the competing quests on the Broken Isles starting-zone selection
 /// screen, exposed via `C_AdventureMap.GetZoneChoiceInfo`.
@@ -893,6 +916,14 @@ pub struct SimState {
     /// default — callers receive 0 for missing entries, which the helper
     /// treats as "no further point purchasable".
     pub artifact_point_costs: HashMap<(i32, i32), i64>,
+    /// Allied-race directory keyed by `raceID`. Consumed by
+    /// `C_AlliedRaces.GetRaceInfoByID`. Seeded with the canonical 10 races
+    /// (`lightforgeddraenei`, `darkirondwarf`, `voidelf`, `mechagnome`,
+    /// `vulpera`, `zandalaritroll`, `highmountaintauren`, `nightborne`,
+    /// `magharorc`, `earthendwarf`) so `Blizzard_AlliedRacesUI` can resolve
+    /// every race the dialog can be opened for. Unknown ids return nil and
+    /// `AlliedRacesFrameMixin:LoadRaceData` short-circuits.
+    pub allied_races: HashMap<i64, AlliedRaceInfo>,
     /// Heart of Azeroth state. `None` keeps
     /// `C_AzeriteItem.FindActiveAzeriteItem` returning nil so the
     /// `Blizzard_ActionBar/Mainline/AzeriteBar.lua` mixin stays hidden.
@@ -1474,9 +1505,8 @@ pub use super::sim_substates::{
     Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, MouseButtons,
     NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState,
     QuestRewardCurrency, QuestRewardItem, TorghastState, TradeState, VoiceChannel, VoiceChatState,
-    VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
-    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
-    WowLabsPoint, WowLabsState,
+    VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
+    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
 };
 
 #[derive(Default)]
@@ -2261,6 +2291,7 @@ impl SimState {
         self.action_bars = default_action_bars();
         self.party_members = default_party();
         self.party_group_active = false;
+        self.allied_races = default_allied_races();
         crate::lua_api::globals::keybindings::init_keybindings(self);
         self.player.name = random_player_name();
         self.player.power = 50_000;
