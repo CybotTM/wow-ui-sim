@@ -31,6 +31,7 @@ macro_rules! build_empty_sim_state {
             anima_diversion: AnimaDiversionState::default(),
             garrison_talents: GarrisonTalentState::default(),
             clipboard: ClipboardState::default(),
+            chat_edit_open_state: None,
             quest_portrait_state: None,
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
@@ -909,6 +910,21 @@ pub struct ClipboardState {
     pub last_remove_markup: bool,
 }
 
+/// Args captured by the `ChatFrameUtil.OpenChat(text, chatType?,
+/// cursorPosition?)` helper. `chat_type` is stored as a string when
+/// real WoW callers pass either a chat-type token or a chat-frame
+/// name; `None` matches the common `nil` second-arg case (e.g.
+/// `Blizzard_APIDocumentation.lua:81`). `cursor_position` is the
+/// byte-offset the addon wants the cursor parked at — the
+/// APIDocumentation `/api dump` flow uses this to land just past the
+/// `"/dump "` prefix.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct ChatEditOpenState {
+    pub text: String,
+    pub chat_type: Option<String>,
+    pub cursor_position: Option<i64>,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -946,6 +962,11 @@ pub struct SimState {
     /// Clipboard capture from the `CopyToClipboard` global. Never
     /// touches the OS clipboard — tests assert what was passed.
     pub clipboard: ClipboardState,
+    /// Most recent `ChatFrameUtil.OpenChat` request, or `None` when
+    /// the chat-edit box has never been programmatically opened. The
+    /// simulator never focuses a real edit box; tests assert what
+    /// would have been pre-filled.
+    pub chat_edit_open_state: Option<ChatEditOpenState>,
     /// Most recent `QuestFrame_ShowQuestPortrait` args, or `None` after a
     /// `QuestFrame_HideQuestPortrait` call. Drives nothing at render
     /// time — it exists so admin probes / tests can assert the dialog
