@@ -690,6 +690,170 @@ fn quest_offer_data_provider_pattern_iterates_each_offer() {
 }
 
 #[test]
+fn get_quest_offer_info_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetQuestOfferInfo)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_quest_offer_info_returns_no_values_when_unloaded() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestOfferInfo(1))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_quest_offer_info_returns_no_values_for_out_of_range_index() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer()];
+
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestOfferInfo(2))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_quest_offer_info_returns_no_values_for_non_positive_index() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer()];
+
+    let zero_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestOfferInfo(0))")
+        .unwrap();
+    let negative_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestOfferInfo(-1))")
+        .unwrap();
+    assert!(zero_count.abs() < 1e-6);
+    assert!(negative_count.abs() < 1e-6);
+}
+
+#[test]
+fn get_quest_offer_info_returns_nine_descriptor_values() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer()];
+
+    env.exec(
+        "questID, isTrivial, frequency, isLegendary, title, description, \
+         normalizedX, normalizedY, insetIndex = C_AdventureMap.GetQuestOfferInfo(1)",
+    )
+    .unwrap();
+
+    let arity: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestOfferInfo(1))")
+        .unwrap();
+    let quest_id: f64 = env.eval("return questID").unwrap();
+    let is_trivial: bool = env.eval("return isTrivial").unwrap();
+    let frequency: f64 = env.eval("return frequency").unwrap();
+    let is_legendary: bool = env.eval("return isLegendary").unwrap();
+    let title: String = env.eval("return title").unwrap();
+    let description: String = env.eval("return description").unwrap();
+    let normalized_x: f64 = env.eval("return normalizedX").unwrap();
+    let normalized_y: f64 = env.eval("return normalizedY").unwrap();
+    let inset_is_nil: bool = env.eval("return insetIndex == nil").unwrap();
+
+    assert!((arity - 9.0).abs() < 1e-6);
+    assert!((quest_id - 41_653.0).abs() < 1e-6);
+    assert!(!is_trivial);
+    assert!((frequency - 1.0).abs() < 1e-6);
+    assert!(!is_legendary);
+    assert_eq!(title, "The Tidestone of Golganneth");
+    assert_eq!(description, "Recover the Pillar of Creation.");
+    assert!((normalized_x - 0.55).abs() < 1e-6);
+    assert!((normalized_y - 0.62).abs() < 1e-6);
+    assert!(
+        inset_is_nil,
+        "insetIndex must be nil when offer.inset_index is None so the canvas pin path runs"
+    );
+}
+
+#[test]
+fn get_quest_offer_info_returns_inset_index_when_set() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut offer = sample_quest_offer();
+    offer.inset_index = Some(2);
+    env.state().borrow_mut().adventure_map.quest_offers = vec![offer];
+
+    let inset: f64 = env
+        .eval(
+            "local _, _, _, _, _, _, _, _, insetIndex = C_AdventureMap.GetQuestOfferInfo(1) \
+             return insetIndex",
+        )
+        .unwrap();
+    assert!((inset - 2.0).abs() < 1e-6);
+}
+
+#[test]
+fn get_quest_offer_info_propagates_trivial_and_legendary_flags() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut trivial = sample_quest_offer();
+    trivial.is_trivial = true;
+    let mut legendary = sample_quest_offer();
+    legendary.is_legendary = true;
+    env.state().borrow_mut().adventure_map.quest_offers = vec![trivial, legendary];
+
+    let first_trivial: bool = env
+        .eval("local _, t = C_AdventureMap.GetQuestOfferInfo(1) return t")
+        .unwrap();
+    let second_legendary: bool = env
+        .eval("local _, _, _, l = C_AdventureMap.GetQuestOfferInfo(2) return l")
+        .unwrap();
+    assert!(first_trivial);
+    assert!(second_legendary);
+}
+
+#[test]
+fn get_quest_offer_info_indexes_one_based() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut second = sample_quest_offer();
+    second.quest_id = 41_654;
+    second.title = "Stormheim".to_string();
+    env.state().borrow_mut().adventure_map.quest_offers =
+        vec![sample_quest_offer(), second];
+
+    let first_id: f64 = env
+        .eval("local id = C_AdventureMap.GetQuestOfferInfo(1) return id")
+        .unwrap();
+    let second_id: f64 = env
+        .eval("local id = C_AdventureMap.GetQuestOfferInfo(2) return id")
+        .unwrap();
+    assert!((first_id - 41_653.0).abs() < 1e-6);
+    assert!((second_id - 41_654.0).abs() < 1e-6);
+}
+
+#[test]
+fn quest_offer_data_provider_pattern_collects_each_offer() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut second = sample_quest_offer();
+    second.quest_id = 41_654;
+    env.state().borrow_mut().adventure_map.quest_offers =
+        vec![sample_quest_offer(), second];
+
+    env.exec(
+        r#"
+        _G.__offer_ids = {}
+        for offerIndex = 1, C_AdventureMap.GetNumQuestOffers() do
+            local questID = C_AdventureMap.GetQuestOfferInfo(offerIndex)
+            _G.__offer_ids[offerIndex] = questID
+        end
+        "#,
+    )
+    .unwrap();
+
+    let count: f64 = env.eval("return #_G.__offer_ids").unwrap();
+    let first: f64 = env.eval("return _G.__offer_ids[1]").unwrap();
+    let second_id: f64 = env.eval("return _G.__offer_ids[2]").unwrap();
+    assert!((count - 2.0).abs() < 1e-6);
+    assert!((first - 41_653.0).abs() < 1e-6);
+    assert!((second_id - 41_654.0).abs() < 1e-6);
+}
+
+#[test]
 fn build_detail_tiles_pattern_iterates_over_num_detail_tiles() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);

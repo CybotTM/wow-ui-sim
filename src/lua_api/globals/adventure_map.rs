@@ -3,9 +3,9 @@
 //!
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
 //! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
-//! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, and
-//! `GetNumQuestOffers()`. Future commits will fill in the rest of the
-//! surface (quest offer details, dialog hooks).
+//! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, `GetNumQuestOffers()`,
+//! and `GetQuestOfferInfo()`. Future commits will fill in the rest of
+//! the surface (dialog hooks, quest portraits).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -33,6 +33,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     table_set_rust_fn_static(state, table_ref, "GetNumZoneChoices", get_num_zone_choices)?;
     table_set_rust_fn_static(state, table_ref, "GetZoneChoiceInfo", get_zone_choice_info)?;
     table_set_rust_fn_static(state, table_ref, "GetNumQuestOffers", get_num_quest_offers)?;
+    table_set_rust_fn_static(state, table_ref, "GetQuestOfferInfo", get_quest_offer_info)?;
     Ok(())
 }
 
@@ -167,6 +168,35 @@ fn get_num_quest_offers(state: &mut LuaState) -> LuaResult<u32> {
     let count = borrow_state(state)?.adventure_map.quest_offers.len();
     state.push(Val::Num(count as f64));
     Ok(1)
+}
+
+fn get_quest_offer_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot_index) = lua_one_based_index_to_slot(stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    let descriptor = {
+        let sim = borrow_state(state)?;
+        sim.adventure_map.quest_offers.get(slot_index).cloned()
+    };
+    let Some(offer) = descriptor else {
+        return Ok(0);
+    };
+    let title = create_string(state, &offer.title);
+    let description = create_string(state, &offer.description);
+    let inset_index = match offer.inset_index {
+        Some(value) => Val::Num(value as f64),
+        None => Val::Nil,
+    };
+    state.push(Val::Num(offer.quest_id as f64));
+    state.push(Val::Bool(offer.is_trivial));
+    state.push(Val::Num(offer.frequency as f64));
+    state.push(Val::Bool(offer.is_legendary));
+    state.push(title);
+    state.push(description);
+    state.push(Val::Num(offer.normalized_x));
+    state.push(Val::Num(offer.normalized_y));
+    state.push(inset_index);
+    Ok(9)
 }
 
 /// Convert a Lua-facing 1-based index to a 0-based slot index. Returns
