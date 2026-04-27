@@ -1,11 +1,11 @@
 //! Archaeology state for legacy (non-namespaced) globals consumed by
 //! `Blizzard_ArchaeologyUI`.
 //!
-//! Drives `GetArchaeologyInfo`, `GetNumArchaeologyRaces`,
-//! `GetArchaeologyRaceInfo`, and `GetNumArtifactsByRace`. The richer
-//! active-artifact / keystone / completion-history surfaces hang off the
-//! same struct in follow-up patches; this file currently only carries
-//! the race-summary subset.
+//! Backs the race-summary, active-artifact, keystone-socket,
+//! completion-history, and `CloseResearch` surfaces. Each global module
+//! function reads from this struct; tests seed fields directly.
+
+use std::time::Instant;
 
 /// Single archaeology race entry surfaced by `GetArchaeologyRaceInfo`.
 /// `texture` is a FileDataID-shaped number per Wowless's API yaml.
@@ -96,6 +96,11 @@ pub struct ArchaeologyState {
     /// `RequestArtifactCompletionHistory` flips it to true so addons that
     /// gate on the request can proceed.
     pub history_available: bool,
+    /// Wall-clock `Instant` of the most recent `CloseResearch()` call.
+    /// `ArchaeologyFrame_OnHide` and `ArchaeologyFrame_ShowFailed` both
+    /// invoke `CloseResearch()`; recording the timestamp lets tests
+    /// assert the call happened without exposing the no-op as a counter.
+    pub last_close_request: Option<Instant>,
 }
 
 impl Default for ArchaeologyState {
@@ -106,6 +111,7 @@ impl Default for ArchaeologyState {
             selected: None,
             keystone_value: 0,
             history_available: false,
+            last_close_request: None,
         }
     }
 }

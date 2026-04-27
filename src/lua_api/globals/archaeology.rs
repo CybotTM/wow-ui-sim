@@ -40,6 +40,12 @@
 //! - `RequestArtifactCompletionHistory()` — server-driven companion;
 //!   stubbed as flipping `history_available` to true.
 //!
+//! Close hint:
+//! - `CloseResearch()` — fired by `ArchaeologyFrame_OnHide` (`:51`) and
+//!   `ArchaeologyFrame_ShowFailed` (`:201`). Records the call timestamp
+//!   into `state.archaeology.last_close_request` so tests can assert it
+//!   ran; otherwise a no-op.
+//!
 //! Without `GetArchaeologyInfo` the addon errors out at
 //! `Blizzard_ArchaeologyUI.lua:102` during `OnLoad` and `ArchaeologyFrame`
 //! becomes a half-initialized table.
@@ -50,6 +56,7 @@ use crate::lua_api::state::SelectedArtifact;
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::time::Instant;
 
 fn get_archaeology_info(state: &mut LuaState) -> LuaResult<u32> {
     let profession = borrow_state(state)?.archaeology.profession_name.clone();
@@ -377,6 +384,11 @@ fn get_artifact_info_by_race(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
+fn close_research(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.archaeology.last_close_request = Some(Instant::now());
+    Ok(0)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetArchaeologyInfo", get_archaeology_info)?;
     LuaApiMut::register_function(lua, "GetNumArchaeologyRaces", get_num_archaeology_races)?;
@@ -401,5 +413,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "RequestArtifactCompletionHistory",
         request_artifact_completion_history,
     )?;
+    LuaApiMut::register_function(lua, "CloseResearch", close_research)?;
     Ok(())
 }
