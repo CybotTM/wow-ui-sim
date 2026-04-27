@@ -215,6 +215,8 @@ macro_rules! build_empty_sim_state {
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),
             auction_bids: Vec::new(),
+            auction_throttle_ready: true,
+            auction_should_auto_populate_price: true,
             mythic_plus: MythicPlusState::default(),
             character_services: CharacterServicesState::default(),
             scenario: ScenarioState::default(),
@@ -1591,6 +1593,13 @@ pub struct SimState {
     /// / `GetBidInfo`. Empty by default — tests / addons populate via
     /// `A_Admin.AddAuctionBid`.
     pub auction_bids: Vec<BidAuction>,
+    /// Drives `C_AuctionHouse.IsThrottledMessageSystemReady`. The live
+    /// client clears this briefly while a query is in-flight; the sim
+    /// has no real throttle, so it stays true unless a test toggles it.
+    pub auction_throttle_ready: bool,
+    /// Drives `C_AuctionHouse.ShouldAutoPopulatePrice`. Mirrors the
+    /// per-account toggle in the live client.
+    pub auction_should_auto_populate_price: bool,
     /// Mythic+ probe state. Drives `C_MythicPlus.*` methods. Seeded
     /// with season 14, affix id=9 (Tyrannical), no run history, no
     /// owned key (level 0), no weekly best.

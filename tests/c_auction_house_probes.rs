@@ -2,7 +2,12 @@
 //! `SimState.auction_browse_results` + `auction_replicate_items`.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::lua_api::state::{AuctionBrowseResult, AuctionReplicateItem};
+use wow_ui_sim::lua_api::state::{AuctionBrowseResult, AuctionReplicateItem, OwnedAuction};
+
+const AQIRITE_ITEM_ID: i32 = 210935;
+const COMMODITY_STATUS_UNKNOWN: i32 = 0;
+const COMMODITY_STATUS_ITEM: i32 = 1;
+const COMMODITY_STATUS_COMMODITY: i32 = 2;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
@@ -198,4 +203,258 @@ fn replicate_items_reflect_sim_state_mutation() {
     assert_eq!(texture, 999);
     assert_eq!(quality, 4);
     assert!(!usable);
+}
+
+#[test]
+fn make_item_key_returns_canonical_4_field_table() {
+    let env = env();
+    let (item_id, item_level, suffix, species): (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local key = C_AuctionHouse.MakeItemKey(12345, 70, 99, 42)
+            return key.itemID, key.itemLevel, key.itemSuffix, key.battlePetSpeciesID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(item_id, 12345);
+    assert_eq!(item_level, 70);
+    assert_eq!(suffix, 99);
+    assert_eq!(species, 42);
+}
+
+#[test]
+fn make_item_key_zeroes_optional_args_when_omitted() {
+    let env = env();
+    let (item_id, item_level, suffix, species): (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local key = C_AuctionHouse.MakeItemKey(7777)
+            return key.itemID, key.itemLevel, key.itemSuffix, key.battlePetSpeciesID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(item_id, 7777);
+    assert_eq!(item_level, 0);
+    assert_eq!(suffix, 0);
+    assert_eq!(species, 0);
+}
+
+#[test]
+fn get_item_key_from_item_resolves_item_id_to_full_key() {
+    let env = env();
+    let (item_id, item_level): (i32, i32) = env
+        .eval(
+            r#"
+            local key = C_AuctionHouse.GetItemKeyFromItem({ itemID = 210935 })
+            return key.itemID, key.itemLevel
+            "#,
+        )
+        .unwrap();
+    assert_eq!(item_id, AQIRITE_ITEM_ID);
+    assert_eq!(item_level, 70, "itemLevel filled in from items DB");
+}
+
+#[test]
+fn get_item_key_from_item_returns_nil_when_location_missing_id() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_AuctionHouse.GetItemKeyFromItem({}) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn get_time_left_band_info_returns_min_max_seconds_per_band() {
+    let env = env();
+    let (short_min, short_max, medium_min, medium_max, long_max, very_long_max): (
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            local sMin, sMax = C_AuctionHouse.GetTimeLeftBandInfo(0)
+            local mMin, mMax = C_AuctionHouse.GetTimeLeftBandInfo(1)
+            local _, lMax = C_AuctionHouse.GetTimeLeftBandInfo(2)
+            local _, vMax = C_AuctionHouse.GetTimeLeftBandInfo(3)
+            return sMin, sMax, mMin, mMax, lMax, vMax
+            "#,
+        )
+        .unwrap();
+    assert_eq!(short_min, 0);
+    assert_eq!(short_max, 30 * 60);
+    assert_eq!(medium_min, 30 * 60);
+    assert_eq!(medium_max, 2 * 60 * 60);
+    assert_eq!(long_max, 12 * 60 * 60);
+    assert_eq!(very_long_max, 48 * 60 * 60);
+}
+
+#[test]
+fn get_time_left_band_info_returns_nothing_for_unknown_band() {
+    let env = env();
+    let count: i32 = env
+        .eval("return select('#', C_AuctionHouse.GetTimeLeftBandInfo(99))")
+        .unwrap();
+    assert_eq!(count, 0);
+}
+
+#[test]
+fn is_throttled_message_system_ready_reflects_state_flag() {
+    let env = env();
+    let default_ready: bool = env
+        .eval("return C_AuctionHouse.IsThrottledMessageSystemReady()")
+        .unwrap();
+    assert!(default_ready, "default sim state is throttle-ready");
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.auction_throttle_ready = false;
+    }
+    let throttled: bool = env
+        .eval("return C_AuctionHouse.IsThrottledMessageSystemReady()")
+        .unwrap();
+    assert!(!throttled, "flips to false after state mutation");
+}
+
+#[test]
+fn should_auto_populate_price_reflects_state_flag() {
+    let env = env();
+    let default_auto: bool = env
+        .eval("return C_AuctionHouse.ShouldAutoPopulatePrice()")
+        .unwrap();
+    assert!(default_auto);
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.auction_should_auto_populate_price = false;
+    }
+    let disabled: bool = env
+        .eval("return C_AuctionHouse.ShouldAutoPopulatePrice()")
+        .unwrap();
+    assert!(!disabled);
+}
+
+#[test]
+fn is_sell_item_valid_blocks_soulbound_items() {
+    let env = env();
+    // Hearthstone (6948): bonding=1 (BoP) → not sellable.
+    let bop_valid: bool = env
+        .eval("return C_AuctionHouse.IsSellItemValid({ itemID = 6948 })")
+        .unwrap();
+    assert!(!bop_valid);
+
+    // Aqirite: bonding=0 → sellable.
+    let commodity_valid: bool = env
+        .eval("return C_AuctionHouse.IsSellItemValid({ itemID = 210935 })")
+        .unwrap();
+    assert!(commodity_valid);
+}
+
+#[test]
+fn is_sell_item_valid_returns_false_for_missing_location() {
+    let env = env();
+    let valid: bool = env
+        .eval("return C_AuctionHouse.IsSellItemValid({})")
+        .unwrap();
+    assert!(!valid);
+}
+
+#[test]
+fn get_cancel_cost_returns_5_percent_of_buyout() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        state.auction_owned.push(OwnedAuction {
+            auction_id: 4242,
+            item_id: AQIRITE_ITEM_ID,
+            item_level: 70,
+            quantity: 5,
+            bid_amount: 1_000,
+            buyout_amount: 100_000,
+            status: 0,
+            time_left: 3,
+            time_left_seconds: 12 * 3600,
+        });
+    }
+    let cost: i64 = env
+        .eval("return C_AuctionHouse.GetCancelCost(4242)")
+        .unwrap();
+    assert_eq!(cost, 5_000, "5% of 100_000 buyout");
+}
+
+#[test]
+fn get_cancel_cost_returns_zero_for_unknown_auction() {
+    let env = env();
+    let cost: i64 = env
+        .eval("return C_AuctionHouse.GetCancelCost(999999)")
+        .unwrap();
+    assert_eq!(cost, 0);
+}
+
+#[test]
+fn get_available_post_count_returns_max_stack_minus_listed_quantity() {
+    let env = env();
+    {
+        let mut state = env.state().borrow_mut();
+        // Aqirite max stack = 1000. List 250, expect 750 available.
+        state.auction_owned.push(OwnedAuction {
+            auction_id: 1,
+            item_id: AQIRITE_ITEM_ID,
+            item_level: 70,
+            quantity: 250,
+            bid_amount: 0,
+            buyout_amount: 0,
+            status: 0,
+            time_left: 3,
+            time_left_seconds: 12 * 3600,
+        });
+    }
+    let available: i32 = env
+        .eval("return C_AuctionHouse.GetAvailablePostCount({ itemID = 210935 })")
+        .unwrap();
+    assert_eq!(available, 750);
+}
+
+#[test]
+fn get_available_post_count_returns_zero_for_unknown_item() {
+    let env = env();
+    let available: i32 = env
+        .eval("return C_AuctionHouse.GetAvailablePostCount({})")
+        .unwrap();
+    assert_eq!(available, 0);
+}
+
+#[test]
+fn get_item_commodity_status_classifies_item_vs_commodity() {
+    let env = env();
+    let (commodity, item, unknown): (i32, i32, i32) = env
+        .eval(
+            r#"
+            return C_AuctionHouse.GetItemCommodityStatus({ itemID = 210935 }),
+                   C_AuctionHouse.GetItemCommodityStatus({ itemID = 211988 }),
+                   C_AuctionHouse.GetItemCommodityStatus({})
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        commodity, COMMODITY_STATUS_COMMODITY,
+        "Aqirite stacks to 1000"
+    );
+    assert_eq!(
+        item, COMMODITY_STATUS_ITEM,
+        "Greatcloak is gear, not a commodity"
+    );
+    assert_eq!(unknown, COMMODITY_STATUS_UNKNOWN);
+}
+
+#[test]
+fn get_quote_duration_remaining_defaults_to_zero() {
+    let env = env();
+    let remaining: i64 = env
+        .eval("return C_AuctionHouse.GetQuoteDurationRemaining()")
+        .unwrap();
+    assert_eq!(remaining, 0);
 }

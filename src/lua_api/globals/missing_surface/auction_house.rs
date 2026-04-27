@@ -103,7 +103,47 @@ const AUCTION_HOUSE_METHODS: &[(&'static str, AuctionHouseMethod)] = &[
         "GetMaxOwnedAuctionBuyout",
         c_auction_house_get_max_owned_auction_buyout,
     ),
+    ("MakeItemKey", c_auction_house_make_item_key),
+    ("GetItemKeyFromItem", c_auction_house_get_item_key_from_item),
+    (
+        "GetTimeLeftBandInfo",
+        c_auction_house_get_time_left_band_info,
+    ),
+    (
+        "IsThrottledMessageSystemReady",
+        c_auction_house_is_throttled_message_system_ready,
+    ),
+    (
+        "ShouldAutoPopulatePrice",
+        c_auction_house_should_auto_populate_price,
+    ),
+    ("IsSellItemValid", c_auction_house_is_sell_item_valid),
+    ("GetCancelCost", c_auction_house_get_cancel_cost),
+    (
+        "GetAvailablePostCount",
+        c_auction_house_get_available_post_count,
+    ),
+    (
+        "GetItemCommodityStatus",
+        c_auction_house_get_item_commodity_status,
+    ),
+    (
+        "GetQuoteDurationRemaining",
+        c_auction_house_get_quote_duration_remaining,
+    ),
 ];
+
+const ITEM_BONDING_BIND_ON_PICKUP: u8 = 1;
+const ITEM_BONDING_QUEST: u8 = 4;
+
+const SECONDS_30_MINUTES: i64 = 30 * 60;
+const SECONDS_2_HOURS: i64 = 2 * 60 * 60;
+const SECONDS_12_HOURS: i64 = 12 * 60 * 60;
+const SECONDS_48_HOURS: i64 = 48 * 60 * 60;
+
+const ITEM_COMMODITY_STATUS_UNKNOWN: i32 = 0;
+const ITEM_COMMODITY_STATUS_ITEM: i32 = 1;
+const ITEM_COMMODITY_STATUS_COMMODITY: i32 = 2;
 
 pub(super) fn register_auction_house_surface(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_AuctionHouse")?;
@@ -648,6 +688,167 @@ fn extract_item_key_id(state: &mut LuaState, value: Val) -> Option<u32> {
         Some(Val::Num(item_id)) if item_id > 0.0 => Some(item_id as u32),
         _ => None,
     }
+}
+
+fn c_auction_house_make_item_key(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let item_level = optional_int_arg(state, 2)?;
+    let item_suffix = optional_int_arg(state, 3)?;
+    let battle_pet_species_id = optional_int_arg(state, 4)?;
+    let item_key = create_table(state);
+    table_set(state, item_key, "itemID", Val::Num(item_id as f64));
+    table_set(state, item_key, "itemLevel", Val::Num(item_level as f64));
+    table_set(state, item_key, "itemSuffix", Val::Num(item_suffix as f64));
+    table_set(
+        state,
+        item_key,
+        "battlePetSpeciesID",
+        Val::Num(battle_pet_species_id as f64),
+    );
+    state.push(item_key);
+    Ok(1)
+}
+
+fn c_auction_house_get_item_key_from_item(state: &mut LuaState) -> LuaResult<u32> {
+    let location = Val::from_stack(state, 1)?;
+    let Some(item_id) = extract_item_id_from_location(state, location) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let item_level = items::get_item(item_id)
+        .map(|item| item.item_level as i32)
+        .unwrap_or(0);
+    let item_key = push_item_key_table(state, item_id as i32, item_level);
+    state.push(item_key);
+    Ok(1)
+}
+
+fn c_auction_house_get_time_left_band_info(state: &mut LuaState) -> LuaResult<u32> {
+    let band = i32::from_stack(state, 1)?;
+    let Some((min_seconds, max_seconds)) = time_left_band_range(band) else {
+        return Ok(0);
+    };
+    state.push(Val::Num(min_seconds as f64));
+    state.push(Val::Num(max_seconds as f64));
+    Ok(2)
+}
+
+fn c_auction_house_is_throttled_message_system_ready(state: &mut LuaState) -> LuaResult<u32> {
+    let ready = borrow_state(state)?.auction_throttle_ready;
+    state.push(Val::Bool(ready));
+    Ok(1)
+}
+
+fn c_auction_house_should_auto_populate_price(state: &mut LuaState) -> LuaResult<u32> {
+    let auto_populate = borrow_state(state)?.auction_should_auto_populate_price;
+    state.push(Val::Bool(auto_populate));
+    Ok(1)
+}
+
+fn c_auction_house_is_sell_item_valid(state: &mut LuaState) -> LuaResult<u32> {
+    let location = Val::from_stack(state, 1)?;
+    let valid = extract_item_id_from_location(state, location)
+        .and_then(items::get_item)
+        .is_some_and(item_is_sellable);
+    state.push(Val::Bool(valid));
+    Ok(1)
+}
+
+fn c_auction_house_get_cancel_cost(state: &mut LuaState) -> LuaResult<u32> {
+    let auction_id = i32::from_stack(state, 1)?;
+    let buyout = borrow_state(state)?
+        .auction_owned
+        .iter()
+        .find(|row| row.auction_id == auction_id)
+        .map(|row| row.buyout_amount)
+        .unwrap_or(0);
+    let cost = cancel_cost_for_buyout(buyout);
+    state.push(Val::Num(cost as f64));
+    Ok(1)
+}
+
+fn c_auction_house_get_available_post_count(state: &mut LuaState) -> LuaResult<u32> {
+    let location = Val::from_stack(state, 1)?;
+    let count = available_post_count_for_location(state, location)?;
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn c_auction_house_get_item_commodity_status(state: &mut LuaState) -> LuaResult<u32> {
+    let location = Val::from_stack(state, 1)?;
+    let status = match extract_item_id_from_location(state, location).and_then(items::get_item) {
+        Some(item) if item_is_commodity(item) => ITEM_COMMODITY_STATUS_COMMODITY,
+        Some(_) => ITEM_COMMODITY_STATUS_ITEM,
+        None => ITEM_COMMODITY_STATUS_UNKNOWN,
+    };
+    state.push(Val::Num(status as f64));
+    Ok(1)
+}
+
+fn c_auction_house_get_quote_duration_remaining(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+/// Read an optional positive integer from the Lua stack, defaulting to
+/// 0 when the slot is nil or non-numeric. Matches the retail
+/// `MakeItemKey` contract where `itemLevel`/`itemSuffix` are optional.
+fn optional_int_arg(state: &mut LuaState, slot: i32) -> LuaResult<i32> {
+    match Val::from_stack(state, slot)? {
+        Val::Num(n) => Ok(n as i32),
+        _ => Ok(0),
+    }
+}
+
+/// Resolve an `ItemLocation`-shaped Lua table to an `itemID`. The sim
+/// has no bag/equipment inventory yet, so tests pass `{ itemID = X }`
+/// directly. When a `resolve_item_location` helper lands this can grow
+/// a bag/slot fallback; today the shape matches an `ItemKey`, so
+/// delegate to the shared field reader.
+fn extract_item_id_from_location(state: &mut LuaState, value: Val) -> Option<u32> {
+    extract_item_key_id(state, value)
+}
+
+/// `(min, max)` seconds for each `Enum.AuctionHouseTimeLeftBand`
+/// member (0=Short..3=VeryLong). Mirrors the real client's bands per
+/// `Blizzard_AuctionHouseUtil.lua` time-left labels: Short=under 30
+/// min, Medium=30 min..2 h, Long=2..12 h, VeryLong=12..48 h.
+fn time_left_band_range(band: i32) -> Option<(i64, i64)> {
+    match band {
+        0 => Some((0, SECONDS_30_MINUTES)),
+        1 => Some((SECONDS_30_MINUTES, SECONDS_2_HOURS)),
+        2 => Some((SECONDS_2_HOURS, SECONDS_12_HOURS)),
+        3 => Some((SECONDS_12_HOURS, SECONDS_48_HOURS)),
+        _ => None,
+    }
+}
+
+/// `IsSellItemValid` blocks soulbound and quest items. The sim has no
+/// "locked" cursor state yet, so the bonding flag is the only gate.
+fn item_is_sellable(item: &items::ItemInfo) -> bool {
+    item.bonding != ITEM_BONDING_BIND_ON_PICKUP && item.bonding != ITEM_BONDING_QUEST
+}
+
+/// Cancellation deposit forfeit: 5% of buyout, rounded down. Matches
+/// the live client's `AUCTION_HOUSE_CANCEL_FEE_PERCENT` constant.
+fn cancel_cost_for_buyout(buyout: i64) -> i64 {
+    (buyout * 5) / 100
+}
+
+fn available_post_count_for_location(state: &mut LuaState, location: Val) -> LuaResult<i32> {
+    let Some(item_id) = extract_item_id_from_location(state, location) else {
+        return Ok(0);
+    };
+    let max_stack = items::get_item(item_id)
+        .map(|item| item.stackable.max(1) as i32)
+        .unwrap_or(1);
+    let already_listed: i32 = borrow_state(state)?
+        .auction_owned
+        .iter()
+        .filter(|row| row.item_id as u32 == item_id)
+        .map(|row| row.quantity)
+        .sum();
+    Ok((max_stack - already_listed).max(0))
 }
 
 fn push_browse_result_table(state: &mut LuaState, row: &AuctionBrowseResult) -> Val {
