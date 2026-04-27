@@ -382,3 +382,50 @@ fn test_staged_changes_expose_selection_swaps() {
 
     assert!(swap_node > 0);
 }
+
+// ============================================================================
+// C_SpecializationInfo.SetSpecialization — cast-based flow
+// ============================================================================
+
+#[test]
+fn c_spec_set_specialization_starts_cast_and_defers_active_index() {
+    let env = env();
+    env.state().borrow_mut().player.active_spec_index = 1;
+
+    let ok: bool = env
+        .eval("return C_SpecializationInfo.SetSpecialization(2)")
+        .unwrap();
+    assert!(ok, "SetSpecialization should return true");
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.player.pending_spec_change,
+        Some(2),
+        "pending_spec_change should be queued"
+    );
+    assert_eq!(
+        state.player.active_spec_index, 1,
+        "active_spec_index must NOT change until cast completes \
+         (otherwise the UI's grey overlay never clears)"
+    );
+    assert!(
+        state.casting.is_some(),
+        "a cast must be in flight so the UI's PLAYER_SPECIALIZATION_CHANGED \
+         dismissal path runs"
+    );
+}
+
+#[test]
+fn c_spec_set_specialization_same_spec_is_noop() {
+    let env = env();
+    env.state().borrow_mut().player.active_spec_index = 2;
+
+    let ok: bool = env
+        .eval("return C_SpecializationInfo.SetSpecialization(2)")
+        .unwrap();
+    assert!(ok);
+
+    let state = env.state().borrow();
+    assert_eq!(state.player.pending_spec_change, None);
+    assert!(state.casting.is_none());
+}

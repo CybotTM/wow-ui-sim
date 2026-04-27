@@ -1,10 +1,11 @@
 //! C_SpecializationInfo and UIWidgetContainerMixin implementations.
 
-use crate::lua_api::game_data::CLASS_LABELS;
+use crate::lua_api::game_data::{CLASS_LABELS, CastingState};
 use crate::lua_api::globals::spellbook_data;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, frame_id_from_stack, table_set,
 };
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use crate::specializations;
 use rilua::vm::state::LuaState;
@@ -234,13 +235,43 @@ fn c_spec_get_spells_display(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn c_spec_set_specialization(state: &mut LuaState) -> LuaResult<u32> {
+    const SPEC_ACTIVATION_SPELL_ID: u32 = 200749;
+    const SPEC_ACTIVATION_CAST_SECONDS: f64 = 1.5;
+
     let requested_index = match stack_val(state, 1) {
         Val::Num(n) => n as i32,
         _ => 0,
     };
     let can_set = requested_or_active_spec(state, requested_index).is_some();
     if can_set {
-        borrow_state_mut(state)?.player.active_spec_index = requested_index.max(1);
+        let target_index = requested_index.max(1);
+        let started = {
+            let mut sim = borrow_state_mut(state)?;
+            if sim.player.active_spec_index == target_index
+                && sim.player.pending_spec_change.is_none()
+            {
+                false
+            } else {
+                sim.player.pending_spec_change = Some(target_index);
+                let now = sim.start_time.elapsed().as_secs_f64();
+                let cast_id = sim.next_cast_id;
+                sim.next_cast_id = sim.next_cast_id.wrapping_add(1);
+                sim.casting = Some(CastingState {
+                    spell_id: SPEC_ACTIVATION_SPELL_ID,
+                    spell_name: "Activate Specialization".to_string(),
+                    icon_path: String::new(),
+                    start_time: now,
+                    end_time: now + SPEC_ACTIVATION_CAST_SECONDS,
+                    cast_id,
+                });
+                true
+            }
+        };
+        if started {
+            let player = create_string(state, "player");
+            let spell_id_val = Val::Num(SPEC_ACTIVATION_SPELL_ID as f64);
+            fire_named_event_state(state, "UNIT_SPELLCAST_START", &[player, spell_id_val]);
+        }
     }
     state.push(Val::Bool(can_set));
     Ok(1)
