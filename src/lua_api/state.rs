@@ -590,12 +590,14 @@ pub struct AzeriteItemState {
 }
 
 /// `C_AzeriteEmpoweredItem` backing state read by
-/// `Blizzard_AzeriteRespecUI`. The respec frame asks once for the cost,
-/// runs `IsAzeriteEmpoweredItem` whenever the cursor changes, and
-/// invokes `ConfirmAzeriteEmpoweredItemRespec` from the static popup.
-/// `last_close_request` / `last_confirmed_respec` are write-only audit
-/// fields the simulator's tests assert against — Blizzard's panel never
-/// reads them back.
+/// `Blizzard_AzeriteRespecUI` (respec flow) and `Blizzard_AzeriteUI`
+/// (panel flow). The respec frame asks once for the cost, runs
+/// `IsAzeriteEmpoweredItem` whenever the cursor changes, and invokes
+/// `ConfirmAzeriteEmpoweredItemRespec` from the static popup. The panel
+/// reads `power_text` / `spec_available` / `heart_equipped` per row and
+/// writes selections via `SelectPower`. `last_close_request` /
+/// `last_confirmed_respec` are write-only audit fields the simulator's
+/// tests assert against — Blizzard's panel never reads them back.
 #[derive(Clone, Debug, Default)]
 pub struct AzeriteEmpoweredItemState {
     /// Gold (in copper) returned by `GetAzeriteEmpoweredItemRespecCost`.
@@ -615,6 +617,45 @@ pub struct AzeriteEmpoweredItemState {
     /// `ConfirmAzeriteEmpoweredItemRespec`. Tests assert on this to
     /// verify the static popup wired the right item through.
     pub last_confirmed_respec: Option<ItemLocationData>,
+    /// Power text shown in the panel's per-power tooltip. Keyed by
+    /// `(itemID, powerID, powerLevel)` (powerLevel = 0 Base / 1
+    /// Upgraded / 2 Downgraded — `Enum.AzeritePowerLevel`).
+    /// `GetPowerText` returns nil when not seeded.
+    pub power_text: HashMap<(i32, i32, i32), AzeriteEmpoweredPowerText>,
+    /// Whether the player has the Heart of Azeroth equipped. Drives
+    /// the panel's tier grey-out via
+    /// `AzeriteEmpoweredItemPowerMixin:Update`. Default `false`.
+    pub heart_equipped: bool,
+    /// Per-spec availability for each power. Default true unless an
+    /// entry is seeded false — the panel dims unavailable powers.
+    pub spec_available: HashMap<(i32, i32), bool>,
+    /// Powers selected per item, accumulated by `SelectPower` and
+    /// cleared by `ConfirmAzeriteEmpoweredItemRespec`. The key
+    /// captures the originating `itemLocation` so two stacks of the
+    /// same item id keep independent selections.
+    pub selections: HashMap<AzeriteEmpoweredSelectionKey, Vec<i32>>,
+}
+
+/// Power text struct returned by `C_AzeriteEmpoweredItem.GetPowerText`
+/// (`AzeriteEmpoweredItemPowerText` in
+/// `AzeriteEmpoweredItemDocumentation.lua`). Both fields are required
+/// — the addon reads `.name` and `.description` directly.
+#[derive(Clone, Debug, Default)]
+pub struct AzeriteEmpoweredPowerText {
+    pub name: String,
+    pub description: String,
+}
+
+/// Composite key for `AzeriteEmpoweredItemState::selections`. Combines
+/// the resolved item id with the originating bag/slot or equipment
+/// slot so two empowered items with the same id but different
+/// locations don't share a selection list.
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq)]
+pub struct AzeriteEmpoweredSelectionKey {
+    pub item_id: i32,
+    pub bag_id: Option<i32>,
+    pub slot_index: Option<i32>,
+    pub equipment_slot_index: Option<i32>,
 }
 
 /// Equipped artifact metadata read by `C_ArtifactUI.GetEquippedArtifactInfo`,

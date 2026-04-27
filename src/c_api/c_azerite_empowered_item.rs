@@ -1,8 +1,8 @@
-//! `C_AzeriteEmpoweredItem` — respec-flow surface read by
-//! `Blizzard_AzeriteRespecUI`. Backed by `state.azerite_empowered`.
+//! `C_AzeriteEmpoweredItem` — surface read by `Blizzard_AzeriteRespecUI`
+//! (respec flow) and `Blizzard_AzeriteUI` (panel flow). Backed by
+//! `state.azerite_empowered`.
 //!
-//! Methods (4 total — scoped to what `Blizzard_AzeriteRespecUI` actually
-//! consumes; the full namespace has more entries that no UI addon reaches):
+//! Respec-flow methods:
 //! - `CloseAzeriteEmpoweredItemRespec(itemLocation?)` — fires
 //!   `AZERITE_EMPOWERED_ITEM_RESPEC_CLOSE` so the panel can hide via
 //!   `UIPanelWindows.showFailedFunc`.
@@ -15,13 +15,32 @@
 //!   `ItemLocationMixin` shapes (`{bagID, slotIndex}` and
 //!   `{equipmentSlotIndex}`).
 //! - `ConfirmAzeriteEmpoweredItemRespec(itemLocation)` — records the
-//!   location on `last_confirmed_respec`. No-op when the location is nil
-//!   or not a table (mirrors the addon's nil-cursor case).
+//!   location on `last_confirmed_respec` and clears the resolved
+//!   item's `selections` entry. No-op when the location is nil or not
+//!   a table (mirrors the addon's nil-cursor case).
+//!
+//! Panel-flow methods:
+//! - `GetPowerText(itemLocation, powerID, level) → {name, description}|nil`
+//!   — looks up `state.azerite_empowered.power_text` keyed by
+//!   `(itemID, powerID, level)`. Returns nil when not seeded; the
+//!   addon's tooltip path only reaches it after seeding.
+//! - `IsHeartOfAzerothEquipped() → bool` — returns
+//!   `state.azerite_empowered.heart_equipped`. Drives
+//!   `AzeriteEmpoweredItemPowerMixin:Update`.
+//! - `IsPowerAvailableForSpec(powerID, specID) → bool` — looks up
+//!   `state.azerite_empowered.spec_available`; defaults to true so
+//!   panels show powers as available unless seeded false.
+//! - `SelectPower(itemLocation, powerID) → bool` — appends `powerID`
+//!   to `state.azerite_empowered.selections[itemLocation]` and fires
+//!   `AZERITE_EMPOWERED_ITEM_SELECTION_UPDATED`. Returns false when
+//!   the location can't be resolved to an item id.
 
 use crate::c_api::ensure_namespace;
 use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
-use crate::lua_api::methods::{borrow_state, borrow_state_mut};
-use crate::lua_api::state::ItemLocationData;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table_with_fields};
+use crate::lua_api::state::{
+    AzeriteEmpoweredPowerText, AzeriteEmpoweredSelectionKey, ItemLocationData,
+};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
@@ -43,6 +62,10 @@ const AZERITE_EMPOWERED_METHODS: &[(&str, AzeriteEmpoweredMethod)] = &[
         "ConfirmAzeriteEmpoweredItemRespec",
         confirm_azerite_empowered_item_respec,
     ),
+    ("GetPowerText", get_power_text),
+    ("IsHeartOfAzerothEquipped", is_heart_of_azeroth_equipped),
+    ("IsPowerAvailableForSpec", is_power_available_for_spec),
+    ("SelectPower", select_power),
 ];
 
 pub(crate) fn register_c_azerite_empowered_item_surface(state: &mut LuaState) -> LuaResult<()> {
@@ -86,9 +109,107 @@ fn confirm_azerite_empowered_item_respec(state: &mut LuaState) -> LuaResult<u32>
     let Some(location) = read_optional_location(state, 1) else {
         return Ok(0);
     };
+    let selection_key = build_selection_key(state, 1);
     let mut sim = borrow_state_mut(state)?;
     sim.azerite_empowered.last_confirmed_respec = Some(location);
+    if let Some(key) = selection_key {
+        sim.azerite_empowered.selections.remove(&key);
+    }
     Ok(0)
+}
+
+fn get_power_text(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(text) = lookup_power_text(state)? else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let name_str = state.gc.intern_string(text.name.as_bytes());
+    let desc_str = state.gc.intern_string(text.description.as_bytes());
+    let table = create_table_with_fields(
+        state,
+        &[
+            ("name", Val::Str(name_str)),
+            ("description", Val::Str(desc_str)),
+        ],
+    );
+    state.push(table);
+    Ok(1)
+}
+
+fn lookup_power_text(state: &mut LuaState) -> LuaResult<Option<AzeriteEmpoweredPowerText>> {
+    let Some(item_id) = resolve_location_item_id(state, 1) else {
+        return Ok(None);
+    };
+    let Ok(power_id) = i32::from_stack(state, 2) else {
+        return Ok(None);
+    };
+    let Ok(level) = i32::from_stack(state, 3) else {
+        return Ok(None);
+    };
+    Ok(borrow_state(state)?
+        .azerite_empowered
+        .power_text
+        .get(&(item_id, power_id, level))
+        .cloned())
+}
+
+fn is_heart_of_azeroth_equipped(state: &mut LuaState) -> LuaResult<u32> {
+    let equipped = borrow_state(state)?.azerite_empowered.heart_equipped;
+    state.push(Val::Bool(equipped));
+    Ok(1)
+}
+
+fn is_power_available_for_spec(state: &mut LuaState) -> LuaResult<u32> {
+    let power_id = i32::from_stack(state, 1)?;
+    let spec_id = i32::from_stack(state, 2)?;
+    let available = borrow_state(state)?
+        .azerite_empowered
+        .spec_available
+        .get(&(power_id, spec_id))
+        .copied()
+        .unwrap_or(true);
+    state.push(Val::Bool(available));
+    Ok(1)
+}
+
+fn select_power(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(key) = build_selection_key(state, 1) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let power_id = match i32::from_stack(state, 2) {
+        Ok(value) => value,
+        Err(_) => {
+            state.push(Val::Bool(false));
+            return Ok(1);
+        }
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        sim.azerite_empowered
+            .selections
+            .entry(key)
+            .or_default()
+            .push(power_id);
+    }
+    dispatch_event_now(state, "AZERITE_EMPOWERED_ITEM_SELECTION_UPDATED", &[])?;
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+/// Build the composite selection key for `state.azerite_empowered.selections`
+/// from an `itemLocation` arg. Returns None when the location can't be
+/// resolved to an item id (no shape match, or the bag/equipment lookup
+/// misses).
+fn build_selection_key(state: &mut LuaState, slot: i32) -> Option<AzeriteEmpoweredSelectionKey> {
+    let item_id = resolve_location_item_id(state, slot)?;
+    let fields = read_location_fields(state, slot)?;
+    Some(AzeriteEmpoweredSelectionKey {
+        item_id,
+        bag_id: fields.bag_id,
+        slot_index: fields.slot_index,
+        equipment_slot_index: fields.equipment_slot,
+    })
 }
 
 /// Read the `{bagID, slotIndex, equipmentSlotIndex}` shape produced by
