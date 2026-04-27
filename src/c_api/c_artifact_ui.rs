@@ -53,6 +53,12 @@ pub(crate) fn register_c_artifact_ui_surface(state: &mut LuaState) -> LuaResult<
         "GetCostForPointAtRank",
         get_cost_for_point_at_rank,
     )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetArtifactXPRewardTargetInfo",
+        get_artifact_xp_reward_target_info,
+    )?;
     Ok(())
 }
 
@@ -107,6 +113,28 @@ fn is_equipped_artifact_disabled(state: &mut LuaState) -> LuaResult<u32> {
         .is_some_and(|info| info.disabled);
     state.push(Val::Bool(disabled));
     Ok(1)
+}
+
+/// `GetArtifactXPRewardTargetInfo(artifactCategory) -> name, icon` —
+/// returns the equipped artifact's display name and icon when its
+/// `category` matches `artifactCategory`. Returns nothing (nil pair)
+/// when no artifact is equipped or the category mismatches; matches
+/// the `MayReturnNothing` shape in the docs.
+fn get_artifact_xp_reward_target_info(state: &mut LuaState) -> LuaResult<u32> {
+    let requested_category = i32::from_stack(state, 1)?;
+    let display = borrow_state(state)?
+        .equipped_artifact
+        .as_ref()
+        .filter(|info| info.category == requested_category)
+        .map(|info| (info.name.clone(), info.icon.clone()));
+    let Some((name, icon)) = display else {
+        return Ok(0);
+    };
+    let name_val = create_string(state, &name);
+    let icon_val = create_string(state, &icon);
+    state.push(name_val);
+    state.push(icon_val);
+    Ok(2)
 }
 
 fn get_cost_for_point_at_rank(state: &mut LuaState) -> LuaResult<u32> {

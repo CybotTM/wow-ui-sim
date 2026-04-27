@@ -20,6 +20,7 @@ fn sample_artifact() -> ArtifactInfo {
         tier: 2,
         maxed: false,
         disabled: false,
+        category: 1,
     }
 }
 
@@ -138,6 +139,53 @@ fn get_cost_for_point_at_rank_reads_state_table() {
     assert!((tier_one - 1_000.0).abs() < 1e-6);
     assert!((tier_two - 5_000.0).abs() < 1e-6);
     assert!(missing_rank.abs() < 1e-6);
+}
+
+#[test]
+fn xp_reward_target_info_is_nil_when_no_artifact_equipped() {
+    let env = WowLuaEnv::new().expect("env");
+    let nil: bool = env
+        .eval("return C_ArtifactUI.GetArtifactXPRewardTargetInfo(1) == nil")
+        .unwrap();
+    assert!(nil);
+}
+
+#[test]
+fn xp_reward_target_info_returns_name_and_icon_when_category_matches() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().equipped_artifact = Some(sample_artifact());
+    env.exec("name, icon = C_ArtifactUI.GetArtifactXPRewardTargetInfo(1)")
+        .unwrap();
+    let name: String = env.eval("return name").unwrap();
+    let icon: String = env.eval("return icon").unwrap();
+    assert_eq!(name, "Ashbringer");
+    assert!(icon.contains("artifactashbringer"));
+}
+
+#[test]
+fn xp_reward_target_info_is_nil_when_category_mismatches() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().equipped_artifact = Some(sample_artifact());
+    let nil: bool = env
+        .eval("return C_ArtifactUI.GetArtifactXPRewardTargetInfo(99) == nil")
+        .unwrap();
+    assert!(nil);
+}
+
+#[test]
+fn xp_reward_target_info_uses_state_category_value() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut artifact = sample_artifact();
+    artifact.category = 7;
+    env.state().borrow_mut().equipped_artifact = Some(artifact);
+    let nil_for_one: bool = env
+        .eval("return C_ArtifactUI.GetArtifactXPRewardTargetInfo(1) == nil")
+        .unwrap();
+    let name_for_seven: String = env
+        .eval("return (C_ArtifactUI.GetArtifactXPRewardTargetInfo(7))")
+        .unwrap();
+    assert!(nil_for_one);
+    assert_eq!(name_for_seven, "Ashbringer");
 }
 
 #[test]

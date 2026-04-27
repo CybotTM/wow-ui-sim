@@ -580,6 +580,10 @@ pub struct ArtifactInfo {
     pub tier: i32,
     pub maxed: bool,
     pub disabled: bool,
+    /// Artifact category (`Enum.ArtifactCategory`). Used by
+    /// `C_ArtifactUI.GetArtifactXPRewardTargetInfo` to gate the
+    /// reward-display name/icon to the matching artifact only.
+    pub category: i32,
 }
 
 /// Zone-choice descriptor for the adventure map. A zone choice is one of
