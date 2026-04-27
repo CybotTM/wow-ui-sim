@@ -25,7 +25,9 @@
 //! Registered from `register_tail_globals` after `missing_surface`.
 
 use crate::event::Event;
-use crate::lua_api::methods::borrow_state_mut;
+use crate::lua_api::frame::methods::methods_hierarchy::reparent_widget;
+use crate::lua_api::methods::{borrow_state_mut, extract_frame_id};
+use crate::lua_api::state::QuestPortraitState;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -159,6 +161,76 @@ fn untrack_achievement(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn stack_string(state: &mut LuaState, index: i32) -> String {
+    let Val::Str(s) = stack_val(state, index) else {
+        return String::new();
+    };
+    state
+        .gc
+        .string_arena
+        .get(s)
+        .and_then(|lua_str| std::str::from_utf8(lua_str.data()).ok())
+        .map(str::to_owned)
+        .unwrap_or_default()
+}
+
+fn stack_f64(state: &mut LuaState, index: i32) -> f64 {
+    match stack_val(state, index) {
+        Val::Num(n) => n,
+        _ => 0.0,
+    }
+}
+
+/// `QuestFrame_ShowQuestPortrait(parent, portraitDisplayID,
+/// mountPortraitDisplayID, modelSceneID, text, name, x, y, hideModel)`
+/// — records the request on `SimState.quest_portrait_state` and
+/// reparents the global `QuestModelScene` frame to `parent` so the
+/// dialog visually owns the portrait. Tests probe state directly; the
+/// 3D model itself is intentionally not rendered.
+fn quest_frame_show_quest_portrait(state: &mut LuaState) -> LuaResult<u32> {
+    let parent_val = stack_val(state, 1);
+    let parent_id = extract_frame_id(state, parent_val);
+    let portrait_display_id = stack_i32(state, 2).unwrap_or(0);
+    let mount_portrait_display_id = stack_i32(state, 3).unwrap_or(0);
+    let model_scene_id = stack_i32(state, 4).unwrap_or(0);
+    let text = stack_string(state, 5);
+    let name = stack_string(state, 6);
+    let x = stack_f64(state, 7);
+    let y = stack_f64(state, 8);
+    let hide_model = stack_bool(state, 9).unwrap_or(false);
+
+    let mut sim = borrow_state_mut(state)?;
+    let model_scene_id_u64 = sim.widgets.get_id_by_name("QuestModelScene");
+    sim.quest_portrait_state = Some(QuestPortraitState {
+        parent_frame_id: parent_id,
+        portrait_display_id,
+        mount_portrait_display_id,
+        model_scene_id,
+        text,
+        name,
+        x,
+        y,
+        hide_model,
+    });
+    if let Some(scene_id) = model_scene_id_u64 {
+        reparent_widget(&mut sim.widgets, scene_id, parent_id);
+    }
+    Ok(0)
+}
+
+/// `QuestFrame_HideQuestPortrait()` — clears
+/// `SimState.quest_portrait_state` and detaches the global
+/// `QuestModelScene` from its parent (matching Blizzard's
+/// `SetParent(nil)` step).
+fn quest_frame_hide_quest_portrait(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.quest_portrait_state = None;
+    if let Some(scene_id) = sim.widgets.get_id_by_name("QuestModelScene") {
+        reparent_widget(&mut sim.widgets, scene_id, None);
+    }
+    Ok(0)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ConfirmAcceptQuest", confirm_accept_quest)?;
     LuaApiMut::register_function(lua, "CloseQuestFrame", close_quest_frame)?;
@@ -180,5 +252,15 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "SetAbandonQuest", set_abandon_quest)?;
     LuaApiMut::register_function(lua, "SetTrackedAchievement", set_tracked_achievement)?;
     LuaApiMut::register_function(lua, "UntrackAchievement", untrack_achievement)?;
+    LuaApiMut::register_function(
+        lua,
+        "QuestFrame_ShowQuestPortrait",
+        quest_frame_show_quest_portrait,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "QuestFrame_HideQuestPortrait",
+        quest_frame_hide_quest_portrait,
+    )?;
     Ok(())
 }

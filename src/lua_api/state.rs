@@ -28,6 +28,7 @@ macro_rules! build_empty_sim_state {
             addon_saved_enable_state: None,
             system_chat_log: Vec::new(),
             adventure_map: AdventureMapState::default(),
+            quest_portrait_state: None,
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
@@ -710,6 +711,28 @@ pub struct AdventureMapState {
     pub texture_kit: String,
 }
 
+/// Recorded args from the most recent `QuestFrame_ShowQuestPortrait`
+/// invocation. The dialog re-uses these globals to attach an NPC
+/// portrait to whichever frame opens a quest, so tests assert against
+/// this recorded state to verify the right parent / portrait IDs were
+/// requested. `QuestFrame_HideQuestPortrait` clears the field by
+/// setting `SimState.quest_portrait_state` to `None`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct QuestPortraitState {
+    pub parent_frame_id: Option<u64>,
+    pub portrait_display_id: i32,
+    pub mount_portrait_display_id: i32,
+    pub model_scene_id: i32,
+    pub text: String,
+    pub name: String,
+    pub x: f64,
+    pub y: f64,
+    /// Mirrors the `useCompactDescription` flag the dialog passes through
+    /// (named `hideModel` by the PLAN since `AM_QuestDialog.lua` sets
+    /// `true` here purely to suppress the 3D model frame).
+    pub hide_model: bool,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -739,6 +762,11 @@ pub struct SimState {
     pub system_chat_log: Vec<String>,
     /// Adventure-map state backing the `C_AdventureMap` namespace.
     pub adventure_map: AdventureMapState,
+    /// Most recent `QuestFrame_ShowQuestPortrait` args, or `None` after a
+    /// `QuestFrame_HideQuestPortrait` call. Drives nothing at render
+    /// time — it exists so admin probes / tests can assert the dialog
+    /// asked for the right portrait.
+    pub quest_portrait_state: Option<QuestPortraitState>,
     /// Console variables (CVars).
     pub cvars: CVarStorage,
     /// Tooltip state for GameTooltip frames (keyed by frame ID).
