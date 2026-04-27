@@ -30,6 +30,7 @@ macro_rules! build_empty_sim_state {
             adventure_map: AdventureMapState::default(),
             anima_diversion: AnimaDiversionState::default(),
             garrison_talents: GarrisonTalentState::default(),
+            clipboard: ClipboardState::default(),
             quest_portrait_state: None,
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
@@ -897,6 +898,17 @@ pub struct GarrisonTalentState {
     pub unlock_world_quests: HashMap<i64, i64>,
 }
 
+/// OS clipboard state backing the `CopyToClipboard(text, removeMarkup?)`
+/// global. The simulator never touches the real OS clipboard — tests
+/// inspect `last_text` to assert what the addon would have copied. The
+/// `removeMarkup` flag mirrors the second arg so callers can verify the
+/// requested mode without re-running the strip helper.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct ClipboardState {
+    pub last_text: Option<String>,
+    pub last_remove_markup: bool,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -931,6 +943,9 @@ pub struct SimState {
     /// Garrison-talent state backing `C_Garrison.GetTalentInfo` /
     /// `C_Garrison.GetTalentUnlockWorldQuest`.
     pub garrison_talents: GarrisonTalentState,
+    /// Clipboard capture from the `CopyToClipboard` global. Never
+    /// touches the OS clipboard — tests assert what was passed.
+    pub clipboard: ClipboardState,
     /// Most recent `QuestFrame_ShowQuestPortrait` args, or `None` after a
     /// `QuestFrame_HideQuestPortrait` call. Drives nothing at render
     /// time — it exists so admin probes / tests can assert the dialog

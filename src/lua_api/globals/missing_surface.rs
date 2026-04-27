@@ -106,6 +106,7 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     LuaApiMut::register_function(lua, "PlaySoundFile", play_sound_file)?;
     LuaApiMut::register_function(lua, "StopSound", stop_sound)?;
     LuaApiMut::register_function(lua, "LaunchURL", launch_url)?;
+    LuaApiMut::register_function(lua, "CopyToClipboard", copy_to_clipboard)?;
     install_date_alias(lua)?;
     LuaApiMut::register_function(lua, "GetSpellLink", get_spell_link_global)?;
     LuaApiMut::register_function(lua, "GetSpellIcon", get_spell_icon_global)?;
@@ -354,6 +355,22 @@ fn launch_url(state: &mut LuaState) -> LuaResult<u32> {
     let url = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
     borrow_state_mut(state)?.last_launched_url = Some(url);
     Ok(0)
+}
+
+fn copy_to_clipboard(state: &mut LuaState) -> LuaResult<u32> {
+    let raw = val_to_string(state, stack_val(state, 1)).unwrap_or_default();
+    let remove_markup = bool::from_stack(state, 2).unwrap_or(false);
+    let stored = if remove_markup {
+        crate::render::strip_wow_markup(&raw)
+    } else {
+        raw
+    };
+    let mut sim = borrow_state_mut(state)?;
+    sim.clipboard.last_text = Some(stored);
+    sim.clipboard.last_remove_markup = remove_markup;
+    drop(sim);
+    state.push(Val::Bool(true));
+    Ok(1)
 }
 
 fn get_max_level_for_latest_expansion(state: &mut LuaState) -> LuaResult<u32> {
