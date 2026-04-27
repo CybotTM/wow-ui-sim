@@ -215,6 +215,7 @@ macro_rules! build_empty_sim_state {
             auction_replicate_items: default_auction_replicate_items(),
             auction_owned: Vec::new(),
             auction_bids: Vec::new(),
+            auction_item_searches: ::std::collections::HashMap::new(),
             auction_throttle_ready: true,
             auction_should_auto_populate_price: true,
             mythic_plus: MythicPlusState::default(),
@@ -281,12 +282,12 @@ pub use super::state_types::{
     AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
     AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
     ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
-    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, KillingBlowInfo, LfgCategoryInfo,
-    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
-    MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
-    MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
-    PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState,
-    SocialFriend, SummonRequestState, WorldState,
+    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
+    ItemSearchResults, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo,
+    MapChildRect, MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix,
+    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
+    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1593,6 +1594,11 @@ pub struct SimState {
     /// / `GetBidInfo`. Empty by default — tests / addons populate via
     /// `A_Admin.AddAuctionBid`.
     pub auction_bids: Vec<BidAuction>,
+    /// Per-`ItemKey` search-result buckets. Drives the
+    /// `C_AuctionHouse.GetNumItemSearchResults` /
+    /// `GetItemSearchResultInfo` family. Empty by default — tests seed
+    /// directly via `state.auction_item_searches.insert(...)`.
+    pub auction_item_searches: ::std::collections::HashMap<ItemSearchKey, ItemSearchResults>,
     /// Drives `C_AuctionHouse.IsThrottledMessageSystemReady`. The live
     /// client clears this briefly while a query is in-flight; the sim
     /// has no real throttle, so it stays true unless a test toggles it.

@@ -16,8 +16,14 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::items;
-use crate::lua_api::methods::{borrow_state, create_string, create_table, table_set};
-use crate::lua_api::state::{AuctionBrowseResult, BidAuction, OwnedAuction};
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
+use crate::lua_api::methods::{
+    borrow_state, create_string, create_table, create_table_with_fields, table_set,
+};
+use crate::lua_api::state::{
+    AuctionBrowseResult, BidAuction, ItemSearchKey, ItemSearchResultInfo, ItemSearchResults,
+    OwnedAuction,
+};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::vm::{gc::arena::GcRef, table::Table};
@@ -131,6 +137,39 @@ const AUCTION_HOUSE_METHODS: &[(&'static str, AuctionHouseMethod)] = &[
         "GetQuoteDurationRemaining",
         c_auction_house_get_quote_duration_remaining,
     ),
+    (
+        "GetNumItemSearchResults",
+        c_auction_house_get_num_item_search_results,
+    ),
+    (
+        "GetItemSearchResultInfo",
+        c_auction_house_get_item_search_result_info,
+    ),
+    (
+        "GetItemSearchResultsQuantity",
+        c_auction_house_get_item_search_results_quantity,
+    ),
+    (
+        "HasFullItemSearchResults",
+        c_auction_house_has_full_item_search_results,
+    ),
+    (
+        "GetMaxItemSearchResultBid",
+        c_auction_house_get_max_item_search_result_bid,
+    ),
+    (
+        "GetMaxItemSearchResultBuyout",
+        c_auction_house_get_max_item_search_result_buyout,
+    ),
+    (
+        "RefreshItemSearchResults",
+        c_auction_house_refresh_item_search_results,
+    ),
+    (
+        "RequestMoreItemSearchResults",
+        c_auction_house_request_more_item_search_results,
+    ),
+    ("HasSearchResults", c_auction_house_has_search_results),
 ];
 
 const ITEM_BONDING_BIND_ON_PICKUP: u8 = 1;
@@ -880,4 +919,220 @@ fn push_browse_result_table(state: &mut LuaState, row: &AuctionBrowseResult) -> 
     );
     table_set(state, t, "appearanceLink", Val::Nil);
     t
+}
+
+const ITEM_SEARCH_RESULTS_UPDATED: &str = "ITEM_SEARCH_RESULTS_UPDATED";
+
+fn c_auction_house_get_num_item_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let count = with_item_search_bucket(state, arg, |bucket| bucket.entries.len())?.unwrap_or(0);
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn c_auction_house_get_item_search_result_info(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let index = i32::from_stack(state, 2)?;
+    if index < 1 {
+        return Ok(0);
+    }
+    let Some(key) = extract_item_search_key(state, arg) else {
+        return Ok(0);
+    };
+    let entry = borrow_state(state)?
+        .auction_item_searches
+        .get(&key)
+        .and_then(|bucket| bucket.entries.get((index - 1) as usize).cloned());
+    let Some(entry) = entry else { return Ok(0) };
+    let table = push_item_search_result_info_table(state, &entry);
+    state.push(table);
+    Ok(1)
+}
+
+fn c_auction_house_get_item_search_results_quantity(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let total = with_item_search_bucket(state, arg, sum_quantity)?.unwrap_or(0);
+    state.push(Val::Num(total as f64));
+    Ok(1)
+}
+
+fn c_auction_house_has_full_item_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    // Default true when no bucket exists — addons treat "no results yet" as
+    // already-full so they don't pointlessly call `RequestMoreItemSearchResults`.
+    let full =
+        with_item_search_bucket(state, arg, |bucket| bucket.has_full_results)?.unwrap_or(true);
+    state.push(Val::Bool(full));
+    Ok(1)
+}
+
+fn c_auction_house_get_max_item_search_result_bid(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let max = with_item_search_bucket(state, arg, max_bid_amount)?.unwrap_or(0);
+    push_max_money_value(state, max);
+    Ok(1)
+}
+
+fn c_auction_house_get_max_item_search_result_buyout(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let max = with_item_search_bucket(state, arg, max_buyout_amount)?.unwrap_or(0);
+    push_max_money_value(state, max);
+    Ok(1)
+}
+
+fn c_auction_house_refresh_item_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let Some(key) = extract_item_search_key(state, arg) else {
+        return Ok(0);
+    };
+    let item_key = push_item_key_table_from_search_key(state, key);
+    dispatch_event_now(state, ITEM_SEARCH_RESULTS_UPDATED, &[item_key])?;
+    Ok(0)
+}
+
+fn c_auction_house_request_more_item_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let Some(key) = extract_item_search_key(state, arg) else {
+        state.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let already_full = borrow_state(state)?
+        .auction_item_searches
+        .get(&key)
+        .is_none_or(|bucket| bucket.has_full_results);
+    let item_key = push_item_key_table_from_search_key(state, key);
+    dispatch_event_now(state, ITEM_SEARCH_RESULTS_UPDATED, &[item_key])?;
+    state.push(Val::Bool(!already_full));
+    Ok(1)
+}
+
+fn c_auction_house_has_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let arg = Val::from_stack(state, 1)?;
+    let has =
+        with_item_search_bucket(state, arg, |bucket| !bucket.entries.is_empty())?.unwrap_or(false);
+    state.push(Val::Bool(has));
+    Ok(1)
+}
+
+fn sum_quantity(bucket: &ItemSearchResults) -> i64 {
+    bucket.entries.iter().map(|e| e.quantity as i64).sum()
+}
+
+fn max_bid_amount(bucket: &ItemSearchResults) -> i64 {
+    bucket
+        .entries
+        .iter()
+        .map(|e| e.bid_amount)
+        .max()
+        .unwrap_or(0)
+}
+
+fn max_buyout_amount(bucket: &ItemSearchResults) -> i64 {
+    bucket
+        .entries
+        .iter()
+        .map(|e| e.buyout_amount)
+        .max()
+        .unwrap_or(0)
+}
+
+/// Run `f` against the per-key search bucket, returning `None` when the
+/// argument is not a valid item key or no bucket has been seeded.
+fn with_item_search_bucket<R>(
+    state: &mut LuaState,
+    arg: Val,
+    f: impl FnOnce(&ItemSearchResults) -> R,
+) -> LuaResult<Option<R>> {
+    let Some(key) = extract_item_search_key(state, arg) else {
+        return Ok(None);
+    };
+    Ok(borrow_state(state)?.auction_item_searches.get(&key).map(f))
+}
+
+fn push_item_key_table_from_search_key(state: &mut LuaState, key: ItemSearchKey) -> Val {
+    let (item_id, item_level, item_suffix, species) = key;
+    create_table_with_fields(
+        state,
+        &[
+            ("itemID", Val::Num(item_id as f64)),
+            ("itemLevel", Val::Num(item_level as f64)),
+            ("itemSuffix", Val::Num(item_suffix as f64)),
+            ("battlePetSpeciesID", Val::Num(species as f64)),
+        ],
+    )
+}
+
+fn push_item_search_result_info_table(state: &mut LuaState, entry: &ItemSearchResultInfo) -> Val {
+    let owners = build_owners_array(state, &entry.owners);
+    let item_link = create_string(state, &entry.item_link);
+    let bidder = match &entry.bidder {
+        Some(name) => create_string(state, name),
+        None => Val::Nil,
+    };
+    create_table_with_fields(
+        state,
+        &[
+            ("owners", owners),
+            ("timeLeft", Val::Num(entry.time_left as f64)),
+            ("auctionID", Val::Num(entry.auction_id as f64)),
+            ("quantity", Val::Num(entry.quantity as f64)),
+            ("itemLink", item_link),
+            ("containsOwnerItem", Val::Bool(entry.contains_owner_item)),
+            ("containsAccountItem", Val::Bool(entry.contains_account_item)),
+            (
+                "containsSocketedItem",
+                Val::Bool(entry.contains_socketed_item),
+            ),
+            ("bidder", bidder),
+            ("minBid", Val::Num(entry.min_bid as f64)),
+            ("bidAmount", Val::Num(entry.bid_amount as f64)),
+            ("buyoutAmount", Val::Num(entry.buyout_amount as f64)),
+            ("timeLeftSeconds", Val::Num(entry.time_left_seconds as f64)),
+        ],
+    )
+}
+
+fn build_owners_array(state: &mut LuaState, owners: &[String]) -> Val {
+    let array = create_table(state);
+    for (index, owner) in owners.iter().enumerate() {
+        let owner_val = create_string(state, owner);
+        set_table_array(state, array, index as i64 + 1, owner_val);
+    }
+    array
+}
+
+/// Read the canonical 4-tuple `(itemID, itemLevel, itemSuffix,
+/// battlePetSpeciesID)` from a Lua `ItemKey` table. Returns `None` when
+/// the value is not a table or `itemID` is missing/zero.
+fn extract_item_search_key(state: &mut LuaState, value: Val) -> Option<ItemSearchKey> {
+    let Val::Table(table_ref) = value else {
+        return None;
+    };
+    let item_id_key = state.gc.intern_string_static(b"itemID");
+    let item_level_key = state.gc.intern_string_static(b"itemLevel");
+    let item_suffix_key = state.gc.intern_string_static(b"itemSuffix");
+    let species_key = state.gc.intern_string_static(b"battlePetSpeciesID");
+    let table = state.gc.tables.get(table_ref)?;
+    let arena = &state.gc.string_arena;
+    let item_id = match table.get_str(item_id_key, arena) {
+        Val::Num(n) if n > 0.0 => n as i32,
+        _ => return None,
+    };
+    Some((
+        item_id,
+        read_int_field(table, item_level_key, arena),
+        read_int_field(table, item_suffix_key, arena),
+        read_int_field(table, species_key, arena),
+    ))
+}
+
+fn read_int_field(
+    table: &Table,
+    key: GcRef<rilua::vm::string::LuaString>,
+    arena: &rilua::vm::gc::arena::Arena<rilua::vm::string::LuaString>,
+) -> i32 {
+    match table.get_str(key, arena) {
+        Val::Num(n) => n as i32,
+        _ => 0,
+    }
 }

@@ -51,6 +51,48 @@ pub struct OwnedAuction {
     pub time_left_seconds: i64,
 }
 
+/// Canonical `ItemKey` tuple: `(itemID, itemLevel, itemSuffix,
+/// battlePetSpeciesID)`. Used as the lookup key for
+/// `state.auction_item_searches` so the same query that returned a row
+/// can later read or refresh it. Tests build it via the helper that
+/// matches `MakeItemKey`'s shape.
+pub type ItemSearchKey = (i32, i32, i32, i32);
+
+/// Per-search-key result bucket. Drives the
+/// `C_AuctionHouse.GetNumItemSearchResults` /
+/// `GetItemSearchResultInfo` family. `has_full_results == false`
+/// signals the addon's "load more" button (i.e. the next
+/// `RequestMoreItemSearchResults` call should refill the bucket).
+#[derive(Debug, Clone, Default)]
+pub struct ItemSearchResults {
+    pub entries: Vec<ItemSearchResultInfo>,
+    pub has_full_results: bool,
+}
+
+/// One row of an item-search result list. Mirrors the canonical retail
+/// shape consumed by `AuctionHouseItemBuyFrame.lua`. The 13 fields
+/// match the public `ItemSearchResultInfo` struct in
+/// `AuctionHouseDocumentation.lua`.
+#[derive(Debug, Clone)]
+pub struct ItemSearchResultInfo {
+    pub owners: Vec<String>,
+    /// `Enum.AuctionHouseTimeLeftBand` (0..3).
+    pub time_left: i32,
+    pub auction_id: i64,
+    pub quantity: i32,
+    pub item_link: String,
+    pub contains_owner_item: bool,
+    pub contains_account_item: bool,
+    pub contains_socketed_item: bool,
+    /// `nil` when no bid; player GUID when the player is the high
+    /// bidder; any other string when another bidder leads.
+    pub bidder: Option<String>,
+    pub min_bid: i64,
+    pub bid_amount: i64,
+    pub buyout_amount: i64,
+    pub time_left_seconds: i64,
+}
+
 /// One row of the player's active bid list (Bids tab). Drives
 /// `C_AuctionHouse.GetNumBids` / `GetBidInfo`. The bidder field uses
 /// the same shape Blizzard expects from `GetBidStatus`: nil = no bid,
