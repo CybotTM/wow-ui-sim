@@ -4,10 +4,11 @@
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
 //! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
 //! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, `GetNumQuestOffers()`,
-//! `GetQuestOfferInfo()`, `GetQuestInfo()`, and
-//! `GetQuestPortraitInfo()`. Future commits will fill in the rest of
-//! the surface (accept/abandon flows).
+//! `GetQuestOfferInfo()`, `GetQuestInfo()`, `GetQuestPortraitInfo()`,
+//! and `StartQuest()`. Future commits will fill in the rest of the
+//! surface (decline/abstain flows, dialog hooks).
 
+use crate::event::{Event, EventArg};
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::LuaApiMut;
@@ -42,6 +43,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetQuestPortraitInfo",
         get_quest_portrait_info,
     )?;
+    table_set_rust_fn_static(state, table_ref, "StartQuest", start_quest)?;
     Ok(())
 }
 
@@ -264,6 +266,39 @@ fn get_quest_portrait_info(state: &mut LuaState) -> LuaResult<u32> {
     set_table_field(state, table_val, "name", name);
     state.push(table_val);
     Ok(1)
+}
+
+fn start_quest(state: &mut LuaState) -> LuaResult<u32> {
+    let Val::Num(quest_id_f) = stack_val(state, 1) else {
+        return Ok(0);
+    };
+    if quest_id_f < 0.0 {
+        return Ok(0);
+    }
+    let quest_id_u32 = quest_id_f as u32;
+    let quest_id_i64 = quest_id_f as i64;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if !sim.quest_log.contains(&quest_id_u32) {
+            sim.quest_log.push(quest_id_u32);
+        }
+        sim.adventure_map
+            .quest_offers
+            .retain(|offer| offer.quest_id != quest_id_i64);
+        sim.adventure_map
+            .zone_choices
+            .retain(|choice| choice.quest_id != quest_id_i64);
+    }
+    push_quest_accepted_event(state, quest_id_f)?;
+    Ok(0)
+}
+
+fn push_quest_accepted_event(state: &mut LuaState, quest_id: f64) -> LuaResult<()> {
+    borrow_state_mut(state)?.events.push(Event {
+        name: "QUEST_ACCEPTED".to_string(),
+        args: vec![EventArg::Number(quest_id)],
+    });
+    Ok(())
 }
 
 fn set_table_field(state: &mut LuaState, table_val: Val, key: &'static str, value: Val) {

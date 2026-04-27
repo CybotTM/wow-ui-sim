@@ -1164,6 +1164,156 @@ fn refresh_portrait_pattern_short_circuits_on_unknown_quest() {
 }
 
 #[test]
+fn start_quest_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.StartQuest)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn start_quest_returns_no_values() {
+    let env = WowLuaEnv::new().expect("env");
+    let nothing: bool = env
+        .eval("return select('#', C_AdventureMap.StartQuest(40519)) == 0")
+        .unwrap();
+    assert!(nothing, "StartQuest should return zero values");
+}
+
+#[test]
+fn start_quest_appends_to_quest_log() {
+    let env = WowLuaEnv::new().expect("env");
+    assert!(
+        !env.state().borrow().quest_log.contains(&40_519),
+        "quest_log should not contain the quest before StartQuest"
+    );
+
+    env.exec("C_AdventureMap.StartQuest(40519)").unwrap();
+
+    assert!(
+        env.state().borrow().quest_log.contains(&40_519),
+        "StartQuest must append the quest id to state.quest_log"
+    );
+}
+
+#[test]
+fn start_quest_does_not_duplicate_existing_log_entry() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().quest_log = vec![40_519];
+
+    env.exec("C_AdventureMap.StartQuest(40519)").unwrap();
+
+    let count = env
+        .state()
+        .borrow()
+        .quest_log
+        .iter()
+        .filter(|id| **id == 40_519)
+        .count();
+    assert_eq!(
+        count, 1,
+        "StartQuest must not duplicate an existing log entry"
+    );
+}
+
+#[test]
+fn start_quest_removes_matching_offer_pin() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut accepted = sample_quest_offer();
+    accepted.quest_id = 40_519;
+    let mut other = sample_quest_offer();
+    other.quest_id = 40_520;
+    env.state().borrow_mut().adventure_map.quest_offers = vec![accepted, other];
+
+    env.exec("C_AdventureMap.StartQuest(40519)").unwrap();
+
+    let remaining_ids: Vec<i64> = env
+        .state()
+        .borrow()
+        .adventure_map
+        .quest_offers
+        .iter()
+        .map(|offer| offer.quest_id)
+        .collect();
+    assert_eq!(
+        remaining_ids,
+        vec![40_520],
+        "StartQuest must remove the accepted offer and leave others intact"
+    );
+}
+
+#[test]
+fn start_quest_removes_matching_zone_choice() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut chosen = sample_zone_choice();
+    chosen.quest_id = 40_519;
+    let mut other = sample_zone_choice();
+    other.quest_id = 40_521;
+    env.state().borrow_mut().adventure_map.zone_choices = vec![chosen, other];
+
+    env.exec("C_AdventureMap.StartQuest(40519)").unwrap();
+
+    let remaining_ids: Vec<i64> = env
+        .state()
+        .borrow()
+        .adventure_map
+        .zone_choices
+        .iter()
+        .map(|choice| choice.quest_id)
+        .collect();
+    assert_eq!(
+        remaining_ids,
+        vec![40_521],
+        "StartQuest must remove the accepted zone choice and leave others intact"
+    );
+}
+
+#[test]
+fn start_quest_queues_quest_accepted_event() {
+    let env = WowLuaEnv::new().expect("env");
+    env.exec("C_AdventureMap.StartQuest(40519)").unwrap();
+
+    let st = env.state().borrow();
+    let event = st
+        .events
+        .pending()
+        .iter()
+        .find(|e| e.name == "QUEST_ACCEPTED")
+        .expect("StartQuest must queue QUEST_ACCEPTED");
+    let payload = event
+        .args
+        .first()
+        .expect("QUEST_ACCEPTED must carry the questID payload");
+    let id = match payload {
+        wow_ui_sim::event::EventArg::Number(n) => *n,
+        other => panic!("expected questID number, got {other:?}"),
+    };
+    assert!(
+        (id - 40_519.0).abs() < 1e-6,
+        "QUEST_ACCEPTED payload must be the accepted questID"
+    );
+}
+
+#[test]
+fn start_quest_short_circuits_on_non_numeric_argument() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer()];
+
+    env.exec("C_AdventureMap.StartQuest('not-a-number')").unwrap();
+
+    assert_eq!(
+        env.state().borrow().adventure_map.quest_offers.len(),
+        1,
+        "Non-numeric arg must leave offers untouched"
+    );
+    assert!(
+        env.state().borrow().quest_log.is_empty(),
+        "Non-numeric arg must leave the quest log untouched"
+    );
+}
+
+#[test]
 fn build_detail_tiles_pattern_iterates_over_num_detail_tiles() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
