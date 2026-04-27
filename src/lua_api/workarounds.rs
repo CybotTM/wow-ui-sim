@@ -110,6 +110,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_container_frame_token_tracker", || {
         patch_container_frame_token_tracker(env);
     });
+    log_step(env, "patch_achievement_display_set_achievements", || {
+        patch_achievement_display_set_achievements(env);
+    });
     log_step(env, "patch_housing_dashboard_preload", || {
         patch_housing_dashboard_preload(&env.loader_env());
     });
@@ -789,6 +792,25 @@ fn patch_container_frame_token_tracker(env: &crate::lua_api::WowLuaEnv) {
 fn patch_paging_controls_page_text(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(PAGING_CONTROLS_PAGE_TEXT_WORKAROUND_LUA);
 }
+
+fn patch_achievement_display_set_achievements(env: &crate::lua_api::WowLuaEnv) {
+    // Blizzard_FrameXML/AchievementDisplayFrame.lua reassigns
+    // `AchievementDisplayMixin = {}` and re-defines `:SetAchievements`
+    // on top of the bootstrap stub. The live body iterates through
+    // a frame pool and reads `GetAchievementInfo` per criteria — both
+    // out of scope for a 2D-only simulator. Reinstate the stub so the
+    // AlliedRaces panel call site doesn't error.
+    let _ = env.exec(ACHIEVEMENT_DISPLAY_SET_ACHIEVEMENTS_WORKAROUND_LUA);
+}
+
+const ACHIEVEMENT_DISPLAY_SET_ACHIEVEMENTS_WORKAROUND_LUA: &str = r#"
+    if type(AchievementDisplayMixin) ~= "table" then
+        AchievementDisplayMixin = {}
+    end
+    AchievementDisplayMixin.SetAchievements = function(self, achievementIds)
+        self.achievementIds = achievementIds
+    end
+"#;
 
 fn patch_talent_edge_frame_level_sync(env: &crate::lua_api::WowLuaEnv) {
     let _ = env.exec(TALENT_EDGE_FRAME_LEVEL_SYNC_WORKAROUND_LUA);
