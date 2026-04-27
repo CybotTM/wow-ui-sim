@@ -372,7 +372,12 @@ fn build_currency_reward_table(
     let entry = create_table(state);
     let name_val = create_string(state, &currency.name);
     let texture_val = create_string(state, &currency.texture);
-    table_set(state, entry, "currencyID", Val::Num(currency.currency_id as f64));
+    table_set(
+        state,
+        entry,
+        "currencyID",
+        Val::Num(currency.currency_id as f64),
+    );
     table_set(state, entry, "name", name_val);
     table_set(state, entry, "texture", texture_val);
     table_set(

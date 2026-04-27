@@ -14,9 +14,7 @@
 //! the line to `DEFAULT_CHAT_FRAME` (or `ChatFrame1` as a fallback) when a
 //! chat frame is available.
 
-use crate::lua_api::methods::{
-    borrow_state_mut, call_function_state, create_string, table_get,
-};
+use crate::lua_api::methods::{borrow_state_mut, call_function_state, create_string, table_get};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;

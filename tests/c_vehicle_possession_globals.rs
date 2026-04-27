@@ -154,7 +154,10 @@ fn unit_vehicle_skin_treats_action_bar_controller_branch() {
             "#,
         )
         .unwrap();
-    assert!(!unskinned, "empty skin should not request the override skin");
+    assert!(
+        !unskinned,
+        "empty skin should not request the override skin"
+    );
 
     env.state().borrow_mut().player.vehicle_skin = Some("Demolisher".into());
     let skinned: bool = env

@@ -646,16 +646,8 @@ fn put_action_in_slot(state: &mut LuaState) -> LuaResult<u32> {
     borrow_state_mut(state)?
         .action_bars
         .insert(target, spell_id);
-    fire_named_event_state(
-        state,
-        "ACTIONBAR_SLOT_CHANGED",
-        &[Val::Num(source as f64)],
-    );
-    fire_named_event_state(
-        state,
-        "ACTIONBAR_SLOT_CHANGED",
-        &[Val::Num(target as f64)],
-    );
+    fire_named_event_state(state, "ACTIONBAR_SLOT_CHANGED", &[Val::Num(source as f64)]);
+    fire_named_event_state(state, "ACTIONBAR_SLOT_CHANGED", &[Val::Num(target as f64)]);
     push_bool(state, true)
 }
 

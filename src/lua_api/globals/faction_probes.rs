@@ -210,9 +210,15 @@ const REPUTATION_METHODS: &[(&str, RustFn)] = &[
     ("GetNumFactions", reputation_get_num_factions),
     ("GetFactionInfo", reputation_get_faction_info),
     ("GetWatchedFactionData", reputation_get_watched_faction_data),
-    ("SetWatchedFactionByID", reputation_set_watched_faction_by_id),
+    (
+        "SetWatchedFactionByID",
+        reputation_set_watched_faction_by_id,
+    ),
     ("IsMajorFaction", reputation_is_major_faction),
-    ("IsAccountWideReputation", reputation_is_account_wide_reputation),
+    (
+        "IsAccountWideReputation",
+        reputation_is_account_wide_reputation,
+    ),
 ];
 
 fn register_reputation_namespace(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -250,7 +256,9 @@ fn reputation_get_faction_data_by_id(_state: &mut LuaState) -> LuaResult<u32> {
 
 fn reputation_is_faction_paragon(state: &mut LuaState) -> LuaResult<u32> {
     let is_paragon = match stack_i32(state, 1) {
-        Some(id) => borrow_state(state)?.faction_paragon.contains_key(&(id as i64)),
+        Some(id) => borrow_state(state)?
+            .faction_paragon
+            .contains_key(&(id as i64)),
         None => false,
     };
     state.push(Val::Bool(is_paragon));
@@ -318,7 +326,9 @@ fn reputation_set_watched_faction_by_id(_state: &mut LuaState) -> LuaResult<u32>
 
 fn reputation_is_major_faction(state: &mut LuaState) -> LuaResult<u32> {
     let is_major = match stack_i32(state, 1) {
-        Some(id) => borrow_state(state)?.major_factions.contains_key(&(id as i64)),
+        Some(id) => borrow_state(state)?
+            .major_factions
+            .contains_key(&(id as i64)),
         None => false,
     };
     state.push(Val::Bool(is_major));

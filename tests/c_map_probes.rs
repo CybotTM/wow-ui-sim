@@ -358,10 +358,22 @@ fn get_map_rect_on_map_composes_rect_up_through_grandparent() {
     let expected_r = 0.20 + 0.55 * span_x;
     let expected_t = 0.10 + 0.60 * span_y;
     let expected_b = 0.10 + 0.75 * span_y;
-    assert!((l - expected_l).abs() < 1e-9, "l: got {l}, want {expected_l}");
-    assert!((r - expected_r).abs() < 1e-9, "r: got {r}, want {expected_r}");
-    assert!((t - expected_t).abs() < 1e-9, "t: got {t}, want {expected_t}");
-    assert!((b - expected_b).abs() < 1e-9, "b: got {b}, want {expected_b}");
+    assert!(
+        (l - expected_l).abs() < 1e-9,
+        "l: got {l}, want {expected_l}"
+    );
+    assert!(
+        (r - expected_r).abs() < 1e-9,
+        "r: got {r}, want {expected_r}"
+    );
+    assert!(
+        (t - expected_t).abs() < 1e-9,
+        "t: got {t}, want {expected_t}"
+    );
+    assert!(
+        (b - expected_b).abs() < 1e-9,
+        "b: got {b}, want {expected_b}"
+    );
 }
 
 #[test]

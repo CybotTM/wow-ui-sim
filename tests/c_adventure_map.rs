@@ -26,9 +26,7 @@ fn c_adventure_map_namespace_is_a_table() {
 #[test]
 fn get_map_id_is_a_function() {
     let env = WowLuaEnv::new().expect("env");
-    let kind: String = env
-        .eval("return type(C_AdventureMap.GetMapID)")
-        .unwrap();
+    let kind: String = env.eval("return type(C_AdventureMap.GetMapID)").unwrap();
     assert_eq!(kind, "function");
 }
 
@@ -53,9 +51,7 @@ fn get_map_id_returns_a_number_type() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().adventure_map.map_id = 42;
 
-    let kind: String = env
-        .eval("return type(C_AdventureMap.GetMapID())")
-        .unwrap();
+    let kind: String = env.eval("return type(C_AdventureMap.GetMapID())").unwrap();
     assert_eq!(kind, "number");
 }
 
@@ -156,9 +152,7 @@ fn get_num_map_insets_returns_zero_when_loaded_empty() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().adventure_map.insets = Some(Vec::new());
 
-    let count: f64 = env
-        .eval("return C_AdventureMap.GetNumMapInsets()")
-        .unwrap();
+    let count: f64 = env.eval("return C_AdventureMap.GetNumMapInsets()").unwrap();
     assert!(count.abs() < 1e-6);
 }
 
@@ -171,9 +165,7 @@ fn get_num_map_insets_returns_seeded_length() {
         AdventureMapInset::default(),
     ]);
 
-    let count: f64 = env
-        .eval("return C_AdventureMap.GetNumMapInsets()")
-        .unwrap();
+    let count: f64 = env.eval("return C_AdventureMap.GetNumMapInsets()").unwrap();
     assert!((count - 3.0).abs() < 1e-6);
 }
 
@@ -208,9 +200,7 @@ fn sample_inset() -> AdventureMapInset {
         num_detail_tiles: 8,
         normalized_x: 0.42,
         normalized_y: 0.18,
-        detail_tiles: vec![
-            1_001, 1_002, 1_003, 1_004, 1_005, 1_006, 1_007, 1_008,
-        ],
+        detail_tiles: vec![1_001, 1_002, 1_003, 1_004, 1_005, 1_006, 1_007, 1_008],
     }
 }
 
@@ -550,7 +540,10 @@ fn get_zone_choice_info_returns_six_descriptor_values() {
     assert!((quest_id - 40_519.0).abs() < 1e-6);
     assert_eq!(texture_kit, "alliance");
     assert_eq!(name, "Azsuna");
-    assert_eq!(zone_description, "Reclaim the lost magic of the night elves.");
+    assert_eq!(
+        zone_description,
+        "Reclaim the lost magic of the night elves."
+    );
     assert!((normalized_x - 0.31).abs() < 1e-6);
     assert!((normalized_y - 0.55).abs() < 1e-6);
 }
@@ -562,8 +555,7 @@ fn get_zone_choice_info_indexes_one_based() {
     second.quest_id = 40_521;
     second.texture_kit = "horde".to_string();
     second.name = "Highmountain".to_string();
-    env.state().borrow_mut().adventure_map.zone_choices =
-        vec![sample_zone_choice(), second];
+    env.state().borrow_mut().adventure_map.zone_choices = vec![sample_zone_choice(), second];
 
     let first_id: f64 = env
         .eval("local id = C_AdventureMap.GetZoneChoiceInfo(1) return id")
@@ -586,8 +578,7 @@ fn quest_choice_data_provider_pattern_collects_each_choice() {
     let mut second = sample_zone_choice();
     second.quest_id = 40_521;
     second.name = "Highmountain".to_string();
-    env.state().borrow_mut().adventure_map.zone_choices =
-        vec![sample_zone_choice(), second];
+    env.state().borrow_mut().adventure_map.zone_choices = vec![sample_zone_choice(), second];
 
     env.exec(
         r#"
@@ -814,8 +805,7 @@ fn get_quest_offer_info_indexes_one_based() {
     let mut second = sample_quest_offer();
     second.quest_id = 41_654;
     second.title = "Stormheim".to_string();
-    env.state().borrow_mut().adventure_map.quest_offers =
-        vec![sample_quest_offer(), second];
+    env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer(), second];
 
     let first_id: f64 = env
         .eval("local id = C_AdventureMap.GetQuestOfferInfo(1) return id")
@@ -832,8 +822,7 @@ fn quest_offer_data_provider_pattern_collects_each_offer() {
     let env = WowLuaEnv::new().expect("env");
     let mut second = sample_quest_offer();
     second.quest_id = 41_654;
-    env.state().borrow_mut().adventure_map.quest_offers =
-        vec![sample_quest_offer(), second];
+    env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer(), second];
 
     env.exec(
         r#"
@@ -902,10 +891,8 @@ fn get_quest_info_returns_three_descriptor_strings() {
         .quest_info
         .insert(40_519, sample_quest_info());
 
-    env.exec(
-        "questTitle, descriptionText, objectiveText = C_AdventureMap.GetQuestInfo(40519)",
-    )
-    .unwrap();
+    env.exec("questTitle, descriptionText, objectiveText = C_AdventureMap.GetQuestInfo(40519)")
+        .unwrap();
 
     let arity: f64 = env
         .eval("return select('#', C_AdventureMap.GetQuestInfo(40519))")
@@ -916,7 +903,10 @@ fn get_quest_info_returns_three_descriptor_strings() {
 
     assert!((arity - 3.0).abs() < 1e-6);
     assert_eq!(title, "Curse of the Drowned");
-    assert_eq!(description, "Investigate the source of the curse plaguing Azsuna.");
+    assert_eq!(
+        description,
+        "Investigate the source of the curse plaguing Azsuna."
+    );
     assert_eq!(objective, "Cleanse 5 Drowned Souls.");
 }
 
@@ -926,7 +916,10 @@ fn get_quest_info_keys_off_quest_id() {
     let mut other = sample_quest_info();
     other.title = "Highmountain Tribes".to_string();
     let mut state = env.state().borrow_mut();
-    state.adventure_map.quest_info.insert(40_519, sample_quest_info());
+    state
+        .adventure_map
+        .quest_info
+        .insert(40_519, sample_quest_info());
     state.adventure_map.quest_info.insert(40_521, other);
     drop(state);
 
@@ -1054,7 +1047,9 @@ fn get_quest_portrait_info_populates_documented_fields() {
         .unwrap();
 
     let portrait_id: f64 = env.eval("return portraitInfo.portraitDisplayID").unwrap();
-    let mount_id: f64 = env.eval("return portraitInfo.mountPortraitDisplayID").unwrap();
+    let mount_id: f64 = env
+        .eval("return portraitInfo.mountPortraitDisplayID")
+        .unwrap();
     let scene_id: f64 = env.eval("return portraitInfo.modelSceneID").unwrap();
     let text: String = env.eval("return portraitInfo.text").unwrap();
     let name: String = env.eval("return portraitInfo.name").unwrap();
@@ -1166,9 +1161,7 @@ fn refresh_portrait_pattern_short_circuits_on_unknown_quest() {
 #[test]
 fn start_quest_is_a_function() {
     let env = WowLuaEnv::new().expect("env");
-    let kind: String = env
-        .eval("return type(C_AdventureMap.StartQuest)")
-        .unwrap();
+    let kind: String = env.eval("return type(C_AdventureMap.StartQuest)").unwrap();
     assert_eq!(kind, "function");
 }
 
@@ -1300,7 +1293,8 @@ fn start_quest_short_circuits_on_non_numeric_argument() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().adventure_map.quest_offers = vec![sample_quest_offer()];
 
-    env.exec("C_AdventureMap.StartQuest('not-a-number')").unwrap();
+    env.exec("C_AdventureMap.StartQuest('not-a-number')")
+        .unwrap();
 
     assert_eq!(
         env.state().borrow().adventure_map.quest_offers.len(),

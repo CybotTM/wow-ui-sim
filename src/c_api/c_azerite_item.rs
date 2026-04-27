@@ -28,7 +28,12 @@ pub(crate) fn register_c_azerite_item_surface(state: &mut LuaState) -> LuaResult
     table_set_rust_fn_static(state, ns, "FindActiveAzeriteItem", find_active_azerite_item)?;
     table_set_rust_fn_static(state, ns, "GetAzeriteItemXPInfo", get_azerite_item_xp_info)?;
     table_set_rust_fn_static(state, ns, "GetPowerLevel", get_power_level)?;
-    table_set_rust_fn_static(state, ns, "GetUnlimitedPowerLevel", get_unlimited_power_level)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "GetUnlimitedPowerLevel",
+        get_unlimited_power_level,
+    )?;
     table_set_rust_fn_static(
         state,
         ns,

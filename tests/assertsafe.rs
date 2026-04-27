@@ -42,9 +42,11 @@ fn assertsafe_global_is_a_function() {
 #[test]
 fn assertsafe_truthy_cond_is_a_no_op() {
     let env = env();
-    env.exec(r#"assertsafe(true, "should not appear")"#).unwrap();
+    env.exec(r#"assertsafe(true, "should not appear")"#)
+        .unwrap();
     env.exec(r#"assertsafe(1, "should not appear")"#).unwrap();
-    env.exec(r#"assertsafe("hi", "should not appear")"#).unwrap();
+    env.exec(r#"assertsafe("hi", "should not appear")"#)
+        .unwrap();
     env.exec(r#"assertsafe({}, "should not appear")"#).unwrap();
 
     assert_eq!(

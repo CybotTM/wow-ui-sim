@@ -788,7 +788,10 @@ fn test_is_addon_default_enabled_true_for_factory_enabled() {
     let result: bool = env
         .eval("return C_AddOns.IsAddOnDefaultEnabled('EnabledAddon')")
         .unwrap();
-    assert!(result, "addon without DefaultState should default to enabled");
+    assert!(
+        result,
+        "addon without DefaultState should default to enabled"
+    );
 }
 
 #[test]
@@ -821,7 +824,10 @@ fn test_is_addon_default_enabled_independent_of_runtime_enabled() {
     let result: bool = env
         .eval("return C_AddOns.IsAddOnDefaultEnabled('EnabledAddon')")
         .unwrap();
-    assert!(result, "factory default must be independent of current state");
+    assert!(
+        result,
+        "factory default must be independent of current state"
+    );
 }
 
 #[test]

@@ -39,10 +39,7 @@ fn put_action_in_slot_empty_source_returns_false() {
     let moved: bool = env
         .eval("return C_ActionBar.PutActionInSlot(50, 51)")
         .unwrap();
-    assert!(
-        !moved,
-        "should return false when source slot has no action"
-    );
+    assert!(!moved, "should return false when source slot has no action");
 }
 
 #[test]

@@ -530,7 +530,8 @@ fn c_addons_get_scripts_disallowed_for_beta(state: &mut LuaState) -> LuaResult<u
 /// and to render the dependency line in the addon tooltip. Unknown addon
 /// or empty deps → no return values (nothing pushed).
 fn c_addons_get_addon_dependencies(state: &mut LuaState) -> LuaResult<u32> {
-    let deps = with_addon(state, stack_val(state, 1), |a| a.dependencies.clone()).unwrap_or_default();
+    let deps =
+        with_addon(state, stack_val(state, 1), |a| a.dependencies.clone()).unwrap_or_default();
     for dep in &deps {
         let val = create_string(state, dep);
         state.push(val);

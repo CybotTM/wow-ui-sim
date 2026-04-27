@@ -32,9 +32,7 @@ fn button_frame_template_exposes_inherited_top_tile_streaks() {
     );
 
     let object_type: String = env
-        .eval(
-            "return TestButtonFrameTopTileStreaks.TopTileStreaks:GetObjectType()",
-        )
+        .eval("return TestButtonFrameTopTileStreaks.TopTileStreaks:GetObjectType()")
         .unwrap();
     assert_eq!(object_type, "Texture");
 
@@ -124,10 +122,11 @@ fn allied_races_addon_loads_without_top_tile_streaks_error() {
     let env = env_with_shared_xml();
     load_addon_or_panic(&env, "Blizzard_AlliedRacesUI");
 
-    let frame_exists: bool = env
-        .eval("return AlliedRacesFrame ~= nil")
-        .unwrap_or(false);
-    assert!(frame_exists, "AlliedRacesFrame should exist after addon load");
+    let frame_exists: bool = env.eval("return AlliedRacesFrame ~= nil").unwrap_or(false);
+    assert!(
+        frame_exists,
+        "AlliedRacesFrame should exist after addon load"
+    );
 
     let has_top_tile_streaks: bool = env
         .eval("return AlliedRacesFrame.TopTileStreaks ~= nil")

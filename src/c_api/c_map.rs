@@ -256,7 +256,11 @@ fn c_map_get_map_info_at_position(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-fn find_child_at_point(rects: &[crate::lua_api::state::MapChildRect], x: f64, y: f64) -> Option<i32> {
+fn find_child_at_point(
+    rects: &[crate::lua_api::state::MapChildRect],
+    x: f64,
+    y: f64,
+) -> Option<i32> {
     rects
         .iter()
         .find(|rect| x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)

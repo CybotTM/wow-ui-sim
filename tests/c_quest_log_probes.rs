@@ -566,9 +566,8 @@ fn get_quest_log_reward_info_returns_seeded_item() {
     let env = env();
     seed_lost_expedition_one_reward(&env);
 
-    let (name, texture, count, quality, is_usable): (String, String, i32, i32, bool) = env
-        .eval("return GetQuestLogRewardInfo(1, 80000)")
-        .unwrap();
+    let (name, texture, count, quality, is_usable): (String, String, i32, i32, bool) =
+        env.eval("return GetQuestLogRewardInfo(1, 80000)").unwrap();
 
     assert_eq!(name, "Earthen Lockbox");
     assert_eq!(texture, "Interface\\Icons\\INV_Box_01");
@@ -639,16 +638,14 @@ fn get_quest_log_reward_info_indexes_each_reward_independently() {
         ],
     );
 
-    let first: (String, String, i32, i32, bool) = env
-        .eval("return GetQuestLogRewardInfo(1, 80000)")
-        .unwrap();
+    let first: (String, String, i32, i32, bool) =
+        env.eval("return GetQuestLogRewardInfo(1, 80000)").unwrap();
     assert_eq!(first.0, "First Reward");
     assert_eq!(first.3, 2);
     assert!(first.4);
 
-    let second: (String, String, i32, i32, bool) = env
-        .eval("return GetQuestLogRewardInfo(2, 80000)")
-        .unwrap();
+    let second: (String, String, i32, i32, bool) =
+        env.eval("return GetQuestLogRewardInfo(2, 80000)").unwrap();
     assert_eq!(second.0, "Second Reward");
     assert_eq!(second.2, 5);
     assert_eq!(second.3, 4);

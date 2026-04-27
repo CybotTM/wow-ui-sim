@@ -33,7 +33,11 @@ fn get_major_faction_data(state: &mut LuaState) -> LuaResult<u32> {
     let Ok(faction_id) = i64::from_stack(state, 1) else {
         return Ok(0);
     };
-    let Some(data) = borrow_state(state)?.major_factions.get(&faction_id).cloned() else {
+    let Some(data) = borrow_state(state)?
+        .major_factions
+        .get(&faction_id)
+        .cloned()
+    else {
         state.push(Val::Nil);
         return Ok(1);
     };

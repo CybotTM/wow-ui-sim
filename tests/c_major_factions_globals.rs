@@ -109,7 +109,10 @@ fn get_major_faction_data_unlock_description_can_be_nil() {
     let env = WowLuaEnv::new().expect("env");
     let mut faction = sample_faction(2507);
     faction.unlock_description = None;
-    env.state().borrow_mut().major_factions.insert(2507, faction);
+    env.state()
+        .borrow_mut()
+        .major_factions
+        .insert(2507, faction);
     let nil: bool = env
         .eval("return C_MajorFactions.GetMajorFactionData(2507).unlockDescription == nil")
         .unwrap();

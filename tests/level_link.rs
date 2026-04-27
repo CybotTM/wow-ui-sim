@@ -37,15 +37,9 @@ fn level_link_action_locks_read_state_locked_action_slots() {
         state.locked_action_slots.insert(2);
         state.locked_action_slots.insert(7);
     }
-    let listed_first: bool = env
-        .eval("return C_LevelLink.IsActionLocked(2)")
-        .unwrap();
-    let listed_second: bool = env
-        .eval("return C_LevelLink.IsActionLocked(7)")
-        .unwrap();
-    let unlisted: bool = env
-        .eval("return C_LevelLink.IsActionLocked(99)")
-        .unwrap();
+    let listed_first: bool = env.eval("return C_LevelLink.IsActionLocked(2)").unwrap();
+    let listed_second: bool = env.eval("return C_LevelLink.IsActionLocked(7)").unwrap();
+    let unlisted: bool = env.eval("return C_LevelLink.IsActionLocked(99)").unwrap();
     assert!(listed_first);
     assert!(listed_second);
     assert!(!unlisted);
@@ -87,9 +81,7 @@ fn level_link_action_locks_reject_non_numeric_input() {
     let from_invalid: bool = env
         .eval(r#"return C_LevelLink.IsActionLocked("bad-action")"#)
         .unwrap();
-    let from_table: bool = env
-        .eval("return C_LevelLink.IsActionLocked({})")
-        .unwrap();
+    let from_table: bool = env.eval("return C_LevelLink.IsActionLocked({})").unwrap();
     assert!(
         !from_string,
         "string-shaped action IDs should not match the integer slot set"
