@@ -17,9 +17,7 @@ fn build_test_app(screen_kind: ScreenKind) -> App {
     env.borrow().set_screen_mode(screen_kind);
     env.borrow().set_screen_size(800.0, 600.0);
 
-    let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
-        "./textures",
-    ))));
+    let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
     let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
         super::super::app::DEFAULT_FONTS_PATH,
     ))));

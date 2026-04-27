@@ -14,13 +14,21 @@ use std::sync::{Arc, Mutex};
 use tempfile::tempdir;
 use tokio::sync::mpsc;
 
-fn build_test_app_with_textures(textures_path: &Path) -> App {
+fn build_test_app() -> App {
+    build_test_app_with_addons(None)
+}
+
+fn build_test_app_with_addons(addons_path: Option<&Path>) -> App {
     let env = Rc::new(RefCell::new(
         WowLuaEnv::new().expect("Failed to create Lua environment"),
     ));
     env.borrow().set_screen_mode(ScreenKind::Game);
 
-    let texture_manager = Rc::new(RefCell::new(TextureManager::new(textures_path)));
+    let mut mgr = TextureManager::new();
+    if let Some(path) = addons_path {
+        mgr = mgr.with_addons_path(path);
+    }
+    let texture_manager = Rc::new(RefCell::new(mgr));
     let font_system = Rc::new(RefCell::new(WowFontSystem::new(&std::path::PathBuf::from(
         crate::iced_app::app::DEFAULT_FONTS_PATH,
     ))));
@@ -46,21 +54,23 @@ fn build_test_app_with_textures(textures_path: &Path) -> App {
 #[test]
 fn budgeted_preload_loads_explicitly_queued_texture_requests() {
     let temp_dir = tempdir().unwrap();
-    let texture_path = temp_dir.path().join("world-map-tile.png");
+    let addons_dir = temp_dir.path();
+    let texture_path = addons_dir.join("Interface/AddOns/world-map-tile.png");
+    std::fs::create_dir_all(texture_path.parent().unwrap()).unwrap();
     let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
     image.save(&texture_path).unwrap();
 
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app_with_addons(Some(addons_dir));
     app.env
         .borrow()
         .state()
         .borrow_mut()
-        .enqueue_texture_preloads(["world-map-tile".to_string()]);
+        .enqueue_texture_preloads(["Interface/AddOns/world-map-tile".to_string()]);
 
     app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
 
     assert!(
-        app.texture_manager.borrow().get("world-map-tile").is_some(),
+        app.texture_manager.borrow().get("Interface/AddOns/world-map-tile").is_some(),
         "queued preload should decode the requested texture source"
     );
     assert!(
@@ -78,7 +88,7 @@ fn budgeted_preload_requeues_tail_when_budget_hits() {
         image.save(&texture_path).unwrap();
     }
 
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
     app.env
         .borrow()
         .state()
@@ -104,8 +114,7 @@ fn budgeted_preload_requeues_tail_when_budget_hits() {
 
 #[test]
 fn empty_queue_preload_clears_stale_pending_state_without_draw_owned_requests() {
-    let temp_dir = tempdir().unwrap();
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
     app.textures_pending.set(true);
 
     app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
@@ -118,8 +127,7 @@ fn empty_queue_preload_clears_stale_pending_state_without_draw_owned_requests() 
 
 #[test]
 fn empty_queue_preload_keeps_draw_owned_pending_state() {
-    let temp_dir = tempdir().unwrap();
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
     app.textures_pending.set(true);
 
     let request_path = "render-owned-pending";
@@ -141,12 +149,14 @@ fn empty_queue_preload_keeps_draw_owned_pending_state() {
 #[test]
 fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_requests() {
     let temp_dir = tempdir().unwrap();
-    let texture_path = temp_dir.path().join("render-owned-pending.png");
+    let addons_dir = temp_dir.path();
+    let texture_path = addons_dir.join("Interface/AddOns/render-owned-pending.png");
+    std::fs::create_dir_all(texture_path.parent().unwrap()).unwrap();
     let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
     image.save(&texture_path).unwrap();
 
-    let app = build_test_app_with_textures(temp_dir.path());
-    let request_path = "render-owned-pending".to_string();
+    let app = build_test_app_with_addons(Some(addons_dir));
+    let request_path = "Interface/AddOns/render-owned-pending".to_string();
     app.env
         .borrow()
         .state()
@@ -175,8 +185,7 @@ fn preload_current_render_requests_keeps_pending_until_draw_uploads_cached_reque
 
 #[test]
 fn pending_transition_reinjects_clean_cached_strata_for_staged_requests() {
-    let temp_dir = tempdir().unwrap();
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
     let request_path = "retained-reinject";
 
     let mut batch = QuadBatch::new();
@@ -211,8 +220,7 @@ fn pending_transition_reinjects_clean_cached_strata_for_staged_requests() {
 
 #[test]
 fn pending_path_state_tracks_rebuilt_strata_deltas() {
-    let temp_dir = tempdir().unwrap();
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
 
     let mut strata0 = QuadBatch::new();
     strata0
@@ -254,8 +262,7 @@ fn pending_path_state_tracks_rebuilt_strata_deltas() {
 
 #[test]
 fn pending_path_queue_drains_when_request_is_marked_ready() {
-    let temp_dir = tempdir().unwrap();
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
 
     let mut batch = QuadBatch::new();
     batch
@@ -283,8 +290,7 @@ fn pending_path_queue_drains_when_request_is_marked_ready() {
 
 #[test]
 fn rebuilt_requests_reuse_ready_path_cache_without_redecode() {
-    let temp_dir = tempdir().unwrap();
-    let app = build_test_app_with_textures(temp_dir.path());
+    let app = build_test_app();
 
     let mut initial_batch = QuadBatch::new();
     initial_batch

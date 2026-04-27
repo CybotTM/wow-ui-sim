@@ -83,7 +83,7 @@ pub mod zones;
 
 pub use error::{Error, Result};
 #[cfg(feature = "gui")]
-pub use iced_app::{DebugOptions, run_iced_ui, run_iced_ui_with_textures};
+pub use iced_app::{DebugOptions, run_iced_ui};
 
 /// Blend mode for quad rendering.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

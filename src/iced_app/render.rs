@@ -862,13 +862,13 @@ mod tests {
         1u16 << strata
     }
 
-    fn build_test_app_with_textures(textures_path: &Path) -> App {
+    fn build_test_app() -> App {
         let env = Rc::new(RefCell::new(
             WowLuaEnv::new().expect("Failed to create Lua environment"),
         ));
         env.borrow().set_screen_mode(ScreenKind::Game);
 
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new(textures_path)));
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&std::path::PathBuf::from(
             crate::iced_app::app::DEFAULT_FONTS_PATH,
         ))));
@@ -913,8 +913,7 @@ mod tests {
 
     #[test]
     fn window_unfocused_publishes_mouse_leave() {
-        let temp_dir = tempdir().unwrap();
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         let mut shader_state = ();
         let action = <&App as shader::Program<Message>>::update(
             &&app,
@@ -1103,7 +1102,7 @@ mod tests {
         let normal_path = "Interface/Buttons/UI-Panel-Button-Up";
         write_test_texture(temp_dir.path(), normal_path, [0xaa, 0x22, 0x22, 0xff]);
 
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         app.env
             .borrow()
             .exec(
@@ -1152,8 +1151,7 @@ mod tests {
 
     #[test]
     fn cached_button_state_texture_restores_normal_after_hover() {
-        let temp_dir = tempdir().unwrap();
-        let mut app = build_test_app_with_textures(temp_dir.path());
+        let mut app = build_test_app();
         app.env
             .borrow()
             .exec(
@@ -1246,8 +1244,7 @@ mod tests {
 
     #[test]
     fn mouse_leave_rebuild_restores_button_normal_texture() {
-        let temp_dir = tempdir().unwrap();
-        let mut app = build_test_app_with_textures(temp_dir.path());
+        let mut app = build_test_app();
         app.env
             .borrow()
             .exec(
@@ -1314,8 +1311,7 @@ mod tests {
 
     #[test]
     fn mouse_up_rebuild_restores_pressed_button_normal_texture() {
-        let temp_dir = tempdir().unwrap();
-        let mut app = build_test_app_with_textures(temp_dir.path());
+        let mut app = build_test_app();
         app.env
             .borrow()
             .exec(
@@ -1384,8 +1380,7 @@ mod tests {
 
     #[test]
     fn mouse_leave_clears_pressed_button_texture_state() {
-        let temp_dir = tempdir().unwrap();
-        let mut app = build_test_app_with_textures(temp_dir.path());
+        let mut app = build_test_app();
         app.env
             .borrow()
             .exec(
@@ -1509,8 +1504,7 @@ mod tests {
 
     #[test]
     fn rebuild_dirty_strata_skips_irrelevant_cached_strata() {
-        let temp_dir = tempdir().unwrap();
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(QuadBatch::new()));
         app.cached_frame_snapshots.borrow_mut()[0] =
             Some(HashMap::from([(1_u64, FrameQuadSnapshot::default())]));
@@ -1527,8 +1521,7 @@ mod tests {
 
     #[test]
     fn rebuild_dirty_strata_resets_consumed_full_rebuild_sentinel() {
-        let temp_dir = tempdir().unwrap();
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         app.pending_dirty_ids.borrow_mut().take();
 
         let _ = app.rebuild_dirty_strata(Size::new(64.0, 64.0), dirty_mask(0));
@@ -1542,8 +1535,7 @@ mod tests {
 
     #[test]
     fn consumed_full_rebuild_sentinel_preserves_next_incremental_fast_path() {
-        let temp_dir = tempdir().unwrap();
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(QuadBatch::new()));
         app.cached_frame_snapshots.borrow_mut()[0] =
             Some(HashMap::from([(1_u64, FrameQuadSnapshot::default())]));
@@ -1576,7 +1568,7 @@ mod tests {
         write_test_texture(temp_dir.path(), &art_path, [0x22, 0x66, 0xaa, 0xff]);
         write_test_texture(temp_dir.path(), &overlay_path, [0xdd, 0xaa, 0x33, 0xff]);
 
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         app.env
             .borrow()
             .exec(&format!("C_Map.RequestPreloadMap({map_id})"))
@@ -1606,8 +1598,7 @@ mod tests {
 
     #[test]
     fn resolve_layout_and_buckets_recomputes_tooltip_layout_after_sizing() {
-        let temp_dir = tempdir().unwrap();
-        let app = build_test_app_with_textures(temp_dir.path());
+        let app = build_test_app();
         app.env
             .borrow()
             .exec(

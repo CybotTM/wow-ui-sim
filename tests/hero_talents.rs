@@ -270,7 +270,7 @@ fn test_active_hero_node_icon_texture_path_resolves_to_real_asset() {
         )
         .unwrap();
 
-    let mut mgr = TextureManager::new(PathBuf::from("./textures"));
+    let mut mgr = TextureManager::new();
     let texture = load_texture_or_crop(&mut mgr, &texture_path).unwrap_or_else(|| {
         panic!("hero node spell texture did not resolve: {texture_path}");
     });

@@ -31,9 +31,7 @@ fn main() {
     }
 
     println!("\n--- TextureManager.load (full pipeline) ---");
-    let cache_root = std::env::temp_dir().join("wow-ui-sim-casc-smoke-textures");
-    std::fs::create_dir_all(&cache_root).unwrap();
-    let mut mgr = TextureManager::new(&cache_root);
+    let mut mgr = TextureManager::new();
 
     let probes = [
         "Interface\\Buttons\\UI-Panel-Button-Up",

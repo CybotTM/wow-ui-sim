@@ -15,13 +15,13 @@ use std::sync::{Arc, Mutex};
 
 #[test]
 fn decode_crop_request_rejects_malformed_coords() {
-    let mut mgr = crate::texture::TextureManager::new(".");
+    let mut mgr = crate::texture::TextureManager::new();
     assert!(decode_crop_request(&mut mgr, "foo@crop:0.1,0.2,0.3").is_none());
 }
 
 #[test]
 fn decode_crop_request_uses_cached_texture_dimensions() {
-    let mut mgr = crate::texture::TextureManager::new(".");
+    let mut mgr = crate::texture::TextureManager::new();
     mgr.insert_test_texture(
         r"Interface\Foo\Bar",
         crate::texture::TextureData {
@@ -44,7 +44,7 @@ fn decode_crop_request_uses_cached_texture_dimensions() {
 
 #[test]
 fn load_texture_prefer_bc_reuses_cached_rgba_buffer() {
-    let mut mgr = crate::texture::TextureManager::new(".");
+    let mut mgr = crate::texture::TextureManager::new();
     let cached_pixels = Arc::<[u8]>::from(vec![0xaa; 4 * 4 * 4]);
     mgr.insert_test_texture(
         r"Interface\Foo\Cached",
@@ -70,7 +70,7 @@ fn load_texture_prefer_bc_reuses_cached_rgba_buffer() {
 
 #[test]
 fn load_texture_prefer_bc_reuses_cached_crop_buffer() {
-    let mut mgr = crate::texture::TextureManager::new(".");
+    let mut mgr = crate::texture::TextureManager::new();
     mgr.insert_test_texture(
         r"Interface\Foo\CropSource",
         crate::texture::TextureData {
@@ -104,7 +104,7 @@ fn load_texture_prefer_bc_reuses_cached_crop_buffer() {
 
 #[test]
 fn load_texture_prefer_bc_cached_crop_request_skips_crop_decode_work() {
-    let mut mgr = crate::texture::TextureManager::new(".");
+    let mut mgr = crate::texture::TextureManager::new();
     mgr.insert_test_texture(
         r"Interface\Foo\CropSource",
         crate::texture::TextureData {

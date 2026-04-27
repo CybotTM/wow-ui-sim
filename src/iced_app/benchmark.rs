@@ -6,7 +6,7 @@ use iced::{Rectangle, Size};
 
 use crate::lua_api::WowLuaEnv;
 
-use super::app::{App, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES};
+use super::app::{App, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS};
 use super::{DebugOptions, Message};
 
 const BENCHMARK_SIZE: Size = Size {
@@ -89,7 +89,6 @@ fn spellbook_phase(
 
 fn boot_benchmark_app(env: WowLuaEnv) -> App {
     INIT_ENV.with(|cell| *cell.borrow_mut() = Some(env));
-    INIT_TEXTURES.with(|cell| *cell.borrow_mut() = Some(crate::paths::default_textures_path()));
     INIT_DEBUG.with(|cell| *cell.borrow_mut() = Some(DebugOptions::default()));
     INIT_SAVED_VARS.with(|cell| *cell.borrow_mut() = None);
 

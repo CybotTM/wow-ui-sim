@@ -79,8 +79,6 @@ pub use layout::{
 
 // GUI-only imports and re-exports
 #[cfg(feature = "gui")]
-use std::path::PathBuf;
-#[cfg(feature = "gui")]
 use std::sync::OnceLock;
 #[cfg(feature = "gui")]
 use std::time::Instant;
@@ -114,7 +112,7 @@ pub use styles::palette;
 #[cfg(feature = "gui")]
 pub use app::DebugOptions;
 #[cfg(feature = "gui")]
-use app::{INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES};
+use app::{INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS};
 
 #[cfg(feature = "gui")]
 fn perf_logging_enabled() -> bool {
@@ -185,27 +183,13 @@ pub fn run_iced_ui(
     exec_lua: Option<String>,
     exec_lua_secure: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let textures_path = crate::paths::default_textures_path();
-    if let Some(code) = exec_lua {
-        app::INIT_EXEC_LUA.with(|cell| *cell.borrow_mut() = Some((code, exec_lua_secure)));
-    }
-    run_iced_ui_with_textures(env, textures_path, debug, saved_vars)
-}
-
-/// Run the iced UI with the given Lua environment and textures path.
-#[cfg(feature = "gui")]
-pub fn run_iced_ui_with_textures(
-    env: WowLuaEnv,
-    textures_path: PathBuf,
-    debug: DebugOptions,
-    saved_vars: Option<SavedVariablesManager>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    // Store in thread-local for the boot function
     INIT_ENV.with(|cell| *cell.borrow_mut() = Some(env));
-    INIT_TEXTURES.with(|cell| *cell.borrow_mut() = Some(textures_path));
     INIT_DEBUG.with(|cell| *cell.borrow_mut() = Some(debug));
     if let Some(sv) = saved_vars {
         INIT_SAVED_VARS.with(|cell| *cell.borrow_mut() = Some(sv));
+    }
+    if let Some(code) = exec_lua {
+        app::INIT_EXEC_LUA.with(|cell| *cell.borrow_mut() = Some((code, exec_lua_secure)));
     }
 
     iced::application(App::boot, App::update, App::view)

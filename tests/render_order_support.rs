@@ -31,14 +31,8 @@ fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
     Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
 }
 
-pub(crate) fn make_texture_manager() -> Option<TextureManager> {
-    let textures_path = PathBuf::from("./textures");
-    if !textures_path.exists() {
-        return None;
-    }
-
-    let mgr = TextureManager::new(textures_path);
-    Some(mgr)
+pub(crate) fn make_texture_manager() -> TextureManager {
+    TextureManager::new()
 }
 
 pub(crate) fn build_screenshot_like_batch(

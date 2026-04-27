@@ -180,18 +180,6 @@ impl TextureManager {
             return Some(result);
         }
 
-        let path = if normalized_path.len() >= 10
-            && normalized_path[..10].eq_ignore_ascii_case("Interface/")
-        {
-            &normalized_path[10..]
-        } else {
-            normalized_path
-        };
-
-        if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {
-            return Some(result);
-        }
-
         None
     }
 

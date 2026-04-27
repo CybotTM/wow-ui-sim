@@ -732,7 +732,7 @@ mod tests {
 
     #[test]
     fn process_budgeted_texture_request_returns_true_before_loading_uncached_work() {
-        let mut tex_mgr = TextureManager::new(PathBuf::from("./textures"));
+        let mut tex_mgr = TextureManager::new();
         let mut textures = vec![GpuTextureData {
             path: "already-loaded".to_string(),
             width: 1,
@@ -766,9 +766,7 @@ mod tests {
         ));
         env.borrow().set_screen_mode(ScreenKind::Game);
 
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
-            "./textures",
-        ))));
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
             crate::iced_app::app::DEFAULT_FONTS_PATH,
         ))));
@@ -798,8 +796,7 @@ mod tests {
         env.borrow().set_screen_mode(ScreenKind::Game);
 
         let texture_manager = Rc::new(RefCell::new(
-            TextureManager::new(PathBuf::from("./textures"))
-                .with_disk_cache("./cache/textures"),
+            TextureManager::new().with_disk_cache("./cache/textures"),
         ));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
             crate::iced_app::app::DEFAULT_FONTS_PATH,

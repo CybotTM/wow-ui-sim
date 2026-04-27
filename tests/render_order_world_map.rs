@@ -14,13 +14,13 @@ fn opening_world_map_does_not_darken_the_strip_above_the_panel() {
     let env = env_with_isolated_world_map_ui();
 
     let baseline_batch = build_screenshot_like_batch(&env, 1024, 768, None);
-    let mut baseline_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut baseline_mgr = make_texture_manager();
     let baseline_render = render_to_image(&baseline_batch, &mut baseline_mgr, 1024, 768, None);
 
     open_world_map(&env);
 
     let world_map_batch = build_screenshot_like_batch(&env, 1024, 768, None);
-    let mut world_map_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut world_map_mgr = make_texture_manager();
     let world_map_render = render_to_image(&world_map_batch, &mut world_map_mgr, 1024, 768, None);
 
     let strip_rect = (80, 0, 820, 80);

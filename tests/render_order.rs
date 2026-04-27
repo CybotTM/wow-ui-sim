@@ -439,7 +439,7 @@ fn isolated_world_map_current_map_does_not_render_fog_of_war_without_db_entry() 
         let (explored_right_x, explored_right_y, unexplored_left_x, unexplored_left_y) =
             exploration_sample_points(&env);
 
-        let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
+        let mut visible_mgr = make_texture_manager();
         let visible_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
         let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1024, 768, None);
 
@@ -454,7 +454,7 @@ fn isolated_world_map_current_map_does_not_render_fog_of_war_without_db_entry() 
         wow_ui_sim::startup::process_pending_timers(&env);
         wow_ui_sim::startup::fire_one_on_update_tick(&env);
 
-        let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
+        let mut hidden_mgr = make_texture_manager();
         let hidden_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
         let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
 
