@@ -36,6 +36,30 @@ pub(crate) use load_addon_trace::{
 pub use xml_frame::create_frame_from_xml;
 pub use xml_frame::{fast_create_frame_profile_body_report, fast_create_frame_profile_report};
 
+/// Addons that ship the shared XML template library which Blizzard's other
+/// addons inherit from (`ButtonFrameTemplate`, `PortraitFrameBaseTemplate`,
+/// `UIPanelButtonTemplate`, …). In real WoW these are part of the FrameXML
+/// core and load before any addon, so addons reference their templates
+/// without declaring an explicit `## Dependencies:` line. When the full
+/// Blizzard set is force-loaded for testing (`discover_all_blizzard_addons`),
+/// we promote these to `LoadFirst` so dependency-free LoadOnDemand addons
+/// that alphabetically precede them (e.g. `Blizzard_AlliedRacesUI`) do not
+/// instantiate frames against an empty template registry.
+const FOUNDATIONAL_LOAD_FIRST_ADDONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+];
+
+fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathBuf, TocFile)>) {
+    for name in FOUNDATIONAL_LOAD_FIRST_ADDONS {
+        if let Some((_, toc)) = addons.get_mut(*name) {
+            toc.metadata
+                .insert("LoadFirst".to_string(), "1".to_string());
+        }
+    }
+}
+
 /// Find the TOC file for an addon directory.
 /// Prefers Mainline variant, then exact name match, then any non-Classic TOC.
 pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
@@ -277,14 +301,19 @@ pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)
 ///
 /// This is stricter than `discover_blizzard_addons_for_screen`: it includes all 315
 /// `Blizzard_*` directories present in the checkout, regardless of screen restrictions
-/// or `LoadOnDemand`, then sorts them by dependencies.
+/// or `LoadOnDemand`, then sorts them by dependencies. Foundational shared XML
+/// addons (`Blizzard_SharedXMLBase`, `Blizzard_SharedXML`, `Blizzard_SharedXMLGame`)
+/// are emitted first via the eager LoadFirst pass so dependency-free LoadOnDemand
+/// frames that inherit their templates resolve against a fully-registered
+/// template chain.
 pub fn discover_all_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)> {
     let entries = match std::fs::read_dir(blizzard_ui_dir) {
         Ok(entries) => entries,
         Err(_) => return Vec::new(),
     };
 
-    let mut addons = Vec::new();
+    let mut toc_map: HashMap<String, (PathBuf, TocFile)> = HashMap::new();
+    let mut unparsed: Vec<(String, PathBuf)> = Vec::new();
     for entry in entries.flatten() {
         let path = entry.path();
         if !path.is_dir() {
@@ -296,13 +325,21 @@ pub fn discover_all_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, Path
         if !name.starts_with("Blizzard_") {
             continue;
         }
-        if let Some(toc_path) = find_toc_file(&path) {
-            addons.push((name.to_string(), toc_path));
+        let Some(toc_path) = find_toc_file(&path) else {
+            continue;
+        };
+        match TocFile::from_file(&toc_path) {
+            Ok(toc) => {
+                toc_map.insert(name.to_string(), (toc_path, toc));
+            }
+            Err(_) => unparsed.push((name.to_string(), toc_path)),
         }
     }
 
-    sort_addons_by_dependencies(&mut addons);
-    addons
+    promote_foundational_addons_to_load_first(&mut toc_map);
+    let mut sorted = topological_sort_addons(toc_map);
+    sorted.extend(unparsed);
+    sorted
 }
 
 /// Discover Blizzard addons for a specific screen mode, topologically sorted by dependencies.
