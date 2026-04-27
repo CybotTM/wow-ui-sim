@@ -297,15 +297,14 @@ pub use super::state_types::{
     AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem, BarberShopAlternateFormRace,
     BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState, BidAuction,
     BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote,
-    CommoditySearchResultInfo,
-    CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin,
-    DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey,
-    ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
-    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
-    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
-    PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
+    CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo,
+    CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
+    ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfgCategoryInfo,
+    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
+    MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
+    MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
+    PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState,
+    SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 

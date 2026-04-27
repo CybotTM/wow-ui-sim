@@ -64,8 +64,7 @@ fn boost_tutorial_required_globals_exist() {
 fn blizzard_boost_tutorial_loads_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &dispatcher_toc())
-        .expect("Blizzard_Dispatcher should load");
+    load_addon(&env.loader_env(), &dispatcher_toc()).expect("Blizzard_Dispatcher should load");
 
     {
         let mut state = env.state().borrow_mut();
@@ -109,8 +108,7 @@ fn blizzard_boost_tutorial_loads_without_errors() {
 fn boost_tutorial_unhighlight_runs_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &dispatcher_toc())
-        .expect("Blizzard_Dispatcher should load");
+    load_addon(&env.loader_env(), &dispatcher_toc()).expect("Blizzard_Dispatcher should load");
     load_addon(&env.loader_env(), &boost_tutorial_toc())
         .expect("Blizzard_BoostTutorial should load");
 

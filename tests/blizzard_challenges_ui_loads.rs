@@ -95,8 +95,7 @@ fn blizzard_challenges_ui_loads_without_errors() {
 fn challenges_keystone_frame_show_and_hide_run_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &challenges_ui_toc())
-        .expect("Blizzard_ChallengesUI should load");
+    load_addon(&env.loader_env(), &challenges_ui_toc()).expect("Blizzard_ChallengesUI should load");
 
     {
         let mut state = env.state().borrow_mut();

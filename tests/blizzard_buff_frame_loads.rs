@@ -81,8 +81,7 @@ fn blizzard_buff_frame_loads_without_errors() {
 fn buff_frame_update_runs_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &buff_frame_toc())
-        .expect("Blizzard_BuffFrame should load");
+    load_addon(&env.loader_env(), &buff_frame_toc()).expect("Blizzard_BuffFrame should load");
 
     {
         let mut state = env.state().borrow_mut();

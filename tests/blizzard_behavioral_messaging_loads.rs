@@ -12,8 +12,14 @@ fn blizzard_ui_dir() -> PathBuf {
 fn behavioral_messaging_dependency_chain() -> Vec<(&'static str, PathBuf)> {
     let ui = blizzard_ui_dir();
     vec![
-        ("Blizzard_StatusUI", ui.join("Blizzard_StatusUI/Blizzard_StatusUI.toc")),
-        ("Blizzard_GMChatUI", ui.join("Blizzard_GMChatUI/Blizzard_GMChatUI.toc")),
+        (
+            "Blizzard_StatusUI",
+            ui.join("Blizzard_StatusUI/Blizzard_StatusUI.toc"),
+        ),
+        (
+            "Blizzard_GMChatUI",
+            ui.join("Blizzard_GMChatUI/Blizzard_GMChatUI.toc"),
+        ),
         (
             "Blizzard_BehavioralMessaging",
             ui.join("Blizzard_BehavioralMessaging/Blizzard_BehavioralMessaging.toc"),

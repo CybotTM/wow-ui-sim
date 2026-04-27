@@ -137,8 +137,7 @@ fn blizzard_black_market_ui_loads_without_errors() {
 fn black_market_show_runs_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &black_market_toc())
-        .expect("BlackMarketUI should load");
+    load_addon(&env.loader_env(), &black_market_toc()).expect("BlackMarketUI should load");
 
     {
         let mut state = env.state().borrow_mut();

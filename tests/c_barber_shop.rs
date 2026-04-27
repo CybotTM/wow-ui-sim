@@ -127,7 +127,9 @@ fn get_viewing_chr_model_returns_nil_when_unset() {
 fn get_viewing_chr_model_returns_id_when_set() {
     let env = WowLuaEnv::new().expect("env");
     env.state().borrow_mut().barber_shop.viewing_chr_model = Some(2107);
-    let model_id: i32 = env.eval("return C_BarberShop.GetViewingChrModel()").unwrap();
+    let model_id: i32 = env
+        .eval("return C_BarberShop.GetViewingChrModel()")
+        .unwrap();
     assert_eq!(model_id, 2107);
 }
 
@@ -233,7 +235,10 @@ fn get_available_customizations_returns_nil_by_default() {
 #[test]
 fn get_available_customizations_returns_seeded_categories() {
     let env = WowLuaEnv::new().expect("env");
-    env.state().borrow_mut().barber_shop.available_customizations = Some(seeded_categories());
+    env.state()
+        .borrow_mut()
+        .barber_shop
+        .available_customizations = Some(seeded_categories());
     let (count, name, option_id, second_choice_nil): (i32, String, i32, bool) = env
         .eval(
             r#"
@@ -278,7 +283,8 @@ fn clear_preview_choices_drops_only_preview_when_flag_false() {
         sim.barber_shop.preview_choices.insert(2, 20);
         sim.barber_shop.has_changes = true;
     }
-    env.eval::<()>("C_BarberShop.ClearPreviewChoices(false)").unwrap();
+    env.eval::<()>("C_BarberShop.ClearPreviewChoices(false)")
+        .unwrap();
     let sim = env.state().borrow();
     assert!(sim.barber_shop.preview_choices.is_empty());
     assert_eq!(sim.barber_shop.choices.get(&1).copied(), Some(10));
@@ -294,7 +300,8 @@ fn clear_preview_choices_clears_saved_when_flag_true() {
         sim.barber_shop.preview_choices.insert(2, 20);
         sim.barber_shop.has_changes = true;
     }
-    env.eval::<()>("C_BarberShop.ClearPreviewChoices(true)").unwrap();
+    env.eval::<()>("C_BarberShop.ClearPreviewChoices(true)")
+        .unwrap();
     let sim = env.state().borrow();
     assert!(sim.barber_shop.preview_choices.is_empty());
     assert!(sim.barber_shop.choices.is_empty());
@@ -333,11 +340,16 @@ fn mark_seen_helpers_record_into_state() {
 #[test]
 fn camera_zoom_round_trips_through_state() {
     let env = WowLuaEnv::new().expect("env");
-    env.eval::<()>("C_BarberShop.SetCameraZoomLevel(3, false)").unwrap();
-    let zoom: f64 = env.eval("return C_BarberShop.GetCurrentCameraZoom()").unwrap();
+    env.eval::<()>("C_BarberShop.SetCameraZoomLevel(3, false)")
+        .unwrap();
+    let zoom: f64 = env
+        .eval("return C_BarberShop.GetCurrentCameraZoom()")
+        .unwrap();
     assert!((zoom - 3.0).abs() < 1e-6);
     env.eval::<()>("C_BarberShop.ZoomCamera(0.5)").unwrap();
-    let zoom_after: f64 = env.eval("return C_BarberShop.GetCurrentCameraZoom()").unwrap();
+    let zoom_after: f64 = env
+        .eval("return C_BarberShop.GetCurrentCameraZoom()")
+        .unwrap();
     assert!((zoom_after - 3.5).abs() < 1e-6);
 }
 
@@ -382,12 +394,14 @@ fn set_viewing_altered_form_writes_state_and_fires_force_update() {
 #[test]
 fn set_viewing_shapeshift_form_accepts_nil_and_id() {
     let env = WowLuaEnv::new().expect("env");
-    env.eval::<()>("C_BarberShop.SetViewingShapeshiftForm(31)").unwrap();
+    env.eval::<()>("C_BarberShop.SetViewingShapeshiftForm(31)")
+        .unwrap();
     assert_eq!(
         env.state().borrow().barber_shop.viewing_shapeshift_form,
         Some(31)
     );
-    env.eval::<()>("C_BarberShop.SetViewingShapeshiftForm(nil)").unwrap();
+    env.eval::<()>("C_BarberShop.SetViewingShapeshiftForm(nil)")
+        .unwrap();
     assert!(
         env.state()
             .borrow()
@@ -413,22 +427,28 @@ fn set_viewing_chr_model_writes_state_and_fires_camera_event() {
         )
         .unwrap();
     assert_eq!(count, 1);
-    assert_eq!(env.state().borrow().barber_shop.viewing_chr_model, Some(900));
+    assert_eq!(
+        env.state().borrow().barber_shop.viewing_chr_model,
+        Some(900)
+    );
 }
 
 #[test]
 fn set_model_dress_state_writes_field() {
     let env = WowLuaEnv::new().expect("env");
-    env.eval::<()>("C_BarberShop.SetModelDressState(true)").unwrap();
+    env.eval::<()>("C_BarberShop.SetModelDressState(true)")
+        .unwrap();
     assert!(env.state().borrow().barber_shop.model_dressed);
-    env.eval::<()>("C_BarberShop.SetModelDressState(false)").unwrap();
+    env.eval::<()>("C_BarberShop.SetModelDressState(false)")
+        .unwrap();
     assert!(!env.state().borrow().barber_shop.model_dressed);
 }
 
 #[test]
 fn set_camera_distance_offset_writes_field() {
     let env = WowLuaEnv::new().expect("env");
-    env.eval::<()>("C_BarberShop.SetCameraDistanceOffset(1.25)").unwrap();
+    env.eval::<()>("C_BarberShop.SetCameraDistanceOffset(1.25)")
+        .unwrap();
     let offset = env.state().borrow().barber_shop.camera_distance_offset;
     assert!((offset - 1.25).abs() < 1e-6);
 }

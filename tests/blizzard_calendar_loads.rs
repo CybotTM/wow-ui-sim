@@ -81,8 +81,7 @@ fn blizzard_calendar_loads_without_errors() {
 fn calendar_show_and_hide_run_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &calendar_toc())
-        .expect("Blizzard_Calendar should load");
+    load_addon(&env.loader_env(), &calendar_toc()).expect("Blizzard_Calendar should load");
 
     {
         let mut state = env.state().borrow_mut();

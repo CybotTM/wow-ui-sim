@@ -294,7 +294,10 @@ fn set_raid_target_globals_are_callable_no_ops() {
         set_icon_ok,
         "SetRaidTargetIcon should be the legacy alias of SetRaidTarget"
     );
-    assert!(clear_ok, "SetRaidTarget(unit, 0) should clear without error");
+    assert!(
+        clear_ok,
+        "SetRaidTarget(unit, 0) should clear without error"
+    );
     assert!(
         invalid_unit_ok,
         "SetRaidTarget should silently no-op on unknown unit tokens"

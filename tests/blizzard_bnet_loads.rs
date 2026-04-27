@@ -67,8 +67,7 @@ fn blizzard_bnet_loads_without_errors() {
         state.lua_error_counts.clear();
     }
 
-    load_addon(&env.loader_env(), &bnet_toc())
-        .expect("Blizzard_BNet should load via Rust loader");
+    load_addon(&env.loader_env(), &bnet_toc()).expect("Blizzard_BNet should load via Rust loader");
 
     let load_errors: Vec<String> = env.state().borrow().lua_errors.clone();
     assert!(
@@ -99,8 +98,7 @@ fn blizzard_bnet_loads_without_errors() {
 fn bnet_toast_show_and_hide_run_without_errors() {
     let env = load_full_game_ui();
 
-    load_addon(&env.loader_env(), &bnet_toc())
-        .expect("Blizzard_BNet should load");
+    load_addon(&env.loader_env(), &bnet_toc()).expect("Blizzard_BNet should load");
 
     {
         let mut state = env.state().borrow_mut();
