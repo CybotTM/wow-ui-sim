@@ -220,6 +220,7 @@ macro_rules! build_empty_sim_state {
             auction_sell_search_results: ::std::collections::HashMap::new(),
             auction_last_browse_query: None,
             auction_favorites: Vec::new(),
+            auction_sell_quote: None,
             auction_throttle_ready: true,
             auction_should_auto_populate_price: true,
             mythic_plus: MythicPlusState::default(),
@@ -284,16 +285,16 @@ use super::game_data::{
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
     AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
-    AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionSortSpec, BagItem,
-    BidAuction, BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommoditySearchResultInfo,
-    CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin,
-    DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey,
-    ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfgCategoryInfo, LootRollInfo,
-    LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState,
-    MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun,
-    MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer,
-    PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend,
-    SummonRequestState, WorldState,
+    AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionSellQuote,
+    AuctionSellQuoteKind, AuctionSortSpec, BagItem, BidAuction, BnetFriend, BnetGameAccount,
+    BrowseQuery, ChatBubble, CommoditySearchResultInfo, CommoditySearchResults, CraftingState,
+    CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity,
+    GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo, ItemSearchResults,
+    KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect,
+    MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
+    MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
+    OwnedAuction, PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep,
+    SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1628,6 +1629,10 @@ pub struct SimState {
     /// `HasFavorites`, `SetFavoriteItem` — will read/write this list).
     /// Empty by default.
     pub auction_favorites: Vec<ItemSearchKey>,
+    /// In-flight sell quote captured by `PostItem`/`PostCommodity`.
+    /// `Confirm*` reads it to finalize the listing; `CancelSell` clears
+    /// it. `None` outside of an active sell-flow.
+    pub auction_sell_quote: Option<AuctionSellQuote>,
     /// Drives `C_AuctionHouse.IsThrottledMessageSystemReady`. The live
     /// client clears this briefly while a query is in-flight; the sim
     /// has no real throttle, so it stays true unless a test toggles it.

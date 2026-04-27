@@ -158,6 +158,36 @@ pub struct BrowseQuery {
     pub item_class_filters: Vec<AuctionItemClassFilter>,
 }
 
+/// Distinguishes an item-style sell quote (single-row post with bid +
+/// buyout) from a commodity-style sell quote (stack post with a unit
+/// price). Drives the dispatch in `ConfirmPostItem`/`ConfirmPostCommodity`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AuctionSellQuoteKind {
+    Item,
+    Commodity,
+}
+
+/// In-flight sell quote stored into `state.auction_sell_quote` when
+/// `PostItem`/`PostCommodity` runs. Mirrors the retail flow where
+/// `PostX` validates + computes the deposit and `ConfirmPostX`
+/// finalizes the listing using the pending quote. `CancelSell` clears
+/// it without firing any event.
+#[derive(Debug, Clone)]
+pub struct AuctionSellQuote {
+    pub kind: AuctionSellQuoteKind,
+    pub item_id: i32,
+    /// 1-based duration index (1 = 12h, 2 = 24h, 3 = 48h).
+    pub duration: i32,
+    pub quantity: i32,
+    /// Per-unit price for commodities, buyout for items. Matches the
+    /// shape `AuctionHouseSellFrame` posts to the server.
+    pub unit_price: i64,
+    /// Copper amount the player must pay to list. `CalculateItemDeposit`
+    /// / `CalculateCommodityDeposit` stamp this when the quote is
+    /// captured so `Confirm*` can deduct without re-computing.
+    pub deposit: i64,
+}
+
 /// One row of the player's active bid list (Bids tab). Drives
 /// `C_AuctionHouse.GetNumBids` / `GetBidInfo`. The bidder field uses
 /// the same shape Blizzard expects from `GetBidStatus`: nil = no bid,
