@@ -158,6 +158,7 @@ macro_rules! frame_defaults {
             model_rendering: ModelRenderingState::default(),
             model_scene_state: ModelSceneState::default(),
             model_scene_actor_ids: Vec::new(),
+            model_scene_actor_tags: Vec::new(),
             player_model_state: PlayerModelState::default(),
             mouse_motion_enabled: false,
             user_id: 0,

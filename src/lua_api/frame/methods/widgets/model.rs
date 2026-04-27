@@ -948,6 +948,7 @@ pub(super) fn scene_project_3d_point_to_2d(state: &mut LuaState) -> LuaResult<u3
 pub(super) fn scene_create_actor(state: &mut LuaState) -> LuaResult<u32> {
     let scene_id = frame_id_from_stack(state, 1)?;
     let name = super::shared::opt_string(state, 2);
+    let tag = name.clone();
     let actor_id = create_frame_instance(
         state,
         WidgetType::Frame,
@@ -960,10 +961,46 @@ pub(super) fn scene_create_actor(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
     if let Some(scene) = sim.widgets.get_mut_visual(scene_id) {
         scene.model_scene_actor_ids.push(actor_id);
+        if let Some(tag) = tag.filter(|t| !t.is_empty()) {
+            scene
+                .model_scene_actor_tags
+                .retain(|(existing, _)| existing != &tag);
+            scene.model_scene_actor_tags.push((tag, actor_id));
+        }
     }
     drop(sim);
     let actor = frame_ref(state, actor_id)?;
     state.push(actor);
+    Ok(1)
+}
+
+/// Returns the actor whose script tag matches `tag`, mirroring
+/// `ModelSceneMixin:GetActorByTag`
+/// (`vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneMixin.lua:136`).
+/// AlliedRacesFrameMixin:UpdateModel relies on this lookup to attach
+/// the per-race actor before re-applying the creature display ID.
+pub(super) fn scene_get_actor_by_tag(state: &mut LuaState) -> LuaResult<u32> {
+    let scene_id = frame_id_from_stack(state, 1)?;
+    let Some(tag) = super::shared::opt_string(state, 2) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let actor_id = borrow_state(state)?
+        .widgets
+        .get(scene_id)
+        .and_then(|scene| {
+            scene
+                .model_scene_actor_tags
+                .iter()
+                .find(|(existing, _)| existing == &tag)
+                .map(|(_, id)| *id)
+        });
+    if let Some(actor_id) = actor_id {
+        let actor = frame_ref(state, actor_id)?;
+        state.push(actor);
+    } else {
+        state.push(Val::Nil);
+    }
     Ok(1)
 }
 
@@ -1002,9 +1039,11 @@ pub(super) fn scene_take_actor(state: &mut LuaState) -> LuaResult<u32> {
     let scene_id = frame_id_from_stack(state, 1)?;
     let actor_id = {
         let mut sim = borrow_state_mut(state)?;
-        sim.widgets
-            .get_mut_visual(scene_id)
-            .and_then(|scene| scene.model_scene_actor_ids.pop())
+        sim.widgets.get_mut_visual(scene_id).and_then(|scene| {
+            let popped = scene.model_scene_actor_ids.pop()?;
+            scene.model_scene_actor_tags.retain(|(_, id)| *id != popped);
+            Some(popped)
+        })
     };
     if let Some(actor_id) = actor_id {
         let mut sim = borrow_state_mut(state)?;
@@ -1031,7 +1070,10 @@ pub(super) fn scene_clear_scene(state: &mut LuaState) -> LuaResult<u32> {
         let mut sim = borrow_state_mut(state)?;
         sim.widgets
             .get_mut_visual(scene_id)
-            .map(|scene| std::mem::take(&mut scene.model_scene_actor_ids))
+            .map(|scene| {
+                scene.model_scene_actor_tags.clear();
+                std::mem::take(&mut scene.model_scene_actor_ids)
+            })
             .unwrap_or_default()
     };
     let mut sim = borrow_state_mut(state)?;
@@ -1240,6 +1282,7 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("CreateActor", scene_create_actor),
     ("GetNumActors", scene_get_num_actors),
     ("GetActorAtIndex", scene_get_actor_at_index),
+    ("GetActorByTag", scene_get_actor_by_tag),
     ("TakeActor", scene_take_actor),
     ("SetResetCallback", scene_set_reset_callback),
     ("ClearScene", scene_clear_scene),

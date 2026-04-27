@@ -309,6 +309,10 @@ pub struct Frame {
     pub model_scene_state: ModelSceneState,
     /// ModelScene actor IDs in scene order.
     pub model_scene_actor_ids: Vec<u64>,
+    /// ModelScene actor lookup by script tag, mirroring
+    /// `ModelSceneMixin.tagToActor`. Populated when `CreateActor(tag)`
+    /// runs with a non-empty tag and cleared by `ClearScene`.
+    pub model_scene_actor_tags: Vec<(String, u64)>,
     /// Persisted PlayerModel-only state.
     pub player_model_state: PlayerModelState,
     /// Whether mouse motion events are enabled.
