@@ -29,8 +29,8 @@ The simulator reads textures and fonts directly from a live WoW install at `/syn
 
 ### Smoke verification
 
-- [x] `cargo run --example casc_smoke` resolves at least the three baseline textures (`Interface\Buttons\UI-Panel-Button-Up`, `Interface\DialogFrame\UI-DialogBox-Background`, `Interface\Icons\INV_Misc_QuestionMark`) end-to-end through `TextureManager.load`.
-- [x] The same example reports `Some(fdid)` for at least `fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf` via direct `asset_resolver::lookup_path`.
+- [ ] `cargo run --example casc_smoke` resolves at least the three baseline textures (`Interface\Buttons\UI-Panel-Button-Up`, `Interface\DialogFrame\UI-DialogBox-Background`, `Interface\Icons\INV_Misc_QuestionMark`) end-to-end through `TextureManager.load`.
+- [ ] The same example reports `Some(fdid)` for at least `fonts/frizqt__.ttf`, `fonts/arialn.ttf`, `fonts/frizqt___cyr.ttf` via direct `asset_resolver::lookup_path`.
 
 ## How it works
 
@@ -55,7 +55,7 @@ The simulator reads textures and fonts directly from a live WoW install at `/syn
 
 ## Known gaps (current cycle)
 
-- [ ] No Rust integration test in `tests/` that asserts CASC actually produces correct bytes (only the example binary covers this).
+- [ ] No Rust integration test in `tests/` that asserts CASC actually produces correct bytes. `examples/casc_smoke.rs` is a manual harness — `cargo test` does not run it, so every smoke-verification bullet above is `[ ]`. Promote them by writing a `#[test]` (gated on `/syncthing/World of Warcraft/Data` existing) that calls `TextureManager.load` and `asset_resolver::lookup_path` and asserts the same three textures + three fonts.
 - [ ] No regression coverage for the `WOW_SIM_CASC=0` opt-out path — the OnceLock state is process-global and hard to flip mid-test.
 - [ ] No assertion that the warm-cache path (`out_path.exists()` short-circuit in `try_casc_resolve`) is actually faster than the cold path.
 - [ ] `asset_resolver::lookup_path` is not backslash-tolerant; the loader normalises but consumers calling the resolver directly hit `None` on `Fonts\\FRIZQT__.TTF`. Consider lifting normalisation into `asset-resolver` upstream.
