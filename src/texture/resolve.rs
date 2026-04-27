@@ -51,13 +51,19 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
 
     // Listfile entries always include the file extension; our normalized paths usually don't.
     // Try common UI asset extensions.
+    let lower = normalized_path.to_ascii_lowercase();
+    let prefixed =
+        (!lower.starts_with("interface/")).then(|| format!("Interface/{normalized_path}"));
+    let bases: Vec<String> = std::iter::once(normalized_path.to_string())
+        .chain(prefixed)
+        .collect();
     let candidates: &[&str] = &["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"];
-    let (fdid, listfile_path) = std::iter::once(normalized_path.to_string())
-        .chain(
-            candidates
-                .iter()
-                .map(|ext| format!("{normalized_path}.{ext}")),
-        )
+    let (fdid, listfile_path) = bases
+        .iter()
+        .flat_map(|b| {
+            std::iter::once(b.clone())
+                .chain(candidates.iter().map(move |ext| format!("{b}.{ext}")))
+        })
         .find_map(|p| resolver.lookup_path(&p).map(|fdid| (fdid, p)))?;
 
     let extract_dir = casc_extract_dir()?;
@@ -184,10 +190,17 @@ impl TextureManager {
         // has GC'd but the older dump still has on disk.
         let blizzard_art_root =
             Path::new("/syncthing/World of Warcraft/_retail_/BlizzardInterfaceArt");
-        if blizzard_art_root.exists()
-            && let Some(result) = self.try_resolve_in_dir(blizzard_art_root, normalized_path)
-        {
-            return Some(result);
+        if blizzard_art_root.exists() {
+            if let Some(result) = self.try_resolve_in_dir(blizzard_art_root, normalized_path) {
+                return Some(result);
+            }
+            let lower = normalized_path.to_ascii_lowercase();
+            if !lower.starts_with("interface/") {
+                let prefixed = format!("Interface/{normalized_path}");
+                if let Some(result) = self.try_resolve_in_dir(blizzard_art_root, &prefixed) {
+                    return Some(result);
+                }
+            }
         }
 
         None
