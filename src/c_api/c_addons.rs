@@ -109,6 +109,8 @@ fn register_c_addons_state(
     table_set_rust_fn_static(state, t, "DisableAddOn", c_addons_disable_addon)?;
     table_set_rust_fn_static(state, t, "EnableAllAddOns", c_addons_enable_all_addons)?;
     table_set_rust_fn_static(state, t, "DisableAllAddOns", c_addons_disable_all_addons)?;
+    table_set_rust_fn_static(state, t, "SaveAddOns", c_addons_save_addons)?;
+    table_set_rust_fn_static(state, t, "ResetAddOns", c_addons_reset_addons)?;
     table_set_rust_fn_static(
         state,
         t,
@@ -415,6 +417,32 @@ fn c_addons_disable_all_addons(state: &mut LuaState) -> LuaResult<u32> {
     for addon in &mut borrow_state_mut(state)?.addons {
         if addon.folder_name != "__BuiltIn" {
             addon.enabled = false;
+        }
+    }
+    Ok(0)
+}
+
+/// `C_AddOns.SaveAddOns()` — commit the current per-addon enable state as
+/// the new baseline. Subsequent `ResetAddOns` calls revert back to this
+/// snapshot. Called by the addon list when the user clicks Okay.
+fn c_addons_save_addons(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let snapshot: Vec<bool> = sim.addons.iter().map(|a| a.enabled).collect();
+    sim.addon_saved_enable_state = Some(snapshot);
+    Ok(0)
+}
+
+/// `C_AddOns.ResetAddOns()` — restore per-addon enable state from the last
+/// `SaveAddOns` snapshot. No-op when no snapshot exists. Called by the
+/// addon list when the user clicks Cancel, so pending toggles get reverted.
+fn c_addons_reset_addons(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    let Some(snapshot) = sim.addon_saved_enable_state.clone() else {
+        return Ok(0);
+    };
+    for (idx, &saved_enabled) in snapshot.iter().enumerate() {
+        if let Some(addon) = sim.addons.get_mut(idx) {
+            addon.enabled = saved_enabled;
         }
     }
     Ok(0)

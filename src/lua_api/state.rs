@@ -25,6 +25,7 @@ macro_rules! build_empty_sim_state {
             rilua_timers: ::std::collections::VecDeque::new(),
             focused_frame_id: $runtime.focused_frame_id,
             addons: $collections.addons,
+            addon_saved_enable_state: None,
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
@@ -592,6 +593,14 @@ pub struct SimState {
     pub focused_frame_id: Option<u64>,
     /// Registered addons (includes all scanned addons, not just loaded ones).
     pub addons: Vec<AddonInfo>,
+    /// Last `C_AddOns.SaveAddOns` snapshot of `addons[i].enabled`, indexed
+    /// to match `addons`. `None` means no commit has happened yet, in which
+    /// case `ResetAddOns` is a no-op. Live mutations through
+    /// `EnableAddOn`/`DisableAddOn`/`EnableAllAddOns`/`DisableAllAddOns`
+    /// modify `addons[i].enabled` directly; `Save` overwrites this snapshot
+    /// with the current live state, and `Reset` restores live state from
+    /// this snapshot.
+    pub addon_saved_enable_state: Option<Vec<bool>>,
     /// Console variables (CVars).
     pub cvars: CVarStorage,
     /// Tooltip state for GameTooltip frames (keyed by frame ID).

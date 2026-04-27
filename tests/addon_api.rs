@@ -854,3 +854,113 @@ fn test_is_addon_default_enabled_unknown_returns_false() {
         .unwrap();
     assert!(!by_index);
 }
+
+// ── C_AddOns.SaveAddOns / ResetAddOns ─────────────────────────────────────────
+
+fn env_with_two_user_addons() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    {
+        let mut state = env.state().borrow_mut();
+        state.addons.push(AddonInfo {
+            folder_name: "AddonA".into(),
+            title: "A".into(),
+            enabled: true,
+            ..Default::default()
+        });
+        state.addons.push(AddonInfo {
+            folder_name: "AddonB".into(),
+            title: "B".into(),
+            enabled: true,
+            ..Default::default()
+        });
+    }
+    env
+}
+
+fn enabled_state(env: &WowLuaEnv, name: &str) -> bool {
+    let state = env.state().borrow();
+    state
+        .addons
+        .iter()
+        .find(|a| a.folder_name == name)
+        .expect("addon registered")
+        .enabled
+}
+
+#[test]
+fn test_save_addons_followed_by_reset_reverts_pending_disable() {
+    let env = env_with_two_user_addons();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+    env.exec("C_AddOns.DisableAddOn('AddonA')").unwrap();
+    assert!(!enabled_state(&env, "AddonA"));
+
+    env.exec("C_AddOns.ResetAddOns()").unwrap();
+    assert!(
+        enabled_state(&env, "AddonA"),
+        "ResetAddOns must revert AddonA to its saved-enabled baseline"
+    );
+}
+
+#[test]
+fn test_save_addons_followed_by_reset_reverts_pending_enable() {
+    let env = env_with_two_user_addons();
+    env.exec("C_AddOns.DisableAddOn('AddonA')").unwrap();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+    env.exec("C_AddOns.EnableAddOn('AddonA')").unwrap();
+    assert!(enabled_state(&env, "AddonA"));
+
+    env.exec("C_AddOns.ResetAddOns()").unwrap();
+    assert!(
+        !enabled_state(&env, "AddonA"),
+        "ResetAddOns must revert AddonA to its saved-disabled baseline"
+    );
+}
+
+#[test]
+fn test_save_addons_baseline_includes_all_addons() {
+    // Toggle both addons, save, toggle back the other way, reset — each
+    // addon must end up at the value it had at Save time, not at any of the
+    // intermediate transitions.
+    let env = env_with_two_user_addons();
+    env.exec("C_AddOns.DisableAddOn('AddonA')").unwrap();
+    env.exec("C_AddOns.DisableAddOn('AddonB')").unwrap();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+
+    env.exec("C_AddOns.EnableAllAddOns()").unwrap();
+    assert!(enabled_state(&env, "AddonA"));
+    assert!(enabled_state(&env, "AddonB"));
+
+    env.exec("C_AddOns.ResetAddOns()").unwrap();
+    assert!(!enabled_state(&env, "AddonA"));
+    assert!(!enabled_state(&env, "AddonB"));
+}
+
+#[test]
+fn test_reset_addons_no_op_when_nothing_saved() {
+    // Without a prior SaveAddOns, ResetAddOns must not clobber the live
+    // state — there's no baseline to revert to.
+    let env = env_with_two_user_addons();
+    env.exec("C_AddOns.DisableAddOn('AddonA')").unwrap();
+    env.exec("C_AddOns.ResetAddOns()").unwrap();
+    assert!(
+        !enabled_state(&env, "AddonA"),
+        "ResetAddOns without a snapshot should leave live state alone"
+    );
+}
+
+#[test]
+fn test_save_addons_overwrites_previous_baseline() {
+    // The baseline is the *most recent* save, not a stack. After save→toggle
+    // →save, Reset should revert to the second save's state.
+    let env = env_with_two_user_addons();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+    env.exec("C_AddOns.DisableAddOn('AddonA')").unwrap();
+    env.exec("C_AddOns.SaveAddOns()").unwrap();
+    env.exec("C_AddOns.EnableAddOn('AddonA')").unwrap();
+
+    env.exec("C_AddOns.ResetAddOns()").unwrap();
+    assert!(
+        !enabled_state(&env, "AddonA"),
+        "ResetAddOns should revert to the second SaveAddOns snapshot, not the first"
+    );
+}
