@@ -1,6 +1,6 @@
 # CASC asset loading
 
-The simulator reads textures and fonts directly from a live WoW install at `/syncthing/World of Warcraft/Data` via the [`asset-resolver`](/home/osso/Projects/world-of-osso/asset-resolver) crate (a thin wrapper over `cascette-rs` + the community listfile). This spec describes the contract the loader must satisfy. For implementation details see the wiki.
+The simulator reads textures and fonts directly from a live WoW install via the [`asset-resolver`](/home/osso/Projects/world-of-osso/asset-resolver) crate (a thin wrapper over `cascette-rs` + the community listfile). The install location is discovered through `asset_resolver::wow_install_path()`: `WOW_INSTALL_PATH` env, then `WOW_DATA_PATH` env, then a built-in candidate list (Linux/Wine/Lutris/WSL/macOS); the default is `/syncthing/World of Warcraft`. This spec describes the contract the loader must satisfy. For implementation details see the wiki.
 
 ## What it must do
 
@@ -9,7 +9,8 @@ The simulator reads textures and fonts directly from a live WoW install at `/syn
 - [ ] `casc` Cargo feature is on by default and pulls in `asset-resolver`.
 - [ ] Building with `--no-default-features` (or `--features ""`) compiles cleanly with no CASC symbols and the loader skips the CASC tier entirely.
 - [ ] `WOW_SIM_CASC=0` at runtime disables the CASC tier without rebuilding (loader behaves as if the feature were off).
-- [ ] When neither `/syncthing/World of Warcraft/Data` exists nor `GAME_ENGINE_SHARED_ROOT` is set, the loader does not panic — it just reports a CASC miss and continues.
+- [ ] When `asset_resolver::wow_install_path()` returns `None` (no env override and no candidate path on disk), the loader does not panic — it just reports a CASC miss and continues.
+- [ ] `WOW_INSTALL_PATH` (install root) and `WOW_DATA_PATH` (`Data/` dir) override discovery; both are validated by checking that `<root>/Data/data` exists before they win.
 
 ### Texture resolution
 
@@ -19,7 +20,7 @@ The simulator reads textures and fonts directly from a live WoW install at `/syn
 - [ ] A second resolution of the same path returns the cached file without re-extracting from CASC.
 - [ ] Addon-shipped textures under `Interface/AddOns/<Addon>/...` resolve before CASC is consulted.
 - [ ] Listfile lookup is case-insensitive (`UI-Panel-Button-Up.blp` and `ui-panel-button-up.blp` both resolve to the same fileDataID).
-- [ ] When CASC misses (e.g. live archives have been GC'd by a partial patch but the encoding manifest still references the entry), a third-tier fallback resolves the path under `/syncthing/World of Warcraft/_retail_/BlizzardInterfaceArt/Interface/...` with the same case-insensitive matching as the addon tier. Repeated misses on the same path use the existing `.missing` sentinel to short-circuit CASC fast (~40ms warm path).
+- [ ] When CASC misses (e.g. live archives have been GC'd by a partial patch but the encoding manifest still references the entry), a third-tier fallback resolves the path under `<install-root>/_retail_/BlizzardInterfaceArt/Interface/...` (install root from `asset_resolver::wow_install_path()`) with the same case-insensitive matching as the addon tier. Repeated misses on the same path use the existing `.missing` sentinel to short-circuit CASC fast (~40ms warm path).
 
 ### Font resolution
 

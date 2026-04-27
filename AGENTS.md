@@ -83,7 +83,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 ## WoW Game Files
 
 - `./Interface/BlizzardUI/` - Symlink → `vendor/wow-ui-source/Interface/AddOns` (Gethe/wow-ui-source sparse checkout, pinned to tag). Run `./scripts/setup-blizzard-ui.sh` to set up.
-- `/syncthing/World of Warcraft/Data` - Live WoW install. The simulator reads textures and fonts directly from CASC via the `asset-resolver` crate (gated behind the `casc` feature, on by default). Set `WOW_SIM_CASC=0` to disable.
+- WoW install (default `/syncthing/World of Warcraft`, override via `WOW_INSTALL_PATH` or `WOW_DATA_PATH`; `asset_resolver::wow_install_path()` also tries common Linux/Wine/Lutris/WSL/macOS paths). The simulator reads textures and fonts directly from CASC via the `asset-resolver` crate (gated behind the `casc` feature, on by default). Set `WOW_SIM_CASC=0` to disable.
 - `~/Projects/wow/WTF` - SavedVariables from real WoW installation
 
 ## Reference Implementations
@@ -457,7 +457,7 @@ wow-cli audit-api --gaps --format plan         # Paste-ready markdown checkboxes
 ### Texture Sources (in order of priority)
 
 1. Addon directories — for addon-specific textures shipped under `Interface/AddOns/`.
-2. CASC — the live WoW install at `/syncthing/World of Warcraft/Data`, resolved via the `asset-resolver` crate using the community listfile. Extracted BLPs are cached under `~/.cache/wow-ui-sim/casc-extract/` keyed by listfile path.
+2. CASC — the live WoW install discovered by `asset_resolver::wow_install_path()` (default `/syncthing/World of Warcraft`, overridable via `WOW_INSTALL_PATH` or `WOW_DATA_PATH`), resolved via the `asset-resolver` crate using the community listfile. Extracted BLPs are cached under `~/.cache/wow-ui-sim/casc-extract/` keyed by listfile path.
 
 There is no longer a curated `./textures/` mirror or `~/Projects/wow/Interface` extract — adding a new texture means making sure CASC has it (the listfile is updated upstream by `asset-resolver`).
 

@@ -29,9 +29,19 @@ fn casc_enabled() -> bool {
                 }
             }
         }
-        // Require the WoW install to be present, otherwise no point trying.
-        std::path::Path::new("/syncthing/World of Warcraft/Data").exists()
+        // Require a discoverable WoW install, otherwise no point trying.
+        asset_resolver::wow_install_path().is_some()
     })
+}
+
+#[cfg(feature = "casc")]
+fn blizzard_interface_art_root() -> Option<PathBuf> {
+    asset_resolver::wow_install_path().map(|root| root.join("_retail_/BlizzardInterfaceArt"))
+}
+
+#[cfg(not(feature = "casc"))]
+fn blizzard_interface_art_root() -> Option<PathBuf> {
+    None
 }
 
 #[cfg(feature = "casc")]
@@ -188,16 +198,16 @@ impl TextureManager {
 
         // Fallback: an extracted Interface dump. Covers entries the live CASC
         // has GC'd but the older dump still has on disk.
-        let blizzard_art_root =
-            Path::new("/syncthing/World of Warcraft/_retail_/BlizzardInterfaceArt");
-        if blizzard_art_root.exists() {
-            if let Some(result) = self.try_resolve_in_dir(blizzard_art_root, normalized_path) {
+        if let Some(blizzard_art_root) = blizzard_interface_art_root()
+            && blizzard_art_root.exists()
+        {
+            if let Some(result) = self.try_resolve_in_dir(&blizzard_art_root, normalized_path) {
                 return Some(result);
             }
             let lower = normalized_path.to_ascii_lowercase();
             if !lower.starts_with("interface/") {
                 let prefixed = format!("Interface/{normalized_path}");
-                if let Some(result) = self.try_resolve_in_dir(blizzard_art_root, &prefixed) {
+                if let Some(result) = self.try_resolve_in_dir(&blizzard_art_root, &prefixed) {
                     return Some(result);
                 }
             }

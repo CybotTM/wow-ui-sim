@@ -90,8 +90,8 @@ fn casc_enabled() -> bool {
                 }
             }
         }
-        // Require the WoW install to be present, otherwise no point trying.
-        std::path::Path::new("/syncthing/World of Warcraft/Data").exists()
+        // Require a discoverable WoW install, otherwise no point trying.
+        asset_resolver::wow_install_path().is_some()
     })
 }
 
