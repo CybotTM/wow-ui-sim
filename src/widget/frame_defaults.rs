@@ -214,6 +214,7 @@ macro_rules! frame_defaults {
             editbox_input_language: "ROMAN".to_string(),
             editbox_highlight_range: None,
             editbox_highlight_color: Color::new(1.0, 1.0, 1.0, 1.0),
+            editbox_focused: false,
 
             // ScrollFrame
             scroll_child_id: None,
