@@ -53,6 +53,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[explicit-xml-parent-anchors]] | Nested XML frames with `parent="..."` must use that explicit parent for implicit anchors; fixed PaperDoll sidebar tabs anchoring to `PaperDollFrame` instead of `CharacterFrameInsetRight` |
 | [[generated-stubs-audit]] | 6 priority findings in generated_stubs.rs affecting startup/panel-load paths |
 | [[chatframe-scrollbar-anchor-reapply]] | Inherited child anchor reapply used the child name for `$parent...` substitution, pushing `ChatFrame1` scrollbar descendants off-screen |
+| [[hero-spec-dialog-anchors]] | LIGHTSMITH/TEMPLAR selection dialog: layer-children batched out of XML order + runtime templates skipped named-anchor re-resolution, dropping panel content to spec-frame edge |
 | [[hero-spec-icon-bug]] | Retired — 5 layers of evidence confirm icon renders correctly |
 | [[hit-testing]] | Two-phase algorithm: HitGrid spatial index + depth-first child drill-down |
 | [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |
