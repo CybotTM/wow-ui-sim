@@ -164,6 +164,7 @@ macro_rules! build_empty_sim_state {
             photo_sharing_enabled: false,
             tutorial_flags: $collections.tutorial_flags,
             wowlabs: WowLabsState::default(),
+            archaeology: ArchaeologyState::default(),
             quest_log: Vec::new(),
             quest_log_entries: QuestLogState::seeded(),
             pending_quest_offer: None,
@@ -1382,6 +1383,11 @@ pub struct SimState {
     /// Seeded WoW Labs / Plunderstorm matchmaking state used by the
     /// `C_WowLabs*` namespaces.
     pub wowlabs: WowLabsState,
+    /// Backing state for the legacy archaeology globals consumed by
+    /// `Blizzard_ArchaeologyUI` (`GetArchaeologyInfo`,
+    /// `GetNumArchaeologyRaces`, `GetArchaeologyRaceInfo`,
+    /// `GetNumArtifactsByRace`).
+    pub archaeology: ArchaeologyState,
     /// Active quests in the player's log (quest IDs). Order reflects
     /// accept order. Drives `GetNumQuestLogEntries` and the quest-verbs
     /// module in `globals/quest_verbs.rs`.
@@ -1697,13 +1703,14 @@ pub struct SimState {
 // Keybindings) live in `sim_substates.rs`; re-exported here so existing
 // `crate::lua_api::state::X` call sites keep working.
 pub use super::sim_substates::{
-    BattlefieldQueue, BattlefieldStatus, CharacterServicesState, ChatChannel, ChatWindow,
-    FactionEntry, GameRuleValue, GameRulesState, GossipOption, GossipQuestRow, GossipState,
-    Keybindings, LfgListCounts, LootMethodState, MessageLogEntry, ModifierKeys, MouseButtons,
-    NetStats, PetBattlePet, PetBattleState, PetState, QuestLogEntry, QuestLogState,
-    QuestRewardCurrency, QuestRewardItem, TorghastState, TradeState, VoiceChannel, VoiceChatState,
-    VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo, WowLabsDataManagerState,
-    WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember, WowLabsPoint, WowLabsState,
+    ArchaeologyArtifact, ArchaeologyRace, ArchaeologyState, BattlefieldQueue, BattlefieldStatus,
+    CharacterServicesState, ChatChannel, ChatWindow, FactionEntry, GameRuleValue, GameRulesState,
+    GossipOption, GossipQuestRow, GossipState, Keybindings, LfgListCounts, LootMethodState,
+    MessageLogEntry, ModifierKeys, MouseButtons, NetStats, PetBattlePet, PetBattleState, PetState,
+    QuestLogEntry, QuestLogState, QuestRewardCurrency, QuestRewardItem, TorghastState, TradeState,
+    VoiceChannel, VoiceChatState, VoiceMember, WowLabsAreaInfo, WowLabsCircleInfo,
+    WowLabsDataManagerState, WowLabsMatchmakingState, WowLabsPartyInvite, WowLabsPartyMember,
+    WowLabsPoint, WowLabsState,
 };
 
 #[derive(Default)]

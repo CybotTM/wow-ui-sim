@@ -171,6 +171,7 @@ fn register_state_probes(lua: &mut rilua::Lua) -> crate::Result<()> {
     super::mail_probes::register_all(lua)?;
     super::voice_chat_probes::register_all(lua)?;
     super::state_backed_queries::register_all(lua)?;
+    super::archaeology::register_all(lua)?;
     Ok(())
 }
 
