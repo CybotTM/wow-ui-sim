@@ -35,6 +35,41 @@ if CreateColor == nil then
   end
 end
 
+if GetMoneyString == nil then
+  -- Mirrors Blizzard's FormattingUtil.lua plain-text path with the
+  -- 2-arg signature the simulator surfaces. The icon-texture escapes
+  -- and colorblind CVar branches are not modelled, so the output is
+  -- the chat-style "123g 45s 67c" form. Zero-copper segments are
+  -- elided unless the entire amount is zero (canonicalises 0 → "0c").
+  local function __wow_separate_thousands(n)
+    local digits = tostring(n)
+    if #digits <= 3 then
+      return digits
+    end
+    local out = digits:sub(-3)
+    local i = #digits - 3
+    while i > 0 do
+      local chunk_start = math.max(1, i - 2)
+      out = digits:sub(chunk_start, i) .. "," .. out
+      i = chunk_start - 1
+    end
+    return out
+  end
+  function GetMoneyString(money, separateThousands)
+    money = math.floor(tonumber(money) or 0)
+    if money < 0 then money = 0 end
+    local gold = math.floor(money / 10000)
+    local silver = math.floor((money - gold * 10000) / 100)
+    local copper = money % 100
+    local gold_text = separateThousands and __wow_separate_thousands(gold) or tostring(gold)
+    local parts = {}
+    if gold > 0 then parts[#parts + 1] = gold_text .. "g" end
+    if silver > 0 then parts[#parts + 1] = silver .. "s" end
+    if copper > 0 or #parts == 0 then parts[#parts + 1] = copper .. "c" end
+    return table.concat(parts, " ")
+  end
+end
+
 if GetColorForCurrencyReward == nil then
   -- Mirrors Blizzard's UIParent.lua. The currency-overflow probe is not
   -- modelled, so the overflow branch is omitted; callers always pass
