@@ -75,6 +75,7 @@ macro_rules! build_empty_sim_state {
             equipped_artifact: None,
             artifact_point_costs: HashMap::new(),
             allied_races: HashMap::new(),
+            model_scenes: HashMap::new(),
             active_player_interactions: HashSet::new(),
             azerite_item: None,
             major_factions: HashMap::new(),
@@ -260,8 +261,8 @@ pub use super::game_data::{
     tick_party_health,
 };
 use super::game_data::{
-    default_action_bars, default_allied_races, default_party, default_player_buffs,
-    random_player_name,
+    default_action_bars, default_allied_races, default_model_scenes, default_party,
+    default_player_buffs, random_player_name,
 };
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
@@ -941,6 +942,17 @@ pub struct SimState {
     /// every race the dialog can be opened for. Unknown ids return nil and
     /// `AlliedRacesFrameMixin:LoadRaceData` short-circuits.
     pub allied_races: HashMap<i64, AlliedRaceInfo>,
+    /// Static model-scene actor manifest keyed by `modelSceneID`. Mirrors
+    /// the canonical `C_ModelInfo.GetModelSceneInfoByID` data: each entry
+    /// is the ordered list of script tags an actor pool re-creates when
+    /// `ModelScene:TransitionToModelSceneID` fires for that scene id.
+    /// Seeded with scene `727` (AlliedRaces showcase) so
+    /// `Blizzard_AlliedRacesFrameUI.lua:143` resolves
+    /// `GetActorByTag(<race-tag>)` and the `"player"` fallback after a
+    /// transition. Scenes not listed here transition to a no-op, matching
+    /// the `not modelSceneType` early return in
+    /// `vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneMixin.lua:73`.
+    pub model_scenes: HashMap<i64, Vec<String>>,
     /// Active NPC-interaction set keyed by `Enum.PlayerInteractionType`.
     /// Populated when frames open via the player-interaction manager and
     /// cleared by `C_PlayerInteractionManager.ClearInteraction(type)`.
@@ -2317,6 +2329,7 @@ impl SimState {
         self.party_members = default_party();
         self.party_group_active = false;
         self.allied_races = default_allied_races();
+        self.model_scenes = default_model_scenes();
         crate::lua_api::globals::keybindings::init_keybindings(self);
         self.player.name = random_player_name();
         self.player.power = 50_000;

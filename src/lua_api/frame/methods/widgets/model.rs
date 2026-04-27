@@ -1119,6 +1119,122 @@ pub(super) fn scene_is_allow_overlapped_models(state: &mut LuaState) -> LuaResul
     Ok(1)
 }
 
+/// Rebuilds the scene's actor pool from the static `modelSceneID` manifest
+/// (`SimState::model_scenes`), mirroring
+/// `ModelSceneMixin:TransitionToModelSceneID`
+/// (`vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneMixin.lua:71`).
+///
+/// Real WoW reads `C_ModelInfo.GetModelSceneInfoByID(modelSceneID)` and
+/// re-creates one actor per declared row. We carry the same per-scene tag
+/// list keyed on `modelSceneID`, so `ClearScene + Transition + GetActorByTag`
+/// rounds-trips for `Blizzard_AlliedRacesFrameUI:UpdateModel`. Visual
+/// transitions (camera pan, fade) are out of scope — actor pool + the
+/// `self.modelSceneID` book-keeping is enough for tag lookup, the only
+/// observable contract addons rely on.
+///
+/// We deliberately do not invoke `self.resetCallback` here. The Blizzard
+/// mixin only fires the callback from `:Reset()`, and AlliedRaces' callback
+/// (`AlliedRacesFrameMixin.OnModelSceneReset`) calls back into
+/// `UpdateModel → TransitionToModelSceneID`, which would loop forever.
+pub(super) fn scene_transition_to_model_scene_id(state: &mut LuaState) -> LuaResult<u32> {
+    let scene_id = frame_id_from_stack(state, 1)?;
+    let Val::Table(scene_ref) = stack_val(state, 1) else {
+        return Ok(0);
+    };
+    let target_scene_id = val_to_f64(stack_val(state, 2)) as i64;
+    let force = opt_bool(state, 5).unwrap_or(false);
+
+    let tags = lookup_model_scene_actor_tags(state, target_scene_id)?;
+    let Some(tags) = tags else { return Ok(0) };
+
+    if !force && current_model_scene_id_matches(state, scene_ref, target_scene_id) {
+        return Ok(0);
+    }
+
+    drain_existing_actors(state, scene_id)?;
+    rebuild_actor_pool(state, scene_id, &tags)?;
+    write_model_scene_id(state, scene_ref, target_scene_id);
+    Ok(0)
+}
+
+fn lookup_model_scene_actor_tags(
+    state: &mut LuaState,
+    scene_id: i64,
+) -> LuaResult<Option<Vec<String>>> {
+    let sim = borrow_state(state)?;
+    let tags = sim
+        .model_scenes
+        .get(&scene_id)
+        .filter(|t| !t.is_empty())
+        .cloned();
+    Ok(tags)
+}
+
+fn current_model_scene_id_matches(
+    state: &mut LuaState,
+    scene_ref: GcRef<Table>,
+    target_scene_id: i64,
+) -> bool {
+    let key = state.gc.intern_string(b"modelSceneID");
+    let Some(scene_table) = state.gc.tables.get(scene_ref) else {
+        return false;
+    };
+    matches!(
+        scene_table.get_str(key, &state.gc.string_arena),
+        Val::Num(n) if (n as i64) == target_scene_id
+    )
+}
+
+fn drain_existing_actors(state: &mut LuaState, scene_id: u64) -> LuaResult<()> {
+    let actor_ids: Vec<u64> = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.widgets
+            .get_mut_visual(scene_id)
+            .map(|scene| {
+                scene.model_scene_actor_tags.clear();
+                std::mem::take(&mut scene.model_scene_actor_ids)
+            })
+            .unwrap_or_default()
+    };
+    let mut sim = borrow_state_mut(state)?;
+    for actor_id in actor_ids {
+        reparent_widget(&mut sim.widgets, actor_id, None);
+    }
+    Ok(())
+}
+
+fn rebuild_actor_pool(state: &mut LuaState, scene_id: u64, tags: &[String]) -> LuaResult<()> {
+    for tag in tags {
+        let actor_id = create_frame_instance(
+            state,
+            WidgetType::Frame,
+            "ModelSceneActor",
+            Some(tag.clone()),
+            Some(scene_id),
+            true,
+            None,
+        )?;
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(scene) = sim.widgets.get_mut_visual(scene_id) {
+            scene.model_scene_actor_ids.push(actor_id);
+            scene.model_scene_actor_tags.push((tag.clone(), actor_id));
+        }
+    }
+    Ok(())
+}
+
+fn write_model_scene_id(state: &mut LuaState, scene_ref: GcRef<Table>, scene_id: i64) {
+    let key = state.gc.intern_string(b"modelSceneID");
+    if let Some(t) = state.gc.tables.get_mut(scene_ref) {
+        let _ = t.raw_set(
+            Val::Str(key),
+            Val::Num(scene_id as f64),
+            &state.gc.string_arena,
+        );
+    }
+    state.gc.barrier_back(scene_ref);
+}
+
 /// Stores a Lua callback at `self.resetCallback`, mirroring
 /// `ModelSceneMixin:SetResetCallback`
 /// (`vendor/wow-ui-source/Interface/AddOns/Blizzard_SharedXML/ModelSceneMixin.lua:56`).
@@ -1205,7 +1321,10 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("ResetLights", stub_variadic),
     ("RefreshUnit", refresh_unit),
     ("RefreshCamera", refresh_camera),
-    ("TransitionToModelSceneID", stub_variadic),
+    (
+        "TransitionToModelSceneID",
+        scene_transition_to_model_scene_id,
+    ),
     ("SetFromModelSceneID", stub_variadic),
     ("CycleVariation", stub_variadic),
     ("AdvanceTime", stub_variadic),

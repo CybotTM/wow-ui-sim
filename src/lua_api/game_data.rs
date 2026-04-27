@@ -984,6 +984,49 @@ fn ability(name: &str, description: &str, icon: i64) -> AlliedRaceRacialAbility 
     }
 }
 
+/// Canonical actor-tag table for the static `modelSceneID` registry consumed
+/// by `ModelScene:TransitionToModelSceneID`.
+///
+/// Real WoW backs this with `C_ModelInfo.GetModelSceneInfoByID` rows that
+/// resolve to per-actor records (`UiModelSceneActor.db2`). We only carry the
+/// script tags because the simulator's 3D path is intentionally stubbed —
+/// the tags are what `GetActorByTag` needs to round-trip the same actor the
+/// addon expects.
+///
+/// Scene `727` is the AlliedRaces showcase scene; the tags mirror the
+/// dedup'd values of `Actor_X_ModelID` in
+/// `Blizzard_AlliedRacesUI/Blizzard_AlliedRacesFrameUI.lua` plus the
+/// `"player"` fallback the mixin defaults to when the model id is unknown.
+pub fn default_model_scenes() -> HashMap<i64, Vec<String>> {
+    let mut scenes = HashMap::new();
+    scenes.insert(727, allied_races_scene_actor_tags());
+    scenes
+}
+
+fn allied_races_scene_actor_tags() -> Vec<String> {
+    [
+        "player",
+        "lightforgeddraenei",
+        "lightforgeddraenei-female",
+        "darkirondwarf",
+        "darkirondwarf-female",
+        "voidelf",
+        "voidelf-female",
+        "mechagnome",
+        "vulpera",
+        "zandalaritroll",
+        "highmountaintauren",
+        "highmountaintauren-female",
+        "nightborne",
+        "magharorc",
+        "earthendwarf",
+        "earthendwarf-female",
+    ]
+    .iter()
+    .map(|s| (*s).to_string())
+    .collect()
+}
+
 /// Pre-populate main action bar (slots 1-12) with Protection Paladin spells.
 pub fn default_action_bars() -> HashMap<u32, u32> {
     let prot_paladin_bar: &[(u32, u32)] = &[
