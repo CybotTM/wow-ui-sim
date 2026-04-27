@@ -90,6 +90,12 @@ pub struct ArchaeologyState {
     /// subtracts it. Tests set this directly; the simulator does not derive
     /// it from item data.
     pub keystone_value: i32,
+    /// Whether the server-side completion-history payload has arrived.
+    /// `IsArtifactCompletionHistoryAvailable` reads this; the completed-
+    /// page paginator hides every row until it is true.
+    /// `RequestArtifactCompletionHistory` flips it to true so addons that
+    /// gate on the request can proceed.
+    pub history_available: bool,
 }
 
 impl Default for ArchaeologyState {
@@ -99,6 +105,7 @@ impl Default for ArchaeologyState {
             races: Vec::new(),
             selected: None,
             keystone_value: 0,
+            history_available: false,
         }
     }
 }
@@ -113,5 +120,18 @@ impl ArchaeologyState {
         }
         let zero_based = (race_index - 1) as usize;
         self.races.get(zero_based)
+    }
+
+    /// Returns the 1-based artifact entry inside the 1-based race,
+    /// or `None` if either index is out of range. Drives
+    /// `GetArtifactInfoByRace`, whose caller treats `None` as the
+    /// signal to advance to the next race.
+    pub fn artifact_at(&self, race_index: i32, project_index: i32) -> Option<&ArchaeologyArtifact> {
+        let race = self.race_at(race_index)?;
+        if project_index < 1 {
+            return None;
+        }
+        let zero_based = (project_index - 1) as usize;
+        race.artifacts.get(zero_based)
     }
 }

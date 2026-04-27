@@ -29,6 +29,17 @@
 //! - `RemoveItemFromArtifact()` — empties the rightmost-set socket and
 //!   subtracts `keystone_value` from `adjust_progress`.
 //!
+//! Completion-history surface (drives the completed-page paginator):
+//! - `IsArtifactCompletionHistoryAvailable() → bool`
+//! - `GetArtifactInfoByRace(raceIndex, projectIndex) →
+//!   name, description, rarity, icon, spellDescription, _, _, spellID,
+//!   firstCompletionTime, completionCount` (10 returns; positions 6 and 7
+//!   are explicitly ignored by the addon — we push 0). Returns nothing
+//!   for out-of-range indices so the paginator's `if not name` advances
+//!   to the next race.
+//! - `RequestArtifactCompletionHistory()` — server-driven companion;
+//!   stubbed as flipping `history_available` to true.
+//!
 //! Without `GetArchaeologyInfo` the addon errors out at
 //! `Blizzard_ArchaeologyUI.lua:102` during `OnLoad` and `ArchaeologyFrame`
 //! becomes a half-initialized table.
@@ -289,6 +300,83 @@ fn remove_item_from_artifact(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+fn is_artifact_completion_history_available(state: &mut LuaState) -> LuaResult<u32> {
+    let available = borrow_state(state)?.archaeology.history_available;
+    state.push(Val::Bool(available));
+    Ok(1)
+}
+
+fn request_artifact_completion_history(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.archaeology.history_available = true;
+    Ok(0)
+}
+
+/// Snapshot of an `ArchaeologyArtifact` ready to be pushed as the 10
+/// returns of `GetArtifactInfoByRace`. The addon explicitly ignores
+/// positions 6 and 7 (`_, _,` in the destructuring at
+/// `Blizzard_ArchaeologyUI.lua:450`); they are pushed as `0` so the
+/// stack still has the right shape.
+struct ArtifactRow {
+    name: String,
+    description: String,
+    rarity: i32,
+    icon: u32,
+    spell_description: String,
+    spell_id: u32,
+    first_completion_time: i64,
+    completion_count: i32,
+}
+
+fn artifact_row_for(
+    state: &mut LuaState,
+    race_index: i32,
+    project_index: i32,
+) -> LuaResult<Option<ArtifactRow>> {
+    let sim = borrow_state(state)?;
+    let Some(artifact) = sim.archaeology.artifact_at(race_index, project_index) else {
+        return Ok(None);
+    };
+    Ok(Some(ArtifactRow {
+        name: artifact.name.clone(),
+        description: artifact.description.clone(),
+        rarity: artifact.rarity,
+        icon: artifact.icon,
+        spell_description: artifact.spell_description.clone(),
+        spell_id: artifact.spell_id,
+        first_completion_time: artifact.first_completion_time,
+        completion_count: artifact.completion_count,
+    }))
+}
+
+fn push_artifact_row(state: &mut LuaState, row: ArtifactRow) -> LuaResult<u32> {
+    let name_val = create_string(state, &row.name);
+    let description_val = create_string(state, &row.description);
+    let spell_description_val = create_string(state, &row.spell_description);
+    state.push(name_val);
+    state.push(description_val);
+    state.push(Val::Num(row.rarity as f64));
+    state.push(Val::Num(row.icon as f64));
+    state.push(spell_description_val);
+    // Returns 6 and 7 are documented as unused; the addon destructures
+    // them as `_, _,` and never reads them. Push numeric zeros so the
+    // tuple shape matches the documented signature.
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(row.spell_id as f64));
+    state.push(Val::Num(row.first_completion_time as f64));
+    state.push(Val::Num(row.completion_count as f64));
+    Ok(10)
+}
+
+fn get_artifact_info_by_race(state: &mut LuaState) -> LuaResult<u32> {
+    let race_index = i32::from_stack(state, 1)?;
+    let project_index = i32::from_stack(state, 2)?;
+    match artifact_row_for(state, race_index, project_index)? {
+        Some(row) => push_artifact_row(state, row),
+        None => Ok(0),
+    }
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetArchaeologyInfo", get_archaeology_info)?;
     LuaApiMut::register_function(lua, "GetNumArchaeologyRaces", get_num_archaeology_races)?;
@@ -302,5 +390,16 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "ItemAddedToArtifact", item_added_to_artifact)?;
     LuaApiMut::register_function(lua, "SocketItemToArtifact", socket_item_to_artifact)?;
     LuaApiMut::register_function(lua, "RemoveItemFromArtifact", remove_item_from_artifact)?;
+    LuaApiMut::register_function(
+        lua,
+        "IsArtifactCompletionHistoryAvailable",
+        is_artifact_completion_history_available,
+    )?;
+    LuaApiMut::register_function(lua, "GetArtifactInfoByRace", get_artifact_info_by_race)?;
+    LuaApiMut::register_function(
+        lua,
+        "RequestArtifactCompletionHistory",
+        request_artifact_completion_history,
+    )?;
     Ok(())
 }

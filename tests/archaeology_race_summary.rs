@@ -40,6 +40,7 @@ fn seed_two_races(env: &WowLuaEnv) {
         ],
         selected: None,
         keystone_value: 0,
+        history_available: false,
     };
 }
 
