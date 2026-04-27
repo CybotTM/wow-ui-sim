@@ -194,3 +194,124 @@ fn refresh_insets_guard_short_circuits_on_nil() {
         "RefreshInsets-style guard must skip the body when the count is nil"
     );
 }
+
+fn sample_inset() -> AdventureMapInset {
+    AdventureMapInset {
+        map_id: 627,
+        title: "Stormheim".to_string(),
+        description: "Vrykul homeland and the Halls of Valor.".to_string(),
+        collapsed_icon: "AdventureMapIcon-Stormheim".to_string(),
+        area_table_id: 7558,
+        num_detail_tiles: 8,
+        normalized_x: 0.42,
+        normalized_y: 0.18,
+    }
+}
+
+#[test]
+fn get_map_inset_info_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetMapInsetInfo)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_map_inset_info_returns_no_values_when_unloaded() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetInfo(1))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_info_returns_no_values_for_out_of_range_index() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetInfo(2))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_info_returns_no_values_for_non_positive_index() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let zero_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetInfo(0))")
+        .unwrap();
+    let negative_count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetMapInsetInfo(-1))")
+        .unwrap();
+    assert!(zero_count.abs() < 1e-6);
+    assert!(negative_count.abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_info_returns_eight_descriptor_values() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    env.exec(
+        "mapID, title, description, collapsedIcon, areaTableID, \
+         numDetailTiles, normalizedX, normalizedY = \
+         C_AdventureMap.GetMapInsetInfo(1)",
+    )
+    .unwrap();
+
+    let map_id: f64 = env.eval("return mapID").unwrap();
+    let title: String = env.eval("return title").unwrap();
+    let description: String = env.eval("return description").unwrap();
+    let collapsed_icon: String = env.eval("return collapsedIcon").unwrap();
+    let area_table_id: f64 = env.eval("return areaTableID").unwrap();
+    let num_detail_tiles: f64 = env.eval("return numDetailTiles").unwrap();
+    let normalized_x: f64 = env.eval("return normalizedX").unwrap();
+    let normalized_y: f64 = env.eval("return normalizedY").unwrap();
+
+    assert!((map_id - 627.0).abs() < 1e-6);
+    assert_eq!(title, "Stormheim");
+    assert_eq!(description, "Vrykul homeland and the Halls of Valor.");
+    assert_eq!(collapsed_icon, "AdventureMapIcon-Stormheim");
+    assert!((area_table_id - 7558.0).abs() < 1e-6);
+    assert!((num_detail_tiles - 8.0).abs() < 1e-6);
+    assert!((normalized_x - 0.42).abs() < 1e-6);
+    assert!((normalized_y - 0.18).abs() < 1e-6);
+}
+
+#[test]
+fn get_map_inset_info_indexes_one_based() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut second = sample_inset();
+    second.map_id = 630;
+    second.title = "Suramar".to_string();
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset(), second]);
+
+    let map_ids: (f64, f64) = env
+        .eval(
+            "local a = C_AdventureMap.GetMapInsetInfo(1) \
+             local b = C_AdventureMap.GetMapInsetInfo(2) \
+             return a, b",
+        )
+        .unwrap();
+    assert!((map_ids.0 - 627.0).abs() < 1e-6);
+    assert!((map_ids.1 - 630.0).abs() < 1e-6);
+}
+
+#[test]
+fn is_map_inset_expanded_pattern_uses_only_first_return() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.insets = Some(vec![sample_inset()]);
+
+    let map_id: f64 = env
+        .eval("local mapID = C_AdventureMap.GetMapInsetInfo(1) return mapID")
+        .unwrap();
+    assert!(
+        (map_id - 627.0).abs() < 1e-6,
+        "IsMapInsetExpanded pattern must read mapID as the first return value"
+    );
+}

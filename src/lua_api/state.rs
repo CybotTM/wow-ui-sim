@@ -581,11 +581,22 @@ pub struct ArtifactInfo {
 }
 
 /// Inset frame descriptor for the adventure map. An inset is a sub-region
-/// close-up panel published by `C_AdventureMap.GetMapInsetInfo`. Future
-/// commits will add the descriptor fields (mapID, title, area table id,
-/// detail-tile list, etc.) as the rest of the inset surface lands.
+/// close-up panel published by `C_AdventureMap.GetMapInsetInfo`.
+/// `normalized_x` and `normalized_y` are 0..1 canvas coordinates that
+/// `AdventureMapInsetMixin:Initialize` converts to a `SetPoint` offset.
+/// `num_detail_tiles` is the count of `GetMapInsetDetailTileInfo` entries
+/// the inset can index into via `BuildDetailTiles`.
 #[derive(Clone, Debug, Default)]
-pub struct AdventureMapInset {}
+pub struct AdventureMapInset {
+    pub map_id: i64,
+    pub title: String,
+    pub description: String,
+    pub collapsed_icon: String,
+    pub area_table_id: i64,
+    pub num_detail_tiles: i64,
+    pub normalized_x: f64,
+    pub normalized_y: f64,
+}
 
 /// Adventure-map (Broken Isles / Garrison-style world map) state. Drives
 /// the `C_AdventureMap` namespace consumed by the Blizzard_AdventureMap

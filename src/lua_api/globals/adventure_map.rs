@@ -1,12 +1,12 @@
 //! `C_AdventureMap` namespace — Broken Isles / Garrison-style adventure-map
 //! surface consumed by the Blizzard_AdventureMap addon.
 //!
-//! Currently implements `GetMapID()`, `Close()`, and `GetNumMapInsets()`.
-//! Future commits will fill in the full surface (zone choices, quest
-//! offers, per-inset descriptors, dialog hooks).
+//! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`, and
+//! `GetMapInsetInfo()`. Future commits will fill in the rest of the
+//! surface (zone choices, quest offers, detail-tile lookup, dialog hooks).
 
-use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::table_set_rust_fn_static;
+use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
+use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
 use rilua::LuaApiMut;
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -21,6 +21,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     table_set_rust_fn_static(state, table_ref, "GetMapID", get_map_id)?;
     table_set_rust_fn_static(state, table_ref, "Close", close)?;
     table_set_rust_fn_static(state, table_ref, "GetNumMapInsets", get_num_map_insets)?;
+    table_set_rust_fn_static(state, table_ref, "GetMapInsetInfo", get_map_inset_info)?;
     Ok(())
 }
 
@@ -70,4 +71,46 @@ fn get_num_map_insets(state: &mut LuaState) -> LuaResult<u32> {
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn get_map_inset_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(slot_index) = lua_inset_index_to_slot(stack_val(state, 1)) else {
+        return Ok(0);
+    };
+    let descriptor = {
+        let sim = borrow_state(state)?;
+        sim.adventure_map
+            .insets
+            .as_ref()
+            .and_then(|insets| insets.get(slot_index).cloned())
+    };
+    let Some(inset) = descriptor else {
+        return Ok(0);
+    };
+    let title = create_string(state, &inset.title);
+    let description = create_string(state, &inset.description);
+    let collapsed_icon = create_string(state, &inset.collapsed_icon);
+    state.push(Val::Num(inset.map_id as f64));
+    state.push(title);
+    state.push(description);
+    state.push(collapsed_icon);
+    state.push(Val::Num(inset.area_table_id as f64));
+    state.push(Val::Num(inset.num_detail_tiles as f64));
+    state.push(Val::Num(inset.normalized_x));
+    state.push(Val::Num(inset.normalized_y));
+    Ok(8)
+}
+
+/// Convert the Lua-facing 1-based `insetIndex` to a 0-based slot index
+/// for `state.adventure_map.insets`. Returns `None` for non-numeric or
+/// non-positive arguments so the caller can short-circuit with no return
+/// values, matching WoW's "unknown inset" path.
+fn lua_inset_index_to_slot(arg: Val) -> Option<usize> {
+    let Val::Num(index) = arg else {
+        return None;
+    };
+    if index < 1.0 {
+        return None;
+    }
+    Some(index as usize - 1)
 }
