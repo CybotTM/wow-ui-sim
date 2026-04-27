@@ -605,6 +605,10 @@ Created `investigations/world-map-create-texture-sublevel.md` to document the fo
 
 Created `investigations/world-map-voice-chat-alerts.md` to document the reduced-stack world-map overlay where voice prompt frames appeared above the panel. Recorded the two harness prerequisites behind it: `Blizzard_Channels` needs `Blizzard_SocialToast` for `SocialToastTemplate hidden="true"`, and alert positioning needs the real chat-alert addons instead of the `ChatAlertFrame` stub. Updated `index.md` with the new investigation page.
 
+## [2026-04-27] investigation | explicit XML parent anchors
+
+Created `investigations/explicit-xml-parent-anchors.md` to document the PaperDoll sidebar tab positioning bug. Root cause: nested XML frame creation preferred the containing frame over an explicit child `parent="..."`, so implicit anchors resolved to `PaperDollFrame` instead of `CharacterFrameInsetRight`. Added the page to `index.md`.
+
 ## [2026-04-13] ingest | world map OnUpdate hover polling investigation
 
 Created `investigations/world-map-onupdate-hover-polling.md` to document the post-texture-fix `UIParent_OnUpdate` cost: `FCF_OnUpdate` hover polling, the unnecessary mutable borrow in `IsMouseOver()`, the new immutable-borrow regression test, and the runtime repro where verbose OnUpdate logs stayed quiet after startup. Updated `index.md` with the new investigation page.
