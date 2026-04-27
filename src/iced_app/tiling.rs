@@ -43,8 +43,16 @@ struct UvRepeatInfo {
     rotated: bool,
 }
 
-/// Compute tile dimensions from frame size or UV region as fallback.
+/// Compute the natural pixel size of one tile. For atlas-backed textures this
+/// is the atlas slot's source size, so `horizTile`/`vertTile` repeats at the
+/// texture's authored width/height instead of stretching one quad to fill the
+/// whole frame.
 fn tile_dimensions(f: &crate::widget::Frame, uv_w: f32, uv_h: f32) -> (f32, f32) {
+    if let Some(atlas_name) = f.atlas.as_deref() {
+        if let Some(info) = crate::atlas::get_atlas_info(atlas_name) {
+            return (info.width() as f32, info.height() as f32);
+        }
+    }
     let tile_w = if f.width > 0.0 {
         f.width
     } else {
