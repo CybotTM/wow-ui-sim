@@ -216,6 +216,7 @@ macro_rules! build_empty_sim_state {
             auction_owned: Vec::new(),
             auction_bids: Vec::new(),
             auction_item_searches: ::std::collections::HashMap::new(),
+            auction_commodity_searches: ::std::collections::HashMap::new(),
             auction_throttle_ready: true,
             auction_should_auto_populate_price: true,
             mythic_plus: MythicPlusState::default(),
@@ -281,13 +282,14 @@ pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
     AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
     AuctionBrowseResult, AuctionReplicateItem, BagItem, BidAuction, BnetFriend, BnetGameAccount,
-    ChatBubble, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin, DeathRecapEntry,
-    EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
-    ItemSearchResults, KillingBlowInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo,
-    MapChildRect, MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix,
-    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
-    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
-    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
+    ChatBubble, CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo,
+    CursorInfo, CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember,
+    GuildRank, ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo,
+    LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect,
+    MirrorTimer, MovementState, MythicPlusAffix, MythicPlusRatingMapSummary,
+    MythicPlusRatingSummary, MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess,
+    OwnedAuction, PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep,
+    SecondaryPowerState, SocialFriend, SummonRequestState, WorldState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1599,6 +1601,13 @@ pub struct SimState {
     /// `GetItemSearchResultInfo` family. Empty by default — tests seed
     /// directly via `state.auction_item_searches.insert(...)`.
     pub auction_item_searches: ::std::collections::HashMap<ItemSearchKey, ItemSearchResults>,
+    /// Per-itemID commodity-search result buckets. Drives the
+    /// `C_AuctionHouse.GetNumCommoditySearchResults` /
+    /// `GetCommoditySearchResultInfo` family. Commodities are stack-only
+    /// items so the `itemID` alone uniquely identifies the listing pile.
+    /// Empty by default — tests seed directly via
+    /// `state.auction_commodity_searches.insert(...)`.
+    pub auction_commodity_searches: ::std::collections::HashMap<i32, CommoditySearchResults>,
     /// Drives `C_AuctionHouse.IsThrottledMessageSystemReady`. The live
     /// client clears this briefly while a query is in-flight; the sim
     /// has no real throttle, so it stays true unless a test toggles it.

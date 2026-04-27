@@ -1,8 +1,8 @@
 //! Collection / inventory / world-object data types.
 
 pub use super::auction_house::{
-    AuctionBrowseResult, AuctionReplicateItem, BidAuction, ItemSearchKey, ItemSearchResultInfo,
-    ItemSearchResults, OwnedAuction,
+    AuctionBrowseResult, AuctionReplicateItem, BidAuction, CommoditySearchResultInfo,
+    CommoditySearchResults, ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, OwnedAuction,
 };
 
 /// A Great Vault activity slot (one row/tier in the weekly rewards UI).

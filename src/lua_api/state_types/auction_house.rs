@@ -93,6 +93,37 @@ pub struct ItemSearchResultInfo {
     pub time_left_seconds: i64,
 }
 
+/// Per-itemID commodity-search result bucket. Drives the
+/// `C_AuctionHouse.GetNumCommoditySearchResults` /
+/// `GetCommoditySearchResultInfo` family. Commodity searches do not use
+/// the full `ItemKey` tuple — commodities are stack-only items so the
+/// `itemID` alone uniquely identifies the listing pile.
+/// `has_full_results == false` signals the addon's "load more" button.
+#[derive(Debug, Clone, Default)]
+pub struct CommoditySearchResults {
+    pub entries: Vec<CommoditySearchResultInfo>,
+    pub has_full_results: bool,
+}
+
+/// One row of a commodity search result list. Mirrors the canonical
+/// retail shape consumed by `AuctionHouseCommoditiesBuyFrame.lua` to
+/// render the per-unit pricing list.
+#[derive(Debug, Clone)]
+pub struct CommoditySearchResultInfo {
+    pub item_id: i32,
+    pub quantity: i32,
+    /// Per-unit price in copper. Lowest unit price posts first.
+    pub unit_price: i64,
+    pub auction_id: i64,
+    pub owners: Vec<String>,
+    pub time_left_seconds: i64,
+    /// How many of `quantity` belong to the player. Used by the buy UI
+    /// to gray out rows that would buy back the player's own listing.
+    pub num_owner_items: i32,
+    pub contains_owner_item: bool,
+    pub contains_account_item: bool,
+}
+
 /// One row of the player's active bid list (Bids tab). Drives
 /// `C_AuctionHouse.GetNumBids` / `GetBidInfo`. The bidder field uses
 /// the same shape Blizzard expects from `GetBidStatus`: nil = no bid,

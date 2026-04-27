@@ -21,8 +21,8 @@ use crate::lua_api::methods::{
     borrow_state, create_string, create_table, create_table_with_fields, table_set,
 };
 use crate::lua_api::state::{
-    AuctionBrowseResult, BidAuction, ItemSearchKey, ItemSearchResultInfo, ItemSearchResults,
-    OwnedAuction,
+    AuctionBrowseResult, BidAuction, CommoditySearchResultInfo, CommoditySearchResults,
+    ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, OwnedAuction,
 };
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
@@ -170,6 +170,34 @@ const AUCTION_HOUSE_METHODS: &[(&'static str, AuctionHouseMethod)] = &[
         c_auction_house_request_more_item_search_results,
     ),
     ("HasSearchResults", c_auction_house_has_search_results),
+    (
+        "GetNumCommoditySearchResults",
+        c_auction_house_get_num_commodity_search_results,
+    ),
+    (
+        "GetCommoditySearchResultInfo",
+        c_auction_house_get_commodity_search_result_info,
+    ),
+    (
+        "GetCommoditySearchResultsQuantity",
+        c_auction_house_get_commodity_search_results_quantity,
+    ),
+    (
+        "HasFullCommoditySearchResults",
+        c_auction_house_has_full_commodity_search_results,
+    ),
+    (
+        "GetMaxCommoditySearchResultPrice",
+        c_auction_house_get_max_commodity_search_result_price,
+    ),
+    (
+        "RefreshCommoditySearchResults",
+        c_auction_house_refresh_commodity_search_results,
+    ),
+    (
+        "RequestMoreCommoditySearchResults",
+        c_auction_house_request_more_commodity_search_results,
+    ),
 ];
 
 const ITEM_BONDING_BIND_ON_PICKUP: u8 = 1;
@@ -1078,7 +1106,10 @@ fn push_item_search_result_info_table(state: &mut LuaState, entry: &ItemSearchRe
             ("quantity", Val::Num(entry.quantity as f64)),
             ("itemLink", item_link),
             ("containsOwnerItem", Val::Bool(entry.contains_owner_item)),
-            ("containsAccountItem", Val::Bool(entry.contains_account_item)),
+            (
+                "containsAccountItem",
+                Val::Bool(entry.contains_account_item),
+            ),
             (
                 "containsSocketedItem",
                 Val::Bool(entry.contains_socketed_item),
@@ -1135,4 +1166,122 @@ fn read_int_field(
         Val::Num(n) => n as i32,
         _ => 0,
     }
+}
+
+const COMMODITY_SEARCH_RESULTS_UPDATED: &str = "COMMODITY_SEARCH_RESULTS_UPDATED";
+
+fn c_auction_house_get_num_commodity_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let count =
+        with_commodity_search_bucket(state, item_id, |bucket| bucket.entries.len()).unwrap_or(0);
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn c_auction_house_get_commodity_search_result_info(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let index = i32::from_stack(state, 2)?;
+    if index < 1 {
+        return Ok(0);
+    }
+    let entry = borrow_state(state)?
+        .auction_commodity_searches
+        .get(&item_id)
+        .and_then(|bucket| bucket.entries.get((index - 1) as usize).cloned());
+    let Some(entry) = entry else { return Ok(0) };
+    let table = push_commodity_search_result_info_table(state, &entry);
+    state.push(table);
+    Ok(1)
+}
+
+fn c_auction_house_get_commodity_search_results_quantity(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let total = with_commodity_search_bucket(state, item_id, sum_commodity_quantity).unwrap_or(0);
+    state.push(Val::Num(total as f64));
+    Ok(1)
+}
+
+fn c_auction_house_has_full_commodity_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    // Default true when no bucket exists — addons treat "no results yet" as
+    // already-full so they don't pointlessly call `RequestMoreCommoditySearchResults`.
+    let full = with_commodity_search_bucket(state, item_id, |bucket| bucket.has_full_results)
+        .unwrap_or(true);
+    state.push(Val::Bool(full));
+    Ok(1)
+}
+
+fn c_auction_house_get_max_commodity_search_result_price(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let max = with_commodity_search_bucket(state, item_id, max_unit_price).unwrap_or(0);
+    push_max_money_value(state, max);
+    Ok(1)
+}
+
+fn c_auction_house_refresh_commodity_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    dispatch_event_now(
+        state,
+        COMMODITY_SEARCH_RESULTS_UPDATED,
+        &[Val::Num(item_id as f64)],
+    )?;
+    Ok(0)
+}
+
+fn c_auction_house_request_more_commodity_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = i32::from_stack(state, 1)?;
+    let already_full = borrow_state(state)?
+        .auction_commodity_searches
+        .get(&item_id)
+        .is_none_or(|bucket| bucket.has_full_results);
+    state.push(Val::Bool(!already_full));
+    Ok(1)
+}
+
+fn sum_commodity_quantity(bucket: &CommoditySearchResults) -> i64 {
+    bucket.entries.iter().map(|e| e.quantity as i64).sum()
+}
+
+fn max_unit_price(bucket: &CommoditySearchResults) -> i64 {
+    bucket
+        .entries
+        .iter()
+        .map(|e| e.unit_price)
+        .max()
+        .unwrap_or(0)
+}
+
+/// Run `f` against the per-itemID commodity bucket, returning `None`
+/// when no bucket has been seeded.
+fn with_commodity_search_bucket<R>(
+    state: &mut LuaState,
+    item_id: i32,
+    f: impl FnOnce(&CommoditySearchResults) -> R,
+) -> Option<R> {
+    let sim = borrow_state(state).ok()?;
+    sim.auction_commodity_searches.get(&item_id).map(f)
+}
+
+fn push_commodity_search_result_info_table(
+    state: &mut LuaState,
+    entry: &CommoditySearchResultInfo,
+) -> Val {
+    let owners = build_owners_array(state, &entry.owners);
+    create_table_with_fields(
+        state,
+        &[
+            ("itemID", Val::Num(entry.item_id as f64)),
+            ("quantity", Val::Num(entry.quantity as f64)),
+            ("unitPrice", Val::Num(entry.unit_price as f64)),
+            ("auctionID", Val::Num(entry.auction_id as f64)),
+            ("owners", owners),
+            ("timeLeftSeconds", Val::Num(entry.time_left_seconds as f64)),
+            ("numOwnerItems", Val::Num(entry.num_owner_items as f64)),
+            ("containsOwnerItem", Val::Bool(entry.contains_owner_item)),
+            (
+                "containsAccountItem",
+                Val::Bool(entry.contains_account_item),
+            ),
+        ],
+    )
 }
