@@ -34,6 +34,51 @@ fn test_hidden_xml_parent_does_not_hide_child_shown_flag() {
 }
 
 #[test]
+fn test_nested_xml_frame_parent_attribute_overrides_containing_frame() {
+    let ctx = load_test_xml(
+        "nested-explicit-parent",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="OuterParent" parent="UIParent">
+                <Size x="300" y="200"/>
+                <Anchors><Anchor point="TOPLEFT" x="10" y="-20"/></Anchors>
+                <Frames>
+                    <Frame name="ExplicitParent" parent="UIParent">
+                        <Size x="100" y="80"/>
+                        <Anchors><Anchor point="TOPLEFT" x="200" y="-100"/></Anchors>
+                    </Frame>
+                    <Frame name="NestedExplicitChild" parent="ExplicitParent">
+                        <Size x="40" y="20"/>
+                        <Anchors>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-6" y="-1"/>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        "return NestedExplicitChild:GetParent() == ExplicitParent",
+        "nested frame parent attribute should override containing XML frame",
+    );
+    ctx.assert_lua_true(
+        r#"
+        (function()
+            local point, relativeTo, relativePoint, x, y = NestedExplicitChild:GetPoint(1)
+            return point == "BOTTOMRIGHT"
+                and relativeTo == ExplicitParent
+                and relativePoint == "TOPRIGHT"
+                and x == -6
+                and y == -1
+        end)()
+        "#,
+        "implicit anchor target should be the explicit XML parent",
+    );
+}
+
+#[test]
 fn test_xml_frame_with_layers_and_scripts() {
     let t = load_test_xml(
         "test-xml",

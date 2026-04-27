@@ -22,14 +22,18 @@ pub(super) fn prepare_frame_creation(
 ) -> Option<PreparedFrameCreation> {
     let creator_name = current_loading_addon_name(env);
     let inherited_parent_buf = resolve_parent(frame, parent_override);
-    let parent_for_name = subst_parent_override
+    let parent_for_name = frame
+        .parent
+        .as_deref()
+        .or(subst_parent_override)
         .or(parent_override)
-        .or(frame.parent.as_deref())
         .or(inherited_parent_buf.as_deref());
     let name = resolve_frame_name(frame, parent_for_name, creator_name.as_deref())?;
     let subst_parent = resolve_subst_parent(frame, &name, subst_parent_override, parent_override);
-    let explicit_parent = parent_override
-        .or(frame.parent.as_deref())
+    let explicit_parent = frame
+        .parent
+        .as_deref()
+        .or(parent_override)
         .or(inherited_parent_buf.as_deref())
         .map(str::to_string);
     let parent = explicit_parent
@@ -140,7 +144,10 @@ fn resolve_subst_parent(
     if frame.name.is_some() {
         resolved_name.to_string()
     } else {
-        subst_parent_override
+        frame
+            .parent
+            .as_deref()
+            .or(subst_parent_override)
             .or(parent_override)
             .unwrap_or(resolved_name)
             .to_string()
