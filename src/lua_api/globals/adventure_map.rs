@@ -2,9 +2,9 @@
 //! surface consumed by the Blizzard_AdventureMap addon.
 //!
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
-//! `GetMapInsetInfo()`, and `GetMapInsetDetailTileInfo()`. Future commits
-//! will fill in the rest of the surface (zone choices, quest offers,
-//! dialog hooks).
+//! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`, and
+//! `GetNumZoneChoices()`. Future commits will fill in the rest of the
+//! surface (per-zone-choice descriptors, quest offers, dialog hooks).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -29,6 +29,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetMapInsetDetailTileInfo",
         get_map_inset_detail_tile_info,
     )?;
+    table_set_rust_fn_static(state, table_ref, "GetNumZoneChoices", get_num_zone_choices)?;
     Ok(())
 }
 
@@ -127,6 +128,12 @@ fn get_map_inset_detail_tile_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(0);
     };
     state.push(Val::Num(id as f64));
+    Ok(1)
+}
+
+fn get_num_zone_choices(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?.adventure_map.zone_choices.len();
+    state.push(Val::Num(count as f64));
     Ok(1)
 }
 

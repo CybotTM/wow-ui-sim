@@ -11,7 +11,7 @@
 //! `UIPanelWindows["AdventureMapFrame"].showFailedFunc`, so it must be
 //! present at addon load time (see `Blizzard_AdventureMap.lua:56`).
 
-use wow_ui_sim::lua_api::{AdventureMapInset, WowLuaEnv};
+use wow_ui_sim::lua_api::{AdventureMapInset, AdventureMapZoneChoice, WowLuaEnv};
 
 #[test]
 fn c_adventure_map_namespace_is_a_table() {
@@ -398,6 +398,77 @@ fn get_map_inset_detail_tile_info_returns_no_values_for_non_positive_tile() {
         .unwrap();
     assert!(zero_count.abs() < 1e-6);
     assert!(negative_count.abs() < 1e-6);
+}
+
+#[test]
+fn get_num_zone_choices_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetNumZoneChoices)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_num_zone_choices_defaults_to_zero() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return C_AdventureMap.GetNumZoneChoices()")
+        .unwrap();
+    assert!(
+        count.abs() < 1e-6,
+        "GetNumZoneChoices must return 0 (not nil) before any choice is published"
+    );
+}
+
+#[test]
+fn get_num_zone_choices_returns_a_number_type() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetNumZoneChoices())")
+        .unwrap();
+    assert_eq!(kind, "number");
+}
+
+#[test]
+fn get_num_zone_choices_returns_seeded_length() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.zone_choices = vec![
+        AdventureMapZoneChoice::default(),
+        AdventureMapZoneChoice::default(),
+        AdventureMapZoneChoice::default(),
+        AdventureMapZoneChoice::default(),
+    ];
+
+    let count: f64 = env
+        .eval("return C_AdventureMap.GetNumZoneChoices()")
+        .unwrap();
+    assert!((count - 4.0).abs() < 1e-6);
+}
+
+#[test]
+fn get_num_zone_choices_supports_iteration_loop() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().adventure_map.zone_choices = vec![
+        AdventureMapZoneChoice::default(),
+        AdventureMapZoneChoice::default(),
+    ];
+
+    env.exec(
+        r#"
+        _G.__visited = 0
+        for _ = 1, C_AdventureMap.GetNumZoneChoices() do
+            _G.__visited = _G.__visited + 1
+        end
+        "#,
+    )
+    .unwrap();
+
+    let visited: f64 = env.eval("return _G.__visited").unwrap();
+    assert!(
+        (visited - 2.0).abs() < 1e-6,
+        "for-loop bound by GetNumZoneChoices must iterate exactly the seeded count"
+    );
 }
 
 #[test]

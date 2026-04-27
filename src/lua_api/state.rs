@@ -580,6 +580,14 @@ pub struct ArtifactInfo {
     pub disabled: bool,
 }
 
+/// Zone-choice descriptor for the adventure map. A zone choice is one of
+/// the competing quests on the Broken Isles starting-zone selection
+/// screen, exposed via `C_AdventureMap.GetZoneChoiceInfo`. Future commits
+/// will add the descriptor fields (questID, textureKit, name, etc.) as
+/// the rest of the zone-choice surface lands.
+#[derive(Clone, Debug, Default)]
+pub struct AdventureMapZoneChoice {}
+
 /// Inset frame descriptor for the adventure map. An inset is a sub-region
 /// close-up panel published by `C_AdventureMap.GetMapInsetInfo`.
 /// `normalized_x` and `normalized_y` are 0..1 canvas coordinates that
@@ -610,13 +618,16 @@ pub struct AdventureMapInset {
 /// the adventure map, or `None` if the map has not been closed this
 /// session. `insets` is `None` until inset metadata has been published
 /// for the active map, mirroring `C_AdventureMap.GetNumMapInsets`'s
-/// nil-or-number contract. Future fields will hold zone choices and
-/// quest offers.
+/// nil-or-number contract. `zone_choices` defaults to empty (not
+/// `None`) because `C_AdventureMap.GetNumZoneChoices` always returns
+/// a number — zero before any choices are published. Future fields
+/// will hold quest offers.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
     pub last_closed: Option<f64>,
     pub insets: Option<Vec<AdventureMapInset>>,
+    pub zone_choices: Vec<AdventureMapZoneChoice>,
 }
 
 /// Shared simulator state accessible from Lua.
