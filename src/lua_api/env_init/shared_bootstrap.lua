@@ -35,6 +35,12 @@ end
 if SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON == nil then
   SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON = 303826
 end
+-- Played by ModelSceneControlFrame, AlliedRaces banner clicks, and the
+-- character-select rotation button. Canonical id from
+-- Blizzard_SharedXML/Mainline/SoundKitConstants.lua:51.
+if SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER == nil then
+  SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER = 861
+end
 
 if CatalogShopConstants == nil then
   CatalogShopConstants = {
