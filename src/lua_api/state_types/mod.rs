@@ -1,6 +1,7 @@
 //! Plain data types used by SimState.
 
 pub mod auction_house;
+pub mod azerite_essence;
 pub mod character_world;
 pub mod collections;
 pub mod crafting;
@@ -10,6 +11,7 @@ pub mod social;
 pub mod wow_token;
 
 pub use crate::lua_api::timer_layout::RiluaPendingTimer as PendingTimer;
+pub use azerite_essence::{AzeriteEssenceInfo, AzeriteEssenceMilestoneInfo, AzeriteEssenceState};
 pub use character_world::*;
 pub use collections::*;
 pub use crafting::*;

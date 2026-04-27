@@ -82,6 +82,7 @@ macro_rules! build_empty_sim_state {
             model_scenes: HashMap::new(),
             active_player_interactions: HashSet::new(),
             azerite_item: None,
+            azerite_essence: AzeriteEssenceState::default(),
             major_factions: HashMap::new(),
             major_faction_renown_levels: HashMap::new(),
             account_wide_reputation_factions: HashSet::new(),
@@ -289,7 +290,8 @@ pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
     AchievementStatistic, AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, AreaPoiInfo,
     AuctionBrowseResult, AuctionItemClassFilter, AuctionReplicateItem, AuctionRowInfo,
-    AuctionSellQuote, AuctionSellQuoteKind, AuctionSortSpec, BagItem, BidAuction, BnetFriend,
+    AuctionSellQuote, AuctionSellQuoteKind, AuctionSortSpec, AzeriteEssenceInfo,
+    AzeriteEssenceMilestoneInfo, AzeriteEssenceState, BagItem, BidAuction, BnetFriend,
     BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote, CommoditySearchResultInfo,
     CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo, CursorItemOrigin,
     DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey,
@@ -1145,6 +1147,12 @@ pub struct SimState {
     /// `C_AzeriteItem.FindActiveAzeriteItem` returning nil so the
     /// `Blizzard_ActionBar/Mainline/AzeriteBar.lua` mixin stays hidden.
     pub azerite_item: Option<AzeriteItemState>,
+    /// `C_AzeriteEssence` backing state. Drives the
+    /// `Blizzard_AzeriteEssenceUI` panel — milestones, essences,
+    /// pending activation, forge state, and the panel-open gate.
+    /// Defaults to "no neck equipped, nothing unlocked" so
+    /// `CanOpenUI` returns false until a test seeds it.
+    pub azerite_essence: AzeriteEssenceState,
     /// Major-faction (Renown) data keyed by `factionID`. Empty by default —
     /// `C_MajorFactions.GetMajorFactionData` returns nil for unknown ids and
     /// `C_Reputation.IsMajorFaction` reports false, keeping the
