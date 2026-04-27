@@ -178,8 +178,36 @@ fn finalize_template_frame(
 ) -> LuaResult<()> {
     runtime::apply_runtime_template_direct_properties(state_rc, frame_id, inherits, frame_name);
     crate::lua_api::globals::template::repair_direct_child_parent_keys(state, frame_id)?;
+    resolve_runtime_template_named_anchors(state, frame_id)?;
     if fire_on_load {
         runtime::fire_frame_on_load(state, frame_id)?;
+    }
+    Ok(())
+}
+
+/// Re-resolve `$parent.X` style anchors for a runtime template frame and its
+/// direct children once both child frames and layer regions exist.
+///
+/// `set_single_anchor` records the unresolved relative-key string when a sibling
+/// hasn't been created yet (template child frames are created before layer
+/// fontstrings/textures). Without this pass the anchors stay unresolved and
+/// children fall back to anchoring against their parent.
+pub(crate) fn resolve_runtime_template_named_anchors(
+    state: &mut LuaState,
+    frame_id: u64,
+) -> LuaResult<()> {
+    let mut sim = crate::lua_api::methods::borrow_state_mut(state)
+        .map_err(|error| rilua::runtime_error(error.to_string()))?;
+    let child_ids = sim
+        .widgets
+        .get(frame_id)
+        .map(|frame| frame.children.clone())
+        .unwrap_or_default();
+    sim.widgets.resolve_named_anchor_targets_for_frame(frame_id);
+    sim.widgets.mark_rect_dirty(frame_id);
+    for child_id in child_ids {
+        sim.widgets.resolve_named_anchor_targets_for_frame(child_id);
+        sim.widgets.mark_rect_dirty(child_id);
     }
     Ok(())
 }
