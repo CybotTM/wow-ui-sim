@@ -4,8 +4,9 @@
 //! Currently implements `GetMapID()`, `Close()`, `GetNumMapInsets()`,
 //! `GetMapInsetInfo()`, `GetMapInsetDetailTileInfo()`,
 //! `GetNumZoneChoices()`, `GetZoneChoiceInfo()`, `GetNumQuestOffers()`,
-//! and `GetQuestOfferInfo()`. Future commits will fill in the rest of
-//! the surface (dialog hooks, quest portraits).
+//! `GetQuestOfferInfo()`, and `GetQuestInfo()`. Future commits will
+//! fill in the rest of the surface (quest portraits, accept/abandon
+//! flows).
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_string, create_table};
 use crate::lua_bridge::{stack_val, table_set_rust_fn_static};
@@ -34,6 +35,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     table_set_rust_fn_static(state, table_ref, "GetZoneChoiceInfo", get_zone_choice_info)?;
     table_set_rust_fn_static(state, table_ref, "GetNumQuestOffers", get_num_quest_offers)?;
     table_set_rust_fn_static(state, table_ref, "GetQuestOfferInfo", get_quest_offer_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetQuestInfo", get_quest_info)?;
     Ok(())
 }
 
@@ -197,6 +199,27 @@ fn get_quest_offer_info(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(offer.normalized_y));
     state.push(inset_index);
     Ok(9)
+}
+
+fn get_quest_info(state: &mut LuaState) -> LuaResult<u32> {
+    let Val::Num(quest_id_f) = stack_val(state, 1) else {
+        return Ok(0);
+    };
+    let quest_id = quest_id_f as i64;
+    let info = {
+        let sim = borrow_state(state)?;
+        sim.adventure_map.quest_info.get(&quest_id).cloned()
+    };
+    let Some(info) = info else {
+        return Ok(0);
+    };
+    let title = create_string(state, &info.title);
+    let description = create_string(state, &info.description);
+    let objective_text = create_string(state, &info.objective_text);
+    state.push(title);
+    state.push(description);
+    state.push(objective_text);
+    Ok(3)
 }
 
 /// Convert a Lua-facing 1-based index to a 0-based slot index. Returns

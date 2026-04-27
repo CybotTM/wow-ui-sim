@@ -12,7 +12,8 @@
 //! present at addon load time (see `Blizzard_AdventureMap.lua:56`).
 
 use wow_ui_sim::lua_api::{
-    AdventureMapInset, AdventureMapQuestOffer, AdventureMapZoneChoice, WowLuaEnv,
+    AdventureMapInset, AdventureMapQuestInfo, AdventureMapQuestOffer, AdventureMapZoneChoice,
+    WowLuaEnv,
 };
 
 #[test]
@@ -851,6 +852,137 @@ fn quest_offer_data_provider_pattern_collects_each_offer() {
     assert!((count - 2.0).abs() < 1e-6);
     assert!((first - 41_653.0).abs() < 1e-6);
     assert!((second_id - 41_654.0).abs() < 1e-6);
+}
+
+fn sample_quest_info() -> AdventureMapQuestInfo {
+    AdventureMapQuestInfo {
+        title: "Curse of the Drowned".to_string(),
+        description: "Investigate the source of the curse plaguing Azsuna.".to_string(),
+        objective_text: "Cleanse 5 Drowned Souls.".to_string(),
+    }
+}
+
+#[test]
+fn get_quest_info_is_a_function() {
+    let env = WowLuaEnv::new().expect("env");
+    let kind: String = env
+        .eval("return type(C_AdventureMap.GetQuestInfo)")
+        .unwrap();
+    assert_eq!(kind, "function");
+}
+
+#[test]
+fn get_quest_info_returns_no_values_for_unknown_quest() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestInfo(99999))")
+        .unwrap();
+    assert!(
+        count.abs() < 1e-6,
+        "GetQuestInfo must return zero values for unknown quests so the dialog's \
+         `if descriptionText then` guard short-circuits"
+    );
+}
+
+#[test]
+fn get_quest_info_returns_no_values_for_non_numeric_argument() {
+    let env = WowLuaEnv::new().expect("env");
+    let count: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestInfo('not-a-number'))")
+        .unwrap();
+    assert!(count.abs() < 1e-6);
+}
+
+#[test]
+fn get_quest_info_returns_three_descriptor_strings() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_info
+        .insert(40_519, sample_quest_info());
+
+    env.exec(
+        "questTitle, descriptionText, objectiveText = C_AdventureMap.GetQuestInfo(40519)",
+    )
+    .unwrap();
+
+    let arity: f64 = env
+        .eval("return select('#', C_AdventureMap.GetQuestInfo(40519))")
+        .unwrap();
+    let title: String = env.eval("return questTitle").unwrap();
+    let description: String = env.eval("return descriptionText").unwrap();
+    let objective: String = env.eval("return objectiveText").unwrap();
+
+    assert!((arity - 3.0).abs() < 1e-6);
+    assert_eq!(title, "Curse of the Drowned");
+    assert_eq!(description, "Investigate the source of the curse plaguing Azsuna.");
+    assert_eq!(objective, "Cleanse 5 Drowned Souls.");
+}
+
+#[test]
+fn get_quest_info_keys_off_quest_id() {
+    let env = WowLuaEnv::new().expect("env");
+    let mut other = sample_quest_info();
+    other.title = "Highmountain Tribes".to_string();
+    let mut state = env.state().borrow_mut();
+    state.adventure_map.quest_info.insert(40_519, sample_quest_info());
+    state.adventure_map.quest_info.insert(40_521, other);
+    drop(state);
+
+    let first_title: String = env
+        .eval("local t = C_AdventureMap.GetQuestInfo(40519) return t")
+        .unwrap();
+    let second_title: String = env
+        .eval("local t = C_AdventureMap.GetQuestInfo(40521) return t")
+        .unwrap();
+    assert_eq!(first_title, "Curse of the Drowned");
+    assert_eq!(second_title, "Highmountain Tribes");
+}
+
+#[test]
+fn refresh_details_pattern_short_circuits_on_unknown_quest() {
+    let env = WowLuaEnv::new().expect("env");
+    env.exec(
+        r#"
+        _G.__rendered = false
+        local _, descriptionText = C_AdventureMap.GetQuestInfo(123456)
+        if descriptionText then
+            _G.__rendered = true
+        end
+        "#,
+    )
+    .unwrap();
+
+    let rendered: bool = env.eval("return _G.__rendered").unwrap();
+    assert!(
+        !rendered,
+        "RefreshDetails-style guard must skip the body when descriptionText is nil"
+    );
+}
+
+#[test]
+fn refresh_details_pattern_renders_known_quest() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state()
+        .borrow_mut()
+        .adventure_map
+        .quest_info
+        .insert(40_519, sample_quest_info());
+
+    env.exec(
+        r#"
+        _G.__title_seen = nil
+        local questTitle, descriptionText, objectiveText = C_AdventureMap.GetQuestInfo(40519)
+        if descriptionText then
+            _G.__title_seen = questTitle
+        end
+        "#,
+    )
+    .unwrap();
+
+    let title: String = env.eval("return _G.__title_seen").unwrap();
+    assert_eq!(title, "Curse of the Drowned");
 }
 
 #[test]

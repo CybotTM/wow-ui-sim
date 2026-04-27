@@ -598,6 +598,19 @@ pub struct AdventureMapZoneChoice {
     pub normalized_y: f64,
 }
 
+/// Dialog-shaped quest text used by the adventure-map quest-choice
+/// dialog (`AdventureMapQuestChoiceDialogMixin:RefreshDetails`). Indexed
+/// by quest id and surfaced via `C_AdventureMap.GetQuestInfo`. Missing
+/// entries cause the API to return zero values; the dialog uses the
+/// `if descriptionText then ...` guard to skip rendering when the
+/// quest text is unknown.
+#[derive(Clone, Debug, Default)]
+pub struct AdventureMapQuestInfo {
+    pub title: String,
+    pub description: String,
+    pub objective_text: String,
+}
+
 /// Quest-offer descriptor for the adventure map. A quest offer is a
 /// standard non-legendary pin advertised on the canvas, surfaced via
 /// `C_AdventureMap.GetQuestOfferInfo`. `is_trivial`, `frequency`, and
@@ -654,7 +667,11 @@ pub struct AdventureMapInset {
 /// likewise defaults to empty: `C_AdventureMap.GetNumQuestOffers`
 /// always returns a number, and the
 /// `AdventureMap_QuestOfferDataProviderMixin:RefreshAllData` loop
-/// drives off it without a nil guard.
+/// drives off it without a nil guard. `quest_info` carries the
+/// dialog-shaped (title, description, objective) text consumed by
+/// `AdventureMapQuestChoiceDialogMixin:RefreshDetails`; missing keys
+/// make `C_AdventureMap.GetQuestInfo` return zero values so the
+/// dialog's `if descriptionText then ...` guard can short-circuit.
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
@@ -662,6 +679,7 @@ pub struct AdventureMapState {
     pub insets: Option<Vec<AdventureMapInset>>,
     pub zone_choices: Vec<AdventureMapZoneChoice>,
     pub quest_offers: Vec<AdventureMapQuestOffer>,
+    pub quest_info: HashMap<i64, AdventureMapQuestInfo>,
 }
 
 /// Shared simulator state accessible from Lua.
