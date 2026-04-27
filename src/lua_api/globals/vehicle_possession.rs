@@ -7,6 +7,7 @@
 //! - `UnitHasVehicleUI(unit)`         → `player.has_vehicle_ui`
 //! - `UnitControllingVehicle(unit)`   → `player.controlling_vehicle`
 //! - `UnitOnTaxi(unit)`               → `player.on_taxi`
+//! - `UnitVehicleSkin(unit)`          → `player.vehicle_skin` (`""` when none)
 //! - `CanExitVehicle()`               → `player.has_vehicle_ui || player.on_taxi`
 //! - `VehicleExit()`                  → clears the three vehicle flags and
 //!   fires `UNIT_EXITED_VEHICLE` with `"player"`.
@@ -59,6 +60,25 @@ fn unit_on_taxi(state: &mut LuaState) -> LuaResult<u32> {
     push_player_flag(state, |sim| sim.player.on_taxi)
 }
 
+/// `UnitVehicleSkin(unit)` — skin/style identifier for the unit's current
+/// vehicle UI. Returns the empty string when the unit is not in a skinned
+/// vehicle. `ActionBarController_UpdateAll` uses the empty-string sentinel
+/// to decide whether the skinned override bar should display.
+fn unit_vehicle_skin(state: &mut LuaState) -> LuaResult<u32> {
+    let skin = if unit_arg_is_player(state, 1) {
+        borrow_state(state)?
+            .player
+            .vehicle_skin
+            .clone()
+            .unwrap_or_default()
+    } else {
+        String::new()
+    };
+    let value = create_string(state, &skin);
+    state.push(value);
+    Ok(1)
+}
+
 /// `CanExitVehicle()` — true when the leave button should be shown. The
 /// real client gates this on additional vehicle-controller flags; the
 /// simulator collapses it to "has vehicle UI or on taxi".
@@ -102,6 +122,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "UnitHasVehicleUI", unit_has_vehicle_ui)?;
     LuaApiMut::register_function(lua, "UnitControllingVehicle", unit_controlling_vehicle)?;
     LuaApiMut::register_function(lua, "UnitOnTaxi", unit_on_taxi)?;
+    LuaApiMut::register_function(lua, "UnitVehicleSkin", unit_vehicle_skin)?;
     LuaApiMut::register_function(lua, "CanExitVehicle", can_exit_vehicle)?;
     LuaApiMut::register_function(lua, "VehicleExit", vehicle_exit)?;
     LuaApiMut::register_function(lua, "TaxiRequestEarlyLanding", taxi_request_early_landing)?;

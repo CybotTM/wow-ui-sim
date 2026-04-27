@@ -207,6 +207,10 @@ pub struct PlayerState {
     /// Latched true after the player clicks the leave button while on taxi.
     /// Surfaced for tests to assert that `TaxiRequestEarlyLanding` fired.
     pub taxi_early_landing_requested: bool,
+    /// Skin/style identifier for the player's current vehicle UI. `None`
+    /// surfaces as the empty string — the sentinel `ActionBarController`
+    /// uses to swap between `MainActionBar` and a skinned `OverrideActionBar`.
+    pub vehicle_skin: Option<String>,
 }
 
 impl PlayerState {

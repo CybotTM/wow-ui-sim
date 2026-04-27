@@ -117,6 +117,58 @@ fn taxi_request_early_landing_sets_flag() {
 }
 
 #[test]
+fn unit_vehicle_skin_defaults_to_empty_string() {
+    let env = WowLuaEnv::new().expect("env");
+    let skin: String = env.eval("return UnitVehicleSkin('player')").unwrap();
+    assert_eq!(skin, "");
+}
+
+#[test]
+fn unit_vehicle_skin_reads_player_field() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().player.vehicle_skin = Some("MechagonShredder".into());
+    let skin: String = env.eval("return UnitVehicleSkin('player')").unwrap();
+    assert_eq!(skin, "MechagonShredder");
+}
+
+#[test]
+fn unit_vehicle_skin_only_for_player() {
+    let env = WowLuaEnv::new().expect("env");
+    env.state().borrow_mut().player.vehicle_skin = Some("MechagonShredder".into());
+    let target: String = env.eval("return UnitVehicleSkin('target')").unwrap();
+    assert_eq!(target, "");
+    let party: String = env.eval("return UnitVehicleSkin('party1')").unwrap();
+    assert_eq!(party, "");
+}
+
+#[test]
+fn unit_vehicle_skin_treats_action_bar_controller_branch() {
+    // Mirrors `ActionBarController_UpdateAll`: skinned override bar shows when
+    // the skin is non-empty; falls back to the default path on empty.
+    let env = WowLuaEnv::new().expect("env");
+    let unskinned: bool = env
+        .eval(
+            r#"
+            local skin = UnitVehicleSkin('player')
+            return skin and skin ~= ''
+            "#,
+        )
+        .unwrap();
+    assert!(!unskinned, "empty skin should not request the override skin");
+
+    env.state().borrow_mut().player.vehicle_skin = Some("Demolisher".into());
+    let skinned: bool = env
+        .eval(
+            r#"
+            local skin = UnitVehicleSkin('player')
+            return skin and skin ~= ''
+            "#,
+        )
+        .unwrap();
+    assert!(skinned, "non-empty skin should request the override skin");
+}
+
+#[test]
 fn unit_channel_info_returns_nil_when_not_channeling() {
     let env = WowLuaEnv::new().expect("env");
     let nil_first: bool = env.eval("return UnitChannelInfo('player') == nil").unwrap();
