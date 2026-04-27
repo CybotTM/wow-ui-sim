@@ -35,6 +35,21 @@ if CreateColor == nil then
   end
 end
 
+if GetColorForCurrencyReward == nil then
+  -- Mirrors Blizzard's UIParent.lua. The currency-overflow probe is not
+  -- modelled, so the overflow branch is omitted; callers always pass
+  -- through the defaultColor / HIGHLIGHT_FONT_COLOR fallback.
+  function GetColorForCurrencyReward(_currencyID, _rewardQuantity, defaultColor)
+    if defaultColor ~= nil then
+      return defaultColor
+    end
+    if HIGHLIGHT_FONT_COLOR ~= nil then
+      return HIGHLIGHT_FONT_COLOR
+    end
+    return __wow_make_color(1, 1, 1, 1)
+  end
+end
+
 local __wow_console_font_height = 14
 
 if ConsoleGetColorFromType == nil then
