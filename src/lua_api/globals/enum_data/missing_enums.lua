@@ -15459,6 +15459,16 @@ if not Enum.UnitMirrorPetFlagsMeta then
   }
 end
 
+if not Enum.UnitSex then
+  Enum.UnitSex = {
+    Male = 0,
+    Female = 1,
+    None = 2,
+    Both = 3,
+    Neutral = 4,
+  }
+end
+
 if not Enum.UnitSexMeta then
   Enum.UnitSexMeta = {
     MaxValue = 4,

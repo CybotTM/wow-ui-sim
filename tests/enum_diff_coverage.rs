@@ -317,6 +317,39 @@ fn low_usage_character_create_and_transmog_enums_are_available_with_expected_val
 }
 
 #[test]
+fn unit_sex_is_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local enumTable = Enum.UnitSex
+            if type(enumTable) ~= "table" then
+                return "missing_enum"
+            end
+
+            local checks = {
+                { "Male", 0 },
+                { "Female", 1 },
+                { "None", 2 },
+                { "Both", 3 },
+                { "Neutral", 4 },
+            }
+
+            for _, check in ipairs(checks) do
+                if enumTable[check[1]] ~= check[2] then
+                    return "wrong_value:" .. check[1] .. "=" .. tostring(enumTable[check[1]])
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
     let extra = parse_enum_names("diff_enums_extra.txt");
     assert!(
