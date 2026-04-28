@@ -78,7 +78,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ## Addon Directories
 
-- `./Interface/AddOns/` - Third-party addons bundled with the simulator (e.g., AccountPlayed). This is the simulator's own addon directory, NOT the WoW game extract.
+- `./Interface/AddOns/` - Addons bundled with the simulator (Admin, Blizzard_FrameXML, SimCommands, TestFramework). This is the simulator's own addon directory, NOT the WoW game extract.
 
 ## WoW Game Files
 
