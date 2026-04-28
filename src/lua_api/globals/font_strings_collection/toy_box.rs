@@ -52,7 +52,7 @@ fn toy_get_from_index(state: &mut LuaState) -> LuaResult<u32> {
     };
     match item_id {
         Some(item_id) => item_id.into_stack(state),
-        None => (0i32).into_stack(state),
+        None => (-1i32).into_stack(state),
     }
 }
 

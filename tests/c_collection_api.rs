@@ -304,6 +304,16 @@ fn test_toy_box_get_toy_from_index() {
 }
 
 #[test]
+fn test_toy_box_get_toy_from_index_out_of_range() {
+    let env = env();
+    let id: i32 = env.eval("return C_ToyBox.GetToyFromIndex(9999)").unwrap();
+    assert_eq!(
+        id, -1,
+        "out-of-range index must return -1 so ToySpellButton_UpdateButton hides the slot"
+    );
+}
+
+#[test]
 fn test_toy_box_get_num_filtered_toys() {
     let env = env();
     let count: i32 = env.eval("return C_ToyBox.GetNumFilteredToys()").unwrap();
