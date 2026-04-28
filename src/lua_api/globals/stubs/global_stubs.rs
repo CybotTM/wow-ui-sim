@@ -3,6 +3,8 @@
 use rilua::vm::closure::RustFn;
 use rilua::vm::state::LuaState;
 
+use crate::lua_bridge::FromStack;
+
 use super::{
     is_nil_global, set_global_fn, stub_false, stub_nil, stub_repair_all_cost, stub_role_none,
     stub_role_none_enum, stub_zero,
@@ -237,6 +239,7 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("GetReadyCheckTimeLeft", stub_zero),
     // GetRestrictedAccountData is SimState-backed in xp_honor_rest.rs.
     ("GetClassicExpansionLevel", stub_current_expansion_level),
+    ("ClassicExpansionAtLeast", stub_classic_expansion_at_least),
     ("GetCurrentRegion", stub_current_region),
     ("GetServerExpansionLevel", stub_current_expansion_level),
     ("GetRepairAllCost", stub_repair_all_cost),
@@ -251,6 +254,12 @@ fn stub_current_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {
 
 fn stub_current_region(state: &mut LuaState) -> rilua::LuaResult<u32> {
     state.push(rilua::Val::Num(CURRENT_REGION_ID));
+    Ok(1)
+}
+
+fn stub_classic_expansion_at_least(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    let level = f64::from_stack(state, 1).unwrap_or(0.0);
+    state.push(rilua::Val::Bool(CURRENT_EXPANSION_LEVEL >= level));
     Ok(1)
 }
 
