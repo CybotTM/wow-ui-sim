@@ -6,6 +6,15 @@ Chronological record of wiki operations.
 
 Created `investigations/windows-port-build.md` after the Windows smoke pass. The root cause was the local `iced-dynamic` re-export crate forcing a huge `iced_dynamic.dll` link, which hit MSVC `LNK1189`; the build now depends on upstream `iced` directly. Verified `wow-sim`, `wow-cli`, GUI startup, and screenshot output on Windows. Updated the note after adding shared WoW resource discovery for install root, CASC `Data`, extracted Interface art, AddOns, and WTF. Live WTF is documented and tested as read-only import; simulator-local SavedVariables take precedence once present.
 
+## [2026-04-28] update | remaining EditMode startup hotspot narrowed
+
+Updated `investigations/startup-createframe-profile.md` with follow-up probes
+on the remaining post-load `apply_system_anchors` cost. `InitSystemAnchors`
+and the registered-system loop were effectively free; the cost stayed in
+`UpdateBottomActionBarPositions()` / managed-frame layout. Recorded the
+discarded forbidden-attribute no-op idea because it broke
+`tests/frame_positions.rs` by shifting `ObjectiveTrackerFrame`.
+
 ## [2026-04-28] update | duplicate post-event EditMode pass
 
 Updated `investigations/startup-createframe-profile.md` with the startup
