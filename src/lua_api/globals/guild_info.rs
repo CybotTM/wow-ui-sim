@@ -8,6 +8,11 @@
 //!   retail's "no explicit mute" baseline keeps addons' chat input enabled).
 //! - `CanViewOfficerNote()` / `CanEditOfficerNote()` — `world.guild_is_officer`.
 //! - `GetGuildNewsInfo(index)` — nil while guild news state is unmodeled.
+//! - `IsGuildRankAssignmentAllowed(guid, rankOrder)` — true. The sim has no
+//!   per-rank authenticator gate, so every rank is freely assignable.
+//! - `SetGuildRankOrder(guid, rankOrder)` — no-op. Wired up so the rank radio
+//!   menu in `CommunitiesGuildMemberDetail` can fire `:SetSelected()` without
+//!   error; per-member rank state isn't yet round-tripped.
 //!
 //! Admin:
 //! - `A_Admin.SetGuildClubId(id?)` — nil / empty clears.
@@ -71,6 +76,15 @@ pub fn get_guild_news_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+pub fn is_guild_rank_assignment_allowed(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
+pub fn set_guild_rank_order(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 fn ensure_c_guild_info_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_GuildInfo");
     let global = state.global;
@@ -119,6 +133,13 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "CanEditOfficerNote",
         can_edit_officer_note,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsGuildRankAssignmentAllowed",
+        is_guild_rank_assignment_allowed,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "SetGuildRankOrder", set_guild_rank_order)?;
     Ok(())
 }
 
