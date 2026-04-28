@@ -22,6 +22,29 @@ Opening the talent panel demand-loads `Blizzard_PlayerSpells`, which creates hun
 
 Remaining cost: Rust-side template instantiation (`get_template`, `compute_frame_rect`, HashMap hashing) and Lua error traceback building (`luaH_next` in `compat53_findfield`).
 
+## Problem 1b: Discarded Strata Repair Work on Show
+
+### Symptom
+
+After the shallow `issecretvalue` fix, the repeated open path was still slower than expected. Release `bench_talents` runs showed first opens in the expected broad range, but subsequent opens around 200ms+ instead of the documented ~76-90ms range.
+
+### Root Cause
+
+`SimState::set_frame_visible` always called `try_repair_strata_buckets_after_show` after `Show()`. That helper built a same-strata subtree repair plan before checking whether `strata_buckets` existed. In headless benchmark/loading paths the buckets are often `None`, so every talent button/region show paid `collect_same_strata_subtree_ids` / `frame_render_alpha` work and then discarded the result.
+
+### Fix
+
+`try_repair_strata_buckets_after_show` now returns immediately when `strata_buckets` is `None`. The existing repair path is preserved for live rendered buckets; unloaded buckets can still stay invalidated and build lazily on first render.
+
+### Benchmark Results
+
+Release `bench_talents` on this worktree:
+
+| Version | First open | Subsequent |
+|---|---:|---:|
+| Before guard | 259-472ms | 211-282ms |
+| After guard | 364-398ms | 112-150ms |
+
 ## Problem 2: OnUpdate Loop (5 FPS)
 
 ### Symptom
