@@ -42,6 +42,12 @@ pub fn stub_false(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Returns `true`.
+pub fn stub_true(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
+    Ok(1)
+}
+
 /// Returns `0`.
 pub fn stub_zero(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));

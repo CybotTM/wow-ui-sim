@@ -7,11 +7,12 @@ use crate::lua_bridge::FromStack;
 
 use super::{
     is_nil_global, set_global_fn, stub_false, stub_nil, stub_repair_all_cost, stub_role_none,
-    stub_role_none_enum, stub_zero,
+    stub_role_none_enum, stub_true, stub_zero,
 };
 
 const CURRENT_EXPANSION_LEVEL: f64 = 10.0;
 const CURRENT_REGION_ID: f64 = 1.0;
+const NUM_EXPANSIONS: f64 = 11.0;
 
 static GLOBAL_NIL_STUBS: &[&str] = &[
     "AddFriend",
@@ -242,9 +243,18 @@ static GLOBAL_CUSTOM_STUBS: &[(&'static str, RustFn)] = &[
     ("ClassicExpansionAtLeast", stub_classic_expansion_at_least),
     ("GetCurrentRegion", stub_current_region),
     ("GetServerExpansionLevel", stub_current_expansion_level),
+    ("GetNumExpansions", stub_num_expansions),
     ("GetRepairAllCost", stub_repair_all_cost),
     ("UnitGroupRolesAssigned", stub_role_none),
     ("UnitGroupRolesAssignedEnum", stub_role_none_enum),
+    // Transmog wardrobe needs `IsUnitModelReadyForUI("player")` to return
+    // true so model-reload paths progress instead of bailing out. We don't
+    // simulate model load timing — the model is always "ready".
+    ("IsUnitModelReadyForUI", stub_true),
+    // GetUICameraInfo returns nothing; callers nil-check the first return
+    // and skip the camera setup branch when unset. This is fine for a
+    // headless 2D simulator that doesn't render 3D models anyway.
+    ("GetUICameraInfo", stub_nil),
 ];
 
 fn stub_current_expansion_level(state: &mut LuaState) -> rilua::LuaResult<u32> {
@@ -260,6 +270,11 @@ fn stub_current_region(state: &mut LuaState) -> rilua::LuaResult<u32> {
 fn stub_classic_expansion_at_least(state: &mut LuaState) -> rilua::LuaResult<u32> {
     let level = f64::from_stack(state, 1).unwrap_or(0.0);
     state.push(rilua::Val::Bool(CURRENT_EXPANSION_LEVEL >= level));
+    Ok(1)
+}
+
+fn stub_num_expansions(state: &mut LuaState) -> rilua::LuaResult<u32> {
+    state.push(rilua::Val::Num(NUM_EXPANSIONS));
     Ok(1)
 }
 
