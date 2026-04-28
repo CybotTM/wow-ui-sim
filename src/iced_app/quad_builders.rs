@@ -333,7 +333,9 @@ fn dispatch_widget_quads(
         }
         WidgetType::Button => button::emit_button_quads_with_text(batch, text_ctx, frame),
         WidgetType::Texture => emit_texture_quads_with_mask(batch, frame),
-        WidgetType::FontString => emit_fontstring_quads(batch, text_ctx, frame),
+        WidgetType::FontString | WidgetType::SimpleHTML => {
+            emit_fontstring_quads(batch, text_ctx, frame)
+        }
         WidgetType::CheckButton => button::emit_checkbutton_quads(batch, text_ctx, frame),
         WidgetType::EditBox => button::emit_editbox_with_text(
             batch,
