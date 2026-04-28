@@ -10,34 +10,22 @@ use std::rc::Rc;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 
+#[cfg(not(unix))]
+use crate::inspector_server_stub as debug_server;
 use crate::lua_api::WowLuaEnv;
 use crate::lua_server;
 use crate::render::{GlyphAtlas, WowFontSystem};
 use crate::saved_variables::SavedVariablesManager;
 use crate::texture::TextureManager;
+use debug_server::ScreenshotData;
 #[cfg(unix)]
 use iced_layout_inspector::server as debug_server;
-#[cfg(not(unix))]
-use crate::inspector_server_stub as debug_server;
-use debug_server::ScreenshotData;
 
 use super::Message;
 use super::state::InspectorState;
 
 /// Default path to WoW TTF fonts.
 pub const DEFAULT_FONTS_PATH: &str = "./fonts";
-
-/// Default path to local WebP textures (preferred).
-pub const LOCAL_TEXTURES_PATH: &str = "./textures";
-
-/// Fallback path to wow-ui-textures repository.
-pub const FALLBACK_TEXTURES_PATH: &str = "/home/osso/Repos/wow-ui-textures";
-
-/// Default path to WoW Interface directory (extracted game files).
-pub const DEFAULT_INTERFACE_PATH: &str = "/home/osso/Projects/wow/Interface";
-
-/// Default path to addons directory.
-pub const DEFAULT_ADDONS_PATH: &str = "./Interface/AddOns";
 
 const DEFAULT_FAST_TICK_MS: u64 = 16;
 
@@ -359,13 +347,7 @@ impl App {
             .expect("WowLuaEnv not initialized");
         let textures_path = INIT_TEXTURES
             .with(|cell| cell.borrow_mut().take())
-            .unwrap_or_else(|| {
-                if PathBuf::from(LOCAL_TEXTURES_PATH).exists() {
-                    PathBuf::from(LOCAL_TEXTURES_PATH)
-                } else {
-                    PathBuf::from(FALLBACK_TEXTURES_PATH)
-                }
-            });
+            .unwrap_or_else(crate::paths::default_textures_path);
         let saved_vars = INIT_SAVED_VARS.with(|cell| cell.borrow_mut().take());
         (Rc::new(RefCell::new(env)), textures_path, saved_vars)
     }
@@ -390,8 +372,8 @@ impl App {
         Rc<RefCell<GlyphAtlas>>,
     ) {
         let mut tex_mgr = TextureManager::new(textures_path)
-            .with_interface_path(DEFAULT_INTERFACE_PATH)
-            .with_addons_path(DEFAULT_ADDONS_PATH)
+            .with_interface_path(crate::paths::default_interface_path())
+            .with_addons_path(crate::paths::default_addons_path())
             .with_disk_cache("./cache/textures");
         if Self::eager_startup_texture_preloads_enabled() {
             let class_name = {
@@ -594,7 +576,9 @@ impl Drop for App {
             let env = self.env.borrow();
             let mut lua = env.rilua_mut();
             match saved_vars.save_all(lua.state_mut()) {
-                Ok(()) => crate::logging::eprintln_elapsed("[wow-sim] SavedVariables saved"),
+                Ok(()) => crate::logging::eprintln_elapsed(
+                    "[wow-sim] SavedVariables saved to simulator storage",
+                ),
                 Err(e) => crate::logging::eprintln_elapsed(&format!(
                     "[wow-sim] SavedVariables save error: {e}"
                 )),

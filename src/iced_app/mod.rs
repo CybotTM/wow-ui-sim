@@ -114,10 +114,7 @@ pub use styles::palette;
 #[cfg(feature = "gui")]
 pub use app::DebugOptions;
 #[cfg(feature = "gui")]
-use app::{
-    FALLBACK_TEXTURES_PATH, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES,
-    LOCAL_TEXTURES_PATH,
-};
+use app::{INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES};
 
 #[cfg(feature = "gui")]
 fn perf_logging_enabled() -> bool {
@@ -188,12 +185,7 @@ pub fn run_iced_ui(
     exec_lua: Option<String>,
     exec_lua_secure: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Prefer local WebP textures, fall back to full repo
-    let textures_path = if PathBuf::from(LOCAL_TEXTURES_PATH).exists() {
-        PathBuf::from(LOCAL_TEXTURES_PATH)
-    } else {
-        PathBuf::from(FALLBACK_TEXTURES_PATH)
-    };
+    let textures_path = crate::paths::default_textures_path();
     if let Some(code) = exec_lua {
         app::INIT_EXEC_LUA.with(|cell| *cell.borrow_mut() = Some((code, exec_lua_secure)));
     }
