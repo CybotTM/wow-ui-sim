@@ -79,7 +79,12 @@ fn get_major_faction_ids(state: &mut LuaState) -> LuaResult<u32> {
         unreachable!("create_table must return a table");
     };
     for (index, id) in ids.iter().enumerate() {
-        table_set_num(state, sequence_ref, (index + 1) as f64, Val::Num(*id as f64));
+        table_set_num(
+            state,
+            sequence_ref,
+            (index + 1) as f64,
+            Val::Num(*id as f64),
+        );
     }
     state.push(sequence);
     Ok(1)
