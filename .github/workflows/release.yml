@@ -18,10 +18,8 @@ jobs:
         include:
           - name: linux-x86_64
             os: ubuntu-latest
-            archive: tar.gz
           - name: windows-x86_64
             os: windows-latest
-            archive: zip
 
     steps:
       - name: Checkout
@@ -59,11 +57,10 @@ jobs:
           name="wow-ui-sim-${GITHUB_REF_NAME}-${{ matrix.name }}"
           root="dist/${name}"
 
-          mkdir -p "${root}/Interface" "${root}/scripts"
+          mkdir -p "${root}/scripts"
           cp target/release/wow-sim target/release/wow-cli "${root}/"
           cp README.md LICENSE "${root}/"
           cp scripts/setup-blizzard-ui.sh scripts/setup-blizzard-ui.ps1 "${root}/scripts/"
-          cp -R Interface/AddOns "${root}/Interface/AddOns"
           cp -R fonts "${root}/fonts"
 
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
@@ -85,11 +82,10 @@ jobs:
           $name = "wow-ui-sim-$env:GITHUB_REF_NAME-${{ matrix.name }}"
           $root = "dist\$name"
 
-          New-Item -ItemType Directory -Force "$root\Interface", "$root\scripts" | Out-Null
+          New-Item -ItemType Directory -Force "$root\scripts" | Out-Null
           Copy-Item target\release\wow-sim.exe, target\release\wow-cli.exe $root
           Copy-Item README.md, LICENSE $root
           Copy-Item scripts\setup-blizzard-ui.sh, scripts\setup-blizzard-ui.ps1 "$root\scripts"
-          Copy-Item -Recurse Interface\AddOns "$root\Interface\AddOns"
           Copy-Item -Recurse fonts "$root\fonts"
 
           Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
