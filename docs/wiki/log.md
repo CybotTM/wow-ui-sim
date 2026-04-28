@@ -21,7 +21,9 @@ Created `investigations/three-slice-button-tiling.md`. Escape menu red button
 stripes came from standard `HighlightTexture` children rendering while the
 buttons were not hovered. The red-button center atlas special case was removed;
 atlas tiling uses source size, and highlight children now render only when the
-parent button is hovered or highlight-locked.
+parent button is hovered or highlight-locked. Additive overlays also skip the
+shader brightness boost so active highlights do not amplify low-alpha atlas edge
+pixels into visible stripes.
 
 ## [2026-04-28] update | eager animation_frame_ids_for_group
 
