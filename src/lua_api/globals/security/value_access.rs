@@ -10,7 +10,7 @@ use std::collections::HashSet;
 use crate::lua_api::methods::val_to_string;
 
 use super::register_if_missing;
-use super::secret_values::{mark_secret_value, table_is_secret, value_is_secret};
+use super::secret_values::{mark_secret_value, table_is_secret, value_is_secret_shallow};
 
 pub(super) fn register_value_access_fallbacks(lua: &mut rilua::Lua) -> LuaResult<()> {
     register_if_missing(lua, "issecretvalue", issecretvalue_fallback)?;
@@ -129,11 +129,13 @@ fn set_slot_taint(
     }
 }
 
-/// `issecretvalue(v)` — returns true for tainted values and tables containing
-/// tainted slots or nested tainted values.
+/// `issecretvalue(v)` — returns true for tainted values. Inspects the value
+/// itself (string marker, function closure-taint, or direct slot-taint on a
+/// table) without recursing into nested table contents; `canaccesstable` is
+/// the deep check.
 fn issecretvalue_fallback(state: &mut LuaState) -> LuaResult<u32> {
     let value = state.stack_get(state.base);
-    let secret = value_is_secret(state, value, &mut HashSet::new());
+    let secret = value_is_secret_shallow(state, value);
     state.push(Val::Bool(secret));
     Ok(1)
 }
@@ -141,7 +143,7 @@ fn issecretvalue_fallback(state: &mut LuaState) -> LuaResult<u32> {
 /// `canaccessvalue(v)` — returns true for non-secret values.
 fn canaccessvalue_fallback(state: &mut LuaState) -> LuaResult<u32> {
     let value = state.stack_get(state.base);
-    let secret = value_is_secret(state, value, &mut HashSet::new());
+    let secret = value_is_secret_shallow(state, value);
     state.push(Val::Bool(!secret));
     Ok(1)
 }
@@ -150,10 +152,9 @@ fn canaccessvalue_fallback(state: &mut LuaState) -> LuaResult<u32> {
 /// non-secret.
 fn canaccessallvalues_fallback(state: &mut LuaState) -> LuaResult<u32> {
     let nargs = state.top.saturating_sub(state.base);
-    let mut visited = HashSet::new();
     let mut accessible = true;
     for index in 0..nargs {
-        if value_is_secret(state, state.stack_get(state.base + index), &mut visited) {
+        if value_is_secret_shallow(state, state.stack_get(state.base + index)) {
             accessible = false;
             break;
         }
@@ -162,12 +163,15 @@ fn canaccessallvalues_fallback(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
-/// `canaccesstable(t)` — returns true only for non-secret tables.
+/// `canaccesstable(t)` — returns true only for non-secret tables. Performs a
+/// deep recursive walk so that tables containing tainted strings or
+/// closures (e.g. unit identity names from `UnitName`) are reported as
+/// inaccessible.
 fn canaccesstable_fallback(state: &mut LuaState) -> LuaResult<u32> {
     let value = state.stack_get(state.base);
     let accessible = match value {
         Val::Table(table_ref) => !table_is_secret(state, table_ref, &mut HashSet::new()),
-        _ => !value_is_secret(state, value, &mut HashSet::new()),
+        _ => !value_is_secret_shallow(state, value),
     };
     state.push(Val::Bool(accessible));
     Ok(1)

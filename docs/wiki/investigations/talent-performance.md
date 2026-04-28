@@ -1,6 +1,6 @@
 # Talent Performance
 
-Two separate performance problems affecting the talent panel: slow initial load and an OnUpdate loop that dropped the sim to ~5 FPS.
+Three separate performance problems affecting the talent panel: slow initial load, an OnUpdate loop that dropped the sim to ~5 FPS, and a multi-second Spec→Talents tab switch caused by a recursive `issecretvalue`.
 
 ## Problem 1: Slow Initial Load
 
@@ -42,6 +42,28 @@ Buttons appeared rect-invalid due to two bugs in `is_rect_dirty()`:
 1. `is_rect_dirty()` now only caches `Some(false)` (clean) results — dirty results are never cached.
 2. `resolve_rect_if_dirty(id)` walks up the ancestor chain, finds all dirty roots, computes their layout rects, and clears their flags before resolving the target.
 3. Removed `workarounds_talents.rs` (Lua-side workaround targeting the wrong cause).
+
+## Problem 3: Spec→Talents Tab Switch (~3.5s)
+
+### Symptom
+
+Switching from the Specializations tab back to Talents took multiple seconds (user-reported "about 20s" with full addon load). `Blizzard_ClassTalentsFrame.xml` sets `refreshOnShow=true`, so `LoadTalentTreeInternal` rebuilds the tree on every Show: `talentButtonCollection:ReleaseAll()` releases all 135 talent buttons, then re-instantiates them. The release alone took ~2.1s — ~16ms per button.
+
+### Root Cause
+
+`SecureObjectPoolMixin:CheckAllowReleaseObject` calls `issecretvalue(object)` on every released frame, and `SecureMap`/`SecureStack`/`SecureNumber` assertions add 2–3 more `issecretvalue` calls per release. The Rust fallback `value_is_secret` recursed into nested table contents via `table_is_secret`, walking the entire WoW frame's deep table tree (~7.4ms per call on a frame).
+
+### Fix
+
+`src/lua_api/globals/security/secret_values.rs` adds `value_is_secret_shallow`, used by `issecretvalue`, `canaccessvalue`, and `canaccessallvalues`. For tables it only inspects direct slot taints set via `__sim_mark_slot_taint` — no entry walk, no recursion. `canaccesstable` keeps the deep `table_is_secret` walk so its accessibility semantics still detect nested secret strings (verified by `test_table_containing_party_identity_is_not_accessible`).
+
+### Benchmark Results
+
+| Operation | Before | After |
+|---|---|---|
+| `talentButtonCollection:ReleaseAll()` (135 buttons) | 2159ms | 2.6ms |
+| Spec→Talents tab switch | ~3500ms | ~90ms |
+| `issecretvalue(frame)` × 1000 | 7411ms | <10ms |
 
 ## Benchmark Binary
 

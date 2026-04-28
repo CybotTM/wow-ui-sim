@@ -39,6 +39,9 @@ pub(crate) fn mark_secret_value(state: &mut LuaState, value: Val) {
     }
 }
 
+/// Recursive deep secret check: walks nested tables looking for any tainted
+/// slot or nested secret value. Used by `canaccesstable` (the deep
+/// accessibility check) and internally by `table_is_secret`.
 pub(super) fn value_is_secret(
     state: &mut LuaState,
     value: Val,
@@ -53,6 +56,68 @@ pub(super) fn value_is_secret(
         Val::Table(table_ref) => table_is_secret(state, table_ref, visited),
         _ => false,
     }
+}
+
+/// Shallow secret check: only inspects the value itself.
+///
+/// For tables this checks direct slot taints (set via
+/// `__sim_mark_slot_taint`) but does NOT recurse into entry values. Used by
+/// `issecretvalue`, `canaccessvalue`, and `canaccessallvalues`. The deep walk
+/// in `value_is_secret`/`table_is_secret` traverses an entire frame's table
+/// tree which is prohibitively expensive in pool Release hot paths
+/// (`SecureObjectPoolMixin:CheckAllowReleaseObject` calls `issecretvalue` on
+/// every released frame, plus SecureMap/SecureStack assertions on every
+/// reclaim).
+pub(super) fn value_is_secret_shallow(state: &mut LuaState, value: Val) -> bool {
+    if value_has_secret_marker(state, value) {
+        return true;
+    }
+
+    match value {
+        Val::Function(func_ref) => function_is_secret(state, func_ref),
+        Val::Table(table_ref) => table_has_direct_slot_taint(state, table_ref),
+        _ => false,
+    }
+}
+
+/// Returns true if any slot on `table_ref` itself has been marked tainted via
+/// `__sim_mark_slot_taint`. Does not recurse into nested values.
+fn table_has_direct_slot_taint(
+    state: &LuaState,
+    table_ref: rilua::vm::gc::arena::GcRef<Table>,
+) -> bool {
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return false;
+    };
+
+    for (index, value) in table.array_slice().iter().copied().enumerate() {
+        if value.is_nil() {
+            continue;
+        }
+        if table.get_slot_taint_int((index + 1) as i64).is_some() {
+            return true;
+        }
+    }
+
+    for (key, _value) in table.hash_entries() {
+        let tainted = match key {
+            Val::Str(key_ref) => state
+                .gc
+                .string_arena
+                .get(key_ref)
+                .and_then(|s| table.get_slot_taint_str(s.data()))
+                .is_some(),
+            Val::Num(n) if n.is_finite() && (n as i64) as f64 == n => {
+                table.get_slot_taint_int(n as i64).is_some()
+            }
+            _ => false,
+        };
+        if tainted {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn value_has_secret_marker(state: &mut LuaState, value: Val) -> bool {
