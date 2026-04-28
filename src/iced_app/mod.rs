@@ -17,6 +17,8 @@ pub mod layout;
 #[cfg(feature = "gui")]
 mod app;
 #[cfg(feature = "gui")]
+mod app_icon;
+#[cfg(feature = "gui")]
 mod benchmark;
 #[cfg(feature = "gui")]
 mod button_vis;
@@ -216,6 +218,7 @@ pub fn run_iced_ui_with_textures(
 
     iced::application(App::boot, App::update, App::view)
         .title(App::title)
+        .window(app_icon::settings())
         .subscription(App::subscription)
         .run()?;
 
