@@ -3,7 +3,9 @@
 Escape menu red buttons showed vertical stripe artifacts because their standard
 `HighlightTexture` overlays were rendered while the buttons were not hovered.
 The highlight atlas itself contains pale vertical columns, so drawing it on all
-buttons made inactive buttons look striped.
+buttons made inactive buttons look striped. The remaining active-highlight
+stripe came from applying the simulator's dark-texture brightness boost to
+additive overlays, which made very low-alpha atlas edge pixels too visible.
 
 ## Content
 
@@ -28,7 +30,8 @@ runtime dumps showed each button's `.HighlightTexture` child visible at alpha
 Fix: standard button highlight texture children are skipped during the normal
 texture pass unless the parent button is hovered or `LockHighlight()` /
 `SetHighlightLocked(true)` is active. Hover rendering still draws the child
-highlight through the overlay pass.
+highlight through the overlay pass. Additive overlays also bypass the shader
+brightness boost.
 
 ## Sources
 
@@ -36,6 +39,7 @@ highlight through the overlay pass.
 - [ThreeSliceButtonTemplate.xml](../../Interface/BlizzardUI/Blizzard_SharedXML/Shared/Button/ThreeSliceButtonTemplate.xml) — Center texture `horizTile=true`
 - [data/atlas.rs](../../data/atlas.rs) — RedButton atlas dimensions and tiling metadata
 - [quad_builders.rs](../../src/iced_app/quad_builders.rs) — button highlight child gating
+- [quad.wgsl](../../src/render/shader/quad.wgsl) — additive overlays bypass brightness boost
 - [tiling.rs](../../src/iced_app/tiling.rs) — simulator tile-size computation and regression test
 
 ## See Also
