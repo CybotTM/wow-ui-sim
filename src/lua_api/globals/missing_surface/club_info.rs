@@ -22,8 +22,11 @@
 
 use super::{ensure_namespace, set_table_array};
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, table_get, table_set, val_to_string,
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+    val_to_string,
 };
+use crate::lua_api::script_helpers::fire_named_event_state;
+use crate::lua_api::state_types::character_world::GuildChatMessage;
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -308,10 +311,8 @@ fn c_club_get_message_info(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     };
 
-    match generated_guild_messages()
-        .iter()
-        .find(|message| message.id == message_id)
-    {
+    let messages = resolved_guild_messages(state)?;
+    match messages.iter().find(|message| message.id == message_id) {
         Some(message) => {
             let message_info = build_message_info_table(state, message);
             state.push(message_info);
@@ -324,11 +325,11 @@ fn c_club_get_message_info(state: &mut LuaState) -> LuaResult<u32> {
 fn c_club_get_message_ranges(state: &mut LuaState) -> LuaResult<u32> {
     let ranges = create_table(state);
     if is_guild_stream_arg(state) {
-        let messages = generated_guild_messages();
+        let messages = resolved_guild_messages(state)?;
         let range = build_message_range_table(
             state,
-            messages.first().expect("generated guild messages"),
-            messages.last().expect("generated guild messages"),
+            messages.first().expect("seeded guild messages"),
+            messages.last().expect("seeded guild messages"),
         );
         set_table_array(state, ranges, 1, range);
     }
@@ -343,9 +344,11 @@ fn c_club_get_messages_before(state: &mut LuaState) -> LuaResult<u32> {
         return Ok(1);
     }
 
-    let newest = message_id_from_stack(state, 3).unwrap_or_else(last_generated_message_id);
+    let all_messages = resolved_guild_messages(state)?;
+    let newest = message_id_from_stack(state, 3)
+        .unwrap_or_else(|| all_messages.last().map(|m| m.id).unwrap_or_default());
     let count = i64::from_stack(state, 4)?.max(0) as usize;
-    let messages = messages_before(newest, count);
+    let messages = messages_before(&all_messages, newest, count);
     let array = create_table(state);
     for (index, message) in messages.iter().enumerate() {
         let message_info = build_message_info_table(state, message);
@@ -361,15 +364,42 @@ fn c_club_request_more_messages_before(_state: &mut LuaState) -> LuaResult<u32> 
 
 fn c_club_is_beginning_of_stream(state: &mut LuaState) -> LuaResult<u32> {
     let message_id = message_id_from_stack(state, 3);
-    let first_message_id = generated_guild_messages()
-        .first()
-        .map(|message| message.id)
-        .unwrap_or_default();
+    let messages = resolved_guild_messages(state)?;
+    let first_message_id = messages.first().map(|m| m.id).unwrap_or_default();
     state.push(Val::Bool(message_id == Some(first_message_id)));
     Ok(1)
 }
 
-fn c_club_send_message(_state: &mut LuaState) -> LuaResult<u32> {
+fn c_club_send_message(state: &mut LuaState) -> LuaResult<u32> {
+    if !is_guild_stream_arg(state) {
+        return Ok(0);
+    }
+    let Ok(text) = String::from_stack(state, 3) else {
+        return Ok(0);
+    };
+    if text.is_empty() {
+        return Ok(0);
+    }
+
+    let new_index = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.world.guild_chat_messages.push(GuildChatMessage {
+            author_member_id: 1,
+            content: text,
+        });
+        sim.world.guild_chat_messages.len() - 1
+    };
+
+    let message_id = dynamic_message_id(new_index);
+    let club_id_val = create_string(state, GUILD_CLUB_ID);
+    let stream_id_val = Val::Num(GUILD_STREAM_ID);
+    let message_id_val = build_message_id_table(state, message_id);
+
+    fire_named_event_state(
+        state,
+        "CLUB_MESSAGE_ADDED",
+        &[club_id_val, stream_id_val, message_id_val],
+    );
     Ok(0)
 }
 
@@ -471,11 +501,11 @@ fn index_from_member_id(member_id: i64) -> Option<usize> {
         .and_then(|zero_based| usize::try_from(zero_based).ok())
 }
 
-#[derive(Clone, Copy)]
-struct GeneratedMessage {
+#[derive(Clone)]
+struct ResolvedMessage {
     id: MessageId,
     author_member_id: i64,
-    content: &'static str,
+    content: String,
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
@@ -484,57 +514,60 @@ struct MessageId {
     position: i64,
 }
 
-fn generated_guild_messages() -> [GeneratedMessage; 4] {
-    [
-        generated_message(
-            0,
-            1,
-            "Welcome to Heroes of Azeroth. Repairs are open for raid night.",
-        ),
-        generated_message(
-            1,
-            1,
-            "Mythic plus keys start after reset. Bring flasks if you have them.",
-        ),
-        generated_message(
-            2,
-            2,
-            "I put extra feasts and vantus runes in the guild bank.",
-        ),
-        generated_message(
-            3,
-            1,
-            "Transmog run on Sunday. Invites go out ten minutes early.",
-        ),
-    ]
+const STATIC_GUILD_MESSAGES: &[(i64, &str)] = &[
+    (1, "Welcome to Heroes of Azeroth. Repairs are open for raid night."),
+    (1, "Mythic plus keys start after reset. Bring flasks if you have them."),
+    (2, "I put extra feasts and vantus runes in the guild bank."),
+    (1, "Transmog run on Sunday. Invites go out ten minutes early."),
+];
+
+fn resolved_guild_messages(state: &LuaState) -> LuaResult<Vec<ResolvedMessage>> {
+    let mut messages: Vec<ResolvedMessage> = STATIC_GUILD_MESSAGES
+        .iter()
+        .enumerate()
+        .map(|(index, (author, content))| ResolvedMessage {
+            id: message_id_at(index),
+            author_member_id: *author,
+            content: (*content).to_string(),
+        })
+        .collect();
+
+    let sim = borrow_state(state)?;
+    for (index, msg) in sim.world.guild_chat_messages.iter().enumerate() {
+        messages.push(ResolvedMessage {
+            id: dynamic_message_id(index),
+            author_member_id: msg.author_member_id,
+            content: msg.content.clone(),
+        });
+    }
+    Ok(messages)
 }
 
-fn generated_message(index: i64, author_member_id: i64, content: &'static str) -> GeneratedMessage {
-    GeneratedMessage {
-        id: MessageId {
-            epoch: FIRST_MESSAGE_EPOCH + index * MESSAGE_EPOCH_STEP,
-            position: index + 1,
-        },
-        author_member_id,
-        content,
+fn message_id_at(absolute_index: usize) -> MessageId {
+    let index = absolute_index as i64;
+    MessageId {
+        epoch: FIRST_MESSAGE_EPOCH + index * MESSAGE_EPOCH_STEP,
+        position: index + 1,
     }
 }
 
-fn last_generated_message_id() -> MessageId {
-    generated_guild_messages()
-        .last()
-        .map(|message| message.id)
-        .unwrap_or_default()
+fn dynamic_message_id(dynamic_index: usize) -> MessageId {
+    message_id_at(STATIC_GUILD_MESSAGES.len() + dynamic_index)
 }
 
-fn messages_before(newest: MessageId, count: usize) -> Vec<GeneratedMessage> {
-    let mut messages: Vec<_> = generated_guild_messages()
-        .into_iter()
+fn messages_before(
+    all_messages: &[ResolvedMessage],
+    newest: MessageId,
+    count: usize,
+) -> Vec<ResolvedMessage> {
+    let mut filtered: Vec<ResolvedMessage> = all_messages
+        .iter()
         .filter(|message| message.id.epoch <= newest.epoch)
+        .cloned()
         .collect();
-    let keep_from = messages.len().saturating_sub(count);
-    messages.drain(..keep_from);
-    messages
+    let keep_from = filtered.len().saturating_sub(count);
+    filtered.drain(..keep_from);
+    filtered
 }
 
 fn message_id_from_stack(state: &mut LuaState, index: i32) -> Option<MessageId> {
@@ -627,8 +660,8 @@ fn build_member_info_table(
 
 fn build_message_range_table(
     state: &mut LuaState,
-    oldest: &GeneratedMessage,
-    newest: &GeneratedMessage,
+    oldest: &ResolvedMessage,
+    newest: &ResolvedMessage,
 ) -> Val {
     let range = create_table(state);
     let oldest_id = build_message_id_table(state, oldest.id);
@@ -638,10 +671,10 @@ fn build_message_range_table(
     range
 }
 
-fn build_message_info_table(state: &mut LuaState, message: &GeneratedMessage) -> Val {
+fn build_message_info_table(state: &mut LuaState, message: &ResolvedMessage) -> Val {
     let info = create_table(state);
     let message_id = build_message_id_table(state, message.id);
-    let content = create_string(state, message.content);
+    let content = create_string(state, &message.content);
     let author = build_message_author_table(state, message.author_member_id);
     table_set(state, info, "messageId", message_id);
     table_set(state, info, "content", content);

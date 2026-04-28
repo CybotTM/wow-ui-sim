@@ -442,6 +442,9 @@ pub struct WorldState {
     /// `GuildInvite` / `GuildUninvite` / `GuildKick` / `GuildPromote`.
     /// Empty when the player has no guild.
     pub guild_members: Vec<GuildMember>,
+    /// Guild chat messages sent at runtime via `C_Club.SendMessage`. Appended
+    /// after the static seed messages exposed by `C_Club.GetMessagesBefore`.
+    pub guild_chat_messages: Vec<GuildChatMessage>,
 }
 
 /// A guild member: display name, 1-based rank index, and online state.
@@ -451,6 +454,15 @@ pub struct GuildMember {
     pub name: String,
     pub rank_index: i32,
     pub online: bool,
+}
+
+/// A guild chat message authored at runtime (typically by the player via
+/// `C_Club.SendMessage`). The simulator assigns positions/epochs based on
+/// the message's index in `WorldState::guild_chat_messages`.
+#[derive(Debug, Clone)]
+pub struct GuildChatMessage {
+    pub author_member_id: i64,
+    pub content: String,
 }
 
 /// Seeded `C_PvP.GetWorldPVPAreaInfo()` row.

@@ -333,6 +333,85 @@ fn club_unread_message_queries_have_safe_defaults() {
 }
 
 #[test]
+fn send_message_appends_to_history_and_fires_event() {
+    let env = env();
+    let (
+        message_count,
+        last_content,
+        event_fired,
+        event_club,
+        event_stream,
+        retrieved_content,
+    ): (i32, String, bool, String, i32, String) = env
+        .eval(
+            r#"
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("CLUB_MESSAGE_ADDED")
+            local fired = false
+            local capturedClub, capturedStream, capturedMessageId
+            listener:SetScript("OnEvent", function(self, event, clubId, streamId, messageId)
+                fired = true
+                capturedClub = clubId
+                capturedStream = streamId
+                capturedMessageId = messageId
+            end)
+
+            C_Club.SendMessage("guild-0", 1, "Pulling in 30 seconds")
+
+            local ranges = C_Club.GetMessageRanges("guild-0", 1)
+            local newest = ranges[1].newestMessageId
+            local messages = C_Club.GetMessagesBefore("guild-0", 1, newest, 20)
+            local last = messages[#messages]
+            local lookup = C_Club.GetMessageInfo("guild-0", 1, capturedMessageId)
+            return #messages, last.content, fired,
+                capturedClub, capturedStream, lookup.content
+            "#,
+        )
+        .unwrap();
+    assert_eq!(message_count, 5, "static seed (4) + 1 sent message");
+    assert_eq!(last_content, "Pulling in 30 seconds");
+    assert!(event_fired, "CLUB_MESSAGE_ADDED should fire");
+    assert_eq!(event_club, "guild-0");
+    assert_eq!(event_stream, 1);
+    assert_eq!(
+        retrieved_content, "Pulling in 30 seconds",
+        "GetMessageInfo should return the sent message via the event's messageId"
+    );
+}
+
+#[test]
+fn send_message_ignores_empty_text() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            C_Club.SendMessage("guild-0", 1, "")
+            local ranges = C_Club.GetMessageRanges("guild-0", 1)
+            local messages = C_Club.GetMessagesBefore("guild-0", 1, ranges[1].newestMessageId, 20)
+            return #messages
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 4, "empty text should not append a message");
+}
+
+#[test]
+fn send_message_ignores_unknown_stream() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            C_Club.SendMessage("guild-0", 99, "Stream that does not exist")
+            local ranges = C_Club.GetMessageRanges("guild-0", 1)
+            local messages = C_Club.GetMessagesBefore("guild-0", 1, ranges[1].newestMessageId, 20)
+            return #messages
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 4, "unknown stream should not append to guild stream");
+}
+
+#[test]
 fn club_finder_queries_have_safe_empty_defaults() {
     let env = env();
     let (enabled, invites, applicants, pending, status_flags, guild_total): (
