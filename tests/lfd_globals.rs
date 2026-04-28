@@ -204,6 +204,60 @@ fn lfg_construct_declined_message_does_not_error() {
 }
 
 #[test]
+fn is_lfg_dungeon_joinable_in_range() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- 1205 = Grim Batol, min_level=15, max_level=80; player default level 70
+            local all, player, hide, size = IsLFGDungeonJoinable(1205)
+            if all ~= true then return "all=" .. tostring(all) end
+            if player ~= true then return "player=" .. tostring(player) end
+            if hide ~= false then return "hide=" .. tostring(hide) end
+            if size ~= 5 then return "size=" .. tostring(size) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "IsLFGDungeonJoinable(1205): {result}");
+}
+
+#[test]
+fn is_lfg_dungeon_joinable_out_of_range() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- -1 = Random Heroic header, min/max=80; player default level 70
+            local all, player, hide, size = IsLFGDungeonJoinable(-1)
+            if all ~= true then return "all=" .. tostring(all) end
+            if player ~= false then return "player=" .. tostring(player) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "IsLFGDungeonJoinable(-1): {result}");
+}
+
+#[test]
+fn is_lfg_dungeon_joinable_unknown_id() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local all, player, hide, size = IsLFGDungeonJoinable(9999)
+            if all ~= false then return "all=" .. tostring(all) end
+            if player ~= false then return "player=" .. tostring(player) end
+            if hide ~= true then return "hide=" .. tostring(hide) end
+            if size ~= 0 then return "size=" .. tostring(size) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "IsLFGDungeonJoinable(9999): {result}");
+}
+
+#[test]
 fn get_lfg_dungeon_num_encounters() {
     let env = env();
     let result: String = env

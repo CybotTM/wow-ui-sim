@@ -23,6 +23,8 @@
 //! - `GetLFDLockPlayerCount()`         → 0. The sim has no LFD locks.
 //! - `GetLFDLockInfo(dungeonID, idx)`  → all-nil. No lock data without queue.
 //! - `GetLFDRoleLockInfo(id, roleID)`  → empty table. No role restrictions.
+//! - `IsLFGDungeonJoinable(dungeonID)` → `(isAvailableForAll, isAvailableForPlayer,
+//!   hideIfNotJoinable, totalGroupSizeRequired)` from `lfd_dungeons` + `player.level`.
 
 use crate::lua_api::methods::{borrow_state, create_string, create_table};
 use crate::lua_api::state::BattlefieldStatus;
@@ -281,6 +283,42 @@ fn get_lfd_role_lock_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `IsLFGDungeonJoinable(dungeonID)` →
+/// `(isAvailableForAll, isAvailableForPlayer, hideIfNotJoinable, totalGroupSizeRequired)`.
+///
+/// Computed from `lfd_dungeons` + `player.level`. Unknown ids return
+/// `(false, false, true, 0)` so callers that gate on `hideIfNotJoinable`
+/// drop them. Headers (negative ids) participate the same way as dungeons —
+/// `GetLFDChoiceOrder` includes them and the UI iterates the same level check.
+fn is_lfg_dungeon_joinable(state: &mut LuaState) -> LuaResult<u32> {
+    let dungeon_id = match stack_val(state, 1) {
+        Val::Num(n) => n as i32,
+        _ => {
+            state.push(Val::Bool(false));
+            state.push(Val::Bool(false));
+            state.push(Val::Bool(true));
+            state.push(Val::Num(0.0));
+            return Ok(4);
+        }
+    };
+    let (available_for_all, available_for_player, total_group_size) = {
+        let sim = borrow_state(state)?;
+        let player_level = sim.player.level;
+        match sim.lfd_dungeons.iter().find(|d| d.dungeon_id == dungeon_id) {
+            Some(d) => {
+                let in_range = player_level >= d.min_level && player_level <= d.max_level;
+                (true, in_range, d.max_players)
+            }
+            None => (false, false, 0),
+        }
+    };
+    state.push(Val::Bool(available_for_all));
+    state.push(Val::Bool(available_for_player));
+    state.push(Val::Bool(!available_for_all)); // hideIfNotJoinable: only true for unknown ids
+    state.push(Val::Num(total_group_size as f64));
+    Ok(4)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetBattlefieldStatus", get_battlefield_status)?;
     LuaApiMut::register_function(
@@ -312,5 +350,6 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFDLockPlayerCount", get_lfd_lock_player_count)?;
     LuaApiMut::register_function(lua, "GetLFDLockInfo", get_lfd_lock_info)?;
     LuaApiMut::register_function(lua, "GetLFDRoleLockInfo", get_lfd_role_lock_info)?;
+    LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
     Ok(())
 }
