@@ -89,3 +89,4 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[dropdown-intrinsic-script-chain]] | Reputation dropdowns did not open because style-template scripts replaced intrinsic `DropdownButton` scripts; simulator now chains intrinsic handlers and removed the fake fallback menu materializer |
 | [[menu-pool-set-to-defaults]] | Guild roster Mythic+ Rating dropdown rendered as a screen-spanning stripe because pooled menu element frames retained stale sizes; `SetToDefaults` now resets size to 0,0 and clears anchors |
 | [[three-slice-button-tiling]] | Escape menu red button bands came from atlas-backed Center tiling at raw source width instead of preserving aspect ratio from the drawn button height |
+| [[windows-port-build]] | Windows build failed at `iced_dynamic.dll` with MSVC `LNK1189`; depending on upstream `iced` directly avoids the forced DLL link, and shared path discovery now finds CASC, extracted Interface art, AddOns, and WTF defaults |

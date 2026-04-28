@@ -218,9 +218,7 @@ fn default_wowless_path() -> PathBuf {
 }
 
 fn default_interface_path() -> PathBuf {
-    dirs::home_dir()
-        .unwrap_or_default()
-        .join("Projects/wow/Interface")
+    wow_ui_sim::paths::default_interface_path()
 }
 
 fn main() {

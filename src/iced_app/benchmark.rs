@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 use iced::mouse;
@@ -7,10 +6,7 @@ use iced::{Rectangle, Size};
 
 use crate::lua_api::WowLuaEnv;
 
-use super::app::{
-    App, FALLBACK_TEXTURES_PATH, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES,
-    LOCAL_TEXTURES_PATH,
-};
+use super::app::{App, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES};
 use super::{DebugOptions, Message};
 
 const BENCHMARK_SIZE: Size = Size {
@@ -93,20 +89,12 @@ fn spellbook_phase(
 
 fn boot_benchmark_app(env: WowLuaEnv) -> App {
     INIT_ENV.with(|cell| *cell.borrow_mut() = Some(env));
-    INIT_TEXTURES.with(|cell| *cell.borrow_mut() = Some(default_textures_path()));
+    INIT_TEXTURES.with(|cell| *cell.borrow_mut() = Some(crate::paths::default_textures_path()));
     INIT_DEBUG.with(|cell| *cell.borrow_mut() = Some(DebugOptions::default()));
     INIT_SAVED_VARS.with(|cell| *cell.borrow_mut() = None);
 
     let (app, _task) = App::boot();
     app
-}
-
-fn default_textures_path() -> PathBuf {
-    if PathBuf::from(LOCAL_TEXTURES_PATH).exists() {
-        PathBuf::from(LOCAL_TEXTURES_PATH)
-    } else {
-        PathBuf::from(FALLBACK_TEXTURES_PATH)
-    }
 }
 
 fn benchmark_phase(app: &mut App, options: PhaseOptions) -> crate::Result<BenchmarkPhase> {

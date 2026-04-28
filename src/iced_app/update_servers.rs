@@ -3,7 +3,10 @@
 use std::sync::mpsc;
 
 use iced::{Task, window};
+#[cfg(unix)]
 use iced_layout_inspector::server::Command as DebugCommand;
+#[cfg(not(unix))]
+use crate::inspector_server_stub::Command as DebugCommand;
 
 use crate::lua_api::WowLuaEnv;
 use crate::lua_server::{LuaCommand, Response as LuaResponse};

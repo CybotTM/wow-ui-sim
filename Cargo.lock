@@ -1729,13 +1729,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iced-dynamic"
-version = "0.1.0"
-dependencies = [
- "iced",
-]
-
-[[package]]
 name = "iced-layout-inspector"
 version = "0.1.0"
 source = "git+https://github.com/Osso/iced-layout-inspector.git?tag=v0.2.0#c1f1dd2cda01a14c3fbcca66e3a767daa355da9e"
@@ -3655,6 +3648,7 @@ checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
 [[package]]
 name = "rilua"
 version = "0.1.21"
+source = "git+https://github.com/Osso/rilua.git#2bd1464abfea886155c82193e8ad468e8a3da547"
 dependencies = [
  "smallvec",
 ]
@@ -5692,7 +5686,7 @@ dependencies = [
  "cosmic-text",
  "dirs",
  "glob",
- "iced-dynamic",
+ "iced",
  "iced-layout-inspector",
  "iced_runtime",
  "iced_wgpu",

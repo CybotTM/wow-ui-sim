@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-28] ingest | Windows port build unblock
+
+Created `investigations/windows-port-build.md` after the Windows smoke pass. The root cause was the local `iced-dynamic` re-export crate forcing a huge `iced_dynamic.dll` link, which hit MSVC `LNK1189`; the build now depends on upstream `iced` directly. Verified `wow-sim`, `wow-cli`, GUI startup, and screenshot output on Windows. Updated the note after adding shared WoW resource discovery for install root, CASC `Data`, extracted Interface art, AddOns, and WTF. Live WTF is documented and tested as read-only import; simulator-local SavedVariables take precedence once present.
+
 ## [2026-04-28] update | duplicate post-event EditMode pass
 
 Updated `investigations/startup-createframe-profile.md` with the startup

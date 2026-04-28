@@ -4,6 +4,10 @@
 /// winit (via iced) requires the event loop on the main thread, so we can't
 /// just spawn a worker thread with a larger stack. Instead, bump RLIMIT_STACK
 /// and re-exec so the kernel allocates a larger main-thread stack.
+///
+/// On Windows the main-thread stack size is fixed at link time (set via the
+/// `/STACK` linker flag in `.cargo/config.toml`), so this function is a no-op.
+#[cfg(unix)]
 pub fn ensure_large_stack() {
     use std::os::unix::process::CommandExt;
     const DESIRED: libc::rlim_t = 32 * 1024 * 1024;
@@ -37,4 +41,9 @@ pub fn ensure_large_stack() {
         .exec();
     eprintln!("re-exec failed: {err}");
     std::process::exit(1);
+}
+
+#[cfg(not(unix))]
+pub fn ensure_large_stack() {
+    // Windows: stack size is set at link time via `/STACK` (see .cargo/config.toml).
 }

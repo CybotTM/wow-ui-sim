@@ -1,7 +1,10 @@
 //! App::update() method and related logic.
 
 use iced::Task;
+#[cfg(unix)]
 use iced_layout_inspector::server::ScreenshotData;
+#[cfg(not(unix))]
+use crate::inspector_server_stub::ScreenshotData;
 use rustc_hash::FxHashSet;
 use std::sync::OnceLock;
 use std::time::{Duration, Instant};

@@ -25,7 +25,10 @@ use rilua::{LuaApiMut, Val};
 
 use saved_variables_serialize::serialize_assignment;
 
-/// Configuration for loading WTF saved variables from a real WoW installation.
+/// Read-only source for importing WTF saved variables from a real WoW installation.
+///
+/// Writes always go to `SavedVariablesManager::storage_dir`, never back to this
+/// path.
 #[derive(Debug, Clone)]
 pub struct WtfConfig {
     pub wtf_path: PathBuf,
@@ -131,6 +134,10 @@ impl SavedVariablesManager {
             return Ok(0);
         };
         if self.wtf_loaded.contains_key(addon_name) {
+            return Ok(0);
+        }
+        if self.has_local_storage_for_addon(addon_name) {
+            self.wtf_loaded.insert(addon_name.to_string(), false);
             return Ok(0);
         }
 
@@ -341,6 +348,11 @@ impl SavedVariablesManager {
                 .join(format!("{}.lua", addon_name));
         }
         self.storage_dir.join(format!("{}.lua", addon_name))
+    }
+
+    fn has_local_storage_for_addon(&self, addon_name: &str) -> bool {
+        self.storage_path(addon_name, false).exists()
+            || self.storage_path(addon_name, true).exists()
     }
 }
 

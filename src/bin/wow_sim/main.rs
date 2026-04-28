@@ -248,7 +248,6 @@ fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
 }
 
 fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
-    use wow_ui_sim::saved_variables::WtfConfig;
     let skip = args.no_saved_vars
         || std::env::var("WOW_SIM_NO_SAVED_VARS")
             .map(|v| v == "1")
@@ -258,14 +257,14 @@ fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
         return None;
     }
     let mut saved_vars = SavedVariablesManager::new();
-    let wtf_path = PathBuf::from("/syncthing/Sync/Projects/wow/WTF");
-    if wtf_path.exists() {
-        let wtf = WtfConfig::new(wtf_path, "50868465#2", "Burning Blade", "Haky");
+    if let Some(wtf) = wow_ui_sim::paths::default_wtf_config() {
         logging::println_elapsed(&format!(
-            "WTF config: {} @ {}/{}",
+            "WTF import source (read-only): {} @ {}/{}",
             wtf.account, wtf.realm, wtf.character
         ));
         saved_vars.set_wtf_config(wtf);
+    } else {
+        logging::println_elapsed("WTF config: no WoW WTF directory found");
     }
     Some(saved_vars)
 }
@@ -288,6 +287,7 @@ fn init_sound(env: &WowLuaEnv) {
     }
 }
 
+#[cfg(target_os = "linux")]
 fn apply_resource_limits() {
     let max_mem_gb: u64 = std::env::var("WOW_SIM_MAX_MEM_GB")
         .ok()
@@ -315,6 +315,12 @@ fn apply_resource_limits() {
     logging::println_elapsed(&format!(
         "Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)"
     ));
+}
+
+#[cfg(not(target_os = "linux"))]
+fn apply_resource_limits() {
+    // RLIMIT_AS and sched_setaffinity are Linux-specific; the simulator runs
+    // unconstrained on other platforms.
 }
 
 fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
