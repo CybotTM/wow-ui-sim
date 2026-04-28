@@ -25,6 +25,8 @@ pub mod global_slot_coverage;
 #[path = "../data/global_strings.rs"]
 pub mod global_strings;
 pub mod iced_app;
+#[cfg(not(unix))]
+pub mod inspector_server_stub;
 #[path = "../data/items.rs"]
 pub mod items;
 pub mod layout;
@@ -33,6 +35,10 @@ pub mod logging;
 pub mod lua_api;
 pub mod lua_bridge;
 pub mod lua_errors;
+#[cfg(unix)]
+pub mod lua_server;
+#[cfg(not(unix))]
+#[path = "lua_server_windows.rs"]
 pub mod lua_server;
 #[path = "../data/manifest_interface_data.rs"]
 pub mod manifest_interface_data;

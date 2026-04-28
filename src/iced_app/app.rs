@@ -15,7 +15,11 @@ use crate::lua_server;
 use crate::render::{GlyphAtlas, WowFontSystem};
 use crate::saved_variables::SavedVariablesManager;
 use crate::texture::TextureManager;
-use iced_layout_inspector::server::{self as debug_server, ScreenshotData};
+#[cfg(unix)]
+use iced_layout_inspector::server as debug_server;
+#[cfg(not(unix))]
+use crate::inspector_server_stub as debug_server;
+use debug_server::ScreenshotData;
 
 use super::Message;
 use super::state::InspectorState;
