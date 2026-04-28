@@ -484,7 +484,7 @@ mod tests {
     }
 
     #[test]
-    fn test_load_wtf_saved_variables_before_local_storage() {
+    fn test_local_storage_takes_precedence_over_wtf_import_source() {
         let dir = tempdir().unwrap();
         let wtf_root = dir.path().join("WTF");
         let local_root = dir.path().join("LocalSavedVariables");
@@ -515,14 +515,67 @@ mod tests {
         ));
 
         let loaded = with_state(&env, |state| mgr.load_wtf_for_addon(state, "TestAddon")).unwrap();
-        assert_eq!(loaded, 1);
+        assert_eq!(loaded, 0);
         with_state(&env, |state| {
             mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
         })
         .unwrap();
 
         let source: String = env.eval("return TestDB.source").unwrap();
-        assert_eq!(source, "wtf");
+        assert_eq!(source, "local");
+    }
+
+    #[test]
+    fn test_wtf_source_is_read_only_when_saving() {
+        let dir = tempdir().unwrap();
+        let wtf_root = dir.path().join("WTF");
+        let local_root = dir.path().join("LocalSavedVariables");
+        let wtf_path = wtf_root
+            .join("Account")
+            .join("TestAccount")
+            .join("SavedVariables");
+        fs::create_dir_all(&wtf_path).unwrap();
+        fs::create_dir_all(&local_root).unwrap();
+        let wtf_file = wtf_path.join("TestAddon.lua");
+        fs::write(
+            &wtf_file,
+            "\nTestDB = { [\"source\"] = \"wtf\", [\"unchanged\"] = true }\n",
+        )
+        .unwrap();
+
+        let env = new_env();
+        let mut mgr = SavedVariablesManager::with_storage_dir(local_root.clone());
+        mgr.set_wtf_config(WtfConfig::new(
+            &wtf_root,
+            "TestAccount",
+            "Realm",
+            "Character",
+        ));
+
+        let loaded = with_state(&env, |state| mgr.load_wtf_for_addon(state, "TestAddon")).unwrap();
+        assert_eq!(loaded, 1);
+        with_state(&env, |state| {
+            mgr.init_for_addon(state, "TestAddon", &["TestDB".to_string()], &[])
+        })
+        .unwrap();
+
+        env.exec(r#"TestDB.source = "sim"; TestDB.newValue = 42"#)
+            .unwrap();
+        with_state(&env, |state| mgr.save_addon(state, "TestAddon")).unwrap();
+
+        let wtf_content = fs::read_to_string(&wtf_file).unwrap();
+        assert!(
+            wtf_content.contains("[\"source\"] = \"wtf\""),
+            "live WTF file should remain unchanged"
+        );
+        assert!(
+            !wtf_content.contains("newValue"),
+            "live WTF file should not receive simulator writes"
+        );
+
+        let local_content = fs::read_to_string(local_root.join("TestAddon.lua")).unwrap();
+        assert!(local_content.contains("[\"source\"] = \"sim\""));
+        assert!(local_content.contains("[\"newValue\"] = 42"));
     }
 
     #[test]
