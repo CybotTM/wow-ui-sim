@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-27] update | shallow `issecretvalue` for pool releases
+
+Updated `investigations/talent-performance.md` with a new "Spec→Talents Tab Switch (~3.5s)" section. The Spec→Talents tab switch was multiple seconds because `LoadTalentTreeInternal` rebuilds the tree on every Show (`refreshOnShow=true`), and `talentButtonCollection:ReleaseAll()` calls `issecretvalue(frame)` 3× per button. The Rust fallback recursed into the entire frame's table tree (~7.4ms/call). Added `value_is_secret_shallow` in `src/lua_api/globals/security/secret_values.rs` that only inspects direct slot taints on tables, used by `issecretvalue`/`canaccessvalue`/`canaccessallvalues`. `canaccesstable` keeps the deep walk so its accessibility semantics still detect nested secret strings. Result: ReleaseAll 2159ms → 2.6ms; tab switch 3500ms → ~90ms; all 45 security_api tests pass.
+
 ## [2026-04-27] ingest | hero spec dialog anchor investigation
 
 Created `investigations/hero-spec-dialog-anchors.md` documenting two anchor resolution bugs in `HeroTalentsSelectionDialog`. (1) `xml_layer_batch.rs` emitted all textures before all fontstrings into the same Lua chunk, breaking XML document order so SpecImage's `relativeKey="$parent.SpecName"` ran before SpecName existed and fell back to the spec frame. (2) Runtime template path lacked the loader's `resolve_named_anchor_targets_for_frame` re-pass, leaving NodesContainer's `$parent.Description` anchor as an unresolved string. Both fixed; talent node icons now render inside their LIGHTSMITH/TEMPLAR panels instead of at the screen bottom.
