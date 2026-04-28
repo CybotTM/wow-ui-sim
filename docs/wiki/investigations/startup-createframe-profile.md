@@ -25,24 +25,42 @@ environment, backed by `SimState::post_event_workarounds_applied`, and the
 change, the same dump-tree lane logs two `apply_system_anchors` starts instead
 of four: post-load plus the first post-event pass.
 
-### Remaining EditMode startup hotspot narrowed (2026-04-28)
+### Remaining EditMode startup hotspot fixed (2026-04-28)
 
-Follow-up probes on the remaining post-load `apply_system_anchors` pass ruled
-out several tempting targets:
+Follow-up probes on the remaining post-load `apply_system_anchors` pass first
+ruled out several tempting targets:
 
 - `emm:InitSystemAnchors()` alone: about `0.1ms`
 - registered system update/seed loop without action-bar position update: about
   `0.3ms`
 - `UpdateBottomActionBarPositions()` alone: still about `0.8-0.9s`
 
-This points at the bottom action-bar positioning path, especially the
-`UIParent_ManageFramePositions()` / managed-frame layout work that follows
-bottom-bar positioning. Temporary Rust probes showed many sub-millisecond
-`GetSize` / rect-resolution calls during that phase, including
+That was incomplete. File-based Lua profiling of the registered-system loop
+showed the first pass was actually dominated by full `UpdateSystem()` calls on
+group/raid systems:
+
+- `CompactRaidFrameContainer`: about `655ms`
+- `PartyFrame`: about `146ms`
+- `CompactArenaFrame`: about `120ms`
+
+Those calls run full roster/unit layout work during startup even though the
+default startup position only needs `systemInfo` and anchors. The fix keeps
+the action-bar seed path, keeps full `UpdateSystem()` for normal systems
+(FocusFrame, Minimap, BuffFrame, etc. need setting handlers), and uses the
+narrow seed-plus-`ApplySystemAnchor()` path only for `PartyFrame`,
+`CompactArenaFrame`, and `CompactRaidFrameContainer`.
+
+After the targeted skip, local no-saved-vars dump-tree timings dropped the
+first `apply_system_anchors` pass from about `0.8-1.1s` to about `160-215ms`,
+while the post-event pass stays around `40-50ms`. `tests/frame_positions.rs`
+still passes all 28 layout assertions.
+
+Temporary Rust probes also showed many sub-millisecond `GetSize` /
+rect-resolution calls during the managed-layout phase, including
 `PlayerFrameBottomManagedFramesContainer`, `ObjectiveTrackerFrame`,
 `UIParentRightManagedFrameContainer`, boss/arena containers, and action-bar
-button containers. No single `SetPoint` or `ClearAllPoints` Rust call showed up
-as a large individual cost.
+button containers. No single `SetPoint` or `ClearAllPoints` Rust call showed
+up as a large individual cost.
 
 Discarded fix: treating unchanged forbidden-frame `SetAttribute` calls as
 no-ops broke `tests/frame_positions.rs` (`ObjectiveTrackerFrame` shifted from

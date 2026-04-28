@@ -157,9 +157,16 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 or EditModeUtil:IsRightAnchoredActionBar(systemFrame)
         end
 
-        local refresh_action_bar_system
+        local function skips_expensive_startup_system_update(systemFrame)
+            local frameName = system_frame_name(systemFrame)
+            -- These frames run full roster/unit layout work during UpdateSystem.
+            -- Their default startup positions only need systemInfo + anchors.
+            return frameName == "PartyFrame"
+                or frameName == "CompactArenaFrame"
+                or frameName == "CompactRaidFrameContainer"
+        end
 
-        local function seed_action_bar_system(systemFrame)
+        local function seed_system_frame(systemFrame)
             local systemInfo = emm:GetActiveLayoutSystemInfo(systemFrame.system, systemFrame.systemIndex)
             if not systemInfo then
                 return
@@ -169,10 +176,9 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
             systemFrame.systemInfo = systemInfo
             systemFrame:SetHasActiveChanges(false)
             systemFrame:UpdateSettingMap(true)
-            refresh_action_bar_system(systemFrame)
         end
 
-        refresh_action_bar_system = function(systemFrame)
+        local function refresh_action_bar_system(systemFrame)
             local systemInfo = systemFrame.systemInfo
             -- Replay the action-bar setting handlers without the full
             -- EditMode frame update path.
@@ -203,7 +209,13 @@ const APPLY_SYSTEM_ANCHORS_LUA: &str = r#"
                 -- path and can stall startup. Seed just enough state for the
                 -- default-position layout pass to run, and let the normal bar
                 -- systems own their runtime layout afterward.
-                seed_action_bar_system(systemFrame)
+                seed_system_frame(systemFrame)
+                refresh_action_bar_system(systemFrame)
+            elseif skips_expensive_startup_system_update(systemFrame) then
+                seed_system_frame(systemFrame)
+                if systemFrame.ApplySystemAnchor then
+                    pcall(systemFrame.ApplySystemAnchor, systemFrame)
+                end
             else
                 pcall(emm.UpdateSystem, emm, systemFrame)
             end
