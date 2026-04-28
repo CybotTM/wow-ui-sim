@@ -43,14 +43,18 @@ struct UvRepeatInfo {
     rotated: bool,
 }
 
-/// Compute the natural pixel size of one tile. For atlas-backed textures this
-/// is the atlas slot's source size, so `horizTile`/`vertTile` repeats at the
-/// texture's authored width/height instead of stretching one quad to fill the
-/// whole frame.
-fn tile_dimensions(f: &crate::widget::Frame, uv_w: f32, uv_h: f32) -> (f32, f32) {
+/// Compute the natural pixel size of one tile. For atlas-backed single-axis
+/// tiling, preserve the atlas slot's aspect ratio based on the drawn
+/// orthogonal axis so the repeated tile is not stretched.
+fn tile_dimensions(
+    f: &crate::widget::Frame,
+    bounds: Rectangle,
+    uv_w: f32,
+    uv_h: f32,
+) -> (f32, f32) {
     if let Some(atlas_name) = f.atlas.as_deref() {
         if let Some(info) = crate::atlas::get_atlas_info(atlas_name) {
-            return (info.width() as f32, info.height() as f32);
+            return atlas_tile_dimensions(f, bounds, &info);
         }
     }
     let tile_w = if f.width > 0.0 {
@@ -64,6 +68,22 @@ fn tile_dimensions(f: &crate::widget::Frame, uv_w: f32, uv_h: f32) -> (f32, f32)
         (uv_h * 128.0).max(8.0)
     };
     (tile_w, tile_h)
+}
+
+fn atlas_tile_dimensions(
+    f: &crate::widget::Frame,
+    bounds: Rectangle,
+    info: &crate::atlas::AtlasLookup,
+) -> (f32, f32) {
+    let source_w = info.width() as f32;
+    let source_h = info.height() as f32;
+    if f.horiz_tile && !f.vert_tile && bounds.height > 0.0 && source_h > 0.0 {
+        return (source_w * bounds.height / source_h, source_h);
+    }
+    if f.vert_tile && !f.horiz_tile && bounds.width > 0.0 && source_w > 0.0 {
+        return (source_w, source_h * bounds.width / source_w);
+    }
+    (source_w, source_h)
 }
 
 /// Analyze raw 8-arg SetTexCoord values to determine tiling parameters.
@@ -160,7 +180,7 @@ pub(super) fn emit_tiled_texture(
         return;
     }
 
-    let config = standard_tile_config(tex_path, uvs, f, alpha);
+    let config = standard_tile_config(tex_path, bounds, uvs, f, alpha);
     emit_standard_tiled_texture(batch, bounds, &config, f);
 }
 
@@ -183,12 +203,13 @@ fn emit_uv_repeat_if_needed(
 
 fn standard_tile_config(
     tex_path: &str,
+    bounds: Rectangle,
     uvs: &Rectangle,
     f: &crate::widget::Frame,
     alpha: f32,
 ) -> StandardTileConfig {
     let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, uvs);
-    let (tile_w, tile_h) = tile_dimensions(f, cropped_uvs.width, cropped_uvs.height);
+    let (tile_w, tile_h) = tile_dimensions(f, bounds, cropped_uvs.width, cropped_uvs.height);
 
     StandardTileConfig {
         cropped_path,
@@ -508,7 +529,9 @@ mod tests {
         };
         let uvs = Rectangle::new(Point::new(0.25, 0.5), Size::new(0.5, 0.25));
 
-        let config = standard_tile_config("Interface/Test", &uvs, &frame, 0.5);
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(256.0, 256.0));
+
+        let config = standard_tile_config("Interface/Test", bounds, &uvs, &frame, 0.5);
 
         assert_eq!(
             config.cropped_path,
@@ -532,10 +555,40 @@ mod tests {
         };
         let uvs = Rectangle::new(Point::new(0.0, 0.003906), Size::new(0.015625, 0.164063));
 
-        let config = standard_tile_config("Interface/FrameGeneral/UIFrameTabs", &uvs, &frame, 1.0);
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(14.0, 42.0));
+
+        let config = standard_tile_config(
+            "Interface/FrameGeneral/UIFrameTabs",
+            bounds,
+            &uvs,
+            &frame,
+            1.0,
+        );
 
         assert_eq!(config.tile_w, 1.0);
         assert_eq!(config.tile_h, 42.0);
+    }
+
+    #[test]
+    fn horizontal_atlas_tiles_preserve_source_aspect_ratio() {
+        let frame = crate::widget::Frame {
+            atlas: Some("_128-RedButton-Center".to_string()),
+            horiz_tile: true,
+            ..Default::default()
+        };
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(85.0, 36.0));
+        let uvs = Rectangle::new(Point::new(0.0, 0.000488), Size::new(0.125, 0.0625));
+
+        let config = standard_tile_config(
+            "Interface\\buttons\\128redbutton",
+            bounds,
+            &uvs,
+            &frame,
+            1.0,
+        );
+
+        assert_eq!(config.tile_w, 18.0);
+        assert_eq!(config.tile_h, 128.0);
     }
 
     #[test]

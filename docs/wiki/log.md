@@ -11,6 +11,15 @@ already ran post-event workarounds through `env_events.rs`, then
 Added one-shot state for `WowLuaEnv::apply_post_event_workarounds`; local
 dump-tree logs now show two `apply_system_anchors` passes instead of four.
 
+## [2026-04-28] ingest | three-slice button tiling
+
+Created `investigations/three-slice-button-tiling.md`. Escape menu red button
+bands persisted after the original center-stretch fix because
+`_128-RedButton-Center` was repeated at raw atlas width (`64px`) while its
+`128px` source height was drawn into a `36px` button. Atlas-backed single-axis
+tiling now preserves source aspect ratio from the drawn orthogonal axis, so the
+GameMenu center repeats at `64 * 36 / 128 = 18px`.
+
 ## [2026-04-28] update | eager animation_frame_ids_for_group
 
 Updated `investigations/talent-performance.md` with the panel-open 1.3 FPS root
