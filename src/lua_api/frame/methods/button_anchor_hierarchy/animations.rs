@@ -925,7 +925,6 @@ fn advance_animation_group(
             resolve_group_alpha_targets(sim, group),
         )
     };
-    let animation_frame_ids = animation_frame_ids_for_group(sim, group_id);
     let unique_alpha_target_ids = unique_alpha_targets(&alpha_target_ids_by_animation);
     let saved_alphas: std::collections::HashMap<u64, f32> = unique_alpha_target_ids
         .iter()
@@ -940,7 +939,7 @@ fn advance_animation_group(
         })
         .collect();
     let mut loop_count = 0u32;
-    let (alpha_updates, flipbook_updates, frame_id) = {
+    let (group_finished, alpha_updates, flipbook_updates, frame_id) = {
         let group = sim.animation_groups.get_mut(&group_id)?;
 
         for (&target_id, &saved_alpha) in &saved_alphas {
@@ -955,9 +954,6 @@ fn advance_animation_group(
             &mut loop_count,
             finished_scripts,
         );
-        if group_finished {
-            finished_animation_scripts.extend(animation_frame_ids.iter().copied());
-        }
 
         sync_animation_elapsed(group);
         let mut alpha_updates = Vec::new();
@@ -981,8 +977,12 @@ fn advance_animation_group(
         }
         let flipbook_updates = collect_group_flipbook_updates(group);
         let frame_id = animation_group_frame_id(group);
-        (alpha_updates, flipbook_updates, frame_id)
+        (group_finished, alpha_updates, flipbook_updates, frame_id)
     };
+
+    if group_finished {
+        finished_animation_scripts.extend(animation_frame_ids_for_group(sim, group_id));
+    }
 
     Some(AnimationGroupAdvance {
         owner_id,
