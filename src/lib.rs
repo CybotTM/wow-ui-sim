@@ -3,6 +3,10 @@
 //! A standalone environment for testing World of Warcraft addons outside the game.
 //! Embeds Lua 5.1 and implements the WoW widget API.
 
+#[cfg(feature = "fast-build")]
+#[allow(unused_imports)]
+use iced_dynamic;
+
 pub mod addon_tests;
 pub mod atlas;
 #[path = "../data/atlas.rs"]
