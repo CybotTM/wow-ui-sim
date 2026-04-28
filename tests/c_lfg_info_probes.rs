@@ -118,6 +118,11 @@ fn get_lfg_category_info_reflects_state_mutation() {
             LfgCategoryInfo {
                 name: "Scenarios".into(),
                 order: 3,
+                separate_recommended: false,
+                prefer_current_area: false,
+                allow_cross_faction: false,
+                auto_choose_activity: false,
+                show_playstyle_dropdown: false,
             },
         );
     }

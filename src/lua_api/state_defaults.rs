@@ -511,7 +511,7 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "WQ group Ringing Deeps",
             "Doing WQs together",
             "Malfurion",
-            0,
+            1700,
             3,
             5,
         ),

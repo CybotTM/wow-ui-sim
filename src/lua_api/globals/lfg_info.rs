@@ -8,11 +8,30 @@
 //! Admin: `A_Admin.SetCanUsePremadeGroup(b?)` — no-arg defaults to true.
 
 use crate::lua_api::methods::{borrow_state, borrow_state_mut, create_table};
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{LuaResult, Val};
+
+/// `C_LFGInfo.IsLFGFollowerDungeon(dungeonID)` → bool.
+fn is_lfg_follower_dungeon(state: &mut LuaState) -> LuaResult<u32> {
+    let dungeon_id = match stack_val(state, 1) {
+        rilua::Val::Num(n) => n as i32,
+        _ => {
+            state.push(rilua::Val::Bool(false));
+            return Ok(1);
+        }
+    };
+    let is_follower = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .find(|d| d.dungeon_id == dungeon_id)
+        .map(|d| d.is_follower_dungeon)
+        .unwrap_or(false);
+    state.push(rilua::Val::Bool(is_follower));
+    Ok(1)
+}
 
 pub fn can_player_use_premade_group(state: &mut LuaState) -> LuaResult<u32> {
     let v = borrow_state(state)?.can_use_premade_group;
@@ -51,6 +70,12 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         table_ref,
         "CanPlayerUsePremadeGroup",
         can_player_use_premade_group,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsLFGFollowerDungeon",
+        is_lfg_follower_dungeon,
     )?;
     Ok(())
 }

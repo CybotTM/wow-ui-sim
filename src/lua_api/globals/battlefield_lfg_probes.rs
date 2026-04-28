@@ -13,14 +13,17 @@
 //! - `GetWorldPVPQueueStatus(index)`   → 7 values with the same status token
 //!   family as battlefield queues. Default is the inert
 //!   `("none", "", 0, 0, 0, 0, false)` shape Blizzard startup expects.
-//! - `GetLFGDungeonInfo(dungeonID)`    → nil. The sim doesn't seed a
-//!   dungeon list.
+//! - `GetLFGDungeonInfo(dungeonID)`    → 21 values from `SimState.lfd_dungeons`.
 //! - `GetLFGMode(category)`            → `(nil, nil)`. No active LFG.
-//! - `GetLFGDungeonNumEncounters(id)`  → 0 (same rationale as
-//!   `GetLFGDungeonInfo`).
+//! - `GetLFGDungeonNumEncounters(id)`  → `(numEncounters, numCompleted)`.
+//! - `GetLFDChoiceOrder()`             → array of dungeon IDs in seeded order.
+//! - `GetNumRandomDungeons()`          → count of random-flagged LFD entries.
+//! - `GetLFGRandomDungeonInfo(index)`  → `(id, name)` for 1-based random index.
+//! - `GetRandomDungeonBestChoice()`    → first random dungeon id, or nil.
 
-use crate::lua_api::methods::{borrow_state, create_string};
+use crate::lua_api::methods::{borrow_state, create_string, create_table};
 use crate::lua_api::state::BattlefieldStatus;
+use crate::lua_api::state_types::LfdDungeonInfo;
 use crate::lua_bridge::stack_val;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
@@ -101,11 +104,54 @@ fn get_world_pvp_queue_status(state: &mut LuaState) -> LuaResult<u32> {
     Ok(7)
 }
 
-/// `GetLFGDungeonInfo(dungeonID)` — retail returns ~18 values; we
-/// don't seed a dungeon list yet, so always nil.
+fn push_dungeon_info(state: &mut LuaState, d: &LfdDungeonInfo) {
+    let name = create_string(state, &d.name);
+    let texture = create_string(state, &d.texture_filename);
+    let description = create_string(state, &d.description);
+    let map_name = create_string(state, &d.map_name);
+    state.push(name);                                    // 1: name
+    state.push(Val::Num(d.type_id as f64));              // 2: typeID
+    state.push(Val::Num(d.subtype_id as f64));           // 3: subtypeID
+    state.push(Val::Num(d.min_level as f64));            // 4: minLevel
+    state.push(Val::Num(d.max_level as f64));            // 5: maxLevel
+    state.push(Val::Num(d.rec_level as f64));            // 6: recLevel
+    state.push(Val::Num(d.min_rec_level as f64));        // 7: minRecLevel
+    state.push(Val::Num(d.max_rec_level as f64));        // 8: maxRecLevel
+    state.push(Val::Num(d.expansion_level as f64));      // 9: expansionLevel
+    state.push(Val::Num(d.group_id as f64));             // 10: groupID
+    state.push(texture);                                 // 11: textureFilename
+    state.push(Val::Num(d.difficulty as f64));           // 12: difficulty
+    state.push(Val::Num(d.max_players as f64));          // 13: maxPlayers
+    state.push(description);                             // 14: description
+    state.push(Val::Bool(d.is_holiday));                 // 15: isHoliday
+    state.push(Val::Num(d.min_players as f64));          // 16: minPlayers
+    state.push(map_name);                                // 17: mapName
+    state.push(Val::Num(d.min_gear as f64));             // 18: minGear
+    state.push(Val::Bool(d.is_scaling_dungeon));         // 19: isScalingDungeon
+    state.push(Val::Num(d.dungeon_id as f64));           // 20: dungeonID (echo)
+    state.push(Val::Bool(d.is_follower_dungeon));        // 21: isFollowerDungeon
+}
+
+/// `GetLFGDungeonInfo(dungeonID)` → 21 values from `lfd_dungeons`, or nil.
 fn get_lfg_dungeon_info(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    Ok(1)
+    let dungeon_id = match stack_val(state, 1) {
+        Val::Num(n) => n as i32,
+        _ => {
+            state.push(Val::Nil);
+            return Ok(1);
+        }
+    };
+    let dungeon = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .find(|d| d.dungeon_id == dungeon_id)
+        .cloned();
+    let Some(d) = dungeon else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    push_dungeon_info(state, &d);
+    Ok(21)
 }
 
 /// `GetLFGMode(category[, queueID])` — retail returns `(mode, submode)`.
@@ -116,11 +162,94 @@ fn get_lfg_mode(state: &mut LuaState) -> LuaResult<u32> {
     Ok(2)
 }
 
-/// `GetLFGDungeonNumEncounters(dungeonID)` — 0 for every id since no
-/// dungeons are seeded.
+/// `GetLFGDungeonNumEncounters(dungeonID)` → `(numEncounters, numCompleted)`.
 fn get_lfg_dungeon_num_encounters(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
+    let dungeon_id = stack_i32(state, 1).unwrap_or(0);
+    let known = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .any(|d| d.dungeon_id == dungeon_id && dungeon_id > 0);
+    if known {
+        state.push(Val::Num(3.0)); // numEncounters
+        state.push(Val::Num(0.0)); // numCompleted
+    } else {
+        state.push(Val::Num(0.0));
+        state.push(Val::Num(0.0));
+    }
+    Ok(2)
+}
+
+/// `GetLFDChoiceOrder()` → array of dungeon IDs in seeded order.
+fn get_lfd_choice_order(state: &mut LuaState) -> LuaResult<u32> {
+    let ids = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .map(|d| d.dungeon_id)
+        .collect::<Vec<_>>();
+    let result = create_table(state);
+    if let Val::Table(table_ref) = result {
+        for (index, id) in ids.iter().enumerate() {
+            if let Some(table) = state.gc.tables.get_mut(table_ref) {
+                let _ = table.raw_set(
+                    Val::Num(index as f64 + 1.0),
+                    Val::Num(*id as f64),
+                    &state.gc.string_arena,
+                );
+            }
+        }
+        state.gc.barrier_back(table_ref);
+    }
+    state.push(result);
     Ok(1)
+}
+
+/// `GetNumRandomDungeons()` → count of lfd_dungeons where is_random=true.
+fn get_num_random_dungeons(state: &mut LuaState) -> LuaResult<u32> {
+    let count = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .filter(|d| d.is_random)
+        .count();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+/// `GetLFGRandomDungeonInfo(index)` → `(id, name)` for 1-based random subset index.
+fn get_lfg_random_dungeon_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = stack_i32(state, 1).unwrap_or(1) as usize;
+    let found = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .filter(|d| d.is_random)
+        .nth(index.saturating_sub(1))
+        .map(|d| (d.dungeon_id, d.name.clone()));
+    let Some((id, name)) = found else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    state.push(Val::Num(id as f64));
+    let name_val = create_string(state, &name);
+    state.push(name_val);
+    Ok(2)
+}
+
+/// `GetRandomDungeonBestChoice()` → first random dungeon id, or nil.
+fn get_random_dungeon_best_choice(state: &mut LuaState) -> LuaResult<u32> {
+    let found = borrow_state(state)?
+        .lfd_dungeons
+        .iter()
+        .find(|d| d.is_random)
+        .map(|d| d.dungeon_id);
+    match found {
+        Some(id) => {
+            state.push(Val::Num(id as f64));
+            Ok(1)
+        }
+        None => {
+            state.push(Val::Nil);
+            Ok(1)
+        }
+    }
 }
 
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
@@ -142,6 +271,18 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         lua,
         "GetLFGDungeonNumEncounters",
         get_lfg_dungeon_num_encounters,
+    )?;
+    LuaApiMut::register_function(lua, "GetLFDChoiceOrder", get_lfd_choice_order)?;
+    LuaApiMut::register_function(lua, "GetNumRandomDungeons", get_num_random_dungeons)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLFGRandomDungeonInfo",
+        get_lfg_random_dungeon_info,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "GetRandomDungeonBestChoice",
+        get_random_dungeon_best_choice,
     )?;
     Ok(())
 }
