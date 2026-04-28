@@ -25,6 +25,7 @@ use super::Message;
 use super::state::InspectorState;
 
 /// Default path to WoW TTF fonts.
+#[cfg(test)]
 pub const DEFAULT_FONTS_PATH: &str = "./fonts";
 
 const DEFAULT_FAST_TICK_MS: u64 = 16;
@@ -396,9 +397,7 @@ impl App {
             }
         }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-            DEFAULT_FONTS_PATH,
-        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::from_default_sources()));
         env_rc.borrow().set_font_system(Rc::clone(&font_system));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         (texture_manager, font_system, glyph_atlas)

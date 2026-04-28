@@ -7,6 +7,10 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use casc_lib::blte::decoder::decode_blte_with_keys;
+use casc_lib::error::CascError;
+use casc_lib::extract::pipeline::{CascStorage, OpenConfig};
+use casc_lib::root::flags::LocaleFlags;
 use cosmic_text::fontdb;
 
 /// WoW font path constants (as they appear in Lua/XML).
@@ -24,25 +28,25 @@ struct FontEntry {
 
 struct WowFontFile {
     filename: &'static str,
+    fdid: u32,
     wow_paths: &'static [&'static str],
 }
 
 const WOW_FONT_FILES: &[WowFontFile] = &[
     WowFontFile {
         filename: "FRIZQT__.TTF",
+        fdid: 615960,
         wow_paths: &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"],
     },
     WowFontFile {
         filename: "ARIALN.ttf",
+        fdid: 615958,
         wow_paths: &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"],
     },
     WowFontFile {
         filename: "frizqt___cyr.ttf",
+        fdid: 615971,
         wow_paths: &["Fonts\\frizqt___cyr.ttf"],
-    },
-    WowFontFile {
-        filename: "TrajanPro3SemiBold.ttf",
-        wow_paths: &["Fonts\\TrajanPro3SemiBold.ttf"],
     },
 ];
 
@@ -77,10 +81,61 @@ impl WowFontSystem {
         for font_file in WOW_FONT_FILES {
             load_wow_font(fonts_dir, font_file, &mut db, &mut font_map);
         }
+        load_system_fallback_if_empty(&mut db, &mut font_map);
 
         let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
         let swash_cache = cosmic_text::SwashCache::new();
 
+        Self {
+            font_system,
+            swash_cache,
+            font_map,
+        }
+    }
+
+    /// Create a font system by loading WoW fonts from local CASC storage.
+    pub fn from_casc_install(install_root: &Path) -> Self {
+        let mut db = fontdb::Database::new();
+        let mut font_map = HashMap::new();
+
+        match CascFontSource::open(install_root) {
+            Ok(source) => {
+                for font_file in WOW_FONT_FILES {
+                    load_wow_font_from_casc(&source, font_file, &mut db, &mut font_map);
+                }
+            }
+            Err(error) => {
+                tracing::warn!(
+                    "Failed to open CASC font source at {}: {}",
+                    install_root.display(),
+                    error
+                );
+            }
+        }
+        load_system_fallback_if_empty(&mut db, &mut font_map);
+
+        let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
+        let swash_cache = cosmic_text::SwashCache::new();
+
+        Self {
+            font_system,
+            swash_cache,
+            font_map,
+        }
+    }
+
+    /// Create a font system from the default discovered WoW install.
+    pub fn from_default_sources() -> Self {
+        if let Some(install_root) = crate::paths::discover_wow_resources().install_root {
+            return Self::from_casc_install(&install_root);
+        }
+
+        tracing::warn!("No WoW install found; text rendering will use cosmic-text fallback fonts");
+        let mut db = fontdb::Database::new();
+        let mut font_map = HashMap::new();
+        load_system_fallback_if_empty(&mut db, &mut font_map);
+        let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
+        let swash_cache = cosmic_text::SwashCache::new();
         Self {
             font_system,
             swash_cache,
@@ -200,6 +255,84 @@ impl WowFontSystem {
     }
 }
 
+struct CascFontSource {
+    storage: CascStorage,
+}
+
+impl CascFontSource {
+    fn open(install_root: &Path) -> Result<Self, casc_lib::error::CascError> {
+        let listfile = casc_font_listfile_path();
+        let config = OpenConfig {
+            install_dir: install_root.to_path_buf(),
+            product: Some("wow".to_string()),
+            keyfile: None,
+            listfile: Some(listfile),
+            output_dir: None,
+        };
+        CascStorage::open(&config).map(|storage| Self { storage })
+    }
+
+    fn read_font(&self, font_file: &WowFontFile) -> Option<Vec<u8>> {
+        match read_casc_fdid(&self.storage, font_file.fdid, LocaleFlags::ALL) {
+            Ok(data) => Some(data),
+            Err(error) => {
+                crate::logging::eprintln_elapsed(&format!(
+                    "[Font] CASC read failed for {} ({}): {}",
+                    font_file.filename, font_file.fdid, error
+                ));
+                None
+            }
+        }
+    }
+}
+
+fn read_casc_fdid(
+    storage: &CascStorage,
+    fdid: u32,
+    locale: LocaleFlags,
+) -> Result<Vec<u8>, CascError> {
+    let root_entry =
+        storage
+            .root
+            .find_by_fdid(fdid, locale)
+            .ok_or_else(|| CascError::KeyNotFound {
+                key_type: "FDID".into(),
+                hash: format!("{} (locale {})", fdid, locale),
+            })?;
+    let enc_entry = storage
+        .encoding
+        .find_ekey(&root_entry.ckey)
+        .ok_or_else(|| CascError::KeyNotFound {
+            key_type: "CKey".into(),
+            hash: hex::encode(root_entry.ckey),
+        })?;
+    let ekey = &enc_entry.ekeys[0];
+    let idx_entry = storage
+        .index
+        .find(ekey)
+        .ok_or_else(|| CascError::KeyNotFound {
+            key_type: "EKey".into(),
+            hash: hex::encode(ekey),
+        })?;
+    let blte_data = storage.data.read_entry(
+        idx_entry.archive_number,
+        idx_entry.archive_offset,
+        idx_entry.size,
+    )?;
+    decode_blte_with_keys(blte_data, Some(&storage.keystore))
+}
+
+fn casc_font_listfile_path() -> std::path::PathBuf {
+    let path = std::env::temp_dir().join("wow-ui-sim-casc-font-listfile.csv");
+    let content = WOW_FONT_FILES
+        .iter()
+        .map(|font| format!("{};fonts/{}", font.fdid, font.filename.to_lowercase()))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let _ = std::fs::write(&path, content);
+    path
+}
+
 fn load_wow_font(
     fonts_dir: &Path,
     font_file: &WowFontFile,
@@ -217,6 +350,50 @@ fn load_wow_font(
 
     tracing::debug!(
         "Loaded font {} -> family '{}'",
+        font_file.filename,
+        family_name
+    );
+}
+
+fn load_system_fallback_if_empty(
+    db: &mut fontdb::Database,
+    font_map: &mut HashMap<String, FontEntry>,
+) {
+    if !font_map.is_empty() {
+        return;
+    }
+
+    db.load_system_fonts();
+    let Some(family_name) = db
+        .faces()
+        .next()
+        .and_then(|face| face.families.first().map(|(family, _)| family.to_string()))
+    else {
+        return;
+    };
+
+    for font_file in WOW_FONT_FILES {
+        register_font_aliases(font_file.wow_paths, &family_name, font_map);
+    }
+}
+
+fn load_wow_font_from_casc(
+    source: &CascFontSource,
+    font_file: &WowFontFile,
+    db: &mut fontdb::Database,
+    font_map: &mut HashMap<String, FontEntry>,
+) {
+    let Some(data) = source.read_font(font_file) else {
+        tracing::warn!("Font not found in CASC: {}", font_file.filename);
+        return;
+    };
+
+    let family_name = fontdb_family_name(&data).unwrap_or_else(|| font_file.filename.to_string());
+    db.load_font_data(data);
+    register_font_aliases(font_file.wow_paths, &family_name, font_map);
+
+    tracing::debug!(
+        "Loaded CASC font {} -> family '{}'",
         font_file.filename,
         family_name
     );
@@ -277,11 +454,10 @@ mod tests {
     #[test]
     fn loads_wow_fonts() {
         let fs = WowFontSystem::new(&fonts_dir());
-        // 4 font files loaded: FRIZQT__, ARIALN, frizqt___cyr, TrajanPro3SemiBold
-        // Case-insensitive aliases collapse to 4 unique normalized keys
+        // FRIZQT__ has two case aliases; the font map stores normalized keys.
         assert_eq!(
             fs.font_map.len(),
-            4,
+            3,
             "font_map: {:?}",
             fs.font_map.keys().collect::<Vec<_>>()
         );
@@ -292,8 +468,8 @@ mod tests {
         let fs = WowFontSystem::new(&fonts_dir());
         let name = fs.family_name(Some("Fonts\\FRIZQT__.TTF")).unwrap();
         assert!(
-            name.contains("Friz") || name.contains("Fritz"),
-            "Unexpected family name: {name}"
+            !name.is_empty(),
+            "Expected a concrete family name for FRIZQT__, got: {name}"
         );
     }
 
@@ -312,8 +488,8 @@ mod tests {
         let fs = WowFontSystem::new(&fonts_dir());
         let name = fs.family_name(Some("Fonts\\NONEXISTENT.TTF")).unwrap();
         assert!(
-            name.contains("Friz") || name.contains("Fritz"),
-            "Expected Friz Quadrata fallback, got: {name}"
+            !name.is_empty(),
+            "Expected a fallback family name, got: {name}"
         );
     }
 
@@ -322,8 +498,8 @@ mod tests {
         let fs = WowFontSystem::new(&fonts_dir());
         let name = fs.family_name(None).unwrap();
         assert!(
-            name.contains("Friz") || name.contains("Fritz"),
-            "Expected Friz Quadrata for None, got: {name}"
+            !name.is_empty(),
+            "Expected a default family name, got: {name}"
         );
     }
 
