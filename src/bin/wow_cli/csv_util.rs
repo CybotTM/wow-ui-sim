@@ -1,5 +1,39 @@
 //! Shared CSV utilities for code generators.
 
+use std::io::{BufRead, BufReader, Read};
+
+/// Read a CSV file as logical records, joining physical lines that contain
+/// unbalanced quotes (multi-line fields). Returns rows with the header row
+/// at index 0.
+pub fn read_csv_records<R: Read>(reader: BufReader<R>) -> std::io::Result<Vec<String>> {
+    let mut records = Vec::new();
+    let mut buffer = String::new();
+    let mut quote_count = 0usize;
+    for line in reader.lines() {
+        let line = line?;
+        if buffer.is_empty() {
+            quote_count = line.bytes().filter(|b| *b == b'"').count();
+            if quote_count.is_multiple_of(2) {
+                records.push(line);
+            } else {
+                buffer.push_str(&line);
+            }
+        } else {
+            buffer.push('\n');
+            buffer.push_str(&line);
+            quote_count += line.bytes().filter(|b| *b == b'"').count();
+            if quote_count.is_multiple_of(2) {
+                records.push(std::mem::take(&mut buffer));
+                quote_count = 0;
+            }
+        }
+    }
+    if !buffer.is_empty() {
+        records.push(buffer);
+    }
+    Ok(records)
+}
+
 /// Parse a CSV line, handling quoted fields properly.
 pub fn parse_csv_line(line: &str) -> Vec<String> {
     let mut fields = Vec::new();
