@@ -5,10 +5,10 @@ Chronological record of wiki operations.
 ## [2026-04-28] ingest | three-slice button tiling
 
 Created `investigations/three-slice-button-tiling.md`. Escape menu red button
-bands came from using the full non-seamless `_128-RedButton-Center` source:
-stretching it created broad bands, and an over-correction repeated it every
-`18px`. Red-button Center atlases now tile a seam-safe center column instead of
-the full 64px source span.
+stripes came from standard `HighlightTexture` children rendering while the
+buttons were not hovered. The red-button center atlas special case was removed;
+atlas tiling uses source size, and highlight children now render only when the
+parent button is hovered or highlight-locked.
 
 ## [2026-04-28] update | eager animation_frame_ids_for_group
 
