@@ -205,7 +205,7 @@ fn random_entry() -> WarbandSceneData {
         description: "Use a random owned campsite.".to_string(),
         source: String::new(),
         quality: 1,
-        texture_kit: "campcollection-icon-camp".to_string(),
+        texture_kit: "campcollection-bg-random".to_string(),
         is_collected: true,
         is_favorite: false,
         has_fanfare: false,
