@@ -335,14 +335,14 @@ fn club_unread_message_queries_have_safe_defaults() {
 #[test]
 fn send_message_appends_to_history_and_fires_event() {
     let env = env();
-    let (
-        message_count,
-        last_content,
-        event_fired,
-        event_club,
-        event_stream,
-        retrieved_content,
-    ): (i32, String, bool, String, i32, String) = env
+    let (message_count, last_content, event_fired, event_club, event_stream, retrieved_content): (
+        i32,
+        String,
+        bool,
+        String,
+        i32,
+        String,
+    ) = env
         .eval(
             r#"
             local listener = CreateFrame("Frame")

@@ -515,10 +515,19 @@ struct MessageId {
 }
 
 const STATIC_GUILD_MESSAGES: &[(i64, &str)] = &[
-    (1, "Welcome to Heroes of Azeroth. Repairs are open for raid night."),
-    (1, "Mythic plus keys start after reset. Bring flasks if you have them."),
+    (
+        1,
+        "Welcome to Heroes of Azeroth. Repairs are open for raid night.",
+    ),
+    (
+        1,
+        "Mythic plus keys start after reset. Bring flasks if you have them.",
+    ),
     (2, "I put extra feasts and vantus runes in the guild bank."),
-    (1, "Transmog run on Sunday. Invites go out ten minutes early."),
+    (
+        1,
+        "Transmog run on Sunday. Invites go out ten minutes early.",
+    ),
 ];
 
 fn resolved_guild_messages(state: &LuaState) -> LuaResult<Vec<ResolvedMessage>> {
