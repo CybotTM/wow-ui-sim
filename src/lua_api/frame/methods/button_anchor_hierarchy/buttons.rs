@@ -77,22 +77,66 @@ pub(super) fn is_enabled(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// Fire the `OnEnable` or `OnDisable` Lua script for a button, if registered.
+fn fire_enable_disable_script(state: &mut LuaState, id: u64, enabled: bool) {
+    let handler_name = if enabled { "OnEnable" } else { "OnDisable" };
+    let Some(handler) = get_rilua_script(state, id, handler_name) else {
+        return;
+    };
+    let Ok(frame) = frame_ref(state, id) else {
+        return;
+    };
+    if let Err(error) = call_function_state(state, handler, &[frame]) {
+        call_error_handler_state(state, &error.to_string());
+    }
+}
+
 pub(super) fn set_enabled(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let enabled = bool::from_stack(state, 2).ok().unwrap_or(true);
+    let changed = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| button_enabled(f) != enabled)
+            .unwrap_or(false)
+    };
     set_button_enabled_value(state, id, enabled)?;
+    if changed {
+        fire_enable_disable_script(state, id, enabled);
+    }
     Ok(0)
 }
 
 pub(super) fn enable(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let was_disabled = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(|f| !button_enabled(f))
+            .unwrap_or(false)
+    };
     set_button_enabled_value(state, id, true)?;
+    if was_disabled {
+        fire_enable_disable_script(state, id, true);
+    }
     Ok(0)
 }
 
 pub(super) fn disable(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
+    let was_enabled = {
+        let sim = borrow_state(state)?;
+        sim.widgets
+            .get(id)
+            .map(button_enabled)
+            .unwrap_or(true)
+    };
     set_button_enabled_value(state, id, false)?;
+    if was_enabled {
+        fire_enable_disable_script(state, id, false);
+    }
     Ok(0)
 }
 
