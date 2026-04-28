@@ -55,6 +55,7 @@ macro_rules! build_empty_sim_state {
             screen_height: $runtime.screen_height,
             screen_kind: $runtime.screen_kind,
             is_logged_in: $runtime.is_logged_in,
+            post_event_workarounds_applied: false,
             screen_first_displayed: $runtime.screen_first_displayed,
             saved_account_name: $runtime.saved_account_name,
             saved_account_list: $runtime.saved_account_list,
@@ -1197,6 +1198,8 @@ pub struct SimState {
     pub screen_kind: ScreenKind,
     /// Whether the simulated player is logged into the world.
     pub is_logged_in: bool,
+    /// Whether one-shot startup workarounds after `PLAYER_ENTERING_WORLD` have run.
+    pub post_event_workarounds_applied: bool,
     /// Whether the current glue screen has been displayed at least once.
     pub screen_first_displayed: bool,
     /// Remembered account name for glue login UI helpers.
@@ -3195,6 +3198,14 @@ impl SimState {
         }
     }
 
+    pub fn mark_post_event_workarounds_applied(&mut self) -> bool {
+        if self.post_event_workarounds_applied {
+            return false;
+        }
+        self.post_event_workarounds_applied = true;
+        true
+    }
+
     pub fn set_mouse_position(&mut self, pos: Option<(f32, f32)>) {
         self.mouse_position = pos;
         let Some((mx, my)) = pos else {
@@ -3278,5 +3289,15 @@ mod tests {
         assert!(state.saved_account_name.is_empty());
         assert!(state.saved_account_list.is_empty());
         assert!(state.start_time.elapsed() < Duration::from_secs(1));
+    }
+
+    #[test]
+    fn post_event_workaround_marker_is_one_shot() {
+        let mut state = SimState::default();
+
+        assert!(!state.post_event_workarounds_applied);
+        assert!(state.mark_post_event_workarounds_applied());
+        assert!(state.post_event_workarounds_applied);
+        assert!(!state.mark_post_event_workarounds_applied());
     }
 }

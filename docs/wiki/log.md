@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-28] update | duplicate post-event EditMode pass
+
+Updated `investigations/startup-createframe-profile.md` with the startup
+workaround duplication found during dump-tree profiling. `PLAYER_ENTERING_WORLD`
+already ran post-event workarounds through `env_events.rs`, then
+`fire_startup_events()` and `settle_headless_startup()` ran the same pass again.
+Added one-shot state for `WowLuaEnv::apply_post_event_workarounds`; local
+dump-tree logs now show two `apply_system_anchors` passes instead of four.
+
 ## [2026-04-28] update | eager animation_frame_ids_for_group
 
 Updated `investigations/talent-performance.md` with the panel-open 1.3 FPS root

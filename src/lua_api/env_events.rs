@@ -142,7 +142,7 @@ impl WowLuaEnv {
             self.dispatch_event_to_frame(widget_id, event, args)?;
         }
         if event == "PLAYER_ENTERING_WORLD" {
-            super::workarounds::apply_post_event(self);
+            self.apply_post_event_workarounds();
         }
         Ok(())
     }
