@@ -25,6 +25,13 @@ pub fn register_all_ui_strings(lua: &mut rilua::Lua) -> crate::Result<()> {
             table_set(state, global, name, Val::Num(value));
         }
     }
+    for defs in STRING_DEFS {
+        for &(name, value) in defs.iter() {
+            let resolved = resolve_lua_escapes(value);
+            let lua_value = create_string(state, &resolved);
+            table_set(state, global, name, lua_value);
+        }
+    }
     Ok(())
 }
 
@@ -44,3 +51,6 @@ const INT_DEFS: &[&[crate::lua_api::globals::strings::string_data::IntDef]] = &[
 
 const FLOAT_DEFS: &[&[crate::lua_api::globals::strings::string_data::FloatDef]] =
     &[string_data::TAXI_FLOAT_CONSTANTS];
+
+const STRING_DEFS: &[&[crate::lua_api::globals::strings::string_data::StringDef]] =
+    &[string_data::FONT_COLOR_CODE_STRINGS];
