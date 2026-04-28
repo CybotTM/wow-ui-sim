@@ -20,6 +20,9 @@
 //! - `GetNumRandomDungeons()`          → count of random-flagged LFD entries.
 //! - `GetLFGRandomDungeonInfo(index)`  → `(id, name)` for 1-based random index.
 //! - `GetRandomDungeonBestChoice()`    → first random dungeon id, or nil.
+//! - `GetLFDLockPlayerCount()`         → 0. The sim has no LFD locks.
+//! - `GetLFDLockInfo(dungeonID, idx)`  → all-nil. No lock data without queue.
+//! - `GetLFDRoleLockInfo(id, roleID)`  → empty table. No role restrictions.
 
 use crate::lua_api::methods::{borrow_state, create_string, create_table};
 use crate::lua_api::state::BattlefieldStatus;
@@ -252,6 +255,32 @@ fn get_random_dungeon_best_choice(state: &mut LuaState) -> LuaResult<u32> {
     }
 }
 
+/// `GetLFDLockPlayerCount()` → number of party members for which lock info
+/// would be reported. The sim has no LFD locks, so 0.
+fn get_lfd_lock_player_count(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+/// `GetLFDLockInfo(dungeonID, partyIndex)` — retail returns 6 values
+/// describing a player's lock on a dungeon. The sim has no locks, so
+/// every call reports all-nil.
+fn get_lfd_lock_info(state: &mut LuaState) -> LuaResult<u32> {
+    for _ in 0..6 {
+        state.push(Val::Nil);
+    }
+    Ok(6)
+}
+
+/// `GetLFDRoleLockInfo(dungeonID, roleID)` → array of `{reason_id,
+/// sub_reason, reason_string}` rows. No role restrictions in the sim,
+/// so an empty table is the inert shape Blizzard UI expects.
+fn get_lfd_role_lock_info(state: &mut LuaState) -> LuaResult<u32> {
+    let result = create_table(state);
+    state.push(result);
+    Ok(1)
+}
+
 pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetBattlefieldStatus", get_battlefield_status)?;
     LuaApiMut::register_function(
@@ -280,5 +309,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
         "GetRandomDungeonBestChoice",
         get_random_dungeon_best_choice,
     )?;
+    LuaApiMut::register_function(lua, "GetLFDLockPlayerCount", get_lfd_lock_player_count)?;
+    LuaApiMut::register_function(lua, "GetLFDLockInfo", get_lfd_lock_info)?;
+    LuaApiMut::register_function(lua, "GetLFDRoleLockInfo", get_lfd_role_lock_info)?;
     Ok(())
 }

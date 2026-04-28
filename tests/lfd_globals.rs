@@ -135,6 +135,75 @@ fn c_lfg_info_is_follower_dungeon() {
 }
 
 #[test]
+fn get_lfd_lock_player_count_returns_zero() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local n = GetLFDLockPlayerCount()
+            if type(n) ~= "number" then return "type=" .. type(n) end
+            if n ~= 0 then return "count=" .. n end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFDLockPlayerCount: {result}");
+}
+
+#[test]
+fn get_lfd_lock_info_returns_six_nils() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local a, b, c, d, e, f = GetLFDLockInfo(1203, 1)
+            if a ~= nil or b ~= nil or c ~= nil or d ~= nil or e ~= nil or f ~= nil then
+                return "non_nil"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFDLockInfo: {result}");
+}
+
+#[test]
+fn get_lfd_role_lock_info_returns_empty_table() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local t = GetLFDRoleLockInfo(1203, 1)
+            if type(t) ~= "table" then return "type=" .. type(t) end
+            if #t ~= 0 then return "count=" .. #t end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetLFDRoleLockInfo: {result}");
+}
+
+#[test]
+fn lfg_construct_declined_message_does_not_error() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Mirrors LFGConstructDeclinedMessage's loop; the call must not
+            -- raise even when nothing is locked.
+            local ok = pcall(function()
+                for i = 1, GetLFDLockPlayerCount() do
+                    GetLFDLockInfo(1203, i)
+                end
+            end)
+            return ok and "ok" or "error"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn get_lfg_dungeon_num_encounters() {
     let env = env();
     let result: String = env
