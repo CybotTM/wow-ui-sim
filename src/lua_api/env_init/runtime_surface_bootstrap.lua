@@ -10594,15 +10594,6 @@ C_Calendar = __wow_merge_namespace(C_Calendar, {
 })
 
 C_MajorFactions = __wow_merge_namespace(C_MajorFactions, {
-  GetMajorFactionIDs = function(_expansionLevel)
-    return {}
-  end,
-  IsMajorFactionHiddenFromExpansionPage = function(_factionID)
-    return false
-  end,
-  ShouldDisplayMajorFactionAsJourney = function(_factionID)
-    return false
-  end,
   GetMajorFactionData = function(factionID)
     return {
       factionID = factionID or 0,

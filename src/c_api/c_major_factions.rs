@@ -15,7 +15,8 @@
 
 use crate::c_api::helpers::ensure_namespace;
 use crate::lua_api::methods::{
-    borrow_state, create_string, create_table, create_table_with_fields, table_set_num,
+    borrow_state, call_function_state, create_string, create_table, create_table_with_fields,
+    table_set_num,
 };
 use crate::lua_api::state::{MajorFactionData, RenownLevelInfo};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
@@ -26,6 +27,19 @@ pub(crate) fn register_c_major_factions_surface(state: &mut LuaState) -> LuaResu
     let ns = ensure_namespace(state, "C_MajorFactions")?;
     table_set_rust_fn_static(state, ns, "GetMajorFactionData", get_major_faction_data)?;
     table_set_rust_fn_static(state, ns, "GetRenownLevels", get_renown_levels)?;
+    table_set_rust_fn_static(state, ns, "GetMajorFactionIDs", get_major_faction_ids)?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "IsMajorFactionHiddenFromExpansionPage",
+        is_major_faction_hidden_from_expansion_page,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        ns,
+        "ShouldDisplayMajorFactionAsJourney",
+        should_display_major_faction_as_journey,
+    )?;
     Ok(())
 }
 
@@ -43,6 +57,43 @@ fn get_major_faction_data(state: &mut LuaState) -> LuaResult<u32> {
     };
     let table = build_major_faction_data_table(state, &data);
     state.push(table);
+    Ok(1)
+}
+
+fn get_major_faction_ids(state: &mut LuaState) -> LuaResult<u32> {
+    let expansion = i32::from_stack(state, 1).ok();
+    let mut ids: Vec<i64> = {
+        let s = borrow_state(state)?;
+        s.major_factions
+            .values()
+            .filter(|d| match expansion {
+                Some(exp) => d.expansion_filter == exp,
+                None => true,
+            })
+            .map(|d| d.faction_id)
+            .collect()
+    };
+    ids.sort_unstable();
+    let sequence = create_table(state);
+    let Val::Table(sequence_ref) = sequence else {
+        unreachable!("create_table must return a table");
+    };
+    for (index, id) in ids.iter().enumerate() {
+        table_set_num(state, sequence_ref, (index + 1) as f64, Val::Num(*id as f64));
+    }
+    state.push(sequence);
+    Ok(1)
+}
+
+fn is_major_faction_hidden_from_expansion_page(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = i64::from_stack(state, 1);
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn should_display_major_faction_as_journey(state: &mut LuaState) -> LuaResult<u32> {
+    let _ = i64::from_stack(state, 1);
+    state.push(Val::Bool(false));
     Ok(1)
 }
 
@@ -78,6 +129,9 @@ fn build_major_faction_data_table(state: &mut LuaState, data: &MajorFactionData)
     let renown_level_threshold = Val::Num(data.renown_level_threshold as f64);
     let celebration_sound_kit = Val::Num(data.celebration_sound_kit as f64);
     let renown_fanfare_sound_kit_id = Val::Num(data.renown_fanfare_sound_kit_id as f64);
+    let (r, g, b) = data.faction_font_color;
+    let color = create_color_mixin(state, r as f64, g as f64, b as f64);
+    let faction_font_color = create_table_with_fields(state, &[("color", color)]);
     create_table_with_fields(
         state,
         &[
@@ -92,8 +146,35 @@ fn build_major_faction_data_table(state: &mut LuaState, data: &MajorFactionData)
             ("celebrationSoundKit", celebration_sound_kit),
             ("renownFanfareSoundKitID", renown_fanfare_sound_kit_id),
             ("textureKit", texture_kit),
+            ("factionFontColor", faction_font_color),
         ],
     )
+}
+
+fn create_color_mixin(state: &mut LuaState, r: f64, g: f64, b: f64) -> Val {
+    let create_color_key = state.gc.intern_string(b"CreateColor");
+    let create_color = state
+        .gc
+        .tables
+        .get(state.global)
+        .map(|globals| globals.get_str(create_color_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    match call_function_state(
+        state,
+        create_color,
+        &[Val::Num(r), Val::Num(g), Val::Num(b), Val::Num(1.0)],
+    ) {
+        Ok(color) => color,
+        Err(_) => create_table_with_fields(
+            state,
+            &[
+                ("r", Val::Num(r)),
+                ("g", Val::Num(g)),
+                ("b", Val::Num(b)),
+                ("a", Val::Num(1.0)),
+            ],
+        ),
+    }
 }
 
 fn optional_string_val(state: &mut LuaState, text: Option<&String>) -> Val {
