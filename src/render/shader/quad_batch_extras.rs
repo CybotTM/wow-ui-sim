@@ -9,6 +9,10 @@ struct ThreeSliceParams {
     color: [f32; 4],
     tex_index: i32,
     blend_mode: BlendMode,
+    /// Normalized V of top edge of source strip (0.0 = texture top).
+    v_top: f32,
+    /// Normalized V of bottom edge of source strip (1.0 = texture bottom).
+    v_bottom: f32,
 }
 
 impl QuadBatch {
@@ -54,6 +58,8 @@ impl QuadBatch {
         path: &str,
         tex_width: f32,
         color: [f32; 4],
+        v_top: f32,
+        v_bottom: f32,
     ) {
         self.push_three_slice_h_path_blend(
             bounds,
@@ -63,6 +69,8 @@ impl QuadBatch {
             tex_width,
             color,
             BlendMode::Alpha,
+            v_top,
+            v_bottom,
         );
     }
 
@@ -76,6 +84,8 @@ impl QuadBatch {
         tex_width: f32,
         color: [f32; 4],
         blend_mode: BlendMode,
+        v_top: f32,
+        v_bottom: f32,
     ) {
         if bounds.width <= left_cap_width + right_cap_width {
             self.push_textured_path(bounds, path, color, blend_mode);
@@ -91,6 +101,8 @@ impl QuadBatch {
             color,
             tex_index: -2,
             blend_mode,
+            v_top,
+            v_bottom,
         });
         self.push_texture_request(path, vertex_start, 12);
     }
@@ -104,6 +116,8 @@ impl QuadBatch {
         tex_index: i32,
         tex_width: f32,
         color: [f32; 4],
+        v_top: f32,
+        v_bottom: f32,
     ) {
         if bounds.width <= left_cap_width + right_cap_width {
             self.push_textured(bounds, tex_index, color, BlendMode::Alpha);
@@ -118,6 +132,8 @@ impl QuadBatch {
             color,
             tex_index,
             blend_mode: BlendMode::Alpha,
+            v_top,
+            v_bottom,
         });
     }
 
@@ -227,47 +243,29 @@ impl QuadBatch {
         let middle_width = params.bounds.width - params.left_cap_width - params.right_cap_width;
         let left_uv = params.left_cap_width / params.tex_width;
         let right_uv_start = 1.0 - (params.right_cap_width / params.tex_width);
-
-        self.push_quad(
-            Rectangle::new(
-                Point::new(params.bounds.x, params.bounds.y),
-                Size::new(params.left_cap_width, params.bounds.height),
-            ),
-            Rectangle::new(Point::ORIGIN, Size::new(left_uv, 1.0)),
-            params.color,
-            params.tex_index,
-            params.blend_mode,
-        );
-
-        self.push_quad(
-            Rectangle::new(
-                Point::new(params.bounds.x + params.left_cap_width, params.bounds.y),
-                Size::new(middle_width, params.bounds.height),
-            ),
-            Rectangle::new(
-                Point::new(left_uv, 0.0),
-                Size::new(right_uv_start - left_uv, 1.0),
-            ),
-            params.color,
-            params.tex_index,
-            params.blend_mode,
-        );
-
-        self.push_quad(
-            Rectangle::new(
-                Point::new(
-                    params.bounds.x + params.bounds.width - params.right_cap_width,
-                    params.bounds.y,
+        let v_height = params.v_bottom - params.v_top;
+        let mut emit = |dest_x: f32, dest_w: f32, uv_x: f32, uv_w: f32| {
+            self.push_quad(
+                Rectangle::new(
+                    Point::new(dest_x, params.bounds.y),
+                    Size::new(dest_w, params.bounds.height),
                 ),
-                Size::new(params.right_cap_width, params.bounds.height),
-            ),
-            Rectangle::new(
-                Point::new(right_uv_start, 0.0),
-                Size::new(1.0 - right_uv_start, 1.0),
-            ),
-            params.color,
-            params.tex_index,
-            params.blend_mode,
+                Rectangle::new(Point::new(uv_x, params.v_top), Size::new(uv_w, v_height)),
+                params.color,
+                params.tex_index,
+                params.blend_mode,
+            );
+        };
+        let left_x = params.bounds.x;
+        let middle_x = params.bounds.x + params.left_cap_width;
+        let right_x = params.bounds.x + params.bounds.width - params.right_cap_width;
+        emit(left_x, params.left_cap_width, 0.0, left_uv);
+        emit(middle_x, middle_width, left_uv, right_uv_start - left_uv);
+        emit(
+            right_x,
+            params.right_cap_width,
+            right_uv_start,
+            1.0 - right_uv_start,
         );
     }
 

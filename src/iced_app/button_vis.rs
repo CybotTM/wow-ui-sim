@@ -76,6 +76,12 @@ fn parent_allows_hover_highlight(f: &crate::widget::Frame, registry: &WidgetRegi
         parent.widget_type,
         WidgetType::Button | WidgetType::CheckButton
     ) {
+        // Suppress the HighlightTexture slot child here — it is rendered exclusively
+        // by append_hover_highlight, which controls timing and blend mode. Allowing
+        // it through the regular draw loop produces double additive blending on hover.
+        if parent.children_keys.get("HighlightTexture") == Some(&f.id) {
+            return false;
+        }
         return is_enabled(parent);
     }
     true

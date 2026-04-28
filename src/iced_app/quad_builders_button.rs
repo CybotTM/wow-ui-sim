@@ -10,6 +10,9 @@ use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_tex
 
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
 
+/// UI-Panel-Button-Up is 128×32; button-up strip occupies rows 0-21 (V = 0 .. 22/32 = 0.6875).
+const BUTTON_TEX_V_BOTTOM: f32 = 0.6875;
+
 /// Build quads for a Button widget.
 pub(super) fn build_button_quads(
     batch: &mut QuadBatch,
@@ -84,6 +87,8 @@ fn emit_button_texture(
             tex_path,
             BUTTON_TEX_WIDTH,
             [1.0, 1.0, 1.0, alpha],
+            0.0,
+            BUTTON_TEX_V_BOTTOM,
         );
     }
 }
@@ -122,6 +127,8 @@ pub(crate) fn emit_button_highlight(
                 BUTTON_TEX_WIDTH,
                 [1.0, 1.0, 1.0, 0.5 * alpha],
                 BlendMode::Additive,
+                0.0,
+                BUTTON_TEX_V_BOTTOM,
             );
         }
     }
