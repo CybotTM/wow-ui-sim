@@ -142,7 +142,6 @@ local function InitUI()
         local row = CreateRow(palette, i)
         row:SetScript("OnClick", function(self)
             if self.command and self.command.action then
-                palette:Hide()
                 self.command.action()
             end
         end)
@@ -161,7 +160,6 @@ local function InitUI()
     searchBox:SetScript("OnEnterPressed", function(self)
         -- Execute first matching command
         if filteredCommands[1] and filteredCommands[1].action then
-            palette:Hide()
             filteredCommands[1].action()
         end
     end)
