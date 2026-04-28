@@ -415,6 +415,7 @@ pub fn apply_xml_frame_level(
 ) {
     let mut level = None;
     let mut fixed_frame_level = None;
+    let mut use_parent_level = None;
     if !inherits.is_empty() {
         for entry in &*crate::xml::get_template_chain(inherits) {
             if let Some(entry_level) = entry.frame.frame_level {
@@ -422,6 +423,9 @@ pub fn apply_xml_frame_level(
             }
             if let Some(entry_fixed) = entry.frame.fixed_frame_level {
                 fixed_frame_level = Some(entry_fixed);
+            }
+            if let Some(entry_upl) = entry.frame.use_parent_level {
+                use_parent_level = Some(entry_upl);
             }
         }
     }
@@ -431,9 +435,35 @@ pub fn apply_xml_frame_level(
     if let Some(frame_fixed) = frame.fixed_frame_level {
         fixed_frame_level = Some(frame_fixed);
     }
+    if let Some(frame_upl) = frame.use_parent_level {
+        use_parent_level = Some(frame_upl);
+    }
+    if use_parent_level == Some(true) {
+        set_xml_frame_level_to_parent(state, frame_id);
+        return;
+    }
     if let Some(l) = level {
         set_xml_frame_level(state, frame_id, l, fixed_frame_level.unwrap_or(false));
     }
+}
+
+/// Force a frame to share its parent's level (XML `useParentLevel="true"`).
+fn set_xml_frame_level_to_parent(state: &Rc<RefCell<SimState>>, frame_id: u64) {
+    let mut s = state.borrow_mut();
+    let parent_level = s
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.parent_id)
+        .and_then(|parent_id| s.widgets.get(parent_id))
+        .map(|parent| parent.frame_level);
+    if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
+        frame.frame_level_offset = Some(0);
+        frame.has_fixed_frame_level = false;
+        if let Some(pl) = parent_level {
+            frame.frame_level = pl;
+        }
+    }
+    crate::lua_api::frame::propagate_strata_level_pub(&mut s.widgets, frame_id);
 }
 
 /// Resolve and apply hidden from template chain + instance XML.
