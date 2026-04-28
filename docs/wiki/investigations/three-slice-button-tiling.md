@@ -1,10 +1,9 @@
 # Three-Slice Button Tiling
 
-Escape menu red buttons still showed vertical bands after atlas center textures
-were tiled instead of stretched. The remaining mismatch was tile scale: the
-simulator repeated `_128-RedButton-Center` at its raw 64px atlas width even
-though the 128px-tall source strip was drawn into a 36px-tall button, so the
-center tile was still horizontally stretched relative to its vertical scale.
+Escape menu red buttons showed vertical bands because the center atlas art is
+not horizontally seamless. Stretching the full center strip made broad bands;
+repeating the full strip made seams; an attempted aspect-ratio correction made
+dense 18px stripes.
 
 ## Content
 
@@ -20,14 +19,12 @@ For `BigRedThreeSliceButtonTemplate`, the pieces are:
 - `128-RedButton-Right`: `292x128`, not tiled
 
 In a 200x36 GameMenu button, Left resolves to about `32x36`, Right to about
-`82x36`, and Center to about `85x36`. A non-stretched horizontal repeat must
-therefore use the same scale as the drawn vertical axis: `64 * 36 / 128 = 18`.
-Repeating at 64px produced too few, too-wide center tiles.
+`82x36`, and Center to about `85x36`. The Center source art is not seamless
+across its 64px width, so full-strip repeats expose a vertical seam. Repeating
+it every `18px` made the same source variation much denser.
 
-Fix: atlas-backed single-axis tiling now preserves source aspect ratio from the
-drawn orthogonal axis. Horizontal atlas tiling computes tile width from
-`source_width * bounds.height / source_height`; vertical atlas tiling mirrors
-that using destination width.
+Fix: red-button Center atlases use a seam-safe center strip as the repeated
+source region. This avoids using the non-seamless 64px source span.
 
 ## Sources
 

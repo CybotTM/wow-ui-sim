@@ -5,11 +5,10 @@ Chronological record of wiki operations.
 ## [2026-04-28] ingest | three-slice button tiling
 
 Created `investigations/three-slice-button-tiling.md`. Escape menu red button
-bands persisted after the original center-stretch fix because
-`_128-RedButton-Center` was repeated at raw atlas width (`64px`) while its
-`128px` source height was drawn into a `36px` button. Atlas-backed single-axis
-tiling now preserves source aspect ratio from the drawn orthogonal axis, so the
-GameMenu center repeats at `64 * 36 / 128 = 18px`.
+bands came from using the full non-seamless `_128-RedButton-Center` source:
+stretching it created broad bands, and an over-correction repeated it every
+`18px`. Red-button Center atlases now tile a seam-safe center column instead of
+the full 64px source span.
 
 ## [2026-04-28] update | eager animation_frame_ids_for_group
 
