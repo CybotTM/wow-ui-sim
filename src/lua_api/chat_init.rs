@@ -55,6 +55,7 @@ pub fn init_chat_type_colors(env: &WowLuaEnv) {
 fn start_fake_chat(env: &WowLuaEnv) {
     register_fake_chat_data(env);
     fix_chat_scrollbar_anchors(env);
+    schedule_fake_chat_tickers(env);
 }
 
 fn register_fake_chat_data(env: &WowLuaEnv) {
