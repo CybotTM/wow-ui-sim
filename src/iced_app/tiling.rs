@@ -187,10 +187,6 @@ fn standard_tile_config(
     f: &crate::widget::Frame,
     alpha: f32,
 ) -> StandardTileConfig {
-    if let Some(config) = red_button_center_tile_config(tex_path, f, alpha) {
-        return config;
-    }
-
     let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, uvs);
     let (tile_w, tile_h) = tile_dimensions(f, cropped_uvs.width, cropped_uvs.height);
 
@@ -201,44 +197,6 @@ fn standard_tile_config(
         tile_h,
         tint: frame_tint(f, alpha),
     }
-}
-
-fn red_button_center_tile_config(
-    tex_path: &str,
-    f: &crate::widget::Frame,
-    alpha: f32,
-) -> Option<StandardTileConfig> {
-    const SEAM_SAFE_CENTER_STRIP_WIDTH: f32 = 4.0;
-
-    if !f.horiz_tile || f.vert_tile {
-        return None;
-    }
-    let atlas_name = f.atlas.as_deref()?.to_ascii_lowercase();
-    if !matches!(
-        atlas_name.as_str(),
-        "_128-redbutton-center"
-            | "_128-redbutton-center-pressed"
-            | "_128-redbutton-center-disabled"
-    ) {
-        return None;
-    }
-
-    let info = crate::atlas::get_atlas_info(&atlas_name)?;
-    let source_width = info.width() as f32;
-    let strip_width = SEAM_SAFE_CENTER_STRIP_WIDTH;
-    let strip_u = strip_width / source_width;
-    let cropped_uvs = Rectangle::new(
-        Point::new(0.5 - strip_u * 0.5, 0.0),
-        Size::new(strip_u, 1.0),
-    );
-
-    Some(StandardTileConfig {
-        cropped_path: tex_path.to_string(),
-        cropped_uvs,
-        tile_w: strip_width,
-        tile_h: info.height() as f32,
-        tint: frame_tint(f, alpha),
-    })
 }
 
 fn emit_standard_tiled_texture(
@@ -581,25 +539,18 @@ mod tests {
     }
 
     #[test]
-    fn red_button_center_tiles_use_seam_safe_strip() {
+    fn horizontal_atlas_tiles_use_source_size() {
         let frame = crate::widget::Frame {
             atlas: Some("_128-RedButton-Center".to_string()),
             horiz_tile: true,
             ..Default::default()
         };
-        let uvs = Rectangle::new(Point::ORIGIN, Size::new(1.0, 1.0));
+        let uvs = Rectangle::new(Point::new(0.0, 0.000488), Size::new(0.125, 0.0625));
 
-        let config = standard_tile_config(
-            "Interface\\buttons\\128redbutton@crop:0.000000,0.125000,0.000488,0.062988",
-            &uvs,
-            &frame,
-            1.0,
-        );
+        let config = standard_tile_config("Interface\\buttons\\128redbutton", &uvs, &frame, 1.0);
 
-        assert_eq!(config.tile_w, 4.0);
+        assert_eq!(config.tile_w, 64.0);
         assert_eq!(config.tile_h, 128.0);
-        assert_eq!(config.cropped_uvs.x, 0.46875);
-        assert_eq!(config.cropped_uvs.width, 0.0625);
         assert_eq!(
             config.cropped_path,
             "Interface\\buttons\\128redbutton@crop:0.000000,0.125000,0.000488,0.062988"
