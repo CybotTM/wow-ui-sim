@@ -1,10 +1,7 @@
 -- Built-in commands for the SimCommands palette.
 
-SimCommands:Register("Open Mailbox", "Show the mail inbox", function()
-    C_AddOns.LoadAddOn("Blizzard_MailFrame")
-    if MailFrame_Show then
-        MailFrame_Show()
-    end
+SimCommands:Register("Open Mailbox", "Fire MAIL_SHOW event", function()
+    FireEvent("MAIL_SHOW")
 end, "UI Panels")
 
 SimCommands:Register("Open Bank", "Fire BANKFRAME_OPENED event", function()
