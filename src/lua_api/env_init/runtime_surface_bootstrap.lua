@@ -8810,33 +8810,12 @@ end
 -- Guild bank: not simulated; single callsite in GuildControlUI.
 C_GuildBank = C_GuildBank or __wow_namespace()
 
--- C_GuildInfo.GetClubId / IsGuildOfficer / CanSpeakInGuildChat are
--- registered from Rust (src/lua_api/globals/guild_info.rs), backed by
--- SimState::world.guild_club_id / guild_is_officer / guild_can_speak_in_chat.
+-- C_GuildInfo.GetClubId / IsGuildOfficer / CanSpeakInGuildChat /
+-- GetMOTD / SetMOTD / GetInfoText / SetInfoText are registered from Rust
+-- (src/lua_api/globals/guild_info.rs), backed by SimState::world fields.
 -- Merge the stub-namespace __index fallback so other unimplemented
 -- C_GuildInfo members resolve to the no-op metamethod.
 C_GuildInfo = __wow_merge_namespace(C_GuildInfo, {})
-if rawget(C_GuildInfo, "_textState") == nil then
-  C_GuildInfo._textState = {
-    motd = "Raid invites tonight at 20:00 server. Repairs are on for progression.",
-    infoText = "Mythic-focused guild recruiting healers and a warlock for weekend raids.",
-  }
-end
-if rawget(C_GuildInfo, "GetMOTD") == nil then
-  function C_GuildInfo.GetMOTD()
-    return C_GuildInfo._textState.motd
-  end
-end
-if rawget(C_GuildInfo, "GetInfoText") == nil then
-  function C_GuildInfo.GetInfoText()
-    return C_GuildInfo._textState.infoText
-  end
-end
-if rawget(C_GuildInfo, "SetInfoText") == nil then
-  function C_GuildInfo.SetInfoText(text)
-    C_GuildInfo._textState.infoText = tostring(text or "")
-  end
-end
 -- GetAvailableLocaleInfo is registered from Rust
 -- (src/lua_api/globals/locale_info.rs). Returns the 12-locale retail list
 -- as { localeId, localeName, englishName, displayName } entries.

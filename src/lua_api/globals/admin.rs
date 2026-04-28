@@ -181,6 +181,15 @@ fn register_guild_and_game_rules(b: TableBuilder) -> LuaResult<TableBuilder> {
         .set_function(
             "SetGuildCanSpeakInChat",
             super::guild_info::admin_set_guild_can_speak_in_chat,
+        )?
+        .set_function("SetGuildMOTD", super::guild_info::admin_set_guild_motd)?
+        .set_function(
+            "SetGuildInfoText",
+            super::guild_info::admin_set_guild_info_text,
+        )?
+        .set_function(
+            "SetGuildChallenges",
+            super::guild_info::admin_set_guild_challenges,
         )
 }
 
