@@ -749,8 +749,7 @@ fn c_guild_info_set_motd_round_trips_through_world_state() {
     let parts: Vec<&str> = result.split('|').collect();
     assert_eq!(parts.len(), 3, "expected 3 parts, got {result}");
     assert_eq!(
-        parts[0],
-        "Raid invites tonight at 20:00 server. Repairs are on for progression.",
+        parts[0], "Raid invites tonight at 20:00 server. Repairs are on for progression.",
         "initial MOTD should be seeded"
     );
     assert_eq!(parts[1], "Mythic raid Friday 21:00 server.");
@@ -796,8 +795,6 @@ fn admin_set_guild_challenges_replaces_world_state_rows() {
         .unwrap();
     assert_eq!(mythic, "5:1/1 999/999");
 
-    let missing: bool = env
-        .eval("return GetGuildChallengeInfo(2) == nil")
-        .unwrap();
+    let missing: bool = env.eval("return GetGuildChallengeInfo(2) == nil").unwrap();
     assert!(missing, "challenge type 2 was not seeded, expected nil");
 }

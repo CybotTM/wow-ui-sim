@@ -16,7 +16,31 @@ pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
     let fixed = strip_duplicate_self_closing(&contents, "Size");
     let fixed = strip_duplicate_self_closing(&fixed, "TexCoords");
     let fixed = strip_duplicate_script_handlers(&fixed);
+    let fixed = normalize_whitespace_padded_bools(&fixed);
     Ok(parse_xml(&fixed)?)
+}
+
+/// Strip leading/trailing whitespace inside boolean-valued XML attribute values.
+///
+/// Blizzard's source occasionally ships typos like `hidden=" true"` (note the leading space).
+/// quick-xml's serde-bool deserializer rejects these because the literal does not match
+/// `true`/`false`/`1`/`0` exactly. Examples in vendor XML:
+///   - Blizzard_GarrisonTemplates/Blizzard_CovenantMissionTemplates.xml:598
+///   - Blizzard_GarrisonUI/Mainline/Blizzard_GarrisonLandingPage.xml:673
+fn normalize_whitespace_padded_bools(xml: &str) -> String {
+    let pairs = [
+        (r#"=" true""#, r#"="true""#),
+        (r#"="true ""#, r#"="true""#),
+        (r#"=" false""#, r#"="false""#),
+        (r#"="false ""#, r#"="false""#),
+    ];
+    let mut out = xml.to_string();
+    for (from, to) in pairs {
+        if out.contains(from) {
+            out = out.replace(from, to);
+        }
+    }
+    out
 }
 
 /// Strip CurseForge/BigWigs packager XML comment markers so source-form addons parse correctly.

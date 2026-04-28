@@ -281,7 +281,11 @@ pub fn admin_set_guild_challenges(state: &mut LuaState) -> LuaResult<u32> {
             let row_refs: Vec<GcRef<Table>> = (1..=len)
                 .filter_map(|i| {
                     let val = state.gc.tables.get(tref)?.get_int(i as i64);
-                    if let Val::Table(r) = val { Some(r) } else { None }
+                    if let Val::Table(r) = val {
+                        Some(r)
+                    } else {
+                        None
+                    }
                 })
                 .collect();
             row_refs

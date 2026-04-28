@@ -29,6 +29,12 @@ pub(super) fn register_garrison_talent_surface(state: &mut LuaState) -> LuaResul
         "GetTalentUnlockWorldQuest",
         get_talent_unlock_world_quest,
     )?;
+    table_set_rust_fn_static(
+        state,
+        namespace,
+        "GetAllEncounterThreats",
+        get_all_encounter_threats,
+    )?;
     let globals = state.global;
     table_set_rust_fn_static(
         state,
@@ -37,6 +43,12 @@ pub(super) fn register_garrison_talent_surface(state: &mut LuaState) -> LuaResul
         get_garrison_talent_cost_string,
     )?;
     Ok(())
+}
+
+fn get_all_encounter_threats(state: &mut LuaState) -> LuaResult<u32> {
+    let empty = create_table(state);
+    state.push(empty);
+    Ok(1)
 }
 
 fn get_talent_info(state: &mut LuaState) -> LuaResult<u32> {
@@ -71,6 +83,15 @@ fn get_talent_unlock_world_quest(state: &mut LuaState) -> LuaResult<u32> {
 
 fn build_talent_info_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> Val {
     let entry = create_table(state);
+    set_identity_fields(state, entry, info);
+    set_progression_fields(state, entry, info);
+    set_research_fields(state, entry, info);
+    let costs = build_currency_costs_table(state, info);
+    table_set(state, entry, "researchCurrencyCosts", costs);
+    entry
+}
+
+fn set_identity_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
     let name = create_string(state, &info.name);
     let description = create_string(state, &info.description);
     table_set(state, entry, "id", Val::Num(info.id as f64));
@@ -79,6 +100,9 @@ fn build_talent_info_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> V
     table_set(state, entry, "icon", Val::Num(info.icon as f64));
     table_set(state, entry, "tier", Val::Num(info.tier as f64));
     table_set(state, entry, "uiOrder", Val::Num(info.ui_order as f64));
+}
+
+fn set_progression_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
     table_set(
         state,
         entry,
@@ -99,6 +123,9 @@ fn build_talent_info_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> V
     );
     table_set(state, entry, "researched", Val::Bool(info.researched));
     table_set(state, entry, "selected", Val::Bool(info.selected));
+}
+
+fn set_research_fields(state: &mut LuaState, entry: Val, info: &GarrisonTalentInfo) {
     table_set(
         state,
         entry,
@@ -130,7 +157,9 @@ fn build_talent_info_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> V
         "researchGoldCost",
         Val::Num(info.research_gold_cost as f64),
     );
+}
 
+fn build_currency_costs_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> Val {
     let costs = create_table(state);
     for (cost_index, cost) in info.research_currency_costs.iter().enumerate() {
         let cost_entry = create_table(state);
@@ -148,8 +177,7 @@ fn build_talent_info_table(state: &mut LuaState, info: &GarrisonTalentInfo) -> V
         );
         set_table_array(state, costs, cost_index as i64 + 1, cost_entry);
     }
-    table_set(state, entry, "researchCurrencyCosts", costs);
-    entry
+    costs
 }
 
 fn get_garrison_talent_cost_string(state: &mut LuaState) -> LuaResult<u32> {
