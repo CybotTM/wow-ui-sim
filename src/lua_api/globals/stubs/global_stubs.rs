@@ -62,6 +62,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "SetActionBarToggles",
     "SetChannelPassword",
     "SetInsertItemsLeftToRight",
+    "SetLFGRoles",
     "SetLootThreshold",
     "SetPartyLeader",
     "SetRaidSubgroup",
