@@ -18,6 +18,7 @@
 mod audit_api;
 mod csv_util;
 mod gen_atlas;
+mod gen_encounter_journal;
 mod gen_global_strings;
 mod gen_items;
 mod gen_manifest;
@@ -200,6 +201,8 @@ enum GenerateTarget {
     MapArt,
     /// Generate data/quest_ui_map.rs from QuestPOIBlob CSV
     QuestPoi,
+    /// Generate data/encounter_journal.rs from Journal* CSVs
+    EncounterJournal,
 }
 
 fn default_addons_path() -> PathBuf {
@@ -284,6 +287,7 @@ fn run_generator(target: GenerateTarget) {
         GenerateTarget::Zones => gen_zones::run(),
         GenerateTarget::MapArt => gen_map_art::run(),
         GenerateTarget::QuestPoi => gen_quest_poi::run(),
+        GenerateTarget::EncounterJournal => gen_encounter_journal::run(),
     };
     if let Err(e) = result {
         eprintln!("Error: {}", e);

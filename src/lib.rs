@@ -16,6 +16,8 @@ pub mod debug_helpers;
 pub mod dump;
 #[cfg(feature = "gui")]
 pub mod dump_texture;
+#[path = "../data/encounter_journal.rs"]
+pub mod encounter_journal_data;
 pub mod error;
 pub mod event;
 pub mod extract_textures;

@@ -158,6 +158,7 @@ fn register_legacy_global_shims(lua: &mut rilua::Lua) -> LuaResult<()> {
     )?;
     LuaApiMut::register_function(lua, "GetMultiCastTotemSpells", get_multi_cast_totem_spells)?;
     LuaApiMut::register_function(lua, "GetMouseButtonClicked", get_mouse_button_clicked)?;
+    encounter_journal::register_ej_globals(lua)?;
     Ok(())
 }
 

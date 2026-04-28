@@ -1,257 +1,37 @@
-//! `C_EncounterJournal` static probe surface.
+//! `C_EncounterJournal` namespace and `EJ_*` legacy globals — the data
+//! surface behind the Adventure Guide. Backed by static tables in
+//! `data/encounter_journal.rs` (regenerated via `wow-cli generate
+//! encounter-journal`) and per-session state in `SimState.encounter_journal`.
 //!
-//! Migrates 2 entries off `NAMESPACE_NIL_STUBS`:
+//! Schema parity:
 //!
-//! - `C_EncounterJournal.GetEncounterInfo(encounterID)` — returns the
-//!   8-value retail tuple `(name, description, encounterID, rootSectionID,
-//!   linkSection, journalInstanceID, dungeonEncounterID, instanceID)` for
-//!   a seeded encounter, or nothing for an unknown id.
-//! - `C_EncounterJournal.GetInstanceInfo(instanceID)` — returns the
-//!   9-value retail tuple `(name, description, bgImage, buttonImage1,
-//!   loreImage, buttonImage2, dungeonAreaMapID, linkRaidID, linkDungeonID)`
-//!   for a seeded instance, or nothing for an unknown id.
+//! - `C_EncounterJournal.GetEncounterInfo` — 8-tuple matching the official
+//!   retail return: `(name, description, encounterID, rootSectionID,
+//!   linkSection, journalInstanceID, dungeonEncounterID, instanceID)`.
+//! - `C_EncounterJournal.GetInstanceInfo` — 9-tuple: `(name, description,
+//!   bgImage, buttonImage1, loreImage, buttonImage2, dungeonAreaMapID,
+//!   linkRaidID, linkDungeonID)`. Image fields are returned as fileDataIDs
+//!   (numbers) per the real DBC schema.
+//! - `C_EncounterJournal.GetSectionInfo` — table per
+//!   `vendor/wow-ui-source/.../EncounterJournalDocumentation` with at least
+//!   `spellID`, `headerType`, `description`, `title`, `siblingSectionID`,
+//!   `firstChildSectionID`.
+//! - `C_EncounterJournal.GetLootInfo` / `GetLootInfoByIndex` — table with
+//!   `name`, `icon`, `itemQuality`, `itemID`, `link`, `slot`, `armorType`,
+//!   `encounterID`, `displayAsPerPlayerLoot` (always false here).
 //!
-//! Data covers Dragonflight + War Within raids (Vault of the Incarnates,
-//! Aberrus, Amirdrassil, Nerub-ar Palace) with real retail encounter and
-//! instance IDs from Wowpedia / wago.tools.
+//! `EJ_*` legacy globals route through the same data, with state held
+//! in `SimState.encounter_journal` rather than Lua globals.
 
 use super::ensure_namespace;
-use crate::lua_api::methods::create_string;
-use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use crate::encounter_journal_data as data;
+use crate::items;
+use crate::lua_api::methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_set,
+};
+use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val};
-
-// ---------------------------------------------------------------------------
-// Seed data
-// ---------------------------------------------------------------------------
-
-struct EncounterRow {
-    encounter_id: u32,
-    name: &'static str,
-    description: &'static str,
-    root_section_id: u32,
-    link_section: &'static str,
-    journal_instance_id: u32,
-    dungeon_encounter_id: u32,
-    instance_id: u32,
-}
-
-struct InstanceRow {
-    instance_id: u32,
-    name: &'static str,
-    description: &'static str,
-    bg_image: &'static str,
-    button_image1: &'static str,
-    lore_image: &'static str,
-    button_image2: &'static str,
-    dungeon_area_map_id: u32,
-    link_raid_id: u32,
-    link_dungeon_id: u32,
-}
-
-// Encounter IDs, names and instance IDs from wowpedia / wago.tools.
-// journalInstanceID is the EJ instance id (distinct from the LFG instance id).
-static ENCOUNTERS: &[EncounterRow] = &[
-    // --- Vault of the Incarnates (instance 1200, journalInstanceID 1193) ---
-    EncounterRow {
-        encounter_id: 2587,
-        name: "Eranog",
-        description: "Commander of the Primalist armies.",
-        root_section_id: 14981,
-        link_section: "",
-        journal_instance_id: 1193,
-        dungeon_encounter_id: 2587,
-        instance_id: 1200,
-    },
-    EncounterRow {
-        encounter_id: 2639,
-        name: "The Primal Council",
-        description: "Four Primalist commanders united in purpose.",
-        root_section_id: 15052,
-        link_section: "",
-        journal_instance_id: 1193,
-        dungeon_encounter_id: 2639,
-        instance_id: 1200,
-    },
-    EncounterRow {
-        encounter_id: 2590,
-        name: "Sennarth, The Cold Breath",
-        description: "Ancient spider corrupted by the Primalists.",
-        root_section_id: 14984,
-        link_section: "",
-        journal_instance_id: 1193,
-        dungeon_encounter_id: 2590,
-        instance_id: 1200,
-    },
-    EncounterRow {
-        encounter_id: 2592,
-        name: "Raszageth the Storm-Eater",
-        description: "Final boss of the Vault of the Incarnates.",
-        root_section_id: 14986,
-        link_section: "",
-        journal_instance_id: 1193,
-        dungeon_encounter_id: 2592,
-        instance_id: 1200,
-    },
-    // --- Aberrus, the Shadowed Crucible (instance 1208, journalInstanceID 1208) ---
-    EncounterRow {
-        encounter_id: 2688,
-        name: "Kazzara, the Hellforged",
-        description: "A dracthyr twisted by Neltharion's experiments.",
-        root_section_id: 15738,
-        link_section: "",
-        journal_instance_id: 1208,
-        dungeon_encounter_id: 2688,
-        instance_id: 1208,
-    },
-    EncounterRow {
-        encounter_id: 2693,
-        name: "Rashok, the Elder",
-        description: "An elder nathrezim empowered by the Shadowflame.",
-        root_section_id: 15743,
-        link_section: "",
-        journal_instance_id: 1208,
-        dungeon_encounter_id: 2693,
-        instance_id: 1208,
-    },
-    // --- Amirdrassil, the Dream's Hope (instance 2549, journalInstanceID 1207) ---
-    EncounterRow {
-        encounter_id: 2728,
-        name: "Gnarlroot",
-        description: "A corrupted treant guardian of Amirdrassil.",
-        root_section_id: 16026,
-        link_section: "",
-        journal_instance_id: 1207,
-        dungeon_encounter_id: 2728,
-        instance_id: 2549,
-    },
-    EncounterRow {
-        encounter_id: 2731,
-        name: "Tindral Sageswift, Seer of the Flame",
-        description: "A night elf druid who bargained with the Emerald Dream's corruption.",
-        root_section_id: 16029,
-        link_section: "",
-        journal_instance_id: 1207,
-        dungeon_encounter_id: 2731,
-        instance_id: 2549,
-    },
-    EncounterRow {
-        encounter_id: 2737,
-        name: "Fyrakk the Blazing",
-        description: "Incarnate of fire, final boss of Amirdrassil.",
-        root_section_id: 16035,
-        link_section: "",
-        journal_instance_id: 1207,
-        dungeon_encounter_id: 2737,
-        instance_id: 2549,
-    },
-    // --- Nerub-ar Palace (instance 2657, journalInstanceID 1273) ---
-    EncounterRow {
-        encounter_id: 2902,
-        name: "Ulgrax the Devourer",
-        description: "A massive nerubian beast lurking beneath the palace.",
-        root_section_id: 17392,
-        link_section: "",
-        journal_instance_id: 1273,
-        dungeon_encounter_id: 2902,
-        instance_id: 2657,
-    },
-    EncounterRow {
-        encounter_id: 2917,
-        name: "The Bloodbound Horror",
-        description: "A monstrosity bound from the blood of fallen heroes.",
-        root_section_id: 17407,
-        link_section: "",
-        journal_instance_id: 1273,
-        dungeon_encounter_id: 2917,
-        instance_id: 2657,
-    },
-    EncounterRow {
-        encounter_id: 2922,
-        name: "Queen Ansurek",
-        description: "Queen of the nerubians and final boss of Nerub-ar Palace.",
-        root_section_id: 17412,
-        link_section: "",
-        journal_instance_id: 1273,
-        dungeon_encounter_id: 2922,
-        instance_id: 2657,
-    },
-];
-
-static INSTANCES: &[InstanceRow] = &[
-    InstanceRow {
-        instance_id: 1200,
-        name: "Vault of the Incarnates",
-        description: "The Primalists have broken through to Thaldraszus.",
-        bg_image: "Interface\\EncounterJournal\\UI-EJ-BG-VaultOfTheIncarnates",
-        button_image1: "",
-        lore_image: "",
-        button_image2: "",
-        dungeon_area_map_id: 0,
-        link_raid_id: 1200,
-        link_dungeon_id: 0,
-    },
-    InstanceRow {
-        instance_id: 1208,
-        name: "Aberrus, the Shadowed Crucible",
-        description: "Neltharion's secret laboratory hidden beneath Zaralek Cavern.",
-        bg_image: "Interface\\EncounterJournal\\UI-EJ-BG-Aberrus",
-        button_image1: "",
-        lore_image: "",
-        button_image2: "",
-        dungeon_area_map_id: 0,
-        link_raid_id: 1208,
-        link_dungeon_id: 0,
-    },
-    InstanceRow {
-        instance_id: 2549,
-        name: "Amirdrassil, the Dream's Hope",
-        description: "The new world tree grows in the Emerald Dream.",
-        bg_image: "Interface\\EncounterJournal\\UI-EJ-BG-Amirdrassil",
-        button_image1: "",
-        lore_image: "",
-        button_image2: "",
-        dungeon_area_map_id: 0,
-        link_raid_id: 2549,
-        link_dungeon_id: 0,
-    },
-    InstanceRow {
-        instance_id: 2657,
-        name: "Nerub-ar Palace",
-        description: "Queen Ansurek's ancient nerubian stronghold beneath Azj-Kahet.",
-        bg_image: "Interface\\EncounterJournal\\UI-EJ-BG-NerubarPalace",
-        button_image1: "",
-        lore_image: "",
-        button_image2: "",
-        dungeon_area_map_id: 0,
-        link_raid_id: 2657,
-        link_dungeon_id: 0,
-    },
-    InstanceRow {
-        instance_id: 2522,
-        name: "Vault of the Incarnates",
-        description: "The Primalists have broken through to Thaldraszus.",
-        bg_image: "Interface\\EncounterJournal\\UI-EJ-BG-VaultOfTheIncarnates",
-        button_image1: "",
-        lore_image: "",
-        button_image2: "",
-        dungeon_area_map_id: 0,
-        link_raid_id: 2522,
-        link_dungeon_id: 0,
-    },
-    InstanceRow {
-        instance_id: 2569,
-        name: "Aberrus, the Shadowed Crucible",
-        description: "Neltharion's secret laboratory hidden beneath Zaralek Cavern.",
-        bg_image: "Interface\\EncounterJournal\\UI-EJ-BG-Aberrus",
-        button_image1: "",
-        lore_image: "",
-        button_image2: "",
-        dungeon_area_map_id: 0,
-        link_raid_id: 2569,
-        link_dungeon_id: 0,
-    },
-];
+use rilua::{LuaApiMut, LuaResult, Val};
 
 // ---------------------------------------------------------------------------
 // Registration
@@ -261,56 +41,802 @@ pub(super) fn register_encounter_journal_surface(state: &mut LuaState) -> LuaRes
     let table_ref = ensure_namespace(state, "C_EncounterJournal")?;
     table_set_rust_fn_static(state, table_ref, "GetEncounterInfo", get_encounter_info)?;
     table_set_rust_fn_static(state, table_ref, "GetInstanceInfo", get_instance_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetSectionInfo", get_section_info)?;
+    table_set_rust_fn_static(state, table_ref, "GetLootInfo", get_loot_info)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetLootInfoByIndex",
+        get_loot_info_by_index,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetSectionIconFlags",
+        get_section_icon_flags,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "InstanceHasLoot", instance_has_loot)?;
+    table_set_rust_fn_static(state, table_ref, "GetSlotFilter", get_slot_filter)?;
+    table_set_rust_fn_static(state, table_ref, "SetSlotFilter", set_slot_filter)?;
+    table_set_rust_fn_static(state, table_ref, "ResetSlotFilter", reset_slot_filter)?;
+    table_set_rust_fn_static(state, table_ref, "SetTab", set_tab)?;
     table_set_rust_fn_static(state, table_ref, "OnOpen", noop)?;
+    table_set_rust_fn_static(state, table_ref, "OnClose", noop)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "InitalizeSelectedTier",
+        initialize_selected_tier,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "StartArathiRPE", noop)?;
+    Ok(())
+}
+
+pub(crate) fn register_ej_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    LuaApiMut::register_function(lua, "EJ_GetNumTiers", ej_get_num_tiers)?;
+    LuaApiMut::register_function(lua, "EJ_GetTierInfo", ej_get_tier_info)?;
+    LuaApiMut::register_function(lua, "EJ_GetCurrentTier", ej_get_current_tier)?;
+    LuaApiMut::register_function(lua, "EJ_SelectTier", ej_select_tier)?;
+    LuaApiMut::register_function(lua, "EJ_GetInstanceInfo", ej_get_instance_info)?;
+    LuaApiMut::register_function(lua, "EJ_GetInstanceByIndex", ej_get_instance_by_index)?;
+    LuaApiMut::register_function(lua, "EJ_GetEncounterInfo", ej_get_encounter_info)?;
+    LuaApiMut::register_function(
+        lua,
+        "EJ_GetEncounterInfoByIndex",
+        ej_get_encounter_info_by_index,
+    )?;
+    LuaApiMut::register_function(lua, "EJ_GetCreatureInfo", ej_get_creature_info)?;
+    LuaApiMut::register_function(lua, "EJ_SelectInstance", ej_select_instance)?;
+    LuaApiMut::register_function(lua, "EJ_SelectEncounter", ej_select_encounter)?;
+    LuaApiMut::register_function(lua, "EJ_GetSelectedInstance", ej_get_selected_instance)?;
+    LuaApiMut::register_function(lua, "EJ_GetSelectedEncounter", ej_get_selected_encounter)?;
+    LuaApiMut::register_function(lua, "EJ_GetDifficulty", ej_get_difficulty)?;
+    LuaApiMut::register_function(lua, "EJ_SetDifficulty", ej_set_difficulty)?;
+    LuaApiMut::register_function(lua, "EJ_InstanceIsRaid", ej_instance_is_raid)?;
+    LuaApiMut::register_function(
+        lua,
+        "EJ_IsValidInstanceDifficulty",
+        ej_is_valid_instance_difficulty,
+    )?;
+    LuaApiMut::register_function(lua, "EJ_GetNumLoot", ej_get_num_loot)?;
+    LuaApiMut::register_function(
+        lua,
+        "EJ_GetLootInfoByIndex",
+        ej_get_loot_info_by_index_global,
+    )?;
+    LuaApiMut::register_function(lua, "EJ_GetLootFilter", ej_get_loot_filter)?;
+    LuaApiMut::register_function(lua, "EJ_SetLootFilter", ej_set_loot_filter)?;
+    LuaApiMut::register_function(lua, "EJ_ResetLootFilter", ej_reset_loot_filter)?;
+    LuaApiMut::register_function(lua, "EJ_GetInvTypeSortOrder", ej_get_inv_type_sort_order)?;
+    LuaApiMut::register_function(
+        lua,
+        "EJ_GetNumEncountersForLootByIndex",
+        ej_get_num_encounters_for_loot_by_index,
+    )?;
+    LuaApiMut::register_function(lua, "EJ_IsLootListOutOfDate", ej_is_loot_list_out_of_date)?;
+    LuaApiMut::register_function(lua, "EJ_GetSectionPath", ej_get_section_path)?;
+    LuaApiMut::register_function(lua, "EJ_GetContentTuningID", ej_get_content_tuning_id)?;
+    LuaApiMut::register_function(lua, "EJ_SetSearch", ej_set_search)?;
+    LuaApiMut::register_function(lua, "EJ_ClearSearch", ej_clear_search)?;
+    LuaApiMut::register_function(lua, "EJ_EndSearch", ej_end_search)?;
+    LuaApiMut::register_function(lua, "EJ_GetSearchSize", ej_get_search_size)?;
+    LuaApiMut::register_function(lua, "EJ_GetSearchProgress", ej_get_search_progress)?;
+    LuaApiMut::register_function(lua, "EJ_GetNumSearchResults", ej_get_num_search_results)?;
+    LuaApiMut::register_function(lua, "EJ_GetSearchResult", ej_get_search_result)?;
+    LuaApiMut::register_function(lua, "EJ_IsSearchFinished", ej_is_search_finished)?;
+    LuaApiMut::register_function(lua, "EJ_HandleLinkPath", ej_handle_link_path)?;
+    LuaApiMut::register_function(lua, "EJ_HideLootJournalPanel", noop_global)?;
+    LuaApiMut::register_function(lua, "EJ_HideNonInstancePanels", noop_global)?;
+    LuaApiMut::register_function(lua, "EJ_HideSuggestPanel", noop_global)?;
+    LuaApiMut::register_function(lua, "EJ_HideTutorialsPanel", noop_global)?;
     Ok(())
 }
 
 // ---------------------------------------------------------------------------
-// Handlers
+// C_EncounterJournal handlers
 // ---------------------------------------------------------------------------
 
 fn get_encounter_info(state: &mut LuaState) -> LuaResult<u32> {
     let encounter_id = u32::from_stack(state, 1)?;
-    let Some(row) = ENCOUNTERS.iter().find(|r| r.encounter_id == encounter_id) else {
+    let Some(row) = data::encounter_by_id(encounter_id) else {
         return Ok(0);
     };
-    let name = create_string(state, row.name);
-    let description = create_string(state, row.description);
-    let link_section = create_string(state, row.link_section);
-    state.push(name);
-    state.push(description);
-    state.push(Val::Num(row.encounter_id as f64));
-    state.push(Val::Num(row.root_section_id as f64));
-    state.push(link_section);
-    state.push(Val::Num(row.journal_instance_id as f64));
-    state.push(Val::Num(row.dungeon_encounter_id as f64));
-    state.push(Val::Num(row.instance_id as f64));
+    push_encounter_tuple(state, row);
     Ok(8)
 }
 
 fn get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
     let instance_id = u32::from_stack(state, 1)?;
-    let Some(row) = INSTANCES.iter().find(|r| r.instance_id == instance_id) else {
+    let Some(row) = data::instance_by_id(instance_id) else {
         return Ok(0);
     };
-    let name = create_string(state, row.name);
-    let description = create_string(state, row.description);
-    let bg_image = create_string(state, row.bg_image);
-    let button_image1 = create_string(state, row.button_image1);
-    let lore_image = create_string(state, row.lore_image);
-    let button_image2 = create_string(state, row.button_image2);
-    state.push(name);
-    state.push(description);
-    state.push(bg_image);
-    state.push(button_image1);
-    state.push(lore_image);
-    state.push(button_image2);
-    state.push(Val::Num(row.dungeon_area_map_id as f64));
-    state.push(Val::Num(row.link_raid_id as f64));
-    state.push(Val::Num(row.link_dungeon_id as f64));
+    push_instance_tuple(state, row);
     Ok(9)
+}
+
+fn get_section_info(state: &mut LuaState) -> LuaResult<u32> {
+    let section_id = u32::from_stack(state, 1)?;
+    let Some(row) = data::section_by_id(section_id) else {
+        return Ok(0);
+    };
+    let table = create_table(state);
+    let title = create_string(state, row.title);
+    let body = create_string(state, row.body);
+    let empty_link = create_string(state, "");
+    table_set(state, table, "spellID", Val::Num(row.spell_id as f64));
+    table_set(state, table, "headerType", Val::Num(row.kind as f64));
+    table_set(state, table, "title", title);
+    table_set(state, table, "description", body);
+    table_set(
+        state,
+        table,
+        "siblingSectionID",
+        Val::Num(row.next_sibling_id as f64),
+    );
+    table_set(
+        state,
+        table,
+        "firstChildSectionID",
+        Val::Num(row.first_child_id as f64),
+    );
+    table_set(
+        state,
+        table,
+        "parentSectionID",
+        Val::Num(row.parent_id as f64),
+    );
+    table_set(
+        state,
+        table,
+        "creatureDisplayID",
+        Val::Num(row.icon_creature_display_id as f64),
+    );
+    table_set(
+        state,
+        table,
+        "uiModelSceneID",
+        Val::Num(row.model_scene_id as f64),
+    );
+    table_set(state, table, "iconFlags", Val::Num(row.icon_flags as f64));
+    table_set(state, table, "filteredByDifficulty", Val::Bool(false));
+    table_set(state, table, "link", empty_link);
+    state.push(table);
+    Ok(1)
+}
+
+fn get_loot_info(state: &mut LuaState) -> LuaResult<u32> {
+    let item_id = u32::from_stack(state, 1)?;
+    let table = build_loot_table(state, item_id, 0);
+    state.push(table);
+    Ok(1)
+}
+
+fn get_loot_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
+    let index = u32::from_stack(state, 1)? as usize;
+    let (current_encounter, current_instance, difficulty) = {
+        let sim = borrow_state(state)?;
+        (
+            sim.encounter_journal.current_encounter,
+            sim.encounter_journal.current_instance,
+            sim.encounter_journal.difficulty,
+        )
+    };
+    let loot = filtered_loot(current_encounter, current_instance, difficulty);
+    if index == 0 || index > loot.len() {
+        return Ok(0);
+    }
+    let row = loot[index - 1];
+    let item_id = row.item_id;
+    let encounter_id = row.encounter_id;
+    let table = build_loot_table(state, item_id, encounter_id);
+    state.push(table);
+    Ok(1)
+}
+
+fn get_section_icon_flags(state: &mut LuaState) -> LuaResult<u32> {
+    let section_id = u32::from_stack(state, 1)?;
+    let flags = data::section_by_id(section_id)
+        .map(|s| s.icon_flags as f64)
+        .unwrap_or(0.0);
+    state.push(Val::Num(flags));
+    Ok(1)
+}
+
+fn instance_has_loot(state: &mut LuaState) -> LuaResult<u32> {
+    let instance_id = borrow_state(state)?.encounter_journal.current_instance;
+    let has_loot = data::encounters_for_instance(instance_id)
+        .iter()
+        .any(|e| !data::loot_for_encounter(e.id).is_empty());
+    state.push(Val::Bool(has_loot));
+    Ok(1)
+}
+
+fn get_slot_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = borrow_state(state)?.encounter_journal.slot_filter;
+    state.push(Val::Num(slot as f64));
+    Ok(1)
+}
+
+fn set_slot_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let slot = i32::from_stack(state, 1).unwrap_or(-1);
+    borrow_state_mut(state)?.encounter_journal.slot_filter = slot;
+    Ok(0)
+}
+
+fn reset_slot_filter(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.encounter_journal.slot_filter = -1;
+    Ok(0)
+}
+
+fn set_tab(state: &mut LuaState) -> LuaResult<u32> {
+    let tab = u32::from_stack(state, 1).unwrap_or(0);
+    borrow_state_mut(state)?.encounter_journal.current_tab = tab;
+    Ok(0)
+}
+
+fn initialize_selected_tier(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    if data::tier_by_order(sim.encounter_journal.current_tier).is_none() {
+        sim.encounter_journal.current_tier = data::TIERS.iter().map(|t| t.order).max().unwrap_or(1);
+    }
+    Ok(0)
 }
 
 fn noop(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
+}
+
+fn noop_global(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// EJ_* handlers
+// ---------------------------------------------------------------------------
+
+fn ej_get_num_tiers(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(data::TIERS.len() as f64));
+    Ok(1)
+}
+
+fn ej_get_tier_info(state: &mut LuaState) -> LuaResult<u32> {
+    let tier_order = u32::from_stack(state, 1).unwrap_or(0);
+    let Some(tier) = data::tier_by_order(tier_order) else {
+        let empty = create_string(state, "");
+        state.push(empty);
+        return Ok(1);
+    };
+    let name = create_string(state, tier.name);
+    state.push(name);
+    Ok(1)
+}
+
+fn ej_get_current_tier(state: &mut LuaState) -> LuaResult<u32> {
+    let tier = borrow_state(state)?.encounter_journal.current_tier;
+    state.push(Val::Num(tier as f64));
+    Ok(1)
+}
+
+fn ej_select_tier(state: &mut LuaState) -> LuaResult<u32> {
+    let tier = u32::from_stack(state, 1).unwrap_or(0);
+    if data::tier_by_order(tier).is_some() {
+        borrow_state_mut(state)?.encounter_journal.current_tier = tier;
+    }
+    Ok(0)
+}
+
+fn ej_get_instance_info(state: &mut LuaState) -> LuaResult<u32> {
+    let arg_present = !matches!(stack_val(state, 1), Val::Nil);
+    let instance_id = if arg_present {
+        u32::from_stack(state, 1).unwrap_or(0)
+    } else {
+        borrow_state(state)?.encounter_journal.current_instance
+    };
+    let Some(row) = data::instance_by_id(instance_id) else {
+        return Ok(0);
+    };
+    push_instance_legacy_tuple(state, row);
+    Ok(11)
+}
+
+fn ej_get_instance_by_index(state: &mut LuaState) -> LuaResult<u32> {
+    let index = u32::from_stack(state, 1).unwrap_or(0) as usize;
+    let is_raid = bool::from_stack(state, 2).unwrap_or(true);
+    let tier_order = borrow_state(state)?.encounter_journal.current_tier;
+    let instances = data::instances_for_tier(tier_order, is_raid);
+    if index == 0 || index > instances.len() {
+        return Ok(0);
+    }
+    let inst = instances[index - 1];
+    state.push(Val::Num(inst.id as f64));
+    push_instance_legacy_tuple(state, inst);
+    Ok(12)
+}
+
+fn ej_get_encounter_info(state: &mut LuaState) -> LuaResult<u32> {
+    let encounter_id = u32::from_stack(state, 1)?;
+    let Some(row) = data::encounter_by_id(encounter_id) else {
+        return Ok(0);
+    };
+    push_encounter_tuple(state, row);
+    Ok(8)
+}
+
+fn ej_get_encounter_info_by_index(state: &mut LuaState) -> LuaResult<u32> {
+    let index = u32::from_stack(state, 1).unwrap_or(0) as usize;
+    let arg2_present = !matches!(stack_val(state, 2), Val::Nil);
+    let instance_id = if arg2_present {
+        u32::from_stack(state, 2).unwrap_or(0)
+    } else {
+        borrow_state(state)?.encounter_journal.current_instance
+    };
+    let encounters = data::encounters_for_instance(instance_id);
+    if index == 0 || index > encounters.len() {
+        return Ok(0);
+    }
+    push_encounter_tuple(state, encounters[index - 1]);
+    Ok(8)
+}
+
+fn ej_get_creature_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = u32::from_stack(state, 1).unwrap_or(0) as usize;
+    let arg2_present = !matches!(stack_val(state, 2), Val::Nil);
+    let encounter_id = if arg2_present {
+        u32::from_stack(state, 2).unwrap_or(0)
+    } else {
+        borrow_state(state)?.encounter_journal.current_encounter
+    };
+    let creatures = data::creatures_for_encounter(encounter_id);
+    if index == 0 || index > creatures.len() {
+        return Ok(0);
+    }
+    let c = creatures[index - 1];
+    let name = create_string(state, c.name);
+    let description = create_string(state, c.description);
+    state.push(Val::Num(c.id as f64));
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(c.display_id as f64));
+    state.push(Val::Num(c.icon_file_id as f64));
+    state.push(Val::Num(c.model_scene_id as f64));
+    Ok(6)
+}
+
+fn ej_select_instance(state: &mut LuaState) -> LuaResult<u32> {
+    let instance_id = u32::from_stack(state, 1).unwrap_or(0);
+    let mut sim = borrow_state_mut(state)?;
+    sim.encounter_journal.current_instance = instance_id;
+    if let Some(inst) = data::instance_by_id(instance_id) {
+        sim.encounter_journal.is_raid = inst.is_raid;
+    }
+    Ok(0)
+}
+
+fn ej_select_encounter(state: &mut LuaState) -> LuaResult<u32> {
+    let encounter_id = u32::from_stack(state, 1).unwrap_or(0);
+    borrow_state_mut(state)?.encounter_journal.current_encounter = encounter_id;
+    Ok(0)
+}
+
+fn ej_get_selected_instance(state: &mut LuaState) -> LuaResult<u32> {
+    let id = borrow_state(state)?.encounter_journal.current_instance;
+    if id == 0 {
+        return Ok(0);
+    }
+    state.push(Val::Num(id as f64));
+    Ok(1)
+}
+
+fn ej_get_selected_encounter(state: &mut LuaState) -> LuaResult<u32> {
+    let id = borrow_state(state)?.encounter_journal.current_encounter;
+    if id == 0 {
+        return Ok(0);
+    }
+    state.push(Val::Num(id as f64));
+    Ok(1)
+}
+
+fn ej_get_difficulty(state: &mut LuaState) -> LuaResult<u32> {
+    let difficulty = borrow_state(state)?.encounter_journal.difficulty;
+    state.push(Val::Num(difficulty as f64));
+    Ok(1)
+}
+
+fn ej_set_difficulty(state: &mut LuaState) -> LuaResult<u32> {
+    let difficulty = u32::from_stack(state, 1).unwrap_or(0);
+    borrow_state_mut(state)?.encounter_journal.difficulty = difficulty;
+    Ok(0)
+}
+
+fn ej_instance_is_raid(state: &mut LuaState) -> LuaResult<u32> {
+    let is_raid = {
+        let sim = borrow_state(state)?;
+        let id = sim.encounter_journal.current_instance;
+        data::instance_by_id(id)
+            .map(|i| i.is_raid)
+            .unwrap_or(sim.encounter_journal.is_raid)
+    };
+    state.push(Val::Bool(is_raid));
+    Ok(1)
+}
+
+fn ej_is_valid_instance_difficulty(state: &mut LuaState) -> LuaResult<u32> {
+    let difficulty = u32::from_stack(state, 1).unwrap_or(0);
+    state.push(Val::Bool(difficulty > 0));
+    Ok(1)
+}
+
+fn ej_get_num_loot(state: &mut LuaState) -> LuaResult<u32> {
+    let (encounter, instance, difficulty) = {
+        let sim = borrow_state(state)?;
+        (
+            sim.encounter_journal.current_encounter,
+            sim.encounter_journal.current_instance,
+            sim.encounter_journal.difficulty,
+        )
+    };
+    let count = filtered_loot(encounter, instance, difficulty).len();
+    state.push(Val::Num(count as f64));
+    Ok(1)
+}
+
+fn ej_get_loot_info_by_index_global(state: &mut LuaState) -> LuaResult<u32> {
+    get_loot_info_by_index(state)
+}
+
+fn ej_get_loot_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let (class_filter, spec_filter) = {
+        let sim = borrow_state(state)?;
+        (
+            sim.encounter_journal.class_filter,
+            sim.encounter_journal.spec_filter,
+        )
+    };
+    state.push(Val::Num(class_filter as f64));
+    state.push(Val::Num(spec_filter as f64));
+    Ok(2)
+}
+
+fn ej_set_loot_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let class_filter = u32::from_stack(state, 1).unwrap_or(0);
+    let spec_filter = u32::from_stack(state, 2).unwrap_or(0);
+    let mut sim = borrow_state_mut(state)?;
+    sim.encounter_journal.class_filter = class_filter;
+    sim.encounter_journal.spec_filter = spec_filter;
+    Ok(0)
+}
+
+fn ej_reset_loot_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.encounter_journal.class_filter = 0;
+    sim.encounter_journal.spec_filter = 0;
+    Ok(0)
+}
+
+fn ej_get_inv_type_sort_order(state: &mut LuaState) -> LuaResult<u32> {
+    let inv_type = u32::from_stack(state, 1).unwrap_or(0);
+    let order = match inv_type {
+        1 => 1,                       // INVTYPE_HEAD
+        3 => 2,                       // INVTYPE_SHOULDER
+        16 => 3,                      // INVTYPE_CLOAK
+        5 | 20 => 4,                  // INVTYPE_CHEST / INVTYPE_ROBE
+        4 => 5,                       // INVTYPE_BODY (shirt)
+        19 => 6,                      // INVTYPE_TABARD
+        9 => 7,                       // INVTYPE_WRIST
+        10 => 8,                      // INVTYPE_HAND
+        6 => 9,                       // INVTYPE_WAIST
+        7 => 10,                      // INVTYPE_LEGS
+        8 => 11,                      // INVTYPE_FEET
+        2 => 12,                      // INVTYPE_NECK
+        11 => 13,                     // INVTYPE_FINGER
+        12 => 14,                     // INVTYPE_TRINKET
+        13 | 17 | 21 | 22 | 26 => 15, // weapons
+        14 => 16,                     // INVTYPE_SHIELD
+        15 | 23 | 25 | 28 => 17,      // ranged/holdable/relic
+        _ => 99,
+    };
+    state.push(Val::Num(order as f64));
+    Ok(1)
+}
+
+fn ej_get_num_encounters_for_loot_by_index(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(1.0));
+    Ok(1)
+}
+
+fn ej_is_loot_list_out_of_date(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn ej_get_section_path(state: &mut LuaState) -> LuaResult<u32> {
+    let section_id = u32::from_stack(state, 1).unwrap_or(0);
+    let mut path: Vec<&'static str> = Vec::new();
+    let mut cursor = section_id;
+    while cursor != 0 {
+        let Some(row) = data::section_by_id(cursor) else {
+            break;
+        };
+        path.push(row.title);
+        cursor = row.parent_id;
+        if path.len() >= 16 {
+            break;
+        }
+    }
+    path.reverse();
+    let joined = path.join(" > ");
+    let s = create_string(state, &joined);
+    state.push(s);
+    Ok(1)
+}
+
+fn ej_get_content_tuning_id(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+fn ej_set_search(state: &mut LuaState) -> LuaResult<u32> {
+    let text = String::from_stack(state, 1).unwrap_or_default();
+    let results = compute_search_results(&text);
+    let mut sim = borrow_state_mut(state)?;
+    sim.encounter_journal.search_text = text;
+    sim.encounter_journal.search_finished = true;
+    sim.encounter_journal.search_results = results;
+    Ok(0)
+}
+
+fn ej_clear_search(state: &mut LuaState) -> LuaResult<u32> {
+    let mut sim = borrow_state_mut(state)?;
+    sim.encounter_journal.search_text.clear();
+    sim.encounter_journal.search_results.clear();
+    sim.encounter_journal.search_finished = true;
+    Ok(0)
+}
+
+fn ej_end_search(state: &mut LuaState) -> LuaResult<u32> {
+    borrow_state_mut(state)?.encounter_journal.search_finished = true;
+    Ok(0)
+}
+
+fn ej_get_search_size(state: &mut LuaState) -> LuaResult<u32> {
+    let n = borrow_state(state)?.encounter_journal.search_results.len();
+    state.push(Val::Num(n as f64));
+    Ok(1)
+}
+
+fn ej_get_search_progress(state: &mut LuaState) -> LuaResult<u32> {
+    let n = borrow_state(state)?.encounter_journal.search_results.len();
+    state.push(Val::Num(n as f64));
+    Ok(1)
+}
+
+fn ej_get_num_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    let n = borrow_state(state)?.encounter_journal.search_results.len();
+    state.push(Val::Num(n as f64));
+    Ok(1)
+}
+
+fn ej_get_search_result(state: &mut LuaState) -> LuaResult<u32> {
+    let index = u32::from_stack(state, 1).unwrap_or(0) as usize;
+    let result = {
+        let sim = borrow_state(state)?;
+        if index == 0 || index > sim.encounter_journal.search_results.len() {
+            return Ok(0);
+        }
+        sim.encounter_journal.search_results[index - 1].clone()
+    };
+    let link = create_string(state, &result.item_link);
+    state.push(Val::Num(result.id as f64));
+    state.push(Val::Num(result.kind as f64));
+    state.push(Val::Num(result.difficulty_id as f64));
+    state.push(Val::Num(result.instance_id as f64));
+    state.push(Val::Num(result.encounter_id as f64));
+    state.push(link);
+    state.push(Val::Num(result.icon as f64));
+    Ok(7)
+}
+
+fn ej_is_search_finished(state: &mut LuaState) -> LuaResult<u32> {
+    let finished = borrow_state(state)?.encounter_journal.search_finished;
+    state.push(Val::Bool(finished));
+    Ok(1)
+}
+
+fn ej_handle_link_path(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+fn push_encounter_tuple(state: &mut LuaState, row: &data::Encounter) {
+    let name = create_string(state, row.name);
+    let description = create_string(state, row.description);
+    let link = create_string(state, "");
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(row.id as f64));
+    state.push(Val::Num(row.first_section_id as f64));
+    state.push(link);
+    state.push(Val::Num(row.instance_id as f64));
+    state.push(Val::Num(row.dungeon_encounter_id as f64));
+    state.push(Val::Num(row.ui_map_id as f64));
+}
+
+fn push_instance_tuple(state: &mut LuaState, row: &data::Instance) {
+    let name = create_string(state, row.name);
+    let description = create_string(state, row.description);
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(row.bg_file_id as f64));
+    state.push(Val::Num(row.button_file_id as f64));
+    state.push(Val::Num(row.lore_file_id as f64));
+    state.push(Val::Num(row.button_small_file_id as f64));
+    state.push(Val::Num(row.area_id as f64));
+    state.push(Val::Num(if row.is_raid { row.id as f64 } else { 0.0 }));
+    state.push(Val::Num(if row.is_raid { 0.0 } else { row.id as f64 }));
+}
+
+fn push_instance_legacy_tuple(state: &mut LuaState, row: &data::Instance) {
+    let name = create_string(state, row.name);
+    let description = create_string(state, row.description);
+    state.push(name);
+    state.push(description);
+    state.push(Val::Num(row.bg_file_id as f64));
+    state.push(Val::Num(row.button_file_id as f64));
+    state.push(Val::Num(row.lore_file_id as f64));
+    state.push(Val::Num(row.button_small_file_id as f64));
+    state.push(Val::Num(row.area_id as f64));
+    state.push(Val::Num(if row.is_raid { row.id as f64 } else { 0.0 }));
+    state.push(Val::Num(if row.is_raid { 0.0 } else { row.id as f64 }));
+    state.push(Val::Bool(false));
+    state.push(Val::Num(row.map_id as f64));
+}
+
+fn build_loot_table(state: &mut LuaState, item_id: u32, encounter_id: u32) -> Val {
+    let table = create_table(state);
+    let item = items::get_item(item_id);
+    let name_str = item.map(|i| i.name).unwrap_or("");
+    let icon_id = item.map(|i| i.icon_file_data_id).unwrap_or(134400) as f64;
+    let quality = item.map(|i| i.quality as f64).unwrap_or(0.0);
+    let inv_type_num = item.map(|i| i.inventory_type as f64).unwrap_or(0.0);
+    let link_str = item_link(item_id);
+    let slot_str = inv_type_slot(item.map(|i| i.inventory_type).unwrap_or(0));
+
+    let name = create_string(state, name_str);
+    let link = create_string(state, &link_str);
+    let slot = create_string(state, slot_str);
+    let armor_type = create_string(state, "");
+
+    table_set(state, table, "itemID", Val::Num(item_id as f64));
+    table_set(state, table, "name", name);
+    table_set(state, table, "icon", Val::Num(icon_id));
+    table_set(state, table, "itemQuality", Val::Num(quality));
+    table_set(state, table, "inventoryType", Val::Num(inv_type_num));
+    table_set(state, table, "link", link);
+    table_set(state, table, "slot", slot);
+    table_set(state, table, "armorType", armor_type);
+    table_set(state, table, "encounterID", Val::Num(encounter_id as f64));
+    table_set(state, table, "displayAsPerPlayerLoot", Val::Bool(false));
+    table_set(state, table, "displayAsExtremelyRare", Val::Bool(false));
+    table_set(state, table, "displayAsVeryRare", Val::Bool(false));
+    table_set(state, table, "handError", Val::Bool(false));
+    table_set(state, table, "weaponTypeError", Val::Bool(false));
+    table_set(state, table, "displaySeasonID", Val::Num(0.0));
+    table_set(state, table, "filterType", Val::Num(0.0));
+    table
+}
+
+fn item_link(item_id: u32) -> String {
+    if item_id == 0 {
+        return String::new();
+    }
+    let name = items::get_item(item_id)
+        .map(|i| i.name)
+        .unwrap_or("Unknown");
+    format!("|cffffffff|Hitem:{item_id}|h[{name}]|h|r")
+}
+
+fn inv_type_slot(inv_type: u8) -> &'static str {
+    match inv_type {
+        1 => "INVTYPE_HEAD",
+        2 => "INVTYPE_NECK",
+        3 => "INVTYPE_SHOULDER",
+        4 => "INVTYPE_BODY",
+        5 => "INVTYPE_CHEST",
+        6 => "INVTYPE_WAIST",
+        7 => "INVTYPE_LEGS",
+        8 => "INVTYPE_FEET",
+        9 => "INVTYPE_WRIST",
+        10 => "INVTYPE_HAND",
+        11 => "INVTYPE_FINGER",
+        12 => "INVTYPE_TRINKET",
+        13 => "INVTYPE_WEAPON",
+        14 => "INVTYPE_SHIELD",
+        15 => "INVTYPE_RANGED",
+        16 => "INVTYPE_CLOAK",
+        17 => "INVTYPE_2HWEAPON",
+        20 => "INVTYPE_ROBE",
+        21 => "INVTYPE_WEAPONMAINHAND",
+        22 => "INVTYPE_WEAPONOFFHAND",
+        23 => "INVTYPE_HOLDABLE",
+        25 => "INVTYPE_THROWN",
+        26 => "INVTYPE_RANGEDRIGHT",
+        28 => "INVTYPE_RELIC",
+        _ => "",
+    }
+}
+
+fn filtered_loot(encounter_id: u32, instance_id: u32, difficulty: u32) -> Vec<&'static data::Loot> {
+    if encounter_id != 0 {
+        return data::loot_for_encounter(encounter_id)
+            .iter()
+            .copied()
+            .filter(|l| {
+                difficulty == 0
+                    || l.difficulty_mask == 0
+                    || (l.difficulty_mask & (1 << difficulty.saturating_sub(1)) != 0)
+            })
+            .collect();
+    }
+    if instance_id != 0 {
+        let mut all = Vec::new();
+        for encounter in data::encounters_for_instance(instance_id) {
+            all.extend(data::loot_for_encounter(encounter.id).iter().copied());
+        }
+        return all;
+    }
+    Vec::new()
+}
+
+fn compute_search_results(query: &str) -> Vec<crate::lua_api::state::EncounterJournalSearchResult> {
+    use crate::lua_api::state::EncounterJournalSearchResult;
+    let needle = query.trim().to_ascii_lowercase();
+    if needle.is_empty() {
+        return Vec::new();
+    }
+    let mut results = Vec::new();
+    for instance in data::INSTANCES.iter() {
+        if instance.name.to_ascii_lowercase().contains(&needle) {
+            results.push(EncounterJournalSearchResult {
+                id: instance.id,
+                kind: 1,
+                instance_id: instance.id,
+                ..Default::default()
+            });
+            if results.len() >= 200 {
+                return results;
+            }
+        }
+    }
+    for encounter in data::ENCOUNTERS.iter() {
+        if encounter.name.to_ascii_lowercase().contains(&needle) {
+            results.push(EncounterJournalSearchResult {
+                id: encounter.id,
+                kind: 2,
+                instance_id: encounter.instance_id,
+                encounter_id: encounter.id,
+                ..Default::default()
+            });
+            if results.len() >= 200 {
+                return results;
+            }
+        }
+    }
+    for section in data::SECTIONS.iter().take(5000) {
+        if section.title.to_ascii_lowercase().contains(&needle) {
+            results.push(EncounterJournalSearchResult {
+                id: section.id,
+                kind: 3,
+                instance_id: 0,
+                encounter_id: section.encounter_id,
+                ..Default::default()
+            });
+            if results.len() >= 200 {
+                return results;
+            }
+        }
+    }
+    results
 }

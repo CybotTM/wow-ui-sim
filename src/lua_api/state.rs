@@ -28,6 +28,7 @@ macro_rules! build_empty_sim_state {
             addon_saved_enable_state: None,
             system_chat_log: Vec::new(),
             adventure_map: AdventureMapState::default(),
+            encounter_journal: EncounterJournalState::default(),
             anima_diversion: AnimaDiversionState::default(),
             garrison_talents: GarrisonTalentState::default(),
             clipboard: ClipboardState::default(),
@@ -843,6 +844,73 @@ pub struct AdventureMapInset {
 /// reads this string and switches on `"midnight"`. Defaults to the
 /// empty string so the kit-specific branch is taken only when a
 /// scenario explicitly seeds a kit.
+/// State backing the Adventure Guide / `C_EncounterJournal` surface.
+/// Mirrors the small slice of UI state the addon would otherwise keep
+/// in client-side globals: which tier the player has selected, which
+/// instance/encounter is being displayed, the current difficulty,
+/// loot filters (class+spec, slot), and an in-flight search.
+#[derive(Clone, Debug)]
+pub struct EncounterJournalState {
+    /// Tier order index (1..N), matching `JournalTier.order`. Defaults
+    /// to the latest visible expansion.
+    pub current_tier: u32,
+    /// Selected `JournalInstance.id` (raid or dungeon), or 0 when none.
+    pub current_instance: u32,
+    /// Selected `JournalEncounter.id`, or 0 when no boss tab is open.
+    pub current_encounter: u32,
+    /// Active raid/dungeon `DifficultyID`. Defaults to Normal Raid (14).
+    pub difficulty: u32,
+    /// Loot filter — `classID` (1..13) or 0 for "all".
+    pub class_filter: u32,
+    /// Loot filter — `specID` or 0 for "all".
+    pub spec_filter: u32,
+    /// Slot filter — `Enum.ItemSlotFilterType` member, or -1 for "all".
+    pub slot_filter: i32,
+    /// Whether the panel is currently showing raids (true) or dungeons.
+    pub is_raid: bool,
+    /// In-flight search text (set by `EJ_SetSearch`).
+    pub search_text: String,
+    /// Cached search results (item/encounter IDs hit by the last search).
+    pub search_results: Vec<EncounterJournalSearchResult>,
+    /// Whether the last search has finished indexing.
+    pub search_finished: bool,
+    /// Currently active EJ tab (1=Suggested, 2=Dungeons, 3=Raids,
+    /// 4=Loot, 5=Search).
+    pub current_tab: u32,
+}
+
+impl Default for EncounterJournalState {
+    fn default() -> Self {
+        Self {
+            current_tier: 12,
+            current_instance: 0,
+            current_encounter: 0,
+            difficulty: 14,
+            class_filter: 0,
+            spec_filter: 0,
+            slot_filter: -1,
+            is_raid: true,
+            search_text: String::new(),
+            search_results: Vec::new(),
+            search_finished: true,
+            current_tab: 3,
+        }
+    }
+}
+
+/// One row returned by `EJ_GetSearchResult`. `kind` mirrors the EJ
+/// search-result type id (1=instance, 2=encounter, 3=section, 4=item).
+#[derive(Clone, Debug, Default)]
+pub struct EncounterJournalSearchResult {
+    pub id: u32,
+    pub kind: u8,
+    pub difficulty_id: u32,
+    pub instance_id: u32,
+    pub encounter_id: u32,
+    pub icon: u32,
+    pub item_link: String,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct AdventureMapState {
     pub map_id: i64,
@@ -1049,6 +1117,10 @@ pub struct SimState {
     pub system_chat_log: Vec<String>,
     /// Adventure-map state backing the `C_AdventureMap` namespace.
     pub adventure_map: AdventureMapState,
+    /// Encounter Journal (Adventure Guide) state backing C_EncounterJournal
+    /// + EJ_* globals. Tracks the active tier/instance/encounter, difficulty,
+    /// loot/slot filters, and search state.
+    pub encounter_journal: EncounterJournalState,
     /// Anima-diversion state backing the `C_AnimaDiversion` namespace.
     pub anima_diversion: AnimaDiversionState,
     /// Garrison-talent state backing `C_Garrison.GetTalentInfo` /
