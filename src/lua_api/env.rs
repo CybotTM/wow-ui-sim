@@ -251,6 +251,13 @@ impl WowLuaEnv {
 
     /// Apply workarounds that must run after startup events.
     pub fn apply_post_event_workarounds(&self) {
+        if !self
+            .state()
+            .borrow_mut()
+            .mark_post_event_workarounds_applied()
+        {
+            return;
+        }
         super::workarounds::apply_post_event(self);
     }
 }
