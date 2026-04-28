@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-28] ingest | menu pool SetToDefaults size/anchor reset
+
+Created `investigations/menu-pool-set-to-defaults.md`. Guild roster Mythic+ Rating dropdown rendered as a screen-spanning stripe because `Frame:SetToDefaults` did not reset size or clear anchors. `Menu.lua` `MeasureFrameExtents` reads `frame:GetSize()` from pooled element frames, so previous-user widths inflated each menu measurement. Two `SetToDefaults` registrations existed on the shared frame metatable; `map_frames::register_all` runs after `misc::register_all` so the map_frames version is the active one (the misc registration is dead code). Extended `map_frames::set_to_defaults` to call `frame.clear_all_points()`, `frame.set_size(0.0, 0.0)`, clear `width_is_text_auto`, clear `layout_rect`, and `remove_all_anchor_dependents_for(id)` — matching real WoW semantics documented in `Compositor.lua`. Verified: Guild dropdown now stays at 180×103 even after a 900px synthetic dropdown is opened first; previously it grew to 1036→1172. All 8 minimap_specialized tests still pass.
+
 ## [2026-04-27] update | shallow `issecretvalue` for pool releases
 
 Updated `investigations/talent-performance.md` with a new "Spec→Talents Tab Switch (~3.5s)" section. The Spec→Talents tab switch was multiple seconds because `LoadTalentTreeInternal` rebuilds the tree on every Show (`refreshOnShow=true`), and `talentButtonCollection:ReleaseAll()` calls `issecretvalue(frame)` 3× per button. The Rust fallback recursed into the entire frame's table tree (~7.4ms/call). Added `value_is_secret_shallow` in `src/lua_api/globals/security/secret_values.rs` that only inspects direct slot taints on tables, used by `issecretvalue`/`canaccessvalue`/`canaccessallvalues`. `canaccesstable` keeps the deep walk so its accessibility semantics still detect nested secret strings. Result: ReleaseAll 2159ms → 2.6ms; tab switch 3500ms → ~90ms; all 45 security_api tests pass.

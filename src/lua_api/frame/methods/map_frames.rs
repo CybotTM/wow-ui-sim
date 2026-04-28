@@ -714,8 +714,17 @@ fn update_blips(state: &mut LuaState) -> LuaResult<u32> {
 fn set_to_defaults(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     {
+        // Real WoW's FrameCompositor:SetToDefaults clears anchors and resets size
+        // to 0,0 (see BlizzardUI Compositor.lua). The menu element pool relies on
+        // this — without it, MeasureFrameExtents reads a stale GetSize() from a
+        // previously reused frame and inflates the menu width.
         let mut sim = borrow_state_mut(state)?;
+        sim.widgets.remove_all_anchor_dependents_for(id);
         if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.clear_all_points();
+            frame.set_size(0.0, 0.0);
+            frame.width_is_text_auto = false;
+            frame.layout_rect = None;
             frame.minimap_blip_texture = None;
             frame.minimap_mask_texture = None;
             frame.minimap_icon_texture = None;
@@ -735,6 +744,7 @@ fn set_to_defaults(state: &mut LuaState) -> LuaResult<u32> {
             frame.arch_blob_outside = Default::default();
             frame.arch_blob_ring = Default::default();
         }
+        sim.widgets.mark_rect_dirty(id);
     }
     let fields = get_or_create_frame_fields(state, id);
     table_set(state, fields, MINIMAP_ZOOM_KEY, Val::Num(0.0));
