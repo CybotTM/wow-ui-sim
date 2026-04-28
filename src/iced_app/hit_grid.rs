@@ -53,21 +53,6 @@ impl HitGrid {
         }
     }
 
-    /// Find the topmost frame containing `pos` (Phase 1).
-    ///
-    /// Returns the frame with the highest strata/level whose rect contains
-    /// the point, or `None`.
-    pub fn topmost_at(&self, pos: Point) -> Option<u64> {
-        let col = ((pos.x / CELL_SIZE) as usize).min(self.cols.saturating_sub(1));
-        let row = ((pos.y / CELL_SIZE) as usize).min(self.rows.saturating_sub(1));
-        let cell = &self.cells[row * self.cols + col];
-        // Reverse: highest strata/level is last in the sorted order.
-        cell.iter()
-            .rev()
-            .find(|&&id| self.rects.get(&id).is_some_and(|r| r.contains(pos)))
-            .copied()
-    }
-
     /// Find the topmost frame containing `pos` that also matches `predicate`.
     pub fn topmost_matching_at<F>(&self, pos: Point, mut predicate: F) -> Option<u64>
     where
@@ -175,7 +160,7 @@ mod tests {
             (Point::new(250.0, 250.0), None),    // outside all
         ];
         for (pos, expected) in cases {
-            let grid_result = grid.topmost_at(pos);
+            let grid_result = grid.topmost_matching_at(pos, |_| true);
             let linear_result = linear_topmost(&hittable, pos);
             assert_eq!(grid_result, expected, "grid mismatch at {pos:?}");
             assert_eq!(grid_result, linear_result, "grid != linear at {pos:?}");
@@ -189,11 +174,11 @@ mod tests {
         let grid = HitGrid::new(hittable, 256.0, 256.0);
 
         // Test points in different cells within the frame.
-        assert_eq!(grid.topmost_at(Point::new(20.0, 20.0)), Some(1)); // cell (0,0)
-        assert_eq!(grid.topmost_at(Point::new(100.0, 100.0)), Some(1)); // cell (1,1)
-        assert_eq!(grid.topmost_at(Point::new(200.0, 200.0)), Some(1)); // cell (3,3)
+        assert_eq!(grid.topmost_matching_at(Point::new(20.0, 20.0), |_| true), Some(1)); // cell (0,0)
+        assert_eq!(grid.topmost_matching_at(Point::new(100.0, 100.0), |_| true), Some(1)); // cell (1,1)
+        assert_eq!(grid.topmost_matching_at(Point::new(200.0, 200.0), |_| true), Some(1)); // cell (3,3)
         // Just outside.
-        assert_eq!(grid.topmost_at(Point::new(5.0, 5.0)), None);
+        assert_eq!(grid.topmost_matching_at(Point::new(5.0, 5.0), |_| true), None);
     }
 
     #[test]
@@ -214,9 +199,9 @@ mod tests {
         ];
         let grid = HitGrid::new(hittable, 128.0, 128.0);
 
-        assert_eq!(grid.topmost_at(Point::new(63.0, 63.0)), Some(1));
-        assert_eq!(grid.topmost_at(Point::new(65.0, 65.0)), Some(1));
-        assert_eq!(grid.topmost_at(Point::new(59.0, 59.0)), None);
+        assert_eq!(grid.topmost_matching_at(Point::new(63.0, 63.0), |_| true), Some(1));
+        assert_eq!(grid.topmost_matching_at(Point::new(65.0, 65.0), |_| true), Some(1));
+        assert_eq!(grid.topmost_matching_at(Point::new(59.0, 59.0), |_| true), None);
     }
 
     #[test]
@@ -233,10 +218,14 @@ mod tests {
         // Check every frame is hittable at its center.
         for &(id, r) in &hittable {
             let center = Point::new(r.x + 5.0, r.y + 5.0);
-            assert_eq!(grid.topmost_at(center), Some(id), "missed frame {id}");
+            assert_eq!(
+                grid.topmost_matching_at(center, |_| true),
+                Some(id),
+                "missed frame {id}"
+            );
         }
 
         // Check gaps between frames return None.
-        assert_eq!(grid.topmost_at(Point::new(15.0, 5.0)), None);
+        assert_eq!(grid.topmost_matching_at(Point::new(15.0, 5.0), |_| true), None);
     }
 }
