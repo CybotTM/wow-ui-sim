@@ -341,10 +341,7 @@ pub(super) fn emit_editbox_with_text(
         let caret_top = bounds.y + top_inset + 1.0;
         let caret_height = (bounds.height - top_inset - bottom_inset - 2.0).max(2.0);
         batch.push_solid(
-            Rectangle::new(
-                Point::new(caret_x, caret_top),
-                Size::new(1.5, caret_height),
-            ),
+            Rectangle::new(Point::new(caret_x, caret_top), Size::new(1.5, caret_height)),
             [1.0, 0.95, 0.55, 0.95 * alpha],
         );
         batch.push_border(bounds, 1.0, [1.0, 0.85, 0.30, 0.85 * alpha]);
