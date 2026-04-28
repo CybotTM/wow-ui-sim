@@ -381,6 +381,9 @@ impl SimState {
     }
 
     fn try_repair_strata_buckets_after_show(&mut self, shown_id: u64) -> bool {
+        if self.strata_buckets.is_none() {
+            return false;
+        }
         let Some(repair_root) = self.visible_same_strata_ancestor(shown_id) else {
             return false;
         };

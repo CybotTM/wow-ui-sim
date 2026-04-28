@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-28] update | talent strata repair skip
+
+Updated `investigations/talent-performance.md` with the discarded strata repair
+root cause. `set_frame_visible()` was building same-strata repair plans during
+talent frame show even when `strata_buckets` was `None`, so the work was thrown
+away. Added the guard in `try_repair_strata_buckets_after_show`; release
+`bench_talents` subsequent opens dropped from roughly 211-282ms to 112-150ms in
+this worktree.
+
 ## [2026-04-27] update | shallow `issecretvalue` for pool releases
 
 Updated `investigations/talent-performance.md` with a new "Spec→Talents Tab Switch (~3.5s)" section. The Spec→Talents tab switch was multiple seconds because `LoadTalentTreeInternal` rebuilds the tree on every Show (`refreshOnShow=true`), and `talentButtonCollection:ReleaseAll()` calls `issecretvalue(frame)` 3× per button. The Rust fallback recursed into the entire frame's table tree (~7.4ms/call). Added `value_is_secret_shallow` in `src/lua_api/globals/security/secret_values.rs` that only inspects direct slot taints on tables, used by `issecretvalue`/`canaccessvalue`/`canaccessallvalues`. `canaccesstable` keeps the deep walk so its accessibility semantics still detect nested secret strings. Result: ReleaseAll 2159ms → 2.6ms; tab switch 3500ms → ~90ms; all 45 security_api tests pass.
