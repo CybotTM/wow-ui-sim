@@ -77,6 +77,8 @@ static CURRENCY_LIST: &[CurrencyEntry] = &[
     currency(1191, "Valor", 0, 0, 5868908, 0),
     currency(1813, "Reservoir Anima", 23500, 35000, 3528287, 0),
     currency(1767, "Stygia", 140, 0, 134418, 0),
+    currency(824, "Garrison Resources", 0, 0, 1042294, 0),
+    currency(1101, "Oil", 0, 0, 1391724, 0),
 ];
 
 /// Number of items in the currency list.

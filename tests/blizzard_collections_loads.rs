@@ -185,10 +185,8 @@ fn wardrobe_appearances_panel_populates_for_head_slot() {
     let env = load_full_game_ui();
     load_addon(&env.loader_env(), &collections_toc()).expect("Blizzard_Collections should load");
 
-    env.eval::<()>(
-        "CollectionsJournal:Show(); CollectionsJournal_SetTab(CollectionsJournal, 5)",
-    )
-    .expect("opening the Appearances tab should not error");
+    env.eval::<()>("CollectionsJournal:Show(); CollectionsJournal_SetTab(CollectionsJournal, 5)")
+        .expect("opening the Appearances tab should not error");
 
     let active_category: f64 = env
         .eval("return WardrobeCollectionFrame.ItemsCollectionFrame.activeCategory or -1")
@@ -199,9 +197,7 @@ fn wardrobe_appearances_panel_populates_for_head_slot() {
     );
 
     let filtered_count: f64 = env
-        .eval(
-            "return #(WardrobeCollectionFrame.ItemsCollectionFrame.filteredVisualsList or {})",
-        )
+        .eval("return #(WardrobeCollectionFrame.ItemsCollectionFrame.filteredVisualsList or {})")
         .expect("filteredVisualsList length query should succeed");
     assert!(
         filtered_count > 0.0,

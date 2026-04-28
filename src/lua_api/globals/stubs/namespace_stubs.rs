@@ -257,6 +257,12 @@ static NAMESPACE_EMPTY_TABLE_STUBS: &[NsStub] = &[
         "GetGarrisonPlotsInstancesForMap",
         stub_empty_table,
     ),
+    ("C_Garrison", "GetBuildingSizes", stub_empty_table),
+    (
+        "C_Garrison",
+        "GetRecruiterAbilityCategories",
+        stub_empty_table,
+    ),
     // C_LFGInfo GetSystemPanelData is SimState-backed in missing_surface/lfg_info.rs.
     ("C_Map", "GetMapBannersForMap", stub_empty_table),
     ("C_Map", "GetMapLinksForMap", stub_empty_table),
