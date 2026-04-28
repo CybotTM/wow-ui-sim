@@ -4,6 +4,27 @@ Runtime `CreateFrame` profiling shows startup pain is concentrated in script-cre
 
 ## Findings
 
+### Duplicate post-event EditMode workaround pass (2026-04-28)
+
+Fresh `WOW_SIM_NO_SAVED_VARS=1 wow-sim dump-tree` timing showed
+`EditMode.apply_system_anchors` was not just expensive; it was being repeated.
+Before the fix, stderr contained four `starting apply_system_anchors` entries:
+
+- one from post-load workaround setup
+- one from the `PLAYER_ENTERING_WORLD` hook in `env_events.rs`
+- one from the explicit `fire_startup_events()` post-event call
+- one from the extra `settle_headless_startup()` post-event call
+
+The first pass still dominates because it initializes the full system-anchor
+state (`~792-873ms` in local debug runs), but the duplicate post-event passes
+added another `~80ms` of repeated work in dump-tree.
+
+Fix: `WowLuaEnv::apply_post_event_workarounds()` is now one-shot per
+environment, backed by `SimState::post_event_workarounds_applied`, and the
+`PLAYER_ENTERING_WORLD` event hook uses that same idempotent path. After the
+change, the same dump-tree lane logs two `apply_system_anchors` starts instead
+of four: post-load plus the first post-event pass.
+
 ### Instrumentation
 
 `src/lua_api/globals/create_frame.rs` now supports runtime profiling for top-level Lua `CreateFrame` calls via:
