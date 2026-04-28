@@ -425,7 +425,10 @@ impl App {
         std::sync::mpsc::Receiver<lua_server::LuaCommand>,
     ) {
         let (cmd_rx, _guard) = debug_server::init();
+        #[cfg(unix)]
         std::mem::forget(_guard);
+        #[cfg(not(unix))]
+        let _ = _guard;
 
         let lua_rx = lua_server::init();
         (cmd_rx, lua_rx)
