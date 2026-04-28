@@ -11,7 +11,12 @@
 //! - `CanEditPublicNote()`          -> true when the player is in a guild
 //! - `CanEditMOTD()`                -> `world.guild_is_officer` when in a guild
 //! - `CanEditGuildInfo()`           -> one-or-nil from `world.guild_is_officer`
-//! - `IsGuildLeader()`              -> false until rank privileges are modeled
+//! - `IsGuildLeader()`              -> `guild_members[0].rank_index == 1` (the
+//!   "self is first guild member" hack mirrors `c_club_get_member_info_for_self`).
+//! - `CanGuildPromote()` / `CanGuildDemote()` -> true when the player is the
+//!   Guild Leader or an Officer (rank_index <= 2 on the simplified model).
+//!   `GuildRoster.lua`'s `SetupRankDropdown` calls these unconditionally; if
+//!   they're nil the rank radio menu errors out and stays empty.
 //! - `QueryGuildRecipes()`          -> no-op, guild recipe state is unmodeled
 //! - `CanViewGuildRecipes()`        -> false, guild recipe state is unmodeled
 //! - `QueryGuildNews()`             -> no-op, guild news state is unmodeled
@@ -119,8 +124,29 @@ fn can_edit_guild_info(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+fn self_rank_index(state: &mut LuaState) -> LuaResult<Option<i32>> {
+    let world = &borrow_state(state)?.world;
+    if world.guild_name.is_none() {
+        return Ok(None);
+    }
+    Ok(world.guild_members.first().map(|m| m.rank_index))
+}
+
 fn is_guild_leader(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Bool(false));
+    let b = self_rank_index(state)?.is_some_and(|r| r == 1);
+    state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_guild_promote(state: &mut LuaState) -> LuaResult<u32> {
+    let b = self_rank_index(state)?.is_some_and(|r| r <= 2);
+    state.push(Val::Bool(b));
+    Ok(1)
+}
+
+fn can_guild_demote(state: &mut LuaState) -> LuaResult<u32> {
+    let b = self_rank_index(state)?.is_some_and(|r| r <= 2);
+    state.push(Val::Bool(b));
     Ok(1)
 }
 
@@ -282,6 +308,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanEditMOTD", can_edit_motd)?;
     LuaApiMut::register_function(lua, "CanEditGuildInfo", can_edit_guild_info)?;
     LuaApiMut::register_function(lua, "IsGuildLeader", is_guild_leader)?;
+    LuaApiMut::register_function(lua, "CanGuildPromote", can_guild_promote)?;
+    LuaApiMut::register_function(lua, "CanGuildDemote", can_guild_demote)?;
     LuaApiMut::register_function(lua, "QueryGuildRecipes", query_guild_recipes)?;
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
     LuaApiMut::register_function(lua, "QueryGuildNews", query_guild_news)?;
