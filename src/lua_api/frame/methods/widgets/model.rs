@@ -545,6 +545,10 @@ pub(super) fn stub_false(state: &mut LuaState) -> LuaResult<u32> {
     false.into_stack(state)
 }
 
+pub(super) fn stub_true(state: &mut LuaState) -> LuaResult<u32> {
+    true.into_stack(state)
+}
+
 // ModelScene
 
 pub(super) fn scene_set_allow_overlapped_models(state: &mut LuaState) -> LuaResult<u32> {
@@ -1365,6 +1369,17 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("SetGradientMask", stub_variadic),
     ("SetCustomCamera", stub_variadic),
     ("MakeCurrentCameraCustom", stub_variadic),
+    // DressUpModel / transmog wardrobe — no real 3D, just absorb the calls
+    ("SetUseTransmogSkin", stub_variadic),
+    ("SetUseTransmogChoices", stub_variadic),
+    ("SetObeyHideInTransmogFlag", stub_variadic),
+    ("TryOn", stub_variadic),
+    ("UndressSlot", stub_variadic),
+    ("Undress", stub_variadic),
+    ("SetUnit", stub_variadic),
+    ("UpdateCamera", stub_variadic),
+    ("SetDesaturated", stub_variadic),
+    ("FreezeAnimation", stub_variadic),
     // Typed return stubs
     ("GetModelSceneID", stub_zero),
     ("GetCamDistanceScale", stub_one),
@@ -1378,6 +1393,11 @@ const MODEL_METHODS: &[(&'static str, rilua::vm::closure::RustFn)] = &[
     ("IsUsingModelCenterToTransform", stub_false),
     ("GetUpperEmblemTexture", stub_nil),
     ("GetLowerEmblemTexture", stub_nil),
+    // Wardrobe gates appearance enumeration on these — must be true so
+    // the items list populates and the geometry-ready code path runs.
+    ("IsSlotAllowed", stub_true),
+    ("IsGeoReady", stub_true),
+    ("HasTrackableSource", stub_false),
     // ModelScene-specific (round-tripped state)
     ("SetCameraPosition", scene_set_camera_position),
     ("GetCameraPosition", scene_get_camera_position),

@@ -173,3 +173,49 @@ fn blizzard_collections_journal_helpers_are_defined() {
         "Six top-level CollectionsJournal helper functions should be defined after load"
     );
 }
+
+/// Regression: opening the Wardrobe (Appearances) tab must populate the
+/// items collection with at least one appearance for the active slot.
+/// Earlier this returned 0 because `IsUnitModelReadyForUI`,
+/// `SetUseTransmogSkin`, `IsSlotAllowed`, and friends were missing — the
+/// `ChangeModelsSlot`/`SetActiveCategory` chain bailed out before
+/// `RefreshVisualsList` ran.
+#[test]
+fn wardrobe_appearances_panel_populates_for_head_slot() {
+    let env = load_full_game_ui();
+    load_addon(&env.loader_env(), &collections_toc()).expect("Blizzard_Collections should load");
+
+    env.eval::<()>(
+        "CollectionsJournal:Show(); CollectionsJournal_SetTab(CollectionsJournal, 5)",
+    )
+    .expect("opening the Appearances tab should not error");
+
+    let active_category: f64 = env
+        .eval("return WardrobeCollectionFrame.ItemsCollectionFrame.activeCategory or -1")
+        .expect("activeCategory query should succeed");
+    assert!(
+        active_category > 0.0,
+        "ItemsCollectionFrame.activeCategory should be set (>0) after opening the wardrobe, got {active_category}"
+    );
+
+    let filtered_count: f64 = env
+        .eval(
+            "return #(WardrobeCollectionFrame.ItemsCollectionFrame.filteredVisualsList or {})",
+        )
+        .expect("filteredVisualsList length query should succeed");
+    assert!(
+        filtered_count > 0.0,
+        "filteredVisualsList should contain at least one appearance for the default head slot, got {filtered_count}"
+    );
+
+    let first_visible: bool = env
+        .eval(
+            "local m = WardrobeCollectionFrame.ItemsCollectionFrame.Models \
+             return m and m[1] and m[1]:IsShown() or false",
+        )
+        .expect("first model query should succeed");
+    assert!(
+        first_visible,
+        "First appearance tile (Models[1]) should be visible after the wardrobe populates"
+    );
+}
