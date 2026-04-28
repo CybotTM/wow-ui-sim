@@ -109,27 +109,27 @@ fn push_dungeon_info(state: &mut LuaState, d: &LfdDungeonInfo) {
     let texture = create_string(state, &d.texture_filename);
     let description = create_string(state, &d.description);
     let map_name = create_string(state, &d.map_name);
-    state.push(name);                                    // 1: name
-    state.push(Val::Num(d.type_id as f64));              // 2: typeID
-    state.push(Val::Num(d.subtype_id as f64));           // 3: subtypeID
-    state.push(Val::Num(d.min_level as f64));            // 4: minLevel
-    state.push(Val::Num(d.max_level as f64));            // 5: maxLevel
-    state.push(Val::Num(d.rec_level as f64));            // 6: recLevel
-    state.push(Val::Num(d.min_rec_level as f64));        // 7: minRecLevel
-    state.push(Val::Num(d.max_rec_level as f64));        // 8: maxRecLevel
-    state.push(Val::Num(d.expansion_level as f64));      // 9: expansionLevel
-    state.push(Val::Num(d.group_id as f64));             // 10: groupID
-    state.push(texture);                                 // 11: textureFilename
-    state.push(Val::Num(d.difficulty as f64));           // 12: difficulty
-    state.push(Val::Num(d.max_players as f64));          // 13: maxPlayers
-    state.push(description);                             // 14: description
-    state.push(Val::Bool(d.is_holiday));                 // 15: isHoliday
-    state.push(Val::Num(d.min_players as f64));          // 16: minPlayers
-    state.push(map_name);                                // 17: mapName
-    state.push(Val::Num(d.min_gear as f64));             // 18: minGear
-    state.push(Val::Bool(d.is_scaling_dungeon));         // 19: isScalingDungeon
-    state.push(Val::Num(d.dungeon_id as f64));           // 20: dungeonID (echo)
-    state.push(Val::Bool(d.is_follower_dungeon));        // 21: isFollowerDungeon
+    state.push(name); // 1: name
+    state.push(Val::Num(d.type_id as f64)); // 2: typeID
+    state.push(Val::Num(d.subtype_id as f64)); // 3: subtypeID
+    state.push(Val::Num(d.min_level as f64)); // 4: minLevel
+    state.push(Val::Num(d.max_level as f64)); // 5: maxLevel
+    state.push(Val::Num(d.rec_level as f64)); // 6: recLevel
+    state.push(Val::Num(d.min_rec_level as f64)); // 7: minRecLevel
+    state.push(Val::Num(d.max_rec_level as f64)); // 8: maxRecLevel
+    state.push(Val::Num(d.expansion_level as f64)); // 9: expansionLevel
+    state.push(Val::Num(d.group_id as f64)); // 10: groupID
+    state.push(texture); // 11: textureFilename
+    state.push(Val::Num(d.difficulty as f64)); // 12: difficulty
+    state.push(Val::Num(d.max_players as f64)); // 13: maxPlayers
+    state.push(description); // 14: description
+    state.push(Val::Bool(d.is_holiday)); // 15: isHoliday
+    state.push(Val::Num(d.min_players as f64)); // 16: minPlayers
+    state.push(map_name); // 17: mapName
+    state.push(Val::Num(d.min_gear as f64)); // 18: minGear
+    state.push(Val::Bool(d.is_scaling_dungeon)); // 19: isScalingDungeon
+    state.push(Val::Num(d.dungeon_id as f64)); // 20: dungeonID (echo)
+    state.push(Val::Bool(d.is_follower_dungeon)); // 21: isFollowerDungeon
 }
 
 /// `GetLFGDungeonInfo(dungeonID)` → 21 values from `lfd_dungeons`, or nil.
@@ -274,11 +274,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     )?;
     LuaApiMut::register_function(lua, "GetLFDChoiceOrder", get_lfd_choice_order)?;
     LuaApiMut::register_function(lua, "GetNumRandomDungeons", get_num_random_dungeons)?;
-    LuaApiMut::register_function(
-        lua,
-        "GetLFGRandomDungeonInfo",
-        get_lfg_random_dungeon_info,
-    )?;
+    LuaApiMut::register_function(lua, "GetLFGRandomDungeonInfo", get_lfg_random_dungeon_info)?;
     LuaApiMut::register_function(
         lua,
         "GetRandomDungeonBestChoice",

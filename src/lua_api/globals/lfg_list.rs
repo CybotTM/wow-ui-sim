@@ -183,24 +183,14 @@ fn get_activity_info_table(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "activityID", Val::Num(activity_id as f64));
     table_set(state, info, "fullName", full_name);
     table_set(state, info, "shortName", short_name);
-    table_set(
-        state,
-        info,
-        "categoryID",
-        Val::Num(act.category_id as f64),
-    );
+    table_set(state, info, "categoryID", Val::Num(act.category_id as f64));
     table_set(
         state,
         info,
         "groupFinderActivityGroupID",
         Val::Num(act.group_id as f64),
     );
-    table_set(
-        state,
-        info,
-        "maxPlayers",
-        Val::Num(act.max_players as f64),
-    );
+    table_set(state, info, "maxPlayers", Val::Num(act.max_players as f64));
     table_set(
         state,
         info,
@@ -223,12 +213,7 @@ fn get_activity_info_table(state: &mut LuaState) -> LuaResult<u32> {
         "ilvlSuggestion",
         Val::Num(act.item_level as f64),
     );
-    table_set(
-        state,
-        info,
-        "useHonorLevel",
-        Val::Bool(act.use_honor_level),
-    );
+    table_set(state, info, "useHonorLevel", Val::Bool(act.use_honor_level));
     state.push(info);
     Ok(1)
 }
@@ -319,10 +304,7 @@ fn get_available_activity_groups(state: &mut LuaState) -> LuaResult<u32> {
         let sim = borrow_state(state)?;
         sim.lfg_activity_groups
             .iter()
-            .filter(|g| {
-                g.category_id == category_id
-                    && (filters == 0 || g.filters & filters != 0)
-            })
+            .filter(|g| g.category_id == category_id && (filters == 0 || g.filters & filters != 0))
             .map(|g| (g.group_id, g.order_index))
             .collect::<Vec<_>>()
     };
@@ -461,11 +443,7 @@ fn get_available_language_search_filter(state: &mut LuaState) -> LuaResult<u32> 
     if let Val::Table(table_ref) = result {
         let lang = state.gc.intern_string_static(b"enUS");
         if let Some(table) = state.gc.tables.get_mut(table_ref) {
-            let _ = table.raw_set(
-                Val::Num(1.0),
-                Val::Str(lang),
-                &state.gc.string_arena,
-            );
+            let _ = table.raw_set(Val::Num(1.0), Val::Str(lang), &state.gc.string_arena);
         }
         state.gc.barrier_back(table_ref);
     }
