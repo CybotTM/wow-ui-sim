@@ -174,11 +174,23 @@ mod tests {
         let grid = HitGrid::new(hittable, 256.0, 256.0);
 
         // Test points in different cells within the frame.
-        assert_eq!(grid.topmost_matching_at(Point::new(20.0, 20.0), |_| true), Some(1)); // cell (0,0)
-        assert_eq!(grid.topmost_matching_at(Point::new(100.0, 100.0), |_| true), Some(1)); // cell (1,1)
-        assert_eq!(grid.topmost_matching_at(Point::new(200.0, 200.0), |_| true), Some(1)); // cell (3,3)
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(20.0, 20.0), |_| true),
+            Some(1)
+        ); // cell (0,0)
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(100.0, 100.0), |_| true),
+            Some(1)
+        ); // cell (1,1)
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(200.0, 200.0), |_| true),
+            Some(1)
+        ); // cell (3,3)
         // Just outside.
-        assert_eq!(grid.topmost_matching_at(Point::new(5.0, 5.0), |_| true), None);
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(5.0, 5.0), |_| true),
+            None
+        );
     }
 
     #[test]
@@ -199,9 +211,18 @@ mod tests {
         ];
         let grid = HitGrid::new(hittable, 128.0, 128.0);
 
-        assert_eq!(grid.topmost_matching_at(Point::new(63.0, 63.0), |_| true), Some(1));
-        assert_eq!(grid.topmost_matching_at(Point::new(65.0, 65.0), |_| true), Some(1));
-        assert_eq!(grid.topmost_matching_at(Point::new(59.0, 59.0), |_| true), None);
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(63.0, 63.0), |_| true),
+            Some(1)
+        );
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(65.0, 65.0), |_| true),
+            Some(1)
+        );
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(59.0, 59.0), |_| true),
+            None
+        );
     }
 
     #[test]
@@ -226,6 +247,9 @@ mod tests {
         }
 
         // Check gaps between frames return None.
-        assert_eq!(grid.topmost_matching_at(Point::new(15.0, 5.0), |_| true), None);
+        assert_eq!(
+            grid.topmost_matching_at(Point::new(15.0, 5.0), |_| true),
+            None
+        );
     }
 }

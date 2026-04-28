@@ -19,14 +19,10 @@ fn hit_test_like_gui(env: &WowLuaEnv, pos: Point) -> Option<u64> {
     let hittable_by_id: HashMap<u64, Rectangle> = hittable.iter().copied().collect();
 
     // Phase 1: topmost hittable frame whose subtree contains a hittable target at pos.
-    let initial_id = hittable
-        .iter()
-        .rev()
-        .find_map(|(id, rect)| {
-            (rect.contains(pos)
-                && deepest_hover(&state.widgets, &hittable_by_id, *id, pos).is_some())
+    let initial_id = hittable.iter().rev().find_map(|(id, rect)| {
+        (rect.contains(pos) && deepest_hover(&state.widgets, &hittable_by_id, *id, pos).is_some())
             .then_some(*id)
-        })?;
+    })?;
     deepest_hover(&state.widgets, &hittable_by_id, initial_id, pos)
 }
 
