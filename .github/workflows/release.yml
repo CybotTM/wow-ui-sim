@@ -1,0 +1,119 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-latest
+            archive: tar.gz
+          - name: windows-x86_64
+            os: windows-latest
+            archive: zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.name }}
+
+      - name: Use CI cargo config
+        shell: pwsh
+        run: Copy-Item .cargo/config.ci.toml .cargo/config.toml
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev libudev-dev
+
+      - name: Build release binaries
+        run: cargo build --release --locked --bin wow-sim --bin wow-cli
+
+      - name: Package Linux release
+        if: runner.os == 'Linux'
+        id: package-linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          name="wow-ui-sim-${GITHUB_REF_NAME}-${{ matrix.name }}"
+          root="dist/${name}"
+
+          mkdir -p "${root}/Interface" "${root}/scripts"
+          cp target/release/wow-sim target/release/wow-cli "${root}/"
+          cp README.md LICENSE "${root}/"
+          cp scripts/setup-blizzard-ui.sh scripts/setup-blizzard-ui.ps1 "${root}/scripts/"
+          cp -R Interface/AddOns "${root}/Interface/AddOns"
+          cp -R fonts "${root}/fonts"
+
+          tar -C dist -czf "dist/${name}.tar.gz" "${name}"
+          echo "asset=dist/${name}.tar.gz" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload Linux package
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
+          path: ${{ steps.package-linux.outputs.asset }}
+
+      - name: Package Windows release
+        if: runner.os == 'Windows'
+        id: package-windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $name = "wow-ui-sim-$env:GITHUB_REF_NAME-${{ matrix.name }}"
+          $root = "dist\$name"
+
+          New-Item -ItemType Directory -Force "$root\Interface", "$root\scripts" | Out-Null
+          Copy-Item target\release\wow-sim.exe, target\release\wow-cli.exe $root
+          Copy-Item README.md, LICENSE $root
+          Copy-Item scripts\setup-blizzard-ui.sh, scripts\setup-blizzard-ui.ps1 "$root\scripts"
+          Copy-Item -Recurse Interface\AddOns "$root\Interface\AddOns"
+          Copy-Item -Recurse fonts "$root\fonts"
+
+          Compress-Archive -Path $root -DestinationPath "dist\$name.zip" -Force
+          "asset=dist/$name.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Upload Windows package
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-ui-sim-${{ github.ref_name }}-${{ matrix.name }}
+          path: ${{ steps.package-windows.outputs.asset }}
+
+  publish-release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs: build-release
+    steps:
+      - name: Download release packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
