@@ -30,7 +30,7 @@ rodio = { version = "0.21", optional = true }
 lz4_flex = "0.11"
 
 # Iced GUI (optional, gated behind "gui" feature)
-iced = { version = "0.1.0", optional = true, path = "iced-dynamic", package = "iced-dynamic" }
+iced = { version = "0.14.0", optional = true, features = ["advanced", "canvas", "image", "tokio", "wgpu"] }
 iced_wgpu = { version = "0.14", optional = true, path = "iced-wgpu-patched" }
 iced_runtime = { version = "0.14", optional = true }
 iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.git", tag = "v0.2.0", optional = true }
