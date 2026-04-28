@@ -656,3 +656,148 @@ fn communities_stream_dropdown_click_opens_menu() {
         );
     }
 }
+
+#[test]
+fn guild_info_panel_populates_motd_details_and_challenges() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            if CommunitiesFrame == nil then return "missing_communities" end
+            local details = CommunitiesFrame.GuildDetailsFrame
+            if details == nil then return "missing_guild_details" end
+            local frame = details.Info
+            if frame == nil then return "missing_info_frame" end
+
+            -- Officer rights so the edit buttons reveal themselves.
+            A_Admin.SetGuildIsOfficer(true)
+            frame:Show()
+            CommunitiesGuildInfoFrame_OnShow(frame)
+            -- OnShow only requests challenge data; drive the update directly so
+            -- the row labels/counts populate without waiting on the event pump.
+            CommunitiesGuildInfoFrame_UpdateChallenges(frame)
+
+            local motd = frame.MOTDScrollFrame.MOTD:GetText() or ""
+            local detailsText = frame.DetailsFrame:GetScrollChild().Details:GetText() or ""
+
+            local challengeRows = {}
+            for i, row in ipairs(frame.Challenges) do
+                if row:IsShown() then
+                    local label = (row.label and row.label:GetText()) or ""
+                    local countShown = row.count and row.count:IsShown()
+                    local count = (countShown and row.count:GetText()) or ""
+                    local checkShown = row.check and row.check:IsShown()
+                    table.insert(challengeRows, label .. "=" .. count .. (checkShown and "[done]" or ""))
+                end
+            end
+
+            local editMotd = frame.EditMOTDButton:IsShown() and "yes" or "no"
+            local editDetails = frame.EditDetailsButton:IsShown() and "yes" or "no"
+
+            return table.concat({
+                "motd:" .. motd,
+                "details:" .. detailsText,
+                "rows:" .. table.concat(challengeRows, "|"),
+                "editMOTD:" .. editMotd,
+                "editDetails:" .. editDetails,
+            }, ";")
+        "#).unwrap();
+
+        assert!(
+            result.contains("motd:Raid invites tonight at 20:00 server."),
+            "MOTD should be populated from world.guild_motd: {result}"
+        );
+        assert!(
+            result.contains("details:Mythic-focused guild recruiting"),
+            "Details should be populated from world.guild_info_text: {result}"
+        );
+        // GUILD_CHALLENGE_ORDER = {1, 4, 2, 3} — type 1 Dungeon, type 4 (no
+        // global string), type 2 Raid (1/1 → check), type 3 Rated BG.
+        assert!(
+            result.contains("Dungeon=5 / 7"),
+            "Dungeon challenge row should show 5/7 progress: {result}"
+        );
+        assert!(
+            result.contains("Raid=[done]"),
+            "Raid challenge (1/1) should display the completed check: {result}"
+        );
+        assert!(
+            result.contains("Rated Battleground=1 / 3"),
+            "RBG challenge row should show 1/3 progress: {result}"
+        );
+        assert!(
+            result.contains("editMOTD:yes;editDetails:yes"),
+            "Officer edit buttons should be shown when guild_is_officer: {result}"
+        );
+    }
+}
+
+#[test]
+fn c_guild_info_set_motd_round_trips_through_world_state() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    let result: String = env
+        .eval(
+            r#"
+        local original = C_GuildInfo.GetMOTD()
+        C_GuildInfo.SetMOTD("Mythic raid Friday 21:00 server.")
+        local updated = C_GuildInfo.GetMOTD()
+        local roster = GetGuildRosterMOTD()
+        return original .. "|" .. updated .. "|" .. roster
+    "#,
+        )
+        .expect("SetMOTD should round-trip via world state");
+
+    let parts: Vec<&str> = result.split('|').collect();
+    assert_eq!(parts.len(), 3, "expected 3 parts, got {result}");
+    assert_eq!(
+        parts[0],
+        "Raid invites tonight at 20:00 server. Repairs are on for progression.",
+        "initial MOTD should be seeded"
+    );
+    assert_eq!(parts[1], "Mythic raid Friday 21:00 server.");
+    assert_eq!(
+        parts[2], parts[1],
+        "GetGuildRosterMOTD must return the same world.guild_motd as C_GuildInfo.GetMOTD"
+    );
+}
+
+#[test]
+fn admin_set_guild_challenges_replaces_world_state_rows() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.eval::<()>(
+        r#"
+        A_Admin.SetGuildChallenges({
+            { challengeType = 1, current = 3, max = 7, gold = 100, maxGold = 700 },
+            { challengeType = 5, current = 1, max = 1, gold = 999, maxGold = 999 },
+        })
+    "#,
+    )
+    .expect("SetGuildChallenges should accept a list");
+
+    let count: f64 = env.eval("return GetNumGuildChallenges()").unwrap();
+    assert_eq!(count, 2.0);
+
+    let dungeon: String = env
+        .eval(
+            r#"
+        local id, current, max, gold, maxGold = GetGuildChallengeInfo(1)
+        return tostring(id) .. ":" .. tostring(current) .. "/" .. tostring(max) .. " " .. tostring(gold) .. "/" .. tostring(maxGold)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(dungeon, "1:3/7 100/700");
+
+    let mythic: String = env
+        .eval(
+            r#"
+        local id, current, max, gold, maxGold = GetGuildChallengeInfo(5)
+        return tostring(id) .. ":" .. tostring(current) .. "/" .. tostring(max) .. " " .. tostring(gold) .. "/" .. tostring(maxGold)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(mythic, "5:1/1 999/999");
+
+    let missing: bool = env
+        .eval("return GetGuildChallengeInfo(2) == nil")
+        .unwrap();
+    assert!(missing, "challenge type 2 was not seeded, expected nil");
+}

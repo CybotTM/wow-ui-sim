@@ -436,8 +436,18 @@ pub struct WorldState {
     /// Default true — matches retail's "no explicit mute" baseline so addons
     /// that gate chat input on this probe don't silence themselves on startup.
     pub guild_can_speak_in_chat: bool,
-    /// Guild Message of the Day. Empty string when not set.
+    /// Guild Message of the Day. Empty string when not set. Drives
+    /// `C_GuildInfo.GetMOTD()` and `GetGuildRosterMOTD()`.
     pub guild_motd: String,
+    /// Guild long-form info / description text editable by officers via
+    /// `C_GuildInfo.SetInfoText`. Drives `C_GuildInfo.GetInfoText()`.
+    pub guild_info_text: String,
+    /// Active weekly guild challenges. Drives `GetNumGuildChallenges()` /
+    /// `GetGuildChallengeInfo(orderIndex)`. Each entry corresponds to one
+    /// challenge type id (`1`=Dungeon, `2`=Raid, `3`=Rated BG, `4`=Scenario,
+    /// `5`=Mythic+). The Communities Guild Info panel iterates
+    /// `GUILD_CHALLENGE_ORDER = {1,4,2,3}` and looks up rows by type id.
+    pub guild_challenges: Vec<GuildChallenge>,
     /// Guild members (names + 1-based rank indices + online state). Populated by
     /// `GuildInvite` / `GuildUninvite` / `GuildKick` / `GuildPromote`.
     /// Empty when the player has no guild.
@@ -454,6 +464,18 @@ pub struct GuildMember {
     pub name: String,
     pub rank_index: i32,
     pub online: bool,
+}
+
+/// One row of `GetGuildChallengeInfo(orderIndex)`: returns
+/// `(challengeType, current, max, gold, maxGold)`. `challenge_type` matches
+/// `GUILD_CHALLENGE_TYPE`*N* / `GUILD_CHALLENGE_LABEL`*N* in `GlobalStrings`.
+#[derive(Debug, Clone, Default)]
+pub struct GuildChallenge {
+    pub challenge_type: i32,
+    pub current: i32,
+    pub max: i32,
+    pub gold: i32,
+    pub max_gold: i32,
 }
 
 /// A guild chat message authored at runtime (typically by the player via
@@ -565,6 +587,9 @@ pub fn seeded_world_state() -> WorldState {
         guild_num_members: 2,
         guild_ranks: default_guild_ranks(),
         guild_members: default_guild_members(),
+        guild_motd: default_guild_motd(),
+        guild_info_text: default_guild_info_text(),
+        guild_challenges: default_guild_challenges(),
         pvp_type: "contested".into(),
         guild_can_speak_in_chat: true,
         world_pvp_areas: default_world_pvp_areas(),
@@ -603,6 +628,47 @@ fn default_guild_members() -> Vec<GuildMember> {
             name: "Jaina".into(),
             rank_index: 2,
             online: false,
+        },
+    ]
+}
+
+fn default_guild_motd() -> String {
+    "Raid invites tonight at 20:00 server. Repairs are on for progression.".into()
+}
+
+fn default_guild_info_text() -> String {
+    "Mythic-focused guild recruiting healers and a warlock for weekend raids.".into()
+}
+
+fn default_guild_challenges() -> Vec<GuildChallenge> {
+    vec![
+        GuildChallenge {
+            challenge_type: 1,
+            current: 5,
+            max: 7,
+            gold: 1250000,
+            max_gold: 1750000,
+        },
+        GuildChallenge {
+            challenge_type: 2,
+            current: 1,
+            max: 1,
+            gold: 5000000,
+            max_gold: 5000000,
+        },
+        GuildChallenge {
+            challenge_type: 3,
+            current: 1,
+            max: 3,
+            gold: 1000000,
+            max_gold: 3000000,
+        },
+        GuildChallenge {
+            challenge_type: 4,
+            current: 2,
+            max: 7,
+            gold: 500000,
+            max_gold: 1750000,
         },
     ]
 }
