@@ -8916,6 +8916,23 @@ C_CovenantSanctumUI = __wow_merge_namespace(C_CovenantSanctumUI, {
     end
     return {}
   end,
+  GetSoulCurrencies = function()
+    return {}
+  end,
+  GetAnimaInfo = function()
+    return 0, 0
+  end,
+  CanDepositAnima = function()
+    return false
+  end,
+  DepositAnima = function() end,
+  EndInteraction = function() end,
+  GetFeatures = function()
+    return {}
+  end,
+  GetCurrentTalentTreeID = function()
+    return 0
+  end,
 })
 
 -- C_LevelLink.IsActionLocked is registered from Rust
