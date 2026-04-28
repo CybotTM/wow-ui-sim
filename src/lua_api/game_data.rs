@@ -3,7 +3,9 @@
 //! Contains player/party/target/aura definitions and the default data
 //! generators used by `SimState::default()`.
 
-use crate::lua_api::state::{AlliedRaceInfo, AlliedRaceRacialAbility};
+use crate::lua_api::state::{
+    AlliedRaceInfo, AlliedRaceRacialAbility, MajorFactionData, RenownLevelInfo,
+};
 use std::collections::HashMap;
 
 /// Information about the current target.
@@ -1025,6 +1027,84 @@ fn allied_races_scene_actor_tags() -> Vec<String> {
     .iter()
     .map(|s| (*s).to_string())
     .collect()
+}
+
+/// Major Factions for The War Within (`expansion_filter = 11`). Drives the
+/// EncounterJournal "Journeys" panel via `C_MajorFactions.GetMajorFactionIDs`
+/// and the per-id `GetMajorFactionData` lookup. Faction ids match
+/// `MajorFactions.db2`:
+/// - 2590 Council of Dornogal
+/// - 2570 Hallowfall Arathi
+/// - 2594 The Assembly of the Deeps
+/// - 2600 The Severed Threads
+pub fn default_major_factions() -> HashMap<i64, MajorFactionData> {
+    let rows: &[(i64, &str, &str, (f32, f32, f32))] = &[
+        (
+            2590,
+            "Council of Dornogal",
+            "councilofdornogal",
+            (0.96, 0.78, 0.40),
+        ),
+        (
+            2570,
+            "Hallowfall Arathi",
+            "hallowfallarathi",
+            (0.99, 0.91, 0.62),
+        ),
+        (
+            2594,
+            "The Assembly of the Deeps",
+            "assemblyofthedeeps",
+            (0.51, 0.78, 0.55),
+        ),
+        (
+            2600,
+            "The Severed Threads",
+            "severedthreads",
+            (0.45, 0.78, 0.86),
+        ),
+    ];
+    let mut map = HashMap::new();
+    for &(faction_id, name, texture_kit, faction_font_color) in rows {
+        map.insert(
+            faction_id,
+            MajorFactionData {
+                faction_id,
+                name: name.to_string(),
+                expansion_filter: 11,
+                renown_level: 1,
+                renown_reputation_earned: 0,
+                renown_level_threshold: 2500,
+                is_unlocked: true,
+                unlock_description: None,
+                celebration_sound_kit: 0,
+                renown_fanfare_sound_kit_id: 0,
+                texture_kit: texture_kit.to_string(),
+                faction_font_color,
+            },
+        );
+    }
+    map
+}
+
+/// Default Renown level table: levels 1..=20 per faction. The mixin uses the
+/// last entry's `level` to clamp the bar (`GetMaxLevel`); milestone/capstone
+/// flags are not yet driven by any panel we render.
+pub fn default_major_faction_renown_levels() -> HashMap<i64, Vec<RenownLevelInfo>> {
+    let mut map = HashMap::new();
+    for &faction_id in &[2590i64, 2570, 2594, 2600] {
+        let levels = (1..=20)
+            .map(|level| RenownLevelInfo {
+                faction_id,
+                level,
+                locked: false,
+                is_milestone: false,
+                is_capstone: level == 20,
+            })
+            .collect();
+        map.insert(faction_id, levels);
+    }
+    map
 }
 
 /// Pre-populate main action bar (slots 1-12) with Protection Paladin spells.

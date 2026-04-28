@@ -290,8 +290,9 @@ pub use super::game_data::{
     tick_party_health,
 };
 use super::game_data::{
-    default_action_bars, default_allied_races, default_model_scenes, default_party,
-    default_player_buffs, random_player_name,
+    default_action_bars, default_allied_races, default_major_faction_renown_levels,
+    default_major_factions, default_model_scenes, default_party, default_player_buffs,
+    random_player_name,
 };
 pub use super::state_types::{
     AchievementComparisonData, AchievementGuildRep, AchievementInfo, AchievementSearchState,
@@ -556,6 +557,10 @@ pub struct MajorFactionData {
     pub celebration_sound_kit: i32,
     pub renown_fanfare_sound_kit_id: i32,
     pub texture_kit: String,
+    /// `DBColorExport.color` (RGB in 0..1 range). The simulator wraps it in
+    /// `CreateColor` so `factionFontColor.color:GetRGB()` works in
+    /// `JourneysProgressBarMixin:RefreshBar`.
+    pub faction_font_color: (f32, f32, f32),
 }
 
 /// One entry in the renown level table returned by
@@ -3146,6 +3151,8 @@ impl SimState {
         self.party_group_active = false;
         self.allied_races = default_allied_races();
         self.model_scenes = default_model_scenes();
+        self.major_factions = default_major_factions();
+        self.major_faction_renown_levels = default_major_faction_renown_levels();
         crate::lua_api::globals::keybindings::init_keybindings(self);
         self.player.name = random_player_name();
         self.player.power = 50_000;
