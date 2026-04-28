@@ -270,3 +270,95 @@ fn test_xml_frame_level_inherited_from_template_is_parent_relative_offset() {
     assert_eq!(child_level - parent_level, 10);
     assert!(child_uses_parent);
 }
+
+#[test]
+fn test_xml_use_parent_level_overrides_inherited_frame_level() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+
+    // Mirrors the DialogBorderTemplate / NineSlicePanelTemplate combo:
+    // a high explicit frameLevel on a chain entry that should be overridden
+    // by `useParentLevel="true"` on a sibling chain entry.
+    let template_xml = r#"
+        <Ui>
+            <Frame name="HighLevelTemplate" virtual="true" frameLevel="500">
+                <Size x="10" y="10"/>
+            </Frame>
+            <Frame name="ParentLevelBorderTemplate" virtual="true" inherits="HighLevelTemplate" useParentLevel="true">
+                <Size x="10" y="10"/>
+            </Frame>
+        </Ui>
+    "#;
+    let template_ui = parse_xml(template_xml).unwrap();
+    for element in &template_ui.elements {
+        if let XmlElement::Frame(frame) = element {
+            create_frame_from_xml(
+                &env.loader_env(),
+                frame,
+                "Frame",
+                None,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    let instance_xml = r#"
+        <Ui>
+            <Frame name="UseParentLevelHost" parent="UIParent" frameLevel="40">
+                <Size x="100" y="100"/>
+                <Frames>
+                    <Frame parentKey="Border" inherits="ParentLevelBorderTemplate"/>
+                    <Frame parentKey="Header">
+                        <Size x="50" y="20"/>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>
+    "#;
+    let instance_ui = parse_xml(instance_xml).unwrap();
+    if let XmlElement::Frame(frame) = &instance_ui.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let (host_level, border_level, header_level): (i32, i32, i32) = env
+        .eval(
+            r#"
+            return UseParentLevelHost:GetFrameLevel(),
+                   UseParentLevelHost.Border:GetFrameLevel(),
+                   UseParentLevelHost.Header:GetFrameLevel()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        border_level, host_level,
+        "useParentLevel=true should pin the border to the host's level (not host+500)"
+    );
+    assert!(
+        header_level > border_level,
+        "default-level sibling should render above the useParentLevel border (header={header_level}, border={border_level})"
+    );
+
+    // Border must follow parent level changes (offset 0, not fixed).
+    let (host_after, border_after): (i32, i32) = env
+        .eval(
+            r#"
+            UseParentLevelHost:SetFrameLevel(120)
+            return UseParentLevelHost:GetFrameLevel(), UseParentLevelHost.Border:GetFrameLevel()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(host_after, 120);
+    assert_eq!(border_after, host_after);
+}

@@ -212,6 +212,8 @@ pub struct FrameXml {
     pub frame_level: Option<i32>,
     #[serde(rename = "@fixedFrameLevel")]
     pub fixed_frame_level: Option<bool>,
+    #[serde(rename = "@useParentLevel")]
+    pub use_parent_level: Option<bool>,
     #[serde(rename = "@toplevel")]
     pub toplevel: Option<bool>,
     #[serde(rename = "@protected")]
