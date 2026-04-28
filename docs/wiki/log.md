@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-28] update | eager animation_frame_ids_for_group
+
+Updated `investigations/talent-performance.md` with the panel-open 1.3 FPS root
+cause. `advance_animation_group()` called `animation_frame_ids_for_group` on
+every group every tick (full linear scan of `anim_frame_to_anim`), but the
+result was only consumed inside the `if group_finished` branch. Moved the call
+into the conditional. Live-process flamegraph went from 63.9% CPU in that
+function to 0.00%; total animation-tick cost dropped from dominant to 3.5%.
+
 ## [2026-04-28] update | talent strata repair skip
 
 Updated `investigations/talent-performance.md` with the discarded strata repair

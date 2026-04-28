@@ -88,6 +88,35 @@ Switching from the Specializations tab back to Talents took multiple seconds (us
 | Spec→Talents tab switch | ~3500ms | ~90ms |
 | `issecretvalue(frame)` × 1000 | 7411ms | <10ms |
 
+## Problem 4: Eager `animation_frame_ids_for_group` (1.3 FPS panel-open)
+
+### Symptom
+
+GUI title bar reported `1.3 FPS | tick:304ms | draw:401ms` while the talent panel sat open. Flamegraph attached to the live process: `animation_frame_ids_for_group` was **63.9% of all CPU time**.
+
+### Root Cause
+
+`advance_animation_group` (in `src/lua_api/frame/methods/button_anchor_hierarchy/animations.rs`) called `animation_frame_ids_for_group(sim, group_id)` unconditionally on every group, every tick. That helper does a full linear scan of `sim.anim_frame_to_anim` (a `HashMap<frame_id, (group_id, animation_index)>` covering every animation in the sim).
+
+Cost was **O(groups × total_anim_frames) per tick**. With the talent panel open, the sheen animation alone produces ~135 active groups, plus everything else in the UI; `anim_frame_to_anim` carries thousands of entries. Result: the inner loop dominated steady-state CPU.
+
+The collected `Vec<u64>` had a single consumer: `finished_animation_scripts.extend(...)` inside `if group_finished { ... }`. For a sheen on a 22-second sync cycle, `group_finished` is false on virtually every tick, so the work was thrown away.
+
+### Fix
+
+Move the call inside the `if group_finished` branch. Restructure the inner block to return `group_finished`, then call `animation_frame_ids_for_group` only when needed.
+
+### Result
+
+Re-profiled with the same setup (talent panel open, 12s perf record):
+
+| Metric | Before | After |
+|---|---:|---:|
+| `animation_frame_ids_for_group` | 63.9% | 0.00% |
+| `advance_animation_groups` total | dominant | 3.5% |
+
+Tests: `animation_anim`, `animation_group`, `animation_group_state`, `anim_target_visibility` — 64 tests, all green.
+
 ## Benchmark Binary
 
 `src/bin/bench_talents.rs` — loads all addons, fires startup events, then opens/closes the talent panel 10 times. Use `RUSTFLAGS="-C force-frame-pointers=yes"` for flamegraph profiling.
