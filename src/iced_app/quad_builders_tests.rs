@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use super::*;
 use crate::render::glyph::GlyphAtlas;
 use crate::widget::{Frame, TextSegment, WidgetRegistry, WidgetType};
@@ -155,7 +153,7 @@ fn emit_widget_text_quads_uses_text_segment_colors() {
     ];
 
     let mut batch = QuadBatch::new();
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
     let mut text_renderer = WidgetTextRenderer {
         batch: &mut batch,

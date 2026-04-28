@@ -609,8 +609,6 @@ fn emit_tooltip_text_run(
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use iced::{Point, Rectangle, Size};
 
     use super::*;
@@ -716,7 +714,7 @@ mod tests {
         };
 
         let mut batch = QuadBatch::new();
-        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut font_sys = WowFontSystem::new();
         let mut glyph_atlas = GlyphAtlas::new();
         let tooltip_data = HashMap::from([(42_u64, data)]);
         let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
@@ -896,7 +894,7 @@ mod tests {
         };
 
         let mut batch = QuadBatch::new();
-        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut font_sys = WowFontSystem::new();
         let mut glyph_atlas = GlyphAtlas::new();
         let tooltip_data = HashMap::from([(42_u64, data)]);
         let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
@@ -944,7 +942,7 @@ mod tests {
         };
 
         let mut batch = QuadBatch::new();
-        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut font_sys = WowFontSystem::new();
         let mut glyph_atlas = GlyphAtlas::new();
         let tooltip_data = HashMap::from([(42_u64, data)]);
         let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
@@ -1037,7 +1035,7 @@ mod tests {
         };
 
         let mut batch = QuadBatch::new();
-        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut font_sys = WowFontSystem::new();
         let mut glyph_atlas = GlyphAtlas::new();
         let tooltip_data = HashMap::from([(42_u64, data)]);
         let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));

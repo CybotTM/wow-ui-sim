@@ -15,14 +15,8 @@ use image_blp::types::BlpContent;
 /// Texture manager that loads and caches textures.
 #[derive(Debug)]
 pub struct TextureManager {
-    /// Base path to local WebP textures (`./textures`).
-    textures_path: PathBuf,
-    /// Base path to WoW Interface directory (for extracted game files).
-    interface_path: Option<PathBuf>,
     /// Base path to addons directory (for addon textures).
     addons_path: Option<PathBuf>,
-    /// Directory for decoded RGBA disk cache (lz4 compressed).
-    disk_cache_dir: Option<PathBuf>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
     /// Cache of texture dimensions keyed by normalized WoW path.
@@ -46,13 +40,10 @@ pub struct TextureData {
 }
 
 impl TextureManager {
-    /// Create a new texture manager with the given textures path.
-    pub fn new(textures_path: impl Into<PathBuf>) -> Self {
+    /// Create a new texture manager.
+    pub fn new() -> Self {
         Self {
-            textures_path: textures_path.into(),
-            interface_path: None,
             addons_path: None,
-            disk_cache_dir: None,
             cache: HashMap::new(),
             size_cache: HashMap::new(),
             bc_cache: HashMap::new(),
@@ -60,20 +51,6 @@ impl TextureManager {
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
         }
-    }
-
-    /// Set the WoW Interface directory path for extracted game files.
-    pub fn with_interface_path(mut self, path: impl Into<PathBuf>) -> Self {
-        self.interface_path = Some(path.into());
-        self
-    }
-
-    /// Set the disk cache directory for decoded RGBA textures.
-    pub fn with_disk_cache(mut self, path: impl Into<PathBuf>) -> Self {
-        let dir = path.into();
-        std::fs::create_dir_all(&dir).ok();
-        self.disk_cache_dir = Some(dir);
-        self
     }
 
     /// Set the addons directory path for addon textures.
@@ -112,13 +89,8 @@ impl TextureManager {
         if let Some(file_path) = self.resolve_path(&normalized) {
             telemetry.resolve_elapsed = resolve_start.elapsed();
             let (loaded, load_telemetry) =
-                self.load_with_disk_cache_with_telemetry(&normalized, &file_path);
-            telemetry.disk_cache_hit = load_telemetry.disk_cache_hit;
-            telemetry.disk_probe_elapsed = load_telemetry.disk_probe_elapsed;
-            telemetry.disk_read_elapsed = load_telemetry.disk_read_elapsed;
-            telemetry.disk_decompress_elapsed = load_telemetry.disk_decompress_elapsed;
+                self.load_texture_with_telemetry(&file_path);
             telemetry.decode_elapsed = load_telemetry.decode_elapsed;
-            telemetry.disk_write_elapsed = load_telemetry.disk_write_elapsed;
             if let Some(data) = loaded {
                 self.size_cache
                     .insert(normalized.clone(), (data.width, data.height));
@@ -148,43 +120,21 @@ impl TextureManager {
         self.cache.contains_key(&normalized) || self.bc_cache.contains_key(&normalized)
     }
 
-    fn load_with_disk_cache_with_telemetry(
+    fn load_texture_with_telemetry(
         &self,
-        normalized: &str,
         file_path: &Path,
     ) -> (Option<TextureData>, RgbaLoadTelemetry) {
         let mut telemetry = RgbaLoadTelemetry::default();
-        // Try disk cache first
-        if let Some(cache_dir) = &self.disk_cache_dir {
-            let (data, disk_telemetry) = crate::texture_cache::load_from_disk_cache_with_telemetry(
-                cache_dir, normalized, file_path,
-            );
-            telemetry.disk_cache_hit = disk_telemetry.cache_hit;
-            telemetry.disk_probe_elapsed = disk_telemetry.probe_elapsed;
-            telemetry.disk_read_elapsed = disk_telemetry.read_elapsed;
-            telemetry.disk_decompress_elapsed = disk_telemetry.decompress_elapsed;
-            if data.is_some() {
-                return (data, telemetry);
-            }
-        }
-        // Decode from source
         let decode_start = Instant::now();
         match load_texture_file(file_path) {
             Ok(data) => {
                 telemetry.decode_elapsed = decode_start.elapsed();
-                if let Some(cache_dir) = &self.disk_cache_dir {
-                    telemetry.disk_write_elapsed =
-                        crate::texture_cache::write_to_disk_cache_with_telemetry(
-                            cache_dir, normalized, &data,
-                        );
-                }
                 (Some(data), telemetry)
             }
             Err(e) => {
                 telemetry.decode_elapsed = decode_start.elapsed();
                 crate::logging::eprintln_elapsed(&format!(
-                    "[TexMgr] Load error: {} -> {}: {}",
-                    normalized,
+                    "[TexMgr] Load error: {}: {}",
                     file_path.display(),
                     e
                 ));
@@ -225,13 +175,8 @@ pub struct BcLoadTelemetry {
 #[derive(Debug, Default, Clone, Copy)]
 pub struct RgbaLoadTelemetry {
     pub mem_cache_hit: bool,
-    pub disk_cache_hit: bool,
     pub resolve_elapsed: Duration,
-    pub disk_probe_elapsed: Duration,
-    pub disk_read_elapsed: Duration,
-    pub disk_decompress_elapsed: Duration,
     pub decode_elapsed: Duration,
-    pub disk_write_elapsed: Duration,
     pub total_elapsed: Duration,
 }
 
@@ -462,13 +407,7 @@ mod tests {
 
     #[test]
     fn test_load_webp_texture() {
-        let textures_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("textures");
-        if !textures_path.exists() {
-            eprintln!("Skipping test: textures directory not found");
-            return;
-        }
-
-        let mut mgr = TextureManager::new(&textures_path);
+        let mut mgr = TextureManager::new();
         let result = mgr.load("Interface/BUTTONS/UI-SortArrow");
 
         assert!(result.is_some(), "Should load UI-SortArrow texture");
@@ -503,8 +442,8 @@ mod tests {
         blue_img.save(&png_path).unwrap();
 
         // Load texture - should prefer webp
-        let mut mgr = TextureManager::new(base);
-        let result = mgr.load("test-texture");
+        let mut mgr = TextureManager::new().with_addons_path(base);
+        let result = mgr.load("Interface/AddOns/test-texture");
 
         assert!(result.is_some(), "Should load test-texture");
         let data = result.unwrap();
@@ -529,27 +468,6 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_path_prefers_interface_blp_over_local_webp() {
-        let temp_dir = TempDir::new().unwrap();
-        let textures_path = temp_dir.path().join("textures");
-        let interface_path = temp_dir.path().join("Interface");
-        fs::create_dir_all(textures_path.join("icons")).unwrap();
-        fs::create_dir_all(interface_path.join("icons")).unwrap();
-
-        let webp_path = textures_path.join("icons").join("paladin_holy.webp");
-        let blp_path = interface_path.join("icons").join("PALADIN_HOLY.BLP");
-        fs::write(&webp_path, b"webp").unwrap();
-        fs::write(&blp_path, b"blp").unwrap();
-
-        let mgr = TextureManager::new(&textures_path).with_interface_path(&interface_path);
-        let resolved = mgr
-            .resolve_path(&normalize_wow_path(r"Interface\ICONS\PALADIN_HOLY"))
-            .expect("resolver should find interface BLP");
-
-        assert_eq!(resolved, blp_path);
-    }
-
-    #[test]
     fn test_fallback_to_png_when_no_webp() {
         let temp_dir = TempDir::new().unwrap();
         let base = temp_dir.path();
@@ -559,8 +477,8 @@ mod tests {
         let green_img = image::RgbaImage::from_pixel(2, 2, image::Rgba([0, 255, 0, 255]));
         green_img.save(&png_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
-        let result = mgr.load("only-png");
+        let mut mgr = TextureManager::new().with_addons_path(base);
+        let result = mgr.load("Interface/AddOns/only-png");
 
         assert!(result.is_some(), "Should load png when webp not available");
         let data = result.unwrap();
@@ -583,17 +501,16 @@ mod tests {
         let img = image::RgbaImage::from_pixel(1, 1, image::Rgba([128, 128, 128, 255]));
         img.save(&webp_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
+        let mut mgr = TextureManager::new().with_addons_path(base);
 
         // Try loading with different cases
-        let result = mgr.load("buttons/ui-panel-button");
+        let result = mgr.load("Interface/AddOns/buttons/ui-panel-button");
         assert!(result.is_some(), "Should load with lowercase path");
     }
 
     #[test]
     fn test_nonexistent_texture_returns_none() {
-        let temp_dir = TempDir::new().unwrap();
-        let mut mgr = TextureManager::new(temp_dir.path());
+        let mut mgr = TextureManager::new();
 
         let result = mgr.load("this/texture/does/not/exist");
         assert!(
@@ -611,15 +528,15 @@ mod tests {
         let img = image::RgbaImage::from_pixel(4, 4, image::Rgba([100, 100, 100, 255]));
         img.save(&webp_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
+        let mut mgr = TextureManager::new().with_addons_path(base);
 
         // First load
-        let result1 = mgr.load("cached");
+        let result1 = mgr.load("Interface/AddOns/cached");
         assert!(result1.is_some());
         let pixels1 = result1.unwrap().pixels.clone();
 
         // Second load should return cached version (using get, no disk access)
-        let result2 = mgr.get("cached");
+        let result2 = mgr.get("Interface/AddOns/cached");
         assert!(result2.is_some(), "Should get from cache");
 
         // Verify same data
@@ -635,22 +552,18 @@ mod tests {
         let img = image::RgbaImage::from_pixel(4, 4, image::Rgba([100, 100, 100, 255]));
         img.save(&webp_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
+        let mut mgr = TextureManager::new().with_addons_path(base);
         assert!(
-            mgr.load("cached").is_some(),
+            mgr.load("Interface/AddOns/cached").is_some(),
             "first load should populate memory cache"
         );
 
-        let (cached, telemetry) = mgr.load_with_telemetry("cached");
+        let (cached, telemetry) = mgr.load_with_telemetry("Interface/AddOns/cached");
 
         assert!(cached.is_some(), "second load should still return texture");
         assert!(
             telemetry.mem_cache_hit,
             "telemetry should report memory cache hits"
-        );
-        assert!(
-            !telemetry.disk_cache_hit,
-            "memory cache hit should skip disk cache"
         );
         assert_eq!(
             telemetry.resolve_elapsed,
@@ -673,9 +586,9 @@ mod tests {
         let img = image::RgbaImage::from_pixel(7, 5, image::Rgba([10, 20, 30, 255]));
         img.save(&webp_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
+        let mut mgr = TextureManager::new().with_addons_path(base);
         let dims = mgr
-            .get_or_load_texture_size("metadata-only")
+            .get_or_load_texture_size("Interface/AddOns/metadata-only")
             .expect("metadata-only size lookup should succeed");
 
         assert_eq!(dims, (7, 5));
@@ -685,7 +598,7 @@ mod tests {
             "size-only lookup should not force full RGBA decode into the cache"
         );
         assert_eq!(
-            mgr.get_texture_size("metadata-only"),
+            mgr.get_texture_size("Interface/AddOns/metadata-only"),
             Some((7, 5)),
             "size-only lookup should still seed the size cache"
         );
@@ -705,13 +618,13 @@ mod tests {
         }
         img.save(&webp_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
-        assert!(mgr.load("cropped").is_some(), "base texture should load");
+        let mut mgr = TextureManager::new().with_addons_path(base);
+        assert!(mgr.load("Interface/AddOns/cropped").is_some(), "base texture should load");
 
         fs::remove_file(&webp_path).unwrap();
 
         let sub = mgr
-            .load_sub_region("cropped", 1, 1, 2, 2)
+            .load_sub_region("Interface/AddOns/cropped", 1, 1, 2, 2)
             .expect("sub-region should load from cached base");
         assert_eq!((sub.width, sub.height), (2, 2));
         assert_eq!(sub.pixels[0], 10);
@@ -720,8 +633,7 @@ mod tests {
 
     #[test]
     fn test_load_bc_caches_dxt_blp_data() {
-        let temp_dir = TempDir::new().unwrap();
-        let mut mgr = TextureManager::new(temp_dir.path());
+        let mut mgr = TextureManager::new();
         mgr.bc_cache.insert(
             "cached-dxt".to_string(),
             BcTextureResult {
@@ -744,8 +656,7 @@ mod tests {
 
     #[test]
     fn test_load_bc_with_telemetry_reports_cache_hits() {
-        let temp_dir = TempDir::new().unwrap();
-        let mut mgr = TextureManager::new(temp_dir.path());
+        let mut mgr = TextureManager::new();
         mgr.bc_cache.insert(
             "cached-dxt".to_string(),
             BcTextureResult {
@@ -785,8 +696,8 @@ mod tests {
         let img = image::RgbaImage::from_pixel(2, 2, image::Rgba([1, 2, 3, 255]));
         img.save(&png_path).unwrap();
 
-        let mut mgr = TextureManager::new(base);
-        let (first, first_telemetry) = mgr.load_bc_with_telemetry("not-bc");
+        let mut mgr = TextureManager::new().with_addons_path(base);
+        let (first, first_telemetry) = mgr.load_bc_with_telemetry("Interface/AddOns/not-bc");
         assert!(
             first.is_none(),
             "png texture should stay on the non-BC path"
@@ -796,7 +707,7 @@ mod tests {
             "first attempt should resolve the texture path"
         );
 
-        let (second, second_telemetry) = mgr.load_bc_with_telemetry("not-bc");
+        let (second, second_telemetry) = mgr.load_bc_with_telemetry("Interface/AddOns/not-bc");
         assert!(
             second.is_none(),
             "non-BC texture should still return None for BC requests"
@@ -873,8 +784,7 @@ mod tests {
 
     #[test]
     fn test_is_cached_reports_bc_preloaded_textures() {
-        let temp_dir = TempDir::new().unwrap();
-        let mut mgr = TextureManager::new(temp_dir.path());
+        let mut mgr = TextureManager::new();
         mgr.bc_cache.insert(
             normalize_wow_path(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"),
             BcTextureResult {
@@ -893,8 +803,7 @@ mod tests {
 
     #[test]
     fn test_load_texture_prefer_bc_reuses_cached_bc_buffer() {
-        let temp_dir = TempDir::new().unwrap();
-        let mut mgr = TextureManager::new(temp_dir.path());
+        let mut mgr = TextureManager::new();
         mgr.bc_cache.insert(
             "cached-dxt".to_string(),
             BcTextureResult {
@@ -931,14 +840,7 @@ mod tests {
 
     #[test]
     fn test_preloaded_talent_textures_cover_active_class_atlas_entries() {
-        let textures_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("textures");
-        if !textures_path.exists() {
-            eprintln!("Skipping test: textures directory not found");
-            return;
-        }
-        let home = dirs::home_dir().unwrap_or_default();
-        let mut mgr = TextureManager::new(&textures_path)
-            .with_interface_path(home.join("Projects/wow/Interface"));
+        let mut mgr = TextureManager::new();
 
         mgr.preload_talent_textures(790);
         mgr.preload_talent_panel_textures("Paladin");
@@ -1022,14 +924,7 @@ mod tests {
 
     #[test]
     fn test_preloaded_talent_icons_are_cached() {
-        let textures_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("textures");
-        if !textures_path.exists() {
-            eprintln!("Skipping test: textures directory not found");
-            return;
-        }
-        let home = dirs::home_dir().unwrap_or_default();
-        let mut mgr = TextureManager::new(&textures_path)
-            .with_interface_path(home.join("Projects/wow/Interface"));
+        let mut mgr = TextureManager::new();
         mgr.preload_talent_textures(790);
 
         let missing = find_uncached_talent_icons(&mgr, 790);

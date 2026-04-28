@@ -122,7 +122,7 @@ enum Commands {
         addons: PathBuf,
 
         /// Path to WoW Interface directory (for BLP textures)
-        #[arg(long, default_value_os_t = default_interface_path())]
+        #[arg(long, default_value_os_t = dirs::home_dir().unwrap_or_default().join("Projects/wow/Interface"))]
         interface: PathBuf,
 
         /// Output directory for WebP textures
@@ -215,10 +215,6 @@ fn default_blizzard_ui_path() -> PathBuf {
 
 fn default_wowless_path() -> PathBuf {
     dirs::home_dir().unwrap_or_default().join("Repos/wowless")
-}
-
-fn default_interface_path() -> PathBuf {
-    wow_ui_sim::paths::default_interface_path()
 }
 
 fn main() {

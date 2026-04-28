@@ -5,7 +5,6 @@
 //! paths (e.g. `Fonts\\FRIZQT__.TTF`) to fontdb family names.
 
 use std::collections::HashMap;
-use std::path::Path;
 
 use cosmic_text::fontdb;
 
@@ -15,6 +14,9 @@ const WOW_FONT_ARIAL_NARROW: &str = "Fonts\\ARIALN.TTF";
 
 /// Default WoW font (Friz Quadrata).
 pub const DEFAULT_WOW_FONT: &str = WOW_FONT_FRIZ;
+
+/// Embedded fallback for FRIZQT__.TTF — used when CASC is unavailable or the lookup misses.
+const FRIZQT_FALLBACK: &[u8] = include_bytes!("../../assets/fonts/FRIZQT__.TTF");
 
 /// Font entry mapping a WoW path to a fontdb family name.
 #[derive(Debug, Clone)]
@@ -33,16 +35,12 @@ const WOW_FONT_FILES: &[WowFontFile] = &[
         wow_paths: &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"],
     },
     WowFontFile {
-        filename: "ARIALN.ttf",
+        filename: "ARIALN.TTF",
         wow_paths: &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"],
     },
     WowFontFile {
         filename: "frizqt___cyr.ttf",
         wow_paths: &["Fonts\\frizqt___cyr.ttf"],
-    },
-    WowFontFile {
-        filename: "TrajanPro3SemiBold.ttf",
-        wow_paths: &["Fonts\\TrajanPro3SemiBold.ttf"],
     },
 ];
 
@@ -66,16 +64,60 @@ impl std::fmt::Debug for WowFontSystem {
     }
 }
 
+#[cfg(feature = "casc")]
+use std::sync::OnceLock;
+
+#[cfg(feature = "casc")]
+static FONT_CASC_INITIALIZED: OnceLock<bool> = OnceLock::new();
+
+#[cfg(feature = "casc")]
+fn casc_enabled() -> bool {
+    *FONT_CASC_INITIALIZED.get_or_init(|| {
+        // Opt-out: WOW_SIM_CASC=0 disables. Anything else (or unset) enables.
+        if std::env::var("WOW_SIM_CASC").ok().as_deref() == Some("0") {
+            return false;
+        }
+        // asset-resolver looks for its data dir via GAME_ENGINE_SHARED_ROOT.
+        // Default to the sibling game-engine repo if the user hasn't pointed it elsewhere.
+        if std::env::var_os("GAME_ENGINE_SHARED_ROOT").is_none()
+            && let Some(home) = dirs::home_dir()
+        {
+            let default_root = home.join("Projects/world-of-osso/game-engine");
+            if default_root.exists() {
+                // SAFETY: set_var before any other thread reads it (OnceLock guarantees first call).
+                unsafe {
+                    std::env::set_var("GAME_ENGINE_SHARED_ROOT", &default_root);
+                }
+            }
+        }
+        // Require a discoverable WoW install, otherwise no point trying.
+        asset_resolver::wow_install_path().is_some()
+    })
+}
+
+#[cfg(feature = "casc")]
+fn try_casc_font_bytes(filename: &str) -> Option<Vec<u8>> {
+    if !casc_enabled() {
+        return None;
+    }
+    let path = format!("fonts/{}", filename.to_lowercase());
+    let fdid = asset_resolver::lookup_path(&path)?;
+    asset_resolver::resolve_bytes(fdid)
+}
+
+#[cfg(not(feature = "casc"))]
+fn try_casc_font_bytes(_filename: &str) -> Option<Vec<u8>> {
+    None
+}
+
 impl WowFontSystem {
-    /// Create a new font system with WoW fonts loaded from the given directory.
-    ///
-    /// `fonts_dir` should point to the `fonts/` directory containing TTF files.
-    pub fn new(fonts_dir: &Path) -> Self {
+    /// Create a new font system with WoW fonts loaded from CASC (or embedded fallback).
+    pub fn new() -> Self {
         let mut db = fontdb::Database::new();
         let mut font_map = HashMap::new();
 
         for font_file in WOW_FONT_FILES {
-            load_wow_font(fonts_dir, font_file, &mut db, &mut font_map);
+            load_wow_font(font_file, &mut db, &mut font_map);
         }
 
         let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
@@ -200,15 +242,39 @@ impl WowFontSystem {
     }
 }
 
+impl Default for WowFontSystem {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn load_wow_font(
-    fonts_dir: &Path,
     font_file: &WowFontFile,
     db: &mut fontdb::Database,
     font_map: &mut HashMap<String, FontEntry>,
 ) {
-    let path = fonts_dir.join(font_file.filename);
-    let Some(data) = read_font_file(&path) else {
-        return;
+    let is_frizqt = font_file.filename.eq_ignore_ascii_case("FRIZQT__.TTF");
+
+    let data = match try_casc_font_bytes(font_file.filename) {
+        Some(bytes) => {
+            tracing::debug!("Loaded font {} from CASC", font_file.filename);
+            bytes
+        }
+        None => {
+            if is_frizqt {
+                tracing::debug!(
+                    "Font {} not found in CASC, using embedded fallback",
+                    font_file.filename
+                );
+                FRIZQT_FALLBACK.to_vec()
+            } else {
+                tracing::warn!(
+                    "Font {} not found in CASC, skipping",
+                    font_file.filename
+                );
+                return;
+            }
+        }
     };
 
     let family_name = fontdb_family_name(&data).unwrap_or_else(|| font_file.filename.to_string());
@@ -216,25 +282,10 @@ fn load_wow_font(
     register_font_aliases(font_file.wow_paths, &family_name, font_map);
 
     tracing::debug!(
-        "Loaded font {} -> family '{}'",
+        "Registered font {} -> family '{}'",
         font_file.filename,
         family_name
     );
-}
-
-fn read_font_file(path: &Path) -> Option<Vec<u8>> {
-    if !path.exists() {
-        tracing::warn!("Font file not found: {}", path.display());
-        return None;
-    }
-
-    match std::fs::read(path) {
-        Ok(data) => Some(data),
-        Err(error) => {
-            tracing::warn!("Failed to read font {}: {}", path.display(), error);
-            None
-        }
-    }
 }
 
 fn register_font_aliases(
@@ -268,28 +319,24 @@ fn fontdb_family_name(data: &[u8]) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
-
-    fn fonts_dir() -> PathBuf {
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fonts")
-    }
 
     #[test]
     fn loads_wow_fonts() {
-        let fs = WowFontSystem::new(&fonts_dir());
-        // 4 font files loaded: FRIZQT__, ARIALN, frizqt___cyr, TrajanPro3SemiBold
-        // Case-insensitive aliases collapse to 4 unique normalized keys
-        assert_eq!(
-            fs.font_map.len(),
-            4,
-            "font_map: {:?}",
+        let fs = WowFontSystem::new();
+        // 3 font files: FRIZQT__ (2 aliases), ARIALN (2 aliases), frizqt___cyr (1 alias)
+        // TrajanPro3SemiBold removed (not in CASC)
+        // When CASC is unavailable only FRIZQT__ (embedded fallback) is guaranteed.
+        // Just verify at least the fallback loaded.
+        assert!(
+            !fs.font_map.is_empty(),
+            "font_map should have at least the FRIZQT fallback: {:?}",
             fs.font_map.keys().collect::<Vec<_>>()
         );
     }
 
     #[test]
     fn resolves_friz_quadrata() {
-        let fs = WowFontSystem::new(&fonts_dir());
+        let fs = WowFontSystem::new();
         let name = fs.family_name(Some("Fonts\\FRIZQT__.TTF")).unwrap();
         assert!(
             name.contains("Friz") || name.contains("Fritz"),
@@ -299,7 +346,7 @@ mod tests {
 
     #[test]
     fn resolves_case_insensitive() {
-        let fs = WowFontSystem::new(&fonts_dir());
+        let fs = WowFontSystem::new();
         let upper = fs.family_name(Some("Fonts\\FRIZQT__.TTF"));
         let lower = fs.family_name(Some("Fonts\\frizqt__.ttf"));
         let mixed = fs.family_name(Some("fonts\\FrizQT__.TTF"));
@@ -309,7 +356,7 @@ mod tests {
 
     #[test]
     fn unknown_font_falls_back_to_default() {
-        let fs = WowFontSystem::new(&fonts_dir());
+        let fs = WowFontSystem::new();
         let name = fs.family_name(Some("Fonts\\NONEXISTENT.TTF")).unwrap();
         assert!(
             name.contains("Friz") || name.contains("Fritz"),
@@ -319,7 +366,7 @@ mod tests {
 
     #[test]
     fn none_font_uses_default() {
-        let fs = WowFontSystem::new(&fonts_dir());
+        let fs = WowFontSystem::new();
         let name = fs.family_name(None).unwrap();
         assert!(
             name.contains("Friz") || name.contains("Fritz"),
@@ -329,7 +376,7 @@ mod tests {
 
     #[test]
     fn can_shape_text_with_loaded_font() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let attrs = fs.attrs_owned(Some("Fonts\\FRIZQT__.TTF"));
         let metrics = cosmic_text::Metrics::new(14.0, 18.0);
         let mut buffer = cosmic_text::Buffer::new(&mut fs.font_system, metrics);
@@ -350,21 +397,21 @@ mod tests {
 
     #[test]
     fn measure_text_width_returns_positive() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let w = fs.measure_text_width("Hello", Some(WOW_FONT_FRIZ), 14.0);
         assert!(w > 0.0, "Expected positive width, got {w}");
     }
 
     #[test]
     fn measure_text_width_empty_is_zero() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let w = fs.measure_text_width("", Some(WOW_FONT_FRIZ), 14.0);
         assert_eq!(w, 0.0);
     }
 
     #[test]
     fn measure_text_width_scales_with_length() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let short = fs.measure_text_width("Hi", Some(WOW_FONT_FRIZ), 14.0);
         let long = fs.measure_text_width("Hello World", Some(WOW_FONT_FRIZ), 14.0);
         assert!(
@@ -375,7 +422,7 @@ mod tests {
 
     #[test]
     fn measure_text_height_single_line() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let h = fs.measure_text_height("Hello", Some(WOW_FONT_FRIZ), 14.0, None);
         let line_height = (14.0_f32 * 1.2).ceil();
         assert_eq!(h, line_height, "Single line should equal line_height");
@@ -383,7 +430,7 @@ mod tests {
 
     #[test]
     fn measure_text_height_wraps_with_narrow_width() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let long_text =
             "This is a fairly long sentence that should wrap when given a narrow width constraint";
         let single = fs.measure_text_height(long_text, Some(WOW_FONT_FRIZ), 14.0, None);
@@ -396,7 +443,7 @@ mod tests {
 
     #[test]
     fn measure_text_height_empty_is_zero() {
-        let mut fs = WowFontSystem::new(&fonts_dir());
+        let mut fs = WowFontSystem::new();
         let h = fs.measure_text_height("", Some(WOW_FONT_FRIZ), 14.0, Some(200.0));
         assert_eq!(h, 0.0);
     }

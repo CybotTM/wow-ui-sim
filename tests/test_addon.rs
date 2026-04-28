@@ -1,7 +1,6 @@
 //! Tests using the purpose-built TestAddon.
 
 use std::cell::RefCell;
-use std::path::PathBuf;
 use std::rc::Rc;
 
 use std::fs;
@@ -522,7 +521,7 @@ fn test_buff_duration_text_centered_under_icon() {
     // After SetFormattedText, the Duration should have non-zero width so the
     // TOP anchor centers it horizontally under the Icon.
     let env = WowLuaEnv::new().unwrap();
-    let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
+    let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
     env.set_font_system(font_system);
 
     env.exec(

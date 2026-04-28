@@ -76,7 +76,7 @@ fn masked_circular_class_texture_keeps_background_visible_in_corners() {
     );
 
     let mut tex_mgr =
-        render_order_support::make_texture_manager().expect("texture directories should exist");
+        render_order_support::make_texture_manager();
     let batch = render_order_support::build_screenshot_like_batch(
         &env,
         width,

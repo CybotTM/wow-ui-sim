@@ -5,7 +5,6 @@ use rilua::LuaApiMut;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
 use std::collections::VecDeque;
-use std::path::PathBuf;
 use std::rc::Rc;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
@@ -24,9 +23,6 @@ use iced_layout_inspector::server as debug_server;
 use super::Message;
 use super::state::InspectorState;
 
-/// Default path to WoW TTF fonts.
-pub const DEFAULT_FONTS_PATH: &str = "./fonts";
-
 const DEFAULT_FAST_TICK_MS: u64 = 16;
 
 /// Debug visualization options.
@@ -39,7 +35,6 @@ pub struct DebugOptions {
 // Thread-local storage for init params
 thread_local! {
     pub static INIT_ENV: RefCell<Option<WowLuaEnv>> = const { RefCell::new(None) };
-    pub static INIT_TEXTURES: RefCell<Option<PathBuf>> = const { RefCell::new(None) };
     pub static INIT_DEBUG: RefCell<Option<DebugOptions>> = const { RefCell::new(None) };
     pub static INIT_SAVED_VARS: RefCell<Option<SavedVariablesManager>> = const { RefCell::new(None) };
     pub static INIT_EXEC_LUA: RefCell<Option<(String, bool)>> = const { RefCell::new(None) };
@@ -179,7 +174,7 @@ impl App {
     }
 
     pub fn boot() -> (Self, Task<Message>) {
-        let (env_rc, textures_path, saved_vars) = Self::take_init_params();
+        let (env_rc, saved_vars) = Self::take_init_params();
         let config = crate::config::SimConfig::load();
         Self::apply_config_to_state(&env_rc, &config);
 
@@ -194,7 +189,7 @@ impl App {
         let log_messages = Self::collect_startup_logs(&env_rc);
 
         let (texture_manager, font_system, glyph_atlas) =
-            Self::init_rendering(&env_rc, textures_path);
+            Self::init_rendering(&env_rc);
         let (cmd_rx, lua_rx) = Self::init_servers();
         let (debug_borders, debug_anchors) = Self::resolve_debug_flags();
 
@@ -337,19 +332,12 @@ impl App {
         env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
     }
 
-    fn take_init_params() -> (
-        Rc<RefCell<WowLuaEnv>>,
-        PathBuf,
-        Option<SavedVariablesManager>,
-    ) {
+    fn take_init_params() -> (Rc<RefCell<WowLuaEnv>>, Option<SavedVariablesManager>) {
         let env = INIT_ENV
             .with(|cell| cell.borrow_mut().take())
             .expect("WowLuaEnv not initialized");
-        let textures_path = INIT_TEXTURES
-            .with(|cell| cell.borrow_mut().take())
-            .unwrap_or_else(crate::paths::default_textures_path);
         let saved_vars = INIT_SAVED_VARS.with(|cell| cell.borrow_mut().take());
-        (Rc::new(RefCell::new(env)), textures_path, saved_vars)
+        (Rc::new(RefCell::new(env)), saved_vars)
     }
 
     /// Drain console output collected during startup.
@@ -365,16 +353,12 @@ impl App {
     #[allow(clippy::type_complexity)]
     fn init_rendering(
         env_rc: &Rc<RefCell<WowLuaEnv>>,
-        textures_path: PathBuf,
     ) -> (
         Rc<RefCell<TextureManager>>,
         Rc<RefCell<WowFontSystem>>,
         Rc<RefCell<GlyphAtlas>>,
     ) {
-        let mut tex_mgr = TextureManager::new(textures_path)
-            .with_interface_path(crate::paths::default_interface_path())
-            .with_addons_path(crate::paths::default_addons_path())
-            .with_disk_cache("./cache/textures");
+        let mut tex_mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
         if Self::eager_startup_texture_preloads_enabled() {
             let class_name = {
                 let env = env_rc.borrow();
@@ -396,9 +380,7 @@ impl App {
             }
         }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-            DEFAULT_FONTS_PATH,
-        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         env_rc.borrow().set_font_system(Rc::clone(&font_system));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         (texture_manager, font_system, glyph_atlas)
@@ -604,12 +586,8 @@ mod tests {
         ));
         env.borrow().set_screen_mode(screen_kind);
 
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
-            "./textures",
-        ))));
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-            DEFAULT_FONTS_PATH,
-        ))));
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();

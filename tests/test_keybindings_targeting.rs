@@ -261,7 +261,7 @@ fn target_frame_portrait_corners_match_background_when_replaced_with_class_icon(
         let portrait_rect = target_portrait_rect(&env, width as f32, height as f32);
 
         let mut visible_mgr =
-            render_order_support::make_texture_manager().expect("texture directories should exist");
+            render_order_support::make_texture_manager();
         let visible_batch =
             render_order_support::build_screenshot_like_batch(&env, width, height, Some("TargetFrame"));
         let visible_render = render_to_image(&visible_batch, &mut visible_mgr, width, height, None);
@@ -271,7 +271,7 @@ fn target_frame_portrait_corners_match_background_when_replaced_with_class_icon(
         wow_ui_sim::startup::run_extra_update_ticks(&env, 1);
 
         let mut hidden_mgr =
-            render_order_support::make_texture_manager().expect("texture directories should exist");
+            render_order_support::make_texture_manager();
         let hidden_batch =
             render_order_support::build_screenshot_like_batch(&env, width, height, Some("TargetFrame"));
         let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, width, height, None);

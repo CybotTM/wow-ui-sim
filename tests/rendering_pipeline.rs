@@ -10,8 +10,6 @@
 
 mod common;
 
-use std::path::PathBuf;
-
 use common::env_with_shared_xml;
 use wow_ui_sim::atlas::{ATLAS_DB, get_atlas_info};
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
@@ -22,20 +20,8 @@ use wow_ui_sim::texture::TextureManager;
 // Helpers
 // ============================================================================
 
-const INTERFACE_PATH: &str = "/home/osso/Projects/wow/Interface";
-const LOCAL_TEXTURES: &str = "./textures";
-
-fn make_texture_manager() -> Option<TextureManager> {
-    let textures_path = PathBuf::from(LOCAL_TEXTURES);
-    if !textures_path.exists() {
-        return None;
-    }
-
-    let mut mgr = TextureManager::new(&textures_path);
-    if PathBuf::from(INTERFACE_PATH).exists() {
-        mgr = mgr.with_interface_path(INTERFACE_PATH);
-    }
-    Some(mgr)
+fn make_texture_manager() -> TextureManager {
+    TextureManager::new()
 }
 
 /// Build strata buckets from a WowLuaEnv (mutable borrow), then return a clone.
@@ -59,10 +45,7 @@ const MINIMAL_SCROLLBAR_ATLAS: &str = "Interface/Buttons/ScrollBarProportional";
 
 #[test]
 fn layer1_load_scroll_up_button_texture() {
-    let Some(mut mgr) = make_texture_manager() else {
-        eprintln!("Skipping: texture directories not found");
-        return;
-    };
+    let mut mgr = make_texture_manager();
 
     let data = mgr.load(SCROLL_UP_BUTTON);
     assert!(
@@ -84,10 +67,7 @@ fn layer1_load_scroll_up_button_texture() {
 
 #[test]
 fn layer1_load_scroll_down_button_texture() {
-    let Some(mut mgr) = make_texture_manager() else {
-        eprintln!("Skipping: texture directories not found");
-        return;
-    };
+    let mut mgr = make_texture_manager();
 
     let data = mgr.load(SCROLL_DOWN_BUTTON);
     assert!(
@@ -102,10 +82,7 @@ fn layer1_load_scroll_down_button_texture() {
 
 #[test]
 fn layer1_load_scroll_knob_texture() {
-    let Some(mut mgr) = make_texture_manager() else {
-        eprintln!("Skipping: texture directories not found");
-        return;
-    };
+    let mut mgr = make_texture_manager();
 
     let data = mgr.load(SCROLL_KNOB);
     assert!(
@@ -120,10 +97,7 @@ fn layer1_load_scroll_knob_texture() {
 
 #[test]
 fn layer1_load_minimal_scrollbar_atlas_texture() {
-    let Some(mut mgr) = make_texture_manager() else {
-        eprintln!("Skipping: texture directories not found");
-        return;
-    };
+    let mut mgr = make_texture_manager();
 
     let data = mgr.load(MINIMAL_SCROLLBAR_ATLAS);
     assert!(
@@ -142,10 +116,7 @@ fn layer1_load_minimal_scrollbar_atlas_texture() {
 
 #[test]
 fn layer2_backslash_resolves_same_as_forward_slash() {
-    let Some(mut mgr) = make_texture_manager() else {
-        eprintln!("Skipping: texture directories not found");
-        return;
-    };
+    let mut mgr = make_texture_manager();
 
     let forward = mgr.load("Interface/Buttons/UI-ScrollBar-ScrollUpButton-Up");
     assert!(forward.is_some(), "Forward slash path should load");
@@ -163,10 +134,7 @@ fn layer2_backslash_resolves_same_as_forward_slash() {
 
 #[test]
 fn layer2_case_insensitive_resolution() {
-    let Some(mut mgr) = make_texture_manager() else {
-        eprintln!("Skipping: texture directories not found");
-        return;
-    };
+    let mut mgr = make_texture_manager();
 
     // The actual files use mixed case; try all-lowercase
     let result = mgr.load("interface/buttons/ui-scrollbar-scrollupbutton-up");
@@ -546,7 +514,7 @@ fn layer5_additive_quads_preserve_destination_color_in_overlap() {
         BlendMode::Additive,
     );
 
-    let mut tex_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut tex_mgr = make_texture_manager();
     let image = render_to_image(&batch, &mut tex_mgr, 64, 64, None);
     let red_only = image.get_pixel(16, 16).0;
     let overlap = image.get_pixel(32, 16).0;
@@ -592,10 +560,7 @@ fn layer5_gpu_atlas_upload_and_lookup() {
         return;
     };
 
-    let Some(mut tex_mgr) = make_texture_manager() else {
-        eprintln!("Skipping GPU test: texture directories not found");
-        return;
-    };
+    let mut tex_mgr = make_texture_manager();
 
     let mut atlas = GpuTextureAtlas::new(&device);
     assert!(atlas.is_empty(), "Atlas should start empty");
@@ -699,10 +664,7 @@ fn layer5_gpu_atlas_real_scroll_textures() {
         return;
     };
 
-    let Some(mut tex_mgr) = make_texture_manager() else {
-        eprintln!("Skipping GPU test: texture directories not found");
-        return;
-    };
+    let mut tex_mgr = make_texture_manager();
 
     let mut atlas = GpuTextureAtlas::new(&device);
 

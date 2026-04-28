@@ -72,7 +72,6 @@ pub mod spells;
 pub mod stack;
 pub mod startup;
 pub mod texture;
-pub(crate) mod texture_cache;
 pub mod toc;
 #[path = "../data/traits.rs"]
 pub mod traits;
@@ -83,7 +82,7 @@ pub mod zones;
 
 pub use error::{Error, Result};
 #[cfg(feature = "gui")]
-pub use iced_app::{DebugOptions, run_iced_ui, run_iced_ui_with_textures};
+pub use iced_app::{DebugOptions, run_iced_ui};
 
 /// Blend mode for quad rendering.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

@@ -52,7 +52,7 @@ fn load_settled_game_ui() -> WowLuaEnv {
 }
 
 fn build_text_quad_batch(env: &WowLuaEnv) -> wow_ui_sim::render::QuadBatch {
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
     let buckets = {
         let mut state = env.state().borrow_mut();

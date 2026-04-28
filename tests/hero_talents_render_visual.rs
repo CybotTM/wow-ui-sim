@@ -50,24 +50,12 @@ fn open_class_talent_frame(env: &WowLuaEnv) {
         .expect("Failed to open class talent frame");
 }
 
-fn make_texture_manager() -> Option<TextureManager> {
-    let textures_path = PathBuf::from("./textures");
-    if !textures_path.exists() {
-        return None;
-    }
-
-    let interface_path = dirs::home_dir()
-        .unwrap_or_default()
-        .join("Projects/wow/Interface");
-    let mut mgr = TextureManager::new(textures_path);
-    if interface_path.exists() {
-        mgr = mgr.with_interface_path(interface_path);
-    }
-    Some(mgr)
+fn make_texture_manager() -> TextureManager {
+    TextureManager::new()
 }
 
 fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
-    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+    Rc::new(RefCell::new(WowFontSystem::new()))
 }
 
 fn build_screenshot_like_batch(
@@ -365,7 +353,7 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
         })
         .map(|request| request.path.clone());
 
-    let mut crop_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut crop_mgr = make_texture_manager();
     let crop = load_texture_or_crop(&mut crop_mgr, &icon_request.path)
         .expect("cropped hero spec icon texture should load");
     let crop_image = RgbaImage::from_raw(crop.width, crop.height, crop.rgba.to_vec())
@@ -407,9 +395,9 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
             ));
     }
 
-    let mut isolated_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut isolated_mgr = make_texture_manager();
     let isolated_render = render_to_image(&isolated_batch, &mut isolated_mgr, 1024, 768, None);
-    let mut full_render_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut full_render_mgr = make_texture_manager();
     let full_render = render_to_image(&batch, &mut full_render_mgr, 1024, 768, None);
     let rendered_rect = (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height);
     let crop_rect = (
@@ -484,7 +472,7 @@ fn hero_spec_icon_mask_clips_corners_but_preserves_center_pixels() {
     };
     let rendered_rect = (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height);
 
-    let mut masked_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut masked_mgr = make_texture_manager();
     let masked_batch = build_screenshot_like_batch(&env, 128, 128, None);
     let masked_render = render_to_image(&masked_batch, &mut masked_mgr, 128, 128, None);
 
@@ -501,7 +489,7 @@ fn hero_spec_icon_mask_clips_corners_but_preserves_center_pixels() {
         icon.mask_textures.clear();
     }
 
-    let mut unmasked_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut unmasked_mgr = make_texture_manager();
     let unmasked_batch = build_screenshot_like_batch(&env, 128, 128, None);
     let unmasked_render = render_to_image(&unmasked_batch, &mut unmasked_mgr, 128, 128, None);
 
@@ -580,7 +568,7 @@ fn hiding_hero_talents_container_only_changes_top_center_region() {
         (hero_container_id, hero_rect)
     };
 
-    let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut visible_mgr = make_texture_manager();
     let visible_batch = {
         let buckets = {
             let mut state = env.state().borrow_mut();
@@ -608,7 +596,7 @@ fn hiding_hero_talents_container_only_changes_top_center_region() {
         state.ensure_layout_rects();
     }
 
-    let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut hidden_mgr = make_texture_manager();
     let hidden_batch = {
         let buckets = {
             let mut state = env.state().borrow_mut();
@@ -751,9 +739,9 @@ fn lower_right_artifact_bbox_matches_background_marble_in_raw_player_spells_rend
         "artifact bbox should not overlap solid-color quads: {solid_matches:#?}"
     );
 
-    let mut raw_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut raw_mgr = make_texture_manager();
     let raw_render = render_to_image(&batch, &mut raw_mgr, 1600, 1200, None);
-    let mut marble_mgr = make_texture_manager().expect("texture directories should exist");
+    let mut marble_mgr = make_texture_manager();
     let marble_render = render_to_image(
         &marble_only_batch(1600, 1200),
         &mut marble_mgr,

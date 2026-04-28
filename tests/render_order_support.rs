@@ -28,23 +28,11 @@ pub(crate) fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
 }
 
 fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
-    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+    Rc::new(RefCell::new(WowFontSystem::new()))
 }
 
-pub(crate) fn make_texture_manager() -> Option<TextureManager> {
-    let textures_path = PathBuf::from("./textures");
-    if !textures_path.exists() {
-        return None;
-    }
-
-    let interface_path = dirs::home_dir()
-        .unwrap_or_default()
-        .join("Projects/wow/Interface");
-    let mut mgr = TextureManager::new(textures_path);
-    if interface_path.exists() {
-        mgr = mgr.with_interface_path(interface_path);
-    }
-    Some(mgr)
+pub(crate) fn make_texture_manager() -> TextureManager {
+    TextureManager::new()
 }
 
 pub(crate) fn build_screenshot_like_batch(

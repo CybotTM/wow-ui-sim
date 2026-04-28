@@ -11,9 +11,7 @@ fn blizzard_ui_dir() -> PathBuf {
 
 fn setup_full_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_font_system(Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-        "./fonts",
-    )))));
+    env.set_font_system(Rc::new(RefCell::new(WowFontSystem::new())));
     env.set_screen_size(1024.0, 768.0);
 
     let ui = blizzard_ui_dir();

@@ -6,7 +6,6 @@ use crate::screen::ScreenKind;
 use crate::texture::TextureManager;
 use iced::Size;
 use std::cell::RefCell;
-use std::path::PathBuf;
 use std::rc::Rc;
 use tokio::sync::mpsc;
 
@@ -17,12 +16,8 @@ fn build_test_app(screen_kind: ScreenKind) -> App {
     env.borrow().set_screen_mode(screen_kind);
     env.borrow().set_screen_size(800.0, 600.0);
 
-    let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
-        "./textures",
-    ))));
-    let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
-        super::super::app::DEFAULT_FONTS_PATH,
-    ))));
+    let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
+    let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
     let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
     let (_cmd_tx, cmd_rx) = mpsc::channel(1);
     let (_lua_tx, lua_rx) = std::sync::mpsc::channel();

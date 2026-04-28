@@ -234,7 +234,7 @@ pub struct WowFontSystem {
 }
 ```
 
-Supported fonts: FRIZQT__.TTF (default), ARIALN.TTF, frizqt___cyr.ttf, TrajanPro3SemiBold.ttf. Uppercase path normalization for HashMap lookup, fallback to default if not found.
+Supported fonts: FRIZQT__.TTF (default), ARIALN.TTF, frizqt___cyr.ttf — loaded from CASC by default. FRIZQT__.TTF also has an embedded fallback (`assets/fonts/FRIZQT__.TTF`) used when CASC is unavailable. Uppercase path normalization for HashMap lookup, fallback to default if not found.
 
 ---
 

@@ -163,7 +163,6 @@ mod tests {
     use crate::lua_api::env::WowLuaAppData;
     use rilua::LuaApi;
     use std::cell::RefCell;
-    use std::path::PathBuf;
     use std::rc::Rc;
 
     #[test]
@@ -241,7 +240,7 @@ mod tests {
     #[test]
     fn set_font_system_updates_rilua_app_data() {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("."))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         env.set_font_system(Rc::clone(&font_system));
         let rilua = env.rilua();
         let app_data = rilua

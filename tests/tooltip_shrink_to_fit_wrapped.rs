@@ -29,10 +29,9 @@ fn test_set_shrink_to_fit_wrapped_false_keeps_wrapped_line_width() {
 }
 
 fn update_tooltip_sizes(env: &WowLuaEnv) {
-    use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
 
-    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut font_sys = WowFontSystem::new();
     let mut state = env.state().borrow_mut();
     wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
 }

@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -15,7 +14,6 @@ use wow_ui_sim::render::{FrameQuadSnapshot, GlyphAtlas, QuadBatch, WowFontSystem
 use wow_ui_sim::widget::{Anchor, FrameStrata};
 
 const PERF_SCREEN_SIZE: (f32, f32) = (1024.0, 768.0);
-const PERF_FONTS_PATH: &str = "./fonts";
 const PERF_DIRTY_TEXTURE_NAME: &str = "PerfDirtyTexture";
 const PERF_TOOLTIP_OWNER_NAME: &str = "PerfTooltipOwner";
 const PERF_TOOLTIP_HEADER: &str = "Performance Tooltip";
@@ -64,7 +62,7 @@ pub fn measure_strata_bucket_rebuild(env: &WowLuaEnv) -> Duration {
 }
 
 pub fn measure_full_quad_batch_build(env: &WowLuaEnv) -> Duration {
-    let mut font_system = WowFontSystem::new(Path::new(PERF_FONTS_PATH));
+    let mut font_system = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
 
     let started = Instant::now();
@@ -95,7 +93,7 @@ pub fn measure_full_quad_batch_build(env: &WowLuaEnv) -> Duration {
 pub fn measure_dirty_tree_quad_rebuild(env: &WowLuaEnv) -> Duration {
     ensure_perf_dirty_texture_exists(env);
 
-    let mut font_system = WowFontSystem::new(Path::new(PERF_FONTS_PATH));
+    let mut font_system = WowFontSystem::new();
     let mut glyph_atlas = GlyphAtlas::new();
     let mut strata_cache = empty_strata_cache();
     let mut snapshot_cache = empty_snapshot_cache();
@@ -191,7 +189,7 @@ pub fn measure_dirty_tree_quad_rebuild(env: &WowLuaEnv) -> Duration {
 pub fn measure_tooltip_collect_and_quad_emission(env: &WowLuaEnv) -> Duration {
     seed_perf_tooltip(env);
 
-    let mut font_system = WowFontSystem::new(Path::new(PERF_FONTS_PATH));
+    let mut font_system = WowFontSystem::new();
     {
         let mut state = env.state().borrow_mut();
         update_tooltip_sizes(&mut state, &mut font_system);

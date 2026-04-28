@@ -86,23 +86,6 @@ Static analysis of `vendor/wow-ui-source/` to find gaps between what BlizzardUI 
 wow-cli audit-api --gaps --format plan      # Markdown checkboxes for PLAN.md
 ```
 
-### `convert-texture`
-
-Convert a single BLP texture to WebP.
-
-```bash
-wow-cli convert-texture ~/Projects/wow/Interface/BUTTONS/redbuttons.BLP -o ./textures/buttons/redbuttons.webp
-```
-
-### `extract-textures`
-
-Batch-extract all textures referenced by addons from BLP to WebP.
-
-```bash
-wow-cli extract-textures
-wow-cli extract-textures --output ./tex
-```
-
 ## Common Flags (wow-sim)
 
 | Flag | Effect |

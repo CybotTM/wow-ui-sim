@@ -28,7 +28,7 @@ fn debug_elements_enable_borders_and_anchors() {
     let dispatch = CommandDispatch {
         command: None,
         env,
-        font_system: Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts")))),
+        font_system: Rc::new(RefCell::new(WowFontSystem::new())),
         delay: None,
         exec_lua: None,
         saved_stdout: None,

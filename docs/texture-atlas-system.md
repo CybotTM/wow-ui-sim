@@ -18,8 +18,6 @@ Three interconnected layers:
 
 ```rust
 pub struct TextureManager {
-    textures_path: PathBuf,           // ./textures (local WebP cache)
-    interface_path: Option<PathBuf>,  // ~/Projects/wow/Interface (extracted BLP files)
     addons_path: Option<PathBuf>,     // Addon directories
     cache: HashMap<String, TextureData>,       // Loaded texture pixels
     sub_cache: HashMap<String, TextureData>,   // Sub-region extractions
@@ -28,22 +26,20 @@ pub struct TextureManager {
 
 **Key type:** `TextureData { width: u32, height: u32, pixels: Vec<u8> }` -- RGBA8 format
 
-### Path Resolution Strategy (lines 57-157)
+### Path Resolution Strategy
 
-Four-tier priority system with case-insensitive matching:
+Two-tier priority:
 
-1. **Addon textures** -- `Interface/AddOns/{AddonName}/...` (lines 130-137)
-2. **Local WebP cache** -- `./textures/...` (lines 145-148)
-3. **Game files** -- `~/Projects/wow/Interface/...` extracted BLP (lines 151-154)
-4. **Case-insensitive fallback** -- Crawls directories byte-by-byte (lines 184-217)
+1. **Addon textures** -- `Interface/AddOns/{AddonName}/...`
+2. **CASC** -- the live WoW install at `/syncthing/World of Warcraft/Data`, resolved via the `asset-resolver` crate (`src/texture/resolve.rs:try_casc_resolve`). The first hit retries `path`, `path.blp`, `path.BLP`, `path.tga`, `path.TGA`, `path.ttf`, `path.TTF`, `path.otf`, `path.OTF`. Extracted BLPs land in `~/.cache/wow-ui-sim/casc-extract/<listfile/path>`.
 
-**Extension priority** (line 162): `webp > WEBP > PNG > png > tga > TGA > blp > BLP > jpg > JPG`
+CASC is gated behind the `casc` Cargo feature (default-on). Set `WOW_SIM_CASC=0` to disable.
 
-### Path Normalization (lines 233-243)
+### Path Normalization
 
-Replace backslashes with forward slashes, remove file extension. Example: `Interface\Buttons\UI-Panel-Button-Up.blp` -> `Interface/Buttons/UI-Panel-Button-Up`
+Replace backslashes with forward slashes, remove file extension. Example: `Interface\Buttons\UI-Panel-Button-Up.blp` -> `Interface/Buttons/UI-Panel-Button-Up`.
 
-### File Format Support (lines 246-275)
+### File Format Support
 
 - **BLP**: `image_blp` crate (0.24 compat layer, since simulator uses `image` 0.25)
 - **PNG/WebP/TGA/JPG**: Standard `image` crate, all converted to RGBA8

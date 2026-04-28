@@ -1033,28 +1033,18 @@ mod tests {
     use iced_runtime::window::Action as WindowAction;
     use std::cell::RefCell;
     use std::collections::HashMap;
-    use std::path::Path;
-    use std::path::PathBuf;
     use std::rc::Rc;
     use tempfile::tempdir;
     use tokio::sync::mpsc;
 
     fn build_test_app(screen_kind: ScreenKind) -> App {
-        build_test_app_with_textures(screen_kind, Path::new("./textures"))
-    }
-
-    fn build_test_app_with_textures(screen_kind: ScreenKind, textures_path: &Path) -> App {
         let env = Rc::new(RefCell::new(
             WowLuaEnv::new().expect("Failed to create Lua environment"),
         ));
         env.borrow().set_screen_mode(screen_kind);
 
-        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
-            textures_path,
-        ))));
-        let font_system = Rc::new(RefCell::new(crate::render::WowFontSystem::new(
-            &PathBuf::from(super::super::app::DEFAULT_FONTS_PATH),
-        )));
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
+        let font_system = Rc::new(RefCell::new(crate::render::WowFontSystem::new()));
         let glyph_atlas = Rc::new(RefCell::new(crate::render::GlyphAtlas::new()));
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);
         let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
@@ -1302,7 +1292,7 @@ mod tests {
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
         image.save(&texture_path).unwrap();
 
-        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let mut app = build_test_app(ScreenKind::Game);
         app.screen_size.set(Size::new(1024.0, 768.0));
         app.selected_rot_level = "Off".to_string();
         app.strata_dirty.set(0);
@@ -1398,7 +1388,7 @@ mod tests {
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
         image.save(&texture_path).unwrap();
 
-        let app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let app = build_test_app(ScreenKind::Game);
         app.strata_dirty.set(0);
         app.textures_pending.set(false);
 
@@ -1429,7 +1419,7 @@ mod tests {
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
         image.save(&texture_path).unwrap();
 
-        let app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let app = build_test_app(ScreenKind::Game);
         app.strata_dirty.set(0);
         app.textures_pending.set(false);
 
@@ -1460,7 +1450,7 @@ mod tests {
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
         image.save(&texture_path).unwrap();
 
-        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let mut app = build_test_app(ScreenKind::Game);
         app.screen_size.set(Size::new(1024.0, 768.0));
         app.selected_rot_level = "Off".to_string();
         app.strata_dirty.set(0);
@@ -1499,8 +1489,7 @@ mod tests {
 
     #[test]
     fn process_timers_skips_redraw_when_pending_state_does_not_progress() {
-        let temp_dir = tempdir().unwrap();
-        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let mut app = build_test_app(ScreenKind::Game);
         app.screen_size.set(Size::new(1024.0, 768.0));
         app.selected_rot_level = "Off".to_string();
         app.strata_dirty.set(0);
@@ -1525,7 +1514,7 @@ mod tests {
         let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
         image.save(&texture_path).unwrap();
 
-        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let mut app = build_test_app(ScreenKind::Game);
         app.screen_size.set(Size::new(1024.0, 768.0));
         app.selected_rot_level = "Off".to_string();
         app.strata_dirty.set(0);
@@ -1567,7 +1556,7 @@ mod tests {
         image.save(&visible_texture).unwrap();
         image.save(&queued_texture).unwrap();
 
-        let mut app = build_test_app_with_textures(ScreenKind::Game, temp_dir.path());
+        let mut app = build_test_app(ScreenKind::Game);
         app.screen_size.set(Size::new(1024.0, 768.0));
         app.selected_rot_level = "Off".to_string();
         app.strata_dirty.set(0);
