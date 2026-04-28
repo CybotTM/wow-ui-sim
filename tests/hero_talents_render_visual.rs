@@ -51,19 +51,14 @@ fn open_class_talent_frame(env: &WowLuaEnv) {
 }
 
 fn make_texture_manager() -> Option<TextureManager> {
-    let home = dirs::home_dir().unwrap_or_default();
-    let local_textures = PathBuf::from("./textures");
-    let textures_path = if local_textures.exists() {
-        local_textures
-    } else {
-        let fallback = home.join("Repos/wow-ui-textures");
-        if !fallback.exists() {
-            return None;
-        }
-        fallback
-    };
+    let textures_path = PathBuf::from("./textures");
+    if !textures_path.exists() {
+        return None;
+    }
 
-    let interface_path = home.join("Projects/wow/Interface");
+    let interface_path = dirs::home_dir()
+        .unwrap_or_default()
+        .join("Projects/wow/Interface");
     let mut mgr = TextureManager::new(textures_path);
     if interface_path.exists() {
         mgr = mgr.with_interface_path(interface_path);

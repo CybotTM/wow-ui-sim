@@ -24,16 +24,12 @@ use wow_ui_sim::texture::TextureManager;
 
 const INTERFACE_PATH: &str = "/home/osso/Projects/wow/Interface";
 const LOCAL_TEXTURES: &str = "./textures";
-const FALLBACK_TEXTURES: &str = "/home/osso/Repos/wow-ui-textures";
 
 fn make_texture_manager() -> Option<TextureManager> {
-    let textures_path = if PathBuf::from(LOCAL_TEXTURES).exists() {
-        PathBuf::from(LOCAL_TEXTURES)
-    } else if PathBuf::from(FALLBACK_TEXTURES).exists() {
-        PathBuf::from(FALLBACK_TEXTURES)
-    } else {
+    let textures_path = PathBuf::from(LOCAL_TEXTURES);
+    if !textures_path.exists() {
         return None;
-    };
+    }
 
     let mut mgr = TextureManager::new(&textures_path);
     if PathBuf::from(INTERFACE_PATH).exists() {

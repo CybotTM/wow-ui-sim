@@ -32,15 +32,7 @@ pub fn default_textures_path() -> PathBuf {
     if let Some(path) = env_path("WOW_SIM_TEXTURES_PATH") {
         return path;
     }
-
-    let local = PathBuf::from("./textures");
-    if local.exists() {
-        return local;
-    }
-
-    dirs::home_dir()
-        .unwrap_or_default()
-        .join("Repos/wow-ui-textures")
+    PathBuf::from("./textures")
 }
 
 pub fn default_casc_data_path() -> Option<PathBuf> {

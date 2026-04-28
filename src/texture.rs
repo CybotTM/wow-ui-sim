@@ -15,7 +15,7 @@ use image_blp::types::BlpContent;
 /// Texture manager that loads and caches textures.
 #[derive(Debug)]
 pub struct TextureManager {
-    /// Base path to wow-ui-textures repository (for game UI textures).
+    /// Base path to local WebP textures (`./textures`).
     textures_path: PathBuf,
     /// Base path to WoW Interface directory (for extracted game files).
     interface_path: Option<PathBuf>,
