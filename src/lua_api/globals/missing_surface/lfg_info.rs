@@ -77,6 +77,36 @@ fn get_lfg_category_info(state: &mut LuaState) -> LuaResult<u32> {
     let name_val = create_string(state, &info.name);
     table_set(state, t, "name", name_val);
     table_set(state, t, "order", Val::Num(info.order as f64));
+    table_set(
+        state,
+        t,
+        "separateRecommended",
+        Val::Bool(info.separate_recommended),
+    );
+    table_set(
+        state,
+        t,
+        "preferCurrentArea",
+        Val::Bool(info.prefer_current_area),
+    );
+    table_set(
+        state,
+        t,
+        "allowCrossFaction",
+        Val::Bool(info.allow_cross_faction),
+    );
+    table_set(
+        state,
+        t,
+        "autoChooseActivity",
+        Val::Bool(info.auto_choose_activity),
+    );
+    table_set(
+        state,
+        t,
+        "showPlaystyleDropdown",
+        Val::Bool(info.show_playstyle_dropdown),
+    );
     state.push(t);
     Ok(1)
 }

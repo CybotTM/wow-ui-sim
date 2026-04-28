@@ -108,14 +108,91 @@ pub struct ChatBubble {
 }
 
 /// Metadata for an LFG category (Dungeons, Raids, etc.). Drives
-/// `C_LFGInfo.GetLFGCategoryInfo(categoryID)`. Seeded with the two
-/// standard retail categories: 2 = Dungeons, 3 = Raids.
+/// `C_LFGInfo.GetLFGCategoryInfo(categoryID)` and
+/// `C_LFGList.GetLfgCategoryInfo(categoryID)`. Seeded with standard
+/// retail categories: 2=Dungeons, 3=Raids, 4=Arenas, 6=Custom, 9=Battlegrounds.
 #[derive(Debug, Clone)]
 pub struct LfgCategoryInfo {
     /// Display name shown in the Group Finder tab.
     pub name: String,
-    /// Whether the category is available to the player.
+    /// Sort order within the category picker.
     pub order: i32,
+    /// Whether recommended groups are shown in a separate section.
+    pub separate_recommended: bool,
+    /// Whether to prefer activities in the player's current area.
+    pub prefer_current_area: bool,
+    /// Whether cross-faction groups are allowed.
+    pub allow_cross_faction: bool,
+    /// Whether to automatically select an activity when entering.
+    pub auto_choose_activity: bool,
+    /// Whether to show the playstyle dropdown.
+    pub show_playstyle_dropdown: bool,
+}
+
+/// An activity group (sub-grouping within a category).
+/// Drives `C_LFGList.GetAvailableActivityGroups` and `GetActivityGroupInfo`.
+#[derive(Debug, Clone)]
+pub struct LfgActivityGroupInfo {
+    pub group_id: u32,
+    pub category_id: i32,
+    pub name: String,
+    pub order_index: i32,
+    /// Bitmask matching Enum.LFGListFilter values (PvE=1, PvP=2, etc.).
+    pub filters: u32,
+}
+
+/// An individual activity within a group.
+/// Drives `C_LFGList.GetAvailableActivities` and `GetActivityInfoTable`.
+#[derive(Debug, Clone)]
+pub struct LfgActivityInfo {
+    pub activity_id: u32,
+    pub group_id: u32,
+    pub category_id: i32,
+    pub full_name: String,
+    pub short_name: String,
+    pub min_level: i32,
+    pub max_players: i32,
+    pub item_level: i32,
+    pub filters: u32,
+    /// Enum.LFGListDisplayType (0=ClassEnumerate, 1=ItemLevel, etc.).
+    pub display_type: i32,
+    pub order_index: i32,
+    pub use_honor_level: bool,
+    pub difficulty_id: i32,
+    pub allow_cross_faction: bool,
+    pub is_current_raid_activity: bool,
+}
+
+/// A dungeon entry for the LFD (Looking for Dungeon) panel.
+/// Drives `GetLFGDungeonInfo`, `GetLFDChoiceOrder`, etc.
+#[derive(Debug, Clone)]
+pub struct LfdDungeonInfo {
+    /// Negative ids are header rows; positive ids are dungeons.
+    pub dungeon_id: i32,
+    pub name: String,
+    /// 1=Dungeon, 2=HeroicDifficulty, 6=Random.
+    pub type_id: i32,
+    pub subtype_id: i32,
+    pub min_level: i32,
+    pub max_level: i32,
+    pub rec_level: i32,
+    pub min_rec_level: i32,
+    pub max_rec_level: i32,
+    pub expansion_level: i32,
+    pub group_id: i32,
+    pub texture_filename: String,
+    pub difficulty: i32,
+    pub max_players: i32,
+    pub description: String,
+    pub is_holiday: bool,
+    pub min_players: i32,
+    pub map_name: String,
+    pub min_gear: i32,
+    pub is_scaling_dungeon: bool,
+    /// Whether this entry shows in the random-dungeon dropdown.
+    pub is_random: bool,
+    /// Whether `C_LFGInfo.IsLFGFollowerDungeon` returns true.
+    pub is_follower_dungeon: bool,
 }
 
 /// Minimal area-POI metadata keyed by area poi id in
