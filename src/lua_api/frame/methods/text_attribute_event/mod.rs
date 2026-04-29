@@ -225,8 +225,17 @@ return function(frame, methodName, ...)
     end
     local results = pack(method(frame, ...))
     if callerTaint ~= nil then
+        for index = 1, select("#", ...) do
+            local value = select(index, ...)
+            if type(value) == "string" then
+                __sim_mark_secret_value(value)
+            end
+        end
         for index = 1, results.n do
-            __sim_mark_secret_value(results[index])
+            local value = results[index]
+            if type(value) == "string" then
+                __sim_mark_secret_value(value)
+            end
         end
     end
     return unpack(results, 1, results.n)
