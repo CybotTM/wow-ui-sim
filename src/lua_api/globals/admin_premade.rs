@@ -29,9 +29,21 @@ pub(super) fn add_premade_listing(state: &mut LuaState) -> LuaResult<u32> {
         activity_id,
         num_members: num,
         max_members: max,
-        voice_chat: false,
+        voice_chat: String::new(),
         auto_accept: false,
         is_delisted: false,
+        party_guid: format!("Party-3-0000-1234-{:08X}", id),
+        tanks: 0,
+        healers: 0,
+        damagers: num,
+        no_role: 0,
+        classes_by_role: std::collections::HashMap::new(),
+        general_playstyle: 0,
+        cross_faction_listing: false,
+        leader_faction_group: 0,
+        num_bnet_friends: 0,
+        num_char_friends: 0,
+        num_guild_mates: 0,
     });
     drop(st);
     state.push(Val::Num(id as f64));

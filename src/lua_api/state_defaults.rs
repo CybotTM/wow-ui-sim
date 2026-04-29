@@ -420,14 +420,31 @@ pub(super) fn default_heirlooms() -> Vec<HeirloomData> {
 }
 
 pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
+    use std::collections::HashMap;
+
+    /// `Enum.LFGEntryGeneralPlaystyle` codes as named constants — the
+    /// raw numbers are otherwise opaque in the seed table.
+    const PLAYSTYLE_LEARNING: i32 = 1;
+    const PLAYSTYLE_FUN_RELAXED: i32 = 2;
+    const PLAYSTYLE_FUN_SERIOUS: i32 = 3;
+
+    /// Faction id encoding for `leaderFactionGroup` (`PLAYER_FACTION_GROUP`):
+    /// 0 = neutral/cross-faction, 1 = Horde, 2 = Alliance.
+    const FACTION_HORDE: i32 = 1;
+    const FACTION_ALLIANCE: i32 = 2;
+
     let mut id = 0u32;
     let l = |id: &mut u32,
              name: &str,
              comment: &str,
              leader: &str,
              activity: u32,
-             num: i32,
-             max: i32| {
+             tanks: i32,
+             healers: i32,
+             damagers: i32,
+             max: i32,
+             playstyle: i32,
+             faction: i32| {
         *id += 1;
         PremadeListing {
             search_result_id: *id,
@@ -435,11 +452,23 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             comment: comment.to_string(),
             leader_name: leader.to_string(),
             activity_id: activity,
-            num_members: num,
+            num_members: tanks + healers + damagers,
             max_members: max,
-            voice_chat: false,
+            voice_chat: String::new(),
             auto_accept: false,
             is_delisted: false,
+            party_guid: format!("Party-3-0000-1234-{:08X}", *id),
+            tanks,
+            healers,
+            damagers,
+            no_role: 0,
+            classes_by_role: HashMap::new(),
+            general_playstyle: playstyle,
+            cross_faction_listing: false,
+            leader_faction_group: faction,
+            num_bnet_friends: 0,
+            num_char_friends: 0,
+            num_guild_mates: 0,
         }
     };
     vec![
@@ -449,8 +478,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Know mechanics, 2.5k io",
             "Thrallx",
             1195,
-            3,
+            1,
+            1,
+            1,
             5,
+            PLAYSTYLE_FUN_SERIOUS,
+            FACTION_HORDE,
         ),
         l(
             &mut id,
@@ -458,8 +491,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Weekly key, all welcome",
             "Jainavx",
             1188,
-            2,
+            0,
+            1,
+            1,
             5,
+            PLAYSTYLE_FUN_RELAXED,
+            FACTION_ALLIANCE,
         ),
         l(
             &mut id,
@@ -467,8 +504,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "AOTC prog, be geared",
             "Anduin",
             1296,
-            12,
+            2,
+            3,
+            7,
             20,
+            PLAYSTYLE_FUN_SERIOUS,
+            FACTION_ALLIANCE,
         ),
         l(
             &mut id,
@@ -476,8 +517,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Learning run, patient",
             "Sylvanas",
             1295,
-            8,
+            2,
+            2,
+            4,
             20,
+            PLAYSTYLE_LEARNING,
+            FACTION_HORDE,
         ),
         l(
             &mut id,
@@ -485,8 +530,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Quick kill, summon up",
             "Khadgar",
             1350,
-            18,
+            3,
+            4,
+            11,
             40,
+            PLAYSTYLE_FUN_RELAXED,
+            FACTION_ALLIANCE,
         ),
         l(
             &mut id,
@@ -494,8 +543,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Just capping",
             "Garrosh",
             491,
+            0,
+            0,
             1,
             2,
+            PLAYSTYLE_FUN_RELAXED,
+            FACTION_HORDE,
         ),
         l(
             &mut id,
@@ -503,8 +556,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Casual RBG, no rage",
             "Velen",
             493,
-            7,
+            1,
+            2,
+            4,
             10,
+            PLAYSTYLE_FUN_RELAXED,
+            FACTION_ALLIANCE,
         ),
         l(
             &mut id,
@@ -512,8 +569,12 @@ pub(super) fn default_premade_listings() -> Vec<PremadeListing> {
             "Doing WQs together",
             "Malfurion",
             1700,
+            0,
+            0,
             3,
             5,
+            PLAYSTYLE_FUN_RELAXED,
+            FACTION_ALLIANCE,
         ),
     ]
 }

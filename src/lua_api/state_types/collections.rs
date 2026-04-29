@@ -470,6 +470,11 @@ pub struct TransmogAppearance {
 }
 
 /// A premade group listing in the Group Finder.
+///
+/// Backs `C_LFGList.GetSearchResultInfo` and `GetSearchResultMemberCounts`.
+/// The role counts (`tanks` + `healers` + `damagers` + `no_role`) should
+/// equal `num_members` so `LFGListGroupDataDisplayEnumerate_Update` doesn't
+/// run off the end of its icon array.
 #[derive(Debug, Clone)]
 pub struct PremadeListing {
     pub search_result_id: u32,
@@ -479,9 +484,86 @@ pub struct PremadeListing {
     pub activity_id: u32,
     pub num_members: i32,
     pub max_members: i32,
-    pub voice_chat: bool,
+    /// VOIP server URL or short label; empty string when none.
+    /// Blizzard's UI checks `voiceChat ~= ""` to decide whether to show
+    /// the headphone icon, so a bool would never trigger the right path.
+    pub voice_chat: String,
     pub auto_accept: bool,
     pub is_delisted: bool,
+    /// Stable group identifier — looked up by the search panel's per-result
+    /// decline cache (`LFGListFrame.declines[searchResultInfo.partyGUID]`).
+    pub party_guid: String,
+    pub tanks: i32,
+    pub healers: i32,
+    pub damagers: i32,
+    pub no_role: i32,
+    /// Per-role class breakdown: `classes_by_role["TANK"]["WARRIOR"] = 1`.
+    /// Leave empty for activities that use the role-count display
+    /// (`Enum.LFGListDisplayType.RoleCount`).
+    pub classes_by_role:
+        std::collections::HashMap<String, std::collections::HashMap<String, i32>>,
+    /// `Enum.LFGEntryGeneralPlaystyle`: 0=None, 1=Learning, 2=FunRelaxed,
+    /// 3=FunSerious, 4=Expert.
+    pub general_playstyle: i32,
+    pub cross_faction_listing: bool,
+    /// Faction id of the leader: 0=neutral, 1=Horde, 2=Alliance.
+    pub leader_faction_group: i32,
+    pub num_bnet_friends: i32,
+    pub num_char_friends: i32,
+    pub num_guild_mates: i32,
+}
+
+/// Player-side filter state for the Group Finder search panel,
+/// returned by `C_LFGList.GetAdvancedFilter`.
+///
+/// The default (all-false / zero / empty) is permissive: every helper
+/// the panel calls (`...DifficultyNoneChecked`, `...PlaystyleNoneChecked`)
+/// returns true, so `EntryStillSatisfiesFilters` passes every search
+/// result. Tests / admin verbs may flip individual fields to model a
+/// player who has narrowed their search.
+#[derive(Debug, Clone, Default)]
+pub struct LfgAdvancedFilter {
+    pub needs_tank: bool,
+    pub needs_healer: bool,
+    pub needs_damage: bool,
+    pub needs_my_class: bool,
+    pub has_tank: bool,
+    pub has_healer: bool,
+    pub minimum_rating: i32,
+    /// `groupFinderActivityGroupID` allow-list. Empty means "any".
+    pub activities: Vec<u32>,
+    pub difficulty_normal: bool,
+    pub difficulty_heroic: bool,
+    pub difficulty_mythic: bool,
+    pub difficulty_mythic_plus: bool,
+    /// `Enum.LFGEntryGeneralPlaystyle` flags 1..4 (Learning, FunRelaxed,
+    /// FunSerious, Expert).
+    pub general_playstyle1: bool,
+    pub general_playstyle2: bool,
+    pub general_playstyle3: bool,
+    pub general_playstyle4: bool,
+}
+
+/// A pending application the player has submitted to a premade listing.
+///
+/// Backs `C_LFGList.GetApplications` and `GetApplicationInfo`. Created by
+/// `ApplyToGroup`. `start_time` is captured at submission so the panel's
+/// `appDuration` countdown (`GetTime() + appDuration`) animates correctly.
+#[derive(Debug, Clone)]
+pub struct LfgApplication {
+    pub application_id: u64,
+    pub search_result_id: u32,
+    /// Application status. Canonical values used by the panel:
+    /// `"none"`, `"applied"`, `"invited"`, `"inviteaccepted"`,
+    /// `"invitedeclined"`, `"declined"`, `"declined_full"`,
+    /// `"declined_delisted"`, `"timedout"`, `"cancelled"`, `"failed"`.
+    pub status: String,
+    pub pending_status: Option<String>,
+    pub start_time: f64,
+    pub duration: f64,
+    /// Selected role: `"TANK"`, `"HEALER"`, `"DAMAGER"`, or empty when
+    /// none chosen.
+    pub role: String,
 }
 
 /// An item attachment in a mail message.

@@ -167,6 +167,14 @@ macro_rules! build_empty_sim_state {
             lfg_active_categories: ::std::collections::HashSet::new(),
             lfg_activity_groups: default_lfg_activity_groups(),
             lfg_activities: default_lfg_activities(),
+            lfg_applications: Vec::new(),
+            lfg_next_application_id: 1,
+            lfg_advanced_filter: LfgAdvancedFilter::default(),
+            lfg_language_filter: {
+                let mut m = std::collections::HashMap::new();
+                m.insert("enUS".to_string(), true);
+                m
+            },
             lfd_dungeons: default_lfd_dungeons(),
             photo_sharing_authorized: false,
             photo_sharing_enabled: false,
@@ -306,7 +314,8 @@ pub use super::state_types::{
     CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo,
     CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
     ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo,
-    LfgActivityGroupInfo, LfgActivityInfo, LfgCategoryInfo, LootRollInfo, LuaErrorRecord,
+    LfgActivityGroupInfo, LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo,
+    LootRollInfo, LuaErrorRecord,
     MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix,
     MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
     MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
@@ -1568,6 +1577,20 @@ pub struct SimState {
     pub lfg_activity_groups: Vec<LfgActivityGroupInfo>,
     /// Individual activities seeded for the Group Finder UI.
     pub lfg_activities: Vec<LfgActivityInfo>,
+    /// Pending applications submitted via `C_LFGList.ApplyToGroup`. Reads
+    /// back through `GetApplications` / `GetApplicationInfo`. Empty by
+    /// default — the player hasn't queued for anything on a fresh sim.
+    pub lfg_applications: Vec<LfgApplication>,
+    /// Monotonic counter for `LfgApplication.application_id`. Assigning
+    /// from a counter (rather than reusing array indices) keeps stale
+    /// references in addon Lua from aliasing freshly-cancelled slots.
+    pub lfg_next_application_id: u64,
+    /// Player's Group Finder advanced-filter selections. Default is
+    /// all-permissive — see `LfgAdvancedFilter`.
+    pub lfg_advanced_filter: LfgAdvancedFilter,
+    /// `C_LFGList.GetLanguageSearchFilter()` map. Default `{ enUS = true }`
+    /// matches `GetAvailableLanguageSearchFilter`.
+    pub lfg_language_filter: std::collections::HashMap<String, bool>,
     /// LFD dungeon list for the Looking for Dungeon panel.
     pub lfd_dungeons: Vec<LfdDungeonInfo>,
     /// Whether `C_PhotoSharing.IsAuthorized()` reports true. Sim has no

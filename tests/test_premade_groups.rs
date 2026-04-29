@@ -142,3 +142,209 @@ fn admin_clear_premade_listings() {
         .unwrap();
     assert_eq!(result, "0");
 }
+
+#[test]
+fn get_filtered_search_results_mirrors_get_search_results() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local total, results = C_LFGList.GetFilteredSearchResults()
+            if total ~= 8 then return "total=" .. tostring(total) end
+            if type(results) ~= "table" or #results ~= 8 then
+                return "results=" .. tostring(results and #results)
+            end
+            if results[1] ~= 1 or results[8] ~= 8 then
+                return "ids=" .. tostring(results[1]) .. "," .. tostring(results[8])
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetFilteredSearchResults: {result}");
+}
+
+#[test]
+fn search_result_info_has_full_blizzard_schema() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local info = C_LFGList.GetSearchResultInfo(1)
+            if type(info.activityIDs) ~= "table" or info.activityIDs[1] ~= 1195 then
+                return "activityIDs=" .. tostring(info.activityIDs and info.activityIDs[1])
+            end
+            if type(info.voiceChat) ~= "string" then
+                return "voiceChat type=" .. type(info.voiceChat)
+            end
+            if type(info.partyGUID) ~= "string" or info.partyGUID == "" then
+                return "partyGUID=" .. tostring(info.partyGUID)
+            end
+            if info.numBNetFriends ~= 0 or info.numCharFriends ~= 0 or info.numGuildMates ~= 0 then
+                return "friend counts wrong"
+            end
+            if type(info.generalPlaystyle) ~= "number" then
+                return "generalPlaystyle=" .. type(info.generalPlaystyle)
+            end
+            if type(info.crossFactionListing) ~= "boolean" then
+                return "crossFactionListing=" .. type(info.crossFactionListing)
+            end
+            if type(info.leaderFactionGroup) ~= "number" then
+                return "leaderFactionGroup=" .. type(info.leaderFactionGroup)
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "schema: {result}");
+}
+
+#[test]
+fn get_search_result_member_counts_returns_role_breakdown() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local mc = C_LFGList.GetSearchResultMemberCounts(1)
+            if type(mc) ~= "table" then return "type=" .. type(mc) end
+            -- First seeded listing is 1 tank, 1 healer, 1 damager
+            if mc.TANK ~= 1 or mc.HEALER ~= 1 or mc.DAMAGER ~= 1 or mc.NOROLE ~= 0 then
+                return string.format("counts T=%s H=%s D=%s N=%s",
+                    tostring(mc.TANK), tostring(mc.HEALER),
+                    tostring(mc.DAMAGER), tostring(mc.NOROLE))
+            end
+            if type(mc.classesByRole) ~= "table" then
+                return "classesByRole=" .. type(mc.classesByRole)
+            end
+            if type(mc.leaversByClass) ~= "table" then
+                return "leaversByClass=" .. type(mc.leaversByClass)
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetSearchResultMemberCounts: {result}");
+}
+
+#[test]
+fn get_application_info_for_unsubmitted_returns_none() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local id, status, pending, dur, role = C_LFGList.GetApplicationInfo(1)
+            -- No application submitted yet — must return canonical "none",
+            -- not nil, so the panel's `appStatus ~= "none"` check works.
+            if status ~= "none" then return "status=" .. tostring(status) end
+            if pending ~= nil then return "pending=" .. tostring(pending) end
+            if dur ~= 0 then return "dur=" .. tostring(dur) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetApplicationInfo: {result}");
+}
+
+#[test]
+fn apply_to_group_creates_application_and_fires_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = nil
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("LFG_LIST_APPLICATION_STATUS_UPDATED")
+            f:SetScript("OnEvent", function(self, event, rid, newStatus, oldStatus, name)
+                if event == "LFG_LIST_APPLICATION_STATUS_UPDATED" then
+                    fired = { rid = rid, newStatus = newStatus, oldStatus = oldStatus, name = name }
+                end
+            end)
+
+            C_LFGList.ApplyToGroup(1, false, true, false)
+            local apps = C_LFGList.GetApplications()
+            if #apps ~= 1 or apps[1] ~= 1 then return "apps=" .. tostring(#apps) end
+
+            local appID, status, pending, dur, role = C_LFGList.GetApplicationInfo(1)
+            if status ~= "applied" then return "status=" .. tostring(status) end
+            if role ~= "HEALER" then return "role=" .. tostring(role) end
+            if dur ~= 120 then return "dur=" .. tostring(dur) end
+
+            if not fired then return "event_not_fired" end
+            if fired.rid ~= 1 then return "fired.rid=" .. tostring(fired.rid) end
+            if fired.newStatus ~= "applied" then return "fired.new=" .. tostring(fired.newStatus) end
+            if fired.oldStatus ~= "none" then return "fired.old=" .. tostring(fired.oldStatus) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "ApplyToGroup: {result}");
+}
+
+#[test]
+fn apply_to_group_is_idempotent() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            C_LFGList.ApplyToGroup(2, true, false, false)
+            C_LFGList.ApplyToGroup(2, false, true, false)
+            local apps = C_LFGList.GetApplications()
+            if #apps ~= 1 then return "apps=" .. tostring(#apps) end
+            local _, _, _, _, role = C_LFGList.GetApplicationInfo(2)
+            -- Role is whichever was set on first apply; second call is a
+            -- no-op so role must still be the original "TANK".
+            if role ~= "TANK" then return "role=" .. tostring(role) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "idempotent apply: {result}");
+}
+
+#[test]
+fn cancel_application_removes_entry() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            C_LFGList.ApplyToGroup(3, false, false, true)
+            if #C_LFGList.GetApplications() ~= 1 then return "before=" .. #C_LFGList.GetApplications() end
+            C_LFGList.CancelApplication(3)
+            if #C_LFGList.GetApplications() ~= 0 then return "after=" .. #C_LFGList.GetApplications() end
+            local _, status = C_LFGList.GetApplicationInfo(3)
+            if status ~= "none" then return "status=" .. tostring(status) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "CancelApplication: {result}");
+}
+
+#[test]
+fn get_advanced_filter_default_is_permissive() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local f = C_LFGList.GetAdvancedFilter()
+            if type(f) ~= "table" then return "type=" .. type(f) end
+            -- All booleans must be false and minimumRating zero, otherwise
+            -- the panel filters out every search result on first open.
+            for _, k in ipairs({"needsTank","needsHealer","needsDamage","needsMyClass",
+                                "hasTank","hasHealer","difficultyNormal","difficultyHeroic",
+                                "difficultyMythic","difficultyMythicPlus",
+                                "generalPlaystyle1","generalPlaystyle2",
+                                "generalPlaystyle3","generalPlaystyle4"}) do
+                if f[k] ~= false then return k .. "=" .. tostring(f[k]) end
+            end
+            if f.minimumRating ~= 0 then return "rating=" .. tostring(f.minimumRating) end
+            if type(f.activities) ~= "table" or #f.activities ~= 0 then
+                return "activities=" .. tostring(f.activities and #f.activities)
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetAdvancedFilter: {result}");
+}
+

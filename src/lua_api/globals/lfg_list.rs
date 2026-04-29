@@ -9,7 +9,7 @@ use crate::lua_api::methods::{
     table_set,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_api::state_types::{LfgActivityInfo, PremadeListing};
+use crate::lua_api::state_types::{LfgActivityInfo, LfgApplication, PremadeListing};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -43,6 +43,14 @@ pub fn get_num_applicants(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn fire_named_event(state: &mut LuaState, event_name: &str) -> LuaResult<()> {
+    fire_event_with_args(state, event_name, Vec::new())
+}
+
+fn fire_event_with_args(
+    state: &mut LuaState,
+    event_name: &str,
+    args: Vec<Val>,
+) -> LuaResult<()> {
     borrow_state_mut(state)?.events.push(Event {
         name: event_name.to_string(),
         args: Vec::new(),
@@ -55,7 +63,11 @@ fn fire_named_event(state: &mut LuaState, event_name: &str) -> LuaResult<()> {
             continue;
         };
         let event_name_val = create_string(state, event_name);
-        let _ = call_function_state(state, handler, &[frame, event_name_val]);
+        let mut call_args = Vec::with_capacity(2 + args.len());
+        call_args.push(frame);
+        call_args.push(event_name_val);
+        call_args.extend(args.iter().cloned());
+        let _ = call_function_state(state, handler, &call_args);
     }
     Ok(())
 }
@@ -84,6 +96,8 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
     let name = create_string(state, &listing.name);
     let comment = create_string(state, &listing.comment);
     let leader_name = create_string(state, &listing.leader_name);
+    let voice_chat = create_string(state, &listing.voice_chat);
+    let party_guid = create_string(state, &listing.party_guid);
     table_set(
         state,
         info,
@@ -93,12 +107,26 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
     table_set(state, info, "name", name);
     table_set(state, info, "comment", comment);
     table_set(state, info, "leaderName", leader_name);
+    // `activityID` is the legacy single-value form; `activityIDs` is the
+    // current shape addons read (`searchResultInfo.activityIDs[1]`).
     table_set(
         state,
         info,
         "activityID",
         Val::Num(listing.activity_id as f64),
     );
+    let activity_ids = create_table(state);
+    if let Val::Table(activity_ids_ref) = activity_ids {
+        if let Some(t) = state.gc.tables.get_mut(activity_ids_ref) {
+            let _ = t.raw_set(
+                Val::Num(1.0),
+                Val::Num(listing.activity_id as f64),
+                &state.gc.string_arena,
+            );
+        }
+        state.gc.barrier_back(activity_ids_ref);
+    }
+    table_set(state, info, "activityIDs", activity_ids);
     table_set(
         state,
         info,
@@ -111,12 +139,50 @@ fn build_search_result_info(state: &mut LuaState, listing: &PremadeListing) -> V
         "maxMembers",
         Val::Num(listing.max_members as f64),
     );
-    table_set(state, info, "voiceChat", Val::Bool(listing.voice_chat));
+    table_set(state, info, "voiceChat", voice_chat);
     table_set(state, info, "autoAccept", Val::Bool(listing.auto_accept));
     table_set(state, info, "isDelisted", Val::Bool(listing.is_delisted));
+    table_set(state, info, "partyGUID", party_guid);
+    table_set(
+        state,
+        info,
+        "numBNetFriends",
+        Val::Num(listing.num_bnet_friends as f64),
+    );
+    table_set(
+        state,
+        info,
+        "numCharFriends",
+        Val::Num(listing.num_char_friends as f64),
+    );
+    table_set(
+        state,
+        info,
+        "numGuildMates",
+        Val::Num(listing.num_guild_mates as f64),
+    );
+    table_set(
+        state,
+        info,
+        "generalPlaystyle",
+        Val::Num(listing.general_playstyle as f64),
+    );
+    table_set(
+        state,
+        info,
+        "crossFactionListing",
+        Val::Bool(listing.cross_faction_listing),
+    );
+    table_set(
+        state,
+        info,
+        "leaderFactionGroup",
+        Val::Num(listing.leader_faction_group as f64),
+    );
     table_set(state, info, "requiredItemLevel", Val::Num(0.0));
     table_set(state, info, "requiredHonorLevel", Val::Num(0.0));
     table_set(state, info, "requiredDungeonScore", Val::Num(0.0));
+    table_set(state, info, "requiredPvpRating", Val::Num(0.0));
     table_set(state, info, "questID", Val::Num(0.0));
     table_set(state, info, "age", Val::Num(0.0));
     table_set(state, info, "isWarMode", Val::Bool(false));
@@ -169,6 +235,263 @@ fn get_search_results(state: &mut LuaState) -> LuaResult<u32> {
 
 fn search(state: &mut LuaState) -> LuaResult<u32> {
     fire_named_event(state, "LFG_LIST_SEARCH_RESULTS_RECEIVED")?;
+    Ok(0)
+}
+
+/// `GetFilteredSearchResults()` → `(totalResults, results)`. Mirrors
+/// `GetSearchResults` once the user has applied filters in the panel —
+/// the sim does not model server-side filter state, so the panel sees
+/// every seeded listing.
+fn get_filtered_search_results(state: &mut LuaState) -> LuaResult<u32> {
+    get_search_results(state)
+}
+
+/// `GetSearchResultMemberCounts(resultID)` → display data table.
+///
+/// Shape consumed by `LFGListGroupDataDisplay_Update`:
+///   `{ TANK = n, HEALER = n, DAMAGER = n, NOROLE = n,
+///      classesByRole = { TANK = { WARRIOR = n, ... }, ... },
+///      leaversByClass = { WARRIOR = n, ... } }`
+///
+/// `LFGListGroupDataDisplayEnumerate_Update` reads `displayData.NOROLE`
+/// without a nil-guard (`numPlayers = TANK + HEALER + DAMAGER + NOROLE`),
+/// so every key must be a number, not nil.
+fn get_search_result_member_counts(state: &mut LuaState) -> LuaResult<u32> {
+    let search_result_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as u32;
+    let Some(listing) = premade_listing(state, search_result_id) else {
+        state.push(Val::Nil);
+        return Ok(1);
+    };
+    let display = create_table(state);
+    table_set(state, display, "TANK", Val::Num(listing.tanks as f64));
+    table_set(state, display, "HEALER", Val::Num(listing.healers as f64));
+    table_set(state, display, "DAMAGER", Val::Num(listing.damagers as f64));
+    table_set(state, display, "NOROLE", Val::Num(listing.no_role as f64));
+
+    let classes_by_role = create_table(state);
+    if let Val::Table(outer_ref) = classes_by_role {
+        for (role, class_counts) in &listing.classes_by_role {
+            let inner = create_table(state);
+            if let Val::Table(inner_ref) = inner {
+                for (class_name, count) in class_counts {
+                    let key = create_string(state, class_name);
+                    if let Val::Str(class_str) = key {
+                        if let Some(t) = state.gc.tables.get_mut(inner_ref) {
+                            let _ = t.raw_set(
+                                Val::Str(class_str),
+                                Val::Num(*count as f64),
+                                &state.gc.string_arena,
+                            );
+                        }
+                    }
+                }
+                state.gc.barrier_back(inner_ref);
+            }
+            let role_key = create_string(state, role);
+            if let Val::Str(role_str) = role_key {
+                if let Some(t) = state.gc.tables.get_mut(outer_ref) {
+                    let _ = t.raw_set(Val::Str(role_str), inner, &state.gc.string_arena);
+                }
+            }
+        }
+        state.gc.barrier_back(outer_ref);
+    }
+    table_set(state, display, "classesByRole", classes_by_role);
+
+    let leavers = create_table(state);
+    table_set(state, display, "leaversByClass", leavers);
+    state.push(display);
+    Ok(1)
+}
+
+/// `GetGroupLeaverCountsByRole()` → `(tank, healer, damager)`. Sim has
+/// no group-history model, so report zero leavers in every role.
+fn get_group_leaver_counts_by_role(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    state.push(Val::Num(0.0));
+    Ok(3)
+}
+
+/// `GetApplications()` → array of `searchResultID` for every pending
+/// application the player has submitted.
+fn get_applications(state: &mut LuaState) -> LuaResult<u32> {
+    let result_ids = {
+        let sim = borrow_state(state)?;
+        sim.lfg_applications
+            .iter()
+            .map(|app| app.search_result_id)
+            .collect::<Vec<_>>()
+    };
+    let result = create_table(state);
+    if let Val::Table(table_ref) = result {
+        for (index, rid) in result_ids.iter().enumerate() {
+            if let Some(t) = state.gc.tables.get_mut(table_ref) {
+                let _ = t.raw_set(
+                    Val::Num(index as f64 + 1.0),
+                    Val::Num(*rid as f64),
+                    &state.gc.string_arena,
+                );
+            }
+        }
+        state.gc.barrier_back(table_ref);
+    }
+    state.push(result);
+    Ok(1)
+}
+
+/// `GetApplicationInfo(searchResultID)` →
+///   `(applicationID, applicationStatus, pendingStatus, applicationDuration, role)`.
+///
+/// Returns the `"none"` status (not nil) when no application exists for
+/// `resultID` — the panel's search-entry render does
+/// `isApplication = (appStatus ~= "none" or pendingStatus)`, so a nil
+/// status would mark every browsed result as an active application.
+fn get_application_info(state: &mut LuaState) -> LuaResult<u32> {
+    let search_result_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as u32;
+    let app_opt = borrow_state(state)?
+        .lfg_applications
+        .iter()
+        .find(|a| a.search_result_id == search_result_id)
+        .cloned();
+    let Some(app) = app_opt else {
+        state.push(Val::Num(0.0));
+        let none_str = create_string(state, "none");
+        state.push(none_str);
+        state.push(Val::Nil);
+        state.push(Val::Num(0.0));
+        let empty = create_string(state, "");
+        state.push(empty);
+        return Ok(5);
+    };
+    state.push(Val::Num(app.application_id as f64));
+    let status_val = create_string(state, &app.status);
+    state.push(status_val);
+    match &app.pending_status {
+        Some(s) => {
+            let v = create_string(state, s);
+            state.push(v);
+        }
+        None => state.push(Val::Nil),
+    }
+    state.push(Val::Num(app.duration as f64));
+    let role_val = create_string(state, &app.role);
+    state.push(role_val);
+    Ok(5)
+}
+
+/// `ApplyToGroup(searchResultID, tank, healer, damager)` — submit an
+/// application. Idempotent: re-applying to a result that already has a
+/// pending application is a no-op (matches retail's "you have a pending
+/// application" guard, exposed as the gray Sign Up button).
+fn apply_to_group(state: &mut LuaState) -> LuaResult<u32> {
+    let search_result_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as u32;
+    let tank = Option::<bool>::from_stack(state, 2)?.unwrap_or(false);
+    let healer = Option::<bool>::from_stack(state, 3)?.unwrap_or(false);
+    let damager = Option::<bool>::from_stack(state, 4)?.unwrap_or(false);
+    let role = if tank {
+        "TANK"
+    } else if healer {
+        "HEALER"
+    } else if damager {
+        "DAMAGER"
+    } else {
+        ""
+    }
+    .to_string();
+    let listing_name = {
+        let sim = borrow_state(state)?;
+        if sim
+            .lfg_applications
+            .iter()
+            .any(|a| a.search_result_id == search_result_id)
+        {
+            return Ok(0);
+        }
+        sim.world
+            .premade_listings
+            .iter()
+            .find(|l| l.search_result_id == search_result_id)
+            .map(|l| l.name.clone())
+    };
+    let Some(listing_name) = listing_name else {
+        return Ok(0);
+    };
+    let now = {
+        let sim = borrow_state(state)?;
+        sim.start_time.elapsed().as_secs_f64()
+    };
+    {
+        let mut sim = borrow_state_mut(state)?;
+        let app_id = sim.lfg_next_application_id;
+        sim.lfg_next_application_id += 1;
+        sim.lfg_applications.push(LfgApplication {
+            application_id: app_id,
+            search_result_id,
+            status: "applied".to_string(),
+            pending_status: None,
+            start_time: now,
+            duration: 120.0,
+            role,
+        });
+    }
+    let new_status = create_string(state, "applied");
+    let old_status = create_string(state, "none");
+    let group_name = create_string(state, &listing_name);
+    fire_event_with_args(
+        state,
+        "LFG_LIST_APPLICATION_STATUS_UPDATED",
+        vec![
+            Val::Num(search_result_id as f64),
+            new_status,
+            old_status,
+            group_name,
+        ],
+    )?;
+    fire_event_with_args(
+        state,
+        "LFG_LIST_SEARCH_RESULT_UPDATED",
+        vec![Val::Num(search_result_id as f64)],
+    )?;
+    Ok(0)
+}
+
+/// `CancelApplication(searchResultID)` — cancel a pending application.
+/// Removes the entry from `lfg_applications` and fires the status-update
+/// event so the panel transitions the row back to its non-application
+/// rendering branch.
+fn cancel_application(state: &mut LuaState) -> LuaResult<u32> {
+    let search_result_id = Option::<f64>::from_stack(state, 1)?.unwrap_or(0.0) as u32;
+    let listing_name = {
+        let mut sim = borrow_state_mut(state)?;
+        let pos = sim
+            .lfg_applications
+            .iter()
+            .position(|a| a.search_result_id == search_result_id);
+        let Some(idx) = pos else {
+            return Ok(0);
+        };
+        sim.lfg_applications.remove(idx);
+        sim.world
+            .premade_listings
+            .iter()
+            .find(|l| l.search_result_id == search_result_id)
+            .map(|l| l.name.clone())
+            .unwrap_or_default()
+    };
+    let new_status = create_string(state, "cancelled");
+    let old_status = create_string(state, "applied");
+    let group_name = create_string(state, &listing_name);
+    fire_event_with_args(
+        state,
+        "LFG_LIST_APPLICATION_STATUS_UPDATED",
+        vec![
+            Val::Num(search_result_id as f64),
+            new_status,
+            old_status,
+            group_name,
+        ],
+    )?;
     Ok(0)
 }
 
@@ -451,6 +774,106 @@ fn get_available_language_search_filter(state: &mut LuaState) -> LuaResult<u32> 
     Ok(1)
 }
 
+/// `GetLanguageSearchFilter()` → `{ enUS = true, ... }`. Map keyed by
+/// language code; the panel's filter dropdown reads bool values to
+/// decide which checkboxes are ticked.
+fn get_language_search_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let entries = {
+        let sim = borrow_state(state)?;
+        sim.lfg_language_filter
+            .iter()
+            .map(|(k, v)| (k.clone(), *v))
+            .collect::<Vec<_>>()
+    };
+    let result = create_table(state);
+    if let Val::Table(table_ref) = result {
+        for (lang, enabled) in &entries {
+            let key = create_string(state, lang);
+            if let Val::Str(s) = key {
+                if let Some(t) = state.gc.tables.get_mut(table_ref) {
+                    let _ = t.raw_set(Val::Str(s), Val::Bool(*enabled), &state.gc.string_arena);
+                }
+            }
+        }
+        state.gc.barrier_back(table_ref);
+    }
+    state.push(result);
+    Ok(1)
+}
+
+/// `GetDefaultLanguageSearchFilter()` → same shape as
+/// `GetLanguageSearchFilter`, but reflects the player's default
+/// (locale-derived) language set rather than current selections.
+fn get_default_language_search_filter(state: &mut LuaState) -> LuaResult<u32> {
+    get_language_search_filter(state)
+}
+
+/// `GetAdvancedFilter()` → table mirroring `LfgAdvancedFilter`.
+///
+/// Fields consumed by `EntryStillSatisfiesFilters` and the filter
+/// dropdown helpers. All-false / zero / empty defaults pass every
+/// search result through.
+fn get_advanced_filter(state: &mut LuaState) -> LuaResult<u32> {
+    let f = borrow_state(state)?.lfg_advanced_filter.clone();
+    let info = create_table(state);
+    table_set(state, info, "needsTank", Val::Bool(f.needs_tank));
+    table_set(state, info, "needsHealer", Val::Bool(f.needs_healer));
+    table_set(state, info, "needsDamage", Val::Bool(f.needs_damage));
+    table_set(state, info, "needsMyClass", Val::Bool(f.needs_my_class));
+    table_set(state, info, "hasTank", Val::Bool(f.has_tank));
+    table_set(state, info, "hasHealer", Val::Bool(f.has_healer));
+    table_set(state, info, "minimumRating", Val::Num(f.minimum_rating as f64));
+    let activities = create_table(state);
+    if let Val::Table(act_ref) = activities {
+        for (i, aid) in f.activities.iter().enumerate() {
+            if let Some(t) = state.gc.tables.get_mut(act_ref) {
+                let _ = t.raw_set(
+                    Val::Num(i as f64 + 1.0),
+                    Val::Num(*aid as f64),
+                    &state.gc.string_arena,
+                );
+            }
+        }
+        state.gc.barrier_back(act_ref);
+    }
+    table_set(state, info, "activities", activities);
+    table_set(state, info, "difficultyNormal", Val::Bool(f.difficulty_normal));
+    table_set(state, info, "difficultyHeroic", Val::Bool(f.difficulty_heroic));
+    table_set(state, info, "difficultyMythic", Val::Bool(f.difficulty_mythic));
+    table_set(
+        state,
+        info,
+        "difficultyMythicPlus",
+        Val::Bool(f.difficulty_mythic_plus),
+    );
+    table_set(
+        state,
+        info,
+        "generalPlaystyle1",
+        Val::Bool(f.general_playstyle1),
+    );
+    table_set(
+        state,
+        info,
+        "generalPlaystyle2",
+        Val::Bool(f.general_playstyle2),
+    );
+    table_set(
+        state,
+        info,
+        "generalPlaystyle3",
+        Val::Bool(f.general_playstyle3),
+    );
+    table_set(
+        state,
+        info,
+        "generalPlaystyle4",
+        Val::Bool(f.general_playstyle4),
+    );
+    state.push(info);
+    Ok(1)
+}
+
 fn ensure_c_lfg_list_table(state: &mut LuaState) -> GcRef<Table> {
     let key = state.gc.intern_string_static(b"C_LFGList");
     let global = state.global;
@@ -492,6 +915,38 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         has_search_result_info,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetSearchResults", get_search_results)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetFilteredSearchResults",
+        get_filtered_search_results,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetSearchResultMemberCounts",
+        get_search_result_member_counts,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetGroupLeaverCountsByRole",
+        get_group_leaver_counts_by_role,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "GetApplications", get_applications)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetApplicationInfo",
+        get_application_info,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "ApplyToGroup", apply_to_group)?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CancelApplication",
+        cancel_application,
+    )?;
     table_set_rust_fn_static(
         state,
         table_ref,
@@ -555,6 +1010,19 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "GetAvailableLanguageSearchFilter",
         get_available_language_search_filter,
     )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetLanguageSearchFilter",
+        get_language_search_filter,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetDefaultLanguageSearchFilter",
+        get_default_language_search_filter,
+    )?;
+    table_set_rust_fn_static(state, table_ref, "GetAdvancedFilter", get_advanced_filter)?;
     Ok(())
 }
 
