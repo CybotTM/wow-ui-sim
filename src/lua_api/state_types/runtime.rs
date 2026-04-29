@@ -22,6 +22,8 @@ pub enum CursorInfo {
         stack_count: i32,
         origin: CursorItemOrigin,
     },
+    /// Money in copper held on the cursor (PickupPlayerMoney → DropCursorMoney).
+    Money { copper: u64 },
 }
 
 /// Where a cursor-carried item came from — used to route drops back.

@@ -385,6 +385,12 @@ fn get_cursor_info(state: &mut LuaState) -> LuaResult<u32> {
             state.push(Val::Num(item_id as f64));
             Ok(2)
         }
+        CursorInfo::Money { copper } => {
+            let kind = create_string(state, "money");
+            state.push(kind);
+            state.push(Val::Num(copper as f64));
+            Ok(2)
+        }
     }
 }
 
@@ -406,7 +412,9 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
         | CursorInfo::Spell { spell_id }
         | CursorInfo::PetAction { spell_id, .. } => spell_id,
         CursorInfo::Talent { talent_id, .. } => talent_id,
-        CursorInfo::Item { .. } | CursorInfo::Macro { .. } => return Ok(0),
+        CursorInfo::Item { .. } | CursorInfo::Macro { .. } | CursorInfo::Money { .. } => {
+            return Ok(0);
+        }
     };
     st.action_bars.insert(slot, spell_id);
     st.cursor_item = None;
@@ -415,6 +423,63 @@ fn place_action(state: &mut LuaState) -> LuaResult<u32> {
     refresh_action_ui_buttons(state, slot);
     fire_named_event(state, "CURSOR_CHANGED");
     Ok(0)
+}
+
+/// `PickupPlayerMoney(amount)` — move `amount` copper from `player.money`
+/// onto the cursor as a `Money` payload, replacing whatever was there. If
+/// the player doesn't have enough money the call is a silent no-op (matches
+/// the live client, which clamps below the available balance).
+fn pickup_player_money(state: &mut LuaState) -> LuaResult<u32> {
+    let Some(amount) = stack_i32(state, 1).and_then(|n| u64::try_from(n).ok()) else {
+        return Ok(0);
+    };
+    if amount == 0 {
+        return Ok(0);
+    }
+    let mut st = match borrow_state_mut(state) {
+        Ok(s) => s,
+        Err(_) => return Ok(0),
+    };
+    let available = u64::try_from(st.player.money.max(0)).unwrap_or(0);
+    if amount > available {
+        return Ok(0);
+    }
+    st.player.money -= amount as i64;
+    st.cursor_item = Some(CursorInfo::Money { copper: amount });
+    drop(st);
+    fire_named_event(state, "CURSOR_CHANGED");
+    fire_named_event(state, "PLAYER_MONEY");
+    Ok(0)
+}
+
+/// `DropCursorMoney()` — return any money currently on the cursor back to
+/// the player and clear the cursor. Other cursor payloads are left intact
+/// (matches the live client, which only acts on money).
+fn drop_cursor_money(state: &mut LuaState) -> LuaResult<u32> {
+    let mut st = match borrow_state_mut(state) {
+        Ok(s) => s,
+        Err(_) => return Ok(0),
+    };
+    let Some(CursorInfo::Money { copper }) = st.cursor_item.clone() else {
+        return Ok(0);
+    };
+    st.player.money += copper as i64;
+    st.cursor_item = None;
+    drop(st);
+    fire_named_event(state, "CURSOR_CHANGED");
+    fire_named_event(state, "PLAYER_MONEY");
+    Ok(0)
+}
+
+/// `GetCursorMoney()` — copper currently held on the cursor (0 when the
+/// cursor is empty or carrying a non-money payload).
+fn get_cursor_money(state: &mut LuaState) -> LuaResult<u32> {
+    let copper = match borrow_state(state)?.cursor_item {
+        Some(CursorInfo::Money { copper }) => copper,
+        _ => 0,
+    };
+    state.push(Val::Num(copper as f64));
+    Ok(1)
 }
 
 /// Install in the global table. Exposed for tests that want to bypass the
@@ -436,5 +501,8 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetCursorInfo", get_cursor_info)?;
     LuaApiMut::register_function(lua, "CursorHasItem", cursor_has_item)?;
     LuaApiMut::register_function(lua, "PlaceAction", place_action)?;
+    LuaApiMut::register_function(lua, "PickupPlayerMoney", pickup_player_money)?;
+    LuaApiMut::register_function(lua, "DropCursorMoney", drop_cursor_money)?;
+    LuaApiMut::register_function(lua, "GetCursorMoney", get_cursor_money)?;
     Ok(())
 }

@@ -209,6 +209,7 @@ fn test_global_functions_callable() {
         "ClearOverrideBindings",
         "GetInventoryItemLink",
         "GetInventoryItemTexture",
+        "GetInventoryItemsForSlot",
         "GetInventorySlotInfo",
         "GetFramerate",
         "format",
