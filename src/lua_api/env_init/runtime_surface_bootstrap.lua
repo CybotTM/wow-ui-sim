@@ -9346,6 +9346,11 @@ C_Widget = C_Widget or __wow_namespace()
 C_SuperTrack = __wow_merge_namespace(C_SuperTrack, {
   GetSuperTrackedQuestID = function() return 0 end,
   SetSuperTrackedQuestID = __wow_noop,
+  GetHighestPrioritySuperTrackingType = function() return nil end,
+  ClearAllSuperTracked = __wow_noop,
+  ClearSuperTrackedContent = __wow_noop,
+  ClearSuperTrackedMapPin = __wow_noop,
+  GetSuperTrackedMapPin = function() return end,
 })
 C_AutoComplete = __wow_merge_namespace(C_AutoComplete, {
   GetAutoCompleteRealms = function() return {} end,
