@@ -121,7 +121,7 @@ pub fn collect_hittable_frames(
             let Some(rect) = f.layout_rect else { continue };
             if f.visible
                 && f.effective_alpha > 0.0
-                && f.mouse_enabled
+                && (f.mouse_enabled || matches!(f.widget_type, WidgetType::EditBox))
                 && !f
                     .name
                     .as_deref()
