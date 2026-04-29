@@ -9,6 +9,7 @@ use super::helpers::{append_parent_array_entry, apply_frame_mixins, resolve_glob
 use crate::lua_api::methods::{borrow_state, create_string, frame_ref};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
+use rustc_hash::FxHashSet;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -182,11 +183,16 @@ fn finalize_template_frame(
     if fire_on_load {
         runtime::fire_frame_on_load(state, frame_id)?;
     }
+
+    // `OnLoad` handlers can re-anchor using named keys (for example after
+    // reading runtime state). Re-resolve one more time after hooks run so late
+    // named-key anchors are still fixed against freshly created sibling layers.
+    resolve_runtime_template_named_anchors(state, frame_id)?;
     Ok(())
 }
 
-/// Re-resolve `$parent.X` style anchors for a runtime template frame and its
-/// direct children once both child frames and layer regions exist.
+/// Re-resolve `$parent.X` style anchors for a runtime template frame subtree
+/// once both child frames and layer regions exist.
 ///
 /// `set_single_anchor` records the unresolved relative-key string when a sibling
 /// hasn't been created yet (template child frames are created before layer
@@ -198,16 +204,20 @@ pub(crate) fn resolve_runtime_template_named_anchors(
 ) -> LuaResult<()> {
     let mut sim = crate::lua_api::methods::borrow_state_mut(state)
         .map_err(|error| rilua::runtime_error(error.to_string()))?;
-    let child_ids = sim
-        .widgets
-        .get(frame_id)
-        .map(|frame| frame.children.clone())
-        .unwrap_or_default();
-    sim.widgets.resolve_named_anchor_targets_for_frame(frame_id);
-    sim.widgets.mark_rect_dirty(frame_id);
-    for child_id in child_ids {
-        sim.widgets.resolve_named_anchor_targets_for_frame(child_id);
-        sim.widgets.mark_rect_dirty(child_id);
+    let mut todo = vec![frame_id];
+    let mut seen = FxHashSet::default();
+    while let Some(current_id) = todo.pop() {
+        if !seen.insert(current_id) {
+            continue;
+        }
+        sim.widgets.resolve_named_anchor_targets_for_frame(current_id);
+        sim.widgets.mark_rect_dirty(current_id);
+        let child_ids = sim
+            .widgets
+            .get(current_id)
+            .map(|frame| frame.children.clone())
+            .unwrap_or_default();
+        todo.extend(child_ids);
     }
     Ok(())
 }
