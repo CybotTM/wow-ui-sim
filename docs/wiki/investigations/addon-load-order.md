@@ -23,7 +23,3 @@ There is no missing load order mechanism to fix. This is real WoW behavior. The 
 ## Sources
 
 - [addon-load-order-investigation.md](../../addon-load-order-investigation.md) — full analysis
-
-## See Also
-
-- [[bag-button]] — downstream effects of partial bag button initialization
