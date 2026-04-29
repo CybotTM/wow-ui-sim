@@ -7,7 +7,7 @@
 //!
 //! Generates: data/items.rs
 
-use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
+use super::csv_util::{escape_str, parse_csv_line, read_csv_records, wow_data_dir};
 use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
@@ -73,6 +73,14 @@ fn collect_required_item_ids() -> BTreeSet<u32> {
         collect_number_literals_after(&src, "itemID = ", &mut ids);
     }
 
+    // Adventure Guide loot rows.
+    let journal_loot = wow_data_dir().join("JournalEncounterItem.csv");
+    if let Ok(file) = std::fs::File::open(&journal_loot) {
+        if let Ok(records) = read_csv_records(BufReader::new(file)) {
+            collect_item_ids_from_journal_loot(&records, &mut ids);
+        }
+    }
+
     // Bag items from state.rs default backpack
     if let Ok(src) = std::fs::read_to_string("src/lua_api/state.rs") {
         collect_number_literals_after(&src, "item_id: ", &mut ids);
@@ -99,6 +107,26 @@ fn collect_number_literals_after(src: &str, marker: &str, out: &mut BTreeSet<u32
             }
         }
         rest = &rest[digits_len..];
+    }
+}
+
+fn collect_item_ids_from_journal_loot(records: &[String], out: &mut BTreeSet<u32>) {
+    let mut iter = records.iter();
+    let Some(header) = iter.next() else {
+        return;
+    };
+    let header_fields = parse_csv_line(header);
+    let item_idx = header_fields
+        .iter()
+        .position(|field| field == "ItemID")
+        .unwrap_or(0);
+    for record in iter {
+        let fields = parse_csv_line(record);
+        if let Some(item_id) = fields.get(item_idx).and_then(|field| field.parse::<u32>().ok()) {
+            if item_id != 0 {
+                out.insert(item_id);
+            }
+        }
     }
 }
 
