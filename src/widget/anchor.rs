@@ -69,6 +69,23 @@ impl AnchorPoint {
             Self::BottomRight => "BOTTOMRIGHT",
         }
     }
+
+    /// Horizontal anchor factor: 0.0 for left edge, 0.5 for center, 1.0 for right edge.
+    pub fn horizontal_factor(&self) -> f32 {
+        match self {
+            Self::TopLeft | Self::Left | Self::BottomLeft => 0.0,
+            Self::Top | Self::Center | Self::Bottom => 0.5,
+            Self::TopRight | Self::Right | Self::BottomRight => 1.0,
+        }
+    }
+
+    pub fn pins_left_edge(&self) -> bool {
+        matches!(self, Self::TopLeft | Self::Left | Self::BottomLeft)
+    }
+
+    pub fn pins_right_edge(&self) -> bool {
+        matches!(self, Self::TopRight | Self::Right | Self::BottomRight)
+    }
 }
 
 /// An anchor defines how a widget is positioned relative to another widget.
