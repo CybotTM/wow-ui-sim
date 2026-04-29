@@ -116,6 +116,28 @@ fn get_random_dungeon_best_choice() {
 }
 
 #[test]
+fn unit_has_lfg_random_cooldown_is_registered_and_defaults_false() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if type(UnitHasLFGRandomCooldown) ~= "function" then
+                return "type=" .. type(UnitHasLFGRandomCooldown)
+            end
+            if UnitHasLFGRandomCooldown("player") ~= false then
+                return "player=" .. tostring(UnitHasLFGRandomCooldown("player"))
+            end
+            if UnitHasLFGRandomCooldown("party1") ~= false then
+                return "party1=" .. tostring(UnitHasLFGRandomCooldown("party1"))
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "UnitHasLFGRandomCooldown: {result}");
+}
+
+#[test]
 fn c_lfg_info_is_follower_dungeon() {
     let env = env();
     let result: String = env

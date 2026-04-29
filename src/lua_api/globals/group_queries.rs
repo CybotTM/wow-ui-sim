@@ -85,6 +85,11 @@ fn register_unit_relationships(state: &mut LuaState) {
     set_global(state, "UnitIsGroupLeader", unit_is_group_leader);
     set_global(state, "UnitIsGroupAssistant", unit_is_group_assistant);
     set_global(state, "UnitHasLFGDeserter", always_false);
+    set_global(
+        state,
+        "UnitHasLFGRandomCooldown",
+        unit_has_lfg_random_cooldown,
+    );
 }
 
 fn register_unit_liveness(state: &mut LuaState) {
@@ -258,6 +263,15 @@ fn active_party_count(state: &mut LuaState) -> LuaResult<usize> {
     } else {
         0
     })
+}
+
+fn unit_has_lfg_random_cooldown(state: &mut LuaState) -> LuaResult<u32> {
+    let unit = Option::<String>::from_stack(state, 1)?.unwrap_or_default();
+    let has_cooldown = borrow_state(state)?
+        .lfg_random_cooldown_units
+        .contains(unit.as_str());
+    state.push(Val::Bool(has_cooldown));
+    Ok(1)
 }
 
 fn unit_exists(state: &mut LuaState) -> LuaResult<u32> {

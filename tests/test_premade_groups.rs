@@ -56,7 +56,7 @@ fn get_search_results_returns_ids() {
 }
 
 #[test]
-fn search_fires_event() {
+fn search_fires_results_event_on_next_tick() {
     let env = env();
     let result: String = env
         .eval(
@@ -68,11 +68,21 @@ fn search_fires_event() {
                 if event == "LFG_LIST_SEARCH_RESULTS_RECEIVED" then fired = true end
             end)
             C_LFGList.Search(2)
-            return fired and "ok" or "not_fired"
+            return fired and "fired_sync" or "pending"
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Search should fire event: {result}");
+    assert_eq!(
+        result, "pending",
+        "Search event timing before tick: {result}"
+    );
+
+    env.process_timers().unwrap();
+    let result: String = env.eval("return fired and 'ok' or 'not_fired'").unwrap();
+    assert_eq!(
+        result, "ok",
+        "Search should fire event on timer tick: {result}"
+    );
 }
 
 #[test]

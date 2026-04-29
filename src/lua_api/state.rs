@@ -165,6 +165,7 @@ macro_rules! build_empty_sim_state {
             can_use_premade_group: false,
             lfg_category_info: default_lfg_category_info(),
             lfg_active_categories: ::std::collections::HashSet::new(),
+            lfg_random_cooldown_units: ::std::collections::HashSet::new(),
             lfg_activity_groups: default_lfg_activity_groups(),
             lfg_activities: default_lfg_activities(),
             lfg_applications: Vec::new(),
@@ -1572,6 +1573,9 @@ pub struct SimState {
     /// Set of category ids for which `C_LFGInfo.IsLFGModeActiveForCategory`
     /// returns true. Default empty (no active LFG modes).
     pub lfg_active_categories: std::collections::HashSet<i32>,
+    /// Unit tokens with an active random-dungeon queue cooldown. Default
+    /// empty: seeded characters are ready for random LFD queues.
+    pub lfg_random_cooldown_units: std::collections::HashSet<String>,
     /// Activity groups seeded for the Group Finder UI.
     pub lfg_activity_groups: Vec<LfgActivityGroupInfo>,
     /// Individual activities seeded for the Group Finder UI.

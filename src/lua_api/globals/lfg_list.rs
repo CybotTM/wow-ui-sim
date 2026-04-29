@@ -4,17 +4,21 @@
 //! `lfg_activities`, and `world.premade_listings`.
 
 use crate::event::Event;
+use crate::lua_api::env::WowLuaAppData;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, call_function_state, create_string, create_table, frame_ref,
     table_set,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_api::state_types::{LfgActivityInfo, LfgApplication, PremadeListing};
+use crate::lua_api::state_types::{LfgActivityInfo, LfgApplication, PendingTimer, PremadeListing};
+use crate::lua_api::{next_timer_id, timer_layout};
 use crate::lua_bridge::{FromStack, table_set_rust_fn_static};
+use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaResult, Val};
+use rilua::{LuaResult, Val, runtime_error};
+use std::time::Instant;
 
 pub fn get_num_applications(state: &mut LuaState) -> LuaResult<u32> {
     let (total, viewed) = {
@@ -66,6 +70,40 @@ fn fire_event_with_args(state: &mut LuaState, event_name: &str, args: Vec<Val>) 
         let _ = call_function_state(state, handler, &call_args);
     }
     Ok(())
+}
+
+fn defer_lfg_search_results_event(state: &mut LuaState) -> LuaResult<()> {
+    let callback = Val::Function(state.gc.alloc_closure(Closure::Rust(RustClosure::new(
+        dispatch_lfg_search_results_received,
+        "C_LFGList.SearchResultsReady",
+    ))));
+    let id = next_timer_id();
+    timer_layout::store_timer_callback(state, id, callback);
+
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let owner_addon = {
+        let sim = app.sim_state.borrow();
+        sim.loading_addon_index.or(sim.executing_addon_index)
+    };
+    app.sim_state
+        .borrow_mut()
+        .rilua_timers
+        .push_back(PendingTimer {
+            id,
+            fire_at: Instant::now(),
+            interval: None,
+            remaining: None,
+            cancelled: false,
+            owner_addon,
+        });
+    Ok(())
+}
+
+fn dispatch_lfg_search_results_received(state: &mut LuaState) -> LuaResult<u32> {
+    fire_event_with_args(state, "LFG_LIST_SEARCH_RESULTS_RECEIVED", Vec::new())?;
+    Ok(0)
 }
 
 fn premade_listing(state: &LuaState, search_result_id: u32) -> Option<PremadeListing> {
@@ -230,7 +268,7 @@ fn get_search_results(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn search(state: &mut LuaState) -> LuaResult<u32> {
-    fire_named_event(state, "LFG_LIST_SEARCH_RESULTS_RECEIVED")?;
+    defer_lfg_search_results_event(state)?;
     Ok(0)
 }
 
