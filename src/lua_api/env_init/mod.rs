@@ -37,6 +37,8 @@ pub(crate) use runtime::{
 pub(crate) use bootstrap::init_runtime_surface_bootstrap;
 pub(crate) use bootstrap::init_shared_bootstrap;
 pub(crate) use enums::init_enum_globals;
+#[cfg(feature = "client-wrath")]
+pub(crate) use bootstrap::init_wrath_compat_bootstrap;
 
 /// Initialize the primary rilua state: seed registries, globals, frame methods, and taint.
 pub(super) fn init_lua_state(
@@ -52,6 +54,8 @@ pub(super) fn init_lua_state(
     // those two points the mark phase is paused.
     super::globals::register_globals(lua, state.clone())?;
     bootstrap::init_runtime_surface_bootstrap(lua)?;
+    #[cfg(feature = "client-wrath")]
+    bootstrap::init_wrath_compat_bootstrap(lua)?;
     // secureenv is shallow-copied from `_G` here. It keeps its copy of
     // the dangerous globals (dofile / loadfile / require / string.dump /
     // math.randomseed) so secure chunks — which Blizzard trusts —
