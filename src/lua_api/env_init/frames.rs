@@ -3,6 +3,8 @@
 use crate::lua_api::frame::methods::{
     button_anchor_hierarchy, core_state, map_frames, misc, text_attribute_event, widgets,
 };
+#[cfg(feature = "client-wrath")]
+use crate::lua_api::frame::methods::wrath_compat;
 use crate::lua_api::methods::{
     borrow_state_mut, extract_frame_id, registry_set, table_set, val_to_string,
 };
@@ -46,6 +48,8 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     text_attribute_event::register_all(state, frame_mt_ref)?;
     button_anchor_hierarchy::register_all(state, frame_mt_ref)?;
     widgets::register_all(state, frame_mt_ref)?;
+    #[cfg(feature = "client-wrath")]
+    wrath_compat::register_all(state, frame_mt_ref)?;
 
     // Replace the self-referencing `__index` with a shallow clone that omits
     // metamethod keys. Blizzard's restricted code does
