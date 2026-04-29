@@ -543,3 +543,41 @@ fn encounter_toggle_loads_and_shows_frame() {
     assert!(loaded, "encounter journal toggle should load the addon");
     assert!(shown, "encounter journal toggle should show the frame");
 }
+
+#[test]
+fn encounter_journal_journeys_frame_seeds_tww_major_factions() {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+    load_panel_harness(&env);
+
+    env.exec("ToggleEncounterJournal()")
+        .expect("ToggleEncounterJournal should execute");
+
+    let (count, names): (i32, String) = env
+        .eval(
+            r#"
+            local frame = EncounterJournal and EncounterJournal.JourneysFrame
+            if not frame then
+                return -1, ""
+            end
+            frame:Refresh()
+            local out = {}
+            for _, entry in ipairs(frame.renownJourneyData) do
+                out[#out + 1] = entry.name
+            end
+            return #frame.renownJourneyData, table.concat(out, "|")
+            "#,
+        )
+        .expect("Journeys frame probe should return");
+
+    assert_eq!(
+        count, 4,
+        "JourneysFrame should seed four TWW major factions"
+    );
+    assert_eq!(
+        names,
+        "Hallowfall Arathi|Council of Dornogal|The Assembly of the Deeps|The Severed Threads",
+        "JourneysFrame should list the seeded TWW major factions in faction-id order"
+    );
+}

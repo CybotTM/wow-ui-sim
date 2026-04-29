@@ -10594,14 +10594,6 @@ C_MajorFactions = __wow_merge_namespace(C_MajorFactions, {
   GetCurrentRenownLevel = function(_factionID)
     return 1
   end,
-  GetRenownLevels = function(_factionID)
-    return {
-      {
-        level = 1,
-        rewardInfo = {},
-      },
-    }
-  end,
   GetRenownRewardsForLevel = function(_factionID, _level)
     return {}
   end,
