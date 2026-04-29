@@ -48,7 +48,7 @@ pub mod manifest_interface_data;
 pub mod map_art;
 pub mod map_exploration;
 pub mod paths;
-mod profession_item_overrides;
+pub mod profession_item_overrides;
 #[path = "../data/quest_poi_blobs.rs"]
 pub mod quest_poi_blobs;
 #[path = "../data/quest_ui_map.rs"]
