@@ -157,6 +157,69 @@ fn query_guild_recipes(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
+/// `QueryGuildEventLog()` — retail asks the server for the guild event log
+/// and fires `GUILD_EVENT_LOG_UPDATE` when it arrives. The sim has the log
+/// in-memory, so dispatch the event synchronously to drive
+/// `CommunitiesGuildLogFrame_Update`.
+fn query_guild_event_log(state: &mut LuaState) -> LuaResult<u32> {
+    dispatch_event_now(state, "GUILD_EVENT_LOG_UPDATE", &[])?;
+    Ok(0)
+}
+
+fn get_num_guild_events(state: &mut LuaState) -> LuaResult<u32> {
+    let n = borrow_state(state)?.world.guild_events.len() as f64;
+    state.push(Val::Num(n));
+    Ok(1)
+}
+
+/// `GetGuildEventInfo(index)` — returns
+/// `(type, player1, player2, rank, year, month, day, hour)`. Out-of-range
+/// indices push 8 nils.
+fn get_guild_event_info(state: &mut LuaState) -> LuaResult<u32> {
+    let index = i32::from_stack(state, 1)?;
+    let zero_based = match usize::try_from(index.saturating_sub(1)) {
+        Ok(i) => i,
+        Err(_) => return push_nil_event_row(state),
+    };
+    let event = {
+        let st = borrow_state(state)?;
+        st.world.guild_events.get(zero_based).cloned()
+    };
+    let Some(event) = event else {
+        return push_nil_event_row(state);
+    };
+    let event_type = create_string(state, &event.event_type);
+    let player1 = create_string(state, &event.player1);
+    state.push(event_type);
+    state.push(player1);
+    match event.player2 {
+        Some(name) => {
+            let v = create_string(state, &name);
+            state.push(v);
+        }
+        None => state.push(Val::Nil),
+    }
+    match event.rank_name {
+        Some(rank) => {
+            let v = create_string(state, &rank);
+            state.push(v);
+        }
+        None => state.push(Val::Nil),
+    }
+    state.push(Val::Num(event.year as f64));
+    state.push(Val::Num(event.month as f64));
+    state.push(Val::Num(event.day as f64));
+    state.push(Val::Num(event.hour as f64));
+    Ok(8)
+}
+
+fn push_nil_event_row(state: &mut LuaState) -> LuaResult<u32> {
+    for _ in 0..8 {
+        state.push(Val::Nil);
+    }
+    Ok(8)
+}
+
 fn query_guild_news(state: &mut LuaState) -> LuaResult<u32> {
     dispatch_event_now(state, "GUILD_NEWS_UPDATE", &[])?;
     Ok(0)
@@ -324,6 +387,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "CanViewGuildRecipes", can_view_guild_recipes)?;
     LuaApiMut::register_function(lua, "QueryGuildNews", query_guild_news)?;
     LuaApiMut::register_function(lua, "GuildNewsSort", guild_news_sort)?;
+    LuaApiMut::register_function(lua, "QueryGuildEventLog", query_guild_event_log)?;
+    LuaApiMut::register_function(lua, "GetNumGuildEvents", get_num_guild_events)?;
+    LuaApiMut::register_function(lua, "GetGuildEventInfo", get_guild_event_info)?;
     LuaApiMut::register_function(lua, "GetNumGuildMembers", get_num_guild_members)?;
     LuaApiMut::register_function(lua, "GetGuildRosterSize", get_guild_roster_size)?;
     LuaApiMut::register_function(lua, "GetGuildRosterMOTD", get_guild_roster_motd)?;

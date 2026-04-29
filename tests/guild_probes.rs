@@ -55,6 +55,9 @@ fn guild_edit_permissions_track_officer_status() {
 #[test]
 fn is_guild_leader_defaults_false() {
     let env = env();
+    // Seeded world places "Uther" (rank 1) as the first guild member, so
+    // clear the roster first to assert the "no guild leader" path.
+    env.state().borrow_mut().world.guild_members.clear();
     let leader: bool = env.eval("return IsGuildLeader()").unwrap();
     assert!(!leader);
 }
@@ -220,6 +223,8 @@ fn get_guild_roster_size_returns_total_count() {
 #[test]
 fn get_guild_roster_motd_defaults_empty() {
     let env = env();
+    // Seeded world ships a non-empty MOTD; clear it to assert the "no MOTD" path.
+    env.state().borrow_mut().world.guild_motd.clear();
     let motd: String = env.eval("return GetGuildRosterMOTD()").unwrap();
     assert!(motd.is_empty());
 }

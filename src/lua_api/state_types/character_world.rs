@@ -455,6 +455,10 @@ pub struct WorldState {
     /// Guild chat messages sent at runtime via `C_Club.SendMessage`. Appended
     /// after the static seed messages exposed by `C_Club.GetMessagesBefore`.
     pub guild_chat_messages: Vec<GuildChatMessage>,
+    /// Guild event log entries surfaced by `GetNumGuildEvents` /
+    /// `GetGuildEventInfo`. Newest entries last; the Communities Guild Log
+    /// panel iterates from the end. Empty when the player has no guild.
+    pub guild_events: Vec<GuildEvent>,
 }
 
 /// A guild member: display name, 1-based rank index, and online state.
@@ -464,6 +468,24 @@ pub struct GuildMember {
     pub name: String,
     pub rank_index: i32,
     pub online: bool,
+}
+
+/// One entry of the guild event log returned by `GetGuildEventInfo(i)`:
+/// `(type, player1, player2, rank, year, month, day, hour)`. `event_type` is
+/// one of `"invite"`, `"join"`, `"promote"`, `"demote"`, `"remove"`, `"quit"`.
+/// `player2` is the actor (e.g. the inviter) for `invite` / `promote` /
+/// `demote` / `remove`; nil for `join` / `quit`. `rank_name` is only used for
+/// `promote` / `demote`. Year is years-since-2000 to match retail.
+#[derive(Debug, Clone)]
+pub struct GuildEvent {
+    pub event_type: String,
+    pub player1: String,
+    pub player2: Option<String>,
+    pub rank_name: Option<String>,
+    pub year: i32,
+    pub month: i32,
+    pub day: i32,
+    pub hour: i32,
 }
 
 /// One row of `GetGuildChallengeInfo(orderIndex)`: returns
@@ -590,6 +612,7 @@ pub fn seeded_world_state() -> WorldState {
         guild_motd: default_guild_motd(),
         guild_info_text: default_guild_info_text(),
         guild_challenges: default_guild_challenges(),
+        guild_events: default_guild_events(),
         pvp_type: "contested".into(),
         guild_can_speak_in_chat: true,
         world_pvp_areas: default_world_pvp_areas(),
@@ -628,6 +651,71 @@ fn default_guild_members() -> Vec<GuildMember> {
             name: "Jaina".into(),
             rank_index: 2,
             online: false,
+        },
+    ]
+}
+
+fn default_guild_events() -> Vec<GuildEvent> {
+    vec![
+        GuildEvent {
+            event_type: "join".into(),
+            player1: "Uther".into(),
+            player2: None,
+            rank_name: None,
+            year: 24,
+            month: 9,
+            day: 1,
+            hour: 18,
+        },
+        GuildEvent {
+            event_type: "invite".into(),
+            player1: "Uther".into(),
+            player2: Some("Jaina".into()),
+            rank_name: None,
+            year: 24,
+            month: 10,
+            day: 4,
+            hour: 21,
+        },
+        GuildEvent {
+            event_type: "join".into(),
+            player1: "Jaina".into(),
+            player2: None,
+            rank_name: None,
+            year: 24,
+            month: 10,
+            day: 4,
+            hour: 22,
+        },
+        GuildEvent {
+            event_type: "promote".into(),
+            player1: "Uther".into(),
+            player2: Some("Jaina".into()),
+            rank_name: Some("Officer".into()),
+            year: 24,
+            month: 11,
+            day: 12,
+            hour: 19,
+        },
+        GuildEvent {
+            event_type: "quit".into(),
+            player1: "Thrall".into(),
+            player2: None,
+            rank_name: None,
+            year: 25,
+            month: 1,
+            day: 6,
+            hour: 14,
+        },
+        GuildEvent {
+            event_type: "remove".into(),
+            player1: "Uther".into(),
+            player2: Some("Sylvanas".into()),
+            rank_name: None,
+            year: 25,
+            month: 2,
+            day: 18,
+            hour: 23,
         },
     ]
 }
