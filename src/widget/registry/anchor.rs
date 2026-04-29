@@ -33,6 +33,17 @@ impl WidgetRegistry {
             }
             return Some(current_id);
         }
+        if let Some(suffix) = first
+            .strip_prefix("$parent")
+            .or_else(|| first.strip_prefix("$Parent"))
+            && !suffix.is_empty()
+            && segments.clone().next().is_none()
+        {
+            let parent_id = self.widgets.get(&frame_id)?.parent_id?;
+            let parent_name = self.widgets.get(&parent_id)?.name.as_deref()?;
+            let resolved = format!("{parent_name}{suffix}");
+            return self.names.get(resolved.as_str()).copied();
+        }
         self.names.get(expr).copied()
     }
 

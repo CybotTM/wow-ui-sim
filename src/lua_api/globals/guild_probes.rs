@@ -19,8 +19,10 @@
 //!   they're nil the rank radio menu errors out and stays empty.
 //! - `QueryGuildRecipes()`          -> no-op, guild recipe state is unmodeled
 //! - `CanViewGuildRecipes()`        -> false, guild recipe state is unmodeled
-//! - `QueryGuildNews()`             -> no-op, guild news state is unmodeled
-//! - `GuildNewsSort()`              -> no-op, guild news state is unmodeled
+//! - `QueryGuildNews()`             -> fires `GUILD_NEWS_UPDATE` so the
+//!   Communities panel calls `_Update` and seeds at least the MOTD row.
+//! - `GuildNewsSort()`              -> fires `GUILD_NEWS_UPDATE` for the same
+//!   reason. Real WoW sorts the news list; the sim has no records to sort.
 //!
 //! Migrates 4 roster-count entries off `GLOBAL_ZERO_STUBS` and supplies the
 //! empty guild news count:
@@ -33,6 +35,7 @@
 //! - `GetNumGuildNews()`      -> 0, guild news state is unmodeled
 
 use crate::lua_api::game_data::CLASS_LABELS;
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::{borrow_state, create_string};
 use crate::lua_bridge::FromStack;
 use rilua::vm::state::LuaState;
@@ -154,11 +157,18 @@ fn query_guild_recipes(_state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-fn query_guild_news(_state: &mut LuaState) -> LuaResult<u32> {
+fn query_guild_news(state: &mut LuaState) -> LuaResult<u32> {
+    dispatch_event_now(state, "GUILD_NEWS_UPDATE", &[])?;
     Ok(0)
 }
 
-fn guild_news_sort(_state: &mut LuaState) -> LuaResult<u32> {
+/// `GuildNewsSort(sortMode)` — sorts the guild news list and fires
+/// `GUILD_NEWS_UPDATE` so panels re-populate. The sim has no guild news
+/// records so there's nothing to sort, but the event fire is what
+/// `CommunitiesGuildNewsFrame_OnShow` relies on to call `_Update` and seed
+/// at least the MOTD entry into the data provider.
+fn guild_news_sort(state: &mut LuaState) -> LuaResult<u32> {
+    dispatch_event_now(state, "GUILD_NEWS_UPDATE", &[])?;
     Ok(0)
 }
 

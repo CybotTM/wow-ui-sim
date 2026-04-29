@@ -753,4 +753,63 @@ mod tests {
             .count();
         assert_eq!(duplicates, 1, "add_child should not duplicate child IDs");
     }
+
+    #[test]
+    fn late_resolve_anchor_with_parent_prefix_suffix() {
+        // Reproduces the Communities Guild Info panel bug: a child frame is
+        // anchored to `$parentHeader2` but Header2 (a layer Texture) is
+        // created AFTER the child frame, so initial resolution stores the
+        // unresolved expression. The late-bind retry must substitute the
+        // $parent prefix and look the resulting name up in the names index.
+        let mut registry = WidgetRegistry::default();
+
+        let mut info = frame(1, WidgetType::Frame, None, FrameStrata::Medium);
+        info.name = Some("InfoPanel".to_string());
+        registry.register(info);
+
+        let mut child = frame(2, WidgetType::ScrollFrame, Some(1), FrameStrata::Medium);
+        child.set_point_with_name(
+            crate::widget::AnchorPoint::TopLeft,
+            Some("$parentHeader2".to_string()),
+            crate::widget::AnchorPoint::BottomLeft,
+            14.0,
+            -1.0,
+        );
+        registry.register(child);
+        registry.add_child(1, 2);
+
+        // At this point Header2 doesn't exist yet — late-bind would fail.
+        registry.resolve_named_anchor_targets_for_frame(2);
+        assert!(
+            registry
+                .get(2)
+                .unwrap()
+                .anchors
+                .first()
+                .unwrap()
+                .relative_to_id
+                .is_none(),
+            "anchor must remain unresolved before Header2 is registered"
+        );
+
+        // Now create Header2 with the substituted name.
+        let mut header2 = frame(3, WidgetType::Texture, Some(1), FrameStrata::Medium);
+        header2.name = Some("InfoPanelHeader2".to_string());
+        registry.register(header2);
+        registry.add_child(1, 3);
+
+        // Late-bind retry must now find Header2 via $parent substitution.
+        registry.resolve_named_anchor_targets_for_frame(2);
+        assert_eq!(
+            registry
+                .get(2)
+                .unwrap()
+                .anchors
+                .first()
+                .unwrap()
+                .relative_to_id,
+            Some(3),
+            "late-bind must substitute $parentHeader2 to InfoPanelHeader2"
+        );
+    }
 }
