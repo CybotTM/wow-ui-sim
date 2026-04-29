@@ -2,6 +2,22 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-29] ingest | Backpack body renders gray, not textured
+
+Created `investigations/backpack-background-texture.md`. User showed a retail
+screenshot of an open `Backpack` (combined-bags) window with a tan/brown
+textured body and reported the simulator was missing it. Render-time tracing
+confirmed the sim emits a solid `PANEL_BACKGROUND_COLOR` quad on the
+`Bg.TopSection`/`Bg.BottomEdge` textures — i.e. exactly what
+`FlatPanelBackgroundTemplate` authors. Both the pinned `12.0.5` vendor and the
+`Gethe/wow-ui-source` `live` HEAD (verified via WebFetch + Codex
+gpt-5.5/high) define `ContainerFrameCombinedBags` with no body atlas/file and
+a no-op `UpdateBackground`. Bank's tan body comes from a separate
+`bank-frame-background` atlas declared on `BankFrame` itself, not shared with
+the bag panel. Conclusion: the textured retail look is applied outside the
+public Blizzard source we have (addon overlay, unmirrored patch, or an
+unknown runtime path); closed without a sim-side change.
+
 ## [2026-04-28] ingest | Windows port build unblock
 
 Created `investigations/windows-port-build.md` after the Windows smoke pass. The root cause was the local `iced-dynamic` re-export crate forcing a huge `iced_dynamic.dll` link, which hit MSVC `LNK1189`; the build now depends on upstream `iced` directly. Verified `wow-sim`, `wow-cli`, GUI startup, and screenshot output on Windows. Updated the note after adding shared WoW resource discovery for install root, CASC `Data`, extracted Interface art, AddOns, and WTF. Live WTF is documented and tested as read-only import; simulator-local SavedVariables take precedence once present.

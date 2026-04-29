@@ -43,6 +43,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
 | [[achievement-panel-hide]] | Achievement panel hide now uses Blizzard's managed panel path; animation completion also fires child animation `OnFinished` scripts for alert hide XML |
+| [[backpack-background-texture]] | Reported missing tan/brown body on Backpack — investigation showed sim renders exactly what `FlatPanelBackgroundTemplate` authors (solid `PANEL_BACKGROUND_COLOR`); retail texture comes from outside the Gethe public source (addon overlay or unmirrored patch path), no sim-side fix |
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop, shallow `issecretvalue` for pool releases (2159ms→2.6ms) |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
 | [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
