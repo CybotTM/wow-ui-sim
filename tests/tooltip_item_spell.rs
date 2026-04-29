@@ -183,6 +183,38 @@ fn test_set_unit_aura_populates_lines() {
 }
 
 #[test]
+fn test_set_unit_aura_colors_like_spell_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"GameTooltip:SetUnitAura("player", 1, "HELPFUL")"#)
+        .unwrap();
+
+    let highlight: (f32, f32, f32) = env
+        .eval("local r,g,b = HIGHLIGHT_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+    let normal: (f32, f32, f32) = env
+        .eval("local r,g,b = NORMAL_FONT_COLOR:GetRGB(); return r,g,b")
+        .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let title = &td.lines[0];
+    let duration = td
+        .lines
+        .iter()
+        .find(|line| line.left_text == "1 hr")
+        .expect("unit aura tooltip should include the remaining duration");
+    let description = td
+        .lines
+        .last()
+        .expect("unit aura tooltip should include a description line");
+
+    assert_color_close(title.left_color, highlight, "unit aura title");
+    assert_color_close(duration.left_color, highlight, "unit aura duration");
+    assert_color_close(description.left_color, normal, "unit aura description");
+}
+
+#[test]
 fn test_set_unit_buff_populates_lines() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(r#"GameTooltip:SetUnitBuff("player", 1)"#).unwrap();
