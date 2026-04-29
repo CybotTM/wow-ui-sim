@@ -8,7 +8,9 @@ use crate::loader::{
 use crate::screen::ScreenKind;
 
 fn blizzard_ui_dir() -> PathBuf {
-    crate::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available")
+    crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 fn addon_names(screen: ScreenKind) -> Vec<String> {

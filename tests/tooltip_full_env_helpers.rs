@@ -6,7 +6,6 @@ use std::path::Path;
 
 use wow_ui_sim::loader::{find_toc_file, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 
 #[path = "common/event_helpers.rs"]
 mod event_helpers;
@@ -84,7 +83,9 @@ pub fn setup_full_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().unwrap();
     env.set_screen_size(1024.0, 768.0);
 
-    let ui = default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced");
+    let ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )));
     env.state().borrow_mut().addon_base_paths = vec![ui.clone()];
 
     load_blizzard_addons(&env, &ui);

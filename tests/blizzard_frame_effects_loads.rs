@@ -1,3 +1,4 @@
+#![cfg(feature = "client-retail")]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
@@ -30,6 +31,7 @@ fn blizzard_ui_cache_dir() -> PathBuf {
         .map(PathBuf::from)
         .map(|home| home.join(".cache/wow-ui-sim/blizzard-ui"))
         .unwrap_or_default()
+
 }
 
 fn frame_effects_toc() -> PathBuf {

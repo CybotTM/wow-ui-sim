@@ -182,7 +182,7 @@ fn set_registry_bool(state: &mut LuaState, key: &'static str, value: bool) {
 fn default_runtime_addon_bases() -> Vec<PathBuf> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     vec![
-        root.join("Interface/BlizzardUI"),
+        crate::client_profile::blizzard_ui_addons_dir_under(&root),
         root.join("Interface/AddOns"),
         root.join("Interface/TestAddOns"),
     ]

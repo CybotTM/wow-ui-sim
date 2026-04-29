@@ -1,3 +1,4 @@
+#![cfg(feature = "client-retail")]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_all_blizzard_addons, discover_blizzard_addons_for_screen};
@@ -10,6 +11,7 @@ use wow_ui_sim::toc::TocFile;
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
         .expect("Blizzard UI cache should be synced")
+
 }
 
 fn pet_battle_dir() -> PathBuf {

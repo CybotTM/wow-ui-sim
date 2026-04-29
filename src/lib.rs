@@ -19,6 +19,7 @@ mod atlas_elements;
 pub mod blizzard_ui_sync;
 pub mod c_api;
 pub mod casc_asset_fallback;
+pub mod client_profile;
 pub mod config;
 #[path = "../data/currencies.rs"]
 pub mod currencies;

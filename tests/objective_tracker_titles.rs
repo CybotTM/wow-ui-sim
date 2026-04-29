@@ -8,6 +8,7 @@ use wow_ui_sim::render::WowFontSystem;
 
 fn blizzard_ui_dir() -> std::path::PathBuf {
     default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
+
 }
 
 fn setup_full_ui() -> WowLuaEnv {

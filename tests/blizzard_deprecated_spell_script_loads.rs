@@ -1,3 +1,4 @@
+#![cfg(feature = "client-retail")]
 use std::path::PathBuf;
 
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
@@ -8,7 +9,8 @@ use wow_ui_sim::toc::TocFile;
 
 fn blizzard_ui_dir() -> PathBuf {
     wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        .unwrap_or_else(|_| wow_ui_sim::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be available"))
+        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
+
 }
 
 fn deprecated_spell_script_toc() -> PathBuf {

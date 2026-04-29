@@ -124,6 +124,32 @@ fn blizzard_ui_cache_path_label() -> String {
         .unwrap_or_else(|_| "~/.cache/wow-ui-sim/blizzard-ui".to_string())
 }
 
+fn resolve_blizzard_ui_addons_path(root: &Path) -> crate::Result<PathBuf> {
+    let profile = crate::client_profile::ACTIVE;
+    let profile_addons = root
+        .join("Interface/BlizzardUI")
+        .join(profile.subdir())
+        .join("AddOns");
+    if profile_addons.exists() {
+        return Ok(profile_addons);
+    }
+
+    let vendor_path = root
+        .join("vendor")
+        .join(format!("wow-ui-source-{}", profile.subdir().to_lowercase()))
+        .join("Interface/AddOns");
+    if vendor_path.exists() {
+        return Ok(vendor_path);
+    }
+
+    Err(crate::Error::Other(format!(
+        "missing Blizzard UI addon tree for {:?} profile; expected {} or {}",
+        profile,
+        profile_addons.display(),
+        vendor_path.display()
+    )))
+}
+
 fn interface_path_candidates(install_root: Option<&PathBuf>) -> Vec<PathBuf> {
     let mut paths = Vec::new();
     push_env_path(&mut paths, "WOW_SIM_INTERFACE_PATH");
@@ -338,6 +364,7 @@ fn env_string(var: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use std::path::{Path, PathBuf};
 
     use super::*;
@@ -441,5 +468,45 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn blizzard_ui_path_prefers_repo_symlink() {
+        let root = tempfile::tempdir().expect("tempdir");
+        let profile_subdir = crate::client_profile::ACTIVE.subdir();
+        let ui = root
+            .path()
+            .join("Interface/BlizzardUI")
+            .join(profile_subdir)
+            .join("AddOns");
+        let vendor = root
+            .path()
+            .join(format!(
+                "vendor/wow-ui-source-{}",
+                profile_subdir.to_lowercase()
+            ))
+            .join("Interface/AddOns");
+        fs::create_dir_all(&ui).expect("create ui dir");
+        fs::create_dir_all(&vendor).expect("create vendor dir");
+
+        let resolved = resolve_blizzard_ui_addons_path(root.path()).expect("resolve path");
+        assert_eq!(resolved, ui);
+    }
+
+    #[test]
+    fn blizzard_ui_path_falls_back_to_vendor_tree() {
+        let root = tempfile::tempdir().expect("tempdir");
+        let profile_subdir = crate::client_profile::ACTIVE.subdir();
+        let vendor = root
+            .path()
+            .join(format!(
+                "vendor/wow-ui-source-{}",
+                profile_subdir.to_lowercase()
+            ))
+            .join("Interface/AddOns");
+        fs::create_dir_all(&vendor).expect("create vendor dir");
+
+        let resolved = resolve_blizzard_ui_addons_path(root.path()).expect("resolve path");
+        assert_eq!(resolved, vendor);
     }
 }

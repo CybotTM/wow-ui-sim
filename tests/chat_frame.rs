@@ -23,7 +23,6 @@ use wow_ui_sim::iced_app::{
 };
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::paths::default_blizzard_ui_addons_path;
 #[cfg(feature = "gui")]
 use wow_ui_sim::render::{GlyphAtlas, QuadBatch, WowFontSystem};
 
@@ -70,7 +69,9 @@ const CHAT_LAYOUT_DEBUG_LUA: &str = r#"
 "#;
 
 fn blizzard_ui_dir() -> PathBuf {
-    default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 /// Create a fully loaded environment with all Blizzard addons and startup events.

@@ -35,6 +35,7 @@ fn blizzard_ui_cache_dir() -> PathBuf {
         .map(PathBuf::from)
         .map(|home| home.join(".cache/wow-ui-sim/blizzard-ui"))
         .unwrap_or_default()
+
 }
 
 /// Blizzard addons needed for the panel system (dependency order).

@@ -8,6 +8,7 @@ use wow_ui_sim::startup::{run_extra_update_ticks, settle_headless_startup};
 
 fn blizzard_ui_dir() -> std::path::PathBuf {
     default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
+
 }
 
 fn load_blizzard_screen(screen: ScreenKind) -> common::LockedEnv {

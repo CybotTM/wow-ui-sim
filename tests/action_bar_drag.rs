@@ -85,8 +85,9 @@ fn seed_action_slot(env: &WowLuaEnv, slot: u32, spell_id: u32) {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        .expect("Blizzard UI cache should be available")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 fn action_bar_toc(addon: &str, toc_name: &str) -> PathBuf {

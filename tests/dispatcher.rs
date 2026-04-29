@@ -4,9 +4,10 @@ use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn dispatcher_toc() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        .expect("Blizzard UI cache should be available")
-        .join("Blizzard_Dispatcher/Blizzard_Dispatcher.toc")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
+    .join("Blizzard_Dispatcher/Blizzard_Dispatcher.toc")
 }
 
 fn env() -> WowLuaEnv {

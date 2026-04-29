@@ -89,7 +89,9 @@ fn val_to_rust_string(env: &WowLuaEnv, value: Val) -> String {
 }
 
 fn blizzard_ui_dir() -> PathBuf {
-    crate::paths::default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
+    crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 /// Create a test environment, write XML content, load it, return context.

@@ -145,6 +145,7 @@ fn env_with_blizzard_ui_from(ui: std::path::PathBuf) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("create env");
     env.set_screen_size(1024.0, 768.0);
 
+
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![ui.clone()];

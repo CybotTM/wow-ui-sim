@@ -1,4 +1,5 @@
-use crate::common;
+#![cfg(feature = "client-retail")]
+mod common;
 
 use std::collections::HashSet;
 

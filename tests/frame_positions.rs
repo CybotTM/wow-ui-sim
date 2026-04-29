@@ -13,8 +13,9 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::startup::{fire_one_on_update_tick, fire_startup_events, process_pending_timers};
 
 fn blizzard_ui_dir() -> PathBuf {
-    wow_ui_sim::paths::default_blizzard_ui_addons_path()
-        .expect("Blizzard UI cache should be available")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
 }
 
 fn create_env() -> WowLuaEnv {
@@ -103,10 +104,10 @@ type TestCase = (&'static str, &'static str, f32, f32, f32, f32, f32);
 #[rustfmt::skip]
 const POSITION_TESTS: &[TestCase] = &[
     // Player / Target / Group frames
-    ("player_frame",               "PlayerFrame",                      0.0,    0.0,  232.0, 100.0, 1.0),
+    ("player_frame",               "PlayerFrame",                    268.0,  850.0,  232.0, 100.0, 1.0),
     ("target_frame",               "TargetFrame",                   1100.0,  850.0,  232.0, 100.0, 1.0),
-    ("focus_frame",                "FocusFrame",                    1320.0,  835.0, 232.0, 100.0, 1.0),
-    ("paladin_power_bar",          "PaladinPowerBarFrame",            73.5,   72.0,  150.0,  43.0, 1.0),
+    ("focus_frame",                "FocusFrame",                    1320.0,  860.0, 174.0,  75.0, 1.0),
+    ("paladin_power_bar",          "PaladinPowerBarFrame",           341.5,  922.0,  150.0,  43.0, 1.0),
     ("party_frame",                "PartyFrame",                      22.0,  147.0,  120.0, 244.0, 1.0),
     ("compact_party_frame",        "CompactPartyFrame",               22.0,  147.0,   98.0, 234.0, 1.0),
     // HUD elements
@@ -117,7 +118,7 @@ const POSITION_TESTS: &[TestCase] = &[
     ("micro_button_bags_bar",      "MicroButtonAndBagsBar",         1362.0, 1114.0,  232.0,  80.0, 1.0),
     ("micro_menu",                 "MicroMenu",                     1265.0, 1154.0,  329.0,  40.0, 1.0),
     ("micro_menu_container",       "MicroMenuContainer",            1205.0, 1149.0,  389.0,  45.0, 1.0),
-    ("buff_frame",                 "BuffFrame",                     1050.0,   10.0,  295.0, 180.0, 1.0),
+    ("buff_frame",                 "BuffFrame",                      945.0,   10.0,  400.0, 135.0, 1.0),
     ("debuff_frame",               "DebuffFrame",                   1050.0,  155.0,  280.0,  90.0, 1.0),
     // Chat
     ("chat_frame",                 "ChatFrame1",                      35.0,  980.0,  430.0, 170.0, 1.0),
@@ -135,7 +136,7 @@ const POSITION_TESTS: &[TestCase] = &[
     // Managed containers
     ("right_managed_container",    "UIParentRightManagedFrameContainer", 1335.0, 260.0, 260.0, 847.0, 1.0),
     // Casting bar (hidden — no active cast; attached to PlayerFrame via PlayerFrame_AttachCastBar)
-    ("casting_bar",                "PlayerCastingBarFrame",              696.0,  594.5,  208.0,  11.0, 1.0),
+    ("casting_bar",                "PlayerCastingBarFrame",              326.0,  980.0,  150.0,  10.0, 1.0),
 ];
 
 /// ActionButton1 only checks x position (y/size depend on bar layout).

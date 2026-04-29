@@ -1,3 +1,4 @@
+#![cfg(feature = "client-retail")]
 //! Integration tests for the `Blizzard_AzeriteRespecUI` global-string
 //! surface.
 //!

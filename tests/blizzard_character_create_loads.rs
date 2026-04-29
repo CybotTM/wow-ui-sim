@@ -1,3 +1,7 @@
+#![cfg(feature = "client-retail")]
+use std::path::PathBuf;
+
+
 use wow_ui_sim::loader::discover_blizzard_addons_for_screen;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -7,6 +11,7 @@ use wow_ui_sim::startup::settle_headless_startup;
 
 fn blizzard_ui_dir() -> std::path::PathBuf {
     default_blizzard_ui_addons_path().expect("Blizzard UI cache should be synced")
+
 }
 
 fn load_character_create_screen() -> WowLuaEnv {

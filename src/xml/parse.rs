@@ -658,14 +658,14 @@ mod tests {
         assert!(result.contains(r#"<Script file="LibStub.lua"/>"#));
     }
 
+    #[cfg(feature = "client-retail")]
     #[test]
     fn test_parse_objective_tracker_widget_container_xml_keeps_self_closing_frame() {
-        let ui = parse_xml_file(
-            &crate::paths::default_blizzard_ui_addons_path()
-                .expect("Blizzard UI cache should be available")
-                .join("Blizzard_ObjectiveTracker/Blizzard_ObjectiveTrackerUIWidgetContainer.xml"),
-        )
-        .expect("ObjectiveTracker widget container XML should parse");
+        let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_ObjectiveTracker/Blizzard_ObjectiveTrackerUIWidgetContainer.xml");
+        let ui = parse_xml_file(&path).expect("ObjectiveTracker widget container XML should parse");
 
         let frame_names = ui
             .elements
@@ -687,14 +687,14 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "client-retail")]
     #[test]
     fn test_parse_low_health_frame_xml_keeps_animations() {
-        let ui = parse_xml_file(
-            &crate::paths::default_blizzard_ui_addons_path()
-                .expect("Blizzard UI cache should be available")
-                .join("Blizzard_FrameXML/Mainline/LowHealthFrame.xml"),
-        )
-        .expect("LowHealthFrame XML should parse");
+        let path = crate::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+            "CARGO_MANIFEST_DIR"
+        )))
+        .join("Blizzard_FrameXML/Mainline/LowHealthFrame.xml");
+        let ui = parse_xml_file(&path).expect("LowHealthFrame XML should parse");
 
         let low_health_frame = ui
             .elements
