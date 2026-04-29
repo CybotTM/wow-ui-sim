@@ -116,6 +116,9 @@ pub fn apply(env: &crate::lua_api::WowLuaEnv) {
     log_step(env, "patch_housing_dashboard_preload", || {
         patch_housing_dashboard_preload(&env.loader_env());
     });
+    log_step(env, "patch_lfg_lock_list", || {
+        patch_lfg_lock_list(env);
+    });
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
@@ -717,6 +720,23 @@ fn patch_game_time_defaults(env: &crate::lua_api::WowLuaEnv) {
         r#"
         if type(GameTimeFrame) == "table" and GameTimeFrame.pendingCalendarInvites == nil then
             GameTimeFrame.pendingCalendarInvites = 0
+        end
+        "#,
+    );
+}
+
+/// Initialize `LFGLockList` so the Dungeons & Raids panel can populate
+/// its dungeon list. In retail this happens via `LFG_LOCK_INFO_RECEIVED`,
+/// but firing that event also triggers RaidFinder/ScenarioFinder
+/// availability checks that depend on many unmodeled APIs. Direct
+/// assignment is the minimal fix: `UpdateLFDDungeonList` reads
+/// `LFGLockList[id]` (LFDFrame.lua:697) before `LFGDungeonList_Setup`
+/// initializes it on demand.
+fn patch_lfg_lock_list(env: &crate::lua_api::WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if type(GetLFGLockList) == "function" and LFGLockList == nil then
+            LFGLockList = GetLFGLockList()
         end
         "#,
     );

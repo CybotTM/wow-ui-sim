@@ -5188,6 +5188,30 @@ if GetScenariosChoiceOrder == nil then
   end
 end
 
+if GetNumRandomScenarios == nil then
+  function GetNumRandomScenarios()
+    return 0
+  end
+end
+
+if GetRandomScenarioInfo == nil then
+  function GetRandomScenarioInfo(_)
+    return nil
+  end
+end
+
+if GetLFDRoleRestrictions == nil then
+  function GetLFDRoleRestrictions(_)
+    return false, false, false
+  end
+end
+
+if GetLFGRoleShortageRewards == nil then
+  function GetLFGRoleShortageRewards(_, _)
+    return false, false, false, false, 0, 0, 0
+  end
+end
+
 if GetProfessionSkillLineID == nil then
   function GetProfessionSkillLineID()
     return 0

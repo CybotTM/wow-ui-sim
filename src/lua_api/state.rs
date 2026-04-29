@@ -2654,10 +2654,12 @@ fn default_lfd_dungeons() -> Vec<LfdDungeonInfo> {
         }
     };
     vec![
-        // Header row (negative id)
+        // Header row (negative id). is_random=false: in retail data,
+        // headers are pure categories — only positive-id "random heroic
+        // dungeon" entries carry is_random=true.
         d(
             -1,
-            "Random Heroic Dungeon",
+            "Random Heroic Dungeons",
             6,
             1,
             80,
@@ -2667,6 +2669,27 @@ fn default_lfd_dungeons() -> Vec<LfdDungeonInfo> {
             10,
             "",
             "",
+            false,
+            false,
+        ),
+        // Random heroic dungeon entry (positive id, is_random=true).
+        // GetRandomDungeonBestChoice returns this id; LFG_UPDATE_RANDOM_INFO
+        // selects it as the default choice. Without a positive-id random
+        // entry, GetRandomDungeonBestChoice returns nil, which breaks the
+        // LFDQueueFrame_SetType("specific") fallback only when the header
+        // itself is mistakenly marked random.
+        d(
+            999,
+            "Random Heroic Dungeon",
+            6,
+            2,
+            80,
+            80,
+            80,
+            5,
+            10,
+            "Interface/LFGFRAME/UI-LFG-BACKGROUND-HEROIC",
+            "A random heroic dungeon.",
             true,
             false,
         ),
