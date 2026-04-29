@@ -6,8 +6,6 @@
 
 const SHARED_BOOTSTRAP_LUA: &str = include_str!("shared_bootstrap.lua");
 const RUNTIME_SURFACE_BOOTSTRAP_LUA: &str = include_str!("runtime_surface_bootstrap.lua");
-#[cfg(feature = "client-wrath")]
-const WRATH_COMPAT_BOOTSTRAP_LUA: &str = include_str!("wrath_compat_bootstrap.lua");
 
 pub(crate) fn init_shared_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(SHARED_BOOTSTRAP_LUA)?;
@@ -16,11 +14,5 @@ pub(crate) fn init_shared_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
 
 pub(crate) fn init_runtime_surface_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
     lua.exec(RUNTIME_SURFACE_BOOTSTRAP_LUA)?;
-    Ok(())
-}
-
-#[cfg(feature = "client-wrath")]
-pub(crate) fn init_wrath_compat_bootstrap(lua: &mut rilua::Lua) -> crate::Result<()> {
-    lua.exec(WRATH_COMPAT_BOOTSTRAP_LUA)?;
     Ok(())
 }

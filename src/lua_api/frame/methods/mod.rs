@@ -9,5 +9,3 @@ pub(crate) mod misc;
 pub(crate) mod text_attribute_event;
 pub(crate) mod widget_scroll;
 pub(crate) mod widgets;
-#[cfg(feature = "client-wrath")]
-pub(crate) mod wrath_compat;
