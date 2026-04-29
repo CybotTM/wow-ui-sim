@@ -658,3 +658,76 @@ fn test_button_frame_level_change_relevels_connected_edges_on_update() {
         "connected edge should be re-leveled after button frame-level updates"
     );
 }
+
+#[test]
+fn test_hero_spec_content_spec_image_anchors_to_spec_name() {
+    // Regression test for xml_layer_batch two-pass ordering bug.
+    // Before fix (commit 1cae5342), xml_layer_batch collected all textures first
+    // then appended fontstrings, so SpecImage's SetPoint ran before SpecName FontString
+    // existed, causing parent["SpecName"] to be nil and anchoring to the parent frame.
+    let env = env_with_full_ui();
+    let result: String = env
+        .eval(
+            r#"
+            C_ClassTalents.SwitchToSpecializationByName("Protection")
+            PlayerSpellsUtil.OpenToClassTalentsTab()
+
+            local talentFrame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+            assert(talentFrame, "expected TalentsFrame")
+            local heroContainer = talentFrame.HeroTalentsContainer
+            assert(heroContainer, "expected HeroTalentsContainer")
+            local dialog = heroContainer.specSelectionDialog
+            assert(dialog, "expected specSelectionDialog")
+            local pool = dialog.SpecContentFramePool
+            assert(pool, "expected SpecContentFramePool")
+
+            -- Acquire a frame; this instantiates HeroTalentSpecContentTemplate.
+            -- The XML anchor on SpecImage uses relativeKey="$parent.SpecName".
+            -- With the bug, SpecName FontString was created after SpecImage's SetPoint
+            -- executed (two-pass batching), so the anchor fell back to the parent frame.
+            local specFrame = pool:Acquire()
+            assert(specFrame, "pool:Acquire() returned nil")
+            assert(specFrame.SpecName, "expected SpecName FontString on spec content frame")
+            assert(specFrame.SpecImage, "expected SpecImage Texture on spec content frame")
+            assert(specFrame.Description, "expected Description FontString on spec content frame")
+            assert(specFrame.NodesContainer, "expected NodesContainer frame on spec content frame")
+
+            -- Check SpecImage's TOP anchor targets SpecName, not the spec frame itself.
+            local point, relativeTo, relativePoint = specFrame.SpecImage:GetPoint(1)
+            assert(point == "TOP",
+                "expected SpecImage TOP anchor, got: " .. tostring(point))
+            assert(relativeTo ~= nil,
+                "SpecImage TOP anchor has no relativeTo — anchor was not set")
+            assert(relativeTo ~= specFrame,
+                "SpecImage is anchored to its parent frame instead of SpecName — two-pass ordering bug")
+            assert(relativeTo == specFrame.SpecName,
+                "SpecImage should anchor to SpecName, relativeTo=" .. tostring(relativeTo))
+
+            -- Check Description's TOP anchor targets SpecImage.
+            local descriptionPoint, descriptionRelativeTo, descriptionRelativePoint = specFrame.Description:GetPoint(1)
+            assert(descriptionPoint == "TOP",
+                "expected Description TOP anchor, got: " .. tostring(descriptionPoint))
+            assert(descriptionRelativeTo ~= nil,
+                "Description TOP anchor has no relativeTo — anchor was not set")
+            assert(descriptionRelativeTo ~= specFrame,
+                "Description is anchored to its parent frame instead of SpecImage")
+            assert(descriptionRelativeTo == specFrame.SpecImage,
+                "Description should anchor to SpecImage, relativeTo=" .. tostring(descriptionRelativeTo))
+
+            -- Check NodesContainer's TOP anchor targets Description.
+            local nodesPoint, nodesRelativeTo = specFrame.NodesContainer:GetPoint(1)
+            assert(nodesPoint == "TOP",
+                "expected NodesContainer TOP anchor, got: " .. tostring(nodesPoint))
+            assert(nodesRelativeTo ~= nil,
+                "NodesContainer TOP anchor has no relativeTo — anchor was not set")
+            assert(nodesRelativeTo ~= specFrame,
+                "NodesContainer is anchored to its parent frame instead of Description")
+            assert(nodesRelativeTo == specFrame.Description,
+                "NodesContainer should anchor to Description, relativeTo=" .. tostring(nodesRelativeTo))
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
