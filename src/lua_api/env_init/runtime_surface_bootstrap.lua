@@ -2288,17 +2288,7 @@ C_ChatInfo = __wow_merge_namespace(C_ChatInfo, {
   IsChannelRegionalForChannelID = function() return false end,
 })
 
--- The bulk of `C_LFGList` lives in `src/lua_api/globals/lfg_list.rs`,
--- backed by SimState (premade listings, applications, advanced filter,
--- language filter). This block is the residual Lua-side surface for
--- methods the sim does not model with state yet.
-C_LFGList = __wow_merge_namespace(C_LFGList, {
-  GetPremadeGroupFinderStyle = function() return 0 end,
-  CanCreateQuestGroup = function() return false end,
-  CanCreateScenarioGroup = function() return false end,
-  IsPremadeGroupFinderEnabled = function() return false end,
-  RemoveListing = __wow_noop,
-})
+-- C_LFGList is state-backed via `src/lua_api/globals/lfg_list.rs`.
 
 C_AddOnProfiler = __wow_merge_namespace(C_AddOnProfiler, {
   CheckForPerformanceMessage = function() return nil end,

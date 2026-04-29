@@ -374,6 +374,35 @@ fn get_applications(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetPremadeGroupFinderStyle()` → style selector.
+fn get_premade_group_finder_style(_state: &mut LuaState) -> LuaResult<u32> {
+    state_push_num_zero(_state)
+}
+
+fn state_push_num_zero(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(rilua::Val::Num(0.0));
+    Ok(1)
+}
+
+fn can_create_quest_group(_state: &mut LuaState) -> LuaResult<u32> {
+    _state.push(rilua::Val::Bool(false));
+    Ok(1)
+}
+
+fn can_create_scenario_group(_state: &mut LuaState) -> LuaResult<u32> {
+    _state.push(rilua::Val::Bool(false));
+    Ok(1)
+}
+
+fn is_premade_group_finder_enabled(_state: &mut LuaState) -> LuaResult<u32> {
+    _state.push(rilua::Val::Bool(false));
+    Ok(1)
+}
+
+fn remove_listing(_state: &mut LuaState) -> LuaResult<u32> {
+    Ok(0)
+}
+
 /// `GetApplicationInfo(searchResultID)` →
 ///   `(applicationID, applicationStatus, pendingStatus, applicationDuration, role)`.
 ///
@@ -974,6 +1003,36 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         table_ref,
         "GetFilteredSearchResults",
         get_filtered_search_results,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "GetPremadeGroupFinderStyle",
+        get_premade_group_finder_style,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanCreateQuestGroup",
+        can_create_quest_group,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "CanCreateScenarioGroup",
+        can_create_scenario_group,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "IsPremadeGroupFinderEnabled",
+        is_premade_group_finder_enabled,
+    )?;
+    table_set_rust_fn_static(
+        state,
+        table_ref,
+        "RemoveListing",
+        remove_listing,
     )?;
     table_set_rust_fn_static(
         state,
