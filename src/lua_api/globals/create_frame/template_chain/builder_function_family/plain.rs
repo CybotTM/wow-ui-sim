@@ -18,7 +18,12 @@ pub(super) fn build_plain_function_variants(
 ) -> LuaResult<Option<Val>> {
     match handler_ref {
         FastHandlerRef::Function(function_name) => {
-            Ok(Some(resolve_global_path(state, function_name)))
+            let target = resolve_global_path(state, function_name);
+            if matches!(target, Val::Nil) {
+                build_missing_global_handler(state, function_name).map(Some)
+            } else {
+                Ok(Some(target))
+            }
         }
         FastHandlerRef::FunctionNoArgs(function_name) => {
             build_function_handler(state, function_name, FunctionHandlerKind::NoArgs).map(Some)
@@ -57,10 +62,31 @@ fn build_function_handler(
     function_name: &str,
     kind: FunctionHandlerKind,
 ) -> LuaResult<Val> {
+    let target = resolve_global_path(state, function_name);
+    if matches!(target, Val::Nil) {
+        // Nil at install means the global isn't defined. Building the
+        // normal wrapper would capture `fn = nil` and error at call time
+        // with the unhelpful `attempt to call upvalue 'fn' (a nil value)`
+        // message. Install a stub instead that errors with the actual
+        // global name, matching what the slow Lua chunk path produces.
+        return build_missing_global_handler(state, function_name);
+    }
     let (source, tag) = function_handler_template(kind);
     let builder = load_template(state, source, tag)?;
-    let target = resolve_global_path(state, function_name);
     crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[target])
+}
+
+const MISSING_GLOBAL_TEMPLATE: &str = r#"
+    local fn_name = ...
+    return function(self, ...)
+        error("attempt to call global '" .. fn_name .. "' (a nil value)", 2)
+    end
+"#;
+
+fn build_missing_global_handler(state: &mut LuaState, function_name: &str) -> LuaResult<Val> {
+    let builder = load_template(state, MISSING_GLOBAL_TEMPLATE, "template-missing-global")?;
+    let name = crate::lua_api::methods::create_string(state, function_name);
+    crate::lua_api::methods::call_function_state(state, Val::Function(builder.gc_ref()), &[name])
 }
 
 // ── Per-kind Lua function-handler templates ──────────────────────────────────
