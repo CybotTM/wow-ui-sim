@@ -272,29 +272,6 @@ pub(super) fn build_texture_lua(
     is_line: bool,
     sub_level: i32,
 ) -> String {
-    let mut code = build_texture_lua_without_anchors(
-        tex_name,
-        texture,
-        parent_name,
-        draw_layer,
-        is_mask,
-        is_line,
-        sub_level,
-    );
-    code.push_str(&build_texture_anchor_lua(texture, tex_name, parent_name));
-    code
-}
-
-/// Build the Lua code string for a texture without anchor/positioning code.
-pub(super) fn build_texture_lua_without_anchors(
-    tex_name: &str,
-    texture: &crate::xml::TextureXml,
-    parent_name: &str,
-    draw_layer: &str,
-    is_mask: bool,
-    is_line: bool,
-    sub_level: i32,
-) -> String {
     let create_method = if is_line {
         "CreateLine"
     } else if is_mask {
@@ -307,6 +284,7 @@ pub(super) fn build_texture_lua_without_anchors(
     code.push_str(&emit_line_thickness(texture, is_line));
     code.push_str(&generate_texture_source_code(texture, is_mask));
     code.push_str(&generate_texture_visual_code(texture));
+    append_texture_anchors(&mut code, texture, parent_name);
     code.push_str(&emit_texture_visibility(texture));
     code.push_str(&emit_masked_textures(texture, is_mask));
     code.push_str(&super::xml_frame_codegen::generate_key_values_code(
@@ -317,25 +295,18 @@ pub(super) fn build_texture_lua_without_anchors(
 }
 
 /// Append anchor or SetAllPoints code for a texture.
-pub(super) fn build_texture_anchor_lua(
-    texture: &crate::xml::TextureXml,
-    tex_name: &str,
-    parent_expr: &str,
-) -> String {
-    let mut code = String::new();
+fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, parent_name: &str) {
     if let Some(anchors) = &texture.anchors {
         code.push_str(&generate_set_point_code(
             anchors,
-            tex_name,
-            parent_expr,
-            parent_expr,
+            "tex",
+            "parent",
+            parent_name,
             "parent",
         ));
     } else if texture.set_all_points != Some(true) {
-        code.push_str(&format!("\n        {}:SetAllPoints(true)\n        ", tex_name));
+        code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
-
-    code
 }
 
 /// Process animation groups on a texture created from XML.
