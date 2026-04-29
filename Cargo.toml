@@ -30,6 +30,7 @@ rodio = { version = "0.21", optional = true }
 
 # Iced GUI (optional, gated behind "gui" feature)
 iced = { version = "0.14.0", optional = true, features = ["advanced", "canvas", "image", "tokio", "wgpu"] }
+iced-dynamic = { path = "iced-dynamic", optional = true }
 iced_wgpu = { version = "0.14", optional = true, path = "iced-wgpu-patched" }
 iced_runtime = { version = "0.14", optional = true }
 iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.git", tag = "v0.2.0", optional = true }
@@ -64,6 +65,10 @@ default = ["sound", "gui", "casc"]
 sound = ["rodio"]
 gui = ["dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
 casc = ["dep:asset-resolver"]
+# Dev-only: dynamically link iced via the iced-dynamic shim crate to speed up
+# incremental rebuilds. Release builds should leave this off so the binary is
+# fully static and not tied to a specific rustc version.
+fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]
 intern-stats = ["rilua/intern-stats"]
 
