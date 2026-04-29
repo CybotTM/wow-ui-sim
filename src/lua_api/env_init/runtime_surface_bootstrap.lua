@@ -359,16 +359,19 @@ end
 
 if UpdateAddOnMemoryUsage == nil then
   function UpdateAddOnMemoryUsage()
+    return 0
   end
 end
 
 if UpdateAddOnCPUUsage == nil then
   function UpdateAddOnCPUUsage()
+    return 0
   end
 end
 
 if ResetCPUUsage == nil then
   function ResetCPUUsage()
+    return 0
   end
 end
 
