@@ -5925,7 +5925,6 @@ dependencies = [
  "dirs",
  "glob",
  "iced",
- "iced-dynamic",
  "iced-layout-inspector",
  "iced_runtime",
  "iced_wgpu",
