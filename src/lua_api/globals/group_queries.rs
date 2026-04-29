@@ -85,6 +85,7 @@ fn register_unit_relationships(state: &mut LuaState) {
     set_global(state, "UnitIsGroupLeader", unit_is_group_leader);
     set_global(state, "UnitIsGroupAssistant", unit_is_group_assistant);
     set_global(state, "UnitHasLFGDeserter", always_false);
+    set_global(state, "UnitHasLFGRandomCooldown", always_false);
 }
 
 fn register_unit_liveness(state: &mut LuaState) {

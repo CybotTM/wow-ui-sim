@@ -23,6 +23,19 @@
 //! - `GetLFDLockPlayerCount()`         → 0. The sim has no LFD locks.
 //! - `GetLFDLockInfo(dungeonID, idx)`  → all-nil. No lock data without queue.
 //! - `GetLFDRoleLockInfo(id, roleID)`  → empty table. No role restrictions.
+//! - `GetLFDChoiceCollapseState(t?)`   → table of `{[dungeonID]=bool}`. Sim has
+//!   no persisted collapse state, so the table is wiped and returned (or a
+//!   fresh empty table if none was passed). Required by `LFGDungeonList_Setup`.
+//! - `GetLFDChoiceEnabledState(t?)`    → table of `{[dungeonID]=bool|0|1|2}`.
+//!   Same wipe-and-return pattern. Required by `LFGDungeonList_Setup`.
+//! - `GetLFGLockList()`                → empty table. No locks without server
+//!   state. Required by `LFGDungeonList_Setup` and `LFGList_DefaultFilterFunction`
+//!   (filter returns `false` when the list is nil, hiding every dungeon).
+//! - `GetBestRFChoice()`               → nil. No raid-finder state. Called from
+//!   `RaidFinderFrame_OnEvent(LFG_LOCK_INFO_RECEIVED)`.
+//! - `GetRandomScenarioBestChoice()`   → nil. No scenario state. Same path.
+//! - `GetLFGDungeonRewards(id)`        → 7 zeros + nil spellID. Called from
+//!   `LFDQueueFrameRandom_UpdateFrame` when a random dungeon is selected.
 //! - `IsLFGDungeonJoinable(dungeonID)` → `(isAvailableForAll, isAvailableForPlayer,
 //!   hideIfNotJoinable, totalGroupSizeRequired)` from `lfd_dungeons` + `player.level`.
 
@@ -264,6 +277,64 @@ fn get_lfd_lock_player_count(state: &mut LuaState) -> LuaResult<u32> {
     Ok(1)
 }
 
+/// `GetLFDChoiceCollapseState(t?)` → table mapping header dungeonID → bool
+/// for whether that header is collapsed in the LFD list. The sim has no
+/// persisted UI state, so a fresh empty table is always returned (the
+/// caller's optional argument is ignored — Lua-side `t = f(t)` simply
+/// rebinds to the new table). Empty means all headers default to expanded.
+fn get_lfd_choice_collapse_state(state: &mut LuaState) -> LuaResult<u32> {
+    let result = create_table(state);
+    state.push(result);
+    Ok(1)
+}
+
+/// `GetLFDChoiceEnabledState(t?)` → table mapping dungeonID → checkbox
+/// state. Empty means nothing checked. Same fresh-table convention as
+/// `GetLFDChoiceCollapseState`.
+fn get_lfd_choice_enabled_state(state: &mut LuaState) -> LuaResult<u32> {
+    let result = create_table(state);
+    state.push(result);
+    Ok(1)
+}
+
+/// `GetLFGLockList()` → table mapping dungeonID → `{lfgID, reason}` for
+/// locked dungeons. The sim has no server-side lock data, so this returns
+/// an empty table. `LFGList_DefaultFilterFunction` returns `false` when
+/// this list is nil — that's why an empty list (rather than nil) is
+/// required for the dungeon list to populate.
+fn get_lfg_lock_list(state: &mut LuaState) -> LuaResult<u32> {
+    let result = create_table(state);
+    state.push(result);
+    Ok(1)
+}
+
+/// `GetBestRFChoice()` → raidID or nil. The sim has no raid-finder
+/// state, so always nil. Called from `RaidFinderFrame_OnEvent` when
+/// `LFG_LOCK_INFO_RECEIVED` fires.
+fn get_best_rf_choice(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+/// `GetRandomScenarioBestChoice()` → scenarioID or nil. The sim has no
+/// scenario data. Called transitively from `RaidFinderFrame_OnEvent`
+/// via `ScenarioFinder_Shared`.
+fn get_random_scenario_best_choice(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Nil);
+    Ok(1)
+}
+
+/// `GetLFGDungeonRewards(dungeonID)` → 7 numbers describing rewards. The
+/// sim has no reward data, so all zeros (and nil spellID). Called from
+/// the random-dungeon panel when a positive-id random dungeon is shown.
+fn get_lfg_dungeon_rewards(state: &mut LuaState) -> LuaResult<u32> {
+    for _ in 0..6 {
+        state.push(Val::Num(0.0));
+    }
+    state.push(Val::Nil);
+    Ok(7)
+}
+
 /// `GetLFDLockInfo(dungeonID, partyIndex)` — retail returns 6 values
 /// describing a player's lock on a dungeon. The sim has no locks, so
 /// every call reports all-nil.
@@ -350,6 +421,24 @@ pub fn register_all(lua: &mut rilua::Lua) -> crate::Result<()> {
     LuaApiMut::register_function(lua, "GetLFDLockPlayerCount", get_lfd_lock_player_count)?;
     LuaApiMut::register_function(lua, "GetLFDLockInfo", get_lfd_lock_info)?;
     LuaApiMut::register_function(lua, "GetLFDRoleLockInfo", get_lfd_role_lock_info)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLFDChoiceCollapseState",
+        get_lfd_choice_collapse_state,
+    )?;
+    LuaApiMut::register_function(
+        lua,
+        "GetLFDChoiceEnabledState",
+        get_lfd_choice_enabled_state,
+    )?;
+    LuaApiMut::register_function(lua, "GetLFGLockList", get_lfg_lock_list)?;
+    LuaApiMut::register_function(lua, "GetBestRFChoice", get_best_rf_choice)?;
+    LuaApiMut::register_function(
+        lua,
+        "GetRandomScenarioBestChoice",
+        get_random_scenario_best_choice,
+    )?;
+    LuaApiMut::register_function(lua, "GetLFGDungeonRewards", get_lfg_dungeon_rewards)?;
     LuaApiMut::register_function(lua, "IsLFGDungeonJoinable", is_lfg_dungeon_joinable)?;
     Ok(())
 }

@@ -421,6 +421,17 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     fire("DISPLAY_SIZE_CHANGED");
     fire("UI_SCALE_CHANGED");
     fire("UPDATE_CHAT_WINDOWS");
+    // Drives LFDQueueFrame_SetType, which shows the Specific/Follower
+    // sub-frame whose OnShow=LFDQueueFrame_Update populates the dungeon
+    // list. Without this, opening the Dungeons & Raids panel leaves the
+    // list empty until the user changes the Type dropdown.
+    //
+    // LFGLockList is initialized via a post-load workaround instead of
+    // firing LFG_LOCK_INFO_RECEIVED, because that event also triggers
+    // RaidFinder/ScenarioFinder availability checks that require many
+    // additional unmodeled APIs (GetNumRFDungeons, GetNumRandomScenarios,
+    // etc.). Direct assignment is enough to satisfy LFDQueueFrame.
+    fire("LFG_UPDATE_RANDOM_INFO");
     seed_buff_durations(env);
 }
 
