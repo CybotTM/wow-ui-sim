@@ -68,7 +68,10 @@ fn budgeted_preload_loads_explicitly_queued_texture_requests() {
     app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
 
     assert!(
-        app.texture_manager.borrow().get("Interface/AddOns/world-map-tile").is_some(),
+        app.texture_manager
+            .borrow()
+            .get("Interface/AddOns/world-map-tile")
+            .is_some(),
         "queued preload should decode the requested texture source"
     );
     assert!(

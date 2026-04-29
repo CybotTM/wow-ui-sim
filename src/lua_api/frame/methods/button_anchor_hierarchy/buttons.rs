@@ -128,10 +128,7 @@ pub(super) fn disable(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let was_enabled = {
         let sim = borrow_state(state)?;
-        sim.widgets
-            .get(id)
-            .map(button_enabled)
-            .unwrap_or(true)
+        sim.widgets.get(id).map(button_enabled).unwrap_or(true)
     };
     set_button_enabled_value(state, id, false)?;
     if was_enabled {

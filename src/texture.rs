@@ -88,8 +88,7 @@ impl TextureManager {
         let resolve_start = Instant::now();
         if let Some(file_path) = self.resolve_path(&normalized) {
             telemetry.resolve_elapsed = resolve_start.elapsed();
-            let (loaded, load_telemetry) =
-                self.load_texture_with_telemetry(&file_path);
+            let (loaded, load_telemetry) = self.load_texture_with_telemetry(&file_path);
             telemetry.decode_elapsed = load_telemetry.decode_elapsed;
             if let Some(data) = loaded {
                 self.size_cache
@@ -619,7 +618,10 @@ mod tests {
         img.save(&webp_path).unwrap();
 
         let mut mgr = TextureManager::new().with_addons_path(base);
-        assert!(mgr.load("Interface/AddOns/cropped").is_some(), "base texture should load");
+        assert!(
+            mgr.load("Interface/AddOns/cropped").is_some(),
+            "base texture should load"
+        );
 
         fs::remove_file(&webp_path).unwrap();
 

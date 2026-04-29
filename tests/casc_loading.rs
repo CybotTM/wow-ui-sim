@@ -57,10 +57,14 @@ fn casc_resolves_baseline_fonts() {
         return;
     }
 
-    let probes = ["fonts/frizqt__.ttf", "fonts/arialn.ttf", "fonts/frizqt___cyr.ttf"];
+    let probes = [
+        "fonts/frizqt__.ttf",
+        "fonts/arialn.ttf",
+        "fonts/frizqt___cyr.ttf",
+    ];
     for path in probes {
-        let fdid = asset_resolver::lookup_path(path)
-            .unwrap_or_else(|| panic!("listfile miss for {path}"));
+        let fdid =
+            asset_resolver::lookup_path(path).unwrap_or_else(|| panic!("listfile miss for {path}"));
         let bytes = asset_resolver::resolve_bytes(fdid)
             .unwrap_or_else(|| panic!("resolve_bytes failed for {path} (fdid {fdid})"));
         assert!(

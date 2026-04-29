@@ -268,10 +268,7 @@ fn load_wow_font(
                 );
                 FRIZQT_FALLBACK.to_vec()
             } else {
-                tracing::warn!(
-                    "Font {} not found in CASC, skipping",
-                    font_file.filename
-                );
+                tracing::warn!("Font {} not found in CASC, skipping", font_file.filename);
                 return;
             }
         }

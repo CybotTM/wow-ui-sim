@@ -14,7 +14,9 @@ fn main() {
             eprintln!("WARN: {} does not exist", root.display());
         }
     }
-    unsafe { std::env::set_var("WOW_SIM_CASC", "1"); }
+    unsafe {
+        std::env::set_var("WOW_SIM_CASC", "1");
+    }
 
     println!("\n--- direct asset-resolver lookups ---");
     let direct_probes = [
