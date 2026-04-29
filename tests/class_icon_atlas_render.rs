@@ -75,8 +75,7 @@ fn masked_circular_class_texture_keeps_background_visible_in_corners() {
         height as f32,
     );
 
-    let mut tex_mgr =
-        render_order_support::make_texture_manager();
+    let mut tex_mgr = render_order_support::make_texture_manager();
     let batch = render_order_support::build_screenshot_like_batch(
         &env,
         width,

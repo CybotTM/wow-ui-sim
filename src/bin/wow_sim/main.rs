@@ -591,9 +591,7 @@ fn candidate_extract_paths(normalized: &str) -> Vec<PathBuf> {
     let Some(root) = casc_extract_root() else {
         return Vec::new();
     };
-    let extensions = [
-        "blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF",
-    ];
+    let extensions = ["blp", "BLP", "tga", "TGA", "ttf", "TTF", "otf", "OTF"];
     let mut paths = Vec::with_capacity(extensions.len() + 1);
     paths.push(root.join(normalized));
     for ext in extensions {

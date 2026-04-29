@@ -71,8 +71,7 @@ fn try_casc_resolve(normalized_path: &str) -> Option<PathBuf> {
     let (fdid, listfile_path) = bases
         .iter()
         .flat_map(|b| {
-            std::iter::once(b.clone())
-                .chain(candidates.iter().map(move |ext| format!("{b}.{ext}")))
+            std::iter::once(b.clone()).chain(candidates.iter().map(move |ext| format!("{b}.{ext}")))
         })
         .find_map(|p| resolver.lookup_path(&p).map(|fdid| (fdid, p)))?;
 

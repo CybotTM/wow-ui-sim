@@ -188,8 +188,7 @@ impl App {
         env_rc.borrow().state().borrow_mut().ensure_layout_rects();
         let log_messages = Self::collect_startup_logs(&env_rc);
 
-        let (texture_manager, font_system, glyph_atlas) =
-            Self::init_rendering(&env_rc);
+        let (texture_manager, font_system, glyph_atlas) = Self::init_rendering(&env_rc);
         let (cmd_rx, lua_rx) = Self::init_servers();
         let (debug_borders, debug_anchors) = Self::resolve_debug_flags();
 
@@ -358,7 +357,8 @@ impl App {
         Rc<RefCell<WowFontSystem>>,
         Rc<RefCell<GlyphAtlas>>,
     ) {
-        let mut tex_mgr = TextureManager::new().with_addons_path(crate::paths::default_addons_path());
+        let mut tex_mgr =
+            TextureManager::new().with_addons_path(crate::paths::default_addons_path());
         if Self::eager_startup_texture_preloads_enabled() {
             let class_name = {
                 let env = env_rc.borrow();
