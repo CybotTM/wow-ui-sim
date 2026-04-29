@@ -276,9 +276,15 @@ fn set_tab(state: &mut LuaState) -> LuaResult<u32> {
 
 fn initialize_selected_tier(state: &mut LuaState) -> LuaResult<u32> {
     let mut sim = borrow_state_mut(state)?;
-    if data::tier_by_order(sim.encounter_journal.current_tier).is_none() {
-        sim.encounter_journal.current_tier = data::TIERS.iter().map(|t| t.order).max().unwrap_or(1);
-    }
+    // InitalizeSelectedTier resets to the Dragonflight tier -- the first expansion
+    // with Journeys content (EJ_JOURNEYS_MIN_TIER in the Lua layer).  Tier 10 is
+    // Dragonflight (expansion 1000).  If absent, fall back to the smallest tier.
+    let df_order = data::TIERS
+        .iter()
+        .find(|t| t.expansion == 1000)
+        .map(|t| t.order)
+        .unwrap_or_else(|| data::TIERS.iter().map(|t| t.order).min().unwrap_or(1));
+    sim.encounter_journal.current_tier = df_order;
     Ok(0)
 }
 
