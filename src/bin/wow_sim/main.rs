@@ -335,7 +335,8 @@ fn init_environment(args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFo
     {
         let mut state = env.state().borrow_mut();
         let mut addon_base_paths = vec![
-            PathBuf::from("./Interface/BlizzardUI"),
+            wow_ui_sim::paths::default_blizzard_ui_addons_path()
+                .expect("missing Blizzard UI addon tree"),
             PathBuf::from("./Interface/AddOns"),
         ];
         if args.is_test_command() {
