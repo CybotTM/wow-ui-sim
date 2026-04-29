@@ -422,3 +422,71 @@ end
 if PlayerArrowEffectFrame == nil then
   PlayerArrowEffectFrame = noopFrame()
 end
+
+-- ─── Additional Wrath-only stubs (batch 3.3c) ────────────────────────────────
+
+if rawget(_G, "Blizzard_CombatLog_Update_QuickButtons") == nil then
+  function Blizzard_CombatLog_Update_QuickButtons()
+    return nil
+  end
+end
+
+if rawget(_G, "GetCVarMax") == nil then
+  function GetCVarMax(name)
+    return 1
+  end
+end
+
+if rawget(_G, "GetHonorCurrency") == nil then
+  function GetHonorCurrency()
+    return 0
+  end
+end
+
+if rawget(_G, "GetMapInfo") == nil then
+  function GetMapInfo()
+    return nil, 0, 0
+  end
+end
+
+if rawget(_G, "GetNumDisplayChannels") == nil then
+  function GetNumDisplayChannels()
+    return 0
+  end
+end
+
+if rawget(_G, "GetNumVoiceSessionMembersBySessionID") == nil then
+  function GetNumVoiceSessionMembersBySessionID(id)
+    return 0
+  end
+end
+
+if rawget(_G, "GetPVPRankInfo") == nil then
+  function GetPVPRankInfo(rank, faction)
+    return "", 0
+  end
+end
+
+if rawget(_G, "GetQuestLogSelection") == nil then
+  function GetQuestLogSelection()
+    return 0
+  end
+end
+
+if rawget(_G, "IsAttackAction") == nil then
+  function IsAttackAction(slot)
+    return false
+  end
+end
+
+if rawget(_G, "IsConsumableAction") == nil then
+  function IsConsumableAction(slot)
+    return false
+  end
+end
+
+if rawget(_G, "UnitCharacterPoints") == nil then
+  function UnitCharacterPoints(unit)
+    return 0, 0
+  end
+end
