@@ -347,4 +347,3 @@ fn get_advanced_filter_default_is_permissive() {
         .unwrap();
     assert_eq!(result, "ok", "GetAdvancedFilter: {result}");
 }
-

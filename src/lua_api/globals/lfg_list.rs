@@ -46,11 +46,7 @@ fn fire_named_event(state: &mut LuaState, event_name: &str) -> LuaResult<()> {
     fire_event_with_args(state, event_name, Vec::new())
 }
 
-fn fire_event_with_args(
-    state: &mut LuaState,
-    event_name: &str,
-    args: Vec<Val>,
-) -> LuaResult<()> {
+fn fire_event_with_args(state: &mut LuaState, event_name: &str, args: Vec<Val>) -> LuaResult<()> {
     borrow_state_mut(state)?.events.push(Event {
         name: event_name.to_string(),
         args: Vec::new(),
@@ -822,7 +818,12 @@ fn get_advanced_filter(state: &mut LuaState) -> LuaResult<u32> {
     table_set(state, info, "needsMyClass", Val::Bool(f.needs_my_class));
     table_set(state, info, "hasTank", Val::Bool(f.has_tank));
     table_set(state, info, "hasHealer", Val::Bool(f.has_healer));
-    table_set(state, info, "minimumRating", Val::Num(f.minimum_rating as f64));
+    table_set(
+        state,
+        info,
+        "minimumRating",
+        Val::Num(f.minimum_rating as f64),
+    );
     let activities = create_table(state);
     if let Val::Table(act_ref) = activities {
         for (i, aid) in f.activities.iter().enumerate() {
@@ -837,9 +838,24 @@ fn get_advanced_filter(state: &mut LuaState) -> LuaResult<u32> {
         state.gc.barrier_back(act_ref);
     }
     table_set(state, info, "activities", activities);
-    table_set(state, info, "difficultyNormal", Val::Bool(f.difficulty_normal));
-    table_set(state, info, "difficultyHeroic", Val::Bool(f.difficulty_heroic));
-    table_set(state, info, "difficultyMythic", Val::Bool(f.difficulty_mythic));
+    table_set(
+        state,
+        info,
+        "difficultyNormal",
+        Val::Bool(f.difficulty_normal),
+    );
+    table_set(
+        state,
+        info,
+        "difficultyHeroic",
+        Val::Bool(f.difficulty_heroic),
+    );
+    table_set(
+        state,
+        info,
+        "difficultyMythic",
+        Val::Bool(f.difficulty_mythic),
+    );
     table_set(
         state,
         info,
@@ -934,19 +950,9 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         get_group_leaver_counts_by_role,
     )?;
     table_set_rust_fn_static(state, table_ref, "GetApplications", get_applications)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetApplicationInfo",
-        get_application_info,
-    )?;
+    table_set_rust_fn_static(state, table_ref, "GetApplicationInfo", get_application_info)?;
     table_set_rust_fn_static(state, table_ref, "ApplyToGroup", apply_to_group)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "CancelApplication",
-        cancel_application,
-    )?;
+    table_set_rust_fn_static(state, table_ref, "CancelApplication", cancel_application)?;
     table_set_rust_fn_static(
         state,
         table_ref,

@@ -500,8 +500,7 @@ pub struct PremadeListing {
     /// Per-role class breakdown: `classes_by_role["TANK"]["WARRIOR"] = 1`.
     /// Leave empty for activities that use the role-count display
     /// (`Enum.LFGListDisplayType.RoleCount`).
-    pub classes_by_role:
-        std::collections::HashMap<String, std::collections::HashMap<String, i32>>,
+    pub classes_by_role: std::collections::HashMap<String, std::collections::HashMap<String, i32>>,
     /// `Enum.LFGEntryGeneralPlaystyle`: 0=None, 1=Learning, 2=FunRelaxed,
     /// 3=FunSerious, 4=Expert.
     pub general_playstyle: i32,
