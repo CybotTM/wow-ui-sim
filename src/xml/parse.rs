@@ -17,6 +17,7 @@ pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
     let fixed = strip_duplicate_self_closing(&fixed, "TexCoords");
     let fixed = strip_duplicate_script_handlers(&fixed);
     let fixed = normalize_whitespace_padded_bools(&fixed);
+    let fixed = normalize_whitespace_padded_numbers(&fixed);
     Ok(parse_xml(&fixed)?)
 }
 
@@ -41,6 +42,26 @@ fn normalize_whitespace_padded_bools(xml: &str) -> String {
         }
     }
     out
+}
+
+/// Strip leading/trailing whitespace inside numeric XML attribute values.
+///
+/// Blizzard's source occasionally ships typos like `y=" 39"` (note the leading space) — see
+/// Blizzard_IslandsQueueUI.xml:170. serde's f32 deserializer rejects whitespace-padded numbers,
+/// which silently aborts the entire XML deserialization for that file. Real WoW's XML loader
+/// trims numeric attribute values, so we mirror that behavior here. The regex only matches
+/// values that are pure numbers wrapped in whitespace, leaving real text attributes untouched.
+fn normalize_whitespace_padded_numbers(xml: &str) -> String {
+    use regex::Regex;
+    use std::sync::OnceLock;
+    static RE: OnceLock<Regex> = OnceLock::new();
+    let re = RE.get_or_init(|| {
+        Regex::new(r#"="(\s+-?\d[\d.]*\s*|-?\d[\d.]*\s+)""#).expect("padded-number regex compiles")
+    });
+    re.replace_all(xml, |caps: &regex::Captures<'_>| {
+        format!(r#"="{}""#, caps[1].trim())
+    })
+    .into_owned()
 }
 
 /// Strip CurseForge/BigWigs packager XML comment markers so source-form addons parse correctly.
@@ -265,6 +286,34 @@ impl std::error::Error for XmlLoadError {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_normalize_whitespace_padded_numbers_trims_leading_space() {
+        let xml = r#"<Size x="39" y=" 39"/>"#;
+        let result = normalize_whitespace_padded_numbers(xml);
+        assert_eq!(result, r#"<Size x="39" y="39"/>"#);
+    }
+
+    #[test]
+    fn test_normalize_whitespace_padded_numbers_trims_trailing_space() {
+        let xml = r#"<Size x="39 " y="39"/>"#;
+        let result = normalize_whitespace_padded_numbers(xml);
+        assert_eq!(result, r#"<Size x="39" y="39"/>"#);
+    }
+
+    #[test]
+    fn test_normalize_whitespace_padded_numbers_preserves_text_attrs() {
+        let xml = r#"<Anchor point="TOPLEFT" relativeTo=" $parent " name="Foo Bar"/>"#;
+        let result = normalize_whitespace_padded_numbers(xml);
+        assert_eq!(result, xml);
+    }
+
+    #[test]
+    fn test_normalize_whitespace_padded_numbers_handles_negative_and_decimal() {
+        let xml = r#"<Anchor x=" -3.5" y="2.0 "/>"#;
+        let result = normalize_whitespace_padded_numbers(xml);
+        assert_eq!(result, r#"<Anchor x="-3.5" y="2.0"/>"#);
+    }
 
     #[test]
     fn test_strip_duplicate_size_keeps_last() {
