@@ -693,6 +693,7 @@ impl App {
     /// whose visual rect contains the point — even non-mouse-enabled containers — so
     /// hittable descendants of a transparent panning/scroll container are still reachable.
     pub(crate) fn hit_test(&self, pos: iced::Point) -> Option<u64> {
+        self.apply_hit_grid_changes();
         let cache = self.cached_hittable.borrow();
         let grid = cache.as_ref()?;
 
@@ -705,6 +706,7 @@ impl App {
     }
 
     pub(crate) fn hit_test_mouse_button(&self, pos: iced::Point, button_name: &str) -> Option<u64> {
+        self.apply_hit_grid_changes();
         let cache = self.cached_hittable.borrow();
         let grid = cache.as_ref()?;
 

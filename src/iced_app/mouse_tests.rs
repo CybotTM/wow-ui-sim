@@ -629,6 +629,102 @@ fn hover_and_click_use_child_render_order_when_parent_wins_phase_one() {
 }
 
 #[test]
+fn hit_test_reflects_frames_shown_by_previous_clicks() {
+    let mut app = build_test_app(ScreenKind::Game);
+
+    {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            RevealParent = CreateFrame("Button", "RevealParent", UIParent)
+            RevealParent:SetSize(100, 100)
+            RevealParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            RevealParent:EnableMouse(true)
+            RevealParent:SetScript("OnClick", function()
+                RevealTarget:Show()
+            end)
+
+            RevealTarget = CreateFrame("Button", "RevealTarget", UIParent)
+            RevealTarget:SetSize(100, 100)
+            RevealTarget:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 300, -100)
+            RevealTarget:EnableMouse(true)
+            RevealTarget:Hide()
+            RevealTarget:SetScript("OnClick", function()
+                __reveal_target_clicks = (__reveal_target_clicks or 0) + 1
+            end)
+
+            __reveal_target_clicks = 0
+            "#,
+        )
+        .expect("reveal test setup should succeed");
+    }
+
+    rebuild_hittable_cache(&app);
+
+    let reveal_pos = Point::new(150.0, 150.0);
+    app.handle_mouse_move(reveal_pos);
+    app.handle_mouse_down(reveal_pos);
+    app.handle_mouse_up(reveal_pos);
+
+    let target_center = {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let target_id = state
+            .widgets
+            .iter_ids()
+            .find(|&id| {
+                state.widgets.get(id).and_then(|f| f.name.as_deref()) == Some("RevealTarget")
+            })
+            .expect("target frame should exist");
+        let rect = state
+            .widgets
+            .get(target_id)
+            .and_then(|f| f.layout_rect)
+            .expect("target frame should have a layout rect after being shown");
+        Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0)
+    };
+
+    let hit = app.hit_test(target_center);
+    assert_eq!(
+        hit,
+        Some(
+            app.env
+                .borrow()
+                .state()
+                .borrow()
+                .widgets
+                .iter_ids()
+                .find(|&id| {
+                    app.env
+                        .borrow()
+                        .state()
+                        .borrow()
+                        .widgets
+                        .get(id)
+                        .and_then(|f| f.name.as_deref())
+                        == Some("RevealTarget")
+                })
+                .expect("target frame should exist")
+        ),
+        "hit-test should see frames revealed by earlier UI mutations"
+    );
+
+    app.handle_mouse_down(target_center);
+    app.handle_mouse_up(target_center);
+
+    let clicks: f64 = app
+        .env
+        .borrow()
+        .eval("return __reveal_target_clicks")
+        .expect("click count should be readable");
+    assert_eq!(
+        clicks, 1.0,
+        "newly revealed frame should be clickable immediately after the revealing click"
+    );
+}
+
+#[test]
 fn disabled_buttons_only_run_hover_motion_scripts_when_opted_in() {
     let mut app = build_test_app(ScreenKind::Game);
 

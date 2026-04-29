@@ -42,7 +42,8 @@ pub(super) fn apply_subtree_hit_grid_change(
 
 /// Compute the hit-testable rectangle for a frame, if eligible.
 fn hittable_rect(f: &crate::widget::Frame) -> Option<iced::Rectangle> {
-    let mouse_enabled = f.mouse_enabled || matches!(f.widget_type, crate::widget::WidgetType::EditBox);
+    let mouse_enabled =
+        f.mouse_enabled || matches!(f.widget_type, crate::widget::WidgetType::EditBox);
     if !f.visible || f.effective_alpha <= 0.0 || !mouse_enabled {
         return None;
     }
