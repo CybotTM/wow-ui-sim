@@ -976,6 +976,13 @@ if GetInventoryItemLink == nil then
   end
 end
 
+if GetInventoryItemsForSlot == nil then
+  function GetInventoryItemsForSlot(_slot, _itemTable)
+    -- Equipment flyout callers expect the table argument to be populated.
+    -- The simulator does not model alternate swap candidates, so leave it empty.
+  end
+end
+
 if GetWeaponEnchantInfo == nil then
   function GetWeaponEnchantInfo()
     return false, 0, 0, 0, false, 0, 0, 0
