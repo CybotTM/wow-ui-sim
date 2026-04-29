@@ -90,3 +90,4 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[menu-pool-set-to-defaults]] | Guild roster Mythic+ Rating dropdown rendered as a screen-spanning stripe because pooled menu element frames retained stale sizes; `SetToDefaults` now resets size to 0,0 and clears anchors |
 | [[windows-port-build]] | Windows build failed at `iced_dynamic.dll` with MSVC `LNK1189`; depending on upstream `iced` directly avoids the forced DLL link, and shared path discovery now finds CASC, extracted Interface art, AddOns, and WTF defaults |
 | [[three-slice-button-tiling]] | Escape menu button stripes came from inactive `HighlightTexture` children rendering every frame; standard button highlight children now render only on hover or locked highlight |
+| [[dialog-background-dxt3-stripes]] | Escape-menu dialog background stripes came from treating DXT3 BLPs as BC3 on the raw compressed upload path; DXT3 now falls back to RGBA until BC2 atlas support exists |

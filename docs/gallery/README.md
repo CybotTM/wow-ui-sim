@@ -14,3 +14,4 @@ Stable screenshot assets used by the project README gallery.
 - `housing-panel.png`
 - `talents-panel.png`
 - `damage-meter.webp`
+- `game-menu.webp`

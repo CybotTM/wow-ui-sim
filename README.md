@@ -32,6 +32,10 @@ Join the wowless Discord: <https://discord.gg/rTwWcfJXuz> — we have a `#wow-ui
 |---|---|
 | ![Talents panel](docs/gallery/talents-panel.png) | ![Damage meter](docs/gallery/damage-meter.webp) |
 
+| Game Menu |
+|---|
+| ![Game menu](docs/gallery/game-menu.webp) |
+
 ## GitHub Action
 
 Run your addon's test suite in CI:
