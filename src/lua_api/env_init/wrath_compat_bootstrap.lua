@@ -291,3 +291,134 @@ if debuginfo == nil then
     return ""
   end
 end
+
+-- ─── Additional Wrath-only stubs (batch 3.3b) ────────────────────────────────
+
+if strmatch == nil and string ~= nil then strmatch = string.match end
+
+if Blizzard_CombatLog_RefreshGlobalLinks == nil then
+  function Blizzard_CombatLog_RefreshGlobalLinks()
+  end
+end
+
+if GetActionBarToggles == nil then
+  function GetActionBarToggles()
+    return false, false, false, false, false, false
+  end
+end
+
+if GetActiveVoiceChannel == nil then
+  function GetActiveVoiceChannel()
+    return nil
+  end
+end
+
+if GetAdjustedSkillPoints == nil then
+  function GetAdjustedSkillPoints(level)
+    return level
+  end
+end
+
+if GetCVarMin == nil then
+  function GetCVarMin()
+    return 0
+  end
+end
+
+if GetMultiCastBarOffset == nil then
+  function GetMultiCastBarOffset()
+    return 0
+  end
+end
+
+if GetMultisampleFormats == nil then
+  function GetMultisampleFormats()
+    return ""
+  end
+end
+
+if GetNumBankSlots == nil then
+  function GetNumBankSlots()
+    return 0, 0
+  end
+end
+
+if GetPVPLifetimeStats == nil then
+  function GetPVPLifetimeStats()
+    return 0, 0, 0
+  end
+end
+
+if GetPVPSessionStats == nil then
+  function GetPVPSessionStats()
+    return 0, 0
+  end
+end
+
+if GetVoiceCurrentSessionID == nil then
+  function GetVoiceCurrentSessionID()
+    return nil
+  end
+end
+
+if GetVoiceSessionInfo == nil then
+  function GetVoiceSessionInfo()
+    return nil
+  end
+end
+
+if InitWorldMapPing == nil then
+  function InitWorldMapPing()
+  end
+end
+
+if IsAutoRepeatAction == nil then
+  function IsAutoRepeatAction()
+    return false
+  end
+end
+
+if IsEquippedAction == nil then
+  function IsEquippedAction()
+    return false
+  end
+end
+
+if IsRaidOfficer == nil then
+  function IsRaidOfficer()
+    return false
+  end
+end
+
+if IsUsableAction == nil then
+  function IsUsableAction()
+    return true, false
+  end
+end
+
+if IsVoiceChatEnabled == nil then
+  function IsVoiceChatEnabled()
+    return false
+  end
+end
+
+if SelectQuestLogEntry == nil then
+  function SelectQuestLogEntry()
+  end
+end
+
+-- Frame references: return a no-op proxy table so method calls like
+-- :Show(), :Hide(), :SetTexture() don't crash.
+local function noopFrame()
+  local t = {}
+  setmetatable(t, { __index = function() return function() end end })
+  return t
+end
+
+if MiniMapTrackingIcon == nil then
+  MiniMapTrackingIcon = noopFrame()
+end
+
+if PlayerArrowEffectFrame == nil then
+  PlayerArrowEffectFrame = noopFrame()
+end
