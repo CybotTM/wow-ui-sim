@@ -12,19 +12,7 @@ use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 pub fn blizzard_ui_dir() -> PathBuf {
-    blizzard_ui_candidates()
-        .into_iter()
-        .find(|path| path.exists())
-        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"))
-}
-
-fn blizzard_ui_candidates() -> [PathBuf; 3] {
-    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    [
-        project_root.join("Interface/BlizzardUI"),
-        project_root.join("../reference-addons.new/wow-ui-source/Interface/AddOns"),
-        project_root.join("../Interface/AddOns"),
-    ]
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
 }
 
 /// Blizzard addons needed for the panel system (dependency order).

@@ -67,7 +67,7 @@ const PANEL_HARNESS_ADDONS: &[(&str, &str)] = &[
 ];
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
 }
 
 fn load_blizzard_addon(env: &WowLuaEnv, addon_name: &str, toc_name: &str) {

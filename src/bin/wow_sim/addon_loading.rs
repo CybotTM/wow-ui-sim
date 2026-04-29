@@ -1,6 +1,7 @@
 //! Blizzard and third-party addon loading with timing/summary.
 
 use std::path::{Path, PathBuf};
+use wow_ui_sim::client_profile;
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
     load_addon_with_saved_vars,
@@ -19,23 +20,37 @@ pub const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData", "WowBehaviorTest", 
 
 /// Load Blizzard SharedXML and base UI addons (auto-discovered, dependency-sorted).
 pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
-    let blizzard_ui_path = match wow_ui_sim::paths::default_blizzard_ui_addons_path() {
-        Ok(path) => path,
-        Err(e) => {
-            eprintln!("FATAL: {e}");
-            std::process::exit(1);
-        }
-    };
+    let profile = client_profile::ACTIVE;
+    let addons_dir = client_profile::blizzard_ui_addons_dir();
+    if !addons_dir.exists() {
+        eprintln!(
+            "FATAL: {} is missing: Blizzard UI source not set up for {:?} profile.\n\
+             Run from the repo root:\n\
+             \t./scripts/setup-blizzard-ui.sh {}",
+            addons_dir.display(),
+            profile,
+            profile.subdir().to_lowercase(),
+        );
+        std::process::exit(1);
+    }
 
-    let addons = discover_blizzard_addons_for_screen(&blizzard_ui_path, screen);
     let verbose = std::env::var("WOW_SIM_VERBOSE").is_ok();
-    logging::println_elapsed(&format!("Loading {} Blizzard addons...", addons.len()));
     let blizzard_start = std::time::Instant::now();
     let mut total_timing = LoadTiming::default();
 
     // Stop GC during bulk loading — collect once at the end instead of
     // incremental sweeps on every allocation.
     env.gc_stop();
+
+    // Wrath ships a top-level FrameXML.toc that pre-dates the retail Blizzard_*
+    // split. Load it as a synthetic addon before iterating Blizzard_* dirs so
+    // global UI templates (UIParent, GameTooltip, etc.) register first.
+    if let Some(framexml_toc) = client_profile::blizzard_ui_framexml_toc() {
+        load_one_blizzard_addon(env, "FrameXML", &framexml_toc, verbose, &mut total_timing);
+    }
+
+    let addons = discover_blizzard_addons_for_screen(&addons_dir, screen);
+    logging::println_elapsed(&format!("Loading {} Blizzard addons...", addons.len()));
 
     for (name, toc_path) in &addons {
         load_one_blizzard_addon(env, name, toc_path, verbose, &mut total_timing);

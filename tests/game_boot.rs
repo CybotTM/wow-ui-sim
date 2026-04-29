@@ -12,7 +12,7 @@ use wow_ui_sim::toc::TocFile;
 const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData"];
 
 fn blizzard_ui_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")))
 }
 
 fn addons_dir() -> PathBuf {
@@ -62,7 +62,7 @@ fn load_game_screen() -> WowLuaEnv {
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![
-            PathBuf::from("./Interface/BlizzardUI"),
+            wow_ui_sim::client_profile::blizzard_ui_addons_dir(),
             PathBuf::from("./Interface/AddOns"),
         ];
     }
@@ -95,7 +95,7 @@ fn new_game_env() -> WowLuaEnv {
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![
-            PathBuf::from("./Interface/BlizzardUI"),
+            wow_ui_sim::client_profile::blizzard_ui_addons_dir(),
             PathBuf::from("./Interface/AddOns"),
         ];
     }

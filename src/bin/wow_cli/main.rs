@@ -223,7 +223,7 @@ fn default_addons_path() -> PathBuf {
 }
 
 fn default_blizzard_ui_path() -> PathBuf {
-    PathBuf::from("./vendor/wow-ui-source/Interface/AddOns")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir()
 }
 
 fn default_wowless_path() -> PathBuf {

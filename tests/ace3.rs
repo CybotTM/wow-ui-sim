@@ -194,7 +194,7 @@ fn test_load_details() {
 
 #[test]
 fn test_load_game_menu() {
-    let blizzard_ui = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
+    let blizzard_ui = wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!("CARGO_MANIFEST_DIR")));
 
     if !blizzard_ui.exists() {
         eprintln!("Skipping: BlizzardUI not found at {:?}", blizzard_ui);

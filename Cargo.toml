@@ -80,13 +80,18 @@ sha2 = "0.10"
 # faster incremental rebuilds. Release builds should use:
 #   cargo build --release --no-default-features --features sound,gui
 # to produce a fully static binary not tied to a specific rustc version.
-default = ["sound", "gui", "casc"]
+default = ["sound", "gui", "casc", "client-retail"]
 sound = ["rodio", "casc"]
 gui = ["casc", "dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp", "dep:winapi"]
 casc = ["dep:asset-resolver"]
 fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]
 intern-stats = ["rilua/intern-stats"]
+# Client profile features — exactly one must be enabled. Selects which
+# Interface/BlizzardUI/<Profile>/ subdir the loader reads vendor sources from.
+client-retail = []
+client-wrath = []
+client-mists = []
 
 [profile.release]
 lto = false

@@ -2,8 +2,10 @@ use std::path::{Path, PathBuf};
 use wow_ui_sim::toc::TocFile;
 
 fn blizzard_shared_xml_base_toc() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("Interface/BlizzardUI/Blizzard_SharedXMLBase/Blizzard_SharedXMLBase.toc")
+    wow_ui_sim::client_profile::blizzard_ui_addons_dir_under(std::path::Path::new(env!(
+        "CARGO_MANIFEST_DIR"
+    )))
+    .join("Blizzard_SharedXMLBase/Blizzard_SharedXMLBase.toc")
 }
 
 const ACE3_TOC: &str = "/home/osso/Projects/wow/reference-addons/Ace3/Ace3.toc";

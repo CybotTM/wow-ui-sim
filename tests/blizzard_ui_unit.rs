@@ -1,3 +1,4 @@
+#![cfg(feature = "client-retail")]
 //! Blizzard UI unit lane.
 //!
 //! Keep this file for isolated helper logic and pure component behavior that
