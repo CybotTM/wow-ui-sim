@@ -18,6 +18,7 @@ fn sample_faction(faction_id: i64) -> MajorFactionData {
         celebration_sound_kit: 12345,
         renown_fanfare_sound_kit_id: 67890,
         texture_kit: "majorfactions_dreamwardens".to_string(),
+        faction_font_color: (1.0, 1.0, 1.0),
     }
 }
 
