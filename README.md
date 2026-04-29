@@ -102,6 +102,10 @@ async_test("timer fires callback", function(done)
 end)
 ```
 
+## Admin API
+
+The simulator exposes an `A_Admin` Lua namespace for controlling state in tests (player identity, combat, party, buffs, zone, economy, etc.). See [docs/admin-api/](docs/admin-api/README.md).
+
 ## License
 
 GPL-3.0-only
