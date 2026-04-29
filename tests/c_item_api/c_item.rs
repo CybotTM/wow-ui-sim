@@ -287,3 +287,18 @@ fn test_c_item_get_item_count() {
     let count: i32 = env.eval("return C_Item.GetItemCount(12345)").unwrap();
     assert_eq!(count, 0);
 }
+
+#[test]
+fn test_c_item_does_item_exist_by_id_resolves_profession_overrides() {
+    let env = env();
+    let (exists, name): (bool, String) = env
+        .eval("return C_Item.DoesItemExistByID(2852), C_Item.GetItemNameByID(2852)")
+        .unwrap();
+    assert!(
+        exists,
+        "C_Item.DoesItemExistByID(2852) must resolve via profession_item_overrides — \
+         otherwise NonEmptyItem:ContinueWithCancelOnItemLoad raises and \
+         ProfessionsRecipeSchematicForm:Init aborts before initializing reagentSlots"
+    );
+    assert_eq!(name, "Copper Chain Pants");
+}
