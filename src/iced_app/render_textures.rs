@@ -381,6 +381,7 @@ impl App {
             Some(crate::lua_api::state::CursorInfo::Item { .. }) => return,
             Some(crate::lua_api::state::CursorInfo::Talent { .. }) => return,
             Some(crate::lua_api::state::CursorInfo::Macro { .. }) => return,
+            Some(crate::lua_api::state::CursorInfo::Money { .. }) => return,
             None => return,
         };
         let Some(spell) = crate::spells::get_spell(spell_id) else {
@@ -772,9 +773,7 @@ mod tests {
         ));
         env.borrow().set_screen_mode(ScreenKind::Game);
 
-        let texture_manager = Rc::new(RefCell::new(
-            TextureManager::new(),
-        ));
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new()));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new()));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         let (_cmd_tx, cmd_rx) = mpsc::channel(1);

@@ -308,3 +308,86 @@ fn pickup_bag_from_slot_aliases_pickup_inventory_item() {
         })
     ));
 }
+
+// ── PickupPlayerMoney / DropCursorMoney / GetCursorMoney ──────────────────────
+
+#[test]
+fn pickup_player_money_moves_copper_from_player_to_cursor() {
+    let env = env();
+    env.state().borrow_mut().player.money = 10_000;
+    env.exec("PickupPlayerMoney(2500)").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(st.player.money, 7_500);
+    assert!(matches!(
+        st.cursor_item,
+        Some(CursorInfo::Money { copper: 2500 })
+    ));
+}
+
+#[test]
+fn pickup_player_money_above_balance_is_noop() {
+    let env = env();
+    env.state().borrow_mut().player.money = 100;
+    env.exec("PickupPlayerMoney(500)").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(st.player.money, 100);
+    assert!(st.cursor_item.is_none());
+}
+
+#[test]
+fn drop_cursor_money_returns_copper_to_player() {
+    let env = env();
+    {
+        let mut st = env.state().borrow_mut();
+        st.player.money = 5_000;
+        st.cursor_item = Some(CursorInfo::Money { copper: 1_500 });
+    }
+    env.exec("DropCursorMoney()").unwrap();
+    let st = env.state().borrow();
+    assert_eq!(st.player.money, 6_500);
+    assert!(st.cursor_item.is_none());
+}
+
+#[test]
+fn drop_cursor_money_with_extra_arg_is_no_error() {
+    // CoinPickupFrame.xml fires `<OnLoad function="DropCursorMoney"/>`,
+    // which calls DropCursorMoney(self). The frame argument must be tolerated.
+    let env = env();
+    env.exec("DropCursorMoney(CoinPickupFrame)").unwrap();
+    assert!(env.state().borrow().cursor_item.is_none());
+}
+
+#[test]
+fn drop_cursor_money_leaves_non_money_cursor_alone() {
+    let env = env();
+    env.state().borrow_mut().cursor_item = Some(CursorInfo::Item {
+        item_id: 6948,
+        stack_count: 1,
+        origin: CursorItemOrigin::Bag { bag: 0, slot: 0 },
+    });
+    env.exec("DropCursorMoney()").unwrap();
+    assert!(matches!(
+        env.state().borrow().cursor_item,
+        Some(CursorInfo::Item { item_id: 6948, .. })
+    ));
+}
+
+#[test]
+fn get_cursor_money_reads_cursor_payload() {
+    let env = env();
+    let zero: f64 = env.eval("return GetCursorMoney()").unwrap();
+    assert_eq!(zero as u64, 0);
+
+    env.state().borrow_mut().cursor_item = Some(CursorInfo::Money { copper: 4_242 });
+    let copper: f64 = env.eval("return GetCursorMoney()").unwrap();
+    assert_eq!(copper as u64, 4_242);
+}
+
+#[test]
+fn get_cursor_info_reports_money_cursor() {
+    let env = env();
+    env.state().borrow_mut().cursor_item = Some(CursorInfo::Money { copper: 777 });
+    let (kind, copper): (String, f64) = env.eval("return GetCursorInfo()").unwrap();
+    assert_eq!(kind, "money");
+    assert_eq!(copper as u64, 777);
+}
