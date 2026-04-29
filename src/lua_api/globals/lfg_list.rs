@@ -1028,12 +1028,7 @@ pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
         "IsPremadeGroupFinderEnabled",
         is_premade_group_finder_enabled,
     )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "RemoveListing",
-        remove_listing,
-    )?;
+    table_set_rust_fn_static(state, table_ref, "RemoveListing", remove_listing)?;
     table_set_rust_fn_static(
         state,
         table_ref,

@@ -210,7 +210,8 @@ pub(crate) fn resolve_runtime_template_named_anchors(
         if !seen.insert(current_id) {
             continue;
         }
-        sim.widgets.resolve_named_anchor_targets_for_frame(current_id);
+        sim.widgets
+            .resolve_named_anchor_targets_for_frame(current_id);
         sim.widgets.mark_rect_dirty(current_id);
         let child_ids = sim
             .widgets

@@ -313,7 +313,8 @@ fn anchor_pinned_horizontal_width(state: &LuaState, id: u64) -> Option<f32> {
         return None;
     }
 
-    let left_x = target.width * left_anchor.relative_point.horizontal_factor() + left_anchor.x_offset;
+    let left_x =
+        target.width * left_anchor.relative_point.horizontal_factor() + left_anchor.x_offset;
     let right_x =
         target.width * right_anchor.relative_point.horizontal_factor() + right_anchor.x_offset;
     let width = right_x - left_x;

@@ -122,7 +122,10 @@ fn collect_item_ids_from_journal_loot(records: &[String], out: &mut BTreeSet<u32
         .unwrap_or(0);
     for record in iter {
         let fields = parse_csv_line(record);
-        if let Some(item_id) = fields.get(item_idx).and_then(|field| field.parse::<u32>().ok()) {
+        if let Some(item_id) = fields
+            .get(item_idx)
+            .and_then(|field| field.parse::<u32>().ok())
+        {
             if item_id != 0 {
                 out.insert(item_id);
             }

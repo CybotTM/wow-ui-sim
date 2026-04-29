@@ -65,7 +65,8 @@ fn load_full_game_ui() -> WowLuaEnv {
 
 #[test]
 fn blizzard_personal_resource_display_find_toc_resolves_bare_variant() {
-    let resolved = find_toc_file(&prd_dir()).expect("Blizzard_PersonalResourceDisplay TOC resolves");
+    let resolved =
+        find_toc_file(&prd_dir()).expect("Blizzard_PersonalResourceDisplay TOC resolves");
     assert_eq!(
         resolved,
         prd_toc(),
