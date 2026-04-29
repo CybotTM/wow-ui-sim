@@ -30,6 +30,7 @@ rodio = { version = "0.21", optional = true }
 
 # Iced GUI (optional, gated behind "gui" feature)
 iced = { version = "0.14.0", optional = true, features = ["advanced", "canvas", "image", "tokio", "wgpu"] }
+iced-dynamic = { path = "iced-dynamic", optional = true }
 iced_wgpu = { version = "0.14", optional = true, path = "iced-wgpu-patched" }
 iced_runtime = { version = "0.14", optional = true }
 iced-layout-inspector = { git = "https://github.com/Osso/iced-layout-inspector.git", tag = "v0.2.0", optional = true }
@@ -60,10 +61,15 @@ tempfile = "3"
 sha2 = "0.10"
 
 [features]
-default = ["sound", "gui", "casc"]
+# fast-build is on by default so local dev/debug builds get the iced dylib for
+# faster incremental rebuilds. Release builds should use:
+#   cargo build --release --no-default-features --features sound,gui,casc
+# to produce a fully static binary not tied to a specific rustc version.
+default = ["sound", "gui", "casc", "fast-build"]
 sound = ["rodio"]
 gui = ["dep:iced", "dep:iced_wgpu", "dep:iced_runtime", "dep:wgpu", "dep:iced-layout-inspector", "dep:pollster", "dep:bytemuck", "dep:webp"]
 casc = ["dep:asset-resolver"]
+fast-build = ["gui", "dep:iced-dynamic"]
 rehash-stats = ["rilua/rehash-stats"]
 intern-stats = ["rilua/intern-stats"]
 
