@@ -340,14 +340,18 @@ pub fn generate_set_point_code(
         let (x, y) = resolve_anchor_offset(anchor);
         let rel = resolve_anchor_relative(anchor, parent_expr, parent_name, default_relative);
         // relativeKey chains can reference frames that don't exist yet at load
-        // time (they get reparented later). Wrap in pcall to match WoW behavior
-        // where unresolvable anchors are silently skipped.
         if anchor.relative_key.is_some() {
+            let key = anchor.relative_key.as_deref().unwrap_or_default();
             code.push_str(&format!(
                 r#"
-        pcall(function() {}:SetPoint("{}", {}, "{}", {}, {}) end)
+        {}:SetPoint("{}", "{}", "{}", {}, {})
         "#,
-                target_var, point, rel, relative_point, x, y
+                target_var,
+                point,
+                escape_lua_string(key),
+                relative_point,
+                x,
+                y
             ));
         } else {
             code.push_str(&format!(
