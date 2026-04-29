@@ -179,8 +179,21 @@ fn c_guild_info_guild_roster_fires_event() {
 }
 
 #[test]
-fn request_guild_challenge_info_fires_challenge_updated() {
+fn request_guild_challenge_info_dispatches_challenge_updated() {
     let env = env();
-    env.exec("RequestGuildChallengeInfo()").unwrap();
-    assert!(fired(&env, "GUILD_CHALLENGE_UPDATED"));
+    let received: bool = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            local got = false
+            f:RegisterEvent("GUILD_CHALLENGE_UPDATED")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "GUILD_CHALLENGE_UPDATED" then got = true end
+            end)
+            RequestGuildChallengeInfo()
+            return got
+            "#,
+        )
+        .unwrap();
+    assert!(received);
 }

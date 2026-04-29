@@ -18,6 +18,7 @@
 //! Registered from `register_tail_globals` after `missing_surface`.
 
 use crate::event::Event;
+use crate::lua_api::globals::state_backed_queries::dispatch_event_now;
 use crate::lua_api::methods::borrow_state_mut;
 use crate::lua_api::state_types::GuildMember;
 use crate::lua_bridge::FromStack;
@@ -147,9 +148,13 @@ fn request_guild_roster(state: &mut LuaState) -> LuaResult<u32> {
     Ok(0)
 }
 
-/// `RequestGuildChallengeInfo()` — fire `GUILD_CHALLENGE_UPDATED`.
+/// `RequestGuildChallengeInfo()` — fire `GUILD_CHALLENGE_UPDATED` synchronously.
+/// `CommunitiesGuildInfoFrame_OnLoad` calls this immediately after registering
+/// the event, expecting the OnEvent handler to run before the panel is shown.
+/// Queueing the event leaves the four challenge rows visible with empty labels
+/// because `_UpdateChallenges` never runs in time.
 fn request_guild_challenge_info(state: &mut LuaState) -> LuaResult<u32> {
-    push_event(state, "GUILD_CHALLENGE_UPDATED")?;
+    dispatch_event_now(state, "GUILD_CHALLENGE_UPDATED", &[])?;
     Ok(0)
 }
 
