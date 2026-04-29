@@ -272,7 +272,10 @@ fn bc_texture_data(content: BlpContent) -> Option<(Arc<[u8]>, BcTextureFormat)> 
         BlpContent::Dxt1(dxtn) => {
             first_bc_image(dxtn).map(|bc_data| (bc_data, BcTextureFormat::Bc1))
         }
-        BlpContent::Dxt3(dxtn) | BlpContent::Dxt5(dxtn) => {
+        // DXT3 is BC2, not BC3. The renderer has no BC2 atlas yet, so let
+        // DXT3 fall back through the RGBA path instead of decoding alpha as BC3.
+        BlpContent::Dxt3(_) => None,
+        BlpContent::Dxt5(dxtn) => {
             first_bc_image(dxtn).map(|bc_data| (bc_data, BcTextureFormat::Bc3))
         }
         _ => None,
@@ -745,14 +748,6 @@ mod tests {
         assert_eq!(dxt1.format, BcTextureFormat::Bc1);
         assert_eq!(dxt1.bc_data.as_ref(), [0x11; 8]);
 
-        let dxt3 = bc_texture_result(
-            8,
-            8,
-            BlpContent::Dxt3(test_dxtn(vec![0x22; 16], DxtnFormat::Dxt3)),
-        )
-        .expect("DXT3 content should map to a BC texture result");
-        assert_eq!(dxt3.format, BcTextureFormat::Bc3);
-
         let dxt5 = bc_texture_result(
             8,
             8,
@@ -760,6 +755,17 @@ mod tests {
         )
         .expect("DXT5 content should map to a BC texture result");
         assert_eq!(dxt5.format, BcTextureFormat::Bc3);
+    }
+
+    #[test]
+    fn bc_texture_result_rejects_dxt3_without_bc2_support() {
+        let dxt3 = bc_texture_result(
+            8,
+            8,
+            BlpContent::Dxt3(test_dxtn(vec![0x22; 16], DxtnFormat::Dxt3)),
+        );
+
+        assert!(dxt3.is_none());
     }
 
     #[test]
