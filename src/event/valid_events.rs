@@ -16,7 +16,15 @@ use super::valid_events_b::EVENTS_B;
 use super::valid_events_c::EVENTS_C;
 
 /// Check if an event can be passed to `RegisterEvent()`.
+///
+/// Under non-retail client profiles the validator is permissive: the wrath/mists
+/// event lists predate the events.yaml dataset (which is mainline-only), so
+/// rejecting unknown events would break legitimate WotLK/MoP code paths. The
+/// retail profile keeps strict validation against the generated event tables.
 pub fn is_registerable_event(name: &str) -> bool {
+    if !matches!(crate::client_profile::ACTIVE, crate::client_profile::ClientProfile::Retail) {
+        return !name.is_empty();
+    }
     let first = name.as_bytes().first().copied().unwrap_or(0);
     if first <= b'G' {
         return EVENTS_A.contains(&name) || EVENTS_A_TAIL.contains(&name);
