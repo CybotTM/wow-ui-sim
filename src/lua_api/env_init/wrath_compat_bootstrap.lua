@@ -159,6 +159,7 @@ if GetQuestTimers == nil then
 end
 
 if GetRefreshRates == nil then
+  -- Vararg of available refresh rate ints. Return one (60Hz).
   function GetRefreshRates()
     return 60
   end
@@ -171,6 +172,7 @@ if GetRuneType == nil then
 end
 
 if GetScreenResolutions == nil then
+  -- Vararg of "WxH" strings.
   function GetScreenResolutions()
     return "1024x768"
   end
@@ -332,8 +334,9 @@ if GetMultiCastBarOffset == nil then
 end
 
 if GetMultisampleFormats == nil then
+  -- Wrath caller iterates select("#", ...) in steps of 3 expecting
+  -- (colorBits, depthBits, multiSample) triples. We have none — return nothing.
   function GetMultisampleFormats()
-    return ""
   end
 end
 
