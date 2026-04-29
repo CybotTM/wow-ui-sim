@@ -146,7 +146,7 @@ fn build_fontstring_create_code(
     code
 }
 
-/// Generate Lua code for fontstring text, anchors, alpha, and visibility.
+/// Generate Lua code for fontstring text, styling, keys, scripts, and visibility.
 fn build_fontstring_extra_code(
     fontstring: &crate::xml::FontStringXml,
     parent_name: &str,
@@ -161,15 +161,6 @@ fn build_fontstring_extra_code(
     }
     code.push_str(&generate_fontstring_visual_code(fontstring));
     code.push_str(&generate_fontstring_parent_code(fontstring));
-    if let Some(anchors) = &fontstring.anchors {
-        code.push_str(&generate_set_point_code(
-            anchors,
-            "fs",
-            "parent",
-            parent_name,
-            "parent",
-        ));
-    }
     code.push_str(&super::xml_frame_codegen::generate_key_values_code(
         fontstring.key_values.as_ref(),
         "fs",
@@ -207,6 +198,25 @@ fn build_fontstring_extra_code(
     code
 }
 
+/// Generate Lua code for deferred fontstring anchors.
+pub(super) fn build_fontstring_anchor_lua(
+    fontstring: &crate::xml::FontStringXml,
+    fs_name: &str,
+    parent_name: &str,
+) -> String {
+    let mut code = String::new();
+    if let Some(anchors) = &fontstring.anchors {
+        code.push_str(&generate_set_point_code(
+            anchors,
+            fs_name,
+            parent_name,
+            parent_name,
+            "parent",
+        ));
+    }
+    code
+}
+
 fn fontstring_onload_should_fire_immediately(scripts: &crate::xml::ScriptsXml) -> bool {
     let Some(script) = scripts.on_load.last() else {
         return false;
@@ -225,6 +235,26 @@ fn fontstring_onload_should_fire_immediately(scripts: &crate::xml::ScriptsXml) -
 
 /// Build the Lua code string that creates and configures a fontstring.
 pub(super) fn build_fontstring_lua(
+    fontstring: &crate::xml::FontStringXml,
+    parent_name: &str,
+    draw_layer: &str,
+    sub_level: i32,
+    fs_name: &str,
+    resolved_text: &Option<String>,
+) -> String {
+    let mut code =
+        build_fontstring_create_code(fontstring, parent_name, draw_layer, sub_level, fs_name);
+    code.push_str(&build_fontstring_extra_code(
+        fontstring,
+        parent_name,
+        resolved_text,
+    ));
+    code.push_str(&build_fontstring_anchor_lua(fontstring, fs_name, parent_name));
+    code
+}
+
+/// Build the Lua code string that creates and configures a fontstring without anchors.
+pub(super) fn build_fontstring_lua_without_anchors(
     fontstring: &crate::xml::FontStringXml,
     parent_name: &str,
     draw_layer: &str,
