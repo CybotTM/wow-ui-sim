@@ -118,6 +118,11 @@ fn analyze_uv_repeat(raw: &[f32; 8]) -> UvRepeatInfo {
 
 /// Determine tile pixel size for UV-repeat tiling.
 fn uv_repeat_tile_size(f: &crate::widget::Frame) -> (f32, f32) {
+    if let Some(atlas_name) = f.atlas.as_deref() {
+        if let Some(info) = crate::atlas::get_atlas_info(atlas_name) {
+            return (info.width() as f32, info.height() as f32);
+        }
+    }
     if f.width > 1.0 && f.height > 1.0 {
         (f.width, f.height)
     } else if f.height > 1.0 {
@@ -577,5 +582,32 @@ mod tests {
         assert_eq!(batch.texture_requests.len(), 1);
         assert_eq!(batch.vertices[0].position, [0.0, 0.0]);
         assert_eq!(batch.vertices[1].position, [14.0, 0.0]);
+    }
+
+    #[test]
+    fn uv_repeat_atlas_tiles_use_source_size() {
+        let mut batch = QuadBatch::new();
+        let mut frame = crate::widget::Frame {
+            atlas: Some("_128-RedButton-Center".to_string()),
+            width: 256.0,
+            height: 256.0,
+            ..Default::default()
+        };
+        frame.tex_coords_quad = Some([0.0, 0.0, 0.0, 2.0, 1.0, 0.0, 1.0, 0.0]);
+
+        emit_uv_repeat_tiled(
+            &mut batch,
+            Rectangle::new(Point::ORIGIN, Size::new(128.0, 20.0)),
+            frame.tex_coords_quad.as_ref().expect("tex coords"),
+            "Interface\\buttons\\128redbutton",
+            &frame,
+            1.0,
+        );
+
+        assert_eq!(batch.vertices.len(), 8);
+        assert_eq!(batch.vertices[0].position, [0.0, 0.0]);
+        assert_eq!(batch.vertices[1].position, [64.0, 0.0]);
+        assert_eq!(batch.vertices[4].position, [64.0, 0.0]);
+        assert_eq!(batch.vertices[5].position, [128.0, 0.0]);
     }
 }
