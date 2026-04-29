@@ -5,3 +5,4 @@
 ## SavedVariables: WowSimTrackedRecipesDB
 
 Admin.lua
+AdminProfessions.lua
