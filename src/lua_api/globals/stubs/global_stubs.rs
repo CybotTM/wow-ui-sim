@@ -30,6 +30,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ExpandSkillHeader",
     "ForceLogout",
     "ForceTaint",
+    "DropCursorMoney",
     "InspectUnit",
     "LeaveMythicPlusGroup",
     "LogoutStatusFrame_StartLogout",
