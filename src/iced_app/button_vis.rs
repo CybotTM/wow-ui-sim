@@ -41,7 +41,7 @@ pub fn should_skip_frame(
         }
     }
 
-    let state_override = resolve_button_visibility(f, id, registry, pressed_frame, hovered_frame);
+    let state_override = resolve_button_visibility(f, id, registry, pressed_frame);
     match state_override {
         Some(false) => true,
         Some(true) => false,
@@ -92,14 +92,13 @@ fn resolve_button_visibility(
     id: u64,
     registry: &WidgetRegistry,
     pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
 ) -> Option<bool> {
     if !matches!(f.widget_type, WidgetType::Texture) {
         return None;
     }
     let parent_id = f.parent_id?;
     let parent = registry.get(parent_id)?;
-    texture_visibility(parent, id, parent_id, pressed_frame, hovered_frame)
+    texture_visibility(parent, id, parent_id, pressed_frame)
 }
 
 /// Determine if a Texture child of a Button should render based on button state.
@@ -118,7 +117,6 @@ fn texture_visibility(
     texture_id: u64,
     parent_id: u64,
     pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
 ) -> Option<bool> {
     if !matches!(
         parent.widget_type,
@@ -128,7 +126,6 @@ fn texture_visibility(
     }
     let is_disabled = !is_enabled(parent);
     let is_pressed = !is_disabled && (pressed_frame == Some(parent_id) || parent.button_state == 1);
-    let is_hovered = !is_disabled && hovered_frame == Some(parent_id);
 
     if parent.children_keys.get("DisabledTexture") == Some(&texture_id) {
         return Some(is_disabled);
@@ -140,7 +137,9 @@ fn texture_visibility(
         return Some(is_pressed);
     }
     if parent.children_keys.get("HighlightTexture") == Some(&texture_id) {
-        return Some(is_hovered);
+        // Hover highlight is rendered exclusively by append_hover_highlight.
+        // Keep it out of the generic draw loop so additive blending is applied once.
+        return Some(false);
     }
     None
 }

@@ -1072,6 +1072,10 @@ mod tests {
         paths
     }
 
+    fn overlay_texture_request_count(app: &App) -> usize {
+        app.build_overlay().texture_requests.len()
+    }
+
     fn mark_frames_dirty(app: &App, frame_ids: &[u64]) {
         let env = app.env.borrow();
         let state = env.state().borrow();
@@ -1204,11 +1208,11 @@ mod tests {
         app.hovered_frame = Some(button_id);
         mark_frames_dirty(&app, &[button_id, normal_id, highlight_id]);
         rebuild_after_widget_dirty(&app, size);
+        let hovered_overlay_requests = overlay_texture_request_count(&app);
         assert!(
-            snapshot_texture_alphas(&app, highlight_id)
-                .iter()
-                .any(|alpha| *alpha == 1.0),
-            "hover should emit the highlight texture"
+            hovered_overlay_requests > 0,
+            "hover should emit the highlight texture through the overlay batch \
+             (append_hover_highlight)"
         );
 
         app.env
@@ -1234,9 +1238,11 @@ mod tests {
                 .any(|path| path.contains("@crop:")),
             "restored normal texture should render through an isolated atlas crop"
         );
+        let unhovered_overlay_requests = overlay_texture_request_count(&app);
         assert!(
-            snapshot_texture_alphas(&app, highlight_id).is_empty(),
-            "leaving hover should remove the highlight texture snapshot"
+            unhovered_overlay_requests < hovered_overlay_requests,
+            "leaving hover should drop highlight texture requests from the overlay batch \
+             (was {hovered_overlay_requests}, now {unhovered_overlay_requests})"
         );
     }
 
@@ -1262,7 +1268,7 @@ mod tests {
             )
             .expect("mouse-leave micro button setup should succeed");
 
-        let (normal_id, highlight_id) = {
+        let normal_id = {
             let env = app.env.borrow();
             let state = env.state().borrow();
             let button = state
@@ -1273,11 +1279,11 @@ mod tests {
                 .children_keys
                 .get("NormalTexture")
                 .expect("normal texture child should exist");
-            let highlight_id = *button
+            let _ = *button
                 .children_keys
                 .get("HighlightTexture")
                 .expect("highlight texture child should exist");
-            (normal_id, highlight_id)
+            normal_id
         };
 
         let size = Size::new(320.0, 240.0);
@@ -1286,11 +1292,11 @@ mod tests {
 
         app.handle_mouse_move(Point::new(30.0, 40.0));
         app.rebuild_dirty_strata(size, app.strata_dirty.get());
+        let hovered_overlay_requests = overlay_texture_request_count(&app);
         assert!(
-            snapshot_texture_alphas(&app, highlight_id)
-                .iter()
-                .any(|alpha| *alpha == 1.0),
-            "hover should emit the highlight texture through the real mouse path"
+            hovered_overlay_requests > 0,
+            "hover should emit the highlight texture through the overlay batch \
+             (append_hover_highlight) on the real mouse path"
         );
 
         app.handle_mouse_leave();
@@ -1301,9 +1307,11 @@ mod tests {
                 .any(|alpha| *alpha == 1.0),
             "mouse leave should re-emit the normal texture after OnLeave restores alpha"
         );
+        let unhovered_overlay_requests = overlay_texture_request_count(&app);
         assert!(
-            snapshot_texture_alphas(&app, highlight_id).is_empty(),
-            "mouse leave should remove the highlight texture snapshot"
+            unhovered_overlay_requests < hovered_overlay_requests,
+            "mouse leave should drop highlight texture requests from the overlay batch \
+             (was {hovered_overlay_requests}, now {unhovered_overlay_requests})"
         );
     }
 

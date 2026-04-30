@@ -441,10 +441,11 @@ fn is_inactive_button_highlight_texture(frame: &FrameQuadEmit<'_>) -> bool {
     ) {
         return false;
     }
-    if parent.highlight_locked {
-        return false;
-    }
-    frame.hovered_frame != Some(parent_id)
+    // Hover render goes through `append_hover_highlight` (overlay batch); the
+    // generic draw loop must treat the slot child as inactive so additive
+    // blending is applied once. Locked highlights bypass the suppression and
+    // render through the generic loop because no hover state will toggle them.
+    !parent.highlight_locked
 }
 
 fn emit_fontstring_quads(

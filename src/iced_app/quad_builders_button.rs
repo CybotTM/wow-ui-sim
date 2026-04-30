@@ -11,6 +11,54 @@ use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_tex
 const BUTTON_TEXT_CHILD_KEYS: [&str; 3] = ["Text", "text", "ButtonText"];
 
 /// UI-Panel-Button-Up is 128×32; button-up strip occupies rows 0-21 (V = 0 .. 22/32 = 0.6875).
+const PANEL_BUTTON_UP_CROP_V: f32 = 22.0 / 32.0;
+
+fn remap_panel_button_skin(
+    tex_path: &str,
+    fill_uvs: Option<(f32, f32, f32, f32)>,
+    atlas_tex_coords: Option<(f32, f32, f32, f32)>,
+) -> (String, Option<(f32, f32, f32, f32)>) {
+    let crop = should_crop_panel_button_skin(tex_path);
+    let clamp_v = |(left, right, top, bottom): (f32, f32, f32, f32)| {
+        if crop {
+            (left, right, top, bottom.min(PANEL_BUTTON_UP_CROP_V))
+        } else {
+            (left, right, top, bottom)
+        }
+    };
+    remap_atlas_crop(
+        tex_path,
+        fill_uvs.map(clamp_v),
+        atlas_tex_coords.map(clamp_v),
+    )
+}
+
+fn should_crop_panel_button_skin(texture_path: &str) -> bool {
+    matches!(
+        texture_path,
+        "Interface/Buttons/UI-Panel-Button-Up"
+            | "Interface\\Buttons\\UI-Panel-Button-Up"
+            | "Interface/Buttons/UI-Panel-Button-Highlight"
+            | "Interface\\Buttons\\UI-Panel-Button-Highlight"
+    )
+}
+
+/// Remap atlas crop UVs and emit a single quad with the resulting texture/UV mapping.
+fn push_skinned_button_quad(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    tex_coords: (f32, f32, f32, f32),
+    color: [f32; 4],
+    blend_mode: BlendMode,
+) {
+    let (effective_path, effective_uvs) =
+        remap_panel_button_skin(tex_path, Some(tex_coords), Some(tex_coords));
+    let (left, right, top, bottom) = effective_uvs.unwrap_or((0.0, 1.0, 0.0, 1.0));
+    let uvs = Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
+    batch.push_textured_path_uv(bounds, uvs, &effective_path, color, blend_mode);
+}
+
 const BUTTON_TEX_V_BOTTOM: f32 = 0.6875;
 
 /// Build quads for a Button widget.
@@ -62,18 +110,16 @@ fn emit_button_texture(
     alpha: f32,
 ) {
     let Some(tex_path) = texture_path else { return };
-    if let Some((left, right, top, bottom)) = tex_coords {
-        let (effective_path, effective_uvs) = remap_atlas_crop(
-            tex_path,
-            Some((left, right, top, bottom)),
-            Some((left, right, top, bottom)),
-        );
-        let (left, right, top, bottom) = effective_uvs.unwrap_or((0.0, 1.0, 0.0, 1.0));
-        let uvs = Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
-        batch.push_textured_path_uv(
+    if is_ui_panel_button_atlas(tex_path) {
+        emit_ui_panel_button_strip(batch, bounds, tex_path, tex_coords, alpha, BlendMode::Alpha);
+        return;
+    }
+    if let Some(tex_coords) = tex_coords {
+        push_skinned_button_quad(
+            batch,
             bounds,
-            uvs,
-            &effective_path,
+            tex_path,
+            tex_coords,
             [1.0, 1.0, 1.0, alpha],
             BlendMode::Alpha,
         );
@@ -100,38 +146,102 @@ pub(crate) fn emit_button_highlight(
     f: &crate::widget::Frame,
     alpha: f32,
 ) {
-    if let Some(highlight_path) = &f.highlight_texture {
-        if let Some((left, right, top, bottom)) = f.highlight_tex_coords {
-            let (effective_path, effective_uvs) = remap_atlas_crop(
-                highlight_path,
-                Some((left, right, top, bottom)),
-                Some((left, right, top, bottom)),
-            );
-            let (left, right, top, bottom) = effective_uvs.unwrap_or((0.0, 1.0, 0.0, 1.0));
-            let uvs = Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
-            batch.push_textured_path_uv(
-                bounds,
-                uvs,
-                &effective_path,
-                [1.0, 1.0, 1.0, 0.5 * alpha],
-                BlendMode::Additive,
-            );
-        } else {
-            const BUTTON_TEX_WIDTH: f32 = 128.0;
-            const BUTTON_CAP_WIDTH: f32 = 4.0;
-            batch.push_three_slice_h_path_blend(
-                bounds,
-                BUTTON_CAP_WIDTH,
-                BUTTON_CAP_WIDTH,
-                highlight_path,
-                BUTTON_TEX_WIDTH,
-                [1.0, 1.0, 1.0, 0.5 * alpha],
-                BlendMode::Additive,
-                0.0,
-                BUTTON_TEX_V_BOTTOM,
-            );
-        }
+    let Some(highlight_path) = &f.highlight_texture else {
+        return;
+    };
+    if is_ui_panel_button_atlas(highlight_path) {
+        emit_ui_panel_button_strip(
+            batch,
+            bounds,
+            highlight_path,
+            f.highlight_tex_coords,
+            0.5 * alpha,
+            BlendMode::Additive,
+        );
+        return;
     }
+    if let Some(tex_coords) = f.highlight_tex_coords {
+        push_skinned_button_quad(
+            batch,
+            bounds,
+            highlight_path,
+            tex_coords,
+            [1.0, 1.0, 1.0, 0.5 * alpha],
+            BlendMode::Additive,
+        );
+    } else {
+        emit_button_three_slice_blend(batch, bounds, highlight_path, 0.5 * alpha);
+    }
+}
+
+/// 3-slice horizontal fallback for button textures with the up-strip V crop.
+fn emit_button_three_slice_blend(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    alpha: f32,
+) {
+    const BUTTON_TEX_WIDTH: f32 = 128.0;
+    const BUTTON_CAP_WIDTH: f32 = 4.0;
+    batch.push_three_slice_h_path_blend(
+        bounds,
+        BUTTON_CAP_WIDTH,
+        BUTTON_CAP_WIDTH,
+        tex_path,
+        BUTTON_TEX_WIDTH,
+        [1.0, 1.0, 1.0, alpha],
+        BlendMode::Additive,
+        0.0,
+        BUTTON_TEX_V_BOTTOM,
+    );
+}
+
+fn emit_ui_panel_button_strip(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    alpha: f32,
+    blend_mode: BlendMode,
+) {
+    const BUTTON_TEX_WIDTH: f32 = 128.0;
+    const BUTTON_CAP_WIDTH: f32 = 4.0;
+    const BUTTON_TEX_V_BOTTOM: f32 = 0.6875;
+
+    if let Some((left, right, top, bottom)) = tex_coords {
+        let v_bottom = if bottom > 0.9 {
+            BUTTON_TEX_V_BOTTOM
+        } else {
+            bottom
+        };
+        push_skinned_button_quad(
+            batch,
+            bounds,
+            tex_path,
+            (left, right, top, v_bottom),
+            [1.0, 1.0, 1.0, alpha],
+            blend_mode,
+        );
+        return;
+    }
+
+    batch.push_three_slice_h_path_blend(
+        bounds,
+        BUTTON_CAP_WIDTH,
+        BUTTON_CAP_WIDTH,
+        tex_path,
+        BUTTON_TEX_WIDTH,
+        [1.0, 1.0, 1.0, alpha],
+        blend_mode,
+        0.0,
+        BUTTON_TEX_V_BOTTOM,
+    );
+}
+
+fn is_ui_panel_button_atlas(path: &str) -> bool {
+    let lower = path.replace('\\', "/").to_ascii_lowercase();
+    lower.ends_with("interface/buttons/ui-panel-button-up")
+        || lower.ends_with("interface/buttons/ui-panel-button-highlight")
 }
 
 /// Build quads for an EditBox widget.

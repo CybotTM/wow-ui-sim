@@ -354,7 +354,8 @@ impl App {
             emit_button_highlight(quads, bounds, f, f.alpha);
         }
 
-        if let Some(&ht_id) = f.children_keys.get("HighlightTexture")
+        if !is_pressed
+            && let Some(&ht_id) = f.children_keys.get("HighlightTexture")
             && let Some(ht) = registry.get(ht_id)
         {
             let Some(ht_rect) = ht.layout_rect else {

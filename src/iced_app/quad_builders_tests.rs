@@ -55,19 +55,19 @@ fn button_highlight_texture_is_inactive_when_parent_not_hovered() {
 }
 
 #[test]
-fn button_highlight_texture_renders_when_parent_hovered() {
-    let registry = registry_with_button_highlight(false);
-    let frame = button_highlight_frame(&registry, Some(1));
-
-    assert!(!is_inactive_button_highlight_texture(&frame));
-}
-
-#[test]
 fn locked_button_highlight_texture_renders_without_hover() {
     let registry = registry_with_button_highlight(true);
     let frame = button_highlight_frame(&registry, None);
 
     assert!(!is_inactive_button_highlight_texture(&frame));
+}
+
+#[test]
+fn hovered_button_highlight_texture_stays_out_of_generic_pass() {
+    let registry = registry_with_button_highlight(false);
+    let frame = button_highlight_frame(&registry, Some(1));
+
+    assert!(is_inactive_button_highlight_texture(&frame));
 }
 
 #[test]
