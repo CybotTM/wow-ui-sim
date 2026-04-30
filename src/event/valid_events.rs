@@ -25,14 +25,9 @@ use super::valid_events_c::EVENTS_C;
 /// event lists predate the events.yaml dataset (which is mainline-only), so
 /// rejecting unknown events would break legitimate WotLK/MoP code paths. The
 /// retail profile keeps strict validation against the generated event tables.
-#[cfg(feature = "client-wrath")]
+#[cfg(any(feature = "client-wrath", feature = "client-mists"))]
 pub fn is_registerable_event(name: &str) -> bool {
     crate::wrath::is_registerable_event(name)
-}
-
-#[cfg(feature = "client-mists")]
-pub fn is_registerable_event(name: &str) -> bool {
-    !name.is_empty()
 }
 
 #[cfg(feature = "client-retail")]

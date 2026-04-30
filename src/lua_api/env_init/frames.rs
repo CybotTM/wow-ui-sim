@@ -47,7 +47,7 @@ pub(super) fn init_frame_metatable(lua: &mut rilua::Lua) -> crate::Result<()> {
     text_attribute_event::register_all(state, frame_mt_ref)?;
     button_anchor_hierarchy::register_all(state, frame_mt_ref)?;
     widgets::register_all(state, frame_mt_ref)?;
-    #[cfg(feature = "client-wrath")]
+    #[cfg(any(feature = "client-wrath", feature = "client-mists"))]
     crate::wrath::frame_methods::register_all(state, frame_mt_ref)?;
 
     // Replace the self-referencing `__index` with a shallow clone that omits
