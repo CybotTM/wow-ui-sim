@@ -354,11 +354,9 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
         out,
         "pub fn get_item(id: u32) -> Option<&'static ItemInfo> {{"
     )?;
-    writeln!(out, "    ITEM_DB")?;
-    writeln!(out, "        .get(&id)")?;
     writeln!(
         out,
-        "        .or_else(|| crate::profession_item_overrides::get_item(id))"
+        "    crate::profession_item_overrides::get_item(id).or_else(|| ITEM_DB.get(&id))"
     )?;
     writeln!(out, "}}")?;
     Ok(())

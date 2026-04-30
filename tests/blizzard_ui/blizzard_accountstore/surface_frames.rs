@@ -21,6 +21,27 @@
 //! for the PLAN-named keys (`Inset`, `ItemDisplay`, `Footer`) — the
 //! mismatches surface as tripwires that flip if Blizzard ever renames
 //! the children to match the PLAN shape.
+//!
+//! Spec/source mismatch finding (PLAN.md task for
+//! `FullscreenAccountStoreContainer.LeaveButton`): the plan named the
+//! parentKey child as `LeaveButton` inheriting `MagicButtonTemplate`,
+//! but `Blizzard_AccountStore.xml:167` declares it as
+//! `parentKey="LeaveStoreButton"` inheriting
+//! `BigRedThreeSliceButtonTemplate` (which itself inherits
+//! `ThreeSliceButtonTemplate`, defined at
+//! `Blizzard_SharedXML/Shared/Button/ThreeSliceButtonTemplate.xml:4`).
+//! Both halves of the spec mismatch the source: the parentKey is
+//! `LeaveStoreButton` not `LeaveButton`, and the inherited template is
+//! a three-slice red button (red gradient, 441x128 atlas-driven
+//! visual) not a `MagicButtonTemplate` (a `UIPanelButtonTemplate`
+//! variant with `MagicButton_OnLoad`). The
+//! `fullscreen_account_store_container_publishes_expected_button_with_three_slice_inheritance`
+//! test pins what actually exists (the container as a table, the
+//! `LeaveStoreButton` parentKey, the structural fingerprint of the
+//! three-slice template — `Left` / `Right` / `Center` textures plus
+//! `Controller` frame — that distinguishes it from `MagicButtonTemplate`)
+//! plus a positive nil assertion on `LeaveButton` as the spec/source
+//! mismatch tripwire.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
@@ -138,5 +159,129 @@ fn account_store_frame_publishes_expected_parentkey_children() {
                  re-pin against the new parentKey set."
             );
         }
+    });
+}
+
+const FULLSCREEN_CONTAINER_NAME: &str = "FullscreenAccountStoreContainer";
+const ACTUAL_LEAVE_BUTTON_KEY: &str = "LeaveStoreButton";
+const PLAN_NAMED_LEAVE_BUTTON_KEY: &str = "LeaveButton";
+
+const THREE_SLICE_PARENTKEY_FINGERPRINT: &[(&str, &str)] = &[
+    (
+        "Left",
+        "Texture parentKey on BACKGROUND layer (ThreeSliceButtonTemplate.xml:23)",
+    ),
+    (
+        "Right",
+        "Texture parentKey on BACKGROUND layer (ThreeSliceButtonTemplate.xml:28)",
+    ),
+    (
+        "Center",
+        "Texture parentKey with horizTile=true on BACKGROUND layer (ThreeSliceButtonTemplate.xml:33)",
+    ),
+    (
+        "Controller",
+        "Frame parentKey with ButtonControllerMixin (ThreeSliceButtonTemplate.xml:42)",
+    ),
+];
+
+#[test]
+fn fullscreen_account_store_container_publishes_expected_button_with_three_slice_inheritance() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let container_type: String = env
+            .eval(&format!("return type(_G[{FULLSCREEN_CONTAINER_NAME:?}])"))
+            .expect("FullscreenAccountStoreContainer global probe must run cleanly");
+
+        assert_eq!(
+            container_type, "table",
+            "Expected `_G[{FULLSCREEN_CONTAINER_NAME:?}]` to be a table after `{ROOT}` loads, \
+             got `{container_type}`. The frame is declared at `Blizzard_AccountStore.xml:149` \
+             with `name=\"FullscreenAccountStoreContainer\"`, `parent=\"UIParent\"`, \
+             `mixin=\"FullscreenAccountStoreContainerMixin\"`, and `setAllPoints=true` via \
+             TOPLEFT/BOTTOMRIGHT anchors. It hosts the fullscreen-mode chrome that wraps \
+             `AccountStoreFrame` when the lane runs in WoW Labs / Plunderstorm fullscreen mode \
+             (the `SetFullscreenMode(true)` path at `Blizzard_AccountStore.lua:52-53` reparents \
+             AccountStoreFrame onto this container)."
+        );
+
+        let leave_button_type: String = env
+            .eval(&format!(
+                "return type(_G[{FULLSCREEN_CONTAINER_NAME:?}][{ACTUAL_LEAVE_BUTTON_KEY:?}])"
+            ))
+            .expect("FullscreenAccountStoreContainer.LeaveStoreButton probe must run cleanly");
+
+        assert_eq!(
+            leave_button_type, "table",
+            "Expected `FullscreenAccountStoreContainer.{ACTUAL_LEAVE_BUTTON_KEY}` to be a table \
+             after `{ROOT}` loads, got `{leave_button_type}`. The button is declared at \
+             `Blizzard_AccountStore.xml:167` as a `<Button parentKey=\"LeaveStoreButton\" \
+             inherits=\"BigRedThreeSliceButtonTemplate\" \
+             mixin=\"FullscreenLeaveAccountStoreButtonMixin\">`, anchored BOTTOM y=32 with \
+             height 32. A nil reading means either the XML element was dropped or the \
+             parentKey-sync routing broke — the user would have no way to leave the account \
+             store fullscreen mode and return to the WoW Labs match-details panel."
+        );
+
+        let is_button: bool = env
+            .eval(&format!(
+                "return _G[{FULLSCREEN_CONTAINER_NAME:?}][{ACTUAL_LEAVE_BUTTON_KEY:?}]:IsObjectType(\"Button\")"
+            ))
+            .expect("`IsObjectType(\"Button\")` probe must run cleanly");
+
+        assert!(
+            is_button,
+            "Expected `FullscreenAccountStoreContainer.{ACTUAL_LEAVE_BUTTON_KEY}:IsObjectType(\"Button\")` \
+             to return true after `{ROOT}` loads. The XML declares the element as `<Button>` \
+             (not `<Frame>`), so the simulator's widget-type registration MUST land in the \
+             Button branch. A false reading means the XML-to-widget conversion misrouted the \
+             element type — every Button-specific method (`SetText`, `Enable`, `Disable`, \
+             `Click`, etc.) would surface a missing-method error."
+        );
+
+        for (parent_key, defining_role) in THREE_SLICE_PARENTKEY_FINGERPRINT {
+            let child_type: String = env
+                .eval(&format!(
+                    "return type(_G[{FULLSCREEN_CONTAINER_NAME:?}][{ACTUAL_LEAVE_BUTTON_KEY:?}][{parent_key:?}])"
+                ))
+                .unwrap_or_else(|error| {
+                    panic!(
+                        "failed to probe `LeaveStoreButton.{parent_key}` (three-slice fingerprint): {error}"
+                    )
+                });
+
+            assert_eq!(
+                child_type, "table",
+                "Expected `FullscreenAccountStoreContainer.{ACTUAL_LEAVE_BUTTON_KEY}.{parent_key}` \
+                 to be a table after `{ROOT}` loads (`{defining_role}`), got `{child_type}`. \
+                 The four parentKeys `Left` / `Right` / `Center` / `Controller` are the \
+                 structural fingerprint of `ThreeSliceButtonTemplate` (the parent template that \
+                 `BigRedThreeSliceButtonTemplate` inherits via \
+                 `Blizzard_SharedXML/Shared/Button/ThreeSliceButtonTemplate.xml:61`). PLAN.md \
+                 names `MagicButtonTemplate` as the inherited template, but \
+                 `MagicButtonTemplate` (declared at `SharedUIPanelTemplates.xml:722`, \
+                 inheriting `UIPanelButtonTemplate`) does not declare any of these four \
+                 parentKeys — its visual structure comes from `MagicButton_OnLoad` setting up \
+                 `UI-Panel-Button-*` stretched textures, not three-slice atlases. So all four \
+                 fingerprint assertions present and accounted for IS the proof that the actual \
+                 inheritance is `BigRedThreeSliceButtonTemplate`, NOT `MagicButtonTemplate`."
+            );
+        }
+
+        let plan_named_button_type: String = env
+            .eval(&format!(
+                "return type(_G[{FULLSCREEN_CONTAINER_NAME:?}][{PLAN_NAMED_LEAVE_BUTTON_KEY:?}])"
+            ))
+            .expect("FullscreenAccountStoreContainer.LeaveButton absence probe must run cleanly");
+
+        assert_eq!(
+            plan_named_button_type, "nil",
+            "Expected `FullscreenAccountStoreContainer.{PLAN_NAMED_LEAVE_BUTTON_KEY}` to be nil \
+             after `{ROOT}` loads, got `{plan_named_button_type}`. PLAN.md's spec names \
+             `LeaveButton` as the parentKey, but the actual XML at \
+             `Blizzard_AccountStore.xml:167` uses `parentKey=\"LeaveStoreButton\"` — the \
+             PLAN-named key is genuinely absent. This positive nil assertion is the spec/source \
+             mismatch tripwire: if Blizzard ever renames the button to match the PLAN shape, \
+             this test flips and forces a re-pin against the new parentKey."
+        );
     });
 }

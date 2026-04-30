@@ -399,9 +399,7 @@ pub static ITEM_DB: phf::Map<u32, ItemInfo> = ::phf::Map {
 };
 
 pub fn get_item(id: u32) -> Option<&'static ItemInfo> {
-    ITEM_DB
-        .get(&id)
-        .or_else(|| crate::profession_item_overrides::get_item(id))
+    crate::profession_item_overrides::get_item(id).or_else(|| ITEM_DB.get(&id))
 }
 
 #[cfg(test)]
