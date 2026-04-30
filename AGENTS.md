@@ -488,4 +488,4 @@ Standard WoW button textures in `Interface/Buttons/`:
 - `UI-Panel-Button-Disabled` - Disabled state
 
 
-please be nice, we are working in parallel, no git stash or git revert
+please be nice, we are working in parallel, no git stash or git revert on the main tree, ok for worktrees
