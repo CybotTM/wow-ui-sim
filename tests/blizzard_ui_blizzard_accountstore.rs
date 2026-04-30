@@ -51,3 +51,6 @@ mod behavior_currency_warning;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_storefront_state_event.rs"]
 mod behavior_storefront_state_event;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_transaction_error.rs"]
+mod behavior_transaction_error;
