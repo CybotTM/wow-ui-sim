@@ -127,6 +127,17 @@ fn split_metadata_list(value: &str) -> Vec<String> {
     }
 }
 
+/// Resolve the `[Family]` TOC substitution per active client profile. Retail
+/// vendors ship a `Mainline/` subdir; mists vendors ship `Classic/`. Wrath
+/// FrameXML doesn't use the substitution, so the value there doesn't matter.
+fn family_subdir() -> &'static str {
+    match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => "Mainline",
+        crate::client_profile::ClientProfile::Wrath
+        | crate::client_profile::ClientProfile::Mists => "Classic",
+    }
+}
+
 /// Process a non-metadata, non-comment TOC line as a file path entry.
 fn push_file_entry(
     files: &mut Vec<PathBuf>,
@@ -140,7 +151,7 @@ fn push_file_entry(
         return;
     }
     let line = line.replace("[TextLocale]", "enUS");
-    let line = line.replace("[Family]", "Mainline");
+    let line = line.replace("[Family]", family_subdir());
     let line = line.replace("[Game]", "Standard");
     let file_path = strip_annotations(&line).replace('\\', "/");
     if !file_path.is_empty() {
