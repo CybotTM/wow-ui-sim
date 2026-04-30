@@ -34,13 +34,38 @@ pub fn run_lua_errors(
 
     restore_stderr(saved_stderr);
 
-    if let Some(code) = exec_lua
-        && let Err(e) = env.exec_maybe_secure(code, exec_lua_secure)
-    {
-        eprintln!("[exec-lua] error: {e}");
-    }
-    // Restore stdout so println goes to real stdout (not stderr redirect)
+    // Restore stdout BEFORE exec-lua so user `print(...)` lands on the
+    // real stdout, not the stderr-redirect that startup logging used.
+    // The trailing JSON also writes to real stdout — that's intentional;
+    // a post-startup probe (`--exec-lua 'print(state)'`) and the error
+    // baseline both go to stdout, with the JSON last.
     restore_stdout(saved_stdout);
+
+    if let Some(code) = exec_lua {
+        // Re-route `print` to `io.stdout:write` for the duration of the
+        // probe. By the time we get here, Blizzard_PrintHandler.lua has
+        // overwritten the global `print` to send into chat-frame plumbing
+        // (and is set up before our shared_bootstrap could reroute) — so
+        // user `print(...)` from --exec-lua otherwise vanishes. See
+        // PLAN.classic.md Phase 6.5 for the investigation.
+        // Trailing flush: libc stdout is fully-buffered when stdout is a
+        // file (not a TTY); without an explicit flush the print output
+        // would land AFTER the JSON instead of before it.
+        let probe_code = format!(
+            "print = function(...) \
+                local n = select('#', ...) \
+                for i = 1, n do \
+                    if i > 1 then io.stdout:write('\\t') end \
+                    io.stdout:write(tostring((select(i, ...)))) \
+                end \
+                io.stdout:write('\\n') \
+            end\n{code}\n\
+            if io and io.stdout and io.stdout.flush then io.stdout:flush() end"
+        );
+        if let Err(e) = env.exec_maybe_secure(&probe_code, exec_lua_secure) {
+            eprintln!("[exec-lua] error: {e}");
+        }
+    }
 
     print_rehash_stats();
     print_intern_stats();
