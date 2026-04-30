@@ -196,3 +196,35 @@ fn editbox_ime_composition_getter_reflects_runtime_state() {
         "IsInIMECompositionMode should reflect the backing editbox runtime state"
     );
 }
+
+#[test]
+fn editbox_insert_refreshes_stripped_render_text() {
+    let env = env();
+    env.eval::<()>(
+        r#"
+        local eb = CreateFrame("EditBox", "StubFamilyInsertedText", UIParent)
+        eb:SetText("")
+        eb:Insert("Visible")
+        "#,
+    )
+    .unwrap();
+
+    let frame_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("StubFamilyInsertedText")
+        .expect("StubFamilyInsertedText should exist");
+    let state = env.state().borrow();
+    let frame = state
+        .widgets
+        .get(frame_id)
+        .expect("StubFamilyInsertedText frame should exist");
+
+    assert_eq!(frame.text.as_deref(), Some("Visible"));
+    assert_eq!(
+        frame.text_stripped.as_deref(),
+        Some("Visible"),
+        "Insert should keep renderer-facing stripped text in sync with typed text"
+    );
+}

@@ -668,6 +668,8 @@ pub(super) fn insert(state: &mut LuaState) -> LuaResult<u32> {
         let current = f.text.get_or_insert_with(String::new);
         let insert_at = pos.min(current.len());
         current.insert_str(insert_at, &text);
+        f.text_stripped = Some(crate::render::strip_wow_markup(current));
+        f.text_segments.clear();
         f.editbox_cursor_pos = (insert_at + text.len()) as i32;
     }
     Ok(0)
