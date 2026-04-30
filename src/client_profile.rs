@@ -1,4 +1,4 @@
-//! WoW client profile selection — retail, wrath, mists.
+//! WoW client profile selection — retail, wrath, mists, era.
 //!
 //! Exactly one `client-*` cargo feature must be enabled. The active profile
 //! determines which `Interface/BlizzardUI/<Profile>/` subdir the addon loader
@@ -11,6 +11,7 @@ pub enum ClientProfile {
     Retail,
     Wrath,
     Mists,
+    Era,
 }
 
 impl ClientProfile {
@@ -19,6 +20,7 @@ impl ClientProfile {
             ClientProfile::Retail => "Retail",
             ClientProfile::Wrath => "Wrath",
             ClientProfile::Mists => "Mists",
+            ClientProfile::Era => "Era",
         }
     }
 }
@@ -26,6 +28,7 @@ impl ClientProfile {
 #[cfg(all(
     not(feature = "client-wrath"),
     not(feature = "client-mists"),
+    not(feature = "client-era"),
     feature = "client-retail",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Retail;
@@ -33,6 +36,7 @@ pub const ACTIVE: ClientProfile = ClientProfile::Retail;
 #[cfg(all(
     not(feature = "client-retail"),
     not(feature = "client-mists"),
+    not(feature = "client-era"),
     feature = "client-wrath",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Wrath;
@@ -40,23 +44,40 @@ pub const ACTIVE: ClientProfile = ClientProfile::Wrath;
 #[cfg(all(
     not(feature = "client-retail"),
     not(feature = "client-wrath"),
+    not(feature = "client-era"),
     feature = "client-mists",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Mists;
 
+#[cfg(all(
+    not(feature = "client-retail"),
+    not(feature = "client-wrath"),
+    not(feature = "client-mists"),
+    feature = "client-era",
+))]
+pub const ACTIVE: ClientProfile = ClientProfile::Era;
+
 #[cfg(any(
     all(feature = "client-retail", feature = "client-wrath"),
     all(feature = "client-retail", feature = "client-mists"),
+    all(feature = "client-retail", feature = "client-era"),
     all(feature = "client-wrath", feature = "client-mists"),
+    all(feature = "client-wrath", feature = "client-era"),
+    all(feature = "client-mists", feature = "client-era"),
 ))]
-compile_error!("Exactly one of client-retail, client-wrath, client-mists must be enabled");
+compile_error!(
+    "Exactly one of client-retail, client-wrath, client-mists, client-era must be enabled"
+);
 
 #[cfg(not(any(
     feature = "client-retail",
     feature = "client-wrath",
     feature = "client-mists",
+    feature = "client-era",
 )))]
-compile_error!("Exactly one of client-retail, client-wrath, client-mists must be enabled");
+compile_error!(
+    "Exactly one of client-retail, client-wrath, client-mists, client-era must be enabled"
+);
 
 /// Path to `Interface/BlizzardUI/<Profile>` relative to the repo root.
 pub fn blizzard_ui_root() -> PathBuf {

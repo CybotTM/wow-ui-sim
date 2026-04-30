@@ -55,6 +55,7 @@ fn is_allowed_game_type(line: &str) -> bool {
         crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
         crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
         crate::client_profile::ClientProfile::Mists => &["mists", "mists_classic", "classic"],
+        crate::client_profile::ClientProfile::Era => &["vanilla", "classic_era", "classic"],
     };
     types.split(',').any(|t| allowed.contains(&t.trim()))
 }
@@ -139,7 +140,8 @@ fn family_subdir() -> &'static str {
     match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Retail => "Mainline",
         crate::client_profile::ClientProfile::Wrath
-        | crate::client_profile::ClientProfile::Mists => "Classic",
+        | crate::client_profile::ClientProfile::Mists
+        | crate::client_profile::ClientProfile::Era => "Classic",
     }
 }
 
@@ -319,6 +321,7 @@ impl TocFile {
             crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
             crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
             crate::client_profile::ClientProfile::Mists => &["mists", "mists_classic", "classic"],
+            crate::client_profile::ClientProfile::Era => &["vanilla", "classic_era", "classic"],
         };
         self.metadata
             .get("AllowLoadGameType")

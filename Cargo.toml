@@ -99,6 +99,7 @@ intern-stats = ["rilua/intern-stats"]
 client-retail = []
 client-wrath = []
 client-mists = []
+client-era = []
 
 [profile.release]
 lto = false
