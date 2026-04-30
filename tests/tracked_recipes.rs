@@ -68,9 +68,7 @@ fn set_recipe_tracked_fires_update_event_only_on_real_change() {
         .expect("read event count");
     assert_eq!(count, 2, "only real transitions fire the event");
 
-    let last_id: i64 = env
-        .eval("return __recipe_events[2].id")
-        .expect("event id");
+    let last_id: i64 = env.eval("return __recipe_events[2].id").expect("event id");
     let last_tracked: bool = env
         .eval("return __recipe_events[2].tracked")
         .expect("event tracked flag");

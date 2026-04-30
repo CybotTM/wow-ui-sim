@@ -50,16 +50,9 @@ pub(super) fn craft_recipe(state: &mut LuaState, recipe_id: i32, count: i32) -> 
             return false;
         };
 
-        consume_reagents(
-            &mut sim.bag_items,
-            &plan.reagent_deltas,
-            &mut affected_bags,
-        );
-        let output_bag = add_output_item(
-            &mut sim.bag_items,
-            plan.output_item_id,
-            plan.output_count,
-        );
+        consume_reagents(&mut sim.bag_items, &plan.reagent_deltas, &mut affected_bags);
+        let output_bag =
+            add_output_item(&mut sim.bag_items, plan.output_item_id, plan.output_count);
         affected_bags.insert(output_bag);
     }
 
@@ -126,11 +119,7 @@ fn consume_item_stacks(
     }
 }
 
-fn add_output_item(
-    bag_items: &mut HashMap<(i32, i32), BagItem>,
-    item_id: u32,
-    count: i32,
-) -> i32 {
+fn add_output_item(bag_items: &mut HashMap<(i32, i32), BagItem>, item_id: u32, count: i32) -> i32 {
     if let Some((key, slot)) = bag_items
         .iter_mut()
         .find(|(_, slot)| slot.item_id == item_id)
