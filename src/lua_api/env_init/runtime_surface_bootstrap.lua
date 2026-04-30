@@ -1,6 +1,14 @@
 local function __wow_noop()
 end
 
+-- DropCursorMoney(frame) drops the cursor's money stack onto the target frame
+-- (a CoinPickupFrame) in real WoW. The simulator does not model cursor-money
+-- drops, but Blizzard XML wires this as an OnLoad handler.
+if DropCursorMoney == nil then
+  function DropCursorMoney(_frame)
+  end
+end
+
 -- GetInventorySlotInfo is registered from Rust
 -- (src/lua_api/globals/inventory_slot.rs). Returns the canonical
 -- (slotId, textureFileID, checkRelic) triple; case-insensitive on the
