@@ -34,11 +34,6 @@ if CreateWorldMapArrowFrame == nil then
   end
 end
 
-if DropCursorMoney == nil then
-  function DropCursorMoney()
-  end
-end
-
 if FCF_DockUpdate == nil then
   function FCF_DockUpdate()
   end

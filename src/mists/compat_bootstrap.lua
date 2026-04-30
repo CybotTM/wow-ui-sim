@@ -10,10 +10,6 @@
 
 -- ─── Pre-Cata leftover globals that mists kept but retail removed ────────────
 
-if rawget(_G, "DropCursorMoney") == nil then
-  function DropCursorMoney() end
-end
-
 if rawget(_G, "FillLocalizedClassList") == nil then
   function FillLocalizedClassList(t) return t end
 end

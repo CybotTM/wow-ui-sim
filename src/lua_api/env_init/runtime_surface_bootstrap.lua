@@ -307,6 +307,18 @@ if GetCursorMoney == nil then
   end
 end
 
+-- DropCursorMoney(frame) drops the cursor's money stack onto the target frame
+-- (a CoinPickupFrame) in real WoW. It's wired up directly as the
+-- `<OnLoad function="DropCursorMoney"/>` handler of CoinPickupFrame in
+-- Blizzard_FrameXML/Mainline/CoinPickupFrame.xml, so nil here triggers
+-- "attempt to call global 'DropCursorMoney' (a nil value)" during
+-- CoinPickupFrame's OnLoad. No-op stub: the simulator doesn't model
+-- cursor-money drops anyway.
+if DropCursorMoney == nil then
+  function DropCursorMoney(_frame)
+  end
+end
+
 if ActionButtonUtil == nil then
   ActionButtonUtil = {}
 end
