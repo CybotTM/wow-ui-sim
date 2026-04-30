@@ -1,0 +1,89 @@
+# CASC asset cache
+
+The simulator reads textures and fonts from a live WoW install via three stacked caches. Each layer has a distinct purpose, lifetime, and on-disk location; this page explains what they cache, how they're wired together, and the measured cost of hits and misses.
+
+## Cache layers
+
+| Layer | Stores | Location | Built / refreshed by | Lifetime |
+|---|---|---|---|---|
+| FDID resolution | `fdid → (content_key, encoding_key)` | `<shared>/data/casc/resolution.sqlite` (~85 MB, ~1.87 M rows) | `casc_refresh` in the game-engine repo, validated against `root.bin`/`encoding.bin` mtimes | Persistent across processes; rebuilt when WoW patches |
+| BLP byte cache | Extracted BLP files keyed by listfile path | `~/.cache/wow-ui-sim/casc-extract/<Interface/...>.blp` | `asset_resolver::ensure_cached` on first miss | Persistent across processes; never invalidated automatically |
+| In-memory texture cache | `TextureData` (decoded RGBA) keyed by normalised wow path | `TextureManager::cache` | `TextureManager::load` on first hit | Per-process |
+
+`<shared>` resolves to `$GAME_ENGINE_SHARED_ROOT`, which `src/texture/resolve.rs::casc_enabled` auto-sets to `~/Projects/world-of-osso/game-engine` if that directory exists. The two projects share **only** the resolution sqlite (cheap to share, expensive to build); they do not share extracted BLP bytes.
+
+Without the resolution sqlite, every cold start would parse `root.bin` (63 MB) + `encoding.bin` (185 MB) to build the FDID → encoding-key chain. With it, that step becomes a single `Connection::open` plus per-FDID sqlite SELECTs.
+
+## Lookup flow
+
+```
+TextureManager::load(wow_path)
+  ├─ in-memory hit?         → return TextureData     [≈ 2 µs]
+  ├─ resolve_path(normalised)
+  │    ├─ addon dir?        → file path
+  │    ├─ try_casc_resolve
+  │    │    ├─ asset_resolver::lookup_path           (listfile, multiple ext candidates)
+  │    │    ├─ out_path.exists()?                    [BLP cache hit → return path]
+  │    │    └─ asset_resolver::ensure_cached(fdid)
+  │    │         ├─ first call per process: init CASC
+  │    │         │    ├─ Installation::open + initialize  (load 45 .idx + open .data archives)
+  │    │         │    └─ CascResolutionCache::open        (sqlite, freshness-checked)
+  │    │         ├─ resolve_fdid(fdid)               (sqlite SELECT → encoding key)
+  │    │         ├─ read_file_by_encoding_key        (archive read + BLTE decompress)
+  │    │         └─ write to out_path                (BLP cache populated)
+  │    └─ extracted-Interface fallback under <wow>/_retail_/BlizzardInterfaceArt
+  └─ load_texture_file(path) + insert in-memory cache
+```
+
+`Installation::initialize` does **not** parse `root.bin` or `encoding.bin` — that work is permanently delegated to the resolution sqlite. The expensive runtime steps that remain are the per-process CASC init (indices + archives) and the per-file BLTE decompress.
+
+## Measured costs
+
+Numbers below are from `examples/casc_bench.rs`, run on the dev workstation against `/syncthing/World of Warcraft` with `target/release` and the resolution sqlite warm:
+
+```
+probe                                              CASC extract  disk cache  mem cache
+---------------------------------------------------------------------------------------
+UI-Panel-Button-Up      (128×32, includes init)      302.17 ms      1.16 ms    1.7 µs
+UI-DialogBox-Background (64×64)                        1.84 ms    701.8 µs    2.4 µs
+INV_Misc_QuestionMark   (64×64)                       11.15 ms      1.14 ms    1.9 µs
+UI-Panel-MinimizeButton (32×32)                        1.62 ms    904.2 µs    1.9 µs
+WorldMap/GEAR_64GREY    (64×64)                       13.40 ms      1.15 ms    2.3 µs
+UI-Tooltip-Background   (64×64)                       13.23 ms      1.25 ms    2.4 µs
+UI-Backpack-EmptySlot   (64×64)                       18.81 ms      1.01 ms    1.1 µs
+UI-StatusBar            (64×8)                         8.77 ms      1.03 ms    1.8 µs
+---------------------------------------------------------------------------------------
+average (incl. init)                                   46.37 ms      1.04 ms    1.9 µs
+average (excl. first)                                   9.83 ms      1.06 ms    2.0 µs
+```
+
+Breakdown by layer:
+
+- **CASC init** (one-time per process, first extract only): ~300 ms. Loads 45 `.idx` files, opens 190 GB of `.data` archives via mmap, opens the resolution sqlite. Independent of the asset being requested.
+- **CASC per-file extract** (steady state): ~10 ms typical. Sqlite SELECT (sub-µs) + index lookup + archive read + BLTE decompress + disk write.
+- **BLP cache hit** (file present, fresh `TextureManager`): ~1 ms. Listfile lookup + `out_path.exists()` + read + image-blp decode.
+- **In-memory hit**: ~2 µs. HashMap lookup.
+
+The BLP byte cache is roughly **10× faster** than re-extracting steady-state, and ~300× faster than the very first asset of the process. Once populated (`~/.cache/wow-ui-sim/casc-extract/`, currently 672 MB / 1747 files), the simulator can avoid CASC init entirely for any startup that touches only assets already on disk.
+
+## Failure modes
+
+- **Resolution sqlite missing or stale**: `CascResolutionCache::open` returns `Err`, `init_casc` fails, every CASC lookup misses. Detected at startup via `CASC resolution cache: N entries` log line — its absence means the sqlite did not load. Fix: rebuild via `casc_refresh` in the game-engine repo.
+- **`GAME_ENGINE_SHARED_ROOT` set before `casc_enabled` runs**: `asset-resolver`'s `OnceLock` initialises with whatever value was visible at first call. The auto-set only fires if the env var is unset, so an explicit override always wins; an empty/wrong override pins the resolver to a directory without the sqlite.
+- **Case-variant duplicates**: `out_path` uses the case returned by the listfile lookup. If a caller passes a non-canonical case to `lookup_path`, the BLP can land under `interface/...` or `INTERFACE/...` instead of `Interface/...`. The cache currently has 4 such stragglers out of 1747 files; harmless but wasteful.
+- **Listfile/CASC drift**: when the live archives have GC'd a file the encoding manifest still references, CASC extract fails with "missing resolution entry" or "missing archive location". The loader writes a `.missing` sentinel and falls back to `<wow>/_retail_/BlizzardInterfaceArt/` for the next request.
+
+## Sources
+
+- [`docs/specs/casc-loading.md`](../../specs/casc-loading.md) — behavioral contract for CASC loading
+- `src/texture/resolve.rs` — `casc_enabled`, `try_casc_resolve`, `casc_extract_dir`
+- `src/texture.rs` — `TextureManager::load` and the in-memory cache
+- `asset-resolver/src/casc_resolver.rs` — `init_casc`, `extract_fdid_to_path`, `Installation::initialize`
+- `asset-resolver/src/casc_cache.rs` — `CascResolutionCache::open`, freshness check, `resolve_fdid`
+- `asset-resolver/src/paths.rs` — shared-root resolution and `remap_to_shared_data_path`
+- `examples/casc_bench.rs` — reproduction harness for the timing table
+
+## See Also
+
+- [[texture-atlas]] — `TextureManager` structure, BLP/PNG/WebP support, atlas database
+- [[rendering-pipeline]] — font system and downstream consumers of CASC assets

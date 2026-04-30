@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-30] ingest | CASC asset cache layers and measured costs
+
+Created `systems/casc-asset-cache.md` after measuring the three stacked caches end-to-end with `examples/casc_bench.rs`. The doc covers (a) the resolution sqlite shared with the game-engine repo via `GAME_ENGINE_SHARED_ROOT`, (b) the per-listfile-path BLP byte cache at `~/.cache/wow-ui-sim/casc-extract/`, and (c) the per-process `TextureManager` in-memory cache, with concrete timings (~300 ms one-time CASC init, ~10 ms steady-state extract, ~1 ms disk hit, ~2 µs mem hit). Records that `Installation::initialize` no longer parses `root.bin`/`encoding.bin` — that work is permanently delegated to the resolution sqlite — so the per-extract cost stays in the millisecond range.
+
 ## [2026-04-29] ingest | Backpack body renders gray, not textured
 
 Created `investigations/backpack-background-texture.md`. User showed a retail
