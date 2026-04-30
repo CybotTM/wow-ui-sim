@@ -18,3 +18,6 @@ mod surface_frames;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/surface_mixins.rs"]
 mod surface_mixins;
+
+#[path = "blizzard_ui/blizzard_accessibilitytemplates/behavior_text_size_manager.rs"]
+mod behavior_text_size_manager;
