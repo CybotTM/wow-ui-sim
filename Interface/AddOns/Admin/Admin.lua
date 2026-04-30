@@ -87,6 +87,9 @@ local function UpdateTrackedRecipeDB(recipeID, tracked, isRecrafting)
 end
 
 local function ReplayTrackedRecipeBucket(bucket, isRecrafting)
+    if not (C_TradeSkillUI and C_TradeSkillUI.SetRecipeTracked) then
+        return
+    end
     for i = 1, #bucket do
         C_TradeSkillUI.SetRecipeTracked(bucket[i], true, isRecrafting)
     end
