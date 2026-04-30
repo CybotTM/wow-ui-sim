@@ -612,7 +612,9 @@ fn test_c_equipment_set_create_appears_in_list() {
     assert_eq!(len, 1);
 
     let name: String = env
-        .eval("return (C_EquipmentSet.GetEquipmentSetInfo(C_EquipmentSet.GetEquipmentSetID('Tank')))")
+        .eval(
+            "return (C_EquipmentSet.GetEquipmentSetInfo(C_EquipmentSet.GetEquipmentSetID('Tank')))",
+        )
         .unwrap();
     assert_eq!(name, "Tank");
 }
@@ -719,7 +721,10 @@ fn test_c_equipment_set_ignored_slots() {
             "#,
         )
         .unwrap();
-    assert!(mask_present, "SaveEquipmentSet must persist the pending ignore mask");
+    assert!(
+        mask_present,
+        "SaveEquipmentSet must persist the pending ignore mask"
+    );
 }
 
 #[test]

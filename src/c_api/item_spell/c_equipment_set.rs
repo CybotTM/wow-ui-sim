@@ -104,9 +104,7 @@ fn fire_event(state: &mut LuaState, event_name: &'static str, args: Vec<Val>) ->
     Ok(())
 }
 
-fn snapshot_equipped_items(
-    state: &LuaState,
-) -> (HashMap<i32, u32>, HashMap<i32, i64>) {
+fn snapshot_equipped_items(state: &LuaState) -> (HashMap<i32, u32>, HashMap<i32, i64>) {
     let mut item_ids = HashMap::new();
     let mut locations = HashMap::new();
     let Ok(sim) = borrow_state(state) else {
@@ -248,9 +246,7 @@ fn c_use_equipment_set(state: &mut LuaState) -> LuaResult<u32> {
     let set_id = i32::from_stack(state, 1)?;
     let exists = find_set_index_by_id(state, set_id).is_some();
     if exists {
-        borrow_state_mut(state)?
-            .equipment_manager
-            .last_used_set_id = Some(set_id);
+        borrow_state_mut(state)?.equipment_manager.last_used_set_id = Some(set_id);
         fire_event(state, EQUIPMENT_SWAP_PENDING, Vec::new())?;
         fire_event(
             state,
@@ -332,12 +328,7 @@ fn c_get_equipment_set_info(state: &mut LuaState) -> LuaResult<u32> {
     let set_id = i32::from_stack(state, 1)?;
     let info = {
         let sim = borrow_state(state)?;
-        let Some(set) = sim
-            .equipment_manager
-            .sets
-            .iter()
-            .find(|s| s.id == set_id)
-        else {
+        let Some(set) = sim.equipment_manager.sets.iter().find(|s| s.id == set_id) else {
             return Ok(0);
         };
         let is_equipped = sim.equipment_manager.last_used_set_id == Some(set_id);

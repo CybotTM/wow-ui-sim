@@ -315,14 +315,14 @@ pub use super::state_types::{
     BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote,
     CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo,
     CursorItemOrigin, DeathRecapEntry, EquipmentManagerState, EquipmentSet, EquippedItem,
-    GreatVaultActivity, GuildMember, GuildRank,
-    ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo,
-    LfgActivityGroupInfo, LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo,
-    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
-    MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
-    MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
-    PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState,
-    SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
+    GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
+    ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo, LfgActivityInfo,
+    LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo,
+    MapChildRect, MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix,
+    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
+    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
