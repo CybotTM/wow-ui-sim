@@ -13,7 +13,7 @@ REF_OVERRIDE="${2:-}"
 
 if [ -z "$PROFILE" ]; then
     echo "Usage: $0 <profile> [ref]"
-    echo "  profile: retail | wrath | mists"
+    echo "  profile: retail | wrath | mists | era"
     exit 2
 fi
 
@@ -40,8 +40,14 @@ case "$PROFILE" in
         SPARSE_PATHS=("Interface/AddOns")
         SUBDIR="Mists"
         ;;
+    era)
+        REPO_URL="https://github.com/Gethe/wow-ui-source.git"
+        DEFAULT_REF="e0099491e5ce94ef87c791b053f1e1509b5fd7ac"  # branch classic_era HEAD
+        SPARSE_PATHS=("Interface/AddOns")
+        SUBDIR="Era"
+        ;;
     *)
-        echo "ERROR: unknown profile '$PROFILE' (expected: retail | wrath | mists)"
+        echo "ERROR: unknown profile '$PROFILE' (expected: retail | wrath | mists | era)"
         exit 2
         ;;
 esac

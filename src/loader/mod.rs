@@ -74,6 +74,7 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
         crate::client_profile::ClientProfile::Retail => "_Mainline",
         crate::client_profile::ClientProfile::Wrath => "_Wrath",
         crate::client_profile::ClientProfile::Mists => "_Mists",
+        crate::client_profile::ClientProfile::Era => "_Vanilla",
     };
     let toc_variants = [
         format!("{}{}.toc", addon_name, primary_suffix),
@@ -96,6 +97,9 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
         }
         crate::client_profile::ClientProfile::Mists => {
             &["_Cata", "_Wrath", "_TBC", "_Vanilla", "_Mainline"]
+        }
+        crate::client_profile::ClientProfile::Era => {
+            &["_Cata", "_Wrath", "_TBC", "_Mists", "_Mainline"]
         }
     };
     if let Ok(entries) = std::fs::read_dir(addon_dir) {

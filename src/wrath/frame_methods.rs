@@ -4,7 +4,7 @@
 //! later retail builds. Stubbed here so wrath addon code does not crash on
 //! missing method errors.
 //!
-//! Only compiled when `--features client-wrath` is active.
+//! Compiled under `client-wrath`, `client-mists`, and `client-era`.
 
 use crate::lua_bridge::table_set_rust_fn_static;
 use rilua::{LuaApiMut, LuaResult, Val};

@@ -18,7 +18,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROFILES=("$@")
 if [ ${#PROFILES[@]} -eq 0 ]; then
-    PROFILES=(retail wrath mists)
+    PROFILES=(retail wrath mists era)
 fi
 
 start=$(date +%s)

@@ -85,7 +85,11 @@ pub mod traits;
 pub mod widget;
 #[cfg(feature = "client-mists")]
 pub mod mists;
-#[cfg(any(feature = "client-wrath", feature = "client-mists"))]
+#[cfg(any(
+    feature = "client-wrath",
+    feature = "client-mists",
+    feature = "client-era"
+))]
 pub mod wrath;
 pub mod xml;
 #[path = "../data/zones.rs"]
