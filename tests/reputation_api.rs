@@ -202,6 +202,76 @@ fn test_legacy_reputations_shown_persists() {
 }
 
 #[test]
+fn test_account_wide_reputation_for_tww_major_faction() {
+    let env = env();
+    let is_account_wide: bool = env
+        .eval("return C_Reputation.IsAccountWideReputation(2590)")
+        .unwrap();
+    assert!(
+        is_account_wide,
+        "Council of Dornogal (2590) should be account-wide"
+    );
+}
+
+#[test]
+fn test_account_wide_reputation_for_classic_faction() {
+    let env = env();
+    let is_account_wide: bool = env
+        .eval("return C_Reputation.IsAccountWideReputation(72)")
+        .unwrap();
+    assert!(
+        !is_account_wide,
+        "Stormwind (72) should be character-only, not account-wide"
+    );
+}
+
+#[test]
+fn test_account_wide_reputation_unknown_faction() {
+    let env = env();
+    let is_account_wide: bool = env
+        .eval("return C_Reputation.IsAccountWideReputation(999999)")
+        .unwrap();
+    assert!(!is_account_wide);
+}
+
+#[test]
+fn test_faction_data_exposes_is_account_wide() {
+    let env = env();
+    let is_account_wide: bool = env
+        .eval(
+            "local d = C_Reputation.GetFactionDataByID(2590); \
+             return d.isAccountWide",
+        )
+        .unwrap();
+    assert!(is_account_wide);
+
+    let not_account_wide: bool = env
+        .eval(
+            "local d = C_Reputation.GetFactionDataByID(72); \
+             return d.isAccountWide",
+        )
+        .unwrap();
+    assert!(!not_account_wide);
+}
+
+#[test]
+fn test_legacy_marker_on_classic_factions() {
+    let env = env();
+    let stormwind_legacy: bool = env
+        .eval("return C_Reputation.GetFactionDataByID(72).isLegacy")
+        .unwrap();
+    assert!(stormwind_legacy, "Stormwind should be marked legacy");
+
+    let dornogal_legacy: bool = env
+        .eval("return C_Reputation.GetFactionDataByID(2590).isLegacy")
+        .unwrap();
+    assert!(
+        !dornogal_legacy,
+        "Council of Dornogal should not be marked legacy"
+    );
+}
+
+#[test]
 fn test_reputation_sort_type_enum_values() {
     let env = env();
     let none: i32 = env.eval("return Enum.ReputationSortType.None").unwrap();

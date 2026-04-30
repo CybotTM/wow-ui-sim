@@ -7389,17 +7389,17 @@ if type(__wow_reputation_state) ~= "table" then
     sortType = Enum.ReputationSortType and Enum.ReputationSortType.None or 0,
     showLegacy = true,
     factions = {
-      { factionID = 0, name = "The War Within", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false },
-      { factionID = 2590, name = "Council of Dornogal", description = "The governing body of Dornogal.", reaction = 6, standing = 8200, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 2570, name = "Hallowfall Arathi", description = "The Arathi settlers of Hallowfall.", reaction = 7, standing = 4500, bottom = 0, top = 21000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 2600, name = "The Assembly of the Deeps", description = "United denizens of the deep.", reaction = 6, standing = 11000, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 2605, name = "The Severed Threads", description = "A coalition of Nerubian outcasts.", reaction = 5, standing = 4800, bottom = 0, top = 6000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 0, name = "Dragonflight", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false },
-      { factionID = 2507, name = "Dragonscale Expedition", description = "Explorers of the Dragon Isles.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 2510, name = "Valdrakken Accord", description = "The united dragonflights.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 0, name = "Classic", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false },
-      { factionID = 72, name = "Stormwind", description = "The Kingdom of Stormwind.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
-      { factionID = 47, name = "Ironforge", description = "The Dwarven capital.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true },
+      { factionID = 0, name = "The War Within", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false, isAccountWide = false, isLegacy = false },
+      { factionID = 2590, name = "Council of Dornogal", description = "The governing body of Dornogal.", reaction = 6, standing = 8200, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
+      { factionID = 2570, name = "Hallowfall Arathi", description = "The Arathi settlers of Hallowfall.", reaction = 7, standing = 4500, bottom = 0, top = 21000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
+      { factionID = 2600, name = "The Assembly of the Deeps", description = "United denizens of the deep.", reaction = 6, standing = 11000, bottom = 0, top = 12000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
+      { factionID = 2605, name = "The Severed Threads", description = "A coalition of Nerubian outcasts.", reaction = 5, standing = 4800, bottom = 0, top = 6000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
+      { factionID = 0, name = "Dragonflight", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false, isAccountWide = false, isLegacy = false },
+      { factionID = 2507, name = "Dragonscale Expedition", description = "Explorers of the Dragon Isles.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
+      { factionID = 2510, name = "Valdrakken Accord", description = "The united dragonflights.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = true, isLegacy = false },
+      { factionID = 0, name = "Classic", description = "", reaction = 0, standing = 0, bottom = 0, top = 0, isHeader = true, isCollapsed = false, isChild = false, isAccountWide = false, isLegacy = true },
+      { factionID = 72, name = "Stormwind", description = "The Kingdom of Stormwind.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = false, isLegacy = true },
+      { factionID = 47, name = "Ironforge", description = "The Dwarven capital.", reaction = 8, standing = 999, bottom = 0, top = 1000, isHeader = false, isCollapsed = false, isChild = true, isAccountWide = false, isLegacy = true },
     },
   }
   rawset(_G, "__wow_reputation_state", __wow_reputation_state)
@@ -7412,6 +7412,12 @@ local function __wow_reputation_normalize_faction(faction)
   faction.currentReactionThreshold = faction.currentReactionThreshold or faction.bottom or 0
   faction.nextReactionThreshold = faction.nextReactionThreshold or faction.top or faction.currentReactionThreshold
   faction.currentStanding = faction.currentStanding or faction.standing or faction.currentReactionThreshold
+  if faction.isAccountWide == nil then
+    faction.isAccountWide = false
+  end
+  if faction.isLegacy == nil then
+    faction.isLegacy = false
+  end
   return faction
 end
 
@@ -7547,10 +7553,9 @@ C_Reputation.GetGuildFactionData = function()
     isChild = false,
   })
 end
-if C_Reputation.IsAccountWideReputation == nil then
-  C_Reputation.IsAccountWideReputation = function()
-    return false
-  end
+C_Reputation.IsAccountWideReputation = function(factionID)
+  local faction = __wow_reputation_find_by_id(tonumber(factionID) or 0)
+  return faction ~= nil and faction.isAccountWide == true
 end
 if C_Reputation.IsFactionParagonForCurrentPlayer == nil then
   C_Reputation.IsFactionParagonForCurrentPlayer = function()
