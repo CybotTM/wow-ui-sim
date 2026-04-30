@@ -39,3 +39,6 @@ mod behavior_lock_string_match;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_save_button_click.rs"]
 mod behavior_save_button_click;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_save_result_event.rs"]
+mod behavior_save_result_event;
