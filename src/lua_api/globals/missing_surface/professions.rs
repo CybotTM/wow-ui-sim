@@ -51,6 +51,15 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         c_trade_skill_ui_get_crafting_order_count,
     ),
     ("GetCraftableCount", stub_zero),
+    ("GetDependentReagents", stub_empty_table),
+    ("GetItemSlotModifications", stub_empty_table),
+    ("GetItemSlotModificationsForOrder", stub_empty_table),
+    ("GetRecraftRemovalWarnings", stub_empty_table),
+    ("GetRemainingRecasts", stub_zero),
+    ("IsRecraftItemEquipped", stub_false),
+    ("RecraftLimitCategoryValid", stub_true),
+    ("CanStoreEnchantInItem", stub_false),
+    ("CanTradeSkillListLink", stub_false),
     ("GetCategories", c_trade_skill_ui_get_categories),
     (
         "GetFilteredRecipeIDs",
@@ -228,6 +237,11 @@ fn stub_nil(state: &mut LuaState) -> LuaResult<u32> {
 
 fn stub_false(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Bool(false));
+    Ok(1)
+}
+
+fn stub_true(state: &mut LuaState) -> LuaResult<u32> {
+    state.push(Val::Bool(true));
     Ok(1)
 }
 

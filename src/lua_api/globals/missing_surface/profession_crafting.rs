@@ -7,9 +7,11 @@
 
 use crate::lua_api::globals::profession_data;
 use crate::lua_api::methods::{borrow_state, borrow_state_mut};
+use crate::lua_api::script_helpers::fire_named_event_state;
 use crate::lua_api::state::BagItem;
+use rilua::Val;
 use rilua::vm::state::LuaState;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 /// Returns true iff the recipe exists in the catalogue AND all reagents are
 /// available in `player.bag_items` for the requested `count`.
@@ -42,12 +44,29 @@ pub(super) fn craft_recipe(state: &mut LuaState, recipe_id: i32, count: i32) -> 
         return false;
     };
 
-    let Ok(mut sim) = borrow_state_mut(state) else {
-        return false;
-    };
+    let mut affected_bags = BTreeSet::new();
+    {
+        let Ok(mut sim) = borrow_state_mut(state) else {
+            return false;
+        };
 
-    consume_reagents(&mut sim.bag_items, &plan.reagent_deltas);
-    add_output_item(&mut sim.bag_items, plan.output_item_id, plan.output_count);
+        consume_reagents(
+            &mut sim.bag_items,
+            &plan.reagent_deltas,
+            &mut affected_bags,
+        );
+        let output_bag = add_output_item(
+            &mut sim.bag_items,
+            plan.output_item_id,
+            plan.output_count,
+        );
+        affected_bags.insert(output_bag);
+    }
+
+    for bag_id in &affected_bags {
+        fire_named_event_state(state, "BAG_UPDATE", &[Val::Num(*bag_id as f64)]);
+    }
+    fire_named_event_state(state, "BAG_UPDATE_DELAYED", &[]);
 
     true
 }
@@ -79,9 +98,13 @@ fn reagent_deltas(recipe: &profession_data::RecipeEntry, count: i32) -> Vec<(u32
         .collect()
 }
 
-fn consume_reagents(bag_items: &mut HashMap<(i32, i32), BagItem>, reagent_deltas: &[(u32, i32)]) {
+fn consume_reagents(
+    bag_items: &mut HashMap<(i32, i32), BagItem>,
+    reagent_deltas: &[(u32, i32)],
+    affected_bags: &mut BTreeSet<i32>,
+) {
     for &(item_id, needed) in reagent_deltas {
-        consume_item_stacks(bag_items, item_id, needed);
+        consume_item_stacks(bag_items, item_id, needed, affected_bags);
     }
     bag_items.retain(|_, item| item.stack_count > 0);
 }
@@ -90,21 +113,30 @@ fn consume_item_stacks(
     bag_items: &mut HashMap<(i32, i32), BagItem>,
     item_id: u32,
     mut needed: i32,
+    affected_bags: &mut BTreeSet<i32>,
 ) {
-    for slot in bag_items.values_mut() {
+    for ((bag_id, _), slot) in bag_items.iter_mut() {
         if slot.item_id != item_id || needed == 0 {
             continue;
         }
         let taken = needed.min(slot.stack_count);
         slot.stack_count -= taken;
         needed -= taken;
+        affected_bags.insert(*bag_id);
     }
 }
 
-fn add_output_item(bag_items: &mut HashMap<(i32, i32), BagItem>, item_id: u32, count: i32) {
-    if let Some(slot) = bag_items.values_mut().find(|slot| slot.item_id == item_id) {
+fn add_output_item(
+    bag_items: &mut HashMap<(i32, i32), BagItem>,
+    item_id: u32,
+    count: i32,
+) -> i32 {
+    if let Some((key, slot)) = bag_items
+        .iter_mut()
+        .find(|(_, slot)| slot.item_id == item_id)
+    {
         slot.stack_count += count;
-        return;
+        return key.0;
     }
 
     let key = free_bag0_slot(bag_items);
@@ -115,6 +147,7 @@ fn add_output_item(bag_items: &mut HashMap<(i32, i32), BagItem>, item_id: u32, c
             stack_count: count,
         },
     );
+    key.0
 }
 
 /// Find a free slot in bag 0 (slots 1–16). Falls back to negative slots if

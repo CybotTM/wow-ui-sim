@@ -163,6 +163,55 @@ fn craft_recipe_consumes_reagents_and_adds_output() {
 }
 
 #[test]
+fn craft_recipe_fires_bag_update_events() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.ClearBags()
+            A_Admin.AddBagItem(0, 1, 210934, 12)
+            A_Admin.AddBagItem(0, 2, 210937, 2)
+
+            local listener = CreateFrame("Frame")
+            listener:RegisterEvent("BAG_UPDATE")
+            listener:RegisterEvent("BAG_UPDATE_DELAYED")
+            local bag_update_count = 0
+            local bag_delayed_count = 0
+            listener:SetScript("OnEvent", function(_, event, bagID)
+                if event == "BAG_UPDATE" then
+                    bag_update_count = bag_update_count + 1
+                elseif event == "BAG_UPDATE_DELAYED" then
+                    bag_delayed_count = bag_delayed_count + 1
+                end
+            end)
+
+            if not C_TradeSkillUI.CraftRecipe(100001, 1) then return "craft_failed" end
+            if bag_update_count < 1 then return "bag_update=" .. bag_update_count end
+            if bag_delayed_count ~= 1 then return "bag_delayed=" .. bag_delayed_count end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "CraftRecipe should fire BAG_UPDATE and BAG_UPDATE_DELAYED so the bag UI refreshes: {result}"
+    );
+}
+
+#[test]
+fn get_remaining_recasts_returns_zero_for_normal_recipes() {
+    // The Blizzard ProfessionsCrafting.lua ValidateControls path does
+    // `C_TradeSkillUI.GetRemainingRecasts() + 1`, so a missing stub crashes the
+    // entire post-craft validation, leaving the Create button greyed and the
+    // UI desynced from bag state.
+    let env = env();
+    let result: f64 = env
+        .eval("return C_TradeSkillUI.GetRemainingRecasts()")
+        .unwrap();
+    assert_eq!(result, 0.0);
+}
+
+#[test]
 fn craft_recipe_with_count_consumes_proportionally() {
     let env = env();
     let result: String = env
