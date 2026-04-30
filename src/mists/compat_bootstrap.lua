@@ -210,6 +210,31 @@ if rawget(_G, "NUM_LE_ITEM_QUALITYS") == nil then
   NUM_LE_ITEM_QUALITYS = 8
 end
 
+-- LE_ITEM_QUALITY_*: pre-Cata legacy enum constants. Mists's
+-- Blizzard_FrameXMLBase/Classic/Constants.lua uses these as table keys, so
+-- any nil among them errors the file with "table index is nil" before later
+-- constants like KEYRING_CONTAINER and NUM_BAG_SLOTS get defined, cascading
+-- into EquipmentManager.lua's "for KEYRING_CONTAINER, NUM_BAG_SLOTS" loop.
+if rawget(_G, "LE_ITEM_QUALITY_POOR") == nil then LE_ITEM_QUALITY_POOR = 0 end
+if rawget(_G, "LE_ITEM_QUALITY_COMMON") == nil then LE_ITEM_QUALITY_COMMON = 1 end
+if rawget(_G, "LE_ITEM_QUALITY_UNCOMMON") == nil then LE_ITEM_QUALITY_UNCOMMON = 2 end
+if rawget(_G, "LE_ITEM_QUALITY_RARE") == nil then LE_ITEM_QUALITY_RARE = 3 end
+if rawget(_G, "LE_ITEM_QUALITY_EPIC") == nil then LE_ITEM_QUALITY_EPIC = 4 end
+if rawget(_G, "LE_ITEM_QUALITY_LEGENDARY") == nil then LE_ITEM_QUALITY_LEGENDARY = 5 end
+if rawget(_G, "LE_ITEM_QUALITY_ARTIFACT") == nil then LE_ITEM_QUALITY_ARTIFACT = 6 end
+if rawget(_G, "LE_ITEM_QUALITY_HEIRLOOM") == nil then LE_ITEM_QUALITY_HEIRLOOM = 7 end
+if rawget(_G, "LE_ITEM_QUALITY_WOW_TOKEN") == nil then LE_ITEM_QUALITY_WOW_TOKEN = 8 end
+
+-- Inventory slot constants used as table keys in Constants.lua line 189+.
+if rawget(_G, "INVSLOT_MAINHAND") == nil then INVSLOT_MAINHAND = 16 end
+if rawget(_G, "INVSLOT_OFFHAND") == nil then INVSLOT_OFFHAND = 17 end
+if rawget(_G, "INVSLOT_RANGED") == nil then INVSLOT_RANGED = 18 end
+
+-- Challenge medal constants (Constants.lua line 607+).
+if rawget(_G, "CHALLENGE_MEDAL_BRONZE") == nil then CHALLENGE_MEDAL_BRONZE = 1 end
+if rawget(_G, "CHALLENGE_MEDAL_SILVER") == nil then CHALLENGE_MEDAL_SILVER = 2 end
+if rawget(_G, "CHALLENGE_MEDAL_GOLD") == nil then CHALLENGE_MEDAL_GOLD = 3 end
+
 -- ─── DebugBarManager (mists debug overlay) ───────────────────────────────────
 
 if rawget(_G, "DebugBarManager") == nil then
@@ -219,6 +244,40 @@ if rawget(_G, "DebugBarManager") == nil then
 end
 
 -- ─── C_LootHistory namespace ─────────────────────────────────────────────────
+
+-- C_Item.GetItemQualityColor: mists's UIParent.lua iterates qualities 0..8
+-- and stuffs the (r,g,b) tuple into ITEM_QUALITY_COLORS. Returning nil for
+-- the tuple causes nil arithmetic when CreateColor formats hex markup.
+do
+  local quality_colors = {
+    [0] = { 0.62, 0.62, 0.62, "9d9d9d" },  -- Poor (gray)
+    [1] = { 1.00, 1.00, 1.00, "ffffff" },  -- Common (white)
+    [2] = { 0.12, 1.00, 0.00, "1eff00" },  -- Uncommon (green)
+    [3] = { 0.00, 0.44, 0.87, "0070dd" },  -- Rare (blue)
+    [4] = { 0.64, 0.21, 0.93, "a335ee" },  -- Epic (purple)
+    [5] = { 1.00, 0.50, 0.00, "ff8000" },  -- Legendary (orange)
+    [6] = { 0.90, 0.80, 0.50, "e6cc80" },  -- Artifact (light gold)
+    [7] = { 0.00, 0.80, 1.00, "00ccff" },  -- Heirloom (light blue)
+    [8] = { 0.00, 0.80, 1.00, "00ccff" },  -- Token (light blue)
+  }
+
+  C_Item = C_Item or {}
+  -- Override unconditionally: the simulator's existing C_Item registration
+  -- doesn't expose this method, and mists's UIParent.lua needs it during
+  -- bootstrap. Even if a future C_Item stub appears, mists's hardcoded color
+  -- table is fine for visual fidelity in 2D mode.
+  function C_Item.GetItemQualityColor(quality)
+    local row = quality_colors[quality] or quality_colors[1]
+    return row[1], row[2], row[3], row[4]
+  end
+
+  -- Flat global GetItemQualityColor: simulator's nil-stub returns nothing;
+  -- mists's UIParent.lua expects (r,g,b,hex). Always override under mists.
+  function GetItemQualityColor(quality)
+    local row = quality_colors[quality] or quality_colors[1]
+    return row[1], row[2], row[3], row[4]
+  end
+end
 
 if rawget(_G, "C_LootHistory") == nil then
   C_LootHistory = {
@@ -293,12 +352,20 @@ if rawget(_G, "GetPVPLifetimeStats") == nil then
   function GetPVPLifetimeStats() return 0, 0, 0 end
 end
 
+if rawget(_G, "GetNumBankSlots") == nil then
+  function GetNumBankSlots() return 0, 0 end
+end
+
 if rawget(_G, "IsAttackAction") == nil then
   function IsAttackAction(slot) return false end
 end
 
 if rawget(_G, "IsEquippedAction") == nil then
   function IsEquippedAction(slot) return false end
+end
+
+if rawget(_G, "IsConsumableAction") == nil then
+  function IsConsumableAction(slot) return false end
 end
 
 if rawget(_G, "MoneyFrame_SetMaxDisplayWidth") == nil then
