@@ -235,6 +235,35 @@ fn test_class_talents_switch_methods_update_seeded_spec_and_loadout_state() {
 }
 
 #[test]
+fn test_load_config_switches_loadout_and_returns_no_changes_necessary() {
+    let env = env();
+    let (load_result, before, after, after_loadout): (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local configs = C_ClassTalents.GetConfigIDsBySpecID(66)
+            assert(#configs == 2, "Protection should expose two seeded loadouts")
+
+            local before = C_ClassTalents.GetActiveConfigID()
+            assert(before == configs[1], "default loadout should start active")
+
+            local result, err, newlyLearned = C_ClassTalents.LoadConfig(configs[2], true)
+            assert(err == nil, "no error string expected on success")
+            assert(newlyLearned == nil, "no newly-learned-nodes table expected on no-op load")
+
+            local after = C_ClassTalents.GetActiveConfigID()
+            local lastSelected = C_ClassTalents.GetLastSelectedSavedConfigID(66)
+            return result, before, after, lastSelected
+            "#,
+        )
+        .unwrap();
+
+    // Enum.LoadConfigResult.NoChangesNecessary == 1
+    assert_eq!(load_result, 1);
+    assert_ne!(after, before);
+    assert_eq!(after, after_loadout);
+}
+
+#[test]
 fn test_active_hero_node_icon_texture_path_resolves_to_real_asset() {
     let env = env();
     let texture_path: String = env
