@@ -299,11 +299,16 @@ if rawget(_G, "GetActionCharges") == nil then
 end
 
 if rawget(_G, "GetExtraBarIndex") == nil then
-  function GetExtraBarIndex() return nil end
+  -- ActionButton_CalculateAction does `(page - 1) * NUM_ACTIONBAR_BUTTONS` when
+  -- the button is marked self.isExtra, with no nil guard. Returning 1 gives
+  -- a (1-1)*N = 0 offset, so the resulting action slot is just self:GetID().
+  function GetExtraBarIndex() return 1 end
 end
 
 if rawget(_G, "GetMultiCastBarIndex") == nil then
-  function GetMultiCastBarIndex() return nil end
+  -- Same reasoning as GetExtraBarIndex above: ActionButton_CalculateAction
+  -- expects a numeric page index when self.buttonType == "MULTICASTACTIONBUTTON".
+  function GetMultiCastBarIndex() return 1 end
 end
 
 if rawget(_G, "IsAutoRepeatAction") == nil then
