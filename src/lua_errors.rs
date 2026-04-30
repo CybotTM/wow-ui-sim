@@ -218,16 +218,21 @@ fn unique_error_messages(state: &SimState) -> Vec<UniqueLuaError> {
     order
 }
 
-/// Extract the core error message, stripping "runtime error: " prefix.
+/// Extract the core error message, stripping "runtime error: " prefix and the
+/// `<source>:<line>:` location chunk so similar errors with different paths
+/// dedup against the same key.
 pub(crate) fn extract_error_message(raw: &str) -> String {
     let first_line = raw.lines().next().unwrap_or(raw);
-    normalize_error_headline(first_line)
+    normalize_error_headline(first_line, /*strip_location=*/ true)
 }
 
+/// Format an error for human/JSON display. Preserves the `<source>:<line>:`
+/// location so the reader can find the exact call site — distinct from
+/// `extract_error_message` which strips it for stable dedup keys.
 fn format_error_for_display(raw: &str) -> String {
     let mut lines = raw.lines();
     let first_line = lines.next().unwrap_or(raw);
-    let mut formatted = normalize_error_headline(first_line);
+    let mut formatted = normalize_error_headline(first_line, /*strip_location=*/ false);
     for line in lines {
         formatted.push('\n');
         formatted.push_str(line);
@@ -235,11 +240,15 @@ fn format_error_for_display(raw: &str) -> String {
     formatted
 }
 
-fn normalize_error_headline(first_line: &str) -> String {
+fn normalize_error_headline(first_line: &str, strip_location: bool) -> String {
     let stripped = first_line
         .strip_prefix("runtime error: ")
         .unwrap_or(first_line);
-    strip_lua_location_prefix(stripped)
+    if strip_location {
+        strip_lua_location_prefix(stripped)
+    } else {
+        stripped.to_string()
+    }
 }
 
 fn strip_lua_location_prefix(msg: &str) -> String {
@@ -360,10 +369,12 @@ mod tests {
 
         let state = env.state().borrow();
         let grouped = grouped_errors_by_addon(&state);
+        // Preserves the source:line prefix so the reader can find the call site —
+        // see Phase 6.2 of PLAN.classic.md for the rationale.
         assert_eq!(
             grouped.get("TestAddon"),
             Some(&vec![String::from(
-                "[OnLoad] SomeFrame: boom\nstack traceback:\n\t[C]: in function 'error'"
+                "[OnLoad] SomeFrame: Interface/AddOns/TestAddon/Main.lua:9: boom\nstack traceback:\n\t[C]: in function 'error'"
             )])
         );
     }
