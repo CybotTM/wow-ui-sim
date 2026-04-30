@@ -55,7 +55,10 @@ pub(super) fn init_lua_state(
     crate::lua_api::workarounds::apply_permanent_bootstrap(lua)?;
     crate::lua_api::workarounds::apply_temporary_bootstrap(lua)?;
     #[cfg(feature = "client-wrath")]
-    crate::wrath::compat_bootstrap::init(lua)?;
+    {
+        crate::wrath::compat_bootstrap::init(lua)?;
+        crate::wrath::compat_bootstrap::init_wrath_only_proxies(lua)?;
+    }
     // secureenv is shallow-copied from `_G` here. It keeps its copy of
     // the dangerous globals (dofile / loadfile / require / string.dump /
     // math.randomseed) so secure chunks — which Blizzard trusts —
