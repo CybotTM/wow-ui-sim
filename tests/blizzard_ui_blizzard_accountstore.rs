@@ -66,3 +66,6 @@ mod behavior_fullscreen_escape;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_refund_timer.rs"]
 mod behavior_refund_timer;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_currency_for_store.rs"]
+mod behavior_currency_for_store;
