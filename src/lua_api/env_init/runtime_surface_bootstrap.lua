@@ -8864,6 +8864,16 @@ if GetLootSpecialization == nil then
     return 0
   end
 end
+if HasLootSpecializations == nil then
+  function HasLootSpecializations()
+    return true
+  end
+end
+if CanShowSetRoleButton == nil then
+  function CanShowSetRoleButton()
+    return false
+  end
+end
 
 if GetSpellConfirmationPromptsInfo == nil then
   function GetSpellConfirmationPromptsInfo()

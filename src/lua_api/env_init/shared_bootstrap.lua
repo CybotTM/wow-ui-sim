@@ -1175,10 +1175,14 @@ end
 
 -- Rilua's C-level secureexecuterange is a no-op stub (taint.rs TODO).
 -- Always install our Lua implementation to override it. Must match Elune:
---   1. Iterate with lua_next (i.e. `pairs`), NOT ipairs — hash-keyed tables
---      (CallbackRegistryMixin stores callbacks keyed by owner ID) must be
---      visited, not just the array part.
---   2. Continue iterating even if the callback errors — WoW routes errors
+--   1. Visit numeric indices in order (ipairs) so ordered arrays — e.g.
+--      Menu element initializers built with table.insert(t, 1, x) — run
+--      in their intended sequence. Rilua's pairs() walks hash buckets,
+--      not numeric order, so it would call the prepended factory init
+--      (which creates frame.fontString) AFTER initializers that read it.
+--   2. Then visit any remaining hash-keyed entries — CallbackRegistryMixin
+--      keys callbacks by owner ID, so we must not stop at the array part.
+--   3. Continue iterating even if the callback errors — WoW routes errors
 --      to the error handler but the loop keeps going, so each invocation
 --      is wrapped in pcall.
 function secureexecuterange(tbl, callback, ...)
@@ -1187,8 +1191,15 @@ function secureexecuterange(tbl, callback, ...)
   end
   local extra = {...}
   local n = select("#", ...)
-  for key, value in pairs(tbl) do
+  local seen = {}
+  for key, value in ipairs(tbl) do
+    seen[key] = true
     pcall(callback, key, value, unpack(extra, 1, n))
+  end
+  for key, value in pairs(tbl) do
+    if not seen[key] then
+      pcall(callback, key, value, unpack(extra, 1, n))
+    end
   end
 end
 
