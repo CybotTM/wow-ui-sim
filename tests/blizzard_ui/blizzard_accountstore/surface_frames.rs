@@ -23,6 +23,28 @@
 //! the children to match the PLAN shape.
 //!
 //! Spec/source mismatch finding (PLAN.md task for
+//! `AccountStoreInsetFrameTemplate`): the plan wrote that the
+//! template "resolves and is referenced by `AccountStoreFrame.Inset`",
+//! but `AccountStoreFrame.Inset` does not exist (the same mismatch
+//! pinned by the negative-assertion list in the prior test). The
+//! actual references are at `Blizzard_AccountStore.xml:93` and `:100`,
+//! both inheriting the template via `inherits="AccountStoreInsetFrameTemplate"`
+//! on Frame children with parentKeys `LeftInset` and `RightInset`.
+//! Virtual templates never escape into `_G`, so the resolution proof
+//! comes from the structural fingerprint the template leaves on every
+//! inheritor: a `Bg` Texture parentKey on the BACKGROUND layer plus
+//! eight border-tile Texture parentKeys on the BORDER layer
+//! (`InsetBorderTopLeft`, `InsetBorderTopRight`, `InsetBorderBottomLeft`,
+//! `InsetBorderBottomRight`, `InsetBorderTop`, `InsetBorderBottom`,
+//! `InsetBorderLeft`, `InsetBorderRight`). The
+//! `account_store_inset_frame_template_resolves_into_both_inheritors`
+//! test pins the virtual-template absence in `_G`, then asserts the
+//! nine-parentKey fingerprint on BOTH `LeftInset` and `RightInset` —
+//! the dual-inheritor pin is the strongest proof that the template
+//! resolves: a regression that broke template inheritance would lose
+//! the fingerprint on both at once.
+//!
+//! Spec/source mismatch finding (PLAN.md task for
 //! `FullscreenAccountStoreContainer.LeaveButton`): the plan named the
 //! parentKey child as `LeaveButton` inheriting `MagicButtonTemplate`,
 //! but `Blizzard_AccountStore.xml:167` declares it as
@@ -283,5 +305,113 @@ fn fullscreen_account_store_container_publishes_expected_button_with_three_slice
              mismatch tripwire: if Blizzard ever renames the button to match the PLAN shape, \
              this test flips and forces a re-pin against the new parentKey."
         );
+    });
+}
+
+const INSET_TEMPLATE_NAME: &str = "AccountStoreInsetFrameTemplate";
+
+const INSET_TEMPLATE_FINGERPRINT: &[(&str, &str)] = &[
+    (
+        "Bg",
+        "BACKGROUND-layer tiled Texture (Blizzard_AccountStore.xml:9 — \
+         BlackMarketBackground-Tile, horizTile + vertTile)",
+    ),
+    (
+        "InsetBorderTopLeft",
+        "BORDER-layer corner Texture inheriting UI-Frame-InnerTopLeft \
+         (Blizzard_AccountStore.xml:30)",
+    ),
+    (
+        "InsetBorderTopRight",
+        "BORDER-layer corner Texture inheriting UI-Frame-InnerTopRight \
+         (Blizzard_AccountStore.xml:35)",
+    ),
+    (
+        "InsetBorderBottomLeft",
+        "BORDER-layer corner Texture inheriting UI-Frame-InnerBotLeftCorner \
+         (Blizzard_AccountStore.xml:40)",
+    ),
+    (
+        "InsetBorderBottomRight",
+        "BORDER-layer corner Texture inheriting UI-Frame-InnerBotRight \
+         (Blizzard_AccountStore.xml:45)",
+    ),
+    (
+        "InsetBorderTop",
+        "BORDER-layer top-edge tile inheriting _UI-Frame-InnerTopTile \
+         (Blizzard_AccountStore.xml:50)",
+    ),
+    (
+        "InsetBorderBottom",
+        "BORDER-layer bottom-edge tile inheriting _UI-Frame-InnerBotTile \
+         (Blizzard_AccountStore.xml:56)",
+    ),
+    (
+        "InsetBorderLeft",
+        "BORDER-layer left-edge tile inheriting !UI-Frame-InnerLeftTile \
+         (Blizzard_AccountStore.xml:62)",
+    ),
+    (
+        "InsetBorderRight",
+        "BORDER-layer right-edge tile inheriting !UI-Frame-InnerRightTile \
+         (Blizzard_AccountStore.xml:68)",
+    ),
+];
+
+const INSET_TEMPLATE_INHERITORS: &[(&str, &str)] = &[
+    ("LeftInset", "Blizzard_AccountStore.xml:93"),
+    ("RightInset", "Blizzard_AccountStore.xml:100"),
+];
+
+#[test]
+fn account_store_inset_frame_template_resolves_into_both_inheritors() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let virtual_template_global_type: String = env
+            .eval(&format!("return type(_G[{INSET_TEMPLATE_NAME:?}])"))
+            .expect("AccountStoreInsetFrameTemplate global probe must run cleanly");
+
+        assert_eq!(
+            virtual_template_global_type, "nil",
+            "Expected `_G[{INSET_TEMPLATE_NAME:?}]` to be nil after `{ROOT}` loads, got \
+             `{virtual_template_global_type}`. Virtual templates (declared with \
+             `virtual=\"true\"` at `Blizzard_AccountStore.xml:5`) live in the simulator's \
+             template registry only — they do not register as named globals because they are \
+             never instantiated as standalone frames; they only contribute their declarative \
+             shape to inheritors via the XML loader's template-resolution path. A non-nil \
+             reading here means a regression converted the template into a concrete frame \
+             registration (probably by a missing `virtual=\"true\"` attribute), which would \
+             leak the template into `_G` and likely break the inheritance chain that drives \
+             `LeftInset` / `RightInset`."
+        );
+
+        for (inheritor_key, inheritor_site) in INSET_TEMPLATE_INHERITORS {
+            for (fingerprint_key, fingerprint_role) in INSET_TEMPLATE_FINGERPRINT {
+                let child_type: String = env
+                    .eval(&format!(
+                        "return type(_G[{FRAME_NAME:?}][{inheritor_key:?}][{fingerprint_key:?}])"
+                    ))
+                    .unwrap_or_else(|error| {
+                        panic!(
+                            "failed to probe `AccountStoreFrame.{inheritor_key}.{fingerprint_key}` \
+                             (template fingerprint): {error}"
+                        )
+                    });
+
+                assert_eq!(
+                    child_type, "table",
+                    "Expected `AccountStoreFrame.{inheritor_key}.{fingerprint_key}` to be a \
+                     table after `{ROOT}` loads. The {inheritor_key} parentKey at \
+                     `{inheritor_site}` inherits `AccountStoreInsetFrameTemplate` via \
+                     `inherits=\"{INSET_TEMPLATE_NAME}\"`, which contributes the \
+                     `{fingerprint_key}` parentKey ({fingerprint_role}). A nil reading means \
+                     either (a) the virtual-template registration was dropped (the registry \
+                     never recorded the template body), or (b) the template-resolution path \
+                     failed to copy the parentKey children onto the inheritor (a regression in \
+                     the XML loader's inherit-merge routing). Either case would leave the \
+                     inset frame without its background/border chrome, so the panel's two \
+                     content panes would render against the bare frame backdrop."
+                );
+            }
+        }
     });
 }
