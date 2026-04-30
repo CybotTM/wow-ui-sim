@@ -45,3 +45,6 @@ mod behavior_card_select_refund;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_currency_format.rs"]
 mod behavior_currency_format;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_currency_warning.rs"]
+mod behavior_currency_warning;
