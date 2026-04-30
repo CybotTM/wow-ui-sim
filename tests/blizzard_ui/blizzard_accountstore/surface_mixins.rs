@@ -8,6 +8,9 @@
 //! - `category` — `AccountStoreCategoryMixin` (per-row category button)
 //! - `category_list` — `AccountStoreCategoryListMixin` (left-side category
 //!   column wrapping the ScrollBox)
+//! - `fullscreen_container` — `FullscreenAccountStoreContainerMixin`
+//!   (toplevel container hosting AccountStoreFrame in WoW Labs /
+//!   Plunderstorm fullscreen mode)
 //! - `item_display` — `AccountStoreItemDisplayMixin` (StoreDisplay panel
 //!   driving paging and per-store state)
 //! - `item_rack` — `AccountStoreItemRackMixin` (per-category card pool laid
@@ -30,6 +33,9 @@ mod category;
 
 #[path = "surface_mixins/category_list.rs"]
 mod category_list;
+
+#[path = "surface_mixins/fullscreen_container.rs"]
+mod fullscreen_container;
 
 #[path = "surface_mixins/item_display.rs"]
 mod item_display;
