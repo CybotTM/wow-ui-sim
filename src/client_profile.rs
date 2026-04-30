@@ -1,4 +1,4 @@
-//! WoW client profile selection — retail, wrath, mists, era.
+//! WoW client profile selection — retail, wrath, mists, era, anniversary.
 //!
 //! Exactly one `client-*` cargo feature must be enabled. The active profile
 //! determines which `Interface/BlizzardUI/<Profile>/` subdir the addon loader
@@ -12,6 +12,7 @@ pub enum ClientProfile {
     Wrath,
     Mists,
     Era,
+    Anniversary,
 }
 
 impl ClientProfile {
@@ -21,6 +22,7 @@ impl ClientProfile {
             ClientProfile::Wrath => "Wrath",
             ClientProfile::Mists => "Mists",
             ClientProfile::Era => "Era",
+            ClientProfile::Anniversary => "Anniversary",
         }
     }
 }
@@ -29,6 +31,7 @@ impl ClientProfile {
     not(feature = "client-wrath"),
     not(feature = "client-mists"),
     not(feature = "client-era"),
+    not(feature = "client-anniversary"),
     feature = "client-retail",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Retail;
@@ -37,6 +40,7 @@ pub const ACTIVE: ClientProfile = ClientProfile::Retail;
     not(feature = "client-retail"),
     not(feature = "client-mists"),
     not(feature = "client-era"),
+    not(feature = "client-anniversary"),
     feature = "client-wrath",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Wrath;
@@ -45,6 +49,7 @@ pub const ACTIVE: ClientProfile = ClientProfile::Wrath;
     not(feature = "client-retail"),
     not(feature = "client-wrath"),
     not(feature = "client-era"),
+    not(feature = "client-anniversary"),
     feature = "client-mists",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Mists;
@@ -53,20 +58,34 @@ pub const ACTIVE: ClientProfile = ClientProfile::Mists;
     not(feature = "client-retail"),
     not(feature = "client-wrath"),
     not(feature = "client-mists"),
+    not(feature = "client-anniversary"),
     feature = "client-era",
 ))]
 pub const ACTIVE: ClientProfile = ClientProfile::Era;
+
+#[cfg(all(
+    not(feature = "client-retail"),
+    not(feature = "client-wrath"),
+    not(feature = "client-mists"),
+    not(feature = "client-era"),
+    feature = "client-anniversary",
+))]
+pub const ACTIVE: ClientProfile = ClientProfile::Anniversary;
 
 #[cfg(any(
     all(feature = "client-retail", feature = "client-wrath"),
     all(feature = "client-retail", feature = "client-mists"),
     all(feature = "client-retail", feature = "client-era"),
+    all(feature = "client-retail", feature = "client-anniversary"),
     all(feature = "client-wrath", feature = "client-mists"),
     all(feature = "client-wrath", feature = "client-era"),
+    all(feature = "client-wrath", feature = "client-anniversary"),
     all(feature = "client-mists", feature = "client-era"),
+    all(feature = "client-mists", feature = "client-anniversary"),
+    all(feature = "client-era", feature = "client-anniversary"),
 ))]
 compile_error!(
-    "Exactly one of client-retail, client-wrath, client-mists, client-era must be enabled"
+    "Exactly one of client-retail, client-wrath, client-mists, client-era, client-anniversary must be enabled"
 );
 
 #[cfg(not(any(
@@ -74,9 +93,10 @@ compile_error!(
     feature = "client-wrath",
     feature = "client-mists",
     feature = "client-era",
+    feature = "client-anniversary",
 )))]
 compile_error!(
-    "Exactly one of client-retail, client-wrath, client-mists, client-era must be enabled"
+    "Exactly one of client-retail, client-wrath, client-mists, client-era, client-anniversary must be enabled"
 );
 
 /// Path to `Interface/BlizzardUI/<Profile>` relative to the repo root.

@@ -64,33 +64,22 @@ fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathB
     }
 }
 
-/// Find the TOC file for an addon directory.
-///
-/// Picks the variant matching the active client profile (e.g. `_Mists.toc`
-/// under `client-mists`, `_Wrath.toc` under `client-wrath`, `_Mainline.toc`
-/// under retail). Falls back to the bare `<addon>.toc`, then any compatible
-/// flavor toc.
-pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
-    let addon_name = addon_dir.file_name()?.to_str()?;
-    let primary_suffix = match crate::client_profile::ACTIVE {
+/// TOC suffix matching the active client profile (e.g. `_Mainline` for retail,
+/// `_Vanilla` for era/anniversary).
+fn active_profile_toc_suffix() -> &'static str {
+    match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Retail => "_Mainline",
         crate::client_profile::ClientProfile::Wrath => "_Wrath",
         crate::client_profile::ClientProfile::Mists => "_Mists",
-        crate::client_profile::ClientProfile::Era => "_Vanilla",
-    };
-    let toc_variants = [
-        format!("{}{}.toc", addon_name, primary_suffix),
-        format!("{}.toc", addon_name),
-    ];
-    for variant in &toc_variants {
-        let toc_path = addon_dir.join(variant);
-        if toc_path.exists() {
-            return Some(toc_path);
-        }
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => "_Vanilla",
     }
-    // Fallback: find any .toc file matching the active profile flavor; skip
-    // tocs that target other client flavors.
-    let exclude_suffixes: &[&str] = match crate::client_profile::ACTIVE {
+}
+
+/// TOC suffixes that target other client flavors and should be skipped when
+/// scanning for an addon's compatible flavor toc.
+fn other_profile_toc_suffixes() -> &'static [&'static str] {
+    match crate::client_profile::ACTIVE {
         crate::client_profile::ClientProfile::Retail => {
             &["_Cata", "_Wrath", "_TBC", "_Vanilla", "_Mists"]
         }
@@ -100,22 +89,49 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
         crate::client_profile::ClientProfile::Mists => {
             &["_Cata", "_Wrath", "_TBC", "_Vanilla", "_Mainline"]
         }
-        crate::client_profile::ClientProfile::Era => {
+        crate::client_profile::ClientProfile::Era
+        | crate::client_profile::ClientProfile::Anniversary => {
             &["_Cata", "_Wrath", "_TBC", "_Mists", "_Mainline"]
         }
-    };
-    if let Ok(entries) = std::fs::read_dir(addon_dir) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.extension().map(|e| e == "toc").unwrap_or(false) {
-                let name = path.file_name().unwrap().to_str().unwrap();
-                if !exclude_suffixes.iter().any(|s| name.contains(s)) {
-                    return Some(path);
-                }
+    }
+}
+
+/// Scan `addon_dir` for any .toc file whose name doesn't carry an
+/// excluded-flavor suffix (used as a last-resort fallback in `find_toc_file`).
+fn scan_for_compatible_flavor_toc(addon_dir: &Path) -> Option<PathBuf> {
+    let exclude_suffixes = other_profile_toc_suffixes();
+    let entries = std::fs::read_dir(addon_dir).ok()?;
+    entries.flatten().find_map(|entry| {
+        let path = entry.path();
+        if path.extension().map(|e| e == "toc").unwrap_or(false) {
+            let name = path.file_name()?.to_str()?;
+            if !exclude_suffixes.iter().any(|s| name.contains(s)) {
+                return Some(path);
             }
         }
+        None
+    })
+}
+
+/// Find the TOC file for an addon directory.
+///
+/// Picks the variant matching the active client profile (e.g. `_Mists.toc`
+/// under `client-mists`, `_Wrath.toc` under `client-wrath`, `_Mainline.toc`
+/// under retail). Falls back to the bare `<addon>.toc`, then any compatible
+/// flavor toc.
+pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
+    let addon_name = addon_dir.file_name()?.to_str()?;
+    let toc_variants = [
+        format!("{}{}.toc", addon_name, active_profile_toc_suffix()),
+        format!("{}.toc", addon_name),
+    ];
+    for variant in &toc_variants {
+        let toc_path = addon_dir.join(variant);
+        if toc_path.exists() {
+            return Some(toc_path);
+        }
     }
-    None
+    scan_for_compatible_flavor_toc(addon_dir)
 }
 
 /// Result of loading an addon.

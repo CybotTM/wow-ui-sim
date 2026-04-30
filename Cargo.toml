@@ -100,6 +100,7 @@ client-retail = []
 client-wrath = []
 client-mists = []
 client-era = []
+client-anniversary = []
 
 [profile.release]
 lto = false
