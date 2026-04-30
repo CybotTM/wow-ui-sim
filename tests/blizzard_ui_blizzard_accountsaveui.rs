@@ -54,3 +54,6 @@ mod behavior_update_sizing;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_on_size_changed.rs"]
 mod behavior_on_size_changed;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_editbox_keys.rs"]
+mod behavior_editbox_keys;
