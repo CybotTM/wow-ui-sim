@@ -39,3 +39,6 @@ mod behavior_category_selected;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_card_select_purchase.rs"]
 mod behavior_card_select_purchase;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_card_select_refund.rs"]
+mod behavior_card_select_refund;
