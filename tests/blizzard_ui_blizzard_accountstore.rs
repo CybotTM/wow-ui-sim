@@ -24,3 +24,6 @@ mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_toggle.rs"]
 mod behavior_toggle;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_set_storefront.rs"]
+mod behavior_set_storefront;
