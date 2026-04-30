@@ -76,13 +76,36 @@ are Phase 7.5 candidates for an `src/era/compat_bootstrap.lua`:
 
 ## How to use these baselines
 
-When changing the simulator, before-and-after diffs against these JSON files
-make regressions vs. progress legible:
+`scripts/diff-lua-errors.sh BASELINE NEW` compares two snapshots and
+reports `regressed` (in NEW but not BASELINE) and `fixed` (in BASELINE
+but not NEW) message sets.
 
 ```
-diff <(jq -r '.[].message' docs/baselines/era-lua-errors.json) \
-     <(WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 ./target/debug/wow-sim lua-errors | jq -r '.[].message')
+# Quick local diff after a change
+WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 \
+    ./target/debug/wow-sim lua-errors > /tmp/now.json
+./scripts/diff-lua-errors.sh docs/baselines/wrath-lua-errors.json /tmp/now.json
+
+# Quiet mode (just counts) — useful for scripting
+./scripts/diff-lua-errors.sh BASELINE NEW --quiet
+# → regressed=N fixed=M baseline=B current=C
+
+# Fail the shell on any regression — for stricter CI gating later
+./scripts/diff-lua-errors.sh BASELINE NEW --exit-on-regression
 ```
 
-CI uploads a per-profile artifact named `<profile>-lua-errors` after every
-matrix run; compare against the baseline to confirm no new errors appeared.
+CI integration:
+
+- `.github/workflows/test.yml` `client-profile-smoke` job runs the diff
+  after capturing `lua-errors.json` and prints regressed/fixed messages
+  in the run log. The diff is informational today (doesn't fail the
+  job); flip the script to `--exit-on-regression` once the baselines
+  stabilize.
+- `.github/workflows/addon-harness.yml` runs the diff transitively via
+  `scripts/test-classic-addons.sh`, which uses
+  `scripts/diff-lua-errors.sh ... --quiet` to compute the
+  "addon-induced errors" count surfaced per matrix entry.
+
+The per-profile JSON artifacts uploaded by both workflows are the
+machine-readable form; the committed snapshots in `docs/baselines/` are
+the master-branch reference point those PRs are diffed against.
