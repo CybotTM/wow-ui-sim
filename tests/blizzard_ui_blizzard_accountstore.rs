@@ -33,3 +33,6 @@ mod behavior_on_show_sound;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_on_hide_sound.rs"]
 mod behavior_on_hide_sound;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_category_selected.rs"]
+mod behavior_category_selected;
