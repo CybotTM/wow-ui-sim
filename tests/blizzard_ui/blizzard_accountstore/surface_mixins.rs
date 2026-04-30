@@ -5,6 +5,9 @@
 //! - `account_store` — `AccountStoreMixin` (panel root)
 //! - `base_card` — `AccountStoreBaseCardMixin` (card template parent of the
 //!   four derived card mixins)
+//! - `category` — `AccountStoreCategoryMixin` (per-row category button)
+//! - `category_list` — `AccountStoreCategoryListMixin` (left-side category
+//!   column wrapping the ScrollBox)
 //! - `item_display` — `AccountStoreItemDisplayMixin` (StoreDisplay panel
 //!   driving paging and per-store state)
 //! - `item_rack` — `AccountStoreItemRackMixin` (per-category card pool laid
@@ -21,6 +24,12 @@ mod account_store;
 
 #[path = "surface_mixins/base_card.rs"]
 mod base_card;
+
+#[path = "surface_mixins/category.rs"]
+mod category;
+
+#[path = "surface_mixins/category_list.rs"]
+mod category_list;
 
 #[path = "surface_mixins/item_display.rs"]
 mod item_display;
