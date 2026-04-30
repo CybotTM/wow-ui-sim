@@ -30,3 +30,6 @@ mod behavior_set_storefront;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_on_show_sound.rs"]
 mod behavior_on_show_sound;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_on_hide_sound.rs"]
+mod behavior_on_hide_sound;
