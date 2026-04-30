@@ -476,3 +476,7 @@ end
 if rawget(_G, "ChatAlertFrame") == nil then
   ChatAlertFrame = noopFrame()
 end
+
+if rawget(_G, "MiniMapTrackingIcon") == nil then
+  MiniMapTrackingIcon = noopFrame()
+end
