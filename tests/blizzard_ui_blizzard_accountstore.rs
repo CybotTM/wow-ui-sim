@@ -57,3 +57,6 @@ mod behavior_transaction_error;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_item_info_updated.rs"]
 mod behavior_item_info_updated;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_item_rack_paging.rs"]
+mod behavior_item_rack_paging;
