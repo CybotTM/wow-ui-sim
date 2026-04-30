@@ -48,3 +48,6 @@ mod behavior_currency_format;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_currency_warning.rs"]
 mod behavior_currency_warning;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_storefront_state_event.rs"]
+mod behavior_storefront_state_event;
