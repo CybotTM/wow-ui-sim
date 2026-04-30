@@ -325,7 +325,10 @@ fn collect_kept_lines(lines: &[&str], remove: &[bool]) -> String {
 /// Error type for XML loading.
 #[derive(Debug)]
 pub enum XmlLoadError {
+    /// IO error without a known path. Prefer `IoWithPath` when the path is
+    /// available — it makes diagnosis dramatically easier.
     Io(std::io::Error),
+    /// IO error with the failing path attached.
     IoWithPath {
         path: std::path::PathBuf,
         source: std::io::Error,

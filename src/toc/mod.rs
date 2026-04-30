@@ -41,7 +41,7 @@ fn strip_annotations(line: &str) -> &str {
 }
 
 /// Check if an inline `[AllowLoadGameType ...]` annotation includes a game type
-/// compatible with mainline retail WoW (standard mode).
+/// compatible with the active client profile.
 fn is_allowed_game_type(line: &str) -> bool {
     let Some(start) = line.find("[AllowLoadGameType") else {
         return true;
@@ -51,9 +51,12 @@ fn is_allowed_game_type(line: &str) -> bool {
         return true;
     };
     let types = &rest[..end];
-    types
-        .split(',')
-        .any(|t| matches!(t.trim(), "mainline" | "standard"))
+    let allowed: &[&str] = match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
+        crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
+        crate::client_profile::ClientProfile::Mists => &["mists", "mists_classic", "classic"],
+    };
+    types.split(',').any(|t| allowed.contains(&t.trim()))
 }
 
 /// Resolve addon name from Title metadata or directory name.
