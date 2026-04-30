@@ -24,9 +24,15 @@ pub struct RecipeCategory {
 }
 
 /// A reagent requirement for a recipe.
+///
+/// `dependent_reagents` lists items that must also be allocated when this
+/// reagent is allocated — e.g. a Crest's required Spark of Omens. The
+/// crafting form refuses to craft when any dependent is missing
+/// (`ProfessionsRecipeTransactionMixin:HasMissingDependentReagents`).
 pub struct ReagentSlot {
     pub item_id: u32,
     pub quantity: i32,
+    pub dependent_reagents: &'static [ReagentSlot],
 }
 
 /// A crafting recipe.
@@ -119,7 +125,24 @@ const fn wago_blacksmithing_recipe(
 }
 
 const fn reagent(item_id: u32, quantity: i32) -> ReagentSlot {
-    ReagentSlot { item_id, quantity }
+    ReagentSlot {
+        item_id,
+        quantity,
+        dependent_reagents: &[],
+    }
+}
+
+#[allow(dead_code)]
+const fn reagent_with_deps(
+    item_id: u32,
+    quantity: i32,
+    dependent_reagents: &'static [ReagentSlot],
+) -> ReagentSlot {
+    ReagentSlot {
+        item_id,
+        quantity,
+        dependent_reagents,
+    }
 }
 
 static ROUGH_SHARPENING_STONE_REAGENTS: &[ReagentSlot] = &[reagent(2835, 1)];
@@ -513,4 +536,19 @@ pub fn get_category(category_id: i32) -> Option<&'static RecipeCategory> {
     RECIPE_CATEGORIES
         .iter()
         .find(|c| c.category_id == category_id)
+}
+
+/// Find the dependent reagents declared for `item_id` across all recipes.
+///
+/// `C_TradeSkillUI.GetDependentReagents(reagent)` is the API surface; the
+/// dependency is intrinsic to the reagent item (not the recipe slot), so the
+/// first matching slot wins. Returns `&[]` for items with no declared
+/// dependents (the common case).
+pub fn find_reagent_dependents(item_id: u32) -> &'static [ReagentSlot] {
+    BLACKSMITHING_RECIPES
+        .iter()
+        .flat_map(|r| r.reagents.iter())
+        .find(|slot| slot.item_id == item_id)
+        .map(|slot| slot.dependent_reagents)
+        .unwrap_or(&[])
 }

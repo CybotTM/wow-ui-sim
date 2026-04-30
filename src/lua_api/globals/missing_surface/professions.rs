@@ -50,6 +50,10 @@ const TRADE_SKILL_METHODS: &[NamespaceMethod] = &[
         "GetCraftingOrderCount",
         c_trade_skill_ui_get_crafting_order_count,
     ),
+    (
+        "GetDependentReagents",
+        c_trade_skill_ui_get_dependent_reagents,
+    ),
     ("GetCraftableCount", stub_zero),
     ("GetCategories", c_trade_skill_ui_get_categories),
     (
@@ -335,6 +339,40 @@ fn c_trade_skill_ui_get_child_profession_infos(state: &mut LuaState) -> LuaResul
 
 fn c_trade_skill_ui_get_crafting_order_count(state: &mut LuaState) -> LuaResult<u32> {
     state.push(Val::Num(0.0));
+    Ok(1)
+}
+
+/// `C_TradeSkillUI.GetDependentReagents(reagent) -> CraftingReagent[]`.
+///
+/// Always returns an array (possibly empty). Returning nil here would crash
+/// callers that wrap the result in `ipairs`, e.g.
+/// `ProfessionsRecipeTransactionMixin:AreDependentReagentsAllocated`.
+fn c_trade_skill_ui_get_dependent_reagents(state: &mut LuaState) -> LuaResult<u32> {
+    let reagent = Val::from_stack(state, 1).unwrap_or(Val::Nil);
+    let item_id = match reagent {
+        Val::Table(_) => match table_get(state, reagent, "itemID") {
+            Val::Num(n) if n > 0.0 => Some(n as u32),
+            _ => None,
+        },
+        _ => None,
+    };
+    let dependents: &'static [profession_data::ReagentSlot] = match item_id {
+        Some(id) => profession_data::find_reagent_dependents(id),
+        None => &[],
+    };
+    let table = create_table(state);
+    for (index, dep) in dependents.iter().enumerate() {
+        let entry = create_table(state);
+        table_set(state, entry, "itemID", Val::Num(dep.item_id as f64));
+        table_set(
+            state,
+            entry,
+            "quantityRequired",
+            Val::Num(dep.quantity as f64),
+        );
+        set_table_array(state, table, (index + 1) as i64, entry);
+    }
+    state.push(table);
     Ok(1)
 }
 
