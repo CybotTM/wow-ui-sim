@@ -55,6 +55,9 @@ jobs:
       - name: cargo build wow-sim
         run: cargo build --bin wow-sim --no-default-features --features "sound gui casc client-${{ matrix.profile }}"
 
+      - name: cargo check --tests (catch profile-gated test rot)
+        run: cargo check --tests --no-default-features --features "sound gui casc client-${{ matrix.profile }}"
+
       - name: lua-errors smoke (must exit 0)
         run: WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout 90 ./target/debug/wow-sim --no-addons --no-saved-vars lua-errors > lua-errors.json
 
