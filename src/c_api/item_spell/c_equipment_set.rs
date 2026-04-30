@@ -121,14 +121,6 @@ fn snapshot_equipped_items(state: &LuaState) -> (HashMap<i32, u32>, HashMap<i32,
     (item_ids, locations)
 }
 
-fn find_set_index_by_id(state: &LuaState, set_id: i32) -> Option<usize> {
-    let sim = borrow_state(state).ok()?;
-    sim.equipment_manager
-        .sets
-        .iter()
-        .position(|s| s.id == set_id)
-}
-
 fn apply_equipment_set(state: &mut LuaState, set_id: i32) -> LuaResult<bool> {
     let set = {
         let sim = borrow_state(state)?;
@@ -166,8 +158,7 @@ fn apply_equipment_set(state: &mut LuaState, set_id: i32) -> LuaResult<bool> {
         }
     }
 
-    sim.player.stats =
-        CharacterStats::compute(&sim.player.equipped_items, sim.player.class_index);
+    sim.player.stats = CharacterStats::compute(&sim.player.equipped_items, sim.player.class_index);
     sim.equipment_manager.last_used_set_id = Some(set_id);
     Ok(true)
 }
