@@ -1,0 +1,60 @@
+//! Public globals exposed by `Blizzard_AccountSaveUI.lua` at file scope.
+//!
+//! Source (`Interface/BlizzardUI/Blizzard_AccountSaveUI/
+//! Blizzard_AccountSaveUI.lua`):
+//!
+//! ```lua
+//! ACCOUNT_SAVE_KICK_ERROR_CODE = 241;
+//! ...
+//! AccountSaveFrameMixin = {};
+//! ```
+//!
+//! Both globals are written unconditionally during file-scope execution,
+//! so any regression that prevents the addon from running its top-level
+//! statements (taint mismatch, parser desync, missing `StaticPopupDialogs`
+//! sandbox table, etc.) trips one of the assertions below long before the
+//! richer surface tests get a chance to fail.
+//!
+//! `AccountSaveFrameMixin` is checked as a Lua `"table"` rather than for
+//! membership of any specific method. The mixin's method table is
+//! populated later in the same file (`function AccountSaveFrameMixin:OnLoad()`,
+//! …) — those are pinned by the dedicated behavior fixtures. This file
+//! only guards the file-scope assignment itself.
+
+use crate::common::blizzard_addon_harness::with_blizzard_addon_glue_smoke_shape;
+
+const ROOT: &str = "Blizzard_AccountSaveUI";
+
+#[test]
+fn account_save_frame_mixin_is_a_table() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let mixin_type = env
+            .eval::<String>("return type(AccountSaveFrameMixin)")
+            .expect("type(AccountSaveFrameMixin) must evaluate cleanly");
+        assert_eq!(
+            mixin_type, "table",
+            "AccountSaveFrameMixin must be a table after Blizzard_AccountSaveUI.lua \
+             runs at file scope. The source assigns `AccountSaveFrameMixin = {{}};` \
+             unconditionally; if this regresses, either the addon never executed its \
+             top-level statements (taint/loader regression) or something later in the \
+             closure clobbered the global. Got: type = `{mixin_type}`."
+        );
+    });
+}
+
+#[test]
+fn account_save_kick_error_code_is_241() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let code = env
+            .eval::<i64>("return ACCOUNT_SAVE_KICK_ERROR_CODE")
+            .expect("ACCOUNT_SAVE_KICK_ERROR_CODE must be readable as an integer");
+        assert_eq!(
+            code, 241,
+            "ACCOUNT_SAVE_KICK_ERROR_CODE must be exactly 241 — the constant is the \
+             contract that AccountSaveFrame uses to recognise the boot-after-save \
+             ACCOUNT_SAVE_RESULT payload. Source line 1 of \
+             Blizzard_AccountSaveUI.lua: `ACCOUNT_SAVE_KICK_ERROR_CODE = 241;`. \
+             Got: {code}."
+        );
+    });
+}
