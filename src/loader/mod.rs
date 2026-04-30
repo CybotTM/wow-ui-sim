@@ -63,11 +63,20 @@ fn promote_foundational_addons_to_load_first(addons: &mut HashMap<String, (PathB
 }
 
 /// Find the TOC file for an addon directory.
-/// Prefers Mainline variant, then exact name match, then any non-Classic TOC.
+///
+/// Picks the variant matching the active client profile (e.g. `_Mists.toc`
+/// under `client-mists`, `_Wrath.toc` under `client-wrath`, `_Mainline.toc`
+/// under retail). Falls back to the bare `<addon>.toc`, then any compatible
+/// flavor toc.
 pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
     let addon_name = addon_dir.file_name()?.to_str()?;
+    let primary_suffix = match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => "_Mainline",
+        crate::client_profile::ClientProfile::Wrath => "_Wrath",
+        crate::client_profile::ClientProfile::Mists => "_Mists",
+    };
     let toc_variants = [
-        format!("{}_Mainline.toc", addon_name),
+        format!("{}{}.toc", addon_name, primary_suffix),
         format!("{}.toc", addon_name),
     ];
     for variant in &toc_variants {
@@ -76,18 +85,25 @@ pub fn find_toc_file(addon_dir: &Path) -> Option<PathBuf> {
             return Some(toc_path);
         }
     }
-    // Fallback: find any .toc file (skip Classic/TBC/etc.)
+    // Fallback: find any .toc file matching the active profile flavor; skip
+    // tocs that target other client flavors.
+    let exclude_suffixes: &[&str] = match crate::client_profile::ACTIVE {
+        crate::client_profile::ClientProfile::Retail => {
+            &["_Cata", "_Wrath", "_TBC", "_Vanilla", "_Mists"]
+        }
+        crate::client_profile::ClientProfile::Wrath => {
+            &["_Cata", "_Mainline", "_TBC", "_Vanilla", "_Mists"]
+        }
+        crate::client_profile::ClientProfile::Mists => {
+            &["_Cata", "_Wrath", "_TBC", "_Vanilla", "_Mainline"]
+        }
+    };
     if let Ok(entries) = std::fs::read_dir(addon_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.extension().map(|e| e == "toc").unwrap_or(false) {
                 let name = path.file_name().unwrap().to_str().unwrap();
-                if !name.contains("_Cata")
-                    && !name.contains("_Wrath")
-                    && !name.contains("_TBC")
-                    && !name.contains("_Vanilla")
-                    && !name.contains("_Mists")
-                {
+                if !exclude_suffixes.iter().any(|s| name.contains(s)) {
                     return Some(path);
                 }
             }
