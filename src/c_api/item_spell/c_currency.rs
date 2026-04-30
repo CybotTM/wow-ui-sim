@@ -261,40 +261,6 @@ fn parse_currency_id_from_link(link: &str) -> Option<i32> {
     id_str.parse::<i32>().ok()
 }
 
-pub(super) fn register_c_equipment_set(state: &mut LuaState) -> LuaResult<()> {
-    let table_ref = ensure_namespace(state, "C_EquipmentSet")?;
-    table_set_rust_fn_static(state, table_ref, "GetEquipmentSetIDs", c_equipment_set_ids)?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetNumEquipmentSets",
-        c_equipment_set_count,
-    )?;
-    table_set_rust_fn_static(
-        state,
-        table_ref,
-        "GetEquipmentSetInfo",
-        c_equipment_set_info,
-    )?;
-    Ok(())
-}
-
-fn c_equipment_set_count(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Num(0.0));
-    Ok(1)
-}
-
-fn c_equipment_set_ids(state: &mut LuaState) -> LuaResult<u32> {
-    let table = create_table(state);
-    state.push(table);
-    Ok(1)
-}
-
-fn c_equipment_set_info(state: &mut LuaState) -> LuaResult<u32> {
-    state.push(Val::Nil);
-    Ok(1)
-}
-
 pub(super) fn register_c_bank(state: &mut LuaState) -> LuaResult<()> {
     let table_ref = ensure_namespace(state, "C_Bank")?;
     table_set_rust_fn_static(
