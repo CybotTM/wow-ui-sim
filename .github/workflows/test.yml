@@ -8,6 +8,7 @@ on:
 
 jobs:
   cargo-test:
+    name: cargo test (retail)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,8 +16,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Fetch Blizzard UI source
-        run: ./scripts/setup-blizzard-ui.sh
+      - name: Fetch Blizzard UI source (retail)
+        run: ./scripts/setup-blizzard-ui.sh retail
 
       - name: Use CI cargo config
         run: cp .cargo/config.ci.toml .cargo/config.toml
@@ -25,4 +26,42 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run cargo test
-        run: cargo test --no-default-features -- --test-threads=1
+        run: cargo test -- --test-threads=1
+
+  client-profile-smoke:
+    name: ${{ matrix.profile }} build + lua-errors smoke
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [wrath, mists]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch Blizzard UI source (${{ matrix.profile }})
+        run: ./scripts/setup-blizzard-ui.sh ${{ matrix.profile }}
+
+      - name: Use CI cargo config
+        run: cp .cargo/config.ci.toml .cargo/config.toml
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.profile }}
+
+      - name: cargo build wow-sim
+        run: cargo build --bin wow-sim --no-default-features --features "sound gui casc client-${{ matrix.profile }}"
+
+      - name: lua-errors smoke (must exit 0)
+        run: WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout 90 ./target/debug/wow-sim --no-addons --no-saved-vars lua-errors > lua-errors.json
+
+      - name: Upload error baseline
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.profile }}-lua-errors
+          path: lua-errors.json
+          if-no-files-found: ignore
