@@ -13,6 +13,20 @@
 //! substitutes — a future Blizzard rename to the PLAN-shaped names
 //! would flip this test and force a re-pin against the new names.
 //!
+//! Spec/source mismatch finding (PLAN.md task for the
+//! `ACCOUNT_STORE_TRANSACTION_ERROR` static popup): the plan named the
+//! field set as `button1`, `OnAccept`, `text` — but
+//! `Blizzard_AccountStoreUtil.lua:11-18` declares the popup with
+//! `text`, `button1`, `showAlert`, `hideOnEscape`, `timeout`,
+//! `whileDead` and NO `OnAccept` handler. This is the dismiss-only
+//! confirmation pattern (the popup just informs the user that the
+//! transaction failed; clicking OK closes it without dispatching a
+//! follow-up action). The `account_store_transaction_error_popup_is_registered_with_expected_fields`
+//! test pins `text` (string, populated), `button1` (string, populated),
+//! `showAlert` (bool true), and absence-of-`OnAccept` (the spec/source
+//! mismatch surfaces as a positive nil assertion so the test would flip
+//! if Blizzard later adds a handler).
+//!
 //! Three tables are published at file scope by the lane's primary Lua
 //! body (`Blizzard_AccountStore.lua`):
 //!
@@ -238,5 +252,103 @@ fn account_store_util_publishes_table_and_currency_functions() {
                  this as a nil-call error against the AccountStoreUtil namespace."
             );
         }
+    });
+}
+
+const TRANSACTION_ERROR_POPUP_KEY: &str = "ACCOUNT_STORE_TRANSACTION_ERROR";
+
+#[test]
+fn account_store_transaction_error_popup_is_registered_with_expected_fields() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let popup_type: String = env
+            .eval(&format!(
+                "return type(StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}])"
+            ))
+            .expect("StaticPopupDialogs lookup must run cleanly");
+
+        assert_eq!(
+            popup_type, "table",
+            "Expected `StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}]` to be a table after \
+             `{ROOT}` loads, got `{popup_type}`. The popup is registered at file scope in \
+             `Blizzard_AccountStoreUtil.lua:11-18` (the literal `StaticPopupDialogs[\"...\"] = {{ \
+             ... }}` table assignment) and consumed by \
+             `Blizzard_AccountStoreItemDisplay.lua:96` via `StaticPopup_Show(\"...\")` when the \
+             `ACCOUNT_STORE_TRANSACTION_ERROR` event fires. A nil here means either the \
+             `StaticPopupDialogs` global was not registered by Blizzard_StaticPopup (a missing \
+             dependency), or the file-scope assignment did not run."
+        );
+
+        let text_is_string: bool = env
+            .eval(&format!(
+                "local p = StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}]; \
+                 return type(p.text) == \"string\" and #p.text > 0"
+            ))
+            .expect("popup `text` field probe must run cleanly");
+
+        assert!(
+            text_is_string,
+            "Expected `StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}].text` to be a \
+             non-empty string after `{ROOT}` loads. The source declares it as \
+             `NORMAL_FONT_COLOR:WrapTextInColorCode(ACCOUNT_STORE_INCOMPLETE_TRANSACTION)` at \
+             `Blizzard_AccountStoreUtil.lua:12` — the wrap call evaluates eagerly at file-scope \
+             load time, so this is a concrete string by the time the lane finishes loading. A \
+             nil or empty reading means either the global locale string \
+             `ACCOUNT_STORE_INCOMPLETE_TRANSACTION` was not registered, or `NORMAL_FONT_COLOR` \
+             does not implement `WrapTextInColorCode` — both surface as the popup rendering \
+             with no body text in real WoW."
+        );
+
+        let button1_is_string: bool = env
+            .eval(&format!(
+                "local p = StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}]; \
+                 return type(p.button1) == \"string\" and #p.button1 > 0"
+            ))
+            .expect("popup `button1` field probe must run cleanly");
+
+        assert!(
+            button1_is_string,
+            "Expected `StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}].button1` to be a \
+             non-empty string after `{ROOT}` loads. The source declares it as the global locale \
+             string `OKAY` at `Blizzard_AccountStoreUtil.lua:13`, which resolves to the localized \
+             OK label at file-scope load time. A nil or empty reading means the `OKAY` global \
+             was not registered by the locale tier — the popup would render with a blank button \
+             label in real WoW."
+        );
+
+        let show_alert: bool = env
+            .eval(&format!(
+                "local p = StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}]; \
+                 return p.showAlert == true"
+            ))
+            .expect("popup `showAlert` field probe must run cleanly");
+
+        assert!(
+            show_alert,
+            "Expected `StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}].showAlert` to be \
+             literally `true` after `{ROOT}` loads. The source sets it at \
+             `Blizzard_AccountStoreUtil.lua:14`, which the StaticPopup framework reads to \
+             render the alert icon (the warning triangle) on the popup frame. A regression \
+             dropping this flag would render the popup as a plain dialog without the \
+             error-severity visual cue."
+        );
+
+        let on_accept_is_nil: bool = env
+            .eval(&format!(
+                "local p = StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}]; \
+                 return p.OnAccept == nil"
+            ))
+            .expect("popup `OnAccept` absence probe must run cleanly");
+
+        assert!(
+            on_accept_is_nil,
+            "Expected `StaticPopupDialogs[{TRANSACTION_ERROR_POPUP_KEY:?}].OnAccept` to be nil \
+             after `{ROOT}` loads. PLAN.md's spec asks for an `OnAccept` handler, but the source \
+             at `Blizzard_AccountStoreUtil.lua:11-18` does NOT define one — the popup is the \
+             dismiss-only `text + button1 + showAlert + hideOnEscape + timeout + whileDead` \
+             pattern (clicking OK closes the popup without dispatching follow-up action). This \
+             positive nil assertion is the spec/source-mismatch tripwire: if a future Blizzard \
+             revision adds an `OnAccept`, this test flips and forces a re-pin against the new \
+             handler shape (and a corresponding behavior test to assert what `OnAccept` does)."
+        );
     });
 }
