@@ -60,6 +60,40 @@ fn account_save_kick_error_code_is_241() {
 }
 
 #[test]
+fn account_save_static_popup_dialogs_explicit_acknowledge() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let (in_progress_ack, success_ack) = env
+            .eval::<(bool, bool)>(
+                r#"
+                local in_progress = StaticPopupDialogs["ACCOUNT_SAVE_IN_PROGRESS"]
+                local success     = StaticPopupDialogs["ACCOUNT_SAVE_SUCCESS"]
+                assert(type(in_progress) == "table",
+                    "StaticPopupDialogs[ACCOUNT_SAVE_IN_PROGRESS] must be a table")
+                assert(type(success) == "table",
+                    "StaticPopupDialogs[ACCOUNT_SAVE_SUCCESS] must be a table")
+                return in_progress.explicitAcknowledge == true,
+                       success.explicitAcknowledge == true
+                "#,
+            )
+            .expect(
+                "StaticPopupDialogs[ACCOUNT_SAVE_IN_PROGRESS] and \
+                 StaticPopupDialogs[ACCOUNT_SAVE_SUCCESS] must both be registered \
+                 tables after Blizzard_AccountSaveUI.lua runs",
+            );
+        assert!(
+            in_progress_ack && success_ack,
+            "Both ACCOUNT_SAVE_IN_PROGRESS and ACCOUNT_SAVE_SUCCESS dialogs must \
+             carry `explicitAcknowledge = true` (Blizzard_AccountSaveUI.lua lines \
+             3-23). The flag forces the player to dismiss the dialog manually \
+             instead of auto-clearing on focus loss — required because the kick \
+             flow needs an explicit user action before disconnect. Got: \
+             ACCOUNT_SAVE_IN_PROGRESS.explicitAcknowledge={in_progress_ack}, \
+             ACCOUNT_SAVE_SUCCESS.explicitAcknowledge={success_ack}."
+        );
+    });
+}
+
+#[test]
 fn account_save_frame_mixin_visual_state_enum() {
     with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
         let (disabled, enabled_locked, enabled_unlocked) = env
