@@ -42,3 +42,6 @@ mod behavior_card_select_purchase;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_card_select_refund.rs"]
 mod behavior_card_select_refund;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_currency_format.rs"]
+mod behavior_currency_format;
