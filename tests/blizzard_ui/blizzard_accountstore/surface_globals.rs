@@ -36,6 +36,14 @@ const PUBLISHED_TABLES: &[&str] = &[
 const CATEGORY_LIST_TABLES: &[&str] =
     &["AccountStoreCategoryMixin", "AccountStoreCategoryListMixin"];
 
+const CARD_TEMPLATE_TABLES: &[&str] = &[
+    "AccountStoreBaseCardMixin",
+    "AccountStoreCreatureCardMixin",
+    "AccountStoreIconCardMixin",
+    "AccountStoreTransmogSetCardMixin",
+    "AccountStoreMountCardMixin",
+];
+
 #[test]
 fn account_store_publishes_expected_global_mixin_tables() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -84,5 +92,50 @@ fn account_store_category_list_publishes_expected_global_mixin_tables() {
                  category-selection flow."
             );
         }
+    });
+}
+
+#[test]
+fn account_store_card_templates_publishes_expected_global_mixin_tables() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for global in CARD_TEMPLATE_TABLES {
+            let actual_type: String = env
+                .eval(&format!("return type(_G[{global:?}])"))
+                .unwrap_or_else(|error| panic!("failed to probe `{global}` type: {error}"));
+
+            assert_eq!(
+                actual_type, "table",
+                "Expected `{global}` to publish as a table after `{ROOT}` loads, got \
+                 `{actual_type}`. The five card mixins are declared at file scope in \
+                 `Blizzard_AccountStoreCardTemplates.lua` (lines 13, 230, 252, 263, 367) and \
+                 wired via `mixin=\"...\"` on the corresponding card frame templates in \
+                 `Blizzard_AccountStoreCardTemplates.xml`. The XML's per-card-type templates \
+                 build on `AccountStoreBaseCardMixin` for shared OnLoad/OnEnter/OnLeave/OnEvent \
+                 handlers and override `UpdateCardDisplay` per type — a nil reading here means \
+                 either the file did not execute or it stopped before the relevant assignment, \
+                 which would leave every card frame in the lane without its display-update \
+                 method."
+            );
+        }
+
+        let mount_aliases_creature: bool = env
+            .eval("return rawequal(AccountStoreMountCardMixin, AccountStoreCreatureCardMixin)")
+            .expect("Mount/Creature alias-identity probe must run cleanly");
+
+        assert!(
+            mount_aliases_creature,
+            "`AccountStoreMountCardMixin` MUST be the same table reference as \
+             `AccountStoreCreatureCardMixin` (Blizzard_AccountStoreCardTemplates.lua:367 — \
+             `AccountStoreMountCardMixin = AccountStoreCreatureCardMixin;`). The two card \
+             types share their entire behavior surface (the mount card is rendered with the \
+             same creature-display path as the creature card), so the addon expresses this by \
+             aliasing the table directly rather than wrapping with `CreateFromMixins`. A \
+             regression that converts the alias into a fresh empty table or a `CreateFromMixins` \
+             wrap would break the shared-behavior contract: the mount card would lose access \
+             to `UpdateCardDisplay` and any future Creature-mixin additions would silently \
+             fail to propagate. The general type-only assertion above would pass in that \
+             regression scenario (Mount is still a table), so this identity check is the only \
+             thing keeping the alias contract honest."
+        );
     });
 }
