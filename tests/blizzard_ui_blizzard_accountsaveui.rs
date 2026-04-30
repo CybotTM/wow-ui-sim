@@ -51,3 +51,6 @@ mod behavior_success_popup_launch_url;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_update_sizing.rs"]
 mod behavior_update_sizing;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_on_size_changed.rs"]
+mod behavior_on_size_changed;
