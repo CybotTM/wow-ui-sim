@@ -80,8 +80,11 @@ pub(super) fn set_reagent_count(state: &mut LuaState) -> LuaResult<u32> {
 
 /// `A_Admin.SeedReagentsForRecipe(recipe_id, count)` — bulk-seed every
 /// reagent in `recipe_id` at `required_count * count`, so the recipe
-/// becomes craftable exactly `count` times. Returns `true` on success;
-/// `false` (no-op) when `recipe_id` is unknown to `profession_data`.
+/// becomes craftable exactly `count` times. Dependent reagents declared
+/// on each slot (e.g. a Spark of Omens required alongside a Crest) are
+/// seeded too — without them, `HasMissingDependentReagents` would still
+/// block crafting. Returns `true` on success; `false` (no-op) when
+/// `recipe_id` is unknown to `profession_data`.
 pub(super) fn seed_reagents_for_recipe(state: &mut LuaState) -> LuaResult<u32> {
     let recipe_id = i32::from_stack(state, 1)?;
     let count = i32::from_stack(state, 2)?.max(0);
@@ -90,11 +93,13 @@ pub(super) fn seed_reagents_for_recipe(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Bool(false));
         return Ok(1);
     };
-    let plan: Vec<(u32, i32)> = recipe
-        .reagents
-        .iter()
-        .map(|r| (r.item_id, r.quantity * count))
-        .collect();
+    let mut plan: Vec<(u32, i32)> = Vec::with_capacity(recipe.reagents.len());
+    for r in recipe.reagents {
+        plan.push((r.item_id, r.quantity * count));
+        for dep in r.dependent_reagents {
+            plan.push((dep.item_id, dep.quantity * count));
+        }
+    }
     for (item_id, qty) in plan {
         apply_reagent_count(state, item_id, qty);
     }
