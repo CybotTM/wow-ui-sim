@@ -44,6 +44,17 @@ const CARD_TEMPLATE_TABLES: &[&str] = &[
     "AccountStoreMountCardMixin",
 ];
 
+const ITEM_VIEW_TABLES: &[(&str, &str)] = &[
+    (
+        "AccountStoreItemDisplayMixin",
+        "Blizzard_AccountStoreItemDisplay.lua:2",
+    ),
+    (
+        "AccountStoreItemRackMixin",
+        "Blizzard_AccountStoreItemRack.lua:18",
+    ),
+];
+
 #[test]
 fn account_store_publishes_expected_global_mixin_tables() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -137,5 +148,31 @@ fn account_store_card_templates_publishes_expected_global_mixin_tables() {
              regression scenario (Mount is still a table), so this identity check is the only \
              thing keeping the alias contract honest."
         );
+    });
+}
+
+#[test]
+fn account_store_item_view_publishes_expected_global_mixin_tables() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for (global, defining_site) in ITEM_VIEW_TABLES {
+            let actual_type: String = env
+                .eval(&format!("return type(_G[{global:?}])"))
+                .unwrap_or_else(|error| panic!("failed to probe `{global}` type: {error}"));
+
+            assert_eq!(
+                actual_type, "table",
+                "Expected `{global}` to publish as a table after `{ROOT}` loads, got \
+                 `{actual_type}`. Declared at `{defining_site}` (`{global} = {{}}`) and \
+                 consumed via `mixin=\"{global}\"` on the corresponding XML frame template. \
+                 The two globals come from sibling Lua files \
+                 (`Blizzard_AccountStoreItemRack.lua` runs third, \
+                 `Blizzard_AccountStoreItemDisplay.lua` runs fourth in the TOC order); a \
+                 regression that drops either file from the TOC, or that fails to reach the \
+                 assignment, would surface as a nil here. The item-rack mixin renders the \
+                 grid of available cards inside the selected category, and the item-display \
+                 mixin renders the focused-card detail panel — both are required for the lane \
+                 to function past the category-list selection."
+            );
+        }
     });
 }
