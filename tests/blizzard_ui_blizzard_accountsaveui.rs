@@ -24,3 +24,6 @@ mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_account_state_disabled.rs"]
 mod behavior_account_state_disabled;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_account_state_locked.rs"]
+mod behavior_account_state_locked;
