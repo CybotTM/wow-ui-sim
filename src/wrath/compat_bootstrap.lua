@@ -597,3 +597,7 @@ end
 if type(SetCVar) == "function" and (GetCVar == nil or GetCVar("voiceChatMode") == nil) then
   SetCVar("voiceChatMode", "0")
 end
+
+if rawget(_G, "IsZoomOutAvailable") == nil then
+  function IsZoomOutAvailable() return false end
+end
