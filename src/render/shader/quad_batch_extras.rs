@@ -1,7 +1,7 @@
 use super::quad::{BlendMode, FrameQuadSnapshot, QuadBatch, QuadVertex, TextureRequest};
 use iced::{Point, Rectangle, Size};
 
-struct ThreeSliceParams {
+struct ThreeSliceParams<'a> {
     bounds: Rectangle,
     left_cap_width: f32,
     right_cap_width: f32,
@@ -13,6 +13,8 @@ struct ThreeSliceParams {
     v_top: f32,
     /// Normalized V of bottom edge of source strip (1.0 = texture bottom).
     v_bottom: f32,
+    /// Texture path (when known) used for path-keyed v_bottom overrides.
+    path: Option<&'a str>,
 }
 
 impl QuadBatch {
@@ -103,6 +105,7 @@ impl QuadBatch {
             blend_mode,
             v_top,
             v_bottom,
+            path: Some(path),
         });
         self.push_texture_request(path, vertex_start, 12);
     }
@@ -134,6 +137,7 @@ impl QuadBatch {
             blend_mode: BlendMode::Alpha,
             v_top,
             v_bottom,
+            path: None,
         });
     }
 
@@ -243,7 +247,14 @@ impl QuadBatch {
         let middle_width = params.bounds.width - params.left_cap_width - params.right_cap_width;
         let left_uv = params.left_cap_width / params.tex_width;
         let right_uv_start = 1.0 - (params.right_cap_width / params.tex_width);
-        let v_height = params.v_bottom - params.v_top;
+        let v_bottom = match params.path {
+            Some("Interface/Buttons/UI-Panel-Button-Up")
+            | Some("Interface\\Buttons\\UI-Panel-Button-Up")
+            | Some("Interface/Buttons/UI-Panel-Button-Highlight")
+            | Some("Interface\\Buttons\\UI-Panel-Button-Highlight") => 22.0 / 32.0,
+            _ => params.v_bottom,
+        };
+        let v_height = v_bottom - params.v_top;
         let mut emit = |dest_x: f32, dest_w: f32, uv_x: f32, uv_w: f32| {
             self.push_quad(
                 Rectangle::new(

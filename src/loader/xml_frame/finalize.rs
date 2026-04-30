@@ -81,7 +81,7 @@ fn apply_frame_button_extras(
     // `CreateFrame(..., inherits)` already installs template-owned button
     // texture/text extras. The XML finalize pass should only apply the
     // frame's direct extras or inherited ButtonText regions get created twice.
-    apply_button_textures(env, frame, name, "")?;
+    apply_button_textures(env, frame, name, inherits)?;
     apply_button_text(env, frame, name, "")?;
     apply_button_fonts(env, frame, name, "")?;
     apply_bar_texture(env, frame, name, inherits)?;
