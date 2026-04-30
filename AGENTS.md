@@ -4,7 +4,8 @@
 
 - **NEVER modify files in `Interface/AddOns/Wowless/`** — this is an external test suite, not our code.
 - **NEVER modify files in `Interface/AddOns/WowlessData/`** — regenerate with `python3 tools/gen_wowless_data.py` (reads from `~/Repos/wowless/data/`). Update the source repo first: `cd ~/Repos/wowless && git pull`.
-- Blizzard UI runtime files live in `~/.cache/wow-ui-sim/blizzard-ui`, populated from the committed manifest with `wow-cli casc sync-blizzard-ui`. Do not rely on `Interface/BlizzardUI` or `vendor/wow-ui-source` for runtime loading.
+- Blizzard UI runtime files live in `~/.cache/wow-ui-sim/blizzard-ui`, populated from the committed manifest with `wow-cli casc sync-blizzard-ui`. Do not rely on `Interface/BlizzardUI` or `vendor/wow-ui-source` for retail runtime loading.
+- **NEVER modify files in `Interface/BlizzardUI/`** — this is a directory of per-client-profile symlinks (`Retail`, `Wrath`, `Mists`) pointing into vendor checkouts. To set up or refresh classic profile sources, run `./scripts/setup-blizzard-ui.sh <profile> [ref]` for one profile or `./scripts/init-worktree.sh` for all three at once.
 - **NEVER override, monkey-patch, or otherwise change Blizzard/vendor Lua behavior as a performance optimization.** Blizzard Lua is the compatibility target. For perf work, optimize simulator-side primitive/method/dirty/dispatch costs (`SetAlpha`, `SetFormattedText`, `SetPoint`, `SetFontObject`, etc.) instead. Only patch Blizzard/vendor behavior when matching real WoW semantics/correctness, never as a performance shortcut.
 
 ## Wiki
@@ -110,7 +111,8 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ## WoW Game Files
 
-- `~/.cache/wow-ui-sim/blizzard-ui` - Blizzard UI source cache used by runtime loading. Populate with `wow-cli casc sync-blizzard-ui`; the file list comes from `data/blizzard-ui-files.txt`.
+- `~/.cache/wow-ui-sim/blizzard-ui` - Blizzard UI source cache used by retail runtime loading. Populate with `wow-cli casc sync-blizzard-ui`; the file list comes from `data/blizzard-ui-files.txt`.
+- `./Interface/BlizzardUI/` - Directory of per-client-profile symlinks: `Retail`, `Wrath`, `Mists`, each pointing into a separate sparse-checkout under `vendor/wow-ui-source-<profile>/Interface`. Both `BlizzardUI/` and `vendor/` are gitignored, so worktrees start without them — run `./scripts/init-worktree.sh` after `git worktree add` to recreate all three (idempotent; ~2s if vendor dirs already exist on disk).
 - WoW install (default `/syncthing/World of Warcraft`, override via `WOW_INSTALL_PATH` or `WOW_DATA_PATH`; `asset_resolver::wow_install_path()` also tries common Linux/Wine/Lutris/WSL/macOS paths). The simulator reads textures and fonts directly from CASC via the `asset-resolver` crate (gated behind the `casc` feature, on by default). Set `WOW_SIM_CASC=0` to disable.
 - `~/Projects/wow/WTF` - SavedVariables from real WoW installation
 
