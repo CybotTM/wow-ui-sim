@@ -47,6 +47,22 @@
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
 const ROOT: &str = "Blizzard_AccountStore";
+const REQUIRED_DEPS: &[&str] = &["Blizzard_SharedXML", "Blizzard_StaticPopup"];
+const OPTIONAL_DEP: &str = "Blizzard_UIParentPanelManager";
+const LANE_FILE_SCOPE_GLOBALS: &[&str] = &[
+    "AccountStoreMixin",
+    "FullscreenAccountStoreContainerMixin",
+    "FullscreenLeaveAccountStoreButtonMixin",
+    "AccountStoreItemRackMixin",
+    "AccountStoreCategoryMixin",
+    "AccountStoreCategoryListMixin",
+    "AccountStoreItemDisplayMixin",
+    "AccountStoreBaseCardMixin",
+    "AccountStoreCreatureCardMixin",
+    "AccountStoreIconCardMixin",
+    "AccountStoreTransmogSetCardMixin",
+    "AccountStoreUtil",
+];
 
 #[test]
 fn account_store_load_emits_no_lane_specific_lua_errors() {
@@ -84,5 +100,95 @@ fn account_store_load_emits_no_lane_specific_lua_errors() {
              (`*AccountStore*Mixin`, `AccountStoreUtil`). Got:\n  {}",
             lane_lua_errors.join("\n  ")
         );
+    });
+}
+
+#[test]
+fn account_store_dependency_closure_includes_every_declared_dep() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
+        for required in REQUIRED_DEPS {
+            assert!(
+                loaded.iter().any(|name| name == required),
+                "RequiredDep `{required}` MUST appear in the closure-walked `loaded` set after \
+                 the smoke-shape harness runs `Blizzard_AccountStore` as a root. The TOC's \
+                 `## Dependencies: Blizzard_SharedXML, Blizzard_StaticPopup` line is parsed by \
+                 `split_metadata_list` (src/toc.rs) and fed to the closure walker \
+                 (src/loader/mod.rs:454 — `toc.dependencies().chain(toc.optional_deps())`). If \
+                 either name is missing here, downstream addons that inherit StaticPopup / \
+                 SharedXML templates would fail to resolve their parent template chain. \
+                 Loaded set: {loaded:?}"
+            );
+        }
+
+        let optional_dep_loaded = env
+            .eval::<bool>(&format!(
+                r#"return C_AddOns.IsAddOnLoaded("{OPTIONAL_DEP}") == true
+                "#,
+            ))
+            .expect("IsAddOnLoaded probe must run cleanly");
+
+        assert!(
+            optional_dep_loaded,
+            "OptionalDep `{OPTIONAL_DEP}` MUST be available at runtime when the smoke-shape \
+             harness finishes loading `Blizzard_AccountStore`. Note: this addon's TOC declares \
+             the dep using the singular form `## OptionalDep:`, but the simulator's TOC parser \
+             only recognises the plural `## OptionalDeps:` (src/toc.rs:229-234). The closure \
+             walker therefore won't pull `{OPTIONAL_DEP}` transitively — it lands in the runtime \
+             solely via the panel-addons baseline that `with_blizzard_addon_smoke_shape` runs \
+             before walking the closure (`tests/common/panel_fixtures.rs:53-56`). A regression \
+             that drops `{OPTIONAL_DEP}` from the `PANEL_ADDONS` baseline, OR that fixes the \
+             singular-form parser without adding the addon to the closure for this lane, would \
+             flip this assertion. The test queries `C_AddOns.IsAddOnLoaded` because that surface \
+             reads from `sim.addons` (the runtime registry the panel baseline populates), not \
+             from the closure walker's per-call output. Closure-walked set: {loaded:?}"
+        );
+
+        assert!(
+            !loaded.iter().any(|name| name == OPTIONAL_DEP),
+            "Documented gap: `{OPTIONAL_DEP}` is currently NOT expected in the closure-walked \
+             `loaded` set, because the AccountStore TOC uses singular `## OptionalDep:` and the \
+             parser only handles plural `## OptionalDeps:`. If a future change extends the parser \
+             to accept the singular form, this assertion will flip and serve as a tripwire — \
+             remove this negative assertion and add `{OPTIONAL_DEP}` to `REQUIRED_DEPS` (or move \
+             it into a positive list) so the closure walker is the single source of truth. Got \
+             `{OPTIONAL_DEP}` unexpectedly present in: {loaded:?}"
+        );
+    });
+}
+
+#[test]
+fn account_store_load_on_demand_root_executes_file_scope_code() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, loaded| {
+        assert!(
+            loaded.iter().any(|name| name == ROOT),
+            "`{ROOT}` MUST appear in the closure-walked `loaded` set despite carrying \
+             `## LoadOnDemand: 1`. The closure walker chains the LoD pool into the main pool \
+             when an LoD addon is requested as a root (src/loader/mod.rs:410). A regression \
+             that excluded LoD addons from being closure roots would prevent any of this lane's \
+             file-scope code from executing — the global-existence assertions below would all \
+             fail, but this top-level check pins the root cause. Loaded set: {loaded:?}"
+        );
+
+        for global_name in LANE_FILE_SCOPE_GLOBALS {
+            let is_table = env
+                .eval::<bool>(&format!(
+                    r#"return type({global_name}) == "table"
+                    "#,
+                ))
+                .expect("file-scope global type probe must run cleanly");
+
+            assert!(
+                is_table,
+                "Global `{global_name}` MUST be a table after the smoke-shape harness loads \
+                 `Blizzard_AccountStore`. Each entry in `LANE_FILE_SCOPE_GLOBALS` is declared \
+                 via `Mixin = {{}}` (or `CreateFromMixins(...)`) at file scope across the lane's \
+                 six Lua files. If the LoadOnDemand flag silently skipped the addon's load, the \
+                 closure walker would still list it in `loaded` (since LoD routing happens \
+                 upstream) but the file chunks would never run — leaving these globals as nil. \
+                 A nil reading here means the LoadOnDemand handling in `load_addon` regressed: \
+                 the addon was discovered but its file chunks didn't execute. Got \
+                 `type({global_name}) == \"table\"` returned false."
+            );
+        }
     });
 }
