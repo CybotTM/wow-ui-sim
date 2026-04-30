@@ -1,34 +1,38 @@
 //! Mixin-method surface pinned by `Blizzard_AccessibilityTemplates`.
 //!
-//! `UIThemeContainerMixin` is defined in
-//! `Blizzard_AccessibilityTemplates/Mainline/AccessibilityTemplates.lua` as
-//! a free-form Lua table that grows methods via `function Mixin:Method() ... end`
-//! syntax (which is just sugar for assigning a function to
-//! `UIThemeContainerMixin.Method`). Frames using the mixin are produced
-//! via `mixin="UIThemeContainerMixin"` on the `UIThemeContainerFrame`
-//! intrinsic (see `AccessibilityIntrinsics.xml`), and inherit the full
-//! method bag through the standard `Mixin(self, UIThemeContainerMixin)`
-//! pattern that runs from XML mixin attributes.
+//! Two free-form Lua tables grow methods via `function Mixin:Method() ... end`
+//! syntax (just sugar for assigning a function to `Mixin.Method`):
 //!
-//! If any of these methods disappears (or, more subtly, gets shadowed by
-//! a non-function value during the file's load), every dialog that uses
-//! a `UIThemeContainerFrame`-rooted theme container starts erroring at
-//! the first event tick — the four intrinsic-script entry points
-//! (`UIThemeContainerFrame_OnPreLoad/PreShow/PostHide/PostEvent`) all
-//! call into the methods listed here. Pinning the function-shaped
-//! surface is the minimum guard against that class of regression.
+//! - `UIThemeContainerMixin`, defined in
+//!   `Mainline/AccessibilityTemplates.lua`, mixed into the
+//!   `UIThemeContainerFrame` intrinsic via `mixin="UIThemeContainerMixin"`
+//!   in `AccessibilityIntrinsics.xml`. Drives the parchment / stone theme
+//!   swap that QuestText / GossipFrame / ItemText containers depend on.
 //!
-//! The four `..._OnPre*`/`..._OnPost*` intrinsic-script entry points are
-//! intentionally NOT pinned here — they're exercised end-to-end by the
-//! load smoke (which would catch any nil-call from the script chain),
-//! so duplicating that coverage at the function-table level would just
-//! be redundant.
+//! - `TextSizeManagerBase`, defined in `TextSizeManager.lua`. Used by
+//!   `TextSizeManager` (a `CreateFromMixins(TextSizeManagerBase)` instance
+//!   in `TextSizeManagerGame.lua`) and by any cross-flavor consumer that
+//!   maintains its own `CreateFromMixins(TextSizeManagerBase)` font-scale
+//!   subclass.
+//!
+//! If any pinned method disappears — or, more subtly, gets shadowed by a
+//! non-function value during the file's load — every consumer that mixes
+//! the table in starts nil-calling at the first event tick. Pinning the
+//! function-shaped surface is the minimum guard against that class of
+//! regression.
+//!
+//! The four `..._OnPre*`/`..._OnPost*` intrinsic-script entry points on
+//! `UIThemeContainerMixin` are intentionally NOT pinned here — they're
+//! exercised end-to-end by the load smoke (which would catch any nil-call
+//! from the script chain), so duplicating that coverage at the
+//! function-table level would just be redundant.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
+use wow_ui_sim::lua_api::WowLuaEnv;
 
 const ROOT: &str = "Blizzard_AccessibilityTemplates";
 
-const EXPECTED_METHODS: &[&str] = &[
+const UI_THEME_CONTAINER_METHODS: &[&str] = &[
     "UpdateTheme",
     "CheckUpdateTheme",
     "GetCVarValue",
@@ -45,25 +49,67 @@ const EXPECTED_METHODS: &[&str] = &[
     "RegisterBackgroundTexture",
 ];
 
+const TEXT_SIZE_MANAGER_BASE_METHODS: &[&str] = &[
+    "Init",
+    "BuildFonts",
+    "GetFonts",
+    "GetFontBaseHeight",
+    "GetResizedFontHeight",
+    "SetTextScale",
+    "UpdateFonts",
+    "GetMinimumScale",
+    "GetScale",
+    "GetDefaultScaleWeight",
+    "SetMinimumScale",
+    "SetCVarName",
+    "GetCVarName",
+    "GetSettingValue",
+    "SetSettingValue",
+    "GetWeightedScale",
+    "GetScaledValue",
+    "GetScaledValueWeighted",
+    "UpdateRegisteredObjects",
+    "UpdateRegisteredSystems",
+    "RegisterObject",
+    "UpdateObject",
+];
+
+fn assert_mixin_methods(env: &WowLuaEnv, mixin_name: &str, methods: &[&str], defining_file: &str) {
+    for method in methods {
+        let probe = format!("return type({mixin_name}[{method:?}])");
+        let actual_type: String = env.eval(&probe).unwrap_or_else(|error| {
+            panic!("failed to probe `{mixin_name}.{method}` type: {error}")
+        });
+        assert_eq!(
+            actual_type, "function",
+            "Expected `{mixin_name}.{method}` to be a function after `{ROOT}` loads, got \
+             `{actual_type}`. Defined in `{defining_file}` via `function {mixin_name}:{method}(...) end`. \
+             A non-function (or nil) here means every consumer that mixes the table in will \
+             nil-call at the first event tick."
+        );
+    }
+}
+
 #[test]
 fn ui_theme_container_mixin_exposes_expected_methods() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
-        for method in EXPECTED_METHODS {
-            let probe = format!("return type(UIThemeContainerMixin[{method:?}])");
-            let actual_type: String = env.eval(&probe).unwrap_or_else(|error| {
-                panic!("failed to probe `UIThemeContainerMixin.{method}` type: {error}")
-            });
-            assert_eq!(
-                actual_type, "function",
-                "Expected `UIThemeContainerMixin.{method}` to be a function after `{ROOT}` loads, \
-                 got `{actual_type}`. Defined in `Mainline/AccessibilityTemplates.lua` via \
-                 `function UIThemeContainerMixin:{method}(...) ... end`. If this regresses, the \
-                 `Mixin(self, UIThemeContainerMixin)` call wired up by the \
-                 `mixin=\"UIThemeContainerMixin\"` attribute on `UIThemeContainerFrame` will \
-                 silently leave the method nil on every theme-container instance, and the \
-                 intrinsic-script entry points (`OnPreLoad/PreShow/PostHide/PostEvent`) will \
-                 nil-call at the first event tick."
-            );
-        }
+        assert_mixin_methods(
+            env,
+            "UIThemeContainerMixin",
+            UI_THEME_CONTAINER_METHODS,
+            "Mainline/AccessibilityTemplates.lua",
+        );
+    });
+}
+
+#[test]
+fn text_size_manager_base_exposes_expected_methods() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        assert_mixin_methods(
+            env,
+            "TextSizeManagerBase",
+            TEXT_SIZE_MANAGER_BASE_METHODS,
+            "TextSizeManager.lua",
+        );
     });
 }
