@@ -27,6 +27,20 @@
 //! mismatch surfaces as a positive nil assertion so the test would flip
 //! if Blizzard later adds a handler).
 //!
+//! Spec/source mismatch finding (PLAN.md task for `ToggleAccountStoreUI`):
+//! the plan named `ToggleAccountStoreUI(storeFrontID)` as a global
+//! that takes a store-front id, but no such global exists. The closest
+//! match is a `local function ToggleAccountStoreUI()` (zero args) in
+//! `Blizzard_CharacterSelectNavBar.lua:44` whose body is a one-line
+//! redirect: `AccountStoreUtil.ToggleAccountStore()`. The actual
+//! public toggle is `AccountStoreUtil.ToggleAccountStore()` at
+//! `Blizzard_AccountStoreUtil.lua:52` — also zero-arg, it flips
+//! `AccountStoreFrame:IsShown()` via
+//! `SetAccountStoreShown(not AccountStoreFrame:IsShown())`. The
+//! `account_store_toggle_is_callable_and_flips_frame_shown_state`
+//! test pins the absence of the PLAN-named global and the callability +
+//! state-flip behavior of the actual public toggle.
+//!
 //! Three tables are published at file scope by the lane's primary Lua
 //! body (`Blizzard_AccountStore.lua`):
 //!
@@ -349,6 +363,98 @@ fn account_store_transaction_error_popup_is_registered_with_expected_fields() {
              positive nil assertion is the spec/source-mismatch tripwire: if a future Blizzard \
              revision adds an `OnAccept`, this test flips and forces a re-pin against the new \
              handler shape (and a corresponding behavior test to assert what `OnAccept` does)."
+        );
+    });
+}
+
+#[test]
+fn account_store_toggle_is_callable_and_flips_frame_shown_state() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let plan_named_global_type: String = env
+            .eval("return type(_G[\"ToggleAccountStoreUI\"])")
+            .expect("`ToggleAccountStoreUI` global probe must run cleanly");
+
+        assert_eq!(
+            plan_named_global_type, "nil",
+            "Expected `_G[\"ToggleAccountStoreUI\"]` to be nil after `{ROOT}` loads, got \
+             `{plan_named_global_type}`. PLAN.md's spec names `ToggleAccountStoreUI(storeFrontID)` \
+             as a global, but the only `ToggleAccountStoreUI` symbol in the entire UI source is a \
+             `local function ToggleAccountStoreUI()` (zero args, file-local scope) at \
+             `Blizzard_CharacterSelectNavBar.lua:44`, whose body is a single redirect line: \
+             `AccountStoreUtil.ToggleAccountStore()`. Local-scoped functions never escape into \
+             `_G`, so the PLAN-named global is genuinely absent. This positive nil assertion is \
+             the spec/source-mismatch tripwire: if Blizzard ever promotes the redirect to a \
+             global with a `storeFrontID` parameter, this test flips and forces a re-pin against \
+             the new public surface (and probably a behavior test for the parameter dispatch)."
+        );
+
+        let toggle_function_type: String = env
+            .eval("return type(AccountStoreUtil.ToggleAccountStore)")
+            .expect("`AccountStoreUtil.ToggleAccountStore` probe must run cleanly");
+
+        assert_eq!(
+            toggle_function_type, "function",
+            "Expected `AccountStoreUtil.ToggleAccountStore` to be a function after `{ROOT}` \
+             loads, got `{toggle_function_type}`. The actual public toggle entry point is \
+             declared at `Blizzard_AccountStoreUtil.lua:52` and takes zero arguments — it flips \
+             the frame state via `AccountStoreUtil.SetAccountStoreShown(not \
+             AccountStoreFrame:IsShown())`. A nil reading here means the file-scope assignment \
+             was dropped, which would break every external caller (the CharacterSelectNavBar \
+             redirect, any addon that drives the account store from outside this lane)."
+        );
+
+        let initially_hidden: bool = env
+            .eval("return AccountStoreFrame:IsShown() == false")
+            .expect("initial `AccountStoreFrame:IsShown()` probe must run cleanly");
+
+        assert!(
+            initially_hidden,
+            "Expected `AccountStoreFrame:IsShown()` to be false before any toggle is invoked. \
+             The XML at `Blizzard_AccountStore.xml:78` declares the frame with `hidden=\"true\"` \
+             so it MUST start hidden after `{ROOT}` finishes loading. A regression that auto-shows \
+             the frame on load (e.g., a stray `:Show()` in OnLoad) would invert the toggle test \
+             below — both toggle calls would still flip state, but the start-hidden contract \
+             would be silently violated, and any addon that relies on `IsShown()` to gate UI \
+             chrome would render incorrectly until the user manually closed the panel."
+        );
+
+        env.eval::<()>("AccountStoreUtil.ToggleAccountStore(); return")
+            .expect("first `ToggleAccountStore()` call must run cleanly");
+
+        let shown_after_first_toggle: bool = env
+            .eval("return AccountStoreFrame:IsShown() == true")
+            .expect("post-first-toggle `IsShown()` probe must run cleanly");
+
+        assert!(
+            shown_after_first_toggle,
+            "Expected `AccountStoreFrame:IsShown()` to flip to true after the first \
+             `AccountStoreUtil.ToggleAccountStore()` call. The toggle reads the frame's current \
+             shown state (false at this point — pinned by the prior assertion) and routes to \
+             `SetAccountStoreShown(true)`, which calls `ShowUIPanel(AccountStoreFrame)` if the \
+             panel manager is available, falling back to `AccountStoreFrame:Show()` otherwise. A \
+             false reading here means either the toggle no-opped (a regression in \
+             `SetAccountStoreShown`'s if-already-equal early return), or `ShowUIPanel` failed \
+             to mark the frame shown (the panel-manager baseline pre-loaded by the harness \
+             should make this path work — `tests/common/panel_fixtures.rs:53-56`)."
+        );
+
+        env.eval::<()>("AccountStoreUtil.ToggleAccountStore(); return")
+            .expect("second `ToggleAccountStore()` call must run cleanly");
+
+        let hidden_after_second_toggle: bool = env
+            .eval("return AccountStoreFrame:IsShown() == false")
+            .expect("post-second-toggle `IsShown()` probe must run cleanly");
+
+        assert!(
+            hidden_after_second_toggle,
+            "Expected `AccountStoreFrame:IsShown()` to flip back to false after the second \
+             `AccountStoreUtil.ToggleAccountStore()` call. The double-toggle round-trip is the \
+             core contract: a single toggle could spuriously land in the right state even if \
+             the function were buggy (e.g., a stuck-on-true regression), but two toggles MUST \
+             return the frame to its starting state. A true reading here means the hide path \
+             (`HideUIPanel(AccountStoreFrame)` falling back to `AccountStoreFrame:Hide()`) \
+             regressed — the frame would stay open after the user clicked the close button or \
+             pressed escape, breaking the dismiss flow."
         );
     });
 }
