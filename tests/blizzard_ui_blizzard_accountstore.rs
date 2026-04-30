@@ -69,3 +69,6 @@ mod behavior_refund_timer;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_currency_for_store.rs"]
 mod behavior_currency_for_store;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_category_list_refresh.rs"]
+mod behavior_category_list_refresh;
