@@ -54,14 +54,33 @@ specific tag/SHA before running, mirroring the pattern in
 - Details! (MoP Classic): https://github.com/Tercioo/Details-Damage-Meter — `mists` branch
 - pfQuest-Vanilla: https://github.com/shagu/pfQuest — `master` branch (vanilla support kept inline)
 
-## Phase 8.2 hand-off
+## Harness (Phase 8.2 — landed)
 
-The harness needs to do, per addon:
-1. Clone/checkout into `vendor/addons-test/<name>/` (sparse-OK if the repo is large)
-2. Symlink/copy into `Interface/AddOns/<name>/` for the matching profile
-3. Build the simulator with `--features client-<profile>`
-4. Run `wow-sim --no-saved-vars run-tests <name>` (if the addon ships a TestFramework-compatible test) OR `wow-sim --exec-lua` to fire startup events
-5. Capture `lua-errors` output; diff against the profile baseline in
-   `docs/baselines/<profile>-lua-errors.json` to isolate addon-induced new
-   errors
-6. CI lane: matrix over (profile, addon)
+Implemented as `scripts/test-classic-addons.sh` driven by the declarative
+manifest `tools/classic-addon-manifest.tsv`. Per addon, it:
+
+1. Clones (filter:blob:none) into `vendor/addons/<name>/`, pins the
+   manifest ref
+2. Symlinks `Interface/AddOns/<name>` → `vendor/addons/<name>/<subpath>`
+3. Builds `wow-sim` with `--features client-<profile>`
+4. Runs `wow-sim lua-errors`, saves output to
+   `target/addon-harness/<name>-lua-errors.json`
+5. Diffs message-set against `docs/baselines/<profile>-lua-errors.json` to
+   report **addon-induced** errors (= present after addon load, absent in
+   profile baseline)
+6. Removes the symlink (clean tree for the next run; pass `--keep-symlinks`
+   to skip)
+
+Pass criterion: wow-sim must exit 0. Addon-induced Lua errors are reported
+but do NOT fail the harness — those become Phase 8.3 stub work.
+
+Usage:
+
+```
+scripts/test-classic-addons.sh                    # every addon
+scripts/test-classic-addons.sh Bartender4         # one addon by name
+scripts/test-classic-addons.sh --profile wrath    # filter by profile
+scripts/test-classic-addons.sh --skip-clone       # reuse vendor checkouts
+```
+
+CI lane (Phase 8.4) will invoke this script over a (profile, addon) matrix.
