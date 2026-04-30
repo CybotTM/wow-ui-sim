@@ -7,6 +7,7 @@ mod map_lua;
 mod panel_lua;
 mod post_event_lua;
 mod runtime_surfaces;
+mod logging;
 
 use character_lua::*;
 use early_lua::*;
@@ -16,7 +17,7 @@ use panel_lua::*;
 use post_event_lua::*;
 pub(crate) use runtime_surfaces::patch_account_store_set_storefront;
 use runtime_surfaces::*;
-use std::time::Instant;
+use logging::log_step;
 
 struct WorkaroundStep {
     label: &'static str,
@@ -271,22 +272,4 @@ pub fn apply_for_runtime_addon_preload(env: &crate::lua_api::LoaderEnv<'_>, addo
     ) {
         patch_housing_dashboard_preload(env);
     }
-}
-
-fn log_with_timestamp(env: &crate::lua_api::WowLuaEnv, message: &str) {
-    let start_time = env.state().borrow().start_time;
-    eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
-}
-
-fn log_step(env: &crate::lua_api::WowLuaEnv, label: &str, apply_step: impl FnOnce()) {
-    log_with_timestamp(env, &format!("[Workarounds] starting {label}"));
-    let started = Instant::now();
-    apply_step();
-    log_with_timestamp(
-        env,
-        &format!(
-            "[Workarounds] finished {label} in {:.2?}",
-            started.elapsed()
-        ),
-    );
 }
