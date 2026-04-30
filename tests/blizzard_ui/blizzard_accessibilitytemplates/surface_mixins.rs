@@ -1,6 +1,6 @@
 //! Mixin-method surface pinned by `Blizzard_AccessibilityTemplates`.
 //!
-//! Two free-form Lua tables grow methods via `function Mixin:Method() ... end`
+//! Three free-form Lua tables grow methods via `function Mixin:Method() ... end`
 //! syntax (just sugar for assigning a function to `Mixin.Method`):
 //!
 //! - `UIThemeContainerMixin`, defined in
@@ -14,6 +14,13 @@
 //!   in `TextSizeManagerGame.lua`) and by any cross-flavor consumer that
 //!   maintains its own `CreateFromMixins(TextSizeManagerBase)` font-scale
 //!   subclass.
+//!
+//! - `UserScaledElementMixin`, defined in `UserScaledElementTemplates.lua`.
+//!   Mixed into `UserScaledFrameTemplate` / `UserScaledFontStringTemplate` /
+//!   `UserScaledSliderTemplate` via `mixin="UserScaledElementMixin"`. Each
+//!   instance registers itself with `TextSizeManager` in
+//!   `OnLoad_UserScaledElement` and gets its width/height rescaled in
+//!   `OnTextScaleUpdated` whenever the user font-scale CVar changes.
 //!
 //! If any pinned method disappears — or, more subtly, gets shadowed by a
 //! non-function value during the file's load — every consumer that mixes
@@ -74,6 +81,19 @@ const TEXT_SIZE_MANAGER_BASE_METHODS: &[&str] = &[
     "UpdateObject",
 ];
 
+const USER_SCALED_ELEMENT_METHODS: &[&str] = &[
+    "OnLoad_UserScaledElement",
+    "UpdateWidth",
+    "GetWeightedScale",
+    "GetScaledDesiredDimension",
+    "SetDesiredWidth",
+    "GetDesiredWidth",
+    "GetScaledDesiredWidth",
+    "GetDesiredHeight",
+    "GetScaledDesiredHeight",
+    "OnTextScaleUpdated",
+];
+
 fn assert_mixin_methods(env: &WowLuaEnv, mixin_name: &str, methods: &[&str], defining_file: &str) {
     for method in methods {
         let probe = format!("return type({mixin_name}[{method:?}])");
@@ -110,6 +130,18 @@ fn text_size_manager_base_exposes_expected_methods() {
             "TextSizeManagerBase",
             TEXT_SIZE_MANAGER_BASE_METHODS,
             "TextSizeManager.lua",
+        );
+    });
+}
+
+#[test]
+fn user_scaled_element_mixin_exposes_expected_methods() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        assert_mixin_methods(
+            env,
+            "UserScaledElementMixin",
+            USER_SCALED_ELEMENT_METHODS,
+            "UserScaledElementTemplates.lua",
         );
     });
 }
