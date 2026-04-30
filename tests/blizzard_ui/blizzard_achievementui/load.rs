@@ -61,8 +61,11 @@
 //! list below.
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
+use crate::common::panel_fixtures::blizzard_ui_dir;
+use wow_ui_sim::toc::TocFile;
 
 const ROOT: &str = "Blizzard_AchievementUI";
+const ROOT_TOC_FILE: &str = "Blizzard_AchievementUI_Mainline.toc";
 const LANE_FILE_SCOPE_MIXINS: &[&str] = &[
     "AchievementCategoryTemplateMixin",
     "AchievementCategoryTemplateButtonMixin",
@@ -217,6 +220,176 @@ fn achievement_ui_load_on_demand_root_executes_file_scope_code() {
              aborted at line 2 because `UIPanelWindows` was nil at that moment (panel-addons \
              baseline regressed or load order changed), OR (b) the assignment was moved \
              behind a deferred path (e.g. `OnLoad`) — both meaningful contract changes."
+        );
+    });
+}
+
+/// Pin the TOC-driven dependency contract via direct parser dispatch.
+///
+/// Earlier `achievement_ui_dependency_closure_includes_only_the_root` asserts
+/// the literal `loaded == [ROOT]` set, which is correct but reads the contract
+/// as a constant. THIS test grounds the contract in the TOC file via
+/// `TocFile::from_file`: parses `Blizzard_AchievementUI_Mainline.toc`, extracts
+/// `dependencies()` and `optional_deps()`, and asserts every entry appears in
+/// `loaded`. For this addon both lists are currently empty, so the forward
+/// inclusion is vacuous — but the auxiliary "no extras beyond ROOT" check on
+/// the reverse side AND the "TOC has zero deps" parser-grounded assertion
+/// together hold the contract under change: a future PR adding a `##
+/// Dependencies:` line either (a) gets pulled by the closure walker and
+/// satisfies the forward inclusion, OR (b) gets dropped and trips the
+/// inclusion. Either way the empty-list assertion forces the PR to also
+/// update this test, surfacing the contract drift.
+#[test]
+fn achievement_ui_loaded_set_contains_every_declared_toc_dependency() {
+    let toc_path = blizzard_ui_dir().join(ROOT).join(ROOT_TOC_FILE);
+    let toc = TocFile::from_file(&toc_path).unwrap_or_else(|e| {
+        panic!(
+            "TOC at `{}` MUST parse cleanly. The closure walker reads this same file via \
+             `TocFile::from_file` (src/c_api/c_addons.rs:639) when servicing LoadAddOn — a \
+             parser failure here would prove the simulator's runtime LoadAddOn dispatch \
+             cannot resolve this addon either. Got: {e}",
+            toc_path.display()
+        )
+    });
+    let mut declared_deps: Vec<String> = toc.dependencies();
+    declared_deps.extend(toc.optional_deps());
+
+    assert!(
+        declared_deps.is_empty(),
+        "`{ROOT_TOC_FILE}` currently declares NO `## Dependencies:` and NO `## OptionalDeps:` \
+         entries — the parser-extracted set is `{declared_deps:?}`. If a future PR adds either \
+         line, this assertion will trip; that PR must (a) update this expected list AND (b) \
+         either confirm the closure walker pulls the new dep (the forward inclusion below \
+         passes) or fix the closure walker. The plural `## OptionalDeps:` form is the only \
+         one the parser recognises (src/toc.rs:229-234) — singular `## OptionalDep:` is silently \
+         ignored, so a future singular-form addition would NOT change `declared_deps` and would \
+         NOT trip this guard but WOULD silently fail to pull the dep."
+    );
+
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |_env, loaded| {
+        for dep in &declared_deps {
+            assert!(
+                loaded.iter().any(|name| name == dep),
+                "Declared TOC dependency `{dep}` (parsed from \
+                 `{ROOT_TOC_FILE}` via `TocFile::from_file`) MUST appear in the closure-walked \
+                 `loaded` set. The walker calls `toc.dependencies().chain(toc.optional_deps())` \
+                 (src/loader/mod.rs:454) to pull deps transitively. A missing entry here means \
+                 the walker dropped the dep — downstream addons inheriting templates from this \
+                 dep would fail to resolve. Loaded set: {loaded:?}"
+            );
+        }
+
+        for entry in loaded {
+            if entry == ROOT {
+                continue;
+            }
+            assert!(
+                declared_deps.iter().any(|dep| dep == entry),
+                "Closure-walked `loaded` entry `{entry}` is NOT declared as a TOC dependency in \
+                 `{ROOT_TOC_FILE}` — the parser extracted `{declared_deps:?}` from the file's \
+                 `## Dependencies:` and `## OptionalDeps:` lines. An extra entry here means \
+                 either (a) the closure walker pulled an addon that wasn't requested (e.g. via \
+                 a panel-baseline leak into the closure pool), OR (b) the TOC declares a dep \
+                 in a form the parser doesn't recognise (e.g. singular `## OptionalDep:`). \
+                 Loaded set: {loaded:?}"
+            );
+        }
+    });
+}
+
+/// Pin the LoD-trigger contract: `C_AddOns.LoadAddOn` from Lua resolves and
+/// loads the addon when called against a fresh env that has NOT pre-loaded it.
+///
+/// Earlier `achievement_ui_load_on_demand_root_executes_file_scope_code` runs
+/// the smoke-shape harness with `&[ROOT]` as roots, which loads the addon via
+/// the closure walker — that test pins "LoD as a closure root works", not "LoD
+/// as a Lua-driven runtime dispatch works". THIS test exercises the second
+/// path: passing `&[]` to the harness loads only the panel-addons baseline
+/// (`tests/common/panel_fixtures.rs:53-56`), leaving the AchievementUI TOC
+/// discoverable via `addon_base_paths` but unloaded. The Lua call
+/// `C_AddOns.LoadAddOn("Blizzard_AchievementUI")` then exercises
+/// `c_addons_load_addon` (src/c_api/c_addons.rs:570), which finds the TOC via
+/// `find_runtime_addon_toc`, parses it, and runs the file chunks.
+#[test]
+fn achievement_ui_load_on_demand_triggers_via_lua_load_addon_api() {
+    with_blizzard_addon_smoke_shape(&[], &[], |env, loaded| {
+        assert!(
+            !loaded.iter().any(|name| name == ROOT),
+            "Pre-condition violated: `{ROOT}` MUST NOT be in the closure-walked `loaded` set \
+             when the harness is invoked with empty roots. The smoke-shape harness only loads \
+             the closure of `roots` plus the panel-addons baseline — and the panel baseline does \
+             not include `{ROOT}`. A non-empty reading here means a baseline pre-load regressed \
+             into pulling AchievementUI, which would invalidate this test's LoD-trigger \
+             assertion (the pre-loaded addon would short-circuit the LoadAddOn call). Loaded \
+             set: {loaded:?}"
+        );
+
+        let pre_loaded = env
+            .eval::<bool>(&format!(
+                r#"return C_AddOns.IsAddOnLoaded("{ROOT}") == true"#
+            ))
+            .expect("IsAddOnLoaded probe must run cleanly");
+
+        assert!(
+            !pre_loaded,
+            "Pre-condition violated: `C_AddOns.IsAddOnLoaded(\"{ROOT}\")` returned true BEFORE \
+             the LoadAddOn dispatch ran. This means a panel-baseline workaround or runtime \
+             preload (e.g. `apply_for_runtime_addon_preload` at src/c_api/c_addons.rs:584) \
+             auto-loaded AchievementUI as a side effect — which would short-circuit the \
+             LoadAddOn call below and invalidate this test's contract. If this assertion ever \
+             trips, audit the panel baseline and any workaround paths for AchievementUI \
+             auto-load."
+        );
+
+        let load_addon_returned_true = env
+            .eval::<bool>(&format!(
+                r#"local loaded, _reason = C_AddOns.LoadAddOn("{ROOT}")
+                return loaded == true"#
+            ))
+            .expect("C_AddOns.LoadAddOn dispatch must run cleanly");
+
+        assert!(
+            load_addon_returned_true,
+            "`C_AddOns.LoadAddOn(\"{ROOT}\")` MUST return `true` when invoked from Lua against \
+             a discoverable LoD addon. The dispatch lives at \
+             `c_addons_load_addon` (src/c_api/c_addons.rs:570): it locates the TOC via \
+             `find_runtime_addon_toc`, parses it via `TocFile::from_file`, and walks deps + \
+             foundations recursively before executing the file chunks. A `false` return means \
+             one of: (a) `find_runtime_addon_toc` failed to locate the addon (addon_base_paths \
+             regression), (b) the TOC parser tripped, (c) a dependency closure walked through \
+             a disabled addon, OR (d) `load_addon_from_toc` itself errored. Tear-down line: \
+             this is the FIRST gate keeping LoD-only addons usable from runtime Lua code."
+        );
+
+        let post_loaded = env
+            .eval::<bool>(&format!(
+                r#"return C_AddOns.IsAddOnLoaded("{ROOT}") == true"#
+            ))
+            .expect("post-load IsAddOnLoaded probe must run cleanly");
+
+        assert!(
+            post_loaded,
+            "After `C_AddOns.LoadAddOn(\"{ROOT}\")` returned true, \
+             `C_AddOns.IsAddOnLoaded(\"{ROOT}\")` MUST also return true — the LoadAddOn path \
+             ends with `mark_addon_loaded` (src/c_api/c_addons.rs:661), which sets the addon's \
+             `loaded` flag. A false reading here means the load completed but the loaded-state \
+             bookkeeping wasn't updated — downstream `IsAddOnLoaded` callers would see the addon \
+             as not-loaded and re-dispatch LoadAddOn, potentially infinitely."
+        );
+
+        let mixin_present = env
+            .eval::<bool>(r#"return type(AchievementTemplateMixin) == "table""#)
+            .expect("file-scope mixin probe after LoadAddOn must run cleanly");
+
+        assert!(
+            mixin_present,
+            "After LoadAddOn returned true, the file-scope global \
+             `AchievementTemplateMixin` (declared at Blizzard_AchievementUI.lua:1039) MUST be a \
+             table. A nil reading here means the addon's loaded-state bookkeeping was updated \
+             but its file chunks didn't actually execute — proving LoadAddOn took a fast path \
+             past `load_addon_from_toc`'s file-load step. This is a stronger pin than \
+             IsAddOnLoaded alone because it surfaces the case where the addon registry says \
+             loaded but no Lua code actually ran."
         );
     });
 }
