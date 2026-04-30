@@ -493,3 +493,109 @@ if rawget(_G, "UnitCharacterPoints") == nil then
     return 0, 0
   end
 end
+
+-- Phase 4.1: globals that surfaced after the previous batches landed.
+
+if rawget(_G, "FCF_GetCurrentChatFrame") == nil then
+  function FCF_GetCurrentChatFrame()
+    return rawget(_G, "DEFAULT_CHAT_FRAME")
+  end
+end
+
+if rawget(_G, "GetArenaCurrency") == nil then
+  function GetArenaCurrency()
+    return 0
+  end
+end
+
+if rawget(_G, "GetChannelDisplayInfo") == nil then
+  function GetChannelDisplayInfo(idx)
+    return nil
+  end
+end
+
+if rawget(_G, "GetCurrentMapContinent") == nil then
+  function GetCurrentMapContinent()
+    return 0, 0
+  end
+end
+
+if rawget(_G, "GetGamma") == nil then
+  function GetGamma()
+    return 1.0
+  end
+end
+
+if rawget(_G, "GetTabardCreationCost") == nil then
+  function GetTabardCreationCost()
+    return 0
+  end
+end
+
+if rawget(_G, "GetTerrainMip") == nil then
+  function GetTerrainMip()
+    return 0
+  end
+end
+
+if rawget(_G, "GetVideoCaps") == nil then
+  -- Returns a table of capability flags in real wrath. Empty table is a safe
+  -- fallback — callers do `caps.foo` lookups that all return nil.
+  function GetVideoCaps()
+    return {}
+  end
+end
+
+if rawget(_G, "IsStackableAction") == nil then
+  function IsStackableAction(slot)
+    return false
+  end
+end
+
+if rawget(_G, "UnitPVPRank") == nil then
+  function UnitPVPRank(unit)
+    return 0
+  end
+end
+
+if rawget(_G, "GetActionText") == nil then
+  function GetActionText(slot)
+    return ""
+  end
+end
+
+if rawget(_G, "GetCurrentArenaSeason") == nil then
+  function GetCurrentArenaSeason()
+    return 0
+  end
+end
+
+if rawget(_G, "GetCurrentMapDungeonLevel") == nil then
+  function GetCurrentMapDungeonLevel()
+    return 0, 0
+  end
+end
+
+if rawget(_G, "GetPVPRankProgress") == nil then
+  function GetPVPRankProgress()
+    return 0
+  end
+end
+
+if rawget(_G, "DungeonUsesTerrainMap") == nil then
+  function DungeonUsesTerrainMap()
+    return false
+  end
+end
+
+if rawget(_G, "GetPreviousArenaSeason") == nil then
+  function GetPreviousArenaSeason()
+    return 0
+  end
+end
+
+if rawget(_G, "IsActionInRange") == nil then
+  function IsActionInRange(slot)
+    return nil
+  end
+end
