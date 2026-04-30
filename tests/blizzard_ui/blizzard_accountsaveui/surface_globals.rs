@@ -58,3 +58,30 @@ fn account_save_kick_error_code_is_241() {
         );
     });
 }
+
+#[test]
+fn account_save_frame_mixin_visual_state_enum() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let (disabled, enabled_locked, enabled_unlocked) = env
+            .eval::<(i64, i64, i64)>(
+                "return AccountSaveFrameMixin.VisualState.Disabled,
+                        AccountSaveFrameMixin.VisualState.EnabledLocked,
+                        AccountSaveFrameMixin.VisualState.EnabledUnlocked",
+            )
+            .expect(
+                "AccountSaveFrameMixin.VisualState must expose Disabled / EnabledLocked / \
+                 EnabledUnlocked as integer keys",
+            );
+        assert_eq!(
+            (disabled, enabled_locked, enabled_unlocked),
+            (1, 2, 3),
+            "AccountSaveFrameMixin.VisualState pins three enum values referenced by \
+             AccountSaveFrameMixin:UpdateVisualState — Disabled=1, EnabledLocked=2, \
+             EnabledUnlocked=3 (Blizzard_AccountSaveUI.lua lines 27-31). If this \
+             regresses, either the file-scope assignment never ran or a downstream \
+             addon overwrote the table. Got: \
+             (Disabled={disabled}, EnabledLocked={enabled_locked}, \
+             EnabledUnlocked={enabled_unlocked})."
+        );
+    });
+}
