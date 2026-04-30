@@ -293,7 +293,9 @@ end
 -- ─── Phase 4.4b: action-bar / LFD / raid / paperdoll helpers ─────────────────
 
 if rawget(_G, "GetActionCharges") == nil then
-  function GetActionCharges(slot) return nil end
+  -- Returns (charges, maxCharges, chargeStart, chargeDuration). ActionButton_UpdateCount
+  -- compares maxCharges > 1, so it must be a number — return zeros not nils.
+  function GetActionCharges(slot) return 0, 0, 0, 0 end
 end
 
 if rawget(_G, "GetExtraBarIndex") == nil then
