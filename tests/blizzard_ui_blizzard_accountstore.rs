@@ -36,3 +36,6 @@ mod behavior_on_hide_sound;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_category_selected.rs"]
 mod behavior_category_selected;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_card_select_purchase.rs"]
+mod behavior_card_select_purchase;
