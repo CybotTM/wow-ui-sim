@@ -9,3 +9,6 @@ mod common;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/load.rs"]
 mod load;
+
+#[path = "blizzard_ui/blizzard_accessibilitytemplates/surface_globals.rs"]
+mod surface_globals;
