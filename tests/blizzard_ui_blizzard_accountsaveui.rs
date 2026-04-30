@@ -21,3 +21,6 @@ mod surface_events;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/surface_mixins.rs"]
 mod surface_mixins;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_account_state_disabled.rs"]
+mod behavior_account_state_disabled;
