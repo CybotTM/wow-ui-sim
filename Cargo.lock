@@ -666,7 +666,7 @@ dependencies = [
 [[package]]
 name = "cascette-client-storage"
 version = "0.2.0"
-source = "git+https://github.com/wowemulation-dev/cascette-rs?rev=2d1294b#2d1294b9d8eba0c0d0ffc6387f0777f36ecae671"
+source = "git+https://github.com/Osso/cascette-rs?rev=2fe7118#2fe711811b1648a9f04792b835de744fb93f46d1"
 dependencies = [
  "binrw",
  "cascette-crypto",
@@ -690,7 +690,7 @@ dependencies = [
 [[package]]
 name = "cascette-crypto"
 version = "0.2.0"
-source = "git+https://github.com/wowemulation-dev/cascette-rs?rev=2d1294b#2d1294b9d8eba0c0d0ffc6387f0777f36ecae671"
+source = "git+https://github.com/Osso/cascette-rs?rev=2fe7118#2fe711811b1648a9f04792b835de744fb93f46d1"
 dependencies = [
  "binrw",
  "cipher",
@@ -703,11 +703,10 @@ dependencies = [
 [[package]]
 name = "cascette-formats"
 version = "0.2.0"
-source = "git+https://github.com/wowemulation-dev/cascette-rs?rev=2d1294b#2d1294b9d8eba0c0d0ffc6387f0777f36ecae671"
+source = "git+https://github.com/Osso/cascette-rs?rev=2fe7118#2fe711811b1648a9f04792b835de744fb93f46d1"
 dependencies = [
  "binrw",
  "cascette-crypto",
- "divsufsort",
  "flate2",
  "hex",
  "lz4_flex",
@@ -1182,15 +1181,6 @@ checksum = "89a09f22a6c6069a18470eb92d2298acf25463f14256d24778e1230d789a2aec"
 dependencies = [
  "bitflags 2.10.0",
  "objc2 0.6.3",
-]
-
-[[package]]
-name = "divsufsort"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e57e36c45fe0b4ef9bc690e53cce2f46dc193f7be3bc93bb7d23ca6dc1be820"
-dependencies = [
- "sacabase",
 ]
 
 [[package]]
@@ -3951,15 +3941,6 @@ name = "rustversion"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
-
-[[package]]
-name = "sacabase"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9883fc3d6ce3d78bb54d908602f8bc1f7b5f983afe601dabe083009d86267a84"
-dependencies = [
- "num-traits",
-]
 
 [[package]]
 name = "salsa20"
