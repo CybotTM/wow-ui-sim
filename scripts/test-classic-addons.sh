@@ -31,6 +31,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$REPO_ROOT/tools/classic-addon-manifest.tsv"
+COMPAT_ROOT="$REPO_ROOT/tools/classic-addon-compat"
 VENDOR_DIR="$REPO_ROOT/vendor/addons"
 ADDONS_DIR="$REPO_ROOT/Interface/AddOns"
 OUT_DIR="$REPO_ROOT/target/addon-harness"
@@ -95,10 +96,46 @@ install_symlink() {
     ln -s "$src" "$dst"
 }
 
+# Install per-addon compat shims, if any. Convention: each subdirectory under
+# tools/classic-addon-compat/<name>/ is treated as an in-tree companion
+# addon; we symlink it into Interface/AddOns/<subdir> so the loader picks
+# it up. The shim's TOC should declare `## LoadFirst: 1` so it runs before
+# the third-party addon and gets a chance to stub missing globals.
+install_compat_shims() {
+    local name="$1"
+    local compat_dir="$COMPAT_ROOT/$name"
+    [ -d "$compat_dir" ] || return 0
+    local shim
+    for shim in "$compat_dir"/*/; do
+        [ -d "$shim" ] || continue
+        local shim_name
+        shim_name=$(basename "$shim")
+        local dst="$ADDONS_DIR/$shim_name"
+        [ -L "$dst" ] && rm "$dst"
+        [ -e "$dst" ] && { echo "ERROR: $dst exists and is not a symlink" >&2; return 1; }
+        ln -s "$shim" "$dst"
+        echo "  → compat shim: $shim_name"
+    done
+}
+
 remove_symlink() {
     local name="$1"
     local dst="$ADDONS_DIR/$name"
     [ -L "$dst" ] && rm "$dst"
+}
+
+remove_compat_shims() {
+    local name="$1"
+    local compat_dir="$COMPAT_ROOT/$name"
+    [ -d "$compat_dir" ] || return 0
+    local shim
+    for shim in "$compat_dir"/*/; do
+        [ -d "$shim" ] || continue
+        local shim_name
+        shim_name=$(basename "$shim")
+        local dst="$ADDONS_DIR/$shim_name"
+        [ -L "$dst" ] && rm "$dst"
+    done
 }
 
 count_distinct_errors() {
@@ -127,12 +164,20 @@ run_addon() {
 
     ensure_vendor "$name" "$url" "$ref"
     install_symlink "$name" "$subpath"
+    install_compat_shims "$name"
+
+    teardown() {
+        if [ "$KEEP_SYMLINKS" -eq 0 ]; then
+            remove_symlink "$name"
+            remove_compat_shims "$name"
+        fi
+    }
 
     echo "  → cargo build --features client-$profile"
     if ! cargo build --bin wow-sim --no-default-features \
             --features "sound,gui,casc,client-$profile" 2>&1 \
             | tail -3; then
-        [ "$KEEP_SYMLINKS" -eq 0 ] && remove_symlink "$name"
+        teardown
         echo "  ✗ BUILD FAILED"
         return 1
     fi
@@ -141,7 +186,7 @@ run_addon() {
     echo "  → running lua-errors → $out"
     if ! WOW_SIM_NO_SAVED_VARS=1 timeout 120 \
             "$REPO_ROOT/target/debug/wow-sim" lua-errors > "$out" 2>/dev/null; then
-        [ "$KEEP_SYMLINKS" -eq 0 ] && remove_symlink "$name"
+        teardown
         echo "  ✗ wow-sim exited nonzero — possible crash"
         return 1
     fi
@@ -152,7 +197,7 @@ run_addon() {
     induced=$(addon_induced_errors "$profile" "$out")
     echo "  ✓ booted; $total distinct errors total, $induced addon-induced (vs baseline)"
 
-    [ "$KEEP_SYMLINKS" -eq 0 ] && remove_symlink "$name"
+    teardown
     return 0
 }
 

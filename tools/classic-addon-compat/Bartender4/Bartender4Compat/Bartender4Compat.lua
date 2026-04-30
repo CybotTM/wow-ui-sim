@@ -1,0 +1,9 @@
+-- Bartender4 per-addon compat shims.
+--
+-- Loads via ## LoadFirst: 1 before Bartender4 starts. Empty by default —
+-- once Phase 8.4 runs the harness and surfaces a Bartender4-specific gap,
+-- add a rawget-guarded stub here.
+--
+-- If the same gap appears for OTHER manifest addons too, promote the stub
+-- to the profile-level bootstrap (e.g. src/wrath/compat_bootstrap.lua) and
+-- remove it from here. See ../README.md for the rule.
