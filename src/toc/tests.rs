@@ -1,0 +1,393 @@
+use super::*;
+
+#[test]
+fn test_parse_simple_toc() {
+    let contents = r#"
+## Title: MyAddon
+## Interface: 110000
+## Dependencies: Ace3, LibStub
+
+Core.lua
+UI/Main.lua
+UI/Options.xml
+"#;
+    let toc = TocFile::parse(Path::new("/addons/MyAddon"), contents);
+
+    assert_eq!(toc.name, "MyAddon");
+    assert_eq!(toc.interface_versions(), vec![110000]);
+    assert_eq!(toc.dependencies(), vec!["Ace3", "LibStub"]);
+    assert_eq!(toc.files.len(), 3);
+    assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("UI/Main.lua"));
+    assert_eq!(toc.files[2], PathBuf::from("UI/Options.xml"));
+}
+
+#[test]
+fn test_parse_space_separated_dependencies() {
+    let contents = r#"
+## Title: Blizzard_BattlefieldMap
+## Dependencies: Blizzard_MapCanvas Blizzard_SharedMapDataProviders Blizzard_ObjectiveTracker
+BattlefieldMap.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/Blizzard_BattlefieldMap"), contents);
+
+    assert_eq!(
+        toc.dependencies(),
+        vec![
+            "Blizzard_MapCanvas",
+            "Blizzard_SharedMapDataProviders",
+            "Blizzard_ObjectiveTracker",
+        ]
+    );
+}
+
+#[test]
+fn test_parse_blizzard_toc() {
+    let contents = r#"
+## Title: Blizzard_SharedXMLBase
+## AllowLoad: Both
+Compat.lua
+Mixin.lua
+TableUtil.lua
+"#;
+    let toc = TocFile::parse(
+        Path::new("/Interface/AddOns/Blizzard_SharedXMLBase"),
+        contents,
+    );
+
+    assert_eq!(toc.name, "Blizzard_SharedXMLBase");
+    assert!(toc.is_blizzard_addon());
+    assert_eq!(toc.files.len(), 3);
+}
+
+#[test]
+fn test_parse_with_comments() {
+    let contents = r#"
+## Title: TestAddon
+# This is a comment
+#@no-lib-strip@
+Libs/LibStub.lua
+#@end-no-lib-strip@
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    // Comments and directives should be skipped
+    assert_eq!(toc.files.len(), 2);
+    assert_eq!(toc.files[0], PathBuf::from("Libs/LibStub.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Core.lua"));
+}
+
+#[test]
+fn test_parse_backslash_paths() {
+    let contents = r#"
+## Title: TestAddon
+Libs\LibStub\LibStub.lua
+Core\Init.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    // Backslashes should be normalized to forward slashes
+    assert_eq!(toc.files[0], PathBuf::from("Libs/LibStub/LibStub.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Core/Init.lua"));
+}
+
+#[test]
+fn test_optional_deps() {
+    let contents = r#"
+## Title: TestAddon
+## OptionalDeps: Ace3, LibDBIcon-1.0, LibSharedMedia-3.0
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert_eq!(
+        toc.optional_deps(),
+        vec!["Ace3", "LibDBIcon-1.0", "LibSharedMedia-3.0"]
+    );
+}
+
+#[test]
+fn test_load_first_metadata() {
+    let contents = r#"
+## Title: TestAddon
+## LoadFirst: 1
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert!(toc.is_load_first());
+}
+
+#[test]
+fn test_saved_variables() {
+    let contents = r#"
+## Title: TestAddon
+## SavedVariables: TestAddonDB, TestAddonPerCharDB
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert_eq!(
+        toc.saved_variables(),
+        vec!["TestAddonDB", "TestAddonPerCharDB"]
+    );
+}
+
+#[test]
+fn test_multiple_interface_versions() {
+    let contents = r#"
+## Title: TestAddon
+## Interface: 110107, 50500, 11507
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert_eq!(toc.interface_versions(), vec![110107, 50500, 11507]);
+}
+
+/// Wrath profile vendors (andrew6180/WoTLK-3.3.5-UI-Source) write
+/// `## Interface: 30300`. Parser must accept the single legacy value.
+#[test]
+fn test_wrath_interface_version() {
+    let contents = r#"
+## Title: WrathAddon
+## Interface: 30300
+WrathCore.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/WrathAddon"), contents);
+
+    assert_eq!(toc.interface_versions(), vec![30300]);
+    assert!(!toc.is_game_type_restricted());
+}
+
+/// Mists profile vendors write `## Interface: 50500` for MoP-Classic
+/// addons. Parser must accept the single value (the existing
+/// `test_multiple_interface_versions` covers 50500 only as a list element).
+#[test]
+fn test_mists_interface_version() {
+    let contents = r#"
+## Title: MistsAddon
+## Interface: 50500
+MistsCore.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/MistsAddon"), contents);
+
+    assert_eq!(toc.interface_versions(), vec![50500]);
+    assert!(!toc.is_game_type_restricted());
+}
+
+#[test]
+fn test_parse_inline_annotations() {
+    let contents = r#"
+## Title: TestAddon
+Core.lua
+Dump.lua [AllowLoadEnvironment Global]
+Debug.lua [AllowLoadEnvironment Global, SomeFlag]
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    // Annotations should be stripped, only filenames kept
+    assert_eq!(toc.files.len(), 3);
+    assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Dump.lua"));
+    assert_eq!(toc.files[2], PathBuf::from("Debug.lua"));
+    assert_eq!(toc.file_use_secure_env(0), None);
+    assert_eq!(toc.file_use_secure_env(1), None);
+    assert_eq!(toc.file_use_secure_env(2), None);
+}
+
+#[test]
+fn test_parse_load_into_environment_annotations() {
+    let contents = r#"
+## Title: TestAddon
+Core.lua
+Restricted.lua [LoadIntoEnvironment secure]
+Public.lua [LoadIntoEnvironment global]
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert_eq!(toc.files.len(), 3);
+    assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Restricted.lua"));
+    assert_eq!(toc.files[2], PathBuf::from("Public.lua"));
+    assert_eq!(toc.file_use_secure_env(0), None);
+    assert_eq!(toc.file_use_secure_env(1), Some(true));
+    assert_eq!(toc.file_use_secure_env(2), Some(false));
+}
+
+#[test]
+fn test_family_placeholder_resolves_to_mainline() {
+    let contents = r#"
+## Title: Blizzard_Colors
+Shared\ColorOverrides.lua
+[Family]\ColorConstants.lua
+[Family]\ColorManager.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/Blizzard_Colors"), contents);
+
+    assert_eq!(toc.files.len(), 3);
+    assert_eq!(toc.files[0], PathBuf::from("Shared/ColorOverrides.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Mainline/ColorConstants.lua"));
+    assert_eq!(toc.files[2], PathBuf::from("Mainline/ColorManager.lua"));
+}
+
+#[test]
+fn test_game_type_filter_skips_plunderstorm() {
+    let contents = r#"
+## Title: Blizzard_FrameXMLBase
+Constants.lua
+[Game]\GameModeConstants.lua [AllowLoadGameType plunderstorm]
+"#;
+    let toc = TocFile::parse(Path::new("/addons/Blizzard_FrameXMLBase"), contents);
+
+    assert_eq!(toc.files.len(), 1);
+    assert_eq!(toc.files[0], PathBuf::from("Constants.lua"));
+}
+
+#[test]
+fn test_game_type_filter_allows_mainline_and_standard() {
+    let contents = r#"
+## Title: TestAddon
+Core.lua
+Mainline\Override.lua [AllowLoadGameType mainline]
+Standard\Mode.lua [AllowLoadGameType standard]
+Standard\Multi.lua [AllowLoadGameType standard, wowhack, plunderstorm]
+WoWLabs\Mode.lua [AllowLoadGameType plunderstorm]
+Classic\Mode.lua [AllowLoadGameType classic]
+Cata\Mode.lua [AllowLoadGameType wrath, cata, mists]
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+    assert_eq!(toc.files.len(), 4);
+    assert_eq!(toc.files[0], PathBuf::from("Core.lua"));
+    assert_eq!(toc.files[1], PathBuf::from("Mainline/Override.lua"));
+    assert_eq!(toc.files[2], PathBuf::from("Standard/Mode.lua"));
+    assert_eq!(toc.files[3], PathBuf::from("Standard/Multi.lua"));
+}
+
+#[test]
+fn test_is_allowed_game_type() {
+    assert!(is_allowed_game_type("Core.lua"));
+    assert!(is_allowed_game_type(
+        "File.lua [AllowLoadGameType mainline]"
+    ));
+    assert!(is_allowed_game_type(
+        "File.lua [AllowLoadGameType standard]"
+    ));
+    assert!(is_allowed_game_type(
+        "File.lua [AllowLoadGameType standard, wowhack]"
+    ));
+    assert!(!is_allowed_game_type(
+        "File.lua [AllowLoadGameType plunderstorm]"
+    ));
+    assert!(!is_allowed_game_type(
+        "File.lua [AllowLoadGameType classic]"
+    ));
+    assert!(!is_allowed_game_type(
+        "File.lua [AllowLoadGameType wrath, cata, mists]"
+    ));
+}
+
+#[test]
+fn test_is_game_type_restricted() {
+    let plunderstorm = TocFile::parse(
+        Path::new("/addons/Test"),
+        "## AllowLoadGameType: plunderstorm\nCore.lua",
+    );
+    assert!(plunderstorm.is_game_type_restricted());
+
+    let mainline = TocFile::parse(
+        Path::new("/addons/Test"),
+        "## AllowLoadGameType: mainline\nCore.lua",
+    );
+    assert!(!mainline.is_game_type_restricted());
+
+    let standard = TocFile::parse(
+        Path::new("/addons/Test"),
+        "## AllowLoadGameType: standard\nCore.lua",
+    );
+    assert!(!standard.is_game_type_restricted());
+
+    let mixed = TocFile::parse(
+        Path::new("/addons/Test"),
+        "## AllowLoadGameType: plunderstorm, wowhack\nCore.lua",
+    );
+    assert!(mixed.is_game_type_restricted());
+
+    let no_restriction =
+        TocFile::parse(Path::new("/addons/Test"), "## Title: TestAddon\nCore.lua");
+    assert!(!no_restriction.is_game_type_restricted());
+}
+
+#[test]
+fn test_packager_debug_block_interface_version() {
+    // BlizzMove-style TOC: template Interface line skipped, debug block wins
+    let contents = r#"
+## Interface: @toc-version-midnight@, @toc-version-retail@, @toc-version-classic@
+#@debug@
+## Interface: 120000
+#@end-debug@
+## Title: BlizzMove
+## Version: @project-version@
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/BlizzMove"), contents);
+    // Template-only Interface line is skipped; debug block provides version
+    assert_eq!(toc.interface_versions(), vec![120000]);
+    // @project-version@ replaced with "dev"
+    assert_eq!(toc.metadata.get("Version").map(|s| s.as_str()), Some("dev"));
+    assert_eq!(toc.files.len(), 1);
+}
+
+#[test]
+fn test_packager_mixed_interface_version_kept() {
+    // If Interface has at least one plain number alongside templates, keep it
+    let contents = r#"
+## Interface: @toc-version-retail@, 110000
+Core.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+    // Mixed value retained; non-numeric tokens dropped by interface_versions()
+    assert_eq!(toc.interface_versions(), vec![110000]);
+}
+
+#[test]
+fn test_is_all_template_versions() {
+    assert!(is_all_template_versions(
+        "@toc-version-retail@, @toc-version-cata@"
+    ));
+    assert!(is_all_template_versions("@toc-version-retail@"));
+    assert!(!is_all_template_versions("110000"));
+    assert!(!is_all_template_versions("@toc-version-retail@, 110000"));
+    assert!(!is_all_template_versions(""));
+    assert!(!is_all_template_versions("@project-version@"));
+}
+
+#[test]
+fn test_allows_screen_modes() {
+    use crate::screen::ScreenKind;
+
+    let both = TocFile::parse(Path::new("/addons/Both"), "## AllowLoad: Both\nCore.lua");
+    assert!(both.allows_screen(ScreenKind::Game));
+    assert!(both.allows_screen(ScreenKind::Login));
+    assert!(both.allows_screen(ScreenKind::CharacterSelect));
+
+    let game = TocFile::parse(Path::new("/addons/Game"), "## AllowLoad: Game\nCore.lua");
+    assert!(game.allows_screen(ScreenKind::Game));
+    assert!(!game.allows_screen(ScreenKind::Login));
+    assert!(!game.allows_screen(ScreenKind::CharacterSelect));
+
+    let glue = TocFile::parse(Path::new("/addons/Glue"), "## AllowLoad: Glue\nCore.lua");
+    assert!(!glue.allows_screen(ScreenKind::Game));
+    assert!(glue.allows_screen(ScreenKind::Login));
+    assert!(glue.allows_screen(ScreenKind::CharacterSelect));
+
+    let unrestricted = TocFile::parse(
+        Path::new("/addons/Unrestricted"),
+        "## Title: TestAddon\nCore.lua",
+    );
+    assert!(unrestricted.allows_screen(ScreenKind::Game));
+    assert!(!unrestricted.allows_screen(ScreenKind::Login));
+    assert!(!unrestricted.allows_screen(ScreenKind::CharacterSelect));
+}
