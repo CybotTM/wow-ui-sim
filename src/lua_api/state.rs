@@ -217,6 +217,7 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            equipment_manager: EquipmentManagerState::new(),
             maps: default_maps(),
             achievements: default_achievements(),
             achievement_guild_rep: ::std::collections::HashMap::new(),
@@ -313,7 +314,8 @@ pub use super::state_types::{
     BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState, BidAuction,
     BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote,
     CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo,
-    CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
+    CursorItemOrigin, DeathRecapEntry, EquipmentManagerState, EquipmentSet, EquippedItem,
+    GreatVaultActivity, GuildMember, GuildRank,
     ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo,
     LfgActivityGroupInfo, LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo,
     LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
@@ -1738,6 +1740,11 @@ pub struct SimState {
     /// and `GetCurrencyContainerInfo`. Seeded at startup from the
     /// static `currency_data::CURRENCY_LIST`.
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Saved equipment ("gear") sets. Drives the entire
+    /// `C_EquipmentSet` namespace consumed by
+    /// `Blizzard_UIPanels_Game/PaperDollFrame.lua`. Empty by default;
+    /// addons / Lua populate via `CreateEquipmentSet`.
+    pub equipment_manager: EquipmentManagerState,
     /// Map metadata keyed by ui-map id. Drives `C_Map.GetMapArtID`,
     /// `GetMapChildrenInfo`, `GetPlayerMapPosition`. Seeded with the
     /// Azeroth world map, Eastern Kingdoms continent, and Stormwind

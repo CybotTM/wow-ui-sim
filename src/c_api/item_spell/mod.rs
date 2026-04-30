@@ -1,5 +1,6 @@
 mod c_container;
 mod c_currency;
+mod c_equipment_set;
 mod c_item;
 pub(crate) mod helpers;
 
@@ -20,7 +21,7 @@ pub(crate) fn register_item_and_spell_surfaces(state: &mut LuaState) -> LuaResul
     c_container::register_c_item_upgrade(state)?;
     c_container::register_c_container(state)?;
     c_currency::register_c_currency_info(state)?;
-    c_currency::register_c_equipment_set(state)?;
+    c_equipment_set::register_c_equipment_set(state)?;
     c_currency::register_c_bank(state)?;
     c_spell::register_c_spell_surface(state)?;
     c_spell_book::register_c_spell_book(state)?;
