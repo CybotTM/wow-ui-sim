@@ -136,6 +136,11 @@ const POST_LOAD_WORKAROUNDS: &[WorkaroundStep] = &[
         label: "patch_auth_challenge_frame_parent",
         apply: patch_auth_challenge_frame_parent_from_env,
     },
+    #[cfg(feature = "client-wrath")]
+    WorkaroundStep {
+        label: "wrath::post_load",
+        apply: apply_wrath_post_load,
+    },
 ];
 
 pub fn apply(env: &crate::lua_api::WowLuaEnv) {
@@ -158,6 +163,11 @@ fn init_chat_type_colors(env: &crate::lua_api::WowLuaEnv) {
 
 fn patch_housing_dashboard_preload_from_env(env: &crate::lua_api::WowLuaEnv) {
     patch_housing_dashboard_preload(&env.loader_env());
+}
+
+#[cfg(feature = "client-wrath")]
+fn apply_wrath_post_load(env: &crate::lua_api::WowLuaEnv) {
+    crate::wrath::post_load::apply(env);
 }
 
 pub fn apply_post_event(env: &crate::lua_api::WowLuaEnv) {
