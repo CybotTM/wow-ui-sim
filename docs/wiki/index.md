@@ -35,6 +35,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, nine-slice kit detection, UV remapping |
 | [[frame-data-flow]] | Parallel Lua/Rust systems, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
 | [[taint-system]] | Protected-frame gating, dual Lua environment (genv/secureenv), Elune-backed issecure/securecall, Blizzard `issecure()` call-site matrix, SecureHandler fallback, state/attribute drivers |
+| [[casc-asset-cache]] | Three stacked caches (FDID resolution sqlite, BLP byte cache, in-memory texture cache), measured timings (~300 ms init, ~10 ms extract, ~1 ms disk hit, ~2 µs mem hit), failure modes |
 
 ## investigations/
 
@@ -43,7 +44,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
 | [[achievement-panel-hide]] | Achievement panel hide now uses Blizzard's managed panel path; animation completion also fires child animation `OnFinished` scripts for alert hide XML |
-| [[bag-button]] | nil texture from GetInventorySlotInfo, stub returning 0 slots, ItemContextOverlay, frame_level_offset |
+| [[backpack-background-texture]] | Reported missing tan/brown body on Backpack — investigation showed sim renders exactly what `FlatPanelBackgroundTemplate` authors (solid `PANEL_BACKGROUND_COLOR`); retail texture comes from outside the Gethe public source (addon overlay or unmirrored patch path), no sim-side fix |
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop, shallow `issecretvalue` for pool releases (2159ms→2.6ms) |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
 | [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
@@ -57,6 +58,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[hero-spec-icon-bug]] | Retired — 5 layers of evidence confirm icon renders correctly |
 | [[hit-testing]] | Two-phase algorithm: HitGrid spatial index + depth-first child drill-down |
 | [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |
+| [[lfd-dungeon-list-empty]] | Dungeons & Raids panel showed empty Specific list: missing `GetLFGLockList` etc., never-fired `LFG_UPDATE_RANDOM_INFO`, header marked `is_random` |
 | [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
 | [[micro-menu-atlas-revert]] | Micro menu normal icons could disappear after hover because button atlas setters skipped child `atlas_tex_coords`, preventing restored normal textures from using isolated atlas crop requests |

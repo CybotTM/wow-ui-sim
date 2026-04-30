@@ -217,6 +217,7 @@ macro_rules! build_empty_sim_state {
             pet_actions: vec![PetActionSlot::default(); 10],
             glyph: GlyphState::default(),
             currency_info: super::globals::currency_data::seeded_currency_info_map(),
+            equipment_manager: EquipmentManagerState::new(),
             maps: default_maps(),
             achievements: default_achievements(),
             achievement_guild_rep: ::std::collections::HashMap::new(),
@@ -313,14 +314,15 @@ pub use super::state_types::{
     BarberShopCategory, BarberShopCharacterData, BarberShopOption, BarberShopState, BidAuction,
     BnetFriend, BnetGameAccount, BrowseQuery, ChatBubble, CommodityPurchaseQuote,
     CommoditySearchResultInfo, CommoditySearchResults, CraftingState, CurrencyInfo, CursorInfo,
-    CursorItemOrigin, DeathRecapEntry, EquippedItem, GreatVaultActivity, GuildMember, GuildRank,
-    ItemSearchKey, ItemSearchResultInfo, ItemSearchResults, KillingBlowInfo, LfdDungeonInfo,
-    LfgActivityGroupInfo, LfgActivityInfo, LfgAdvancedFilter, LfgApplication, LfgCategoryInfo,
-    LootRollInfo, LuaErrorRecord, MacroInfo, MapChildRect, MapData, MapRect, MirrorTimer,
-    MovementState, MythicPlusAffix, MythicPlusRatingMapSummary, MythicPlusRatingSummary,
-    MythicPlusRun, MythicPlusState, MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction,
-    PendingTimer, PlayerState, PlayerXpState, ScenarioState, ScenarioStep, SecondaryPowerState,
-    SocialFriend, SummonRequestState, TokenAuctionInfo, WorldState, WowTokenState,
+    CursorItemOrigin, DeathRecapEntry, EquipmentManagerState, EquipmentSet, EquippedItem,
+    GreatVaultActivity, GuildMember, GuildRank, ItemSearchKey, ItemSearchResultInfo,
+    ItemSearchResults, KillingBlowInfo, LfdDungeonInfo, LfgActivityGroupInfo, LfgActivityInfo,
+    LfgAdvancedFilter, LfgApplication, LfgCategoryInfo, LootRollInfo, LuaErrorRecord, MacroInfo,
+    MapChildRect, MapData, MapRect, MirrorTimer, MovementState, MythicPlusAffix,
+    MythicPlusRatingMapSummary, MythicPlusRatingSummary, MythicPlusRun, MythicPlusState,
+    MythicPlusWeeklyBest, NilSymbolAccess, OwnedAuction, PendingTimer, PlayerState, PlayerXpState,
+    ScenarioState, ScenarioStep, SecondaryPowerState, SocialFriend, SummonRequestState,
+    TokenAuctionInfo, WorldState, WowTokenState,
 };
 pub use super::tracked_recipes::TrackedRecipes;
 
@@ -1738,6 +1740,11 @@ pub struct SimState {
     /// and `GetCurrencyContainerInfo`. Seeded at startup from the
     /// static `currency_data::CURRENCY_LIST`.
     pub currency_info: HashMap<i32, CurrencyInfo>,
+    /// Saved equipment ("gear") sets. Drives the entire
+    /// `C_EquipmentSet` namespace consumed by
+    /// `Blizzard_UIPanels_Game/PaperDollFrame.lua`. Empty by default;
+    /// addons / Lua populate via `CreateEquipmentSet`.
+    pub equipment_manager: EquipmentManagerState,
     /// Map metadata keyed by ui-map id. Drives `C_Map.GetMapArtID`,
     /// `GetMapChildrenInfo`, `GetPlayerMapPosition`. Seeded with the
     /// Azeroth world map, Eastern Kingdoms continent, and Stormwind
@@ -2654,10 +2661,12 @@ fn default_lfd_dungeons() -> Vec<LfdDungeonInfo> {
         }
     };
     vec![
-        // Header row (negative id)
+        // Header row (negative id). is_random=false: in retail data,
+        // headers are pure categories — only positive-id "random heroic
+        // dungeon" entries carry is_random=true.
         d(
             -1,
-            "Random Heroic Dungeon",
+            "Random Heroic Dungeons",
             6,
             1,
             80,
@@ -2667,6 +2676,27 @@ fn default_lfd_dungeons() -> Vec<LfdDungeonInfo> {
             10,
             "",
             "",
+            false,
+            false,
+        ),
+        // Random heroic dungeon entry (positive id, is_random=true).
+        // GetRandomDungeonBestChoice returns this id; LFG_UPDATE_RANDOM_INFO
+        // selects it as the default choice. Without a positive-id random
+        // entry, GetRandomDungeonBestChoice returns nil, which breaks the
+        // LFDQueueFrame_SetType("specific") fallback only when the header
+        // itself is mistakenly marked random.
+        d(
+            999,
+            "Random Heroic Dungeon",
+            6,
+            2,
+            80,
+            80,
+            80,
+            5,
+            10,
+            "Interface/LFGFRAME/UI-LFG-BACKGROUND-HEROIC",
+            "A random heroic dungeon.",
             true,
             false,
         ),

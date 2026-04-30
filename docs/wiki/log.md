@@ -2,6 +2,26 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-30] ingest | CASC asset cache layers and measured costs
+
+Created `systems/casc-asset-cache.md` after measuring the three stacked caches end-to-end with `examples/casc_bench.rs`. The doc covers (a) the resolution sqlite shared with the game-engine repo via `GAME_ENGINE_SHARED_ROOT`, (b) the per-listfile-path BLP byte cache at `~/.cache/wow-ui-sim/casc-extract/`, and (c) the per-process `TextureManager` in-memory cache, with concrete timings (~300 ms one-time CASC init, ~10 ms steady-state extract, ~1 ms disk hit, ~2 µs mem hit). Records that `Installation::initialize` no longer parses `root.bin`/`encoding.bin` — that work is permanently delegated to the resolution sqlite — so the per-extract cost stays in the millisecond range.
+
+## [2026-04-29] ingest | Backpack body renders gray, not textured
+
+Created `investigations/backpack-background-texture.md`. User showed a retail
+screenshot of an open `Backpack` (combined-bags) window with a tan/brown
+textured body and reported the simulator was missing it. Render-time tracing
+confirmed the sim emits a solid `PANEL_BACKGROUND_COLOR` quad on the
+`Bg.TopSection`/`Bg.BottomEdge` textures — i.e. exactly what
+`FlatPanelBackgroundTemplate` authors. Both the pinned `12.0.5` vendor and the
+`Gethe/wow-ui-source` `live` HEAD (verified via WebFetch + Codex
+gpt-5.5/high) define `ContainerFrameCombinedBags` with no body atlas/file and
+a no-op `UpdateBackground`. Bank's tan body comes from a separate
+`bank-frame-background` atlas declared on `BankFrame` itself, not shared with
+the bag panel. Conclusion: the textured retail look is applied outside the
+public Blizzard source we have (addon overlay, unmirrored patch, or an
+unknown runtime path); closed without a sim-side change.
+
 ## [2026-04-28] ingest | Windows port build unblock
 
 Created `investigations/windows-port-build.md` after the Windows smoke pass. The root cause was the local `iced-dynamic` re-export crate forcing a huge `iced_dynamic.dll` link, which hit MSVC `LNK1189`; the build now depends on upstream `iced` directly. Verified `wow-sim`, `wow-cli`, GUI startup, and screenshot output on Windows. Updated the note after adding shared WoW resource discovery for install root, CASC `Data`, extracted Interface art, AddOns, and WTF. Live WTF is documented and tested as read-only import; simulator-local SavedVariables take precedence once present.
@@ -698,6 +718,10 @@ Created `investigations/world-map-texture-loading-budget.md` to document the pos
 Updated `investigations/startup-createframe-profile.md` with section-level template profiling, the method-only XML script fast path, widened direct-child creation for `ActionButtonSpellFXTemplate` / `MinimalScrollBar`, and current shared-worktree startup numbers showing `36.79s -> 28.89s` on `--no-addons --no-saved-vars`.
 
 Created `investigations/world-map-frame-level-rebuilds.md` to document the world-map performance bug where map pins repeatedly called `SetFrameLevel()` with the same value, forcing unnecessary `strata_buckets` invalidation and bucket rebuilds. Updated `index.md` with the new investigation page.
+
+## [2026-04-29] investigation | LFD dungeon list empty
+
+Created `investigations/lfd-dungeon-list-empty.md` for the Dungeons & Raids panel populating empty when "Specific Dungeons" was selected. Root causes: missing `GetLFDChoiceCollapseState`/`GetLFDChoiceEnabledState`/`GetLFGLockList` globals breaking `LFGDungeonList_Setup`; `LFG_UPDATE_RANDOM_INFO` never fired at startup so `LFDQueueFrame.Specific` stayed hidden and `OnShow=LFDQueueFrame_Update` never ran; `is_random=true` on the negative-id header in `default_lfd_dungeons` routed `GetRandomDungeonBestChoice` to `-1`. Updated `index.md` with the new investigation page.
 
 ## [2026-04-25] ingest | micro-menu atlas revert investigation
 

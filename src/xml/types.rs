@@ -218,6 +218,10 @@ pub struct FrameXml {
     pub toplevel: Option<bool>,
     #[serde(rename = "@protected")]
     pub protected: Option<bool>,
+    /// EditBox `letters` attribute — caps `SetMaxLetters`. Ignored on
+    /// non-EditBox widgets.
+    #[serde(rename = "@letters")]
+    pub letters: Option<i32>,
 
     // Child elements collected via $value to allow multiples
     #[serde(rename = "$value", default)]

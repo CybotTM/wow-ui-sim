@@ -1,0 +1,468 @@
+use std::path::PathBuf;
+
+use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, find_toc_file};
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
+use wow_ui_sim::startup::fire_startup_events_for_screen;
+use wow_ui_sim::toc::TocFile;
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn definitions_frame_dir() -> PathBuf {
+    blizzard_ui_dir().join("Blizzard_SettingsDefinitions_Frame")
+}
+
+fn definitions_frame_mainline_toc() -> PathBuf {
+    definitions_frame_dir().join("Blizzard_SettingsDefinitions_Frame_Mainline.toc")
+}
+
+const HARD_DEPS: &[&str] = &[
+    "Blizzard_SharedXML",
+    "Blizzard_SettingsDefinitions_Shared",
+    "Blizzard_Colors",
+];
+
+const PUBLIC_GLOBAL_NAMESPACES: &[&str] = &[
+    "ActionBarsOverrides",
+    "AccessibilityOverrides",
+    "ColorblindOverrides",
+    "CombatOverrides",
+    "ControlsOverrides",
+    "InterfaceOverrides",
+    "KeybindingsOverrides",
+    "SocialOverrides",
+    "CombatAudioAlertUtil",
+];
+
+const PUBLIC_GLOBAL_MIXINS: &[&str] = &[
+    "ArachnophobiaMixin",
+    "AutoLootDropdownControlMixin",
+    "ItemQualityColorOverrideMixin",
+    "NamePlatePreviewMixin",
+    "NamePlatesTutorialMixin",
+    "PingSystemMixin",
+    "PingSystemTutorialMixin",
+    "RaidFramePreviewMixin",
+    "RTTSMixin",
+    "SettingsKeybindingPrefaceMixin",
+    "SettingsKeybindingSectionMixin",
+    "SubtitlesPreviewMixin",
+];
+
+fn load_full_game_ui() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Game);
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+
+    wow_ui_sim::xml::register_intrinsic_templates();
+
+    let addons = discover_blizzard_addons_for_screen(&blizzard_ui_dir(), ScreenKind::Game);
+    for (name, toc_path) in &addons {
+        load_addon(&env.loader_env(), toc_path)
+            .unwrap_or_else(|err| panic!("[load {name}] FAILED: {err}"));
+    }
+
+    env.apply_post_load_workarounds();
+    fire_startup_events_for_screen(&env, ScreenKind::Game);
+    env
+}
+
+#[test]
+fn find_toc_file_prefers_mainline_variant() {
+    let resolved = find_toc_file(&definitions_frame_dir())
+        .expect("Blizzard_SettingsDefinitions_Frame TOC resolves");
+    assert_eq!(
+        resolved,
+        definitions_frame_mainline_toc(),
+        "find_toc_file must prefer the `_Mainline.toc` variant — there is NO bare \
+         `Blizzard_SettingsDefinitions_Frame.toc`, only the flavor-specific \
+         `_Mainline.toc`. The classic flavor stack uses different override Lua \
+         files (`Mainline\\` subdir is mainline-only) so a separate _Cata/_Wrath \
+         TOC variant in upstream Blizzard source omits the entire Mainline subdir"
+    );
+}
+
+#[test]
+fn toc_declares_eager_game_only_mainline_with_three_hard_deps() {
+    let toc = TocFile::from_file(&definitions_frame_mainline_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC parses");
+
+    assert!(
+        !toc.is_load_on_demand(),
+        "TOC must NOT declare LoadOnDemand — eager Game-screen load required so \
+         every settings category (Controls, Interface, Combat, ActionBars, \
+         Social, PingSystem, Keybindings, Accessibility, Colorblind, AudioAssist, \
+         Mounts, Subtitles, AdvancedOptions, Nameplates) registers with the \
+         Settings panel before the player opens it"
+    );
+    assert!(!toc.is_load_first());
+    assert!(!toc.is_secure_env());
+
+    assert!(
+        toc.allows_screen(ScreenKind::Game),
+        "`## AllowLoad: Game` must enable in-game loading — settings categories \
+         are an in-game concern; the glue-screen options dialog uses a separate \
+         pipeline"
+    );
+
+    for screen in [
+        ScreenKind::Login,
+        ScreenKind::CharacterSelect,
+        ScreenKind::CharacterCreate,
+    ] {
+        assert!(
+            !toc.allows_screen(screen),
+            "Glue screen {screen:?} must NOT be allowed — `## AllowLoad: Game` \
+             explicitly excludes glue screens"
+        );
+    }
+
+    assert!(
+        !toc.is_game_type_restricted(),
+        "AllowLoadGameType=mainline must NOT be classified as restricted — \
+         is_game_type_restricted() returns false when the value contains \
+         'mainline' or 'standard' (src/toc.rs:294-302). Only non-mainline \
+         values like 'plunderstorm' or 'classic' are restricted"
+    );
+
+    let deps = toc.dependencies();
+    assert_eq!(
+        deps,
+        HARD_DEPS.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+        "TOC must declare exactly 3 hard `## Dependencies:` in this order: \
+         Blizzard_SharedXML (UIPanelDialogTemplate / FrameUtil / dropdown \
+         controls), Blizzard_SettingsDefinitions_Shared (Setting / Category / \
+         Layout primitives shared across category definitions), Blizzard_Colors \
+         (NORMAL_FONT_COLOR / HIGHLIGHT_FONT_COLOR / RAID class color tables \
+         used by ItemQualityColorOverrideMixin and NamePlatePreviewMixin). \
+         Order matters: SharedXML must publish dropdown control mixins before \
+         Controls.lua's `AutoLootDropdownControlMixin = \
+         CreateFromMixins(SettingsDropdownControlMixin)` parse-time inheritance \
+         resolves"
+    );
+    assert!(toc.optional_deps().is_empty());
+    assert!(toc.saved_variables().is_empty());
+    assert!(toc.saved_variables_per_character().is_empty());
+}
+
+#[test]
+fn toc_raw_bytes_pin_metadata_with_default_state_enabled() {
+    let raw = std::fs::read_to_string(definitions_frame_mainline_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC reads utf-8");
+
+    assert!(raw.contains("## Title: Blizzard_SettingsDefinitions_Frame"));
+    assert!(raw.contains("## Author: Blizzard Entertainment"));
+    assert!(
+        raw.contains("## DefaultState: enabled"),
+        "TOC must declare `## DefaultState: enabled` — settings panel categories \
+         must always be available; player-facing addon-management UI must not \
+         offer a way to disable category registration"
+    );
+    assert!(raw.contains("## AllowLoad: Game"));
+    assert!(raw.contains("## AllowLoadGameType: mainline"));
+    assert!(raw.contains(
+        "## Dependencies: Blizzard_SharedXML, Blizzard_SettingsDefinitions_Shared, Blizzard_Colors"
+    ));
+    assert!(
+        !raw.contains("## SavedVariables"),
+        "TOC must NOT declare SavedVariables — categories register their own \
+         CVars via the Setting primitive; the addon itself stores no \
+         per-account state"
+    );
+}
+
+#[test]
+fn toc_body_lists_eight_mainline_overrides_first_then_main_files_with_classic_comment() {
+    let toc = TocFile::from_file(&definitions_frame_mainline_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC parses");
+    let listed: Vec<String> = toc
+        .files
+        .iter()
+        .map(|p| p.to_string_lossy().into_owned())
+        .collect();
+
+    let first_eight: Vec<String> = listed.iter().take(8).cloned().collect();
+    let expected_overrides = [
+        "Mainline/GameplaySettingsGroup.lua",
+        "Mainline/InterfaceOverrides.lua",
+        "Mainline/ControlsOverrides.lua",
+        "Mainline/CombatOverrides.lua",
+        "Mainline/SocialOverrides.lua",
+        "Mainline/ColorblindOverrides.lua",
+        "Mainline/KeybindingsOverrides.lua",
+        "Mainline/AccessibilityOverrides.lua",
+    ];
+    assert_eq!(
+        first_eight,
+        expected_overrides
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>(),
+        "First 8 body entries must be the 8 Mainline\\*.lua override files in \
+         declared order (GameplaySettingsGroup → InterfaceOverrides → \
+         ControlsOverrides → CombatOverrides → SocialOverrides → \
+         ColorblindOverrides → KeybindingsOverrides → AccessibilityOverrides). \
+         GameplaySettingsGroup.lua MUST run first because it sets \
+         `CUSTOM_GAMEPLAY_SETTINGS_ORDER` (a top-level global table mapping \
+         CONTROLS_LABEL/INTERFACE_LABEL/etc. → numeric position) that downstream \
+         Register() functions read at parse time to set their category position"
+    );
+
+    for required in [
+        "Controls.xml",
+        "Interface.lua",
+        "Interface.xml",
+        "Combat.lua",
+        "ActionBars.lua",
+        "Social.lua",
+        "PingSystem.xml",
+        "Keybindings.xml",
+        "Accessibility.lua",
+        "Accessibility.xml",
+        "Mainline/Colorblind.xml",
+        "CombatAudioAlertUtil.lua",
+        "AudioAssist.lua",
+        "AudioAssist.xml",
+        "Mounts.lua",
+        "Subtitles.xml",
+        "AdvancedOptions.lua",
+        "Nameplates.lua",
+        "Nameplates.xml",
+    ] {
+        assert!(
+            listed.iter().any(|p| p == required),
+            "TOC body must list {required:?}. Got: {listed:?}"
+        );
+    }
+
+    let raw = std::fs::read_to_string(definitions_frame_mainline_toc())
+        .expect("Blizzard_SettingsDefinitions_Frame_Mainline TOC reads utf-8");
+    assert!(
+        raw.contains(
+            "# NOTE: Accessibility.lua should be the only file loaded in classic, only \
+             mainline needs the xml, but classic may need an older version of the lua file."
+        ),
+        "TOC must preserve the inline `# NOTE: Accessibility.lua...` comment — \
+         documents the cross-flavor split that justifies keeping Accessibility.lua \
+         in the bare-name body and Accessibility.xml separately listed for \
+         mainline. Stripping this comment loses the rationale for why classic \
+         flavors have a different load shape"
+    );
+}
+
+#[test]
+fn appears_only_on_game_screen_eager_discovery() {
+    let ui = blizzard_ui_dir();
+
+    let game_addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+    let found_in_game = game_addons
+        .iter()
+        .any(|(name, _)| name == "Blizzard_SettingsDefinitions_Frame");
+    assert!(
+        found_in_game,
+        "Blizzard_SettingsDefinitions_Frame must auto-discover on Game screen — \
+         eager (no LoadOnDemand) AND `## AllowLoad: Game` puts it in the \
+         in-game eager set"
+    );
+
+    for screen in [
+        ScreenKind::Login,
+        ScreenKind::CharacterSelect,
+        ScreenKind::CharacterCreate,
+    ] {
+        let addons = discover_blizzard_addons_for_screen(&ui, screen);
+        let found = addons
+            .iter()
+            .any(|(name, _)| name == "Blizzard_SettingsDefinitions_Frame");
+        assert!(
+            !found,
+            "Blizzard_SettingsDefinitions_Frame must be excluded from glue \
+             screen {screen:?} — `## AllowLoad: Game` explicitly restricts to \
+             in-game"
+        );
+    }
+}
+
+#[test]
+fn root_directory_holds_eight_mainline_overrides_in_subdir() {
+    let dir = definitions_frame_dir();
+    let mainline_dir = dir.join("Mainline");
+    assert!(
+        mainline_dir.is_dir(),
+        "Mainline\\ subdirectory must exist — holds the 8 mainline-only override \
+         .lua files plus the Colorblind.xml that's mainline-only"
+    );
+
+    for filename in [
+        "GameplaySettingsGroup.lua",
+        "InterfaceOverrides.lua",
+        "ControlsOverrides.lua",
+        "CombatOverrides.lua",
+        "SocialOverrides.lua",
+        "ColorblindOverrides.lua",
+        "KeybindingsOverrides.lua",
+        "AccessibilityOverrides.lua",
+        "Colorblind.xml",
+    ] {
+        assert!(
+            mainline_dir.join(filename).is_file(),
+            "Mainline\\{filename} must exist — listed in TOC body and required \
+             for mainline category-registration overrides"
+        );
+    }
+}
+
+#[test]
+fn loads_without_addon_specific_lua_errors() {
+    let env = load_full_game_ui();
+
+    let load_errors: Vec<String> = env
+        .state()
+        .borrow()
+        .lua_errors
+        .iter()
+        .filter(|message| {
+            message.contains("Blizzard_SettingsDefinitions_Frame")
+                || message.contains("CUSTOM_GAMEPLAY_SETTINGS_ORDER")
+                || message.contains("RaidFramePreview")
+                || message.contains("PingSystemMixin")
+                || message.contains("ArachnophobiaMixin")
+                || message.contains("NamePlatePreview")
+        })
+        .cloned()
+        .collect();
+    assert!(
+        load_errors.is_empty(),
+        "Blizzard_SettingsDefinitions_Frame emitted addon-specific Lua errors \
+         during load:\n  {}",
+        load_errors.join("\n  ")
+    );
+}
+
+#[test]
+fn is_addon_loaded_after_eager_sweep() {
+    let env = load_full_game_ui();
+
+    let loaded: bool = env
+        .eval("return C_AddOns.IsAddOnLoaded('Blizzard_SettingsDefinitions_Frame')")
+        .expect("IsAddOnLoaded probe succeeds");
+    assert!(
+        loaded,
+        "C_AddOns.IsAddOnLoaded('Blizzard_SettingsDefinitions_Frame') must \
+         return true after the eager Game-screen sweep"
+    );
+}
+
+#[test]
+fn publishes_nine_override_namespace_globals_as_tables() {
+    let env = load_full_game_ui();
+
+    for namespace in PUBLIC_GLOBAL_NAMESPACES {
+        let kind: String = env
+            .eval(&format!("return type(_G.{namespace})"))
+            .unwrap_or_else(|err| panic!("type(_G.{namespace}) probe failed: {err}"));
+        assert_eq!(
+            kind, "table",
+            "_G.{namespace} must publish as a table — these 9 namespace tables \
+             group the per-category override functions (e.g. \
+             ActionBarsOverrides.CreateActionBarVisibilitySettings, \
+             ActionBarsOverrides.AdjustActionBarSettings, \
+             ActionBarsOverrides.RunSettingsCallback). The Mainline\\ override \
+             files declare them as `<Namespace>Overrides = {{}}` at top scope; \
+             non-Mainline classic flavors would publish stub or different \
+             tables depending on their own override files"
+        );
+    }
+}
+
+#[test]
+fn publishes_twelve_global_mixin_tables_for_settings_widgets() {
+    let env = load_full_game_ui();
+
+    for mixin in PUBLIC_GLOBAL_MIXINS {
+        let kind: String = env
+            .eval(&format!("return type(_G.{mixin})"))
+            .unwrap_or_else(|err| panic!("type(_G.{mixin}) probe failed: {err}"));
+        assert_eq!(
+            kind, "table",
+            "_G.{mixin} must publish as a table — the 12 global mixins drive \
+             the widgets shown inside settings categories: ArachnophobiaMixin \
+             (Accessibility spider→crab swap preview), AutoLootDropdownControlMixin \
+             (Controls auto-loot CVar dropdown extending \
+             SettingsDropdownControlMixin), ItemQualityColorOverrideMixin \
+             (Interface item-quality color override), NamePlatePreviewMixin / \
+             NamePlatesTutorialMixin (Nameplates preview), PingSystemMixin / \
+             PingSystemTutorialMixin (PingSystem category), \
+             RaidFramePreviewMixin (Interface raid-frame preview), RTTSMixin \
+             (Subtitles real-time text-to-speech dropdown extending \
+             SettingsDropdownControlMixin), SettingsKeybindingPrefaceMixin / \
+             SettingsKeybindingSectionMixin (Keybindings expandable sections), \
+             SubtitlesPreviewMixin (Subtitles preview)"
+        );
+    }
+}
+
+#[test]
+fn custom_gameplay_settings_order_publishes_with_label_keys() {
+    let env = load_full_game_ui();
+
+    let kind: String = env
+        .eval("return type(_G.CUSTOM_GAMEPLAY_SETTINGS_ORDER)")
+        .expect("CUSTOM_GAMEPLAY_SETTINGS_ORDER probe succeeds");
+    assert_eq!(
+        kind, "table",
+        "_G.CUSTOM_GAMEPLAY_SETTINGS_ORDER must publish as a table — \
+         Mainline\\GameplaySettingsGroup.lua line 2 declares \
+         `CUSTOM_GAMEPLAY_SETTINGS_ORDER = {{ ... }}` at top scope. This table \
+         maps category labels (CONTROLS_LABEL, INTERFACE_LABEL, ACTIONBARS_LABEL, \
+         COMBAT_LABEL, SOCIAL_LABEL, PING_SYSTEM_LABEL, SETTINGS_KEYBINDINGS_LABEL, \
+         ADVANCED_OPTIONS_LABEL, NAMEPLATE_OPTIONS_LABEL) to numeric positions \
+         (7-15), letting per-category Register() functions place themselves in \
+         a deterministic order without hardcoding numbers. GameplaySettingsGroup.lua \
+         loads FIRST in TOC body order so the global is populated before any \
+         category file's Register() function reads it"
+    );
+}
+
+#[test]
+fn self_cast_setting_values_publishes_four_named_modes_from_combat_lua() {
+    let env = load_full_game_ui();
+
+    let kind: String = env
+        .eval("return type(_G.SELF_CAST_SETTING_VALUES)")
+        .expect("SELF_CAST_SETTING_VALUES probe succeeds");
+    assert_eq!(
+        kind, "table",
+        "_G.SELF_CAST_SETTING_VALUES must publish as a table — Combat.lua \
+         line 1 declares `SELF_CAST_SETTING_VALUES = {{ NONE=1, AUTO=2, \
+         KEY_PRESS=3, AUTO_AND_KEY_PRESS=4 }}` at top scope. The Combat \
+         category dropdown reads these enum values to build its self-cast \
+         mode picker"
+    );
+
+    for (key, expected) in [
+        ("NONE", 1),
+        ("AUTO", 2),
+        ("KEY_PRESS", 3),
+        ("AUTO_AND_KEY_PRESS", 4),
+    ] {
+        let value: i64 = env
+            .eval(&format!("return SELF_CAST_SETTING_VALUES.{key}"))
+            .unwrap_or_else(|err| panic!("SELF_CAST_SETTING_VALUES.{key} probe failed: {err}"));
+        assert_eq!(
+            value, expected,
+            "SELF_CAST_SETTING_VALUES.{key} must equal {expected} — these \
+             literal values are referenced by their integer codes in saved \
+             CVar state, so changing the mapping would invalidate every \
+             player's saved self-cast preference"
+        );
+    }
+}

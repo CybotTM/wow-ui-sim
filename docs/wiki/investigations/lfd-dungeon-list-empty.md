@@ -1,0 +1,59 @@
+# LFD Dungeon List Empty
+
+The Dungeons & Raids panel showed an empty dungeon list when "Specific Dungeons" was selected. Three missing globals (`GetLFDChoiceCollapseState`, `GetLFDChoiceEnabledState`, `GetLFGLockList`) made `LFGDungeonList_Setup()` error out, and the LFD panel was never told to populate its data provider because `LFG_UPDATE_RANDOM_INFO` did not fire at startup.
+
+## Symptoms
+
+`PVEFrame → Dungeons & Raids → Specific Dungeons` showed `Type: Specific Dungeons` selected but the scroll list was empty. No tooltips, no headers, no entries — just blank background.
+
+## Root Causes
+
+### 1. Missing list-init globals
+
+`Blizzard_GroupFinder/Shared/LFGFrame.lua:1080` defines `LFGDungeonList_Setup()`:
+
+```lua
+LFGCollapseList = GetLFDChoiceCollapseState(LFGCollapseList);
+LFGEnabledList  = GetLFDChoiceEnabledState(LFGEnabledList);
+LFGLockList     = GetLFGLockList();
+```
+
+All three globals were unregistered in the simulator, so the first call (`GetLFDChoiceCollapseState`) raised `attempt to call global ... a nil value` and the rest of `Setup` never ran. Subsequent calls returned without doing anything because `hasSetUp = true` had already been set.
+
+### 2. `LFGLockList` read before init
+
+`UpdateLFDDungeonList()` (LFDFrame.lua:697) reads `LFGLockList[id]` *before* `LFGQueueFrame_UpdateLFGDungeonList` runs `LFGDungeonList_Setup`. In retail, `LFGLockList` is populated by `LFG_LOCK_INFO_RECEIVED` (LFGFrame.lua:173) which fires shortly after login. The simulator never fired this event.
+
+### 3. Random/Specific frame never shown
+
+`LFDQueueFrame.Specific` is the actual list container, with `<OnShow function="LFDQueueFrame_Update"/>` (LFDFrame.xml:273). It is `hidden="true"` by default. In retail, `LFG_UPDATE_RANDOM_INFO` fires at startup and `LFDQueueFrame_OnEvent` calls `LFDQueueFrame_SetType(...)` which shows either Specific, Follower, or Random — triggering OnShow and populating the list. The simulator never fired this event.
+
+### 4. Header marked as random
+
+`default_lfd_dungeons` had `is_random=true` on the negative-id header. This made `GetRandomDungeonBestChoice()` return `-1`, which `LFDQueueFrame_SetType(-1)` then routed through `GetLFGDungeonInfo(-1)` and `LFDQueueFrame_SetTypeRandomDungeon` — which calls `GetLFGDungeonRewards` on the header.
+
+## Fix
+
+Implementation:
+
+- **`battlefield_lfg_probes.rs`**: registered seven new globals — `GetLFDChoiceCollapseState`, `GetLFDChoiceEnabledState`, `GetLFGLockList`, `GetBestRFChoice`, `GetRandomScenarioBestChoice`, `GetLFGDungeonRewards` (all return empty/nil since the sim has no server state).
+- **`group_queries.rs`**: added `UnitHasLFGRandomCooldown` → `false`.
+- **`runtime_surface_bootstrap.lua`**: added Lua-fallback stubs for `GetNumRandomScenarios`, `GetRandomScenarioInfo`, `GetLFDRoleRestrictions`, `GetLFGRoleShortageRewards`.
+- **`startup.rs`**: fire `LFG_UPDATE_RANDOM_INFO` in the post-login event sequence so `LFDQueueFrame_SetType` runs and the Specific/Random sub-frame becomes visible (`OnShow` populates the data provider).
+- **`workarounds.rs`** (`patch_lfg_lock_list`): assign `LFGLockList = GetLFGLockList()` directly instead of firing `LFG_LOCK_INFO_RECEIVED`. The event would also wake up RaidFinder and ScenarioFinder, which require many additional unmodeled APIs (`GetNumRFDungeons`, etc.). Direct assignment satisfies the LFD panel without that cascade.
+- **`state.rs`** (`default_lfd_dungeons`): split the random header (negative id, `is_random=false`) from a real positive-id "Random Heroic Dungeon" entry (`id=999, is_random=true`). Matches retail data shape.
+
+## Why direct LFGLockList assignment over event firing
+
+Firing `LFG_LOCK_INFO_RECEIVED` triggers `RaidFinderFrame_OnEvent` → `GetBestRFChoice` → `RaidFinderFrame_UpdateAvailability` → `GetNumRFDungeons` → `ScenarioFinderFrame_UpdateAvailability` → `GetNumRandomScenarios`. None of those exist in the sim. We could stub all of them, but the goal is just to populate `LFGLockList` for the LFD panel; the event broadcast is wider than needed.
+
+## Sources
+
+- `Interface/BlizzardUI/Blizzard_GroupFinder/Shared/LFGFrame.lua` — `LFGDungeonList_Setup` (line 1080), `LFG_LOCK_INFO_RECEIVED` handler (line 173)
+- `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.lua` — `UpdateLFDDungeonList` (line 686), `LFG_UPDATE_RANDOM_INFO` handler (line 80)
+- `Interface/BlizzardUI/Blizzard_GroupFinder/Mainline/LFDFrame.xml` — Specific frame `OnShow="LFDQueueFrame_Update"` (line 273)
+
+## See Also
+
+- [[generated-stubs-audit]] — broader stub-gap pattern this fits into
+- [[event-system]] — startup event sequence in `startup.rs`

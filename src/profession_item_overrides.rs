@@ -222,6 +222,26 @@ static PROFESSION_ITEM_OVERRIDES: &[(u32, ItemInfo)] = &[
         ),
     ),
     (
+        210930,
+        profession_item("Bismuth", 1, 70, 0, 500, 1000, 0, 10, 5728051),
+    ),
+    (
+        210931,
+        profession_item("Bismuth", 2, 70, 0, 500, 1000, 0, 10, 5728051),
+    ),
+    (
+        210934,
+        profession_item("Aqirite", 2, 70, 0, 1500, 1000, 0, 10, 134573),
+    ),
+    (
+        210935,
+        profession_item("Aqirite", 3, 70, 0, 1500, 1000, 0, 10, 134573),
+    ),
+    (
+        210937,
+        profession_item("Ironclaw Ore", 2, 70, 0, 1500, 1000, 0, 10, 5735005),
+    ),
+    (
         217143,
         profession_item(
             "Algari Competitor's Plate Breastplate",

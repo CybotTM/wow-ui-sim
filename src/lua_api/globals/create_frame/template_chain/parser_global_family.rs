@@ -564,10 +564,17 @@ fn parse_inline_global_method_with_string_global_bool_args(
     }
     let target_path = target_path.trim();
     let method_name = method_name.trim();
+    // Reject `self.*` for target — `self` is the per-frame OnLoad arg, not a
+    // global resolvable at parse time. Reject Lua keyword literals
+    // (`true`/`false`/`nil`) for second_arg_path — `is_fast_handler_path`
+    // accepts them as identifiers but `_G.true` etc. resolve to nil and
+    // silently substitute nil for the intended literal value.
     (is_fast_handler_path(target_path)
+        && target_path.split('.').next() != Some("self")
         && is_fast_identifier(method_name)
         && is_fast_handler_path(second_arg_path)
-        && second_arg_path.split('.').next() != Some("self"))
+        && second_arg_path.split('.').next() != Some("self")
+        && !matches!(second_arg_path, "true" | "false" | "nil"))
     .then_some((target_path, method_name, first, second_arg_path, third))
 }
 

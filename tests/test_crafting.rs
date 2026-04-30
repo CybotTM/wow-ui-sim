@@ -395,6 +395,52 @@ fn seed_reagents_for_recipe_supports_count_arg() {
 }
 
 #[test]
+fn get_dependent_reagents_returns_empty_table_for_unknown_reagent() {
+    // Regression: GetDependentReagents used to be unregistered, so callers
+    // got nil and `ipairs(nil)` crashed in
+    // ProfessionsRecipeTransactionMixin:AreDependentReagentsAllocated.
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local r = C_TradeSkillUI.GetDependentReagents({ itemID = 210934 })
+            if type(r) ~= "table" then return "type=" .. type(r) end
+            -- Iterating with ipairs must not error; current data has no deps.
+            local count = 0
+            for _ in ipairs(r) do count = count + 1 end
+            return "count=" .. count
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "count=0",
+        "GetDependentReagents must return an empty table (not nil) for reagents with no declared deps: {result}"
+    );
+}
+
+#[test]
+fn get_dependent_reagents_handles_nil_or_malformed_input() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local cases = {
+                C_TradeSkillUI.GetDependentReagents(nil),
+                C_TradeSkillUI.GetDependentReagents({}),
+                C_TradeSkillUI.GetDependentReagents({ currencyID = 3008 }),
+            }
+            for i, r in ipairs(cases) do
+                if type(r) ~= "table" then return "case " .. i .. " type=" .. type(r) end
+                for _ in ipairs(r) do return "case " .. i .. " unexpected entries" end
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "{result}");
+}
+
+#[test]
 fn seed_reagents_for_unknown_recipe_returns_false() {
     let env = env();
     let result: String = env

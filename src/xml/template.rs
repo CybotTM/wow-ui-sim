@@ -25,6 +25,7 @@ thread_local! {
     static TEMPLATE_REGISTRY: RefCell<TemplateRegistry> = RefCell::new(TemplateRegistry::default());
     static TEXTURE_TEMPLATE_REGISTRY: RefCell<HashMap<String, TextureXml>> = RefCell::new(HashMap::new());
     static ANIM_GROUP_TEMPLATE_REGISTRY: RefCell<HashMap<String, AnimationGroupXml>> = RefCell::new(HashMap::new());
+    static FONT_STRING_TEMPLATE_REGISTRY: RefCell<HashMap<String, FontStringXml>> = RefCell::new(HashMap::new());
 }
 
 fn with_template_registry<R>(f: impl FnOnce(&TemplateRegistry) -> R) -> R {
@@ -360,13 +361,45 @@ pub fn clear_templates() {
 
     with_texture_template_registry_mut(|registry| registry.clear());
     with_anim_group_template_registry_mut(|registry| registry.clear());
+    with_font_string_template_registry_mut(|registry| registry.clear());
 }
 
 // ---------------------------------------------------------------------------
 // Texture template registry (virtual textures with mixin/inherits)
 // ---------------------------------------------------------------------------
 
-use super::types_elements::{AnimationGroupXml, TextureXml};
+use super::types_elements::{AnimationGroupXml, FontStringXml, TextureXml};
+
+fn with_font_string_template_registry<R>(
+    f: impl FnOnce(&HashMap<String, FontStringXml>) -> R,
+) -> R {
+    FONT_STRING_TEMPLATE_REGISTRY.with(|registry| f(&registry.borrow()))
+}
+
+fn with_font_string_template_registry_mut<R>(
+    f: impl FnOnce(&mut HashMap<String, FontStringXml>) -> R,
+) -> R {
+    FONT_STRING_TEMPLATE_REGISTRY.with(|registry| f(&mut registry.borrow_mut()))
+}
+
+/// Register a virtual `<FontString>` template (e.g.
+/// `UserScaledFontStringTemplate` from Blizzard_AccessibilityTemplates).
+///
+/// FontStrings live in their own registry rather than the unified
+/// `TemplateRegistry` (which only holds `FrameXml`) so the inherits-chain
+/// walker can keep its frame-vs-fontstring shape distinction.
+pub fn register_font_string_template(name: &str, fontstring: FontStringXml) {
+    with_font_string_template_registry_mut(|registry| {
+        registry.insert(name.to_string(), fontstring);
+    });
+}
+
+/// Get a virtual `<FontString>` template by name. Returns `None` when the
+/// name is unknown — callers should treat this as the inherits-chain
+/// terminator for FontString instances.
+pub fn get_font_string_template(name: &str) -> Option<FontStringXml> {
+    with_font_string_template_registry(|registry| registry.get(name).cloned())
+}
 
 /// Register a virtual texture template.
 pub fn register_texture_template(name: &str, texture: TextureXml) {

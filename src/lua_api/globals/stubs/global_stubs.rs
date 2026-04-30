@@ -30,6 +30,7 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "ExpandSkillHeader",
     "ForceLogout",
     "ForceTaint",
+    "DropCursorMoney",
     "InspectUnit",
     "LeaveMythicPlusGroup",
     "LogoutStatusFrame_StartLogout",
@@ -46,6 +47,10 @@ static GLOBAL_NIL_STUBS: &[&str] = &[
     "RequestGuildPartyState",
     "RequestLFDPartyLockInfo",
     "RequestLFDPlayerLockInfo",
+    "RequestPVPOptionsEnabled",
+    "RequestPVPRewards",
+    "RequestRandomBattlegroundInstanceInfo",
+    "RequestRatedInfo",
     "RemoveChatWindowChannel",
     // RequestPartyLootMethod is SimState-backed in loot_method.rs, not a stub.
     "RequestRaidInfo",
@@ -152,6 +157,10 @@ static GLOBAL_ZERO_STUBS: &[&str] = &[
     // SimState-backed in battlefield_lfg_probes.rs, not stubs.
     // GetContainerNumFreeSlots is SimState-backed in inventory_counts.rs,
     // not a stub.
+    // GetCurrentArenaSeason returns NO_ARENA_SEASON (0) — headless mode has
+    // no active arena season, which routes ConquestFrame_EvaluateSeasonState
+    // through the SEASON_STATE_PRESEASON / SEASON_STATE_OFFSEASON branches.
+    "GetCurrentArenaSeason",
     "GetCurrentGuildBankTab",
     "GetNumBattlefieldFlagPositions",
     // GetCursorPosition is SimState-backed in mouse_probes.rs, not a stub.

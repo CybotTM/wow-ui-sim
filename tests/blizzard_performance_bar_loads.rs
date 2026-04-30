@@ -300,3 +300,22 @@ fn blizzard_performance_bar_publishes_three_global_functions() {
         );
     }
 }
+
+#[test]
+fn performance_api_shims_are_safe_noops() {
+    let env = load_full_game_ui();
+
+    let result: (f64, f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            return GetFramerate(),
+                   UpdateAddOnMemoryUsage(),
+                   UpdateAddOnCPUUsage(),
+                   ResetCPUUsage(),
+                   GetAddOnMemoryUsage("missing")
+            "#,
+        )
+        .expect("performance API shim probe should succeed");
+
+    assert_eq!(result, (60.0, 0.0, 0.0, 0.0, 0.0));
+}

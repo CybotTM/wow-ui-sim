@@ -593,6 +593,70 @@ pub struct LootRollInfo {
     pub item_link: String,
 }
 
+/// A saved equipment ("gear") set surfaced through `C_EquipmentSet`.
+/// Mirrors the retail concept of a named loadout: a snapshot of which
+/// item lives in each inventory slot, optional spec assignment, and a
+/// per-slot "ignore on save" mask used by the EquipmentManager pane to
+/// preserve currently-equipped items in slots the user wants left alone.
+#[derive(Debug, Clone)]
+pub struct EquipmentSet {
+    /// Stable id assigned by `CreateEquipmentSet` and used as the
+    /// `setID` return of `GetEquipmentSetInfo` and the argument to
+    /// every `*EquipmentSet*` call. 1-based, monotonically increasing
+    /// per `EquipmentManagerState.next_id`.
+    pub id: i32,
+    pub name: String,
+    /// Texture path supplied to `CreateEquipmentSet` / `ModifyEquipmentSet`
+    /// (e.g. `Interface\\Icons\\INV_Misc_QuestionMark`). Stored as the
+    /// raw input string so we can return it verbatim — `SetTexture`
+    /// accepts both string paths and numeric file ids.
+    pub icon: String,
+    /// 1-based talent spec index assigned via
+    /// `AssignSpecToEquipmentSet`; `None` when unassigned.
+    pub spec_index: Option<i32>,
+    /// Inventory slot ids whose contents should be preserved on save
+    /// (`IgnoreSlotForSave`). Stored on the set itself so the saved
+    /// mask survives across selections — the global "pending save"
+    /// scratch lives separately on `EquipmentManagerState`.
+    pub ignored_slots: HashSet<i32>,
+    /// Inventory-slot → packed item location for items captured by
+    /// `SaveEquipmentSet`. Empty for freshly-created sets that
+    /// haven't snapshotted yet.
+    pub item_locations: HashMap<i32, i64>,
+    /// Inventory-slot → item id snapshot consumed by `GetItemIDs`.
+    pub item_ids: HashMap<i32, u32>,
+}
+
+/// Equipment-manager scratchpad backing the full `C_EquipmentSet`
+/// surface. Ownership of the canonical set list, the global "pending
+/// save" ignore mask, and the most-recently-used set id all live
+/// here so `SimState` only needs one field.
+#[derive(Debug, Clone, Default)]
+pub struct EquipmentManagerState {
+    pub sets: Vec<EquipmentSet>,
+    /// Next id handed out by `CreateEquipmentSet`. Starts at 1.
+    pub next_id: i32,
+    /// Slots flagged via `IgnoreSlotForSave` for the *next* save. The
+    /// EquipmentManager pane primes this from the selected set's
+    /// stored mask via `IgnoreSlotsForSet`, then `SaveEquipmentSet`
+    /// folds it back onto the set.
+    pub ignored_slots_pending_save: HashSet<i32>,
+    /// Last set id passed to `UseEquipmentSet`. Drives the
+    /// `isEquipped` flag on `GetEquipmentSetInfo`.
+    pub last_used_set_id: Option<i32>,
+}
+
+impl EquipmentManagerState {
+    pub fn new() -> Self {
+        Self {
+            sets: Vec::new(),
+            next_id: 1,
+            ignored_slots_pending_save: HashSet::new(),
+            last_used_set_id: None,
+        }
+    }
+}
+
 /// Build the sim's seeded default `WorldState` — Stormwind zone,
 /// "Heroes of Azeroth" guild, populated collections. `WorldState::default`
 /// still returns a fully zero/empty state (the derived `Default`); this

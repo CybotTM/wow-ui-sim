@@ -36,6 +36,7 @@ The simulator reads textures and fonts directly from a live WoW install via the 
 
 ## How it works
 
+- → `docs/wiki/systems/casc-asset-cache.md` — three cache layers, lookup flow, measured per-layer costs
 - → `docs/wiki/systems/texture-atlas.md` — TextureManager structure, path resolution, format support
 - → `docs/rendering-pipeline.md` — Font System section
 - → `docs/texture-atlas-system.md` — full texture/atlas walkthrough

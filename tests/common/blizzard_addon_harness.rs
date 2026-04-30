@@ -16,13 +16,21 @@ pub fn load_blizzard_addon_closure_into_env(
     roots: &[&str],
     overrides: &[BlizzardAddonOverride<'_>],
 ) -> Vec<String> {
+    load_blizzard_addon_closure_for_screen_into_env(env, ui_dir, ScreenKind::Game, roots, overrides)
+}
+
+#[allow(dead_code)]
+pub fn load_blizzard_addon_closure_for_screen_into_env(
+    env: &WowLuaEnv,
+    ui_dir: &Path,
+    screen: ScreenKind,
+    roots: &[&str],
+    overrides: &[BlizzardAddonOverride<'_>],
+) -> Vec<String> {
     let mut loaded = Vec::new();
-    for (name, toc_path) in discover_blizzard_addon_closure_for_screen_with_overrides(
-        ui_dir,
-        ScreenKind::Game,
-        roots,
-        overrides,
-    ) {
+    for (name, toc_path) in
+        discover_blizzard_addon_closure_for_screen_with_overrides(ui_dir, screen, roots, overrides)
+    {
         if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
             panic!("{name} should load in the Blizzard addon closure harness: {error}");
         }
@@ -44,9 +52,13 @@ pub fn build_blizzard_addon_closure_env(
 
 #[allow(dead_code)]
 pub fn new_blizzard_addon_env(ui_dir: &Path) -> WowLuaEnv {
+    new_blizzard_addon_env_for_screen(ui_dir, ScreenKind::Game)
+}
+
+fn new_blizzard_addon_env_for_screen(ui_dir: &Path, screen: ScreenKind) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
-    env.set_screen_mode(ScreenKind::Game);
+    env.set_screen_mode(screen);
 
     let ui = ui_dir.to_path_buf();
     {
@@ -159,4 +171,54 @@ where
     F: FnOnce(&WowLuaEnv, &[String]) -> R,
 {
     with_blizzard_addon_smoke_shape_in_dir(&blizzard_ui_dir(), roots, overrides, assertions)
+}
+
+#[allow(dead_code)]
+pub fn new_blizzard_addon_glue_env(ui_dir: &Path) -> WowLuaEnv {
+    new_blizzard_addon_env_for_screen(ui_dir, ScreenKind::CharacterSelect)
+}
+
+// Glue counterpart of `with_blizzard_addon_smoke_shape`. Used by addons whose
+// TOC carries `## AllowLoad: Glue` — those are filtered out by the game-screen
+// closure walker (`allows_screen(Game)` is false for `Glue`), so the
+// game-shape harness can never reach them. This variant pins the env to
+// `ScreenKind::CharacterSelect`, walks the dependency closure with the same
+// glue screen, and loads each addon in topological order.
+//
+// No "panel-addons" baseline is loaded first: the closure walker already
+// pulls in `Blizzard_GlueXML` and its transitive deps from `roots` when the
+// root TOC lists `## Dependencies: Blizzard_GlueXML`, so loading anything
+// extra would either duplicate work or fight the dependency order.
+#[allow(dead_code)]
+pub fn with_blizzard_addon_glue_smoke_shape_in_dir<R, F>(
+    ui_dir: &Path,
+    roots: &[&str],
+    overrides: &[BlizzardAddonOverride<'_>],
+    assertions: F,
+) -> R
+where
+    F: FnOnce(&WowLuaEnv, &[String]) -> R,
+{
+    let env = new_blizzard_addon_glue_env(ui_dir);
+    clear_recorded_lua_errors(&env);
+    let loaded = load_blizzard_addon_closure_for_screen_into_env(
+        &env,
+        ui_dir,
+        ScreenKind::CharacterSelect,
+        roots,
+        overrides,
+    );
+    assertions(&env, &loaded)
+}
+
+#[allow(dead_code)]
+pub fn with_blizzard_addon_glue_smoke_shape<R, F>(
+    roots: &[&str],
+    overrides: &[BlizzardAddonOverride<'_>],
+    assertions: F,
+) -> R
+where
+    F: FnOnce(&WowLuaEnv, &[String]) -> R,
+{
+    with_blizzard_addon_glue_smoke_shape_in_dir(&blizzard_ui_dir(), roots, overrides, assertions)
 }
