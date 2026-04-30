@@ -4,7 +4,6 @@ mod common;
 
 use std::path::PathBuf;
 
-use wow_ui_sim::event::EventArg;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
@@ -640,6 +639,13 @@ fn test_set_recipe_tracked_updates_state_and_fires_event() {
 
     env.eval::<()>(
         r#"
+        __recipe_events = {}
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("TRACKED_RECIPE_UPDATE")
+        f:SetScript("OnEvent", function(_, _event, recipeID, tracked)
+            __recipe_events[#__recipe_events + 1] = { id = recipeID, tracked = tracked }
+        end)
+
         C_TradeSkillUI.SetRecipeTracked(100005, true, false)
         C_TradeSkillUI.SetRecipeTracked(100005, true, false)
         C_TradeSkillUI.SetRecipeTracked(100005, true, true)
@@ -652,19 +658,20 @@ fn test_set_recipe_tracked_updates_state_and_fires_event() {
     assert_eq!(state.tracked_recipes.list(true), &[100005]);
     drop(state);
 
-    let events = env.state().borrow_mut().events.drain();
-    assert_eq!(events.len(), 2, "only real state changes should fire");
+    let count: i64 = env.eval("return #__recipe_events").unwrap();
+    assert_eq!(count, 2, "only real state changes should fire");
 
-    let normal_event = &events[0];
-    assert_eq!(normal_event.name, "TRACKED_RECIPE_UPDATE");
-    assert_eq!(normal_event.args.len(), 2);
-    assert!(matches!(normal_event.args[0], EventArg::Number(id) if id == 100005.0));
-    assert!(matches!(normal_event.args[1], EventArg::Boolean(true)));
+    let (id1, tracked1): (i64, bool) = env
+        .eval("return __recipe_events[1].id, __recipe_events[1].tracked")
+        .unwrap();
+    assert_eq!(id1, 100005);
+    assert!(tracked1);
 
-    let recraft_event = &events[1];
-    assert_eq!(recraft_event.name, "TRACKED_RECIPE_UPDATE");
-    assert!(matches!(recraft_event.args[0], EventArg::Number(id) if id == 100005.0));
-    assert!(matches!(recraft_event.args[1], EventArg::Boolean(true)));
+    let (id2, tracked2): (i64, bool) = env
+        .eval("return __recipe_events[2].id, __recipe_events[2].tracked")
+        .unwrap();
+    assert_eq!(id2, 100005);
+    assert!(tracked2);
 }
 
 #[test]

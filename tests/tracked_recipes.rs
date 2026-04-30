@@ -40,10 +40,20 @@ fn set_recipe_tracked_mutates_sim_state() {
 }
 
 #[test]
-fn set_recipe_tracked_queues_update_event_only_on_real_change() {
+fn set_recipe_tracked_fires_update_event_only_on_real_change() {
     let env = WowLuaEnv::new().expect("Lua env");
-    // Drop any startup-pushed events so the assertion only sees recipe-tracker activity.
-    env.state().borrow_mut().events.drain();
+
+    env.exec(
+        r#"
+        __recipe_events = {}
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("TRACKED_RECIPE_UPDATE")
+        f:SetScript("OnEvent", function(_, _event, recipeID, tracked)
+            __recipe_events[#__recipe_events + 1] = { id = recipeID, tracked = tracked }
+        end)
+        "#,
+    )
+    .expect("listener");
 
     env.exec("C_TradeSkillUI.SetRecipeTracked(7, true, false)")
         .expect("first set");
@@ -53,15 +63,19 @@ fn set_recipe_tracked_queues_update_event_only_on_real_change() {
     env.exec("C_TradeSkillUI.SetRecipeTracked(7, false, false)")
         .expect("untrack");
 
-    let drained = env.state().borrow_mut().events.drain();
-    let updates: Vec<_> = drained
-        .iter()
-        .filter(|e| e.name == "TRACKED_RECIPE_UPDATE")
-        .collect();
-    assert_eq!(updates.len(), 2, "only real transitions queue the event");
+    let count: i64 = env
+        .eval("return #__recipe_events")
+        .expect("read event count");
+    assert_eq!(count, 2, "only real transitions fire the event");
 
-    let last = updates.last().expect("two events");
-    assert_eq!(last.args.len(), 2, "event carries recipe id + tracked flag");
+    let last_id: i64 = env
+        .eval("return __recipe_events[2].id")
+        .expect("event id");
+    let last_tracked: bool = env
+        .eval("return __recipe_events[2].tracked")
+        .expect("event tracked flag");
+    assert_eq!(last_id, 7, "event carries recipe id");
+    assert!(!last_tracked, "second transition was untrack");
 }
 
 #[test]
@@ -175,7 +189,17 @@ fn tracked_recipes_roundtrip_through_admin_saved_variables() {
         );
         drop(sim);
 
-        env.state().borrow_mut().events.drain();
+        env.exec(
+            r#"
+            __recipe_events = {}
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("TRACKED_RECIPE_UPDATE")
+            f:SetScript("OnEvent", function(_, _event, recipeID, tracked)
+                __recipe_events[#__recipe_events + 1] = { id = recipeID, tracked = tracked }
+            end)
+            "#,
+        )
+        .expect("listener");
         env.fire_event("VARIABLES_LOADED")
             .expect("VARIABLES_LOADED should dispatch");
         env.fire_event("PLAYER_LOGIN")
@@ -194,17 +218,11 @@ fn tracked_recipes_roundtrip_through_admin_saved_variables() {
         );
         drop(sim);
 
-        let updates: Vec<_> = env
-            .state()
-            .borrow_mut()
-            .events
-            .drain()
-            .into_iter()
-            .filter(|event| event.name == "TRACKED_RECIPE_UPDATE")
-            .collect();
+        let count: i64 = env
+            .eval("return #__recipe_events")
+            .expect("read event count");
         assert_eq!(
-            updates.len(),
-            2,
+            count, 2,
             "replaying saved recipes should emit tracker updates for both buckets",
         );
     }

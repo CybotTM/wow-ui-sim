@@ -1,6 +1,5 @@
 use super::profession_crafting::{craft_recipe, recipe_is_craftable};
 use super::{ensure_namespace, set_table_array};
-use crate::event::{Event, EventArg};
 use crate::items;
 use crate::lua_api::globals::{profession_data, spellbook_data};
 use crate::lua_api::methods::{
@@ -662,19 +661,16 @@ fn c_trade_skill_ui_set_recipe_tracked(state: &mut LuaState) -> LuaResult<u32> {
     let tracked = bool::from_stack(state, 2)?;
     let is_recrafting = Option::<bool>::from_stack(state, 3)?.unwrap_or(false);
 
-    let mut sim = borrow_state_mut(state)?;
-    let changed = sim.tracked_recipes.set(recipe_id, tracked, is_recrafting);
+    let changed = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.tracked_recipes.set(recipe_id, tracked, is_recrafting)
+    };
     if !changed {
         return Ok(0);
     }
 
-    sim.events.push(Event {
-        name: "TRACKED_RECIPE_UPDATE".to_string(),
-        args: vec![
-            EventArg::Number(recipe_id as f64),
-            EventArg::Boolean(tracked),
-        ],
-    });
+    let args = [Val::Num(recipe_id as f64), Val::Bool(tracked)];
+    fire_named_event_state(state, "TRACKED_RECIPE_UPDATE", &args);
     Ok(0)
 }
 
