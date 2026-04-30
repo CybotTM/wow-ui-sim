@@ -20,7 +20,7 @@ use crate::lua_api::methods::{
     table_set_num, val_to_string,
 };
 use crate::lua_api::script_helpers::{get_event_listeners, get_script};
-use crate::lua_api::state_types::EquipmentSet;
+use crate::lua_api::state_types::{CharacterStats, EquipmentSet, EquippedItem};
 use crate::lua_bridge::{FromStack, stack_val, table_set_rust_fn_static};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, Val};
@@ -127,6 +127,49 @@ fn find_set_index_by_id(state: &LuaState, set_id: i32) -> Option<usize> {
         .sets
         .iter()
         .position(|s| s.id == set_id)
+}
+
+fn apply_equipment_set(state: &mut LuaState, set_id: i32) -> LuaResult<bool> {
+    let set = {
+        let sim = borrow_state(state)?;
+        let Some(set) = sim.equipment_manager.sets.iter().find(|s| s.id == set_id) else {
+            return Ok(false);
+        };
+        set.clone()
+    };
+
+    let mut sim = borrow_state_mut(state)?;
+    let slots_to_update: HashSet<i32> = sim
+        .player
+        .equipped_items
+        .keys()
+        .chain(set.item_ids.keys())
+        .copied()
+        .filter(|slot| !set.ignored_slots.contains(slot))
+        .collect();
+
+    for slot in slots_to_update {
+        match set.item_ids.get(&slot) {
+            Some(item_id) => {
+                sim.player.equipped_items.insert(
+                    slot,
+                    EquippedItem {
+                        item_id: *item_id,
+                        enchant_id: 0,
+                        gem_ids: [0; 3],
+                    },
+                );
+            }
+            None => {
+                sim.player.equipped_items.remove(&slot);
+            }
+        }
+    }
+
+    sim.player.stats =
+        CharacterStats::compute(&sim.player.equipped_items, sim.player.class_index);
+    sim.equipment_manager.last_used_set_id = Some(set_id);
+    Ok(true)
 }
 
 // ── mutation surface ────────────────────────────────────────────────
@@ -244,9 +287,8 @@ fn c_save_equipment_set(state: &mut LuaState) -> LuaResult<u32> {
 
 fn c_use_equipment_set(state: &mut LuaState) -> LuaResult<u32> {
     let set_id = i32::from_stack(state, 1)?;
-    let exists = find_set_index_by_id(state, set_id).is_some();
+    let exists = apply_equipment_set(state, set_id)?;
     if exists {
-        borrow_state_mut(state)?.equipment_manager.last_used_set_id = Some(set_id);
         fire_event(state, EQUIPMENT_SWAP_PENDING, Vec::new())?;
         fire_event(
             state,
