@@ -298,14 +298,19 @@ impl TocFile {
             .unwrap_or(false)
     }
 
-    /// Check if addon is restricted to a non-mainline game type (e.g. plunderstorm, classic).
-    /// These addons have `AllowLoadGameType: <type>` and should only load in that mode.
+    /// Check if addon is restricted to a game type incompatible with the active client profile.
+    /// Tocs with `AllowLoadGameType: <type>` only load when that type matches the active profile.
     pub fn is_game_type_restricted(&self) -> bool {
+        let allowed: &[&str] = match crate::client_profile::ACTIVE {
+            crate::client_profile::ClientProfile::Retail => &["mainline", "standard"],
+            crate::client_profile::ClientProfile::Wrath => &["wrath", "wrath_classic", "classic"],
+            crate::client_profile::ClientProfile::Mists => &["mists", "mists_classic", "classic"],
+        };
         self.metadata
             .get("AllowLoadGameType")
             .map(|v| {
                 !v.split(',')
-                    .any(|t| matches!(t.trim(), "mainline" | "standard"))
+                    .any(|t| allowed.contains(&t.trim()))
             })
             .unwrap_or(false)
     }
