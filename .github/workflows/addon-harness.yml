@@ -1,0 +1,80 @@
+name: Addon harness
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    paths:
+      - 'tools/classic-addon-manifest.tsv'
+      - 'tools/classic-addon-compat/**'
+      - 'scripts/test-classic-addons.sh'
+      - 'src/**'
+      - 'Cargo.toml'
+      - '.github/workflows/addon-harness.yml'
+  workflow_dispatch:
+
+jobs:
+  # Parse tools/classic-addon-manifest.tsv into a JSON matrix so the harness
+  # job below fans out one runner per (profile, addon) pair without
+  # requiring the matrix to be hardcoded in YAML.
+  discover-addons:
+    name: Discover addons
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build matrix from manifest
+        id: build-matrix
+        run: |
+          matrix=$(awk -F'\t' '
+            BEGIN { sep="" }
+            /^#/ { next }
+            $1 == "" || $1 == "name" { next }
+            NF >= 5 {
+              printf "%s{\"name\":\"%s\",\"profile\":\"%s\"}", sep, $1, $2
+              sep=","
+            }
+          ' tools/classic-addon-manifest.tsv)
+          echo "matrix=[$matrix]" >> "$GITHUB_OUTPUT"
+          echo "Discovered: [$matrix]"
+
+  harness:
+    name: ${{ matrix.addon.profile }} / ${{ matrix.addon.name }}
+    needs: discover-addons
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        addon: ${{ fromJSON(needs.discover-addons.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch Blizzard UI source (${{ matrix.addon.profile }})
+        run: ./scripts/setup-blizzard-ui.sh ${{ matrix.addon.profile }}
+
+      - name: Use CI cargo config
+        run: cp .cargo/config.ci.toml .cargo/config.toml
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          # Share the build cache across addons that target the same profile.
+          # The wow-sim binary doesn't change per-addon — only Interface/AddOns
+          # contents do.
+          key: addon-harness-${{ matrix.addon.profile }}
+
+      - name: Run harness for ${{ matrix.addon.name }}
+        run: ./scripts/test-classic-addons.sh ${{ matrix.addon.name }}
+
+      - name: Upload per-addon lua-errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: addon-${{ matrix.addon.profile }}-${{ matrix.addon.name }}-lua-errors
+          path: target/addon-harness/${{ matrix.addon.name }}-lua-errors.json
+          if-no-files-found: ignore
