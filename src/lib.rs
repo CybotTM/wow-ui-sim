@@ -83,7 +83,7 @@ pub mod toc;
 #[path = "../data/traits.rs"]
 pub mod traits;
 pub mod widget;
-#[cfg(feature = "client-wrath")]
+#[cfg(any(feature = "client-wrath", feature = "client-mists"))]
 pub mod wrath;
 pub mod xml;
 #[path = "../data/zones.rs"]
