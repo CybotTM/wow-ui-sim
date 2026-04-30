@@ -91,6 +91,8 @@ pub mod toc;
 #[path = "../data/traits.rs"]
 pub mod traits;
 pub mod widget;
+#[cfg(feature = "client-mists")]
+pub mod mists;
 #[cfg(any(feature = "client-wrath", feature = "client-mists"))]
 pub mod wrath;
 pub mod xml;
