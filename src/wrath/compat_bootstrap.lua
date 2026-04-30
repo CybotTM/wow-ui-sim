@@ -410,21 +410,8 @@ if SelectQuestLogEntry == nil then
   end
 end
 
--- Frame references: return a no-op proxy table so method calls like
--- :Show(), :Hide(), :SetTexture() don't crash.
-local function noopFrame()
-  local t = {}
-  setmetatable(t, { __index = function() return function() end end })
-  return t
-end
-
-if MiniMapTrackingIcon == nil then
-  MiniMapTrackingIcon = noopFrame()
-end
-
-if PlayerArrowEffectFrame == nil then
-  PlayerArrowEffectFrame = noopFrame()
-end
+-- Frame proxy stubs moved to compat_frame_proxies.lua (wrath-only — these
+-- conflict with real frames defined by Blizzard_SharedXML under mists).
 
 -- ─── Additional Wrath-only stubs (batch 3.3c) ────────────────────────────────
 
