@@ -230,3 +230,86 @@ if rawget(_G, "C_LootHistory") == nil then
     CanMasterLoot = function() return false end,
   }
 end
+
+-- ─── Phase 4.4b: action-bar / LFD / raid / paperdoll helpers ─────────────────
+
+if rawget(_G, "GetActionCharges") == nil then
+  function GetActionCharges(slot) return nil end
+end
+
+if rawget(_G, "GetExtraBarIndex") == nil then
+  function GetExtraBarIndex() return nil end
+end
+
+if rawget(_G, "GetMultiCastBarIndex") == nil then
+  function GetMultiCastBarIndex() return nil end
+end
+
+if rawget(_G, "IsAutoRepeatAction") == nil then
+  function IsAutoRepeatAction(slot) return false end
+end
+
+if rawget(_G, "IsUsableAction") == nil then
+  function IsUsableAction(slot) return true, false end
+end
+
+if rawget(_G, "GetLFDChoiceCollapseState") == nil then
+  function GetLFDChoiceCollapseState() return false end
+end
+
+if rawget(_G, "GetNumRaidProfiles") == nil then
+  function GetNumRaidProfiles() return 0 end
+end
+
+if rawget(_G, "GetPVPYesterdayStats") == nil then
+  function GetPVPYesterdayStats() return 0, 0 end
+end
+
+if rawget(_G, "MoneyFrame_SetType") == nil then
+  function MoneyFrame_SetType(self, t) end
+end
+
+if rawget(_G, "MoneyFrame_Update") == nil then
+  function MoneyFrame_Update(self, value) end
+end
+
+if rawget(_G, "MoneyInputFrame_SetNextFocus") == nil then
+  function MoneyInputFrame_SetNextFocus() end
+end
+
+if rawget(_G, "PaperDollItemSlotButton_Update") == nil then
+  function PaperDollItemSlotButton_Update(self) end
+end
+
+if rawget(_G, "RefreshDebuffs") == nil then
+  function RefreshDebuffs() end
+end
+
+if rawget(_G, "GetLFDChoiceEnabledState") == nil then
+  function GetLFDChoiceEnabledState() return true end
+end
+
+if rawget(_G, "GetPVPLifetimeStats") == nil then
+  function GetPVPLifetimeStats() return 0, 0, 0 end
+end
+
+if rawget(_G, "IsAttackAction") == nil then
+  function IsAttackAction(slot) return false end
+end
+
+if rawget(_G, "IsEquippedAction") == nil then
+  function IsEquippedAction(slot) return false end
+end
+
+if rawget(_G, "MoneyFrame_SetMaxDisplayWidth") == nil then
+  function MoneyFrame_SetMaxDisplayWidth(self, w) end
+end
+
+if rawget(_G, "RequestRatedInfo") == nil then
+  function RequestRatedInfo() end
+end
+
+-- ChatAlertFrame and MiniMapTrackingBackground are frame references. Mists's
+-- Blizzard_SharedXML normally defines them as real frames; if it doesn't get
+-- there, leaving them nil is preferable to a noopFrame proxy which conflicts
+-- with the real frame definition (see wrath/compat_frame_proxies.lua note).
