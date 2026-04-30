@@ -72,3 +72,6 @@ mod behavior_currency_for_store;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_category_list_refresh.rs"]
 mod behavior_category_list_refresh;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_card_creature_display.rs"]
+mod behavior_card_creature_display;
