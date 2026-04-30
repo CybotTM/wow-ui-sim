@@ -252,6 +252,10 @@ the bag panel. Conclusion: the textured retail look is applied outside the
 public Blizzard source we have (addon overlay, unmirrored patch, or an
 unknown runtime path); closed without a sim-side change.
 
+## [2026-04-30] ingest | client-profiles system page
+
+Created `systems/client-profiles.md` documenting the five-profile cargo-feature layout (retail/wrath/mists/era/anniversary), vendor pinning, profile-aware TOC suffix and gametype tables, per-profile compat bootstraps (`src/wrath/`, `src/mists/`, `src/era/` shared by era + anniversary), wrath's synthetic FrameXML addon, and the CI matrix. Updated `systems/addon-loading.md` to fix the now-stale "Mainline-only TOC suffix" claims and link to the new page; updated `index.md` with a row in `systems/`. Source: PLAN.classic.md Phase 7.x landings (cargo features, profile-aware loader/toc, src/era/ bootstrap), commits 2915f2b9..6b320417.
+
 ## [2026-04-28] ingest | Windows port build unblock
 
 Created `investigations/windows-port-build.md` after the Windows smoke pass. The root cause was the local `iced-dynamic` re-export crate forcing a huge `iced_dynamic.dll` link, which hit MSVC `LNK1189`; the build now depends on upstream `iced` directly. Verified `wow-sim`, `wow-cli`, GUI startup, and screenshot output on Windows. Updated the note after adding shared WoW resource discovery for install root, CASC `Data`, extracted Interface art, AddOns, and WTF. Live WTF is documented and tested as read-only import; simulator-local SavedVariables take precedence once present.

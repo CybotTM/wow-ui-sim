@@ -4,11 +4,11 @@ The addon loading pipeline discovers addon directories, parses TOC files, loads 
 
 ## Addon Discovery and TOC Parsing
 
-`find_toc_file()` (`src/loader/mod.rs`) prefers `{AddonName}_Mainline.toc` over `{AddonName}.toc` over first non-Classic `.toc` for retail WoW compatibility.
+`find_toc_file()` (`src/loader/mod.rs`) prefers `{AddonName}<suffix>.toc` (suffix is profile-dependent: `_Mainline` retail, `_Wrath` wrath, `_Mists` mists, `_Vanilla` era + anniversary) over `{AddonName}.toc` over the first `.toc` whose name doesn't carry another profile's suffix. The suffix table and exclude list live in `active_profile_toc_suffix()` / `other_profile_toc_suffixes()`. See [[client-profiles]].
 
 `TocFile` fields: `addon_dir`, `name`, `metadata: HashMap<String, String>` (Interface version, Title, Dependencies, RequiredDeps, OptionalDeps, LoadOnDemand, SavedVariables, SavedVariablesPerCharacter), `files: Vec<PathBuf>` in load order.
 
-TOC parsing strips `#` comments, skips `[AllowLoadTextLocale]` lines for non-enUS, skips `[AllowLoadGameType]` lines unless "mainline"/"standard", replaces `[Family]` → "Mainline" and `[Game]` → "Standard" placeholders, normalizes backslashes. Path resolution is case-insensitive for Windows/macOS compatibility.
+TOC parsing strips `#` comments, skips `[AllowLoadTextLocale]` lines for non-enUS, skips `[AllowLoadGameType]` lines unless the inline gametype matches the active profile's allow-list (retail: mainline/standard; wrath: wrath/wrath_classic/classic; mists: mists/mists_classic/classic; era: vanilla/classic_era/classic; anniversary: vanilla/classic_anniversary/classic), substitutes `[Family]` for the profile's family-subdir (Mainline retail, Classic everywhere else), `[Game]` → "Standard", normalizes backslashes. Path resolution is case-insensitive for Windows/macOS compatibility. See [[client-profiles]] for the full profile-aware tables.
 
 ## Load Flow (`src/loader/addon.rs`)
 
