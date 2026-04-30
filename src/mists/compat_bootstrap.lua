@@ -454,7 +454,25 @@ if rawget(_G, "RequestRatedInfo") == nil then
   function RequestRatedInfo() end
 end
 
--- ChatAlertFrame and MiniMapTrackingBackground are frame references. Mists's
--- Blizzard_SharedXML normally defines them as real frames; if it doesn't get
--- there, leaving them nil is preferable to a noopFrame proxy which conflicts
--- with the real frame definition (see wrath/compat_frame_proxies.lua note).
+-- ChatAlertFrame and MiniMapTrackingBackground are frame references that
+-- mists's vendor never defines (verified via grep). Provide noop-method
+-- proxy frames so callers like TextToSpeech.lua / MiniMapTrackingButton can
+-- chain method calls without crashing.
+--
+-- This is the same proxy pattern the wrath bootstrap uses. It caused mists
+-- recursion ONLY when applied to MiniMapTrackingIcon/PlayerArrowEffectFrame,
+-- which mists's Blizzard_SharedXML does define as real frames; for the two
+-- below the vendor never creates them, so the proxies don't conflict.
+local function noopFrame()
+  local t = {}
+  setmetatable(t, { __index = function() return function() end end })
+  return t
+end
+
+if rawget(_G, "MiniMapTrackingBackground") == nil then
+  MiniMapTrackingBackground = noopFrame()
+end
+
+if rawget(_G, "ChatAlertFrame") == nil then
+  ChatAlertFrame = noopFrame()
+end
