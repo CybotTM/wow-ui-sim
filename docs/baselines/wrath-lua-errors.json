@@ -1,0 +1,266 @@
+[
+  {
+    "message": "...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:78: attempt to index field 'text' (a nil value)",
+    "count": 3
+  },
+  {
+    "message": "[OnLoad] VideoOptionsResolutionPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:78: attempt to index field 'text' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] VideoOptionsEffectsPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:78: attempt to index field 'text' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/UIPanelTemplates.lua:365: attempt to perform arithmetic on field 'cursorOffset' (a nil value)",
+    "count": 56
+  },
+  {
+    "message": "[OnLoad] AudioOptionsSoundPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:78: attempt to index field 'text' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)",
+    "count": 15
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsControlsPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "not a function",
+    "count": 9
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsCombatPanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsDisplayPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsObjectivesPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsSocialPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsActionBarsPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsNamesPanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsCombatTextPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsStatusTextPanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsUnitFramePanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsBuffsPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsCameraPanel: ...face/BlizzardUI/Wrath/FrameXML/OptionsFrameTemplates.lua:92: attempt to index field 'toggle' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsMousePanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsFeaturesPanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] InterfaceOptionsHelpPanel: not a function\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/UIPanelTemplates.lua:300: attempt to index field '?' (a nil value)",
+    "count": 11
+  },
+  {
+    "message": "[OnLoad] BattlefieldFrameInfoScrollFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UIPanelTemplates.lua:300: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:2217: attempt to index local 'frame' (a nil value)",
+    "count": 2
+  },
+  {
+    "message": "[OnLoad] MainMenuBar: ./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:2217: attempt to index local 'frame' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:3109: attempt to concatenate local 'localizedName' (a table value)",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] CharacterMicroButton: ./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:3109: attempt to concatenate local 'localizedName' (a table value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/TutorialFrame.lua:790: attempt to index local '(for index)' (a nil value)",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] TutorialFrame: ./Interface/BlizzardUI/Wrath/FrameXML/TutorialFrame.lua:790: attempt to index local '(for index)' (a nil value)\n(string):15: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "@./Interface/BlizzardUI/Wrath/FrameXML/GameTime.lua: ./Interface/BlizzardUI/Wrath/FrameXML/GameTime.lua:17: attempt to perform arithmetic on local 'PI' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "Parse error: unknown variant `Fontstring`, expected one of `Texture`, `FontString`, `Line`, `MaskTexture`\nstack traceback:\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] PlayerFrameDropDown: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "expected number, got string at argument 1",
+    "count": 16
+  },
+  {
+    "message": "[OnLoad] TargetFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] FocusFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] Boss1TargetFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] Boss2TargetFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] Boss3TargetFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] Boss4TargetFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] SpellBookFrame: expected number, got string at argument 1\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/SkillFrame.lua:194: attempt to perform arithmetic on local 'skillRank' (a nil value)",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] SkillFrame: ./Interface/BlizzardUI/Wrath/FrameXML/SkillFrame.lua:194: attempt to perform arithmetic on local 'skillRank' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/UIDropDownMenu.lua:234: attempt to index local 'button' (a nil value)",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] WatchFrameHeaderDropDown: ./Interface/BlizzardUI/Wrath/FrameXML/UIDropDownMenu.lua:234: attempt to index local 'button' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] PendingListFrameDropDown: ./Interface/BlizzardUI/Wrath/FrameXML/UnitPopup.lua:223: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "...ine-function-number-arg-no-global-slots/56088224343ae994:4: attempt to call upvalue 'fn' (a nil value)",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] WhoFrame: ...ine-function-number-arg-no-global-slots/56088224343ae994:4: attempt to call upvalue 'fn' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] RaidFrame: ./Interface/BlizzardUI/Wrath/FrameXML/PartyMemberFrame.lua:9: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:276: attempt to call global 'GetNumMapLandmarks' (a nil value)",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] WorldMapFrame: ./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:276: attempt to call global 'GetNumMapLandmarks' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] SendMailFrame: expected number, got string at argument 1\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] PVPBattlegroundFrameInfoScrollFrame: ./Interface/BlizzardUI/Wrath/FrameXML/UIPanelTemplates.lua:300: attempt to index field '?' (a nil value)\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "expected Lua closure in execute",
+    "count": 3
+  },
+  {
+    "message": "[OnLoad] PVPBattlegroundFrame: expected Lua closure in execute\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "[OnLoad] VehicleMenuBar: expected Lua closure in execute\n(string):15: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk\n\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function '__report'\n\t(string):16: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):4: in main chunk\n\t(string):6: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "attempt to call a nil value",
+    "count": 2
+  },
+  {
+    "message": "...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:968: attempt to index local '(for generator)' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:968: in function 'InterfaceOptionsSocialPanelChatStyle_SetChatStyle'\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "bad argument #1 to 'floor' (number expected)\nstack traceback:\n\t(string):1: in main chunk\n\t[C]: in function 'floor'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:2275: in function 'SecondsToTime'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:505: in function <./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:471>\n\t(tail call): ?\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:376: in function 'WatchFrame_Update'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:1334: in function 'WatchFrame_SetWidth'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:278: in function <./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:230>\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:968: in function 'InterfaceOptionsSocialPanelChatStyle_SetChatStyle'\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:2139: attempt to perform arithmetic on local 'opacity' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:2139: in function 'WorldMapFrame_SetOpacity'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:1409: in function 'WorldMap_ToggleSizeDown'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:184: in function <./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:168>\n\t[C]: in function 'floor'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:2275: in function 'SecondsToTime'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:505: in function <./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:471>\n\t(tail call): ?\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:376: in function 'WatchFrame_Update'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:1334: in function 'WatchFrame_SetWidth'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:278: in function <./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:230>\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:968: in function 'InterfaceOptionsSocialPanelChatStyle_SetChatStyle'\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "@Interface/AddOns/Blizzard_CombatLog/Blizzard_CombatLog.lua: Interface/AddOns/Blizzard_CombatLog/Blizzard_CombatLog.lua:3337: attempt to index local 'COMBATLOG' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t(string):1: in main chunk\n\t[C]: in function 'LoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:235: in function 'UIParentLoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:258: in function 'CombatLog_LoadUI'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:482: in function <./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:454>\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:2139: in function 'WorldMapFrame_SetOpacity'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:1409: in function 'WorldMap_ToggleSizeDown'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:184: in function <./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:168>\n\t[C]: in function 'floor'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:2275: in function 'SecondsToTime'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:505: in function <./Interface/BlizzardUI/Wrath/FrameXML/WatchFrame.lua:471>\n\t...\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "generated/loader-exec-no-global-slots/c21694f8d634c62b:16: attempt to perform arithmetic on local 'value' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\tgenerated/loader-exec-no-global-slots/c21694f8d634c62b:16: in function <generated/loader-exec-no-global-slots/c21694f8d634c62b:13>\n\t(string):1: in main chunk\n\t[C]: in function 'securecall'\n\t...face/BlizzardUI/Wrath/FrameXML/OptionsPanelTemplates.lua:353: in function <...face/BlizzardUI/Wrath/FrameXML/OptionsPanelTemplates.lua:311>\n\t[C]: in function 'LoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:235: in function 'UIParentLoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:258: in function 'CombatLog_LoadUI'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:482: in function <./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:454>\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:2139: in function 'WorldMapFrame_SetOpacity'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:1409: in function 'WorldMap_ToggleSizeDown'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:184: in function <./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:168>\n\t...\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:260: attempt to concatenate local 'value' (a nil value)\nstack traceback:\n\t(string):1: in main chunk\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:260: in function 'InterfaceOptionsCombatPanelTOTDropDown_OnEvent'\n\tgenerated/loader-exec-no-global-slots/dda98f444eea0e11:15: in function <generated/loader-exec-no-global-slots/dda98f444eea0e11:13>\n\t[C]: ?\n\t[C]: in function 'securecall'\n\t...face/BlizzardUI/Wrath/FrameXML/OptionsPanelTemplates.lua:353: in function <...face/BlizzardUI/Wrath/FrameXML/OptionsPanelTemplates.lua:311>\n\t[C]: in function 'LoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:235: in function 'UIParentLoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:258: in function 'CombatLog_LoadUI'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:482: in function <./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:454>\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:2139: in function 'WorldMapFrame_SetOpacity'\n\t./Interface/BlizzardUI/Wrath/FrameXML/WorldMapFrame.lua:1409: in function 'WorldMap_ToggleSizeDown'\n\t...\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:39: attempt to compare number with nil\nstack traceback:\n\t(string):1: in main chunk\n\t...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:39: in function 'UpdateMicroButtons'\n\t...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:123: in function <...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:119>\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:260: in function 'InterfaceOptionsCombatPanelTOTDropDown_OnEvent'\n\tgenerated/loader-exec-no-global-slots/dda98f444eea0e11:15: in function <generated/loader-exec-no-global-slots/dda98f444eea0e11:13>\n\t[C]: ?\n\t[C]: in function 'securecall'\n\t...face/BlizzardUI/Wrath/FrameXML/OptionsPanelTemplates.lua:353: in function <...face/BlizzardUI/Wrath/FrameXML/OptionsPanelTemplates.lua:311>\n\t[C]: in function 'LoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:235: in function 'UIParentLoadAddOn'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:258: in function 'CombatLog_LoadUI'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:482: in function <./Interface/BlizzardUI/Wrath/FrameXML/UIParent.lua:454>\n\t...\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 1
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/BuffFrame.lua:190: attempt to perform arithmetic on local 'expirationTime' (a string value)\nstack traceback:\n\t(string):1: in main chunk\n\t./Interface/BlizzardUI/Wrath/FrameXML/BuffFrame.lua:190: in function '(for index)'\n\t./Interface/BlizzardUI/Wrath/FrameXML/BuffFrame.lua:86: in function 'BuffFrame_Update'\n\t./Interface/BlizzardUI/Wrath/FrameXML/PlayerFrame.lua:349: in function 'PlayerFrame_ToPlayerArt'\n\t./Interface/BlizzardUI/Wrath/FrameXML/PlayerFrame.lua:138: in function 'OnEvent'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UnitFrame.lua:417: in function <./Interface/BlizzardUI/Wrath/FrameXML/UnitFrame.lua:415>\n\t...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:39: in function 'UpdateMicroButtons'\n\t...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:123: in function <...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:119>\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:260: in function 'InterfaceOptionsCombatPanelTOTDropDown_OnEvent'\n\tgenerated/loader-exec-no-global-slots/dda98f444eea0e11:15: in function <generated/loader-exec-no-global-slots/dda98f444eea0e11:13>\n\t[C]: ?\n\t[C]: in function 'securecall'\n\t...\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 3
+  },
+  {
+    "message": "./Interface/BlizzardUI/Wrath/FrameXML/DurabilityFrame.lua:24: attempt to call local '(for generator)' (a nil value)\nstack traceback:\n\t(string):1: in function '(for generator)'\n\t./Interface/BlizzardUI/Wrath/FrameXML/DurabilityFrame.lua:24: in function 'DurabilityFrame_SetAlerts'\n\tgenerated/loader-exec-no-global-slots/6a74193d0f65719f:11: in function <generated/loader-exec-no-global-slots/6a74193d0f65719f:10>\n\t./Interface/BlizzardUI/Wrath/FrameXML/BuffFrame.lua:190: in function '(for index)'\n\t./Interface/BlizzardUI/Wrath/FrameXML/BuffFrame.lua:86: in function 'BuffFrame_Update'\n\t./Interface/BlizzardUI/Wrath/FrameXML/PlayerFrame.lua:349: in function 'PlayerFrame_ToPlayerArt'\n\t./Interface/BlizzardUI/Wrath/FrameXML/PlayerFrame.lua:138: in function 'OnEvent'\n\t./Interface/BlizzardUI/Wrath/FrameXML/UnitFrame.lua:417: in function <./Interface/BlizzardUI/Wrath/FrameXML/UnitFrame.lua:415>\n\t...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:39: in function 'UpdateMicroButtons'\n\t...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:123: in function <...ce/BlizzardUI/Wrath/FrameXML/MainMenuBarMicroButtons.lua:119>\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:260: in function 'InterfaceOptionsCombatPanelTOTDropDown_OnEvent'\n\tgenerated/loader-exec-no-global-slots/dda98f444eea0e11:15: in function <generated/loader-exec-no-global-slots/dda98f444eea0e11:13>\n\t...\n\t...ace/BlizzardUI/Wrath/FrameXML/InterfaceOptionsPanels.lua:905: in function 'newsecurefunction'\n\t(string):1: in main chunk\n\t[C]: ?\n\t(string):1: in main chunk\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t[C]: ?\n\t(string):1: in main chunk\n\t(string):1: in main chunk",
+    "count": 2
+  }
+]
