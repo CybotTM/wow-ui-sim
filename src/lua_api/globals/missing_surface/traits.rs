@@ -862,6 +862,7 @@ const CLASS_TALENTS_CONFIG_METHODS: &[(&str, rilua::RustFn)] = &[
         "HasUnspentHeroTalentPoints",
         c_class_talents_has_unspent_hero_talent_points,
     ),
+    ("LoadConfig", c_class_talents_load_config),
 ];
 
 fn register_c_class_talents_config_fns(
@@ -1725,6 +1726,34 @@ fn c_class_talents_get_trait_tree_for_spec(state: &mut LuaState) -> LuaResult<u3
         None => state.push(Val::Nil),
     }
     Ok(1)
+}
+
+fn c_class_talents_load_config(state: &mut LuaState) -> LuaResult<u32> {
+    const RESULT_ERROR: f64 = 0.0;
+    const RESULT_NO_CHANGES: f64 = 1.0;
+
+    let config_id = i32::from_stack(state, 1)?;
+    let Some(spec_id) = config_spec_id(config_id) else {
+        state.push(Val::Num(RESULT_ERROR));
+        state.push(Val::Nil);
+        state.push(Val::Nil);
+        return Ok(3);
+    };
+
+    borrow_state_mut(state)?
+        .talents
+        .switch_to_loadout(spec_id, config_id);
+
+    fire_named_event_with_arg(
+        state,
+        "ACTIVE_COMBAT_CONFIG_CHANGED",
+        Val::Num(config_id as f64),
+    );
+
+    state.push(Val::Num(RESULT_NO_CHANGES));
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(3)
 }
 
 fn c_class_talents_can_change_talents(state: &mut LuaState) -> LuaResult<u32> {
