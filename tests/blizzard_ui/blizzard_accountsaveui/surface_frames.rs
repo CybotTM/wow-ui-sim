@@ -88,3 +88,91 @@ fn account_save_frame_exposes_all_parent_keys() {
         }
     });
 }
+
+#[test]
+fn account_save_frame_text_is_a_simple_html_widget() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let object_type = env
+            .eval::<String>("return AccountSaveFrame.Text:GetObjectType()")
+            .expect("AccountSaveFrame.Text must support GetObjectType");
+        assert_eq!(
+            object_type, "SimpleHTML",
+            "AccountSaveFrame.Text must be a SimpleHTML widget — XML declares it as \
+             `<SimpleHTML parentKey=\"Text\" resizeToFitContents=\"true\">` (lines 28-40 \
+             of Blizzard_AccountSaveUI.xml). The widget receives `<FontString>`, \
+             `<FontStringHeader1>` and `<FontStringHeader2>` children that the kick-flow \
+             dialog body relies on; if this drops to a plain Frame, the rich-text dialog \
+             body would render as a single un-styled run. Got: `{object_type}`."
+        );
+    });
+}
+
+#[test]
+fn account_save_frame_lock_edit_box_caps_at_32_letters() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let (object_type, max_letters) = env
+            .eval::<(String, i64)>(
+                "return AccountSaveFrame.LockEditBox:GetObjectType(),
+                        AccountSaveFrame.LockEditBox:GetMaxLetters()",
+            )
+            .expect("AccountSaveFrame.LockEditBox must support GetObjectType and GetMaxLetters");
+        assert_eq!(
+            object_type, "EditBox",
+            "AccountSaveFrame.LockEditBox must be an EditBox widget — XML declares \
+             `<EditBox parentKey=\"LockEditBox\" letters=\"32\" historyLines=\"1\">` \
+             (lines 41-65). Got: `{object_type}`."
+        );
+        assert_eq!(
+            max_letters, 32,
+            "AccountSaveFrame.LockEditBox must cap input at 32 letters — the \
+             `letters=\"32\"` XML attribute maps to SetMaxLetters(32). The kick-flow \
+             confirmation phrase is exactly 32 characters; reducing or removing this \
+             cap would let the player type extra characters and silently fail the \
+             confirmation match. Got: max_letters = {max_letters}."
+        );
+    });
+}
+
+#[test]
+fn account_save_frame_save_button_inherits_ui_panel_button_template() {
+    with_blizzard_addon_glue_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let template_registered = wow_ui_sim::xml::get_template("UIPanelButtonTemplate").is_some();
+        assert!(
+            template_registered,
+            "UIPanelButtonTemplate must be present in the unified template registry \
+             before AccountSaveFrame's <Button parentKey=\"SaveButton\" \
+             inherits=\"UIPanelButtonTemplate\" ...> entry can resolve its inherits \
+             chain. If this regresses, either Blizzard_SharedXML failed to load \
+             alongside Blizzard_GlueXML or the inheritance walker stopped registering \
+             SecureUIPanelTemplates.xml's virtual buttons."
+        );
+
+        let (object_type, has_left, has_right, has_middle) = env
+            .eval::<(String, bool, bool, bool)>(
+                "return AccountSaveFrame.SaveButton:GetObjectType(),
+                        AccountSaveFrame.SaveButton.Left   ~= nil,
+                        AccountSaveFrame.SaveButton.Right  ~= nil,
+                        AccountSaveFrame.SaveButton.Middle ~= nil",
+            )
+            .expect(
+                "AccountSaveFrame.SaveButton must expose GetObjectType plus Left / Right / \
+                 Middle parentKey children inherited from UIPanelButtonTemplate",
+            );
+        assert_eq!(
+            object_type, "Button",
+            "AccountSaveFrame.SaveButton must be a Button widget — XML declares \
+             `<Button parentKey=\"SaveButton\" ... inherits=\"UIPanelButtonTemplate\">`. \
+             Got: `{object_type}`."
+        );
+        assert!(
+            has_left && has_right && has_middle,
+            "AccountSaveFrame.SaveButton must expose `Left`, `Right`, `Middle` \
+             child textures inherited from UIPanelButtonTemplate → \
+             UIPanelButtonNoTooltipTemplate (SecureUIPanelTemplates.xml lines 210-242). \
+             These three textures are the only template-specific surface attached \
+             to every UIPanelButtonTemplate instance — if any goes missing, the \
+             button's inheritance chain stopped being walked for THIS instance. \
+             Got: Left={has_left}, Right={has_right}, Middle={has_middle}."
+        );
+    });
+}
