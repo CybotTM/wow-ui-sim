@@ -61,6 +61,16 @@ jobs:
       - name: lua-errors smoke (must exit 0)
         run: WOW_SIM_NO_ADDONS=1 WOW_SIM_NO_SAVED_VARS=1 timeout 90 ./target/debug/wow-sim --no-addons --no-saved-vars lua-errors > lua-errors.json
 
+      - name: Diff against committed baseline
+        # Compares the just-captured lua-errors.json against the committed
+        # baseline at docs/baselines/<profile>-lua-errors.json. Reports
+        # regressed (new) and fixed (gone) error messages for visibility
+        # in the PR; does NOT fail the job on regression — baselines move
+        # quickly during dev. Bump to --exit-on-regression once they
+        # stabilize.
+        if: always()
+        run: ./scripts/diff-lua-errors.sh docs/baselines/${{ matrix.profile }}-lua-errors.json lua-errors.json
+
       - name: Upload error baseline
         if: always()
         uses: actions/upload-artifact@v4

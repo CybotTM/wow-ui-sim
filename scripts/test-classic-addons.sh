@@ -151,10 +151,9 @@ addon_induced_errors() {
         echo "no-baseline"
         return
     fi
-    # Set difference: messages present in addon run but not baseline.
-    comm -23 \
-        <(jq -r '.[].message' "$addon_json" 2>/dev/null | sort -u) \
-        <(jq -r '.[].message' "$baseline" 2>/dev/null | sort -u) | wc -l
+    # `regressed` = messages present in addon run but not profile baseline.
+    "$REPO_ROOT/scripts/diff-lua-errors.sh" "$baseline" "$addon_json" --quiet \
+        | sed -n 's/.*regressed=\([0-9]*\).*/\1/p'
 }
 
 run_addon() {
