@@ -11,8 +11,12 @@ client profile. Captured 2026-04-30 at the heads documented in
 | retail       |                 0 | `Gethe/wow-ui-source@b062d332` (12.0.5) |
 | wrath        |                66 | `andrew6180/WoTLK-3.3.5-UI-Source@27334191` |
 | mists        |                54 | `Gethe/wow-ui-source@33d87412` (classic) |
-| era          |               124 | `Gethe/wow-ui-source@e0099491` (1.15.8 build 67156) |
-| anniversary  |               118 | `Gethe/wow-ui-source@b29b0d0a` (2.5.5 build 67157) |
+| era          |                98 | `Gethe/wow-ui-source@e0099491` (1.15.8 build 67156) |
+| anniversary  |                93 | `Gethe/wow-ui-source@b29b0d0a` (2.5.5 build 67157) |
+
+**Phase 7.5 reduction:** Era 124 → 98 (−26), Anniversary 118 → 93 (−25) after
+adding `src/era/compat_bootstrap.lua` (~30 vanilla-only stub globals shared
+between both profiles).
 
 Snapshots are stored as `<profile>-lua-errors.json` next to this README.
 Re-capture by running, for each profile:
