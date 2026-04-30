@@ -86,6 +86,10 @@ fn process_element(
             register_virtual_texture(tex);
             Ok(0)
         }
+        XmlElement::FontString(fs) => {
+            register_virtual_font_string(fs);
+            Ok(0)
+        }
         XmlElement::AnimationGroup(ag) => {
             register_virtual_anim_group(ag);
             Ok(0)
@@ -237,6 +241,17 @@ fn register_virtual_texture(texture: &crate::xml::TextureXml) {
         && let Some(ref name) = texture.name
     {
         crate::xml::register_texture_template(name, texture.clone());
+    }
+}
+
+/// Register a top-level virtual FontString template (e.g.
+/// `UserScaledFontStringTemplate`). FontString templates live in their
+/// own registry — see `src/xml/template.rs::register_font_string_template`.
+fn register_virtual_font_string(fontstring: &crate::xml::FontStringXml) {
+    if fontstring.is_virtual == Some(true)
+        && let Some(ref name) = fontstring.name
+    {
+        crate::xml::register_font_string_template(name, fontstring.clone());
     }
 }
 
