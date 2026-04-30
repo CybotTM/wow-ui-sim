@@ -54,3 +54,6 @@ mod behavior_storefront_state_event;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_transaction_error.rs"]
 mod behavior_transaction_error;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_item_info_updated.rs"]
+mod behavior_item_info_updated;
