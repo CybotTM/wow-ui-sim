@@ -666,7 +666,7 @@ dependencies = [
 [[package]]
 name = "cascette-client-storage"
 version = "0.2.0"
-source = "git+https://github.com/wowemulation-dev/cascette-rs?rev=2d1294b#2d1294b9d8eba0c0d0ffc6387f0777f36ecae671"
+source = "git+https://github.com/Osso/cascette-rs?rev=2fe7118#2fe711811b1648a9f04792b835de744fb93f46d1"
 dependencies = [
  "binrw",
  "cascette-crypto",
@@ -690,7 +690,7 @@ dependencies = [
 [[package]]
 name = "cascette-crypto"
 version = "0.2.0"
-source = "git+https://github.com/wowemulation-dev/cascette-rs?rev=2d1294b#2d1294b9d8eba0c0d0ffc6387f0777f36ecae671"
+source = "git+https://github.com/Osso/cascette-rs?rev=2fe7118#2fe711811b1648a9f04792b835de744fb93f46d1"
 dependencies = [
  "binrw",
  "cipher",
@@ -703,11 +703,10 @@ dependencies = [
 [[package]]
 name = "cascette-formats"
 version = "0.2.0"
-source = "git+https://github.com/wowemulation-dev/cascette-rs?rev=2d1294b#2d1294b9d8eba0c0d0ffc6387f0777f36ecae671"
+source = "git+https://github.com/Osso/cascette-rs?rev=2fe7118#2fe711811b1648a9f04792b835de744fb93f46d1"
 dependencies = [
  "binrw",
  "cascette-crypto",
- "divsufsort",
  "flate2",
  "hex",
  "lz4_flex",
@@ -1185,15 +1184,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "divsufsort"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e57e36c45fe0b4ef9bc690e53cce2f46dc193f7be3bc93bb7d23ca6dc1be820"
-dependencies = [
- "sacabase",
-]
-
-[[package]]
 name = "dlib"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1304,7 +1294,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2746,7 +2736,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -3846,6 +3836,7 @@ checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
 [[package]]
 name = "rilua"
 version = "0.1.21"
+source = "git+https://github.com/Osso/rilua.git#2bd1464abfea886155c82193e8ad468e8a3da547"
 dependencies = [
  "smallvec",
 ]
@@ -3936,7 +3927,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3944,15 +3935,6 @@ name = "rustversion"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
-
-[[package]]
-name = "sacabase"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9883fc3d6ce3d78bb54d908602f8bc1f7b5f983afe601dabe083009d86267a84"
-dependencies = [
- "num-traits",
-]
 
 [[package]]
 name = "salsa20"
@@ -4500,7 +4482,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix 1.1.3",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5324,7 +5306,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
