@@ -48,3 +48,6 @@ mod behavior_save_result_errors;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_success_popup_launch_url.rs"]
 mod behavior_success_popup_launch_url;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_update_sizing.rs"]
+mod behavior_update_sizing;
