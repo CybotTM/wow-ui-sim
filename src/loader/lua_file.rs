@@ -24,7 +24,7 @@ pub fn load_lua_file(
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let io_start = Instant::now();
-    let bytes = std::fs::read(path)?;
+    let bytes = std::fs::read(path).map_err(|e| LoadError::io_with_path(path, e))?;
     timing.io_time += io_start.elapsed();
 
     let chunk_name = wow_chunk_name(path);

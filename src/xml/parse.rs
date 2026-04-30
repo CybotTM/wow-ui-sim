@@ -11,7 +11,10 @@ pub fn parse_xml(xml: &str) -> Result<UiXml, quick_xml::DeError> {
 ///
 /// Applies fixups for known Blizzard XML quirks before parsing.
 pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
-    let contents = std::fs::read_to_string(path)?;
+    let contents = std::fs::read_to_string(path).map_err(|e| XmlLoadError::IoWithPath {
+        path: path.to_path_buf(),
+        source: e,
+    })?;
     let contents = strip_packager_xml_comments(&contents);
     let fixed = strip_duplicate_self_closing(&contents, "Size");
     let fixed = strip_duplicate_self_closing(&fixed, "TexCoords");
@@ -260,7 +263,14 @@ fn collect_kept_lines(lines: &[&str], remove: &[bool]) -> String {
 /// Error type for XML loading.
 #[derive(Debug)]
 pub enum XmlLoadError {
+    /// IO error without a known path. Prefer `IoWithPath` when the path is
+    /// available — it makes diagnosis dramatically easier.
     Io(std::io::Error),
+    /// IO error with the failing path attached.
+    IoWithPath {
+        path: std::path::PathBuf,
+        source: std::io::Error,
+    },
     Parse(quick_xml::DeError),
 }
 
@@ -280,6 +290,9 @@ impl std::fmt::Display for XmlLoadError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             XmlLoadError::Io(e) => write!(f, "IO error: {}", e),
+            XmlLoadError::IoWithPath { path, source } => {
+                write!(f, "IO error reading {}: {}", path.display(), source)
+            }
             XmlLoadError::Parse(e) => write!(f, "Parse error: {}", e),
         }
     }
