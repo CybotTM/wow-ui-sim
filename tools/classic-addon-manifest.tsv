@@ -1,0 +1,23 @@
+# Classic-profile addon test manifest. Read by scripts/test-classic-addons.sh.
+# Tab-separated; lines starting with # are comments; blank lines ignored.
+#
+# Columns:
+#   name     Slug used as Interface/AddOns/<name> and vendor/addons/<name>
+#   profile  Cargo client-* feature without the prefix (wrath|mists|era|anniversary)
+#   url      Git repo URL
+#   ref      Branch / tag / SHA to pin (avoid HEAD — pin everything)
+#   subpath  Path inside the cloned repo where the addon's TOC lives.
+#            "." means root. Use multiple lines per repo if the addon ships
+#            sibling sub-addons (e.g. DBM-Core + DBM-PvP).
+#
+# See docs/baselines/classic-addon-test-targets.md for picks rationale.
+
+name	profile	url	ref	subpath
+Bartender4	wrath	https://github.com/Nevcairiel/Bartender4.git	master	.
+DBM-Wrath	wrath	https://github.com/DeadlyBossMods/DBM-Wrath.git	master	DBM-Core
+AtlasLootClassic	wrath	https://github.com/Hoizame/AtlasLootClassic.git	wotlk	AtlasLootClassic
+Skada-WoTLK	wrath	https://github.com/bkader/Skada-WoTLK.git	master	Skada
+WeakAuras-Mists	mists	https://github.com/WeakAuras/WeakAuras2.git	mists	WeakAuras
+ElvUI-Classic-Mists	mists	https://github.com/tukui-org/ElvUI-Classic.git	mists	ElvUI
+Details-Mists	mists	https://github.com/Tercioo/Details-Damage-Meter.git	mists	Details
+pfQuest-Vanilla	era	https://github.com/shagu/pfQuest.git	master	.
