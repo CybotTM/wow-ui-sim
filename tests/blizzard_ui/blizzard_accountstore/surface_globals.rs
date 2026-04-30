@@ -33,6 +33,9 @@ const PUBLISHED_TABLES: &[&str] = &[
     "FullscreenLeaveAccountStoreButtonMixin",
 ];
 
+const CATEGORY_LIST_TABLES: &[&str] =
+    &["AccountStoreCategoryMixin", "AccountStoreCategoryListMixin"];
+
 #[test]
 fn account_store_publishes_expected_global_mixin_tables() {
     with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
@@ -51,6 +54,34 @@ fn account_store_publishes_expected_global_mixin_tables() {
                  the relevant `{global} = {{}}` assignment (upstream-global regression). \
                  Either way, the XML's mixin reference would break and the frame would not \
                  inherit any of its declared methods."
+            );
+        }
+    });
+}
+
+#[test]
+fn account_store_category_list_publishes_expected_global_mixin_tables() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for global in CATEGORY_LIST_TABLES {
+            let actual_type: String = env
+                .eval(&format!("return type(_G[{global:?}])"))
+                .unwrap_or_else(|error| panic!("failed to probe `{global}` type: {error}"));
+
+            assert_eq!(
+                actual_type, "table",
+                "Expected `{global}` to publish as a table after `{ROOT}` loads, got \
+                 `{actual_type}`. Both globals are declared at file scope in \
+                 `Blizzard_AccountStoreCategoryList.lua` (lines 2 and 18 — `{global} = {{}}`) \
+                 and consumed by the corresponding XML on the category-list scroll-box rows \
+                 and the list container respectively. The TOC orders \
+                 `Blizzard_AccountStoreCategoryList.lua` second (right after \
+                 `Blizzard_AccountStoreUtil.lua`); a regression that drops this file from the \
+                 TOC, or that fails to reach the assignment, would surface as a nil here. \
+                 The category-list mixins are also a load-order canary for the rest of the \
+                 lane: `Blizzard_AccountStore.lua:OnStoreFrontSet` reaches into \
+                 `AccountStoreCategoryListMixin` indirectly via the XML's parentKey routing, \
+                 so any regression dropping these globals would silently break the whole \
+                 category-selection flow."
             );
         }
     });
