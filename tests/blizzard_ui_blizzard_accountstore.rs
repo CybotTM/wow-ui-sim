@@ -63,3 +63,6 @@ mod behavior_item_rack_paging;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_fullscreen_escape.rs"]
 mod behavior_fullscreen_escape;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_refund_timer.rs"]
+mod behavior_refund_timer;
