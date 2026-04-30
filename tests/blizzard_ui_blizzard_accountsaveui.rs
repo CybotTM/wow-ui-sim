@@ -33,3 +33,6 @@ mod behavior_account_state_unlocked;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_save_in_progress.rs"]
 mod behavior_save_in_progress;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_lock_string_match.rs"]
+mod behavior_lock_string_match;
