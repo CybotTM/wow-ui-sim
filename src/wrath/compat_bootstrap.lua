@@ -586,3 +586,14 @@ if rawget(_G, "IsActionInRange") == nil then
     return nil
   end
 end
+
+-- ─── CVar defaults for wrath options panels ──────────────────────────────────
+-- Wrath FrameXML/AudioOptionsPanels.lua reads `voiceChatMode` via
+-- BlizzardOptionsPanel_GetCVarSafe and immediately does `voiceChatMode + 1`
+-- for tooltip-key composition, with no nil guard. Real WoW ships a CVar
+-- default of "0"; the simulator's CVar registry doesn't include wrath-era
+-- audio CVars, so the local goes nil and arithmetic errors out. Seed the
+-- value here so the panel loads cleanly.
+if type(SetCVar) == "function" and (GetCVar == nil or GetCVar("voiceChatMode") == nil) then
+  SetCVar("voiceChatMode", "0")
+end
