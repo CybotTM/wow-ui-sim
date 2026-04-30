@@ -404,5 +404,4 @@ impl TocFile {
 }
 
 #[cfg(test)]
-#[path = "toc_tests.rs"]
 mod tests;

@@ -181,8 +181,9 @@ WrathCore.lua
     assert!(!toc.is_game_type_restricted());
 }
 
-/// Mists profile vendors write `## Interface: 50500` for MoP-Classic addons.
-/// Parser must accept the single value.
+/// Mists profile vendors write `## Interface: 50500` for MoP-Classic
+/// addons. Parser must accept the single value (the existing
+/// `test_multiple_interface_versions` covers 50500 only as a list element).
 #[test]
 fn test_mists_interface_version() {
     let contents = r#"
@@ -351,7 +352,8 @@ fn test_is_game_type_restricted() {
     );
     assert!(mixed.is_game_type_restricted());
 
-    let no_restriction = TocFile::parse(Path::new("/addons/Test"), "## Title: TestAddon\nCore.lua");
+    let no_restriction =
+        TocFile::parse(Path::new("/addons/Test"), "## Title: TestAddon\nCore.lua");
     assert!(!no_restriction.is_game_type_restricted());
 }
 
