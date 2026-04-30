@@ -84,3 +84,15 @@ scripts/test-classic-addons.sh --skip-clone       # reuse vendor checkouts
 ```
 
 CI lane (Phase 8.4) will invoke this script over a (profile, addon) matrix.
+
+## Per-addon stub shims (Phase 8.3 — landed)
+
+When the harness reports a nonzero `addon-induced errors` count, fix it by
+adding rawget-guarded stubs to a per-addon companion addon under
+`tools/classic-addon-compat/<manifest-name>/<shim-name>/`. The harness
+auto-symlinks every immediate subdirectory there into `Interface/AddOns/`
+when running the parent addon; the shim's TOC declares `## LoadFirst: 1`
+so its globals exist before the third-party addon's first chunk runs. See
+`tools/classic-addon-compat/README.md` for the full convention. Promote
+shared gaps to a profile-level bootstrap (`src/wrath/`, `src/mists/`,
+`src/era/`) instead of repeating them per-addon.
