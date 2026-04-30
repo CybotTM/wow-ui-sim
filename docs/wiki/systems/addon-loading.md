@@ -2,6 +2,43 @@
 
 The addon loading pipeline discovers addon directories, parses TOC files, loads Lua and XML files in declared order, applies templates, fires startup events, and initializes SavedVariables.
 
+## Vendor sources & per-profile setup
+
+The Blizzard UI source isn't checked into this repo — `Interface/BlizzardUI/` and `vendor/` are gitignored. Each client profile points at its own sparse-checkout symlink:
+
+```
+Interface/BlizzardUI/Retail      -> vendor/wow-ui-source-retail/Interface
+Interface/BlizzardUI/Wrath       -> vendor/wow-ui-source-wrath/Interface
+Interface/BlizzardUI/Mists       -> vendor/wow-ui-source-mists/Interface
+Interface/BlizzardUI/Era         -> vendor/wow-ui-source-era/Interface
+Interface/BlizzardUI/Anniversary -> vendor/wow-ui-source-anniversary/Interface
+```
+
+The active profile (selected by the `client-*` cargo feature; see [[client-profiles]]) is the only one the loader reads from at runtime, but multiple profiles can coexist on disk so a developer can flip between them without re-cloning.
+
+`scripts/setup-blizzard-ui.sh <profile> [ref]` clones / refreshes a single profile's vendor checkout. It pins a specific SHA per profile (defaults documented inline in the script) and creates the matching symlink. Idempotent — safe to re-run.
+
+```bash
+./scripts/setup-blizzard-ui.sh retail        # use the pinned SHA
+./scripts/setup-blizzard-ui.sh wrath
+./scripts/setup-blizzard-ui.sh mists
+./scripts/setup-blizzard-ui.sh era
+./scripts/setup-blizzard-ui.sh anniversary
+./scripts/setup-blizzard-ui.sh retail v12.0.5  # override the pinned ref
+```
+
+`scripts/init-worktree.sh` is the bootstrap: in a fresh git worktree it calls the per-profile setup for `(retail wrath mists era anniversary)` so the worktree is buildable for all five profiles. Without these symlinks the loader fatals at startup with `Interface/BlizzardUI/<Profile>/AddOns is missing` and benchmarks / tests silently fail on global nil-call errors.
+
+The vendor-source list is canonical:
+
+| Profile     | Vendor repo                                                | Pinned ref                                               |
+|-------------|------------------------------------------------------------|----------------------------------------------------------|
+| Retail      | `Gethe/wow-ui-source`                                      | `b062d332` (12.0.5)                                      |
+| Wrath       | `andrew6180/WoTLK-3.3.5-UI-Source` (verified byte-identical to `wowgaming/3.3.5-interface-files`) | `27334191` master HEAD     |
+| Mists       | `Gethe/wow-ui-source` branch `classic`                     | `33d87412`                                               |
+| Era         | `Gethe/wow-ui-source` branch `classic_era`                 | `e0099491` (1.15.8 build 67156)                          |
+| Anniversary | `Gethe/wow-ui-source` branch `classic_anniversary`         | `b29b0d0a` (2.5.5 build 67157)                           |
+
 ## Addon Discovery and TOC Parsing
 
 `find_toc_file()` (`src/loader/mod.rs`) prefers `{AddonName}<suffix>.toc` (suffix is profile-dependent: `_Mainline` retail, `_Wrath` wrath, `_Mists` mists, `_Vanilla` era + anniversary) over `{AddonName}.toc` over the first `.toc` whose name doesn't carry another profile's suffix. The suffix table and exclude list live in `active_profile_toc_suffix()` / `other_profile_toc_suffixes()`. See [[client-profiles]].
@@ -22,13 +59,21 @@ TOC parsing strips `#` comments, skips `[AllowLoadTextLocale]` lines for non-enU
 
 ## Blizzard Addon Load Order
 
-27 addons in hardcoded dependency order (`src/main.rs`):
+27 addons in hardcoded dependency order (`src/main.rs`) under retail:
 
 - **Foundation**: SharedXMLBase → Colors → SharedXML → SharedXMLGame → UIPanelTemplates → FrameXMLBase
 - **Core**: LoadLocale → Fonts_Shared → HelpPlate → AccessibilityTemplates → ObjectAPI → UIParent → TextStatusBar → ... → FrameXML
 - **UI Panels**: UIPanels_Game → MapCanvas → WorldMap → ActionBar → GameMenu → UIWidgets → Minimap → AddOnList → Communities
 
 Third-party addons loaded alphabetically after Blizzard addons.
+
+The other profiles discover a different addon set:
+
+- **Wrath** ships its UI as a flat `Interface/FrameXML/` tree alongside `Interface/AddOns/`, with no `Blizzard_FrameXML` addon. The loader detects this via `client_profile::blizzard_ui_framexml_toc()` (Some → wrath layout, None → addon layout) and synthesizes a virtual `FrameXML` addon that loads before the regular `Blizzard_*` discovery pass. Wrath ships 24 `Blizzard_*` addons + the synthetic FrameXML.
+- **Mists** ships ~112 `Blizzard_*` addons (most retail addons exist with `_Mists.toc` variants).
+- **Era / Anniversary** ship the `Gethe/wow-ui-source` multi-flavor addon set (Era uses ~35 `Blizzard_*_Vanilla.toc` variants; Anniversary uses the same vanilla TOCs against a 2.5.5 build).
+
+Counts above are the discovered set after filtering by `is_allowed_game_type` and `default_enabled`; the on-disk addon directory may carry many more `_Cata.toc` / `_TBC.toc` / etc. variants the active profile skips.
 
 ## XML Element Handlers
 
@@ -65,6 +110,7 @@ Priority: WTF loading (`WTF/Account/{account}/SavedVariables/{addon}.lua` and pe
 
 ## See Also
 
+- [[client-profiles]] — cargo-feature selection, vendor pinning, profile-aware loader paths and gametypes
 - [[xml-template-system]] — XML parsing and template registry populated during loading
 - [[event-system]] — startup events fired after all addons load
 - [[lua-api]] — WowLuaEnv that executes all Lua files
