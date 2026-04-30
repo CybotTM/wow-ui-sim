@@ -166,6 +166,36 @@ Core.lua
     assert_eq!(toc.interface_versions(), vec![110107, 50500, 11507]);
 }
 
+/// Wrath profile vendors (andrew6180/WoTLK-3.3.5-UI-Source) write
+/// `## Interface: 30300`. Parser must accept the single legacy value.
+#[test]
+fn test_wrath_interface_version() {
+    let contents = r#"
+## Title: WrathAddon
+## Interface: 30300
+WrathCore.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/WrathAddon"), contents);
+
+    assert_eq!(toc.interface_versions(), vec![30300]);
+    assert!(!toc.is_game_type_restricted());
+}
+
+/// Mists profile vendors write `## Interface: 50500` for MoP-Classic addons.
+/// Parser must accept the single value.
+#[test]
+fn test_mists_interface_version() {
+    let contents = r#"
+## Title: MistsAddon
+## Interface: 50500
+MistsCore.lua
+"#;
+    let toc = TocFile::parse(Path::new("/addons/MistsAddon"), contents);
+
+    assert_eq!(toc.interface_versions(), vec![50500]);
+    assert!(!toc.is_game_type_restricted());
+}
+
 #[test]
 fn test_supports_interface_version() {
     let current = TocFile::parse(
