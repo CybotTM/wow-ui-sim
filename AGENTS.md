@@ -5,7 +5,7 @@
 - **NEVER modify files in `Interface/AddOns/Wowless/`** — this is an external test suite, not our code.
 - **NEVER modify files in `Interface/AddOns/WowlessData/`** — regenerate with `python3 tools/gen_wowless_data.py` (reads from `~/Repos/wowless/data/`). Update the source repo first: `cd ~/Repos/wowless && git pull`.
 - Blizzard UI runtime files live in `~/.cache/wow-ui-sim/blizzard-ui`, populated from the committed manifest with `wow-cli casc sync-blizzard-ui`. Do not rely on `Interface/BlizzardUI` or `vendor/wow-ui-source` for retail runtime loading.
-- **NEVER modify files in `Interface/BlizzardUI/`** — this is a directory of per-client-profile symlinks (`Retail`, `Wrath`, `Mists`) pointing into vendor checkouts. To set up or refresh classic profile sources, run `./scripts/setup-blizzard-ui.sh <profile> [ref]` for one profile or `./scripts/init-worktree.sh` for all three at once.
+- **NEVER modify files in `Interface/BlizzardUI/`** — this is a directory of per-client-profile symlinks (`Retail`, `Wrath`, `Mists`, `Era`, `Anniversary`) pointing into vendor checkouts. To set up or refresh classic profile sources, run `./scripts/setup-blizzard-ui.sh <profile> [ref]` for one profile or `./scripts/init-worktree.sh` for all five at once.
 - **NEVER override, monkey-patch, or otherwise change Blizzard/vendor Lua behavior as a performance optimization.** Blizzard Lua is the compatibility target. For perf work, optimize simulator-side primitive/method/dirty/dispatch costs (`SetAlpha`, `SetFormattedText`, `SetPoint`, `SetFontObject`, etc.) instead. Only patch Blizzard/vendor behavior when matching real WoW semantics/correctness, never as a performance shortcut.
 
 ## Wiki
@@ -112,7 +112,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 ## WoW Game Files
 
 - `~/.cache/wow-ui-sim/blizzard-ui` - Blizzard UI source cache used by retail runtime loading. Populate with `wow-cli casc sync-blizzard-ui`; the file list comes from `data/blizzard-ui-files.txt`.
-- `./Interface/BlizzardUI/` - Directory of per-client-profile symlinks: `Retail`, `Wrath`, `Mists`, each pointing into a separate sparse-checkout under `vendor/wow-ui-source-<profile>/Interface`. Both `BlizzardUI/` and `vendor/` are gitignored, so worktrees start without them — run `./scripts/init-worktree.sh` after `git worktree add` to recreate all three (idempotent; ~2s if vendor dirs already exist on disk).
+- `./Interface/BlizzardUI/` - Directory of per-client-profile symlinks: `Retail`, `Wrath`, `Mists`, `Era`, `Anniversary`, each pointing into a separate sparse-checkout under `vendor/wow-ui-source-<profile>/Interface`. Both `BlizzardUI/` and `vendor/` are gitignored, so worktrees start without them — run `./scripts/init-worktree.sh` after `git worktree add` to recreate all five (idempotent; ~2s per profile already on disk).
 - WoW install (default `/syncthing/World of Warcraft`, override via `WOW_INSTALL_PATH` or `WOW_DATA_PATH`; `asset_resolver::wow_install_path()` also tries common Linux/Wine/Lutris/WSL/macOS paths). The simulator reads textures and fonts directly from CASC via the `asset-resolver` crate (gated behind the `casc` feature, on by default). Set `WOW_SIM_CASC=0` to disable.
 - `~/Projects/wow/WTF` - SavedVariables from real WoW installation
 
@@ -230,6 +230,45 @@ The simulator uses **rilua** — a pure-Rust Lua 5.1 VM that bakes Elune-style t
 ## Intentional Gaps
 
 - **No 3D rendering**: Model, ModelScene, PlayerModel, DressUpModel frames have stub-only implementations for camera, lighting, transform, animation, and mesh methods (`widget_model.rs`). The simulator renders 2D UI only — 3D model display is out of scope. These ~38 stubs are permanent and should not be converted to real implementations.
+
+## Client Profiles
+
+The simulator builds for one of five client profiles per cargo build (`client-retail` default; `client-wrath`, `client-mists`, `client-era`, `client-anniversary` selectable via `--no-default-features --features "sound,gui,casc,client-<profile>"`). Exactly one profile feature must be enabled — `src/client_profile.rs` enforces this with a `compile_error!`. See `docs/wiki/systems/client-profiles.md` for the full architecture.
+
+### Where stubs go
+
+When a Blizzard global or frame method is referenced by vendor sources but not implemented in the simulator's runtime surface, add a stub. The placement rule is **scope, not convenience**:
+
+| Scope | Location | Mechanism |
+|-------|----------|-----------|
+| Wrath only | `src/wrath/compat_bootstrap.lua` (or `frame_methods.rs` for methods on the frame metatable, or `compat_frame_proxies.lua` for frame-handle proxies) | `if rawget(_G, "X") == nil then ... end` guarded |
+| Mists only | `src/mists/compat_bootstrap.lua` | rawget-guarded |
+| Era only or Era+Anniversary (vanilla content) | `src/era/compat_bootstrap.lua` (shared between both) | rawget-guarded |
+| Single third-party addon | `tools/classic-addon-compat/<addon>/<shim>/<shim>.lua` with `## LoadFirst: 1` | rawget-guarded |
+| Cross-profile / runtime surface | `src/lua_api/env_init/runtime_surface_bootstrap.lua` (loaded under all profiles) | rawget-guarded |
+
+**Promotion rule:** start narrow. A new gap belongs in the per-addon shim first; if the same gap surfaces across multiple addons under one profile, promote it to that profile's bootstrap; if it's needed across multiple profiles, promote it to `runtime_surface_bootstrap.lua`. **Never** add cross-profile content to a per-profile module — and never add per-profile content to the runtime surface.
+
+### The cfg(any) refactor signal
+
+When `#[cfg(any(feature = "client-X", feature = "client-Y"))]` (or the equivalent on a single helper / module reference) starts repeating in two or more places, that's the signal to extract a shared module.
+
+The current shared modules:
+
+- **`src/wrath/`** — compiled under `client-wrath` + `client-mists` + `client-era` + `client-anniversary` (gated in `src/lib.rs`). Provides `frame_methods::register_all` (no-op stubs for backdrop / depth / player-texture methods every non-retail profile needs) and `is_registerable_event` (permissive — accepts any non-empty event name, since the mainline `events.yaml` strict list doesn't cover pre-Cata content).
+- **`src/era/`** — compiled under `client-era` + `client-anniversary` (vanilla content; the underlying API gaps are near-identical).
+- **`src/mists/`** — compiled only under `client-mists` (no profile shares it).
+
+If you find yourself writing `#[cfg(any(...))]` on a third site to gate the same set of profiles, **extract a function or module** with that cfg(any) at its declaration so individual call sites stay clean. Don't copy-paste cfg(any) lists — they always fall out of sync.
+
+### When NOT to add per-profile code
+
+- **Profile-aware behavior in `src/loader/` or `src/toc/`** belongs in helpers like `active_profile_toc_suffix()` / `other_profile_toc_suffixes()` that match on `crate::client_profile::ACTIVE`, not in `#[cfg]` walls. Use the runtime const so `cargo check` validates all five arms in one pass; cfg gates would silo arms behind feature flags and let drift accumulate.
+- **Compat shims for retail** are usually a sign of a real bug or a missing namespace. Fix the underlying simulator surface; don't add a `src/retail/` (it doesn't exist).
+
+### Vendor pinning
+
+Each profile pins a specific vendor SHA in `scripts/setup-blizzard-ui.sh`. Bumping the pin is a deliberate change — it tends to surface new gaps (or fix old ones) in the matching baseline at `docs/baselines/<profile>-lua-errors.json`. Re-capture the baseline after a pin bump and commit both together.
 
 ## Performance
 
