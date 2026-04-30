@@ -21,3 +21,6 @@ mod surface_mixins;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/behavior_text_size_manager.rs"]
 mod behavior_text_size_manager;
+
+#[path = "blizzard_ui/blizzard_accessibilitytemplates/behavior_theme_update.rs"]
+mod behavior_theme_update;
