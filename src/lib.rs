@@ -88,7 +88,8 @@ pub mod mists;
 #[cfg(any(
     feature = "client-wrath",
     feature = "client-mists",
-    feature = "client-era"
+    feature = "client-era",
+    feature = "client-anniversary"
 ))]
 pub mod wrath;
 pub mod xml;

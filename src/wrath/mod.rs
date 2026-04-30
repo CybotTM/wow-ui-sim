@@ -16,9 +16,9 @@ pub mod compat_bootstrap;
 pub mod frame_methods;
 pub mod post_load;
 
-/// Wrath/mists/era profiles accept any non-empty event name; the mainline
-/// `events.yaml` strict-list doesn't cover pre-Cataclysm, MoP-Classic, or
-/// Vanilla.
+/// Wrath/mists/era/anniversary profiles accept any non-empty event name;
+/// the mainline `events.yaml` strict-list doesn't cover pre-Cataclysm,
+/// MoP-Classic, or Vanilla.
 pub fn is_registerable_event(name: &str) -> bool {
     !name.is_empty()
 }
