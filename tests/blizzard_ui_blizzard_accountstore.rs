@@ -27,3 +27,6 @@ mod behavior_toggle;
 
 #[path = "blizzard_ui/blizzard_accountstore/behavior_set_storefront.rs"]
 mod behavior_set_storefront;
+
+#[path = "blizzard_ui/blizzard_accountstore/behavior_on_show_sound.rs"]
+mod behavior_on_show_sound;
