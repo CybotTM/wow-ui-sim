@@ -1,4 +1,17 @@
-//! Surface-level globals pinned by `Blizzard_AccountStore.lua`.
+//! Surface-level globals pinned by the `Blizzard_AccountStore` lane.
+//!
+//! Spec/source mismatch finding (PLAN.md task for `AccountStoreUtil`):
+//! the plan named `FormatCurrencyDisplayWithIcon` and
+//! `FormatCurrencyTotalWithIcon`, but neither exists in this revision of
+//! `Blizzard_AccountStoreUtil.lua`. The closest-named real functions are
+//! `FormatCurrencyDisplay` (line 56 — formats amount with embedded icon
+//! markup) and `FormatCurrencyDisplayWithWarning` (line 74 — same plus
+//! threshold-based color wrapping). The other two PLAN-named functions
+//! (`IsCurrencyAtWarningThreshold`, `AddCurrencyTotalTooltip`) match the
+//! source verbatim. The `account_store_util_publishes_table_and_currency_functions`
+//! test pins all four real functions, including the closest-name
+//! substitutes — a future Blizzard rename to the PLAN-shaped names
+//! would flip this test and force a re-pin against the new names.
 //!
 //! Three tables are published at file scope by the lane's primary Lua
 //! body (`Blizzard_AccountStore.lua`):
@@ -52,6 +65,22 @@ const ITEM_VIEW_TABLES: &[(&str, &str)] = &[
     (
         "AccountStoreItemRackMixin",
         "Blizzard_AccountStoreItemRack.lua:18",
+    ),
+];
+
+const ACCOUNT_STORE_UTIL_FUNCTIONS: &[(&str, &str)] = &[
+    (
+        "IsCurrencyAtWarningThreshold",
+        "Blizzard_AccountStoreUtil.lua:65",
+    ),
+    (
+        "AddCurrencyTotalTooltip",
+        "Blizzard_AccountStoreUtil.lua:108",
+    ),
+    ("FormatCurrencyDisplay", "Blizzard_AccountStoreUtil.lua:56"),
+    (
+        "FormatCurrencyDisplayWithWarning",
+        "Blizzard_AccountStoreUtil.lua:74",
     ),
 ];
 
@@ -172,6 +201,41 @@ fn account_store_item_view_publishes_expected_global_mixin_tables() {
                  grid of available cards inside the selected category, and the item-display \
                  mixin renders the focused-card detail panel — both are required for the lane \
                  to function past the category-list selection."
+            );
+        }
+    });
+}
+
+#[test]
+fn account_store_util_publishes_table_and_currency_functions() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        let table_type: String = env
+            .eval("return type(_G[\"AccountStoreUtil\"])")
+            .expect("AccountStoreUtil type probe must run cleanly");
+
+        assert_eq!(
+            table_type, "table",
+            "Expected `AccountStoreUtil` to publish as a table after `{ROOT}` loads, got \
+             `{table_type}`. The namespace is declared at file scope in \
+             `Blizzard_AccountStoreUtil.lua:1` (`AccountStoreUtil = {{}}`) and runs first in \
+             the TOC ordering — every later file in the lane reaches `AccountStoreUtil.*` to \
+             route currency formatting and toggle behavior, so a nil here would chain into \
+             every downstream `AccountStoreUtil.X` call returning a nil-call error."
+        );
+
+        for (function_name, defining_site) in ACCOUNT_STORE_UTIL_FUNCTIONS {
+            let actual_type: String = env
+                .eval(&format!("return type(AccountStoreUtil[{function_name:?}])"))
+                .unwrap_or_else(|error| {
+                    panic!("failed to probe `AccountStoreUtil.{function_name}`: {error}")
+                });
+
+            assert_eq!(
+                actual_type, "function",
+                "Expected `AccountStoreUtil.{function_name}` to be a function after `{ROOT}` \
+                 loads (declared at `{defining_site}`), got `{actual_type}`. A nil reading \
+                 means the assignment was dropped — every downstream caller would surface \
+                 this as a nil-call error against the AccountStoreUtil namespace."
             );
         }
     });
