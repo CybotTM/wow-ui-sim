@@ -54,6 +54,65 @@
 //!   addon's contract — the mixin's OnShow body — without taking a
 //!   dependency on `:Show()` reliably firing OnShow in this simulator
 //!   build.
+//!
+//! Spec/source mismatch finding (PLAN.md task for
+//! `AccountStoreItemDisplayMixin` EventRegistry callbacks): the plan
+//! names four events as EventRegistry callbacks for
+//! `AccountStoreItemDisplayMixin` —
+//! `ACCOUNT_STORE_CURRENCY_AVAILABLE_UPDATED`,
+//! `ACCOUNT_STORE_FRONT_UPDATED`, `ACCOUNT_STORE_TRANSACTION_ERROR`,
+//! `ACCOUNT_STORE_ITEM_INFO_UPDATED`. All four halves of the claim are
+//! wrong:
+//!
+//! 1. The first three (`ACCOUNT_STORE_CURRENCY_AVAILABLE_UPDATED`,
+//!    `ACCOUNT_STORE_FRONT_UPDATED`, `ACCOUNT_STORE_TRANSACTION_ERROR`)
+//!    are FRAME events registered via
+//!    `FrameUtil.RegisterFrameForEvents(self, AccountStoreItemDisplayEvents)`
+//!    in `OnShow` (`Blizzard_AccountStoreItemDisplay.lua:67`) — NOT
+//!    `EventRegistry` callbacks. Frame events fire through the
+//!    `:OnEvent` script-handler path; `EventRegistry` callbacks fire
+//!    through `EventRegistry:TriggerEvent`. The two systems are
+//!    separate.
+//!
+//! 2. `ACCOUNT_STORE_ITEM_INFO_UPDATED` is a frame event on a DIFFERENT
+//!    mixin: `AccountStoreBaseCardMixin`
+//!    (`Blizzard_AccountStoreCardTemplates.lua:15-18`,
+//!    `AccountStoreBaseCardEvents` list) — NOT on
+//!    `AccountStoreItemDisplayMixin`. It also is not an EventRegistry
+//!    callback.
+//!
+//! 3. `AccountStoreItemDisplayMixin`'s actual EventRegistry callbacks
+//!    (registered in OnLoad via
+//!    `self:AddStaticEventMethod(EventRegistry, ...)` at
+//!    `Blizzard_AccountStoreItemDisplay.lua:58-59`) are two custom
+//!    dot-namespaced events:
+//!    - `"AccountStore.StoreFrontSet"` → `self.OnStoreFrontSet`
+//!    - `"AccountStore.CategorySelected"` → `self.OnCategorySelected`
+//!
+//!    Triggered by `AccountStoreMixin:SetStoreFrontID` (line 47:
+//!    `EventRegistry:TriggerEvent("AccountStore.StoreFrontSet", ...)`)
+//!    and `AccountStoreMixin:CategorySelected`. None of the four
+//!    PLAN-named events match either of these two actual events.
+//!
+//! Two tests pin both halves of this third mismatch:
+//!
+//! - `account_store_item_display_event_registry_callbacks_match_actual_event_names`
+//!   asserts `EventRegistry:HasRegistrantsForEvent(actual_event)` is
+//!   true for both `"AccountStore.StoreFrontSet"` and
+//!   `"AccountStore.CategorySelected"` after addon load. This pins the
+//!   actual contract — that AddStaticEventMethod ran during OnLoad and
+//!   the callbacks are registered on the global EventRegistry.
+//!
+//! - `account_store_item_display_does_not_register_event_registry_callbacks_for_plan_named_events`
+//!   asserts `EventRegistry:HasRegistrantsForEvent(plan_event)` is
+//!   false for all four PLAN-named events. This is the spec/source
+//!   mismatch tripwire — `HasRegistrantsForEvent` walks the entire
+//!   `EventRegistry` callback table, so a true reading would mean
+//!   either (a) some addon registered an EventRegistry callback for
+//!   the PLAN-named event (unlikely — the names follow client-event
+//!   conventions, not dot-namespaced EventRegistry conventions), or
+//!   (b) Blizzard added the PLAN-named events to the EventRegistry
+//!   callback contract (forcing a re-pin against the new shape).
 
 use crate::common::blizzard_addon_harness::with_blizzard_addon_smoke_shape;
 
@@ -218,5 +277,121 @@ fn account_store_item_display_onshow_registers_actual_event_list() {
              Blizzard_PVPUI/Mainline line 2439, Blizzard_PlunderstormBasics line 42), none of \
              them this one."
         );
+    });
+}
+
+const ACTUAL_EVENT_REGISTRY_CALLBACKS: &[(&str, &str)] = &[
+    (
+        "AccountStore.StoreFrontSet",
+        "Blizzard_AccountStoreItemDisplay.lua:58 — `self:AddStaticEventMethod(EventRegistry, \
+         \"AccountStore.StoreFrontSet\", self.OnStoreFrontSet)`. Triggered by \
+         AccountStoreMixin:SetStoreFrontID at Blizzard_AccountStore.lua:47.",
+    ),
+    (
+        "AccountStore.CategorySelected",
+        "Blizzard_AccountStoreItemDisplay.lua:59 — `self:AddStaticEventMethod(EventRegistry, \
+         \"AccountStore.CategorySelected\", self.OnCategorySelected)`. Triggered by \
+         AccountStoreMixin:CategorySelected.",
+    ),
+];
+
+#[test]
+fn account_store_item_display_event_registry_callbacks_match_actual_event_names() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for (callback_event_name, source_site) in ACTUAL_EVENT_REGISTRY_CALLBACKS {
+            let has_registrants: bool = env
+                .eval(&format!(
+                    "return EventRegistry:HasRegistrantsForEvent({callback_event_name:?})"
+                ))
+                .unwrap_or_else(|error| {
+                    panic!(
+                        "failed to probe \
+                         `EventRegistry:HasRegistrantsForEvent({callback_event_name:?})`: {error}"
+                    )
+                });
+
+            assert!(
+                has_registrants,
+                "Expected `EventRegistry:HasRegistrantsForEvent({callback_event_name:?})` to \
+                 return true after `{ROOT}` loads ({source_site}), got false. \
+                 `AccountStoreItemDisplayMixin:OnLoad` (`Blizzard_AccountStoreItemDisplay.lua:32-60`) \
+                 calls `self:AddStaticEventMethod(EventRegistry, ..., handler)` at lines 58-59 to \
+                 wire two custom EventRegistry callbacks. `AddStaticEventMethod` \
+                 (`CallbackRegistrant.lua:29-32`) inserts the handler into the static registrant \
+                 table AND immediately calls `RegisterFromRegistrationInfo`, which delegates to \
+                 `EventRegistry:RegisterCallback`. So after the OnLoad chain runs, EventRegistry's \
+                 callback table for the event MUST be populated. A false reading means either (a) \
+                 OnLoad never reached the `AddStaticEventMethod` calls (likely an error earlier \
+                 in OnLoad — e.g. Footer subwidgets missing), (b) `AddStaticEventMethod` failed \
+                 to delegate to `RegisterCallback` (a regression in CallbackRegistrantMixin), or \
+                 (c) the simulator's EventRegistry singleton was not bootstrapped as a \
+                 CallbackRegistryMixin (a regression in `runtime_surface_bootstrap.lua:12143-12146`)."
+            );
+        }
+    });
+}
+
+const PLAN_NAMED_EVENT_REGISTRY_CALLBACKS_ABSENT: &[(&str, &str)] = &[
+    (
+        "ACCOUNT_STORE_CURRENCY_AVAILABLE_UPDATED",
+        "frame event in AccountStoreItemDisplayEvents (Blizzard_AccountStoreItemDisplay.lua:5), \
+         registered via FrameUtil.RegisterFrameForEvents in OnShow — NOT an EventRegistry \
+         callback. The frame-event surface is verified by the prior \
+         `account_store_item_display_onshow_registers_actual_event_list` test.",
+    ),
+    (
+        "ACCOUNT_STORE_FRONT_UPDATED",
+        "frame event in AccountStoreItemDisplayEvents (Blizzard_AccountStoreItemDisplay.lua:6), \
+         registered via FrameUtil.RegisterFrameForEvents in OnShow — NOT an EventRegistry \
+         callback.",
+    ),
+    (
+        "ACCOUNT_STORE_TRANSACTION_ERROR",
+        "frame event in AccountStoreItemDisplayEvents (Blizzard_AccountStoreItemDisplay.lua:7), \
+         registered via FrameUtil.RegisterFrameForEvents in OnShow — NOT an EventRegistry \
+         callback.",
+    ),
+    (
+        "ACCOUNT_STORE_ITEM_INFO_UPDATED",
+        "frame event on a DIFFERENT mixin (AccountStoreBaseCardMixin), declared at \
+         Blizzard_AccountStoreCardTemplates.lua:17 and registered via \
+         FrameUtil.RegisterFrameForEvents in `AccountStoreBaseCardMixin:OnShow` — NOT an \
+         EventRegistry callback, and NOT on AccountStoreItemDisplayMixin at all.",
+    ),
+];
+
+#[test]
+fn account_store_item_display_does_not_register_event_registry_callbacks_for_plan_named_events() {
+    with_blizzard_addon_smoke_shape(&[ROOT], &[], |env, _loaded| {
+        for (plan_event, mismatch_reason) in PLAN_NAMED_EVENT_REGISTRY_CALLBACKS_ABSENT {
+            let has_registrants: bool = env
+                .eval(&format!(
+                    "return EventRegistry:HasRegistrantsForEvent({plan_event:?})"
+                ))
+                .unwrap_or_else(|error| {
+                    panic!(
+                        "failed to probe \
+                         `EventRegistry:HasRegistrantsForEvent({plan_event:?})`: {error}"
+                    )
+                });
+
+            assert!(
+                !has_registrants,
+                "Expected `EventRegistry:HasRegistrantsForEvent({plan_event:?})` to return false \
+                 after `{ROOT}` loads (PLAN.md spec/source mismatch tripwire — {mismatch_reason}), \
+                 got true. `HasRegistrantsForEvent` walks the entire EventRegistry callback table \
+                 (`CallbackRegistry.lua:96-104`), so a true reading means either (a) some other \
+                 addon registered an EventRegistry callback for the PLAN-named event — unlikely \
+                 because the names follow client-event conventions (UPPER_SNAKE_CASE) rather than \
+                 the dot-namespaced convention EventRegistry uses (e.g. `AccountStore.StoreFrontSet`), \
+                 or (b) Blizzard added these events to the EventRegistry callback contract for \
+                 `AccountStoreItemDisplayMixin`, forcing a re-pin against the new shape. Note: \
+                 the actual EventRegistry callbacks registered by `AccountStoreItemDisplayMixin:OnLoad` \
+                 are `\"AccountStore.StoreFrontSet\"` and `\"AccountStore.CategorySelected\"` — \
+                 verified by the companion \
+                 `account_store_item_display_event_registry_callbacks_match_actual_event_names` \
+                 test."
+            );
+        }
     });
 }
