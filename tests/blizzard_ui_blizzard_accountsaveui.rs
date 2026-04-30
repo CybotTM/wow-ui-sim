@@ -45,3 +45,6 @@ mod behavior_save_result_event;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_save_result_errors.rs"]
 mod behavior_save_result_errors;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_success_popup_launch_url.rs"]
+mod behavior_success_popup_launch_url;
