@@ -93,6 +93,8 @@ pub mod traits;
 pub mod widget;
 #[cfg(feature = "client-mists")]
 pub mod mists;
+#[cfg(any(feature = "client-era", feature = "client-anniversary"))]
+pub mod era;
 #[cfg(any(
     feature = "client-wrath",
     feature = "client-mists",

@@ -61,6 +61,8 @@ pub(super) fn init_lua_state(
     }
     #[cfg(feature = "client-mists")]
     crate::mists::compat_bootstrap::init(lua)?;
+    #[cfg(any(feature = "client-era", feature = "client-anniversary"))]
+    crate::era::compat_bootstrap::init(lua)?;
     // secureenv is shallow-copied from `_G` here. It keeps its copy of
     // the dangerous globals (dofile / loadfile / require / string.dump /
     // math.randomseed) so secure chunks — which Blizzard trusts —
