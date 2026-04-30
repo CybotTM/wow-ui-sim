@@ -42,3 +42,6 @@ mod behavior_save_button_click;
 
 #[path = "blizzard_ui/blizzard_accountsaveui/behavior_save_result_event.rs"]
 mod behavior_save_result_event;
+
+#[path = "blizzard_ui/blizzard_accountsaveui/behavior_save_result_errors.rs"]
+mod behavior_save_result_errors;
