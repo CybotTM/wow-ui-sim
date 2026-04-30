@@ -24,3 +24,6 @@ mod behavior_text_size_manager;
 
 #[path = "blizzard_ui/blizzard_accessibilitytemplates/behavior_theme_update.rs"]
 mod behavior_theme_update;
+
+#[path = "blizzard_ui/blizzard_accessibilitytemplates/behavior_user_scaled_element.rs"]
+mod behavior_user_scaled_element;
