@@ -368,6 +368,82 @@ if rawget(_G, "IsConsumableAction") == nil then
   function IsConsumableAction(slot) return false end
 end
 
+if rawget(_G, "IsStackableAction") == nil then
+  function IsStackableAction(slot) return false end
+end
+
+-- Additional action-slot probes called from Classic/ActionButton.lua's
+-- ActionButton_Update hot path. Default returns mirror "no spell here":
+if rawget(_G, "HasAction") == nil then
+  function HasAction(slot) return false end
+end
+if rawget(_G, "HasZoneAbility") == nil then
+  function HasZoneAbility() return false end
+end
+if rawget(_G, "IsItemAction") == nil then
+  function IsItemAction(slot) return false end
+end
+if rawget(_G, "IsCurrentAction") == nil then
+  function IsCurrentAction(slot) return false end
+end
+if rawget(_G, "IsAutoCastPetAction") == nil then
+  function IsAutoCastPetAction(slot) return false end
+end
+if rawget(_G, "IsEnabledAutoCastPetAction") == nil then
+  function IsEnabledAutoCastPetAction(slot) return false end
+end
+if rawget(_G, "IsSpellOverlayed") == nil then
+  function IsSpellOverlayed() return false end
+end
+if rawget(_G, "IsBindingForGamePad") == nil then
+  function IsBindingForGamePad() return false end
+end
+if rawget(_G, "GetActionInfo") == nil then
+  function GetActionInfo(slot) return nil, nil, nil end
+end
+if rawget(_G, "GetActionTexture") == nil then
+  function GetActionTexture(slot) return nil end
+end
+if rawget(_G, "GetActionText") == nil then
+  function GetActionText(slot) return "" end
+end
+if rawget(_G, "IsActionInRange") == nil then
+  function IsActionInRange(slot) return nil end
+end
+if rawget(_G, "UnitInPhase") == nil then
+  function UnitInPhase(unit) return true end
+end
+if rawget(_G, "GetActionCount") == nil then
+  function GetActionCount(slot) return 0 end
+end
+if rawget(_G, "GetActionCooldown") == nil then
+  function GetActionCooldown(slot) return 0, 0, 0 end
+end
+if rawget(_G, "GetActionButtonForID") == nil then
+  function GetActionButtonForID(id) return nil end
+end
+if rawget(_G, "GetCooldownDuration") == nil then
+  function GetCooldownDuration() return 0 end
+end
+if rawget(_G, "GetMacroSpell") == nil then
+  function GetMacroSpell(idx) return nil end
+end
+if rawget(_G, "GetSpellCharges") == nil then
+  function GetSpellCharges(spell) return nil end
+end
+if rawget(_G, "GetNewActionHighlightMark") == nil then
+  function GetNewActionHighlightMark() return false end
+end
+if rawget(_G, "GetOnBarHighlightMark") == nil then
+  function GetOnBarHighlightMark() return false end
+end
+if rawget(_G, "GetLastZoneAbilitySpellTexture") == nil then
+  function GetLastZoneAbilitySpellTexture() return nil end
+end
+if rawget(_G, "GetCVarValueBool") == nil then
+  function GetCVarValueBool(name) return false end
+end
+
 if rawget(_G, "MoneyFrame_SetMaxDisplayWidth") == nil then
   function MoneyFrame_SetMaxDisplayWidth(self, w) end
 end
