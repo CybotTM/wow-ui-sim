@@ -17,3 +17,18 @@ fn c_equipment_set_count_defaults_to_zero() {
         .unwrap();
     assert_eq!(count, 0);
 }
+
+#[test]
+fn use_equipment_set_updates_equipped_inventory_items() {
+    let env = support::env();
+    let equipped_id: i64 = env
+        .eval(
+            "C_EquipmentSet.CreateEquipmentSet('Default Gear', ''); \
+             local setID = C_EquipmentSet.GetEquipmentSetID('Default Gear'); \
+             A_Admin.EquipItem(1, 229181); \
+             C_EquipmentSet.UseEquipmentSet(setID); \
+             return GetInventoryItemID('player', 1)",
+        )
+        .unwrap();
+    assert_eq!(equipped_id, 211993);
+}
