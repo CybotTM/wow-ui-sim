@@ -203,6 +203,34 @@ fn craft_recipe_starts_player_cast_for_cast_bar() {
 }
 
 #[test]
+fn craft_recipe_uses_profession_cast_duration() {
+    let env = env();
+    env.exec(
+        r#"
+        A_Admin.SetSelectedProfession(164)
+        A_Admin.LearnRecipe(100001)
+        A_Admin.SeedReagentsForRecipe(100001, 1)
+        "#,
+    )
+    .unwrap();
+
+    let duration_ms: f64 = env
+        .eval(
+            r#"
+            C_TradeSkillUI.CraftRecipe(100001, 1)
+            local _, _, _, startTime, endTime = UnitCastingInfo("player")
+            return endTime - startTime
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        (duration_ms - 2000.0).abs() < 10.0,
+        "profession craft cast duration should be ~2000ms, got {duration_ms}"
+    );
+}
+
+#[test]
 fn craft_recipe_fires_bag_update_events() {
     let env = env();
     let result: String = env
