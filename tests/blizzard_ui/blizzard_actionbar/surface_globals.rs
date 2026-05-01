@@ -153,6 +153,11 @@ const PLAN_NAMED_EXTRA_BAR_GLOBALS: &[&str] = &[
     "ExtraActionBar_ForceShowIfNeeded",
     "ExtraActionBar_CancelForceShow",
 ];
+const PLAN_NAMED_BAR_HELPER_GLOBALS: &[&str] = &[
+    "ArtifactBarGetNumArtifactTraitsPurchasableFromXP",
+    "ReputationParagonWatchBar_OnEnter",
+    "ReputationParagonWatchBar_OnLeave",
+];
 
 #[test]
 fn action_bar_plan_named_input_globals_are_functions() {
@@ -514,6 +519,124 @@ fn action_bar_plan_named_extra_bar_globals_are_functions() {
                  binding at `Shared/ExtraActionBar.xml:126` plus every world-event consumer that \
                  calls `ExtraActionBar_ForceShowIfNeeded` / `_CancelForceShow` directly. Got \
                  `type({name}) == \"function\"` returned false."
+            );
+        }
+    });
+}
+
+/// Pin the bar-helper globals — a mixed-publisher batch that exercises
+/// the cross-addon surface boundary. Two of the three globals are
+/// declared by a SIBLING addon (`Blizzard_UIPanels_Game`), not by
+/// `Blizzard_ActionBar` itself, even though they are CONSUMED by
+/// `Blizzard_ActionBar`'s `Shared/ReputationBar.lua`. A regression in
+/// either addon's file-chunk load — or in the TOC dependency wiring
+/// that ensures `Blizzard_UIPanels_Game` loads BEFORE `Blizzard_ActionBar`
+/// — would break this contract.
+///
+/// PLAN.md task: `ArtifactBarGetNumArtifactTraitsPurchasableFromXP`,
+/// `ReputationParagonWatchBar_OnEnter`, `ReputationParagonWatchBar_OnLeave`
+/// are functions.
+///
+/// Source map and publisher attribution:
+///
+/// - `ArtifactBarGetNumArtifactTraitsPurchasableFromXP(pointsSpent,
+///   artifactXP, artifactTier)` at
+///   `Blizzard_ActionBar/Mainline/ArtifactBar.lua:96` — declared BY
+///   `Blizzard_ActionBar` itself, but ONLY in the Mainline TOC flavor.
+///   Pure helper that loops calling `C_ArtifactUI.GetCostForPointAtRank`
+///   until either `artifactXP` runs below the next-rank cost or
+///   `xpForNextPoint` reaches 0 (the `C_ArtifactUI` cap signal). Returns
+///   the triple `(numPoints, remainingXP, xpForNextPoint)` so the caller
+///   can render the partial-fill UI. The internal consumer is
+///   `ArtifactBarMixin:UpdateBar` at lua:17 — the public global exists
+///   so the legacy artifact UI in `Blizzard_ArtifactUI` can drive its own
+///   tier-spend math through the same helper without re-implementing it.
+///
+/// - `ReputationParagonWatchBar_OnEnter(self)` at
+///   `Blizzard_UIPanels_Game/Mainline/ReputationFrame.lua:686` — declared
+///   BY THE SIBLING ADDON. Hover handler that gates on
+///   `C_Reputation.IsFactionParagonForCurrentPlayer(self.factionID)`,
+///   then anchors `EmbeddedItemTooltip` to the watch bar and dispatches
+///   `ReputationParagonFrame_SetupParagonTooltip(self)` (a sibling
+///   helper at `ReputationFrame.lua:660`). Stores
+///   `self.UpdateTooltip = ReputationParagonFrame_SetupParagonTooltip`
+///   so the tooltip auto-refreshes on `OnUpdate` ticks while the cursor
+///   is held over the bar.
+///
+/// - `ReputationParagonWatchBar_OnLeave(self)` at
+///   `Blizzard_UIPanels_Game/Mainline/ReputationFrame.lua:697` — also
+///   declared BY THE SIBLING ADDON. Counterpart that calls
+///   `EmbeddedItemTooltip_Hide(EmbeddedItemTooltip)` and clears
+///   `self.UpdateTooltip = nil` so the auto-refresh stops.
+///
+/// **Why this is a cross-addon surface.** `Blizzard_ActionBar/Shared/
+/// ReputationBar.lua:187` and `:196` are inside
+/// `ReputationStatusBarMixin:OnEnter` and `:OnLeave` — they CALL the
+/// two `ReputationParagon*` globals but do NOT declare them. The TOC
+/// for `Blizzard_ActionBar` lists `Blizzard_UIPanels_Game` as a
+/// dependency, AND `Blizzard_UIPanels_Game` is in
+/// `panel_fixtures.rs`'s `PANEL_ADDONS` baseline preload (the harness
+/// loads the panel addons OUTSIDE the closure-walked `loaded` slice
+/// passed to the test callback). Both wiring paths must hold for the
+/// `ReputationParagonWatchBar_*` globals to be visible at the moment
+/// `Blizzard_ActionBar` finishes loading.
+///
+/// **Note on the gap dependency.** The PLAN line carries no
+/// `(depends-on:)` suffix, so NONE of these globals are pre-published
+/// by the simulator's `runtime_surface_bootstrap.lua` / Rust env-init.
+/// The contract is therefore one-way: a nil reading proves either (a)
+/// the publishing addon's file chunk failed (Blizzard_ActionBar for the
+/// Artifact helper, Blizzard_UIPanels_Game for the two ReputationParagon
+/// handlers), OR (b) the TOC dependency wiring regressed —
+/// `Blizzard_UIPanels_Game` loaded AFTER `Blizzard_ActionBar` instead of
+/// before, leaving the `ReputationParagonWatchBar_*` globals nil at the
+/// moment the harness probes them, OR (c) the panel-baseline preload
+/// in `panel_fixtures.rs` dropped `Blizzard_UIPanels_Game` (which would
+/// also break every other test that depends on the panel-addons
+/// baseline — multi-test failure mode), OR (d) Blizzard moved the
+/// `Mainline/ArtifactBar.lua` chunk into a TOC flavor branch the
+/// harness doesn't pick up (e.g. moved to a Classic/Cataclysm-only
+/// path while the test still loads Mainline).
+#[test]
+fn action_bar_plan_named_bar_helper_globals_are_functions() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        for name in PLAN_NAMED_BAR_HELPER_GLOBALS {
+            let is_function = env
+                .eval::<bool>(&format!(r#"return type({name}) == "function""#))
+                .expect("file-scope global type probe must run cleanly");
+
+            assert!(
+                is_function,
+                "Global `{name}` MUST be a function after the startup-shape harness loads \
+                 `Blizzard_ActionBar`. This batch is a MIXED-PUBLISHER set: \
+                 `ArtifactBarGetNumArtifactTraitsPurchasableFromXP` is declared by \
+                 `Blizzard_ActionBar` itself at `Mainline/ArtifactBar.lua:96` (Mainline-only — \
+                 gated by the addon's TOC flavor selection), while \
+                 `ReputationParagonWatchBar_OnEnter` and `_OnLeave` are declared by the SIBLING \
+                 addon `Blizzard_UIPanels_Game` at `Mainline/ReputationFrame.lua:686` and `:697` \
+                 — `Blizzard_ActionBar/Shared/ReputationBar.lua:187` and `:196` consume them from \
+                 `ReputationStatusBarMixin:OnEnter` / `:OnLeave` but do NOT declare them. The PLAN \
+                 line has no `(depends-on:)` suffix, so NONE of these are pre-published by the \
+                 simulator's `runtime_surface_bootstrap.lua` / Rust env-init — the contract is \
+                 one-way. A nil reading proves either (a) the publishing addon's file chunk \
+                 failed (Blizzard_ActionBar's `Mainline/ArtifactBar.lua` for the Artifact helper, \
+                 Blizzard_UIPanels_Game's `Mainline/ReputationFrame.lua` for the two \
+                 ReputationParagon handlers — load.rs's \
+                 `action_bar_load_emits_no_lane_specific_lua_errors` would also fail for the \
+                 ActionBar publisher), OR (b) the TOC dependency wiring regressed and \
+                 `Blizzard_UIPanels_Game` loaded AFTER `Blizzard_ActionBar` instead of before — \
+                 leaving the cross-addon globals nil at probe time, OR (c) the panel-baseline \
+                 preload in `tests/common/panel_fixtures.rs` dropped `Blizzard_UIPanels_Game` \
+                 from `PANEL_ADDONS` (would also break every other panel-baseline-dependent test \
+                 — multi-test failure mode), OR (d) the addon's TOC flavor selection no longer \
+                 picks up `Mainline/ArtifactBar.lua` (e.g. Blizzard moved the Artifact UI to a \
+                 different TOC flavor), OR (e) Blizzard re-shaped one of the surfaces — moved \
+                 `ArtifactBarGetNumArtifactTraitsPurchasableFromXP` onto `C_ArtifactUI` as a \
+                 method (which would break legacy `Blizzard_ArtifactUI` consumers), or moved the \
+                 ReputationParagonWatchBar handlers onto a `ReputationParagonWatchBarMixin` frame \
+                 mixin (which would break ActionBar's direct global call sites at \
+                 `Shared/ReputationBar.lua:187/196`). Got `type({name}) == \"function\"` returned \
+                 false."
             );
         }
     });
