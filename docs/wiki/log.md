@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-05-01] update | Crafting cast duration
+
+Updated `investigations/crafting-cast-bar.md` after the crafting bar was found to finish too quickly. The simulator had reused a 1.5 second GCD-style duration for `C_TradeSkillUI.CraftRecipe`; normal profession crafts now use a 2.0 second default, with a regression in `tests/test_crafting.rs`.
+
 ## [2026-04-30] ingest | CASC asset cache layers and measured costs
 
 Created `systems/casc-asset-cache.md` after measuring the three stacked caches end-to-end with `examples/casc_bench.rs`. The doc covers (a) the resolution sqlite shared with the game-engine repo via `GAME_ENGINE_SHARED_ROOT`, (b) the per-listfile-path BLP byte cache at `~/.cache/wow-ui-sim/casc-extract/`, and (c) the per-process `TextureManager` in-memory cache, with concrete timings (~300 ms one-time CASC init, ~10 ms steady-state extract, ~1 ms disk hit, ~2 µs mem hit). Records that `Installation::initialize` no longer parses `root.bin`/`encoding.bin` — that work is permanently delegated to the resolution sqlite — so the per-extract cost stays in the millisecond range.

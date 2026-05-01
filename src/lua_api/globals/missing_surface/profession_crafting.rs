@@ -14,7 +14,7 @@ use rilua::Val;
 use rilua::vm::state::LuaState;
 use std::collections::{BTreeSet, HashMap};
 
-const CRAFTING_CAST_DURATION_SECONDS: f64 = 1.5;
+const CRAFTING_CAST_DURATION_SECONDS: f64 = 2.0;
 const DEFAULT_CRAFTING_ICON: &str = "Interface/Icons/INV_Misc_QuestionMark";
 
 /// Returns true iff the recipe exists in the catalogue AND all reagents are
