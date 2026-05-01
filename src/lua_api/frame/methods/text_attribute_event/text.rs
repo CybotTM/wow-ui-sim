@@ -44,6 +44,16 @@ struct TooltipLineValues {
     wrap: Val,
 }
 
+struct AutoTextHeightState {
+    is_fontstring: bool,
+    has_text: bool,
+    width: f32,
+    width_is_text_auto: bool,
+    height_is_text_auto: bool,
+    word_wrap: bool,
+    height: f32,
+}
+
 pub(super) fn set_text(state: &mut LuaState) -> LuaResult<u32> {
     let id = frame_id_from_stack(state, 1)?;
     let text = read_text_arg(state, 2);
@@ -177,28 +187,14 @@ fn sync_button_text_child(
 }
 
 fn update_auto_text_height(state: &mut LuaState, id: u64) {
-    let Some((is_fontstring, has_text, width, width_is_text_auto, word_wrap, height)) =
-        (match borrow_state(state) {
-            Ok(sim) => sim.widgets.get(id).map(|frame| {
-                (
-                    frame.widget_type == WidgetType::FontString,
-                    frame.text.as_ref().is_some_and(|text| !text.is_empty()),
-                    frame.width,
-                    frame.width_is_text_auto,
-                    frame.word_wrap,
-                    frame.height,
-                )
-            }),
-            Err(_) => return,
-        })
-    else {
+    let Some(current) = read_auto_text_height_state(state, id) else {
         return;
     };
-    if !is_fontstring || !has_text || height.abs() > f32::EPSILON {
+    if !should_update_auto_text_height(&current) {
         return;
     }
-    let width_is_explicit = word_wrap && width > 0.0 && !width_is_text_auto;
-    let wrap_width = width_is_explicit.then_some(width);
+    let width_is_explicit = current.word_wrap && current.width > 0.0 && !current.width_is_text_auto;
+    let wrap_width = width_is_explicit.then_some(current.width);
     let height = measure_text_height(state, id, wrap_width) as f32;
     let Ok(mut sim) = borrow_state_mut(state) else {
         return;
@@ -206,14 +202,48 @@ fn update_auto_text_height(state: &mut LuaState, id: u64) {
     let Some(frame) = sim.widgets.get(id) else {
         return;
     };
-    if (frame.height - height).abs() <= 0.5 {
+    if (frame.height - height).abs() <= 0.5 && frame.height_is_text_auto {
         return;
     }
     let Some(frame) = sim.widgets.get_mut_visual(id) else {
         return;
     };
     frame.height = height;
+    frame.height_is_text_auto = true;
     sim.widgets.mark_rect_dirty(id);
+}
+
+fn read_auto_text_height_state(state: &LuaState, id: u64) -> Option<AutoTextHeightState> {
+    let sim = borrow_state(state).ok()?;
+    sim.widgets.get(id).map(|frame| AutoTextHeightState {
+        is_fontstring: frame.widget_type == WidgetType::FontString,
+        has_text: frame.text.as_ref().is_some_and(|text| !text.is_empty()),
+        width: frame.width,
+        width_is_text_auto: frame.width_is_text_auto,
+        height_is_text_auto: frame.height_is_text_auto,
+        word_wrap: frame.word_wrap,
+        height: frame.height,
+    })
+}
+
+fn should_update_auto_text_height(current: &AutoTextHeightState) -> bool {
+    current.is_fontstring
+        && current.has_text
+        && (current.height.abs() <= f32::EPSILON || current.height_is_text_auto)
+}
+
+pub(crate) fn refresh_auto_text_height_after_width_change(state: &mut LuaState, id: u64) {
+    let should_refresh = {
+        let Ok(sim) = borrow_state(state) else {
+            return;
+        };
+        sim.widgets.get(id).is_some_and(|frame| {
+            frame.widget_type == WidgetType::FontString && frame.height_is_text_auto
+        })
+    };
+    if should_refresh {
+        update_auto_text_height(state, id);
+    }
 }
 
 fn update_auto_text_width(state: &mut LuaState, id: u64) {

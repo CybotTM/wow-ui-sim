@@ -309,14 +309,15 @@ impl SimState {
         if !self.widgets.is_rect_dirty(id) {
             return;
         }
-        // Fast path: `id` itself is dirty — no ancestor walk needed.
-        if self.widgets.is_rect_dirty_self(id) {
+        let dirty_roots = self.widgets.collect_dirty_ancestor_roots(id);
+        // Fast path: only `id` itself is dirty, so no ancestor layout can be stale.
+        if dirty_roots.len() == 1 && dirty_roots[0] == id {
             self.invalidate_layout(id);
             self.widgets.clear_rect_dirty(id);
             return;
         }
         // Slow path: dirty ancestor(s) need subtree recomputation first.
-        self.resolve_dirty_ancestors(id);
+        self.resolve_dirty_roots(dirty_roots);
         self.invalidate_layout(id);
         self.widgets.clear_rect_dirty(id);
     }
@@ -324,8 +325,7 @@ impl SimState {
     /// Resolve dirty ancestor roots that cause `id` to appear dirty via the
     /// `is_rect_dirty` ancestor walk. Computes their layout rects and clears
     /// their dirty flags so descendants become clean.
-    fn resolve_dirty_ancestors(&mut self, id: u64) {
-        let dirty_roots = self.widgets.collect_dirty_ancestor_roots(id);
+    fn resolve_dirty_roots(&mut self, dirty_roots: Vec<u64>) {
         if dirty_roots.is_empty() {
             return;
         }

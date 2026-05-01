@@ -70,6 +70,7 @@ pub(super) struct ExplicitSizeState {
     pub width: f32,
     pub height: f32,
     pub width_is_text_auto: bool,
+    pub height_is_text_auto: bool,
 }
 
 pub(super) fn current_explicit_size_state(
@@ -80,12 +81,19 @@ pub(super) fn current_explicit_size_state(
         width: frame.width,
         height: frame.height,
         width_is_text_auto: frame.width_is_text_auto,
+        height_is_text_auto: frame.height_is_text_auto,
     })
 }
 
 pub(super) fn clear_auto_width_flag(state: &mut crate::lua_api::state::SimState, id: u64) {
     if let Some(frame) = state.widgets.get_mut(id) {
         frame.width_is_text_auto = false;
+    }
+}
+
+pub(super) fn clear_auto_height_flag(state: &mut crate::lua_api::state::SimState, id: u64) {
+    if let Some(frame) = state.widgets.get_mut(id) {
+        frame.height_is_text_auto = false;
     }
 }
 
@@ -98,6 +106,7 @@ pub(super) fn apply_explicit_size(
     if let Some(frame) = state.widgets.get_mut_visual(id) {
         frame.set_size(width, height);
         frame.width_is_text_auto = false;
+        frame.height_is_text_auto = false;
     }
     state.widgets.mark_rect_dirty(id);
 }
@@ -121,6 +130,7 @@ pub(super) fn apply_explicit_height(
 ) {
     if let Some(frame) = state.widgets.get_mut_visual(id) {
         frame.height = height;
+        frame.height_is_text_auto = false;
     }
     state.widgets.mark_rect_dirty(id);
 }
