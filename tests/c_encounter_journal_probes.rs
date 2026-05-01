@@ -263,6 +263,38 @@ fn test_magisters_terrace_loot_rows_are_not_marked_seasonal() {
 }
 
 #[test]
+fn test_magisters_terrace_loot_rows_have_renderable_text_and_icons() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            EJ_SelectInstance(1300)
+            local count = EJ_GetNumLoot()
+            if count <= 0 then
+                return "count=" .. tostring(count)
+            end
+
+            for i = 1, count do
+                local item = C_EncounterJournal.GetLootInfoByIndex(i)
+                if type(item.itemQuality) ~= "string" or not item.itemQuality:match("^ff%x%x%x%x%x%x$") then
+                    return "quality:" .. tostring(i) .. ":" .. tostring(item.itemID) .. ":" .. tostring(item.itemQuality)
+                end
+                if type(item.icon) ~= "number" or item.icon <= 0 then
+                    return "icon:" .. tostring(i) .. ":" .. tostring(item.itemID) .. ":" .. tostring(item.icon)
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Adventure Guide loot rows need color-code quality strings and renderable icons: {result}"
+    );
+}
+
+#[test]
 fn test_adventure_guide_raid_loot_rows_have_item_metadata() {
     let env = env();
     let result: String = env

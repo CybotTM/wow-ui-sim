@@ -26,6 +26,7 @@
 use super::ensure_namespace;
 use crate::encounter_journal_data as data;
 use crate::items;
+use crate::lua_api::globals::strings::string_data::game_enums::ITEM_QUALITY_COLORS_DATA;
 use crate::lua_api::methods::{
     borrow_state, borrow_state_mut, create_string, create_table, table_set, table_set_num,
 };
@@ -798,13 +799,14 @@ fn build_loot_table(state: &mut LuaState, item_id: u32, encounter_id: u32) -> Va
     let table = create_table(state);
     let item = items::get_item(item_id);
     let name_str = item.map(|i| i.name).unwrap_or("");
-    let icon_id = item.map(|i| i.icon_file_data_id).unwrap_or(134400) as f64;
-    let quality = item.map(|i| i.quality as f64).unwrap_or(0.0);
+    let icon_id = loot_icon_file_data_id(item) as f64;
+    let quality_color = loot_quality_color_code(item);
     let inv_type_num = item.map(|i| i.inventory_type as f64).unwrap_or(0.0);
     let link_str = item_link(item_id);
     let slot_str = inv_type_slot(item.map(|i| i.inventory_type).unwrap_or(0));
 
     let name = create_string(state, name_str);
+    let item_quality = create_string(state, quality_color);
     let link = create_string(state, &link_str);
     let slot = create_string(state, slot_str);
     let armor_type = create_string(state, "");
@@ -812,7 +814,7 @@ fn build_loot_table(state: &mut LuaState, item_id: u32, encounter_id: u32) -> Va
     table_set(state, table, "itemID", Val::Num(item_id as f64));
     table_set(state, table, "name", name);
     table_set(state, table, "icon", Val::Num(icon_id));
-    table_set(state, table, "itemQuality", Val::Num(quality));
+    table_set(state, table, "itemQuality", item_quality);
     table_set(state, table, "inventoryType", Val::Num(inv_type_num));
     table_set(state, table, "link", link);
     table_set(state, table, "slot", slot);
@@ -826,6 +828,23 @@ fn build_loot_table(state: &mut LuaState, item_id: u32, encounter_id: u32) -> Va
     table_set(state, table, "displaySeasonID", Val::Nil);
     table_set(state, table, "filterType", Val::Num(0.0));
     table
+}
+
+fn loot_icon_file_data_id(item: Option<&items::ItemInfo>) -> u32 {
+    item.and_then(|i| (i.icon_file_data_id != 0).then_some(i.icon_file_data_id))
+        .unwrap_or(134400)
+}
+
+fn loot_quality_color_code(item: Option<&items::ItemInfo>) -> &'static str {
+    let quality = item.map(|i| i.quality).unwrap_or(1);
+    item_quality_color_code(quality)
+}
+
+fn item_quality_color_code(quality: u8) -> &'static str {
+    ITEM_QUALITY_COLORS_DATA
+        .iter()
+        .find_map(|(index, _, _, _, hex)| (*index == quality as i32).then_some(*hex))
+        .unwrap_or("ffffffff")
 }
 
 fn item_link(item_id: u32) -> String {
