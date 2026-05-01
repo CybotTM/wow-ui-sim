@@ -23,6 +23,8 @@ use rilua::vm::closure::{Closure, RustClosure};
 use rilua::vm::state::LuaState;
 use rilua::{LuaResult, RustFn, Val};
 
+const QUEST_NPC_NAME: &str = "Quest Giver";
+
 pub fn register_all(state: &mut LuaState) {
     register_group_status(state);
     register_unit_queries(state);
@@ -279,6 +281,7 @@ fn unit_exists(state: &mut LuaState) -> LuaResult<u32> {
     let exists = match unit.as_str() {
         "" => false,
         "player" | "vehicle" => true,
+        "questnpc" => borrow_state(state)?.gossip.active,
         "pet" => true,
         "target" => borrow_state(state)?.current_target.is_some(),
         "focus" => borrow_state(state)?.current_focus.is_some(),
@@ -327,6 +330,13 @@ fn unit_name_for(state: &mut LuaState, unit: &str) -> LuaResult<String> {
         let st = borrow_state(state)?;
         match unit {
             "player" | "pet" | "vehicle" => st.player.name.clone(),
+            "questnpc" => {
+                if st.gossip.active {
+                    QUEST_NPC_NAME.to_string()
+                } else {
+                    "Unknown".to_string()
+                }
+            }
             "target" => st
                 .current_target
                 .as_ref()
