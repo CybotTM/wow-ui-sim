@@ -19,6 +19,9 @@ use crate::lua_bridge::{FromStack, stack_val};
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
 
+const FIRST_EQUIPMENT_SLOT_ID: i32 = 1;
+const LAST_PROFESSION_SLOT_ID: i32 = 28;
+
 fn stack_i32(state: &mut LuaState, index: i32) -> Option<i32> {
     match stack_val(state, index) {
         Val::Num(n) => Some(n as i32),
@@ -122,7 +125,8 @@ fn can_inspect(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn player_equipped_item_id(state: &mut LuaState, unit: &str, slot: i32) -> Option<u32> {
-    if unit != "player" || !(1..=19).contains(&slot) {
+    let is_equipment_slot = (FIRST_EQUIPMENT_SLOT_ID..=LAST_PROFESSION_SLOT_ID).contains(&slot);
+    if unit != "player" || !is_equipment_slot {
         return None;
     }
     borrow_state(state)
@@ -140,6 +144,22 @@ fn fallback_icon_for_slot(slot: i32) -> f64 {
         13 | 14 => 338783.0, // Trinket
         _ => 134400.0,       // Question mark fallback
     }
+}
+
+fn inventory_item_texture_for_slot(slot: i32, item_id: u32) -> f64 {
+    items::get_item(item_id)
+        .map(|item| {
+            if item.icon_file_data_id == 0 {
+                fallback_icon_for_slot(slot)
+            } else {
+                item.icon_file_data_id as f64
+            }
+        })
+        .unwrap_or_else(|| fallback_icon_for_slot(slot))
+}
+
+fn is_bag_inventory_slot(slot: i32) -> bool {
+    matches!(slot, 20..=25)
 }
 
 fn get_inventory_item_id(state: &mut LuaState) -> LuaResult<u32> {
@@ -165,27 +185,17 @@ fn get_inventory_item_texture(state: &mut LuaState) -> LuaResult<u32> {
         state.push(Val::Nil);
         return Ok(1);
     }
-    // Bag slots: Bag0Slot..Bag4Slot (20-24) + ReagentBag0Slot (25).
-    if (20..=25).contains(&slot) {
+    if let Some(item_id) = player_equipped_item_id(state, &unit, slot) {
+        state.push(Val::Num(inventory_item_texture_for_slot(slot, item_id)));
+        return Ok(1);
+    }
+    if is_bag_inventory_slot(slot) {
         let texture =
             crate::lua_api::methods::create_string(state, "Interface\\Icons\\INV_Misc_Bag_08");
         state.push(texture);
         return Ok(1);
     }
-    let Some(item_id) = player_equipped_item_id(state, &unit, slot) else {
-        state.push(Val::Nil);
-        return Ok(1);
-    };
-    let texture = items::get_item(item_id)
-        .map(|item| {
-            if item.icon_file_data_id == 0 {
-                fallback_icon_for_slot(slot)
-            } else {
-                item.icon_file_data_id as f64
-            }
-        })
-        .unwrap_or_else(|| fallback_icon_for_slot(slot));
-    state.push(Val::Num(texture));
+    state.push(Val::Nil);
     Ok(1)
 }
 

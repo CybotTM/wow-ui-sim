@@ -79,6 +79,18 @@ fn test_bag_slot_texture() {
 }
 
 #[test]
+fn test_profession_slot_texture_prefers_equipped_item() {
+    let env = env();
+    env.exec("A_Admin.EquipItem(20, 238017)").unwrap();
+    let item_id: i64 = env.eval("return GetInventoryItemID('player', 20)").unwrap();
+    let tex: i64 = env
+        .eval("return GetInventoryItemTexture('player', 20)")
+        .unwrap();
+    assert_eq!(item_id, 238017);
+    assert_eq!(tex, 7456228);
+}
+
+#[test]
 fn test_admin_equip_item() {
     let env = env();
     env.exec("A_Admin.EquipItem(17, 229181)").unwrap();
