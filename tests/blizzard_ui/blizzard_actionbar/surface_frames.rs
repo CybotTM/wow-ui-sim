@@ -613,3 +613,77 @@ fn plan_named_event_routing_frames_exist_with_register_frame_surface() {
         }
     });
 }
+
+/// Pin `SpellFlyout` identity. Declared at `Shared/SpellFlyout.xml:62`
+/// as a `toplevel="true"` `frameStrata="DIALOG"` `hidden="true"` Frame
+/// inheriting `SecureFrameTemplate, ResizeLayoutFrame, FlyoutPopupTemplate`
+/// with `mixin="SpellFlyoutMixin"`. The DIALOG strata is what lifts
+/// the flyout above the action bar (which lives in the default
+/// MEDIUM strata for non-Main bars and HIGH for MainActionBar's
+/// EditMode-bumped frame level), so a regression that drops the
+/// strata to MEDIUM/LOW would visually clip the flyout under the
+/// action bar's own buttons.
+///
+/// The hidden=true initial state matters because the flyout is a
+/// pop-out that the action button reveals on click via
+/// `SpellFlyout:Toggle(...)` (`Shared/SpellFlyout.lua`); a default-
+/// shown flyout would render at startup over whatever's behind it
+/// and steal mouse-over events from action buttons until the player
+/// clicked elsewhere.
+///
+/// Pin three facts: (1) `SpellFlyout` exists as a table global, (2)
+/// `:GetFrameStrata()` returns `"DIALOG"`, (3) `:IsShown()` returns
+/// `false` (the explicit Show/Hide state — `IsVisible()` would also
+/// be false because the parent chain matters, but `IsShown()` is the
+/// more direct pin on the XML's `hidden="true"`).
+#[test]
+fn spell_flyout_publishes_dialog_strata_hidden_by_default() {
+    with_blizzard_addon_startup_shape(&[ROOT], &[], |env, _loaded| {
+        let frame_type: String = env
+            .eval("return type(_G.SpellFlyout)")
+            .expect("SpellFlyout existence probe must run cleanly");
+
+        assert_eq!(
+            frame_type, "table",
+            "Expected `_G.SpellFlyout` to be a table after `{ROOT}` loads, got \
+             `{frame_type}`. The XML at `Shared/SpellFlyout.xml:62` declares \
+             `<Frame name=\"SpellFlyout\" toplevel=\"true\" hidden=\"true\" \
+             frameStrata=\"DIALOG\" frameLevel=\"10\" \
+             inherits=\"SecureFrameTemplate, ResizeLayoutFrame, FlyoutPopupTemplate\" \
+             mixin=\"SpellFlyoutMixin\">`. A nil reading means the addon's XML chunk \
+             failed to execute or the frame failed to register its name; every \
+             ActionButton that calls `SpellFlyout:Toggle(...)` from `Shared/SpellFlyout.lua` \
+             would nil-call."
+        );
+
+        let frame_strata: String = env
+            .eval("return _G.SpellFlyout:GetFrameStrata()")
+            .expect("SpellFlyout:GetFrameStrata() must run cleanly");
+
+        assert_eq!(
+            frame_strata, "DIALOG",
+            "Expected `SpellFlyout:GetFrameStrata()` to return `DIALOG`, got \
+             `{frame_strata}`. The XML at `Shared/SpellFlyout.xml:62` declares \
+             `frameStrata=\"DIALOG\"` literally — the DIALOG layer sits above MEDIUM \
+             (the default strata for the non-Main bars) and HIGH, so the flyout pops \
+             out OVER the action bar's own buttons. A regression that drops the strata \
+             would cause the flyout's spell icons to clip behind the action bar slots \
+             at runtime."
+        );
+
+        let is_shown: bool = env
+            .eval("return _G.SpellFlyout:IsShown() == true")
+            .expect("SpellFlyout:IsShown() must run cleanly");
+
+        assert!(
+            !is_shown,
+            "Expected `SpellFlyout:IsShown()` to return `false` (i.e. the frame is \
+             hidden by default). The XML at `Shared/SpellFlyout.xml:62` declares \
+             `hidden=\"true\"`, and the flyout is meant to be a pop-out that the \
+             action button reveals on click via `SpellFlyout:Toggle(...)` in \
+             `Shared/SpellFlyout.lua`. A default-shown flyout would render at \
+             startup over whatever's behind it and steal mouse-over events from \
+             action buttons until the player clicked elsewhere."
+        );
+    });
+}
