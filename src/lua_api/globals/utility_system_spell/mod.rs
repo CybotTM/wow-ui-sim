@@ -447,6 +447,16 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
         .map(|index| state.stack_get(state.base + 1 + index))
         .collect::<Vec<_>>();
 
+    let results = call_function_with_secure_taint(state, func, &args);
+    push_securecall_results(state, results)
+}
+
+fn call_function_with_secure_taint(
+    state: &mut LuaState,
+    func: Val,
+    args: &[Val],
+) -> Result<Vec<Val>, rilua::LuaError> {
+    let saved_taints = clear_securecall_taint(state);
     const DIRECT_CALL_FALLBACK_ERROR: &str = "expected Lua closure in execute";
     let results = match call_function_state_multi(state, func, &args) {
         Ok(results) => Ok(results),
@@ -455,7 +465,14 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
         }
         Err(error) => Err(error),
     };
+    restore_securecall_taint(state, saved_taints);
+    results
+}
 
+fn push_securecall_results(
+    state: &mut LuaState,
+    results: Result<Vec<Val>, rilua::LuaError>,
+) -> LuaResult<u32> {
     match results {
         Ok(results) if results.is_empty() => {
             state.push(Val::Nil);
@@ -473,6 +490,22 @@ pub fn securecall(state: &mut LuaState) -> LuaResult<u32> {
             state.push(Val::Nil);
             Ok(1)
         }
+    }
+}
+
+fn clear_securecall_taint(state: &mut LuaState) -> Vec<Option<String>> {
+    let active_depth = state.ci.saturating_add(1);
+    let mut saved_taints = Vec::with_capacity(active_depth);
+    for call_info in state.call_stack.iter_mut().take(active_depth) {
+        saved_taints.push(call_info.taint.clone());
+        call_info.taint = None;
+    }
+    saved_taints
+}
+
+fn restore_securecall_taint(state: &mut LuaState, saved_taints: Vec<Option<String>>) {
+    for (call_info, taint) in state.call_stack.iter_mut().zip(saved_taints) {
+        call_info.taint = taint;
     }
 }
 

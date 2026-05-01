@@ -481,6 +481,35 @@ fn test_securecall_restores_taint() {
 }
 
 #[test]
+fn test_securecall_clears_taint_for_nested_closures() {
+    let env = env();
+    let (secure_inside, nested_secret): (bool, bool) = env
+        .eval(
+            r#"
+            local secureInside
+            local nestedSecret
+            debug.setstacktaint("TestAddon")
+            securecall(function()
+                secureInside = issecure()
+                nestedSecret = issecretvalue(function() end)
+            end)
+            debug.setstacktaint(nil)
+            return secureInside, nestedSecret
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        secure_inside,
+        "securecall should execute the target with a secure stack even when the caller is tainted"
+    );
+    assert!(
+        !nested_secret,
+        "closures created inside securecall should not inherit caller taint"
+    );
+}
+
+#[test]
 fn test_loadstring_taints() {
     let env = env();
     let result: bool = env
