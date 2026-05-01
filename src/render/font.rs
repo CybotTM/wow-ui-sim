@@ -11,9 +11,17 @@ use cosmic_text::fontdb;
 /// WoW font path constants (as they appear in Lua/XML).
 const WOW_FONT_FRIZ: &str = "Fonts\\FRIZQT__.TTF";
 const WOW_FONT_ARIAL_NARROW: &str = "Fonts\\ARIALN.TTF";
+const LINE_HEIGHT_MULTIPLIER: f32 = 1.2;
 
 /// Default WoW font (Friz Quadrata).
 pub const DEFAULT_WOW_FONT: &str = WOW_FONT_FRIZ;
+
+pub(crate) fn line_height_for_font_size(font_size: f32) -> Option<f32> {
+    if !font_size.is_finite() || font_size <= 0.0 {
+        return None;
+    }
+    Some((font_size * LINE_HEIGHT_MULTIPLIER).ceil().max(1.0))
+}
 
 /// Embedded fallback for FRIZQT__.TTF — used when CASC is unavailable or the lookup misses.
 const FRIZQT_FALLBACK: &[u8] = include_bytes!("../../assets/fonts/FRIZQT__.TTF");
@@ -174,10 +182,12 @@ impl WowFontSystem {
         font_path: Option<&str>,
         font_size: f32,
     ) -> f32 {
+        let Some(line_height) = line_height_for_font_size(font_size) else {
+            return 0.0;
+        };
         if text.is_empty() {
             return 0.0;
         }
-        let line_height = (font_size * 1.2).ceil();
         let metrics = cosmic_text::Metrics::new(font_size, line_height);
         let attrs = self.attrs_owned(font_path);
         let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
@@ -209,10 +219,12 @@ impl WowFontSystem {
         font_size: f32,
         wrap_width: Option<f32>,
     ) -> f32 {
+        let Some(line_height) = line_height_for_font_size(font_size) else {
+            return 0.0;
+        };
         if text.is_empty() {
             return 0.0;
         }
-        let line_height = (font_size * 1.2).ceil();
         let metrics = cosmic_text::Metrics::new(font_size, line_height);
         let attrs = self.attrs_owned(font_path);
         let shape_width = match wrap_width {
@@ -404,6 +416,17 @@ mod tests {
         let mut fs = WowFontSystem::new();
         let w = fs.measure_text_width("", Some(WOW_FONT_FRIZ), 14.0);
         assert_eq!(w, 0.0);
+    }
+
+    #[test]
+    fn zero_font_size_measures_as_empty_text() {
+        let mut fs = WowFontSystem::new();
+
+        assert_eq!(fs.measure_text_width("Collections", None, 0.0), 0.0);
+        assert_eq!(
+            fs.measure_text_height("Collections", None, 0.0, Some(100.0)),
+            0.0
+        );
     }
 
     #[test]

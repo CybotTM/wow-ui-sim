@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use cosmic_text::{Buffer, CacheKey, Metrics, Shaping, SwashContent};
 use iced::Rectangle;
 
-use super::font::WowFontSystem;
+use super::font::{WowFontSystem, line_height_for_font_size};
 use super::shader::{BlendMode, QuadBatch};
 use crate::widget::TextJustify;
 
@@ -322,7 +322,8 @@ fn shape_text_to_runs(
     font_system: &mut WowFontSystem,
     shape: TextShapeRequest<'_>,
 ) -> (Buffer, f32) {
-    let line_height = (shape.font_size * 1.2).ceil();
+    let line_height = line_height_for_font_size(shape.font_size)
+        .expect("shape_text_to_runs requires a positive font size");
     let metrics = Metrics::new(shape.font_size, line_height);
     let attrs = font_system.attrs_owned(shape.font_path);
 
@@ -537,7 +538,10 @@ pub fn emit_text_quads(
     max_lines: u32,
     pre_stripped: Option<&str>,
 ) {
-    if text.is_empty() || bounds.height <= 0.0 {
+    let has_text = !text.is_empty();
+    let has_drawable_height = bounds.height > 0.0;
+    let has_valid_font_size = line_height_for_font_size(font_size).is_some();
+    if !has_text || !has_drawable_height || !has_valid_font_size {
         return;
     }
 
@@ -666,7 +670,11 @@ pub fn emit_text_quads(
 
 #[cfg(test)]
 mod tests {
-    use super::{build_glyph_entry, subpixel_mask_alpha};
+    use super::{GlyphAtlas, build_glyph_entry, emit_text_quads, subpixel_mask_alpha};
+    use crate::font::WowFontSystem;
+    use crate::render::shader::QuadBatch;
+    use crate::widget::{TextJustify, TextOutline};
+    use iced::{Point, Rectangle, Size};
 
     #[test]
     fn subpixel_mask_alpha_averages_rgb_channels() {
@@ -681,5 +689,34 @@ mod tests {
         let entry = build_glyph_entry(8, 16, 20, 30, 4, 7);
         assert_eq!(entry.left, 4);
         assert_eq!(entry.top, 7);
+    }
+
+    #[test]
+    fn zero_font_size_emits_no_text_quads() {
+        let mut batch = QuadBatch::new();
+        let mut fonts = WowFontSystem::new();
+        let mut glyphs = GlyphAtlas::new();
+
+        emit_text_quads(
+            &mut batch,
+            &mut fonts,
+            &mut glyphs,
+            "Collections",
+            Rectangle::new(Point::ORIGIN, Size::new(120.0, 20.0)),
+            None,
+            0.0,
+            [1.0, 1.0, 1.0, 1.0],
+            TextJustify::Left,
+            TextJustify::Center,
+            0,
+            None,
+            (0.0, 0.0),
+            TextOutline::None,
+            false,
+            0,
+            None,
+        );
+
+        assert_eq!(batch.quad_count(), 0);
     }
 }
