@@ -201,6 +201,79 @@ fn test_transmog_collection_filter_surface_supports_wardrobe_dropdowns() {
 }
 
 #[test]
+fn test_transmog_collection_source_type_filter_changes_category_results() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if #C_TransmogCollection.GetCategoryAppearances(1, nil) ~= 5 then return "initial" end
+            C_TransmogCollection.SetSourceTypeFilter(1, false)
+            if C_TransmogCollection.IsUsingDefaultFilters() then return "still_default" end
+            if C_TransmogCollection.IsSourceTypeFilterChecked(1) then return "source_1_checked" end
+            local filtered = C_TransmogCollection.GetCategoryAppearances(1, nil)
+            if #filtered ~= 2 then return "filtered_count=" .. #filtered end
+            for _, appearance in ipairs(filtered) do
+                if appearance.sourceType == 1 then return "source_1_present" end
+            end
+            C_TransmogCollection.SetDefaultFilters()
+            if not C_TransmogCollection.IsUsingDefaultFilters() then return "not_default" end
+            if #C_TransmogCollection.GetCategoryAppearances(1, nil) ~= 5 then return "restored" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_transmog_collection_collected_filters_change_counts_and_results() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            C_TransmogCollection.SetUncollectedShown(false)
+            if C_TransmogCollection.GetUncollectedShown() then return "uncollected_still_shown" end
+            if C_TransmogCollection.GetFilteredCategoryTotal(1) ~= 4 then return "collected_total" end
+            if #C_TransmogCollection.GetCategoryAppearances(1, nil) ~= 4 then return "collected_rows" end
+            C_TransmogCollection.SetCollectedShown(false)
+            C_TransmogCollection.SetUncollectedShown(true)
+            if C_TransmogCollection.GetCollectedShown() then return "collected_still_shown" end
+            if C_TransmogCollection.GetFilteredCategoryTotal(1) ~= 1 then return "uncollected_total" end
+            local rows = C_TransmogCollection.GetCategoryAppearances(1, nil)
+            if #rows ~= 1 then return "uncollected_rows=" .. #rows end
+            if rows[1].isCollected then return "row_collected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_transmog_collection_search_filters_category_results() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local searchType = Enum.TransmogSearchType.Items
+            if not C_TransmogCollection.SetSearch(searchType, "99999") then return "not_finished" end
+            if C_TransmogCollection.IsSearchInProgress(searchType) then return "in_progress" end
+            if C_TransmogCollection.IsSearchDBLoading() then return "db_loading" end
+            if C_TransmogCollection.SearchSize(searchType) ~= 1 then return "size" end
+            if C_TransmogCollection.SearchProgress(searchType) ~= 1 then return "progress" end
+            local rows = C_TransmogCollection.GetCategoryAppearances(1, nil)
+            if #rows ~= 1 then return "rows=" .. #rows end
+            if rows[1].itemID ~= 99999 then return "item=" .. tostring(rows[1].itemID) end
+            C_TransmogCollection.ClearSearch(searchType)
+            if #C_TransmogCollection.GetCategoryAppearances(1, nil) ~= 5 then return "cleared" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_collection_get_all_appearance_sources_empty() {
     let env = env();
     let count: i32 = env

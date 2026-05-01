@@ -384,6 +384,13 @@ pub struct WorldState {
     pub loot_rolls: HashMap<i32, LootRollInfo>,
     pub collected_transmogs: HashSet<i32>,
     pub transmog_appearances: Vec<TransmogAppearance>,
+    pub transmog_collected_shown: bool,
+    pub transmog_uncollected_shown: bool,
+    pub transmog_all_factions_shown: bool,
+    pub transmog_all_races_shown: bool,
+    pub transmog_class_filter: i32,
+    pub transmog_source_type_filters: HashSet<i32>,
+    pub transmog_search_text: HashMap<i32, String>,
     /// Applied transmog per equipment slot: slotID → sourceID.
     pub applied_transmog_slots: HashMap<i32, i32>,
     pub collected_mounts: HashSet<i32>,
@@ -869,6 +876,13 @@ fn apply_collection_defaults(ws: &mut WorldState) {
     ws.collected_heirlooms = heirlooms.iter().map(|h| h.item_id).collect();
     ws.heirlooms = heirlooms;
     ws.transmog_appearances = default_transmog_appearances();
+    ws.transmog_collected_shown = true;
+    ws.transmog_uncollected_shown = true;
+    ws.transmog_all_factions_shown = false;
+    ws.transmog_all_races_shown = false;
+    ws.transmog_class_filter = 2;
+    ws.transmog_source_type_filters = (1..=7).collect();
+    ws.transmog_search_text.clear();
     ws.mounts = default_mounts();
     ws.pets = default_pets();
     ws.toys = default_toys();

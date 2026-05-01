@@ -45,6 +45,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
 | [[achievement-panel-hide]] | Achievement panel hide now uses Blizzard's managed panel path; animation completion also fires child animation `OnFinished` scripts for alert hide XML |
 | [[adventure-guide-boss-icons]] | Encounter Journal creature icon fileDataID `0` must be returned as nil so Blizzard boss buttons use their default icon instead of clearing the texture |
+| [[appearances-wardrobe-api]] | Collections Journal Appearances opens, but browsing/filtering/search/favorites need stateful `C_TransmogCollection` source, visual, filter, and search backing instead of fixed stubs |
 | [[backpack-background-texture]] | Reported missing tan/brown body on Backpack — investigation showed sim renders exactly what `FlatPanelBackgroundTemplate` authors (solid `PANEL_BACKGROUND_COLOR`); retail texture comes from outside the Gethe public source (addon overlay or unmirrored patch path), no sim-side fix |
 | [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop, shallow `issecretvalue` for pool releases (2159ms→2.6ms) |
 | [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
