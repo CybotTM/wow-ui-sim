@@ -1029,7 +1029,7 @@ fn allied_races_scene_actor_tags() -> Vec<String> {
     .collect()
 }
 
-/// Major Factions for The War Within (`expansion_filter = 11`). Drives the
+/// Major Factions for The War Within (`expansion_filter = 10`). Drives the
 /// EncounterJournal "Journeys" panel via `C_MajorFactions.GetMajorFactionIDs`
 /// and the per-id `GetMajorFactionData` lookup. Faction ids match
 /// `MajorFactions.db2`:
@@ -1038,53 +1038,69 @@ fn allied_races_scene_actor_tags() -> Vec<String> {
 /// - 2594 The Assembly of the Deeps
 /// - 2600 The Severed Threads
 pub fn default_major_factions() -> HashMap<i64, MajorFactionData> {
-    let rows: &[(i64, &str, &str, (f32, f32, f32))] = &[
-        (
-            2590,
-            "Council of Dornogal",
-            "councilofdornogal",
-            (0.96, 0.78, 0.40),
-        ),
-        (
-            2570,
-            "Hallowfall Arathi",
-            "hallowfallarathi",
-            (0.99, 0.91, 0.62),
-        ),
+    let rows = default_major_faction_rows();
+    rows.iter()
+        .enumerate()
+        .map(|(index, row)| {
+            let priority = (rows.len() - index) as i32;
+            (row.faction_id, row.to_data(priority))
+        })
+        .collect()
+}
+
+struct MajorFactionRow {
+    faction_id: i64,
+    name: &'static str,
+    expansion_filter: i32,
+    texture_kit: &'static str,
+    faction_font_color: (f32, f32, f32),
+}
+
+impl MajorFactionRow {
+    fn to_data(&self, ui_priority: i32) -> MajorFactionData {
+        MajorFactionData {
+            faction_id: self.faction_id,
+            name: self.name.to_string(),
+            expansion_filter: self.expansion_filter,
+            max_level: 20,
+            renown_level: 1,
+            renown_reputation_earned: 0,
+            renown_level_threshold: 2500,
+            ui_priority,
+            is_unlocked: true,
+            unlock_description: None,
+            celebration_sound_kit: 0,
+            renown_fanfare_sound_kit_id: 0,
+            texture_kit: self.texture_kit.to_string(),
+            faction_font_color: self.faction_font_color,
+        }
+    }
+}
+
+fn default_major_faction_rows() -> Vec<MajorFactionRow> {
+    vec![
+        (2590, "Council of Dornogal", 10, "storm", (0.96, 0.78, 0.40)),
+        (2570, "Hallowfall Arathi", 10, "flame", (0.99, 0.91, 0.62)),
         (
             2594,
             "The Assembly of the Deeps",
-            "assemblyofthedeeps",
+            10,
+            "candle",
             (0.51, 0.78, 0.55),
         ),
-        (
-            2600,
-            "The Severed Threads",
-            "severedthreads",
-            (0.45, 0.78, 0.86),
-        ),
-    ];
-    let mut map = HashMap::new();
-    for &(faction_id, name, texture_kit, faction_font_color) in rows {
-        map.insert(
+        (2600, "The Severed Threads", 10, "web", (0.45, 0.78, 0.86)),
+    ]
+    .into_iter()
+    .map(
+        |(faction_id, name, expansion_filter, texture_kit, faction_font_color)| MajorFactionRow {
             faction_id,
-            MajorFactionData {
-                faction_id,
-                name: name.to_string(),
-                expansion_filter: 11,
-                renown_level: 1,
-                renown_reputation_earned: 0,
-                renown_level_threshold: 2500,
-                is_unlocked: true,
-                unlock_description: None,
-                celebration_sound_kit: 0,
-                renown_fanfare_sound_kit_id: 0,
-                texture_kit: texture_kit.to_string(),
-                faction_font_color,
-            },
-        );
-    }
-    map
+            name,
+            expansion_filter,
+            texture_kit,
+            faction_font_color,
+        },
+    )
+    .collect()
 }
 
 /// Default Renown level table: levels 1..=20 per faction. The mixin uses the

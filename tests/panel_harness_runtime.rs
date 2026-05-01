@@ -606,7 +606,7 @@ fn encounter_journal_display_dungeon_instance_does_not_recurse() {
 }
 
 #[test]
-fn encounter_journal_journeys_frame_seeds_tww_major_factions() {
+fn encounter_journal_journeys_frame_seeds_current_major_factions_without_tww_leak() {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
@@ -615,30 +615,30 @@ fn encounter_journal_journeys_frame_seeds_tww_major_factions() {
     env.exec("ToggleEncounterJournal()")
         .expect("ToggleEncounterJournal should execute");
 
-    let (count, names): (i32, String) = env
+    let (count, names, expansion): (i32, String, i32) = env
         .eval(
             r#"
             local frame = EncounterJournal and EncounterJournal.JourneysFrame
             if not frame then
-                return -1, ""
+                return -1, "", -1
             end
             frame:Refresh()
             local out = {}
             for _, entry in ipairs(frame.renownJourneyData) do
                 out[#out + 1] = entry.name
             end
-            return #frame.renownJourneyData, table.concat(out, "|")
+            return #frame.renownJourneyData, table.concat(out, "|"), frame.expansionFilter or LE_EXPANSION_LEVEL_CURRENT
             "#,
         )
         .expect("Journeys frame probe should return");
 
+    assert_eq!(expansion, 11, "current Journeys tier should be Midnight");
     assert_eq!(
-        count, 4,
-        "JourneysFrame should seed four TWW major factions"
-    );
-    assert_eq!(
-        names,
-        "Hallowfall Arathi|Council of Dornogal|The Assembly of the Deeps|The Severed Threads",
-        "JourneysFrame should list the seeded TWW major factions in faction-id order"
+        names.contains("Hallowfall Arathi")
+            || names.contains("Council of Dornogal")
+            || names.contains("The Assembly of the Deeps")
+            || names.contains("The Severed Threads"),
+        false,
+        "current Midnight Journeys must not show War Within rows; count={count}, names={names}"
     );
 }
