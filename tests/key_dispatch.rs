@@ -164,6 +164,28 @@ fn editbox_receives_typed_text() {
 }
 
 #[test]
+fn focused_editbox_inserts_printable_key_when_text_payload_is_missing() {
+    let env = env();
+    env.exec(
+        r#"
+        local eb = CreateFrame("EditBox", "TestFallbackTextEB", UIParent)
+        eb:SetText("")
+        eb:SetFocus()
+        "#,
+    )
+    .unwrap();
+
+    env.send_key_press("A", None).unwrap();
+    env.send_key_press("B", None).unwrap();
+
+    let text: String = env.eval(r#"return TestFallbackTextEB:GetText()"#).unwrap();
+    assert_eq!(
+        text, "ab",
+        "focused EditBox should insert printable key names when the GUI event has no text payload"
+    );
+}
+
+#[test]
 fn editbox_on_text_changed_fires_on_input() {
     let env = env();
     env.exec(

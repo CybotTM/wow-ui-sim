@@ -50,6 +50,20 @@ fn editbox_text_char_count(frame: &crate::widget::Frame) -> i32 {
         .unwrap_or(0)
 }
 
+fn printable_text_for_editbox_key<'a>(key: &'a str, text: Option<&'a str>) -> Option<String> {
+    if let Some(text) = text {
+        let printable: String = text.chars().filter(|c| !c.is_control()).collect();
+        return (!printable.is_empty()).then_some(printable);
+    }
+    if key == "SPACE" {
+        return Some(" ".to_string());
+    }
+    if key.chars().count() == 1 {
+        return Some(key.to_lowercase());
+    }
+    None
+}
+
 // ── WowLuaEnv impl ───────────────────────────────────────────────────────────
 
 impl WowLuaEnv {
@@ -160,11 +174,8 @@ impl WowLuaEnv {
             "HOME" => self.editbox_cursor_home(fid)?,
             "END" => self.editbox_cursor_end(fid)?,
             _ => {
-                if let Some(t) = text {
-                    let printable: String = t.chars().filter(|c| !c.is_control()).collect();
-                    if !printable.is_empty() {
-                        self.editbox_insert_text(fid, &printable)?;
-                    }
+                if let Some(printable) = printable_text_for_editbox_key(key, text) {
+                    self.editbox_insert_text(fid, &printable)?;
                 }
             }
         }
